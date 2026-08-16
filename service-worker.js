@@ -1,70 +1,42 @@
-const CACHE = 'z40k-v16-4';
-
-const PRECACHE = [
-  './',
-  './index.html',
-  './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
-];
+const CACHE = 'z40k-v16-7';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE)
-          .map(key => caches.delete(key))
-      )
+      Promise.all(keys.map(key => caches.delete(key)))
     )
   );
-
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  const req = event.request;
+  if (event.request.method !== 'GET') return;
 
-  if (req.method !== 'GET') return;
-
-  if (req.mode === 'navigate') {
+  // Toujours récupérer la dernière version de l'application.
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-
-          caches.open(CACHE).then(cache => {
-            cache.put('./index.html', copy);
-          });
-
-          return res;
-        })
-        .catch(() => caches.match('./index.html'))
+      fetch(event.request, { cache: 'no-store' })
+        .catch(() => caches.match(event.request))
     );
-
     return;
   }
 
+  // Images et autres fichiers : réseau d'abord, cache en secours.
   event.respondWith(
-    caches.match(req).then(cached => {
-      if (cached) return cached;
-
-      return fetch(req).then(res => {
-        const copy = res.clone();
+    fetch(event.request)
+      .then(response => {
+        const copy = response.clone();
 
         caches.open(CACHE).then(cache => {
-          cache.put(req, copy);
+          cache.put(event.request, copy);
         });
 
-        return res;
-      });
-    })
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v6
@@ -25,7 +26,12 @@ jobs:
         run: |
           rm -rf _site
           mkdir _site
+
+          # Récupère les images et assets du package initial
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
+
+          # Utilise TOUJOURS le dernier index.html du dépôt
+          cp index.html _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
@@ -39,6 +45,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
     needs: build
 

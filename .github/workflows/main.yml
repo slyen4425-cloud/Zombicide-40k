@@ -27,17 +27,15 @@ jobs:
           rm -rf _site
           mkdir _site
 
-          # Les artworks déjà présents
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
 
-          # Toujours utiliser les derniers fichiers du dépôt
           cp index.html _site/index.html
           cp manifest.webmanifest _site/manifest.webmanifest
           cp service-worker.js _site/service-worker.js
 
           mkdir -p _site/icons
-          cp icons/icon-192.png _site/icons/icon-192.png
-          cp icons/icon-512.png _site/icons/icon-512.png
+          cp icon-192.png _site/icons/icon-192.png
+          cp icon-512.png _site/icons/icon-512.png
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

@@ -24,7 +24,7 @@ jobs:
 
       - name: Préparer le site
         run: |
-          echo "=== VERSION DU INDEX RACINE ==="
+          echo "=== INDEX RACINE ==="
           grep -n "Version 16.6" index.html
 
           rm -rf _site
@@ -32,7 +32,6 @@ jobs:
 
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
 
-          echo "=== REMPLACEMENT PAR LE INDEX ACTUEL ==="
           cp -f index.html _site/index.html
           cp -f manifest.webmanifest _site/manifest.webmanifest
           cp -f service-worker.js _site/service-worker.js
@@ -41,35 +40,10 @@ jobs:
           cp -f icon-192.png _site/icons/icon-192.png
           cp -f icon-512.png _site/icons/icon-512.png
 
-          echo "=== VERSION QUI VA ÊTRE PUBLIÉE ==="
+          echo "=== INDEX PUBLIÉ ==="
           grep -n "Version 16.6" _site/index.html
 
-          # Sécurité : interdit de publier si la V16.6 n'est pas présente
           grep -q "Version 16.6" _site/index.html
-
-      - name: Configurer GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Envoyer le site
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: _site
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Publier GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-          mkdir -p _site/icons
-          cp icon-192.png _site/icons/icon-192.png
-          cp icon-512.png _site/icons/icon-512.png
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

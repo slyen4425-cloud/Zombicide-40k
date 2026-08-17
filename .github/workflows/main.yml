@@ -2,7 +2,8 @@ name: Deploy Zombicide 40K
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -20,14 +21,16 @@ jobs:
 
     steps:
       - name: Récupérer le dépôt
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Préparer le site
         run: |
           rm -rf _site
-          mkdir _site
+          mkdir -p _site
 
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
+
+          echo "=== REMPLACEMENT PAR LES FICHIERS ACTUELS ==="
 
           cp -f index.html _site/index.html
           cp -f manifest.webmanifest _site/manifest.webmanifest
@@ -36,6 +39,14 @@ jobs:
           mkdir -p _site/icons
           cp -f icon-192.png _site/icons/icon-192.png
           cp -f icon-512.png _site/icons/icon-512.png
+
+          echo "=== INDEX RACINE ==="
+          grep -o "Version [^<]*" index.html | head -1 || true
+
+          echo "=== INDEX QUI SERA PUBLIE ==="
+          grep -o "Version [^<]*" _site/index.html | head -1 || true
+
+          echo "=== SITE PRET ==="
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

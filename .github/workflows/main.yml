@@ -24,14 +24,13 @@ jobs:
 
       - name: Préparer le site
         run: |
-          echo "=== INDEX RACINE ==="
-          grep -n "Version 16.6" index.html
-
           rm -rf _site
           mkdir _site
 
+          # Assets et images de base
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
 
+          # Toujours utiliser les fichiers actuels du dépôt
           cp -f index.html _site/index.html
           cp -f manifest.webmanifest _site/manifest.webmanifest
           cp -f service-worker.js _site/service-worker.js
@@ -39,11 +38,6 @@ jobs:
           mkdir -p _site/icons
           cp -f icon-192.png _site/icons/icon-192.png
           cp -f icon-512.png _site/icons/icon-512.png
-
-          echo "=== INDEX PUBLIÉ ==="
-          grep -n "Version 16.6" _site/index.html
-
-          grep -q "Version 16.6" _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

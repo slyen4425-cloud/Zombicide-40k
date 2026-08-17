@@ -1,0 +1,3008 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zombicide 40K — Fiches joueurs</title>
+<style>
+:root {
+ --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
+ --text:#f2eee6; --muted:#b7afa4; --blue:#2779b9; --yellow:#c79a20;
+ --orange:#cd6b20; --red:#9f241f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:linear-gradient(#090909,#151515);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:780px;margin:auto;padding:14px 12px 34px}
+h1{text-align:center;font-size:27px;margin:8px 0 16px;letter-spacing:.7px}
+h2{margin:4px 0 12px;text-align:center}
+#menu{display:block}
+.charGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.charPick{padding:0;border:1px solid #373737;background:#171717;border-radius:15px;overflow:hidden;color:white;font-weight:900;font-size:15px;box-shadow:0 8px 24px #0008}
+.charPick img{width:100%;aspect-ratio:1/1.25;object-fit:cover;display:block}
+.charPick span{display:block;padding:11px 6px}
+#sheet{display:none}
+.topbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.topbar button{min-width:auto}
+.back{background:#333}
+.card{border-radius:16px;overflow:hidden;border:1px solid #333;background:#000;box-shadow:0 10px 30px #0008}
+.card img{width:100%;display:block}
+.panel{margin-top:13px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.row{display:flex;gap:10px;align-items:stretch}
+.stat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.label{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.4px}
+.value{font-size:31px;font-weight:900;margin:3px 0 8px}
+.controls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+button{border:0;border-radius:11px;padding:11px 14px;font-size:17px;font-weight:850;color:#fff;background:#3a3a3a}
+button:active{transform:scale(.98)}
+.xpbar{margin-top:12px;height:18px;border-radius:999px;overflow:hidden;display:flex;border:1px solid #444}
+.seg.blue{background:var(--blue);flex:7} .seg.yellow{background:var(--yellow);flex:12}
+.seg.orange{background:var(--orange);flex:24} .seg.red{background:var(--red);flex:1}
+.marker{position:relative;margin-top:-18px;height:18px;pointer-events:none}
+.marker:after{content:"";position:absolute;top:-4px;width:4px;height:26px;border-radius:4px;background:#fff;box-shadow:0 0 6px #000;left:calc((min(var(--xp),43)/43)*100%);transform:translateX(-2px)}
+.level{text-align:center;margin-top:8px;font-weight:900}
+.skills{display:grid;gap:9px;margin-top:10px}
+.skill{display:flex;align-items:center;gap:12px;border-radius:13px;padding:12px;background:#242424;border:1px solid #ffffff18}
+.skill.locked{opacity:.36;filter:grayscale(.85)}
+.skill.choiceLocked{opacity:.28;filter:grayscale(1);pointer-events:none}
+.skill input{width:27px;height:27px;flex:0 0 auto}
+.skill strong{display:block;font-size:16px} .skill small{color:var(--muted);font-size:13px}
+.skill.blue{border-left:7px solid var(--blue)} .skill.yellow{border-left:7px solid var(--yellow)}
+.skill.orange{border-left:7px solid var(--orange)} .skill.red{border-left:7px solid var(--red)}
+.badge{display:inline-block;background:#333;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800;margin-left:5px}
+.numInput{width:100%;font-size:24px;text-align:center;padding:9px;border-radius:10px;border:1px solid #444;background:#111;color:white}
+.note{width:100%;min-height:90px;border-radius:12px;padding:12px;background:#111;border:1px solid #3c3c3c;color:white;font-size:16px;resize:vertical}
+.actions{display:flex;gap:8px;margin-top:10px} .actions button{flex:1;font-size:14px}
+.danger{background:#70201d} .hint{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+@media(max-width:600px){.charGrid{grid-template-columns:1fr} .charPick{display:grid;grid-template-columns:105px 1fr;align-items:center;text-align:left} .charPick img{aspect-ratio:1/1.05;height:110px;object-fit:cover} .charPick span{font-size:18px;padding:16px} .row{flex-direction:column}}
+
+.searchBtn{width:100%;margin-top:10px;background:#7a4b14;font-size:21px;padding:15px}
+.itemCard{margin-top:12px;background:#111;border:1px solid #454545;border-radius:14px;overflow:hidden}
+.itemCard img{width:100%;display:block}
+.itemInfo{padding:12px}
+.itemInfo strong{font-size:18px;display:block}
+.itemInfo small{color:var(--muted)}
+.itemButtons{display:flex;gap:8px;margin-top:10px}
+.itemButtons button{flex:1;font-size:14px}
+.inventoryGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:10px}
+.invItem{background:#222;border:1px solid #444;border-radius:12px;overflow:hidden}
+.invItem img{width:100%;aspect-ratio:3/4;object-fit:contain;display:block;background:#111}
+.invText{padding:8px;font-size:12px}
+.invText strong{display:block;font-size:13px}
+.empty{color:var(--muted);text-align:center;padding:15px}
+.equipped{outline:2px solid #d6a72b}
+
+
+.handSlots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.handSlot{min-height:170px;background:#111;border:2px dashed #555;border-radius:14px;padding:8px;text-align:center}
+.handSlot .handTitle{font-weight:900;font-size:13px;color:#d6d0c5;margin-bottom:7px}
+.handSlot img{width:100%;max-height:230px;object-fit:contain;border-radius:9px}
+.handSlot .emptyHand{color:var(--muted);padding:45px 4px;font-size:13px}
+.handSlot .weaponName{font-weight:850;font-size:13px;margin-top:6px}
+.handSlot button{font-size:12px;padding:8px 10px;margin-top:7px}
+@media(max-width:430px){.handSlots{gap:7px}.handSlot{min-height:145px;padding:6px}}
+
+.weaponAmmo{margin-top:8px;padding:8px;border-radius:10px;background:#1b1b1b;border:1px solid #444}
+.weaponAmmo .ammoLine{font-size:14px;font-weight:900;margin-bottom:7px}
+.weaponAmmo .ammoControls{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.weaponAmmo button{font-size:13px;padding:8px 10px;min-width:42px}
+.weaponAmmo .fullBtn{background:#70501c}
+
+.rulesBtn{width:100%;margin-top:10px;background:#4b3a22;font-size:19px;padding:14px}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:9999;padding:14px;overflow:auto}
+.modalBox{max-width:760px;margin:20px auto;background:#171717;border:1px solid #555;border-radius:16px;padding:14px;box-shadow:0 15px 50px #000}
+.modalHeader{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#171717;padding-bottom:10px;z-index:2}
+.modalHeader h2{flex:1;margin:0;text-align:left}
+.closeBtn{background:#6e1f1b;min-width:46px}
+.ruleSearch{width:100%;font-size:16px;padding:11px;border-radius:10px;border:1px solid #444;background:#101010;color:#fff;margin:8px 0 12px}
+.ruleEntry{background:#222;border:1px solid #3d3d3d;border-radius:12px;padding:12px;margin:9px 0}
+.ruleEntry h3{margin:0 0 6px;font-size:17px}
+.ruleEntry p{margin:0;color:#d6d0c5;line-height:1.4}
+.skill.clickable{cursor:pointer}
+.skill.clickable:hover{background:#2b2b2b}
+
+.statusBadge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;margin-top:5px}
+.status-available{background:#236b3e}.status-inplay{background:#285f92}.status-dead{background:#7b2420}
+.charPick.campaignDead{filter:grayscale(1);opacity:.55}
+.charPick.campaignInplay{outline:3px solid #367fb8}
+.charPick .campaignLine{display:block;padding:0 8px 10px;font-size:12px;font-weight:900}
+.statusPanel{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.statusPanel button{flex:1;font-size:13px}.statusPanel .selected{outline:2px solid #fff}
+.shieldPanel{margin-top:8px;padding:8px;border:1px solid #555;border-radius:10px;background:#1b1b1b}
+
+.setupPanel{margin-bottom:14px}
+.deckConfig{display:grid;gap:8px;margin-top:10px}
+.deckRow{display:grid;grid-template-columns:64px 1fr 105px;gap:10px;align-items:center;background:#202020;border:1px solid #3b3b3b;border-radius:12px;padding:8px}
+.deckRow img{width:64px;height:82px;object-fit:cover;border-radius:8px}
+.deckRow strong{font-size:14px}
+.deckQty{display:flex;gap:5px;align-items:center;justify-content:flex-end}
+.deckQty input{width:52px;text-align:center;font-size:17px;padding:7px;border-radius:8px;border:1px solid #555;background:#111;color:#fff}
+.deckQty button{padding:7px 9px;font-size:14px;min-width:34px}
+.deckSummary{margin-top:10px;text-align:center;font-weight:900}
+.startGameBtn{width:100%;margin-top:12px;background:#7a4b14;font-size:20px;padding:14px}
+.deckTopBar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.deckTopBar button{font-size:13px;padding:9px 11px}
+.remainingBadge{background:#333;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}
+@media(max-width:520px){.deckRow{grid-template-columns:54px 1fr}.deckRow img{width:54px;height:70px}.deckQty{grid-column:1/3;justify-content:center}}
+
+.zombieBtn{width:100%;margin-top:10px;background:#5c2020;font-size:19px;padding:14px}
+.zombieGrid{display:grid;gap:9px;margin-top:12px}
+.zombieRow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#202020;border:1px solid #3d3d3d;border-radius:12px;padding:11px}
+.zombieName{font-weight:900;font-size:16px}.zombieSub{font-size:12px;color:var(--muted);margin-top:2px}
+.zombieControls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.zombieControls input{width:62px;text-align:center;font-size:18px;padding:8px;border-radius:9px;border:1px solid #555;background:#111;color:#fff}
+.reserveNum{font-size:22px;font-weight:900;min-width:70px;text-align:center}
+.waveBox{margin-top:12px;padding:14px;border-radius:14px;background:#111;border:1px solid #4a4a4a}
+.waveResult{margin-top:10px;padding:12px;border-radius:12px;background:#242424;font-size:16px;line-height:1.45}
+.waveDanger{font-weight:900;font-size:18px;margin-bottom:5px}
+.waveWarning{margin-top:8px;padding:9px;border-radius:9px;background:#6b241f;font-weight:900}
+.waveOk{margin-top:8px;color:#b9d9bc;font-weight:800}
+@media(max-width:520px){.zombieRow{grid-template-columns:1fr}.zombieControls{justify-content:center}}
+
+.spawnModal{display:none;position:fixed;inset:0;background:#000d;z-index:10000;align-items:center;justify-content:center;padding:18px}
+.spawnCard{width:min(92vw,430px);background:#171717;border:1px solid #555;border-radius:18px;padding:18px;text-align:center;box-shadow:0 18px 60px #000}
+.spawnArt{font-size:110px;line-height:1;margin:8px 0 12px;filter:drop-shadow(0 6px 12px #000)}
+.spawnQty{font-size:30px;font-weight:950;margin:8px 0}
+.spawnType{font-size:22px;font-weight:900}
+.spawnClose{width:100%;margin-top:12px;background:#5c2020}
+
+.zombieThumb{width:62px;height:82px;object-fit:cover;border-radius:8px;border:1px solid #4b4b4b;flex:0 0 auto}
+.zombieInfoWrap{display:flex;align-items:center;gap:10px}
+.spawnArtImg{width:100%;max-height:340px;object-fit:contain;border-radius:12px;background:#0f0f0f}
+
+.homeActions{display:grid;gap:10px;margin-top:12px}
+.homeActions button{width:100%;font-size:20px;padding:15px}
+.resumeBtn{background:#285f92}
+.newGameBtn{background:#6f1f1f}
+.dangerBadge{display:inline-block;margin:8px auto 4px;padding:7px 12px;border-radius:999px;font-size:14px;font-weight:950}
+.danger-blue{background:#2779b9}.danger-yellow{background:#c79a20;color:#111}
+.danger-orange{background:#cd6b20}.danger-red{background:#9f241f}
+.spawnCard .dangerBadge{display:inline-block}
+
+.zombieClickable{cursor:pointer}
+.zombieClickable:hover{background:#292929}
+.zRuleStats{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+.zRuleStat{background:#2b2b2b;border:1px solid #484848;border-radius:10px;padding:7px 10px;font-size:13px;font-weight:900}
+.zRuleBody{line-height:1.5;color:#ddd}
+.zRuleBody p{margin:8px 0}
+
+.homeTop{display:flex;align-items:center;justify-content:center;position:relative;margin:4px 0 16px}
+.homeTop h1{margin:0}.homeGear{position:absolute;right:0;top:50%;transform:translateY(-50%);min-width:44px;padding:9px 10px;font-size:20px;background:#2b2b2b}
+.onlineBtn{background:#3c5d46}.onlineHint{display:block;font-size:12px;font-weight:750;opacity:.78;margin-top:4px}
+.z40kOverlay{display:none;position:fixed;inset:0;z-index:20000;background:#000d;align-items:center;justify-content:center;padding:16px}
+.z40kOverlay.open{display:flex}.z40kDialog{width:min(94vw,440px);max-height:90vh;overflow:auto;background:#171717;border:1px solid #5b4a34;border-radius:18px;padding:16px;box-shadow:0 18px 60px #000}
+.z40kDialogHead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.z40kDialogHead h2{flex:1;text-align:left;margin:0}.z40kDialogClose{background:#6e1f1b;min-width:44px}
+.syncSummary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#202020;border:1px solid #3c3c3c;border-radius:12px;padding:10px;margin-bottom:12px}
+.syncActions{display:grid;gap:9px}.syncJoin{display:grid;grid-template-columns:1fr auto;gap:8px}.syncJoin input{min-width:0;font-size:18px;text-transform:uppercase;font-weight:900;letter-spacing:3px;border-radius:10px;border:1px solid #555;background:#fff;color:#111;padding:10px}
+.syncShare{display:grid;grid-template-columns:1fr 1fr;gap:8px}.settingsActions{display:grid;gap:9px}
+
+
+.dicePanel{margin-top:13px;background:#15191d;border:1px solid #35404a;border-radius:16px;padding:14px}
+.dicePanelTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.diceWeapons{display:grid;gap:8px}
+.diceWeaponBtn{width:100%;text-align:left;background:#27343e;border:1px solid #455968;padding:12px}
+.diceWeaponBtn small{display:block;color:#c9d1d8;font-size:12px;margin-top:4px}
+.diceModal{display:none;position:fixed;inset:0;z-index:30000;background:#000d;align-items:center;justify-content:center;padding:16px}
+.diceModal.open{display:flex}
+.diceBox{width:min(94vw,460px);max-height:90vh;overflow:auto;background:#171717;border:1px solid #59636d;border-radius:18px;padding:16px;box-shadow:0 18px 60px #000}
+.diceHeader{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.diceHeader h2{flex:1;margin:0;text-align:left}
+.diceRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.die{width:52px;height:52px;border-radius:11px;background:#f1eee8;color:#161616;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:950;box-shadow:0 4px 12px #0008}
+.die.success{outline:4px solid #2e8b57;background:#dff5e8}
+.die.fail{outline:3px solid #8a2d2d;background:#f3dddd}
+.diceResult{padding:12px;border-radius:12px;background:#222;border:1px solid #414141;text-align:center;font-size:17px;line-height:1.45}
+.diceControls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.diceControls button{font-size:15px}
+.armorSetup{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.armorSetup label{background:#222;border:1px solid #444;border-radius:12px;padding:10px;font-size:13px;font-weight:800}
+.armorSetup select,.armorSetup input{width:100%;margin-top:6px;background:#111;color:#fff;border:1px solid #555;border-radius:9px;padding:9px;font-size:18px;text-align:center}
+.attackMeta{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.attackMeta span{background:#292929;border:1px solid #484848;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:850}
+.armorBtn{margin-top:9px;background:#36556b}
+
+
+.die{
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .16s ease,filter .16s ease;
+}
+.die.rolling{
+  animation:diceShake .16s linear infinite;
+  filter:blur(.2px) brightness(1.15);
+}
+.die.finalPop{animation:dicePop .28s ease-out}
+@keyframes diceShake{
+  0%{transform:translate(0,0) rotate(0deg) scale(.94)}
+  25%{transform:translate(-5px,3px) rotate(-12deg) scale(1.02)}
+  50%{transform:translate(4px,-4px) rotate(11deg) scale(.97)}
+  75%{transform:translate(3px,4px) rotate(-7deg) scale(1.03)}
+  100%{transform:translate(0,0) rotate(0deg) scale(.94)}
+}
+@keyframes dicePop{
+  0%{transform:scale(.75) rotate(-10deg)}
+  65%{transform:scale(1.16) rotate(5deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+.diceStage{
+  min-height:92px;
+  background:radial-gradient(circle at center,#283039 0,#171a1e 62%,#101214 100%);
+  border:1px solid #3f4850;border-radius:14px;padding:12px;margin:12px 0;
+  box-shadow:inset 0 0 24px #0008;
+}
+.dieShadow{box-shadow:0 10px 16px #0009, inset 0 0 0 2px #ffffff55}
+
+
+.diceStage{position:relative;overflow:hidden;perspective:700px}
+.die.throwing{
+  animation:diceThrow 1.05s cubic-bezier(.18,.7,.18,1) forwards;
+  animation-delay:var(--delay,0ms);
+}
+.die.tumbling{
+  animation:diceTumble .18s linear infinite;
+}
+@keyframes diceThrow{
+  0%{transform:translate3d(var(--sx,0px),-115px,120px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(.72);opacity:.2}
+  38%{transform:translate3d(calc(var(--sx,0px)*.35),18px,15px) rotateX(300deg) rotateY(220deg) rotateZ(160deg) scale(1.1);opacity:1}
+  58%{transform:translate3d(calc(var(--sx,0px)*.12),-22px,5px) rotateX(405deg) rotateY(310deg) rotateZ(230deg) scale(.96)}
+  76%{transform:translate3d(0,8px,0) rotateX(480deg) rotateY(380deg) rotateZ(290deg) scale(1.04)}
+  89%{transform:translate3d(0,-5px,0) rotateX(520deg) rotateY(420deg) rotateZ(320deg) scale(.99)}
+  100%{transform:translate3d(0,0,0) rotateX(540deg) rotateY(450deg) rotateZ(340deg) scale(1)}
+}
+@keyframes diceTumble{
+  0%{transform:rotateX(0) rotateY(0) rotateZ(0) scale(.98)}
+  50%{transform:rotateX(22deg) rotateY(-18deg) rotateZ(10deg) scale(1.05)}
+  100%{transform:rotateX(0) rotateY(0) rotateZ(0) scale(.98)}
+}
+.diceStage::after{
+  content:"";position:absolute;left:12%;right:12%;bottom:7px;height:13px;border-radius:50%;
+  background:#0008;filter:blur(7px);pointer-events:none;
+}
+.specialRollIcon{font-size:42px;text-align:center;margin:2px 0 6px}
+
+
+/* D6 graphique ivoire / métal */
+.die{
+  --pip:#161616;
+  --edge:#b9aa8d;
+  position:relative;
+  width:58px;height:58px;
+  border-radius:13px;
+  background:
+    linear-gradient(145deg,#fffdf5 0%,#e7dfcf 58%,#c8b99c 100%);
+  border:2px solid var(--edge);
+  box-shadow:
+    inset 3px 3px 5px #ffffffcc,
+    inset -4px -4px 7px #8f826c66,
+    0 10px 16px #0009;
+  color:transparent;
+  display:block;
+  overflow:hidden;
+}
+.die::before{
+  content:"";
+  position:absolute;inset:5px;
+  border-radius:9px;
+  border:1px solid #7f735f55;
+  box-shadow:inset 0 0 8px #ffffff99;
+}
+.die .pip{
+  position:absolute;
+  width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#444 0,#161616 48%,#050505 100%);
+  box-shadow:inset 1px 1px 2px #ffffff22,0 1px 2px #0007;
+  transform:translate(-50%,-50%);
+}
+.die .p1{left:25%;top:25%}
+.die .p2{left:50%;top:25%}
+.die .p3{left:75%;top:25%}
+.die .p4{left:25%;top:50%}
+.die .p5{left:50%;top:50%}
+.die .p6{left:75%;top:50%}
+.die .p7{left:25%;top:75%}
+.die .p8{left:50%;top:75%}
+.die .p9{left:75%;top:75%}
+.die.success{
+  outline:3px solid #3eb56d;
+  box-shadow:
+    inset 3px 3px 5px #ffffffcc,
+    inset -4px -4px 7px #8f826c66,
+    0 0 16px #3eb56d88,
+    0 10px 16px #0009;
+}
+.die.fail{
+  outline:3px solid #a43a3a;
+  box-shadow:
+    inset 3px 3px 5px #ffffffcc,
+    inset -4px -4px 7px #8f826c66,
+    0 0 14px #a43a3a77,
+    0 10px 16px #0009;
+}
+.die.rolling,.die.throwing,.die.tumbling{color:transparent}
+
+
+.combatQuickCard{
+  background:#20262b;border:1px solid #46515a;border-radius:13px;padding:11px;
+}
+.combatQuickHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.combatQuickName{font-size:16px;font-weight:950}
+.combatQuickAmmo{font-size:13px;font-weight:900;padding:5px 8px;border-radius:999px;background:#121619;border:1px solid #414b52}
+.combatQuickAmmo.empty{background:#5d2424;border-color:#8d3b3b}
+.combatQuickStats{font-size:12px;color:#c7cdd1;margin:7px 0 9px}
+.combatQuickActions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.combatQuickActions.one{grid-template-columns:1fr}
+.combatQuickActions button{font-size:14px;padding:11px 8px}
+.combatAttackBtn{background:#365d76}
+.combatReloadBtn{background:#72531d}
+
+
+.z40kUpdateBanner{
+  display:none;position:fixed;left:10px;right:10px;bottom:12px;z-index:60000;
+  max-width:620px;margin:auto;background:#18231c;border:1px solid #3d7a4d;
+  border-radius:14px;padding:11px;box-shadow:0 12px 36px #000b
+}
+.z40kUpdateBanner.show{display:block}
+.z40kUpdateRow{display:flex;gap:9px;align-items:center}
+.z40kUpdateText{flex:1;font-size:13px;line-height:1.35}
+.z40kUpdateText strong{display:block;font-size:15px;margin-bottom:2px}
+.z40kUpdateBtn{background:#2d6c3d;font-size:14px;padding:10px 12px;white-space:nowrap}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<link rel="manifest" href="manifest.webmanifest?v=167">
+<meta name="z40k-app-version" content="16.13.3">
+<meta name="theme-color" content="#2e1414">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zombicide 40K">
+<link rel="apple-touch-icon" href="icons/icon-192.png?v=167">
+
+</head>
+<body>
+<div class="wrap">
+
+<div id="z40kSyncBar" class="z40kOverlay" onclick="z40kOnlineBackdrop(event)">
+  <div class="z40kDialog">
+    <div class="z40kDialogHead"><h2>🌐 Partie en ligne</h2><button class="z40kDialogClose" type="button" onclick="z40kCloseOnline()">✕</button></div>
+    <div class="syncSummary"><span id="z40kSyncStatus" style="padding:5px 9px;border-radius:999px;background:#4a3517;font-weight:900">🟠 Hors ligne</span><span id="z40kRoomCode" style="font-weight:900;letter-spacing:2px"></span></div>
+    <div class="syncActions">
+      <button type="button" onclick="z40kCreateRoom()">＋ CRÉER UNE PARTIE EN LIGNE</button>
+      <div class="syncJoin"><input id="z40kJoinCode" maxlength="6" placeholder="CODE"><button type="button" onclick="z40kJoinRoom()">REJOINDRE</button></div>
+      <div class="syncShare"><button type="button" onclick="z40kShareInvite()">📤 Partager</button><button type="button" onclick="z40kShowQR()">▣ QR Code</button></div>
+      <button type="button" onclick="z40kLeaveRoom()" style="background:#552525">Quitter la synchronisation</button>
+    </div>
+    <div id="z40kSyncMsg" class="hint" style="margin-top:10px">La partie locale continue de fonctionner normalement.</div>
+  </div>
+</div>
+
+<div id="z40kQRModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:20px">
+  <div style="max-width:360px;width:100%;background:#171717;border:1px solid #6d552f;border-radius:16px;padding:18px;text-align:center;color:#fff">
+    <div style="font-size:20px;font-weight:800;margin-bottom:8px">Rejoindre la partie</div>
+    <div id="z40kQRCode" style="display:flex;justify-content:center;background:#fff;padding:12px;border-radius:10px;margin:12px auto;width:max-content"></div>
+    <div id="z40kQRRoom" style="font-size:24px;font-weight:900;letter-spacing:3px;margin:8px 0"></div>
+    <div id="z40kQRLink" style="font-size:11px;word-break:break-all;color:#bbb;margin-bottom:12px"></div>
+    <button type="button" onclick="z40kShareInvite()">📤 Partager le lien</button>
+    <button type="button" onclick="z40kHideQR()" style="margin-left:6px;background:#552525">Fermer</button>
+  </div>
+</div>
+
+
+<div id="z40kShortcutModal" class="z40kOverlay" onclick="z40kShortcutBackdrop(event)">
+  <div class="z40kDialog">
+    <div class="z40kDialogHead">
+      <h2>📲 Installer Zombicide 40K</h2>
+      <button class="z40kDialogClose" type="button" onclick="z40kCloseShortcut()">✕</button>
+    </div>
+    <div style="line-height:1.5">
+      <p style="margin-top:0"><strong>Chrome ne permet pas toujours au bouton du site d’ouvrir directement son écran d’installation.</strong></p>
+      <p>Dans ce cas, choisis :</p>
+      <div style="background:#242424;border:1px solid #444;border-radius:12px;padding:12px;margin:10px 0;font-weight:850">
+        ⋮ Chrome → Installer et créer un raccourci → <strong>Créer un raccourci</strong>
+      </div>
+      <p class="hint" style="font-size:13px">Le raccourci apparaîtra sur l’écran d’accueil avec l’icône Zombicide 40K.</p>
+    </div>
+    <div class="settingsActions" style="margin-top:12px">
+      <button type="button" onclick="z40kCopyAppLink()">📋 Copier le lien de l’application</button>
+      <button type="button" onclick="z40kCloseShortcut()" style="background:#552525">Fermer</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="attackDiceModal" class="diceModal" onclick="diceBackdropClose(event,'attackDiceModal')">
+  <div class="diceBox">
+    <div class="diceHeader">
+      <h2 id="attackDiceTitle">🎲 Attaque</h2>
+      <button class="closeBtn" type="button" onclick="closeAttackRoll()">✕</button>
+    </div>
+    <div id="attackDiceMeta" class="attackMeta"></div>
+    <div class="diceStage"><div id="attackDiceRolls" class="diceRow"></div></div>
+    <div id="attackDiceResult" class="diceResult">Choisis une arme équipée.</div>
+    <div class="diceControls">
+      <button type="button" onclick="rerollAttack()">🎲 Relancer</button>
+      <button type="button" onclick="closeAttackRoll()" style="background:#552525">Fermer</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="specialDiceModal" class="diceModal" onclick="diceBackdropClose(event,'specialDiceModal')">
+  <div class="diceBox">
+    <div class="diceHeader">
+      <h2 id="specialDiceTitle">🎲 Jet de compétence</h2>
+      <button class="closeBtn" type="button" onclick="closeSpecialRoll()">✕</button>
+    </div>
+    <div id="specialDiceIcon" class="specialRollIcon">🎯</div>
+    <div id="specialDiceMeta" class="attackMeta"></div>
+    <div class="diceStage"><div id="specialDiceRolls" class="diceRow"></div></div>
+    <div id="specialDiceResult" class="diceResult">Jet en cours…</div>
+    <button type="button" style="width:100%;margin-top:10px" onclick="closeSpecialRoll()">Fermer</button>
+  </div>
+</div>
+
+<div id="armorDiceModal" class="diceModal" onclick="diceBackdropClose(event,'armorDiceModal')">
+  <div class="diceBox">
+    <div class="diceHeader">
+      <h2>🛡️ Jet d’armure</h2>
+      <button class="closeBtn" type="button" onclick="closeArmorRoll()">✕</button>
+    </div>
+    <div class="armorSetup">
+      <label>Armure de base
+        <select id="armorBase">
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="5">5+</option>
+          <option value="6">6+</option>
+          <option value="7">Aucune sauvegarde</option>
+        </select>
+      </label>
+      <label>Blessures à sauvegarder
+        <input id="armorDiceCount" type="number" min="1" max="20" value="1" inputmode="numeric">
+      </label>
+      <label>Malus d’armure
+        <select id="armorPenalty">
+          <option value="0">Aucun</option>
+          <option value="1">−1 Armure</option>
+          <option value="2">−2 Armure</option>
+          <option value="3">−3 Armure</option>
+        </select>
+      </label>
+      <label>Jet final
+        <div id="armorFinalDisplay" style="margin-top:6px;background:#111;border:1px solid #555;border-radius:9px;padding:9px;font-size:18px;text-align:center;font-weight:900">2+</div>
+      </label>
+    </div>
+    <div id="armorThresholdInfo" class="attackMeta"></div>
+    <button type="button" style="width:100%;background:#36556b" onclick="rollArmor()">🎲 LANCER L’ARMURE</button>
+    <div class="diceStage"><div id="armorDiceRolls" class="diceRow"></div></div>
+    <div id="armorDiceResult" class="diceResult">Armure Space Marine : 2+.</div>
+    <div id="armorApplyBox" style="display:none;margin-top:10px">
+      <button id="armorApplyBtn" type="button" style="width:100%;background:#70201d" onclick="applyArmorFailures()">💥 Appliquer les blessures</button>
+    </div>
+  </div>
+</div>
+
+<div id="z40kSettingsModal" class="z40kOverlay" onclick="z40kSettingsBackdrop(event)">
+  <div class="z40kDialog">
+    <div class="z40kDialogHead"><h2>⚙️ Options</h2><button class="z40kDialogClose" type="button" onclick="z40kCloseSettings()">✕</button></div>
+    <div class="settingsActions">
+      <button type="button" onclick="z40kShareApp()">📤 Partager l’application</button>
+      <button type="button" id="z40kInstallBtn" onclick="z40kInstallApp()">📲 Installer / créer un raccourci</button>
+      <button type="button" onclick="openRules()">📖 Livret de règles</button>
+    </div>
+    <div class="hint" style="margin-top:10px">Version web installable — les mises à jour sont récupérées depuis GitHub Pages.</div>
+  </div>
+</div>
+
+
+  <div id="setup">
+    <div class="homeTop">
+      <h1>ZOMBICIDE 40K</h1>
+      <button class="homeGear" type="button" onclick="z40kOpenSettings()" aria-label="Options">⚙️</button>
+    </div>
+    <div class="panel" style="text-align:center">
+      <h2 style="margin-top:0">Accueil</h2>
+      <div id="z40kBuildVersion" class="hint" style="margin-top:-4px">Version 16.13.3 TEST · correctif boucle synchro</div>
+      <div class="homeActions">
+        <button id="resumeBtn" class="resumeBtn" onclick="resumeGame()">▶ REPRENDRE LA PARTIE</button>
+        <button class="newGameBtn" onclick="newGame()">＋ NOUVELLE PARTIE</button>
+        <button class="onlineBtn" onclick="z40kOpenOnline()">🌐 JOUER EN LIGNE
+          <span id="z40kHomeOnlineHint" class="onlineHint">Créer ou rejoindre une partie</span>
+        </button>
+      </div>
+      <div id="noSaveHint" class="hint" style="display:none;margin-top:10px">Aucune partie en cours.</div>
+    </div>
+  </div>
+
+  <div id="pregameSetup" style="display:none">
+    <h1>ZOMBICIDE 40K</h1>
+    <div class="panel" style="text-align:center">
+      <h2 style="margin-top:0">Préparer la partie</h2>
+      <button class="rulesBtn" onclick="openObjectManager()">📦 GESTIONNAIRE D’OBJETS</button>
+      <button class="zombieBtn" onclick="openZombieManager('setup')">🧟 GESTIONNAIRE DE ZOMBIES</button>
+      <button class="startGameBtn" onclick="startConfiguredGame()">▶ DÉMARRER LA PARTIE</button>
+      <button style="width:100%;margin-top:10px;background:#333" onclick="backHome()">← Retour accueil</button>
+    </div>
+  </div>
+
+  <div id="objectManager" style="display:none">
+    <div class="topbar">
+      <button class="back" onclick="closeObjectManager()">← Retour</button>
+      <h2 style="flex:1;margin:0">📦 Gestionnaire d’objets</h2>
+    </div>
+    <div class="panel setupPanel">
+      <div class="hint">Configure le nombre d’exemplaires de chaque objet disponibles dans la pioche.</div>
+      <div id="deckConfig" class="deckConfig"></div>
+      <div id="deckTotal" class="deckSummary"></div>
+      <button class="startGameBtn" onclick="saveManagerAndReturn()">✓ ENREGISTRER</button>
+    </div>
+  </div>
+
+  <div id="zombieManager" style="display:none">
+    <div class="topbar">
+      <button class="back" onclick="closeZombieManager()">← Retour</button>
+      <h2 style="flex:1;margin:0">🧟 Gestionnaire de Zombies</h2>
+    </div>
+
+    <div class="panel" id="zombieConfigPanel">
+      <strong>Configuration de la réserve</strong>
+      <div class="hint">Valeurs de base Black Plague + ennemis optionnels. Un ennemi réglé à 0 ne peut jamais apparaître.</div>
+      <div id="zombieConfig" class="zombieGrid"></div>
+      <button class="startGameBtn" style="font-size:15px" onclick="saveZombieConfigAndReset()">✓ ENREGISTRER ET REMPLIR LA RÉSERVE</button>
+    </div>
+
+    <div class="panel" id="zombieReservePanel">
+      <strong>Réserve actuelle</strong>
+      <div class="hint">Quand vous éliminez des Zombies, remettez-les ici avec +1 / +3 / +5 / +8.</div>
+      <div id="zombieReserve" class="zombieGrid"></div>
+    </div>
+
+    <div class="panel" id="zombieWavePanel">
+      <strong>Générateur d’apparition</strong>
+      <div id="currentDanger" class="waveDanger">Niveau : Bleu</div>
+      <div class="hint">Le niveau est calculé automatiquement à partir du héros « En jeu » ayant le plus d’XP.</div>
+      <button class="zombieBtn" onclick="generateZombieWave()">🧟 GÉNÉRER UNE APPARITION</button>
+      <div id="waveResult" class="waveResult">Aucune apparition générée.</div>
+    </div>
+  </div>
+
+  <div id="spawnModal" class="spawnModal" onclick="spawnBackdropClose(event)">
+    <div class="spawnCard">
+      <img id="spawnArtImg" class="spawnArtImg" alt="Zombie">
+      <div id="spawnDangerBadge" class="dangerBadge danger-blue">NIVEAU BLEU</div>
+      <div id="spawnQty" class="spawnQty">4 ×</div>
+      <div id="spawnType" class="spawnType">Walker</div>
+      <div id="spawnWarn"></div>
+      <button class="spawnClose" onclick="closeSpawnPopup()">OK</button>
+    </div>
+  </div>
+
+  <div id="menu" style="display:none">
+    <div class="deckTopBar">
+      <button onclick="openDeckSetup()">⚙️ Pioche</button>
+      <span id="remainingDeckBadge" class="remainingBadge">Pioche : 0</span>
+      <button onclick="resetDeckFromConfig()">↻ Refaire la pioche</button>
+    </div>
+    <h1>ZOMBICIDE 40K</h1>
+    <h2>Choisis ton personnage</h2>
+    <button class="rulesBtn" onclick="openRules()">📖 LIVRET DE RÈGLES</button>
+    <button class="zombieBtn" style="background:#3d3d3d" onclick="openZombieManager('menu')">🧟 GÉRER LA RÉSERVE</button>
+    <div class="charGrid" style="margin-top:12px"><button class="charPick" onclick="openChar('servo_lancer')">
+        <img src="assets/img_01_53b38c99.png" alt="SERVO-LANCER">
+        <span>SERVO-LANCER</span>
+    </button>
+<button class="charPick" onclick="openChar('angelo')">
+        <img src="assets/img_02_289f15e8.png" alt="ANGELO">
+        <span>ANGELO</span>
+    </button>
+<button class="charPick" onclick="openChar('logg_black')">
+        <img src="assets/img_03_de27e5a7.png" alt="LOGG BLACK">
+        <span>LOGG BLACK</span>
+    </button>
+    <button class="charPick" onclick="openChar('darius')">
+        <img src="assets/img_04_25156b9a.jpg" alt="DARIUS">
+        <span>DARIUS</span>
+    </button>
+    <button class="charPick" onclick="openChar('kael')">
+        <img src="assets/img_05_184ce6b8.jpg" alt="KAEL">
+        <span>KAEL</span>
+    </button>
+    <button class="charPick" onclick="openChar('valeria')">
+        <img src="assets/img_06_a737b5eb.jpg" alt="VALERIA">
+        <span>VALERIA</span>
+    </button></div>
+  </div>
+
+  <div id="sheet">
+    <div class="topbar">
+      <button class="back" onclick="goMenu()">← Personnages</button>
+      <div style="flex:1;text-align:center">
+        <h2 id="charName" style="margin:0"></h2>
+        <span id="charStatusBadge" class="statusBadge status-available">🟢 DISPONIBLE</span>
+      </div>
+      <button onclick="openRules()">📖</button>
+    </div>
+    <div class="panel" style="margin-top:0">
+      <strong>Statut campagne</strong>
+      <div class="statusPanel">
+        <button id="stAvailable" onclick="setCampaignStatus('available')">🟢 Disponible</button>
+        <button id="stInplay" onclick="setCampaignStatus('inplay')">🔵 En jeu</button>
+        <button id="stDead" onclick="setCampaignStatus('dead')">☠️ Mort</button>
+      </div>
+    </div>
+    <div class="panel" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="zombieBtn" style="flex:2;margin:0" onclick="generateZombieWaveQuick()">⚡ GÉNÉRER UNE APPARITION</button>
+      <button style="flex:1;min-width:130px" onclick="openZombieManager('sheet')">🧟 Réserve</button>
+    </div>
+
+
+    <div class="dicePanel">
+      <div class="dicePanelTitle">
+        <strong>🎲 Jets de dés</strong>
+        <button type="button" class="armorBtn" onclick="openArmorRoll()">🛡️ JET D’ARMURE</button>
+      </div>
+      <div id="equippedAttackButtons" class="diceWeapons"></div>
+      <div id="noAttackWeapon" class="hint" style="display:none">Équipe une arme pour afficher ses actions rapides.</div>
+    </div>
+
+    <div class="card"><img id="charImage" alt=""></div>
+
+    <div class="panel">
+      <div class="row">
+        <div class="stat">
+          <div class="label">EXPÉRIENCE</div>
+          <div class="value" id="xpValue">0</div>
+          <div class="controls"><button onclick="changeXP(-1)">−</button><button onclick="changeXP(1)">+</button></div>
+        </div>
+        <div class="stat">
+          <div class="label">BLESSURES</div>
+          <div class="value"><span id="woundsValue">0</span> / 3</div>
+          <div class="controls"><button onclick="changeWounds(-1)">−</button><button onclick="changeWounds(1)">+</button></div>
+        </div>
+      </div>
+      <div class="xpbar"><div class="seg blue"></div><div class="seg yellow"></div><div class="seg orange"></div><div class="seg red"></div></div>
+      <div class="marker" id="xpMarker" style="--xp:0"></div>
+      <div class="level" id="levelText"></div>
+    </div>
+
+    <div class="panel" id="extraPanel" style="display:none">
+      <strong id="extraTitle">Ressource</strong>
+      <div class="stat" style="margin-top:10px">
+        <div class="value" id="extraValue">0</div>
+        <div class="controls"><button onclick="changeExtra(-1)">−</button><button onclick="changeExtra(1)">+</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <strong>Compétences</strong><span class="badge">déblocage par XP</span>
+      <div class="skills" id="skills"></div>
+    </div>
+
+    <div class="panel">
+      <strong>Fouille & objets</strong><span class="badge">pioche aléatoire</span>
+      <button class="searchBtn" onclick="searchItem()">🔎 FOUILLER</button>
+      <div id="foundItem"></div>
+      <div style="margin-top:16px"><strong>Équipement</strong><span class="badge">mains</span></div>
+      <div class="handSlots">
+        <div class="handSlot" id="rightHand"></div>
+        <div class="handSlot" id="leftHand"></div>
+      </div>
+      <div style="margin-top:10px"><div class="handSlot" id="equipmentSlot"></div></div>
+      <div style="margin-top:16px"><strong>Inventaire</strong></div>
+      <div class="inventoryGrid" id="inventory"></div>
+    </div>
+
+    <div class="panel">
+      <strong>Notes / équipement</strong>
+      <textarea id="notes" class="note" placeholder="Armes, objectifs, objets..."></textarea>
+      <div class="actions">
+        <button onclick="clearChecks()">Décocher compétences</button>
+        <button class="danger" onclick="resetChar()">Nouvelle partie</button>
+      </div>
+      <div class="hint">Chaque personnage est sauvegardé séparément sur ce téléphone.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const RULES = {
+  "Diversion":"Placez un jeton Diversion dans une zone située dans le champ de vision du héros. Lors du prochain tour des Zombies, tous les Zombies se dirigent en priorité vers le jeton Diversion. Cette compétence peut être utilisée un nombre limité de fois, indiqué sur la fiche du héros. Exemple : Diversion 3 = utilisable 3 fois.",
+  "Tourelle":"Déploiement : dépensez 1 action pour placer la Tourelle dans la zone du héros. Une seule Tourelle peut être déployée à la fois. Avant chaque tour des Zombies, la Tourelle effectue automatiquement 3 tirs contre les Zombies présents dans la zone occupée la plus proche. Ses attaques ont une Force de 1. La Tourelle possède 3 PV. Le héros peut dépenser 1 action lorsqu’il se trouve dans sa zone pour la récupérer. Si la Tourelle est détruite, elle est définitivement perdue et ne peut plus être utilisée pendant cette partie.",
+  "Grappin":"Le héros peut dépenser 1 action pour attirer dans sa zone un allié situé dans son champ de vision. L’allié est immédiatement déplacé dans la zone du héros.",
+  "Miracle":"Une fois par partie, le héros peut ressusciter un allié mort. L’allié revient immédiatement en jeu avec 3 points de vie.",
+  "Chien robot":"Le héros déploie un Chien Robot possédant 3 PV. Le Chien Robot suit obligatoirement le héros lors de ses déplacements et reste toujours dans sa zone. Il peut encaisser les blessures à la place du héros : chaque blessure ainsi encaissée lui fait perdre 1 PV. Lors du tour du héros, si au moins un Zombie est présent dans sa zone, le Chien Robot peut effectuer une attaque : 2 dés, Force 1, Précision 3+. S’il tombe à 0 PV, le Chien Robot est détruit.",
+  "Maître de mission":"Lorsque plusieurs objectifs sont présents sur la carte, le héros peut révéler leur contenu ou leur nature.",
+  "Extermination":"Le héros déclenche une Extermination dans sa zone. Tous les Zombies présents dans cette zone sont immédiatement éliminés, quelles que soient leur résistance ou leurs compétences. Cette compétence peut être utilisée un nombre limité de fois, indiqué sur la fiche du héros. Exemple : Extermination 2 = utilisable 2 fois par partie.",
+  "Soins intensifs":"Le héros rend immédiatement 1 point de santé à tous les alliés présents dans sa zone, lui compris. Cette compétence peut être utilisée un nombre limité de fois, indiqué sur la fiche du héros. Exemple : Soins intensifs 2 = utilisable 2 fois par partie.",
+  "Fortification":"Une fois par tour, Darius peut activer Fortification pour lui-même ou pour un allié présent dans sa zone. Le héros choisi gagne +1 à ses jets de sauvegarde contre les attaques à distance jusqu’au prochain tour de Darius. Aucun jeton n’est placé.",
+  "Tir de suppression":"Lorsqu’une attaque à distance de Darius touche au moins 1 Zombie, les Zombies survivants dans la zone ciblée perdent 1 action lors de leur prochaine activation.",
+  "Dernier Rempart":"Jusqu’au prochain tour de Darius, chaque héros présent dans sa zone peut relancer 1 dé de jet de sauvegarde raté, une fois par tour. Utilisable 2 fois par partie.",
+  "Feu nourri":"Lorsqu’une attaque à distance de Darius élimine au moins 3 Zombies, Darius récupère immédiatement 1 action.",
+  "Position imprenable":"Tant que Darius ne s’est pas déplacé durant son tour, il gagne +1 dé et +1 au résultat de ses attaques à distance.",
+  "Infiltration":"Le premier déplacement de Kael à chaque tour est gratuit.",
+  "Exécution":"Kael gagne +1 dégât lorsqu’il attaque un Zombie qui est seul dans sa zone.",
+  "Ombre":"Kael peut quitter une zone contenant des Zombies sans payer d’action supplémentaire liée à leur présence.",
+  "Frappe fantôme":"Kael peut se déplacer immédiatement jusqu’à une zone située à 2 zones maximum dans son champ de vision. Ce déplacement ne coûte aucune action. Utilisable 2 fois par partie.",
+  "Chasseur de monstres":"Kael gagne +2 dés lorsqu’il attaque une Abomination ou un Zombie spécial.",
+  "Disparition":"Jusqu’au prochain tour de Kael, les Zombies l’ignorent pour leurs déplacements et leurs attaques. Utilisable 1 fois par partie.",
+  "Foi inébranlable":"Une fois par tour, Valeria peut relancer 1 dé raté.",
+  "Sainte colère":"Valeria gagne +1 dé en mêlée pour chaque point de vie manquant, maximum +2 dés.",
+  "Encouragement":"Une fois par tour, un allié dans la zone de Valeria peut effectuer 1 déplacement gratuit.",
+  "Purification":"Valeria effectue immédiatement une attaque contre tous les Zombies standards présents dans sa zone : 5 dés, Précision 3+, Force 2. Utilisable 5 fois par partie.",
+  "Miracle de guerre":"Tous les héros présents dans la zone de Valeria récupèrent immédiatement 1 point de vie. Utilisable 1 fois par partie.",
+  "Croisade":"Tous les héros présents dans la zone de Valeria gagnent +1 Force à leurs attaques jusqu’au début du prochain tour de Valeria. Utilisable 1 fois par partie.",
+  "Armure de Space Marine":"Les héros de type Space Marine disposent d’un jet d’Armure de 2+. Lorsqu’un Space Marine subit une blessure pouvant être sauvegardée, lancez le jet d’Armure : sur un résultat de 2 ou plus, la blessure est annulée. Les effets qui réduisent l’Armure modifient ce seuil.",
+  "Tyranide (optionnel)":"Le Tyranide est un type de Zombie optionnel. Sa réserve est réglée à 0 par défaut. Pour l’utiliser dans une partie, le joueur doit volontairement augmenter sa quantité dans le gestionnaire de Zombies. Il possède 2 actions par activation et réduit de 1 le jet d’Armure de la cible lorsqu’il attaque.",
+  "Cracheur Tyranide":"Le Cracheur Tyranide est un ennemi optionnel. Sa réserve est réglée à 0 par défaut. Il effectue 2 actions par activation. Il peut tirer jusqu’à 1 zone de distance et son attaque touche automatiquement. Lorsqu’il attaque, le jet d’Armure de la cible est réduit de 2 pour cette attaque."
+};
+
+function openRules(skillName=null){
+  document.getElementById("rulesModal").style.display="block";
+  document.body.style.overflow="hidden";
+  document.getElementById("ruleSearch").value="";
+  renderRulebook(skillName);
+}
+function closeRules(){
+  document.getElementById("rulesModal").style.display="none";
+  document.body.style.overflow="";
+}
+function modalBackdropClose(e){
+  if(e.target.id==="rulesModal") closeRules();
+}
+function renderRulebook(focusName=null){
+  const box=document.getElementById("rulesContent");
+  const q=(document.getElementById("ruleSearch").value||"").toLowerCase().trim();
+  let entries=Object.entries(RULES);
+  if(focusName && RULES[focusName]!==undefined) entries=[[focusName,RULES[focusName]]];
+  else if(q) entries=entries.filter(([n,d])=>(n+" "+d).toLowerCase().includes(q));
+  if(!entries.length){
+    box.innerHTML='<div class="empty">Aucune règle trouvée.</div>';
+    return;
+  }
+  box.innerHTML=entries.map(([name,desc])=>
+    '<div class="ruleEntry"><h3>'+name+'</h3><p>'+desc+'</p></div>'
+  ).join("");
+  document.getElementById("rulesTitle").textContent=focusName ? focusName : "Livret de règles";
+}
+
+const CHARS = {"servo_lancer":{"name":"SERVO-LANCER","image":"assets/img_01_53b38c99.png","skills":[{"color":"blue","unlock":0,"title":"Économe","desc":"Quand il recharge, sur un résultat de 5 ou 6, conserve le chargeur.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"+1 au résultat avec arme à distance","desc":"","key":"s2"},{"color":"orange","unlock":19,"title":"+1 dé au jet de tir à distance","desc":"","key":"s3"},{"color":"red","unlock":43,"title":"Diversion 3","desc":"Voir livre de règle.","key":"s4"},{"color":"red","unlock":43,"title":"Tourelle","desc":"Voir livre de règle.","key":"s5"},{"color":"red","unlock":43,"title":"Les tirs ne consomment que la moitié des munitions","desc":"","key":"s6"}],"extra_counter":null},"angelo":{"name":"ANGELO","image":"assets/img_02_289f15e8.png","skills":[{"color":"blue","unlock":0,"title":"Médecin","desc":"Le héros possède 2 potions qui soignent 1 blessure.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"+1 au résultat de jet de mêlée","desc":"","key":"s2"},{"color":"orange","unlock":19,"title":"+1 dé au lancer de mêlée","desc":"","key":"s3"},{"color":"red","unlock":43,"title":"Grappin","desc":"Voir livre de règle.","key":"s4"},{"color":"red","unlock":43,"title":"Miracle","desc":"Voir livre de règle.","key":"s5"},{"color":"red","unlock":43,"title":"Chien robot","desc":"Voir livre de règle.","key":"s6"}],"extra_counter":{"key":"potions","label":"POTIONS","default":2,"max":2}},"logg_black":{"name":"LOGG BLACK","image":"assets/img_03_de27e5a7.png","skills":[{"color":"blue","unlock":0,"title":"Commence avec une arme au choix","desc":"Dans la pile d’objet.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"+1 Mouvement gratuit","desc":"","key":"s2"},{"color":"orange","unlock":19,"title":"+2 dés au tir avec Bolter","desc":"","key":"s3"},{"color":"red","unlock":43,"title":"Maître de mission","desc":"Voir règle.","key":"s4"},{"color":"red","unlock":43,"title":"Extermination 2","desc":"Voir règle.","key":"s5"},{"color":"red","unlock":43,"title":"Soins intensifs 2","desc":"Voir règle.","key":"s6"}],"extra_counter":null},"darius":{"name":"DARIUS","image":"assets/img_04_25156b9a.jpg","skills":[{"color":"blue","unlock":0,"title":"Fortification","desc":"Voir livre de règle.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"Tir de suppression","desc":"Voir livre de règle.","key":"s2"},{"color":"orange","unlock":19,"title":"+2 dés avec armes à 2 mains à distance","desc":"","key":"s3"},{"color":"red","unlock":43,"title":"Dernier Rempart 2","desc":"Voir livre de règle.","key":"s4"},{"color":"red","unlock":43,"title":"Feu nourri","desc":"Voir livre de règle.","key":"s5"},{"color":"red","unlock":43,"title":"Position imprenable","desc":"Voir livre de règle.","key":"s6"}],"extra_counter":null},"kael":{"name":"KAEL","image":"assets/img_05_184ce6b8.jpg","skills":[{"color":"blue","unlock":0,"title":"Infiltration","desc":"Voir livre de règle.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"Exécution","desc":"Voir livre de règle.","key":"s2"},{"color":"orange","unlock":19,"title":"Ombre","desc":"Voir livre de règle.","key":"s3"},{"color":"red","unlock":43,"title":"Frappe fantôme 2","desc":"Voir livre de règle.","key":"s4"},{"color":"red","unlock":43,"title":"Chasseur de monstres","desc":"Voir livre de règle.","key":"s5"},{"color":"red","unlock":43,"title":"Disparition 1","desc":"Voir livre de règle.","key":"s6"}],"extra_counter":null},"valeria":{"name":"VALERIA","image":"assets/img_06_a737b5eb.jpg","skills":[{"color":"blue","unlock":0,"title":"Foi inébranlable","desc":"Voir livre de règle.","key":"s0"},{"color":"yellow","unlock":7,"title":"+1 Action","desc":"","key":"s1"},{"color":"orange","unlock":19,"title":"Sainte colère","desc":"Voir livre de règle.","key":"s2"},{"color":"orange","unlock":19,"title":"Encouragement","desc":"Voir livre de règle.","key":"s3"},{"color":"red","unlock":43,"title":"Purification 5","desc":"Voir livre de règle.","key":"s4"},{"color":"red","unlock":43,"title":"Miracle de guerre 1","desc":"Voir livre de règle.","key":"s5"},{"color":"red","unlock":43,"title":"Croisade 1","desc":"Voir livre de règle.","key":"s6"}],"extra_counter":null}};
+const ITEMS = [{"id":"chargeur_bolter_2","name":"Chargeur Bolter — 2 chargeurs","type":"Consommable","effect":"Ajoute 2 chargeurs à l’arme équipée. Recharger consomme 1 action.","image_data":"assets/img_07_1390c30b.png","hands":0,"ammoCapacity":0,"reloads":2},{"id":"chargeur_bolter_1","name":"Chargeur Bolter — 1 chargeur","type":"Consommable","effect":"Ajoute 1 chargeur à l’arme équipée. Recharger consomme 1 action.","image_data":"assets/img_08_8a4a46dc.png","hands":0,"ammoCapacity":0,"reloads":1},{"id":"hache_energetique","name":"Hache énergétique","type":"Arme","effect":"Zone 0 • 2 dés • Précision 3+ • Force 2","hands":1,"image_data":"assets/img_09_00b03dce.png","ammoCapacity":0},{"id":"lance_grenade","name":"Lance-Grenade","type":"Arme","effect":"Zone 1-2 • 1 dé • Précision 5+ • Force 2","hands":2,"ammoCapacity":1,"image_data":"assets/img_10_e940d82d.png"},{"id":"lance_flammes","name":"Lance-Flammes","type":"Arme","effect":"Portée 1-2 • 4 dés • Précision 4+ • Force 1","hands":2,"ammoCapacity":3,"image_data":"assets/img_11_d5bcb253.png"},{"id":"pistolet_plasma","name":"Pistolet Plasma","type":"Arme","effect":"Portée 0-1 • 1 dé • Précision 3+ • Force 1","hands":1,"ammoCapacity":8,"image_data":"assets/img_12_3cb0d253.png"},{"id":"jet_pack","name":"Jet Pack","type":"Équipement","effect":"Ajoute 1 action de déplacement supplémentaire. Ignore le malus de déplacement lié au nombre de zombies présents.","hands":0,"ammoCapacity":0,"wearable":true,"image_data":"assets/img_13_dc98a4bc.png"},{"id":"kit_medical","name":"Kit Médical","type":"Consommable","effect":"Redonne 1 point de santé quand utilisé. Défausser la carte.","hands":0,"ammoCapacity":0,"heal":1,"image_data":"assets/img_14_48aa449f.png"},{"id":"crane_donnees","name":"Crâne de Données","type":"Consommable","effect":"Donne 2 points d'expérience. Défausser la carte quand utilisée.","hands":0,"ammoCapacity":0,"xpGain":2,"image_data":"assets/img_15_450056b8.png"},{"id":"bouclier_tempete","name":"Bouclier Tempête","type":"Équipement","effect":"Quand équipé, permet d’éviter tout dommage de projectile. Faites un jet de sauvegarde à 2+. En cas d’échec, défaussez le bouclier.","hands":1,"ammoCapacity":0,"shieldSave":2,"image_data":"assets/img_16_948b8374.png"},{"id":"canon_plasma","name":"Canon à Plasma","type":"Arme","effect":"Portée 0-1 • 3 dés • Précision 4+ • Force 3","hands":2,"ammoCapacity":3,"image_data":"assets/img_17_dac8fa45.png"},{"id":"marteau_deux_mains","name":"Marteau à Deux Mains","type":"Arme","effect":"Sur un résultat de 6 au jet de touche, faites tomber les Zombies dans la zone. Ils devront se relever.","hands":2,"ammoCapacity":0,"image_data":"assets/img_18_f09add3b.jpg"},{"id":"bolter_lourd","name":"Bolter Lourd","type":"Arme","effect":"Zone 1-3 • 5 dés • Précision 5+ • Force 2","hands":2,"ammoCapacity":20,"image_data":"assets/img_19_bf3fd8f3.jpg"},{"id":"bolter","name":"Bolter","type":"Arme","effect":"Zone 1-3 • 4 dés • Précision 5+ • Force 1","hands":1,"ammoCapacity":12,"image_data":"assets/img_20_35f03b5e.jpg"},{"id":"epee_tronconneuse","name":"Épée Tronçonneuse","type":"Arme","effect":"Zone 0 • 2 dés • Précision 4+ • Force 2","hands":1,"ammoCapacity":0,"image_data":"assets/img_21_f4f05222.jpg"},{"id":"sniper","name":"Sniper","type":"Arme","effect":"Zone 2-6 • 1 dé • Précision 3+ • Force 3","hands":2,"ammoCapacity":3,"image_data":"assets/img_22_65b48717.jpg"},{"id":"gantelet_energetique","name":"Gantelet énergétique","type":"Arme","hands":1,"range":"0","dice":2,"accuracy":"4+","strength":3,"description":"Impact énergétique : sur un 6 naturel, l’attaque gagne +1 Force.","image_data":"assets/img_23_0095840d.jpg"},{"id":"fusil_plasma","name":"Fusil à plasma","type":"Arme","hands":2,"range":"1-2","dice":3,"accuracy":"4+","strength":3,"ammoCapacity":6,"description":"Surchauffe : après une attaque ayant obtenu au moins deux 1 naturels, le porteur subit une attaque de Force 1, sauvegarde autorisée.","image_data":"assets/img_24_5ab892ea.jpg"},{"id":"grenade_krak","name":"Grenade Krak","type":"Consommable","hands":1,"range":"0-1","dice":1,"accuracy":"3+","strength":4,"description":"Défausser après utilisation. Ne touche qu’une seule cible.","image_data":"assets/img_25_4d75c641.jpg"}];
+
+
+const SESSION_KEY="z40k_session_active_v1";
+
+function hasActiveSession(){
+  return localStorage.getItem(SESSION_KEY)==="1";
+}
+function markSessionActive(v){
+  if(v)localStorage.setItem(SESSION_KEY,"1");
+  else localStorage.removeItem(SESSION_KEY);
+}
+function renderHome(){
+  const active=hasActiveSession();
+  const b=document.getElementById("resumeBtn");
+  const h=document.getElementById("noSaveHint");
+  if(b){b.disabled=!active;b.style.opacity=active?"1":".4";}
+  if(h)h.style.display=active?"none":"block";
+}
+function backHome(){
+  ["pregameSetup","menu","sheet","objectManager","zombieManager"].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display="none";
+  });
+  document.getElementById("setup").style.display="block";
+  renderHome();window.scrollTo(0,0);
+}
+function resumeGame(){
+  if(!hasActiveSession())return;
+  document.getElementById("setup").style.display="none";
+  document.getElementById("menu").style.display="block";
+  renderMenuStatuses();renderDeckBadge();window.scrollTo(0,0);
+}
+function newGame(){
+  // Nouvelle partie = remise à zéro complète de la configuration et de l'état Zombies.
+  try{
+    localStorage.removeItem(ZOMBIE_CONFIG_KEY);
+    localStorage.removeItem(ZOMBIE_RESERVE_KEY);
+    localStorage.removeItem(SPAWN_DECK_KEY);
+  }catch(e){}
+
+  if(hasActiveSession() && !confirm("Commencer une nouvelle partie ? Toute la progression actuelle sera effacée."))return;
+
+  // Reset character progress for every survivor, while keeping user configuration preferences.
+  Object.keys(CHARS).forEach(id=>localStorage.removeItem(key(id)));
+
+  // Reset current gameplay state.
+  localStorage.removeItem(DECK_KEY);
+  localStorage.removeItem(ZOMBIE_RESERVE_KEY);
+  localStorage.removeItem(SPAWN_DECK_KEY);
+  markSessionActive(false);
+
+  ["setup","menu","sheet","objectManager","zombieManager"].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display="none";
+  });
+  document.getElementById("pregameSetup").style.display="block";
+  renderDeckConfig();
+  loadZombieReserve();
+  window.scrollTo(0,0);
+}
+
+const DECK_KEY="z40k_global_deck_v1";
+const DECK_CONFIG_KEY="z40k_global_deck_config_v1";
+
+function defaultDeckConfig(){
+  const cfg={};
+  ITEMS.forEach(it=>{
+    // Practical starter defaults; all can be changed before starting.
+    cfg[it.id] = it.reloads===1 ? 10 :
+                 it.reloads===2 ? 5 :
+                 it.id==="kit_medical" ? 4 :
+                 2;
+  });
+  return cfg;
+}
+function loadDeckConfig(){
+  let cfg=defaultDeckConfig();
+  try{
+    const s=JSON.parse(localStorage.getItem(DECK_CONFIG_KEY));
+    if(s) cfg=Object.assign(cfg,s);
+  }catch(e){}
+  return cfg;
+}
+function saveDeckConfig(cfg){localStorage.setItem(DECK_CONFIG_KEY,JSON.stringify(cfg));}
+
+function loadDeckState(){
+  try{
+    const s=JSON.parse(localStorage.getItem(DECK_KEY));
+    if(s && s.remaining) return s;
+  }catch(e){}
+  return null;
+}
+function saveDeckState(ds){localStorage.setItem(DECK_KEY,JSON.stringify(ds));}
+function deckRemainingTotal(){
+  const ds=loadDeckState(); if(!ds)return 0;
+  return Object.values(ds.remaining).reduce((a,b)=>a+(Number(b)||0),0);
+}
+function renderDeckBadge(){
+  const el=document.getElementById("remainingDeckBadge");
+  if(el)el.textContent="Pioche : "+deckRemainingTotal()+" carte"+(deckRemainingTotal()>1?"s":"");
+}
+function renderDeckConfig(){
+  const box=document.getElementById("deckConfig"); if(!box)return;
+  const cfg=loadDeckConfig();
+  box.innerHTML="";
+  ITEMS.forEach(it=>{
+    const row=document.createElement("div");
+    row.className="deckRow";
+
+    const img=document.createElement("img");
+    img.src=it.image_data;
+    img.alt=it.name;
+
+    const info=document.createElement("div");
+    const title=document.createElement("strong");
+    title.textContent=it.name;
+    const type=document.createElement("div");
+    type.className="hint";
+    type.style.textAlign="left";
+    type.style.marginTop="3px";
+    type.textContent=it.type;
+    info.appendChild(title);
+    info.appendChild(type);
+
+    const qty=document.createElement("div");
+    qty.className="deckQty";
+
+    const minus=document.createElement("button");
+    minus.textContent="−";
+    minus.onclick=()=>changeDeckQty(it.id,-1);
+
+    const input=document.createElement("input");
+    input.id="qty_"+it.id;
+    input.type="number";
+    input.min="0";
+    input.inputMode="numeric";
+    input.value=Math.max(0,Number(cfg[it.id])||0);
+    input.onchange=()=>setDeckQty(it.id,input.value);
+
+    const plus=document.createElement("button");
+    plus.textContent="+";
+    plus.onclick=()=>changeDeckQty(it.id,1);
+
+    qty.appendChild(minus);
+    qty.appendChild(input);
+    qty.appendChild(plus);
+
+    row.appendChild(img);
+    row.appendChild(info);
+    row.appendChild(qty);
+    box.appendChild(row);
+  });
+  updateDeckTotal();
+}
+function setDeckQty(id,val){
+  const cfg=loadDeckConfig();
+  cfg[id]=Math.max(0,parseInt(val,10)||0);
+  saveDeckConfig(cfg); renderDeckConfig();
+}
+function changeDeckQty(id,delta){
+  const cfg=loadDeckConfig();
+  cfg[id]=Math.max(0,(parseInt(cfg[id],10)||0)+delta);
+  saveDeckConfig(cfg); renderDeckConfig();
+}
+function updateDeckTotal(){
+  const cfg=loadDeckConfig();
+  const total=Object.values(cfg).reduce((a,b)=>a+(parseInt(b,10)||0),0);
+  const el=document.getElementById("deckTotal");
+  if(el)el.textContent="Total de la pioche : "+total+" carte"+(total>1?"s":"");
+}
+function buildDeckFromConfig(){
+  const cfg=loadDeckConfig();
+  const remaining={};
+  ITEMS.forEach(it=>remaining[it.id]=Math.max(0,parseInt(cfg[it.id],10)||0));
+  const ds={remaining,createdAt:Date.now()};
+  saveDeckState(ds); return ds;
+}
+function startConfiguredGame(){
+  buildDeckFromConfig();
+  resetZombieReserveFromConfig();
+  resetSpawnDeck();
+  markSessionActive(true);
+  const ps=document.getElementById("pregameSetup");if(ps)ps.style.display="none";
+  const zcp=document.getElementById("zombieConfigPanel"); if(zcp)zcp.style.display="none";
+  document.getElementById("objectManager").style.display="none";
+  document.getElementById("setup").style.display="none";
+  document.getElementById("menu").style.display="block";
+  renderMenuStatuses(); renderDeckBadge();
+  window.scrollTo(0,0);
+}
+function openObjectManager(){
+  const setup=document.getElementById("setup");
+  const pregame=document.getElementById("pregameSetup");
+  const menu=document.getElementById("menu");
+  const sheet=document.getElementById("sheet");
+  if(setup)setup.style.display="none";
+  if(pregame)pregame.style.display="none";
+  if(menu)menu.style.display="none";
+  if(sheet)sheet.style.display="none";
+  document.getElementById("objectManager").style.display="block";
+  renderDeckConfig(); window.scrollTo(0,0);
+}
+function closeObjectManager(){
+  document.getElementById("objectManager").style.display="none";
+  const existing=loadDeckState();
+  if(existing){
+    document.getElementById("menu").style.display="block";
+    renderMenuStatuses();renderDeckBadge();
+  }else{
+    document.getElementById(hasActiveSession()?"menu":"pregameSetup").style.display="block";
+  }
+  window.scrollTo(0,0);
+}
+function saveManagerAndReturn(){
+  document.getElementById("objectManager").style.display="none";
+  document.getElementById("pregameSetup").style.display="block";
+  window.scrollTo(0,0);
+}
+function openDeckSetup(){openObjectManager();}
+function resetDeckFromConfig(){
+  if(confirm("Recréer la pioche avec les quantités configurées ?")){
+    buildDeckFromConfig(); renderDeckBadge();
+  }
+}
+function chooseRandomAvailableItem(){
+  let ds=loadDeckState();
+  if(!ds) ds=buildDeckFromConfig();
+  const pool=[];
+  ITEMS.forEach(it=>{
+    const n=Math.max(0,Number(ds.remaining[it.id])||0);
+    for(let i=0;i<n;i++)pool.push(it.id);
+  });
+  if(!pool.length)return null;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function consumeDeckItem(itemId){
+  const ds=loadDeckState(); if(!ds)return false;
+  const n=Math.max(0,Number(ds.remaining[itemId])||0);
+  if(n<=0)return false;
+  ds.remaining[itemId]=n-1;
+  saveDeckState(ds); renderDeckBadge(); return true;
+}
+
+
+const ZOMBIE_CONFIG_KEY="z40k_zombie_config_v1";
+const ZOMBIE_RESERVE_KEY="z40k_zombie_reserve_v1";
+let zombieManagerReturn="setup";
+
+const ZOMBIE_TYPES=[{"id":"walker","name":"Walker","defaultCount":35,"art":"assets/img_26_ff05a090.png","rule":{"actions":1,"damage":1,"xp":1,"summary":"Zombie standard. Il effectue 1 action par activation.","details":"S’il partage une zone avec un Survivant, il attaque et inflige 1 blessure. Sinon, il se déplace d’1 zone vers les Survivants visibles, puis vers la source de bruit la plus importante. Il est éliminé par une attaque infligeant au moins 1 dégât."}},{"id":"fatty","name":"Fatty","defaultCount":14,"art":"assets/img_27_f3d5c020.png","rule":{"actions":1,"damage":2,"xp":1,"summary":"Zombie résistant. Il effectue 1 action par activation.","details":"Il se déplace et attaque comme un Walker, mais il faut une attaque infligeant au moins 2 dégâts pour l’éliminer. Plusieurs réussites avec une arme de Dégâts 1 ne suffisent pas."}},{"id":"runner","name":"Runner","defaultCount":14,"art":"assets/img_28_1395802a.png","rule":{"actions":2,"damage":1,"xp":1,"summary":"Zombie rapide. Il effectue 2 actions par activation.","details":"Après la première action de tous les Zombies, les Runners disposent d’une seconde action. Chacune de leurs actions peut être une attaque ou un déplacement. Ils sont éliminés par une attaque infligeant au moins 1 dégât."}},{"id":"abomination","name":"Abomination","defaultCount":1,"art":"assets/img_29_f102b709.png","rule":{"actions":1,"damage":3,"xp":5,"summary":"Monstre extrêmement résistant. Il effectue 1 action par activation.","details":"Il faut une attaque infligeant au moins 3 dégâts pour l’éliminer. Les blessures qu’il inflige ne peuvent pas être annulées par un jet d’Armure. Dans Black Plague, le Feu de Dragon est la méthode normale pour l’éliminer."}},{"id":"necromancer","name":"Nécromancien","defaultCount":1,"art":"assets/img_30_e02b021c.png","rule":{"actions":1,"damage":1,"xp":1,"summary":"Zombie spécial qui cherche à s’échapper.","details":"Lorsqu’il apparaît, placez une zone d’Invasion Nécromancien dans sa zone et résolvez immédiatement une apparition supplémentaire pour cette zone. Ensuite, cette zone fonctionne comme une zone d’Invasion normale. Le Nécromancien se déplace vers la zone d’Invasion standard la plus proche afin de quitter le plateau. Il ne peut normalement y avoir qu’un seul Nécromancien en jeu à la fois. Il est éliminé par une attaque infligeant au moins 1 dégât."}},{"id":"tyranide","name":"Tyranide","defaultCount":0,"art":"assets/img_31_a7de1a50.jpg","rule":{"actions":2,"damage":1,"xp":1,"summary":"Créature xéno agressive. Elle effectue 2 actions par activation.","details":"Le Tyranide effectue 2 actions à chaque activation. Lorsqu’un Tyranide attaque un héros, son jet d’Armure est réduit de 1 pour cette attaque. Exemple : un Space Marine protégé normalement sur 2+ sauvegarde sur 3+ contre une attaque de Tyranide."}},{"id":"cracheur","name":"Cracheur Tyranide","defaultCount":0,"art":"assets/img_32_29232d11.jpg","rule":{"actions":2,"damage":1,"xp":1,"summary":"Tyranide à distance. Il effectue 2 actions par activation.","details":"Le Cracheur peut attaquer un héros situé jusqu’à 1 zone de distance. Son tir touche automatiquement. Lorsqu’un Cracheur attaque un héros, le jet d’Armure de la cible est réduit de 2 pour cette attaque. Exemple : un Space Marine avec une Armure de 2+ sauvegarde sur 4+ contre un tir de Cracheur."}}];
+
+function defaultZombieConfig(){
+  const o={}; ZOMBIE_TYPES.forEach(z=>o[z.id]=z.defaultCount); return o;
+}
+function loadZombieConfig(){
+  let o=defaultZombieConfig();
+  try{const s=JSON.parse(localStorage.getItem(ZOMBIE_CONFIG_KEY));if(s)o=Object.assign(o,s)}catch(e){}
+  return o;
+}
+function saveZombieConfig(o){localStorage.setItem(ZOMBIE_CONFIG_KEY,JSON.stringify(o))}
+function loadZombieReserve(){
+  try{const s=JSON.parse(localStorage.getItem(ZOMBIE_RESERVE_KEY));if(s)return s}catch(e){}
+  const o=loadZombieConfig();localStorage.setItem(ZOMBIE_RESERVE_KEY,JSON.stringify(o));return o;
+}
+function saveZombieReserve(o){localStorage.setItem(ZOMBIE_RESERVE_KEY,JSON.stringify(o))}
+
+function renderZombieConfig(){
+  const box=document.getElementById("zombieConfig");if(!box)return;
+  const cfg=loadZombieConfig();box.innerHTML="";
+  ZOMBIE_TYPES.forEach(z=>{
+    const row=document.createElement("div");row.className="zombieRow zombieClickable";
+    row.onclick=(ev)=>{if(ev.target.tagName!=="BUTTON" && ev.target.tagName!=="INPUT")openZombieRule(z.id);};
+    row.innerHTML='<div class="zombieInfoWrap"><img class="zombieThumb" src="'+z.art+'" alt=""><div><div class="zombieName">'+z.name+'</div><div class="zombieSub">Valeur boîte : '+z.defaultCount+' • toucher pour voir les règles</div></div></div>';
+    const controls=document.createElement("div");controls.className="zombieControls";
+    const minus=document.createElement("button");minus.textContent="−";minus.onclick=()=>changeZombieConfig(z.id,-1);
+    const input=document.createElement("input");input.type="number";input.min="0";input.inputMode="numeric";input.value=Math.max(0,Number(cfg[z.id])||0);
+    input.onchange=()=>setZombieConfig(z.id,input.value);
+    const plus=document.createElement("button");plus.textContent="+";plus.onclick=()=>changeZombieConfig(z.id,1);
+    controls.append(minus,input,plus);row.appendChild(controls);box.appendChild(row);
+  });
+}
+function changeZombieConfig(id,d){
+  const c=loadZombieConfig();c[id]=Math.max(0,(Number(c[id])||0)+d);saveZombieConfig(c);renderZombieConfig();
+}
+function setZombieConfig(id,v){
+  const c=loadZombieConfig();c[id]=Math.max(0,parseInt(v,10)||0);saveZombieConfig(c);renderZombieConfig();
+}
+function saveZombieConfigAndReset(){
+  const c=loadZombieConfig();
+  saveZombieReserve({...c});
+  renderZombieReserve();
+  document.getElementById("zombieManager").style.display="none";
+  document.getElementById("pregameSetup").style.display="block";
+  window.scrollTo(0,0);
+}
+
+function renderZombieReserve(){
+  const box=document.getElementById("zombieReserve");if(!box)return;
+  const r=loadZombieReserve(),cfg=loadZombieConfig();box.innerHTML="";
+  ZOMBIE_TYPES.forEach(z=>{
+    const row=document.createElement("div");row.className="zombieRow zombieClickable";
+    row.onclick=(ev)=>{if(ev.target.tagName!=="BUTTON" && ev.target.tagName!=="INPUT")openZombieRule(z.id);};
+    row.innerHTML='<div class="zombieInfoWrap"><img class="zombieThumb" src="'+z.art+'" alt=""><div><div class="zombieName">'+z.name+'</div><div class="zombieSub">En réserve : '+Math.max(0,Number(r[z.id])||0)+' / '+(cfg[z.id]??0)+' • toucher pour voir les règles</div></div></div>';
+    const c=document.createElement("div");c.className="zombieControls";
+    const n=document.createElement("span");n.className="reserveNum";n.textContent=Math.max(0,Number(r[z.id])||0);
+    [1,3,5,8].forEach(v=>{
+      const b=document.createElement("button");b.textContent="+"+v;b.onclick=()=>changeZombieReserve(z.id,v);c.appendChild(b);
+    });
+    row.appendChild(c);box.appendChild(row);
+  });
+}
+function changeZombieReserve(id,d){
+  const r=loadZombieReserve(),cfg=loadZombieConfig();
+  const max=Math.max(0,Number(cfg[id])||0);
+  r[id]=Math.max(0,Math.min(max,(Number(r[id])||0)+d));
+  saveZombieReserve(r);renderZombieReserve();
+}
+
+function highestInPlayXP(){
+  let best=0,found=false,source="";
+  Object.keys(CHARS).forEach(id=>{
+    const s=loadState(id);
+    if(s.campaignStatus==="inplay"){
+      const xp=Number(s.xp)||0;
+      if(!found || xp>best){best=xp;source=CHARS[id].name;}
+      found=true;
+    }
+  });
+  // Practical fallback for testing: if nobody is marked "En jeu",
+  // use the currently open survivor instead of silently forcing Blue.
+  if(!found && current && state){
+    best=Number(state.xp)||0;
+    found=true;
+    source=CHARS[current].name+" (fiche actuelle)";
+  }
+  return {xp:best,found,source};
+}
+function dangerInfo(){
+  const h=highestInPlayXP(),xp=h.xp;
+  if(xp>=43)return {key:"red",name:"Rouge",xp,found:h.found,source:h.source};
+  if(xp>=19)return {key:"orange",name:"Orange",xp,found:h.found,source:h.source};
+  if(xp>=7)return {key:"yellow",name:"Jaune",xp,found:h.found,source:h.source};
+  return {key:"blue",name:"Bleu",xp,found:h.found,source:h.source};
+}
+function renderDanger(){
+  const d=dangerInfo(),el=document.getElementById("currentDanger");if(!el)return;
+  el.textContent="Niveau : "+d.name+" — "+d.xp+" XP"+(d.source?" • "+d.source:" (aucun héros En jeu)");
+}
+
+
+/* Deck d'apparition Zombicide: Black Plague (54 cartes).
+   Chaque carte contient une ligne Bleu / Jaune / Orange / Rouge.
+   "Brute" est affiché ici comme "Fatty" pour conserver le nom utilisé dans l'application. */
+
+const SPAWN_DECK_KEY="z40k_spawn_deck_bp_v1";
+
+const BP_SPAWN_CARDS=[
+{id:1,b:["none"],y:["runner",2],o:["walker",5],r:["fatty",2]},
+{id:2,b:["none"],y:["fatty",2],o:["walker",5],r:["walker",5]},
+{id:3,b:["none"],y:["walker",4],o:["runner",3],r:["runner",2]},
+{id:4,b:["walker",1],y:["runner",1],o:["fatty",3],r:["fatty",3]},
+{id:5,b:["walker",1],y:["fatty",1],o:["walker",4],r:["walker",5]},
+{id:6,b:["walker",1],y:["walker",2],o:["runner",1],r:["runner",3]},
+{id:7,b:["walker",2],y:["runner",1],o:["fatty",1],r:["fatty",3]},
+{id:8,b:["walker",3],y:["fatty",1],o:["walker",4],r:["walker",6]},
+{id:9,b:["fatty",1],y:["walker",2],o:["runner",2],r:["runner",3]},
+{id:10,b:["fatty",1],y:["walker",2],o:["fatty",2],r:["walker",5]},
+{id:11,b:["runner",1],y:["walker",3],o:["walker",3],r:["walker",6]},
+{id:12,b:["runner",1],y:["walker",3],o:["walker",3],r:["walker",5]},
+{id:13,b:["abomination",1],y:["runner",1],o:["walker",5],r:["fatty",2]},
+{id:14,b:["walker",2],y:["abomination",1],o:["fatty",1],r:["runner",3]},
+{id:15,b:["walker",2],y:["fatty",1],o:["abomination",1],r:["walker",6]},
+{id:16,b:["walker",1],y:["walker",3],o:["runner",2],r:["abomination",1]},
+{id:17,b:["walker",1],y:["runner",2],o:["fatty",3],r:["walker",6]},
+{id:18,b:["runner",1],y:["fatty",1],o:["walker",4],r:["walker",5]},
+{id:19,b:["walker",1],y:["walker",4],o:["runner",2],r:["fatty",3]},
+{id:20,b:["fatty",1],y:["runner",1],o:["walker",6],r:["runner",2]},
+{id:21,b:["walker",1],y:["fatty",2],o:["runner",2],r:["walker",8]},
+{id:22,b:["fatty",1],y:["walker",2],o:["fatty",2],r:["walker",7]},
+{id:23,b:["runner",1],y:["walker",4],o:["walker",4],r:["fatty",3]},
+{id:24,b:["fatty",1],y:["walker",3],o:["walker",5],r:["runner",3]},
+{id:25,b:["abomination",1],y:["runner",1],o:["walker",5],r:["fatty",2]},
+{id:26,b:["walker",2],y:["abomination",1],o:["fatty",1],r:["runner",3]},
+{id:27,b:["walker",2],y:["fatty",1],o:["abomination",1],r:["walker",6]},
+{id:28,b:["walker",1],y:["walker",3],o:["runner",2],r:["abomination",1]},
+{id:29,b:["walker",1],y:["runner",2],o:["fatty",3],r:["walker",6]},
+{id:30,b:["runner",1],y:["fatty",1],o:["walker",4],r:["walker",5]},
+{id:31,b:["walker",1],y:["walker",4],o:["runner",2],r:["fatty",3]},
+{id:32,b:["fatty",1],y:["runner",1],o:["walker",6],r:["runner",2]},
+{id:33,b:["walker",1],y:["fatty",2],o:["runner",2],r:["walker",8]},
+{id:34,b:["walker",1],y:["fatty",2],o:["walker",2],r:["fatty",7]},
+{id:35,b:["runner",1],y:["walker",4],o:["walker",4],r:["fatty",3]},
+{id:36,b:["fatty",1],y:["walker",3],o:["walker",5],r:["runner",3]},
+{id:37,b:["none"],y:["activation","walker"],o:["activation","walker"],r:["activation","walker"]},
+{id:38,b:["none"],y:["activation","walker"],o:["activation","walker"],r:["activation","walker"]},
+{id:39,b:["none"],y:["activation","fatty"],o:["activation","fatty"],r:["activation","fatty"]},
+{id:40,b:["none"],y:["activation","runner"],o:["activation","runner"],r:["activation","runner"]},
+{id:41,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:42,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:43,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:44,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:45,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:46,b:["necromancer",1],y:["necromancer",1],o:["necromancer",1],r:["necromancer",1]},
+{id:47,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:48,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:49,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:50,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:51,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:52,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:53,b:["double"],y:["double"],o:["double"],r:["double"]},
+{id:54,b:["double"],y:["double"],o:["double"],r:["double"]}
+];
+
+function shuffleArray(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function resetSpawnDeck(){
+  const ds={deck:shuffleArray(BP_SPAWN_CARDS.map(c=>c.id)),discard:[],pendingDraws:1};
+  localStorage.setItem(SPAWN_DECK_KEY,JSON.stringify(ds));return ds;
+}
+function loadSpawnDeck(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SPAWN_DECK_KEY));
+    if(s&&Array.isArray(s.deck)&&Array.isArray(s.discard))return s;
+  }catch(e){}
+  return resetSpawnDeck();
+}
+function saveSpawnDeck(ds){localStorage.setItem(SPAWN_DECK_KEY,JSON.stringify(ds))}
+function drawSpawnCard(){
+  const ds=loadSpawnDeck();
+  if(!ds.deck.length){
+    ds.deck=shuffleArray(ds.discard.slice());ds.discard=[];
+  }
+  const id=ds.deck.pop();ds.discard.push(id);saveSpawnDeck(ds);
+  return BP_SPAWN_CARDS.find(c=>c.id===id);
+}
+function dangerColumn(){
+  const d=dangerInfo();
+  return d.key==="blue"?"b":d.key==="yellow"?"y":d.key==="orange"?"o":"r";
+}
+function zombieLabel(id){
+  const z=ZOMBIE_TYPES.find(x=>x.id===id);return z?z.name:id;
+}
+
+function configuredCount(id){
+  const cfg=loadZombieConfig();
+  return Math.max(0,Number(cfg[id])||0);
+}
+function currentReserveCount(id){
+  const r=loadZombieReserve();
+  return Math.max(0,Number(r[id])||0);
+}
+function resolveWalkerFamilyType(){
+  const candidates=["walker","tyranide","cracheur"]
+    .filter(id=>configuredCount(id)>0 && currentReserveCount(id)>0);
+
+  if(!candidates.length) return "walker";
+
+  const total=candidates.reduce((s,id)=>s+configuredCount(id),0);
+  let roll=Math.random()*total;
+  for(const id of candidates){
+    roll-=configuredCount(id);
+    if(roll<=0)return id;
+  }
+  return candidates[candidates.length-1];
+}
+function resolveSpawnType(requestedType){
+  if(requestedType!=="walker") return requestedType;
+  return resolveWalkerFamilyType();
+}
+
+function takeFromZombieReserve(type,wanted){
+  const r=loadZombieReserve();
+  const available=Math.max(0,Number(r[type])||0);
+  const spawned=Math.min(wanted,available);
+  r[type]=available-spawned;saveZombieReserve(r);
+  return {spawned,available,shortage:spawned<wanted};
+}
+function resolveSpawnCard(card){
+  const d=dangerInfo(),entry=card[dangerColumn()];
+  if(entry[0]==="none"){
+    return {cardId:card.id,kind:"none",title:"AUCUNE APPARITION",text:"Aucun Zombie."};
+  }
+  if(entry[0]==="double"){
+    return {
+      cardId:card.id,
+      kind:"double",
+      title:"DOUBLE APPARITION",
+      text:"Cette apparition génère immédiatement 1 carte d’apparition supplémentaire."
+    };
+  }
+  if(entry[0]==="activation"){
+    if(entry[1]==="walker"){
+      const active=["walker","tyranide","cracheur"].filter(id=>configuredCount(id)>0);
+      const labels=active.length?active.map(zombieLabel):["Walker"];
+      return {
+        cardId:card.id,
+        kind:"activation",
+        type:"walker",
+        title:"ACTIVATION SUPPLÉMENTAIRE — "+labels.join(" / "),
+        text:"Tous les "+labels.join(", ")+" déjà en jeu reçoivent immédiatement 1 activation supplémentaire."
+      };
+    }
+    const label=zombieLabel(entry[1]);
+    return {
+      cardId:card.id,
+      kind:"activation",
+      type:entry[1],
+      title:"ACTIVATION SUPPLÉMENTAIRE — "+label,
+      text:"Tous les "+label+" déjà en jeu reçoivent immédiatement 1 activation supplémentaire."
+    };
+  }
+  const requestedType=entry[0],wanted=entry[1];
+  const type=resolveSpawnType(requestedType);
+  const take=takeFromZombieReserve(type,wanted);
+  let warning="";
+  if(take.shortage){
+    warning="⚠️ Réserve insuffisante : tous les "+zombieLabel(type)+"s déjà en jeu reçoivent 1 ACTIVATION SUPPLÉMENTAIRE.";
+  }
+  return {cardId:card.id,kind:"spawn",type,wanted,spawned:take.spawned,warning,
+    title:wanted+" × "+zombieLabel(type),text:wanted+" × "+zombieLabel(type)};
+}
+
+function closeSpawnPopup(){
+  const modal=document.getElementById("spawnModal");
+  if(modal)modal.style.display="none";
+  document.body.style.overflow="";
+}
+function spawnBackdropClose(e){
+  if(e.target && e.target.id==="spawnModal")closeSpawnPopup();
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")closeSpawnPopup();
+});
+
+function setSpawnDangerBadge(){
+  const d=dangerInfo();
+  const el=document.getElementById("spawnDangerBadge");
+  if(!el)return;
+  el.textContent="NIVEAU "+d.name.toUpperCase()+" — "+d.xp+" XP";
+  el.className="dangerBadge danger-"+d.key;
+}
+
+function showSpawnResolution(results,dangerName){
+  const result=document.getElementById("waveResult");
+
+  const spawns=results.filter(x=>x.kind==="spawn");
+  const doubles=results.filter(x=>x.kind==="double");
+  const activations=results.filter(x=>x.kind==="activation");
+  const warnings=results.filter(x=>x.warning || x.kind==="warning");
+
+  // Résumé du gestionnaire : uniquement les instructions utiles, sans numéros de cartes.
+  if(result){
+    let h='<div class="waveDanger">Niveau '+dangerName+'</div>';
+    if(doubles.length) h+='<div style="margin-top:8px"><strong>DOUBLE APPARITION'+(doubles.length>1?" ×"+doubles.length:"")+'</strong></div>';
+    spawns.forEach(x=>{
+      h+='<div style="margin-top:8px"><strong>'+x.title+'</strong></div>';
+    });
+    activations.forEach(x=>{
+      h+='<div style="margin-top:8px"><strong>'+x.title+'</strong></div>';
+    });
+    warnings.forEach(x=>{
+      if(x.warning)h+='<div class="waveWarning">'+x.warning+'</div>';
+      else if(x.text)h+='<div class="waveWarning">'+x.text+'</div>';
+    });
+    result.innerHTML=h;
+  }
+
+  setSpawnDangerBadge();
+  const artEl=document.getElementById("spawnArtImg");
+  const qty=document.getElementById("spawnQty");
+  const type=document.getElementById("spawnType");
+  const warn=document.getElementById("spawnWarn");
+
+  // Une apparition normale : artwork + "2 × FATTY", rien d'autre.
+  if(results.length===1 && spawns.length===1){
+    const x=spawns[0];
+    const z=ZOMBIE_TYPES.find(v=>v.id===x.type);
+    artEl.src=z?z.art:"";
+    artEl.style.display="block";
+    qty.textContent=x.wanted+" × "+zombieLabel(x.type).toUpperCase();
+    type.textContent="";
+    warn.innerHTML=x.warning?'<div class="waveWarning">'+x.warning+'</div>':"";
+  }
+  // Une activation : type explicitement indiqué.
+  else if(results.length===1 && activations.length===1){
+    artEl.style.display="none";
+    qty.textContent="ACTIVATION SUPPLÉMENTAIRE";
+    type.textContent=zombieLabel(activations[0].type).toUpperCase();
+    warn.innerHTML="";
+  }
+  // Double apparition / chaîne : on affiche seulement le résultat final à placer.
+  else{
+    artEl.style.display="none";
+    qty.textContent=doubles.length ? "DOUBLE APPARITION !" : "APPARITION MULTIPLE";
+    type.textContent=doubles.length ? "EFFECTUEZ 2 NOUVELLES INVOCATIONS DANS CETTE ZONE" : "";
+
+    let lines=[];
+    spawns.forEach(x=>{
+      lines.push('<div style="margin-top:10px;font-size:1.2em;font-weight:800">'+
+        x.wanted+' × '+zombieLabel(x.type).toUpperCase()+'</div>');
+    });
+    activations.forEach(x=>{
+      lines.push('<div style="margin-top:10px;font-weight:800">ACTIVATION SUPPLÉMENTAIRE — '+
+        zombieLabel(x.type).toUpperCase()+'</div>');
+    });
+    warnings.forEach(x=>{
+      if(x.warning)lines.push('<div class="waveWarning">'+x.warning+'</div>');
+      else if(x.text)lines.push('<div class="waveWarning">'+x.text+'</div>');
+    });
+    warn.innerHTML=lines.join("");
+  }
+
+  document.getElementById("spawnModal").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function generateRealSpawn(){
+  const card=drawSpawnCard();
+  const resolved=resolveSpawnCard(card);
+  renderZombieReserve();
+  renderDanger();
+  const dName=dangerInfo().name;
+  showSpawnResolution([resolved],dName);
+  z40kBroadcastEvent('zombie_wave',{results:[resolved],dangerName:dName});
+}
+function generateZombieWave(){generateRealSpawn()}
+function generateZombieWaveQuick(){generateRealSpawn()}
+
+
+function openZombieRule(id){
+  const z=ZOMBIE_TYPES.find(x=>x.id===id); if(!z||!z.rule)return;
+  document.getElementById("zombieRuleTitle").textContent=z.name;
+  const r=z.rule;
+  document.getElementById("zombieRuleContent").innerHTML=
+    '<div style="text-align:center"><img src="'+z.art+'" alt="" style="max-width:220px;width:70%;border-radius:12px"></div>'+
+    '<div class="zRuleStats">'+
+      '<span class="zRuleStat">Actions : '+r.actions+'</span>'+
+      '<span class="zRuleStat">Dégâts min : '+r.damage+'</span>'+
+      '<span class="zRuleStat">XP : '+r.xp+'</span>'+
+    '</div>'+
+    '<div class="zRuleBody"><p><strong>'+r.summary+'</strong></p><p>'+r.details+'</p></div>';
+  document.getElementById("zombieRuleModal").style.display="block";
+  document.body.style.overflow="hidden";
+}
+function closeZombieRule(){
+  document.getElementById("zombieRuleModal").style.display="none";
+  document.body.style.overflow="";
+}
+function zombieRuleBackdropClose(e){
+  if(e.target.id==="zombieRuleModal")closeZombieRule();
+}
+
+function openZombieManager(from){
+  zombieManagerReturn=from||"setup";
+  ["setup","pregameSetup","menu","sheet","objectManager"].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display="none"});
+  document.getElementById("zombieManager").style.display="block";
+  const pregame=(zombieManagerReturn==="setup");
+  const configPanel=document.getElementById("zombieConfigPanel");
+  const reservePanel=document.getElementById("zombieReservePanel");
+  const wavePanel=document.getElementById("zombieWavePanel");
+  if(configPanel)configPanel.style.display=pregame?"block":"none";
+  if(reservePanel)reservePanel.style.display=pregame?"none":"block";
+  if(wavePanel)wavePanel.style.display=pregame?"none":"block";
+  if(pregame)renderZombieConfig();
+  else{renderZombieReserve();renderDanger();}
+  window.scrollTo(0,0);
+}
+function closeZombieManager(){
+  document.getElementById("zombieManager").style.display="none";
+  if(zombieManagerReturn==="menu"){
+    document.getElementById("menu").style.display="block";renderMenuStatuses();renderDeckBadge();
+  }else if(zombieManagerReturn==="sheet"){
+    document.getElementById("sheet").style.display="block";
+    render();
+  }else{
+    document.getElementById("pregameSetup").style.display="block";
+  }
+  window.scrollTo(0,0);
+}
+function resetZombieReserveFromConfig(){
+  saveZombieReserve({...loadZombieConfig()});
+}
+
+let current = null;
+let state = null;
+
+function key(id){return "z40k_"+id+"_v1"}
+function defaultState(id){
+  const c=CHARS[id];
+  const st={xp:0,wounds:0,notes:"",checks:{},inventory:[],rightHand:null,leftHand:null,equipment:null,found:null,diversionUsed:0,turret:{status:"available",hp:3},miracleUsed:false,robotDog:{status:"available",hp:3},exterminationUsed:0,intensiveCareUsed:0,campaignStatus:"available"};
+  if(c.extra_counter) st[c.extra_counter.key]=c.extra_counter.default;
+  return st;
+}
+function makeInventoryEntry(itemId){
+  const it=itemById(itemId);
+  return {uid:"i_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8),itemId:itemId,ammo:(it&&it.ammoCapacity)?it.ammoCapacity:0,reloads:(it&&it.reloads)?it.reloads:0};
+}
+function loadState(id){
+  let st=defaultState(id);
+  try{const s=JSON.parse(localStorage.getItem(key(id))); if(s) st=Object.assign(st,s)}catch(e){}
+  if(!Array.isArray(st.inventory))st.inventory=[];
+  st.inventory=st.inventory.map(e=>{
+    if(typeof e==="string") return makeInventoryEntry(e);
+    if(e && e.itemId){
+      const it=itemById(e.itemId);
+      if(typeof e.ammo!=="number")e.ammo=(it&&it.ammoCapacity)?it.ammoCapacity:0;
+      if(typeof e.reloads!=="number")e.reloads=(it&&it.reloads)?it.reloads:0;
+      if(!e.uid)e.uid="i_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8);
+      return e;
+    }
+    return null;
+  }).filter(Boolean);
+  return st;
+}
+function save(){if(current)localStorage.setItem(key(current),JSON.stringify(state))}
+
+function campaignStatusLabel(s){
+  return s==="dead" ? "☠️ MORT" : s==="inplay" ? "🔵 EN JEU" : "🟢 DISPONIBLE";
+}
+function renderMenuStatuses(){
+  document.querySelectorAll(".charPick").forEach(btn=>{
+    const oc=btn.getAttribute("onclick")||"";
+    const mm=oc.match(/openChar\('([^']+)'\)/); if(!mm)return;
+    const id=mm[1], st=loadState(id);
+    let line=btn.querySelector(".campaignLine");
+    if(!line){line=document.createElement("span");line.className="campaignLine";btn.appendChild(line);}
+    line.textContent=campaignStatusLabel(st.campaignStatus||"available");
+    btn.classList.toggle("campaignDead",st.campaignStatus==="dead");
+    btn.classList.toggle("campaignInplay",st.campaignStatus==="inplay");
+  });
+}
+function setCampaignStatus(s){
+  state.campaignStatus=s; save(); render();
+}
+
+function openChar(id){
+  current=id;
+  state=loadState(id);
+  document.getElementById("menu").style.display="none";
+  document.getElementById("sheet").style.display="block";
+  window.scrollTo(0,0);
+  try{render();}
+  catch(err){
+    console.error(err);
+    alert("Erreur fiche "+id+" : "+err.message);
+  }
+}
+function goMenu(){
+  save(); document.getElementById("sheet").style.display="none";
+  document.getElementById("menu").style.display="block"; current=null; state=null; renderMenuStatuses(); renderDeckBadge(); window.scrollTo(0,0);
+}
+function level(xp){
+  if(xp>=43)return["Rouge","#9f241f"]; if(xp>=19)return["Orange","#cd6b20"];
+  if(xp>=7)return["Jaune","#c79a20"]; return["Bleu","#2779b9"];
+}
+
+let attackRollContext = null;
+let lastArmorFailures = 0;
+
+function itemAttackStats(it){
+  if(!it || it.type!=="Arme") return null;
+
+  let dice = Number(it.dice)||0;
+  let accuracy = parseInt(String(it.accuracy||"").replace(/\D/g,""),10)||0;
+  let strength = Number(it.strength)||0;
+  let range = it.range!=null ? String(it.range) : "";
+
+  const src = String(it.effect||"");
+  if(!dice){
+    const m=src.match(/(\d+)\s*d[ée]s?/i);
+    if(m)dice=parseInt(m[1],10);
+  }
+  if(!accuracy){
+    const m=src.match(/Pr[ée]cision\s*(\d+)\+/i);
+    if(m)accuracy=parseInt(m[1],10);
+  }
+  if(!strength){
+    const m=src.match(/Force\s*(\d+)/i);
+    if(m)strength=parseInt(m[1],10);
+  }
+  if(!range){
+    const m=src.match(/(?:Zone|Port[ée]e)\s*([0-9]+(?:-[0-9]+)?)/i);
+    if(m)range=m[1];
+  }
+
+  if(!dice || !accuracy) return null;
+  const melee = range==="0" || /^0(?:-|$)/.test(range);
+  return {dice,accuracy,strength,range,melee};
+}
+
+function checkedSkill(title){
+  const c=CHARS[current];
+  if(!c || !state)return false;
+  const s=c.skills.find(x=>x.title===title || x.title.startsWith(title));
+  return !!(s && state.checks && state.checks[s.key]);
+}
+
+function effectiveAttackStats(it){
+  const base=itemAttackStats(it);
+  if(!base)return null;
+  const st={...base,mods:[]};
+
+  if(current==="servo_lancer" && !st.melee){
+    if(checkedSkill("+1 dé au jet de tir à distance")){st.dice+=1;st.mods.push("+1 dé (compétence)");}
+    if(checkedSkill("+1 au résultat avec arme à distance")){st.accuracy=Math.max(2,st.accuracy-1);st.mods.push("+1 résultat");}
+  }
+  if(current==="angelo" && st.melee){
+    if(checkedSkill("+1 dé au lancer de mêlée")){st.dice+=1;st.mods.push("+1 dé (compétence)");}
+    if(checkedSkill("+1 au résultat de jet de mêlée")){st.accuracy=Math.max(2,st.accuracy-1);st.mods.push("+1 résultat");}
+  }
+  if(current==="logg_black" && it.id==="bolter" && checkedSkill("+2 dés au tir avec Bolter")){
+    st.dice+=2;st.mods.push("+2 dés Bolter");
+  }
+  if(current==="darius" && !st.melee && Number(it.hands)===2 && checkedSkill("+2 dés avec armes à 2 mains à distance")){
+    st.dice+=2;st.mods.push("+2 dés arme 2 mains");
+  }
+  return st;
+}
+
+function uniqueEquippedWeaponIndexes(){
+  const ids=[state?.rightHand,state?.leftHand].filter(v=>v!==null&&v!==undefined);
+  return [...new Set(ids)].filter(idx=>{
+    const e=getEntry(idx),it=getItemFromEntry(e);
+    return !!(it && it.type==="Arme" && itemAttackStats(it));
+  });
+}
+
+function renderAttackButtons(){
+  const box=document.getElementById("equippedAttackButtons");
+  const empty=document.getElementById("noAttackWeapon");
+  if(!box||!state)return;
+  box.innerHTML="";
+
+  const indexes=uniqueEquippedWeaponIndexes();
+  if(empty)empty.style.display=indexes.length?"none":"block";
+
+  indexes.forEach(idx=>{
+    const e=getEntry(idx),it=getItemFromEntry(e),st=effectiveAttackStats(it);
+    if(!e||!it||!st)return;
+
+    const card=document.createElement("div");
+    card.className="combatQuickCard";
+
+    const hasAmmo=Number(it.ammoCapacity)>0;
+    const currentAmmo=hasAmmo ? Number(e.ammo??0) : null;
+    const ammoHtml=hasAmmo
+      ? '<span class="combatQuickAmmo '+(currentAmmo<=0?'empty':'')+'">🔸 '+currentAmmo+' / '+it.ammoCapacity+'</span>'
+      : '<span class="combatQuickAmmo">∞</span>';
+
+    card.innerHTML=
+      '<div class="combatQuickHead">'+
+        '<div class="combatQuickName">'+(st.melee?'⚔️ ':'🔫 ')+it.name+'</div>'+
+        ammoHtml+
+      '</div>'+
+      '<div class="combatQuickStats">'+
+        st.dice+' dés · Précision '+st.accuracy+'+ · Force '+(st.strength||'—')+
+        (st.range?' · Portée '+st.range:'')+
+        (st.mods.length?' · '+st.mods.join(' · '):'')+
+      '</div>'+
+      '<div class="combatQuickActions '+(hasAmmo?'':'one')+'">'+
+        '<button type="button" class="combatAttackBtn">🎲 '+(st.melee?'ATTAQUER':'TIRER')+'</button>'+
+        (hasAmmo?'<button type="button" class="combatReloadBtn">🔄 RECHARGER</button>':'')+
+      '</div>';
+
+    const buttons=card.querySelectorAll("button");
+    buttons[0].onclick=()=>openAttackRoll(idx);
+    if(hasAmmo && buttons[1])buttons[1].onclick=()=>refillWeapon(idx);
+
+    box.appendChild(card);
+  });
+}
+
+
+function setDieFace(el,value){
+  const faces={
+    1:["p5"],
+    2:["p1","p9"],
+    3:["p1","p5","p9"],
+    4:["p1","p3","p7","p9"],
+    5:["p1","p3","p5","p7","p9"],
+    6:["p1","p3","p4","p6","p7","p9"]
+  };
+  const list=faces[value]||faces[1];
+  el.dataset.value=String(value);
+  el.innerHTML=list.map(p=>'<span class="pip '+p+'"></span>').join("");
+}
+
+function animateDice(containerId,count,finalRolls,threshold,onDone){
+  const box=document.getElementById(containerId);
+  if(!box)return;
+  box.innerHTML="";
+  const dice=[];
+
+  for(let i=0;i<count;i++){
+    const d=document.createElement("div");
+    const sx=(Math.random()*150-75).toFixed(0)+"px";
+    d.className="die throwing";
+    d.style.setProperty("--sx",sx);
+    d.style.setProperty("--delay",(i*65)+"ms");
+    setDieFace(d,Math.floor(Math.random()*6)+1);
+    box.appendChild(d);
+    dice.push(d);
+  }
+
+  let ticks=0;
+  const faceTimer=setInterval(()=>{
+    ticks++;
+    dice.forEach((d,i)=>{
+      if(ticks<13+i)setDieFace(d,Math.floor(Math.random()*6)+1);
+    });
+  },80);
+
+  const totalTime=1250 + Math.max(0,count-1)*65;
+  setTimeout(()=>{
+    clearInterval(faceTimer);
+
+    dice.forEach(d=>d.className="die tumbling");
+    let settleTicks=0;
+    const settle=setInterval(()=>{
+      settleTicks++;
+      dice.forEach(d=>setDieFace(d,Math.floor(Math.random()*6)+1));
+      if(settleTicks>=4){
+        clearInterval(settle);
+        dice.forEach((d,i)=>{
+          const v=finalRolls[i];
+          d.className="die finalPop "+(v>=threshold?"success":"fail");
+          setDieFace(d,v);
+        });
+        if(navigator.vibrate) navigator.vibrate([18,25,12]);
+        if(onDone)setTimeout(onDone,260);
+      }
+    },105);
+  },totalTime);
+}
+
+function diceHtml(rolls,threshold){
+  const faces={
+    1:["p5"],2:["p1","p9"],3:["p1","p5","p9"],
+    4:["p1","p3","p7","p9"],5:["p1","p3","p5","p7","p9"],
+    6:["p1","p3","p4","p6","p7","p9"]
+  };
+  return rolls.map(v=>{
+    const cls=v>=threshold?"success":"fail";
+    const pips=(faces[v]||faces[1]).map(p=>'<span class="pip '+p+'"></span>').join("");
+    return '<div class="die '+cls+'" data-value="'+v+'">'+pips+'</div>';
+  }).join("");
+}
+
+
+let specialRollCloseCallback=null;
+
+function closeSpecialRoll(){
+  document.getElementById("specialDiceModal")?.classList.remove("open");
+  specialRollCloseCallback=null;
+}
+
+function showSpecialD6Roll({title="Jet de compétence",icon="🎯",threshold=5,successText="Réussite !",failText="Échec.",meta="",onResolved=null}){
+  const modal=document.getElementById("specialDiceModal");
+  if(!modal)return;
+
+  const roll=Math.floor(Math.random()*6)+1;
+  const success=roll>=threshold;
+
+  document.getElementById("specialDiceTitle").textContent="🎲 "+title;
+  document.getElementById("specialDiceIcon").textContent=icon;
+  document.getElementById("specialDiceMeta").innerHTML=
+    "<span>1 dé</span><span>Réussite "+threshold+"+</span>"+(meta?"<span>"+meta+"</span>":"");
+  document.getElementById("specialDiceResult").innerHTML="🎲 <strong>Lancer en cours…</strong>";
+  modal.classList.add("open");
+  z40kBroadcastEvent('special_roll',{title,icon,threshold,roll,success,successText,failText,meta});
+
+  animateDice("specialDiceRolls",1,[roll],threshold,()=>{
+    document.getElementById("specialDiceResult").innerHTML=
+      (success?"✅ ":"❌ ")+"<strong>"+(success?successText:failText)+"</strong><br><small>Résultat du dé : "+roll+"</small>";
+    if(onResolved)onResolved({roll,success});
+  });
+
+  return roll;
+}
+
+
+function openAttackRoll(idx){
+  const e=getEntry(idx),it=getItemFromEntry(e),st=effectiveAttackStats(it);
+  if(!e||!it||!st)return;
+
+  if(it.ammoCapacity>0 && (e.ammo??0)<=0){
+    alert("Chargeur vide. Recharge l’arme avant d’attaquer.");
+    return;
+  }
+
+  attackRollContext={idx,itemId:it.id};
+  document.getElementById("attackDiceModal").classList.add("open");
+  rollAttack(idx);
+}
+
+function closeAttackRoll(){
+  document.getElementById("attackDiceModal")?.classList.remove("open");
+  attackRollContext=null;
+}
+
+function rerollAttack(){
+  if(attackRollContext)rollAttack(attackRollContext.idx);
+}
+
+function rollAttack(idx){
+  const e=getEntry(idx),it=getItemFromEntry(e),st=effectiveAttackStats(it);
+  if(!e||!it||!st)return;
+
+  if(it.ammoCapacity>0 && (e.ammo??0)<=0){
+    document.getElementById("attackDiceResult").innerHTML="❌ <strong>Chargeur vide.</strong>";
+    return;
+  }
+
+  if(it.ammoCapacity>0){
+    e.ammo=Math.max(0,(e.ammo??0)-1);
+    save();
+  }
+
+  const rolls=Array.from({length:st.dice},()=>Math.floor(Math.random()*6)+1);
+  const hits=rolls.filter(v=>v>=st.accuracy).length;
+
+  document.getElementById("attackDiceTitle").textContent="🎲 "+it.name;
+  const meta=[
+    st.dice+" dés",
+    "Précision "+st.accuracy+"+",
+    "Force "+(st.strength||"—"),
+    st.range ? "Portée "+st.range : "",
+    ...st.mods
+  ].filter(Boolean);
+  document.getElementById("attackDiceMeta").innerHTML=meta.map(x=>"<span>"+x+"</span>").join("");
+  document.getElementById("attackDiceResult").innerHTML="🎲 Lancer en cours…";
+  z40kBroadcastEvent('attack_roll',{
+    weapon:it.name,dice:st.dice,accuracy:st.accuracy,strength:st.strength||null,range:st.range||"",
+    rolls,hits,ammoText:it.ammoCapacity>0?("1 munition consommée · "+e.ammo+" restante"+(e.ammo>1?"s":"")):""
+  });
+
+  animateDice("attackDiceRolls",st.dice,rolls,st.accuracy,()=>{
+    document.getElementById("attackDiceResult").innerHTML=
+      "<strong>"+hits+" réussite"+(hits>1?"s":"")+"</strong> sur "+st.dice+
+      (it.ammoCapacity>0 ? "<br><small>1 munition consommée · "+e.ammo+" restante"+(e.ammo>1?"s":"")+"</small>" : "");
+  });
+
+  renderHands();
+  renderAttackButtons();
+}
+
+function baseArmorSave(){
+  const chosen=Number(document.getElementById("armorBase")?.value||0);
+  if(chosen)return chosen;
+  const c=CHARS[current]||{};
+  return Number(c.armorSave)||2;
+}
+
+function openArmorRoll(){
+  lastArmorFailures=0;
+  const baseSel=document.getElementById("armorBase");
+  if(baseSel){
+    const saved=state?.armorSaveChoice;
+    baseSel.value=String(saved || 2);
+  }
+  document.getElementById("armorDiceModal").classList.add("open");
+  document.getElementById("armorDiceRolls").innerHTML="";
+  document.getElementById("armorDiceResult").textContent="Choisis l’armure, le nombre de blessures et le malus.";
+  document.getElementById("armorApplyBox").style.display="none";
+  updateArmorThresholdInfo();
+}
+
+function closeArmorRoll(){
+  document.getElementById("armorDiceModal")?.classList.remove("open");
+}
+
+function updateArmorThresholdInfo(){
+  const base=Number(document.getElementById("armorBase")?.value||2);
+  const penalty=Number(document.getElementById("armorPenalty")?.value||0);
+  const threshold=Math.min(7,base+penalty);
+  const box=document.getElementById("armorThresholdInfo");
+  const final=document.getElementById("armorFinalDisplay");
+  const label=threshold>6?"Impossible":threshold+"+";
+  if(box)box.innerHTML="<span>Armure de base "+(base>6?"Aucune":base+"+")+"</span><span>Jet requis "+label+"</span>";
+  if(final)final.textContent=label;
+}
+
+function rollArmor(){
+  const count=Math.max(1,Math.min(20,parseInt(document.getElementById("armorDiceCount").value,10)||1));
+  const base=Math.max(2,Number(document.getElementById("armorBase").value)||2);
+  const penalty=Math.max(0,Number(document.getElementById("armorPenalty").value)||0);
+  const threshold=Math.min(7,base+penalty);
+  const rolls=Array.from({length:count},()=>Math.floor(Math.random()*6)+1);
+  const saved=threshold>6?0:rolls.filter(v=>v>=threshold).length;
+  const failed=count-saved;
+  lastArmorFailures=failed;
+
+  document.getElementById("armorDiceResult").innerHTML="🎲 Lancer en cours…";
+  z40kBroadcastEvent('armor_roll',{base,penalty,threshold,rolls,saved,failed});
+  animateDice("armorDiceRolls",count,rolls,threshold,()=>{
+    document.getElementById("armorDiceResult").innerHTML=
+      "🛡️ <strong>"+saved+" sauvegardée"+(saved>1?"s":"")+"</strong> · "+
+      "💥 <strong>"+failed+" blessure"+(failed>1?"s":"")+" subie"+(failed>1?"s":"")+"</strong>";
+  });
+
+  const apply=document.getElementById("armorApplyBox");
+  apply.style.display=failed>0?"block":"none";
+  document.getElementById("armorApplyBtn").textContent="💥 Appliquer "+failed+" blessure"+(failed>1?"s":"");
+  updateArmorThresholdInfo();
+}
+
+function applyArmorFailures(){
+  if(!state || lastArmorFailures<=0)return;
+  state.wounds=Math.max(0,Math.min(3,state.wounds+lastArmorFailures));
+
+  // Si le héros atteint 3/3 blessures, il passe automatiquement au statut Mort.
+  if(state.wounds>=3){
+    state.campaignStatus="dead";
+  }
+
+  save();
+  lastArmorFailures=0;
+  closeArmorRoll();
+  render();
+}
+
+function diceBackdropClose(e,id){
+  if(e.target?.id===id){
+    document.getElementById(id)?.classList.remove("open");
+    if(id==="attackDiceModal")attackRollContext=null;
+  }
+}
+
+function render(){
+  const c=CHARS[current];
+  document.getElementById("charName").textContent=c.name;
+  document.getElementById("charImage").src=c.image;
+  if(!state.campaignStatus)state.campaignStatus="available";
+  const badge=document.getElementById("charStatusBadge");
+  badge.textContent=campaignStatusLabel(state.campaignStatus);
+  badge.className="statusBadge "+(state.campaignStatus==="dead"?"status-dead":state.campaignStatus==="inplay"?"status-inplay":"status-available");
+  document.getElementById("stAvailable").classList.toggle("selected",state.campaignStatus==="available");
+  document.getElementById("stInplay").classList.toggle("selected",state.campaignStatus==="inplay");
+  document.getElementById("stDead").classList.toggle("selected",state.campaignStatus==="dead");
+  document.getElementById("xpValue").textContent=state.xp;
+  document.getElementById("woundsValue").textContent=state.wounds;
+  document.getElementById("xpMarker").style.setProperty("--xp",state.xp);
+  const lv=level(state.xp), le=document.getElementById("levelText");
+  le.textContent="Niveau "+lv[0]+" — "+state.xp+" XP"; le.style.color=lv[1];
+
+  const skills=document.getElementById("skills"); skills.innerHTML="";
+  c.skills.forEach(s=>{
+    const lab=document.createElement("label"); lab.className="skill "+s.color+(state.xp<s.unlock?" locked":"");
+    const ruleName =
+      s.title.startsWith("Diversion") ? "Diversion" :
+      s.title.startsWith("Extermination") ? "Extermination" :
+      s.title.startsWith("Soins intensifs") ? "Soins intensifs" :
+      s.title.startsWith("Dernier Rempart") ? "Dernier Rempart" :
+      s.title.startsWith("Frappe fantôme") ? "Frappe fantôme" :
+      s.title.startsWith("Disparition") ? "Disparition" :
+      s.title.startsWith("Purification") ? "Purification" :
+      s.title.startsWith("Miracle de guerre") ? "Miracle de guerre" :
+      s.title.startsWith("Croisade") ? "Croisade" :
+      s.title;
+    const hasRule = !!RULES[ruleName];
+    if(hasRule){
+      lab.classList.add("clickable");
+      lab.onclick=(ev)=>{
+        if(ev.target && (ev.target.tagName==="INPUT" || ev.target.tagName==="BUTTON")) return;
+        ev.preventDefault();
+        openRules(ruleName);
+      };
+    }
+    const sameColorChosen=(s.color==="orange"||s.color==="red")
+      ? c.skills.find(other=>other.color===s.color && other.key!==s.key && !!state.checks[other.key])
+      : null;
+    const choiceLocked=!!sameColorChosen && !state.checks[s.key];
+    if(choiceLocked)lab.classList.add("choiceLocked");
+
+    const inp=document.createElement("input");
+    inp.type="checkbox";
+    inp.disabled=(state.xp<s.unlock)||choiceLocked;
+    inp.checked=!!state.checks[s.key];
+    inp.onchange=()=>{
+      if(inp.checked && (s.color==="orange"||s.color==="red")){
+        c.skills.forEach(other=>{
+          if(other.color===s.color && other.key!==s.key)state.checks[other.key]=false;
+        });
+      }
+      state.checks[s.key]=inp.checked;
+      save();
+      render();
+    };
+    const tx=document.createElement("div"); 
+    const strong=document.createElement("strong"); strong.textContent=s.title; tx.appendChild(strong);
+    if(s.desc){const sm=document.createElement("small"); sm.textContent=s.desc; tx.appendChild(sm)}
+    if(s.title.startsWith("Diversion")){
+      const max=parseInt((s.title.match(/\d+/)||["3"])[0],10);
+      if(typeof state.diversionUsed!=="number") state.diversionUsed=0;
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML='<strong style="font-size:13px">Utilisations : '+state.diversionUsed+' / '+max+'</strong> '+
+        '<button style="font-size:12px;padding:7px 9px" '+(state.diversionUsed>=max?'disabled':'')+
+        ' onclick="useDiversion('+max+')">Utiliser</button> '+
+        '<button style="font-size:12px;padding:7px 9px" onclick="resetDiversion()">↻</button>';
+      tx.appendChild(ctr);
+    }
+    if(s.title.startsWith("Extermination")){
+      const max=parseInt((s.title.match(/\d+/)||["2"])[0],10);
+      if(typeof state.exterminationUsed!=="number") state.exterminationUsed=0;
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML='<strong style="font-size:13px">Utilisations : '+state.exterminationUsed+' / '+max+'</strong> '+
+        '<button style="font-size:12px;padding:7px 9px" '+(state.exterminationUsed>=max?'disabled':'')+
+        ' onclick="useExtermination('+max+')">Utiliser</button> '+
+        '<button style="font-size:12px;padding:7px 9px" onclick="resetExtermination()">↻</button>';
+      tx.appendChild(ctr);
+    }
+    if(s.title.startsWith("Soins intensifs")){
+      const max=parseInt((s.title.match(/\d+/)||["2"])[0],10);
+      if(typeof state.intensiveCareUsed!=="number") state.intensiveCareUsed=0;
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML='<strong style="font-size:13px">Utilisations : '+state.intensiveCareUsed+' / '+max+'</strong> '+
+        '<button style="font-size:12px;padding:7px 9px" '+(state.intensiveCareUsed>=max?'disabled':'')+
+        ' onclick="useIntensiveCare('+max+')">Utiliser</button> '+
+        '<button style="font-size:12px;padding:7px 9px" onclick="resetIntensiveCare()">↻</button>';
+      tx.appendChild(ctr);
+    }
+    const limitedMax =
+      s.title.startsWith("Dernier Rempart") ? 2 :
+      s.title.startsWith("Frappe fantôme") ? 2 :
+      s.title.startsWith("Disparition") ? 1 :
+      s.title.startsWith("Purification") ? 5 :
+      s.title.startsWith("Miracle de guerre") ? 1 :
+      s.title.startsWith("Croisade") ? 1 : 0;
+    if(limitedMax>0){
+      if(!state.newSkillUses) state.newSkillUses={};
+      if(typeof state.newSkillUses[s.key]!=="number") state.newSkillUses[s.key]=0;
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      const used=state.newSkillUses[s.key];
+      ctr.innerHTML='<strong style="font-size:13px">Utilisations : '+used+' / '+limitedMax+'</strong> '+
+        '<button style="font-size:12px;padding:7px 9px" '+(used>=limitedMax?'disabled':'')+
+        ' onclick="event.stopPropagation();useNewLimitedSkill(\''+s.key+'\','+limitedMax+')">Utiliser</button> '+
+        '<button style="font-size:12px;padding:7px 9px" onclick="event.stopPropagation();resetNewLimitedSkill(\''+s.key+'\')">↻</button>';
+      tx.appendChild(ctr);
+    }
+    if(s.title==="Tourelle"){
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML=turretControlsHtml();
+      tx.appendChild(ctr);
+    }
+    if(s.title==="Miracle"){
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML=miracleControlsHtml();
+      tx.appendChild(ctr);
+    }
+    if(s.title==="Chien robot"){
+      const ctr=document.createElement("div"); ctr.style.marginTop="8px";
+      ctr.innerHTML=robotDogControlsHtml();
+      tx.appendChild(ctr);
+    }
+    lab.appendChild(inp); lab.appendChild(tx); skills.appendChild(lab);
+  });
+
+  const ep=document.getElementById("extraPanel");
+  if(c.extra_counter){
+    ep.style.display="block"; document.getElementById("extraTitle").textContent=c.extra_counter.label;
+    const k=c.extra_counter.key; if(typeof state[k]!=="number")state[k]=c.extra_counter.default;
+    document.getElementById("extraValue").textContent=state[k];
+  } else ep.style.display="none";
+
+  document.getElementById("notes").value=state.notes||"";
+  renderFound();
+  renderHands();
+  renderGear();
+  renderInventory();
+  renderAttackButtons();
+  save();
+}
+function changeXP(v){state.xp=Math.max(0,Math.min(999,state.xp+v));render()}
+function changeWounds(v){state.wounds=Math.max(0,Math.min(3,state.wounds+v));render()}
+function useNewLimitedSkill(k,max){
+  if(!state.newSkillUses)state.newSkillUses={};
+  state.newSkillUses[k]=Math.min(max,(state.newSkillUses[k]||0)+1);
+  save();render();
+}
+function resetNewLimitedSkill(k){
+  if(!state.newSkillUses)state.newSkillUses={};
+  state.newSkillUses[k]=0;
+  save();render();
+}
+function changeExtra(v){
+  const c=CHARS[current]; if(!c.extra_counter)return;
+  const k=c.extra_counter.key, max=c.extra_counter.max ?? 999;
+  state[k]=Math.max(0,Math.min(max,(state[k]??c.extra_counter.default)+v));render();
+}
+
+function itemById(id){return ITEMS.find(x=>x.id===id)}
+function searchItem(){
+  if(!state)return;
+  const itemId=chooseRandomAvailableItem();
+  if(!itemId){
+    alert("La pioche est vide.");
+    return;
+  }
+  state.found=itemId; save(); renderFound();
+}
+function renderFound(){
+  const box=document.getElementById("foundItem"); if(!box)return;
+  if(!state.found){box.innerHTML='<div class="empty">Appuie sur FOUILLER pour piocher un objet.</div>';return}
+  const it=itemById(state.found);
+  box.innerHTML='<div class="itemCard"><img src="'+it.image_data+'" alt=""><div class="itemInfo"><strong>'+it.name+'</strong><small>'+it.effect+'</small><div class="itemButtons"><button onclick="takeFound()">Prendre</button><button onclick="discardFound()">Défausser</button></div></div></div>';
+}
+function takeFound(){
+  if(!state.found)return;
+  const id=state.found;
+  if(!consumeDeckItem(id)){
+    alert("Cet objet n’est plus disponible dans la pioche.");
+    state.found=null; save(); renderFound(); return;
+  }
+  state.inventory.push(makeInventoryEntry(id));
+  state.found=null; save(); renderFound(); renderHands(); renderInventory(); renderDeckBadge();
+}
+function discardFound(){state.found=null;save();renderFound()}
+function getEntry(idx){return (idx===null||idx===undefined)?null:state.inventory[idx]}
+function getItemFromEntry(entry){return entry?itemById(entry.itemId):null}
+
+function changeWeaponAmmo(idx,delta){
+  const e=getEntry(idx), it=getItemFromEntry(e);
+  if(!e||!it||!it.ammoCapacity)return;
+  e.ammo=Math.max(0,Math.min(it.ammoCapacity,(e.ammo??it.ammoCapacity)+delta));
+  save();renderHands();
+}
+function reloadCount(){
+  return state.inventory.reduce((n,e,idx)=>{
+    if(idx===state.rightHand||idx===state.leftHand||idx===state.equipment)return n;
+    const it=getItemFromEntry(e); return n+((it&&it.reloads)?(e.reloads??it.reloads):0);
+  },0);
+}
+function refillWeapon(idx){
+  const e=getEntry(idx),it=getItemFromEntry(e); if(!e||!it||!it.ammoCapacity)return;
+  if(e.ammo>=it.ammoCapacity){alert("L’arme est déjà chargée.");return;}
+  const ri=state.inventory.findIndex((r,j)=>{
+    if(j===state.rightHand||j===state.leftHand||j===state.equipment)return false;
+    const q=getItemFromEntry(r); return q&&q.reloads&&(r.reloads??q.reloads)>0;
+  });
+  if(ri<0){alert("Aucun chargeur disponible.");return;}
+
+  const finishReload=(conserveChargeur)=>{
+    const r=state.inventory[ri],q=getItemFromEntry(r);
+    if(!r||!q)return;
+
+    if(!conserveChargeur){
+      r.reloads=(r.reloads??q.reloads)-1;
+    }
+
+    e.ammo=it.ammoCapacity;
+
+    if(!conserveChargeur && r.reloads<=0){
+      state.inventory.splice(ri,1);
+      if(state.rightHand!==null&&state.rightHand>ri)state.rightHand--;
+      if(state.leftHand!==null&&state.leftHand>ri)state.leftHand--;
+      if(state.equipment!==null&&state.equipment>ri)state.equipment--;
+    }
+
+    save();renderHands();renderGear();renderInventory();renderAttackButtons();
+  };
+
+  if(current==="servo_lancer"){
+    showSpecialD6Roll({
+      title:"ÉCONOME",
+      icon:"🔋",
+      threshold:5,
+      meta:"Conserver le chargeur",
+      successText:"Chargeur conservé !",
+      failText:"Chargeur consommé.",
+      onResolved:({success})=>finishReload(success)
+    });
+  }else{
+    finishReload(false);
+  }
+}
+
+function renderHands(){
+  const r=document.getElementById("rightHand"), l=document.getElementById("leftHand");
+  if(!r||!l)return;
+  const draw=(box,label,idx,side)=>{
+    const entry=getEntry(idx);
+    if(!entry){
+      box.innerHTML='<div class="handTitle">'+label+'</div><div class="emptyHand">Main vide</div>'; return;
+    }
+    const it=getItemFromEntry(entry);
+    if(!it){
+      box.innerHTML='<div class="handTitle">'+label+'</div><div class="emptyHand">Objet introuvable</div>'; return;
+    }
+
+    let ammoHtml="";
+    if(it.ammoCapacity>0){
+      const ammo=(typeof entry.ammo==="number")?entry.ammo:it.ammoCapacity;
+      ammoHtml='<div class="weaponAmmo"><div class="ammoLine">MUNITIONS : '+ammo+' / '+it.ammoCapacity+'</div>'+
+        '<div class="ammoControls">'+
+        '<button onclick="changeWeaponAmmo('+idx+',-1)">−1</button>'+
+        '<button onclick="changeWeaponAmmo('+idx+',1)">+1</button>'+
+        '<button class="fullBtn" onclick="refillWeapon('+idx+')">Recharger ('+reloadCount()+')</button>'+
+        '</div></div>';
+    }
+
+    let shieldHtml="";
+    if(it.shieldSave){
+      shieldHtml='<div class="shieldPanel"><strong>🛡️ Sauvegarde 2+</strong><div style="margin-top:6px"><button onclick="shieldSave('+idx+')">Faire le jet</button></div></div>';
+    }
+    box.innerHTML='<div class="handTitle">'+label+'</div><img src="'+it.image_data+'" alt="">'+
+      '<div class="weaponName">'+it.name+'</div>'+ammoHtml+shieldHtml+
+      '<button onclick="unequip(\''+side+'\')">Retirer de la main</button>';
+  };
+  draw(r,"MAIN DROITE",state.rightHand,"right");
+  draw(l,"MAIN GAUCHE",state.leftHand,"left");
+}
+
+function renderInventory(){
+  const box=document.getElementById("inventory"); if(!box)return;
+  if(!state.inventory||!state.inventory.length){box.innerHTML='<div class="empty">Inventaire vide</div>';return}
+  box.innerHTML=""; let visible=0;
+  state.inventory.forEach((entry,idx)=>{
+    if(state.rightHand===idx||state.leftHand===idx||state.equipment===idx)return;
+    const it=getItemFromEntry(entry);if(!it)return;visible++;
+    const d=document.createElement("div");d.className="invItem";let actions="";
+    if(it.type==="Arme" || it.shieldSave){
+      actions+=it.hands===2?'<button onclick="equipTwoHands('+idx+')">Équiper 2 mains</button>':
+      '<button onclick="equipRight('+idx+')">Main droite</button><button onclick="equipLeft('+idx+')">Main gauche</button>';
+    }
+    if(it.wearable)actions+='<button onclick="equipGear('+idx+')">Équiper</button>';
+    if(it.heal)actions+='<button onclick="useMedical('+idx+')">Utiliser</button>';
+    if(it.xpGain)actions+='<button onclick="useDataSkull('+idx+')">Utiliser</button>';
+    let info="";
+    if(it.ammoCapacity)info+='<div style="margin-top:5px;font-weight:800">Munitions : '+entry.ammo+' / '+it.ammoCapacity+'</div>';
+    if(it.reloads)info+='<div style="margin-top:5px;font-weight:800">Recharges restantes : '+entry.reloads+'</div>';
+    d.innerHTML='<img src="'+it.image_data+'"><div class="invText"><strong>'+it.name+'</strong><span>'+it.type+'</span>'+info+
+      '<div class="itemButtons">'+actions+'<button onclick="dropItem('+idx+')">Retirer</button></div></div>';
+    box.appendChild(d);
+  });
+  if(!visible)box.innerHTML='<div class="empty">Tous les objets sont équipés.</div>';
+}
+function renderGear(){
+ const box=document.getElementById("equipmentSlot");if(!box)return;
+ const e=getEntry(state.equipment);
+ if(!e){box.innerHTML='<div class="handTitle">ÉQUIPEMENT</div><div class="emptyHand">Aucun équipement</div>';return}
+ const it=getItemFromEntry(e);
+ box.innerHTML='<div class="handTitle">ÉQUIPEMENT</div><img src="'+it.image_data+'"><div class="weaponName">'+it.name+'</div><button onclick="unequipGear()">Retirer l’équipement</button>';
+}
+function equipGear(i){state.equipment=i;save();renderGear();renderInventory()}
+function unequipGear(){state.equipment=null;save();renderGear();renderInventory()}
+
+function removeInventoryEntry(i){
+  state.inventory.splice(i,1);
+  if(state.rightHand!==null&&state.rightHand>i)state.rightHand--;
+  if(state.leftHand!==null&&state.leftHand>i)state.leftHand--;
+  if(state.equipment!==null&&state.equipment>i)state.equipment--;
+}
+function useDataSkull(i){
+  const e=getEntry(i),it=getItemFromEntry(e); if(!it||!it.xpGain)return;
+  if(confirm("Utiliser le Crâne de Données et gagner "+it.xpGain+" XP ?")){
+    state.xp+=it.xpGain; removeInventoryEntry(i); save(); render();
+  }
+}
+function shieldSave(i){
+  const e=getEntry(i),it=getItemFromEntry(e); if(!it||!it.shieldSave)return;
+
+  showSpecialD6Roll({
+    title:"BOUCLIER TEMPÊTE",
+    icon:"🛡️",
+    threshold:it.shieldSave,
+    meta:"Sauvegarde projectile",
+    successText:"Projectile bloqué !",
+    failText:"Échec — Bouclier détruit.",
+    onResolved:({success})=>{
+      if(!success){
+        clearIndexFromHands(i);
+        removeInventoryEntry(i);
+        save();
+        renderHands();
+        renderInventory();
+        renderAttackButtons();
+      }
+    }
+  });
+}
+
+function useMedical(i){
+ if(state.wounds<=0){alert("Le héros n’a aucune blessure.");return}
+ state.wounds=Math.max(0,state.wounds-1);state.inventory.splice(i,1);
+ if(state.rightHand!==null&&state.rightHand>i)state.rightHand--;
+ if(state.leftHand!==null&&state.leftHand>i)state.leftHand--;
+ if(state.equipment!==null&&state.equipment>i)state.equipment--;
+ save();render();
+}
+function clearIndexFromHands(idx){
+  if(state.rightHand===idx)state.rightHand=null;
+  if(state.leftHand===idx)state.leftHand=null;
+  if(state.equipment===idx)state.equipment=null;
+}
+function clearEquippedTwoHandWeapon(){
+  const ids=[state.rightHand,state.leftHand].filter(v=>v!==null&&v!==undefined);
+  for(const equippedIdx of [...new Set(ids)]){
+    const e=getEntry(equippedIdx), q=getItemFromEntry(e);
+    if(q&&q.hands===2){
+      if(state.rightHand===equippedIdx)state.rightHand=null;
+      if(state.leftHand===equippedIdx)state.leftHand=null;
+    }
+  }
+}
+function equipRight(idx){
+  const entry=getEntry(idx), it=getItemFromEntry(entry);
+  if(!it||!(it.type==="Arme"||it.shieldSave))return;
+  if(it.hands===2){equipTwoHands(idx);return;}
+  clearEquippedTwoHandWeapon();
+  if(state.leftHand===idx)state.leftHand=null;
+  state.rightHand=idx;
+  save();
+  renderHands();
+  renderInventory();
+  renderAttackButtons();
+}
+function equipLeft(idx){
+  const entry=getEntry(idx), it=getItemFromEntry(entry);
+  if(!it||!(it.type==="Arme"||it.shieldSave))return;
+  if(it.hands===2){equipTwoHands(idx);return;}
+  clearEquippedTwoHandWeapon();
+  if(state.rightHand===idx)state.rightHand=null;
+  state.leftHand=idx;
+  save();
+  renderHands();
+  renderInventory();
+  renderAttackButtons();
+}
+function equipTwoHands(idx){
+  state.rightHand=idx;
+  state.leftHand=idx;
+  save();
+  renderHands();
+  renderInventory();
+  renderAttackButtons();
+}
+function unequip(side){
+  if(side==="right"){
+    const idx=state.rightHand;
+    state.rightHand=null;
+    const e=getEntry(idx), it=getItemFromEntry(e);
+    if(idx!==null && state.leftHand===idx && it?.hands===2)state.leftHand=null;
+  } else {
+    const idx=state.leftHand;
+    state.leftHand=null;
+    const e=getEntry(idx), it=getItemFromEntry(e);
+    if(idx!==null && state.rightHand===idx && it?.hands===2)state.rightHand=null;
+  }
+  save();
+  renderHands();
+  renderInventory();
+  renderAttackButtons();
+}
+function dropItem(idx){
+  const entry=getEntry(idx);
+  const item=getItemFromEntry(entry);
+  const name=item?item.name:"cet objet";
+  if(!confirm("Retirer définitivement « "+name+" » de l’inventaire ?"))return;
+  clearIndexFromHands(idx);
+  state.inventory.splice(idx,1);
+  if(state.rightHand!==null && state.rightHand>idx)state.rightHand--;
+  if(state.leftHand!==null && state.leftHand>idx)state.leftHand--;
+  if(state.equipment!==null && state.equipment>idx)state.equipment--;
+  save();renderHands();renderGear();renderInventory();
+}
+document.getElementById("notes").addEventListener("input",e=>{if(state){state.notes=e.target.value;save()}});
+document.getElementById("armorPenalty")?.addEventListener("change",updateArmorThresholdInfo);
+document.getElementById("armorBase")?.addEventListener("change",()=>{
+  if(state){state.armorSaveChoice=Number(document.getElementById("armorBase").value)||2;save();}
+  updateArmorThresholdInfo();
+});
+
+function useDiversion(max){
+  if(typeof state.diversionUsed!=="number")state.diversionUsed=0;
+  if(state.diversionUsed<max)state.diversionUsed++;
+  save();render();
+}
+function resetDiversion(){state.diversionUsed=0;save();render();}
+
+function ensureTurret(){
+  if(!state.turret || typeof state.turret!=="object")state.turret={status:"available",hp:3};
+}
+function turretControlsHtml(){
+  ensureTurret();
+  const t=state.turret;
+  if(t.status==="destroyed")
+    return '<div style="padding:8px;border:1px solid #7b2420;border-radius:9px"><strong>TOURELLE DÉTRUITE</strong><br><small>Indisponible pour le reste de la partie.</small></div>';
+  if(t.status==="available")
+    return '<div><strong style="font-size:13px">Tourelle disponible</strong> <button style="font-size:12px;padding:7px 9px" onclick="deployTurret()">Déployer (1 action)</button></div>';
+  return '<div style="padding:8px;border:1px solid #555;border-radius:9px">'+
+    '<strong style="font-size:13px">TOURELLE DÉPLOYÉE — ❤️ '+t.hp+' / 3 PV</strong><div style="margin-top:6px">'+
+    '<button style="font-size:12px;padding:7px 9px" onclick="turretDamage()">−1 PV</button> '+
+    '<button style="font-size:12px;padding:7px 9px" onclick="turretHeal()">+1 PV</button> '+
+    '<button style="font-size:12px;padding:7px 9px" onclick="recoverTurret()">Récupérer (1 action)</button></div></div>';
+}
+function deployTurret(){ensureTurret();if(state.turret.status==="available"){state.turret.status="deployed";state.turret.hp=3;save();render()}}
+function recoverTurret(){ensureTurret();if(state.turret.status==="deployed"){state.turret.status="available";save();render()}}
+function turretDamage(){
+  ensureTurret();if(state.turret.status!=="deployed")return;
+  state.turret.hp=Math.max(0,state.turret.hp-1);
+  if(state.turret.hp===0)state.turret.status="destroyed";
+  save();render();
+}
+function turretHeal(){ensureTurret();if(state.turret.status==="deployed"){state.turret.hp=Math.min(3,state.turret.hp+1);save();render()}}
+
+
+
+function useExtermination(max){
+  if(typeof state.exterminationUsed!=="number")state.exterminationUsed=0;
+  if(state.exterminationUsed<max){
+    if(confirm("Utiliser Extermination ? Tous les Zombies présents dans la zone sont éliminés.")){
+      state.exterminationUsed++;save();render();
+    }
+  }
+}
+function resetExtermination(){state.exterminationUsed=0;save();render();}
+
+function useIntensiveCare(max){
+  if(typeof state.intensiveCareUsed!=="number")state.intensiveCareUsed=0;
+  if(state.intensiveCareUsed<max){
+    if(confirm("Utiliser Soins intensifs ? Tous les alliés présents dans la zone récupèrent 1 point de santé.")){
+      state.intensiveCareUsed++;save();render();
+    }
+  }
+}
+function resetIntensiveCare(){state.intensiveCareUsed=0;save();render();}
+
+function miracleControlsHtml(){
+  if(typeof state.miracleUsed!=="boolean")state.miracleUsed=false;
+  if(state.miracleUsed)
+    return '<div style="padding:8px;border:1px solid #555;border-radius:9px"><strong style="font-size:13px">✨ MIRACLE UTILISÉ ✓</strong><br><small>Indisponible jusqu’à la prochaine partie.</small></div>';
+  return '<div><strong style="font-size:13px">✨ Miracle disponible</strong> <button style="font-size:12px;padding:7px 9px" onclick="useMiracle()">Utiliser Miracle</button></div>';
+}
+function useMiracle(){
+  if(state.miracleUsed)return;
+  if(confirm("Utiliser Miracle ? Cette compétence ne peut être utilisée qu’une seule fois par partie.")){
+    state.miracleUsed=true;save();render();
+  }
+}
+
+function ensureRobotDog(){
+  if(!state.robotDog||typeof state.robotDog!=="object")state.robotDog={status:"available",hp:3};
+}
+function robotDogControlsHtml(){
+  ensureRobotDog();
+  const d=state.robotDog;
+  if(d.status==="destroyed")
+    return '<div style="padding:8px;border:1px solid #7b2420;border-radius:9px"><strong>🐕 CHIEN ROBOT DÉTRUIT</strong><br><small>Indisponible pour le reste de la partie.</small></div>';
+  if(d.status==="available")
+    return '<div><strong style="font-size:13px">🐕 Chien Robot disponible</strong> <button style="font-size:12px;padding:7px 9px" onclick="deployRobotDog()">Déployer</button></div>';
+  return '<div style="padding:8px;border:1px solid #555;border-radius:9px">'+
+    '<strong style="font-size:13px">🐕 CHIEN ROBOT — ❤️ '+d.hp+' / 3 PV</strong>'+
+    '<div style="font-size:12px;margin-top:5px">Attaque : 🎲 2 dés • Force 1 • Précision 3+</div>'+
+    '<div style="margin-top:6px"><button style="font-size:12px;padding:7px 9px" onclick="robotDogDamage()">−1 PV</button> '+
+    '<button style="font-size:12px;padding:7px 9px" onclick="robotDogHeal()">+1 PV</button></div></div>';
+}
+function deployRobotDog(){
+  ensureRobotDog();
+  if(state.robotDog.status==="available"){
+    state.robotDog.status="deployed";state.robotDog.hp=3;save();render();
+  }
+}
+function robotDogDamage(){
+  ensureRobotDog();if(state.robotDog.status!=="deployed")return;
+  state.robotDog.hp=Math.max(0,state.robotDog.hp-1);
+  if(state.robotDog.hp===0)state.robotDog.status="destroyed";
+  save();render();
+}
+function robotDogHeal(){
+  ensureRobotDog();
+  if(state.robotDog.status==="deployed"){
+    state.robotDog.hp=Math.min(3,state.robotDog.hp+1);save();render();
+  }
+}
+
+function clearChecks(){state.checks={};render()}
+function resetChar(){
+  if(confirm("Réinitialiser cette fiche ?")){state=defaultState(current);render()}
+}
+
+(function initApp(){
+  renderDeckConfig();
+  loadZombieReserve();
+  ["pregameSetup","objectManager","zombieManager","menu","sheet"].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display="none";
+  });
+  document.getElementById("setup").style.display="block";
+  renderHome();
+})();
+</script>
+
+
+<div id="zombieRuleModal" class="modal" onclick="zombieRuleBackdropClose(event)">
+  <div class="modalBox">
+    <div class="modalHeader">
+      <h2 id="zombieRuleTitle">Règle Zombie</h2>
+      <button class="closeBtn" onclick="closeZombieRule()">✕</button>
+    </div>
+    <div id="zombieRuleContent"></div>
+  </div>
+</div>
+
+<div id="rulesModal" class="modal" onclick="modalBackdropClose(event)">
+  <div class="modalBox">
+    <div class="modalHeader">
+      <h2 id="rulesTitle">Livret de règles</h2>
+      <button class="closeBtn" onclick="closeRules()">✕</button>
+    </div>
+    <input id="ruleSearch" class="ruleSearch" placeholder="Rechercher une compétence..." oninput="renderRulebook()">
+    <div id="rulesContent"></div>
+  </div>
+</div>
+
+
+<script>
+const Z40K_SUPABASE_URL = 'https://dntbwwjaqjunkbubgnba.supabase.co';
+const Z40K_SUPABASE_KEY = 'sb_publishable_LUV2pjUqotr2x5rjH52CnQ_0ZHR0LwS';
+const z40kSB = window.supabase.createClient(Z40K_SUPABASE_URL, Z40K_SUPABASE_KEY);
+let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;
+let z40kRoomCode = localStorage.getItem('z40k_online_room_code') || '';
+let z40kChannel = null;
+let z40kUserId = null;
+let z40kApplyingRemote = false;
+let z40kPushTimer = null;
+let z40kLastEventId=null;
+const Z40K_EVENT_KEY='event';
+const Z40K_META_KEYS = new Set(['z40k_online_room_id','z40k_online_room_code','z40k_online_user']);
+
+function z40kSetStatus(label, ok=false) {
+  const e=document.getElementById('z40kSyncStatus');
+  const c=document.getElementById('z40kRoomCode');
+  if(e) { e.textContent=label; e.style.background=ok?'#185d31':'#4a3517'; }
+  if(c) c.textContent=z40kRoomCode ? 'CODE '+z40kRoomCode : '';
+}
+function z40kMsg(m) { const e=document.getElementById('z40kSyncMsg'); if(e)e.textContent=m; }
+
+async function z40kEnsureAuth() {
+  let {data:{session}}=await z40kSB.auth.getSession();
+  if(!session) {
+    const {data,error}=await z40kSB.auth.signInAnonymously();
+    if(error) throw error;
+    session=data.session;
+  }
+  z40kUserId = session?.user?.id || null;
+  return session;
+}
+
+function z40kSnapshot() {
+  const data={};
+  for(let i=0;i<localStorage.length;i++) {
+    const k=localStorage.key(i);
+    if(!k || Z40K_META_KEYS.has(k) || k.startsWith('sb-')) continue;
+    data[k]=localStorage.getItem(k);
+  }
+  return data;
+}
+
+function z40kApplySnapshot(data) {
+  if(!data || typeof data!=='object') return;
+  z40kApplyingRemote=true;
+  try {
+    // Remove game keys that no longer exist in the shared snapshot.
+    const toRemove=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k || Z40K_META_KEYS.has(k) || k.startsWith('sb-')) continue;
+      if(!(k in data)) toRemove.push(k);
+    }
+    toRemove.forEach(k=>localStorage.removeItem(k));
+    Object.entries(data).forEach(([k,v])=>{
+      if(!Z40K_META_KEYS.has(k) && !k.startsWith('sb-')) localStorage.setItem(k,String(v));
+    });
+  } finally { z40kApplyingRemote=false; }
+}
+
+function z40kRefreshUI(){
+  const previousRemoteState = z40kApplyingRemote;
+
+  // Pendant l'affichage d'une modification reçue d'un autre téléphone,
+  // aucune sauvegarde locale ne doit repartir vers Supabase.
+  z40kApplyingRemote = true;
+
+  try{
+    if(typeof renderHome==='function') renderHome();
+    if(typeof renderMenuStatuses==='function') renderMenuStatuses();
+    if(typeof renderDeckBadge==='function') renderDeckBadge();
+    if(typeof renderZombieConfig==='function') renderZombieConfig();
+    if(typeof renderZombieReserve==='function') renderZombieReserve();
+    if(typeof renderDeckConfig==='function') renderDeckConfig();
+
+    // Recharge la fiche actuellement ouverte avec l'état partagé.
+    if(
+      typeof current!=='undefined' &&
+      current &&
+      typeof loadState==='function'
+    ){
+      state = loadState(current);
+
+      if(typeof render==='function'){
+        render();
+      }
+    }
+
+  }catch(err){
+    console.warn('Refresh UI synchro:',err);
+
+  }finally{
+    // Réautorise les sauvegardes seulement une fois le rafraîchissement distant terminé.
+    z40kApplyingRemote = previousRemoteState;
+  }
+}
+
+async function z40kPushState() {
+  if(!z40kRoomId || z40kApplyingRemote) return;
+  try {
+    const session=await z40kEnsureAuth();
+    const payload={
+      room_id:z40kRoomId,
+      state_key:'game',
+      state_value:z40kSnapshot(),
+      updated_by:session.user.id,
+      updated_at:new Date().toISOString()
+    };
+    const {error}=await z40kSB.from('z40k_sync_state').upsert(payload,{onConflict:'room_id,state_key'});
+    if(error) throw error;
+    z40kSetStatus('🟢 Synchronisé',true);
+  } catch(e) {
+    console.error(e); z40kSetStatus('🔴 Erreur synchro'); z40kMsg(e.message||String(e));
+  }
+}
+
+function z40kSchedulePush() {
+  if(!z40kRoomId || z40kApplyingRemote) return;
+  clearTimeout(z40kPushTimer);
+  z40kPushTimer=setTimeout(z40kPushState,350);
+}
+
+
+function z40kMakeEventId(){
+  return window.crypto?.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+"-"+Math.random().toString(36).slice(2);
+}
+async function z40kBroadcastEvent(type,payload){
+  if(!z40kRoomId)return;
+  try{
+    const session=await z40kEnsureAuth();
+    const id=z40kMakeEventId();
+    z40kLastEventId=id;
+    await z40kSB.from('z40k_sync_state').upsert({
+      room_id:z40kRoomId,state_key:Z40K_EVENT_KEY,
+      state_value:{id,type,payload:payload||{},ts:Date.now()},
+      updated_by:session.user.id,updated_at:new Date().toISOString()
+    },{onConflict:'room_id,state_key'});
+  }catch(e){console.warn('Evénement partagé',e);}
+}
+function z40kHandleSharedEvent(ev){
+  if(!ev||!ev.id||ev.id===z40kLastEventId)return;
+  z40kLastEventId=ev.id;
+  const p=ev.payload||{};
+  if(ev.type==='attack_roll')z40kRemoteAttack(p);
+  else if(ev.type==='armor_roll')z40kRemoteArmor(p);
+  else if(ev.type==='special_roll')z40kRemoteSpecial(p);
+  else if(ev.type==='zombie_wave'&&Array.isArray(p.results))showSpawnResolution(p.results,p.dangerName||'Bleu');
+}
+function z40kRemoteAttack(p){
+  const modal=document.getElementById('attackDiceModal');if(!modal)return;
+  attackRollContext=null;modal.classList.add('open');
+  document.getElementById('attackDiceTitle').textContent='🎲 '+(p.weapon||'Attaque');
+  document.getElementById('attackDiceMeta').innerHTML=[
+    p.dice?p.dice+' dés':'',p.accuracy?'Précision '+p.accuracy+'+':'',
+    p.strength?'Force '+p.strength:'',p.range?'Portée '+p.range:'','👥 Autre joueur'
+  ].filter(Boolean).map(x=>'<span>'+x+'</span>').join('');
+  document.getElementById('attackDiceResult').innerHTML='🎲 <strong>Lancer partagé en cours…</strong>';
+  const rolls=Array.isArray(p.rolls)?p.rolls:[];
+  animateDice('attackDiceRolls',rolls.length,rolls,Number(p.accuracy)||6,()=>{
+    document.getElementById('attackDiceResult').innerHTML='<strong>'+(p.hits||0)+' réussite'+((p.hits||0)>1?'s':'')+'</strong> sur '+rolls.length+
+      (p.ammoText?'<br><small>'+p.ammoText+'</small>':'')+'<br><small>👥 Jet effectué par un autre joueur</small>';
+  });
+}
+function z40kRemoteArmor(p){
+  const modal=document.getElementById('armorDiceModal');if(!modal)return;
+  modal.classList.add('open');lastArmorFailures=0;
+  document.getElementById('armorApplyBox').style.display='none';
+  document.getElementById('armorDiceResult').innerHTML='🎲 <strong>Jet d’armure partagé en cours…</strong>';
+  const rolls=Array.isArray(p.rolls)?p.rolls:[];
+  animateDice('armorDiceRolls',rolls.length,rolls,Number(p.threshold)||7,()=>{
+    document.getElementById('armorDiceResult').innerHTML='🛡️ <strong>'+(p.saved||0)+' sauvegardée'+((p.saved||0)>1?'s':'')+
+      '</strong> · 💥 <strong>'+(p.failed||0)+' blessure'+((p.failed||0)>1?'s':'')+' subie'+((p.failed||0)>1?'s':'')+
+      '</strong><br><small>👥 Jet effectué par un autre joueur</small>';
+  });
+}
+function z40kRemoteSpecial(p){
+  const modal=document.getElementById('specialDiceModal');if(!modal)return;
+  modal.classList.add('open');
+  document.getElementById('specialDiceTitle').textContent='🎲 '+(p.title||'Jet de compétence');
+  document.getElementById('specialDiceIcon').textContent=p.icon||'🎯';
+  document.getElementById('specialDiceMeta').innerHTML='<span>1 dé</span><span>Réussite '+(p.threshold||6)+'+</span><span>👥 Autre joueur</span>';
+  document.getElementById('specialDiceResult').innerHTML='🎲 <strong>Lancer partagé en cours…</strong>';
+  const roll=Number(p.roll)||1, threshold=Number(p.threshold)||6;
+  animateDice('specialDiceRolls',1,[roll],threshold,()=>{
+    document.getElementById('specialDiceResult').innerHTML=(p.success?'✅ ':'❌ ')+'<strong>'+
+      (p.success?(p.successText||'Réussite !'):(p.failText||'Échec.'))+'</strong><br><small>Résultat : '+roll+' · 👥 autre joueur</small>';
+  });
+}
+
+async function z40kSubscribe() {
+  if(z40kChannel) await z40kSB.removeChannel(z40kChannel);
+  if(!z40kRoomId) return;
+  z40kChannel=z40kSB.channel('z40k-'+z40kRoomId)
+    .on('postgres_changes',{event:'*',schema:'public',table:'z40k_sync_state',filter:'room_id=eq.'+z40kRoomId},payload=>{
+      const row=payload.new;
+      if(!row)return;
+      if(z40kUserId && row.updated_by===z40kUserId)return;
+      if(row.state_key===Z40K_EVENT_KEY){z40kHandleSharedEvent(row.state_value);return;}
+      if(row.state_key!=='game')return;
+
+      const wasActive = (typeof hasActiveSession==='function') ? hasActiveSession() : false;
+      z40kApplySnapshot(row.state_value);
+      z40kRefreshUI();
+      const isActive = (typeof hasActiveSession==='function') ? hasActiveSession() : false;
+      z40kSetStatus('🟢 Synchronisé',true);
+      if(!wasActive && isActive && typeof resumeGame==='function'){
+        z40kMsg('La partie vient de démarrer — ouverture automatique.');
+        resumeGame();
+      }else{
+        z40kMsg('Mise à jour reçue d’un autre appareil.');
+      }
+    }).subscribe(status=>{
+      if(status==='SUBSCRIBED'){
+        z40kSetStatus('🟢 Synchronisé',true);
+      }else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+        z40kSetStatus('🔴 Connexion instable');
+      }
+    });
+}
+
+
+
+
+function z40kOpenOnline(){const m=document.getElementById('z40kSyncBar');if(m)m.classList.add('open');}
+function z40kCloseOnline(){const m=document.getElementById('z40kSyncBar');if(m)m.classList.remove('open');}
+function z40kOnlineBackdrop(e){if(e.target?.id==='z40kSyncBar')z40kCloseOnline();}
+function z40kOpenSettings(){const m=document.getElementById('z40kSettingsModal');if(m)m.classList.add('open');}
+function z40kCloseSettings(){const m=document.getElementById('z40kSettingsModal');if(m)m.classList.remove('open');}
+function z40kSettingsBackdrop(e){if(e.target?.id==='z40kSettingsModal')z40kCloseSettings();}
+async function z40kShareApp(){
+  const u=new URL(window.location.href);u.search='';u.hash='';const url=u.toString();
+  try{
+    if(navigator.share){await navigator.share({title:'Zombicide 40K',text:'Installe Zombicide 40K sur ton téléphone',url});}
+    else if(navigator.clipboard){await navigator.clipboard.writeText(url);alert('Lien de l’application copié.');}
+    else{prompt('Copie ce lien :',url);}
+  }catch(e){}
+}
+let z40kInstallPrompt = null;
+
+function z40kIsStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function z40kOpenShortcut(){const m=document.getElementById('z40kShortcutModal');if(m)m.classList.add('open');}
+function z40kCloseShortcut(){const m=document.getElementById('z40kShortcutModal');if(m)m.classList.remove('open');}
+function z40kShortcutBackdrop(e){if(e.target?.id==='z40kShortcutModal')z40kCloseShortcut();}
+async function z40kCopyAppLink(){
+  const u=new URL(window.location.href);u.search='';u.hash='';
+  try{await navigator.clipboard.writeText(u.toString());alert('Lien de l’application copié.');}
+  catch(e){prompt('Copie ce lien :',u.toString());}
+}
+function z40kRefreshInstallButton(){
+  const btn=document.getElementById('z40kInstallBtn');if(!btn)return;
+  if(z40kIsStandalone()){
+    btn.textContent='✅ Application installée';btn.disabled=true;btn.style.opacity='.65';
+  }else{
+    btn.textContent='📲 Installer / créer un raccourci';btn.disabled=false;btn.style.opacity='1';
+  }
+}
+window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();z40kInstallPrompt=e;z40kRefreshInstallButton();});
+window.addEventListener('appinstalled',()=>{z40kInstallPrompt=null;z40kRefreshInstallButton();});
+window.addEventListener('DOMContentLoaded',z40kRefreshInstallButton);
+async function z40kInstallApp(){
+  if(z40kIsStandalone()){z40kRefreshInstallButton();return;}
+  if(z40kInstallPrompt){
+    try{
+      z40kInstallPrompt.prompt();
+      const result=await z40kInstallPrompt.userChoice;
+      if(result?.outcome==='accepted'){z40kInstallPrompt=null;return;}
+    }catch(e){}
+  }
+  z40kOpenShortcut();
+}
+
+function z40kInviteUrl(){
+  if(!z40kRoomCode) return '';
+  const u = new URL(window.location.href);
+  u.search = '';
+  u.hash = '';
+  u.searchParams.set('join', z40kRoomCode);
+  return u.toString();
+}
+
+async function z40kShareInvite(){
+  if(!z40kRoomCode){
+    z40kMsg('Crée ou rejoins d’abord une partie en ligne.');
+    return;
+  }
+  const url = z40kInviteUrl();
+  try{
+    if(navigator.share){
+      await navigator.share({
+        title:'Zombicide 40K',
+        text:'Rejoins ma partie Zombicide 40K — code '+z40kRoomCode,
+        url
+      });
+      z40kMsg('Invitation partagée.');
+    }else if(navigator.clipboard){
+      await navigator.clipboard.writeText(url);
+      z40kMsg('Lien d’invitation copié.');
+    }else{
+      prompt('Copie ce lien :', url);
+    }
+  }catch(e){
+    if(e?.name!=='AbortError') z40kMsg('Impossible de partager automatiquement. Utilise le QR code.');
+  }
+}
+
+function z40kShowQR(){
+  if(!z40kRoomCode){
+    z40kMsg('Crée ou rejoins d’abord une partie en ligne.');
+    return;
+  }
+  const url=z40kInviteUrl();
+  const modal=document.getElementById('z40kQRModal');
+  const holder=document.getElementById('z40kQRCode');
+  const room=document.getElementById('z40kQRRoom');
+  const link=document.getElementById('z40kQRLink');
+  if(room) room.textContent='CODE '+z40kRoomCode;
+  if(link) link.textContent=url;
+  if(holder){
+    holder.innerHTML='';
+    if(window.QRCode){
+      new QRCode(holder,{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+    }else{
+      holder.style.color='#111';
+      holder.textContent='QR indisponible — utilise Partager.';
+    }
+  }
+  if(modal) modal.style.display='flex';
+}
+
+function z40kHideQR(){
+  const modal=document.getElementById('z40kQRModal');
+  if(modal) modal.style.display='none';
+}
+
+async function z40kCreateRoom() {
+  try {
+    z40kSetStatus('🟡 Connexion…'); z40kMsg('Création de la partie en ligne…');
+    await z40kEnsureAuth();
+    const {data,error}=await z40kSB.rpc('z40k_make_room');
+    if(error) throw error;
+    const r=Array.isArray(data)?data[0]:data;
+    z40kRoomId=r.room_id; z40kRoomCode=r.room_code;
+    localStorage.setItem('z40k_online_room_id',z40kRoomId);
+    localStorage.setItem('z40k_online_room_code',z40kRoomCode);
+    await z40kSubscribe();
+    await z40kPushState();
+    z40kMsg('Partie créée. Partage le lien ou le QR code — code '+z40kRoomCode);
+  } catch(e) { console.error(e); z40kSetStatus('🔴 Erreur'); z40kMsg(e.message||String(e)); }
+}
+
+async function z40kJoinRoom() {
+  try {
+    const inp=document.getElementById('z40kJoinCode');
+    const code=(inp?.value||'').trim().toUpperCase();
+    if(code.length!==6) { z40kMsg('Entre le code à 6 caractères.'); return; }
+    z40kSetStatus('🟡 Connexion…'); await z40kEnsureAuth();
+    const {data,error}=await z40kSB.rpc('z40k_join_room',{p_code:code});
+    if(error) throw error;
+    const r=Array.isArray(data)?data[0]:data;
+    z40kRoomId=r.room_id; z40kRoomCode=r.room_code;
+    localStorage.setItem('z40k_online_room_id',z40kRoomId);
+    localStorage.setItem('z40k_online_room_code',z40kRoomCode);
+    const {data:rows,error:readErr}=await z40kSB.from('z40k_sync_state').select('state_value').eq('room_id',z40kRoomId).eq('state_key','game').maybeSingle();
+    if(readErr) throw readErr;
+    if(rows?.state_value) {
+      z40kApplySnapshot(rows.state_value);
+      z40kRefreshUI();
+    }
+    await z40kSubscribe();
+    z40kSetStatus('🟢 Synchronisé',true);
+    if(typeof hasActiveSession==='function' && hasActiveSession()){
+      z40kMsg('Partie '+z40kRoomCode+' rejointe — ouverture de la partie en cours.');
+      if(typeof resumeGame==='function') resumeGame();
+    }else{
+      z40kMsg('Partie '+z40kRoomCode+' rejointe. Le joueur hôte n’a pas encore démarré la partie.');
+      if(typeof renderHome==='function') renderHome();
+    }
+  } catch(e) { console.error(e); z40kSetStatus('🔴 Erreur'); z40kMsg(e.message||String(e)); }
+}
+
+async function z40kLeaveRoom() {
+  if(z40kChannel) await z40kSB.removeChannel(z40kChannel);
+  z40kChannel=null; z40kRoomId=null; z40kRoomCode='';
+  localStorage.removeItem('z40k_online_room_id'); localStorage.removeItem('z40k_online_room_code');
+  z40kSetStatus('🟠 Hors ligne'); z40kMsg('Synchronisation quittée. La sauvegarde locale est conservée.');
+}
+
+const z40kOrigSetItem=Storage.prototype.setItem;
+Storage.prototype.setItem=function(k,v) {
+  z40kOrigSetItem.call(this,k,v);
+  if(this===localStorage && !Z40K_META_KEYS.has(k) && !String(k).startsWith('sb-')) z40kSchedulePush();
+};
+const z40kOrigRemoveItem=Storage.prototype.removeItem;
+Storage.prototype.removeItem=function(k) {
+  z40kOrigRemoveItem.call(this,k);
+  if(this===localStorage && !Z40K_META_KEYS.has(k) && !String(k).startsWith('sb-')) z40kSchedulePush();
+};
+
+window.addEventListener('DOMContentLoaded', async()=>{
+  const inviteCode=(new URLSearchParams(location.search).get('join')||'').trim().toUpperCase();
+
+  if(z40kRoomId && z40kRoomCode) {
+    try {
+      await z40kEnsureAuth(); await z40kSubscribe();
+      z40kSetStatus('🟢 Synchronisé',true); z40kMsg('Partie en ligne '+z40kRoomCode);
+    } catch(e) { z40kSetStatus('🔴 Erreur'); z40kMsg(e.message||String(e)); }
+  } else z40kSetStatus('🟠 Hors ligne');
+
+  if(inviteCode && /^[A-Z0-9]{6}$/.test(inviteCode) && inviteCode!==z40kRoomCode){
+    const inp=document.getElementById('z40kJoinCode');
+    if(inp) inp.value=inviteCode;
+    z40kMsg('Invitation détectée — connexion à la partie '+inviteCode+'…');
+    setTimeout(()=>z40kJoinRoom(),250);
+  }
+});
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js', {updateViaCache:'none'}).catch(err => console.warn('Service worker:', err));
+  });
+}
+</script>
+
+
+
+
+
+<div id="z40kUpdateBanner" class="z40kUpdateBanner">
+  <div class="z40kUpdateRow">
+    <div class="z40kUpdateText">
+      <strong>🔄 Nouvelle version disponible</strong>
+      Appuie sur Mettre à jour pour charger la dernière version.
+    </div>
+    <button type="button" class="z40kUpdateBtn" onclick="z40kApplyUpdate()">METTRE À JOUR</button>
+  </div>
+</div>
+
+
+<script>
+const Z40K_APP_VERSION = "16.13.1";
+let z40kWaitingWorker = null;
+
+function z40kShowUpdateBanner(){
+  document.getElementById('z40kUpdateBanner')?.classList.add('show');
+}
+
+async function z40kCheckPublishedVersion(){
+  try{
+    const u = new URL(window.location.href);
+    u.search = '';
+    u.hash = '';
+    u.searchParams.set('_z40k_check', Date.now().toString());
+    const r = await fetch(u.toString(), {cache:'no-store'});
+    if(!r.ok) return;
+    const html = await r.text();
+    const m = html.match(/<meta\s+name=["']z40k-app-version["']\s+content=["']([^"']+)["']/i);
+    if(m && m[1] && m[1] !== Z40K_APP_VERSION) z40kShowUpdateBanner();
+  }catch(e){}
+}
+
+async function z40kApplyUpdate(){
+  const btn=document.querySelector('.z40kUpdateBtn');
+  if(btn){btn.disabled=true;btn.textContent='MISE À JOUR…';}
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const reg of regs){
+        try{await reg.update();}catch(e){}
+        if(reg.waiting){
+          reg.waiting.postMessage({type:'SKIP_WAITING'});
+        }
+      }
+    }
+  }catch(e){}
+  const u=new URL(window.location.href);
+  u.searchParams.set('_z40k_reload',Date.now().toString());
+  window.location.replace(u.toString());
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});
+      await reg.update();
+
+      if(reg.waiting){
+        z40kWaitingWorker=reg.waiting;
+        z40kShowUpdateBanner();
+      }
+
+      reg.addEventListener('updatefound',()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener('statechange',()=>{
+          if(worker.state==='installed' && navigator.serviceWorker.controller){
+            z40kWaitingWorker=worker;
+            z40kShowUpdateBanner();
+          }
+        });
+      });
+    }catch(e){}
+    z40kCheckPublishedVersion();
+  });
+
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(sessionStorage.getItem('z40k_controller_reload_16.13.1')==='1')return;
+    sessionStorage.setItem('z40k_controller_reload_16.13.1','1');
+    const u=new URL(window.location.href);
+    u.searchParams.set('_z40k_sw',Date.now().toString());
+    window.location.replace(u.toString());
+  });
+}
+</script>
+
+</body>
+</html>

@@ -27,10 +27,8 @@ jobs:
           rm -rf _site
           mkdir _site
 
-          # Assets et images de base
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
 
-          # Toujours utiliser les fichiers actuels du dépôt
           cp -f index.html _site/index.html
           cp -f manifest.webmanifest _site/manifest.webmanifest
           cp -f service-worker.js _site/service-worker.js

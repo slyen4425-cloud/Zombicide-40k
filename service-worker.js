@@ -1,8 +1,8 @@
-const Z40K_SW_VERSION = 'z40k-sw-2';
+const Z40K_SW_VERSION = 'z40k-sw-3';
 const STATIC_CACHE = Z40K_SW_VERSION + '-static';
 const RUNTIME_CACHE = Z40K_SW_VERSION + '-runtime';
 
-self.addEventListener('install', event => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
@@ -12,8 +12,8 @@ self.addEventListener('activate', event => {
 
     await Promise.all(
       keys
-        .filter(k => !k.startsWith(Z40K_SW_VERSION))
-        .map(k => caches.delete(k))
+        .filter(key => !key.startsWith(Z40K_SW_VERSION))
+        .map(key => caches.delete(key))
     );
 
     await self.clients.claim();
@@ -21,7 +21,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
@@ -33,22 +33,20 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(req.url);
 
-  // INDEX / HTML :
-  // toujours chercher la dernière version sur GitHub en priorité.
-  if (req.mode === 'navigate' || req.destination === 'document') {
+  // IMPORTANT :
+  // La page principale ne doit jamais rester bloquée
+  // sur une ancienne version.
+  if (
+    req.mode === 'navigate' ||
+    req.destination === 'document' ||
+    url.pathname.endsWith('/index.html')
+  ) {
     event.respondWith((async () => {
       try {
-        const fresh = await fetch(req, {
+        return await fetch(req, {
           cache: 'no-store'
         });
-
-        if (fresh && fresh.ok) {
-          const cache = await caches.open(RUNTIME_CACHE);
-          await cache.put('./index.html', fresh.clone());
-        }
-
-        return fresh;
-      } catch (e) {
+      } catch (err) {
         return (
           await caches.match('./index.html')
         ) || Response.error();
@@ -58,8 +56,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Manifest :
-  // priorité à la version en ligne.
+  // Manifest : toujours chercher la dernière version.
   if (url.pathname.endsWith('/manifest.webmanifest')) {
     event.respondWith(
       fetch(req, {
@@ -70,8 +67,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Images / icônes :
-  // on garde le cache pour accélérer l'application.
+  // Images / icônes / assets :
+  // cache autorisé pour accélérer l'application.
   if (
     req.destination === 'image' ||
     req.destination === 'font' ||
@@ -85,7 +82,7 @@ self.addEventListener('fetch', event => {
 
       const res = await fetch(req);
 
-      if (res && res.ok) {
+      if (res?.ok) {
         const cache = await caches.open(STATIC_CACHE);
         cache.put(req, res.clone());
       }
@@ -96,19 +93,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Autres fichiers :
-  // réseau en priorité, cache seulement en secours.
+  // JS, CSS, Supabase, QR code, etc.
+  // Réseau d'abord, cache uniquement en secours.
   event.respondWith((async () => {
     try {
-      const res = await fetch(req);
+      const res = await fetch(req, {
+        cache: 'no-cache'
+      });
 
-      if (res && res.ok) {
+      if (res?.ok) {
         const cache = await caches.open(RUNTIME_CACHE);
         cache.put(req, res.clone());
       }
 
       return res;
-    } catch (e) {
+    } catch (err) {
       return (
         await caches.match(req)
       ) || Response.error();

@@ -28,25 +28,29 @@ jobs:
           rm -rf _site
           mkdir -p _site
 
+          # Récupère les anciens assets/images du pack principal
           unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
 
-          echo "=== REMPLACEMENT PAR LES FICHIERS ACTUELS ==="
-
+          # Toujours utiliser les fichiers actuels du dépôt
           cp -f index.html _site/index.html
           cp -f manifest.webmanifest _site/manifest.webmanifest
           cp -f service-worker.js _site/service-worker.js
 
+          # Icônes PWA
           mkdir -p _site/icons
           cp -f icon-192.png _site/icons/icon-192.png
           cp -f icon-512.png _site/icons/icon-512.png
 
-          echo "=== INDEX RACINE ==="
-          grep -o "Version [^<]*" index.html | head -1 || true
+          # Sons de l'application
+          cp -f sound_*.mp3 _site/
 
-          echo "=== INDEX QUI SERA PUBLIE ==="
-          grep -o "Version [^<]*" _site/index.html | head -1 || true
+          echo "=== FICHIERS AUDIO COPIÉS ==="
+          ls -lh _site/sound_*.mp3
 
-          echo "=== SITE PRET ==="
+          echo "=== VERSION PUBLIÉE ==="
+          grep -o 'z40k-app-version" content="[^"]*' _site/index.html || true
+
+          echo "=== SITE PRÊT ==="
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

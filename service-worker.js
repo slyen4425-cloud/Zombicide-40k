@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gensrpg-v16-73-8';
+const CACHE_NAME = 'gensrpg-v16-77-1-pwa-fix';
 
 const CORE_ASSETS = [
   './',
@@ -33,39 +33,64 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(event.request.url);
 
-  // Ne gère que les requêtes du même site
-  if (url.origin !== self.location.origin) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, copy).catch(() => {});
-          });
-        }
-
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then(cached => {
-          if (cached) return cached;
-
-          // Si on navigue hors ligne, revenir sur l'application
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
+  // Pages HTML : toujours essayer la version en ligne d'abord
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document'
+  ) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put('./index.html', copy));
           }
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
 
-          return Response.error();
-        });
+  // Manifest et service worker : ne pas garder une vieille version
+  if (
+    url.pathname.endsWith('/manifest.webmanifest') ||
+    url.pathname.endsWith('/service-worker.js')
+  ) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Images et autres fichiers
+  event.respondWith(
+    caches.match(event.request)
+      .then(cached => {
+        if (cached) return cached;
+
+        return fetch(event.request)
+          .then(response => {
+            if (response && response.ok) {
+              const copy = response.clone();
+
+              caches.open(CACHE_NAME)
+                .then(cache => cache.put(event.request, copy));
+            }
+
+            return response;
+          });
       })
   );
 });
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (
+    event.data &&
+    event.data.type === 'SKIP_WAITING'
+  ) {
     self.skipWaiting();
   }
 });

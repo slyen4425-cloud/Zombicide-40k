@@ -1,9 +1,10 @@
-name: Deploy Zombicide 40K
+name: Deploy GenSrpG to GitHub Pages
 
 on:
   push:
     branches:
       - main
+
   workflow_dispatch:
 
 permissions:
@@ -28,35 +29,75 @@ jobs:
           rm -rf _site
           mkdir -p _site
 
-          # Récupère les anciens assets/images du pack principal
-          unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
+          # Ancien pack principal, s'il existe encore
+          if [ -f "Z40K_GITHUB_PAGES_READY.zip" ]; then
+            unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
+          fi
 
-          # Toujours utiliser les fichiers actuels du dépôt
+          # Application principale
           cp -f index.html _site/index.html
-          cp -f manifest.webmanifest _site/manifest.webmanifest
-          cp -f service-worker.js _site/service-worker.js
+
+          # Manifest
+          if [ -f "manifest.webmanifest" ]; then
+            cp -f manifest.webmanifest _site/manifest.webmanifest
+          fi
+
+          if [ -f "manifest.json" ]; then
+            cp -f manifest.json _site/manifest.json
+          fi
+
+          # Service Worker
+          if [ -f "service-worker.js" ]; then
+            cp -f service-worker.js _site/service-worker.js
+          fi
 
           # Icônes PWA
           mkdir -p _site/icons
-          cp -f icon-192.png _site/icons/icon-192.png
-          cp -f icon-512.png _site/icons/icon-512.png
 
-          # Sons de l'application
-          cp -f sound_*.mp3 _site/
+          if [ -f "icon-192.png" ]; then
+            cp -f icon-192.png _site/icons/icon-192.png
+          fi
 
-          echo "=== FICHIERS AUDIO COPIÉS ==="
-          ls -lh _site/sound_*.mp3
+          if [ -f "icon-512.png" ]; then
+            cp -f icon-512.png _site/icons/icon-512.png
+          fi
 
-          echo "=== VERSION PUBLIÉE ==="
-          grep -o 'z40k-app-version" content="[^"]*' _site/index.html || true
+          # Sons
+          for file in sound_*.mp3; do
+            if [ -f "$file" ]; then
+              cp -f "$file" _site/
+            fi
+          done
 
-          echo "=== SITE PRÊT ==="
+          # Assets GenSrpG
+          # Dungeon, créatures, héros, objets, backgrounds, etc.
+          if [ -d "assets" ]; then
+            cp -R assets _site/assets
+          fi
+
+          echo ""
+          echo "========================================="
+          echo " CONTENU DU SITE À PUBLIER"
+          echo "========================================="
+          find _site -maxdepth 5 -type f | sort
+
+          echo ""
+          echo "========================================="
+          echo " ASSETS DUNGEON"
+          echo "========================================="
+          find _site/assets/dungeon -type f 2>/dev/null | sort || true
+
+          echo ""
+          echo "========================================="
+          echo " SONS"
+          echo "========================================="
+          ls -lh _site/sound_*.mp3 2>/dev/null || true
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Envoyer le site
-        uses: actions/upload-pages-artifact@v4
+      - name: Envoyer le site comme artifact Pages
+        uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
@@ -66,9 +107,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
+
     needs: build
 
     steps:
-      - name: Publier GitHub Pages
+      - name: Déployer sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

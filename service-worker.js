@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.164";
+const CACHE_NAME = "gensrpg-cache-16.166-audio-fix";
 
 const CORE_FILES = [
   "./",
@@ -32,27 +32,21 @@ self.addEventListener("install", event => {
    ========================= */
 
 self.addEventListener("activate", event => {
-
   event.waitUntil(
     (async () => {
-
       const cacheNames = await caches.keys();
 
-      /* Supprime automatiquement
-         toutes les anciennes versions */
+      /* Supprime tous les anciens caches */
       await Promise.all(
         cacheNames
           .filter(name => name !== CACHE_NAME)
           .map(name => caches.delete(name))
       );
 
-      /* Le nouveau SW prend immédiatement
-         le contrôle des pages ouvertes */
+      /* Le nouveau SW prend immédiatement le contrôle */
       await self.clients.claim();
-
     })()
   );
-
 });
 
 
@@ -61,14 +55,12 @@ self.addEventListener("activate", event => {
    ========================= */
 
 self.addEventListener("message", event => {
-
   if (
     event.data &&
     event.data.type === "SKIP_WAITING"
   ) {
     self.skipWaiting();
   }
-
 });
 
 
@@ -77,7 +69,6 @@ self.addEventListener("message", event => {
    ========================= */
 
 self.addEventListener("fetch", event => {
-
   const request = event.request;
 
   if (request.method !== "GET") {
@@ -86,8 +77,7 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  /* Ne gère que les fichiers
-     provenant de GenSrpG */
+  /* Seulement les fichiers du site GenSrpG */
   if (url.origin !== self.location.origin) {
     return;
   }
@@ -95,23 +85,16 @@ self.addEventListener("fetch", event => {
 
   /* =====================================
      HTML / NAVIGATION
-
      NETWORK FIRST
-
-     On demande TOUJOURS la dernière
-     version disponible sur GitHub.
      ===================================== */
 
   if (
     request.mode === "navigate" ||
     request.destination === "document"
   ) {
-
     event.respondWith(
       (async () => {
-
         try {
-
           const freshResponse = await fetch(
             request,
             {
@@ -120,7 +103,6 @@ self.addEventListener("fetch", event => {
           );
 
           if (freshResponse && freshResponse.ok) {
-
             const cache =
               await caches.open(CACHE_NAME);
 
@@ -128,17 +110,11 @@ self.addEventListener("fetch", event => {
               request,
               freshResponse.clone()
             );
-
           }
 
           return freshResponse;
 
         } catch (error) {
-
-          /* Hors connexion :
-             on reprend la dernière version
-             disponible en cache */
-
           const cached =
             await caches.match(request);
 
@@ -154,9 +130,7 @@ self.addEventListener("fetch", event => {
           }
 
           return Response.error();
-
         }
-
       })()
     );
 
@@ -166,25 +140,22 @@ self.addEventListener("fetch", event => {
 
   /* =====================================
      MANIFEST
-
-     NETWORK FIRST également
+     NETWORK FIRST
      ===================================== */
 
   if (request.destination === "manifest") {
-
     event.respondWith(
       (async () => {
-
         try {
-
           const fresh =
             await fetch(
               request,
-              { cache: "no-store" }
+              {
+                cache: "no-store"
+              }
             );
 
           if (fresh && fresh.ok) {
-
             const cache =
               await caches.open(CACHE_NAME);
 
@@ -192,19 +163,64 @@ self.addEventListener("fetch", event => {
               request,
               fresh.clone()
             );
-
           }
 
           return fresh;
 
         } catch (error) {
-
           return (
             await caches.match(request)
           ) || Response.error();
-
         }
+      })()
+    );
 
+    return;
+  }
+
+
+  /* =====================================
+     SONS / AUDIO
+     NETWORK FIRST
+     ===================================== */
+
+  if (
+    request.destination === "audio" ||
+    /\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)
+  ) {
+    event.respondWith(
+      (async () => {
+        try {
+          const fresh =
+            await fetch(
+              request,
+              {
+                cache: "no-store"
+              }
+            );
+
+          if (fresh && fresh.ok) {
+            const cache =
+              await caches.open(CACHE_NAME);
+
+            await cache.put(
+              request,
+              fresh.clone()
+            );
+          }
+
+          return fresh;
+
+        } catch (error) {
+          const cached =
+            await caches.match(request);
+
+          if (cached) {
+            return cached;
+          }
+
+          return Response.error();
+        }
       })()
     );
 
@@ -214,11 +230,7 @@ self.addEventListener("fetch", event => {
 
   /* =====================================
      IMAGES DUNGEON
-
      NETWORK FIRST
-
-     Important pendant que tu ajoutes
-     progressivement les nouveaux arts.
      ===================================== */
 
   if (
@@ -226,20 +238,18 @@ self.addEventListener("fetch", event => {
       "/assets/dungeon/"
     )
   ) {
-
     event.respondWith(
       (async () => {
-
         try {
-
           const fresh =
             await fetch(
               request,
-              { cache: "no-store" }
+              {
+                cache: "no-store"
+              }
             );
 
           if (fresh && fresh.ok) {
-
             const cache =
               await caches.open(CACHE_NAME);
 
@@ -247,13 +257,11 @@ self.addEventListener("fetch", event => {
               request,
               fresh.clone()
             );
-
           }
 
           return fresh;
 
         } catch (error) {
-
           const cached =
             await caches.match(request);
 
@@ -262,9 +270,7 @@ self.addEventListener("fetch", event => {
           }
 
           return Response.error();
-
         }
-
       })()
     );
 
@@ -274,13 +280,11 @@ self.addEventListener("fetch", event => {
 
   /* =====================================
      AUTRES ASSETS
-
      CACHE FIRST
      ===================================== */
 
   event.respondWith(
     (async () => {
-
       const cached =
         await caches.match(request);
 
@@ -289,12 +293,10 @@ self.addEventListener("fetch", event => {
       }
 
       try {
-
         const fresh =
           await fetch(request);
 
         if (fresh && fresh.ok) {
-
           const cache =
             await caches.open(CACHE_NAME);
 
@@ -302,18 +304,13 @@ self.addEventListener("fetch", event => {
             request,
             fresh.clone()
           );
-
         }
 
         return fresh;
 
       } catch (error) {
-
         return Response.error();
-
       }
-
     })()
   );
-
 });

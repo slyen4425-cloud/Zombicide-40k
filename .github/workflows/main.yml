@@ -70,16 +70,20 @@ jobs:
           done
 
           # Assets GenSrpG
-          # Dungeon, créatures, héros, objets, backgrounds, etc.
+          # IMPORTANT :
+          # on copie le CONTENU de assets/
+          # et non le dossier assets lui-même,
+          # sinon on obtient assets/assets/
           if [ -d "assets" ]; then
-            cp -R assets _site/assets
+            mkdir -p _site/assets
+            cp -R assets/. _site/assets/
           fi
 
           echo ""
           echo "========================================="
           echo " CONTENU DU SITE À PUBLIER"
           echo "========================================="
-          find _site -maxdepth 5 -type f | sort
+          find _site -maxdepth 6 -type f | sort
 
           echo ""
           echo "========================================="

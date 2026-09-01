@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.166-audio-fix";
+const CACHE_NAME = "gensrpg-cache-16.78.1-dungeon-fixes";
 
 const CORE_FILES = [
   "./",

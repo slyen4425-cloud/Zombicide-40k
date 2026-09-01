@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.0</title>
+<title>GenSrpG V16.78.1</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -9017,6 +9017,8 @@ function switchGameModeFromHome(profileId){
 }
 function applyModeEditorVisibility(){
   let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}
+  const summary=document.getElementById("participantSummary");
+  let selected=[];try{selected=normalizeGameParticipants?.()||[]}catch(e){}
   const editorHub=document.getElementById("editorHub");
   const editorHubVisible=!!editorHub && editorHub.style.display!=="none";
   const familyContext=editorHubVisible ? gensSelectedFamily : null;
@@ -16548,8 +16550,14 @@ function diceHtml(rolls,threshold){
 let specialRollCloseCallback=null;
 
 function closeSpecialRoll(){
+  if(typeof dungeonPendingHeroDamage!=="undefined"&&dungeonPendingHeroDamage){
+    try{showToast?.("❤️ Applique les dégâts avant de continuer.")}catch(e){}
+    return false;
+  }
   document.getElementById("specialDiceModal")?.classList.remove("open");
   specialRollCloseCallback=null;
+  document.dispatchEvent(new CustomEvent("gensrpg:enemy-attack-resolved"));
+  return true;
 }
 
 function showSpecialD6Roll({title="Jet de compétence",icon="🎯",threshold=5,successText="Réussite !",failText="Échec.",meta="",onResolved=null}){
@@ -17550,6 +17558,7 @@ function applyArmorFailures(){
 function diceBackdropClose(e,id){
   if(e.target?.id===id){
     if(id==="attackDiceModal"){closeAttackRoll();return}
+    if(id==="specialDiceModal"){closeSpecialRoll();return}
     document.getElementById(id)?.classList.remove("open");
   }
 }
@@ -17955,6 +17964,7 @@ function dungeonConfirmPendingHeroDamage(){
   if(dungeonCombatActive){
     try{renderDungeonCombatRound()}catch(e){console.warn("Combat RPG refresh after damage",e)}
   }
+  document.dispatchEvent(new CustomEvent("gensrpg:enemy-attack-resolved"));
 }
 
 let dungeonSheetTab="character";
@@ -19786,7 +19796,7 @@ function resetChar(){
   if(confirm("Réinitialiser cette fiche ?")){state=defaultState(current);render()}
 }
 
-(function initApp(){
+window.addEventListener("DOMContentLoaded",function initApp(){
   renderDeckConfig();
   loadZombieReserve();
   ["pregameSetup","objectManager","zombieManager","menu","sheet"].forEach(id=>{
@@ -19794,7 +19804,7 @@ function resetChar(){
   });
   document.getElementById("setup").style.display="block";
   renderHome();
-})();
+},{once:true});
 </script>
 
 
@@ -35289,6 +35299,7 @@ function combatItems61(heroId){
       .filter(x=>x.it?.rpgUse && Math.max(1,Number(x.entry?.qty)||1)>0);
   }catch(e){return[]}
 }
+window.combatItems61=combatItems61;
 function saveHero61(heroId,st){
   localStorage.setItem(key(heroId),JSON.stringify(st));
   if(String(current||"")===String(heroId))state=st;
@@ -37246,6 +37257,7 @@ try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOT
 const SESSION_PROFILE_KEY="gensrpg_session_profile_100_v1";
 const CORE_KEY="gensrpg_dungeon_core02_v1";
 const MOVE_KEY="gensrpg_dungeon_tactical098_v1";
+const RUNTIME_KEY100="gensrpg_dungeon_runtime_v2";
 
 /* ---------------------------------------------------------
    SESSION : mémoriser le vrai univers au démarrage.
@@ -37257,10 +37269,13 @@ function profileFamily100(p){
   try{return gensContentFamilyForProfile?.(p)||""}catch(e){return ""}
 }
 function readCore100(){
-  try{
-    const x=JSON.parse(localStorage.getItem(CORE_KEY)||"{}");
-    return x&&typeof x==="object"?x:{};
-  }catch(e){return {}}
+  for(const storageKey of [RUNTIME_KEY100,CORE_KEY]){
+    try{
+      const x=JSON.parse(localStorage.getItem(storageKey)||"null");
+      if(x&&typeof x==="object"&&Array.isArray(x.participants)&&x.participants.length)return x;
+    }catch(e){}
+  }
+  return {};
 }
 function readMove100(){
   try{
@@ -37377,31 +37392,33 @@ window.resumeGame=function(){
     const p=resolveSessionProfile100();
     if(p){
       try{setActiveGameProfileId?.(String(p.id))}catch(e){}
-      try{window.gensSelectedFamily="adventure"}catch(e){}
       try{applyGameProfile?.(p,false)}catch(e){console.warn("Core 1.00 profil reprise",e)}
-      try{document.body.classList.add("gensDungeonTheme")}catch(e){}
-      hideForeignGameUi100();
-
-      // Empêche explicitement le hub Capture de se réafficher.
-      const cap=document.getElementById("captureGameHub");
-      if(cap)cap.style.display="none";
-      const capSheet=document.getElementById("captureHeroSheet");
-      if(capSheet)capSheet.style.display="none";
-
-      saveSessionProfile100();
-
-      try{
-        if(DungeonCore01.show()){
-          setTimeout(()=>{
-            hideForeignGameUi100();
-            const d=document.getElementById("gensDungeonCore01");
-            if(d)d.style.display="block";
-            try{dc099Paint?.();dc099SyncMainAction?.()}catch(e){}
-          },0);
-          return;
-        }
-      }catch(e){console.error("Core 1.00 reprise Dungeon",e)}
     }
+    try{window.gensSelectedFamily="adventure"}catch(e){}
+    try{document.body.classList.add("gensDungeonTheme")}catch(e){}
+    hideForeignGameUi100();
+
+    // Empêche explicitement le hub Capture de se réafficher.
+    const cap=document.getElementById("captureGameHub");
+    if(cap)cap.style.display="none";
+    const capSheet=document.getElementById("captureHeroSheet");
+    if(capSheet)capSheet.style.display="none";
+
+    if(p){
+      saveSessionProfile100();
+    }
+
+    try{
+      if(DungeonCore01.show()){
+        setTimeout(()=>{
+          hideForeignGameUi100();
+          const d=document.getElementById("gensDungeonCore01");
+          if(d)d.style.display="block";
+          try{dc099Paint?.();dc099SyncMainAction?.()}catch(e){}
+        },0);
+        return;
+      }
+    }catch(e){console.error("Core 1.00 reprise Dungeon",e)}
   }
 
   // Partie non-Dungeon : comportement historique.
@@ -39124,7 +39141,7 @@ function ensureModal(){
  m=document.createElement('div');m.id='dc200Modal';m.innerHTML='<div id="dc200ModalBox"><div id="dc200ModalTitle"></div><div id="dc200ModalBody"></div><div id="dc200ModalActions"><button type="button" class="dc01Btn primary" id="dc200ModalOk">CONTINUER</button></div></div>';
  document.body.appendChild(m);document.getElementById('dc200ModalOk').onclick=closeModal;return m;
 }
-function modal(title,html,onDone){const m=ensureModal();document.getElementById('dc200ModalTitle').textContent=title||'Dungeon';document.getElementById('dc200ModalBody').innerHTML=html||'';modalDone200=typeof onDone==='function'?onDone:null;m.classList.add('open')}
+function modal(title,html,onDone){const m=ensureModal(),ok=document.getElementById('dc200ModalOk');document.getElementById('dc200ModalTitle').textContent=title||'Dungeon';document.getElementById('dc200ModalBody').innerHTML=html||'';modalDone200=typeof onDone==='function'?onDone:null;if(ok){ok.textContent='CONTINUER';ok.className='dc01Btn primary';ok.onclick=closeModal;ok.disabled=false}m.classList.remove('dc212VictoryOpen');m.classList.add('open')}
 function closeModal(){const m=ensureModal();m.classList.remove('open');const cb=modalDone200;modalDone200=null;if(cb)try{cb()}catch(e){console.error('DC200 modal callback',e)}render()}
 
 function liveEnemies(){try{const x=rt(),branch=!!x?.branch?.active;return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}}
@@ -39319,7 +39336,7 @@ function mainAction(x){
   }
   if(chest){
     b.textContent=chest.challenge&&!chest.challengeDone?'🧩 DÉVERROUILLER LE COFFRE':'🔍 FOUILLER LE COFFRE';
-    b.onclick=()=>searchChest(String(chest.id));return
+    b.onclick=()=>window.DungeonCore01?.searchChest?.(String(chest.id));return
   }
   if(x.last?.kind==='ambush'&&live.length){b.classList.add('dc053CombatAction');b.textContent='⚔️ EMBUSCADE — COMBATTRE';b.onclick=()=>startCombat(live.map(e=>String(e.id)),'ambush');return}
   if(x.branch?.active){
@@ -39333,7 +39350,7 @@ function mainAction(x){
   if(positional&&x.room>0&&activePos(x)!==ex){b.textContent='🚪 REJOINDRE LA SORTIE';b.onclick=()=>modal('🚪 Sortie','Place le héros actif sur la case <strong>SORTIE</strong>.');return}
   b.textContent=x.room<=0?'🚪 ENTRER DANS LE DONJON':'🚪 EXPLORER LA SALLE SUIVANTE';b.onclick=explore
 } function render(){const x=rt();if(!active200||!x)return;syncChestAuthority208(x);const e=shell();if(e){e.style.display='block';e.classList.add('dc200Active')}hideLegacy();document.getElementById('dc01Round').textContent='TOUR '+(x.round||1);document.getElementById('dc01ActiveHero').textContent='🎯 '+heroName(activeHero(x));document.getElementById('dc01Phase').textContent='Exploration · héros '+((x.index||0)+1)+'/'+Math.max(1,x.participants.length);renderHeroes(x);const sRole=document.getElementById('dc01Role');if(sRole)sRole.value=role();const as=document.getElementById('dc01DeviceHero');if(as){as.innerHTML=x.participants.map(id=>'<option value="'+esc(id)+'">'+esc(heroName(id))+'</option>').join('');if(x.participants.includes(assigned()))as.value=assigned()}const wrap=document.getElementById('dc01HeroAssignWrap');if(wrap)wrap.style.display=role()==='gm'?'none':'';const meta=document.getElementById('dc01RoomMeta');if(meta)meta.textContent='Salle '+x.room+' / '+(Number(cfg().rooms)||0)+' · moteur Dungeon 2.00';const eh=document.getElementById('dc01Enemies'),live=liveEnemies();if(eh)eh.innerHTML=live.length?'<div class="dc01Enemy">⚔️ '+live.length+' ennemi(s) vivant(s) : '+live.slice(0,5).map(e=>esc(enemyName(e))).join(', ')+'</div>':'<div class="dc01Meta">Aucun ennemi vivant dans la salle.</div>';const board=document.getElementById('dc047RoomBoard');if(board){board.innerHTML=x.last?.map?dungeonMapHtml(x.last.map):''}assignEnemyCells(x);saveRt(x);renderScene200(x);renderRule(x);movementRender(x);mainAction(x);const end=document.getElementById('dc01EndTurn');if(end)end.disabled=!canAct(x);const gm=document.getElementById('dc01Gm');if(gm)gm.style.display=role()==='gm'?'':'none';const hint=document.getElementById('dc01ActionHint');if(hint)hint.textContent=canAct(x)?'✅ '+heroName(activeHero(x))+' peut agir.':'⏳ Tour de '+heroName(activeHero(x))+'.'}
-function show(){if(!isDungeonMode?.())return false;active200=true;hideLegacy();const e=shell();if(e)e.style.display='block';window.scrollTo(0,0);let x=rt();if(!x){const ids=party();if(!ids.length)return false;x=newRt(ids);saveRt(x)}render();return true}
+function show(){let x=rt();const resumable=Array.isArray(x?.participants)&&x.participants.length>0;if(!isDungeonMode?.()&&!resumable)return false;active200=true;hideLegacy();const e=shell();if(e)e.style.display='block';window.scrollTo(0,0);if(!x){const ids=party();if(!ids.length)return false;x=newRt(ids);saveRt(x)}render();return true}
 function start(){
  try{ensureDungeonContent?.();applyCustomHeroesMulti?.()}catch(e){}
  let ids=party().filter(id=>CHARS?.[id]||findCustomHero?.(id));
@@ -42724,16 +42741,24 @@ function pickTarget(){
   if(!hs.length)return null;
   return hs.sort((a,b)=>Number(a.s.hp)-Number(b.s.hp))[0].id;
 }
+function completeAi(token=T.aiToken){
+  if(!T.aiBusy||token!==T.aiToken)return;
+  T.aiBusy=false;
+  advance();
+}
 function runAi(){
   const cur=current();
   if(!cur||cur.kind!=="enemy"||T.aiBusy||T.pendingHero||resultOpen())return;
   T.aiBusy=true;
+  const token=(Number(T.aiToken)||0)+1;
+  T.aiToken=token;
 
   setTimeout(()=>{
+    let launched=false;
     try{
       const inst=(loadActiveEnemies?.()||[]).find(e=>String(e.id)===String(cur.id));
       if(!inst||inst.defeated||Number(inst.hp)<=0){
-        T.aiBusy=false;advance();return;
+        completeAi(token);return;
       }
       const def=activeEnemyDefinition?.(inst.enemyId);
       const skills=dungeonEnemyAttackSkills?.(def)||[];
@@ -42745,29 +42770,16 @@ function runAi(){
           if(window.dungeonTurn156){dungeonTurn156.active=false;dungeonTurn156.aiBusy=false}
         }catch(e){}
         rollDungeonEnemyAttackSkill?.(inst.id,skill.id,target);
+        launched=resultOpen();
       }
     }catch(e){console.warn("Core 3.03 IA",e)}
-    /* If the enemy attack opened its result popup, wait for CONTINUER.
-       Otherwise advance after a short readable pause. */
-    setTimeout(()=>{
-      const p=document.getElementById("dc036AiPopup");
-      const open=!!p&&(p.classList.contains("open")||(p.style.display&&p.style.display!=="none"));
-      if(!open){T.aiBusy=false;advance()}
-    },350);
+    /* Une attaque visible se termine uniquement après fermeture réelle du jet
+       (et application des dégâts). Si aucun jet n'a pu démarrer, on libère le tour. */
+    if(!launched)setTimeout(()=>completeAi(token),350);
   },350);
 }
 
-const oldContinue302=window.dc036ContinueAi;
-if(typeof oldContinue302==="function"){
-  window.dc036ContinueAi=function(){
-    const r=oldContinue302.apply(this,arguments);
-    if(T.aiBusy){
-      T.aiBusy=false;
-      setTimeout(advance,0);
-    }
-    return r;
-  };
-}
+document.addEventListener("gensrpg:enemy-attack-resolved",()=>completeAi(T.aiToken));
 
 function render(){
   /* On appelle le renderer 2.14 intact. */
@@ -42992,6 +43004,35 @@ try{
  const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.06";
  const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.06 · compatibilité narrative complète.";
 }catch(e){}
+</script>
+<script id="dungeonCore307CriticalResumeFix">
+(function(){
+"use strict";
+const previousResume307=window.resumeGame;
+window.resumeGame=function(){
+  let runtime=null;
+  try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
+  const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
+  if((typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
+    try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
+    ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.style.display="none";
+    });
+    try{
+      if(DungeonCore01.show()){
+        const shell=document.getElementById("gensDungeonCore01");if(shell)shell.style.display="block";
+        window.scrollTo(0,0);
+        return true;
+      }
+    }catch(e){console.error("Core 3.07 reprise Dungeon",e)}
+  }
+  return typeof previousResume307==="function"?previousResume307.apply(this,arguments):undefined;
+};
+try{
+  const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.07";
+  const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.07 · reprise, coffres et timeline IA stabilisés.";
+}catch(e){}
+})();
 </script>
 </body>
 </html>

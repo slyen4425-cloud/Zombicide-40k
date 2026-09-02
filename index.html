@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.3</title>
+<title>GenSrpG V16.78.4</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -43168,6 +43168,104 @@ window.dungeonDebug309=function(){
   return {room:x?.room,enemyInstances:Object.keys(x?.enemyCells||{}).length,enemyTokens:document.querySelectorAll(".dc214Enemy").length,enemyArts:document.querySelectorAll(".dc214Enemy img").length,heroTokens:document.querySelectorAll(".dc214Hero").length,chestCells:cells.filter(c=>c.classList.contains("dc206ChestCell")).length}
 };
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.09";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.09 · pions lisibles · ennemis visibles · coffres raccordés."}catch(e){}
+})();
+</script>
+<style id="dungeonCore310PersistenceCss">
+.dc047Cell .dc310Hero,.dc047Cell .dc310Enemy{
+  position:absolute!important;z-index:45!important;overflow:hidden!important;
+  border-radius:50%!important;pointer-events:none!important;box-shadow:0 2px 7px #000!important
+}
+.dc047Cell .dc310Hero{
+  width:36px!important;height:36px!important;border:2px solid #a9dfff!important;background:#16344d!important
+}
+.dc047Cell .dc310Hero.active{border-color:#ffd76b!important;outline:2px solid #ffd76b!important}
+.dc047Cell .dc310Enemy{
+  width:36px!important;height:36px!important;right:3px!important;bottom:3px!important;
+  border:2px solid #ef7777!important;background:#421919!important
+}
+.dc047Cell .dc310Hero img,.dc047Cell .dc310Enemy img{
+  width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;
+  object-position:center 18%!important;background:transparent!important
+}
+.dc047Cell .dc310Fallback{width:100%;height:100%;display:grid;place-items:center;font-size:17px;font-weight:950}
+.dc047Cell .dc310Enemy.key:after{content:"🔑";position:absolute;right:-7px;top:-9px;font-size:13px}
+</style>
+<script id="dungeonCore310PersistenceAndTokens">
+(function(){
+"use strict";
+const RT="gensrpg_dungeon_runtime_v2",ROOT="assets/dungeon/creatures/";
+let paintQueued=false,painting=false;
+function runtime(){try{return JSON.parse(localStorage.getItem(RT)||"null")}catch(e){return null}}
+function cells(){return [...document.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")]}
+function heroDef(id){return CHARS?.[id]||findCustomHero?.(id)||{}}
+function heroName(id){return heroDef(id).name||String(id||"Héros")}
+function heroArt(id){const d=heroDef(id);return d.image||d.avatar||({dungeon_aldren:ROOT+"dng_aldren.png",dungeon_lyra:ROOT+"dng_lyra.png",dungeon_brom:ROOT+"dng_brom.png"}[String(id)]||"")}
+function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
+function enemies(x){
+  const branch=!!x?.branch?.active;
+  try{return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}
+}
+function enemyArt(e){
+  let d=null;try{d=activeEnemyDefinition?.(e?.enemyId)||null}catch(_){}
+  try{if(typeof gensDungeonCreatureArt165==="function")return gensDungeonCreatureArt165(d||e?.enemyId)||""}catch(_){}
+  return e?.enemyId?ROOT+String(e.enemyId)+".png":(d?.image_data||d?.art||"")
+}
+function imageToken(cls,src,fallback,title){
+  const t=document.createElement("span");t.className=cls;t.title=title||"";
+  const fb=()=>{t.innerHTML="";const s=document.createElement("span");s.className="dc310Fallback";s.textContent=fallback;t.appendChild(s)};
+  if(src){const img=document.createElement("img");img.src=src;img.alt=title||"";img.onerror=fb;t.appendChild(img)}else fb();
+  return t
+}
+function paint(){
+  paintQueued=false;if(painting)return;painting=true;
+  try{
+    const x=runtime(),board=cells();if(!x||Number(x.room||0)<=0||!board.length)return;
+    board.forEach(c=>c.querySelectorAll(".dc310Hero,.dc310Enemy,.dc214Hero,.dc214Enemy").forEach(n=>n.remove()));
+    const active=String(x.participants?.[Number(x.index)||0]||""),byCell={};
+    (x.participants||[]).forEach(id=>{const p=Number(x.positions?.[id]);if(Number.isInteger(p)&&board[p])(byCell[p]||(byCell[p]=[])).push(String(id))});
+    const offsets=[[2,2],[34,2],[2,34],[34,34],[18,18],[48,18]];
+    Object.entries(byCell).forEach(([p,ids])=>ids.forEach((id,k)=>{
+      const t=imageToken("dc310Hero"+(id===active?" active":""),heroArt(id),initials(id),heroName(id));
+      t.style.left=offsets[k%offsets.length][0]+"px";t.style.top=offsets[k%offsets.length][1]+"px";board[Number(p)].appendChild(t)
+    }));
+    const all=enemies(x);
+    all.forEach(e=>{const p=Number(x.enemyCells?.[e.id]);if(!Number.isInteger(p)||!board[p])return;let name=e.name||"Ennemi";try{name=activeEnemyDefinition?.(e.enemyId)?.name||name}catch(_){}const t=imageToken("dc310Enemy"+(String(x.last?.keyEnemyId||"")===String(e.id)?" key":""),enemyArt(e),"👹",name);board[p].appendChild(t)});
+  }finally{painting=false}
+}
+function queuePaint(){if(paintQueued)return;paintQueued=true;requestAnimationFrame(paint)}
+
+/* The movement engine rebuilds the board through its private renderer. Observe only
+   board replacements so tokens are restored after moves without changing gameplay. */
+const observe=()=>{const b=document.getElementById("dc047RoomBoard");if(!b)return;new MutationObserver(m=>{if(m.some(v=>[...v.addedNodes,...v.removedNodes].some(n=>n.nodeType===1&&!n.classList?.contains("dc310Hero")&&!n.classList?.contains("dc310Enemy"))))queuePaint()}).observe(b,{childList:true,subtree:true})};
+
+if(window.DungeonCore01){
+  const oldRender=DungeonCore01.render;if(typeof oldRender==="function")DungeonCore01.render=function(){const r=oldRender.apply(this,arguments);queuePaint();return r};
+  const oldShow=DungeonCore01.show;if(typeof oldShow==="function")DungeonCore01.show=function(){const r=oldShow.apply(this,arguments);queuePaint();return r};
+  DungeonCore01.quit=function(){
+    if(!confirm("Sauvegarder et quitter le Dungeon ?\n\nLa partie restera disponible avec « Reprendre » depuis le menu."))return;
+    const x=runtime();
+    try{if(x){localStorage.setItem(RT,JSON.stringify(x));saveDungeonState?.({room:Number(x.room)||0,last:x.last||null});if(Array.isArray(x.participants)&&x.participants.length)saveGameParticipants?.(x.participants)}}catch(e){console.warn("Core 3.10 sauvegarde Dungeon",e)}
+    try{markSessionActive?.(true)}catch(e){localStorage.setItem("z40k_session_active_v1","1")}
+    ["gensDungeonCore01","sheet","menu","pregameSetup","dungeonCombatModal","dungeonCombatVictoryModal","dungeonCombatStatsModal","dc032GameOver","dc104SafeModal","dc200Modal","specialDiceModal","attackDiceModal"].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove("open");e.style.display="none"}});
+    document.body.style.removeProperty("overflow");document.documentElement.style.removeProperty("overflow");
+    const setup=document.getElementById("setup");if(setup)setup.style.display="block";
+    try{showGensRootHome?.()}catch(e){}const root=document.getElementById("gensRootHome");if(root)root.style.display="block";window.scrollTo(0,0)
+  }
+}
+
+const previousResume310=window.resumeGame;
+window.resumeGame=function(){
+  const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
+  if(ok&&window.DungeonCore01){
+    try{markSessionActive?.(true)}catch(e){localStorage.setItem("z40k_session_active_v1","1")}
+    try{if(Array.isArray(x.participants))saveGameParticipants?.(x.participants);window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme");if(DungeonCore01.show()){queuePaint();return true}}catch(e){console.error("Core 3.10 reprise Dungeon",e)}
+  }
+  return typeof previousResume310==="function"?previousResume310.apply(this,arguments):undefined
+};
+document.addEventListener("DOMContentLoaded",()=>{observe();queuePaint()});
+if(document.readyState!=="loading"){observe();queuePaint()}
+window.dungeonDebug310=function(){const x=runtime();return {saved:!!x,sessionActive:localStorage.getItem("z40k_session_active_v1")==="1",room:x?.room,heroTokens:document.querySelectorAll(".dc310Hero").length,enemyTokens:document.querySelectorAll(".dc310Enemy").length,enemyArts:document.querySelectorAll(".dc310Enemy img").length}};
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.10";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.10 · sauvegarde/reprise fiable · pions persistants."}catch(e){}
 })();
 </script>
 </body>

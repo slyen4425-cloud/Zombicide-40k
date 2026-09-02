@@ -414,13 +414,44 @@ function testRoomSnapshotsSurviveTurnChanges() {
 
 function testRuntimeUsesSpatialParticipationAndNoGroupReset() {
   const runtime = script("dungeonCore200Rebuild");
+  const explore = runtime.match(/function explore\(\)\{[\s\S]*?\} function moveTo/)?.[0] || "";
   assert.match(runtime, /const heroes=spatialHeroesHere\(x\)/, "un combat doit limiter les héros à la salle active");
   assert.match(runtime, /spatialSetRoom\(x,heroId,targetRoom\)/, "la porte doit déplacer seulement le héros actif");
   assert.doesNotMatch(
-    runtime.match(/function explore\(\)\{[\s\S]*?\} function moveTo/)?.[0] || "",
+    explore,
     /ensurePositions\(x,true\)/,
     "explorer une salle ne doit plus réinitialiser les positions de tout le groupe"
   );
+  assert.match(explore, /const movementLeft=/, "le mouvement restant doit être capturé avant le changement de salle");
+  assert.equal(
+    (explore.match(/x\.remaining\[heroId\]=movementLeft/g) || []).length,
+    2,
+    "le mouvement restant doit être conservé dans une salle nouvelle comme dans une salle existante"
+  );
+  assert.doesNotMatch(
+    explore,
+    /x\.remaining\[heroId\]=moveMax\(heroId\)/,
+    "franchir une porte ne doit pas rendre tous les points de mouvement"
+  );
+  const branchEntry = runtime.match(/function enterBranch\(id\)\{[\s\S]*?function leaveBranch/)?.[0] || "";
+  assert.match(branchEntry, /x\.remaining\[hero\]=movementLeft/, "une sous-salle doit aussi conserver le mouvement restant");
+  assert.doesNotMatch(branchEntry, /x\.remaining\[hero\]=moveMax\(hero\)/, "une sous-salle ne doit pas offrir un nouveau tour gratuit");
+}
+
+function testEnemyAlertsAndBowContextRecovery() {
+  const runtime = script("dungeonCore200Rebuild");
+  assert.match(runtime, /RENFORTS ENNEMIS/, "les renforts doivent afficher un popup bloquant");
+  assert.match(runtime, /HÉROS REPÉRÉ/, "une détection ennemie doit prévenir avant le combat automatique");
+  assert.match(
+    html,
+    /if\(!e\|\|!it\|\|!st\)\{[\s\S]*?dungeonCombatRestoreHeroContext\(\)/,
+    "une attaque d'arme refusée doit libérer le contexte du héros"
+  );
+  assert.match(runtime, /function visibleEnemies\(\)/, "la visibilité des ennemis doit être distincte de leur engagement");
+
+  const finalTokens = script("dungeonCore310PersistenceAndTokens");
+  const visible = finalTokens.match(/function enemies\(x\)\{[\s\S]*?\n\}/)?.[0] || "";
+  assert.doesNotMatch(visible, /dc200BypassedBy/, "le tour d'un héros furtif ne doit pas masquer les ennemis aux autres héros");
 }
 
 testEncounterOnlyRepairsOnRoomCreation();
@@ -431,4 +462,5 @@ testExistingRunMigratesWithoutMovingHeroes();
 testDoorCrossingMovesOnlyActiveHero();
 testRoomSnapshotsSurviveTurnChanges();
 testRuntimeUsesSpatialParticipationAndNoGroupReset();
+testEnemyAlertsAndBowContextRecovery();
 console.log("Dungeon regression tests: OK");

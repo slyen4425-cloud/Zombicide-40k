@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.7</title>
+<title>GenSrpG V16.78.8</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -18105,7 +18105,10 @@ function dungeonCombatAttack(heroId,inventoryIdx,targetId){
 
   const e=getEntry(inventoryIdx),it=getItemFromEntry(e),st=effectiveAttackStats(it);
   if(!e||!it||!st){
-    current=oldCurrent;state=oldState;
+    /* Une arme momentanément invalide ne doit jamais laisser le contexte du
+       héros verrouillé. C'était la cause du blocage intermittent de l'arc de
+       Lyra, que le passage en mains nues réinitialisait indirectement. */
+    dungeonCombatRestoreHeroContext();
     alert("Cette arme ne possède pas encore de statistiques d’attaque utilisables.");
     return;
   }
@@ -39264,6 +39267,7 @@ function modal(title,html,onDone){const m=ensureModal(),ok=document.getElementBy
 function closeModal(){const m=ensureModal();m.classList.remove('open');const cb=modalDone200;modalDone200=null;if(cb)try{cb()}catch(e){console.error('DC200 modal callback',e)}render()}
 
 function liveEnemies(){try{const x=rt(),branch=!!x?.branch?.active,hero=activeHero(x);return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&!e.dc200BypassedBy?.[hero]&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}}
+function visibleEnemies(){try{const x=rt(),branch=!!x?.branch?.active;return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}}
 function enemyName(e){try{return activeEnemyDefinition?.(e?.enemyId)?.name||e?.name||'Ennemi'}catch(_){return e?.name||'Ennemi'}}
 function map(){return rt()?.last?.map||null}
 function cells(){return map()?.cells||[]}
@@ -39284,7 +39288,10 @@ function exitLocked(x=rt()){
 }
 function assignEnemyCells(x){
  const m=x?.last?.map;if(!m||!Array.isArray(m.cells))return;
- const live=liveEnemies(),liveIds=new Set(live.map(e=>String(e.id)));x.enemyCells=x.enemyCells||{};
+  /* La visibilité est commune à la salle. Un héros ayant réussi une approche
+     furtive peut éviter le combat, mais ne doit pas effacer les pions ennemis
+     pour les autres héros quand son tour devient actif. */
+  const live=visibleEnemies(),liveIds=new Set(live.map(e=>String(e.id)));x.enemyCells=x.enemyCells||{};
  Object.keys(x.enemyCells).forEach(id=>{if(!liveIds.has(String(id)))delete x.enemyCells[id]});
  const used=new Set(Object.values(x.enemyCells).map(Number));const markers=[];m.cells.forEach((v,i)=>{if(String(v)==='enemy')markers.push(i)});
  // preserve valid assignments
@@ -39469,7 +39476,7 @@ function mainAction(x){
   const ex=exitIndex(x.last?.map);
   if(positional&&x.room>0&&activePos(x)!==ex){b.textContent='🚪 REJOINDRE LA SORTIE';b.onclick=()=>modal('🚪 Sortie','Place le héros actif sur la case <strong>SORTIE</strong>.');return}
   b.textContent=x.room<=0?'🚪 ENTRER DANS LE DONJON':'🚪 EXPLORER LA SALLE SUIVANTE';b.onclick=explore
-} function render(){const x=spatialEnsure(rt());if(!active200||!x)return;syncChestAuthority208(x);const e=shell();if(e){e.style.display='block';e.classList.add('dc200Active')}hideLegacy();document.getElementById('dc01Round').textContent='TOUR '+(x.round||1);document.getElementById('dc01ActiveHero').textContent='🎯 '+heroName(activeHero(x));document.getElementById('dc01Phase').textContent='Exploration · héros '+((x.index||0)+1)+'/'+Math.max(1,x.participants.length);renderHeroes(x);const sRole=document.getElementById('dc01Role');if(sRole)sRole.value=role();const as=document.getElementById('dc01DeviceHero');if(as){as.innerHTML=x.participants.map(id=>'<option value="'+esc(id)+'">'+esc(heroName(id))+'</option>').join('');if(x.participants.includes(assigned()))as.value=assigned()}const wrap=document.getElementById('dc01HeroAssignWrap');if(wrap)wrap.style.display=role()==='gm'?'none':'';const meta=document.getElementById('dc01RoomMeta');if(meta)meta.textContent=(Number(x.room)>0?'Salle '+x.room:'Entrée')+' / '+(Number(cfg().rooms)||0)+' · positions individuelles';const eh=document.getElementById('dc01Enemies'),live=liveEnemies();if(eh)eh.innerHTML=live.length?'<div class="dc01Enemy">⚔️ '+live.length+' ennemi(s) vivant(s) : '+live.slice(0,5).map(e=>esc(enemyName(e))).join(', ')+'</div>':'<div class="dc01Meta">Aucun ennemi vivant dans la salle.</div>';const board=document.getElementById('dc047RoomBoard');if(board){board.innerHTML=x.last?.map?dungeonMapHtml(x.last.map):''}assignEnemyCells(x);saveRt(x);renderScene200(x);renderRule(x);movementRender(x);mainAction(x);const end=document.getElementById('dc01EndTurn');if(end)end.disabled=!canAct(x);const gm=document.getElementById('dc01Gm');if(gm)gm.style.display=role()==='gm'?'':'none';const hint=document.getElementById('dc01ActionHint');if(hint)hint.textContent=canAct(x)?'✅ '+heroName(activeHero(x))+' peut agir.':'⏳ Tour de '+heroName(activeHero(x))+'.'}
+} function render(){const x=spatialEnsure(rt());if(!active200||!x)return;syncChestAuthority208(x);const e=shell();if(e){e.style.display='block';e.classList.add('dc200Active')}hideLegacy();document.getElementById('dc01Round').textContent='TOUR '+(x.round||1);document.getElementById('dc01ActiveHero').textContent='🎯 '+heroName(activeHero(x));document.getElementById('dc01Phase').textContent='Exploration · héros '+((x.index||0)+1)+'/'+Math.max(1,x.participants.length);renderHeroes(x);const sRole=document.getElementById('dc01Role');if(sRole)sRole.value=role();const as=document.getElementById('dc01DeviceHero');if(as){as.innerHTML=x.participants.map(id=>'<option value="'+esc(id)+'">'+esc(heroName(id))+'</option>').join('');if(x.participants.includes(assigned()))as.value=assigned()}const wrap=document.getElementById('dc01HeroAssignWrap');if(wrap)wrap.style.display=role()==='gm'?'none':'';const meta=document.getElementById('dc01RoomMeta');if(meta)meta.textContent=(Number(x.room)>0?'Salle '+x.room:'Entrée')+' / '+(Number(cfg().rooms)||0)+' · positions individuelles';const eh=document.getElementById('dc01Enemies'),visible=visibleEnemies();if(eh)eh.innerHTML=visible.length?'<div class="dc01Enemy">⚔️ '+visible.length+' ennemi(s) vivant(s) : '+visible.slice(0,5).map(e=>esc(enemyName(e))).join(', ')+'</div>':'<div class="dc01Meta">Aucun ennemi vivant dans la salle.</div>';const board=document.getElementById('dc047RoomBoard');if(board){board.innerHTML=x.last?.map?dungeonMapHtml(x.last.map):''}assignEnemyCells(x);saveRt(x);renderScene200(x);renderRule(x);movementRender(x);mainAction(x);const end=document.getElementById('dc01EndTurn');if(end)end.disabled=!canAct(x);const gm=document.getElementById('dc01Gm');if(gm)gm.style.display=role()==='gm'?'':'none';const hint=document.getElementById('dc01ActionHint');if(hint)hint.textContent=canAct(x)?'✅ '+heroName(activeHero(x))+' peut agir.':'⏳ Tour de '+heroName(activeHero(x))+'.'}
 function show(){let x=rt();const resumable=Array.isArray(x?.participants)&&x.participants.length>0;if(!isDungeonMode?.()&&!resumable)return false;active200=true;hideLegacy();const e=shell();if(e)e.style.display='block';window.scrollTo(0,0);if(!x){const ids=party();if(!ids.length)return false;x=newRt(ids);saveRt(x)}else{spatialEnsure(x);const id=activeHero(x),expected=Number(x.heroRooms?.[id])||0;if(Number(x.room)!==expected)spatialActivate(x,id);saveRt(x)}render();return true}
 function start(){
  try{ensureDungeonContent?.();applyCustomHeroesMulti?.()}catch(e){}
@@ -39566,6 +39573,8 @@ function explore(){
   }
   if(x.room>=Number(cfg().rooms||10))return modal('🏆 Donjon terminé','Le groupe a terminé le donjon.');
   const targetRoom=Math.max(1,Number(x.room||0)+1);
+  const movementLeft=Number.isFinite(Number(x.remaining?.[heroId]))
+    ?Math.max(0,Number(x.remaining[heroId])):moveMax(heroId);
   spatialPersist(x);
 
   /* Une salle n'est créée qu'une fois. Les héros suivants la rejoignent
@@ -39576,7 +39585,7 @@ function explore(){
     spatialActivate(x,heroId);
     const entry=spawnIndex(x.last?.map);
     if(Number.isInteger(entry)&&entry>=0)x.positions[heroId]=entry;
-    x.remaining[heroId]=moveMax(heroId);
+    x.remaining[heroId]=movementLeft;
     x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:false,at:Date.now()};
     saveRt(x);render();
     return modal('🚪 '+heroName(heroId)+' avance','Le héros rejoint la salle '+targetRoom+'. Les autres héros conservent leur salle et leur position.');
@@ -39588,7 +39597,7 @@ function explore(){
   x.last={kind,room:x.room,at:Date.now(),title:made.result.title,map:made.map,narrative:'',exitLocked:false,keyEnemyId:''};
   const entry=spawnIndex(x.last?.map);
   if(Number.isInteger(entry)&&entry>=0)x.positions[heroId]=entry;
-  x.remaining[heroId]=moveMax(heroId);
+  x.remaining[heroId]=movementLeft;
   x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:true,at:Date.now()};
   saveRt(x);placeSceneForRoom(x,kind,made.result);
   if(kind==='rest')applyRest200(x);
@@ -39599,13 +39608,10 @@ function nearbyInterveners(target,x){const base=Number(x.enemyCells?.[target.id]
  // Core 2.05 : renforts visibles mais non systématiques.
  const chance=d===1?65:d===2?30:0;
  if(chance&&Math.random()*100<chance)out.push(e)});
- if(out.length){
-   const names=out.map(e=>enemyName(e));
-   try{showToast?.('⚔️ RENFORTS : '+out.length+' ennemi'+(out.length>1?'s':'')+' proche'+(out.length>1?'s':'')+(out.length>1?' rejoignent':' rejoint')+' le combat · '+names.join(', '))}catch(e){}
- }
  return out}
-function startCombat(ids,reason){const x=rt();if(!x)return false;let chosen=liveEnemies().filter(e=>ids.map(String).includes(String(e.id)));if(!chosen.length)return false;if(reason==='cell'&&chosen[0]){const extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}try{const heroes=spatialHeroesHere(x);dungeonCombatSelection={heroes:heroes.length?heroes:[activeHero(x)].filter(Boolean),enemies:chosen.map(e=>e.id)};resetDungeonCombatRewards?.();dungeonCombatActive=true;const modalEl=document.getElementById('dungeonCombatModal'),host=document.getElementById('dungeonCombatSetupView');if(modalEl){modalEl.classList.add('dc200CombatOpen');modalEl.style.display='block'}document.body.style.overflow='hidden';if(typeof window.__dc302RenderCombat==='function')window.__dc302RenderCombat();else if(typeof window.__dc214RenderCombat==='function')window.__dc214RenderCombat();else if(typeof window.__dc200StableRenderCombatRound==='function')window.__dc200StableRenderCombatRound();else renderDungeonCombatRound();if(host&&!(host.innerHTML||'').trim())throw new Error('Le rendu du combat est vide.');return true}catch(e){console.error('DC200 start combat',e);cleanupCombat();modal('⚠️ Combat impossible','Le moteur a intercepté une erreur avant de bloquer l’interface : <strong>'+esc(e.message||e)+'</strong>.');return false}}
-function cleanupCombat(){try{dungeonCombatActive=false}catch(e){}['dungeonCombatModal','dungeonCombatVictoryModal','dungeonCombatStatsModal','specialDiceModal','attackDiceModal','dc036AiPopup','dc032AiPopup'].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove('open','dc200CombatOpen');e.style.display='none';e.style.removeProperty('pointer-events')}});document.body.style.removeProperty('overflow');document.body.style.removeProperty('pointer-events');document.documentElement.style.removeProperty('overflow');document.documentElement.style.removeProperty('pointer-events')}
+function launchCombat200(x,chosen){try{dungeonCombatRestoreHeroContext();const heroes=spatialHeroesHere(x);dungeonCombatSelection={heroes:heroes.length?heroes:[activeHero(x)].filter(Boolean),enemies:chosen.map(e=>e.id)};resetDungeonCombatRewards?.();dungeonCombatActive=true;const modalEl=document.getElementById('dungeonCombatModal'),host=document.getElementById('dungeonCombatSetupView');if(modalEl){modalEl.classList.add('dc200CombatOpen');modalEl.style.display='block'}document.body.style.overflow='hidden';if(typeof window.__dc302RenderCombat==='function')window.__dc302RenderCombat();else if(typeof window.__dc214RenderCombat==='function')window.__dc214RenderCombat();else if(typeof window.__dc200StableRenderCombatRound==='function')window.__dc200StableRenderCombatRound();else renderDungeonCombatRound();if(host&&!(host.innerHTML||'').trim())throw new Error('Le rendu du combat est vide.');return true}catch(e){console.error('DC200 start combat',e);cleanupCombat();modal('⚠️ Combat impossible','Le moteur a intercepté une erreur avant de bloquer l’interface : <strong>'+esc(e.message||e)+'</strong>.');return false}}
+function startCombat(ids,reason){const x=rt();if(!x)return false;let chosen=liveEnemies().filter(e=>ids.map(String).includes(String(e.id)));if(!chosen.length)return false;let extras=[];if(reason==='cell'&&chosen[0]){extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}const begin=()=>launchCombat200(x,chosen);if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}if(reason==='detection'||reason==='stealth_fail'){const names=chosen.map(e=>esc(enemyName(e))).join(', ');modal(reason==='stealth_fail'?'🥷 REPÉRAGE ÉCHOUÉ':'👁️ HÉROS REPÉRÉ','<strong>'+esc(heroName(activeHero(x)))+' est détecté.</strong><br><br>'+names+(chosen.length>1?' attaquent et engagent le combat.':' attaque et engage le combat.'),begin);return true}return begin()}
+function cleanupCombat(){try{dungeonCombatRestoreHeroContext();dungeonCombatActive=false}catch(e){}['dungeonCombatModal','dungeonCombatVictoryModal','dungeonCombatStatsModal','specialDiceModal','attackDiceModal','dc036AiPopup','dc032AiPopup'].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove('open','dc200CombatOpen');e.style.display='none';e.style.removeProperty('pointer-events')}});document.body.style.removeProperty('overflow');document.body.style.removeProperty('pointer-events');document.documentElement.style.removeProperty('overflow');document.documentElement.style.removeProperty('pointer-events')}
 function finishVictory(){const x=rt();cleanupCombat();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render();modal('🏆 Victoire',typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.'));return true}
 window.openDungeonCombatVictoryPopup=function(){if(!dungeonCombatActive)return;try{dungeonCombatRewards.shown=true}catch(e){}const html=typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.');const m=ensureModal();document.getElementById('dc200ModalTitle').textContent='🏆 VICTOIRE';document.getElementById('dc200ModalBody').innerHTML=html;modalDone200=()=>{cleanupCombat();const x=rt();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render()};m.classList.add('open')};
 window.finishDungeonCombatVictory=function(){closeModal()};
@@ -39659,7 +39665,7 @@ function gmChest(rarity){if(role()!=='gm')return;const x=rt(),i=nearestFree(x);i
 function openGm(){if(role()!=='gm')return;modal('🎛️ OUTILS MJ','<div class="dc01Actions"><button onclick="DungeonCore01.gmChest(\'common\')">🎁 Coffre commun</button><button onclick="DungeonCore01.gmChest(\'rare\')">💙 Coffre rare</button><button onclick="DungeonCore01.gmChest(\'epic\')">💜 Coffre épique</button><button onclick="DungeonCore01.gmChest(\'legendary\')">💛 Coffre légendaire</button><button onclick="DungeonCore01.addFeature(\'trapdoor\')">🕳️ Trappe</button><button onclick="DungeonCore01.legacyGm()">⚙️ Réglages MJ complets</button></div>')}
 function addFeature(kind){if(role()!=='gm')return;const x=rt(),i=nearestFree(x),el=addDungeonSceneElement?.({kind,name:kind==='trapdoor'?'Trappe':kind==='stairs_up'?'Escalier montant':'Escalier descendant',room:x.room,cellIndex:i,environment:'dungeon',branchType:kind==='trapdoor'?'treasure':'secret'});if(x?.last?.map&&i>=0)x.last.map.cells[i]='trapdoor';saveRt(x);render();modal('🗺️ Élément ajouté',(el?.name||'Passage')+' a été ajouté à la salle.')}
 function openHero(id){const x=rt();if(!x?.participants?.includes(String(id)))return;if(role()!=='gm'&&String(assigned())!==String(id))return modal('🔒 Héros non contrôlé','Ce téléphone contrôle '+esc(heroName(assigned()))+'.');const e=shell();if(e)e.style.display='none';try{openChar?.(String(id))}catch(err){show();modal('⚠️ Erreur fiche',esc(err.message||err))}}
-function enterBranch(id){const x=rt(),el=(loadDungeonSceneElements?.()||[]).find(e=>String(e.id)===String(id));if(!x||!el)return false;const hero=activeHero(x),cp=Number(el.cellIndex);if(tactical()&&activePos(x)!==cp)return modal('🕳️ Passage','📍 Place le héros actif sur la case du passage.');if(x.branch?.active)return false;spatialPersist(x);x.branch={active:true,heroId:hero,parentRoom:Number(x.room)||0,sourceId:String(id),sourceCell:Number(el.cellIndex)};x.enemyCells={};const size=5,cs=Array(size*size).fill('floor');cs[22]='entry';cs[2]='exit';cs[12]=el.branchType==='boss'?'enemy':'chest';x.last={kind:el.branchType==='boss'?'boss':'chest',room:x.room,title:'Sous-salle secrète',map:{version:2,size,cells:cs,entryIdx:22,exitIdx:2},exitLocked:false,keyEnemyId:''};x.positions[hero]=22;x.remaining[hero]=moveMax(hero);saveRt(x);if(el.branchType==='boss'){const before=new Set((loadActiveEnemies?.()||[]).map(e=>String(e.id)));try{dungeonBossRoom?.(x.room)}catch(e){}try{const all=loadActiveEnemies?.()||[];all.forEach(e=>{if(!before.has(String(e.id))&&Number(e.dungeonRoom||0)===Number(x.room))e.dc200Branch=true});saveActiveEnemies?.(all)}catch(e){}assignEnemyCells(x);initLock(x)}else{const rarity=dungeonPickChestRarity?.(cfg())||'rare';addDungeonSceneElement?.({kind:'chest',name:'Coffre secret',rarity,trapped:false,room:x.room,cellIndex:12,branch200:true})}saveRt(x);render();modal('🕳️ Sous-salle',heroName(hero)+' entre seul dans la zone séparée. Les autres héros restent à leur position.')}
+function enterBranch(id){const x=rt(),el=(loadDungeonSceneElements?.()||[]).find(e=>String(e.id)===String(id));if(!x||!el)return false;const hero=activeHero(x),cp=Number(el.cellIndex);if(tactical()&&activePos(x)!==cp)return modal('🕳️ Passage','📍 Place le héros actif sur la case du passage.');if(x.branch?.active)return false;const movementLeft=Number.isFinite(Number(x.remaining?.[hero]))?Math.max(0,Number(x.remaining[hero])):moveMax(hero);spatialPersist(x);x.branch={active:true,heroId:hero,parentRoom:Number(x.room)||0,sourceId:String(id),sourceCell:Number(el.cellIndex)};x.enemyCells={};const size=5,cs=Array(size*size).fill('floor');cs[22]='entry';cs[2]='exit';cs[12]=el.branchType==='boss'?'enemy':'chest';x.last={kind:el.branchType==='boss'?'boss':'chest',room:x.room,title:'Sous-salle secrète',map:{version:2,size,cells:cs,entryIdx:22,exitIdx:2},exitLocked:false,keyEnemyId:''};x.positions[hero]=22;x.remaining[hero]=movementLeft;saveRt(x);if(el.branchType==='boss'){const before=new Set((loadActiveEnemies?.()||[]).map(e=>String(e.id)));try{dungeonBossRoom?.(x.room)}catch(e){}try{const all=loadActiveEnemies?.()||[];all.forEach(e=>{if(!before.has(String(e.id))&&Number(e.dungeonRoom||0)===Number(x.room))e.dc200Branch=true});saveActiveEnemies?.(all)}catch(e){}assignEnemyCells(x);initLock(x)}else{const rarity=dungeonPickChestRarity?.(cfg())||'rare';addDungeonSceneElement?.({kind:'chest',name:'Coffre secret',rarity,trapped:false,room:x.room,cellIndex:12,branch200:true})}saveRt(x);render();modal('🕳️ Sous-salle',heroName(hero)+' entre seul dans la zone séparée. Les autres héros restent à leur position.')}
 function leaveBranch(){const x=rt();if(!x?.branch?.active)return false;if(x.last?.kind==='boss'&&liveEnemies().length){modal('👑 Boss présent','Le Boss doit être vaincu avant de remonter.');return false}const hero=activeHero(x),source=x.branch.sourceId,sourceCell=Number(x.branch.sourceCell),parentRoom=Number(x.branch.parentRoom??x.room)||0;spatialClearBranch(x,hero);x.branch=null;spatialSetRoom(x,hero,parentRoom);spatialActivate(x,hero);if(Number.isInteger(sourceCell)&&sourceCell>=0)x.positions[hero]=sourceCell;try{removeDungeonSceneElement?.(source);const a=(loadDungeonSceneElements?.()||[]).filter(e=>!e.branch200);saveDungeonSceneElements?.(a)}catch(e){}saveRt(x);render();return true}
 window.dc200EnterBranch=enterBranch;window.dc200LeaveBranch=leaveBranch;
 function changeRole(v){try{setDeviceGameRole?.(v)}catch(e){}render()}
@@ -42173,12 +42179,12 @@ function heroArt(id){
 }
 function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
 function live(x){
-  const branch=!!x?.branch?.active,hero=String(x?.participants?.[Number(x?.index)||0]||"");
+  const branch=!!x?.branch?.active;
   try{
     return (loadActiveEnemies?.()||[]).filter(e=>
       !e.removed&&!e.defeated&&Number(e.hp)>0 &&
       Number(e.dungeonRoom||0)===Number(x?.room||0) &&
-      !e.dc200Bypassed && !e.dc200BypassedBy?.[hero] &&
+      !e.dc200Bypassed &&
       (branch?e.dc200Branch===true:e.dc200Branch!==true)
     )
   }catch(e){return []}
@@ -42762,7 +42768,9 @@ if(typeof oldStart301==="function"){
   window.dc200StartCombat=function(){
     T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
     const r=oldStart301.apply(this,arguments);
-    setTimeout(()=>{init(true);render()},0);
+    /* Certains combats attendent désormais la validation d'un popup de
+       détection/renfort. Ne pas démarrer une timeline vide sous ce popup. */
+    setTimeout(()=>{if(typeof dungeonCombatActive!=="undefined"&&dungeonCombatActive){init(true);render()}},0);
     return r;
   };
 }
@@ -43356,8 +43364,8 @@ function heroName(id){return heroDef(id).name||String(id||"Héros")}
 function heroArt(id){const d=heroDef(id);return d.image||d.avatar||({dungeon_aldren:ROOT+"dng_aldren.png",dungeon_lyra:ROOT+"dng_lyra.png",dungeon_brom:ROOT+"dng_brom.png"}[String(id)]||"")}
 function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
 function enemies(x){
-  const branch=!!x?.branch?.active,hero=String(x?.participants?.[Number(x?.index)||0]||"");
-  try{return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&!e.dc200BypassedBy?.[hero]&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}
+  const branch=!!x?.branch?.active;
+  try{return (loadActiveEnemies?.()||[]).filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0)&&!e.dc200Bypassed&&(branch?e.dc200Branch===true:e.dc200Branch!==true))}catch(e){return []}
 }
 function enemyArt(e){
   let d=null;try{d=activeEnemyDefinition?.(e?.enemyId)||null}catch(_){}
@@ -43531,7 +43539,7 @@ window.dungeonHandleLevelUp071=function(heroId,beforeXp,st,delay=80){
 };
 
 window.dungeonDebug312=function(){return {queued:levelQueue312.length,open:levelOpen312,busy:combatBusy312()}};
-try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.13";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.13 · salles et positions individuelles · moteur stable conservé."}catch(e){}
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.14";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.14 · mouvement conservé · alertes ennemies · arc stabilisé."}catch(e){}
 })();
 </script>
 </body>

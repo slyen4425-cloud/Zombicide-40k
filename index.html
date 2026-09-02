@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.4</title>
+<title>GenSrpG V16.78.5</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -40131,7 +40131,12 @@ function decorate202(){
   const x=rt202();if(!x)return;
   try{
     recordRoom202(x);
-    ensureEncounter202(x);
+    /*
+      Une rencontre ne doit être réparée qu'au moment où la salle vient
+      d'être créée (hook explore ci-dessus). La relancer depuis chaque
+      render/show recréait immédiatement des ennemis après une victoire,
+      particulièrement dans les salles d'embuscade.
+    */
     ensureTrap202(x);
     paintTrap202();
     roomFlavor202(x);
@@ -43171,6 +43176,10 @@ try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOT
 })();
 </script>
 <style id="dungeonCore310PersistenceCss">
+.dc047Cell.enemy{font-size:0!important}
+.dc047Cell.enemy>.dc054MapGlyph,
+.dc047Cell.enemy>.dc055Asset:not(.dc055Floor),
+.dc047Cell.enemy>.dc052MapImg{display:none!important}
 .dc047Cell .dc310Hero,.dc047Cell .dc310Enemy{
   position:absolute!important;z-index:45!important;overflow:hidden!important;
   border-radius:50%!important;pointer-events:none!important;box-shadow:0 2px 7px #000!important
@@ -43220,7 +43229,14 @@ function paint(){
   paintQueued=false;if(painting)return;painting=true;
   try{
     const x=runtime(),board=cells();if(!x||Number(x.room||0)<=0||!board.length)return;
-    board.forEach(c=>c.querySelectorAll(".dc310Hero,.dc310Enemy,.dc214Hero,.dc214Enemy").forEach(n=>n.remove()));
+    board.forEach(c=>{
+      c.querySelectorAll(".dc209AllyToken,.dc211HeroToken,.dc212HeroToken,.dc212EnemyToken,.dc213HeroToken,.dc213EnemyToken,.dc214Hero,.dc214Enemy,.dc310Hero,.dc310Enemy").forEach(n=>n.remove());
+      c.classList.remove("dc201EnemyToken","dc201Key");
+      delete c.dataset.dc201Enemy;
+      if(c.classList.contains("enemy")){
+        [...c.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim()).forEach(n=>n.remove())
+      }
+    });
     const active=String(x.participants?.[Number(x.index)||0]||""),byCell={};
     (x.participants||[]).forEach(id=>{const p=Number(x.positions?.[id]);if(Number.isInteger(p)&&board[p])(byCell[p]||(byCell[p]=[])).push(String(id))});
     const offsets=[[2,2],[34,2],[2,34],[34,34],[18,18],[48,18]];
@@ -43265,7 +43281,7 @@ window.resumeGame=function(){
 document.addEventListener("DOMContentLoaded",()=>{observe();queuePaint()});
 if(document.readyState!=="loading"){observe();queuePaint()}
 window.dungeonDebug310=function(){const x=runtime();return {saved:!!x,sessionActive:localStorage.getItem("z40k_session_active_v1")==="1",room:x?.room,heroTokens:document.querySelectorAll(".dc310Hero").length,enemyTokens:document.querySelectorAll(".dc310Enemy").length,enemyArts:document.querySelectorAll(".dc310Enemy img").length}};
-try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.10";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.10 · sauvegarde/reprise fiable · pions persistants."}catch(e){}
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.11";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.11 · combats terminables · portraits uniques · reprise fiable."}catch(e){}
 })();
 </script>
 </body>

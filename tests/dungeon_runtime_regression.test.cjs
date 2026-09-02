@@ -84,6 +84,7 @@ function testEncounterOnlyRepairsOnRoomCreation() {
     room: 1,
     branch: null,
     positions: {},
+    dc313LastTransition: { heroId: "dungeon_aldren", from: 0, to: 1, created: true },
     last: { kind: "ambush", map: { cells: ["floor"], size: 1 } }
   };
   const created = runCore202(entrance, newRoom);
@@ -92,6 +93,13 @@ function testEncounterOnlyRepairsOnRoomCreation() {
   created.core.render();
   created.core.show();
   assert.equal(created.getSpawns(), 1, "les rendus suivants ne doivent pas dupliquer la rencontre");
+
+  const joinedExisting = runCore202(entrance, {
+    ...newRoom,
+    dc313LastTransition: { heroId: "dungeon_lyra", from: 0, to: 1, created: false }
+  });
+  joinedExisting.core.explore();
+  assert.equal(joinedExisting.getSpawns(), 0, "rejoindre une salle déjà vidée ne doit pas recréer ses ennemis");
 }
 
 class ClassList {
@@ -297,8 +305,130 @@ function testLevelUpsAreQueuedUntilCombatEnds() {
   assert.match(document.getElementById("dc312LevelText").innerHTML, /Lyra passe niveau 3/);
 }
 
+function spatialModel() {
+  const context = { window: {} };
+  vm.runInNewContext(script("dungeonCore313SpatialModel"), context);
+  assert.ok(context.window.DungeonSpatial313, "le modèle spatial 3.13 doit être exposé");
+  return context.window.DungeonSpatial313;
+}
+
+function testExistingRunMigratesWithoutMovingHeroes() {
+  const spatial = spatialModel();
+  const runtime = {
+    participants: ["aldren", "lyra", "brom"],
+    index: 0,
+    room: 4,
+    last: { kind: "enemy", map: { size: 2, cells: ["entry", "floor", "enemy", "exit"] } },
+    positions: { aldren: 1, lyra: 0, brom: 3 },
+    remaining: { aldren: 2, lyra: 3, brom: 1 },
+    enemyCells: { skeleton: 2 }
+  };
+
+  spatial.ensure(runtime);
+
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(runtime.heroRooms)),
+    { aldren: 4, lyra: 4, brom: 4 },
+    "une sauvegarde antérieure doit migrer dans la salle courante sans téléportation"
+  );
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(runtime.positions)),
+    { aldren: 1, lyra: 0, brom: 3 },
+    "la migration doit conserver chaque case existante"
+  );
+  assert.equal(runtime.roomStates["4"].last.kind, "enemy");
+  assert.equal(runtime.spatialVersion, 1);
+}
+
+function testDoorCrossingMovesOnlyActiveHero() {
+  const spatial = spatialModel();
+  const runtime = {
+    participants: ["aldren", "lyra", "brom"],
+    index: 0,
+    room: 0,
+    last: null,
+    positions: { aldren: -1, lyra: -1, brom: -1 },
+    remaining: { aldren: 3, lyra: 3, brom: 3 },
+    enemyCells: {}
+  };
+  spatial.ensure(runtime);
+
+  const roomOne = {
+    kind: "enemy",
+    room: 1,
+    map: { size: 2, cells: ["entry", "floor", "enemy", "exit"], entryIdx: 0, exitIdx: 3 }
+  };
+  spatial.setRoom(runtime, "aldren", 1);
+  runtime.room = 1;
+  runtime.last = roomOne;
+  runtime.enemyCells = { skeleton: 2 };
+  runtime.positions.aldren = 0;
+  spatial.persist(runtime);
+
+  assert.equal(spatial.roomOf(runtime, "aldren"), 1);
+  assert.equal(spatial.roomOf(runtime, "lyra"), 0);
+  assert.equal(runtime.positions.lyra, -1);
+  assert.deepEqual(Array.from(spatial.heroesHere(runtime)), ["aldren"]);
+
+  runtime.index = 1;
+  spatial.activate(runtime, "lyra");
+  assert.equal(runtime.room, 0, "le tour de Lyra doit revenir à sa propre salle");
+  assert.equal(runtime.last, null);
+  assert.equal(runtime.positions.aldren, 0, "la position d'Aldren doit rester mémorisée en salle 1");
+
+  spatial.setRoom(runtime, "lyra", 1);
+  spatial.activate(runtime, "lyra");
+  runtime.positions.lyra = 0;
+  assert.equal(runtime.last.kind, "enemy", "Lyra doit rejoindre la salle déjà générée");
+  assert.equal(runtime.positions.aldren, 0);
+  assert.equal(runtime.positions.brom, -1);
+  assert.deepEqual(Array.from(spatial.heroesHere(runtime)), ["aldren", "lyra"]);
+}
+
+function testRoomSnapshotsSurviveTurnChanges() {
+  const spatial = spatialModel();
+  const runtime = {
+    participants: ["aldren", "lyra"], index: 0, room: 1,
+    last: { kind: "chest", map: { size: 1, cells: ["entry"] }, marker: "room-one" },
+    positions: { aldren: 0, lyra: 4 }, remaining: {}, enemyCells: {},
+    heroRooms: { aldren: 1, lyra: 2 },
+    roomStates: {
+      "2": { last: { kind: "boss", map: { size: 1, cells: ["exit"] }, marker: "room-two" }, enemyCells: { boss: 0 } }
+    },
+    heroBranchStates: {}
+  };
+
+  spatial.ensure(runtime);
+  spatial.persist(runtime);
+  runtime.index = 1;
+  spatial.activate(runtime, "lyra");
+  assert.equal(runtime.room, 2);
+  assert.equal(runtime.last.marker, "room-two");
+  assert.equal(runtime.enemyCells.boss, 0);
+
+  runtime.index = 0;
+  spatial.activate(runtime, "aldren");
+  assert.equal(runtime.room, 1);
+  assert.equal(runtime.last.marker, "room-one");
+}
+
+function testRuntimeUsesSpatialParticipationAndNoGroupReset() {
+  const runtime = script("dungeonCore200Rebuild");
+  assert.match(runtime, /const heroes=spatialHeroesHere\(x\)/, "un combat doit limiter les héros à la salle active");
+  assert.match(runtime, /spatialSetRoom\(x,heroId,targetRoom\)/, "la porte doit déplacer seulement le héros actif");
+  assert.doesNotMatch(
+    runtime.match(/function explore\(\)\{[\s\S]*?\} function moveTo/)?.[0] || "",
+    /ensurePositions\(x,true\)/,
+    "explorer une salle ne doit plus réinitialiser les positions de tout le groupe"
+  );
+}
+
 testEncounterOnlyRepairsOnRoomCreation();
 testCreaturePortraitReplacesEveryLegacyGlyph();
 testCombatItemsDoNotStackHiddenDamagePopup();
 testLevelUpsAreQueuedUntilCombatEnds();
+testExistingRunMigratesWithoutMovingHeroes();
+testDoorCrossingMovesOnlyActiveHero();
+testRoomSnapshotsSurviveTurnChanges();
+testRuntimeUsesSpatialParticipationAndNoGroupReset();
 console.log("Dungeon regression tests: OK");

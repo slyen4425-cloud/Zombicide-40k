@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.1-dungeon-fixes";
+const CACHE_NAME = "gensrpg-cache-16.78.2-dungeon-new-run-reset";
 
 const CORE_FILES = [
   "./",

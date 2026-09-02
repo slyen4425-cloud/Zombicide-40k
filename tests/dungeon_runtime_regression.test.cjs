@@ -206,6 +206,99 @@ function testCreaturePortraitReplacesEveryLegacyGlyph() {
   assert.equal(cell.dataset.dc201Enemy, undefined);
 }
 
+function testCombatItemsDoNotStackHiddenDamagePopup() {
+  const combatItems = script("dungeonCore061CombatItems");
+  const damageBranch = combatItems.match(/if\(u\.kind==="damage"\)\{([\s\S]*?)\n  \}\n\n  alert/);
+  assert.ok(damageBranch, "branche de dégâts des consommables introuvable");
+  assert.doesNotMatch(
+    damageBranch[1],
+    /showEffectPopup/,
+    "le résultat du parchemin ne doit pas ouvrir une seconde popup cachée"
+  );
+
+  const timeline = script("dungeonCore303TimelineRootFix");
+  assert.match(timeline, /"dungeonCombatUseItem061"/, "un consommable doit consommer le tour du héros");
+  assert.match(
+    timeline,
+    /const active=ownsTurn&&!T\.pendingHero&&!resultOpen\(\)/,
+    "les actions doivent être verrouillées dès qu'un résultat est en attente"
+  );
+}
+
+function testLevelUpsAreQueuedUntilCombatEnds() {
+  const localStorage = storage();
+  const body = new Element("body");
+  const combat = new Element("div");
+  combat.id = "dungeonCombatModal";
+  combat.style.display = "block";
+  combat.classList.add("dc200CombatOpen");
+  body.appendChild(combat);
+
+  const findById = (node, id) => {
+    if (node.id === id) return node;
+    for (const child of node.childNodes || []) {
+      const found = findById(child, id);
+      if (found) return found;
+    }
+    return null;
+  };
+  const timers = [];
+  let popupCalls = 0;
+  const document = {
+    body,
+    createElement(tag) { return new Element(tag); },
+    getElementById(id) { return findById(body, id); },
+    querySelector() { return null; }
+  };
+  const context = {
+    console,
+    document,
+    localStorage,
+    window: {},
+    CHARS: { dungeon_lyra: { name: "Lyra" } },
+    current: "",
+    state: null,
+    dungeonCombatActive: true,
+    dungeonRpgLevelFromXp(xp) { return 1 + Math.floor(Number(xp || 0) / 10); },
+    dungeonSyncProgressionForState(id, st) {
+      st.skillPoints = Math.floor(st.xp / 10);
+      st.statPoints = Math.floor(st.xp / 10);
+    },
+    activeProg() { return { levelUpRestore: "none" }; },
+    findCustomHero() { return null; },
+    key(id) { return `state-${id}`; },
+    z40kEscHtml(value) { return String(value); },
+    showEffectPopup() { popupCalls += 1; },
+    setTimeout(fn, delay) { timers.push({ fn, delay }); return timers.length; },
+    clearTimeout() {}
+  };
+  vm.runInNewContext(script("dungeonCore312TurnAndPopupFixes"), context);
+
+  const st = { xp: 20, wounds: 0 };
+  assert.equal(context.window.dungeonHandleLevelUp071("dungeon_lyra", 0, st, 80), true);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(context.window.dungeonDebug312())),
+    { queued: 2, open: false, busy: true }
+  );
+  assert.equal(popupCalls, 0, "les niveaux ne doivent plus utiliser l'effectModal générique");
+
+  context.dungeonCombatActive = false;
+  combat.style.display = "none";
+  combat.classList.remove("dc200CombatOpen");
+  timers.shift().fn();
+  assert.equal(context.window.dungeonDebug312().queued, 1);
+  assert.equal(context.window.dungeonDebug312().open, true);
+  assert.match(document.getElementById("dc312LevelText").innerHTML, /Lyra passe niveau 2/);
+
+  context.window.dc312CloseLevelPopup();
+  timers.shift().fn();
+  assert.equal(context.window.dungeonDebug312().queued, 0);
+  assert.equal(context.window.dungeonDebug312().open, true);
+  assert.match(document.getElementById("dc312LevelText").innerHTML, /Lyra passe niveau 3/);
+}
+
 testEncounterOnlyRepairsOnRoomCreation();
 testCreaturePortraitReplacesEveryLegacyGlyph();
+testCombatItemsDoNotStackHiddenDamagePopup();
+testLevelUpsAreQueuedUntilCombatEnds();
 console.log("Dungeon regression tests: OK");

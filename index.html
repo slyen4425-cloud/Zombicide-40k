@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.5</title>
+<title>GenSrpG V16.78.6</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -35372,7 +35372,8 @@ window.dungeonCombatUseItem061=function(heroId,idx,targetId){
     const damage=Math.max(1,Number(u.value)||1)+magicBonus61(heroId);
     removeItem61(st,idx);saveHero61(heroId,st);
     applyDungeonDirectDamage(target.id,damage,it.name);
-    try{showEffectPopup("🔥",it.name,(CHARS[heroId]?.name||"Héros")+" inflige <strong>"+damage+" dégâts</strong>.","Objet consommé",true)}catch(e){}
+    /* applyDungeonDirectDamage ouvre déjà le résultat détaillé. Une seconde
+       effectModal restait cachée sous le jet et pouvait bloquer la timeline. */
     renderDungeonCombatRound();
     return;
   }
@@ -42738,8 +42739,9 @@ function applyTurnUi(){
 
   document.querySelectorAll("#combatHeroSide .combatantCard").forEach((card,i)=>{
     const id=String(heroIds[i]||"");
-    const active=cur.kind==="hero"&&cur.id===id;
-    card.classList.toggle("turnActive156",active);
+    const ownsTurn=cur.kind==="hero"&&cur.id===id;
+    const active=ownsTurn&&!T.pendingHero&&!resultOpen();
+    card.classList.toggle("turnActive156",ownsTurn);
 
     card.querySelectorAll(".dungeonHeroCombatAttackBtn").forEach(el=>{el.disabled=!active});
     card.querySelectorAll(".dc211CombatTools button,.dc213CombatTools button").forEach(el=>{
@@ -42817,7 +42819,7 @@ window.__dc302RenderCombat=render;
 window.renderDungeonCombatRound=render;
 
 /* Les actions héros consomment le tour uniquement après fermeture du résultat. */
-["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent"].forEach(name=>{
+["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItem061"].forEach(name=>{
   const base=window[name];if(typeof base!=="function")return;
   window[name]=function(heroId){
     const cur=current();
@@ -43282,6 +43284,111 @@ document.addEventListener("DOMContentLoaded",()=>{observe();queuePaint()});
 if(document.readyState!=="loading"){observe();queuePaint()}
 window.dungeonDebug310=function(){const x=runtime();return {saved:!!x,sessionActive:localStorage.getItem("z40k_session_active_v1")==="1",room:x?.room,heroTokens:document.querySelectorAll(".dc310Hero").length,enemyTokens:document.querySelectorAll(".dc310Enemy").length,enemyArts:document.querySelectorAll(".dc310Enemy img").length}};
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.11";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.11 · combats terminables · portraits uniques · reprise fiable."}catch(e){}
+})();
+</script>
+<style id="dungeonCore312TurnAndPopupCss">
+/* Les effets génériques ne doivent plus être invisibles sous le combat. */
+#effectModal.open{z-index:2147483500!important}
+#dc312LevelModal{
+  position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.88);
+  display:none;align-items:center;justify-content:center;padding:18px
+}
+#dc312LevelModal.open{display:flex!important}
+#dc312LevelModal .dc312LevelBox{
+  width:min(520px,96vw);max-height:88vh;overflow:auto;text-align:center;
+  background:linear-gradient(180deg,#252014,#12110e);border:2px solid #d9b75d;
+  border-radius:18px;padding:20px;box-shadow:0 18px 70px #000
+}
+#dc312LevelIcon{font-size:54px;line-height:1}
+#dc312LevelTitle{margin:10px 0;color:#ffe193;font-size:25px}
+#dc312LevelText{line-height:1.55}
+#dc312LevelClose{width:100%;margin-top:16px;padding:13px;font-weight:950}
+</style>
+<script id="dungeonCore312TurnAndPopupFixes">
+(function(){
+"use strict";
+
+/* Les gains de niveau peuvent arriver pour plusieurs héros pendant la même
+   attaque. Ils sont conservés dans une vraie file et affichés après le combat,
+   au lieu de s'écraser dans l'effectModal sous la fenêtre de dés. */
+const levelQueue312=[];
+let levelOpen312=false,pumpTimer312=null;
+
+function ensureLevelModal312(){
+  let modal=document.getElementById("dc312LevelModal");if(modal)return modal;
+  modal=document.createElement("div");modal.id="dc312LevelModal";
+  const box=document.createElement("div");box.className="dc312LevelBox";
+  const icon=document.createElement("div");icon.id="dc312LevelIcon";icon.textContent="⭐";
+  const title=document.createElement("h2");title.id="dc312LevelTitle";title.textContent="NIVEAU SUPÉRIEUR !";
+  const text=document.createElement("div");text.id="dc312LevelText";
+  const close=document.createElement("button");close.id="dc312LevelClose";close.type="button";close.textContent="CONTINUER";close.onclick=()=>window.dc312CloseLevelPopup();
+  box.appendChild(icon);box.appendChild(title);box.appendChild(text);box.appendChild(close);modal.appendChild(box);document.body.appendChild(modal);
+  return modal
+}
+function modalOpen312(id){
+  const el=document.getElementById(id);if(!el)return false;
+  return el.classList.contains("open")||el.style.display==="block"||el.style.display==="flex"
+}
+function combatBusy312(){
+  const combat=document.getElementById("dungeonCombatModal");
+  const combatVisible=typeof dungeonCombatActive!=="undefined"&&!!dungeonCombatActive&&!!combat&&
+    (combat.classList.contains("open")||combat.classList.contains("dc200CombatOpen")||combat.style.display==="block"||combat.style.display==="flex");
+  return combatVisible||["attackDiceModal","specialDiceModal","effectModal","dc200Modal","dungeonCombatVictoryModal"].some(modalOpen312)
+}
+function schedulePump312(delay=80){
+  if(pumpTimer312!==null)return;
+  pumpTimer312=setTimeout(()=>{pumpTimer312=null;pump312()},Math.max(0,Number(delay)||0))
+}
+function pump312(){
+  if(levelOpen312||!levelQueue312.length)return;
+  if(combatBusy312()){schedulePump312(120);return}
+  const notice=levelQueue312.shift(),modal=ensureLevelModal312();
+  document.getElementById("dc312LevelIcon").textContent="⭐";
+  document.getElementById("dc312LevelTitle").textContent="NIVEAU SUPÉRIEUR !";
+  document.getElementById("dc312LevelText").innerHTML=
+    "<strong>"+z40kEscHtml(notice.name)+" passe niveau "+notice.level+"</strong><br><br>"+
+    "🌳 "+notice.skillPoints+" point(s) de talent disponible(s)<br>"+
+    "📊 "+notice.statPoints+" point(s) de caractéristique disponible(s)"+
+    (notice.restore?"<br><br>"+notice.restore:"");
+  levelOpen312=true;modal.classList.add("open")
+}
+window.dc312CloseLevelPopup=function(){
+  const modal=document.getElementById("dc312LevelModal");if(modal)modal.classList.remove("open");
+  levelOpen312=false;schedulePump312(40)
+};
+
+window.dungeonHandleLevelUp071=function(heroId,beforeXp,st,delay=80){
+  try{
+    const before=dungeonRpgLevelFromXp(beforeXp),after=dungeonRpgLevelFromXp(st.xp);
+    if(after<=before)return false;
+    const p=(typeof activeProg==="function"?activeProg():{})||{};
+    let restore="";
+    if(p.levelUpRestore==="health"||p.levelUpRestore==="health_mana"){
+      st.wounds=0;restore="❤️ PV restaurés"
+    }
+    if(p.levelUpRestore==="health_mana"){
+      const oc=current,os=state;
+      try{current=heroId;state=st;st.mana=dungeonMaxMana()}finally{current=oc;state=os}
+      restore+=(restore?" · ":"")+"💧 Mana restauré"
+    }
+    dungeonSyncProgressionForState(heroId,st);
+    localStorage.setItem(key(heroId),JSON.stringify(st));
+    if(String(current||"")===String(heroId))state=st;
+    const name=CHARS[heroId]?.name||findCustomHero(heroId)?.name||heroId;
+    for(let level=before+1;level<=after;level++){
+      levelQueue312.push({
+        heroId:String(heroId),name,level,
+        skillPoints:Math.max(0,Number(st.skillPoints)||0),
+        statPoints:Math.max(0,Number(st.statPoints)||0),
+        restore:level===after?restore:""
+      })
+    }
+    schedulePump312(delay);return true
+  }catch(e){console.warn("Level up Core 3.12",e);return false}
+};
+
+window.dungeonDebug312=function(){return {queued:levelQueue312.length,open:levelOpen312,busy:combatBusy312()}};
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.12";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.12 · tours verrouillés · niveaux en file · popups combat propres."}catch(e){}
 })();
 </script>
 </body>

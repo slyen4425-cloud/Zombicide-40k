@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.5-dungeon-spawn-token-fixes";
+const CACHE_NAME = "gensrpg-cache-16.78.6-dungeon-turn-level-popup-fixes";
 
 const CORE_FILES = [
   "./",

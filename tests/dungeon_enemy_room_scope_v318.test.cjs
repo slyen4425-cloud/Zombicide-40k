@@ -1,7 +1,8 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const patch=fs.readFileSync(require('node:path').join(__dirname,'..','assets','dungeon','dungeon-core-318.js'),'utf8');
+const path=require('node:path');
+const patch=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-core-318.js'),'utf8');
 
 function storage(initial={}){
   const m=new Map(Object.entries(initial));
@@ -96,6 +97,15 @@ function makeContext({dungeon=true,runtimeRoom=3,legacyRoom=8}={}){
   const ids=context.trackSpawnedEnemyInstances('zombie',1);
   const e=getEnemies().find(x=>ids.includes(x.id));
   assert.equal(e.dungeonRoom,null,'hors Dungeon, le tracker original doit rester inchangé');
+})();
+
+(function deploymentWiringIsPresent(){
+  const workflow=fs.readFileSync(path.join(__dirname,'..','.github','workflows','main.yml'),'utf8');
+  const sw=fs.readFileSync(path.join(__dirname,'..','service-worker.js'),'utf8');
+  assert.match(workflow,/dungeon_enemy_room_scope_v318\.test\.cjs/,'le workflow doit exécuter le test 3.18');
+  assert.match(workflow,/assets\/dungeon\/dungeon-core-318\.js/,'le build Pages doit injecter Core 3.18');
+  assert.match(sw,/gensrpg-cache-16\.78\.15-dungeon-room-scope/,'le cache PWA doit être incrémenté');
+  assert.match(sw,/assets\/dungeon\/dungeon-core-318\.js/,'Core 3.18 doit être pré-caché');
 })();
 
 (function patchDoesNotRewriteStableSystems(){

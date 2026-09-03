@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect-and-test:
@@ -19,5 +19,15 @@ jobs:
           node-version: '22'
       - name: Existing dungeon regression suite
         run: node tests/dungeon_runtime_regression.test.cjs
-      - name: Inspect Core 3.17 integration targets
-        run: node tests/inspect_core317_targets.cjs
+      - name: Extract Core 3.17 integration targets
+        run: node tests/extract_core317_targets.cjs
+      - name: Commit compact inspection dump
+        if: github.actor != 'github-actions[bot]'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/core317_targets_dump.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: capture Core 3.17 integration targets [skip ci]"
+            git push
+          fi

@@ -1,8 +1,9 @@
-const CACHE_NAME = "gensrpg-cache-16.78.10-dungeon-item-sets";
+const CACHE_NAME = "gensrpg-cache-16.78.11-dungeon-core317";
 
 const CORE_FILES = [
   "./",
   "./index.html",
+  "./assets/dungeon/dungeon-core-317.js",
   "./manifest.json"
 ];
 

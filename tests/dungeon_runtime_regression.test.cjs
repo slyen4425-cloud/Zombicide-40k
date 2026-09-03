@@ -731,7 +731,7 @@ function testEquipmentSetsAndZipCatalogue() {
 
   assert.match(html, /assets\/dungeon\/dungeon-core-316\.js/);
   assert.match(html, /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre la timeline finale");
-  assert.match(html, /GenSrpG V16\.78\.10/);
+  assert.match(html, /GenSrpG V16\.78\.11/);
 }
 
 testEncounterOnlyRepairsOnRoomCreation();

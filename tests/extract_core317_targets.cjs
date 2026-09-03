@@ -38,7 +38,7 @@ let out='';
 for(const name of ['defaultDungeonRpgRules','normalizeDungeonRpgRules','fillDungeonRpgRulesEditor','readDungeonRpgRulesEditor','saveDungeonRpgRulesFromEditor','currentRpgEconomy','saveRpgUniverseEconomy','merchantItems','openMerchant','renderMerchant','merchantBuy','merchantSell','dungeonSetHeroWounds','applyDamage48','applyBossAttackDamage','baseArmorSave','dc315ResolveCombatWipe','explore','renderMovementButtons','renderDungeon','renderActions']){
  out+=`\n===== FUNCTION ${name} =====\n${extractFunction(name)}`;
 }
-for(const term of ['minPhysicalDamage','armorReductionGain','armorReductionStep','armorReductionEnabled']) out+=`\n===== FUNCTIONS CONTAINING ${term} =====\n${functionsContaining(term)}`;
+for(const term of ['minPhysicalDamage','armorReductionGain','armorReductionStep','armorReductionEnabled','dungeonMitigationForHero(','configuredMin','dungeonSetHeroWounds?.(','dungeonSetHeroWounds(']) out+=`\n===== FUNCTIONS CONTAINING ${term} =====\n${functionsContaining(term)}`;
 for(const term of ['id="drMinPhysicalDamage"','id="rpgMinPhysicalDamage"','id="rpgMerchantBuyMultiplier"','id="rpgMerchantEventEnabled"','id="merchantList"','onclick="explore()"','explore()','DungeonCore315','dungeon-core-316.js']) out+=`\n===== SNIPPET ${term} =====\n${snippet(term)}`;
 fs.writeFileSync(path.join(__dirname,'core317_targets_dump.txt'),out);
 console.log('Wrote',out.length,'bytes');

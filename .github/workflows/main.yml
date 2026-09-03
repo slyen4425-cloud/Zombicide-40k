@@ -27,6 +27,9 @@ jobs:
       - name: Tester le créateur de pièces Dungeon
         run: node tests/dungeon_room_creator_v1.test.cjs
 
+      - name: Tester l'instanciation ennemie par salle
+        run: node tests/dungeon_enemy_room_scope_v318.test.cjs
+
       - name: Préparer le site
         run: |
           rm -rf _site
@@ -105,16 +108,19 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           index = Path("_site/index.html")
-          module = Path("_site/assets/dungeon/dungeon-room-creator-100.js")
-          if not module.exists():
-              raise SystemExit("Room Creator asset missing")
+          modules = [
+              (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
+              (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
+          ]
           html = index.read_text(encoding="utf-8")
-          tag = '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>'
-          if tag not in html:
-              if "</body>" not in html:
-                  raise SystemExit("Cannot inject Room Creator: </body> missing")
-              html = html.replace("</body>", tag + "\n</body>")
-              index.write_text(html, encoding="utf-8")
+          if "</body>" not in html:
+              raise SystemExit("Cannot inject Dungeon modules: </body> missing")
+          for module, tag, error in modules:
+              if not module.exists():
+                  raise SystemExit(error)
+              if tag not in html:
+                  html = html.replace("</body>", tag + "\n</body>")
+          index.write_text(html, encoding="utf-8")
           PY
 
       - name: Configurer GitHub Pages

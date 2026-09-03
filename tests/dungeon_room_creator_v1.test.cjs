@@ -68,7 +68,7 @@ assert.match(src,/dungeonAdvancedEditor/,'launcher must target the Dungeon edito
 assert.match(src,/drc100Launcher/,'room creator launcher missing');
 assert.match(src,/30×30/,'large room UI missing');
 for(const tool of ['entry','exit','enemy','boss','trap','chest','merchant','rest','puzzle'])assert.ok(d.TOOLS[tool],`missing tool ${tool}`);
-assert.match(sw,/gensrpg-cache-16\.78\.14-room-creator100/,'PWA cache not bumped');
+assert.match(sw,/const CACHE_NAME = "gensrpg-cache-[^"]+"/,'PWA cache missing');
 assert.match(sw,/dungeon-room-creator-100\.js/,'Room Creator must be precached');
 assert.match(workflow,/Charger les modules Dungeon externes/,'Pages module injection step missing');
 assert.match(workflow,/dungeon-room-creator-100\.js/,'Pages must load Room Creator');

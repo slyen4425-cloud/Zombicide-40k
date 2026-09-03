@@ -24,6 +24,9 @@ jobs:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
+      - name: Tester le créateur de pièces Dungeon
+        run: node tests/dungeon_room_creator_v1.test.cjs
+
       - name: Préparer le site
         run: |
           rm -rf _site

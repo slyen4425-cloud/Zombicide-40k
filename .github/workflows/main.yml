@@ -97,6 +97,23 @@ jobs:
           echo "========================================="
           ls -lh _site/sound_*.mp3 2>/dev/null || true
 
+      - name: Charger les modules Dungeon externes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          index = Path("_site/index.html")
+          module = Path("_site/assets/dungeon/dungeon-room-creator-100.js")
+          if not module.exists():
+              raise SystemExit("Room Creator asset missing")
+          html = index.read_text(encoding="utf-8")
+          tag = '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>'
+          if tag not in html:
+              if "</body>" not in html:
+                  raise SystemExit("Cannot inject Room Creator: </body> missing")
+              html = html.replace("</body>", tag + "\n</body>")
+              index.write_text(html, encoding="utf-8")
+          PY
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 

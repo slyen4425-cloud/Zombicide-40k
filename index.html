@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.10</title>
+<title>GenSrpG V16.78.11</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -3140,6 +3140,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
           <label>Armure : palier <input id="drArmorStep" type="number" min="1" max="999"></label>
           <label>Réduction physique gagnée <input id="drArmorGain" type="number" min="0" max="99"></label>
           <label>Dégâts physiques minimum après armure <input id="drMinPhysicalDamage" type="number" min="0" max="99"></label>
+          <label>Chance de blocage total (%) <input id="drArmorZeroBlockChance" type="number" min="0" max="100" value="75"></label>
           <label>Esprit : palier résistance magique <input id="drMagicResistStep" type="number" min="1" max="999"></label>
           <label>Résistance magique gagnée <input id="drMagicResistGain" type="number" min="0" max="99"></label>
           <label>Dégâts magiques minimum après résistance <input id="drMinMagicDamage" type="number" min="0" max="99"></label>
@@ -5191,7 +5192,7 @@ function defaultDungeonRpgRules(){
     baseInitiative:0,agilityInitiativeStep:9999,initiativeGain:0,
     enduranceHpStep:10,hpGain:2,
     defensePenaltyPerPoint:1,hitChanceMin:5,hitChanceMax:95,
-    armorReductionStep:2,armorReductionGain:1,minPhysicalDamage:1,
+    armorReductionStep:2,armorReductionGain:1,minPhysicalDamage:1,armorZeroBlockChance:75,
     spiritMagicResistStep:20,magicResistGain:1,minMagicDamage:1
   };
 }
@@ -5231,7 +5232,7 @@ function normalizeDungeonRpgRules(r){
   non("defensePenaltyPerPoint",25);
   o.hitChanceMin=Math.max(0,Math.min(99,Number.isFinite(Number(o.hitChanceMin))?Number(o.hitChanceMin):d.hitChanceMin));
   o.hitChanceMax=Math.max(o.hitChanceMin,Math.min(100,Number(o.hitChanceMax)||d.hitChanceMax));
-  pos("armorReductionStep");non("armorReductionGain",99);non("minPhysicalDamage",99);
+  pos("armorReductionStep");non("armorReductionGain",99);non("minPhysicalDamage",99);non("armorZeroBlockChance",100);
   pos("spiritMagicResistStep");non("magicResistGain",99);non("minMagicDamage",99);
   return o;
 }
@@ -5440,7 +5441,7 @@ function fillDungeonRpgRulesEditor(){
     drBaseDodge:"baseDodge",drDodgeStep:"agilityDodgeStep",drDodgeGain:"dodgeGain",drDodgeCap:"dodgeCap",
     drBaseInitiative:"baseInitiative",drInitiativeStep:"agilityInitiativeStep",drInitiativeGain:"initiativeGain",
     drHpStep:"enduranceHpStep",drHpGain:"hpGain",
-    drArmorStep:"armorReductionStep",drArmorGain:"armorReductionGain",drMinPhysicalDamage:"minPhysicalDamage",
+    drArmorStep:"armorReductionStep",drArmorGain:"armorReductionGain",drMinPhysicalDamage:"minPhysicalDamage",drArmorZeroBlockChance:"armorZeroBlockChance",
     drMagicResistStep:"spiritMagicResistStep",drMagicResistGain:"magicResistGain",drMinMagicDamage:"minMagicDamage"
   };
   Object.entries(map).forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.value=r[k]});
@@ -5480,7 +5481,7 @@ function readDungeonRpgRulesEditor(){
     baseDodge:v("drBaseDodge"),agilityDodgeStep:v("drDodgeStep"),dodgeGain:v("drDodgeGain"),dodgeCap:v("drDodgeCap"),
     baseInitiative:v("drBaseInitiative"),agilityInitiativeStep:v("drInitiativeStep"),initiativeGain:v("drInitiativeGain"),
     enduranceHpStep:v("drHpStep"),hpGain:v("drHpGain"),
-    armorReductionStep:v("drArmorStep"),armorReductionGain:v("drArmorGain"),minPhysicalDamage:v("drMinPhysicalDamage"),
+    armorReductionStep:v("drArmorStep"),armorReductionGain:v("drArmorGain"),minPhysicalDamage:v("drMinPhysicalDamage"),armorZeroBlockChance:v("drArmorZeroBlockChance"),
     spiritMagicResistStep:v("drMagicResistStep"),magicResistGain:v("drMagicResistGain"),minMagicDamage:v("drMinMagicDamage")
   };
 }
@@ -10626,7 +10627,7 @@ function gensReferenceRpgSettings(){
     stats:{active:["force","agility","intelligence","spirit","endurance","initiative"],baseHp:3,hpPer10Endurance:2,baseMana:0,manaPer10Spirit:10},
     combat:{baseHit:Number(rules.basicAttackBaseChance)||60,minHit:Number(rules.minHitChance)||5,maxHit:Number(rules.maxHitChance)||95,critMultiplier:Number(rules.critMultiplier)||2,critCap:Number(rules.critCap)||100,minPhysicalDamage:Number(rules.minPhysicalDamage)||0,minMagicDamage:Number(rules.minMagicDamage)||0,physicalDamageFormula:rules.physicalDamageFormula||"step",physicalDamagePercentPerPoint:Number(rules.physicalDamagePercentPerPoint)||0,magicDamageFormula:rules.magicDamageFormula||"step",magicDamagePercentPerPoint:Number(rules.magicDamagePercentPerPoint)||0,rangedDamageFormula:rules.rangedDamageFormula||"none",rangedDamagePercentPerPoint:Number(rules.rangedDamagePercentPerPoint)||0,hpFormula:rules.hpFormula||"step",hpPercentPerPoint:Number(rules.hpPercentPerPoint)||0,manaFormula:rules.manaFormula||"step",manaPercentPerPoint:Number(rules.manaPercentPerPoint)||0,critFormula:rules.critFormula||"step",critPercentPerPoint:Number(rules.critPercentPerPoint)||0,dodgeFormula:rules.dodgeFormula||"step",dodgePercentPerPoint:Number(rules.dodgePercentPerPoint)||0,initiativeFormula:rules.initiativeFormula||"step",initiativePerPoint:Number(rules.initiativePerPoint)||0,magicResistFormula:rules.magicResistFormula||"step",magicResistPerPoint:Number(rules.magicResistPerPoint)||0,rulesComplexity:rules.rulesComplexity||"simple",initiativeUsage:rules.initiativeUsage||"tests",initiativeTurnMode:rules.initiativeTurnMode||"fixed",initiativeDie:Number(rules.initiativeDie)||20,testsEnabled:rules.testsEnabled!==false,testDie:Number(rules.testDie)||20,testDefaultDifficulty:Number(rules.testDefaultDifficulty)||10},
     talents:{slots:24,required:true},
-    economy:{enabled:false,currencyName:"Or",currencyIcon:"🪙",startingGold:0,sellPercent:50,merchantBuyMultiplier:1,enemyGoldEnabled:true,merchantEventEnabled:true},
+    economy:{enabled:false,currencyName:"Or",currencyIcon:"🪙",startingGold:0,sellPercent:50,merchantBuyMultiplier:1,merchantStockLimits:{weapons:3,equipment:3,consumables:3,other:3},enemyGoldEnabled:true,merchantEventEnabled:true},
     elements:gensDefaultElementSettings(),
     exploration:{
       chestTrapChance:(typeof loadDungeonChestRules==="function"?Number(loadDungeonChestRules()?.trappedChance):0)||0,
@@ -10653,7 +10654,7 @@ function gensBlankRpgSettings(){
     combat:{baseHit:60,minHit:5,maxHit:95,critMultiplier:2,critCap:100,minPhysicalDamage:0,minMagicDamage:0,physicalDamageFormula:"step",physicalDamagePercentPerPoint:0,magicDamageFormula:"step",magicDamagePercentPerPoint:0,rangedDamageFormula:"none",rangedDamagePercentPerPoint:0,hpFormula:"step",hpPercentPerPoint:0,manaFormula:"step",manaPercentPerPoint:0,critFormula:"step",critPercentPerPoint:0,dodgeFormula:"step",dodgePercentPerPoint:0,initiativeFormula:"direct",initiativePerPoint:0,
     rulesComplexity:"simple",initiativeUsage:"tests",initiativeTurnMode:"fixed",initiativeDie:20,testsEnabled:true,testDie:20,testDefaultDifficulty:10,magicResistFormula:"step",magicResistPerPoint:0},
     talents:{slots:24,required:true},
-    economy:{enabled:false,currencyName:"Or",currencyIcon:"🪙",startingGold:0,sellPercent:50,merchantBuyMultiplier:1,enemyGoldEnabled:true,merchantEventEnabled:true},
+    economy:{enabled:false,currencyName:"Or",currencyIcon:"🪙",startingGold:0,sellPercent:50,merchantBuyMultiplier:1,merchantStockLimits:{weapons:3,equipment:3,consumables:3,other:3},enemyGoldEnabled:true,merchantEventEnabled:true},
     elements:gensDefaultElementSettings(),
     exploration:{chestTrapChance:0,lootEnabled:true,emptyChestChance:0,chestItemCount:1,
       trapBaseDifficulty:50,trapDetection:true,trapDetectionStat:"agilite",trapDetectionBase:50,trapDetectionRadius:2,trapDetectionStatGain:2,trapDetectionOnce:true,enemyDetection:true,enemyDetectionRadius:2,enemyDetectionShowZones:true,enemyDetectionAutoCombat:true,
@@ -11592,7 +11593,7 @@ function renderRpgUniverseEditor(){
   set("rpgXpPerLevel",cfg.progression.xpPerLevel);set("rpgMaxLevel",cfg.progression.maxLevel);set("rpgTalentPointsPerLevel",cfg.progression.talentPointsPerLevel);set("rpgStartingSkillPoints",cfg.progression.startingSkillPoints||0);set("rpgStartingStatPoints",cfg.progression.startingStatPoints||0);set("rpgStatPointsPerLevel",cfg.progression.statPointsPerLevel??1);set("rpgAttributeEditMode",cfg.progression.attributeEditMode||"points");set("rpgLevelUpRestore",cfg.progression.levelUpRestore||"none");set("rpgWeaponSwitchCost",cfg.progression.weaponSwitchCost||"free");set("rpgXpCurveMode",cfg.progression.xpCurveMode||"linear");set("rpgKeepXp",String(cfg.progression.keepXp!==false));set("rpgKeepGear",String(cfg.progression.keepGear!==false));set("rpgPermadeath",String(!!cfg.progression.permadeath));setTimeout(()=>{try{renderRpgHeroProgressionCurve()}catch(e){}},0);
   set("rpgBaseHp",cfg.stats.baseHp);set("rpgHpPer10End",cfg.stats.hpPer10Endurance);set("rpgBaseMana",cfg.stats.baseMana);set("rpgManaPer10Spirit",cfg.stats.manaPer10Spirit);
   set("rpgBaseHit",cfg.combat.baseHit);set("rpgMinHit",cfg.combat.minHit);set("rpgMaxHit",cfg.combat.maxHit);set("rpgCritMultiplier",cfg.combat.critMultiplier);set("rpgCritCap",cfg.combat.critCap);set("rpgMinPhysicalDamage",cfg.combat.minPhysicalDamage);set("rpgMinMagicDamage",cfg.combat.minMagicDamage);
-  set("rpgPhysicalFormula",cfg.combat.physicalDamageFormula||"step");set("rpgPhysicalPctPerPoint",cfg.combat.physicalDamagePercentPerPoint||0);set("rpgMagicFormula",cfg.combat.magicDamageFormula||"step");set("rpgMagicPctPerPoint",cfg.combat.magicDamagePercentPerPoint||0);set("rpgRangedFormula",cfg.combat.rangedDamageFormula||"none");set("rpgRangedPctPerPoint",cfg.combat.rangedDamagePercentPerPoint||0);set("rpgHpFormula",cfg.combat.hpFormula||"step");set("rpgHpPctPerPoint",cfg.combat.hpPercentPerPoint||0);set("rpgManaFormula",cfg.combat.manaFormula||"step");set("rpgManaPctPerPoint",cfg.combat.manaPercentPerPoint||0);set("rpgCritFormula",cfg.combat.critFormula||"step");const eco=cfg.economy||{};set("rpgCurrencyName",eco.currencyName||"Or");set("rpgCurrencyIcon",eco.currencyIcon||"🪙");set("rpgStartingGold",eco.startingGold??0);set("rpgSellPercent",eco.sellPercent??50);set("rpgMerchantBuyMultiplier",eco.merchantBuyMultiplier??1);set("rpgEnemyGoldEnabled",String(eco.enemyGoldEnabled!==false));set("rpgMerchantEventEnabled",String(eco.merchantEventEnabled!==false));const ems=document.getElementById("rpgEconomyModuleStatus");if(ems)ems.innerHTML=(cfg.gameplay?.modules?.economy?"✅ Économie activée":"⛔ Économie désactivée")+" · change ce choix dans Style & Modules.";const els=document.getElementById("rpgElementsModuleStatus");if(els)els.innerHTML=(cfg.gameplay?.modules?.elements?"✅ Éléments activés":"⛔ Éléments désactivés")+" · change ce choix dans Style & Modules.";setTimeout(renderRpgEconomyVisibility,0);set("rpgCritPctPerPoint",cfg.combat.critPercentPerPoint||0);set("rpgDodgeFormula",cfg.combat.dodgeFormula||"step");set("rpgDodgePctPerPoint",cfg.combat.dodgePercentPerPoint||0);set("rpgInitiativeFormula","direct");set("rpgInitiativePerPoint",0);set("rpgMagicResistFormula",cfg.combat.magicResistFormula||"step");set("rpgMagicResistPerPoint",cfg.combat.magicResistPerPoint||0);set("rpgRulesComplexity",cfg.combat.rulesComplexity||"simple");set("rpgInitiativeUsage",cfg.combat.initiativeUsage||"tests");set("rpgInitiativeTurnMode",cfg.combat.initiativeTurnMode||"fixed");set("rpgInitiativeDie",String(cfg.combat.initiativeDie||20));set("rpgTestsEnabled",String(cfg.combat.testsEnabled!==false));set("rpgTestDie",String(cfg.combat.testDie||20));set("rpgTestDefaultDifficulty",Number(cfg.combat.testDefaultDifficulty)||10);renderRpgInitiativeOptions();
+  set("rpgPhysicalFormula",cfg.combat.physicalDamageFormula||"step");set("rpgPhysicalPctPerPoint",cfg.combat.physicalDamagePercentPerPoint||0);set("rpgMagicFormula",cfg.combat.magicDamageFormula||"step");set("rpgMagicPctPerPoint",cfg.combat.magicDamagePercentPerPoint||0);set("rpgRangedFormula",cfg.combat.rangedDamageFormula||"none");set("rpgRangedPctPerPoint",cfg.combat.rangedDamagePercentPerPoint||0);set("rpgHpFormula",cfg.combat.hpFormula||"step");set("rpgHpPctPerPoint",cfg.combat.hpPercentPerPoint||0);set("rpgManaFormula",cfg.combat.manaFormula||"step");set("rpgManaPctPerPoint",cfg.combat.manaPercentPerPoint||0);set("rpgCritFormula",cfg.combat.critFormula||"step");const eco=cfg.economy||{};set("rpgCurrencyName",eco.currencyName||"Or");set("rpgCurrencyIcon",eco.currencyIcon||"🪙");set("rpgStartingGold",eco.startingGold??0);set("rpgSellPercent",eco.sellPercent??50);set("rpgMerchantBuyMultiplier",eco.merchantBuyMultiplier??1);const stock317=eco.merchantStockLimits||{};set("rpgMerchantStockWeapons",stock317.weapons??3);set("rpgMerchantStockEquipment",stock317.equipment??3);set("rpgMerchantStockConsumables",stock317.consumables??3);set("rpgMerchantStockOther",stock317.other??3);set("rpgEnemyGoldEnabled",String(eco.enemyGoldEnabled!==false));set("rpgMerchantEventEnabled",String(eco.merchantEventEnabled!==false));const ems=document.getElementById("rpgEconomyModuleStatus");if(ems)ems.innerHTML=(cfg.gameplay?.modules?.economy?"✅ Économie activée":"⛔ Économie désactivée")+" · change ce choix dans Style & Modules.";const els=document.getElementById("rpgElementsModuleStatus");if(els)els.innerHTML=(cfg.gameplay?.modules?.elements?"✅ Éléments activés":"⛔ Éléments désactivés")+" · change ce choix dans Style & Modules.";setTimeout(renderRpgEconomyVisibility,0);set("rpgCritPctPerPoint",cfg.combat.critPercentPerPoint||0);set("rpgDodgeFormula",cfg.combat.dodgeFormula||"step");set("rpgDodgePctPerPoint",cfg.combat.dodgePercentPerPoint||0);set("rpgInitiativeFormula","direct");set("rpgInitiativePerPoint",0);set("rpgMagicResistFormula",cfg.combat.magicResistFormula||"step");set("rpgMagicResistPerPoint",cfg.combat.magicResistPerPoint||0);set("rpgRulesComplexity",cfg.combat.rulesComplexity||"simple");set("rpgInitiativeUsage",cfg.combat.initiativeUsage||"tests");set("rpgInitiativeTurnMode",cfg.combat.initiativeTurnMode||"fixed");set("rpgInitiativeDie",String(cfg.combat.initiativeDie||20));set("rpgTestsEnabled",String(cfg.combat.testsEnabled!==false));set("rpgTestDie",String(cfg.combat.testDie||20));set("rpgTestDefaultDifficulty",Number(cfg.combat.testDefaultDifficulty)||10);renderRpgInitiativeOptions();
   const mv=cfg.movement||gensBlankRpgSettings().movement;
   set("rpgMovementUnit",mv.unit||"case");set("rpgMovementCustomUnit",mv.customUnit||"");set("rpgMovementMode",mv.mode||"narrative");set("rpgMovementRefreshMode",mv.refreshMode||"turn");set("rpgCombatParticipationRange",Number.isFinite(Number(mv.combatParticipationRange))?Math.max(0,Number(mv.combatParticipationRange)):3);
   [["rpgMoveHeroes","heroes"],["rpgMoveCreatures","creatures"],["rpgMoveEnemies","enemies"],["rpgMoveCompanions","companions"]].forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.checked=mv.entities?.[k]!==false});
@@ -11745,6 +11746,7 @@ function saveRpgUniverseEconomy(){
   e.startingGold=Math.max(0,Number(document.getElementById("rpgStartingGold")?.value)||0);
   e.sellPercent=Math.max(0,Number(document.getElementById("rpgSellPercent")?.value)||0);
   e.merchantBuyMultiplier=Math.max(0,Number(document.getElementById("rpgMerchantBuyMultiplier")?.value)||1);
+  e.merchantStockLimits={weapons:Math.max(0,Math.min(999,Math.round(Number(document.getElementById("rpgMerchantStockWeapons")?.value)||0))),equipment:Math.max(0,Math.min(999,Math.round(Number(document.getElementById("rpgMerchantStockEquipment")?.value)||0))),consumables:Math.max(0,Math.min(999,Math.round(Number(document.getElementById("rpgMerchantStockConsumables")?.value)||0))),other:Math.max(0,Math.min(999,Math.round(Number(document.getElementById("rpgMerchantStockOther")?.value)||0)))};
   e.enemyGoldEnabled=document.getElementById("rpgEnemyGoldEnabled")?.value!=="false";
   e.merchantEventEnabled=document.getElementById("rpgMerchantEventEnabled")?.value!=="false";
   saveGameProfiles(profiles);applyGameProfile(p,false);renderRpgUniverseEditor();alert("Économie enregistrée ✅");
@@ -20167,7 +20169,13 @@ window.addEventListener("DOMContentLoaded",function initApp(){
     <div class="smodCard" id="rpgEconomyTradeCard"><h3>🛒 Achat / vente</h3>
       <label>Prix d’achat marchand ×<input id="rpgMerchantBuyMultiplier" type="number" min="0" max="100" step="0.05" value="1"></label>
       <label>Prix de revente (% du prix objet)<input id="rpgSellPercent" type="number" min="0" max="1000" value="50"></label>
-      <div class="smodMini">Chaque objet possède sa valeur de base. Le marchand calcule automatiquement les prix avec ces réglages.</div>
+      <div class="dungeonRulesEditorGrid" style="margin-top:8px">
+        <label>Stock Armes<input id="rpgMerchantStockWeapons" type="number" min="0" max="999" value="3"></label>
+        <label>Stock Équipements<input id="rpgMerchantStockEquipment" type="number" min="0" max="999" value="3"></label>
+        <label>Stock Consommables<input id="rpgMerchantStockConsumables" type="number" min="0" max="999" value="3"></label>
+        <label>Stock Autres<input id="rpgMerchantStockOther" type="number" min="0" max="999" value="3"></label>
+      </div>
+      <div class="smodMini">Chaque objet possède sa valeur de base. Le marchand calcule automatiquement les prix et le stock avec ces réglages.</div>
     </div>
     <div class="smodCard" id="rpgEconomyDropCard"><h3>🎁 Drops économiques</h3>
       <label>Les ennemis peuvent lâcher de la monnaie<select id="rpgEnemyGoldEnabled"><option value="true">Oui</option><option value="false">Non</option></select></label>
@@ -32475,7 +32483,7 @@ function dc043ApplyEnemyAttack(inst,def,skill,targetHeroId){
     const mit=dungeonMitigationForHero(targetHeroId,profile.damageType);
     const reduction=Math.max(0,Number(mit.reduction)||0);
     const configuredMin=Math.max(0,Number(mit.min)||0);
-    const final=elemental>0?Math.max(1,configuredMin,elemental-reduction):0;
+    const final=window.DungeonCore317.resolveArmorFloor(elemental,reduction,configuredMin,profile.damageType,rules);
 
     rd.rawDamage=raw;
     rd.elementalDamage=elemental;
@@ -43614,5 +43622,6 @@ window.dungeonDebug312=function(){return {queued:levelQueue312.length,open:level
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.16";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.16 · sets d’équipement · 22 nouveaux objets."}catch(e){}
 })();
 </script>
+<script src="assets/dungeon/dungeon-core-317.js"></script>
 </body>
 </html>

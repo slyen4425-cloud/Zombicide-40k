@@ -1,0 +1,1427 @@
+
+===== minPhysicalDamage =====
+
+--- 1 @ 5135807 ---
+
+    critFormula:"step",critPercentPerPoint:0,
+    dodgeFormula:"step",dodgePercentPerPoint:0,
+    initiativeFormula:"step",initiativePerPoint:0,
+    rulesComplexity:"simple",initiativeUsage:"tests",initiativeTurnMode:"fixed",initiativeDie:20,testsEnabled:true,testDie:20,testDefaultDifficulty:10,
+    magicResistFormula:"step",magicResistPerPoint:0,
+    meleeHitStep:10,meleeHitGain:5,
+    rangedHitStep:10,rangedHitGain:5,
+    magicHitStep:10,magicHitGain:5,
+    basicAttackBaseChance:50,
+    baseMana:0,spiritManaStep:10,manaGain:10,magicAttackManaCost:1,
+    baseCrit:0,agilityCritStep:10,critGain:5,critCap:50,critMultiplier:2,
+    baseDodge:0,agilityDodgeStep:10,dodgeGain:3,dodgeCap:40,
+    baseInitiative:0,agilityInitiativeStep:9999,initiativeGain:0,
+    enduranceHpStep:10,hpGain:2,
+    defensePenaltyPerPoint:1,hitChanceMin:5,hitChanceMax:95,
+    armorReductionStep:2,armorReductionGain:1,minPhysicalDamage:1,
+    spiritMagicResistStep:20,magicResistGain:1,minMagicDamage:1
+  };
+}
+function normalizeDungeonRpgRules(r){
+  const d=defaultDungeonRpgRules(),o={...d,...(r||{})};
+  const pos=(k,min=1,max=9999)=>o[k]=Math.max(min,Math.min(max,Number(o[k])||d[k]));
+  const non=(k,max=9999)=>o[k]=Math.max(0,Math.min(max,Number(o[k])||0));
+  pos("xpPerLevel");non("skillPointsPerLevel",99);non("startingSkillPoints",99);
+  pos("physicalDamageStep");non("physicalDamageGain",99);
+  o.physicalDamageFormula=o.physicalDamageFormula==="percent"?"percent":"step";non("physicalDamagePercentPerPoint",100);
+  pos("magicDamageStep");non("magicDamageGain",99);
+  o.magicDamageFormula=o.magicDamageFormula==="percent"?"percent":"step";non("magicDamagePercentPerPoint",100);
+  o.rangedDamageFormula=o.rangedDamageFormula==="percent"?"percent":"none";non("rangedDamagePercentPerPoint",100);
+  o.hpFormula=o.hpFormula==="percent"?"percent":"step";non("hpPercentPerPoint",100);
+  o.manaFormula=o.manaFormula==="percent"?"percent":"step";non("manaPercentPerPoint",100);
+  o.critFormula=o.critFormula==="perPoint"?"perPoint":"step";non("critPercentPerPoint",100);
+  o.dodgeFormula=o.dodgeFormula==="perPoint"?"perPoint":"step";non("dodgePercentPerPoint",100);
+  o.initiativeFormula=o.initiativeFormula==="perPoint"?"perPoint":"step";non("initiativePerPoint",100);
+  o.magicResistFormula=o.magicResistFormula==="perPoint"?"perPoi
+
+--- 2 @ 5139000 ---
+9,Number(o.basicAttackBaseChance)||d.basicAttackBaseChance));
+  non("baseMana");pos("spiritManaStep");non("manaGain");non("magicAttackManaCost");
+  non("baseCrit",100);pos("agilityCritStep");non("critGain",100);non("critCap",100);
+  o.critMultiplier=Math.max(1,Math.min(10,Number(o.critMultiplier)||d.critMultiplier));
+  non("baseDodge",100);pos("agilityDodgeStep");non("dodgeGain",100);non("dodgeCap",100);
+  o.baseInitiative=Math.max(-99,Math.min(999,Number(o.baseInitiative)||0));
+  pos("agilityInitiativeStep");non("initiativeGain",99);
+  pos("enduranceHpStep");non("hpGain",999);
+  non("defensePenaltyPerPoint",25);
+  o.hitChanceMin=Math.max(0,Math.min(99,Number.isFinite(Number(o.hitChanceMin))?Number(o.hitChanceMin):d.hitChanceMin));
+  o.hitChanceMax=Math.max(o.hitChanceMin,Math.min(100,Number(o.hitChanceMax)||d.hitChanceMax));
+  pos("armorReductionStep");non("armorReductionGain",99);non("minPhysicalDamage",99);
+  pos("spiritMagicResistStep");non("magicResistGain",99);non("minMagicDamage",99);
+  return o;
+}
+function loadDungeonRpgRules(){try{return normalizeDungeonRpgRules(JSON.parse(localStorage.getItem(GENS_DUNGEON_RPG_RULES_KEY)||"{}"))}catch(e){return defaultDungeonRpgRules()}}
+function saveDungeonRpgRules(r){localStorage.setItem(GENS_DUNGEON_RPG_RULES_KEY,JSON.stringify(normalizeDungeonRpgRules(r)));try{if(current&&state){dungeonSyncProgressionForState(current,state);save();render()}}catch(e){}}
+function dungeonRpgLevelFromXp(xp){const r=loadDungeonRpgRules();return 1+Math.floor(Math.max(0,Number(xp)||0)/Math.max(1,r.xpPerLevel))}
+function dungeonRpgXpIntoLevel(xp){const r=loadDungeonRpgRules();return Math.max(0,Number(xp)||0)%Math.max(1,r.xpPerLevel)}
+function dungeonRpgEarnedSkillPoints(xp){const r=loadDungeonRpgRules();return Math.max(0,r.startingSkillPoints)+Math.floor(Math.max(0,Number(xp)||0)/Math.max(1,r.xpPerLevel))*Math.max(0,r.skillPointsPerLevel)}
+function dungeonActiveProgressionConfig(){
+  try{
+    if(typeof loadGameProfiles==="function" && typeof activeGameProfileId==="function"){
+      const p=loadGameProfiles().find(x=>String(x.id)===String(activeGameProfileId()));
+      if(p?.gameStyle==="dungeon")return p.rpgUniverse?.progression||{};
+    }
+  }catch(e){}
+  return {};
+}
+window.dungeonActiveProgressionConfig=dungeonActiveProgressionConfig;
+
+function dungeonS
+
+--- 3 @ 5150030 ---
+
+    r.critFormula==="perPoint"
+      ?"💥 Chaque <strong>1 Agilité</strong> : +<strong>"+r.critPercentPerPoint+"%</strong> critique · critique ×<strong>"+r.critMultiplier+"</strong>."
+      :"💥 Tous les <strong>"+r.agilityCritStep+" Agilité</strong> : +<strong>"+r.critGain+"%</strong> critique · critique ×<strong>"+r.critMultiplier+"</strong>.",
+    r.dodgeFormula==="perPoint"
+      ?"💨 Chaque <strong>1 Agilité</strong> : +<strong>"+r.dodgePercentPerPoint+"%</strong> esquive · plafond "+r.dodgeCap+"%."
+      :"💨 Tous les <strong>"+r.agilityDodgeStep+" Agilité</strong> : +<strong>"+r.dodgeGain+"%</strong> esquive · plafond "+r.dodgeCap+"%.",
+    "🐎 Initiative : caractéristique indépendante, sans bonus automatique d’Agilité.",
+    "🛡️ Tous les <strong>"+r.armorReductionStep+" Armure</strong> : −<strong>"+r.armorReductionGain+"</strong> dégât physique par touche · minimum <strong>"+r.minPhysicalDamage+"</strong>.",
+    r.magicResistFormula==="perPoint"
+      ?"🔮 Chaque <strong>1 Esprit</strong> : +<strong>"+r.magicResistPerPoint+"</strong> résistance magique · minimum magique <strong>"+r.minMagicDamage+"</strong>."
+      :"🔮 Tous les <strong>"+r.spiritMagicResistStep+" Esprit</strong> : +<strong>"+r.magicResistGain+"</strong> résistance magique, plus les bonus d’équipement · minimum magique <strong>"+r.minMagicDamage+"</strong>.",
+    r.hpFormula==="percent"
+      ?"❤️ Chaque <strong>1 Endurance</strong> : +<strong>"+r.hpPercentPerPoint+"%</strong> des PV de base."
+      :"❤️ Tous les <strong>"+r.enduranceHpStep+" Endurance</strong> : +<strong>"+r.hpGain+"</strong> PV max."
+  ].filter(Boolean).map(x=>'<div class="dungeonRuleLine">'+x+'</div>').join("");
+}
+function renderDungeonProgressiveRules(){
+  const usage=document.getElementById("drInitiativeUsage")?.value||"tests",style=document.getElementById("drRulesComplexity")?.value||"simple";
+  const turn=document.getElementById("drInitiativeTurnOptions"),tests=document.getElementById("drUniversalTestOptions");
+  if(turn)turn.style.display=(usage==="turns"||usage==="both"||usage==="custom")?"grid":"none";
+  if(tests)tests.style.display=(usage==="tests"||usage==="both"||usage==="custom"||style==="rpg"||style==="custom")?"block":"none";
+}
+function dungeonUniversalTest(statValue,opt={}){
+  const r=loadDungeonRpgRules(); if(!r.tes
+
+--- 4 @ 5154315 ---
+ain",
+    drRangedHitStep:"rangedHitStep",drRangedHitGain:"rangedHitGain",
+    drMagicHitStep:"magicHitStep",drMagicHitGain:"magicHitGain",
+    drBasicHitChance:"basicAttackBaseChance",drHitChanceMin:"hitChanceMin",drHitChanceMax:"hitChanceMax",drDefensePenalty:"defensePenaltyPerPoint",
+    drBaseMana:"baseMana",drSpiritStep:"spiritManaStep",drManaGain:"manaGain",drMagicAttackCost:"magicAttackManaCost",
+    drBaseCrit:"baseCrit",drCritStep:"agilityCritStep",drCritGain:"critGain",drCritCap:"critCap",drCritMultiplier:"critMultiplier",
+    drBaseDodge:"baseDodge",drDodgeStep:"agilityDodgeStep",drDodgeGain:"dodgeGain",drDodgeCap:"dodgeCap",
+    drBaseInitiative:"baseInitiative",drInitiativeStep:"agilityInitiativeStep",drInitiativeGain:"initiativeGain",
+    drHpStep:"enduranceHpStep",drHpGain:"hpGain",
+    drArmorStep:"armorReductionStep",drArmorGain:"armorReductionGain",drMinPhysicalDamage:"minPhysicalDamage",
+    drMagicResistStep:"spiritMagicResistStep",drMagicResistGain:"magicResistGain",drMinMagicDamage:"minMagicDamage"
+  };
+  Object.entries(map).forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.value=r[k]});
+  const selects={
+    drPhysicalFormula:r.physicalDamageFormula,drMagicFormula:r.magicDamageFormula,
+    drRangedDamageFormula:r.rangedDamageFormula,drHpFormula:r.hpFormula,drManaFormula:r.manaFormula,
+    drCritFormula:r.critFormula,drDodgeFormula:r.dodgeFormula,drInitiativeFormula:r.initiativeFormula,
+    drMagicResistFormula:r.magicResistFormula
+  };
+  Object.entries(selects).forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.value=val});
+  [["drRulesComplexity",r.rulesComplexity],["drInitiativeUsage",r.initiativeUsage],["drInitiativeTurnMode",r.initiativeTurnMode],["drInitiativeDie",r.initiativeDie],["drTestDie",r.testDie]].forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.value=String(val)});
+  const te=document.getElementById("drTestsEnabled");if(te)te.checked=r.testsEnabled!==false; const td=document.getElementById("drTestDefaultDifficulty");if(td)td.value=r.testDefaultDifficulty; renderDungeonProgressiveRules();
+  const p=document.getElementById("dungeonRulesEditorPreview");if(p)p.innerHTML="<strong>📖 Résumé joueur</strong>"+dungeonRpgRulesSummaryHtml();
+}
+function readDungeonRpgRulesEditor(){
+  const v=id=>Number(document.g
+
+===== rpgMinPhysicalDamage =====
+
+--- 1 @ 5534040 ---
+intsPerLevel??1);set("rpgAttributeEditMode",cfg.progression.attributeEditMode||"points");set("rpgLevelUpRestore",cfg.progression.levelUpRestore||"none");set("rpgWeaponSwitchCost",cfg.progression.weaponSwitchCost||"free");set("rpgXpCurveMode",cfg.progression.xpCurveMode||"linear");set("rpgKeepXp",String(cfg.progression.keepXp!==false));set("rpgKeepGear",String(cfg.progression.keepGear!==false));set("rpgPermadeath",String(!!cfg.progression.permadeath));setTimeout(()=>{try{renderRpgHeroProgressionCurve()}catch(e){}},0);
+  set("rpgBaseHp",cfg.stats.baseHp);set("rpgHpPer10End",cfg.stats.hpPer10Endurance);set("rpgBaseMana",cfg.stats.baseMana);set("rpgManaPer10Spirit",cfg.stats.manaPer10Spirit);
+  set("rpgBaseHit",cfg.combat.baseHit);set("rpgMinHit",cfg.combat.minHit);set("rpgMaxHit",cfg.combat.maxHit);set("rpgCritMultiplier",cfg.combat.critMultiplier);set("rpgCritCap",cfg.combat.critCap);set("rpgMinPhysicalDamage",cfg.combat.minPhysicalDamage);set("rpgMinMagicDamage",cfg.combat.minMagicDamage);
+  set("rpgPhysicalFormula",cfg.combat.physicalDamageFormula||"step");set("rpgPhysicalPctPerPoint",cfg.combat.physicalDamagePercentPerPoint||0);set("rpgMagicFormula",cfg.combat.magicDamageFormula||"step");set("rpgMagicPctPerPoint",cfg.combat.magicDamagePercentPerPoint||0);set("rpgRangedFormula",cfg.combat.rangedDamageFormula||"none");set("rpgRangedPctPerPoint",cfg.combat.rangedDamagePercentPerPoint||0);set("rpgHpFormula",cfg.combat.hpFormula||"step");set("rpgHpPctPerPoint",cfg.combat.hpPercentPerPoint||0);set("rpgManaFormula",cfg.combat.manaFormula||"step");set("rpgManaPctPerPoint",cfg.combat.manaPercentPerPoint||0);set("rpgCritFormula",cfg.combat.critFormula||"step");const eco=cfg.economy||{};set("rpgCurrencyName",eco.currencyName||"Or");set("rpgCurrencyIcon",eco.currencyIcon||"🪙");set("rpgStartingGold",eco.startingGold??0);set("rpgSellPercent",eco.sellPercent??50);set("rpgMerchantBuyMultiplier",eco.merchantBuyMultiplier??1);set("rpgEnemyGoldEnabled",String(eco.enemyGoldEnabled!==false));set("rpgMerchantEventEnabled",String(eco.merchantEventEnabled!==false));const ems=document.getElementById("rpgEconomyModuleStatus");if(ems)ems.innerHTML=(cfg.gameplay?.modules?.economy?"✅ Économie activée":"⛔ Économie désactivée")+" · change ce choix dans Style & Modules.";const els=document.getElementById("rpg
+
+--- 2 @ 5557903 ---
+)die.style.display=((usage==="turns"||usage==="both"||usage==="custom")&&document.getElementById("rpgInitiativeTurnMode")?.value==="die")?"block":"none";
+}
+function saveRpgUniverseCombat(){
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(rpgEditingId));if(i<0)return;const p=profiles[i];ensureRpgProfileData(p);const x=p.rpgUniverse.combat;
+  x.baseHit=Math.max(0,Math.min(100,Number(document.getElementById("rpgBaseHit")?.value)||0));x.minHit=Math.max(0,Math.min(100,Number(document.getElementById("rpgMinHit")?.value)||0));x.maxHit=Math.max(0,Math.min(100,Number(document.getElementById("rpgMaxHit")?.value)||100));x.critMultiplier=Math.max(1,Number(document.getElementById("rpgCritMultiplier")?.value)||2);x.critCap=Math.max(0,Math.min(100,Number(document.getElementById("rpgCritCap")?.value)||100));x.minPhysicalDamage=Math.max(0,Number(document.getElementById("rpgMinPhysicalDamage")?.value)||0);x.minMagicDamage=Math.max(0,Number(document.getElementById("rpgMinMagicDamage")?.value)||0);
+  x.physicalDamageFormula=document.getElementById("rpgPhysicalFormula")?.value||"step";x.physicalDamagePercentPerPoint=Math.max(0,Number(document.getElementById("rpgPhysicalPctPerPoint")?.value)||0);x.magicDamageFormula=document.getElementById("rpgMagicFormula")?.value||"step";x.magicDamagePercentPerPoint=Math.max(0,Number(document.getElementById("rpgMagicPctPerPoint")?.value)||0);x.rangedDamageFormula=document.getElementById("rpgRangedFormula")?.value||"none";x.rangedDamagePercentPerPoint=Math.max(0,Number(document.getElementById("rpgRangedPctPerPoint")?.value)||0);x.hpFormula=document.getElementById("rpgHpFormula")?.value||"step";x.hpPercentPerPoint=Math.max(0,Number(document.getElementById("rpgHpPctPerPoint")?.value)||0);x.manaFormula=document.getElementById("rpgManaFormula")?.value||"step";x.manaPercentPerPoint=Math.max(0,Number(document.getElementById("rpgManaPctPerPoint")?.value)||0);x.critFormula=document.getElementById("rpgCritFormula")?.value||"step";x.critPercentPerPoint=Math.max(0,Number(document.getElementById("rpgCritPctPerPoint")?.value)||0);x.dodgeFormula=document.getElementById("rpgDodgeFormula")?.value||"step";x.dodgePercentPerPoint=Math.max(0,Number(document.getElementById("rpgDodgePctPerPoint")?.value)||0);x.initiativeFormula="direct";x.initiativePerPoi
+
+--- 3 @ 6769010 ---
+UniverseStats()">💾 ENREGISTRER</button></div>
+    </div>
+
+    <div id="rpgTab_combat" class="rpgUniverseTab" style="display:none">
+      <div class="smodGrid">
+        <div class="smodCard"><h3>🎯 Toucher</h3>
+          <label>Chance de base %<input id="rpgBaseHit" type="number" min="0" max="100"></label>
+          <label>Chance minimum %<input id="rpgMinHit" type="number" min="0" max="100"></label>
+          <label>Chance maximum %<input id="rpgMaxHit" type="number" min="0" max="100"></label>
+        </div>
+        <div class="smodCard"><h3>💥 Critique</h3>
+          <label>Multiplicateur critique<input id="rpgCritMultiplier" type="number" min="1" max="20" step="0.1"></label>
+          <label>Critique max %<input id="rpgCritCap" type="number" min="0" max="100"></label>
+        </div>
+        <div class="smodCard"><h3>🛡️ Défense</h3>
+          <label>Dégâts physiques minimum<input id="rpgMinPhysicalDamage" type="number" min="0" max="999"></label>
+          <label>Dégâts magiques minimum<input id="rpgMinMagicDamage" type="number" min="0" max="999"></label>
+        </div>
+      </div>
+
+      
+      <div class="smodCard" style="margin-top:10px">
+        <h3>🐎 Initiative & tests</h3>
+        <div class="smodMini">Une seule configuration pour tout l’univers RPG. Initiative est une caractéristique indépendante ; choisis ici uniquement comment le jeu l’utilise.</div>
+        <div class="smodGrid" style="margin-top:8px">
+          <label>Style de règles<select id="rpgRulesComplexity" onchange="applyRpgRulesPreset(this.value)"><option value="simple">🎲 Simple</option><option value="tactical">⚔️ Tactique</option><option value="rpg">📖 JDR</option><option value="custom">🛠️ Personnalisé</option></select></label>
+          <label>Utilisation de l’Initiative<select id="rpgInitiativeUsage" onchange="renderRpgInitiativeOptions()"><option value="off">Non utilisée</option><option value="turns">Ordre des tours</option><option value="tests">Tests / réactions</option><option value="both">Ordre des tours + tests</option><option value="custom">Personnalisé</option></select></label>
+        </div>
+        <div id="rpgRulesPresetHelp" class="hint" style="text-align:left;margin-top:8px"></div>
+        <div id="rpgInitiativeTurnOptions" class="smodGrid" style="margin-top:8px">
+          <label>Ordre de
+
+===== dungeonCombatHeroSnapshot =====
+
+--- 1 @ 5213175 ---
+}
+function dungeonHeroHasRequiredWeapon(heroId,req){
+  if(!req)return true;
+  const weapons=dungeonCombatHeroWeapons(heroId);
+  const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const names=weapons.map(w=>norm(w.it?.name||""));
+  const modes=weapons.map(w=>norm(w.it?.rpgAttackMode||w.it?.attackMode||"melee"));
+  if(req==="melee")return modes.some(m=>m==="melee");
+  if(req==="ranged")return modes.some(m=>m==="ranged"||m==="distance");
+  if(req==="sword_axe")return names.some(n=>/epee|sword|hache|axe/.test(n));
+  if(req==="sword")return names.some(n=>/epee|sword/.test(n));
+  if(req==="axe")return names.some(n=>/hache|axe/.test(n));
+  if(req==="bow")return names.some(n=>/arc|bow/.test(n));
+  if(req==="staff")return names.some(n=>/baton|staff/.test(n));
+  return true;
+}
+function dungeonSpendTalentMana(heroId,cost){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId),c=Math.max(0,Number(cost)||0);
+  if((Number(st.mana)||0)<c){alert("Mana insuffisant : "+c+" requis.");return false}
+  st.mana=Math.max(0,(Number(st.mana)||0)-c);localStorage.setItem(key(heroId),JSON.stringify(st));if(current===heroId)state=st;return true;
+}
+
+function dungeonTalentSaveHeroState(heroId,st){
+  localStorage.setItem(key(heroId),JSON.stringify(st));
+  if(current===heroId)state=st;
+}
+function dungeonTalentHealHero(heroId,amount){
+  const st=loadState(heroId),before=Math.max(0,Number(st.wounds)||0);
+  st.wounds=Math.max(0,before-Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return before-st.wounds;
+}
+function dungeonTalentRestoreMana(heroId,amount){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId);
+  const before=Math.max(0,Number(st.mana)||0),max=Math.max(0,Number(snap.maxMana)||0);
+  st.mana=Math.min(max,before+Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return st.mana-before;
+}
+function dungeonTalentDealDirectDamage(heroId,targetId,amount,damageType="physical",element=""){
+  const target=loadActiveEnemies().find(e=>String(e.id)===String(targetId)&&!e.defeated&&Number(e.hp)>0);
+  if(!target)return false;
+  const def=activeEnemyDefinition(target.enemyId),types=target.elementTypes||def?.rule?.elementTypes||[];
+  const mult=gensElementMultiplier(element,types),finalAmount=Math.max(0,
+
+--- 2 @ 5213939 ---
+ names.some(n=>/baton|staff/.test(n));
+  return true;
+}
+function dungeonSpendTalentMana(heroId,cost){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId),c=Math.max(0,Number(cost)||0);
+  if((Number(st.mana)||0)<c){alert("Mana insuffisant : "+c+" requis.");return false}
+  st.mana=Math.max(0,(Number(st.mana)||0)-c);localStorage.setItem(key(heroId),JSON.stringify(st));if(current===heroId)state=st;return true;
+}
+
+function dungeonTalentSaveHeroState(heroId,st){
+  localStorage.setItem(key(heroId),JSON.stringify(st));
+  if(current===heroId)state=st;
+}
+function dungeonTalentHealHero(heroId,amount){
+  const st=loadState(heroId),before=Math.max(0,Number(st.wounds)||0);
+  st.wounds=Math.max(0,before-Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return before-st.wounds;
+}
+function dungeonTalentRestoreMana(heroId,amount){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId);
+  const before=Math.max(0,Number(st.mana)||0),max=Math.max(0,Number(snap.maxMana)||0);
+  st.mana=Math.min(max,before+Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return st.mana-before;
+}
+function dungeonTalentDealDirectDamage(heroId,targetId,amount,damageType="physical",element=""){
+  const target=loadActiveEnemies().find(e=>String(e.id)===String(targetId)&&!e.defeated&&Number(e.hp)>0);
+  if(!target)return false;
+  const def=activeEnemyDefinition(target.enemyId),types=target.elementTypes||def?.rule?.elementTypes||[];
+  const mult=gensElementMultiplier(element,types),finalAmount=Math.max(0,Math.round((Number(amount)||0)*mult));
+  combatRewardHeroId=heroId;
+  attackRollContext={heroId,hits:1,hitDamages:[finalAmount],damageType,element,elementMultiplier:mult};
+  applyDungeonAttackDamage(target.id,finalAmount,1,finalAmount);
+  attackRollContext=null;
+  if(element&&mult!==1)try{showToast((gensElementById(element)?.icon||'🌈')+' '+(mult===0?'Immunité':mult>1?'Faiblesse ×'+mult:'Résistance ×'+mult))}catch(e){}
+  return true;
+}
+
+function dungeonTalentCalculatedAmount(heroId,e){
+  const base=Number(e?.base)||0;if(!e?.scaleAttribute||!Number(e?.scaleCoeff))return Math.max(0,Math.round(base));
+  const snap=dungeonCombatHeroSnapshot(heroId),v=Number(snap?.[e.scaleAttribute])||0;return Math.max(0,Math.round(base+v*Number(e.scaleCoeff)));
+}
+function du
+
+--- 3 @ 5215219 ---
+s().find(e=>String(e.id)===String(targetId)&&!e.defeated&&Number(e.hp)>0);
+  if(!target)return false;
+  const def=activeEnemyDefinition(target.enemyId),types=target.elementTypes||def?.rule?.elementTypes||[];
+  const mult=gensElementMultiplier(element,types),finalAmount=Math.max(0,Math.round((Number(amount)||0)*mult));
+  combatRewardHeroId=heroId;
+  attackRollContext={heroId,hits:1,hitDamages:[finalAmount],damageType,element,elementMultiplier:mult};
+  applyDungeonAttackDamage(target.id,finalAmount,1,finalAmount);
+  attackRollContext=null;
+  if(element&&mult!==1)try{showToast((gensElementById(element)?.icon||'🌈')+' '+(mult===0?'Immunité':mult>1?'Faiblesse ×'+mult:'Résistance ×'+mult))}catch(e){}
+  return true;
+}
+
+function dungeonTalentCalculatedAmount(heroId,e){
+  const base=Number(e?.base)||0;if(!e?.scaleAttribute||!Number(e?.scaleCoeff))return Math.max(0,Math.round(base));
+  const snap=dungeonCombatHeroSnapshot(heroId),v=Number(snap?.[e.scaleAttribute])||0;return Math.max(0,Math.round(base+v*Number(e.scaleCoeff)));
+}
+function dungeonTalentCooldownRemaining(heroId,talentId){return Math.max(0,Number(loadState(heroId)?.talentCooldowns?.[talentId])||0)}
+function dungeonTalentSetCooldown(heroId,talentId,turns){const st=loadState(heroId);st.talentCooldowns=st.talentCooldowns||{};st.talentCooldowns[talentId]=Math.max(0,Number(turns)||0);dungeonTalentSaveHeroState(heroId,st)}
+function dungeonEnemyDerivedForInstance(inst){
+  const def=inst?activeEnemyDefinition(inst.enemyId):null,d=def?dungeonEnemyDerived(def):null;if(!d)return d;
+  const m=inst?.runtimeMods||{};return {...d,defense:Math.max(0,(Number(d.defense)||0)+(Number(m.defense)||0)),initiative:(Number(d.initiative)||0)+(Number(m.initiative)||0)};
+}
+function dungeonApplyEnemyTalentStatMod(targetId,e,talentName){
+  const list=loadActiveEnemies(),ix=list.findIndex(x=>String(x.id)===String(targetId));if(ix<0)return false;
+  const inst=list[ix];inst.runtimeMods=inst.runtimeMods||{actions:0,strength:0,armor:null};inst.talentTimedMods=Array.isArray(inst.talentTimedMods)?inst.talentTimedMods:[];
+  const stat=e.stat==="initiative"?"initiative":"defense",value=Number(e.value)||0,duration=Math.max(1,Number(e.duration)||1);
+  inst.runtimeMods[stat]=(Number(inst.runtimeMods[stat])||0)+value;inst.talentTimedMods.push({id:"tm_"+Date.now().toString(36
+
+--- 4 @ 6628170 ---
+g>0)next.push(st);
+    });
+    all[heroId]=next;
+  });
+  saveDungeonHeroStatuses(all);
+  if(notes.length)setTimeout(()=>showEffectPopup("☠️","EFFETS PERSISTANTS",notes.map(z40kEscHtml).join("<br>"),"Début du nouveau tour",true),180);
+}
+
+function applyDungeonPassiveRoundEffects(){
+  if(!isDungeonMode())return;
+  const ids=typeof dungeonParticipants==="function"?dungeonParticipants():[];
+  const notes=[];
+  ids.forEach(id=>{
+    const hpRegen=dungeonHeroPassiveTotal(id,"regenHp",null,true);
+    const manaRegen=dungeonHeroPassiveTotal(id,"regenMana",null,true);
+    if(hpRegen>0){
+      const st=loadState(id),before=Math.max(0,Number(st.wounds)||0);
+      st.wounds=Math.max(0,before-hpRegen);localStorage.setItem(key(id),JSON.stringify(st));
+      if(before-st.wounds>0)notes.push((CHARS[id]?.name||id)+" +"+(before-st.wounds)+" PV");
+    }
+    if(manaRegen>0){
+      const st=loadState(id),max=dungeonCombatHeroSnapshot(id).maxMana,before=Math.max(0,Number(st.mana)||0);
+      st.mana=Math.min(max,before+manaRegen);localStorage.setItem(key(id),JSON.stringify(st));
+      if(st.mana-before>0)notes.push((CHARS[id]?.name||id)+" +"+(st.mana-before)+" Mana");
+    }
+  });
+  if(notes.length)setTimeout(()=>showEffectPopup("🌿","RÉGÉNÉRATION PASSIVE",notes.map(z40kEscHtml).join("<br>"),"Début du nouveau tour",true),250);
+}
+
+function dungeonUnlockedSkillEffects(){
+  const unlocked=new Set(state?.skillTreeUnlocked||[]);
+  return dungeonTreeNodes().filter(n=>unlocked.has(n.id)).flatMap(n=>Array.isArray(n.effects)?n.effects:[]);
+}
+function dungeonSkillEffectTotal(kind,mode=null,attribute=null){
+  let base=dungeonUnlockedSkillEffects().reduce((sum,e)=>{
+    if(e.kind!==kind)return sum;
+    if(mode && e.mode && e.mode!=="all" && e.mode!==mode)return sum;
+    if(attribute && e.attribute!==attribute)return sum;
+    if(!dungeonPassiveEffectApplies(current,e))return sum;
+    return sum+(Number(e.value)||0);
+  },0);
+  
+  
+  
+  return base;
+}
+function dungeonTreeNodes(){return dungeonTreeNodesForHero(current)}
+function dungeonTreeDisplayNodes(heroId){const set=dungeonTalentSetById(dungeonHeroTalentSetId(heroId));if(set&&Array.isArray(set.nodes))return normalizeDungeonTalentSetSlots(set).nodes;const playable=dungeonTreeNodesForHero(heroId);return normalizeDungeonTalentSetSlots({id:'runtime_'+heroId,name:'Arbre',node
+
+===== dungeonCombatEnemy =====
+
+--- 1 @ 6100728 ---
+<strong>"+z40kEscHtml(effectResult)+"</strong>":""),
+    (def.name||"Ennemi")+(s.cooldown>0?" · Recharge "+s.cooldown+" tour(s)":""),
+    true
+  );
+}
+
+
+function dungeonEnemyAttackSkills(def){
+  const r=def?.rule||{};
+  const base={id:"basic",name:r.attackName||"Attaque de base",dice:Math.max(1,Number(r.attackDice)||1),baseChance:Math.max(1,Math.min(99,Number(r.attackBaseChance??r.rpgHitChance)||50)),damage:Math.max(0,Number(r.damage)||0),mode:r.attackMode||dungeonInferEnemyAttackMode(def?.id,r.range),range:r.range||"0",text:"Attaque principale"};
+  const extras=(Array.isArray(r.attackSkills)?r.attackSkills:[]).map(x=>({...x,baseChance:Number(x.baseChance??x.hitChance??r.attackBaseChance??r.rpgHitChance??50),mode:x.mode||r.attackMode||dungeonInferEnemyAttackMode(def?.id,r.range)}));
+  return [base,...extras];
+}
+function rollDungeonEnemyAttackSkill(instanceId,skillId,targetHeroId=null){
+  dungeonCombatEnemyTargetHeroId=targetHeroId||"__auto__";
+  const inst=loadActiveEnemies().find(x=>String(x.id)===String(instanceId));if(!inst)return;
+  const def=activeEnemyDefinition(inst.enemyId);if(!def)return;
+  const sk=dungeonEnemyAttackSkills(def).find(x=>String(x.id)===String(skillId));if(!sk)return;
+  const rule={...(def.rule||{}),_dungeonSkill:sk};
+  rollEnemyAttack(instanceId,rule,sk.name);
+}
+function dungeonMitigationForHero(heroId,damageType){
+  const d=dungeonDerivedForHero(heroId),r=loadDungeonRpgRules();
+  const passive=Math.max(0,dungeonHeroPassiveTotal(heroId,"damageReduction",null,true));
+  return damageType==="magic"?{score:d.magicResistance,reduction:d.magicResistance+passive,min:r.minMagicDamage,label:"Résistance magique"+(passive?" + passifs":"")}:{score:d.armor,reduction:d.armorReduction+passive,min:r.minPhysicalDamage,label:"Armure"+(passive?" + passifs":"")};
+}
+function dungeonMitigationForEnemy(def,damageType){
+  const d=dungeonEnemyDerived(def),r=loadDungeonRpgRules();
+  return damageType==="magic"?{score:d.magicResistance,reduction:d.magicResistance,min:r.minMagicDamage,label:"Résistance magique"}:{score:d.armor,reduction:d.armorReduction,min:r.minPhysicalDamage,label:"Armure"};
+}
+function rollEnemyAttack(instanceId,overrideRule=null,attackName=""){
+  const inst=loadActiveEnemies().find(x=>String(x.id)===String(instanceId));if(!inst)return;
+  const def=activeEnemyDef
+
+--- 2 @ 6102387 ---
+ive?" + passifs":"")}:{score:d.armor,reduction:d.armorReduction+passive,min:r.minPhysicalDamage,label:"Armure"+(passive?" + passifs":"")};
+}
+function dungeonMitigationForEnemy(def,damageType){
+  const d=dungeonEnemyDerived(def),r=loadDungeonRpgRules();
+  return damageType==="magic"?{score:d.magicResistance,reduction:d.magicResistance,min:r.minMagicDamage,label:"Résistance magique"}:{score:d.armor,reduction:d.armorReduction,min:r.minPhysicalDamage,label:"Armure"};
+}
+function rollEnemyAttack(instanceId,overrideRule=null,attackName=""){
+  const inst=loadActiveEnemies().find(x=>String(x.id)===String(instanceId));if(!inst)return;
+  const def=activeEnemyDefinition(inst.enemyId);if(!def)return;
+  const r=overrideRule||def.rule||{};
+  if(isDungeonMode()){
+    const sk=r._dungeonSkill||null,profile=dungeonEnemyAttackProfile(def,sk),rules=loadDungeonRpgRules();
+    const dice=profile.dice,forced=(dungeonCombatEnemyTargetHeroId&&dungeonCombatEnemyTargetHeroId!=="__auto__")?dungeonCombatEnemyTargetHeroId:null;
+    const results=[],allocations={};
+    for(let i=0;i<dice;i++){
+      const heroId=forced||dungeonChooseEnemyTarget();if(!heroId)continue;
+      const target=dungeonDerivedForHero(heroId);
+      const defPenalty=Math.max(0,(target.defense-profile.attributeValue)*rules.defensePenaltyPerPoint);
+      const chance=dungeonClampHitChance(profile.preDefenseChance-defPenalty),threshold=d100ThresholdFromChance(chance),roll=Math.floor(Math.random()*100)+1,hit=roll>=threshold;
+      const critThreshold=Math.max(1,101-profile.crit),crit=hit&&profile.crit>0&&roll>=critThreshold;
+      const raw=hit?Math.round(profile.power*(crit?rules.critMultiplier:1)):0,elementMultiplier=gensElementMultiplier(profile.element,gensHeroElementTypes(heroId)),elementRaw=Math.max(0,Math.round(raw*elementMultiplier));
+      let dodgeRoll=null,dodged=false,mit=null,final=0;
+      if(hit){
+        if(target.dodge>0){dodgeRoll=Math.floor(Math.random()*100)+1;dodged=dodgeRoll>=Math.max(1,101-target.dodge)}
+        if(!dodged){mit=dungeonMitigationForHero(heroId,profile.damageType);final=Math.max(Number(mit.min)||0,elementRaw-Math.max(0,Number(mit.reduction)||0));if(elementRaw<=0)final=0;allocations[heroId]=(allocations[heroId]||0)+final;}
+      }
+      results.push({heroId,chance,threshold,roll,hit,crit,raw,elementRaw,
+
+--- 3 @ 6102419 ---
+rmor,reduction:d.armorReduction+passive,min:r.minPhysicalDamage,label:"Armure"+(passive?" + passifs":"")};
+}
+function dungeonMitigationForEnemy(def,damageType){
+  const d=dungeonEnemyDerived(def),r=loadDungeonRpgRules();
+  return damageType==="magic"?{score:d.magicResistance,reduction:d.magicResistance,min:r.minMagicDamage,label:"Résistance magique"}:{score:d.armor,reduction:d.armorReduction,min:r.minPhysicalDamage,label:"Armure"};
+}
+function rollEnemyAttack(instanceId,overrideRule=null,attackName=""){
+  const inst=loadActiveEnemies().find(x=>String(x.id)===String(instanceId));if(!inst)return;
+  const def=activeEnemyDefinition(inst.enemyId);if(!def)return;
+  const r=overrideRule||def.rule||{};
+  if(isDungeonMode()){
+    const sk=r._dungeonSkill||null,profile=dungeonEnemyAttackProfile(def,sk),rules=loadDungeonRpgRules();
+    const dice=profile.dice,forced=(dungeonCombatEnemyTargetHeroId&&dungeonCombatEnemyTargetHeroId!=="__auto__")?dungeonCombatEnemyTargetHeroId:null;
+    const results=[],allocations={};
+    for(let i=0;i<dice;i++){
+      const heroId=forced||dungeonChooseEnemyTarget();if(!heroId)continue;
+      const target=dungeonDerivedForHero(heroId);
+      const defPenalty=Math.max(0,(target.defense-profile.attributeValue)*rules.defensePenaltyPerPoint);
+      const chance=dungeonClampHitChance(profile.preDefenseChance-defPenalty),threshold=d100ThresholdFromChance(chance),roll=Math.floor(Math.random()*100)+1,hit=roll>=threshold;
+      const critThreshold=Math.max(1,101-profile.crit),crit=hit&&profile.crit>0&&roll>=critThreshold;
+      const raw=hit?Math.round(profile.power*(crit?rules.critMultiplier:1)):0,elementMultiplier=gensElementMultiplier(profile.element,gensHeroElementTypes(heroId)),elementRaw=Math.max(0,Math.round(raw*elementMultiplier));
+      let dodgeRoll=null,dodged=false,mit=null,final=0;
+      if(hit){
+        if(target.dodge>0){dodgeRoll=Math.floor(Math.random()*100)+1;dodged=dodgeRoll>=Math.max(1,101-target.dodge)}
+        if(!dodged){mit=dungeonMitigationForHero(heroId,profile.damageType);final=Math.max(Number(mit.min)||0,elementRaw-Math.max(0,Number(mit.reduction)||0));if(elementRaw<=0)final=0;allocations[heroId]=(allocations[heroId]||0)+final;}
+      }
+      results.push({heroId,chance,threshold,roll,hit,crit,raw,elementRaw,elementMultiplier,dodgeRoll,dodg
+
+--- 4 @ 6102464 ---
+.minPhysicalDamage,label:"Armure"+(passive?" + passifs":"")};
+}
+function dungeonMitigationForEnemy(def,damageType){
+  const d=dungeonEnemyDerived(def),r=loadDungeonRpgRules();
+  return damageType==="magic"?{score:d.magicResistance,reduction:d.magicResistance,min:r.minMagicDamage,label:"Résistance magique"}:{score:d.armor,reduction:d.armorReduction,min:r.minPhysicalDamage,label:"Armure"};
+}
+function rollEnemyAttack(instanceId,overrideRule=null,attackName=""){
+  const inst=loadActiveEnemies().find(x=>String(x.id)===String(instanceId));if(!inst)return;
+  const def=activeEnemyDefinition(inst.enemyId);if(!def)return;
+  const r=overrideRule||def.rule||{};
+  if(isDungeonMode()){
+    const sk=r._dungeonSkill||null,profile=dungeonEnemyAttackProfile(def,sk),rules=loadDungeonRpgRules();
+    const dice=profile.dice,forced=(dungeonCombatEnemyTargetHeroId&&dungeonCombatEnemyTargetHeroId!=="__auto__")?dungeonCombatEnemyTargetHeroId:null;
+    const results=[],allocations={};
+    for(let i=0;i<dice;i++){
+      const heroId=forced||dungeonChooseEnemyTarget();if(!heroId)continue;
+      const target=dungeonDerivedForHero(heroId);
+      const defPenalty=Math.max(0,(target.defense-profile.attributeValue)*rules.defensePenaltyPerPoint);
+      const chance=dungeonClampHitChance(profile.preDefenseChance-defPenalty),threshold=d100ThresholdFromChance(chance),roll=Math.floor(Math.random()*100)+1,hit=roll>=threshold;
+      const critThreshold=Math.max(1,101-profile.crit),crit=hit&&profile.crit>0&&roll>=critThreshold;
+      const raw=hit?Math.round(profile.power*(crit?rules.critMultiplier:1)):0,elementMultiplier=gensElementMultiplier(profile.element,gensHeroElementTypes(heroId)),elementRaw=Math.max(0,Math.round(raw*elementMultiplier));
+      let dodgeRoll=null,dodged=false,mit=null,final=0;
+      if(hit){
+        if(target.dodge>0){dodgeRoll=Math.floor(Math.random()*100)+1;dodged=dodgeRoll>=Math.max(1,101-target.dodge)}
+        if(!dodged){mit=dungeonMitigationForHero(heroId,profile.damageType);final=Math.max(Number(mit.min)||0,elementRaw-Math.max(0,Number(mit.reduction)||0));if(elementRaw<=0)final=0;allocations[heroId]=(allocations[heroId]||0)+final;}
+      }
+      results.push({heroId,chance,threshold,roll,hit,crit,raw,elementRaw,elementMultiplier,dodgeRoll,dodged,mit,final,defPenalty,targetDefense:target.
+
+===== marchand =====
+
+--- 1 @ 960542 ---
+utton>
+      </div>
+      <div class="creatorField">
+        <label>Armure</label>
+        <select id="hcArmor"><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option><option value="6">6+</option></select>
+        <label>PV maximum</label><input id="hcHp" type="number" min="1" max="20" value="3">
+        <div style="margin-top:12px;padding:10px;border-radius:10px;background:#24201a;border:1px solid #554831;font-size:12px;line-height:1.4">
+          Les compétences du héros sont désormais choisies depuis la bibliothèque.
+        </div>
+      </div>
+    </div>
+
+    <div id="hcDungeonStatsBox" class="eqSection" style="display:none;margin-top:12px">
+      <strong>📊 Caractéristiques RPG</strong>
+      <div class="hint" style="text-align:left;margin-top:4px">Ce bloc est optionnel par héros. Un dresseur, marchand ou personnage narratif peut ne pas utiliser de caractéristiques.</div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:900">
+        <input id="hcUseRpgStats" type="checkbox" checked onchange="hcRenderRpgStatsUsage()"> Utiliser les caractéristiques pour ce héros
+      </label>
+      <div id="hcRpgStatsFields" class="dungeonRulesEditorGrid" style="margin-top:8px">
+        <label>Force <input id="hcRpgForce" type="number" min="0" max="999" value="10"></label>
+        <label>Agilité <input id="hcRpgAgility" type="number" min="0" max="999" value="10"></label>
+        <label>Intelligence <input id="hcRpgIntelligence" type="number" min="0" max="999" value="10"></label>
+        <label>Esprit <input id="hcRpgSpirit" type="number" min="0" max="999" value="10"></label>
+        <label>Endurance <input id="hcRpgEndurance" type="number" min="0" max="999" value="10"></label>
+        <label>Défense de base <input id="hcRpgDefense" type="number" min="0" max="999" value="10"></label>
+        <label>Armure de base <input id="hcRpgArmor" type="number" min="0" max="999" value="0"></label>
+        <label>Initiative de base <input id="hcRpgInitiative" type="number" min="-99" max="999" value="0"></label>
+        <label class="gensMovementField">Mouvement personnel / tour <input id="hcRpgMovement" type="number" min="0" max="99" value="3"><span class="small">Nomb
+
+--- 2 @ 1317940 ---
+"Armure">🛡️ Armure</option>
+          <option value="Consommable">🧪 Consommable</option>
+          <option value="Équipement">🎒 Accessoire / Équipement</option>
+          <option value="Objet spécial">✨ Objet spécial</option><option value="Objet de capture">🪤 Objet de capture</option>
+        </select>
+      </div>
+      <div class="eqField" id="eqAttackElementWrap" style="display:none"><label>Élément</label><select id="eqAttackElement"></select><div class="small">Pour une arme, cet élément s’applique aussi aux dégâts.</div></div><div class="eqField" id="eqResistanceWrap"><label>🛡️ Résistances accordées par l’objet</label><div id="eqResistanceEditor"></div></div><div class="eqField" id="eqEconomyWrap"><label>💰 Valeur de l’objet</label><input id="eqPrice" type="number" min="0" max="999999" value="0"><div class="small">Prix de base dans la monnaie de l’univers. 0 = objet sans valeur marchande.</div></div><div class="eqField" id="eqCaptureItemWrap" style="display:none">
+<label>🪤 Niveau de capture</label><input id="eqCaptureLevel" type="number" min="1" max="99" value="1">
+<label>Bonus de capture (%)</label><input id="eqCaptureBonus" type="number" min="0" max="100" value="0">
+<div class="small">Bonus ajouté à la chance finale. L’objet est consommé lors d’une tentative.</div>
+</div>
+    </div>
+
+    <div class="eqField"><label>Image</label><input id="eqImageFile" type="file" accept="image/*" onchange="equipmentImageChanged(event)">
+      <button type="button" class="cropMiniBtn" onclick="openEquipmentCropper()">✂️ CADRER L’IMAGE</button>
+    </div>
+    <input id="eqImageData" type="hidden">
+    <input id="eqCropJson" type="hidden" value='{"x":0,"y":0,"scale":1}'>
+
+    <div id="eqWeaponBox" class="eqSection">
+      <strong>⚔️ Statistiques de combat</strong>
+      <div class="eqGrid">
+        <div class="eqField"><label>Type d'attaque</label>
+          <select id="eqAttackMode" onchange="equipmentAttackModeChanged()">
+            <option value="melee">Mêlée</option><option value="ranged">Distance</option><option value="magic">Magie</option><option value="hybrid">Hybride</option>
+          </select>
+        </div>
+        <div class="eqField"><label>Slots / mains occupés</label><input id="eqHands" type="number" min="0" max="6" value="1"></div>
+        <div class="eqField
+
+--- 3 @ 5341928 ---
+upe."},
+{id:"d_evt_breath",name:"Un instant de répit",icon:"🔥",category:"boon",weight:13,minRound:1,effect:{kind:"healRandom",value:1},text:"Le groupe trouve quelques secondes pour reprendre son souffle."},
+{id:"d_evt_cache",name:"Cache abandonnée",icon:"🎁",category:"loot",weight:12,minRound:2,effect:{kind:"loot"},text:"Une cache oubliée attire l’attention des héros."},
+{id:"d_evt_omen",name:"Présage inquiétant",icon:"🕯️",category:"narrative",weight:13,minRound:1,effect:{kind:"none"},text:"Les flammes vacillent. Quelque chose observe le groupe depuis l’obscurité."},
+{id:"d_evt_echo",name:"Échos du donjon",icon:"🌫️",category:"narrative",weight:10,minRound:1,effect:{kind:"none"},text:"Un grondement traverse les murs puis disparaît aussi vite qu’il est venu."}, {id:"d_evt_merchant",name:"Marchand itinérant",icon:"🛒",category:"boon",weight:8,minRound:2,effect:{kind:"merchant"},text:"Un marchand itinérant propose ses marchandises au groupe."}
+]};
+function loadDungeonEvents(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENTS_KEY)||"null");return Array.isArray(a)&&a.length?a:dungeonBuiltinEvents()}catch(e){return dungeonBuiltinEvents()}}
+function saveDungeonEvents(a){localStorage.setItem(GENS_DUNGEON_EVENTS_KEY,JSON.stringify(Array.isArray(a)?a:[]))}
+function loadDungeonEventHistory(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENT_HISTORY_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonEventHistory(a){localStorage.setItem(GENS_DUNGEON_EVENT_HISTORY_KEY,JSON.stringify((a||[]).slice(-40)))}
+function dungeonEligibleEvents(round){
+  const r=Math.max(1,Number(round)||1),settings=currentRpgEventSettings(),activeTags=new Set((settings.activeTags||[]).map(v=>String(v).toLowerCase()));
+  let list=currentRpgEventPool().filter(e=>{
+    if(!e||e.enabled===false||r<Math.max(1,Number(e.minRound)||1)||(e.maxRound&&r>Number(e.maxRound))||Math.max(0,Number(e.weight)||0)<=0)return false;
+    const tags=(e.tags||[]).map(v=>String(v).toLowerCase()).filter(Boolean);
+    return !tags.length||tags.some(t=>activeTags.has(t));
+  });
+  if(settings.eventRepeats===false){
+    const seen=new Set(loadDungeonEventHistory().map(h=>String(h.id)));
+    const unseen=list.filter(e=>!seen.has(String(e.id)));
+    if(unseen.length)list=unseen;
+ 
+
+--- 4 @ 5341959 ---
+:"Un instant de répit",icon:"🔥",category:"boon",weight:13,minRound:1,effect:{kind:"healRandom",value:1},text:"Le groupe trouve quelques secondes pour reprendre son souffle."},
+{id:"d_evt_cache",name:"Cache abandonnée",icon:"🎁",category:"loot",weight:12,minRound:2,effect:{kind:"loot"},text:"Une cache oubliée attire l’attention des héros."},
+{id:"d_evt_omen",name:"Présage inquiétant",icon:"🕯️",category:"narrative",weight:13,minRound:1,effect:{kind:"none"},text:"Les flammes vacillent. Quelque chose observe le groupe depuis l’obscurité."},
+{id:"d_evt_echo",name:"Échos du donjon",icon:"🌫️",category:"narrative",weight:10,minRound:1,effect:{kind:"none"},text:"Un grondement traverse les murs puis disparaît aussi vite qu’il est venu."}, {id:"d_evt_merchant",name:"Marchand itinérant",icon:"🛒",category:"boon",weight:8,minRound:2,effect:{kind:"merchant"},text:"Un marchand itinérant propose ses marchandises au groupe."}
+]};
+function loadDungeonEvents(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENTS_KEY)||"null");return Array.isArray(a)&&a.length?a:dungeonBuiltinEvents()}catch(e){return dungeonBuiltinEvents()}}
+function saveDungeonEvents(a){localStorage.setItem(GENS_DUNGEON_EVENTS_KEY,JSON.stringify(Array.isArray(a)?a:[]))}
+function loadDungeonEventHistory(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENT_HISTORY_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonEventHistory(a){localStorage.setItem(GENS_DUNGEON_EVENT_HISTORY_KEY,JSON.stringify((a||[]).slice(-40)))}
+function dungeonEligibleEvents(round){
+  const r=Math.max(1,Number(round)||1),settings=currentRpgEventSettings(),activeTags=new Set((settings.activeTags||[]).map(v=>String(v).toLowerCase()));
+  let list=currentRpgEventPool().filter(e=>{
+    if(!e||e.enabled===false||r<Math.max(1,Number(e.minRound)||1)||(e.maxRound&&r>Number(e.maxRound))||Math.max(0,Number(e.weight)||0)<=0)return false;
+    const tags=(e.tags||[]).map(v=>String(v).toLowerCase()).filter(Boolean);
+    return !tags.length||tags.some(t=>activeTags.has(t));
+  });
+  if(settings.eventRepeats===false){
+    const seen=new Set(loadDungeonEventHistory().map(h=>String(h.id)));
+    const unseen=list.filter(e=>!seen.has(String(e.id)));
+    if(unseen.length)list=unseen;
+  }
+  return list;
+}
+function du
+
+===== Marchand =====
+
+--- 1 @ 1253757 ---
+n value="random">Aléatoire</option><option value="none">Aucun automatique</option></select></label>
+        <label>N pour Boss <input id="daeBossEvery" type="number" min="1" max="50"></label>
+        <label>Chance Boss aléatoire (%) <input id="daeBossChance" type="number" min="0" max="100"></label>
+        <label style="grid-column:1/-1">Salles Boss précises <input id="daeBossRooms" type="text" placeholder="Ex. 5, 10, 15"></label>
+      </div>
+      <div class="eqSection"><strong>🎲 Fréquence des types de salles</strong><div class="dungeonCfgGrid" style="margin-top:8px"><label>Combat — fréquence <input id="daeWEnemy" type="number" min="0"></label><label>Embuscade ⚡ — fréquence <input id="daeWAmbush" type="number" min="0"></label><label>Piège — fréquence <input id="daeWTrap" type="number" min="0"></label><label>Coffre — fréquence <input id="daeWChest" type="number" min="0"></label><label>Marchand — fréquence <input id="daeWMerchant" type="number" min="0"></label><label>Repos — fréquence <input id="daeWRest" type="number" min="0"></label><label>Calme / mystère — fréquence <input id="daeWMystery" type="number" min="0"></label></div><div id="daeRoomWeightPreview074"></div><div class="hint">Une fréquence est une valeur relative : <strong>20 apparaît deux fois plus souvent que 10</strong>. Les pourcentages réels sont calculés automatiquement ci-dessus.</div></div>
+      <div class="eqSection"><strong>🎁 Coffres</strong><div class="dungeonCfgGrid" style="margin-top:8px"><label>Commun <input id="daeChestCommon" type="number" min="0"></label><label>Rare <input id="daeChestRare" type="number" min="0"></label><label>Épique <input id="daeChestEpic" type="number" min="0"></label><label>Légendaire <input id="daeChestLegendary" type="number" min="0"></label><label>Chance d’être piégé (%) <input id="daeChestTrap" type="number" min="0" max="100"></label></div><div class="hint">Fréquences relatives des raretés : 20 apparaît deux fois plus souvent que 10.</div></div>
+      <div class="eqSection"><strong>🪤 Pièges</strong>
+<div class="dungeonCfgGrid" style="margin-top:8px">
+<label>Danger global
+<select id="daeTrapPower">
+<option value="weak">Faible ×0,5</option>
+<option value="normal">Normal ×1</option>
+<option value="dangerous">Dangereux ×1,5</option>
+<option value="deadly">Mortel ×2</o
+
+--- 2 @ 5341828 ---
+nd:1,effect:{kind:"damageRandom",value:1},text:"Un mécanisme oublié se déclenche sous les pas du groupe."},
+{id:"d_evt_breath",name:"Un instant de répit",icon:"🔥",category:"boon",weight:13,minRound:1,effect:{kind:"healRandom",value:1},text:"Le groupe trouve quelques secondes pour reprendre son souffle."},
+{id:"d_evt_cache",name:"Cache abandonnée",icon:"🎁",category:"loot",weight:12,minRound:2,effect:{kind:"loot"},text:"Une cache oubliée attire l’attention des héros."},
+{id:"d_evt_omen",name:"Présage inquiétant",icon:"🕯️",category:"narrative",weight:13,minRound:1,effect:{kind:"none"},text:"Les flammes vacillent. Quelque chose observe le groupe depuis l’obscurité."},
+{id:"d_evt_echo",name:"Échos du donjon",icon:"🌫️",category:"narrative",weight:10,minRound:1,effect:{kind:"none"},text:"Un grondement traverse les murs puis disparaît aussi vite qu’il est venu."}, {id:"d_evt_merchant",name:"Marchand itinérant",icon:"🛒",category:"boon",weight:8,minRound:2,effect:{kind:"merchant"},text:"Un marchand itinérant propose ses marchandises au groupe."}
+]};
+function loadDungeonEvents(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENTS_KEY)||"null");return Array.isArray(a)&&a.length?a:dungeonBuiltinEvents()}catch(e){return dungeonBuiltinEvents()}}
+function saveDungeonEvents(a){localStorage.setItem(GENS_DUNGEON_EVENTS_KEY,JSON.stringify(Array.isArray(a)?a:[]))}
+function loadDungeonEventHistory(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENT_HISTORY_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonEventHistory(a){localStorage.setItem(GENS_DUNGEON_EVENT_HISTORY_KEY,JSON.stringify((a||[]).slice(-40)))}
+function dungeonEligibleEvents(round){
+  const r=Math.max(1,Number(round)||1),settings=currentRpgEventSettings(),activeTags=new Set((settings.activeTags||[]).map(v=>String(v).toLowerCase()));
+  let list=currentRpgEventPool().filter(e=>{
+    if(!e||e.enabled===false||r<Math.max(1,Number(e.minRound)||1)||(e.maxRound&&r>Number(e.maxRound))||Math.max(0,Number(e.weight)||0)<=0)return false;
+    const tags=(e.tags||[]).map(v=>String(v).toLowerCase()).filter(Boolean);
+    return !tags.length||tags.some(t=>activeTags.has(t));
+  });
+  if(settings.eventRepeats===false){
+    const seen=new Set(loadDungeonEventHistory().map(h=>String(h.
+
+--- 3 @ 7060191 ---
+ hcAvatarCrop={x:0,y:0,scale:1,rot:0};
+    const img=document.getElementById("hcAvatarPreview");
+    img.src=hcAvatarData;
+    img.style.display="block";
+    renderHeroAvatarPreviewCrop();
+    setTimeout(()=>openHeroCropper(),60);
+  }catch(err){
+    console.warn(err);
+    alert("Impossible de préparer cette image. Essaie une autre photo.");
+  }
+});
+z40kApplyCustomHeroes();
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+  applyCustomHeroesMulti();
+  renderMenuStatuses();
+  try{
+    renderHomeGameModeSwitcher();
+    renderHome();
+    applyModeEditorVisibility();
+    showGensRootHome();
+  }catch(e){console.warn("Initialisation accueil / mode :",e)}
+});
+
+</script>
+
+
+
+<div id="merchantModal" class="modal" style="display:none;z-index:57550" onclick="if(event.target.id==='merchantModal')closeMerchant()">
+  <div class="modalBox" style="max-width:780px">
+    <div class="modalHeader"><h2>🛒 Marchand</h2><button class="closeBtn" type="button" onclick="closeMerchant()">✕</button></div>
+    <div class="merchantHero071"><label>👤 Héros qui commerce<select id="merchantHero071" onchange="merchantSelectHero071(this.value)"></select></label></div>
+    <div id="merchantWallet" class="hint" style="text-align:left"></div>
+    <div id="merchantList" style="display:grid;gap:8px;margin-top:10px"></div>
+  </div>
+</div>
+<div id="dungeonMasterModal" class="modal" style="display:none;z-index:46500" onclick="if(event.target.id==='dungeonMasterModal')closeDungeonMasterPanel()">
+  <div class="modalBox" style="max-width:680px">
+    <div class="modalHeader"><h2>🎛️ Maître du jeu — Salle</h2><button class="closeBtn" type="button" onclick="closeDungeonMasterPanel()">✕</button></div>
+    <div class="hint" style="text-align:left">Ajoute librement du contenu, même si la génération automatique de salles est désactivée. Les éléments restent dans la salle courante jusqu’à résolution ou suppression.</div>
+    <div class="dungeonMjSection"><h3>👹 Ajouter des ennemis</h3><div class="dungeonMjGrid"><label>Créature<select id="dungeonMjEnemy"></select></label><label>Quantité<input id="dungeonMjEnemyQty" type="number" min="1" max="20" value="1"></label></div><button type="button" class="startGameBtn" style="margin-top:8px" onclick="dungeonMjSpawnEnemy()">➕ AJOUTER LES ENNEMIS</button></div>
+    <div class="du
+
+--- 4 @ 7064609 ---
+ groupe.</div>
+<button type="button" style="width:100%;margin-top:8px" onclick="dungeonMjAddObjective()">➕ AJOUTER L’OBJECTIF SECONDAIRE</button></div>
+    <div class="dungeonMjSection" id="dungeonMjGoldSection">
+<h3>💰 Gérer la bourse des héros</h3>
+<div class="dungeonMjGrid">
+<label>Héros<select id="dungeonMjGoldHero"></select></label>
+<label>Montant<input id="dungeonMjGoldAmount" type="number" min="1" max="999999" value="10"></label>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+<button type="button" style="background:#285c3d" onclick="dungeonMjChangeGold(1)">➕ DONNER</button>
+<button type="button" style="background:#6a3333" onclick="dungeonMjChangeGold(-1)">➖ RETIRER</button>
+</div>
+<div id="dungeonMjGoldBalance" class="hint" style="margin-top:7px;text-align:left"></div>
+</div><div class="dungeonMjSection" id="dungeonMjMerchantSection"><h3>🛒 Marchand</h3><button type="button" style="width:100%" onclick="openMerchant()">OUVRIR UN MARCHAND</button></div><div class="dungeonMjSection" id="dungeonMjUnifiedRules175"><h3>⚙️ Règles MJ / IA</h3>
+<div class="dungeonMjGrid">
+<label>Multiplicateur XP<input id="dmj175Xp" type="number" min="0" step="0.25"></label>
+<label>Multiplicateur Or<input id="dmj175Gold" type="number" min="0" step="0.25"></label>
+<label>Multiplicateur butin<input id="dmj175Loot" type="number" min="0" step="0.25"></label>
+<label>Événements<select id="dmj175Events"><option value="1">Faible</option><option value="2">Normale</option><option value="3">Élevée</option></select></label>
+<label>Difficulté<select id="dmj175Diff"><option value="1">Facile</option><option value="2">Équilibrée</option><option value="3">Difficile</option><option value="4">Expert</option></select></label>
+<label>Contrôle des ennemis<select id="dmj175Control"><option value="ai">IA automatique</option><option value="mj">MJ contrôle tout</option><option value="mixed">Mixte IA / MJ</option></select></label>
+<label>Initiative<select id="dmj175Init"><option value="strict">Timeline stricte</option><option value="flexible">Flexible MJ</option></select></label>
+<label>IA tactique<select id="dmj175Ai"><option value="basic">Basique</option><option value="standard">Standard</option><option value="advanced">Avancée</option></select></label>
+</div>
+<label styl
+
+===== merchant =====
+
+--- 1 @ 5159624 ---
+"),magicResistGain:v("drMagicResistGain"),minMagicDamage:v("drMinMagicDamage")
+  };
+}
+function saveDungeonRpgRulesFromEditor(){saveDungeonRpgRules(readDungeonRpgRulesEditor());fillDungeonRpgRulesEditor();alert("Règles RPG Dungeon enregistrées ✅")}
+function resetDungeonRpgRules(){if(!confirm("Réinitialiser toutes les règles RPG Dungeon ?"))return;localStorage.removeItem(GENS_DUNGEON_RPG_RULES_KEY);fillDungeonRpgRulesEditor();try{if(current&&state){dungeonSyncProgressionForState(current,state);state.mana=Math.min(Number(state.mana)||0,dungeonMaxMana());save();render()}}catch(e){}}
+
+
+function defaultDungeonConfig(){return {environment:"stone",rooms:10,difficulty:"normal",growth:"normal",boss:"final",bossEvery:5,bossChance:13,bossRooms:"",size:"medium",roomGeometry:"fixed",narration:true,map:true,narrative:"classic",events:true,eventChance:35,roomWeights:{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11},challengeDoorChance:22,challengeChestChance:28,challengeAssistAfter:2,challengeAssistMode:"progressive",challenges:null,secondaryObjectiveChance:25,secondaryObjectiveXp:15,specialBranchChance:22,specialBranchWeights:{treasure:45,boss:25,secret:30},chestWeights:{common:60,rare:25,epic:10,legendary:5},chestTrapChance:15,trapWeights:{dart:35,snare:25,rune:20,collapse:20},trapPower:"normal",trapDamage:{dart:1,snare:1,rune:2,collapse:2},trapCheckBase:50,trapCheckReference:10,trapCheckPerPoint:3}}
+function loadDungeonConfig(){try{return {...defaultDungeonConfig(),...JSON.parse(localStorage.getItem(GENS_DUNGEON_CONFIG_KEY)||"{}")}}catch(e){return defaultDungeonConfig()}}
+function saveDungeonConfig(c){localStorage.setItem(GENS_DUNGEON_CONFIG_KEY,JSON.stringify({...defaultDungeonConfig(),...(c||{})}));renderDungeonConfigUi()}
+function saveDungeonConfigFromUi(){
+  const c=loadDungeonConfig();
+  c.rooms=Math.max(3,Math.min(50,Number(document.getElementById("dungeonCfgRooms")?.value)||10));
+  c.difficulty=document.getElementById("dungeonCfgDifficulty")?.value||"normal";
+  c.growth=document.getElementById("dungeonCfgGrowth")?.value||"normal";
+  c.boss=document.getElementById("dungeonCfgBoss")?.value||"final";if(c.boss==="every5"){c.boss="everyN";c.bossEvery=5}
+  c.size=document.getElementById("dungeonCfgSize")?.value||"medium";
+  c.narration=!!document.getElementById(
+
+--- 2 @ 5341812 ---
+weight:15,minRound:1,effect:{kind:"damageRandom",value:1},text:"Un mécanisme oublié se déclenche sous les pas du groupe."},
+{id:"d_evt_breath",name:"Un instant de répit",icon:"🔥",category:"boon",weight:13,minRound:1,effect:{kind:"healRandom",value:1},text:"Le groupe trouve quelques secondes pour reprendre son souffle."},
+{id:"d_evt_cache",name:"Cache abandonnée",icon:"🎁",category:"loot",weight:12,minRound:2,effect:{kind:"loot"},text:"Une cache oubliée attire l’attention des héros."},
+{id:"d_evt_omen",name:"Présage inquiétant",icon:"🕯️",category:"narrative",weight:13,minRound:1,effect:{kind:"none"},text:"Les flammes vacillent. Quelque chose observe le groupe depuis l’obscurité."},
+{id:"d_evt_echo",name:"Échos du donjon",icon:"🌫️",category:"narrative",weight:10,minRound:1,effect:{kind:"none"},text:"Un grondement traverse les murs puis disparaît aussi vite qu’il est venu."}, {id:"d_evt_merchant",name:"Marchand itinérant",icon:"🛒",category:"boon",weight:8,minRound:2,effect:{kind:"merchant"},text:"Un marchand itinérant propose ses marchandises au groupe."}
+]};
+function loadDungeonEvents(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENTS_KEY)||"null");return Array.isArray(a)&&a.length?a:dungeonBuiltinEvents()}catch(e){return dungeonBuiltinEvents()}}
+function saveDungeonEvents(a){localStorage.setItem(GENS_DUNGEON_EVENTS_KEY,JSON.stringify(Array.isArray(a)?a:[]))}
+function loadDungeonEventHistory(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENT_HISTORY_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonEventHistory(a){localStorage.setItem(GENS_DUNGEON_EVENT_HISTORY_KEY,JSON.stringify((a||[]).slice(-40)))}
+function dungeonEligibleEvents(round){
+  const r=Math.max(1,Number(round)||1),settings=currentRpgEventSettings(),activeTags=new Set((settings.activeTags||[]).map(v=>String(v).toLowerCase()));
+  let list=currentRpgEventPool().filter(e=>{
+    if(!e||e.enabled===false||r<Math.max(1,Number(e.minRound)||1)||(e.maxRound&&r>Number(e.maxRound))||Math.max(0,Number(e.weight)||0)<=0)return false;
+    const tags=(e.tags||[]).map(v=>String(v).toLowerCase()).filter(Boolean);
+    return !tags.length||tags.some(t=>activeTags.has(t));
+  });
+  if(settings.eventRepeats===false){
+    const seen=new Set(loadDungeonEventHistory().
+
+--- 3 @ 5341908 ---
+ sous les pas du groupe."},
+{id:"d_evt_breath",name:"Un instant de répit",icon:"🔥",category:"boon",weight:13,minRound:1,effect:{kind:"healRandom",value:1},text:"Le groupe trouve quelques secondes pour reprendre son souffle."},
+{id:"d_evt_cache",name:"Cache abandonnée",icon:"🎁",category:"loot",weight:12,minRound:2,effect:{kind:"loot"},text:"Une cache oubliée attire l’attention des héros."},
+{id:"d_evt_omen",name:"Présage inquiétant",icon:"🕯️",category:"narrative",weight:13,minRound:1,effect:{kind:"none"},text:"Les flammes vacillent. Quelque chose observe le groupe depuis l’obscurité."},
+{id:"d_evt_echo",name:"Échos du donjon",icon:"🌫️",category:"narrative",weight:10,minRound:1,effect:{kind:"none"},text:"Un grondement traverse les murs puis disparaît aussi vite qu’il est venu."}, {id:"d_evt_merchant",name:"Marchand itinérant",icon:"🛒",category:"boon",weight:8,minRound:2,effect:{kind:"merchant"},text:"Un marchand itinérant propose ses marchandises au groupe."}
+]};
+function loadDungeonEvents(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENTS_KEY)||"null");return Array.isArray(a)&&a.length?a:dungeonBuiltinEvents()}catch(e){return dungeonBuiltinEvents()}}
+function saveDungeonEvents(a){localStorage.setItem(GENS_DUNGEON_EVENTS_KEY,JSON.stringify(Array.isArray(a)?a:[]))}
+function loadDungeonEventHistory(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_EVENT_HISTORY_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonEventHistory(a){localStorage.setItem(GENS_DUNGEON_EVENT_HISTORY_KEY,JSON.stringify((a||[]).slice(-40)))}
+function dungeonEligibleEvents(round){
+  const r=Math.max(1,Number(round)||1),settings=currentRpgEventSettings(),activeTags=new Set((settings.activeTags||[]).map(v=>String(v).toLowerCase()));
+  let list=currentRpgEventPool().filter(e=>{
+    if(!e||e.enabled===false||r<Math.max(1,Number(e.minRound)||1)||(e.maxRound&&r>Number(e.maxRound))||Math.max(0,Number(e.weight)||0)<=0)return false;
+    const tags=(e.tags||[]).map(v=>String(v).toLowerCase()).filter(Boolean);
+    return !tags.length||tags.some(t=>activeTags.has(t));
+  });
+  if(settings.eventRepeats===false){
+    const seen=new Set(loadDungeonEventHistory().map(h=>String(h.id)));
+    const unseen=list.filter(e=>!seen.has(String(e.id)));
+    if(unseen.l
+
+--- 4 @ 5345474 ---
+ngeonTurnEvent(evt,completedRound){const effect=evt?.effect||{kind:"none"};let result="";if(effect.kind==="spawn")result=dungeonEventSpawn(effect.qty||1,completedRound).text;else if(effect.kind==="damageRandom"){const id=dungeonRandomHero();if(id){const n=Math.max(1,Number(effect.value)||1),w=dungeonSetHeroWounds(id,n);result=(CHARS[id]?.name||findCustomHero(id)?.name||id)+" subit "+n+" blessure"+(n>1?"s":"")+". Blessures : "+w+"."}}else if(effect.kind==="healRandom"){const all=dungeonParticipants(),candidates=all.filter(id=>(Number(loadState(id)?.wounds)||0)>0),pool=candidates.length?candidates:all;const id=pool.length?pool[Math.floor(Math.random()*pool.length)]:null;if(id){const n=Math.max(1,Number(effect.value)||1),w=dungeonSetHeroWounds(id,-n);result=(CHARS[id]?.name||findCustomHero(id)?.name||id)+" récupère "+n+" blessure"+(n>1?"s":"")+". Blessures : "+w+"."}}else if(effect.kind==="merchant"){if(gensEconomyEnabled()&&currentRpgEconomy().merchantEventEnabled!==false){setTimeout(openMerchant,250);result="Un marchand ouvre sa boutique."}else result="Aucun marchand n’est disponible dans cet univers."}else if(effect.kind==="loot"){const d=dungeonGrantRandomLoot();result=d?((CHARS[d.heroId]?.name||findCustomHero(d.heroId)?.name||d.heroId)+" reçoit "+(d.item?.name||"un objet")+"."):"Aucun objet n’est disponible dans la pioche."}const hist=loadDungeonEventHistory();hist.push({id:evt.id,name:evt.name,category:evt.category||"",round:completedRound,at:Date.now(),result});saveDungeonEventHistory(hist);showEffectPopup(evt.icon||"🎲","ÉVÉNEMENT — "+(evt.name||"Donjon"),z40kEscHtml(evt.text||"")+(result?"<br><br><strong>"+z40kEscHtml(result)+"</strong>":""),"Entre le tour "+completedRound+" et le tour "+(Number(completedRound)+1),true);try{renderActiveEnemyButtons();renderActiveEnemies()}catch(e){}return {event:evt,result}}
+function triggerDungeonTurnEvent(completedRound){
+  if(!isDungeonMode())return null;
+  const settings=currentRpgEventSettings();
+  if(settings.roundEvents===false||!["round","both"].includes(settings.eventTrigger))return null;
+  const chance=Math.max(0,Math.min(100,Number(settings.eventChance)||0));if(Math.random()*100>=chance)return null;
+  const evt=dungeonWeightedEventPick(dungeonEligibleEvents(completedRound));return evt?applyDungeonTurnEvent(evt,complet
+
+===== Merchant =====
+
+--- 1 @ 1253793 ---
+option value="none">Aucun automatique</option></select></label>
+        <label>N pour Boss <input id="daeBossEvery" type="number" min="1" max="50"></label>
+        <label>Chance Boss aléatoire (%) <input id="daeBossChance" type="number" min="0" max="100"></label>
+        <label style="grid-column:1/-1">Salles Boss précises <input id="daeBossRooms" type="text" placeholder="Ex. 5, 10, 15"></label>
+      </div>
+      <div class="eqSection"><strong>🎲 Fréquence des types de salles</strong><div class="dungeonCfgGrid" style="margin-top:8px"><label>Combat — fréquence <input id="daeWEnemy" type="number" min="0"></label><label>Embuscade ⚡ — fréquence <input id="daeWAmbush" type="number" min="0"></label><label>Piège — fréquence <input id="daeWTrap" type="number" min="0"></label><label>Coffre — fréquence <input id="daeWChest" type="number" min="0"></label><label>Marchand — fréquence <input id="daeWMerchant" type="number" min="0"></label><label>Repos — fréquence <input id="daeWRest" type="number" min="0"></label><label>Calme / mystère — fréquence <input id="daeWMystery" type="number" min="0"></label></div><div id="daeRoomWeightPreview074"></div><div class="hint">Une fréquence est une valeur relative : <strong>20 apparaît deux fois plus souvent que 10</strong>. Les pourcentages réels sont calculés automatiquement ci-dessus.</div></div>
+      <div class="eqSection"><strong>🎁 Coffres</strong><div class="dungeonCfgGrid" style="margin-top:8px"><label>Commun <input id="daeChestCommon" type="number" min="0"></label><label>Rare <input id="daeChestRare" type="number" min="0"></label><label>Épique <input id="daeChestEpic" type="number" min="0"></label><label>Légendaire <input id="daeChestLegendary" type="number" min="0"></label><label>Chance d’être piégé (%) <input id="daeChestTrap" type="number" min="0" max="100"></label></div><div class="hint">Fréquences relatives des raretés : 20 apparaît deux fois plus souvent que 10.</div></div>
+      <div class="eqSection"><strong>🪤 Pièges</strong>
+<div class="dungeonCfgGrid" style="margin-top:8px">
+<label>Danger global
+<select id="daeTrapPower">
+<option value="weak">Faible ×0,5</option>
+<option value="normal">Normal ×1</option>
+<option value="dangerous">Dangereux ×1,5</option>
+<option value="deadly">Mortel ×2</option>
+</select></label>
+<label>Fléc
+
+--- 2 @ 5345575 ---
+nd==="spawn")result=dungeonEventSpawn(effect.qty||1,completedRound).text;else if(effect.kind==="damageRandom"){const id=dungeonRandomHero();if(id){const n=Math.max(1,Number(effect.value)||1),w=dungeonSetHeroWounds(id,n);result=(CHARS[id]?.name||findCustomHero(id)?.name||id)+" subit "+n+" blessure"+(n>1?"s":"")+". Blessures : "+w+"."}}else if(effect.kind==="healRandom"){const all=dungeonParticipants(),candidates=all.filter(id=>(Number(loadState(id)?.wounds)||0)>0),pool=candidates.length?candidates:all;const id=pool.length?pool[Math.floor(Math.random()*pool.length)]:null;if(id){const n=Math.max(1,Number(effect.value)||1),w=dungeonSetHeroWounds(id,-n);result=(CHARS[id]?.name||findCustomHero(id)?.name||id)+" récupère "+n+" blessure"+(n>1?"s":"")+". Blessures : "+w+"."}}else if(effect.kind==="merchant"){if(gensEconomyEnabled()&&currentRpgEconomy().merchantEventEnabled!==false){setTimeout(openMerchant,250);result="Un marchand ouvre sa boutique."}else result="Aucun marchand n’est disponible dans cet univers."}else if(effect.kind==="loot"){const d=dungeonGrantRandomLoot();result=d?((CHARS[d.heroId]?.name||findCustomHero(d.heroId)?.name||d.heroId)+" reçoit "+(d.item?.name||"un objet")+"."):"Aucun objet n’est disponible dans la pioche."}const hist=loadDungeonEventHistory();hist.push({id:evt.id,name:evt.name,category:evt.category||"",round:completedRound,at:Date.now(),result});saveDungeonEventHistory(hist);showEffectPopup(evt.icon||"🎲","ÉVÉNEMENT — "+(evt.name||"Donjon"),z40kEscHtml(evt.text||"")+(result?"<br><br><strong>"+z40kEscHtml(result)+"</strong>":""),"Entre le tour "+completedRound+" et le tour "+(Number(completedRound)+1),true);try{renderActiveEnemyButtons();renderActiveEnemies()}catch(e){}return {event:evt,result}}
+function triggerDungeonTurnEvent(completedRound){
+  if(!isDungeonMode())return null;
+  const settings=currentRpgEventSettings();
+  if(settings.roundEvents===false||!["round","both"].includes(settings.eventTrigger))return null;
+  const chance=Math.max(0,Math.min(100,Number(settings.eventChance)||0));if(Math.random()*100>=chance)return null;
+  const evt=dungeonWeightedEventPick(dungeonEligibleEvents(completedRound));return evt?applyDungeonTurnEvent(evt,completedRound):null;
+}
+
+function dungeonEncounter(room){
+  refreshCustomEnemiesIntoZombieTypes();
+
+  // Cor
+
+--- 3 @ 5451629 ---
+tns[1].onclick=()=>applyDungeonAdventure(a.id,true);host.appendChild(d);
+  });
+}
+function loadDungeonAdventureIntoEditor(id){
+  const a=ensureDungeonAdventureLibrary().find(x=>String(x.id)===String(id));if(!a)return;
+  dungeonAdventureEditingId=a.id;const c={...defaultDungeonConfig(),...(a.config||{})},set=(id,v)=>{const x=document.getElementById(id);if(x)x.value=v};
+  set("daeName",a.name||"");set("daeTheme",a.theme||"");set("daeDescription",a.description||"");set("daeRooms",c.rooms);set("daeDifficulty",c.difficulty);set("daeGrowth",c.growth);set("daeGeometry",c.roomGeometry||"fixed");set("daeSize",c.size);set("daeBoss",c.boss);set("daeBossEvery",c.bossEvery||5);set("daeBossChance",c.bossChance??13);set("daeBossRooms",c.bossRooms||"");
+  const w=c.roomWeights||{};set("daeWEnemy",w.enemy??44);set("daeWAmbush",w.ambush??12);set("daeWTrap",w.trap??14);set("daeWChest",w.chest??14);set("daeWMerchant",w.merchant??8);set("daeWRest",w.rest??11);set("daeWMystery",w.mystery??11);setTimeout(()=>dungeonRoomWeightPercent074?.(),0);set("daeChallengeDoorChance",c.challengeDoorChance??22);set("daeChallengeChestChance",c.challengeChestChance??28);set("daeChallengeAssistAfter",c.challengeAssistAfter??2);set("daeChallengeAssistMode",c.challengeAssistMode||"progressive");set("daeSecondaryObjectiveChance",c.secondaryObjectiveChance??25);set("daeSecondaryObjectiveXp",c.secondaryObjectiveXp??15);set("daeSpecialBranchChance",c.specialBranchChance??22);const sw={treasure:45,boss:25,secret:30,...(c.specialBranchWeights||{})};set("daeSpecialTreasure",sw.treasure);set("daeSpecialBoss",sw.boss);set("daeSpecialSecret",sw.secret);try{dc051LoadChallengeEditor?.(c.challenges)}catch(e){};
+  const cw={common:60,rare:25,epic:10,legendary:5,...(c.chestWeights||{})};set("daeChestCommon",cw.common);set("daeChestRare",cw.rare);set("daeChestEpic",cw.epic);set("daeChestLegendary",cw.legendary);set("daeChestTrap",c.chestTrapChance??15);
+  const tw={dart:35,snare:25,rune:20,collapse:20,...(c.trapWeights||{})};set("daeTrapDart",tw.dart);set("daeTrapSnare",tw.snare);set("daeTrapRune",tw.rune);set("daeTrapCollapse",tw.collapse);set("daeTrapPower",c.trapPower||"normal");const td={dart:1,snare:1,rune:2,collapse:2,...(c.trapDamage||{})};set("daeTrapDmgDart",td.dart);set("daeTrapDmgSnare",td.snare);set("daeTrapDmgRun
+
+--- 4 @ 5454987 ---
+aveDungeonAdventures(list);loadDungeonAdventureIntoEditor(a.id);const n=document.getElementById("daeName");if(n){n.focus();n.select()}
+}
+function collectDungeonAdventureConfigFromEditor(){
+  const num=id=>Number(document.getElementById(id)?.value)||0,val=id=>document.getElementById(id)?.value||"";
+  const c={...defaultDungeonConfig()};c.rooms=Math.max(3,Math.min(100,num("daeRooms")||10));c.difficulty=val("daeDifficulty")||"normal";c.growth=val("daeGrowth")||"normal";c.roomGeometry=val("daeGeometry")||"fixed";c.size=val("daeSize")||"medium";c.boss=val("daeBoss")||"final";c.bossEvery=Math.max(1,num("daeBossEvery")||5);c.bossChance=Math.max(0,Math.min(100,num("daeBossChance")));c.bossRooms=val("daeBossRooms");c.roomWeights={enemy:Math.max(0,num("daeWEnemy")),ambush:Math.max(0,num("daeWAmbush")),trap:Math.max(0,num("daeWTrap")),chest:Math.max(0,num("daeWChest")),merchant:Math.max(0,num("daeWMerchant")),rest:Math.max(0,num("daeWRest")),mystery:Math.max(0,num("daeWMystery"))};c.challengeDoorChance=Math.max(0,Math.min(100,num("daeChallengeDoorChance")));c.challengeChestChance=Math.max(0,Math.min(100,num("daeChallengeChestChance")));c.challengeAssistAfter=Math.max(1,Math.min(20,num("daeChallengeAssistAfter")||2));c.challengeAssistMode=["progressive","soft","off"].includes(val("daeChallengeAssistMode"))?val("daeChallengeAssistMode"):"progressive";c.secondaryObjectiveChance=Math.max(0,Math.min(100,num("daeSecondaryObjectiveChance")));c.secondaryObjectiveXp=Math.max(0,Math.min(999,num("daeSecondaryObjectiveXp")));c.challenges=typeof dc051CollectChallenges==="function"?dc051CollectChallenges():null;c.specialBranchChance=Math.max(0,Math.min(100,num("daeSpecialBranchChance")));c.specialBranchWeights={treasure:Math.max(0,num("daeSpecialTreasure")),boss:Math.max(0,num("daeSpecialBoss")),secret:Math.max(0,num("daeSpecialSecret"))};c.chestWeights={common:Math.max(0,num("daeChestCommon")),rare:Math.max(0,num("daeChestRare")),epic:Math.max(0,num("daeChestEpic")),legendary:Math.max(0,num("daeChestLegendary"))};c.chestTrapChance=Math.max(0,Math.min(100,num("daeChestTrap")));c.trapWeights={dart:Math.max(0,num("daeTrapDart")),snare:Math.max(0,num("daeTrapSnare")),rune:Math.max(0,num("daeTrapRune")),collapse:Math.max(0,num("daeTrapCollapse"))};c.trapPower=val("daeTrapPower")||"normal";c.trapD
+
+===== rpgMerchantBuyMultiplier =====
+
+--- 1 @ 5535028 ---
+inMagicDamage);
+  set("rpgPhysicalFormula",cfg.combat.physicalDamageFormula||"step");set("rpgPhysicalPctPerPoint",cfg.combat.physicalDamagePercentPerPoint||0);set("rpgMagicFormula",cfg.combat.magicDamageFormula||"step");set("rpgMagicPctPerPoint",cfg.combat.magicDamagePercentPerPoint||0);set("rpgRangedFormula",cfg.combat.rangedDamageFormula||"none");set("rpgRangedPctPerPoint",cfg.combat.rangedDamagePercentPerPoint||0);set("rpgHpFormula",cfg.combat.hpFormula||"step");set("rpgHpPctPerPoint",cfg.combat.hpPercentPerPoint||0);set("rpgManaFormula",cfg.combat.manaFormula||"step");set("rpgManaPctPerPoint",cfg.combat.manaPercentPerPoint||0);set("rpgCritFormula",cfg.combat.critFormula||"step");const eco=cfg.economy||{};set("rpgCurrencyName",eco.currencyName||"Or");set("rpgCurrencyIcon",eco.currencyIcon||"🪙");set("rpgStartingGold",eco.startingGold??0);set("rpgSellPercent",eco.sellPercent??50);set("rpgMerchantBuyMultiplier",eco.merchantBuyMultiplier??1);set("rpgEnemyGoldEnabled",String(eco.enemyGoldEnabled!==false));set("rpgMerchantEventEnabled",String(eco.merchantEventEnabled!==false));const ems=document.getElementById("rpgEconomyModuleStatus");if(ems)ems.innerHTML=(cfg.gameplay?.modules?.economy?"✅ Économie activée":"⛔ Économie désactivée")+" · change ce choix dans Style & Modules.";const els=document.getElementById("rpgElementsModuleStatus");if(els)els.innerHTML=(cfg.gameplay?.modules?.elements?"✅ Éléments activés":"⛔ Éléments désactivés")+" · change ce choix dans Style & Modules.";setTimeout(renderRpgEconomyVisibility,0);set("rpgCritPctPerPoint",cfg.combat.critPercentPerPoint||0);set("rpgDodgeFormula",cfg.combat.dodgeFormula||"step");set("rpgDodgePctPerPoint",cfg.combat.dodgePercentPerPoint||0);set("rpgInitiativeFormula","direct");set("rpgInitiativePerPoint",0);set("rpgMagicResistFormula",cfg.combat.magicResistFormula||"step");set("rpgMagicResistPerPoint",cfg.combat.magicResistPerPoint||0);set("rpgRulesComplexity",cfg.combat.rulesComplexity||"simple");set("rpgInitiativeUsage",cfg.combat.initiativeUsage||"tests");set("rpgInitiativeTurnMode",cfg.combat.initiativeTurnMode||"fixed");set("rpgInitiativeDie",String(cfg.combat.initiativeDie||20));set("rpgTestsEnabled",String(cfg.combat.testsEnabled!==false));set("rpgTestDie",String(cfg.combat.testDie||20));set("rpgTestDefaultDifficulty",Number(cfg.c
+
+--- 2 @ 5549914 ---
+.economy;
+    }
+  }catch(e){}
+  try{
+    const p=getActiveGameProfile?.();
+    if(p?.rpgUniverse?.economy)return p.rpgUniverse.economy;
+  }catch(e){}
+  return gensBlankRpgSettings().economy;
+}
+function saveRpgUniverseEconomy(){
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(rpgEditingId));if(i<0)return;
+  const p=profiles[i];ensureRpgProfileData(p);const e=p.rpgUniverse.economy;
+  e.enabled=!!p.rpgUniverse.gameplay?.modules?.economy;
+  e.currencyName=(document.getElementById("rpgCurrencyName")?.value||"Or").trim()||"Or";
+  e.currencyIcon=(document.getElementById("rpgCurrencyIcon")?.value||"🪙").trim()||"🪙";
+  e.startingGold=Math.max(0,Number(document.getElementById("rpgStartingGold")?.value)||0);
+  e.sellPercent=Math.max(0,Number(document.getElementById("rpgSellPercent")?.value)||0);
+  e.merchantBuyMultiplier=Math.max(0,Number(document.getElementById("rpgMerchantBuyMultiplier")?.value)||1);
+  e.enemyGoldEnabled=document.getElementById("rpgEnemyGoldEnabled")?.value!=="false";
+  e.merchantEventEnabled=document.getElementById("rpgMerchantEventEnabled")?.value!=="false";
+  saveGameProfiles(profiles);applyGameProfile(p,false);renderRpgUniverseEditor();alert("Économie enregistrée ✅");
+}
+function gensEconomyEnabled(){return currentRpgEconomy()?.enabled===true}
+function gensCurrencyLabel(v){const e=currentRpgEconomy();return (e?.currencyIcon||"🪙")+" "+Math.max(0,Number(v)||0)+" "+(e?.currencyName||"Or")}
+function gensHeroGold(heroId){
+  const st=loadState(heroId);if(!st)return 0;
+  if(st.gold===undefined)st.gold=Math.max(0,Number(currentRpgEconomy()?.startingGold)||0);
+  return Math.max(0,Number(st.gold)||0);
+}
+function gensSetHeroGold(heroId,v){
+  const st=loadState(heroId);if(!st)return 0;
+  st.gold=Math.max(0,Math.floor(Number(v)||0));localStorage.setItem(key(heroId),JSON.stringify(st));
+  if(current===heroId)state=st;renderEconomyWallet();return st.gold;
+}
+function gensChangeHeroGold(heroId,delta){return gensSetHeroGold(heroId,gensHeroGold(heroId)+(Number(delta)||0))}
+function renderEconomyWallet(){
+  const e=document.getElementById("economyWallet");if(!e)return;
+  if(!gensEconomyEnabled()||!current){e.style.display="none";return}
+  e.style.display="block";e.textContent=gensCurrencyLabel(gensHeroGold(current));
+}
+
+function saveRpgUniverseIdentity(){
+ 
+
+--- 3 @ 6774525 ---
+div>
+
+    
+<div id="rpgTab_economy" class="rpgUniverseTab" style="display:none">
+  <div class="hint" style="text-align:left;line-height:1.5">Configure ici la monnaie, les prix et les marchands. L’activation du système se fait dans <strong>🎮 Style & Modules</strong>.</div>
+  <div class="smodGrid" style="margin-top:10px">
+    <div class="smodCard"><h3>💰 Monnaie</h3>
+      <div id="rpgEconomyModuleStatus" class="smodMini"></div>
+      <div id="rpgEconomyFields">
+        <label>Nom de la monnaie<input id="rpgCurrencyName" value="Or"></label>
+        <label>Icône<input id="rpgCurrencyIcon" maxlength="8" value="🪙"></label>
+        <label>Montant de départ par héros<input id="rpgStartingGold" type="number" min="0" max="999999" value="0"></label>
+      </div>
+    </div>
+    <div class="smodCard" id="rpgEconomyTradeCard"><h3>🛒 Achat / vente</h3>
+      <label>Prix d’achat marchand ×<input id="rpgMerchantBuyMultiplier" type="number" min="0" max="100" step="0.05" value="1"></label>
+      <label>Prix de revente (% du prix objet)<input id="rpgSellPercent" type="number" min="0" max="1000" value="50"></label>
+      <div class="smodMini">Chaque objet possède sa valeur de base. Le marchand calcule automatiquement les prix avec ces réglages.</div>
+    </div>
+    <div class="smodCard" id="rpgEconomyDropCard"><h3>🎁 Drops économiques</h3>
+      <label>Les ennemis peuvent lâcher de la monnaie<select id="rpgEnemyGoldEnabled"><option value="true">Oui</option><option value="false">Non</option></select></label>
+      <label>Événement marchand autorisé<select id="rpgMerchantEventEnabled"><option value="true">Oui</option><option value="false">Non</option></select></label>
+    </div>
+  </div>
+  <div class="smodActions"><button class="startGameBtn" type="button" onclick="saveRpgUniverseEconomy()">💾 ENREGISTRER L’ÉCONOMIE</button></div>
+</div>
+<div id="rpgTab_talents" class="rpgUniverseTab" style="display:none">
+      <div class="smodGrid">
+        <div class="smodCard"><h3>📚 Répertoire de compétences</h3><div class="smodMini">Crée et modifie ici les compétences réutilisables par les arbres et les créatures.</div><button type="button" style="margin-top:8px;width:100%" onclick="openAbilityLibrary(null)">📚 OUVRIR LE RÉPERTOIRE</button></div><div class="smodCard"><h3>🌳 Arbres</h3>
+          <label>Emplacement
+
+===== function explore() =====
+
+--- 1 @ 7562688 ---
+xt){
+    try{
+      /* Core 0.93 : IMPORTANT — ne jamais assigner la variable locale `state`.
+         `state()` est la fonction d'état du moteur Dungeon. L'ancienne ligne
+         la remplaçait par l'objet du héros et cassait tous les rendus suivants. */
+      window.current=String(next);
+      window.state=loadState(window.current);
+    }catch(e){}
+  }
+  try{renderMenuStatuses?.()}catch(e){}
+  render();
+  try{
+    if(typeof showToast==="function")showToast("🔄 Tour de "+heroName(activeHero()));
+  }catch(e){}
+  try{window.dungeonMovementTurnChanged086?.(activeHero())}catch(e){}
+}
+function modal(title,html){document.getElementById('dc01ModalTitle').textContent=title||'Dungeon';document.getElementById('dc01ModalBody').innerHTML=html||'';document.getElementById('dc01Modal').classList.add('open')}
+function closeModal(){document.getElementById('dc01Modal').classList.remove('open');render()}
+function explore(){if(!canAct()){modal('⏳ Action refusée','Ce n’est pas le tour du héros contrôlé par ce téléphone.');return}const living=dungeonLivingEnemies?.()||[];const exitLocked=living.length>0 && (typeof window.dungeonRoomExitLocked102==="function"?window.dungeonRoomExitLocked102():true);if(exitLocked){modal('🔐 Sortie verrouillée','La sortie de cette salle est verrouillée. La clé est portée par un ennemi : éliminez le porteur pour poursuivre.');return}const cfg=loadDungeonConfig(),s=loadDungeonState();if((Number(s.room)||0)>=Number(cfg.rooms||0)){modal('🏆 Donjon terminé','Vous avez exploré les '+Number(cfg.rooms||0)+' salles du donjon.');return}s.room=Math.max(0,Number(s.room)||0)+1;const room=s.room;saveDungeonState(s);let kind=null;const explicitBossRooms=String(cfg.bossRooms||'').split(/[,; ]+/).map(Number).filter(n=>Number.isFinite(n)&&n>0);if(cfg.boss==='final'&&room===cfg.rooms)kind='boss';else if(cfg.boss==='everyN'&&room%Math.max(1,Number(cfg.bossEvery)||5)===0)kind='boss';else if(cfg.boss==='specific'&&explicitBossRooms.includes(room))kind='boss';else if(cfg.boss==='random'&&room>2&&Math.random()<(Math.max(0,Math.min(100,Number(cfg.bossChance)||13))/100))kind='boss';if(!kind){const w={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(cfg.roomWeights||{})};const entries=[['enemy',w.enemy],['ambush',w.ambush],['trap',w.trap],['chest',w.chest],['merchant',w.mer
+
+--- 2 @ 7982509 ---
+.(id);if(hs){let max=0;try{const oldC=window.current,oldS=window.state;window.current=id;window.state=hs;max=Number(dungeonMaxMana?.())||0;window.current=oldC;window.state=oldS}catch(e){}hs.mana=Math.min(max||999,Math.max(0,Number(hs.mana)||0)+mana);localStorage.setItem(key(id),JSON.stringify(hs))}}})}catch(e){console.warn('DC200 rest',e)}}
+function combatEnabled200(){try{return typeof dc045HeroCombatEnabled==='function'?!!dc045HeroCombatEnabled():true}catch(e){return true}}
+function roomIntro(x,result){const n=cfg().narration!==false?dungeonNarrativeText?.(x.last.kind,result.enemyName||'une créature',result.enemyQty||1,x.room):'';let body=(n?'<div class="dc01Notice">'+esc(n)+'</div>':'')+(result.text||'');if(x.last.kind==='ambush')body='<strong>⚠️ EMBUSCADE.</strong><br>'+body;modal('🏰 SALLE '+x.room+' / '+(Number(cfg().rooms)||0)+' — '+(result.title||''),body,()=>maybeEvent('room'))}
+function explore(){
+  let x=rt();
+  if(!x||!canAct(x))return modal('⏳ Action refusée','Ce n’est pas le tour du héros contrôlé par ce téléphone.');
+  spatialEnsure(x);
+  const heroId=activeHero(x);
+  if(x.branch?.active){
+    const live=liveEnemies();
+    if(!tactical()&&live.length)return modal('⚔️ Cache non sécurisée','Vaincs les ennemis présents avant de revenir dans la salle principale.');
+    const ex=exitIndex(x.last?.map);
+    if(!tactical()||activePos(x)===ex)return leaveBranch();
+    return modal('🕳️ Retour','Rejoins la case SORTIE de la cache pour revenir dans la salle principale.');
+  }
+  if(x.room>0){
+    const obj=x.last?.map?.objective;
+    if(obj?.type==='challenge'&&obj.status!=='done')return dc051OpenChallenge?.('door','');
+    const livingNow=liveEnemies();
+    if(!tactical()&&livingNow.length)return modal('⚔️ Salle non sécurisée','Tu dois vaincre les ennemis présents avant d’explorer la salle suivante.');
+    if(exitLocked(x))return modal('🔑 Sortie verrouillée','Trouve et bats le porteur de la clé.');
+    if(tactical()&&activePos(x)!==exitIndex(x.last?.map))return modal('🚪 Sortie','Place le héros actif sur la case SORTIE.');
+  }
+  if(x.room>=Number(cfg().rooms||10))return modal('🏆 Donjon terminé','Le groupe a terminé le donjon.');
+  const targetRoom=Math.max(1,Number(x.room||0)+1);
+  const movementLeft=Number.isFinite(Number(x.remaining?.[heroId]))
+    ?Math.max(0,Number(x.
+
+===== dc315ResolveCombatWipe =====
+
+--- 1 @ 7991075 ---
+|[]).map(String),living=partyIds.filter(heroAlive200);
+ const scope=typeof spatial()?.combatDefeatScope==="function"?spatial().combatDefeatScope(partyIds,engaged,living):(engagedDown200()?(wholePartyDown200(x)?"global":"local"):"none");
+ if(scope!=="local")return false;
+ const fallen=engaged.map(heroName);
+ cleanupCombat();spatialPersist(x);
+ const next=living[0];if(next){const i=(x.participants||[]).map(String).indexOf(String(next));if(i>=0)x.index=i;spatialActivate(x,next);try{window.current=next;window.state=loadState?.(next)}catch(e){}}
+ dungeonCombatSelection={heroes:[],enemies:[]};resetDungeonCombatRewards?.();saveRt(x);render();
+ modal('☠️ COMBATTANTS HORS COMBAT','<strong>'+esc(fallen.join(', '))+'</strong> '+(fallen.length>1?'sont KO':'est KO')+'.<br><br>Le donjon continue avec <strong>'+esc(heroName(next))+'</strong>. Les ennemis restent dans la salle.');
+ return true
+}
+window.dc315ResolveCombatWipe=resolveLocalCombatDefeat200;
+function finishVictory(){const x=rt();cleanupCombat();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render();modal('🏆 Victoire',typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.'));return true}
+window.openDungeonCombatVictoryPopup=function(){if(!dungeonCombatActive)return;try{dungeonCombatRewards.shown=true}catch(e){}const html=typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.');const m=ensureModal();document.getElementById('dc200ModalTitle').textContent='🏆 VICTOIRE';document.getElementById('dc200ModalBody').innerHTML=html;modalDone200=()=>{cleanupCombat();const x=rt();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render()};m.classList.add('open')};
+window.finishDungeonCombatVictory=function(){closeModal()};
+window.dc200StartCombat=startCombat;
+function endTurn(){const x=rt();if(!x||!canAct(x))return modal('⏳ Tour verrouillé','Seul le héros actif ou le MJ peut terminer ce tour.');spatialEnsure(x);const ended=activeHero(x);try{const hs=loadState?.(ended);if(Array.isArray(hs?.dc067ChallengeDebuffs)){hs.dc067ChallengeDebuffs=hs.dc067ChallengeDebuffs.map(e=>({...e,remaini
+
+--- 2 @ 8139320 ---
+yId);
+      const skills=dungeonEnemyAttackSkills?.(def)||[];
+      const skill=skills[Math.floor(Math.random()*skills.length)]||skills[0];
+      const target=pickTarget();
+      if(skill&&target){
+        /* l'ancien système 156 reste coupé : aucune double IA */
+        try{
+          if(window.dungeonTurn156){dungeonTurn156.active=false;dungeonTurn156.aiBusy=false}
+        }catch(e){}
+        rollDungeonEnemyAttackSkill?.(inst.id,skill.id,target);
+        launched=resultOpen();
+      }
+    }catch(e){console.warn("Core 3.03 IA",e)}
+    /* Une attaque visible se termine uniquement après fermeture réelle du jet
+       (et application des dégâts). Si aucun jet n'a pu démarrer, on libère le tour. */
+    if(!launched)setTimeout(()=>completeAi(token),350);
+  },350);
+}
+
+document.addEventListener("gensrpg:enemy-attack-resolved",()=>completeAi(T.aiToken));
+
+function render(){
+  if(typeof window.dc315ResolveCombatWipe==="function"&&window.dc315ResolveCombatWipe()){
+    T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
+    return;
+  }
+  /* On appelle le renderer 2.14 intact. */
+  if(typeof window.__dc214RenderCombat==="function"){
+    window.__dc214RenderCombat();
+  }else if(typeof window.renderDungeonCombatRound==="function" && window.renderDungeonCombatRound!==render){
+    window.renderDungeonCombatRound();
+  }
+  document.querySelectorAll(".dungeonTimelineTitle157,#dungeonTimeline156,#dc301Timeline").forEach(e=>e.remove());
+  document.querySelectorAll("#dungeonCombatSetupView .dungeonTimeline156").forEach(e=>{
+    if(e.id!=="dc302Timeline")e.remove();
+  });
+  applyTurnUi();
+  const cur=current();
+  if(cur?.kind==="enemy"&&!T.pendingHero&&!resultOpen())runAi();
+}
+window.__dc302RenderCombat=render;
+
+/* Le runtime 2.00 doit appeler cette couche, mais on conserve __dc214RenderCombat intact. */
+window.renderDungeonCombatRound=render;
+
+/* Les actions héros consomment le tour uniquement après fermeture du résultat. */
+["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItem061","dungeonCombatUseItemAbility316"].forEach(name=>{
+  const base=window[name];if(typeof base!=="function")return;
+  window[name]=function(heroId){
+    const cur=current();
+    if(cur&&!(cur.kind==="hero"&&String(cur.id)===String(heroId))){
+      alert("Ce n'est pas le t
+
+--- 3 @ 8139364 ---
+kills?.(def)||[];
+      const skill=skills[Math.floor(Math.random()*skills.length)]||skills[0];
+      const target=pickTarget();
+      if(skill&&target){
+        /* l'ancien système 156 reste coupé : aucune double IA */
+        try{
+          if(window.dungeonTurn156){dungeonTurn156.active=false;dungeonTurn156.aiBusy=false}
+        }catch(e){}
+        rollDungeonEnemyAttackSkill?.(inst.id,skill.id,target);
+        launched=resultOpen();
+      }
+    }catch(e){console.warn("Core 3.03 IA",e)}
+    /* Une attaque visible se termine uniquement après fermeture réelle du jet
+       (et application des dégâts). Si aucun jet n'a pu démarrer, on libère le tour. */
+    if(!launched)setTimeout(()=>completeAi(token),350);
+  },350);
+}
+
+document.addEventListener("gensrpg:enemy-attack-resolved",()=>completeAi(T.aiToken));
+
+function render(){
+  if(typeof window.dc315ResolveCombatWipe==="function"&&window.dc315ResolveCombatWipe()){
+    T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
+    return;
+  }
+  /* On appelle le renderer 2.14 intact. */
+  if(typeof window.__dc214RenderCombat==="function"){
+    window.__dc214RenderCombat();
+  }else if(typeof window.renderDungeonCombatRound==="function" && window.renderDungeonCombatRound!==render){
+    window.renderDungeonCombatRound();
+  }
+  document.querySelectorAll(".dungeonTimelineTitle157,#dungeonTimeline156,#dc301Timeline").forEach(e=>e.remove());
+  document.querySelectorAll("#dungeonCombatSetupView .dungeonTimeline156").forEach(e=>{
+    if(e.id!=="dc302Timeline")e.remove();
+  });
+  applyTurnUi();
+  const cur=current();
+  if(cur?.kind==="enemy"&&!T.pendingHero&&!resultOpen())runAi();
+}
+window.__dc302RenderCombat=render;
+
+/* Le runtime 2.00 doit appeler cette couche, mais on conserve __dc214RenderCombat intact. */
+window.renderDungeonCombatRound=render;
+
+/* Les actions héros consomment le tour uniquement après fermeture du résultat. */
+["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItem061","dungeonCombatUseItemAbility316"].forEach(name=>{
+  const base=window[name];if(typeof base!=="function")return;
+  window[name]=function(heroId){
+    const cur=current();
+    if(cur&&!(cur.kind==="hero"&&String(cur.id)===String(heroId))){
+      alert("Ce n'est pas le tour de ce héros.");
+      return;
+    }
+    
+
+===== wounds =====
+
+--- 1 @ 1346454 ---
+one">
+      <img id="customSheetBg" class="customSheetBg" alt="Fond GenSrpG">
+      <div id="customSheetAvatarFrame" class="customSheetAvatarFrame">
+        <img id="customSheetAvatar" class="customSheetAvatar" alt="Avatar du héros">
+      </div>
+      <div id="customSheetHeroName" class="customSheetHeroName"></div>
+      <div id="customSheetSkills" class="customSheetSkills"></div>
+      <div id="dungeonHeroStats" class="dungeonHeroStats" style="display:none"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <div class="stat">
+          <div class="label">EXPÉRIENCE</div>
+          <div class="value" id="xpValue">0</div>
+          <div class="controls"><button onclick="changeXP(-1)">−</button><button onclick="changeXP(1)">+</button></div>
+        </div>
+        <div class="stat">
+          <div class="label">BLESSURES</div>
+          <div class="value"><span id="woundsValue">0</span> / <span id="woundsMaxValue">3</span></div>
+          <div class="controls"><button onclick="changeWounds(-1)">−</button><button onclick="changeWounds(1)">+</button></div>
+        </div>
+      </div>
+      <div id="zombicideXpBar" class="xpbar"><div class="seg blue"></div><div class="seg yellow"></div><div class="seg orange"></div><div class="seg red"></div></div>
+      <div class="marker" id="xpMarker" style="--xp:0"></div><div id="dungeonProgressText" style="display:none;text-align:center;margin-top:10px;font-weight:900"></div>
+      <div class="level" id="levelText"></div><div id="economyWallet" style="display:none;margin-top:10px;text-align:center;font-weight:1000;font-size:18px"></div>
+    </div>
+
+    <div class="panel" id="extraPanel" style="display:none">
+      <strong id="extraTitle">Ressource</strong>
+      <div class="stat" style="margin-top:10px">
+        <div class="value" id="extraValue">0</div>
+        <div class="controls"><button onclick="changeExtra(-1)">−</button><button onclick="changeExtra(1)">+</button></div>
+      </div>
+    </div>
+
+    <div class="panel dungeonStatsPanel" id="dungeonAttributePanel">
+      <strong>📊 Stats & règles RPG</strong><span class="badge">calcul automatique</span>
+      <div class="dungeonStatsGrid" id="dungeonAttributeGrid"></div>
+      <div id="dungeonDerivedStats" class="dungeonDerivedGrid"></div>
+      <div id="d
+
+--- 2 @ 1346488 ---
+" class="customSheetBg" alt="Fond GenSrpG">
+      <div id="customSheetAvatarFrame" class="customSheetAvatarFrame">
+        <img id="customSheetAvatar" class="customSheetAvatar" alt="Avatar du héros">
+      </div>
+      <div id="customSheetHeroName" class="customSheetHeroName"></div>
+      <div id="customSheetSkills" class="customSheetSkills"></div>
+      <div id="dungeonHeroStats" class="dungeonHeroStats" style="display:none"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <div class="stat">
+          <div class="label">EXPÉRIENCE</div>
+          <div class="value" id="xpValue">0</div>
+          <div class="controls"><button onclick="changeXP(-1)">−</button><button onclick="changeXP(1)">+</button></div>
+        </div>
+        <div class="stat">
+          <div class="label">BLESSURES</div>
+          <div class="value"><span id="woundsValue">0</span> / <span id="woundsMaxValue">3</span></div>
+          <div class="controls"><button onclick="changeWounds(-1)">−</button><button onclick="changeWounds(1)">+</button></div>
+        </div>
+      </div>
+      <div id="zombicideXpBar" class="xpbar"><div class="seg blue"></div><div class="seg yellow"></div><div class="seg orange"></div><div class="seg red"></div></div>
+      <div class="marker" id="xpMarker" style="--xp:0"></div><div id="dungeonProgressText" style="display:none;text-align:center;margin-top:10px;font-weight:900"></div>
+      <div class="level" id="levelText"></div><div id="economyWallet" style="display:none;margin-top:10px;text-align:center;font-weight:1000;font-size:18px"></div>
+    </div>
+
+    <div class="panel" id="extraPanel" style="display:none">
+      <strong id="extraTitle">Ressource</strong>
+      <div class="stat" style="margin-top:10px">
+        <div class="value" id="extraValue">0</div>
+        <div class="controls"><button onclick="changeExtra(-1)">−</button><button onclick="changeExtra(1)">+</button></div>
+      </div>
+    </div>
+
+    <div class="panel dungeonStatsPanel" id="dungeonAttributePanel">
+      <strong>📊 Stats & règles RPG</strong><span class="badge">calcul automatique</span>
+      <div class="dungeonStatsGrid" id="dungeonAttributeGrid"></div>
+      <div id="dungeonDerivedStats" class="dungeonDerivedGrid"></div>
+      <div id="dungeonCombatFormula" class="dungeo
+
+--- 3 @ 5145613 ---
+ative");
+}
+function dungeonEnduranceHpBonus(){
+  const r=loadDungeonRpgRules(),v=dungeonAttributeValue("endurance");
+  if(r.hpFormula==="percent"){
+    const base=Math.max(1,Number(CHARS[current]?.maxHp||state?.maxWounds||3)||3);
+    return Math.round(base*(v*Math.max(0,Number(r.hpPercentPerPoint)||0))/100);
+  }
+  return Math.floor(v/Math.max(1,r.enduranceHpStep))*r.hpGain;
+}
+function dungeonHitBonusForMode(mode,value){
+  const r=loadDungeonRpgRules();let step=r.meleeHitStep,gain=r.meleeHitGain;
+  if(mode==="ranged"){step=r.rangedHitStep;gain=r.rangedHitGain}
+  if(mode==="magic"){step=r.magicHitStep;gain=r.magicHitGain}
+  return Math.floor(Math.max(0,Number(value)||0)/Math.max(1,step))*gain;
+}
+function dungeonDerivedForHero(heroId){
+  const oldCurrent=current,oldState=state;
+  try{
+    current=heroId;state=loadState(heroId);
+    const maxHp=effectiveMaxWounds(),w=Math.max(0,Number(state.wounds)||0);
+    return {
+      level:dungeonRpgLevelFromXp(state.xp),xpInto:dungeonRpgXpIntoLevel(state.xp),
+      force:dungeonAttributeValue("force"),agilite:dungeonAttributeValue("agilite"),
+      intelligence:dungeonAttributeValue("intelligence"),esprit:dungeonAttributeValue("esprit"),endurance:dungeonAttributeValue("endurance"),
+      physical:dungeonPhysicalDamageBonus(),magic:dungeonMagicDamageBonus(),maxMana:dungeonMaxMana(),
+      mana:Math.max(0,Math.min(dungeonMaxMana(),Number(state.mana)||0)),
+      crit:dungeonCriticalChance(),dodge:dungeonDodgeChance(),initiative:dungeonDerivedInitiative(),
+      defense:dungeonDerivedDefense(),armor:dungeonArmorScore(),armorReduction:dungeonArmorReduction(),magicResistance:dungeonMagicResistance(),maxHp,hp:Math.max(0,maxHp-w)
+    };
+  }finally{current=oldCurrent;state=oldState}
+}
+function dungeonMaxHpForHero(heroId,stObj=null){
+  const oldCurrent=current,oldState=state;
+  try{current=heroId;state=stObj||loadState(heroId);return Math.max(1,effectiveMaxWounds())}
+  finally{current=oldCurrent;state=oldState}
+}
+function changeDungeonMana(v){if(!isDungeonHeroSheet())return;const max=dungeonMaxMana();state.mana=Math.max(0,Math.min(max,(Number(state.mana)||0)+Number(v||0)));save();renderDungeonAttributes();renderDungeonHeroStats()}
+function refillDungeonMana(){if(!isDungeonHeroSheet())return;state.mana=dungeonMaxMana();save();renderDungeonAt
+
+--- 4 @ 5213710 ---
+d|hache|axe/.test(n));
+  if(req==="sword")return names.some(n=>/epee|sword/.test(n));
+  if(req==="axe")return names.some(n=>/hache|axe/.test(n));
+  if(req==="bow")return names.some(n=>/arc|bow/.test(n));
+  if(req==="staff")return names.some(n=>/baton|staff/.test(n));
+  return true;
+}
+function dungeonSpendTalentMana(heroId,cost){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId),c=Math.max(0,Number(cost)||0);
+  if((Number(st.mana)||0)<c){alert("Mana insuffisant : "+c+" requis.");return false}
+  st.mana=Math.max(0,(Number(st.mana)||0)-c);localStorage.setItem(key(heroId),JSON.stringify(st));if(current===heroId)state=st;return true;
+}
+
+function dungeonTalentSaveHeroState(heroId,st){
+  localStorage.setItem(key(heroId),JSON.stringify(st));
+  if(current===heroId)state=st;
+}
+function dungeonTalentHealHero(heroId,amount){
+  const st=loadState(heroId),before=Math.max(0,Number(st.wounds)||0);
+  st.wounds=Math.max(0,before-Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return before-st.wounds;
+}
+function dungeonTalentRestoreMana(heroId,amount){
+  const st=loadState(heroId),snap=dungeonCombatHeroSnapshot(heroId);
+  const before=Math.max(0,Number(st.mana)||0),max=Math.max(0,Number(snap.maxMana)||0);
+  st.mana=Math.min(max,before+Math.max(0,Number(amount)||0));
+  dungeonTalentSaveHeroState(heroId,st);
+  return st.mana-before;
+}
+function dungeonTalentDealDirectDamage(heroId,targetId,amount,damageType="physical",element=""){
+  const target=loadActiveEnemies().find(e=>String(e.id)===String(targetId)&&!e.defeated&&Number(e.hp)>0);
+  if(!target)return false;
+  const def=activeEnemyDefinition(target.enemyId),types=target.elementTypes||def?.rule?.elementTypes||[];
+  const mult=gensElementMultiplier(element,types),finalAmount=Math.max(0,Math.round((Number(amount)||0)*mult));
+  combatRewardHeroId=heroId;
+  attackRollContext={heroId,hits:1,hitDamages:[finalAmount],damageType,element,elementMultiplier:mult};
+  applyDungeonAttackDamage(target.id,finalAmount,1,finalAmount);
+  attackRollContext=null;
+  if(element&&mult!==1)try{showToast((gensElementById(element)?.icon||'🌈')+' '+(mult===0?'Immunité':mult>1?'Faiblesse ×'+mult:'Résistance ×'+mult))}catch(e){}
+  return true;
+}
+
+function dungeonTalentCalculatedAmount(heroId,e){
+  const base=Number(e?.ba
+
+===== FUNCTIONS =====
+addCombatItems61
+applyArmorFailures
+applyBossAttackDamage
+applyDamage48
+applyDungeonAttackDamage
+applyDungeonCombatScaling
+applyDungeonDirectDamage
+baseArmorSave
+bindRoomChests100
+captureBattleDamageValue
+captureBuyCreatureTalent
+captureBuyItem
+captureElementDamageMultiplier
+captureExploreAt
+captureOpenExplore
+captureOpenShop
+captureSetShopTab
+captureShopItems
+cleanupCombat
+cleanupCombatSurface212
+cleanupCombatUi102
+closeArmorRoll
+closeDamageLayers
+closeDungeonCombat
+closeDungeonCombatStatsPopup
+closeMerchant
+combatBusy312
+combatDefeatScope313
+combatEnabled200
+combatHeroes200
+combatItems61
+combatOn53
+combatReserveEnabled
+combatReserveEnemyOptions
+combatTools211
+createRoom
+damage051
+damageCustomDeployable
+dc028RemoveHeroExplore
+dc030RefreshCombatButton
+dc031RefreshCombat
+dc045ApplyHeroCombatMode
+dc045HeroCombatEnabled
+dc050ProfileHeroCombat
+dc050RefreshCombat
+decorateCombat
+decorateCombat071
+decorateRoomAssets051
+dungeonApplyHeroDamage
+dungeonApplyStatDamagePercent
+dungeonArmorReduction
+dungeonArmorReductionFromScore
+dungeonArmorScore
+dungeonBossRoom
+dungeonCombatAttack
+dungeonCombatBasicAttack
+dungeonCombatHeroArt
+dungeonCombatHeroSnapshot
+dungeonCombatHeroState
+dungeonCombatHeroTargetOptions
+dungeonCombatHeroWeapons
+dungeonCombatLivingHeroIds
+dungeonCombatRememberHeroContext
+dungeonCombatRestoreHeroContext
+dungeonCombatStatChip
+dungeonCombatThumbHtml
+dungeonCombatUseActiveTalent
+dungeonCombatUseHero
+dungeonCombatVictoryHtml
+dungeonConfirmPendingHeroDamage
+dungeonDamagePercentForMode
+dungeonDamageReduction
+dungeonLegacyArmorToScore
+dungeonMagicDamageBonus
+dungeonMerchantDefaultPrice066
+dungeonPhysicalDamageBonus
+dungeonRecordCombatReward
+dungeonTalentDealDirectDamage
+effectiveArmorSave
+effectiveBossArmor
+enemyAutoArmorPenalty
+ensureRoomMap070
+explore
+exploreDungeonRoom
+finishCombatReserveReturn
+finishDungeonCombatVictory
+gensCaptureCombatConfig
+heroCombatEnabled073
+hideCombatLayers
+initRoomLock102
+injectCombatTools
+launchCombat200
+maybeForceCombatRoom202
+merchantBuy
+merchantItems
+merchantSell
+normalizeCombatTurn211
+openArmorRoll
+openDungeonCombatSetup
+openDungeonCombatStats
+openDungeonCombatVictoryPopup
+openMerchant
+parseArmorThreshold
+pendingForRoom48
+placeSceneForRoom
+prepareCombatReserveReturn
+recentNoCombat202
+recordRoom202
+renderCaptureExploreResult
+renderCaptureShop
+renderDungeonCombatMath
+renderDungeonCombatRound
+renderDungeonCombatSetup
+renderMerchant
+renderMerchant071
+resetDungeonCombatRewards
+resolveLocalCombatDefeat200
+robotDogDamage
+rollArmor
+room
+room051
+room079
+room080
+room104
+room52
+room53
+room54
+roomFlavor202
+roomIntro
+roomKey313
+roomMap
+roomOf313
+roomRule104
+roomScene
+roomState47
+saveRpgUniverseCombat
+sceneForRoom
+setCombatCloseState
+setRoom313
+silentHeroDamage023
+spatialSetRoom
+startCombat
+startCombat104
+startDungeonClassicCombat
+syncRpgUniverseCombatToDungeonRules
+toggleDungeonCombatEnemy
+toggleDungeonCombatHero
+turretDamage
+updateArmorThresholdInfo
+updateCombatReserveReturnUi
+updateDungeonExploreButtons
+z40kCreateRoom
+z40kJoinRoom
+z40kLeaveRoom
+z40kRemoteArmor

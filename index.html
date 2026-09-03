@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.8</title>
+<title>GenSrpG V16.78.9</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -10637,7 +10637,7 @@ function gensReferenceRpgSettings(){
       activeTags:["donjon"],
       events:(typeof dungeonBuiltinEvents==="function"?dungeonBuiltinEvents().map(e=>JSON.parse(JSON.stringify(e))):[])
     },
-    movement:{enabled:false,mode:"tactical",unit:"case",customUnit:"",refreshMode:"turn",entities:{heroes:true,creatures:true,enemies:true,companions:true},defaults:{hero:3,creature:1,enemy:1,companion:3},balanceVersion:2}
+    movement:{enabled:false,mode:"tactical",unit:"case",customUnit:"",refreshMode:"turn",combatParticipationRange:3,entities:{heroes:true,creatures:true,enemies:true,companions:true},defaults:{hero:3,creature:1,enemy:1,companion:3},balanceVersion:2}
   };
 }
 function gensBlankRpgSettings(){
@@ -10660,7 +10660,7 @@ function gensBlankRpgSettings(){
       roundEvents:true,eventTrigger:"manual",eventChance:0,eventRepeats:true,
       secretChance:0,restEnabled:true,restHeal:0,restMana:0,activeTags:[],events:[]},
     encounters:{enabled:true,locations:[]},
-    movement:{enabled:false,mode:"narrative",unit:"case",customUnit:"",refreshMode:"turn",entities:{heroes:true,creatures:true,enemies:true,companions:true},defaults:{hero:3,creature:1,enemy:1,companion:3},balanceVersion:2},
+    movement:{enabled:false,mode:"narrative",unit:"case",customUnit:"",refreshMode:"turn",combatParticipationRange:3,entities:{heroes:true,creatures:true,enemies:true,companions:true},defaults:{hero:3,creature:1,enemy:1,companion:3},balanceVersion:2},
     captureCombat:{activeSlots:1,teamSize:6,minBattleTeam:3,maxBattleTeam:6,recallCost:"turn",autoReplaceKo:true,itemsAllowed:true,captureAllowed:true,controller:"auto",allowBattleOverride:true,itemSlots:4,itemsPerTurn:1,defendAllowed:true,initiativeMode:"dynamic",victoryMode:"all_ko",saveBattle:true,healMode:"free",healCost:20},
     trainerCombat:{enabled:false,captureOpponent:false,goldReward:0},
     pvp:{enabled:false,rewards:false,itemLoss:false,permadeath:false,captureOpponent:false}
@@ -11457,6 +11457,7 @@ function saveRpgMovementSettings(){
     unit:document.getElementById("rpgMovementUnit")?.value||"case",
     customUnit:document.getElementById("rpgMovementCustomUnit")?.value.trim()||"",
     refreshMode:document.getElementById("rpgMovementRefreshMode")?.value||"turn",
+    combatParticipationRange:(()=>{const n=Number(document.getElementById("rpgCombatParticipationRange")?.value);return Number.isFinite(n)?Math.max(0,Math.min(20,n)):3})(),
     entities:{heroes:!!document.getElementById("rpgMoveHeroes")?.checked,creatures:!!document.getElementById("rpgMoveCreatures")?.checked,enemies:!!document.getElementById("rpgMoveEnemies")?.checked,companions:!!document.getElementById("rpgMoveCompanions")?.checked},
     defaults:{hero:3,creature:1,enemy:1,companion:3},
     balanceVersion:2
@@ -11593,7 +11594,7 @@ function renderRpgUniverseEditor(){
   set("rpgBaseHit",cfg.combat.baseHit);set("rpgMinHit",cfg.combat.minHit);set("rpgMaxHit",cfg.combat.maxHit);set("rpgCritMultiplier",cfg.combat.critMultiplier);set("rpgCritCap",cfg.combat.critCap);set("rpgMinPhysicalDamage",cfg.combat.minPhysicalDamage);set("rpgMinMagicDamage",cfg.combat.minMagicDamage);
   set("rpgPhysicalFormula",cfg.combat.physicalDamageFormula||"step");set("rpgPhysicalPctPerPoint",cfg.combat.physicalDamagePercentPerPoint||0);set("rpgMagicFormula",cfg.combat.magicDamageFormula||"step");set("rpgMagicPctPerPoint",cfg.combat.magicDamagePercentPerPoint||0);set("rpgRangedFormula",cfg.combat.rangedDamageFormula||"none");set("rpgRangedPctPerPoint",cfg.combat.rangedDamagePercentPerPoint||0);set("rpgHpFormula",cfg.combat.hpFormula||"step");set("rpgHpPctPerPoint",cfg.combat.hpPercentPerPoint||0);set("rpgManaFormula",cfg.combat.manaFormula||"step");set("rpgManaPctPerPoint",cfg.combat.manaPercentPerPoint||0);set("rpgCritFormula",cfg.combat.critFormula||"step");const eco=cfg.economy||{};set("rpgCurrencyName",eco.currencyName||"Or");set("rpgCurrencyIcon",eco.currencyIcon||"🪙");set("rpgStartingGold",eco.startingGold??0);set("rpgSellPercent",eco.sellPercent??50);set("rpgMerchantBuyMultiplier",eco.merchantBuyMultiplier??1);set("rpgEnemyGoldEnabled",String(eco.enemyGoldEnabled!==false));set("rpgMerchantEventEnabled",String(eco.merchantEventEnabled!==false));const ems=document.getElementById("rpgEconomyModuleStatus");if(ems)ems.innerHTML=(cfg.gameplay?.modules?.economy?"✅ Économie activée":"⛔ Économie désactivée")+" · change ce choix dans Style & Modules.";const els=document.getElementById("rpgElementsModuleStatus");if(els)els.innerHTML=(cfg.gameplay?.modules?.elements?"✅ Éléments activés":"⛔ Éléments désactivés")+" · change ce choix dans Style & Modules.";setTimeout(renderRpgEconomyVisibility,0);set("rpgCritPctPerPoint",cfg.combat.critPercentPerPoint||0);set("rpgDodgeFormula",cfg.combat.dodgeFormula||"step");set("rpgDodgePctPerPoint",cfg.combat.dodgePercentPerPoint||0);set("rpgInitiativeFormula","direct");set("rpgInitiativePerPoint",0);set("rpgMagicResistFormula",cfg.combat.magicResistFormula||"step");set("rpgMagicResistPerPoint",cfg.combat.magicResistPerPoint||0);set("rpgRulesComplexity",cfg.combat.rulesComplexity||"simple");set("rpgInitiativeUsage",cfg.combat.initiativeUsage||"tests");set("rpgInitiativeTurnMode",cfg.combat.initiativeTurnMode||"fixed");set("rpgInitiativeDie",String(cfg.combat.initiativeDie||20));set("rpgTestsEnabled",String(cfg.combat.testsEnabled!==false));set("rpgTestDie",String(cfg.combat.testDie||20));set("rpgTestDefaultDifficulty",Number(cfg.combat.testDefaultDifficulty)||10);renderRpgInitiativeOptions();
   const mv=cfg.movement||gensBlankRpgSettings().movement;
-  set("rpgMovementUnit",mv.unit||"case");set("rpgMovementCustomUnit",mv.customUnit||"");set("rpgMovementMode",mv.mode||"narrative");set("rpgMovementRefreshMode",mv.refreshMode||"turn");
+  set("rpgMovementUnit",mv.unit||"case");set("rpgMovementCustomUnit",mv.customUnit||"");set("rpgMovementMode",mv.mode||"narrative");set("rpgMovementRefreshMode",mv.refreshMode||"turn");set("rpgCombatParticipationRange",Number.isFinite(Number(mv.combatParticipationRange))?Math.max(0,Number(mv.combatParticipationRange)):3);
   [["rpgMoveHeroes","heroes"],["rpgMoveCreatures","creatures"],["rpgMoveEnemies","enemies"],["rpgMoveCompanions","companions"]].forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.checked=mv.entities?.[k]!==false});
   set("rpgMoveHeroValue",mv.defaults?.hero??3);set("rpgMoveCreatureValue",mv.defaults?.creature??1);set("rpgMoveEnemyValue",mv.defaults?.enemy??1);set("rpgMoveCompanionValue",mv.defaults?.companion??3);
   const cc=cfg.captureCombat||gensBlankRpgSettings().captureCombat,tc=cfg.trainerCombat||{},pv=cfg.pvp||{};
@@ -20286,6 +20287,10 @@ window.addEventListener("DOMContentLoaded",function initApp(){
       <label>Mode<select id="rpgMovementMode"><option value="tactical">Tactique — grille case par case</option><option value="narrative">Narratif — sans position sur grille</option><option value="hybrid">Hybride — narration + tactique en combat</option></select></label>
       <label>Récupération du mouvement<select id="rpgMovementRefreshMode"><option value="turn">Au début de chaque tour du héros</option><option value="manual">Manuel / MJ</option></select></label>
       <div class="smodMini">Tactique : active la position réelle des héros sur la mini-map du Dungeon. Narratif : aucun déplacement n’est imposé dans l’application. Hybride : exploration libre et distances réservées aux phases tactiques/combat.</div>
+    </div>
+    <div class="smodCard"><h3>⚔️ Participation aux combats</h3>
+      <label>Portée d’entraide (cases)<input id="rpgCombatParticipationRange" type="number" min="0" max="20" value="3"></label>
+      <div class="smodMini">Un héros rejoint le combat seulement s’il est dans la même salle ou sous-salle et à cette distance maximale du héros qui engage. En mode narratif, tous les héros de la même zone participent.</div>
     </div>
   </div>
   <div class="smodActions"><button class="startGameBtn" type="button" onclick="saveRpgMovementSettings()">💾 ENREGISTRER DÉPLACEMENTS</button></div>
@@ -39199,6 +39204,28 @@ function heroesHere313(x){
   ensure313(x);
   return (x?.participants||[]).map(String).filter(id=>sameView313(x,id))
 }
+function participatingHeroes313(x,leader,maxRange,tactical=true){
+  ensure313(x);leader=String(leader||active313(x));
+  const here=heroesHere313(x);if(!tactical)return here;
+  const map=x?.last?.map,cells=map?.cells,size=Number(map?.size)||Math.round(Math.sqrt(cells?.length||0))||1;
+  const start=Number(x?.positions?.[leader]),range=Math.max(0,Number(maxRange)||0);
+  if(!Array.isArray(cells)||!Number.isInteger(start)||start<0)return here.filter(id=>id===leader);
+  const distances=new Map([[start,0]]),queue=[start],occupied=new Set(Object.values(x?.enemyCells||{}).map(Number));
+  for(let qi=0;qi<queue.length;qi++){
+    const cell=queue[qi],distance=distances.get(cell)||0;if(distance>=range)continue;
+    const row=Math.floor(cell/size),col=cell%size,next=[];
+    if(row>0)next.push(cell-size);if(row<size-1)next.push(cell+size);if(col>0)next.push(cell-1);if(col<size-1)next.push(cell+1);
+    next.forEach(n=>{if(n<0||n>=cells.length||distances.has(n)||["wall","void"].includes(String(cells[n])))return;if(n!==start&&occupied.has(n))return;distances.set(n,distance+1);queue.push(n)})
+  }
+  return here.filter(id=>id===leader||distances.has(Number(x?.positions?.[id])))
+}
+function combatDefeatScope313(participants,combatants,living){
+  const party=[...new Set((participants||[]).map(String).filter(Boolean))];
+  const fight=[...new Set((combatants||[]).map(String).filter(Boolean))];
+  const alive=new Set((living||[]).map(String).filter(Boolean));
+  if(!fight.length||fight.some(id=>alive.has(id)))return "none";
+  return party.length>0&&party.every(id=>!alive.has(id))?"global":"local"
+}
 function clearBranch313(x,id){
   ensure313(x);if(x&&id)delete x.heroBranchStates[String(id)];return x
 }
@@ -39206,6 +39233,8 @@ function clearBranch313(x,id){
 window.DungeonSpatial313={
   ensure:ensure313,persist:persist313,activate:activate313,setRoom:setRoom313,
   roomOf:roomOf313,sameView:sameView313,heroesHere:heroesHere313,
+  participatingHeroes:participatingHeroes313,
+  combatDefeatScope:combatDefeatScope313,
   clearBranch:clearBranch313,clone:clone313,active:active313
 };
 })();
@@ -39278,6 +39307,15 @@ function neighbours(i,size,total){const r=Math.floor(i/size),c=i%size,a=[];if(r>
 function distanceMap(from,m,max,x){const size=Number(m?.size)||Math.round(Math.sqrt(m?.cells?.length||0))||1,d=new Map([[from,0]]),q=[from];let qi=0;const occupied=new Set(Object.values(x?.enemyCells||{}).map(Number));while(qi<q.length){const cur=q[qi++],cd=d.get(cur)||0;if(cd>=max)continue;if(cur!==from&&occupied.has(cur))continue;for(const n of neighbours(cur,size,m.cells.length)){if(d.has(n)||blocked(m.cells[n]))continue;d.set(n,cd+1);q.push(n)}}return d}
 function position(id,x=rt()){const n=Number(x?.positions?.[id]);return Number.isInteger(n)?n:-1}
 function activePos(x=rt()){return position(activeHero(x),x)}
+function heroAlive200(id){try{return Number(dungeonCombatHeroSnapshot?.(id)?.hp)>0}catch(e){return false}}
+function participationRange200(){const n=Number(movementCfg()?.combatParticipationRange);return Number.isFinite(n)?Math.max(0,Math.min(20,n)):3}
+function combatHeroes200(x){
+ const leader=activeHero(x),model=spatial();
+ const ids=typeof model?.participatingHeroes==="function"
+   ?model.participatingHeroes(x,leader,participationRange200(),tactical())
+   :spatialHeroesHere(x);
+ return ids.filter(heroAlive200)
+}
 function enemyAt(idx,x=rt()){const pair=Object.entries(x?.enemyCells||{}).find(([,c])=>Number(c)===Number(idx));if(!pair)return null;return liveEnemies().find(e=>String(e.id)===String(pair[0]))||null}
 function keyCarrier(x=rt()){const id=String(x?.last?.keyEnemyId||'');return id?liveEnemies().find(e=>String(e.id)===id)||null:null}
 function exitLocked(x=rt()){
@@ -39609,9 +39647,25 @@ function nearbyInterveners(target,x){const base=Number(x.enemyCells?.[target.id]
  const chance=d===1?65:d===2?30:0;
  if(chance&&Math.random()*100<chance)out.push(e)});
  return out}
-function launchCombat200(x,chosen){try{dungeonCombatRestoreHeroContext();const heroes=spatialHeroesHere(x);dungeonCombatSelection={heroes:heroes.length?heroes:[activeHero(x)].filter(Boolean),enemies:chosen.map(e=>e.id)};resetDungeonCombatRewards?.();dungeonCombatActive=true;const modalEl=document.getElementById('dungeonCombatModal'),host=document.getElementById('dungeonCombatSetupView');if(modalEl){modalEl.classList.add('dc200CombatOpen');modalEl.style.display='block'}document.body.style.overflow='hidden';if(typeof window.__dc302RenderCombat==='function')window.__dc302RenderCombat();else if(typeof window.__dc214RenderCombat==='function')window.__dc214RenderCombat();else if(typeof window.__dc200StableRenderCombatRound==='function')window.__dc200StableRenderCombatRound();else renderDungeonCombatRound();if(host&&!(host.innerHTML||'').trim())throw new Error('Le rendu du combat est vide.');return true}catch(e){console.error('DC200 start combat',e);cleanupCombat();modal('⚠️ Combat impossible','Le moteur a intercepté une erreur avant de bloquer l’interface : <strong>'+esc(e.message||e)+'</strong>.');return false}}
+function launchCombat200(x,chosen){try{dungeonCombatRestoreHeroContext();const here=spatialHeroesHere(x).filter(heroAlive200),heroes=combatHeroes200(x),excluded=here.filter(id=>!heroes.includes(id));dungeonCombatSelection={heroes:heroes.length?heroes:[activeHero(x)].filter(heroAlive200),enemies:chosen.map(e=>e.id)};x.dc315LastCombatParticipation={leader:activeHero(x),range:tactical()?participationRange200():null,heroes:[...dungeonCombatSelection.heroes],excluded,at:Date.now()};saveRt(x);resetDungeonCombatRewards?.();dungeonCombatActive=true;const modalEl=document.getElementById('dungeonCombatModal'),host=document.getElementById('dungeonCombatSetupView');if(modalEl){modalEl.classList.add('dc200CombatOpen');modalEl.style.display='block'}document.body.style.overflow='hidden';if(typeof window.__dc302RenderCombat==='function')window.__dc302RenderCombat();else if(typeof window.__dc214RenderCombat==='function')window.__dc214RenderCombat();else if(typeof window.__dc200StableRenderCombatRound==='function')window.__dc200StableRenderCombatRound();else renderDungeonCombatRound();if(host&&!(host.innerHTML||'').trim())throw new Error('Le rendu du combat est vide.');return true}catch(e){console.error('DC200 start combat',e);cleanupCombat();modal('⚠️ Combat impossible','Le moteur a intercepté une erreur avant de bloquer l’interface : <strong>'+esc(e.message||e)+'</strong>.');return false}}
 function startCombat(ids,reason){const x=rt();if(!x)return false;let chosen=liveEnemies().filter(e=>ids.map(String).includes(String(e.id)));if(!chosen.length)return false;let extras=[];if(reason==='cell'&&chosen[0]){extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}const begin=()=>launchCombat200(x,chosen);if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}if(reason==='detection'||reason==='stealth_fail'){const names=chosen.map(e=>esc(enemyName(e))).join(', ');modal(reason==='stealth_fail'?'🥷 REPÉRAGE ÉCHOUÉ':'👁️ HÉROS REPÉRÉ','<strong>'+esc(heroName(activeHero(x)))+' est détecté.</strong><br><br>'+names+(chosen.length>1?' attaquent et engagent le combat.':' attaque et engage le combat.'),begin);return true}return begin()}
 function cleanupCombat(){try{dungeonCombatRestoreHeroContext();dungeonCombatActive=false}catch(e){}['dungeonCombatModal','dungeonCombatVictoryModal','dungeonCombatStatsModal','specialDiceModal','attackDiceModal','dc036AiPopup','dc032AiPopup'].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove('open','dc200CombatOpen');e.style.display='none';e.style.removeProperty('pointer-events')}});document.body.style.removeProperty('overflow');document.body.style.removeProperty('pointer-events');document.documentElement.style.removeProperty('overflow');document.documentElement.style.removeProperty('pointer-events')}
+function partyIds200(x=rt()){const ids=(x?.participants||party()).map(String).filter(Boolean);return [...new Set(ids)]}
+function engagedDown200(){const ids=(dungeonCombatSelection?.heroes||[]).map(String).filter(Boolean);return ids.length>0&&ids.every(id=>!heroAlive200(id))}
+function wholePartyDown200(x=rt()){const ids=partyIds200(x);return ids.length>0&&ids.every(id=>!heroAlive200(id))}
+function resolveLocalCombatDefeat200(){
+ const x=rt();if(!x||!dungeonCombatActive)return false;
+ const partyIds=partyIds200(x),engaged=(dungeonCombatSelection?.heroes||[]).map(String),living=partyIds.filter(heroAlive200);
+ const scope=typeof spatial()?.combatDefeatScope==="function"?spatial().combatDefeatScope(partyIds,engaged,living):(engagedDown200()?(wholePartyDown200(x)?"global":"local"):"none");
+ if(scope!=="local")return false;
+ const fallen=engaged.map(heroName);
+ cleanupCombat();spatialPersist(x);
+ const next=living[0];if(next){const i=(x.participants||[]).map(String).indexOf(String(next));if(i>=0)x.index=i;spatialActivate(x,next);try{window.current=next;window.state=loadState?.(next)}catch(e){}}
+ dungeonCombatSelection={heroes:[],enemies:[]};resetDungeonCombatRewards?.();saveRt(x);render();
+ modal('☠️ COMBATTANTS HORS COMBAT','<strong>'+esc(fallen.join(', '))+'</strong> '+(fallen.length>1?'sont KO':'est KO')+'.<br><br>Le donjon continue avec <strong>'+esc(heroName(next))+'</strong>. Les ennemis restent dans la salle.');
+ return true
+}
+window.dc315ResolveCombatWipe=resolveLocalCombatDefeat200;
 function finishVictory(){const x=rt();cleanupCombat();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render();modal('🏆 Victoire',typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.'));return true}
 window.openDungeonCombatVictoryPopup=function(){if(!dungeonCombatActive)return;try{dungeonCombatRewards.shown=true}catch(e){}const html=typeof window.__dc200StableCombatVictoryHtml==='function'?window.__dc200StableCombatVictoryHtml():(typeof dungeonCombatVictoryHtml==='function'?dungeonCombatVictoryHtml():'Combat terminé.');const m=ensureModal();document.getElementById('dc200ModalTitle').textContent='🏆 VICTOIRE';document.getElementById('dc200ModalBody').innerHTML=html;modalDone200=()=>{cleanupCombat();const x=rt();if(x){assignEnemyCells(x);exitLocked(x);saveRt(x)}render()};m.classList.add('open')};
 window.finishDungeonCombatVictory=function(){closeModal()};
@@ -42000,7 +42054,9 @@ function heroHp(id){
   try{return Number(dungeonCombatHeroSnapshot?.(id)?.hp)||0}catch(e){return 0}
 }
 function allPartyDown(){
-  const ids=[...(dungeonCombatSelection?.heroes||[])];
+  let ids=[];
+  try{ids=(JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")?.participants||[]).map(String).filter(Boolean)}catch(e){}
+  if(!ids.length)try{ids=(loadGameParticipants?.()||[]).map(String).filter(Boolean)}catch(e){}
   return ids.length>0&&ids.every(id=>heroHp(id)<=0)
 }
 function closeDamageLayers(){
@@ -42371,7 +42427,9 @@ function decorateCombat(){
 }
 
 function partyDown(){
-  const ids=[...(dungeonCombatSelection?.heroes||[])];
+  let ids=[];
+  try{ids=(JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")?.participants||[]).map(String).filter(Boolean)}catch(e){}
+  if(!ids.length)try{ids=(loadGameParticipants?.()||[]).map(String).filter(Boolean)}catch(e){}
   if(!ids.length)return false;
   return ids.every(id=>{
     try{return Number(dungeonCombatHeroSnapshot(id)?.hp)<=0}catch(e){return false}
@@ -42950,6 +43008,10 @@ function runAi(){
 document.addEventListener("gensrpg:enemy-attack-resolved",()=>completeAi(T.aiToken));
 
 function render(){
+  if(typeof window.dc315ResolveCombatWipe==="function"&&window.dc315ResolveCombatWipe()){
+    T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
+    return;
+  }
   /* On appelle le renderer 2.14 intact. */
   if(typeof window.__dc214RenderCombat==="function"){
     window.__dc214RenderCombat();
@@ -43539,7 +43601,7 @@ window.dungeonHandleLevelUp071=function(heroId,beforeXp,st,delay=80){
 };
 
 window.dungeonDebug312=function(){return {queued:levelQueue312.length,open:levelOpen312,busy:combatBusy312()}};
-try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.14";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.14 · mouvement conservé · alertes ennemies · arc stabilisé."}catch(e){}
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.15";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.15 · portée de combat · défaite globale fiable."}catch(e){}
 })();
 </script>
 </body>

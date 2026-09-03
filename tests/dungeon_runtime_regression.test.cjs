@@ -412,10 +412,79 @@ function testRoomSnapshotsSurviveTurnChanges() {
   assert.equal(runtime.last.marker, "room-one");
 }
 
+function testCombatParticipationUsesConfiguredRange() {
+  const spatial = spatialModel();
+  const runtime = {
+    participants: ["aldren", "lyra", "brom", "remote"], index: 0, room: 1,
+    last: { kind: "enemy", map: { size: 3, cells: Array(9).fill("floor") } },
+    positions: { aldren: 0, lyra: 2, brom: 8, remote: 1 }, remaining: {}, enemyCells: {},
+    heroRooms: { aldren: 1, lyra: 1, brom: 1, remote: 2 }, roomStates: {}, heroBranchStates: {}
+  };
+  spatial.ensure(runtime);
+
+  assert.deepEqual(
+    Array.from(spatial.participatingHeroes(runtime, "aldren", 2, true)),
+    ["aldren", "lyra"],
+    "seuls les héros de la même salle à portée doivent participer"
+  );
+  assert.deepEqual(
+    Array.from(spatial.participatingHeroes(runtime, "aldren", 2, false)),
+    ["aldren", "lyra", "brom"],
+    "le mode narratif conserve tous les héros de la même zone"
+  );
+
+  runtime.last.map.cells[1] = "wall";
+  runtime.last.map.cells[4] = "wall";
+  assert.deepEqual(
+    Array.from(spatial.participatingHeroes(runtime, "aldren", 2, true)),
+    ["aldren"],
+    "la portée doit suivre les cases praticables et ne pas traverser les murs"
+  );
+}
+
+function testLocalCombatLossIsNotGlobalDefeat() {
+  const spatial = spatialModel();
+  assert.equal(
+    spatial.combatDefeatScope(["aldren", "lyra", "brom"], ["aldren", "lyra"], ["brom"]),
+    "local",
+    "deux combattants KO ne doivent pas tuer le troisième héros resté ailleurs"
+  );
+  assert.equal(
+    spatial.combatDefeatScope(["aldren", "lyra", "brom"], ["aldren", "lyra"], []),
+    "global",
+    "la partie se termine seulement quand tout le groupe est KO"
+  );
+  assert.equal(
+    spatial.combatDefeatScope(["aldren", "lyra", "brom"], ["aldren", "lyra"], ["lyra", "brom"]),
+    "none",
+    "le combat continue tant qu'un combattant est encore debout"
+  );
+
+  const runtime = script("dungeonCore200Rebuild");
+  assert.match(runtime, /function wholePartyDown200/, "le runtime doit distinguer combat perdu et groupe entier KO");
+  assert.match(runtime, /COMBATTANTS HORS COMBAT/, "une défaite locale doit rendre la main au héros survivant");
+  assert.match(runtime, /Les ennemis restent dans la salle/, "une défaite locale ne doit pas supprimer les ennemis");
+
+  for (const id of ["dungeonCore213Stability", "dungeonCore214SingleAuthority"]) {
+    const core = script(id);
+    const fnName = id.includes("213") ? "allPartyDown" : "partyDown";
+    const body = core.match(new RegExp(`function ${fnName}\\(\\)\\{[\\s\\S]*?\\n\\}`))?.[0] || "";
+    assert.match(body, /gensrpg_dungeon_runtime_v2/, `${id} doit vérifier tous les héros du runtime`);
+    assert.doesNotMatch(body, /dungeonCombatSelection/, `${id} ne doit pas confondre combattants et groupe entier`);
+  }
+
+  assert.match(
+    script("dungeonCore303TimelineRootFix"),
+    /dc315ResolveCombatWipe/,
+    "la timeline finale doit arrêter un combat dont tous les participants sont KO"
+  );
+}
+
 function testRuntimeUsesSpatialParticipationAndNoGroupReset() {
   const runtime = script("dungeonCore200Rebuild");
   const explore = runtime.match(/function explore\(\)\{[\s\S]*?\} function moveTo/)?.[0] || "";
-  assert.match(runtime, /const heroes=spatialHeroesHere\(x\)/, "un combat doit limiter les héros à la salle active");
+  assert.match(runtime, /participatingHeroes/, "un combat doit limiter les héros selon la salle et la portée configurée");
+  assert.match(runtime, /combatParticipationRange/, "la portée d'entraide doit provenir de l'éditeur");
   assert.match(runtime, /spatialSetRoom\(x,heroId,targetRoom\)/, "la porte doit déplacer seulement le héros actif");
   assert.doesNotMatch(
     explore,
@@ -461,6 +530,8 @@ testLevelUpsAreQueuedUntilCombatEnds();
 testExistingRunMigratesWithoutMovingHeroes();
 testDoorCrossingMovesOnlyActiveHero();
 testRoomSnapshotsSurviveTurnChanges();
+testCombatParticipationUsesConfiguredRange();
+testLocalCombatLossIsNotGlobalDefeat();
 testRuntimeUsesSpatialParticipationAndNoGroupReset();
 testEnemyAlertsAndBowContextRecovery();
 console.log("Dungeon regression tests: OK");

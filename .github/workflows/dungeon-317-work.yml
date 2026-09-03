@@ -1,0 +1,23 @@
+name: Dungeon 3.17 workbench
+
+on:
+  push:
+    branches:
+      - "work/dungeon-v16.78.11-spatial-armor-shop"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Existing dungeon regression suite
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Inspect Core 3.17 integration targets
+        run: node tests/inspect_core317_targets.cjs

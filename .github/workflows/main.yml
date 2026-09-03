@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - work/dungeon-v16.78.17-equipment-ui-regression
 
   workflow_dispatch:
 
@@ -13,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -23,6 +24,9 @@ jobs:
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
+
+      - name: Tester la batterie Dungeon runtime complète
+        run: node tests/dungeon_runtime_regression.test.cjs
 
       - name: Tester le créateur de pièces Dungeon
         run: node tests/dungeon_room_creator_v1.test.cjs
@@ -111,6 +115,7 @@ jobs:
           modules = [
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
+              (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -123,15 +128,21 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
+      - name: Tester le chargement final Dungeon
+        run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
+
       - name: Configurer GitHub Pages
+        if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
 
       - name: Envoyer le site comme artifact Pages
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

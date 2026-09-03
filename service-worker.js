@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.15-dungeon-room-scope";
+const CACHE_NAME = "gensrpg-cache-16.78.16-dungeon-branch-single-spawn";
 
 const CORE_FILES = [
   "./",

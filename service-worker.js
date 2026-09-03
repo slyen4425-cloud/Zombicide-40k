@@ -1,9 +1,10 @@
-const CACHE_NAME = "gensrpg-cache-16.78.14-room-creator100";
+const CACHE_NAME = "gensrpg-cache-16.78.15-dungeon-room-scope";
 
 const CORE_FILES = [
   "./",
   "./index.html",
   "./assets/dungeon/dungeon-core-317.js",
+  "./assets/dungeon/dungeon-core-318.js",
   "./assets/dungeon/dungeon-room-creator-100.js",
   "./manifest.json"
 ];
@@ -24,7 +25,7 @@ self.addEventListener("install", event => {
           console.warn("Impossible de mettre en cache :", file);
         }
       }
-    })()
+    })
   );
 });
 

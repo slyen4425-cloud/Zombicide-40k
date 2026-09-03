@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.9-dungeon-combat-range";
+const CACHE_NAME = "gensrpg-cache-16.78.10-dungeon-item-sets";
 
 const CORE_FILES = [
   "./",

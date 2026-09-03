@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GenSrpG V16.78.9</title>
+<title>GenSrpG V16.78.10</title>
 <style>
 :root {
  --bg:#0d0d0d; --panel:#181818; --panel2:#242424; --line:#383838;
@@ -42849,6 +42849,16 @@ try{
 }catch(e){}
 })();
 </script>
+<style id="dungeonCore316EquipmentSetsCss">
+.dc316SetPiece{margin-top:5px;padding:4px 7px;border-radius:7px;background:#332817;color:#efd48d;font-size:10px;font-weight:850}
+.dc316Rarity{display:inline-block;margin:4px 4px 0 0;padding:3px 6px;border-radius:999px;background:#24201a;border:1px solid #64583f;font-size:9px;font-weight:900;text-transform:uppercase}
+.dc316Rarity.rare{color:#72bcff;border-color:#3e76a1}.dc316Rarity.epic{color:#d79aff;border-color:#8554a6}.dc316Rarity.legendary{color:#ffd76c;border-color:#a17d26}
+.dc316Sets{display:grid;gap:8px;margin-top:10px}.dc316Set{padding:9px;border:1px solid #655535;border-radius:10px;background:#17130d}.dc316Set>strong{color:#f0d28a}.dc316SetProgress{font-size:10px;margin-top:3px;opacity:.84}
+.dc316Thresholds{display:grid;gap:3px;margin-top:7px}.dc316Threshold{padding:4px 6px;border-radius:6px;background:#211d17;color:#8e8778;font-size:10px}.dc316Threshold.active{background:#193320;color:#a9efa9;border:1px solid #3c7145}
+.dc316ItemAbilities{display:grid;gap:5px;margin-top:7px}.dc316ItemAbilities strong{font-size:10px}.dc316AbilityBtn{padding:7px!important;font-size:9px!important;background:#61441f!important}
+.dc316Ammo{margin-top:4px;color:#f0bb67;font-size:10px;font-weight:850}
+</style>
+<script src="assets/dungeon/dungeon-core-316.js"></script>
 <script id="dungeonCore303TimelineRootFix">
 (function(){
 "use strict";
@@ -43032,7 +43042,7 @@ window.__dc302RenderCombat=render;
 window.renderDungeonCombatRound=render;
 
 /* Les actions héros consomment le tour uniquement après fermeture du résultat. */
-["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItem061"].forEach(name=>{
+["dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItem061","dungeonCombatUseItemAbility316"].forEach(name=>{
   const base=window[name];if(typeof base!=="function")return;
   window[name]=function(heroId){
     const cur=current();
@@ -43601,7 +43611,7 @@ window.dungeonHandleLevelUp071=function(heroId,beforeXp,st,delay=80){
 };
 
 window.dungeonDebug312=function(){return {queued:levelQueue312.length,open:levelOpen312,busy:combatBusy312()}};
-try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.15";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.15 · portée de combat · défaite globale fiable."}catch(e){}
+try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.16";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.16 · sets d’équipement · 22 nouveaux objets."}catch(e){}
 })();
 </script>
 </body>

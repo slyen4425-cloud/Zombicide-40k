@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const zlib = require("node:zlib");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 
@@ -523,6 +524,216 @@ function testEnemyAlertsAndBowContextRecovery() {
   assert.doesNotMatch(visible, /dc200BypassedBy/, "le tour d'un héros furtif ne doit pas masquer les ennemis aux autres héros");
 }
 
+function testEquipmentSetsAndZipCatalogue() {
+  const core316Path = path.join(__dirname, "..", "assets", "dungeon", "dungeon-core-316.js");
+  const core316 = fs.readFileSync(core316Path, "utf8");
+  const itemMap = {};
+  let equippedItems = [];
+  let enemies = [];
+  const heroStore = {};
+  const popupLog = [];
+  const storageLog = {};
+  const documentElements = { dungeonEquipmentSlots: { style: {}, innerHTML: "" } };
+  const context = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: () => 0 }),
+    DUNGEON_ITEM_IDS: ["dng_leather"],
+    ITEMS: [],
+    RPG_GEAR_LABELS: { head: "Tête", shoulders: "Épaules", torso: "Torse", legs: "Jambes", feet: "Pieds", hands: "Mains", neck: "Cou", offhand: "Main secondaire" },
+    document: { getElementById(id) { return documentElements[id] || null; } },
+    isDungeonMode() { return true; },
+    dungeonItems() {
+      return [{
+        id: "dng_leather", name: "Armure de cuir", type: "Équipement", rpgSlot: "torso",
+        image_data: "assets/dungeon/creatures/dng_leather.png",
+        effect: "+1 Armure · +1 Agilité.", rpgBonuses: { armor: 1, agilite: 1 }
+      }];
+    },
+    loadDungeonItemOverrides() { return {}; },
+    gensNormCrop(value) { return value; },
+    dungeonEquipmentBonus() { return 0; },
+    dungeonEquippedItems() { return equippedItems; },
+    equipmentCardStatsHtml() { return ""; },
+    itemById(id) { return itemMap[id] || null; },
+    z40kEscHtml(value) { return String(value ?? ""); },
+    dungeonRarityLabel(value) { return value; },
+    getEntry(index) { return context.state?.inventory?.[index] || null; },
+    getItemFromEntry(entry) { return entry ? itemMap[entry.itemId] || null : null; },
+    loadState(id) { return JSON.parse(JSON.stringify(heroStore[id] || {})); },
+    key(id) { return `hero:${id}`; },
+    localStorage: {
+      getItem(name) { return storageLog[name] ?? null; },
+      setItem(name, value) {
+        storageLog[name] = String(value);
+        if (name.startsWith("hero:")) heroStore[name.slice(5)] = JSON.parse(value);
+      }
+    },
+    loadActiveEnemies() { return JSON.parse(JSON.stringify(enemies)); },
+    applyDungeonAttackDamage(instanceId, damage) {
+      const target = enemies.find(enemy => enemy.id === instanceId);
+      if (target) target.hp = Math.max(0, target.hp - damage);
+    },
+    dungeonApplyEnemyTalentDot(heroId, targetId, effect, label) {
+      const target = enemies.find(enemy => enemy.id === targetId);
+      if (!target) return false;
+      target.dots = [...(target.dots || []), { heroId, effect, label }];
+      return true;
+    },
+    dungeonApplyEnemyTalentStatMod(targetId, effect, label) {
+      const target = enemies.find(enemy => enemy.id === targetId);
+      if (!target) return false;
+      target.mods = [...(target.mods || []), { effect, label }];
+      return true;
+    },
+    dungeonTalentHealHero(heroId, amount) {
+      const hero = heroStore[heroId];
+      if (!hero) return 0;
+      const before = hero.wounds || 0;
+      hero.wounds = Math.max(0, before - amount);
+      return before - hero.wounds;
+    },
+    dungeonTalentDealDirectDamage(heroId, targetId, amount) {
+      const target = enemies.find(enemy => enemy.id === targetId);
+      if (target) target.hp = Math.max(0, target.hp - amount);
+      return !!target;
+    },
+    dungeonParticipants() { return Object.keys(heroStore); },
+    tickDungeonTalentRuntimeEffects() {},
+    showEffectPopup(...args) { popupLog.push(args); },
+    alert() {},
+    CHARS: {},
+    dungeonCombatSelection: { heroes: [], enemies: [] },
+    attackRollContext: null,
+    combatRewardHeroId: null,
+    current: null,
+    state: null
+  };
+  context.window = context;
+  vm.runInNewContext(core316, context, { filename: "dungeon-core-316.js" });
+
+  const catalogue = Array.from(context.DUNGEON_ITEM_DEFINITIONS_316);
+  assert.equal(catalogue.length, 22, "les 22 PNG du ZIP doivent avoir une définition d'objet");
+  assert.equal(new Set(catalogue.map(item => item.id)).size, 22, "les IDs des nouveaux objets doivent être uniques");
+  catalogue.forEach(item => {
+    itemMap[item.id] = item;
+    const artPath = path.join(__dirname, "..", "assets", "dungeon", "items", item.file);
+    assert.ok(
+      fs.existsSync(artPath),
+      `art manquant pour ${item.id}`
+    );
+    const png = fs.readFileSync(artPath);
+    assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", `signature PNG invalide pour ${item.id}`);
+    let offset = 8;
+    let complete = false;
+    const compressed = [];
+    while (offset + 12 <= png.length) {
+      const length = png.readUInt32BE(offset);
+      const type = png.toString("ascii", offset + 4, offset + 8);
+      const data = png.subarray(offset + 8, offset + 8 + length);
+      assert.equal(data.length, length, `chunk PNG tronqué pour ${item.id}`);
+      if (type === "IDAT") compressed.push(data);
+      if (type === "IEND") { complete = true; break; }
+      offset += 12 + length;
+    }
+    assert.equal(complete, true, `IEND absent pour ${item.id}`);
+    assert.ok(zlib.inflateSync(Buffer.concat(compressed)).length > 0, `pixels PNG illisibles pour ${item.id}`);
+  });
+
+  const allItems = Array.from(context.dungeonItems());
+  allItems.forEach(item => { itemMap[item.id] = item; });
+  const leatherChest = allItems.find(item => item.id === "dng_leather");
+  assert.equal(leatherChest.setId, "set_leather", "l'armure de cuir existante doit devenir la cinquième pièce du set");
+  assert.equal(catalogue.filter(item => item.setId === "set_ancient").length, 5, "l'Armure des Anciens doit contenir cinq pièces");
+  assert.equal(catalogue.filter(item => item.setId === "set_leather").length, 4, "le ZIP doit compléter le plastron de cuir existant avec quatre pièces");
+
+  const leather = allItems.filter(item => item.setId === "set_leather");
+  const leatherState = context.dungeonSetStateFromItems316(leather)[0];
+  assert.equal(leatherState.count, 5);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(leatherState.bonuses)),
+    { agilite: 1, dodge: 5, initiative: 1, defense: 1 },
+    "les quatre paliers cumulés du set de cuir doivent être actifs"
+  );
+
+  const duplicateLeather = context.dungeonSetStateFromItems316([...leather, leather[0]])[0];
+  assert.equal(duplicateLeather.count, 5, "équiper deux fois la même pièce ne doit pas augmenter le set");
+
+  const ancient = catalogue.filter(item => item.setId === "set_ancient");
+  const ancientFour = context.dungeonSetStateFromItems316(ancient.slice(0, 4))[0];
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(ancientFour.bonuses)),
+    { armor: 1, magicDefense: 1, endurance: 2 },
+    "quatre pièces des Anciens ne doivent pas activer le palier cinq pièces"
+  );
+  assert.equal(context.dungeonSetBonusFromItems316(ancient, "force"), 1);
+  assert.equal(context.dungeonSetBonusFromItems316(ancient, "defense"), 1);
+
+  const leechBow = catalogue.find(item => item.id === "ditem_leech_bow");
+  const emberQuiver = catalogue.find(item => item.id === "ditem_ember_quiver");
+  const armor = ancient[0];
+  itemMap.dng_arrows = { id: "dng_arrows", reloads: 1, rpgReloadKind: "arrows" };
+  const reloadState = {
+    inventory: [
+      { uid: "bow", itemId: leechBow.id, ammo: 0 },
+      { uid: "quiver", itemId: emberQuiver.id, reloads: 1 },
+      { uid: "armor", itemId: armor.id }
+    ],
+    rightHand: 0,
+    leftHand: 0,
+    rpgGear: { head: 2 }
+  };
+  const mark = context.dungeonReloadMark316(reloadState, 0, true);
+  reloadState.inventory[0].ammo = leechBow.ammoCapacity;
+  reloadState.inventory.splice(1, 1);
+  assert.equal(context.dungeonFinishReloadMark316(reloadState, mark), true);
+  assert.equal(reloadState.rpgGear.head, 1, "consommer un carquois doit conserver le bon index d'armure équipée");
+  assert.equal(reloadState.inventory[0].activeAmmoEffect.label, "Flèches incendiaires");
+  assert.equal(reloadState.inventory[0].activeAmmoEffect.remaining, 10);
+
+  equippedItems = leather;
+  assert.equal(context.dungeonEquipmentBonus("agilite"), 1, "le moteur dérivé doit inclure les bonus actifs du set");
+
+  context.state = {
+    inventory: leather.map((item, index) => ({ uid: `leather-${index}`, itemId: item.id })),
+    rpgGear: { torso: 0, shoulders: 1, hands: 2, legs: 3, feet: 4, head: null, neck: null, offhand: null }
+  };
+  context.renderDungeonGear();
+  assert.match(documentElements.dungeonEquipmentSlots.innerHTML, /Ensemble de cuir · 5\/5/);
+  assert.match(documentElements.dungeonEquipmentSlots.innerHTML, /✅ 5 pièces/);
+  assert.match(documentElements.dungeonEquipmentSlots.innerHTML, /assets\/dungeon\/items\/ditem_leather_boots\.png/);
+
+  const ashBlade = catalogue.find(item => item.id === "ditem_ash_blade");
+  heroStore.lyra = { wounds: 2, inventory: [{ uid: "leech", itemId: leechBow.id, ammo: 9 }], rightHand: 0, leftHand: 0, rpgGear: {} };
+  itemMap[ashBlade.id] = ashBlade;
+  enemies = [{ id: "enemy-1", hp: 10 }];
+  context.attackRollContext = { heroId: "lyra", itemId: leechBow.id };
+  context.applyDungeonAttackDamage("enemy-1", 2, 1, 2);
+  assert.equal(heroStore.lyra.wounds, 1, "l'Arc du Sangsue doit rendre 1 PV après avoir blessé");
+
+  heroStore.lyra.inventory[0] = { uid: "ash", itemId: ashBlade.id };
+  context.attackRollContext = { heroId: "lyra", itemId: ashBlade.id };
+  context.applyDungeonAttackDamage("enemy-1", 1, 1, 1);
+  assert.equal(enemies[0].dots.at(-1).label, "Brûlure de Cendre", "la Lame de Cendre doit réutiliser le moteur de DoT");
+
+  const guardian = catalogue.find(item => item.id === "ditem_guardian_staff");
+  heroStore.brom = { wounds: 3, inventory: [{ uid: "staff", itemId: guardian.id }], rightHand: 0, leftHand: 0, rpgGear: {} };
+  heroStore.aldren = { wounds: 1, inventory: [], rightHand: null, leftHand: null, rpgGear: {} };
+  context.CHARS.brom = { name: "Brom" };
+  context.CHARS.aldren = { name: "Aldren" };
+  context.dungeonCombatSelection = { heroes: ["brom", "aldren"], enemies: ["enemy-1"] };
+  context.dungeonCombatUseItemAbility316("brom", guardian.id, "guardian_group_heal", "enemy-1");
+  assert.equal(heroStore.brom.wounds, 1);
+  assert.equal(heroStore.aldren.wounds, 0);
+  assert.equal(heroStore.brom.itemCooldowns[`${guardian.id}:guardian_group_heal`], 3);
+  assert.equal(popupLog.length, 1, "une compétence d'objet doit produire un résultat visible");
+  context.tickDungeonTalentRuntimeEffects();
+  assert.equal(heroStore.brom.itemCooldowns[`${guardian.id}:guardian_group_heal`], 2, "le cooldown d'objet doit diminuer avec le moteur de tours existant");
+
+  assert.match(html, /assets\/dungeon\/dungeon-core-316\.js/);
+  assert.match(html, /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre la timeline finale");
+  assert.match(html, /GenSrpG V16\.78\.10/);
+}
+
 testEncounterOnlyRepairsOnRoomCreation();
 testCreaturePortraitReplacesEveryLegacyGlyph();
 testCombatItemsDoNotStackHiddenDamagePopup();
@@ -534,4 +745,5 @@ testCombatParticipationUsesConfiguredRange();
 testLocalCombatLossIsNotGlobalDefeat();
 testRuntimeUsesSpatialParticipationAndNoGroupReset();
 testEnemyAlertsAndBowContextRecovery();
+testEquipmentSetsAndZipCatalogue();
 console.log("Dungeon regression tests: OK");

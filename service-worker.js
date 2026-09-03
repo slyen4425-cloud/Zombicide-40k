@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.16-dungeon-branch-single-spawn";
+const CACHE_NAME = "gensrpg-cache-16.78.16-equipment-ui-hotfix-1";
 
 const CORE_FILES = [
   "./",
@@ -6,6 +6,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-core-317.js",
   "./assets/dungeon/dungeon-core-318.js",
   "./assets/dungeon/dungeon-room-creator-100.js",
+  "./assets/dungeon/dungeon-equipment-ui.js",
   "./manifest.json"
 ];
 

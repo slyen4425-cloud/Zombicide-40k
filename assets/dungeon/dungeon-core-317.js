@@ -1,10 +1,11 @@
-/* GenSrpG Dungeon Core 3.17 — spatial return, armor floor and merchant stock */
+/* GenSrpG Dungeon Core 3.17.1 — spatial return, armor floor and merchant stock UI hotfix */
 (function(){
 "use strict";
 
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const RT_KEY="gensrpg_dungeon_runtime_v2";
-const VERSION="3.17";
+const VERSION="3.17.1";
+const APP_VERSION="16.78.12";
 
 function clampInt(value,min,max,fallback){
   const n=Number(value);
@@ -137,52 +138,85 @@ function stateStock(st,items,e){
 }
 function merchantStockContext(st,items,e){return runtimeStock(items,e)||stateStock(st,items,e)}
 
+const MERCHANT_TABS=[
+  {id:"weapons",label:"⚔️ Armes"},
+  {id:"equipment",label:"🛡️ Armures & équipements"},
+  {id:"consumables",label:"🧪 Consommables"},
+  {id:"other",label:"📦 Autres"}
+];
+let merchantTab317="weapons";
+function setMerchantTab(tab){
+  const id=String(tab||"");
+  if(MERCHANT_TABS.some(x=>x.id===id))merchantTab317=id;
+  try{if(typeof ROOT.renderMerchant==="function")ROOT.renderMerchant()}catch(e){}
+}
+function tabButtonHtml(tab,items,stock){
+  const count=items.filter(it=>merchantCategory(it)===tab.id).length;
+  const units=items.filter(it=>merchantCategory(it)===tab.id).reduce((n,it)=>n+Math.max(0,Number(stock[String(it.id)])||0),0);
+  const active=merchantTab317===tab.id;
+  return '<button type="button" data-dc317-merchant-tab="'+tab.id+'" onclick="DungeonCore317.setMerchantTab(\''+tab.id+'\')" aria-pressed="'+(active?'true':'false')+'" style="'+(active?'font-weight:800;outline:2px solid currentColor;':'')+'">'+tab.label+' <span class="badge">'+count+' · '+units+'</span></button>';
+}
+function renderMerchant317(){
+  const box=document.getElementById("merchantList"),wallet=document.getElementById("merchantWallet");if(!box)return;
+  const e=typeof currentRpgEconomy==="function"?currentRpgEconomy():{},gold=(typeof current!=="undefined"&&current&&typeof gensHeroGold==="function")?gensHeroGold(current):0;
+  if(wallet)wallet.innerHTML='<strong>'+gensCurrencyLabel(gold)+'</strong> · Prix achat ×'+Number(e.merchantBuyMultiplier||1)+' · Revente '+Number(e.sellPercent||0)+'%';
+  const items=typeof merchantItems==="function"?merchantItems():[];
+  const st=(typeof current!=="undefined"&&current&&typeof loadState==="function")?loadState(current):{inventory:[]};
+  const ctx=merchantStockContext(st,items,e),stock=ctx.stock;ctx.persist();
+
+  const tabs='<div id="dc317MerchantTabs" class="v2LibActions" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px">'+MERCHANT_TABS.map(t=>tabButtonHtml(t,items,stock)).join("")+'</div>';
+  const filtered=items.filter(it=>merchantCategory(it)===merchantTab317);
+  let html=tabs;
+  html+=filtered.length?filtered.map(it=>{
+    const buy=Math.max(0,Math.round(dungeonMerchantDefaultPrice066(it)*(Number(e.merchantBuyMultiplier)||1)));
+    const qty=Math.max(0,Number(stock[String(it.id)])||0),empty=qty<=0;
+    return '<div class="v2LibCard" data-dc317-category="'+merchantCategory(it)+'"><div class="v2LibHead"><strong>'+esc(it.name||it.id)+'</strong><span class="badge">'+gensCurrencyLabel(buy)+'</span></div><div class="small">'+esc(it.type||"Objet")+' · <strong>Stock : '+qty+'</strong></div><div class="v2LibActions"><button type="button" '+(empty?'disabled title="Rupture de stock"':'onclick="merchantBuy(\''+escAttr(it.id)+'\')"')+'>'+(empty?'⛔ RUPTURE':'🛒 ACHETER')+'</button></div></div>';
+  }).join(""):'<div class="empty">Aucun objet dans cette catégorie.</div>';
+
+  if(typeof current!=="undefined"&&current){
+    const inv=Array.isArray(st.inventory)?st.inventory:[];
+    if(inv.length)html+='<h3 style="margin:12px 0 0">💸 Vendre</h3>'+inv.map((x,i)=>{const it=itemById(x.itemId||x.id),sell=Math.max(0,Math.round((Number(it?.price)||0)*(Number(e.sellPercent)||0)/100));return it&&sell>0?'<div class="v2LibCard"><div class="v2LibHead"><strong>'+esc(it.name)+'</strong><span class="badge">'+gensCurrencyLabel(sell)+'</span></div><div class="v2LibActions"><button type="button" onclick="merchantSell('+i+')">💸 VENDRE</button></div></div>':''}).join("");
+  }
+  box.innerHTML=html;
+}
+renderMerchant317.__dc317=true;
+
+function merchantBuy317(itemId){
+  if(typeof current==="undefined"||!current)return;const it=itemById(itemId);if(!it)return;
+  const e=currentRpgEconomy(),price=Math.max(0,Math.round(dungeonMerchantDefaultPrice066(it)*(Number(e.merchantBuyMultiplier)||1)));
+  const items=merchantItems(),st=loadState(current);st.inventory=Array.isArray(st.inventory)?st.inventory:[];
+  const ctx=merchantStockContext(st,items,e),stock=ctx.stock,id=String(itemId),qty=Math.max(0,Number(stock[id])||0);
+  if(qty<=0){ctx.persist();notice("⛔ Rupture de stock",(it.name||"Cet objet")+" n’est plus disponible chez ce marchand.");renderMerchant317();return}
+  if(gensHeroGold(current)<price){notice("🪙 Achat","Pas assez de "+(e.currencyName||"Or")+".");return}
+  st.inventory.push(makeInventoryEntry(itemId));st.gold=gensHeroGold(current)-price;stock[id]=qty-1;ctx.persist();
+  localStorage.setItem(key(current),JSON.stringify(st));if(typeof state!=="undefined")state=st;renderMerchant317();try{renderInventory();renderEconomyWallet()}catch(e){}
+}
+merchantBuy317.__dc317=true;
+
+function merchantSell317(index){
+  if(typeof current==="undefined"||!current)return;const st=loadState(current);st.inventory=Array.isArray(st.inventory)?st.inventory:[];const entry=st.inventory[index],it=itemById(entry?.itemId||entry?.id);if(!it)return;
+  const e=currentRpgEconomy(),price=Math.max(0,Math.round((Number(it.price)||0)*(Number(e.sellPercent)||0)/100));if(price<=0)return;
+  const items=merchantItems(),ctx=merchantStockContext(st,items,e),stock=ctx.stock,id=String(it.id);
+  st.inventory.splice(index,1);st.gold=gensHeroGold(current)+price;stock[id]=Math.max(0,Number(stock[id])||0)+1;ctx.persist();
+  localStorage.setItem(key(current),JSON.stringify(st));if(typeof state!=="undefined")state=st;renderMerchant317();try{renderInventory();renderHands();renderGear();renderEconomyWallet()}catch(e){}
+}
+merchantSell317.__dc317=true;
+
 function installMerchantOverrides(){
   if(typeof ROOT.renderMerchant!=="function"||typeof ROOT.merchantBuy!=="function"||typeof ROOT.merchantSell!=="function")return false;
-  if(ROOT.renderMerchant.__dc317)return true;
-
-  const render=function(){
-    const box=document.getElementById("merchantList"),wallet=document.getElementById("merchantWallet");if(!box)return;
-    const e=typeof currentRpgEconomy==="function"?currentRpgEconomy():{},gold=(typeof current!=="undefined"&&current&&typeof gensHeroGold==="function")?gensHeroGold(current):0;
-    if(wallet)wallet.innerHTML='<strong>'+gensCurrencyLabel(gold)+'</strong> · Prix achat ×'+Number(e.merchantBuyMultiplier||1)+' · Revente '+Number(e.sellPercent||0)+'%';
-    const items=typeof merchantItems==="function"?merchantItems():[];
-    const st=(typeof current!=="undefined"&&current&&typeof loadState==="function")?loadState(current):{inventory:[]};
-    const ctx=merchantStockContext(st,items,e),stock=ctx.stock;ctx.persist();
-    box.innerHTML=items.length?items.map(it=>{
-      const buy=Math.max(0,Math.round(dungeonMerchantDefaultPrice066(it)*(Number(e.merchantBuyMultiplier)||1)));
-      const qty=Math.max(0,Number(stock[String(it.id)])||0),empty=qty<=0;
-      return '<div class="v2LibCard"><div class="v2LibHead"><strong>'+esc(it.name||it.id)+'</strong><span class="badge">'+gensCurrencyLabel(buy)+'</span></div><div class="small">'+esc(it.type||"Objet")+' · Stock : '+qty+'</div><div class="v2LibActions"><button type="button" '+(empty?'disabled title="Rupture de stock"':'onclick="merchantBuy(\''+escAttr(it.id)+'\')"')+'>'+(empty?'⛔ RUPTURE':'🛒 ACHETER')+'</button></div></div>';
-    }).join(""):'<div class="empty">Aucun objet avec une valeur marchande.</div>';
-    if(typeof current!=="undefined"&&current){
-      const inv=Array.isArray(st.inventory)?st.inventory:[];
-      if(inv.length)box.innerHTML+='<h3 style="margin:12px 0 0">💸 Vendre</h3>'+inv.map((x,i)=>{const it=itemById(x.itemId||x.id),sell=Math.max(0,Math.round((Number(it?.price)||0)*(Number(e.sellPercent)||0)/100));return it&&sell>0?'<div class="v2LibCard"><div class="v2LibHead"><strong>'+esc(it.name)+'</strong><span class="badge">'+gensCurrencyLabel(sell)+'</span></div><div class="v2LibActions"><button type="button" onclick="merchantSell('+i+')">💸 VENDRE</button></div></div>':''}).join("");
-    }
-  };
-  render.__dc317=true;
-
-  const buy=function(itemId){
-    if(typeof current==="undefined"||!current)return;const it=itemById(itemId);if(!it)return;
-    const e=currentRpgEconomy(),price=Math.max(0,Math.round(dungeonMerchantDefaultPrice066(it)*(Number(e.merchantBuyMultiplier)||1)));
-    const items=merchantItems(),st=loadState(current);st.inventory=Array.isArray(st.inventory)?st.inventory:[];
-    const ctx=merchantStockContext(st,items,e),stock=ctx.stock,id=String(itemId),qty=Math.max(0,Number(stock[id])||0);
-    if(qty<=0){ctx.persist();notice("⛔ Rupture de stock",(it.name||"Cet objet")+" n’est plus disponible chez ce marchand.");render();return}
-    if(gensHeroGold(current)<price){notice("🪙 Achat","Pas assez de "+(e.currencyName||"Or")+".");return}
-    st.inventory.push(makeInventoryEntry(itemId));st.gold=gensHeroGold(current)-price;stock[id]=qty-1;ctx.persist();
-    localStorage.setItem(key(current),JSON.stringify(st));if(typeof state!=="undefined")state=st;render();try{renderInventory();renderEconomyWallet()}catch(e){}
-  };
-  buy.__dc317=true;
-
-  const sell=function(index){
-    if(typeof current==="undefined"||!current)return;const st=loadState(current);st.inventory=Array.isArray(st.inventory)?st.inventory:[];const entry=st.inventory[index],it=itemById(entry?.itemId||entry?.id);if(!it)return;
-    const e=currentRpgEconomy(),price=Math.max(0,Math.round((Number(it.price)||0)*(Number(e.sellPercent)||0)/100));if(price<=0)return;
-    const items=merchantItems(),ctx=merchantStockContext(st,items,e),stock=ctx.stock,id=String(it.id);
-    st.inventory.splice(index,1);st.gold=gensHeroGold(current)+price;stock[id]=Math.max(0,Number(stock[id])||0)+1;ctx.persist();
-    localStorage.setItem(key(current),JSON.stringify(st));if(typeof state!=="undefined")state=st;render();try{renderInventory();renderHands();renderGear();renderEconomyWallet()}catch(e){}
-  };
-  sell.__dc317=true;
-
-  ROOT.renderMerchant=render;ROOT.merchantBuy=buy;ROOT.merchantSell=sell;
+  if(ROOT.renderMerchant.__dc317&&ROOT.merchantBuy.__dc317&&ROOT.merchantSell.__dc317)return true;
+  ROOT.renderMerchant=renderMerchant317;
+  ROOT.merchantBuy=merchantBuy317;
+  ROOT.merchantSell=merchantSell317;
   return true;
+}
+
+let merchantRetryTimer=0;
+function ensureMerchantOverrides(){
+  installMerchantOverrides();
+  if(typeof setInterval==="function"&&!merchantRetryTimer){
+    merchantRetryTimer=setInterval(()=>{try{installMerchantOverrides()}catch(e){}},1200);
+  }
 }
 
 let backQueued=false;
@@ -209,17 +243,18 @@ function ensureBackButton(){
 }
 
 function install(){
-  installMerchantOverrides();
+  ensureMerchantOverrides();
   scheduleBackButton();
   if(typeof MutationObserver==="function"&&document?.documentElement){
-    const obs=new MutationObserver(scheduleBackButton);obs.observe(document.documentElement,{childList:true,subtree:true});
+    const obs=new MutationObserver(()=>{scheduleBackButton();try{installMerchantOverrides()}catch(e){}});obs.observe(document.documentElement,{childList:true,subtree:true});
   }
 }
 
-ROOT.DungeonCore317={VERSION,merchantCategory,stockLimits,isPhysicalDamageType,resolveArmorFloor,readRuntime,writeRuntime,goBackRoom,ensureBackButton,installMerchantOverrides};
-ROOT.GENSRPG_VERSION="16.78.11";
+ROOT.DungeonCore317={VERSION,APP_VERSION,merchantCategory,stockLimits,isPhysicalDamageType,resolveArmorFloor,readRuntime,writeRuntime,goBackRoom,ensureBackButton,installMerchantOverrides,setMerchantTab,MERCHANT_TABS};
+ROOT.GENSRPG_VERSION=APP_VERSION;
 ROOT.DUNGEON_CORE_VERSION=VERSION;
 if(typeof document!=="undefined"){
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+  if(typeof ROOT.addEventListener==="function")ROOT.addEventListener("load",ensureMerchantOverrides,{once:true});
 }
 })();

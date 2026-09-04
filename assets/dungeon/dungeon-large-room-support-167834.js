@@ -62,7 +62,7 @@ function remapEnemies(x,map){
 function remapScene(x,map){try{const all=ROOT.loadDungeonSceneElements?.()||[];let changed=false;all.forEach(el=>{if(Number(el?.room)!==Number(x.room))return;if(el.kind==="chest"&&map.chestIdx>=0&&Number(el.cellIndex)!==map.chestIdx){el.cellIndex=map.chestIdx;changed=true}if(el.kind==="trap"&&map.trapIdx>=0&&Number(el.cellIndex)!==map.trapIdx){el.cellIndex=map.trapIdx;changed=true}});if(changed)ROOT.saveDungeonSceneElements?.(all)}catch(e){}}
 function persist(x){try{ROOT.DungeonSpatial313?.ensure?.(x);ROOT.DungeonSpatial313?.persist?.(x)}catch(e){}writeRt(x)}
 function isAuthored(x){const l=x?.last||{},m=l.map||{};return !!(l.worldRuntime167823||l.customRoomRuntime167822||m.worldTemplate167834||m.worldTemplate167835||m.worldGeometryAuthoritative167835)}
-function roomWasCreated(before,after){if(!after?.last||Number(after.room)<=0)return false;if(after.dc313LastTransition?.created===true)return true;return Number(after.room)>Number(before?.room||0)}
+function roomWasCreated(before,after){if(!after?.last||Number(after.room)<=0)return false;const from=Number(before?.room||0),to=Number(after.room||0),t=after.dc313LastTransition;if(to===from)return false;if(t?.created===true&&Number(t.to)===to)return true;return to>from}
 function repairGenerated(before,desired){
   const x=readRt();if(!x||!roomWasCreated(before,x)||isAuthored(x))return false;const old=x.last?.map;if(!old)return false;
   const target=clamp(desired);if(Number(old.size)===target&&Number(old.width||old.size)===target&&old.cells?.length===target*target){old.largeRoom167835=true;persist(x);return false}
@@ -87,7 +87,7 @@ function roomMap(room){
 }
 function structuralMatch(map,exact){if(!map||!exact||Number(map.width||map.size)!==exact.width||Number(map.height||map.size)!==exact.height||map.cells?.length!==exact.cells.length)return false;for(let i=0;i<exact.cells.length;i++){const wanted=exact.cells[i];if(wanted==="wall"||wanted==="entry"||wanted==="exit")if(String(map.cells[i])!==wanted)return false}return true}
 function overlayDynamic(exact,old){const dynamic=new Set(["enemy","boss","chest","trap","puzzle","npc","item","merchant","rest","trapdoor"]);if(!old?.cells)return exact;for(let i=0;i<Math.min(exact.cells.length,old.cells.length);i++){const v=String(old.cells[i]||"");if(dynamic.has(v)&&!["wall","entry","exit"].includes(exact.cells[i]))exact.cells[i]=v}return exact}
-function ensureWorldState(x,sel,pack,plan){
+function ensureWorldState(x,sel,pack){
   const hero=activeHero(x),roomNo=Math.max(1,Number(x.room)||1);let w=x.world167823&&x.world167823.dungeonId===sel.id?x.world167823:{dungeonId:sel.id,heroNodes:{},nodeRooms:{},roomNodes:{},history:{}};
   for(const k of ["heroNodes","nodeRooms","roomNodes","history"])w[k]=w[k]&&typeof w[k]==="object"?w[k]:{};
   w.nodeRooms[String(pack.node.id)]=roomNo;w.roomNodes[String(roomNo)]=String(pack.node.id);if(hero){w.heroNodes[hero]=String(pack.node.id);w.history[hero]=Array.isArray(w.history[hero])?w.history[hero]:[];if(w.history[hero][w.history[hero].length-1]!==String(pack.node.id))w.history[hero].push(String(pack.node.id))}x.world167823=w;
@@ -95,9 +95,9 @@ function ensureWorldState(x,sel,pack,plan){
   return hero;
 }
 function repairWorld(before,sel,plan){
-  let x=readRt();if(!x||!roomWasCreated(before,x)&&!x.last)return false;const pack=worldPack(sel,plan,x);if(!pack)return false;let exact=roomMap(pack.room),changed=false;const old=x.last?.map;
+  let x=readRt();if(!x?.last)return false;const target=String(plan?.targetNodeId||""),reached=!!target&&String(x.last.worldNodeId||"")===target;if(!roomWasCreated(before,x)&&!reached)return false;const pack=worldPack(sel,plan,x);if(!pack)return false;let exact=roomMap(pack.room),changed=false;const old=x.last?.map;
   if(!structuralMatch(old,exact)){exact.objective=clone(old?.objective||x.last?.objective||exact.objective);exact=overlayDynamic(exact,old);x.last.map=exact;x.last.objective=clone(exact.objective);remapEnemies(x,exact);changed=true}else{x.last.map.width=exact.width;x.last.map.height=exact.height;x.last.map.size=exact.width;x.last.map.worldTemplate167835=true;x.last.map.worldGeometryAuthoritative167835=true}
-  const hero=ensureWorldState(x,sel,pack,plan),arrival=Number(plan?.edge?.toEntryIndex);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero&&(changed||!Number.isInteger(Number(x.positions[hero]))))x.positions[hero]=Number.isInteger(arrival)&&arrival>=0&&arrival<x.last.map.cells.length?arrival:Math.max(0,Number(x.last.map.entryIdx)||0);
+  const hero=ensureWorldState(x,sel,pack),arrival=Number(plan?.edge?.toEntryIndex);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero&&(changed||!Number.isInteger(Number(x.positions[hero]))))x.positions[hero]=Number.isInteger(arrival)&&arrival>=0&&arrival<x.last.map.cells.length?arrival:Math.max(0,Number(x.last.map.entryIdx)||0);
   persist(x);
   try{if(!x.last.worldContentApplied167824)ROOT.DungeonZoneContent167824?.applyCurrentZone?.()}catch(e){console.warn("V16.78.35 zone content apply",e)}
   return changed;

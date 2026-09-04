@@ -1,19 +1,19 @@
-/* GenSrpG V16.78.28 — direct exact-content editing on Room Creator templates.
-   Configure placed elements directly before the room belongs to any World Builder graph.
+/* GenSrpG V16.78.29 — direct exact-content editing on Room Creator templates.
+   Responsiveness fix: updates are event-driven from Room Creator actions only; no whole-document observer.
    The room is auto-saved when direct configuration starts. Template content is copied
    into each newly-created World Builder zone instance, which may then diverge independently. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.1.0",APP_VERSION="16.78.28",TEMPLATE_DUNGEON_ID="__room_template__";
+const VERSION="1.2.0",APP_VERSION="16.78.29",TEMPLATE_DUNGEON_ID="__room_template__";
 const CONFIGURABLE=new Set(["enemy","boss","chest","trap","puzzle"]);
 const ENEMIES=[
  ["dng_skeleton","Squelette"],["dng_skeleton_archer","Squelette archer"],["dng_skeleton_guard","Squelette garde"],["dng_ghoul","Goule"],["dng_wraith","Spectre"],["dng_lich","Liche"],
  ["dng_goblin","Gobelin"],["dng_goblin_archer","Gobelin archer"],["dng_goblin_shaman","Gobelin chaman"],["dng_orc","Orc"],["dng_orc_berserker","Orc berserker"],["dng_orc_shaman","Orc chaman"],
  ["dng_spider","Araignée"],["dng_direwolf","Loup sinistre"],["dng_harpy","Harpie"],["dng_troll","Troll"],["dng_golem","Golem"],["dng_minotaur","Minotaure"],["dng_wyvern","Wyverne"],["dng_necromancer","Nécromancien"]
 ];
-let templateMode=false,activeCell=-1,activeObject="",advancedOpen=false,installed=false,observer=null;
+let templateMode=false,activeCell=-1,activeObject="",advancedOpen=false,installed=false;
 function roomApi(){return ROOT.DungeonRoomCreator100||null}
 function zoneApi(){return ROOT.DungeonZoneContent167824||null}
 function visualApi(){return ROOT.DungeonRoomVisualConfig167826||ROOT.DungeonRoomVisualConfig167825||null}
@@ -29,7 +29,7 @@ function inferRoomId(){
 }
 function ensureSavedRoom(){
   const api=roomApi();if(!api)return "";
-  try{const saved=api.saveCurrent?.();if(saved?.id)return String(saved.id)}catch(e){console.warn("GenSrpG V16.78.28 autosave",e)}
+  try{const saved=api.saveCurrent?.();if(saved?.id)return String(saved.id)}catch(e){console.warn("GenSrpG V16.78.29 autosave",e)}
   return inferRoomId();
 }
 function room(){const id=inferRoomId();return id?roomApi()?.findRoom?.(id)||null:null}
@@ -52,19 +52,25 @@ function copyTemplateToZone(dungeonId,nodeId,roomId,force){
 function propagateToInheritedZones(roomId){const b=builderApi();if(!b?.loadLibrary)return 0;let n=0;for(const g of b.loadLibrary()||[])for(const node of g.nodes||[])if(String(node.roomId||"")===String(roomId||""))if(copyTemplateToZone(g.id,node.id,roomId,false))n++;return n}
 function wrapBuilder(){
   const b=builderApi();if(!b||b.__drt167828Wrapped||typeof b.addRoomInstance!=="function")return false;
-  const old=b.addRoomInstance;b.addRoomInstance=function(dungeonId,roomId,label){const out=old.apply(this,arguments);try{const node=out?.node;if(node?.id)copyTemplateToZone(dungeonId,node.id,roomId,false)}catch(e){console.warn("GenSrpG V16.78.28 template copy",e)}return out};b.__drt167828Wrapped=true;return true;
+  const old=b.addRoomInstance;b.addRoomInstance=function(dungeonId,roomId,label){const out=old.apply(this,arguments);try{const node=out?.node;if(node?.id)copyTemplateToZone(dungeonId,node.id,roomId,false)}catch(e){console.warn("GenSrpG V16.78.29 template copy",e)}return out};b.__drt167828Wrapped=true;return true;
 }
 function ensureStyles(){if(!DOC||DOC.getElementById("drt167828Styles"))return;const s=DOC.createElement("style");s.id="drt167828Styles";s.textContent=`#drt167828Panel{border:1px solid #416347;background:#111b14;border-radius:12px;padding:10px;margin:10px 0}#drt167828Panel .drtTitle{font-weight:900}.drtActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.drtActions button{flex:1;min-width:180px}.drtMain{background:#285d35!important;font-weight:900}.drtMain.on{outline:2px solid #62c978;background:#347b46!important}.drtHint{font-size:12px;color:#a9c9b1;margin-top:7px}.drc100Cell.drt167828Configurable{box-shadow:inset 0 0 0 3px #d1a34d;cursor:pointer}.drc100Cell.drt167828Configured{box-shadow:inset 0 0 0 3px #4fc36a}.drc100Cell.drt167828Configurable::after{content:'✎';position:absolute;font-size:10px;right:2px;bottom:2px}#drv167826Panel.drtAdvancedClosed{display:none!important}#drt167828Modal{display:none;position:fixed;inset:0;z-index:72000;background:#050505e8;padding:12px;overflow:auto;color:#fff}#drt167828Modal.open{display:flex;align-items:center;justify-content:center}.drtCard{width:min(560px,100%);background:#171717;border:1px solid #555;border-radius:15px;padding:14px}.drtGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.drtGrid label{display:grid;gap:4px;font-size:12px;color:#ccc}.drtGrid input,.drtGrid select,.drtGrid textarea{width:100%;background:#090909;color:#fff;border:1px solid #444;border-radius:8px;padding:9px;font:inherit}.drtFull{grid-column:1/-1}.drtModalActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.drtModalActions button{flex:1;min-width:120px}@media(max-width:620px){.drtGrid{grid-template-columns:1fr}.drtFull{grid-column:auto}}`;DOC.head.appendChild(s)}
-function ensurePanel(){if(!DOC)return false;const editor=DOC.getElementById("drc100Editor");if(!editor)return false;let p=DOC.getElementById("drt167828Panel");if(!p){p=DOC.createElement("div");p.id="drt167828Panel";const old=DOC.getElementById("drv167826Panel"),palette=DOC.getElementById("drc100Palette");if(old?.parentNode)old.parentNode.insertBefore(p,old);else if(palette)editor.insertBefore(p,palette);else editor.insertBefore(p,editor.firstChild)}renderPanel();return true}
+function ensurePanel(){
+  if(!DOC)return false;const editor=DOC.getElementById("drc100Editor");if(!editor)return false;
+  let p=DOC.getElementById("drt167828Panel");
+  if(!p){p=DOC.createElement("div");p.id="drt167828Panel";const old=DOC.getElementById("drv167826Panel"),palette=DOC.getElementById("drc100Palette");if(old?.parentNode)old.parentNode.insertBefore(p,old);else if(palette)editor.insertBefore(p,palette);else editor.insertBefore(p,editor.firstChild)}
+  return true;
+}
 function renderPanel(){
   if(!DOC)return;const p=DOC.getElementById("drt167828Panel");if(!p)return;const id=inferRoomId(),can=editorHasRoom(),content=id?templateContent(id):null;
-  p.innerHTML='<div class="drtTitle">🧱 Contenu exact de cette pièce</div><div class="drtHint">'+(can?'Pose tes éléments puis configure-les directement. La pièce sera enregistrée automatiquement quand tu actives ce mode. Aucun monde ni numéro de case n’est nécessaire.':'Crée ou sélectionne une pièce pour configurer son contenu exact.')+'</div><div class="drtActions"><button type="button" id="drt167828Toggle" class="drtMain '+(templateMode?'on':'')+'" '+(can?'':'disabled')+'>'+(templateMode?'✓ Configuration active':'🎯 Configurer directement les éléments')+'</button><button type="button" id="drt167828Advanced" '+(id?'':'disabled')+'>⚙️ Variante par zone</button></div>'+(content&&content.mode!=="inherit"?'<div class="drtHint">✓ Modèle configuré : '+(content.enemies?.length||0)+' groupe(s) ennemi · '+(content.chests?.length||0)+' coffre(s) · '+(content.traps?.length||0)+' piège(s) · '+(content.puzzles?.length||0)+' énigme(s)</div>':'');
+  const html='<div class="drtTitle">🧱 Contenu exact de cette pièce</div><div class="drtHint">'+(can?'Pose tes éléments puis configure-les directement. La pièce sera enregistrée automatiquement quand tu actives ce mode. Aucun monde ni numéro de case n’est nécessaire.':'Crée ou sélectionne une pièce pour configurer son contenu exact.')+'</div><div class="drtActions"><button type="button" id="drt167828Toggle" class="drtMain '+(templateMode?'on':'')+'" '+(can?'':'disabled')+'>'+(templateMode?'✓ Configuration active':'🎯 Configurer directement les éléments')+'</button><button type="button" id="drt167828Advanced" '+(id?'':'disabled')+'>⚙️ Variante par zone</button></div>'+(content&&content.mode!=="inherit"?'<div class="drtHint">✓ Modèle configuré : '+(content.enemies?.length||0)+' groupe(s) ennemi · '+(content.chests?.length||0)+' coffre(s) · '+(content.traps?.length||0)+' piège(s) · '+(content.puzzles?.length||0)+' énigme(s)</div>':'');
+  if(p.innerHTML!==html)p.innerHTML=html;
   const toggle=DOC.getElementById("drt167828Toggle");if(toggle)toggle.onclick=()=>setTemplateMode(!templateMode);const adv=DOC.getElementById("drt167828Advanced");if(adv)adv.onclick=()=>{advancedOpen=!advancedOpen;syncAdvanced();renderPanel()};syncAdvanced();
 }
 function syncAdvanced(){const p=DOC?.getElementById("drv167826Panel");if(p)p.classList.toggle("drtAdvancedClosed",!advancedOpen)}
 function setTemplateMode(v){
   if(v){const id=ensureSavedRoom();templateMode=!!id;if(!id){try{ROOT.showToast?.("Enregistre d’abord la pièce.")}catch(e){}}}else templateMode=false;
-  try{visualApi()?.setVisualMode?.(false)}catch(e){}renderPanel();decorateGrid();if(templateMode)try{ROOT.showToast?.("🎯 Configuration active : touche directement un élément déjà placé.")}catch(e){}return templateMode;
+  try{visualApi()?.setVisualMode?.(false)}catch(e){}ensurePanel();renderPanel();decorateGrid();if(templateMode)try{ROOT.showToast?.("🎯 Configuration active : touche directement un élément déjà placé.")}catch(e){}return templateMode;
 }
 function block(ev){ev?.preventDefault?.();ev?.stopPropagation?.();ev?.stopImmediatePropagation?.()}
 function clearOwnHandler(el){const h=el?.__drt167828Handler;if(!h)return;if(el.onpointerdown===h)el.onpointerdown=null;if(el.onclick===h)el.onclick=null;delete el.__drt167828Handler}
@@ -89,16 +95,19 @@ function saveActive(){
   const id=inferRoomId();if(!id||activeCell<0)return false;let data={};if(activeObject==="enemy"||activeObject==="boss")data={enemyId:DOC.getElementById("drtEnemy")?.value,qty:DOC.getElementById("drtQty")?.value,hp:DOC.getElementById("drtHp")?.value,hasKey:!!DOC.getElementById("drtKey")?.checked};else if(activeObject==="chest")data={rarity:DOC.getElementById("drtRarity")?.value,gold:DOC.getElementById("drtGold")?.value,itemsText:DOC.getElementById("drtItems")?.value};else if(activeObject==="trap")data={trapType:DOC.getElementById("drtTrapType")?.value,damage:DOC.getElementById("drtDamage")?.value,refId:DOC.getElementById("drtTrapRef")?.value,label:DOC.getElementById("drtTrapLabel")?.value,once:true};else if(activeObject==="puzzle")data={refId:DOC.getElementById("drtPuzzleRef")?.value,targetType:DOC.getElementById("drtTarget")?.value,label:DOC.getElementById("drtPuzzleLabel")?.value};configureTemplate(id,activeCell,activeObject,data);closeEditor();renderPanel();decorateGrid();try{ROOT.showToast?.("✓ Contenu du modèle enregistré") }catch(e){}return true;
 }
 function deleteActive(){const id=inferRoomId();if(!id||activeCell<0)return false;removeTemplate(id,activeCell,activeObject);closeEditor();renderPanel();decorateGrid();return true}
+function refreshEditor(){ensurePanel();renderPanel();syncAdvanced();decorateGrid()}
 function wrapRoomApi(){
   const a=roomApi();if(!a||a.__drt167828Wrapped)return false;a.__drt167828Wrapped=true;
   const resetNames=["open","editRoom","newRoom","duplicateRoom","applyResize","resizePreset","clearRoom"];
-  for(const name of resetNames){const old=a[name];if(typeof old!=="function")continue;a[name]=function(){const out=old.apply(this,arguments);templateMode=false;setTimeout(()=>{ensurePanel();renderPanel();decorateGrid()},0);return out}}
-  for(const name of ["saveCurrent","setZoom"]){const old=a[name];if(typeof old!=="function")continue;a[name]=function(){const out=old.apply(this,arguments);setTimeout(()=>{ensurePanel();renderPanel();decorateGrid()},0);return out}}
+  for(const name of resetNames){const old=a[name];if(typeof old!=="function")continue;a[name]=function(){const out=old.apply(this,arguments);templateMode=false;setTimeout(refreshEditor,0);return out}}
+  for(const name of ["saveCurrent","setZoom"]){const old=a[name];if(typeof old!=="function")continue;a[name]=function(){const out=old.apply(this,arguments);setTimeout(refreshEditor,0);return out}}
   return true;
 }
 function install(){
-  if(installed){wrapBuilder();wrapRoomApi();ensurePanel();syncAdvanced();return true}installed=true;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}ensureStyles();ensureModal();wrapBuilder();wrapRoomApi();ensurePanel();syncAdvanced();decorateGrid();if(DOC&&typeof MutationObserver==="function"){observer=new MutationObserver(()=>{wrapBuilder();wrapRoomApi();ensurePanel();syncAdvanced();decorateGrid()});observer.observe(DOC.documentElement,{childList:true,subtree:true})}return true;
+  if(installed){wrapBuilder();wrapRoomApi();return true}installed=true;
+  try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
+  ensureStyles();ensureModal();wrapBuilder();wrapRoomApi();refreshEditor();return true;
 }
-ROOT.DungeonRoomTemplateContent167828={VERSION,APP_VERSION,TEMPLATE_DUNGEON_ID,editorHasRoom,inferRoomId,ensureSavedRoom,templateContent,saveTemplate,configureTemplate,removeTemplate,copyTemplateToZone,propagateToInheritedZones,wrapBuilder,setTemplateMode,decorateGrid,openEditor,closeEditor,saveActive,deleteActive,install};
+ROOT.DungeonRoomTemplateContent167828={VERSION,APP_VERSION,TEMPLATE_DUNGEON_ID,editorHasRoom,inferRoomId,ensureSavedRoom,templateContent,saveTemplate,configureTemplate,removeTemplate,copyTemplateToZone,propagateToInheritedZones,wrapBuilder,setTemplateMode,decorateGrid,openEditor,closeEditor,saveActive,deleteActive,install,refreshEditor};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}else install();
 })();

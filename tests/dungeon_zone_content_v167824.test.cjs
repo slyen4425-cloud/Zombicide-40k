@@ -73,3 +73,5 @@ const htmlArg=process.argv[2];if(htmlArg){const html=fs.readFileSync(htmlArg,'ut
 console.log('Dungeon exact zone content V16.78.24 regressions: OK');
 require('./dungeon_room_visual_config_v167826.test.cjs');
 require('./dungeon_room_grid_capture_v167830.test.cjs');
+require('./dungeon_room_content_ui_v167831.test.cjs');
+require('./gens_multiplayer_entry_v167831.test.cjs');

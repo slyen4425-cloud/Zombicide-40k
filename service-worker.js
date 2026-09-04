@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.31-intuitive-content-multiplayer";
+const CACHE_NAME = "gensrpg-cache-16.78.32-random-content-world-selection";
 
 const CORE_FILES = [
   "./",
@@ -13,9 +13,11 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-template-content-167828.js",
   "./assets/dungeon/dungeon-room-grid-capture-167830.js",
   "./assets/dungeon/dungeon-room-content-ui-167831.js",
+  "./assets/dungeon/dungeon-random-library-content-167832.js",
   "./assets/dungeon/dungeon-world-builder-167821.js",
   "./assets/dungeon/dungeon-room-runtime-167822.js",
   "./assets/dungeon/dungeon-world-runtime-167823.js",
+  "./assets/dungeon/dungeon-world-session-bridge-167832.js",
   "./assets/dungeon/dungeon-zone-content-167824.js",
   "./assets/dungeon/dungeon-equipment-ui.js",
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",

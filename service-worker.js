@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.21-dungeon-builder";
+const CACHE_NAME = "gensrpg-cache-16.78.22-custom-dungeon-runtime";
 
 const CORE_FILES = [
   "./",
@@ -9,6 +9,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-creator-v2-167819.js",
   "./assets/dungeon/dungeon-room-creator-feedback-167821.js",
   "./assets/dungeon/dungeon-world-builder-167821.js",
+  "./assets/dungeon/dungeon-custom-runtime-167822.js",
   "./assets/dungeon/dungeon-equipment-ui.js",
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",
@@ -87,7 +88,6 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  /* Seulement les fichiers du site GenSrpG */
   if (url.origin !== self.location.origin) {
     return;
   }

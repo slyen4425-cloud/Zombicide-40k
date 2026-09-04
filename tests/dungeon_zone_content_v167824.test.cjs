@@ -72,3 +72,4 @@ assert.match(sw,/dungeon-zone-content-167824\.js/);
 const htmlArg=process.argv[2];if(htmlArg){const html=fs.readFileSync(htmlArg,'utf8');const world=html.indexOf('dungeon-world-runtime-167823.js?v=167823'),zone=html.indexOf('dungeon-zone-content-167824.js?v=167824');assert.ok(world>=0&&zone>world,'final site must load exact-zone content after authoritative world runtime')}
 console.log('Dungeon exact zone content V16.78.24 regressions: OK');
 require('./dungeon_room_visual_config_v167826.test.cjs');
+require('./dungeon_room_grid_capture_v167830.test.cjs');

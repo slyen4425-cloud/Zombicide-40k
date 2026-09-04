@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.34-large-rooms-authoritative-world";
+const CACHE_NAME = "gensrpg-cache-16.78.35-real-room-sizes-world-geometry";
 
 const CORE_FILES = [
   "./",

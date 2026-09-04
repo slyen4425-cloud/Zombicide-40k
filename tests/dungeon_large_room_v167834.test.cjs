@@ -18,6 +18,7 @@ const graph={id:'world-test',name:'Deux pièces',startNodeId:'A',nodes:[{id:'A',
 const core={
  render(){renderCount++;return true},show(){return true},
  explore(){
+   if(oldMode==='blocked')return false;
    const before=read(),room=Number(before.room||0)+1,id='e'+room;
    const map={version:4,size:9,width:9,height:9,cells:Array(81).fill('floor'),entryIdx:0,exitIdx:80,heroIdx:0,enemies:[40],objective:{type:'reach_exit',status:'open'}};
    map.cells[0]='entry';map.cells[80]='exit';map.cells[40]='enemy';
@@ -36,21 +37,18 @@ reset();vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-large-r
 const api=ctx.DungeonLargeRoom167834;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.35');assert.equal(api.MAX_SIZE,15);assert.equal(api.MIN_SIZE,6);
 assert.equal(api.gridSize(),15,'large must mean 15x15');let direct=api.generate('enemy',5,15);assert.equal(direct.cells.length,225);assert.equal(direct.largeRoom167835,true);
 
-// Régression exacte du téléphone : le vieux Core écrit réellement une 9x9 pendant explore().
-// Le runtime final doit être réparé, pas seulement l’API de génération isolée.
 config={size:'large',roomGeometry:'fixed'};primary={kind:'adventure',id:'adv'};worldSave={enabled:false,dungeonId:''};oldMode='generated';reset();core.explore();let x=read();
 assert.equal(x.last.map.size,15,'the actual DungeonCore01.explore result must no longer stay capped at 9');assert.equal(x.last.map.cells.length,225);assert.equal(x.last.map.largeRoom167835,true);assert.ok(Number(x.enemyCells.e1)>=0&&Number(x.enemyCells.e1)<225);
-
 config={size:'small',roomGeometry:'fixed'};reset();core.explore();x=read();assert.equal(x.last.map.size,6);assert.equal(x.last.map.cells.length,36);
 config={size:'medium',roomGeometry:'fixed'};reset();core.explore();x=read();assert.equal(x.last.map.size,9,'fixed medium intentionally remains 9x9');
 config={roomGeometry:'random'};randomValue=.999;reset();core.explore();x=read();assert.equal(x.last.map.size,15,'random mode must be able to reach 15x15 through the real explore path');
 randomValue=0;reset();core.explore();x=read();assert.equal(x.last.map.size,6,'random mode must also reach 6x6');
 
-// Une pièce déjà créée par Room Creator ne doit jamais être redimensionnée par le garde généré.
 config={size:'large',roomGeometry:'fixed'};primary={kind:'adventure',id:'adv'};oldMode='authored';reset();core.explore();x=read();assert.equal(x.last.map.size,7);assert.equal(x.last.customRoomId,'manual');
 
-// Monde construit : même si le vieux chemin tente encore d’écrire 9x9, la pièce choisie gagne,
-// indépendamment du mode de contenu de Zone.
+// Une sortie refusée ne crée rien. Un vieux dc313LastTransition.created=true ne doit pas tromper V16.78.35.
+oldMode='blocked';primary={kind:'adventure',id:'adv'};const blockedMap={version:4,size:9,width:9,height:9,cells:Array(81).fill('floor'),entryIdx:0,exitIdx:80};blockedMap.cells[0]='entry';blockedMap.cells[80]='exit';write({participants:['hero'],index:0,room:1,last:{kind:'world',room:1,map:blockedMap,exitLocked:true},positions:{hero:0},remaining:{hero:3},enemyCells:{},heroRooms:{hero:1},roomStates:{},dc313LastTransition:{heroId:'hero',from:0,to:1,created:true}});const blockedBefore=JSON.stringify(read().last.map);assert.equal(core.explore(),false);assert.equal(JSON.stringify(read().last.map),blockedBefore,'a blocked explore must never rebuild or resize the current room');
+
 oldMode='generated';primary={kind:'world',id:'world-test'};worldSave={enabled:false,dungeonId:''};zoneApply=0;reset();core.explore();x=read();
 assert.deepEqual(worldSave,{enabled:true,dungeonId:'world-test'},'the selected World Builder world must be resynchronised before explore');
 assert.equal(x.last.map.width,6);assert.equal(x.last.map.height,6);assert.equal(x.last.map.cells.length,36);assert.equal(x.last.map.cells[0],'entry');assert.equal(x.last.map.cells[5],'wall');assert.equal(x.last.map.cells[35],'exit');assert.equal(x.last.worldNodeId,'A');assert.equal(x.last.customRoomId,'room_exact');assert.equal(x.world167823.roomNodes['1'],'A');assert.equal(zoneApply,1,'exact/mixed Zone content gets a chance to apply after geometry authority is restored');

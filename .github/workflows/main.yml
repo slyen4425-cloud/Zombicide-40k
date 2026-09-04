@@ -106,7 +106,7 @@ jobs:
           echo "========================================="
           ls -lh _site/sound_*.mp3 2>/dev/null || true
 
-      - name: Charger les modules GenSrpG externes
+      - name: Charger les modules Dungeon externes
         run: |
           python3 - <<'PY'
           from pathlib import Path

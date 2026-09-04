@@ -29,22 +29,27 @@ assert.deepEqual(cfgByAdv['adv-100'],{enabled:true,dungeonId:'world-test'});
 assert.equal(context.loadDungeonConfig().rooms,2,'un monde à 2 zones ne doit plus exposer les 100 salles de Morea au Core');
 assert.equal(context.loadDungeonConfig().worldBuilderAuthoritative,true);
 
+// Reproduit la régression réelle : l’ancien parcours réinitialise son réglage avant le lancement.
 cfgByAdv['adv-100']={enabled:false,dungeonId:''};
 (async()=>{
  await context.startConfiguredGame();
  assert.equal(started,1,'le démarrage Dungeon historique doit toujours être appelé une seule fois');
  assert.deepEqual(cfgByAdv['adv-100'],{enabled:true,dungeonId:'world-test'},'le monde choisi doit être resynchronisé juste avant le lancement');
  assert.equal(context.loadDungeonConfig().rooms,2);
+
+ // Un clic explicite sur une aventure générée redevient l’unique sélection et désactive le monde construit.
  context.applyDungeonAdventure('adv-100',true);
  assert.deepEqual(JSON.parse(JSON.stringify(api.primary())),{kind:'adventure',id:'adv-100'});
  assert.deepEqual(cfgByAdv['adv-100'],{enabled:false,dungeonId:''});
  assert.equal(context.loadDungeonConfig().rooms,100,'revenir à Morea doit restaurer son nombre de salles générées');
+
  api.selectWorld('world-test',false);
  context.applyDungeonAdventure('adv-20',true);
  assert.equal(activeAdv,'adv-20');
  assert.deepEqual(JSON.parse(JSON.stringify(api.primary())),{kind:'adventure',id:'adv-20'});
  assert.deepEqual(cfgByAdv['adv-20'],{enabled:false,dungeonId:''});
  assert.equal(context.loadDungeonConfig().rooms,20);
+
  assert.equal(context.renderSessionDungeonLibrary.__dws167833,true,'la bibliothèque de préparation doit être enrichie sans deuxième moteur');
  assert.match(src,/PRIMARY_KEY="gensrpg_dungeon_primary_selection_v167833"/);
  assert.match(src,/syncSelectionForStart/);

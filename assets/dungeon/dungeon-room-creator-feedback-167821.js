@@ -20,8 +20,8 @@ ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSumm
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();
 
-/* V16.78.38 — charge les choix aléatoires, la sélection unique World Builder,
-   l'isolation des réglages de génération, la configuration intuitive et le multijoueur existant. */
+/* V16.78.39 — charge les choix aléatoires, la sélection unique World Builder,
+   le moteur dédié des donjons construits, la configuration intuitive et le multijoueur existant. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
@@ -30,7 +30,7 @@ let attempts=0;
 function neutralizeLegacyLauncher(){if(!DOC)return;let el=DOC.getElementById("dzc167824Launch");if(!el){el=DOC.createElement("span");el.id="dzc167824Launch";el.setAttribute("aria-hidden","true");DOC.body.appendChild(el)}el.style.setProperty("display","none","important");el.remove=function(){this.style.setProperty("display","none","important")}}
 function loadMultiplayerEntry(){if(!DOC||ROOT.GenSrpGMultiplayerEntry167831||DOC.getElementById("gmp167831Script"))return;const m=DOC.createElement("script");m.id="gmp167831Script";m.src="assets/gensrpg/gens-multiplayer-entry-167831.js?v=167833";m.async=false;DOC.body.appendChild(m)}
 function loadRandomLibrary(){if(!DOC||ROOT.DungeonRandomLibraryContent167832||DOC.getElementById("drl167832Script"))return;const r=DOC.createElement("script");r.id="drl167832Script";r.src="assets/dungeon/dungeon-random-library-content-167832.js?v=167833";r.async=false;DOC.body.appendChild(r)}
-function loadWorldSessionBridge(){if(!DOC||ROOT.DungeonWorldSessionBridge167832||DOC.getElementById("dws167832Script"))return;const w=DOC.createElement("script");w.id="dws167832Script";w.src="assets/dungeon/dungeon-world-session-bridge-167832.js?v=167838";w.async=false;DOC.body.appendChild(w)}
+function loadWorldSessionBridge(){if(!DOC||ROOT.DungeonWorldSessionBridge167832||DOC.getElementById("dws167832Script"))return;const w=DOC.createElement("script");w.id="dws167832Script";w.src="assets/dungeon/dungeon-world-session-bridge-167832.js?v=167839";w.async=false;DOC.body.appendChild(w)}
 function loadIntuitiveUI(){if(!DOC||ROOT.DungeonRoomContentUI167831||DOC.getElementById("dui167831Script"))return;const u=DOC.createElement("script");u.id="dui167831Script";u.src="assets/dungeon/dungeon-room-content-ui-167831.js?v=167833";u.async=false;DOC.body.appendChild(u)}
 function loadGridCapture(){if(!DOC)return;if(ROOT.DungeonRoomGridCapture167830){loadIntuitiveUI();return}if(DOC.getElementById("drgc167830Script")){setTimeout(loadGridCapture,50);return}const g=DOC.createElement("script");g.id="drgc167830Script";g.src="assets/dungeon/dungeon-room-grid-capture-167830.js?v=167833";g.async=false;g.onload=loadIntuitiveUI;DOC.body.appendChild(g)}
 function loadTemplateContent(){if(!DOC)return;if(ROOT.DungeonRoomTemplateContent167828){loadGridCapture();return}if(DOC.getElementById("drt167828Script")){setTimeout(loadTemplateContent,50);return}const t=DOC.createElement("script");t.id="drt167828Script";t.src="assets/dungeon/dungeon-room-template-content-167828.js?v=167833";t.async=false;t.onload=loadGridCapture;DOC.body.appendChild(t)}

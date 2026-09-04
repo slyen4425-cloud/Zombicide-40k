@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.37-built-world-isolation";
+const CACHE_NAME = "gensrpg-cache-16.78.38-built-world-no-auto-generation";
 
 const CORE_FILES = [
   "./",

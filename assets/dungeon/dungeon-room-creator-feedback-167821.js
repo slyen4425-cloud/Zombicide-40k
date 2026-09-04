@@ -20,13 +20,17 @@ ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSumm
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();
 
-/* V16.78.31 — charge la configuration visuelle, le garde grille puis les menus intuitifs. */
+/* V16.78.31 — charge la configuration intuitive et réexpose le multijoueur existant. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 let attempts=0;
 function neutralizeLegacyLauncher(){if(!DOC)return;let el=DOC.getElementById("dzc167824Launch");if(!el){el=DOC.createElement("span");el.id="dzc167824Launch";el.setAttribute("aria-hidden","true");DOC.body.appendChild(el)}el.style.setProperty("display","none","important");el.remove=function(){this.style.setProperty("display","none","important")}}
+function loadMultiplayerEntry(){
+  if(!DOC||ROOT.GenSrpGMultiplayerEntry167831||DOC.getElementById("gmp167831Script"))return;
+  const m=DOC.createElement("script");m.id="gmp167831Script";m.src="assets/gensrpg/gens-multiplayer-entry-167831.js?v=167831";m.async=false;DOC.body.appendChild(m);
+}
 function loadIntuitiveUI(){
   if(!DOC||ROOT.DungeonRoomContentUI167831||DOC.getElementById("dui167831Script"))return;
   const u=DOC.createElement("script");u.id="dui167831Script";u.src="assets/dungeon/dungeon-room-content-ui-167831.js?v=167831";u.async=false;DOC.body.appendChild(u);
@@ -57,5 +61,6 @@ function loadVisualConfig(){
   neutralizeLegacyLauncher();
   const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167831";s.async=false;s.onload=loadHotfix;DOC.body.appendChild(s);
 }
-if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",loadVisualConfig,{once:true});else loadVisualConfig()}
+function boot(){loadMultiplayerEntry();loadVisualConfig()}
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",boot,{once:true});else boot()}
 })();

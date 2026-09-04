@@ -1,0 +1,37 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-template-content-167828.js'),'utf8');
+const loader=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function cls(){const s=new Set();return {add(...x){x.forEach(v=>s.add(v))},remove(...x){x.forEach(v=>s.delete(v))},contains(v){return s.has(v)},toggle(v,on){on?s.add(v):s.delete(v)}}}
+const elements=new Map();
+function element(tag='div'){return {tagName:String(tag).toUpperCase(),id:'',value:'',innerHTML:'',textContent:'',disabled:false,dataset:{},style:{display:'',setProperty(k,v){this[k]=v}},classList:cls(),parentNode:null,children:[],onpointerdown:null,onclick:null,__drt167828Handler:null,setAttribute(){},appendChild(c){c.parentNode=this;this.children.push(c);if(c.id)elements.set(c.id,c);return c},insertBefore(c){return this.appendChild(c)},querySelectorAll(){return []}}}
+const body=element('body'),head=element('head'),html=element('html');
+const document={readyState:'loading',body,head,documentElement:html,createElement:element,addEventListener(){},getElementById(id){return elements.get(id)||null}};
+function add(id,tag='input',value=''){const e=element(tag);e.id=id;e.value=String(value);elements.set(id,e);return e}
+const editor=add('drc100Editor','div');editor.style.display='block';add('drc100Name','input','Nouvelle crypte');add('drc100Width','input',4);add('drc100Height','input',4);
+const grid=add('drc100Grid','div');const enemyCell=element('button');enemyCell.dataset.drcIndex='5';grid.querySelectorAll=()=>[enemyCell];
+let activeRoom={id:'room-direct',name:'Nouvelle crypte',width:4,height:4,cells:Array.from({length:16},()=>({terrain:'floor',object:null}))};activeRoom.cells[5].object='enemy';
+let library=[];let saves=0;
+const roomApi={loadLibrary(){return library.map(clone)},findRoom(id){const r=library.find(x=>x.id===String(id));return r?clone(r):null},saveCurrent(){saves++;library=[clone(activeRoom)];return clone(activeRoom)}};
+const store={};function empty(){return {mode:'inherit',enemies:[],chests:[],traps:[],puzzles:[],npcs:[],items:[]}}
+const zoneApi={getZoneContent(d,n){return clone(store[d]?.[n]||empty())},saveZoneContent(d,n,c){store[d]=store[d]||{};store[d][n]=clone(c);return clone(store[d][n])}};
+const visualApi={setVisualMode(){return false},configureElement(d,n,r,cell,obj,data){assert.equal(r,'room-direct');const c=zoneApi.getZoneContent(d,n);if(c.mode==='inherit')c.mode='fixed';if(obj==='enemy')c.enemies=[{id:'e1',enemyId:data.enemyId||'dng_skeleton',qty:Number(data.qty||1),cell:Number(cell),role:'enemy',hasKey:!!data.hasKey,hp:null}];if(obj==='chest')c.chests=[{id:'c1',cell:Number(cell),rarity:data.rarity||'common',gold:Number(data.gold||0),items:[]}];zoneApi.saveZoneContent(d,n,c);return obj==='enemy'?c.enemies[0]:c.chests[0]},removeElement(d,n,cell,obj){const c=zoneApi.getZoneContent(d,n);if(obj==='enemy')c.enemies=[];zoneApi.saveZoneContent(d,n,c);return c},itemsText(){return ''},parseItems(){return []}};
+let graphs=[];let seq=0;const builderApi={loadLibrary(){return graphs.map(clone)},addRoomInstance(dungeonId,roomId,label){const g=graphs.find(x=>x.id===dungeonId);const node={id:'zone-'+(++seq),roomId,label};g.nodes.push(node);return {node,dungeon:clone(g)}}};
+const context={console,Math,Date,document,setTimeout(fn){fn();return 1},MutationObserver:function(){this.observe=()=>{}},PointerEvent:function(){},showToast(){},DungeonRoomCreator100:roomApi,DungeonZoneContent167824:zoneApi,DungeonRoomVisualConfig167826:visualApi,DungeonWorldBuilder167821:builderApi};context.window=context;context.globalThis=context;
+vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-room-template-content-167828.js'});
+const api=context.DungeonRoomTemplateContent167828;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.28');
+assert.equal(library.length,0,'la pièce peut ne pas encore être enregistrée ni appartenir à un monde');
+assert.equal(api.setTemplateMode(true),true,'la configuration directe doit fonctionner sans World Builder');assert.equal(saves,1,'activer la configuration doit sauvegarder automatiquement la grille courante');assert.equal(library[0].cells[5].object,'enemy');
+api.decorateGrid();assert.equal(typeof enemyCell.onpointerdown,'function','l’ennemi fraîchement posé doit devenir directement tactile');let prevented=false;enemyCell.onpointerdown({preventDefault(){prevented=true},stopPropagation(){},stopImmediatePropagation(){}});assert.equal(prevented,true);const modal=elements.get('drt167828Modal');assert.ok(modal&&modal.classList.contains('open'),'toucher l’ennemi doit ouvrir sa fiche sans contexte Monde/Zone');
+api.configureTemplate('room-direct',5,'enemy',{enemyId:'dng_orc',qty:2,hasKey:true});const tpl=api.templateContent('room-direct');assert.equal(tpl.mode,'fixed');assert.equal(tpl.enemies[0].enemyId,'dng_orc');assert.equal(tpl.enemies[0].qty,2);assert.equal(tpl.enemies[0].cell,5);assert.equal(tpl.enemies[0].hasKey,true);
+api.setTemplateMode(false);assert.equal(enemyCell.onpointerdown,null,'quitter le mode direct doit retirer uniquement son propre gestionnaire tactile');
+graphs=[{id:'world-1',name:'Monde',nodes:[]}];api.wrapBuilder();const added=builderApi.addRoomInstance('world-1','room-direct','Crypte 1');assert.ok(added.node.id);const copied=zoneApi.getZoneContent('world-1',added.node.id);assert.equal(copied.mode,'fixed','le contenu du modèle doit être copié dans la nouvelle instance de zone');assert.equal(copied.enemies[0].enemyId,'dng_orc');assert.equal(copied.enemies[0].cell,5);
+zoneApi.saveZoneContent('world-1',added.node.id,{...copied,enemies:[{id:'custom',enemyId:'dng_lich',qty:1,cell:6,role:'enemy'}]});assert.equal(api.copyTemplateToZone('world-1',added.node.id,'room-direct',false),false,'une variante de zone déjà fixée ne doit pas être écrasée par le modèle');assert.equal(zoneApi.getZoneContent('world-1',added.node.id).enemies[0].enemyId,'dng_lich');
+assert.match(src,/ensureSavedRoom/);assert.match(src,/TEMPLATE_DUNGEON_ID="__room_template__"/);assert.match(src,/⚙️ Variante par zone/);assert.match(loader,/dungeon-room-template-content-167828\.js\?v=167828/);assert.match(sw,/gensrpg-cache-16\.78\.28-template-content/);assert.match(sw,/dungeon-room-template-content-167828\.js/);
+const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-room-template-content-167828.js')),'le module V16.78.28 doit être présent dans le site final');const built=fs.readFileSync(path.join(site,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');assert.match(built,/dungeon-room-template-content-167828\.js\?v=167828/)}
+console.log('Dungeon Room template content V16.78.28 direct configuration: OK');

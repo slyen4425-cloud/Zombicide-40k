@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.29-ui-responsiveness";
+const CACHE_NAME = "gensrpg-cache-16.78.30-grid-capture";
 
 const CORE_FILES = [
   "./",
@@ -11,6 +11,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-config-167826.js",
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-room-template-content-167828.js",
+  "./assets/dungeon/dungeon-room-grid-capture-167830.js",
   "./assets/dungeon/dungeon-world-builder-167821.js",
   "./assets/dungeon/dungeon-room-runtime-167822.js",
   "./assets/dungeon/dungeon-world-runtime-167823.js",

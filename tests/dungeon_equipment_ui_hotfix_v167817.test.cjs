@@ -7,9 +7,9 @@ const hotfix=fs.readFileSync(process.argv[3],"utf8");
 const built=process.argv[4]?fs.readFileSync(process.argv[4],"utf8"):"";
 
 const ancient=[
-  {id:"ditem_ancient_helm",name:"Heaume des Anciens",setId:"set_ancient",setPieceId:"head",rpgBonuses:{armor:1,esprit:1}},
-  {id:"ditem_ancient_chest",name:"Plastron des Anciens",setId:"set_ancient",setPieceId:"torso",rpgBonuses:{armor:3}},
-  {id:"ditem_ancient_gauntlets",name:"Gantelets des Anciens",setId:"set_ancient",setPieceId:"hands",rpgBonuses:{armor:1,force:1}}
+  {id:"ditem_ancient_helm",name:"Heaume des Anciens",dungeonBuiltin:true,setId:"set_ancient",setPieceId:"head",rpgBonuses:{armor:1,esprit:1}},
+  {id:"ditem_ancient_chest",name:"Plastron des Anciens",dungeonBuiltin:true,setId:"set_ancient",setPieceId:"torso",rpgBonuses:{armor:3}},
+  {id:"ditem_ancient_gauntlets",name:"Gantelets des Anciens",dungeonBuiltin:true,setId:"set_ancient",setPieceId:"hands",rpgBonuses:{armor:1,force:1}}
 ];
 const map=Object.fromEntries(ancient.map(x=>[x.id,x]));
 let overrides={};
@@ -18,7 +18,6 @@ const context={
   console,Date,Math,
   setTimeout(fn){fn();return 1},
   requestAnimationFrame(fn){fn()},
-  DUNGEON_ITEM_IDS:ancient.map(x=>x.id),
   ITEMS:[...ancient],
   DUNGEON_EQUIPMENT_SETS:{
     set_ancient:{
@@ -40,7 +39,7 @@ const context={
     rightHand:null,leftHand:null,
     rpgGear:{head:0,torso:1,hands:2}
   },
-  dungeonEquippedItems(){return []},
+  dungeonEquippedItems(){return []}, // ancien comportement fautif hors isDungeonHeroSheet()
   getItemFromEntry(entry){return map[entry?.itemId]||null},
   itemById(id){return map[id]||null},
   dungeonItems(){return ancient},

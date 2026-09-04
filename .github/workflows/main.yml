@@ -1,4 +1,4 @@
-# GenSrpG V16.78.21 Dungeon Builder Phase 3 regression guard — 2026-09-04
+# GenSrpG V16.78.22 Dungeon custom-room runtime integration guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -37,6 +37,9 @@ jobs:
       - name: Tester le constructeur de donjon Phase 3
         run: node tests/dungeon_world_builder_v167821.test.cjs
 
+      - name: Tester l'intégration des pièces créées en partie Dungeon
+        run: node tests/dungeon_room_runtime_v167822.test.cjs
+
       - name: Tester l'instanciation ennemie par salle
         run: node tests/dungeon_enemy_room_scope_v318.test.cjs
 
@@ -45,15 +48,12 @@ jobs:
           rm -rf _site
           mkdir -p _site
 
-          # Ancien pack principal, s'il existe encore
           if [ -f "Z40K_GITHUB_PAGES_READY.zip" ]; then
             unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
           fi
 
-          # Application principale
           cp -f index.html _site/index.html
 
-          # Manifest
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi
@@ -62,12 +62,10 @@ jobs:
             cp -f manifest.json _site/manifest.json
           fi
 
-          # Service Worker
           if [ -f "service-worker.js" ]; then
             cp -f service-worker.js _site/service-worker.js
           fi
 
-          # Icônes PWA
           mkdir -p _site/icons
 
           if [ -f "icon-192.png" ]; then
@@ -78,14 +76,12 @@ jobs:
             cp -f icon-512.png _site/icons/icon-512.png
           fi
 
-          # Sons
           for file in sound_*.mp3; do
             if [ -f "$file" ]; then
               cp -f "$file" _site/
             fi
           done
 
-          # Assets GenSrpG
           if [ -d "assets" ]; then
             mkdir -p _site/assets
             cp -R assets/. _site/assets/
@@ -120,6 +116,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
               (Path("_site/assets/dungeon/dungeon-world-builder-167821.js"), '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>', "Dungeon World Builder Phase 3 asset missing"),
+              (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -144,6 +141,9 @@ jobs:
 
       - name: Tester le chargement final du Constructeur Phase 3
         run: node tests/dungeon_world_builder_v167821.test.cjs _site/index.html
+
+      - name: Tester le chargement final de l'intégration des pièces
+        run: node tests/dungeon_room_runtime_v167822.test.cjs _site/index.html
 
       - name: Tester le hotfix équipements Dungeon V16.78.17
         run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html

@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.19-room-creator-v2";
+const CACHE_NAME = "gensrpg-cache-16.78.20-world-summary";
 
 const CORE_FILES = [
   "./",
@@ -10,6 +10,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-equipment-ui.js",
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",
+  "./assets/gensrpg/gens-world-summary-167820.js",
   "./manifest.json"
 ];
 
@@ -160,7 +161,7 @@ self.addEventListener("fetch", event => {
               {
                 cache: "no-store"
               }
-            );
+          );
 
           if (fresh && fresh.ok) {
             const cache =

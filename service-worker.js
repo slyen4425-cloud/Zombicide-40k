@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.18-set-editor";
+const CACHE_NAME = "gensrpg-cache-16.78.19-room-creator-v2";
 
 const CORE_FILES = [
   "./",
@@ -6,6 +6,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-core-317.js",
   "./assets/dungeon/dungeon-core-318.js",
   "./assets/dungeon/dungeon-room-creator-100.js",
+  "./assets/dungeon/dungeon-room-creator-v2-167819.js",
   "./assets/dungeon/dungeon-equipment-ui.js",
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",

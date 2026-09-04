@@ -1,4 +1,4 @@
-# GenSrpG Dungeon set editor regression guard — 2026-09-04
+# GenSrpG Dungeon Room Creator V2 regression guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -30,6 +30,9 @@ jobs:
 
       - name: Tester le créateur de pièces Dungeon
         run: node tests/dungeon_room_creator_v1.test.cjs
+
+      - name: Tester le créateur de pièces Dungeon V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
 
       - name: Tester l'instanciation ennemie par salle
         run: node tests/dungeon_enemy_room_scope_v318.test.cjs
@@ -111,6 +114,7 @@ jobs:
           modules = [
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
+              (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -128,6 +132,9 @@ jobs:
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
+
+      - name: Tester le chargement final du Créateur V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs _site/index.html
 
       - name: Tester le hotfix équipements Dungeon V16.78.17
         run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html

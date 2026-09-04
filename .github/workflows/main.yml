@@ -1,4 +1,4 @@
-# GenSrpG V16.78.38 built World Builder isolated from all automatic Dungeon generation — 2026-09-04
+# GenSrpG V16.78.39 dedicated runtime for fully authored Dungeon worlds — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -43,10 +43,13 @@ jobs:
       - name: Tester l'intégration des pièces créées en partie Dungeon
         run: node tests/dungeon_room_runtime_v167822.test.cjs
 
-      - name: Tester l'isolation des réglages automatiques du Monde construit
+      - name: Tester la sélection du moteur de Monde construit
         run: node tests/dungeon_world_session_bridge_v167832.test.cjs
 
-      - name: Tester le Monde construit isolé du générateur
+      - name: Tester le moteur dédié de donjon construit
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+
+      - name: Tester le World Runtime historique de compatibilité
         run: node tests/dungeon_world_runtime_v167823.test.cjs
 
       - name: Tester le contenu exact par Zone
@@ -124,14 +127,15 @@ jobs:
           index = Path("_site/index.html")
           modules = [
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>', "Dungeon single world authority V16.78.36 asset missing"),
+              (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>', "Dungeon large-room support missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
               (Path("_site/assets/dungeon/dungeon-world-builder-167821.js"), '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>', "Dungeon World Builder Phase 3 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
-              (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon isolated World Runtime V16.78.38 missing"),
+              (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
+              (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167839"></script>', "Dedicated authored Dungeon runtime missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -151,14 +155,16 @@ jobs:
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
 
-      - name: Tester le chargement final de l'autorité World Builder isolée
+      - name: Tester le chargement final du moteur construit dédié
         run: |
-          grep -q 'dungeon-large-room-support-167834.js?v=167836' _site/index.html
           grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
-          grep -q 'dungeon-world-session-bridge-167832.js?v=167838' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
-          grep -q 'gensrpg-cache-16.78.38-built-world-no-auto-generation' _site/service-worker.js
+          grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
+          grep -q 'dungeon-authored-runtime-167839.js?v=167839' _site/index.html
+          grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
+          grep -q 'gensrpg-cache-16.78.39-authored-dungeon-runtime' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
+          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
           node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
 
       - name: Tester le chargement final du Créateur V2
@@ -169,9 +175,6 @@ jobs:
 
       - name: Tester le chargement final de l'intégration des pièces
         run: node tests/dungeon_room_runtime_v167822.test.cjs _site/index.html
-
-      - name: Tester le chargement final du Monde construit autoritaire
-        run: node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
 
       - name: Tester le chargement final du contenu exact par Zone
         run: node tests/dungeon_zone_content_v167824.test.cjs _site/index.html

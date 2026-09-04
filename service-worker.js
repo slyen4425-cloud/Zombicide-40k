@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.38-built-world-no-auto-generation";
+const CACHE_NAME = "gensrpg-cache-16.78.39-authored-dungeon-runtime";
 
 const CORE_FILES = [
   "./",
@@ -20,6 +20,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-world-runtime-167823.js",
   "./assets/dungeon/dungeon-world-session-bridge-167832.js",
   "./assets/dungeon/dungeon-zone-content-167824.js",
+  "./assets/dungeon/dungeon-authored-runtime-167839.js",
   "./assets/dungeon/dungeon-equipment-ui.js",
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",

@@ -1,4 +1,4 @@
-# GenSrpG V16.78.35 real room sizes + built-world geometry guard — 2026-09-04
+# GenSrpG V16.78.36 single World Builder authority + real room sizes — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -28,7 +28,7 @@ jobs:
       - name: Tester la batterie Dungeon runtime complète
         run: node tests/dungeon_runtime_regression.test.cjs
 
-      - name: Tester les vraies tailles de salle et la géométrie World Builder
+      - name: Tester l'autorité unique World Builder et les vraies tailles
         run: node tests/dungeon_large_room_v167834.test.cjs
 
       - name: Tester le créateur de pièces Dungeon
@@ -121,7 +121,7 @@ jobs:
           index = Path("_site/index.html")
           modules = [
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167835"></script>', "Dungeon real room authority V16.78.35 asset missing"),
+              (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>', "Dungeon single world authority V16.78.36 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
@@ -148,9 +148,10 @@ jobs:
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
 
-      - name: Tester le chargement final de l'autorité réelle des salles
+      - name: Tester le chargement final de l'autorité unique World Builder
         run: |
-          grep -q 'dungeon-large-room-support-167834.js?v=167835' _site/index.html
+          grep -q 'dungeon-large-room-support-167834.js?v=167836' _site/index.html
+          grep -q 'gensrpg-cache-16.78.36-single-world-authority' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
 
       - name: Tester le chargement final du Créateur V2

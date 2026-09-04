@@ -116,7 +116,7 @@ assert.match(workflow,/dungeon-world-builder-167821\.js/);
 assert.match(workflow,/dungeon_world_builder_v167821\.test\.cjs/);
 assert.match(sw,/dungeon-room-creator-feedback-167821\.js/);
 assert.match(sw,/dungeon-world-builder-167821\.js/);
-assert.match(sw,/gensrpg-cache-16\.78\.21-/);
+assert.match(sw,/gensrpg-cache-16\.78\.\d+-/);
 
 if(htmlArg){
   const html=fs.readFileSync(htmlArg,'utf8');

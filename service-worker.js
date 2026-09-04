@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.30-grid-capture";
+const CACHE_NAME = "gensrpg-cache-16.78.31-intuitive-content-multiplayer";
 
 const CORE_FILES = [
   "./",
@@ -12,6 +12,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-room-template-content-167828.js",
   "./assets/dungeon/dungeon-room-grid-capture-167830.js",
+  "./assets/dungeon/dungeon-room-content-ui-167831.js",
   "./assets/dungeon/dungeon-world-builder-167821.js",
   "./assets/dungeon/dungeon-room-runtime-167822.js",
   "./assets/dungeon/dungeon-world-runtime-167823.js",
@@ -20,6 +21,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",
   "./assets/gensrpg/gens-world-summary-167820.js",
+  "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./manifest.json"
 ];
 

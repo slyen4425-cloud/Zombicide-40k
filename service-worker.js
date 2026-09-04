@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.32-random-content-world-selection";
+const CACHE_NAME = "gensrpg-cache-16.78.33-single-adventure-selection";
 
 const CORE_FILES = [
   "./",

@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -54,22 +56,63 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
+
           if [ -f "Z40K_GITHUB_PAGES_READY.zip" ]; then
             unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
           fi
+
           cp -f index.html _site/index.html
-          if [ -f "manifest.webmanifest" ]; then cp -f manifest.webmanifest _site/manifest.webmanifest; fi
-          if [ -f "manifest.json" ]; then cp -f manifest.json _site/manifest.json; fi
-          if [ -f "service-worker.js" ]; then cp -f service-worker.js _site/service-worker.js; fi
+
+          if [ -f "manifest.webmanifest" ]; then
+            cp -f manifest.webmanifest _site/manifest.webmanifest
+          fi
+
+          if [ -f "manifest.json" ]; then
+            cp -f manifest.json _site/manifest.json
+          fi
+
+          if [ -f "service-worker.js" ]; then
+            cp -f service-worker.js _site/service-worker.js
+          fi
+
           mkdir -p _site/icons
-          if [ -f "icon-192.png" ]; then cp -f icon-192.png _site/icons/icon-192.png; fi
-          if [ -f "icon-512.png" ]; then cp -f icon-512.png _site/icons/icon-512.png; fi
-          for file in sound_*.mp3; do if [ -f "$file" ]; then cp -f "$file" _site/; fi; done
-          if [ -d "assets" ]; then mkdir -p _site/assets; cp -R assets/. _site/assets/; fi
+
+          if [ -f "icon-192.png" ]; then
+            cp -f icon-192.png _site/icons/icon-192.png
+          fi
+
+          if [ -f "icon-512.png" ]; then
+            cp -f icon-512.png _site/icons/icon-512.png
+          fi
+
+          for file in sound_*.mp3; do
+            if [ -f "$file" ]; then
+              cp -f "$file" _site/
+            fi
+          done
+
+          if [ -d "assets" ]; then
+            mkdir -p _site/assets
+            cp -R assets/. _site/assets/
+          fi
+
+          echo ""
           echo "========================================="
           echo " CONTENU DU SITE À PUBLIER"
           echo "========================================="
           find _site -maxdepth 6 -type f | sort
+
+          echo ""
+          echo "========================================="
+          echo " ASSETS DUNGEON"
+          echo "========================================="
+          find _site/assets/dungeon -type f 2>/dev/null | sort || true
+
+          echo ""
+          echo "========================================="
+          echo " SONS"
+          echo "========================================="
+          ls -lh _site/sound_*.mp3 2>/dev/null || true
 
       - name: Charger les modules Dungeon externes
         run: |
@@ -95,8 +138,10 @@ jobs:
           if "</body>" not in html:
               raise SystemExit("Cannot inject GenSrpG modules: </body> missing")
           for module, tag, error in modules:
-              if not module.exists(): raise SystemExit(error)
-              if tag not in html: html = html.replace("</body>", tag + "\n</body>")
+              if not module.exists():
+                  raise SystemExit(error)
+              if tag not in html:
+                  html = html.replace("</body>", tag + "\n</body>")
           index.write_text(html, encoding="utf-8")
           PY
 
@@ -144,8 +189,11 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
+
     needs: build
+
     steps:
       - name: Déployer sur GitHub Pages
         id: deployment

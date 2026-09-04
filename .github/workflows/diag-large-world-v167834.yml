@@ -1,4 +1,4 @@
-name: Diagnose Large Rooms V16.78.34
+name: Validate Large Rooms V16.78.34
 on:
   push:
     branches:
@@ -6,27 +6,34 @@ on:
 permissions:
   contents: read
 jobs:
-  diag:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect generator and runtime hooks
+      - name: Syntax
         run: |
-          python - <<'PY'
-          import re, pathlib
-          html=pathlib.Path('index.html').read_text(encoding='utf-8')
-          needles=['function dungeonGridSize','dungeonGridSize=','DungeonCore01={','function explore(','explore(){','function generateMap','function dungeonGenerate','function buildMap','function mapFor','function newRoom','dc047BuildMap','dc060']
-          for needle in needles:
-              p=html.find(needle)
-              print('\n###',needle,'@',p)
-              if p>=0: print(html[max(0,p-1200):p+5000])
-          print('\n### ASSIGNMENTS TO DUNGEONCORE EXPLORE')
-          for m in re.finditer(r'DungeonCore01\.explore\s*=|core\.explore\s*=',html):
-              print('at',m.start(),html[max(0,m.start()-600):m.start()+1800])
-          print('\n### MAP GENERATOR CANDIDATES')
-          for m in re.finditer(r'function\s+([\w$]*(?:map|room|grid)[\w$]*)\s*\(',html,re.I):
-              name=m.group(1)
-              frag=html[m.start():m.start()+1800]
-              if 'cells' in frag or 'entryIdx' in frag or 'dungeonGridSize' in frag:
-                  print(name,'@',m.start(),frag[:1800])
-          PY
+          node --check assets/dungeon/dungeon-large-room-support-167834.js
+          node --check assets/dungeon/dungeon-world-runtime-167823.js
+      - name: Large rooms 15x15
+        run: node tests/dungeon_large_room_v167834.test.cjs
+      - name: Direct fixed World Builder authority
+        run: node tests/dungeon_world_runtime_v167823.test.cjs
+      - name: Exact Zone content
+        run: node tests/dungeon_zone_content_v167824.test.cjs
+      - name: Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Room Creator V1
+        run: node tests/dungeon_room_creator_v1.test.cjs
+      - name: Room Creator V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+      - name: World Builder
+        run: node tests/dungeon_world_builder_v167821.test.cjs
+      - name: Room Runtime
+        run: node tests/dungeon_room_runtime_v167822.test.cjs
+      - name: Enemy room scope
+        run: node tests/dungeon_enemy_room_scope_v318.test.cjs
+      - name: Cache wiring
+        run: |
+          grep -q '16.78.34-large-rooms-authoritative-world' service-worker.js
+          grep -q 'dungeon-large-room-support-167834.js' service-worker.js
+          grep -q 'dungeon-large-room-support-167834.js?v=167834' .github/workflows/main.yml

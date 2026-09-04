@@ -230,7 +230,7 @@ function makeBranchContext(){
   const sw=fs.readFileSync(path.join(__dirname,'..','service-worker.js'),'utf8');
   assert.match(workflow,/dungeon_enemy_room_scope_v318\.test\.cjs/,'le workflow doit exécuter les régressions Core 3.18.x');
   assert.match(workflow,/assets\/dungeon\/dungeon-core-318\.js/,'le build Pages doit injecter la couche Core 3.18.x');
-  assert.match(sw,/const CACHE_NAME\s*=\s*"gensrpg-cache-16\.78\.16-[^"]+"/,'le cache PWA doit rester versionné et pouvoir évoluer avec les hotfix');
+  assert.match(sw,/const CACHE_NAME\s*=\s*"gensrpg-cache-16\.78\.\d+-[^"]+"/,'le cache PWA doit rester versionné et pouvoir évoluer avec les hotfix');
   assert.match(sw,/assets\/dungeon\/dungeon-core-318\.js/,'Core 3.18.x doit être pré-caché');
 })();
 

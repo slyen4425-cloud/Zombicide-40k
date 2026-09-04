@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.24-zone-content";
+const CACHE_NAME = "gensrpg-cache-16.78.27-config-context";
 
 const CORE_FILES = [
   "./",
@@ -8,6 +8,8 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-creator-100.js",
   "./assets/dungeon/dungeon-room-creator-v2-167819.js",
   "./assets/dungeon/dungeon-room-creator-feedback-167821.js",
+  "./assets/dungeon/dungeon-room-visual-config-167826.js",
+  "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-world-builder-167821.js",
   "./assets/dungeon/dungeon-room-runtime-167822.js",
   "./assets/dungeon/dungeon-world-runtime-167823.js",

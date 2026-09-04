@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.28-template-content";
+const CACHE_NAME = "gensrpg-cache-16.78.29-ui-responsiveness";
 
 const CORE_FILES = [
   "./",

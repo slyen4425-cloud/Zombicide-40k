@@ -5,7 +5,8 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-random-library-content-167832.js'),'utf8');
 let spawned=[],made=[];
-const context={console,Math:{...Math,random(){return 0}},document:null,setTimeout(fn){fn();return 1},
+const math={random(){return 0},floor:Math.floor,min:Math.min,max:Math.max};
+const context={console,Math:math,document:null,setTimeout(fn){fn();return 1},
  enemiesForMode(dungeon){assert.equal(dungeon,true);return [{id:'custom_ogre',name:'Ogre'},{id:'dng_skeleton',name:'Squelette'}]},
  itemsForMode(dungeon){assert.equal(dungeon,true);return [{id:'potion_heal',name:'Potion'},{id:'lame_cendre',name:'Lame'}]},
  trackSpawnedEnemyInstances(type,qty,room){spawned.push({type,qty,room});return ['e1']},

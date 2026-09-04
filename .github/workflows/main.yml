@@ -1,4 +1,4 @@
-# GenSrpG Dungeon equipment UI regression guard — 2026-09-03
+# GenSrpG Dungeon equipment UI regression guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -80,10 +80,6 @@ jobs:
           done
 
           # Assets GenSrpG
-          # IMPORTANT :
-          # on copie le CONTENU de assets/
-          # et non le dossier assets lui-même,
-          # sinon on obtient assets/assets/
           if [ -d "assets" ]; then
             mkdir -p _site/assets
             cp -R assets/. _site/assets/
@@ -116,6 +112,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
+              (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -130,6 +127,9 @@ jobs:
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
+
+      - name: Tester le hotfix équipements Dungeon V16.78.17
+        run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

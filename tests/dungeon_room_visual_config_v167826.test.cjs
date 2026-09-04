@@ -49,3 +49,4 @@ assert.match(loader,/drv167826Script/,'le loader doit charger la V16.78.26');
 assert.match(loader,/dzc167824Launch/,'l’ancien launcher doit être neutralisé');
 assert.doesNotMatch(loader,/dungeon-room-visual-config-167825\.js/,'l’ancien asset V16.78.25 ne doit plus être chargé');
 console.log('Dungeon Room visual configuration V16.78.26 pointer regression: OK');
+require('./dungeon_room_visual_hotfix_v167827.test.cjs');

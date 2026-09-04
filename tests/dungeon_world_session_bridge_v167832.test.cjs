@@ -59,8 +59,8 @@ cfgByAdv['adv-100']={enabled:false,dungeonId:''};
  assert.doesNotMatch(src,/saveDungeonAdventures\s*=/,'le bridge ne doit pas recréer la bibliothèque Aventure Dungeon');
  const loader=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  assert.match(loader,/dungeon-world-session-bridge-167832\.js\?v=167833/);
- assert.match(sw,/gensrpg-cache-16\.78\.35-real-room-sizes-world-geometry/);
+ assert.match(sw,/gensrpg-cache-16\.78\.36-single-world-authority/);
  assert.match(sw,/dungeon-world-session-bridge-167832\.js/);
  const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-world-session-bridge-167832.js')),'le bridge World Builder doit être présent dans le site final')}
- console.log('Dungeon single adventure/world selection V16.78.35 cache compatibility: OK');
+ console.log('Dungeon single adventure/world selection V16.78.36 cache compatibility: OK');
 })().catch(e=>{console.error(e);process.exitCode=1});

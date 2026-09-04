@@ -1,0 +1,41 @@
+name: Diagnose World Runtime
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.33-single-adventure-selection
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect generated room map code and world runtime
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          html=pathlib.Path('index.html').read_text(encoding='utf-8')
+          print('INDEX', len(html))
+          ids=re.findall(r'<script[^>]+id=["\']([^"\']+)["\']', html)
+          print('SCRIPT IDS WITH ROOM/MAP:', [x for x in ids if 'room' in x.lower() or 'map' in x.lower()][:80])
+          for sid in ids:
+              if any(k in sid.lower() for k in ('room','map','dungeon')):
+                  m=re.search(r'<script[^>]+id=["\']'+re.escape(sid)+r'["\'][^>]*>([\s\S]*?)</script>',html)
+                  if not m: continue
+                  src=m.group(1)
+                  if any(k in src for k in ('entryIdx','exitIdx','dc047Grid','map:{','map =','map=')):
+                      hits=[]
+                      for pat in [r'.{0,100}(?:size|width|height).{0,160}',r'.{0,100}Math\.random\(\).{0,160}',r'.{0,100}entryIdx.{0,160}']:
+                          hits+=re.findall(pat,src,re.I)
+                      if hits:
+                          print('\n###',sid,'len',len(src))
+                          for h in hits[:30]: print(h.replace('\n',' ')[:500])
+          print('\n=== WORLD RUNTIME KEY FLOW ===')
+          w=pathlib.Path('assets/dungeon/dungeon-world-runtime-167823.js').read_text(encoding='utf-8')
+          for needle in ['const out=old(...arguments)','applyNewNode','after.last={...after.last,map','enemyCells=remapEnemyCells','transitionCreated']:
+              print(needle, needle in w)
+          print('\n=== ZONE CONTENT APPLY ===')
+          z=pathlib.Path('assets/dungeon/dungeon-zone-content-167824.js').read_text(encoding='utf-8')
+          for needle in ['content.mode==="fixed"','removeRoomEnemies(room)','clearDynamicMarkers(map)','spawnEnemy(spec.enemyId','worldContentApplied167824']:
+              print(needle, needle in z)
+          PY

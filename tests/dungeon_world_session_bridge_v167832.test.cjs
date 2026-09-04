@@ -29,38 +29,22 @@ assert.deepEqual(cfgByAdv['adv-100'],{enabled:true,dungeonId:'world-test'});
 assert.equal(context.loadDungeonConfig().rooms,2,'un monde à 2 zones ne doit plus exposer les 100 salles de Morea au Core');
 assert.equal(context.loadDungeonConfig().worldBuilderAuthoritative,true);
 
-// Reproduit la régression réelle : l’ancien parcours réinitialise son réglage avant le lancement.
 cfgByAdv['adv-100']={enabled:false,dungeonId:''};
 (async()=>{
  await context.startConfiguredGame();
  assert.equal(started,1,'le démarrage Dungeon historique doit toujours être appelé une seule fois');
  assert.deepEqual(cfgByAdv['adv-100'],{enabled:true,dungeonId:'world-test'},'le monde choisi doit être resynchronisé juste avant le lancement');
  assert.equal(context.loadDungeonConfig().rooms,2);
-
- // Un clic explicite sur une aventure générée redevient l’unique sélection et désactive le monde construit.
  context.applyDungeonAdventure('adv-100',true);
  assert.deepEqual(JSON.parse(JSON.stringify(api.primary())),{kind:'adventure',id:'adv-100'});
  assert.deepEqual(cfgByAdv['adv-100'],{enabled:false,dungeonId:''});
  assert.equal(context.loadDungeonConfig().rooms,100,'revenir à Morea doit restaurer son nombre de salles générées');
-
- api.selectWorld('world-test',false);
- context.applyDungeonAdventure('adv-20',true);
- assert.equal(activeAdv,'adv-20');
- assert.deepEqual(JSON.parse(JSON.stringify(api.primary())),{kind:'adventure',id:'adv-20'});
- assert.deepEqual(cfgByAdv['adv-20'],{enabled:false,dungeonId:''});
- assert.equal(context.loadDungeonConfig().rooms,20);
-
+ api.selectWorld('world-test',false);context.applyDungeonAdventure('adv-20',true);
+ assert.equal(activeAdv,'adv-20');assert.deepEqual(JSON.parse(JSON.stringify(api.primary())),{kind:'adventure',id:'adv-20'});assert.deepEqual(cfgByAdv['adv-20'],{enabled:false,dungeonId:''});assert.equal(context.loadDungeonConfig().rooms,20);
  assert.equal(context.renderSessionDungeonLibrary.__dws167833,true,'la bibliothèque de préparation doit être enrichie sans deuxième moteur');
- assert.match(src,/PRIMARY_KEY="gensrpg_dungeon_primary_selection_v167833"/);
- assert.match(src,/syncSelectionForStart/);
- assert.match(src,/worldBuilderAuthoritative:true/);
- assert.match(src,/removeBadge/,'l’état ACTIF de l’aventure legacy doit être retiré quand un monde est sélectionné');
- assert.doesNotMatch(src,/data-dws-generated/,'il ne doit plus exister une deuxième carte Donjon généré active en parallèle');
- assert.doesNotMatch(src,/saveDungeonAdventures\s*=/,'le bridge ne doit pas recréer la bibliothèque Aventure Dungeon');
+ assert.match(src,/PRIMARY_KEY="gensrpg_dungeon_primary_selection_v167833"/);assert.match(src,/syncSelectionForStart/);assert.match(src,/worldBuilderAuthoritative:true/);assert.match(src,/removeBadge/);assert.doesNotMatch(src,/data-dws-generated/);assert.doesNotMatch(src,/saveDungeonAdventures\s*=/);
  const loader=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
- assert.match(loader,/dungeon-world-session-bridge-167832\.js\?v=167833/);
- assert.match(sw,/gensrpg-cache-16\.78\.34-large-rooms-authoritative-world/);
- assert.match(sw,/dungeon-world-session-bridge-167832\.js/);
+ assert.match(loader,/dungeon-world-session-bridge-167832\.js\?v=167833/);assert.match(sw,/gensrpg-cache-16\.78\.35-real-room-sizes-world-geometry/);assert.match(sw,/dungeon-world-session-bridge-167832\.js/);
  const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-world-session-bridge-167832.js')),'le bridge World Builder doit être présent dans le site final')}
- console.log('Dungeon single adventure/world selection V16.78.34 cache compatibility: OK');
+ console.log('Dungeon single adventure/world selection V16.78.35 cache compatibility: OK');
 })().catch(e=>{console.error(e);process.exitCode=1});

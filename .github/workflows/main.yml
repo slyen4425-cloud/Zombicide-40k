@@ -1,4 +1,4 @@
-# GenSrpG V16.78.23 authoritative built-world runtime guard — 2026-09-04
+# GenSrpG V16.78.24 exact built-world zone content guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -42,6 +42,9 @@ jobs:
 
       - name: Tester le Monde construit autoritaire
         run: node tests/dungeon_world_runtime_v167823.test.cjs
+
+      - name: Tester le contenu exact par Zone
+        run: node tests/dungeon_zone_content_v167824.test.cjs
 
       - name: Tester l'instanciation ennemie par salle
         run: node tests/dungeon_enemy_room_scope_v318.test.cjs
@@ -121,6 +124,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-world-builder-167821.js"), '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>', "Dungeon World Builder Phase 3 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167823"></script>', "Dungeon authoritative World Runtime missing"),
+              (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -151,6 +155,9 @@ jobs:
 
       - name: Tester le chargement final du Monde construit autoritaire
         run: node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
+
+      - name: Tester le chargement final du contenu exact par Zone
+        run: node tests/dungeon_zone_content_v167824.test.cjs _site/index.html
 
       - name: Tester le hotfix équipements Dungeon V16.78.17
         run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html

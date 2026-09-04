@@ -80,3 +80,19 @@ if(DOC){
   if(typeof MutationObserver==="function")new MutationObserver(()=>install()).observe(DOC.documentElement,{childList:true,subtree:true});
 }
 })();
+
+/* V16.78.25 — charge l'éditeur visuel de contenu exact depuis le Créateur de pièces. */
+(function(){
+"use strict";
+const ROOT=typeof window!=="undefined"?window:globalThis;
+const DOC=typeof document!=="undefined"?document:null;
+function loadVisualConfig(){
+  if(!DOC||ROOT.DungeonRoomVisualConfig167825||DOC.getElementById("drv167825Script"))return;
+  const s=DOC.createElement("script");
+  s.id="drv167825Script";
+  s.src="assets/dungeon/dungeon-room-visual-config-167825.js?v=167825";
+  s.async=false;
+  DOC.body.appendChild(s);
+}
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",loadVisualConfig,{once:true});else loadVisualConfig()}
+})();

@@ -1,13 +1,14 @@
-/* GenSrpG V16.78.35 — real Dungeon room-size + built-world geometry authority.
-   This guard runs around the actual DungeonCore01.explore path. It repairs a late legacy
-   9x9 clamp after room creation and keeps a selected World Builder room authoritative
-   independently from the Zone content mode. Combat/timeline/spawn producers are untouched. */
+/* GenSrpG V16.78.36 — real Dungeon room-size + single World Builder authority.
+   The pre-game primary selection is now the canonical source for built worlds. Legacy editor
+   activation can no longer override it, and the requested World Builder target node wins over
+   stale runtime metadata. Combat/timeline/spawn producers are untouched. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="2.0.0",APP_VERSION="16.78.35",MAX_SIZE=15,MIN_SIZE=6;
+const VERSION="2.1.0",APP_VERSION="16.78.36",MAX_SIZE=15,MIN_SIZE=6;
 const RT_KEY="gensrpg_dungeon_runtime_v2";
+const PRIMARY_KEY="gensrpg_dungeon_primary_selection_v167833";
 let exploreBusy=false;
 function clone(v){try{return v==null?v:JSON.parse(JSON.stringify(v))}catch(e){return v}}
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
@@ -70,8 +71,15 @@ function repairGenerated(before,desired){
   const hero=activeHero(x);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero)x.positions[hero]=Math.max(0,Number(map.entryIdx)||0);
   remapEnemies(x,map);remapScene(x,map);persist(x);return true;
 }
+function readPrimarySelection(){try{const x=JSON.parse(localStorage.getItem(PRIMARY_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function selectedWorld(){
-  try{const p=ROOT.DungeonWorldSessionBridge167832?.primary?.();if(p?.kind==="world"&&p.id)return {id:String(p.id),primary:true}}catch(e){}
+  let p=null;
+  try{p=ROOT.DungeonWorldSessionBridge167832?.primary?.()||null}catch(e){}
+  if(!p)p=readPrimarySelection();
+  if(p&&typeof p==="object"){
+    if(String(p.kind)==="world"&&p.id)return {id:String(p.id),primary:true};
+    if(String(p.kind)==="adventure")return null;
+  }
   try{const aid=String(ROOT.activeDungeonAdventureId?.()||"default"),c=ROOT.DungeonWorldRuntime167823?.getConfig?.(aid);if(c?.enabled&&c.dungeonId)return {id:String(c.dungeonId),primary:false}}catch(e){}
   return null;
 }
@@ -79,7 +87,7 @@ function syncWorldSelection(sel){if(!sel?.id)return;try{const aid=String(ROOT.ac
 function worldPlan(sel){if(!sel?.id)return null;syncWorldSelection(sel);try{const p=ROOT.DungeonWorldRuntime167823?.currentPlan?.();if(p?.targetNodeId)return {...p,dungeonId:sel.id}}catch(e){}return {dungeonId:sel.id,targetNodeId:""}}
 function worldPack(sel,plan,after){
   const id=String(sel?.id||plan?.dungeonId||after?.last?.worldDungeonId||"");if(!id)return null;let graph=null;try{graph=ROOT.DungeonWorldBuilder167821?.findDungeon?.(id)||null}catch(e){}if(!graph)return null;
-  const nodeId=String(after?.last?.worldNodeId||plan?.targetNodeId||graph.startNodeId||""),node=(graph.nodes||[]).find(n=>String(n.id)===nodeId);if(!node)return null;let room=null;try{room=ROOT.DungeonRoomCreator100?.findRoom?.(node.roomId)||null}catch(e){}return room?{graph,node,room}:null;
+  const nodeId=String(plan?.targetNodeId||after?.last?.worldNodeId||graph.startNodeId||""),node=(graph.nodes||[]).find(n=>String(n.id)===nodeId);if(!node)return null;let room=null;try{room=ROOT.DungeonRoomCreator100?.findRoom?.(node.roomId)||null}catch(e){}return room?{graph,node,room}:null;
 }
 function roomMap(room){
   const width=Math.max(1,Number(room?.width)||1),height=Math.max(1,Number(room?.height)||1),cells=(room?.cells||[]).slice(0,width*height).map(c=>c?.terrain==="wall"?"wall":String(c?.object||"floor"));while(cells.length<width*height)cells.push("floor");
@@ -99,20 +107,21 @@ function repairWorld(before,sel,plan){
   if(!structuralMatch(old,exact)){exact.objective=clone(old?.objective||x.last?.objective||exact.objective);exact=overlayDynamic(exact,old);x.last.map=exact;x.last.objective=clone(exact.objective);remapEnemies(x,exact);changed=true}else{x.last.map.width=exact.width;x.last.map.height=exact.height;x.last.map.size=exact.width;x.last.map.worldTemplate167835=true;x.last.map.worldGeometryAuthoritative167835=true}
   const hero=ensureWorldState(x,sel,pack),arrival=Number(plan?.edge?.toEntryIndex);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero&&(changed||!Number.isInteger(Number(x.positions[hero]))))x.positions[hero]=Number.isInteger(arrival)&&arrival>=0&&arrival<x.last.map.cells.length?arrival:Math.max(0,Number(x.last.map.entryIdx)||0);
   persist(x);
-  try{if(!x.last.worldContentApplied167824)ROOT.DungeonZoneContent167824?.applyCurrentZone?.()}catch(e){console.warn("V16.78.35 zone content apply",e)}
+  try{if(!x.last.worldContentApplied167824)ROOT.DungeonZoneContent167824?.applyCurrentZone?.()}catch(e){console.warn("V16.78.36 zone content apply",e)}
   return changed;
 }
+function retireDuplicateWorldActivation(){if(!DOC)return false;const p=DOC.getElementById("dwr167823Panel");if(!p)return false;try{p.style.setProperty("display","none","important");p.setAttribute("aria-hidden","true");p.dataset.dlr167836Retired="true"}catch(e){}return true}
 function patchLabels(){if(!DOC)return;const text=(id,value,label)=>{const s=DOC.getElementById(id),o=s?.querySelector?.('option[value="'+value+'"]');if(o&&o.textContent!==label)o.textContent=label};text("daeGeometry","random","Taille aléatoire 6×6 à 15×15");text("daeSize","small","6×6");text("daeSize","medium","9×9");text("daeSize","large","15×15");text("dungeonCfgSize","small","Petites 6×6");text("dungeonCfgSize","medium","Moyennes 9×9");text("dungeonCfgSize","large","Grandes 15×15")}
 function ensureStyle(){if(!DOC||DOC.getElementById("dlr167835Style"))return;const s=DOC.createElement("style");s.id="dlr167835Style";s.textContent=`#dc047RoomBoard{overflow:auto;-webkit-overflow-scrolling:touch}.dc047Grid{width:max-content;min-width:100%}.dc047Grid>.dc047Cell{min-width:28px;min-height:28px}.dc047Grid.dlr167835Large>.dc047Cell{font-size:clamp(11px,2.7vw,18px)}@media(max-width:620px){.dc047Grid>.dc047Cell{min-width:26px;min-height:26px}}`;DOC.head.appendChild(s)}
 function markLarge(){if(!DOC)return;const map=readRt()?.last?.map;const g=DOC.querySelector?.("#dc047RoomBoard .dc047Grid");if(g)g.classList.toggle("dlr167835Large",Number(map?.width||map?.size||0)>9)}
-function wrapRender(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dlr167835)continue;const w=function(){const r=old.apply(this,arguments);patchLabels();markLarge();return r};w.__dlr167835=true;w.__dlr167835Original=old;core[name]=w}return true}
+function wrapRender(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dlr167835)continue;const w=function(){const r=old.apply(this,arguments);patchLabels();retireDuplicateWorldActivation();markLarge();return r};w.__dlr167835=true;w.__dlr167835Original=old;core[name]=w}return true}
 function wrapExplore(){
   const core=ROOT.DungeonCore01;if(!core||typeof core.explore!=="function")return false;const old=core.explore;if(old.__dlr167835)return true;
-  const w=function(){if(exploreBusy)return old.apply(this,arguments);exploreBusy=true;const before=clone(readRt()),sel=selectedWorld(),plan=sel?worldPlan(sel):null,desired=sel?null:gridSize();let out;try{out=old.apply(this,arguments);const changed=sel?repairWorld(before,sel,plan):repairGenerated(before,desired);if(changed)try{core.render?.()}catch(e){}markLarge();return out}finally{exploreBusy=false}};
+  const w=function(){if(exploreBusy)return old.apply(this,arguments);exploreBusy=true;const before=clone(readRt()),sel=selectedWorld(),plan=sel?worldPlan(sel):null,desired=sel?null:gridSize();let out;try{out=old.apply(this,arguments);const changed=sel?repairWorld(before,sel,plan):repairGenerated(before,desired);if(changed)try{core.render?.()}catch(e){}retireDuplicateWorldActivation();markLarge();return out}finally{exploreBusy=false}};
   w.__dlr167835=true;w.__dlr167835Original=old;core.explore=w;return true;
 }
-function install(){ROOT.dungeonGridSize=gridSize;ROOT.generateDungeonMap=function(kind,enemyQty){return generate(kind,enemyQty,gridSize())};ensureStyle();patchLabels();wrapRender();wrapExplore();markLarge();ROOT.GENSRPG_VERSION=APP_VERSION;return true}
-ROOT.DungeonLargeRoom167834={VERSION,APP_VERSION,MIN_SIZE,MAX_SIZE,gridSize,generate,repairGenerated,repairWorld,roomMap,install};
+function install(){ROOT.dungeonGridSize=gridSize;ROOT.generateDungeonMap=function(kind,enemyQty){return generate(kind,enemyQty,gridSize())};ensureStyle();patchLabels();wrapRender();wrapExplore();retireDuplicateWorldActivation();markLarge();ROOT.GENSRPG_VERSION=APP_VERSION;return true}
+ROOT.DungeonLargeRoom167834={VERSION,APP_VERSION,MIN_SIZE,MAX_SIZE,PRIMARY_KEY,gridSize,generate,readPrimarySelection,selectedWorld,repairGenerated,repairWorld,roomMap,retireDuplicateWorldActivation,install};
 ROOT.DungeonRoomAuthority167835=ROOT.DungeonLargeRoom167834;
 install();if(typeof setTimeout==="function")for(const ms of [0,50,250,1000,2500])setTimeout(install,ms);
 })();

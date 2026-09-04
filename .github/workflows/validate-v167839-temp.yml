@@ -1,0 +1,25 @@
+name: Validate V16.78.39 authored Dungeon runtime
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.39-authored-runtime
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check assets/dungeon/dungeon-authored-runtime-167839.js
+      - run: node --check assets/dungeon/dungeon-world-session-bridge-167832.js
+      - run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - run: node tests/dungeon_world_session_bridge_v167832.test.cjs
+      - run: node tests/dungeon_runtime_regression.test.cjs
+      - run: node tests/dungeon_large_room_v167834.test.cjs
+      - run: node tests/dungeon_room_creator_v1.test.cjs
+      - run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+      - run: node tests/dungeon_world_builder_v167821.test.cjs
+      - run: node tests/dungeon_room_runtime_v167822.test.cjs
+      - run: node tests/dungeon_world_runtime_v167823.test.cjs
+      - run: node tests/dungeon_zone_content_v167824.test.cjs
+      - run: node tests/dungeon_enemy_room_scope_v318.test.cjs

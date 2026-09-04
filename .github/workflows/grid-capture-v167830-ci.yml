@@ -1,0 +1,30 @@
+name: Validate Grid Capture V16.78.30
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.30-grid-capture
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax capture guard
+        run: node --check assets/dungeon/dungeon-room-grid-capture-167830.js
+      - name: Test capture versus Room Creator paint
+        run: node tests/dungeon_room_grid_capture_v167830.test.cjs
+      - name: Test exact zone content chain
+        run: node tests/dungeon_zone_content_v167824.test.cjs
+      - name: Test full Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Test Room Creator V1
+        run: node tests/dungeon_room_creator_v1.test.cjs
+      - name: Test Room Creator V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+      - name: Test World Builder
+        run: node tests/dungeon_world_builder_v167821.test.cjs
+      - name: Test World Runtime
+        run: node tests/dungeon_world_runtime_v167823.test.cjs
+      - name: Test enemy room scope
+        run: node tests/dungeon_enemy_room_scope_v318.test.cjs

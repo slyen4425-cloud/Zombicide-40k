@@ -1,4 +1,4 @@
-# GenSrpG Dungeon Room Creator V2 regression guard — 2026-09-04
+# GenSrpG V16.78.20 live world-summary regression guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -106,7 +106,7 @@ jobs:
           echo "========================================="
           ls -lh _site/sound_*.mp3 2>/dev/null || true
 
-      - name: Charger les modules Dungeon externes
+      - name: Charger les modules GenSrpG externes
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -118,10 +118,11 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
+              (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
-              raise SystemExit("Cannot inject Dungeon modules: </body> missing")
+              raise SystemExit("Cannot inject GenSrpG modules: </body> missing")
           for module, tag, error in modules:
               if not module.exists():
                   raise SystemExit(error)
@@ -141,6 +142,9 @@ jobs:
 
       - name: Tester l'éditeur de sets Dungeon V16.78.18
         run: node tests/dungeon_set_editor_v167818.test.cjs assets/dungeon/dungeon-set-editor-167818.js _site/index.html .github/workflows/main.yml service-worker.js
+
+      - name: Tester les récapitulatifs de mondes V16.78.20
+        run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

@@ -19,3 +19,17 @@ function install(){if(!DOC||!v2())return;ensureFeedback();wrap("addAttachmentUI"
 ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSummary,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>install()).observe(DOC.documentElement,{childList:true,subtree:true})}
 })();
+
+/* V16.78.26 — charge le configurateur visuel uniquement après le runtime de contenu exact. */
+(function(){
+"use strict";
+const ROOT=typeof window!=="undefined"?window:globalThis;
+const DOC=typeof document!=="undefined"?document:null;
+let attempts=0;
+function loadVisualConfig(){
+  if(!DOC||ROOT.DungeonRoomVisualConfig167826||DOC.getElementById("drv167826Script"))return;
+  if(!ROOT.DungeonZoneContent167824&&attempts++<80){setTimeout(loadVisualConfig,50);return}
+  const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167826";s.async=false;DOC.body.appendChild(s);
+}
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",loadVisualConfig,{once:true});else loadVisualConfig()}
+})();

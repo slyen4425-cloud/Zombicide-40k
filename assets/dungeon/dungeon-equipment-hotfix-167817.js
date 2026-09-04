@@ -47,6 +47,8 @@ function bonusText(bonuses){
   }).join(" · ")||"Bonus descriptif";
 }
 
+/* 1) Le moteur de set ne doit plus dépendre du garde isDungeonHeroSheet().
+      Si l'ancien helper renvoie vide, on reconstruit depuis state.rpgGear + mains. */
 const baseEquipped=ROOT.dungeonEquippedItems;
 if(typeof baseEquipped==="function"&&!baseEquipped.__equipmentHotfix167817){
   const wrapped=function(){
@@ -74,6 +76,7 @@ if(typeof baseEquipped==="function"&&!baseEquipped.__equipmentHotfix167817){
   ROOT.dungeonEquippedItems=wrapped;
 }
 
+/* 2) Afficher les stats RPG + set dans la bibliothèque d'équipements. */
 const baseSummary=ROOT.equipmentSummary;
 if(typeof baseSummary==="function"&&!baseSummary.__equipmentHotfix167817){
   const wrapped=function(item){
@@ -89,6 +92,7 @@ if(typeof baseSummary==="function"&&!baseSummary.__equipmentHotfix167817){
   ROOT.equipmentSummary=wrapped;
 }
 
+/* 3) Afficher les stats RPG sur les cartes d'objet standard. */
 const baseCardStats=ROOT.equipmentCardStatsHtml;
 if(typeof baseCardStats==="function"&&!baseCardStats.__equipmentHotfix167817){
   const wrapped=function(item){
@@ -102,17 +106,30 @@ if(typeof baseCardStats==="function"&&!baseCardStats.__equipmentHotfix167817){
   ROOT.equipmentCardStatsHtml=wrapped;
 }
 
+function isBuiltinDungeonItem(item,id=""){
+  if(item?.dungeonBuiltin)return true;
+  const wanted=String(id||item?.id||"");
+  try{
+    if(typeof ROOT.dungeonItems==="function"){
+      const found=ROOT.dungeonItems().find(candidate=>String(candidate?.id)===wanted);
+      if(found?.dungeonBuiltin)return true;
+    }
+  }catch(e){}
+  try{if(Array.isArray(ROOT.DUNGEON_ITEM_IDS)&&ROOT.DUNGEON_ITEM_IDS.map(String).includes(wanted))return true}catch(e){}
+  return false;
+}
 function isDungeonEditorItem(item){
   try{if(typeof ROOT.isDungeonMode==="function"&&ROOT.isDungeonMode())return true}catch(e){}
   const id=String(item?.id||DOC?.getElementById("eqEditId")?.value||"");
-  if(item?.dungeonBuiltin||item?.gameMode==="dungeon")return true;
-  try{if(Array.isArray(ROOT.DUNGEON_ITEM_IDS)&&ROOT.DUNGEON_ITEM_IDS.map(String).includes(id))return true}catch(e){}
+  if(isBuiltinDungeonItem(item,id)||item?.gameMode==="dungeon")return true;
   return false;
 }
 function setHtml(item){
   const set=ROOT.DUNGEON_EQUIPMENT_SETS?.[item?.setId];
   if(!set)return '<div class="deuiHotfixMuted">Aucun set</div>';
-  return '<div class="deuiHotfixSetName">🧩 '+esc(set.name)+'</div>'+ '<div class="deuiHotfixMuted">Pièce : '+esc(item?.setPieceId||item?.id||"—")+' · '+Math.max(1,number(set?.pieceCount))+' pièces</div>'+ '<div class="deuiHotfixThresholds">'+thresholds(set).map(t=>'<div>• '+number(t?.pieces)+' pièces : '+esc(bonusText(t?.bonuses))+'</div>').join("")+'</div>';
+  return '<div class="deuiHotfixSetName">🧩 '+esc(set.name)+'</div>'+ 
+    '<div class="deuiHotfixMuted">Pièce : '+esc(item?.setPieceId||item?.id||"—")+' · '+Math.max(1,number(set?.pieceCount))+' pièces</div>'+ 
+    '<div class="deuiHotfixThresholds">'+thresholds(set).map(t=>'<div>• '+number(t?.pieces)+' pièces : '+esc(bonusText(t?.bonuses))+'</div>').join("")+'</div>';
 }
 function ensureEditorSection(){
   if(!DOC)return null;
@@ -124,13 +141,27 @@ function ensureEditorSection(){
   section=DOC.createElement("div");
   section.id="deuiEquipmentEditorStats167817";
   section.className="eqSection";
-  section.innerHTML='<strong>🛡️ Statistiques RPG de l’équipement</strong>'+ '<div class="small" style="margin-top:4px">Valeurs du système existant <code>rpgBonuses</code>.</div>'+ '<div class="deuiHotfixGrid">'+FIELDS.map(field=>'<label><span>'+esc(field.label)+'</span><input id="deuiHotfixBonus_'+esc(field.key)+'" type="number" step="1" value="0"></label>').join("")+'</div>'+ '<div class="deuiHotfixSetBox"><strong>🧩 Set</strong><div id="deuiHotfixSetInfo"></div></div>';
+  section.innerHTML=
+    '<strong>🛡️ Statistiques RPG de l’équipement</strong>'+ 
+    '<div class="small" style="margin-top:4px">Valeurs du système existant <code>rpgBonuses</code>.</div>'+ 
+    '<div class="deuiHotfixGrid">'+FIELDS.map(field=>
+      '<label><span>'+esc(field.label)+'</span><input id="deuiHotfixBonus_'+esc(field.key)+'" type="number" step="1" value="0"></label>'
+    ).join("")+'</div>'+ 
+    '<div class="deuiHotfixSetBox"><strong>🧩 Set</strong><div id="deuiHotfixSetInfo"></div></div>';
   const anchor=DOC.getElementById("eqSoundBox")||DOC.getElementById("eqEvolutionBox");
   if(anchor&&anchor.parentNode===card)card.insertBefore(section,anchor);else card.appendChild(section);
+
   if(!DOC.getElementById("deuiEquipmentHotfixStyles167817")){
     const style=DOC.createElement("style");
     style.id="deuiEquipmentHotfixStyles167817";
-    style.textContent=".deuiHotfixGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}.deuiHotfixGrid label{display:grid;grid-template-columns:1fr 78px;gap:7px;align-items:center;font-size:12px}.deuiHotfixGrid input{width:100%;box-sizing:border-box;background:#0d0d0d;color:#fff;border:1px solid #555;border-radius:7px;padding:7px}.deuiHotfixSetBox{margin-top:10px;padding-top:9px;border-top:1px solid #333}.deuiHotfixSetName{font-weight:900;margin-top:6px}.deuiHotfixMuted,.deuiHotfixThresholds{font-size:12px;color:#bbb;margin-top:4px}.deuiHotfixThresholds{display:grid;gap:3px}.deuiHotfixStats{margin-top:5px;font-size:11px;font-weight:800;color:#e0d3a3}@media(max-width:620px){.deuiHotfixGrid{grid-template-columns:1fr}}";
+    style.textContent=
+      ".deuiHotfixGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}"+
+      ".deuiHotfixGrid label{display:grid;grid-template-columns:1fr 78px;gap:7px;align-items:center;font-size:12px}"+
+      ".deuiHotfixGrid input{width:100%;box-sizing:border-box;background:#0d0d0d;color:#fff;border:1px solid #555;border-radius:7px;padding:7px}"+
+      ".deuiHotfixSetBox{margin-top:10px;padding-top:9px;border-top:1px solid #333}.deuiHotfixSetName{font-weight:900;margin-top:6px}"+
+      ".deuiHotfixMuted,.deuiHotfixThresholds{font-size:12px;color:#bbb;margin-top:4px}.deuiHotfixThresholds{display:grid;gap:3px}"+
+      ".deuiHotfixStats{margin-top:5px;font-size:11px;font-weight:800;color:#e0d3a3}"+
+      "@media(max-width:620px){.deuiHotfixGrid{grid-template-columns:1fr}}";
     (DOC.head||DOC.documentElement||DOC.body)?.appendChild(style);
   }
   return section;
@@ -145,13 +176,18 @@ function loadEditor(item){
 }
 function readEditorBonuses(){
   const out={};
-  FIELDS.forEach(field=>{const input=DOC?.getElementById("deuiHotfixBonus_"+field.key);const value=Number(input?.value);if(Number.isFinite(value))out[field.key]=value});
+  FIELDS.forEach(field=>{
+    const input=DOC?.getElementById("deuiHotfixBonus_"+field.key);
+    const value=Number(input?.value);
+    if(Number.isFinite(value))out[field.key]=value;
+  });
   return out;
 }
 function persistBonuses(id,bonuses){
   id=String(id||"");if(!id)return false;
   try{
-    if(Array.isArray(ROOT.DUNGEON_ITEM_IDS)&&ROOT.DUNGEON_ITEM_IDS.map(String).includes(id)&&typeof ROOT.loadDungeonItemOverrides==="function"&&typeof ROOT.saveDungeonItemOverrides==="function"){
+    const item=findItem(id);
+    if(isBuiltinDungeonItem(item,id)&&typeof ROOT.loadDungeonItemOverrides==="function"&&typeof ROOT.saveDungeonItemOverrides==="function"){
       const overrides=ROOT.loadDungeonItemOverrides()||{};
       const previous=overrides[id]&&typeof overrides[id]==="object"?overrides[id]:{};
       overrides[id]={...previous,rpgBonuses:{...(previous.rpgBonuses||{}),...bonuses}};
@@ -179,7 +215,12 @@ function persistBonuses(id,bonuses){
 
 const baseOpen=ROOT.openEquipmentEditor;
 if(typeof baseOpen==="function"&&!baseOpen.__equipmentHotfix167817){
-  const wrapped=function(){const result=baseOpen.apply(this,arguments);const id=String(DOC?.getElementById("eqEditId")?.value||arguments[0]||"");loadEditor(findItem(id));return result};
+  const wrapped=function(){
+    const result=baseOpen.apply(this,arguments);
+    const id=String(DOC?.getElementById("eqEditId")?.value||arguments[0]||"");
+    loadEditor(findItem(id));
+    return result;
+  };
   wrapped.__equipmentHotfix167817=true;wrapped.__original=baseOpen;ROOT.openEquipmentEditor=wrapped;
 }
 const baseSave=ROOT.saveEquipmentEditor;
@@ -193,7 +234,12 @@ if(typeof baseSave==="function"&&!baseSave.__equipmentHotfix167817){
     if(!id&&dungeon&&idField){id="custom_item_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);idField.value=id}
     const bonuses=dungeon?readEditorBonuses():null;
     const result=baseSave.apply(this,arguments);
-    if(dungeon&&id&&bonuses){persistBonuses(id,bonuses);try{ROOT.renderEquipmentLibrary?.()}catch(e){}try{ROOT.renderGear?.()}catch(e){}try{ROOT.DungeonEquipmentUI?.refresh?.()}catch(e){}}
+    if(dungeon&&id&&bonuses){
+      persistBonuses(id,bonuses);
+      try{ROOT.renderEquipmentLibrary?.()}catch(e){}
+      try{ROOT.renderGear?.()}catch(e){}
+      try{ROOT.DungeonEquipmentUI?.refresh?.()}catch(e){}
+    }
     return result;
   };
   wrapped.__equipmentHotfix167817=true;wrapped.__original=baseSave;ROOT.saveEquipmentEditor=wrapped;

@@ -20,15 +20,23 @@ ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSumm
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>install()).observe(DOC.documentElement,{childList:true,subtree:true})}
 })();
 
-/* V16.78.26 — charge le configurateur visuel uniquement après le runtime de contenu exact. */
+/* V16.78.26 — charge le configurateur visuel après le runtime exact et neutralise l'ancien launcher. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 let attempts=0;
+function neutralizeLegacyLauncher(){
+  if(!DOC)return;
+  let el=DOC.getElementById("dzc167824Launch");
+  if(!el){el=DOC.createElement("span");el.id="dzc167824Launch";el.setAttribute("aria-hidden","true");DOC.body.appendChild(el)}
+  el.style.setProperty("display","none","important");
+  el.remove=function(){this.style.setProperty("display","none","important")};
+}
 function loadVisualConfig(){
   if(!DOC||ROOT.DungeonRoomVisualConfig167826||DOC.getElementById("drv167826Script"))return;
   if(!ROOT.DungeonZoneContent167824&&attempts++<80){setTimeout(loadVisualConfig,50);return}
+  neutralizeLegacyLauncher();
   const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167826";s.async=false;DOC.body.appendChild(s);
 }
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",loadVisualConfig,{once:true});else loadVisualConfig()}

@@ -1,0 +1,32 @@
+name: Validate UI Responsiveness V16.78.29
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.29-ui-responsiveness
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax visual hotfix
+        run: node --check assets/dungeon/dungeon-room-visual-hotfix-167827.js
+      - name: Syntax template content
+        run: node --check assets/dungeon/dungeon-room-template-content-167828.js
+      - name: Test UI responsiveness and visual config
+        run: node tests/dungeon_room_visual_hotfix_v167827.test.cjs
+      - name: Test exact zone content
+        run: node tests/dungeon_zone_content_v167824.test.cjs
+      - name: Test full Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Test Room Creator V1
+        run: node tests/dungeon_room_creator_v1.test.cjs
+      - name: Test Room Creator V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+      - name: Test World Builder
+        run: node tests/dungeon_world_builder_v167821.test.cjs
+      - name: Test World Runtime
+        run: node tests/dungeon_world_runtime_v167823.test.cjs
+      - name: Test enemy room scope
+        run: node tests/dungeon_enemy_room_scope_v318.test.cjs

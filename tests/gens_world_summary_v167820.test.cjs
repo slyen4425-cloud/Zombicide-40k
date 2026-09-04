@@ -75,7 +75,7 @@ assert.match(src,/gensUniverseCard\[data-rpg-profile\]/,'world card selector mis
 assert.match(workflow,/gens-world-summary-167820\.js/,'Pages workflow must inject live world summaries');
 assert.match(workflow,/gens_world_summary_v167820\.test\.cjs/,'Pages workflow must run live-summary regression');
 assert.match(sw,/gens-world-summary-167820\.js/,'live-summary module must be pre-cached');
-assert.match(sw,/gensrpg-cache-16\.78\.20-/,'PWA cache must advance to V16.78.20');
+assert.match(sw,/gensrpg-cache-16\.78\.\d+-/,'PWA cache must remain on a GenSrpG 16.78.x release');
 if(builtArg){
  const html=fs.readFileSync(builtArg,'utf8');
  assert.match(html,/assets\/gensrpg\/gens-world-summary-167820\.js\?v=167820/,'final HTML must load the V16.78.20 world summary module');

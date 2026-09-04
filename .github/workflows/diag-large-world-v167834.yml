@@ -1,0 +1,32 @@
+name: Diagnose Large Rooms V16.78.34
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.34-large-rooms-authoritative-world
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect generator and runtime hooks
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          html=pathlib.Path('index.html').read_text(encoding='utf-8')
+          needles=['function dungeonGridSize','dungeonGridSize=','DungeonCore01={','function explore(','explore(){','function generateMap','function dungeonGenerate','function buildMap','function mapFor','function newRoom','dc047BuildMap','dc060']
+          for needle in needles:
+              p=html.find(needle)
+              print('\n###',needle,'@',p)
+              if p>=0: print(html[max(0,p-1200):p+5000])
+          print('\n### ASSIGNMENTS TO DUNGEONCORE EXPLORE')
+          for m in re.finditer(r'DungeonCore01\.explore\s*=|core\.explore\s*=',html):
+              print('at',m.start(),html[max(0,m.start()-600):m.start()+1800])
+          print('\n### MAP GENERATOR CANDIDATES')
+          for m in re.finditer(r'function\s+([\w$]*(?:map|room|grid)[\w$]*)\s*\(',html,re.I):
+              name=m.group(1)
+              frag=html[m.start():m.start()+1800]
+              if 'cells' in frag or 'entryIdx' in frag or 'dungeonGridSize' in frag:
+                  print(name,'@',m.start(),frag[:1800])
+          PY

@@ -26,4 +26,11 @@ assert.match(loader,/dungeon-room-visual-hotfix-167827\.js\?v=167827/,'le loader
 assert.match(loader,/dungeon-room-visual-config-167826\.js\?v=167827/,'le configurateur doit être cache-busté en V16.78.27');
 assert.match(sw,/gensrpg-cache-16\.78\.27-config-context/,'le cache PWA doit être réellement remonté');
 assert.match(sw,/dungeon-room-visual-config-167826\.js/);assert.match(sw,/dungeon-room-visual-hotfix-167827\.js/);
+const htmlArg=process.argv[2];
+if(htmlArg){
+  const site=path.dirname(path.resolve(htmlArg));
+  assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-room-visual-hotfix-167827.js')),'le hotfix V16.78.27 doit exister dans le site final construit');
+  const builtLoader=fs.readFileSync(path.join(site,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');
+  assert.match(builtLoader,/dungeon-room-visual-hotfix-167827\.js\?v=167827/,'le loader du site final doit demander le hotfix V16.78.27');
+}
 console.log('Dungeon Room visual hotfix V16.78.27 context regression: OK');

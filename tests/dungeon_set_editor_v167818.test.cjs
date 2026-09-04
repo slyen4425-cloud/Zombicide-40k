@@ -38,6 +38,6 @@ result=ctx.DungeonSetEditor.resetSetDefinition('set_ancient');assert.equal(resul
 for(const label of ['Nom du set','Nombre de pièces','Pièces associées','Ajouter un palier','Enregistrer le set','Armure','Défense magique','Critique %'])assert.match(editor,new RegExp(label));
 assert.match(editor,/paliers sont <strong>cumulatifs<\/strong>/);
 assert.match(workflow,/dungeon-set-editor-167818\.js/);assert.match(workflow,/dungeon_set_editor_v167818\.test\.cjs/);
-assert.match(sw,/gensrpg-cache-16\.78\.18-set-editor/);assert.match(sw,/dungeon-set-editor-167818\.js/);
+assert.match(sw,/const CACHE_NAME\s*=\s*"gensrpg-cache-16\.78\.\d+-[^"]+"/);assert.match(sw,/dungeon-set-editor-167818\.js/);
 if(built){const hotfixPos=built.lastIndexOf('dungeon-equipment-hotfix-167817.js');const setEditorPos=built.lastIndexOf('dungeon-set-editor-167818.js');assert.ok(setEditorPos>hotfixPos,'éditeur de sets doit charger après le hotfix équipement');}
 console.log('Dungeon set editor V16.78.18: OK');

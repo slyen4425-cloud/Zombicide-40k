@@ -1,15 +1,14 @@
-/* GenSrpG V16.78.27 — Room Creator visual configuration context hotfix.
-   Fixes the visible-first-context/not-selected bug and retires obsolete Dungeon UI panels.
+/* GenSrpG V16.78.29 — Room Creator visual context hotfix, responsiveness-safe.
+   Keeps context selection and legacy UI cleanup without observing the whole application DOM.
    No combat, movement, timeline or spawn behavior is changed. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.27";
-let installed=false,observer=null,timer=0;
+const VERSION="1.1.0",APP_VERSION="16.78.29";
+let installed=false,timer=0;
 
 function visualApi(){return ROOT.DungeonRoomVisualConfig167826||ROOT.DungeonRoomVisualConfig167825||null}
-function toast(msg){try{ROOT.showToast?.(msg)}catch(e){}}
 function retireLegacyUi(){
   if(!DOC)return false;
   let st=DOC.getElementById("drv167827LegacyStyles");
@@ -34,7 +33,7 @@ function autoSelectVisibleContext(){
   try{
     if(typeof sel.onchange==="function")sel.onchange();
     else sel.dispatchEvent?.(new Event("change",{bubbles:true}));
-  }catch(e){console.warn("GenSrpG V16.78.27 context selection",e)}
+  }catch(e){console.warn("GenSrpG V16.78.29 context selection",e)}
   return true;
 }
 function repairButton(){
@@ -58,7 +57,10 @@ function repairHint(){
   const panel=DOC.getElementById("drv167826Panel"),sel=DOC.getElementById("drv167826Context");
   const hint=panel?.querySelector?.(".drv167826Hint");
   if(!hint)return false;
-  if(!sel?.value)hint.textContent="Cette pièce n’est encore liée à aucune zone du World Builder. Ajoute-la au monde, puis reviens ici pour configurer directement ses éléments.";
+  if(!sel?.value){
+    const msg="Cette pièce n’est encore liée à aucune zone du World Builder. Ajoute-la au monde, puis reviens ici pour configurer directement ses éléments.";
+    if(hint.textContent!==msg)hint.textContent=msg;
+  }
   return true;
 }
 function refresh(){
@@ -78,10 +80,6 @@ function install(){
     timer=setTimeout(poll,50);
   };
   poll();
-  if(DOC&&typeof MutationObserver==="function"){
-    observer=new MutationObserver(()=>refresh());
-    observer.observe(DOC.documentElement,{childList:true,subtree:true});
-  }
   return true;
 }
 ROOT.DungeonRoomVisualHotfix167827={VERSION,APP_VERSION,retireLegacyUi,autoSelectVisibleContext,repairButton,repairHint,refresh,install};

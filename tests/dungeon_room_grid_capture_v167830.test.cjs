@@ -22,6 +22,7 @@ function fire(){let stopped=false;const ev={target:cell,preventDefault(){},stopP
 fire();assert.equal(opened,1,'template configuration touch must open editor');assert.equal(painted,0,'historical paint listener must never run while template configuration is active');
 templateToggle.classList.set(false);zoneToggle.classList.set(true);fire();assert.equal(zoneOpened,1,'per-zone configuration touch must activate exact cell');assert.equal(painted,0,'historical paint listener must never run while per-zone configuration is active');
 zoneToggle.classList.set(false);fire();assert.equal(painted,1,'normal Room Creator painting must remain untouched outside configuration mode');
-assert.match(loader,/dungeon-room-grid-capture-167830\.js\?v=167830/,'loader must request V16.78.30 capture guard');
-const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-room-grid-capture-167830.js')),'capture guard must exist in final built site')}
-console.log('Dungeon Room grid capture V16.78.30 regression: OK');
+assert.match(loader,/dungeon-room-grid-capture-167830\.js\?v=167831/,'loader must cache-bust the capture guard with V16.78.31');
+assert.match(loader,/dungeon-room-content-ui-167831\.js\?v=167831/,'intuitive UI must load after capture guard');
+const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-room-grid-capture-167830.js')),'capture guard must exist in final built site');assert.ok(fs.existsSync(path.join(site,'assets','dungeon','dungeon-room-content-ui-167831.js')),'intuitive UI must exist in final built site')}
+console.log('Dungeon Room grid capture V16.78.31 loading regression: OK');

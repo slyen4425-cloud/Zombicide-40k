@@ -5,6 +5,7 @@
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 const VERSION="16.78.21";
+let lastMessage="✅ Sauvegarde automatique active";
 
 function base(){return ROOT.DungeonRoomCreator100||null}
 function v2(){return ROOT.DungeonRoomCreatorV2||null}
@@ -42,9 +43,9 @@ function summaryFor(roomId){
 function updateSummary(message){
   const box=DOC?.getElementById("drc200AutosaveStatus")||ensureFeedback();
   if(!box)return;
+  if(message)lastMessage=String(message);
   const roomId=inferRoomId(),s=summaryFor(roomId);
-  const prefix=message||"✅ Sauvegarde automatique active";
-  const html=esc(prefix)+'<br><span style="font-weight:500;color:#9fc8aa">Interactions enregistrées : '+s.puzzles+' énigme'+(s.puzzles===1?"":"s")+' · '+s.traps+' piège'+(s.traps===1?"":"s")+' · '+s.caches+' cache'+(s.caches===1?"":"s")+' liée'+(s.caches===1?"":"s")+'</span>';
+  const html=esc(lastMessage)+'<br><span style="font-weight:500;color:#9fc8aa">Interactions enregistrées : '+s.puzzles+' énigme'+(s.puzzles===1?"":"s")+' · '+s.traps+' piège'+(s.traps===1?"":"s")+' · '+s.caches+' cache'+(s.caches===1?"":"s")+' liée'+(s.caches===1?"":"s")+'</span>';
   if(box.innerHTML!==html)box.innerHTML=html;
 }
 function stamp(label){

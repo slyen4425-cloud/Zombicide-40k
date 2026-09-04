@@ -40,13 +40,15 @@ const modal=elements.get('drv167826Modal');
 assert.ok(modal,'la fiche de configuration doit être créée après un toucher sur l’ennemi');
 assert.equal(modal.classList.contains('open'),true,'la fiche de configuration doit réellement s’ouvrir');
 
+api.configureElement('world-1','zone-1','room-a',5,'enemy',{enemyId:'dng_orc'});
+assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(content.enemies[0].hp,null,'sans réglage UI les PV doivent venir du monstre');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');
 api.configureElement('world-1','zone-1','room-a',9,'chest',{rarity:'epic',gold:25,itemsText:'potion_soin'});
 assert.equal(content.mode,'fixed');assert.equal(content.chests.length,1);assert.equal(content.chests[0].cell,9);
 assert.match(patch,/el\.onpointerdown=handler/,'le correctif doit brancher directement chaque case');
 assert.doesNotMatch(patch,/DOC\.addEventListener\("pointerdown",intercept,true\)/,'l’ancien intercepteur global fragile ne doit plus être utilisé');
 assert.match(loader,/DungeonZoneContent167824/,'le loader doit attendre le runtime de contenu exact');
-assert.match(loader,/drv167826Script/,'le loader doit charger la V16.78.26');
+assert.match(loader,/drv167826Script/,'le loader doit charger la configuration visuelle');
 assert.match(loader,/dzc167824Launch/,'l’ancien launcher doit être neutralisé');
 assert.doesNotMatch(loader,/dungeon-room-visual-config-167825\.js/,'l’ancien asset V16.78.25 ne doit plus être chargé');
-console.log('Dungeon Room visual configuration V16.78.26 pointer regression: OK');
+console.log('Dungeon Room visual configuration simple-enemy regression: OK');
 require('./dungeon_room_visual_hotfix_v167827.test.cjs');

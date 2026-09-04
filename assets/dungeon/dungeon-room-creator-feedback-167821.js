@@ -20,7 +20,7 @@ ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSumm
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>install()).observe(DOC.documentElement,{childList:true,subtree:true})}
 })();
 
-/* V16.78.26 — charge le configurateur visuel après le runtime exact et neutralise l'ancien launcher. */
+/* V16.78.27 — charge le configurateur visuel puis son hotfix de contexte. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
@@ -33,11 +33,17 @@ function neutralizeLegacyLauncher(){
   el.style.setProperty("display","none","important");
   el.remove=function(){this.style.setProperty("display","none","important")};
 }
+function loadHotfix(){
+  if(!DOC||ROOT.DungeonRoomVisualHotfix167827||DOC.getElementById("drv167827Script"))return;
+  const h=DOC.createElement("script");h.id="drv167827Script";h.src="assets/dungeon/dungeon-room-visual-hotfix-167827.js?v=167827";h.async=false;DOC.body.appendChild(h);
+}
 function loadVisualConfig(){
-  if(!DOC||ROOT.DungeonRoomVisualConfig167826||DOC.getElementById("drv167826Script"))return;
+  if(!DOC)return;
+  if(ROOT.DungeonRoomVisualConfig167826){loadHotfix();return}
+  if(DOC.getElementById("drv167826Script")){setTimeout(loadVisualConfig,50);return}
   if(!ROOT.DungeonZoneContent167824&&attempts++<80){setTimeout(loadVisualConfig,50);return}
   neutralizeLegacyLauncher();
-  const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167826";s.async=false;DOC.body.appendChild(s);
+  const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167827";s.async=false;s.onload=loadHotfix;DOC.body.appendChild(s);
 }
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",loadVisualConfig,{once:true});else loadVisualConfig()}
 })();

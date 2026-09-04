@@ -24,7 +24,7 @@ const graph={id:'world_1',name:'Monde test',startNodeId:'A',nodes:[
   {id:'ca',fromNodeId:'C',fromExitIndex:4,toNodeId:'A',toEntryIndex:0}
 ]};
 const localStorage=storage({[RT]:JSON.stringify({participants:['hero'],index:0,room:0,last:null,positions:{hero:-1},remaining:{hero:3},enemyCells:{},roomStates:{},heroRooms:{hero:0}})});
-let generatorCalls=0,zoneApplyCalls=0;
+let generatorCalls=0,zoneApplyCalls=0,renderCalls=0;
 function read(){return JSON.parse(localStorage.getItem(RT)||'null')}
 function write(x){localStorage.setItem(RT,JSON.stringify(x))}
 const spatial={
@@ -34,7 +34,7 @@ const spatial={
   activate(x,h){this.ensure(x);const r=Number(x.heroRooms[h]||0);x.room=r;const s=x.roomStates[String(r)];if(s){x.last=JSON.parse(JSON.stringify(s.last));x.enemyCells=JSON.parse(JSON.stringify(s.enemyCells||{}))}}
 };
 const core={
-  render(){return true},show(){return true},
+  render(){renderCalls++;return true},show(){return true},
   explore(){generatorCalls++;const x=read(),h=x.participants[x.index]||'hero',to=Number(x.room||0)+1;x.room=to;x.heroRooms[h]=to;x.last={kind:'enemy',map:{size:9,width:9,height:9,cells:Array(81).fill('enemy'),entryIdx:0,exitIdx:80}};x.positions[h]=0;write(x);return true}
 };
 const ctx={console,Math,Date,localStorage,setTimeout(fn){fn();return 1},clearTimeout(){},globalThis:null,window:null,DungeonCore01:core,DungeonSpatial313:spatial,
@@ -47,10 +47,11 @@ ctx.globalThis=ctx;ctx.window=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-world-runtime-167823.js'});
 const api=ctx.DungeonWorldRuntime167823;
 assert.ok(api);
-assert.equal(api.APP_VERSION,'16.78.37');
+assert.equal(api.APP_VERSION,'16.78.38');assert.equal(api.VERSION,'1.3.0');
 assert.equal(api.chooseEdge(graph,'A',2).toNodeId,'B');
 assert.equal(api.chooseEdge(graph,'A',3).toNodeId,'C');
 assert.equal(api.chooseEdge(graph,'A',99),null);
+assert.equal(core.render.__dwr167838,true,'le rafraîchissement du bouton de sortie doit être raccordé au render, pas au DOM entier');
 
 api.saveConfig({enabled:true,dungeonId:'world_1'},'adv_1');
 api.saveZoneContent('world_1','B',{mode:'fixed',enemies:[{enemyId:'__random_enemy__',cell:1}]});
@@ -61,7 +62,8 @@ let x=read();
 assert.equal(generatorCalls,0,'aucun réglage de génération de salle ne doit être consulté');
 assert.equal(x.room,1);assert.equal(x.last.worldNodeId,'A');assert.equal(x.last.customRoomId,'room_a');
 assert.equal(x.last.map.width,2);assert.equal(x.last.map.height,2);assert.equal(x.last.map.cells.length,4);
-assert.equal(x.last.worldGeneratorBypassed167837,true);
+assert.equal(x.last.worldGeneratorBypassed167837,true);assert.equal(x.last.worldGeneratorBypassed167838,true);
+assert.equal(x.last.map.worldGeneratorBypassed167838,true);
 assert.equal(zoneApplyCalls,0,'inherit vide ne doit pas inventer de contenu');
 
 x.positions.hero=3;write(x);
@@ -70,7 +72,7 @@ x=read();assert.equal(generatorCalls,0);assert.equal(x.last.worldNodeId,'C');ass
 
 x.positions.hero=4;write(x);
 assert.equal(core.explore(),true,'le retour vers A doit réutiliser son snapshot');
-x=read();assert.equal(generatorCalls,0);assert.equal(x.room,1);assert.equal(x.last.worldNodeId,'A');
+x=read();assert.equal(generatorCalls,0);assert.equal(x.room,1);assert.equal(x.last.worldNodeId,'A');assert.equal(x.last.worldGeneratorBypassed167838,true);
 
 x.positions.hero=2;write(x);
 assert.equal(core.explore(),true,'la connexion A -> B doit charger la pièce B directement');
@@ -93,10 +95,14 @@ templateFallbackScenario();
 
 assert.doesNotMatch(src,/prepareLegacyExit/,'le World Builder ne doit plus préparer puis appeler le générateur legacy');
 assert.doesNotMatch(src,/content\.mode==="fixed"\)\s*\{/,'le contournement du générateur ne doit plus dépendre du mode fixed');
-assert.match(src,/worldGeneratorBypassed167837:true/);
+assert.match(src,/worldGeneratorBypassed167838:true/);
 assert.match(src,/TEMPLATE_DUNGEON_ID="__room_template__"/);
 assert.match(src,/function directFixedNode/,'le nom public historique est conservé pour compatibilité');
+assert.match(src,/installRenderWrapper/,'le rafraîchissement UI doit être événementiel');
+assert.doesNotMatch(src,/new\s+MutationObserver/,'le World Runtime ne doit plus observer toute l’application');
+assert.doesNotMatch(src,/dwr167823Enabled|dwr167823Save|UTILISER CE MONDE|World Builder comme autorité de cette aventure/,'le second sélecteur d’activation dans l’éditeur doit disparaître');
+assert.match(src,/retireLegacyPanel/);
 assert.match(src,/Sortie non reliée/);
 
-if(htmlArg){const html=fs.readFileSync(htmlArg,'utf8');const builderPos=html.indexOf('assets/dungeon/dungeon-world-builder-167821.js?v=167821');const roomRuntimePos=html.indexOf('assets/dungeon/dungeon-room-runtime-167822.js?v=167822');const worldRuntimePos=html.indexOf('assets/dungeon/dungeon-world-runtime-167823.js?v=167837');assert.ok(builderPos>=0&&roomRuntimePos>builderPos&&worldRuntimePos>roomRuntimePos,'final HTML must load builder, room runtime, then isolated world runtime V16.78.37')}
-console.log('Dungeon built World isolation V16.78.37 regressions: OK');
+if(htmlArg){const html=fs.readFileSync(htmlArg,'utf8');const builderPos=html.indexOf('assets/dungeon/dungeon-world-builder-167821.js?v=167821');const roomRuntimePos=html.indexOf('assets/dungeon/dungeon-room-runtime-167822.js?v=167822');const worldRuntimePos=html.indexOf('assets/dungeon/dungeon-world-runtime-167823.js?v=167838');assert.ok(builderPos>=0&&roomRuntimePos>builderPos&&worldRuntimePos>roomRuntimePos,'final HTML must load builder, room runtime, then isolated world runtime V16.78.38')}
+console.log('Dungeon built World isolation + single activation V16.78.38 regressions: OK');

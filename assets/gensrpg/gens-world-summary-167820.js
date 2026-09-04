@@ -23,7 +23,7 @@ function recordFamily(record){
   return "rpg";
 }
 function isCaptureRecord(record){return recordFamily(record)==="creature"||String(record?.universeId||"")===CAPTURE_ID}
-function isDungeonRecord(record){return !isCaptureRecord(record)&&String(record?.gameMode||"dungeon")==="dungeon"}
+function isDungeonRecord(record){return !isCaptureRecord(record)&&(record?.gameMode==="dungeon"||!!record?.dungeonBuiltin)}
 function plural(n,one,many){return Number(n)===1?one:many}
 
 function dungeonSummary(profile){
@@ -56,7 +56,11 @@ function captureSummary(profile){
   const trainerCount=trainers.length?uniqueCount(trainers):uniqueCount(arr(p.heroPool));
   const creatures=uniqueCount(captureEntities(pid));
   const starterItems=arr(call("gensStarterCaptureItems",[],[]));
-  const customCaptureItems=arr(call("loadCustomEquipment",[],[])).filter(it=>isCaptureRecord(it)&&(!it.universeId||String(it.universeId)===pid||pid===CAPTURE_ID));
+  const customCaptureItems=arr(call("loadCustomEquipment",[],[])).filter(it=>{
+    if(!isCaptureRecord(it))return false;
+    const universe=String(it?.universeId||"");
+    return !universe||universe===pid||universe==="starter_capture";
+  });
   const objects=uniqueCount([...starterItems,...customCaptureItems]);
   return {kind:"capture",live:true,trainers:trainerCount,creatures,objects,text:`${trainerCount} ${plural(trainerCount,"dresseur","dresseurs")} · ${creatures} ${plural(creatures,"créature","créatures")} · ${objects} ${plural(objects,"objet","objets")}`};
 }

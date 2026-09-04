@@ -28,7 +28,6 @@ function ensureFeedback(){
     if(roomStatus?.parentNode)roomStatus.parentNode.insertBefore(box,controls);
     else controls.parentNode?.insertBefore(box,controls);
   }
-  updateSummary();
   return box;
 }
 function summaryFor(roomId){
@@ -45,7 +44,8 @@ function updateSummary(message){
   if(!box)return;
   const roomId=inferRoomId(),s=summaryFor(roomId);
   const prefix=message||"✅ Sauvegarde automatique active";
-  box.innerHTML=esc(prefix)+'<br><span style="font-weight:500;color:#9fc8aa">Interactions enregistrées : '+s.puzzles+' énigme'+(s.puzzles===1?"":"s")+' · '+s.traps+' piège'+(s.traps===1?"":"s")+' · '+s.caches+' cache'+(s.caches===1?"":"s")+' liée'+(s.caches===1?"":"s")+'</span>';
+  const html=esc(prefix)+'<br><span style="font-weight:500;color:#9fc8aa">Interactions enregistrées : '+s.puzzles+' énigme'+(s.puzzles===1?"":"s")+' · '+s.traps+' piège'+(s.traps===1?"":"s")+' · '+s.caches+' cache'+(s.caches===1?"":"s")+' liée'+(s.caches===1?"":"s")+'</span>';
+  if(box.innerHTML!==html)box.innerHTML=html;
 }
 function stamp(label){
   const t=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
@@ -71,6 +71,7 @@ function install(){
   wrap("addAttachmentUI","Interaction ajoutée");
   wrap("removeAttachmentUI","Interaction supprimée");
   wrap("saveCacheLinkUI","Liaison de cache mise à jour");
+  updateSummary();
 }
 ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSummary,install};
 if(DOC){

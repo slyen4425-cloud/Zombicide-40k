@@ -1,4 +1,4 @@
-# GenSrpG Dungeon equipment UI regression guard — 2026-09-04
+# GenSrpG Dungeon set editor regression guard — 2026-09-04
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -113,6 +113,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
+              (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -130,6 +131,9 @@ jobs:
 
       - name: Tester le hotfix équipements Dungeon V16.78.17
         run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html
+
+      - name: Tester l'éditeur de sets Dungeon V16.78.18
+        run: node tests/dungeon_set_editor_v167818.test.cjs assets/dungeon/dungeon-set-editor-167818.js _site/index.html .github/workflows/main.yml service-worker.js
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

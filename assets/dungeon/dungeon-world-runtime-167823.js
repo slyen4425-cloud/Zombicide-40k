@@ -1,0 +1,88 @@
+/* GenSrpG V16.78.23 — Authoritative built-world runtime.
+   Uses Dungeon World Builder connections as the authority for zone order.
+   Existing Dungeon explore/spawn/combat remain intact; the selected world decides
+   which saved room template is loaded after each valid connected exit. */
+(function(){
+"use strict";
+const ROOT=typeof window!=="undefined"?window:globalThis;
+const DOC=typeof document!=="undefined"?document:null;
+const VERSION="1.0.0";
+const APP_VERSION="16.78.23";
+const RT_KEY="gensrpg_dungeon_runtime_v2";
+const CFG_KEY="gensrpg_dungeon_authoritative_world_cfg_v1";
+const CONTENT_KEY="gensrpg_zone_instance_content_v1";
+let installing=false;
+
+function clone(v){try{return v==null?v:JSON.parse(JSON.stringify(v))}catch(e){return v}}
+function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||"null");return v==null?fallback:v}catch(e){return fallback}}
+function writeJson(key,v){localStorage.setItem(key,JSON.stringify(v));return v}
+function builder(){return ROOT.DungeonWorldBuilder167821||null}
+function roomApi(){return ROOT.DungeonRoomCreator100||null}
+function currentAdventureId(){try{return String(ROOT.activeDungeonAdventureId?.()||"default")}catch(e){return "default"}}
+function readRuntime(){const x=readJson(RT_KEY,null);return x&&typeof x==="object"?x:null}
+function writeRuntime(x){return writeJson(RT_KEY,x||{})}
+function activeHeroId(x){const list=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,list.length-1),Number(x?.index)||0));return String(list[i]||"")}
+function nodeLabel(graph,nodeId){const n=(graph?.nodes||[]).find(x=>x.id===String(nodeId||""));if(!n)return String(nodeId||"Zone");const r=roomApi()?.findRoom?.(n.roomId);return String(n.label||r?.name||"Zone")}
+function graphFor(id){try{return builder()?.findDungeon?.(String(id||""))||null}catch(e){return null}}
+function validGraph(g){try{return !!g&&!!builder()?.validation?.(g)?.valid&&!!g.startNodeId}catch(e){return !!g&&Array.isArray(g.nodes)&&g.nodes.length>0&&!!g.startNodeId}}
+function allConfigs(){const x=readJson(CFG_KEY,{});return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}
+function getConfig(adventureId){const id=String(adventureId||currentAdventureId()),raw=allConfigs()[id]||{};return {enabled:!!raw.enabled,dungeonId:String(raw.dungeonId||"")}}
+function saveConfig(cfg,adventureId){const id=String(adventureId||currentAdventureId()),all=allConfigs();all[id]={enabled:!!cfg?.enabled,dungeonId:String(cfg?.dungeonId||"")};writeJson(CFG_KEY,all);return clone(all[id])}
+function normalizeContent(raw){const r=raw&&typeof raw==="object"?raw:{};return {mode:["inherit","fixed","mixed"].includes(String(r.mode))?String(r.mode):"inherit",enemies:Array.isArray(r.enemies)?clone(r.enemies):[],chests:Array.isArray(r.chests)?clone(r.chests):[],traps:Array.isArray(r.traps)?clone(r.traps):[],puzzles:Array.isArray(r.puzzles)?clone(r.puzzles):[],npcs:Array.isArray(r.npcs)?clone(r.npcs):[],items:Array.isArray(r.items)?clone(r.items):[],updatedAt:String(r.updatedAt||"")}}
+function contentStore(){const x=readJson(CONTENT_KEY,{});return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}
+function getZoneContent(dungeonId,nodeId){return normalizeContent(contentStore()?.[String(dungeonId||"")]?.[String(nodeId||"")])}
+function saveZoneContent(dungeonId,nodeId,content){const d=String(dungeonId||""),n=String(nodeId||"");if(!d||!n)return null;const all=contentStore();all[d]=all[d]&&typeof all[d]==="object"?all[d]:{};all[d][n]={...normalizeContent(content),updatedAt:new Date().toISOString()};writeJson(CONTENT_KEY,all);return clone(all[d][n])}
+
+function ensureWorldState(x,dungeonId,seed){
+  const previous=seed&&seed.dungeonId===String(dungeonId||"")?seed:null;
+  let w=x.world167823&&x.world167823.dungeonId===String(dungeonId||"")?x.world167823:null;
+  if(!w)w={dungeonId:String(dungeonId||""),heroNodes:{},nodeRooms:{},roomNodes:{},history:{}};
+  for(const key of ["heroNodes","nodeRooms","roomNodes","history"]){w[key]=w[key]&&typeof w[key]==="object"?w[key]:{};if(previous?.[key])w[key]={...clone(previous[key]),...w[key]}}
+  x.world167823=w;return w;
+}
+function nodeForHero(x,w,hero){const room=String(Number(x?.room)||0);return String(w?.roomNodes?.[room]||w?.heroNodes?.[hero]||"")}
+function outgoingEdges(graph,nodeId){return (graph?.edges||[]).filter(e=>String(e.fromNodeId)===String(nodeId||""))}
+function chooseEdge(graph,nodeId,position){const list=outgoingEdges(graph,nodeId);const exact=list.find(e=>Number(e.fromExitIndex)===Number(position));if(exact)return exact;return list.length===1?list[0]:null}
+function targetPlan(before,graph,w,hero){
+  const current=nodeForHero(before,w,hero);
+  if(!current)return {targetNodeId:String(graph.startNodeId||""),edge:null,currentNodeId:"",first:true};
+  const pos=Number(before?.positions?.[hero]);const edge=chooseEdge(graph,current,pos);
+  return edge?{targetNodeId:String(edge.toNodeId||""),edge,currentNodeId:current,first:false}:{targetNodeId:"",edge:null,currentNodeId:current,first:false};
+}
+function notice(title,text){try{if(typeof ROOT.modal==="function")return ROOT.modal(title,text)}catch(e){}try{ROOT.showToast?.((title?title+" · ":"")+text)}catch(e){}}
+function roomForNode(graph,nodeId){const node=(graph?.nodes||[]).find(n=>String(n.id)===String(nodeId||""));if(!node)return null;const room=roomApi()?.findRoom?.(node.roomId);return room?{node,room}:null}
+function convertMap(room){const width=Math.max(1,Number(room?.width)||1),height=Math.max(1,Number(room?.height)||1);const cells=(room?.cells||[]).map(c=>c?.terrain==="wall"?"wall":String(c?.object||"floor"));return {size:width,width,height,cells,entryIdx:cells.findIndex(v=>v==="entry"),exitIdx:cells.findIndex(v=>v==="exit")}}
+function enemyAnchors(room,map){const preferred=[];(room?.cells||[]).forEach((c,i)=>{if(c?.object==="enemy"||c?.object==="boss")preferred.push(i)});if(preferred.length)return preferred;const reserved=new Set([map.entryIdx,map.exitIdx].filter(i=>i>=0));const out=[];for(let i=0;i<map.cells.length;i++)if(map.cells[i]==="floor"&&!reserved.has(i))out.push(i);return out}
+function remapEnemyCells(enemyCells,anchors){const ids=Object.keys(enemyCells||{}),spots=anchors.length?anchors:[0],out={};ids.forEach((id,i)=>{out[id]=spots[Math.min(i,spots.length-1)]});return out}
+function activeEnemyIds(){try{return new Set((ROOT.loadActiveEnemies?.()||[]).map(e=>String(e?.id||"")).filter(Boolean))}catch(e){return new Set()}}
+function removeEnemiesAddedSince(beforeIds){try{const list=ROOT.loadActiveEnemies?.()||[],next=list.filter(e=>beforeIds.has(String(e?.id||"")));if(next.length!==list.length)ROOT.saveActiveEnemies?.(next)}catch(e){}}
+function persistSpatial(x){try{ROOT.DungeonSpatial313?.ensure?.(x);ROOT.DungeonSpatial313?.persist?.(x)}catch(e){}}
+function transitionCreated(x){const t=x?.dc313LastTransition||x?.dc317LastTransition||null;return !!t&&t.created===true}
+function prepareLegacyExit(before,hero,plan){if(!plan?.edge||!before?.last?.map)return before;const pos=Number(before?.positions?.[hero]);if(Number.isInteger(pos)&&before.last.map.cells?.[pos]==="exit"&&Number(before.last.map.exitIdx)!==pos){before.last.map.exitIdx=pos;writeRuntime(before)}return before}
+function applyNewNode(after,graph,plan,hero,w){const pack=roomForNode(graph,plan.targetNodeId);if(!pack||!after?.last)return false;const map=convertMap(pack.room),roomNo=Math.max(1,Number(after.room)||1);after.last={...after.last,map,worldRuntime167823:true,worldDungeonId:String(graph.id),worldNodeId:String(pack.node.id),worldZoneLabel:nodeLabel(graph,pack.node.id),customRoomRuntime167822:true,customRoomId:String(pack.room.id),customRoomName:String(pack.room.name||nodeLabel(graph,pack.node.id))};after.enemyCells=remapEnemyCells(after.enemyCells,enemyAnchors(pack.room,map));w.nodeRooms[String(pack.node.id)]=roomNo;w.roomNodes[String(roomNo)]=String(pack.node.id);w.heroNodes[hero]=String(pack.node.id);w.history[hero]=Array.isArray(w.history[hero])?w.history[hero]:[];if(w.history[hero][w.history[hero].length-1]!==String(pack.node.id))w.history[hero].push(String(pack.node.id));const entry=Number(plan.edge?.toEntryIndex);const arrival=Number.isInteger(entry)&&entry>=0?entry:map.entryIdx;if(arrival>=0){after.positions=after.positions&&typeof after.positions==="object"?after.positions:{};after.positions[hero]=arrival}persistSpatial(after);writeRuntime(after);return true}
+function switchToVisitedNode(after,graph,plan,hero,w,beforeEnemyIds){const targetRoom=Number(w.nodeRooms?.[String(plan.targetNodeId)]);const snap=after?.roomStates?.[String(targetRoom)];if(!targetRoom||!snap?.last)return false;const movement=Number.isFinite(Number(after?.remaining?.[hero]))?Number(after.remaining[hero]):0;const generatedRoom=Number(after.room)||0;removeEnemiesAddedSince(beforeEnemyIds);try{const spatial=ROOT.DungeonSpatial313;spatial?.ensure?.(after);spatial?.setRoom?.(after,hero,targetRoom);spatial?.activate?.(after,hero)}catch(e){after.room=targetRoom;after.last=clone(snap.last);after.enemyCells=clone(snap.enemyCells||{})}w.heroNodes[hero]=String(plan.targetNodeId);w.roomNodes[String(targetRoom)]=String(plan.targetNodeId);w.history[hero]=Array.isArray(w.history[hero])?w.history[hero]:[];if(w.history[hero][w.history[hero].length-1]!==String(plan.targetNodeId))w.history[hero].push(String(plan.targetNodeId));const entry=Number(plan.edge?.toEntryIndex),fallback=Number(after?.last?.map?.entryIdx);const arrival=Number.isInteger(entry)&&entry>=0?entry:fallback;if(arrival>=0){after.positions=after.positions&&typeof after.positions==="object"?after.positions:{};after.positions[hero]=arrival}after.remaining=after.remaining&&typeof after.remaining==="object"?after.remaining:{};after.remaining[hero]=movement;after.dc167823Redirect={fromGeneratedRoom:generatedRoom,toRoom:targetRoom,nodeId:String(plan.targetNodeId),at:Date.now()};writeRuntime(after);return true}
+function syncHeroNodeFromRoom(x,w,hero){const mapped=w.roomNodes?.[String(Number(x?.room)||0)];if(mapped)w.heroNodes[hero]=String(mapped)}
+
+function installExploreWrapper(){const core=ROOT.DungeonCore01;if(!core||typeof core.explore!=="function")return false;if(core.explore.__dwr167823)return true;const old=core.explore.bind(core);const wrapped=function(){
+  const cfg=getConfig(),graph=cfg.enabled?graphFor(cfg.dungeonId):null;if(!cfg.enabled||!validGraph(graph))return old(...arguments);
+  const before=readRuntime();if(!before||before.branch?.active)return old(...arguments);const hero=activeHeroId(before);if(!hero)return old(...arguments);
+  const seed=clone(before.world167823||null),w=ensureWorldState(before,graph.id,seed);syncHeroNodeFromRoom(before,w,hero);const plan=targetPlan(before,graph,w,hero);
+  if(!plan.targetNodeId){const zone=nodeLabel(graph,plan.currentNodeId);notice("🚫 Sortie non reliée","Cette sortie de « "+zone+" » n’est reliée à aucune zone dans le Monde construit.");return false}
+  const pack=roomForNode(graph,plan.targetNodeId);if(!pack){notice("⚠️ Monde construit","La zone cible n’a plus de modèle de pièce valide.");return false}
+  prepareLegacyExit(before,hero,plan);const beforeEnemies=activeEnemyIds();const out=old(...arguments);const after=readRuntime();if(!after||!after.last)return out;const next=ensureWorldState(after,graph.id,seed);const canonical=Number(next.nodeRooms?.[String(plan.targetNodeId)]);
+  if(canonical&&canonical!==Number(after.room)&&after.roomStates?.[String(canonical)]?.last)switchToVisitedNode(after,graph,plan,hero,next,beforeEnemies);else applyNewNode(after,graph,plan,hero,next);
+  try{core.render?.()}catch(e){}try{ROOT.showToast?.("🌍 "+nodeLabel(graph,plan.targetNodeId))}catch(e){}ensureExitButton();return out
+};wrapped.__dwr167823=true;wrapped.__dwr167823Original=old;core.explore=wrapped;return true}
+function currentPlan(){const cfg=getConfig(),graph=cfg.enabled?graphFor(cfg.dungeonId):null,x=readRuntime();if(!cfg.enabled||!validGraph(graph)||!x)return null;const hero=activeHeroId(x);if(!hero)return null;const w=ensureWorldState(x,graph.id,clone(x.world167823||null));syncHeroNodeFromRoom(x,w,hero);const current=nodeForHero(x,w,hero);if(!current)return {graph,hero,currentNodeId:"",targetNodeId:graph.startNodeId,edge:null};const edge=chooseEdge(graph,current,Number(x?.positions?.[hero]));return {graph,hero,currentNodeId:current,targetNodeId:String(edge?.toNodeId||""),edge}}
+function travel(){installExploreWrapper();return ROOT.DungeonCore01?.explore?.()}
+function ensureExitButton(){if(!DOC)return;const explore=DOC.getElementById("dc01Explore"),old=DOC.getElementById("dwr167823Exit");if(!explore){old?.remove();return}const p=currentPlan(),x=readRuntime();if(!p||!p.currentNodeId){old?.remove();return}const pos=Number(x?.positions?.[p.hero]),isExit=x?.last?.map?.cells?.[pos]==="exit";if(!isExit){old?.remove();return}let btn=old;if(!btn){btn=DOC.createElement("button");btn.id="dwr167823Exit";btn.type="button";if(explore.className)btn.className=explore.className;btn.onclick=travel;explore.parentNode?.insertBefore(btn,explore)}if(p.targetNodeId){btn.disabled=false;btn.textContent="🚪 Vers "+nodeLabel(p.graph,p.targetNodeId)}else{btn.disabled=true;btn.textContent="🚫 Sortie non reliée"}}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+function renderPanel(){if(!DOC)return;const box=DOC.getElementById("dwr167823Panel");if(!box)return;const cfg=getConfig(),worlds=builder()?.loadLibrary?.()||[];const opts=['<option value="">— aucun monde construit —</option>'].concat(worlds.map(g=>'<option value="'+esc(g.id)+'" '+(cfg.dungeonId===g.id?'selected':'')+'>'+esc(g.name)+' · '+(g.nodes?.length||0)+' zone(s)</option>')).join('');const selected=cfg.dungeonId?graphFor(cfg.dungeonId):null,val=selected?builder()?.validation?.(selected):null;box.innerHTML='<div style="font-weight:900;margin-bottom:6px">🌍 Monde construit — ordre exact</div><label style="display:flex;gap:8px;align-items:center"><input id="dwr167823Enabled" type="checkbox" '+(cfg.enabled?'checked':'')+'> Utiliser le World Builder comme autorité de cette aventure</label><label style="display:grid;gap:4px;margin-top:8px">Monde / donjon<select id="dwr167823World">'+opts+'</select></label><div style="font-size:12px;color:#aaa;margin:7px 0">Chaque sortie utilise exactement la connexion définie dans le World Builder. Une zone déjà visitée réutilise son état au lieu d’être recréée.</div>'+(val?'<div style="font-size:12px;color:'+(val.valid?'#8fd39d':'#ff9b91')+'">'+(val.valid?'✓ Monde valide':'⚠ '+esc((val.errors||[]).join(' · ')))+(val.warnings?.length?' · '+esc(val.warnings.join(' · ')):'')+'</div>':'')+'<button id="dwr167823Save" type="button" style="margin-top:8px">💾 UTILISER CE MONDE</button><div id="dwr167823Status" style="font-size:12px;color:#aaa;margin-top:5px"></div>';
+  DOC.getElementById("dwr167823World")?.addEventListener("change",()=>{const c=getConfig();c.dungeonId=String(DOC.getElementById("dwr167823World")?.value||"");saveConfig(c);renderPanel()});DOC.getElementById("dwr167823Save")?.addEventListener("click",()=>{const dungeonId=String(DOC.getElementById("dwr167823World")?.value||""),enabled=!!DOC.getElementById("dwr167823Enabled")?.checked,g=graphFor(dungeonId);if(enabled&&!validGraph(g)){notice("⚠️ Monde construit","Choisis un monde valide avant de l’activer.");return}saveConfig({enabled,dungeonId});const s=DOC.getElementById("dwr167823Status");if(s)s.textContent=enabled?'✓ Ce monde contrôle désormais l’ordre des zones de cette aventure.':'Mode Monde construit désactivé.';ensureExitButton()})
+}
+function ensurePanel(){if(!DOC||DOC.getElementById("dwr167823Panel"))return;const anchor=DOC.getElementById("drr167822Panel")||DOC.getElementById("drc100Launcher")||DOC.getElementById("dungeonAdvancedEditor")?.querySelector(".panel");if(!anchor)return;const box=DOC.createElement("div");box.id="dwr167823Panel";box.style.cssText="margin-top:10px;padding:10px;border:1px solid #35536a;border-radius:10px;background:#0e151a";anchor.parentNode?.insertBefore(box,anchor.nextSibling);renderPanel()}
+function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;installExploreWrapper();ensurePanel();ensureExitButton();return true}finally{installing=false}}
+ROOT.DungeonWorldRuntime167823={VERSION,APP_VERSION,CFG_KEY,CONTENT_KEY,getConfig,saveConfig,getZoneContent,saveZoneContent,ensureWorldState,chooseEdge,targetPlan,convertMap,remapEnemyCells,install,travel,currentPlan,renderPanel};
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{installExploreWrapper();ensurePanel();ensureExitButton()}).observe(DOC.documentElement,{childList:true,subtree:true})}
+if(typeof setTimeout==="function")setTimeout(install,0);
+})();

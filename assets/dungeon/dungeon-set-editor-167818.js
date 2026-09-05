@@ -328,7 +328,7 @@ if(typeof baseSave==="function"&&!baseSave.__setEditor167818){
 
 ensureSection();addNewButton();bindEvents();syncEditorFromCurrentItem();
 if(DOC&&typeof ROOT.MutationObserver==="function"){
-  try{new ROOT.MutationObserver(()=>{ensureSection();addNewButton()}).observe(DOC.documentElement||DOC.body,{childList:true,subtree:true})}catch(e){}
+  try{DOC.addEventListener("click",()=>setTimeout(()=>{ensureSection();addNewButton()},0),true)}catch(e){}
 }
 
 ROOT.DungeonSetEditor={VERSION,STORAGE_KEY,FIELDS,BASE_SETS,normalizeSet,loadOverrides,applySavedOverrides,saveSetDefinition,resetSetDefinition,persistItemMembership,summaryBonuses,syncEditorFromCurrentItem,readSetForm};

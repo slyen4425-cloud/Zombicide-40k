@@ -67,7 +67,7 @@ function renderConfigPanel(){if(!DOC)return;const box=DOC.getElementById("drr167
 function ensureConfigPanel(){if(!DOC||DOC.getElementById("drr167822Panel"))return;const launcher=DOC.getElementById("drc100Launcher")||DOC.getElementById("dungeonAdvancedEditor")?.querySelector(".panel");if(!launcher)return;const box=DOC.createElement("div");box.id="drr167822Panel";box.style.cssText="margin-top:10px;padding:10px;border:1px solid #4b3f31;border-radius:10px;background:#12100d";launcher.appendChild(box);renderConfigPanel()}
 function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;installExploreWrapper();ensureConfigPanel();return true}finally{installing=false}}
 ROOT.DungeonRoomRuntime167822={VERSION,APP_VERSION,CFG_KEY,getConfig,saveConfig,selectedTemplates,convertMap,remapEnemyCells,applyTemplateToCurrentRoom,install,renderConfigPanel};
-if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{installExploreWrapper();ensureConfigPanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{installExploreWrapper();ensureConfigPanel()},0),true)}
 else installExploreWrapper();
 if(typeof setTimeout==="function")setTimeout(install,0);
 })();

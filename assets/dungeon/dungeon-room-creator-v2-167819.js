@@ -123,5 +123,5 @@ function installWrappers(){
 function install(){const b=base();if(!b)return;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}try{if(DOC&&/^GenSrpG/i.test(DOC.title||""))DOC.title="GenSrpG V"+APP_VERSION}catch(e){}ensureStyles();ensureCacheTool();ensurePanel();installWrappers();renderPanel()}
 
 ROOT.DungeonRoomCreatorV2={VERSION,APP_VERSION,SCHEMA_VERSION,STORAGE_KEY,TARGET_TYPES,KINDS,normalizeAttachment,normalizeCacheLink,normalizeMeta,roomMeta,saveRoomMeta,removeRoomMeta,roomTargets,addAttachment,removeAttachment,attachmentsForTarget,reconcileRoom,cacheCells,upsertCacheLink,cacheLinkFor,roomPackage,addAttachmentUI,removeAttachmentUI,saveCacheLinkUI,install};
-if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureCacheTool();ensurePanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}else install();
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{ensureCacheTool();ensurePanel()},0),true)}else install();
 })();

@@ -94,6 +94,6 @@ function open(){ensureStyles();ensureModal();const m=DOC?.getElementById("dzc167
 function close(){DOC?.getElementById("dzc167824Modal")?.classList.remove("open")}
 function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;ensureStyles();ensureModal();ensureLauncher();wrapCore();return true}finally{installing=false}}
 ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,parseRewardItems,rewardItemsText,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};
-if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureLauncher();wrapCore();ensureInteractionPanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}else wrapCore();
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();wrapCore();ensureInteractionPanel()},0),true)}else wrapCore();
 if(typeof setTimeout==="function")setTimeout(install,0);
 })();

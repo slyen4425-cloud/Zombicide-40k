@@ -58,7 +58,7 @@ jobs:
       - name: Mobile browser home and creator smoke test
         shell: bash
         run: |
-          cat >/tmp/home_probe.mjs <<'JS'
+          cat >home_probe_temp.mjs <<'JS'
           import { chromium } from 'playwright';
           const browser=await chromium.launch({headless:true});
           const page=await browser.newPage({viewport:{width:412,height:915},isMobile:true,hasTouch:true});
@@ -71,15 +71,15 @@ jobs:
             cards:[...document.querySelectorAll('button.gensRootModeCard')].map(b=>(b.textContent||'').trim().replace(/\s+/g,' ').slice(0,100)),
             creatorApi:!!window.DungeonRoomCreator100,
             builderApi:!!window.DungeonWorldBuilder167821,
-            creatorModal:getComputedStyle(document.getElementById('drc100Modal')).display,
-            builderModal:getComputedStyle(document.getElementById('drc300Modal')).display,
+            creatorModal:document.getElementById('drc100Modal')?getComputedStyle(document.getElementById('drc100Modal')).display:null,
+            builderModal:document.getElementById('drc300Modal')?getComputedStyle(document.getElementById('drc300Modal')).display:null,
             creatorInHome:!!document.getElementById('drc100Launcher')?.closest('#gensRootHome,#gensFamilyHome,#gensGameHome'),
             builderInHome:!!document.getElementById('drc300Launcher')?.closest('#gensRootHome,#gensFamilyHome,#gensGameHome')
           }));
           console.log('initial',JSON.stringify(initial));
           if(initial.cards.length<3) throw new Error('Expected at least 3 root mode cards, got '+initial.cards.length);
           if(!initial.creatorApi||!initial.builderApi) throw new Error('Creator/builder API missing');
-          if(initial.creatorModal!=='none'||initial.builderModal!=='none') throw new Error('Creator/builder modal visible on home');
+          if(initial.creatorModal!=='none'||initial.builderModal!=='none') throw new Error('Creator/builder modal not safely hidden on home');
           if(initial.creatorInHome||initial.builderInHome) throw new Error('Creator/builder launcher leaked into home UI');
           for(let i=0;i<Math.min(3,initial.cards.length);i++){
             await page.evaluate(()=>{ if(typeof showGensRootHome==='function') showGensRootHome(); });
@@ -108,12 +108,14 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 1
-          timeout 45s node /tmp/home_probe.mjs
+          timeout 45s node home_probe_temp.mjs
+          rm -f home_probe_temp.mjs
       - name: Commit only production source fix and remove temporary workflow
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f home_probe_temp.mjs
           git rm .github/workflows/apply-home-ui-production-fix.yml
           git add assets/dungeon/dungeon-room-creator-100.js assets/dungeon/dungeon-world-builder-167821.js
           git diff --cached --check

@@ -1,0 +1,24 @@
+name: Debug home UI freeze
+on:
+  push:
+    branches:
+      - debug/home-ui-freeze-2026-09-05
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Diagnose index home navigation
+        run: node tests/home_ui_freeze_diagnostic.cjs
+      - name: Show key source even if syntax diagnostic failed
+        if: always()
+        run: |
+          echo '=== home handlers ==='
+          grep -n -A45 -B10 'function switchGameModeFromHome' index.html || true
+          grep -n -A70 -B10 'function openGensBuiltInGame' index.html || true
+          echo '=== overrides ==='
+          grep -n -A50 -B15 'gensSwitchUniverse155' index.html || true
+          echo '=== global observers ==='
+          grep -R -n 'new MutationObserver\|MutationObserver(' assets --include='*.js' || true

@@ -21,7 +21,7 @@ const context={console,Math,Date,localStorage:store,setTimeout(){return 1},
  DungeonSpatial313:{ensure(x){return x},persist(x){x.roomStates[String(x.room)]={last:JSON.parse(JSON.stringify(x.last)),enemyCells:JSON.parse(JSON.stringify(x.enemyCells||{}))};return x}},
  DungeonCore01:{explore(){return true},render(){return true}},
  loadActiveEnemies(){return enemies},saveActiveEnemies(v){enemies=v},
- loadDungeonSceneElements(){return scenes},saveDungeonSceneElements(v){scenes=v},addDungeonSceneElement(v){const el={id:"scene-"+(++sceneSeq),...v};scenes.push(el);return el},removeDungeonSceneElement(id){scenes=scenes.filter(e=>String(e.id)!==String(id));return true},
+ loadDungeonSceneElements(){return JSON.parse(JSON.stringify(scenes))},saveDungeonSceneElements(v){scenes=JSON.parse(JSON.stringify(v))},addDungeonSceneElement(v){const el={id:"scene-"+(++sceneSeq),...v};const next=JSON.parse(JSON.stringify(scenes));next.push(JSON.parse(JSON.stringify(el)));scenes=next;return el},removeDungeonSceneElement(id){scenes=scenes.filter(e=>String(e.id)!==String(id));return true},
  trackSpawnedEnemyInstances(type,qty,roomNo){const ids=[];for(let i=0;i<qty;i++){const id='fixed-'+(++seq);ids.push(id);enemies.push({id,enemyId:type,hp:7,dungeonRoom:roomNo})}return ids},
  loadState(){return heroState},key(id){return 'hero:'+id},makeInventoryEntry(itemId){return {itemId}},gensHeroGold(){return heroState.gold},showToast(){},modal(){}}
 context.window=context;context.globalThis=context;
@@ -32,7 +32,7 @@ const hpUnset=api.normalizeContent({mode:'fixed',enemies:[{enemyId:'dng_skeleton
 assert.equal(api.APP_VERSION,'16.78.24');
 api.saveZoneContent('d1','n1',{mode:'fixed',enemies:[{id:'e1',enemyId:'dng_skeleton',qty:2,cell:4,hasKey:true}],chests:[{id:'ch1',cell:5,rarity:'rare',gold:20,items:[{itemId:'potion_heal',qty:2}]}],traps:[{id:'t1',cell:6,trapType:'damage',damage:3,once:true}],puzzles:[{id:'p1',cell:2,refId:'puzzle_001'}],items:[{id:'i1',cell:7,itemId:'dloot_old_coin',qty:1}],npcs:[{id:'n1npc',cell:1,npcId:'npc_alrik',label:'Alrik'}]});
 assert.equal(api.applyCurrentZone(),true);
-assert.equal(scenes.length,1,'exact authored chest must have one linked scene element');assert.equal(scenes[0].rarity,'rare','scene chest must use authored rarity instead of a random rarity');assert.equal(scenes[0].exactChest167824,true);assert.equal(scenes[0].exactChestId167824,'ch1');
+assert.equal(scenes.length,1,'exact authored chest must have one linked scene element');assert.equal(scenes[0].rarity,'rare','scene chest must use authored rarity instead of a random rarity');assert.equal(scenes[0].exactChest167824,true);assert.equal(scenes[0].exactChestId167824,'ch1');assert.equal(scenes[0].rarity,'rare');
 let x=JSON.parse(store.getItem(RT));
 assert.equal(enemies.some(e=>e.id==='random'),false,'fixed mode must remove generated enemies in this room');
 const fixed=enemies.filter(e=>e.enemyId==='dng_skeleton');

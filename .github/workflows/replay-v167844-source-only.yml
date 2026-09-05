@@ -1,0 +1,98 @@
+name: Replay V16.78.44 source patch
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.44-authored-content-fixes-2026-09-05
+    paths:
+      - .github/workflows/replay-v167844-source-only.yml
+permissions:
+  contents: write
+jobs:
+  replay-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay the already validated patch block
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/apply-v167844-authored-content-fixes.yml')
+          lines=p.read_text(encoding='utf-8').splitlines()
+          name='      - name: Patch authored Dungeon content natively'
+          i=lines.index(name)
+          j=i+1
+          while j<len(lines) and 'run: |' not in lines[j]: j+=1
+          if j>=len(lines): raise SystemExit('patch run block not found')
+          base=len(lines[j])-len(lines[j].lstrip())
+          out=[]; k=j+1
+          while k<len(lines):
+              line=lines[k]
+              indent=len(line)-len(line.lstrip()) if line.strip() else base+2
+              if line.strip() and indent<=base: break
+              out.append(line[base+2:] if len(line)>=base+2 else '')
+              k+=1
+          Path('/tmp/v167844_patch.sh').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          PY
+          bash /tmp/v167844_patch.sh
+          git checkout -- .github/workflows/main.yml
+      - name: Syntax and focused regressions
+        shell: bash
+        run: |
+          node --check assets/dungeon/dungeon-zone-content-167824.js
+          node --check assets/dungeon/dungeon-room-visual-config-167826.js
+          node --check assets/dungeon/dungeon-room-template-content-167828.js
+          node --check assets/dungeon/dungeon-authored-runtime-167839.js
+          node --check tests/dungeon_authored_content_v167844.test.cjs
+          git diff --check
+          node tests/dungeon_authored_content_v167844.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_room_visual_config_v167826.test.cjs
+          node tests/dungeon_room_creator_v2_v167819.test.cjs
+          node tests/gens_ui_recovery_v167843.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+      - name: Final assembled-load regression
+        shell: bash
+        run: |
+          rm -rf _site && mkdir -p _site/assets
+          cp index.html _site/index.html
+          cp -R assets/. _site/assets/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html'); html=p.read_text(encoding='utf-8')
+          modules=[
+            '<script src="assets/dungeon/dungeon-core-318.js"></script>',
+            '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>',
+            '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
+            '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
+            '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>',
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>'
+          ]
+          for tag in modules:
+            if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          p.write_text(html,encoding='utf-8')
+          PY
+          node tests/dungeon_final_load_regression.test.cjs _site/index.html
+          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
+          node tests/dungeon_zone_content_v167824.test.cjs _site/index.html
+          node tests/dungeon_authored_content_v167844.test.cjs
+      - name: Commit validated production source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf _site
+          git rm -f .github/workflows/apply-v167844-authored-content-fixes.yml .github/workflows/replay-v167844-source-only.yml
+          git add assets/dungeon/dungeon-zone-content-167824.js assets/dungeon/dungeon-room-visual-config-167826.js assets/dungeon/dungeon-room-template-content-167828.js assets/dungeon/dungeon-authored-runtime-167839.js service-worker.js tests/dungeon_zone_content_v167824.test.cjs tests/dungeon_room_visual_config_v167826.test.cjs tests/dungeon_room_template_content_v167828.test.cjs tests/dungeon_authored_runtime_v167839.test.cjs tests/dungeon_authored_content_v167844.test.cjs
+          git diff --cached --check
+          git commit -m "Fix authored Dungeon content and interaction targets V16.78.44"
+          git push

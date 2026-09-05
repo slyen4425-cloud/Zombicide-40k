@@ -1,0 +1,27 @@
+name: Diagnose Dungeon live UI
+on:
+  push:
+    branches:
+      - diag/dungeon-live-ui-2026-09-05
+    paths:
+      - .github/workflows/diag-dungeon-live-ui.yml
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate chest cards and map renderers
+        shell: bash
+        run: |
+          echo '=== Exact chest strings ==='
+          grep -RniE 'Va sur la case|pour le fouiller|Coffre Rare|Coffre Commun|Coffre Épique|Coffre Epique' index.html assets tests | head -n 200 || true
+          echo '=== dc200Scene references ==='
+          grep -Rni 'dc200Scene' index.html assets | head -n 200 || true
+          echo '=== chest card render references ==='
+          grep -RniE 'sceneCard|SceneCard|coffre.*fouill|fouill.*coffre|chest.*card|card.*chest' index.html assets | head -n 300 || true
+          echo '=== dungeon map render references ==='
+          grep -RniE 'enemyCells|map\.cells|dc047RoomBoard|dc200.*map|render.*map|render.*room' assets/dungeon index.html | head -n 400 || true
+          echo '=== trap runtime references ==='
+          grep -RniE 'triggerTrap|autoTrap|openDungeonTrap|triggeredTraps' assets/dungeon | head -n 250 || true

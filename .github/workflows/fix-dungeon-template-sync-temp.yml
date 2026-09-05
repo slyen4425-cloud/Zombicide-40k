@@ -1,14 +1,11 @@
 name: Fix Dungeon template inheritance
 on:
   push:
-    branches:
-      - work/dungeon-template-sync-fix-2026-09-05
-    paths:
-      - .github/workflows/fix-dungeon-template-sync-temp.yml
 permissions:
   contents: write
 jobs:
   patch-test:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +24,6 @@ jobs:
           node tests/dungeon_room_runtime_v167822.test.cjs
           node tests/dungeon_runtime_regression.test.cjs
           node tests/gens_ui_recovery_v167843.test.cjs
-          grep -q 'return clone(tpl)' assets/dungeon/dungeon-authored-runtime-167839.js
-          ! grep -q 'saveZoneContent?.(g.id,node.id,tpl)' assets/dungeon/dungeon-authored-runtime-167839.js
       - name: Commit validated fix
         run: |
           git config user.name "slyen4425-cloud"

@@ -12,13 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect actual bestiary HP and tracker wrappers
+      - name: Inspect Dungeon mode and bestiary constructor
         run: |
-          echo '=== skeleton definitions ==='
-          grep -n 'dng_skeleton' index.html | head -n 80 || true
-          echo '=== tracker wrappers around 31200 ==='
-          sed -n '31190,31270p' index.html
-          echo '=== Core 3.18 tracker patch ==='
-          cat assets/dungeon/dungeon-core-318.js
-          echo '=== authored apply hooks ==='
-          grep -nE 'applyCurrentZone|worldContentApplied167824|effectiveContent' assets/dungeon/dungeon-authored-runtime-167839.js assets/dungeon/dungeon-zone-content-167824.js
+          echo '=== isDungeonMode ==='
+          grep -nE 'function isDungeonMode|isDungeonMode=' index.html | head -n 50 || true
+          L=$(grep -n 'function isDungeonMode' index.html | head -1 | cut -d: -f1); if [ -n "$L" ]; then A=$((L-15)); B=$((L+35)); sed -n "${A},${B}p" index.html; fi
+          echo '=== enemy constructor E around 6450 ==='
+          sed -n '6440,6505p' index.html
+          echo '=== dungeon primary world launch ==='
+          grep -nE 'gensrpg_dungeon_primary_selection_v167833|kind.:.world|kind:"world"|kind=.world' index.html assets/dungeon/*.js | head -n 120 || true

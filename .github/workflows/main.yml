@@ -1,4 +1,4 @@
-# GenSrpG V16.78.39 dedicated runtime for fully authored Dungeon worlds — 2026-09-04
+# GenSrpG V16.78.40 dedicated authored Dungeon movement initialization — 2026-09-05
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -46,7 +46,7 @@ jobs:
       - name: Tester la sélection du moteur de Monde construit
         run: node tests/dungeon_world_session_bridge_v167832.test.cjs
 
-      - name: Tester le moteur dédié de donjon construit
+      - name: Tester le moteur dédié et le mouvement du donjon construit
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
 
       - name: Tester le World Runtime historique de compatibilité
@@ -135,7 +135,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
-              (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167839"></script>', "Dedicated authored Dungeon runtime missing"),
+              (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -159,9 +159,9 @@ jobs:
         run: |
           grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
           grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
-          grep -q 'dungeon-authored-runtime-167839.js?v=167839' _site/index.html
+          grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
-          grep -q 'gensrpg-cache-16.78.39-authored-dungeon-runtime' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

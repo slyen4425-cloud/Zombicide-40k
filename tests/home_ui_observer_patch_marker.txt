@@ -1,0 +1,3 @@
+Diagnostic trigger only.
+Tests the branch after removing the global MutationObserver from Dungeon Room Creator V1.
+No production or gameplay behavior is changed by this marker file.

@@ -26,6 +26,7 @@ context.window=context;context.globalThis=context;
 vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-zone-content-167824.js'});
 const api=context.DungeonZoneContent167824;
 assert.ok(api,'zone content API must load');
+const hpUnset=api.normalizeContent({mode:'fixed',enemies:[{enemyId:'dng_skeleton',hp:null},{enemyId:'dng_ghoul'},{enemyId:'dng_wraith',hp:''},{enemyId:'dng_orc',hp:9}]});assert.equal(hpUnset.enemies[0].hp,null,'null hp must stay unset and use the enemy base HP');assert.equal(hpUnset.enemies[1].hp,null,'missing hp must stay unset');assert.equal(hpUnset.enemies[2].hp,null,'blank hp must stay unset');assert.equal(hpUnset.enemies[3].hp,9,'an explicit authored hp must still be preserved');
 assert.equal(api.APP_VERSION,'16.78.24');
 api.saveZoneContent('d1','n1',{mode:'fixed',enemies:[{id:'e1',enemyId:'dng_skeleton',qty:2,cell:4,hasKey:true}],chests:[{id:'ch1',cell:5,rarity:'rare',gold:20,items:[{itemId:'potion_heal',qty:2}]}],traps:[{id:'t1',cell:6,trapType:'damage',damage:3,once:true}],puzzles:[{id:'p1',cell:2,refId:'puzzle_001'}],items:[{id:'i1',cell:7,itemId:'dloot_old_coin',qty:1}],npcs:[{id:'n1npc',cell:1,npcId:'npc_alrik',label:'Alrik'}]});
 assert.equal(api.applyCurrentZone(),true);

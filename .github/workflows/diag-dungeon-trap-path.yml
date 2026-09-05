@@ -1,0 +1,16 @@
+name: Diagnose Dungeon trap path
+on:
+  push:
+    branches:
+      - diag/dungeon-trap-path-2026-09-05
+jobs:
+  grep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate trap runtime paths
+        run: |
+          echo '=== trap API definitions / calls ==='
+          grep -RInE --include='*.js' --include='*.html' 'dungeonTrapTypes|openDungeonTrap|dungeonOpenTrap069|openTrap069|startTrap069|dtrap_(darts|poison_gas|spikes|pit|boulder|alarm|arcane_rune)' . | head -n 250 || true
+          echo '=== generic trap map / trigger paths ==='
+          grep -RInE --include='*.js' --include='*.html' 'cell.*trap|trap.*cell|===.?["'"']trap["'"']|==.?["'"']trap["'"']|case ["'"']trap["'"']|kind.?[:=].?["'"']trap["'"']' assets index.html | head -n 250 || true

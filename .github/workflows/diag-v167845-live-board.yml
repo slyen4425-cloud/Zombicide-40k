@@ -1,0 +1,28 @@
+name: Diagnose V16.78.45 live board
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.45-live-board-fix-2026-09-05
+    paths:
+      - .github/workflows/diag-v167845-live-board.yml
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate chest scene UI and board renderer
+        run: |
+          echo '=== Va sur la case ==='
+          grep -Rni --exclude-dir=.git --exclude='*.zip' 'Va sur la case' . || true
+          echo '=== pour le fouiller ==='
+          grep -Rni --exclude-dir=.git --exclude='*.zip' 'pour le fouiller' . || true
+          echo '=== Coffre Rare / Commun / Epique ==='
+          grep -RniE --exclude-dir=.git --exclude='*.zip' 'Coffre (Rare|Commun|Épique|Epique|Légendaire)' . || true
+          echo '=== dc200Scene / scene cards ==='
+          grep -RniE --exclude-dir=.git --exclude='*.zip' 'dc200Scene|SceneCard|sceneCard|scene-card' . || true
+          echo '=== enemyCells render references ==='
+          grep -Rni --exclude-dir=.git --exclude='*.zip' 'enemyCells' assets index.html | head -n 200 || true
+          echo '=== map marker rendering ==='
+          grep -RniE --exclude-dir=.git --exclude='*.zip' 'map\.cells|cell.*enemy|enemy.*cell' assets/dungeon index.html | head -n 250 || true

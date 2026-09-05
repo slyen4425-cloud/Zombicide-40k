@@ -11,11 +11,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: work/dungeon-exact-trap-fix-2026-09-05
-      - name: Trace trap runtime paths
+      - name: Inspect exact trap scene paths
         run: |
-          echo '=== dungeonTrapTypes / trap ids ==='
-          grep -nE 'dungeonTrapTypes|dtrap_darts|dtrap_snare|dtrap_rune|dtrap_collapse' index.html | head -80 || true
-          echo '=== trap open/resolve functions ==='
-          grep -nE 'openDungeonTrap|dungeonOpenTrap|openTrap069|startTrap069|triggerTrap|resolveTrap|applyTrap|trapType' index.html | head -160 || true
-          echo '=== map cell trap checks ==='
-          grep -nE "cells\[[^]]+\].*trap|===.?['\"]trap['\"]|==.?['\"]trap['\"]|case.?['\"]trap['\"]" index.html | head -160 || true
+          echo '=== trap definitions ==='
+          sed -n '24905,24940p' index.html
+          echo '=== tactical map scene marker renderer ==='
+          sed -n '35170,35220p' index.html
+          echo '=== current tactical handleCell ==='
+          sed -n '39635,39670p' index.html
+          echo '=== later scene trap authority ==='
+          sed -n '40165,40225p' index.html
+          echo '=== detected trap rendering ==='
+          sed -n '40790,40820p' index.html
+          echo '=== scene trap movement hooks ==='
+          sed -n '41145,41210p' index.html

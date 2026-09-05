@@ -44,7 +44,7 @@ const context={console,Math,Date,document,localStorage,setTimeout(fn){fn();retur
  DungeonWorldRuntime167823:{saveConfig(cfg){if(cfg.enabled)legacyConfigEnabledWrites++;return cfg}},gensGameplayModules(){return {movement:true}}
 };
 context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-runtime-167839.js'});
-const api=context.DungeonAuthoredRuntime167839;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.40');assert.equal(api.VERSION,'1.0.1');assert.equal(api.active(),true);
+const api=context.DungeonAuthoredRuntime167839;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.44');assert.equal(api.VERSION,'1.1.0');assert.equal(api.active(),true);
 assert.equal(api.heroMoveAllowance('hero'),4,'le runtime construit doit réutiliser la valeur publique de déplacement Dungeon');
 assert.equal(api.movementForEntry({remaining:{}},'hero'),4,'une première entrée sans mouvement initialisé doit recevoir la valeur du héros');
 assert.equal(api.movementForEntry({remaining:{hero:0}},'hero'),0,'un vrai reste à 0 ne doit jamais être rechargé par un passage de porte');

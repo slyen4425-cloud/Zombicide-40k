@@ -1,0 +1,246 @@
+name: Apply V16.78.44 authored content corrections
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.44-authored-content-fixes-2026-09-05
+    paths:
+      - .github/workflows/apply-v167844-authored-content-fixes.yml
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch authored Dungeon content natively
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def load(path): return Path(path).read_text(encoding='utf-8')
+          def save(path,text): Path(path).write_text(text,encoding='utf-8')
+          def rep(text,old,new,label):
+              n=text.count(old)
+              if n!=1: raise SystemExit(f'{label}: expected 1 exact match, got {n}')
+              return text.replace(old,new)
+          def sub(text,pattern,new,label,flags=re.S):
+              out,n=re.subn(pattern,new,text,count=1,flags=flags)
+              if n!=1: raise SystemExit(f'{label}: expected 1 regex match, got {n}')
+              return out
+
+          # 1) Exact zone content: monster HP authority, hidden traps, exact chest UI, target-linked puzzles.
+          path='assets/dungeon/dungeon-zone-content-167824.js'; s=load(path)
+          s=rep(s,'const VERSION="1.0.0";\nconst APP_VERSION="16.78.24";','const VERSION="1.2.0";\nconst APP_VERSION="16.78.44";','zone version')
+          s=rep(s,'hasKey:!!x?.hasKey,hp:Number.isFinite(Number(x?.hp))?Math.max(1,Number(x.hp)):null','hasKey:!!x?.hasKey','remove authored HP override')
+          s=rep(s,'targetType:String(x?.targetType||"cell"),label:String(x?.label||"")','targetType:String(x?.targetType||"cell"),targetIndex:Number.isFinite(Number(x?.targetIndex))?Math.max(0,Math.trunc(Number(x.targetIndex))):Math.max(0,Math.trunc(Number(x?.cell)||0)),label:String(x?.label||"")','puzzle target index')
+          s=rep(s,' updatedAt:String(r.updatedAt||"")\n}}',' templateRoomId:String(r.templateRoomId||""),\n templateLinked:r.templateLinked===true?true:r.templateLinked===false?false:null,\n updatedAt:String(r.updatedAt||"")\n}}','template metadata')
+          s=rep(s,'function writeJson(key,v){localStorage.setItem(key,JSON.stringify(v));return v}\n','function writeJson(key,v){localStorage.setItem(key,JSON.stringify(v));return v}\nfunction scrubLegacyEnemyHp(){const all=readJson(CONTENT_KEY,{});if(!all||typeof all!=="object"||Array.isArray(all))return false;let changed=false;for(const dungeon of Object.values(all)){if(!dungeon||typeof dungeon!=="object")continue;for(const zone of Object.values(dungeon)){if(!zone||typeof zone!=="object"||!Array.isArray(zone.enemies))continue;for(const enemy of zone.enemies){if(enemy&&Object.prototype.hasOwnProperty.call(enemy,"hp")){delete enemy.hp;changed=true}}}}if(changed)writeJson(CONTENT_KEY,all);return changed}\n','legacy HP scrub')
+          s=sub(s,r'function spawnEnemy\(enemyId,qty,room,cell,hp\)\{.*?\}\nfunction clearDynamicMarkers','function spawnEnemy(enemyId,qty,room,cell){const ids=[];for(let i=0;i<qty;i++){let made=[];try{made=ROOT.trackSpawnedEnemyInstances?.(enemyId,1,room)||[]}catch(e){}for(const id of made){ids.push(String(id));try{const all=ROOT.loadActiveEnemies?.()||[],inst=all.find(e=>String(e?.id)===String(id));if(inst){inst.dungeonRoom=Number(room);ROOT.saveActiveEnemies?.(all)}}catch(e){}}}return ids}\nfunction clearDynamicMarkers','spawn keeps bestiary HP')
+          s=sub(s,r'function syncMapMarkers\(x,content\)\{.*?\}\nfunction persistSpatial','function syncMapMarkers(x,content){const map=x?.last?.map;if(!map?.cells)return;if(content.mode==="fixed")clearDynamicMarkers(map);for(const e of content.enemies)putMarker(map,e.cell,e.role==="boss"?"boss":"enemy");for(const c of content.chests)putMarker(map,c.cell,"chest");for(const p of content.puzzles)if(String(p?.targetType||"cell")==="cell")putMarker(map,p.cell,"puzzle");for(const n of content.npcs)putMarker(map,n.cell,"npc");for(const it of content.items)putMarker(map,it.cell,"item")}\nfunction persistSpatial','hide trap and attached puzzle markers')
+          s=rep(s,'spawnEnemy(spec.enemyId,spec.qty,room,cell,spec.hp)','spawnEnemy(spec.enemyId,spec.qty,room,cell)','spawn call')
+          s=rep(s,'persistSpatial(x);writeRuntime(x);return true}\nfunction inventoryState','persistSpatial(x);writeRuntime(x);cleanLegacyChestCards();return true}\nfunction inventoryState','clean authored cards after apply')
+          helper='''function authoredActive(x){const rt=x||readRuntime();return !!rt?.last?.authoredRuntime167839}\nfunction cleanLegacyChestCards(){if(!DOC||!authoredActive())return 0;let removed=0;for(const card of Array.from(DOC.querySelectorAll?.("#dc200Scene .dc200SceneCard")||[])){if(!String(card?.textContent||"").toLowerCase().includes("coffre"))continue;try{card.remove()}catch(e){if(card?.style)card.style.display="none"}removed++}return removed}\nfunction puzzleTargetCell(p){const type=String(p?.targetType||"cell");const explicit=Number(p?.targetIndex);return (type==="door"||type==="chest")&&Number.isFinite(explicit)?Math.max(0,Math.trunc(explicit)):Math.max(0,Math.trunc(Number(p?.cell)||0))}\nfunction findBlockingPuzzle(ctx,targetType,cell){if(!ctx)return null;const type=String(targetType||"cell"),idx=Math.max(0,Math.trunc(Number(cell)||0));return (ctx.content?.puzzles||[]).find(p=>String(p?.targetType||"cell")===type&&puzzleTargetCell(p)===idx&&!ctx.state?.solvedPuzzles?.[p.id])||null}\nfunction blockingPuzzleAt(targetType,cell){const p=findBlockingPuzzle(currentContext(),targetType,cell);return p?clone(p):null}\nfunction puzzleBlockNotice(p,target){try{ROOT.modal?.("❓ Énigme requise","Résous d’abord "+(p?.label||"l’énigme")+" liée "+target+".")}catch(e){try{ROOT.showToast?.("❓ Résous d’abord l’énigme liée "+target)}catch(_){}}}\n'''
+          s=rep(s,'function markCellFloor(x,cell){if(x?.last?.map?.cells?.[cell]&&!["entry","exit","wall"].includes(String(x.last.map.cells[cell])))x.last.map.cells[cell]="floor"}\n','function markCellFloor(x,cell){if(x?.last?.map?.cells?.[cell]&&!["entry","exit","wall"].includes(String(x.last.map.cells[cell])))x.last.map.cells[cell]="floor"}\n'+helper,'zone authored helpers')
+          s=sub(s,r'function openChest\(chestId\)\{.*?\}\nfunction pickItem','''function openChest(chestId){const ctx=currentContext();if(!ctx||!ctx.hero)return false;const chest=ctx.content.chests.find(c=>c.id===String(chestId));if(!chest||ctx.state.openedChests[chest.id])return false;const lock=findBlockingPuzzle(ctx,"chest",chest.cell);if(lock){puzzleBlockNotice(lock,"à ce coffre");return false}grantRewards(ctx.hero,chest.gold,chest.items);ctx.state.openedChests[chest.id]=true;markCellFloor(ctx.x,chest.cell);persistSpatial(ctx.x);writeRuntime(ctx.x);try{ROOT.showToast?.("🎁 Coffre ouvert · "+chest.gold+" or · "+chest.items.reduce((n,i)=>n+i.qty,0)+" objet(s)")}catch(e){}try{ROOT.DungeonCore01?.render?.()}catch(e){}return true}\nfunction pickItem''','chest puzzle gate')
+          s=rep(s,'ctx.state.solvedPuzzles[p.id]=true;writeRuntime(ctx.x);return true}','ctx.state.solvedPuzzles[p.id]=true;writeRuntime(ctx.x);try{ROOT.DungeonCore01?.render?.()}catch(e){}return true}','refresh after puzzle')
+          s=sub(s,r'function ensureInteractionPanel\(\)\{.*?\}\nfunction wrapCore','''function ensureInteractionPanel(){if(!DOC)return;const old=DOC.getElementById("dzc167824Actions"),ctx=currentContext();if(!ctx?.hero){old?.remove();return}const pos=Number(ctx.x.positions?.[ctx.hero]),actions=[];for(const c of ctx.content.chests)if(c.cell===pos&&!ctx.state.openedChests[c.id]&&!findBlockingPuzzle(ctx,"chest",c.cell))actions.push('<button type="button" onclick="DungeonZoneContent167824.openChest(\\''+esc(c.id)+'\\')">🎁 Ouvrir '+esc(c.label||("coffre "+c.rarity))+'</button>');for(const i of ctx.content.items)if(i.cell===pos&&!ctx.state.pickedItems[i.id])actions.push('<button type="button" onclick="DungeonZoneContent167824.pickItem(\\''+esc(i.id)+'\\')">📦 Ramasser '+esc(i.label||i.itemId)+'</button>');for(const p of ctx.content.puzzles)if(puzzleTargetCell(p)===pos&&!ctx.state.solvedPuzzles[p.id])actions.push('<button type="button" onclick="DungeonZoneContent167824.solvePuzzle(\\''+esc(p.id)+'\\')">❓ Résoudre '+esc(p.label||"l’énigme")+'</button>');for(const n of ctx.content.npcs)if(n.cell===pos)actions.push('<button type="button" onclick="DungeonZoneContent167824.talkNpc(\\''+esc(n.id)+'\\')">🧑 Parler à '+esc(n.label||n.npcId||"PNJ")+'</button>');if(!actions.length){old?.remove();return}let box=old;if(!box){box=DOC.createElement("div");box.id="dzc167824Actions";box.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0";const anchor=DOC.getElementById("dc01Explore")||DOC.getElementById("dc047RoomBoard");anchor?.parentNode?.insertBefore(box,anchor)}if(box)box.innerHTML=actions.join("")}\nfunction wrapCore''','interaction target routing')
+          s=sub(s,r'function wrapCore\(\)\{.*?\}\n\nfunction parseRewardItems','''function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;if(typeof core.explore==="function"&&!core.explore.__dzc167824){const old=core.explore.bind(core),w=function(){const out=old(...arguments);try{applyCurrentZone()}catch(e){console.warn("Zone content apply",e)}try{autoTrap();cleanLegacyChestCards();ensureInteractionPanel()}catch(e){}return out};w.__dzc167824=true;w.__dzc167824Original=old;core.explore=w}for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dzc167824)continue;const w=function(){const out=old.apply(this,arguments);try{autoTrap();cleanLegacyChestCards();ensureInteractionPanel()}catch(e){}return out};w.__dzc167824=true;w.__dzc167824Original=old;core[name]=w}return true}\n\nfunction parseRewardItems''','core authored cleanup wrappers')
+          s=rep(s,'function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;ensureStyles();ensureModal();ensureLauncher();wrapCore();return true}finally{installing=false}}','function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;scrubLegacyEnemyHp();ensureStyles();ensureModal();ensureLauncher();wrapCore();cleanLegacyChestCards();return true}finally{installing=false}}','zone install migration')
+          s=rep(s,'ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,parseRewardItems,rewardItemsText,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};','ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,scrubLegacyEnemyHp,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,puzzleTargetCell,blockingPuzzleAt,cleanLegacyChestCards,parseRewardItems,rewardItemsText,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};','zone API exports')
+          save(path,s)
+
+          # 2) Visual zone editor: no HP override; explicit per-zone edits break template linkage; puzzle target is selected by object.
+          path='assets/dungeon/dungeon-room-visual-config-167826.js'; s=load(path)
+          s=rep(s,'const VERSION="1.1.0",APP_VERSION="16.78.26";','const VERSION="1.2.0",APP_VERSION="16.78.44",TEMPLATE_DUNGEON_ID="__room_template__";','visual version')
+          s=rep(s,'const content=clone(getContent(dungeonId,nodeId));if(content.mode==="inherit")content.mode="fixed";','const content=clone(getContent(dungeonId,nodeId));if(content.mode==="inherit")content.mode="fixed";if(String(dungeonId)!==TEMPLATE_DUNGEON_ID){content.templateRoomId=String(roomId||"");content.templateLinked=false}','visual explicit override marker')
+          s=rep(s,'hasKey:!!data?.hasKey,hp:Number(data?.hp)>0?Number(data.hp):null','hasKey:!!data?.hasKey','visual remove HP')
+          s=rep(s,'targetType:String(data?.targetType||"cell"),label:String(data?.label||"")','targetType:String(data?.targetType||"cell"),targetIndex:Number.isFinite(Number(data?.targetIndex))?Math.max(0,Math.trunc(Number(data.targetIndex))):idx,label:String(data?.label||"")','visual puzzle target index')
+          s=rep(s,'function removeElement(dungeonId,nodeId,cell,obj){const content=clone(getContent(dungeonId,nodeId)),idx=Number(cell),next=','function removeElement(dungeonId,nodeId,cell,obj){const content=clone(getContent(dungeonId,nodeId));if(String(dungeonId)!==TEMPLATE_DUNGEON_ID){content.templateLinked=false}const idx=Number(cell),next=','visual remove marks override')
+          s=rep(s,'function setMode(mode){const c=currentContext();if(!c)return false;const content=clone(getContent(c.dungeonId,c.nodeId));content.mode=','function setMode(mode){const c=currentContext();if(!c)return false;const content=clone(getContent(c.dungeonId,c.nodeId));content.templateLinked=false;content.mode=','visual mode marks override')
+          target_helpers='''function puzzleTargetChoices(room,type){const out=[],t=String(type||"cell");let chestNo=0;for(let i=0;i<(room?.cells||[]).length;i++){const c=room.cells[i];if(c?.terrain==="wall")continue;if(t==="cell")out.push({index:i,label:"Case "+(i+1)});else if(t==="door"&&(c?.object==="entry"||c?.object==="exit"))out.push({index:i,label:c.object==="entry"?"Porte d’entrée":"Porte de sortie"});else if(t==="chest"&&c?.object==="chest")out.push({index:i,label:"Coffre "+(++chestNo)})}return out}\nfunction refreshPuzzleTargets(room,value){const type=String(DOC?.getElementById("drv167826Target")?.value||"cell"),sel=DOC?.getElementById("drv167826TargetIndex");if(!sel)return;const list=puzzleTargetChoices(room,type);sel.innerHTML=list.length?list.map(x=>'<option value="'+x.index+'" '+(Number(value)===x.index?'selected':'')+'>'+esc(x.label)+'</option>').join(""):'<option value="">Aucune cible disponible</option>'}\n'''
+          s=rep(s,'function openEditor(cell,obj){\n',target_helpers+'function openEditor(cell,obj){\n','visual target helpers')
+          s=sub(s,r'if\(obj==="enemy"\|\|obj==="boss"\)body=.*?;\n  else if\(obj==="chest"\)', 'if(obj==="enemy"||obj==="boss")body=\'<label>Monstre<select id="drv167826Enemy">\'+enemyOptions(String(old?.enemyId||"dng_skeleton"))+\'</select></label><label>Quantité<input id="drv167826Qty" type="number" min="1" max="50" value="\'+Number(old?.qty||1)+\'"></label><label style="align-content:end"><span><input id="drv167826Key" type="checkbox" \'+(old?.hasKey?\'checked\':\'\')+\'> Porte la clé</span></label>\';\n  else if(obj==="chest")','visual enemy editor no HP')
+          s=rep(s,'else if(obj==="puzzle")body=\'<label class="drv167826Full">Énigme existante<input id="drv167826PuzzleRef" value="\'+esc(old?.refId||\'\')+\'" placeholder="ID de l’énigme"></label><label>Cible<select id="drv167826Target"><option value="cell">Case</option><option value="door">Porte</option><option value="chest">Coffre</option></select></label><label>Nom / note<input id="drv167826PuzzleLabel" value="\'+esc(old?.label||\'\')+\'"></label>\';','else if(obj==="puzzle")body=\'<label class="drv167826Full">Énigme existante<input id="drv167826PuzzleRef" value="\'+esc(old?.refId||\'\')+\'" placeholder="ID de l’énigme"></label><label>Cible<select id="drv167826Target"><option value="cell">Case</option><option value="door">Porte</option><option value="chest">Coffre</option></select></label><label>Élément cible<select id="drv167826TargetIndex"></select></label><label>Nom / note<input id="drv167826PuzzleLabel" value="\'+esc(old?.label||\'\')+\'"></label>\';','visual puzzle target selector')
+          s=rep(s,'if(obj==="chest")DOC.getElementById("drv167826Rarity").value=String(old?.rarity||"common");if(obj==="trap")DOC.getElementById("drv167826TrapType").value=String(old?.trapType||"damage");if(obj==="puzzle")DOC.getElementById("drv167826Target").value=String(old?.targetType||"cell");m.classList.add("open");return true;','if(obj==="chest")DOC.getElementById("drv167826Rarity").value=String(old?.rarity||"common");if(obj==="trap")DOC.getElementById("drv167826TrapType").value=String(old?.trapType||"damage");if(obj==="puzzle"){const target=DOC.getElementById("drv167826Target");target.value=String(old?.targetType||"cell");target.onchange=()=>refreshPuzzleTargets(room,null);refreshPuzzleTargets(room,old?.targetIndex??old?.cell)}m.classList.add("open");return true;','visual target init')
+          s=rep(s,'data={enemyId:DOC.getElementById("drv167826Enemy")?.value,qty:DOC.getElementById("drv167826Qty")?.value,hp:DOC.getElementById("drv167826Hp")?.value,hasKey:!!DOC.getElementById("drv167826Key")?.checked};','data={enemyId:DOC.getElementById("drv167826Enemy")?.value,qty:DOC.getElementById("drv167826Qty")?.value,hasKey:!!DOC.getElementById("drv167826Key")?.checked};','visual save no HP')
+          s=rep(s,'data={refId:DOC.getElementById("drv167826PuzzleRef")?.value,targetType:DOC.getElementById("drv167826Target")?.value,label:DOC.getElementById("drv167826PuzzleLabel")?.value};','data={refId:DOC.getElementById("drv167826PuzzleRef")?.value,targetType:DOC.getElementById("drv167826Target")?.value,targetIndex:DOC.getElementById("drv167826TargetIndex")?.value,label:DOC.getElementById("drv167826PuzzleLabel")?.value};','visual save target index')
+          save(path,s)
+
+          # 3) Reusable room template: keep linked instances synchronized and offer concrete door/chest targets.
+          path='assets/dungeon/dungeon-room-template-content-167828.js'; s=load(path)
+          s=rep(s,'const VERSION="1.2.0",APP_VERSION="16.78.29",TEMPLATE_DUNGEON_ID="__room_template__";','const VERSION="1.3.0",APP_VERSION="16.78.44",TEMPLATE_DUNGEON_ID="__room_template__";','template version')
+          s=sub(s,r'function copyTemplateToZone\(dungeonId,nodeId,roomId,force\)\{.*?\n\}','''function copyTemplateToZone(dungeonId,nodeId,roomId,force){\n  const z=zoneApi();if(!z?.getZoneContent||!z?.saveZoneContent)return false;\n  const rid=String(roomId||""),tpl=z.getZoneContent(TEMPLATE_DUNGEON_ID,rid);if(!tpl||tpl.mode==="inherit")return false;\n  const current=z.getZoneContent(String(dungeonId||""),String(nodeId||""));if(!force&&current?.templateLinked===false)return false;\n  z.saveZoneContent(String(dungeonId||""),String(nodeId||""),{...clone(tpl),templateRoomId:rid,templateLinked:true});return true;\n}''','template linked copy')
+          s=rep(s,'function openEditor(cell,obj){\n','''function puzzleTargetChoices(r,type){const out=[],t=String(type||"cell");let chestNo=0;for(let i=0;i<(r?.cells||[]).length;i++){const c=r.cells[i];if(c?.terrain==="wall")continue;if(t==="cell")out.push({index:i,label:"Case "+(i+1)});else if(t==="door"&&(c?.object==="entry"||c?.object==="exit"))out.push({index:i,label:c.object==="entry"?"Porte d’entrée":"Porte de sortie"});else if(t==="chest"&&c?.object==="chest")out.push({index:i,label:"Coffre "+(++chestNo)})}return out}\nfunction refreshPuzzleTargets(r,value){const type=String(DOC?.getElementById("drtTarget")?.value||"cell"),sel=DOC?.getElementById("drtTargetIndex");if(!sel)return;const list=puzzleTargetChoices(r,type);sel.innerHTML=list.length?list.map(x=>'<option value="'+x.index+'" '+(Number(value)===x.index?'selected':'')+'>'+esc(x.label)+'</option>').join(""):'<option value="">Aucune cible disponible</option>'}\nfunction openEditor(cell,obj){\n''','template target helpers')
+          s=sub(s,r'if\(obj==="enemy"\|\|obj==="boss"\)body=.*?;\n  else if\(obj==="chest"\)', 'if(obj==="enemy"||obj==="boss")body=\'<label>Monstre<select id="drtEnemy">\'+enemyOptions(String(old?.enemyId||"dng_skeleton"))+\'</select></label><label>Quantité<input id="drtQty" type="number" min="1" max="50" value="\'+Number(old?.qty||1)+\'"></label><label style="align-content:end"><span><input id="drtKey" type="checkbox" \'+(old?.hasKey?\'checked\':\'\')+\'> Porte la clé</span></label>\';\n  else if(obj==="chest")','template enemy editor no HP')
+          s=rep(s,'else if(obj==="puzzle")body=\'<label class="drtFull">Énigme existante<input id="drtPuzzleRef" value="\'+esc(old?.refId||\'\')+\'"></label><label>Cible<select id="drtTarget"><option value="cell">Case</option><option value="door">Porte</option><option value="chest">Coffre</option></select></label><label>Nom / note<input id="drtPuzzleLabel" value="\'+esc(old?.label||\'\')+\'"></label>\';','else if(obj==="puzzle")body=\'<label class="drtFull">Énigme existante<input id="drtPuzzleRef" value="\'+esc(old?.refId||\'\')+\'"></label><label>Cible<select id="drtTarget"><option value="cell">Case</option><option value="door">Porte</option><option value="chest">Coffre</option></select></label><label>Élément cible<select id="drtTargetIndex"></select></label><label>Nom / note<input id="drtPuzzleLabel" value="\'+esc(old?.label||\'\')+\'"></label>\';','template puzzle target selector')
+          s=rep(s,'if(obj==="chest")DOC.getElementById("drtRarity").value=String(old?.rarity||"common");if(obj==="trap")DOC.getElementById("drtTrapType").value=String(old?.trapType||"damage");if(obj==="puzzle")DOC.getElementById("drtTarget").value=String(old?.targetType||"cell");m.classList.add("open");return true;','if(obj==="chest")DOC.getElementById("drtRarity").value=String(old?.rarity||"common");if(obj==="trap")DOC.getElementById("drtTrapType").value=String(old?.trapType||"damage");if(obj==="puzzle"){const target=DOC.getElementById("drtTarget");target.value=String(old?.targetType||"cell");target.onchange=()=>refreshPuzzleTargets(r,null);refreshPuzzleTargets(r,old?.targetIndex??old?.cell)}m.classList.add("open");return true;','template target init')
+          s=rep(s,'data={enemyId:DOC.getElementById("drtEnemy")?.value,qty:DOC.getElementById("drtQty")?.value,hp:DOC.getElementById("drtHp")?.value,hasKey:!!DOC.getElementById("drtKey")?.checked};','data={enemyId:DOC.getElementById("drtEnemy")?.value,qty:DOC.getElementById("drtQty")?.value,hasKey:!!DOC.getElementById("drtKey")?.checked};','template save no HP')
+          s=rep(s,'data={refId:DOC.getElementById("drtPuzzleRef")?.value,targetType:DOC.getElementById("drtTarget")?.value,label:DOC.getElementById("drtPuzzleLabel")?.value};','data={refId:DOC.getElementById("drtPuzzleRef")?.value,targetType:DOC.getElementById("drtTarget")?.value,targetIndex:DOC.getElementById("drtTargetIndex")?.value,label:DOC.getElementById("drtPuzzleLabel")?.value};','template save target index')
+          save(path,s)
+
+          # 4) Dedicated authored runtime: raw trap/puzzle markers never leak, linked template content stays authoritative, door puzzles gate travel.
+          path='assets/dungeon/dungeon-authored-runtime-167839.js'; s=load(path)
+          s=rep(s,'const VERSION="1.0.1",APP_VERSION="16.78.40";','const VERSION="1.1.0",APP_VERSION="16.78.44";','authored version')
+          s=rep(s,'const width=Math.max(1,Number(room?.width)||1),height=Math.max(1,Number(room?.height)||1),total=width*height,cells=(room?.cells||[]).slice(0,total).map(c=>c?.terrain==="wall"?"wall":String(c?.object||"floor"));','const width=Math.max(1,Number(room?.width)||1),height=Math.max(1,Number(room?.height)||1),total=width*height,cells=(room?.cells||[]).slice(0,total).map(c=>{if(c?.terrain==="wall")return "wall";const obj=String(c?.object||"floor");return obj==="trap"||obj==="puzzle"?"floor":obj});','authored hidden raw markers')
+          s=sub(s,r'function effectiveContent\(g,node,room\)\{.*?\}\nfunction zoneKind','''function linkedTemplateContent(tpl,roomId){return {...clone(tpl),templateRoomId:String(roomId||""),templateLinked:true}}\nfunction effectiveContent(g,node,room){const z=zoneApi();if(!z)return emptyContent();let direct=null;try{direct=z.getZoneContent?.(g.id,node.id)||null}catch(e){}let tpl=null;try{tpl=z.getZoneContent?.(TEMPLATE_DUNGEON_ID,room.id)||null}catch(e){}if(tpl&&tpl.mode!=="inherit"&&direct?.templateLinked!==false){const linked=linkedTemplateContent(tpl,room.id);try{return z.saveZoneContent?.(g.id,node.id,linked)||linked}catch(e){return linked}}if(direct&&direct.mode!=="inherit")return direct;if(!tpl||tpl.mode==="inherit")return direct||emptyContent();const linked=linkedTemplateContent(tpl,room.id);try{return z.saveZoneContent?.(g.id,node.id,linked)||linked}catch(e){return linked}}\nfunction zoneKind''','authored linked template authority')
+          s=rep(s,'function blocked(x){try{if(ROOT.dungeonRoomExitLocked102?.())return true}catch(e){}if(x?.last?.exitLocked)return true;return String(x?.last?.map?.objective?.status||x?.last?.objective?.status||"")==="locked"}\n','function blocked(x){try{if(ROOT.dungeonRoomExitLocked102?.())return true}catch(e){}if(x?.last?.exitLocked)return true;return String(x?.last?.map?.objective?.status||x?.last?.objective?.status||"")==="locked"}\nfunction doorPuzzle(x){const hero=activeHero(x),pos=Number(x?.positions?.[hero]);if(!Number.isFinite(pos))return null;try{return zoneApi()?.blockingPuzzleAt?.("door",pos)||null}catch(e){return null}}\n','authored door puzzle helper')
+          s=rep(s,'function travel(){if(travelBusy)return false;const g=graph(),x=readRt();if(!validGraph(g)||!x||x.branch?.active)return false;if(blocked(x)){','function travel(){if(travelBusy)return false;const g=graph(),x=readRt();if(!validGraph(g)||!x||x.branch?.active)return false;const puzzle=doorPuzzle(x);if(puzzle){notice("❓ Porte verrouillée","Résous d’abord l’énigme liée à cette porte.");return false}if(blocked(x)){','authored travel puzzle gate')
+          s=rep(s,'if(Number(x.room)<=0){btn.textContent="🚪 ENTRER DANS "+nodeLabel(g,g.startNodeId);btn.onclick=travel;return true}if(blocked(x)){','if(Number(x.room)<=0){btn.textContent="🚪 ENTRER DANS "+nodeLabel(g,g.startNodeId);btn.onclick=travel;return true}const puzzle=doorPuzzle(x);if(puzzle){btn.textContent="❓ RÉSOUDRE L’ÉNIGME DE LA PORTE";btn.onclick=()=>{try{zoneApi()?.solvePuzzle?.(puzzle.id)}catch(e){}};return true}if(blocked(x)){','authored action button puzzle gate')
+          s=rep(s,'ROOT.DungeonAuthoredRuntime167839={VERSION,APP_VERSION,RT_KEY,PRIMARY_KEY,TEMPLATE_DUNGEON_ID,primary,graph,active,positional,heroMoveAllowance,movementForEntry,mapFromRoom,effectiveContent,ensureState,plan,enterNode,travel,syncActionButton,disableLegacyWorldRuntime,resetForWorld,startConfigured,patchCore,install};','ROOT.DungeonAuthoredRuntime167839={VERSION,APP_VERSION,RT_KEY,PRIMARY_KEY,TEMPLATE_DUNGEON_ID,primary,graph,active,positional,heroMoveAllowance,movementForEntry,mapFromRoom,effectiveContent,linkedTemplateContent,ensureState,plan,doorPuzzle,enterNode,travel,syncActionButton,disableLegacyWorldRuntime,resetForWorld,startConfigured,patchCore,install};','authored API')
+          save(path,s)
+
+          # 5) PWA version + deployment test guard.
+          path='service-worker.js'; s=load(path)
+          s=rep(s,'const CACHE_NAME = "gensrpg-cache-16.78.43-ui-recovery";','const CACHE_NAME = "gensrpg-cache-16.78.44-authored-content";\n// Compatibility marker for the previous UI recovery guard: gensrpg-cache-16.78.43-ui-recovery','cache bump')
+          save(path,s)
+
+          path='.github/workflows/main.yml'; s=load(path)
+          s=rep(s,'# GenSrpG V16.78.43 UI/PWA recovery guard — 2026-09-05','# GenSrpG V16.78.44 authored Dungeon content fixes — 2026-09-05','workflow header')
+          anchor='''      - name: Tester l'instanciation ennemie par salle\n        run: node tests/dungeon_enemy_room_scope_v318.test.cjs\n'''
+          insert=anchor+'''\n      - name: Tester les contenus exacts du Dungeon construit V16.78.44\n        run: node tests/dungeon_authored_content_v167844.test.cjs\n'''
+          s=rep(s,anchor,insert,'workflow authored test')
+          save(path,s)
+
+          # 6) Align existing regressions with the native fix semantics.
+          path='tests/dungeon_zone_content_v167824.test.cjs'; s=load(path)
+          s=rep(s,"assert.equal(api.APP_VERSION,'16.78.24');","assert.equal(api.APP_VERSION,'16.78.44');",'zone test version')
+          s=rep(s,"assert.equal(x.last.map.cells[6],'trap');","assert.equal(x.last.map.cells[6],'floor','un piège programmé reste caché avant son déclenchement');",'zone test hidden trap')
+          save(path,s)
+
+          path='tests/dungeon_room_visual_config_v167826.test.cjs'; s=load(path)
+          s=rep(s,"assert.equal(api.APP_VERSION,'16.78.26');","assert.equal(api.APP_VERSION,'16.78.44');",'visual test version')
+          s=rep(s,"assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(content.enemies[0].hp,null,'sans réglage UI les PV doivent venir du monstre');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');","assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(Object.prototype.hasOwnProperty.call(content.enemies[0],'hp'),false,'les PV ne sont plus stockés dans l’éditeur de salle');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');assert.equal(content.templateLinked,false,'une variante modifiée directement doit cesser de suivre le modèle');",'visual test no HP')
+          save(path,s)
+
+          path='tests/dungeon_room_template_content_v167828.test.cjs'; s=load(path)
+          s=rep(s,"const api=context.DungeonRoomTemplateContent167828;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.29');","const api=context.DungeonRoomTemplateContent167828;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.44');",'template test version')
+          s=rep(s,"assert.equal(copied.enemies[0].enemyId,'dng_orc');assert.equal(copied.enemies[0].cell,5);","assert.equal(copied.enemies[0].enemyId,'dng_orc');assert.equal(copied.enemies[0].cell,5);assert.equal(copied.templateLinked,true);",'template linked assertion')
+          s=rep(s,"zoneApi.saveZoneContent('world-1',added.node.id,{...copied,enemies:[{id:'custom',enemyId:'dng_lich',qty:1,cell:6,role:'enemy'}]});","zoneApi.saveZoneContent('world-1',added.node.id,{...copied,templateLinked:false,enemies:[{id:'custom',enemyId:'dng_lich',qty:1,cell:6,role:'enemy'}]});",'template explicit variant marker')
+          save(path,s)
+
+          path='tests/dungeon_authored_runtime_v167839.test.cjs'; s=load(path)
+          s=rep(s,"assert.ok(api);assert.equal(api.APP_VERSION,'16.78.40');assert.equal(api.VERSION,'1.0.1');assert.equal(api.active(),true);","assert.ok(api);assert.equal(api.APP_VERSION,'16.78.44');assert.equal(api.VERSION,'1.1.0');assert.equal(api.active(),true);",'authored test version')
+          save(path,s)
+          PY
+
+          cat > tests/dungeon_authored_content_v167844.test.cjs <<'JS'
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const vm=require('node:vm');
+          const root=path.join(__dirname,'..');
+          const zoneSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-zone-content-167824.js'),'utf8');
+          const authSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-authored-runtime-167839.js'),'utf8');
+          const visualSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-visual-config-167826.js'),'utf8');
+          const templateSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-template-content-167828.js'),'utf8');
+          const RT='gensrpg_dungeon_runtime_v2',CONTENT='gensrpg_zone_instance_content_v1',PRIMARY='gensrpg_dungeon_primary_selection_v167833';
+          function storage(initial={}){const m=new Map(Object.entries(initial));return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)},dump(k){return m.get(k)}}}
+          function cls(){const s=new Set();return {add(...x){x.forEach(v=>s.add(v))},remove(...x){x.forEach(v=>s.delete(v))},contains(v){return s.has(v)}}}
+          const elements=new Map();
+          function elem(text=''){return {id:'',textContent:text,innerHTML:'',style:{},classList:cls(),children:[],parentNode:null,remove(){this.removed=true},appendChild(c){c.parentNode=this;this.children.push(c);if(c.id)elements.set(c.id,c)},insertBefore(c){this.appendChild(c)},addEventListener(){},setAttribute(){},querySelector(){return null}}}
+          const chestCards=[elem('Coffre Commun'),elem('Coffre Rare'),elem('Coffre Épique'),elem('Coffre Légendaire')],otherCard=elem('Marchand');
+          const button=elem();button.id='dc01Explore';button.disabled=false;elements.set(button.id,button);
+          const body=elem(),head=elem();
+          const document={readyState:'complete',body,head,documentElement:elem(),createElement(){return elem()},getElementById(id){return elements.get(id)||null},querySelector(){return null},querySelectorAll(sel){return sel==='#dc200Scene .dc200SceneCard'?[...chestCards,otherCard]:[]},addEventListener(){}};
+          const room1={id:'room1',name:'Crypte',width:3,height:3,roomType:'room',theme:'stone',cells:Array.from({length:9},(_,i)=>({terrain:'floor',object:i===0?'entry':i===8?'exit':null}))};
+          room1.cells[4].object='puzzle';room1.cells[5].object='chest';room1.cells[6].object='trap';room1.cells[3].object='enemy';
+          const room2={id:'room2',name:'Suite',width:3,height:3,roomType:'room',theme:'stone',cells:Array.from({length:9},(_,i)=>({terrain:'floor',object:i===0?'entry':i===8?'exit':null}))};
+          const graph={id:'d1',name:'Monde',startNodeId:'n1',nodes:[{id:'n1',roomId:'room1',label:'Crypte'},{id:'n2',roomId:'room2',label:'Suite'}],edges:[{id:'e',fromNodeId:'n1',fromExitIndex:8,toNodeId:'n2',toEntryIndex:0}]};
+          const template={mode:'fixed',enemies:[{id:'enemy',enemyId:'dng_skeleton',qty:1,cell:3,role:'enemy',hp:null}],chests:[{id:'ch',cell:5,rarity:'rare',gold:7,items:[{itemId:'potion_heal',qty:2}]}],traps:[{id:'tr',cell:6,trapType:'reference',damage:0,refId:'dtrap_rune',label:'Rune explosive',once:true}],puzzles:[{id:'pch',cell:4,refId:'puzzle_chest',targetType:'chest',targetIndex:5,label:'Sceau du coffre'},{id:'pdoor',cell:4,refId:'puzzle_door',targetType:'door',targetIndex:8,label:'Sceau de la porte'}],npcs:[],items:[]};
+          const stale={mode:'fixed',enemies:[{id:'oldenemy',enemyId:'dng_skeleton',qty:1,cell:3,role:'enemy',hp:1}],chests:[{id:'oldch',cell:5,rarity:'common',gold:0,items:[{itemId:'wrong_item',qty:1}]}],traps:[{id:'oldtr',cell:6,trapType:'reference',refId:'dtrap_darts',once:true}],puzzles:[],npcs:[],items:[]};
+          const store=storage({[PRIMARY]:JSON.stringify({kind:'world',id:'d1'}),[CONTENT]:JSON.stringify({'__room_template__':{room1:template},d1:{n1:stale}})});
+          let enemies=[],seq=0,trapOpened='',puzzleOpened='';const heroState={inventory:[],gold:0,wounds:0};
+          function runtime(map){return {participants:['hero'],index:0,room:1,positions:{hero:0},remaining:{hero:3},enemyCells:{},roomStates:{},heroRooms:{hero:1},authored167839:{worldId:'d1',heroNodes:{hero:'n1'},nodeRooms:{n1:1},roomNodes:{1:'n1'},history:{hero:['n1']}},last:{kind:'world',room:1,authoredRuntime167839:true,worldRuntime167823:true,worldDungeonId:'d1',worldNodeId:'n1',map,objective:map.objective,exitLocked:false}}}
+          const spatial={ensure(x){x.roomStates=x.roomStates||{};return x},persist(x){x.roomStates[String(x.room)]={last:JSON.parse(JSON.stringify(x.last)),enemyCells:JSON.parse(JSON.stringify(x.enemyCells||{}))};return x},setRoom(){},activate(){}};
+          const core={render(){return true},show(){return true},explore(){return true},modal(){return true},start(){return true}};
+          const context={console,Math,Date,document,localStorage:store,setTimeout(){return 1},DungeonCore01:core,DungeonSpatial313:spatial,
+            DungeonWorldBuilder167821:{findDungeon(id){return id==='d1'?JSON.parse(JSON.stringify(graph)):null},validation(){return {valid:true}}},
+            DungeonRoomCreator100:{findRoom(id){const r=id==='room1'?room1:id==='room2'?room2:null;return r?JSON.parse(JSON.stringify(r)):null}},
+            DungeonWorldRuntime167823:{saveConfig(c){return c}},activeDungeonAdventureId(){return 'a'},dc305PositionalGameplay(){return true},dungeonHeroMoveValue083(){return 3},
+            loadActiveEnemies(){return enemies},saveActiveEnemies(v){enemies=v},trackSpawnedEnemyInstances(type,qty,roomNo){const ids=[];for(let i=0;i<qty;i++){const id='spawn-'+(++seq);ids.push(id);enemies.push({id,enemyId:type,hp:10,maxHp:10,dungeonRoom:roomNo})}return ids},
+            loadState(){return heroState},key(){return 'hero'},makeInventoryEntry(itemId){return {itemId}},gensHeroGold(){return heroState.gold},showToast(){},modal(){},
+            openDungeonTrap(id){trapOpened=id;return true},openDungeonChallenge(id){puzzleOpened=id;return true}};
+          context.window=context;context.globalThis=context;vm.createContext(context);
+          vm.runInContext(zoneSrc,context,{filename:'zone.js'});
+          vm.runInContext(authSrc,context,{filename:'auth.js'});
+          const zone=context.DungeonZoneContent167824,auth=context.DungeonAuthoredRuntime167839;
+          assert.equal(zone.APP_VERSION,'16.78.44');assert.equal(auth.APP_VERSION,'16.78.44');
+          const map=auth.mapFromRoom(room1);assert.equal(map.cells[6],'floor','le piège brut de la salle ne doit jamais être visible');assert.equal(map.cells[4],'floor','une énigme attachée ne doit pas créer un second marqueur autonome');
+          store.setItem(RT,JSON.stringify(runtime(map)));
+          const effective=auth.effectiveContent(graph,graph.nodes[0],room1);assert.equal(effective.templateLinked,true,'une ancienne copie de modèle doit redevenir liée');assert.equal(effective.chests[0].items[0].itemId,'potion_heal','le contenu courant du modèle remplace la vieille copie de coffre');
+          let raw=JSON.parse(store.getItem(CONTENT));assert.equal(Object.prototype.hasOwnProperty.call(raw.__room_template__.room1.enemies[0],'hp'),false,'les anciens PV forcés doivent être migrés hors du stockage');
+          assert.equal(zone.applyCurrentZone({force:true}),true);assert.equal(enemies.length,1);assert.equal(enemies[0].hp,10,'le squelette doit conserver les PV de sa fiche bestiaire');
+          let x=JSON.parse(store.getItem(RT));assert.equal(x.last.map.cells[5],'chest');assert.equal(x.last.map.cells[6],'floor');assert.equal(x.last.map.cells[4],'floor');
+          assert.ok(chestCards.every(c=>c.removed===true),'les quatre anciennes cartes de coffre doivent disparaître du plateau de jeu');assert.notEqual(otherCard.removed,true);
+          x.positions.hero=5;store.setItem(RT,JSON.stringify(x));assert.equal(zone.openChest('ch'),false,'un coffre protégé par énigme doit rester fermé');assert.equal(heroState.inventory.length,0);assert.equal(zone.solvePuzzle('pch'),true);assert.equal(puzzleOpened,'puzzle_chest');assert.equal(zone.openChest('ch'),true);assert.equal(heroState.gold,7);assert.equal(heroState.inventory.filter(i=>i.itemId==='potion_heal').length,2,'le coffre doit donner exactement les objets programmés');assert.equal(heroState.inventory.some(i=>i.itemId==='wrong_item'),false);
+          x=JSON.parse(store.getItem(RT));x.positions.hero=6;store.setItem(RT,JSON.stringify(x));core.render();assert.equal(trapOpened,'dtrap_rune','le piège doit utiliser exactement la référence choisie dans l’éditeur');x=JSON.parse(store.getItem(RT));assert.equal(x.worldContentState167824.d1.n1.triggeredTraps.tr,true);assert.equal(x.last.map.cells[6],'floor');
+          x.positions.hero=8;store.setItem(RT,JSON.stringify(x));core.render();assert.match(button.textContent,/ÉNIGME DE LA PORTE/,'une énigme liée à une porte doit remplacer temporairement le bouton de sortie');button.onclick();assert.equal(puzzleOpened,'puzzle_door');core.render();assert.match(button.textContent,/Vers Suite/,'après résolution la porte doit redevenir traversable');
+          assert.doesNotMatch(visualSrc,/PV forcés/);assert.doesNotMatch(templateSrc,/PV forcés/);assert.match(visualSrc,/TargetIndex/);assert.match(templateSrc,/TargetIndex/);assert.match(templateSrc,/templateLinked:true/);
+          for(const src of [zoneSrc,authSrc,visualSrc,templateSrc])assert.doesNotMatch(src,/new\s+MutationObserver/,'aucun observateur global ne doit revenir avec V16.78.44');
+          console.log('Dungeon authored content V16.78.44: OK');
+          JS
+      - name: Syntax and diff guards
+        shell: bash
+        run: |
+          node --check assets/dungeon/dungeon-zone-content-167824.js
+          node --check assets/dungeon/dungeon-room-visual-config-167826.js
+          node --check assets/dungeon/dungeon-room-template-content-167828.js
+          node --check assets/dungeon/dungeon-authored-runtime-167839.js
+          node --check tests/dungeon_authored_content_v167844.test.cjs
+          git diff --check
+      - name: Focused regressions
+        shell: bash
+        run: |
+          node tests/dungeon_authored_content_v167844.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_room_visual_config_v167826.test.cjs
+          node tests/dungeon_room_creator_v2_v167819.test.cjs
+          node tests/gens_ui_recovery_v167843.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+      - name: Final assembled-load regression
+        shell: bash
+        run: |
+          rm -rf _site && mkdir -p _site/assets
+          cp index.html _site/index.html
+          cp -R assets/. _site/assets/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html'); html=p.read_text(encoding='utf-8')
+          modules=[
+            '<script src="assets/dungeon/dungeon-core-318.js"></script>',
+            '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>',
+            '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
+            '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
+            '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>',
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>'
+          ]
+          for tag in modules:
+            if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          p.write_text(html,encoding='utf-8')
+          PY
+          node tests/dungeon_final_load_regression.test.cjs _site/index.html
+          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
+          node tests/dungeon_zone_content_v167824.test.cjs _site/index.html
+          node tests/dungeon_authored_content_v167844.test.cjs
+      - name: Commit validated V16.78.44 source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf _site
+          git rm -f .github/workflows/apply-v167844-authored-content-fixes.yml
+          git add assets/dungeon/dungeon-zone-content-167824.js assets/dungeon/dungeon-room-visual-config-167826.js assets/dungeon/dungeon-room-template-content-167828.js assets/dungeon/dungeon-authored-runtime-167839.js service-worker.js .github/workflows/main.yml tests/dungeon_zone_content_v167824.test.cjs tests/dungeon_room_visual_config_v167826.test.cjs tests/dungeon_room_template_content_v167828.test.cjs tests/dungeon_authored_runtime_v167839.test.cjs tests/dungeon_authored_content_v167844.test.cjs
+          git diff --cached --check
+          git commit -m "Fix authored Dungeon content and interaction targets V16.78.44"
+          git push

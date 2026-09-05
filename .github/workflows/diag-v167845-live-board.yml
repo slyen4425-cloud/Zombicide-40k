@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect exact board and scene renderer
+      - name: Inspect live enemy authority and scene storage
         run: |
-          echo '=== spatial renderer 39320-39420 ==='
-          sed -n '39320,39420p' index.html
-          echo '=== main render 39500-39545 ==='
-          sed -n '39500,39545p' index.html
-          echo '=== later scene cleanup 41255-41290 ==='
-          sed -n '41255,41290p' index.html
-          echo '=== art renderer 43320-43510 ==='
-          sed -n '43320,43510p' index.html
-          echo '=== zone content full ==='
-          cat assets/dungeon/dungeon-zone-content-167824.js
+          echo '=== definitions ==='
+          grep -nE 'function (visibleEnemies|liveEnemies)|trackSpawnedEnemyInstances|dc200Bypassed|function sceneForRoom|loadDungeonSceneElements' index.html | head -n 240 || true
+          echo '=== spatial enemy filters 39270-39345 ==='
+          sed -n '39270,39345p' index.html
+          echo '=== spawn tracker surroundings ==='
+          L=$(grep -n 'function trackSpawnedEnemyInstances' index.html | head -1 | cut -d: -f1); if [ -n "$L" ]; then A=$((L-35)); B=$((L+80)); sed -n "${A},${B}p" index.html; fi
+          echo '=== every dc200Bypassed write ==='
+          grep -n 'dc200Bypassed' index.html || true
+          echo '=== scene storage definitions ==='
+          grep -nE 'function (loadDungeonSceneElements|saveDungeonSceneElements|addDungeonSceneElement|removeDungeonSceneElement)' index.html | head -n 80 || true

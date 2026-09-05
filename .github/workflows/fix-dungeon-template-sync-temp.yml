@@ -31,6 +31,6 @@ jobs:
         run: |
           git config user.name "slyen4425-cloud"
           git config user.email "slyen4425@gmail.com"
-          git add assets/dungeon/dungeon-room-template-content-167828.js assets/dungeon/dungeon-authored-runtime-167839.js tests/dungeon_room_template_content_v167828.test.cjs tests/dungeon_authored_runtime_v167839.test.cjs .github/workflows/main.yml
+          git add assets/dungeon/dungeon-room-template-content-167828.js assets/dungeon/dungeon-authored-runtime-167839.js tests/dungeon_room_template_content_v167828.test.cjs tests/dungeon_authored_runtime_v167839.test.cjs
           git commit -m "Fix Dungeon room template inheritance and stale content"
           git push origin HEAD:work/dungeon-template-sync-fix-2026-09-05

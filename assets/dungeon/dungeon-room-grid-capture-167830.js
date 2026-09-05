@@ -1,11 +1,11 @@
-/* GenSrpG V16.78.30 — Room Creator configuration grid capture.
+/* GenSrpG V16.78.43 — Room Creator configuration grid capture + UI recovery bootstrap.
    Intercepts configuration touches before the historical Room Creator paint listener.
    UI-only: no combat, movement, spawn, timeline or world-runtime behavior is changed. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.30";
+const VERSION="1.0.1",APP_VERSION="16.78.43";
 let boundGrid=null,boundHandler=null,installed=false;
 function templateActive(){return !!DOC?.getElementById("drt167828Toggle")?.classList?.contains("on")}
 function zoneActive(){return !!DOC?.getElementById("drv167826Toggle")?.classList?.contains("on")}
@@ -36,10 +36,14 @@ function wrapRoomOpen(){
   const api=ROOT.DungeonRoomCreator100;if(!api||api.__drgc167830Wrapped||typeof api.open!=="function")return false;
   const old=api.open;api.open=function(){const out=old.apply(this,arguments);setTimeout(bindGrid,0);return out};api.__drgc167830Wrapped=true;return true;
 }
-function install(){
-  if(installed){wrapRoomOpen();bindGrid();return true}installed=true;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
-  wrapRoomOpen();bindGrid();return true;
+function loadUiRecovery(){
+  if(!DOC||ROOT.GenSrpGUiRecovery167843||DOC.getElementById("gensUiRecovery167843Script"))return !!ROOT.GenSrpGUiRecovery167843;
+  const s=DOC.createElement("script");s.id="gensUiRecovery167843Script";s.src="assets/gensrpg/gens-ui-recovery-167843.js?v=167843";s.async=false;(DOC.body||DOC.documentElement)?.appendChild(s);return true;
 }
-ROOT.DungeonRoomGridCapture167830={VERSION,APP_VERSION,templateActive,zoneActive,capture,bindGrid,wrapRoomOpen,install};
+function install(){
+  if(installed){wrapRoomOpen();bindGrid();loadUiRecovery();return true}installed=true;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
+  wrapRoomOpen();bindGrid();loadUiRecovery();return true;
+}
+ROOT.DungeonRoomGridCapture167830={VERSION,APP_VERSION,templateActive,zoneActive,capture,bindGrid,wrapRoomOpen,loadUiRecovery,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}else install();
 })();

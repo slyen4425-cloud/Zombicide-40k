@@ -12,15 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect live enemy authority and scene storage
+      - name: Inspect actual bestiary HP and tracker wrappers
         run: |
-          echo '=== definitions ==='
-          grep -nE 'function (visibleEnemies|liveEnemies)|trackSpawnedEnemyInstances|dc200Bypassed|function sceneForRoom|loadDungeonSceneElements' index.html | head -n 240 || true
-          echo '=== spatial enemy filters 39270-39345 ==='
-          sed -n '39270,39345p' index.html
-          echo '=== spawn tracker surroundings ==='
-          L=$(grep -n 'function trackSpawnedEnemyInstances' index.html | head -1 | cut -d: -f1); if [ -n "$L" ]; then A=$((L-35)); B=$((L+80)); sed -n "${A},${B}p" index.html; fi
-          echo '=== every dc200Bypassed write ==='
-          grep -n 'dc200Bypassed' index.html || true
-          echo '=== scene storage definitions ==='
-          grep -nE 'function (loadDungeonSceneElements|saveDungeonSceneElements|addDungeonSceneElement|removeDungeonSceneElement)' index.html | head -n 80 || true
+          echo '=== skeleton definitions ==='
+          grep -n 'dng_skeleton' index.html | head -n 80 || true
+          echo '=== tracker wrappers around 31200 ==='
+          sed -n '31190,31270p' index.html
+          echo '=== Core 3.18 tracker patch ==='
+          cat assets/dungeon/dungeon-core-318.js
+          echo '=== authored apply hooks ==='
+          grep -nE 'applyCurrentZone|worldContentApplied167824|effectiveContent' assets/dungeon/dungeon-authored-runtime-167839.js assets/dungeon/dungeon-zone-content-167824.js

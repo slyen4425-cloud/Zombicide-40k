@@ -17,11 +17,22 @@ jobs:
       - name: Build compact diagnostic report
         if: always()
         run: node tests/home_ui_freeze_report.cjs
-      - name: Commit diagnostic report
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run local site and mobile browser probe
+        run: |
+          python3 -m http.server 8765 >/tmp/gens-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          node tests/home_ui_browser_probe.mjs
+      - name: Commit diagnostic reports
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add diagnostics/home-ui-freeze-report.txt
-          git diff --cached --quiet || git commit -m "Record home UI freeze diagnostic report"
+          git add diagnostics/home-ui-freeze-report.txt diagnostics/home-ui-browser-report.txt || true
+          git diff --cached --quiet || git commit -m "Record real browser home UI diagnostic"
           git push

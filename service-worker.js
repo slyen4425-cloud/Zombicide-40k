@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.39-authored-dungeon-runtime";
+const CACHE_NAME = "gensrpg-cache-16.78.40-authored-movement";
 
 const CORE_FILES = [
   "./",

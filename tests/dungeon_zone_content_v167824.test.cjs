@@ -70,6 +70,15 @@ assert.ok(enemies.some(e=>e.enemyId==='dng_ghoul'),'mixed mode must add configur
 
 x=JSON.parse(store.getItem(RT));x.last.worldContentApplied167824=null;x.last.worldZoneContent167824={mode:'fixed',enemies:[{id:'inh',enemyId:'dng_wraith',qty:2,cell:3}],chests:[{id:'inhch',cell:5,rarity:'common',gold:1,items:[]}],traps:[],puzzles:[],npcs:[],items:[]};store.setItem(RT,JSON.stringify(x));api.saveZoneContent('d1','n1',{mode:'inherit'});assert.equal(api.applyCurrentZone({force:true}),true,'an inherited authored zone must apply the effective room template content');x=JSON.parse(store.getItem(RT));assert.equal(enemies.filter(e=>e.enemyId==='dng_wraith').length,2,'inherited authored enemies must be instantiated');assert.equal(x.last.map.cells[5],'chest','inherited authored chest marker must remain available to interactions');assert.equal(api.openChest('inhch'),true,'inherited authored chest must use the same effective content as enemy spawning');
 
+// Browser-realistic regression: exact chest rewards must still work when loadState/key/makeInventoryEntry are not exposed on window.
+delete context.loadState;delete context.key;delete context.makeInventoryEntry;delete context.gensHeroGold;
+store.setItem('z40k_aldren_v1',JSON.stringify({inventory:[],gold:7,wounds:0}));
+x=JSON.parse(store.getItem(RT));x.last.worldContentApplied167824=null;x.positions.aldren=4;store.setItem(RT,JSON.stringify(x));
+api.saveZoneContent('d1','n1',{mode:'fixed',chests:[{id:'browserChest',cell:4,rarity:'legendary',gold:3,items:[{itemId:'ditem_ash_blade',qty:1}]}]});
+assert.equal(api.applyCurrentZone({force:true}),true);
+assert.equal(api.openChest('browserChest'),true,'exact chest must write rewards through the real hero storage even without legacy globals');
+const browserHero=JSON.parse(store.getItem('z40k_aldren_v1'));assert.equal(browserHero.gold,10);assert.equal(browserHero.inventory.filter(i=>i.itemId==='ditem_ash_blade').length,1);
+
 assert.deepEqual(JSON.parse(JSON.stringify(api.parseRewardItems('potion_heal*2, sword_01 x 3'))),[{itemId:'potion_heal',qty:2},{itemId:'sword_01',qty:3}]);
 assert.doesNotMatch(src,/function\s+(?:moveTo|launchCombat200|endTurn|goBackRoom)\s*\(/,'zone content layer must not rewrite stable movement/combat/timeline');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');

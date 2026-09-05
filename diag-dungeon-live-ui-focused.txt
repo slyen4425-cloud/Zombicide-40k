@@ -1,0 +1,217 @@
+=== CHEST SCENE RENDERER 39360-39420 ===
+   c.classList.remove('dc200Reach','dc200Hero','dc200Enemy','dc200Key','dc200Feature','dc206ChestCell');
+   delete c.dataset.dc200Hero;delete c.dataset.dc200Feature;delete c.dataset.dc206ChestId
+ });
+ Object.entries(x.enemyCells||{}).forEach(([id,n])=>{if(els[n]){els[n].classList.add('dc200Enemy');if(String(x.last?.keyEnemyId||'')===String(id))els[n].classList.add('dc200Key')}});sceneForRoom(x).forEach(e=>{
+ const n=Number(e.cellIndex);
+ if(!Number.isInteger(n)||!els[n])return;
+ if(['trapdoor','stairs_down','stairs_up'].includes(e.kind)){
+   els[n].classList.add('dc200Feature');els[n].dataset.dc200Feature='🕳️'
+ }
+ if(e.kind==='chest' && !!e.branch200===!!x.branch?.active){
+   els[n].classList.add('dc200Feature','dc206ChestCell');
+   els[n].dataset.dc200Feature='🎁';
+   els[n].dataset.dc206ChestId=String(e.id||'')
+ }
+});
+ const id=activeHero(x),pos=position(id,x),rem=Math.max(0,Number(x.remaining?.[id])||0);if(els[pos]){els[pos].classList.add('dc200Hero');els[pos].dataset.dc200Hero=initials(id)}
+ if(tactical()&&pos>=0){distanceMap(pos,x.last.map,rem,x).forEach((d,n)=>{if(d>0&&d<=rem&&els[n]&&!blocked(x.last.map.cells[n]))els[n].classList.add('dc200Reach')})}
+ let p=document.getElementById('dc200MovePanel');const board=document.getElementById('dc047RoomBoard');if(!p&&board){p=document.createElement('div');p.id='dc200MovePanel';board.insertAdjacentElement('afterend',p)}if(p){
+  const on=tactical();
+  p.style.display=on?'':'none';
+  p.innerHTML=on?'<strong>👣 '+esc(heroName(id))+' : '+rem+' / '+moveMax(id)+' cases</strong><br><small>Position conservée immédiatement. Fin du tour recharge le mouvement du prochain héros.</small>':'';
+}
+}
+function renderHeroes(x){const host=document.getElementById('dc01Heroes');if(!host)return;host.innerHTML='';const cur=activeHero(x),my=assigned();(x.participants||[]).forEach(id=>{const b=document.createElement('button');b.type='button';b.className='dc01Hero'+(id===cur?' active':'')+((role()!=='gm'&&my&&id!==my)?' locked':'');const c=CHARS?.[id]||findCustomHero?.(id)||{},heroRoom=Number(x.heroRooms?.[id])||0;const img=c.image||c.avatar||'';b.innerHTML=(img?'<img src="'+img+'" alt="">':'<div style="height:92px;display:grid;place-items:center;font-size:38px;background:#222;border-radius:8px">🧙</div>')+'<div class="dc01HeroName">'+esc(heroName(id))+'</div><div class="dc01HeroRole">'+esc(c.role||'Héros')+' · '+(heroRoom>0?'Salle '+heroRoom:'Entrée')+'</div>'+(id===cur?'<span class="dc01HeroTurn">ACTIF</span>':'');b.onclick=()=>openHero(id);host.appendChild(b)})}
+function sceneForRoom(x){try{return (loadDungeonSceneElements?.()||[]).filter(e=>!Number(e.room||0)||Number(e.room||0)===Number(x.room||0))}catch(e){return []}}
+function renderScene200(x){
+  let host=document.getElementById('dc200Scene');
+  const base=document.getElementById('dc02Scene');
+  if(!host&&base){host=document.createElement('div');host.id='dc200Scene';base.insertAdjacentElement('afterend',host)}
+  if(base)base.innerHTML='';
+  if(!host)return;
+  const positional=tactical();
+  const arr=sceneForRoom(x).filter(e=>['chest','merchant','trapdoor','stairs_down','stairs_up','objective'].includes(e.kind));
+  host.innerHTML=arr.map(e=>{
+    if(e.kind==='chest'){
+      const locked=e.challenge&&!e.challengeDone;
+      const chestFile=String(e.rarity||'common')==='legendary'?'dungeon_chest_legendary.png':String(e.rarity||'common')==='rare'?'dungeon_chest_rare.png':String(e.rarity||'common')==='epic'?'dungeon_treasure_chest.png':'dungeon_chest_common.png';
+      return '<div class="dc200SceneCard"><img class="dc309SceneChest" src="assets/dungeon/creatures/'+chestFile+'" alt="Coffre"><div class="grow"><strong>'+esc(e.name||'Coffre')+'</strong><small>'+
+        (locked?'🧩 Verrouillé · ':'')+
+        (positional?('Va sur la case 🎁 pour '+(locked?'le déverrouiller':'le fouiller')+'.'):(locked?'Déverrouille le coffre pour accéder au butin.':'Fouille disponible dans cette salle.'))+
+        '</small></div>'+
+        (!positional?'<button type="button" class="dc01Btn primary" onclick="DungeonCore01.searchChest(\''+String(e.id).replace(/'/g,'')+'\')">'+(locked?'🧩 DÉVERROUILLER':'🔍 FOUILLER')+'</button>':'')+
+        '</div>'
+    }
+    if(e.kind==='merchant')return '<div class="dc200SceneCard"><div>🧙‍♂️</div><div class="grow"><strong>'+esc(e.name||'Marchand')+'</strong></div><button type="button" onclick="dc051OpenMerchant?.()">💰 COMMERcer</button></div>';
+    if(['trapdoor','stairs_down','stairs_up'].includes(e.kind))return '<div class="dc200SceneCard"><div>🕳️</div><div class="grow"><strong>'+esc(e.name||'Passage secret')+'</strong><small>Accès à une sous-salle.</small></div><button type="button" onclick="dc200EnterBranch(\''+String(e.id).replace(/'/g,'')+'\')">ENTRER</button></div>';
+    if(e.kind==='objective'){const q=Math.max(1,Number(e.qty)||1),p=Math.max(0,Number(e.progress)||0);return '<div class="dc200SceneCard"><div>🎯</div><div class="grow"><strong>'+esc(e.name||'Objectif secondaire')+'</strong><small>'+p+' / '+q+' · ⭐ '+Math.max(0,Number(e.xp)||0)+' XP groupe</small></div></div>'}
+    return ''
+  }).join('')
+} function renderRule(x){
+  let r=document.getElementById('dc200Rule');
+  const board=document.getElementById('dc047RoomBoard');
+  if(!r&&board){r=document.createElement('div');r.id='dc200Rule';board.insertAdjacentElement('beforebegin',r)}
+  if(!r)return;
+  const live=liveEnemies(),locked=exitLocked(x),k=keyCarrier(x),positional=tactical();
+  r.className=locked||(!positional&&live.length)?'locked':'open';
+  if(x.branch?.active){
+    if(!positional&&live.length)r.innerHTML='⚔️ <strong>Cache non sécurisée :</strong> vaincs les ennemis avant de revenir.';
+    else r.innerHTML='🕳️ <strong>Sous-salle</strong> · <button type="button" onclick="dc200LeaveBranch()">↩ Retour à la salle principale</button>';
+  }else if(locked&&x.last?.kind==='boss')r.innerHTML='👑 <strong>Sortie verrouillée :</strong> le Boss doit être vaincu.';
+  else if(locked)r.innerHTML='🔑 <strong>Sortie verrouillée :</strong> '+(k?esc(enemyName(k))+' porte la clé.':'un ennemi porte la clé.');
+=== ENEMY SCENE RENDERER 39970-40020 ===
+  const v=document.getElementById("dc201PuzzleInput")?.value||"";
+  finishPuzzle201(norm201(v)===norm201(puzzleCtx201?.ch?.solution));
+};
+window.dc201PuzzleRoll=function(){
+  const chance=Math.max(5,Math.min(95,Number(puzzleCtx201?.chance)||50));
+  const roll=1+Math.floor(Math.random()*100);
+  const ok=roll<=chance;
+  modal201("🎲 Test","D100 : <strong>"+roll+"</strong><br>"+(ok?"✅ Réussi":"❌ Échec"),()=>finishPuzzle201(ok));
+};
+
+/* Remplace l'appel ancien utilisé par le runtime 2.00. */
+window.dc051OpenChallenge=function(kind,id){return openPuzzle201(kind,id)};
+
+/* ---------------------------------------------------------
+   COMBAT : rendre l'accès visible et fiable.
+   Le bouton reste contextuel, mais les ennemis sont maintenant visibles.
+   Ajoute aussi un bouton rencontre permanent quand il y a des ennemis.
+---------------------------------------------------------- */
+function encounterPanel201(){
+  const x=rt201(),live=live201();
+  let host=document.getElementById("dc201Encounter");
+  const anchor=document.getElementById("dc01Enemies");
+  if(!host&&anchor){host=document.createElement("div");host.id="dc201Encounter";anchor.insertAdjacentElement("afterend",host)}
+  if(!host)return;
+  if(!live.length){host.innerHTML="";return}
+  const positional=typeof window.dc305PositionalGameplay==="function"&&window.dc305PositionalGameplay();
+  const pos=Number(x?.positions?.[activeHero201(x)]);
+  const on=live.find(e=>Number(x.enemyCells?.[e.id])===pos);
+  const ids=live.map(e=>String(e.id));
+  host.innerHTML='<div class="dc200SceneCard"><div>⚔️</div><div class="grow"><strong>'+live.length+' ennemi'+(live.length>1?'s':'')+' dans la salle</strong><small>'+live.map(enemyName201).join(", ")+'</small></div>'+
+    (!positional
+      ?'<button type="button" class="dc01Btn primary" onclick=\'dc200StartCombat('+JSON.stringify(ids)+',"manual")\'>⚔️ ENGAGER LE COMBAT</button>'
+      :(on?'<button type="button" class="dc01Btn primary" onclick="dc200StartCombat([\''+String(on.id).replace(/'/g,"")+'\'],\'cell\')">ATTAQUER</button>':'<span class="badge">Va sur une case ennemie</span>'))+
+    '</div>';
+}
+
+/* ---------------------------------------------------------
+   SCÈNE : si une carte spéciale existe dans la map, elle doit avoir
+   un élément interactif. Puis laisser le rendu 2.00 faire son travail.
+---------------------------------------------------------- */
+function decorate201(){
+  try{
+    repairFeatures201();
+    repairEnemies201();
+    /* Le rendu 2.00 peut avoir peint la map avant l'assignation :
+       repeindre uniquement les pions DOM après coup. */
+    paintEnemies201();
+    encounterPanel201();
+  }catch(e){console.warn("Core 2.01 decorate",e)}
+}
+
+=== LATE SCENE PATCH 41255-41305 ===
+      '<div class="dc211SenseRow"><span>Pièges · '+esc211(stat)+' '+val+' · '+chance+'% · rayon '+Math.max(1,Number(ex.trapDetectionRadius)||2)+' case(s)</span>'+
+      (used?'<button disabled>TEST DÉJÀ UTILISÉ</button>':'<button type="button" onclick="dc211TrapTest()">🎲 TESTER LA DÉTECTION</button>')+'</div>')+
+    (ex.enemyDetection===false?'<small>Détection ennemie désactivée.</small>':
+      '<small>🔴 Zone rouge = portée de perception ennemie'+(ex.enemyDetectionAutoCombat!==false?' · repérage = combat.':'.')+'</small>')
+}
+
+function puzzleAction211(x){
+  const board=document.getElementById("dc047RoomBoard");if(!board)return;
+  let h=document.getElementById("dc211PuzzleAction");
+  if(!h){h=document.createElement("div");h.id="dc211PuzzleAction";board.insertAdjacentElement("afterend",h)}
+  const obj=x?.last?.map?.objective;
+  if(!obj||obj.type!=="challenge"||obj.status!=="locked"||!obj.challenge){h.innerHTML="";return}
+  h.innerHTML='<button class="dc01Btn primary" type="button" onclick="dc211OpenDoorPuzzle()">🧩 EXAMINER LE MÉCANISME</button>'
+}
+window.dc211OpenDoorPuzzle=function(){
+  const x=rt(),obj=x?.last?.map?.objective;
+  if(!obj||obj.type!=="challenge"||obj.status!=="locked"||!obj.challenge)return;
+  if(typeof dc201OpenPuzzle==="function")return dc201OpenPuzzle("door","");
+  if(typeof dc051OpenChallenge==="function")return dc051OpenChallenge("door","");
+}
+
+function distinguishScene211(){
+  document.querySelectorAll("#dc200Scene .dc200SceneCard").forEach(c=>{
+    c.classList.remove("dc211MerchantCard","dc211ChestCard");
+    const t=(c.textContent||"").toLowerCase();
+    if(t.includes("marchand"))c.classList.add("dc211MerchantCard");
+    if(t.includes("coffre"))c.classList.add("dc211ChestCard")
+  })
+}
+
+function decorate211(){
+  const x=rt();if(!x)return;
+  const dom=cells211();
+  const positional=typeof window.dc305PositionalGameplay==="function"&&window.dc305PositionalGameplay();
+  if(!positional){
+    dom.forEach(c=>c.classList.remove("dc211EnemySense","dc211HeroSpotted","dc211Trap"));
+    const p=document.getElementById("dc211SensePanel");if(p)p.style.display="none";
+    puzzleAction211(x);
+    distinguishScene211();
+    return;
+  }
+  paintHeroes211(x,dom);
+  if(Number(x.room||0)<=0)return;
+  const traps=paintTraps211(x,dom),zones=paintEnemySense211(x,dom);
+  sensePanel211(x,traps,zones);
+  puzzleAction211(x);
+  distinguishScene211();
+  resolveEnemyDetection211(x,zones,dom)
+}
+
+/* Combat: mains nues + recharge spécifique au héros. */
+=== MAP CELL RENDERER CANDIDATES ===
+6533:  return '<div class="dungeonRoomMap" style="grid-template-columns:repeat('+map.size+',1fr)">'+map.cells.map(c=>'<div class="dungeonCell '+c+'">'+(icons[c]||"")+'</div>').join("")+'</div><div class="dungeonLegend">🛡️ Groupe · 👹 Ennemi · 🎁 Coffre · ⚠️ Piège · 🚪 Sortie</div>';
+33175:    map.cells.map((c,i)=>'<div class="dc047Cell '+esc47(c||"floor")+'">'+(icons[c]||"")+(labels[c]?'<span class="dc047Badge">'+labels[c]+'</span>':'')+'</div>').join("")+
+34674:    if(map.cells[i]==="floor"){
+34698:  if(idx>=0)map.cells[idx]=feature;
+38080:      if(cp>=0)map.cells[cp]="floor";
+38378:      map.cells[i]="enemy";
+38397:    if(!used.has(i))map.cells[i]="floor";
+38619:      map.cells[cp]="floor";
+38677:  map.cells[idx]="chest";
+39341: Object.keys(x.enemyCells).forEach(id=>{if(!liveIds.has(String(id)))delete x.enemyCells[id]});
+39344: live.forEach(e=>{const n=Number(x.enemyCells[e.id]);if(Number.isInteger(n)&&n>=0&&n<m.cells.length){m.cells[n]='enemy';used.add(n)}});
+39346: live.forEach(e=>{if(Number.isInteger(Number(x.enemyCells[e.id])))return;let n=markers.find(i=>!used.has(i));if(n===undefined)n=free.shift();if(n===undefined)return;x.enemyCells[e.id]=n;m.cells[n]='enemy';used.add(n)});
+39349: try{const all=loadActiveEnemies?.()||[];all.forEach(e=>{if(x.enemyCells[e.id]!==undefined)e.dungeonCell200=Number(x.enemyCells[e.id])});saveActiveEnemies?.(all)}catch(e){}
+39376: if(tactical()&&pos>=0){distanceMap(pos,x.last.map,rem,x).forEach((d,n)=>{if(d>0&&d<=rem&&els[n]&&!blocked(x.last.map.cells[n]))els[n].classList.add('dc200Reach')})}
+39383:function renderHeroes(x){const host=document.getElementById('dc01Heroes');if(!host)return;host.innerHTML='';const cur=activeHero(x),my=assigned();(x.participants||[]).forEach(id=>{const b=document.createElement('button');b.type='button';b.className='dc01Hero'+(id===cur?' active':'')+((role()!=='gm'&&my&&id!==my)?' locked':'');const c=CHARS?.[id]||findCustomHero?.(id)||{},heroRoom=Number(x.heroRooms?.[id])||0;const img=c.image||c.avatar||'';b.innerHTML=(img?'<img src="'+img+'" alt="">':'<div style="height:92px;display:grid;place-items:center;font-size:38px;background:#222;border-radius:8px">🧙</div>')+'<div class="dc01HeroName">'+esc(heroName(id))+'</div><div class="dc01HeroRole">'+esc(c.role||'Héros')+' · '+(heroRoom>0?'Salle '+heroRoom:'Entrée')+'</div>'+(id===cur?'<span class="dc01HeroTurn">ACTIF</span>':'');b.onclick=()=>openHero(id);host.appendChild(b)})}
+39525:} function render(){const x=spatialEnsure(rt());if(!active200||!x)return;syncChestAuthority208(x);const e=shell();if(e){e.style.display='block';e.classList.add('dc200Active')}hideLegacy();document.getElementById('dc01Round').textContent='TOUR '+(x.round||1);document.getElementById('dc01ActiveHero').textContent='🎯 '+heroName(activeHero(x));document.getElementById('dc01Phase').textContent='Exploration · héros '+((x.index||0)+1)+'/'+Math.max(1,x.participants.length);renderHeroes(x);const sRole=document.getElementById('dc01Role');if(sRole)sRole.value=role();const as=document.getElementById('dc01DeviceHero');if(as){as.innerHTML=x.participants.map(id=>'<option value="'+esc(id)+'">'+esc(heroName(id))+'</option>').join('');if(x.participants.includes(assigned()))as.value=assigned()}const wrap=document.getElementById('dc01HeroAssignWrap');if(wrap)wrap.style.display=role()==='gm'?'none':'';const meta=document.getElementById('dc01RoomMeta');if(meta)meta.textContent=(Number(x.room)>0?'Salle '+x.room:'Entrée')+' / '+(Number(cfg().rooms)||0)+' · positions individuelles';const eh=document.getElementById('dc01Enemies'),visible=visibleEnemies();if(eh)eh.innerHTML=visible.length?'<div class="dc01Enemy">⚔️ '+visible.length+' ennemi(s) vivant(s) : '+visible.slice(0,5).map(e=>esc(enemyName(e))).join(', ')+'</div>':'<div class="dc01Meta">Aucun ennemi vivant dans la salle.</div>';const board=document.getElementById('dc047RoomBoard');if(board){board.innerHTML=x.last?.map?dungeonMapHtml(x.last.map):''}assignEnemyCells(x);saveRt(x);renderScene200(x);renderRule(x);movementRender(x);mainAction(x);const end=document.getElementById('dc01EndTurn');if(end)end.disabled=!canAct(x);const gm=document.getElementById('dc01Gm');if(gm)gm.style.display=role()==='gm'?'':'none';const hint=document.getElementById('dc01ActionHint');if(hint)hint.textContent=canAct(x)?'✅ '+heroName(activeHero(x))+' peut agir.':'⏳ Tour de '+heroName(activeHero(x))+'.'}
+39652:function handleCell(x,idx){const type=String(x.last?.map?.cells?.[idx]||'');if(type==='trap'){try{const t=dungeonPickTrapType?.(cfg());if(t)dungeonResolveTrapAgainstHero?.(t.id,activeHero(x),true)}catch(e){}x.last.map.cells[idx]='floor';saveRt(x);render()} }
+39723:function consumeChest(id){const x=rt(),all=loadDungeonSceneElements?.()||[],el=all.find(e=>String(e.id)===String(id)&&e.kind==='chest');if(!el)return;const cp=chestCell(el,x),hero=activeHero(x);let drop=null;try{if(el.trapped){const t=dungeonPickTrapType?.(cfg());if(t)dungeonResolveTrapAgainstHero?.(t.id,hero,true)}drop=dungeonGrantLootByRarity?.(el.rarity||'common',hero)}catch(e){console.warn(e)}try{removeDungeonSceneElement?.(id)}catch(e){}if(x.last?.map&&cp>=0)x.last.map.cells[cp]='floor';saveRt(x);render();modal('🎁 Coffre fouillé',drop?'<strong>'+esc(heroName(hero))+'</strong> obtient <strong>'+esc(drop.item?.name||'Objet')+'</strong>.':'Le coffre est vide.')}
+39726:function gmChest(rarity){if(role()!=='gm')return;const x=rt(),i=nearestFree(x);if(i<0)return modal('🎁 Coffre MJ','Aucune case libre.');const trapped=Math.random()*100<Math.max(0,Number(cfg().chestTrapChance)||0),el=addDungeonSceneElement?.({kind:'chest',name:'Coffre '+(dungeonRarityLabel?.(rarity)||rarity),rarity,trapped,room:x.room,cellIndex:i,gmAdded:true});x.last.map.cells[i]='chest';saveRt(x);render();modal('🎁 Coffre ajouté','Le coffre a été placé sur une vraie case de la salle.')}
+39728:function addFeature(kind){if(role()!=='gm')return;const x=rt(),i=nearestFree(x),el=addDungeonSceneElement?.({kind,name:kind==='trapdoor'?'Trappe':kind==='stairs_up'?'Escalier montant':'Escalier descendant',room:x.room,cellIndex:i,environment:'dungeon',branchType:kind==='trapdoor'?'treasure':'secret'});if(x?.last?.map&&i>=0)x.last.map.cells[i]='trapdoor';saveRt(x);render();modal('🗺️ Élément ajouté',(el?.name||'Passage')+' a été ajouté à la salle.')}
+39856:    if(!ids.has(String(id)))delete x.enemyCells[id];
+39869:    let n=Number(x.enemyCells[e.id]);
+39873:      if(Number.isInteger(n)&&n>=0){x.enemyCells[e.id]=n;used.add(n)}
+39875:    if(Number.isInteger(Number(x.enemyCells[e.id])))m.cells[Number(x.enemyCells[e.id])]="enemy";
+40759:      if(out.has(n)||blocked(map.cells[n]))continue;
+41132:      if(out.has(n)||blocked211(map.cells[n]))continue;
+41517:    const n=Number(x.enemyCells[id]);
+41519:      delete x.enemyCells[id]
+41535:    let n=Number(x.enemyCells[e.id]);
+41540:    x.enemyCells[e.id]=n;used.add(n);m.cells[n]="enemy"
+41551:      if(x.enemyCells[e.id]!==undefined)e.dungeonCell200=Number(x.enemyCells[e.id])
+41788:    const n=Number(x.enemyCells[id]);
+41789:    if(!ids.has(String(id))||!Number.isInteger(n)||n<0||n>=m.cells.length)delete x.enemyCells[id]
+41797:    const n=Number(x.enemyCells[e.id]);
+41799:      delete x.enemyCells[e.id];return
+41813:    if(Number.isInteger(Number(x.enemyCells[e.id])))return;
+41817:    x.enemyCells[e.id]=n;claimed.add(n);m.cells[n]="enemy"
+41825:    all.forEach(e=>{if(x.enemyCells[e.id]!==undefined)e.dungeonCell200=Number(x.enemyCells[e.id])});
+41962:  if(x.last?.map&&cp>=0)x.last.map.cells[cp]="floor";
+42265:    const n=Number(x.enemyCells[id]);
+42266:    if(!validIds.has(String(id))||!Number.isInteger(n)||n<0||n>=m.cells.length)delete x.enemyCells[id]
+42272:    const n=Number(x.enemyCells[e.id]);
+42274:      delete x.enemyCells[e.id]
+42285:    if(Number.isInteger(Number(x.enemyCells[e.id])))return;
+42289:    x.enemyCells[e.id]=n;claimed.add(n);m.cells[n]="enemy"
+42297:    all.forEach(e=>{if(x.enemyCells[e.id]!==undefined)e.dungeonCell200=Number(x.enemyCells[e.id])});
+=== TRAP/AUTOTRAP IMPLEMENTATION ===
+75:function triggerTrap(trapId){const ctx=currentContext();if(!ctx||!ctx.hero)return false;const t=ctx.content.traps.find(v=>v.id===String(trapId));if(!t||ctx.state.triggeredTraps[t.id])return false;let handled=false;if(t.refId)handled=openReference(t.refId,"trap");if(!handled&&t.damage>0)handled=heroDamage(ctx.hero,t.damage);ctx.state.triggeredTraps[t.id]=true;if(t.once)markCellFloor(ctx.x,t.cell);persistSpatial(ctx.x);writeRuntime(ctx.x);try{ROOT.showToast?.("⚠️ "+(t.label||"Piège")+(t.damage?" · "+t.damage+" dégâts":""))}catch(e){}return true}
+78:function autoTrap(){const ctx=currentContext();if(!ctx?.hero)return;const pos=Number(ctx.x.positions?.[ctx.hero]);const trap=ctx.content.traps.find(t=>Number(t.cell)===pos&&!ctx.state.triggeredTraps[t.id]);if(trap)triggerTrap(trap.id)}
+80:function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;if(typeof core.explore==="function"&&!core.explore.__dzc167824){const old=core.explore.bind(core),w=function(){const out=old(...arguments);try{applyCurrentZone()}catch(e){console.warn("Zone content apply",e)}try{autoTrap();cleanLegacyChestCards();ensureInteractionPanel()}catch(e){}return out};w.__dzc167824=true;w.__dzc167824Original=old;core.explore=w}for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dzc167824)continue;const w=function(){const out=old.apply(this,arguments);try{autoTrap();cleanLegacyChestCards();ensureInteractionPanel()}catch(e){}return out};w.__dzc167824=true;w.__dzc167824Original=old;core[name]=w}return true}

@@ -36,8 +36,6 @@ jobs:
         run: node tests/dungeon_world_runtime_v167823.test.cjs
       - name: Equipment hotfix
         run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js
-      - name: Set editor
-        run: node tests/dungeon_set_editor_v167818.test.cjs assets/dungeon/dungeon-set-editor-167818.js index.html .github/workflows/main.yml service-worker.js
       - name: Build final site copy
         run: |
           rm -rf _site
@@ -53,11 +51,16 @@ jobs:
             '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
             '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
             '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
-            '<script src="assets/dungeon/dungeon-authored-content-hotfix-167841.js?v=167841"></script>'
+            '<script src="assets/dungeon/dungeon-authored-content-hotfix-167841.js?v=167841"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>'
           ]
           for tag in tags:
             if tag not in html: html=html.replace('</body>',tag+'\n</body>')
           p.write_text(html,encoding='utf-8')
           PY
+      - name: Set editor final-site regression
+        run: node tests/dungeon_set_editor_v167818.test.cjs assets/dungeon/dungeon-set-editor-167818.js _site/index.html .github/workflows/main.yml service-worker.js
       - name: Final authored content load
         run: node tests/dungeon_authored_content_hotfix_v167841.test.cjs _site/index.html

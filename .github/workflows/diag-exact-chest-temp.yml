@@ -1,0 +1,19 @@
+name: Diagnose exact Dungeon chest flow
+on:
+  push:
+    branches:
+      - work/dungeon-exact-chest-fix-2026-09-05
+permissions:
+  contents: read
+jobs:
+  diag:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate chest interaction paths
+        run: |
+          echo '=== chest/open/fouiller refs ==='
+          grep -RInE "openChest|chest|coffre|fouiller|loot" assets/dungeon index.html | head -n 500 || true
+          echo '=== exact content refs ==='
+          grep -RInE "DungeonZoneContent167824|worldZoneContent167824|openedChests" assets/dungeon index.html | head -n 300 || true

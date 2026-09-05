@@ -26,7 +26,7 @@ context.window=context;context.globalThis=context;
 vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-zone-content-167824.js'});
 const api=context.DungeonZoneContent167824;
 assert.ok(api,'zone content API must load');
-assert.equal(api.APP_VERSION,'16.78.44');
+assert.equal(api.APP_VERSION,'16.78.45');
 api.saveZoneContent('d1','n1',{mode:'fixed',enemies:[{id:'e1',enemyId:'dng_skeleton',qty:2,cell:4,hasKey:true}],chests:[{id:'ch1',cell:5,rarity:'rare',gold:20,items:[{itemId:'potion_heal',qty:2}]}],traps:[{id:'t1',cell:6,trapType:'damage',damage:3,once:true}],puzzles:[{id:'p1',cell:2,refId:'puzzle_001'}],items:[{id:'i1',cell:7,itemId:'dloot_old_coin',qty:1}],npcs:[{id:'n1npc',cell:1,npcId:'npc_alrik',label:'Alrik'}]});
 assert.equal(api.applyCurrentZone(),true);
 let x=JSON.parse(store.getItem(RT));

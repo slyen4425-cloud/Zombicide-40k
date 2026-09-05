@@ -38,7 +38,7 @@ context.window=context;context.globalThis=context;vm.createContext(context);
 vm.runInContext(zoneSrc,context,{filename:'zone.js'});
 vm.runInContext(authSrc,context,{filename:'auth.js'});
 const zone=context.DungeonZoneContent167824,auth=context.DungeonAuthoredRuntime167839;
-assert.equal(zone.APP_VERSION,'16.78.44');assert.equal(auth.APP_VERSION,'16.78.44');
+assert.equal(zone.APP_VERSION,'16.78.45');assert.equal(auth.APP_VERSION,'16.78.44');
 const map=auth.mapFromRoom(room1);assert.equal(map.cells[6],'floor','le piège brut de la salle ne doit jamais être visible');assert.equal(map.cells[4],'floor','une énigme attachée ne doit pas créer un second marqueur autonome');
 store.setItem(RT,JSON.stringify(runtime(map)));
 const effective=auth.effectiveContent(graph,graph.nodes[0],room1);assert.equal(effective.templateLinked,true,'une ancienne copie de modèle doit redevenir liée');assert.equal(effective.chests[0].items[0].itemId,'potion_heal','le contenu courant du modèle remplace la vieille copie de coffre');

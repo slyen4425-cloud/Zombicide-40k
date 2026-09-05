@@ -1,4 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.44-authored-content";
+const CACHE_NAME = "gensrpg-cache-16.78.45-live-board";
+// Compatibility marker: gensrpg-cache-16.78.44-authored-content
 // Compatibility marker for the previous UI recovery guard: gensrpg-cache-16.78.43-ui-recovery
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement

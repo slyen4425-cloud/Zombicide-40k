@@ -1,0 +1,32 @@
+name: Validate V16.78.42 home UI isolation
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.42-home-ui-isolation
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax isolated authored hotfix
+        run: node --check assets/dungeon/dungeon-authored-content-hotfix-167841.js
+      - name: Home isolation + authored content regression
+        run: node tests/dungeon_authored_content_hotfix_v167841.test.cjs
+      - name: Full Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Authored movement
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: World session selection
+        run: node tests/dungeon_world_session_bridge_v167832.test.cjs
+      - name: Exact zone content
+        run: node tests/dungeon_zone_content_v167824.test.cjs
+      - name: Enemy room scope
+        run: node tests/dungeon_enemy_room_scope_v318.test.cjs
+      - name: Room Creator V1
+        run: node tests/dungeon_room_creator_v1.test.cjs
+      - name: Room Creator V2
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+      - name: World Builder
+        run: node tests/dungeon_world_builder_v167821.test.cjs

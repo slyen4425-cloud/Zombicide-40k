@@ -49,6 +49,9 @@ jobs:
       - name: Tester le moteur dédié et le mouvement du donjon construit
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
 
+      - name: Tester les liaisons secondaires et retours du donjon construit
+        run: node tests/dungeon_zone_links_v167846.test.cjs
+
       - name: Tester le World Runtime historique de compatibilité
         run: node tests/dungeon_world_runtime_v167823.test.cjs
 
@@ -168,6 +171,7 @@ jobs:
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
+          node tests/dungeon_zone_links_v167846.test.cjs
           node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
 
       - name: Tester le chargement final du Créateur V2

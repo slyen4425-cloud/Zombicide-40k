@@ -1,0 +1,23 @@
+name: Validate authored trap cleanup
+on:
+  push:
+    branches:
+      - work/dungeon-legacy-random-trap-fix-2026-09-05
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax
+        run: node --check assets/dungeon/dungeon-exact-trap-runtime-167845.js
+      - name: Targeted Dungeon tests
+        run: |
+          node tests/dungeon_exact_trap_runtime_v167845.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+          node tests/gens_ui_recovery_v167843.test.cjs
+          node tests/dungeon_room_template_content_v167828.test.cjs

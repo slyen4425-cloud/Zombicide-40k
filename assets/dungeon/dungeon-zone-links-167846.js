@@ -9,7 +9,7 @@
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 const RT_KEY="gensrpg_dungeon_runtime_v2";
-const VERSION="1.0.0",APP_VERSION="16.78.46";
+const VERSION="1.0.1",APP_VERSION="16.78.46";
 let retries=0;
 function clone(v){try{return v==null?v:JSON.parse(JSON.stringify(v))}catch(e){return v}}
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
@@ -34,7 +34,9 @@ function authoredContext(){
   const currentNodeId=String(w?.roomNodes?.[String(Number(x.room)||0)]||w?.heroNodes?.[hero]||x.last.worldNodeId||"");
   return {W,B,x,graph,hero,w,currentNodeId,pos:Number(x?.positions?.[hero])}
 }
-function nodeLabel(graph,nodeId){const n=(graph?.nodes||[]).find(v=>String(v.id)===String(nodeId||"")),r=roomApi()?.findRoom?.(n?.roomId);return String(n?.label||r?.name||"Zone")}
+function nodeInfo(graph,nodeId){const node=(graph?.nodes||[]).find(v=>String(v.id)===String(nodeId||""));return node?{node,room:roomApi()?.findRoom?.(node.roomId)||null}:null}
+function nodeLabel(graph,nodeId){const p=nodeInfo(graph,nodeId);return String(p?.node?.label||p?.room?.name||"Zone")}
+function entryIndexForNode(graph,nodeId){const room=nodeInfo(graph,nodeId)?.room,cells=Array.isArray(room?.cells)?room.cells:[];const i=cells.findIndex(c=>c?.object==="entry");return i>=0?i:0}
 function cacheCells(room){const out=[];(room?.cells||[]).forEach((c,i)=>{if(c?.object==="cache")out.push(i)});return out}
 function reverseEdge(graph,nodeId,pos){return (graph?.edges||[]).find(e=>String(e?.toNodeId)===String(nodeId||"")&&Number(e?.toEntryIndex)===Number(pos))||null}
 function cacheBinding(graph,nodeId,pos){return (graph?.cacheBindings||[]).find(b=>String(b?.sourceNodeId)===String(nodeId||"")&&Number(b?.sourceIndex)===Number(pos)&&b?.targetNodeId)||null}
@@ -56,7 +58,7 @@ function performTransition(ctx,targetNodeId,arrivalIndex,stackMode,stackData){
   return true
 }
 function travelReverse(){const ctx=authoredContext();if(!ctx)return false;const e=reverseEdge(ctx.graph,ctx.currentNodeId,ctx.pos);if(!e)return false;const ok=performTransition(ctx,e.fromNodeId,e.fromExitIndex,"none");if(ok)try{ROOT.showToast?.("↩ "+nodeLabel(ctx.graph,e.fromNodeId))}catch(err){}return ok}
-function travelCache(){const ctx=authoredContext();if(!ctx)return false;const b=cacheBinding(ctx.graph,ctx.currentNodeId,ctx.pos);if(!b)return false;const data={sourceNodeId:String(ctx.currentNodeId),sourceIndex:Number(b.sourceIndex),targetNodeId:String(b.targetNodeId),at:Date.now()};const ok=performTransition(ctx,b.targetNodeId,0,"push",data);if(ok)try{ROOT.showToast?.("🕳️ "+nodeLabel(ctx.graph,b.targetNodeId))}catch(err){}return ok}
+function travelCache(){const ctx=authoredContext();if(!ctx)return false;const b=cacheBinding(ctx.graph,ctx.currentNodeId,ctx.pos);if(!b)return false;const data={sourceNodeId:String(ctx.currentNodeId),sourceIndex:Number(b.sourceIndex),targetNodeId:String(b.targetNodeId),at:Date.now()};const ok=performTransition(ctx,b.targetNodeId,entryIndexForNode(ctx.graph,b.targetNodeId),"push",data);if(ok)try{ROOT.showToast?.("🕳️ "+nodeLabel(ctx.graph,b.targetNodeId))}catch(err){}return ok}
 function travelReturn(){const ctx=authoredContext();if(!ctx)return false;const top=topReturn(ctx);if(!top)return false;const ok=performTransition(ctx,top.sourceNodeId,top.sourceIndex,"return",top);if(ok)try{ROOT.showToast?.("↩ Retour vers "+nodeLabel(ctx.graph,top.sourceNodeId))}catch(err){}return ok}
 function ensureButton(id,label,handler,anchor){if(!DOC||!anchor)return null;let b=DOC.getElementById(id);if(!b){b=DOC.createElement("button");b.id=id;b.type="button";if(anchor.className)b.className=anchor.className;b.onclick=handler;anchor.parentNode?.insertBefore(b,anchor)}b.textContent=label;b.disabled=false;return b}
 function removeButton(id){try{DOC?.getElementById(id)?.remove()}catch(e){}}
@@ -85,7 +87,7 @@ function renderWorldCacheBindings(){
   if(!DOC)return false;const box=DOC.getElementById("drc300Caches"),B=builder();if(!box||!B)return false;const graphId=activeGraphId(),g=B.findDungeon?.(graphId);if(!g)return false;
   const rows=[];for(const node of g.nodes||[]){const room=roomApi()?.findRoom?.(node.roomId);for(const index of cacheCells(room))rows.push({node,room,index})}
   if(!rows.length){box.innerHTML='<div style="color:#999;font-size:12px">Aucune cache / passage secret placé dans les pièces utilisées.</div>';return true}
-  box.innerHTML=rows.map((r,i)=>{const binding=(g.cacheBindings||[]).find(b=>String(b.sourceNodeId)===String(r.node.id)&&Number(b.sourceIndex)===Number(r.index)),legacy=legacySuggestedRoomId(r.room.id,r.index),candidates=(g.nodes||[]).filter(n=>String(n.id)!==String(r.node.id)),suggested=!binding&&legacy?candidates.find(n=>String(n.roomId)===legacy):null,selected=String(binding?.targetNodeId||suggested?.id||"");const opts=['<option value="">— aucune destination —</option>'].concat(candidates.map(n=>'<option value="'+String(n.id).replace(/"/g,'&quot;')+'" '+(selected===String(n.id)?'selected':'')+'>'+nodeLabel(g,n.id).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))+'</option>')).join("");return '<div class="drc300Card"><b>🕳️ '+nodeLabel(g,r.node.id)+' · case '+(r.index+1)+'</b><small>Destination gérée uniquement ici.'+(suggested?' Ancienne liaison détectée et proposée sans modification automatique.':'')+'</small><div class="drc300Actions"><select data-zl-cache="'+i+'" style="flex:1">'+opts+'</select><button type="button" data-zl-save="'+i+'">💾 Lier</button></div></div>'}).join("");
+  box.innerHTML=rows.map((r,i)=>{const binding=(g.cacheBindings||[]).find(b=>String(b.sourceNodeId)===String(r.node.id)&&Number(b.sourceIndex)===Number(r.index)),legacy=legacySuggestedRoomId(r.room.id,r.index),candidates=(g.nodes||[]).filter(n=>String(n.id)!==String(r.node.id)),suggested=!binding&&legacy?candidates.find(n=>String(n.roomId)===legacy):null,selected=String(binding?.targetNodeId||suggested?.id||"");const opts=['<option value="">— aucune destination —</option>'].concat(candidates.map(n=>'<option value="'+String(n.id).replace(/"/g,'&quot;')+'" '+(selected===String(n.id)?'selected':'')+'>'+nodeLabel(g,n.id).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;","gt;":"&gt;"}[c]||c))+'</option>')).join("");return '<div class="drc300Card"><b>🕳️ '+nodeLabel(g,r.node.id)+' · case '+(r.index+1)+'</b><small>Destination gérée uniquement ici.'+(suggested?' Ancienne liaison détectée et proposée sans modification automatique.':'')+'</small><div class="drc300Actions"><select data-zl-cache="'+i+'" style="flex:1">'+opts+'</select><button type="button" data-zl-save="'+i+'">💾 Lier</button></div></div>'}).join("");
   box.querySelectorAll("[data-zl-save]").forEach(btn=>btn.onclick=()=>{const i=Number(btn.dataset.zlSave),r=rows[i],sel=box.querySelector('[data-zl-cache="'+i+'"]');if(saveCacheBinding(g.id,r.node.id,r.index,sel?.value||"")){try{ROOT.showToast?.("✅ Liaison de cache enregistrée") }catch(e){}renderWorldCacheBindings()}});return true
 }
 function refreshEditors(){hideRoomCacheDestinationEditor();renderWorldCacheBindings()}
@@ -95,6 +97,6 @@ function install(){
   if(DOC&&!DOC.__zoneLinks167846Click){DOC.__zoneLinks167846Click=true;DOC.addEventListener("click",e=>{if(e?.target?.closest?.("#drc100Modal,#drc300Modal"))setTimeout(refreshEditors,0)},true)}
   if(!ok&&retries++<30&&typeof setTimeout==="function")setTimeout(install,100);return ok
 }
-ROOT.DungeonZoneLinks167846={VERSION,APP_VERSION,authoredContext,reverseEdge,cacheBinding,saveCacheBinding,travelReverse,travelCache,travelReturn,paintTravelButtons,hideRoomCacheDestinationEditor,renderWorldCacheBindings,refreshEditors,install};
+ROOT.DungeonZoneLinks167846={VERSION,APP_VERSION,authoredContext,nodeInfo,entryIndexForNode,reverseEdge,cacheBinding,saveCacheBinding,travelReverse,travelCache,travelReturn,paintTravelButtons,hideRoomCacheDestinationEditor,renderWorldCacheBindings,refreshEditors,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}else install();
 })();

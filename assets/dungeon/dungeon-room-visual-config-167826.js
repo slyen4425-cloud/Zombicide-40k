@@ -131,7 +131,7 @@ function closeEditor(){DOC?.getElementById("drv167826Modal")?.classList.remove("
 function saveActive(){
   const c=currentContext();if(!c||activeCell<0)return false;let data={};
   if(activeObject==="enemy"||activeObject==="boss")data={enemyId:DOC.getElementById("drv167826Enemy")?.value,qty:DOC.getElementById("drv167826Qty")?.value,hp:DOC.getElementById("drv167826Hp")?.value,hasKey:!!DOC.getElementById("drv167826Key")?.checked};
-  else if(activeObject==="chest")data={rarity:DOC.getElementById("drv167826Rarity")?.value,gold:DOC.getElementById("drv167826Gold")?.value,itemsText:DOC.getElementById("drv167826Items")?.value};
+  else if(activeObject==="chest"){const modern=ROOT.DungeonRoomContentUI167831?.selectedItems?.("zone");data={rarity:DOC.getElementById("drv167826Rarity")?.value,gold:DOC.getElementById("drv167826Gold")?.value,items:Array.isArray(modern)?modern:parseItems(DOC.getElementById("drv167826Items")?.value||"")};}
   else if(activeObject==="trap")data={trapType:DOC.getElementById("drv167826TrapType")?.value,damage:DOC.getElementById("drv167826Damage")?.value,refId:DOC.getElementById("drv167826TrapRef")?.value,label:DOC.getElementById("drv167826TrapLabel")?.value,once:true};
   else if(activeObject==="puzzle")data={refId:DOC.getElementById("drv167826PuzzleRef")?.value,targetType:DOC.getElementById("drv167826Target")?.value,label:DOC.getElementById("drv167826PuzzleLabel")?.value};
   configureElement(c.dungeonId,c.nodeId,inferRoom(),activeCell,activeObject,data);try{ROOT.showToast?.("✓ "+typeLabel(activeObject)+" configuré") }catch(e){}closeEditor();renderPanel();decorateGrid();return true;

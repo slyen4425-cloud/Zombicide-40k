@@ -1,0 +1,243 @@
+=== MAP STATE REPAIR 39315-39365 ===
+function distanceMap(from,m,max,x){const size=Number(m?.size)||Math.round(Math.sqrt(m?.cells?.length||0))||1,d=new Map([[from,0]]),q=[from];let qi=0;const occupied=new Set(Object.values(x?.enemyCells||{}).map(Number));while(qi<q.length){const cur=q[qi++],cd=d.get(cur)||0;if(cd>=max)continue;if(cur!==from&&occupied.has(cur))continue;for(const n of neighbours(cur,size,m.cells.length)){if(d.has(n)||blocked(m.cells[n]))continue;d.set(n,cd+1);q.push(n)}}return d}
+function position(id,x=rt()){const n=Number(x?.positions?.[id]);return Number.isInteger(n)?n:-1}
+function activePos(x=rt()){return position(activeHero(x),x)}
+function heroAlive200(id){try{return Number(dungeonCombatHeroSnapshot?.(id)?.hp)>0}catch(e){return false}}
+function participationRange200(){const n=Number(movementCfg()?.combatParticipationRange);return Number.isFinite(n)?Math.max(0,Math.min(20,n)):3}
+function combatHeroes200(x){
+ const leader=activeHero(x),model=spatial();
+ const ids=typeof model?.participatingHeroes==="function"
+   ?model.participatingHeroes(x,leader,participationRange200(),tactical())
+   :spatialHeroesHere(x);
+ return ids.filter(heroAlive200)
+}
+function enemyAt(idx,x=rt()){const pair=Object.entries(x?.enemyCells||{}).find(([,c])=>Number(c)===Number(idx));if(!pair)return null;return liveEnemies().find(e=>String(e.id)===String(pair[0]))||null}
+function keyCarrier(x=rt()){const id=String(x?.last?.keyEnemyId||'');return id?liveEnemies().find(e=>String(e.id)===id)||null:null}
+function exitLocked(x=rt()){
+ if(!x?.last)return false;
+ if(x.last.kind==='boss'){if(liveEnemies().length)return true;x.last.exitLocked=false;x.last.keyEnemyId='';saveRt(x);return false}
+ if(!x.last.exitLocked)return false;
+ const k=keyCarrier(x);if(!k){x.last.exitLocked=false;x.last.keyEnemyId='';saveRt(x);try{showToast?.('🔑 Clé récupérée ! La sortie est ouverte.')}catch(e){};return false}return true
+}
+function assignEnemyCells(x){
+ const m=x?.last?.map;if(!m||!Array.isArray(m.cells))return;
+  /* La visibilité est commune à la salle. Un héros ayant réussi une approche
+     furtive peut éviter le combat, mais ne doit pas effacer les pions ennemis
+     pour les autres héros quand son tour devient actif. */
+  const live=visibleEnemies(),liveIds=new Set(live.map(e=>String(e.id)));x.enemyCells=x.enemyCells||{};
+ Object.keys(x.enemyCells).forEach(id=>{if(!liveIds.has(String(id)))delete x.enemyCells[id]});
+ const used=new Set(Object.values(x.enemyCells).map(Number));const markers=[];m.cells.forEach((v,i)=>{if(String(v)==='enemy')markers.push(i)});
+ // preserve valid assignments
+ live.forEach(e=>{const n=Number(x.enemyCells[e.id]);if(Number.isInteger(n)&&n>=0&&n<m.cells.length){m.cells[n]='enemy';used.add(n)}});
+ const heroCells=new Set((x.participants||[]).filter(id=>spatialSameView(x,id)).map(id=>Number(x.positions?.[id])).filter(Number.isInteger));const free=[];m.cells.forEach((v,i)=>{if(blocked(v)||['entry','exit','chest','cache','trap','puzzle'].includes(String(v))||used.has(i)||heroCells.has(i))return;free.push(i)});
+ live.forEach(e=>{if(Number.isInteger(Number(x.enemyCells[e.id])))return;let n=markers.find(i=>!used.has(i));if(n===undefined)n=free.shift();if(n===undefined)return;x.enemyCells[e.id]=n;m.cells[n]='enemy';used.add(n)});
+ // only clear orphan enemy markers
+ m.cells.forEach((v,i)=>{if(String(v)==='enemy'&&![...Object.values(x.enemyCells)].some(n=>Number(n)===i))m.cells[i]='floor'});
+ try{const all=loadActiveEnemies?.()||[];all.forEach(e=>{if(x.enemyCells[e.id]!==undefined)e.dungeonCell200=Number(x.enemyCells[e.id])});saveActiveEnemies?.(all)}catch(e){}
+}
+function ensurePositions(x,reset=false){const m=x?.last?.map;if(!m)return;const sp=spawnIndex(m);x.positions=x.positions||{};x.remaining=x.remaining||{};(x.participants||[]).forEach(id=>{if(reset||!Number.isInteger(Number(x.positions[id])))x.positions[id]=sp;if(reset||!Number.isFinite(Number(x.remaining[id])))x.remaining[id]=moveMax(id)})}
+
+function movementRender(x){
+ const grid=document.querySelector('#dc047RoomBoard .dc047Grid');if(!grid)return;
+ const els=[...grid.querySelectorAll(':scope>.dc047Cell')];
+ // Core 2.07: chaque cellule DOM reçoit explicitement son index de carte.
+ // Toutes les interactions visuelles utilisent désormais cette même source.
+ els.forEach((c,i)=>{
+   c.dataset.dcMapIndex=String(i);
+   c.classList.remove('dc200Reach','dc200Hero','dc200Enemy','dc200Key','dc200Feature','dc206ChestCell');
+   delete c.dataset.dc200Hero;delete c.dataset.dc200Feature;delete c.dataset.dc206ChestId
+ });
+ Object.entries(x.enemyCells||{}).forEach(([id,n])=>{if(els[n]){els[n].classList.add('dc200Enemy');if(String(x.last?.keyEnemyId||'')===String(id))els[n].classList.add('dc200Key')}});sceneForRoom(x).forEach(e=>{
+ const n=Number(e.cellIndex);
+ if(!Number.isInteger(n)||!els[n])return;
+=== CORE 2.01 ENEMY HELPERS 39880-39975 ===
+function paintEnemies201(){
+  const x=rt201();if(!x)return;
+  const grid=document.querySelector("#dc047RoomBoard .dc047Grid");
+  if(!grid)return;
+  const cells=[...grid.querySelectorAll(":scope > .dc047Cell")];
+  cells.forEach(c=>{c.classList.remove("dc201EnemyToken","dc201Key");delete c.dataset.dc201Enemy});
+  const live=live201();
+  live.forEach(e=>{
+    const n=Number(x.enemyCells?.[e.id]);
+    if(!Number.isInteger(n)||!cells[n])return;
+    cells[n].classList.add("dc201EnemyToken");
+    cells[n].dataset.dc201Enemy="👹";
+    if(String(x.last?.keyEnemyId||"")===String(e.id))cells[n].classList.add("dc201Key");
+    cells[n].title=enemyName201(e);
+  });
+}
+
+/* ---------------------------------------------------------
+   ÉNIGMES 2.01 : runtime natif, sans loadDungeonState ancien.
+---------------------------------------------------------- */
+let puzzleCtx201=null;
+function norm201(v){return String(v??"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ")}
+function puzzleSource201(kind,id){
+  const x=rt201();
+  if(kind==="chest"){
+    const all=scene201(),el=all.find(e=>String(e.id)===String(id));
+    return el?.challenge?{kind,id,ch:el.challenge,attempts:Number(el.challengeAttempts)||0}:null;
+  }
+  const obj=x?.last?.map?.objective;
+  return obj?.type==="challenge"&&obj?.challenge?{kind:"door",id:"",ch:obj.challenge,attempts:Number(obj.challengeAttempts)||0}:null;
+}
+function modal201(title,html,onClose){
+  if(typeof DungeonCore01?.modal==="function")DungeonCore01.modal(title,html,onClose);
+}
+function openPuzzle201(kind,id){
+  const ctx=puzzleSource201(kind,id);if(!ctx)return modal201("🧩 Énigme","Aucune énigme active.");
+  puzzleCtx201=ctx;
+  const ch=ctx.ch;
+  let body='<div class="dc201PuzzlePrompt">'+esc201(ch.prompt||"Résous ce défi.")+'</div>';
+  if(ch.type==="choice"){
+    const opts=String(ch.options||"").split(",").map(x=>x.trim()).filter(Boolean);
+    body+='<div class="dc201PuzzleActions">'+opts.map((o,i)=>'<button class="dc01Btn" onclick="dc201PuzzleAnswer('+i+')">'+esc201(o)+'</button>').join("")+'</div>';
+    puzzleCtx201.options=opts;
+  }else if(ch.type==="stat"){
+    let chance=50;
+    try{
+      const hero=activeHero201(),st=loadState?.(hero),stat=String(ch.stat||"intelligence");
+      const val=Number(st?.dungeonStats?.[stat]??CHARS?.[hero]?.dungeonStats?.[stat]??10);
+      chance=Math.max(5,Math.min(95,50+(val-10)*3));
+    }catch(e){}
+    puzzleCtx201.chance=chance;
+    body+='<p>Test de <strong>'+esc201(ch.stat||"intelligence")+'</strong> · '+chance+'%.</p>'+
+      '<button class="dc01Btn primary" style="width:100%" onclick="dc201PuzzleRoll()">🎲 LANCER LE D100</button>';
+  }else{
+    body+='<input id="dc201PuzzleInput" type="text" placeholder="Ta réponse…" style="width:100%;padding:11px;border-radius:9px;background:#0c0b09;color:#fff;border:1px solid #65503a">'+
+      '<button class="dc01Btn primary" style="width:100%;margin-top:8px" onclick="dc201PuzzleText()">VALIDER</button>';
+  }
+  modal201((kind==="chest"?"🎁 Coffre":"🚪 Porte")+" — Énigme",body);
+}
+function finishPuzzle201(ok){
+  const ctx=puzzleCtx201;if(!ctx)return;
+  const x=rt201();
+  if(ctx.kind==="chest"){
+    const a=scene201(),el=a.find(e=>String(e.id)===String(ctx.id));
+    if(!el)return;
+    if(ok){el.challengeDone=true;el.challengeAttempts=0}
+    else el.challengeAttempts=(Number(el.challengeAttempts)||0)+1;
+    saveScene201(a);
+  }else{
+    const obj=x?.last?.map?.objective;
+    if(!obj)return;
+    if(ok){obj.status="done";obj.challengeAttempts=0}
+    else obj.challengeAttempts=(Number(obj.challengeAttempts)||0)+1;
+    x.last.objective=obj;
+    save201(x);
+  }
+
+  if(ok){
+    modal201("✅ Défi réussi",ctx.kind==="chest"?"Le coffre est déverrouillé.":"Le mécanisme se désactive.",()=>{DungeonCore01?.render?.()});
+  }else{
+    modal201("❌ Échec","Le défi n’est pas résolu. Tu peux réessayer.",()=>openPuzzle201(ctx.kind,ctx.id));
+  }
+}
+window.dc201OpenPuzzle=openPuzzle201;
+window.dc201PuzzleAnswer=function(i){
+  const ctx=puzzleCtx201;if(!ctx)return;
+  const ans=ctx.options?.[Number(i)]||"";
+  finishPuzzle201(norm201(ans)===norm201(ctx.ch.solution));
+};
+window.dc201PuzzleText=function(){
+  const v=document.getElementById("dc201PuzzleInput")?.value||"";
+  finishPuzzle201(norm201(v)===norm201(puzzleCtx201?.ch?.solution));
+};
+window.dc201PuzzleRoll=function(){
+  const chance=Math.max(5,Math.min(95,Number(puzzleCtx201?.chance)||50));
+  const roll=1+Math.floor(Math.random()*100);
+=== CORE 2.11 TRAP HELPERS 41170-41260 ===
+  x.dc211TrapTests=x.dc211TrapTests||{};
+  return x.dc211TrapTests[String(x.room)+"|"+String(id)]||null
+}
+function setTrapTest211(x,id,data){
+  x.dc211TrapTests=x.dc211TrapTests||{};
+  x.dc211TrapTests[String(x.room)+"|"+String(id)]=data;saveRt211(x)
+}
+window.dc211TrapTest=function(){
+  const x=rt();if(!x||Number(x.room||0)<=0)return;
+  const ex=profile(),id=activeHero211(x);
+  if(ex.trapDetection===false)return;
+  if(ex.trapDetectionOnce!==false&&trapTestState211(x,id))return;
+  const stat=String(ex.trapDetectionStat||"agilite");
+  const val=heroStat211(id,stat);
+  const base=Math.max(0,Math.min(100,Number(ex.trapDetectionBase)||50));
+  const gain=Math.max(0,Number(ex.trapDetectionStatGain)||2);
+  const chance=Math.max(0,Math.min(100,Math.round(base+val*gain)));
+  const roll=1+Math.floor(Math.random()*100),ok=roll<=chance;
+  const radius=Math.max(1,Number(ex.trapDetectionRadius)||2),pos=Number(x.positions?.[id]),map=x.last?.map;
+  let found=0;
+  if(ok&&map&&Number.isInteger(pos)){
+    const z=range211(pos,radius,map),a=scene();let changed=false;
+    a.forEach(e=>{
+      if(e.kind!=="trap"||Number(e.room||0)!==Number(x.room||0))return;
+      if(z.has(Number(e.cellIndex))){if(e.detected!==true){e.detected=true;changed=true}found++}
+    });
+    if(changed)saveScene(a)
+  }
+  setTrapTest211(x,id,{roll,chance,success:ok,found,at:Date.now()});
+  try{
+    DungeonCore01.modal(ok?"👁️ Détection réussie":"👁️ Détection échouée",
+      "<strong>"+esc211(heroName211(id))+"</strong> · "+esc211(stat)+" "+val+
+      "<br>D100 : <strong>"+roll+"</strong> · chance "+chance+"%"+
+      (ok?("<br><br>"+(found?("✅ "+found+" piège"+(found>1?"s":"")+" repéré"+(found>1?"s":"")+"."):"✅ Aucun piège détecté dans la portée.")):
+      "<br><br>❌ Le test est consommé pour cette salle."))
+  }catch(e){}
+  try{DungeonCore01.render?.()}catch(e){}
+}
+
+function paintEnemySense211(x,dom){
+  dom.forEach(c=>c.classList.remove("dc211EnemySense","dc211HeroSpotted"));
+  const ex=profile();if(ex.enemyDetection===false||!x?.last?.map)return [];
+  const zones=[];
+  livingEnemies211(x).forEach(e=>{
+    const c=Number(x.enemyCells?.[e.id]);if(!Number.isInteger(c))return;
+    const r=enemyRadius211(e),z=range211(c,r,x.last.map);
+    if(ex.enemyDetectionShowZones!==false)z.forEach((_,i)=>dom[i]?.classList.add("dc211EnemySense"));
+    zones.push({e,r,z})
+  });
+  return zones
+}
+
+let detectBusy211=false;
+function resolveEnemyDetection211(x,zones,dom){
+  const ex=profile();if(ex.enemyDetection===false||detectBusy211)return;
+  const heroes=(x.participants||[]).filter(id=>window.DungeonSpatial313?.sameView(x,id)!==false).filter(heroAlive211);
+  const spotted=[];
+  heroes.forEach(id=>{
+    const pos=Number(x.positions?.[id]);if(!Number.isInteger(pos))return;
+    const by=zones.filter(z=>z.z.has(pos));
+    if(by.length){dom[pos]?.classList.add("dc211HeroSpotted");spotted.push({id,by})}
+  });
+  if(!spotted.length)return;
+  x.dc211EnemyDetection=x.dc211EnemyDetection||{};
+  const sig=String(x.room)+"|"+spotted.map(s=>s.id+":"+s.by.map(z=>z.e.id).sort().join(",")).sort().join("|");
+  if(x.dc211EnemyDetection[sig])return;
+  x.dc211EnemyDetection[sig]=Date.now();saveRt211(x);
+  if(ex.enemyDetectionAutoCombat!==false&&typeof dc200StartCombat==="function"){
+    const ids=[...new Set(spotted.flatMap(s=>s.by.map(z=>String(z.e.id))))];
+    detectBusy211=true;
+    setTimeout(()=>{try{dc200StartCombat(ids,"detection")}finally{setTimeout(()=>detectBusy211=false,250)}},80)
+  }
+}
+
+function sensePanel211(x,detected,zones){
+  const board=document.getElementById("dc047RoomBoard");if(!board)return;
+  let p=document.getElementById("dc211SensePanel");
+  if(!p){p=document.createElement("div");p.id="dc211SensePanel";board.insertAdjacentElement("beforebegin",p)}
+  if(Number(x?.room||0)<=0){p.style.display="none";return}
+  p.style.display="";
+  const ex=profile(),id=activeHero211(x),used=trapTestState211(x,id);
+  const stat=String(ex.trapDetectionStat||"agilite"),val=heroStat211(id,stat);
+  const chance=Math.max(0,Math.min(100,Math.round((Number(ex.trapDetectionBase)||50)+val*(Number(ex.trapDetectionStatGain)||2))));
+  p.innerHTML='<div class="dc211SenseRow"><strong>👁️ DÉTECTION</strong><span>Pièges visibles : '+detected+' · Ennemis : '+zones.length+'</span></div>'+
+    (ex.trapDetection===false?'<small>Détection de pièges désactivée dans l’éditeur.</small>':
+      '<div class="dc211SenseRow"><span>Pièges · '+esc211(stat)+' '+val+' · '+chance+'% · rayon '+Math.max(1,Number(ex.trapDetectionRadius)||2)+' case(s)</span>'+
+      (used?'<button disabled>TEST DÉJÀ UTILISÉ</button>':'<button type="button" onclick="dc211TrapTest()">🎲 TESTER LA DÉTECTION</button>')+'</div>')+
+    (ex.enemyDetection===false?'<small>Détection ennemie désactivée.</small>':
+      '<small>🔴 Zone rouge = portée de perception ennemie'+(ex.enemyDetectionAutoCombat!==false?' · repérage = combat.':'.')+'</small>')
+}
+
+=== ZONE AUTOTRAP FULL ===
+function triggerTrap(trapId){const ctx=currentContext();if(!ctx||!ctx.hero)return false;const t=ctx.content.traps.find(v=>v.id===String(trapId));if(!t||ctx.state.triggeredTraps[t.id])return false;let handled=false;if(t.refId)handled=openReference(t.refId,"trap");if(!handled&&t.damage>0)handled=heroDamage(ctx.hero,t.damage);ctx.state.triggeredTraps[t.id]=true;if(t.once)markCellFloor(ctx.x,t.cell);persistSpatial(ctx.x);writeRuntime(ctx.x);try{ROOT.showToast?.("⚠️ "+(t.label||"Piège")+(t.damage?" · "+t.damage+" dégâts":""))}catch(e){}

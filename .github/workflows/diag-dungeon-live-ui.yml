@@ -6,7 +6,7 @@ on:
     paths:
       - .github/workflows/diag-dungeon-live-ui.yml
 permissions:
-  contents: read
+  contents: write
 jobs:
   inspect:
     runs-on: ubuntu-latest
@@ -15,13 +15,23 @@ jobs:
       - name: Locate chest cards and map renderers
         shell: bash
         run: |
-          echo '=== Exact chest strings ==='
-          grep -RniE 'Va sur la case|pour le fouiller|Coffre Rare|Coffre Commun|Coffre Épique|Coffre Epique' index.html assets tests | head -n 200 || true
-          echo '=== dc200Scene references ==='
-          grep -Rni 'dc200Scene' index.html assets | head -n 200 || true
-          echo '=== chest card render references ==='
-          grep -RniE 'sceneCard|SceneCard|coffre.*fouill|fouill.*coffre|chest.*card|card.*chest' index.html assets | head -n 300 || true
-          echo '=== dungeon map render references ==='
-          grep -RniE 'enemyCells|map\.cells|dc047RoomBoard|dc200.*map|render.*map|render.*room' assets/dungeon index.html | head -n 400 || true
-          echo '=== trap runtime references ==='
-          grep -RniE 'triggerTrap|autoTrap|openDungeonTrap|triggeredTraps' assets/dungeon | head -n 250 || true
+          {
+            echo '=== Exact chest strings ==='
+            grep -RniE 'Va sur la case|pour le fouiller|Coffre Rare|Coffre Commun|Coffre Épique|Coffre Epique' index.html assets tests | head -n 250 || true
+            echo '=== dc200Scene references ==='
+            grep -Rni 'dc200Scene' index.html assets | head -n 250 || true
+            echo '=== chest card render references ==='
+            grep -RniE 'sceneCard|SceneCard|coffre.*fouill|fouill.*coffre|chest.*card|card.*chest' index.html assets | head -n 350 || true
+            echo '=== dungeon map render references ==='
+            grep -RniE 'enemyCells|map\.cells|dc047RoomBoard|dc200.*map|render.*map|render.*room' assets/dungeon index.html | head -n 450 || true
+            echo '=== trap runtime references ==='
+            grep -RniE 'triggerTrap|autoTrap|openDungeonTrap|triggeredTraps' assets/dungeon | head -n 300 || true
+          } > diag-dungeon-live-ui.txt
+      - name: Commit diagnostic report
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diag-dungeon-live-ui.txt
+          git commit -m "Capture Dungeon live UI diagnostic" || exit 0
+          git push

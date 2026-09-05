@@ -1,0 +1,21 @@
+name: Diagnose exact Dungeon traps
+on:
+  push:
+    branches:
+      - work/dungeon-exact-trap-fix-2026-09-05
+jobs:
+  diag:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/dungeon-exact-trap-fix-2026-09-05
+      - name: Trace trap runtime paths
+        run: |
+          echo '=== dungeonTrapTypes / trap ids ==='
+          grep -nE 'dungeonTrapTypes|dtrap_darts|dtrap_snare|dtrap_rune|dtrap_collapse' index.html | head -80 || true
+          echo '=== trap open/resolve functions ==='
+          grep -nE 'openDungeonTrap|dungeonOpenTrap|openTrap069|startTrap069|triggerTrap|resolveTrap|applyTrap|trapType' index.html | head -160 || true
+          echo '=== map cell trap checks ==='
+          grep -nE "cells\[[^]]+\].*trap|===.?['\"]trap['\"]|==.?['\"]trap['\"]|case.?['\"]trap['\"]" index.html | head -160 || true

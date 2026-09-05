@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const hotfix=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-authored-content-hotfix-167841.js'),'utf8');
+assert.match(html,/Mode Survie|SURVIE/i,'l’accueil doit encore contenir le mode Survie');
+assert.match(html,/Aventure RPG|Dungeon/i,'l’accueil doit encore contenir le mode Aventure');
+assert.match(html,/Duel|Affrontement|PVP/i,'l’accueil doit encore contenir le mode Duel');
+assert.doesNotMatch(hotfix,/^install\(\);/m,'un hotfix Dungeon ne doit pas s’exécuter globalement avant DOMContentLoaded');
+assert.doesNotMatch(hotfix,/GENSRPG_VERSION\s*=\s*APP_VERSION/,'un hotfix Dungeon ne doit pas remplacer la version globale de l’application à l’accueil');
+console.log('Home mode selection isolation V16.78.42: OK');

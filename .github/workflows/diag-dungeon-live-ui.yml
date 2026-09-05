@@ -12,26 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Capture focused live renderer snippets
+      - name: Capture exact live renderer paths
         shell: bash
         run: |
           {
-            echo '=== CHEST SCENE RENDERER 39360-39420 ==='
-            sed -n '39360,39420p' index.html
-            echo '=== ENEMY SCENE RENDERER 39970-40020 ==='
-            sed -n '39970,40020p' index.html
-            echo '=== LATE SCENE PATCH 41255-41305 ==='
-            sed -n '41255,41305p' index.html
-            echo '=== MAP CELL RENDERER CANDIDATES ==='
-            grep -nE 'function .*render.*Map|function .*render.*Room|enemyCells\[|enemyCells\.|map\.cells\.map|map\.cells\[' index.html | tail -n 120 || true
-            echo '=== TRAP/AUTOTRAP IMPLEMENTATION ==='
-            grep -nE 'function autoTrap|function triggerTrap|autoTrap\(' assets/dungeon/dungeon-zone-content-167824.js || true
-          } > diag-dungeon-live-ui-focused.txt
-      - name: Commit focused diagnostic report
+            echo '=== MAP STATE REPAIR 39315-39365 ==='
+            sed -n '39315,39365p' index.html
+            echo '=== CORE 2.01 ENEMY HELPERS 39880-39975 ==='
+            sed -n '39880,39975p' index.html
+            echo '=== CORE 2.11 TRAP HELPERS 41170-41260 ==='
+            sed -n '41170,41260p' index.html
+            echo '=== ZONE AUTOTRAP FULL ==='
+            grep -o 'function autoTrap([^}]*}[^}]*}' assets/dungeon/dungeon-zone-content-167824.js || true
+            grep -o 'function triggerTrap([^}]*}[^}]*}' assets/dungeon/dungeon-zone-content-167824.js || true
+          } > diag-dungeon-live-ui-precise.txt
+      - name: Commit precise report
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add diag-dungeon-live-ui-focused.txt
-          git commit -m "Capture focused Dungeon live UI diagnostic" || exit 0
+          git add diag-dungeon-live-ui-precise.txt
+          git commit -m "Capture precise Dungeon live renderer paths" || exit 0
           git push

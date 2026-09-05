@@ -94,6 +94,9 @@ function open(){ensureStyles();ensureModal();const m=DOC?.getElementById("dzc167
 function close(){DOC?.getElementById("dzc167824Modal")?.classList.remove("open")}
 function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;ensureStyles();ensureModal();ensureLauncher();wrapCore();return true}finally{installing=false}}
 ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,parseRewardItems,rewardItemsText,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};
-if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();wrapCore();ensureInteractionPanel()},0),true)}else wrapCore();
+let runtimeRebindQueued=false;
+function scheduleRuntimeRebind(){if(runtimeRebindQueued)return;runtimeRebindQueued=true;setTimeout(()=>{runtimeRebindQueued=false;try{ensureLauncher();wrapCore()}catch(e){}},0)}
+function installRuntimeObserver(){if(!DOC||typeof MutationObserver!=="function")return false;const target=DOC.body||DOC.documentElement;if(!target)return false;const observer=new MutationObserver(list=>{for(const m of list||[]){for(const n of Array.from(m.addedNodes||[])){if(!n||n.nodeType!==1)continue;const id=String(n.id||"");if(id==="dc01Explore"||id==="dc047RoomBoard"||id==="dc200Scene"||n.querySelector?.("#dc01Explore,#dc047RoomBoard,#dc200Scene")){scheduleRuntimeRebind();return}}}});observer.observe(target,{childList:true,subtree:true});return true}
+if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",()=>{install();installRuntimeObserver()},{once:true});else{install();installRuntimeObserver()}DOC.addEventListener("click",()=>{scheduleRuntimeRebind();try{ensureInteractionPanel()}catch(e){}},true)}else wrapCore();
 if(typeof setTimeout==="function")setTimeout(install,0);
 })();

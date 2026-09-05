@@ -79,6 +79,7 @@ assert.equal(api.applyCurrentZone({force:true}),true);
 assert.equal(api.openChest('browserChest'),true,'exact chest must write rewards through the real hero storage even without legacy globals');
 const browserHero=JSON.parse(store.getItem('z40k_aldren_v1'));assert.equal(browserHero.gold,10);assert.equal(browserHero.inventory.filter(i=>i.itemId==='ditem_ash_blade').length,1);
 
+assert.equal(api.rewardItemsSummary([{itemId:'ditem_ash_blade',qty:1},{itemId:'potion_heal',qty:2}]),'Lame de Cendre · Potion de soin ×2','chest popup must show visible item names and quantities');
 assert.deepEqual(JSON.parse(JSON.stringify(api.parseRewardItems('potion_heal*2, sword_01 x 3'))),[{itemId:'potion_heal',qty:2},{itemId:'sword_01',qty:3}]);
 assert.doesNotMatch(src,/function\s+(?:moveTo|launchCombat200|endTurn|goBackRoom)\s*\(/,'zone content layer must not rewrite stable movement/combat/timeline');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');

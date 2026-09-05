@@ -66,8 +66,8 @@ const builtEvents=context.currentRpgEventSettings();assert.equal(builtEvents.rou
  assert.doesNotMatch(src,/saveDungeonAdventures\s*=/,'le bridge ne doit pas recréer la bibliothèque Aventure Dungeon');
  const loader=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  assert.match(loader,/dungeon-world-session-bridge-167832\.js\?v=167839/);
- assert.match(sw,/gensrpg-cache-16\.78\.40-authored-movement/);
+ assert.match(sw,/gensrpg-cache-16\.78\.41-authored-content-fixes/);
  assert.match(sw,/dungeon-world-session-bridge-167832\.js/);assert.match(sw,/dungeon-authored-runtime-167839\.js/);
  const htmlArg=process.argv[2];if(htmlArg){const site=path.dirname(path.resolve(htmlArg));for(const f of ['dungeon-world-session-bridge-167832.js','dungeon-authored-runtime-167839.js'])assert.ok(fs.existsSync(path.join(site,'assets','dungeon',f)),f+' doit être présent dans le site final');const builtLoader=fs.readFileSync(path.join(site,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');assert.match(builtLoader,/dungeon-world-session-bridge-167832\.js\?v=167839/)}
- console.log('Dungeon authored runtime selection V16.78.40 cache alignment: OK');
+ console.log('Dungeon authored runtime selection V16.78.41 cache alignment: OK');
 })().catch(e=>{console.error(e);process.exitCode=1});

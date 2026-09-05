@@ -1,4 +1,4 @@
-name: Apply home UI observer production fix
+name: Apply home UI editor observer fix
 on:
   push:
     branches:
@@ -12,119 +12,111 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Replace broad DOM observers with lightweight UI refresh hooks
+      - name: Make Dungeon editor UI refresh event-driven
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          room = Path('assets/dungeon/dungeon-room-creator-100.js')
-          text = room.read_text(encoding='utf-8')
-          old = 'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>ensureLauncher()).observe(DOC.documentElement,{childList:true,subtree:true})}'
-          new = 'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(ensureLauncher,0),true)}'
-          if text.count(old) != 1:
-              raise SystemExit(f'Room Creator observer block count={text.count(old)}, expected 1')
-          room.write_text(text.replace(old, new), encoding='utf-8')
-
-          builder = Path('assets/dungeon/dungeon-world-builder-167821.js')
-          text = builder.read_text(encoding='utf-8')
-          old = '''if(DOC){
-            if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();
-            if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureLauncher();ensureModal()}).observe(DOC.documentElement,{childList:true,subtree:true});
-          }'''
-          new = '''if(DOC){
-            if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();
-            DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();ensureModal()},0),true);
-          }'''
-          if text.count(old) != 1:
-              raise SystemExit(f'World Builder observer block count={text.count(old)}, expected 1')
-          builder.write_text(text.replace(old, new), encoding='utf-8')
+          changes={
+          'assets/dungeon/dungeon-room-creator-100.js': [
+            ('if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>ensureLauncher()).observe(DOC.documentElement,{childList:true,subtree:true})}',
+             'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(ensureLauncher,0),true)}')],
+          'assets/dungeon/dungeon-room-creator-v2-167819.js': [
+            ('if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureCacheTool();ensurePanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}else install();',
+             'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{ensureCacheTool();ensurePanel()},0),true)}else install();')],
+          'assets/dungeon/dungeon-world-builder-167821.js': [
+            ('if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureLauncher();ensureModal()}).observe(DOC.documentElement,{childList:true,subtree:true});',
+             'DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();ensureModal()},0),true);')],
+          'assets/dungeon/dungeon-room-runtime-167822.js': [
+            ('if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{installExploreWrapper();ensureConfigPanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}',
+             'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{installExploreWrapper();ensureConfigPanel()},0),true)}')],
+          'assets/dungeon/dungeon-zone-content-167824.js': [
+            ('if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureLauncher();wrapCore();ensureInteractionPanel()}).observe(DOC.documentElement,{childList:true,subtree:true})}else wrapCore();',
+             'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();wrapCore();ensureInteractionPanel()},0),true)}else wrapCore();')],
+          'assets/dungeon/dungeon-room-visual-config-167826.js': [
+            ('if(DOC&&typeof MutationObserver==="function")new MutationObserver(()=>{hideLegacyLauncher();ensurePanel();wrapRoomApi();decorateGrid()}).observe(DOC.documentElement,{childList:true,subtree:true});',
+             'if(DOC)DOC.addEventListener("click",()=>setTimeout(()=>{hideLegacyLauncher();ensurePanel();wrapRoomApi();decorateGrid()},0),true);')],
+          'assets/dungeon/dungeon-set-editor-167818.js': [
+            ('try{new ROOT.MutationObserver(()=>{ensureSection();addNewButton()}).observe(DOC.documentElement||DOC.body,{childList:true,subtree:true})}catch(e){}',
+             'try{DOC.addEventListener("click",()=>setTimeout(()=>{ensureSection();addNewButton()},0),true)}catch(e){}')],
+          }
+          for name,repls in changes.items():
+              p=Path(name); text=p.read_text(encoding='utf-8')
+              for old,new in repls:
+                  n=text.count(old)
+                  if n!=1: raise SystemExit(f'{name}: expected one observer block, found {n}')
+                  text=text.replace(old,new)
+              p.write_text(text,encoding='utf-8')
           PY
       - name: Static guards
         shell: bash
         run: |
-          node --check assets/dungeon/dungeon-room-creator-100.js
-          node --check assets/dungeon/dungeon-world-builder-167821.js
-          ! grep -q 'observe(DOC.documentElement' assets/dungeon/dungeon-room-creator-100.js
-          ! grep -q 'observe(DOC.documentElement' assets/dungeon/dungeon-world-builder-167821.js
-          grep -q 'ROOT.DungeonRoomCreator100=' assets/dungeon/dungeon-room-creator-100.js
-          grep -q 'ROOT.DungeonWorldBuilder167821=' assets/dungeon/dungeon-world-builder-167821.js
+          files=(
+            assets/dungeon/dungeon-room-creator-100.js
+            assets/dungeon/dungeon-room-creator-v2-167819.js
+            assets/dungeon/dungeon-world-builder-167821.js
+            assets/dungeon/dungeon-room-runtime-167822.js
+            assets/dungeon/dungeon-zone-content-167824.js
+            assets/dungeon/dungeon-room-visual-config-167826.js
+            assets/dungeon/dungeon-set-editor-167818.js
+          )
+          for f in "${files[@]}"; do node --check "$f"; done
+          for f in "${files[@]}"; do
+            ! grep -Eq 'MutationObserver.*observe\(DOC\.(documentElement|body)|observe\(DOC\.documentElement' "$f"
+          done
           git diff --check
-          test "$(git diff --name-only | sort | tr '\n' ' ')" = "assets/dungeon/dungeon-room-creator-100.js assets/dungeon/dungeon-world-builder-167821.js "
-      - name: Install Playwright Chromium
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-      - name: Mobile browser home and creator smoke test
+          test "$(git diff --name-only | sort | tr '\n' ' ')" = "assets/dungeon/dungeon-room-creator-100.js assets/dungeon/dungeon-room-creator-v2-167819.js assets/dungeon/dungeon-room-runtime-167822.js assets/dungeon/dungeon-room-visual-config-167826.js assets/dungeon/dungeon-set-editor-167818.js assets/dungeon/dungeon-world-builder-167821.js assets/dungeon/dungeon-zone-content-167824.js "
+      - name: Run affected Dungeon regressions
         shell: bash
         run: |
-          cat >home_probe_temp.mjs <<'JS'
-          import { chromium } from 'playwright';
-          const browser=await chromium.launch({headless:true});
-          const page=await browser.newPage({viewport:{width:412,height:915},isMobile:true,hasTouch:true});
-          const pageErrors=[];
-          page.on('pageerror',e=>pageErrors.push(String(e?.stack||e?.message||e)));
-          await page.route('**/*',route=>{
-            const u=new URL(route.request().url());
-            if(u.hostname==='127.0.0.1'||u.hostname==='localhost'||u.protocol==='data:'||u.protocol==='blob:') return route.continue();
-            return route.abort();
-          });
-          await page.goto('http://127.0.0.1:8765/index.html',{waitUntil:'commit',timeout:10000});
-          await page.waitForSelector('button.gensRootModeCard',{timeout:7000});
-          await page.waitForTimeout(500);
-          const initial=await page.evaluate(()=>({
-            ready:document.readyState,
-            cards:[...document.querySelectorAll('button.gensRootModeCard')].map(b=>(b.textContent||'').trim().replace(/\s+/g,' ').slice(0,100)),
-            creatorApi:!!window.DungeonRoomCreator100,
-            builderApi:!!window.DungeonWorldBuilder167821,
-            creatorModal:document.getElementById('drc100Modal')?getComputedStyle(document.getElementById('drc100Modal')).display:null,
-            builderModal:document.getElementById('drc300Modal')?getComputedStyle(document.getElementById('drc300Modal')).display:null,
-            creatorInHome:!!document.getElementById('drc100Launcher')?.closest('#gensRootHome,#gensFamilyHome,#gensGameHome'),
-            builderInHome:!!document.getElementById('drc300Launcher')?.closest('#gensRootHome,#gensFamilyHome,#gensGameHome')
-          }));
-          console.log('initial',JSON.stringify(initial));
-          if(initial.cards.length<3) throw new Error('Expected at least 3 root mode cards, got '+initial.cards.length);
-          if(!initial.creatorApi||!initial.builderApi) throw new Error('Creator/builder API missing');
-          if(initial.creatorModal!=='none'||initial.builderModal!=='none') throw new Error('Creator/builder modal not safely hidden on home');
-          if(initial.creatorInHome||initial.builderInHome) throw new Error('Creator/builder launcher leaked into home UI');
-          for(let i=0;i<3;i++){
-            await page.evaluate(()=>{ if(typeof showGensRootHome==='function') showGensRootHome(); });
-            await page.waitForTimeout(80);
-            const card=page.locator('button.gensRootModeCard').nth(i);
-            const label=(await card.textContent()||'').trim().replace(/\s+/g,' ');
-            await card.click({timeout:5000});
-            await page.evaluate(()=>new Promise(r=>setTimeout(r,60)));
-            console.log('clicked root card',i,label);
-          }
-          await page.evaluate(()=>{ if(typeof showGensRootHome==='function') showGensRootHome(); });
-          const refresh=await page.evaluate(async()=>{
-            const editor=document.getElementById('dungeonAdvancedEditor');
-            document.getElementById('drc100Launcher')?.remove();
-            document.getElementById('drc300Launcher')?.remove();
-            document.dispatchEvent(new MouseEvent('click',{bubbles:true}));
-            await new Promise(r=>setTimeout(r,20));
-            return {editor:!!editor,room:!!document.getElementById('drc100Launcher'),builder:!!document.getElementById('drc300Launcher')};
-          });
-          console.log('launcher refresh',JSON.stringify(refresh));
-          if(refresh.editor && (!refresh.room||!refresh.builder)) throw new Error('Advanced editor launchers were not restored by lightweight hook');
-          if(pageErrors.length) throw new Error('Page errors: '+pageErrors.join('\n'));
-          await browser.close();
-          console.log('HOME_UI_SMOKE_OK');
-          JS
-          python3 -m http.server 8765 >/tmp/gens-http.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID || true' EXIT
-          sleep 1
-          timeout 35s node home_probe_temp.mjs
-          rm -f home_probe_temp.mjs
-      - name: Commit only production source fix and remove temporary workflows
+          node tests/dungeon_room_creator_v1.test.cjs
+          node tests/dungeon_room_creator_v2_v167819.test.cjs
+          node tests/dungeon_world_builder_v167821.test.cjs
+          node tests/dungeon_room_runtime_v167822.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+      - name: Validate final assembled load contract
+        shell: bash
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp -f index.html _site/index.html
+          mkdir -p _site/assets
+          cp -R assets/. _site/assets/
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path('_site/index.html')
+          modules=[
+            '<script src="assets/dungeon/dungeon-core-318.js"></script>',
+            '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>',
+            '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
+            '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
+            '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>',
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>',
+          ]
+          html=index.read_text(encoding='utf-8')
+          for tag in modules:
+              if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          index.write_text(html,encoding='utf-8')
+          PY
+          node tests/dungeon_final_load_regression.test.cjs _site/index.html
+      - name: Commit only production fix and remove temporary diagnostics
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rm -f home_probe_temp.mjs
-          git rm .github/workflows/apply-home-ui-production-fix.yml .github/workflows/bisect-home-dom-load.yml
-          git add assets/dungeon/dungeon-room-creator-100.js assets/dungeon/dungeon-world-builder-167821.js
+          rm -rf _site
+          git rm -f .github/workflows/apply-home-ui-production-fix.yml .github/workflows/bisect-home-dom-load.yml .github/workflows/isolate-home-browser-freeze.yml
+          git add assets/dungeon/dungeon-room-creator-100.js assets/dungeon/dungeon-room-creator-v2-167819.js assets/dungeon/dungeon-world-builder-167821.js assets/dungeon/dungeon-room-runtime-167822.js assets/dungeon/dungeon-zone-content-167824.js assets/dungeon/dungeon-room-visual-config-167826.js assets/dungeon/dungeon-set-editor-167818.js
           git diff --cached --check
-          git commit -m "Fix home UI freeze from dungeon editor DOM observers"
+          git commit -m "Make Dungeon editor UI refresh event-driven"
           git push

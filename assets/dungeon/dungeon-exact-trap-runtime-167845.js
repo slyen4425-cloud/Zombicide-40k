@@ -1,0 +1,36 @@
+/* GenSrpG Dungeon — exact authored traps for built worlds.
+   Keeps configured traps hidden as scene elements until detection, prevents the
+   legacy random map-cell trap handler from replacing their configured type,
+   and resolves the exact configured trap when the active hero steps on it. */
+(function(){
+"use strict";
+const ROOT=typeof window!=="undefined"?window:globalThis;
+const RT_KEY="gensrpg_dungeon_runtime_v2";
+const VERSION="1.0.0";
+const APP_VERSION="16.78.45";
+let retries=0;
+function clone(v){try{return v==null?v:JSON.parse(JSON.stringify(v))}catch(e){return v}}
+function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
+function saveRt(x){try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));return true}catch(e){return false}}
+function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldRuntime167823&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
+function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function content(x){const c=x?.last?.worldZoneContent167824;return c&&typeof c==="object"?c:{traps:[]}}
+function trapState(x){const d=String(x?.last?.worldDungeonId||""),n=String(x?.last?.worldNodeId||"");x.worldContentState167824=x.worldContentState167824&&typeof x.worldContentState167824==="object"?x.worldContentState167824:{};x.worldContentState167824[d]=x.worldContentState167824[d]&&typeof x.worldContentState167824[d]==="object"?x.worldContentState167824[d]:{};let s=x.worldContentState167824[d][n];if(!s||typeof s!=="object")s={openedChests:{},pickedItems:{},triggeredTraps:{},solvedPuzzles:{},talkedNpcs:{}};s.triggeredTraps=s.triggeredTraps&&typeof s.triggeredTraps==="object"?s.triggeredTraps:{};x.worldContentState167824[d][n]=s;return s}
+function normalizeTrapId(ref){let id=String(ref||"").trim().toLowerCase();const aliases={dtrap_darts:"dart",dtrap_dart:"dart",dtrap_snare:"snare",dtrap_rune:"rune",dtrap_collapse:"collapse",darts:"dart"};id=aliases[id]||id;try{const types=ROOT.dungeonTrapTypes?.()||{};if(types[id])return String(types[id].id||id);for(const t of Object.values(types))if(String(t?.id||"")===id)return id}catch(e){}return ["dart","snare","rune","collapse"].includes(id)?id:"dart"}
+function trapName(id,fallback){try{return String(ROOT.dungeonTrapTypes?.()?.[id]?.name||fallback||"Piège")}catch(e){return String(fallback||"Piège")}}
+function scenes(){try{const a=ROOT.loadDungeonSceneElements?.();return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveScenes(a){try{ROOT.saveDungeonSceneElements?.(a);return true}catch(e){return false}}
+function sync(x){if(!authored(x))return false;const traps=Array.isArray(content(x).traps)?content(x).traps:[],room=Number(x.room)||0,d=String(x.last.worldDungeonId),n=String(x.last.worldNodeId),state=trapState(x);let all=scenes(),changed=false;const wanted=new Set(traps.map(t=>String(t?.id||"")).filter(Boolean));all=all.filter(el=>{if(!el?.exactTrap167845||Number(el.room||0)!==room||String(el.exactDungeonId167845||"")!==d||String(el.exactNodeId167845||"")!==n)return true;const id=String(el.exactTrapId167845||"");if(!wanted.has(id)||state.triggeredTraps[id]){changed=true;return false}return true});for(const t of traps){const id=String(t?.id||"");if(!id||state.triggeredTraps[id])continue;const cell=Math.max(0,Math.trunc(Number(t?.cell)||0)),tid=normalizeTrapId(t?.refId||t?.trapType);let el=all.find(e=>e?.exactTrap167845&&String(e.exactTrapId167845)===id&&Number(e.room||0)===room&&String(e.exactDungeonId167845||"")===d&&String(e.exactNodeId167845||"")===n);if(!el){el={id:"exacttrap_"+id+"_"+room,kind:"trap",room,cellIndex:cell,trapId:tid,name:trapName(tid,t?.label),detected:false,exactTrap167845:true,exactTrapId167845:id,exactDungeonId167845:d,exactNodeId167845:n};all.push(el);changed=true}else{const detected=el.detected===true;if(Number(el.cellIndex)!==cell||String(el.trapId)!==tid||String(el.name)!==trapName(tid,t?.label)){el.cellIndex=cell;el.trapId=tid;el.name=trapName(tid,t?.label);changed=true}el.detected=detected}
+    if(x.last?.map?.cells&&String(x.last.map.cells[cell])==="trap"){x.last.map.cells[cell]="floor";changed=true}
+  }
+  if(changed){saveScenes(all);try{ROOT.DungeonSpatial313?.ensure?.(x);ROOT.DungeonSpatial313?.persist?.(x)}catch(e){}saveRt(x)}
+  return true
+}
+function removeSceneFor(x,trapId){const id=String(trapId||""),d=String(x?.last?.worldDungeonId||""),n=String(x?.last?.worldNodeId||""),room=Number(x?.room)||0,all=scenes(),next=all.filter(e=>!(e?.exactTrap167845&&String(e.exactTrapId167845||"")===id&&Number(e.room||0)===room&&String(e.exactDungeonId167845||"")===d&&String(e.exactNodeId167845||"")===n));if(next.length!==all.length)saveScenes(next)}
+function triggerAtHero(x){if(!authored(x))return false;const hero=activeHero(x);if(!hero)return false;const pos=Number(x.positions?.[hero]),state=trapState(x),traps=Array.isArray(content(x).traps)?content(x).traps:[],t=traps.find(v=>Number(v?.cell)===pos&&!state.triggeredTraps[String(v?.id||"")]);if(!t)return false;const tid=normalizeTrapId(t?.refId||t?.trapType);if(typeof ROOT.dungeonResolveTrapAgainstHero!=="function")return false;let result=null;try{result=ROOT.dungeonResolveTrapAgainstHero(tid,hero,true)}catch(e){console.warn("Exact trap resolve",e);return false}if(result==null)return false;const id=String(t.id);state.triggeredTraps[id]=true;if(x.last?.map?.cells?.[Number(t.cell)]!==undefined)x.last.map.cells[Number(t.cell)]="floor";removeSceneFor(x,id);try{ROOT.DungeonSpatial313?.ensure?.(x);ROOT.DungeonSpatial313?.persist?.(x)}catch(e){}saveRt(x);return true}
+function beforeCore(){const x=readRt();if(!authored(x))return false;sync(x);const fresh=readRt();return triggerAtHero(fresh)}
+function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show","explore"]){const old=core[name];if(typeof old!=="function"||old.__exactTrap167845)continue;const w=function(){try{beforeCore()}catch(e){console.warn("Exact authored trap",e)}return old.apply(this,arguments)};w.__exactTrap167845=true;w.__exactTrapOriginal=old;core[name]=w}return true}
+function install(){if(wrapCore()){try{beforeCore()}catch(e){}return true}if(retries++<30&&typeof setTimeout==="function")setTimeout(install,100);return false}
+ROOT.DungeonExactTrapRuntime167845={VERSION,APP_VERSION,normalizeTrapId,sync,triggerAtHero,beforeCore,wrapCore,install};
+install();
+})();

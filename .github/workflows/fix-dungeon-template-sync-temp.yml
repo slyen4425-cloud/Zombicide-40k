@@ -12,7 +12,9 @@ jobs:
         with:
           ref: work/dungeon-template-sync-fix-2026-09-05
       - name: Apply patch
-        run: python3 .github/scripts/fix_dungeon_template_sync.py
+        run: |
+          python3 .github/scripts/fix_dungeon_template_sync.py
+          python3 .github/scripts/fix_test_variant_mode.py
       - name: Syntax and regressions
         run: |
           node --check assets/dungeon/dungeon-room-template-content-167828.js

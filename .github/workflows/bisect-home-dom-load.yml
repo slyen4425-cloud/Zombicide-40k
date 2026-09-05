@@ -1,0 +1,52 @@
+name: Bisect home DOM load
+on:
+  push:
+    branches:
+      - fix/home-ui-observers-2026-09-05
+    paths:
+      - .github/workflows/bisect-home-dom-load.yml
+permissions:
+  contents: read
+jobs:
+  probe-history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Probe DOMContentLoaded across UI recovery history
+        shell: bash
+        run: |
+          cat >history_probe.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import { execFileSync } from 'node:child_process';
+          import fs from 'node:fs';
+          const commits=[
+            ['stable-rollback','b406ed9e16adbecbeb0c4a85f516f7fc41bf896c'],
+            ['ui-guard','40914507450e877865ffa3fc94c092d531d97f29'],
+            ['ui-bootstrap','52055c29ac46e988cc16caac0098ee90770ecd22'],
+            ['pwa-cache','2fe2652b7d639fc142a3acdd6c52c36790499344'],
+            ['sim-dom-fix','dd6d34f6784448c22f10b0fb0bae61956217846c'],
+            ['grid-contract','913c6df1400f85488d15608af7ca2c3802599ddb'],
+            ['main-base','557ab70d051cbbabb48538f16a1096c88379e34a']
+          ];
+          const browser=await chromium.launch({headless:true});
+          for(const [name,sha] of commits){
+            fs.rmSync('/tmp/homehist',{recursive:true,force:true});fs.mkdirSync('/tmp/homehist',{recursive:true});
+            execFileSync('bash',['-lc',`git archive ${sha} | tar -x -C /tmp/homehist`],{stdio:'inherit'});
+            const page=await browser.newPage({viewport:{width:412,height:915},isMobile:true,hasTouch:true});
+            const errors=[];page.on('pageerror',e=>errors.push(String(e?.message||e)));
+            const start=Date.now();let status='PASS',detail='';
+            try{await page.goto('file:///tmp/homehist/index.html',{waitUntil:'domcontentloaded',timeout:7000});detail='dcl='+(Date.now()-start)+'ms title='+await page.title();}
+            catch(e){status='FAIL';detail=(e?.message||String(e)).split('\n')[0]+' elapsed='+(Date.now()-start)+'ms';}
+            console.log(`HISTORY_PROBE ${name} ${sha} ${status} ${detail} errors=${errors.length}`);
+            await page.close();
+          }
+          await browser.close();
+          JS
+          node history_probe.mjs
+          rm -f history_probe.mjs

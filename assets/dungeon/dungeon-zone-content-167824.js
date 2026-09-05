@@ -25,7 +25,9 @@ function worldApi(){return ROOT.DungeonWorldRuntime167823||null}
 function readRuntime(){const x=readJson(RT_KEY,null);return x&&typeof x==="object"?x:null}
 function writeRuntime(x){return writeJson(RT_KEY,x||{})}
 function activeHeroId(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
-function normalizeItems(v){return Array.isArray(v)?v.map(x=>({itemId:String(x?.itemId||x?.id||""),qty:Math.max(1,Math.trunc(Number(x?.qty)||1))})).filter(x=>x.itemId):[]}
+function itemNameKey(v){return String(v||"").trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function resolveRewardItemId(v){const raw=String(v||"").trim();if(!raw)return "";let list=[];try{list=typeof ROOT.dungeonItems==="function"?ROOT.dungeonItems():[]}catch(e){}if(!Array.isArray(list)||!list.length)return raw;const exact=list.find(it=>String(it?.id||"")===raw);if(exact)return String(exact.id);const key=itemNameKey(raw),named=list.find(it=>itemNameKey(it?.name)===key);return String(named?.id||raw)}
+function normalizeItems(v){return Array.isArray(v)?v.map(x=>({itemId:resolveRewardItemId(x?.itemId||x?.id||""),qty:Math.max(1,Math.trunc(Number(x?.qty)||1))})).filter(x=>x.itemId):[]}
 function normalizeContent(raw){const r=raw&&typeof raw==="object"?raw:{};return {
  mode:["inherit","fixed","mixed"].includes(String(r.mode))?String(r.mode):"inherit",
  enemies:(Array.isArray(r.enemies)?r.enemies:[]).map(x=>({id:String(x?.id||uid("enemy")),enemyId:String(x?.enemyId||""),qty:Math.max(1,Math.min(50,Math.trunc(Number(x?.qty)||1))),cell:Math.max(0,Math.trunc(Number(x?.cell)||0)),role:String(x?.role||"enemy"),hasKey:!!x?.hasKey,hp:(x?.hp===null||x?.hp===undefined||x?.hp==="")?null:(Number.isFinite(Number(x.hp))?Math.max(1,Number(x.hp)):null)})).filter(x=>x.enemyId),

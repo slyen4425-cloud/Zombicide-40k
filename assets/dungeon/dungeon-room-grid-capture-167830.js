@@ -5,7 +5,7 @@
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.0.1",APP_VERSION="16.78.43";
+const VERSION="1.0.2",APP_VERSION="16.78.43";
 let boundGrid=null,boundHandler=null,installed=false;
 function templateActive(){return !!DOC?.getElementById("drt167828Toggle")?.classList?.contains("on")}
 function zoneActive(){return !!DOC?.getElementById("drv167826Toggle")?.classList?.contains("on")}
@@ -37,8 +37,9 @@ function wrapRoomOpen(){
   const old=api.open;api.open=function(){const out=old.apply(this,arguments);setTimeout(bindGrid,0);return out};api.__drgc167830Wrapped=true;return true;
 }
 function loadUiRecovery(){
-  if(!DOC||ROOT.GenSrpGUiRecovery167843||DOC.getElementById("gensUiRecovery167843Script"))return !!ROOT.GenSrpGUiRecovery167843;
-  const s=DOC.createElement("script");s.id="gensUiRecovery167843Script";s.src="assets/gensrpg/gens-ui-recovery-167843.js?v=167843";s.async=false;(DOC.body||DOC.documentElement)?.appendChild(s);return true;
+  if(!DOC||ROOT.GenSrpGUiRecovery167843||DOC.getElementById?.("gensUiRecovery167843Script"))return !!ROOT.GenSrpGUiRecovery167843;
+  if(typeof DOC.createElement!=="function")return false;
+  const s=DOC.createElement("script");s.id="gensUiRecovery167843Script";s.src="assets/gensrpg/gens-ui-recovery-167843.js?v=167843";s.async=false;(DOC.body||DOC.documentElement)?.appendChild?.(s);return true;
 }
 function install(){
   if(installed){wrapRoomOpen();bindGrid();loadUiRecovery();return true}installed=true;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}

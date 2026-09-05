@@ -1,4 +1,4 @@
-# GenSrpG V16.78.44 authored Dungeon content fixes — 2026-09-05
+# GenSrpG V16.78.43 UI/PWA recovery guard — 2026-09-05
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -57,9 +57,6 @@ jobs:
 
       - name: Tester l'instanciation ennemie par salle
         run: node tests/dungeon_enemy_room_scope_v318.test.cjs
-
-      - name: Tester les contenus exacts du Dungeon construit V16.78.44
-        run: node tests/dungeon_authored_content_v167844.test.cjs
 
       - name: Bloquer les régressions d'interface et de cache V16.78.43
         run: node tests/gens_ui_recovery_v167843.test.cjs

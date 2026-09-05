@@ -12,17 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Locate chest scene UI and board renderer
+      - name: Inspect exact board and scene renderer
         run: |
-          echo '=== Va sur la case ==='
-          grep -Rni --exclude-dir=.git --exclude='*.zip' 'Va sur la case' . || true
-          echo '=== pour le fouiller ==='
-          grep -Rni --exclude-dir=.git --exclude='*.zip' 'pour le fouiller' . || true
-          echo '=== Coffre Rare / Commun / Epique ==='
-          grep -RniE --exclude-dir=.git --exclude='*.zip' 'Coffre (Rare|Commun|Épique|Epique|Légendaire)' . || true
-          echo '=== dc200Scene / scene cards ==='
-          grep -RniE --exclude-dir=.git --exclude='*.zip' 'dc200Scene|SceneCard|sceneCard|scene-card' . || true
-          echo '=== enemyCells render references ==='
-          grep -Rni --exclude-dir=.git --exclude='*.zip' 'enemyCells' assets index.html | head -n 200 || true
-          echo '=== map marker rendering ==='
-          grep -RniE --exclude-dir=.git --exclude='*.zip' 'map\.cells|cell.*enemy|enemy.*cell' assets/dungeon index.html | head -n 250 || true
+          echo '=== spatial renderer 39320-39420 ==='
+          sed -n '39320,39420p' index.html
+          echo '=== main render 39500-39545 ==='
+          sed -n '39500,39545p' index.html
+          echo '=== later scene cleanup 41255-41290 ==='
+          sed -n '41255,41290p' index.html
+          echo '=== art renderer 43320-43510 ==='
+          sed -n '43320,43510p' index.html
+          echo '=== zone content full ==='
+          cat assets/dungeon/dungeon-zone-content-167824.js

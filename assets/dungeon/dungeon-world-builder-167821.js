@@ -363,6 +363,6 @@ function install(){try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}ensureStyles()
 ROOT.DungeonWorldBuilder167821={VERSION,APP_VERSION,SCHEMA_VERSION,STORAGE_KEY,GRAPH_KIND,normalizeGraph,loadLibrary,findDungeon,upsertDungeon,createDungeon,deleteDungeon,duplicateDungeon,roomPorts,addRoomInstance,removeRoomInstance,setStart,connectRooms,removeConnection,expectedCacheBindings,bindCache,validation,runtimePackage,open,close,install};
 if(DOC){
   if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();
-  if(typeof MutationObserver==="function")new MutationObserver(()=>{ensureLauncher();ensureModal()}).observe(DOC.documentElement,{childList:true,subtree:true});
+  DOC.addEventListener("click",()=>setTimeout(()=>{ensureLauncher();ensureModal()},0),true);
 }
 })();

@@ -151,7 +151,7 @@ function install(){
   if(installed){hideLegacyLauncher();return true}installed=true;
   try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
   ensureStyles();ensureModal();hideLegacyLauncher();wrapRoomApi();ensurePanel();decorateGrid();
-  if(DOC&&typeof MutationObserver==="function")new MutationObserver(()=>{hideLegacyLauncher();ensurePanel();wrapRoomApi();decorateGrid()}).observe(DOC.documentElement,{childList:true,subtree:true});
+  if(DOC)DOC.addEventListener("click",()=>setTimeout(()=>{hideLegacyLauncher();ensurePanel();wrapRoomApi();decorateGrid()},0),true);
   return true;
 }
 const API={VERSION,APP_VERSION,GRAPH_KEY,CONFIGURABLE,contextsForRoom,getContent,configureElement,removeElement,parseItems,itemsText,setMode,setVisualMode,activateCell,bindCell,openEditor,closeEditor,saveActive,deleteActive,hideLegacyLauncher,install,decorateGrid};

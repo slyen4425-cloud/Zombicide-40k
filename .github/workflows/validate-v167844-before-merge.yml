@@ -1,0 +1,65 @@
+name: Validate V16.78.44 before merge
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.44-authored-content-fixes-2026-09-05
+    paths:
+      - .github/workflows/validate-v167844-before-merge.yml
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify deployment guard and cache
+        run: |
+          grep -q 'dungeon_authored_content_v167844.test.cjs' .github/workflows/main.yml
+          grep -q 'gensrpg-cache-16.78.44-authored-content' service-worker.js
+          ! grep -q 'PV forcés' assets/dungeon/dungeon-room-template-content-167828.js
+          ! grep -q 'PV forcés' assets/dungeon/dungeon-room-visual-config-167826.js
+      - name: Run full changed-area regression battery
+        run: |
+          node tests/dungeon_runtime_regression.test.cjs
+          node tests/dungeon_large_room_v167834.test.cjs
+          node tests/dungeon_room_creator_v1.test.cjs
+          node tests/dungeon_room_creator_v2_v167819.test.cjs
+          node tests/dungeon_world_builder_v167821.test.cjs
+          node tests/dungeon_room_runtime_v167822.test.cjs
+          node tests/dungeon_world_session_bridge_v167832.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_world_runtime_v167823.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_enemy_room_scope_v318.test.cjs
+          node tests/dungeon_authored_content_v167844.test.cjs
+          node tests/gens_ui_recovery_v167843.test.cjs
+      - name: Final load smoke
+        run: |
+          rm -rf _site && mkdir -p _site/assets
+          cp index.html _site/index.html
+          cp -R assets/. _site/assets/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html'); html=p.read_text(encoding='utf-8')
+          modules=[
+            '<script src="assets/dungeon/dungeon-core-318.js"></script>',
+            '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>',
+            '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
+            '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
+            '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>',
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>'
+          ]
+          for tag in modules:
+            if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          p.write_text(html,encoding='utf-8')
+          PY
+          node tests/dungeon_final_load_regression.test.cjs _site/index.html
+          node tests/dungeon_authored_content_v167844.test.cjs

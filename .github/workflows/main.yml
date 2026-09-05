@@ -1,4 +1,4 @@
-# GenSrpG V16.78.40 dedicated authored Dungeon movement initialization — 2026-09-05
+# GenSrpG V16.78.41 authored Dungeon content fixes — 2026-09-05
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -54,6 +54,9 @@ jobs:
 
       - name: Tester le contenu exact par Zone
         run: node tests/dungeon_zone_content_v167824.test.cjs
+
+      - name: Tester les correctifs contenu construit V16.78.41
+        run: node tests/dungeon_authored_content_hotfix_v167841.test.cjs
 
       - name: Tester l'instanciation ennemie par salle
         run: node tests/dungeon_enemy_room_scope_v318.test.cjs
@@ -136,6 +139,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
+              (Path("_site/assets/dungeon/dungeon-authored-content-hotfix-167841.js"), '<script src="assets/dungeon/dungeon-authored-content-hotfix-167841.js?v=167841"></script>', "Authored Dungeon content hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -160,11 +164,13 @@ jobs:
           grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
           grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
           grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
+          grep -q 'dungeon-authored-content-hotfix-167841.js?v=167841' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
-          grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.41-authored-content-fixes' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
+          node tests/dungeon_authored_content_hotfix_v167841.test.cjs _site/index.html
           node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
 
       - name: Tester le chargement final du Créateur V2

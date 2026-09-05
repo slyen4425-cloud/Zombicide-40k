@@ -26,7 +26,7 @@ context.window=context;context.globalThis=context;
 vm.createContext(context);vm.runInContext(patch,context);
 const api=context.DungeonRoomVisualConfig167826;
 assert.ok(api,'API V16.78.26 absente');
-assert.equal(api.APP_VERSION,'16.78.26');
+assert.equal(api.APP_VERSION,'16.78.44');
 assert.equal(api.setVisualMode(true),true,'le mode visuel doit pouvoir réellement s’activer quand la pièce est utilisée dans une zone');
 
 const cell=element('button');cell.dataset.drcIndex='5';
@@ -41,7 +41,7 @@ assert.ok(modal,'la fiche de configuration doit être créée après un toucher 
 assert.equal(modal.classList.contains('open'),true,'la fiche de configuration doit réellement s’ouvrir');
 
 api.configureElement('world-1','zone-1','room-a',5,'enemy',{enemyId:'dng_orc'});
-assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(content.enemies[0].hp,null,'sans réglage UI les PV doivent venir du monstre');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');
+assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(Object.prototype.hasOwnProperty.call(content.enemies[0],'hp'),false,'les PV ne sont plus stockés dans l’éditeur de salle');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');assert.equal(content.templateLinked,false,'une variante modifiée directement doit cesser de suivre le modèle');
 api.configureElement('world-1','zone-1','room-a',9,'chest',{rarity:'epic',gold:25,itemsText:'potion_soin'});
 assert.equal(content.mode,'fixed');assert.equal(content.chests.length,1);assert.equal(content.chests[0].cell,9);
 assert.match(patch,/el\.onpointerdown=handler/,'le correctif doit brancher directement chaque case');

@@ -62,6 +62,8 @@ assert.equal(api.applyCurrentZone({force:true}),true);
 assert.ok(enemies.some(e=>e.id==='random2'),'mixed mode must preserve generated enemies');
 assert.ok(enemies.some(e=>e.enemyId==='dng_ghoul'),'mixed mode must add configured enemy');
 
+x=JSON.parse(store.getItem(RT));x.last.worldContentApplied167824=null;x.last.worldZoneContent167824={mode:'fixed',enemies:[{id:'inh',enemyId:'dng_wraith',qty:2,cell:3}],chests:[{id:'inhch',cell:5,rarity:'common',gold:1,items:[]}],traps:[],puzzles:[],npcs:[],items:[]};store.setItem(RT,JSON.stringify(x));api.saveZoneContent('d1','n1',{mode:'inherit'});assert.equal(api.applyCurrentZone({force:true}),true,'an inherited authored zone must apply the effective room template content');x=JSON.parse(store.getItem(RT));assert.equal(enemies.filter(e=>e.enemyId==='dng_wraith').length,2,'inherited authored enemies must be instantiated');assert.equal(x.last.map.cells[5],'chest','inherited authored chest marker must remain available to interactions');assert.equal(api.openChest('inhch'),true,'inherited authored chest must use the same effective content as enemy spawning');
+
 assert.deepEqual(JSON.parse(JSON.stringify(api.parseRewardItems('potion_heal*2, sword_01 x 3'))),[{itemId:'potion_heal',qty:2},{itemId:'sword_01',qty:3}]);
 assert.doesNotMatch(src,/function\s+(?:moveTo|launchCombat200|endTurn|goBackRoom)\s*\(/,'zone content layer must not rewrite stable movement/combat/timeline');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');

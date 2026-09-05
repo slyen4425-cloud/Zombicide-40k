@@ -1,0 +1,46 @@
+name: Apply isolated home UI observer diagnostic
+on:
+  push:
+    branches:
+      - debug/home-ui-freeze-2026-09-05
+    paths:
+      - .github/workflows/apply-home-ui-observer-diagnostic.yml
+permissions:
+  contents: write
+jobs:
+  patch-room-creator-v1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact minimal patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('assets/dungeon/dungeon-room-creator-100.js')
+          text = p.read_text(encoding='utf-8')
+          old = 'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install();if(typeof MutationObserver==="function")new MutationObserver(()=>ensureLauncher()).observe(DOC.documentElement,{childList:true,subtree:true})}'
+          new = 'if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one global Room Creator observer block, found {count}')
+          p.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+      - name: Verify patch is isolated and valid
+        shell: bash
+        run: |
+          node --check assets/dungeon/dungeon-room-creator-100.js
+          ! grep -q 'MutationObserver' assets/dungeon/dungeon-room-creator-100.js
+          grep -q 'ROOT.DungeonRoomCreator100=' assets/dungeon/dungeon-room-creator-100.js
+          grep -q 'function install()' assets/dungeon/dungeon-room-creator-100.js
+          git diff --check
+          test "$(git diff --name-only)" = "assets/dungeon/dungeon-room-creator-100.js"
+          git diff -- assets/dungeon/dungeon-room-creator-100.js
+      - name: Commit diagnostic patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/dungeon/dungeon-room-creator-100.js
+          git commit -m "Disable global Room Creator V1 DOM observer for home UI diagnostic"
+          git push

@@ -1,11 +1,12 @@
-/* GenSrpG V16.78.43 — Room Creator configuration grid capture + UI recovery bootstrap.
+/* GenSrpG V16.78.30 — Room Creator configuration grid capture.
+   V16.78.43 adds only a UI-recovery bootstrap; the module's historical contract remains V16.78.30.
    Intercepts configuration touches before the historical Room Creator paint listener.
    UI-only: no combat, movement, spawn, timeline or world-runtime behavior is changed. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.0.2",APP_VERSION="16.78.43";
+const VERSION="1.0.2",APP_VERSION="16.78.30";
 let boundGrid=null,boundHandler=null,installed=false;
 function templateActive(){return !!DOC?.getElementById("drt167828Toggle")?.classList?.contains("on")}
 function zoneActive(){return !!DOC?.getElementById("drv167826Toggle")?.classList?.contains("on")}

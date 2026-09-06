@@ -33,9 +33,10 @@ assert.match(grid,/gens-ui-recovery-167843\.js\?v=167843/,'network-first bootstr
 assert.match(grid,/loadUiRecovery\(\)/,'recovery bootstrap not called');
 
 const sw=fs.readFileSync(swPath,'utf8');
-assert.match(sw,/gensrpg-cache-16\.78\.43-ui-recovery/,'fresh V16.78.43 cache missing');
+assert.match(sw,/gensrpg-cache-16\.78\.66-wall-block-visual/,'current V16.78.66 cache missing');
+assert.match(sw,/gensrpg-cache-16\.78\.40-authored-movement/,'authored-movement compatibility marker missing');
 assert.match(sw,/gens-ui-recovery-167843\.js/,'recovery asset not precached');
 assert.match(sw,/request\.destination==="script"\|\|request\.destination==="style"/,'JS/CSS network-first guard missing');
 assert.match(sw,/cache:"reload"/,'install must bypass stale HTTP cache');
 
-console.log('V16.78.43 UI recovery regression: OK');
+console.log('V16.78.66 UI recovery/cache regression: OK');

@@ -1,0 +1,32 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-authored-branch-nav-cleanup-167863.js'),'utf8');
+const RT='gensrpg_dungeon_runtime_v2';
+const store={};
+const rt={room:2,index:0,participants:['lyra'],positions:{lyra:0},last:{authoredRuntime167839:true,worldNodeId:'branch_A_7_cache'},authored167839:{roomNodes:{'2':'branch_A_7_cache'},heroNodes:{lyra:'branch_A_7_cache'}},authored167847ReturnStacks:{lyra:[{sourceNodeId:'A',sourceIndex:7,targetNodeId:'branch_A_7_cache'}]}};
+store[RT]=JSON.stringify(rt);
+function style(){return {display:'',setProperty(k,v){if(k==='display')this.display=v},removeProperty(k){if(k==='display')this.display=''}}}
+function btn(id,text){return {id,textContent:text,value:'',dataset:{},style:style(),hidden:false,setAttribute(){},removeAttribute(){},closest(){return this}}}
+const good=btn('dwr167846Return','↩ Retour vers Foret_1');
+const room=btn('legacyRoom','↩ SALLE 1');
+const exit=btn('dc01Explore','🚫 SORTIE NON RELIÉE');
+const other=btn('other','✅ FIN DU TOUR');
+const all=[good,room,exit,other];
+const listeners={};
+const document={readyState:'complete',querySelectorAll(){return all},getElementById(id){return all.find(x=>x.id===id)||null},addEventListener(n,fn){(listeners[n]||(listeners[n]=[])).push(fn)}};
+const context={console,JSON,Math,document,localStorage:{getItem(k){return store[k]||null}},setTimeout(fn){fn();return 1},DungeonCore01:{render(){},show(){}}};context.window=context;context.globalThis=context;
+vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-branch-nav-cleanup-167863.js'});
+const api=context.DungeonAuthoredBranchNavCleanup167863;
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.63');assert.equal(api.branchReturnActive(),true);
+api.sync();
+assert.equal(good.hidden,false,'dedicated cache return remains visible');
+assert.equal(room.hidden,true,'legacy SALLE button hidden in cache');
+assert.equal(exit.hidden,true,'legacy authored exit button hidden in cache');
+assert.equal(other.hidden,false,'unrelated actions remain visible');
+const x=JSON.parse(store[RT]);x.authored167847ReturnStacks.lyra=[];store[RT]=JSON.stringify(x);
+api.sync();
+assert.equal(room.hidden,false,'legacy room nav restored outside cache');
+assert.equal(exit.hidden,false,'normal authored exit restored outside cache');
+console.log('Dungeon authored branch nav cleanup V16.78.63: OK');

@@ -1,0 +1,25 @@
+name: Validate authored action fix V16.78.58
+on:
+  push:
+    branches:
+      - work/dungeon-cache-action-v2-2026-09-06
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax
+        run: |
+          node --check assets/dungeon/dungeon-authored-action-fix-167857.js
+          node --check assets/dungeon/dungeon-authored-bootstrap-167849.js
+      - name: Targeted action regression
+        run: node tests/dungeon_authored_action_fix_v167857.test.cjs
+      - name: Dungeon regressions
+        run: |
+          node tests/dungeon_zone_links_v167846.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_authored_cache_visual_v167852.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs

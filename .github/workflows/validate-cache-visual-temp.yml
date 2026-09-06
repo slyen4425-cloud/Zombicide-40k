@@ -1,0 +1,28 @@
+name: Validate authored cache visual runtime
+on:
+  push:
+    branches:
+      - work/dungeon-cache-runtime-visual-fix-2026-09-06
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax
+        run: |
+          node --check assets/dungeon/dungeon-authored-cache-visual-167852.js
+          node --check assets/dungeon/dungeon-authored-bootstrap-167849.js
+      - name: Cache visual runtime regression
+        run: node tests/dungeon_authored_cache_visual_v167852.test.cjs
+      - name: Authored Dungeon regressions
+        run: |
+          node tests/dungeon_authored_bootstrap_v167849.test.cjs
+          node tests/dungeon_zone_links_v167846.test.cjs
+          node tests/dungeon_authored_runtime_v167839.test.cjs
+          node tests/dungeon_zone_content_v167824.test.cjs
+          node tests/dungeon_exact_trap_runtime_v167845.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+          node tests/dungeon_cache_editor_stability_v167851.test.cjs

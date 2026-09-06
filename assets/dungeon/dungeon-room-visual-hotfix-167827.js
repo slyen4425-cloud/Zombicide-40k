@@ -1,14 +1,14 @@
-/* GenSrpG V16.78.65 — Room Creator visual polish, responsiveness-safe.
-   Keeps context selection and legacy UI cleanup, and now paints supported room themes
-   with the existing six-variant floor texture sets. Wall rendering is intentionally left
-   untouched until the dedicated wall asset is confirmed. No combat, movement, timeline,
-   spawn behavior or room geometry is changed. */
+/* GenSrpG V16.78.66 — Room Creator visual polish, responsiveness-safe.
+   Paints supported floor themes with their existing six-variant texture sets and uses
+   the validated centered stone-block asset for blocked wall cells. No combat, movement,
+   timeline, spawn behavior or room geometry is changed. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.2.0",APP_VERSION="16.78.65";
+const VERSION="1.3.0",APP_VERSION="16.78.66";
 const FLOOR_ROOT="assets/dungeon/creatures/";
+const WALL_ASSET=FLOOR_ROOT+"dng_wall_block.jpg";
 const FLOOR_THEMES=new Set(["stone","cave","forest","ice","lava"]);
 let installed=false,timer=0;
 
@@ -29,7 +29,7 @@ function retireLegacyUi(){
 function ensureThemeStyles(){
   if(!DOC||DOC.getElementById("drv167827ThemeStyles"))return;
   const st=DOC.createElement("style");st.id="drv167827ThemeStyles";
-  st.textContent=".drc100Cell.drv167827Textured{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}.drc100Cell.drv167827Textured.obj{font-size:20px;text-shadow:0 1px 3px #000,0 0 5px #000}.drc100Cell.wall{background-image:none!important}";
+  st.textContent=".drc100Cell.drv167827Textured{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}.drc100Cell.drv167827Textured.obj{font-size:20px;text-shadow:0 1px 3px #000,0 0 5px #000}.drc100Cell.wall{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;color:transparent!important;text-shadow:none!important;border-color:#4f4a43!important}";
   DOC.head?.appendChild(st);
 }
 function theme(){
@@ -49,7 +49,12 @@ function paintThemeTextures(){
   if(!cells.length)return false;
   for(let i=0;i<cells.length;i++){
     const el=cells[i],wall=el.classList?.contains("wall");
-    if(wall||!themeName){
+    if(wall){
+      el.classList?.remove("drv167827Textured");
+      if(el.style)el.style.backgroundImage='url("'+WALL_ASSET+'")';
+      continue;
+    }
+    if(!themeName){
       el.classList?.remove("drv167827Textured");
       if(el.style)el.style.backgroundImage="";
       continue;
@@ -72,7 +77,7 @@ function autoSelectVisibleContext(){
   try{
     if(typeof sel.onchange==="function")sel.onchange();
     else sel.dispatchEvent?.(new Event("change",{bubbles:true}));
-  }catch(e){console.warn("GenSrpG V16.78.65 context selection",e)}
+  }catch(e){console.warn("GenSrpG V16.78.66 context selection",e)}
   return true;
 }
 function repairButton(){
@@ -130,6 +135,6 @@ function install(){
   poll();
   return true;
 }
-ROOT.DungeonRoomVisualHotfix167827={VERSION,APP_VERSION,FLOOR_THEMES,floorAsset,paintThemeTextures,retireLegacyUi,autoSelectVisibleContext,repairButton,repairHint,refresh,install};
+ROOT.DungeonRoomVisualHotfix167827={VERSION,APP_VERSION,FLOOR_THEMES,WALL_ASSET,floorAsset,paintThemeTextures,retireLegacyUi,autoSelectVisibleContext,repairButton,repairHint,refresh,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}else install();
 })();

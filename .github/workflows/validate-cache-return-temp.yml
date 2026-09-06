@@ -1,0 +1,18 @@
+name: Validate cache return position temp
+on:
+  push:
+    branches:
+      - work/dungeon-cache-return-fix-2026-09-06
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tests/dungeon_authored_return_persist_v167862.test.cjs
+      - run: node tests/dungeon_authored_action_fix_v167857.test.cjs
+      - run: node tests/dungeon_zone_links_v167846.test.cjs
+      - run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - run: node tests/dungeon_secondary_branch_content_fix_v167860.test.cjs
+      - run: node tests/dungeon_runtime_regression.test.cjs

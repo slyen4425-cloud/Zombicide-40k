@@ -20,8 +20,8 @@ ROOT.DungeonRoomCreatorFeedback167821={VERSION,inferRoomId,summaryFor,updateSumm
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();
 
-/* V16.78.39 — charge les choix aléatoires, la sélection unique World Builder,
-   le moteur dédié des donjons construits, la configuration intuitive et le multijoueur existant. */
+/* V16.78.49 — charge les choix aléatoires, la sélection unique World Builder,
+   le moteur dédié des donjons construits, le bootstrap final, la configuration intuitive et le multijoueur existant. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
@@ -31,11 +31,12 @@ function neutralizeLegacyLauncher(){if(!DOC)return;let el=DOC.getElementById("dz
 function loadMultiplayerEntry(){if(!DOC||ROOT.GenSrpGMultiplayerEntry167831||DOC.getElementById("gmp167831Script"))return;const m=DOC.createElement("script");m.id="gmp167831Script";m.src="assets/gensrpg/gens-multiplayer-entry-167831.js?v=167833";m.async=false;DOC.body.appendChild(m)}
 function loadRandomLibrary(){if(!DOC||ROOT.DungeonRandomLibraryContent167832||DOC.getElementById("drl167832Script"))return;const r=DOC.createElement("script");r.id="drl167832Script";r.src="assets/dungeon/dungeon-random-library-content-167832.js?v=167833";r.async=false;DOC.body.appendChild(r)}
 function loadWorldSessionBridge(){if(!DOC||ROOT.DungeonWorldSessionBridge167832||DOC.getElementById("dws167832Script"))return;const w=DOC.createElement("script");w.id="dws167832Script";w.src="assets/dungeon/dungeon-world-session-bridge-167832.js?v=167839";w.async=false;DOC.body.appendChild(w)}
+function loadAuthoredBootstrap(){if(!DOC||ROOT.DungeonAuthoredBootstrap167849||DOC.getElementById("dab167849Script"))return;const b=DOC.createElement("script");b.id="dab167849Script";b.src="assets/dungeon/dungeon-authored-bootstrap-167849.js?v=167849";b.async=false;DOC.body.appendChild(b)}
 function loadIntuitiveUI(){if(!DOC||ROOT.DungeonRoomContentUI167831||DOC.getElementById("dui167831Script"))return;const u=DOC.createElement("script");u.id="dui167831Script";u.src="assets/dungeon/dungeon-room-content-ui-167831.js?v=167833";u.async=false;DOC.body.appendChild(u)}
 function loadGridCapture(){if(!DOC)return;if(ROOT.DungeonRoomGridCapture167830){loadIntuitiveUI();return}if(DOC.getElementById("drgc167830Script")){setTimeout(loadGridCapture,50);return}const g=DOC.createElement("script");g.id="drgc167830Script";g.src="assets/dungeon/dungeon-room-grid-capture-167830.js?v=167833";g.async=false;g.onload=loadIntuitiveUI;DOC.body.appendChild(g)}
 function loadTemplateContent(){if(!DOC)return;if(ROOT.DungeonRoomTemplateContent167828){loadGridCapture();return}if(DOC.getElementById("drt167828Script")){setTimeout(loadTemplateContent,50);return}const t=DOC.createElement("script");t.id="drt167828Script";t.src="assets/dungeon/dungeon-room-template-content-167828.js?v=167833";t.async=false;t.onload=loadGridCapture;DOC.body.appendChild(t)}
 function loadHotfix(){if(!DOC)return;if(ROOT.DungeonRoomVisualHotfix167827){loadTemplateContent();return}if(DOC.getElementById("drv167827Script")){setTimeout(loadHotfix,50);return}const h=DOC.createElement("script");h.id="drv167827Script";h.src="assets/dungeon/dungeon-room-visual-hotfix-167827.js?v=167833";h.async=false;h.onload=loadTemplateContent;DOC.body.appendChild(h)}
 function loadVisualConfig(){if(!DOC)return;if(ROOT.DungeonRoomVisualConfig167826){loadHotfix();return}if(DOC.getElementById("drv167826Script")){setTimeout(loadVisualConfig,50);return}if(!ROOT.DungeonZoneContent167824&&attempts++<80){setTimeout(loadVisualConfig,50);return}neutralizeLegacyLauncher();const s=DOC.createElement("script");s.id="drv167826Script";s.src="assets/dungeon/dungeon-room-visual-config-167826.js?v=167833";s.async=false;s.onload=loadHotfix;DOC.body.appendChild(s)}
-function boot(){loadMultiplayerEntry();loadRandomLibrary();loadWorldSessionBridge();loadVisualConfig()}
+function boot(){loadMultiplayerEntry();loadRandomLibrary();loadWorldSessionBridge();loadAuthoredBootstrap();loadVisualConfig()}
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",boot,{once:true});else boot()}
 })();

@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.43-ui-recovery";
+const CACHE_NAME = "gensrpg-cache-16.78.65-room-visual-polish";
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement
 
@@ -56,9 +56,6 @@ async function networkFirst(request){
   }
 }
 
-/* =========================
-   INSTALLATION
-   ========================= */
 self.addEventListener("install",event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{
@@ -66,9 +63,6 @@ self.addEventListener("install",event=>{
   }));
 });
 
-/* =========================
-   ACTIVATION
-   ========================= */
 self.addEventListener("activate",event=>{
   event.waitUntil((async()=>{
     const cacheNames=await caches.keys();
@@ -77,23 +71,16 @@ self.addEventListener("activate",event=>{
   })());
 });
 
-/* =========================
-   MISE À JOUR IMMÉDIATE
-   ========================= */
 self.addEventListener("message",event=>{
   if(event.data&&event.data.type==="SKIP_WAITING")self.skipWaiting();
 });
 
-/* =========================
-   REQUÊTES
-   ========================= */
 self.addEventListener("fetch",event=>{
   const request=event.request;
   if(request.method!=="GET")return;
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
 
-  /* HTML / navigation : toujours réseau d'abord. */
   if(request.mode==="navigate"||request.destination==="document"){
     event.respondWith((async()=>{
       try{
@@ -107,19 +94,16 @@ self.addEventListener("fetch",event=>{
     return;
   }
 
-  /* JS / CSS : réseau d'abord pour empêcher le mélange de versions PWA. */
   if(request.destination==="script"||request.destination==="style"||/\.(?:js|css)$/i.test(url.pathname)){
     event.respondWith(networkFirst(request));
     return;
   }
 
-  /* Manifest, sons et assets Dungeon : réseau d'abord. */
   if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")){
     event.respondWith(networkFirst(request));
     return;
   }
 
-  /* Autres assets : cache d'abord, puis réseau. */
   event.respondWith((async()=>{
     const cached=await caches.match(request);
     if(cached)return cached;

@@ -17,11 +17,15 @@ const authored={active(){return authoredActive},graph(){return JSON.parse(JSON.s
 const roomApi={findRoom(id){return rooms[id]?JSON.parse(JSON.stringify(rooms[id])):null},loadLibrary(){return Object.values(rooms).map(r=>JSON.parse(JSON.stringify(r)))}};
 const context={console,JSON,Math,Date,localStorage:store,setTimeout(){return 1},DungeonAuthoredRuntime167839:authored,DungeonWorldBuilder167821:builder,DungeonRoomCreator100:roomApi,DungeonCore01:{render(){return true}},showToast(){}};
 context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-zone-links-167846.js'});
-const api=context.DungeonZoneLinks167846;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.48');assert.equal(api.VERSION,'1.2.0');
+const api=context.DungeonZoneLinks167846;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.50');assert.equal(api.VERSION,'1.2.1');
+const cacheClick={target:{closest(sel){if(sel==='#drc100Modal,#drc300Modal')return {};if(sel==='#drc300Caches')return {};return null}}};
+const structuralClick={target:{closest(sel){if(sel==='#drc100Modal,#drc300Modal')return {};if(sel==='#drc300Caches')return null;return null}}};
+assert.equal(api.shouldRefreshEditorClick(cacheClick),false,'touching the cache picker must not rebuild the select on mobile');
+assert.equal(api.shouldRefreshEditorClick(structuralClick),true,'structural editor clicks may still request a refresh');
 let val=builder.validation(graph);assert.equal(val.valid,true);assert.equal(val.cacheCount,1);assert.deepEqual(Array.from(val.warnings),[],'valid secondary library branch must not require a main-pool node');
 assert.equal(api.reverseEdge(graph,'B',1).id,'e1');assert.equal(api.travelReverse(),true);let rt=JSON.parse(store.getItem(RT));assert.equal(rt.last.worldNodeId,'A');assert.equal(rt.positions.hero,4);
 rt=makeRuntime('A',2);store.setItem(RT,JSON.stringify(rt));const binding=api.cacheBinding(graph,'A',2);assert.equal(api.bindingRoomId(graph,binding),'attic');const branch=api.graphWithBranch(graph,binding);assert.ok(branch);assert.equal(graph.nodes.length,2);assert.equal(branch.graph.nodes.length,3);assert.equal(api.travelCache(),true);rt=JSON.parse(store.getItem(RT));assert.equal(rt.last.customRoomId,'attic');assert.equal(rt.positions.hero,3);assert.equal(rt.authored167847ReturnStacks.hero.length,1);assert.equal(api.travelReturn(),true);rt=JSON.parse(store.getItem(RT));assert.equal(rt.last.worldNodeId,'A');assert.equal(rt.positions.hero,2);
 assert.equal(api.saveCacheBinding('world-1','A',2,'attic'),true);assert.equal(graph.cacheBindings[0].targetRoomId,'attic');assert.equal(graph.cacheBindings[0].targetNodeId,'');assert.equal(graph.nodes.length,2);
 graph.cacheBindings=[];val=builder.validation(graph);assert.ok(val.warnings.some(w=>/Cache sans destination/.test(w)),'an unlinked physical cache should get a clear warning, not an old pool warning');
 authoredActive=false;store.setItem(RT,JSON.stringify(makeRuntime('A',2)));assert.equal(api.authoredContext(),null);assert.equal(api.travelCache(),false);
-console.log('Dungeon authored secondary zone links V16.78.48: OK');
+console.log('Dungeon authored secondary zone links V16.78.50: OK');

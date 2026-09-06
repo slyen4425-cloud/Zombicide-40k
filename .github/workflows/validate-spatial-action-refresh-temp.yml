@@ -1,0 +1,22 @@
+name: Validate spatial action refresh temp
+
+on:
+  push:
+    branches:
+      - work/dungeon-action-refresh-spatial-hook-2026-09-06
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test authored action refresh
+        run: node tests/dungeon_authored_action_fix_v167857.test.cjs
+      - name: Test secondary branch content
+        run: node tests/dungeon_secondary_branch_content_fix_v167860.test.cjs
+      - name: Dungeon runtime regression
+        run: node tests/dungeon_runtime_regression.test.cjs

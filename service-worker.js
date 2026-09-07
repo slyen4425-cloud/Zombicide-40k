@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.70-wall-hd-enemy-token";
+const CACHE_NAME = "gensrpg-cache-16.78.72-perceptual-actor-scale";
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement
 

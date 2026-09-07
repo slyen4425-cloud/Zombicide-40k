@@ -5,9 +5,9 @@
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.74";
+const VERSION="1.0.1",APP_VERSION="16.78.74";
 const HIDDEN_CLASS="dui167874Hidden";
-let observer=null;
+let retries=0;
 function norm(s){return String(s||"").replace(/\s+/g," ").trim()}
 function isEnemySummaryText(text){return /ennemi\(s\) vivant\(s\)/i.test(norm(text))}
 function isGhostChestText(text){const t=norm(text);return /Coffre\s+(?:commun|rare|epic|épique|legendary|légendaire)/i.test(t)&&!/Va sur la case/i.test(t)}
@@ -37,13 +37,16 @@ function hideRedundant(root){
 }
 function ensureStyle(){if(!DOC||DOC.getElementById("dui167874Style"))return;const s=DOC.createElement("style");s.id="dui167874Style";s.textContent='.'+HIDDEN_CLASS+'{display:none!important}';DOC.head?.appendChild(s)}
 function sync(){ensureStyle();return hideRedundant(DOC)}
-function installObserver(){
-  if(!DOC||observer||typeof ROOT.MutationObserver!=="function")return;
-  const host=DOC.querySelector("#dc047RoomBoard")?.parentElement||DOC.body;if(!host)return;
-  observer=new ROOT.MutationObserver(muts=>{for(const m of muts){for(const n of m.addedNodes||[]){if(n?.nodeType===1)hideRedundant(n)}}});
-  observer.observe(host,{childList:true,subtree:true});
+function wrap(){
+  const core=ROOT.DungeonCore01;if(!core)return false;
+  for(const name of ["render","show"]){
+    const old=core[name];if(typeof old!=="function"||old.__dui167874)continue;
+    const w=function(){const out=old.apply(this,arguments);try{sync()}catch(e){}return out};
+    w.__dui167874=true;w.__duiOriginal=old;core[name]=w;
+  }
+  return true;
 }
-function install(){sync();installObserver();for(const ms of [50,250,700])setTimeout(sync,ms)}
-ROOT.DungeonUICleanup167874={VERSION,APP_VERSION,isEnemySummaryText,isGhostChestText,hideRedundant,sync,install};
+function install(){if(wrap()){for(const ms of [0,50,250,700])setTimeout(sync,ms);return true}if(retries++<30)setTimeout(install,100);return false}
+ROOT.DungeonUICleanup167874={VERSION,APP_VERSION,isEnemySummaryText,isGhostChestText,hideRedundant,sync,wrap,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();

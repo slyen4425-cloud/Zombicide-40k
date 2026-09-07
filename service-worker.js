@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.83-ui-freeze-rollback";
+const CACHE_NAME = "gensrpg-cache-16.78.84-safe-editor-only";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -6,6 +6,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.83-ui-freeze-rollback";
 // gensrpg-cache-16.78.80-stat-rule-links-help
 // gensrpg-cache-16.78.81-custom-stat-effects
 // gensrpg-cache-16.78.82-rpg-rule-unification
+// gensrpg-cache-16.78.83-ui-freeze-rollback
 
 const CORE_FILES = [
   "./",

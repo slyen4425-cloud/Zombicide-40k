@@ -5,13 +5,12 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const file=path.join(root,'assets','gensrpg','gens-custom-stats-167881.js');
 const helpFile=path.join(root,'assets','gensrpg','gens-stat-help-extension-167881.js');
-const runtimeFile=path.join(root,'assets','gensrpg','gens-equipment-ability-runtime-167885.js');
 const src=fs.readFileSync(file,'utf8');
 const help=fs.readFileSync(helpFile,'utf8');
 assert.doesNotThrow(()=>new Function(src),'V16.78.81 custom stat engine must stay syntactically valid');
-assert.doesNotThrow(()=>new Function(help),'V16.78.85 safe editor extension must stay syntactically valid');
+assert.doesNotThrow(()=>new Function(help),'V16.78.84 safe editor extension must stay syntactically valid');
 assert.match(src,/APP_VERSION="16\.78\.81"/);
-assert.match(help,/APP_VERSION="16\.78\.85"/,'safe editor extension version must be explicit');
+assert.match(help,/APP_VERSION="16\.78\.84"/,'safe editor extension version must be explicit');
 assert.match(src,/function syncPrimaryList/,'custom stats must join the canonical Characteristics principales selector');
 assert.match(src,/rpgStatsList/,'custom stat activation must reuse the existing active-stat list');
 assert.match(src,/p\.rpgUniverse\.stats\.customStats=next/,'customStats must remain the definition source of truth');
@@ -20,7 +19,7 @@ assert.match(src,/function effectTotals/,'runtime modifiers must be calculated f
 assert.match(src,/attribute:force/);assert.match(src,/movement/);assert.match(src,/damage:all/);
 assert.match(src,/effectiveAttackStats/,'existing custom stat damage effects must still reach actual hero attack power');
 assert.match(src,/dungeonHeroMoveValue083/,'existing custom stat movement effects must still reach actual movement allowance');
-assert.match(src,/dungeonAttributeValue/,'existing custom stat effects must still reach core RPG attributes');
+assert.match(src,/dungeonAttributeValue/,'custom stat effects must reach core RPG attributes');
 assert.doesNotMatch(src,/customStatEffectsRuntime|localStorage\.setItem\([^\n]*effects/i,'effects must not create a parallel runtime source of truth');
 assert.match(help,/function statCatalog/,'editor extension must expose one shared stat catalogue');
 assert.match(help,/GensCustomStats167879\?\.defs/,'custom stats must come from the canonical custom-stat definitions');
@@ -30,11 +29,10 @@ assert.match(help,/gse167884HitStat/,'equipment editor must expose a configurabl
 assert.match(help,/gse167884DamageStat/,'equipment editor must expose a configurable raw-damage stat');
 assert.match(help,/rpgAbilityRefs/,'equipment must store only ability-library references');
 assert.match(help,/loadAbilityLibrary/,'ability choices must reuse the existing library');
-assert.match(help,/gens-equipment-ability-runtime-167885\.js\?v=167885/,'safe editor loader must load the isolated V16.78.85 runtime adapter');
-assert.doesNotMatch(help,/dungeonTalentCalculatedAmount|applyDungeonAttackDamage|effectiveAttackStats|dungeonHeroMoveValue083|enemyCells\s*=|dungeonRoom\s*=|setInterval|MutationObserver/,'editor/loader layer must not patch combat math, movement or global observers');
+assert.doesNotMatch(help,/dungeonTalentCalculatedAmount|dungeonTalentDealDirectDamage|dungeonTreeNodesForHero|dungeonUnlockedActiveTalents|dungeonUnlockedSkillEffectsForHero|applyDungeonAttackDamage|effectiveAttackStats|dungeonHeroMoveValue083|enemyCells\s*=|dungeonRoom\s*=/,'V16.78.84 must remain editor-only and must not patch runtime/gameplay');
+assert.doesNotMatch(help,/setInterval|MutationObserver/,'safe editor layer must not install repeating/global observers');
 assert.match(help,/api\.HELP\.statEffects/,'contextual help must still explain gameplay effects');
 assert.match(help,/api\.HELP\.primaryStats/,'contextual help must still explain the active-stat selector');
-assert.equal(fs.existsSync(runtimeFile),true,'isolated V16.78.85 equipment ability runtime asset must exist');
 const profile={id:'demo',name:'Dungeon demo',rpgUniverse:{stats:{active:['force','epuisement'],customStats:[{id:'epuisement',name:'Épuisement',kind:'gauge',min:0,max:100,defaultValue:0,effects:[{when:'gte',threshold:50,target:'attribute:force',mode:'flat',value:-2}]}]},exploration:{}}};
 const hero={customStats:{epuisement:60},rpgAttributes:{force:10,epuisement:60}};
 const sandbox={console,Math,Date,setTimeout:()=>0,clearTimeout:()=>{},localStorage:{getItem:()=>null,setItem:()=>{}},window:null,globalThis:null};
@@ -44,14 +42,10 @@ sandbox.GensCustomStats167879.installEffectHooks();
 assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true,'custom stat activation must use the canonical stats.active list');
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensCustomStats167879.effectTotals('h','attribute:force'))),{flat:-2,percent:0});
 assert.equal(sandbox.dungeonAttributeValue('force'),8,'Épuisement >= 50 must actually reduce Force by 2');
-require('./gens_equipment_ability_runtime_v167885.test.cjs');
-const sitePath=process.argv[2]&&fs.existsSync(process.argv[2])?process.argv[2]:null;
-if(sitePath){
- const site=fs.readFileSync(sitePath,'utf8');
+const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
+if(site){
  assert.match(site,/gens-custom-stats-167881\.js\?v=167881/,'deployed site must load the canonical custom-stat engine');
  assert.match(site,/gens-stat-help-extension-167881\.js\?v=167881/,'deployed site must load the safe editor extension');
  assert.doesNotMatch(site,/gens-custom-stats-167879\.js\?v=167879/,'obsolete custom-stat runtime must not be injected alongside V16.78.81');
- const deployedRuntime=path.join(path.dirname(sitePath),'assets','gensrpg','gens-equipment-ability-runtime-167885.js');
- assert.equal(fs.existsSync(deployedRuntime),true,'deployed site must include the isolated V16.78.85 equipment ability runtime asset');
 }
-console.log('GenSrpG custom stats + safe equipment ability runtime V16.78.85 regression: OK');
+console.log('GenSrpG custom stats + safe editor-only V16.78.84 regression: OK');

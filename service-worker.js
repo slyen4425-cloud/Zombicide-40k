@@ -1,10 +1,11 @@
-const CACHE_NAME = "gensrpg-cache-16.78.82-rpg-rule-unification";
+const CACHE_NAME = "gensrpg-cache-16.78.83-ui-freeze-rollback";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
 // gensrpg-cache-16.78.79-generic-custom-stats
 // gensrpg-cache-16.78.80-stat-rule-links-help
 // gensrpg-cache-16.78.81-custom-stat-effects
+// gensrpg-cache-16.78.82-rpg-rule-unification
 
 const CORE_FILES = [
   "./",

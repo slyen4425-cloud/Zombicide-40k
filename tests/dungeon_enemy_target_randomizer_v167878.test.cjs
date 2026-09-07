@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-enemy-target-randomizer-167878.js'),'utf8');
+assert.doesNotThrow(()=>new Function(src),'enemy target randomizer must stay syntactically valid');
+assert.match(src,/APP_VERSION="16\.78\.78"/);
+assert.match(src,/REPEAT_FACTOR=\.35/,'repeat target must be penalized, not forbidden');
+assert.match(src,/dungeonHeroThreatScore/,'existing threat foundation must be reused');
+assert.match(src,/dungeonThreatBonus/,'future aggro/tanking hook must remain available');
+assert.match(src,/dungeonShouldMjControl156/,'MJ forced targeting must stay authoritative');
+assert.match(src,/old\.apply\(this,arguments\)/,'MJ path must preserve the requested target unchanged');
+assert.match(src,/old\.call\(this,instanceId,skillId,picked\)/,'automatic attacks must receive the randomized target');
+assert.doesNotMatch(src,/sort\(\(a,b\)=>Number\(a\.s\.hp\)-Number\(b\.s\.hp\)\)/,'must not use deterministic lowest-HP targeting');
+assert.doesNotMatch(src,/positions\s*=|enemyCells\s*=|saveActiveEnemies|localStorage\.setItem/,'target selection must not mutate gameplay state');
+const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
+if(site)assert.match(site,/dungeon-enemy-target-randomizer-167878\.js\?v=167878/,'deployed index must load target randomizer');
+console.log('Dungeon enemy target randomizer V16.78.78 regression: OK');

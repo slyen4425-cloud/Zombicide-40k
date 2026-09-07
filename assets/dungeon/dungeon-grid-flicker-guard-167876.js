@@ -1,6 +1,7 @@
-/* GenSrpG Dungeon V16.78.77 — source render stability.
-   Authored World Builder only: applies terrain before dungeonMapHtml reaches the live DOM
-   and paints Core 3.10 actor tokens synchronously after a board rebuild. Visual only. */
+/* GenSrpG Dungeon V16.78.78 — source render stability + enemy target randomization.
+   Authored World Builder only: applies terrain before dungeonMapHtml reaches the live DOM,
+   paints Core 3.10 actor tokens synchronously after a board rebuild, and randomizes automatic
+   enemy targets while preserving MJ forced targets. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
@@ -9,8 +10,10 @@ const RT_KEY="gensrpg_dungeon_runtime_v2";
 const FLOOR_ROOT="assets/dungeon/creatures/";
 const WALL_ASSET=FLOOR_ROOT+"dng_wall_block.jpg";
 const THEMES=new Set(["stone","cave","forest","ice","lava"]);
-const VERSION="2.0.0",APP_VERSION="16.78.77";
-let retries=0;
+const VERSION="2.1.0",APP_VERSION="16.78.78";
+const ENEMY_REPEAT_FACTOR=.35;
+const lastEnemyTarget=new Map();
+let retries=0,targetRetries=0;
 function rt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
 function room(x){const id=String(x?.last?.customRoomId||"");if(!id)return null;try{return ROOT.DungeonRoomCreator100?.findRoom?.(id)||null}catch(e){return null}}
@@ -27,7 +30,13 @@ function token(cls,src,fallback,title){const t=DOC.createElement("span");t.class
 function paintTokensNow(){if(!DOC)return 0;const x=rt();if(!authored(x)||Number(x.room||0)<=0)return 0;const cells=[...DOC.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")];if(!cells.length)return 0;cells.forEach(c=>c.querySelectorAll(".dc310Hero,.dc310Enemy").forEach(n=>n.remove()));const active=String(x.participants?.[Number(x.index)||0]||"");let count=0;(x.participants||[]).forEach(id=>{try{if(ROOT.DungeonSpatial313?.sameView?.(x,id)===false)return}catch(e){}const p=Number(x.positions?.[id]);if(!Number.isInteger(p)||!cells[p])return;cells[p].appendChild(token("dc310Hero"+(String(id)===active?" active":""),heroArt(id),initials(id),heroName(id)));count++});for(const e of activeEnemies(x)){const p=Number(x.enemyCells?.[e.id]);if(!Number.isInteger(p)||!cells[p])continue;let name=e.name||"Ennemi";try{name=ROOT.activeEnemyDefinition?.(e.enemyId)?.name||name}catch(_){}cells[p].appendChild(token("dc310Enemy"+(String(x.last?.keyEnemyId||"")===String(e.id)?" key":""),enemyArt(e),"👹",name));count++}return count}
 function disableLateScaleObserver(){try{const o=ROOT.__dac167852TokenObserver;if(o&&typeof o.disconnect==="function")o.disconnect();if(o)ROOT.__dac167852TokenObserver=o}catch(e){}}
 function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dsr167877)continue;const w=function(){const out=old.apply(this,arguments);try{paintTokensNow()}catch(e){}return out};w.__dsr167877=true;w.__dsrOriginal=old;core[name]=w}return true}
-function install(){ensureStyle();disableLateScaleObserver();const a=patchMapHtml(),b=wrapCore();if(a&&b){try{paintTokensNow()}catch(e){}return true}if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
-ROOT.DungeonGridFlickerGuard167876={VERSION,APP_VERSION,patchMapHtml,paintTokensNow,disableLateScaleObserver,install};
+function combatLivingHeroes(){const ids=Array.isArray(ROOT.dungeonCombatSelection?.heroes)?ROOT.dungeonCombatSelection.heroes:[];return ids.filter(id=>{try{return Number(ROOT.dungeonCombatHeroSnapshot?.(id)?.hp)>0}catch(e){return false}}).map(String)}
+function heroThreat(heroId){try{if(typeof ROOT.dungeonHeroThreatScore==="function")return Math.max(.01,Number(ROOT.dungeonHeroThreatScore(heroId))||1)}catch(e){}try{return Math.max(.01,1+(Number(ROOT.loadState?.(heroId)?.dungeonThreatBonus)||0))}catch(e){return 1}}
+function chooseEnemyTarget(enemyId,rng=Math.random){const ids=combatLivingHeroes();if(!ids.length)return null;if(ids.length===1){lastEnemyTarget.set(String(enemyId),ids[0]);return ids[0]}const prev=lastEnemyTarget.get(String(enemyId));const weighted=ids.map(id=>({id,w:heroThreat(id)*(String(id)===String(prev)?ENEMY_REPEAT_FACTOR:1)}));const total=weighted.reduce((n,x)=>n+x.w,0);let roll=Math.max(0,Math.min(.999999999,Number(rng())||0))*total;for(const x of weighted){roll-=x.w;if(roll<=0){lastEnemyTarget.set(String(enemyId),x.id);return x.id}}const pick=weighted[weighted.length-1].id;lastEnemyTarget.set(String(enemyId),pick);return pick}
+function isMjControlledEnemy(instanceId){try{const cur=typeof ROOT.dungeonCurrentTurn156==="function"?ROOT.dungeonCurrentTurn156():null;return !!(ROOT.dungeonTurn156?.active&&cur?.kind==="enemy"&&String(cur.id)===String(instanceId)&&typeof ROOT.dungeonShouldMjControl156==="function"&&ROOT.dungeonShouldMjControl156(cur))}catch(e){return false}}
+function wrapEnemyTargeting(){const old=ROOT.rollDungeonEnemyAttackSkill;if(typeof old!=="function"||old.__dtr167878)return false;const w=function(instanceId,skillId,targetHeroId=null){if(isMjControlledEnemy(instanceId))return old.apply(this,arguments);const picked=chooseEnemyTarget(instanceId);if(!picked)return old.apply(this,arguments);return old.call(this,instanceId,skillId,picked)};w.__dtr167878=true;w.__dtrOriginal=old;ROOT.rollDungeonEnemyAttackSkill=w;return true}
+function installTargeting(){if(wrapEnemyTargeting())return true;if(targetRetries++<50&&typeof setTimeout==="function")setTimeout(installTargeting,100);return false}
+function install(){ensureStyle();disableLateScaleObserver();const a=patchMapHtml(),b=wrapCore();installTargeting();if(a&&b){try{paintTokensNow()}catch(e){}return true}if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
+ROOT.DungeonGridFlickerGuard167876={VERSION,APP_VERSION,patchMapHtml,paintTokensNow,disableLateScaleObserver,ENEMY_REPEAT_FACTOR,combatLivingHeroes,heroThreat,chooseEnemyTarget,isMjControlledEnemy,wrapEnemyTargeting,installTargeting,install,lastEnemyTarget};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();

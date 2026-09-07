@@ -252,12 +252,14 @@ function renderLinksEditor(sync=true){
 }
 function restoreOldCustomHooks(){
   const names=["dungeonAttributeValue","dungeonHeroMoveValue083","dungeonDerivedDefense","dungeonArmorScore","dungeonMagicResistance","dungeonCriticalChance","dungeonDodgeChance","effectiveMaxWounds","dungeonMaxMana","effectiveAttackStats"];
-  for(const n of names){const f=R[n];if(typeof f==="function"&&f.__gcsEffects167881&&typeof f.__gcsOriginal==="function")R[n]=f.__gcsOriginal}
+  for(const n of names){
+    const f=R[n];if(typeof f==="function"&&f.__gcsEffects167881&&typeof f.__gcsOriginal==="function")R[n]=f.__gcsOriginal;
+    if(typeof R[n]==="function")R[n].__gcsEffects167881=true;
+  }
   for(const n of ["dc047StealthPrompt","dc047ResolveStealth","dungeonCombatAttack","dungeonCombatBasicAttack","dungeonCombatUseActiveTalent","dungeonCombatUseItemAbility316"]){
     const f=R[n];if(typeof f==="function"&&f.__gcs167879&&typeof f.__gcsOriginal==="function")R[n]=f.__gcsOriginal;
     if(typeof R[n]==="function")R[n].__gcs167879=true;
   }
-  if(typeof R.dungeonAttributeValue==="function")R.dungeonAttributeValue.__gcsEffects167881=true;
 }
 function wrapReplace(name,fn){
   const old=R[name];if(typeof old!=="function"||old.__gsr167887)return false;

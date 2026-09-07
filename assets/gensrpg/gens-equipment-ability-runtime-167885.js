@@ -5,7 +5,7 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis;
-const VERSION="1.0.0",APP_VERSION="16.78.85";
+const VERSION="1.0.1",APP_VERSION="16.78.85";
 
 function abilityLibrary(){
   try{return Array.isArray(R.loadAbilityLibrary?.())?R.loadAbilityLibrary():[]}catch(e){return []}
@@ -59,27 +59,32 @@ function mergeUnique(base,extra){
   for(const x of extra||[]){const id=String(x?.id||"");if(!id||seen.has(id))continue;seen.add(id);out.push(x)}
   return out;
 }
+function appendEffects(base,extra){
+  const out=Array.isArray(base)?base.slice():[];
+  for(const effect of extra||[])out.push(effect);
+  return out;
+}
 function install(){
-  const wrap=(name,buildExtra)=>{
+  const wrapAbilities=(name,buildExtra)=>{
     const old=R[name];
     if(typeof old!=="function"||old.__gearAbility167885)return false;
-    const w=function(hero){
-      const base=old.apply(this,arguments);
-      const extra=buildExtra(String(hero??""));
-      return mergeUnique(base,extra);
-    };
-    w.__gearAbility167885=true;
-    w.__original=old;
-    R[name]=w;
-    return true;
+    const w=function(hero){return mergeUnique(old.apply(this,arguments),buildExtra(String(hero??"")))};
+    w.__gearAbility167885=true;w.__original=old;R[name]=w;return true;
   };
-  wrap("dungeonTreeNodesForHero",hero=>grantedAbilities(hero));
-  wrap("dungeonUnlockedActiveTalents",hero=>grantedAbilities(hero).filter(a=>String(a?.type)==="active"));
-  wrap("dungeonUnlockedSkillEffectsForHero",hero=>grantedAbilities(hero).filter(a=>String(a?.type)!=="active").flatMap(a=>Array.isArray(a?.effects)?a.effects:[]));
+  wrapAbilities("dungeonTreeNodesForHero",hero=>grantedAbilities(hero));
+  wrapAbilities("dungeonUnlockedActiveTalents",hero=>grantedAbilities(hero).filter(a=>String(a?.type)==="active"));
+  const oldEffects=R.dungeonUnlockedSkillEffectsForHero;
+  if(typeof oldEffects==="function"&&!oldEffects.__gearAbility167885){
+    const w=function(hero){
+      const extra=grantedAbilities(String(hero??"")).filter(a=>String(a?.type)!=="active").flatMap(a=>Array.isArray(a?.effects)?a.effects:[]);
+      return appendEffects(oldEffects.apply(this,arguments),extra);
+    };
+    w.__gearAbility167885=true;w.__original=oldEffects;R.dungeonUnlockedSkillEffectsForHero=w;
+  }
   try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}
   return true;
 }
 
-R.GensEquipmentAbilityRuntime167885={VERSION,APP_VERSION,abilityLibrary,rpgAbilities,equippedItems,grantedAbilityIds,grantedAbilities,mergeUnique,install};
+R.GensEquipmentAbilityRuntime167885={VERSION,APP_VERSION,abilityLibrary,rpgAbilities,equippedItems,grantedAbilityIds,grantedAbilities,mergeUnique,appendEffects,install};
 install();
 })();

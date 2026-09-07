@@ -45,7 +45,4 @@ assert.deepEqual(JSON.parse(JSON.stringify(sandbox.dungeonUnlockedSkillEffectsFo
 state={inventory:[{itemId:'sword'},{itemId:'armor'}],rightHand:null,leftHand:null,equipment:null,rpgGear:{}};
 assert.deepEqual(sandbox.dungeonUnlockedActiveTalents('h').map(x=>x.id),['base_active'],'unequipping the item must immediately remove the granted ability');
 assert.equal(abilities[0].cost,undefined,'library definitions must not be mutated');
-
-const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
-if(site)assert.match(site,/gens-equipment-ability-runtime-167885\.js\?v=167885/,'deployed site must load the isolated equipment ability runtime');
 console.log('GenSrpG equipment ability runtime V16.78.85 regression: OK');

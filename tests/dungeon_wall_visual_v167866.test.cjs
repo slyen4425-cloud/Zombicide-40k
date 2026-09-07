@@ -9,6 +9,26 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const asset=path.join(root,'assets','dungeon','creatures','dng_wall_block.jpg');
 const siteIndex=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 
+function jpegSize(buf){
+  assert.ok(Buffer.isBuffer(buf),'wall asset must be binary data');
+  assert.equal(buf[0],0xff,'wall asset must start with JPEG SOI');
+  assert.equal(buf[1],0xd8,'wall asset must start with JPEG SOI');
+  let i=2;
+  const sof=new Set([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf]);
+  while(i+8<buf.length){
+    if(buf[i]!==0xff){i++;continue}
+    while(i<buf.length&&buf[i]===0xff)i++;
+    const marker=buf[i++];
+    if(marker===0xd8||marker===0xd9||marker===0x01)continue;
+    if(i+1>=buf.length)break;
+    const len=buf.readUInt16BE(i);
+    if(len<2||i+len>buf.length)break;
+    if(sof.has(marker))return {height:buf.readUInt16BE(i+3),width:buf.readUInt16BE(i+5)};
+    i+=len;
+  }
+  throw new Error('wall asset JPEG SOF marker not found');
+}
+
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
@@ -29,7 +49,10 @@ assert.doesNotMatch(runtime,/className="dav167867Wall"/,'old wall overlay must n
 assert.doesNotMatch(runtime,/dungeon_wall\.png/);
 
 assert.ok(fs.existsSync(asset),'validated wall block asset must exist');
-assert.ok(fs.statSync(asset).size>20000,'wall block asset must be the HD replacement, not the old tiny 96px file');
+const wallBytes=fs.readFileSync(asset);
+assert.ok(wallBytes.length>5000,'wall block asset must not be the old tiny placeholder');
+const dims=jpegSize(wallBytes);
+assert.ok(dims.width>=256&&dims.height>=256,`wall block asset must be at least 256x256, got ${dims.width}x${dims.height}`);
 for(const theme of ['stone','cave','forest','ice','lava']){
   assert.ok(fs.existsSync(path.join(root,'assets','dungeon','creatures',`dng_floor_${theme}_01.png`)),`missing ${theme} floor asset`);
 }
@@ -43,4 +66,4 @@ if(siteIndex){
   assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must be injected in deployed index');
 }
 
-console.log('Dungeon authored wall HD + enemy token framing V16.78.70 regression: OK');
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + enemy token framing V16.78.70 regression: OK`);

@@ -29,6 +29,7 @@ function jpegSize(buf){
   throw new Error('wall asset JPEG SOF marker not found');
 }
 
+assert.doesNotThrow(()=>new Function(runtime),'runtime visual bridge must stay syntactically valid');
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
@@ -41,10 +42,17 @@ assert.match(runtime,/room\?\.theme\|\|x\?\.last\?\.map\?\.environment/,'runtime
 assert.match(runtime,/dng_floor_"\+t\+"_"\+variant\+"\.png/,'runtime floor theme assets missing');
 assert.match(runtime,/dav167870WallCell/,'runtime wall-cell class missing');
 assert.match(runtime,/setProperty\("background-image"/,'runtime must paint the live cell background directly');
-assert.match(runtime,/enemyTokenRoot\(cell,img\)/,'enemy wrapper centering helper missing');
-assert.match(runtime,/dav167870EnemyToken/,'enemy token class missing');
-assert.match(runtime,/width:70%!important/,'enemy token must be slightly smaller than the cell');
-assert.match(runtime,/place-items:center!important/,'enemy token must be centered');
+assert.match(runtime,/enemyTokenRoot\(cell,img\)/,'actor wrapper centering helper missing');
+assert.match(runtime,/dav167870EnemyToken/,'actor token class missing');
+assert.match(runtime,/width:70%!important/,'actor token must retain a CSS fallback size');
+assert.match(runtime,/place-items:center!important/,'actor token must be centered');
+assert.match(runtime,/const ACTOR_RATIO=\.76/,'actor size ratio must be explicit and map-size independent');
+assert.match(runtime,/getBoundingClientRect/,'actor size must use the live rendered cell dimensions');
+assert.match(runtime,/function heroCellIndexes/,'hero tokens must use the same responsive sizing as enemies');
+assert.match(runtime,/function actorCellIndexes/,'hero and enemy cells must share one responsive sizing path');
+assert.match(runtime,/style\.setProperty\("object-fit","cover"/,'actor art must fill the token frame');
+assert.match(runtime,/ACTOR_ZOOM=1\.12/,'actor art framing zoom must be explicit');
+assert.match(runtime,/ResizeObserver/,'token sizing must be recalculated when the tactical grid resizes');
 assert.doesNotMatch(runtime,/className="dav167867Wall"/,'old wall overlay must not be used anymore');
 assert.doesNotMatch(runtime,/dungeon_wall\.png/);
 
@@ -66,4 +74,4 @@ if(siteIndex){
   assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must be injected in deployed index');
 }
 
-console.log(`Dungeon authored wall ${dims.width}x${dims.height} + enemy token framing V16.78.70 regression: OK`);
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + responsive actor token framing V16.78.70 regression: OK`);

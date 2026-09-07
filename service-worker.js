@@ -1,6 +1,7 @@
 const CACHE_NAME = "gensrpg-cache-16.78.77-source-render-stability";
-// Compatibility marker kept for the existing V16.78.40 deployment guard:
+// Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
+// gensrpg-cache-16.78.72-perceptual-actor-scale
 
 const CORE_FILES = [
   "./",

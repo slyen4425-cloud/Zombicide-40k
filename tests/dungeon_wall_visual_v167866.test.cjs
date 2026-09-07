@@ -78,8 +78,9 @@ assert.ok(dims.width>=256&&dims.height>=256,`wall block asset must be at least 2
 for(const theme of ['stone','cave','forest','ice','lava']){
   assert.ok(fs.existsSync(path.join(root,'assets','dungeon','creatures',`dng_floor_${theme}_01.png`)),`missing ${theme} floor asset`);
 }
-assert.match(sw,/gensrpg-cache-16\.78\.72-perceptual-actor-scale/);
+assert.match(sw,/gensrpg-cache-16\.78\.74-ui-cleanup/);
 assert.match(sw,/dungeon-authored-cache-visual-167852\.js/);
+assert.match(sw,/dungeon-ui-cleanup-167874\.js/);
 assert.match(sw,/dng_floor_forest_01\.png/);
 assert.match(sw,/dng_floor_ice_01\.png/);
 assert.match(sw,/dng_floor_lava_01\.png/);
@@ -88,4 +89,4 @@ if(siteIndex){
   assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must remain injected in deployed index');
 }
 
-console.log(`Dungeon authored wall ${dims.width}x${dims.height} + late Core 3.10 actor refit V16.78.73 regression: OK`);
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + late Core 3.10 actor refit preserved under V16.78.74 UI cleanup: OK`);

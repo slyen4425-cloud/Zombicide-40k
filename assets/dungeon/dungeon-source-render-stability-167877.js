@@ -9,7 +9,7 @@ const RT_KEY="gensrpg_dungeon_runtime_v2";
 const FLOOR_ROOT="assets/dungeon/creatures/";
 const WALL_ASSET=FLOOR_ROOT+"dng_wall_block.jpg";
 const THEMES=new Set(["stone","cave","forest","ice","lava"]);
-const VERSION="2.0.0",APP_VERSION="16.78.77";
+const VERSION="1.0.0",APP_VERSION="16.78.77";
 let retries=0;
 function rt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
@@ -28,6 +28,6 @@ function paintTokensNow(){if(!DOC)return 0;const x=rt();if(!authored(x)||Number(
 function disableLateScaleObserver(){try{const o=ROOT.__dac167852TokenObserver;if(o&&typeof o.disconnect==="function")o.disconnect();if(o)ROOT.__dac167852TokenObserver=o}catch(e){}}
 function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dsr167877)continue;const w=function(){const out=old.apply(this,arguments);try{paintTokensNow()}catch(e){}return out};w.__dsr167877=true;w.__dsrOriginal=old;core[name]=w}return true}
 function install(){ensureStyle();disableLateScaleObserver();const a=patchMapHtml(),b=wrapCore();if(a&&b){try{paintTokensNow()}catch(e){}return true}if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
-ROOT.DungeonGridFlickerGuard167876={VERSION,APP_VERSION,patchMapHtml,paintTokensNow,disableLateScaleObserver,install};
+ROOT.DungeonSourceRenderStability167877={VERSION,APP_VERSION,patchMapHtml,paintTokensNow,disableLateScaleObserver,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();

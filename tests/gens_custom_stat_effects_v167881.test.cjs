@@ -3,49 +3,122 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const file=path.join(root,'assets','gensrpg','gens-custom-stats-167881.js');
-const helpFile=path.join(root,'assets','gensrpg','gens-stat-help-extension-167881.js');
-const src=fs.readFileSync(file,'utf8');
-const help=fs.readFileSync(helpFile,'utf8');
-assert.doesNotThrow(()=>new Function(src),'V16.78.81 custom stat engine must stay syntactically valid');
-assert.doesNotThrow(()=>new Function(help),'V16.78.84 safe editor extension must stay syntactically valid');
-assert.match(src,/APP_VERSION="16\.78\.81"/);
-assert.match(help,/APP_VERSION="16\.78\.84"/,'safe editor extension version must be explicit');
-assert.match(src,/function syncPrimaryList/,'custom stats must join the canonical Characteristics principales selector');
-assert.match(src,/rpgStatsList/,'custom stat activation must reuse the existing active-stat list');
-assert.match(src,/p\.rpgUniverse\.stats\.customStats=next/,'customStats must remain the definition source of truth');
-assert.match(src,/effects:\(Array\.isArray\(d\.effects\)/,'effects must live inside each custom stat definition');
-assert.match(src,/function effectTotals/,'runtime modifiers must be calculated from definitions on demand');
-assert.match(src,/attribute:force/);assert.match(src,/movement/);assert.match(src,/damage:all/);
-assert.match(src,/effectiveAttackStats/,'existing custom stat damage effects must still reach actual hero attack power');
-assert.match(src,/dungeonHeroMoveValue083/,'existing custom stat movement effects must still reach actual movement allowance');
-assert.match(src,/dungeonAttributeValue/,'custom stat effects must reach core RPG attributes');
-assert.doesNotMatch(src,/customStatEffectsRuntime|localStorage\.setItem\([^\n]*effects/i,'effects must not create a parallel runtime source of truth');
-assert.match(help,/function statCatalog/,'editor extension must expose one shared stat catalogue');
-assert.match(help,/GensCustomStats167879\?\.defs/,'custom stats must come from the canonical custom-stat definitions');
-assert.match(help,/dtalentEffectsHost select\[data-f="scaleAttribute"\]/,'ability scaling editor must accept custom stats');
-assert.match(help,/dtalentPassiveAttribute/,'passive ability editor must accept custom stats');
-assert.match(help,/gse167884HitStat/,'equipment editor must expose a configurable hit/test stat');
-assert.match(help,/gse167884DamageStat/,'equipment editor must expose a configurable raw-damage stat');
-assert.match(help,/rpgAbilityRefs/,'equipment must store only ability-library references');
-assert.match(help,/loadAbilityLibrary/,'ability choices must reuse the existing library');
-assert.doesNotMatch(help,/dungeonTalentCalculatedAmount|dungeonTalentDealDirectDamage|dungeonTreeNodesForHero|dungeonUnlockedActiveTalents|dungeonUnlockedSkillEffectsForHero|applyDungeonAttackDamage|effectiveAttackStats|dungeonHeroMoveValue083|enemyCells\s*=|dungeonRoom\s*=/,'V16.78.84 must remain editor-only and must not patch runtime/gameplay');
-assert.doesNotMatch(help,/setInterval|MutationObserver/,'safe editor layer must not install repeating/global observers');
-assert.match(help,/api\.HELP\.statEffects/,'contextual help must still explain gameplay effects');
-assert.match(help,/api\.HELP\.primaryStats/,'contextual help must still explain the active-stat selector');
-const profile={id:'demo',name:'Dungeon demo',rpgUniverse:{stats:{active:['force','epuisement'],customStats:[{id:'epuisement',name:'Épuisement',kind:'gauge',min:0,max:100,defaultValue:0,effects:[{when:'gte',threshold:50,target:'attribute:force',mode:'flat',value:-2}]}]},exploration:{}}};
-const hero={customStats:{epuisement:60},rpgAttributes:{force:10,epuisement:60}};
-const sandbox={console,Math,Date,setTimeout:()=>0,clearTimeout:()=>{},localStorage:{getItem:()=>null,setItem:()=>{}},window:null,globalThis:null};
-sandbox.window=sandbox;sandbox.globalThis=sandbox;sandbox.current='h';sandbox.currentRpgProfile=()=>profile;sandbox.loadGameProfiles=()=>[profile];sandbox.saveGameProfiles=()=>{};sandbox.loadState=()=>hero;sandbox.key=id=>'hero_'+id;sandbox.dungeonAttributeValue=id=>Number(hero.rpgAttributes[id])||0;
+const customFile=path.join(root,'assets','gensrpg','gens-custom-stats-167881.js');
+const genericFile=path.join(root,'assets','gensrpg','gens-stat-help-extension-167881.js');
+const custom=fs.readFileSync(customFile,'utf8');
+const src=fs.readFileSync(genericFile,'utf8');
+
+assert.doesNotThrow(()=>new Function(custom),'canonical custom stat engine must remain syntactically valid');
+assert.doesNotThrow(()=>new Function(src),'V16.78.87 generic stat link engine must be syntactically valid');
+assert.match(src,/APP_VERSION="16\.78\.87"/);
+assert.match(src,/Liaisons caractéristiques → valeurs/,'editor must expose the generic link editor');
+assert.match(src,/damage:physical/);assert.match(src,/damage:melee/);assert.match(src,/damage:ranged/);assert.match(src,/damage:magic/);
+assert.match(src,/hit:melee/);assert.match(src,/hit:ranged/);assert.match(src,/hit:magic/);
+assert.match(src,/max_hp/);assert.match(src,/max_mana/);assert.match(src,/crit/);assert.match(src,/dodge/);assert.match(src,/initiative/);assert.match(src,/defense/);assert.match(src,/armor/);assert.match(src,/magic_resistance/);assert.match(src,/movement/);
+assert.match(src,/p\.rpgUniverse\.stats/,'generic rules must live under the RPG stats source');
+assert.match(src,/derivedRules/,'derived rules must have one persisted source');
+assert.match(src,/function sourceValue/,'all native/custom sources must pass through one resolver');
+assert.match(src,/GensCustomStats167879\?\.value/,'custom stat values must come from the canonical custom-stat engine');
+assert.match(src,/function totals/,'runtime must calculate target contributions from persisted rules');
+assert.match(src,/function explainTarget/,'hero explanations must be generated from the same rules');
+assert.match(src,/renderDungeonAttributes/,'hero attribute sheet must be refreshed from generic links');
+assert.match(src,/renderDungeonHeroStats/,'derived stat sheet must be refreshed from generic links');
+assert.match(src,/dtalentEffectsHost select\[data-f="scaleAttribute"\]/,'ability editor must keep custom stat selection');
+assert.match(src,/dungeonTalentCalculatedAmount/,'ability runtime must use the same characteristic catalogue');
+assert.match(src,/rpgAbilityRefs/,'equipment must continue to store only ability references');
+assert.doesNotMatch(src,/createElement\("script"\)|gens-equipment-ability-runtime-167885|MutationObserver|setInterval|setTimeout/,'V16.78.87 must not dynamically load runtime code or install repeating/delayed UI workers');
+assert.doesNotMatch(src,/enemyCells\s*=|dungeonRoom\s*=|timeline|startDungeonCombat/,'generic stat refactor must not touch spatial combat/spawn/timeline');
+assert.match(src,/gsr167887CleanupStyle/,'old duplicate editors must be removed by exact scoped selectors');
+
+const profile={
+  id:'demo',
+  name:'Dungeon demo',
+  rpgUniverse:{
+    stats:{
+      active:['force','necromancie'],
+      customStats:[{id:'necromancie',name:'Nécromancie',icon:'☠️',kind:'score',min:0,max:100,defaultValue:0,visible:true,editMode:'points'}],
+      derivedRules:[
+        {id:'necro_phys',enabled:true,source:'necromancie',target:'damage:physical',calc:'step',step:10,value:2,unit:'flat'},
+        {id:'necro_melee',enabled:true,source:'necromancie',target:'damage:melee',calc:'perPoint',step:1,value:.1,unit:'flat'},
+        {id:'necro_hit',enabled:true,source:'necromancie',target:'hit:melee',calc:'step',step:10,value:3,unit:'flat'},
+        {id:'force_crit',enabled:true,source:'force',target:'crit',calc:'perPoint',step:1,value:.5,unit:'flat'},
+        {id:'necro_hp',enabled:true,source:'necromancie',target:'max_hp',calc:'perPoint',step:1,value:1,unit:'percent'},
+        {id:'necro_move',enabled:true,source:'necromancie',target:'movement',calc:'step',step:20,value:-1,unit:'flat'}
+      ]
+    }
+  }
+};
+const hero={rpgAttributes:{force:10,necromancie:20},customStats:{necromancie:20}};
+const legacyRules={
+  physicalDamageFormula:'step',physicalDamageStep:10,physicalDamageGain:1,
+  magicDamageFormula:'step',magicDamageStep:10,magicDamageGain:1,
+  rangedDamageFormula:'none',rangedDamagePercentPerPoint:0,
+  meleeHitStep:10,meleeHitGain:5,rangedHitStep:10,rangedHitGain:5,magicHitStep:10,magicHitGain:5,
+  critFormula:'step',agilityCritStep:10,critGain:0,critPercentPerPoint:0,
+  dodgeFormula:'step',agilityDodgeStep:10,dodgeGain:0,dodgePercentPerPoint:0,
+  manaFormula:'step',baseMana:0,spiritManaStep:10,manaGain:0,manaPercentPerPoint:0,
+  hpFormula:'step',enduranceHpStep:10,hpGain:0,hpPercentPerPoint:0,
+  magicResistFormula:'step',spiritMagicResistStep:10,magicResistGain:0,magicResistPerPoint:0,
+  initiativeFormula:'step',agilityInitiativeStep:9999,initiativeGain:0,initiativePerPoint:0
+};
+const sandbox={console,Math,Date,window:null,globalThis:null};
+sandbox.window=sandbox;sandbox.globalThis=sandbox;
+sandbox.current='h';
+sandbox.currentRpgProfile=()=>profile;
+sandbox.loadGameProfiles=()=>[profile];
+sandbox.saveGameProfiles=()=>{};
+sandbox.applyGameProfile=()=>{};
+sandbox.GensCustomStats167879={
+  defs:()=>profile.rpgUniverse.stats.customStats,
+  value:(heroId,id)=>Number(hero.customStats[id]??hero.rpgAttributes[id])||0
+};
+sandbox.loadDungeonRpgRules=()=>legacyRules;
+sandbox.dungeonAttributeValue=id=>Number(hero.rpgAttributes[id])||0;
+sandbox.dungeonEnduranceHpBonus=()=>0;
+sandbox.dungeonPhysicalDamageBonus=()=>1;
+sandbox.dungeonMagicDamageBonus=()=>1;
+sandbox.dungeonHitBonusForMode=()=>5;
+sandbox.dungeonEnemyAttackProfile=()=>({statBonus:sandbox.dungeonHitBonusForMode('melee',10)});
+sandbox.itemAttackStats=()=>({strength:3,hitChance:50});
+sandbox.applyDungeonCombatScaling=(it,st)=>{st.hitChance=55;st.strength=4;st.mods=['legacy'];return st};
+sandbox.dungeonTalentCalculatedAmount=()=>999;
+sandbox.dungeonDamagePercentForMode=()=>0;
+sandbox.dungeonApplyStatDamagePercent=(base)=>({pct:0,bonus:0});
+sandbox.dungeonCriticalChance=()=>2;
+sandbox.dungeonDodgeChance=()=>3;
+sandbox.dungeonMagicResistance=()=>0;
+sandbox.dungeonDerivedInitiative=()=>5;
+sandbox.dungeonMaxMana=()=>100;
+sandbox.effectiveMaxWounds=()=>100;
+sandbox.dungeonDerivedDefense=()=>14;
+sandbox.dungeonArmorScore=()=>2;
+sandbox.dungeonHeroMoveValue083=()=>3;
+
 vm.runInNewContext(src,sandbox);
-sandbox.GensCustomStats167879.installEffectHooks();
-assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true,'custom stat activation must use the canonical stats.active list');
-assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensCustomStats167879.effectTotals('h','attribute:force'))),{flat:-2,percent:0});
-assert.equal(sandbox.dungeonAttributeValue('force'),8,'Épuisement >= 50 must actually reduce Force by 2');
+sandbox.GensGenericStats167887.install();
+
+assert.equal(sandbox.GensGenericStats167887.sourceValue('necromancie','h'),20,'custom source value must be usable like a native characteristic');
+assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensGenericStats167887.totals('damage:physical','h'))),{flat:4,percent:0});
+assert.equal(sandbox.dungeonPhysicalDamageBonus(),4,'physical damage source must be fully configurable');
+assert.equal(sandbox.dungeonHitBonusForMode('melee',999),6,'hero hit bonus must use configured source rather than the legacy value argument');
+assert.equal(sandbox.dungeonEnemyAttackProfile().statBonus,5,'enemy legacy calculation must not accidentally read the current hero generic source');
+const st={melee:true,mods:[]};sandbox.applyDungeonCombatScaling({rpgScaling:{attribute:'force',baseChance:50}},st);
+assert.equal(st.hitChance,56,'weapon hit scaling must use generic universe links');
+assert.equal(st.strength,9,'weapon damage must combine physical and melee generic links from raw item power');
+assert.equal(sandbox.dungeonTalentCalculatedAmount('h',{base:5,scaleAttribute:'necromancie',scaleCoeff:.5,kind:'heal'}),15,'ability scaling must accept a custom characteristic at runtime');
+assert.equal(sandbox.dungeonTalentCalculatedAmount('h',{base:5,scaleAttribute:'necromancie',scaleCoeff:.5,kind:'damage'}),21,'damaging abilities must also receive generic damage links once');
+assert.equal(sandbox.dungeonCriticalChance(),7,'crit must be driven by generic links, not hardcoded Agility');
+assert.equal(sandbox.effectiveMaxWounds(),120,'percent links must work on amount targets');
+assert.equal(sandbox.dungeonHeroMoveValue083('h'),2,'movement must accept generic stat modifiers');
+const pct=sandbox.dungeonApplyStatDamagePercent(10,'melee');
+assert.equal(pct.bonus,2,'mode-specific flat damage links must be applied without a second damage engine');
+assert.match(sandbox.GensGenericStats167887.descriptionForSource('necromancie'),/Dégâts physiques/);
+assert.match(sandbox.GensGenericStats167887.descriptionForSource('necromancie'),/Déplacement/);
+
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 if(site){
- assert.match(site,/gens-custom-stats-167881\.js\?v=167881/,'deployed site must load the canonical custom-stat engine');
- assert.match(site,/gens-stat-help-extension-167881\.js\?v=167881/,'deployed site must load the safe editor extension');
- assert.doesNotMatch(site,/gens-custom-stats-167879\.js\?v=167879/,'obsolete custom-stat runtime must not be injected alongside V16.78.81');
+  assert.match(site,/gens-custom-stats-167881\.js\?v=167881/,'final site must still load canonical custom stats');
+  assert.match(site,/gens-stat-help-extension-167881\.js\?v=167881/,'final site must load the stat refactor through the existing static slot');
+  assert.doesNotMatch(site,/gens-equipment-ability-runtime-167885\.js/,'broken V16.78.85 runtime loader must stay absent from final HTML');
 }
-console.log('GenSrpG custom stats + safe editor-only V16.78.84 regression: OK');
+console.log('GenSrpG generic characteristic links V16.78.87 regression: OK');

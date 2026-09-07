@@ -1,4 +1,4 @@
-# GenSrpG V16.78.69 runtime terrain guard — 2026-09-07
+# GenSrpG V16.78.70 wall HD + enemy token guard — 2026-09-07
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -142,7 +142,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
-              (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167869"></script>', "Authored Dungeon runtime terrain bridge missing"),
+              (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167870"></script>', "Authored Dungeon runtime wall/token bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
@@ -159,7 +159,7 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
-      - name: Tester le chargement réel murs et terrains Dungeon V16.78.69
+      - name: Tester le chargement réel mur HD et pions ennemis Dungeon V16.78.70
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
 
       - name: Tester le chargement final Dungeon
@@ -170,10 +170,10 @@ jobs:
           grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
           grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
           grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
-          grep -q 'dungeon-authored-cache-visual-167852.js?v=167869' _site/index.html
+          grep -q 'dungeon-authored-cache-visual-167852.js?v=167870' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
-          grep -q 'gensrpg-cache-16.78.69-runtime-terrain' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.70-wall-hd-enemy-token' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

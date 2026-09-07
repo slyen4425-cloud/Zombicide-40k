@@ -12,31 +12,35 @@ const siteIndex=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
-assert.match(runtime,/APP_VERSION="16\.78\.69"/);
+assert.match(runtime,/APP_VERSION="16\.78\.70"/);
 assert.match(runtime,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.match(runtime,/DungeonRoomCreator100\?\.findRoom/,'runtime must read the original authored room');
 assert.match(runtime,/roomCells=Array\.isArray\(room\?\.cells\)/,'runtime must use authored room cells');
 assert.match(runtime,/String\(source\.terrain\|\|""\)==="wall"/,'runtime must use authored terrain for walls');
 assert.match(runtime,/room\?\.theme\|\|x\?\.last\?\.map\?\.environment/,'runtime must use authored theme');
 assert.match(runtime,/dng_floor_"\+t\+"_"\+variant\+"\.png/,'runtime floor theme assets missing');
-assert.match(runtime,/dav167869WallCell/,'runtime wall-cell class missing');
+assert.match(runtime,/dav167870WallCell/,'runtime wall-cell class missing');
 assert.match(runtime,/setProperty\("background-image"/,'runtime must paint the live cell background directly');
+assert.match(runtime,/enemyTokenRoot\(cell,img\)/,'enemy wrapper centering helper missing');
+assert.match(runtime,/dav167870EnemyToken/,'enemy token class missing');
+assert.match(runtime,/width:70%!important/,'enemy token must be slightly smaller than the cell');
+assert.match(runtime,/place-items:center!important/,'enemy token must be centered');
 assert.doesNotMatch(runtime,/className="dav167867Wall"/,'old wall overlay must not be used anymore');
 assert.doesNotMatch(runtime,/dungeon_wall\.png/);
 
 assert.ok(fs.existsSync(asset),'validated wall block asset must exist');
-assert.ok(fs.statSync(asset).size>1000,'wall block asset must not be empty');
+assert.ok(fs.statSync(asset).size>20000,'wall block asset must be the HD replacement, not the old tiny 96px file');
 for(const theme of ['stone','cave','forest','ice','lava']){
   assert.ok(fs.existsSync(path.join(root,'assets','dungeon','creatures',`dng_floor_${theme}_01.png`)),`missing ${theme} floor asset`);
 }
-assert.match(sw,/gensrpg-cache-16\.78\.69-runtime-terrain/);
+assert.match(sw,/gensrpg-cache-16\.78\.70-wall-hd-enemy-token/);
 assert.match(sw,/dungeon-authored-cache-visual-167852\.js/);
 assert.match(sw,/dng_floor_forest_01\.png/);
 assert.match(sw,/dng_floor_ice_01\.png/);
 assert.match(sw,/dng_floor_lava_01\.png/);
 
 if(siteIndex){
-  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167869/,'runtime terrain bridge must be injected in deployed index');
+  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must be injected in deployed index');
 }
 
-console.log('Dungeon authored runtime terrain V16.78.69 regression: OK');
+console.log('Dungeon authored wall HD + enemy token framing V16.78.70 regression: OK');

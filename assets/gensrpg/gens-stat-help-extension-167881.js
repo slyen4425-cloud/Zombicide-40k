@@ -1,0 +1,8 @@
+/* GenSrpG V16.78.81 — extends the existing contextual-help system, no separate help state. */
+(function(){
+"use strict";
+const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
+const VERSION="1.0.0",APP_VERSION="16.78.81";
+function install(){const api=R.GensStatRules167880;if(!api?.HELP)return false;api.HELP.primaryStats={title:"Caractéristiques principales",body:"Cette liste est le sélecteur unique des caractéristiques actives de l’univers. Les statistiques personnalisées créées plus bas y apparaissent automatiquement. Décoche une stat pour la désactiver sans supprimer sa définition.",example:"Tu crées Épuisement : elle apparaît ici. Cochée, sa valeur et ses effets peuvent agir en jeu."};api.HELP.statEffects={title:"Effets en jeu d’une statistique",body:"Définit ce que la statistique change réellement lorsque sa condition est remplie. Tu peux cumuler plusieurs effets : Force, déplacement, défense, armure, critique, PV/Mana max ou dégâts. Les effets sont lus directement depuis la définition de la stat : aucune copie parallèle n’est créée.",example:"Épuisement ≥ 50 → Force -2 ; ≥ 70 → Déplacement -1 ; ≥ 80 → Tous les dégâts -20 %."};if(D){const host=D.getElementById("rpgStatsList")?.closest(".smodCard"),h=host?.querySelector("h3");if(h&&!h.querySelector(".gsh167881PrimaryHelp")){const b=D.createElement("button");b.type="button";b.className="gsh167880Help gsh167881PrimaryHelp";b.textContent="?";b.onclick=()=>api.help("primaryStats");h.appendChild(b)}}return true}
+R.GensStatHelpExtension167881={VERSION,APP_VERSION,install};if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",()=>setTimeout(install,0),{once:true}):setTimeout(install,0)}
+})();

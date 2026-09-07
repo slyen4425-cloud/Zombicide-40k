@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.84-safe-editor-only";
+const CACHE_NAME = "gensrpg-cache-16.78.85-equipment-ability-runtime";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -7,6 +7,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.84-safe-editor-only";
 // gensrpg-cache-16.78.81-custom-stat-effects
 // gensrpg-cache-16.78.82-rpg-rule-unification
 // gensrpg-cache-16.78.83-ui-freeze-rollback
+// gensrpg-cache-16.78.84-safe-editor-only
 
 const CORE_FILES = [
   "./",
@@ -47,6 +48,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-custom-stats-167881.js",
   "./assets/gensrpg/gens-stat-rules-help-167880.js",
   "./assets/gensrpg/gens-stat-help-extension-167881.js",
+  "./assets/gensrpg/gens-equipment-ability-runtime-167885.js",
   "./manifest.json"
 ];
 

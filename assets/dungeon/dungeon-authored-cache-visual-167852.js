@@ -1,4 +1,4 @@
-/* GenSrpG Dungeon — authored cache/runtime visual bridge 16.78.67.
+/* GenSrpG Dungeon — authored cache/runtime visual bridge 16.78.68.
    Built World Builder only: keeps authored cache behavior, overlays the validated wall asset
    on real runtime wall cells, and recenters/reduces enemy artwork on its authored tactical cell.
    No movement, combat, timeline, spawn or room geometry behavior is changed. */
@@ -7,7 +7,7 @@
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 const RT_KEY="gensrpg_dungeon_runtime_v2";
-const VERSION="1.1.0",APP_VERSION="16.78.67";
+const VERSION="1.1.1",APP_VERSION="16.78.68";
 const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
 let retries=0;
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}

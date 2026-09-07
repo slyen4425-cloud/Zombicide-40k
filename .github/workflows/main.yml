@@ -1,4 +1,4 @@
-# GenSrpG V16.78.76 tactical grid flicker guard — 2026-09-07
+# GenSrpG V16.78.79 generic custom RPG stats + Furtivité — 2026-09-07
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -63,6 +63,9 @@ jobs:
 
       - name: Bloquer les régressions d'interface et de cache
         run: node tests/gens_ui_recovery_v167843.test.cjs
+
+      - name: Tester les stats personnalisées et la Furtivité V16.78.79
+        run: node tests/gens_custom_stats_v167879.test.cjs
 
       - name: Préparer le site
         run: |
@@ -143,11 +146,13 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
               (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167870"></script>', "Authored Dungeon runtime wall/token bridge missing"),
-              (Path("_site/assets/dungeon/dungeon-grid-flicker-guard-167876.js"), '<script src="assets/dungeon/dungeon-grid-flicker-guard-167876.js?v=167876"></script>', "Dungeon tactical grid flicker guard missing"),
+              (Path("_site/assets/dungeon/dungeon-grid-flicker-guard-167876.js"), '<script src="assets/dungeon/dungeon-grid-flicker-guard-167876.js?v=167876"></script>', "Dungeon source-time terrain/token stability missing"),
+              (Path("_site/assets/dungeon/dungeon-enemy-target-randomizer-167878.js"), '<script src="assets/dungeon/dungeon-enemy-target-randomizer-167878.js?v=167878"></script>', "Dungeon enemy target randomizer missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
+              (Path("_site/assets/gensrpg/gens-custom-stats-167879.js"), '<script src="assets/gensrpg/gens-custom-stats-167879.js?v=167879"></script>', "GenSrpG generic custom stats module missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -163,8 +168,14 @@ jobs:
       - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon V16.78.72
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
 
-      - name: Tester le garde anti-clignotement Dungeon V16.78.76
+      - name: Tester le rendu source terrain/pions Dungeon V16.78.77
         run: node tests/dungeon_grid_flicker_v167876.test.cjs _site/index.html
+
+      - name: Tester le ciblage ennemi V16.78.78
+        run: node tests/dungeon_enemy_target_randomizer_v167878.test.cjs _site/index.html
+
+      - name: Tester le chargement final des stats personnalisées V16.78.79
+        run: node tests/gens_custom_stats_v167879.test.cjs _site/index.html
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
@@ -176,9 +187,12 @@ jobs:
           grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
           grep -q 'dungeon-authored-cache-visual-167852.js?v=167870' _site/index.html
           grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
+          grep -q 'dungeon-enemy-target-randomizer-167878.js?v=167878' _site/index.html
+          grep -q 'gens-custom-stats-167879.js?v=167879' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.79-generic-custom-stats' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

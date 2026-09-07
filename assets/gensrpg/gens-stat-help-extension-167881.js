@@ -5,10 +5,11 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="2.0.0",APP_VERSION="16.78.82";
+const VERSION="2.0.1",APP_VERSION="16.78.82";
 const CORE_STATS=[
   ["force","Force"],["agilite","Agilité"],["intelligence","Intelligence"],["esprit","Esprit"],["endurance","Endurance"],["initiative","Initiative"]
 ];
+const CORE_IDS=new Set(CORE_STATS.map(x=>x[0]));
 const DAMAGE_KINDS=new Set(["damage","magic_damage","area_damage","double_strike","life_steal","execute","dot"]);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const attr=v=>esc(v).replace(/`/g,"&#96;");
@@ -24,9 +25,14 @@ function statCatalog(){
   return out;
 }
 function statValue(hero,id){
-  try{const api=customApi(),d=api?.def?.(id);if(d)return Number(api.value(hero,id))||0}catch(e){}
-  try{const s=R.loadState?.(hero)||{};if(s?.rpgAttributes?.[id]!=null)return Number(s.rpgAttributes[id])||0}catch(e){}
-  try{const snap=R.dungeonCombatHeroSnapshot?.(hero)||{};if(snap?.[id]!=null)return Number(snap[id])||0}catch(e){}
+  const ref=String(id||"");
+  try{const api=customApi(),d=api?.def?.(ref);if(d)return Number(api.value(hero,ref))||0}catch(e){}
+  if(CORE_IDS.has(ref)){
+    try{const derived=R.dungeonDerivedForHero?.(hero);if(derived&&derived[ref]!=null)return Number(derived[ref])||0}catch(e){}
+    try{if(String(hero)===String(R.current||"")&&typeof R.dungeonAttributeValue==='function')return Number(R.dungeonAttributeValue(ref))||0}catch(e){}
+  }
+  try{const s=R.loadState?.(hero)||{};if(s?.rpgAttributes?.[ref]!=null)return Number(s.rpgAttributes[ref])||0}catch(e){}
+  try{const snap=R.dungeonCombatHeroSnapshot?.(hero)||{};if(snap?.[ref]!=null)return Number(snap[ref])||0}catch(e){}
   return 0;
 }
 function optionHtml(selected=""){return statCatalog().map(s=>'<option value="'+attr(s.id)+'"'+(String(s.id)===String(selected)?' selected':'')+'>'+esc((s.icon?s.icon+' ':'')+s.name+(s.custom?' · personnalisée':''))+'</option>').join("")}
@@ -65,8 +71,11 @@ function decorateEquipmentEditor(){
 function selectedItemRefs(){if(!D)return [];return [...D.querySelectorAll('#grb167882ItemAbilities input[type="checkbox"]:checked')].map(x=>String(x.value))}
 function persistItemRules(id,refs,scPatch){
   if(!id)return false;try{
-    if(Array.isArray(R.DUNGEON_ITEM_IDS)&&R.DUNGEON_ITEM_IDS.includes(String(id))&&typeof R.loadDungeonItemOverrides==='function'){const o=R.loadDungeonItemOverrides()||{},prev=o[id]&&typeof o[id]==='object'?o[id]:{},scale={...(prev.rpgScaling||R.dungeonItems?.().find(x=>String(x.id)===String(id))?.rpgScaling||{}),...(scPatch||{})};o[id]={...prev,rpgAbilityRefs:[...new Set(refs||[])],rpgScaling:scale};R.saveDungeonItemOverrides?.(o);R.refreshCustomEquipmentIntoItems?.();return true}
-    const a=R.loadCustomEquipment?.()||[],ix=a.findIndex(x=>String(x.id)===String(id));if(ix<0)return false;a[ix]={...a[ix],rpgAbilityRefs:[...new Set(refs||[])],rpgScaling:{...(a[ix].rpgScaling||{}),...(scPatch||{})}};R.saveCustomEquipment?.(a);R.refreshCustomEquipmentIntoItems?.();return true
+    const live=R.dungeonItems?.().find(x=>String(x.id)===String(id))||null;
+    const custom=(R.loadCustomEquipment?.()||[]),customIndex=custom.findIndex(x=>String(x.id)===String(id));
+    if(customIndex>=0){custom[customIndex]={...custom[customIndex],rpgAbilityRefs:[...new Set(refs||[])],rpgScaling:{...(custom[customIndex].rpgScaling||{}),...(scPatch||{})}};R.saveCustomEquipment?.(custom);R.refreshCustomEquipmentIntoItems?.();return true}
+    if(live&&typeof R.loadDungeonItemOverrides==='function'){const o=R.loadDungeonItemOverrides()||{},prev=o[id]&&typeof o[id]==='object'?o[id]:{},scale={...(prev.rpgScaling||live.rpgScaling||{}),...(scPatch||{})};o[id]={...prev,rpgAbilityRefs:[...new Set(refs||[])],rpgScaling:scale};R.saveDungeonItemOverrides?.(o);R.refreshCustomEquipmentIntoItems?.();return true}
+    return false
   }catch(e){console.warn('RPG item rule save',e);return false}
 }
 function progressionRawBonus(hero,e,raw){

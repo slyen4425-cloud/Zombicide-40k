@@ -1,4 +1,4 @@
-# GenSrpG V16.78.70 wall HD + enemy token guard — 2026-09-07
+# GenSrpG V16.78.72 perceptual actor scaling guard — 2026-09-07
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -159,7 +159,7 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
-      - name: Tester le chargement réel mur HD et pions ennemis Dungeon V16.78.70
+      - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon V16.78.72
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
 
       - name: Tester le chargement final Dungeon
@@ -173,7 +173,7 @@ jobs:
           grep -q 'dungeon-authored-cache-visual-167852.js?v=167870' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
-          grep -q 'gensrpg-cache-16.78.70-wall-hd-enemy-token' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

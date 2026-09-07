@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.77-source-render-stability";
+const CACHE_NAME = "gensrpg-cache-16.78.79-generic-custom-stats";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -16,6 +16,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-authored-cache-visual-167852.js",
   "./assets/dungeon/dungeon-source-render-stability-167877.js",
+  "./assets/dungeon/dungeon-enemy-target-randomizer-167878.js",
   "./assets/dungeon/creatures/dng_wall_block.jpg",
   "./assets/dungeon/creatures/dng_floor_stone_01.png",
   "./assets/dungeon/creatures/dng_floor_cave_01.png",
@@ -38,6 +39,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-world-summary-167820.js",
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
+  "./assets/gensrpg/gens-custom-stats-167879.js",
   "./manifest.json"
 ];
 
@@ -108,7 +110,7 @@ self.addEventListener("fetch",event=>{
     return;
   }
 
-  if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")){
+  if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")||url.pathname.includes("/assets/gensrpg/")){
     event.respondWith(networkFirst(request));
     return;
   }

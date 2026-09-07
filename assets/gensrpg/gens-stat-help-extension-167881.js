@@ -168,6 +168,7 @@ function damageTargets(mode){
   return ["damage:all","damage:physical","damage:melee"];
 }
 function hitTargets(mode){return ["hit:all","hit:"+(mode==="magic"?"magic":mode==="ranged"?"ranged":"melee")]}
+let enemyAttackContext=false;
 function descriptionForSource(id){
   const linked=rules().filter(r=>r.enabled&&r.source===id);
   if(!linked.length)return "Aucune liaison automatique.";
@@ -229,11 +230,14 @@ function cleanOldEditorUi(){
   if(!D)return;
   if(!D.getElementById("gsr167887CleanupStyle")){
     const st=D.createElement("style");st.id="gsr167887CleanupStyle";
-    st.textContent='div.smodCard:has(#rpgPhysicalFormula),#gcsStealthSettings,#gsr167880Box,#gcs167879Box label:has([data-gcs="usage"]),#gcs167879Box details:has(.gcsEffects){display:none!important}';
+    st.textContent='div.smodCard:has(#rpgPhysicalFormula),#gcsStealthSettings,#gsr167880Box,#gsr167880HeroActions,#gcs167879Box label:has([data-gcs="usage"]),#gcs167879Box details:has(.gcsEffects){display:none!important}';
     D.head?.appendChild(st);
   }
   const old=D.getElementById("rpgPhysicalFormula")?.closest(".smodCard");if(old)old.style.display="none";
   const gsr=D.getElementById("gsr167880Box");if(gsr)gsr.style.display="none";
+  const heroTests=D.getElementById("gsr167880HeroActions");if(heroTests)heroTests.style.display="none";
+  try{R.__gsr167880Observer?.disconnect?.()}catch(e){}
+  R.__gsr167880Observer=R.__gsr167880Observer||{disabled:true,disconnect(){}};
   const stealth=D.getElementById("gcsStealthSettings");if(stealth)stealth.style.display="none";
   for(const x of D.querySelectorAll('#gcs167879Box [data-gcs="usage"]')){const l=x.closest("label");if(l)l.style.display="none"}
   for(const x of D.querySelectorAll("#gcs167879Box .gcsEffects")){const d=x.closest("details");if(d)d.style.display="none"}
@@ -297,22 +301,56 @@ function legacyContribution(target){
 }
 function installRuntime(){
   restoreOldCustomHooks();
+  wrapReplace("dungeonEnemyAttackProfile",(old,args)=>{
+    enemyAttackContext=true;
+    try{return old.apply(this,args)}finally{enemyAttackContext=false}
+  });
   wrapReplace("dungeonPhysicalDamageBonus",()=>Math.round(combineTargets(["damage:all","damage:physical"]).flat));
   wrapReplace("dungeonMagicDamageBonus",()=>Math.round(combineTargets(["damage:all","damage:magic"]).flat));
-  wrapReplace("dungeonHitBonusForMode",(old,args)=>Math.round(combineTargets(hitTargets(String(args[0]||"melee"))).flat));
-  wrapReplace("dungeonDamagePercentForMode",(old,args)=>combineTargets(damageTargets(String(args[0]||"melee"))).percent);
+  wrapReplace("dungeonHitBonusForMode",(old,args)=>enemyAttackContext?old.apply(this,args):Math.round(combineTargets(hitTargets(String(args[0]||"melee"))).flat));
+  wrapReplace("dungeonDamagePercentForMode",(old,args)=>enemyAttackContext?old.apply(this,args):combineTargets(damageTargets(String(args[0]||"melee"))).percent);
   wrapReplace("dungeonApplyStatDamagePercent",(old,args)=>{
+    if(enemyAttackContext)return old.apply(this,args);
     const base=Math.max(0,Number(args[0])||0),mode=String(args[1]||"melee"),all=combineTargets(damageTargets(mode));
     const modeFlat=mode==="magic"?0:(totals("damage:"+mode).flat||0);
     const bonus=modeFlat+base*all.percent/100;
     return {pct:all.percent,bonus};
+  });
+  wrapReplace("applyDungeonCombatScaling",(old,args)=>{
+    const it=args[0],st=args[1],out=old.apply(this,args);
+    if(!it||!st)return out;
+    const sc=it.rpgScaling||{},mode=sc.magic?"magic":(st.melee?"melee":"ranged");
+    const raw=R.itemAttackStats?.(it),baseStrength=Math.max(0,Number(raw?.strength)||0);
+    const baseChance=Math.max(1,Math.min(99,Number(sc.baseChance)||Number(raw?.hitChance)||50));
+    const hit=combineTargets(hitTargets(mode)),dmg=combineTargets(damageTargets(mode));
+    st.hitChance=Math.max(0,Math.round(baseChance+hit.flat));
+    st.strength=Math.max(0,baseStrength+dmg.flat+baseStrength*dmg.percent/100);
+    st.mods=[];
+    if(hit.flat)st.mods.push("Liaisons RPG : "+(hit.flat>=0?"+":"")+hit.flat+"% toucher");
+    if(dmg.flat||dmg.percent)st.mods.push("Liaisons RPG : "+(dmg.flat>=0?"+":"")+dmg.flat+" dégâts"+(dmg.percent?((" · ")+(dmg.percent>=0?"+":"")+dmg.percent+"%"):""));
+    return out;
+  });
+  wrapReplace("dungeonTalentCalculatedAmount",(old,args)=>{
+    const heroId=String(args[0]||currentHero()),e=args[1]||{},base=Number(e.base)||0;
+    let amount=base;
+    if(e.scaleAttribute&&Number(e.scaleCoeff))amount+=sourceValue(e.scaleAttribute,heroId)*Number(e.scaleCoeff);
+    const damaging=["damage","magic_damage","area_damage","dot","double_strike","life_steal","execute"].includes(String(e.kind||""));
+    if(damaging){
+      const mode=(e.damageType==="magic"||e.kind==="magic_damage")?"magic":(e.range&&Number(e.range)>1?"ranged":"melee");
+      const d=combineTargets(damageTargets(mode),heroId);
+      amount+=d.flat+amount*d.percent/100;
+    }
+    return Math.max(0,Math.round(amount));
   });
   for(const [name,target,min,max] of [
     ["dungeonDerivedDefense","defense",0,Infinity],
     ["dungeonArmorScore","armor",0,Infinity],
     ["dungeonHeroMoveValue083","movement",0,Infinity]
   ]){
-    wrapReplace(name,(old,args)=>applyTarget(Number(old.apply(this,args))||0,target,currentHero(),{min,max}));
+    wrapReplace(name,(old,args)=>{
+      const hero=(name==="dungeonHeroMoveValue083"&&args[0])?String(args[0]):currentHero();
+      return applyTarget(Number(old.apply(this,args))||0,target,hero,{min,max});
+    });
   }
   for(const [name,target,min,max] of [
     ["dungeonCriticalChance","crit",0,100],

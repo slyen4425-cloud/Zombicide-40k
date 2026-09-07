@@ -18,6 +18,7 @@ assert.match(bridge,/statAbilityLinks/,'stat-to-ability links must store referen
 assert.match(bridge,/rpgAbilityRefs/,'equipment must link to ability-library IDs');
 assert.match(bridge,/decorateAbilityScaling/,'ability scaling editor must accept the shared stat catalog');
 assert.match(bridge,/grb167882WeaponStat/,'existing equipment editor must receive a configurable stat selector');
+assert.match(bridge,/dungeonAttributeValue\(ref\)/,'core-stat consumers must use the final modified stat value');
 assert.match(bridge,/function calculatedTalentAmount/,'ability damage must use the unified raw-damage calculation');
 assert.match(bridge,/hitDamages:\[raw\]/,'ability damage must enter the existing damage resolver as raw damage');
 assert.doesNotMatch(bridge,/finalAmount=.*gensElementMultiplier/,'ability bridge must not pre-apply element multiplier before the canonical resolver');
@@ -34,7 +35,7 @@ assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true);
 assert.equal(sandbox.dungeonAttributeValue('force'),8,'Épuisement >= 50 must reduce Force through the canonical custom-stat engine');
 assert.equal(sandbox.GensRpgRuleBridge167882.grantedAbilities('h')[0].id,'a1','threshold link must grant the referenced library ability');
 const raw=sandbox.GensRpgRuleBridge167882.calculatedTalentAmount('h',ability.effects[0]);
-assert.equal(raw,10,'raw ability damage must combine base + custom-stat scaling + global Force progression');
+assert.equal(raw,9,'raw ability damage must use final modified Force: base 3 + Épuisement scaling 6, with Force 8 below the +1/10 threshold');
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 if(site){
  assert.match(site,/gens-custom-stats-167881\.js\?v=167881/);

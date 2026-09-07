@@ -27,6 +27,7 @@ const hero={customStats:{epuisement:60},rpgAttributes:{force:10,epuisement:60}};
 const sandbox={console,Math,Date,setTimeout:()=>0,clearTimeout:()=>{},localStorage:{getItem:()=>null,setItem:()=>{}},window:null,globalThis:null};
 sandbox.window=sandbox;sandbox.globalThis=sandbox;sandbox.current='h';sandbox.currentRpgProfile=()=>profile;sandbox.loadGameProfiles=()=>[profile];sandbox.saveGameProfiles=()=>{};sandbox.loadState=()=>hero;sandbox.key=id=>'hero_'+id;sandbox.dungeonAttributeValue=id=>Number(hero.rpgAttributes[id])||0;
 vm.runInNewContext(src,sandbox);
+sandbox.GensCustomStats167879.installEffectHooks();
 assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true,'custom stat activation must use the canonical stats.active list');
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensCustomStats167879.effectTotals('h','attribute:force'))),{flat:-2,percent:0});
 assert.equal(sandbox.dungeonAttributeValue('force'),8,'Épuisement >= 50 must actually reduce Force by 2');

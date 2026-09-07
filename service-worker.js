@@ -1,8 +1,9 @@
-const CACHE_NAME = "gensrpg-cache-16.78.80-stat-rule-links-help";
+const CACHE_NAME = "gensrpg-cache-16.78.81-custom-stat-effects";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
 // gensrpg-cache-16.78.79-generic-custom-stats
+// gensrpg-cache-16.78.80-stat-rule-links-help
 
 const CORE_FILES = [
   "./",
@@ -40,8 +41,9 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-world-summary-167820.js",
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
-  "./assets/gensrpg/gens-custom-stats-167879.js",
+  "./assets/gensrpg/gens-custom-stats-167881.js",
   "./assets/gensrpg/gens-stat-rules-help-167880.js",
+  "./assets/gensrpg/gens-stat-help-extension-167881.js",
   "./manifest.json"
 ];
 

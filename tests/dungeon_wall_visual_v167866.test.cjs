@@ -33,7 +33,7 @@ assert.doesNotThrow(()=>new Function(runtime),'runtime visual bridge must stay s
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
-assert.match(runtime,/APP_VERSION="16\.78\.73"/);
+assert.match(runtime,/APP_VERSION="16\.78\.75"/);
 assert.match(runtime,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.match(runtime,/DungeonRoomCreator100\?\.findRoom/,'runtime must read the original authored room');
 assert.match(runtime,/roomCells=Array\.isArray\(room\?\.cells\)/,'runtime must use authored room cells');
@@ -70,6 +70,15 @@ assert.match(runtime,/ResizeObserver/,'token sizing must be recalculated when th
 assert.doesNotMatch(runtime,/className="dav167867Wall"/,'old wall overlay must not be used anymore');
 assert.doesNotMatch(runtime,/dungeon_wall\.png/);
 
+// UI cleanup V16.78.75: exact renderer selectors only. Never infer parents from text.
+assert.match(runtime,/UI_ENEMY_SUMMARY_SELECTOR="#dc01Enemies"/,'enemy summary must use its exact renderer id');
+assert.match(runtime,/UI_GHOST_CHEST_SELECTOR="#dc200Scene \.dc200SceneCard:has\(> \.dc309SceneChest\)"/,'ghost chest cards must be identified by their exact chest-image child');
+assert.match(runtime,/UI_ENEMY_SUMMARY_SELECTOR\+'\{display:none!important\}'/,'enemy summary exact selector must be hidden by CSS only');
+assert.match(runtime,/UI_GHOST_CHEST_SELECTOR\+'\{display:none!important\}'/,'ghost chest exact selector must be hidden by CSS only');
+assert.doesNotMatch(runtime,/isGhostChestText|isEnemySummaryText|smallestCard|div,section,article,p,span,strong/,'broad text-driven UI cleanup must never return');
+assert.doesNotMatch(runtime,/aria-hidden.*dui167874|dui167874Hidden/,'broken V16.78.74 ancestor hiding must stay removed');
+assert.match(runtime,/function install\(\)\{ensureStyle\(\);/,'exact CSS must be installed without waiting for authored room state');
+
 assert.ok(fs.existsSync(asset),'validated wall block asset must exist');
 const wallBytes=fs.readFileSync(asset);
 assert.ok(wallBytes.length>5000,'wall block asset must not be the old tiny placeholder');
@@ -86,6 +95,8 @@ assert.match(sw,/dng_floor_lava_01\.png/);
 
 if(siteIndex){
   assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must remain injected in deployed index');
+  assert.match(siteIndex,/getElementById\('dc01Enemies'\)/,'deployed renderer must still expose the exact enemy-summary id');
+  assert.match(siteIndex,/class="dc309SceneChest"/,'deployed renderer must still mark chest summary art explicitly');
 }
 
-console.log(`Dungeon authored wall ${dims.width}x${dims.height} + late Core 3.10 actor refit V16.78.73 regression: OK`);
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + actor refit + exact-selector UI cleanup V16.78.75 regression: OK`);

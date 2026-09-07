@@ -1,4 +1,4 @@
-# GenSrpG V16.78.79 generic custom RPG stats + Furtivité — 2026-09-07
+# GenSrpG V16.78.80 stat rule links + contextual help — 2026-09-07
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -66,6 +66,9 @@ jobs:
 
       - name: Tester les stats personnalisées et la Furtivité V16.78.79
         run: node tests/gens_custom_stats_v167879.test.cjs
+
+      - name: Tester les raccordements de stats et l'aide V16.78.80
+        run: node tests/gens_stat_rules_help_v167880.test.cjs
 
       - name: Préparer le site
         run: |
@@ -153,6 +156,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
               (Path("_site/assets/gensrpg/gens-custom-stats-167879.js"), '<script src="assets/gensrpg/gens-custom-stats-167879.js?v=167879"></script>', "GenSrpG generic custom stats module missing"),
+              (Path("_site/assets/gensrpg/gens-stat-rules-help-167880.js"), '<script src="assets/gensrpg/gens-stat-rules-help-167880.js?v=167880"></script>', "GenSrpG stat rule links/help module missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -177,6 +181,9 @@ jobs:
       - name: Tester le chargement final des stats personnalisées V16.78.79
         run: node tests/gens_custom_stats_v167879.test.cjs _site/index.html
 
+      - name: Tester le chargement final des raccordements et de l'aide V16.78.80
+        run: node tests/gens_stat_rules_help_v167880.test.cjs _site/index.html
+
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
 
@@ -189,10 +196,12 @@ jobs:
           grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
           grep -q 'dungeon-enemy-target-randomizer-167878.js?v=167878' _site/index.html
           grep -q 'gens-custom-stats-167879.js?v=167879' _site/index.html
+          grep -q 'gens-stat-rules-help-167880.js?v=167880' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.79-generic-custom-stats' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.80-stat-rule-links-help' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

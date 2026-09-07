@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.72-perceptual-actor-scale";
+const CACHE_NAME = "gensrpg-cache-16.78.74-ui-cleanup";
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement
 
@@ -14,6 +14,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-config-167826.js",
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-authored-cache-visual-167852.js",
+  "./assets/dungeon/dungeon-ui-cleanup-167874.js",
   "./assets/dungeon/creatures/dng_wall_block.jpg",
   "./assets/dungeon/creatures/dng_floor_stone_01.png",
   "./assets/dungeon/creatures/dng_floor_cave_01.png",

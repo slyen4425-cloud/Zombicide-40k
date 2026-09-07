@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-grid-flicker-guard-167876.js'),'utf8');
+assert.doesNotThrow(()=>new Function(src),'grid flicker guard must stay syntactically valid');
+assert.match(src,/APP_VERSION="16\.78\.76"/);
+assert.match(src,/cloneNode\(true\)/,'guard must preserve the last fully painted grid');
+assert.match(src,/position:fixed!important/,'snapshot must survive board DOM replacement');
+assert.match(src,/requestAnimationFrame/,'snapshot must release on the next paint cycle');
+assert.match(src,/DungeonAuthoredCacheVisual167852\?\.sync\?\.\(\)/,'final authored textures must be synchronized before releasing snapshot');
+assert.match(src,/\["render","show"\]/,'guard must wrap only Dungeon render lifecycle');
+assert.doesNotMatch(src,/dungeonMoveHero098\s*=|positions\s*=|enemyCells\s*=|localStorage\.setItem|saveDungeon|saveActiveEnemies/,'visual guard must not mutate gameplay or movement state');
+const siteIndex=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
+if(siteIndex)assert.match(siteIndex,/dungeon-grid-flicker-guard-167876\.js\?v=167876/,'deployed index must load flicker guard');
+console.log('Dungeon tactical grid flicker guard V16.78.76 regression: OK');

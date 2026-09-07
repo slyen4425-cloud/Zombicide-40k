@@ -1,4 +1,4 @@
-# GenSrpG V16.78.80 stat rule links + contextual help — 2026-09-07
+# GenSrpG V16.78.81 custom stat effects + canonical activation — 2026-09-07
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -64,11 +64,11 @@ jobs:
       - name: Bloquer les régressions d'interface et de cache
         run: node tests/gens_ui_recovery_v167843.test.cjs
 
-      - name: Tester les stats personnalisées et la Furtivité V16.78.79
-        run: node tests/gens_custom_stats_v167879.test.cjs
-
       - name: Tester les raccordements de stats et l'aide V16.78.80
         run: node tests/gens_stat_rules_help_v167880.test.cjs
+
+      - name: Tester l'activation et les effets des stats V16.78.81
+        run: node tests/gens_custom_stat_effects_v167881.test.cjs
 
       - name: Préparer le site
         run: |
@@ -155,8 +155,9 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
-              (Path("_site/assets/gensrpg/gens-custom-stats-167879.js"), '<script src="assets/gensrpg/gens-custom-stats-167879.js?v=167879"></script>', "GenSrpG generic custom stats module missing"),
+              (Path("_site/assets/gensrpg/gens-custom-stats-167881.js"), '<script src="assets/gensrpg/gens-custom-stats-167881.js?v=167881"></script>', "GenSrpG canonical custom stat engine missing"),
               (Path("_site/assets/gensrpg/gens-stat-rules-help-167880.js"), '<script src="assets/gensrpg/gens-stat-rules-help-167880.js?v=167880"></script>', "GenSrpG stat rule links/help module missing"),
+              (Path("_site/assets/gensrpg/gens-stat-help-extension-167881.js"), '<script src="assets/gensrpg/gens-stat-help-extension-167881.js?v=167881"></script>', "GenSrpG custom stat contextual help extension missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -178,11 +179,11 @@ jobs:
       - name: Tester le ciblage ennemi V16.78.78
         run: node tests/dungeon_enemy_target_randomizer_v167878.test.cjs _site/index.html
 
-      - name: Tester le chargement final des stats personnalisées V16.78.79
-        run: node tests/gens_custom_stats_v167879.test.cjs _site/index.html
-
       - name: Tester le chargement final des raccordements et de l'aide V16.78.80
         run: node tests/gens_stat_rules_help_v167880.test.cjs _site/index.html
+
+      - name: Tester le chargement final des stats et effets V16.78.81
+        run: node tests/gens_custom_stat_effects_v167881.test.cjs _site/index.html
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
@@ -195,13 +196,16 @@ jobs:
           grep -q 'dungeon-authored-cache-visual-167852.js?v=167870' _site/index.html
           grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
           grep -q 'dungeon-enemy-target-randomizer-167878.js?v=167878' _site/index.html
-          grep -q 'gens-custom-stats-167879.js?v=167879' _site/index.html
+          grep -q 'gens-custom-stats-167881.js?v=167881' _site/index.html
           grep -q 'gens-stat-rules-help-167880.js?v=167880' _site/index.html
+          grep -q 'gens-stat-help-extension-167881.js?v=167881' _site/index.html
+          ! grep -q 'gens-custom-stats-167879.js?v=167879' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.79-generic-custom-stats' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.80-stat-rule-links-help' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.81-custom-stat-effects' _site/service-worker.js
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

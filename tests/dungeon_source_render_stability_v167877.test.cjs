@@ -1,0 +1,27 @@
+const assert=require('node:assert');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-source-render-stability-167877.js'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):'';
+assert.doesNotThrow(()=>new Function(src));
+assert.match(src,/APP_VERSION="16\.78\.77"/);
+assert.match(src,/function patchMapHtml/);
+assert.match(src,/tpl\.innerHTML=html/);
+assert.match(src,/querySelectorAll\("\.dc047Grid > \.dc047Cell"\)/);
+assert.match(src,/dav167870WallCell/);
+assert.match(src,/dng_wall_block\.jpg/);
+assert.match(src,/dng_floor_"\+t\+"_"\+v\+"\.png/);
+assert.match(src,/function paintTokensNow/);
+assert.match(src,/\.dc310Hero,\.dc310Enemy/);
+assert.match(src,/paintTokensNow\(\)/);
+assert.match(src,/__dac167852TokenObserver/);
+assert.match(src,/\.disconnect\(\)/);
+assert.match(src,/@container \(max-width:82px\)/);
+assert.match(src,/@container \(max-width:54px\)/);
+assert.match(src,/transform:scale\(1\.12\)/);
+assert.match(sw,/gensrpg-cache-16\.78\.77-source-render-stability/);
+assert.match(sw,/dungeon-source-render-stability-167877\.js/);
+if(site){assert.match(site,/dungeon-source-render-stability-167877\.js\?v=167877/);assert.doesNotMatch(site,/dungeon-grid-flicker-guard-167876\.js\?v=167876/)}
+console.log('Dungeon source render stability V16.78.77 regression: OK');

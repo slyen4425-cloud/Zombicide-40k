@@ -33,7 +33,7 @@ assert.doesNotThrow(()=>new Function(runtime),'runtime visual bridge must stay s
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
-assert.match(runtime,/APP_VERSION="16\.78\.70"/);
+assert.match(runtime,/APP_VERSION="16\.78\.72"/);
 assert.match(runtime,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.match(runtime,/DungeonRoomCreator100\?\.findRoom/,'runtime must read the original authored room');
 assert.match(runtime,/roomCells=Array\.isArray\(room\?\.cells\)/,'runtime must use authored room cells');
@@ -44,14 +44,20 @@ assert.match(runtime,/dav167870WallCell/,'runtime wall-cell class missing');
 assert.match(runtime,/setProperty\("background-image"/,'runtime must paint the live cell background directly');
 assert.match(runtime,/enemyTokenRoot\(cell,img\)/,'actor wrapper centering helper missing');
 assert.match(runtime,/dav167870EnemyToken/,'actor token class missing');
-assert.match(runtime,/width:70%!important/,'actor token must retain a CSS fallback size');
+assert.match(runtime,/width:76%!important/,'actor token must retain the validated small-room CSS fallback');
 assert.match(runtime,/place-items:center!important/,'actor token must be centered');
-assert.match(runtime,/const ACTOR_RATIO=\.76/,'actor size ratio must be explicit and map-size independent');
+assert.match(runtime,/const ACTOR_RATIO=\.76/,'large visual cells keep the validated ratio');
+assert.match(runtime,/ACTOR_RATIO_MEDIUM=\.82/,'medium cells need perceptual compensation');
+assert.match(runtime,/ACTOR_RATIO_COMPACT=\.88/,'compact large-room cells need stronger perceptual compensation');
+assert.match(runtime,/function actorRatioForSide/,'actor ratio must adapt to live cell side');
+assert.match(runtime,/n>0&&n<=54/,'compact-cell threshold must be explicit');
+assert.match(runtime,/n>54&&n<=82/,'medium-cell threshold must be explicit');
+assert.match(runtime,/side\*actorRatioForSide\(side\)/,'token size must use adaptive ratio');
 assert.match(runtime,/getBoundingClientRect/,'actor size must use the live rendered cell dimensions');
 assert.match(runtime,/function heroCellIndexes/,'hero tokens must use the same responsive sizing as enemies');
 assert.match(runtime,/function actorCellIndexes/,'hero and enemy cells must share one responsive sizing path');
 assert.match(runtime,/style\.setProperty\("object-fit","cover"/,'actor art must fill the token frame');
-assert.match(runtime,/ACTOR_ZOOM=1\.12/,'actor art framing zoom must be explicit');
+assert.match(runtime,/ACTOR_ZOOM=1\.12/,'actor art framing zoom must remain validated');
 assert.match(runtime,/ResizeObserver/,'token sizing must be recalculated when the tactical grid resizes');
 assert.doesNotMatch(runtime,/className="dav167867Wall"/,'old wall overlay must not be used anymore');
 assert.doesNotMatch(runtime,/dungeon_wall\.png/);
@@ -64,14 +70,14 @@ assert.ok(dims.width>=256&&dims.height>=256,`wall block asset must be at least 2
 for(const theme of ['stone','cave','forest','ice','lava']){
   assert.ok(fs.existsSync(path.join(root,'assets','dungeon','creatures',`dng_floor_${theme}_01.png`)),`missing ${theme} floor asset`);
 }
-assert.match(sw,/gensrpg-cache-16\.78\.70-wall-hd-enemy-token/);
+assert.match(sw,/gensrpg-cache-16\.78\.72-perceptual-actor-scale/);
 assert.match(sw,/dungeon-authored-cache-visual-167852\.js/);
 assert.match(sw,/dng_floor_forest_01\.png/);
 assert.match(sw,/dng_floor_ice_01\.png/);
 assert.match(sw,/dng_floor_lava_01\.png/);
 
 if(siteIndex){
-  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must be injected in deployed index');
+  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must remain injected in deployed index');
 }
 
-console.log(`Dungeon authored wall ${dims.width}x${dims.height} + responsive actor token framing V16.78.70 regression: OK`);
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + perceptual actor token scaling V16.78.72 regression: OK`);

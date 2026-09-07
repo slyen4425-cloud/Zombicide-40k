@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.68-runtime-visual-load";
+const CACHE_NAME = "gensrpg-cache-16.78.69-runtime-terrain";
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement
 
@@ -15,6 +15,11 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-authored-cache-visual-167852.js",
   "./assets/dungeon/creatures/dng_wall_block.jpg",
+  "./assets/dungeon/creatures/dng_floor_stone_01.png",
+  "./assets/dungeon/creatures/dng_floor_cave_01.png",
+  "./assets/dungeon/creatures/dng_floor_forest_01.png",
+  "./assets/dungeon/creatures/dng_floor_ice_01.png",
+  "./assets/dungeon/creatures/dng_floor_lava_01.png",
   "./assets/dungeon/dungeon-room-template-content-167828.js",
   "./assets/dungeon/dungeon-room-grid-capture-167830.js",
   "./assets/dungeon/dungeon-room-content-ui-167831.js",

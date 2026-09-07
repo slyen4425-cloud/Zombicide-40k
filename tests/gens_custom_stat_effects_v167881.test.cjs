@@ -22,13 +22,12 @@ assert.match(src,/dungeonAttributeValue/,'custom stat effects must reach core RP
 assert.doesNotMatch(src,/customStatEffectsRuntime|localStorage\.setItem\([^\n]*effects/i,'effects must not create a parallel runtime source of truth');
 assert.match(help,/api\.HELP\.statEffects/,'contextual help must explain gameplay effects');
 assert.match(help,/api\.HELP\.primaryStats/,'contextual help must explain the active-stat selector');
-const profile={id:'demo',name:'Dungeon demo',rpgUniverse:{stats:{active:['force'],customStats:[{id:'epuisement',name:'Épuisement',kind:'gauge',min:0,max:100,defaultValue:0,effects:[{when:'gte',threshold:50,target:'attribute:force',mode:'flat',value:-2}]}]},exploration:{}}};
+const profile={id:'demo',name:'Dungeon demo',rpgUniverse:{stats:{active:['force','epuisement'],customStats:[{id:'epuisement',name:'Épuisement',kind:'gauge',min:0,max:100,defaultValue:0,effects:[{when:'gte',threshold:50,target:'attribute:force',mode:'flat',value:-2}]}]},exploration:{}}};
 const hero={customStats:{epuisement:60},rpgAttributes:{force:10,epuisement:60}};
 const sandbox={console,Math,Date,setTimeout:()=>0,clearTimeout:()=>{},localStorage:{getItem:()=>null,setItem:()=>{}},window:null,globalThis:null};
 sandbox.window=sandbox;sandbox.globalThis=sandbox;sandbox.current='h';sandbox.currentRpgProfile=()=>profile;sandbox.loadGameProfiles=()=>[profile];sandbox.saveGameProfiles=()=>{};sandbox.loadState=()=>hero;sandbox.key=id=>'hero_'+id;sandbox.dungeonAttributeValue=id=>Number(hero.rpgAttributes[id])||0;
 vm.runInNewContext(src,sandbox);
-assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true,'demo migration should activate Furtivité only, existing custom active state is preserved/managed by active list');
-profile.rpgUniverse.stats.active.push('epuisement');
+assert.equal(sandbox.GensCustomStats167879.isActive('epuisement'),true,'custom stat activation must use the canonical stats.active list');
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensCustomStats167879.effectTotals('h','attribute:force'))),{flat:-2,percent:0});
 assert.equal(sandbox.dungeonAttributeValue('force'),8,'Épuisement >= 50 must actually reduce Force by 2');
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;

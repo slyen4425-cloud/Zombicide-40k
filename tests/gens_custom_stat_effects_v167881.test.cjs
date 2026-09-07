@@ -24,6 +24,7 @@ assert.match(src,/function explainTarget/,'hero explanations must be generated f
 assert.match(src,/renderDungeonAttributes/,'hero attribute sheet must be refreshed from generic links');
 assert.match(src,/renderDungeonHeroStats/,'derived stat sheet must be refreshed from generic links');
 assert.match(src,/dtalentEffectsHost select\[data-f="scaleAttribute"\]/,'ability editor must keep custom stat selection');
+assert.match(src,/dungeonTalentCalculatedAmount/,'ability runtime must use the same characteristic catalogue');
 assert.match(src,/rpgAbilityRefs/,'equipment must continue to store only ability references');
 assert.doesNotMatch(src,/createElement\("script"\)|gens-equipment-ability-runtime-167885|MutationObserver|setInterval|setTimeout/,'V16.78.87 must not dynamically load runtime code or install repeating/delayed UI workers');
 assert.doesNotMatch(src,/enemyCells\s*=|dungeonRoom\s*=|timeline|startDungeonCombat/,'generic stat refactor must not touch spatial combat/spawn/timeline');
@@ -39,6 +40,7 @@ const profile={
       derivedRules:[
         {id:'necro_phys',enabled:true,source:'necromancie',target:'damage:physical',calc:'step',step:10,value:2,unit:'flat'},
         {id:'necro_melee',enabled:true,source:'necromancie',target:'damage:melee',calc:'perPoint',step:1,value:.1,unit:'flat'},
+        {id:'necro_hit',enabled:true,source:'necromancie',target:'hit:melee',calc:'step',step:10,value:3,unit:'flat'},
         {id:'force_crit',enabled:true,source:'force',target:'crit',calc:'perPoint',step:1,value:.5,unit:'flat'},
         {id:'necro_hp',enabled:true,source:'necromancie',target:'max_hp',calc:'perPoint',step:1,value:1,unit:'percent'},
         {id:'necro_move',enabled:true,source:'necromancie',target:'movement',calc:'step',step:20,value:-1,unit:'flat'}
@@ -76,6 +78,10 @@ sandbox.dungeonEnduranceHpBonus=()=>0;
 sandbox.dungeonPhysicalDamageBonus=()=>1;
 sandbox.dungeonMagicDamageBonus=()=>1;
 sandbox.dungeonHitBonusForMode=()=>5;
+sandbox.dungeonEnemyAttackProfile=()=>({statBonus:sandbox.dungeonHitBonusForMode('melee',10)});
+sandbox.itemAttackStats=()=>({strength:3,hitChance:50});
+sandbox.applyDungeonCombatScaling=(it,st)=>{st.hitChance=55;st.strength=4;st.mods=['legacy'];return st};
+sandbox.dungeonTalentCalculatedAmount=()=>999;
 sandbox.dungeonDamagePercentForMode=()=>0;
 sandbox.dungeonApplyStatDamagePercent=(base)=>({pct:0,bonus:0});
 sandbox.dungeonCriticalChance=()=>2;
@@ -94,6 +100,13 @@ sandbox.GensGenericStats167887.install();
 assert.equal(sandbox.GensGenericStats167887.sourceValue('necromancie','h'),20,'custom source value must be usable like a native characteristic');
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.GensGenericStats167887.totals('damage:physical','h'))),{flat:4,percent:0});
 assert.equal(sandbox.dungeonPhysicalDamageBonus(),4,'physical damage source must be fully configurable');
+assert.equal(sandbox.dungeonHitBonusForMode('melee',999),6,'hero hit bonus must use configured source rather than the legacy value argument');
+assert.equal(sandbox.dungeonEnemyAttackProfile().statBonus,5,'enemy legacy calculation must not accidentally read the current hero generic source');
+const st={melee:true,mods:[]};sandbox.applyDungeonCombatScaling({rpgScaling:{attribute:'force',baseChance:50}},st);
+assert.equal(st.hitChance,56,'weapon hit scaling must use generic universe links');
+assert.equal(st.strength,9,'weapon damage must combine physical and melee generic links from raw item power');
+assert.equal(sandbox.dungeonTalentCalculatedAmount('h',{base:5,scaleAttribute:'necromancie',scaleCoeff:.5,kind:'heal'}),15,'ability scaling must accept a custom characteristic at runtime');
+assert.equal(sandbox.dungeonTalentCalculatedAmount('h',{base:5,scaleAttribute:'necromancie',scaleCoeff:.5,kind:'damage'}),21,'damaging abilities must also receive generic damage links once');
 assert.equal(sandbox.dungeonCriticalChance(),7,'crit must be driven by generic links, not hardcoded Agility');
 assert.equal(sandbox.effectiveMaxWounds(),120,'percent links must work on amount targets');
 assert.equal(sandbox.dungeonHeroMoveValue083('h'),2,'movement must accept generic stat modifiers');

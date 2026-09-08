@@ -1,6 +1,6 @@
-const CACHE_NAME = "gensrpg-cache-16.79.02-stat-rules-import-safety";
-// gensrpg-deploy-16.79.02-stat-rules-import-safety
-// gensrpg-publish-trigger-16.79.02
+const CACHE_NAME = "gensrpg-cache-16.79.03-mobile-stat-art";
+// gensrpg-deploy-16.79.03-mobile-stat-art
+// gensrpg-publish-trigger-16.79.03
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -26,6 +26,7 @@ const CACHE_NAME = "gensrpg-cache-16.79.02-stat-rules-import-safety";
 // gensrpg-cache-16.78.98-stat-talent-cleanup
 // gensrpg-cache-16.79.00-intermode-safety
 // gensrpg-cache-16.79.01-stat-service
+// gensrpg-cache-16.79.02-stat-rules-import-safety
 
 const CORE_FILES = [
   "./",

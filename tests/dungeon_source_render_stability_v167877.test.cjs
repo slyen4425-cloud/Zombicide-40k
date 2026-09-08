@@ -1,0 +1,22 @@
+const assert=require('node:assert');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-source-render-stability-167877.js'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):'';
+assert.doesNotThrow(()=>new Function(src));
+assert.match(src,/APP_VERSION="16\.78\.77"/);
+assert.match(src,/function patchMapHtml/);
+assert.match(src,/dav167870WallCell/);
+assert.match(src,/dng_wall_block\.jpg/);
+assert.match(src,/function paintTokensNow/);
+assert.match(src,/\.dc310Hero,\.dc310Enemy/);
+assert.match(src,/@container \(max-width:82px\)/);
+assert.match(src,/@container \(max-width:54px\)/);
+assert.match(src,/transform:scale\(1\.12\)/);
+assert.doesNotMatch(src,/chooseEnemyTarget|rollDungeonEnemyAttackSkill|ENEMY_REPEAT_FACTOR/,'visual module must not contain gameplay targeting logic');
+assert.match(sw,/gensrpg-cache-16\.78\.74-restored-visuals/);
+assert.match(sw,/dungeon-source-render-stability-167877\.js/);
+if(site){assert.match(site,/dungeon-source-render-stability-167877\.js\?v=167877/);assert.doesNotMatch(site,/dungeon-grid-flicker-guard-167876\.js\?v=167876/)}
+console.log('Dungeon visual-only source render stability regression: OK');

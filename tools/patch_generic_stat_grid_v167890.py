@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""GenSrpG V16.78.97 — replace the hard-coded Dungeon attribute grid.
+"""GenSrpG V16.78.98 — final stat/talent sheet cleanup.
 
-The final page now renders the hero characteristic grid from the active RPG profile's
-canonical definitions. Legacy agility/spirit ids are normalized to agilite/esprit and
-all +/- changes share Dungeon's numeric rpgStatSpent economy.
+Keeps one canonical characteristic grid, lets the native Dungeon renderer rebuild the
+important derived-stat/rule summaries before replacing only the primary grid, hides the
+legacy compact duplicate stat strip, prevents the talent tree from escaping its tab,
+and removes obsolete PERSONNALISÉ badges from in-game hero cards.
 """
 from __future__ import annotations
 import sys
 from pathlib import Path
 
-VERSION="16.78.97"
-MARKER="gensCanonicalStatGridV167897"
+VERSION="16.78.98"
+MARKER="gensCanonicalStatGridV167898"
 PROFILE_MARKER="gensCurrentRpgProfileActiveV167894"
 RENAMES={"renderDungeonAttributes":"renderDungeonAttributes__native167890","renderDungeonHeroStats":"renderDungeonHeroStats__native167890"}
 
@@ -35,7 +36,7 @@ NEW_PROFILE='''function currentRpgProfile(){
 }'''
 
 WRAPPER=r'''
-/* gensCanonicalStatGridV167897 — one characteristic renderer for core + authored stats. */
+/* gensCanonicalStatGridV167898 — sole primary characteristic renderer. */
 const GENS_CORE_STAT_IDS_V167897=new Set(["force","agilite","intelligence","esprit","endurance","initiative"]);
 const GENS_STAT_ALIAS_V167897={agility:"agilite",spirit:"esprit"};
 const GENS_STAT_FALLBACK_V167897=[
@@ -113,40 +114,60 @@ function gensRenderCanonicalAttributesV167897(){
   host.innerHTML=defs.map(def=>{
     const id=gensCanonStatIdV167897(def.id),v=gensCanonicalDisplayValueV167897(id,def),raw=gensCanonicalAssignedValueV167897(id,def),core=GENS_CORE_STAT_IDS_V167897.has(id);
     const gear=core?dungeonEquipmentBonus(id):0,skill=core?dungeonSkillEffectTotal("attribute",null,id):0;
-    const desc=String(def.description||"").trim(),links=String(rulesApi?.descriptionForSource?.(id)||"").trim();
+    const fallback=GENS_STAT_FALLBACK_V167897.find(x=>x.id===id)?.description||"";
+    const desc=String(def.description||fallback||"").trim(),links=String(rulesApi?.descriptionForSource?.(id)||"").trim();
     const mode=String(def.editMode||"points"),editable=mode!=="runtime";
     const baseText=core?('Base '+raw+(gear?' · équipement '+(gear>0?'+':'')+gear:'')+(skill?' · talents +'+skill:'')):'Base '+(Number(def.defaultValue)||0);
     return '<div class="dungeonStatBox gsrCanonicalStatCard" data-stat-id="'+gensEscStatV167897(id)+'"><strong>'+gensEscStatV167897((def.icon?def.icon+' ':'')+(def.name||id))+'</strong><span>'+v+'</span><small style="display:block">'+gensEscStatV167897(baseText)+'</small>'+(desc?'<small class="gsrCustomStatDescription" style="display:block;color:#d6c18a;margin:4px 0">'+gensEscStatV167897(desc)+'</small>':'')+(links&&links!=="Aucune liaison automatique."?'<small class="gsrCustomStatLinks" style="display:block;color:#bdb19b;margin:4px 0">Influence : '+gensEscStatV167897(links)+'</small>':'')+(editable?'<div class="controls"><button data-stat="'+gensEscStatV167897(id)+'" onclick="gensChangeCanonicalStatV167897(this.dataset.stat,-1)">−</button><button data-stat="'+gensEscStatV167897(id)+'" onclick="gensChangeCanonicalStatV167897(this.dataset.stat,1)">+</button></div>':'')+'</div>';
   }).join("");
-  host.dataset.gensUnifiedStatGrid="167897";host.dataset.gensActiveCanonicalStatIds=defs.map(d=>gensCanonStatIdV167897(d.id)).join(",");return true;
+  host.querySelectorAll("#gcsHeroStats,.gsrCustomStatCard").forEach(n=>n.remove());
+  host.dataset.gensUnifiedStatGrid="167898";host.dataset.gensActiveCanonicalStatIds=defs.map(d=>gensCanonStatIdV167897(d.id)).join(",");return true;
 }
 function gensRenderActiveCustomStatsV167892(){return gensRenderCanonicalAttributesV167897()}
-function gensUnifiedStatGridV167890(){try{globalThis.current=gensCurrentHeroIdV167891();globalThis.GensGenericStats167887?.patchSheetTexts?.();gensRenderCanonicalAttributesV167897()}catch(error){console.warn("GenSrpG V16.78.97 canonical stat grid",error)}}
-function renderDungeonAttributes(){return gensRenderCanonicalAttributesV167897()||renderDungeonAttributes__native167890.apply(this,arguments)}
-function renderDungeonHeroStats(){const out=renderDungeonHeroStats__native167890.apply(this,arguments);gensRenderCanonicalAttributesV167897();return out}
-try{globalThis.GENSRPG_VERSION="16.78.97"}catch(error){}
+function gensUnifiedStatGridV167890(){try{globalThis.current=gensCurrentHeroIdV167891();globalThis.GensGenericStats167887?.patchSheetTexts?.();gensRenderCanonicalAttributesV167897()}catch(error){console.warn("GenSrpG V16.78.98 canonical stat grid",error)}}
+function renderDungeonAttributes(){
+  const out=renderDungeonAttributes__native167890.apply(this,arguments);
+  gensRenderCanonicalAttributesV167897();
+  const compact=document.getElementById("dungeonHeroStats");if(compact){compact.style.display="none";compact.innerHTML=""}
+  return out;
+}
+function renderDungeonHeroStats(){
+  const compact=document.getElementById("dungeonHeroStats");if(compact){compact.style.display="none";compact.innerHTML=""}
+  gensRenderCanonicalAttributesV167897();
+  return true;
+}
+try{globalThis.GENSRPG_VERSION="16.78.98";globalThis.GENSRPG_CANONICAL_STATS=true}catch(error){}
 '''.strip()
+
+TALENT_OLD='if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":"block";'
+TALENT_NEW='if(p)p.style.display=d&&dungeonSheetTab==="skills"?"block":"none";if(z)z.style.display=d?"none":"block";'
+BADGE_OLD='badge.textContent=h.dungeonBuiltin?"RPG INTÉGRÉ":"PERSONNALISÉ";'
+BADGE_NEW='badge.textContent=h.dungeonBuiltin?"RPG":"";badge.style.display=h.dungeonBuiltin?"inline-block":"none";'
 
 def patch_text(html:str)->str:
     if PROFILE_MARKER not in html:
         count=html.count(OLD_PROFILE)
-        if count!=1: raise RuntimeError(f"V16.78.97: expected one legacy currentRpgProfile(), found {count}")
+        if count!=1: raise RuntimeError(f"V16.78.98: expected one legacy currentRpgProfile(), found {count}")
         html=html.replace(OLD_PROFILE,NEW_PROFILE,1)
     if MARKER in html:return html
     positions=[]
     for old,new in RENAMES.items():
         needle=f"function {old}(){{";count=html.count(needle)
-        if count!=1:raise RuntimeError(f"V16.78.97: expected exactly one {needle!r}, found {count}")
+        if count!=1:raise RuntimeError(f"V16.78.98: expected exactly one {needle!r}, found {count}")
         pos=html.index(needle);html=html.replace(needle,f"function {new}(){{",1);positions.append(pos)
+    if TALENT_OLD not in html:raise RuntimeError("V16.78.98: talent panel display hook missing")
+    html=html.replace(TALENT_OLD,TALENT_NEW,1)
+    html=html.replace(BADGE_OLD,BADGE_NEW)
+    html=html.replace("'<span class=\"customHeroBadge\">PERSONNALISÉ</span>'","''")
     close=html.find("</script>",max(positions))
-    if close<0:raise RuntimeError("V16.78.97: could not find closing </script> for native stat renderer")
+    if close<0:raise RuntimeError("V16.78.98: could not find closing </script> for native stat renderer")
     html=html[:close]+"\n"+WRAPPER+"\n"+html[close:]
-    if MARKER not in html or PROFILE_MARKER not in html:raise RuntimeError("V16.78.97: canonical grid/profile patch missing")
+    if MARKER not in html or PROFILE_MARKER not in html:raise RuntimeError("V16.78.98: canonical grid/profile patch missing")
     return html
 
 def main()->int:
     if len(sys.argv)!=2:
         print("usage: patch_generic_stat_grid_v167890.py <index.html>",file=sys.stderr);return 2
     path=Path(sys.argv[1]);path.write_text(patch_text(path.read_text(encoding="utf-8")),encoding="utf-8")
-    print(f"GenSrpG V{VERSION}: canonical characteristic grid applied");return 0
+    print(f"GenSrpG V{VERSION}: stat/talent sheet cleanup applied");return 0
 if __name__=="__main__":raise SystemExit(main())

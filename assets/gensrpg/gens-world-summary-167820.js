@@ -1,6 +1,7 @@
 /* GenSrpG V16.78.20 — live world-card summaries.
    Recomputes built-in Dungeon / Monster Capture card counts from live content sources.
-   Does not mutate world profiles, saves, gameplay, movement, combat, timeline or spawn. */
+   Does not mutate world profiles, saves, gameplay, movement, combat, timeline or spawn.
+   V16.79.00 also bootstraps the dedicated inter-mode safety guard. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
@@ -8,6 +9,7 @@ const DOC=typeof document!=="undefined"?document:null;
 const VERSION="16.78.20";
 const DUNGEON_ID="game_profile_dungeon_demo";
 const CAPTURE_ID="gp_mt7ker7t_m2iw9";
+const SAFETY_SCRIPT_ID="gensIntermodeSafety167900Script";
 let patchTimer=0;
 
 function arr(v){return Array.isArray(v)?v:[]}
@@ -83,8 +85,13 @@ function patchCards(){
   return changed;
 }
 function schedulePatch(){if(!DOC)return;if(patchTimer)return;patchTimer=setTimeout(()=>{patchTimer=0;patchCards()},0)}
-function install(){if(!DOC)return;patchCards();if(typeof MutationObserver==="function"){const target=DOC.body||DOC.documentElement;if(target)new MutationObserver(schedulePatch).observe(target,{childList:true,subtree:true})}}
+function loadIntermodeSafety(){
+  if(ROOT.GensIntermodeSafety167900)return true;
+  if(!DOC||DOC.getElementById?.(SAFETY_SCRIPT_ID)||typeof DOC.createElement!=="function")return false;
+  const s=DOC.createElement("script");s.id=SAFETY_SCRIPT_ID;s.src="assets/gensrpg/gens-intermode-safety-167900.js?v=167900";s.async=false;(DOC.body||DOC.documentElement)?.appendChild?.(s);return true;
+}
+function install(){if(!DOC)return;loadIntermodeSafety();patchCards();if(typeof MutationObserver==="function"){const target=DOC.body||DOC.documentElement;if(target)new MutationObserver(schedulePatch).observe(target,{childList:true,subtree:true})}}
 
-ROOT.GensWorldSummary167820={VERSION,DUNGEON_ID,CAPTURE_ID,dungeonSummary,captureSummary,legacySummary,summarizeProfile,summarizeId,patchCards,install};
+ROOT.GensWorldSummary167820={VERSION,DUNGEON_ID,CAPTURE_ID,SAFETY_SCRIPT_ID,dungeonSummary,captureSummary,legacySummary,summarizeProfile,summarizeId,patchCards,loadIntermodeSafety,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();

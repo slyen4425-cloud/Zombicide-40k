@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - work/v16.78.78-event-popup-ambush-finish
 permissions:
   contents: read
 jobs:

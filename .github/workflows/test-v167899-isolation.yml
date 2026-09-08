@@ -1,0 +1,32 @@
+name: Test V16.78.99 RPG Stat Isolation
+
+on:
+  push:
+    branches:
+      - work/dungeon-v16.78.99-shared-stat-service
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test shared stat service and mode isolation
+        run: node tests/gens_stat_service_v167899.test.cjs
+      - name: Test stat grid integration
+        run: node tests/gens_native_stat_grid_v167890.test.cjs
+      - name: Test legacy effects compatibility
+        run: node tests/gens_custom_stat_effects_v167881.test.cjs
+      - name: Test final stat bridge
+        run: node tests/gens_custom_stat_runtime_profile_v167889.test.cjs
+      - name: Test Dungeon runtime regression
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Test authored Dungeon runtime separately
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: Check stat modules do not own mode navigation
+        run: |
+          ! grep -Eq 'openCapture|startCapture|captureScreen|openHome|homeScreen|DungeonAuthoredRuntime[[:space:]]*=' assets/gensrpg/gens-stat-service-167899.js
+          ! grep -Eq 'openCapture|startCapture|captureScreen|openHome|homeScreen' assets/gensrpg/gens-custom-stats-167881.js
+          ! grep -Eq 'openCapture|startCapture|captureScreen|openHome|homeScreen' assets/gensrpg/gens-custom-stat-runtime-profile-167889.js

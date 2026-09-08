@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.79
+name: Test Builder Events V16.78.80
 on:
   push:
     branches:
       - main
-      - work/v16.78.79-final-popup-reinforcement
+      - work/v16.78.80-terminal-button-position
 permissions:
   contents: read
 jobs:
@@ -19,7 +19,7 @@ jobs:
         run: node tests/dungeon_event_ambush_position_v167878.test.cjs
       - name: Tester le runtime Dungeon complet
         run: node tests/dungeon_runtime_regression.test.cjs
-      - name: Tester le moteur authored
+      - name: Tester le moteur authored et la vraie case de sortie finale
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
       - name: Tester le contenu exact par zone
         run: node tests/dungeon_zone_content_v167824.test.cjs

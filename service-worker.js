@@ -1,9 +1,10 @@
-const CACHE_NAME = "gensrpg-cache-16.78.75-final-exit-hero-art";
+const CACHE_NAME = "gensrpg-cache-16.78.76-direct-final-exit";
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
 // gensrpg-cache-16.78.73-clean-dynamic-stats
 // gensrpg-cache-16.78.74-restored-visuals
+// gensrpg-cache-16.78.75-final-exit-hero-art
 
 const CORE_FILES = [
   "./",

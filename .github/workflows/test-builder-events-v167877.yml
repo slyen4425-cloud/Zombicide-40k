@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.83
+name: Test Builder Events V16.78.84
 on:
   push:
     branches:
       - main
-      - work/v16.78.83-event-config-click
+      - work/v16.78.84-event-highlight
 permissions:
   contents: read
 jobs:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Tester les cases événement configurables, aléatoires et dynamiques
+      - name: Tester les cases événement configurables et leur surbrillance
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs
       - name: Tester la sortie finale sans faux positif sur les caches secondaires
         run: node tests/dungeon_authored_final_exit_v167878.test.cjs

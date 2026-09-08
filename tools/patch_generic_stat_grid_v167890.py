@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""GenSrpG V16.78.92 — complete active custom-stat cards in the native hero grid.
+"""GenSrpG V16.78.93 — render custom stats from the same lexical RPG profile as the native hero sheet.
 
-The polished native renderer stays unchanged. The build-time wrapper exposes the
-lexical `current` hero, lets the existing generic engine refresh derived texts, then
-renders every active custom characteristic from the active RPG profile in the same
-native grid. No observer, timer, loader or parallel stat store is introduced.
+The polished native renderer stays unchanged. The build-time wrapper executes inside the
+same classic script as `current`, `currentRpgProfile()` and `loadState()`, so the custom
+stat cards no longer depend on a second global-profile bridge. No observer, timer,
+dynamic loader or parallel stat store is introduced.
 """
 from __future__ import annotations
 import sys
 from pathlib import Path
 
-VERSION = "16.78.92"
+VERSION = "16.78.93"
 MARKER = "gensUnifiedStatGridV167890"
 RENAMES = {
     "renderDungeonAttributes": "renderDungeonAttributes__native167890",
@@ -18,26 +18,43 @@ RENAMES = {
 }
 
 WRAPPER = r'''
-/* GenSrpG V16.78.92 — native characteristic grid + complete active custom stats. */
+/* GenSrpG V16.78.93 — native characteristic grid + lexical RPG profile source. */
 function gensCurrentHeroIdV167891(){
   try{return current?String(current):String(globalThis.current||"")}catch(error){return String(globalThis.current||"")}
 }
 function gensEscStatV167892(value){
   return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 }
+function gensCurrentRpgProfileV167893(){
+  try{return currentRpgProfile()||null}catch(error){return null}
+}
+function gensActiveCustomStatDefsV167893(){
+  try{
+    const profile=gensCurrentRpgProfileV167893(),stats=profile?.rpgUniverse?.stats||{};
+    const active=new Set((Array.isArray(stats.active)?stats.active:[]).map(String));
+    return (Array.isArray(stats.customStats)?stats.customStats:[]).filter(def=>def&&def.id&&active.has(String(def.id)));
+  }catch(error){return []}
+}
+function gensCustomStatValueV167893(heroId,def){
+  try{
+    const state=loadState(heroId)||{},id=String(def?.id||"");
+    const direct=Number(state?.customStats?.[id]);if(Number.isFinite(direct))return direct;
+    const mirrored=Number(state?.rpgAttributes?.[id]);if(Number.isFinite(mirrored))return mirrored;
+    return Number(def?.defaultValue)||0;
+  }catch(error){return Number(def?.defaultValue)||0}
+}
 function gensRenderActiveCustomStatsV167892(){
   try{
-    const grid=document.getElementById("dungeonAttributeGrid"),customApi=globalThis.GensCustomStats167879,genericApi=globalThis.GensGenericStats167887;
-    if(!grid||!customApi)return false;
+    const grid=document.getElementById("dungeonAttributeGrid"),genericApi=globalThis.GensGenericStats167887;
+    if(!grid)return false;
     grid.querySelectorAll(".gsrCustomStatCard").forEach(node=>node.remove());
     const heroId=gensCurrentHeroIdV167891();if(!heroId)return false;
-    const profile=globalThis.getActiveGameProfile?.()||globalThis.currentRpgProfile?.()||null;
-    const stats=profile?.rpgUniverse?.stats||{},active=new Set((Array.isArray(stats.active)?stats.active:[]).map(String));
-    const list=(Array.isArray(stats.customStats)?stats.customStats:[]).filter(def=>def&&def.id&&active.has(String(def.id)));
-    const state=globalThis.loadState?.(heroId)||{},points=Math.max(0,Number(state.statPoints)||0);
+    const list=gensActiveCustomStatDefsV167893();
+    const state=loadState(heroId)||{},points=Math.max(0,Number(state.statPoints)||0);
     for(const def of list){
-      const id=String(def.id),value=Number(customApi.value?.(heroId,id))||0,base=Number(def.defaultValue)||0,card=document.createElement("div");
+      const id=String(def.id),value=gensCustomStatValueV167893(heroId,def),base=Number(def.defaultValue)||0,card=document.createElement("div");
       card.className="dungeonStatBox gsrCustomStatCard";
+      card.dataset.statId=id;
       const canEdit=def.editMode!=="runtime",canAdd=def.editMode!=="points"||points>0;
       const ownDescription=String(def.description||"").trim();
       const links=String(genericApi?.descriptionForSource?.(id)||"").trim();
@@ -49,19 +66,20 @@ function gensRenderActiveCustomStatsV167892(){
       grid.appendChild(card);
     }
     grid.dataset.gensActiveCustomStats=String(list.length);
+    grid.dataset.gensActiveCustomStatIds=list.map(def=>String(def.id)).join(",");
     return true;
-  }catch(error){console.warn("GenSrpG V16.78.92 custom stat cards",error);return false}
+  }catch(error){console.warn("GenSrpG V16.78.93 custom stat cards",error);return false}
 }
 function gensUnifiedStatGridV167890(){
   try{
     const heroId=gensCurrentHeroIdV167891();
     if(heroId)globalThis.current=heroId;
     const grid=document.getElementById("dungeonAttributeGrid");
-    if(grid)grid.dataset.gensUnifiedStatGrid="167892";
+    if(grid)grid.dataset.gensUnifiedStatGrid="167893";
     const api=globalThis.GensGenericStats167887;
     if(api)api.patchSheetTexts?.();
     gensRenderActiveCustomStatsV167892();
-  }catch(error){console.warn("GenSrpG V16.78.92 stat grid",error)}
+  }catch(error){console.warn("GenSrpG V16.78.93 stat grid",error)}
 }
 function renderDungeonAttributes(){
   const out=renderDungeonAttributes__native167890.apply(this,arguments);
@@ -73,7 +91,7 @@ function renderDungeonHeroStats(){
   gensUnifiedStatGridV167890();
   return out;
 }
-try{globalThis.GENSRPG_VERSION="16.78.92"}catch(error){}
+try{globalThis.GENSRPG_VERSION="16.78.93"}catch(error){}
 '''.strip()
 
 
@@ -85,16 +103,16 @@ def patch_text(html: str) -> str:
         needle=f"function {old}(){{"
         count=html.count(needle)
         if count!=1:
-            raise RuntimeError(f"V16.78.92: expected exactly one {needle!r}, found {count}")
+            raise RuntimeError(f"V16.78.93: expected exactly one {needle!r}, found {count}")
         pos=html.index(needle)
         html=html.replace(needle,f"function {new}(){{",1)
         positions.append(pos)
     close=html.find("</script>",max(positions))
     if close<0:
-        raise RuntimeError("V16.78.92: could not find closing </script> for native stat renderer")
+        raise RuntimeError("V16.78.93: could not find closing </script> for native stat renderer")
     html=html[:close]+"\n"+WRAPPER+"\n"+html[close:]
-    if MARKER not in html or "gensRenderActiveCustomStatsV167892" not in html:
-        raise RuntimeError("V16.78.92: complete custom-stat grid wrapper missing after patch")
+    if MARKER not in html or "gensActiveCustomStatDefsV167893" not in html:
+        raise RuntimeError("V16.78.93: lexical-profile custom-stat wrapper missing after patch")
     return html
 
 
@@ -103,6 +121,6 @@ def main()->int:
         print("usage: patch_generic_stat_grid_v167890.py <index.html>",file=sys.stderr);return 2
     path=Path(sys.argv[1]);html=path.read_text(encoding="utf-8")
     path.write_text(patch_text(html),encoding="utf-8")
-    print(f"GenSrpG V{VERSION}: complete active custom-stat grid applied")
+    print(f"GenSrpG V{VERSION}: lexical-profile custom-stat grid applied")
     return 0
 if __name__=="__main__": raise SystemExit(main())

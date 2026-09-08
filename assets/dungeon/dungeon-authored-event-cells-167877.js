@@ -1,10 +1,10 @@
-/* GenSrpG V16.78.81 — authored Dungeon event cells + dynamic configuration.
+/* GenSrpG V16.78.82 — authored Dungeon event cells + dynamic configuration.
    Reuses the existing Dungeon event library. Each authored event tile can stay random or target
    any event currently present in the RPG event library; newly created events appear automatically. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const RT_KEY="gensrpg_dungeon_runtime_v2",CONFIG_KEY="gensrpg_authored_event_cell_config_v1",APP_VERSION="16.78.81",VERSION="1.2.0",MARKER="event",RANDOM_EVENT_ID="__random_event__";
+const RT_KEY="gensrpg_dungeon_runtime_v2",CONFIG_KEY="gensrpg_authored_event_cell_config_v1",APP_VERSION="16.78.82",VERSION="1.2.1",MARKER="event",RANDOM_EVENT_ID="__random_event__";
 let scheduled=false;
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
 function readJson(k,f){try{const x=JSON.parse(localStorage.getItem(k)||"null");return x==null?f:x}catch(e){return f}}
@@ -13,6 +13,13 @@ function read(){const x=readJson(RT_KEY,null);return x&&typeof x==="object"?x:nu
 function write(x){return writeJson(RT_KEY,x||{})}
 function hero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
 function installTool(){const api=R.DungeonRoomCreator100,tools=api?.TOOLS;if(!tools)return false;if(!tools.event)tools.event={label:"Événement",icon:"🎲",kind:"object"};if(D&&!D.getElementById("dae167877Style")){const s=D.createElement("style");s.id="dae167877Style";s.textContent=".drc100Cell.event{background:#30224a;border-color:#6f58a5}.drc100Cell.event::after{content:'🎲';font-size:16px}#dae167881ConfigModal{display:none;position:fixed;inset:0;z-index:72000;background:#050505dd;padding:12px;overflow:auto;color:#fff}#dae167881ConfigModal.open{display:flex;align-items:center;justify-content:center}.dae167881Card{width:min(560px,100%);background:#171717;border:1px solid #555;border-radius:15px;padding:14px;box-shadow:0 20px 70px #000}.dae167881Card h3{margin:0 0 8px}.dae167881Card select{width:100%;background:#090909;color:#fff;border:1px solid #444;border-radius:8px;padding:10px;font:inherit}.dae167881Actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.dae167881Actions button{flex:1;min-width:120px}";D.head?.appendChild(s)}return true}
+function ensurePaletteButton(){
+  if(!D||!installTool())return false;
+  const api=R.DungeonRoomCreator100,p=D.getElementById("drc100Palette");if(!api||!p)return false;
+  let b=p.querySelector?.('[data-tool="event"]')||null;
+  if(!b){b=D.createElement("button");b.type="button";b.dataset.tool="event";b.textContent="🎲 Événement";b.onclick=()=>api.setTool?.("event");p.appendChild?.(b)}
+  return true;
+}
 function context(){const x=read();if(!x||Number(x.room)<=0||x.branch?.active||!x.last?.authoredRuntime167839)return null;const h=hero(x),pos=Number(x?.positions?.[h]),map=x?.last?.map||{},cells=Array.isArray(map.cells)?map.cells:[];if(!h||!Number.isInteger(pos)||pos<0||String(cells[pos]||"").toLowerCase()!==MARKER)return null;const worldId=String(x.last.worldDungeonId||""),nodeId=String(x.last.worldNodeId||"");if(!worldId||!nodeId)return null;const key=worldId+"::"+nodeId+"::"+pos;x.authoredEventCells167877=x.authoredEventCells167877&&typeof x.authoredEventCells167877==="object"?x.authoredEventCells167877:{};return {x,h,pos,worldId,nodeId,key,done:!!x.authoredEventCells167877[key]}}
 function eventRound(c){return Math.max(1,Number(c?.x?.round)||Number(R.loadDungeonState?.()?.room)||Number(c?.x?.room)||1)}
 function eventLibrary(){let list=[];try{list=R.loadDungeonEvents?.()||[]}catch(e){}if(!Array.isArray(list)||!list.length)try{list=R.currentRpgEventPool?.()||[]}catch(e){}const seen=new Set(),out=[];for(const e of Array.isArray(list)?list:[]){const id=String(e?.id||e?.key||"");if(!id||seen.has(id))continue;seen.add(id);out.push({id,label:String(e?.name||e?.label||e?.title||id),event:e,enabled:e?.enabled!==false})}return out.sort((a,b)=>a.label.localeCompare(b.label,"fr"))}
@@ -35,7 +42,7 @@ function closeConfig(){D?.getElementById("dae167881ConfigModal")?.classList.remo
 function saveEditorConfig(){const m=D?.getElementById("dae167881ConfigModal"),sel=D?.getElementById("dae167881EventSelect");if(!m||!sel)return false;saveConfig(m.dataset.worldId,m.dataset.nodeId,Number(m.dataset.cell),sel.value);closeConfig();try{R.showToast?.("🎲 Événement configuré : "+String(sel.options?.[sel.selectedIndex]?.text||sel.value))}catch(e){}return true}
 function clearConfig(){const m=D?.getElementById("dae167881ConfigModal");if(!m)return false;removeConfig(m.dataset.worldId,m.dataset.nodeId,Number(m.dataset.cell));closeConfig();try{R.showToast?.("🎲 Case événement remise en mode aléatoire.")}catch(e){}return true}
 function interceptEditor(ev){if(!D||!D.getElementById("drv167826Toggle")?.classList?.contains("on"))return;const el=ev.target?.closest?.("[data-drc-index]");if(!el)return;const room=inferEditorRoom(),idx=Number(el.dataset.drcIndex);if(String(room?.cells?.[idx]?.object||"")!==MARKER)return;ev.preventDefault?.();ev.stopPropagation?.();ev.stopImmediatePropagation?.();openConfig(idx)}
-function install(){installTool();wrap("render");wrap("show");if(D&&!D.__dae167879Click){D.__dae167879Click=true;D.addEventListener("click",schedule,true)}if(D&&!D.__dae167881Editor){D.__dae167881Editor=true;D.addEventListener("pointerdown",interceptEditor,true);D.addEventListener("click",interceptEditor,true)}schedule();try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true}
-R.DungeonAuthoredEventCells167877={VERSION,APP_VERSION,MARKER,RANDOM_EVENT_ID,CONFIG_KEY,installTool,context,eventRound,eventLibrary,getConfig,saveConfig,removeConfig,pickEvent,applyEvent,fire,schedule,openConfig,closeConfig,saveEditorConfig,clearConfig,install};
+function install(){installTool();ensurePaletteButton();wrap("render");wrap("show");if(D&&!D.__dae167879Click){D.__dae167879Click=true;D.addEventListener("click",()=>{schedule();if(typeof setTimeout==="function")setTimeout(ensurePaletteButton,0);else ensurePaletteButton()},true)}if(D&&!D.__dae167881Editor){D.__dae167881Editor=true;D.addEventListener("pointerdown",interceptEditor,true);D.addEventListener("click",interceptEditor,true)}schedule();try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true}
+R.DungeonAuthoredEventCells167877={VERSION,APP_VERSION,MARKER,RANDOM_EVENT_ID,CONFIG_KEY,installTool,ensurePaletteButton,context,eventRound,eventLibrary,getConfig,saveConfig,removeConfig,pickEvent,applyEvent,fire,schedule,openConfig,closeConfig,saveEditorConfig,clearConfig,install};
 install();if(D&&D.readyState==="loading")D.addEventListener("DOMContentLoaded",install,{once:true});if(typeof setTimeout==="function")for(const ms of [50,250,1000])setTimeout(install,ms);
 })();

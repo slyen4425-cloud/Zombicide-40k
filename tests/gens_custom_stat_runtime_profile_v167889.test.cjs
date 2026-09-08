@@ -13,8 +13,8 @@ assert.match(src,/stats\.active|s\.active/,'stats.active must remain the activat
 assert.match(src,/for\(const d of s\.customStats\)/,'legacy custom definitions must be repaired into active once');
 assert.match(src,/api\.activeIds=function/,'legacy Furtivité force-activation must be bypassed for exported API reads');
 assert.match(src,/api\.isActive=function/,'activation checks must read canonical active list directly');
-assert.match(src,/data-gcs-primary/,'custom characteristic checkboxes must autosave activation');
-assert.match(src,/\[data-gcs\],\[data-e\]/,'custom stat definition changes must autosave');
+assert.match(src,/handlePrimaryChange/,'custom characteristic checkboxes must autosave activation through one handler');
+assert.match(src,/handleCustomDefinitionChange/,'custom stat definition changes must autosave through one handler');
 assert.doesNotMatch(src,/MutationObserver|setInterval|setTimeout|createElement\("script"\)|startDungeonCombat|enemyCells\s*=|dungeonRoom\s*=/,'authority bridge must not add risky workers/loaders/spatial mutations');
 
 const legacy={id:'dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{
@@ -69,13 +69,19 @@ sandbox.GensCustomStats167879.defs();
 assert.equal(sandbox.GensCustomStats167879.isActive('furtivite'),false,'legacy ensure may run internally but exported API must restore canonical activation');
 assert.ok(legacyEnsureCalls>0);
 
-const fakeInput={value:'mouvement',checked:true,closest:sel=>sel.includes('data-gcs-primary')?fakeInput:null};
-primary.listeners.change?.({target:fakeInput});
+const fakeInput={
+ value:'mouvement',checked:true,
+ matches:sel=>sel==='[data-gcs-primary="1"] input[type="checkbox"]',
+ closest:()=>null
+};
+assert.equal(typeof primary.listeners.change,'function','primary editor listener must be bound');
+assert.equal(bridge.handlePrimaryChange({target:fakeInput}),true,'primary handler must persist activation');
 assert.equal(sandbox.GensCustomStats167879.isActive('mouvement'),true,'primary custom checkbox must autosave activation');
 
 const fakeCustomField={matches:sel=>sel==='[data-gcs],[data-e]'};
 let persisted=0;sandbox.GensCustomStats167879.persist=()=>{persisted++;return true};
-custom.listeners.change?.({target:fakeCustomField});
+assert.equal(typeof custom.listeners.change,'function','custom editor listener must be bound');
+assert.equal(bridge.handleCustomDefinitionChange({target:fakeCustomField}),true);
 assert.equal(persisted,1,'custom stat definition changes must autosave through the existing canonical persist function');
 
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;

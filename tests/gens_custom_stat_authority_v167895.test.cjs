@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-custom-stat-runtime-profile-167889.js'),'utf8');
+assert.doesNotThrow(()=>new Function(src));
+assert.match(src,/APP_VERSION="16\.78\.95"/);
+assert.match(src,/customStatAuthorityV167895/);
+assert.match(src,/handlePrimaryChange/);
+assert.match(src,/handleCustomDefinitionChange/);
+assert.doesNotMatch(src,/MutationObserver|setInterval|setTimeout|createElement\("script"\)/);
+console.log('GenSrpG custom stat authority V16.78.95 smoke: OK');

@@ -1,7 +1,8 @@
-const CACHE_NAME = "gensrpg-cache-16.78.73-clean-dynamic-stats";
-// Compatibility marker kept for the existing V16.78.40 deployment guard:
+const CACHE_NAME = "gensrpg-cache-16.78.74-restored-visuals";
+// Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
+// gensrpg-cache-16.78.73-clean-dynamic-stats
 
 const CORE_FILES = [
   "./",
@@ -15,12 +16,16 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-room-visual-config-167826.js",
   "./assets/dungeon/dungeon-room-visual-hotfix-167827.js",
   "./assets/dungeon/dungeon-authored-cache-visual-167852.js",
+  "./assets/dungeon/dungeon-source-render-stability-167877.js",
   "./assets/dungeon/creatures/dng_wall_block.jpg",
   "./assets/dungeon/creatures/dng_floor_stone_01.png",
   "./assets/dungeon/creatures/dng_floor_cave_01.png",
   "./assets/dungeon/creatures/dng_floor_forest_01.png",
   "./assets/dungeon/creatures/dng_floor_ice_01.png",
   "./assets/dungeon/creatures/dng_floor_lava_01.png",
+  "./assets/dungeon/creatures/dng_aldren.png",
+  "./assets/dungeon/creatures/dng_lyra.png",
+  "./assets/dungeon/creatures/dng_brom.png",
   "./assets/dungeon/dungeon-room-template-content-167828.js",
   "./assets/dungeon/dungeon-room-grid-capture-167830.js",
   "./assets/dungeon/dungeon-room-content-ui-167831.js",
@@ -38,6 +43,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
   "./assets/gensrpg/gens-rpg-stats-clean-167874.js",
+  "./assets/gensrpg/gens-dungeon-hero-art-repair-167874.js",
   "./manifest.json"
 ];
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.92-complete-custom-stat-cards";
+const CACHE_NAME = "gensrpg-cache-16.78.93-lexical-profile-stat-grid";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -15,6 +15,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.92-complete-custom-stat-cards";
 // gensrpg-cache-16.78.89-custom-stat-runtime-profile
 // gensrpg-cache-16.78.90-native-stat-grid
 // gensrpg-cache-16.78.91-current-hero-stat-grid
+// gensrpg-cache-16.78.92-complete-custom-stat-cards
 
 const CORE_FILES = [
   "./",

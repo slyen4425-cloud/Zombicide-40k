@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.87-generic-stat-links";
+const CACHE_NAME = "gensrpg-cache-16.78.88-custom-stat-ui";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -10,6 +10,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.87-generic-stat-links";
 // gensrpg-cache-16.78.84-safe-editor-only
 // gensrpg-cache-16.78.85-equipment-ability-runtime
 // gensrpg-cache-16.78.86-ui-freeze-rollback
+// gensrpg-cache-16.78.87-generic-stat-links
 
 const CORE_FILES = [
   "./",

@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 VERSION="16.78.99"
-TAG='<script src="assets/gensrpg/gens-stat-service-167899.js?v=167899"></script>'
+TAG='<!-- gensUnifiedStatGridV167890 compatibility marker: replaced by shared service V16.78.99 -->\n<script src="assets/gensrpg/gens-stat-service-167899.js?v=167899"></script>'
 MARKER='gens-stat-service-167899.js?v=167899'
 
 

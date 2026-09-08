@@ -18,26 +18,22 @@ const core={explore(){return 'normal-explore'},render(){renderCalls++;return tru
 const timers=[];
 const ctx={console,Math,Date,localStorage,document,DungeonAuthoredRuntime167839:authored,DungeonCore01:core,markSessionActive(){},showGensRootHome(){homeCalls++},setTimeout(fn,ms){timers.push({fn,ms});return timers.length}};
 ctx.window=ctx;ctx.globalThis=ctx;
-function save(pos,cells=['floor','cache','exit']){localStorage.setItem(RT,JSON.stringify({participants:['aldren'],index:0,room:3,positions:{aldren:pos},last:{authoredRuntime167839:true,worldDungeonId:'world_1',worldNodeId:'last',map:{cells,exitIdx:2}},branch:null}))}
+function save(pos,extra={}){localStorage.setItem(RT,JSON.stringify({participants:['aldren'],index:0,room:3,positions:{aldren:pos},last:{authoredRuntime167839:true,worldDungeonId:'world_1',worldNodeId:'last',map:{cells:['floor','cache','exit'],exitIdx:2}},branch:null,...extra}))}
 save(1);
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
 const api=ctx.DungeonAuthoredFinalExit167875;
-assert.ok(api);assert.equal(api.APP_VERSION,'16.78.78');
-assert.equal(core.explore(),'normal-explore','le module de fin ne doit plus intercepter explore() : une cache reste une interaction normale');
-let state=api.finalState();
-assert.equal(state.hasExit,true);assert.equal(state.atExit,false,'être sur une cache de la zone finale ne doit pas compter comme sortie');
-const originalText=btn.textContent;api.syncButton();assert.equal(btn.textContent,originalText,'le bouton normal ne doit pas être remplacé tant que le héros n’est pas sur EXIT');
-assert.equal(api.finish(),false,'finish() refuse toute fin hors de la vraie case EXIT');
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.79');
+assert.equal(core.explore(),'normal-explore');
+let state=api.finalState();assert.equal(state.hasExit,true);assert.equal(state.atExit,false);
+const originalText=btn.textContent;api.syncButton();assert.equal(btn.textContent,originalText);assert.equal(api.finish(),false);
 
-save(2);api.syncButton();
-assert.equal(btn.textContent,'🏆 TERMINER LE DONJON');
-assert.equal(api.finish(),true,'la vraie case EXIT peut terminer le donjon');
-assert.equal(popup?.title,'🏆 Donjon terminé','la fin doit afficher un popup explicite');
-assert.equal(homeCalls,0,'l’accueil doit attendre la fermeture du popup');
-popup.cb();
+save(2,{authored167847ReturnStacks:{aldren:[{sourceNodeId:'last',sourceIndex:1,targetNodeId:'branch_last_1_cache'}]}});
+assert.equal(api.finalState(),null,'une branche secondaire/cache ne doit jamais être considérée comme fin de donjon');
+api.syncButton();assert.equal(btn.textContent,originalText,'aucun bouton terminer dans une cache/branche secondaire');
+
+save(2);api.syncButton();assert.equal(btn.textContent,'🏆 TERMINER LE DONJON');
+assert.equal(api.finish(),true);assert.equal(popup?.title,'🏆 Donjon terminé');assert.equal(homeCalls,0);popup.cb();
 while(timers.length){const t=timers.shift();if(t.ms<=160)t.fn()}
-assert.ok(homeCalls>=1,'après fermeture du popup et rerender, le retour accueil doit être réappliqué');
-assert.equal(elements.gensRootHome.style.display,'block');
-
-assert.doesNotMatch(src,/wrapExplore\s*\(/,'le correctif ne doit plus envelopper explore()');
-console.log('Authored final exit V16.78.78: OK');
+assert.ok(homeCalls>=1);assert.equal(elements.gensRootHome.style.display,'block');
+assert.doesNotMatch(src,/wrapExplore\s*\(/);
+console.log('Authored final exit V16.78.79: OK');

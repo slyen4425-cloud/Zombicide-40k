@@ -1,0 +1,22 @@
+name: Test Builder Events V16.78.77
+on:
+  push:
+    branches:
+      - work/v16.78.77-builder-events
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tester les cases événement authored
+        run: node tests/dungeon_authored_event_cells_v167877.test.cjs
+      - name: Tester le runtime Dungeon complet
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Tester le moteur authored
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: Tester le contenu exact par zone
+        run: node tests/dungeon_zone_content_v167824.test.cjs
+      - name: Tester le créateur de pièces
+        run: node tests/dungeon_room_creator_v1.test.cjs

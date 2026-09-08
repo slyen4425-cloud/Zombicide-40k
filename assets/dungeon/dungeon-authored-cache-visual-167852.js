@@ -45,3 +45,15 @@ function install(){ensureStyle();if(wrap()){for(const ms of [0,50,250])setTimeou
 ROOT.DungeonAuthoredCacheVisual167852={VERSION,APP_VERSION,FLOOR_THEMES,WALL_ASSET,ACTOR_RATIO,ACTOR_RATIO_MEDIUM,ACTOR_RATIO_COMPACT,ACTOR_ZOOM,UI_ENEMY_SUMMARY_SELECTOR,UI_GHOST_CHEST_SELECTOR,floorAsset,authoredRoom,enemyTokenRoot,isActorImage,actorRatioForSide,actorTokenSize,fitActorToken,refitDc310Tokens,installTokenMutationSync,cacheCells,enemyCellIndexes,heroCellIndexes,actorCellIndexes,cleanupLegacyChestScenes,paintBoardVisuals,paint,sync,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}
 })();
+
+/* Load the V16.78.77 authored event-cell extension from a module that is guaranteed to be present in the final Pages build. */
+(function(){
+"use strict";
+const D=typeof document!=="undefined"?document:null;
+if(!D||D.getElementById("dae167877Loader"))return;
+const s=D.createElement("script");
+s.id="dae167877Loader";
+s.src="assets/dungeon/dungeon-authored-event-cells-167877.js?v=167877";
+s.async=false;
+(D.body||D.head||D.documentElement).appendChild(s);
+})();

@@ -16,20 +16,25 @@ const ctx={console,Math,Date,localStorage,setTimeout(fn){fn();return 1},loadActi
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-event-runtime-fix-167878.js'});
 const api=ctx.DungeonEventRuntimeFix167878;
-assert.ok(api);assert.equal(api.APP_VERSION,'16.78.78');
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.79');
+function dist(cell){const size=5,heroCells=[12,13];return Math.min(...heroCells.map(h=>Math.abs(Math.floor(h/size)-Math.floor(cell/size))+Math.abs((h%size)-(cell%size))))}
 ctx.applyDungeonTurnEvent({id:'d_evt_ambush',name:'Embuscade'});
 let x=JSON.parse(localStorage.getItem(RT));
-const placed=Number(x.enemyCells.ambush_new);
-assert.ok(Number.isInteger(placed),'le nouvel ennemi d’embuscade doit recevoir une position tactique');
-const size=5,heroCells=[12,13];
-const distance=Math.min(...heroCells.map(h=>Math.abs(Math.floor(h/size)-Math.floor(placed/size))+Math.abs((h%size)-(placed%size))));
-assert.equal(distance,1,'l’ennemi d’embuscade doit apparaître sur une case adjacente à un héros');
-assert.notEqual(placed,24,'l’embuscade ne doit pas envoyer le monstre au fond sur la sortie');
-assert.ok(renderCalls>=1,'la grille doit être rerendue après le repositionnement');
-assert.equal(enemies.find(e=>e.id==='ambush_new').dungeonCell200,placed);
+const ambush=Number(x.enemyCells.ambush_new);
+assert.ok(Number.isInteger(ambush),'le nouvel ennemi d’embuscade doit recevoir une position tactique');
+assert.equal(dist(ambush),1,'l’ennemi d’embuscade doit apparaître sur une case adjacente à un héros');
+assert.notEqual(ambush,24,'l’embuscade ne doit pas envoyer le monstre au fond sur la sortie');
+assert.equal(enemies.find(e=>e.id==='ambush_new').dungeonCell200,ambush);
 
 ctx.applyDungeonTurnEvent({id:'d_evt_reinforce',name:'Renforts ennemis'});
 x=JSON.parse(localStorage.getItem(RT));
-assert.equal(x.enemyCells.reinforce_new,undefined,'les autres événements gardent leur placement normal');
-assert.equal(api.isAmbush({id:'d_evt_ambush'}),true);assert.equal(api.isAmbush({id:'d_evt_reinforce'}),false);
-console.log('Dungeon Ambush event proximity V16.78.78: OK');
+const reinf=Number(x.enemyCells.reinforce_new);
+assert.ok(Number.isInteger(reinf),'un renfort doit lui aussi recevoir une position tactique');
+assert.equal(dist(reinf),1,'un renfort doit apparaître près des héros et non au fond de la salle');
+assert.notEqual(reinf,24,'un renfort ne doit pas apparaître sur la sortie au bout de la salle');
+assert.equal(enemies.find(e=>e.id==='reinforce_new').dungeonCell200,reinf);
+assert.ok(renderCalls>=2,'la grille doit être rerendue après chaque repositionnement');
+assert.equal(api.isAmbush({id:'d_evt_ambush'}),true);
+assert.equal(api.isReinforcement({id:'d_evt_reinforce',name:'Renforts ennemis'}),true);
+assert.equal(api.isCloseSpawnEvent({id:'d_evt_reinforce'}),true);
+console.log('Dungeon Ambush/Reinforcement proximity V16.78.79: OK');

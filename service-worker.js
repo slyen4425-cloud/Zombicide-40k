@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.78-event-popup-ambush-finish";
+const CACHE_NAME = "gensrpg-cache-16.78.79-final-popup-reinforcement";
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -7,6 +7,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.78-event-popup-ambush-finish";
 // gensrpg-cache-16.78.75-final-exit-hero-art
 // gensrpg-cache-16.78.76-direct-final-exit
 // gensrpg-cache-16.78.77-builder-events
+// gensrpg-cache-16.78.78-event-popup-ambush-finish
 
 const CORE_FILES = [
   "./",

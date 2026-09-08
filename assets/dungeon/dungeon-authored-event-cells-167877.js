@@ -1,10 +1,10 @@
-/* GenSrpG V16.78.78 — authored Dungeon event cells.
+/* GenSrpG V16.78.79 — authored Dungeon event cells.
    Adds a reusable 🎲 event tile to Room Creator and routes it through the existing complete Dungeon
    event engine (selection + effect + popup), once per authored zone cell. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const RT_KEY="gensrpg_dungeon_runtime_v2",APP_VERSION="16.78.78",VERSION="1.1.0",MARKER="event";
+const RT_KEY="gensrpg_dungeon_runtime_v2",APP_VERSION="16.78.79",VERSION="1.1.1",MARKER="event";
 let scheduled=false;
 function read(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function write(x){try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));return true}catch(e){return false}}
@@ -33,8 +33,8 @@ function fire(){
   }catch(e){delete c.x.authoredEventCells167877[c.key];write(c.x);console.warn("Authored Dungeon event cell",e);fallbackPopup("Impossible de résoudre cet événement.");return false}
 }
 function schedule(){if(scheduled)return;scheduled=true;if(typeof setTimeout==="function")setTimeout(fire,0);else fire()}
-function wrap(name){const core=R.DungeonCore01,old=core?.[name];if(typeof old!=="function"||old.__dae167878)return false;const w=function(){const out=old.apply(this,arguments);schedule();return out};w.__dae167878=true;w.__original=old;core[name]=w;return true}
-function install(){installTool();wrap("render");wrap("show");if(D&&!D.__dae167878Click){D.__dae167878Click=true;D.addEventListener("click",schedule,true)}schedule();try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true}
+function wrap(name){const core=R.DungeonCore01,old=core?.[name];if(typeof old!=="function"||old.__dae167879)return false;const w=function(){const out=old.apply(this,arguments);schedule();return out};w.__dae167879=true;w.__original=old;core[name]=w;return true}
+function install(){installTool();wrap("render");wrap("show");if(D&&!D.__dae167879Click){D.__dae167879Click=true;D.addEventListener("click",schedule,true)}schedule();try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true}
 R.DungeonAuthoredEventCells167877={VERSION,APP_VERSION,MARKER,installTool,context,eventRound,pickEvent,applyEvent,fire,schedule,install};
 install();if(D&&D.readyState==="loading")D.addEventListener("DOMContentLoaded",install,{once:true});if(typeof setTimeout==="function")for(const ms of [50,250,1000])setTimeout(install,ms);
 })();

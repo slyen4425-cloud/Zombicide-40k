@@ -7,10 +7,16 @@ const src=fs.readFileSync(file,'utf8');
 assert.doesNotThrow(()=>new Function(src),'V16.78.99 compatibility layer must be valid JS');
 assert.match(src,/APP_VERSION="16\.78\.99"/);assert.match(src,/function effectTotals/);assert.match(src,/function applyEffects/);assert.match(src,/function renderStealthSettings/);assert.match(src,/function prompt\(/);
 assert.match(src,/GensStatService167899/,'legacy effects must consume the shared stat service');
-assert.match(src,/function renderEditor\(\)\{return true\}/);assert.match(src,/function syncPrimaryList\(\)\{return true\}/);assert.match(src,/function renderHero\(\)\{return true\}/);
+assert.match(src,/function runtimeContext\(\)/,'legacy effects must be gated by Dungeon runtime');
+assert.match(src,/function editorContext\(\)/,'legacy editor helpers must be gated by Dungeon editor');
+assert.match(src,/if\(!runtimeContext\(\)\)return base/,'wrapped derived values must return original value outside Dungeon');
+assert.match(src,/if\(!runtimeContext\(\)\|\|!st\)return st/,'attack stat wrapper must remain inert outside Dungeon');
+assert.match(src,/function renderEditor\(\)\{return editorContext\(\)\}/);
+assert.match(src,/function syncPrimaryList\(\)\{return editorContext\(\)\}/);
+assert.match(src,/function renderHero\(\)\{return runtimeContext\(\)\}/);
 assert.doesNotMatch(src,/gcs167879Box/,'compatibility layer must not build a second stat editor');
 assert.doesNotMatch(src,/gcsHeroStats/,'compatibility layer must not build a second hero stat grid');
 assert.doesNotMatch(src,/personnalis[ée]e/i,'compatibility layer must not emit personalized labels');
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 if(site){assert.match(site,/gens-custom-stats-167881\.js\?v=167881/);assert.match(site,/gens-stat-service-167899\.js\?v=167899/)}
-console.log('GenSrpG V16.78.99 effects/stealth compatibility: OK');
+console.log('GenSrpG V16.78.99 effects/stealth compatibility + isolation: OK');

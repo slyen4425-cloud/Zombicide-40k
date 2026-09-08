@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
-"""GenSrpG V16.78.94 — active RPG profile is authoritative outside the editor.
+"""GenSrpG V16.78.97 — replace the hard-coded Dungeon attribute grid.
 
-The RPG editor may keep `rpgEditingId` after it closes. Previously `currentRpgProfile()`
-kept preferring that stale editor id during gameplay, so the hero sheet and generic
-rules could read an older profile snapshot (often containing Furtivité only). This
-build patch makes the active gameplay profile authoritative whenever the RPG editor is
-closed, while preserving the edited profile while the modal is actually open.
+The final page now renders the hero characteristic grid from the active RPG profile's
+canonical definitions. Legacy agility/spirit ids are normalized to agilite/esprit and
+all +/- changes share Dungeon's numeric rpgStatSpent economy.
 """
 from __future__ import annotations
 import sys
 from pathlib import Path
 
-VERSION = "16.78.94"
-MARKER = "gensUnifiedStatGridV167890"
-PROFILE_MARKER = "gensCurrentRpgProfileActiveV167894"
-RENAMES = {
-    "renderDungeonAttributes": "renderDungeonAttributes__native167890",
-    "renderDungeonHeroStats": "renderDungeonHeroStats__native167890",
-}
+VERSION="16.78.97"
+MARKER="gensCanonicalStatGridV167897"
+PROFILE_MARKER="gensCurrentRpgProfileActiveV167894"
+RENAMES={"renderDungeonAttributes":"renderDungeonAttributes__native167890","renderDungeonHeroStats":"renderDungeonHeroStats__native167890"}
 
-OLD_PROFILE = '''function currentRpgProfile(){
+OLD_PROFILE='''function currentRpgProfile(){
   const arr=rpgProfiles();
   if(rpgEditingId){
     const exact=arr.find(p=>String(p.id)===String(rpgEditingId));
@@ -29,115 +24,129 @@ OLD_PROFILE = '''function currentRpgProfile(){
   if(active)return active;
   return arr.find(p=>p.id===GAME_PROFILE_DUNGEON_ID)||arr[0]||null;
 }'''
-
-NEW_PROFILE = '''function currentRpgProfile(){
+NEW_PROFILE='''function currentRpgProfile(){
   /* gensCurrentRpgProfileActiveV167894: editor profile only while the editor is visible. */
-  const arr=rpgProfiles();
-  let editorOpen=false;
+  const arr=rpgProfiles();let editorOpen=false;
   try{editorOpen=document.getElementById("rpgUniverseEditorModal")?.style?.display==="block"}catch(e){}
-  if(editorOpen&&rpgEditingId){
-    const exact=arr.find(p=>String(p.id)===String(rpgEditingId));
-    if(exact)return exact;
-  }
-  const active=arr.find(p=>String(p.id)===String(activeGameProfileId()));
-  if(active)return active;
-  if(rpgEditingId){
-    const fallbackEdit=arr.find(p=>String(p.id)===String(rpgEditingId));
-    if(fallbackEdit)return fallbackEdit;
-  }
+  if(editorOpen&&rpgEditingId){const exact=arr.find(p=>String(p.id)===String(rpgEditingId));if(exact)return exact}
+  const active=arr.find(p=>String(p.id)===String(activeGameProfileId()));if(active)return active;
+  if(rpgEditingId){const fallbackEdit=arr.find(p=>String(p.id)===String(rpgEditingId));if(fallbackEdit)return fallbackEdit}
   return arr.find(p=>p.id===GAME_PROFILE_DUNGEON_ID)||arr[0]||null;
 }'''
 
-WRAPPER = r'''
-/* GenSrpG V16.78.94 — native characteristic grid + authoritative active RPG profile. */
-function gensCurrentHeroIdV167891(){
-  try{return current?String(current):String(globalThis.current||"")}catch(error){return String(globalThis.current||"")}
-}
-function gensEscStatV167892(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-}
-function gensCurrentRpgProfileV167893(){
-  try{return currentRpgProfile()||null}catch(error){return null}
-}
-function gensActiveCustomStatDefsV167893(){
+WRAPPER=r'''
+/* gensCanonicalStatGridV167897 — one characteristic renderer for core + authored stats. */
+const GENS_CORE_STAT_IDS_V167897=new Set(["force","agilite","intelligence","esprit","endurance","initiative"]);
+const GENS_STAT_ALIAS_V167897={agility:"agilite",spirit:"esprit"};
+const GENS_STAT_FALLBACK_V167897=[
+ {id:"force",name:"Force",icon:"💪",defaultValue:10,editMode:"points",visible:true,description:"Dégâts physiques et précision de mêlée."},
+ {id:"agilite",name:"Agilité",icon:"🏃",defaultValue:10,editMode:"points",visible:true,description:"Précision à distance, critique, esquive et initiative."},
+ {id:"intelligence",name:"Intelligence",icon:"🧠",defaultValue:10,editMode:"points",visible:true,description:"Dégâts et précision magiques."},
+ {id:"esprit",name:"Esprit",icon:"✨",defaultValue:10,editMode:"points",visible:true,description:"Mana et résistance magique."},
+ {id:"endurance",name:"Endurance",icon:"❤️",defaultValue:10,editMode:"points",visible:true,description:"Points de vie maximum."},
+ {id:"initiative",name:"Initiative",icon:"⚡",defaultValue:0,editMode:"points",visible:true,description:"Ordre d'action et tests d'initiative selon les règles de l'univers."}
+];
+function gensCanonStatIdV167897(id){return GENS_STAT_ALIAS_V167897[String(id||"")]||String(id||"")}
+function gensEscStatV167897(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+function gensCurrentHeroIdV167891(){try{return current?String(current):""}catch(error){return ""}}
+function gensCanonicalStatDefsV167897(){
   try{
-    const profile=gensCurrentRpgProfileV167893(),stats=profile?.rpgUniverse?.stats||{};
-    const active=new Set((Array.isArray(stats.active)?stats.active:[]).map(String));
-    return (Array.isArray(stats.customStats)?stats.customStats:[]).filter(def=>def&&def.id&&active.has(String(def.id)));
-  }catch(error){return []}
+    const api=globalThis.GensCanonicalStatRegistry167897;if(api?.defs){const x=api.defs();if(Array.isArray(x)&&x.length)return x}
+    const p=currentRpgProfile(),s=p?.rpgUniverse?.stats||{},defs=Array.isArray(s.customStats)?s.customStats:[];
+    return defs.length?defs:GENS_STAT_FALLBACK_V167897;
+  }catch(error){return GENS_STAT_FALLBACK_V167897}
 }
-function gensCustomStatValueV167893(heroId,def){
-  try{
-    const state=loadState(heroId)||{},id=String(def?.id||"");
-    const direct=Number(state?.customStats?.[id]);if(Number.isFinite(direct))return direct;
-    const mirrored=Number(state?.rpgAttributes?.[id]);if(Number.isFinite(mirrored))return mirrored;
-    return Number(def?.defaultValue)||0;
-  }catch(error){return Number(def?.defaultValue)||0}
+function gensCanonicalActiveSetV167897(){
+  try{const p=currentRpgProfile(),raw=p?.rpgUniverse?.stats?.active||[];return new Set(raw.map(gensCanonStatIdV167897))}catch(error){return new Set(GENS_STAT_FALLBACK_V167897.map(x=>x.id))}
 }
-function gensRenderActiveCustomStatsV167892(){
-  try{
-    const grid=document.getElementById("dungeonAttributeGrid"),genericApi=globalThis.GensGenericStats167887;
-    if(!grid)return false;
-    grid.querySelectorAll(".gsrCustomStatCard").forEach(node=>node.remove());
-    const heroId=gensCurrentHeroIdV167891();if(!heroId)return false;
-    const list=gensActiveCustomStatDefsV167893();
-    const state=loadState(heroId)||{},points=Math.max(0,Number(state.statPoints)||0);
-    for(const def of list){
-      const id=String(def.id),value=gensCustomStatValueV167893(heroId,def),base=Number(def.defaultValue)||0,card=document.createElement("div");
-      card.className="dungeonStatBox gsrCustomStatCard";card.dataset.statId=id;
-      const canEdit=def.editMode!=="runtime",canAdd=def.editMode!=="points"||points>0;
-      const ownDescription=String(def.description||"").trim();
-      const links=String(genericApi?.descriptionForSource?.(id)||"").trim();
-      const descriptionHtml=ownDescription?'<small class="gsrCustomStatDescription" style="display:block;margin-top:10px;color:#d6c18a">'+gensEscStatV167892(ownDescription)+'</small>':'';
-      const linksHtml=links&&links!=="Aucune liaison automatique."?'<small class="gsrCustomStatLinks" style="display:block;margin-top:6px;color:#bdb19b">Influence : '+gensEscStatV167892(links)+'</small>':'';
-      const minus=canEdit?'<button type="button" onclick="GensCustomStats167879.change(\''+gensEscStatV167892(id)+'\',-1)">−</button>':'';
-      const plus=canEdit?'<button type="button" '+(canAdd?'':'disabled title="Aucun point de caractéristique disponible"')+' onclick="GensCustomStats167879.change(\''+gensEscStatV167892(id)+'\',1)">＋</button>':'';
-      card.innerHTML='<strong>'+gensEscStatV167892((def.icon?def.icon+' ':'')+(def.name||id))+'</strong><div style="font-size:36px;font-weight:900;line-height:1.05;margin:4px 0">'+value+(def.kind==="gauge"?' / '+Number(def.max||0):'')+'</div><small>Base '+base+'</small>'+descriptionHtml+linksHtml+(canEdit?'<div style="display:flex;gap:8px;justify-content:center;margin-top:12px">'+minus+plus+'</div>':'');
-      grid.appendChild(card);
+function gensCanonicalActiveDefsV167897(){
+  const active=gensCanonicalActiveSetV167897(),seen=new Set();
+  return gensCanonicalStatDefsV167897().map(d=>({...d,id:gensCanonStatIdV167897(d.id)})).filter(d=>d.id&&d.visible!==false&&active.has(d.id)&&!seen.has(d.id)&&(seen.add(d.id),true));
+}
+function gensCanonicalAssignedValueV167897(id,def){
+  id=gensCanonStatIdV167897(id);const direct=Number(state?.rpgAttributes?.[id]);if(Number.isFinite(direct))return direct;
+  const custom=Number(state?.customStats?.[id]);if(Number.isFinite(custom))return custom;
+  if(GENS_CORE_STAT_IDS_V167897.has(id)){try{return Number(dungeonBaseAttributeFromDefinition(current,id))||0}catch(error){}}
+  return Number(def?.defaultValue)||0;
+}
+function gensCanonicalDisplayValueV167897(id,def){
+  id=gensCanonStatIdV167897(id);
+  if(GENS_CORE_STAT_IDS_V167897.has(id)){try{return Number(dungeonAttributeValue(id))||0}catch(error){}}
+  return gensCanonicalAssignedValueV167897(id,def);
+}
+function gensChangeCanonicalStatV167897(id,delta){
+  if(!isDungeonHeroSheet()||!current||!state)return false;
+  id=gensCanonStatIdV167897(id);delta=Number(delta)||0;if(!delta)return false;
+  const def=gensCanonicalStatDefsV167897().find(d=>gensCanonStatIdV167897(d.id)===id);if(!def||def.editMode==="runtime")return false;
+  state.rpgAttributes=state.rpgAttributes&&typeof state.rpgAttributes==="object"?state.rpgAttributes:{};
+  state.customStats=state.customStats&&typeof state.customStats==="object"?state.customStats:{};
+  state.rpgStatSpentById=state.rpgStatSpentById&&typeof state.rpgStatSpentById==="object"?state.rpgStatSpentById:{};
+  dungeonSyncProgressionForState(current,state);
+  const prog=dungeonActiveProgressionConfig(),free=prog.attributeEditMode==="free"||def.editMode==="free";
+  const base=GENS_CORE_STAT_IDS_V167897.has(id)?Math.max(Number(def.min)||0,Number(dungeonBaseAttributeFromDefinition(current,id))||0):Math.max(Number(def.min)||0,Number(def.defaultValue)||0);
+  const min=Number.isFinite(Number(def.min))?Number(def.min):0,max=Number.isFinite(Number(def.max))?Number(def.max):999;
+  const cur=gensCanonicalAssignedValueV167897(id,def),next=Math.max(min,Math.min(max,cur+delta));if(next===cur)return false;
+  const actual=next-cur;
+  if(!free&&def.editMode!=="free"){
+    if(actual>0){
+      if(Math.max(0,Number(state.statPoints)||0)<actual){alert("Aucun point de caractéristique disponible.");return false}
+      state.rpgStatSpent=Math.max(0,Number(state.rpgStatSpent)||0)+actual;
+      state.rpgStatSpentById[id]=Math.max(0,Number(state.rpgStatSpentById[id])||0)+actual;
+    }else if(actual<0){
+      if(cur<=base)return false;
+      const byId=Math.max(0,Number(state.rpgStatSpentById[id])||0),legacy=Math.max(0,Number(state.rpgStatSpent)||0);
+      const refund=Math.min(-actual,byId>0?byId:legacy);if(refund<=0)return false;
+      state.rpgStatSpent=Math.max(0,legacy-refund);state.rpgStatSpentById[id]=Math.max(0,byId-refund);
     }
-    grid.dataset.gensActiveCustomStats=String(list.length);
-    grid.dataset.gensActiveCustomStatIds=list.map(def=>String(def.id)).join(",");
-    return true;
-  }catch(error){console.warn("GenSrpG V16.78.94 custom stat cards",error);return false}
+  }
+  state.rpgAttributes[id]=next;state.customStats[id]=next;
+  dungeonSyncProgressionForState(current,state);save();renderDungeonAttributes();renderDungeonHeroStats();return true;
 }
-function gensUnifiedStatGridV167890(){
-  try{
-    const heroId=gensCurrentHeroIdV167891();if(heroId)globalThis.current=heroId;
-    const grid=document.getElementById("dungeonAttributeGrid");if(grid)grid.dataset.gensUnifiedStatGrid="167894";
-    const api=globalThis.GensGenericStats167887;if(api)api.patchSheetTexts?.();
-    gensRenderActiveCustomStatsV167892();
-  }catch(error){console.warn("GenSrpG V16.78.94 stat grid",error)}
+function gensRenderCanonicalAttributesV167897(){
+  const host=document.getElementById("dungeonAttributeGrid");if(!host||!isDungeonHeroSheet())return false;
+  dungeonSyncProgressionForState(current,state);
+  const defs=gensCanonicalActiveDefsV167897(),rulesApi=globalThis.GensGenericStats167887;
+  let pointsBanner=document.getElementById("dungeonStatPointsBanner073");if(!pointsBanner){pointsBanner=document.createElement("div");pointsBanner.id="dungeonStatPointsBanner073";host.parentNode?.insertBefore(pointsBanner,host)}
+  const prog=dungeonActiveProgressionConfig(),freeStats=prog.attributeEditMode==="free";
+  pointsBanner.className="dungeonStatPointsBanner073 "+(freeStats?"free":"points");
+  pointsBanner.innerHTML=freeStats?'<strong>🎭 MODE ROLEPLAY — CARACTÉRISTIQUES LIBRES</strong><small>Les + / − ne consomment aucun point.</small>':'<strong>📊 '+Math.max(0,Number(state.statPoints)||0)+' POINT'+(Number(state.statPoints)===1?'':'S')+' DE CARACTÉRISTIQUE À DISTRIBUER</strong><small>+1 consomme 1 point · −1 rembourse un point dépensé.</small>';
+  host.innerHTML=defs.map(def=>{
+    const id=gensCanonStatIdV167897(def.id),v=gensCanonicalDisplayValueV167897(id,def),raw=gensCanonicalAssignedValueV167897(id,def),core=GENS_CORE_STAT_IDS_V167897.has(id);
+    const gear=core?dungeonEquipmentBonus(id):0,skill=core?dungeonSkillEffectTotal("attribute",null,id):0;
+    const desc=String(def.description||"").trim(),links=String(rulesApi?.descriptionForSource?.(id)||"").trim();
+    const mode=String(def.editMode||"points"),editable=mode!=="runtime";
+    const baseText=core?('Base '+raw+(gear?' · équipement '+(gear>0?'+':'')+gear:'')+(skill?' · talents +'+skill:'')):'Base '+(Number(def.defaultValue)||0);
+    return '<div class="dungeonStatBox gsrCanonicalStatCard" data-stat-id="'+gensEscStatV167897(id)+'"><strong>'+gensEscStatV167897((def.icon?def.icon+' ':'')+(def.name||id))+'</strong><span>'+v+'</span><small style="display:block">'+gensEscStatV167897(baseText)+'</small>'+(desc?'<small class="gsrCustomStatDescription" style="display:block;color:#d6c18a;margin:4px 0">'+gensEscStatV167897(desc)+'</small>':'')+(links&&links!=="Aucune liaison automatique."?'<small class="gsrCustomStatLinks" style="display:block;color:#bdb19b;margin:4px 0">Influence : '+gensEscStatV167897(links)+'</small>':'')+(editable?'<div class="controls"><button data-stat="'+gensEscStatV167897(id)+'" onclick="gensChangeCanonicalStatV167897(this.dataset.stat,-1)">−</button><button data-stat="'+gensEscStatV167897(id)+'" onclick="gensChangeCanonicalStatV167897(this.dataset.stat,1)">+</button></div>':'')+'</div>';
+  }).join("");
+  host.dataset.gensUnifiedStatGrid="167897";host.dataset.gensActiveCanonicalStatIds=defs.map(d=>gensCanonStatIdV167897(d.id)).join(",");return true;
 }
-function renderDungeonAttributes(){const out=renderDungeonAttributes__native167890.apply(this,arguments);gensUnifiedStatGridV167890();return out;}
-function renderDungeonHeroStats(){const out=renderDungeonHeroStats__native167890.apply(this,arguments);gensUnifiedStatGridV167890();return out;}
-try{globalThis.GENSRPG_VERSION="16.78.94"}catch(error){}
+function gensRenderActiveCustomStatsV167892(){return gensRenderCanonicalAttributesV167897()}
+function gensUnifiedStatGridV167890(){try{globalThis.current=gensCurrentHeroIdV167891();globalThis.GensGenericStats167887?.patchSheetTexts?.();gensRenderCanonicalAttributesV167897()}catch(error){console.warn("GenSrpG V16.78.97 canonical stat grid",error)}}
+function renderDungeonAttributes(){return gensRenderCanonicalAttributesV167897()||renderDungeonAttributes__native167890.apply(this,arguments)}
+function renderDungeonHeroStats(){const out=renderDungeonHeroStats__native167890.apply(this,arguments);gensRenderCanonicalAttributesV167897();return out}
+try{globalThis.GENSRPG_VERSION="16.78.97"}catch(error){}
 '''.strip()
 
-
-def patch_text(html: str) -> str:
+def patch_text(html:str)->str:
     if PROFILE_MARKER not in html:
         count=html.count(OLD_PROFILE)
-        if count!=1:
-            raise RuntimeError(f"V16.78.94: expected one legacy currentRpgProfile(), found {count}")
+        if count!=1: raise RuntimeError(f"V16.78.97: expected one legacy currentRpgProfile(), found {count}")
         html=html.replace(OLD_PROFILE,NEW_PROFILE,1)
-    if MARKER in html:
-        return html
+    if MARKER in html:return html
     positions=[]
     for old,new in RENAMES.items():
-        needle=f"function {old}(){{"
-        count=html.count(needle)
-        if count!=1: raise RuntimeError(f"V16.78.94: expected exactly one {needle!r}, found {count}")
+        needle=f"function {old}(){{";count=html.count(needle)
+        if count!=1:raise RuntimeError(f"V16.78.97: expected exactly one {needle!r}, found {count}")
         pos=html.index(needle);html=html.replace(needle,f"function {new}(){{",1);positions.append(pos)
     close=html.find("</script>",max(positions))
-    if close<0: raise RuntimeError("V16.78.94: could not find closing </script> for native stat renderer")
+    if close<0:raise RuntimeError("V16.78.97: could not find closing </script> for native stat renderer")
     html=html[:close]+"\n"+WRAPPER+"\n"+html[close:]
-    if MARKER not in html or PROFILE_MARKER not in html: raise RuntimeError("V16.78.94: profile/grid patch missing")
+    if MARKER not in html or PROFILE_MARKER not in html:raise RuntimeError("V16.78.97: canonical grid/profile patch missing")
     return html
-
 
 def main()->int:
     if len(sys.argv)!=2:
         print("usage: patch_generic_stat_grid_v167890.py <index.html>",file=sys.stderr);return 2
     path=Path(sys.argv[1]);path.write_text(patch_text(path.read_text(encoding="utf-8")),encoding="utf-8")
-    print(f"GenSrpG V{VERSION}: active-profile stat source applied");return 0
-if __name__=="__main__": raise SystemExit(main())
+    print(f"GenSrpG V{VERSION}: canonical characteristic grid applied");return 0
+if __name__=="__main__":raise SystemExit(main())

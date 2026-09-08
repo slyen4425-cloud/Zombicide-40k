@@ -9,8 +9,8 @@ const custom=fs.readFileSync(customFile,'utf8');
 const src=fs.readFileSync(genericFile,'utf8');
 
 assert.doesNotThrow(()=>new Function(custom),'canonical custom stat engine must remain syntactically valid');
-assert.doesNotThrow(()=>new Function(src),'V16.78.87 generic stat link engine must be syntactically valid');
-assert.match(src,/APP_VERSION="16\.78\.87"/);
+assert.doesNotThrow(()=>new Function(src),'V16.78.88 generic stat link engine must be syntactically valid');
+assert.match(src,/APP_VERSION="16\.78\.88"/);
 assert.match(src,/Liaisons caractéristiques → valeurs/,'editor must expose the generic link editor');
 assert.match(src,/damage:physical/);assert.match(src,/damage:melee/);assert.match(src,/damage:ranged/);assert.match(src,/damage:magic/);
 assert.match(src,/hit:melee/);assert.match(src,/hit:ranged/);assert.match(src,/hit:magic/);
@@ -26,9 +26,15 @@ assert.match(src,/renderDungeonHeroStats/,'derived stat sheet must be refreshed 
 assert.match(src,/dtalentEffectsHost select\[data-f="scaleAttribute"\]/,'ability editor must keep custom stat selection');
 assert.match(src,/dungeonTalentCalculatedAmount/,'ability runtime must use the same characteristic catalogue');
 assert.match(src,/rpgAbilityRefs/,'equipment must continue to store only ability references');
-assert.doesNotMatch(src,/createElement\("script"\)|gens-equipment-ability-runtime-167885|MutationObserver|setInterval|setTimeout/,'V16.78.87 must not dynamically load runtime code or install repeating/delayed UI workers');
+assert.doesNotMatch(src,/createElement\("script"\)|gens-equipment-ability-runtime-167885|MutationObserver|setInterval|setTimeout/,'V16.78.88 must not dynamically load runtime code or install repeating/delayed UI workers');
 assert.doesNotMatch(src,/enemyCells\s*=|dungeonRoom\s*=|timeline|startDungeonCombat/,'generic stat refactor must not touch spatial combat/spawn/timeline');
 assert.match(src,/gsr167887CleanupStyle/,'old duplicate editors must be removed by exact scoped selectors');
+assert.match(src,/function renderCustomStatsInMainGrid/,'custom stats must render in the same main stat grid as native characteristics');
+assert.match(src,/descriptionForSource\(d\.id\)/,'custom stat cards must explain their configured links');
+assert.match(src,/GensCustomStats167879\.change/,'custom stat cards must reuse the canonical point-spending API');
+assert.match(src,/box\.onchange/,'link editor must autosave committed field changes');
+assert.match(src,/Enregistrement automatique actif/,'editor must clearly state autosave status');
+assert.doesNotMatch(src,/s\.custom\?" · personnalisée"|\(personnalisée\)/,'created stats should not be visually branded as personnalisée in generic selectors');
 
 const profile={
   id:'demo',
@@ -70,7 +76,9 @@ sandbox.saveGameProfiles=()=>{};
 sandbox.applyGameProfile=()=>{};
 sandbox.GensCustomStats167879={
   defs:()=>profile.rpgUniverse.stats.customStats,
-  value:(heroId,id)=>Number(hero.customStats[id]??hero.rpgAttributes[id])||0
+  isActive:id=>profile.rpgUniverse.stats.active.includes(id),
+  value:(heroId,id)=>Number(hero.customStats[id]??hero.rpgAttributes[id])||0,
+  change:()=>true
 };
 sandbox.loadDungeonRpgRules=()=>legacyRules;
 sandbox.dungeonAttributeValue=id=>Number(hero.rpgAttributes[id])||0;
@@ -121,4 +129,4 @@ if(site){
   assert.match(site,/gens-stat-help-extension-167881\.js\?v=167881/,'final site must load the stat refactor through the existing static slot');
   assert.doesNotMatch(site,/gens-equipment-ability-runtime-167885\.js/,'broken V16.78.85 runtime loader must stay absent from final HTML');
 }
-console.log('GenSrpG generic characteristic links V16.78.87 regression: OK');
+console.log('GenSrpG generic characteristic links + custom stat UI V16.78.88 regression: OK');

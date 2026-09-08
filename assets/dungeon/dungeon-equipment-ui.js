@@ -1,6 +1,7 @@
 /* GenSrpG Dungeon — equipment UI bridge 2.0 / V16.79.01
    UI-only adapter: set progress + rpgBonuses settings.
-   RPG characteristic fields are read dynamically from GensRpgStatService167901.
+   RPG characteristic fields are read dynamically from GensRpgStatService167901,
+   with a direct active-profile fallback before the service finishes booting.
    No movement, combat, timeline or spawn changes. */
 (function(){
 "use strict";
@@ -15,7 +16,11 @@ const BASE_FIELDS=[
 let refreshing=false,scheduled=false,observer=null,hookedRenderer=null;
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const numeric=(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback;
-function statDefinitions(){try{const a=ROOT.GensRpgStatService167901?.definitions?.();return Array.isArray(a)?a:[]}catch(e){return []}}
+function statDefinitions(){
+ try{const a=ROOT.GensRpgStatService167901?.definitions?.();if(Array.isArray(a)&&a.length)return a}catch(e){}
+ try{const p=ROOT.getActiveGameProfile?.()||ROOT.currentRpgProfile?.(),a=p?.rpgUniverse?.stats?.customStats;if(Array.isArray(a)&&a.length)return a}catch(e){}
+ return [];
+}
 function fields(){
  const out=[],seen=new Set();
  const add=(key,label,system=false)=>{key=String(key||"");if(!key||seen.has(key))return;seen.add(key);out.push({key,label:String(label||key),system})};

@@ -1,5 +1,6 @@
-const CACHE_NAME = "gensrpg-cache-16.78.99-shared-stat-service";
+const CACHE_NAME = "gensrpg-cache-16.78.99-shared-stat-service-isolated";
 // gensrpg-deploy-16.78.99-shared-stat-service-isolated
+// gensrpg-cache-16.78.99-shared-stat-service
 // gensrpg-cache-16.78.98-stat-talent-cleanup
 // gensrpg-publish-trigger-16.78.98
 // Compatibility markers kept for existing deployment/regression guards:

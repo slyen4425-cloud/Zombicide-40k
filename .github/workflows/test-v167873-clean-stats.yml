@@ -30,14 +30,15 @@ jobs:
           from pathlib import Path
           p=Path('_site/index.html')
           h=p.read_text(encoding='utf-8')
-          tag='<script src="assets/gensrpg/gens-rpg-stats-clean-167873.js?v=167873"></script>'
+          tag='<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>'
           if tag not in h:h=h.replace('</body>',tag+'\n</body>')
           p.write_text(h,encoding='utf-8')
           PY
       - name: Final guards
         run: |
-          grep -q 'gens-rpg-stats-clean-167873.js?v=167873' _site/index.html
+          grep -q 'gens-rpg-stats-clean-167874.js?v=167874' _site/index.html
           grep -q 'gensrpg-cache-16.78.73-clean-dynamic-stats' _site/service-worker.js
+          ! grep -q 'gens-rpg-stats-clean-167873.js?v=167873' _site/index.html
           ! grep -q 'gens-custom-stats-167881' _site/index.html
           ! grep -q 'gens-rpg-stat-reconcile-167902' _site/index.html
           node tests/gens_clean_dynamic_stats_v167873.test.cjs

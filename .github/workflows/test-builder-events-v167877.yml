@@ -1,8 +1,9 @@
-name: Test Builder Events V16.78.77
+name: Test Builder Events V16.78.78
 on:
   push:
     branches:
       - main
+      - work/v16.78.78-event-popup-ambush-finish
 permissions:
   contents: read
 jobs:
@@ -10,8 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Tester les cases événement authored
+      - name: Tester les cases événement authored et leur popup
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs
+      - name: Tester la sortie finale sans faux positif sur les caches
+        run: node tests/dungeon_authored_final_exit_v167878.test.cjs
+      - name: Tester la proximité des monstres de l'événement Embuscade
+        run: node tests/dungeon_event_ambush_position_v167878.test.cjs
       - name: Tester le runtime Dungeon complet
         run: node tests/dungeon_runtime_regression.test.cjs
       - name: Tester le moteur authored

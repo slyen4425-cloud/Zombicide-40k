@@ -1,0 +1,78 @@
+name: Test V16.79.02 stat/import safety
+on:
+  push:
+    branches:
+      - work/v16.79.02-stat-rules-sheet-import-safety
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: V16.79.02 stat/import safety regression
+        run: node tests/gens_stat_import_safety_v167902.test.cjs
+      - name: Dynamic stat service permanent gate
+        run: node tests/gens_native_stat_grid_v167890.test.cjs
+      - name: Stat runtime authority
+        run: node tests/gens_custom_stat_runtime_profile_v167889.test.cjs
+      - name: Stat rules/effects
+        run: node tests/gens_custom_stat_effects_v167881.test.cjs
+      - name: Inter-mode safety
+        run: node tests/gens_ui_recovery_v167843.test.cjs
+      - name: Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Authored Dungeon
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: Build production-like final page
+        run: |
+          rm -rf _site && mkdir -p _site
+          cp index.html _site/index.html
+          cp service-worker.js _site/service-worker.js
+          mkdir -p _site/assets
+          cp -R assets/. _site/assets/
+          python3 tools/patch_generic_stat_grid_v167890.py _site/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path('_site/index.html')
+          modules=[
+            'assets/dungeon/dungeon-core-318.js',
+            'assets/dungeon/dungeon-large-room-support-167834.js',
+            'assets/dungeon/dungeon-room-creator-100.js',
+            'assets/dungeon/dungeon-room-creator-v2-167819.js',
+            'assets/dungeon/dungeon-room-creator-feedback-167821.js',
+            'assets/dungeon/dungeon-world-builder-167821.js',
+            'assets/dungeon/dungeon-room-runtime-167822.js',
+            'assets/dungeon/dungeon-world-runtime-167823.js',
+            'assets/dungeon/dungeon-zone-content-167824.js',
+            'assets/dungeon/dungeon-authored-runtime-167839.js',
+            'assets/dungeon/dungeon-equipment-ui.js',
+            'assets/dungeon/dungeon-equipment-hotfix-167817.js',
+            'assets/dungeon/dungeon-set-editor-167818.js',
+            'assets/gensrpg/gens-world-summary-167820.js',
+            'assets/gensrpg/gens-custom-stats-167881.js',
+            'assets/gensrpg/gens-stat-rules-help-167880.js',
+            'assets/gensrpg/gens-stat-help-extension-167881.js',
+            'assets/gensrpg/gens-custom-stat-runtime-profile-167889.js',
+          ]
+          html=index.read_text(encoding='utf-8')
+          for src in modules:
+            tag=f'<script src="{src}"></script>'
+            if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          index.write_text(html,encoding='utf-8')
+          PY
+      - name: Final-site V16.79.02 guards
+        run: |
+          node tests/gens_native_stat_grid_v167890.test.cjs _site/index.html
+          node tests/dungeon_final_load_regression.test.cjs _site/index.html
+          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path('_site/index.html').read_text(encoding='utf-8')
+          assert h.count('gens-rpg-stat-reconcile-167902.js?v=167902')==1
+          assert h.count('gens-backup-import-safe-167902.js?v=167902')==1
+          assert 'gensCanonicalStatGridV167898' not in h
+          assert 'GENS_CORE_STAT_IDS_V167897' not in h
+          print('V16.79.02 final page guards: OK')
+          PY

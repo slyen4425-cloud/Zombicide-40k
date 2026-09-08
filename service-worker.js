@@ -1,4 +1,5 @@
 const CACHE_NAME = "gensrpg-cache-16.78.96-unified-dynamic-stats";
+// gensrpg-deploy-16.78.96-unified-dynamic-stats
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

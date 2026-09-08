@@ -1,6 +1,7 @@
-const CACHE_NAME = "gensrpg-cache-16.78.72-perceptual-actor-scale";
+const CACHE_NAME = "gensrpg-cache-16.78.73-clean-dynamic-stats";
 // Compatibility marker kept for the existing V16.78.40 deployment guard:
 // gensrpg-cache-16.78.40-authored-movement
+// gensrpg-cache-16.78.72-perceptual-actor-scale
 
 const CORE_FILES = [
   "./",
@@ -36,6 +37,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-world-summary-167820.js",
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
+  "./assets/gensrpg/gens-rpg-stats-clean-167873.js",
   "./manifest.json"
 ];
 
@@ -106,7 +108,7 @@ self.addEventListener("fetch",event=>{
     return;
   }
 
-  if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")){
+  if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")||url.pathname.includes("/assets/gensrpg/")){
     event.respondWith(networkFirst(request));
     return;
   }

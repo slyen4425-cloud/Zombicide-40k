@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.82
+name: Test Builder Events V16.78.83
 on:
   push:
     branches:
       - main
-      - work/v16.78.82-event-palette
+      - work/v16.78.83-event-config-click
 permissions:
   contents: read
 jobs:

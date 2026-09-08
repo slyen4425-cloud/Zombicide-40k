@@ -38,7 +38,7 @@ TALENT_OLD='if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":
 TALENT_NEW='if(p)p.style.display=d&&dungeonSheetTab==="skills"?"block":"none";if(z)z.style.display=d?"none":"block";'
 BADGE_OLD='badge.textContent=h.dungeonBuiltin?"RPG INTÉGRÉ":"PERSONNALISÉ";'
 BADGE_NEW='badge.textContent=h.dungeonBuiltin?"RPG":"";badge.style.display=h.dungeonBuiltin?"inline-block":"none";'
-MARKER_SCRIPT='''\n<script>/* gensStatBuildNoRendererV167901 — stat rendering belongs to GensRpgStatService167901 only. */</script>\n'''
+MARKER_SCRIPT='''\n<script>/* gensStatBuildNoRendererV167901 — stat rendering belongs to GensRpgStatService167901 only.\n   gensUnifiedStatGridV167890 compatibility marker only — legacy renderer removed. */</script>\n'''
 
 def patch_text(html:str)->str:
     # Strip the old injected V16.78.98 renderer if this patcher is accidentally run on an

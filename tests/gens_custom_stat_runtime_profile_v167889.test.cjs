@@ -26,8 +26,7 @@ const legacy={id:'dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{
 }}};
 let store=[legacy];
 let currentProfile=()=>legacy;
-const listeners={};
-function mkHost(){return {dataset:{},addEventListener:(n,fn)=>{listeners[n]=fn}}}
+function mkHost(){const listeners={};return {dataset:{},listeners,addEventListener:(n,fn)=>{listeners[n]=fn}}}
 const primary=mkHost(),custom=mkHost();
 const document={
   readyState:'complete',
@@ -71,8 +70,13 @@ assert.equal(sandbox.GensCustomStats167879.isActive('furtivite'),false,'legacy e
 assert.ok(legacyEnsureCalls>0);
 
 const fakeInput={value:'mouvement',checked:true,closest:sel=>sel.includes('data-gcs-primary')?fakeInput:null};
-listeners.change?.({target:fakeInput});
+primary.listeners.change?.({target:fakeInput});
 assert.equal(sandbox.GensCustomStats167879.isActive('mouvement'),true,'primary custom checkbox must autosave activation');
+
+const fakeCustomField={matches:sel=>sel==='[data-gcs],[data-e]'};
+let persisted=0;sandbox.GensCustomStats167879.persist=()=>{persisted++;return true};
+custom.listeners.change?.({target:fakeCustomField});
+assert.equal(persisted,1,'custom stat definition changes must autosave through the existing canonical persist function');
 
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 if(site)assert.match(site,/gens-custom-stat-runtime-profile-167889\.js\?v=167889/,'final site must load the canonical authority bridge slot');

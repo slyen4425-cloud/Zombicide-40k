@@ -1,0 +1,27 @@
+name: Test RPG stat service V16.79.01
+on:
+  push:
+    branches:
+      - work/rpg-stat-service-v16.79.01
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dynamic RPG stat service
+        run: node tests/gens_rpg_stat_service_v167901.test.cjs
+      - name: Permanent inter-mode safety gate
+        run: node tests/gens_ui_recovery_v167843.test.cjs
+      - name: Existing custom stat effects
+        run: node tests/gens_custom_stat_effects_v167881.test.cjs
+      - name: Existing runtime profile regression
+        run: node tests/gens_custom_stat_runtime_profile_v167889.test.cjs
+      - name: Existing native stat grid regression
+        run: node tests/gens_native_stat_grid_v167890.test.cjs
+      - name: Dungeon runtime regression
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Authored Dungeon regression
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs

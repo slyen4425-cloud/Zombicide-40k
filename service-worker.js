@@ -1,5 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.96-unified-dynamic-stats";
-// gensrpg-deploy-16.78.96-unified-dynamic-stats
+const CACHE_NAME = "gensrpg-cache-16.78.97-canonical-stat-registry";
+// gensrpg-deploy-16.78.97-canonical-stat-registry
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -20,6 +20,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.96-unified-dynamic-stats";
 // gensrpg-cache-16.78.93-lexical-profile-stat-grid
 // gensrpg-cache-16.78.94-active-rpg-profile-stats
 // gensrpg-cache-16.78.95-custom-stat-authority
+// gensrpg-cache-16.78.96-unified-dynamic-stats
 
 const CORE_FILES = [
   "./",

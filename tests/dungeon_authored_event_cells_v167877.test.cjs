@@ -4,8 +4,9 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
-const file=path.join(root,'assets','dungeon','dungeon-authored-final-exit-167875.js');
+const file=path.join(root,'assets','dungeon','dungeon-authored-event-cells-167877.js');
 const src=fs.readFileSync(file,'utf8');
+const bridge=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-authored-cache-visual-167852.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 const values=new Map();
 const localStorage={getItem(k){return values.has(k)?values.get(k):null},setItem(k,v){values.set(k,String(v))},removeItem(k){values.delete(k)}};
@@ -13,11 +14,11 @@ const runtime={participants:['aldren'],index:0,room:4,positions:{aldren:0},last:
 localStorage.setItem(RT,JSON.stringify(runtime));
 let eventCalls=0,renderCalls=0;
 const head={appendChild(){}};
-const document={readyState:'complete',head,body:{style:{removeProperty(){}}},documentElement:{style:{removeProperty(){}}},getElementById(){return null},createElement(){return {id:'',textContent:'',classList:{remove(){}},style:{}}},addEventListener(){}};
+const document={readyState:'complete',head,body:{appendChild(){},style:{removeProperty(){}}},documentElement:{appendChild(){},style:{removeProperty(){}}},getElementById(){return null},createElement(){return {id:'',textContent:'',classList:{remove(){}},style:{}}},addEventListener(){}};
 const core={render(){renderCalls++;return true},show(){return this.render()},explore(){return true},modal(){return true}};
-const ctx={console,Math,Date,localStorage,document,setTimeout(fn){fn();return 1},DungeonCore01:core,DungeonRoomCreator100:{TOOLS:{floor:{label:'Sol',icon:'·',kind:'terrain'}}},DungeonAuthoredRuntime167839:{active(){return false}},DungeonCore318:{withRoom(room,fn){assert.equal(room,4);return fn()}},dungeonEventSpawn(){eventCalls++;return true},showToast(){}};
+const ctx={console,Math,Date,localStorage,document,setTimeout(fn){fn();return 1},DungeonCore01:core,DungeonRoomCreator100:{TOOLS:{floor:{label:'Sol',icon:'·',kind:'terrain'}}},DungeonCore318:{withRoom(room,fn){assert.equal(room,4);return fn()}},dungeonEventSpawn(){eventCalls++;return true},showToast(){}};
 ctx.window=ctx;ctx.globalThis=ctx;
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
+vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-event-cells-167877.js'});
 
 const api=ctx.DungeonAuthoredEventCells167877;
 assert.ok(api,'le module de cases événement doit être installé');
@@ -45,4 +46,5 @@ assert.equal(eventCalls,2,'la même position dans une autre zone doit être un n
 
 assert.match(src,/dungeonEventSpawn/,'le système doit appeler le moteur d’événements Dungeon existant');
 assert.doesNotMatch(src,/trackSpawnedEnemyInstances\?\./,'le module ne doit pas recréer un moteur de spawn ennemi');
+assert.match(bridge,/dungeon-authored-event-cells-167877\.js\?v=167877/,'le build chargé doit lancer le module événement depuis un bridge déjà présent');
 console.log('Authored Dungeon event cells V16.78.77: OK');

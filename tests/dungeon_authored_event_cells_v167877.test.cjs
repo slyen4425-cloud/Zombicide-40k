@@ -23,7 +23,7 @@ vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-event-
 
 const api=ctx.DungeonAuthoredEventCells167877;
 assert.ok(api,'le module de cases événement doit être installé');
-assert.equal(api.APP_VERSION,'16.78.78');
+assert.equal(api.APP_VERSION,'16.78.79');
 assert.equal(ctx.DungeonRoomCreator100.TOOLS.event.label,'Événement');
 assert.equal(ctx.DungeonRoomCreator100.TOOLS.event.icon,'🎲');
 assert.equal(applyCalls,0,'aucun événement ne doit partir tant que le héros n’est pas sur la case');
@@ -48,5 +48,5 @@ assert.equal(applyCalls,2,'la même position dans une autre zone doit être un n
 
 assert.match(src,/applyDungeonTurnEvent/,'la case doit réutiliser le moteur complet d’événements existant');
 assert.doesNotMatch(src,/trackSpawnedEnemyInstances/,'le module ne doit pas recréer un moteur de spawn ennemi');
-assert.match(loader,/dungeon-authored-event-cells-167877\.js\?v=167878/,'le bridge toujours chargé doit lancer la bonne version du module événement');
-console.log('Authored Dungeon event cells V16.78.78: OK');
+assert.match(loader,/dungeon-authored-event-cells-167877\.js\?v=167879/,'le bridge toujours chargé doit lancer la bonne version du module événement');
+console.log('Authored Dungeon event cells V16.78.79: OK');

@@ -1,4 +1,4 @@
-# GenSrpG V16.78.73 clean dynamic RPG stats guard — 2026-09-08
+# GenSrpG V16.78.74 restored visuals on clean stats base — 2026-09-08
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -66,6 +66,12 @@ jobs:
 
       - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
+
+      - name: Tester la stabilité visuelle source Dungeon
+        run: node tests/dungeon_source_render_stability_v167877.test.cjs
+
+      - name: Tester la restauration des arts héros Dungeon
+        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
 
       - name: Préparer le site
         run: |
@@ -145,12 +151,14 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
-              (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167870"></script>', "Authored Dungeon runtime wall/token bridge missing"),
+              (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>', "Authored Dungeon runtime wall/token bridge missing"),
+              (Path("_site/assets/dungeon/dungeon-source-render-stability-167877.js"), '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>', "Dungeon source render stability missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
+              (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
@@ -163,8 +171,14 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
-      - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon V16.78.72
+      - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
+
+      - name: Tester le chargement final de la stabilité visuelle Dungeon
+        run: node tests/dungeon_source_render_stability_v167877.test.cjs _site/index.html
+
+      - name: Tester le chargement final des arts héros Dungeon
+        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
@@ -174,15 +188,21 @@ jobs:
           grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
           grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
           grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
-          grep -q 'dungeon-authored-cache-visual-167852.js?v=167870' _site/index.html
+          grep -q 'dungeon-authored-cache-visual-167852.js?v=167875' _site/index.html
+          grep -q 'dungeon-source-render-stability-167877.js?v=167877' _site/index.html
+          grep -q 'gens-dungeon-hero-art-repair-167874.js?v=167874' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gens-rpg-stats-clean-167874.js?v=167874' _site/index.html
           ! grep -q 'gens-custom-stats-167881' _site/index.html
           ! grep -q 'gens-rpg-stat-reconcile-167902' _site/index.html
+          ! grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
           grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.73-clean-dynamic-stats' _site/service-worker.js
+          grep -q 'gensrpg-cache-16.78.74-restored-visuals' _site/service-worker.js
           node tests/gens_clean_dynamic_stats_v167873.test.cjs
+          node tests/dungeon_source_render_stability_v167877.test.cjs _site/index.html
+          node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
           node tests/dungeon_large_room_v167834.test.cjs
           node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
           node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html

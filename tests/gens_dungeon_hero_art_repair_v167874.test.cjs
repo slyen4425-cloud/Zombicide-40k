@@ -8,7 +8,9 @@ assert.doesNotMatch(src,/GensRpgStatService|GensCleanRpgStats|dungeonAttributeVa
 assert.match(src,/dng_aldren\.png/);
 assert.match(src,/dng_lyra\.png/);
 assert.match(src,/dng_brom\.png/);
-assert.match(src,/dungeon-authored-final-exit-167875\.js\?v=167875/);
+assert.match(src,/dungeon-authored-final-exit-167875\.js\?v=167878/);
+assert.match(src,/dungeon-authored-event-cells-167877\.js\?v=167878/);
+assert.match(src,/dungeon-event-runtime-fix-167878\.js\?v=167878/);
 const chars={
  dungeon_aldren:{image:'assets/old/generic_hero.png',avatar:'data:image/svg+xml;base64,BBB'},
  dungeon_lyra:{image:'assets/dungeon/creatures/dng_lyra.png',avatar:''},
@@ -25,5 +27,5 @@ assert.equal(chars.dungeon_lyra.image,'assets/dungeon/creatures/dng_lyra.png');
 assert.equal(chars.dungeon_lyra.avatar,'assets/dungeon/creatures/dng_lyra.png');
 assert.equal(chars.dungeon_brom.image,'assets/dungeon/creatures/dng_brom.png');
 assert.equal(chars.dungeon_brom.avatar,'assets/dungeon/creatures/dng_brom.png');
-console.log('Dungeon built-in hero art repair V16.78.75: OK');
-require('./dungeon_authored_final_exit_v167875.test.cjs');
+console.log('Dungeon built-in hero art repair + V16.78.78 runtime loader: OK');
+require('./dungeon_authored_final_exit_v167878.test.cjs');

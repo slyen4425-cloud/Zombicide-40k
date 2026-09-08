@@ -1,24 +1,55 @@
 #!/usr/bin/env python3
-"""GenSrpG V16.78.93 — render custom stats from the same lexical RPG profile as the native hero sheet.
+"""GenSrpG V16.78.94 — active RPG profile is authoritative outside the editor.
 
-The polished native renderer stays unchanged. The build-time wrapper executes inside the
-same classic script as `current`, `currentRpgProfile()` and `loadState()`, so the custom
-stat cards no longer depend on a second global-profile bridge. No observer, timer,
-dynamic loader or parallel stat store is introduced.
+The RPG editor may keep `rpgEditingId` after it closes. Previously `currentRpgProfile()`
+kept preferring that stale editor id during gameplay, so the hero sheet and generic
+rules could read an older profile snapshot (often containing Furtivité only). This
+build patch makes the active gameplay profile authoritative whenever the RPG editor is
+closed, while preserving the edited profile while the modal is actually open.
 """
 from __future__ import annotations
 import sys
 from pathlib import Path
 
-VERSION = "16.78.93"
+VERSION = "16.78.94"
 MARKER = "gensUnifiedStatGridV167890"
+PROFILE_MARKER = "gensCurrentRpgProfileActiveV167894"
 RENAMES = {
     "renderDungeonAttributes": "renderDungeonAttributes__native167890",
     "renderDungeonHeroStats": "renderDungeonHeroStats__native167890",
 }
 
+OLD_PROFILE = '''function currentRpgProfile(){
+  const arr=rpgProfiles();
+  if(rpgEditingId){
+    const exact=arr.find(p=>String(p.id)===String(rpgEditingId));
+    if(exact)return exact;
+  }
+  const active=arr.find(p=>String(p.id)===String(activeGameProfileId()));
+  if(active)return active;
+  return arr.find(p=>p.id===GAME_PROFILE_DUNGEON_ID)||arr[0]||null;
+}'''
+
+NEW_PROFILE = '''function currentRpgProfile(){
+  /* gensCurrentRpgProfileActiveV167894: editor profile only while the editor is visible. */
+  const arr=rpgProfiles();
+  let editorOpen=false;
+  try{editorOpen=document.getElementById("rpgUniverseEditorModal")?.style?.display==="block"}catch(e){}
+  if(editorOpen&&rpgEditingId){
+    const exact=arr.find(p=>String(p.id)===String(rpgEditingId));
+    if(exact)return exact;
+  }
+  const active=arr.find(p=>String(p.id)===String(activeGameProfileId()));
+  if(active)return active;
+  if(rpgEditingId){
+    const fallbackEdit=arr.find(p=>String(p.id)===String(rpgEditingId));
+    if(fallbackEdit)return fallbackEdit;
+  }
+  return arr.find(p=>p.id===GAME_PROFILE_DUNGEON_ID)||arr[0]||null;
+}'''
+
 WRAPPER = r'''
-/* GenSrpG V16.78.93 — native characteristic grid + lexical RPG profile source. */
+/* GenSrpG V16.78.94 — native characteristic grid + authoritative active RPG profile. */
 function gensCurrentHeroIdV167891(){
   try{return current?String(current):String(globalThis.current||"")}catch(error){return String(globalThis.current||"")}
 }
@@ -53,8 +84,7 @@ function gensRenderActiveCustomStatsV167892(){
     const state=loadState(heroId)||{},points=Math.max(0,Number(state.statPoints)||0);
     for(const def of list){
       const id=String(def.id),value=gensCustomStatValueV167893(heroId,def),base=Number(def.defaultValue)||0,card=document.createElement("div");
-      card.className="dungeonStatBox gsrCustomStatCard";
-      card.dataset.statId=id;
+      card.className="dungeonStatBox gsrCustomStatCard";card.dataset.statId=id;
       const canEdit=def.editMode!=="runtime",canAdd=def.editMode!=="points"||points>0;
       const ownDescription=String(def.description||"").trim();
       const links=String(genericApi?.descriptionForSource?.(id)||"").trim();
@@ -68,59 +98,46 @@ function gensRenderActiveCustomStatsV167892(){
     grid.dataset.gensActiveCustomStats=String(list.length);
     grid.dataset.gensActiveCustomStatIds=list.map(def=>String(def.id)).join(",");
     return true;
-  }catch(error){console.warn("GenSrpG V16.78.93 custom stat cards",error);return false}
+  }catch(error){console.warn("GenSrpG V16.78.94 custom stat cards",error);return false}
 }
 function gensUnifiedStatGridV167890(){
   try{
-    const heroId=gensCurrentHeroIdV167891();
-    if(heroId)globalThis.current=heroId;
-    const grid=document.getElementById("dungeonAttributeGrid");
-    if(grid)grid.dataset.gensUnifiedStatGrid="167893";
-    const api=globalThis.GensGenericStats167887;
-    if(api)api.patchSheetTexts?.();
+    const heroId=gensCurrentHeroIdV167891();if(heroId)globalThis.current=heroId;
+    const grid=document.getElementById("dungeonAttributeGrid");if(grid)grid.dataset.gensUnifiedStatGrid="167894";
+    const api=globalThis.GensGenericStats167887;if(api)api.patchSheetTexts?.();
     gensRenderActiveCustomStatsV167892();
-  }catch(error){console.warn("GenSrpG V16.78.93 stat grid",error)}
+  }catch(error){console.warn("GenSrpG V16.78.94 stat grid",error)}
 }
-function renderDungeonAttributes(){
-  const out=renderDungeonAttributes__native167890.apply(this,arguments);
-  gensUnifiedStatGridV167890();
-  return out;
-}
-function renderDungeonHeroStats(){
-  const out=renderDungeonHeroStats__native167890.apply(this,arguments);
-  gensUnifiedStatGridV167890();
-  return out;
-}
-try{globalThis.GENSRPG_VERSION="16.78.93"}catch(error){}
+function renderDungeonAttributes(){const out=renderDungeonAttributes__native167890.apply(this,arguments);gensUnifiedStatGridV167890();return out;}
+function renderDungeonHeroStats(){const out=renderDungeonHeroStats__native167890.apply(this,arguments);gensUnifiedStatGridV167890();return out;}
+try{globalThis.GENSRPG_VERSION="16.78.94"}catch(error){}
 '''.strip()
 
 
 def patch_text(html: str) -> str:
+    if PROFILE_MARKER not in html:
+        count=html.count(OLD_PROFILE)
+        if count!=1:
+            raise RuntimeError(f"V16.78.94: expected one legacy currentRpgProfile(), found {count}")
+        html=html.replace(OLD_PROFILE,NEW_PROFILE,1)
     if MARKER in html:
         return html
     positions=[]
     for old,new in RENAMES.items():
         needle=f"function {old}(){{"
         count=html.count(needle)
-        if count!=1:
-            raise RuntimeError(f"V16.78.93: expected exactly one {needle!r}, found {count}")
-        pos=html.index(needle)
-        html=html.replace(needle,f"function {new}(){{",1)
-        positions.append(pos)
+        if count!=1: raise RuntimeError(f"V16.78.94: expected exactly one {needle!r}, found {count}")
+        pos=html.index(needle);html=html.replace(needle,f"function {new}(){{",1);positions.append(pos)
     close=html.find("</script>",max(positions))
-    if close<0:
-        raise RuntimeError("V16.78.93: could not find closing </script> for native stat renderer")
+    if close<0: raise RuntimeError("V16.78.94: could not find closing </script> for native stat renderer")
     html=html[:close]+"\n"+WRAPPER+"\n"+html[close:]
-    if MARKER not in html or "gensActiveCustomStatDefsV167893" not in html:
-        raise RuntimeError("V16.78.93: lexical-profile custom-stat wrapper missing after patch")
+    if MARKER not in html or PROFILE_MARKER not in html: raise RuntimeError("V16.78.94: profile/grid patch missing")
     return html
 
 
 def main()->int:
     if len(sys.argv)!=2:
         print("usage: patch_generic_stat_grid_v167890.py <index.html>",file=sys.stderr);return 2
-    path=Path(sys.argv[1]);html=path.read_text(encoding="utf-8")
-    path.write_text(patch_text(html),encoding="utf-8")
-    print(f"GenSrpG V{VERSION}: lexical-profile custom-stat grid applied")
-    return 0
+    path=Path(sys.argv[1]);path.write_text(patch_text(path.read_text(encoding="utf-8")),encoding="utf-8")
+    print(f"GenSrpG V{VERSION}: active-profile stat source applied");return 0
 if __name__=="__main__": raise SystemExit(main())

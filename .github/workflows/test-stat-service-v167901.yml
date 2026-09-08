@@ -25,3 +25,41 @@ jobs:
         run: node tests/dungeon_runtime_regression.test.cjs
       - name: Authored Dungeon regression
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: Build final page with production stat module order
+        run: |
+          rm -rf _site && mkdir -p _site/assets/gensrpg
+          cp index.html _site/index.html
+          cp -R assets/gensrpg/. _site/assets/gensrpg/
+          python3 tools/patch_generic_stat_grid_v167890.py _site/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html')
+          html=p.read_text(encoding='utf-8')
+          tags=[
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>',
+            '<script src="assets/gensrpg/gens-custom-stats-167881.js?v=167881"></script>',
+            '<script src="assets/gensrpg/gens-stat-rules-help-167880.js?v=167880"></script>',
+            '<script src="assets/gensrpg/gens-stat-help-extension-167881.js?v=167881"></script>',
+            '<script src="assets/gensrpg/gens-custom-stat-runtime-profile-167889.js?v=167889"></script>',
+          ]
+          for tag in tags:
+            if tag not in html: html=html.replace('</body>',tag+'\n</body>')
+          p.write_text(html,encoding='utf-8')
+          PY
+      - name: Final-site single stat authority
+        run: |
+          node tests/gens_custom_stat_runtime_profile_v167889.test.cjs _site/index.html
+          node tests/gens_native_stat_grid_v167890.test.cjs _site/index.html
+          node tests/gens_rpg_stat_service_v167901.test.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path('_site/index.html').read_text(encoding='utf-8')
+          order=['gens-custom-stats-167881.js','gens-stat-rules-help-167880.js','gens-stat-help-extension-167881.js','gens-custom-stat-runtime-profile-167889.js']
+          pos=[h.rfind(x) for x in order]
+          assert all(x>=0 for x in pos), pos
+          assert pos==sorted(pos), pos
+          assert 'gensCanonicalStatGridV167898' not in h
+          assert 'GENS_CORE_STAT_IDS_V167897' not in h
+          assert h.count('gensStatBuildNoRendererV167901')==1
+          print('Final stat module order / single renderer: OK')
+          PY

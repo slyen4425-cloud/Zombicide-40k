@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.88-custom-stat-ui";
+const CACHE_NAME = "gensrpg-cache-16.78.89-custom-stat-runtime-profile";
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -11,6 +11,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.88-custom-stat-ui";
 // gensrpg-cache-16.78.85-equipment-ability-runtime
 // gensrpg-cache-16.78.86-ui-freeze-rollback
 // gensrpg-cache-16.78.87-generic-stat-links
+// gensrpg-cache-16.78.88-custom-stat-ui
 
 const CORE_FILES = [
   "./",
@@ -51,6 +52,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-custom-stats-167881.js",
   "./assets/gensrpg/gens-stat-rules-help-167880.js",
   "./assets/gensrpg/gens-stat-help-extension-167881.js",
+  "./assets/gensrpg/gens-custom-stat-runtime-profile-167889.js",
   "./manifest.json"
 ];
 

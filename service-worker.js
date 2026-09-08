@@ -37,7 +37,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-world-summary-167820.js",
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
-  "./assets/gensrpg/gens-rpg-stats-clean-167873.js",
+  "./assets/gensrpg/gens-rpg-stats-clean-167874.js",
   "./manifest.json"
 ];
 

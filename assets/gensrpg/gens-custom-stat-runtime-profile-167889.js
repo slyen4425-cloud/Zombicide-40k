@@ -6,7 +6,7 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="2.0.0",APP_VERSION="16.78.95",MIGRATION_KEY="customStatAuthorityV167895";
+const VERSION="2.0.1",APP_VERSION="16.78.95",MIGRATION_KEY="customStatAuthorityV167895";
 function editorOpen(){try{return D?.getElementById("rpgUniverseEditorModal")?.style?.display==="block"}catch(e){return false}}
 function activeProfile(){try{return R.getActiveGameProfile?.()||null}catch(e){return null}}
 function contextProfile(){
@@ -33,8 +33,6 @@ function saveProfile(p){
 function migrateProfile(p){
   const s=profileStats(p);if(!s||s[MIGRATION_KEY]===true)return false;
   const active=new Set(s.active.map(String));
-  // V81-V94 created a new custom stat as active by default. Repair old profiles once so
-  // every already-created characteristic receives the same treatment as Furtivité.
   for(const d of s.customStats){const id=String(d?.id||"");if(id)active.add(id)}
   s.active=[...active];s[MIGRATION_KEY]=true;return true;
 }
@@ -75,8 +73,6 @@ function patchCanonicalApi(){
     };
     wrapped.__gcsAuthority167895=true;wrapped.__original=old;api[name]=wrapped;
   }
-  // Do not call the legacy activeIds/isActive implementation: it invokes the V81
-  // ensure() routine that force-adds Furtivité. stats.active is authoritative now.
   api.activeIds=function(){return rawActiveSet()};
   api.isActive=function(id){return rawActiveSet().has(String(id))};
   const oldDefs=api.defs;
@@ -95,23 +91,32 @@ function patchCanonicalApi(){
   api.def=function(id){return (api.defs?.()||[]).find(x=>String(x?.id||"")===String(id))||null};
   api.__gcsAuthority167895=true;return true;
 }
+function primaryInputFromEvent(event){
+  const t=event?.target;if(!t)return null;
+  if(t.matches?.('[data-gcs-primary="1"] input[type="checkbox"]'))return t;
+  const row=t.closest?.('[data-gcs-primary="1"]');
+  const input=row?.querySelector?.('input[type="checkbox"]');
+  return input||null;
+}
+function handlePrimaryChange(event){
+  const input=primaryInputFromEvent(event);if(!input)return false;
+  return setActive(input.value,!!input.checked);
+}
+function handleCustomDefinitionChange(event){
+  const t=event?.target;if(!t?.matches?.("[data-gcs],[data-e]"))return false;
+  try{return R.GensCustomStats167879?.persist?.()!==false}catch(e){console.warn("GenSrpG V16.78.95 autosave stat",e);return false}
+}
 function bindEditorAutosave(){
   if(!D)return false;
   const primary=D.getElementById("rpgStatsList");
   if(primary&&!primary.dataset.gcsAuthority167895){
     primary.dataset.gcsAuthority167895="1";
-    primary.addEventListener("change",event=>{
-      const input=event.target?.closest?.('[data-gcs-primary="1"] input[type="checkbox"]');
-      if(input)setActive(input.value,!!input.checked);
-    });
+    primary.addEventListener("change",handlePrimaryChange);
   }
   const custom=D.getElementById("gcs167879Box");
   if(custom&&!custom.dataset.gcsAuthority167895){
     custom.dataset.gcsAuthority167895="1";
-    custom.addEventListener("change",event=>{
-      const t=event.target;if(!t?.matches?.("[data-gcs],[data-e]"))return;
-      try{R.GensCustomStats167879?.persist?.()}catch(e){console.warn("GenSrpG V16.78.95 autosave stat",e)}
-    });
+    custom.addEventListener("change",handleCustomDefinitionChange);
   }
   return true;
 }
@@ -127,6 +132,6 @@ function install(){
   try{R.GensCustomStats167879?.syncPrimaryList?.()}catch(e){}
   bindEditorAutosave();refreshSheet();return true;
 }
-R.GensCustomStatRuntimeProfile167889={VERSION,APP_VERSION,MIGRATION_KEY,editorOpen,activeProfile,contextProfile,profileStats,migrateProfile,migrateProfiles,rawActiveSet,setActive,patchCanonicalApi,bindEditorAutosave,patchEditorRenderer,refreshSheet,install};
+R.GensCustomStatRuntimeProfile167889={VERSION,APP_VERSION,MIGRATION_KEY,editorOpen,activeProfile,contextProfile,profileStats,migrateProfile,migrateProfiles,rawActiveSet,setActive,patchCanonicalApi,primaryInputFromEvent,handlePrimaryChange,handleCustomDefinitionChange,bindEditorAutosave,patchEditorRenderer,refreshSheet,install};
 if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",install,{once:true}):install()}
 })();

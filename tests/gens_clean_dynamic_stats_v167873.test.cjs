@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const unified=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-stats-unified-167885.js'),'utf8');
 let savedProfiles=[];
 const profile={id:'dungeon',gameStyle:'dungeon',rpgUniverse:{progression:{attributeEditMode:'points'},stats:{
  active:['force','agility','intelligence','spirit','endurance','initiative','chance'],
@@ -44,4 +45,14 @@ assert.equal(heroState.statPoints,2,'-1 must refund the point spent on the custo
 assert.ok(api.legacyRules().some(r=>r.id==='legacy_phys'&&r.step===10&&r.gain===1),'old 10 Force = +1 physical damage rule must remain editable');
 const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),2,'inactive custom stat must stop influencing combat');assert.equal(before,3);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
-console.log('GenSrpG V16.78.73 clean stats: stable core + unknown stat + points + influences OK');
+assert.match(unified,/unifiedEffects85/,'unified effect storage missing');
+assert.match(unified,/mode:e\.mode==="threshold"/,'conditional threshold effects missing');
+assert.match(unified,/\["enemy_vision","👁️ Champ de vision des ennemis"/,'enemy vision target missing');
+assert.match(unified,/"stat:"\+d\.id/,'one stat must be able to influence another stat');
+assert.match(unified,/MOTEUR EXISTANT/,'legacy hard-coded rules must be represented in unified editor');
+assert.match(unified,/data-u85-bonus/,'equipment must expose dynamic stat bonuses');
+assert.match(unified,/data-u85-herostat/,'hero creator must expose new stat values');
+assert.match(unified,/gs85uExplain/,'in-game stat explanation box missing');
+assert.match(unified,/Résumé joueur/,'clear generated summary missing');
+assert.doesNotMatch(unified,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused by unified stats');
+console.log('GenSrpG V16.78.85 stats: stable core + unified multi-effects + conditions + equipment + sheet UI contracts OK');

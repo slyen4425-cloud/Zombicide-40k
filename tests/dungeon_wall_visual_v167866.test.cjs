@@ -33,7 +33,7 @@ assert.doesNotThrow(()=>new Function(runtime),'runtime visual bridge must stay s
 assert.match(editor,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.doesNotMatch(editor,/dungeon_wall\.png/);
 
-assert.match(runtime,/APP_VERSION="16\.78\.72"/);
+assert.match(runtime,/APP_VERSION="16\.78\.75"/);
 assert.match(runtime,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/);
 assert.match(runtime,/DungeonRoomCreator100\?\.findRoom/,'runtime must read the original authored room');
 assert.match(runtime,/roomCells=Array\.isArray\(room\?\.cells\)/,'runtime must use authored room cells');
@@ -77,7 +77,7 @@ assert.match(sw,/dng_floor_ice_01\.png/);
 assert.match(sw,/dng_floor_lava_01\.png/);
 
 if(siteIndex){
-  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167870/,'runtime terrain/token bridge must remain injected in deployed index');
+  assert.match(siteIndex,/dungeon-authored-cache-visual-167852\.js\?v=167875/,'runtime terrain/token bridge must remain injected in deployed index');
 }
 
-console.log(`Dungeon authored wall ${dims.width}x${dims.height} + perceptual actor token scaling V16.78.72 regression: OK`);
+console.log(`Dungeon authored wall ${dims.width}x${dims.height} + restored perceptual actor scaling regression: OK`);

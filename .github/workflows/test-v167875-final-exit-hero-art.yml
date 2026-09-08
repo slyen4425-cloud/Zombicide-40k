@@ -1,0 +1,27 @@
+name: Test V16.78.75 final exit and hero art
+on:
+  push:
+    branches:
+      - work/v16.78.75-final-exit-hero-art
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test hero art and final authored exit
+        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
+      - name: Test clean stats remain intact
+        run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
+      - name: Test Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Test authored runtime
+        run: node tests/dungeon_authored_runtime_v167839.test.cjs
+      - name: Test visual scale
+        run: node tests/dungeon_source_render_stability_v167877.test.cjs
+      - name: Cache guard
+        run: |
+          grep -q 'gensrpg-cache-16.78.75-final-exit-hero-art' service-worker.js
+          grep -q 'dungeon-authored-final-exit-167875.js' service-worker.js
+          grep -q 'dng_aldren.png' service-worker.js

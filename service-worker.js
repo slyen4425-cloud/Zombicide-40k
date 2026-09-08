@@ -1,6 +1,6 @@
-const CACHE_NAME = "gensrpg-cache-16.78.98-stat-talent-cleanup";
-// gensrpg-deploy-16.78.98-stat-talent-cleanup
-// gensrpg-publish-trigger-16.78.98
+const CACHE_NAME = "gensrpg-cache-16.79.00-intermode-safety";
+// gensrpg-deploy-16.79.00-intermode-safety
+// gensrpg-publish-trigger-16.79.00
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -23,6 +23,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.98-stat-talent-cleanup";
 // gensrpg-cache-16.78.95-custom-stat-authority
 // gensrpg-cache-16.78.96-unified-dynamic-stats
 // gensrpg-cache-16.78.97-canonical-stat-registry
+// gensrpg-cache-16.78.98-stat-talent-cleanup
 
 const CORE_FILES = [
   "./",
@@ -58,6 +59,7 @@ const CORE_FILES = [
   "./assets/dungeon/dungeon-equipment-hotfix-167817.js",
   "./assets/dungeon/dungeon-set-editor-167818.js",
   "./assets/gensrpg/gens-world-summary-167820.js",
+  "./assets/gensrpg/gens-intermode-safety-167900.js",
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
   "./assets/gensrpg/gens-custom-stats-167881.js",

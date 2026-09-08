@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.84
+name: Test Builder Events V16.78.86
 on:
   push:
     branches:
       - main
-      - work/v16.78.84-event-highlight
+      - work/v16.78.86-stat-editor-actions
 permissions:
   contents: read
 jobs:
@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Tester les actions Ajouter stat et Ajouter effet
+        run: node tests/gens_rpg_stat_actions_v167886.test.cjs
       - name: Tester les cases événement configurables et leur surbrillance
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs
       - name: Tester la sortie finale sans faux positif sur les caches secondaires

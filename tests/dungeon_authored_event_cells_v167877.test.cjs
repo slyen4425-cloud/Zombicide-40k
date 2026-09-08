@@ -19,14 +19,18 @@ const core={render(){return true},show(){return true},modal(){return true}};
 const ctx={console,Math,Date,localStorage,document,setTimeout(fn){fn();return 1},DungeonCore01:core,DungeonRoomCreator100:{TOOLS:{}},DungeonCore318:{withRoom(room,fn){assert.equal(room,4);return fn()}},loadDungeonEvents(){return library},dungeonEligibleEvents(){return [ambush,reinf]},dungeonWeightedEventPick(list){return list[0]},applyDungeonTurnEvent(evt,round){applied.push({id:evt.id,round});return {event:evt}},showEffectPopup(){},showToast(){}};
 ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-event-cells-167877.js'});
 const api=ctx.DungeonAuthoredEventCells167877;
-assert.ok(api);assert.equal(api.APP_VERSION,'16.78.83');assert.equal(api.RANDOM_EVENT_ID,'__random_event__');assert.equal(api.TEMPLATE_DUNGEON_ID,'__room_template__');
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.84');assert.equal(api.RANDOM_EVENT_ID,'__random_event__');assert.equal(api.TEMPLATE_DUNGEON_ID,'__room_template__');
 assert.equal(ctx.DungeonRoomCreator100.TOOLS.event.label,'Événement');
-assert.equal(typeof api.ensurePaletteButton,'function');
+assert.equal(typeof api.ensurePaletteButton,'function');assert.equal(typeof api.decorateEventCells,'function');
+assert.match(src,/dae167884NeedsConfig/,'une case événement non configurée doit avoir un état visuel distinct');
+assert.match(src,/dae167884Configured/,'une case événement configurée doit avoir un état visuel distinct');
 assert.match(src,/drt167828Toggle/,'le mode Contenu exact doit ouvrir la configuration événement');
 assert.ok(api.eventLibrary().some(x=>x.id==='evt_custom_new'));
 
 // Configuration du modèle de pièce : aucune zone n'est nécessaire.
+assert.equal(api.rawConfig(api.TEMPLATE_DUNGEON_ID,'template_room',1),null);
 api.saveConfig(api.TEMPLATE_DUNGEON_ID,'template_room',1,'evt_custom_new');
+assert.ok(api.rawConfig(api.TEMPLATE_DUNGEON_ID,'template_room',1),'un choix enregistré doit être considéré comme configuré');
 assert.equal(api.getConfig(api.TEMPLATE_DUNGEON_ID,'template_room',1).eventId,'evt_custom_new');
 assert.equal(api.resolveConfig('world_test','room_B',1,'template_room').eventId,'evt_custom_new');
 assert.equal(api.resolveConfig('world_test','room_B',1,'template_room').source,'template');
@@ -41,8 +45,8 @@ x.last.worldNodeId='room_C';x.authoredEventCells167877={};x.positions.aldren=1;l
 assert.equal(api.resolveConfig('world_test','room_C',1,'template_room').source,'zone');api.fire();
 assert.equal(applied.at(-1).id,'evt_created_later');
 
-// Aléatoire explicite sur une zone reste possible.
-x=JSON.parse(localStorage.getItem(RT));x.last.worldNodeId='room_D';x.authoredEventCells167877={};x.positions.aldren=1;localStorage.setItem(RT,JSON.stringify(x));api.saveConfig('world_test','room_D',1,api.RANDOM_EVENT_ID);api.fire();
+// Aléatoire explicite reste une configuration réelle (donc état visuel configuré).
+x=JSON.parse(localStorage.getItem(RT));x.last.worldNodeId='room_D';x.authoredEventCells167877={};x.positions.aldren=1;localStorage.setItem(RT,JSON.stringify(x));api.saveConfig('world_test','room_D',1,api.RANDOM_EVENT_ID);assert.ok(api.rawConfig('world_test','room_D',1));api.fire();
 assert.equal(applied.at(-1).id,'d_evt_ambush');
 assert.match(src,/loadDungeonEvents/);assert.match(src,/Aléatoire — bibliothèque des événements/);assert.match(src,/applyDungeonTurnEvent/);assert.doesNotMatch(src,/trackSpawnedEnemyInstances/);
-console.log('Authored Dungeon room-template configurable event cells V16.78.83: OK');
+console.log('Authored Dungeon event highlighting V16.78.84: OK');

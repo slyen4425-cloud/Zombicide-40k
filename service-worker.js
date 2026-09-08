@@ -1,6 +1,6 @@
-const CACHE_NAME = "gensrpg-cache-16.79.01-stat-service";
-// gensrpg-deploy-16.79.01-stat-service
-// gensrpg-publish-trigger-16.79.01
+const CACHE_NAME = "gensrpg-cache-16.79.02-stat-rules-import-safety";
+// gensrpg-deploy-16.79.02-stat-rules-import-safety
+// gensrpg-publish-trigger-16.79.02
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -25,6 +25,7 @@ const CACHE_NAME = "gensrpg-cache-16.79.01-stat-service";
 // gensrpg-cache-16.78.97-canonical-stat-registry
 // gensrpg-cache-16.78.98-stat-talent-cleanup
 // gensrpg-cache-16.79.00-intermode-safety
+// gensrpg-cache-16.79.01-stat-service
 
 const CORE_FILES = [
   "./",
@@ -67,6 +68,8 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-stat-rules-help-167880.js",
   "./assets/gensrpg/gens-stat-help-extension-167881.js",
   "./assets/gensrpg/gens-custom-stat-runtime-profile-167889.js",
+  "./assets/gensrpg/gens-rpg-stat-reconcile-167902.js",
+  "./assets/gensrpg/gens-backup-import-safe-167902.js",
   "./manifest.json"
 ];
 

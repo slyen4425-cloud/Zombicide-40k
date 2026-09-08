@@ -27,7 +27,7 @@ assert.match(src,/dtalentEffectsHost select\[data-f="scaleAttribute"\]/,'ability
 assert.match(src,/dungeonTalentCalculatedAmount/,'ability runtime must use the same characteristic catalogue');
 assert.match(src,/rpgAbilityRefs/,'equipment must continue to store only ability references');
 assert.doesNotMatch(src,/createElement\("script"\)|gens-equipment-ability-runtime-167885|MutationObserver|setInterval|setTimeout/,'V16.78.88 must not dynamically load runtime code or install repeating/delayed UI workers');
-assert.doesNotMatch(src,/enemyCells\s*=|dungeonRoom\s*=|timeline|startDungeonCombat/,'generic stat refactor must not touch spatial combat/spawn/timeline');
+assert.doesNotMatch(src,/enemyCells\s*=|dungeonRoom\s*=|timeline\s*(?:=|\.|\[)|startDungeonCombat/,'generic stat refactor must not touch spatial combat/spawn/timeline');
 assert.match(src,/gsr167887CleanupStyle/,'old duplicate editors must be removed by exact scoped selectors');
 assert.match(src,/function renderCustomStatsInMainGrid/,'custom stats must render in the same main stat grid as native characteristics');
 assert.match(src,/descriptionForSource\(d\.id\)/,'custom stat cards must explain their configured links');

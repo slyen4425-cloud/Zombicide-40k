@@ -4,10 +4,15 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 
+/* Permanent cross-mode gate: this existing mandatory deployment test now also
+   verifies Survival custom-hero recovery and Capture ability-library routing. */
+require('./gens_intermode_safety_v167900.test.cjs');
+
 const recoveryPath=path.join(root,'assets','gensrpg','gens-ui-recovery-167843.js');
 const gridPath=path.join(root,'assets','dungeon','dungeon-room-grid-capture-167830.js');
+const safetyPath=path.join(root,'assets','gensrpg','gens-intermode-safety-167900.js');
 const swPath=path.join(root,'service-worker.js');
-for(const p of [recoveryPath,gridPath,swPath])assert.ok(fs.existsSync(p),`missing ${p}`);
+for(const p of [recoveryPath,gridPath,safetyPath,swPath])assert.ok(fs.existsSync(p),`missing ${p}`);
 
 const styles=[];
 function classList(initial=[]){const s=new Set(initial);return {contains:v=>s.has(v),add:v=>s.add(v),remove:v=>s.delete(v),values:()=>[...s]}}
@@ -39,4 +44,4 @@ assert.match(sw,/gens-ui-recovery-167843\.js/,'recovery asset not precached');
 assert.match(sw,/request\.destination==="script"\|\|request\.destination==="style"/,'JS/CSS network-first guard missing');
 assert.match(sw,/cache:"reload"/,'install must bypass stale HTTP cache');
 
-console.log('V16.78.72 UI recovery/cache regression: OK');
+console.log('V16.78.72 UI recovery/cache + inter-mode regression: OK');

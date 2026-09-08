@@ -2,7 +2,7 @@ name: Test Builder Events V16.78.77
 on:
   push:
     branches:
-      - work/v16.78.77-builder-events
+      - main
 permissions:
   contents: read
 jobs:

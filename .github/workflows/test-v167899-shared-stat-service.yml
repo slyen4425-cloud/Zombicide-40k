@@ -32,7 +32,7 @@ jobs:
       - name: Test authored Dungeon engine separately
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
 
-      - name: Build final page with production module order
+      - name: Build final stat page with production stat-module order
         run: |
           rm -rf _site
           mkdir -p _site
@@ -56,13 +56,12 @@ jobs:
           p.write_text(html,encoding='utf-8')
           PY
 
-      - name: Test final built page
+      - name: Test final built stat page
         run: |
           node tests/gens_stat_service_v167899.test.cjs _site/index.html
           node tests/gens_native_stat_grid_v167890.test.cjs _site/index.html
           node tests/gens_custom_stat_effects_v167881.test.cjs _site/index.html
           node tests/gens_custom_stat_runtime_profile_v167889.test.cjs _site/index.html
-          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
           grep -q 'gens-stat-service-167899.js?v=167899' _site/index.html
           grep -q 'gensrpg-cache-16.78.99-shared-stat-service' _site/service-worker.js
           ! grep -q 'gensCanonicalStatGridV167897' _site/index.html

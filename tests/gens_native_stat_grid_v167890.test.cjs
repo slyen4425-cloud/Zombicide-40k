@@ -25,7 +25,7 @@ assert.match(html,/gensCurrentRpgProfileActiveV167894/,'active gameplay profile 
 assert.doesNotMatch(html.slice(html.indexOf('gensCanonicalStatGridV167897')),/MutationObserver|setInterval|startDungeonCombat|enemyCells\s*=|dungeonRoom\s*=/,'stat renderer must not touch spatial/combat systems');
 cp.execFileSync('python3',[patcher,target],{stdio:'pipe'});
 const twice=fs.readFileSync(target,'utf8');
-assert.equal((twice.match(/gensCanonicalStatGridV167897/g)||[]).length,2,'marker appears in comment + testable implementation only once after idempotent patch');
+assert.equal((twice.match(/gensCanonicalStatGridV167897/g)||[]).length,1,'patch must be idempotent');
 const site=process.argv[2]&&fs.existsSync(process.argv[2])?fs.readFileSync(process.argv[2],'utf8'):null;
 if(site){assert.match(site,/gensCanonicalStatGridV167897/);assert.match(site,/GENSRPG_VERSION="16\.78\.97"/)}
 console.log('GenSrpG canonical Dungeon stat grid V16.78.97 regression: OK');

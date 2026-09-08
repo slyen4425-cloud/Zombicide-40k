@@ -2,8 +2,9 @@
 """GenSrpG V16.79.02 — final build cleanup and safety bridges.
 
 The RPG stat registry/calculation engine remains owned exclusively by
-GensRpgStatService167901. This patcher does not create or rename a stat engine.
-It also loads the V16.79.02 UI reconciliation and selective-import safety bridges.
+GensRpgStatService167901. This patcher MUST NOT create, rename or wrap any stat
+renderer or registry. It only loads the V16.79.02 UI reconciliation and
+selective-import safety bridges plus the existing non-stat final-build fixes.
 """
 from __future__ import annotations
 import sys

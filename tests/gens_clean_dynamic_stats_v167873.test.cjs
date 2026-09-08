@@ -23,7 +23,7 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
 };
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167873.js'});
-const api=ctx.GensCleanRpgStats167873;assert.ok(api,'clean stat API missing');
+const api=ctx.GensCleanRpgStats167873;assert.ok(api,'clean stat API missing');api.install();
 assert.equal(api.def('chance').name,'Chance');
 assert.equal(api.active('chance'),true);
 assert.equal(api.base('dungeon_aldren','chance'),10);

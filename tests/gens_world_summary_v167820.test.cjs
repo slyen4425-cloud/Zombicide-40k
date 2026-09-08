@@ -5,9 +5,11 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-world-summary-167820.js'),'utf8');
+const safetyPath=path.join(root,'assets','gensrpg','gens-intermode-safety-167900.js');
 const builtArg=process.argv[2];
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+assert.ok(fs.existsSync(safetyPath),'inter-mode safety asset missing');
 
 const values=new Map();
 const localStorage={
@@ -72,6 +74,8 @@ assert.equal(custom.text,'2 héros · 3 objets · 4 monstres');
 
 assert.match(src,/MutationObserver/,'world cards must be repatched after the existing renderer redraws them');
 assert.match(src,/gensUniverseCard\[data-rpg-profile\]/,'world card selector missing');
+assert.match(src,/gens-intermode-safety-167900\.js\?v=167900/,'generic bootstrap must load the inter-mode safety guard');
+assert.match(src,/loadIntermodeSafety\(\)/,'inter-mode safety bootstrap not called');
 assert.match(workflow,/gens-world-summary-167820\.js/,'Pages workflow must inject live world summaries');
 assert.match(workflow,/gens_world_summary_v167820\.test\.cjs/,'Pages workflow must run live-summary regression');
 assert.match(sw,/gens-world-summary-167820\.js/,'live-summary module must be pre-cached');
@@ -79,5 +83,7 @@ assert.match(sw,/gensrpg-cache-16\.78\.\d+-/,'PWA cache must remain on a GenSrpG
 if(builtArg){
  const html=fs.readFileSync(builtArg,'utf8');
  assert.match(html,/assets\/gensrpg\/gens-world-summary-167820\.js\?v=167820/,'final HTML must load the V16.78.20 world summary module');
+ const builtSafety=path.join(path.dirname(builtArg),'assets','gensrpg','gens-intermode-safety-167900.js');
+ assert.ok(fs.existsSync(builtSafety),'final site must contain the inter-mode safety guard loaded by world summary');
 }
-console.log('GenSrpG world summaries V16.78.20: OK');
+console.log('GenSrpG world summaries + inter-mode bootstrap: OK');

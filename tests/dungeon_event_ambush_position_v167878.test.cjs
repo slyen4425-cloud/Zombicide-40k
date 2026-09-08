@@ -1,0 +1,35 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-event-runtime-fix-167878.js'),'utf8');
+const RT='gensrpg_dungeon_runtime_v2';
+const store=new Map();
+const localStorage={getItem(k){return store.has(k)?store.get(k):null},setItem(k,v){store.set(k,String(v))}};
+const runtime={participants:['aldren','lyra'],index:0,room:5,heroRooms:{aldren:5,lyra:5},positions:{aldren:12,lyra:13},enemyCells:{old_enemy:0},last:{map:{size:5,cells:Array(25).fill('floor')}}};
+runtime.last.map.cells[0]='enemy';runtime.last.map.cells[24]='exit';
+localStorage.setItem(RT,JSON.stringify(runtime));
+let enemies=[{id:'old_enemy',enemyId:'dng_skeleton',dungeonRoom:5,hp:3}],renderCalls=0;
+const ctx={console,Math,Date,localStorage,setTimeout(fn){fn();return 1},loadActiveEnemies(){return enemies},saveActiveEnemies(v){enemies=v},DungeonSpatial313:{sameView(){return true},persist(){}},DungeonCore01:{render(){renderCalls++;return true}},applyDungeonTurnEvent(evt){if(evt.id==='d_evt_ambush')enemies.push({id:'ambush_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});else enemies.push({id:'reinforce_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});return {event:evt}}};
+ctx.window=ctx;ctx.globalThis=ctx;
+vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-event-runtime-fix-167878.js'});
+const api=ctx.DungeonEventRuntimeFix167878;
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.78');
+ctx.applyDungeonTurnEvent({id:'d_evt_ambush',name:'Embuscade'});
+let x=JSON.parse(localStorage.getItem(RT));
+const placed=Number(x.enemyCells.ambush_new);
+assert.ok(Number.isInteger(placed),'le nouvel ennemi d’embuscade doit recevoir une position tactique');
+const size=5,heroCells=[12,13];
+const distance=Math.min(...heroCells.map(h=>Math.abs(Math.floor(h/size)-Math.floor(placed/size))+Math.abs((h%size)-(placed%size))));
+assert.equal(distance,1,'l’ennemi d’embuscade doit apparaître sur une case adjacente à un héros');
+assert.notEqual(placed,24,'l’embuscade ne doit pas envoyer le monstre au fond sur la sortie');
+assert.ok(renderCalls>=1,'la grille doit être rerendue après le repositionnement');
+assert.equal(enemies.find(e=>e.id==='ambush_new').dungeonCell200,placed);
+
+ctx.applyDungeonTurnEvent({id:'d_evt_reinforce',name:'Renforts ennemis'});
+x=JSON.parse(localStorage.getItem(RT));
+assert.equal(x.enemyCells.reinforce_new,undefined,'les autres événements gardent leur placement normal');
+assert.equal(api.isAmbush({id:'d_evt_ambush'}),true);assert.equal(api.isAmbush({id:'d_evt_reinforce'}),false);
+console.log('Dungeon Ambush event proximity V16.78.78: OK');

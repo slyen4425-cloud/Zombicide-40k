@@ -1,3 +1,3 @@
-GenSrpG V16.78.97
-Canonical RPG stat registry
+GenSrpG V16.78.99
+Shared RPG stats service — Dungeon-isolated
 2026-09-08

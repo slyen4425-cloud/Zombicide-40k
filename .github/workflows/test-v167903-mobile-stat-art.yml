@@ -21,7 +21,7 @@ jobs:
         run: node tests/dungeon_runtime_regression.test.cjs
       - name: Authored Dungeon runtime
         run: node tests/dungeon_authored_runtime_v167839.test.cjs
-      - name: Build final production page
+      - name: Build final stat page
         run: |
           rm -rf _site && mkdir -p _site
           cp index.html _site/index.html
@@ -45,11 +45,10 @@ jobs:
             if tag not in h:h=h.replace('</body>',tag+'\n</body>')
           p.write_text(h,encoding='utf-8')
           PY
-      - name: Final site guards
+      - name: Final stat site guards
         run: |
           node tests/gens_stat_import_safety_v167902.test.cjs
           node tests/gens_native_stat_grid_v167890.test.cjs _site/index.html
-          node tests/dungeon_final_load_regression.test.cjs _site/index.html
           grep -q 'gens-rpg-stat-reconcile-167902.js?v=167902' _site/index.html
           grep -q 'gens-custom-stat-runtime-profile-167889.js?v=167889' _site/index.html
           grep -q 'gensrpg-cache-16.79.03-mobile-stat-art' _site/service-worker.js

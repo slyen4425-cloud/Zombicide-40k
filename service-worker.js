@@ -1,5 +1,6 @@
-const CACHE_NAME = "gensrpg-cache-16.78.98-stat-talent-cleanup";
-// gensrpg-deploy-16.78.98-stat-talent-cleanup
+const CACHE_NAME = "gensrpg-cache-16.78.99-shared-stat-service";
+// gensrpg-deploy-16.78.99-shared-stat-service
+// gensrpg-cache-16.78.98-stat-talent-cleanup
 // gensrpg-publish-trigger-16.78.98
 // Compatibility markers kept for existing deployment/regression guards:
 // gensrpg-cache-16.78.40-authored-movement
@@ -61,6 +62,7 @@ const CORE_FILES = [
   "./assets/gensrpg/gens-multiplayer-entry-167831.js",
   "./assets/gensrpg/gens-ui-recovery-167843.js",
   "./assets/gensrpg/gens-custom-stats-167881.js",
+  "./assets/gensrpg/gens-stat-service-167899.js",
   "./assets/gensrpg/gens-stat-rules-help-167880.js",
   "./assets/gensrpg/gens-stat-help-extension-167881.js",
   "./assets/gensrpg/gens-custom-stat-runtime-profile-167889.js",

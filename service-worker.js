@@ -1,5 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.88-stat-editor-visible-actions";
-// Deployment marker: V16.78.88 visible stat editor actions.
+const CACHE_NAME = "gensrpg-cache-16.78.89-stat-persistence";
+// Deployment marker: V16.78.89 persistent stat creation and stable mobile taps.
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale
@@ -18,6 +18,7 @@ const CACHE_NAME = "gensrpg-cache-16.78.88-stat-editor-visible-actions";
 // gensrpg-cache-16.78.85-unified-stats
 // gensrpg-cache-16.78.86-stat-editor-actions
 // gensrpg-cache-16.78.87-stat-actions-direct
+// gensrpg-cache-16.78.88-stat-editor-visible-actions
 
 const CORE_FILES = [
   "./","./index.html","./assets/dungeon/dungeon-core-317.js","./assets/dungeon/dungeon-core-318.js","./assets/dungeon/dungeon-large-room-support-167834.js","./assets/dungeon/dungeon-room-creator-100.js","./assets/dungeon/dungeon-room-creator-v2-167819.js","./assets/dungeon/dungeon-room-creator-feedback-167821.js","./assets/dungeon/dungeon-room-visual-config-167826.js","./assets/dungeon/dungeon-room-visual-hotfix-167827.js","./assets/dungeon/dungeon-authored-cache-visual-167852.js","./assets/dungeon/dungeon-authored-event-cells-167877.js","./assets/dungeon/dungeon-event-runtime-fix-167878.js","./assets/dungeon/dungeon-source-render-stability-167877.js","./assets/dungeon/dungeon-authored-final-exit-167875.js","./assets/dungeon/creatures/dng_wall_block.jpg","./assets/dungeon/creatures/dng_floor_stone_01.png","./assets/dungeon/creatures/dng_floor_cave_01.png","./assets/dungeon/creatures/dng_floor_forest_01.png","./assets/dungeon/creatures/dng_floor_ice_01.png","./assets/dungeon/creatures/dng_floor_lava_01.png","./assets/dungeon/creatures/dng_aldren.png","./assets/dungeon/creatures/dng_lyra.png","./assets/dungeon/creatures/dng_brom.png","./assets/dungeon/dungeon-room-template-content-167828.js","./assets/dungeon/dungeon-room-grid-capture-167830.js","./assets/dungeon/dungeon-room-content-ui-167831.js","./assets/dungeon/dungeon-random-library-content-167832.js","./assets/dungeon/dungeon-world-builder-167821.js","./assets/dungeon/dungeon-room-runtime-167822.js","./assets/dungeon/dungeon-world-runtime-167823.js","./assets/dungeon/dungeon-world-session-bridge-167832.js","./assets/dungeon/dungeon-zone-content-167824.js","./assets/dungeon/dungeon-authored-runtime-167839.js","./assets/dungeon/dungeon-equipment-ui.js","./assets/dungeon/dungeon-equipment-hotfix-167817.js","./assets/dungeon/dungeon-set-editor-167818.js","./assets/gensrpg/gens-world-summary-167820.js","./assets/gensrpg/gens-multiplayer-entry-167831.js","./assets/gensrpg/gens-ui-recovery-167843.js","./assets/gensrpg/gens-rpg-stats-clean-167874.js","./assets/gensrpg/gens-rpg-stats-unified-167885.js","./assets/gensrpg/gens-rpg-stats-actions-direct-167887.js","./assets/gensrpg/gens-rpg-stats-editor-actions-167888.js","./assets/gensrpg/gens-dungeon-hero-art-repair-167874.js","./manifest.json"

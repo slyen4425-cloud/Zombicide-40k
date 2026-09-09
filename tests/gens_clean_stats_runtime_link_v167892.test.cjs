@@ -20,6 +20,7 @@ vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
 assert.equal(api.APP_VERSION,'16.78.92');
+api.syncCanonicalRuntime();
 assert.deepEqual(Array.from(vm.runInContext('DUNGEON_DEFAULT_ATTRIBUTES.map(x=>x.id)',ctx)),[], 'no checked stat => no canonical in-game stat');
 const s=profiles[0].rpgUniverse.stats;
 s.dynamicDefinitions.push({id:'epuisement',name:'Épuisement',icon:'🥵',defaultValue:2,min:0,max:20,visible:true,description:'Fatigue du héros'});

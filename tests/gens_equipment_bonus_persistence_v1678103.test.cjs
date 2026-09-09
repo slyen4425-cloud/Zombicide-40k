@@ -26,9 +26,9 @@ const ctx={console,Math,JSON,setTimeout:()=>0,globalThis:null,
 };ctx.globalThis=ctx;ctx.window=ctx;vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-equipment-bonus-persistence-1678103.js'});
 const api=ctx.GensEquipmentBonusPersistence1678103;assert.ok(api);
 let r=api.persistBonuses('custom_sword',{force:3,necromancie:2});
-assert.equal(r.ok,true);assert.equal(r.kind,'custom');assert.deepEqual(custom[0].rpgBonuses,{force:3,necromancie:2});
+assert.equal(r.ok,true);assert.equal(r.kind,'custom');assert.equal(JSON.stringify(custom[0].rpgBonuses),JSON.stringify({force:3,necromancie:2}));
 r=api.persistBonuses('dng_sword',{force:4});
-assert.equal(r.ok,true);assert.equal(r.kind,'override');assert.deepEqual(overrides.dng_sword.rpgBonuses,{force:4});
+assert.equal(r.ok,true);assert.equal(r.kind,'override');assert.equal(JSON.stringify(overrides.dng_sword.rpgBonuses),JSON.stringify({force:4}));
 assert.match(api.bonusSummary({rpgBonuses:{force:2,necromancie:1}}),/\+2 .*Force/);
 assert.match(api.bonusSummary({rpgBonuses:{force:2,necromancie:1}}),/\+1 .*Nécromancie/);
 console.log('V16.78.103 equipment bonus persistence: custom + built-in save + weapon description OK');

@@ -17,16 +17,18 @@ const p={id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{movement:{
   dynamicRules:[],legacyEffectsMigrated94:true
 }}};
 let profiles=[p];
+let customHeroes=[{id:'custom_one',name:'Test',dungeonStats:{chance:4}}];
 const state={rpgAttributes:{force:10,agilite:10,intelligence:10,esprit:10,endurance:10,initiative:2},statPoints:3,rpgStatSpent:0};
 const context={
   console,Math,Date,Set,Map,JSON,
   setTimeout(fn){fn();return 1},clearTimeout(){},
   current:'hero',state,
-  CHARS:{hero:{dungeonStats:{force:10,agilite:10,intelligence:10,esprit:10,endurance:10,initiative:2,defense:12,armor:3,movement:5,chance:7}}},
+  CHARS:{hero:{dungeonStats:{force:10,agilite:10,intelligence:10,esprit:10,endurance:10,initiative:2,defense:12,armor:3,movement:5,chance:7}},custom_one:{dungeonStats:{chance:4}}},
   DUNGEON_DEFAULT_ATTRIBUTES:[{id:'force',name:'Force'}],
   isDungeonMode(){return true},
   currentRpgProfile(){return profiles[0]},getActiveGameProfile(){return profiles[0]},activeGameProfileId(){return 'dungeon'},getActiveGameProfileId(){return 'dungeon'},
   loadGameProfiles(){return profiles},saveGameProfiles(next){profiles=next},
+  loadCustomHeroesMulti(){return customHeroes},saveCustomHeroesMulti(next){customHeroes=next},
   loadDungeonRpgRules(){return {critCap:100,dodgeCap:100}},saveDungeonRpgRules(){},
   loadState(){return state},save(){},saveState(){},
   dungeonEquipmentBonus(id){return id==='defense'?2:id==='armor'?4:0},
@@ -58,6 +60,9 @@ assert.equal(context.dungeonDerivedDefense(),15,'Défense = 12 base +2 équipeme
 assert.equal(context.dungeonArmorScore(),9,'Armure = 3 base +4 équipement +2 effet');
 assert.equal(context.dungeonHeroMoveValue083('hero'),6,'Mouvement = 5 personnel +1 effet');
 assert.equal(api.value('hero','chance'),7,'une stat personnalisée existante ne doit pas être écrasée par sa valeur par défaut');
+assert.equal(api.persistHeroDynamic('custom_one',{chance:9}),true,'l’éditeur héros doit pouvoir persister une stat personnalisée');
+assert.equal(customHeroes[0].dungeonStats.chance,9,'la valeur personnalisée doit être écrite dans dungeonStats du héros');
+assert.equal(context.CHARS.custom_one.dungeonStats.chance,9,'la définition runtime du héros doit être synchronisée');
 
 profiles[0].rpgUniverse.stats.active=profiles[0].rpgUniverse.stats.active.filter(x=>x!=='defense');
 assert.equal(context.dungeonDerivedDefense(),0,'désactiver Défense doit neutraliser la valeur native');
@@ -72,4 +77,5 @@ assert.match(src,/function renderHeroEditorStats/,'éditeur héros dynamique man
 assert.match(src,/data-gens-dynamic-hero-stat/,'champs de stats personnalisées héros manquants');
 assert.match(src,/hcRpgElementsWrap/,'le bloc élémentaire doit rester séparé dans l’éditeur héros');
 assert.match(src,/\["legacy_hit_ranged","agilite","hit:ranged","rangedHitStep","rangedHitGain"\]/,'migration toucher distance incorrecte');
-console.log('V16.78.95 native Defense/Armor/Movement: OK');
+assert.match(src,/addEventListener\("input",live\)/,'le résumé des effets doit se mettre à jour pendant la saisie');
+console.log('V16.78.95 native Defense/Armor/Movement + dynamic hero stats: OK');

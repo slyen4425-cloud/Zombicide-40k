@@ -48,3 +48,4 @@ assert.equal(heroState.statPoints,2,'-1 must refund the point through stable pro
 const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),1,'inactive custom stat must stop influencing combat while migrated Force remains');assert.equal(before,2);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
 console.log('GenSrpG V16.78.95 clean stats: canonical +/- + unknown stat + points + single-authority influences OK');
+require('./gens_native_defense_armor_movement_v167895.test.cjs');

@@ -26,7 +26,8 @@ assert.equal(api.addEffect('nouvelle_stat'),true,'effect must persist on the new
 assert.equal(s.unifiedEffects85.length,1,'new effect must exist in profile data immediately');
 assert.equal(s.unifiedEffects85[0].source,'nouvelle_stat');
 assert.ok(renders>=2,'canonical editor must rerender after adding an effect');
-assert.doesNotMatch(visible,/pointerdown|touchstart|mousedown/,'V16.78.89 must not rely on long-press/down events');
+assert.doesNotMatch(visible,/addEventListener\("(?:pointerdown|touchstart|mousedown)"/,'V16.78.89 must not bind long-press/down events');
+assert.match(visible,/addEventListener\("pointerup"/,'V16.78.89 must bind normal pointer release');
 assert.doesNotMatch(visible,/insertAdjacentHTML/,'V16.78.89 must not create temporary DOM-only stat drafts');
 assert.match(visible,/syncVisibleStatFields/,'current stat form values must be synchronized before structural rerender');
 assert.match(loader,/gens-rpg-stats-editor-actions-167888\.js\?v=167889/,'production loader must force V16.78.89 stat actions');

@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.99
+name: Test Builder Events V16.78.100
 on:
   push:
     branches:
       - main
-      - work/v16.78.99-ui-sheet-stability
+      - work/v16.78.100-ui-cleanup
 permissions:
   contents: read
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel scoped V16.78.99
+      - name: Vérifier le bridge visuel scoped V16.78.100
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
       - name: Vérifier l’éditeur héros sûr V16.78.97
         run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
@@ -23,10 +23,14 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js
       - name: Vérifier la politique coût/verrouillage V16.78.99
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
+      - name: Vérifier le nettoyage UI ciblé V16.78.100
+        run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
       - name: Bloquer les régressions grille UI Aldren et progression
         run: node tests/gens_stability_guard_v167897.test.cjs
       - name: Tester le correctif fiche perso et isolation UI V16.78.99
         run: node tests/gens_v167899_ui_sheet_guard.test.cjs
+      - name: Tester carte héros doublons et résumé stats V16.78.100
+        run: node tests/gens_v1678100_ui_cleanup_guard.test.cjs
       - name: Tester le nettoyage de l’éditeur RPG
         run: node tests/gens_editor_cleanup_v167893.test.cjs
       - name: Tester l’autorité unique du moteur de stats

@@ -6,7 +6,7 @@ const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
 
 const p={id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{movement:{defaults:{hero:3}},stats:{
-  active:['force','agilite','intelligence','esprit','endurance','initiative'],
+  active:['force','agilite','intelligence','esprit','endurance','initiative','chance'],
   dynamicDefinitions:[{id:'chance',name:'Chance',icon:'🍀',defaultValue:2,min:0,max:99,visible:true}],
   dynamicEffects90:[
     {id:'fx_def',source:'force',target:'defense',mode:'step',step:10,gain:1,enabled:true},
@@ -64,6 +64,7 @@ context.saveRpgUniverseStats();
 assert.ok(api.active('defense'),'le save legacy ne doit plus décocher Défense');
 assert.ok(api.active('armor'),'le save legacy ne doit plus décocher Armure');
 assert.ok(api.active('movement'),'le save legacy ne doit plus décocher Mouvement');
+assert.ok(api.active('chance'),'le save legacy ne doit pas décocher une stat personnalisée active');
 
 assert.match(src,/function renderHeroEditorStats/,'éditeur héros dynamique manquant');
 assert.match(src,/data-gens-dynamic-hero-stat/,'champs de stats personnalisées héros manquants');

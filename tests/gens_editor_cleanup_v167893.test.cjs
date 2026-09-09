@@ -10,7 +10,8 @@ assert.match(src,/rpgPhysicalFormula/,'legacy characteristic modifiers card must
 assert.match(src,/closest\?\.\("\.smodCard"\)/,'cleanup must hide the old UI card, not remove engine data');
 assert.match(src,/card\.hidden=true/,'obsolete editor cards must be hidden');
 assert.match(src,/cleanupLegacyRpgEditor/,'cleanup must run from the existing always-loaded bridge');
-assert.match(stats,/APP_VERSION="16\.78\.92"/,'validated V16.78.92 stats engine must stay untouched');
+assert.match(stats,/APP_VERSION="16\.78\.94"/,'single stats module must now carry V16.78.94');
 assert.match(stats,/DUNGEON_DEFAULT_ATTRIBUTES/,'canonical runtime link must remain intact');
-assert.doesNotMatch(src,/delete\s+R\.|delete\s+.*rpgBaseHp|delete\s+.*rpgBaseMana/,'cleanup must not delete runtime settings');
-console.log('GenSrpG V16.78.93 editor cleanup: old HP/Mana/modifier UI hidden, V16.78.92 stat engine preserved');
+assert.match(stats,/legacyEffectsMigrated94/,'V16.78.94 must neutralize hidden legacy coefficient interference');
+assert.doesNotMatch(src,/delete\s+R\.|delete\s+.*rpgBaseHp|delete\s+.*rpgBaseMana/,'visual cleanup must not delete runtime settings');
+console.log('GenSrpG V16.78.94 editor cleanup: old HP/Mana/modifier UI remains hidden while the single stats engine is upgraded');

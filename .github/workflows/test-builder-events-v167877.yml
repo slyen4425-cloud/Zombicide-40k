@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.84
+name: Test Builder Events V16.78.90
 on:
   push:
     branches:
       - main
-      - work/v16.78.84-event-highlight
+      - work/v16.78.90-clean-stats-rebuild
 permissions:
   contents: read
 jobs:
@@ -11,6 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier le module unique de stats V16.78.90
+        run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+      - name: Tester création, effets, sauvegarde et rechargement des stats
+        run: node tests/gens_clean_stats_rebuild_v167890.test.cjs
+      - name: Tester les caractéristiques dynamiques existantes
+        run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
       - name: Tester les cases événement configurables et leur surbrillance
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs
       - name: Tester la sortie finale sans faux positif sur les caches secondaires

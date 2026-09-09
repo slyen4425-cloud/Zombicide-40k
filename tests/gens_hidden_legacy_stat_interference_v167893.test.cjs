@@ -26,6 +26,8 @@ const ctx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function')fn()
 ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);
 vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[];',ctx);
 vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+const api=ctx.GensCleanRpgStats167874;
+api.installRuntime();
 assert.equal(ctx.dungeonPhysicalDamageBonus(),7,'legacy physical bonus (2) is still added under new effect (5)');
 assert.equal(ctx.dungeonMagicDamageBonus(),10,'legacy magic bonus (3) is still added under new effect (7)');
 assert.equal(ctx.dungeonEnduranceHpBonus(),15,'legacy HP bonus (4) is still added under new effect (11)');

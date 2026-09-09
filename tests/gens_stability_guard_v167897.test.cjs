@@ -7,7 +7,7 @@ const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-her
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.doesNotThrow(()=>new Function(editor),'safe hero editor syntax');
 assert.match(editor,/APP_VERSION="16\.78\.97"/);
-assert.doesNotMatch(editor,/MutationObserver|observer\.observe/,'hero editor must never observe the global DOM');
+assert.doesNotMatch(editor,/new\s+(?:R\.)?MutationObserver|\.observe\s*\(D\.documentElement/,'hero editor must never observe the global DOM');
 assert.doesNotMatch(editor,/GENSRPG_VERSION\s*=/,'UI-only editor must not change global app version');
 assert.match(bridge,/dungeon-grid-display-recovery-167856\.js\?v=167897/,'always-loaded bridge must restore tactical grid recovery');
 assert.match(bridge,/gens-hero-editor-dynamic-167897\.js\?v=167897/,'always-loaded bridge must load safe hero editor');

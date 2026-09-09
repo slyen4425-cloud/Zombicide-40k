@@ -16,6 +16,9 @@ assert.match(src,/runtimeDefs/,'set/evolution choices must come from active cano
 assert.match(src,/rpgBonuses/,'evolution bonuses must persist through canonical rpgBonuses');
 assert.match(src,/dungeonEquipmentBonus/,'runtime equipment bonus must include unlocked evolution stat bonuses');
 assert.match(src,/gensrpg_dungeon_set_overrides_v1/,'existing set storage must be preserved');
+assert.match(src,/dseAddThreshold/,'canonical set editor must own add-threshold action');
+assert.match(src,/dseRemoveThreshold/,'canonical set editor must own remove-threshold action');
+assert.match(src,/renderSetThresholds/,'set threshold edits must be re-rendered from canonical data without dropping custom stats');
 assert.match(bridge,/gens-equipment-stat-cleanup-1678102\.js\?v=1678102/,'always-loaded bridge must load equipment cleanup');
 assert.match(sw,/gensrpg-cache-16\.78\.102-equipment-stat-cleanup/);
 assert.match(sw,/gens-equipment-stat-cleanup-1678102\.js/);

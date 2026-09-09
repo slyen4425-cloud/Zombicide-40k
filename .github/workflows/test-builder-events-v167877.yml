@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.94
+name: Test Builder Events V16.78.97
 on:
   push:
     branches:
       - main
-      - work/v16.78.94-stat-engine-cleanup
+      - work/v16.78.97-stability-guard
 permissions:
   contents: read
 jobs:
@@ -11,10 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Vérifier le module unique de stats V16.78.94
+      - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel V16.78.93
+      - name: Vérifier le bridge visuel et stabilité
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
+      - name: Vérifier l’éditeur héros sûr V16.78.97
+        run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
+      - name: Bloquer les régressions grille Random Builder et Aldren
+        run: node tests/gens_stability_guard_v167897.test.cjs
       - name: Tester le nettoyage de l’éditeur RPG
         run: node tests/gens_editor_cleanup_v167893.test.cjs
       - name: Tester l’autorité unique du moteur de stats
@@ -25,6 +29,8 @@ jobs:
         run: node tests/gens_clean_stats_runtime_link_v167892.test.cjs
       - name: Tester les caractéristiques dynamiques existantes
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
+      - name: Tester Défense, Armure et Mouvement natifs
+        run: node tests/gens_native_defense_armor_movement_v167895.test.cjs
       - name: Tester les cases événement configurables et leur surbrillance
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs
       - name: Tester la sortie finale sans faux positif sur les caches secondaires

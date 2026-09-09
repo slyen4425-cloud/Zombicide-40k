@@ -1,6 +1,6 @@
-/* GenSrpG V16.78.86 — visual repair for built-in Dungeon hero art + stable late runtime bridges.
+/* GenSrpG V16.78.87 — visual repair for built-in Dungeon hero art + stable late runtime bridges.
    Built-in Dungeon heroes always use their official PNG assets. The same always-loaded bridge also
-   loads authored final-exit/event modules, shared event placement, unified stats, and mobile stat actions. */
+   loads authored final-exit/event modules, shared event placement, unified stats, and direct mobile stat actions. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
@@ -9,8 +9,8 @@ const HERO_NAMES={Aldren:"dungeon_aldren",Lyra:"dungeon_lyra",Brom:"dungeon_brom
 const FINAL_EXIT_SRC="assets/dungeon/dungeon-authored-final-exit-167875.js?v=167879";
 const EVENT_CELL_SRC="assets/dungeon/dungeon-authored-event-cells-167877.js?v=167879";
 const EVENT_FIX_SRC="assets/dungeon/dungeon-event-runtime-fix-167878.js?v=167879";
-const UNIFIED_STATS_SRC="assets/gensrpg/gens-rpg-stats-unified-167885.js?v=167885";
-const STAT_ACTIONS_SRC="assets/gensrpg/gens-rpg-stats-actions-fix-167886.js?v=167886";
+const UNIFIED_STATS_SRC="assets/gensrpg/gens-rpg-stats-unified-167885.js?v=167887";
+const STAT_ACTIONS_SRC="assets/gensrpg/gens-rpg-stats-actions-direct-167887.js?v=167887";
 let scheduled=false,observer=null;
 function same(a,b){return String(a||"").split("?")[0].split("#")[0].endsWith(String(b||""))}
 function forceImg(img,art){if(!img||!art)return 0;const src=img.getAttribute?.("src")||img.src||"";if(same(src,art))return 0;try{img.src=art;img.setAttribute?.("src",art);return 1}catch(e){return 0}}
@@ -21,7 +21,7 @@ function repairPicks(){if(!D)return 0;let n=0;for(const card of D.querySelectorA
 function repairSheet(){if(!D)return 0;const id=String(R.current||""),art=HERO_ART[id];if(!art)return 0;let n=0;for(const img of [D.getElementById("charImage"),D.getElementById("customSheetAvatar")])n+=forceImg(img,art);return n}
 function repair(){return repairDefs()+repairParticipants()+repairPicks()+repairSheet()}
 function loadScript(src,flag,ready){if(!D||ready()||D.querySelector('script[data-'+flag+']'))return false;const s=D.createElement("script");s.src=src;s.async=false;s.setAttribute('data-'+flag,'1');(D.body||D.head||D.documentElement).appendChild(s);return true}
-function loadRuntimeBridges(){loadScript(EVENT_FIX_SRC,"der167879",()=>!!R.DungeonEventRuntimeFix167878);loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875);loadScript(EVENT_CELL_SRC,"dae167879",()=>!!R.DungeonAuthoredEventCells167877);loadScript(UNIFIED_STATS_SRC,"gsu167885",()=>!!R.GensUnifiedStats167885);loadScript(STAT_ACTIONS_SRC,"gsa167886",()=>!!R.GensRpgStatActions167886);return true}
+function loadRuntimeBridges(){loadScript(EVENT_FIX_SRC,"der167879",()=>!!R.DungeonEventRuntimeFix167878);loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875);loadScript(EVENT_CELL_SRC,"dae167879",()=>!!R.DungeonAuthoredEventCells167877);loadScript(UNIFIED_STATS_SRC,"gsu167887",()=>!!R.GensUnifiedStats167885);loadScript(STAT_ACTIONS_SRC,"gsa167887",()=>!!R.GensStatsActionsDirect167887);return true}
 function loadFinalExit(){return loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875)}
 function schedule(){if(scheduled)return;scheduled=true;const run=()=>{scheduled=false;try{repair()}catch(e){}};typeof R.requestAnimationFrame==="function"?R.requestAnimationFrame(run):setTimeout(run,0)}
 function hook(name){const old=R[name];if(typeof old!=="function"||old.__gdar167874)return;const w=function(){const out=old.apply(this,arguments);repairDefs();schedule();return out};w.__gdar167874=true;w.__original=old;R[name]=w}

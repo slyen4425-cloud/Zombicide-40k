@@ -19,7 +19,7 @@ vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[{id:"force",name:"Force"},{id
 vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
-assert.equal(api.APP_VERSION,'16.78.94');
+assert.equal(api.APP_VERSION,'16.78.95');
 api.syncCanonicalRuntime();
 assert.deepEqual(Array.from(vm.runInContext('DUNGEON_DEFAULT_ATTRIBUTES.map(x=>x.id)',ctx)),[], 'no checked stat => no canonical in-game stat');
 const s=profiles[0].rpgUniverse.stats;
@@ -34,4 +34,4 @@ s.active=[];api.syncCanonicalRuntime();
 assert.deepEqual(Array.from(vm.runInContext('DUNGEON_DEFAULT_ATTRIBUTES.map(x=>x.id)',ctx)),[],'unchecking all stats must clear the game build');
 assert.match(src,/DUNGEON_DEFAULT_ATTRIBUTES/,'module must attach to the existing canonical Dungeon stat list');
 assert.doesNotMatch(src,/GensUnifiedStats167885|GensStatsActionsDirect167887|GensRpgStatsEditorActions167888/,'must remain a single clean stats module');
-console.log('GenSrpG V16.78.94 canonical stat runtime link: OK');
+console.log('GenSrpG V16.78.95 canonical stat runtime link: OK');

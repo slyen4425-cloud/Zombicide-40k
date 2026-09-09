@@ -44,7 +44,7 @@ vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[];',ctx);
 vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
-assert.equal(api.APP_VERSION,'16.78.94');
+assert.equal(api.APP_VERSION,'16.78.95');
 api.root(profiles[0]);
 api.migrateLegacyEffects(profiles[0]);
 api.installRuntime();
@@ -69,4 +69,4 @@ assert.equal(ctx.dungeonCriticalChance(),8,'old crit behavior must survive only 
 const countBefore=stats.dynamicEffects90.length;
 api.migrateLegacyEffects(profiles[0]);
 assert.equal(profiles[0].rpgUniverse.stats.dynamicEffects90.length,countBefore,'migration must be idempotent and never duplicate effects');
-console.log('GenSrpG V16.78.94 stat engine cleanup: hidden legacy coefficients neutralized, visible effects are the single authority');
+console.log('GenSrpG V16.78.95 stat engine cleanup: hidden legacy coefficients neutralized, visible effects are the single authority');

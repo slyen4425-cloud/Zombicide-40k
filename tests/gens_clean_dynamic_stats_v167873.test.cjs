@@ -27,7 +27,7 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;assert.ok(api,'clean stat API missing');api.install();
-assert.equal(api.APP_VERSION,'16.78.94');
+assert.equal(api.APP_VERSION,'16.78.95');
 assert.equal(api.def('chance').name,'Chance');
 assert.equal(api.active('chance'),true);
 assert.equal(api.value('dungeon_aldren','chance'),13,'unknown stat must include equipment and talent bonuses');
@@ -47,4 +47,5 @@ assert.equal(heroState.rpgAttributes.chance,10);
 assert.equal(heroState.statPoints,2,'-1 must refund the point through stable progression sync');
 const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),1,'inactive custom stat must stop influencing combat while migrated Force remains');assert.equal(before,2);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
-console.log('GenSrpG V16.78.94 clean stats: canonical +/- + unknown stat + points + single-authority influences OK');
+console.log('GenSrpG V16.78.95 clean stats: canonical +/- + unknown stat + points + single-authority influences OK');
+require('./gens_native_defense_armor_movement_v167895.test.cjs');

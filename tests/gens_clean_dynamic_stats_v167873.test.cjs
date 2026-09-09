@@ -18,7 +18,9 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
  dungeonEquipmentBonus:id=>id==='chance'?2:0,dungeonSkillEffectTotal:(kind,_x,id)=>kind==='attribute'&&id==='chance'?1:0,dungeonChallengeDebuffTotal067:()=>0,
  dungeonActiveProgressionConfig:()=>({attributeEditMode:'points'}),dungeonSyncProgressionForState:(_h,st)=>{st.statPoints=2-Math.max(0,Number(st.rpgStatSpent)||0)},
  loadDungeonRpgRules:()=>rules,saveDungeonRpgRules:r=>Object.assign(rules,r),
- dungeonAttributeValue:id=>{nativeCoreCalls++;return id==='force'?17:5},changeDungeonAttribute:()=>true,renderDungeonAttributes:()=>true,renderRpgUniverseEditor:()=>true,renderDungeonHeroStats:()=>true,saveRpgUniverseStats:()=>true,
+ dungeonAttributeValue:id=>{nativeCoreCalls++;return id==='force'?17:5},
+ changeDungeonAttribute:(id,delta)=>{const d=Number(delta)||0,cur=Number(heroState.rpgAttributes[id]??0);if(d>0){if(heroState.statPoints<1)return false;heroState.rpgStatSpent++;heroState.rpgStatSpentById[id]=Math.max(0,Number(heroState.rpgStatSpentById[id])||0)+1}else if(d<0){const spent=Math.max(0,Number(heroState.rpgStatSpentById[id])||0);if(spent<1)return false;heroState.rpgStatSpent--;heroState.rpgStatSpentById[id]=spent-1}heroState.rpgAttributes[id]=cur+d;ctx.dungeonSyncProgressionForState('dungeon_aldren',heroState);return true},
+ renderDungeonAttributes:()=>true,renderRpgUniverseEditor:()=>true,renderDungeonHeroStats:()=>true,saveRpgUniverseStats:()=>true,
  dungeonPhysicalDamageBonus:()=>2,dungeonMagicDamageBonus:()=>3,dungeonEnduranceHpBonus:()=>2,dungeonMaxMana:()=>10,dungeonCriticalChance:()=>5,dungeonDodgeChance:()=>3,dungeonMagicResistance:()=>1,dungeonDerivedDefense:()=>0,dungeonArmorScore:()=>0,dungeonDerivedInitiative:()=>10,
  applyDungeonCombatScaling:(_it,st)=>st
 };
@@ -34,14 +36,14 @@ assert.ok(nativeCoreCalls>=1,'stable core function must still be called');
 assert.equal(api.extraTotal('damage:physical'),1,'10 Chance must add +1 physical damage');
 assert.equal(ctx.dungeonPhysicalDamageBonus(),3,'native physical bonus + dynamic influence');
 assert.equal(api.changeCustom('chance',1),true);
-assert.equal(heroState.rpgAttributes.chance,11);
+assert.equal(heroState.rpgAttributes.chance,11,'custom + must go through the canonical Dungeon attribute changer');
 assert.equal(heroState.rpgStatSpentById.chance,1);
 assert.equal(heroState.statPoints,1,'+1 must consume one real point through stable progression sync');
 assert.equal(api.changeCustom('chance',-1),true);
 assert.equal(heroState.rpgAttributes.chance,10);
 assert.equal(heroState.rpgStatSpentById.chance,0);
 assert.equal(heroState.statPoints,2,'-1 must refund the point spent on the custom stat');
-assert.ok(api.legacyRules().some(r=>r.id==='legacy_phys'&&r.step===10&&r.gain===1),'old 10 Force = +1 physical damage rule must remain editable');
+assert.ok(api.legacyEffects().some(r=>r.id==='legacy_phys'&&r.step===10&&r.gain===1),'old 10 Force = +1 physical damage rule must remain editable');
 const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),2,'inactive custom stat must stop influencing combat');assert.equal(before,3);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
-console.log('GenSrpG V16.78.73 clean stats: stable core + unknown stat + points + influences OK');
+console.log('GenSrpG V16.78.92 clean stats: canonical +/- + unknown stat + points + influences OK');

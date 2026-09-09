@@ -9,9 +9,9 @@ const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-her
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.doesNotThrow(()=>new Function(artSrc));
 assert.doesNotThrow(()=>new Function(policySrc));
-assert.match(bridge,/gens-dungeon-hero-ingame-art-167898\.js\?v=167898/);
-assert.match(bridge,/gens-stat-upgrade-policy-167898\.js\?v=167898/);
-assert.match(sw,/gensrpg-cache-16\.78\.98-hero-art-stat-cost/);
+assert.match(bridge,/gens-dungeon-hero-ingame-art-167898\.js\?v=167899/);
+assert.match(bridge,/gens-stat-upgrade-policy-167898\.js\?v=167899/);
+assert.match(sw,/gensrpg-cache-16\.78\.99-sheet-ui-stability/);
 assert.ok(sw.includes('gens-dungeon-hero-ingame-art-167898.js'));
 assert.ok(sw.includes('gens-stat-upgrade-policy-167898.js'));
 
@@ -43,4 +43,4 @@ assert.equal(ctx.changeDungeonAttribute('movement',1),true);assert.equal(st.rpgA
 assert.equal(ctx.changeDungeonAttribute('movement',1),true);assert.equal(st.rpgAttributes.movement,5);assert.equal(st.rpgStatSpent,20);assert.equal(st.statPoints,0);
 assert.equal(ctx.changeDungeonAttribute('movement',1),false);assert.equal(st.rpgAttributes.movement,5);
 pApi.savePolicy('movement',{enabled:false,cost:10});assert.equal(ctx.changeDungeonAttribute('movement',-1),false,'locked stat must block +/-');
-console.log('V16.78.98 guard: in-game Aldren art + configurable stat lock/cost + Movement 10 points OK');
+console.log('V16.78.99 compatibility guard: in-game Aldren map art + configurable stat lock/cost + Movement 10 points OK');

@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-dungeon-hero-art-repair-167874.js'),'utf8');
 const stats=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
-assert.match(src,/GenSrpG V16\.78\.100/,'cleanup/stability bridge must carry V16.78.100');
+assert.match(src,/GenSrpG V16\.78\.102/,'cleanup/stability bridge must carry V16.78.102');
 assert.match(src,/rpgBaseHp/,'legacy HP editor card must be targeted');
 assert.match(src,/rpgBaseMana/,'legacy Mana editor card must be targeted');
 assert.match(src,/rpgPhysicalFormula/,'legacy characteristic modifiers card must be targeted');
@@ -17,4 +17,4 @@ assert.match(stats,/APP_VERSION="16\.78\.95"/,'single stats module must remain o
 assert.match(stats,/DUNGEON_DEFAULT_ATTRIBUTES/,'canonical runtime link must remain intact');
 assert.match(stats,/legacyEffectsMigrated94/,'legacy hidden coefficients must remain neutralized');
 assert.doesNotMatch(src,/delete\s+R\.|delete\s+.*rpgBaseHp|delete\s+.*rpgBaseMana/,'visual cleanup must not delete runtime settings');
-console.log('GenSrpG V16.78.100 scoped editor cleanup/stability bridge + V16.78.95 stats engine: OK');
+console.log('GenSrpG V16.78.102 scoped editor cleanup/stability bridge + V16.78.95 stats engine: OK');

@@ -1,6 +1,4 @@
-/* GenSrpG V16.78.100 — visual repair + scoped stability bridge.
-   Built-in Dungeon heroes keep their official PNG assets. Runtime/UI repairs are triggered by
-   explicit lifecycle hooks only: no global DOM observer that can interfere with unrelated panels. */
+/* GenSrpG V16.78.102 — visual repair + scoped stability bridge. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
@@ -10,11 +8,12 @@ const FINAL_EXIT_SRC="assets/dungeon/dungeon-authored-final-exit-167875.js?v=167
 const EVENT_CELL_SRC="assets/dungeon/dungeon-authored-event-cells-167877.js?v=167879";
 const EVENT_FIX_SRC="assets/dungeon/dungeon-event-runtime-fix-167878.js?v=167879";
 const GRID_RECOVERY_SRC="assets/dungeon/dungeon-grid-display-recovery-167856.js?v=1678100";
-const HERO_EDITOR_SRC="assets/gensrpg/gens-hero-editor-dynamic-167897.js?v=1678100";
+const HERO_EDITOR_SRC="assets/gensrpg/gens-hero-editor-dynamic-167897.js?v=1678101";
 const HERO_INGAME_SRC="assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js?v=1678100";
 const SHEET_ART_SRC="assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js?v=1678100";
 const STAT_POLICY_SRC="assets/gensrpg/gens-stat-upgrade-policy-167898.js?v=1678100";
 const UI_CLEANUP_SRC="assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js?v=1678100";
+const EQUIPMENT_CLEANUP_SRC="assets/gensrpg/gens-equipment-stat-cleanup-1678102.js?v=1678102";
 const LEGACY_EDITOR_CONTROL_IDS=["rpgBaseHp","rpgBaseMana","rpgPhysicalFormula"];
 let scheduled=false;
 function same(a,b){return String(a||"").split("?")[0].split("#")[0].endsWith(String(b||""))}
@@ -27,12 +26,12 @@ function repairSheet(){if(!D)return 0;const id=String(R.current||""),art=HERO_AR
 function repair(){return repairDefs()+repairParticipants()+repairPicks()+repairSheet()}
 function cleanupLegacyRpgEditor(){if(!D)return 0;let n=0;for(const id of LEGACY_EDITOR_CONTROL_IDS){for(const control of D.querySelectorAll('[id="'+id+'"]')){const card=control.closest?.(".smodCard");if(card&&card.dataset.gensCleanup167893!=="1"){card.dataset.gensCleanup167893="1";card.hidden=true;card.style.display="none";n++}}}for(const grid of D.querySelectorAll(".smodGrid")){const children=[...grid.children];if(children.length&&children.every(x=>x.hidden||x.style?.display==="none"))grid.style.display="none"}return n}
 function loadScript(src,flag,ready){if(!D||ready()||D.querySelector('script[data-'+flag+']'))return false;const s=D.createElement("script");s.src=src;s.async=false;s.setAttribute('data-'+flag,'1');(D.body||D.head||D.documentElement).appendChild(s);return true}
-function loadRuntimeBridges(){loadScript(EVENT_FIX_SRC,"der167879",()=>!!R.DungeonEventRuntimeFix167878);loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875);loadScript(EVENT_CELL_SRC,"dae167879",()=>!!R.DungeonAuthoredEventCells167877);loadScript(GRID_RECOVERY_SRC,"dgr1678100",()=>!!R.DungeonGridDisplayRecovery167856);loadScript(HERO_EDITOR_SRC,"ghed1678100",()=>!!R.GensHeroEditorDynamic167897);loadScript(HERO_INGAME_SRC,"ghia1678100",()=>!!R.GensDungeonHeroIngameArt167898);loadScript(SHEET_ART_SRC,"gdss1678100",()=>!!R.GensDungeonSheetArtStability167899);loadScript(STAT_POLICY_SRC,"gsp1678100",()=>!!R.GensStatUpgradePolicy167898);loadScript(UI_CLEANUP_SRC,"gduc1678100",()=>!!R.GensDungeonUiCleanup1678100);return true}
+function loadRuntimeBridges(){loadScript(EVENT_FIX_SRC,"der167879",()=>!!R.DungeonEventRuntimeFix167878);loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875);loadScript(EVENT_CELL_SRC,"dae167879",()=>!!R.DungeonAuthoredEventCells167877);loadScript(GRID_RECOVERY_SRC,"dgr1678100",()=>!!R.DungeonGridDisplayRecovery167856);loadScript(HERO_EDITOR_SRC,"ghed1678101",()=>!!R.GensHeroEditorDynamic167897);loadScript(HERO_INGAME_SRC,"ghia1678100",()=>!!R.GensDungeonHeroIngameArt167898);loadScript(SHEET_ART_SRC,"gdss1678100",()=>!!R.GensDungeonSheetArtStability167899);loadScript(STAT_POLICY_SRC,"gsp1678100",()=>!!R.GensStatUpgradePolicy167898);loadScript(UI_CLEANUP_SRC,"gduc1678100",()=>!!R.GensDungeonUiCleanup1678100);loadScript(EQUIPMENT_CLEANUP_SRC,"gesc1678102",()=>!!R.GensEquipmentStatCleanup1678102);return true}
 function loadFinalExit(){return loadScript(FINAL_EXIT_SRC,"daf167879",()=>!!R.DungeonAuthoredFinalExit167875)}
-function schedule(){if(scheduled)return;scheduled=true;const run=()=>{scheduled=false;try{repair();cleanupLegacyRpgEditor();R.GensDungeonHeroIngameArt167898?.repairBoard?.();R.GensDungeonSheetArtStability167899?.repairSheet?.();R.GensStatUpgradePolicy167898?.decorateGame?.();R.GensStatUpgradePolicy167898?.injectEditor?.();R.GensDungeonUiCleanup1678100?.run?.()}catch(e){}};typeof R.requestAnimationFrame==="function"?R.requestAnimationFrame(run):setTimeout(run,0)}
+function schedule(){if(scheduled)return;scheduled=true;const run=()=>{scheduled=false;try{repair();cleanupLegacyRpgEditor();R.GensDungeonHeroIngameArt167898?.repairBoard?.();R.GensDungeonSheetArtStability167899?.repairSheet?.();R.GensStatUpgradePolicy167898?.decorateGame?.();R.GensStatUpgradePolicy167898?.injectEditor?.();R.GensDungeonUiCleanup1678100?.run?.();R.GensEquipmentStatCleanup1678102?.cleanupLegacyEquipmentUi?.()}catch(e){}};typeof R.requestAnimationFrame==="function"?R.requestAnimationFrame(run):setTimeout(run,0)}
 function hook(name){const old=R[name];if(typeof old!=="function"||old.__gdar167874)return false;const w=function(){const out=old.apply(this,arguments);repairDefs();schedule();return out};w.__gdar167874=true;w.__original=old;R[name]=w;return true}
-function hookAll(){for(const n of ["ensureDungeonHeroes","renderParticipantSelector","renderMenu","openChar","openCharacter","openHeroSheet","showHeroSheet","renderCharacterSheet","renderDungeonHeroSheet","renderDungeonHeroStats","renderDungeonAttributes","renderRpgUniverseEditor","saveRpgUniverseStats","openHeroCreator","hcRenderRpgStatsUsage"])hook(n);return true}
+function hookAll(){for(const n of ["ensureDungeonHeroes","renderParticipantSelector","renderMenu","openChar","openCharacter","openHeroSheet","showHeroSheet","renderCharacterSheet","renderDungeonHeroSheet","renderDungeonHeroStats","renderDungeonAttributes","renderRpgUniverseEditor","saveRpgUniverseStats","openHeroCreator","hcRenderRpgStatsUsage","openEquipmentEditor"])hook(n);return true}
 function install(){repairDefs();hookAll();schedule();loadRuntimeBridges();let tries=0;const retry=()=>{hookAll();schedule();if(tries++<30)setTimeout(retry,100)};setTimeout(retry,50);return true}
-R.GensDungeonHeroArtRepair167874={HERO_ART,FINAL_EXIT_SRC,EVENT_CELL_SRC,EVENT_FIX_SRC,GRID_RECOVERY_SRC,HERO_EDITOR_SRC,HERO_INGAME_SRC,SHEET_ART_SRC,STAT_POLICY_SRC,UI_CLEANUP_SRC,LEGACY_EDITOR_CONTROL_IDS,forceImg,repairDefs,repairParticipants,repairPicks,repairSheet,repair,cleanupLegacyRpgEditor,loadFinalExit,loadRuntimeBridges,hookAll,install};
+R.GensDungeonHeroArtRepair167874={HERO_ART,FINAL_EXIT_SRC,EVENT_CELL_SRC,EVENT_FIX_SRC,GRID_RECOVERY_SRC,HERO_EDITOR_SRC,HERO_INGAME_SRC,SHEET_ART_SRC,STAT_POLICY_SRC,UI_CLEANUP_SRC,EQUIPMENT_CLEANUP_SRC,LEGACY_EDITOR_CONTROL_IDS,forceImg,repairDefs,repairParticipants,repairPicks,repairSheet,repair,cleanupLegacyRpgEditor,loadFinalExit,loadRuntimeBridges,hookAll,install};
 if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",install,{once:true}):install()}
 })();

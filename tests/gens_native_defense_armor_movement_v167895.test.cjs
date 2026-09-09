@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 
 const p={id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{movement:{defaults:{hero:3}},stats:{
   active:['force','agilite','intelligence','esprit','endurance','initiative','chance'],
@@ -49,6 +50,7 @@ assert.ok(api,'API stats absente');
 api.install();
 
 assert.equal(api.APP_VERSION,'16.78.95');
+assert.match(sw,/gensrpg-cache-16\.78\.95-native-defense-armor-movement/,'cache PWA V16.78.95 manquant');
 const ids=api.CORE.map(x=>x.id);
 for(const id of ['defense','armor','movement'])assert.ok(ids.includes(id),id+' doit être natif');
 for(const id of ['defense','armor','movement'])assert.ok(api.active(id),id+' doit être activé lors de la migration 95');

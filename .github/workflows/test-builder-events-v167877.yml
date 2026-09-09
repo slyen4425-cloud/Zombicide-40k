@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.92
+name: Test Builder Events V16.78.93
 on:
   push:
     branches:
       - main
-      - work/v16.78.92-stat-runtime-link
+      - work/v16.78.93-editor-cleanup
 permissions:
   contents: read
 jobs:
@@ -13,6 +13,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier le module unique de stats V16.78.92
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+      - name: Vérifier le bridge visuel V16.78.93
+        run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
+      - name: Tester le nettoyage de l’éditeur RPG
+        run: node tests/gens_editor_cleanup_v167893.test.cjs
       - name: Tester création, effets, sauvegarde et rechargement des stats
         run: node tests/gens_clean_stats_rebuild_v167890.test.cjs
       - name: Tester le raccordement des stats au renderer Dungeon existant

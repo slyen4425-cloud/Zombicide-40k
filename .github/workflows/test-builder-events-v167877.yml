@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - work/v16.78.87-stat-actions-direct
+      - work/v16.78.87-direct-stat-buttons
 permissions:
   contents: read
 jobs:

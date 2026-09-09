@@ -21,27 +21,30 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
  dungeonAttributeValue:id=>{nativeCoreCalls++;return id==='force'?17:5},
  changeDungeonAttribute:(id,delta)=>{const d=Number(delta)||0,cur=Number(heroState.rpgAttributes[id]??0);if(d>0){if(heroState.statPoints<1)return false;heroState.rpgStatSpent++}else if(d<0){if(cur<=10)return false;heroState.rpgStatSpent=Math.max(0,heroState.rpgStatSpent-1)}heroState.rpgAttributes[id]=cur+d;ctx.dungeonSyncProgressionForState('dungeon_aldren',heroState);return true},
  renderDungeonAttributes:()=>true,renderRpgUniverseEditor:()=>true,renderDungeonHeroStats:()=>true,saveRpgUniverseStats:()=>true,
- dungeonPhysicalDamageBonus:()=>2,dungeonMagicDamageBonus:()=>3,dungeonEnduranceHpBonus:()=>2,dungeonMaxMana:()=>10,dungeonCriticalChance:()=>5,dungeonDodgeChance:()=>3,dungeonMagicResistance:()=>1,dungeonDerivedDefense:()=>0,dungeonArmorScore:()=>0,dungeonDerivedInitiative:()=>10,
+ dungeonPhysicalDamageBonus:()=>Number(rules.physicalDamageGain||0),dungeonMagicDamageBonus:()=>Number(rules.magicDamageGain||0),dungeonEnduranceHpBonus:()=>Number(rules.hpGain||0),dungeonMaxMana:()=>Number(rules.manaGain||0),dungeonCriticalChance:()=>Number(rules.critGain||0),dungeonDodgeChance:()=>Number(rules.dodgeGain||0),dungeonMagicResistance:()=>Number(rules.magicResistGain||0),dungeonDerivedDefense:()=>0,dungeonArmorScore:()=>0,dungeonDerivedInitiative:()=>10,
  applyDungeonCombatScaling:(_it,st)=>st
 };
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;assert.ok(api,'clean stat API missing');api.install();
+assert.equal(api.APP_VERSION,'16.78.94');
 assert.equal(api.def('chance').name,'Chance');
 assert.equal(api.active('chance'),true);
 assert.equal(api.value('dungeon_aldren','chance'),13,'unknown stat must include equipment and talent bonuses');
 assert.equal(ctx.dungeonAttributeValue('chance'),13,'runtime lookup must accept an unknown stat id');
 assert.equal(ctx.dungeonAttributeValue('force'),17,'core Force must keep the stable native runtime');
 assert.ok(nativeCoreCalls>=1,'stable core function must still be called');
-assert.equal(api.extraTotal('damage:physical'),1,'10 Chance must add +1 physical damage');
-assert.equal(ctx.dungeonPhysicalDamageBonus(),3,'native physical bonus + dynamic influence');
+assert.equal(rules.physicalDamageGain,0,'legacy physical gain must be neutralized after migration');
+assert.ok(api.effects().some(r=>r.id==='migrated_legacy_phys'&&r.step===10&&r.gain===1),'old Force rule must be preserved as a normal visible effect');
+assert.equal(api.legacyEffects().length,0,'legacy effect source must no longer stay live after migration');
+assert.equal(api.extraTotal('damage:physical'),2,'Chance + migrated Force must both be explicit visible effects');
+assert.equal(ctx.dungeonPhysicalDamageBonus(),2,'physical damage must come only from the visible effect system after legacy neutralization');
 assert.equal(ctx.changeDungeonAttribute('chance',1),true,'custom + must use the canonical Dungeon attribute changer');
 assert.equal(heroState.rpgAttributes.chance,11,'custom + must persist in the same rpgAttributes object as core stats');
 assert.equal(heroState.statPoints,1,'+1 must consume one real characteristic point');
 assert.equal(ctx.changeDungeonAttribute('chance',-1),true,'custom - must use the canonical Dungeon attribute changer');
 assert.equal(heroState.rpgAttributes.chance,10);
 assert.equal(heroState.statPoints,2,'-1 must refund the point through stable progression sync');
-assert.ok(api.legacyEffects().some(r=>r.id==='legacy_phys'&&r.step===10&&r.gain===1),'old 10 Force = +1 physical damage rule must remain editable');
-const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),2,'inactive custom stat must stop influencing combat');assert.equal(before,3);
+const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),1,'inactive custom stat must stop influencing combat while migrated Force remains');assert.equal(before,2);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
-console.log('GenSrpG V16.78.92 clean stats: canonical +/- + unknown stat + points + influences OK');
+console.log('GenSrpG V16.78.94 clean stats: canonical +/- + unknown stat + points + single-authority influences OK');

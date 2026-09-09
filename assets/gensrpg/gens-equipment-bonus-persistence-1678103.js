@@ -1,0 +1,26 @@
+/* GenSrpG V16.78.103 — equipment canonical bonus persistence + description visibility.
+   Persists base RPG stat bonuses for custom and built-in Dungeon items and exposes them on item summaries/cards. */
+(function(){
+"use strict";
+const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
+const VERSION="1.0.0",APP_VERSION="16.78.103";
+let installed=false;
+const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+function api(){return R.GensCleanRpgStats167874||null}
+function defs(){try{return api()?.defs?.()||api()?.runtimeDefs?.()||[]}catch(e){return []}}
+function labelFor(id){const d=defs().find(x=>String(x?.id)===String(id));return d?String((d.icon?d.icon+" ":"")+d.name):String(id)}
+function readEditorBonuses(){const out={};if(!D)return out;for(const row of D.querySelectorAll("#eqCanonicalRpgBonuses1678101 .gensEqCanonicalRow")){const id=String(row.querySelector("[data-eq-stat]")?.value||""),v=num(row.querySelector("[data-eq-value]")?.value,0);if(id&&api()?.def?.(id))out[id]=(out[id]||0)+v}return out}
+function itemRecord(id){id=String(id||"");try{const custom=(R.loadCustomEquipment?.()||[]).find(x=>String(x?.id)===id);if(custom)return custom}catch(e){}try{const d=R.dungeonItems?.().find(x=>String(x?.id)===id);if(d)return d}catch(e){}try{return (R.ITEMS||[]).find(x=>String(x?.id)===id)||null}catch(e){return null}}
+function syncRuntimeItem(id,bonuses){const item=itemRecord(id);if(item)item.rpgBonuses={...bonuses};try{const pos=Array.isArray(R.ITEMS)?R.ITEMS.findIndex(x=>String(x?.id)===String(id)):-1;if(pos>=0)R.ITEMS[pos].rpgBonuses={...bonuses}}catch(e){}return item}
+function persistBonuses(id,bonuses,beforeIds=[]){id=String(id||"");bonuses=bonuses&&typeof bonuses==="object"?{...bonuses}:{};try{const list=R.loadCustomEquipment?.()||[];let target=list.find(x=>String(x?.id)===id);if(!target&&beforeIds.length){const old=new Set(beforeIds.map(String));target=list.find(x=>!old.has(String(x?.id)))}if(target){id=String(target.id);target.rpgBonuses={...bonuses};R.saveCustomEquipment?.(list);try{R.refreshCustomEquipmentIntoItems?.()}catch(e){}syncRuntimeItem(id,bonuses);return {ok:true,kind:"custom",id,bonuses:{...bonuses}}}}catch(e){console.warn("equipment bonus custom save",e)}
+ if(!id)return {ok:false,kind:"missing_id"};
+ try{if(typeof R.loadDungeonItemOverrides==="function"&&typeof R.saveDungeonItemOverrides==="function"){const overrides=R.loadDungeonItemOverrides()||{},prev=overrides[id]&&typeof overrides[id]==="object"?overrides[id]:{};overrides[id]={...prev,rpgBonuses:{...bonuses}};R.saveDungeonItemOverrides(overrides);try{R.ensureDungeonItems?.()}catch(e){}syncRuntimeItem(id,bonuses);return {ok:true,kind:"override",id,bonuses:{...bonuses}}}}catch(e){console.warn("equipment bonus override save",e)}
+ const item=syncRuntimeItem(id,bonuses);return {ok:!!item,kind:item?"runtime":"missing",id,bonuses:{...bonuses}}}
+function bonusSummary(item){const b=item?.rpgBonuses&&typeof item.rpgBonuses==="object"?item.rpgBonuses:{};return Object.entries(b).filter(([,v])=>num(v,0)!==0).map(([id,v])=>{const n=num(v,0);return (n>0?"+":"")+n+" "+labelFor(id)}).join(" · ")}
+function refresh(){for(const name of ["renderEquipmentLibrary","renderGear","renderDungeonGear"]){try{R[name]?.()}catch(e){}}try{R.DungeonEquipmentUI?.refresh?.()}catch(e){}return true}
+function wrapSave(){const old=R.saveEquipmentEditor;if(typeof old!=="function"||old.__bonusPersist103)return false;const w=function(){const before=(R.loadCustomEquipment?.()||[]).map(x=>x.id),edit=String(D?.getElementById?.("eqEditId")?.value||""),bonuses=readEditorBonuses(),out=old.apply(this,arguments);setTimeout(()=>{try{const list=R.loadCustomEquipment?.()||[],oldIds=new Set(before.map(String)),id=edit||String(list.find(x=>!oldIds.has(String(x.id)))?.id||"");persistBonuses(id,bonuses,before);refresh()}catch(e){}},0);return out};w.__bonusPersist103=true;w.__original=old;R.saveEquipmentEditor=w;return true}
+function wrapSummary(){const old=R.equipmentSummary;if(typeof old==="function"&&!old.__bonusPersist103){const w=function(item){const base=String(old.apply(this,arguments)||""),s=bonusSummary(item);if(!s||base.includes("Bonus stats : "+s))return base;return [base,"Bonus stats : "+s].filter(Boolean).join(" · ")};w.__bonusPersist103=true;w.__original=old;R.equipmentSummary=w}const card=R.equipmentCardStatsHtml;if(typeof card==="function"&&!card.__bonusPersist103){const w=function(item){const base=String(card.apply(this,arguments)||""),s=bonusSummary(item);if(!s||base.includes("data-canonical-item-bonuses"))return base;return base+'<div data-canonical-item-bonuses="1" class="deuiHotfixStats">📊 '+s+'</div>'};w.__bonusPersist103=true;w.__original=card;R.equipmentCardStatsHtml=w}return true}
+function install(){if(installed)return true;if(!api()){setTimeout(install,25);return false}installed=true;wrapSave();wrapSummary();let tries=0;const retry=()=>{wrapSave();wrapSummary();if(tries++<30)setTimeout(retry,100)};setTimeout(retry,50);return true}
+R.GensEquipmentBonusPersistence1678103={VERSION,APP_VERSION,defs,labelFor,readEditorBonuses,itemRecord,persistBonuses,bonusSummary,refresh,wrapSave,wrapSummary,install};
+if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",install,{once:true}):install()}else install();
+})();

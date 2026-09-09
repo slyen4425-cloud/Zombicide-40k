@@ -15,7 +15,7 @@ function makeCtx(){
 }
 let ctx=makeCtx(),api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'clean stats API missing');
-assert.equal(api.APP_VERSION,'16.78.92');
+assert.equal(api.APP_VERSION,'16.78.94');
 assert.equal(api.addStat(null),true,'new stat must be created without a draft DOM');
 assert.ok(profiles[0].rpgUniverse.stats.dynamicDefinitions.some(d=>d.id==='nouvelle_stat'),'new stat must be persisted immediately');
 assert.ok(profiles[0].rpgUniverse.stats.active.includes('nouvelle_stat'),'new stat must be active immediately');
@@ -29,8 +29,8 @@ assert.equal(api.def('nouvelle_stat').name,'Épuisement','custom stat must survi
 assert.equal(api.effects().length,1,'custom effect must survive a complete module reload');
 assert.equal(api.effects()[0].target,'stat:force');
 assert.match(api.summaryFor('nouvelle_stat'),/Force|force/,'player summary must explain the target stat');
-assert.equal(api.legacyEffects().length,10,'all historical Dungeon rules must remain represented');
+assert.equal(api.legacyEffects().length,10,'pre-migration historical Dungeon rules must remain discoverable for one-time conversion');
 assert.match(src,/data-add-stat/,'editor must own its new-stat button');
 assert.match(src,/data-add-effect/,'editor must own per-stat add-effect buttons');
 assert.doesNotMatch(src,/GensUnifiedStats167885|GensStatsActionsDirect167887|GensRpgStatsEditorActions167888/,'clean rebuild must not depend on stacked stat patch modules');
-console.log('GenSrpG V16.78.92 clean stat rebuild: persistence + reload + effects OK');
+console.log('GenSrpG V16.78.94 clean stat rebuild: persistence + reload + effects OK');

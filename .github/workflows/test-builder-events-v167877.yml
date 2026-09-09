@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.97
+name: Test Builder Events V16.78.98
 on:
   push:
     branches:
       - main
-      - work/v16.78.97-stability-guard
+      - work/v16.78.98-aldren-ingame-stat-cost
 permissions:
   contents: read
 jobs:
@@ -13,11 +13,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel et stabilité
+      - name: Vérifier le bridge visuel et stabilité V16.78.98
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
       - name: Vérifier l’éditeur héros sûr V16.78.97
         run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
-      - name: Bloquer les régressions grille Random Builder et Aldren
+      - name: Vérifier la réparation art héros en jeu V16.78.98
+        run: node --check assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js
+      - name: Vérifier la politique de coût/verrouillage des stats V16.78.98
+        run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
+      - name: Bloquer les régressions grille Random Builder Aldren et progression
         run: node tests/gens_stability_guard_v167897.test.cjs
       - name: Tester le nettoyage de l’éditeur RPG
         run: node tests/gens_editor_cleanup_v167893.test.cjs

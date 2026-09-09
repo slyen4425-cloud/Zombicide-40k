@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.88
+name: Test Builder Events V16.78.89
 on:
   push:
     branches:
       - main
-      - work/v16.78.87-direct-stat-buttons
+      - work/v16.78.89-stat-persistence
 permissions:
   contents: read
 jobs:
@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Vérifier le nouveau module d'actions visible de l'éditeur de stats
+      - name: Vérifier le module d'actions persistantes de l'éditeur de stats
         run: node --check assets/gensrpg/gens-rpg-stats-editor-actions-167888.js
-      - name: Tester les actions directes Ajouter stat et Ajouter effet
+      - name: Tester création et ajout d'effet persistants
         run: node tests/gens_stat_actions_direct_v167887.test.cjs
       - name: Tester les caractéristiques dynamiques existantes
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs

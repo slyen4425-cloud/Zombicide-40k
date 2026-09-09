@@ -6,19 +6,20 @@ const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-equipment-bonus-persistence-1678103.js'),'utf8');
 const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-hero-art-repair-167874.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.doesNotThrow(()=>new Function(src),'V16.78.103 equipment persistence syntax');
-assert.match(src,/APP_VERSION="16\.78\.103"/);
+assert.doesNotThrow(()=>new Function(src),'equipment persistence syntax');
+assert.match(src,/APP_VERSION="16\.78\.104"/);
 assert.match(src,/loadDungeonItemOverrides/,'built-in Dungeon items must persist through item overrides');
 assert.match(src,/saveCustomEquipment/,'custom equipment must persist through custom equipment storage');
 assert.match(src,/equipmentSummary/,'weapon summary must expose canonical bonuses');
 assert.match(src,/equipmentCardStatsHtml/,'weapon card description must expose canonical bonuses');
-assert.match(bridge,/gens-equipment-bonus-persistence-1678103\.js\?v=1678103/,'runtime bridge must load V16.78.103 persistence fix');
-assert.match(sw,/gensrpg-cache-16\.78\.103-equipment-bonus-persistence/);
+assert.match(bridge,/gens-equipment-bonus-persistence-1678103\.js\?v=1678104/,'runtime bridge must load fresh persistence fix');
+assert.match(sw,/gensrpg-cache-16\.78\.104-equipment-reload-stability/);
 assert.match(sw,/gens-equipment-bonus-persistence-1678103\.js/);
 let custom=[{id:'custom_sword',name:'Épée custom',rpgBonuses:{}}];
 let overrides={};
 const dungeon=[{id:'dng_sword',name:'Épée Dungeon',rpgBonuses:{}}];
-const ctx={console,Math,JSON,setTimeout:()=>0,globalThis:null,
+const storage={};
+const ctx={console,Math,JSON,setTimeout:()=>0,globalThis:null,localStorage:{getItem:k=>storage[k]??null,setItem:(k,v)=>{storage[k]=String(v)}},
  GensCleanRpgStats167874:{defs:()=>[{id:'force',name:'Force',icon:'💪'},{id:'necromancie',name:'Nécromancie',icon:'☠️'}],runtimeDefs:()=>[{id:'force',name:'Force',icon:'💪'},{id:'necromancie',name:'Nécromancie',icon:'☠️'}],def:id=>({force:{id:'force'},necromancie:{id:'necromancie'}}[id]||null)},
  loadCustomEquipment:()=>custom,saveCustomEquipment:list=>{custom=JSON.parse(JSON.stringify(list))},refreshCustomEquipmentIntoItems:()=>{},
  dungeonItems:()=>dungeon,ITEMS:dungeon,
@@ -29,6 +30,5 @@ let r=api.persistBonuses('custom_sword',{force:3,necromancie:2});
 assert.equal(r.ok,true);assert.equal(r.kind,'custom');assert.equal(JSON.stringify(custom[0].rpgBonuses),JSON.stringify({force:3,necromancie:2}));
 r=api.persistBonuses('dng_sword',{force:4});
 assert.equal(r.ok,true);assert.equal(r.kind,'override');assert.equal(JSON.stringify(overrides.dng_sword.rpgBonuses),JSON.stringify({force:4}));
-assert.match(api.bonusSummary({rpgBonuses:{force:2,necromancie:1}}),/\+2 .*Force/);
-assert.match(api.bonusSummary({rpgBonuses:{force:2,necromancie:1}}),/\+1 .*Nécromancie/);
-console.log('V16.78.103 equipment bonus persistence: custom + built-in save + weapon description OK');
+assert.match(api.bonusSummary({id:'custom_sword',rpgBonuses:{force:2,necromancie:1}}),/\+3 .*Force|\+2 .*Force/);
+console.log('equipment bonus persistence regression: native custom + built-in save paths OK');

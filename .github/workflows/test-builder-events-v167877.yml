@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.102
+name: Test Builder Events V16.78.103
 on:
   push:
     branches:
       - main
-      - work/v16.78.102-equipment-stat-cleanup
+      - work/v16.78.103-equipment-bonus-persistence
 permissions:
   contents: read
 jobs:
@@ -19,6 +19,8 @@ jobs:
         run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
       - name: Vérifier le nettoyage équipements V16.78.102
         run: node --check assets/gensrpg/gens-equipment-stat-cleanup-1678102.js
+      - name: Vérifier la persistance bonus équipement V16.78.103
+        run: node --check assets/gensrpg/gens-equipment-bonus-persistence-1678103.js
       - name: Vérifier la réparation art héros map V16.78.98
         run: node --check assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js
       - name: Vérifier la réparation art fiche perso V16.78.99
@@ -29,6 +31,8 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
       - name: Tester le nettoyage équipements et stats de set/évolution V16.78.102
         run: node tests/gens_equipment_stat_cleanup_v1678102.test.cjs
+      - name: Tester la persistance et l’affichage des bonus équipement V16.78.103
+        run: node tests/gens_equipment_bonus_persistence_v1678103.test.cjs
       - name: Tester la consolidation stats héros objets capacités V16.78.101
         run: node tests/gens_canonical_stats_consolidation_v1678101.test.cjs
       - name: Bloquer les régressions grille UI Aldren et progression

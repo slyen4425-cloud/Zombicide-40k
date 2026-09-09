@@ -31,7 +31,7 @@ const LEGACY=[
  ["legacy_crit","agilite","crit","agilityCritStep","critGain"],
  ["legacy_dodge","agilite","dodge","agilityDodgeStep","dodgeGain"],
  ["legacy_hit_melee","force","hit:melee","meleeHitStep","meleeHitGain"],
- ["legacy_hit_ranged","agilite","hit:ranged","agilityDodgeStep","dodgeGain"],
+ ["legacy_hit_ranged","agilite","hit:ranged","rangedHitStep","rangedHitGain"],
  ["legacy_hit_magic","intelligence","hit:magic","magicHitStep","magicHitGain"],
  ["legacy_magic_res","esprit","magic_resistance","spiritMagicResistStep","magicResistGain"]
 ];

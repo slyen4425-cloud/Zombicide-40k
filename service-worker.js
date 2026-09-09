@@ -1,4 +1,5 @@
 const CACHE_NAME = "gensrpg-cache-16.78.88-stat-editor-visible-actions";
+// Deployment marker: V16.78.88 visible stat editor actions.
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

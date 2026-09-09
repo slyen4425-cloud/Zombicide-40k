@@ -1,0 +1,6 @@
+V16.78.99 UI/sheet stability
+- Built-in Dungeon hero art repaired on in-game character sheet via explicit lifecycle hooks.
+- No global MutationObserver in always-loaded visual bridge.
+- Stat cards show visible +1 = X point(s) badge; Movement remains 10 points per +1 by default.
+- PWA cache: gensrpg-cache-16.78.99-sheet-ui-stability.
+- Stability guards cover Random/Builder grids, map art, sheet art, stats progression, editor cleanup and full Dungeon runtime.

@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-hero-editor-dynamic-167896.js'),'utf8');
+const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-hero-art-repair-167874.js'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+assert.match(src,/APP_VERSION="16\.78\.96"/,'dynamic hero editor must carry V16.78.96');
+assert.match(src,/api\(\)\?\.runtimeDefs\?\.\(\)/,'hero editor must be built from canonical active runtime definitions');
+assert.match(src,/data-gens-canonical-hero-stat/,'canonical hero stat inputs missing');
+assert.match(src,/data-gensLegacyHeroStat/,'legacy fixed hero stat fields must be hidden, not deleted');
+assert.match(src,/syncLegacy\(vals=read\(\)\)/,'canonical values must be synchronized to legacy save inputs');
+assert.match(src,/persist\(id,vals,beforeIds/,'custom and native hero stat values must persist back to dungeonStats');
+assert.match(src,/hcRpgElementsWrap/,'element block must remain separate and preserved');
+assert.match(bridge,/gens-hero-editor-dynamic-167896\.js\?v=167896/,'always-loaded bridge must load dynamic hero editor');
+assert.match(sw,/gensrpg-cache-16\.78\.96-dynamic-hero-editor/,'PWA cache must be bumped to V16.78.96');
+assert.match(sw,/gens-hero-editor-dynamic-167896\.js/,'dynamic hero editor must be available offline');
+console.log('GenSrpG V16.78.96 dynamic hero editor: canonical active stats + legacy compatibility + elements preserved OK');

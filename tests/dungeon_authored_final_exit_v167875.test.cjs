@@ -10,7 +10,7 @@ assert.doesNotMatch(src,/GensRpgStatService|GensCleanRpgStats|dungeonAttributeVa
 const store=new Map();
 const runtime={room:3,index:0,participants:['dungeon_aldren'],positions:{dungeon_aldren:8},last:{authoredRuntime167839:true,worldDungeonId:'world1',worldNodeId:'node3',map:{exitIdx:8,cells:['floor','floor','floor','floor','floor','floor','floor','floor','exit'],objective:{status:'open'}},objective:{status:'open'}},branch:{active:false}};
 store.set('gensrpg_dungeon_runtime_v2',JSON.stringify(runtime));
-const core={explore(){return 'legacy'},render(){return true},show(){return true},modal(){return true}};
+const core={explore(){return 'legacy'},render(){return true},show(){return true},modal(_title,_text,onDone){if(typeof onDone==='function')onDone();return true}};
 let home=false,session=true;
 const ctx={console,setTimeout:f=>f(),clearTimeout,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v))},DungeonCore01:core,DungeonAuthoredRuntime167839:{active:()=>true,graph:()=>({id:'world1'}),plan:()=>({currentNodeId:'node3',outgoing:[],targetNodeId:'',needsExit:false}),positional:()=>true},markSessionActive:v=>{session=!!v},dc033ForceHome:()=>{home=true},saveDungeonState:()=>{},showToast:()=>{}};
 ctx.window=ctx;ctx.globalThis=ctx;

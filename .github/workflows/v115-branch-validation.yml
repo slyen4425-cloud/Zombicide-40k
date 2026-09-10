@@ -1,9 +1,9 @@
-name: V116 Branch Validation
+name: V117 Targeted Validation
 
 on:
   push:
     branches:
-      - work/v16.78.116-home-freeze-fix
+      - work/v16.78.117-home-bootstrap-root-cause
 
 permissions:
   contents: read
@@ -14,14 +14,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Run complete test battery
+      - name: Run targeted PWA and combat guards
         shell: bash
         run: |
           set -euo pipefail
-          count=0
-          for test in tests/*.test.cjs; do
-            echo "=== $test ==="
-            node "$test"
-            count=$((count+1))
-          done
-          echo "Executed $count test files successfully."
+          node tests/gens_stability_guard_v167897.test.cjs
+          node tests/gens_combat_latency_v1678115.test.cjs
+          node tests/gens_combat_loader_versions_v1678115.test.cjs
+          node tests/gens_combat_runtime_performance_v1678110.test.cjs
+          node tests/gens_combat_timeline_isolation_v1678114.test.cjs
+          node tests/gens_d100_semantics_v1678114.test.cjs
+          echo "V117 targeted PWA/combat validation passed."

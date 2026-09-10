@@ -7,7 +7,7 @@ assert.match(perf,/dungeonAttributeValue/);
 assert.match(perf,/GensCleanRpgStats167874/);
 assert.match(perf,/dungeonEnemyRpgStats/);
 assert.doesNotMatch(dice,/[◆✦★⭐]/,'Le dé ne doit plus afficher de placeholder étoile/diamant');
-assert.match(dice,/randomFace\(6\)/);
+assert.match(dice,/makeReel\(6,finalValue/,'D6 must use the smooth reel path');
 assert.match(dice,/APP_VERSION="16\.78\.112"/);
 assert.match(dice,/WATCHDOG_MS=650/);
 assert.match(dice,/REEL_STEPS=11/);

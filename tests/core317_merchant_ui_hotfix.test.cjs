@@ -41,8 +41,8 @@ ctx.globalThis=ctx;
 vm.createContext(ctx);
 vm.runInContext(src,ctx,{filename:'dungeon-core-317.js'});
 
-assert.equal(ctx.DungeonCore317.VERSION,'3.17.1');
-assert.equal(ctx.GENSRPG_VERSION,'16.78.12');
+assert.equal(ctx.DungeonCore317.VERSION,'3.17.2');
+assert.equal(ctx.GENSRPG_VERSION,'16.78.13');
 assert.equal(ctx.DungeonCore317.resolveArmorFloor(2,5,1,'physical',{armorZeroBlockChance:75},74),0);
 assert.equal(ctx.DungeonCore317.resolveArmorFloor(2,5,1,'physical',{armorZeroBlockChance:75},75),1);
 
@@ -78,4 +78,4 @@ assert.equal(heroState.inventory.length,0);
 assert.equal(heroState.gold,95);
 assert(merchantList.innerHTML.includes('Stock : 2'));
 
-console.log('Core 3.17.1 merchant UI hotfix: OK');
+console.log('Core 3.17.2 merchant UI hotfix: OK');

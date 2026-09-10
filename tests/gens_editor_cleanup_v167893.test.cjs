@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-dungeon-hero-art-repair-167874.js'),'utf8');
 const stats=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
-assert.match(src,/GenSrpG V16\.78\.113/,'cleanup/stability bridge must carry current V16.78.113 layer');
+assert.match(src,/GenSrpG V16\.78\.115/,'cleanup/stability bridge must carry current V16.78.115 layer');
 assert.match(src,/rpgBaseHp/,'legacy HP editor card must be targeted');
 assert.match(src,/rpgBaseMana/,'legacy Mana editor card must be targeted');
 assert.match(src,/rpgPhysicalFormula/,'legacy characteristic modifiers card must be targeted');
@@ -15,8 +15,8 @@ assert.match(src,/openHeroCreator/,'hero editor cleanup must be tied to its expl
 assert.match(src,/applyCustomHeroesMulti/,'hero art repair must also survive CHARS rebuild');
 assert.match(src,/gens-canonical-detection-1678107\.js\?v=1678108/,'canonical detection V108 must be loaded from the stable runtime bridge');
 assert.match(src,/gens-dice-performance-1678108\.js\?v=1678112/,'mobile dice V112 layer must be loaded from the stable runtime bridge');
-assert.match(src,/gens-combat-runtime-performance-1678110\.js\?v=1678110/,'combat runtime performance layer must be loaded from the stable runtime bridge');
-assert.match(src,/gens-combat-flow-1678111\.js\?v=1678112/,'combat flow V112 layer must be loaded from the stable runtime bridge');
+assert.match(src,/gens-combat-runtime-performance-1678110\.js\?v=1678115/,'combat runtime performance V115 layer must be loaded from the stable runtime bridge');
+assert.match(src,/gens-combat-flow-1678111\.js\?v=1678115/,'combat flow must be cache-busted by the V115 stable runtime bridge');
 const hookAll=(src.match(/function hookAll\(\)\{[^\n]+/)||[''])[0];
 assert.ok(!hookAll.includes('renderDungeonHeroStats')&&!hookAll.includes('renderDungeonAttributes'),'editor/visual cleanup must stay off combat-hot stat renderers');
 assert.doesNotMatch(src,/MutationObserver|\.observe\s*\(/,'cleanup bridge must not observe unrelated UI panels globally');
@@ -24,4 +24,4 @@ assert.match(stats,/APP_VERSION="16\.78\.95"/,'single stats module must remain o
 assert.match(stats,/DUNGEON_DEFAULT_ATTRIBUTES/,'canonical runtime link must remain intact');
 assert.match(stats,/legacyEffectsMigrated94/,'legacy hidden coefficients must remain neutralized');
 assert.doesNotMatch(src,/delete\s+R\.|delete\s+.*rpgBaseHp|delete\s+.*rpgBaseMana/,'visual cleanup must not delete runtime settings');
-console.log('GenSrpG V16.78.113 scoped editor cleanup/stability bridge + V16.78.95 stats engine: OK');
+console.log('GenSrpG V16.78.115 scoped editor cleanup/stability bridge + V16.78.95 stats engine: OK');

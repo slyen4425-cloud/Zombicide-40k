@@ -25,8 +25,9 @@ function runModern(){
 }
 
 function runLegacy(){
-  let scheduled=[];const runner=function(){setTimeout(()=>{},250)},advance=function(){};
+  let scheduled=[];
   const ctx={console,Promise,document:{getElementById:()=>null},setTimeout:(fn,ms)=>{scheduled.push(ms);return 1}};
+  const runner=function(){ctx.setTimeout(()=>{},250)},advance=function(){};
   ctx.window=ctx;ctx.globalThis=ctx;ctx.renderDungeonCombatRound=()=>{};ctx.dungeonRunAi156=runner;ctx.dungeonAdvanceTurn156=advance;ctx.dungeonTurn156={active:false,aiBusy:false};ctx.dungeonCurrentTurn156=()=>null;
   vm.runInNewContext(src,ctx,{filename:'combat-flow-legacy'});
   const r1=ctx.dungeonRunAi156,a1=ctx.dungeonAdvanceTurn156;ctx.GensCombatFlow1678111.install();

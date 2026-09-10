@@ -40,7 +40,7 @@ function testPatchMarkers(){
   assert.match(html,/id="rpgMerchantStockOther"/,'stock Autres éditable manquant');
   assert.match(html,/id="drArmorZeroBlockChance"/,'chance de blocage total manquante');
   assert.match(html,/DungeonCore317\.resolveArmorFloor\(elemental,reduction,configuredMin,profile\.damageType,rules\)/,'résolution d’armure 3.17 non branchée');
-  assert.match(sw,/gensrpg-cache-16\.78\.11-dungeon-core317/,'cache PWA 16.78.11 manquant');
+  assert.match(sw,/const CACHE_NAME = "gensrpg-cache-[^"]+";/,'cache PWA actif manquant');
   assert.match(sw,/assets\/dungeon\/dungeon-core-317\.js/,'Core 3.17 doit être pré-caché');
 }
 

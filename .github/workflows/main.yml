@@ -84,6 +84,10 @@ jobs:
 
           cp -f index.html _site/index.html
 
+          if [ -f "pwa-recovery.html" ]; then
+            cp -f pwa-recovery.html _site/pwa-recovery.html
+          fi
+
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi

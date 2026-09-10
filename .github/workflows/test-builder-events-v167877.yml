@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.104
+name: Test Builder Events V16.78.105
 on:
   push:
     branches:
       - main
-      - work/v16.78.104-equipment-reload-stability
+      - work/v16.78.105-enemy-stats-module
 permissions:
   contents: read
 jobs:
@@ -13,8 +13,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel scoped V16.78.104
+      - name: Vérifier le bridge visuel scoped V16.78.105
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
+      - name: Vérifier le module stats ennemis V16.78.105
+        run: node --check assets/gensrpg/gens-enemy-canonical-stats-1678105.js
       - name: Vérifier la consolidation canonique V16.78.101
         run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
       - name: Vérifier le nettoyage équipements V16.78.102
@@ -29,6 +31,10 @@ jobs:
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
       - name: Vérifier le nettoyage UI ciblé V16.78.100
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
+      - name: Tester module stats ennemis ON/OFF et stats canoniques V16.78.105
+        run: node tests/gens_enemy_stats_module_v1678105.test.cjs
+      - name: Tester art Aldren après reconstruction tardive V16.78.105
+        run: node tests/gens_aldren_post_rebuild_v1678105.test.cjs
       - name: Tester le nettoyage équipements et stats de set/évolution V16.78.102
         run: node tests/gens_equipment_stat_cleanup_v1678102.test.cjs
       - name: Tester la persistance et l’affichage des bonus équipement V16.78.103
@@ -37,7 +43,7 @@ jobs:
         run: node tests/gens_equipment_reload_stability_v1678104.test.cjs
       - name: Tester la consolidation stats héros objets capacités V16.78.101
         run: node tests/gens_canonical_stats_consolidation_v1678101.test.cjs
-      - name: Bloquer les régressions grille UI Aldren et progression
+      - name: Bloquer les régressions grille UI Aldren progression et stats ennemis
         run: node tests/gens_stability_guard_v167897.test.cjs
       - name: Tester le correctif fiche perso et isolation UI V16.78.99
         run: node tests/gens_v167899_ui_sheet_guard.test.cjs
@@ -47,13 +53,13 @@ jobs:
         run: node tests/gens_editor_cleanup_v167893.test.cjs
       - name: Tester l’autorité unique du moteur de stats
         run: node tests/gens_stat_engine_cleanup_v167894.test.cjs
-      - name: Tester création, effets, sauvegarde et rechargement des stats
+      - name: Tester création effets sauvegarde et rechargement des stats
         run: node tests/gens_clean_stats_rebuild_v167890.test.cjs
       - name: Tester le raccordement des stats au renderer Dungeon existant
         run: node tests/gens_clean_stats_runtime_link_v167892.test.cjs
       - name: Tester les caractéristiques dynamiques existantes
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
-      - name: Tester Défense, Armure et Mouvement natifs
+      - name: Tester Défense Armure et Mouvement natifs
         run: node tests/gens_native_defense_armor_movement_v167895.test.cjs
       - name: Tester les cases événement configurables et leur surbrillance
         run: node tests/dungeon_authored_event_cells_v167877.test.cjs

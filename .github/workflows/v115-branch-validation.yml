@@ -1,0 +1,27 @@
+name: V115 Branch Validation
+
+on:
+  push:
+    branches:
+      - work/v16.78.115-combat-latency
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run complete test battery
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for test in tests/*.test.cjs; do
+            echo "=== $test ==="
+            node "$test"
+            count=$((count+1))
+          done
+          echo "Executed $count test files successfully."

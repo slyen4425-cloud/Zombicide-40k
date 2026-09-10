@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GenSrpG — récupération PWA</title>
+<style>body{font-family:system-ui,sans-serif;background:#111;color:#eee;margin:0;display:grid;place-items:center;min-height:100vh;padding:24px;box-sizing:border-box}.box{max-width:560px;width:100%;background:#1b1b1b;border:1px solid #444;border-radius:16px;padding:22px}.ok{color:#8fda8f}.err{color:#ff9b9b}button{font:inherit;padding:12px 16px;border-radius:10px;border:0;margin-top:12px}</style>
+</head>
+<body>
+<div class="box">
+<h1>Récupération GenSrpG</h1>
+<p id="status">Nettoyage du cache PWA en cours…</p>
+<p>Les mondes, sauvegardes et données IndexedDB ne sont pas supprimés.</p>
+<button id="retry" hidden>Relancer GenSrpG</button>
+</div>
+<script>
+(async()=>{
+ const status=document.getElementById('status'),retry=document.getElementById('retry');
+ try{
+   if('serviceWorker' in navigator){
+     const regs=await navigator.serviceWorker.getRegistrations();
+     await Promise.all(regs.map(r=>r.unregister()));
+   }
+   if('caches' in window){
+     const names=await caches.keys();
+     await Promise.all(names.map(n=>caches.delete(n)));
+   }
+   status.className='ok';
+   status.textContent='Nettoyage terminé. Relance de GenSrpG…';
+   retry.hidden=false;
+   retry.onclick=()=>location.replace('./?pwa_recovered='+Date.now());
+   setTimeout(()=>location.replace('./?pwa_recovered='+Date.now()),700);
+ }catch(e){
+   status.className='err';
+   status.textContent='Échec du nettoyage automatique : '+String(e&&e.message||e);
+   retry.hidden=false;
+   retry.onclick=()=>location.replace('./?pwa_recovered='+Date.now());
+ }
+})();
+</script>
+</body>
+</html>

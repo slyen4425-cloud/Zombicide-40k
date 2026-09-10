@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.109
+name: Test Builder Events V16.78.110
 on:
   push:
     branches:
       - main
-      - work/v16.78.109-combat-dice-performance
+      - work/v16.78.110-combat-runtime-performance
 permissions:
   contents: read
 jobs:
@@ -19,8 +19,10 @@ jobs:
         run: node --check assets/gensrpg/gens-enemy-canonical-stats-1678105.js
       - name: Vérifier le module Détection canonique V16.78.108
         run: node --check assets/gensrpg/gens-canonical-detection-1678107.js
-      - name: Vérifier le module dés mobile V16.78.109
+      - name: Vérifier le module dés mobile V16.78.110
         run: node --check assets/gensrpg/gens-dice-performance-1678108.js
+      - name: Vérifier le cache runtime combat V16.78.110
+        run: node --check assets/gensrpg/gens-combat-runtime-performance-1678110.js
       - name: Vérifier le correctif live carte héros V16.78.106
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
       - name: Vérifier la consolidation canonique V16.78.101
@@ -35,6 +37,8 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js
       - name: Vérifier la politique coût/verrouillage V16.78.99
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
+      - name: Tester le coût runtime combat et les dés V16.78.110
+        run: node tests/gens_combat_runtime_performance_v1678110.test.cjs
       - name: Tester animation visible et coût runtime des dés V16.78.109
         run: node tests/gens_detection_dice_stability_v1678108.test.cjs
       - name: Tester Détection canonique héros ennemis équipements capacités V16.78.108

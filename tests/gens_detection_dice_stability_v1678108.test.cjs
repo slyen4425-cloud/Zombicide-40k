@@ -15,8 +15,9 @@ assert.match(src,/gensDiceReelTrack/,'dice must use a reel track');
 assert.match(src,/translate3d/,'reel must animate on compositor-friendly transform');
 assert.match(src,/\.animate\(/,'reel must use Web Animations when available');
 assert.match(bridge,/gens-dice-performance-1678108\.js\?v=1678112/);
-assert.match(bridge,/gens-combat-flow-1678111\.js\?v=1678112/);
-assert.match(sw,/gensrpg-cache-16\.78\.112-combat-fluidity/);
+assert.match(bridge,/gens-combat-flow-1678111\.js\?v=1678115/);
+assert.match(bridge,/gens-combat-runtime-performance-1678110\.js\?v=1678115/);
+assert.match(sw,/gensrpg-cache-16\.78\.115-combat-latency/);
 
 let animationCalls=0;
 function node(tag='div'){
@@ -39,4 +40,4 @@ now=0;timers.length=0;let d100done=0;api.animateRpgDiceFast('d100',1,[72],60,100
 assert.equal(animationCalls,6,'D100 must use track + card compositor animations');
 assert.equal(timers.filter(t=>t.at>0&&t.at<420).length,0,'no repeated JS text updates may run during D100 roll');
 runTimers(650);assert.equal(d100done,1);assert.equal(boxes.d100.children.length,1);assert.match(boxes.d100.children[0].className,/success/);
-console.log('V16.78.112 dice: smooth transform reel, zero per-frame JS/text churn, bounded completion OK');
+console.log('V16.78.112 dice preserved; V16.78.115 combat loader/cache integration OK');

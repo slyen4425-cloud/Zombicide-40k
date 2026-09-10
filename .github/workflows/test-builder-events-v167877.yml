@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.113
+name: Test Builder Events V16.78.114
 on:
   push:
     branches:
       - main
-      - work/v16.78.113-combat-profiler-fix
+      - work/v16.78.114-combat-timeline-d100
 permissions:
   contents: read
 jobs:
@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Diagnostiquer timeline combat V16.78.114
+        run: node tests/diagnose_combat_timeline_v1678114.cjs
+      - name: Diagnostiquer attaque joueur V16.78.114
+        run: node tests/diagnose_player_attack_v1678114.cjs
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
       - name: Vérifier le bridge visuel V16.78.113

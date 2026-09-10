@@ -1,0 +1,6 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const terms=['window.dungeonCombatAttack=function','function dungeonCombatAttack','attackDiceResult','rpgD100Card','d100ThresholdFromChance','dungeonPending','closeAttackRoll','dc037PendingHeroAdvance','initiativeMode','rpgInitiativeUsage','renderRpgInitiativeOptions','saveRpgUniverse'];
+function scriptAround(pos){const before=html.lastIndexOf('<script',pos),after=html.indexOf('</script>',pos);const head=before>=0?html.slice(before,Math.min(before+350,after)):'';return {id:(head.match(/id=["\']([^"\']+)/)||[])[1]||'inline',before,after};}
+for(const term of terms){let p=0,n=0;while((p=html.indexOf(term,p))>=0&&n<20){const s=scriptAround(p),a=Math.max(s.before>=0?s.before:p-1400,p-1800),b=Math.min(s.after>=0?s.after+9:p+2600,p+3600);console.log(`\n=== ${term} #${++n} script=${s.id} pos=${p} ===\n`+html.slice(a,b).replace(/\s+/g,' ').slice(0,5000));p+=term.length;}console.log(`COUNT ${term} >= ${n}`)}

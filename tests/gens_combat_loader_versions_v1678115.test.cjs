@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert');
+const src=fs.readFileSync('assets/gensrpg/gens-dungeon-hero-art-repair-167874.js','utf8');
+assert.match(src,/GenSrpG V16\.78\.116/);
+assert.match(src,/COMBAT_PERF_SRC="assets\/gensrpg\/gens-combat-runtime-performance-1678110\.js\?v=1678116"/);
+assert.match(src,/COMBAT_FLOW_SRC="assets\/gensrpg\/gens-combat-flow-1678111\.js\?v=1678115"/);
+assert.match(src,/function loadCombatPerformance\(\)\{return loadScript\(COMBAT_PERF_SRC,"gcrp1678116",\(\)=>R\.GensCombatRuntimePerformance1678110\?\.APP_VERSION==="16\.78\.115"\)\}/);
+assert.match(src,/DUNGEON_ENTRY_HOOKS=new Set\(\["loadDungeonGame","resumeDungeonGame","startDungeonGame","newDungeonGame"\]\)/);
+assert.match(src,/if\(DUNGEON_ENTRY_HOOKS\.has\(name\)\)loadCombatPerformance\(\);const out=old\.apply/);
+const bridges=src.slice(src.indexOf('function loadRuntimeBridges(){'),src.indexOf('function loadFinalExit(){'));
+assert.doesNotMatch(bridges,/loadScript\(COMBAT_PERF_SRC/,'Le module performance combat ne doit jamais être chargé pendant le bootstrap/accueil');
+assert.match(src,/GensCombatFlow1678111\?\.APP_VERSION==="16\.78\.114"/);
+assert.doesNotMatch(src,/COMBAT_PERF_SRC="[^"]+\?v=1678110"/);
+console.log('V16.78.116 lazy Dungeon combat loader + home bootstrap isolation OK');

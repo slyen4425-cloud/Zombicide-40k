@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.114
+name: Test Builder Events V16.78.115
 on:
   push:
     branches:
       - main
-      - work/v16.78.114-combat-timeline-d100
+      - work/v16.78.115-combat-latency
 permissions:
   contents: read
 jobs:
@@ -11,13 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Tester latence/cache combat V16.78.115
+        run: node tests/gens_combat_latency_v1678115.test.cjs
+      - name: Tester chargement modules combat V16.78.115
+        run: node tests/gens_combat_loader_versions_v1678115.test.cjs
       - name: Diagnostiquer timeline combat V16.78.114
         run: node tests/diagnose_combat_timeline_v1678114.cjs
       - name: Diagnostiquer attaque joueur V16.78.114
         run: node tests/diagnose_player_attack_v1678114.cjs
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel V16.78.113
+      - name: Vérifier le bridge visuel V16.78.115
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
       - name: Vérifier UI cleanup V16.78.113
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
@@ -29,9 +33,9 @@ jobs:
         run: node --check assets/gensrpg/gens-canonical-detection-1678107.js
       - name: Vérifier dés V16.78.112
         run: node --check assets/gensrpg/gens-dice-performance-1678108.js
-      - name: Vérifier cache runtime combat V16.78.110
+      - name: Vérifier cache runtime combat V16.78.115
         run: node --check assets/gensrpg/gens-combat-runtime-performance-1678110.js
-      - name: Vérifier flux combat V16.78.112
+      - name: Vérifier flux combat V16.78.114
         run: node --check assets/gensrpg/gens-combat-flow-1678111.js
       - name: Tester hot-path réel V16.78.113
         run: node tests/gens_combat_hotpath_v1678113.test.cjs

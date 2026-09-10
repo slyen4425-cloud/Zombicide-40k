@@ -1,10 +1,13 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const path=require('node:path');
 const vm=require('node:vm');
-const editor=fs.readFileSync(process.argv[2], 'utf8');
-const built=process.argv[3]?fs.readFileSync(process.argv[3], 'utf8'):'';
-const workflow=fs.readFileSync(process.argv[4]||'.github/workflows/main.yml','utf8');
-const sw=fs.readFileSync(process.argv[5]||'service-worker.js','utf8');
+const root=path.join(__dirname,'..');
+const editorPath=process.argv[2]||path.join(root,'assets','dungeon','dungeon-set-editor-167818.js');
+const editor=fs.readFileSync(editorPath,'utf8');
+const built=process.argv[3]?fs.readFileSync(process.argv[3],'utf8'):'';
+const workflow=fs.readFileSync(process.argv[4]||path.join(root,'.github','workflows','main.yml'),'utf8');
+const sw=fs.readFileSync(process.argv[5]||path.join(root,'service-worker.js'),'utf8');
 
 function storage(initial={}){const m=new Map(Object.entries(initial));return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
 let itemOverrides={};

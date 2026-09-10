@@ -1,10 +1,15 @@
 const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const vm=require("node:vm");
+const path=require("node:path");
 
-const baseUi=fs.readFileSync(process.argv[2],"utf8");
-const hotfix=fs.readFileSync(process.argv[3],"utf8");
-const built=process.argv[4]?fs.readFileSync(process.argv[4],"utf8"):"";
+const root=path.join(__dirname,"..");
+const baseUiPath=process.argv[2]||path.join(root,"assets","dungeon","dungeon-equipment-ui.js");
+const hotfixPath=process.argv[3]||path.join(root,"assets","dungeon","dungeon-equipment-hotfix-167817.js");
+const builtPath=process.argv[4]||"";
+const baseUi=fs.readFileSync(baseUiPath,"utf8");
+const hotfix=fs.readFileSync(hotfixPath,"utf8");
+const built=builtPath&&fs.existsSync(builtPath)?fs.readFileSync(builtPath,"utf8"):"";
 
 const ancient=[
   {id:"ditem_ancient_helm",name:"Heaume des Anciens",dungeonBuiltin:true,setId:"set_ancient",setPieceId:"head",rpgBonuses:{armor:1,esprit:1}},
@@ -39,7 +44,7 @@ const context={
     rightHand:null,leftHand:null,
     rpgGear:{head:0,torso:1,hands:2}
   },
-  dungeonEquippedItems(){return []}, // ancien comportement fautif hors isDungeonHeroSheet()
+  dungeonEquippedItems(){return []},
   getItemFromEntry(entry){return map[entry?.itemId]||null},
   itemById(id){return map[id]||null},
   dungeonItems(){return ancient},

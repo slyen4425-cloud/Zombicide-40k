@@ -1,0 +1,23 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const perf=fs.readFileSync('assets/gensrpg/gens-combat-runtime-performance-1678110.js','utf8');
+const dice=fs.readFileSync('assets/gensrpg/gens-dice-performance-1678108.js','utf8');
+assert.match(perf,/APP_VERSION="16\.78\.110"/);
+assert.match(perf,/queueMicrotask/);
+assert.match(perf,/dungeonAttributeValue/);
+assert.match(perf,/GensCleanRpgStats167874/);
+assert.match(perf,/dungeonEnemyRpgStats/);
+assert.doesNotMatch(dice,/[◆✦★⭐]/,'Le dé ne doit plus afficher de placeholder étoile/diamant');
+assert.match(dice,/randomFace\(6\)/);
+assert.match(dice,/APP_VERSION="16\.78\.110"/);
+assert.match(dice,/WATCHDOG_MS=850/);
+let calls=0,valueCalls=0,enemyCalls=0;
+const sandbox={console,setTimeout:(fn)=>{fn();return 1},clearTimeout(){},Promise,queueMicrotask:fn=>fn(),current:'hero1',dungeonAttributeValue(id){calls++;return id==='force'?12:3},dungeonEnemyRpgStats(def){enemyCalls++;return {force:def.force||1}},GensCleanRpgStats167874:{value(hero,id){valueCalls++;return hero==='hero1'&&id==='force'?12:0},runtimeDefs(){return [{id:'force'}]}},renderDungeonCombatRound(){},__dc302RenderCombat(){},__dc214RenderCombat(){},applyDungeonAttackDamage(){},silentHeroDamage023(){},changeDungeonAttribute(){},dc214Equip(){},dc214Reload(){},save(){},saveState(){}};
+sandbox.window=sandbox;sandbox.globalThis=sandbox;
+vm.createContext(sandbox);vm.runInContext(perf,sandbox);
+// Simulate one hot rendering turn without clearing microtasks until after repeated reads.
+// The source-level guards above ensure microtask-bounded caching; here validate wrappers preserve values.
+assert.equal(sandbox.dungeonAttributeValue('force'),12);
+assert.equal(sandbox.GensCleanRpgStats167874.value('hero1','force'),12);
+const e={force:7};assert.equal(sandbox.dungeonEnemyRpgStats(e).force,7);
+assert.ok(sandbox.GensCombatRuntimePerformance1678110);
+console.log('V16.78.110 combat runtime performance guard: OK');

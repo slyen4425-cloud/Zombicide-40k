@@ -1,9 +1,9 @@
-name: V115 Branch Validation
+name: V116 Branch Validation
 
 on:
   push:
     branches:
-      - work/v16.78.115-combat-latency
+      - work/v16.78.116-home-freeze-fix
 
 permissions:
   contents: read

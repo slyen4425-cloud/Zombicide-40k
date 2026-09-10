@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.107
+name: Test Builder Events V16.78.108
 on:
   push:
     branches:
       - main
-      - work/v16.78.107-canonical-detection
+      - work/v16.78.108-detection-dice-stability
 permissions:
   contents: read
 jobs:
@@ -13,12 +13,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier le module unique de stats V16.78.95
         run: node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
-      - name: Vérifier le bridge visuel scoped V16.78.107
+      - name: Vérifier le bridge visuel scoped V16.78.108
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
       - name: Vérifier le module stats ennemis V16.78.105
         run: node --check assets/gensrpg/gens-enemy-canonical-stats-1678105.js
-      - name: Vérifier le module Détection canonique V16.78.107
+      - name: Vérifier le module Détection canonique V16.78.108
         run: node --check assets/gensrpg/gens-canonical-detection-1678107.js
+      - name: Vérifier le module dés mobile V16.78.108
+        run: node --check assets/gensrpg/gens-dice-performance-1678108.js
       - name: Vérifier le correctif live carte héros V16.78.106
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
       - name: Vérifier la consolidation canonique V16.78.101
@@ -33,7 +35,9 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js
       - name: Vérifier la politique coût/verrouillage V16.78.99
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
-      - name: Tester Détection canonique héros ennemis équipements capacités V16.78.107
+      - name: Tester Détection explicite et performances des dés V16.78.108
+        run: node tests/gens_detection_dice_stability_v1678108.test.cjs
+      - name: Tester Détection canonique héros ennemis équipements capacités V16.78.108
         run: node tests/gens_canonical_detection_v1678107.test.cjs
       - name: Tester le vrai renderer tardif de la carte héros V16.78.106
         run: node tests/gens_party_art_live_renderer_v1678106.test.cjs

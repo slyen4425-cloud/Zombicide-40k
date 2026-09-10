@@ -20,7 +20,7 @@ const context={console,JSON,Math,Date,document,localStorage:{getItem(k){return s
 context.window=context;context.globalThis=context;
 vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-cache-visual-167852.js'});
 const api=context.DungeonAuthoredCacheVisual167852;
-assert.ok(api);assert.equal(api.APP_VERSION,'16.78.69');
+assert.ok(api);assert.equal(api.APP_VERSION,'16.78.75');
 assert.deepEqual([...api.cacheCells(JSON.parse(store.gensrpg_dungeon_runtime_v2))],[2]);
 assert.equal(api.floorAsset('forest',0),'assets/dungeon/creatures/dng_floor_forest_01.png');
 assert.equal(api.authoredRoom(JSON.parse(store.gensrpg_dungeon_runtime_v2)).id,'room-a');
@@ -32,4 +32,4 @@ assert.equal(cells[1].classList.contains('dav167869WallCell'),true,'authored wal
 assert.match(cells[1].style.values['background-image'],/dng_wall_block\.jpg/,'wall asset must paint live cell');
 assert.match(cells[0].style.values['background-image'],/dng_floor_forest_01\.png/,'forest floor must paint live cell');
 assert.equal(cells[2].children.some(x=>x.className==='dac167852Cache'),true,'cache cell must receive visible marker');
-console.log('Dungeon authored cache/runtime terrain visual V16.78.69: OK');
+console.log('Dungeon authored cache/runtime terrain visual V16.78.75: OK');

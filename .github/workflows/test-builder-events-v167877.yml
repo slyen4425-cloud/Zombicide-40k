@@ -1,9 +1,9 @@
-name: Test Builder Events V16.78.105
+name: Test Builder Events V16.78.106
 on:
   push:
     branches:
       - main
-      - work/v16.78.105-enemy-stats-module
+      - work/v16.78.106-party-art-runtime-fix
 permissions:
   contents: read
 jobs:
@@ -17,6 +17,8 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-hero-art-repair-167874.js
       - name: Vérifier le module stats ennemis V16.78.105
         run: node --check assets/gensrpg/gens-enemy-canonical-stats-1678105.js
+      - name: Vérifier le correctif live carte héros V16.78.106
+        run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
       - name: Vérifier la consolidation canonique V16.78.101
         run: node --check assets/gensrpg/gens-hero-editor-dynamic-167897.js
       - name: Vérifier le nettoyage équipements V16.78.102
@@ -29,8 +31,8 @@ jobs:
         run: node --check assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js
       - name: Vérifier la politique coût/verrouillage V16.78.99
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
-      - name: Vérifier le nettoyage UI ciblé V16.78.100
-        run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
+      - name: Tester le vrai renderer tardif de la carte héros V16.78.106
+        run: node tests/gens_party_art_live_renderer_v1678106.test.cjs
       - name: Tester module stats ennemis ON/OFF et stats canoniques V16.78.105
         run: node tests/gens_enemy_stats_module_v1678105.test.cjs
       - name: Tester art Aldren après reconstruction tardive V16.78.105

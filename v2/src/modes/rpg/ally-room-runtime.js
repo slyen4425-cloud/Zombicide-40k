@@ -1,27 +1,71 @@
 import { setActorPosition } from './spatial-engine.js';
+import { roomTransitionAllowed } from './room-tactical-bridge.js';
 
 function clone(value){return structuredClone(value);}
+function key(position){return `${Number(position?.x)},${Number(position?.y)}`;}
 
 function isActive(runtime){return runtime&&runtime.active!==false&&!runtime.dismissed&&!runtime.expired;}
+
+function occupiedDestinationCells(spatial,roomId){
+  const occupied=new Set();
+  for(const position of Object.values(spatial?.positions||{})){
+    if(String(position?.zoneId??'')===String(roomId??'')) occupied.add(key(position));
+  }
+  return occupied;
+}
+
+function followerEntryCells(roomLayout,origin,occupied,count){
+  if(!roomLayout||count<=0) return [];
+  const start={x:Number(origin?.x)||0,y:Number(origin?.y)||0};
+  const queue=[start],seen=new Set([key(start)]),out=[];
+  const steps=[[1,0],[-1,0],[0,1],[0,-1]];
+  while(queue.length&&out.length<count){
+    const current=queue.shift();
+    for(const [dx,dy] of steps){
+      const next={x:current.x+dx,y:current.y+dy};
+      const nextKey=key(next);
+      if(seen.has(nextKey)) continue;
+      seen.add(nextKey);
+      if(!roomTransitionAllowed(roomLayout,current,next)) continue;
+      queue.push(next);
+      if(occupied.has(nextKey)) continue;
+      occupied.add(nextKey);
+      out.push(next);
+      if(out.length>=count) break;
+    }
+  }
+  return out;
+}
 
 export function alliesInRoom(roster,roomId){
   return (roster?.order||[]).map(id=>roster.actors?.[id]).filter(runtime=>isActive(runtime)&&String(runtime.roomId??'')===String(roomId??''));
 }
 
-export function transitionAlliesWithOwner(roster,spatial,{ownerActorId,fromRoomId,toRoomId,entryPosition={x:0,y:0},ownerPosition=null}={}){
+export function transitionAlliesWithOwner(roster,spatial,{ownerActorId,fromRoomId,toRoomId,entryPosition={x:0,y:0},ownerPosition=null,roomLayout=null}={}){
   const nextRoster=clone(roster); let nextSpatial=clone(spatial); const moved=[]; const stayed=[];
+  const followers=[];
   for(const id of nextRoster.order||[]){
     const runtime=nextRoster.actors?.[id]; if(!isActive(runtime)) continue;
     const follows=runtime.followOwner!==false&&runtime.ownerActorId&&String(runtime.ownerActorId)===String(ownerActorId);
     const inOrigin=String(runtime.roomId??'')===String(fromRoomId??'');
     if(!follows||!inOrigin){stayed.push(String(id));continue;}
-    const position=ownerPosition||entryPosition||{x:0,y:0};
+    followers.push(String(id));
+  }
+
+  const base=ownerPosition||entryPosition||{x:0,y:0};
+  const occupied=occupiedDestinationCells(nextSpatial,toRoomId);
+  occupied.add(key(base));
+  const distinctCells=followerEntryCells(roomLayout,base,occupied,followers.length);
+
+  followers.forEach((id,index)=>{
+    const runtime=nextRoster.actors?.[id];
+    const position=distinctCells[index]||base;
     runtime.roomId=String(toRoomId);
     runtime.x=Number(position.x)||0; runtime.y=Number(position.y)||0;
     nextSpatial=setActorPosition(nextSpatial,String(id),{x:runtime.x,y:runtime.y,zoneId:String(toRoomId)});
     moved.push(String(id));
-  }
-  return {roster:nextRoster,spatial:nextSpatial,movedInstanceIds:moved,stayedInstanceIds:stayed};
+  });
+  return {roster:nextRoster,spatial:nextSpatial,movedInstanceIds:moved,stayedInstanceIds:stayed,distinctPlacementCount:distinctCells.length};
 }
 
 export function transitionIndependentAllies(roster,{fromRoomId,toRoomId,instanceIds=[]}={}){

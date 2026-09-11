@@ -28,7 +28,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Le runtime Donjon suit plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
 - La vue Donjon est raccordée à `heroLocations` : choix du héros actif par nom, salle affichée propre à ce héros, et passage appliqué uniquement au héros focalisé.
 - Le démarrage d'un vrai combat de salle dispose d'un bridge dédié : ennemis actifs de la salle + héros réellement présents, puis filtre de proximité spatiale avant création du vrai `combat-engine` D100.
-- Le vrai combat de salle est maintenant monté dans la vue Donjon : les ennemis actifs sont affichés, le héros focalisé peut engager, et le combat créé est conservé comme combat Donjon courant sans passer par le laboratoire de test.
+- Le vrai combat de salle est monté dans la vue Donjon : les ennemis actifs sont affichés, le héros focalisé peut engager, et le combat créé est conservé comme combat Donjon courant sans passer par le laboratoire de test.
+- La fin du combat peut maintenant être réconciliée vers les runtimes réels : états héros synchronisés, ennemis KO marqués vaincus dans la bonne salle, loot/boss-key déclenchés via le moteur de spawn existant, salle libérée sans respawn et héros vivants ailleurs préservés.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -87,26 +88,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - démarrage combat réel depuis runtime de salle : `34651712990` success
 - checkpoint bridge combat de salle : `34651774201` success
 - entrée du combat réel dans la vue Donjon : `34652076626` success
+- réconciliation fin de combat Donjon : `34653003698` success
 
 ## Dernière étape terminée
 
-Montage du vrai combat de salle directement dans la vue Donjon :
-- `dungeon-gameplay-view.js` importe désormais `activeDungeonEnemies()` et `startDungeonCombat()` du bridge dédié;
-- la vue affiche les ennemis actifs de la salle focalisée avec leurs noms lisibles;
-- le bouton `Engager le combat avec …` n'est actif que si le runtime du héros focalisé est réellement fourni;
-- au clic, la vue appelle directement `startDungeonCombat()` avec le vrai `roomRuntime`, les vrais runtimes héros, l'état spatial et la configuration de portée fournis par la partie;
-- le combat créé est le vrai `createCombatState()` D100 et est conservé dans la vue comme combat Donjon courant; le laboratoire `Combat test` n'est pas utilisé;
-- une fois lancé, la vue affiche un résumé du combat en cours (participants, round, acteur courant) sans recalculer l'issue dans le rendu;
-- `rpg-page.js` transporte maintenant `dungeonHeroRuntimes`, `dungeonSpatial`, `dungeonSpatialConfig` et `dungeonCombat`, expose des setters/getters correspondants, et remonte `onDungeonCombatStart` au parent;
-- un héros situé dans une autre salle ou hors portée reste filtré par `dungeon-combat-runtime.js` avant création du combat;
-- régression vue : ennemi actif affiché, bouton de combat disponible avec runtime Lyra chargé, bouton désactivé sans runtime héros, et salle vide affichant correctement l'absence d'ennemi.
+Réconciliation de la fin du vrai combat Donjon vers les runtimes de partie :
+- `dungeon-combat-runtime.js` expose maintenant `reconcileDungeonCombatResult()`;
+- la fonction refuse un combat encore actif : aucune conséquence de fin n'est appliquée avant `phase === ended`;
+- les états des héros participants sont recopiés depuis le `combatState` vers leurs vrais runtimes, y compris ressources et KO;
+- un héros KO devient inactif, mais un héros vivant dans une autre salle et non participant reste totalement inchangé;
+- chaque ennemi KO est retrouvé par `roomEntityId` dans la salle qui a créé le combat;
+- la défaite réelle passe par `resolveRoomCreatureDefeat()` : loot, boss-key et état `defeated/active` utilisent donc le moteur de spawn/bestiaire déjà existant au lieu d'un second système;
+- les ennemis encore vivants conservent leur état de combat mis à jour;
+- `roomCleared` est dérivé de `activeDungeonEnemies()` après réconciliation, ce qui garantit qu'un ennemi vaincu ne peut pas respawn au prochain engagement;
+- `heroesStillAlive` est calculé sur l'ensemble des runtimes héros de la partie, pas seulement les combattants : le cas historique de faux Game Over quand Brom est vivant ailleurs est explicitement protégé;
+- régression : Aldren blessé est synchronisé, Lyra KO reste KO/inactive, Brom vivant ailleurs reste actif, le squelette vaincu produit son loot puis disparaît des futurs combats.
 
 Commits de l'étape :
-- vue Donjon + entrée combat réel : `97dccff0e7a1e32799d8d48a33b5dba2e63be25a`
-- transport état combat via page RPG : `94fff6571c4599a4187881dd5367f74e69aaa2bf`
-- régression entrée combat : `d302006442d3da67fd2bd57ba57f41bae8236539`
+- réconciliation runtime combat -> salle/héros : `d67612551381a8cef4f8ce237dc6db55066c369d`
+- régression fin de combat : `8dec3471f3a5e3bdaaf3bd6644eeec3d5a2bb264`
 
-CI finale : `34652076626` success.
+CI finale : `34653003698` success.
 
 ## Stockage — décision repoussée
 
@@ -116,7 +118,7 @@ CI finale : `34652076626` success.
 
 ## Priorités ouvertes
 
-- raccorder maintenant la fin du combat Donjon au runtime de salle : synchroniser états héros, marquer exactement les ennemis vaincus, déclencher loot/boss-key et libérer la salle sans respawn;
+- raccorder `reconcileDungeonCombatResult()` à la vraie vue/page Donjon lorsque le `combatState` passe à `ended`, puis rafraîchir salle, loot et héros sans second état parallèle;
 - monter ensuite les actions/compétences réelles du combat dans la vue Donjon autour du même `combatState`, sans recréer de second moteur;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

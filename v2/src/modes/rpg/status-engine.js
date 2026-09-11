@@ -55,8 +55,12 @@ export function addPersistentStatus(actor, status, { definitions = {}, context =
   if (!applied.applied) return { ok: false, reason: applied.reason || 'not-applied', actor: next };
 
   next.state = applied.state;
+  const appliedValue = Number(next.state?.stats?.[statId] ?? previousValue) || 0;
+  const appliedDelta = appliedValue - previousValue;
+  const sourceId = String(status.sourceId || status.source || id);
   const incoming = {
     id,
+    sourceId,
     label: status.label || status.name || 'Effet temporaire',
     effectId: String(status.effectId),
     remaining: Math.max(1, Number(status.remaining ?? status.duration ?? 1) || 1),
@@ -65,7 +69,16 @@ export function addPersistentStatus(actor, status, { definitions = {}, context =
     maxStacks: 1,
     stacks: 1,
     persistent: true,
-    revert: { kind: 'stat', id: statId, previousValue },
+    modifier: {
+      kind: 'stat',
+      id: statId,
+      sourceId,
+      operation: effect.operation || 'add',
+      value: Number(effect.value) || 0,
+      appliedDelta,
+    },
+    // Kept only so old serialized actors can still be read during the V2 transition.
+    revert: { kind: 'stat-delta', id: statId, delta: appliedDelta, sourceId },
   };
   next.statuses.push(incoming);
   return { ok: true, refreshed: false, actor: next, status: clone(incoming) };
@@ -110,6 +123,15 @@ export function decayStatuses(actor, amount = 1) {
       kept.push(status);
       continue;
     }
+    if (status.persistent && status.revert?.kind === 'stat-delta' && status.revert.id) {
+      next.state = next.state || {};
+      next.state.stats = next.state.stats || {};
+      const statId = String(status.revert.id);
+      const current = Number(next.state.stats[statId]) || 0;
+      next.state.stats[statId] = current - (Number(status.revert.delta) || 0);
+      continue;
+    }
+    // Legacy V2 saves created before source-layered modifiers used an absolute rollback.
     if (status.persistent && status.revert?.kind === 'stat' && status.revert.id) {
       next.state = next.state || {};
       next.state.stats = next.state.stats || {};

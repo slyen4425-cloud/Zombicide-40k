@@ -37,6 +37,28 @@ function roomNpcInteractions(layout){
   return (layout?.interactions||[]).filter(interaction=>interaction&&interaction.enabled!==false&&['npc','ally'].includes(String(interaction.kind)));
 }
 
+export function eventPresentationEntries(eventState){
+  const entries=[];
+  for(const row of eventState?.log||[]){
+    if(row.type==='event-text'&&row.text) entries.push({kind:'text',icon:'💬',text:String(row.text)});
+    else if(row.type==='event-check-resolved') entries.push({kind:'check',icon:'🎲',text:`Jet ${row.success?'réussi':'échoué'}`});
+    else if(row.type==='event-effect-applied') entries.push({kind:'effect',icon:'✨',text:'Un effet a été appliqué.'});
+    else if(row.type==='event-reward') entries.push({kind:'reward',icon:'🎁',text:`Récompense reçue : ${row.quantity||1} × ${row.itemId||'objet'}`});
+    else if(row.type==='event-flag-set') entries.push({kind:'flag',icon:'📌',text:'L’état de l’aventure a été modifié.'});
+    else if(row.type==='event-door-updated') entries.push({kind:'door',icon:'🚪',text:'Une porte a changé d’état.'});
+    else if(row.type==='event-spawn') entries.push({kind:'spawn',icon:'⚔️',text:row.created===false?'Une présence était déjà sur place.':'Une nouvelle présence apparaît.'});
+    else if(row.type==='event-transition-requested') entries.push({kind:'transition',icon:'➡️',text:'Un déplacement vers une autre zone est demandé.'});
+    else if(row.type==='event-choice-selected') entries.push({kind:'choice',icon:'✅',text:`Choix : ${row.label||'décision validée'}`});
+  }
+  return entries;
+}
+
+function renderEventPresentation(eventState){
+  const entries=eventPresentationEntries(eventState);
+  if(!entries.length) return '';
+  return `<section class="editor-section dungeon-event-presentation"><div class="section-title-row"><div><h3>📜 Événement</h3><p class="muted">Ce qui vient de se produire dans la partie.</p></div></div><div class="editor-list">${entries.map(entry=>`<div class="editor-card compact dungeon-event-line"><strong>${entry.icon}</strong> <span>${esc(entry.text)}</span></div>`).join('')}</div></section>`;
+}
+
 function renderEventChoice(roomRuntime){
   const active=roomRuntime?.eventOrchestrator?.active?.eventState||null;
   const waiting=active?.status==='waiting-choice'?active.waitingChoice:null;
@@ -61,12 +83,13 @@ function renderLootSection(roomRuntime,lootRecipients=[],selectedLootRecipientKe
   }).join('')}</div></section>`;
 }
 
-export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null}={}){
+export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null,eventPresentationState=null}={}){
   const roomId=roomRuntime?.currentRoomId?String(roomRuntime.currentRoomId):null;
   const hasRuntime=Boolean(roomRuntime&&roomId);
   const activeEvent=roomRuntime?.eventOrchestrator?.active?.eventState||null;
   const eventStatus=activeEvent?.status==='waiting-choice'?'Choix en attente':activeEvent?'Événement en cours':'Aucun événement bloquant';
-  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`Salle actuelle : ${esc(roomId)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid"><section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomId)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventChoice(roomRuntime)}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
+  const presentation=eventPresentationState||activeEvent;
+  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`Salle actuelle : ${esc(roomId)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid"><section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomId)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
 }
 
 export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},onRoomRuntimeChange=null}={}){
@@ -75,13 +98,14 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   let currentLootRecipients=clone(lootRecipients||[]);
   let currentLootRecipientKey=selectedLootRecipientKey||null;
   let currentEventWorld=clone(eventWorld||{});
+  let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
   const notify=(out=null)=>onRoomRuntimeChange?.(currentRuntime,out);
 
   const render=()=>{
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;
-    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout});
+    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation});
 
     host.querySelectorAll('[data-grant-dungeon-loot]').forEach(button=>button.addEventListener('click',()=>{
       const card=button.closest('[data-dungeon-loot]');
@@ -100,6 +124,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       if(!out.ok) return;
       currentRuntime=out.roomRuntime;
       currentEventWorld=out.world;
+      if(out.eventState) currentEventPresentation=clone(out.eventState);
       notify(out);
       render();
     }));
@@ -122,7 +147,11 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
           next.wallet=state.wallet;
           currentRuntime=next;
         },
-        onEventStateChange(eventState,out){if(out?.world) currentEventWorld=out.world;},
+        onEventStateChange(eventState,out){
+          if(eventState) currentEventPresentation=clone(eventState);
+          if(out?.world) currentEventWorld=out.world;
+          render();
+        },
       });
     }
   };
@@ -130,12 +159,19 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   render();
   return {
     render,
-    setRoomRuntime(nextRuntime){currentRuntime=nextRuntime||null;render();return currentRuntime;},
+    setRoomRuntime(nextRuntime){
+      const previousRoomId=currentRuntime?.currentRoomId||null;
+      currentRuntime=nextRuntime||null;
+      if(previousRoomId&&String(previousRoomId)!==String(currentRuntime?.currentRoomId||'')) currentEventPresentation=null;
+      if(currentRuntime?.eventOrchestrator?.active?.eventState) currentEventPresentation=clone(currentRuntime.eventOrchestrator.active.eventState);
+      render();return currentRuntime;
+    },
     setUniverse(nextUniverse){currentUniverse=nextUniverse||{};render();return currentUniverse;},
     setLootRecipients(nextRecipients,selectedKey=currentLootRecipientKey){currentLootRecipients=clone(nextRecipients||[]);currentLootRecipientKey=selectedKey||null;render();return clone(currentLootRecipients);},
     setEventWorld(nextWorld){currentEventWorld=clone(nextWorld||{});render();return clone(currentEventWorld);},
     getRoomRuntime:()=>currentRuntime,
     getLootRecipients:()=>clone(currentLootRecipients),
     getEventWorld:()=>clone(currentEventWorld),
+    getEventPresentation:()=>currentEventPresentation?clone(currentEventPresentation):null,
   };
 }

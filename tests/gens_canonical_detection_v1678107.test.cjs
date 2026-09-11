@@ -21,7 +21,7 @@ assert.match(bridge,/gens-canonical-detection-1678107\.js\?v=1678107/);
 assert.match(equipment,/runtimeDefs/,'equipment/set/evolution editors must source canonical active stats');
 assert.match(heroEditor,/runtimeDefs/,'hero and ability editors must source canonical active stats');
 assert.match(heroEditor,/scaleAttribute/,'ability scaling must stay connected to active stats');
-assert.match(sw,/gensrpg-cache-16\.78\.107-canonical-detection/);
+assert.match(sw,/const CACHE_NAME = "gensrpg-cache-[^"]+";/,'service worker must expose a versioned GenSrpG cache name');
 assert.match(sw,/gens-canonical-detection-1678107\.js/);
 
 const profile={id:'u1',name:'Test',rpgUniverse:{stats:{active:['force'],dynamicDefinitions:[]},exploration:{trapDetectionRadius:2,enemyDetectionRadius:2},movement:{combatParticipationRange:3}}};

@@ -2,6 +2,8 @@ import { renderQuestJournal } from './quest-journal-ui.js';
 import { renderLootRecipientPicker, grantCreatureLootToSelectedRecipient } from './loot-recipient-ui.js';
 import { mountRoomNpcInteraction } from './room-npc-interaction-ui.js';
 import { resolveRoomRuntimeEventChoice } from './room-event-runtime.js';
+import { availableRoomLinks } from './world-engine.js';
+import { transitionDungeonRoom } from './room-runtime.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
@@ -37,6 +39,17 @@ function roomNpcInteractions(layout){
   return (layout?.interactions||[]).filter(interaction=>interaction&&interaction.enabled!==false&&['npc','ally'].includes(String(interaction.kind)));
 }
 
+export function dungeonTransitionEntries(worldIndex,roomRuntime,{conditionEvaluator=null,inventory=null}={}){
+  if(!worldIndex||!roomRuntime?.worldSession) return [];
+  return availableRoomLinks(worldIndex,roomRuntime.worldSession,{conditionEvaluator,inventory}).map(link=>({
+    id:String(link.id),
+    label:String(link.label||'Passage'),
+    targetRoomId:String(link.targetRoomId),
+    targetRoomName:String(worldIndex.rooms?.[String(link.targetRoomId)]?.name||'Salle suivante'),
+    traversal:String(link.traversal||'forward'),
+  }));
+}
+
 export function eventPresentationEntries(eventState){
   const entries=[];
   for(const row of eventState?.log||[]){
@@ -67,6 +80,12 @@ function renderEventChoice(roomRuntime){
   return `<section class="editor-section dungeon-event-choice"><div class="section-title-row"><div><h3>❗ Choix d’événement</h3><p class="muted">La partie attend ta décision avant de poursuivre.</p></div></div><div class="action-row">${choices||'<p class="muted">Aucun choix disponible.</p>'}</div></section>`;
 }
 
+function renderTransitionSection(worldIndex,roomRuntime,options={}){
+  if(!roomRuntime?.currentRoomId) return '';
+  const links=dungeonTransitionEntries(worldIndex,roomRuntime,options);
+  return `<section class="editor-section dungeon-transition-section"><div class="section-title-row"><div><h3>🚪 Passages</h3><p class="muted">Passages actuellement accessibles depuis cette salle.</p></div></div><div class="action-row">${links.map(link=>`<button type="button" class="secondary-button" data-dungeon-transition="${esc(link.id)}">${link.traversal==='reverse'?'↩️':'➡️'} ${esc(link.label)} · ${esc(link.targetRoomName)}</button>`).join('')||'<p class="muted">Aucun passage accessible pour le moment.</p>'}</div></section>`;
+}
+
 function renderNpcSection(layout){
   const interactions=roomNpcInteractions(layout);
   if(!interactions.length) return '';
@@ -83,21 +102,24 @@ function renderLootSection(roomRuntime,lootRecipients=[],selectedLootRecipientKe
   }).join('')}</div></section>`;
 }
 
-export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null,eventPresentationState=null}={}){
+export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null,eventPresentationState=null,worldIndex=null,conditionEvaluator=null,inventory=null}={}){
   const roomId=roomRuntime?.currentRoomId?String(roomRuntime.currentRoomId):null;
   const hasRuntime=Boolean(roomRuntime&&roomId);
   const activeEvent=roomRuntime?.eventOrchestrator?.active?.eventState||null;
   const eventStatus=activeEvent?.status==='waiting-choice'?'Choix en attente':activeEvent?'Événement en cours':'Aucun événement bloquant';
   const presentation=eventPresentationState||activeEvent;
-  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`Salle actuelle : ${esc(roomId)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid"><section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomId)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
+  const roomName=worldIndex?.rooms?.[roomId]?.name||roomId;
+  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`Salle actuelle : ${esc(roomName)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid"><section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomName)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderTransitionSection(worldIndex,roomRuntime,{conditionEvaluator,inventory})}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
 }
 
-export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},onRoomRuntimeChange=null}={}){
+export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},worldIndex=null,conditionEvaluator=null,inventory=null,onRoomRuntimeChange=null}={}){
   let currentUniverse=universe||{};
   let currentRuntime=roomRuntime||null;
   let currentLootRecipients=clone(lootRecipients||[]);
   let currentLootRecipientKey=selectedLootRecipientKey||null;
   let currentEventWorld=clone(eventWorld||{});
+  let currentWorldIndex=worldIndex||null;
+  let currentInventory=inventory||null;
   let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
   const notify=(out=null)=>onRoomRuntimeChange?.(currentRuntime,out);
@@ -105,7 +127,25 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   const render=()=>{
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;
-    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation});
+    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory});
+
+    host.querySelectorAll('[data-dungeon-transition]').forEach(button=>button.addEventListener('click',()=>{
+      if(!currentWorldIndex||!currentRuntime) return;
+      const out=transitionDungeonRoom(currentWorldIndex,currentRuntime,button.dataset.dungeonTransition,{
+        layoutProvider,
+        conditionEvaluator,
+        inventory:currentInventory,
+        quests:questList(currentUniverse),
+        questDefinitions:currentUniverse,
+        questContext:{world:currentEventWorld},
+      });
+      if(!out.ok) return;
+      const previousRoomId=currentRuntime.currentRoomId;
+      currentRuntime=out.runtime;
+      if(String(previousRoomId)!==String(currentRuntime.currentRoomId)) currentEventPresentation=null;
+      notify(out);
+      render();
+    }));
 
     host.querySelectorAll('[data-grant-dungeon-loot]').forEach(button=>button.addEventListener('click',()=>{
       const card=button.closest('[data-dungeon-loot]');
@@ -167,6 +207,8 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       render();return currentRuntime;
     },
     setUniverse(nextUniverse){currentUniverse=nextUniverse||{};render();return currentUniverse;},
+    setWorldIndex(nextWorldIndex){currentWorldIndex=nextWorldIndex||null;render();return currentWorldIndex;},
+    setInventory(nextInventory){currentInventory=nextInventory||null;render();return currentInventory;},
     setLootRecipients(nextRecipients,selectedKey=currentLootRecipientKey){currentLootRecipients=clone(nextRecipients||[]);currentLootRecipientKey=selectedKey||null;render();return clone(currentLootRecipients);},
     setEventWorld(nextWorld){currentEventWorld=clone(nextWorld||{});render();return clone(currentEventWorld);},
     getRoomRuntime:()=>currentRuntime,

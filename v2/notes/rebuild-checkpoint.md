@@ -24,6 +24,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Le picker de destinataire de loot est intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
 - Les interactions PNJ/allié et les choix d’événements sont surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
 - Les textes et conséquences des événements sont présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
+- Les passages authored du World Builder sont maintenant directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -72,23 +73,31 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - réglages obstacles dans Créateur de salle : `34649715933` success
 - checkpoint obstacles éditeur : `34649791631` success
 - statuts persistants superposables par source : `34650030877` success
+- checkpoint statuts superposables : `34650111943` success
+- transitions World Builder directement dans vue Donjon : `34650608938` success
 
 ## Dernière étape terminée
 
-Statuts persistants superposables par source :
-- `status-engine.js` ne mémorise plus une valeur absolue à restaurer pour les nouveaux statuts persistants;
-- chaque statut conserve maintenant son `sourceId`, son opération, sa valeur et surtout le `appliedDelta` réellement appliqué après limites/clamp;
-- à l'expiration, seul ce delta est retiré de la valeur courante : les autres bonus/malus actifs restent présents;
-- un changement indépendant de stat intervenu pendant que les statuts sont actifs n'est plus écrasé par l'expiration d'un ancien statut;
-- rafraîchir le même statut continue de prolonger sa durée sans appliquer deux fois le bonus;
-- les anciennes sauvegardes V2 possédant encore `revert.kind='stat'` restent compatibles via le chemin de rollback legacy;
-- la régression couvre trois sources simultanées sur la même stat (`+3`, `+2`, `-1`), leurs expirations à des tours différents et une modification indépendante entre deux expirations.
+Transitions authored directement jouables depuis la vue Donjon :
+- `dungeon-gameplay-view.js` lit les passages disponibles avec `availableRoomLinks()` à partir du vrai `worldSession` du runtime;
+- les boutons affichent uniquement le libellé authored et le nom de la salle cible, pas les IDs techniques visibles;
+- les passages exigeant un objet ne sont pas proposés tant que l’inventaire transmis ne contient pas cet objet;
+- les conditions authored passent par le même `conditionEvaluator` que le moteur du monde;
+- cliquer un passage appelle directement `transitionDungeonRoom()` : pas de second runtime ou de téléportation UI parallèle;
+- la transition instancie/recharge la salle via `layoutProvider`, incrémente les visites, alimente le log, et envoie le signal de visite aux quêtes existantes;
+- la page RPG construit le `worldIndex` à partir du vrai `loadWorldDraft()` et le fournit à la vue Donjon;
+- la page expose aussi `setDungeonInventory()` et `refreshDungeonWorld()` pour garder passages/objets/world authored synchronisés;
+- une première régression de test a échoué à cause d'un appel incorrect à `addItem()` dans le test, puis une seconde parce qu'un ID présent uniquement dans un attribut `data-*` était assimilé à tort à un ID visible; les deux assertions de test ont été corrigées sans contourner les règles de gameplay;
+- batterie complète finale verte.
 
 Commits de l'étape :
-- moteur statuts : `29bc752ff21623378236673459cde905ef102107`
-- régression : `549addafc44172d02a662fe1c902255bcb74d2e0`
+- vue Donjon + vraies transitions : `3409ad2cac7d698ba97f76f116b5e5c6773e26fc`
+- raccord page RPG au World Builder : `a3582e2e316945da01ee08204fce8b0d0b8bfb96`
+- régression initiale : `d7a0259fb8bb482421d011e7ae20a5c2e9877d78`
+- correction inventaire de test : `759017c3e90a33a2befe3b606e92443e8b716bd5`
+- correction assertion visibilité : `10bbd21e00e53f5609f278c9416d1279fad3e46f`
 
-CI finale : `34650030877` success.
+CI finale : `34650608938` success.
 
 ## Stockage — décision repoussée
 
@@ -98,6 +107,7 @@ CI finale : `34650030877` success.
 
 ## Priorités ouvertes
 
-- poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
+- raccorder maintenant le démarrage du combat réel depuis les ennemis actifs de la salle à la vue Donjon, en réutilisant le runtime de combat D100 existant;
+- raccorder ensuite la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

@@ -20,7 +20,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
 - Présentation combat : timeline, KO, PV/ressources, journal moteur et ciblage vivant dans la vraie vue Donjon.
 - Consommables de combat : runtime + UI réelle branchés au même `combatState` et au vrai inventaire héros ; quantité, cible valide, consommation unique, effets génériques et progression de timeline sont visibles/raccordés.
-- Fuite combat : runtime dédié prêt ; les héros participants gardent leur état de combat, les héros dans d’autres salles restent intacts et les ennemis reviennent à leur état persistant de salle sans défaite/loot artificiels.
+- Fuite combat : runtime + bouton réel dans la vue Donjon ; les héros participants gardent leur état, les héros dans d’autres salles restent intacts, les ennemis reviennent à leur état persistant et le bloc combat est fermé sans passer par une fausse victoire/défaite.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -42,30 +42,30 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - runtime consommables combat Donjon : `34657796799` success
 - UI consommables combat Donjon : `34658191700` success
 - runtime fuite combat Donjon : `34658436096` success
+- UI fuite combat Donjon : `34658702948` success
 
 ## Dernière étape terminée
 
-Runtime de fuite raccordé au vrai modèle de combat Donjon :
-- nouveau module `v2/src/modes/rpg/dungeon-combat-flee-runtime.js` ;
-- la fuite n’est possible que pendant un vrai `dungeon-room-combat` actif ;
-- les héros qui participaient au combat récupèrent leur état courant du `combatState` : dégâts/ressources/KO sont donc conservés ;
-- les héros absents du combat, notamment ceux situés dans une autre salle, ne sont pas modifiés ;
-- le `roomRuntime` n’est pas réconcilié avec les dégâts infligés aux ennemis : leurs PV/états reviennent donc exactement à l’état persistant de la salle avant le combat ;
-- aucun ennemi n’est marqué vaincu, aucun loot n’est créé/attribué et aucune clé de boss ne peut être obtenue par fuite ;
-- le combat passe en `phase:'fled'`, sans vainqueur ni acteur actif, et journalise `combat-fled` ;
-- une deuxième tentative de fuite sur ce combat déjà fermé est refusée ;
-- régression dédiée : héros A conserve ses dégâts, héros B dans une autre salle reste inchangé, ennemi repasse de 2 PV combat à 10 PV persistants, sans `defeated` ni `lootClaimed`.
+Fuite branchée dans la vraie vue Donjon :
+- nouveau module `v2/src/modes/rpg/dungeon-combat-flee-ui.js` ;
+- bouton lisible `🏃 Fuir` uniquement pendant un vrai `dungeon-room-combat` en phase `turn` ;
+- le clic appelle exclusivement `fleeDungeonCombat()` : aucune seconde logique de fuite n’est recréée dans l’interface ;
+- après fuite, le résultat `phase:'fled'` est propagé aux callbacks avec `kind:'combat-flee'`, mais le combat actif de la page est remis à `null` afin de fermer réellement le bloc combat ;
+- les `heroRuntimes` renvoyés par le runtime sont resynchronisés immédiatement, donc dégâts/ressources/KO des participants restent conservés ;
+- le `roomRuntime` persistant reste l’autorité pour les ennemis, donc leurs dégâts temporaires de combat ne sont pas enregistrés ;
+- la réconciliation victoire/défaite n’est jamais appelée pour cette sortie ; aucun loot, aucune clé boss et aucun ennemi vaincu artificiellement ;
+- régression `rpg-dungeon-combat-flee-ui.test.mjs` : bouton seulement sur combat actif Donjon, fermeture du combat actif, propagation `combat-flee`, resynchronisation héros + salle.
 
 Commits de l’étape :
-- runtime fuite : `d94aa55f81799c4d9836e924427c6e188be15a25`
-- régression fuite : `eab89f7a86cbf4b018987c45a156054b5ae5f9de`
+- contrôle UI fuite : `659ee46f85df68fa3f87e993a4518d8a91db7e8c`
+- montage page Donjon : `e631714efe643c4e72298eee2ab122a7c9b8bfbd`
+- régression UI : `e2334508dc098c92c041ac1f9f3718e870881451`
 
-CI finale : `34658436096` success.
+CI finale : `34658702948` success.
 
 ## Priorités ouvertes
 
-1. brancher maintenant la fuite dans la vraie vue Donjon : bouton `Fuir`, fermeture propre du bloc combat et propagation des héros mis à jour sans passer par la réconciliation victoire/défaite ;
-2. vérifier/raccorder `combat direct OFF / MJ contrôle total` contre le legacy ;
-3. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
-4. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-5. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. vérifier/raccorder `combat direct OFF / MJ contrôle total` contre le legacy ;
+2. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
+3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

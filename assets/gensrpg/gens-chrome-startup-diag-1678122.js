@@ -3,6 +3,7 @@
   window.__GENSRPG_DIAG122_INSTALLED__=true;
   const rows=[];
   let box=null;
+  let expanded=false;
   const now=()=>new Date().toLocaleTimeString();
   const textOf=(x)=>{try{return String(x??'').replace(/\s+/g,' ').slice(0,180)}catch{return '[unprintable]'}};
   const targetOf=(t)=>{try{
@@ -13,28 +14,54 @@
     const txt=textOf(t.innerText||t.textContent||'').slice(0,80);
     return `${tag}${id}${cls}${txt?` «${txt}»`:''}`;
   }catch{return '[target?]'}};
+  function applyBoxMode(){
+    if(!box) return;
+    if(expanded){
+      box.style.left='6px';
+      box.style.right='6px';
+      box.style.width='auto';
+      box.style.maxHeight='55vh';
+      box.style.padding='8px';
+      box.style.overflow='auto';
+      box.style.whiteSpace='pre-wrap';
+    }else{
+      box.style.left='auto';
+      box.style.right='6px';
+      box.style.width='128px';
+      box.style.maxHeight='34px';
+      box.style.padding='6px 8px';
+      box.style.overflow='hidden';
+      box.style.whiteSpace='nowrap';
+    }
+  }
   function ensureBox(){
     if(box&&box.isConnected) return box;
     if(!document.body) return null;
     box=document.createElement('div');
     box.id='gensrpgDiag122';
-    box.style.cssText='position:fixed;z-index:2147483647;left:6px;right:6px;bottom:6px;max-height:38vh;overflow:auto;background:rgba(0,0,0,.92);color:#fff;border:2px solid #00e0ff;border-radius:10px;padding:8px;font:12px/1.35 monospace;white-space:pre-wrap;box-shadow:0 0 20px #000;pointer-events:auto';
-    box.addEventListener('click',()=>{box.style.maxHeight=box.style.maxHeight==='75vh'?'38vh':'75vh'});
+    box.style.cssText='position:fixed;z-index:2147483647;bottom:6px;background:rgba(0,0,0,.88);color:#fff;border:2px solid #00e0ff;border-radius:10px;font:12px/1.35 monospace;box-shadow:0 0 12px #000;pointer-events:auto;user-select:none';
+    box.addEventListener('click',()=>{expanded=!expanded;applyBoxMode();render()});
     document.body.appendChild(box);
+    applyBoxMode();
     render();
     return box;
   }
   function render(){
     if(!box||!box.isConnected) return;
-    box.textContent='DIAG CHROME V122\n'+rows.slice(-12).join('\n');
+    if(!expanded){
+      const lastError=[...rows].reverse().find(r=>r.includes('❌'));
+      box.textContent=lastError?'DIAG V123 ⚠️':'DIAG V123 ✓';
+      return;
+    }
+    box.textContent='DIAG CHROME V123 — toucher pour replier\n'+rows.slice(-14).join('\n');
   }
   function log(msg,kind='i'){
     rows.push(`${now()} ${kind==='e'?'❌':kind==='w'?'⚠️':'•'} ${msg}`);
     if(rows.length>80) rows.splice(0,rows.length-80);
     ensureBox(); render();
-    try{console[kind==='e'?'error':kind==='w'?'warn':'log']('[V122]',msg)}catch{}
+    try{console[kind==='e'?'error':kind==='w'?'warn':'log']('[V123]',msg)}catch{}
   }
-  window.__GENSRPG_DIAG122__={log,rows};
+  window.__GENSRPG_DIAG122__={log,rows,expand:()=>{expanded=true;applyBoxMode();render()}};
   window.addEventListener('error',e=>log(`ERROR ${e.message||'inconnue'} @ ${e.filename||'?'}:${e.lineno||0}:${e.colno||0}`,'e'),true);
   window.addEventListener('unhandledrejection',e=>log(`PROMISE ${textOf(e.reason&&e.reason.stack||e.reason)}`,'e'),true);
   const nativeAdd=EventTarget.prototype.addEventListener;
@@ -62,5 +89,5 @@
   },true);
   document.addEventListener('DOMContentLoaded',()=>{ensureBox();log(`DOMContentLoaded UA=${textOf(navigator.userAgent)}`);});
   window.addEventListener('load',()=>log('window.load terminé'));
-  setTimeout(()=>{ensureBox();log('diag chargé avant bootstrap principal');},0);
+  setTimeout(()=>{ensureBox();log('diag V123 chargé avant bootstrap principal');},0);
 })();

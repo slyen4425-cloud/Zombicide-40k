@@ -14,6 +14,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime, obstacles configurables sans saisie technique.
 - Éditeur RPG : sélecteur de jet réutilisable dans les compétences et éditeur dédié des pièges avec détection/désarmement séparés.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée, couverture directionnelle et modificateurs tactiques issus des équipements réellement équipés.
+- Statuts persistants : les modificateurs de stats expirent maintenant par delta/source au lieu de restaurer une ancienne valeur absolue; plusieurs bonus/malus peuvent coexister sur la même stat sans s'écraser.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
@@ -69,25 +70,25 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - couverture directionnelle salle/obstacles : `34649297286` success
 - checkpoint couverture directionnelle : `34649352594` success
 - réglages obstacles dans Créateur de salle : `34649715933` success
+- checkpoint obstacles éditeur : `34649791631` success
+- statuts persistants superposables par source : `34650030877` success
 
 ## Dernière étape terminée
 
-Réglages d’obstacles/couverture directement dans le Créateur de salle :
-- `createWall()` conserve maintenant `kind` et `coverModifier` en plus de `blocksMovement` / `blocksVision`, ce qui rend les obstacles authored compatibles avec la couverture directionnelle déjà utilisée par le combat;
-- l’éditeur propose des types lisibles `Mur plein`, `Muret`, `Barricade`, `Barrière`, sans saisie d’identifiant technique;
-- chaque prochain obstacle peut régler séparément : blocage déplacement, blocage ligne de vue et modificateur de couverture;
-- les presets restent modifiables : par exemple `Muret` sélectionne déplacement bloqué, vue autorisée, couverture -15;
-- la couverture posée directement sur une case reste distincte de la couverture directionnelle d’un obstacle de bord;
-- les icônes de grille distinguent désormais mur, muret, barricade et barrière;
-- l’ancien outil `Mur` devient `Obstacle` mais continue d’utiliser la structure `walls` existante : aucun second système de pathfinding/vision/couverture n’est créé;
-- régression `rpg-room-obstacle-editor.test.mjs` protège la normalisation, la persistance du type/couverture et les libellés UI.
+Statuts persistants superposables par source :
+- `status-engine.js` ne mémorise plus une valeur absolue à restaurer pour les nouveaux statuts persistants;
+- chaque statut conserve maintenant son `sourceId`, son opération, sa valeur et surtout le `appliedDelta` réellement appliqué après limites/clamp;
+- à l'expiration, seul ce delta est retiré de la valeur courante : les autres bonus/malus actifs restent présents;
+- un changement indépendant de stat intervenu pendant que les statuts sont actifs n'est plus écrasé par l'expiration d'un ancien statut;
+- rafraîchir le même statut continue de prolonger sa durée sans appliquer deux fois le bonus;
+- les anciennes sauvegardes V2 possédant encore `revert.kind='stat'` restent compatibles via le chemin de rollback legacy;
+- la régression couvre trois sources simultanées sur la même stat (`+3`, `+2`, `-1`), leurs expirations à des tours différents et une modification indépendante entre deux expirations.
 
 Commits de l'étape :
-- données obstacle dans `room-engine.js` : `489873f1da171ab85dd6fde4af067187a4e0d789`
-- UI Créateur de salle : `dcb4e2d341a328ec354e1d56f8aec848c772a984`
-- régression : `b6141b86de461e52820375181d356dc6c7a43811`
+- moteur statuts : `29bc752ff21623378236673459cde905ef102107`
+- régression : `549addafc44172d02a662fe1c902255bcb74d2e0`
 
-CI finale : `34649715933` success.
+CI finale : `34650030877` success.
 
 ## Stockage — décision repoussée
 
@@ -97,6 +98,6 @@ CI finale : `34649715933` success.
 
 ## Priorités ouvertes
 
-- remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
+- étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

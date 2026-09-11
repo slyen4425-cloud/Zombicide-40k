@@ -1,0 +1,67 @@
+name: One-shot Chrome diagnostic V122
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  inject:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Inject early Chrome diagnostic and bump PWA cache
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          tag = '<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=1678122"></script>'
+          if tag not in html:
+              if '<head>' not in html:
+                  raise SystemExit('V122: <head> marker missing')
+              html = html.replace('<head>', '<head>\n'+tag, 1)
+              index.write_text(html, encoding='utf-8')
+
+          sw = Path('service-worker.js')
+          s = sw.read_text(encoding='utf-8')
+          old = 'const CACHE_NAME = "gensrpg-cache-16.78.107-canonical-detection";'
+          new = 'const CACHE_NAME = "gensrpg-cache-16.78.122-chrome-startup-diagnostic";'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('V122: active cache marker unexpected')
+          diag = '"./assets/gensrpg/gens-chrome-startup-diag-1678122.js"'
+          if diag not in s:
+              marker = '"./manifest.json"'
+              if marker not in s:
+                  raise SystemExit('V122: CORE_FILES manifest marker missing')
+              s = s.replace(marker, diag+','+marker, 1)
+          sw.write_text(s, encoding='utf-8')
+
+          final = index.read_text(encoding='utf-8')
+          if final.find(tag) > final.find('<script', final.find(tag)+1):
+              raise SystemExit('V122: diagnostic is not the first script')
+          if 'gensrpg-cache-16.78.122-chrome-startup-diagnostic' not in sw.read_text(encoding='utf-8'):
+              raise SystemExit('V122: cache bump missing')
+          PY
+
+      - name: Verify diagnostic syntax
+        run: node --check assets/gensrpg/gens-chrome-startup-diag-1678122.js
+
+      - name: Commit V122 injection
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          git commit -m "V16.78.122 diagnostic: trace Chrome startup clicks"
+          git push origin HEAD:main

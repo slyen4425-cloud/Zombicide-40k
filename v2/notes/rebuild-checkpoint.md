@@ -24,8 +24,9 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Le picker de destinataire de loot est intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
 - Les interactions PNJ/allié et les choix d’événements sont surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
 - Les textes et conséquences des événements sont présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
-- Les passages authored du World Builder sont maintenant directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
-- Le runtime Donjon sait maintenant suivre plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
+- Les passages authored du World Builder sont directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
+- Le runtime Donjon suit plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
+- La vue Donjon est maintenant raccordée à `heroLocations` : choix du héros actif par nom, salle affichée propre à ce héros, et passage appliqué uniquement au héros focalisé.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -78,25 +79,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - transitions World Builder directement dans vue Donjon : `34650608938` success
 - checkpoint transitions Donjon : `34650681453` success
 - déplacements individuels multi-héros / retours arrière : `34651007333` success
+- checkpoint déplacements multi-héros : `34651081170` success
+- focus héros + déplacement individuel dans vue Donjon : `34651410540` success
 
 ## Dernière étape terminée
 
-Déplacements individuels multi-héros et retours arrière au niveau runtime Donjon :
-- `createDungeonRuntime()` accepte maintenant `heroIds` et `focusedHeroId`; chaque héros reçoit une entrée `heroLocations` distincte sans casser le mode historique mono/groupe;
-- chaque héros conserve indépendamment `roomId`, `visitedRoomIds`, `history`, `sequence` et sa future position locale `x/y`;
-- `transitionDungeonHeroRoom()` traverse le vrai lien du World Builder pour un seul héros, en réutilisant `traverseRoomLink()` et les mêmes règles d'objet/conditions;
-- déplacer Lyra ne déplace plus Aldren : les autres héros gardent leur salle et leur historique intacts;
-- `setFocusedDungeonHero()` change seulement la salle affichée/focalisée, sans téléporter les autres héros;
-- `heroesInRoom()` et `getHeroRoomLocation()` fournissent la base pour sélectionner plus tard les participants réels aux combats/interactions;
-- lorsqu'un héros revient dans une salle déjà visitée, `ensureRoomInstance()` réutilise la même instance : ennemis, coffres, portes et interactions persistants ne sont pas recréés;
-- le signal de visite de quête peut être déclenché sur l'entrée du héros concerné;
-- régression : Aldren reste salle A pendant que Lyra va salle B, le focus peut passer sur Lyra, puis Lyra revient salle A; l'ennemi de A n'est pas dupliqué et les historiques héros restent indépendants.
+Raccord du multi-héros à la vraie vue Donjon :
+- la vue affiche maintenant un sélecteur `Héros actif` à partir de `roomRuntime.heroLocations`, avec nom/icône du héros et salle où il se trouve;
+- changer de héros utilise `setFocusedDungeonHero()` : seule la salle affichée/focalisée change, aucun autre héros n'est déplacé;
+- l'en-tête rappelle quel héros est actuellement joué et dans quelle salle il se trouve;
+- la liste des passages est calculée depuis la session propre du héros focalisé (`roomId`, historique, visites), donc un héros en salle B voit bien son retour vers A pendant qu'un autre héros resté en A voit ses propres sorties;
+- cliquer un passage appelle `transitionDungeonHeroRoom()` quand le runtime multi-héros est actif : seul le héros focalisé traverse le lien;
+- le mode historique sans `heroLocations` garde le fallback `transitionDungeonRoom()` pour compatibilité;
+- noms de héros et salles sont affichés à la place des IDs techniques;
+- régression : Lyra focalisée en Crypte voit les sorties de la Crypte; Aldren focalisé dans la Galerie voit le même lien en sens retour vers la Crypte.
 
 Commits de l'étape :
-- runtime multi-héros / transition individuelle : `4a96b58b1bf0add5abce8f473b6144044a790cea`
-- régression déplacements/retours arrière : `daf01aa360160616a63197757ef3f05b10ddead4`
+- vue Donjon multi-héros : `cb80bbf982f20fac11e98d28338156ec5cdd50f8`
+- régression focus/déplacement individuel : `2a48415a1bc4621e2a21ed6d5a6f34fd72a72edc`
 
-CI finale : `34651007333` success.
+CI finale : `34651410540` success.
 
 ## Stockage — décision repoussée
 
@@ -106,8 +108,7 @@ CI finale : `34651007333` success.
 
 ## Priorités ouvertes
 
-- raccorder `heroLocations` à la vue Donjon : choix du héros actif/focalisé et bouton de passage appliqué uniquement à ce héros;
-- démarrer ensuite le combat réel depuis les ennemis actifs de la salle en ne sélectionnant que les héros réellement présents/proches;
-- raccorder la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
+- démarrer le combat réel depuis les ennemis actifs de la salle en ne sélectionnant que les héros réellement présents/proches du héros engageant;
+- raccorder ensuite la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

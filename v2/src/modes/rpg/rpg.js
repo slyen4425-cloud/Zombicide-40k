@@ -1,5 +1,6 @@
 import { createStatDefinition, createResourceDefinition } from '../../core/contracts.js';
 import { readJson, writeJson, cloneData } from '../../core/storage.js';
+import { mountAdvancedRpgEditor, ensureAdvancedRpgCollections } from './advanced-editor.js';
 
 const RPG_KEY = 'rpg_universe';
 const RPG_ID = 'starter';
@@ -17,25 +18,28 @@ const DEFAULT_RESOURCES = [
 ];
 
 export function createDefaultRpgUniverse() {
-  return {
+  return ensureAdvancedRpgCollections({
     schemaVersion: 1,
     id: RPG_ID,
     name: 'Mon univers RPG',
     stats: cloneData(DEFAULT_STATS),
     resources: cloneData(DEFAULT_RESOURCES),
+    conditions: [],
     effects: [],
     skills: [],
     heroes: [],
     forms: [],
     updatedAt: new Date().toISOString(),
-  };
+  });
 }
 
 export function loadRpgUniverse() {
-  return readJson(RPG_KEY, RPG_ID, null) || createDefaultRpgUniverse();
+  const universe = readJson(RPG_KEY, RPG_ID, null) || createDefaultRpgUniverse();
+  return ensureAdvancedRpgCollections(universe);
 }
 
 export function saveRpgUniverse(universe) {
+  ensureAdvancedRpgCollections(universe);
   universe.updatedAt = new Date().toISOString();
   return writeJson(RPG_KEY, RPG_ID, universe);
 }
@@ -129,6 +133,21 @@ function fieldValue(input) {
   return input.value;
 }
 
+function detachStat(universe, id) {
+  universe.resources.forEach(resource => { if (resource.maxFormula?.statId === id) resource.maxFormula.statId = null; });
+  universe.conditions.forEach(c => { if (c.sourceKind === 'stat' && c.sourceId === id) c.sourceId = null; });
+  universe.effects.forEach(e => { if (e.statId === id) e.statId = null; });
+  universe.skills.forEach(s => { if (s.roll?.statId === id) s.roll.statId = null; });
+}
+
+function detachResource(universe, id) {
+  universe.stats.forEach(stat => { if (stat.upgrade?.costResourceId === id) stat.upgrade.costResourceId = null; });
+  universe.conditions.forEach(c => { if (c.sourceKind === 'resource' && c.sourceId === id) c.sourceId = null; });
+  universe.effects.forEach(e => { if (e.resourceId === id) e.resourceId = null; });
+  universe.skills.forEach(s => { if (s.costResourceId === id) s.costResourceId = null; });
+  universe.forms.forEach(f => { if (f.costResourceId === id) f.costResourceId = null; });
+}
+
 export function mountRpgEditor(host) {
   let universe = loadRpgUniverse();
 
@@ -138,12 +157,13 @@ export function mountRpgEditor(host) {
   }
 
   function render() {
+    ensureAdvancedRpgCollections(universe);
     host.innerHTML = `
       <section class="workspace-head">
         <div>
           <p class="eyebrow">RPG · ÉDITEUR GÉNÉRIQUE</p>
           <h2>${esc(universe.name)}</h2>
-          <p class="muted">Première base fonctionnelle : statistiques et ressources libres, sans noms imposés par le moteur.</p>
+          <p class="muted">Statistiques, ressources, conditions, effets, compétences et transformations libres. Aucun nom de règle n'est imposé au moteur.</p>
         </div>
         <button class="help-button" type="button" data-help="rpg-editor" aria-label="Aide éditeur RPG">?</button>
       </section>
@@ -162,7 +182,8 @@ export function mountRpgEditor(host) {
           <button class="primary-button" type="button" id="addRpgResource">+ Ressource</button>
         </div>
         <div class="editor-list">${universe.resources.map(r => renderResourceCard(r, universe.stats)).join('')}</div>
-      </section>`;
+      </section>
+      <div id="rpgAdvancedHost"></div>`;
 
     host.querySelector('#addRpgStat')?.addEventListener('click', () => {
       universe.stats.push(createStatDefinition());
@@ -192,20 +213,19 @@ export function mountRpgEditor(host) {
     host.querySelectorAll('[data-delete-stat]').forEach(button => button.addEventListener('click', () => {
       const id = button.dataset.deleteStat;
       universe.stats = universe.stats.filter(x => x.id !== id);
-      universe.resources.forEach(resource => {
-        if (resource.maxFormula?.statId === id) resource.maxFormula.statId = null;
-      });
+      detachStat(universe, id);
       saveAndRender();
     }));
 
     host.querySelectorAll('[data-delete-resource]').forEach(button => button.addEventListener('click', () => {
       const id = button.dataset.deleteResource;
       universe.resources = universe.resources.filter(x => x.id !== id);
-      universe.stats.forEach(stat => {
-        if (stat.upgrade?.costResourceId === id) stat.upgrade.costResourceId = null;
-      });
+      detachResource(universe, id);
       saveAndRender();
     }));
+
+    const advancedHost = host.querySelector('#rpgAdvancedHost');
+    if (advancedHost) mountAdvancedRpgEditor(advancedHost, universe, next => { universe = next; saveAndRender(); });
   }
 
   render();

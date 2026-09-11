@@ -13,7 +13,10 @@ const oldSet=createSetDefinition({id:'ancient',name:'Armure des Anciens',itemIds
 const definitions={stats,resources,skills,items:[sword,helm,chest],sets:[oldSet],effects:[]};
 
 const hero=createHeroDefinition({
-  id:'aldren',name:'Aldren',statValues:{force:6},resourceValues:{pv:22},skillIds:['bow-shot'],inventorySlots:['main-hand','head','body'],startingItems:[{itemId:'sword',quantity:1}]
+  id:'aldren',name:'Aldren',statValues:{force:6},resourceValues:{pv:22},skillIds:['bow-shot'],
+  inventorySlots:['main-hand','head','body'],
+  startingItems:[{itemId:'sword',quantity:1}],
+  startingEquipment:[{itemId:'sword',slot:'main-hand'}]
 });
 assert.equal(validateHeroDefinition(hero,definitions).valid,true);
 let runtime=createHeroRuntime(hero,definitions);
@@ -23,9 +26,9 @@ assert.equal(runtime.state.resources.pv.max,40);
 assert.equal(runtime.state.resources.pv.current,22);
 assert.equal(runtime.progression.level,1);
 assert.equal(inventoryQuantity(runtime.inventory,'sword'),1,'starting items must be populated when hero runtime is created');
+assert.equal(runtime.inventory.equipment['main-hand']?.itemId,'sword','configured starting equipment must already be equipped');
 
-let out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='sword').entryId,'main-hand',definitions); runtime.inventory=out.inventory;
-out=addItem(runtime.inventory,'helm',1,definitions); runtime.inventory=out.inventory;
+let out=addItem(runtime.inventory,'helm',1,definitions); runtime.inventory=out.inventory;
 out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='helm').entryId,'head',definitions); runtime.inventory=out.inventory;
 out=addItem(runtime.inventory,'chest',1,definitions); runtime.inventory=out.inventory;
 out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='chest').entryId,'body',definitions); runtime.inventory=out.inventory;
@@ -39,10 +42,14 @@ runtime=setHeroKo(runtime,true); assert.equal(runtime.ko,true); assert.equal(run
 runtime=setHeroKo(runtime,false); assert.equal(runtime.ko,false); assert.equal(runtime.active,true);
 runtime=setHeroDead(runtime,true); assert.equal(runtime.dead,true); assert.equal(runtime.ko,true); assert.equal(runtime.active,false);
 
-const broken=createHeroDefinition({id:'bad',name:'Cassé',statValues:{missing:1},skillIds:['ghost'],startingItems:[{itemId:'void',quantity:1}]});
+const broken=createHeroDefinition({
+  id:'bad',name:'Cassé',statValues:{missing:1},skillIds:['ghost'],inventorySlots:['head'],
+  startingItems:[{itemId:'void',quantity:1}],startingEquipment:[{itemId:'sword',slot:'head'}]
+});
 const check=validateHeroDefinition(broken,definitions);
 assert.equal(check.valid,false);
 assert.equal(check.errors.some(e=>e.code==='missing-stat'),true);
 assert.equal(check.errors.some(e=>e.code==='missing-skill'),true);
 assert.equal(check.errors.some(e=>e.code==='missing-item'),true);
+assert.equal(check.errors.some(e=>e.code==='equipment-slot-not-allowed'),true);
 console.log('rpg hero engine ok');

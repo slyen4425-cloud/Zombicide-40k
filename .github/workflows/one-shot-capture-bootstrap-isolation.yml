@@ -1,0 +1,47 @@
+name: One-shot Capture bootstrap isolation
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  isolate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Disable only automatic Monster Capture startup seed
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'ensureBuiltinMonsterCapture162();\ndocument.addEventListener("DOMContentLoaded",()=>setTimeout(ensureBuiltinMonsterCapture162,60));'
+          new = '/* V121 DIAGNOSTIC: automatic Monster Capture startup seed disabled. Function remains available. */'
+          if old not in s:
+              raise SystemExit('Expected Monster Capture startup seed marker not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          chk = p.read_text(encoding='utf-8')
+          if old in chk:
+              raise SystemExit('Monster Capture startup seed still present')
+          if 'window.ensureBuiltinMonsterCapture162=function()' not in chk:
+              raise SystemExit('Capture seed function was unexpectedly removed')
+          PY
+
+      - name: Commit isolation patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "V16.78.121 diagnostic: disable automatic Capture startup seed"
+          git push origin HEAD:main

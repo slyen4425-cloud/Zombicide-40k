@@ -2,7 +2,7 @@ import { createCombatState } from './combat-engine.js';
 import { prepareSkillAction, resolveAndAdvance } from './turn-runtime.js';
 import { beginActiveTurn, reconcileCombatState } from './combat-session.js';
 import { createPresentationState, syncPresentationFromCombat, drainPresentation } from './combat-presentation.js';
-import { evaluateResourceMax } from '../../core/resource-formula.js';
+import { resolveResourceMax } from '../../core/formulas.js';
 
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(v){return structuredClone(v);}
@@ -10,8 +10,9 @@ function clone(v){return structuredClone(v);}
 function defaultActorState(universe){
   const stats=Object.fromEntries((universe.stats||[]).map(s=>[s.id,Number(s.baseValue)||0]));
   const resources={};
+  const partial={stats,resources};
   for(const r of universe.resources||[]){
-    const max=evaluateResourceMax(r,{stats});
+    const max=resolveResourceMax(r,partial,universe);
     resources[r.id]={current:max,max};
   }
   return {stats,resources,level:1,xp:0,skillRuntime:{},statuses:[]};

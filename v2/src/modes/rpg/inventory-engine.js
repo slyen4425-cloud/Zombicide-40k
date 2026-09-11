@@ -60,6 +60,12 @@ export function removeItem(inventory,itemId,quantity=1){
   return {ok:true,inventory:next};
 }
 
+function clearEquipmentEntries(equipment,entryIds){
+  for(const [used,equipped] of Object.entries(equipment||{})){
+    if(equipped&&entryIds.has(String(equipped.entryId))) delete equipment[used];
+  }
+}
+
 export function equipItem(inventory,entryId,slot,definitions={}){
   const next=clone(inventory); const entry=(next.entries||[]).find(e=>String(e.entryId)===String(entryId));
   if(!entry) return {ok:false,reason:'entry-missing',inventory};
@@ -67,11 +73,17 @@ export function equipItem(inventory,entryId,slot,definitions={}){
   const target=String(slot||'');
   if(!target||!(next.slots||[]).includes(target)) return {ok:false,reason:'slot-missing',inventory};
   if(!(item.equipSlots||[]).includes(target)) return {ok:false,reason:'slot-not-allowed',inventory};
-  const occupied=[target,...(item.occupiesSlots||[])];
+  const occupied=[...new Set([target,...(item.occupiesSlots||[]).map(String)])];
   for(const used of occupied) if(!(next.slots||[]).includes(used)) return {ok:false,reason:'required-slot-missing',inventory};
-  const conflicts=new Set(occupied);
-  for(const [used,equipped] of Object.entries(next.equipment||{})) if(equipped&&String(equipped.entryId)===String(entryId)) conflicts.add(used);
-  for(const used of conflicts) delete next.equipment[used];
+
+  next.equipment=next.equipment||{};
+  const conflictingEntryIds=new Set([String(entryId)]);
+  for(const used of occupied){
+    const equipped=next.equipment[used];
+    if(equipped?.entryId) conflictingEntryIds.add(String(equipped.entryId));
+  }
+  clearEquipmentEntries(next.equipment,conflictingEntryIds);
+
   const record={entryId:String(entryId),itemId:String(entry.itemId),primarySlot:target};
   for(const used of occupied) next.equipment[used]=record;
   next.sequence=(Number(next.sequence)||0)+1;

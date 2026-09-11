@@ -26,24 +26,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Médias bestiaire : `icon`, `artId`, `audioId` persistent dans le runtime. CI run `34634410838` : success.
 - Objets de départ héros : `startingItems` remplit maintenant l'inventaire à la création du runtime. CI run `34634619019` : success.
 - Équipement de départ héros : `startingEquipment` permet d'équiper proprement l'objet prévu dès la création du runtime. CI run `34635030983` : success.
+- Loot de salle : `resolveRoomCreatureDefeat()` persiste la défaite et le loot idempotent directement dans l'entité de salle. CI run `34635256399` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Raccord du loot des créatures au runtime réel de salle :
-- nouveau `resolveRoomCreatureDefeat(roomRuntime, instanceId, universe, options)` dans `spawn-engine.js`;
-- la créature de salle est marquée `defeated:true` et `active:false`;
-- le runtime de créature stocké dans `entity.data.creatureRuntime` est lui aussi mis à jour;
-- le claim de loot passe par l'autorité idempotente `claimCreatureLoot()`;
-- les `lootDrops` et `lootClaimed` sont donc persistés directement dans l'entité de salle;
-- si la salle est sauvegardée, rechargée ou résolue une seconde fois, le même loot est renvoyé sans reroll;
-- le test couvre spécifiquement une Wyverne de boss vaincue, sauvegardée puis résolue une seconde fois sans duplication de loot.
+Statuts persistants réversibles pour les modificateurs de caractéristiques :
+- nouveau `addPersistentStatus()` dans `status-engine.js`;
+- un effet `stat-modifier` temporaire est appliqué une seule fois à l'ajout du statut;
+- sa valeur précédente est conservée dans le statut pour permettre un retour exact à l'expiration;
+- rafraîchir le même statut prolonge sa durée sans réappliquer le bonus une seconde fois;
+- `processStatuses()` ignore volontairement ces statuts persistants pour empêcher les cumuls à chaque début de tour;
+- `decayStatuses()` restaure la valeur d'origine quand le statut expire;
+- les DoT/HoT et autres statuts périodiques existants continuent de fonctionner selon leur `timing` historique.
 
 Commits de l'étape :
-- moteur : `4b8319a6f385be42242e9e462547c3e365b9fc1d`
-- régression : `06dedb601b631d7f087b4c896145e49573966627`
+- moteur : `915ab5e7f264f1a2220bf1c610a8124a8798115e`
+- régression : `cea29f707abf97bd40d93335fb6ad76e4d80e560`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -57,9 +58,9 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 ## Points encore ouverts prioritaires
 
 - intégrer proprement l'attribution des drops au héros/groupe après `resolveRoomCreatureDefeat()`;
+- étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
 - couverture/obstacles et modificateurs d'équipement tactiques;
-- status à modificateurs persistants réversibles;
 - lifecycle audio de salle et vrai playback frontend;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

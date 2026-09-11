@@ -41,25 +41,26 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Clé de boss : elle est maintenant générée au moment de la défaite réelle du boss, pas au spawn. CI run `34638633003` : success.
 - Passage verrouillé par objet : `requiredItemId` est appliqué par le World Engine / runtime donjon. CI run `34639084070` : success.
 - Sélecteur d'objet requis World Builder : menu par nom/icône, sans ID brut. CI run `34639994371` : success.
+- Sélecteur de conditions World Builder : multi-sélection par nom, sans ID brut. CI run `34640343911` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Sélecteur de conditions directement dans les liaisons du World Builder :
-- `world-editor.js` expose `linkConditionOptions()` et utilise la vraie collection `universe.conditions`;
-- chaque liaison peut sélectionner plusieurs conditions actives via un menu multiple, uniquement par leur nom;
-- aucune saisie d'identifiant technique n'est nécessaire;
-- les conditions désactivées sont exclues du sélecteur;
-- les `conditionIds` existants sont normalisés et persistent comme tableau de chaînes dans le draft;
-- le texte de l'éditeur indique clairement que l'objet requis et toutes les conditions doivent être satisfaits;
-- le bouton d'aide des conditions réutilise l'aide contextuelle `rpg-condition`;
-- la régression vérifie l'affichage par nom, la sélection persistée et l'exclusion des conditions désactivées.
+État persistant des portes de salle + ouverture par clé :
+- `createRoomInstance()` capture maintenant l'état des portes du layout dans `room.doors` (`state`, `locked`, `keyItemId`);
+- `openRoomDoor()` ouvre une porte du runtime, refuse une porte verrouillée sans clé et accepte la clé correspondante depuis l'inventaire;
+- par défaut la clé n'est pas consommée; `consumeKey:true` permettra explicitement une clé à usage unique;
+- l'ouverture passe la porte à `state:'open'` et `locked:false`, puis journalise `room-door-opened`;
+- `materializeRoomLayout()` superpose l'état runtime persistant sur le layout de base avant les calculs tactiques;
+- une porte verrouillée bloque donc le déplacement tactique, puis devient immédiatement franchissable après ouverture;
+- quitter la salle, revenir ou ré-instancier la salle ne referme/reverrouille pas la porte déjà ouverte;
+- le test couvre aussi le refus `missing-key` et vérifie que la clé réutilisable reste dans l'inventaire.
 
 Commits de l'étape :
-- World Builder : `ade7bb2f4c539f3988b6bb3030e5ee9ec19b135d`
-- régression : `5564614df41dc91a669b9ffc3f753781cd7a530a`
+- runtime portes : `af4f39f4eb1a1b4ac3f5f5d633a2ea2d37d4cb97`
+- régression : `6eaa76e67d7e5be6a897416e2de57567bfca46f1`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -72,6 +73,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
+- brancher `materializeRoomLayout()` dans les vrais appels tactiques/perception du runtime de donjon afin que l'état des portes persistantes soit utilisé partout automatiquement;
 - choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
 - commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;

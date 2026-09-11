@@ -1,4 +1,4 @@
-name: Deploy GenSrpG diagnostic baseline to GitHub Pages
+name: Deploy GenSrpG known-good V16.78.123 to GitHub Pages
 
 on:
   push:
@@ -19,72 +19,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Récupérer la base diagnostic V16.78.107
+      - name: Récupérer la référence V16.78.123 connue fonctionnelle
         uses: actions/checkout@v4
         with:
-          ref: fcb2695b546d511c10c58cbc938954e6ab734ac6
+          ref: 22ce0194fcb8b9a439fc2cdcecb3ffb91c5be58c
 
-      - name: Vérifier la base diagnostic
+      - name: Vérifier la référence
         run: |
           test -f index.html
           test -f service-worker.js
-          echo "Diagnostic baseline commit:"
+          test -f assets/gensrpg/gens-chrome-startup-diag-1678122.js
+          echo "Known-good commit:"
           git rev-parse HEAD
-          echo "Expected: fcb2695b546d511c10c58cbc938954e6ab734ac6"
+          echo "Expected: 22ce0194fcb8b9a439fc2cdcecb3ffb91c5be58c"
 
-      - name: Préparer le site diagnostic
+      - name: Préparer le site exact V123
         run: |
           rm -rf _site
           mkdir -p _site
           cp -f index.html _site/index.html
           if [ -f manifest.webmanifest ]; then cp -f manifest.webmanifest _site/manifest.webmanifest; fi
           if [ -f manifest.json ]; then cp -f manifest.json _site/manifest.json; fi
-          if [ -f service-worker.js ]; then cp -f service-worker.js _site/service-worker.js; fi
+          cp -f service-worker.js _site/service-worker.js
           if [ -d icons ]; then cp -R icons _site/icons; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           for file in sound_*.mp3; do
             if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
-
-      - name: Isoler le bootstrap Capture automatique
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('_site/index.html')
-          s=p.read_text(encoding='utf-8')
-          before=s
-          s,n1=re.subn(r'(?m)^\s*ensureBuiltinMonsterCapture162\(\);\s*$', '', s)
-          s,n2=re.subn(r'(?m)^\s*document\.addEventListener\(["\']DOMContentLoaded["\'],\s*\(\)\s*=>\s*setTimeout\(ensureBuiltinMonsterCapture162,\s*60\)\s*\);\s*$', '', s)
-          print('capture direct calls removed:', n1)
-          print('capture DOMContentLoaded calls removed:', n2)
-          if n1 < 1 or n2 < 1:
-              raise SystemExit('Expected Capture startup calls not found')
-          if 'window.ensureBuiltinMonsterCapture162' not in s:
-              raise SystemExit('Capture function itself was unexpectedly removed')
-          p.write_text(s,encoding='utf-8')
-          PY
-
-      - name: Injecter le traceur Chrome avant bootstrap
-        run: |
-          mkdir -p _site/assets/gensrpg
-          curl -fsSL https://raw.githubusercontent.com/slyen4425-cloud/Zombicide-40k/main/assets/gensrpg/gens-chrome-startup-diag-1678122.js -o _site/assets/gensrpg/gens-chrome-startup-diag-1678122.js
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('_site/index.html')
-          s=p.read_text(encoding='utf-8')
-          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v107capturediag"></script>'
-          if tag not in s:
-              if '<head>' in s:
-                  s=s.replace('<head>', '<head>\n'+tag, 1)
-              elif '<html' in s:
-                  i=s.find('>')+1
-                  s=s[:i]+'\n'+tag+s[i:]
-              else:
-                  s=tag+'\n'+s
-          p.write_text(s,encoding='utf-8')
-          PY
-          grep -q 'gens-chrome-startup-diag-1678122.js?v=v107capturediag' _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

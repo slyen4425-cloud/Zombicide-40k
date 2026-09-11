@@ -2,21 +2,36 @@ import { evaluateAttackPosition, combatDistance } from './tactical-combat.js';
 
 function clamp01(value){return Math.max(0,Math.min(0.999999999,Number(value)||0));}
 
-export function validCombatTargets({combat,actorId,spatial=null,source=null,config={}}={}){
+export function normalizeTargetKind(value){
+  const kind=String(value||'enemy');
+  return ['enemy','ally','self','any'].includes(kind)?kind:'enemy';
+}
+
+export function validSkillTargets({combat,actorId,targetKind='enemy',spatial=null,source=null,config={}}={}){
   const actor=combat?.actors?.[String(actorId)];
   if(!actor||actor.ko) return [];
+  const kind=normalizeTargetKind(targetKind);
   const targets=[];
   for(const candidate of Object.values(combat?.actors||{})){
-    if(!candidate||candidate.ko||String(candidate.id)===String(actorId)||String(candidate.side)===String(actor.side)) continue;
+    if(!candidate||candidate.ko) continue;
+    const self=String(candidate.id)===String(actorId);
+    const sameSide=String(candidate.side)===String(actor.side);
+    if(kind==='self'&&!self) continue;
+    if(kind==='ally'&&(!sameSide||self)) continue;
+    if(kind==='enemy'&&(sameSide||self)) continue;
     let position={ok:true,distance:null,modifier:0};
-    if(spatial&&source) position=evaluateAttackPosition({spatial,combat,actorId,targetId:candidate.id,source,config});
+    if(kind==='enemy'&&spatial&&source) position=evaluateAttackPosition({spatial,combat,actorId,targetId:candidate.id,source,config});
     if(!position.ok) continue;
     targets.push({actor:candidate,distance:position.distance,modifier:position.modifier||0,position});
   }
   return targets;
 }
 
-export function validatePlayerTarget({combat,actorId,targetId,spatial=null,source=null,config={}}={}){
+export function validCombatTargets({combat,actorId,spatial=null,source=null,config={}}={}){
+  return validSkillTargets({combat,actorId,targetKind:'enemy',spatial,source,config});
+}
+
+export function validateSkillTarget({combat,actorId,targetId,targetKind='enemy',spatial=null,source=null,config={}}={}){
   if(String(combat?.activeActorId)!==String(actorId)) return {ok:false,reason:'not-active-actor'};
   const actor=combat?.actors?.[String(actorId)];
   const target=combat?.actors?.[String(targetId)];
@@ -24,13 +39,24 @@ export function validatePlayerTarget({combat,actorId,targetId,spatial=null,sourc
   if(!target) return {ok:false,reason:'missing-target'};
   if(actor.ko) return {ok:false,reason:'actor-ko'};
   if(target.ko) return {ok:false,reason:'target-ko'};
-  if(String(actor.side)===String(target.side)) return {ok:false,reason:'same-side'};
-  if(spatial&&source){
+
+  const kind=normalizeTargetKind(targetKind);
+  const self=String(actor.id)===String(target.id);
+  const sameSide=String(actor.side)===String(target.side);
+  if(kind==='self'&&!self) return {ok:false,reason:'self-required'};
+  if(kind==='ally'&&(!sameSide||self)) return {ok:false,reason:'ally-required'};
+  if(kind==='enemy'&&(sameSide||self)) return {ok:false,reason:sameSide?'same-side':'enemy-required'};
+
+  if(kind==='enemy'&&spatial&&source){
     const position=evaluateAttackPosition({spatial,combat,actorId,targetId,source,config});
     if(!position.ok) return {ok:false,reason:position.reason,position};
-    return {ok:true,targetId:String(targetId),position};
+    return {ok:true,targetId:String(targetId),targetKind:kind,position};
   }
-  return {ok:true,targetId:String(targetId),position:null};
+  return {ok:true,targetId:String(targetId),targetKind:kind,position:null};
+}
+
+export function validatePlayerTarget({combat,actorId,targetId,spatial=null,source=null,config={}}={}){
+  return validateSkillTarget({combat,actorId,targetId,targetKind:'enemy',spatial,source,config});
 }
 
 function resourceRatio(actor,resourceId){

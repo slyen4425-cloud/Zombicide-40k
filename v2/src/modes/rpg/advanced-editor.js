@@ -126,6 +126,17 @@ function setNested(target, path, value) {
   cursor[keys[0]] = value;
 }
 
+function bindCards(host, selector, datasetKey, list, rerender) {
+  host.querySelectorAll(selector).forEach(card => {
+    const record = list.find(x => String(x.id) === String(card.dataset[datasetKey]));
+    if (!record) return;
+    card.querySelectorAll('[data-f]').forEach(input => input.addEventListener('change', () => {
+      setNested(record, input.dataset.f, valueOf(input));
+      rerender();
+    }));
+  });
+}
+
 export function mountAdvancedRpgEditor(host, universe, onChange) {
   ensureAdvancedRpgCollections(universe);
   host.innerHTML = `
@@ -140,15 +151,10 @@ export function mountAdvancedRpgEditor(host, universe, onChange) {
   host.querySelector('#addRpgSkill')?.addEventListener('click', () => { universe.skills.push(newSkill()); rerender(); });
   host.querySelector('#addRpgForm')?.addEventListener('click', () => { universe.forms.push(newHeroForm()); rerender(); });
 
-  const bind = (selector, list) => host.querySelectorAll(selector).forEach(card => {
-    const key = selector.slice(6, -1).replace('-id', '');
-    const record = list.find(x => String(x.id) === String(card.dataset[key]));
-    card.querySelectorAll('[data-f]').forEach(input => input.addEventListener('change', () => { setNested(record, input.dataset.f, valueOf(input)); rerender(); }));
-  });
-  bind('[data-condition-id]', universe.conditions);
-  bind('[data-effect-id]', universe.effects);
-  bind('[data-skill-id]', universe.skills);
-  bind('[data-form-id]', universe.forms);
+  bindCards(host, '[data-condition-id]', 'conditionId', universe.conditions, rerender);
+  bindCards(host, '[data-effect-id]', 'effectId', universe.effects, rerender);
+  bindCards(host, '[data-skill-id]', 'skillId', universe.skills, rerender);
+  bindCards(host, '[data-form-id]', 'formId', universe.forms, rerender);
 
   host.querySelectorAll('[data-delete-condition]').forEach(b => b.addEventListener('click', () => { const id = b.dataset.deleteCondition; universe.conditions = universe.conditions.filter(x => x.id !== id); universe.skills.forEach(x => x.conditionIds = (x.conditionIds || []).filter(v => v !== id)); universe.forms.forEach(x => { x.conditionIds = (x.conditionIds || []).filter(v => v !== id); x.returnConditionIds = (x.returnConditionIds || []).filter(v => v !== id); }); rerender(); }));
   host.querySelectorAll('[data-delete-effect]').forEach(b => b.addEventListener('click', () => { const id = b.dataset.deleteEffect; universe.effects = universe.effects.filter(x => x.id !== id); universe.skills.forEach(x => x.effectIds = (x.effectIds || []).filter(v => v !== id)); universe.forms.forEach(x => x.effectIds = (x.effectIds || []).filter(v => v !== id)); rerender(); }));

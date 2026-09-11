@@ -21,23 +21,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Alliés : transition par salle, durées `room` décrémentées uniquement dans la salle concernée; métadonnées de combat conservées à l'entrée en combat.
 - Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`. CI run `34632880339` : success.
 - État KO alliés : les alliés KO/morts sont exclus du contrôle, du mouvement et des prochains combats; une vraie réanimation les rend à nouveau éligibles. CI run `34633451924` : success.
+- Placement alliés changement de salle : placement distinct sur cases accessibles quand `roomLayout` est connu. CI run `34633817217` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Placement des alliés suiveurs lors d'un changement de salle :
-- `transitionAlliesWithOwner()` accepte maintenant un `roomLayout`;
-- lorsque le layout est connu, les alliés sont placés sur des cases distinctes accessibles autour de la position d'entrée du propriétaire;
-- la case du propriétaire est réservée et n'est plus réutilisée par un suiveur;
-- les cases déjà occupées dans la salle sont évitées;
-- les cellules bloquées et les murs/portes fermées sont respectés via `roomTransitionAllowed()`;
-- si aucun `roomLayout` n'est fourni, le comportement historique reste disponible pour compatibilité.
+Loot de créature rendu idempotent :
+- `createCreatureRuntime()` initialise `lootClaimed:false` et `lootDrops:null`;
+- nouveau `claimCreatureLoot(runtime, creature, options)`;
+- impossible de réclamer le loot avant la défaite (`not-defeated`);
+- le premier claim lance le tirage une seule fois puis persiste `lootClaimed` et les `lootDrops` dans le runtime;
+- un second claim, y compris après `structuredClone`/sauvegarde-rechargement, renvoie `already-claimed` et les mêmes drops sans relancer l'aléatoire;
+- évite donc les doublons de clé de boss ou de loot si une salle/un runtime est rouvert ou résolu deux fois.
 
 Commits de l'étape :
-- moteur : `687af714ecd94958ce12574aa22e19aeef276c51`
-- régression : `cd9b6bd0d159902f668004eaf4d19006ba9638d6`
+- moteur : `c87d3ba69326cea07f246d861141644260c5afd8`
+- régression : `62839d123a7969bcaefb4b129e3686ed367a9662`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -50,8 +51,12 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
+- raccorder le claim de loot au flux réel de fin de combat / room runtime;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
 - couverture/obstacles et modificateurs d'équipement tactiques;
+- status à modificateurs persistants réversibles;
 - lifecycle audio de salle et vrai playback frontend;
+- items de départ héros à auto-remplir;
+- préserver `audioId` du bestiaire dans le runtime;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

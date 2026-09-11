@@ -91,8 +91,9 @@ function applyAction(state,action,context){
       return {state:next,world};
     }
     room.entities=Array.isArray(room.entities)?room.entities:[];
-    if(!entityExists(room,entity.id)) room.entities.push({...entity,id:String(entity.id),active:entity.active!==false,defeated:Boolean(entity.defeated),removed:Boolean(entity.removed)});
-    next=appendLog(next,'event-spawn',{actionId,roomId,entityId:String(entity.id),created:entityExists(room,entity.id)});
+    const existed=entityExists(room,entity.id);
+    if(!existed) room.entities.push({...entity,id:String(entity.id),active:entity.active!==false,defeated:Boolean(entity.defeated),removed:Boolean(entity.removed)});
+    next=appendLog(next,'event-spawn',{actionId,roomId,entityId:String(entity.id),created:!existed});
     return {state:next,world};
   }
 

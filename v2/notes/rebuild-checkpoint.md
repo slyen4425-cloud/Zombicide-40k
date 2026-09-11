@@ -38,24 +38,26 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Contrôleur de session audio RPG : état audio unique + commit + transition + cleanup. CI run `34637908130` : success.
 - Lifecycle session audio dans le shell RPG : `mountRpgPage()` possède la session, et `app.js` la détruit en quittant/chageant de mode. CI run `34638147144` : success.
 - Destinataire explicite du loot : `lootGrantedTo` persiste le héros/groupe/conteneur qui a reçu les objets. CI run `34638378209` : success.
+- Clé de boss : elle est maintenant générée au moment de la défaite réelle du boss, pas au spawn. CI run `34638633003` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Clé de boss attribuée uniquement après la défaite réelle du boss :
-- `executeSpawn()` ne renvoie plus la clé au simple spawn du boss;
-- l'entité de salle conserve maintenant la provenance du spawn (`spawnId`, `kind`, `bossKeyItemId`);
-- `resolveRoomCreatureDefeat()` ajoute la clé garantie au loot persistant seulement lorsque ce boss est effectivement vaincu;
-- la clé fait donc partie du même loot idempotent que les autres objets et survit aux sauvegardes/rechargements;
-- revenir dans la salle ou rappeler la résolution ne reroll pas le loot et ne duplique pas la clé;
-- `grantRoomCreatureDrops()` attribue ensuite la clé au même destinataire que le reste du loot, une seule fois;
-- cela corrige le cas historique où une clé de boss pouvait être absente ou découplée de la vraie victoire.
+Passages de donjon réellement verrouillés par objet/clé :
+- `createRoomLink()` accepte désormais `requiredItemId`;
+- `availableRoomLinks()` masque/refuse un passage tant que l'objet requis n'est pas réellement présent dans l'inventaire fourni;
+- `traverseRoomLink()` applique la même règle, donc impossible de contourner le verrou par appel direct;
+- `transitionDungeonRoom()` transmet maintenant l'inventaire au moteur de navigation;
+- le test couvre explicitement un passage `boss-exit` : sans `boss-key`, `link-unavailable` et le héros reste dans la salle du boss; dès que la clé est dans l'inventaire, la transition vers la salle suivante devient possible;
+- cela complète le correctif précédent : la clé apparaît à la mort du boss puis peut réellement conditionner l'accès à la suite du donjon.
 
 Commits de l'étape :
-- moteur : `9fdf59c422a720c30206e6cb28ec68ce7fcd9d32`
-- régression : `b4619231503cf1bb44269467344778919208c4e7`
+- lien/condition d'objet : `46c6db6f7127438c6f371dbbb9c9efb40b0df4cc`
+- raccord runtime donjon : `773041c8de88c0834f814abdb85f11489a6e4a71`
+- test World Builder/navigation : `aab8c4f41e7a1a95281deffb9817f7163e198b3e`
+- test runtime de salle : `25777d587d861f512ab47e90004c498efed717f2`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -68,8 +70,8 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
+- exposer `requiredItemId` proprement dans le World Builder/éditeur avec un sélecteur d'objet, jamais un ID brut;
 - choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
-- verrouiller les passages/portes qui dépendent d'une clé de boss sur la possession réelle de cette clé dans le runtime de donjon;
 - commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;

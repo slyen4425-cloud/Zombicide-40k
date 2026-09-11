@@ -1,6 +1,7 @@
 import { createWorldSession, traverseRoomLink } from './world-engine.js';
 import { inventoryQuantity, removeItem } from './inventory-engine.js';
 import { resolveRoomInteractionCheck } from './interaction-engine.js';
+import { applyRoomVisitToQuests, applyInteractionResultToQuests } from './room-quest-bridge.js';
 
 function clone(value){return structuredClone(value);}
 function roomKey(roomId){return String(roomId||'');}
@@ -63,18 +64,19 @@ export function createRoomInstance(roomId,layout,{entities=null}={}){
   };
 }
 
-export function createDungeonRuntime(worldIndex,{startRoomId=null,layoutProvider=null}={}){
+export function createDungeonRuntime(worldIndex,{startRoomId=null,layoutProvider=null,questRuntime=null,quests=[],questDefinitions={},questContext={},now=null}={}){
   const started=createWorldSession(worldIndex,{startRoomId});
   if(!started.ok) return {ok:false,reason:started.reason,runtime:null};
   let runtime={
     worldSession:started.session,
     currentRoomId:String(started.session.currentRoomId),
     rooms:{},
+    questRuntime:questRuntime?clone(questRuntime):null,
     sequence:0,
     log:[],
   };
   runtime=ensureRoomInstance(runtime,runtime.currentRoomId,layoutProvider?.(runtime.currentRoomId)||null).runtime;
-  runtime=visitCurrentRoom(runtime,'start');
+  runtime=visitCurrentRoom(runtime,'start',{quests,definitions:questDefinitions,context:questContext,now});
   return {ok:true,runtime};
 }
 
@@ -95,15 +97,20 @@ function appendLog(runtime,type,payload={}){
   return next;
 }
 
-export function visitCurrentRoom(runtime,reason='enter'){
+export function visitCurrentRoom(runtime,reason='enter',{quests=[],definitions={},context={},now=null}={}){
   const id=roomKey(runtime?.currentRoomId);
   if(!id||!runtime?.rooms?.[id]) return runtime;
-  const next=clone(runtime);
+  let next=clone(runtime);
   next.rooms[id].visits=(Number(next.rooms[id].visits)||0)+1;
-  return appendLog(next,'room-entered',{roomId:id,reason,visits:next.rooms[id].visits});
+  next=appendLog(next,'room-entered',{roomId:id,reason,visits:next.rooms[id].visits});
+  if((quests||[]).length){
+    const questOut=applyRoomVisitToQuests(next.questRuntime,quests,id,{definitions,context,now});
+    next.questRuntime=questOut.runtime;
+  }
+  return next;
 }
 
-export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=null,conditionEvaluator=null,inventory=null}={}){
+export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=null,conditionEvaluator=null,inventory=null,quests=[],questDefinitions={},questContext={},now=null}={}){
   const moved=traverseRoomLink(worldIndex,runtime.worldSession,linkId,{conditionEvaluator,inventory});
   if(!moved.ok) return {ok:false,reason:moved.reason,runtime};
   let next=clone(runtime);
@@ -112,7 +119,7 @@ export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=
   next.currentRoomId=String(moved.session.currentRoomId);
   const ensured=ensureRoomInstance(next,next.currentRoomId,layoutProvider?.(next.currentRoomId)||null);
   next=ensured.runtime;
-  next=visitCurrentRoom(next,'link');
+  next=visitCurrentRoom(next,'link',{quests,definitions:questDefinitions,context:questContext,now});
   next=appendLog(next,'room-transition',{fromRoomId,toRoomId:next.currentRoomId,linkId:String(linkId),created:ensured.created});
   return {ok:true,runtime:next,room:clone(next.rooms[next.currentRoomId]),created:ensured.created};
 }
@@ -135,7 +142,7 @@ export function updateRoomInteractionState(runtime,roomId,interactionId,patch={}
   return {ok:true,runtime:appendLog(next,'room-interaction-updated',{roomId:id,interactionId:String(interactionId)})};
 }
 
-export function attemptRoomInteraction(runtime,roomId,interaction,actor,{definitions={},random=Math.random,roll=null,completeOnSuccess=true}={}){
+export function attemptRoomInteraction(runtime,roomId,interaction,actor,{definitions={},random=Math.random,roll=null,completeOnSuccess=true,quests=[],questDefinitions=definitions,questContext={},now=null}={}){
   const id=roomKey(roomId); const interactionId=String(interaction?.id||'');
   const next=clone(runtime);
   const state=next.rooms?.[id]?.interactions?.[interactionId];
@@ -151,7 +158,7 @@ export function attemptRoomInteraction(runtime,roomId,interaction,actor,{definit
   state.lastCheck=clone(resolved.check);
   if(resolved.success&&completeOnSuccess) state.completed=true;
 
-  const logged=appendLog(next,'room-interaction-attempted',{
+  let logged=appendLog(next,'room-interaction-attempted',{
     roomId:id,
     interactionId,
     attempt:state.attempts,
@@ -159,6 +166,10 @@ export function attemptRoomInteraction(runtime,roomId,interaction,actor,{definit
     success:resolved.success,
     check:state.lastCheck,
   });
+  if((quests||[]).length){
+    const questOut=applyInteractionResultToQuests(logged.questRuntime,quests,interaction,{success:resolved.success,outcome:resolved.outcome},{definitions:questDefinitions,context:questContext,now});
+    logged.questRuntime=questOut.runtime;
+  }
   return {ok:true,success:resolved.success,outcome:resolved.outcome,runtime:logged,state:clone(logged.rooms[id].interactions[interactionId]),check:clone(resolved.check),definition:resolved.definition||null};
 }
 

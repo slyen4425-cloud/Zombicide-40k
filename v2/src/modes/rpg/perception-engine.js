@@ -1,4 +1,5 @@
 import { shortestPathDistance, getActorPosition } from './spatial-engine.js';
+import { hasRoomLineOfSight } from './room-tactical-bridge.js';
 
 function numericStat(actor, statId, fallback = 0) {
   if (!statId) return Number(fallback) || 0;
@@ -42,6 +43,17 @@ export function canDetectActor(spatial, observerId, targetId, actors = {}, confi
   const vision = actorVisionRange(observer, c);
   const distance = shortestPathDistance(spatial, observerPos, targetPos, { diagonal: Boolean(config.diagonal), maxDistance: vision });
   if (!Number.isFinite(distance) || distance > vision) return { detected: false, reason: 'out-of-vision', distance, vision, score: -Infinity, threshold: actorStealthValue(target, c) };
+
+  if (c.blockedLineOfSightStopsDetection && config.roomLayout && !hasRoomLineOfSight(config.roomLayout, observerPos, targetPos)) {
+    return {
+      detected: false,
+      reason: 'line-of-sight-blocked',
+      distance,
+      vision,
+      score: -Infinity,
+      threshold: actorStealthValue(target, c),
+    };
+  }
 
   const perceptionScore = vision - distance * c.distancePenaltyPerUnit;
   const stealth = actorStealthValue(target, c);

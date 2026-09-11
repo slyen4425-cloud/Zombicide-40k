@@ -1,9 +1,10 @@
 import { applyEffect } from '../../core/effects.js';
+import { resolveDefinedActorCheck } from '../../core/checks.js';
 
 function clone(value){return structuredClone(value);}
 function uid(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
-export const EVENT_ACTION_KINDS=['text','audio','effect','spawn','door','reward','flag','transition','choice'];
+export const EVENT_ACTION_KINDS=['text','audio','effect','spawn','door','reward','flag','transition','choice','check'];
 
 function normalizeActions(actions,eventId,prefix='a'){
   return (actions||[]).map((action,index)=>{
@@ -16,6 +17,11 @@ function normalizeActions(actions,eventId,prefix='a'){
         label:String(choice?.label||`Choix ${choiceIndex+1}`),
         actions:normalizeActions(choice?.actions||[],eventId,`${prefix}${index+1}c${choiceIndex+1}.`),
       }));
+    }
+    if(out.kind==='check'){
+      out.checkId=out.checkId==null?null:String(out.checkId);
+      out.successActions=normalizeActions(out.successActions||[],eventId,`${prefix}${index+1}s.`);
+      out.failureActions=normalizeActions(out.failureActions||[],eventId,`${prefix}${index+1}f.`);
     }
     return out;
   });
@@ -49,6 +55,26 @@ function applyAction(state,action,context){
 
   if(action.kind==='text'){
     next=appendLog(next,'event-text',{actionId,text:String(action.text||'')}); return {state:next,world};
+  }
+
+  if(action.kind==='check'){
+    const actorId=String(action.actorId||context.defaultTargetId||'');
+    const actor=world.actors[actorId];
+    if(!actor){next=appendLog(next,'event-action-skipped',{actionId,kind:'check',reason:'actor-missing'});return {state:next,world};}
+    const resolved=resolveDefinedActorCheck({
+      checkId:action.checkId,
+      fallback:action.check||null,
+      definitions:context.definitions||{},
+      actor,
+      random:context.checkRandom||Math.random,
+      roll:action.roll??null,
+    });
+    if(!resolved.ok){next=appendLog(next,'event-action-skipped',{actionId,kind:'check',reason:resolved.reason||'check-failed-to-resolve',checkId:action.checkId||null});return {state:next,world};}
+    const success=Boolean(resolved.check?.success);
+    const branch=success?action.successActions:action.failureActions;
+    if(branch?.length) next.queue.splice(next.cursor,0,...clone(branch));
+    next=appendLog(next,'event-check-resolved',{actionId,actorId,checkId:action.checkId||null,success,check:resolved.check});
+    return {state:next,world};
   }
 
   if(action.kind==='audio'){

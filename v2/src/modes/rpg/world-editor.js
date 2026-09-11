@@ -22,6 +22,7 @@ export function ensureWorldDraft(draft){
   next.world=next.world||createWorld();
   next.world.zones=next.zones.map(z=>String(z.id));
   for(const zone of next.zones){zone.roomIds=next.rooms.filter(r=>String(r.zoneId)===String(zone.id)).map(r=>String(r.id));}
+  for(const link of next.links){link.conditionIds=Array.isArray(link.conditionIds)?link.conditionIds.map(String):[];}
   if(next.world.startRoomId&&!next.rooms.some(r=>String(r.id)===String(next.world.startRoomId))) next.world.startRoomId=next.rooms[0]?.id||null;
   return next;
 }
@@ -37,6 +38,10 @@ export function linkRequiredItemOptions(items=[],selected=null){
   const enabled=(items||[]).filter(item=>item&&item.enabled!==false&&item.id);
   return ['<option value="">— Aucun objet requis —</option>',...enabled.map(item=>`<option value="${esc(item.id)}" ${String(item.id)===String(selected||'')?'selected':''}>${esc(item.icon||'📦')} ${esc(item.name||'Objet')}</option>`)].join('');
 }
+export function linkConditionOptions(conditions=[],selectedIds=[]){
+  const selected=new Set((selectedIds||[]).map(String));
+  return (conditions||[]).filter(condition=>condition&&condition.enabled!==false&&condition.id).map(condition=>`<option value="${esc(condition.id)}" ${selected.has(String(condition.id))?'selected':''}>${esc(condition.name||condition.label||'Condition')}</option>`).join('');
+}
 
 function zoneCard(zone,rooms){
   const count=rooms.filter(r=>String(r.zoneId)===String(zone.id)).length;
@@ -47,15 +52,21 @@ function roomCard(room,zones,startRoomId){
   return `<article class="editor-card compact" data-room-id="${esc(room.id)}"><div class="editor-card-head"><strong>🚪 ${esc(room.name)}</strong>${String(room.id)===String(startRoomId)?'<span class="status-pill">Départ</span>':''}</div><div class="form-grid"><label>Nom<input data-room-field="name" value="${esc(room.name)}"></label><label>Zone<select data-room-field="zoneId">${zoneOptions(zones,room.zoneId)}</select></label><label>Type<select data-room-field="kind"><option value="room" ${room.kind==='room'?'selected':''}>Salle</option><option value="corridor" ${room.kind==='corridor'?'selected':''}>Couloir</option><option value="cache" ${room.kind==='cache'?'selected':''}>Cache / annexe</option><option value="boss" ${room.kind==='boss'?'selected':''}>Boss</option><option value="rest" ${room.kind==='rest'?'selected':''}>Repos</option></select></label></div><div class="toggle-row"><label><input type="radio" name="worldStartRoom" data-start-room="${esc(room.id)}" ${String(room.id)===String(startRoomId)?'checked':''}> Salle de départ</label></div><button class="danger-button" type="button" data-delete-room="${esc(room.id)}">Supprimer</button></article>`;
 }
 
-function linkCard(link,rooms,items){
-  return `<article class="editor-card compact" data-link-id="${esc(link.id)}"><div class="editor-card-head"><strong>🔗 ${esc(link.label||'Passage')}</strong></div><div class="form-grid"><label>Nom<input data-link-field="label" value="${esc(link.label||'')}"></label><label>Depuis<select data-link-field="fromRoomId">${roomOptions(rooms,link.fromRoomId)}</select></label><label>Vers<select data-link-field="toRoomId">${roomOptions(rooms,link.toRoomId)}</select></label><label>Type<select data-link-field="direction"><option value="forward" ${link.direction==='forward'?'selected':''}>Passage</option><option value="branch" ${link.direction==='branch'?'selected':''}>Branche</option><option value="return" ${link.direction==='return'?'selected':''}>Retour explicite</option></select></label><label>Objet requis <button class="help-button tiny" type="button" data-help="rpg-world-builder" aria-label="Aide objet requis">?</button><select data-link-field="requiredItemId">${linkRequiredItemOptions(items,link.requiredItemId)}</select></label></div><div class="toggle-row"><label><input type="checkbox" data-link-field="enabled" ${link.enabled!==false?'checked':''}> Actif</label><label><input type="checkbox" data-link-field="oneWay" ${link.oneWay?'checked':''}> Sens unique</label></div><p class="muted">L'objet est choisi par son nom. Le lien reste inaccessible tant que l'inventaire ne le possède pas.</p><button class="danger-button" type="button" data-delete-link="${esc(link.id)}">Supprimer</button></article>`;
+function linkCard(link,rooms,items,conditions){
+  const conditionOptions=linkConditionOptions(conditions,link.conditionIds||[]);
+  return `<article class="editor-card compact" data-link-id="${esc(link.id)}"><div class="editor-card-head"><strong>🔗 ${esc(link.label||'Passage')}</strong></div><div class="form-grid"><label>Nom<input data-link-field="label" value="${esc(link.label||'')}"></label><label>Depuis<select data-link-field="fromRoomId">${roomOptions(rooms,link.fromRoomId)}</select></label><label>Vers<select data-link-field="toRoomId">${roomOptions(rooms,link.toRoomId)}</select></label><label>Type<select data-link-field="direction"><option value="forward" ${link.direction==='forward'?'selected':''}>Passage</option><option value="branch" ${link.direction==='branch'?'selected':''}>Branche</option><option value="return" ${link.direction==='return'?'selected':''}>Retour explicite</option></select></label><label>Objet requis <button class="help-button tiny" type="button" data-help="rpg-world-builder" aria-label="Aide objet requis">?</button><select data-link-field="requiredItemId">${linkRequiredItemOptions(items,link.requiredItemId)}</select></label><label>Conditions requises <button class="help-button tiny" type="button" data-help="rpg-condition" aria-label="Aide conditions requises">?</button><select multiple size="${Math.max(2,Math.min(5,(conditions||[]).length||2))}" data-link-field="conditionIds">${conditionOptions}</select></label></div><div class="toggle-row"><label><input type="checkbox" data-link-field="enabled" ${link.enabled!==false?'checked':''}> Actif</label><label><input type="checkbox" data-link-field="oneWay" ${link.oneWay?'checked':''}> Sens unique</label></div><p class="muted">L'objet et les conditions sont choisis par leur nom. Le lien reste inaccessible tant que toutes les exigences ne sont pas remplies.</p><button class="danger-button" type="button" data-delete-link="${esc(link.id)}">Supprimer</button></article>`;
 }
 
-function fieldValue(input){if(input.type==='checkbox')return input.checked;return input.value||null;}
+function fieldValue(input){
+  if(input.type==='checkbox')return input.checked;
+  if(input.multiple)return [...input.selectedOptions].map(option=>String(option.value)).filter(Boolean);
+  return input.value||null;
+}
 
 export function mountWorldEditor(host,universe={}){
   let draft=loadWorldDraft();
   const items=Array.isArray(universe?.items)?universe.items:[];
+  const conditions=Array.isArray(universe?.conditions)?universe.conditions:[];
   function commit(){draft=ensureWorldDraft(draft);saveWorldDraft(draft);render();}
   function render(){
     draft=ensureWorldDraft(draft);
@@ -64,7 +75,7 @@ export function mountWorldEditor(host,universe={}){
       <section class="editor-section"><div class="section-title-row"><div><h3>Monde</h3><p class="muted">Structure générale et salle de départ.</p></div></div><div class="form-grid"><label>Nom du monde<input id="worldName" value="${esc(draft.world.name)}"></label><label>Salle de départ<select id="worldStart">${roomOptions(draft.rooms,draft.world.startRoomId)}</select></label></div><p class="muted">Validation : ${validation.valid?'✅ structure valide':`⚠️ ${validation.errors.length} problème(s)`}</p></section>
       <section class="editor-section"><div class="section-title-row"><div><h3>Zones</h3><p class="muted">Une zone regroupe plusieurs salles sans imposer un ordre linéaire.</p></div><button class="primary-button" id="addWorldZone" type="button">+ Zone</button></div><div class="editor-list">${draft.zones.map(z=>zoneCard(z,draft.rooms)).join('')||'<p class="muted">Aucune zone.</p>'}</div></section>
       <section class="editor-section"><div class="section-title-row"><div><h3>Salles</h3><p class="muted">Salle normale, couloir, cache, boss ou repos. Les branches restent de vraies branches.</p></div><button class="primary-button" id="addWorldRoom" type="button" ${draft.zones.length?'':'disabled'}>+ Salle</button></div><div class="editor-list">${draft.rooms.map(r=>roomCard(r,draft.zones,draft.world.startRoomId)).join('')||'<p class="muted">Aucune salle.</p>'}</div></section>
-      <section class="editor-section"><div class="section-title-row"><div><h3>Liaisons</h3><p class="muted">Choisis la salle de départ, la destination et éventuellement l'objet requis pour franchir le passage.</p></div><button class="primary-button" id="addWorldLink" type="button" ${draft.rooms.length>1?'':'disabled'}>+ Liaison</button></div><div class="editor-list">${draft.links.map(l=>linkCard(l,draft.rooms,items)).join('')||'<p class="muted">Aucune liaison.</p>'}</div></section>`;
+      <section class="editor-section"><div class="section-title-row"><div><h3>Liaisons</h3><p class="muted">Choisis la salle de départ, la destination, l'objet requis et les conditions éventuelles pour franchir le passage.</p></div><button class="primary-button" id="addWorldLink" type="button" ${draft.rooms.length>1?'':'disabled'}>+ Liaison</button></div><div class="editor-list">${draft.links.map(l=>linkCard(l,draft.rooms,items,conditions)).join('')||'<p class="muted">Aucune liaison.</p>'}</div></section>`;
 
     host.querySelector('#worldName')?.addEventListener('change',e=>{draft.world.name=e.target.value||'Mon monde';commit();});
     host.querySelector('#worldStart')?.addEventListener('change',e=>{draft.world.startRoomId=e.target.value||null;commit();});

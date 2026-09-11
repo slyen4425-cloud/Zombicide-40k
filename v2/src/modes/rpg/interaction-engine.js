@@ -1,7 +1,7 @@
 function clone(value){return structuredClone(value);}
 function id(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
-export const INTERACTION_KINDS=['chest','trap','puzzle','event','switch','portal','object'];
+export const INTERACTION_KINDS=['chest','trap','puzzle','event','switch','portal','object','npc','ally'];
 export const ATTACHMENT_KINDS=['cell','door','interaction'];
 
 export function ensureRoomInteractions(layout){

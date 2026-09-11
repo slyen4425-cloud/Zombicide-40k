@@ -2,82 +2,65 @@
 
 Branche de travail : `rebuild/v2`
 
-Ce fichier sert de point de reprise entre les fils de discussion. Il doit être mis à jour après chaque étape importante validée.
+Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main` tant que la parité et la validation utilisateur ne sont pas suffisantes.
 
 ## État important au 2026-09-11
 
-- Reconstruction V2 isolée de `main`; la version stable n'est pas remplacée.
 - Séparation Survie / RPG conservée.
-- Moteur RPG data-driven : stats, ressources, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles, événements.
-- Combat D100/tours : identité de tour `turnSequence`, rejet des actions obsolètes `stale-turn`, résolution unique.
-- Compétences : une seule autorité centrale dans `v2/src/core/skills.js`; suppression du chevauchement de cooldown/charges.
-- Inventaire : remplacement propre des équipements multi-slot, sans slot fantôme.
-- Bestiaire : ressources de créature bornées entre min et max au spawn.
-- Combat tactique : portée, mouvement, ligne de vue, murs/portes, arme équipée.
-- Perception/furtivité : vraie ligne de vue de salle, murs bloquants respectés.
-- Ciblage joueur : sélection manuelle validée avant dépense de ressource/charge/cooldown.
-- Ciblage IA : règles `nearest`, `weakest`, `random`, `varied`; mémoire de cible et anti-focus immédiat lorsque plusieurs cibles sont valides.
-- Runtime ennemi : choix coordonné compétence + cible + mémoire.
-- Alliés : transition par salle, durées `room` décrémentées uniquement dans la salle concernée; métadonnées de combat conservées à l'entrée en combat.
-- Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`. CI run `34632880339` : success.
-- État KO alliés : les alliés KO/morts sont exclus du contrôle, du mouvement et des prochains combats; une vraie réanimation les rend à nouveau éligibles. CI run `34633451924` : success.
-- Placement alliés changement de salle : placement distinct sur cases accessibles quand `roomLayout` est connu. CI run `34633817217` : success.
-- Loot bestiaire : claim idempotent, pas de double tirage après sauvegarde/rechargement. CI run `34634065664` : success.
-- Médias bestiaire : `icon`, `artId`, `audioId` persistent dans le runtime. CI run `34634410838` : success.
-- Objets de départ héros : `startingItems` remplit maintenant l'inventaire à la création du runtime. CI run `34634619019` : success.
-- Équipement de départ héros : `startingEquipment` permet d'équiper proprement l'objet prévu dès la création du runtime. CI run `34635030983` : success.
-- Loot de salle : `resolveRoomCreatureDefeat()` persiste la défaite et le loot idempotent directement dans l'entité de salle. CI run `34635256399` : success.
-- Statuts persistants réversibles : les modificateurs temporaires de stats ne se cumulent plus à chaque tick et restaurent la valeur d'origine à l'expiration. CI run `34635529424` : success.
-- Attribution de loot : `grantRoomCreatureDrops()` distribue les drops à l'inventaire une seule fois, de façon atomique. CI run `34635840687` : success.
-- Couverture tactique configurable : `coverModifier` de la case cible se combine aux autres modificateurs et peut être ignoré par une source `ignoresCover`. CI run `34636060720` : success.
-- Lifecycle audio de salle : transition leave → arrêt ancienne ambience → enter → nouvelle ambience. CI run `34636291490` : success.
-- Couverture dans le Créateur de salle : outil `🛡️ Couverture` + `coverModifier` éditable. CI run `34636530585` : success.
-- Raccord audio au vrai changement de salle : `transitionDungeonRoomWithAudio()` conserve le moteur monde pur et orchestre les cues audio séparément. CI run `34636880180` : success.
-- Sortie audio navigateur : `createBrowserAudioOutput()` gère lecture, boucle, volume, délai, arrêt par son/canal et nettoyage. CI run `34637035449` : success.
-- Pont moteur→sortie audio : `audio-output-runtime.js` synchronise l'état audio RPG avec la lecture navigateur. CI run `34637467293` : success.
-- Contrôleur de session audio RPG : état audio unique + commit + transition + cleanup. CI run `34637908130` : success.
-- Lifecycle session audio dans le shell RPG : `mountRpgPage()` possède la session, et `app.js` la détruit en quittant/chageant de mode. CI run `34638147144` : success.
-- Destinataire explicite du loot : `lootGrantedTo` persiste le héros/groupe/conteneur qui a reçu les objets. CI run `34638378209` : success.
-- Clé de boss : elle est maintenant générée au moment de la défaite réelle du boss, pas au spawn. CI run `34638633003` : success.
-- Passage verrouillé par objet : `requiredItemId` est appliqué par le World Engine / runtime donjon. CI run `34639084070` : success.
-- Sélecteur d'objet requis World Builder : menu par nom/icône, sans ID brut. CI run `34639994371` : success.
-- Sélecteur de conditions World Builder : multi-sélection par nom, sans ID brut. CI run `34640343911` : success.
-- Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
-- Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
-- Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
+- RPG data-driven : stats, ressources, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
+- Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
+- Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
+- Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
+- Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
+- Alliés : placement, transitions, durée par salle, KO/réanimation, injection combat.
+- Bestiaire : ressources bornées, médias, loot idempotent, drops persistants et attribution à un destinataire explicite.
+- Boss : clé créée seulement à la défaite réelle; passages `requiredItemId` verrouillés sur possession réelle de l'objet.
+- World Builder : objets requis et conditions choisis par menus lisibles, jamais par ID brut.
+- Portes de salle runtime : état persistant, ouverture par clé, option future de consommation de clé, layout matérialisé avec état runtime.
+- Audio RPG : lifecycle de salle, sortie navigateur, session audio unique, cleanup en quittant le RPG.
+- Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel volontairement différé.
+
+## Jalons CI récents validés
+
+- loot destinataire : `34638378209` success
+- clé de boss à la défaite : `34638633003` success
+- passage verrouillé par objet : `34639084070` success
+- sélecteur objet requis World Builder : `34639994371` success
+- sélecteur conditions World Builder : `34640343911` success
+- portes persistantes / ouverture par clé : `34640631070` success
 
 ## Dernière étape codée
 
-État persistant des portes de salle + ouverture par clé :
-- `createRoomInstance()` capture maintenant l'état des portes du layout dans `room.doors` (`state`, `locked`, `keyItemId`);
-- `openRoomDoor()` ouvre une porte du runtime, refuse une porte verrouillée sans clé et accepte la clé correspondante depuis l'inventaire;
-- par défaut la clé n'est pas consommée; `consumeKey:true` permettra explicitement une clé à usage unique;
-- l'ouverture passe la porte à `state:'open'` et `locked:false`, puis journalise `room-door-opened`;
-- `materializeRoomLayout()` superpose l'état runtime persistant sur le layout de base avant les calculs tactiques;
-- une porte verrouillée bloque donc le déplacement tactique, puis devient immédiatement franchissable après ouverture;
-- quitter la salle, revenir ou ré-instancier la salle ne referme/reverrouille pas la porte déjà ouverte;
-- le test couvre aussi le refus `missing-key` et vérifie que la clé réutilisable reste dans l'inventaire.
+Configuration des portes verrouillées directement dans le Créateur de salle :
+- `mountRoomEditor(host, universe)` reçoit maintenant le vrai univers RPG;
+- ajout d'un réglage `🔒 Verrouiller les prochaines portes placées`;
+- ajout d'un sélecteur `Clé / objet de porte` alimenté par les objets RPG actifs;
+- le sélecteur affiche icône + nom et jamais un ID technique;
+- les objets désactivés sont exclus;
+- une porte/entrée/sortie placée avec le verrou actif reçoit `locked:true` et le `keyItemId` choisi;
+- si aucun objet n'est choisi, la porte peut rester verrouillée pour être ouverte plus tard par événement/énigme/interrupteur;
+- `rpg-page.js` transmet `loadRpgUniverse()` au Créateur de salle;
+- la régression vérifie la persistance `locked/keyItemId`, le libellé `Clé du boss`, la sélection et l'exclusion d'une clé désactivée.
 
 Commits de l'étape :
-- runtime portes : `af4f39f4eb1a1b4ac3f5f5d633a2ea2d37d4cb97`
-- régression : `6eaa76e67d7e5be6a897416e2de57567bfca46f1`
+- éditeur de salle : `cd70a79bec4d6bfd10994a5f1a28f1196709493a`
+- raccord page RPG : `d2292c39ed65cf5be2dd02103a734f35d7c5e1a3`
+- régression : `e5f5128b2b68de0497adccf654eb22ac3c9c5ba7`
 
-CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
+CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
 ## Stockage — décision repoussée
 
-- Le choix du backend cloud réel est volontairement remis à plus tard.
 - Ne pas exposer de jeton GitHub personnel dans la PWA.
-- Si un cloud est retenu, privilégier stockage local hors-ligne + synchronisation distante authentifiée.
+- Si un cloud est retenu : local-first/offline + synchronisation distante authentifiée + gestion de révisions/conflits.
 - Conserver import/export manuel comme filet de sécurité.
 
-## Points encore ouverts prioritaires
+## Priorités ouvertes
 
-- brancher `materializeRoomLayout()` dans les vrais appels tactiques/perception du runtime de donjon afin que l'état des portes persistantes soit utilisé partout automatiquement;
-- choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
-- commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
-- enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
-- étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
-- ligne de vue/perception et combat à continuer d'unifier sans doublons;
-- choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
-- audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.
+- brancher automatiquement `materializeRoomLayout()` dans les vrais appels tactiques/perception du runtime de donjon;
+- choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
+- construire le noyau générique de jets/tests et son éditeur;
+- poursuivre lifecycle quêtes et UI PNJ/interactions;
+- enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
+- remplacer le rollback absolu des statuts par des modificateurs superposables par source;
+- audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

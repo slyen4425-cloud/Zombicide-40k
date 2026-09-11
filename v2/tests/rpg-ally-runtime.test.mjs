@@ -39,6 +39,9 @@ assert.equal(combatants[1].initiative,12);
 assert.equal(combatants[1].ownerActorId,'aldren');
 
 let combat=createCombatState({combatants:[{id:'aldren',side:'heroes',initiative:15,state:{stats:{},resources:{}}},...combatants,{id:'orc',side:'enemies',initiative:5,state:{stats:{},resources:{}}}]});
+assert.equal(combat.actors['wolf-1'].allyKind,'summon');
+assert.equal(combat.actors['wolf-1'].controlMode,'player');
+assert.equal(combat.actors['wolf-1'].ownerActorId,'aldren');
 combat=markCombatantKo(combat,'wolf-1',true);
 roster=syncAlliesFromCombat(roster,combat);
 assert.equal(roster.actors['wolf-1'].actor.ko,true);

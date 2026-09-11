@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createWorld, createZone, createRoom, createRoomLink, buildWorldIndex } from '../src/modes/rpg/world-engine.js';
 import { createDungeonRuntime, transitionDungeonRoom, updateRoomEntity, updateRoomInteractionState, ensureRoomInstance, roomRuntimeSnapshot } from '../src/modes/rpg/room-runtime.js';
+import { createInventoryState, addItem } from '../src/modes/rpg/inventory-engine.js';
 
 const zone=createZone({id:'z1',name:'Zone'});
 const roomA=createRoom({id:'a',zoneId:'z1',name:'Salle A'});
@@ -48,5 +49,21 @@ assert.equal(returned.interactions.chest1.opened,true,'opened chest state must p
 const ensured=ensureRoomInstance(runtime,'a',layouts.a);
 assert.equal(ensured.created,false);
 assert.equal(ensured.room.entities.length,1,'re-instantiation must not respawn content');
+
+const bossExit=createRoomLink({id:'boss-exit',fromRoomId:'a',toRoomId:'b',oneWay:true,requiredItemId:'boss-key'});
+const gatedIndex=buildWorldIndex({world,zones:[zone],rooms:[roomA,roomB],links:[bossExit]});
+const gatedStart=createDungeonRuntime(gatedIndex,{layoutProvider});
+assert.equal(gatedStart.ok,true);
+const emptyInventory=createInventoryState();
+const blocked=transitionDungeonRoom(gatedIndex,gatedStart.runtime,'boss-exit',{layoutProvider,inventory:emptyInventory});
+assert.equal(blocked.ok,false);
+assert.equal(blocked.reason,'link-unavailable');
+assert.equal(blocked.runtime.currentRoomId,'a','blocked boss exit must leave the hero in the boss room');
+const defs={items:[{id:'boss-key',name:'Clé du boss',enabled:true,stackable:true,maxStack:9}]};
+const withKey=addItem(emptyInventory,'boss-key',1,defs);
+assert.equal(withKey.ok,true);
+const unlocked=transitionDungeonRoom(gatedIndex,gatedStart.runtime,'boss-exit',{layoutProvider,inventory:withKey.inventory});
+assert.equal(unlocked.ok,true);
+assert.equal(unlocked.runtime.currentRoomId,'b','boss exit must become traversable once the key is in inventory');
 
 console.log('rpg-room-runtime.test.mjs: ok');

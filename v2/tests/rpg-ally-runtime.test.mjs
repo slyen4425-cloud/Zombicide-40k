@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createSpatialState, setActorPosition } from '../src/modes/rpg/spatial-engine.js';
-import { createAllyRoster, createAllyRuntime, addAlly } from '../src/modes/rpg/ally-engine.js';
+import { createAllyRoster, createAllyRuntime, addAlly, combatEligibleAllies, canPlayerControl } from '../src/modes/rpg/ally-engine.js';
 import { placeAlly, moveAlly, alliesNearEngager, buildAllyCombatants, syncAlliesFromCombat, finishAllyTurn, finishAllyCombat } from '../src/modes/rpg/ally-runtime.js';
 import { createCombatState, markCombatantKo } from '../src/modes/rpg/combat-engine.js';
 
@@ -44,8 +44,21 @@ assert.equal(combat.actors['wolf-1'].controlMode,'player');
 assert.equal(combat.actors['wolf-1'].ownerActorId,'aldren');
 combat=markCombatantKo(combat,'wolf-1',true);
 roster=syncAlliesFromCombat(roster,combat);
+assert.equal(roster.actors['wolf-1'].ko,true);
 assert.equal(roster.actors['wolf-1'].actor.ko,true);
 assert.equal(roster.actors['wolf-1'].actor.active,false);
+assert.equal(combatEligibleAllies(roster).some(x=>x.instanceId==='wolf-1'),false,'KO ally must not re-enter a later combat');
+assert.equal(canPlayerControl(roster.actors['wolf-1'],{playerActorIds:['aldren']}).ok,false,'KO ally must not be controllable');
+const koMove=moveAlly(roster,spatial,'wolf-1',{x:3,y:0,zoneId:'room-a'},{movementStatId:'move',defaultMovement:3});
+assert.equal(koMove.ok,false);
+assert.equal(koMove.reason,'defeated');
+
+combat.actors['wolf-1'].ko=false;
+roster=syncAlliesFromCombat(roster,combat);
+assert.equal(roster.actors['wolf-1'].ko,false);
+assert.equal(roster.actors['wolf-1'].actor.ko,false);
+assert.equal(roster.actors['wolf-1'].actor.active,true);
+assert.equal(combatEligibleAllies(roster).some(x=>x.instanceId==='wolf-1'),true,'revived ally becomes combat eligible again');
 
 let tick=finishAllyTurn(roster);
 assert.equal(tick.roster.actors['wolf-1'].remaining,1);

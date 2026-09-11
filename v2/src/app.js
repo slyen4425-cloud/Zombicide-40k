@@ -9,7 +9,7 @@ const MODES = [
 
 const HELP = {
   home: { title: 'Comment fonctionne GenSrpG V2 ?', html: '<p>La V2 est reconstruite sans toucher à la version stable actuelle.</p><p><strong>Survie, RPG, Capture et PVP sont séparés.</strong> Le Core ne partage que des services techniques neutres.</p>' },
-  status: { title: 'État de la reconstruction', html: '<p>Le socle RPG sait créer des statistiques, ressources, conditions, effets, compétences et transformations avec des liens par menus.</p><p>Un laboratoire de combat permet maintenant de tester le moteur de dés et la timeline sans dépendre des animations finales.</p>' },
+  status: { title: 'État de la reconstruction', html: '<p>Le socle RPG sait créer des statistiques, ressources, conditions, effets, compétences et transformations avec des liens par menus.</p><p>Le combat de test utilise maintenant des règles configurables pour l’initiative, le KO et les jets.</p>' },
   survival: { title: 'Mode Survie', html: '<p>Le but est de conserver les fonctions actuelles en les nettoyant, sans réinventer inutilement les règles déjà efficaces.</p>' },
   rpg: { title: 'Mode RPG', html: '<p>Le RPG reste basé sur les dés. Les statistiques, ressources, effets, distances, conditions et règles sont configurables.</p><p>Les liens utilisent des sélecteurs et menus : aucun identifiant technique ne doit être saisi à la main.</p>' },
   'rpg-editor': { title: 'Éditeur RPG générique', html: '<p>Cette zone définit les briques de l’univers RPG. Elles sont réutilisées par les héros, objets, jets, compétences, pièges, événements et transformations.</p>' },
@@ -19,7 +19,8 @@ const HELP = {
   'rpg-effect': { title: 'Effet', html: '<p>Un effet modifie une statistique ou une ressource. Il pourra être réutilisé par une compétence, un objet, un piège, un événement ou une forme.</p><p>Exemple : Force +5 pendant 3 tours, ou PV −2.</p>' },
   'rpg-skill': { title: 'Compétence', html: '<p>Une compétence regroupe conditions, coût, charges, recharge, jet éventuel, cible et effets.</p><p>Chaque dépendance est choisie dans une liste : pas d’ID à recopier.</p>' },
   'rpg-form': { title: 'Évolution / transformation', html: '<p>Une forme peut être temporaire ou permanente. Elle peut demander des conditions, consommer une ressource, durer plusieurs tours, appliquer des effets et ajouter des compétences.</p><p>Exemple : Ki ≥ 80 → Forme éveillée pendant 3 tours.</p>' },
-  'rpg-combat-lab': { title: 'Laboratoire de combat', html: '<p>Cette zone teste le moteur RPG avec deux combattants temporaires. Elle utilise les compétences créées dans la configuration.</p><p>Le moteur résout une action une seule fois, puis avance la timeline. Les futures animations de dés ne seront jamais responsables de la logique.</p><p><strong>Astuce :</strong> crée d’abord au moins une compétence et un effet, puis ouvre l’onglet Combat test.</p>' },
+  'rpg-combat-config': { title: 'Règles de combat', html: '<p>Tu choisis ici ce qui détermine l’initiative, quelle valeur provoque un KO et quel dé sert par défaut aux jets.</p><p>Exemple : Initiative = Agilité + D20 ; KO si Points de vie ≤ 0. Ces noms ne sont pas imposés : une autre statistique ou ressource peut être choisie dans les menus.</p>' },
+  'rpg-combat-lab': { title: 'Laboratoire de combat', html: '<p>Cette zone teste le moteur RPG avec deux combattants temporaires. Elle utilise les compétences et les règles de combat configurées.</p><p>Le moteur résout une action une seule fois, puis avance la timeline. Les futures animations de dés ne seront jamais responsables de la logique.</p><p><strong>Astuce :</strong> crée d’abord au moins une compétence et un effet, puis ouvre l’onglet Combat test.</p>' },
   capture: { title: 'Capture de créatures', html: '<p>Ce chantier est volontairement mis de côté. Son ancien fonctionnement sera récupéré avant toute réécriture.</p>' },
   pvp: { title: 'Affrontement / PVP', html: '<p>Architecture réservée, moteur à construire plus tard.</p>' },
 };
@@ -30,7 +31,7 @@ function renderModes() {
 }
 
 function renderStatus() {
-  document.querySelector('#buildStatus').innerHTML = '<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>RPG :</strong> éditeur générique + laboratoire de combat aux dés</li></ul>';
+  document.querySelector('#buildStatus').innerHTML = '<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>RPG :</strong> éditeur générique + règles de combat configurables + laboratoire de combat</li></ul>';
 }
 
 function openHelp(key) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHeroDefinition,validateHeroDefinition,createHeroRuntime,resolveHeroSkillIds,heroSheetSnapshot,setHeroKo,setHeroDead} from '../src/modes/rpg/hero-engine.js';
-import {createItemDefinition,addItem,equipItem} from '../src/modes/rpg/inventory-engine.js';
+import {createItemDefinition,addItem,equipItem,inventoryQuantity} from '../src/modes/rpg/inventory-engine.js';
 import {createSetDefinition} from '../src/modes/rpg/set-engine.js';
 
 const stats=[{id:'force',name:'Force',baseValue:2,min:0,max:20},{id:'agi',name:'Agilité',baseValue:3,min:0,max:20}];
@@ -22,9 +22,9 @@ assert.equal(runtime.state.stats.agi,3);
 assert.equal(runtime.state.resources.pv.max,40);
 assert.equal(runtime.state.resources.pv.current,22);
 assert.equal(runtime.progression.level,1);
+assert.equal(inventoryQuantity(runtime.inventory,'sword'),1,'starting items must be populated when hero runtime is created');
 
-let out=addItem(runtime.inventory,'sword',1,definitions); runtime.inventory=out.inventory;
-out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='sword').entryId,'main-hand',definitions); runtime.inventory=out.inventory;
+let out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='sword').entryId,'main-hand',definitions); runtime.inventory=out.inventory;
 out=addItem(runtime.inventory,'helm',1,definitions); runtime.inventory=out.inventory;
 out=equipItem(runtime.inventory,runtime.inventory.entries.find(e=>e.itemId==='helm').entryId,'head',definitions); runtime.inventory=out.inventory;
 out=addItem(runtime.inventory,'chest',1,definitions); runtime.inventory=out.inventory;

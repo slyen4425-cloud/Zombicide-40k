@@ -16,6 +16,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
+- UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
+- Quêtes : moteur de définition + nouveau runtime persistant de démarrage, progression par signaux, complétion et échec.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -35,25 +37,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - sélecteur jet Créateur de salle : `34643290918` success
 - sélecteur jet compétences : `34643616351` success
 - éditeur pièges : `34643853871` success
+- picker destinataire de loot : `34644185299` success
+- checkpoint picker loot : `34644216194` success
 
 ## Dernière étape codée
 
-UI générique de destinataire de loot :
-- nouveau `loot-recipient-ui.js`;
-- un destinataire est identifié par `kind:id` et garde son propre inventaire;
-- sélecteur lisible par nom/icône : héros, groupe ou autre inventaire, sans ID technique exposé;
-- destinataires désactivés ou sans inventaire exclus;
-- fallback automatique vers le premier inventaire disponible si aucune sélection valide n'est fournie;
-- `grantCreatureLootToSelectedRecipient()` raccorde le choix UI à `grantRoomCreatureDropsToRecipient()`;
-- après attribution, seul l'inventaire choisi est mis à jour;
-- le runtime conserve `lootGrantedTo`, donc impossible de rediriger ou dupliquer le même loot au retour dans la salle;
-- régression `rpg-loot-recipient-ui.test.mjs` couvre héros, sac de groupe, exclusion, attribution et anti-double-loot.
+Runtime générique de lifecycle des quêtes :
+- nouveau `quest-runtime.js`;
+- `createQuestRuntime()` construit un état persistant par quête;
+- `startQuestRuntime()` évalue les `startConditionIds` via le moteur générique de conditions avant activation;
+- `applyQuestSignal()` traduit des signaux gameplay (`defeat`, `flag`, `visit`, etc.) en progression des objectifs correspondants par `kind` + `targetId`;
+- les conditions propres à un objectif sont évaluées avant sa progression;
+- la progression reste bornée à `required` et les objectifs optionnels ne bloquent pas la complétion;
+- `completeQuestRuntime()` et `failQuestRuntime()` conservent les récompenses/événements déjà définis par `quest-engine.js`;
+- log séquencé pour démarrage, progression, complétion et échec;
+- snapshot stable par quête pour future UI PNJ/journal;
+- régression `rpg-quest-runtime.test.mjs` couvre conditions de départ, signaux non pertinents, progression, clamp, objectif obligatoire, complétion, récompenses, logs et redémarrage d'une quête répétable après échec.
 
 Commits de l'étape :
-- workflow UI destinataire : `09d32ff9b286adf8f0099b0ed0d5129b742091be`
-- régression : `8b23b0a11ec85175ecb7dbba3faf72b54e2ccfcd`
+- runtime quêtes : `d2aed6a2579f74614c9ca9bc9e8cd6222055f0ea`
+- régression : `391f0c894b07d192a4f2f5169f512dff8e3d8e6f`
 
-CI de cette nouvelle étape : à vérifier sur le run déclenché par ce checkpoint.
+CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
 
 ## Stockage — décision repoussée
 
@@ -63,8 +68,9 @@ CI de cette nouvelle étape : à vérifier sur le run déclenché par ce checkpo
 
 ## Priorités ouvertes
 
-- intégrer ce picker dans la vraie UI de gameplay du donjon quand la vue de loot/fin de combat est montée;
-- poursuivre lifecycle quêtes et UI PNJ/interactions;
+- raccorder ce quest runtime aux interactions PNJ/objets/salles pour produire automatiquement les signaux de quête;
+- construire le journal/UI de quête et l'UI PNJ/interactions;
+- intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

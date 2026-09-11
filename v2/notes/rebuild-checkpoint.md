@@ -19,20 +19,26 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Ciblage IA : règles `nearest`, `weakest`, `random`, `varied`; mémoire de cible et anti-focus immédiat lorsque plusieurs cibles sont valides.
 - Runtime ennemi : choix coordonné compétence + cible + mémoire.
 - Alliés : transition par salle, durées `room` décrémentées uniquement dans la salle concernée; métadonnées de combat conservées à l'entrée en combat.
-- Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`.
+- Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`. CI run `34632880339` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Auto-injection des alliés au démarrage d'un combat. `createCombatWithAllies()` fusionne les combattants de base avec les alliés éligibles selon la proximité spatiale, conserve leurs métadonnées de contrôle et évite les doublons si un allié est déjà présent dans la liste de combat.
+Durcissement de l'état KO des alliés :
+- `combatEligibleAllies()` exclut maintenant les alliés KO/morts, y compris si l'état est porté par `runtime.actor`;
+- `canPlayerControl()` refuse un allié KO/mort;
+- `moveAlly()` refuse un allié KO/mort avec `reason: defeated`;
+- `syncAlliesFromCombat()` synchronise explicitement `runtime.ko`, `runtime.actor.ko` et `runtime.actor.active`;
+- si un allié est réellement réanimé (`ko=false` dans le combat), il redevient proprement éligible et actif au lieu de rester bloqué par un ancien `active=false`.
 
 Commits de l'étape :
-- moteur : `a019bb917659dcf34285f4a9bcb42ada7d8de868`
-- test : `d40bb28f396af789bc0025364c93525c3dde4e8a`
+- éligibilité : `8f1ed12f5efc0d3aaa8803b466ba5dbeb0f1ebbb`
+- synchronisation : `65d1cc12b189f550a5efa79a3ae2647e789eb439`
+- régression : `dd7e7d7bc4e3fb481b51b38d64020d35d28952f0`
 
-CI : run `34632880339`, encore en cours au dernier contrôle.
+CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
 ## Stockage — décision repoussée
 
@@ -43,7 +49,6 @@ CI : run `34632880339`, encore en cours au dernier contrôle.
 
 ## Points encore ouverts prioritaires
 
-- cohérence KO/active côté alliés;
 - placement valide des alliés suiveurs à l'entrée d'une salle (éviter le même carreau pour tous);
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
 - couverture/obstacles et modificateurs d'équipement tactiques;

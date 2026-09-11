@@ -22,6 +22,7 @@ export function prepareSkillAction(combat, skill, targetId, definitions = {}, co
   const action = {
     id: context.actionId || globalThis.crypto?.randomUUID?.() || `act_${Date.now()}_${Math.random()}`,
     actorId: next.activeActorId,
+    turnSequence: Number(next.turnSequence) || 0,
     targetId: targetId || next.activeActorId,
     skillId: skill.id,
     effectIds: [...(skill.effectIds || [])],

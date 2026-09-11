@@ -5,6 +5,7 @@ const definitions={
   stats:[],
   resources:[{id:'hp',min:0,maxFormula:{kind:'fixed',value:10}}],
   effects:[{id:'hurt',kind:'resource-modifier',resourceId:'hp',operation:'subtract',value:2,chance:100,conditions:[]}],
+  checks:[{id:'agility-test',name:'Test Agilité',enabled:true,die:100,mode:'roll-under',statId:'agility',difficulty:40,modifier:0}],
 };
 
 const event=createEventDefinition({
@@ -23,7 +24,7 @@ const event=createEventDefinition({
 });
 
 const initialWorld={
-  actors:{hero:{resources:{hp:{current:10,max:10}},stats:{}}},
+  actors:{hero:{resources:{hp:{current:10,max:10}},stats:{agility:10}}},
   inventory:{},flags:{},doors:{gate:{id:'gate',state:'open',locked:false}},
   rooms:{roomA:{entities:[]}},
 };
@@ -53,5 +54,31 @@ assert.equal(rerun.state.log.filter(x=>x.type==='event-completed').length,1);
 const invalidChoice=chooseEventOption(result.state,'missing',{world:result.world,definitions});
 assert.equal(invalidChoice.ok,false);
 assert.equal(invalidChoice.reason,'choice-missing');
+
+const checkedEvent=createEventDefinition({
+  id:'agility-door',
+  actions:[{
+    kind:'check',id:'jump-check',checkId:'agility-test',actorId:'hero',
+    successActions:[{kind:'flag',flagId:'jump_success',value:true}],
+    failureActions:[{kind:'effect',effectId:'hurt',targetId:'hero'},{kind:'flag',flagId:'jump_failed',value:true}],
+  }],
+});
+
+let checked=createEventState(checkedEvent,{runId:'run-check-success',roomId:'roomA'});
+let checkedResult=runEvent(checked,{world:initialWorld,definitions,defaultTargetId:'hero',checkRandom:()=>0.1,effectContext:{randomPercent:()=>0}});
+assert.equal(checkedResult.state.status,'completed');
+assert.equal(checkedResult.world.flags.jump_success,true);
+assert.equal(checkedResult.world.flags.jump_failed,undefined);
+assert.equal(checkedResult.world.actors.hero.resources.hp.current,10);
+const successLog=checkedResult.state.log.find(x=>x.type==='event-check-resolved');
+assert.equal(successLog.checkId,'agility-test');
+assert.equal(successLog.success,true);
+
+checked=createEventState(checkedEvent,{runId:'run-check-failure',roomId:'roomA'});
+checkedResult=runEvent(checked,{world:initialWorld,definitions,defaultTargetId:'hero',checkRandom:()=>0.95,effectContext:{randomPercent:()=>0}});
+assert.equal(checkedResult.world.flags.jump_success,undefined);
+assert.equal(checkedResult.world.flags.jump_failed,true);
+assert.equal(checkedResult.world.actors.hero.resources.hp.current,8);
+assert.equal(checkedResult.state.log.find(x=>x.type==='event-check-resolved')?.success,false);
 
 console.log('rpg-event-engine: ok');

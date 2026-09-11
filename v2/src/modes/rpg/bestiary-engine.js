@@ -53,7 +53,7 @@ export function createCreatureRuntime(creature,universe={}, {instanceId=uid(),ro
   return {
     instanceId:String(instanceId),creatureId:definition.id,name:definition.name,boss:definition.boss,
     roomId:roomId==null?null:String(roomId),x:Number.isFinite(Number(x))?Number(x):null,y:Number.isFinite(Number(y))?Number(y):null,
-    active:true,defeated:false,removed:false,state,skillIds:[...definition.skillIds],ai:clone(definition.ai),tags:[...definition.tags],xp:definition.xp,
+    active:true,defeated:false,removed:false,lootClaimed:false,lootDrops:null,state,skillIds:[...definition.skillIds],ai:clone(definition.ai),tags:[...definition.tags],xp:definition.xp,
   };
 }
 
@@ -85,4 +85,19 @@ export function rollCreatureLoot(creature,{random=Math.random}={}){
     if(entry.itemId&&quantity>0) drops.push({itemId:String(entry.itemId),quantity});
   }
   return drops;
+}
+
+export function claimCreatureLoot(runtime,creature,{random=Math.random}={}){
+  if(!runtime) return {ok:false,reason:'missing-runtime',runtime,drops:[]};
+  if(runtime.lootClaimed){
+    return {ok:false,reason:'already-claimed',runtime:clone(runtime),drops:clone(runtime.lootDrops||[])};
+  }
+  if(!runtime.defeated){
+    return {ok:false,reason:'not-defeated',runtime:clone(runtime),drops:[]};
+  }
+  const next=clone(runtime);
+  const drops=rollCreatureLoot(creature,{random});
+  next.lootClaimed=true;
+  next.lootDrops=clone(drops);
+  return {ok:true,reason:null,runtime:next,drops:clone(drops)};
 }

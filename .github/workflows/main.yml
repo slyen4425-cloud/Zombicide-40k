@@ -46,6 +46,27 @@ jobs:
             if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
 
+      - name: Injecter uniquement le traceur Chrome V123 avant bootstrap
+        run: |
+          mkdir -p _site/assets/gensrpg
+          curl -fsSL https://raw.githubusercontent.com/slyen4425-cloud/Zombicide-40k/main/assets/gensrpg/gens-chrome-startup-diag-1678122.js -o _site/assets/gensrpg/gens-chrome-startup-diag-1678122.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v95diag"></script>'
+          if tag not in s:
+              if '<head>' in s:
+                  s=s.replace('<head>', '<head>\n'+tag, 1)
+              elif '<html' in s:
+                  i=s.find('>')+1
+                  s=s[:i]+'\n'+tag+s[i:]
+              else:
+                  s=tag+'\n'+s
+          p.write_text(s,encoding='utf-8')
+          PY
+          grep -q 'gens-chrome-startup-diag-1678122.js?v=v95diag' _site/index.html
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 

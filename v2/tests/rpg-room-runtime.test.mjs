@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createWorld, createZone, createRoom, createRoomLink, buildWorldIndex } from '../src/modes/rpg/world-engine.js';
-import { createDungeonRuntime, transitionDungeonRoom, updateRoomEntity, updateRoomInteractionState, ensureRoomInstance, openRoomDoor, materializeRoomLayout, roomRuntimeSnapshot, attemptRoomInteraction } from '../src/modes/rpg/room-runtime.js';
+import { createDungeonRuntime, transitionDungeonRoom, transitionDungeonHeroRoom, getHeroRoomLocation, heroesInRoom, setFocusedDungeonHero, updateRoomEntity, updateRoomInteractionState, ensureRoomInstance, openRoomDoor, materializeRoomLayout, roomRuntimeSnapshot, attemptRoomInteraction } from '../src/modes/rpg/room-runtime.js';
 import { createInventoryState, addItem } from '../src/modes/rpg/inventory-engine.js';
 import { createRoomLayout, createDoor, addDoor } from '../src/modes/rpg/room-engine.js';
 import { shortestRoomPathDistance } from '../src/modes/rpg/room-tactical-bridge.js';
@@ -122,5 +122,35 @@ assert.equal(withKey.ok,true);
 const unlocked=transitionDungeonRoom(gatedIndex,gatedStart.runtime,'boss-exit',{layoutProvider,inventory:withKey.inventory});
 assert.equal(unlocked.ok,true);
 assert.equal(unlocked.runtime.currentRoomId,'b','boss exit must become traversable once the key is in inventory');
+
+// Plusieurs héros peuvent maintenant occuper des salles différentes et revenir indépendamment.
+let party=createDungeonRuntime(index,{layoutProvider,heroIds:['aldren','lyra'],focusedHeroId:'aldren'});
+assert.equal(party.ok,true);
+let partyRuntime=party.runtime;
+assert.deepEqual(heroesInRoom(partyRuntime,'a').sort(),['aldren','lyra']);
+assert.equal(getHeroRoomLocation(partyRuntime,'aldren').roomId,'a');
+assert.equal(getHeroRoomLocation(partyRuntime,'lyra').roomId,'a');
+
+let lyraForward=transitionDungeonHeroRoom(index,partyRuntime,'lyra','ab',{layoutProvider});
+assert.equal(lyraForward.ok,true); partyRuntime=lyraForward.runtime;
+assert.equal(getHeroRoomLocation(partyRuntime,'lyra').roomId,'b');
+assert.equal(getHeroRoomLocation(partyRuntime,'aldren').roomId,'a','moving Lyra must not teleport Aldren');
+assert.deepEqual(heroesInRoom(partyRuntime,'a'),['aldren']);
+assert.deepEqual(heroesInRoom(partyRuntime,'b'),['lyra']);
+assert.equal(partyRuntime.currentRoomId,'a','focused Aldren keeps the gameplay view in room A');
+
+let focusLyra=setFocusedDungeonHero(partyRuntime,'lyra');
+assert.equal(focusLyra.ok,true); partyRuntime=focusLyra.runtime;
+assert.equal(partyRuntime.currentRoomId,'b','focus follows the selected hero without moving anybody');
+
+let lyraBack=transitionDungeonHeroRoom(index,partyRuntime,'lyra','ab',{layoutProvider});
+assert.equal(lyraBack.ok,true); partyRuntime=lyraBack.runtime;
+assert.equal(lyraBack.created,false,'returning to room A must reuse the existing room instance');
+assert.equal(getHeroRoomLocation(partyRuntime,'lyra').roomId,'a');
+assert.equal(getHeroRoomLocation(partyRuntime,'aldren').roomId,'a');
+assert.deepEqual(heroesInRoom(partyRuntime,'a').sort(),['aldren','lyra']);
+assert.equal(roomRuntimeSnapshot(partyRuntime,'a').entities.length,1,'individual backtracking must never duplicate room enemies');
+assert.equal(getHeroRoomLocation(partyRuntime,'lyra').history.length,2,'each hero keeps an independent travel history');
+assert.equal(getHeroRoomLocation(partyRuntime,'aldren').history.length,0,'stationary hero history must stay untouched');
 
 console.log('rpg-room-runtime.test.mjs: ok');

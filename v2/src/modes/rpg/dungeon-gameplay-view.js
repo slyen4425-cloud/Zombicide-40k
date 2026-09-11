@@ -4,9 +4,9 @@ import { mountRoomNpcInteraction } from './room-npc-interaction-ui.js';
 import { resolveRoomRuntimeEventChoice } from './room-event-runtime.js';
 import { availableRoomLinks } from './world-engine.js';
 import { transitionDungeonRoom, transitionDungeonHeroRoom, setFocusedDungeonHero } from './room-runtime.js';
-import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult } from './dungeon-combat-runtime.js';
+import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult, dungeonHeroCombatSkills, executeDungeonHeroSkill } from './dungeon-combat-runtime.js';
 
-function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
+function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
 
 function questList(universe={}){
@@ -135,18 +135,42 @@ function renderTransitionSection(worldIndex,roomRuntime,options={}){
   return `<section class="editor-section dungeon-transition-section"><div class="section-title-row"><div><h3>🚪 Passages</h3><p class="muted">${heroName?`${esc(heroName)} se déplace seul. `:''}Passages actuellement accessibles depuis cette salle.</p></div></div><div class="action-row">${links.map(link=>`<button type="button" class="secondary-button" data-dungeon-transition="${esc(link.id)}">${link.traversal==='reverse'?'↩️':'➡️'} ${esc(link.label)} · ${esc(link.targetRoomName)}</button>`).join('')||'<p class="muted">Aucun passage accessible pour le moment.</p>'}</div></section>`;
 }
 
-function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=null}={}){
+function combatActorName(universe,actor,id){
+  if(actor?.side==='heroes') return heroDefinition(universe,actor.metadata?.heroId||id)?.name||id;
+  const creature=(universe.bestiary||[]).find(entry=>String(entry.id)===String(actor?.metadata?.creatureId));
+  return creature?.name||actor?.metadata?.creatureId||id;
+}
+
+export function dungeonCombatTargetEntries(universe,combat){
+  const actor=combat?.actors?.[combat?.activeActorId];
+  if(!actor) return [];
+  return Object.values(combat.actors||{}).filter(candidate=>candidate&&!candidate.ko).map(candidate=>({
+    id:String(candidate.id),
+    side:String(candidate.side||''),
+    self:String(candidate.id)===String(actor.id),
+    name:combatActorName(universe,candidate,candidate.id),
+  }));
+}
+
+function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=null,message=''}={}){
   const roomId=roomRuntime?.currentRoomId?String(roomRuntime.currentRoomId):null;
   if(!roomId) return '';
   const enemies=activeDungeonEnemies(roomRuntime,roomId);
   if(activeCombat?.metadata?.roomId===roomId&&activeCombat.phase!=='ended'){
-    const names=(activeCombat.order||[]).map(id=>{
-      const actor=activeCombat.actors?.[id];
-      if(actor?.side==='heroes') return heroDefinition(universe,actor.metadata?.heroId||id)?.name||id;
-      const creature=(universe.bestiary||[]).find(entry=>String(entry.id)===String(actor?.metadata?.creatureId));
-      return creature?.name||actor?.metadata?.creatureId||id;
-    });
-    return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Participants :</strong> ${names.map(esc).join(' · ')}</p><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(activeCombat.activeActorId||'—')}</p></section>`;
+    const names=(activeCombat.order||[]).map(id=>combatActorName(universe,activeCombat.actors?.[id],id));
+    const actor=activeCombat.actors?.[activeCombat.activeActorId];
+    const actorName=combatActorName(universe,actor,activeCombat.activeActorId||'—');
+    let actions='';
+    if(actor?.side==='heroes'){
+      const skills=dungeonHeroCombatSkills({combat:activeCombat,heroRuntimes,universe});
+      const targets=dungeonCombatTargetEntries(universe,activeCombat);
+      actions=skills.length
+        ?`<div class="combat-actions dungeon-combat-actions"><label>Compétence<select data-dungeon-combat-skill>${skills.map(skill=>`<option value="${esc(skill.id)}">${esc(skill.icon||'✨')} ${esc(skill.name||'Compétence')}</option>`).join('')}</select></label><label>Cible<select data-dungeon-combat-target>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="primary-button" data-dungeon-use-skill>Utiliser la compétence</button></div>`
+        :'<p class="muted">Aucune compétence disponible pour ce héros.</p>';
+    } else {
+      actions='<p class="muted">Tour ennemi : les actions IA seront raccordées à cette même timeline.</p>';
+    }
+    return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Participants :</strong> ${names.map(esc).join(' · ')}</p><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(actorName)}</p>${actions}${message?`<div class="combat-result" aria-live="polite">${esc(message)}</div>`:''}</section>`;
   }
   if(!enemies.length) return '<section class="editor-section dungeon-combat-section"><h3>⚔️ Combat</h3><p class="muted">Aucun ennemi actif dans cette salle.</p></section>';
   const enemyNames=enemies.map(entry=>{
@@ -175,7 +199,7 @@ function renderLootSection(roomRuntime,lootRecipients=[],selectedLootRecipientKe
   }).join('')}</div></section>`;
 }
 
-export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null,eventPresentationState=null,worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],activeCombat=null}={}){
+export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootRecipients=[],selectedLootRecipientKey=null,roomLayout=null,eventPresentationState=null,worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],activeCombat=null,combatMessage=''}={}){
   const roomId=roomRuntime?.currentRoomId?String(roomRuntime.currentRoomId):null;
   const hasRuntime=Boolean(roomRuntime&&roomId);
   const activeEvent=roomRuntime?.eventOrchestrator?.active?.eventState||null;
@@ -184,10 +208,10 @@ export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootReci
   const roomName=worldIndex?.rooms?.[roomId]?.name||roomId;
   const focusedHero=roomRuntime?.focusedHeroId?heroDefinition(universe,roomRuntime.focusedHeroId):null;
   const heroLabel=focusedHero?.name||roomRuntime?.focusedHeroId||null;
-  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`${heroLabel?`${esc(heroLabel)} · `:''}Salle actuelle : ${esc(roomName)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid">${renderHeroFocusSection(universe,roomRuntime,worldIndex)}<section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomName)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderCombatSection(universe,roomRuntime,{heroRuntimes,activeCombat})}${renderTransitionSection(worldIndex,roomRuntime,{conditionEvaluator,inventory,universe})}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
+  return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`${heroLabel?`${esc(heroLabel)} · `:''}Salle actuelle : ${esc(roomName)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid">${renderHeroFocusSection(universe,roomRuntime,worldIndex)}<section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomName)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderCombatSection(universe,roomRuntime,{heroRuntimes,activeCombat,message:combatMessage})}${renderTransitionSection(worldIndex,roomRuntime,{conditionEvaluator,inventory,universe})}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
 }
 
-export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],spatial=null,spatialConfig={},activeCombat=null,onCombatStart=null,onCombatEnd=null,onRoomRuntimeChange=null}={}){
+export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],spatial=null,spatialConfig={},activeCombat=null,onCombatStart=null,onCombatChange=null,onCombatEnd=null,onRoomRuntimeChange=null}={}){
   let currentUniverse=universe||{};
   let currentRuntime=roomRuntime||null;
   let currentLootRecipients=clone(lootRecipients||[]);
@@ -199,6 +223,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   let currentSpatial=spatial?clone(spatial):null;
   let currentSpatialConfig=clone(spatialConfig||{});
   let currentCombat=activeCombat?clone(activeCombat):null;
+  let currentCombatMessage='';
   let lastReconciledCombatKey=null;
   let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
@@ -220,7 +245,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
     reconcileCurrentCombat();
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;
-    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory,heroRuntimes:currentHeroRuntimes,activeCombat:currentCombat});
+    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory,heroRuntimes:currentHeroRuntimes,activeCombat:currentCombat,combatMessage:currentCombatMessage});
 
     host.querySelector('[data-dungeon-hero-focus]')?.addEventListener('change',event=>{
       if(!currentRuntime) return;
@@ -245,8 +270,30 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       });
       if(!out.ok) return;
       currentCombat=out.combat;
+      currentCombatMessage='Combat engagé.';
       lastReconciledCombatKey=null;
       onCombatStart?.(clone(currentCombat),out);
+      render();
+    });
+
+    host.querySelector('[data-dungeon-use-skill]')?.addEventListener('click',()=>{
+      if(!currentCombat) return;
+      const skillId=host.querySelector('[data-dungeon-combat-skill]')?.value||null;
+      const targetId=host.querySelector('[data-dungeon-combat-target]')?.value||null;
+      const out=executeDungeonHeroSkill({
+        combat:currentCombat,
+        heroRuntimes:currentHeroRuntimes,
+        universe:currentUniverse,
+        skillId,
+        targetId,
+        spatial:currentSpatial,
+        spatialConfig:currentSpatialConfig,
+      });
+      if(!out.ok){currentCombatMessage=`Action refusée : ${out.reason}.`;render();return;}
+      currentCombat=out.combat;
+      const skill=(currentUniverse.skills||[]).find(entry=>String(entry.id)===String(out.skillId));
+      currentCombatMessage=`${skill?.name||'Compétence'} : ${out.check?.success===false?'échec':'résolue'}${out.check?.roll!=null?` · jet ${out.check.roll}`:''}.`;
+      onCombatChange?.(clone(currentCombat),out);
       render();
     });
 
@@ -336,7 +383,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
     setInventory(nextInventory){currentInventory=nextInventory||null;render();return currentInventory;},
     setHeroRuntimes(nextHeroes){currentHeroRuntimes=clone(nextHeroes||[]);render();return clone(currentHeroRuntimes);},
     setSpatial(nextSpatial,nextConfig=currentSpatialConfig){currentSpatial=nextSpatial?clone(nextSpatial):null;currentSpatialConfig=clone(nextConfig||{});render();return currentSpatial?clone(currentSpatial):null;},
-    setCombat(nextCombat){currentCombat=nextCombat?clone(nextCombat):null;if(currentCombat?.phase!=='ended') lastReconciledCombatKey=null;render();return currentCombat?clone(currentCombat):null;},
+    setCombat(nextCombat){currentCombat=nextCombat?clone(nextCombat):null;currentCombatMessage='';if(currentCombat?.phase!=='ended') lastReconciledCombatKey=null;render();return currentCombat?clone(currentCombat):null;},
     setLootRecipients(nextRecipients,selectedKey=currentLootRecipientKey){currentLootRecipients=clone(nextRecipients||[]);currentLootRecipientKey=selectedKey||null;render();return clone(currentLootRecipients);},
     setEventWorld(nextWorld){currentEventWorld=clone(nextWorld||{});render();return clone(currentEventWorld);},
     getRoomRuntime:()=>currentRuntime,

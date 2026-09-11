@@ -14,7 +14,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Les événements peuvent exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
 - Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont persistés dans le runtime de salle.
 - Le Créateur de salle expose le jet requis d'une interaction par un sélecteur lisible nom + dé, sans saisie d'ID technique.
-- L'éditeur de compétences expose maintenant le même choix de jet réutilisable; les anciens réglages locaux restent disponibles comme fallback.
+- L'éditeur de compétences expose le même choix de jet réutilisable; les anciens réglages locaux restent disponibles comme fallback.
+- L'éditeur RPG possède maintenant une section Pièges dédiée avec deux sélecteurs distincts : détection et désarmement.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -44,23 +45,25 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - jets réutilisables sur interactions de salle : `34642816595` success
 - persistance runtime des tentatives d'interaction : `34642980536` success
 - sélecteur de jet dans le Créateur de salle : `34643290918` success
+- sélecteur de jet dans les compétences : `34643616351` success
 
 ## Dernière étape codée
 
-Sélecteur de jet réutilisable dans l'éditeur de compétences :
-- `ensureAdvancedRpgCollections()` normalise désormais `universe.checks`;
-- `newSkill()` crée explicitement `checkId:null` tout en conservant `roll` pour compatibilité;
-- nouvel helper exporté `reusableCheckOptions()`;
-- seuls les jets actifs sont affichés;
-- les options montrent un libellé lisible `Nom · Dxx`, jamais un ID à saisir;
-- une compétence peut sélectionner un `checkId` directement dans son formulaire;
-- lorsqu'un jet réutilisable est choisi, les anciens champs locaux stat/difficulté et le toggle de jet local sont désactivés avec explication;
-- sans `checkId`, les anciens réglages inline continuent de fonctionner;
-- régression `rpg-skill-check-editor.test.mjs` vérifie sélection, D100/D20, exclusion des jets désactivés et fallback legacy.
+Éditeur dédié des pièges :
+- nouveau `trap-editor.js` avec collection persistante `universe.traps`;
+- création/suppression de pièges depuis la configuration RPG;
+- chaque piège expose `Jet de détection` et `Jet de désarmement` séparément;
+- les menus n'affichent que les checks actifs, avec libellé `Nom · Dxx` et sans saisie d'ID brut;
+- `— Détection automatique —` et `— Désarmement automatique —` conservent les cas sans jet;
+- les champs `enabled`, `hidden` et `reusable` sont éditables;
+- les données restent compatibles avec `trap-engine.js`, qui consomme déjà `detectionCheckId` et `disarmCheckId` avec fallback inline;
+- `rpg.js` initialise, charge et sauvegarde `universe.traps`, puis monte l'éditeur juste après les jets génériques;
+- régression `rpg-trap-editor.test.mjs` couvre normalisation, nouveau piège, D100/D20, sélection et exclusion des checks désactivés.
 
 Commits de l'étape :
-- interface compétences : `b062022ff9c03f8d701617b461b5ec0a228bd73e`
-- régression : `e648ab9d912190a6196fa6ccdf05f7a3385938a0`
+- éditeur pièges : `78e7cd07dd2afe9f627aebd8829407f24523f375`
+- intégration configuration RPG : `16cbdb60018882209d4cfc16f3917f57f9c56d5e`
+- régression : `e970a7e2d31a10106452b5ee10beabd625a7cbc2`
 
 CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
 
@@ -72,7 +75,6 @@ CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commi
 
 ## Priorités ouvertes
 
-- prévoir l'édition dédiée des pièges (détection/désarmement) avec deux sélecteurs de checks lisibles;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

@@ -24,23 +24,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Placement alliés changement de salle : placement distinct sur cases accessibles quand `roomLayout` est connu. CI run `34633817217` : success.
 - Loot bestiaire : claim idempotent, pas de double tirage après sauvegarde/rechargement. CI run `34634065664` : success.
 - Médias bestiaire : `icon`, `artId`, `audioId` persistent dans le runtime. CI run `34634410838` : success.
+- Objets de départ héros : `startingItems` remplit maintenant l'inventaire à la création du runtime. CI run `34634619019` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Population automatique des objets de départ héros :
-- `createHeroRuntime()` ne crée plus un inventaire vide quand `startingItems` est configuré;
-- chaque objet de départ valide est ajouté via l'autorité `addItem()` de l'inventaire, donc les règles de stack et de quantité restent centralisées;
-- les entrées invalides ou quantité 0 sont ignorées sans casser le runtime;
-- le test vérifie qu'Aldren reçoit bien son épée dès la création du runtime, sans ajout manuel après coup.
+Équipement de départ explicite des héros :
+- `createHeroDefinition()` accepte maintenant `startingEquipment` sous forme `{ itemId, slot }`;
+- la validation vérifie que l'objet existe, que le slot existe sur le héros et que l'objet est autorisé sur ce slot;
+- `createHeroRuntime()` ajoute d'abord `startingItems`, puis équipe les entrées demandées via l'autorité `equipItem()` existante;
+- cela permet de définir proprement Aldren avec son épée équipée, Lyra avec son arc équipé et Brom avec son bâton équipé, sans logique spéciale propre à ces héros;
+- le test vérifie que l'épée d'Aldren est déjà présente ET équipée en `main-hand` dès la création du runtime.
 
 Commits de l'étape :
-- moteur : `94c8116aaa530e5e42476e395970b7f50f480e7b`
-- régression : `943b6b655babac23ee10d99b7e84bb0bdc8ac120`
+- moteur : `365011e78e879c97c227956ccf8a3fa1e20db400`
+- régression : `627c96e85ff757c9e649e5d006a078ab1fdcae09`
 
-CI : run `34634619019`, encore en cours au dernier contrôle.
+CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
 ## Stockage — décision repoussée
 

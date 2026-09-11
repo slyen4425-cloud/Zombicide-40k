@@ -4,7 +4,10 @@ import { createInventoryState, inventoryQuantity } from '../src/modes/rpg/invent
 
 const universe={
   stats:[],resources:[],skills:[],
-  items:[{id:'dragon-scale',name:'Écaille de dragon',enabled:true,stackable:true,maxStack:99}],
+  items:[
+    {id:'dragon-scale',name:'Écaille de dragon',enabled:true,stackable:true,maxStack:99},
+    {id:'boss-key',name:'Clé du boss',enabled:true,stackable:true,maxStack:99},
+  ],
   bestiary:[
     {id:'skeleton',name:'Squelette',boss:false,statValues:{},resourceValues:{},skillIds:[],loot:[],ai:{kind:'basic'},tags:[],xp:1},
     {id:'wyvern',name:'Wyverne',boss:true,statValues:{},resourceValues:{},skillIds:[],loot:[{itemId:'dragon-scale',quantity:1,chance:100}],ai:{kind:'basic'},tags:['boss'],xp:10},
@@ -26,7 +29,8 @@ assert.equal(out.ok,true);
 assert.equal(out.instances.length,1);
 assert.equal(out.instances[0].creatureId,'wyvern');
 assert.equal(out.roomRuntime.entities.length,1);
-assert.deepEqual(out.rewards,[{itemId:'boss-key',source:'boss-key'}]);
+assert.deepEqual(out.rewards,[],'boss key must not be granted when the boss merely spawns');
+assert.deepEqual(out.roomRuntime.entities[0].data.spawn,{spawnId:'boss-10',kind:'boss',bossKeyItemId:'boss-key'});
 spawnState=out.spawnState;
 
 const repeat=executeSpawn(bossSpawn,{roomId:'room-10',roomRuntime:out.roomRuntime,spawnState,universe});
@@ -36,24 +40,25 @@ assert.equal(repeat.roomRuntime.entities.length,1);
 
 const defeated=resolveRoomCreatureDefeat(out.roomRuntime,'spawn:boss-10:1',universe,{random:()=>0});
 assert.equal(defeated.ok,true);
-assert.deepEqual(defeated.drops,[{itemId:'dragon-scale',quantity:1}]);
+assert.deepEqual(defeated.drops,[{itemId:'dragon-scale',quantity:1},{itemId:'boss-key',quantity:1}]);
 const defeatedEntity=defeated.roomRuntime.entities.find(e=>e.id==='spawn:boss-10:1');
 assert.equal(defeatedEntity.defeated,true);
 assert.equal(defeatedEntity.active,false);
 assert.equal(defeatedEntity.data.creatureRuntime.lootClaimed,true);
-assert.deepEqual(defeatedEntity.data.creatureRuntime.lootDrops,[{itemId:'dragon-scale',quantity:1}]);
+assert.deepEqual(defeatedEntity.data.creatureRuntime.lootDrops,[{itemId:'dragon-scale',quantity:1},{itemId:'boss-key',quantity:1}]);
 
 let rerolls=0;
 const defeatedAgain=resolveRoomCreatureDefeat(structuredClone(defeated.roomRuntime),'spawn:boss-10:1',universe,{random:()=>{rerolls+=1;return 0.99;}});
 assert.equal(defeatedAgain.ok,false);
 assert.equal(defeatedAgain.reason,'already-claimed');
-assert.deepEqual(defeatedAgain.drops,[{itemId:'dragon-scale',quantity:1}]);
-assert.equal(rerolls,0,'reopening a defeated room creature must never reroll loot');
+assert.deepEqual(defeatedAgain.drops,[{itemId:'dragon-scale',quantity:1},{itemId:'boss-key',quantity:1}]);
+assert.equal(rerolls,0,'reopening a defeated room creature must never reroll loot or duplicate its boss key');
 
 const emptyInventory=createInventoryState();
 const granted=grantRoomCreatureDrops(defeated.roomRuntime,'spawn:boss-10:1',emptyInventory,universe);
 assert.equal(granted.ok,true);
 assert.equal(inventoryQuantity(granted.inventory,'dragon-scale'),1);
+assert.equal(inventoryQuantity(granted.inventory,'boss-key'),1,'boss key must enter inventory only after the boss is defeated and loot is granted');
 const grantedEntity=granted.roomRuntime.entities.find(e=>e.id==='spawn:boss-10:1');
 assert.equal(grantedEntity.data.creatureRuntime.lootGranted,true);
 assert.deepEqual(grantedEntity.data.creatureRuntime.lootGrantedTo,{kind:'inventory',id:null});
@@ -62,6 +67,7 @@ const grantedAgain=grantRoomCreatureDrops(structuredClone(granted.roomRuntime),'
 assert.equal(grantedAgain.ok,false);
 assert.equal(grantedAgain.reason,'already-granted');
 assert.equal(inventoryQuantity(grantedAgain.inventory,'dragon-scale'),1,'reopening the room must not grant creature loot twice');
+assert.equal(inventoryQuantity(grantedAgain.inventory,'boss-key'),1,'reopening the room must not grant the boss key twice');
 assert.deepEqual(grantedAgain.recipient,{kind:'inventory',id:null});
 
 const freshSpawn=executeSpawn(createSpawnDefinition({id:'boss-recipient',kind:'boss',roomId:'room-10',creatureId:'wyvern'}),{roomId:'room-10',roomRuntime:{roomId:'room-10',entities:[],interactions:{}},spawnState:createSpawnState(),universe});

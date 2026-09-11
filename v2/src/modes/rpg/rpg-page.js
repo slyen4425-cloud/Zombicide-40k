@@ -1,7 +1,7 @@
 import { mountRpgEditor, loadRpgUniverse } from './rpg.js';
 import { mountCombatLab } from './combat-lab.js';
 import { mountWorldEditor } from './world-editor.js';
-import { mountRoomEditor } from './room-editor.js';
+import { mountRoomEditor, loadRoomLayout } from './room-editor.js';
 import { mountHeroSheet } from './hero-sheet.js';
 import { mountDungeonGameplayView } from './dungeon-gameplay-view.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
@@ -19,11 +19,11 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],selectedDungeonLootRecipientKey=null,onDungeonLootGranted=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],onDungeonRuntimeChange=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
   let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
-  let currentDungeonLootRecipientKey=selectedDungeonLootRecipientKey||null;
+  let currentDungeonEventWorld={};
   let currentTab='editor';
   let dungeonView=null;
   host.innerHTML=`
@@ -39,6 +39,10 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
   const body=host.querySelector('#rpgPageBody');
   const buttons=[...host.querySelectorAll('[data-rpg-tab]')];
 
+  function dungeonLayoutProvider(roomId){
+    return loadRoomLayout({id:String(roomId),name:String(roomId)});
+  }
+
   function open(tab){
     currentTab=tab;
     dungeonView=null;
@@ -49,12 +53,13 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       universe:loadRpgUniverse(),
       roomRuntime:currentDungeonRuntime,
       lootRecipients:currentDungeonLootRecipients,
-      selectedLootRecipientKey:currentDungeonLootRecipientKey,
-      onLootGranted:(state,out)=>{
-        currentDungeonRuntime=state.roomRuntime;
-        currentDungeonLootRecipients=state.recipients;
-        currentDungeonLootRecipientKey=state.selectedKey;
-        onDungeonLootGranted?.(state,out);
+      layoutProvider:dungeonLayoutProvider,
+      eventWorld:currentDungeonEventWorld,
+      onRoomRuntimeChange:(nextRuntime,out)=>{
+        currentDungeonRuntime=nextRuntime;
+        if(out?.recipients) currentDungeonLootRecipients=out.recipients;
+        if(out?.world) currentDungeonEventWorld=out.world;
+        onDungeonRuntimeChange?.(currentDungeonRuntime,out);
       },
     });
     else if(tab==='heroes') mountHeroSheet(body,loadRpgUniverse());
@@ -73,14 +78,19 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       if(currentTab==='dungeon'&&dungeonView) dungeonView.setRoomRuntime(currentDungeonRuntime);
       return currentDungeonRuntime;
     },
-    setDungeonLootRecipients(nextRecipients,selectedKey=currentDungeonLootRecipientKey){
+    setDungeonLootRecipients(nextRecipients){
       currentDungeonLootRecipients=structuredClone(nextRecipients||[]);
-      currentDungeonLootRecipientKey=selectedKey||null;
-      if(currentTab==='dungeon'&&dungeonView) dungeonView.setLootRecipients(currentDungeonLootRecipients,currentDungeonLootRecipientKey);
+      if(currentTab==='dungeon'&&dungeonView) dungeonView.setLootRecipients(currentDungeonLootRecipients);
       return structuredClone(currentDungeonLootRecipients);
+    },
+    setDungeonEventWorld(nextWorld){
+      currentDungeonEventWorld=structuredClone(nextWorld||{});
+      if(currentTab==='dungeon'&&dungeonView) dungeonView.setEventWorld(currentDungeonEventWorld);
+      return structuredClone(currentDungeonEventWorld);
     },
     getDungeonRuntime:()=>currentDungeonRuntime,
     getDungeonLootRecipients:()=>structuredClone(currentDungeonLootRecipients),
+    getDungeonEventWorld:()=>structuredClone(currentDungeonEventWorld),
     openTab:open,
     dispose:()=>pageRuntime.dispose(),
     isDisposed:()=>pageRuntime.isDisposed(),

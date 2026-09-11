@@ -34,23 +34,26 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Couverture dans le Créateur de salle : outil `🛡️ Couverture` + `coverModifier` éditable. CI run `34636530585` : success.
 - Raccord audio au vrai changement de salle : `transitionDungeonRoomWithAudio()` conserve le moteur monde pur et orchestre les cues audio séparément. CI run `34636880180` : success.
 - Sortie audio navigateur : `createBrowserAudioOutput()` gère lecture, boucle, volume, délai, arrêt par son/canal et nettoyage. CI run `34637035449` : success.
-- Audio : moteur central RPG, bindings, cues runtime et sortie navigateur présents; audit complet des anciens assets audio et raccord UI final encore à faire.
+- Pont moteur→sortie audio : `audio-output-runtime.js` synchronise l'état audio RPG avec la lecture navigateur. CI run `34637467293` : success.
+- Audio : moteur central RPG, bindings, cues runtime, sortie navigateur et pont runtime présents; audit complet des anciens assets audio et raccord final au shell restent à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Pont entre les intentions audio RPG et la vraie sortie navigateur :
-- nouveau `v2/src/modes/rpg/audio-output-runtime.js`;
-- `commitAudioIntentsToOutput()` prend les requests déjà préparées par les moteurs audio, synchronise `startAudio()` puis appelle la sortie navigateur injectée;
-- les sons arrêtés par le moteur sont également arrêtés côté sortie via leur `requestId`;
-- `commitRoomTransitionAudioToOutput()` consomme directement le résultat de `queueRoomTransitionAudio()`;
-- un état audio `muted` bloque aussi la lecture navigateur, donc l'état moteur reste l'autorité;
-- le test couvre une transition Crypte → Hall : arrêt de l'ancienne ambiance, lecture `leave`, `enter`, nouvelle `ambience`, puis vérifie qu'un état muet ne déclenche aucune lecture navigateur.
+Contrôleur de session audio RPG :
+- nouveau `v2/src/modes/rpg/rpg-audio-session.js`;
+- `createRpgAudioSession()` conserve un état audio courant unique pour une session RPG;
+- `commit()` applique des intentions audio ordinaires au moteur + sortie navigateur;
+- `commitRoomTransition()` consomme directement une transition audio de salle tout en gardant l'état de session comme autorité;
+- `snapshot()` expose une copie sûre de l'état courant;
+- `dispose()` coupe proprement toutes les lectures actives quand la session RPG est détruite;
+- une session détruite refuse tout nouveau son avec `session-disposed`;
+- le test vérifie lecture normale, transition d'ambiance, arrêt de l'ancienne ambiance, nettoyage et refus après destruction.
 
 Commits de l'étape :
-- pont runtime/output : `a2930bdfe51c8e7100c1b330b32ef4030bf863cf`
-- régression : `d1e13449dfce5f37b9cfc6635e33a763cf1eaa06`
+- contrôleur : `ca20d2647d978ea6217dc6841a48fc041c6eb491`
+- régression : `14d58491b9c3f110f6795f9670b43be7227d9e4c`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -63,7 +66,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- brancher ce pont `audio-output-runtime` dans le shell/UI RPG réel pour que les transitions de jeu consomment automatiquement les requests;
+- brancher `createRpgAudioSession()` au vrai `mountRpgPage()` puis disposer la session quand on quitte le mode RPG;
 - choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;

@@ -16,11 +16,11 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
-- UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
 - UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent désormais les moteurs existants sans duplication.
 - Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue`; cette file est reliée au runtime de salle, exécutée automatiquement via `event-engine.js`, et reprend après un choix sans double résolution.
-- Une vraie vue `🎮 Donjon` est maintenant montée dans la page RPG V2 et affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
+- La vue `🎮 Donjon` affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
+- Le picker de destinataire de loot est maintenant intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -55,24 +55,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - bridge `roomRuntime.eventQueue` + consommation automatique : `34647190339` success
 - checkpoint runtime événements auto : `34647252406` success
 - vue gameplay Donjon + journal quêtes live : `34647506351` success
+- checkpoint vue Donjon : `34647567121` success
+- distribution loot dans vue Donjon : `34647800892` success
 
 ## Dernière étape terminée
 
-Vue gameplay Donjon et journal de quêtes live :
-- nouveau `dungeon-gameplay-view.js` avec `renderDungeonGameplayView()` et `mountDungeonGameplayView()`;
-- la vue affiche la salle courante, le nombre de visites, les événements en attente et l’état bloquant éventuel;
-- le journal réutilise `quest-journal-ui.js` et lit directement `roomRuntime.questRuntime` : aucune copie parallèle de la progression;
-- `rpg-page.js` possède maintenant un onglet `🎮 Donjon` distinct des outils d’édition/test;
-- `mountRpgPage()` accepte un `dungeonRuntime` et expose `setDungeonRuntime()` afin que la vue se rafraîchisse immédiatement lorsque le runtime de partie change;
-- l’absence de partie active est gérée proprement sans faux état de quête;
-- régression `rpg-dungeon-gameplay-view.test.mjs` couvre salle, visites, file événement, quête active, progression, quête terminée et état sans partie.
+Distribution de loot directement dans la vue gameplay Donjon :
+- `dungeon-gameplay-view.js` réutilise maintenant `loot-recipient-ui.js` au lieu de créer un second système;
+- `dungeonLootEntries()` ne liste que les créatures réellement vaincues avec `lootClaimed=true` et `lootGranted=false` dans la salle courante;
+- le joueur choisit un destinataire lisible (héros, groupe ou autre inventaire), sans afficher d’ID technique;
+- `grantDungeonCreatureLoot()` délègue l’attribution à `grantCreatureLootToSelectedRecipient()` puis remplace uniquement l’instance de salle concernée dans le runtime Donjon;
+- après attribution, `lootGranted` et `lootGrantedTo` restent l’autorité persistante et empêchent une seconde attribution ou un changement de destinataire au retour dans la salle;
+- le butin attribué disparaît automatiquement de la liste de la vue;
+- `mountDungeonGameplayView()` maintient les inventaires destinataires et expose `onLootGranted`;
+- `mountRpgPage()` accepte/actualise maintenant les destinataires via `dungeonLootRecipients` et `setDungeonLootRecipients()`;
+- régression `rpg-dungeon-gameplay-view.test.mjs` couvre affichage, sélection Lyra/groupe, attribution uniquement à Lyra, persistance `lootGrantedTo`, disparition du butin et rejet du doublon.
 
 Commits de l'étape :
-- vue gameplay Donjon : `69c9f926d8132acaf7fcfdd9456d6c4064afade4`
-- montage dans la page RPG : `6f073b01a0ec8b91d655af519feb135c0c426667`
-- régression : `1ea8112961e9750a440166c181c98344353641aa`
+- intégration vue Donjon : `b4a333a676cc8d4db32bf77ab99659b3dcea64f3`
+- raccord page RPG : `bb5b239b3909585e26eefd74e2e8330182861c71`
+- régression : `d8b3314d582e117f4cd3eb5ae17489514e50c58f`
 
-CI : `34647506351` success.
+CI : `34647800892` success.
 
 ## Stockage — décision repoussée
 
@@ -82,8 +86,7 @@ CI : `34647506351` success.
 
 ## Priorités ouvertes
 
-- intégrer le picker de loot dans la vraie vue gameplay Donjon / fin de combat, maintenant que cette vue existe;
-- raccorder progressivement les interactions PNJ, événements et choix à cette vue gameplay sans réintroduire un second runtime;
+- raccorder progressivement les interactions PNJ, événements et choix directement à la vue gameplay Donjon sans réintroduire un second runtime;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

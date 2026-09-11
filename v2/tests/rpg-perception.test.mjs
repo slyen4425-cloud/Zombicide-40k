@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createSpatialState, setActorPosition, setBlockedCells } from '../src/modes/rpg/spatial-engine.js';
+import { createRoomLayout, createDoor, addDoor } from '../src/modes/rpg/room-engine.js';
 import { canDetectActor } from '../src/modes/rpg/perception-engine.js';
 
 let spatial=createSpatialState({zoneId:'room-a'});
@@ -46,5 +47,24 @@ result=canDetectActor(spatial,'guard','rogue',actors,{
 });
 assert.equal(result.detected,true);
 assert.equal(result.reason,'detected');
+
+let authored=createRoomLayout({id:'perception-layout',roomId:'room-a',width:3,height:1});
+let added=addDoor(authored,createDoor({id:'gate',x:0,y:0,edge:'east',state:'closed',locked:true}));
+assert.equal(added.ok,true); authored=added.layout;
+const dungeonRuntime={currentRoomId:'room-a',rooms:{'room-a':{doors:{gate:{id:'gate',state:'closed',locked:true,keyItemId:null}}}}};
+result=canDetectActor(spatial,'guard','rogue',actors,{
+  visionStatId:'vision',stealthStatId:'stealth',distancePenaltyPerUnit:0,
+  blockedLineOfSightStopsDetection:true,baseRoomLayout:authored,dungeonRuntime,
+});
+assert.equal(result.detected,false);
+assert.equal(result.reason,'line-of-sight-blocked');
+dungeonRuntime.rooms['room-a'].doors.gate.state='open';
+dungeonRuntime.rooms['room-a'].doors.gate.locked=false;
+result=canDetectActor(spatial,'guard','rogue',actors,{
+  visionStatId:'vision',stealthStatId:'stealth',distancePenaltyPerUnit:0,
+  blockedLineOfSightStopsDetection:true,baseRoomLayout:authored,dungeonRuntime,
+});
+assert.equal(result.detected,true,'perception must immediately reflect persistent door state');
+assert.equal(authored.doors[0].state,'closed');
 
 console.log('rpg-perception.test.mjs: OK');

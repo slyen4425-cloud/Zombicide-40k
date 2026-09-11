@@ -12,12 +12,21 @@ roster=addAlly(roster,merc).roster; roster=addAlly(roster,summon).roster; roster
 let spatial=createSpatialState({zoneId:'room-a'});
 for(const ally of [merc,summon,escort]) spatial=setActorPosition(spatial,ally.instanceId,{x:ally.x,y:ally.y,zoneId:'room-a'});
 spatial=setActorPosition(spatial,distantSummon.instanceId,{x:distantSummon.x,y:distantSummon.y,zoneId:'room-c'});
+spatial=setActorPosition(spatial,'aldren',{x:1,y:1,zoneId:'room-b'});
 
-let moved=transitionAlliesWithOwner(roster,spatial,{ownerActorId:'aldren',fromRoomId:'room-a',toRoomId:'room-b',entryPosition:{x:0,y:3}});
+const roomLayout={width:4,height:4,cells:{'2,1':{blocked:true}},walls:[],doors:[]};
+let moved=transitionAlliesWithOwner(roster,spatial,{ownerActorId:'aldren',fromRoomId:'room-a',toRoomId:'room-b',entryPosition:{x:1,y:1},ownerPosition:{x:1,y:1},roomLayout});
 assert.deepEqual(moved.movedInstanceIds.sort(),['merc-1','wolf-1']);
+assert.equal(moved.distinctPlacementCount,2);
 assert.equal(moved.roster.actors['escort-1'].roomId,'room-a');
 assert.equal(moved.roster.actors['merc-1'].roomId,'room-b');
-assert.deepEqual(getActorPosition(moved.spatial,'merc-1'),{x:0,y:3,zoneId:'room-b'});
+const mercPos=getActorPosition(moved.spatial,'merc-1');
+const wolfPos=getActorPosition(moved.spatial,'wolf-1');
+assert.notDeepEqual(mercPos,{x:1,y:1,zoneId:'room-b'});
+assert.notDeepEqual(wolfPos,{x:1,y:1,zoneId:'room-b'});
+assert.notDeepEqual(mercPos,wolfPos);
+assert.notDeepEqual(mercPos,{x:2,y:1,zoneId:'room-b'});
+assert.notDeepEqual(wolfPos,{x:2,y:1,zoneId:'room-b'});
 assert.deepEqual(alliesInRoom(moved.roster,'room-b').map(x=>x.instanceId).sort(),['merc-1','wolf-1']);
 
 const independent=transitionIndependentAllies(moved.roster,{fromRoomId:'room-a',toRoomId:'room-b',instanceIds:['escort-1']});

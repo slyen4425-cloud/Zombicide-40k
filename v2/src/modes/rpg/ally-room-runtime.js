@@ -1,5 +1,4 @@
 import { setActorPosition } from './spatial-engine.js';
-import { tickAllyDurations } from './ally-engine.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -36,9 +35,21 @@ export function transitionIndependentAllies(roster,{fromRoomId,toRoomId,instance
 }
 
 export function finishRoomForAllies(roster,roomId){
-  const ticked=tickAllyDurations(roster,'room',1);
-  const expired=ticked.expiredInstanceIds.filter(id=>String(roster?.actors?.[id]?.roomId??'')===String(roomId??''));
-  return {roster:ticked.roster,expiredInstanceIds:expired};
+  const next=clone(roster); const expired=[];
+  next.history=Array.isArray(next.history)?next.history:[];
+  for(const id of next.order||[]){
+    const runtime=next.actors?.[id];
+    if(!runtime||runtime.expired||runtime.dismissed||runtime.durationKind!=='room'||runtime.remaining==null) continue;
+    if(String(runtime.roomId??'')!==String(roomId??'')) continue;
+    runtime.remaining=Math.max(0,Number(runtime.remaining)-1);
+    if(runtime.remaining<=0){
+      runtime.expired=true;
+      runtime.active=false;
+      expired.push(String(id));
+      next.history.push({type:'expired',instanceId:String(id),durationKind:'room'});
+    }
+  }
+  return {roster:next,expiredInstanceIds:expired};
 }
 
 export function removeExpiredAlliesFromSpatial(roster,spatial){

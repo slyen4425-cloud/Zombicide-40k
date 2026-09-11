@@ -18,7 +18,8 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Combat Donjon réel : ennemis actifs de la salle + héros réellement présents/proches, vrai `combatState`, fin de combat réconciliée automatiquement vers salle/héros/loot/boss-key.
 - Actions héros : compétences réelles du runtime héros (base + équipement + sets + formes), `prepareSkillAction()` / `resolveAndAdvance()`, coûts/cooldowns/jets/effets du moteur existant.
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
-- Présentation combat : `combat-presentation-ui.js` est maintenant réellement monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur remplacent le résumé minimal, sans déplacer la logique hors du moteur.
+- Présentation combat : `combat-presentation-ui.js` est monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur, sans déplacer la logique hors du moteur.
+- Contrats de cible combat : `enemy`, `ally`, `self` et `any` sont maintenant validés par le runtime avant toute dépense de ressource/charge/cooldown ; une cible KO reste invalide.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -36,26 +37,31 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - tours ennemis automatiques : `34655064237` success
 - renderer présentation combat réelle : `34655892468` success
 - renderer intégré dans vraie vue Donjon : `34656592813` success
+- contrats de cible `enemy/ally/self/any` : `34656913323` success
 
 ## Dernière étape terminée
 
-Intégration du renderer de combat dans la vraie vue Donjon :
-- `dungeon-gameplay-view.js` importe maintenant `renderCombatPresentation()`;
-- pendant un combat réel actif, le vieux résumé `Participants : ...` est remplacé par la timeline réelle, les cartes de combattants, leurs PV/ressources et le journal moteur;
-- l’acteur actif et les KO sont lus directement depuis `combat.order`, `combat.activeActorId` et `combat.actors`;
-- les contrôles réels héros (compétence + cible + bouton d’action) restent montés à côté de cette présentation et continuent de muter le même `combatState`;
-- les tours IA automatiques, la réconciliation de fin de combat et le loot ne changent pas de runtime;
-- régression d’intégration dédiée : Lyra à 7/8 PV, Squelette KO à 0/6, journal avec jet 42 + effet Dégâts, contrôle `Utiliser la compétence` toujours présent, ancien résumé minimal absent.
+Validation générique des cibles de compétence avant résolution :
+- `targeting-engine.js` expose maintenant `normalizeTargetKind()`, `validSkillTargets()` et `validateSkillTarget()` pour les quatre contrats `enemy`, `ally`, `self`, `any`;
+- `validCombatTargets()` et `validatePlayerTarget()` restent compatibles et délèguent au contrat `enemy` existant ;
+- `prepareSkillAction()` valide désormais toutes les compétences avant `consumeSkillUse()`, donc une mauvaise cible ne dépense ni ressource, ni charge, ni cooldown ;
+- `self` accepte uniquement l’acteur courant ; `ally` accepte un allié vivant distinct de soi ; `enemy` conserve les règles de cible adverse et le contrôle spatial/tactique existant ; `any` accepte toute cible vivante, y compris soi-même ;
+- si aucune cible n’est fournie, le runtime choisit la première cible valide selon le contrat au lieu de supposer uniquement `self` ;
+- une cible KO reste refusée pour tous les contrats ;
+- régression dédiée dans `rpg-turn-runtime.test.mjs` : self correct/incorrect, ally correct/self/ennemi, cible par défaut, any sur héros/allié/ennemi, et refus d’un allié KO.
 
 Commits de l’étape :
-- intégration renderer dans vue Donjon : `ed47701ffead782f3bf0f030af58e7dd4803194c`
-- régression intégration : `ca330a91214739120455a26a9ce88a294d9a012f`
+- ciblage générique : `8778136dec83934fe84c3338805e100562715453`
+- enforcement runtime : `cd6e9fc5c6b30fd2c781f28bb04e2ef9007e5d5e`
+- régression contrats de cible : `95d2e39b547ac801d82c12b81fb1930aac7ff965`
 
-CI finale : `34656592813` success.
+CI finale : `34656913323` success.
 
 ## Priorités ouvertes
 
-1. vérifier et raccorder les règles d’actions restantes contre le legacy : cibles ally/self/any, consommables, fuite, combat direct OFF / MJ contrôle total ;
-2. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
-3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. raccorder maintenant le filtre de cibles `enemy/ally/self/any` à la vraie UI Donjon pour que le menu ne propose que les cibles valides de la compétence sélectionnée ;
+2. vérifier/raccorder les consommables de combat ;
+3. vérifier/raccorder la fuite puis `combat direct OFF / MJ contrôle total` contre le legacy ;
+4. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
+5. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+6. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

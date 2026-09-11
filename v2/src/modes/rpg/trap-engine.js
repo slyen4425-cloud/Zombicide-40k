@@ -1,24 +1,11 @@
 import { applyEffect } from '../../core/effects.js';
-import { resolveCheck } from './combat-engine.js';
+import { resolveActorCheck } from '../../core/checks.js';
 
 function clone(value){return structuredClone(value);}
 function uid(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
-function statValue(actor,statId){
-  if(!statId) return 0;
-  return Number(actor?.stats?.[statId]??0)||0;
-}
-
 function buildCheck(spec={},actor={},random=Math.random){
-  return resolveCheck({
-    die:Number(spec.die)||100,
-    roll:spec.roll??null,
-    statValue:statValue(actor,spec.statId),
-    difficulty:Number(spec.difficulty??50)||0,
-    modifier:Number(spec.modifier)||0,
-    mode:spec.mode||'roll-under',
-    random,
-  });
+  return resolveActorCheck(spec,actor,{random});
 }
 
 export function createTrapDefinition({

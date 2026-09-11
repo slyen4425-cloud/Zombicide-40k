@@ -21,7 +21,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Présentation combat : timeline, KO, PV/ressources, journal moteur et ciblage vivant dans la vraie vue Donjon.
 - Consommables de combat : runtime + UI réelle branchés au même `combatState` et au vrai inventaire héros ; quantité, cible valide, consommation unique, effets génériques et progression de timeline sont visibles/raccordés.
 - Fuite combat : runtime + bouton réel dans la vue Donjon ; les héros participants gardent leur état, les héros dans d’autres salles restent intacts, les ennemis reviennent à leur état persistant et le bloc combat est fermé sans passer par une fausse victoire/défaite.
-- Contrôle du combat : la configuration V2 possède maintenant les deux drapeaux `interaction.directCombat` et `interaction.gmFullControl`, avec une politique centrale `combatInteractionPolicy()` ; les anciens univers sans ces champs migrent vers les valeurs sûres `directCombat:true / gmFullControl:false`.
+- Contrôle du combat : `interaction.directCombat` et `interaction.gmFullControl` sont maintenant réellement appliqués dans la vue Donjon. Direct OFF masque les actions héros automatiques/consommables ; MJ total bloque aussi l’avancement automatique des tours ennemis et laisse la timeline en attente de contrôle manuel.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -45,28 +45,30 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - runtime fuite combat Donjon : `34658436096` success
 - UI fuite combat Donjon : `34658702948` success
 - configuration combat direct / MJ : `34658933290` success
+- application combat direct / MJ dans vraie vue Donjon : `34659348809` success
 
 ## Dernière étape terminée
 
-Fondation data-driven de `combat direct OFF / MJ contrôle total` :
-- `defaultCombatConfig()` expose maintenant `interaction.directCombat=true` et `interaction.gmFullControl=false` ;
-- `ensureCombatConfig()` migre automatiquement les anciens univers qui n’avaient pas ces champs ;
-- `combatInteractionPolicy()` devient l’autorité centrale pour savoir si les actions joueur automatiques, les tours ennemis automatiques et les contrôles manuels MJ doivent être actifs ;
-- avec `directCombat=false`, les actions joueur automatiques sont coupées mais les tours ennemis restent automatiques tant que le MJ total n’est pas actif ;
-- avec `gmFullControl=true`, les actions joueur automatiques et les tours ennemis automatiques sont tous deux coupés, et le mode de contrôles manuels est activé ;
-- l’éditeur de règles de combat affiche maintenant les deux bascules lisibles `Combat direct des héros` et `MJ contrôle total` ;
-- régression `rpg-combat-control-config.test.mjs` : valeurs par défaut, migration legacy, comportement direct OFF et priorité du MJ total.
+Application réelle de `combatInteractionPolicy()` dans la vue Donjon :
+- `dungeon-gameplay-view.js` lit désormais la politique centrale au rendu et au moment des actions ;
+- `directCombat=false` retire les contrôles de compétence du héros actif et les remplace par un message clair ;
+- l’événement de clic compétence possède aussi un garde d’autorité : même si un ancien bouton restait présent, l’action serait refusée ;
+- `dungeon-combat-item-ui.js` ne monte plus les consommables lorsque les actions héros automatiques sont désactivées ;
+- `gmFullControl=true` empêche `runAutomaticEnemyTurns()` d’appeler `advanceDungeonEnemyTurns()` : le tour ennemi reste donc réellement en attente dans le même `combatState`, sans auto-pass ni faux changement de timeline ;
+- la vue indique explicitement `MJ contrôle total : tour ennemi en attente d’une résolution manuelle` au lieu du message de résolution automatique ;
+- aucune logique de calcul n’a été déplacée dans l’UI ; la politique ne fait qu’autoriser/interdire les chemins automatiques existants ;
+- régression `rpg-dungeon-combat-control-view.test.mjs` : Direct OFF masque compétence/consommables, MJ total affiche l’attente manuelle et n’annonce plus de résolution automatique.
 
 Commits de l’étape :
-- config/éditeur/politique : `94087e491b89d255f335dc5f497ea49fdfe0e03e`
-- régression : `0a38e13fe43637ef6e5087e299244498c08a0024`
+- politique appliquée dans vue Donjon : `17c1ebf4880071f4fcc6dc46c7dde5cbc59bfffb`
+- consommables soumis à la même politique : `135922304ceaf6e2969ef47a19d04cd82709d229`
+- régression vue : `661c06b15794ecdfc9802dae1f52b32c25c5cfb5`
 
-CI finale : `34658933290` success.
+CI finale : `34659348809` success.
 
 ## Priorités ouvertes
 
-1. brancher `combatInteractionPolicy()` dans la vraie vue Donjon : `directCombat OFF` doit désactiver les actions héros, et `MJ contrôle total` doit empêcher les tours ennemis automatiques ;
-2. ajouter ensuite les contrôles manuels MJ sur le même `combatState` (PV/KO/jets/tour) sans second moteur ;
-3. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
-4. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-5. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. ajouter les contrôles manuels `MJ contrôle total` sur le même `combatState` : modification PV/ressources, KO/réactivation, passage manuel du tour et résolution de jets sans créer de second moteur ;
+2. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
+3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

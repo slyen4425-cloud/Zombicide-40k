@@ -4,9 +4,9 @@ import { mountRoomNpcInteraction } from './room-npc-interaction-ui.js';
 import { resolveRoomRuntimeEventChoice } from './room-event-runtime.js';
 import { availableRoomLinks } from './world-engine.js';
 import { transitionDungeonRoom, transitionDungeonHeroRoom, setFocusedDungeonHero } from './room-runtime.js';
-import { activeDungeonEnemies, startDungeonCombat } from './dungeon-combat-runtime.js';
+import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult } from './dungeon-combat-runtime.js';
 
-function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
 
 function questList(universe={}){
@@ -56,6 +56,16 @@ export function grantDungeonCreatureLoot(roomRuntime,instanceId,recipients=[],se
   const next=clone(roomRuntime);
   next.rooms[next.currentRoomId]=granted.roomRuntime;
   return {...granted,roomRuntime:next};
+}
+
+export function reconcileEndedDungeonCombat({combat,roomRuntime,heroRuntimes=[],universe={},random=Math.random}={}){
+  if(!combat||combat.phase!=='ended') return {ok:false,reason:'combat-not-ended',combat,roomRuntime,heroRuntimes:clone(heroRuntimes||[]),defeatedEnemyIds:[]};
+  return reconcileDungeonCombatResult({combat,roomRuntime,heroRuntimes,universe,random});
+}
+
+function combatReconcileKey(combat){
+  if(!combat||combat.phase!=='ended') return null;
+  return [combat.metadata?.roomId||'',combat.winner||'',Number(combat.round)||0,Number(combat.turnSequence)||0,(combat.log||[]).length].join('|');
 }
 
 function roomNpcInteractions(layout){
@@ -177,7 +187,7 @@ export function renderDungeonGameplayView(universe={},roomRuntime=null,{lootReci
   return `<section class="workspace-head dungeon-gameplay-head"><div><p class="eyebrow">RPG · DONJON</p><h2>🎮 Partie Donjon</h2><p class="muted">${hasRuntime?`${heroLabel?`${esc(heroLabel)} · `:''}Salle actuelle : ${esc(roomName)} · ${esc(eventStatus)}`:'Aucune partie Donjon active.'}</p></div><button class="help-button" type="button" data-help="rpg-dungeon-gameplay">?</button></section><div class="dungeon-gameplay-grid">${renderHeroFocusSection(universe,roomRuntime,worldIndex)}<section class="editor-section dungeon-gameplay-status"><h3>État de la partie</h3>${hasRuntime?`<p><strong>Salle :</strong> ${esc(roomName)}</p><p><strong>Visites :</strong> ${Number(roomRuntime.rooms?.[roomId]?.visits)||0}</p><p><strong>Événements en attente :</strong> ${(roomRuntime.eventQueue?.pending||[]).length}</p>`:'<p class="muted">Lance ou reprends une partie pour afficher l’état du donjon.</p>'}</section>${renderEventPresentation(presentation)}${renderEventChoice(roomRuntime)}${renderCombatSection(universe,roomRuntime,{heroRuntimes,activeCombat})}${renderTransitionSection(worldIndex,roomRuntime,{conditionEvaluator,inventory,universe})}${renderNpcSection(roomLayout)}${renderLootSection(roomRuntime,lootRecipients,selectedLootRecipientKey)}${renderQuestJournal(questList(universe),roomRuntime?.questRuntime||null)}</div>`;
 }
 
-export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],spatial=null,spatialConfig={},activeCombat=null,onCombatStart=null,onRoomRuntimeChange=null}={}){
+export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,lootRecipients=[],selectedLootRecipientKey=null,layoutProvider=null,eventWorld={},worldIndex=null,conditionEvaluator=null,inventory=null,heroRuntimes=[],spatial=null,spatialConfig={},activeCombat=null,onCombatStart=null,onCombatEnd=null,onRoomRuntimeChange=null}={}){
   let currentUniverse=universe||{};
   let currentRuntime=roomRuntime||null;
   let currentLootRecipients=clone(lootRecipients||[]);
@@ -189,11 +199,25 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   let currentSpatial=spatial?clone(spatial):null;
   let currentSpatialConfig=clone(spatialConfig||{});
   let currentCombat=activeCombat?clone(activeCombat):null;
+  let lastReconciledCombatKey=null;
   let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
   const notify=(out=null)=>onRoomRuntimeChange?.(currentRuntime,out);
+  const reconcileCurrentCombat=()=>{
+    const key=combatReconcileKey(currentCombat);
+    if(!key||key===lastReconciledCombatKey) return null;
+    const out=reconcileEndedDungeonCombat({combat:currentCombat,roomRuntime:currentRuntime,heroRuntimes:currentHeroRuntimes,universe:currentUniverse});
+    if(!out.ok) return out;
+    lastReconciledCombatKey=key;
+    currentRuntime=out.roomRuntime;
+    currentHeroRuntimes=clone(out.heroRuntimes||[]);
+    notify(out);
+    onCombatEnd?.(clone(currentCombat),out);
+    return out;
+  };
 
   const render=()=>{
+    reconcileCurrentCombat();
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;
     host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory,heroRuntimes:currentHeroRuntimes,activeCombat:currentCombat});
@@ -221,6 +245,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       });
       if(!out.ok) return;
       currentCombat=out.combat;
+      lastReconciledCombatKey=null;
       onCombatStart?.(clone(currentCombat),out);
       render();
     });
@@ -311,7 +336,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
     setInventory(nextInventory){currentInventory=nextInventory||null;render();return currentInventory;},
     setHeroRuntimes(nextHeroes){currentHeroRuntimes=clone(nextHeroes||[]);render();return clone(currentHeroRuntimes);},
     setSpatial(nextSpatial,nextConfig=currentSpatialConfig){currentSpatial=nextSpatial?clone(nextSpatial):null;currentSpatialConfig=clone(nextConfig||{});render();return currentSpatial?clone(currentSpatial):null;},
-    setCombat(nextCombat){currentCombat=nextCombat?clone(nextCombat):null;render();return currentCombat?clone(currentCombat):null;},
+    setCombat(nextCombat){currentCombat=nextCombat?clone(nextCombat):null;if(currentCombat?.phase!=='ended') lastReconciledCombatKey=null;render();return currentCombat?clone(currentCombat):null;},
     setLootRecipients(nextRecipients,selectedKey=currentLootRecipientKey){currentLootRecipients=clone(nextRecipients||[]);currentLootRecipientKey=selectedKey||null;render();return clone(currentLootRecipients);},
     setEventWorld(nextWorld){currentEventWorld=clone(nextWorld||{});render();return clone(currentEventWorld);},
     getRoomRuntime:()=>currentRuntime,

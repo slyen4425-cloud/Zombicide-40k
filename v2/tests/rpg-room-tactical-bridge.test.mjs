@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createCombatState } from '../src/modes/rpg/combat-engine.js';
 import { createSpatialState,setActorPosition } from '../src/modes/rpg/spatial-engine.js';
 import { createRoomLayout,createDoor,addDoor,createWall,addWall } from '../src/modes/rpg/room-engine.js';
-import { shortestRoomPathDistance,hasRoomLineOfSight } from '../src/modes/rpg/room-tactical-bridge.js';
+import { shortestRoomPathDistance,hasRoomLineOfSight,roomCoverModifier } from '../src/modes/rpg/room-tactical-bridge.js';
 import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resolveEquippedAttackSource } from '../src/modes/rpg/tactical-combat.js';
 
 let room=createRoomLayout({roomId:'corridor',width:3,height:1});
@@ -56,5 +56,28 @@ room.doors[0].state='open';
 moved=moveCombatActor({spatial,combat,actorId:'lyra',target:{x:1,y:0,zoneId:'corridor'},moveState,config:{mode:'tactical',roomLayout:room,defaultMovement:3}});
 assert.equal(moved.ok,true);
 assert.equal(moved.distance,1);
+
+const coverRoom=createRoomLayout({roomId:'cover-room',width:5,height:1});
+coverRoom.cells['3,0']={x:3,y:0,terrain:'crate',blocked:false,coverModifier:-10};
+const coverFrom={x:0,y:0,zoneId:'cover-room'},coverTo={x:4,y:0,zoneId:'cover-room'};
+assert.equal(roomCoverModifier(coverRoom,coverFrom,coverTo),-10,'an adjacent obstacle between shooter and target must grant cover');
+coverRoom.walls.push({id:'low-wall',x:3,y:0,edge:'east',kind:'low-wall',blocksMovement:false,blocksVision:false,coverModifier:-25});
+assert.equal(hasRoomLineOfSight(coverRoom,coverFrom,coverTo),true,'low cover must not become a vision blocker');
+assert.equal(roomCoverModifier(coverRoom,coverFrom,coverTo),-25,'edge cover closest to target must be able to provide stronger protection');
+
+let coverSpatial=createSpatialState({zoneId:'cover-room'});
+coverSpatial=setActorPosition(coverSpatial,'lyra',coverFrom);
+coverSpatial=setActorPosition(coverSpatial,'skeleton',coverTo);
+const coverCombat=createCombatState({combatants:[
+  {id:'lyra',side:'heroes',initiative:20,state:{}},
+  {id:'skeleton',side:'enemies',initiative:10,state:{}},
+]});
+const coveredShot=evaluateAttackPosition({spatial:coverSpatial,combat:coverCombat,actorId:'lyra',targetId:'skeleton',source:bow,config:{mode:'tactical',roomLayout:coverRoom}});
+assert.equal(coveredShot.ok,true);
+assert.equal(coveredShot.coverModifier,-25);
+assert.equal(coveredShot.modifier,-25);
+const coverIgnoringShot=evaluateAttackPosition({spatial:coverSpatial,combat:coverCombat,actorId:'lyra',targetId:'skeleton',source:{...bow,data:{...bow.data,ignoresCover:true}},config:{mode:'tactical',roomLayout:coverRoom}});
+assert.equal(coverIgnoringShot.coverModifier,0);
+assert.equal(coverIgnoringShot.modifier,0);
 
 console.log('rpg-room-tactical-bridge.test.mjs: ok');

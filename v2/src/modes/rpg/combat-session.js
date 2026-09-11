@@ -1,6 +1,6 @@
 import { advanceCombatTurn } from './combat-engine.js';
 import { evaluateDefeatRule, processActorTurnStart, processActorTurnEnd } from './combat-rules.js';
-import { tickSkillCooldowns } from './skill-runtime.js';
+import { tickSkillCooldowns } from '../../core/skills.js';
 
 function clone(value) { return structuredClone(value); }
 

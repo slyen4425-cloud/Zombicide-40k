@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.123-collapsed-chrome-diagnostic";
+const CACHE_NAME = "gensrpg-cache-16.78.127-chrome-android-touch-recovery";
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

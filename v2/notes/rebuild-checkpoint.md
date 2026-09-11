@@ -17,7 +17,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
-- Quêtes : runtime persistant de démarrage/progression/complétion/échec + bridge salle/interactions vers signaux de quête.
+- Quêtes : runtime persistant + signaux salle/interactions maintenant raccordés directement au runtime de donjon.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -40,24 +40,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - picker destinataire de loot : `34644185299` success
 - checkpoint picker loot : `34644216194` success
 - runtime lifecycle quêtes : `34644426041` success
+- bridge salle/interactions -> quêtes : `34644955703` success
+- raccord automatique runtime donjon -> quêtes : `34645470548` success
 
-## Dernière étape codée
+## Dernière étape terminée
 
-Bridge automatique salle/interactions -> quêtes :
-- nouveau `room-quest-bridge.js`;
-- une visite de salle produit automatiquement un signal `visit` ciblant l'identifiant de salle;
-- une interaction réussie produit un signal générique `interact` et un signal typé selon son `kind` (`npc`, `object`, `switch`, etc.);
-- une interaction échouée ne progresse aucune quête;
-- `interaction.data.questSignals` peut ajouter des signaux configurés, par exemple poser un `flag` de quête;
-- `applyRoomQuestSignals()` applique plusieurs signaux au runtime de quêtes sans dupliquer la logique de progression;
-- helpers dédiés `applyRoomVisitToQuests()` et `applyInteractionResultToQuests()` pour futur raccord direct à la boucle gameplay;
-- régression `rpg-room-quest-bridge.test.mjs` couvre visite de salle, PNJ, échec d'interaction, interrupteur, signal générique et flag custom.
+Raccord automatique du runtime de donjon vers le runtime de quêtes :
+- `room-runtime.js` importe désormais le bridge de quêtes;
+- `createDungeonRuntime()` accepte optionnellement `questRuntime`, `quests`, définitions et contexte de quête;
+- l'entrée dans la salle de départ passe automatiquement par `visitCurrentRoom()` et produit le signal `visit` sans appel manuel externe;
+- `transitionDungeonRoom()` produit automatiquement le signal `visit` pour la salle d'arrivée;
+- `attemptRoomInteraction()` applique automatiquement les signaux `interact`, le type d'interaction (`npc`, `switch`, `object`, etc.) et les `questSignals` personnalisés uniquement après une réussite;
+- le runtime de quêtes est conservé dans `runtime.questRuntime`, donc progression et runtime de salle voyagent ensemble dans l'orchestrateur donjon;
+- tous les nouveaux paramètres sont optionnels : les appels historiques de `room-runtime.js` restent compatibles et ne changent pas de comportement si aucune quête n'est fournie;
+- régression `rpg-room-quest-wiring.test.mjs` couvre visite de salle de départ, interaction PNJ, transition de salle, interrupteur et flag custom sans invocation manuelle du bridge.
 
 Commits de l'étape :
-- bridge quêtes/salle : `fae5cddeca8248dce220bf2c9ca88e04d8f794d7`
-- régression : `d9d3ca14e3618cb5aff0197ed7c229583ebc06b3`
+- raccord runtime : `5aaa19109b1c78e18f3e4b634e84960decc94fc1`
+- régression : `21edac7d317b720184d8a54ad81016a7c0bf1433`
 
-CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
+CI : `34645470548` success.
 
 ## Stockage — décision repoussée
 
@@ -67,8 +69,8 @@ CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commi
 
 ## Priorités ouvertes
 
-- raccorder le bridge de quêtes directement aux appels gameplay `visitCurrentRoom()` / `attemptRoomInteraction()` ou à leur orchestrateur supérieur pour éviter les appels manuels;
-- construire le journal/UI de quête et l'UI PNJ/interactions;
+- construire le journal/UI de quête lisible côté joueur;
+- poursuivre l'UI PNJ/interactions et relier les dialogues/actions de quête;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;

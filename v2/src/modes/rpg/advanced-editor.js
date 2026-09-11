@@ -11,6 +11,7 @@ export function ensureAdvancedRpgCollections(universe) {
   universe.effects = Array.isArray(universe.effects) ? universe.effects : [];
   universe.skills = Array.isArray(universe.skills) ? universe.skills : [];
   universe.forms = Array.isArray(universe.forms) ? universe.forms : [];
+  universe.checks = Array.isArray(universe.checks) ? universe.checks : [];
   return universe;
 }
 
@@ -23,7 +24,7 @@ export function newEffect() {
 }
 
 export function newSkill() {
-  return { id: id(), name: 'Nouvelle compétence', icon: '✨', kind: 'active', description: '', conditionIds: [], costResourceId: null, costValue: 0, cooldown: 0, maxCharges: null, recovery: 'combat', roll: { enabled: true, die: 100, statId: null, difficulty: 50 }, target: 'enemy', effectIds: [] };
+  return { id: id(), name: 'Nouvelle compétence', icon: '✨', kind: 'active', description: '', conditionIds: [], costResourceId: null, costValue: 0, cooldown: 0, maxCharges: null, recovery: 'combat', checkId: null, roll: { enabled: true, die: 100, statId: null, difficulty: 50 }, target: 'enemy', effectIds: [] };
 }
 
 export function newHeroForm() {
@@ -37,6 +38,11 @@ function options(list, selected, none = '— Aucun —') {
 function multiOptions(list, selected = []) {
   const set = new Set((selected || []).map(String));
   return list.map(x => `<option value="${esc(x.id)}" ${set.has(String(x.id)) ? 'selected' : ''}>${esc(x.icon || '')} ${esc(x.name || 'Sans nom')}</option>`).join('');
+}
+
+export function reusableCheckOptions(checks = [], selected = null, none = '— Jet configuré dans la compétence —') {
+  const enabled = (checks || []).filter(check => check?.enabled !== false && check?.id);
+  return [`<option value="">${esc(none)}</option>`, ...enabled.map(check => `<option value="${esc(check.id)}" ${String(check.id) === String(selected || '') ? 'selected' : ''}>🎲 ${esc(check.name || 'Jet / test')} · D${Math.max(2, Math.floor(Number(check.die) || 100))}</option>`)].join('');
 }
 
 function sourceOptions(condition, universe) {
@@ -79,6 +85,7 @@ function effectCard(e, universe) {
 }
 
 function skillCard(s, universe) {
+  const usesReusableCheck = Boolean(s.checkId);
   return `<article class="editor-card" data-skill-id="${esc(s.id)}">
     <div class="editor-card-head"><strong>${esc(s.icon)} ${esc(s.name)}</strong><button class="help-button tiny" data-help="rpg-skill" type="button">?</button></div>
     <div class="form-grid">
@@ -87,11 +94,13 @@ function skillCard(s, universe) {
       <label>Cible<select data-f="target"><option value="self" ${s.target === 'self' ? 'selected' : ''}>Lanceur</option><option value="ally" ${s.target === 'ally' ? 'selected' : ''}>Allié</option><option value="enemy" ${s.target === 'enemy' ? 'selected' : ''}>Ennemi</option><option value="all-allies" ${s.target === 'all-allies' ? 'selected' : ''}>Tous les alliés</option><option value="all-enemies" ${s.target === 'all-enemies' ? 'selected' : ''}>Tous les ennemis</option></select></label>
       <label>Coût<select data-f="costResourceId">${options(universe.resources, s.costResourceId, '— Gratuit —')}</select></label><label>Valeur du coût<input data-f="costValue" type="number" min="0" value="${Number(s.costValue) || 0}"></label>
       <label>Recharge (tours)<input data-f="cooldown" type="number" min="0" value="${Number(s.cooldown) || 0}"></label><label>Charges max<input data-f="maxCharges" type="number" min="0" placeholder="Illimité" value="${s.maxCharges ?? ''}"></label>
-      <label>Stat de jet<select data-f="roll.statId">${options(universe.stats, s.roll?.statId)}</select></label><label>Difficulté / seuil<input data-f="roll.difficulty" type="number" value="${Number(s.roll?.difficulty ?? 50)}"></label>
+      <label>Jet / test réutilisable<select data-f="checkId">${reusableCheckOptions(universe.checks, s.checkId)}</select></label>
+      <label>Stat de jet local<select data-f="roll.statId" ${usesReusableCheck ? 'disabled title="Le jet réutilisable sélectionné fournit déjà la statistique."' : ''}>${options(universe.stats, s.roll?.statId)}</select></label><label>Difficulté / seuil local<input data-f="roll.difficulty" type="number" value="${Number(s.roll?.difficulty ?? 50)}" ${usesReusableCheck ? 'disabled title="Le jet réutilisable sélectionné fournit déjà la difficulté."' : ''}></label>
       <label>Conditions<select data-f="conditionIds" multiple size="4">${multiOptions(universe.conditions, s.conditionIds)}</select></label><label>Effets<select data-f="effectIds" multiple size="4">${multiOptions(universe.effects, s.effectIds)}</select></label>
     </div>
     <label class="wide-label">Description<textarea data-f="description" rows="2">${esc(s.description)}</textarea></label>
-    <div class="toggle-row"><label><input data-f="roll.enabled" type="checkbox" ${s.roll?.enabled !== false ? 'checked' : ''}> Utilise un jet</label></div>
+    <div class="toggle-row"><label><input data-f="roll.enabled" type="checkbox" ${s.roll?.enabled !== false ? 'checked' : ''} ${usesReusableCheck ? 'disabled title="Le jet réutilisable est actif par sa propre définition."' : ''}> Utilise un jet local</label></div>
+    ${usesReusableCheck ? '<p class="muted">Le jet réutilisable sélectionné remplace les anciens réglages locaux pour cette compétence.</p>' : '<p class="muted">Sans jet réutilisable, les réglages locaux restent compatibles avec les anciennes compétences.</p>'}
     <button class="danger-button" data-delete-skill="${esc(s.id)}" type="button">Supprimer</button>
   </article>`;
 }
@@ -142,7 +151,7 @@ export function mountAdvancedRpgEditor(host, universe, onChange) {
   host.innerHTML = `
     <section class="editor-section"><div class="section-title-row"><div><h3>Conditions</h3><p class="muted">Briques réutilisables : stat, ressource, niveau ou XP.</p></div><button class="primary-button" id="addRpgCondition" type="button">+ Condition</button></div><div class="editor-list">${universe.conditions.map(x => conditionCard(x, universe)).join('') || '<p class="muted">Aucune condition.</p>'}</div></section>
     <section class="editor-section"><div class="section-title-row"><div><h3>Effets</h3><p class="muted">Effets génériques réutilisables par compétences, objets, pièges, événements et formes.</p></div><button class="primary-button" id="addRpgEffect" type="button">+ Effet</button></div><div class="editor-list">${universe.effects.map(x => effectCard(x, universe)).join('') || '<p class="muted">Aucun effet.</p>'}</div></section>
-    <section class="editor-section"><div class="section-title-row"><div><h3>Compétences</h3><p class="muted">Coût, charges, jet, conditions, cible et effets sont liés par menus.</p></div><button class="primary-button" id="addRpgSkill" type="button">+ Compétence</button></div><div class="editor-list">${universe.skills.map(x => skillCard(x, universe)).join('') || '<p class="muted">Aucune compétence.</p>'}</div></section>
+    <section class="editor-section"><div class="section-title-row"><div><h3>Compétences</h3><p class="muted">Coût, charges, jet réutilisable ou local, conditions, cible et effets sont liés par menus.</p></div><button class="primary-button" id="addRpgSkill" type="button">+ Compétence</button></div><div class="editor-list">${universe.skills.map(x => skillCard(x, universe)).join('') || '<p class="muted">Aucune compétence.</p>'}</div></section>
     <section class="editor-section"><div class="section-title-row"><div><h3>Évolutions & transformations</h3><p class="muted">Permanentes ou temporaires, avec conditions, coût, durée, effets et compétences ajoutées.</p></div><button class="primary-button" id="addRpgForm" type="button">+ Forme</button></div><div class="editor-list">${universe.forms.map(x => formCard(x, universe)).join('') || '<p class="muted">Aucune forme.</p>'}</div></section>`;
 
   const rerender = () => onChange?.(universe, true);

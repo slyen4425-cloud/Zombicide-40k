@@ -37,23 +37,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Pont moteur→sortie audio : `audio-output-runtime.js` synchronise l'état audio RPG avec la lecture navigateur. CI run `34637467293` : success.
 - Contrôleur de session audio RPG : état audio unique + commit + transition + cleanup. CI run `34637908130` : success.
 - Lifecycle session audio dans le shell RPG : `mountRpgPage()` possède la session, et `app.js` la détruit en quittant/chageant de mode. CI run `34638147144` : success.
+- Destinataire explicite du loot : `lootGrantedTo` persiste le héros/groupe/conteneur qui a reçu les objets. CI run `34638378209` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Destinataire explicite du loot de créature :
-- `grantRoomCreatureDrops()` accepte désormais une métadonnée de destinataire sans imposer une politique globale;
-- le runtime de la créature persiste `lootGrantedTo:{kind,id}` en même temps que `lootGranted:true`;
-- `grantRoomCreatureDropsToRecipient()` reçoit un destinataire générique `{id,kind,inventory}` et renvoie son inventaire mis à jour;
-- cela permet aussi bien un héros, un inventaire de groupe ou un autre conteneur sans coder un cas spécial dans le moteur de spawn;
-- une seconde tentative conserve l'identité du destinataire original et ne redonne aucun objet;
-- un destinataire sans inventaire est refusé avec `recipient-inventory-missing`.
+Clé de boss attribuée uniquement après la défaite réelle du boss :
+- `executeSpawn()` ne renvoie plus la clé au simple spawn du boss;
+- l'entité de salle conserve maintenant la provenance du spawn (`spawnId`, `kind`, `bossKeyItemId`);
+- `resolveRoomCreatureDefeat()` ajoute la clé garantie au loot persistant seulement lorsque ce boss est effectivement vaincu;
+- la clé fait donc partie du même loot idempotent que les autres objets et survit aux sauvegardes/rechargements;
+- revenir dans la salle ou rappeler la résolution ne reroll pas le loot et ne duplique pas la clé;
+- `grantRoomCreatureDrops()` attribue ensuite la clé au même destinataire que le reste du loot, une seule fois;
+- cela corrige le cas historique où une clé de boss pouvait être absente ou découplée de la vraie victoire.
 
 Commits de l'étape :
-- moteur : `6be286b2d00d511637e63ed3e1211bf5bf82113d`
-- régression : `8eb8d0042afd3adaf6796c55c3a68ab8f93a8414`
+- moteur : `9fdf59c422a720c30206e6cb28ec68ce7fcd9d32`
+- régression : `b4619231503cf1bb44269467344778919208c4e7`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -67,6 +69,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 ## Points encore ouverts prioritaires
 
 - choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
+- verrouiller les passages/portes qui dépendent d'une clé de boss sur la possession réelle de cette clé dans le runtime de donjon;
 - commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;

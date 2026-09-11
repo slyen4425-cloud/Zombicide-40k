@@ -1,15 +1,15 @@
-import { mountRpgEditor } from './modes/rpg/rpg.js';
+import { mountRpgPage } from './modes/rpg/rpg-page.js';
 
 const MODES = [
   { id: 'survival', icon: '☠️', name: 'Survie', description: 'Migration fidèle du mode actuel, nettoyée et isolée.', status: 'À migrer', enabled: true },
-  { id: 'rpg', icon: '🧭', name: 'RPG', description: 'JDR aux dés, totalement configurable, avec Dungeon et assistant de table.', status: 'Éditeur générique actif', enabled: true },
+  { id: 'rpg', icon: '🧭', name: 'RPG', description: 'JDR aux dés, totalement configurable, avec Dungeon et assistant de table.', status: 'Éditeur + combat test actifs', enabled: true },
   { id: 'capture', icon: '🔮', name: 'Capture de créatures', description: 'Mode isolé. Conservation de l’existant avant futur combat dynamique.', status: 'Mis de côté', enabled: false },
   { id: 'pvp', icon: '⚔️', name: 'Affrontement / PVP', description: 'Mode séparé réservé pour une phase ultérieure.', status: 'À venir', enabled: false },
 ];
 
 const HELP = {
   home: { title: 'Comment fonctionne GenSrpG V2 ?', html: '<p>La V2 est reconstruite sans toucher à la version stable actuelle.</p><p><strong>Survie, RPG, Capture et PVP sont séparés.</strong> Le Core ne partage que des services techniques neutres.</p>' },
-  status: { title: 'État de la reconstruction', html: '<p>Le socle RPG sait maintenant créer des statistiques, ressources, conditions, effets, compétences et transformations avec des liens par menus.</p><p>Les moteurs de conditions, effets, compétences et formes sont séparés de l’interface.</p>' },
+  status: { title: 'État de la reconstruction', html: '<p>Le socle RPG sait créer des statistiques, ressources, conditions, effets, compétences et transformations avec des liens par menus.</p><p>Un laboratoire de combat permet maintenant de tester le moteur de dés et la timeline sans dépendre des animations finales.</p>' },
   survival: { title: 'Mode Survie', html: '<p>Le but est de conserver les fonctions actuelles en les nettoyant, sans réinventer inutilement les règles déjà efficaces.</p>' },
   rpg: { title: 'Mode RPG', html: '<p>Le RPG reste basé sur les dés. Les statistiques, ressources, effets, distances, conditions et règles sont configurables.</p><p>Les liens utilisent des sélecteurs et menus : aucun identifiant technique ne doit être saisi à la main.</p>' },
   'rpg-editor': { title: 'Éditeur RPG générique', html: '<p>Cette zone définit les briques de l’univers RPG. Elles sont réutilisées par les héros, objets, jets, compétences, pièges, événements et transformations.</p>' },
@@ -19,6 +19,7 @@ const HELP = {
   'rpg-effect': { title: 'Effet', html: '<p>Un effet modifie une statistique ou une ressource. Il pourra être réutilisé par une compétence, un objet, un piège, un événement ou une forme.</p><p>Exemple : Force +5 pendant 3 tours, ou PV −2.</p>' },
   'rpg-skill': { title: 'Compétence', html: '<p>Une compétence regroupe conditions, coût, charges, recharge, jet éventuel, cible et effets.</p><p>Chaque dépendance est choisie dans une liste : pas d’ID à recopier.</p>' },
   'rpg-form': { title: 'Évolution / transformation', html: '<p>Une forme peut être temporaire ou permanente. Elle peut demander des conditions, consommer une ressource, durer plusieurs tours, appliquer des effets et ajouter des compétences.</p><p>Exemple : Ki ≥ 80 → Forme éveillée pendant 3 tours.</p>' },
+  'rpg-combat-lab': { title: 'Laboratoire de combat', html: '<p>Cette zone teste le moteur RPG avec deux combattants temporaires. Elle utilise les compétences créées dans la configuration.</p><p>Le moteur résout une action une seule fois, puis avance la timeline. Les futures animations de dés ne seront jamais responsables de la logique.</p><p><strong>Astuce :</strong> crée d’abord au moins une compétence et un effet, puis ouvre l’onglet Combat test.</p>' },
   capture: { title: 'Capture de créatures', html: '<p>Ce chantier est volontairement mis de côté. Son ancien fonctionnement sera récupéré avant toute réécriture.</p>' },
   pvp: { title: 'Affrontement / PVP', html: '<p>Architecture réservée, moteur à construire plus tard.</p>' },
 };
@@ -29,7 +30,7 @@ function renderModes() {
 }
 
 function renderStatus() {
-  document.querySelector('#buildStatus').innerHTML = '<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>RPG :</strong> éditeur générique relié par menus déroulants</li></ul>';
+  document.querySelector('#buildStatus').innerHTML = '<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>RPG :</strong> éditeur générique + laboratoire de combat aux dés</li></ul>';
 }
 
 function openHelp(key) {
@@ -56,7 +57,7 @@ function openMode(modeId) {
   home.hidden = true;
   workspace.hidden = false;
   host.innerHTML = '';
-  if (modeId === 'rpg') mountRpgEditor(host);
+  if (modeId === 'rpg') mountRpgPage(host);
   else host.innerHTML = '<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre du moteur RPG.</p></section>';
   window.scrollTo({ top: 0, behavior: 'instant' });
 }

@@ -17,7 +17,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
-- Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile prêt à monter dans la vue de gameplay.
+- Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + première UI PNJ/quête.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -43,27 +43,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - bridge salle/interactions -> quêtes : `34644955703` success
 - raccord automatique runtime donjon -> quêtes : `34645470548` success
 - journal de quêtes joueur : `34645656619` success
+- UI PNJ + actions de quête : `34645853645` success
 
 ## Dernière étape terminée
 
-Journal de quêtes côté joueur :
-- nouveau `quest-journal-ui.js`;
-- construit des entrées à partir des définitions de quêtes et de `runtime.questRuntime` sans recopier la logique de progression;
-- affiche d'abord les quêtes actives, puis terminées et échouées;
-- masque les quêtes inactives par défaut et ignore les quêtes désactivées;
-- affiche nom, description, état lisible, objectifs, progression `actuel/requis`, objectif optionnel et statut terminé;
-- les objectifs optionnels ne sont pas comptés dans la progression obligatoire;
-- aucun ID technique n'est montré au joueur;
-- état vide mobile-friendly `Aucune quête active pour le moment`;
-- bouton `?` contextualisé pour le futur HelpDrawer;
-- `mountQuestJournal()` permet de monter le journal directement dans une vue gameplay;
-- régression `rpg-quest-journal-ui.test.mjs` couvre tri, progression, optionnels, masquage inactif/désactivé, rendu lisible et état vide.
+UI PNJ/interactions orientée quêtes :
+- nouveau `npc-interaction-ui.js`;
+- construit une fiche PNJ mobile avec nom, icône/portrait, dialogue lisible, aide contextuelle et actions visibles;
+- les lignes de dialogue utilisent les données déjà filtrées par le système d'interaction/allié et n'exposent aucun identifiant technique;
+- `interaction.data.questActions` peut déclarer des actions data-driven sans coder un PNJ spécifique;
+- action `start-quest` : affiche un libellé joueur puis démarre la quête ciblée via `startQuestRuntime()`;
+- action `signal` : produit un signal générique (`npc`, `flag`, etc.) via `applyQuestSignal()` pour faire progresser les objectifs déjà actifs;
+- les actions peuvent avoir des `conditionIds`; elles restent masquées tant que leur évaluateur de conditions ne les autorise pas;
+- une référence vers une quête absente ou désactivée n'est pas proposée au joueur;
+- `mountNpcInteraction()` fournit un composant montable avec callback lorsque le runtime de quêtes change;
+- régression `rpg-npc-interaction-ui.test.mjs` couvre dialogue, portrait, masquage conditionnel, absence d'ID technique, démarrage de quête et progression par signal.
 
 Commits de l'étape :
-- journal UI : `7f7ae5edac9506b0d790d12d47f4b5f8bf4286a2`
-- régression : `c648fc4c519a330a7e4bbfcc79cf036e08b2d906`
+- UI PNJ/quête : `eefd443890225b10e2ee46c5292dff4e46e0c49c`
+- régression : `61818fcf89add56ccdbebe7524e8c226d4374029`
 
-CI : `34645656619` success.
+CI : `34645853645` success.
 
 ## Stockage — décision repoussée
 
@@ -73,7 +73,7 @@ CI : `34645656619` success.
 
 ## Priorités ouvertes
 
-- poursuivre l'UI PNJ/interactions et relier les dialogues/actions de quête;
+- raccorder cette UI PNJ aux vraies interactions `npc/ally` du runtime de salle et aux dialogues de `ally-interaction-runtime.js`;
 - monter le journal de quêtes dans la vraie vue de gameplay du donjon quand cette vue est raccordée;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

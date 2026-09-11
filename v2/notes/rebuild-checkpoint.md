@@ -27,9 +27,9 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Les passages authored du World Builder sont directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
 - Le runtime Donjon suit plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
 - La vue Donjon est raccordée à `heroLocations` : choix du héros actif par nom, salle affichée propre à ce héros, et passage appliqué uniquement au héros focalisé.
-- Le démarrage d'un vrai combat de salle dispose d'un bridge dédié : ennemis actifs de la salle + héros réellement présents, puis filtre de proximité spatiale avant création du vrai `combat-engine` D100.
+- Le démarrage d'un vrai combat de salle dispose maintenant d'un bridge dédié : ennemis actifs de la salle + héros réellement présents, puis filtre de proximité spatiale avant création du vrai `combat-engine` D100.
 - Le vrai combat de salle est monté dans la vue Donjon : les ennemis actifs sont affichés, le héros focalisé peut engager, et le combat créé est conservé comme combat Donjon courant sans passer par le laboratoire de test.
-- La fin du combat peut maintenant être réconciliée vers les runtimes réels : états héros synchronisés, ennemis KO marqués vaincus dans la bonne salle, loot/boss-key déclenchés via le moteur de spawn existant, salle libérée sans respawn et héros vivants ailleurs préservés.
+- La fin du combat est maintenant réconciliée automatiquement dans la vraie vue Donjon dès que le `combatState` passe à `ended` : états héros, ennemis vaincus, loot/boss-key et salle libérée reviennent directement dans les runtimes de partie.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -89,26 +89,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - checkpoint bridge combat de salle : `34651774201` success
 - entrée du combat réel dans la vue Donjon : `34652076626` success
 - réconciliation fin de combat Donjon : `34653003698` success
+- checkpoint réconciliation fin de combat : `34653071840` success
+- réconciliation automatique à `phase=ended` dans la vue Donjon : `34653443496` success
 
 ## Dernière étape terminée
 
-Réconciliation de la fin du vrai combat Donjon vers les runtimes de partie :
-- `dungeon-combat-runtime.js` expose maintenant `reconcileDungeonCombatResult()`;
-- la fonction refuse un combat encore actif : aucune conséquence de fin n'est appliquée avant `phase === ended`;
-- les états des héros participants sont recopiés depuis le `combatState` vers leurs vrais runtimes, y compris ressources et KO;
-- un héros KO devient inactif, mais un héros vivant dans une autre salle et non participant reste totalement inchangé;
-- chaque ennemi KO est retrouvé par `roomEntityId` dans la salle qui a créé le combat;
-- la défaite réelle passe par `resolveRoomCreatureDefeat()` : loot, boss-key et état `defeated/active` utilisent donc le moteur de spawn/bestiaire déjà existant au lieu d'un second système;
-- les ennemis encore vivants conservent leur état de combat mis à jour;
-- `roomCleared` est dérivé de `activeDungeonEnemies()` après réconciliation, ce qui garantit qu'un ennemi vaincu ne peut pas respawn au prochain engagement;
-- `heroesStillAlive` est calculé sur l'ensemble des runtimes héros de la partie, pas seulement les combattants : le cas historique de faux Game Over quand Brom est vivant ailleurs est explicitement protégé;
-- régression : Aldren blessé est synchronisé, Lyra KO reste KO/inactive, Brom vivant ailleurs reste actif, le squelette vaincu produit son loot puis disparaît des futurs combats.
+Raccord automatique de la fin du combat dans la vraie vue/page Donjon :
+- `dungeon-gameplay-view.js` importe maintenant `reconcileDungeonCombatResult()` et expose `reconcileEndedDungeonCombat()` pour le raccord/test;
+- la vue surveille le `combatState` qu'elle reçoit; dès qu'il passe à `phase === ended`, elle réconcilie immédiatement ce combat vers le vrai `roomRuntime` et les vrais runtimes héros;
+- la réconciliation n'est effectuée qu'une seule fois par état final de combat grâce à une clé de fin de combat, pour éviter les doubles récompenses/callbacks lors de rerenders;
+- après réconciliation, le rendu repart directement du runtime mis à jour : ennemi vaincu retiré des ennemis actifs, salle éventuellement libérée, butin immédiatement visible, état PV/KO des héros actualisé;
+- `rpg-page.js` propage maintenant ce résultat : `currentDungeonRuntime` et `currentDungeonHeroRuntimes` sont remplacés par les valeurs réconciliées, et `onDungeonCombatEnd` permet au niveau parent de persister/réagir à la fin réelle;
+- `setDungeonCombat()` resynchronise immédiatement ses copies avec celles détenues par la vue après réception d'un combat terminé; il n'existe donc pas de second état de salle/héros parallèle;
+- régression vue : un combat final victoire met Lyra à 3 PV dans son vrai runtime, marque exactement `spawn:skeleton:2` vaincu dans la Crypte et dérive correctement `roomCleared`.
 
 Commits de l'étape :
-- réconciliation runtime combat -> salle/héros : `d67612551381a8cef4f8ce237dc6db55066c369d`
-- régression fin de combat : `8dec3471f3a5e3bdaaf3bd6644eeec3d5a2bb264`
+- réconciliation automatique dans vue Donjon : `e32f04f4e47d23ff29ce2abf1d129794e50eb613`
+- propagation état réconcilié via page RPG : `da56d57a2871aeb3a0979b1610bff819b7129e9a`
+- régression raccord automatique : `d480a856e042c128ada53037857dc697350f98fe`
 
-CI finale : `34653003698` success.
+CI finale : `34653443496` success.
 
 ## Stockage — décision repoussée
 
@@ -118,7 +118,7 @@ CI finale : `34653003698` success.
 
 ## Priorités ouvertes
 
-- raccorder `reconcileDungeonCombatResult()` à la vraie vue/page Donjon lorsque le `combatState` passe à `ended`, puis rafraîchir salle, loot et héros sans second état parallèle;
-- monter ensuite les actions/compétences réelles du combat dans la vue Donjon autour du même `combatState`, sans recréer de second moteur;
+- monter maintenant les actions/compétences réelles du combat dans la vue Donjon autour du même `combatState`, sans recréer de second moteur;
+- raccorder ensuite les tours ennemis/fin de tour automatique à cette même UI réelle;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

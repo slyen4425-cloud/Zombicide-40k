@@ -44,8 +44,8 @@ export function executeSpawn(definition,context={}){
   const check=canExecuteSpawn(definition,context);
   const baseState=clone(context.spawnState||createSpawnState());
   const room=clone(context.roomRuntime||null);
-  if(!check.ok) return {ok:false,reason:check.reason,spawnState:baseState,roomRuntime:room,instances:[]};
-  if(!room||String(room.roomId)!==check.def.roomId) return {ok:false,reason:'room-runtime-mismatch',spawnState:baseState,roomRuntime:room,instances:[]};
+  if(!check.ok) return {ok:false,reason:check.reason,spawnState:baseState,roomRuntime:room,instances:[],rewards:[]};
+  if(!room||String(room.roomId)!==check.def.roomId) return {ok:false,reason:'room-runtime-mismatch',spawnState:baseState,roomRuntime:room,instances:[],rewards:[]};
 
   const existingIds=new Set((room.entities||[]).map(e=>String(e.id||e.instanceId)));
   const instances=[];
@@ -54,7 +54,10 @@ export function executeSpawn(definition,context={}){
     const instanceId=`spawn:${check.def.id}:${i+1}`;
     if(existingIds.has(instanceId)) continue;
     const creatureRuntime=createCreatureRuntime(check.creature,context.universe||{}, {instanceId,roomId:check.def.roomId,x:check.def.x,y:check.def.y});
-    room.entities.push({id:instanceId,kind:'creature',active:true,defeated:false,removed:false,x:creatureRuntime.x,y:creatureRuntime.y,data:{creatureRuntime}});
+    room.entities.push({
+      id:instanceId,kind:'creature',active:true,defeated:false,removed:false,x:creatureRuntime.x,y:creatureRuntime.y,
+      data:{creatureRuntime,spawn:{spawnId:check.def.id,kind:check.def.kind,bossKeyItemId:check.def.kind==='boss'?check.def.bossKeyItemId:null}},
+    });
     existingIds.add(instanceId);instances.push(creatureRuntime);
   }
 
@@ -63,9 +66,7 @@ export function executeSpawn(definition,context={}){
   for(const instance of instances) if(!nextState.spawnedInstanceIds.includes(instance.instanceId)) nextState.spawnedInstanceIds.push(instance.instanceId);
   nextState=appendLog(nextState,'spawn-executed',{spawnId:check.def.id,roomId:check.def.roomId,kind:check.def.kind,created:instances.length});
 
-  const rewards=[];
-  if(check.def.kind==='boss'&&check.def.bossKeyItemId) rewards.push({itemId:check.def.bossKeyItemId,source:'boss-key'});
-  return {ok:true,spawnState:nextState,roomRuntime:room,instances,rewards};
+  return {ok:true,spawnState:nextState,roomRuntime:room,instances,rewards:[]};
 }
 
 export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {random=Math.random}={}){
@@ -80,7 +81,13 @@ export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {r
 
   const defeatedRuntime={...clone(runtime),defeated:true,active:false};
   const claimed=claimCreatureLoot(defeatedRuntime,creature,{random});
-  const finalRuntime=claimed.runtime||defeatedRuntime;
+  const finalRuntime=clone(claimed.runtime||defeatedRuntime);
+  const bossKeyItemId=entity.data?.spawn?.kind==='boss'?entity.data?.spawn?.bossKeyItemId:null;
+  if(finalRuntime.lootClaimed&&bossKeyItemId){
+    const drops=Array.isArray(finalRuntime.lootDrops)?clone(finalRuntime.lootDrops):[];
+    if(!drops.some(drop=>String(drop.itemId)===String(bossKeyItemId))) drops.push({itemId:String(bossKeyItemId),quantity:1});
+    finalRuntime.lootDrops=drops;
+  }
   entity.active=false;
   entity.defeated=true;
   entity.data={...(entity.data||{}),creatureRuntime:clone(finalRuntime)};
@@ -89,7 +96,7 @@ export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {r
     reason:claimed.reason||null,
     roomRuntime:room,
     creatureRuntime:clone(finalRuntime),
-    drops:clone(claimed.drops||[]),
+    drops:clone(finalRuntime.lootDrops||[]),
   };
 }
 

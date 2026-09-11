@@ -6,10 +6,12 @@ import { transitionAlliesWithOwner,transitionIndependentAllies,finishRoomForAlli
 let roster=createAllyRoster();
 const merc={instanceId:'merc-1',kind:'mercenary',ownerActorId:'aldren',followOwner:true,active:true,dismissed:false,expired:false,roomId:'room-a',x:1,y:1,durationKind:'persistent',remaining:null};
 const summon={instanceId:'wolf-1',kind:'summon',ownerActorId:'aldren',followOwner:true,active:true,dismissed:false,expired:false,roomId:'room-a',x:2,y:1,durationKind:'room',remaining:1};
+const distantSummon={instanceId:'hawk-1',kind:'summon',ownerActorId:'lyra',followOwner:true,active:true,dismissed:false,expired:false,roomId:'room-c',x:1,y:0,durationKind:'room',remaining:2};
 const escort={instanceId:'escort-1',kind:'escort',ownerActorId:null,followOwner:false,active:true,dismissed:false,expired:false,roomId:'room-a',x:0,y:0,durationKind:'persistent',remaining:null};
-roster=addAlly(roster,merc).roster; roster=addAlly(roster,summon).roster; roster=addAlly(roster,escort).roster;
+roster=addAlly(roster,merc).roster; roster=addAlly(roster,summon).roster; roster=addAlly(roster,distantSummon).roster; roster=addAlly(roster,escort).roster;
 let spatial=createSpatialState({zoneId:'room-a'});
 for(const ally of [merc,summon,escort]) spatial=setActorPosition(spatial,ally.instanceId,{x:ally.x,y:ally.y,zoneId:'room-a'});
+spatial=setActorPosition(spatial,distantSummon.instanceId,{x:distantSummon.x,y:distantSummon.y,zoneId:'room-c'});
 
 let moved=transitionAlliesWithOwner(roster,spatial,{ownerActorId:'aldren',fromRoomId:'room-a',toRoomId:'room-b',entryPosition:{x:0,y:3}});
 assert.deepEqual(moved.movedInstanceIds.sort(),['merc-1','wolf-1']);
@@ -25,8 +27,12 @@ assert.equal(independent.roster.actors['escort-1'].x,null);
 const expired=finishRoomForAllies(moved.roster,'room-b');
 assert.equal(expired.roster.actors['wolf-1'].expired,true);
 assert.equal(expired.roster.actors['merc-1'].expired,false);
+assert.equal(expired.roster.actors['hawk-1'].remaining,2);
+assert.equal(expired.roster.actors['hawk-1'].expired,false);
+assert.deepEqual(expired.expiredInstanceIds,['wolf-1']);
 const cleaned=removeExpiredAlliesFromSpatial(expired.roster,moved.spatial);
 assert.equal(getActorPosition(cleaned.spatial,'wolf-1'),null);
 assert.ok(cleaned.removedInstanceIds.includes('wolf-1'));
+assert.notEqual(getActorPosition(cleaned.spatial,'hawk-1'),null);
 
 console.log('rpg ally room runtime ok');

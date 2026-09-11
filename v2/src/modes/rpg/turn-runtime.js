@@ -1,5 +1,5 @@
 import { queueCombatAction, resolveQueuedAction, advanceCombatTurn } from './combat-engine.js';
-import { skillAvailability, consumeSkillUse, tickSkillCooldowns } from './skill-runtime.js';
+import { skillAvailability, consumeSkillUse, tickSkillCooldowns } from '../../core/skills.js';
 
 function clone(value) { return structuredClone(value); }
 

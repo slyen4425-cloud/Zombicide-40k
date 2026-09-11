@@ -1,15 +1,31 @@
 import assert from 'node:assert/strict';
-import { createInventoryState, createItemDefinition } from '../src/modes/rpg/inventory-engine.js';
-import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot, eventPresentationEntries } from '../src/modes/rpg/dungeon-gameplay-view.js';
+import { createInventoryState, createItemDefinition, addItem } from '../src/modes/rpg/inventory-engine.js';
+import { buildWorldIndex, createWorld, createZone, createRoom, createRoomLink } from '../src/modes/rpg/world-engine.js';
+import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot, eventPresentationEntries, dungeonTransitionEntries } from '../src/modes/rpg/dungeon-gameplay-view.js';
 
 const coin=createItemDefinition({id:'old-coin',name:'Vieille pièce',stackable:true});
-const universe={items:[coin],quests:[{
+const key=createItemDefinition({id:'crypt-key',name:'Clé de crypte',stackable:false});
+const universe={items:[coin,key],quests:[{
   id:'crypt',name:'Crypte oubliée',description:'Trouver la crypte.',enabled:true,
   objectives:[{id:'enter',label:'Entrer dans la crypte',required:1,optional:false}],
 }]};
 
+const zone=createZone({id:'zone',name:'Sous-sol',roomIds:['crypt-room','hall-room','boss-room']});
+const world=createWorld({id:'world',name:'Crypte',startRoomId:'crypt-room',zones:['zone']});
+const rooms=[
+  createRoom({id:'crypt-room',zoneId:'zone',name:'Crypte oubliée'}),
+  createRoom({id:'hall-room',zoneId:'zone',name:'Galerie sombre'}),
+  createRoom({id:'boss-room',zoneId:'zone',name:'Sanctuaire scellé'}),
+];
+const links=[
+  createRoomLink({id:'hall-link',fromRoomId:'crypt-room',toRoomId:'hall-room',label:'Passage vers la galerie'}),
+  createRoomLink({id:'boss-link',fromRoomId:'crypt-room',toRoomId:'boss-room',label:'Porte du sanctuaire',requiredItemId:'crypt-key'}),
+];
+const worldIndex=buildWorldIndex({world,zones:[zone],rooms,links});
+
 const runtime={
   currentRoomId:'crypt-room',
+  worldSession:{worldId:'world',currentRoomId:'crypt-room',visitedRoomIds:['crypt-room'],history:[],flags:{},openedLinks:[],sequence:0},
   rooms:{'crypt-room':{
     visits:2,
     entities:[{
@@ -35,11 +51,22 @@ const eventState={
   ],
 };
 
-let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra',eventPresentationState:eventState});
+let transitions=dungeonTransitionEntries(worldIndex,runtime);
+assert.deepEqual(transitions.map(x=>x.id),['hall-link'],'required item must hide locked authored passage');
+assert.equal(transitions[0].targetRoomName,'Galerie sombre');
+let inventory=addItem(createInventoryState(),key,1).inventory;
+transitions=dungeonTransitionEntries(worldIndex,runtime,{inventory});
+assert.deepEqual(transitions.map(x=>x.id).sort(),['boss-link','hall-link']);
+
+let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra',eventPresentationState:eventState,worldIndex,inventory});
 assert.match(html,/Partie Donjon/);
-assert.match(html,/Salle actuelle : crypt-room/);
+assert.match(html,/Salle actuelle : Crypte oubliée/);
 assert.match(html,/Visites :<\/strong> 2/);
 assert.match(html,/Événements en attente :<\/strong> 1/);
+assert.match(html,/Passages/);
+assert.match(html,/Passage vers la galerie · Galerie sombre/);
+assert.match(html,/Porte du sanctuaire · Sanctuaire scellé/);
+assert.doesNotMatch(html,/hall-link/,'technical link id must stay hidden');
 assert.match(html,/Crypte oubliée/);
 assert.match(html,/Entrer dans la crypte/);
 assert.match(html,/0\/1/);
@@ -70,11 +97,12 @@ assert.deepEqual(duplicate.roomRuntime.rooms['crypt-room'].entities[0].data.crea
 
 runtime.questRuntime.states.crypt.progress.enter=1;
 runtime.questRuntime.states.crypt.status='completed';
-html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients});
+html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,worldIndex});
 assert.match(html,/Terminée/);
 assert.match(html,/1\/1/);
+assert.doesNotMatch(html,/Porte du sanctuaire/,'required item passage must not render without inventory item');
 
-html=renderDungeonGameplayView(universe,null,{lootRecipients:recipients});
+html=renderDungeonGameplayView(universe,null,{lootRecipients:recipients,worldIndex});
 assert.match(html,/Aucune partie Donjon active/);
 assert.match(html,/Aucune quête active pour le moment/);
 assert.match(html,/Aucun butin à distribuer/);

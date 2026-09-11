@@ -1,3 +1,5 @@
+import { installDungeonCombatTargetUi, setCombatTargetUiContext, syncDungeonCombatTargetControls } from './combat-target-ui.js';
+
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function list(value){return Array.isArray(value)?value:Object.values(value||{});}
 
@@ -78,6 +80,9 @@ export function combatJournalEntries(universe={},combat=null,{limit=8}={}){
 
 export function renderCombatPresentation(universe={},combat=null,{journalLimit=8}={}){
   if(!combat) return '';
+  setCombatTargetUiContext({universe,combat});
+  installDungeonCombatTargetUi();
+  if(typeof queueMicrotask==='function') queueMicrotask(()=>syncDungeonCombatTargetControls());
   const timeline=combatTimelineEntries(universe,combat);
   const cards=timeline.map(entry=>{
     const actor=combat.actors?.[entry.id];

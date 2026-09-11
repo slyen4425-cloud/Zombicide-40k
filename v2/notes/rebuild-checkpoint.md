@@ -33,25 +33,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Lifecycle audio de salle : transition leave → arrêt ancienne ambience → enter → nouvelle ambience. CI run `34636291490` : success.
 - Couverture dans le Créateur de salle : outil `🛡️ Couverture` + `coverModifier` éditable. CI run `34636530585` : success.
 - Raccord audio au vrai changement de salle : `transitionDungeonRoomWithAudio()` conserve le moteur monde pur et orchestre les cues audio séparément. CI run `34636880180` : success.
-- Audio : moteur central RPG, bindings, cues runtime et première sortie navigateur présents; audit complet des anciens assets audio et raccord UI final encore à faire.
+- Sortie audio navigateur : `createBrowserAudioOutput()` gère lecture, boucle, volume, délai, arrêt par son/canal et nettoyage. CI run `34637035449` : success.
+- Audio : moteur central RPG, bindings, cues runtime et sortie navigateur présents; audit complet des anciens assets audio et raccord UI final encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Première vraie sortie audio navigateur, isolée du moteur RPG :
-- nouveau `v2/src/core/browser-audio-output.js`;
-- `createBrowserAudioOutput()` reçoit les intentions déjà préparées par le moteur et crée les éléments `Audio` uniquement côté frontend;
-- support de `src`, `loop`, volume/effectiveVolume et `delayMs`;
-- `stop(requestId)` arrête et remet la lecture à zéro;
-- `stopChannel(channel)` permet notamment de couper l'ancienne ambience;
-- `dispose()` nettoie toutes les lectures actives lors d'un changement d'écran ou d'une destruction de vue;
-- le moteur reste testable sans navigateur grâce à `audioFactory` et aux timers injectables;
-- la régression utilise un faux lecteur audio et vérifie lecture immédiate, lecture différée, volume, boucle, arrêt par canal et nettoyage global.
+Pont entre les intentions audio RPG et la vraie sortie navigateur :
+- nouveau `v2/src/modes/rpg/audio-output-runtime.js`;
+- `commitAudioIntentsToOutput()` prend les requests déjà préparées par les moteurs audio, synchronise `startAudio()` puis appelle la sortie navigateur injectée;
+- les sons arrêtés par le moteur sont également arrêtés côté sortie via leur `requestId`;
+- `commitRoomTransitionAudioToOutput()` consomme directement le résultat de `queueRoomTransitionAudio()`;
+- un état audio `muted` bloque aussi la lecture navigateur, donc l'état moteur reste l'autorité;
+- le test couvre une transition Crypte → Hall : arrêt de l'ancienne ambiance, lecture `leave`, `enter`, nouvelle `ambience`, puis vérifie qu'un état muet ne déclenche aucune lecture navigateur.
 
 Commits de l'étape :
-- sortie navigateur : `a0a1c4174d6d02925c6434ce7349740f1aacffa6`
-- régression : `777cd25e2ed0b48259069651ae60d49aa7fd852e`
+- pont runtime/output : `a2930bdfe51c8e7100c1b330b32ef4030bf863cf`
+- régression : `d1e13449dfce5f37b9cfc6635e33a763cf1eaa06`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -64,7 +63,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- brancher `browser-audio-output` au shell/UI RPG pour consommer réellement les requests audio lors du jeu;
+- brancher ce pont `audio-output-runtime` dans le shell/UI RPG réel pour que les transitions de jeu consomment automatiquement les requests;
 - choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;

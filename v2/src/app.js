@@ -1,3 +1,5 @@
+import { mountRpgEditor } from './modes/rpg/rpg.js';
+
 const MODES = [
   {
     id: 'survival',
@@ -12,7 +14,7 @@ const MODES = [
     icon: '🧭',
     name: 'RPG',
     description: 'JDR aux dés, totalement configurable, avec Dungeon et assistant de table.',
-    status: 'Socle en construction',
+    status: 'Éditeur de base actif',
     enabled: true,
   },
   {
@@ -45,8 +47,8 @@ const HELP = {
   status: {
     title: 'État de la reconstruction',
     html: `
-      <p>Cette page est le premier socle de la V2. Elle valide l’isolation des modes et le système d’aide contextuelle.</p>
-      <p>La prochaine étape est de créer les contrats de données du Core puis le moteur générique RPG : statistiques, ressources, effets et conditions.</p>
+      <p>Le premier éditeur RPG est maintenant actif : statistiques et ressources sont créées comme des données libres.</p>
+      <p>Les prochaines briques seront les conditions, effets, compétences et transformations.</p>
     `,
   },
   survival: {
@@ -58,6 +60,29 @@ const HELP = {
     html: `
       <p>Le RPG reste basé sur les dés. Les statistiques, ressources, effets, distances, conditions et règles doivent être configurables.</p>
       <p>Les liens entre objets utilisent des sélecteurs et menus, jamais des identifiants techniques à saisir manuellement.</p>
+    `,
+  },
+  'rpg-editor': {
+    title: 'Éditeur RPG générique',
+    html: `
+      <p>Cette zone définit les briques de base de l'univers RPG. Rien n'est imposé par le moteur.</p>
+      <p>Une statistique ou une ressource créée ici pourra ensuite être utilisée par les héros, objets, jets, compétences, pièges, événements et transformations.</p>
+    `,
+  },
+  'rpg-stat': {
+    title: 'Statistique',
+    html: `
+      <p>Une statistique décrit une valeur de jeu : Force, Furtivité, Chance, Champ de vision, Perception, Corruption, etc.</p>
+      <p><strong>Valeur de base</strong> : valeur par défaut. <strong>Minimum/Maximum</strong> : bornes autorisées. <strong>Coût d'amélioration</strong> : ressource dépensée pour gagner un point.</p>
+      <p>Exemple : une statistique « Furtivité » peut ensuite être sélectionnée dans un jet de détection sans qu'aucun code spécial « furtivité » existe dans le moteur.</p>
+    `,
+  },
+  'rpg-resource': {
+    title: 'Ressource',
+    html: `
+      <p>Une ressource est une jauge dépensable ou variable : PV, Mana, Ki, Rage, Énergie, Points d'action, etc.</p>
+      <p>Le maximum peut être fixe ou lié à une statistique choisie dans la liste. Aucun identifiant technique n'est à saisir.</p>
+      <p>Exemple : « Ki » peut servir plus tard de coût d'une transformation temporaire.</p>
     `,
   },
   capture: {
@@ -73,7 +98,7 @@ const HELP = {
 function renderModes() {
   const host = document.querySelector('#modeGrid');
   host.innerHTML = MODES.map(mode => `
-    <article class="mode-card ${mode.enabled ? '' : 'disabled'}">
+    <article class="mode-card ${mode.enabled ? '' : 'disabled'}" ${mode.enabled ? `data-mode="${mode.id}"` : ''}>
       <div class="mode-card-head">
         <span class="mode-icon" aria-hidden="true">${mode.icon}</span>
         <button class="help-button small" type="button" data-help="${mode.id}" aria-label="Aide ${mode.name}">?</button>
@@ -91,7 +116,8 @@ function renderStatus() {
       <li><strong>Branche :</strong> rebuild/v2</li>
       <li><strong>Stable :</strong> main reste intact</li>
       <li><strong>UI :</strong> mobile-first + aide contextuelle</li>
-      <li><strong>RPG :</strong> aucune dépendance obligatoire à des noms de stats/ressources</li>
+      <li><strong>Core :</strong> stockage V2 isolé et préfixé</li>
+      <li><strong>RPG :</strong> éditeur générique stats + ressources opérationnel</li>
     </ul>
   `;
 }
@@ -113,13 +139,39 @@ function closeHelp() {
   document.querySelector('#drawerBackdrop').hidden = true;
 }
 
+function openMode(modeId) {
+  const home = document.querySelector('#homeView');
+  const workspace = document.querySelector('#workspaceView');
+  const host = document.querySelector('#workspaceHost');
+  home.hidden = true;
+  workspace.hidden = false;
+  host.innerHTML = '';
+  if (modeId === 'rpg') mountRpgEditor(host);
+  else host.innerHTML = '<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre du moteur RPG.</p></section>';
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function backHome() {
+  document.querySelector('#workspaceView').hidden = true;
+  document.querySelector('#homeView').hidden = false;
+  document.querySelector('#workspaceHost').innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
 document.addEventListener('click', event => {
   const help = event.target.closest('[data-help]');
-  if (help) openHelp(help.dataset.help);
+  if (help) {
+    event.stopPropagation();
+    openHelp(help.dataset.help);
+    return;
+  }
+  const mode = event.target.closest('[data-mode]');
+  if (mode) openMode(mode.dataset.mode);
 });
 
 document.querySelector('#helpClose').addEventListener('click', closeHelp);
 document.querySelector('#drawerBackdrop').addEventListener('click', closeHelp);
+document.querySelector('#backHome').addEventListener('click', backHome);
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeHelp();
 });

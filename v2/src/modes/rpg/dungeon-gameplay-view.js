@@ -5,6 +5,7 @@ import { resolveRoomRuntimeEventChoice } from './room-event-runtime.js';
 import { availableRoomLinks } from './world-engine.js';
 import { transitionDungeonRoom, transitionDungeonHeroRoom, setFocusedDungeonHero } from './room-runtime.js';
 import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult, dungeonHeroCombatSkills, executeDungeonHeroSkill, advanceDungeonEnemyTurns } from './dungeon-combat-runtime.js';
+import { renderCombatPresentation } from './combat-presentation-ui.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
@@ -157,9 +158,9 @@ function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=
   if(!roomId) return '';
   const enemies=activeDungeonEnemies(roomRuntime,roomId);
   if(activeCombat?.metadata?.roomId===roomId&&activeCombat.phase!=='ended'){
-    const names=(activeCombat.order||[]).map(id=>combatActorName(universe,activeCombat.actors?.[id],id));
     const actor=activeCombat.actors?.[activeCombat.activeActorId];
     const actorName=combatActorName(universe,actor,activeCombat.activeActorId||'—');
+    const presentation=renderCombatPresentation(universe,activeCombat,{journalLimit:8});
     let actions='';
     if(actor?.side==='heroes'){
       const skills=dungeonHeroCombatSkills({combat:activeCombat,heroRuntimes,universe});
@@ -170,7 +171,7 @@ function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=
     } else {
       actions='<p class="muted">Tour ennemi : résolution automatique sur la même timeline.</p>';
     }
-    return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Participants :</strong> ${names.map(esc).join(' · ')}</p><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(actorName)}</p>${actions}${message?`<div class="combat-result" aria-live="polite">${esc(message)}</div>`:''}</section>`;
+    return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(actorName)}</p>${presentation}${actions}${message?`<div class="combat-result" aria-live="polite">${esc(message)}</div>`:''}</section>`;
   }
   if(!enemies.length) return '<section class="editor-section dungeon-combat-section"><h3>⚔️ Combat</h3><p class="muted">Aucun ennemi actif dans cette salle.</p></section>';
   const enemyNames=enemies.map(entry=>{

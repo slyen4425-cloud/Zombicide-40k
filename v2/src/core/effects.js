@@ -1,4 +1,5 @@
 import { evaluateConditions } from './conditions.js';
+import { resolveResourceMax } from './formulas.js';
 
 function clamp(value, min = null, max = null) {
   let out = Number(value) || 0;
@@ -42,12 +43,13 @@ export function applyEffect(effect, state, definitions = {}, context = {}) {
     if (!id) return { applied: false, reason: 'missing-resource', state };
     const def = definitions.resources?.find?.(x => x.id === id) || definitions.resources?.[id] || {};
     next.resources = next.resources || {};
-    const old = next.resources[id] || { current: 0, max: Number(def.maxFormula?.value) || 0 };
+    const computedMax = resolveResourceMax(def, next, definitions);
+    const old = next.resources[id] || { current: 0, max: computedMax };
     const current = Number(old.current ?? old) || 0;
-    const max = Number(old.max ?? def.maxFormula?.value ?? 0);
+    const max = computedMax || Number(old.max ?? 0) || null;
     next.resources[id] = {
       ...((typeof old === 'object' && old) || {}),
-      current: clamp(applyNumericOperation(current, effect.operation, effect.value), def.min ?? 0, max || null),
+      current: clamp(applyNumericOperation(current, effect.operation, effect.value), def.min ?? 0, max),
       max,
     };
     return { applied: true, state: next };

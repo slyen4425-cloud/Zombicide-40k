@@ -4,7 +4,7 @@ import {createItemDefinition,addItem,equipItem} from '../src/modes/rpg/inventory
 import {createSetDefinition} from '../src/modes/rpg/set-engine.js';
 
 const stats=[{id:'force',name:'Force',baseValue:2,min:0,max:20},{id:'agi',name:'Agilité',baseValue:3,min:0,max:20}];
-const resources=[{id:'pv',name:'PV',min:0,maxFormula:{kind:'stat',statId:'force',multiplier:5,bonus:10}}];
+const resources=[{id:'pv',name:'PV',min:0,maxFormula:{kind:'stat',statId:'force',multiplier:5,add:10}}];
 const skills=[{id:'slash',name:'Taillade'},{id:'bow-shot',name:'Tir'},{id:'set-skill',name:'Ancienne garde'},{id:'form-skill',name:'Rage'}];
 const sword=createItemDefinition({id:'sword',name:'Épée',kind:'weapon',equipSlots:['main-hand'],skillIds:['slash']});
 const helm=createItemDefinition({id:'helm',name:'Casque ancien',kind:'armor',equipSlots:['head']});

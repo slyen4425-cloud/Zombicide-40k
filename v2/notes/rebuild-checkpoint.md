@@ -35,25 +35,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Raccord audio au vrai changement de salle : `transitionDungeonRoomWithAudio()` conserve le moteur monde pur et orchestre les cues audio séparément. CI run `34636880180` : success.
 - Sortie audio navigateur : `createBrowserAudioOutput()` gère lecture, boucle, volume, délai, arrêt par son/canal et nettoyage. CI run `34637035449` : success.
 - Pont moteur→sortie audio : `audio-output-runtime.js` synchronise l'état audio RPG avec la lecture navigateur. CI run `34637467293` : success.
-- Audio : moteur central RPG, bindings, cues runtime, sortie navigateur et pont runtime présents; audit complet des anciens assets audio et raccord final au shell restent à faire.
+- Contrôleur de session audio RPG : état audio unique + commit + transition + cleanup. CI run `34637908130` : success.
+- Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Contrôleur de session audio RPG :
-- nouveau `v2/src/modes/rpg/rpg-audio-session.js`;
-- `createRpgAudioSession()` conserve un état audio courant unique pour une session RPG;
-- `commit()` applique des intentions audio ordinaires au moteur + sortie navigateur;
-- `commitRoomTransition()` consomme directement une transition audio de salle tout en gardant l'état de session comme autorité;
-- `snapshot()` expose une copie sûre de l'état courant;
-- `dispose()` coupe proprement toutes les lectures actives quand la session RPG est détruite;
-- une session détruite refuse tout nouveau son avec `session-disposed`;
-- le test vérifie lecture normale, transition d'ambiance, arrêt de l'ancienne ambiance, nettoyage et refus après destruction.
+Lifecycle réel de la session audio dans la page RPG :
+- `rpg-page.js` expose maintenant `createRpgPageRuntime()` qui crée la sortie navigateur et la `createRpgAudioSession()` associée;
+- `mountRpgPage()` possède cette session et retourne un contrôleur avec `audioSession`, `dispose()` et `isDisposed()`;
+- `app.js` conserve le contrôleur du mode courant dans `workspaceController`;
+- avant tout changement de mode et lors du retour à l'accueil, `disposeWorkspace()` est appelé avant de vider le DOM;
+- quitter le RPG coupe donc les sons/ambiances encore actifs au lieu de les laisser tourner en arrière-plan;
+- la régression `rpg-page-runtime.test.mjs` vérifie qu'un son peut partir via la session, que `dispose()` nettoie la sortie, que le second dispose est idempotent et qu'aucun nouveau son n'est accepté après destruction.
 
 Commits de l'étape :
-- contrôleur : `ca20d2647d978ea6217dc6841a48fc041c6eb491`
-- régression : `14d58491b9c3f110f6795f9670b43be7227d9e4c`
+- page RPG/runtime : `4d0c40154001aec4febe5d9b98494cdca923910f`
+- shell/app cleanup : `bbf66b328aceaf6f925eec865308c279995529b2`
+- régression : `8410b983a3cd340044c08b50656eaff3468b4dec`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -66,7 +66,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- brancher `createRpgAudioSession()` au vrai `mountRpgPage()` puis disposer la session quand on quitte le mode RPG;
+- commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
 - choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;

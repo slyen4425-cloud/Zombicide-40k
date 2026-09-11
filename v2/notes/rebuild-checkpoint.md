@@ -19,7 +19,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
 - UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent les moteurs existants sans duplication.
-- Les événements issus des actions allié sont maintenant mis en file FIFO dans `roomRuntime.eventQueue` pour consommation par le moteur d'événements RPG.
+- Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue` et un orchestrateur dédié les exécute maintenant via `event-engine.js`, un seul événement actif à la fois.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -49,26 +49,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - raccord UI PNJ -> runtime salle/allié : `34646083537` success
 - actions recrutement/invocation/renvoi dans UI PNJ : `34646281587` success
 - file événements actions allié : `34646526482` success
+- orchestrateur file événements RPG : `34646783527` success
 
 ## Dernière étape terminée
 
-File d'événements RPG pour les actions allié :
-- nouveau `event-queue-runtime.js` avec `createEventQueueRuntime()`, `enqueueEventRequest()`, `dequeueEventRequest()` et `peekEventRequest()`;
-- la file est FIFO et conserve un historique `queued/dequeued` avec séquence stable;
-- `room-npc-interaction-ui.js` enfile automatiquement l'`eventId` renvoyé par le moteur allié après recrutement, invocation ou renvoi;
-- les événements de succès utilisent `successEventId`/`dismissEventId` existants;
-- un échec de recrutement peut lui aussi enfiler `failureEventId` sans modifier artificiellement le roster ou le wallet;
-- chaque requête garde sa provenance (`npc-ally-action`, interaction source, type d'action, succès/échec) pour l'orchestrateur gameplay;
-- `mountRoomNpcInteraction()` conserve maintenant le `roomRuntime` mis à jour même lorsqu'une action échoue mais déclenche un événement de réaction;
-- aucune exécution d'événement n'est dupliquée ici : cette étape ne fait qu'alimenter la file destinée à `event-engine.js`;
-- régression `rpg-room-npc-event-queue.test.mjs` couvre échec de recrutement -> événement d'échec, succès -> événement de succès, renvoi -> événement de renvoi et ordre FIFO.
+Orchestration de la file d'événements RPG :
+- nouveau `event-queue-orchestrator.js`;
+- `createEventQueueOrchestrator()` conserve file, événement actif, requêtes terminées, événements `once` déjà consommés et historique;
+- `startNextQueuedEvent()` dépile une seule requête FIFO, retrouve la définition correspondante puis crée/exécute l'état via `createEventState()` + `runEvent()`;
+- tant qu'un événement attend un choix, aucun second événement de la file ne peut démarrer;
+- `resolveActiveEventChoice()` reprend exactement l'événement actif via `chooseEventOption()` puis le clôt lorsqu'il est terminé;
+- les requêtes déjà terminées sont protégées contre une double résolution;
+- les événements `once` ne peuvent pas être rejoués par une seconde requête après leur première complétion;
+- les événements absents ou désactivés sont consommés proprement comme requêtes ignorées au lieu de bloquer la file;
+- l'historique distingue démarrage, complétion et requêtes ignorées;
+- régression `rpg-event-queue-orchestrator.test.mjs` couvre FIFO, événement immédiat, choix bloquant, reprise du choix, protection anti-double résolution, `once`, événement manquant et fin de file.
 
 Commits de l'étape :
-- file d'événements : `a1f4a99abc51da6f950a50ab1ae98d07ace5bcb5`
-- raccord UI PNJ/allié : `1715f5a42e2cfa73bcd828d662fb80a29dabd7f5`
-- régression : `64ab2815b2f0a561be94dfbe0d983367d92d5ab3`
+- orchestrateur : `1f364a30526d66047a1763fc9f55cf958b2ad977`
+- régression : `53b9e60fda2addbc483c2709119b0dda2f958427`
 
-CI : `34646526482` success.
+CI : `34646783527` success.
 
 ## Stockage — décision repoussée
 
@@ -78,7 +79,7 @@ CI : `34646526482` success.
 
 ## Priorités ouvertes
 
-- ajouter l'orchestrateur qui dépile `roomRuntime.eventQueue`, résout la définition correspondante et exécute `event-engine.js` sans double résolution;
+- raccorder l'orchestrateur à `roomRuntime.eventQueue` dans l'orchestrateur gameplay du donjon afin que les événements enfilés par l'UI PNJ soient consommés automatiquement;
 - monter le journal de quêtes dans la vraie vue de gameplay du donjon quand cette vue est raccordée;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

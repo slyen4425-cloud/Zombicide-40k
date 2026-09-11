@@ -1,6 +1,7 @@
 import { dungeonHeroCombatItems, useDungeonHeroCombatItem } from './dungeon-combat-item-runtime.js';
 import { validSkillTargets } from './targeting-engine.js';
 import { combatTargetLabel } from './combat-target-ui.js';
+import { combatInteractionPolicy } from './combat-config.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function list(value){return Array.isArray(value)?value:Object.values(value||{});}
@@ -17,6 +18,7 @@ export function dungeonCombatItemTargetEntries({universe={},combat=null,itemEntr
 }
 
 export function renderDungeonCombatItemControls({universe={},combat=null,heroRuntimes=[]}={}){
+  if(!combatInteractionPolicy(universe).automaticPlayerActions) return '';
   const items=dungeonHeroCombatItems({combat,heroRuntimes,universe});
   if(!items.length) return '';
   const first=items[0];
@@ -25,7 +27,7 @@ export function renderDungeonCombatItemControls({universe={},combat=null,heroRun
 }
 
 export function mountDungeonCombatItemControls(root,{universe={},getCombat=()=>null,getHeroRuntimes=()=>[],onUse=null,onError=null}={}){
-  if(!root?.querySelector) return false;
+  if(!root?.querySelector||!combatInteractionPolicy(universe).automaticPlayerActions) return false;
   const combat=getCombat();
   const actor=combat?.actors?.[combat?.activeActorId];
   const host=root.querySelector('.dungeon-combat-actions');
@@ -52,6 +54,7 @@ export function mountDungeonCombatItemControls(root,{universe={},getCombat=()=>n
   };
   itemSelect?.addEventListener('change',syncTargets);
   useButton?.addEventListener('click',()=>{
+    if(!combatInteractionPolicy(universe).automaticPlayerActions){onError?.({ok:false,reason:'manual-combat-control'});return;}
     const out=useDungeonHeroCombatItem({
       combat:getCombat(),
       heroRuntimes:getHeroRuntimes(),

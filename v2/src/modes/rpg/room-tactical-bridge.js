@@ -72,8 +72,10 @@ export function roomCoverModifier(layout,from,to){
   const beforeTarget=cells.length>1?cells[cells.length-2]:null;
   const candidates=[finiteModifier(layout?.cells?.[key(target.x,target.y)]?.coverModifier)];
   if(beforeTarget){
-    const adjacentCell=layout?.cells?.[key(beforeTarget.x,beforeTarget.y)];
-    candidates.push(finiteModifier(adjacentCell?.coverModifier));
+    if(cells.length>2){
+      const adjacentCell=layout?.cells?.[key(beforeTarget.x,beforeTarget.y)];
+      candidates.push(finiteModifier(adjacentCell?.coverModifier));
+    }
     const feature=transitionFeature(layout,beforeTarget,target)?.feature;
     candidates.push(finiteModifier(feature?.coverModifier));
   }

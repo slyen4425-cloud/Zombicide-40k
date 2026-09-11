@@ -1,5 +1,5 @@
 import { shortestPathDistance, getActorPosition, moveActor, actorMovementAllowance, setActorPosition } from './spatial-engine.js';
-import { shortestRoomPathDistance, hasRoomLineOfSight } from './room-tactical-bridge.js';
+import { shortestRoomPathDistance, hasRoomLineOfSight, roomCoverModifier } from './room-tactical-bridge.js';
 import { resolveRuntimeRoomLayout } from './runtime-room-layout.js';
 
 function clone(value){return structuredClone(value);}
@@ -92,11 +92,15 @@ export function combatDistance(spatial,actorId,targetId,{diagonal=false,maxDista
   return shortestPathDistance(spatial,from,to,{diagonal,maxDistance});
 }
 
-export function targetCoverModifier(spatial,targetId,{roomLayout=null}={}){
+export function targetCoverModifier(spatial,targetId,{actorId=null,roomLayout=null}={}){
   if(!roomLayout) return 0;
-  const pos=getActorPosition(spatial,targetId);
-  if(!pos) return 0;
-  const cell=roomLayout?.cells?.[cellKey(pos.x,pos.y)];
+  const target=getActorPosition(spatial,targetId);
+  if(!target) return 0;
+  if(actorId!=null){
+    const attacker=getActorPosition(spatial,actorId);
+    if(attacker) return roomCoverModifier(roomLayout,attacker,target);
+  }
+  const cell=roomLayout?.cells?.[cellKey(target.x,target.y)];
   const modifier=Number(cell?.coverModifier??0);
   return Number.isFinite(modifier)?modifier:0;
 }
@@ -122,7 +126,7 @@ export function evaluateAttackPosition({spatial,combat,actorId,targetId,source,i
   if(!lineOfSight) return {ok:false,reason:'line-of-sight-blocked',distance,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
   const contactEnemyIds=c.contactPenaltyEnabled&&profile.style==='ranged'?enemiesInContact(spatial,actorId,combat,{diagonal:Boolean(config.diagonal),roomLayout}):[];
   const contactModifier=contactEnemyIds.length&&!profile.ignoresContactPenalty?profile.contactPenalty:0;
-  const coverModifier=c.coverEnabled&&!profile.ignoresCover?targetCoverModifier(spatial,targetId,{roomLayout}):0;
+  const coverModifier=c.coverEnabled&&!profile.ignoresCover?targetCoverModifier(spatial,targetId,{actorId,roomLayout}):0;
   const modifier=contactModifier+coverModifier+equipment.attackModifier;
   return {ok:true,distance,modifier,profile,contactEnemyIds,lineOfSight:true,coverModifier,equipmentModifier:equipment.attackModifier,equipment};
 }

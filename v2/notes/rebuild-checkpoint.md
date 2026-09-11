@@ -28,24 +28,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - sélecteur objet requis World Builder : `34639994371` success
 - sélecteur conditions World Builder : `34640343911` success
 - portes persistantes / ouverture par clé : `34640631070` success
+- configuration portes verrouillées dans le Créateur de salle : `34640903854` success
 
 ## Dernière étape codée
 
-Configuration des portes verrouillées directement dans le Créateur de salle :
-- `mountRoomEditor(host, universe)` reçoit maintenant le vrai univers RPG;
-- ajout d'un réglage `🔒 Verrouiller les prochaines portes placées`;
-- ajout d'un sélecteur `Clé / objet de porte` alimenté par les objets RPG actifs;
-- le sélecteur affiche icône + nom et jamais un ID technique;
-- les objets désactivés sont exclus;
-- une porte/entrée/sortie placée avec le verrou actif reçoit `locked:true` et le `keyItemId` choisi;
-- si aucun objet n'est choisi, la porte peut rester verrouillée pour être ouverte plus tard par événement/énigme/interrupteur;
-- `rpg-page.js` transmet `loadRpgUniverse()` au Créateur de salle;
-- la régression vérifie la persistance `locked/keyItemId`, le libellé `Clé du boss`, la sélection et l'exclusion d'une clé désactivée.
+Consommation automatique du layout runtime par le tactique et la perception :
+- nouveau helper `resolveRuntimeRoomLayout(config)` dans `runtime-room-layout.js`;
+- si `roomLayout` est fourni explicitement, il reste prioritaire;
+- sinon `baseRoomLayout` + `dungeonRuntime` matérialisent automatiquement l'état persistant courant des portes via `materializeRoomLayout()`;
+- `evaluateAttackPosition()` utilise maintenant ce layout résolu pour portée, ligne de vue, contact et couverture;
+- `moveCombatActor()` utilise le même layout résolu pour le déplacement;
+- `canDetectActor()` utilise le même layout résolu pour la ligne de vue de perception;
+- une porte fermée dans le runtime bloque donc attaque/mouvement/vision même si le layout auteur n'a pas été muté;
+- dès que le runtime passe cette porte à `open/unlocked`, tactique et perception la voient immédiatement ouverte;
+- le layout auteur reste immuable.
 
 Commits de l'étape :
-- éditeur de salle : `cd70a79bec4d6bfd10994a5f1a28f1196709493a`
-- raccord page RPG : `d2292c39ed65cf5be2dd02103a734f35d7c5e1a3`
-- régression : `e5f5128b2b68de0497adccf654eb22ac3c9c5ba7`
+- helper runtime layout : `f5ff3841bbeb6099d1b469d252f8e8a5bc0ca251`
+- perception : `7c1b9090984ad4769b34dc4bccda5c905e9a6a98`
+- combat tactique : `af7cdc388bb1771592bb8996bcda807936c2c62d`
+- régression tactique : `609b1586d70de29af530cb0ac7709a4312344d78`
+- régression perception : `4fe977a7c67055a39687e4de5f445fb428ef75ae`
 
 CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
@@ -57,7 +60,6 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 
 ## Priorités ouvertes
 
-- brancher automatiquement `materializeRoomLayout()` dans les vrais appels tactiques/perception du runtime de donjon;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - construire le noyau générique de jets/tests et son éditeur;
 - poursuivre lifecycle quêtes et UI PNJ/interactions;

@@ -1,3 +1,5 @@
+import { inventoryQuantity } from './inventory-engine.js';
+
 function clone(value){return structuredClone(value);}
 function id(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
@@ -13,8 +15,12 @@ export function createRoom({id:roomId=id(),zoneId=null,name='Nouvelle salle',kin
   return {id:String(roomId),zoneId:zoneId?String(zoneId):null,name,kind,links:clone(links),metadata:clone(metadata)};
 }
 
-export function createRoomLink({id:linkId=id(),fromRoomId,toRoomId,label='Passage',direction='forward',conditions=[],oneWay=false,enabled=true}={}){
-  return {id:String(linkId),fromRoomId:String(fromRoomId),toRoomId:String(toRoomId),label,direction,conditionIds:[...conditions].map(String),oneWay:Boolean(oneWay),enabled:enabled!==false};
+export function createRoomLink({id:linkId=id(),fromRoomId,toRoomId,label='Passage',direction='forward',conditions=[],oneWay=false,enabled=true,requiredItemId=null}={}){
+  return {
+    id:String(linkId),fromRoomId:String(fromRoomId),toRoomId:String(toRoomId),label,direction,
+    conditionIds:[...conditions].map(String),oneWay:Boolean(oneWay),enabled:enabled!==false,
+    requiredItemId:requiredItemId==null?null:String(requiredItemId),
+  };
 }
 
 export function buildWorldIndex({world=null,zones=[],rooms=[],links=[]}={}){
@@ -50,13 +56,14 @@ export function createWorldSession(index,{startRoomId=null}={}){
   return {ok:true,session:{worldId:String(index.world.id),currentRoomId:roomId,visitedRoomIds:[roomId],history:[],flags:{},openedLinks:[],sequence:0}};
 }
 
-export function availableRoomLinks(index,session,{conditionEvaluator=null}={}){
+export function availableRoomLinks(index,session,{conditionEvaluator=null,inventory=null}={}){
   const current=String(session?.currentRoomId||'');
   return Object.values(index?.links||{}).filter(link=>{
     if(link.enabled===false) return false;
     const forward=String(link.fromRoomId)===current;
     const reverse=!link.oneWay&&String(link.toRoomId)===current;
     if(!forward&&!reverse) return false;
+    if(link.requiredItemId&&inventoryQuantity(inventory,link.requiredItemId)<=0) return false;
     if(typeof conditionEvaluator==='function'&&(link.conditionIds||[]).some(conditionId=>!conditionEvaluator(conditionId,session))) return false;
     return true;
   }).map(link=>({
@@ -66,8 +73,8 @@ export function availableRoomLinks(index,session,{conditionEvaluator=null}={}){
   }));
 }
 
-export function traverseRoomLink(index,session,linkId,{conditionEvaluator=null}={}){
-  const link=availableRoomLinks(index,session,{conditionEvaluator}).find(x=>String(x.id)===String(linkId));
+export function traverseRoomLink(index,session,linkId,{conditionEvaluator=null,inventory=null}={}){
+  const link=availableRoomLinks(index,session,{conditionEvaluator,inventory}).find(x=>String(x.id)===String(linkId));
   if(!link) return {ok:false,reason:'link-unavailable',session};
   if(!index.rooms?.[String(link.targetRoomId)]) return {ok:false,reason:'target-room-missing',session};
   const next=clone(session);

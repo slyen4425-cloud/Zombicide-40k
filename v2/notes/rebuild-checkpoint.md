@@ -32,25 +32,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - portes persistantes / ouverture par clé : `34640631070` success
 - configuration portes verrouillées dans le Créateur de salle : `34640903854` success
 - layout runtime consommé par tactique/perception : `34641208857` success
-- noyau générique de jets/tests : run `34641462386` à vérifier sur le dernier commit/checkpoint avant validation finale
+- noyau générique de jets/tests : `34641462386` success
+- éditeur générique de jets/tests : `34641810586` success
 
 ## Dernière étape codée
 
-Éditeur générique de jets/tests :
-- nouveau `v2/src/modes/rpg/check-editor.js`;
-- nouvelle collection persistante `universe.checks` normalisée par `ensureCheckDefinitions()`;
-- création de règles de jet réutilisables avec nom, activation, dé, mode roll-under/roll-over, statistique, difficulté, modificateur et description;
-- sélecteur de statistique par icône + nom, sans saisie d'ID technique;
-- les statistiques désactivées sont exclues du sélecteur;
-- le panneau `Jets & tests` est monté dans l'éditeur RPG principal entre Ressources et les réglages spatiaux;
-- suppression d'une statistique détache automatiquement les jets qui la référencent;
-- univers neuf, chargement et sauvegarde garantissent maintenant la présence de `checks`;
-- régression `rpg-check-editor.test.mjs` couvre normalisation, D100, sélection de stat lisible et exclusion des stats désactivées.
+Références de jets réutilisables dans les moteurs :
+- `core/checks.js` sait maintenant retrouver une définition par `checkId` et résoudre un test acteur avec fallback inline;
+- une définition désactivée bloque proprement avec `check-disabled`;
+- les compétences acceptent désormais `checkId`; les anciens champs `roll` restent compatibles;
+- le coût/charge/cooldown d'une compétence sont consommés avant le jet, et les effets ne sont appliqués que si le jet réussit;
+- `skill-runtime.js` ré-exporte `resolveSkillUse()` pour le runtime RPG;
+- les pièges acceptent `detectionCheckId` et `disarmCheckId`, avec fallback vers `detectionCheck` / `disarmCheck` legacy;
+- les résultats mémorisent toujours le jet réellement exécuté;
+- régressions ajoutées pour compétence avec `agility-test` et piège avec `perception-test`/`agility-test`.
 
 Commits de l'étape :
-- persistance/raccord éditeur RPG : `f20954ee1127e96b189e134e1f5985fad9288867`
-- éditeur de jets : `b933d92cb63e22502588c170099b91427be5b0a6`
-- régression : `0fbf9dd08a5c08a62bb3f04a61189c0378d16439`
+- résolution de checks réutilisables : `ed7901a1fbf6ed5a701b396ab880276a4558c672`
+- compétences : `3c8622ab674d08e160467495674e26518c5923ba`
+- pièges : `1b9263007397890c38337d1d28636c10a940470c`
+- export runtime compétence : `e526214af31a2aaffb753e7cb8cdc4b023d99541`
+- régression compétences : `0292455560e77df029600a9fa589d0177e01d2f0`
+- régression pièges : `4d7ec0b35eb504d917088f8963bd30d1e9706e72`
 
 CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
@@ -62,7 +65,8 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 
 ## Priorités ouvertes
 
-- remplacer progressivement les configurations de jet inline des compétences/pièges/événements par des références optionnelles vers `universe.checks`, tout en gardant compatibilité avec les anciens champs;
+- ajouter les références `checkId` dans les interfaces d'édition, sans ID brut;
+- étendre le même modèle de jets réutilisables aux événements/interactions;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

@@ -17,10 +17,11 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
-- UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent désormais les moteurs existants sans duplication.
+- UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent les moteurs existants sans duplication.
 - Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue`; cette file est reliée au runtime de salle, exécutée automatiquement via `event-engine.js`, et reprend après un choix sans double résolution.
 - La vue `🎮 Donjon` affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
-- Le picker de destinataire de loot est maintenant intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
+- Le picker de destinataire de loot est intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
+- Les interactions PNJ/allié et les choix d’événements sont désormais aussi surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -57,26 +58,29 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - vue gameplay Donjon + journal quêtes live : `34647506351` success
 - checkpoint vue Donjon : `34647567121` success
 - distribution loot dans vue Donjon : `34647800892` success
+- checkpoint loot Donjon : `34647858146` success
+- interactions PNJ + choix événements dans vue Donjon : `34648252721` success
 
 ## Dernière étape terminée
 
-Distribution de loot directement dans la vue gameplay Donjon :
-- `dungeon-gameplay-view.js` réutilise maintenant `loot-recipient-ui.js` au lieu de créer un second système;
-- `dungeonLootEntries()` ne liste que les créatures réellement vaincues avec `lootClaimed=true` et `lootGranted=false` dans la salle courante;
-- le joueur choisit un destinataire lisible (héros, groupe ou autre inventaire), sans afficher d’ID technique;
-- `grantDungeonCreatureLoot()` délègue l’attribution à `grantCreatureLootToSelectedRecipient()` puis remplace uniquement l’instance de salle concernée dans le runtime Donjon;
-- après attribution, `lootGranted` et `lootGrantedTo` restent l’autorité persistante et empêchent une seconde attribution ou un changement de destinataire au retour dans la salle;
-- le butin attribué disparaît automatiquement de la liste de la vue;
-- `mountDungeonGameplayView()` maintient les inventaires destinataires et expose `onLootGranted`;
-- `mountRpgPage()` accepte/actualise maintenant les destinataires via `dungeonLootRecipients` et `setDungeonLootRecipients()`;
-- régression `rpg-dungeon-gameplay-view.test.mjs` couvre affichage, sélection Lyra/groupe, attribution uniquement à Lyra, persistance `lootGrantedTo`, disparition du butin et rejet du doublon.
+Interactions PNJ et choix d’événements directement dans la vue gameplay Donjon :
+- `dungeon-gameplay-view.js` rend maintenant les interactions `npc` / `ally` actives de la salle courante dans une section `Personnages`;
+- le montage délègue chaque interaction réelle à `mountRoomNpcInteraction()` : dialogue, quêtes, recrutement, invocation, renvoi et événements continuent donc d’utiliser les moteurs déjà en place;
+- le layout courant est fourni depuis `loadRoomLayout()` par `rpg-page.js`, sans recopier les définitions d’interaction dans un second état;
+- si `roomRuntime.eventOrchestrator.active.eventState` attend un choix, la vue affiche les libellés de `waitingChoice.choices` sous forme de boutons joueur;
+- cliquer un choix appelle `resolveRoomRuntimeEventChoice()`, reprend exactement l’événement actif puis laisse la file continuer automatiquement comme auparavant;
+- le `world` d’événement reste persistant dans la vue et remonte à la page RPG;
+- les changements de runtime issus des PNJ, du loot ou des choix remontent via un seul callback `onRoomRuntimeChange`;
+- l’API de loot existante `dungeonLootEntries()` / `grantDungeonCreatureLoot()` a été explicitement conservée après qu’un premier run ait signalé la régression d’export;
+- régression `rpg-dungeon-interactions-view.test.mjs` couvre visibilité PNJ active, masquage PNJ désactivé, exclusion des interactions non-PNJ, affichage des choix et disparition de la section choix lorsque l’événement n’attend plus.
 
 Commits de l'étape :
-- intégration vue Donjon : `b4a333a676cc8d4db32bf77ab99659b3dcea64f3`
-- raccord page RPG : `bb5b239b3909585e26eefd74e2e8330182861c71`
-- régression : `d8b3314d582e117f4cd3eb5ae17489514e50c58f`
+- vue Donjon PNJ/choix : `115c99de22e30e2c29eaaa3a13b44f4d6e15f2b1`
+- raccord page RPG/layout : `c47ed3d3821bdfabda56e52c59841cdbe22117de`
+- régression : `cb312043434702fbaf7d464df8788133a12dd1eb`
+- correction compatibilité API loot : `a1b2688bbc8f7385cf60aa9407d2a2f15eae314b`
 
-CI : `34647800892` success.
+CI finale : `34648252721` success.
 
 ## Stockage — décision repoussée
 
@@ -86,7 +90,7 @@ CI : `34647800892` success.
 
 ## Priorités ouvertes
 
-- raccorder progressivement les interactions PNJ, événements et choix directement à la vue gameplay Donjon sans réintroduire un second runtime;
+- afficher proprement dans la vue Donjon les textes/conséquences d’événements déjà produits par `event-engine.js` (journal/popup), sans dupliquer l’exécution;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

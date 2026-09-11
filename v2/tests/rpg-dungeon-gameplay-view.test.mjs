@@ -54,7 +54,7 @@ const eventState={
 let transitions=dungeonTransitionEntries(worldIndex,runtime);
 assert.deepEqual(transitions.map(x=>x.id),['hall-link'],'required item must hide locked authored passage');
 assert.equal(transitions[0].targetRoomName,'Galerie sombre');
-let inventory=addItem(createInventoryState(),key,1).inventory;
+let inventory=addItem(createInventoryState(),'crypt-key',1,universe).inventory;
 transitions=dungeonTransitionEntries(worldIndex,runtime,{inventory});
 assert.deepEqual(transitions.map(x=>x.id).sort(),['boss-link','hall-link']);
 

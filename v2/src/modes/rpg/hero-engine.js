@@ -1,6 +1,6 @@
 import { resolveResourceMax } from '../../core/formulas.js';
 import { activeFormSkillIds } from '../../core/hero-forms.js';
-import { createInventoryState, addItem } from './inventory-engine.js';
+import { createInventoryState, addItem, equipItem } from './inventory-engine.js';
 import { equippedItemBonuses } from './item-engine.js';
 import { resolveEquippedSetBonuses } from './set-engine.js';
 import { createProgressionState } from './progression-engine.js';
@@ -11,7 +11,7 @@ function list(definitions,key){return Array.isArray(definitions?.[key])?definiti
 
 export function createHeroDefinition({
   id=uid(),name='Nouveau héros',enabled=true,icon=null,artId=null,audioId=null,
-  statValues={},resourceValues={},skillIds=[],inventorySlots=[],startingItems=[],tags=[],metadata={}
+  statValues={},resourceValues={},skillIds=[],inventorySlots=[],startingItems=[],startingEquipment=[],tags=[],metadata={}
 }={}){
   return {
     id:String(id),name:String(name||'Héros'),enabled:enabled!==false,
@@ -19,6 +19,7 @@ export function createHeroDefinition({
     statValues:clone(statValues||{}),resourceValues:clone(resourceValues||{}),
     skillIds:[...(skillIds||[])].map(String),inventorySlots:[...(inventorySlots||[])].map(String),
     startingItems:(startingItems||[]).map(entry=>({itemId:String(entry.itemId||''),quantity:Math.max(0,Math.floor(Number(entry.quantity??1)||0))})),
+    startingEquipment:(startingEquipment||[]).map(entry=>({itemId:String(entry.itemId||''),slot:String(entry.slot||'')})),
     tags:[...(tags||[])].map(String),metadata:clone(metadata||{}),
   };
 }
@@ -28,13 +29,20 @@ export function validateHeroDefinition(hero,definitions={}){
   const stats=new Set(list(definitions,'stats').map(x=>String(x.id)));
   const resources=new Set(list(definitions,'resources').map(x=>String(x.id)));
   const skills=new Set(list(definitions,'skills').map(x=>String(x.id)));
-  const items=new Set(list(definitions,'items').map(x=>String(x.id)));
+  const items=new Map(list(definitions,'items').map(x=>[String(x.id),x]));
+  const slots=new Set((hero?.inventorySlots||[]).map(String));
   if(!hero?.id) errors.push({code:'missing-id'});
   if(!hero?.name) errors.push({code:'missing-name'});
   for(const id of Object.keys(hero?.statValues||{})) if(!stats.has(String(id))) errors.push({code:'missing-stat',statId:String(id)});
   for(const id of Object.keys(hero?.resourceValues||{})) if(!resources.has(String(id))) errors.push({code:'missing-resource',resourceId:String(id)});
   for(const id of hero?.skillIds||[]) if(!skills.has(String(id))) errors.push({code:'missing-skill',skillId:String(id)});
   for(const entry of hero?.startingItems||[]) if(!items.has(String(entry.itemId))) errors.push({code:'missing-item',itemId:String(entry.itemId)});
+  for(const entry of hero?.startingEquipment||[]){
+    const item=items.get(String(entry.itemId));
+    if(!item){errors.push({code:'missing-equipment-item',itemId:String(entry.itemId)});continue;}
+    if(!slots.has(String(entry.slot))) errors.push({code:'missing-equipment-slot',slot:String(entry.slot)});
+    if(!(item.equipSlots||[]).map(String).includes(String(entry.slot))) errors.push({code:'equipment-slot-not-allowed',itemId:String(entry.itemId),slot:String(entry.slot)});
+  }
   return {valid:errors.length===0,errors};
 }
 
@@ -57,14 +65,19 @@ export function createHeroRuntime(hero,definitions={}, {instanceId=null,progress
     const added=addItem(inventory,entry.itemId,entry.quantity,definitions);
     if(added.ok) inventory=added.inventory;
   }
-  const runtime={
+  for(const entry of definition.startingEquipment||[]){
+    const inventoryEntry=(inventory.entries||[]).find(candidate=>String(candidate.itemId)===String(entry.itemId)&&!Object.values(inventory.equipment||{}).some(equipped=>String(equipped?.entryId)===String(candidate.entryId)));
+    if(!inventoryEntry) continue;
+    const equipped=equipItem(inventory,inventoryEntry.entryId,entry.slot,definitions);
+    if(equipped.ok) inventory=equipped.inventory;
+  }
+  return {
     instanceId:String(instanceId||definition.id),heroId:definition.id,name:definition.name,icon:definition.icon,artId:definition.artId,audioId:definition.audioId,
     enabled:definition.enabled,active:true,ko:false,dead:false,state,
     baseSkillIds:[...definition.skillIds],activeForms:[],currentPermanentFormId:null,
     inventory,
     progression:createProgressionState(progression||{}),tags:[...definition.tags],metadata:clone(definition.metadata),
   };
-  return runtime;
 }
 
 export function resolveHeroSkillIds(heroRuntime,definitions={}){

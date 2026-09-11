@@ -16,7 +16,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Bestiaire : ressources bornées, médias, loot idempotent, drops persistants et attribution à un destinataire explicite.
 - Boss : clé créée seulement à la défaite réelle; passages `requiredItemId` verrouillés sur possession réelle de l'objet.
 - World Builder : objets requis et conditions choisis par menus lisibles, jamais par ID brut.
-- Portes de salle runtime : état persistant, ouverture par clé, option future de consommation de clé, layout matérialisé avec état runtime.
+- Portes de salle runtime : état persistant, ouverture par clé, layout matérialisé avec état runtime.
+- Tactique/perception : consomment automatiquement le layout matérialisé du runtime de donjon.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique, cleanup en quittant le RPG.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel volontairement différé.
 
@@ -29,26 +30,25 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - sélecteur conditions World Builder : `34640343911` success
 - portes persistantes / ouverture par clé : `34640631070` success
 - configuration portes verrouillées dans le Créateur de salle : `34640903854` success
+- layout runtime consommé par tactique/perception : `34641208857` success
 
 ## Dernière étape codée
 
-Consommation automatique du layout runtime par le tactique et la perception :
-- nouveau helper `resolveRuntimeRoomLayout(config)` dans `runtime-room-layout.js`;
-- si `roomLayout` est fourni explicitement, il reste prioritaire;
-- sinon `baseRoomLayout` + `dungeonRuntime` matérialisent automatiquement l'état persistant courant des portes via `materializeRoomLayout()`;
-- `evaluateAttackPosition()` utilise maintenant ce layout résolu pour portée, ligne de vue, contact et couverture;
-- `moveCombatActor()` utilise le même layout résolu pour le déplacement;
-- `canDetectActor()` utilise le même layout résolu pour la ligne de vue de perception;
-- une porte fermée dans le runtime bloque donc attaque/mouvement/vision même si le layout auteur n'a pas été muté;
-- dès que le runtime passe cette porte à `open/unlocked`, tactique et perception la voient immédiatement ouverte;
-- le layout auteur reste immuable.
+Noyau générique de jets/tests :
+- nouveau `v2/src/core/checks.js` comme autorité neutre pour les jets de dés et tests;
+- `rollDie()` gère n'importe quel dé, D100 compris;
+- `normalizeCheckSpec()` normalise dé, stat, difficulté, modificateur et mode;
+- `resolveCheck()` gère `roll-under` et `roll-over` avec résultat détaillé (`roll`, `threshold`, `success`, paramètres normalisés);
+- `resolveActorCheck()` récupère une stat aussi bien depuis un runtime héros simple (`actor.stats`) que depuis un acteur de combat (`actor.state.stats`);
+- `combat-engine.js` utilise maintenant ce noyau partagé et ré-exporte `rollDie/resolveCheck` pour compatibilité avec le code existant;
+- `trap-engine.js` n'a plus son propre raccord de calcul de stat/test et passe par `resolveActorCheck()`;
+- régression dédiée `core-checks.test.mjs` pour D100, D20, roll-under, roll-over et résolution de stat acteur.
 
 Commits de l'étape :
-- helper runtime layout : `f5ff3841bbeb6099d1b469d252f8e8a5bc0ca251`
-- perception : `7c1b9090984ad4769b34dc4bccda5c905e9a6a98`
-- combat tactique : `af7cdc388bb1771592bb8996bcda807936c2c62d`
-- régression tactique : `609b1586d70de29af530cb0ac7709a4312344d78`
-- régression perception : `4fe977a7c67055a39687e4de5f445fb428ef75ae`
+- noyau checks : `0741b1d1c06fbc622dae53734b3bed0a0425cc14`
+- combat raccordé : `4e5bf09316f2cf331d27845de54dd7d68f6b61df`
+- pièges raccordés : `f21cf88884f3162982c34b5444727277615b1f07`
+- régression : `cbad0f383d1987007455b450d7d4b454bc255417`
 
 CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
@@ -60,8 +60,8 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 
 ## Priorités ouvertes
 
+- ajouter l'éditeur de tests/jets génériques avec sélecteurs de stats lisibles et sans ID brut;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
-- construire le noyau générique de jets/tests et son éditeur;
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;

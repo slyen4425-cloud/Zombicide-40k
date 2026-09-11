@@ -36,24 +36,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Sortie audio navigateur : `createBrowserAudioOutput()` gère lecture, boucle, volume, délai, arrêt par son/canal et nettoyage. CI run `34637035449` : success.
 - Pont moteur→sortie audio : `audio-output-runtime.js` synchronise l'état audio RPG avec la lecture navigateur. CI run `34637467293` : success.
 - Contrôleur de session audio RPG : état audio unique + commit + transition + cleanup. CI run `34637908130` : success.
+- Lifecycle session audio dans le shell RPG : `mountRpgPage()` possède la session, et `app.js` la détruit en quittant/chageant de mode. CI run `34638147144` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Lifecycle réel de la session audio dans la page RPG :
-- `rpg-page.js` expose maintenant `createRpgPageRuntime()` qui crée la sortie navigateur et la `createRpgAudioSession()` associée;
-- `mountRpgPage()` possède cette session et retourne un contrôleur avec `audioSession`, `dispose()` et `isDisposed()`;
-- `app.js` conserve le contrôleur du mode courant dans `workspaceController`;
-- avant tout changement de mode et lors du retour à l'accueil, `disposeWorkspace()` est appelé avant de vider le DOM;
-- quitter le RPG coupe donc les sons/ambiances encore actifs au lieu de les laisser tourner en arrière-plan;
-- la régression `rpg-page-runtime.test.mjs` vérifie qu'un son peut partir via la session, que `dispose()` nettoie la sortie, que le second dispose est idempotent et qu'aucun nouveau son n'est accepté après destruction.
+Destinataire explicite du loot de créature :
+- `grantRoomCreatureDrops()` accepte désormais une métadonnée de destinataire sans imposer une politique globale;
+- le runtime de la créature persiste `lootGrantedTo:{kind,id}` en même temps que `lootGranted:true`;
+- `grantRoomCreatureDropsToRecipient()` reçoit un destinataire générique `{id,kind,inventory}` et renvoie son inventaire mis à jour;
+- cela permet aussi bien un héros, un inventaire de groupe ou un autre conteneur sans coder un cas spécial dans le moteur de spawn;
+- une seconde tentative conserve l'identité du destinataire original et ne redonne aucun objet;
+- un destinataire sans inventaire est refusé avec `recipient-inventory-missing`.
 
 Commits de l'étape :
-- page RPG/runtime : `4d0c40154001aec4febe5d9b98494cdca923910f`
-- shell/app cleanup : `bbf66b328aceaf6f925eec865308c279995529b2`
-- régression : `8410b983a3cd340044c08b50656eaff3468b4dec`
+- moteur : `6be286b2d00d511637e63ed3e1211bf5bf82113d`
+- régression : `8eb8d0042afd3adaf6796c55c3a68ab8f93a8414`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -66,8 +66,8 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
+- choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
 - commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
-- choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;

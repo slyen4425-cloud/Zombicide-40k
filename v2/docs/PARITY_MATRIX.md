@@ -9,10 +9,11 @@ Cette matrice sert de garde-fou : aucune fonction historique n'est considérée 
 | Stats RPG | Plusieurs stats historiques + couches de migration | Statistiques libres par ID | Base active | Création, édition, activation, bornes, progression |
 | Ressources RPG | PV/Mana et usages historiques | Ressources libres par ID | Base active | PV, Mana, Ki, Rage, etc. possibles sans code spécial |
 | Conditions | Conditions dispersées | Moteur générique | Base active | Stat, ressource, niveau, XP puis quête/item/flag |
-| Effets | Buff/debuff/DoT/HoT dispersés | Moteur générique | Base active | Effets réutilisables dans toutes les familles de contenu |
+| Effets | Buff/debuff/DoT/HoT dispersés | Moteur générique + statuts temporaires | En cours | Effets réutilisables, durée, cumul, déclenchement début/fin de tour |
 | Compétences | Actives/passives, coûts, cooldowns, charges | Contrat + runtime générique | En cours | Coût, charges, cooldown, cible, jet, effets, conditions |
 | Évolution héros | Non générique | Formes temporaires/permanentes | En cours | Conditions + coût + durée + effets + compétences |
-| Combat RPG | D100/dés + timeline + nombreux wrappers historiques | State machine déterministe | Base technique | 1 action = 1 résolution ; animation non autoritaire |
+| Combat RPG | D100/dés + timeline + nombreux wrappers historiques | State machine déterministe | En cours | 1 action = 1 résolution ; initiative configurable ; statuts temporaires ; animation non autoritaire |
+| Défaite / KO | Historiquement liée aux PV + correctifs locaux | Règle générique stat/ressource/seuil | Base active | Aucun nom `PV` imposé ; univers choisit la condition de KO |
 | Déplacement | Tactique individuel avec correctifs successifs | À reconstruire | À faire | Position individuelle, coûts configurables, pas de téléportation groupe |
 | Vision / furtivité | Détection et perception partiellement codées | À rendre générique | À faire | Stats choisies par menu, règles configurables |
 | World Builder | Monde/zone/salle/branches | À migrer | À faire | Parité des liens, retours, branches, événements |

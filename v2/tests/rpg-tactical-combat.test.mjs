@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createCombatState } from '../src/modes/rpg/combat-engine.js';
 import { createSpatialState,setActorPosition } from '../src/modes/rpg/spatial-engine.js';
 import { createRoomLayout,createDoor,addDoor } from '../src/modes/rpg/room-engine.js';
-import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resetActorCombatMovement,targetCoverModifier } from '../src/modes/rpg/tactical-combat.js';
+import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resetActorCombatMovement,targetCoverModifier,equippedTacticalModifiers } from '../src/modes/rpg/tactical-combat.js';
 
 const config={mode:'tactical',defaultMovement:3,combatAssistRange:3,defaultMeleeRange:1,defaultRangedRange:5,rangedContactModifier:-20};
 let spatial=createSpatialState({zoneId:'room-1'});
@@ -39,6 +39,30 @@ const ignoreCoverBow={id:'piercing-bow',data:{attackStyle:'ranged',rangeMin:1,ra
 const ignoreCover=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:ignoreCoverBow,config:{...config,roomLayout:coverLayout}});
 assert.equal(ignoreCover.coverModifier,0);
 assert.equal(ignoreCover.modifier,-20);
+
+const tacticalDefinitions={items:[
+  {id:'scope',enabled:true,data:{tactical:{attackModifier:10,rangeBonus:2}}},
+  {id:'cloak',enabled:true,data:{tactical:{ignoresCover:true}}},
+  {id:'brace',enabled:true,data:{tactical:{ignoresContactPenalty:true}}},
+]};
+const tacticalInventory={equipment:{
+  accessory:{entryId:'entry-scope',itemId:'scope'},
+  trinket:{entryId:'entry-cloak',itemId:'cloak'},
+  offhand:{entryId:'entry-brace',itemId:'brace'},
+  duplicate:{entryId:'entry-scope',itemId:'scope'},
+}};
+const equipmentMods=equippedTacticalModifiers(tacticalInventory,tacticalDefinitions);
+assert.equal(equipmentMods.attackModifier,10,'same equipped entry referenced by several slots must apply once');
+assert.equal(equipmentMods.rangeBonus,2);
+assert.equal(equipmentMods.ignoresCover,true);
+assert.equal(equipmentMods.ignoresContactPenalty,true);
+const equippedShot=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:{id:'short-bow',data:{attackStyle:'ranged',rangeMin:1,rangeMax:3}},inventory:tacticalInventory,definitions:tacticalDefinitions,config:{...config,roomLayout:coverLayout}});
+assert.equal(equippedShot.ok,true,'equipped range bonus must extend weapon reach');
+assert.equal(equippedShot.profile.rangeMax,5);
+assert.equal(equippedShot.coverModifier,0,'equipped ignoresCover must use the existing cover rule');
+assert.equal(equippedShot.contactEnemyIds.length,1);
+assert.equal(equippedShot.modifier,10,'equipped ignore-contact + cover bypass leave only equipment attack modifier');
+assert.equal(equippedShot.equipmentModifier,10);
 
 let moveState=createCombatMovementState(combat,config);
 const moved=moveCombatActor({spatial,combat,actorId:'lyra',target:{x:2,y:1,zoneId:'room-1'},moveState,config});

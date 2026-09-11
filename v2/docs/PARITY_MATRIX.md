@@ -14,8 +14,8 @@ Cette matrice sert de garde-fou : aucune fonction historique n'est considérée 
 | Évolution héros | Non générique | Formes temporaires/permanentes | En cours | Conditions + coût + durée + effets + compétences |
 | Combat RPG | D100/dés + timeline + nombreux wrappers historiques | State machine déterministe | En cours | 1 action = 1 résolution ; initiative configurable ; statuts temporaires ; animation non autoritaire |
 | Défaite / KO | Historiquement liée aux PV + correctifs locaux | Règle générique stat/ressource/seuil | Base active | Aucun nom `PV` imposé ; univers choisit la condition de KO |
-| Déplacement | Tactique individuel avec correctifs successifs | À reconstruire | À faire | Position individuelle, coûts configurables, pas de téléportation groupe |
-| Vision / furtivité | Détection et perception partiellement codées | À rendre générique | À faire | Stats choisies par menu, règles configurables |
+| Déplacement | Tactique individuel avec correctifs successifs | Positions individuelles + distance par chemin + portée configurable | Base active | Position individuelle, coûts configurables, pas de téléportation groupe |
+| Vision / furtivité | Détection et perception partiellement codées | Moteur générique configurable | Base active | Stats choisies par menu, distance/zone configurables, aucun nom privilégié |
 | World Builder | Monde/zone/salle/branches | À migrer | À faire | Parité des liens, retours, branches, événements |
 | Créateur de salle | Cases, murs, portes, coffres, pièges, énigmes | À migrer | À faire | Toutes interactions éditables et liées par sélecteurs |
 | Événements | Narration + effets limités | Actions composables | À faire | Chaînes d'actions, effets, sons, spawn, portes, choix |

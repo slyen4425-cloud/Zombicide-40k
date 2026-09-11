@@ -29,16 +29,16 @@ assert.equal(meleeFar.ok,false);
 assert.equal(meleeFar.reason,'target-unreachable');
 
 let moveState=createCombatMovementState(combat,config);
-const moved=moveCombatActor({spatial,combat,actorId:'lyra',target:{x:2,y:0,zoneId:'room-1'},moveState,config});
+const moved=moveCombatActor({spatial,combat,actorId:'lyra',target:{x:2,y:1,zoneId:'room-1'},moveState,config});
 assert.equal(moved.ok,true);
-assert.equal(moved.distance,2);
-assert.equal(moved.remaining,1);
+assert.equal(moved.distance,3);
+assert.equal(moved.remaining,0);
 spatial=moved.spatial;
 moveState=moved.moveState;
 
 const bowAfterMove=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:bow,config});
 assert.equal(bowAfterMove.ok,true);
-assert.equal(bowAfterMove.distance,2);
+assert.equal(bowAfterMove.distance,3);
 assert.equal(bowAfterMove.modifier,0);
 
 const swordAfterMove=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:sword,config});

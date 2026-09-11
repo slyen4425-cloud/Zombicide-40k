@@ -1,11 +1,9 @@
-# GenSrpG V16.78.74 restored visuals on clean stats base — 2026-09-08
-name: Deploy GenSrpG to GitHub Pages
+name: Deploy GenSrpG diagnostic baseline to GitHub Pages
 
 on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
@@ -20,215 +18,33 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Récupérer le dépôt
+      - name: Récupérer la base diagnostic V16.78.95
         uses: actions/checkout@v4
+        with:
+          ref: diagnostic/v95-chrome-baseline-2026-09-11
 
-      - name: Tester la batterie Dungeon runtime complète
-        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Vérifier la base diagnostic
+        run: |
+          test -f index.html
+          test -f service-worker.js
+          echo "Diagnostic baseline commit:"
+          git rev-parse HEAD
+          echo "Expected: abb86462325968603983bca06a45dbeabaf2e882"
 
-      - name: Tester l'autorité unique World Builder et les vraies tailles
-        run: node tests/dungeon_large_room_v167834.test.cjs
-
-      - name: Tester le créateur de pièces Dungeon
-        run: node tests/dungeon_room_creator_v1.test.cjs
-
-      - name: Tester le créateur de pièces Dungeon V2
-        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
-
-      - name: Tester le constructeur de donjon Phase 3
-        run: node tests/dungeon_world_builder_v167821.test.cjs
-
-      - name: Tester l'intégration des pièces créées en partie Dungeon
-        run: node tests/dungeon_room_runtime_v167822.test.cjs
-
-      - name: Tester la sélection du moteur de Monde construit
-        run: node tests/dungeon_world_session_bridge_v167832.test.cjs
-
-      - name: Tester le moteur dédié et le mouvement du donjon construit
-        run: node tests/dungeon_authored_runtime_v167839.test.cjs
-
-      - name: Tester les liaisons secondaires et retours du donjon construit
-        run: node tests/dungeon_zone_links_v167846.test.cjs
-
-      - name: Tester le World Runtime historique de compatibilité
-        run: node tests/dungeon_world_runtime_v167823.test.cjs
-
-      - name: Tester le contenu exact par Zone
-        run: node tests/dungeon_zone_content_v167824.test.cjs
-
-      - name: Tester l'instanciation ennemie par salle
-        run: node tests/dungeon_enemy_room_scope_v318.test.cjs
-
-      - name: Bloquer les régressions d'interface et de cache
-        run: node tests/gens_ui_recovery_v167843.test.cjs
-
-      - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
-        run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
-
-      - name: Tester la stabilité visuelle source Dungeon
-        run: node tests/dungeon_source_render_stability_v167877.test.cjs
-
-      - name: Tester la restauration des arts héros Dungeon
-        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
-
-      - name: Préparer le site
+      - name: Préparer le site diagnostic
         run: |
           rm -rf _site
           mkdir -p _site
-
-          if [ -f "Z40K_GITHUB_PAGES_READY.zip" ]; then
-            unzip -o Z40K_GITHUB_PAGES_READY.zip -d _site
-          fi
-
           cp -f index.html _site/index.html
-
-          if [ -f "manifest.webmanifest" ]; then
-            cp -f manifest.webmanifest _site/manifest.webmanifest
-          fi
-
-          if [ -f "manifest.json" ]; then
-            cp -f manifest.json _site/manifest.json
-          fi
-
-          if [ -f "service-worker.js" ]; then
-            cp -f service-worker.js _site/service-worker.js
-          fi
-
-          mkdir -p _site/icons
-
-          if [ -f "icon-192.png" ]; then
-            cp -f icon-192.png _site/icons/icon-192.png
-          fi
-
-          if [ -f "icon-512.png" ]; then
-            cp -f icon-512.png _site/icons/icon-512.png
-          fi
-
+          if [ -f manifest.webmanifest ]; then cp -f manifest.webmanifest _site/manifest.webmanifest; fi
+          if [ -f manifest.json ]; then cp -f manifest.json _site/manifest.json; fi
+          if [ -f service-worker.js ]; then cp -f service-worker.js _site/service-worker.js; fi
+          if [ -d icons ]; then cp -R icons _site/icons; fi
+          if [ -d assets ]; then cp -R assets _site/assets; fi
           for file in sound_*.mp3; do
-            if [ -f "$file" ]; then
-              cp -f "$file" _site/
-            fi
+            if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
-
-          if [ -d "assets" ]; then
-            mkdir -p _site/assets
-            cp -R assets/. _site/assets/
-          fi
-
-          echo ""
-          echo "========================================="
-          echo " CONTENU DU SITE À PUBLIER"
-          echo "========================================="
-          find _site -maxdepth 6 -type f | sort
-
-          echo ""
-          echo "========================================="
-          echo " ASSETS DUNGEON"
-          echo "========================================="
-          find _site/assets/dungeon -type f 2>/dev/null | sort || true
-
-          echo ""
-          echo "========================================="
-          echo " SONS"
-          echo "========================================="
-          ls -lh _site/sound_*.mp3 2>/dev/null || true
-
-      - name: Charger les modules Dungeon externes
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          index = Path("_site/index.html")
-          modules = [
-              (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>', "Dungeon large-room support missing"),
-              (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
-              (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
-              (Path("_site/assets/dungeon/dungeon-world-builder-167821.js"), '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>', "Dungeon World Builder Phase 3 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
-              (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
-              (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
-              (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
-              (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>', "Authored Dungeon runtime wall/token bridge missing"),
-              (Path("_site/assets/dungeon/dungeon-source-render-stability-167877.js"), '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>', "Dungeon source render stability missing"),
-              (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
-              (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
-              (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
-              (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
-              (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
-              (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
-          ]
-          html = index.read_text(encoding="utf-8")
-          if "</body>" not in html:
-              raise SystemExit("Cannot inject GenSrpG modules: </body> missing")
-          for module, tag, error in modules:
-              if not module.exists():
-                  raise SystemExit(error)
-              if tag not in html:
-                  html = html.replace("</body>", tag + "\n</body>")
-          index.write_text(html, encoding="utf-8")
-          PY
-
-      - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
-        run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
-
-      - name: Tester le chargement final de la stabilité visuelle Dungeon
-        run: node tests/dungeon_source_render_stability_v167877.test.cjs _site/index.html
-
-      - name: Tester le chargement final des arts héros Dungeon
-        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
-
-      - name: Tester le chargement final Dungeon
-        run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
-
-      - name: Tester le chargement final du moteur construit dédié
-        run: |
-          grep -q 'dungeon-world-runtime-167823.js?v=167838' _site/index.html
-          grep -q 'dungeon-zone-content-167824.js?v=167824' _site/index.html
-          grep -q 'dungeon-authored-runtime-167839.js?v=167840' _site/index.html
-          grep -q 'dungeon-authored-cache-visual-167852.js?v=167875' _site/index.html
-          grep -q 'dungeon-source-render-stability-167877.js?v=167877' _site/index.html
-          grep -q 'gens-dungeon-hero-art-repair-167874.js?v=167874' _site/index.html
-          grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
-          grep -q 'gens-rpg-stats-clean-167874.js?v=167874' _site/index.html
-          ! grep -q 'gens-custom-stats-167881' _site/index.html
-          ! grep -q 'gens-rpg-stat-reconcile-167902' _site/index.html
-          ! grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
-          grep -q 'gensrpg-cache-16.78.40-authored-movement' _site/service-worker.js
-          grep -q 'gensrpg-cache-16.78.72-perceptual-actor-scale' _site/service-worker.js
-          grep -q 'gensrpg-cache-16.78.73-clean-dynamic-stats' _site/service-worker.js
-          grep -q 'gensrpg-cache-16.78.74-restored-visuals' _site/service-worker.js
-          node tests/gens_clean_dynamic_stats_v167873.test.cjs
-          node tests/dungeon_source_render_stability_v167877.test.cjs _site/index.html
-          node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
-          node tests/dungeon_large_room_v167834.test.cjs
-          node tests/dungeon_world_session_bridge_v167832.test.cjs _site/index.html
-          node tests/dungeon_authored_runtime_v167839.test.cjs _site/index.html
-          node tests/dungeon_zone_links_v167846.test.cjs
-          node tests/dungeon_world_runtime_v167823.test.cjs _site/index.html
-
-      - name: Tester le chargement final du Créateur V2
-        run: node tests/dungeon_room_creator_v2_v167819.test.cjs _site/index.html
-
-      - name: Tester le chargement final du Constructeur Phase 3
-        run: node tests/dungeon_world_builder_v167821.test.cjs _site/index.html
-
-      - name: Tester le chargement final de l'intégration des pièces
-        run: node tests/dungeon_room_runtime_v167822.test.cjs _site/index.html
-
-      - name: Tester le chargement final du contenu exact par Zone
-        run: node tests/dungeon_zone_content_v167824.test.cjs _site/index.html
-
-      - name: Tester le hotfix équipements Dungeon V16.78.17
-        run: node tests/dungeon_equipment_ui_hotfix_v167817.test.cjs assets/dungeon/dungeon-equipment-ui.js assets/dungeon/dungeon-equipment-hotfix-167817.js _site/index.html
-
-      - name: Tester l'éditeur de sets Dungeon V16.78.18
-        run: node tests/dungeon_set_editor_v167818.test.cjs assets/dungeon/dungeon-set-editor-167818.js _site/index.html .github/workflows/main.yml service-worker.js
-
-      - name: Tester les récapitulatifs de mondes V16.78.20
-        run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
@@ -242,11 +58,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
-
     needs: build
-
     steps:
       - name: Déployer sur GitHub Pages
         id: deployment

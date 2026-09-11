@@ -1,5 +1,6 @@
 import { createWorldSession, traverseRoomLink } from './world-engine.js';
 import { inventoryQuantity, removeItem } from './inventory-engine.js';
+import { resolveRoomInteractionCheck } from './interaction-engine.js';
 
 function clone(value){return structuredClone(value);}
 function roomKey(roomId){return String(roomId||'');}
@@ -24,6 +25,9 @@ function interactionState(interaction){
     triggered:false,
     completed:false,
     opened:false,
+    attempts:0,
+    lastOutcome:null,
+    lastCheck:null,
     data:{},
   };
 }
@@ -129,6 +133,33 @@ export function updateRoomInteractionState(runtime,roomId,interactionId,patch={}
   if(!state) return {ok:false,reason:'interaction-missing',runtime};
   next.rooms[id].interactions[String(interactionId)]={...state,...clone(patch),id:String(interactionId)};
   return {ok:true,runtime:appendLog(next,'room-interaction-updated',{roomId:id,interactionId:String(interactionId)})};
+}
+
+export function attemptRoomInteraction(runtime,roomId,interaction,actor,{definitions={},random=Math.random,roll=null,completeOnSuccess=true}={}){
+  const id=roomKey(roomId); const interactionId=String(interaction?.id||'');
+  const next=clone(runtime);
+  const state=next.rooms?.[id]?.interactions?.[interactionId];
+  if(!state) return {ok:false,reason:'interaction-missing',runtime};
+  if(state.completed) return {ok:true,alreadyCompleted:true,success:true,outcome:'success',runtime:next,state:clone(state),check:clone(state.lastCheck)};
+
+  const resolved=resolveRoomInteractionCheck(interaction,actor,{definitions,random,roll});
+  if(!resolved.ok) return {ok:false,reason:resolved.reason,runtime,state:clone(state),check:resolved.check||null};
+
+  state.triggered=true;
+  state.attempts=(Number(state.attempts)||0)+1;
+  state.lastOutcome=resolved.outcome;
+  state.lastCheck=clone(resolved.check);
+  if(resolved.success&&completeOnSuccess) state.completed=true;
+
+  const logged=appendLog(next,'room-interaction-attempted',{
+    roomId:id,
+    interactionId,
+    attempt:state.attempts,
+    outcome:state.lastOutcome,
+    success:resolved.success,
+    check:state.lastCheck,
+  });
+  return {ok:true,success:resolved.success,outcome:resolved.outcome,runtime:logged,state:clone(logged.rooms[id].interactions[interactionId]),check:clone(resolved.check),definition:resolved.definition||null};
 }
 
 export function openRoomDoor(runtime,roomId,doorId,inventory,{consumeKey=false}={}){

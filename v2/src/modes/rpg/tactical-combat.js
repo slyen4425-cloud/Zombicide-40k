@@ -1,5 +1,6 @@
 import { shortestPathDistance, getActorPosition, moveActor, actorMovementAllowance, setActorPosition } from './spatial-engine.js';
 import { shortestRoomPathDistance, hasRoomLineOfSight } from './room-tactical-bridge.js';
+import { resolveRuntimeRoomLayout } from './runtime-room-layout.js';
 
 function clone(value){return structuredClone(value);}
 function list(definitions,key){return Array.isArray(definitions?.[key])?definitions[key]:Object.values(definitions?.[key]||{});}
@@ -80,7 +81,7 @@ export function evaluateAttackPosition({spatial,combat,actorId,targetId,source,c
   const c=normalizeTacticalCombatConfig(config);
   if(c.mode==='narrative'||!c.rangeEnabled) return {ok:true,distance:null,modifier:0,profile:attackProfile(source,c),contactEnemyIds:[],lineOfSight:true,coverModifier:0};
   const profile=attackProfile(source,c);
-  const roomLayout=config.roomLayout||null;
+  const roomLayout=resolveRuntimeRoomLayout(config);
   const distance=combatDistance(spatial,actorId,targetId,{diagonal:Boolean(config.diagonal),maxDistance:profile.rangeMax,roomLayout});
   if(!Number.isFinite(distance)) return {ok:false,reason:'target-unreachable',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0};
   if(distance<profile.rangeMin) return {ok:false,reason:'too-close',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0};
@@ -110,9 +111,10 @@ export function moveCombatActor({spatial,combat,actorId,target,moveState,config=
   const allowance=Math.max(0,Number(moveState?.remaining?.[actorId]??0));
   const actor=combat?.actors?.[String(actorId)]||{};
   let moved;
-  if(config.roomLayout){
+  const roomLayout=resolveRuntimeRoomLayout(config);
+  if(roomLayout){
     const from=getActorPosition(spatial,actorId);
-    const distance=shortestRoomPathDistance(config.roomLayout,from,target,{diagonal:Boolean(config.diagonal),maxDistance:allowance});
+    const distance=shortestRoomPathDistance(roomLayout,from,target,{diagonal:Boolean(config.diagonal),maxDistance:allowance});
     moved=Number.isFinite(distance)&&distance<=allowance?{moved:true,spatial:setActorPosition(spatial,actorId,target),distance,allowance}:{moved:false,reason:'out-of-range',spatial,distance,allowance};
   } else moved=moveActor(spatial,actorId,target,{...config,actor,defaultMovement:allowance,movementStatId:null});
   if(!moved.moved) return {ok:false,reason:moved.reason||'move-refused',spatial,moveState,distance:moved.distance};

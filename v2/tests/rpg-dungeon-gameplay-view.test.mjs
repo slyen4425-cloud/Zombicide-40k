@@ -8,6 +8,7 @@ const key=createItemDefinition({id:'crypt-key',name:'Clé de crypte',stackable:f
 const universe={
   items:[coin,key],
   heroes:[{id:'aldren',name:'Aldren',icon:'⚔️'},{id:'lyra',name:'Lyra',icon:'🏹'}],
+  bestiary:[{id:'skeleton',name:'Squelette'}],
   quests:[{
     id:'crypt',name:'Crypte oubliée',description:'Trouver la crypte.',enabled:true,
     objectives:[{id:'enter',label:'Entrer dans la crypte',required:1,optional:false}],
@@ -38,16 +39,26 @@ const runtime={
   rooms:{
     'crypt-room':{
       visits:2,
-      entities:[{
-        id:'spawn:skeleton:1',kind:'creature',active:false,defeated:true,
-        data:{creatureRuntime:{instanceId:'spawn:skeleton:1',creatureId:'skeleton',defeated:true,active:false,lootClaimed:true,lootGranted:false,lootDrops:[{itemId:'old-coin',quantity:2}]}},
-      }],
+      entities:[
+        {
+          id:'spawn:skeleton:1',kind:'creature',active:false,defeated:true,
+          data:{creatureRuntime:{instanceId:'spawn:skeleton:1',creatureId:'skeleton',defeated:true,active:false,lootClaimed:true,lootGranted:false,lootDrops:[{itemId:'old-coin',quantity:2}]}},
+        },
+        {
+          id:'spawn:skeleton:2',kind:'creature',active:true,defeated:false,
+          data:{creatureRuntime:{instanceId:'spawn:skeleton:2',creatureId:'skeleton',name:'Squelette',defeated:false,active:true,removed:false,state:{stats:{},resources:{}},skillIds:[],ai:{kind:'basic'}}},
+        },
+      ],
     },
     'hall-room':{visits:1,entities:[]},
   },
   eventQueue:{pending:[{id:'event-request:1'}]},
   questRuntime:{states:{crypt:{questId:'crypt',status:'active',progress:{enter:0},startedAt:'2026-09-11T00:00:00Z'}}},
 };
+const heroRuntimes=[
+  {instanceId:'lyra',heroId:'lyra',name:'Lyra',active:true,ko:false,dead:false,state:{stats:{},resources:{}}},
+  {instanceId:'aldren',heroId:'aldren',name:'Aldren',active:true,ko:false,dead:false,state:{stats:{},resources:{}}},
+];
 const recipients=[
   {kind:'hero',id:'lyra',name:'Lyra',icon:'🏹',inventory:createInventoryState()},
   {kind:'group',id:'party',name:'Sac du groupe',icon:'🎒',inventory:createInventoryState()},
@@ -70,7 +81,7 @@ let inventory=addItem(createInventoryState(),'crypt-key',1,universe).inventory;
 transitions=dungeonTransitionEntries(worldIndex,runtime,{inventory});
 assert.deepEqual(transitions.map(x=>x.id).sort(),['boss-link','hall-link']);
 
-let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra',eventPresentationState:eventState,worldIndex,inventory});
+let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra',eventPresentationState:eventState,worldIndex,inventory,heroRuntimes});
 assert.match(html,/Partie Donjon/);
 assert.match(html,/Lyra · Salle actuelle : Crypte oubliée/);
 assert.match(html,/Héros actif/);
@@ -93,8 +104,16 @@ assert.match(html,/Jet réussi/);
 assert.match(html,/Récompense reçue : 3 × old-coin/);
 assert.match(html,/Une porte a changé d’état/);
 assert.match(html,/Choix : Ouvrir le passage/);
+assert.match(html,/Ennemis présents/);
+assert.match(html,/Squelette/);
+assert.match(html,/Engager le combat avec Lyra/);
+assert.doesNotMatch(html,/data-dungeon-start-combat disabled/,'loaded focused hero runtime must enable real combat start');
 assert.equal(eventPresentationEntries(eventState).length,5);
 assert.equal(dungeonLootEntries(runtime).length,1);
+
+const noHeroRuntimeHtml=renderDungeonGameplayView(universe,runtime,{worldIndex});
+assert.match(noHeroRuntimeHtml,/runtime du héros actif doit être chargé/);
+assert.match(noHeroRuntimeHtml,/data-dungeon-start-combat disabled/);
 
 const aldrenFocused=structuredClone(runtime);
 aldrenFocused.focusedHeroId='aldren';
@@ -103,9 +122,10 @@ aldrenFocused.worldSession={...aldrenFocused.worldSession,currentRoomId:'hall-ro
 const aldrenTransitions=dungeonTransitionEntries(worldIndex,aldrenFocused);
 assert.deepEqual(aldrenTransitions.map(x=>x.id),['hall-link'],'focused hero in hall must receive reverse passage from his own room');
 assert.equal(aldrenTransitions[0].traversal,'reverse');
-html=renderDungeonGameplayView(universe,aldrenFocused,{worldIndex});
+html=renderDungeonGameplayView(universe,aldrenFocused,{worldIndex,heroRuntimes});
 assert.match(html,/Aldren · Salle actuelle : Galerie sombre/);
 assert.match(html,/↩️ Passage vers la galerie · Crypte oubliée/);
+assert.match(html,/Aucun ennemi actif dans cette salle/);
 
 const granted=grantDungeonCreatureLoot(runtime,'spawn:skeleton:1',recipients,'hero:lyra',universe);
 assert.equal(granted.ok,true);
@@ -123,7 +143,7 @@ assert.deepEqual(duplicate.roomRuntime.rooms['crypt-room'].entities[0].data.crea
 
 runtime.questRuntime.states.crypt.progress.enter=1;
 runtime.questRuntime.states.crypt.status='completed';
-html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,worldIndex});
+html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,worldIndex,heroRuntimes});
 assert.match(html,/Terminée/);
 assert.match(html,/1\/1/);
 assert.doesNotMatch(html,/Porte du sanctuaire/,'required item passage must not render without inventory item');

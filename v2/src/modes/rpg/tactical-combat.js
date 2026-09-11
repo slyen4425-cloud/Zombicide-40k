@@ -55,6 +55,36 @@ export function resolveEquippedAttackSource(inventory,definitions={}, {slot='mai
   return null;
 }
 
+export function equippedTacticalModifiers(inventory,definitions={}){
+  const result={attackModifier:0,rangeBonus:0,ignoresCover:false,ignoresContactPenalty:false,itemIds:[]};
+  const seenEntries=new Set();
+  for(const record of Object.values(inventory?.equipment||{})){
+    if(!record) continue;
+    const entryKey=record.entryId!=null?String(record.entryId):`${record.itemId||''}:${record.slot||''}`;
+    if(seenEntries.has(entryKey)) continue;
+    seenEntries.add(entryKey);
+    const item=byId(definitions,'items',record.itemId);
+    if(!item||item.enabled===false) continue;
+    const tactical=item.data?.tactical||{};
+    const attackModifier=Number(tactical.attackModifier??0);
+    const rangeBonus=Number(tactical.rangeBonus??0);
+    if(Number.isFinite(attackModifier)) result.attackModifier+=attackModifier;
+    if(Number.isFinite(rangeBonus)) result.rangeBonus+=rangeBonus;
+    result.ignoresCover=result.ignoresCover||Boolean(tactical.ignoresCover);
+    result.ignoresContactPenalty=result.ignoresContactPenalty||Boolean(tactical.ignoresContactPenalty);
+    result.itemIds.push(String(item.id));
+  }
+  return result;
+}
+
+function applyEquippedTacticalProfile(profile,modifiers={}){
+  const next={...profile};
+  next.rangeMax=Math.max(next.rangeMin,Number(next.rangeMax)+(Number(modifiers.rangeBonus)||0));
+  next.ignoresCover=Boolean(next.ignoresCover||modifiers.ignoresCover);
+  next.ignoresContactPenalty=Boolean(next.ignoresContactPenalty||modifiers.ignoresContactPenalty);
+  return next;
+}
+
 export function combatDistance(spatial,actorId,targetId,{diagonal=false,maxDistance=999,roomLayout=null}={}){
   const from=getActorPosition(spatial,actorId),to=getActorPosition(spatial,targetId);
   if(!from||!to) return Infinity;
@@ -77,23 +107,24 @@ export function enemiesInContact(spatial,actorId,combat,{diagonal=false,roomLayo
   return Object.values(combat?.actors||{}).filter(other=>other&&!other.ko&&String(other.id)!==String(actorId)&&String(other.side)!==String(actor.side)&&combatDistance(spatial,actorId,other.id,{diagonal,maxDistance:1,roomLayout})<=1).map(x=>String(x.id));
 }
 
-export function evaluateAttackPosition({spatial,combat,actorId,targetId,source,config={}}={}){
+export function evaluateAttackPosition({spatial,combat,actorId,targetId,source,inventory=null,definitions={},config={}}={}){
   const c=normalizeTacticalCombatConfig(config);
-  if(c.mode==='narrative'||!c.rangeEnabled) return {ok:true,distance:null,modifier:0,profile:attackProfile(source,c),contactEnemyIds:[],lineOfSight:true,coverModifier:0};
-  const profile=attackProfile(source,c);
+  const equipment=equippedTacticalModifiers(inventory,definitions);
+  const profile=applyEquippedTacticalProfile(attackProfile(source,c),equipment);
+  if(c.mode==='narrative'||!c.rangeEnabled) return {ok:true,distance:null,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
   const roomLayout=resolveRuntimeRoomLayout(config);
   const distance=combatDistance(spatial,actorId,targetId,{diagonal:Boolean(config.diagonal),maxDistance:profile.rangeMax,roomLayout});
-  if(!Number.isFinite(distance)) return {ok:false,reason:'target-unreachable',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0};
-  if(distance<profile.rangeMin) return {ok:false,reason:'too-close',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0};
-  if(distance>profile.rangeMax) return {ok:false,reason:'out-of-range',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0};
+  if(!Number.isFinite(distance)) return {ok:false,reason:'target-unreachable',distance,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
+  if(distance<profile.rangeMin) return {ok:false,reason:'too-close',distance,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
+  if(distance>profile.rangeMax) return {ok:false,reason:'out-of-range',distance,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
   const from=getActorPosition(spatial,actorId),to=getActorPosition(spatial,targetId);
   const lineOfSight=!roomLayout||!c.lineOfSightEnabled||!profile.requiresLineOfSight?true:hasRoomLineOfSight(roomLayout,from,to);
-  if(!lineOfSight) return {ok:false,reason:'line-of-sight-blocked',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0};
+  if(!lineOfSight) return {ok:false,reason:'line-of-sight-blocked',distance,modifier:equipment.attackModifier,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0,equipmentModifier:equipment.attackModifier,equipment};
   const contactEnemyIds=c.contactPenaltyEnabled&&profile.style==='ranged'?enemiesInContact(spatial,actorId,combat,{diagonal:Boolean(config.diagonal),roomLayout}):[];
   const contactModifier=contactEnemyIds.length&&!profile.ignoresContactPenalty?profile.contactPenalty:0;
   const coverModifier=c.coverEnabled&&!profile.ignoresCover?targetCoverModifier(spatial,targetId,{roomLayout}):0;
-  const modifier=contactModifier+coverModifier;
-  return {ok:true,distance,modifier,profile,contactEnemyIds,lineOfSight:true,coverModifier};
+  const modifier=contactModifier+coverModifier+equipment.attackModifier;
+  return {ok:true,distance,modifier,profile,contactEnemyIds,lineOfSight:true,coverModifier,equipmentModifier:equipment.attackModifier,equipment};
 }
 
 export function createCombatMovementState(combat,config={}){

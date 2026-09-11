@@ -18,7 +18,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Combat Donjon réel : ennemis actifs de la salle + héros réellement présents/proches, vrai `combatState`, fin de combat réconciliée automatiquement vers salle/héros/loot/boss-key.
 - Actions héros : compétences réelles du runtime héros (base + équipement + sets + formes), `prepareSkillAction()` / `resolveAndAdvance()`, coûts/cooldowns/jets/effets du moteur existant.
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
-- Présentation combat : nouveau renderer lecture seule `combat-presentation-ui.js` pour timeline, KO, ressources/PV et journal moteur, sans déplacer de logique de combat dans l’UI.
+- Présentation combat : `combat-presentation-ui.js` est maintenant réellement monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur remplacent le résumé minimal, sans déplacer la logique hors du moteur.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -35,27 +35,27 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - checkpoint actions héros : `34654041123` success
 - tours ennemis automatiques : `34655064237` success
 - renderer présentation combat réelle : `34655892468` success
+- renderer intégré dans vraie vue Donjon : `34656592813` success
 
 ## Dernière étape terminée
 
-Préparation de la présentation complète du vrai combat, sans toucher à la logique moteur :
-- nouveau fichier `v2/src/modes/rpg/combat-presentation-ui.js`;
-- `combatResourceEntries()` lit directement les ressources présentes dans le vrai `actor.state.resources`, en respectant noms/icônes des définitions quand disponibles;
-- `combatTimelineEntries()` dérive l’ordre, l’acteur actif et les KO du vrai `combat.order`/`combat.actors`;
-- `combatJournalEntries()` transforme uniquement le log moteur existant (`action-resolved`, `combatant-ko`, `combat-ended`, `turn-begin`) en lignes lisibles;
-- `renderCombatPresentation()` affiche cartes participants, PV/ressources, timeline active/KO et journal récent;
-- aucun calcul de dégâts, KO, initiative, jet ou effet n’est refait dans ce module : il reste strictement présentationnel;
-- régression dédiée : Lyra à 6/8 PV et 3/5 Mana, Squelette KO, journal avec jet 42 et effet Dégâts.
+Intégration du renderer de combat dans la vraie vue Donjon :
+- `dungeon-gameplay-view.js` importe maintenant `renderCombatPresentation()`;
+- pendant un combat réel actif, le vieux résumé `Participants : ...` est remplacé par la timeline réelle, les cartes de combattants, leurs PV/ressources et le journal moteur;
+- l’acteur actif et les KO sont lus directement depuis `combat.order`, `combat.activeActorId` et `combat.actors`;
+- les contrôles réels héros (compétence + cible + bouton d’action) restent montés à côté de cette présentation et continuent de muter le même `combatState`;
+- les tours IA automatiques, la réconciliation de fin de combat et le loot ne changent pas de runtime;
+- régression d’intégration dédiée : Lyra à 7/8 PV, Squelette KO à 0/6, journal avec jet 42 + effet Dégâts, contrôle `Utiliser la compétence` toujours présent, ancien résumé minimal absent.
 
 Commits de l’étape :
-- renderer présentation : `a5a713c3e12596b8c24f64c673704d5af39d335c`
-- régression présentation : `e53ae1ae9d41590a01b4fd686bb1670e4e0b2a83`
+- intégration renderer dans vue Donjon : `ed47701ffead782f3bf0f030af58e7dd4803194c`
+- régression intégration : `ca330a91214739120455a26a9ce88a294d9a012f`
 
-CI finale : `34655892468` success.
+CI finale : `34656592813` success.
 
 ## Priorités ouvertes
 
-1. intégrer `renderCombatPresentation()` directement dans la vraie vue Donjon active, en remplacement du résumé texte minimal actuel ;
-2. vérifier les règles d’actions restantes contre le legacy : cibles ally/self/any, consommables, fuite, combat direct OFF / MJ contrôle total ;
+1. vérifier et raccorder les règles d’actions restantes contre le legacy : cibles ally/self/any, consommables, fuite, combat direct OFF / MJ contrôle total ;
+2. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
 3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
 4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

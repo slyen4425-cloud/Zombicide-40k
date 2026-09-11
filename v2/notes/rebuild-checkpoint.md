@@ -25,6 +25,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Les interactions PNJ/allié et les choix d’événements sont surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
 - Les textes et conséquences des événements sont présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
 - Les passages authored du World Builder sont maintenant directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
+- Le runtime Donjon sait maintenant suivre plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -75,29 +76,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - statuts persistants superposables par source : `34650030877` success
 - checkpoint statuts superposables : `34650111943` success
 - transitions World Builder directement dans vue Donjon : `34650608938` success
+- checkpoint transitions Donjon : `34650681453` success
+- déplacements individuels multi-héros / retours arrière : `34651007333` success
 
 ## Dernière étape terminée
 
-Transitions authored directement jouables depuis la vue Donjon :
-- `dungeon-gameplay-view.js` lit les passages disponibles avec `availableRoomLinks()` à partir du vrai `worldSession` du runtime;
-- les boutons affichent uniquement le libellé authored et le nom de la salle cible, pas les IDs techniques visibles;
-- les passages exigeant un objet ne sont pas proposés tant que l’inventaire transmis ne contient pas cet objet;
-- les conditions authored passent par le même `conditionEvaluator` que le moteur du monde;
-- cliquer un passage appelle directement `transitionDungeonRoom()` : pas de second runtime ou de téléportation UI parallèle;
-- la transition instancie/recharge la salle via `layoutProvider`, incrémente les visites, alimente le log, et envoie le signal de visite aux quêtes existantes;
-- la page RPG construit le `worldIndex` à partir du vrai `loadWorldDraft()` et le fournit à la vue Donjon;
-- la page expose aussi `setDungeonInventory()` et `refreshDungeonWorld()` pour garder passages/objets/world authored synchronisés;
-- une première régression de test a échoué à cause d'un appel incorrect à `addItem()` dans le test, puis une seconde parce qu'un ID présent uniquement dans un attribut `data-*` était assimilé à tort à un ID visible; les deux assertions de test ont été corrigées sans contourner les règles de gameplay;
-- batterie complète finale verte.
+Déplacements individuels multi-héros et retours arrière au niveau runtime Donjon :
+- `createDungeonRuntime()` accepte maintenant `heroIds` et `focusedHeroId`; chaque héros reçoit une entrée `heroLocations` distincte sans casser le mode historique mono/groupe;
+- chaque héros conserve indépendamment `roomId`, `visitedRoomIds`, `history`, `sequence` et sa future position locale `x/y`;
+- `transitionDungeonHeroRoom()` traverse le vrai lien du World Builder pour un seul héros, en réutilisant `traverseRoomLink()` et les mêmes règles d'objet/conditions;
+- déplacer Lyra ne déplace plus Aldren : les autres héros gardent leur salle et leur historique intacts;
+- `setFocusedDungeonHero()` change seulement la salle affichée/focalisée, sans téléporter les autres héros;
+- `heroesInRoom()` et `getHeroRoomLocation()` fournissent la base pour sélectionner plus tard les participants réels aux combats/interactions;
+- lorsqu'un héros revient dans une salle déjà visitée, `ensureRoomInstance()` réutilise la même instance : ennemis, coffres, portes et interactions persistants ne sont pas recréés;
+- le signal de visite de quête peut être déclenché sur l'entrée du héros concerné;
+- régression : Aldren reste salle A pendant que Lyra va salle B, le focus peut passer sur Lyra, puis Lyra revient salle A; l'ennemi de A n'est pas dupliqué et les historiques héros restent indépendants.
 
 Commits de l'étape :
-- vue Donjon + vraies transitions : `3409ad2cac7d698ba97f76f116b5e5c6773e26fc`
-- raccord page RPG au World Builder : `a3582e2e316945da01ee08204fce8b0d0b8bfb96`
-- régression initiale : `d7a0259fb8bb482421d011e7ae20a5c2e9877d78`
-- correction inventaire de test : `759017c3e90a33a2befe3b606e92443e8b716bd5`
-- correction assertion visibilité : `10bbd21e00e53f5609f278c9416d1279fad3e46f`
+- runtime multi-héros / transition individuelle : `4a96b58b1bf0add5abce8f473b6144044a790cea`
+- régression déplacements/retours arrière : `daf01aa360160616a63197757ef3f05b10ddead4`
 
-CI finale : `34650608938` success.
+CI finale : `34651007333` success.
 
 ## Stockage — décision repoussée
 
@@ -107,7 +106,8 @@ CI finale : `34650608938` success.
 
 ## Priorités ouvertes
 
-- raccorder maintenant le démarrage du combat réel depuis les ennemis actifs de la salle à la vue Donjon, en réutilisant le runtime de combat D100 existant;
-- raccorder ensuite la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
+- raccorder `heroLocations` à la vue Donjon : choix du héros actif/focalisé et bouton de passage appliqué uniquement à ce héros;
+- démarrer ensuite le combat réel depuis les ennemis actifs de la salle en ne sélectionnant que les héros réellement présents/proches;
+- raccorder la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

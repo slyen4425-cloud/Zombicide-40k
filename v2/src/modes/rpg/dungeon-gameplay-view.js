@@ -6,6 +6,7 @@ import { availableRoomLinks } from './world-engine.js';
 import { transitionDungeonRoom, transitionDungeonHeroRoom, setFocusedDungeonHero } from './room-runtime.js';
 import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult, dungeonHeroCombatSkills, executeDungeonHeroSkill, advanceDungeonEnemyTurns } from './dungeon-combat-runtime.js';
 import { renderCombatPresentation } from './combat-presentation-ui.js';
+import { combatInteractionPolicy } from './combat-config.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
@@ -157,19 +158,26 @@ function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=
   const roomId=roomRuntime?.currentRoomId?String(roomRuntime.currentRoomId):null;
   if(!roomId) return '';
   const enemies=activeDungeonEnemies(roomRuntime,roomId);
+  const policy=combatInteractionPolicy(universe);
   if(activeCombat?.metadata?.roomId===roomId&&activeCombat.phase!=='ended'){
     const actor=activeCombat.actors?.[activeCombat.activeActorId];
     const actorName=combatActorName(universe,actor,activeCombat.activeActorId||'—');
     const presentation=renderCombatPresentation(universe,activeCombat,{journalLimit:8});
     let actions='';
     if(actor?.side==='heroes'){
-      const skills=dungeonHeroCombatSkills({combat:activeCombat,heroRuntimes,universe});
-      const targets=dungeonCombatTargetEntries(universe,activeCombat);
-      actions=skills.length
-        ?`<div class="combat-actions dungeon-combat-actions"><label>Compétence<select data-dungeon-combat-skill>${skills.map(skill=>`<option value="${esc(skill.id)}">${esc(skill.icon||'✨')} ${esc(skill.name||'Compétence')}</option>`).join('')}</select></label><label>Cible<select data-dungeon-combat-target>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="primary-button" data-dungeon-use-skill>Utiliser la compétence</button></div>`
-        :'<p class="muted">Aucune compétence disponible pour ce héros.</p>';
+      if(!policy.automaticPlayerActions){
+        actions=`<div class="combat-actions dungeon-combat-actions"><p class="muted">${policy.gmFullControl?'MJ contrôle total : les actions du héros sont gérées manuellement.':'Combat direct des héros désactivé : les actions automatiques sont indisponibles.'}</p></div>`;
+      } else {
+        const skills=dungeonHeroCombatSkills({combat:activeCombat,heroRuntimes,universe});
+        const targets=dungeonCombatTargetEntries(universe,activeCombat);
+        actions=skills.length
+          ?`<div class="combat-actions dungeon-combat-actions"><label>Compétence<select data-dungeon-combat-skill>${skills.map(skill=>`<option value="${esc(skill.id)}">${esc(skill.icon||'✨')} ${esc(skill.name||'Compétence')}</option>`).join('')}</select></label><label>Cible<select data-dungeon-combat-target>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="primary-button" data-dungeon-use-skill>Utiliser la compétence</button></div>`
+          :'<p class="muted">Aucune compétence disponible pour ce héros.</p>';
+      }
     } else {
-      actions='<p class="muted">Tour ennemi : résolution automatique sur la même timeline.</p>';
+      actions=policy.automaticEnemyTurns
+        ?'<p class="muted">Tour ennemi : résolution automatique sur la même timeline.</p>'
+        :'<p class="muted">MJ contrôle total : tour ennemi en attente d’une résolution manuelle.</p>';
     }
     return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(actorName)}</p>${presentation}${actions}${message?`<div class="combat-result" aria-live="polite">${esc(message)}</div>`:''}</section>`;
   }
@@ -231,7 +239,8 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   const notify=(out=null)=>onRoomRuntimeChange?.(currentRuntime,out);
   const runAutomaticEnemyTurns=()=>{
     const actor=currentCombat?.actors?.[currentCombat?.activeActorId];
-    if(currentCombat?.phase!=='turn'||actor?.side!=='enemies') return null;
+    const policy=combatInteractionPolicy(currentUniverse);
+    if(currentCombat?.phase!=='turn'||actor?.side!=='enemies'||!policy.automaticEnemyTurns) return null;
     const out=advanceDungeonEnemyTurns({combat:currentCombat,universe:currentUniverse,spatial:currentSpatial,spatialConfig:currentSpatialConfig});
     if(!out.ok){currentCombatMessage=`Tour ennemi interrompu : ${out.reason}.`;return out;}
     if(out.actions.length){
@@ -296,6 +305,8 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
 
     host.querySelector('[data-dungeon-use-skill]')?.addEventListener('click',()=>{
       if(!currentCombat) return;
+      const policy=combatInteractionPolicy(currentUniverse);
+      if(!policy.automaticPlayerActions){currentCombatMessage=policy.gmFullControl?'Action gérée manuellement par le MJ.':'Combat direct des héros désactivé.';render();return;}
       const skillId=host.querySelector('[data-dungeon-combat-skill]')?.value||null;
       const targetId=host.querySelector('[data-dungeon-combat-target]')?.value||null;
       const out=executeDungeonHeroSkill({

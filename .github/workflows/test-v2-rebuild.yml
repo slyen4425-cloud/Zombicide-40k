@@ -1,0 +1,33 @@
+name: GenSrpG V2 rebuild tests
+
+on:
+  push:
+    branches: ["rebuild/v2"]
+    paths:
+      - "v2/**"
+      - ".github/workflows/test-v2-rebuild.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run V2 unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          for test_file in v2/tests/*.test.mjs; do
+            echo "==> $test_file"
+            node "$test_file"
+            count=$((count + 1))
+          done
+          echo "Executed $count V2 test files."

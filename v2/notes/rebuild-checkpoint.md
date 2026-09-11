@@ -39,25 +39,27 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Lifecycle session audio dans le shell RPG : `mountRpgPage()` possède la session, et `app.js` la détruit en quittant/chageant de mode. CI run `34638147144` : success.
 - Destinataire explicite du loot : `lootGrantedTo` persiste le héros/groupe/conteneur qui a reçu les objets. CI run `34638378209` : success.
 - Clé de boss : elle est maintenant générée au moment de la défaite réelle du boss, pas au spawn. CI run `34638633003` : success.
+- Passage verrouillé par objet : `requiredItemId` est appliqué par le World Engine / runtime donjon. CI run `34639084070` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Passages de donjon réellement verrouillés par objet/clé :
-- `createRoomLink()` accepte désormais `requiredItemId`;
-- `availableRoomLinks()` masque/refuse un passage tant que l'objet requis n'est pas réellement présent dans l'inventaire fourni;
-- `traverseRoomLink()` applique la même règle, donc impossible de contourner le verrou par appel direct;
-- `transitionDungeonRoom()` transmet maintenant l'inventaire au moteur de navigation;
-- le test couvre explicitement un passage `boss-exit` : sans `boss-key`, `link-unavailable` et le héros reste dans la salle du boss; dès que la clé est dans l'inventaire, la transition vers la salle suivante devient possible;
-- cela complète le correctif précédent : la clé apparaît à la mort du boss puis peut réellement conditionner l'accès à la suite du donjon.
+Sélecteur d'objet requis directement dans le World Builder :
+- `world-editor.js` reçoit maintenant l'univers RPG courant pour accéder à la vraie liste d'objets;
+- chaque liaison affiche un menu `Objet requis` au lieu de demander un identifiant technique;
+- le menu affiche le nom + l'icône de l'objet et conserve seulement l'ID en valeur interne;
+- les objets désactivés sont exclus du menu;
+- l'option `— Aucun objet requis —` permet de retirer le verrou;
+- la valeur choisie est persistée dans `requiredItemId` sur la liaison existante;
+- `rpg-page.js` transmet `loadRpgUniverse()` au World Builder à l'ouverture de l'onglet;
+- le test vérifie qu'une clé de boss apparaît par son nom, que son ID n'est pas affiché comme libellé et qu'un objet désactivé n'est pas proposé.
 
 Commits de l'étape :
-- lien/condition d'objet : `46c6db6f7127438c6f371dbbb9c9efb40b0df4cc`
-- raccord runtime donjon : `773041c8de88c0834f814abdb85f11489a6e4a71`
-- test World Builder/navigation : `aab8c4f41e7a1a95281deffb9817f7163e198b3e`
-- test runtime de salle : `25777d587d861f512ab47e90004c498efed717f2`
+- World Builder : `0e0488b5cbb27279915c7a3190d84d6ef73b4965`
+- raccord page RPG : `a48a7fdce6099fbf0421f956b9899000fbd3e525`
+- régression : `47596ce965ec51fe11f6b5a97a7c8568f9a06ff2`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -70,7 +72,6 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- exposer `requiredItemId` proprement dans le World Builder/éditeur avec un sélecteur d'objet, jamais un ID brut;
 - choisir dans l'UI de jeu comment le joueur sélectionne le destinataire du loot (héros précis / groupe / autre inventaire) en utilisant le nouveau contrat générique;
 - commencer le vrai audit des anciens assets/audio et reconstruire le catalogue de sons vers la V2;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;

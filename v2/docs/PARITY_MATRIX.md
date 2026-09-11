@@ -16,12 +16,13 @@ Cette matrice sert de garde-fou : aucune fonction historique n'est considérée 
 | Défaite / KO | Historiquement liée aux PV + correctifs locaux | Règle générique stat/ressource/seuil | Base active | Aucun nom `PV` imposé ; univers choisit la condition de KO |
 | Déplacement | Tactique individuel avec correctifs successifs | Positions individuelles + distance par chemin + portée configurable | Base active | Position individuelle, coûts configurables, pas de téléportation groupe |
 | Vision / furtivité | Détection et perception partiellement codées | Moteur générique configurable | Base active | Stats choisies par menu, distance/zone configurables, aucun nom privilégié |
-| World Builder | Monde/zone/salle/branches | À migrer | À faire | Parité des liens, retours, branches, événements |
-| Créateur de salle | Cases, murs, portes, coffres, pièges, énigmes | À migrer | À faire | Toutes interactions éditables et liées par sélecteurs |
+| World Builder | Monde/zone/salle/branches | Moteur + éditeur zones/salles/liaisons | En cours | Parité des liens, retours, branches, événements |
+| Créateur de salle | Cases, murs, portes, coffres, pièges, énigmes | Grille + murs/portes + interactions structurées | En cours | Toutes interactions éditables et liées par sélecteurs |
+| Interactions de salle | Case/porte/coffre selon couches legacy | Coffre/piège/énigme/événement/interrupteur/portail/objet | Base active | Rattachement case/porte/coffre par sélecteur, liens invalides refusés |
 | Événements | Narration + effets limités | Actions composables | À faire | Chaînes d'actions, effets, sons, spawn, portes, choix |
-| Coffres | Rareté, loot, pièges, interaction tactique | À migrer | À faire | Rareté, contenu, piège, énigme, événement, audio |
-| Pièges | Tests + dégâts / états | À migrer | À faire | Stat choisie, difficulté, détection, désamorçage, effets |
-| Énigmes | Bibliothèque + porte/coffre selon couches | À migrer | À faire | Case/porte/coffre/événement + aides + pénalités |
+| Coffres | Rareté, loot, pièges, interaction tactique | Support générique créé | En cours | Rareté, contenu, piège, énigme, événement, audio |
+| Pièges | Tests + dégâts / états | Support générique créé | En cours | Stat choisie, difficulté, détection, désamorçage, effets |
+| Énigmes | Bibliothèque + porte/coffre selon couches | Support générique créé | En cours | Case/porte/coffre/événement + aides + pénalités |
 | Inventaire / objets | Armes, armures, consommables, munitions, sets | À migrer | À faire | Stats/effets/sons/charges/restrictions génériques |
 | Sets | Set cuir + Armure des Anciens + paliers | À migrer | À faire | `setId`, paliers, affichage porté/total |
 | Marchands | Stock, rupture, revente, persistance | À migrer | À faire | Stock configurable et persistant |

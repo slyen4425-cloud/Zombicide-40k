@@ -42,6 +42,11 @@ function doorState(door){
   };
 }
 
+function createHeroLocation(heroId,roomId){
+  const id=roomKey(roomId);
+  return {heroId:String(heroId),roomId:id,visitedRoomIds:id?[id]:[],history:[],sequence:0,x:null,y:null};
+}
+
 export function createRoomInstance(roomId,layout,{entities=null}={}){
   const sourceEntities=Array.isArray(entities)?entities:(Array.isArray(layout?.entities)?layout.entities:(Array.isArray(layout?.metadata?.entities)?layout.metadata.entities:[]));
   const uniqueEntities=[]; const seen=new Set();
@@ -64,19 +69,24 @@ export function createRoomInstance(roomId,layout,{entities=null}={}){
   };
 }
 
-export function createDungeonRuntime(worldIndex,{startRoomId=null,layoutProvider=null,questRuntime=null,quests=[],questDefinitions={},questContext={},now=null}={}){
+export function createDungeonRuntime(worldIndex,{startRoomId=null,layoutProvider=null,questRuntime=null,quests=[],questDefinitions={},questContext={},now=null,heroIds=[],focusedHeroId=null}={}){
   const started=createWorldSession(worldIndex,{startRoomId});
   if(!started.ok) return {ok:false,reason:started.reason,runtime:null};
+  const startId=String(started.session.currentRoomId);
+  const heroes=[...new Set((heroIds||[]).filter(Boolean).map(String))];
+  const focus=focusedHeroId!=null?String(focusedHeroId):(heroes[0]||null);
   let runtime={
     worldSession:started.session,
-    currentRoomId:String(started.session.currentRoomId),
+    currentRoomId:startId,
+    focusedHeroId:focus,
+    heroLocations:Object.fromEntries(heroes.map(heroId=>[heroId,createHeroLocation(heroId,startId)])),
     rooms:{},
     questRuntime:questRuntime?clone(questRuntime):null,
     sequence:0,
     log:[],
   };
   runtime=ensureRoomInstance(runtime,runtime.currentRoomId,layoutProvider?.(runtime.currentRoomId)||null).runtime;
-  runtime=visitCurrentRoom(runtime,'start',{quests,definitions:questDefinitions,context:questContext,now});
+  runtime=visitRoom(runtime,runtime.currentRoomId,'start',{quests,definitions:questDefinitions,context:questContext,now,heroId:focus});
   return {ok:true,runtime};
 }
 
@@ -97,17 +107,85 @@ function appendLog(runtime,type,payload={}){
   return next;
 }
 
-export function visitCurrentRoom(runtime,reason='enter',{quests=[],definitions={},context={},now=null}={}){
-  const id=roomKey(runtime?.currentRoomId);
+export function visitRoom(runtime,roomId,reason='enter',{quests=[],definitions={},context={},now=null,heroId=null}={}){
+  const id=roomKey(roomId);
   if(!id||!runtime?.rooms?.[id]) return runtime;
   let next=clone(runtime);
   next.rooms[id].visits=(Number(next.rooms[id].visits)||0)+1;
-  next=appendLog(next,'room-entered',{roomId:id,reason,visits:next.rooms[id].visits});
+  next=appendLog(next,'room-entered',{roomId:id,reason,visits:next.rooms[id].visits,heroId:heroId==null?null:String(heroId)});
   if((quests||[]).length){
     const questOut=applyRoomVisitToQuests(next.questRuntime,quests,id,{definitions,context,now});
     next.questRuntime=questOut.runtime;
   }
   return next;
+}
+
+export function visitCurrentRoom(runtime,reason='enter',options={}){
+  return visitRoom(runtime,runtime?.currentRoomId,reason,options);
+}
+
+export function getHeroRoomLocation(runtime,heroId){
+  const location=runtime?.heroLocations?.[String(heroId)];
+  return location?clone(location):null;
+}
+
+export function heroesInRoom(runtime,roomId){
+  const id=roomKey(roomId);
+  return Object.values(runtime?.heroLocations||{}).filter(location=>roomKey(location?.roomId)===id).map(location=>String(location.heroId));
+}
+
+export function setFocusedDungeonHero(runtime,heroId){
+  const id=String(heroId||'');
+  const location=runtime?.heroLocations?.[id];
+  if(!location) return {ok:false,reason:'hero-location-missing',runtime};
+  const next=clone(runtime);
+  next.focusedHeroId=id;
+  next.currentRoomId=roomKey(location.roomId);
+  next.worldSession={
+    ...(next.worldSession||{}),
+    currentRoomId:next.currentRoomId,
+    visitedRoomIds:clone(location.visitedRoomIds||[next.currentRoomId]),
+    history:clone(location.history||[]),
+    sequence:Number(location.sequence)||0,
+  };
+  return {ok:true,runtime:appendLog(next,'hero-focus-changed',{heroId:id,roomId:next.currentRoomId})};
+}
+
+export function transitionDungeonHeroRoom(worldIndex,runtime,heroId,linkId,{layoutProvider=null,conditionEvaluator=null,inventory=null,quests=[],questDefinitions={},questContext={},now=null}={}){
+  const id=String(heroId||'');
+  const location=runtime?.heroLocations?.[id];
+  if(!location) return {ok:false,reason:'hero-location-missing',runtime};
+  const heroSession={
+    ...(clone(runtime.worldSession||{})),
+    currentRoomId:roomKey(location.roomId),
+    visitedRoomIds:clone(location.visitedRoomIds||[location.roomId]),
+    history:clone(location.history||[]),
+    sequence:Number(location.sequence)||0,
+  };
+  const moved=traverseRoomLink(worldIndex,heroSession,linkId,{conditionEvaluator,inventory});
+  if(!moved.ok) return {ok:false,reason:moved.reason,runtime};
+
+  let next=clone(runtime);
+  const fromRoomId=roomKey(location.roomId);
+  const toRoomId=roomKey(moved.session.currentRoomId);
+  next.heroLocations=next.heroLocations||{};
+  next.heroLocations[id]={
+    ...clone(location),
+    heroId:id,
+    roomId:toRoomId,
+    visitedRoomIds:clone(moved.session.visitedRoomIds||[]),
+    history:clone(moved.session.history||[]),
+    sequence:Number(moved.session.sequence)||0,
+  };
+  const ensured=ensureRoomInstance(next,toRoomId,layoutProvider?.(toRoomId)||null);
+  next=ensured.runtime;
+  next=visitRoom(next,toRoomId,'hero-link',{quests,definitions:questDefinitions,context:questContext,now,heroId:id});
+  if(String(next.focusedHeroId||'')===id){
+    next.currentRoomId=toRoomId;
+    next.worldSession=clone(moved.session);
+  }
+  next=appendLog(next,'hero-room-transition',{heroId:id,fromRoomId,toRoomId,linkId:String(linkId),created:ensured.created});
+  return {ok:true,runtime:next,room:clone(next.rooms[toRoomId]),created:ensured.created,heroId:id,fromRoomId,toRoomId};
 }
 
 export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=null,conditionEvaluator=null,inventory=null,quests=[],questDefinitions={},questContext={},now=null}={}){

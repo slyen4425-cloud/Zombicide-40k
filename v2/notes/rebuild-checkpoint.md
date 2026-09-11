@@ -23,22 +23,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - État KO alliés : les alliés KO/morts sont exclus du contrôle, du mouvement et des prochains combats; une vraie réanimation les rend à nouveau éligibles. CI run `34633451924` : success.
 - Placement alliés changement de salle : placement distinct sur cases accessibles quand `roomLayout` est connu. CI run `34633817217` : success.
 - Loot bestiaire : claim idempotent, pas de double tirage après sauvegarde/rechargement. CI run `34634065664` : success.
+- Médias bestiaire : `icon`, `artId`, `audioId` persistent dans le runtime. CI run `34634410838` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Préservation des médias du bestiaire dans le runtime :
-- `createCreatureRuntime()` conserve maintenant `icon`, `artId` et `audioId` issus de la définition de créature;
-- ces références survivent donc à la création d'instance puis à une sauvegarde/relecture du runtime;
-- cela évite de devoir revenir à la définition source juste pour jouer le son ou afficher l'art d'une créature déjà instanciée en salle/combat.
+Population automatique des objets de départ héros :
+- `createHeroRuntime()` ne crée plus un inventaire vide quand `startingItems` est configuré;
+- chaque objet de départ valide est ajouté via l'autorité `addItem()` de l'inventaire, donc les règles de stack et de quantité restent centralisées;
+- les entrées invalides ou quantité 0 sont ignorées sans casser le runtime;
+- le test vérifie qu'Aldren reçoit bien son épée dès la création du runtime, sans ajout manuel après coup.
 
 Commits de l'étape :
-- moteur : `39dd628b0c939b266bd26e65761c573e2b38f56e`
-- régression : `bc524a4ea71324da579e868d951b066349de18f1`
+- moteur : `94c8116aaa530e5e42476e395970b7f50f480e7b`
+- régression : `943b6b655babac23ee10d99b7e84bb0bdc8ac120`
 
-CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
+CI : run `34634619019`, encore en cours au dernier contrôle.
 
 ## Stockage — décision repoussée
 
@@ -54,6 +56,5 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 - couverture/obstacles et modificateurs d'équipement tactiques;
 - status à modificateurs persistants réversibles;
 - lifecycle audio de salle et vrai playback frontend;
-- items de départ héros à auto-remplir;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

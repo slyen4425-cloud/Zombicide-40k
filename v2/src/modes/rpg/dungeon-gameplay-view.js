@@ -4,7 +4,7 @@ import { mountRoomNpcInteraction } from './room-npc-interaction-ui.js';
 import { resolveRoomRuntimeEventChoice } from './room-event-runtime.js';
 import { availableRoomLinks } from './world-engine.js';
 import { transitionDungeonRoom, transitionDungeonHeroRoom, setFocusedDungeonHero } from './room-runtime.js';
-import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult, dungeonHeroCombatSkills, executeDungeonHeroSkill } from './dungeon-combat-runtime.js';
+import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult, dungeonHeroCombatSkills, executeDungeonHeroSkill, advanceDungeonEnemyTurns } from './dungeon-combat-runtime.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
@@ -168,7 +168,7 @@ function renderCombatSection(universe,roomRuntime,{heroRuntimes=[],activeCombat=
         ?`<div class="combat-actions dungeon-combat-actions"><label>Compétence<select data-dungeon-combat-skill>${skills.map(skill=>`<option value="${esc(skill.id)}">${esc(skill.icon||'✨')} ${esc(skill.name||'Compétence')}</option>`).join('')}</select></label><label>Cible<select data-dungeon-combat-target>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="primary-button" data-dungeon-use-skill>Utiliser la compétence</button></div>`
         :'<p class="muted">Aucune compétence disponible pour ce héros.</p>';
     } else {
-      actions='<p class="muted">Tour ennemi : les actions IA seront raccordées à cette même timeline.</p>';
+      actions='<p class="muted">Tour ennemi : résolution automatique sur la même timeline.</p>';
     }
     return `<section class="editor-section dungeon-combat-section"><div class="section-title-row"><div><h3>⚔️ Combat en cours</h3><p class="muted">Le moteur D100 utilise les participants réellement présents dans cette salle.</p></div></div><p><strong>Participants :</strong> ${names.map(esc).join(' · ')}</p><p><strong>Tour :</strong> ${Number(activeCombat.round)||1} · ${esc(actorName)}</p>${actions}${message?`<div class="combat-result" aria-live="polite">${esc(message)}</div>`:''}</section>`;
   }
@@ -228,6 +228,22 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
   const notify=(out=null)=>onRoomRuntimeChange?.(currentRuntime,out);
+  const runAutomaticEnemyTurns=()=>{
+    const actor=currentCombat?.actors?.[currentCombat?.activeActorId];
+    if(currentCombat?.phase!=='turn'||actor?.side!=='enemies') return null;
+    const out=advanceDungeonEnemyTurns({combat:currentCombat,universe:currentUniverse,spatial:currentSpatial,spatialConfig:currentSpatialConfig});
+    if(!out.ok){currentCombatMessage=`Tour ennemi interrompu : ${out.reason}.`;return out;}
+    if(out.actions.length){
+      currentCombat=out.combat;
+      const last=out.actions.at(-1);
+      const enemyActor=last?.actorId?out.combat?.actors?.[last.actorId]||currentCombat?.actors?.[last.actorId]:null;
+      const enemyName=combatActorName(currentUniverse,enemyActor,last?.actorId||'Ennemi');
+      const skill=(currentUniverse.skills||[]).find(entry=>String(entry.id)===String(last?.skillId||''));
+      currentCombatMessage=last?.passed?`${enemyName} termine son tour sans action valide.`:`${enemyName} utilise ${skill?.name||'une compétence'}${last?.check?.roll!=null?` · jet ${last.check.roll}`:''}.`;
+      onCombatChange?.(clone(currentCombat),{kind:'enemy-turns',actions:clone(out.actions)});
+    }
+    return out;
+  };
   const reconcileCurrentCombat=()=>{
     const key=combatReconcileKey(currentCombat);
     if(!key||key===lastReconciledCombatKey) return null;
@@ -242,6 +258,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   };
 
   const render=()=>{
+    runAutomaticEnemyTurns();
     reconcileCurrentCombat();
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;

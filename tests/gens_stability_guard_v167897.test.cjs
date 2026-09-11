@@ -23,7 +23,7 @@ assert.match(bridge,/gens-enemy-canonical-stats-1678105\.js\?v=1678105/,'always-
 assert.match(bridge,/gens-canonical-detection-1678107\.js\?v=1678107/,'always-loaded bridge must load canonical detection module');
 assert.match(bridge,/applyCustomHeroesMulti/,'hero art repair must run after late CHARS rebuild');
 assert.match(bridge,/dng_aldren\.png/,'Aldren official art must remain hard-pinned');
-assert.match(sw,/gensrpg-cache-16\.78\.107-canonical-detection/);
+assert.match(sw,/const CACHE_NAME = "gensrpg-cache-16\.78\.\d+[-\w]*";/,'service worker must use a versioned GenSrpG cache');
 for(const critical of ['dungeon-grid-display-recovery-167856.js','dungeon-random-library-content-167832.js','dungeon-world-builder-167821.js','dng_aldren.png','gens-hero-editor-dynamic-167897.js','gens-dungeon-hero-ingame-art-167898.js','gens-dungeon-sheet-art-stability-167899.js','gens-stat-upgrade-policy-167898.js','gens-dungeon-ui-cleanup-1678100.js','gens-equipment-stat-cleanup-1678102.js','gens-equipment-bonus-persistence-1678103.js','gens-enemy-canonical-stats-1678105.js','gens-canonical-detection-1678107.js'])assert.ok(sw.includes(critical),'critical cache entry missing: '+critical);
 require('./gens_canonical_detection_v1678107.test.cjs');
 require('./gens_enemy_stats_module_v1678105.test.cjs');
@@ -34,4 +34,4 @@ require('./gens_v167898_guard.test.cjs');
 require('./gens_v167899_ui_sheet_guard.test.cjs');
 require('./gens_v1678100_ui_cleanup_guard.test.cjs');
 require('./dungeon_world_runtime_v167823.test.cjs');
-console.log('V16.78.107 stability guard: grids + hero art + enemy stats + canonical per-entity Detection + existing UI stability OK');
+console.log('V16.78.128 stability guard: grids + hero art + enemy stats + canonical per-entity Detection + observer-free UI stability OK');

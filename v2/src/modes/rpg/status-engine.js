@@ -4,6 +4,10 @@ function clone(value) {
   return structuredClone(value);
 }
 
+function effectById(definitions, effectId) {
+  return definitions?.effects?.find?.(x => String(x.id) === String(effectId)) || definitions?.effects?.[effectId] || null;
+}
+
 export function addTimedStatus(actor, status) {
   const next = clone(actor || {});
   next.statuses = Array.isArray(next.statuses) ? next.statuses : [];
@@ -29,14 +33,53 @@ export function addTimedStatus(actor, status) {
   return next;
 }
 
+export function addPersistentStatus(actor, status, { definitions = {}, context = {} } = {}) {
+  const next = clone(actor || {});
+  next.statuses = Array.isArray(next.statuses) ? next.statuses : [];
+  const id = String(status?.id || '');
+  if (!id) return { ok: false, reason: 'missing-status-id', actor: next };
+
+  const existing = next.statuses.find(x => x.id === id);
+  if (existing) {
+    existing.remaining = Math.max(Number(existing.remaining) || 0, Math.max(1, Number(status.remaining ?? status.duration ?? 1) || 1));
+    return { ok: true, refreshed: true, actor: next, status: clone(existing) };
+  }
+
+  const effect = effectById(definitions, status?.effectId);
+  if (!effect) return { ok: false, reason: 'missing-effect', actor: next };
+  if (effect.kind !== 'stat-modifier' || !effect.statId) return { ok: false, reason: 'unsupported-persistent-effect', actor: next };
+
+  const statId = String(effect.statId);
+  const previousValue = Number(next.state?.stats?.[statId] ?? definitions?.stats?.find?.(x => String(x.id) === statId)?.baseValue ?? 0) || 0;
+  const applied = applyEffect(effect, next.state || {}, definitions, context);
+  if (!applied.applied) return { ok: false, reason: applied.reason || 'not-applied', actor: next };
+
+  next.state = applied.state;
+  const incoming = {
+    id,
+    label: status.label || status.name || 'Effet temporaire',
+    effectId: String(status.effectId),
+    remaining: Math.max(1, Number(status.remaining ?? status.duration ?? 1) || 1),
+    timing: 'persistent',
+    stackable: false,
+    maxStacks: 1,
+    stacks: 1,
+    persistent: true,
+    revert: { kind: 'stat', id: statId, previousValue },
+  };
+  next.statuses.push(incoming);
+  return { ok: true, refreshed: false, actor: next, status: clone(incoming) };
+}
+
 export function processStatuses(actor, timing, { definitions = {}, context = {} } = {}) {
   const next = clone(actor || {});
   next.statuses = Array.isArray(next.statuses) ? next.statuses : [];
   const events = [];
 
   for (const status of next.statuses) {
+    if (status.persistent || status.timing === 'persistent') continue;
     if (status.timing !== timing || !status.effectId) continue;
-    const effect = definitions.effects?.find?.(x => String(x.id) === String(status.effectId));
+    const effect = effectById(definitions, status.effectId);
     if (!effect) {
       events.push({ statusId: status.id, applied: false, reason: 'missing-effect' });
       continue;
@@ -60,8 +103,19 @@ export function processStatuses(actor, timing, { definitions = {}, context = {} 
 export function decayStatuses(actor, amount = 1) {
   const next = clone(actor || {});
   const step = Math.max(0, Number(amount) || 0);
-  next.statuses = (Array.isArray(next.statuses) ? next.statuses : [])
-    .map(status => ({ ...status, remaining: Math.max(0, (Number(status.remaining) || 0) - step) }))
-    .filter(status => status.remaining > 0);
+  const kept = [];
+  for (const rawStatus of Array.isArray(next.statuses) ? next.statuses : []) {
+    const status = { ...rawStatus, remaining: Math.max(0, (Number(rawStatus.remaining) || 0) - step) };
+    if (status.remaining > 0) {
+      kept.push(status);
+      continue;
+    }
+    if (status.persistent && status.revert?.kind === 'stat' && status.revert.id) {
+      next.state = next.state || {};
+      next.state.stats = next.state.stats || {};
+      next.state.stats[String(status.revert.id)] = Number(status.revert.previousValue) || 0;
+    }
+  }
+  next.statuses = kept;
   return next;
 }

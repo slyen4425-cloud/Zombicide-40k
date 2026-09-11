@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createInventoryState, createItemDefinition } from '../src/modes/rpg/inventory-engine.js';
-import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot } from '../src/modes/rpg/dungeon-gameplay-view.js';
+import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot, eventPresentationEntries } from '../src/modes/rpg/dungeon-gameplay-view.js';
 
 const coin=createItemDefinition({id:'old-coin',name:'Vieille pièce',stackable:true});
 const universe={items:[coin],quests:[{
@@ -24,8 +24,18 @@ const recipients=[
   {kind:'hero',id:'lyra',name:'Lyra',icon:'🏹',inventory:createInventoryState()},
   {kind:'group',id:'party',name:'Sac du groupe',icon:'🎒',inventory:createInventoryState()},
 ];
+const eventState={
+  status:'completed',
+  log:[
+    {type:'event-text',text:'Le mur tremble et révèle un passage.'},
+    {type:'event-check-resolved',success:true},
+    {type:'event-reward',itemId:'old-coin',quantity:3},
+    {type:'event-door-updated',doorId:'crypt-door'},
+    {type:'event-choice-selected',label:'Ouvrir le passage'},
+  ],
+};
 
-let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra'});
+let html=renderDungeonGameplayView(universe,runtime,{lootRecipients:recipients,selectedLootRecipientKey:'hero:lyra',eventPresentationState:eventState});
 assert.match(html,/Partie Donjon/);
 assert.match(html,/Salle actuelle : crypt-room/);
 assert.match(html,/Visites :<\/strong> 2/);
@@ -36,6 +46,12 @@ assert.match(html,/0\/1/);
 assert.match(html,/Donner le butin/);
 assert.match(html,/Lyra · Héros/);
 assert.match(html,/Sac du groupe · Groupe/);
+assert.match(html,/Le mur tremble et révèle un passage/);
+assert.match(html,/Jet réussi/);
+assert.match(html,/Récompense reçue : 3 × old-coin/);
+assert.match(html,/Une porte a changé d’état/);
+assert.match(html,/Choix : Ouvrir le passage/);
+assert.equal(eventPresentationEntries(eventState).length,5);
 assert.equal(dungeonLootEntries(runtime).length,1);
 
 const granted=grantDungeonCreatureLoot(runtime,'spawn:skeleton:1',recipients,'hero:lyra',universe);

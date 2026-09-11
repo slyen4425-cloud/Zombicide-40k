@@ -1,6 +1,6 @@
 import { resolveResourceMax } from '../../core/formulas.js';
 import { activeFormSkillIds } from '../../core/hero-forms.js';
-import { createInventoryState } from './inventory-engine.js';
+import { createInventoryState, addItem } from './inventory-engine.js';
 import { equippedItemBonuses } from './item-engine.js';
 import { resolveEquippedSetBonuses } from './set-engine.js';
 import { createProgressionState } from './progression-engine.js';
@@ -51,11 +51,17 @@ export function createHeroRuntime(hero,definitions={}, {instanceId=null,progress
     const current=typeof configured==='object'?Number(configured.current):Number(configured);
     state.resources[String(resource.id)]={current:Number.isFinite(current)?Math.max(Number(resource.min??0),Math.min(max,current)):max,max};
   }
+  let inventory=createInventoryState({slots:definition.inventorySlots});
+  for(const entry of definition.startingItems||[]){
+    if(!entry.itemId||entry.quantity<=0) continue;
+    const added=addItem(inventory,entry.itemId,entry.quantity,definitions);
+    if(added.ok) inventory=added.inventory;
+  }
   const runtime={
     instanceId:String(instanceId||definition.id),heroId:definition.id,name:definition.name,icon:definition.icon,artId:definition.artId,audioId:definition.audioId,
     enabled:definition.enabled,active:true,ko:false,dead:false,state,
     baseSkillIds:[...definition.skillIds],activeForms:[],currentPermanentFormId:null,
-    inventory:createInventoryState({slots:definition.inventorySlots}),
+    inventory,
     progression:createProgressionState(progression||{}),tags:[...definition.tags],metadata:clone(definition.metadata),
   };
   return runtime;

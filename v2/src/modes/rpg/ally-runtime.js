@@ -24,6 +24,7 @@ export function moveAlly(roster,spatial,instanceId,target,spatialConfig={}){
   const runtime=roster?.actors?.[String(instanceId)];
   if(!runtime) return {ok:false,reason:'missing-ally',roster,spatial};
   if(runtime.active===false||runtime.dismissed||runtime.expired) return {ok:false,reason:'inactive',roster,spatial};
+  if(runtime.ko||runtime.dead||runtime.actor?.ko||runtime.actor?.dead) return {ok:false,reason:'defeated',roster,spatial};
   const actor=runtime.actor||{};
   const moved=moveActor(spatial,String(instanceId),target,{...spatialConfig,actor});
   if(!moved.moved) return {ok:false,reason:moved.reason,roster,spatial:moved.spatial,distance:moved.distance,allowance:moved.allowance};
@@ -62,8 +63,10 @@ export function syncAlliesFromCombat(roster,combat){
     if(!runtime||!actor) continue;
     runtime.actor=runtime.actor||{};
     runtime.actor.state=clone(actor.state||{});
-    runtime.actor.ko=Boolean(actor.ko);
-    if(actor.ko) runtime.actor.active=false;
+    const ko=Boolean(actor.ko);
+    runtime.ko=ko;
+    runtime.actor.ko=ko;
+    runtime.actor.active=!ko&&!runtime.actor.dead;
   }
   return next;
 }

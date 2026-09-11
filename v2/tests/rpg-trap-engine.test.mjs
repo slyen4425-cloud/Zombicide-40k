@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { createTrapDefinition, createTrapState, detectTrap, disarmTrap, triggerTrap } from '../src/modes/rpg/trap-engine.js';
 
 const definitions={
+  checks:[
+    {id:'perception-test',enabled:true,die:100,statId:'perception',difficulty:50,mode:'roll-under'},
+    {id:'agility-test',enabled:true,die:20,statId:'agility',difficulty:10,mode:'roll-under'},
+  ],
   effects:[{
     id:'hurt',kind:'resource-modifier',resourceId:'hp',operation:'subtract',value:3,enabled:true,chance:100,
   }],
@@ -53,5 +57,20 @@ assert.equal(safe.actor.resources.hp.current,10);
 const blocked=triggerTrap(safeTrap,safe.state,safe.actor,{definitions});
 assert.equal(blocked.ok,false);
 assert.equal(blocked.reason,'disarmed');
+
+const reusableTrap=createTrapDefinition({
+  id:'trap3',hidden:true,detectionCheckId:'perception-test',disarmCheckId:'agility-test',effectIds:['hurt'],
+});
+let reusableState=createTrapState(reusableTrap);
+const reusableActor={stats:{perception:10,agility:2},resources:{hp:{current:10,max:10}}};
+const detected=detectTrap(reusableTrap,reusableState,reusableActor,{random:()=>0.2,definitions});
+assert.equal(detected.ok,true);
+assert.equal(detected.detected,true);
+assert.equal(detected.check.threshold,60);
+reusableState=detected.state;
+const disarmed=disarmTrap(reusableTrap,reusableState,reusableActor,{random:()=>0,definitions});
+assert.equal(disarmed.ok,true);
+assert.equal(disarmed.disarmed,true);
+assert.equal(disarmed.check.die,20);
 
 console.log('rpg-trap-engine: ok');

@@ -37,7 +37,7 @@ export function mountRpgPage(host,{runtime=null}={}){
     body.innerHTML='';
     if(tab==='combat') mountCombatLab(body,loadRpgUniverse());
     else if(tab==='heroes') mountHeroSheet(body,loadRpgUniverse());
-    else if(tab==='world') mountWorldEditor(body);
+    else if(tab==='world') mountWorldEditor(body,loadRpgUniverse());
     else if(tab==='room') mountRoomEditor(body);
     else mountRpgEditor(body);
   }

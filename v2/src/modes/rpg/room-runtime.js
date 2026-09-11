@@ -1,4 +1,5 @@
 import { createWorldSession, traverseRoomLink } from './world-engine.js';
+import { inventoryQuantity, removeItem } from './inventory-engine.js';
 
 function clone(value){return structuredClone(value);}
 function roomKey(roomId){return String(roomId||'');}
@@ -27,6 +28,15 @@ function interactionState(interaction){
   };
 }
 
+function doorState(door){
+  return {
+    id:String(door.id),
+    state:String(door.state||'closed'),
+    locked:Boolean(door.locked),
+    keyItemId:door.keyItemId==null?null:String(door.keyItemId),
+  };
+}
+
 export function createRoomInstance(roomId,layout,{entities=null}={}){
   const sourceEntities=Array.isArray(entities)?entities:(Array.isArray(layout?.entities)?layout.entities:(Array.isArray(layout?.metadata?.entities)?layout.metadata.entities:[]));
   const uniqueEntities=[]; const seen=new Set();
@@ -43,6 +53,7 @@ export function createRoomInstance(roomId,layout,{entities=null}={}){
     layoutId:layout?.id?String(layout.id):null,
     entities:uniqueEntities,
     interactions:Object.fromEntries((layout?.interactions||[]).filter(x=>x?.id).map(x=>[String(x.id),interactionState(x)])),
+    doors:Object.fromEntries((layout?.doors||[]).filter(x=>x?.id).map(x=>[String(x.id),doorState(x)])),
     flags:{},
     data:{},
   };
@@ -118,6 +129,44 @@ export function updateRoomInteractionState(runtime,roomId,interactionId,patch={}
   if(!state) return {ok:false,reason:'interaction-missing',runtime};
   next.rooms[id].interactions[String(interactionId)]={...state,...clone(patch),id:String(interactionId)};
   return {ok:true,runtime:appendLog(next,'room-interaction-updated',{roomId:id,interactionId:String(interactionId)})};
+}
+
+export function openRoomDoor(runtime,roomId,doorId,inventory,{consumeKey=false}={}){
+  const id=roomKey(roomId); const next=clone(runtime);
+  const room=next.rooms?.[id];
+  if(!room) return {ok:false,reason:'room-not-instantiated',runtime,inventory};
+  const door=room.doors?.[String(doorId)];
+  if(!door) return {ok:false,reason:'door-missing',runtime,inventory};
+  if(String(door.state)==='open'&&!door.locked) return {ok:true,alreadyOpen:true,runtime:next,inventory:clone(inventory),door:clone(door)};
+
+  let nextInventory=clone(inventory);
+  let consumed=false;
+  if(door.locked){
+    if(!door.keyItemId) return {ok:false,reason:'door-locked',runtime,inventory};
+    if(inventoryQuantity(inventory,door.keyItemId)<=0) return {ok:false,reason:'missing-key',runtime,inventory,keyItemId:door.keyItemId};
+    if(consumeKey){
+      const removed=removeItem(inventory,door.keyItemId,1);
+      if(!removed.ok) return {ok:false,reason:removed.reason||'key-consume-failed',runtime,inventory,keyItemId:door.keyItemId};
+      nextInventory=removed.inventory;
+      consumed=true;
+    }
+    door.locked=false;
+  }
+  door.state='open';
+  const logged=appendLog(next,'room-door-opened',{roomId:id,doorId:String(doorId),keyItemId:door.keyItemId||null,keyConsumed:consumed});
+  return {ok:true,alreadyOpen:false,runtime:logged,inventory:nextInventory,door:clone(logged.rooms[id].doors[String(doorId)])};
+}
+
+export function materializeRoomLayout(runtime,roomId,layout){
+  if(!layout) return null;
+  const next=clone(layout);
+  const room=runtime?.rooms?.[roomKey(roomId)];
+  if(!room) return next;
+  next.doors=(next.doors||[]).map(door=>{
+    const state=room.doors?.[String(door.id)];
+    return state?{...door,...clone(state),id:String(door.id)}:door;
+  });
+  return next;
 }
 
 export function roomRuntimeSnapshot(runtime,roomId){

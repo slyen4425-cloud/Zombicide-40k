@@ -19,9 +19,11 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],selectedDungeonLootRecipientKey=null,onDungeonLootGranted=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
+  let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
+  let currentDungeonLootRecipientKey=selectedDungeonLootRecipientKey||null;
   let currentTab='editor';
   let dungeonView=null;
   host.innerHTML=`
@@ -43,7 +45,18 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null}={}){
     buttons.forEach(b=>b.classList.toggle('active',b.dataset.rpgTab===tab));
     body.innerHTML='';
     if(tab==='combat') mountCombatLab(body,loadRpgUniverse());
-    else if(tab==='dungeon') dungeonView=mountDungeonGameplayView(body,{universe:loadRpgUniverse(),roomRuntime:currentDungeonRuntime});
+    else if(tab==='dungeon') dungeonView=mountDungeonGameplayView(body,{
+      universe:loadRpgUniverse(),
+      roomRuntime:currentDungeonRuntime,
+      lootRecipients:currentDungeonLootRecipients,
+      selectedLootRecipientKey:currentDungeonLootRecipientKey,
+      onLootGranted:(state,out)=>{
+        currentDungeonRuntime=state.roomRuntime;
+        currentDungeonLootRecipients=state.recipients;
+        currentDungeonLootRecipientKey=state.selectedKey;
+        onDungeonLootGranted?.(state,out);
+      },
+    });
     else if(tab==='heroes') mountHeroSheet(body,loadRpgUniverse());
     else if(tab==='world') mountWorldEditor(body,loadRpgUniverse());
     else if(tab==='room') mountRoomEditor(body,loadRpgUniverse());
@@ -60,7 +73,14 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null}={}){
       if(currentTab==='dungeon'&&dungeonView) dungeonView.setRoomRuntime(currentDungeonRuntime);
       return currentDungeonRuntime;
     },
+    setDungeonLootRecipients(nextRecipients,selectedKey=currentDungeonLootRecipientKey){
+      currentDungeonLootRecipients=structuredClone(nextRecipients||[]);
+      currentDungeonLootRecipientKey=selectedKey||null;
+      if(currentTab==='dungeon'&&dungeonView) dungeonView.setLootRecipients(currentDungeonLootRecipients,currentDungeonLootRecipientKey);
+      return structuredClone(currentDungeonLootRecipients);
+    },
     getDungeonRuntime:()=>currentDungeonRuntime,
+    getDungeonLootRecipients:()=>structuredClone(currentDungeonLootRecipients),
     openTab:open,
     dispose:()=>pageRuntime.dispose(),
     isDisposed:()=>pageRuntime.isDisposed(),

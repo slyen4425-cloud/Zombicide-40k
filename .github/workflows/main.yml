@@ -1,4 +1,4 @@
-name: Deploy GenSrpG known-good V16.78.123 to GitHub Pages
+name: Deploy GenSrpG V16.78.123 no-SW diagnostic to GitHub Pages
 
 on:
   push:
@@ -29,11 +29,9 @@ jobs:
           test -f index.html
           test -f service-worker.js
           test -f assets/gensrpg/gens-chrome-startup-diag-1678122.js
-          echo "Known-good commit:"
           git rev-parse HEAD
-          echo "Expected: 22ce0194fcb8b9a439fc2cdcecb3ffb91c5be58c"
 
-      - name: Préparer le site exact V123
+      - name: Préparer le site V123
         run: |
           rm -rf _site
           mkdir -p _site
@@ -46,6 +44,65 @@ jobs:
           for file in sound_*.mp3; do
             if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
+
+      - name: Ajouter le mode no-SW dans index
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/index.html')
+          s=p.read_text(encoding='utf-8')
+          guard=r'''<script>
+          (function(){
+            try{
+              const q=new URLSearchParams(location.search);
+              if(!q.has('nosw')) return;
+              window.__GENSRPG_NO_SW_TEST__=true;
+              if('serviceWorker' in navigator){
+                try{
+                  const fakeReg={update:async()=>{},unregister:async()=>true,addEventListener:()=>{},removeEventListener:()=>{},waiting:null,installing:null,active:null};
+                  Object.defineProperty(navigator.serviceWorker,'register',{configurable:true,value:async()=>fakeReg});
+                }catch(e){console.warn('noSW register guard',e)}
+              }
+            }catch(e){console.warn('noSW guard',e)}
+          })();
+          </script>'''
+          if '<head>' in s:
+              s=s.replace('<head>','<head>\n'+guard,1)
+          else:
+              s=guard+'\n'+s
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Créer la page de nettoyage no-SW
+        run: |
+          cat > _site/nosw-clean-v124.html <<'EOF'
+          <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>GenSrpG diagnostic sans service worker</title>
+          <body style="background:#111;color:#fff;font-family:sans-serif;padding:24px"><h2>Nettoyage diagnostic…</h2><pre id="log"></pre>
+          <script>
+          (async()=>{
+            const log=document.getElementById('log');
+            const say=t=>{log.textContent+=t+'\n'};
+            try{
+              if('serviceWorker' in navigator){
+                const regs=await navigator.serviceWorker.getRegistrations();
+                say('Service workers: '+regs.length);
+                await Promise.all(regs.map(r=>r.unregister()));
+                say('Service workers désinscrits');
+              }
+              if('caches' in window){
+                const names=await caches.keys();
+                say('Caches: '+names.length);
+                await Promise.all(names.map(n=>caches.delete(n)));
+                say('Caches supprimés');
+              }
+              say('Redirection vers V123 sans SW…');
+              const target='./?nosw=1&clean=1&t='+Date.now();
+              setTimeout(()=>location.replace(target),350);
+            }catch(e){say('ERREUR: '+(e&&e.stack||e));}
+          })();
+          </script>
+          EOF
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

@@ -11,7 +11,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
 - Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
 - Compétences, pièges, événements et interactions de salle peuvent référencer des jets réutilisables; les anciens formats inline restent compatibles.
-- Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime.
+- Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime, obstacles configurables sans saisie technique.
 - Éditeur RPG : sélecteur de jet réutilisable dans les compétences et éditeur dédié des pièges avec détection/désarmement séparés.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée, couverture directionnelle et modificateurs tactiques issus des équipements réellement équipés.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
@@ -67,26 +67,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - modificateurs tactiques d’équipement : `34648911729` success
 - checkpoint modificateurs équipement : `34648982225` success
 - couverture directionnelle salle/obstacles : `34649297286` success
+- checkpoint couverture directionnelle : `34649352594` success
+- réglages obstacles dans Créateur de salle : `34649715933` success
 
 ## Dernière étape terminée
 
-Couverture directionnelle et obstacles dans le combat tactique :
-- `room-tactical-bridge.js` expose maintenant `roomLineCells()` pour réutiliser la même ligne de tir que la ligne de vue;
-- `roomCoverModifier()` calcule la couverture depuis la direction réelle du tireur vers la cible;
-- la couverture peut provenir de la case de la cible, de la case immédiatement devant elle dans la ligne de tir, ou d’un élément de bord (mur/obstacle/porte) portant un `coverModifier`;
-- les obstacles bas peuvent donc fournir de la couverture avec `blocksVision=false` sans devenir artificiellement des murs opaques;
-- le tireur ne subit pas la couverture de sa propre case lorsqu’il est adjacent à la cible;
-- `targetCoverModifier()` reste rétrocompatible si aucun `actorId` n’est fourni, mais `evaluateAttackPosition()` utilise désormais la résolution directionnelle complète;
-- `ignoresCover` continue de passer par le même moteur et annule aussi ces nouvelles sources de couverture;
-- la ligne de vue et le pathfinding ne sont pas dupliqués : la couverture réutilise les primitives du bridge tactique existant;
-- régression `rpg-room-tactical-bridge.test.mjs` couvre obstacle adjacent, couverture de bord, obstacle bas qui ne bloque pas la vue et contournement via `ignoresCover`.
+Réglages d’obstacles/couverture directement dans le Créateur de salle :
+- `createWall()` conserve maintenant `kind` et `coverModifier` en plus de `blocksMovement` / `blocksVision`, ce qui rend les obstacles authored compatibles avec la couverture directionnelle déjà utilisée par le combat;
+- l’éditeur propose des types lisibles `Mur plein`, `Muret`, `Barricade`, `Barrière`, sans saisie d’identifiant technique;
+- chaque prochain obstacle peut régler séparément : blocage déplacement, blocage ligne de vue et modificateur de couverture;
+- les presets restent modifiables : par exemple `Muret` sélectionne déplacement bloqué, vue autorisée, couverture -15;
+- la couverture posée directement sur une case reste distincte de la couverture directionnelle d’un obstacle de bord;
+- les icônes de grille distinguent désormais mur, muret, barricade et barrière;
+- l’ancien outil `Mur` devient `Obstacle` mais continue d’utiliser la structure `walls` existante : aucun second système de pathfinding/vision/couverture n’est créé;
+- régression `rpg-room-obstacle-editor.test.mjs` protège la normalisation, la persistance du type/couverture et les libellés UI.
 
-Commits principaux de l'étape :
-- bridge couverture directionnelle final : `c87373532858c5409268ca8453e9c4527fe8fbec`
-- raccord moteur tactique : `5dc825cdcd231f4eb67e87f282a4a4dcccfdb53d`
-- régression : `6fcfbe38405904fd3e0b95dabe2c5ae37db46757`
+Commits de l'étape :
+- données obstacle dans `room-engine.js` : `489873f1da171ab85dd6fde4af067187a4e0d789`
+- UI Créateur de salle : `dcb4e2d341a328ec354e1d56f8aec848c772a984`
+- régression : `b6141b86de461e52820375181d356dc6c7a43811`
 
-CI finale : `34649297286` success.
+CI finale : `34649715933` success.
 
 ## Stockage — décision repoussée
 
@@ -96,7 +97,6 @@ CI finale : `34649297286` success.
 
 ## Priorités ouvertes
 
-- exposer proprement les réglages de couverture/obstacles dans l’éditeur de salle sans saisie technique brute;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

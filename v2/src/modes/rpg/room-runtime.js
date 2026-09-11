@@ -88,8 +88,8 @@ export function visitCurrentRoom(runtime,reason='enter'){
   return appendLog(next,'room-entered',{roomId:id,reason,visits:next.rooms[id].visits});
 }
 
-export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=null,conditionEvaluator=null}={}){
-  const moved=traverseRoomLink(worldIndex,runtime.worldSession,linkId,{conditionEvaluator});
+export function transitionDungeonRoom(worldIndex,runtime,linkId,{layoutProvider=null,conditionEvaluator=null,inventory=null}={}){
+  const moved=traverseRoomLink(worldIndex,runtime.worldSession,linkId,{conditionEvaluator,inventory});
   if(!moved.ok) return {ok:false,reason:moved.reason,runtime};
   let next=clone(runtime);
   const fromRoomId=String(next.currentRoomId);

@@ -17,19 +17,29 @@
       <button class="help-button" type="button" data-help="home" aria-label="Aide générale">?</button>
     </header>
 
-    <section class="panel intro-panel">
-      <h2>Choisir un mode</h2>
-      <p>Chaque mode possède son propre moteur et ses propres données. Le Core ne partage que les services techniques neutres.</p>
+    <section id="homeView">
+      <section class="panel intro-panel">
+        <h2>Choisir un mode</h2>
+        <p>Chaque mode possède son propre moteur et ses propres données. Le Core ne partage que les services techniques neutres.</p>
+      </section>
+
+      <section class="mode-grid" id="modeGrid" aria-label="Modes de jeu"></section>
+
+      <section class="panel status-panel">
+        <div class="section-title-row">
+          <h2>État de la V2</h2>
+          <button class="help-button small" type="button" data-help="status" aria-label="Aide sur l'état de la reconstruction">?</button>
+        </div>
+        <div id="buildStatus"></div>
+      </section>
     </section>
 
-    <section class="mode-grid" id="modeGrid" aria-label="Modes de jeu"></section>
-
-    <section class="panel status-panel">
-      <div class="section-title-row">
-        <h2>État de la V2</h2>
-        <button class="help-button small" type="button" data-help="status" aria-label="Aide sur l'état de la reconstruction">?</button>
+    <section id="workspaceView" hidden>
+      <div class="workspace-nav">
+        <button type="button" id="backHome" class="secondary-button">← Accueil</button>
+        <span class="workspace-badge">Branche rebuild/v2</span>
       </div>
-      <div id="buildStatus"></div>
+      <div id="workspaceHost"></div>
     </section>
   </main>
 

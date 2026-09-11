@@ -29,24 +29,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Loot de salle : `resolveRoomCreatureDefeat()` persiste la défaite et le loot idempotent directement dans l'entité de salle. CI run `34635256399` : success.
 - Statuts persistants réversibles : les modificateurs temporaires de stats ne se cumulent plus à chaque tick et restaurent la valeur d'origine à l'expiration. CI run `34635529424` : success.
 - Attribution de loot : `grantRoomCreatureDrops()` distribue les drops à l'inventaire une seule fois, de façon atomique. CI run `34635840687` : success.
+- Couverture tactique configurable : `coverModifier` de la case cible se combine aux autres modificateurs et peut être ignoré par une source `ignoresCover`. CI run `34636060720` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Couverture tactique configurable par case :
-- `normalizeTacticalCombatConfig()` expose désormais `coverEnabled` en modes tactique/hybride;
-- une case de salle peut porter un `coverModifier` numérique sans créer un système de couverture figé;
-- `targetCoverModifier()` lit ce modificateur directement sur la case occupée par la cible;
-- `evaluateAttackPosition()` ajoute le modificateur de couverture au modificateur de contact existant;
-- une arme/compétence peut définir `data.ignoresCover:true` pour ignorer la couverture;
-- en mode narratif la couverture reste désactivée;
-- le test couvre un squelette sur une case `coverModifier:-15`, cumulée avec la pénalité de contact `-20`, puis vérifie une arme ignorant la couverture.
+Lifecycle audio lors d'un changement de salle :
+- `audio-engine.js` expose maintenant `stopAudioChannel(state, channel)` pour arrêter proprement toutes les lectures actives d'un canal donné;
+- `audio-runtime.js` expose `queueRoomTransitionAudio()`;
+- lors d'une transition il peut enchaîner le son `leave` de l'ancienne salle, arrêter l'ancienne ambiance active, puis préparer `enter` et `ambience` de la nouvelle salle;
+- l'absence d'un binding individuel ne bloque pas toute la transition audio;
+- le test démarre réellement l'ambiance de la Crypte dans l'état audio, effectue la transition vers le Hall, vérifie que l'ancienne ambiance n'est plus active et que les trois cues `leave / enter / ambience` attendus sont bien préparés.
 
 Commits de l'étape :
-- moteur : `0bf6315f22f065e009944b2745aaa9b69a3ba17f`
-- régression : `99fd14162fc06b940065c8088822bc3b65b7b9ff`
+- moteur canal audio : `d32f9cbaa5e010ec5b75c4330d7a3dae5e7835d1`
+- orchestration salle : `3688de5a080e92e912f7589e19f2f2676df717eb`
+- régression : `77ce347e6e26191388bca3b2e5ef1ee87a81c692`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -59,10 +59,11 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- choisir ensuite la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
+- raccorder ensuite `queueRoomTransitionAudio()` au vrai flux `transitionDungeonRoom()` sans mélanger moteur de monde et sortie audio navigateur;
+- choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir les obstacles/couvertures via l'éditeur de salle et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
-- lifecycle audio de salle et vrai playback frontend;
+- vrai playback frontend audio encore absent;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

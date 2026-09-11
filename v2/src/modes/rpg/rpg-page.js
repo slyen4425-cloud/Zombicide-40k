@@ -3,8 +3,23 @@ import { mountCombatLab } from './combat-lab.js';
 import { mountWorldEditor } from './world-editor.js';
 import { mountRoomEditor } from './room-editor.js';
 import { mountHeroSheet } from './hero-sheet.js';
+import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
+import { createRpgAudioSession } from './rpg-audio-session.js';
 
-export function mountRpgPage(host){
+export function createRpgPageRuntime({audioOutput=null}={}){
+  const output=audioOutput||createBrowserAudioOutput();
+  const audioSession=createRpgAudioSession({output});
+  let disposed=false;
+  function dispose(){
+    if(disposed) return {ok:true,alreadyDisposed:true};
+    disposed=true;
+    return audioSession.dispose();
+  }
+  return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
+}
+
+export function mountRpgPage(host,{runtime=null}={}){
+  const pageRuntime=runtime||createRpgPageRuntime();
   host.innerHTML=`
     <nav class="rpg-tabs" aria-label="Outils RPG">
       <button type="button" class="rpg-tab active" data-rpg-tab="editor">⚙️ Configuration</button>
@@ -29,4 +44,10 @@ export function mountRpgPage(host){
 
   buttons.forEach(button=>button.addEventListener('click',()=>open(button.dataset.rpgTab)));
   open('editor');
+
+  return {
+    audioSession:pageRuntime.audioSession,
+    dispose:()=>pageRuntime.dispose(),
+    isDisposed:()=>pageRuntime.isDisposed(),
+  };
 }

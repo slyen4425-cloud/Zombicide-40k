@@ -4,7 +4,7 @@ import { createRoomLayout, getRoomCell, setRoomCell, createWall, addWall, create
 import { ensureRoomInteractions, createRoomInteraction, addRoomInteraction, updateRoomInteraction, removeRoomInteraction, validateRoomInteractions } from './interaction-engine.js';
 
 const LAYOUT_KEY='rpg_room_layout';
-function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
 function cellKey(x,y){return `${x},${y}`;}
 
 export function loadRoomLayout(room){
@@ -23,6 +23,14 @@ export function interactionCheckOptions(checks=[],selected=null){
   const enabled=(checks||[]).filter(check=>check&&check.enabled!==false&&check.id);
   return ['<option value="">— Aucun jet requis —</option>',...enabled.map(check=>`<option value="${esc(check.id)}" ${String(check.id)===String(selected||'')?'selected':''}>🎲 ${esc(check.name||'Jet / test')} · D${Math.max(2,Math.floor(Number(check.die)||100))}</option>`)].join('');
 }
+export function obstacleKindOptions(selected='wall'){
+  const kinds=[['wall','Mur plein'],['low-wall','Muret'],['barricade','Barricade'],['fence','Barrière']];
+  return kinds.map(([id,label])=>`<option value="${id}" ${String(selected)===id?'selected':''}>${label}</option>`).join('');
+}
+export function obstaclePlacementConfig({kind='wall',blocksMovement=true,blocksVision=true,coverModifier=-15}={}){
+  const cover=Number(coverModifier??0);
+  return {kind:String(kind||'wall'),blocksMovement:Boolean(blocksMovement),blocksVision:Boolean(blocksVision),coverModifier:Number.isFinite(cover)?cover:0};
+}
 function iconFor(layout,x,y){
   const interaction=(layout.interactions||[]).find(i=>i.enabled!==false&&i.attachment?.kind==='cell'&&Number(i.attachment.x)===x&&Number(i.attachment.y)===y);
   if(interaction){const icons={chest:'📦',trap:'⚠️',puzzle:'🧩',event:'❗',switch:'🔘',portal:'🌀',object:'⭐'};return icons[interaction.kind]||'⭐';}
@@ -33,7 +41,7 @@ function iconFor(layout,x,y){
   const marker=(layout.markers||[]).find(m=>Number(m.x)===x&&Number(m.y)===y);
   if(marker) return marker.kind==='special'?'⭐':'📍';
   const wall=(layout.walls||[]).find(w=>Number(w.x)===x&&Number(w.y)===y);
-  if(wall) return '🧱';
+  if(wall) return wall.kind==='low-wall'?'🛡️':wall.kind==='barricade'?'🚧':wall.kind==='fence'?'⛓️':'🧱';
   const cell=getRoomCell(layout,x,y);
   if(cell.blocked) return '⛔';
   if(Number(cell.coverModifier)||0) return '🛡️';
@@ -83,6 +91,10 @@ export function mountRoomEditor(host,universe={}){
   let tool='floor';
   let edge='north';
   let coverModifier=-15;
+  let obstacleKind='wall';
+  let obstacleBlocksMovement=true;
+  let obstacleBlocksVision=true;
+  let obstacleCoverModifier=0;
   let doorLocked=false;
   let doorKeyItemId=null;
 
@@ -94,7 +106,11 @@ export function mountRoomEditor(host,universe={}){
     else if(tool==='blocked') out=setRoomCell(layout,x,y,{terrain:'floor',blocked:true,coverModifier:0});
     else if(tool==='cover') out=setRoomCell(layout,x,y,{terrain:'floor',blocked:false,coverModifier:Number(coverModifier)||0});
     else if(['water','lava','rock'].includes(tool)) out=setRoomCell(layout,x,y,{terrain:tool,blocked:tool==='rock',coverModifier:0});
-    else if(tool==='wall') {layout=removeAt(layout,x,y,{doors:true});out=addWall(layout,createWall({x,y,edge}));}
+    else if(tool==='wall') {
+      layout=removeAt(layout,x,y,{doors:true});
+      const obstacle=obstaclePlacementConfig({kind:obstacleKind,blocksMovement:obstacleBlocksMovement,blocksVision:obstacleBlocksVision,coverModifier:obstacleCoverModifier});
+      out=addWall(layout,createWall({x,y,edge,...obstacle}));
+    }
     else if(tool==='door'||tool==='entry'||tool==='exit') {layout=removeAt(layout,x,y,{walls:true,doors:true});out=addDoor(layout,createDoor({x,y,edge,entry:tool==='entry',exit:tool==='exit',locked:doorLocked,keyItemId:doorLocked?doorKeyItemId:null}));}
     else if(tool==='special') {layout=removeAt(layout,x,y,{markers:true});out=addMarker(layout,createMarker({x,y,kind:'special',label:'Interaction'}));}
     else if(tool==='erase') {layout=removeAt(layout,x,y,{all:true});persist();return;}
@@ -110,14 +126,26 @@ export function mountRoomEditor(host,universe={}){
     const cells=[];
     for(let y=0;y<layout.height;y++) for(let x=0;x<layout.width;x++) cells.push(`<button type="button" class="room-cell ${terrainClass(layout,x,y)}" data-cell-x="${x}" data-cell-y="${y}" aria-label="Case ${x+1}, ${y+1}"><span>${iconFor(layout,x,y)}</span><small>${x+1},${y+1}</small></button>`);
     host.innerHTML=`<section class="workspace-head"><div><p class="eyebrow">RPG · CRÉATEUR DE SALLE</p><h2>${esc(room.name)}</h2><p class="muted">Peins la grille puis rattache coffres, pièges, énigmes et événements aux cases, portes ou coffres par menus.</p></div><button class="help-button" type="button" data-help="rpg-room-builder">?</button></section>
-      <section class="editor-section"><div class="form-grid"><label>Salle<select id="roomLayoutSelect">${roomOptions(world.rooms,selectedRoomId)}</select></label><label>Orientation mur / porte<select id="roomEdge"><option value="north" ${edge==='north'?'selected':''}>Nord</option><option value="east" ${edge==='east'?'selected':''}>Est</option><option value="south" ${edge==='south'?'selected':''}>Sud</option><option value="west" ${edge==='west'?'selected':''}>Ouest</option></select></label><label>Couverture (modificateur)<input id="roomCoverModifier" type="number" step="1" value="${Number(coverModifier)||0}"></label><label>Clé / objet de porte<select id="roomDoorKeyItem">${doorRequiredItemOptions(items,doorKeyItemId)}</select></label><label>Largeur<input id="roomWidth" type="number" min="1" max="100" value="${layout.width}"></label><label>Hauteur<input id="roomHeight" type="number" min="1" max="100" value="${layout.height}"></label></div><div class="toggle-row"><label><input id="roomDoorLocked" type="checkbox" ${doorLocked?'checked':''}> 🔒 Verrouiller les prochaines portes placées</label></div><p class="muted">Une porte verrouillée peut exiger l’objet choisi. Sans objet requis, elle peut rester verrouillée pour être ouverte plus tard par un événement, une énigme ou un interrupteur.</p><p class="muted">${validation.valid&&interactionValidation.valid?'✅ Salle valide':`⚠️ ${validation.errors.length+interactionValidation.errors.length} problème(s)`}</p></section>
-      <section class="editor-section"><div class="section-title-row"><div><h3>Outils</h3><p class="muted">Choisis un outil puis touche une case. La couverture utilise le modificateur réglé ci-dessus.</p></div></div><div class="room-tools">${[['floor','⬜ Sol'],['blocked','⛔ Bloqué'],['cover','🛡️ Couverture'],['water','💧 Eau'],['lava','🌋 Lave'],['rock','🪨 Rocher'],['wall','🧱 Mur'],['door','🚪 Porte'],['entry','⬅️ Entrée'],['exit','➡️ Sortie'],['special','⭐ Repère'],['erase','🧽 Effacer']].map(([id,label])=>`<button type="button" class="secondary-button ${tool===id?'active-tool':''}" data-room-tool="${id}">${label}</button>`).join('')}</div></section>
+      <section class="editor-section"><div class="form-grid"><label>Salle<select id="roomLayoutSelect">${roomOptions(world.rooms,selectedRoomId)}</select></label><label>Orientation obstacle / porte<select id="roomEdge"><option value="north" ${edge==='north'?'selected':''}>Nord</option><option value="east" ${edge==='east'?'selected':''}>Est</option><option value="south" ${edge==='south'?'selected':''}>Sud</option><option value="west" ${edge==='west'?'selected':''}>Ouest</option></select></label><label>Couverture de case<input id="roomCoverModifier" type="number" step="1" value="${Number(coverModifier)||0}"></label><label>Clé / objet de porte<select id="roomDoorKeyItem">${doorRequiredItemOptions(items,doorKeyItemId)}</select></label><label>Largeur<input id="roomWidth" type="number" min="1" max="100" value="${layout.width}"></label><label>Hauteur<input id="roomHeight" type="number" min="1" max="100" value="${layout.height}"></label></div><div class="toggle-row"><label><input id="roomDoorLocked" type="checkbox" ${doorLocked?'checked':''}> 🔒 Verrouiller les prochaines portes placées</label></div><p class="muted">Une porte verrouillée peut exiger l’objet choisi. Sans objet requis, elle peut rester verrouillée pour être ouverte plus tard par un événement, une énigme ou un interrupteur.</p><p class="muted">${validation.valid&&interactionValidation.valid?'✅ Salle valide':`⚠️ ${validation.errors.length+interactionValidation.errors.length} problème(s)`}</p></section>
+      <section class="editor-section"><div class="section-title-row"><div><h3>🧱 Réglages des obstacles</h3><p class="muted">Ces réglages s’appliquent aux prochains obstacles placés. Un muret peut protéger sans bloquer la vue.</p></div><button class="help-button" type="button" data-help="rpg-room-obstacles">?</button></div><div class="form-grid"><label>Type d’obstacle<select id="roomObstacleKind">${obstacleKindOptions(obstacleKind)}</select></label><label>Couverture<input id="roomObstacleCover" type="number" step="1" value="${Number(obstacleCoverModifier)||0}"></label></div><div class="toggle-row"><label><input id="roomObstacleBlocksMovement" type="checkbox" ${obstacleBlocksMovement?'checked':''}> Bloque le déplacement</label><label><input id="roomObstacleBlocksVision" type="checkbox" ${obstacleBlocksVision?'checked':''}> Bloque la ligne de vue</label></div><p class="muted">Exemple : Muret = déplacement bloqué, vue autorisée, couverture -15. Mur plein = déplacement et vue bloqués.</p></section>
+      <section class="editor-section"><div class="section-title-row"><div><h3>Outils</h3><p class="muted">Choisis un outil puis touche une case. La couverture de case et la couverture directionnelle d’un obstacle restent deux réglages distincts.</p></div></div><div class="room-tools">${[['floor','⬜ Sol'],['blocked','⛔ Bloqué'],['cover','🛡️ Couverture'],['water','💧 Eau'],['lava','🌋 Lave'],['rock','🪨 Rocher'],['wall','🧱 Obstacle'],['door','🚪 Porte'],['entry','⬅️ Entrée'],['exit','➡️ Sortie'],['special','⭐ Repère'],['erase','🧽 Effacer']].map(([id,label])=>`<button type="button" class="secondary-button ${tool===id?'active-tool':''}" data-room-tool="${id}">${label}</button>`).join('')}</div></section>
       <section class="editor-section room-grid-wrap"><div class="room-grid" style="--room-cols:${layout.width}">${cells.join('')}</div></section>
       <section class="editor-section"><div class="section-title-row"><div><h3>Interactions</h3><p class="muted">Un piège ou une énigme peut être attaché à une case, une porte ou directement à un coffre.</p></div><button class="primary-button" id="addRoomInteraction" type="button">+ Interaction</button></div><div class="editor-list">${layout.interactions.map(i=>interactionCard(i,layout,checks)).join('')||'<p class="muted">Aucune interaction.</p>'}</div></section>`;
 
     host.querySelector('#roomLayoutSelect')?.addEventListener('change',e=>selectRoom(e.target.value));
     host.querySelector('#roomEdge')?.addEventListener('change',e=>{edge=e.target.value;render();});
     host.querySelector('#roomCoverModifier')?.addEventListener('change',e=>{coverModifier=Number(e.target.value)||0;render();});
+    host.querySelector('#roomObstacleKind')?.addEventListener('change',e=>{
+      obstacleKind=e.target.value||'wall';
+      if(obstacleKind==='wall'){obstacleBlocksMovement=true;obstacleBlocksVision=true;obstacleCoverModifier=0;}
+      else if(obstacleKind==='low-wall'){obstacleBlocksMovement=true;obstacleBlocksVision=false;obstacleCoverModifier=-15;}
+      else if(obstacleKind==='barricade'){obstacleBlocksMovement=true;obstacleBlocksVision=false;obstacleCoverModifier=-10;}
+      else if(obstacleKind==='fence'){obstacleBlocksMovement=true;obstacleBlocksVision=false;obstacleCoverModifier=-5;}
+      render();
+    });
+    host.querySelector('#roomObstacleCover')?.addEventListener('change',e=>{obstacleCoverModifier=Number(e.target.value)||0;render();});
+    host.querySelector('#roomObstacleBlocksMovement')?.addEventListener('change',e=>{obstacleBlocksMovement=e.target.checked;render();});
+    host.querySelector('#roomObstacleBlocksVision')?.addEventListener('change',e=>{obstacleBlocksVision=e.target.checked;render();});
     host.querySelector('#roomDoorLocked')?.addEventListener('change',e=>{doorLocked=e.target.checked;render();});
     host.querySelector('#roomDoorKeyItem')?.addEventListener('change',e=>{doorKeyItemId=e.target.value||null;render();});
     const resize=()=>{layout=resizeRoomLayout(layout,{width:Number(host.querySelector('#roomWidth')?.value),height:Number(host.querySelector('#roomHeight')?.value)});layout=ensureRoomInteractions(layout);layout.interactions=layout.interactions.filter(i=>validateRoomInteractions({...layout,interactions:[i]}).valid);persist();};

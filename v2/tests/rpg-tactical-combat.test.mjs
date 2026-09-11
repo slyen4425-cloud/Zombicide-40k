@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createCombatState } from '../src/modes/rpg/combat-engine.js';
 import { createSpatialState,setActorPosition } from '../src/modes/rpg/spatial-engine.js';
+import { createRoomLayout,createDoor,addDoor } from '../src/modes/rpg/room-engine.js';
 import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resetActorCombatMovement,targetCoverModifier } from '../src/modes/rpg/tactical-combat.js';
 
 const config={mode:'tactical',defaultMovement:3,combatAssistRange:3,defaultMeleeRange:1,defaultRangedRange:5,rangedContactModifier:-20};
@@ -62,5 +63,24 @@ assert.equal(reset.spent.lyra,0);
 const narrative=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:sword,config:{mode:'narrative'}});
 assert.equal(narrative.ok,true);
 assert.equal(narrative.distance,null);
+
+let authored=createRoomLayout({id:'runtime-layout',roomId:'room-1',width:3,height:1});
+let doorAdded=addDoor(authored,createDoor({id:'gate',x:0,y:0,edge:'east',state:'closed',locked:true}));
+assert.equal(doorAdded.ok,true); authored=doorAdded.layout;
+let runtimeSpatial=createSpatialState({zoneId:'room-1'});
+runtimeSpatial=setActorPosition(runtimeSpatial,'lyra',{x:0,y:0,zoneId:'room-1'});
+runtimeSpatial=setActorPosition(runtimeSpatial,'skeleton',{x:2,y:0,zoneId:'room-1'});
+const runtimeCombat=createCombatState({combatants:[
+ {id:'lyra',side:'heroes',initiative:20,state:{stats:{movement:3}}},
+ {id:'skeleton',side:'enemies',initiative:10,state:{}},
+]});
+const dungeonRuntime={currentRoomId:'room-1',rooms:{'room-1':{doors:{gate:{id:'gate',state:'closed',locked:true,keyItemId:null}}}}};
+let runtimeShot=evaluateAttackPosition({spatial:runtimeSpatial,combat:runtimeCombat,actorId:'lyra',targetId:'skeleton',source:bow,config:{...config,baseRoomLayout:authored,dungeonRuntime}});
+assert.equal(runtimeShot.ok,false,'closed persistent runtime door must block attacks');
+dungeonRuntime.rooms['room-1'].doors.gate.state='open';
+dungeonRuntime.rooms['room-1'].doors.gate.locked=false;
+runtimeShot=evaluateAttackPosition({spatial:runtimeSpatial,combat:runtimeCombat,actorId:'lyra',targetId:'skeleton',source:bow,config:{...config,baseRoomLayout:authored,dungeonRuntime}});
+assert.equal(runtimeShot.ok,true,'opened persistent runtime door must immediately unblock attacks');
+assert.equal(authored.doors[0].state,'closed','authored room layout must remain unchanged');
 
 console.log('rpg-tactical-combat.test.mjs: ok');

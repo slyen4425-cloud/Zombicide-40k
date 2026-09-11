@@ -21,7 +21,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue`; cette file est reliée au runtime de salle, exécutée automatiquement via `event-engine.js`, et reprend après un choix sans double résolution.
 - La vue `🎮 Donjon` affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
 - Le picker de destinataire de loot est intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
-- Les interactions PNJ/allié et les choix d’événements sont désormais aussi surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
+- Les interactions PNJ/allié et les choix d’événements sont surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
+- Les textes et conséquences des événements sont maintenant présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -60,27 +61,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - distribution loot dans vue Donjon : `34647800892` success
 - checkpoint loot Donjon : `34647858146` success
 - interactions PNJ + choix événements dans vue Donjon : `34648252721` success
+- checkpoint PNJ/choix : `34648320258` success
+- présentation textes/conséquences événements : `34648630875` success
 
 ## Dernière étape terminée
 
-Interactions PNJ et choix d’événements directement dans la vue gameplay Donjon :
-- `dungeon-gameplay-view.js` rend maintenant les interactions `npc` / `ally` actives de la salle courante dans une section `Personnages`;
-- le montage délègue chaque interaction réelle à `mountRoomNpcInteraction()` : dialogue, quêtes, recrutement, invocation, renvoi et événements continuent donc d’utiliser les moteurs déjà en place;
-- le layout courant est fourni depuis `loadRoomLayout()` par `rpg-page.js`, sans recopier les définitions d’interaction dans un second état;
-- si `roomRuntime.eventOrchestrator.active.eventState` attend un choix, la vue affiche les libellés de `waitingChoice.choices` sous forme de boutons joueur;
-- cliquer un choix appelle `resolveRoomRuntimeEventChoice()`, reprend exactement l’événement actif puis laisse la file continuer automatiquement comme auparavant;
-- le `world` d’événement reste persistant dans la vue et remonte à la page RPG;
-- les changements de runtime issus des PNJ, du loot ou des choix remontent via un seul callback `onRoomRuntimeChange`;
-- l’API de loot existante `dungeonLootEntries()` / `grantDungeonCreatureLoot()` a été explicitement conservée après qu’un premier run ait signalé la régression d’export;
-- régression `rpg-dungeon-interactions-view.test.mjs` couvre visibilité PNJ active, masquage PNJ désactivé, exclusion des interactions non-PNJ, affichage des choix et disparition de la section choix lorsque l’événement n’attend plus.
+Présentation des textes et conséquences d’événements dans la vue gameplay Donjon :
+- `eventPresentationEntries()` transforme uniquement le journal déjà produit par `event-engine.js` en informations joueur ; aucune nouvelle résolution d’effet n’est introduite;
+- les actions `text`, jets réussis/échoués, récompenses, changements de porte, apparitions, transitions, changements d’état et choix joueur reçoivent une présentation lisible;
+- la vue Donjon affiche une section `📜 Événement` avec ce qui vient de se produire;
+- un événement actif en attente de choix utilise directement son `eventState`; un événement terminé peut rester présenté localement après la résolution pour ne pas disparaître instantanément;
+- les callbacks PNJ et choix mettent à jour cette présentation à partir du `eventState` réellement retourné par les runtimes existants;
+- changer de salle efface la présentation transitoire précédente, sauf si la nouvelle salle possède déjà un événement actif;
+- aucune modification n’a été faite à l’ordre FIFO, aux effets ou à l’anti-double exécution de `event-engine.js` / `event-queue-orchestrator.js`;
+- la régression `rpg-dungeon-gameplay-view.test.mjs` couvre texte narratif, jet, récompense, porte et choix en plus du loot/quêtes déjà protégés.
 
 Commits de l'étape :
-- vue Donjon PNJ/choix : `115c99de22e30e2c29eaaa3a13b44f4d6e15f2b1`
-- raccord page RPG/layout : `c47ed3d3821bdfabda56e52c59841cdbe22117de`
-- régression : `cb312043434702fbaf7d464df8788133a12dd1eb`
-- correction compatibilité API loot : `a1b2688bbc8f7385cf60aa9407d2a2f15eae314b`
+- présentation événements dans la vue Donjon : `27c6db1f1431962a8b2923aaa38b0e706765214a`
+- régression : `cafebc72a5ee3d0bfbacbc7ef97ff34569112b3e`
 
-CI finale : `34648252721` success.
+CI finale : `34648630875` success.
 
 ## Stockage — décision repoussée
 
@@ -90,7 +90,7 @@ CI finale : `34648252721` success.
 
 ## Priorités ouvertes
 
-- afficher proprement dans la vue Donjon les textes/conséquences d’événements déjà produits par `event-engine.js` (journal/popup), sans dupliquer l’exécution;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
+- poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

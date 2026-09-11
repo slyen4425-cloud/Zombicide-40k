@@ -19,10 +19,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Récupérer la base diagnostic V16.78.95
+      - name: Récupérer la base diagnostic V16.78.101
         uses: actions/checkout@v4
         with:
-          ref: diagnostic/v95-chrome-baseline-2026-09-11
+          ref: c458fb008b50db95ef5ca775342bc6eb5947e104
 
       - name: Vérifier la base diagnostic
         run: |
@@ -30,7 +30,7 @@ jobs:
           test -f service-worker.js
           echo "Diagnostic baseline commit:"
           git rev-parse HEAD
-          echo "Expected: abb86462325968603983bca06a45dbeabaf2e882"
+          echo "Expected: c458fb008b50db95ef5ca775342bc6eb5947e104"
 
       - name: Préparer le site diagnostic
         run: |
@@ -54,7 +54,7 @@ jobs:
           from pathlib import Path
           p=Path('_site/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v95diag"></script>'
+          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v101diag"></script>'
           if tag not in s:
               if '<head>' in s:
                   s=s.replace('<head>', '<head>\n'+tag, 1)
@@ -65,7 +65,7 @@ jobs:
                   s=tag+'\n'+s
           p.write_text(s,encoding='utf-8')
           PY
-          grep -q 'gens-chrome-startup-diag-1678122.js?v=v95diag' _site/index.html
+          grep -q 'gens-chrome-startup-diag-1678122.js?v=v101diag' _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

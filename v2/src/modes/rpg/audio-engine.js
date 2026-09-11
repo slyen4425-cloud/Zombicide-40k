@@ -66,3 +66,18 @@ export function stopAudio(state,requestId){
   next.history=[...(next.history||[]),{type:'stopped',requestId:String(requestId),audioId:String(audioId)}];
   return {ok:true,state:next};
 }
+
+export function stopAudioChannel(state,channel){
+  const next=clone(state||createAudioState());
+  const target=String(channel||'');
+  if(!AUDIO_CHANNELS.includes(target)) return {ok:false,reason:'invalid-channel',state};
+  next.playing=next.playing||{};
+  const stopped=[];
+  for(const [requestId,playback] of Object.entries(next.playing)){
+    if(String(playback?.channel)!==target) continue;
+    stopped.push({requestId:String(requestId),audioId:String(playback?.audioId||'')});
+    delete next.playing[requestId];
+  }
+  for(const item of stopped) next.history=[...(next.history||[]),{type:'stopped',requestId:item.requestId,audioId:item.audioId,channel:target}];
+  return {ok:true,state:next,stopped};
+}

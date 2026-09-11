@@ -26,4 +26,25 @@ result=canDetectActor(spatial,'guard','rogue',actors,{visionStatId:'vision',stea
 assert.equal(Number.isFinite(result.distance),true);
 assert.equal(result.distance,4);
 
+spatial=setBlockedCells(spatial,[]);
+actors.rogue.state.stats.stealth=0;
+const wallLayout={
+  width:3,height:1,cells:{},doors:[],
+  walls:[{x:0,y:0,edge:'east',blocksMovement:true,blocksVision:true}],
+};
+result=canDetectActor(spatial,'guard','rogue',actors,{
+  visionStatId:'vision',stealthStatId:'stealth',distancePenaltyPerUnit:0,
+  blockedLineOfSightStopsDetection:true,roomLayout:wallLayout,
+});
+assert.equal(result.detected,false);
+assert.equal(result.reason,'line-of-sight-blocked');
+
+const openSightLayout={...wallLayout,walls:[{x:0,y:0,edge:'east',blocksMovement:true,blocksVision:false}]};
+result=canDetectActor(spatial,'guard','rogue',actors,{
+  visionStatId:'vision',stealthStatId:'stealth',distancePenaltyPerUnit:0,
+  blockedLineOfSightStopsDetection:true,roomLayout:openSightLayout,
+});
+assert.equal(result.detected,true);
+assert.equal(result.reason,'detected');
+
 console.log('rpg-perception.test.mjs: OK');

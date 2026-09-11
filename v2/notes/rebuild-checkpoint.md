@@ -27,24 +27,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Objets de départ héros : `startingItems` remplit maintenant l'inventaire à la création du runtime. CI run `34634619019` : success.
 - Équipement de départ héros : `startingEquipment` permet d'équiper proprement l'objet prévu dès la création du runtime. CI run `34635030983` : success.
 - Loot de salle : `resolveRoomCreatureDefeat()` persiste la défaite et le loot idempotent directement dans l'entité de salle. CI run `34635256399` : success.
+- Statuts persistants réversibles : les modificateurs temporaires de stats ne se cumulent plus à chaque tick et restaurent la valeur d'origine à l'expiration. CI run `34635529424` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Statuts persistants réversibles pour les modificateurs de caractéristiques :
-- nouveau `addPersistentStatus()` dans `status-engine.js`;
-- un effet `stat-modifier` temporaire est appliqué une seule fois à l'ajout du statut;
-- sa valeur précédente est conservée dans le statut pour permettre un retour exact à l'expiration;
-- rafraîchir le même statut prolonge sa durée sans réappliquer le bonus une seconde fois;
-- `processStatuses()` ignore volontairement ces statuts persistants pour empêcher les cumuls à chaque début de tour;
-- `decayStatuses()` restaure la valeur d'origine quand le statut expire;
-- les DoT/HoT et autres statuts périodiques existants continuent de fonctionner selon leur `timing` historique.
+Attribution idempotente du loot de créature à un inventaire :
+- nouveau `grantRoomCreatureDrops(roomRuntime, instanceId, inventory, definitions)` dans `spawn-engine.js`;
+- l'attribution n'est autorisée qu'après un `lootClaimed` valide;
+- les drops passent par l'autorité `addItem()` de l'inventaire, donc stacks et quantités restent centralisés;
+- l'opération est atomique : si un objet ne peut pas être ajouté, l'inventaire d'origine est conservé et le loot n'est pas marqué distribué;
+- après succès, `lootGranted:true` est persisté dans le `creatureRuntime` stocké dans l'entité de salle;
+- un second appel, y compris après sauvegarde/rechargement, renvoie `already-granted` et n'ajoute rien une deuxième fois;
+- le test vérifie qu'une écaille de dragon issue de la Wyverne n'est présente qu'une seule fois après deux tentatives de distribution.
 
 Commits de l'étape :
-- moteur : `915ab5e7f264f1a2220bf1c610a8124a8798115e`
-- régression : `cea29f707abf97bd40d93335fb6ad76e4d80e560`
+- moteur : `553c375fc8d0be277e563d1e7d2870aee5593c2e`
+- régression : `6650d4adf3b518da4cb7de2bb512e58a2bddcb75`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -57,7 +58,7 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- intégrer proprement l'attribution des drops au héros/groupe après `resolveRoomCreatureDefeat()`;
+- choisir ensuite la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
 - couverture/obstacles et modificateurs d'équipement tactiques;

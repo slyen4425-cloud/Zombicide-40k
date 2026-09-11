@@ -3,6 +3,7 @@ import { calculateInitiative } from './initiative.js';
 import { ensureCombatConfig } from './combat-config.js';
 import { combatParticipants } from './spatial-engine.js';
 import { getHeroRoomLocation, heroesInRoom } from './room-runtime.js';
+import { resolveRoomCreatureDefeat } from './spawn-engine.js';
 
 function clone(value){return structuredClone(value);}
 function list(value){return Array.isArray(value)?value:Object.values(value||{});}
@@ -96,5 +97,61 @@ export function startDungeonCombat({
     heroIds:clone(participants.heroIds),
     enemyIds:clone(combat.metadata.enemyIds),
     enemyEntityIds:clone(combat.metadata.enemyEntityIds),
+  };
+}
+
+export function reconcileDungeonCombatResult({
+  combat,
+  roomRuntime,
+  heroRuntimes=[],
+  universe={},
+  random=Math.random,
+}={}){
+  if(!combat||combat.metadata?.kind!=='dungeon-room-combat') return {ok:false,reason:'not-dungeon-combat',combat,roomRuntime,heroRuntimes:clone(heroRuntimes||[]),defeatedEnemyIds:[]};
+  if(combat.phase!=='ended') return {ok:false,reason:'combat-not-ended',combat,roomRuntime,heroRuntimes:clone(heroRuntimes||[]),defeatedEnemyIds:[]};
+  const roomId=String(combat.metadata?.roomId||'');
+  const room=roomRuntime?.rooms?.[roomId];
+  if(!room) return {ok:false,reason:'room-runtime-missing',combat,roomRuntime,heroRuntimes:clone(heroRuntimes||[]),defeatedEnemyIds:[]};
+
+  const nextRuntime=clone(roomRuntime);
+  let roomState=clone(nextRuntime.rooms[roomId]);
+  const nextHeroes=list(heroRuntimes).map(hero=>clone(hero));
+  const defeatedEnemyIds=[];
+
+  for(const actor of Object.values(combat.actors||{})){
+    if(actor.side==='heroes'){
+      const hero=heroRuntimeById(nextHeroes,actor.id);
+      if(!hero) continue;
+      hero.state=clone(actor.state||hero.state||{});
+      hero.ko=Boolean(actor.ko);
+      if(hero.ko) hero.active=false;
+      else if(!hero.dead) hero.active=true;
+      continue;
+    }
+    if(actor.side!=='enemies') continue;
+    const entityId=String(actor.metadata?.roomEntityId||'');
+    const entity=(roomState.entities||[]).find(entry=>String(entry.id)===entityId);
+    if(!entity?.data?.creatureRuntime) continue;
+    entity.data.creatureRuntime.state=clone(actor.state||entity.data.creatureRuntime.state||{});
+    if(!actor.ko) continue;
+    const defeated=resolveRoomCreatureDefeat(roomState,entityId,universe,{random});
+    if(defeated.ok||defeated.reason==='already-claimed'){
+      roomState=defeated.roomRuntime;
+      defeatedEnemyIds.push(entityId);
+    }
+  }
+
+  nextRuntime.rooms[roomId]=roomState;
+  const heroesStillAlive=nextHeroes.some(hero=>hero&&!hero.dead&&!hero.ko&&hero.active!==false);
+  return {
+    ok:true,
+    reason:null,
+    combat:clone(combat),
+    roomRuntime:nextRuntime,
+    heroRuntimes:nextHeroes,
+    defeatedEnemyIds,
+    roomCleared:activeDungeonEnemies(nextRuntime,roomId).length===0,
+    heroesStillAlive,
+    outcome:combat.winner==='heroes'?'victory':combat.winner==='enemies'?'defeat':'ended',
   };
 }

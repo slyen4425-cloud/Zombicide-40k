@@ -1,6 +1,7 @@
 import { inspectAllyRoomInteraction, recruitFromRoomInteraction, summonFromRoomInteraction, dismissFromRoomInteraction } from './ally-interaction-runtime.js';
 import { buildNpcInteractionView, applyNpcQuestAction, renderNpcInteractionView } from './npc-interaction-ui.js';
 import { enqueueEventRequest } from './event-queue-runtime.js';
+import { drainRoomRuntimeEvents } from './room-event-runtime.js';
 
 function clone(value){return structuredClone(value);}
 function byId(list,id){return (list||[]).find(item=>String(item.id)===String(id))||null;}
@@ -86,10 +87,11 @@ export function applyRoomNpcAllyAction(roomRuntime,roomId,roomInteraction,action
   return {...out,roomRuntime:queued.roomRuntime,eventQueued:queued.eventQueued,eventRequest:queued.eventRequest};
 }
 
-export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction,definitions={},quests=[],conditionEvaluator=null,context={},roster=null,wallet={},ownerActorId=null,x=null,y=null,onRoomRuntimeChange=null,onAllyStateChange=null}={}){
+export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction,definitions={},quests=[],conditionEvaluator=null,context={},roster=null,wallet={},ownerActorId=null,x=null,y=null,eventContext={},onRoomRuntimeChange=null,onAllyStateChange=null,onEventStateChange=null}={}){
   let currentRuntime=roomRuntime;
   let currentRoster=roster;
   let currentWallet=wallet;
+  let currentEventWorld=clone(eventContext.world||{});
   const render=()=>{
     const built=buildRoomNpcInteractionView({roomRuntime:currentRuntime,roomId,roomInteraction,definitions,quests,conditionEvaluator});
     if(!built.ok){host.innerHTML='<p class="muted">Interaction indisponible.</p>';return built;}
@@ -103,6 +105,12 @@ export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction
           currentRuntime=out.roomRuntime;
           if(out.ok&&out.roster) currentRoster=out.roster;
           if(out.ok&&out.wallet) currentWallet=out.wallet;
+          if(out.eventQueued){
+            const events=drainRoomRuntimeEvents(currentRuntime,definitions,{...eventContext,roomId,world:currentEventWorld});
+            currentRuntime=events.roomRuntime;
+            currentEventWorld=events.world;
+            onEventStateChange?.({roomRuntime:currentRuntime,world:currentEventWorld,eventState:events.eventState,processed:events.processed,reason:events.reason},out);
+          }
           if(out.ok) onAllyStateChange?.({roomRuntime:currentRuntime,roster:currentRoster,wallet:currentWallet},out);
           onRoomRuntimeChange?.(currentRuntime,out);
           render();
@@ -115,5 +123,5 @@ export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction
     return built;
   };
   render();
-  return {getRoomRuntime:()=>currentRuntime,getRoster:()=>currentRoster,getWallet:()=>currentWallet,render};
+  return {getRoomRuntime:()=>currentRuntime,getRoster:()=>currentRoster,getWallet:()=>currentWallet,getEventWorld:()=>currentEventWorld,render};
 }

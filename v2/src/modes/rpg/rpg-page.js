@@ -20,7 +20,7 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,onDungeonCombatStart=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,onDungeonCombatStart=null,onDungeonCombatChange=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
   let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
@@ -75,6 +75,10 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       onCombatStart:(combat,out)=>{
         currentDungeonCombat=combat;
         onDungeonCombatStart?.(structuredClone(combat),out);
+      },
+      onCombatChange:(combat,out)=>{
+        currentDungeonCombat=structuredClone(combat);
+        onDungeonCombatChange?.(structuredClone(combat),out);
       },
       onCombatEnd:(combat,out)=>{
         currentDungeonCombat=structuredClone(combat);

@@ -17,7 +17,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
-- Quêtes : runtime persistant + signaux salle/interactions maintenant raccordés directement au runtime de donjon.
+- Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile prêt à monter dans la vue de gameplay.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -42,24 +42,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - runtime lifecycle quêtes : `34644426041` success
 - bridge salle/interactions -> quêtes : `34644955703` success
 - raccord automatique runtime donjon -> quêtes : `34645470548` success
+- journal de quêtes joueur : `34645656619` success
 
 ## Dernière étape terminée
 
-Raccord automatique du runtime de donjon vers le runtime de quêtes :
-- `room-runtime.js` importe désormais le bridge de quêtes;
-- `createDungeonRuntime()` accepte optionnellement `questRuntime`, `quests`, définitions et contexte de quête;
-- l'entrée dans la salle de départ passe automatiquement par `visitCurrentRoom()` et produit le signal `visit` sans appel manuel externe;
-- `transitionDungeonRoom()` produit automatiquement le signal `visit` pour la salle d'arrivée;
-- `attemptRoomInteraction()` applique automatiquement les signaux `interact`, le type d'interaction (`npc`, `switch`, `object`, etc.) et les `questSignals` personnalisés uniquement après une réussite;
-- le runtime de quêtes est conservé dans `runtime.questRuntime`, donc progression et runtime de salle voyagent ensemble dans l'orchestrateur donjon;
-- tous les nouveaux paramètres sont optionnels : les appels historiques de `room-runtime.js` restent compatibles et ne changent pas de comportement si aucune quête n'est fournie;
-- régression `rpg-room-quest-wiring.test.mjs` couvre visite de salle de départ, interaction PNJ, transition de salle, interrupteur et flag custom sans invocation manuelle du bridge.
+Journal de quêtes côté joueur :
+- nouveau `quest-journal-ui.js`;
+- construit des entrées à partir des définitions de quêtes et de `runtime.questRuntime` sans recopier la logique de progression;
+- affiche d'abord les quêtes actives, puis terminées et échouées;
+- masque les quêtes inactives par défaut et ignore les quêtes désactivées;
+- affiche nom, description, état lisible, objectifs, progression `actuel/requis`, objectif optionnel et statut terminé;
+- les objectifs optionnels ne sont pas comptés dans la progression obligatoire;
+- aucun ID technique n'est montré au joueur;
+- état vide mobile-friendly `Aucune quête active pour le moment`;
+- bouton `?` contextualisé pour le futur HelpDrawer;
+- `mountQuestJournal()` permet de monter le journal directement dans une vue gameplay;
+- régression `rpg-quest-journal-ui.test.mjs` couvre tri, progression, optionnels, masquage inactif/désactivé, rendu lisible et état vide.
 
 Commits de l'étape :
-- raccord runtime : `5aaa19109b1c78e18f3e4b634e84960decc94fc1`
-- régression : `21edac7d317b720184d8a54ad81016a7c0bf1433`
+- journal UI : `7f7ae5edac9506b0d790d12d47f4b5f8bf4286a2`
+- régression : `c648fc4c519a330a7e4bbfcc79cf036e08b2d906`
 
-CI : `34645470548` success.
+CI : `34645656619` success.
 
 ## Stockage — décision repoussée
 
@@ -69,8 +73,8 @@ CI : `34645470548` success.
 
 ## Priorités ouvertes
 
-- construire le journal/UI de quête lisible côté joueur;
 - poursuivre l'UI PNJ/interactions et relier les dialogues/actions de quête;
+- monter le journal de quêtes dans la vraie vue de gameplay du donjon quand cette vue est raccordée;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;

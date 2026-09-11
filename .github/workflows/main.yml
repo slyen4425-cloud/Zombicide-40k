@@ -1,4 +1,4 @@
-name: Deploy GenSrpG V16.78.123 no-SW diagnostic to GitHub Pages
+name: Deploy GenSrpG V16.78.125 persistent Chrome diagnostic to GitHub Pages
 
 on:
   push:
@@ -24,13 +24,6 @@ jobs:
         with:
           ref: 22ce0194fcb8b9a439fc2cdcecb3ffb91c5be58c
 
-      - name: Vérifier la référence
-        run: |
-          test -f index.html
-          test -f service-worker.js
-          test -f assets/gensrpg/gens-chrome-startup-diag-1678122.js
-          git rev-parse HEAD
-
       - name: Préparer le site V123
         run: |
           rm -rf _site
@@ -44,6 +37,74 @@ jobs:
           for file in sound_*.mp3; do
             if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
+
+      - name: Installer le traceur persistant V125
+        run: |
+          mkdir -p _site/assets/gensrpg
+          cat > _site/assets/gensrpg/gens-chrome-startup-diag-1678122.js <<'EOF'
+          (()=>{
+            if(window.__GENSRPG_DIAG125_INSTALLED__) return;
+            window.__GENSRPG_DIAG125_INSTALLED__=true;
+            const KEY='gensrpg-diag-v125-last';
+            let previous='';
+            try{previous=localStorage.getItem(KEY)||''}catch{}
+            const rows=[];
+            let box=null;
+            let expanded=!!previous;
+            const now=()=>new Date().toLocaleTimeString();
+            const textOf=x=>{try{return String(x??'').replace(/\s+/g,' ').slice(0,220)}catch{return '[unprintable]'}};
+            const targetOf=t=>{try{
+              if(!t) return 'null';
+              const tag=(t.tagName||t.nodeName||'node').toLowerCase();
+              const id=t.id?`#${t.id}`:'';
+              const cls=t.className&&typeof t.className==='string'?'.'+t.className.trim().replace(/\s+/g,'.'):'';
+              const txt=textOf(t.innerText||t.textContent||'').slice(0,90);
+              return `${tag}${id}${cls}${txt?` «${txt}»`:''}`;
+            }catch{return '[target?]'}};
+            function persist(line){try{localStorage.setItem(KEY,line)}catch{}}
+            function applyBoxMode(){if(!box)return;if(expanded){box.style.cssText+=';left:6px;right:6px;width:auto;max-height:60vh;padding:8px;overflow:auto;white-space:pre-wrap'}else{box.style.cssText+=';left:auto;right:6px;width:136px;max-height:34px;padding:6px 8px;overflow:hidden;white-space:nowrap'}}
+            function ensureBox(){
+              if(box&&box.isConnected)return box;if(!document.body)return null;
+              box=document.createElement('div');box.id='gensrpgDiag125';
+              box.style.cssText='position:fixed;z-index:2147483647;bottom:6px;background:rgba(0,0,0,.9);color:#fff;border:2px solid #ffb300;border-radius:10px;font:12px/1.35 monospace;box-shadow:0 0 12px #000;pointer-events:auto;user-select:none';
+              box.addEventListener('click',()=>{expanded=!expanded;applyBoxMode();render()});document.body.appendChild(box);applyBoxMode();render();return box;
+            }
+            function render(){
+              if(!box||!box.isConnected)return;
+              if(!expanded){box.textContent='DIAG V125';return;}
+              box.textContent='DIAG CHROME V125 — toucher pour replier\n'+(previous?'DERNIÈRE ÉTAPE AVANT RECHARGEMENT:\n'+previous+'\n---\n':'')+rows.slice(-16).join('\n');
+            }
+            function log(msg,kind='i'){
+              const line=`${now()} ${kind==='e'?'❌':kind==='w'?'⚠️':'•'} ${msg}`;
+              persist(line);rows.push(line);if(rows.length>100)rows.splice(0,rows.length-100);ensureBox();render();
+              try{console[kind==='e'?'error':kind==='w'?'warn':'log']('[V125]',msg)}catch{}
+            }
+            window.__GENSRPG_DIAG125__={log,rows,previous,expand:()=>{expanded=true;applyBoxMode();render()}};
+            window.addEventListener('error',e=>log(`ERROR ${e.message||'inconnue'} @ ${e.filename||'?'}:${e.lineno||0}:${e.colno||0}`,'e'),true);
+            window.addEventListener('unhandledrejection',e=>log(`PROMISE ${textOf(e.reason&&e.reason.stack||e.reason)}`,'e'),true);
+            const nativeAdd=EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener=function(type,listener,opts){
+              if(type!=='click'||!listener)return nativeAdd.call(this,type,listener,opts);
+              const wrapped=typeof listener==='function'?function(ev){
+                log(`handler START ${listener.name||'[anon]'} sur ${targetOf(this)}`);
+                try{const r=listener.call(this,ev);log(`handler END ${listener.name||'[anon]'}`);return r}
+                catch(err){log(`handler THROW ${listener.name||'[anon]'}: ${textOf(err&&err.stack||err)}`,'e');throw err}
+              }:listener;
+              return nativeAdd.call(this,type,wrapped,opts);
+            };
+            document.addEventListener('click',ev=>{
+              const t=ev.target;const inline=t&&t.getAttribute?t.getAttribute('onclick'):null;
+              log(`CLICK capture ${targetOf(t)}${inline?` onclick=${textOf(inline)}`:''}`);
+              Promise.resolve().then(()=>log('microtask après CLICK'));
+              setTimeout(()=>log('timer 0 après CLICK'),0);
+              requestAnimationFrame(()=>log('RAF après CLICK'));
+              setTimeout(()=>log('timer 250ms après CLICK'),250);
+            },true);
+            document.addEventListener('DOMContentLoaded',()=>{ensureBox();log(`DOMContentLoaded UA=${textOf(navigator.userAgent)}`)});
+            window.addEventListener('load',()=>log('window.load terminé'));
+            setTimeout(()=>{ensureBox();log('diag V125 chargé avant bootstrap principal')},0);
+          })();
+          EOF
 
       - name: Ajouter le mode no-SW dans index
         run: |
@@ -66,47 +127,21 @@ jobs:
             }catch(e){console.warn('noSW guard',e)}
           })();
           </script>'''
-          if '<head>' in s:
-              s=s.replace('<head>','<head>\n'+guard,1)
-          else:
-              s=guard+'\n'+s
+          if '<head>' in s:s=s.replace('<head>','<head>\n'+guard,1)
+          else:s=guard+'\n'+s
           p.write_text(s,encoding='utf-8')
           PY
 
       - name: Créer la page de nettoyage no-SW
         run: |
-          cat > _site/nosw-clean-v124.html <<'EOF'
+          cat > _site/nosw-clean-v125.html <<'EOF'
           <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>GenSrpG diagnostic sans service worker</title>
-          <body style="background:#111;color:#fff;font-family:sans-serif;padding:24px"><h2>Nettoyage diagnostic…</h2><pre id="log"></pre>
-          <script>
-          (async()=>{
-            const log=document.getElementById('log');
-            const say=t=>{log.textContent+=t+'\n'};
-            try{
-              if('serviceWorker' in navigator){
-                const regs=await navigator.serviceWorker.getRegistrations();
-                say('Service workers: '+regs.length);
-                await Promise.all(regs.map(r=>r.unregister()));
-                say('Service workers désinscrits');
-              }
-              if('caches' in window){
-                const names=await caches.keys();
-                say('Caches: '+names.length);
-                await Promise.all(names.map(n=>caches.delete(n)));
-                say('Caches supprimés');
-              }
-              say('Redirection vers V123 sans SW…');
-              const target='./?nosw=1&clean=1&t='+Date.now();
-              setTimeout(()=>location.replace(target),350);
-            }catch(e){say('ERREUR: '+(e&&e.stack||e));}
-          })();
-          </script>
+          <title>GenSrpG diagnostic V125</title><body style="background:#111;color:#fff;font-family:sans-serif;padding:24px"><h2>Diagnostic Chrome V125…</h2><pre id="log"></pre>
+          <script>(async()=>{const l=document.getElementById('log'),say=t=>l.textContent+=t+'\n';try{if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistrations();await Promise.all(r.map(x=>x.unregister()));say('Service workers désinscrits')}if('caches'in window){const n=await caches.keys();await Promise.all(n.map(x=>caches.delete(x)));say('Caches supprimés')}say('Ouverture du test…');setTimeout(()=>location.replace('./?nosw=1&diag125=1&t='+Date.now()),300)}catch(e){say('ERREUR '+(e&&e.stack||e))}})();</script>
           EOF
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
-
       - name: Envoyer le site comme artifact Pages
         uses: actions/upload-pages-artifact@v3
         with:

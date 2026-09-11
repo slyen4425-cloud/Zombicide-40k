@@ -1,4 +1,4 @@
-import { createCreatureRuntime } from './bestiary-engine.js';
+import { createCreatureRuntime, claimCreatureLoot } from './bestiary-engine.js';
 
 function clone(value){return structuredClone(value);}
 function uid(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
@@ -65,4 +65,29 @@ export function executeSpawn(definition,context={}){
   const rewards=[];
   if(check.def.kind==='boss'&&check.def.bossKeyItemId) rewards.push({itemId:check.def.bossKeyItemId,source:'boss-key'});
   return {ok:true,spawnState:nextState,roomRuntime:room,instances,rewards};
+}
+
+export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {random=Math.random}={}){
+  const room=clone(roomRuntime||null);
+  if(!room) return {ok:false,reason:'room-runtime-missing',roomRuntime, drops:[]};
+  const entity=(room.entities||[]).find(x=>String(x.id)===String(instanceId));
+  if(!entity||entity.kind!=='creature') return {ok:false,reason:'creature-entity-missing',roomRuntime,drops:[]};
+  const runtime=entity.data?.creatureRuntime;
+  if(!runtime) return {ok:false,reason:'creature-runtime-missing',roomRuntime,drops:[]};
+  const creature=byId(universe.bestiary,runtime.creatureId);
+  if(!creature) return {ok:false,reason:'creature-definition-missing',roomRuntime,drops:[]};
+
+  const defeatedRuntime={...clone(runtime),defeated:true,active:false};
+  const claimed=claimCreatureLoot(defeatedRuntime,creature,{random});
+  const finalRuntime=claimed.runtime||defeatedRuntime;
+  entity.active=false;
+  entity.defeated=true;
+  entity.data={...(entity.data||{}),creatureRuntime:clone(finalRuntime)};
+  return {
+    ok:claimed.ok,
+    reason:claimed.reason||null,
+    roomRuntime:room,
+    creatureRuntime:clone(finalRuntime),
+    drops:clone(claimed.drops||[]),
+  };
 }

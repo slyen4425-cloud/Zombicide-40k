@@ -3,6 +3,7 @@ import {
   createWorld,createZone,createRoom,createRoomLink,buildWorldIndex,validateWorld,
   createWorldSession,availableRoomLinks,traverseRoomLink,returnToPreviousRoom
 } from '../src/modes/rpg/world-engine.js';
+import { createInventoryState, addItem } from '../src/modes/rpg/inventory-engine.js';
 
 const zone=createZone({id:'z1',name:'Forêt',roomIds:['r1','r2','cache']});
 const rooms=[
@@ -49,6 +50,22 @@ const gatedIndex=buildWorldIndex({world,zones:[zone],rooms,links:[gated]});
 const gatedSession=createWorldSession(gatedIndex).session;
 assert.equal(availableRoomLinks(gatedIndex,gatedSession,{conditionEvaluator:()=>false}).length,0);
 assert.equal(availableRoomLinks(gatedIndex,gatedSession,{conditionEvaluator:id=>id==='key'}).length,1);
+
+const itemGate=createRoomLink({id:'boss-exit',fromRoomId:'r1',toRoomId:'r2',requiredItemId:'boss-key'});
+const itemGateIndex=buildWorldIndex({world,zones:[zone],rooms,links:[itemGate]});
+const itemGateSession=createWorldSession(itemGateIndex).session;
+const itemDefinitions={items:[{id:'boss-key',name:'Clé du boss',enabled:true,stackable:true,maxStack:9}]};
+const emptyInventory=createInventoryState();
+assert.equal(availableRoomLinks(itemGateIndex,itemGateSession,{inventory:emptyInventory}).length,0,'boss exit must stay hidden/blocked before the key exists');
+const blockedByItem=traverseRoomLink(itemGateIndex,itemGateSession,'boss-exit',{inventory:emptyInventory});
+assert.equal(blockedByItem.ok,false);
+assert.equal(blockedByItem.reason,'link-unavailable');
+const keyAdded=addItem(emptyInventory,'boss-key',1,itemDefinitions);
+assert.equal(keyAdded.ok,true);
+assert.equal(availableRoomLinks(itemGateIndex,itemGateSession,{inventory:keyAdded.inventory}).length,1);
+const passedBossExit=traverseRoomLink(itemGateIndex,itemGateSession,'boss-exit',{inventory:keyAdded.inventory});
+assert.equal(passedBossExit.ok,true);
+assert.equal(passedBossExit.session.currentRoomId,'r2');
 
 const broken=buildWorldIndex({world:createWorld({id:'bad',startRoomId:'missing'}),zones:[],rooms:[],links:[]});
 assert.equal(validateWorld(broken).valid,false);

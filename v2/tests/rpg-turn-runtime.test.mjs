@@ -14,8 +14,15 @@ const defs = {
 };
 let combat = createCombatState({ combatants:[
   { id:'hero', side:'heroes', initiative:10, state:{ stats:{agi:10}, resources:{ hp:{current:10,max:10}, stamina:{current:5,max:5} } } },
+  { id:'ally', side:'heroes', initiative:7, state:{ resources:{ hp:{current:10,max:10} } } },
   { id:'enemy', side:'enemies', initiative:5, state:{ resources:{ hp:{current:10,max:10} } } },
 ]});
+
+const invalid = prepareSkillAction(combat, skill, 'ally', defs, { actionId:'bad-target' });
+assert.equal(invalid.ok, false);
+assert.equal(invalid.reason, 'same-side');
+assert.equal(invalid.combat.actors.hero.state.resources.stamina.current, 5, 'invalid manual target must not spend resource');
+assert.equal(invalid.combat.actors.hero.state.skillRuntime, undefined, 'invalid target must not consume charge or start cooldown');
 
 const prep = prepareSkillAction(combat, skill, 'enemy', defs, { actionId:'a1' });
 assert.equal(prep.ok, true);
@@ -26,7 +33,7 @@ assert.equal(prep.combat.actors.hero.state.skillRuntime.strike.cooldown, 2);
 const out = resolveAndAdvance(prep.combat, { definitions:defs, checkResult:{ success:true, roll:20, threshold:60 }, randomPercent:()=>0 });
 assert.equal(out.resolved, true);
 assert.equal(out.combat.actors.enemy.state.resources.hp.current, 7);
-assert.equal(out.combat.activeActorId, 'enemy');
+assert.equal(out.combat.activeActorId, 'ally');
 assert.equal(out.combat.actors.hero.state.skillRuntime.strike.cooldown, 1);
 
 console.log('rpg-turn-runtime.test.mjs: OK');

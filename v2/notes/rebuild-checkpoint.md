@@ -12,7 +12,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
 - Compétences et pièges peuvent référencer des jets réutilisables par `checkId`, avec compatibilité des anciens champs inline.
 - Les événements peuvent exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
-- Les interactions de salle peuvent maintenant demander un jet réutilisable via `checkId`, avec fallback inline et résultat succès/échec explicite.
+- Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont maintenant persistés dans le runtime de salle.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -39,22 +39,23 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - éditeur générique de jets/tests : `34641810586` success
 - correction normalisation des checks : `34642346782` success
 - jets réutilisables dans les événements : `34642604129` success
+- jets réutilisables sur interactions de salle : `34642816595` success
 
 ## Dernière étape codée
 
-Jets réutilisables sur les interactions de salle :
-- `createRoomInteraction()` accepte désormais `checkId` et un fallback inline `check`;
-- les anciennes interactions restent compatibles car l'absence de jet signifie réussite automatique;
-- nouveau helper `resolveRoomInteractionCheck(interaction, actor, options)` basé sur `resolveDefinedActorCheck()`;
-- une interaction désactivée est refusée proprement;
-- une définition de jet désactivée renvoie le contrat partagé `check-disabled`;
-- le résultat fournit `success`, `outcome` (`success` / `failure`), le détail du jet et la définition utilisée;
-- `updateRoomInteraction()` repasse désormais par `createRoomInteraction()` pour conserver la normalisation de `checkId/check` pendant les éditions;
-- régression `rpg-interaction-check.test.mjs` ajoutée avec levier de Force, réussite/échec, fallback D20 inline, jet désactivé et interaction libre sans jet.
+Persistance runtime des tentatives d'interaction :
+- l'état runtime d'une interaction conserve désormais `attempts`, `lastOutcome` et `lastCheck`;
+- nouveau `attemptRoomInteraction(runtime, roomId, interaction, actor, options)` dans `room-runtime.js`;
+- la tentative passe par `resolveRoomInteractionCheck()` et donc par le noyau partagé de jets;
+- un échec incrémente la tentative mais laisse l'interaction rejouable;
+- une réussite marque l'interaction `completed` par défaut;
+- une interaction déjà terminée ne relance pas le dé et renvoie `alreadyCompleted`;
+- le log runtime enregistre `room-interaction-attempted`, tentative, résultat et détail du jet;
+- l'état de tentative/réussite reste intact en quittant la salle, en revenant et lors d'un nouvel `ensureRoomInstance()`.
 
 Commits de l'étape :
-- moteur interactions/check : `0a47a93ed7e0bf4f779ca4f86c7fe02995a382b8`
-- régression interactions : `778d97cd8f3446b46f81b975b2df40e597246f7b`
+- runtime interactions : `e80437d9f187e22537f46715f61520e6cce9c5e9`
+- régression runtime : `9047b9d65b4e5a313fbd53c5559abf23fa2a0b2c`
 
 CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
@@ -67,7 +68,6 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 ## Priorités ouvertes
 
 - ajouter les références `checkId` dans les interfaces d'édition des compétences, pièges et interactions, sans ID brut;
-- brancher la résolution d'interaction sur le runtime de salle pour mémoriser tentative/résultat si besoin;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

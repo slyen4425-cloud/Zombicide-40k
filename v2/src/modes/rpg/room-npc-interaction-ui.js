@@ -1,5 +1,6 @@
 import { inspectAllyRoomInteraction, recruitFromRoomInteraction, summonFromRoomInteraction, dismissFromRoomInteraction } from './ally-interaction-runtime.js';
 import { buildNpcInteractionView, applyNpcQuestAction, renderNpcInteractionView } from './npc-interaction-ui.js';
+import { enqueueEventRequest } from './event-queue-runtime.js';
 
 function clone(value){return structuredClone(value);}
 function byId(list,id){return (list||[]).find(item=>String(item.id)===String(id))||null;}
@@ -59,18 +60,30 @@ export function applyRoomNpcQuestAction(roomRuntime,quests,action,{definitions={
   return {...out,roomRuntime:next};
 }
 
+function queueAllyEvent(roomRuntime,eventId,action,roomInteraction,outcome){
+  if(!eventId) return {roomRuntime,eventQueued:false,eventRequest:null};
+  const next=clone(roomRuntime||{});
+  const queued=enqueueEventRequest(next.eventQueue,eventId,{source:'npc-ally-action',sourceId:roomInteraction?.id||null,metadata:{actionKind:action?.kind||null,outcome}});
+  if(!queued.ok) return {roomRuntime,eventQueued:false,eventRequest:null};
+  next.eventQueue=queued.queue;
+  return {roomRuntime:next,eventQueued:true,eventRequest:queued.request};
+}
+
 export function applyRoomNpcAllyAction(roomRuntime,roomId,roomInteraction,action,{roster,wallet={},definitions={},ownerActorId=null,x=null,y=null,conditionEvaluator=null}={}){
-  if(!action) return {ok:false,reason:'action-missing',roomRuntime,roster,wallet};
+  if(!action) return {ok:false,reason:'action-missing',roomRuntime,roster,wallet,eventQueued:false};
+  let out;
   if(action.kind==='recruit-ally'){
-    return recruitFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,wallet,definitions,ownerActorId,x,y,conditionEvaluator});
+    out=recruitFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,wallet,definitions,ownerActorId,x,y,conditionEvaluator});
+  } else if(action.kind==='summon-ally'){
+    out=summonFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,definitions,ownerActorId,x,y,sourceKind:action.sourceKind,sourceId:action.sourceId,conditionEvaluator});
+  } else if(action.kind==='dismiss-ally'){
+    out=dismissFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,instanceId:action.instanceId,definitions});
+  } else {
+    return {ok:false,reason:'action-unsupported',roomRuntime,roster,wallet,eventQueued:false};
   }
-  if(action.kind==='summon-ally'){
-    return summonFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,definitions,ownerActorId,x,y,sourceKind:action.sourceKind,sourceId:action.sourceId,conditionEvaluator});
-  }
-  if(action.kind==='dismiss-ally'){
-    return dismissFromRoomInteraction({roomRuntime,roomId,roomInteraction,roster,instanceId:action.instanceId,definitions});
-  }
-  return {ok:false,reason:'action-unsupported',roomRuntime,roster,wallet};
+  const baseRuntime=out.roomRuntime||roomRuntime;
+  const queued=queueAllyEvent(baseRuntime,out.eventId,action,roomInteraction,out.ok?'success':'failure');
+  return {...out,roomRuntime:queued.roomRuntime,eventQueued:queued.eventQueued,eventRequest:queued.eventRequest};
 }
 
 export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction,definitions={},quests=[],conditionEvaluator=null,context={},roster=null,wallet={},ownerActorId=null,x=null,y=null,onRoomRuntimeChange=null,onAllyStateChange=null}={}){
@@ -86,11 +99,11 @@ export function mountRoomNpcInteraction(host,{roomRuntime,roomId,roomInteraction
       if(!action) return;
       if(['recruit-ally','summon-ally','dismiss-ally'].includes(action.kind)){
         const out=applyRoomNpcAllyAction(currentRuntime,roomId,roomInteraction,action,{roster:currentRoster,wallet:currentWallet,definitions,ownerActorId,x,y,conditionEvaluator});
-        if(out.ok){
+        if(out.ok||out.eventQueued){
           currentRuntime=out.roomRuntime;
-          if(out.roster) currentRoster=out.roster;
-          if(out.wallet) currentWallet=out.wallet;
-          onAllyStateChange?.({roomRuntime:currentRuntime,roster:currentRoster,wallet:currentWallet},out);
+          if(out.ok&&out.roster) currentRoster=out.roster;
+          if(out.ok&&out.wallet) currentWallet=out.wallet;
+          if(out.ok) onAllyStateChange?.({roomRuntime:currentRuntime,roster:currentRoster,wallet:currentWallet},out);
           onRoomRuntimeChange?.(currentRuntime,out);
           render();
         }

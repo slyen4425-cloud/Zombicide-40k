@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
-import { createSpawnDefinition, createSpawnState, executeSpawn, resolveRoomCreatureDefeat } from '../src/modes/rpg/spawn-engine.js';
+import { createSpawnDefinition, createSpawnState, executeSpawn, resolveRoomCreatureDefeat, grantRoomCreatureDrops } from '../src/modes/rpg/spawn-engine.js';
+import { createInventoryState, inventoryQuantity } from '../src/modes/rpg/inventory-engine.js';
 
 const universe={
   stats:[],resources:[],skills:[],
+  items:[{id:'dragon-scale',name:'Écaille de dragon',enabled:true,stackable:true,maxStack:99}],
   bestiary:[
     {id:'skeleton',name:'Squelette',boss:false,statValues:{},resourceValues:{},skillIds:[],loot:[],ai:{kind:'basic'},tags:[],xp:1},
     {id:'wyvern',name:'Wyverne',boss:true,statValues:{},resourceValues:{},skillIds:[],loot:[{itemId:'dragon-scale',quantity:1,chance:100}],ai:{kind:'basic'},tags:['boss'],xp:10},
@@ -47,6 +49,18 @@ assert.equal(defeatedAgain.ok,false);
 assert.equal(defeatedAgain.reason,'already-claimed');
 assert.deepEqual(defeatedAgain.drops,[{itemId:'dragon-scale',quantity:1}]);
 assert.equal(rerolls,0,'reopening a defeated room creature must never reroll loot');
+
+const emptyInventory=createInventoryState();
+const granted=grantRoomCreatureDrops(defeated.roomRuntime,'spawn:boss-10:1',emptyInventory,universe);
+assert.equal(granted.ok,true);
+assert.equal(inventoryQuantity(granted.inventory,'dragon-scale'),1);
+const grantedEntity=granted.roomRuntime.entities.find(e=>e.id==='spawn:boss-10:1');
+assert.equal(grantedEntity.data.creatureRuntime.lootGranted,true);
+
+const grantedAgain=grantRoomCreatureDrops(structuredClone(granted.roomRuntime),'spawn:boss-10:1',structuredClone(granted.inventory),universe);
+assert.equal(grantedAgain.ok,false);
+assert.equal(grantedAgain.reason,'already-granted');
+assert.equal(inventoryQuantity(grantedAgain.inventory,'dragon-scale'),1,'reopening the room must not grant creature loot twice');
 
 const illegalBoss=createSpawnDefinition({id:'bad-boss',kind:'normal',roomId:'room-8',creatureId:'wyvern'});
 const blocked=executeSpawn(illegalBoss,{roomId:'room-8',roomRuntime:room8,spawnState:createSpawnState(),universe});

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createWorld, createZone, createRoom, createRoomLink, buildWorldIndex } from '../src/modes/rpg/world-engine.js';
-import { createDungeonRuntime, transitionDungeonRoom, updateRoomEntity, updateRoomInteractionState, ensureRoomInstance, openRoomDoor, materializeRoomLayout, roomRuntimeSnapshot } from '../src/modes/rpg/room-runtime.js';
+import { createDungeonRuntime, transitionDungeonRoom, updateRoomEntity, updateRoomInteractionState, ensureRoomInstance, openRoomDoor, materializeRoomLayout, roomRuntimeSnapshot, attemptRoomInteraction } from '../src/modes/rpg/room-runtime.js';
 import { createInventoryState, addItem } from '../src/modes/rpg/inventory-engine.js';
 import { createRoomLayout, createDoor, addDoor } from '../src/modes/rpg/room-engine.js';
 import { shortestRoomPathDistance } from '../src/modes/rpg/room-tactical-bridge.js';
@@ -16,7 +16,10 @@ const index=buildWorldIndex({world,zones:[zone],rooms:[roomA,roomB],links:[link]
 let layoutA=createRoomLayout({id:'la',roomId:'a',width:3,height:1});
 let doorAdded=addDoor(layoutA,createDoor({id:'boss-door',x:0,y:0,edge:'east',state:'closed',locked:true,keyItemId:'boss-key'}));
 assert.equal(doorAdded.ok,true); layoutA=doorAdded.layout;
-layoutA.interactions=[{id:'chest1',enabled:true}];
+layoutA.interactions=[
+  {id:'chest1',enabled:true},
+  {id:'lever1',kind:'switch',name:'Levier lourd',enabled:true,attachment:{kind:'cell',x:1,y:0},conditionIds:[],effectIds:[],checkId:'strength-test',check:null,data:{}},
+];
 layoutA.metadata={entities:[{id:'enemy1',kind:'enemy',x:2,y:0}]};
 const layouts={
   a:layoutA,
@@ -31,6 +34,28 @@ assert.equal(runtime.currentRoomId,'a');
 assert.equal(roomRuntimeSnapshot(runtime,'a').visits,1);
 assert.equal(roomRuntimeSnapshot(runtime,'a').entities.length,1);
 assert.equal(roomRuntimeSnapshot(runtime,'a').doors['boss-door'].locked,true);
+assert.equal(roomRuntimeSnapshot(runtime,'a').interactions.lever1.attempts,0);
+
+const checkDefs={checks:[{id:'strength-test',name:'Test de Force',enabled:true,die:100,mode:'roll-under',statId:'strength',difficulty:50,modifier:0}]};
+const strongHero={stats:{strength:10}};
+let leverAttempt=attemptRoomInteraction(runtime,'a',layoutA.interactions[1],strongHero,{definitions:checkDefs,roll:90});
+assert.equal(leverAttempt.ok,true);
+assert.equal(leverAttempt.success,false);
+assert.equal(leverAttempt.state.attempts,1);
+assert.equal(leverAttempt.state.completed,false);
+assert.equal(leverAttempt.state.lastOutcome,'failure');
+runtime=leverAttempt.runtime;
+leverAttempt=attemptRoomInteraction(runtime,'a',layoutA.interactions[1],strongHero,{definitions:checkDefs,roll:20});
+assert.equal(leverAttempt.ok,true);
+assert.equal(leverAttempt.success,true);
+assert.equal(leverAttempt.state.attempts,2);
+assert.equal(leverAttempt.state.completed,true);
+assert.equal(leverAttempt.state.lastOutcome,'success');
+runtime=leverAttempt.runtime;
+const alreadyDone=attemptRoomInteraction(runtime,'a',layoutA.interactions[1],strongHero,{definitions:checkDefs,roll:99});
+assert.equal(alreadyDone.ok,true);
+assert.equal(alreadyDone.alreadyCompleted,true);
+assert.equal(alreadyDone.state.attempts,2,'completed interaction must not reroll');
 
 let tacticalLayout=materializeRoomLayout(runtime,'a',layoutA);
 assert.equal(shortestRoomPathDistance(tacticalLayout,{x:0,y:0,zoneId:'a'},{x:2,y:0,zoneId:'a'}),Infinity,'locked room door must block movement');
@@ -72,12 +97,15 @@ assert.equal(returned.entities.length,1,'enemy must not be duplicated when retur
 assert.equal(returned.entities[0].defeated,true,'defeated enemy state must persist');
 assert.equal(returned.entities[0].active,false);
 assert.equal(returned.interactions.chest1.opened,true,'opened chest state must persist');
+assert.equal(returned.interactions.lever1.attempts,2,'interaction attempts must persist when returning');
+assert.equal(returned.interactions.lever1.completed,true,'successful interaction completion must persist when returning');
 assert.equal(returned.doors['boss-door'].state,'open','opened door state must persist when returning to a room');
 assert.equal(returned.doors['boss-door'].locked,false);
 
 const ensured=ensureRoomInstance(runtime,'a',layouts.a);
 assert.equal(ensured.created,false);
 assert.equal(ensured.room.entities.length,1,'re-instantiation must not respawn content');
+assert.equal(ensured.room.interactions.lever1.attempts,2,'re-instantiation must preserve interaction attempts');
 assert.equal(ensured.room.doors['boss-door'].state,'open','re-instantiation must not relock an opened door');
 
 const bossExit=createRoomLink({id:'boss-exit',fromRoomId:'a',toRoomId:'b',oneWay:true,requiredItemId:'boss-key'});

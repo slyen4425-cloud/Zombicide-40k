@@ -11,6 +11,11 @@ layout=out.layout;
 assert.equal(getRoomCell(layout,2,1).terrain,'lava');
 assert.equal(getRoomCell(layout,2,1).blocked,true);
 
+out=setRoomCell(layout,3,1,{terrain:'floor',blocked:false,coverModifier:-25});
+assert.equal(out.ok,true);
+layout=out.layout;
+assert.equal(getRoomCell(layout,3,1).coverModifier,-25,'la couverture tactique configurée dans l’éditeur doit rester dans la case');
+
 out=setRoomCell(layout,8,8,{terrain:'water'});
 assert.equal(out.ok,false);
 assert.equal(out.reason,'out-of-bounds');

@@ -33,7 +33,7 @@ jobs:
           TARGET_URL: https://slyen4425-cloud.github.io/Zombicide-40k/?nosw=1&ci=chrome-android-freeze
         run: |
           mkdir -p diagnostic-artifacts
-          cat > /tmp/chrome-freeze-probe.mjs <<'EOF'
+          cat > chrome-freeze-probe.mjs <<'EOF'
           import { chromium, devices } from 'playwright';
           import fs from 'node:fs';
 
@@ -126,7 +126,7 @@ jobs:
           console.log(JSON.stringify(summary,null,2));
           await browser.close();
           EOF
-          node /tmp/chrome-freeze-probe.mjs
+          node ./chrome-freeze-probe.mjs
 
       - name: Upload diagnostics
         if: always()

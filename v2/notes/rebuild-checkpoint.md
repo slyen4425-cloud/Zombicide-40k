@@ -7,8 +7,9 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 ## État important au 2026-09-11
 
 - Séparation Survie / RPG conservée.
-- RPG data-driven : stats, ressources, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
+- RPG data-driven : stats, ressources, jets/tests, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
+- Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -31,24 +32,25 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - portes persistantes / ouverture par clé : `34640631070` success
 - configuration portes verrouillées dans le Créateur de salle : `34640903854` success
 - layout runtime consommé par tactique/perception : `34641208857` success
+- noyau générique de jets/tests : run `34641462386` à vérifier sur le dernier commit/checkpoint avant validation finale
 
 ## Dernière étape codée
 
-Noyau générique de jets/tests :
-- nouveau `v2/src/core/checks.js` comme autorité neutre pour les jets de dés et tests;
-- `rollDie()` gère n'importe quel dé, D100 compris;
-- `normalizeCheckSpec()` normalise dé, stat, difficulté, modificateur et mode;
-- `resolveCheck()` gère `roll-under` et `roll-over` avec résultat détaillé (`roll`, `threshold`, `success`, paramètres normalisés);
-- `resolveActorCheck()` récupère une stat aussi bien depuis un runtime héros simple (`actor.stats`) que depuis un acteur de combat (`actor.state.stats`);
-- `combat-engine.js` utilise maintenant ce noyau partagé et ré-exporte `rollDie/resolveCheck` pour compatibilité avec le code existant;
-- `trap-engine.js` n'a plus son propre raccord de calcul de stat/test et passe par `resolveActorCheck()`;
-- régression dédiée `core-checks.test.mjs` pour D100, D20, roll-under, roll-over et résolution de stat acteur.
+Éditeur générique de jets/tests :
+- nouveau `v2/src/modes/rpg/check-editor.js`;
+- nouvelle collection persistante `universe.checks` normalisée par `ensureCheckDefinitions()`;
+- création de règles de jet réutilisables avec nom, activation, dé, mode roll-under/roll-over, statistique, difficulté, modificateur et description;
+- sélecteur de statistique par icône + nom, sans saisie d'ID technique;
+- les statistiques désactivées sont exclues du sélecteur;
+- le panneau `Jets & tests` est monté dans l'éditeur RPG principal entre Ressources et les réglages spatiaux;
+- suppression d'une statistique détache automatiquement les jets qui la référencent;
+- univers neuf, chargement et sauvegarde garantissent maintenant la présence de `checks`;
+- régression `rpg-check-editor.test.mjs` couvre normalisation, D100, sélection de stat lisible et exclusion des stats désactivées.
 
 Commits de l'étape :
-- noyau checks : `0741b1d1c06fbc622dae53734b3bed0a0425cc14`
-- combat raccordé : `4e5bf09316f2cf331d27845de54dd7d68f6b61df`
-- pièges raccordés : `f21cf88884f3162982c34b5444727277615b1f07`
-- régression : `cbad0f383d1987007455b450d7d4b454bc255417`
+- persistance/raccord éditeur RPG : `f20954ee1127e96b189e134e1f5985fad9288867`
+- éditeur de jets : `b933d92cb63e22502588c170099b91427be5b0a6`
+- régression : `0fbf9dd08a5c08a62bb3f04a61189c0378d16439`
 
 CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
@@ -60,7 +62,7 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 
 ## Priorités ouvertes
 
-- ajouter l'éditeur de tests/jets génériques avec sélecteurs de stats lisibles et sans ID brut;
+- remplacer progressivement les configurations de jet inline des compétences/pièges/événements par des références optionnelles vers `universe.checks`, tout en gardant compatibilité avec les anciens champs;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createDungeonRuntime, transitionDungeonHeroRoom } from '../src/modes/rpg/room-runtime.js';
 import { createWorld, createZone, createRoom, createRoomLink, buildWorldIndex } from '../src/modes/rpg/world-engine.js';
 import { createSpatialState, setActorPosition } from '../src/modes/rpg/spatial-engine.js';
-import { startDungeonCombat, activeDungeonEnemies, dungeonHeroParticipants, dungeonHeroCombatSkills, executeDungeonHeroSkill, reconcileDungeonCombatResult } from '../src/modes/rpg/dungeon-combat-runtime.js';
+import { startDungeonCombat, activeDungeonEnemies, dungeonHeroParticipants, dungeonHeroCombatSkills, executeDungeonHeroSkill, executeDungeonEnemyTurn, advanceDungeonEnemyTurns, reconcileDungeonCombatResult } from '../src/modes/rpg/dungeon-combat-runtime.js';
 
 const zone=createZone({id:'z',name:'Zone',roomIds:['a','b']});
 const world=createWorld({id:'w',name:'Monde',startRoomId:'a',zones:['z']});
@@ -11,7 +11,7 @@ const links=[createRoomLink({id:'ab',fromRoomId:'a',toRoomId:'b',label:'Passage'
 const index=buildWorldIndex({world,zones:[zone],rooms,links});
 const layouts={
   a:{id:'la',roomId:'a',interactions:[],entities:[
-    {id:'enemy-active',kind:'creature',active:true,data:{creatureRuntime:{instanceId:'enemy-active',creatureId:'skeleton',active:true,defeated:false,removed:false,state:{stats:{initiative:4},resources:{hp:{current:5,max:5}}},skillIds:['slash'],ai:{kind:'basic'}}}},
+    {id:'enemy-active',kind:'creature',active:true,data:{creatureRuntime:{instanceId:'enemy-active',creatureId:'skeleton',active:true,defeated:false,removed:false,state:{stats:{initiative:4},resources:{hp:{current:5,max:5}}},skillIds:['slash'],ai:{kind:'basic',targetRule:'nearest'}}}},
     {id:'enemy-dead',kind:'creature',active:false,defeated:true,data:{creatureRuntime:{instanceId:'enemy-dead',creatureId:'zombie',active:false,defeated:true,removed:false,state:{stats:{initiative:9},resources:{hp:{current:0,max:5}}}}}},
   ]},
   b:{id:'lb',roomId:'b',interactions:[],entities:[]},
@@ -33,11 +33,17 @@ const heroRuntimes=[
 const universe={
   stats:[{id:'initiative',baseValue:0}],
   resources:[{id:'hp',name:'PV',min:0,maxFormula:'10'}],
-  effects:[{id:'arrow-damage',name:'Flèche',enabled:true,kind:'resource-modifier',resourceId:'hp',operation:'subtract',value:10,chance:100,conditions:[]}],
-  skills:[{id:'arrow',name:'Tir précis',enabled:true,target:'enemy',effectIds:['arrow-damage'],conditionIds:[],roll:{enabled:false}}],
+  effects:[
+    {id:'arrow-damage',name:'Flèche',enabled:true,kind:'resource-modifier',resourceId:'hp',operation:'subtract',value:10,chance:100,conditions:[]},
+    {id:'slash-damage',name:'Coup de griffe',enabled:true,kind:'resource-modifier',resourceId:'hp',operation:'subtract',value:2,chance:100,conditions:[]},
+  ],
+  skills:[
+    {id:'arrow',name:'Tir précis',enabled:true,target:'enemy',effectIds:['arrow-damage'],conditionIds:[],roll:{enabled:false}},
+    {id:'slash',name:'Griffe',enabled:true,target:'enemy',effectIds:['slash-damage'],conditionIds:[],roll:{enabled:false}},
+  ],
   items:[{id:'bone',name:'Os'}],
   bestiary:[
-    {id:'skeleton',name:'Squelette',loot:[{itemId:'bone',quantityMin:1,quantityMax:1,chance:100}]},
+    {id:'skeleton',name:'Squelette',skillIds:['slash'],ai:{kind:'basic',targetRule:'nearest'},loot:[{itemId:'bone',quantityMin:1,quantityMax:1,chance:100}]},
     {id:'zombie',name:'Zombie',loot:[]},
   ],
   combat:{
@@ -86,6 +92,27 @@ assert.equal(used.combat.processedActionIds.filter(id=>id==='dungeon-action-1').
 const wrongTurn=executeDungeonHeroSkill({combat:{...out.combat,activeActorId:'enemy-active'},heroRuntimes,universe,skillId:'arrow',targetId:'lyra'});
 assert.equal(wrongTurn.ok,false);
 assert.equal(wrongTurn.reason,'not-hero-turn');
+
+const forcedEnemyTurn=structuredClone(out.combat);
+forcedEnemyTurn.activeActorId='enemy-active';
+forcedEnemyTurn.turnSequence=7;
+forcedEnemyTurn.phase='turn';
+forcedEnemyTurn.pendingAction=null;
+const enemyActed=executeDungeonEnemyTurn({combat:forcedEnemyTurn,universe,random:()=>0,randomPercent:()=>0});
+assert.equal(enemyActed.ok,true);
+assert.equal(enemyActed.passed,false);
+assert.equal(enemyActed.skillId,'slash');
+assert.equal(enemyActed.targetId,'lyra','basic nearest AI must select a living hero target');
+assert.equal(enemyActed.combat.actors.lyra.state.resources.hp.current,6,'enemy skill must resolve through the same effect engine');
+assert.equal(enemyActed.combat.activeActorId,'lyra','enemy turn must advance automatically back to the next living hero');
+assert.equal(enemyActed.combat.processedActionIds.filter(id=>id==='dungeon-ai-7-enemy-active-slash').length,1,'enemy action must resolve exactly once');
+
+const automatic=advanceDungeonEnemyTurns({combat:forcedEnemyTurn,universe,random:()=>0,randomPercent:()=>0});
+assert.equal(automatic.ok,true);
+assert.equal(automatic.actions.length,1);
+assert.equal(automatic.actions[0].actorId,'enemy-active');
+assert.equal(automatic.combat.activeActorId,'lyra','automatic enemy loop must stop as soon as control returns to a hero');
+assert.equal(automatic.combat.actors.lyra.state.resources.hp.current,6);
 
 const unfinished=reconcileDungeonCombatResult({combat:out.combat,roomRuntime:runtime,heroRuntimes,universe});
 assert.equal(unfinished.ok,false);

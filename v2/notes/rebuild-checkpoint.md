@@ -28,24 +28,25 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Équipement de départ héros : `startingEquipment` permet d'équiper proprement l'objet prévu dès la création du runtime. CI run `34635030983` : success.
 - Loot de salle : `resolveRoomCreatureDefeat()` persiste la défaite et le loot idempotent directement dans l'entité de salle. CI run `34635256399` : success.
 - Statuts persistants réversibles : les modificateurs temporaires de stats ne se cumulent plus à chaque tick et restaurent la valeur d'origine à l'expiration. CI run `34635529424` : success.
+- Attribution de loot : `grantRoomCreatureDrops()` distribue les drops à l'inventaire une seule fois, de façon atomique. CI run `34635840687` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Attribution idempotente du loot de créature à un inventaire :
-- nouveau `grantRoomCreatureDrops(roomRuntime, instanceId, inventory, definitions)` dans `spawn-engine.js`;
-- l'attribution n'est autorisée qu'après un `lootClaimed` valide;
-- les drops passent par l'autorité `addItem()` de l'inventaire, donc stacks et quantités restent centralisés;
-- l'opération est atomique : si un objet ne peut pas être ajouté, l'inventaire d'origine est conservé et le loot n'est pas marqué distribué;
-- après succès, `lootGranted:true` est persisté dans le `creatureRuntime` stocké dans l'entité de salle;
-- un second appel, y compris après sauvegarde/rechargement, renvoie `already-granted` et n'ajoute rien une deuxième fois;
-- le test vérifie qu'une écaille de dragon issue de la Wyverne n'est présente qu'une seule fois après deux tentatives de distribution.
+Couverture tactique configurable par case :
+- `normalizeTacticalCombatConfig()` expose désormais `coverEnabled` en modes tactique/hybride;
+- une case de salle peut porter un `coverModifier` numérique sans créer un système de couverture figé;
+- `targetCoverModifier()` lit ce modificateur directement sur la case occupée par la cible;
+- `evaluateAttackPosition()` ajoute le modificateur de couverture au modificateur de contact existant;
+- une arme/compétence peut définir `data.ignoresCover:true` pour ignorer la couverture;
+- en mode narratif la couverture reste désactivée;
+- le test couvre un squelette sur une case `coverModifier:-15`, cumulée avec la pénalité de contact `-20`, puis vérifie une arme ignorant la couverture.
 
 Commits de l'étape :
-- moteur : `553c375fc8d0be277e563d1e7d2870aee5593c2e`
-- régression : `6650d4adf3b518da4cb7de2bb512e58a2bddcb75`
+- moteur : `0bf6315f22f065e009944b2745aaa9b69a3ba17f`
+- régression : `99fd14162fc06b940065c8088822bc3b65b7b9ff`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -59,9 +60,9 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 ## Points encore ouverts prioritaires
 
 - choisir ensuite la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
+- enrichir les obstacles/couvertures via l'éditeur de salle et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
-- couverture/obstacles et modificateurs d'équipement tactiques;
 - lifecycle audio de salle et vrai playback frontend;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

@@ -22,23 +22,21 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`. CI run `34632880339` : success.
 - État KO alliés : les alliés KO/morts sont exclus du contrôle, du mouvement et des prochains combats; une vraie réanimation les rend à nouveau éligibles. CI run `34633451924` : success.
 - Placement alliés changement de salle : placement distinct sur cases accessibles quand `roomLayout` est connu. CI run `34633817217` : success.
+- Loot bestiaire : claim idempotent, pas de double tirage après sauvegarde/rechargement. CI run `34634065664` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Loot de créature rendu idempotent :
-- `createCreatureRuntime()` initialise `lootClaimed:false` et `lootDrops:null`;
-- nouveau `claimCreatureLoot(runtime, creature, options)`;
-- impossible de réclamer le loot avant la défaite (`not-defeated`);
-- le premier claim lance le tirage une seule fois puis persiste `lootClaimed` et les `lootDrops` dans le runtime;
-- un second claim, y compris après `structuredClone`/sauvegarde-rechargement, renvoie `already-claimed` et les mêmes drops sans relancer l'aléatoire;
-- évite donc les doublons de clé de boss ou de loot si une salle/un runtime est rouvert ou résolu deux fois.
+Préservation des médias du bestiaire dans le runtime :
+- `createCreatureRuntime()` conserve maintenant `icon`, `artId` et `audioId` issus de la définition de créature;
+- ces références survivent donc à la création d'instance puis à une sauvegarde/relecture du runtime;
+- cela évite de devoir revenir à la définition source juste pour jouer le son ou afficher l'art d'une créature déjà instanciée en salle/combat.
 
 Commits de l'étape :
-- moteur : `c87d3ba69326cea07f246d861141644260c5afd8`
-- régression : `62839d123a7969bcaefb4b129e3686ed367a9662`
+- moteur : `39dd628b0c939b266bd26e65761c573e2b38f56e`
+- régression : `bc524a4ea71324da579e868d951b066349de18f1`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -57,6 +55,5 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 - status à modificateurs persistants réversibles;
 - lifecycle audio de salle et vrai playback frontend;
 - items de départ héros à auto-remplir;
-- préserver `audioId` du bestiaire dans le runtime;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

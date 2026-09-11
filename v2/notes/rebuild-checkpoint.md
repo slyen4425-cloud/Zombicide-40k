@@ -30,7 +30,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Le démarrage d'un vrai combat de salle dispose d'un bridge dédié : ennemis actifs de la salle + héros réellement présents, puis filtre de proximité spatiale avant création du vrai `combat-engine` D100.
 - Le vrai combat de salle est monté dans la vue Donjon : les ennemis actifs sont affichés, le héros focalisé peut engager, et le combat créé est conservé comme combat Donjon courant sans passer par le laboratoire de test.
 - La fin du combat est réconciliée automatiquement dans la vraie vue Donjon dès que le `combatState` passe à `ended` : états héros, ennemis vaincus, loot/boss-key et salle libérée reviennent directement dans les runtimes de partie.
-- Les vraies compétences du héros actif sont maintenant jouables dans la vue Donjon : elles proviennent de son runtime réel (base + équipement + sets + formes), passent par `prepareSkillAction()` / `resolveAndAdvance()` et gardent la résolution unique du moteur D100.
+- Les vraies compétences du héros actif sont jouables dans la vue Donjon : elles proviennent de son runtime réel (base + équipement + sets + formes), passent par `prepareSkillAction()` / `resolveAndAdvance()` et gardent la résolution unique du moteur D100.
+- Les tours ennemis sont maintenant automatiques sur la même timeline : compétences du bestiaire, règles IA/ciblage existantes, résolution D100/effets identique, fin de tour automatique et retour au prochain héros sans second moteur.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -94,26 +95,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - réconciliation automatique à `phase=ended` dans la vue Donjon : `34653443496` success
 - checkpoint réconciliation automatique : `34653520510` success
 - actions/compétences réelles héros dans combat Donjon : `34653973093` success
+- checkpoint actions héros : `34654041123` success
+- tours ennemis automatiques sur combat Donjon réel : `34655064237` success
 
 ## Dernière étape terminée
 
-Actions et compétences réelles du héros directement dans la vue Donjon :
-- `dungeon-combat-runtime.js` expose `dungeonHeroCombatSkills()` : la liste vient du vrai runtime héros via `resolveHeroSkillIds()`, donc compétences de base, équipement, sets et formes restent une seule autorité;
-- `executeDungeonHeroSkill()` vérifie que c'est bien le tour d'un héros, refuse une compétence non possédée et choisit une cible cohérente si nécessaire;
-- le moteur réutilise `prepareSkillAction()` puis `resolveAndAdvance()` : `turnSequence`, `processedActionIds`, coûts, cooldowns, jet D100 et effets restent gérés par les moteurs existants;
-- après résolution, `reconcileCombatState()` applique la vraie règle de KO/défaite puis `beginActiveTurn()` prépare le prochain acteur sans recréer de timeline;
-- la vue Donjon affiche désormais, pendant un tour héros, un menu Compétence + un menu Cible par noms lisibles et un bouton `Utiliser la compétence`; aucun ID technique n'est demandé au joueur;
-- après une action, le même `combatState` est remplacé par son nouvel état et remonté à `rpg-page.js` via `onCombatChange`; si l'action termine le combat, la réconciliation automatique salle/héros/loot déjà existante s'enchaîne immédiatement;
-- pendant un tour ennemi, la vue indique explicitement que la résolution IA n'est pas encore raccordée au lieu de simuler une fausse action;
-- régression moteur : Lyra ne voit que `Tir précis`, l'action retire réellement les PV au squelette, applique la règle de KO, termine le même combat et l'`actionId` n'apparaît qu'une fois dans `processedActionIds`.
+Tours ennemis/IA automatiques dans le vrai combat Donjon :
+- `dungeon-combat-runtime.js` importe désormais `chooseCreatureAction()` et `chooseAiTarget()` au lieu de recréer une IA parallèle;
+- `executeDungeonEnemyTurn()` lit les `skillIds` et la configuration IA réellement transportés par l'acteur bestiaire du combat;
+- la compétence ennemie passe par le même `prepareSkillAction()` puis `resolveAndAdvance()` que les héros : coûts, cooldowns, jet, effets, `turnSequence` et `processedActionIds` gardent donc une seule autorité;
+- pour une compétence offensive, la cible utilise le moteur de ciblage IA existant et sa mémoire (`aiMemory`); les cibles self/ally/any passent par la même logique de cible du runtime;
+- si une créature n'a aucune compétence valide ou aucune cible valide, son tour est terminé proprement via `endActiveTurn()` au lieu de figer la timeline;
+- `advanceDungeonEnemyTurns()` enchaîne les acteurs ennemis consécutifs avec un garde anti-boucle, puis s'arrête dès que le contrôle revient à un héros ou que le combat se termine;
+- la vraie vue Donjon appelle cet enchaînement automatiquement avant chaque rendu de combat : après une action héros, les ennemis jouent donc immédiatement leurs vrais tours, puis l'UI revient au prochain héros; si le combat se termine, la réconciliation salle/héros/loot existante s'enchaîne dans le même rendu;
+- `onCombatChange` reçoit aussi l'état après les tours IA, donc `rpg-page.js` et son parent restent synchronisés avec un seul `combatState`;
+- régression : le squelette utilise réellement `Griffe`, cible Lyra, lui retire 2 PV via le moteur d'effets existant, l'action IA n'est résolue qu'une fois, puis la timeline revient automatiquement à Lyra.
 
 Commits de l'étape :
-- runtime actions héros Donjon : `1ce10448b0d62860c28882cee6337b284bbd7547`
-- UI actions/compétences dans vue Donjon : `7e52cba5e85c459699015663a5450471d6430650`
-- propagation combat live via page RPG : `f00ba8e7576559636f5b53b59173a4152659efe5`
-- régression actions réelles : `486ba9d17f612399141ff52215e591f07eb44e03`
+- runtime tours ennemis : `eb1ee9747f46c7744d7a04ffe43d585c55641382`
+- résolution automatique dans vue Donjon : `10d9cd70c1a894549ba4b59bda5d81c189b2f772`
+- régression tours ennemis : `98d566cf84f9cc72ba14927ded27b322caef86ac`
 
-CI finale : `34653973093` success.
+CI finale : `34655064237` success.
 
 ## Stockage — décision repoussée
 
@@ -123,7 +126,7 @@ CI finale : `34653973093` success.
 
 ## Priorités ouvertes
 
-- raccorder maintenant les tours ennemis/IA au même `combatState` réel, avec ciblage existant, compétences du bestiaire et fin de tour automatique;
-- compléter ensuite la présentation combat réelle (ressources, journal moteur, résultats de jets/effets) sans déplacer la logique dans l'UI;
+- compléter maintenant la présentation combat réelle : ressources/PV lisibles des participants, timeline avec KO, journal moteur et résultat du dernier jet/effet, sans déplacer la logique dans l'UI;
+- vérifier ensuite les règles d'actions de combat restantes (cibles ally/self/any, consommables, fuite, combat direct OFF/MJ) contre le legacy avant de les raccorder une par une;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

@@ -44,8 +44,13 @@ export function getRoomCell(layout,x,y){
   return clone(layout?.cells?.[key(x,y)]||{x:Number(x),y:Number(y),terrain:'floor',blocked:false});
 }
 
-export function createWall({id:wallId=id(),x=0,y=0,edge='north',kind='wall',blocksMovement=true,blocksVision=true}={}){
-  return {id:String(wallId),x:Number(x),y:Number(y),edge,kind,blocksMovement:Boolean(blocksMovement),blocksVision:Boolean(blocksVision)};
+export function createWall({id:wallId=id(),x=0,y=0,edge='north',kind='wall',blocksMovement=true,blocksVision=true,coverModifier=0}={}){
+  const cover=Number(coverModifier??0);
+  return {
+    id:String(wallId),x:Number(x),y:Number(y),edge,kind:String(kind||'wall'),
+    blocksMovement:Boolean(blocksMovement),blocksVision:Boolean(blocksVision),
+    coverModifier:Number.isFinite(cover)?cover:0,
+  };
 }
 
 export function addWall(layout,wall){

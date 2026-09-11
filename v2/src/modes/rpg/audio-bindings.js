@@ -11,6 +11,11 @@ function candidateAudioId(source,cue='default'){
   return null;
 }
 
+function normalizeOptions(options={},cue='default'){
+  const metadata={...(clone(options?.metadata||{})),cue:String(cue)};
+  return {...options,metadata};
+}
+
 export function resolveBoundAudioId(source,cue='default'){
   return candidateAudioId(source,cue);
 }
@@ -18,14 +23,14 @@ export function resolveBoundAudioId(source,cue='default'){
 export function queueBoundAudio({state,source,cue='default',definitions={},options={}}={}){
   const audioId=resolveBoundAudioId(source,cue);
   if(!audioId) return {ok:false,reason:'audio-unbound',state,audioId:null};
-  const queued=queueAudio(state,audioId,definitions,{...clone(options||{}),metadata:{...(clone(options?.metadata||{})),cue:String(cue)}});
+  const queued=queueAudio(state,audioId,definitions,normalizeOptions(options,cue));
   return {...queued,audioId};
 }
 
 export function queueResultAudio({state,result,cue='result',definitions={},options={}}={}){
   const audioId=result?.audioId?String(result.audioId):resolveBoundAudioId(result,cue);
   if(!audioId) return {ok:false,reason:'audio-unbound',state,audioId:null};
-  const queued=queueAudio(state,audioId,definitions,{...clone(options||{}),metadata:{...(clone(options?.metadata||{})),cue:String(cue)}});
+  const queued=queueAudio(state,audioId,definitions,normalizeOptions(options,cue));
   return {...queued,audioId};
 }
 

@@ -18,7 +18,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
-- UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent désormais les moteurs existants sans duplication.
+- UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent les moteurs existants sans duplication.
+- Les événements issus des actions allié sont maintenant mis en file FIFO dans `roomRuntime.eventQueue` pour consommation par le moteur d'événements RPG.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -47,25 +48,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - UI PNJ + actions de quête : `34645853645` success
 - raccord UI PNJ -> runtime salle/allié : `34646083537` success
 - actions recrutement/invocation/renvoi dans UI PNJ : `34646281587` success
+- file événements actions allié : `34646526482` success
 
 ## Dernière étape terminée
 
-Actions allié dans l'UI PNJ réelle :
-- `room-npc-interaction-ui.js` réutilise directement `recruitFromRoomInteraction()`, `summonFromRoomInteraction()` et `dismissFromRoomInteraction()`;
-- l'UI expose automatiquement `Recruter`, `Invoquer` ou `Renvoyer` selon la configuration et l'état runtime réel de l'interaction;
-- le prix d'un recrutement est affiché dans le libellé joueur quand il est non nul;
-- après recrutement, l'action de recrutement disparaît et l'action de renvoi apparaît;
-- le wallet, le roster allié et l'état persistant de l'interaction de salle sont tous mis à jour par les moteurs déjà existants;
-- l'invocation conserve les contraintes `sourceKind/sourceId` du moteur allié;
-- `mountRoomNpcInteraction()` garde désormais `roomRuntime`, `roster` et `wallet` synchronisés et expose un callback `onAllyStateChange`;
-- aucune logique parallèle de recrutement, invocation ou renvoi n'a été créée;
-- régression `rpg-room-npc-ally-actions.test.mjs` couvre recrutement payant, persistance `recruited`, apparition de `Renvoyer`, renvoi réel dans le roster et invocation réelle via une interaction `ally`.
+File d'événements RPG pour les actions allié :
+- nouveau `event-queue-runtime.js` avec `createEventQueueRuntime()`, `enqueueEventRequest()`, `dequeueEventRequest()` et `peekEventRequest()`;
+- la file est FIFO et conserve un historique `queued/dequeued` avec séquence stable;
+- `room-npc-interaction-ui.js` enfile automatiquement l'`eventId` renvoyé par le moteur allié après recrutement, invocation ou renvoi;
+- les événements de succès utilisent `successEventId`/`dismissEventId` existants;
+- un échec de recrutement peut lui aussi enfiler `failureEventId` sans modifier artificiellement le roster ou le wallet;
+- chaque requête garde sa provenance (`npc-ally-action`, interaction source, type d'action, succès/échec) pour l'orchestrateur gameplay;
+- `mountRoomNpcInteraction()` conserve maintenant le `roomRuntime` mis à jour même lorsqu'une action échoue mais déclenche un événement de réaction;
+- aucune exécution d'événement n'est dupliquée ici : cette étape ne fait qu'alimenter la file destinée à `event-engine.js`;
+- régression `rpg-room-npc-event-queue.test.mjs` couvre échec de recrutement -> événement d'échec, succès -> événement de succès, renvoi -> événement de renvoi et ordre FIFO.
 
 Commits de l'étape :
-- UI/runtime actions allié : `9c89c0da71c7d3d13c23bcf3d97cf4209b6ba506`
-- régression : `caf2186c32dc220d9a672567eebbb6aac193e015`
+- file d'événements : `a1f4a99abc51da6f950a50ab1ae98d07ace5bcb5`
+- raccord UI PNJ/allié : `1715f5a42e2cfa73bcd828d662fb80a29dabd7f5`
+- régression : `64ab2815b2f0a561be94dfbe0d983367d92d5ab3`
 
-CI : `34646281587` success.
+CI : `34646526482` success.
 
 ## Stockage — décision repoussée
 
@@ -75,7 +78,7 @@ CI : `34646281587` success.
 
 ## Priorités ouvertes
 
-- raccorder les événements `successEventId/failureEventId/dismissEventId` renvoyés par les actions allié à la file d'événements RPG;
+- ajouter l'orchestrateur qui dépile `roomRuntime.eventQueue`, résout la définition correspondante et exécute `event-engine.js` sans double résolution;
 - monter le journal de quêtes dans la vraie vue de gameplay du donjon quand cette vue est raccordée;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

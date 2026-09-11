@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111318">
+  <title>GenSrpG V2 — Reconstruction</title>
+  <link rel="stylesheet" href="./src/ui/app.css">
+</head>
+<body>
+  <main class="app-shell" id="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">RECONSTRUCTION ISOLÉE</p>
+        <h1>GenSrpG V2</h1>
+      </div>
+      <button class="help-button" type="button" data-help="home" aria-label="Aide générale">?</button>
+    </header>
+
+    <section class="panel intro-panel">
+      <h2>Choisir un mode</h2>
+      <p>Chaque mode possède son propre moteur et ses propres données. Le Core ne partage que les services techniques neutres.</p>
+    </section>
+
+    <section class="mode-grid" id="modeGrid" aria-label="Modes de jeu"></section>
+
+    <section class="panel status-panel">
+      <div class="section-title-row">
+        <h2>État de la V2</h2>
+        <button class="help-button small" type="button" data-help="status" aria-label="Aide sur l'état de la reconstruction">?</button>
+      </div>
+      <div id="buildStatus"></div>
+    </section>
+  </main>
+
+  <aside class="help-drawer" id="helpDrawer" aria-hidden="true">
+    <div class="help-drawer-head">
+      <h2 id="helpTitle">Aide</h2>
+      <button type="button" id="helpClose" aria-label="Fermer l'aide">×</button>
+    </div>
+    <div id="helpBody"></div>
+  </aside>
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

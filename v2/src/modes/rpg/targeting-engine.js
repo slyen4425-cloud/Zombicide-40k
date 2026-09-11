@@ -51,7 +51,6 @@ export function chooseAiTarget({combat,actorId,spatial=null,source=null,config={
   const primaryResourceId=ai.primaryResourceId||config.primaryResourceId||null;
   const lastTargetId=memory.lastTargetId==null?null:String(memory.lastTargetId);
   const avoidRepeat=ai.avoidRepeat!==false && candidates.length>1;
-  const repeatPenalty=Math.max(0,Number(ai.repeatPenalty??0.35)||0);
 
   let pool=candidates;
   if(rule==='random'){
@@ -69,11 +68,14 @@ export function chooseAiTarget({combat,actorId,spatial=null,source=null,config={
     const min=Math.min(...scored.map(x=>x.score));
     pool=scored.filter(x=>x.score===min).map(x=>x.entry);
   } else {
+    if(avoidRepeat){
+      const alternatives=candidates.filter(x=>String(x.actor.id)!==lastTargetId);
+      if(alternatives.length) pool=alternatives;
+    }
     const weighted=[];
     let total=0;
-    for(const entry of candidates){
+    for(const entry of pool){
       let weight=1;
-      if(String(entry.actor.id)===lastTargetId&&avoidRepeat) weight*=repeatPenalty;
       if(Number.isFinite(entry.distance)) weight*=1/(1+Math.max(0,entry.distance)*0.15);
       weight=Math.max(0.0001,weight);
       total+=weight; weighted.push({entry,weight,total});

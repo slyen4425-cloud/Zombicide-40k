@@ -20,6 +20,7 @@ export function createCombatState({ combatants = [], round = 1 } = {}) {
     order: normalized.map(c => c.id),
     actors: Object.fromEntries(normalized.map(c => [c.id, c])),
     turnIndex: 0,
+    turnSequence: normalized.length ? 1 : 0,
     activeActorId: normalized[0]?.id || null,
     pendingAction: null,
     processedActionIds: [],
@@ -52,9 +53,17 @@ export function queueCombatAction(combat, action) {
   if (!action?.id) return { accepted: false, reason: 'missing-action-id', combat };
   if (combat.processedActionIds.includes(String(action.id))) return { accepted: false, reason: 'duplicate-action', combat };
   if (String(action.actorId) !== String(combat.activeActorId)) return { accepted: false, reason: 'wrong-actor', combat };
+  if (action.turnSequence != null && Number(action.turnSequence) !== Number(combat.turnSequence)) {
+    return { accepted: false, reason: 'stale-turn', combat };
+  }
   const next = clone(combat);
-  next.pendingAction = clone({ ...action, id: String(action.id), actorId: String(action.actorId) });
-  next.log.push({ type: 'action-queued', actionId: String(action.id), actorId: String(action.actorId) });
+  next.pendingAction = clone({
+    ...action,
+    id: String(action.id),
+    actorId: String(action.actorId),
+    turnSequence: Number(action.turnSequence ?? combat.turnSequence),
+  });
+  next.log.push({ type: 'action-queued', actionId: String(action.id), actorId: String(action.actorId), turnSequence: next.pendingAction.turnSequence });
   return { accepted: true, combat: next };
 }
 
@@ -65,6 +74,12 @@ export function resolveQueuedAction(combat, { definitions = {}, checkResult = nu
     const safe = clone(combat);
     safe.pendingAction = null;
     return { resolved: false, reason: 'duplicate-action', combat: safe };
+  }
+  if (Number(action.turnSequence) !== Number(combat.turnSequence) || String(action.actorId) !== String(combat.activeActorId)) {
+    const safe = clone(combat);
+    safe.pendingAction = null;
+    safe.log.push({ type: 'action-rejected', actionId: String(action.id), actorId: String(action.actorId), reason: 'stale-turn' });
+    return { resolved: false, reason: 'stale-turn', combat: safe };
   }
 
   const next = clone(combat);
@@ -89,7 +104,7 @@ export function resolveQueuedAction(combat, { definitions = {}, checkResult = nu
 
   next.processedActionIds.push(String(action.id));
   next.pendingAction = null;
-  next.log.push({ type: 'action-resolved', actionId: String(action.id), actorId: action.actorId, targetId: target.id, check, effects: applied });
+  next.log.push({ type: 'action-resolved', actionId: String(action.id), actorId: action.actorId, targetId: target.id, turnSequence: action.turnSequence, check, effects: applied });
   return { resolved: true, combat: next, check, effects: applied };
 }
 
@@ -103,7 +118,8 @@ export function advanceCombatTurn(combat) {
   if (currentPos >= 0 && nextPos === 0) next.round += 1;
   next.activeActorId = livingOrder[nextPos];
   next.turnIndex += 1;
-  next.log.push({ type: 'turn-start', round: next.round, actorId: next.activeActorId });
+  next.turnSequence = (Number(next.turnSequence) || 0) + 1;
+  next.log.push({ type: 'turn-start', round: next.round, actorId: next.activeActorId, turnSequence: next.turnSequence });
   return next;
 }
 

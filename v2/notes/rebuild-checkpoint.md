@@ -19,7 +19,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
 - UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent désormais les moteurs existants sans duplication.
-- Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue`; cette file est maintenant reliée au runtime de salle, exécutée automatiquement via `event-engine.js`, et peut reprendre après un choix sans double résolution.
+- Les événements issus des actions allié sont mis en file FIFO dans `roomRuntime.eventQueue`; cette file est reliée au runtime de salle, exécutée automatiquement via `event-engine.js`, et reprend après un choix sans double résolution.
+- Une vraie vue `🎮 Donjon` est maintenant montée dans la page RPG V2 et affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -52,26 +53,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - orchestrateur file événements RPG : `34646783527` success
 - checkpoint orchestrateur : `34646850393` success
 - bridge `roomRuntime.eventQueue` + consommation automatique : `34647190339` success
+- checkpoint runtime événements auto : `34647252406` success
+- vue gameplay Donjon + journal quêtes live : `34647506351` success
 
 ## Dernière étape terminée
 
-Raccord automatique de la file d'événements au runtime de salle :
-- nouveau `room-event-runtime.js`;
-- `drainRoomRuntimeEvents()` prend directement `roomRuntime.eventQueue`, synchronise un `eventOrchestrator` persistant dans le runtime et exécute les événements FIFO jusqu'à ce que la file soit vide ou qu'un choix joueur bloque la suite;
-- le `world` produit par `event-engine.js` est conservé entre les événements du même drain;
-- `resolveRoomRuntimeEventChoice()` reprend l'événement actif puis, s'il se termine, poursuit automatiquement les événements restants de la file;
-- re-drainer pendant un choix ne relance pas l'événement actif et ne consomme pas la suite prématurément;
-- `roomRuntime.eventQueue` et `roomRuntime.eventOrchestrator` restent synchronisés après chaque exécution;
-- `mountRoomNpcInteraction()` déclenche désormais automatiquement le drain lorsqu'une action recrutement/invocation/renvoi enfile un événement;
-- l'UI maintient aussi le `world` d'événement courant et expose `onEventStateChange` pour la vue gameplay parente;
-- régression `rpg-room-event-runtime.test.mjs` couvre événement immédiat, blocage sur choix, reprise du choix, poursuite automatique de la file et anti-double exécution.
+Vue gameplay Donjon et journal de quêtes live :
+- nouveau `dungeon-gameplay-view.js` avec `renderDungeonGameplayView()` et `mountDungeonGameplayView()`;
+- la vue affiche la salle courante, le nombre de visites, les événements en attente et l’état bloquant éventuel;
+- le journal réutilise `quest-journal-ui.js` et lit directement `roomRuntime.questRuntime` : aucune copie parallèle de la progression;
+- `rpg-page.js` possède maintenant un onglet `🎮 Donjon` distinct des outils d’édition/test;
+- `mountRpgPage()` accepte un `dungeonRuntime` et expose `setDungeonRuntime()` afin que la vue se rafraîchisse immédiatement lorsque le runtime de partie change;
+- l’absence de partie active est gérée proprement sans faux état de quête;
+- régression `rpg-dungeon-gameplay-view.test.mjs` couvre salle, visites, file événement, quête active, progression, quête terminée et état sans partie.
 
 Commits de l'étape :
-- bridge runtime salle/événements : `eecdb9b944cb56715c650613a0a90c8accb148d7`
-- consommation automatique dans UI PNJ : `ede9841ba67665725a329c5b46a4bc78d545f285`
-- régression : `7611da0014dfcc16aadbdf9c67158814c6d1676b`
+- vue gameplay Donjon : `69c9f926d8132acaf7fcfdd9456d6c4064afade4`
+- montage dans la page RPG : `6f073b01a0ec8b91d655af519feb135c0c426667`
+- régression : `1ea8112961e9750a440166c181c98344353641aa`
 
-CI : `34647190339` success.
+CI : `34647506351` success.
 
 ## Stockage — décision repoussée
 
@@ -81,8 +82,8 @@ CI : `34647190339` success.
 
 ## Priorités ouvertes
 
-- monter le journal de quêtes dans la vraie vue de gameplay du donjon et le rafraîchir à partir de `roomRuntime.questRuntime`;
-- intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
+- intégrer le picker de loot dans la vraie vue gameplay Donjon / fin de combat, maintenant que cette vue existe;
+- raccorder progressivement les interactions PNJ, événements et choix à cette vue gameplay sans réintroduire un second runtime;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

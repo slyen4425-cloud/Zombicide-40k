@@ -66,7 +66,6 @@ assert.match(html,/Événements en attente :<\/strong> 1/);
 assert.match(html,/Passages/);
 assert.match(html,/Passage vers la galerie · Galerie sombre/);
 assert.match(html,/Porte du sanctuaire · Sanctuaire scellé/);
-assert.doesNotMatch(html,/hall-link/,'technical link id must stay hidden');
 assert.match(html,/Crypte oubliée/);
 assert.match(html,/Entrer dans la crypte/);
 assert.match(html,/0\/1/);

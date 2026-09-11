@@ -13,7 +13,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Compétences, pièges, événements et interactions de salle peuvent référencer des jets réutilisables; les anciens formats inline restent compatibles.
 - Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime.
 - Éditeur RPG : sélecteur de jet réutilisable dans les compétences et éditeur dédié des pièges avec détection/désarmement séparés.
-- Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée, couverture configurable et modificateurs tactiques issus des équipements réellement équipés.
+- Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée, couverture directionnelle et modificateurs tactiques issus des équipements réellement équipés.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
@@ -65,24 +65,28 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - présentation textes/conséquences événements : `34648630875` success
 - checkpoint présentation événements : `34648701996` success
 - modificateurs tactiques d’équipement : `34648911729` success
+- checkpoint modificateurs équipement : `34648982225` success
+- couverture directionnelle salle/obstacles : `34649297286` success
 
 ## Dernière étape terminée
 
-Modificateurs tactiques des équipements dans le moteur de combat :
-- `equippedTacticalModifiers()` agrège uniquement les objets réellement équipés et évite de compter deux fois une même entrée multi-slot;
-- les objets peuvent fournir via `data.tactical` : `attackModifier`, `rangeBonus`, `ignoresCover`, `ignoresContactPenalty`;
-- `evaluateAttackPosition()` reçoit maintenant facultativement `inventory` + `definitions` et applique ces bonus au profil tactique existant;
-- `rangeBonus` prolonge la portée sans créer un second calcul de distance;
-- `ignoresCover` et `ignoresContactPenalty` passent par les règles de couverture/contact déjà existantes;
-- `attackModifier` est ajouté au modificateur final et exposé séparément dans `equipmentModifier` pour l’UI future;
-- en l’absence d’inventaire, le comportement historique reste identique;
-- régression `rpg-tactical-combat.test.mjs` couvre cumul, anti-double comptage multi-slot, bonus de portée, couverture ignorée et pénalité de contact ignorée.
+Couverture directionnelle et obstacles dans le combat tactique :
+- `room-tactical-bridge.js` expose maintenant `roomLineCells()` pour réutiliser la même ligne de tir que la ligne de vue;
+- `roomCoverModifier()` calcule la couverture depuis la direction réelle du tireur vers la cible;
+- la couverture peut provenir de la case de la cible, de la case immédiatement devant elle dans la ligne de tir, ou d’un élément de bord (mur/obstacle/porte) portant un `coverModifier`;
+- les obstacles bas peuvent donc fournir de la couverture avec `blocksVision=false` sans devenir artificiellement des murs opaques;
+- le tireur ne subit pas la couverture de sa propre case lorsqu’il est adjacent à la cible;
+- `targetCoverModifier()` reste rétrocompatible si aucun `actorId` n’est fourni, mais `evaluateAttackPosition()` utilise désormais la résolution directionnelle complète;
+- `ignoresCover` continue de passer par le même moteur et annule aussi ces nouvelles sources de couverture;
+- la ligne de vue et le pathfinding ne sont pas dupliqués : la couverture réutilise les primitives du bridge tactique existant;
+- régression `rpg-room-tactical-bridge.test.mjs` couvre obstacle adjacent, couverture de bord, obstacle bas qui ne bloque pas la vue et contournement via `ignoresCover`.
 
-Commits de l'étape :
-- moteur tactique : `7ea0d48ff03d6f79147ebbb6ab0b0cfd0cffd8e9`
-- régression : `02e4e90d96ffa6d38b0ec16c383cec698afe9f18`
+Commits principaux de l'étape :
+- bridge couverture directionnelle final : `c87373532858c5409268ca8453e9c4527fe8fbec`
+- raccord moteur tactique : `5dc825cdcd231f4eb67e87f282a4a4dcccfdb53d`
+- régression : `6fcfbe38405904fd3e0b95dabe2c5ae37db46757`
 
-CI finale : `34648911729` success.
+CI finale : `34649297286` success.
 
 ## Stockage — décision repoussée
 
@@ -92,7 +96,7 @@ CI finale : `34648911729` success.
 
 ## Priorités ouvertes
 
-- enrichir les obstacles/couvertures de salle (au-delà du seul `coverModifier` de la case cible) sans dupliquer ligne de vue/pathfinding;
+- exposer proprement les réglages de couverture/obstacles dans l’éditeur de salle sans saisie technique brute;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

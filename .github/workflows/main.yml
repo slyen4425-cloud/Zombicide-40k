@@ -19,10 +19,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Récupérer la base diagnostic V16.78.101
+      - name: Récupérer la base diagnostic V16.78.107
         uses: actions/checkout@v4
         with:
-          ref: c458fb008b50db95ef5ca775342bc6eb5947e104
+          ref: fcb2695b546d511c10c58cbc938954e6ab734ac6
 
       - name: Vérifier la base diagnostic
         run: |
@@ -30,7 +30,7 @@ jobs:
           test -f service-worker.js
           echo "Diagnostic baseline commit:"
           git rev-parse HEAD
-          echo "Expected: c458fb008b50db95ef5ca775342bc6eb5947e104"
+          echo "Expected: fcb2695b546d511c10c58cbc938954e6ab734ac6"
 
       - name: Préparer le site diagnostic
         run: |
@@ -46,7 +46,26 @@ jobs:
             if [ -f "$file" ]; then cp -f "$file" _site/; fi
           done
 
-      - name: Injecter uniquement le traceur Chrome V123 avant bootstrap
+      - name: Isoler le bootstrap Capture automatique
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('_site/index.html')
+          s=p.read_text(encoding='utf-8')
+          before=s
+          s,n1=re.subn(r'(?m)^\s*ensureBuiltinMonsterCapture162\(\);\s*$', '', s)
+          s,n2=re.subn(r'(?m)^\s*document\.addEventListener\(["\']DOMContentLoaded["\'],\s*\(\)\s*=>\s*setTimeout\(ensureBuiltinMonsterCapture162,\s*60\)\s*\);\s*$', '', s)
+          print('capture direct calls removed:', n1)
+          print('capture DOMContentLoaded calls removed:', n2)
+          if n1 < 1 or n2 < 1:
+              raise SystemExit('Expected Capture startup calls not found')
+          if 'window.ensureBuiltinMonsterCapture162' not in s:
+              raise SystemExit('Capture function itself was unexpectedly removed')
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Injecter le traceur Chrome avant bootstrap
         run: |
           mkdir -p _site/assets/gensrpg
           curl -fsSL https://raw.githubusercontent.com/slyen4425-cloud/Zombicide-40k/main/assets/gensrpg/gens-chrome-startup-diag-1678122.js -o _site/assets/gensrpg/gens-chrome-startup-diag-1678122.js
@@ -54,7 +73,7 @@ jobs:
           from pathlib import Path
           p=Path('_site/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v101diag"></script>'
+          tag='<script src="assets/gensrpg/gens-chrome-startup-diag-1678122.js?v=v107capturediag"></script>'
           if tag not in s:
               if '<head>' in s:
                   s=s.replace('<head>', '<head>\n'+tag, 1)
@@ -65,7 +84,7 @@ jobs:
                   s=tag+'\n'+s
           p.write_text(s,encoding='utf-8')
           PY
-          grep -q 'gens-chrome-startup-diag-1678122.js?v=v101diag' _site/index.html
+          grep -q 'gens-chrome-startup-diag-1678122.js?v=v107capturediag' _site/index.html
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

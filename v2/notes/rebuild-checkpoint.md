@@ -20,23 +20,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Runtime ennemi : choix coordonné compétence + cible + mémoire.
 - Alliés : transition par salle, durées `room` décrémentées uniquement dans la salle concernée; métadonnées de combat conservées à l'entrée en combat.
 - Démarrage combat : `v2/src/modes/rpg/combat-setup.js` ajoute automatiquement les alliés éligibles/proches au combat, sans doublon, via `buildAllyCombatants` puis `createCombatState`. CI run `34632880339` : success.
+- État KO alliés : les alliés KO/morts sont exclus du contrôle, du mouvement et des prochains combats; une vraie réanimation les rend à nouveau éligibles. CI run `34633451924` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Durcissement de l'état KO des alliés :
-- `combatEligibleAllies()` exclut maintenant les alliés KO/morts, y compris si l'état est porté par `runtime.actor`;
-- `canPlayerControl()` refuse un allié KO/mort;
-- `moveAlly()` refuse un allié KO/mort avec `reason: defeated`;
-- `syncAlliesFromCombat()` synchronise explicitement `runtime.ko`, `runtime.actor.ko` et `runtime.actor.active`;
-- si un allié est réellement réanimé (`ko=false` dans le combat), il redevient proprement éligible et actif au lieu de rester bloqué par un ancien `active=false`.
+Placement des alliés suiveurs lors d'un changement de salle :
+- `transitionAlliesWithOwner()` accepte maintenant un `roomLayout`;
+- lorsque le layout est connu, les alliés sont placés sur des cases distinctes accessibles autour de la position d'entrée du propriétaire;
+- la case du propriétaire est réservée et n'est plus réutilisée par un suiveur;
+- les cases déjà occupées dans la salle sont évitées;
+- les cellules bloquées et les murs/portes fermées sont respectés via `roomTransitionAllowed()`;
+- si aucun `roomLayout` n'est fourni, le comportement historique reste disponible pour compatibilité.
 
 Commits de l'étape :
-- éligibilité : `8f1ed12f5efc0d3aaa8803b466ba5dbeb0f1ebbb`
-- synchronisation : `65d1cc12b189f550a5efa79a3ae2647e789eb439`
-- régression : `dd7e7d7bc4e3fb481b51b38d64020d35d28952f0`
+- moteur : `687af714ecd94958ce12574aa22e19aeef276c51`
+- régression : `cd9b6bd0d159902f668004eaf4d19006ba9638d6`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -49,7 +50,6 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- placement valide des alliés suiveurs à l'entrée d'une salle (éviter le même carreau pour tous);
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
 - couverture/obstacles et modificateurs d'équipement tactiques;
 - lifecycle audio de salle et vrai playback frontend;

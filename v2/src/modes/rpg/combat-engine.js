@@ -1,4 +1,6 @@
 import { applyEffect } from '../../core/effects.js';
+import { rollDie, resolveCheck } from '../../core/checks.js';
+export { rollDie, resolveCheck } from '../../core/checks.js';
 
 function clone(value) {
   return structuredClone(value);
@@ -32,24 +34,6 @@ export function createCombatState({ combatants = [], round = 1 } = {}) {
     log: [],
     winner: null,
   };
-}
-
-export function rollDie(sides = 100, random = Math.random) {
-  const n = Math.max(2, Math.floor(Number(sides) || 100));
-  return Math.floor(Math.max(0, Math.min(0.999999999, Number(random())))*n) + 1;
-}
-
-export function resolveCheck({ die = 100, roll = null, statValue = 0, difficulty = 50, modifier = 0, mode = 'roll-under', random = Math.random } = {}) {
-  const rolled = roll == null ? rollDie(die, random) : Number(roll);
-  const stat = Number(statValue) || 0;
-  const target = Number(difficulty) || 0;
-  const mod = Number(modifier) || 0;
-  if (mode === 'roll-over') {
-    const threshold = target - stat - mod;
-    return { roll: rolled, success: rolled >= threshold, threshold };
-  }
-  const threshold = target + stat + mod;
-  return { roll: rolled, success: rolled <= threshold, threshold };
 }
 
 export function queueCombatAction(combat, action) {

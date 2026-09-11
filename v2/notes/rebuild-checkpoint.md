@@ -12,7 +12,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
 - Compétences et pièges peuvent référencer des jets réutilisables par `checkId`, avec compatibilité des anciens champs inline.
 - Les événements peuvent exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
-- Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont maintenant persistés dans le runtime de salle.
+- Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont persistés dans le runtime de salle.
+- Le Créateur de salle expose maintenant le jet requis d'une interaction par un sélecteur lisible nom + dé, sans saisie d'ID technique.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -40,24 +41,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - correction normalisation des checks : `34642346782` success
 - jets réutilisables dans les événements : `34642604129` success
 - jets réutilisables sur interactions de salle : `34642816595` success
+- persistance runtime des tentatives d'interaction : `34642980536` success
+- première intégration du sélecteur de jet dans le Créateur de salle : `34643163828` success
 
 ## Dernière étape codée
 
-Persistance runtime des tentatives d'interaction :
-- l'état runtime d'une interaction conserve désormais `attempts`, `lastOutcome` et `lastCheck`;
-- nouveau `attemptRoomInteraction(runtime, roomId, interaction, actor, options)` dans `room-runtime.js`;
-- la tentative passe par `resolveRoomInteractionCheck()` et donc par le noyau partagé de jets;
-- un échec incrémente la tentative mais laisse l'interaction rejouable;
-- une réussite marque l'interaction `completed` par défaut;
-- une interaction déjà terminée ne relance pas le dé et renvoie `alreadyCompleted`;
-- le log runtime enregistre `room-interaction-attempted`, tentative, résultat et détail du jet;
-- l'état de tentative/réussite reste intact en quittant la salle, en revenant et lors d'un nouvel `ensureRoomInstance()`.
+Sélecteur de jet réutilisable dans le Créateur de salle :
+- nouvel helper `interactionCheckOptions()` dans `room-editor.js`;
+- chaque carte d'interaction affiche désormais `Jet / test requis`;
+- les options affichent le nom lisible et le dé (ex. `Test d’Agilité · D20`), jamais un ID brut à saisir;
+- les définitions désactivées sont masquées;
+- `— Aucun jet requis —` permet une interaction sans test;
+- la sélection est persistée dans `interaction.checkId` via le flux d'édition existant;
+- le Créateur de salle utilise `universe.checks` déjà chargé avec l'univers RPG;
+- régression `rpg-room-interaction-check-editor.test.mjs` vérifie nom, D100/D20, sélection et exclusion des jets désactivés.
 
 Commits de l'étape :
-- runtime interactions : `e80437d9f187e22537f46715f61520e6cce9c5e9`
-- régression runtime : `9047b9d65b4e5a313fbd53c5559abf23fa2a0b2c`
+- interface Créateur de salle : `80fd8f4b27d9858d8b51f01d41af2560abe90d31`
+- régression sélecteur : `2a1e132aa026ff8092f7fae5ef730c353fdb5b4e`
 
-CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
+CI du commit interface : `34643163828` success. CI du commit de régression / checkpoint à vérifier au prochain tour.
 
 ## Stockage — décision repoussée
 
@@ -67,7 +70,8 @@ CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avan
 
 ## Priorités ouvertes
 
-- ajouter les références `checkId` dans les interfaces d'édition des compétences, pièges et interactions, sans ID brut;
+- ajouter le même sélecteur de `checkId` dans l'éditeur de compétences, sans ID brut;
+- prévoir l'édition dédiée des pièges (détection/désarmement) avec deux sélecteurs de checks lisibles;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

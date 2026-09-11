@@ -93,25 +93,44 @@ export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {r
   };
 }
 
-export function grantRoomCreatureDrops(roomRuntime,instanceId,inventory,definitions={}){
+function normalizeLootRecipient(recipient={}){
+  const kind=String(recipient?.kind||'inventory');
+  const id=recipient?.id==null?null:String(recipient.id);
+  return {kind,id};
+}
+
+export function grantRoomCreatureDrops(roomRuntime,instanceId,inventory,definitions={}, {recipient=null}={}){
   const room=clone(roomRuntime||null);
-  if(!room) return {ok:false,reason:'room-runtime-missing',roomRuntime,inventory,drops:[]};
+  if(!room) return {ok:false,reason:'room-runtime-missing',roomRuntime,inventory,drops:[],recipient:null};
   const entity=(room.entities||[]).find(x=>String(x.id)===String(instanceId));
-  if(!entity||entity.kind!=='creature') return {ok:false,reason:'creature-entity-missing',roomRuntime,inventory,drops:[]};
+  if(!entity||entity.kind!=='creature') return {ok:false,reason:'creature-entity-missing',roomRuntime,inventory,drops:[],recipient:null};
   const runtime=entity.data?.creatureRuntime;
-  if(!runtime) return {ok:false,reason:'creature-runtime-missing',roomRuntime,inventory,drops:[]};
-  if(runtime.lootGranted) return {ok:false,reason:'already-granted',roomRuntime:room,inventory:clone(inventory),drops:clone(runtime.lootDrops||[])};
-  if(!runtime.lootClaimed) return {ok:false,reason:'loot-not-claimed',roomRuntime:room,inventory:clone(inventory),drops:[]};
+  if(!runtime) return {ok:false,reason:'creature-runtime-missing',roomRuntime,inventory,drops:[],recipient:null};
+  const recordedRecipient=runtime.lootGrantedTo?clone(runtime.lootGrantedTo):null;
+  if(runtime.lootGranted) return {ok:false,reason:'already-granted',roomRuntime:room,inventory:clone(inventory),drops:clone(runtime.lootDrops||[]),recipient:recordedRecipient};
+  if(!runtime.lootClaimed) return {ok:false,reason:'loot-not-claimed',roomRuntime:room,inventory:clone(inventory),drops:[],recipient:null};
 
   let nextInventory=clone(inventory);
   const drops=clone(runtime.lootDrops||[]);
   for(const drop of drops){
     const added=addItem(nextInventory,drop.itemId,drop.quantity,definitions);
-    if(!added.ok) return {ok:false,reason:added.reason||'loot-add-failed',roomRuntime:room,inventory:clone(inventory),drops};
+    if(!added.ok) return {ok:false,reason:added.reason||'loot-add-failed',roomRuntime:room,inventory:clone(inventory),drops,recipient:null};
     nextInventory=added.inventory;
   }
 
-  const nextRuntime={...clone(runtime),lootGranted:true};
+  const lootGrantedTo=normalizeLootRecipient(recipient||{});
+  const nextRuntime={...clone(runtime),lootGranted:true,lootGrantedTo};
   entity.data={...(entity.data||{}),creatureRuntime:nextRuntime};
-  return {ok:true,reason:null,roomRuntime:room,inventory:nextInventory,drops};
+  return {ok:true,reason:null,roomRuntime:room,inventory:nextInventory,drops,recipient:clone(lootGrantedTo)};
+}
+
+export function grantRoomCreatureDropsToRecipient(roomRuntime,instanceId,recipient,definitions={}){
+  if(!recipient?.inventory) return {ok:false,reason:'recipient-inventory-missing',roomRuntime,recipient:recipient?clone(recipient):null,drops:[]};
+  const meta=normalizeLootRecipient(recipient);
+  const granted=grantRoomCreatureDrops(roomRuntime,instanceId,recipient.inventory,definitions,{recipient:meta});
+  if(!granted.ok) return {...granted,recipient:granted.recipient?{...clone(recipient),...granted.recipient,inventory:clone(granted.inventory)}:clone(recipient)};
+  return {
+    ...granted,
+    recipient:{...clone(recipient),...meta,inventory:clone(granted.inventory)},
+  };
 }

@@ -22,6 +22,7 @@ function transitionFeature(layout,from,to){
   return featureAt(layout,from.x,from.y,edge)||featureAt(layout,to.x,to.y,OPP[edge])||null;
 }
 function doorOpen(door){return String(door?.state||'closed')==='open'&&!door?.locked;}
+function finiteModifier(value){const n=Number(value??0);return Number.isFinite(n)?n:0;}
 
 export function roomTransitionAllowed(layout,from,to,{vision=false}={}){
   if(!inside(layout,Number(to.x),Number(to.y))) return false;
@@ -45,7 +46,7 @@ export function shortestRoomPathDistance(layout,from,to,{diagonal=false,maxDista
       const next={x:cur.x+dx,y:cur.y+dy};
       if(!inside(layout,next.x,next.y)) continue;
       if(dx!==0&&dy!==0){
-        const midA={x:cur.x+dx,y:cur.y},midB={x:cur.x,y:cur.y+dy};
+        const midA={x:cur.x+dx,y:cur.y},midB={x:cur.x,y+dy};
         if(!roomTransitionAllowed(layout,cur,midA)||!roomTransitionAllowed(layout,cur,midB)) continue;
       } else if(!roomTransitionAllowed(layout,cur,next)) continue;
       const k=key(next.x,next.y); if(seen.has(k)) continue;
@@ -56,16 +57,32 @@ export function shortestRoomPathDistance(layout,from,to,{diagonal=false,maxDista
   return Infinity;
 }
 
-function bresenhamCells(from,to){
+export function roomLineCells(from,to){
   let x0=Number(from.x),y0=Number(from.y),x1=Number(to.x),y1=Number(to.y);
   const cells=[{x:x0,y:y0}],dx=Math.abs(x1-x0),sx=x0<x1?1:-1,dy=-Math.abs(y1-y0),sy=y0<y1?1:-1; let err=dx+dy;
   while(x0!==x1||y0!==y1){const e2=2*err;if(e2>=dy){err+=dy;x0+=sx;}if(e2<=dx){err+=dx;y0+=sy;}cells.push({x:x0,y:y0});}
   return cells;
 }
 
+export function roomCoverModifier(layout,from,to){
+  if(!layout||!from||!to||String(from.zoneId??'')!==String(to.zoneId??'')) return 0;
+  const cells=roomLineCells(from,to);
+  if(!cells.length) return 0;
+  const target=cells[cells.length-1];
+  const beforeTarget=cells.length>1?cells[cells.length-2]:null;
+  const candidates=[finiteModifier(layout?.cells?.[key(target.x,target.y)]?.coverModifier)];
+  if(beforeTarget){
+    const adjacentCell=layout?.cells?.[key(beforeTarget.x,beforeTarget.y)];
+    candidates.push(finiteModifier(adjacentCell?.coverModifier));
+    const feature=transitionFeature(layout,beforeTarget,target)?.feature;
+    candidates.push(finiteModifier(feature?.coverModifier));
+  }
+  return Math.min(0,...candidates);
+}
+
 export function hasRoomLineOfSight(layout,from,to){
   if(!from||!to||String(from.zoneId??'')!==String(to.zoneId??'')) return false;
-  const cells=bresenhamCells(from,to);
+  const cells=roomLineCells(from,to);
   for(let i=1;i<cells.length;i++){
     const prev=cells[i-1],cur=cells[i];
     const dx=cur.x-prev.x,dy=cur.y-prev.y;

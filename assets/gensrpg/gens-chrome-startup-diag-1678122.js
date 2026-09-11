@@ -1,9 +1,9 @@
 (()=>{
   'use strict';
 
-  // V16.78.126 — Chrome Android UI recovery.
-  // This file deliberately replaces the old V122/V123 global click tracer.
-  // It no longer monkey-patches EventTarget.addEventListener and no overlay is created.
+  // V16.78.127 — Chrome Android touch/click recovery.
+  // Purpose: recover home navigation when Android Chrome paints the pressed state
+  // but drops/delays the real click or fails to repaint the new view.
   if (window.__GENSRPG_CHROME_ANDROID_UI_RECOVERY__) return;
   window.__GENSRPG_CHROME_ANDROID_UI_RECOVERY__ = true;
 
@@ -39,64 +39,105 @@
       transform: none !important;
       -webkit-transform: none !important;
       touch-action: manipulation !important;
+      -webkit-tap-highlight-color: rgba(255,255,255,.12) !important;
+    }
+
+    html.${rootClass}.gens-hard-nav-repaint *,
+    html.${rootClass}.gens-hard-nav-repaint *::before,
+    html.${rootClass}.gens-hard-nav-repaint *::after {
+      animation: none !important;
+      transition: none !important;
+      filter: none !important;
+      -webkit-filter: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      will-change: auto !important;
     }
   `;
   (document.head || document.documentElement).appendChild(style);
 
-  let repaintQueued = false;
+  const clickTimes = new WeakMap();
+  let hardRepaintBusy = false;
 
-  function forceSoftwareRepaint() {
-    if (repaintQueued) return;
-    repaintQueued = true;
-    requestAnimationFrame(() => {
-      repaintQueued = false;
-      const body = document.body;
-      if (!body) return;
-      const previousOutline = body.style.outline;
-      body.style.outline = '1px solid transparent';
-      void body.offsetHeight;
-      requestAnimationFrame(() => {
-        body.style.outline = previousOutline;
-        void body.offsetHeight;
-      });
-    });
+  function navTargetFrom(eventTarget) {
+    return eventTarget instanceof Element
+      ? eventTarget.closest('.gensRootModeCard, .homeGear')
+      : null;
   }
 
-  function watchNavigationMutation() {
+  function hardRepaint() {
+    if (hardRepaintBusy) return;
     const body = document.body;
-    if (!body || typeof MutationObserver === 'undefined') return;
+    if (!body) return;
+    hardRepaintBusy = true;
+    document.documentElement.classList.add('gens-hard-nav-repaint');
 
-    let stopTimer = 0;
-    const observer = new MutationObserver(() => {
-      forceSoftwareRepaint();
-      clearTimeout(stopTimer);
-      stopTimer = setTimeout(() => observer.disconnect(), 350);
-    });
+    const oldDisplay = body.style.display;
+    const oldVisibility = body.style.visibility;
 
-    observer.observe(body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden']
-    });
+    setTimeout(() => {
+      body.style.visibility = 'hidden';
+      body.style.display = 'none';
+      void document.documentElement.offsetHeight;
 
-    stopTimer = setTimeout(() => observer.disconnect(), 1200);
+      setTimeout(() => {
+        body.style.display = oldDisplay;
+        body.style.visibility = oldVisibility;
+        void body.offsetHeight;
+        document.documentElement.classList.remove('gens-hard-nav-repaint');
+        hardRepaintBusy = false;
+      }, 16);
+    }, 0);
+  }
+
+  function softRepaintBurst() {
+    queueMicrotask(hardRepaint);
+    setTimeout(hardRepaint, 40);
+    setTimeout(hardRepaint, 140);
+    setTimeout(hardRepaint, 320);
+  }
+
+  function armFallback(target) {
+    if (!target) return;
+    const armedAt = performance.now();
+    setTimeout(() => {
+      const lastClick = clickTimes.get(target) || 0;
+      if (lastClick >= armedAt - 8) return;
+      try {
+        target.click();
+      } catch (_) {
+        try {
+          target.dispatchEvent(new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            view: window
+          }));
+        } catch (_) {}
+      }
+      softRepaintBurst();
+    }, 110);
   }
 
   document.addEventListener('click', event => {
-    const target = event.target instanceof Element
-      ? event.target.closest('.gensRootModeCard, .homeGear')
-      : null;
+    const target = navTargetFrom(event.target);
     if (!target) return;
-
-    watchNavigationMutation();
-    queueMicrotask(forceSoftwareRepaint);
-    requestAnimationFrame(forceSoftwareRepaint);
-    setTimeout(forceSoftwareRepaint, 40);
-    setTimeout(forceSoftwareRepaint, 120);
-    setTimeout(forceSoftwareRepaint, 280);
+    clickTimes.set(target, performance.now());
+    softRepaintBurst();
   }, true);
 
-  window.addEventListener('pageshow', forceSoftwareRepaint, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(forceSoftwareRepaint, 60), { passive: true });
+  document.addEventListener('pointerup', event => {
+    const target = navTargetFrom(event.target);
+    if (!target) return;
+    armFallback(target);
+  }, true);
+
+  document.addEventListener('touchend', event => {
+    const target = navTargetFrom(event.target);
+    if (!target) return;
+    armFallback(target);
+  }, {capture:true, passive:true});
+
+  window.addEventListener('pageshow', () => setTimeout(hardRepaint, 0), { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(hardRepaint, 60), { passive: true });
 })();

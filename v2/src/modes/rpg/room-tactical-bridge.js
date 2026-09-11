@@ -46,7 +46,7 @@ export function shortestRoomPathDistance(layout,from,to,{diagonal=false,maxDista
       const next={x:cur.x+dx,y:cur.y+dy};
       if(!inside(layout,next.x,next.y)) continue;
       if(dx!==0&&dy!==0){
-        const midA={x:cur.x+dx,y:cur.y},midB={x:cur.x,y+dy};
+        const midA={x:cur.x+dx,y:cur.y},midB={x:cur.x,y:cur.y+dy};
         if(!roomTransitionAllowed(layout,cur,midA)||!roomTransitionAllowed(layout,cur,midB)) continue;
       } else if(!roomTransitionAllowed(layout,cur,next)) continue;
       const k=key(next.x,next.y); if(seen.has(k)) continue;

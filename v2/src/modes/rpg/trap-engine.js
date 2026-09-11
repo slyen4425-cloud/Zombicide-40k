@@ -1,11 +1,11 @@
 import { applyEffect } from '../../core/effects.js';
-import { resolveActorCheck } from '../../core/checks.js';
+import { resolveDefinedActorCheck } from '../../core/checks.js';
 
 function clone(value){return structuredClone(value);}
 function uid(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
-function buildCheck(spec={},actor={},random=Math.random){
-  return resolveActorCheck(spec,actor,{random});
+function buildCheck({checkId=null,fallback=null,definitions={},actor={},random=Math.random}={}){
+  return resolveDefinedActorCheck({checkId,fallback,definitions,actor,random});
 }
 
 export function createTrapDefinition({
@@ -14,6 +14,8 @@ export function createTrapDefinition({
   enabled=true,
   reusable=false,
   hidden=true,
+  detectionCheckId=null,
+  disarmCheckId=null,
   detectionCheck=null,
   disarmCheck=null,
   effectIds=[],
@@ -26,6 +28,8 @@ export function createTrapDefinition({
     enabled:enabled!==false,
     reusable:Boolean(reusable),
     hidden:hidden!==false,
+    detectionCheckId:detectionCheckId==null?null:String(detectionCheckId),
+    disarmCheckId:disarmCheckId==null?null:String(disarmCheckId),
     detectionCheck:detectionCheck?clone(detectionCheck):null,
     disarmCheck:disarmCheck?clone(disarmCheck):null,
     effectIds:[...(effectIds||[])].map(String),
@@ -57,15 +61,17 @@ function appendLog(state,type,payload={}){
   return next;
 }
 
-export function detectTrap(definition,state,actor,{random=Math.random}={}){
+export function detectTrap(definition,state,actor,{random=Math.random,definitions={}}={}){
   const trap=createTrapDefinition(definition);
   if(!trap.enabled) return {ok:false,reason:'disabled',state};
   if(state?.revealed) return {ok:true,already:true,detected:true,state};
-  const check=trap.detectionCheck?buildCheck(trap.detectionCheck,actor,random):{success:true,roll:null,threshold:null};
+  const checked=buildCheck({checkId:trap.detectionCheckId,fallback:trap.detectionCheck,definitions,actor,random});
+  if(!checked.ok) return {ok:false,reason:checked.reason,state};
+  const check=checked.check;
   let next=clone(state||createTrapState(trap));
   next.lastDetection=clone(check);
   if(check.success) next.revealed=true;
-  next=appendLog(next,'trap-detection',{trapId:trap.id,success:Boolean(check.success),check});
+  next=appendLog(next,'trap-detection',{trapId:trap.id,success:Boolean(check.success),check,checkId:trap.detectionCheckId});
   return {ok:true,detected:Boolean(check.success),check,state:next};
 }
 
@@ -75,9 +81,11 @@ export function disarmTrap(definition,state,actor,{random=Math.random,definition
   if(!trap.enabled) return {ok:false,reason:'disabled',state:next,actor};
   if(next.disarmed) return {ok:true,already:true,disarmed:true,state:next,actor};
   if(next.triggered&&!trap.reusable) return {ok:false,reason:'already-triggered',state:next,actor};
-  const check=trap.disarmCheck?buildCheck(trap.disarmCheck,actor,random):{success:true,roll:null,threshold:null};
+  const checked=buildCheck({checkId:trap.disarmCheckId,fallback:trap.disarmCheck,definitions,actor,random});
+  if(!checked.ok) return {ok:false,reason:checked.reason,state:next,actor};
+  const check=checked.check;
   next.lastDisarm=clone(check);
-  next=appendLog(next,'trap-disarm',{trapId:trap.id,success:Boolean(check.success),check});
+  next=appendLog(next,'trap-disarm',{trapId:trap.id,success:Boolean(check.success),check,checkId:trap.disarmCheckId});
   if(check.success){
     next.disarmed=true;
     next.revealed=true;

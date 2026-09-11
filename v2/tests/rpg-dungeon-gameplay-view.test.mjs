@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 import { createInventoryState, createItemDefinition, addItem } from '../src/modes/rpg/inventory-engine.js';
 import { buildWorldIndex, createWorld, createZone, createRoom, createRoomLink } from '../src/modes/rpg/world-engine.js';
-import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot, eventPresentationEntries, dungeonTransitionEntries } from '../src/modes/rpg/dungeon-gameplay-view.js';
+import { renderDungeonGameplayView, dungeonLootEntries, grantDungeonCreatureLoot, eventPresentationEntries, dungeonTransitionEntries, reconcileEndedDungeonCombat } from '../src/modes/rpg/dungeon-gameplay-view.js';
 
 const coin=createItemDefinition({id:'old-coin',name:'Vieille pièce',stackable:true});
 const key=createItemDefinition({id:'crypt-key',name:'Clé de crypte',stackable:false});
 const universe={
   items:[coin,key],
   heroes:[{id:'aldren',name:'Aldren',icon:'⚔️'},{id:'lyra',name:'Lyra',icon:'🏹'}],
-  bestiary:[{id:'skeleton',name:'Squelette'}],
+  bestiary:[{id:'skeleton',name:'Squelette',loot:[]}],
   quests:[{
     id:'crypt',name:'Crypte oubliée',description:'Trouver la crypte.',enabled:true,
     objectives:[{id:'enter',label:'Entrer dans la crypte',required:1,optional:false}],
@@ -56,8 +56,8 @@ const runtime={
   questRuntime:{states:{crypt:{questId:'crypt',status:'active',progress:{enter:0},startedAt:'2026-09-11T00:00:00Z'}}},
 };
 const heroRuntimes=[
-  {instanceId:'lyra',heroId:'lyra',name:'Lyra',active:true,ko:false,dead:false,state:{stats:{},resources:{}}},
-  {instanceId:'aldren',heroId:'aldren',name:'Aldren',active:true,ko:false,dead:false,state:{stats:{},resources:{}}},
+  {instanceId:'lyra',heroId:'lyra',name:'Lyra',active:true,ko:false,dead:false,state:{stats:{},resources:{hp:{current:8,max:8}}}},
+  {instanceId:'aldren',heroId:'aldren',name:'Aldren',active:true,ko:false,dead:false,state:{stats:{},resources:{hp:{current:10,max:10}}}},
 ];
 const recipients=[
   {kind:'hero',id:'lyra',name:'Lyra',icon:'🏹',inventory:createInventoryState()},
@@ -114,6 +114,20 @@ assert.equal(dungeonLootEntries(runtime).length,1);
 const noHeroRuntimeHtml=renderDungeonGameplayView(universe,runtime,{worldIndex});
 assert.match(noHeroRuntimeHtml,/runtime du héros actif doit être chargé/);
 assert.match(noHeroRuntimeHtml,/data-dungeon-start-combat disabled/);
+
+const endedCombat={
+  phase:'ended',winner:'heroes',round:2,turnSequence:4,log:[],
+  metadata:{kind:'dungeon-room-combat',roomId:'crypt-room',engagerHeroId:'lyra',heroIds:['lyra'],enemyIds:['spawn:skeleton:2'],enemyEntityIds:['spawn:skeleton:2']},
+  actors:{
+    lyra:{id:'lyra',side:'heroes',ko:false,state:{stats:{},resources:{hp:{current:3,max:8}}},metadata:{sourceKind:'hero',heroId:'lyra',instanceId:'lyra',roomId:'crypt-room'}},
+    'spawn:skeleton:2':{id:'spawn:skeleton:2',side:'enemies',ko:true,state:{stats:{},resources:{}},metadata:{sourceKind:'creature',roomEntityId:'spawn:skeleton:2',creatureId:'skeleton',roomId:'crypt-room'}},
+  },
+};
+const endedResult=reconcileEndedDungeonCombat({combat:endedCombat,roomRuntime:runtime,heroRuntimes,universe,random:()=>0});
+assert.equal(endedResult.ok,true);
+assert.equal(endedResult.roomRuntime.rooms['crypt-room'].entities.find(x=>x.id==='spawn:skeleton:2').defeated,true,'ended combat must immediately mark the exact room enemy defeated');
+assert.equal(endedResult.heroRuntimes.find(x=>x.instanceId==='lyra').state.resources.hp.current,3,'ended combat must immediately persist hero state');
+assert.equal(endedResult.roomCleared,true,'room must become clear once the last active enemy is reconciled');
 
 const aldrenFocused=structuredClone(runtime);
 aldrenFocused.focusedHeroId='aldren';

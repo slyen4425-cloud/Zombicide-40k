@@ -55,7 +55,7 @@ Commits de l'étape :
 - régression compétences : `0292455560e77df029600a9fa589d0177e01d2f0`
 - régression pièges : `4d7ec0b35eb504d917088f8963bd30d1e9706e72`
 
-CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
+Le run `34642221555` a échoué sur une assertion obsolète de `core-checks.test.mjs` : `normalizeCheckSpec()` expose désormais volontairement `statId:null`. Le moteur n'était pas en faute. Le test a été corrigé dans le commit `3ef5363cd68966fd4f47e0c4b19005ef7faa1aba` pour refléter le contrat actuel. Run de validation : `34642346782`, en cours au dernier contrôle.
 
 ## Stockage — décision repoussée
 

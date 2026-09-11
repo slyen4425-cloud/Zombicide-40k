@@ -13,23 +13,29 @@ permissions:
 jobs:
   chrome-mobile:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [playwright-chromium, google-chrome-stable]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Install Playwright Chromium
+      - name: Install browsers
         run: |
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0
           npx playwright install --with-deps chromium
+          sudo apt-get update -y
+          sudo apt-get install -y google-chrome-stable
+          google-chrome-stable --version || true
 
       - name: Run mobile Chrome freeze probe
         env:
+          ENGINE: ${{ matrix.engine }}
           TARGET_URL: https://slyen4425-cloud.github.io/Zombicide-40k/?nosw=1&ci=chrome-android-freeze
         run: |
           mkdir -p diagnostic-artifacts
@@ -38,9 +44,14 @@ jobs:
           import fs from 'node:fs';
 
           const target = process.env.TARGET_URL;
-          const browser = await chromium.launch({headless:true});
+          const engine = process.env.ENGINE;
+          const launchOptions = engine === 'google-chrome-stable'
+            ? { headless:true, executablePath:'/usr/bin/google-chrome-stable' }
+            : { headless:true };
+          const browser = await chromium.launch(launchOptions);
           const device = devices['Pixel 7'];
-          const summary = [];
+          const summary = {engine, browserVersion: browser.version(), probes: []};
+          console.log('ENGINE=', engine, 'BROWSER_VERSION=', browser.version());
 
           async function openPage(label){
             const context = await browser.newContext({
@@ -67,7 +78,7 @@ jobs:
                 setTimeout(()=>resolve(Math.round(performance.now()-t)),0);
               }));
             } catch(e){ heartbeat='ERR '+e.message; }
-            await page.screenshot({path:`diagnostic-artifacts/${label}-loaded.png`, fullPage:true}).catch(()=>{});
+            await page.screenshot({path:`diagnostic-artifacts/${engine}-${label}-loaded.png`, fullPage:true}).catch(()=>{});
             return {context,page,events,loadMs,gotoState,heartbeat};
           }
 
@@ -75,28 +86,18 @@ jobs:
           let buttons=[];
           try {
             buttons = await first.page.locator('button, [role="button"], input[type="button"], input[type="submit"]').evaluateAll(els =>
-              els.map((el,i)=>({
-                i,
-                tag:el.tagName,
-                id:el.id||'',
-                cls:typeof el.className==='string'?el.className:'',
-                text:(el.innerText||el.value||el.textContent||'').replace(/\s+/g,' ').trim().slice(0,120),
-                visible:!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length)
-              })).filter(x=>x.visible)
+              els.map((el,i)=>({i,tag:el.tagName,id:el.id||'',cls:typeof el.className==='string'?el.className:'',text:(el.innerText||el.value||el.textContent||'').replace(/\s+/g,' ').trim().slice(0,120),visible:!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length)})).filter(x=>x.visible)
             );
           } catch(e){ first.events.push('button-enum-error:'+e.message); }
-          fs.writeFileSync('diagnostic-artifacts/home-buttons.json', JSON.stringify(buttons,null,2));
-          fs.writeFileSync('diagnostic-artifacts/home-events.log', first.events.join('\n'));
           console.log('HOME loadMs=', first.loadMs, 'heartbeat=', first.heartbeat, 'goto=', first.gotoState);
           console.log('VISIBLE BUTTONS=', JSON.stringify(buttons));
+          fs.writeFileSync(`diagnostic-artifacts/${engine}-home-events.log`, first.events.join('\n'));
           await first.context.close();
 
-          const candidates = buttons.slice(0, Math.min(buttons.length, 12));
-          for(const b of candidates){
-            const label=`btn-${String(b.i).padStart(2,'0')}`;
-            const run=await openPage(label);
+          for(const b of buttons.slice(0,12)){
+            const run=await openPage(`btn-${b.i}`);
             const record={button:b, loadMs:run.loadMs, initialHeartbeat:run.heartbeat, goto:run.gotoState};
-            let clickResult='ok', clickMs=null, afterHeartbeat='unknown', urlAfter='';
+            let clickResult='ok', clickMs=null, afterHeartbeat='unknown';
             try {
               const loc=run.page.locator('button, [role="button"], input[type="button"], input[type="submit"]').nth(b.i);
               const t=Date.now();
@@ -109,21 +110,15 @@ jobs:
                 new Promise(resolve => setTimeout(()=>resolve('HOST_TIMEOUT'),3000))
               ]);
             } catch(e){ afterHeartbeat='ERR '+e.message; }
-            try{ urlAfter=run.page.url(); }catch{}
-            record.clickResult=clickResult;
-            record.clickMs=clickMs;
-            record.afterHeartbeat=afterHeartbeat;
-            record.urlAfter=urlAfter;
-            summary.push(record);
+            Object.assign(record,{clickResult,clickMs,afterHeartbeat,urlAfter:run.page.url()});
+            summary.probes.push(record);
             console.log('PROBE', JSON.stringify(record));
-            fs.writeFileSync(`diagnostic-artifacts/${label}-events.log`, run.events.join('\n'));
-            await run.page.screenshot({path:`diagnostic-artifacts/${label}-after.png`, fullPage:true}).catch(()=>{});
+            fs.writeFileSync(`diagnostic-artifacts/${engine}-btn-${b.i}-events.log`, run.events.join('\n'));
             await run.context.close().catch(()=>{});
           }
 
-          fs.writeFileSync('diagnostic-artifacts/summary.json', JSON.stringify(summary,null,2));
-          console.log('SUMMARY');
-          console.log(JSON.stringify(summary,null,2));
+          fs.writeFileSync(`diagnostic-artifacts/${engine}-summary.json`, JSON.stringify(summary,null,2));
+          console.log('SUMMARY', JSON.stringify(summary));
           await browser.close();
           EOF
           node ./chrome-freeze-probe.mjs
@@ -132,6 +127,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: chrome-android-freeze-diagnostic
+          name: chrome-android-freeze-${{ matrix.engine }}
           path: diagnostic-artifacts/
           retention-days: 7

@@ -4,6 +4,9 @@ import { ensureCombatConfig } from './combat-config.js';
 import { combatParticipants } from './spatial-engine.js';
 import { getHeroRoomLocation, heroesInRoom } from './room-runtime.js';
 import { resolveRoomCreatureDefeat } from './spawn-engine.js';
+import { resolveHeroSkillIds } from './hero-engine.js';
+import { prepareSkillAction, resolveAndAdvance } from './turn-runtime.js';
+import { beginActiveTurn, reconcileCombatState } from './combat-session.js';
 
 function clone(value){return structuredClone(value);}
 function list(value){return Array.isArray(value)?value:Object.values(value||{});}
@@ -11,6 +14,10 @@ function list(value){return Array.isArray(value)?value:Object.values(value||{});
 function heroRuntimeById(heroRuntimes=[],heroId){
   const id=String(heroId||'');
   return list(heroRuntimes).find(hero=>String(hero?.instanceId||'')===id||String(hero?.heroId||'')===id)||null;
+}
+
+function definitionById(collection,id){
+  return list(collection).find(entry=>String(entry?.id||'')===String(id||''))||null;
 }
 
 export function activeDungeonEnemies(roomRuntime,roomId=null){
@@ -97,6 +104,79 @@ export function startDungeonCombat({
     heroIds:clone(participants.heroIds),
     enemyIds:clone(combat.metadata.enemyIds),
     enemyEntityIds:clone(combat.metadata.enemyEntityIds),
+  };
+}
+
+export function dungeonHeroCombatSkills({combat,heroRuntimes=[],universe={}}={}){
+  if(!combat||combat.phase!=='turn'||!combat.activeActorId) return [];
+  const actor=combat.actors?.[combat.activeActorId];
+  if(!actor||actor.side!=='heroes'||actor.ko) return [];
+  const hero=heroRuntimeById(heroRuntimes,actor.id);
+  if(!hero) return [];
+  const allowed=new Set(resolveHeroSkillIds(hero,universe).map(String));
+  return list(universe.skills).filter(skill=>skill?.enabled!==false&&allowed.has(String(skill.id))).map(skill=>clone(skill));
+}
+
+function defaultTargetId(combat,skill){
+  const actor=combat?.actors?.[combat?.activeActorId];
+  if(!actor) return null;
+  const targetKind=String(skill?.target||'enemy');
+  if(targetKind==='self') return String(actor.id);
+  const living=Object.values(combat.actors||{}).filter(candidate=>candidate&&!candidate.ko);
+  if(targetKind==='ally') return String(living.find(candidate=>String(candidate.side)===String(actor.side)&&String(candidate.id)!==String(actor.id))?.id||actor.id);
+  if(targetKind==='any') return String(living.find(candidate=>String(candidate.id)!==String(actor.id))?.id||actor.id);
+  return String(living.find(candidate=>String(candidate.side)!==String(actor.side))?.id||'');
+}
+
+export function executeDungeonHeroSkill({
+  combat,
+  heroRuntimes=[],
+  universe={},
+  skillId,
+  targetId=null,
+  spatial=null,
+  spatialConfig={},
+  actionId=null,
+  randomPercent=null,
+}={}){
+  if(!combat||combat.phase!=='turn') return {ok:false,reason:'not-in-turn',combat};
+  const actor=combat.actors?.[combat.activeActorId];
+  if(!actor) return {ok:false,reason:'missing-actor',combat};
+  if(actor.side!=='heroes') return {ok:false,reason:'not-hero-turn',combat};
+  const skills=dungeonHeroCombatSkills({combat,heroRuntimes,universe});
+  const skill=skills.find(entry=>String(entry.id)===String(skillId||''));
+  if(!skill) return {ok:false,reason:'skill-unavailable',combat};
+
+  const config=ensureCombatConfig(universe);
+  const effectiveSkill=clone(skill);
+  effectiveSkill.roll=effectiveSkill.roll||{};
+  if(effectiveSkill.roll.enabled!==false){
+    effectiveSkill.roll.die=Number(effectiveSkill.roll.die)||Number(config.checkDefaults?.die)||100;
+    effectiveSkill.roll.mode=effectiveSkill.roll.mode||config.checkDefaults?.mode||'roll-under';
+  }
+  const selectedTargetId=String(targetId||defaultTargetId(combat,effectiveSkill)||'');
+  if(!selectedTargetId) return {ok:false,reason:'missing-target',combat};
+
+  const prepared=prepareSkillAction(combat,effectiveSkill,selectedTargetId,universe,{
+    actionId:actionId||`dungeon-${combat.turnSequence}-${actor.id}-${effectiveSkill.id}`,
+    targeting:{spatial,config:spatialConfig},
+  });
+  if(!prepared.ok) return {ok:false,reason:prepared.reason,combat:prepared.combat||combat,targetCheck:prepared.targetCheck||null};
+  const resolved=resolveAndAdvance(prepared.combat,{definitions:universe,randomPercent:randomPercent||undefined});
+  if(!resolved.resolved) return {ok:false,reason:resolved.reason,combat:resolved.combat||prepared.combat};
+
+  let next=reconcileCombatState(resolved.combat,{defeatRule:config.defeatRule});
+  if(next.phase==='turn'&&next.activeActorId){
+    next=beginActiveTurn(next,{definitions:universe,defeatRule:config.defeatRule}).combat;
+  }
+  return {
+    ok:true,
+    reason:null,
+    combat:next,
+    skillId:String(effectiveSkill.id),
+    targetId:selectedTargetId,
+    check:resolved.check||null,
+    effects:clone(resolved.effects||[]),
   };
 }
 

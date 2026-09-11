@@ -20,7 +20,8 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
 - Présentation combat : `combat-presentation-ui.js` est monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur, sans déplacer la logique hors du moteur.
 - Contrats de cible combat : `enemy`, `ally`, `self` et `any` sont validés par le runtime avant toute dépense de ressource/charge/cooldown ; une cible KO reste invalide.
-- Ciblage UI vivant : changer la compétence du vrai combat Donjon recalcule maintenant immédiatement le menu Cible à partir de `validSkillTargets()` ; le sélecteur se désactive si aucune cible valide n’existe.
+- Ciblage UI vivant : changer la compétence du vrai combat Donjon recalcule immédiatement le menu Cible à partir de `validSkillTargets()` ; le sélecteur se désactive si aucune cible valide n’existe.
+- Consommables de combat : nouveau runtime dédié raccordé au même `combatState` et au vrai inventaire héros ; consommation unique, effets génériques existants, ciblage `self/ally/enemy/any`, journal moteur et progression de timeline configurable.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -41,27 +42,31 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - contrats de cible `enemy/ally/self/any` : `34656913323` success
 - helper UI filtre cibles de combat : `34657181700` success
 - changement de compétence => cibles recalculées en direct : `34657477226` success
+- runtime consommables combat Donjon : `34657796799` success
 
 ## Dernière étape terminée
 
-Raccord vivant du menu Cible au combat Donjon réel :
-- `combat-target-ui.js` conserve le contexte du `combatState` réel et expose `syncDungeonCombatTargetControls()` ;
-- `installDungeonCombatTargetUi()` écoute le changement du vrai sélecteur `[data-dungeon-combat-skill]` et reconstruit immédiatement `[data-dungeon-combat-target]` ;
-- `combat-presentation-ui.js`, déjà monté dans la vraie vue Donjon, fournit le contexte `universe + combat` au filtre puis programme une synchronisation juste après le rendu DOM ;
-- aucune règle de ciblage n’est recopiée : les choix viennent toujours de `validSkillTargets()` ;
-- `enemy`, `ally`, `self`, `any` changent donc réellement la liste affichée ; les KO sont retirés et un sélecteur sans cible devient désactivé ;
-- régression `rpg-dungeon-combat-target-live.test.mjs` : Tir -> Squelette, Soin allié -> Aldren, Concentration -> Lyra, Pouvoir libre -> trois cibles vivantes, puis désactivation quand l’unique allié devient KO.
+Runtime de consommables branché sur le vrai combat Donjon, sans second moteur :
+- nouveau module `v2/src/modes/rpg/dungeon-combat-item-runtime.js`;
+- `dungeonHeroCombatItems()` lit directement l’inventaire du héros dont c’est réellement le tour ;
+- les objets `consumable` et `scroll` sont utilisables en combat par défaut, sauf `data.combatUsable=false`; tout autre type peut être explicitement autorisé avec `data.combatUsable=true`;
+- les conditions existantes passent par `canUseItem()` et les effets passent par `useInventoryItem()` / `applyEffect()` : aucune seconde logique d’objet ou d’effet n’est créée ;
+- la cible est data-driven via `data.targetKind` ou `data.target`, avec les mêmes contrats `self/ally/enemy/any` que les compétences ;
+- une cible invalide ne consomme rien ; un objet consommé retire exactement une unité du vrai inventaire héros ;
+- l’état cible est modifié directement dans le vrai `combatState`, puis la règle de KO/défaite existante est réévaluée ;
+- un événement moteur `item-used` est ajouté au journal avec objet, cible, effets, audio/event éventuels ;
+- par défaut un consommable termine le tour et avance la timeline existante ; `data.consumeTurn=false` permet explicitement un objet sans consommation de tour ;
+- régression dédiée : potion self soigne 4 PV, décrémente 2→1 et passe au héros suivant ; cible alliée invalide ne consomme rien ; bandage ally soigne l’allié, se consomme et conserve le tour quand `consumeTurn=false`; un matériau ordinaire n’apparaît pas comme action de combat.
 
 Commits de l’étape :
-- binding vivant du sélecteur : `79217a4e815323f251932abdf079314560c43cb0`
-- raccord via la présentation combat réelle : `719418723cac74b1ed9c176689a65b7070c65aa5`
-- régression live : `5e0995ebc794aedc5fdf8e166bb4e7e76ee9fecb`
+- runtime consommables : `4b41c7bc0f2805e0da07e71d7efbe49b1bde9d31`
+- régression consommables : `e27474112af2a248ab1e9269b71c02d70db2879e`
 
-CI finale : `34657477226` success.
+CI finale : `34657796799` success.
 
 ## Priorités ouvertes
 
-1. vérifier/raccorder les consommables de combat ;
+1. brancher maintenant ces consommables dans la vraie vue Donjon : menu Objet + cible valide + bouton Utiliser, avec rafraîchissement immédiat des quantités ;
 2. vérifier/raccorder la fuite puis `combat direct OFF / MJ contrôle total` contre le legacy ;
 3. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
 4. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;

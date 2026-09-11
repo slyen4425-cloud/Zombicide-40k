@@ -10,62 +10,50 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - RPG data-driven : stats, ressources, jets/tests, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
 - Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
-- Compétences et pièges peuvent référencer des jets réutilisables par `checkId`, avec compatibilité des anciens champs inline.
-- Les événements peuvent exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
-- Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont persistés dans le runtime de salle.
-- Le Créateur de salle expose le jet requis d'une interaction par un sélecteur lisible nom + dé, sans saisie d'ID technique.
-- L'éditeur de compétences expose le même choix de jet réutilisable; les anciens réglages locaux restent disponibles comme fallback.
-- L'éditeur RPG possède maintenant une section Pièges dédiée avec deux sélecteurs distincts : détection et désarmement.
+- Compétences, pièges, événements et interactions de salle peuvent référencer des jets réutilisables; les anciens formats inline restent compatibles.
+- Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime.
+- Éditeur RPG : sélecteur de jet réutilisable dans les compétences et éditeur dédié des pièges avec détection/désarmement séparés.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
-- Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
-- Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
-- Alliés : placement, transitions, durée par salle, KO/réanimation, injection combat.
-- Bestiaire : ressources bornées, médias, loot idempotent, drops persistants et attribution à un destinataire explicite.
-- Boss : clé créée seulement à la défaite réelle; passages `requiredItemId` verrouillés sur possession réelle de l'objet.
-- World Builder : objets requis et conditions choisis par menus lisibles, jamais par ID brut.
-- Portes de salle runtime : état persistant, ouverture par clé, layout matérialisé avec état runtime.
-- Tactique/perception : consomment automatiquement le layout matérialisé du runtime de donjon.
-- Audio RPG : lifecycle de salle, sortie navigateur, session audio unique, cleanup en quittant le RPG.
-- Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel volontairement différé.
+- Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
+- Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
+- World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
+- Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
+- Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
 
 ## Jalons CI récents validés
 
-- loot destinataire : `34638378209` success
+- loot destinataire moteur : `34638378209` success
 - clé de boss à la défaite : `34638633003` success
 - passage verrouillé par objet : `34639084070` success
-- sélecteur objet requis World Builder : `34639994371` success
-- sélecteur conditions World Builder : `34640343911` success
 - portes persistantes / ouverture par clé : `34640631070` success
-- configuration portes verrouillées dans le Créateur de salle : `34640903854` success
-- layout runtime consommé par tactique/perception : `34641208857` success
+- layout runtime tactique/perception : `34641208857` success
 - noyau générique de jets/tests : `34641462386` success
 - éditeur générique de jets/tests : `34641810586` success
-- correction normalisation des checks : `34642346782` success
-- jets réutilisables dans les événements : `34642604129` success
-- jets réutilisables sur interactions de salle : `34642816595` success
-- persistance runtime des tentatives d'interaction : `34642980536` success
-- sélecteur de jet dans le Créateur de salle : `34643290918` success
-- sélecteur de jet dans les compétences : `34643616351` success
+- jets réutilisables événements : `34642604129` success
+- jets réutilisables interactions de salle : `34642816595` success
+- tentatives d'interaction persistantes : `34642980536` success
+- sélecteur jet Créateur de salle : `34643290918` success
+- sélecteur jet compétences : `34643616351` success
+- éditeur pièges : `34643853871` success
 
 ## Dernière étape codée
 
-Éditeur dédié des pièges :
-- nouveau `trap-editor.js` avec collection persistante `universe.traps`;
-- création/suppression de pièges depuis la configuration RPG;
-- chaque piège expose `Jet de détection` et `Jet de désarmement` séparément;
-- les menus n'affichent que les checks actifs, avec libellé `Nom · Dxx` et sans saisie d'ID brut;
-- `— Détection automatique —` et `— Désarmement automatique —` conservent les cas sans jet;
-- les champs `enabled`, `hidden` et `reusable` sont éditables;
-- les données restent compatibles avec `trap-engine.js`, qui consomme déjà `detectionCheckId` et `disarmCheckId` avec fallback inline;
-- `rpg.js` initialise, charge et sauvegarde `universe.traps`, puis monte l'éditeur juste après les jets génériques;
-- régression `rpg-trap-editor.test.mjs` couvre normalisation, nouveau piège, D100/D20, sélection et exclusion des checks désactivés.
+UI générique de destinataire de loot :
+- nouveau `loot-recipient-ui.js`;
+- un destinataire est identifié par `kind:id` et garde son propre inventaire;
+- sélecteur lisible par nom/icône : héros, groupe ou autre inventaire, sans ID technique exposé;
+- destinataires désactivés ou sans inventaire exclus;
+- fallback automatique vers le premier inventaire disponible si aucune sélection valide n'est fournie;
+- `grantCreatureLootToSelectedRecipient()` raccorde le choix UI à `grantRoomCreatureDropsToRecipient()`;
+- après attribution, seul l'inventaire choisi est mis à jour;
+- le runtime conserve `lootGrantedTo`, donc impossible de rediriger ou dupliquer le même loot au retour dans la salle;
+- régression `rpg-loot-recipient-ui.test.mjs` couvre héros, sac de groupe, exclusion, attribution et anti-double-loot.
 
 Commits de l'étape :
-- éditeur pièges : `78e7cd07dd2afe9f627aebd8829407f24523f375`
-- intégration configuration RPG : `16cbdb60018882209d4cfc16f3917f57f9c56d5e`
-- régression : `e970a7e2d31a10106452b5ee10beabd625a7cbc2`
+- workflow UI destinataire : `09d32ff9b286adf8f0099b0ed0d5129b742091be`
+- régression : `8b23b0a11ec85175ecb7dbba3faf72b54e2ccfcd`
 
-CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
+CI de cette nouvelle étape : à vérifier sur le run déclenché par ce checkpoint.
 
 ## Stockage — décision repoussée
 
@@ -75,7 +63,7 @@ CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commi
 
 ## Priorités ouvertes
 
-- choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
+- intégrer ce picker dans la vraie UI de gameplay du donjon quand la vue de loot/fin de combat est montée;
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;

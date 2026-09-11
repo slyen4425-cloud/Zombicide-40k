@@ -12,6 +12,11 @@ export function createCombatState({ combatants = [], round = 1 } = {}) {
     orderIndex: index,
     state: clone(c.state || {}),
     ko: Boolean(c.ko),
+    allyKind: c.allyKind == null ? null : String(c.allyKind),
+    controlMode: c.controlMode == null ? null : String(c.controlMode),
+    ownerActorId: c.ownerActorId == null ? null : String(c.ownerActorId),
+    sourceKind: c.sourceKind == null ? null : String(c.sourceKind),
+    metadata: clone(c.metadata || {}),
   }));
   normalized.sort((a, b) => b.initiative - a.initiative || a.orderIndex - b.orderIndex);
   return {

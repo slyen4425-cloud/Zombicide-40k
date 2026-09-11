@@ -10,6 +10,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - RPG data-driven : stats, ressources, jets/tests, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
 - Noyau générique de jets : D100/D20/autres dés, roll-under/roll-over, stat/difficulté/modificateur partagés par les moteurs.
+- Compétences et pièges peuvent référencer des jets réutilisables par `checkId`, avec compatibilité des anciens champs inline.
+- Les événements peuvent désormais exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -34,28 +36,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - layout runtime consommé par tactique/perception : `34641208857` success
 - noyau générique de jets/tests : `34641462386` success
 - éditeur générique de jets/tests : `34641810586` success
+- correction normalisation des checks : `34642346782` success
 
 ## Dernière étape codée
 
-Références de jets réutilisables dans les moteurs :
-- `core/checks.js` sait maintenant retrouver une définition par `checkId` et résoudre un test acteur avec fallback inline;
-- une définition désactivée bloque proprement avec `check-disabled`;
-- les compétences acceptent désormais `checkId`; les anciens champs `roll` restent compatibles;
-- le coût/charge/cooldown d'une compétence sont consommés avant le jet, et les effets ne sont appliqués que si le jet réussit;
-- `skill-runtime.js` ré-exporte `resolveSkillUse()` pour le runtime RPG;
-- les pièges acceptent `detectionCheckId` et `disarmCheckId`, avec fallback vers `detectionCheck` / `disarmCheck` legacy;
-- les résultats mémorisent toujours le jet réellement exécuté;
-- régressions ajoutées pour compétence avec `agility-test` et piège avec `perception-test`/`agility-test`.
+Jets réutilisables dans les chaînes d'événements :
+- `EVENT_ACTION_KINDS` accepte maintenant `check`;
+- une action `check` peut référencer `checkId`, ou conserver un fallback inline `check` pour compatibilité;
+- le héros/acteur est choisi avec `actorId` ou le `defaultTargetId` du contexte;
+- le résultat passe par le noyau partagé `resolveDefinedActorCheck()`;
+- selon réussite ou échec, le moteur injecte immédiatement `successActions` ou `failureActions` dans la même file d'événement;
+- les sous-actions sont normalisées et gardent des IDs stables, donc restent protégées contre les doubles exécutions;
+- le log `event-check-resolved` conserve acteur, checkId, résultat et détail du jet;
+- une définition désactivée est refusée via le contrat partagé des checks;
+- régression ajoutée avec un test d'Agilité qui choisit correctement la branche réussite puis la branche échec et applique le malus uniquement sur échec.
 
 Commits de l'étape :
-- résolution de checks réutilisables : `ed7901a1fbf6ed5a701b396ab880276a4558c672`
-- compétences : `3c8622ab674d08e160467495674e26518c5923ba`
-- pièges : `1b9263007397890c38337d1d28636c10a940470c`
-- export runtime compétence : `e526214af31a2aaffb753e7cb8cdc4b023d99541`
-- régression compétences : `0292455560e77df029600a9fa589d0177e01d2f0`
-- régression pièges : `4d7ec0b35eb504d917088f8963bd30d1e9706e72`
+- moteur événement/check : `7f53ef5a28ecf47fb47ca83b05ea608f3c8e0eaa`
+- régression événement : `e436a8880186b69bbf3d4a96eaad4ac7a804fd87`
 
-Le run `34642221555` a échoué sur une assertion obsolète de `core-checks.test.mjs` : `normalizeCheckSpec()` expose désormais volontairement `statId:null`. Le moteur n'était pas en faute. Le test a été corrigé dans le commit `3ef5363cd68966fd4f47e0c4b19005ef7faa1aba` pour refléter le contrat actuel. Run de validation : `34642346782`, en cours au dernier contrôle.
+CI de cette nouvelle étape : à vérifier sur le dernier commit/checkpoint avant validation finale.
 
 ## Stockage — décision repoussée
 
@@ -65,8 +65,8 @@ Le run `34642221555` a échoué sur une assertion obsolète de `core-checks.test
 
 ## Priorités ouvertes
 
+- étendre le même modèle de jets réutilisables aux interactions de salle et à leur runtime;
 - ajouter les références `checkId` dans les interfaces d'édition, sans ID brut;
-- étendre le même modèle de jets réutilisables aux événements/interactions;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

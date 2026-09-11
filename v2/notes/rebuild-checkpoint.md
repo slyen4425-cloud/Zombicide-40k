@@ -20,7 +20,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
 - Présentation combat : `combat-presentation-ui.js` est monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur, sans déplacer la logique hors du moteur.
 - Contrats de cible combat : `enemy`, `ally`, `self` et `any` sont validés par le runtime avant toute dépense de ressource/charge/cooldown ; une cible KO reste invalide.
-- Préparation UI des cibles : `combat-target-ui.js` dérive maintenant les choix lisibles depuis `validSkillTargets()` et sait reconstruire/désactiver un `<select>` selon la compétence ; le branchement DOM direct dans `dungeon-gameplay-view.js` reste la prochaine étape.
+- Ciblage UI vivant : changer la compétence du vrai combat Donjon recalcule maintenant immédiatement le menu Cible à partir de `validSkillTargets()` ; le sélecteur se désactive si aucune cible valide n’existe.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -40,27 +40,29 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - renderer intégré dans vraie vue Donjon : `34656592813` success
 - contrats de cible `enemy/ally/self/any` : `34656913323` success
 - helper UI filtre cibles de combat : `34657181700` success
+- changement de compétence => cibles recalculées en direct : `34657477226` success
 
 ## Dernière étape terminée
 
-Préparation propre du filtre de cible côté interface, sans dupliquer les règles moteur :
-- nouveau module `v2/src/modes/rpg/combat-target-ui.js`;
-- `combatTargetEntriesForSkill()` appelle directement `validSkillTargets()` : aucune seconde logique de validité n’est créée dans l’UI;
-- les entrées sont nommées avec les définitions héros/bestiaire et indiquent visuellement soi-même / allié / ennemi;
-- `syncCombatTargetSelect()` reconstruit un `<select>` uniquement avec les cibles valides de la compétence courante et le désactive s’il n’existe aucune cible possible;
-- régression dédiée : `enemy` ne propose que le squelette, `ally` seulement Aldren, `self` seulement Lyra, `any` les trois ; un allié KO disparaît immédiatement des choix.
+Raccord vivant du menu Cible au combat Donjon réel :
+- `combat-target-ui.js` conserve le contexte du `combatState` réel et expose `syncDungeonCombatTargetControls()` ;
+- `installDungeonCombatTargetUi()` écoute le changement du vrai sélecteur `[data-dungeon-combat-skill]` et reconstruit immédiatement `[data-dungeon-combat-target]` ;
+- `combat-presentation-ui.js`, déjà monté dans la vraie vue Donjon, fournit le contexte `universe + combat` au filtre puis programme une synchronisation juste après le rendu DOM ;
+- aucune règle de ciblage n’est recopiée : les choix viennent toujours de `validSkillTargets()` ;
+- `enemy`, `ally`, `self`, `any` changent donc réellement la liste affichée ; les KO sont retirés et un sélecteur sans cible devient désactivé ;
+- régression `rpg-dungeon-combat-target-live.test.mjs` : Tir -> Squelette, Soin allié -> Aldren, Concentration -> Lyra, Pouvoir libre -> trois cibles vivantes, puis désactivation quand l’unique allié devient KO.
 
 Commits de l’étape :
-- helper filtre UI : `81b6f2b6f490779b409736267b5be7acacac9bc3`
-- régression filtre UI : `5391b6c1eb1a5e9451c920167acca80ce59f6c27`
+- binding vivant du sélecteur : `79217a4e815323f251932abdf079314560c43cb0`
+- raccord via la présentation combat réelle : `719418723cac74b1ed9c176689a65b7070c65aa5`
+- régression live : `5e0995ebc794aedc5fdf8e166bb4e7e76ee9fecb`
 
-CI finale : `34657181700` success.
+CI finale : `34657477226` success.
 
 ## Priorités ouvertes
 
-1. brancher `combatTargetEntriesForSkill()` / `syncCombatTargetSelect()` directement dans la vraie vue Donjon : changement de compétence => menu Cible recalculé immédiatement ;
-2. vérifier/raccorder les consommables de combat ;
-3. vérifier/raccorder la fuite puis `combat direct OFF / MJ contrôle total` contre le legacy ;
-4. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
-5. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-6. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. vérifier/raccorder les consommables de combat ;
+2. vérifier/raccorder la fuite puis `combat direct OFF / MJ contrôle total` contre le legacy ;
+3. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
+4. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+5. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

@@ -1,0 +1,52 @@
+name: One-shot CDN bootstrap repair V119
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace blocking jsDelivr bootstrap dependencies
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+          pairs = (
+            ('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>', '<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>'),
+            ('<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>', '<script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>'),
+          )
+          changed=False
+          for old,new in pairs:
+            if old in html:
+              html=html.replace(old,new)
+              changed=True
+          if changed:
+            path.write_text(html, encoding='utf-8')
+          final=path.read_text(encoding='utf-8')
+          if 'cdn.jsdelivr.net/npm/@supabase/supabase-js@2' in final or 'cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js' in final:
+            raise SystemExit('jsDelivr bootstrap dependency still present')
+          PY
+
+      - name: Commit repair if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Already repaired"
+            exit 0
+          fi
+          git commit -m "Hotfix startup: avoid jsDelivr bootstrap outage"
+          git push origin HEAD:main

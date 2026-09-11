@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createCombatState } from '../src/modes/rpg/combat-engine.js';
 import { createSpatialState,setActorPosition } from '../src/modes/rpg/spatial-engine.js';
-import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resetActorCombatMovement } from '../src/modes/rpg/tactical-combat.js';
+import { evaluateAttackPosition,createCombatMovementState,moveCombatActor,resetActorCombatMovement,targetCoverModifier } from '../src/modes/rpg/tactical-combat.js';
 
 const config={mode:'tactical',defaultMovement:3,combatAssistRange:3,defaultMeleeRange:1,defaultRangedRange:5,rangedContactModifier:-20};
 let spatial=createSpatialState({zoneId:'room-1'});
@@ -27,6 +27,17 @@ assert.deepEqual(ranged.contactEnemyIds,['ghoul']);
 const meleeFar=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:sword,config});
 assert.equal(meleeFar.ok,false);
 assert.equal(meleeFar.reason,'target-unreachable');
+
+const coverLayout={width:6,height:2,cells:{'4,0':{x:4,y:0,terrain:'rubble',coverModifier:-15}},walls:[],doors:[]};
+assert.equal(targetCoverModifier(spatial,'skeleton',{roomLayout:coverLayout}),-15);
+const rangedWithCover=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:bow,config:{...config,roomLayout:coverLayout}});
+assert.equal(rangedWithCover.ok,true);
+assert.equal(rangedWithCover.coverModifier,-15);
+assert.equal(rangedWithCover.modifier,-35,'contact and target cover modifiers must combine');
+const ignoreCoverBow={id:'piercing-bow',data:{attackStyle:'ranged',rangeMin:1,rangeMax:6,ignoresCover:true}};
+const ignoreCover=evaluateAttackPosition({spatial,combat,actorId:'lyra',targetId:'skeleton',source:ignoreCoverBow,config:{...config,roomLayout:coverLayout}});
+assert.equal(ignoreCover.coverModifier,0);
+assert.equal(ignoreCover.modifier,-20);
 
 let moveState=createCombatMovementState(combat,config);
 const moved=moveCombatActor({spatial,combat,actorId:'lyra',target:{x:2,y:1,zoneId:'room-1'},moveState,config});

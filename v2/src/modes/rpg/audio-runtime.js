@@ -1,4 +1,5 @@
 import { queueBoundAudio, queueResultAudio } from './audio-bindings.js';
+import { stopAudioChannel } from './audio-engine.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -32,6 +33,24 @@ export function queueRoomAudio({state,room,phase='enter',definitions={},options=
     data:{audio:clone(room?.data?.audio||{})},
   }:room;
   return queueBoundAudio({state,source,cue,definitions,options});
+}
+
+export function queueRoomTransitionAudio({state,fromRoom=null,toRoom=null,definitions={},options={}}={}){
+  let next=state;
+  const queued=[];
+  if(fromRoom){
+    const leave=queueRoomAudio({state:next,room:fromRoom,phase:'leave',definitions,options});
+    if(leave.ok){next=leave.state;queued.push({phase:'leave',request:leave.request,audioId:leave.audioId});}
+  }
+  const stopped=stopAudioChannel(next,'ambience');
+  if(stopped.ok) next=stopped.state;
+  if(toRoom){
+    const enter=queueRoomAudio({state:next,room:toRoom,phase:'enter',definitions,options});
+    if(enter.ok){next=enter.state;queued.push({phase:'enter',request:enter.request,audioId:enter.audioId});}
+    const ambience=queueRoomAudio({state:next,room:toRoom,phase:'ambience',definitions,options});
+    if(ambience.ok){next=ambience.state;queued.push({phase:'ambience',request:ambience.request,audioId:ambience.audioId});}
+  }
+  return {ok:true,state:next,queued,stoppedAmbience:stopped.stopped||[]};
 }
 
 export function queueCombatAudio({state,source,phase='start',definitions={},options={}}={}){

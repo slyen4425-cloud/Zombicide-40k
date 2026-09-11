@@ -1,4 +1,5 @@
 import { createCreatureRuntime, claimCreatureLoot } from './bestiary-engine.js';
+import { addItem } from './inventory-engine.js';
 
 function clone(value){return structuredClone(value);}
 function uid(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
@@ -90,4 +91,27 @@ export function resolveRoomCreatureDefeat(roomRuntime,instanceId,universe={}, {r
     creatureRuntime:clone(finalRuntime),
     drops:clone(claimed.drops||[]),
   };
+}
+
+export function grantRoomCreatureDrops(roomRuntime,instanceId,inventory,definitions={}){
+  const room=clone(roomRuntime||null);
+  if(!room) return {ok:false,reason:'room-runtime-missing',roomRuntime,inventory,drops:[]};
+  const entity=(room.entities||[]).find(x=>String(x.id)===String(instanceId));
+  if(!entity||entity.kind!=='creature') return {ok:false,reason:'creature-entity-missing',roomRuntime,inventory,drops:[]};
+  const runtime=entity.data?.creatureRuntime;
+  if(!runtime) return {ok:false,reason:'creature-runtime-missing',roomRuntime,inventory,drops:[]};
+  if(runtime.lootGranted) return {ok:false,reason:'already-granted',roomRuntime:room,inventory:clone(inventory),drops:clone(runtime.lootDrops||[])};
+  if(!runtime.lootClaimed) return {ok:false,reason:'loot-not-claimed',roomRuntime:room,inventory:clone(inventory),drops:[]};
+
+  let nextInventory=clone(inventory);
+  const drops=clone(runtime.lootDrops||[]);
+  for(const drop of drops){
+    const added=addItem(nextInventory,drop.itemId,drop.quantity,definitions);
+    if(!added.ok) return {ok:false,reason:added.reason||'loot-add-failed',roomRuntime:room,inventory:clone(inventory),drops};
+    nextInventory=added.inventory;
+  }
+
+  const nextRuntime={...clone(runtime),lootGranted:true};
+  entity.data={...(entity.data||{}),creatureRuntime:nextRuntime};
+  return {ok:true,reason:null,roomRuntime:room,inventory:nextInventory,drops};
 }

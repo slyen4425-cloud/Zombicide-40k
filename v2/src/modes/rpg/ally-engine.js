@@ -75,7 +75,7 @@ export function createAllyRuntime(definition,definitions={}, {instanceId=uid(),o
     instanceId:String(instanceId),allyDefinitionId:def.id,name:def.name,kind:def.kind,sourceKind:def.sourceKind,sourceId:def.sourceId,
     controlMode:def.controlMode,ownerActorId:ownerActorId==null?null:String(ownerActorId),canJoinCombat:def.canJoinCombat,followOwner:def.followOwner,dismissible:def.dismissible,
     durationKind:def.duration.kind,remaining,roomId:roomId==null?actor.roomId??null:String(roomId),x:Number.isFinite(Number(x))?Number(x):actor.x??null,y:Number.isFinite(Number(y))?Number(y):actor.y??null,
-    active:true,dismissed:false,expired:false,actor,tags:[...def.tags],metadata:clone(def.metadata),
+    active:true,dismissed:false,expired:false,ko:Boolean(actor?.ko),dead:Boolean(actor?.dead),actor,tags:[...def.tags],metadata:clone(def.metadata),
   }};
 }
 
@@ -91,6 +91,7 @@ export function addAlly(roster,runtime){
 
 export function canPlayerControl(runtime,{playerActorIds=[]}={}){
   if(!runtime||runtime.active===false||runtime.dismissed||runtime.expired) return {ok:false,reason:'inactive'};
+  if(runtime.ko||runtime.dead||runtime.actor?.ko||runtime.actor?.dead) return {ok:false,reason:'defeated'};
   if(runtime.controlMode==='none') return {ok:false,reason:'not-controllable'};
   if(runtime.controlMode==='ai') return {ok:false,reason:'ai-controlled'};
   if(runtime.controlMode==='shared') return {ok:true};
@@ -106,7 +107,7 @@ export function controllableAllies(roster,context={}){
 }
 
 export function combatEligibleAllies(roster,{roomId=null}={}){
-  return (roster?.order||[]).map(id=>roster.actors?.[id]).filter(runtime=>runtime&&runtime.active!==false&&!runtime.dismissed&&!runtime.expired&&runtime.canJoinCombat!==false&&(roomId==null||String(runtime.roomId)===String(roomId)));
+  return (roster?.order||[]).map(id=>roster.actors?.[id]).filter(runtime=>runtime&&runtime.active!==false&&!runtime.dismissed&&!runtime.expired&&!runtime.ko&&!runtime.dead&&!runtime.actor?.ko&&!runtime.actor?.dead&&runtime.canJoinCombat!==false&&(roomId==null||String(runtime.roomId)===String(roomId)));
 }
 
 export function dismissAlly(roster,instanceId){

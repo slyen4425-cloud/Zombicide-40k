@@ -31,23 +31,24 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Attribution de loot : `grantRoomCreatureDrops()` distribue les drops à l'inventaire une seule fois, de façon atomique. CI run `34635840687` : success.
 - Couverture tactique configurable : `coverModifier` de la case cible se combine aux autres modificateurs et peut être ignoré par une source `ignoresCover`. CI run `34636060720` : success.
 - Lifecycle audio de salle : transition leave → arrêt ancienne ambience → enter → nouvelle ambience. CI run `34636291490` : success.
+- Couverture dans le Créateur de salle : outil `🛡️ Couverture` + `coverModifier` éditable. CI run `34636530585` : success.
 - Audio : moteur central RPG, bindings et cues runtime présents; audit complet des anciens assets audio et playback navigateur encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Couverture tactique exposée dans le Créateur de salle :
-- nouvel outil `🛡️ Couverture` dans `room-editor.js`;
-- le MJ peut régler librement le `coverModifier` à appliquer avant de peindre une case;
-- une case de couverture reste praticable et stocke le modificateur directement dans ses données;
-- l'outil Sol, les terrains et les cases bloquées effacent proprement un ancien modificateur de couverture pour éviter les restes invisibles;
-- une case couverte affiche une icône bouclier dans la grille;
-- le test du moteur de salle vérifie que `coverModifier` est bien conservé par `setRoomCell/getRoomCell`.
+Raccord du lifecycle audio au vrai changement de salle du donjon :
+- nouveau `v2/src/modes/rpg/dungeon-transition-runtime.js`;
+- `transitionDungeonRoomWithAudio()` appelle l'autorité `transitionDungeonRoom()` existante pour le monde/salle puis orchestre séparément `queueRoomTransitionAudio()`;
+- l'ancienne salle et la nouvelle salle sont résolues depuis le `worldIndex`, donc leurs bindings audio réels sont utilisés;
+- une transition refusée (`link-unavailable`, conditions, etc.) ne touche pas à l'état audio;
+- aucune lecture navigateur n'est ajoutée au moteur monde : on reste sur des intentions audio pures;
+- le test couvre Crypte → Hall, arrêt de l'ancienne ambience, cues `leave / enter / ambience`, puis vérifie qu'une transition invalide laisse l'audio intact.
 
 Commits de l'étape :
-- éditeur : `068f7ac9de05a3f8bd9708ac78b54c9985176d93`
-- régression : `3ecf85ad9bea445b716b519225275765d93f68a9`
+- orchestration : `0d22adf773fa98a621dc54bb84abba23eb08e803`
+- régression : `76bf747795b3e36f18fa762b394557133dd26c38`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 
@@ -60,11 +61,10 @@ CI : à vérifier sur le dernier commit avant de considérer cette étape totale
 
 ## Points encore ouverts prioritaires
 
-- raccorder `queueRoomTransitionAudio()` au vrai flux `transitionDungeonRoom()` sans mélanger moteur de monde et sortie audio navigateur;
+- vrai playback frontend audio encore absent;
 - choisir la politique de destinataire du loot : héros précis, inventaire de groupe, ou sélection utilisateur;
 - enrichir encore les obstacles/couvertures et les effets d'équipement sans dupliquer les règles tactiques;
 - étendre si nécessaire les statuts persistants réversibles à d'autres familles d'effets sans restaurer artificiellement une ressource dépensée entre-temps;
 - ligne de vue/perception et combat à continuer d'unifier sans doublons;
-- vrai playback frontend audio encore absent;
 - choisir et brancher plus tard le backend distant réel, puis définir compte/synchronisation/conflits/offline;
 - audit systématique ancien GenSrpG : assets, sons, sauvegardes, PWA/cache, historique Capture, UI cachées et tests legacy.

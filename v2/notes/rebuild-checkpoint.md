@@ -13,7 +13,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Compétences et pièges peuvent référencer des jets réutilisables par `checkId`, avec compatibilité des anciens champs inline.
 - Les événements peuvent exécuter un jet réutilisable puis enchaîner une branche réussite/échec sans dupliquer la règle de jet.
 - Les interactions de salle peuvent demander un jet réutilisable via `checkId`; leurs tentatives et leur dernier résultat sont persistés dans le runtime de salle.
-- Le Créateur de salle expose maintenant le jet requis d'une interaction par un sélecteur lisible nom + dé, sans saisie d'ID technique.
+- Le Créateur de salle expose le jet requis d'une interaction par un sélecteur lisible nom + dé, sans saisie d'ID technique.
+- L'éditeur de compétences expose maintenant le même choix de jet réutilisable; les anciens réglages locaux restent disponibles comme fallback.
 - Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
 - Perception/furtivité : ligne de vue de salle partagée, sans confondre distance de vision et chemin de déplacement.
 - Ciblage joueur/IA : validation avant dépense, règles IA et anti-focus.
@@ -42,25 +43,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - jets réutilisables dans les événements : `34642604129` success
 - jets réutilisables sur interactions de salle : `34642816595` success
 - persistance runtime des tentatives d'interaction : `34642980536` success
-- première intégration du sélecteur de jet dans le Créateur de salle : `34643163828` success
+- sélecteur de jet dans le Créateur de salle : `34643290918` success
 
 ## Dernière étape codée
 
-Sélecteur de jet réutilisable dans le Créateur de salle :
-- nouvel helper `interactionCheckOptions()` dans `room-editor.js`;
-- chaque carte d'interaction affiche désormais `Jet / test requis`;
-- les options affichent le nom lisible et le dé (ex. `Test d’Agilité · D20`), jamais un ID brut à saisir;
-- les définitions désactivées sont masquées;
-- `— Aucun jet requis —` permet une interaction sans test;
-- la sélection est persistée dans `interaction.checkId` via le flux d'édition existant;
-- le Créateur de salle utilise `universe.checks` déjà chargé avec l'univers RPG;
-- régression `rpg-room-interaction-check-editor.test.mjs` vérifie nom, D100/D20, sélection et exclusion des jets désactivés.
+Sélecteur de jet réutilisable dans l'éditeur de compétences :
+- `ensureAdvancedRpgCollections()` normalise désormais `universe.checks`;
+- `newSkill()` crée explicitement `checkId:null` tout en conservant `roll` pour compatibilité;
+- nouvel helper exporté `reusableCheckOptions()`;
+- seuls les jets actifs sont affichés;
+- les options montrent un libellé lisible `Nom · Dxx`, jamais un ID à saisir;
+- une compétence peut sélectionner un `checkId` directement dans son formulaire;
+- lorsqu'un jet réutilisable est choisi, les anciens champs locaux stat/difficulté et le toggle de jet local sont désactivés avec explication;
+- sans `checkId`, les anciens réglages inline continuent de fonctionner;
+- régression `rpg-skill-check-editor.test.mjs` vérifie sélection, D100/D20, exclusion des jets désactivés et fallback legacy.
 
 Commits de l'étape :
-- interface Créateur de salle : `80fd8f4b27d9858d8b51f01d41af2560abe90d31`
-- régression sélecteur : `2a1e132aa026ff8092f7fae5ef730c353fdb5b4e`
+- interface compétences : `b062022ff9c03f8d701617b461b5ec0a228bd73e`
+- régression : `e648ab9d912190a6196fa6ccdf05f7a3385938a0`
 
-CI du commit interface : `34643163828` success. CI du commit de régression / checkpoint à vérifier au prochain tour.
+CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
 
 ## Stockage — décision repoussée
 
@@ -70,7 +72,6 @@ CI du commit interface : `34643163828` success. CI du commit de régression / ch
 
 ## Priorités ouvertes
 
-- ajouter le même sélecteur de `checkId` dans l'éditeur de compétences, sans ID brut;
 - prévoir l'édition dédiée des pièges (détection/désarmement) avec deux sélecteurs de checks lisibles;
 - choisir l'UI de jeu du destinataire de loot (héros / groupe / autre inventaire);
 - poursuivre lifecycle quêtes et UI PNJ/interactions;

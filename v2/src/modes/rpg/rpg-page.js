@@ -20,7 +20,7 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,onDungeonCombatStart=null,onDungeonRuntimeChange=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,onDungeonCombatStart=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
   let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
@@ -76,9 +76,16 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
         currentDungeonCombat=combat;
         onDungeonCombatStart?.(structuredClone(combat),out);
       },
+      onCombatEnd:(combat,out)=>{
+        currentDungeonCombat=structuredClone(combat);
+        currentDungeonRuntime=out.roomRuntime;
+        currentDungeonHeroRuntimes=structuredClone(out.heroRuntimes||[]);
+        onDungeonCombatEnd?.(structuredClone(combat),out);
+      },
       onRoomRuntimeChange:(nextRuntime,out)=>{
         currentDungeonRuntime=nextRuntime;
         if(out?.recipients) currentDungeonLootRecipients=out.recipients;
+        if(out?.heroRuntimes) currentDungeonHeroRuntimes=structuredClone(out.heroRuntimes);
         if(out?.world) currentDungeonEventWorld=out.world;
         onDungeonRuntimeChange?.(currentDungeonRuntime,out);
       },
@@ -122,7 +129,11 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     },
     setDungeonCombat(nextCombat){
       currentDungeonCombat=nextCombat?structuredClone(nextCombat):null;
-      if(currentTab==='dungeon'&&dungeonView) dungeonView.setCombat(currentDungeonCombat);
+      if(currentTab==='dungeon'&&dungeonView){
+        dungeonView.setCombat(currentDungeonCombat);
+        currentDungeonRuntime=dungeonView.getRoomRuntime();
+        currentDungeonHeroRuntimes=dungeonView.getHeroRuntimes();
+      }
       return currentDungeonCombat?structuredClone(currentDungeonCombat):null;
     },
     refreshDungeonWorld(){

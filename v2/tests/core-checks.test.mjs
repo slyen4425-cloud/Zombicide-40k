@@ -6,7 +6,7 @@ assert.equal(rollDie(100,()=>0.999999),100);
 assert.equal(rollDie(1,()=>0),1,'die size is clamped internally to at least 2 but a zero roll still yields 1');
 
 const normalized=normalizeCheckSpec({die:20,statValue:3,difficulty:12,modifier:2,mode:'roll-over'});
-assert.deepEqual(normalized,{die:20,statValue:3,difficulty:12,modifier:2,mode:'roll-over'});
+assert.deepEqual(normalized,{die:20,statId:null,statValue:3,difficulty:12,modifier:2,mode:'roll-over'});
 
 let check=resolveCheck({die:100,roll:42,statValue:10,difficulty:50,modifier:-5,mode:'roll-under'});
 assert.equal(check.threshold,55);

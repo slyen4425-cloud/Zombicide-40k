@@ -28,6 +28,7 @@ function iconFor(layout,x,y){
   if(wall) return '🧱';
   const cell=getRoomCell(layout,x,y);
   if(cell.blocked) return '⛔';
+  if(Number(cell.coverModifier)||0) return '🛡️';
   if(cell.terrain==='water') return '💧';
   if(cell.terrain==='lava') return '🌋';
   if(cell.terrain==='rock') return '🪨';
@@ -71,14 +72,16 @@ export function mountRoomEditor(host){
   let layout=loadRoomLayout(world.rooms[0]);
   let tool='floor';
   let edge='north';
+  let coverModifier=-15;
 
   function persist(){layout=ensureRoomInteractions(layout);saveRoomLayout(layout);render();}
   function selectRoom(id){selectedRoomId=id;const room=world.rooms.find(r=>String(r.id)===String(id));layout=loadRoomLayout(room);render();}
   function applyTool(x,y){
     let out;
-    if(tool==='floor') out=setRoomCell(removeAt(layout,x,y,{cell:true}),x,y,{terrain:'floor',blocked:false});
-    else if(tool==='blocked') out=setRoomCell(layout,x,y,{terrain:'floor',blocked:true});
-    else if(['water','lava','rock'].includes(tool)) out=setRoomCell(layout,x,y,{terrain:tool,blocked:tool==='rock'});
+    if(tool==='floor') out=setRoomCell(removeAt(layout,x,y,{cell:true}),x,y,{terrain:'floor',blocked:false,coverModifier:0});
+    else if(tool==='blocked') out=setRoomCell(layout,x,y,{terrain:'floor',blocked:true,coverModifier:0});
+    else if(tool==='cover') out=setRoomCell(layout,x,y,{terrain:'floor',blocked:false,coverModifier:Number(coverModifier)||0});
+    else if(['water','lava','rock'].includes(tool)) out=setRoomCell(layout,x,y,{terrain:tool,blocked:tool==='rock',coverModifier:0});
     else if(tool==='wall') {layout=removeAt(layout,x,y,{doors:true});out=addWall(layout,createWall({x,y,edge}));}
     else if(tool==='door'||tool==='entry'||tool==='exit') {layout=removeAt(layout,x,y,{walls:true,doors:true});out=addDoor(layout,createDoor({x,y,edge,entry:tool==='entry',exit:tool==='exit'}));}
     else if(tool==='special') {layout=removeAt(layout,x,y,{markers:true});out=addMarker(layout,createMarker({x,y,kind:'special',label:'Interaction'}));}
@@ -95,13 +98,14 @@ export function mountRoomEditor(host){
     const cells=[];
     for(let y=0;y<layout.height;y++) for(let x=0;x<layout.width;x++) cells.push(`<button type="button" class="room-cell ${terrainClass(layout,x,y)}" data-cell-x="${x}" data-cell-y="${y}" aria-label="Case ${x+1}, ${y+1}"><span>${iconFor(layout,x,y)}</span><small>${x+1},${y+1}</small></button>`);
     host.innerHTML=`<section class="workspace-head"><div><p class="eyebrow">RPG · CRÉATEUR DE SALLE</p><h2>${esc(room.name)}</h2><p class="muted">Peins la grille puis rattache coffres, pièges, énigmes et événements aux cases, portes ou coffres par menus.</p></div><button class="help-button" type="button" data-help="rpg-room-builder">?</button></section>
-      <section class="editor-section"><div class="form-grid"><label>Salle<select id="roomLayoutSelect">${roomOptions(world.rooms,selectedRoomId)}</select></label><label>Orientation mur / porte<select id="roomEdge"><option value="north" ${edge==='north'?'selected':''}>Nord</option><option value="east" ${edge==='east'?'selected':''}>Est</option><option value="south" ${edge==='south'?'selected':''}>Sud</option><option value="west" ${edge==='west'?'selected':''}>Ouest</option></select></label><label>Largeur<input id="roomWidth" type="number" min="1" max="100" value="${layout.width}"></label><label>Hauteur<input id="roomHeight" type="number" min="1" max="100" value="${layout.height}"></label></div><p class="muted">${validation.valid&&interactionValidation.valid?'✅ Salle valide':`⚠️ ${validation.errors.length+interactionValidation.errors.length} problème(s)`}</p></section>
-      <section class="editor-section"><div class="section-title-row"><div><h3>Outils</h3><p class="muted">Choisis un outil puis touche une case.</p></div></div><div class="room-tools">${[['floor','⬜ Sol'],['blocked','⛔ Bloqué'],['water','💧 Eau'],['lava','🌋 Lave'],['rock','🪨 Rocher'],['wall','🧱 Mur'],['door','🚪 Porte'],['entry','⬅️ Entrée'],['exit','➡️ Sortie'],['special','⭐ Repère'],['erase','🧽 Effacer']].map(([id,label])=>`<button type="button" class="secondary-button ${tool===id?'active-tool':''}" data-room-tool="${id}">${label}</button>`).join('')}</div></section>
+      <section class="editor-section"><div class="form-grid"><label>Salle<select id="roomLayoutSelect">${roomOptions(world.rooms,selectedRoomId)}</select></label><label>Orientation mur / porte<select id="roomEdge"><option value="north" ${edge==='north'?'selected':''}>Nord</option><option value="east" ${edge==='east'?'selected':''}>Est</option><option value="south" ${edge==='south'?'selected':''}>Sud</option><option value="west" ${edge==='west'?'selected':''}>Ouest</option></select></label><label>Couverture (modificateur)<input id="roomCoverModifier" type="number" step="1" value="${Number(coverModifier)||0}"></label><label>Largeur<input id="roomWidth" type="number" min="1" max="100" value="${layout.width}"></label><label>Hauteur<input id="roomHeight" type="number" min="1" max="100" value="${layout.height}"></label></div><p class="muted">${validation.valid&&interactionValidation.valid?'✅ Salle valide':`⚠️ ${validation.errors.length+interactionValidation.errors.length} problème(s)`}</p></section>
+      <section class="editor-section"><div class="section-title-row"><div><h3>Outils</h3><p class="muted">Choisis un outil puis touche une case. La couverture utilise le modificateur réglé ci-dessus.</p></div></div><div class="room-tools">${[['floor','⬜ Sol'],['blocked','⛔ Bloqué'],['cover','🛡️ Couverture'],['water','💧 Eau'],['lava','🌋 Lave'],['rock','🪨 Rocher'],['wall','🧱 Mur'],['door','🚪 Porte'],['entry','⬅️ Entrée'],['exit','➡️ Sortie'],['special','⭐ Repère'],['erase','🧽 Effacer']].map(([id,label])=>`<button type="button" class="secondary-button ${tool===id?'active-tool':''}" data-room-tool="${id}">${label}</button>`).join('')}</div></section>
       <section class="editor-section room-grid-wrap"><div class="room-grid" style="--room-cols:${layout.width}">${cells.join('')}</div></section>
       <section class="editor-section"><div class="section-title-row"><div><h3>Interactions</h3><p class="muted">Un piège ou une énigme peut être attaché à une case, une porte ou directement à un coffre.</p></div><button class="primary-button" id="addRoomInteraction" type="button">+ Interaction</button></div><div class="editor-list">${layout.interactions.map(i=>interactionCard(i,layout)).join('')||'<p class="muted">Aucune interaction.</p>'}</div></section>`;
 
     host.querySelector('#roomLayoutSelect')?.addEventListener('change',e=>selectRoom(e.target.value));
     host.querySelector('#roomEdge')?.addEventListener('change',e=>{edge=e.target.value;render();});
+    host.querySelector('#roomCoverModifier')?.addEventListener('change',e=>{coverModifier=Number(e.target.value)||0;render();});
     const resize=()=>{layout=resizeRoomLayout(layout,{width:Number(host.querySelector('#roomWidth')?.value),height:Number(host.querySelector('#roomHeight')?.value)});layout=ensureRoomInteractions(layout);layout.interactions=layout.interactions.filter(i=>validateRoomInteractions({...layout,interactions:[i]}).valid);persist();};
     host.querySelector('#roomWidth')?.addEventListener('change',resize);host.querySelector('#roomHeight')?.addEventListener('change',resize);
     host.querySelectorAll('[data-room-tool]').forEach(b=>b.addEventListener('click',()=>{tool=b.dataset.roomTool;render();}));

@@ -1,5 +1,6 @@
 import { evaluateConditions } from './conditions.js';
 import { applyEffect } from './effects.js';
+import { resolveDefinedActorCheck } from './checks.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -83,11 +84,28 @@ export function canUseSkill(skill,actorState={},context={}){
 
 export function resolveSkillUse(skill,actorState,targetState,definitions={},context={}){
   const conditions=(skill?.conditionIds||[]).map(id=>(definitions.conditions||[]).find(x=>String(x.id)===String(id))).filter(Boolean);
-  const check=skillAvailability(skill,actorState,{...context,conditions});
-  if(!check.ok) return {resolved:false,reason:check.reason,actorState,targetState,log:[]};
-  const actor=consumeSkillUse(skill,check.actorState);
+  const availability=skillAvailability(skill,actorState,{...context,conditions});
+  if(!availability.ok) return {resolved:false,reason:availability.reason,actorState,targetState,check:null,log:[]};
+
+  const actor=consumeSkillUse(skill,availability.actorState);
+  const usesCheck=Boolean(skill?.checkId)||(skill?.roll?.enabled===true);
+  let check=null;
+  if(usesCheck){
+    const checked=resolveDefinedActorCheck({
+      checkId:skill.checkId||null,
+      fallback:skill.roll?.enabled===true?skill.roll:null,
+      definitions,
+      actor:availability.actorState,
+      random:context.random||Math.random,
+      roll:context.roll??null,
+    });
+    if(!checked.ok) return {resolved:false,reason:checked.reason,actorState:actor,targetState,check:null,log:[]};
+    check=checked.check;
+    if(!check.success) return {resolved:true,success:false,actorState:actor,targetState:clone(targetState||{}),check,log:[{kind:'check',success:false,check}]};
+  }
+
   let target=clone(targetState||{});
-  const log=[];
+  const log=check?[{kind:'check',success:true,check}]:[];
   for(const effectId of skill.effectIds||[]){
     const effect=(definitions.effects||[]).find(x=>String(x.id)===String(effectId));
     if(!effect) continue;
@@ -95,5 +113,5 @@ export function resolveSkillUse(skill,actorState,targetState,definitions={},cont
     if(applied.applied) target=applied.state;
     log.push({kind:'effect',effectId:String(effect.id),applied:applied.applied,reason:applied.reason||null});
   }
-  return {resolved:true,actorState:actor,targetState:target,log};
+  return {resolved:true,success:true,actorState:actor,targetState:target,check,log};
 }

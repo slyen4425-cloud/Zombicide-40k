@@ -19,7 +19,8 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Actions héros : compétences réelles du runtime héros (base + équipement + sets + formes), `prepareSkillAction()` / `resolveAndAdvance()`, coûts/cooldowns/jets/effets du moteur existant.
 - Tours ennemis : automatiques sur la même timeline avec `chooseCreatureAction()` + `chooseAiTarget()`, compétence bestiaire réelle, résolution D100/effets identique et fin de tour automatique.
 - Présentation combat : `combat-presentation-ui.js` est monté dans la vue Donjon active : timeline, KO, PV/ressources et journal moteur, sans déplacer la logique hors du moteur.
-- Contrats de cible combat : `enemy`, `ally`, `self` et `any` sont maintenant validés par le runtime avant toute dépense de ressource/charge/cooldown ; une cible KO reste invalide.
+- Contrats de cible combat : `enemy`, `ally`, `self` et `any` sont validés par le runtime avant toute dépense de ressource/charge/cooldown ; une cible KO reste invalide.
+- Préparation UI des cibles : `combat-target-ui.js` dérive maintenant les choix lisibles depuis `validSkillTargets()` et sait reconstruire/désactiver un `<select>` selon la compétence ; le branchement DOM direct dans `dungeon-gameplay-view.js` reste la prochaine étape.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -38,28 +39,26 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - renderer présentation combat réelle : `34655892468` success
 - renderer intégré dans vraie vue Donjon : `34656592813` success
 - contrats de cible `enemy/ally/self/any` : `34656913323` success
+- helper UI filtre cibles de combat : `34657181700` success
 
 ## Dernière étape terminée
 
-Validation générique des cibles de compétence avant résolution :
-- `targeting-engine.js` expose maintenant `normalizeTargetKind()`, `validSkillTargets()` et `validateSkillTarget()` pour les quatre contrats `enemy`, `ally`, `self`, `any`;
-- `validCombatTargets()` et `validatePlayerTarget()` restent compatibles et délèguent au contrat `enemy` existant ;
-- `prepareSkillAction()` valide désormais toutes les compétences avant `consumeSkillUse()`, donc une mauvaise cible ne dépense ni ressource, ni charge, ni cooldown ;
-- `self` accepte uniquement l’acteur courant ; `ally` accepte un allié vivant distinct de soi ; `enemy` conserve les règles de cible adverse et le contrôle spatial/tactique existant ; `any` accepte toute cible vivante, y compris soi-même ;
-- si aucune cible n’est fournie, le runtime choisit la première cible valide selon le contrat au lieu de supposer uniquement `self` ;
-- une cible KO reste refusée pour tous les contrats ;
-- régression dédiée dans `rpg-turn-runtime.test.mjs` : self correct/incorrect, ally correct/self/ennemi, cible par défaut, any sur héros/allié/ennemi, et refus d’un allié KO.
+Préparation propre du filtre de cible côté interface, sans dupliquer les règles moteur :
+- nouveau module `v2/src/modes/rpg/combat-target-ui.js`;
+- `combatTargetEntriesForSkill()` appelle directement `validSkillTargets()` : aucune seconde logique de validité n’est créée dans l’UI;
+- les entrées sont nommées avec les définitions héros/bestiaire et indiquent visuellement soi-même / allié / ennemi;
+- `syncCombatTargetSelect()` reconstruit un `<select>` uniquement avec les cibles valides de la compétence courante et le désactive s’il n’existe aucune cible possible;
+- régression dédiée : `enemy` ne propose que le squelette, `ally` seulement Aldren, `self` seulement Lyra, `any` les trois ; un allié KO disparaît immédiatement des choix.
 
 Commits de l’étape :
-- ciblage générique : `8778136dec83934fe84c3338805e100562715453`
-- enforcement runtime : `cd6e9fc5c6b30fd2c781f28bb04e2ef9007e5d5e`
-- régression contrats de cible : `95d2e39b547ac801d82c12b81fb1930aac7ff965`
+- helper filtre UI : `81b6f2b6f490779b409736267b5be7acacac9bc3`
+- régression filtre UI : `5391b6c1eb1a5e9451c920167acca80ce59f6c27`
 
-CI finale : `34656913323` success.
+CI finale : `34657181700` success.
 
 ## Priorités ouvertes
 
-1. raccorder maintenant le filtre de cibles `enemy/ally/self/any` à la vraie UI Donjon pour que le menu ne propose que les cibles valides de la compétence sélectionnée ;
+1. brancher `combatTargetEntriesForSkill()` / `syncCombatTargetSelect()` directement dans la vraie vue Donjon : changement de compétence => menu Cible recalculé immédiatement ;
 2. vérifier/raccorder les consommables de combat ;
 3. vérifier/raccorder la fuite puis `combat direct OFF / MJ contrôle total` contre le legacy ;
 4. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;

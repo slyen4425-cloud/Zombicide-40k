@@ -13,7 +13,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Compétences, pièges, événements et interactions de salle peuvent référencer des jets réutilisables; les anciens formats inline restent compatibles.
 - Créateur de salle : portes verrouillées par objet, interactions attachables, sélecteur de jet lisible, tentatives persistées en runtime.
 - Éditeur RPG : sélecteur de jet réutilisable dans les compétences et éditeur dédié des pièges avec détection/désarmement séparés.
-- Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée et couverture configurable.
+- Combat tactique : mouvement, portée, ligne de vue, murs/portes, arme équipée, couverture configurable et modificateurs tactiques issus des équipements réellement équipés.
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
@@ -22,7 +22,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - La vue `🎮 Donjon` affiche en direct l’état de salle + le journal de quêtes à partir de `roomRuntime.questRuntime`.
 - Le picker de destinataire de loot est intégré directement dans la vue Donjon : les butins disponibles sont listés, attribuables à un héros/groupe lisible, et disparaissent après attribution idempotente.
 - Les interactions PNJ/allié et les choix d’événements sont surfacés directement dans la vue Donjon, tout en réutilisant `room-npc-interaction-ui.js` et `room-event-runtime.js`.
-- Les textes et conséquences des événements sont maintenant présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
+- Les textes et conséquences des événements sont présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -63,24 +63,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - interactions PNJ + choix événements dans vue Donjon : `34648252721` success
 - checkpoint PNJ/choix : `34648320258` success
 - présentation textes/conséquences événements : `34648630875` success
+- checkpoint présentation événements : `34648701996` success
+- modificateurs tactiques d’équipement : `34648911729` success
 
 ## Dernière étape terminée
 
-Présentation des textes et conséquences d’événements dans la vue gameplay Donjon :
-- `eventPresentationEntries()` transforme uniquement le journal déjà produit par `event-engine.js` en informations joueur ; aucune nouvelle résolution d’effet n’est introduite;
-- les actions `text`, jets réussis/échoués, récompenses, changements de porte, apparitions, transitions, changements d’état et choix joueur reçoivent une présentation lisible;
-- la vue Donjon affiche une section `📜 Événement` avec ce qui vient de se produire;
-- un événement actif en attente de choix utilise directement son `eventState`; un événement terminé peut rester présenté localement après la résolution pour ne pas disparaître instantanément;
-- les callbacks PNJ et choix mettent à jour cette présentation à partir du `eventState` réellement retourné par les runtimes existants;
-- changer de salle efface la présentation transitoire précédente, sauf si la nouvelle salle possède déjà un événement actif;
-- aucune modification n’a été faite à l’ordre FIFO, aux effets ou à l’anti-double exécution de `event-engine.js` / `event-queue-orchestrator.js`;
-- la régression `rpg-dungeon-gameplay-view.test.mjs` couvre texte narratif, jet, récompense, porte et choix en plus du loot/quêtes déjà protégés.
+Modificateurs tactiques des équipements dans le moteur de combat :
+- `equippedTacticalModifiers()` agrège uniquement les objets réellement équipés et évite de compter deux fois une même entrée multi-slot;
+- les objets peuvent fournir via `data.tactical` : `attackModifier`, `rangeBonus`, `ignoresCover`, `ignoresContactPenalty`;
+- `evaluateAttackPosition()` reçoit maintenant facultativement `inventory` + `definitions` et applique ces bonus au profil tactique existant;
+- `rangeBonus` prolonge la portée sans créer un second calcul de distance;
+- `ignoresCover` et `ignoresContactPenalty` passent par les règles de couverture/contact déjà existantes;
+- `attackModifier` est ajouté au modificateur final et exposé séparément dans `equipmentModifier` pour l’UI future;
+- en l’absence d’inventaire, le comportement historique reste identique;
+- régression `rpg-tactical-combat.test.mjs` couvre cumul, anti-double comptage multi-slot, bonus de portée, couverture ignorée et pénalité de contact ignorée.
 
 Commits de l'étape :
-- présentation événements dans la vue Donjon : `27c6db1f1431962a8b2923aaa38b0e706765214a`
-- régression : `cafebc72a5ee3d0bfbacbc7ef97ff34569112b3e`
+- moteur tactique : `7ea0d48ff03d6f79147ebbb6ab0b0cfd0cffd8e9`
+- régression : `02e4e90d96ffa6d38b0ec16c383cec698afe9f18`
 
-CI finale : `34648630875` success.
+CI finale : `34648911729` success.
 
 ## Stockage — décision repoussée
 
@@ -90,7 +92,7 @@ CI finale : `34648630875` success.
 
 ## Priorités ouvertes
 
-- enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;
+- enrichir les obstacles/couvertures de salle (au-delà du seul `coverModifier` de la case cible) sans dupliquer ligne de vue/pathfinding;
 - remplacer le rollback absolu des statuts par des modificateurs superposables par source;
 - poursuivre le raccord gameplay réel (transitions/combats/fin de combat) autour de la vue Donjon sans second runtime;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

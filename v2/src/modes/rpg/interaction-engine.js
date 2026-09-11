@@ -1,3 +1,5 @@
+import { resolveDefinedActorCheck } from '../../core/checks.js';
+
 function clone(value){return structuredClone(value);}
 function id(){return globalThis.crypto?.randomUUID?.()||`v2_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;}
 
@@ -18,6 +20,8 @@ export function createRoomInteraction({
   attachment={kind:'cell',x:0,y:0},
   conditionIds=[],
   effectIds=[],
+  checkId=null,
+  check=null,
   data={},
 }={}){
   return {
@@ -28,7 +32,24 @@ export function createRoomInteraction({
     attachment:clone(attachment||{kind:'cell',x:0,y:0}),
     conditionIds:[...(conditionIds||[])].map(String),
     effectIds:[...(effectIds||[])].map(String),
+    checkId:checkId==null||checkId===''?null:String(checkId),
+    check:check?clone(check):null,
     data:clone(data||{}),
+  };
+}
+
+export function resolveRoomInteractionCheck(interaction,actor,{definitions={},random=Math.random,roll=null}={}){
+  const current=createRoomInteraction(interaction||{});
+  if(!current.enabled) return {ok:false,reason:'interaction-disabled',success:false,check:null,definition:null};
+  const out=resolveDefinedActorCheck({checkId:current.checkId,fallback:current.check,definitions,actor,random,roll});
+  if(!out.ok) return {ok:false,reason:out.reason,success:false,check:out.check,definition:out.definition||null};
+  return {
+    ok:true,
+    reason:null,
+    success:Boolean(out.check?.success),
+    check:clone(out.check),
+    definition:out.definition?clone(out.definition):null,
+    outcome:out.check?.success?'success':'failure',
   };
 }
 
@@ -62,7 +83,7 @@ export function updateRoomInteraction(layout,interactionId,patch={}){
   const next=ensureRoomInteractions(layout);
   const index=next.interactions.findIndex(i=>String(i.id)===String(interactionId));
   if(index<0) return {ok:false,reason:'interaction-missing',layout};
-  const candidate={...next.interactions[index],...clone(patch)};
+  const candidate=createRoomInteraction({...next.interactions[index],...clone(patch),id:next.interactions[index].id});
   if(patch.attachment) candidate.attachment=clone(patch.attachment);
   const check=validateInteractionAttachment(next,candidate);
   if(!check.valid) return {ok:false,reason:check.reason,layout};

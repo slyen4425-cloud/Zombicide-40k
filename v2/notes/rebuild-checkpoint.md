@@ -40,26 +40,26 @@ Ce fichier sert de point de reprise entre les fils de discussion. Il doit être 
 - Destinataire explicite du loot : `lootGrantedTo` persiste le héros/groupe/conteneur qui a reçu les objets. CI run `34638378209` : success.
 - Clé de boss : elle est maintenant générée au moment de la défaite réelle du boss, pas au spawn. CI run `34638633003` : success.
 - Passage verrouillé par objet : `requiredItemId` est appliqué par le World Engine / runtime donjon. CI run `34639084070` : success.
+- Sélecteur d'objet requis World Builder : menu par nom/icône, sans ID brut. CI run `34639994371` : success.
 - Audio : le shell RPG possède maintenant sa propre session audio navigateur et la détruit en quittant/chageant de mode; l'audit des anciens assets audio reste encore à faire.
 - Stockage V2 actuel : `v2/src/core/storage.js` utilise encore `localStorage` avec préfixe `gensrpg_v2__`.
 - Couche `v2/src/core/storage-provider.js` : provider local, provider distant injectable, routeur local/distant, copie local→distant et distant→local. Aucun backend cloud réel n'est encore branché.
 
 ## Dernière étape codée
 
-Sélecteur d'objet requis directement dans le World Builder :
-- `world-editor.js` reçoit maintenant l'univers RPG courant pour accéder à la vraie liste d'objets;
-- chaque liaison affiche un menu `Objet requis` au lieu de demander un identifiant technique;
-- le menu affiche le nom + l'icône de l'objet et conserve seulement l'ID en valeur interne;
-- les objets désactivés sont exclus du menu;
-- l'option `— Aucun objet requis —` permet de retirer le verrou;
-- la valeur choisie est persistée dans `requiredItemId` sur la liaison existante;
-- `rpg-page.js` transmet `loadRpgUniverse()` au World Builder à l'ouverture de l'onglet;
-- le test vérifie qu'une clé de boss apparaît par son nom, que son ID n'est pas affiché comme libellé et qu'un objet désactivé n'est pas proposé.
+Sélecteur de conditions directement dans les liaisons du World Builder :
+- `world-editor.js` expose `linkConditionOptions()` et utilise la vraie collection `universe.conditions`;
+- chaque liaison peut sélectionner plusieurs conditions actives via un menu multiple, uniquement par leur nom;
+- aucune saisie d'identifiant technique n'est nécessaire;
+- les conditions désactivées sont exclues du sélecteur;
+- les `conditionIds` existants sont normalisés et persistent comme tableau de chaînes dans le draft;
+- le texte de l'éditeur indique clairement que l'objet requis et toutes les conditions doivent être satisfaits;
+- le bouton d'aide des conditions réutilise l'aide contextuelle `rpg-condition`;
+- la régression vérifie l'affichage par nom, la sélection persistée et l'exclusion des conditions désactivées.
 
 Commits de l'étape :
-- World Builder : `0e0488b5cbb27279915c7a3190d84d6ef73b4965`
-- raccord page RPG : `a48a7fdce6099fbf0421f956b9899000fbd3e525`
-- régression : `47596ce965ec51fe11f6b5a97a7c8568f9a06ff2`
+- World Builder : `ade7bb2f4c539f3988b6bb3030e5ee9ec19b135d`
+- régression : `5564614df41dc91a669b9ffc3f753781cd7a530a`
 
 CI : à vérifier sur le dernier commit avant de considérer cette étape totalement validée.
 

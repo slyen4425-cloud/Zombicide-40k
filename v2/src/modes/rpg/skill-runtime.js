@@ -4,4 +4,6 @@ export {
   consumeSkillUse,
   tickSkillCooldowns,
   recoverSkillCharges,
+  canUseSkill,
+  resolveSkillUse,
 } from '../../core/skills.js';

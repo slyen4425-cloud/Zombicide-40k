@@ -4,6 +4,7 @@ import { shortestRoomPathDistance, hasRoomLineOfSight } from './room-tactical-br
 function clone(value){return structuredClone(value);}
 function list(definitions,key){return Array.isArray(definitions?.[key])?definitions[key]:Object.values(definitions?.[key]||{});}
 function byId(definitions,key,id){return list(definitions,key).find(x=>String(x.id)===String(id))||null;}
+function cellKey(x,y){return `${Number(x)},${Number(y)}`;}
 
 export function normalizeTacticalCombatConfig(config={}){
   const mode=['narrative','tactical','hybrid'].includes(config.mode)?config.mode:'hybrid';
@@ -13,6 +14,7 @@ export function normalizeTacticalCombatConfig(config={}){
     rangeEnabled:mode!=='narrative' && config.rangeEnabled!==false,
     lineOfSightEnabled:mode!=='narrative' && config.lineOfSightEnabled!==false,
     contactPenaltyEnabled:mode!=='narrative' && config.contactPenaltyEnabled!==false,
+    coverEnabled:mode!=='narrative' && config.coverEnabled!==false,
     defaultMeleeRange:Math.max(0,Number(config.defaultMeleeRange??1)||0),
     defaultRangedRange:Math.max(1,Number(config.defaultRangedRange??5)||1),
     rangedContactModifier:Number(config.rangedContactModifier??-20)||0,
@@ -32,6 +34,7 @@ export function attackProfile(source={},config={}){
     requiresLineOfSight:data.requiresLineOfSight!==false,
     contactPenalty:data.contactPenalty==null?c.rangedContactModifier:Number(data.contactPenalty)||0,
     ignoresContactPenalty:Boolean(data.ignoresContactPenalty),
+    ignoresCover:Boolean(data.ignoresCover),
   };
 }
 
@@ -58,6 +61,15 @@ export function combatDistance(spatial,actorId,targetId,{diagonal=false,maxDista
   return shortestPathDistance(spatial,from,to,{diagonal,maxDistance});
 }
 
+export function targetCoverModifier(spatial,targetId,{roomLayout=null}={}){
+  if(!roomLayout) return 0;
+  const pos=getActorPosition(spatial,targetId);
+  if(!pos) return 0;
+  const cell=roomLayout?.cells?.[cellKey(pos.x,pos.y)];
+  const modifier=Number(cell?.coverModifier??0);
+  return Number.isFinite(modifier)?modifier:0;
+}
+
 export function enemiesInContact(spatial,actorId,combat,{diagonal=false,roomLayout=null}={}){
   const actor=combat?.actors?.[String(actorId)];
   if(!actor) return [];
@@ -66,19 +78,21 @@ export function enemiesInContact(spatial,actorId,combat,{diagonal=false,roomLayo
 
 export function evaluateAttackPosition({spatial,combat,actorId,targetId,source,config={}}={}){
   const c=normalizeTacticalCombatConfig(config);
-  if(c.mode==='narrative'||!c.rangeEnabled) return {ok:true,distance:null,modifier:0,profile:attackProfile(source,c),contactEnemyIds:[],lineOfSight:true};
+  if(c.mode==='narrative'||!c.rangeEnabled) return {ok:true,distance:null,modifier:0,profile:attackProfile(source,c),contactEnemyIds:[],lineOfSight:true,coverModifier:0};
   const profile=attackProfile(source,c);
   const roomLayout=config.roomLayout||null;
   const distance=combatDistance(spatial,actorId,targetId,{diagonal:Boolean(config.diagonal),maxDistance:profile.rangeMax,roomLayout});
-  if(!Number.isFinite(distance)) return {ok:false,reason:'target-unreachable',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false};
-  if(distance<profile.rangeMin) return {ok:false,reason:'too-close',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true};
-  if(distance>profile.rangeMax) return {ok:false,reason:'out-of-range',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true};
+  if(!Number.isFinite(distance)) return {ok:false,reason:'target-unreachable',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0};
+  if(distance<profile.rangeMin) return {ok:false,reason:'too-close',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0};
+  if(distance>profile.rangeMax) return {ok:false,reason:'out-of-range',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:true,coverModifier:0};
   const from=getActorPosition(spatial,actorId),to=getActorPosition(spatial,targetId);
   const lineOfSight=!roomLayout||!c.lineOfSightEnabled||!profile.requiresLineOfSight?true:hasRoomLineOfSight(roomLayout,from,to);
-  if(!lineOfSight) return {ok:false,reason:'line-of-sight-blocked',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false};
+  if(!lineOfSight) return {ok:false,reason:'line-of-sight-blocked',distance,modifier:0,profile,contactEnemyIds:[],lineOfSight:false,coverModifier:0};
   const contactEnemyIds=c.contactPenaltyEnabled&&profile.style==='ranged'?enemiesInContact(spatial,actorId,combat,{diagonal:Boolean(config.diagonal),roomLayout}):[];
-  const modifier=contactEnemyIds.length&&!profile.ignoresContactPenalty?profile.contactPenalty:0;
-  return {ok:true,distance,modifier,profile,contactEnemyIds,lineOfSight:true};
+  const contactModifier=contactEnemyIds.length&&!profile.ignoresContactPenalty?profile.contactPenalty:0;
+  const coverModifier=c.coverEnabled&&!profile.ignoresCover?targetCoverModifier(spatial,targetId,{roomLayout}):0;
+  const modifier=contactModifier+coverModifier;
+  return {ok:true,distance,modifier,profile,contactEnemyIds,lineOfSight:true,coverModifier};
 }
 
 export function createCombatMovementState(combat,config={}){

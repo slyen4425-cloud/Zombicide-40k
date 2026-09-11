@@ -17,7 +17,7 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
-- Quêtes : moteur de définition + nouveau runtime persistant de démarrage, progression par signaux, complétion et échec.
+- Quêtes : runtime persistant de démarrage/progression/complétion/échec + bridge salle/interactions vers signaux de quête.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -39,24 +39,23 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - éditeur pièges : `34643853871` success
 - picker destinataire de loot : `34644185299` success
 - checkpoint picker loot : `34644216194` success
+- runtime lifecycle quêtes : `34644426041` success
 
 ## Dernière étape codée
 
-Runtime générique de lifecycle des quêtes :
-- nouveau `quest-runtime.js`;
-- `createQuestRuntime()` construit un état persistant par quête;
-- `startQuestRuntime()` évalue les `startConditionIds` via le moteur générique de conditions avant activation;
-- `applyQuestSignal()` traduit des signaux gameplay (`defeat`, `flag`, `visit`, etc.) en progression des objectifs correspondants par `kind` + `targetId`;
-- les conditions propres à un objectif sont évaluées avant sa progression;
-- la progression reste bornée à `required` et les objectifs optionnels ne bloquent pas la complétion;
-- `completeQuestRuntime()` et `failQuestRuntime()` conservent les récompenses/événements déjà définis par `quest-engine.js`;
-- log séquencé pour démarrage, progression, complétion et échec;
-- snapshot stable par quête pour future UI PNJ/journal;
-- régression `rpg-quest-runtime.test.mjs` couvre conditions de départ, signaux non pertinents, progression, clamp, objectif obligatoire, complétion, récompenses, logs et redémarrage d'une quête répétable après échec.
+Bridge automatique salle/interactions -> quêtes :
+- nouveau `room-quest-bridge.js`;
+- une visite de salle produit automatiquement un signal `visit` ciblant l'identifiant de salle;
+- une interaction réussie produit un signal générique `interact` et un signal typé selon son `kind` (`npc`, `object`, `switch`, etc.);
+- une interaction échouée ne progresse aucune quête;
+- `interaction.data.questSignals` peut ajouter des signaux configurés, par exemple poser un `flag` de quête;
+- `applyRoomQuestSignals()` applique plusieurs signaux au runtime de quêtes sans dupliquer la logique de progression;
+- helpers dédiés `applyRoomVisitToQuests()` et `applyInteractionResultToQuests()` pour futur raccord direct à la boucle gameplay;
+- régression `rpg-room-quest-bridge.test.mjs` couvre visite de salle, PNJ, échec d'interaction, interrupteur, signal générique et flag custom.
 
 Commits de l'étape :
-- runtime quêtes : `d2aed6a2579f74614c9ca9bc9e8cd6222055f0ea`
-- régression : `391f0c894b07d192a4f2f5169f512dff8e3d8e6f`
+- bridge quêtes/salle : `fae5cddeca8248dce220bf2c9ca88e04d8f794d7`
+- régression : `d9d3ca14e3618cb5aff0197ed7c229583ebc06b3`
 
 CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commit/checkpoint.
 
@@ -68,7 +67,7 @@ CI de cette nouvelle étape : à vérifier au prochain tour sur le dernier commi
 
 ## Priorités ouvertes
 
-- raccorder ce quest runtime aux interactions PNJ/objets/salles pour produire automatiquement les signaux de quête;
+- raccorder le bridge de quêtes directement aux appels gameplay `visitCurrentRoom()` / `attemptRoomInteraction()` ou à leur orchestrateur supérieur pour éviter les appels manuels;
 - construire le journal/UI de quête et l'UI PNJ/interactions;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

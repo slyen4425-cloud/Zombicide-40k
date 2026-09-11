@@ -18,9 +18,13 @@ const runtime=createCreatureRuntime(wyvern,universe,{instanceId:'wyvern-room10',
 assert.equal(runtime.boss,true);
 assert.equal(runtime.roomId,'room10');
 assert.equal(runtime.state.stats.force,18);
-assert.equal(runtime.state.resources.life.current,50);
+assert.equal(runtime.state.resources.life.current,20,'creature resource current must not exceed max');
 assert.equal(runtime.state.resources.life.max,20);
 assert.deepEqual(chooseCreatureAction(runtime,universe),{ok:true,skillId:'roar',targetRule:'nearest'});
+
+const wounded=createCreatureDefinition({id:'wounded',name:'Blessé',resourceValues:{life:-5}});
+const woundedRuntime=createCreatureRuntime(wounded,universe);
+assert.equal(woundedRuntime.state.resources.life.current,0,'creature resource current must respect min');
 
 const loot=rollCreatureLoot(wyvern,{random:()=>0});
 assert.deepEqual(loot,[{itemId:'boss-key',quantity:1},{itemId:'scale',quantity:1}]);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createDungeonRuntime, transitionDungeonHeroRoom } from '../src/modes/rpg/room-runtime.js';
 import { createWorld, createZone, createRoom, createRoomLink, buildWorldIndex } from '../src/modes/rpg/world-engine.js';
 import { createSpatialState, setActorPosition } from '../src/modes/rpg/spatial-engine.js';
-import { startDungeonCombat, activeDungeonEnemies, dungeonHeroParticipants } from '../src/modes/rpg/dungeon-combat-runtime.js';
+import { startDungeonCombat, activeDungeonEnemies, dungeonHeroParticipants, reconcileDungeonCombatResult } from '../src/modes/rpg/dungeon-combat-runtime.js';
 
 const zone=createZone({id:'z',name:'Zone',roomIds:['a','b']});
 const world=createWorld({id:'w',name:'Monde',startRoomId:'a',zones:['z']});
@@ -31,7 +31,11 @@ const heroRuntimes=[
   {instanceId:'brom',heroId:'brom',name:'Brom',active:true,ko:false,dead:false,state:{stats:{initiative:5},resources:{hp:{current:6,max:6}}}},
 ];
 const universe={
-  stats:[{id:'initiative',baseValue:0}],resources:[],effects:[],skills:[],
+  stats:[{id:'initiative',baseValue:0}],resources:[],effects:[],skills:[],items:[{id:'bone',name:'Os'}],
+  bestiary:[
+    {id:'skeleton',name:'Squelette',loot:[{itemId:'bone',quantityMin:1,quantityMax:1,chance:100}]},
+    {id:'zombie',name:'Zombie',loot:[]},
+  ],
   combat:{initiative:{mode:'stat',source:{kind:'stat',id:'initiative'},base:0,modifier:0}},
 };
 
@@ -60,6 +64,33 @@ assert.equal(out.combat.actors.aldren.side,'heroes');
 assert.equal(out.combat.actors.lyra.side,'heroes');
 assert.equal(out.combat.actors['enemy-active'].side,'enemies');
 assert.equal(out.combat.activeActorId,'lyra','initiative must use the existing configured initiative rule');
+
+const unfinished=reconcileDungeonCombatResult({combat:out.combat,roomRuntime:runtime,heroRuntimes,universe});
+assert.equal(unfinished.ok,false);
+assert.equal(unfinished.reason,'combat-not-ended');
+
+const ended=structuredClone(out.combat);
+ended.phase='ended';
+ended.winner='heroes';
+ended.activeActorId=null;
+ended.actors['enemy-active'].ko=true;
+ended.actors.aldren.state.resources.hp.current=6;
+ended.actors.lyra.ko=true;
+ended.actors.lyra.state.resources.hp.current=0;
+const reconciled=reconcileDungeonCombatResult({combat:ended,roomRuntime:runtime,heroRuntimes,universe,random:()=>0});
+assert.equal(reconciled.ok,true);
+assert.equal(reconciled.outcome,'victory');
+assert.equal(reconciled.roomCleared,true);
+assert.equal(reconciled.heroesStillAlive,true,'Brom alive in another room must prevent false global game over');
+assert.deepEqual(reconciled.defeatedEnemyIds,['enemy-active']);
+assert.equal(reconciled.roomRuntime.rooms.a.entities.find(x=>x.id==='enemy-active').defeated,true);
+assert.equal(reconciled.roomRuntime.rooms.a.entities.find(x=>x.id==='enemy-active').data.creatureRuntime.lootClaimed,true);
+assert.deepEqual(reconciled.roomRuntime.rooms.a.entities.find(x=>x.id==='enemy-active').data.creatureRuntime.lootDrops,[{itemId:'bone',quantity:1}]);
+assert.equal(reconciled.heroRuntimes.find(x=>x.instanceId==='aldren').state.resources.hp.current,6);
+assert.equal(reconciled.heroRuntimes.find(x=>x.instanceId==='lyra').ko,true);
+assert.equal(reconciled.heroRuntimes.find(x=>x.instanceId==='lyra').active,false);
+assert.equal(reconciled.heroRuntimes.find(x=>x.instanceId==='brom').active,true,'hero outside combat must remain untouched');
+assert.equal(activeDungeonEnemies(reconciled.roomRuntime,'a').length,0,'reconciled defeated enemy must not respawn into the next combat');
 
 const noEnemies=startDungeonCombat({roomRuntime:{...runtime,currentRoomId:'b',focusedHeroId:'brom'},heroRuntimes,engagerHeroId:'brom',universe});
 assert.equal(noEnemies.ok,false);

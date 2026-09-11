@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createSpawnDefinition, createSpawnState, executeSpawn, resolveRoomCreatureDefeat, grantRoomCreatureDrops } from '../src/modes/rpg/spawn-engine.js';
+import { createSpawnDefinition, createSpawnState, executeSpawn, resolveRoomCreatureDefeat, grantRoomCreatureDrops, grantRoomCreatureDropsToRecipient } from '../src/modes/rpg/spawn-engine.js';
 import { createInventoryState, inventoryQuantity } from '../src/modes/rpg/inventory-engine.js';
 
 const universe={
@@ -56,11 +56,35 @@ assert.equal(granted.ok,true);
 assert.equal(inventoryQuantity(granted.inventory,'dragon-scale'),1);
 const grantedEntity=granted.roomRuntime.entities.find(e=>e.id==='spawn:boss-10:1');
 assert.equal(grantedEntity.data.creatureRuntime.lootGranted,true);
+assert.deepEqual(grantedEntity.data.creatureRuntime.lootGrantedTo,{kind:'inventory',id:null});
 
 const grantedAgain=grantRoomCreatureDrops(structuredClone(granted.roomRuntime),'spawn:boss-10:1',structuredClone(granted.inventory),universe);
 assert.equal(grantedAgain.ok,false);
 assert.equal(grantedAgain.reason,'already-granted');
 assert.equal(inventoryQuantity(grantedAgain.inventory,'dragon-scale'),1,'reopening the room must not grant creature loot twice');
+assert.deepEqual(grantedAgain.recipient,{kind:'inventory',id:null});
+
+const freshSpawn=executeSpawn(createSpawnDefinition({id:'boss-recipient',kind:'boss',roomId:'room-10',creatureId:'wyvern'}),{roomId:'room-10',roomRuntime:{roomId:'room-10',entities:[],interactions:{}},spawnState:createSpawnState(),universe});
+assert.equal(freshSpawn.ok,true);
+const freshDefeat=resolveRoomCreatureDefeat(freshSpawn.roomRuntime,'spawn:boss-recipient:1',universe,{random:()=>0});
+const heroRecipient={id:'hero-lyra',kind:'hero',name:'Lyra',inventory:createInventoryState()};
+const heroGrant=grantRoomCreatureDropsToRecipient(freshDefeat.roomRuntime,'spawn:boss-recipient:1',heroRecipient,universe);
+assert.equal(heroGrant.ok,true);
+assert.equal(heroGrant.recipient.id,'hero-lyra');
+assert.equal(heroGrant.recipient.kind,'hero');
+assert.equal(inventoryQuantity(heroGrant.recipient.inventory,'dragon-scale'),1);
+const recipientRuntime=heroGrant.roomRuntime.entities[0].data.creatureRuntime;
+assert.deepEqual(recipientRuntime.lootGrantedTo,{kind:'hero',id:'hero-lyra'});
+
+const heroGrantAgain=grantRoomCreatureDropsToRecipient(structuredClone(heroGrant.roomRuntime),'spawn:boss-recipient:1',structuredClone(heroGrant.recipient),universe);
+assert.equal(heroGrantAgain.ok,false);
+assert.equal(heroGrantAgain.reason,'already-granted');
+assert.equal(inventoryQuantity(heroGrantAgain.recipient.inventory,'dragon-scale'),1);
+assert.equal(heroGrantAgain.recipient.id,'hero-lyra');
+
+const missingRecipientInventory=grantRoomCreatureDropsToRecipient(freshDefeat.roomRuntime,'spawn:boss-recipient:1',{id:'hero-brom',kind:'hero'},universe);
+assert.equal(missingRecipientInventory.ok,false);
+assert.equal(missingRecipientInventory.reason,'recipient-inventory-missing');
 
 const illegalBoss=createSpawnDefinition({id:'bad-boss',kind:'normal',roomId:'room-8',creatureId:'wyvern'});
 const blocked=executeSpawn(illegalBoss,{roomId:'room-8',roomRuntime:room8,spawnState:createSpawnState(),universe});

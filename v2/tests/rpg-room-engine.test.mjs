@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {createRoomLayout,setRoomCell,getRoomCell,createWall,addWall,createDoor,addDoor,createMarker,addMarker,resizeRoomLayout,validateRoomLayout} from '../src/modes/rpg/room-engine.js';
+import {doorRequiredItemOptions} from '../src/modes/rpg/room-editor.js';
 
 let layout=createRoomLayout({id:'layout-1',roomId:'room-1',name:'Crypte',width:6,height:4});
 assert.equal(layout.width,6);
@@ -25,11 +26,22 @@ assert.equal(out.ok,true);
 layout=out.layout;
 assert.equal(addWall(layout,createWall({id:'wall-2',x:1,y:1,edge:'east'})).reason,'wall-exists');
 
-out=addDoor(layout,createDoor({id:'door-entry',x:0,y:2,edge:'west',entry:true,linkId:'link-start'}));
+out=addDoor(layout,createDoor({id:'door-entry',x:0,y:2,edge:'west',entry:true,linkId:'link-start',locked:true,keyItemId:'boss-key'}));
 assert.equal(out.ok,true);
 layout=out.layout;
 assert.equal(layout.doors[0].entry,true);
 assert.equal(layout.doors[0].linkId,'link-start');
+assert.equal(layout.doors[0].locked,true);
+assert.equal(layout.doors[0].keyItemId,'boss-key');
+
+const keyOptions=doorRequiredItemOptions([
+  {id:'boss-key',name:'Clé du boss',icon:'🗝️',enabled:true},
+  {id:'disabled-key',name:'Clé désactivée',enabled:false},
+],'boss-key');
+assert.equal(keyOptions.includes('Clé du boss'),true);
+assert.equal(keyOptions.includes('value="boss-key" selected'),true);
+assert.equal(keyOptions.includes('Clé désactivée'),false);
+assert.equal(keyOptions.includes('— Aucune clé / objet —'),true);
 
 out=addMarker(layout,createMarker({id:'rock-1',x:4,y:3,kind:'rock'}));
 assert.equal(out.ok,true);

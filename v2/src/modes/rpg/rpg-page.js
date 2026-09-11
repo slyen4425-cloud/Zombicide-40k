@@ -3,6 +3,7 @@ import { mountCombatLab } from './combat-lab.js';
 import { mountWorldEditor } from './world-editor.js';
 import { mountRoomEditor } from './room-editor.js';
 import { mountHeroSheet } from './hero-sheet.js';
+import { mountDungeonGameplayView } from './dungeon-gameplay-view.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
 import { createRpgAudioSession } from './rpg-audio-session.js';
 
@@ -18,11 +19,15 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
+  let currentDungeonRuntime=dungeonRuntime||null;
+  let currentTab='editor';
+  let dungeonView=null;
   host.innerHTML=`
     <nav class="rpg-tabs" aria-label="Outils RPG">
       <button type="button" class="rpg-tab active" data-rpg-tab="editor">⚙️ Configuration</button>
+      <button type="button" class="rpg-tab" data-rpg-tab="dungeon">🎮 Donjon</button>
       <button type="button" class="rpg-tab" data-rpg-tab="heroes">🧙 Héros</button>
       <button type="button" class="rpg-tab" data-rpg-tab="world">🗺️ World Builder</button>
       <button type="button" class="rpg-tab" data-rpg-tab="room">🧱 Salle</button>
@@ -33,9 +38,12 @@ export function mountRpgPage(host,{runtime=null}={}){
   const buttons=[...host.querySelectorAll('[data-rpg-tab]')];
 
   function open(tab){
+    currentTab=tab;
+    dungeonView=null;
     buttons.forEach(b=>b.classList.toggle('active',b.dataset.rpgTab===tab));
     body.innerHTML='';
     if(tab==='combat') mountCombatLab(body,loadRpgUniverse());
+    else if(tab==='dungeon') dungeonView=mountDungeonGameplayView(body,{universe:loadRpgUniverse(),roomRuntime:currentDungeonRuntime});
     else if(tab==='heroes') mountHeroSheet(body,loadRpgUniverse());
     else if(tab==='world') mountWorldEditor(body,loadRpgUniverse());
     else if(tab==='room') mountRoomEditor(body,loadRpgUniverse());
@@ -47,6 +55,13 @@ export function mountRpgPage(host,{runtime=null}={}){
 
   return {
     audioSession:pageRuntime.audioSession,
+    setDungeonRuntime(nextRuntime){
+      currentDungeonRuntime=nextRuntime||null;
+      if(currentTab==='dungeon'&&dungeonView) dungeonView.setRoomRuntime(currentDungeonRuntime);
+      return currentDungeonRuntime;
+    },
+    getDungeonRuntime:()=>currentDungeonRuntime,
+    openTab:open,
     dispose:()=>pageRuntime.dispose(),
     isDisposed:()=>pageRuntime.isDisposed(),
   };

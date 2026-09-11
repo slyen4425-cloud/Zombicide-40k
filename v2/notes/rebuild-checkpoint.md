@@ -17,7 +17,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Perception/furtivité : layout runtime matérialisé, sans confondre distance de vision et chemin de déplacement.
 - Bestiaire : loot idempotent, drops persistants, destinataire explicite, boss key attribuée seulement après défaite réelle.
 - UI générique de destinataire de loot prête pour raccord à la vue de gameplay.
-- Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ désormais raccordée aux vraies interactions `npc/ally` et aux dialogues du runtime allié.
+- Quêtes : runtime persistant + signaux salle/interactions raccordés directement au runtime de donjon + journal joueur mobile + UI PNJ raccordée au runtime salle/allié.
+- UI PNJ/allié : dialogue, actions de quête, recrutement, invocation et renvoi utilisent désormais les moteurs existants sans duplication.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -45,24 +46,26 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - journal de quêtes joueur : `34645656619` success
 - UI PNJ + actions de quête : `34645853645` success
 - raccord UI PNJ -> runtime salle/allié : `34646083537` success
+- actions recrutement/invocation/renvoi dans UI PNJ : `34646281587` success
 
 ## Dernière étape terminée
 
-Raccord direct de l'UI PNJ aux vraies interactions de salle/allié :
-- nouveau `room-npc-interaction-ui.js`;
-- `buildRoomNpcInteractionView()` passe par `inspectAllyRoomInteraction()` : seules les vraies interactions `npc/ally` instanciées dans la salle sont acceptées;
-- les dialogues affichés viennent directement de `ally-interaction-runtime.js`, donc les conditions de dialogue existantes sont réutilisées au lieu de recréer un second système;
-- un `escortQuestId` configuré sur une interaction alliée devient automatiquement une action joueur `Accepter : <nom de quête>` sans exposer d'identifiant technique;
-- les `questActions` déjà définies sur l'interaction de salle restent compatibles et peuvent cohabiter avec cette action d'escorte automatique;
-- `applyRoomNpcQuestAction()` met à jour directement `roomRuntime.questRuntime`, afin que la progression de quête reste attachée au runtime du donjon;
-- `mountRoomNpcInteraction()` fournit un composant montable qui relit le runtime réel de salle et notifie son changement après une action de quête;
-- régression `rpg-room-npc-interaction-ui.test.mjs` couvre interaction `npc` réelle, filtrage conditionnel du dialogue allié, action d'escorte, démarrage de quête dans `roomRuntime.questRuntime` et rejet d'une interaction non PNJ.
+Actions allié dans l'UI PNJ réelle :
+- `room-npc-interaction-ui.js` réutilise directement `recruitFromRoomInteraction()`, `summonFromRoomInteraction()` et `dismissFromRoomInteraction()`;
+- l'UI expose automatiquement `Recruter`, `Invoquer` ou `Renvoyer` selon la configuration et l'état runtime réel de l'interaction;
+- le prix d'un recrutement est affiché dans le libellé joueur quand il est non nul;
+- après recrutement, l'action de recrutement disparaît et l'action de renvoi apparaît;
+- le wallet, le roster allié et l'état persistant de l'interaction de salle sont tous mis à jour par les moteurs déjà existants;
+- l'invocation conserve les contraintes `sourceKind/sourceId` du moteur allié;
+- `mountRoomNpcInteraction()` garde désormais `roomRuntime`, `roster` et `wallet` synchronisés et expose un callback `onAllyStateChange`;
+- aucune logique parallèle de recrutement, invocation ou renvoi n'a été créée;
+- régression `rpg-room-npc-ally-actions.test.mjs` couvre recrutement payant, persistance `recruited`, apparition de `Renvoyer`, renvoi réel dans le roster et invocation réelle via une interaction `ally`.
 
 Commits de l'étape :
-- bridge UI PNJ/salle : `5f0536cfb01fb1d13ec39d547dec56dd496292db`
-- régression : `be06bf91a0d4b7b6e1a983921ba6990d5cf515b2`
+- UI/runtime actions allié : `9c89c0da71c7d3d13c23bcf3d97cf4209b6ba506`
+- régression : `caf2186c32dc220d9a672567eebbb6aac193e015`
 
-CI : `34646083537` success.
+CI : `34646281587` success.
 
 ## Stockage — décision repoussée
 
@@ -72,7 +75,7 @@ CI : `34646083537` success.
 
 ## Priorités ouvertes
 
-- raccorder les actions de recrutement/summon/dismiss existantes à cette même UI PNJ sans dupliquer le runtime allié;
+- raccorder les événements `successEventId/failureEventId/dismissEventId` renvoyés par les actions allié à la file d'événements RPG;
 - monter le journal de quêtes dans la vraie vue de gameplay du donjon quand cette vue est raccordée;
 - intégrer le picker de loot dans la vraie vue de fin de combat/donjon quand elle est montée;
 - enrichir obstacles/couvertures/effets d'équipement sans dupliquer les règles tactiques;

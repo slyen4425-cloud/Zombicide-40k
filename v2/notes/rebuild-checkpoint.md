@@ -26,7 +26,8 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - Les textes et conséquences des événements sont présentés directement dans la vue Donjon à partir du log produit par `event-engine.js`, sans modifier ni dupliquer l’exécution.
 - Les passages authored du World Builder sont directement jouables dans la vue Donjon via le vrai `room-runtime`; objets requis et conditions filtrent les boutons avant traversée.
 - Le runtime Donjon suit plusieurs héros dans des salles différentes : `heroLocations`, focus de héros, transitions individuelles et historique propre à chaque héros, avec retour arrière sans ré-instancier la salle ni respawn.
-- La vue Donjon est maintenant raccordée à `heroLocations` : choix du héros actif par nom, salle affichée propre à ce héros, et passage appliqué uniquement au héros focalisé.
+- La vue Donjon est raccordée à `heroLocations` : choix du héros actif par nom, salle affichée propre à ce héros, et passage appliqué uniquement au héros focalisé.
+- Le démarrage d'un vrai combat de salle dispose maintenant d'un bridge dédié : ennemis actifs de la salle + héros réellement présents, puis filtre de proximité spatiale avant création du vrai `combat-engine` D100.
 - World Builder : objets requis et conditions via menus lisibles, sans saisie d'ID brut.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage V2 : localStorage + provider abstrait local/distant; backend cloud réel différé.
@@ -81,24 +82,27 @@ Ce fichier sert de point de reprise entre les fils. La V2 reste isolée de `main
 - déplacements individuels multi-héros / retours arrière : `34651007333` success
 - checkpoint déplacements multi-héros : `34651081170` success
 - focus héros + déplacement individuel dans vue Donjon : `34651410540` success
+- checkpoint vue Donjon multi-héros : `34651473151` success
+- démarrage combat réel depuis runtime de salle : `34651712990` success
 
 ## Dernière étape terminée
 
-Raccord du multi-héros à la vraie vue Donjon :
-- la vue affiche maintenant un sélecteur `Héros actif` à partir de `roomRuntime.heroLocations`, avec nom/icône du héros et salle où il se trouve;
-- changer de héros utilise `setFocusedDungeonHero()` : seule la salle affichée/focalisée change, aucun autre héros n'est déplacé;
-- l'en-tête rappelle quel héros est actuellement joué et dans quelle salle il se trouve;
-- la liste des passages est calculée depuis la session propre du héros focalisé (`roomId`, historique, visites), donc un héros en salle B voit bien son retour vers A pendant qu'un autre héros resté en A voit ses propres sorties;
-- cliquer un passage appelle `transitionDungeonHeroRoom()` quand le runtime multi-héros est actif : seul le héros focalisé traverse le lien;
-- le mode historique sans `heroLocations` garde le fallback `transitionDungeonRoom()` pour compatibilité;
-- noms de héros et salles sont affichés à la place des IDs techniques;
-- régression : Lyra focalisée en Crypte voit les sorties de la Crypte; Aldren focalisé dans la Galerie voit le même lien en sens retour vers la Crypte.
+Bridge de démarrage du vrai combat Donjon depuis le runtime de salle :
+- nouveau `dungeon-combat-runtime.js`;
+- `activeDungeonEnemies()` ne sélectionne que les créatures réellement actives, non retirées et non vaincues de la salle concernée;
+- `dungeonHeroParticipants()` part du héros engageant, récupère les héros réellement dans la même salle via `heroLocations`, exclut les KO/morts/inactifs, puis applique `combatParticipants()` si un état spatial est fourni;
+- un héros dans une autre salle n'entre jamais dans le combat;
+- un héros de la même salle mais au-delà de `combatAssistRange` n'entre pas non plus lorsque le mode spatial est actif;
+- `startDungeonCombat()` crée ensuite le vrai `createCombatState()` avec les états de héros/créatures existants et la règle d'initiative configurée via `ensureCombatConfig()` + `calculateInitiative()`;
+- le combat conserve dans `combat.metadata` la salle, le héros engageant, les héros participants et les IDs d'entités ennemies pour permettre le futur raccord de fin de combat au runtime de salle;
+- aucun ennemi vaincu ne peut être réinjecté dans un nouveau combat;
+- régression : Aldren + Lyra salle A, Brom salle B; Lyra trop loin est exclue, puis incluse en revenant à portée; Brom reste toujours hors combat; un ennemi vaincu est exclu; l'initiative choisit bien l'acteur courant avec la règle existante.
 
 Commits de l'étape :
-- vue Donjon multi-héros : `cb80bbf982f20fac11e98d28338156ec5cdd50f8`
-- régression focus/déplacement individuel : `2a48415a1bc4621e2a21ed6d5a6f34fd72a72edc`
+- bridge combat Donjon : `9beee99723abc65b552a296d06b786adcc1a8a58`
+- régression combat de salle : `a6e79a229e217ae63b90eb184414ad4c6d31c109`
 
-CI finale : `34651410540` success.
+CI finale : `34651712990` success.
 
 ## Stockage — décision repoussée
 
@@ -108,7 +112,7 @@ CI finale : `34651410540` success.
 
 ## Priorités ouvertes
 
-- démarrer le combat réel depuis les ennemis actifs de la salle en ne sélectionnant que les héros réellement présents/proches du héros engageant;
+- monter maintenant ce démarrage de combat dans la vraie vue Donjon avec les vrais runtimes héros/spatial fournis par la partie;
 - raccorder ensuite la fin de combat au runtime de salle (défaite ennemis, loot, boss/key, sortie) sans second état parallèle;
 - étendre si besoin les statuts persistants non additifs (`multiply`, `percent`, `set`) avec une vraie recomposition ordonnée de couches plutôt qu'un delta simple;
 - audit legacy systématique encore incomplet : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture, UI cachées.

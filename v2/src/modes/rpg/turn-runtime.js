@@ -1,6 +1,6 @@
 import { queueCombatAction, resolveQueuedAction, advanceCombatTurn } from './combat-engine.js';
 import { skillAvailability, consumeSkillUse, tickSkillCooldowns } from '../../core/skills.js';
-import { validatePlayerTarget } from './targeting-engine.js';
+import { validateSkillTarget, validSkillTargets } from './targeting-engine.js';
 
 function clone(value) { return structuredClone(value); }
 
@@ -9,19 +9,19 @@ export function prepareSkillAction(combat, skill, targetId, definitions = {}, co
   const actor = combat.actors?.[combat.activeActorId];
   if (!actor) return { ok:false, reason:'missing-actor', combat };
 
-  const selectedTargetId = targetId || nextDefaultTarget(skill, combat.activeActorId);
-  if (String(skill?.target || 'enemy') === 'enemy') {
-    const targeting = context.targeting || {};
-    const targetCheck = validatePlayerTarget({
-      combat,
-      actorId: combat.activeActorId,
-      targetId: selectedTargetId,
-      spatial: targeting.spatial || null,
-      source: targeting.source || null,
-      config: targeting.config || {},
-    });
-    if (!targetCheck.ok) return { ok:false, reason:targetCheck.reason, combat, targetCheck };
-  }
+  const targetKind=String(skill?.target||'enemy');
+  const selectedTargetId = targetId || nextDefaultTarget(skill, combat);
+  const targeting = context.targeting || {};
+  const targetCheck = validateSkillTarget({
+    combat,
+    actorId: combat.activeActorId,
+    targetId: selectedTargetId,
+    targetKind,
+    spatial: targeting.spatial || null,
+    source: targeting.source || null,
+    config: targeting.config || {},
+  });
+  if (!targetCheck.ok) return { ok:false, reason:targetCheck.reason, combat, targetCheck };
 
   const conditions = (skill.conditionIds || [])
     .map(id => definitions.conditions?.find?.(x => String(x.id) === String(id)))
@@ -52,11 +52,14 @@ export function prepareSkillAction(combat, skill, targetId, definitions = {}, co
   };
   const queued = queueCombatAction(next, action);
   if (!queued.accepted) return { ok:false, reason:queued.reason, combat };
-  return { ok:true, combat:queued.combat, action };
+  return { ok:true, combat:queued.combat, action, targetCheck };
 }
 
-function nextDefaultTarget(skill, actorId) {
-  return String(skill?.target || 'enemy') === 'self' ? String(actorId) : null;
+function nextDefaultTarget(skill, combat) {
+  const actorId=String(combat?.activeActorId||'');
+  if(!actorId) return null;
+  const candidates=validSkillTargets({combat,actorId,targetKind:skill?.target||'enemy'});
+  return candidates[0]?.actor?.id==null?null:String(candidates[0].actor.id);
 }
 
 export function resolveAndAdvance(combat, options = {}) {

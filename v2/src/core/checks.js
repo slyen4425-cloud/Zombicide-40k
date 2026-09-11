@@ -8,6 +8,7 @@ export function normalizeCheckSpec(spec = {}) {
   const mode = spec.mode === 'roll-over' ? 'roll-over' : 'roll-under';
   return {
     die: Math.max(2, Math.floor(Number(spec.die) || 100)),
+    statId: spec.statId == null ? null : String(spec.statId),
     statValue: Number(spec.statValue) || 0,
     difficulty: Number(spec.difficulty) || 0,
     modifier: Number(spec.modifier) || 0,
@@ -35,16 +36,29 @@ export function resolveCheck({ die = 100, roll = null, statValue = 0, difficulty
 }
 
 export function resolveActorCheck(spec = {}, actor = {}, { random = Math.random, roll = null } = {}) {
-  const statId = spec.statId == null ? null : String(spec.statId);
+  const normalized = normalizeCheckSpec(spec);
   const stats = actor?.state?.stats || actor?.stats || {};
-  const statValue = statId ? Number(stats?.[statId] ?? 0) || 0 : Number(spec.statValue) || 0;
+  const statValue = normalized.statId ? Number(stats?.[normalized.statId] ?? 0) || 0 : normalized.statValue;
   return resolveCheck({
-    die: spec.die,
+    ...normalized,
     roll: roll ?? spec.roll ?? null,
     statValue,
-    difficulty: spec.difficulty,
-    modifier: spec.modifier,
-    mode: spec.mode,
     random,
   });
+}
+
+export function findCheckDefinition(definitions = {}, checkId = null) {
+  if (checkId == null || checkId === '') return null;
+  const id = String(checkId);
+  const checks = definitions?.checks || [];
+  if (Array.isArray(checks)) return checks.find(check => String(check?.id) === id) || null;
+  return checks?.[id] || null;
+}
+
+export function resolveDefinedActorCheck({ checkId = null, fallback = null, definitions = {}, actor = {}, random = Math.random, roll = null } = {}) {
+  const defined = findCheckDefinition(definitions, checkId);
+  if (defined?.enabled === false) return { ok: false, reason: 'check-disabled', check: null, definition: defined };
+  const spec = defined || fallback;
+  if (!spec) return { ok: true, check: { success: true, roll: null, threshold: null }, definition: null };
+  return { ok: true, check: resolveActorCheck(spec, actor, { random, roll }), definition: defined || null };
 }

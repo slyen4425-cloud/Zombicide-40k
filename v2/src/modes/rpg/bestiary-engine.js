@@ -43,10 +43,12 @@ export function createCreatureRuntime(creature,universe={}, {instanceId=uid(),ro
   const state={stats:{},resources:{}};
   for(const stat of universe.stats||[]) state.stats[String(stat.id)]=Number(definition.statValues?.[stat.id] ?? stat.baseValue ?? 0)||0;
   for(const resource of universe.resources||[]){
-    const max=resolveResourceMax(resource,state,universe);
+    const max=Math.max(Number(resource?.min??0)||0,Number(resolveResourceMax(resource,state,universe))||0);
     const configured=definition.resourceValues?.[resource.id];
-    const current=typeof configured==='object'?Number(configured.current):Number(configured);
-    state.resources[String(resource.id)]={current:Number.isFinite(current)?current:max,max};
+    const configuredCurrent=typeof configured==='object'?Number(configured.current):Number(configured);
+    const rawCurrent=Number.isFinite(configuredCurrent)?configuredCurrent:max;
+    const min=Number(resource?.min??0)||0;
+    state.resources[String(resource.id)]={current:Math.max(min,Math.min(max,rawCurrent)),max};
   }
   return {
     instanceId:String(instanceId),creatureId:definition.id,name:definition.name,boss:definition.boss,

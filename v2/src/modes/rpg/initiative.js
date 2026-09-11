@@ -12,7 +12,9 @@ export function calculateInitiative(combatant, rule = {}, random = Math.random) 
   const state = combatant?.state || {};
   const base = Number(rule.base) || 0;
   const source = valueFromPath(state, rule.source || {});
-  const modifier = Number(combatant?.initiativeModifier ?? rule.modifier) || 0;
+  const globalModifier = Number(rule.modifier) || 0;
+  const actorModifier = Number(combatant?.initiativeModifier) || 0;
+  const modifier = globalModifier + actorModifier;
   let roll = null;
   let total = base + source + modifier;
 
@@ -23,7 +25,7 @@ export function calculateInitiative(combatant, rule = {}, random = Math.random) 
     total = base + modifier;
   }
 
-  return { total, roll, base, source, modifier };
+  return { total, roll, base, source, modifier, globalModifier, actorModifier };
 }
 
 export function buildInitiativeOrder(combatants = [], rule = {}, random = Math.random) {

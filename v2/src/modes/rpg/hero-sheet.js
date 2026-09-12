@@ -14,16 +14,14 @@ export function buildHeroSheetModel(hero,definitions={}){
   const inventory=sheet.inventory||{entries:[],equipment:{},slots:[]};
   const equippedIds=equippedEntryIds(inventory);
   const entries=(inventory.entries||[]).map(entry=>{const item=byId(definitions,'items',entry.itemId)||{};return{entryId:String(entry.entryId),itemId:String(entry.itemId),name:item.name||'Objet',icon:item.icon||'🎒',kind:item.kind||'misc',rarity:item.rarity||'common',quantity:Number(entry.quantity||1),equipped:equippedIds.has(String(entry.entryId))};});
-  const seenEquipment=new Set();
   const equipment=(inventory.slots||[]).map(slot=>{
     const record=inventory.equipment?.[slot]||null;
     if(!record) return {slot:String(slot),empty:true,item:null,primary:true};
     const item=byId(definitions,'items',record.itemId)||{};
     const primary=String(record.primarySlot||slot)===String(slot);
-    if(primary) seenEquipment.add(String(record.entryId));
     return {slot:String(slot),empty:false,primary,item:{entryId:String(record.entryId),itemId:String(record.itemId),name:item.name||'Objet',icon:item.icon||'🎒',kind:item.kind||'misc',rarity:item.rarity||'common'}};
   });
-  return {heroId:sheet.heroId,name:sheet.name,icon:sheet.icon||'🧙',artId:sheet.artId,status:sheet.dead?'Mort':sheet.ko?'KO':'Prêt',stats,resources,skills,inventory:entries,equipment,level:sheet.progression.level||1,xp:sheet.progression.xp||0,skillPoints:sheet.progression.skillPoints||0,statPoints:sheet.progression.statPoints||0,setProgress:sheet.setProgress||[],activeForms:sheet.activeForms||[]};
+  return {heroId:sheet.heroId,name:sheet.name,icon:sheet.icon||'🧙',artId:sheet.artId,status:sheet.dead?'Mort':sheet.ko?'KO':'Prêt',stats,resources,skills,inventory:entries,startingItems:entries,equipment,level:sheet.progression.level||1,xp:sheet.progression.xp||0,skillPoints:sheet.progression.skillPoints||0,statPoints:sheet.progression.statPoints||0,setProgress:sheet.setProgress||[],activeForms:sheet.activeForms||[]};
 }
 
 function rarityLabel(value){const labels={common:'Commun',uncommon:'Peu commun',rare:'Rare',epic:'Épique',legendary:'Légendaire'};return labels[String(value)]||String(value||'Commun');}

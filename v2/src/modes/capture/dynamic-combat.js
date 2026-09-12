@@ -159,6 +159,8 @@ export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){
   const next=ownedInstance(activeTeam,nextInstanceId);
   if(!next) return {ok:false,reason:'capture-active-creature-not-in-team',battle};
   if(String(next.instanceId)===String(battle.player.activeInstanceId)) return {ok:false,reason:'capture-creature-already-active',battle};
+  const nextVitals=createCaptureVitals({currentHp:next.currentHp,maxHp:next.maxHp});
+  if(nextVitals.ko) return {ok:false,reason:'capture-creature-ko',battle};
   const previousActorId=battle.player.actorId;
   const previousPosition=getActorPosition(battle.spatial,previousActorId);
   const nextActorId=actorId('player',next.instanceId);
@@ -175,10 +177,52 @@ export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){
         activeInstanceId:String(next.instanceId),
         actorId:nextActorId,
         creature:clone(next),
-        vitals:createCaptureVitals({currentHp:next.currentHp,maxHp:next.maxHp}),
+        vitals:nextVitals,
       },
       spatial,
     },
+  };
+}
+
+export function resolveCaptureKoState(battle,activeTeam=[]){
+  if(!battle||battle.status!=='active') return {ok:false,reason:'battle-not-active',battle,activeTeam:clone(activeTeam)};
+
+  if(battle.opponent?.vitals?.ko){
+    const ended=endCaptureBattle(battle,'opponent_ko');
+    return {ok:true,outcome:'opponent_ko',battle:ended.battle,activeTeam:clone(activeTeam)};
+  }
+
+  if(!battle.player?.vitals?.ko){
+    return {ok:true,outcome:'continue',battle,activeTeam:clone(activeTeam)};
+  }
+
+  const syncedTeam=(activeTeam||[]).map(entry=>{
+    if(String(entry.instanceId)!==String(battle.player.activeInstanceId)) return clone(entry);
+    return {
+      ...clone(entry),
+      currentHp:battle.player.vitals.currentHp,
+      maxHp:battle.player.vitals.maxHp,
+    };
+  });
+  const replacement=syncedTeam.find(entry=>{
+    if(String(entry.instanceId)===String(battle.player.activeInstanceId)) return false;
+    return !createCaptureVitals({currentHp:entry.currentHp,maxHp:entry.maxHp}).ko;
+  })||null;
+
+  if(!replacement){
+    const ended=endCaptureBattle(battle,'player_team_unavailable');
+    return {ok:true,outcome:'player_team_unavailable',battle:ended.battle,activeTeam:syncedTeam};
+  }
+
+  const switched=switchCaptureActiveCreature(battle,syncedTeam,replacement.instanceId);
+  if(!switched.ok) return {...switched,activeTeam:syncedTeam};
+  return {
+    ok:true,
+    outcome:'forced_switch',
+    previousInstanceId:String(battle.player.activeInstanceId),
+    activeInstanceId:String(replacement.instanceId),
+    battle:switched.battle,
+    activeTeam:syncedTeam,
   };
 }
 

@@ -5,6 +5,7 @@ import {
   attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
   buildCaptureCreatureInspection,
+  buildCaptureOpponentInspection,
   buildCaptureOpponentSummary,
   buildCaptureRosterLists,
   captureUiNoticeFeedNotices,
@@ -199,8 +200,11 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       ?`<div data-capture-opponent-statuses>${summary.statuses.map(opponentStatusHtml).join('')}</div>`
       :'';
     opponentSummaryNode.innerHTML=`<article class="capture-opponent-summary${summary.ko?' is-ko':''}" data-capture-opponent-instance="${escapeHtml(summary.instanceId)}">
-      <strong>${escapeHtml(summary.title)}</strong>
-      ${wildBadge}${koBadge}${hp}${position}${statuses}
+      <div>
+        <strong>${escapeHtml(summary.title)}</strong>
+        ${wildBadge}${koBadge}${hp}${position}${statuses}
+      </div>
+      <button type="button" data-capture-inspect-opponent>Inspecter</button>
     </article>`;
     return summary;
   }
@@ -335,6 +339,19 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       });
       return {...inspection,overlay:opened.state,blocking:opened.blocking,gameplayDriverStatus:opened.gameplayDriverStatus};
     },
+    inspectOpponent({speciesDef=null}={}){
+      const summary=buildCaptureOpponentSummary(session.state);
+      const species=speciesDef||speciesById?.[String(summary?.speciesId||'')]||null;
+      const inspection=buildCaptureOpponentInspection(session.state,{speciesDef:species});
+      if(!inspection.ok) return inspection;
+      const opened=api.openOverlay({
+        kind:inspection.kind,
+        title:inspection.title,
+        message:inspection.message,
+        metadata:inspection.metadata,
+      });
+      return {...inspection,overlay:opened.state,blocking:opened.blocking,gameplayDriverStatus:opened.gameplayDriverStatus};
+    },
     refreshRosterLists(){return renderRosterLists();},
     refreshOpponentSummary(){return renderOpponentSummary();},
     advance(delta,options={}){
@@ -383,6 +400,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     dispose(){
       if(activeList&&typeof activeList.removeEventListener==='function') activeList.removeEventListener('click',handleRosterInspectClick);
       if(reserveList&&typeof reserveList.removeEventListener==='function') reserveList.removeEventListener('click',handleRosterInspectClick);
+      if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function') opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
       visualActivitySourceAttachment.detach();
       visualClockSourceAttachment.detach();
       visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
@@ -404,8 +422,15 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(instanceId) api.inspectCreature(instanceId);
   }
 
+  function handleOpponentInspectClick(event){
+    const target=event?.target?.closest?.('[data-capture-inspect-opponent]')||event?.target||null;
+    const inspect=target?.hasAttribute?.('data-capture-inspect-opponent')||target?.dataset?.captureInspectOpponent!=null;
+    if(inspect) api.inspectOpponent();
+  }
+
   if(activeList&&typeof activeList.addEventListener==='function') activeList.addEventListener('click',handleRosterInspectClick);
   if(reserveList&&typeof reserveList.addEventListener==='function') reserveList.addEventListener('click',handleRosterInspectClick);
+  if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function') opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);
   if(overlayClose&&typeof overlayClose.addEventListener==='function'){
     overlayClose.addEventListener('click',()=>api.closeOverlay());
   }

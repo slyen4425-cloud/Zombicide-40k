@@ -1,0 +1,146 @@
+.dungeon-combat-section{
+  overflow:hidden;
+}
+
+.dungeon-combat-section .combat-timeline{
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+
+.dungeon-combat-section .combat-turn{
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  scroll-snap-align:start;
+}
+
+.dungeon-combat-section .combatant-card.active{
+  border-color:#456f9f;
+  box-shadow:0 0 0 1px #294d7b inset;
+}
+
+.dungeon-combat-section .combat-actions,
+.dungeon-combat-section .dungeon-combat-gm-controls{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#10151d;
+  padding:12px;
+}
+
+.dungeon-combat-section .combat-actions + .combat-actions,
+.dungeon-combat-section .dungeon-combat-gm-controls{
+  margin-top:10px;
+}
+
+.dungeon-combat-section .combat-actions button,
+.dungeon-combat-section .dungeon-combat-gm-controls button{
+  min-height:46px;
+}
+
+.dungeon-combat-section .action-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.dungeon-combat-section .action-row > button{
+  flex:1 1 160px;
+}
+
+.dungeon-combat-section .dungeon-combat-flee-actions{
+  grid-template-columns:minmax(0,auto) minmax(0,1fr);
+  align-items:center;
+}
+
+.dungeon-combat-section .dungeon-combat-flee-actions p{
+  margin:0;
+}
+
+@media(max-width:620px){
+  .dungeon-combat-section{
+    padding:11px;
+  }
+
+  .dungeon-combat-section > .section-title-row h3{
+    font-size:18px;
+  }
+
+  .dungeon-combat-section .combat-timeline{
+    margin-left:-11px;
+    margin-right:-11px;
+    padding:2px 11px 10px;
+  }
+
+  .dungeon-combat-section .combat-turn{
+    min-height:46px;
+    padding:9px 12px;
+  }
+
+  .dungeon-combat-section .combat-grid{
+    gap:8px;
+  }
+
+  .dungeon-combat-section .combatant-card{
+    padding:11px;
+  }
+
+  .dungeon-combat-section .combat-chips{
+    gap:6px;
+  }
+
+  .dungeon-combat-section .combat-chip{
+    min-height:34px;
+    padding:7px 9px;
+  }
+
+  .dungeon-combat-section .combat-actions,
+  .dungeon-combat-section .dungeon-combat-gm-controls{
+    padding:10px;
+    border-radius:12px;
+  }
+
+  .dungeon-combat-section .combat-actions label,
+  .dungeon-combat-section .dungeon-combat-gm-controls label{
+    min-width:0;
+  }
+
+  .dungeon-combat-section .combat-actions select,
+  .dungeon-combat-section .combat-actions input,
+  .dungeon-combat-section .dungeon-combat-gm-controls select,
+  .dungeon-combat-section .dungeon-combat-gm-controls input{
+    min-height:48px;
+  }
+
+  .dungeon-combat-section .combat-actions button,
+  .dungeon-combat-section .dungeon-combat-gm-controls button{
+    width:100%;
+    min-height:48px;
+  }
+
+  .dungeon-combat-section .action-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .dungeon-combat-section .dungeon-combat-flee-actions{
+    grid-template-columns:1fr;
+  }
+
+  .dungeon-combat-section .combat-journal{
+    margin-top:10px;
+    padding-top:10px;
+  }
+
+  .dungeon-combat-section .combat-log-row{
+    gap:6px;
+    padding:9px 0;
+  }
+}
+
+@media(max-width:390px){
+  .dungeon-combat-section .action-row{
+    grid-template-columns:1fr;
+  }
+}

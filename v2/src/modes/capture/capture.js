@@ -142,7 +142,7 @@ export function switchCaptureBattleCreature(state,nextInstanceId){
   return {...switched,state:{...state,battle:switched.battle}};
 }
 
-export function useCaptureBattleAbility(state,{side='player',targetSide='opponent',abilityDef,abilityState,effectResolver=null,diagonal=false}={}){
+export function useCaptureBattleAbility(state,{side='player',targetSide='opponent',abilityDef,abilityState,effectResolver=null,reactionResolver=null,diagonal=false}={}){
   if(!state.battle) return {ok:false,reason:'battle-missing',state};
   const result=resolveCaptureAbilityAction({
     battle:state.battle,
@@ -151,6 +151,7 @@ export function useCaptureBattleAbility(state,{side='player',targetSide='opponen
     abilityDef,
     abilityState,
     effectResolver,
+    reactionResolver,
     diagonal,
     activeTeam:state.activeTeam,
   });
@@ -179,7 +180,7 @@ export function useCaptureBattleAbility(state,{side='player',targetSide='opponen
   };
 }
 
-export function runCaptureAiStep(state,{abilityDefs=[],abilityState={},effectResolver=null}={}){
+export function runCaptureAiStep(state,{abilityDefs=[],abilityState={},effectResolver=null,reactionResolver=null}={}){
   if(!state.battle) return {ok:false,reason:'battle-missing',state,abilityState:clone(abilityState)};
   const decision=chooseCaptureAiAction({battle:state.battle,abilityDefs,abilityState});
   if(decision.type==='ability'){
@@ -190,6 +191,7 @@ export function runCaptureAiStep(state,{abilityDefs=[],abilityState={},effectRes
       abilityDef,
       abilityState,
       effectResolver,
+      reactionResolver,
     });
     return {...result,decision};
   }

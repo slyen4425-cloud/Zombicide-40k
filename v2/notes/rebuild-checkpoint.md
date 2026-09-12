@@ -12,8 +12,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite et pas temporel unifié réactions + cooldowns + statuts.
-- Le point d'entrée public recommandé de Capture est désormais `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié réactions + cooldowns + statuts et premier scheduler abstrait externe.
+- Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique et `advanceCaptureScheduler()` l'orchestrateur public du scheduler.
+- Le scheduler ne crée aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now` ni cadence temps réel implicite. Le delta vient obligatoirement d'un driver externe futur.
 - Les anciens helpers temporels séparés restent disponibles dans leurs modules bas niveau pour régressions/maintenance, mais ne sont pas exposés par la façade publique.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
@@ -52,35 +53,41 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - progression globale horloge réaction : `34684443173` success
 - pas temporel unifié Capture : `34684569147` success
 - façade publique canonique Capture : `34684749829` success
+- scheduler abstrait Capture : `34684871523` success
 
 ## Dernière étape terminée
 
-Façade publique canonique Capture :
-- nouveau `v2/src/modes/capture/runtime.js` ;
-- cette façade devient le point d'entrée recommandé du mode pour le runtime applicatif ;
-- elle expose les opérations principales Capture sans exposer les anciens helpers temporels séparés ;
-- nouvelle opération publique canonique `advanceCaptureTime(state,options)` ;
-- `advanceCaptureTime()` délègue au runtime temporel unifié `advanceCaptureModeTime()` et fait donc avancer via un seul chemin l'horloge de réaction, les cooldowns et les statuts/effets périodiques ;
-- `advanceCaptureBattleTime` et `tickCaptureBattleReactionCooldowns` restent dans `capture.js` uniquement pour compatibilité/régressions, mais ne sont pas exportés par la façade canonique ;
-- `capture-page.js` importe désormais `createCaptureModeState` depuis `runtime.js`, ce qui fait passer l'entrée UI Capture par la façade officielle ;
-- aucune cadence temps réel, frame ou i-frame n'est figée ;
-- aucun moteur RPG/D100/timeline n'est introduit.
+Premier scheduler abstrait Capture :
+- nouveau `v2/src/modes/capture/scheduler.js` ;
+- contrat `CAPTURE_SCHEDULER_CONTRACT` : driver externe requis, aucune fréquence temps réel figée, aucune boucle navigateur créée en interne ;
+- `createCaptureSchedulerState()` conserve seulement `accumulated`, `steps` et `running` ;
+- `setCaptureSchedulerRunning()` permet pause/reprise explicites ;
+- `pushCaptureSchedulerDelta()` accumule un delta externe, le découpe selon un `stepSize` fourni et n'exécute que le nombre de pas possible/autorisé ;
+- le scheduler bas niveau est driver-agnostic et exige une fonction `advance`, ce qui évite une dépendance circulaire avec la façade publique ;
+- `runtime.js` expose `advanceCaptureScheduler()` et injecte exclusivement `advanceCaptureTime()` comme fonction d'avance canonique ;
+- `maxSteps` permet de plafonner le rattrapage d'un gros delta sans perdre le reliquat accumulé ;
+- si le combat se termine pendant un pas (ex. KO par effet périodique), la boucle s'arrête immédiatement et conserve le delta restant ;
+- scheduler en pause : aucun temps, cooldown, statut ou PV ne bouge ;
+- aucun `setInterval`, `requestAnimationFrame`, `Date.now`, milliseconde, FPS ou cadence finale n'est imposé.
 
 Régression :
-- nouveau `v2/tests/capture-public-runtime.test.mjs` ;
-- vérifie que `advanceCaptureTime()` est exposé ;
-- vérifie que les anciens helpers temporels séparés ne sont pas exposés par la façade ;
-- vérifie qu'un pas public fait réellement avancer horloge + cooldowns + dégâts périodiques + durée de statut ;
-- batterie complète : `34684749829` success.
+- nouveau `v2/tests/capture-scheduler.test.mjs` ;
+- couvre accumulation insuffisante puis rattrapage sur plusieurs pas ;
+- couvre pause sans mutation ;
+- couvre `maxSteps` avec reliquat ;
+- couvre arrêt immédiat après KO adverse et nettoyage combat/rencontre ;
+- vérifie statiquement l'absence de timer navigateur/horloge implicite dans `scheduler.js` ;
+- batterie complète : `34684871523` success.
 
 Commits de l'étape :
-- façade publique Capture : `f2af3ca683c9168acd4a87f0b9ae3dbf884a547e`
-- page Capture routée par façade : `802897617f577893eed0e80a423ac9e43fefa3df`
-- régression façade publique : `1e2b0776b32577cfed1fe06d351791a5bcfdd13d`
+- premier scheduler : `7588fa357eccfc46c94d71533fce18926024d690`
+- scheduler rendu driver-agnostic : `70af9b34ba7de740d07c947254c649659d927eb0`
+- raccord façade publique : `fd4d470d44e6e25da33d7455e3a83331bd72ca1a`
+- régression scheduler : `e6d012c667a2af487707178abe9c6bcb567e5cb4`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : définir le premier contrat de boucle dynamique/ordonnancement autour de `advanceCaptureTime()` sans choisir encore une fréquence réelle ;
+1. prochaine étape Capture : définir le premier contrat de cadence/driver externe autour du scheduler (start/stop/push delta), sans choisir encore secondes/FPS ni créer de timer réel ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

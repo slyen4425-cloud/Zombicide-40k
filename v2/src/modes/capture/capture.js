@@ -12,6 +12,11 @@ import {
   moveOwnedCreature,
   splitRosterIntoTeamAndReserve,
 } from './roster.js';
+import {
+  biomeForCaptureRoom,
+  buildCaptureBiomeIndex,
+  rollCaptureWildEncounter,
+} from './encounters.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -33,6 +38,7 @@ export const captureStorageKeys = Object.freeze({
   roster: (playerId) => `gensrpg:v2:capture:player:${String(playerId)}:roster`,
   team: (playerId) => `gensrpg:v2:capture:player:${String(playerId)}:team`,
   reserve: (playerId) => `gensrpg:v2:capture:player:${String(playerId)}:reserve`,
+  biomes: (profileId) => `gensrpg:v2:capture:profile:${String(profileId)}:biomes`,
 });
 
 export function createCaptureModeState({
@@ -46,6 +52,7 @@ export function createCaptureModeState({
   activeTeam=[],
   reserve=[],
   quarantine=[],
+  currentRoomId=null,
 }={}){
   if(activeTeam.length>6) throw new Error('capture-active-team-limit');
   let spatial=createSpatialState({zoneId});
@@ -64,7 +71,7 @@ export function createCaptureModeState({
     quarantine:clone(quarantine),
     encounter:null,
     battle:null,
-    exploration:{freeMovement:true,turnSequence:null},
+    exploration:{freeMovement:true,turnSequence:null,currentRoomId:currentRoomId?String(currentRoomId):null},
   };
 }
 
@@ -85,6 +92,25 @@ export function moveCaptureActor(state,target,{movement=999,diagonal=false}={}){
     ...result,
     state:{...state,spatial:result.spatial},
   };
+}
+
+export function enterCaptureRoom(state,roomId,{biomes=[],rng=Math.random}={}){
+  if(state.encounter) return {ok:false,reason:'encounter-active',state};
+  const room=state.worldIndex?.rooms?.[String(roomId)]||null;
+  if(!room) return {ok:false,reason:'room-missing',state};
+  const biomeIndex=buildCaptureBiomeIndex(biomes);
+  const biome=biomeForCaptureRoom(room,biomeIndex);
+  const rolled=biome?rollCaptureWildEncounter({biome,rng}):{ok:true,reason:'room-without-biome',encounter:null};
+  const next={
+    ...state,
+    exploration:{...(state.exploration||{}),freeMovement:true,turnSequence:null,currentRoomId:String(roomId)},
+    encounter:rolled.encounter?clone(rolled.encounter):null,
+  };
+  return {ok:true,reason:rolled.reason,room:clone(room),biome:biome?clone(biome):null,roll:rolled.roll??null,encounter:next.encounter,state:next};
+}
+
+export function clearCaptureEncounter(state){
+  return {...state,encounter:null};
 }
 
 export function setCaptureTeam(state,{activeTeam=[],reserve=state.reserve||[]}={}){

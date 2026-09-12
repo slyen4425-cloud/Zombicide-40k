@@ -25,6 +25,7 @@ export function evaluateCaptureReactionWindow(def={},now=null){
   const window=normalizeCaptureReactionWindow(def||{});
   if(!window.enabled) return {ok:true,open:false,reason:'capture-reaction-window-disabled',window};
   if(window.opensAt==null&&window.closesAt==null) return {ok:true,open:true,reason:'capture-reaction-window-unconfigured',window,now:null};
+  if(now==null) return {ok:false,open:false,reason:'capture-reaction-window-time-required',window};
   const moment=Number(now);
   if(!Number.isFinite(moment)) return {ok:false,open:false,reason:'capture-reaction-window-time-required',window};
   if(window.opensAt!=null&&moment<window.opensAt) return {ok:true,open:false,reason:'capture-reaction-window-not-open',window,now:moment};

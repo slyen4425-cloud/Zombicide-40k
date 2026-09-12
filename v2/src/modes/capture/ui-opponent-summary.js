@@ -1,9 +1,13 @@
+import {captureAssetPathAllowed,resolveCaptureSpeciesAsset} from './assets.js';
+
 export const CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT=Object.freeze({
   presentationOnly:true,
   readsAuthoritativeBattleOpponent:true,
   readsAuthoritativeVitals:true,
   readsAuthoritativeStatuses:true,
   readsAuthoritativePosition:true,
+  readsCanonicalCaptureAssetRegistry:true,
+  neverUsesRpgOrDungeonFallback:true,
   exposesInspectionTarget:true,
   mutatesBattle:false,
   mutatesGameplayState:false,
@@ -35,16 +39,35 @@ function statusEntry(status={}){
   };
 }
 
-export function buildCaptureOpponentSummary(state={}){
+function availableAssetPart(part,registry){
+  if(!part||typeof part!=='object') return null;
+  const path=text(part.path,'');
+  const status=text(part.status,'');
+  if(!path||status==='pending_import'||!captureAssetPathAllowed(path,registry)) return null;
+  return {status,path};
+}
+
+export function captureAssetPathToUiSrc(path){
+  const value=text(path,'');
+  if(!value) return null;
+  return value.startsWith('v2/')?`./${value.slice(3)}`:value;
+}
+
+export function buildCaptureOpponentSummary(state={}, {assetRegistry={}}={}){
   const battle=state?.battle||null;
   const opponent=battle?.opponent||null;
   if(!battle||battle.status!=='active'||!opponent) return null;
 
   const creature=opponent.creature||{};
   const instanceId=text(opponent.activeInstanceId||creature.instanceId,'');
-  const speciesId=text(creature.speciesId||battle?.encounter?.speciesId,'');
-  if(!instanceId&&!speciesId) return null;
+  const rawSpeciesId=text(creature.speciesId||battle?.encounter?.speciesId,'');
+  if(!instanceId&&!rawSpeciesId) return null;
 
+  const resolvedAsset=resolveCaptureSpeciesAsset(rawSpeciesId,assetRegistry);
+  const speciesId=resolvedAsset?.speciesId||rawSpeciesId;
+  const displayName=resolvedAsset?.displayName||speciesId||instanceId;
+  const mainArt=availableAssetPart(resolvedAsset?.mainArt,assetRegistry);
+  const iconArt=availableAssetPart(resolvedAsset?.iconArt,assetRegistry);
   const currentHp=finiteOrNull(opponent?.vitals?.currentHp);
   const maxHp=finiteOrNull(opponent?.vitals?.maxHp);
   const ko=opponent?.vitals?.ko===true||(currentHp!==null&&currentHp<=0);
@@ -66,7 +89,8 @@ export function buildCaptureOpponentSummary(state={}){
   return {
     instanceId,
     speciesId,
-    title:speciesId||instanceId,
+    displayName,
+    title:displayName,
     wild:creature.wild===true||battle.mode==='wild',
     currentHp,
     maxHp,
@@ -74,13 +98,15 @@ export function buildCaptureOpponentSummary(state={}){
     ko,
     statuses,
     position,
+    mainArt:mainArt?{...mainArt,src:captureAssetPathToUiSrc(mainArt.path)}:null,
+    iconArt:iconArt?{...iconArt,src:captureAssetPathToUiSrc(iconArt.path)}:null,
   };
 }
 
-export function buildCaptureOpponentInspection(state={}, {speciesDef=null}={}){
-  const summary=buildCaptureOpponentSummary(state);
+export function buildCaptureOpponentInspection(state={}, {speciesDef=null,assetRegistry={}}={}){
+  const summary=buildCaptureOpponentSummary(state,{assetRegistry});
   if(!summary) return {ok:false,reason:'capture-opponent-inspection-unavailable'};
-  const speciesName=text(speciesDef?.name)||text(speciesDef?.displayName)||summary.speciesId||summary.instanceId;
+  const speciesName=text(speciesDef?.name)||text(speciesDef?.displayName)||summary.displayName||summary.speciesId||summary.instanceId;
   const fields=[
     {id:'species',label:'Espèce',value:speciesName},
     {id:'instance',label:'Instance',value:summary.instanceId||'—'},

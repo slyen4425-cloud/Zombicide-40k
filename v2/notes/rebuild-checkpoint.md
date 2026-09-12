@@ -12,10 +12,10 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié, scheduler abstrait, driver externe abstrait, cycle de vie UI/app et couche d'événements UI présentationnelle.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié, scheduler abstrait, driver externe abstrait, cycle de vie UI/app et première couche d’événements UI non bloquants.
 - Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()`, `advanceCaptureScheduler()` et `advanceCaptureDriver()` forment le chemin temporel canonique.
 - Le scheduler, le driver et la couche UI/app ne créent aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now` ni cadence temps réel implicite.
-- Les événements UI ne recalculent aucune règle gameplay : ils sont dérivés exclusivement des résultats autoritaires du moteur Capture.
+- Les événements de combat destinés à l’UI sont dérivés des résultats autoritaires puis consommés par `capture-page.js` sans modifier le gameplay ni mettre le combat en pause.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -56,42 +56,41 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - scheduler abstrait Capture : `34684871523` success
 - driver externe abstrait Capture : `34685018724` success
 - cycle de vie UI/app du combat Capture : `34685171946` success
-- couche d'événements UI Capture : `34685389994` success
+- adaptateur d’événements UI Capture : `34685389994` success
+- dispatcher/feed UI non bloquant : `34685525379` success
 
 ## Dernière étape terminée
 
-Première couche d'événements UI du combat Capture :
-- nouveau `v2/src/modes/capture/ui-events.js` ;
-- contrat `CAPTURE_UI_EVENT_CONTRACT` : présentation uniquement, aucune mutation gameplay, événements dérivés des résultats autoritaires ;
-- `captureUiEventsFromResult()` traduit un résultat moteur unique ; `captureUiEventsFromResults()` agrège une séquence de résultats ;
-- événements couverts à ce stade : `reaction_triggered`, `status_applied`, `status_periodic_effect`, `status_expired`, `ko`, `forced_switch`, `team_unavailable` ;
-- une esquive/réaction est lue depuis le résultat de résolution déjà produit ; aucune chance ou règle n'est recalculée dans la couche UI ;
-- les statuts appliqués sont lus depuis l'outcome de capacité ; les effets périodiques/expirations sont lus depuis `statusTick` ;
-- les KO/remplacements sont lus depuis `koOutcome`, `previousInstanceId` et `activeInstanceId` ;
-- `createCaptureAppSession()` possède maintenant une file `uiEvents` ;
-- `advanceCaptureBattleSession()` ajoute automatiquement les événements produits par les ticks temporels ;
-- `consumeCaptureUiEvents()` retourne puis vide la file sans toucher à l'état de combat ;
-- `runtime.js` expose le contrat et les adaptateurs UI comme partie de la façade publique ;
-- aucune logique RPG/D100/timeline n'est introduite.
+Dispatcher UI non bloquant du combat Capture :
+- nouveau `v2/src/modes/capture/ui-dispatcher.js` ;
+- contrat `CAPTURE_UI_DISPATCHER_CONTRACT` : présentation uniquement, aucune mutation gameplay, aucun blocage, aucune pause du combat ;
+- `captureUiNoticeFromEvent()` transforme les événements autoritaires connus en messages UI ;
+- `dispatchCaptureUiEvents()` envoie ces notices vers un sink de présentation sans toucher à l’état de combat ;
+- `runtime.js` expose le dispatcher comme partie de la façade Capture officielle ;
+- `capture-page.js` contient désormais un feed `[data-capture-combat-feed]` avec `aria-live="polite"` ;
+- après chaque `advance()`, la page consomme `session.uiEvents`, les transforme en notices et les rend dans le feed ;
+- l’UI conserve également une copie locale `notices` consultable pour tests/présentation ;
+- aucun `alert`, `confirm`, popup modale ou appel à `setCaptureBattleBlocking()` n’est déclenché par ce dispatcher ;
+- aucune fréquence/timer navigateur n’a été ajouté.
 
 Régression :
-- nouveau `v2/tests/capture-ui-events.test.mjs` ;
-- couvre réaction/esquive annulant un effet ;
-- couvre application de statut ;
-- couvre effet périodique + expiration ;
-- couvre KO joueur + remplacement forcé ;
-- couvre intégration réelle lifecycle : brûlure adverse -> KO -> fin combat -> événements mis en file -> consommation ;
-- batterie complète : `34685389994` success.
+- nouveau `v2/tests/capture-ui-dispatcher.test.mjs` ;
+- vérifie que toutes les notices sont `blocking:false` ;
+- vérifie que les événements source ne sont pas mutés ;
+- vérifie réaction/esquive, statut appliqué, effet périodique, expiration, KO et remplacement ;
+- vérifie que la page consomme puis dispatch les événements vers le feed `aria-live` ;
+- vérifie l’absence de `alert`, `confirm`, `setInterval` et de pause automatique dans le flush UI ;
+- batterie complète : `34685525379` success.
 
 Commits de l'étape :
-- adaptateur événements UI : `327a6f6f091075760d88aab6bb44c984a8e39daf`
-- file d'événements lifecycle : `1170af84169adf300f8b1b5e43e7db7ba2905f4f`
-- façade runtime UI : `29cddbae5238ea8c516ecfd0b796d1f8a7271ff7`
-- régression événements UI : `0fee88ff1deaaa4fb76d283ef96a9ad8e0c29278`
+- dispatcher UI : `eb8491872cbd8c32e8c742dc5d557c89914839f3`
+- façade runtime : `ac0a5bbfda754d77af2996dfd54e989f89641763`
+- page Capture / feed : `d3d163181f0ef415a3544b8a4fc5dedbf536e1c8`
+- régression dispatcher : `fd8a1f2608caa15051835be4d7ba04ea09bfc0af`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : brancher une première file/dispatcher UI consommable par `capture-page.js` pour afficher les événements sans bloquer ni modifier le gameplay ;
+1. prochaine étape Capture : enrichir ce feed avec une première politique de durée/limite d’affichage des notices, sans imposer de timer gameplay ni bloquer le combat ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

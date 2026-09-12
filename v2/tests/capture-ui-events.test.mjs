@@ -3,6 +3,7 @@ import {
   advanceCaptureBattleSession,
   beginCaptureBattleSession,
   CAPTURE_UI_EVENT_CONTRACT,
+  captureUiEventsFromCaptureAttempt,
   captureUiEventsFromResult,
   consumeCaptureUiEvents,
   createCaptureAppSession,
@@ -12,32 +13,21 @@ import {
 assert.equal(CAPTURE_UI_EVENT_CONTRACT.presentationOnly,true);
 assert.equal(CAPTURE_UI_EVENT_CONTRACT.mutatesGameplayState,false);
 assert.equal(CAPTURE_UI_EVENT_CONTRACT.derivesFromAuthoritativeResults,true);
+assert.equal(CAPTURE_UI_EVENT_CONTRACT.captureAttemptEvents,true);
 
 {
   const result={
     ok:true,
     action:{targetSide:'opponent',outcome:{type:'reaction',reactionId:'dodge',negated:true}},
-    reaction:{
-      triggered:true,
-      reaction:{id:'dodge',type:'dodge',negatesEffect:true},
-      outcome:{success:true},
-    },
+    reaction:{triggered:true,reaction:{id:'dodge',type:'dodge',negatesEffect:true},outcome:{success:true}},
   };
   assert.deepEqual(captureUiEventsFromResult(result),[{
-    type:'reaction_triggered',
-    side:'opponent',
-    reactionId:'dodge',
-    reactionType:'dodge',
-    negated:true,
-    outcome:{success:true},
+    type:'reaction_triggered',side:'opponent',reactionId:'dodge',reactionType:'dodge',negated:true,outcome:{success:true},
   }]);
 }
 
 {
-  const result={
-    ok:true,
-    action:{targetSide:'opponent',outcome:{type:'status',statusId:'burn',stacks:2}},
-  };
+  const result={ok:true,action:{targetSide:'opponent',outcome:{type:'status',statusId:'burn',stacks:2}}};
   assert.deepEqual(captureUiEventsFromResult(result),[{
     type:'status_applied',side:'opponent',statusId:'burn',stacks:2,source:'ability',
   }]);
@@ -46,21 +36,26 @@ assert.equal(CAPTURE_UI_EVENT_CONTRACT.derivesFromAuthoritativeResults,true);
 {
   const result={
     ok:true,
-    statusTick:{
-      playerApplied:[],
-      opponentApplied:[{type:'damage',statusId:'burn',amount:3,stacks:1,ko:false}],
-      playerExpired:[],
-      opponentExpired:[{id:'burn'}],
-    },
-    koOutcome:'forced_switch',
-    previousInstanceId:'p1',
-    activeInstanceId:'p2',
+    statusTick:{playerApplied:[],opponentApplied:[{type:'damage',statusId:'burn',amount:3,stacks:1,ko:false}],playerExpired:[],opponentExpired:[{id:'burn'}]},
+    koOutcome:'forced_switch',previousInstanceId:'p1',activeInstanceId:'p2',
   };
   assert.deepEqual(captureUiEventsFromResult(result),[
     {type:'status_periodic_effect',side:'opponent',effectType:'damage',statusId:'burn',amount:3,stacks:1,ko:false},
     {type:'status_expired',side:'opponent',statusId:'burn'},
     {type:'ko',side:'player',instanceId:'p1'},
     {type:'forced_switch',side:'player',previousInstanceId:'p1',activeInstanceId:'p2'},
+  ]);
+}
+
+{
+  assert.deepEqual(captureUiEventsFromCaptureAttempt({ok:false,reason:'pending_orb_coefficient',itemId:'capture_orb_basic'}),[
+    {type:'capture_unavailable',reason:'pending_orb_coefficient',orbId:'capture_orb_basic'},
+  ]);
+  assert.deepEqual(captureUiEventsFromCaptureAttempt({ok:true,captured:false,attempt:{orbId:'capture_orb_plus',chancePercent:42,roll:77}}),[
+    {type:'capture_failed',orbId:'capture_orb_plus',chancePercent:42,roll:77},
+  ]);
+  assert.deepEqual(captureUiEventsFromCaptureAttempt({ok:true,captured:true,destination:'reserve',creature:{speciesId:'capture_descendre'},attempt:{orbId:'capture_orb_ultra'}}),[
+    {type:'capture_success',orbId:'capture_orb_ultra',destination:'reserve',speciesId:'capture_descendre'},
   ]);
 }
 

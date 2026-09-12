@@ -236,6 +236,23 @@ export function tickCaptureBattleReactionCooldowns(state,{amount=1}={}){
   return {ok:true,amount:Math.max(0,Number(amount)||0),state:{...state,battle,activeTeam,reserve,roster}};
 }
 
+export function advanceCaptureBattleTime(state,{amount=1,tickReactionCooldowns=true}={}){
+  if(!state?.battle) return {ok:false,reason:'battle-missing',state};
+  const delta=Math.max(0,Number(amount)||0);
+  let nextState=state;
+  const battle=clone(state.battle);
+  const current=Number(battle?.timing?.reactionTime);
+  const reactionTime=(Number.isFinite(current)?current:0)+delta;
+  battle.timing={...(battle.timing||{}),reactionTime};
+  nextState={...state,battle};
+  if(tickReactionCooldowns&&delta>0){
+    const ticked=tickCaptureBattleReactionCooldowns(nextState,{amount:delta});
+    if(!ticked.ok) return ticked;
+    nextState=ticked.state;
+  }
+  return {ok:true,amount:delta,reactionTime,state:nextState};
+}
+
 export function attemptCaptureInBattle(state,{orbId,speciesCaptureRate,currentHp,maxHp,orbLibrary,lowHpMultiplier,rng=Math.random}={}){
   if(!state.battle) return {ok:false,reason:'battle-missing',state};
   if(state.battle.status!=='active'||state.battle.mode!=='wild') return {ok:false,reason:'capture-attempt-requires-active-wild-battle',state};

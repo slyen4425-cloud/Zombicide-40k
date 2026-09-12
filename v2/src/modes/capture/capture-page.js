@@ -22,6 +22,7 @@ import {
   createCaptureUiVisualPauseControllerState,
   dispatchCaptureUiEvents,
   executeCapturePlayerAbility,
+  executeCapturePlayerMove,
   finishCaptureBattleSession,
   openCaptureUiOverlay,
   pauseCaptureUiVisualClockAdapter,
@@ -147,6 +148,16 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-roster-reaction" data-capture-reaction="${escapeHtml(reaction.id)}" data-capture-reaction-ready="${reaction.readyByCooldown===true?'true':reaction.readyByCooldown===false?'false':'unknown'}">${escapeHtml(reaction.id)}${cooldown}${resource}</span>`;
   }
 
+  function moveControlsHtml(entry,{battleActive=false}={}){
+    if(!battleActive||entry.location!=='active'||!entry.activeInBattle||entry.ko) return '';
+    return `<div class="capture-player-move-controls" data-capture-player-move-controls aria-label="Déplacement tactique">
+      <button type="button" data-capture-move-direction="up" aria-label="Déplacer vers le haut">↑</button>
+      <button type="button" data-capture-move-direction="left" aria-label="Déplacer vers la gauche">←</button>
+      <button type="button" data-capture-move-direction="down" aria-label="Déplacer vers le bas">↓</button>
+      <button type="button" data-capture-move-direction="right" aria-label="Déplacer vers la droite">→</button>
+    </div>`;
+  }
+
   function rosterEntryHtml(entry,{battleActive=false}={}){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
     const koClass=entry.ko?' is-ko':'';
@@ -159,6 +170,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const canUseAbilities=battleActive&&entry.location==='active'&&entry.activeInBattle&&!entry.ko;
     const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(ability=>rosterAbilityHtml(ability,{interactive:canUseAbilities})).join('')}</div>`:'';
     const reactions=entry.reactions.length?`<div class="capture-roster-reactions" data-capture-reactions>${entry.reactions.map(rosterReactionHtml).join('')}</div>`:'';
+    const movement=moveControlsHtml(entry,{battleActive});
     const visual=entry.iconArt||entry.mainArt;
     const art=visual?.src?`<img class="capture-roster-art" data-capture-roster-art src="${escapeHtml(visual.src)}" alt="${escapeHtml(entry.displayName)}">`:'';
     const canSwitch=battleActive&&entry.location==='active'&&!entry.activeInBattle&&!entry.ko;
@@ -172,6 +184,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         ${statuses}
         ${abilities}
         ${reactions}
+        ${movement}
         ${activeBadge}
         ${koBadge}
       </div>
@@ -341,6 +354,15 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       }
       return result;
     },
+    movePlayer(direction){
+      const result=executeCapturePlayerMove(session.state,{direction});
+      if(result.ok){
+        session={...session,state:result.state};
+        renderRosterLists();
+        renderOpponentSummary();
+      }
+      return result;
+    },
     setBlocking(blocking){
       const result=setCaptureBattleBlocking(session,blocking);
       if(result.ok) session=result.session;
@@ -448,6 +470,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         activeList.removeEventListener('click',handleRosterInspectClick);
         activeList.removeEventListener('click',handleRosterSwitchClick);
         activeList.removeEventListener('click',handleRosterAbilityClick);
+        activeList.removeEventListener('click',handlePlayerMoveClick);
       }
       if(reserveList&&typeof reserveList.removeEventListener==='function') reserveList.removeEventListener('click',handleRosterInspectClick);
       if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function') opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
@@ -484,6 +507,12 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(abilityId&&!target?.disabled) api.usePlayerAbility(abilityId);
   }
 
+  function handlePlayerMoveClick(event){
+    const target=event?.target?.closest?.('[data-capture-move-direction]')||null;
+    const direction=target?.getAttribute?.('data-capture-move-direction')||target?.dataset?.captureMoveDirection||null;
+    if(direction) api.movePlayer(direction);
+  }
+
   function handleOpponentInspectClick(event){
     const target=event?.target?.closest?.('[data-capture-inspect-opponent]')||event?.target||null;
     const inspect=target?.hasAttribute?.('data-capture-inspect-opponent')||target?.dataset?.captureInspectOpponent!=null;
@@ -494,6 +523,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     activeList.addEventListener('click',handleRosterInspectClick);
     activeList.addEventListener('click',handleRosterSwitchClick);
     activeList.addEventListener('click',handleRosterAbilityClick);
+    activeList.addEventListener('click',handlePlayerMoveClick);
   }
   if(reserveList&&typeof reserveList.addEventListener==='function') reserveList.addEventListener('click',handleRosterInspectClick);
   if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function') opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);

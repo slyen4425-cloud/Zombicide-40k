@@ -7,6 +7,8 @@ export function normalizeCaptureAbility(def={}){
     chargeMax:def.chargeMax==null?null:Math.max(0,Number(def.chargeMax)||0),
     cost:def.cost==null?null:Math.max(0,Number(def.cost)||0),
     cooldown:def.cooldown==null?null:Math.max(0,Number(def.cooldown)||0),
+    range:def.range==null?null:Math.max(0,Number(def.range)||0),
+    effect:def.effect==null?null:clone(def.effect),
     tags:[...(def.tags||[])],
     source:def.source||'capture',
   };
@@ -22,8 +24,9 @@ export function initializeCreatureAbilityState(creature={},abilityDefs=[]){
   for(const abilityId of creature.abilityIds||[]){
     const def=defs[abilityId];
     if(!def) continue;
+    const saved=creature?.abilityCharges?.[abilityId];
     state[abilityId]={
-      charges:def.chargeMax,
+      charges:saved==null?def.chargeMax:Math.max(0,Number(saved)||0),
       chargeMax:def.chargeMax,
       cooldownRemaining:0,
       cost:def.cost,

@@ -51,6 +51,13 @@ import {
   captureUiNoticeFromEvent,
   dispatchCaptureUiEvents,
 } from './ui-dispatcher.js';
+import {
+  CAPTURE_UI_NOTICE_FEED_CONTRACT,
+  advanceCaptureUiNoticeVisualTime,
+  appendCaptureUiNotices,
+  captureUiNoticeFeedNotices,
+  createCaptureUiNoticeFeed,
+} from './ui-notice-feed.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -60,6 +67,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalAppLifecycle:true,
   canonicalUiEvents:true,
   canonicalUiDispatcher:true,
+  canonicalUiNoticeFeed:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -73,14 +81,19 @@ export {
   CAPTURE_APP_LIFECYCLE_CONTRACT,
   CAPTURE_UI_EVENT_CONTRACT,
   CAPTURE_UI_DISPATCHER_CONTRACT,
+  CAPTURE_UI_NOTICE_FEED_CONTRACT,
+  advanceCaptureUiNoticeVisualTime,
+  appendCaptureUiNotices,
   attemptCaptureInBattle,
   captureUiEventsFromResult,
   captureUiEventsFromResults,
+  captureUiNoticeFeedNotices,
   captureUiNoticeFromEvent,
   clearCaptureEncounter,
   createCaptureDriverState,
   createCaptureModeState,
   createCaptureSchedulerState,
+  createCaptureUiNoticeFeed,
   createCaptureWorldIndex,
   dispatchCaptureUiEvents,
   enterCaptureRoom,

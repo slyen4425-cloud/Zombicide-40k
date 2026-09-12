@@ -58,8 +58,8 @@ export function createCaptureBattleState({
     status:'active',
     encounter:clone(encounter),
     mode:encounter.type==='wild'?'wild':'battle',
-    player:{activeInstanceId:String(selected.instanceId),actorId:playerActorId,creature:clone(selected),vitals:createCaptureVitals({currentHp:selected.currentHp,maxHp:selected.maxHp})},
-    opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild),vitals:createCaptureVitals({currentHp:wild.currentHp,maxHp:wild.maxHp})},
+    player:{activeInstanceId:String(selected.instanceId),actorId:playerActorId,creature:clone(selected),vitals:createCaptureVitals({currentHp:selected.currentHp,maxHp:selected.maxHp}),statuses:clone(selected.statuses||[])},
+    opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild),vitals:createCaptureVitals({currentHp:wild.currentHp,maxHp:wild.maxHp}),statuses:clone(wild.statuses||[])},
     spatial,
     pendingAction:null,
     actionLog:[],
@@ -132,7 +132,7 @@ export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){
   let spatial=clone(battle.spatial);
   if(previousPosition) spatial=setActorPosition(spatial,nextActorId,previousPosition);
   if(spatial.positions) delete spatial.positions[previousActorId];
-  return {ok:true,previousInstanceId:String(battle.player.activeInstanceId),activeInstanceId:String(next.instanceId),battle:{...battle,player:{activeInstanceId:String(next.instanceId),actorId:nextActorId,creature:clone(next),vitals:nextVitals},spatial}};
+  return {ok:true,previousInstanceId:String(battle.player.activeInstanceId),activeInstanceId:String(next.instanceId),battle:{...battle,player:{activeInstanceId:String(next.instanceId),actorId:nextActorId,creature:clone(next),vitals:nextVitals,statuses:clone(next.statuses||[])},spatial}};
 }
 
 export function resolveCaptureKoState(battle,activeTeam=[]){
@@ -142,7 +142,7 @@ export function resolveCaptureKoState(battle,activeTeam=[]){
     return {ok:true,outcome:'opponent_ko',battle:ended.battle,activeTeam:clone(activeTeam)};
   }
   if(!battle.player?.vitals?.ko) return {ok:true,outcome:'continue',battle,activeTeam:clone(activeTeam)};
-  const syncedTeam=(activeTeam||[]).map(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)?clone(entry):{...clone(entry),currentHp:battle.player.vitals.currentHp,maxHp:battle.player.vitals.maxHp});
+  const syncedTeam=(activeTeam||[]).map(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)?clone(entry):{...clone(entry),currentHp:battle.player.vitals.currentHp,maxHp:battle.player.vitals.maxHp,statuses:clone(battle.player.statuses||[])});
   const replacement=syncedTeam.find(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)&&!createCaptureVitals({currentHp:entry.currentHp,maxHp:entry.maxHp}).ko)||null;
   if(!replacement){
     const ended=endCaptureBattle(battle,'player_team_unavailable');

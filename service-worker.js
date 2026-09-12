@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.128-observer-free-home-recovery";
+const CACHE_NAME = "gensrpg-cache-16.78.129-bounded-chrome-home-recovery";
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

@@ -1,3 +1,5 @@
+import { resolveDungeonCharacterAsset, resolveDungeonWorldAsset, dungeonAssetStyle } from './dungeon-asset-resolver.js';
+
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function list(source,key){return Array.isArray(source?.[key])?source[key]:Object.values(source?.[key]||{});}
 function posKey(x,y){return `${Number(x)},${Number(y)}`;}
@@ -23,7 +25,7 @@ export function buildDungeonRoomGridModel({universe={},roomRuntime=null,roomLayo
     const pos=actorPosition(activeSpatial,id);
     if(!pos||!inside(width,height,pos.x,pos.y)) continue;
     const def=heroDef(universe,id);
-    actors.push({id,side:'hero',x:pos.x,y:pos.y,icon:def?.icon||'🧙',name:def?.name||id,focused:String(roomRuntime?.focusedHeroId||'')===id});
+    actors.push({id,side:'hero',x:pos.x,y:pos.y,icon:def?.icon||'🧙',name:def?.name||id,assetUrl:resolveDungeonCharacterAsset(def||{id,name:id}),focused:String(roomRuntime?.focusedHeroId||'')===id});
   }
 
   for(const entity of roomRuntime?.rooms?.[roomId]?.entities||[]){
@@ -33,7 +35,7 @@ export function buildDungeonRoomGridModel({universe={},roomRuntime=null,roomLayo
     const pos=actorPosition(activeSpatial,id)||((Number.isFinite(Number(entity.x))&&Number.isFinite(Number(entity.y)))?{x:Number(entity.x),y:Number(entity.y)}:null);
     if(!id||!pos||!inside(width,height,pos.x,pos.y)) continue;
     const def=creatureDef(universe,runtime.creatureId);
-    actors.push({id,side:'enemy',x:pos.x,y:pos.y,icon:def?.icon||'👹',name:def?.name||runtime.name||runtime.creatureId||'Ennemi',focused:false});
+    actors.push({id,side:'enemy',x:pos.x,y:pos.y,icon:def?.icon||'👹',name:def?.name||runtime.name||runtime.creatureId||'Ennemi',assetUrl:resolveDungeonCharacterAsset(def||{id:runtime.creatureId,name:runtime.name}),focused:false});
   }
 
   const actorMap=new Map();
@@ -52,24 +54,29 @@ export function buildDungeonRoomGridModel({universe={},roomRuntime=null,roomLayo
   return {ok:true,roomId,width,height,cells,actors};
 }
 
-function worldIcon(entry){
-  if(entry.interaction){const icons={chest:'📦',trap:'⚠️',puzzle:'🧩',event:'❗',switch:'🔘',portal:'🌀',object:'⭐'};return icons[entry.interaction.kind]||'⭐';}
-  if(entry.door?.entry) return '🚪⬅️';
-  if(entry.door?.exit) return '🚪➡️';
-  if(entry.door) return entry.door.locked?'🔒':'🚪';
-  if(entry.marker) return entry.marker.kind==='special'?'⭐':'📍';
-  if(entry.walls?.length) return entry.walls.some(w=>w.kind==='low-wall')?'🛡️':'🧱';
-  if(entry.cell?.blocked) return '⛔';
-  return terrainIcon(entry.cell?.terrain);
+function worldVisual(entry){
+  if(entry.interaction){
+    const kinds={chest:['chest','📦'],trap:['trap','⚠️'],puzzle:[null,'🧩'],event:[null,'❗'],switch:['switch','🔘'],portal:['portal','🌀'],object:[null,'⭐']};
+    const [assetKind,icon]=kinds[entry.interaction.kind]||[null,'⭐'];
+    return {assetUrl:assetKind?resolveDungeonWorldAsset(assetKind):null,icon};
+  }
+  if(entry.door){return {assetUrl:resolveDungeonWorldAsset(entry.door.open?'door_open':'door_closed'),icon:entry.door.entry?'⬅️':entry.door.exit?'➡️':entry.door.locked?'🔒':''};}
+  if(entry.marker){return {assetUrl:resolveDungeonWorldAsset(entry.marker.kind==='boss'?'boss':entry.marker.kind==='exit'?'exit':entry.marker.kind==='start'?'entry':null),icon:entry.marker.kind==='special'?'⭐':'📍'};}
+  if(entry.walls?.length) return {assetUrl:resolveDungeonWorldAsset('wall'),icon:entry.walls.some(w=>w.kind==='low-wall')?'🛡️':''};
+  if(entry.cell?.blocked) return {assetUrl:resolveDungeonWorldAsset('rock'),icon:'⛔'};
+  return {assetUrl:null,icon:terrainIcon(entry.cell?.terrain)};
 }
+
+function terrainAsset(cell={}){return resolveDungeonWorldAsset(cell.terrain==='water'?'water':cell.terrain==='lava'?'lava':cell.terrain==='rock'?'rock':'floor');}
 
 export function renderDungeonRoomGrid(options={}){
   const model=buildDungeonRoomGridModel(options);
   if(!model.ok) return '';
   const cells=model.cells.map(entry=>{
-    const actors=entry.actors.map(actor=>`<span class="dungeon-board-pawn ${actor.side==='hero'?'hero':'enemy'}${actor.focused?' focused':''}" data-dungeon-board-actor="${esc(actor.id)}" title="${esc(actor.name)}" aria-label="${esc(actor.name)}">${esc(actor.icon)}</span>`).join('');
-    const world=worldIcon(entry);
-    return `<div class="${cellClass(entry.cell)}" data-dungeon-board-cell="${entry.x},${entry.y}" aria-label="Case ${entry.x+1}, ${entry.y+1}">${world?`<span class="dungeon-board-world">${world}</span>`:''}${actors}<small>${entry.x+1},${entry.y+1}</small></div>`;
+    const actors=entry.actors.map(actor=>`<span class="dungeon-board-pawn ${actor.side==='hero'?'hero':'enemy'}${actor.focused?' focused':''}${actor.assetUrl?' has-art':''}" data-dungeon-board-actor="${esc(actor.id)}" title="${esc(actor.name)}" aria-label="${esc(actor.name)}" ${actor.assetUrl?`style="${dungeonAssetStyle(actor.assetUrl,{position:'center 24%',size:'cover'})}"`:''}>${actor.assetUrl?'':esc(actor.icon)}</span>`).join('');
+    const world=worldVisual(entry);
+    const terrain=terrainAsset(entry.cell);
+    return `<div class="${cellClass(entry.cell)}" data-dungeon-board-cell="${entry.x},${entry.y}" aria-label="Case ${entry.x+1}, ${entry.y+1}" style="${dungeonAssetStyle(terrain)}">${world.assetUrl?`<span class="dungeon-board-world has-art" style="${dungeonAssetStyle(world.assetUrl,{size:'contain'})}">${world.icon?`<b>${esc(world.icon)}</b>`:''}</span>`:world.icon?`<span class="dungeon-board-world">${esc(world.icon)}</span>`:''}${actors}<small>${entry.x+1},${entry.y+1}</small></div>`;
   }).join('');
   const actorSummary=model.actors.length?model.actors.map(actor=>`${actor.icon} ${esc(actor.name)} · ${actor.x+1},${actor.y+1}`).join(' &nbsp; '):'Aucun pion positionné dans cette salle.';
   return `<section class="editor-section dungeon-board-section"><div class="section-title-row"><div><h3>🗺️ ${esc(model.roomId)}</h3><p class="muted">Touchez une case accessible pour déplacer le héros. Les éléments du décor et les pions reflètent le runtime actuel.</p></div></div><div class="dungeon-board-wrap"><div class="dungeon-board" style="--dungeon-cols:${model.width}" role="grid" aria-label="Grille de la salle">${cells}</div></div><p class="dungeon-board-legend">${actorSummary}</p></section>`;

@@ -5,6 +5,11 @@ import {
   setActorPosition,
   shortestPathDistance,
 } from '../../core/spatial-engine.js';
+import {
+  canUseCaptureAbility,
+  normalizeCaptureAbility,
+  spendCaptureAbility,
+} from './abilities.js';
 
 const clone=value=>structuredClone(value);
 
@@ -56,6 +61,7 @@ export function createCaptureBattleState({
     opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild)},
     spatial,
     pendingAction:null,
+    actionLog:[],
     timing:{model:'future_design_not_frozen'},
   };
 }
@@ -82,6 +88,57 @@ export function isCaptureTargetInRange(battle,range,{fromSide='player',toSide='o
   const normalizedRange=Math.max(0,Number(range)||0);
   const distance=captureBattleDistance(battle,fromSide,toSide,{diagonal,maxDistance:999});
   return {ok:Number.isFinite(distance)&&distance<=normalizedRange,distance,range:normalizedRange};
+}
+
+export function resolveCaptureAbilityAction({
+  battle,
+  side='player',
+  targetSide='opponent',
+  abilityDef,
+  abilityState,
+  effectResolver=null,
+  diagonal=false,
+}={}){
+  if(!battle||battle.status!=='active') return {ok:false,reason:'battle-not-active',battle,abilityState:clone(abilityState||{})};
+  const actor=battle[String(side)]?.actorId;
+  const targetActor=battle[String(targetSide)]?.actorId;
+  if(!actor||!targetActor) return {ok:false,reason:'battle-side-missing',battle,abilityState:clone(abilityState||{})};
+  const ability=normalizeCaptureAbility(abilityDef||{});
+  if(!ability.id) return {ok:false,reason:'capture-ability-id-required',battle,abilityState:clone(abilityState||{})};
+  const usable=canUseCaptureAbility(abilityState,ability.id);
+  if(!usable.ok) return {...usable,battle,abilityState:clone(abilityState||{})};
+  if(ability.range!=null){
+    const rangeCheck=isCaptureTargetInRange(battle,ability.range,{fromSide:side,toSide:targetSide,diagonal});
+    if(!rangeCheck.ok) return {ok:false,reason:'capture-target-out-of-range',...rangeCheck,battle,abilityState:clone(abilityState||{})};
+  }
+  const spent=spendCaptureAbility(abilityState,ability.id,{cooldown:ability.cooldown||0});
+  if(!spent.ok) return {...spent,battle};
+  const action={
+    type:'ability',
+    side:String(side),
+    targetSide:String(targetSide),
+    abilityId:ability.id,
+    effect:clone(ability.effect),
+    resolved:false,
+  };
+  const resolution=typeof effectResolver==='function'
+    ? effectResolver({battle:clone(battle),action:clone(action),ability:clone(ability)})
+    : {ok:true,outcome:{type:'declared_effect',effect:clone(ability.effect)}};
+  if(resolution?.ok===false){
+    return {ok:false,reason:resolution.reason||'capture-effect-resolution-failed',battle,abilityState:clone(abilityState||{})};
+  }
+  const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null)};
+  const nextBattle={
+    ...battle,
+    pendingAction:null,
+    actionLog:[...(battle.actionLog||[]).map(clone),resolvedAction],
+  };
+  return {
+    ok:true,
+    battle:nextBattle,
+    abilityState:spent.state,
+    action:resolvedAction,
+  };
 }
 
 export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){

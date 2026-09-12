@@ -15,7 +15,9 @@ const canonicalization=JSON.parse(fs.readFileSync(path.join(root,'docs','capture
 
 assert.equal(CAPTURE_RUNTIME_CONTRACT.lazyInitializationRequired,true);
 assert.ok(!app.includes("import { mountCapturePage }"),'Capture must not be statically imported at app startup');
-assert.match(app,/await import\('\.\/modes\/capture\/capture-page\.js'\)/,'Capture must be dynamically imported');
+assert.match(app,/import\('\.\/modes\/capture\/capture-page\.js'\)/,'Capture must be dynamically imported');
+assert.match(app,/Promise\.all\(/,'Capture lazy dependencies may load in parallel only after Capture entry');
+assert.match(app,/loadCaptureAssetRegistry\(\)/,'Capture asset registry must stay lazy with Capture entry');
 assert.match(app,/id: 'capture'.*enabled: true/s,'Capture home card must be enabled');
 assert.ok(!app.includes('ensureBuiltinMonsterCapture'),'legacy Capture seed must never run from app startup');
 assert.ok(!page.includes('../rpg/'),'Capture page must not import RPG mode');

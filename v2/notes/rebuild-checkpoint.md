@@ -22,13 +22,18 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Le squelette de démo est injecté uniquement dans le layout temporaire de la salle de départ, puis matérialisé dans le vrai `roomRuntime`.
 - L'univers de démo est conservé seulement dans la session Donjon courante afin que les compétences, l'IA, la règle de KO et les noms soient disponibles pendant le combat.
 - Aucun contenu de démo n'est écrit dans l'éditeur ou le stockage ; dès que des héros configurés existent, ils prennent toujours priorité sur la démo.
-- La vue Donjon affiche une vraie grille de salle en lecture seule, basée sur le layout actuel et les positions du runtime spatial.
+- La vue Donjon affiche une vraie grille de salle basée sur le layout actuel et les positions du runtime spatial.
 - La grille rend le terrain, les cases bloquées, portes, interactions/marqueurs, obstacles simples et les pions héros/ennemis.
-- Les positions ne sont jamais recalculées par l'UI : le renderer lit `spatial.positions`, avec seulement les coordonnées explicites des entités comme fallback pour les ennemis authored.
 - La mini-démo utilise des positions temporaires déterministes : héros case 2,2 ; squelette case 5,2.
-- Le parcours de combat complet de cette mini-démo est maintenant couvert jusqu'à la réconciliation de victoire : première Frappe, riposte automatique Griffe, seconde Frappe, victoire, PV héros synchronisés, squelette vaincu, loot généré et pion ennemi retiré du plateau.
-- Le squelette de démo donne désormais toujours `1 × Os ancien` (`demo_bone`) afin de rendre le bloc butin réellement testable.
+- Le parcours de combat complet de cette mini-démo est couvert jusqu'à la réconciliation de victoire : première Frappe, riposte automatique Griffe, seconde Frappe, victoire, PV héros synchronisés, squelette vaincu, loot généré et pion ennemi retiré du plateau.
+- Le squelette de démo donne toujours `1 × Os ancien` (`demo_bone`) afin de rendre le bloc butin réellement testable.
 - La grille est mobile-first et défile horizontalement si une salle est plus large que l'écran.
+- Hors combat, la grille est maintenant interactive : toucher/clicker une case déplace le héros focalisé uniquement si le vrai pathfinding de salle l'autorise.
+- Ce déplacement utilise le Spatial Core pour la position/allocation et `room-tactical-bridge.js` pour les chemins authored : cases bloquées, murs, portes fermées/verrouillées et détours sont donc respectés.
+- Un mur ou une porte fermée bloque bien son arête ; un détour reste valide s'il existe et tient dans l'allocation de mouvement. Une porte ouverte restaure le pas direct.
+- Chaque clic d'exploration peut cibler une case atteignable dans l'allocation courante du héros ; ce jalon ne crée pas encore de budget de tour d'exploration persistant.
+- Le déplacement libre par clic est volontairement désactivé pendant un combat actif afin de ne jamais contourner le moteur tactique/timeline.
+- Après un déplacement, le même état spatial est stocké dans `roomRuntime.spatial`, réaffiché sur la grille et transmis au prochain combat.
 
 ## Jalons CI récents validés
 
@@ -49,36 +54,41 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG : fallback démo en mémoire jusqu'au vrai `startDungeonCombat()` : `34700599970` success
 - RPG : grille Donjon live + pions runtime sur mobile : `34701638751` success
 - RPG : flux complet démo combat → victoire → loot → retrait du pion : `34701834544` success
+- RPG : déplacement exploration par clic sur grille : `34702387637` success
 
 ## Dernière étape terminée
 
-Quatrième jalon du chantier `RPG → build testable` : verrouillage du parcours complet de combat de la mini-démo.
+Cinquième jalon du chantier `RPG → build testable` : déplacement du héros directement sur la grille hors combat.
 
-- `dungeon-demo-content.js` contient maintenant l'objet temporaire `demo_bone` / `Os ancien` ;
-- `Squelette de test` possède un drop déterministe à 100 %, quantité 1 ;
-- nouveau test d'intégration `v2/tests/rpg-dungeon-demo-flow.test.mjs` ;
-- le test crée la vraie session Donjon de démo à partir d'un univers vide ;
-- il vérifie que la grille initiale contient bien `demo_hero` + `demo_enemy_instance` ;
-- il appelle le vrai `startDungeonCombat()` ;
-- première `Frappe` : squelette 8 → 4 PV et passage du tour au squelette ;
-- `advanceDungeonEnemyTurns()` fait réellement jouer `Griffe` et descend le héros 12 → 10 PV ;
-- seconde `Frappe` : squelette 4 → 0 PV, KO, combat `ended`, victoire héros ;
-- `reconcileDungeonCombatResult()` marque la salle nettoyée, synchronise les 10 PV du héros et marque l'ennemi vaincu ;
-- loot vérifié : `[{itemId:'demo_bone',quantity:1}]` ;
-- `activeDungeonEnemies()` retourne ensuite 0 ;
-- le modèle de grille final ne contient plus que `demo_hero`, ce qui protège explicitement la disparition du pion ennemi après victoire.
+- nouveau module `v2/src/modes/rpg/dungeon-grid-movement.js` ;
+- `moveFocusedDungeonHeroOnGrid()` ne déplace que le héros focalisé réellement présent, actif et non KO dans la salle courante ;
+- l'allocation est lue avec `actorMovementAllowance()` du Spatial Core ;
+- la distance/route est calculée par `shortestRoomPathDistance()` afin de respecter le vrai layout authored ;
+- une cible hors portée ou inaccessible est refusée sans mutation ;
+- succès : nouvelle position écrite via `setActorPosition()`, puis recopiée dans `roomRuntime.spatial` ;
+- combat actif : refus explicite `dungeon-move-combat-active` ; le déplacement de tour de combat reste la responsabilité du moteur tactique existant ;
+- `dungeon-gameplay-view.js` rend les cases tactiles/clavier uniquement hors combat, affiche un retour de déplacement/refus, puis rerend le pion à sa nouvelle position ;
+- le `effectiveSpatial` utilisé pour la grille est également celui envoyé à `startDungeonCombat()` et `executeDungeonHeroSkill()` ;
+- `dungeon-board.css` ajoute uniquement l'affordance tactile/focus, sans changer les règles.
 
 Régression :
-- batterie complète : `34701834544` completed + success.
+- nouveau `v2/tests/rpg-dungeon-grid-movement.test.mjs` ;
+- couvre déplacement valide, portée, case bloquée, mur, porte fermée, porte ouverte, détour, allocation insuffisante, héros KO, combat actif et non-mutation des sources ;
+- le premier run `34702292018` a échoué sur une attente de test incorrecte : le mur bloquait bien le pas direct mais un détour de 3 cases existait ;
+- assertion corrigée pour protéger le vrai comportement pathfinding ;
+- batterie complète finale : `34702387637` completed + success.
 
 Commits de l'étape :
-- loot de démonstration déterministe : `81246f2d7ffb843055468607957d0ca15690237c`
-- test d'intégration du flux complet : `dc3d7da4f2c6a837258af684deeb4e432dcc066c`
+- contrôleur déplacement grille : `dd0118f0f62325bfceed5aa7779c5d5576650cc1`
+- raccordement vue Donjon : `9c1e8606021e1bc23acfd54e1d9fba40bf4443d8`
+- affordance CSS : `91aeae860f0aaa52edfdbb03227aa6849aa3d44e`
+- régression initiale : `ca48a0592ff1e180a68c547a389d3230204c6a99`
+- correction attente détour : `654961b2e73e69d7b90055a0d755e68d0ece50af`
 
 ## Priorités ouvertes
 
-1. RPG testable : raccorder maintenant le déplacement du héros à la grille via le Spatial Core existant, sans créer une seconde logique de mouvement ;
-2. vérifier ensuite les interactions de proximité utiles sur la vraie grille (portes/coffres/ennemis) sans dégrader le moteur stable ;
-3. ajouter le minimum de sauvegarde/reprise nécessaire au test utilisateur ;
-4. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
-5. seulement après ce test utilisateur : reprendre assets/audio/PWA/parité finale puis le chantier Capture.
+1. RPG testable : vérifier/raccorder les interactions de proximité utiles sur la vraie grille (portes/coffres/ennemis) sans dégrader le moteur stable ;
+2. ajouter le minimum de sauvegarde/reprise nécessaire au test utilisateur ;
+3. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
+4. après le premier test utilisateur : corriger l'ergonomie/visuel réel observé, puis reprendre assets/audio/PWA/parité finale ;
+5. Monster Capture reste en pause jusqu'à ce premier cycle de test RPG.

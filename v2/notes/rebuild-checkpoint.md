@@ -12,9 +12,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié réactions + cooldowns + statuts, scheduler abstrait et driver externe abstrait.
-- Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique, `advanceCaptureScheduler()` l'orchestrateur du scheduler et `advanceCaptureDriver()` l'entrée canonique pour injecter un delta externe.
-- Le scheduler et le driver ne créent aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now` ni cadence temps réel implicite.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié, scheduler abstrait, driver externe abstrait et désormais cycle de vie UI/app du combat.
+- Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()`, `advanceCaptureScheduler()` et `advanceCaptureDriver()` forment le chemin temporel canonique.
+- Le scheduler, le driver et la couche UI/app ne créent aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now` ni cadence temps réel implicite.
 - Les anciens helpers temporels séparés restent disponibles dans leurs modules bas niveau pour régressions/maintenance, mais ne sont pas exposés par la façade publique.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
@@ -55,43 +55,42 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - façade publique canonique Capture : `34684749829` success
 - scheduler abstrait Capture : `34684871523` success
 - driver externe abstrait Capture : `34685018724` success
+- cycle de vie UI/app du combat Capture : `34685171946` success
 
 ## Dernière étape terminée
 
-Premier driver externe abstrait Capture :
-- nouveau `v2/src/modes/capture/driver.js` ;
-- contrat `CAPTURE_DRIVER_CONTRACT` : horloge externe requise, aucune boucle temps réel possédée par le runtime, aucune cadence fixe ;
-- état du driver limité à `status`, `frames` et `totalDelta` ;
-- états explicites : `stopped`, `running`, `paused` ;
-- opérations : `startCaptureDriver()`, `pauseCaptureDriver()`, `resumeCaptureDriver()`, `stopCaptureDriver()` ;
-- `advanceCaptureDriver()` est exposé par `runtime.js` et injecte exclusivement `advanceCaptureScheduler()` dans le driver bas niveau ;
-- le driver transmet uniquement le delta fourni par l'appelant ; il ne lit aucune horloge système et ne déclenche aucune boucle de lui-même ;
-- à l'arrêt ou en pause, le delta reçu est ignoré : aucun reliquat scheduler, cooldown, statut, PV ou horloge de combat ne progresse ;
-- après reprise, les deltas futurs repartent à partir de l'état scheduler conservé ;
-- `frames` et `totalDelta` ne comptent que les injections reçues pendant l'état `running` ;
-- aucun `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now`, milliseconde, FPS ou cadence finale n'est imposé.
+Cycle de vie UI/app du combat Capture :
+- nouveau `v2/src/modes/capture/app-lifecycle.js` ;
+- contrat `CAPTURE_APP_LIFECYCLE_CONTRACT` : démarrage du driver avec le combat, pause sur écran bloquant, reprise après déblocage, arrêt dès que le combat se termine ;
+- `createCaptureAppSession()` regroupe `state`, `scheduler`, `driver` et le flag `blocking` ;
+- `beginCaptureBattleSession()` démarre le combat puis passe automatiquement le driver à `running` ;
+- `setCaptureBattleBlocking()` met le driver en `paused` ou le remet en `running` sans faire avancer le temps pendant le blocage ;
+- `advanceCaptureBattleSession()` passe uniquement par `advanceCaptureDriver()` ; si un KO/effet périodique termine le combat, le driver passe automatiquement à `stopped` dans le même flux ;
+- `finishCaptureBattleSession()` arrête également le driver lors d'une fin explicite (`flee`, etc.) ;
+- `runtime.js` expose cette couche comme façade applicative officielle ;
+- `capture-page.js` crée maintenant une session Capture réelle et expose `beginBattle`, `setBlocking`, `advance`, `finishBattle` ;
+- `dispose()` arrête le driver avant de démonter la page ;
+- aucun timer navigateur ni fréquence réelle n'est encore choisi.
 
 Régression :
-- nouveau `v2/tests/capture-driver.test.mjs` ;
-- couvre driver arrêté sans mutation ;
-- couvre démarrage puis accumulation d'un delta insuffisant ;
-- couvre pause sans accumulation du delta reçu ;
-- couvre reprise avec consommation du reliquat scheduler ;
-- couvre arrêt après progression sans nouvelle mutation ;
-- vérifie statiquement l'absence d'horloge/timer navigateur dans `driver.js` ;
-- premier run `34684985821` en échec uniquement parce que le test attendait `null` alors que l'horloge non initialisée est `undefined` ;
-- attente corrigée sans modification du runtime ;
-- batterie complète corrigée : `34685018724` success.
+- nouveau `v2/tests/capture-app-lifecycle.test.mjs` ;
+- couvre `stopped -> running` au démarrage du combat ;
+- couvre `running -> paused` sur UI bloquante sans progression temporelle ;
+- couvre reprise et progression réelle via le scheduler/driver canoniques ;
+- couvre fin explicite avec retour exploration et driver arrêté ;
+- couvre KO adverse par statut pendant l'avance avec arrêt automatique du driver ;
+- vérifie que `capture-page.js` utilise la couche lifecycle et ne crée aucun timer ;
+- batterie complète : `34685171946` success.
 
 Commits de l'étape :
-- driver externe abstrait : `30010d42c0b7626a29046a12f0b30e1ae0c7c020`
-- raccord façade publique : `629497a4bcea99dfb5dbe768d970fd1249f4c3ab`
-- régression driver : `4d7c92715ace4f3e19ab8b963f95a70b69c82aa0`
-- correction attente test : `9410c6c318077243087a91492def79b00de67057`
+- couche lifecycle app : `178f556fa6e3755912956c42dfb41bd0cf559f66`
+- façade runtime lifecycle : `9187c46140a882bc9aee0ca3b999a2bb47d637c2`
+- page Capture raccordée : `82fae9131aec93773ae7b38dfb9355d0321a7ceb`
+- régression lifecycle : `bcf5f1249542d813e1e67d7402fbda4945a1234c`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : définir la première couche d'adaptation UI/app autour du driver (start/pause/resume/stop selon cycle de vie du combat), sans choisir encore la fréquence réelle ni créer de timer automatique ;
+1. prochaine étape Capture : définir la première politique d'événements UI du combat dynamique (notifications de réaction, statut, KO, remplacement) à partir des résultats déjà produits, sans créer de logique gameplay parallèle ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

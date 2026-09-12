@@ -1,6 +1,6 @@
 import {
   advanceCaptureBattleSession,
-  advanceCaptureUiNoticeVisualTime,
+  advanceCaptureUiVisualDriver,
   appendCaptureUiNotices,
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
@@ -8,10 +8,15 @@ import {
   createCaptureAppSession,
   createCaptureModeState,
   createCaptureUiNoticeFeed,
+  createCaptureUiVisualDriverState,
   dispatchCaptureUiEvents,
   finishCaptureBattleSession,
+  pauseCaptureUiVisualDriver,
+  resumeCaptureUiVisualDriver,
   setCaptureBattleBlocking,
+  startCaptureUiVisualDriver,
   stopCaptureDriver,
+  stopCaptureUiVisualDriver,
 } from './runtime.js';
 
 function escapeHtml(value){
@@ -26,6 +31,7 @@ function escapeHtml(value){
 export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
+  let visualDriver=createCaptureUiVisualDriverState();
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -66,6 +72,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get session(){return session;},
     get notices(){return captureUiNoticeFeedNotices(noticeFeed);},
     get noticeFeed(){return structuredClone(noticeFeed);},
+    get visualDriver(){return structuredClone(visualDriver);},
     beginBattle(options={}){
       const result=beginCaptureBattleSession(session,options);
       if(result.ok) session=result.session;
@@ -84,10 +91,30 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       }
       return result;
     },
-    advanceNoticeVisualTime(amount=1){
-      noticeFeed=advanceCaptureUiNoticeVisualTime(noticeFeed,amount);
-      renderFeed();
-      return captureUiNoticeFeedNotices(noticeFeed);
+    startNoticeVisualClock(){
+      visualDriver=startCaptureUiVisualDriver(visualDriver);
+      return structuredClone(visualDriver);
+    },
+    pauseNoticeVisualClock(){
+      visualDriver=pauseCaptureUiVisualDriver(visualDriver);
+      return structuredClone(visualDriver);
+    },
+    resumeNoticeVisualClock(){
+      visualDriver=resumeCaptureUiVisualDriver(visualDriver);
+      return structuredClone(visualDriver);
+    },
+    stopNoticeVisualClock(){
+      visualDriver=stopCaptureUiVisualDriver(visualDriver);
+      return structuredClone(visualDriver);
+    },
+    advanceNoticeVisualTime(delta=0){
+      const result=advanceCaptureUiVisualDriver(noticeFeed,visualDriver,{delta});
+      if(result.ok){
+        noticeFeed=result.feed;
+        visualDriver=result.driver;
+        renderFeed();
+      }
+      return {...result,notices:captureUiNoticeFeedNotices(noticeFeed)};
     },
     flushUiEvents,
     finishBattle(reason){
@@ -97,6 +124,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     },
     dispose(){
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
+      visualDriver=stopCaptureUiVisualDriver(visualDriver);
       noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
       host.innerHTML='';
     },

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Verrouiller les contrats fonctionnels confirmés de Monster Capture avant reconstruction du runtime, sans recopier les dépendances RPG/Dungeon ni inventer des coefficients legacy introuvables.",
+  "architecture": {
+    "mode": "capture",
+    "separateTopLevelMode": true,
+    "sharesNeutralSpatialBaseWithRpg": true,
+    "sharesWorldBuilderBaseWithRpg": true,
+    "sharesRpgTurnEngine": false,
+    "usesRpgTurnSequence": false,
+    "usesRpgD100Timeline": false,
+    "combatRuntime": "dedicated_capture_runtime",
+    "explorationModel": "free_exploration_target",
+    "combatModel": "dynamic_combat_target_later_refinement"
+  },
+  "captureRules": {
+    "speciesOwnCaptureRate": true,
+    "lowHpBonus": {
+      "enabled": true,
+      "thresholdPercent": 30,
+      "exactMultiplier": "pending_recovery_or_design"
+    },
+    "captureItems": {
+      "tieredByLevelOrQuality": true,
+      "exactLegacyIds": "pending_recovery",
+      "exactCoefficients": "pending_recovery_or_rebalance",
+      "mustLiveInCaptureItemLibrary": true,
+      "mustNotBeRpgEquipment": true
+    }
+  },
+  "rosterRules": {
+    "activeTeamLimit": 6,
+    "reserveLimit": "unbounded_by_default",
+    "ownedCreaturesAreInstances": true,
+    "switchingBetweenActiveAndReserve": true,
+    "summonOrActiveCreatureSelection": true,
+    "overflowCaptureGoesToReserve": true,
+    "doNotMergeOwnedInstancesDuringMigration": true
+  },
+  "abilityRules": {
+    "abilitiesCanHaveCharges": true,
+    "abilitiesCanHaveCosts": true,
+    "chargesArePerOwnedCreatureInstance": true,
+    "exactLegacyChargeValues": "pending_recovery",
+    "exactLegacyCosts": "pending_recovery",
+    "dynamicCombatCooldownModel": "future_design_not_frozen"
+  },
+  "encounterRules": {
+    "biomesSupported": true,
+    "spawnPercentPerBiomeSupported": true,
+    "elementOrTypeTagsSupported": true,
+    "raritySupported": true,
+    "wildEncounterUsesCaptureCreatureData": true,
+    "mustNotReadRpgBestiaryAtRuntime": true
+  },
+  "battleRules": {
+    "vsAiSupported": true,
+    "vsPlayerSupported": true,
+    "classicLegacyModeIsMigrationInputOnly": true,
+    "futureDynamicModeRequired": true,
+    "movementAndPositioningExpected": true,
+    "rangeExpected": true,
+    "dodgeOrPositioningExpected": true,
+    "creatureSwitchExpected": true,
+    "exactRealtimeTiming": "future_design_not_frozen"
+  },
+  "migrationPolicy": {
+    "legacyRulesReadOnly": true,
+    "unknownCaptureItem": "quarantine_pending_review",
+    "unknownAbility": "quarantine_pending_review",
+    "unknownCoefficient": "do_not_guess",
+    "generatedFamily": "quarantine_pending_review"
+  }
+}

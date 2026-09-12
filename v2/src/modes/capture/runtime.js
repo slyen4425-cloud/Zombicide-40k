@@ -32,12 +32,21 @@ import {
   startCaptureDriver,
   stopCaptureDriver,
 } from './driver.js';
+import {
+  CAPTURE_APP_LIFECYCLE_CONTRACT,
+  advanceCaptureBattleSession as advanceCaptureBattleSessionCore,
+  beginCaptureBattleSession as beginCaptureBattleSessionCore,
+  createCaptureAppSession as createCaptureAppSessionCore,
+  finishCaptureBattleSession as finishCaptureBattleSessionCore,
+  setCaptureBattleBlocking as setCaptureBattleBlockingCore,
+} from './app-lifecycle.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
   canonicalTimeAdvance:'advanceCaptureTime',
   canonicalSchedulerAdvance:'advanceCaptureScheduler',
   canonicalDriverAdvance:'advanceCaptureDriver',
+  canonicalAppLifecycle:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -48,6 +57,7 @@ export {
   CAPTURE_TIME_RUNTIME_CONTRACT,
   CAPTURE_SCHEDULER_CONTRACT,
   CAPTURE_DRIVER_CONTRACT,
+  CAPTURE_APP_LIFECYCLE_CONTRACT,
   attemptCaptureInBattle,
   clearCaptureEncounter,
   createCaptureDriverState,
@@ -82,4 +92,24 @@ export function advanceCaptureScheduler(state,scheduler,options={}){
 
 export function advanceCaptureDriver(state,scheduler,driver,options={}){
   return pushCaptureDriverDelta(state,scheduler,driver,{...options,advanceScheduler:advanceCaptureScheduler});
+}
+
+export function createCaptureAppSession({state=createCaptureModeState(),scheduler=createCaptureSchedulerState(),driver=createCaptureDriverState()}={}){
+  return createCaptureAppSessionCore({state,scheduler,driver});
+}
+
+export function beginCaptureBattleSession(session,battleOptions={}){
+  return beginCaptureBattleSessionCore(session,battleOptions,{startBattle:startCaptureBattle,startDriver:startCaptureDriver});
+}
+
+export function setCaptureBattleBlocking(session,blocking){
+  return setCaptureBattleBlockingCore(session,blocking,{pauseDriver:pauseCaptureDriver,resumeDriver:resumeCaptureDriver});
+}
+
+export function advanceCaptureBattleSession(session,options={}){
+  return advanceCaptureBattleSessionCore(session,{...options,advanceDriver:advanceCaptureDriver,stopDriver:stopCaptureDriver});
+}
+
+export function finishCaptureBattleSession(session,reason){
+  return finishCaptureBattleSessionCore(session,reason,{finishBattle:finishCaptureBattle,stopDriver:stopCaptureDriver});
 }

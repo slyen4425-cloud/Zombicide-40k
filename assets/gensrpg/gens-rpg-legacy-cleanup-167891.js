@@ -5,7 +5,7 @@
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis;
 const D=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.91";
+const VERSION="1.0.1",APP_VERSION="16.78.91";
 const ALIAS={agility:"agilite",spirit:"esprit",strength:"force",dexterity:"agilite",wisdom:"esprit",constitution:"endurance"};
 const LEGACY=[
  ["force","damage:physical","physicalDamageStep","physicalDamageGain"],
@@ -65,10 +65,10 @@ function hideLabel(text){
 function hideLegacySection(){
  if(!D)return;
  const wanted="modificateurs par caracteristique";
- const candidates=D.querySelectorAll("section,.v2MechanicBox,.v2LibCard,.rpgEditorSection,.rpgUniverseSection,div");
- for(const box of candidates){
-  const heading=box.querySelector?.("h2,h3,h4,strong,.sectionTitle,.v2LibHead");
-  if(heading&&norm(heading.textContent).includes(wanted)){hideNode(box);break}
+ for(const heading of D.querySelectorAll("h2,h3,h4,strong,.sectionTitle")){
+  if(!norm(heading.textContent).includes(wanted))continue;
+  const box=heading.closest?.("section,.v2MechanicBox,.v2LibCard,.rpgEditorSection,.rpgUniverseSection")||heading.parentElement;
+  hideNode(box);return;
  }
 }
 function cleanUi(){

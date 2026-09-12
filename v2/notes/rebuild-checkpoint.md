@@ -12,7 +12,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite et désormais un pas temporel unifié réactions + cooldowns + statuts.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite et pas temporel unifié réactions + cooldowns + statuts.
+- Le point d'entrée public recommandé de Capture est désormais `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique.
+- Les anciens helpers temporels séparés restent disponibles dans leurs modules bas niveau pour régressions/maintenance, mais ne sont pas exposés par la façade publique.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -49,36 +51,36 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - fenêtre temporelle explicite de réaction : `34684261793` success
 - progression globale horloge réaction : `34684443173` success
 - pas temporel unifié Capture : `34684569147` success
+- façade publique canonique Capture : `34684749829` success
 
 ## Dernière étape terminée
 
-Pas temporel unifié Capture :
-- nouveau `v2/src/modes/capture/time-runtime.js` ;
-- nouvelle opération publique `advanceCaptureModeTime(state,{amount,tickReactionCooldowns,tickStatuses})` ;
-- un seul appel avance maintenant `battle.timing.reactionTime`, les cooldowns de réaction et les statuts/effets périodiques avec le même delta ;
-- la cadence reste entièrement explicite et abstraite : aucune seconde, frame, fréquence ou i-frame n'est imposée ;
-- l'état de cooldown de la créature joueur reste synchronisé dans `activeTeam` et `roster` ;
-- les effets périodiques réutilisent le moteur de statuts existant et donc le même flux KO/remplacement/fin de combat ;
-- si un effet périodique met l'adversaire KO, le combat est terminé, la rencontre est nettoyée et l'exploration est réouverte dans le même pas temporel ;
-- `tickStatuses:false` permet de faire avancer uniquement horloge + cooldowns quand le futur design aura besoin de séparer ces couches ;
-- `tickReactionCooldowns:false` reste également possible ;
-- aucun moteur parallèle RPG/D100/timeline n'est introduit.
+Façade publique canonique Capture :
+- nouveau `v2/src/modes/capture/runtime.js` ;
+- cette façade devient le point d'entrée recommandé du mode pour le runtime applicatif ;
+- elle expose les opérations principales Capture sans exposer les anciens helpers temporels séparés ;
+- nouvelle opération publique canonique `advanceCaptureTime(state,options)` ;
+- `advanceCaptureTime()` délègue au runtime temporel unifié `advanceCaptureModeTime()` et fait donc avancer via un seul chemin l'horloge de réaction, les cooldowns et les statuts/effets périodiques ;
+- `advanceCaptureBattleTime` et `tickCaptureBattleReactionCooldowns` restent dans `capture.js` uniquement pour compatibilité/régressions, mais ne sont pas exportés par la façade canonique ;
+- `capture-page.js` importe désormais `createCaptureModeState` depuis `runtime.js`, ce qui fait passer l'entrée UI Capture par la façade officielle ;
+- aucune cadence temps réel, frame ou i-frame n'est figée ;
+- aucun moteur RPG/D100/timeline n'est introduit.
 
 Régression :
-- nouveau `v2/tests/capture-unified-time-runtime.test.mjs` ;
-- couvre progression simultanée horloge + cooldown joueur/adversaire + dégâts périodiques + durée de statut ;
-- couvre KO adverse déclenché par statut avec fin automatique du combat et retour exploration ;
-- couvre progression horloge/cooldowns sans tick des statuts ;
-- batterie complète : `34684569147` success.
+- nouveau `v2/tests/capture-public-runtime.test.mjs` ;
+- vérifie que `advanceCaptureTime()` est exposé ;
+- vérifie que les anciens helpers temporels séparés ne sont pas exposés par la façade ;
+- vérifie qu'un pas public fait réellement avancer horloge + cooldowns + dégâts périodiques + durée de statut ;
+- batterie complète : `34684749829` success.
 
 Commits de l'étape :
-- runtime temps unifié : `b08248c2e0798475e1926b6a7859cdc646fec948`
-- alignement du résultat de statuts : `f56fd87086a1d4318bf7e54c05980b89123585b0`
-- régression temps unifié : `19d3398f409adf8f121f4e67416725bb90079b4e`
+- façade publique Capture : `f2af3ca683c9168acd4a87f0b9ae3dbf884a547e`
+- page Capture routée par façade : `802897617f577893eed0e80a423ac9e43fefa3df`
+- régression façade publique : `1e2b0776b32577cfed1fe06d351791a5bcfdd13d`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : raccorder ce pas temporel unifié comme chemin public principal à la place des ticks séparés, sans retirer encore les helpers bas niveau utiles aux tests ;
+1. prochaine étape Capture : définir le premier contrat de boucle dynamique/ordonnancement autour de `advanceCaptureTime()` sans choisir encore une fréquence réelle ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

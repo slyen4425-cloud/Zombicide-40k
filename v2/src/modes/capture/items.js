@@ -36,8 +36,8 @@ export function createCaptureInventory(seed={}){
   return {counts};
 }
 
-export function consumeCaptureItem(inventory,itemId,amount=1){
-  const resolved=resolveCaptureItem(itemId);
+export function consumeCaptureItem(inventory,itemId,amount=1,items=CAPTURE_ORB_LIBRARY){
+  const resolved=resolveCaptureItem(itemId,items);
   if(!resolved.found) return {ok:false,reason:'unknown_capture_item',inventory:clone(inventory)};
   const next=clone(inventory||{counts:{}});
   next.counts=next.counts||{};

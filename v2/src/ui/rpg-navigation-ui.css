@@ -1,0 +1,84 @@
+/* GenSrpG V2 — structured RPG navigation. Presentation only. */
+.rpg-tabs.rpg-hub-nav{
+  position:relative;
+  top:auto;
+  display:block;
+  overflow:visible;
+  padding:0;
+  margin:12px 0 14px;
+  background:transparent;
+  border:0;
+  backdrop-filter:none;
+}
+.rpg-nav-heading{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:16px;
+  padding:14px 16px;
+  border:1px solid #5f4b2e;
+  border-radius:16px;
+  background:linear-gradient(135deg,#251f16,#15130f 55%,#0e0d0b);
+  box-shadow:0 10px 28px #0007;
+}
+.rpg-nav-heading strong{display:block;font-family:Georgia,"Times New Roman",serif;font-size:21px;color:#f1d89e}
+.rpg-nav-heading .eyebrow{color:#d9b65e;margin-bottom:3px}
+.rpg-nav-heading>p{max-width:380px;margin:0;color:#a99e87;font-size:12px;line-height:1.45;text-align:right}
+.rpg-nav-groups{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-top:9px;
+}
+.rpg-nav-group{
+  min-width:0;
+  border:1px solid #343b45;
+  border-radius:15px;
+  padding:10px;
+  background:linear-gradient(180deg,#171b22,#11141a);
+  box-shadow:0 7px 20px #0005;
+}
+.rpg-nav-group-play{border-color:#765b31;background:linear-gradient(180deg,#241d12,#14110d)}
+.rpg-nav-group-head{display:flex;align-items:flex-start;gap:8px;min-height:49px;margin-bottom:8px}
+.rpg-nav-group-icon{font-size:20px;line-height:1}
+.rpg-nav-group-head strong{display:block;color:#edf0f4;font-size:13px}
+.rpg-nav-group-play .rpg-nav-group-head strong{color:#efd28b}
+.rpg-nav-group-head small{display:block;margin-top:2px;color:#8f99a7;font-size:9px;line-height:1.25}
+.rpg-nav-group-actions{display:grid;gap:6px}
+.rpg-hub-nav .rpg-tab.rpg-nav-action{
+  width:100%;
+  min-width:0;
+  min-height:40px;
+  padding:8px 9px;
+  border-radius:10px;
+  background:#11161d;
+  border-color:#313b48;
+  font-size:11px;
+  text-align:left;
+  white-space:normal;
+}
+.rpg-hub-nav .rpg-tab.rpg-nav-action.active{
+  background:linear-gradient(180deg,#315c8d,#234264);
+  border-color:#6f9aca;
+  box-shadow:0 0 0 1px #8ab7e522 inset,0 5px 14px #0006;
+}
+.rpg-hub-nav .rpg-nav-group-play .rpg-tab.rpg-nav-action.active{
+  background:linear-gradient(180deg,#7b5a28,#59401d);
+  border-color:#ba9046;
+  color:#fff3d1;
+}
+@media(max-width:700px){
+  .rpg-nav-heading{align-items:flex-start;padding:12px 13px}
+  .rpg-nav-heading>p{display:none}
+  .rpg-nav-heading strong{font-size:19px}
+  .rpg-nav-groups{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .rpg-nav-group{padding:8px;border-radius:13px}
+  .rpg-nav-group-head{min-height:43px;margin-bottom:6px}
+  .rpg-nav-group-head small{font-size:8px}
+  .rpg-hub-nav .rpg-tab.rpg-nav-action{min-height:38px;padding:7px 8px;font-size:10px}
+}
+@media(max-width:390px){
+  .rpg-nav-groups{grid-template-columns:1fr 1fr}
+  .rpg-nav-group-head small{display:none}
+  .rpg-nav-group-head{min-height:24px;align-items:center}
+}

@@ -12,9 +12,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié réactions + cooldowns + statuts et premier scheduler abstrait externe.
-- Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique et `advanceCaptureScheduler()` l'orchestrateur public du scheduler.
-- Le scheduler ne crée aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now` ni cadence temps réel implicite. Le delta vient obligatoirement d'un driver externe futur.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite, pas temporel unifié réactions + cooldowns + statuts, scheduler abstrait et driver externe abstrait.
+- Le point d'entrée public recommandé de Capture est `v2/src/modes/capture/runtime.js` ; `advanceCaptureTime()` est l'opération temporelle canonique, `advanceCaptureScheduler()` l'orchestrateur du scheduler et `advanceCaptureDriver()` l'entrée canonique pour injecter un delta externe.
+- Le scheduler et le driver ne créent aucun timer : pas de `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now` ni cadence temps réel implicite.
 - Les anciens helpers temporels séparés restent disponibles dans leurs modules bas niveau pour régressions/maintenance, mais ne sont pas exposés par la façade publique.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
@@ -54,40 +54,44 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - pas temporel unifié Capture : `34684569147` success
 - façade publique canonique Capture : `34684749829` success
 - scheduler abstrait Capture : `34684871523` success
+- driver externe abstrait Capture : `34685018724` success
 
 ## Dernière étape terminée
 
-Premier scheduler abstrait Capture :
-- nouveau `v2/src/modes/capture/scheduler.js` ;
-- contrat `CAPTURE_SCHEDULER_CONTRACT` : driver externe requis, aucune fréquence temps réel figée, aucune boucle navigateur créée en interne ;
-- `createCaptureSchedulerState()` conserve seulement `accumulated`, `steps` et `running` ;
-- `setCaptureSchedulerRunning()` permet pause/reprise explicites ;
-- `pushCaptureSchedulerDelta()` accumule un delta externe, le découpe selon un `stepSize` fourni et n'exécute que le nombre de pas possible/autorisé ;
-- le scheduler bas niveau est driver-agnostic et exige une fonction `advance`, ce qui évite une dépendance circulaire avec la façade publique ;
-- `runtime.js` expose `advanceCaptureScheduler()` et injecte exclusivement `advanceCaptureTime()` comme fonction d'avance canonique ;
-- `maxSteps` permet de plafonner le rattrapage d'un gros delta sans perdre le reliquat accumulé ;
-- si le combat se termine pendant un pas (ex. KO par effet périodique), la boucle s'arrête immédiatement et conserve le delta restant ;
-- scheduler en pause : aucun temps, cooldown, statut ou PV ne bouge ;
-- aucun `setInterval`, `requestAnimationFrame`, `Date.now`, milliseconde, FPS ou cadence finale n'est imposé.
+Premier driver externe abstrait Capture :
+- nouveau `v2/src/modes/capture/driver.js` ;
+- contrat `CAPTURE_DRIVER_CONTRACT` : horloge externe requise, aucune boucle temps réel possédée par le runtime, aucune cadence fixe ;
+- état du driver limité à `status`, `frames` et `totalDelta` ;
+- états explicites : `stopped`, `running`, `paused` ;
+- opérations : `startCaptureDriver()`, `pauseCaptureDriver()`, `resumeCaptureDriver()`, `stopCaptureDriver()` ;
+- `advanceCaptureDriver()` est exposé par `runtime.js` et injecte exclusivement `advanceCaptureScheduler()` dans le driver bas niveau ;
+- le driver transmet uniquement le delta fourni par l'appelant ; il ne lit aucune horloge système et ne déclenche aucune boucle de lui-même ;
+- à l'arrêt ou en pause, le delta reçu est ignoré : aucun reliquat scheduler, cooldown, statut, PV ou horloge de combat ne progresse ;
+- après reprise, les deltas futurs repartent à partir de l'état scheduler conservé ;
+- `frames` et `totalDelta` ne comptent que les injections reçues pendant l'état `running` ;
+- aucun `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now`, milliseconde, FPS ou cadence finale n'est imposé.
 
 Régression :
-- nouveau `v2/tests/capture-scheduler.test.mjs` ;
-- couvre accumulation insuffisante puis rattrapage sur plusieurs pas ;
-- couvre pause sans mutation ;
-- couvre `maxSteps` avec reliquat ;
-- couvre arrêt immédiat après KO adverse et nettoyage combat/rencontre ;
-- vérifie statiquement l'absence de timer navigateur/horloge implicite dans `scheduler.js` ;
-- batterie complète : `34684871523` success.
+- nouveau `v2/tests/capture-driver.test.mjs` ;
+- couvre driver arrêté sans mutation ;
+- couvre démarrage puis accumulation d'un delta insuffisant ;
+- couvre pause sans accumulation du delta reçu ;
+- couvre reprise avec consommation du reliquat scheduler ;
+- couvre arrêt après progression sans nouvelle mutation ;
+- vérifie statiquement l'absence d'horloge/timer navigateur dans `driver.js` ;
+- premier run `34684985821` en échec uniquement parce que le test attendait `null` alors que l'horloge non initialisée est `undefined` ;
+- attente corrigée sans modification du runtime ;
+- batterie complète corrigée : `34685018724` success.
 
 Commits de l'étape :
-- premier scheduler : `7588fa357eccfc46c94d71533fce18926024d690`
-- scheduler rendu driver-agnostic : `70af9b34ba7de740d07c947254c649659d927eb0`
-- raccord façade publique : `fd4d470d44e6e25da33d7455e3a83331bd72ca1a`
-- régression scheduler : `e6d012c667a2af487707178abe9c6bcb567e5cb4`
+- driver externe abstrait : `30010d42c0b7626a29046a12f0b30e1ae0c7c020`
+- raccord façade publique : `629497a4bcea99dfb5dbe768d970fd1249f4c3ab`
+- régression driver : `4d7c92715ace4f3e19ab8b963f95a70b69c82aa0`
+- correction attente test : `9410c6c318077243087a91492def79b00de67057`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : définir le premier contrat de cadence/driver externe autour du scheduler (start/stop/push delta), sans choisir encore secondes/FPS ni créer de timer réel ;
+1. prochaine étape Capture : définir la première couche d'adaptation UI/app autour du driver (start/pause/resume/stop selon cycle de vie du combat), sans choisir encore la fréquence réelle ni créer de timer automatique ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

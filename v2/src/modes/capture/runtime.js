@@ -113,6 +113,7 @@ import {
 } from './ui-roster-list.js';
 import {
   CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT,
+  buildCaptureOpponentInspection,
   buildCaptureOpponentSummary,
 } from './ui-opponent-summary.js';
 
@@ -135,6 +136,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalCreatureInspection:true,
   canonicalUiRosterList:true,
   canonicalUiOpponentSummary:true,
+  canonicalUiOpponentInspection:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -165,6 +167,7 @@ export {
   attachCaptureUiVisualClockSource,
   attemptCaptureInBattle,
   buildCaptureCreatureInspection,
+  buildCaptureOpponentInspection,
   buildCaptureOpponentSummary,
   buildCaptureRosterLists,
   captureRosterListEntry,

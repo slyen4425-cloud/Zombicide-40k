@@ -23,6 +23,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Contrôles MJ manuels : runtime et panneau réel dans la vue Donjon, sur le même `combatState`, pour modifier les ressources/PV, KO/réactiver, effectuer un jet manuel et passer le tour.
 - Sécurité d’interface MJ : le panneau MJ exige `gmFullControl=true` et un appareil explicitement désigné MJ.
 - Rôle appareil MJ persistant localement : le téléphone mémorise `gm` ou `player` dans son propre `localStorage`. La règle de partie et le rôle du téléphone restent séparés ; un autre téléphone ne récupère pas ce rôle automatiquement.
+- Lancement RPG : avant d’ouvrir l’espace RPG, l’appareil affiche maintenant un choix explicite `Ce téléphone est MJ` / `Ce téléphone est Joueur`. Le rôle mémorisé est indiqué et le choix sélectionné est sauvegardé localement avant le montage de la page RPG.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -40,30 +41,28 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - panneau MJ manuel dans vraie vue Donjon : `34673068558` success
 - restriction panneau MJ au seul appareil MJ : `34673262305` success
 - persistance locale du rôle appareil MJ : `34673462295` success
+- choix du rôle téléphone au lancement RPG : `34673652441` success
 
 ## Dernière étape terminée
 
-Persistance locale du rôle du téléphone/appareil MJ :
-- nouveau module `v2/src/modes/rpg/dungeon-device-role.js` ;
-- valeur stockée sous `gensrpg.v2.dungeon.deviceRole` avec seulement deux valeurs reconnues : `gm` et `player` ;
-- toute valeur absente/invalide retombe sur `player`, donc le comportement sûr reste joueur par défaut ;
-- lecture/écriture protégées contre un stockage indisponible ou refusé ;
-- `rpg-page.js` utilise maintenant `dungeonIsGameMasterDevice=null` comme mode auto : dans ce cas il restaure le rôle local mémorisé au montage ;
-- une valeur explicite `true/false` passée par un futur flux réseau/session continue de prendre priorité sur le stockage local ;
-- `setDungeonGameMasterDevice()` met désormais à jour à la fois le rôle courant et sa persistance locale ;
-- le panneau MJ continue d’exiger en plus `gmFullControl=true` : mémoriser le téléphone MJ ne change aucune règle de combat à lui seul ;
-- régression dédiée sur normalisation, sauvegarde/restauration, valeurs invalides et branchement réel dans `rpg-page.js`.
+Choix explicite du rôle du téléphone dans le flux de lancement RPG :
+- nouveau module `v2/src/modes/rpg/dungeon-device-role-launch-ui.js` ;
+- à l’ouverture du mode RPG, la page RPG n’est plus montée immédiatement : l’utilisateur choisit d’abord `📱 Ce téléphone est MJ` ou `🎮 Ce téléphone est Joueur` ;
+- le rôle local déjà mémorisé est lu et affiché avec `Rôle mémorisé`, sans imposer silencieusement ce rôle ;
+- le clic sauvegarde `gm` ou `player` via le module de persistance existant puis monte `mountRpgPage()` avec `dungeonIsGameMasterDevice` explicite ;
+- le choix ne modifie pas `gmFullControl` : rôle appareil et règle de partie restent indépendants ;
+- un téléphone Joueur reste donc sans panneau MJ même si le monde est configuré en MJ total ;
+- la régression vérifie les deux choix, le rôle mémorisé et le fait que `app.js` passe bien le rôle explicite à la page RPG.
 
 Commits de l’étape :
-- stockage local rôle appareil : `53888557ceca51b011cb855562282914522695df`
-- restauration/persistance dans la page RPG : `7559f022ec6907253c4bc5a66d4f9be9a0638466`
-- régression : `72e598c966178938f882b826e4dd3bfc2cab8f9c`
+- UI de choix du rôle : `8c121bb04d1cb632b4c436dfff8bfe2dd94e0e39`
+- branchement dans le lancement RPG : `cd1193d534d86eb1dbd74785d33ebda4ae332e01`
+- régression : `66b3bec821cba172500fcc1f3813eb4d772c345b`
 
-CI finale : `34673462295` success.
+CI finale : `34673652441` success.
 
 ## Priorités ouvertes
 
-1. ajouter un choix clair dans le flux de lancement/connexion de partie pour marquer ce téléphone `MJ` ou `Joueur`, en utilisant le stockage local déjà prêt ;
-2. améliorer ensuite l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, panneau MJ) sans toucher à l’autorité moteur ;
-3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. améliorer maintenant l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, consommables et panneau MJ) sans toucher à l’autorité moteur ;
+2. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+3. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

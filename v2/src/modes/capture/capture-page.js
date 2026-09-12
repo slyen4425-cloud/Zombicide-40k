@@ -107,6 +107,16 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-roster-status" data-capture-status="${escapeHtml(status.id||status.name)}">${escapeHtml(status.name||status.id)}${stacks}${remaining}</span>`;
   }
 
+  function rosterAbilityHtml(ability){
+    const charges=ability.charges!==null&&ability.chargeMax!==null
+      ?` · charges ${escapeHtml(ability.charges)}/${escapeHtml(ability.chargeMax)}`
+      :ability.charges!==null
+        ?` · charges ${escapeHtml(ability.charges)}`
+        :'';
+    const cooldown=ability.cooldownRemaining!==null?` · recharge ${escapeHtml(ability.cooldownRemaining)}`:'';
+    return `<span class="capture-roster-ability" data-capture-ability="${escapeHtml(ability.id)}">${escapeHtml(ability.id)}${charges}${cooldown}</span>`;
+  }
+
   function rosterEntryHtml(entry){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
     const koClass=entry.ko?' is-ko':'';
@@ -116,12 +126,14 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const koBadge=entry.ko?'<span class="capture-roster-ko-badge" data-capture-ko-badge>KO</span>':'';
     const vitals=entry.hpLabel!==null?`<p class="capture-roster-vitals" data-capture-hp>PV : ${escapeHtml(entry.hpLabel)}</p>`:'';
     const statuses=entry.statuses.length?`<div class="capture-roster-statuses" data-capture-statuses>${entry.statuses.map(rosterStatusHtml).join('')}</div>`:'';
+    const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(rosterAbilityHtml).join('')}</div>`:'';
     return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
         <p>${escapeHtml(entry.subtitle)}</p>
         ${vitals}
         ${statuses}
+        ${abilities}
         ${activeBadge}
         ${koBadge}
       </div>

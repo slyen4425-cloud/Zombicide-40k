@@ -208,7 +208,7 @@ assert.match(pageSource,/entry\.statuses\.map\(rosterStatusHtml\)/);
 assert.match(pageSource,/data-capture-abilities/);
 assert.match(pageSource,/data-capture-ability=/);
 assert.match(pageSource,/capture-roster-ability/);
-assert.match(pageSource,/entry\.abilities\.map\(rosterAbilityHtml\)/);
+assert.match(pageSource,/entry\.abilities\.map\(ability=>rosterAbilityHtml\(ability,\{interactive:canUseAbilities\}\)\)/);
 assert.match(pageSource,/charges/);
 assert.match(pageSource,/recharge/);
 assert.match(pageSource,/buildCaptureRosterLists\(session\.state,\{assetRegistry\}\)/);

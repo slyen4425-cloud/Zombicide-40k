@@ -22,7 +22,7 @@ function normalizeExpiry(value){
   return Number.isFinite(numeric)&&numeric>=0?numeric:null;
 }
 
-export function createCaptureUiNoticeFeed({maxVisible=6,expireAfterVisualTime=null,visualTime=0,items=[]}={}){
+export function createCaptureUiNoticeFeed({maxVisible=6,expireAfterVisualTime=null,visualTime=0,nextId=0,items=[]}={}){
   const limit=normalizeLimit(maxVisible);
   const expiry=normalizeExpiry(expireAfterVisualTime);
   const now=Math.max(0,Number(visualTime)||0);
@@ -35,7 +35,7 @@ export function createCaptureUiNoticeFeed({maxVisible=6,expireAfterVisualTime=nu
     maxVisible:limit,
     expireAfterVisualTime:expiry,
     visualTime:now,
-    nextId:Math.max(normalized.length,Math.floor(Number(arguments?.[0]?.nextId)||0)),
+    nextId:Math.max(normalized.length,Math.floor(Number(nextId)||0)),
     items:normalized.slice(-limit),
   };
 }

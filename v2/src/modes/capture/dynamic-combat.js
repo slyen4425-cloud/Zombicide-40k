@@ -11,6 +11,7 @@ import {
   spendCaptureAbility,
 } from './abilities.js';
 import {createCaptureVitals} from './vitals.js';
+import {resolveCaptureReaction} from './reactions.js';
 
 const clone=value=>structuredClone(value);
 
@@ -91,7 +92,7 @@ export function isCaptureTargetInRange(battle,range,{fromSide='player',toSide='o
   return {ok:Number.isFinite(distance)&&distance<=normalizedRange,distance,range:normalizedRange};
 }
 
-export function resolveCaptureAbilityAction({battle,side='player',targetSide='opponent',abilityDef,abilityState,effectResolver=null,diagonal=false,activeTeam=[]}={}){
+export function resolveCaptureAbilityAction({battle,side='player',targetSide='opponent',abilityDef,abilityState,effectResolver=null,diagonal=false,activeTeam=[],reactionDef=null,reactionResolver=null}={}){
   if(!battle) return {ok:false,reason:'battle-not-active',battle,abilityState:clone(abilityState||{})};
   const actor=battle[String(side)]?.actorId;
   const targetActor=battle[String(targetSide)]?.actorId;
@@ -109,14 +110,21 @@ export function resolveCaptureAbilityAction({battle,side='player',targetSide='op
   const spent=spendCaptureAbility(abilityState,ability.id,{cooldown:ability.cooldown||0});
   if(!spent.ok) return {...spent,battle};
   const action={type:'ability',side:String(side),targetSide:String(targetSide),abilityId:ability.id,effect:clone(ability.effect),resolved:false};
+  const reaction=resolveCaptureReaction({battle,action,ability,reactionDef,evaluator:reactionResolver});
+  if(!reaction.ok) return {ok:false,reason:reaction.reason,battle,abilityState:clone(abilityState||{}),reaction};
+  if(reaction.triggered&&reaction.reaction?.negatesEffect){
+    const resolvedAction={...action,resolved:true,outcome:{type:'reaction',reactionId:reaction.reaction.id,reactionType:reaction.reaction.type,negated:true,reactionOutcome:clone(reaction.outcome)}};
+    const loggedBattle={...clone(battle),pendingAction:null,actionLog:[...(battle.actionLog||[]).map(clone),resolvedAction]};
+    return {ok:true,battle:loggedBattle,abilityState:spent.state,action:resolvedAction,koOutcome:'continue',activeTeam:clone(activeTeam),reaction};
+  }
   const resolution=typeof effectResolver==='function'?effectResolver({battle:clone(battle),action:clone(action),ability:clone(ability)}):{ok:true,outcome:{type:'declared_effect',effect:clone(ability.effect)}};
   if(resolution?.ok===false) return {ok:false,reason:resolution.reason||'capture-effect-resolution-failed',battle,abilityState:clone(abilityState||{})};
-  const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null)};
+  const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null),reaction:reaction.triggered?clone(reaction):null};
   const resolvedBattle=resolution?.battle?clone(resolution.battle):clone(battle);
   const loggedBattle={...resolvedBattle,pendingAction:null,actionLog:[...(resolvedBattle.actionLog||battle.actionLog||[]).map(clone),resolvedAction]};
   const ko=resolveCaptureKoState(loggedBattle,activeTeam);
-  if(!ko.ok) return {...ko,abilityState:spent.state,action:resolvedAction};
-  return {ok:true,battle:ko.battle,abilityState:spent.state,action:resolvedAction,koOutcome:ko.outcome,activeTeam:ko.activeTeam,...(ko.previousInstanceId?{previousInstanceId:ko.previousInstanceId}:{}),...(ko.activeInstanceId?{activeInstanceId:ko.activeInstanceId}:{})};
+  if(!ko.ok) return {...ko,abilityState:spent.state,action:resolvedAction,reaction};
+  return {ok:true,battle:ko.battle,abilityState:spent.state,action:resolvedAction,koOutcome:ko.outcome,activeTeam:ko.activeTeam,reaction,...(ko.previousInstanceId?{previousInstanceId:ko.previousInstanceId}:{}),...(ko.activeInstanceId?{activeInstanceId:ko.activeInstanceId}:{})};
 }
 
 export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){

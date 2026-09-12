@@ -146,7 +146,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const statuses=entry.statuses.length?`<div class="capture-roster-statuses" data-capture-statuses>${entry.statuses.map(rosterStatusHtml).join('')}</div>`:'';
     const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(rosterAbilityHtml).join('')}</div>`:'';
     const reactions=entry.reactions.length?`<div class="capture-roster-reactions" data-capture-reactions>${entry.reactions.map(rosterReactionHtml).join('')}</div>`:'';
+    const visual=entry.iconArt||entry.mainArt;
+    const art=visual?.src?`<img class="capture-roster-art" data-capture-roster-art src="${escapeHtml(visual.src)}" alt="${escapeHtml(entry.displayName)}">`:'';
     return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
+      ${art}
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
         <p>${escapeHtml(entry.subtitle)}</p>
@@ -162,7 +165,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   }
 
   function renderRosterLists(){
-    const lists=buildCaptureRosterLists(session.state);
+    const lists=buildCaptureRosterLists(session.state,{assetRegistry});
     if(activeList){
       activeList.innerHTML=lists.activeTeam.length
         ?lists.activeTeam.map(rosterEntryHtml).join('')
@@ -285,7 +288,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get visualPauseController(){return structuredClone(visualPauseController);},
     get presentationBlock(){return structuredClone(presentationBlock);},
     get overlay(){return structuredClone(overlay);},
-    get rosterLists(){return buildCaptureRosterLists(session.state);},
+    get rosterLists(){return buildCaptureRosterLists(session.state,{assetRegistry});},
     get opponentSummary(){return buildCaptureOpponentSummary(session.state,{assetRegistry});},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},

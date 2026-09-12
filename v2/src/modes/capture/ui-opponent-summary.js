@@ -1,4 +1,5 @@
 import {captureAssetPathAllowed,resolveCaptureSpeciesAsset} from './assets.js';
+import {buildCaptureSpatialSummary} from './ui-spatial-summary.js';
 
 export const CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT=Object.freeze({
   presentationOnly:true,
@@ -6,6 +7,7 @@ export const CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT=Object.freeze({
   readsAuthoritativeVitals:true,
   readsAuthoritativeStatuses:true,
   readsAuthoritativePosition:true,
+  readsAuthoritativeSpatialDistance:true,
   readsCanonicalCaptureAssetRegistry:true,
   neverUsesRpgOrDungeonFallback:true,
   exposesInspectionTarget:true,
@@ -85,12 +87,14 @@ export function buildCaptureOpponentSummary(state={}, {assetRegistry={}}={}){
   const position=actorId&&battle?.spatial?.positions?.[actorId]
     ?structuredClone(battle.spatial.positions[actorId])
     :null;
+  const spatial=buildCaptureSpatialSummary(state);
+  const distanceLabel=spatial?.distanceLabel??null;
 
   return {
     instanceId,
     speciesId,
     displayName,
-    title:displayName,
+    title:distanceLabel!==null?`${displayName} · distance ${distanceLabel}`:displayName,
     wild:creature.wild===true||battle.mode==='wild',
     currentHp,
     maxHp,
@@ -98,6 +102,9 @@ export function buildCaptureOpponentSummary(state={}, {assetRegistry={}}={}){
     ko,
     statuses,
     position,
+    playerPosition:spatial?.playerPosition?structuredClone(spatial.playerPosition):null,
+    distance:spatial?.distance??null,
+    distanceLabel,
     mainArt:mainArt?{...mainArt,src:captureAssetPathToUiSrc(mainArt.path)}:null,
     iconArt:iconArt?{...iconArt,src:captureAssetPathToUiSrc(iconArt.path)}:null,
   };
@@ -124,8 +131,14 @@ export function buildCaptureOpponentInspection(state={}, {speciesDef=null,assetR
       }).join(' ; '),
     });
   }
+  if(summary.playerPosition&&summary.playerPosition.x!=null&&summary.playerPosition.y!=null){
+    fields.push({id:'player-position',label:'Votre position',value:`${summary.playerPosition.x}, ${summary.playerPosition.y}`});
+  }
   if(summary.position&&summary.position.x!=null&&summary.position.y!=null){
-    fields.push({id:'position',label:'Position',value:`${summary.position.x}, ${summary.position.y}`});
+    fields.push({id:'position',label:'Position adverse',value:`${summary.position.x}, ${summary.position.y}`});
+  }
+  if(summary.distanceLabel!==null){
+    fields.push({id:'distance',label:'Distance praticable',value:summary.distanceLabel});
   }
   if(speciesDef&&Array.isArray(speciesDef.elements)&&speciesDef.elements.length){
     fields.push({id:'elements',label:'Éléments',value:speciesDef.elements.map(String).join(', ')});

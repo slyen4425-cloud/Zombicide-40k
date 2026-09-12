@@ -50,7 +50,7 @@ function buildState(){
   const before=useCaptureBattleAbility(state,{abilityDef:playerAbility,abilityState:playerAbilityState,effectResolver:resolveCaptureVitalEffect,reactionResolver:dodge});
   assert.equal(before.ok,true);
   assert.equal(before.reaction.triggered,false);
-  assert.equal(before.reaction.reason,'capture-reaction-window-not-open');
+  assert.equal(before.reaction.reason,'capture-reaction-window-time-required');
   assert.equal(before.state.battle.opponent.vitals.currentHp,15);
   state=before.state;
   playerAbilityState=before.abilityState;

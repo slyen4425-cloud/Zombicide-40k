@@ -11,14 +11,16 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome et très avancé ; le chantier Capture reste volontairement en pause.
 - Après le premier test réel sur téléphone, l'utilisateur a jugé l'interface V2 trop archaïque, les sous-menus mal structurés et le Donjon/combat très en retrait par rapport à la V1.
-- Nouvelle priorité immédiate : GEL des ajouts gameplay pendant une passe UX/présentation RPG. La V1 sert de référence de qualité visuelle/fonctionnelle, sans réutiliser son architecture legacy.
+- Priorité actuelle : rendre le RPG réellement jouable et lisible sur téléphone avant de reprendre les autres modes.
 
 ## RPG — socle testable déjà présent
 
 - Accueil → RPG → rôle appareil → page RPG raccordé.
 - Partie Donjon test depuis le World Builder courant.
 - Héros configurés utilisés avec leurs vraies données ; fallback démo en mémoire si aucun héros.
-- Grille Donjon live avec positions runtime, déplacement tactile via Spatial Core + pathfinding authored, murs/portes/obstacles respectés.
+- Grille Donjon live avec positions runtime.
+- Déplacement exploration tactile via Spatial Core + pathfinding authored, murs/portes/obstacles respectés.
+- Déplacement tactique pendant le combat maintenant raccordé au moteur tactique existant.
 - Interactions de proximité case/porte/coffre raccordées au vrai moteur.
 - Combat réel, IA ennemie, victoire, réconciliation, loot et retrait du pion couverts par régression.
 - Sauvegarde/reprise manuelle de session test via le provider V2.
@@ -34,7 +36,7 @@ Le premier test utilisateur a révélé que le socle fonctionnel ne suffit pas :
 - le combat reste trop proche de formulaires/selects techniques ;
 - l'écart de qualité perçue avec la V1 est encore très important.
 
-Décision : ne plus ajouter de mécanique avant d'avoir reconstruit une UX RPG/Donjon cohérente et mobile-first.
+La passe UX reste prioritaire, mais un point gameplay indispensable a été rétabli avant de poursuivre le polish : le déplacement tactique en combat, nécessaire pour donner du sens aux attaques de mêlée/distance, à la portée et au placement.
 
 ## Référence V1 auditée
 
@@ -78,12 +80,6 @@ Une couche de présentation dédiée restructure désormais le DOM après chaque
 
 CI : `34707068397` completed + success.
 
-Commits :
-- structure DOM : `f7fe18d4d481e6c2af8b0f39f1ecf7bd8ec5d87d`
-- styles : `321e0ece8fce6ae331d660664bfc106966c389d1`
-- chargement : `a5b779e6ab4bc3521eab963562b872bc884cce11`
-- régression : `e898650b8a2188ba6dff37c865328e1b273c85c0`
-
 ### Passe 3 — navigation RPG structurée
 
 La barre plate `Configuration / Donjon / Héros / World Builder / Salle / Combat test` est remplacée visuellement par quatre catégories cohérentes :
@@ -93,22 +89,55 @@ La barre plate `Configuration / Donjon / Héros / World Builder / Salle / Combat
 3. `🗺️ Monde` → World Builder + Salles ;
 4. `⚙️ Configuration` → Règles & contenu + Laboratoire combat.
 
-Implémentation volontairement présentation-only :
+- `v2/src/ui/rpg-navigation-ui.js` déplace les boutons existants sans recréer leurs listeners ;
+- `v2/src/ui/rpg-navigation-ui.css` ajoute la hiérarchie mobile/desktop ;
+- entrée RPG orientée vers Donjon/Jouer ;
+- aucun moteur RPG, stockage, World Builder ou combat modifié.
 
-- `v2/src/ui/rpg-navigation-ui.js` déplace les boutons existants dans les groupes sans recréer leurs listeners ;
-- `v2/src/ui/rpg-navigation-ui.css` ajoute une hiérarchie 4 colonnes desktop / 2 colonnes téléphone ;
-- `v2/index.html` charge la nouvelle couche ;
-- à l'entrée RPG, si l'ancien onglet Configuration est encore actif par défaut, la couche UX ouvre automatiquement `Donjon` afin que l'utilisateur arrive d'abord sur `Jouer` ;
-- aucun moteur RPG, stockage, World Builder ou combat n'est modifié.
+CI : `34707462937` completed + success.
 
-Régression : `v2/tests/rpg-navigation-presentation.test.mjs`.
-Batterie complète : `34707462937` completed + success.
+## Déplacement tactique en combat — raccordement actuel
+
+Retour utilisateur : le tir à distance n'a pas de sens si le héros ne peut pas se repositionner pendant son tour.
+
+Audit effectué : `v2/src/modes/rpg/tactical-combat.js` possédait déjà le vrai moteur de déplacement combat :
+- `createCombatMovementState()` ;
+- `moveCombatActor()` ;
+- `resetActorCombatMovement()` ;
+- portée/LOS/couverture via `evaluateAttackPosition()`.
+
+Le nouveau raccordement ne crée donc PAS un second moteur :
+
+- `v2/src/modes/rpg/dungeon-combat-movement.js` adapte le moteur tactique existant à la session Donjon ;
+- budget de mouvement persistant pour le `turnSequence` courant ;
+- nouveau tour = nouveau budget ;
+- seuls les héros actifs peuvent cliquer la grille pendant leur tour ;
+- les autres combattants sont traités comme cases occupées pour la destination/pathfinding du wrapper ;
+- murs, portes et layout authored passent par le moteur tactique existant ;
+- déplacer ne termine pas automatiquement le tour : le héros peut ensuite utiliser sa compétence depuis sa nouvelle position ;
+- le spatial mis à jour est conservé dans le roomRuntime et renvoyé au combat ;
+- feedback mobile `👣 Déplacement tactique — X / Y cases restantes` ;
+- l'ancien déplacement exploration reste bloqué pendant un combat.
+
+Régression : `v2/tests/rpg-dungeon-combat-movement.test.mjs`.
+Le test protège notamment :
+- budget 3 cases cumulé dans un même tour ;
+- budget épuisé refusé ;
+- case occupée refusée ;
+- nouveau `turnSequence` réinitialise le budget ;
+- une attaque distance invalide à 4 cases devient valide après un déplacement de 2 cases, sans changer de combat/tour ;
+- intégration page + CSS.
+
+Batterie complète : `34708055765` completed + success.
 
 Commits :
-- navigation structurée : `e72c36ea4c3cabf587e0529b0a9cc2b10034b484`
-- styles navigation : `c163e1c336bc73ffc428240c5d2396c843d3165e`
-- chargement V2 : `3cc48f1d64c6f551e39df3eb65a0ef6bffc159df`
-- régression : `8bafc0363234ca40e6d80d12f9cd96fb4f8c7d72`
+- premier wrapper (supersédé) : `8313da2309ff77a38d42cb8f4d0cc85098391370` ;
+- UI grille combat : `755e0ba7216831da55684d3311f877e1a30414b8` ;
+- raccordement page RPG : `ca1be4366f8440fbf077d165c8525bef0603e624` ;
+- feedback visuel : `465e89042cf8ded6a72a6bb1ce31bab8912771e1` ;
+- chargement CSS : `37fdaadb288f80e38cbd7604e49af548ff328a6a` ;
+- correction importante pour réutiliser `moveCombatActor()` existant : `56b46e43134439593f290a48b4e762359f0c8e74` ;
+- régression : `4fccd57a743b3de4c9c02127ad7494cc3535df1a`.
 
 ## Jalons CI récents validés
 
@@ -123,6 +152,7 @@ Commits :
 - RPG UX : première refonte présentation Donjon : `34704516033` success
 - RPG UX : hiérarchie surface de jeu / Journal & détails : `34707068397` success
 - RPG UX : navigation Jouer / Héros / Monde / Configuration : `34707462937` success
+- RPG : déplacement tactique en combat raccordé : `34708055765` success
 
 ## Preview téléphone
 
@@ -133,8 +163,8 @@ Pour tester les prochaines passes UX, générer/communiquer une nouvelle URL raw
 
 ## Priorités ouvertes
 
-1. Refaire maintenant l'UX de combat Donjon : portraits/cartes, PV et ressources visibles, timeline lisible, compétences sous forme de commandes/cartes et ciblage visuel ; réduire au maximum les `select` bruts.
-2. Revoir ensuite la fiche héros/inventaire/équipement pour qu'elle soit une interface de jeu et non une suite de formulaires.
-3. Revoir les écrans Monde/Salles et Configuration pour appliquer la même hiérarchie de sous-menus à l'intérieur de chaque catégorie.
-4. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
-5. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.
+1. Reprendre maintenant l'UX du combat Donjon : cartes/portraits, PV et ressources visibles, timeline claire, compétences et ciblage sans formulaires bruts.
+2. Vérifier dans cette passe que la configuration spatiale de la salle (LOS/couverture authored) est bien propagée aux contrôles de ciblage UI, pas seulement au moteur de déplacement.
+3. Revoir ensuite la fiche héros/inventaire/équipement comme interface de jeu.
+4. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
+5. Puis assets réels, audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

@@ -18,7 +18,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Bootstrap global Capture interdit : initialisation seulement à l’ouverture du mode.
 - Stockage Capture V2 exclusivement sous `gensrpg:v2:capture:*`; anciennes clés legacy en lecture seule pour migration.
 - Bibliothèque Capture nettoyée par IDs canoniques : alias legacy préservés, familles générées non validées mises en quarantaine.
-- Le runtime roster Capture existe maintenant dans `v2/src/modes/capture/roster.js` : migration d’IDs, instances possédées distinctes, équipe max 6, réserve, quarantaine des espèces inconnues/non canoniques.
+- Le runtime roster Capture existe dans `v2/src/modes/capture/roster.js` : migration d’IDs, instances possédées distinctes, équipe max 6, réserve, quarantaine des espèces inconnues/non canoniques.
+- Le roster est maintenant intégré dans l’état `capture.js` avec `roster`, `activeTeam`, `reserve` et `quarantine`.
+- La carte Capture de l’accueil est activée mais le code du mode est chargé uniquement par `import()` après ouverture explicite de Capture.
 
 ## Jalons CI récents validés
 
@@ -27,31 +29,34 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - contrats gameplay Capture : `34679477548` success
 - squelette runtime Capture isolé + Core spatial partagé : `34679708898` success
 - migration roster/équipe/réserve Capture : `34679980856` success
+- branchement roster + ouverture lazy Capture : `34680539893` success
 
 ## Dernière étape terminée
 
-Runtime roster / équipe / réserve / migration des IDs canoniques :
-- création de `v2/src/modes/capture/roster.js` ;
-- construction d’un index alias legacy -> espèce canonique à partir de `capture-creature-canonicalization.json` ;
-- les IDs legacy confirmés (`crea_embercub`, `crea_braiseau`, etc.) convergent vers un seul `speciesId` canonique ;
-- chaque créature possédée garde son `instanceId`, son niveau, XP, PV, charges de capacités et métadonnées : deux captures de la même espèce ne sont jamais fusionnées ;
-- l’ancien `speciesId` est conservé dans `legacySpeciesId` pour traçabilité/migration ;
-- espèces ou lignées non canoniques/non validées envoyées en `quarantine` plutôt qu’importées silencieusement ;
-- exemple protégé : `crea_pyrolynx` reste hors canon automatique ;
-- séparation roster -> équipe active + réserve, avec priorité facultative aux anciens IDs actifs ;
-- limite stricte de 6 actifs ;
-- déplacement d’une créature entre équipe et réserve protégé par le même plafond ;
-- nouveau test `v2/tests/capture-roster-migration.test.mjs` couvre alias, doublons possédés, quarantaine, priorité d’équipe et limite de 6.
+Branchement roster dans le runtime Capture + entrée lazy depuis l’accueil :
+- `capture.js` importe maintenant uniquement son moteur `roster.js` propre au mode ;
+- `createCaptureModeState()` porte roster, équipe active, réserve et quarantaine ;
+- `initializeCaptureRoster()` importe les anciennes captures via canonicalisation puis répartit équipe/réserve ;
+- `moveCaptureRosterCreature()` déplace une instance équipe ↔ réserve sans perdre le roster global ;
+- nouveau `v2/src/modes/capture/capture-page.js` comme point d’entrée UI minimal du mode ;
+- la carte Capture de `app.js` est maintenant active ;
+- aucun import statique Capture dans `app.js` ;
+- ouverture via `await import('./modes/capture/capture-page.js')` uniquement après clic utilisateur ;
+- aucun ancien seed `ensureBuiltinMonsterCapture*` n’est exécuté au démarrage ;
+- nouveau test `v2/tests/capture-lazy-entry.test.mjs` protège le lazy-load, l’isolation RPG, la migration roster et la quarantaine.
 
 Commits de l’étape :
-- runtime roster Capture : `045380048c036d756441817fc4847ca5e0f09cee`
-- régression migration roster : `aea61f485f82c26003152e65ced8efa1f58eff97`
+- intégration roster dans état Capture : `40960cae17ae53a99c604fc4f177b04d7b7cbbbf`
+- page Capture lazy : `d91a99e6c5f6531f5f9652b0ef18a705aecd1281`
+- accueil Capture en import dynamique : `0bc79edcfced09bcf1ea298e825dcaf64f7ec2e6`
+- régression lazy entry : `26201e8a294cd6f7009dbd34dd25b3aef1999404`
 
-CI fonctionnelle de l’étape : `34679980856` success.
+CI fonctionnelle de l’étape : `34680539893` success.
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : brancher ce roster dans `capture.js` et préparer l’initialisation lazy du mode depuis l’accueil sans bootstrap global ;
-2. ensuite poursuivre l’audit/liaison des assets Capture, objets de capture et capacités exactes ;
-3. ne construire le moteur de combat dynamique complet qu’après définition détaillée de son comportement ;
-4. avant de déclarer RPG terminé, faire la passe finale dédiée assets/visuels/PWA/cache/parité legacy/tests.
+1. prochaine étape Capture : audit/liaison des assets réels des créatures et icônes avec la table canonique, sans importer les doublons legacy ;
+2. ensuite reconstruire les objets de capture et les capacités/charges avec valeurs confirmées uniquement ;
+3. préparer les biomes/rencontres et la boucle d’exploration libre sur le World Builder partagé ;
+4. ne construire le moteur de combat dynamique complet qu’après définition détaillée de son comportement ;
+5. avant de déclarer RPG terminé, faire la passe finale dédiée assets/visuels/PWA/cache/parité legacy/tests.

@@ -103,13 +103,19 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
 
   function rosterEntryHtml(entry){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
+    const koClass=entry.ko?' is-ko':'';
     const activeAttr=entry.activeInBattle?'true':'false';
-    const badge=entry.activeInBattle?'<span class="capture-roster-active-badge" data-capture-active-battle-badge>Actif en combat</span>':'';
-    return `<article class="capture-roster-entry${activeClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}">
+    const koAttr=entry.ko?'true':'false';
+    const activeBadge=entry.activeInBattle?'<span class="capture-roster-active-badge" data-capture-active-battle-badge>Actif en combat</span>':'';
+    const koBadge=entry.ko?'<span class="capture-roster-ko-badge" data-capture-ko-badge>KO</span>':'';
+    const vitals=entry.hpLabel!==null?`<p class="capture-roster-vitals" data-capture-hp>PV : ${escapeHtml(entry.hpLabel)}</p>`:'';
+    return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
         <p>${escapeHtml(entry.subtitle)}</p>
-        ${badge}
+        ${vitals}
+        ${activeBadge}
+        ${koBadge}
       </div>
       <button type="button" data-capture-inspect-instance="${escapeHtml(entry.instanceId)}">Inspecter</button>
     </article>`;

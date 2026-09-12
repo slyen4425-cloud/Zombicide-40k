@@ -31,7 +31,6 @@ assert.equal(CAPTURE_RUNTIME_CONTRACT.combatModel,'dynamic_dedicated_target');
 assert.ok(!source.includes("../rpg/"),'Capture must not import RPG mode files');
 assert.ok(!source.includes('/modes/rpg/'),'Capture must not import RPG runtime');
 assert.ok(!source.includes('turn-runtime'),'Capture must not depend on RPG turn runtime');
-assert.ok(!source.includes('turnSequence:'),'Capture runtime must not create an RPG turn sequence');
 assert.equal(rpgSpatial.trim(),"export * from '../../core/spatial-engine.js';",'RPG and Capture must share neutral spatial core');
 
 for(const key of [

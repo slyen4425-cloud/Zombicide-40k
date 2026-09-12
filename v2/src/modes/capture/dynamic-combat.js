@@ -79,8 +79,9 @@ export function captureBattleDistance(battle,fromSide='player',toSide='opponent'
 }
 
 export function isCaptureTargetInRange(battle,range,{fromSide='player',toSide='opponent',diagonal=false}={}){
-  const distance=captureBattleDistance(battle,fromSide,toSide,{diagonal,maxDistance:Number(range)});
-  return {ok:Number.isFinite(distance)&&distance<=Number(range),distance,range:Number(range)};
+  const normalizedRange=Math.max(0,Number(range)||0);
+  const distance=captureBattleDistance(battle,fromSide,toSide,{diagonal,maxDistance:999});
+  return {ok:Number.isFinite(distance)&&distance<=normalizedRange,distance,range:normalizedRange};
 }
 
 export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){

@@ -5,7 +5,7 @@ import { mountSurvivalPage } from './modes/survival/survival-page.js';
 const MODES = [
   { id: 'survival', icon: '☠️', name: 'Survie', description: 'Migration fidèle du mode actuel, nettoyée et isolée.', status: 'Socle séparé actif', enabled: true },
   { id: 'rpg', icon: '🧭', name: 'RPG', description: 'JDR aux dés, totalement configurable, avec Dungeon et assistant de table.', status: 'Éditeur + World Builder + créateur de salle + combat test', enabled: true },
-  { id: 'capture', icon: '🔮', name: 'Capture de créatures', description: 'Mode isolé. Conservation de l’existant avant futur combat dynamique.', status: 'Mis de côté', enabled: false },
+  { id: 'capture', icon: '🔮', name: 'Capture de créatures', description: 'Mode autonome avec exploration libre sur le socle spatial partagé.', status: 'Runtime isolé en construction', enabled: true },
   { id: 'pvp', icon: '⚔️', name: 'Affrontement / PVP', description: 'Mode séparé réservé pour une phase ultérieure.', status: 'À venir', enabled: false },
 ];
 
@@ -26,7 +26,7 @@ const HELP = {
   'rpg-form': { title: 'Évolution / transformation', html: '<p>Une forme peut être temporaire ou permanente. Elle peut demander des conditions, consommer une ressource, durer plusieurs tours, appliquer des effets et ajouter des compétences.</p><p>Exemple : Ki ≥ 80 → Forme éveillée pendant 3 tours.</p>' },
   'rpg-combat-config': { title: 'Règles de combat', html: '<p>Tu choisis ici ce qui détermine l’initiative, quelle valeur provoque un KO et quel dé sert par défaut aux jets.</p><p>Exemple : Initiative = Agilité + D20 ; KO si Points de vie ≤ 0. Ces noms ne sont pas imposés : une autre statistique ou ressource peut être choisie dans les menus.</p>' },
   'rpg-combat-lab': { title: 'Laboratoire de combat', html: '<p>Cette zone teste le moteur RPG avec deux combattants temporaires. Elle utilise les compétences et les règles de combat configurées.</p><p>Le moteur résout une action une seule fois, puis avance la timeline. Les futures animations de dés ne seront jamais responsables de la logique.</p><p><strong>Astuce :</strong> crée d’abord au moins une compétence et un effet, puis ouvre l’onglet Combat test.</p>' },
-  capture: { title: 'Capture de créatures', html: '<p>Ce chantier est volontairement mis de côté. Son ancien fonctionnement sera récupéré avant toute réécriture.</p>' },
+  capture: { title: 'Capture de créatures', html: '<p>Monster Capture est un mode autonome. Son runtime, son roster, ses sauvegardes et ses futures règles de combat restent séparés du RPG.</p><p>Il partage seulement le socle technique neutre de déplacement et de World Builder. Le code Capture n’est chargé qu’au moment où tu ouvres ce mode.</p>' },
   pvp: { title: 'Affrontement / PVP', html: '<p>Architecture réservée, moteur à construire plus tard.</p>' },
 };
 
@@ -37,7 +37,7 @@ function disposeWorkspace(){
   workspaceController=null;
 }
 function renderModes(){const host=document.querySelector('#modeGrid');host.innerHTML=MODES.map(mode=>`<article class="mode-card ${mode.enabled?'':'disabled'}" ${mode.enabled?`data-mode="${mode.id}"`:''}><div class="mode-card-head"><span class="mode-icon" aria-hidden="true">${mode.icon}</span><button class="help-button small" type="button" data-help="${mode.id}" aria-label="Aide ${mode.name}">?</button></div><h2>${mode.name}</h2><p>${mode.description}</p><span class="status-pill">${mode.status}</span></article>`).join('');}
-function renderStatus(){document.querySelector('#buildStatus').innerHTML='<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>Survie :</strong> moteur/données/interface séparés du RPG</li><li><strong>RPG :</strong> combat + déplacement + vision/furtivité + World Builder + salle + interactions structurées</li></ul>';}
+function renderStatus(){document.querySelector('#buildStatus').innerHTML='<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>Survie :</strong> moteur/données/interface séparés du RPG</li><li><strong>RPG :</strong> combat + déplacement + vision/furtivité + World Builder + salle + interactions structurées</li><li><strong>Capture :</strong> runtime autonome chargé à la demande</li></ul>';}
 function openHelp(key){const help=HELP[key]||HELP.home;const drawer=document.querySelector('#helpDrawer');document.querySelector('#helpTitle').textContent=help.title;document.querySelector('#helpBody').innerHTML=help.html;drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');document.querySelector('#drawerBackdrop').hidden=false;}
 function closeHelp(){const drawer=document.querySelector('#helpDrawer');drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');document.querySelector('#drawerBackdrop').hidden=true;}
 function mountRpgLaunch(host){
@@ -48,8 +48,23 @@ function mountRpgLaunch(host){
     window.scrollTo({top:0,behavior:'instant'});
   }});
 }
-function openMode(modeId){const home=document.querySelector('#homeView');const workspace=document.querySelector('#workspaceView');const host=document.querySelector('#workspaceHost');disposeWorkspace();home.hidden=true;workspace.hidden=false;host.innerHTML='';if(modeId==='rpg')mountRpgLaunch(host);else if(modeId==='survival')workspaceController=mountSurvivalPage(host)||null;else host.innerHTML='<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre des autres moteurs de jeu.</p></section>';window.scrollTo({top:0,behavior:'instant'});}
+async function mountCaptureLazy(host){
+  host.innerHTML='<section class="panel"><h2>Capture de créatures</h2><p>Chargement du mode…</p></section>';
+  const { mountCapturePage }=await import('./modes/capture/capture-page.js');
+  if(!document.body.contains(host)) return;
+  host.innerHTML='';
+  workspaceController=mountCapturePage(host)||null;
+}
+async function openMode(modeId){
+  const home=document.querySelector('#homeView');const workspace=document.querySelector('#workspaceView');const host=document.querySelector('#workspaceHost');
+  disposeWorkspace();home.hidden=true;workspace.hidden=false;host.innerHTML='';
+  if(modeId==='rpg')mountRpgLaunch(host);
+  else if(modeId==='survival')workspaceController=mountSurvivalPage(host)||null;
+  else if(modeId==='capture')await mountCaptureLazy(host);
+  else host.innerHTML='<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre des autres moteurs de jeu.</p></section>';
+  window.scrollTo({top:0,behavior:'instant'});
+}
 function backHome(){disposeWorkspace();document.querySelector('#workspaceView').hidden=true;document.querySelector('#homeView').hidden=false;document.querySelector('#workspaceHost').innerHTML='';window.scrollTo({top:0,behavior:'instant'});}
-document.addEventListener('click',event=>{const help=event.target.closest('[data-help]');if(help){event.stopPropagation();openHelp(help.dataset.help);return;}const mode=event.target.closest('[data-mode]');if(mode)openMode(mode.dataset.mode);});
+document.addEventListener('click',event=>{const help=event.target.closest('[data-help]');if(help){event.stopPropagation();openHelp(help.dataset.help);return;}const mode=event.target.closest('[data-mode]');if(mode)void openMode(mode.dataset.mode);});
 document.querySelector('#helpClose').addEventListener('click',closeHelp);document.querySelector('#drawerBackdrop').addEventListener('click',closeHelp);document.querySelector('#backHome').addEventListener('click',backHome);document.addEventListener('keydown',event=>{if(event.key==='Escape')closeHelp();});
 renderModes();renderStatus();

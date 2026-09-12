@@ -10,10 +10,10 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG data-driven et combat D100/tours protégés par leurs régressions existantes.
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome, stockage `gensrpg:v2:capture:*`, aucun partage gameplay mutable avec RPG.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité, contrôleur multi-raisons de pause visuelle et premier blocage UI purement présentationnel.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité, contrôleur multi-raisons de pause visuelle, blocage UI présentationnel et premier overlay concret non modal.
 - Le temps visuel des notices reste strictement séparé du temps gameplay.
 - Plusieurs raisons de pause visuelle peuvent coexister ; le temps visuel ne reprend que lorsque toutes les raisons sont levées.
-- Un overlay/blocage de présentation peut maintenant suspendre le temps visuel sans suspendre le driver gameplay.
+- L’overlay concret suspend uniquement le temps visuel et n’appelle jamais le blocage gameplay.
 - Aucun driver/source Capture ne choisit encore de cadence finale réelle ni d’API navigateur imposée.
 - Les visuels Capture validés restent `pending_import` sous `v2/assets/capture/creatures/`.
 - Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
@@ -31,39 +31,38 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - visibilité/activité UI : `34686417842` success
 - contrôleur multi-raisons de pause visuelle : `34686742880` success
 - blocage UI présentationnel : `34687005141` success
+- overlay concret non modal : `34687557658` success
 
 ## Dernière étape terminée
 
-Premier blocage UI purement présentationnel Capture :
-- nouveau `v2/src/modes/capture/ui-presentation-block.js` ;
-- contrat `CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT` : présentation uniquement, pause du temps visuel seulement, ne bloque pas le gameplay, aucune mutation gameplay, raison dédiée `presentation-block` ;
-- état `blocked`, `kind`, `metadata` pour permettre plus tard différents overlays/panneaux sans coupler leur contenu au moteur ;
-- `setCaptureUiPresentationBlocked()` ouvre/ferme cet état et renvoie la raison visuelle à appliquer ;
-- `runtime.js` expose le contrat, l’état et l’opération dans la façade Capture officielle ;
-- `capture-page.js` possède maintenant `presentationBlock` et expose `setPresentationBlocking(blocking, options)` ;
-- cette opération ne touche jamais `setCaptureBattleBlocking()` ni le driver gameplay : elle ajoute/retire uniquement `presentation-block` dans le contrôleur visuel ;
-- le statut du driver gameplay est renvoyé à titre d’observation mais jamais modifié ;
-- si `activity` et `presentation-block` coexistent, fermer l’overlay laisse le visuel en pause tant que `activity` subsiste ;
-- `startNoticeVisualClock()` réapplique la raison de présentation si un blocage est encore ouvert ;
-- `dispose()` réinitialise aussi proprement l’état du blocage de présentation ;
-- aucune API navigateur, aucun timer et aucune logique de combat ajoutés.
+Premier overlay/panneau concret non modal Capture :
+- nouveau `v2/src/modes/capture/ui-overlay.js` ;
+- contrat `CAPTURE_UI_OVERLAY_CONTRACT` : présentation uniquement, non modal, blocage présentationnel, aucune mutation gameplay, isolation RPG ;
+- état `open`, `kind`, `title`, `message`, `metadata` ;
+- `openCaptureUiOverlay()` ouvre l’overlay et demande uniquement un blocage présentationnel ;
+- `closeCaptureUiOverlay()` le ferme et libère uniquement ce blocage présentationnel ;
+- `runtime.js` expose ce module dans la façade Capture officielle ;
+- `capture-page.js` rend un vrai `<aside data-capture-overlay ... aria-modal="false">` avec titre/message et bouton Fermer ;
+- nouvelles opérations page `openOverlay(options)` et `closeOverlay()` ;
+- ouverture -> `presentation-block` actif -> temps visuel suspendu ;
+- fermeture -> retrait de `presentation-block` ; si `activity` ou `manual` reste actif, aucune reprise visuelle prématurée ;
+- le statut du driver gameplay est observable dans le résultat, mais il n’est jamais modifié par l’overlay ;
+- aucun appel à `setCaptureBattleBlocking()`, aucun timer navigateur, aucun couplage au temps gameplay.
 
 Régression :
-- nouveau `v2/tests/capture-ui-presentation-block.test.mjs` ;
-- couvre ouverture/fermeture du blocage, métadonnées, absence de mutation gameplay et interaction `activity + presentation-block` ;
-- vérifie que fermer le blocage de présentation ne déclenche pas de reprise tant qu’une autre raison reste active ;
-- garde statique : le module n’appelle ni `setCaptureBattleBlocking`, ni `advanceCaptureDriver`, ni `advanceCaptureTime`, ni API de timer navigateur ;
-- batterie complète : `34687005141` success.
+- nouveau `v2/tests/capture-ui-overlay.test.mjs` ;
+- couvre contrat, ouverture/fermeture, contenu, comportement `activity + presentation-block`, non-modalité et absence de blocage gameplay ;
+- batterie complète : `34687557658` success.
 
 Commits de l’étape :
-- état/contrat blocage présentation : `6f3f3f375b276619899c177f0126e683414b1c8c`
-- façade runtime : `b3ec783c50b362696535bef4a8cad000c9f20a62`
-- page Capture : `8c52a1562ac02141cd30db8bbb10dcdfee2b6b72`
-- régression : `3989abb1aa3751bef1c1c45b31b48f7308f610b3`
+- état/contrat overlay : `d05b292f333df775b188b9e865f762cc512ccc30`
+- façade runtime : `7938318fc92de9306fc38d2f4654b62f0051b816`
+- page Capture / overlay concret : `dd1f61ca9471e129f84269c92b251dfb17b08675`
+- régression : `5003a79b6ea2dde049304aa3d2affe1f93199dc9`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : raccorder le premier **overlay/panneau concret non modal** à `setPresentationBlocking()` pour valider le flux ouverture -> pause visuelle -> fermeture -> reprise conditionnelle, toujours sans bloquer le gameplay ;
+1. prochaine étape Capture : brancher un premier **contenu métier réel** sur cet overlay (par exemple aide/inspection d’une créature ou détail de statut), toujours sans logique gameplay dans la vue ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles ;

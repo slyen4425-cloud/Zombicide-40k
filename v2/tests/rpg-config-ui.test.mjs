@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const here=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(here,'..');
+const source=fs.readFileSync(path.join(root,'src/ui/rpg-config-ui.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'src/ui/rpg-config-ui.css'),'utf8');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const editor=fs.readFileSync(path.join(root,'src/modes/rpg/rpg.js'),'utf8');
+
+assert.match(source,/Fondations/);
+assert.match(source,/Règles & combat/);
+assert.match(source,/Capacités/);
+assert.match(source,/Contenu & monde/);
+assert.match(source,/append\(section\)/,'the UI layer must move existing editor sections instead of recreating their controls');
+assert.match(source,/data-rpg-config-tab/);
+assert.match(source,/data-rpg-config-group/);
+assert.match(source,/MutationObserver/,'configuration must be reorganized again after the editor rerenders');
+assert.match(css,/rpg-config-nav/);
+assert.match(css,/@media\(max-width:800px\)/);
+assert.match(index,/rpg-config-ui\.css/);
+assert.match(index,/rpg-config-ui\.js/);
+assert.match(editor,/addRpgStat/);
+assert.match(editor,/addRpgResource/);
+assert.match(editor,/mountCheckEditor/);
+assert.match(editor,/mountTrapEditor/);
+assert.match(editor,/mountCombatConfigEditor/);
+assert.match(editor,/mountAdvancedRpgEditor/);
+console.log('rpg-config-ui: ok');

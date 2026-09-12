@@ -9,6 +9,8 @@ import { createDungeonTestSession } from './dungeon-test-session.js';
 import { mountDungeonCombatItemControls } from './dungeon-combat-item-ui.js';
 import { mountDungeonCombatFleeControl } from './dungeon-combat-flee-ui.js';
 import { mountDungeonCombatGmControls } from './dungeon-combat-gm-ui.js';
+import { mountDungeonGridInteractionControls } from './dungeon-grid-interactions-ui.js';
+import { materializeRoomLayout } from './room-runtime.js';
 import { isDungeonGameMasterDevice, setDungeonGameMasterDeviceRole } from './dungeon-device-role.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
 import { createRpgAudioSession } from './rpg-audio-session.js';
@@ -54,7 +56,8 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
   const buttons=[...host.querySelectorAll('[data-rpg-tab]')];
 
   function dungeonLayoutProvider(roomId){
-    return loadRoomLayout({id:String(roomId),name:String(roomId)});
+    const base=loadRoomLayout({id:String(roomId),name:String(roomId)});
+    return currentDungeonRuntime?materializeRoomLayout(currentDungeonRuntime,roomId,base):base;
   }
 
   function currentWorldIndex(){
@@ -87,6 +90,23 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     const install=()=>{
       if(currentTab!=='dungeon'||!dungeonView) return;
       const universe=currentDungeonUniverse;
+      mountDungeonGridInteractionControls(body,{
+        universe,
+        getRoomRuntime:()=>dungeonView?.getRoomRuntime?.()||currentDungeonRuntime,
+        getHeroRuntimes:()=>dungeonView?.getHeroRuntimes?.()||structuredClone(currentDungeonHeroRuntimes),
+        getSpatial:()=>dungeonView?.getSpatial?.()||currentDungeonSpatial,
+        getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
+        getInventory:()=>currentDungeonInventory,
+        getRoomLayout:roomId=>roomId?dungeonLayoutProvider(roomId):null,
+        onChange(out){
+          currentDungeonRuntime=out.roomRuntime||out.runtime||currentDungeonRuntime;
+          if(Object.prototype.hasOwnProperty.call(out,'inventory')) currentDungeonInventory=out.inventory;
+          dungeonView.setInventory(currentDungeonInventory);
+          dungeonView.setRoomRuntime(currentDungeonRuntime);
+          onDungeonRuntimeChange?.(currentDungeonRuntime,{...out,kind:'dungeon-grid-interaction'});
+          scheduleDungeonCombatUi();
+        },
+      });
       mountDungeonCombatItemControls(body,{
         universe,
         getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
@@ -173,6 +193,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
         },
         onRoomRuntimeChange:(nextRuntime,out)=>{
           currentDungeonRuntime=nextRuntime;
+          if(out?.spatial) currentDungeonSpatial=structuredClone(out.spatial);
           if(out?.recipients) currentDungeonLootRecipients=out.recipients;
           if(out?.heroRuntimes) currentDungeonHeroRuntimes=structuredClone(out.heroRuntimes);
           if(out?.world) currentDungeonEventWorld=out.world;
@@ -251,7 +272,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     getDungeonLootRecipients:()=>structuredClone(currentDungeonLootRecipients),
     getDungeonInventory:()=>currentDungeonInventory,
     getDungeonHeroRuntimes:()=>structuredClone(currentDungeonHeroRuntimes),
-    getDungeonSpatial:()=>currentDungeonSpatial?structuredClone(currentDungeonSpatial):null,
+    getDungeonSpatial:()=>currentDungeonSpatial?structuredClone(currentDungeonSpatial):structuredClone(currentDungeonRuntime?.spatial||null),
     getDungeonCombat:()=>currentDungeonCombat?structuredClone(currentDungeonCombat):null,
     getDungeonGameMasterDevice:()=>currentDungeonIsGameMasterDevice,
     getDungeonEventWorld:()=>structuredClone(currentDungeonEventWorld),

@@ -17,8 +17,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Le déplacement joueur passe exclusivement par `executeCapturePlayerMove()` ; obstacles/pathfinding restent décidés par le Core spatial.
 - La capture joueur passe par `executeCapturePlayerCaptureAttempt()` ; taux d’espèce, coefficient d’orbe et multiplicateur bas PV éventuel restent explicitement requis.
 - La règle bas PV reste strictement `<30%`; aucun coefficient/multiplicateur n’est inventé.
-- Le résumé adverse affiche désormais aussi la distance praticable réelle jusqu’à l’adversaire, calculée par `shortestPathDistance()` dans un presenter dédié. Les détours autour des obstacles sont pris en compte ; absence de chemin => `inaccessible`.
+- Le résumé adverse affiche la distance praticable réelle jusqu’à l’adversaire, calculée par `shortestPathDistance()` dans un presenter dédié. Les détours autour des obstacles sont pris en compte ; absence de chemin => `inaccessible`.
 - L’inspection adverse affiche `Votre position`, `Position adverse` et `Distance praticable` sans modifier le combat ni déduire une règle de portée.
+- Les tentatives de capture alimentent désormais le feed non bloquant existant : réussite, échec et configuration indisponible produisent des notices `aria-live` sans popup ni pause gameplay.
 
 ## Jalons CI récents validés
 
@@ -34,37 +35,38 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - déplacement tactique cardinal : `34698850672` success
 - tentative de capture par orbe configurée explicitement : `34699118520` success
 - retour spatial position/distance praticable : `34699538838` success
+- notices non bloquantes des tentatives de capture : `34699910099` success
 
 ## Dernière étape terminée
 
-Retour visuel spatial lecture seule :
-- nouveau presenter `v2/src/modes/capture/ui-spatial-summary.js` ;
-- `buildCaptureSpatialSummary()` lit les actor IDs et positions autoritaires du combat ;
-- la distance est calculée avec le Core partagé `shortestPathDistance()` en non-diagonal par défaut ;
-- un détour autour d’obstacles retourne sa vraie longueur ;
-- un chemin impossible retourne `distance:null` et `distanceLabel:'inaccessible'` ;
-- aucun déplacement, aucune capacité, aucune capture et aucune mutation ne sont effectués ;
-- `capture/runtime.js` expose `CAPTURE_UI_SPATIAL_SUMMARY_CONTRACT` et `buildCaptureSpatialSummary()` via la façade canonique ;
-- `buildCaptureOpponentSummary()` réutilise ce presenter et ajoute la distance au titre visible (`Nom · distance N`) ;
-- l’inspection adverse ajoute position joueur, position adverse et distance praticable ;
-- aucune règle de portée de capacité n’est recalculée dans l’UI.
+Retour utilisateur non bloquant des tentatives de capture :
+- `CAPTURE_UI_EVENT_CONTRACT.captureAttemptEvents` est actif ;
+- nouveau `captureUiEventsFromCaptureAttempt()` transforme un résultat autoritaire en `capture_success`, `capture_failed` ou `capture_unavailable` ;
+- une configuration indisponible conserve le `reason` réel (`missing_species_capture_rate`, `pending_orb_coefficient`, `pending_low_hp_multiplier`, etc.) ;
+- `ui-dispatcher.js` transforme ces événements en messages français lisibles ;
+- toutes ces notices ont `blocking:false` et ne suspendent jamais le combat ;
+- `capture/runtime.js` expose le nouvel event builder via la façade canonique ;
+- `capture-page.js` injecte le résultat de chaque `attemptCapture()` dans le feed existant avec `appendCaptureUiNotices()` ;
+- une capture réussie affiche `Capture réussie !`, une tentative ratée `Capture ratée. Le combat continue.`, et une configuration manquante explique le blocage ;
+- aucun `alert`, `confirm`, overlay, `setCaptureBattleBlocking()` ou timer supplémentaire n’a été ajouté.
 
 Régression :
-- `v2/tests/capture-ui-spatial-summary.test.mjs` couvre distance directe, détour, inaccessible, absence de combat et non-mutation ;
-- `v2/tests/capture-ui-opponent-summary.test.mjs` couvre l’intégration de la distance et les nouveaux champs d’inspection ;
-- batterie complète : `34699538838` success.
+- `v2/tests/capture-ui-events.test.mjs` couvre les trois événements capture ;
+- `v2/tests/capture-ui-dispatcher.test.mjs` couvre les textes, le caractère non bloquant et le raccordement de la page au feed ;
+- batterie complète : `34699910099` success.
 
 Commits de l’étape :
-- presenter spatial : `8ceb8df6d1583ae57a86e7edfd5edba042217316`
-- façade runtime : `c6ec4de8ba39c18cd0106d5e531f27324f068eb7`
-- intégration résumé/inspection adverse : `4f711c7f56c98ab8c7d6105dbee7601cd6529829`
-- régression résumé adverse : `c514e20f485418a4414554948b176934d0635c7f`
-- régression presenter spatial : `ac7c8a9197617675d4e018d3f4fa3aa215325aa6`
+- événements capture UI : `4a54a4e2bd5e83e8429cb8fc407b0dc10bfa9ec0`
+- dispatcher notices capture : `1bc0c5e66c57fae2398f56fd905b4073a4ba240f`
+- façade runtime : `8db645fb0f217265483249dfc5899bac7dfa560f`
+- raccordement page/feed : `93675ba8bb74c45c6b2dd1d14e769194e94c02c9`
+- régression événements : `9797feba01471fe2444cfd054778085df4fae901`
+- régression dispatcher/page : `7e27d5fb95659dee19ce9eada7788ce95d4118db`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : afficher aussi la portée explicite des capacités définies à côté de leur commande, sans calculer leur utilisabilité dans l’UI ;
-2. améliorer ensuite le retour utilisateur des tentatives de capture (ratée/réussie/configuration indisponible) via les notices existantes, sans modal bloquante ;
+1. prochaine étape Capture : afficher la portée explicite des capacités définies à côté de leur commande, sans calculer leur utilisabilité dans l’UI ;
+2. ensuite améliorer le retour des actions refusées (capacité hors portée, déplacement impossible) via les notices existantes, sans modal bloquante ;
 3. importer les vrais arts principaux + icônes quand les fichiers validés sont disponibles ;
 4. figer les coefficients réels des 4 orbes et le multiplicateur bas PV uniquement quand leurs valeurs auront été validées ;
 5. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.

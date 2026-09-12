@@ -1,6 +1,5 @@
 import {
   advanceCaptureBattleSession,
-  advanceCaptureUiVisualDriver,
   appendCaptureUiNotices,
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
@@ -8,14 +7,20 @@ import {
   createCaptureAppSession,
   createCaptureModeState,
   createCaptureUiNoticeFeed,
+  createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
   dispatchCaptureUiEvents,
   finishCaptureBattleSession,
+  pauseCaptureUiVisualClockAdapter,
   pauseCaptureUiVisualDriver,
+  resumeCaptureUiVisualClockAdapter,
   resumeCaptureUiVisualDriver,
+  sampleCaptureUiVisualClock,
   setCaptureBattleBlocking,
+  startCaptureUiVisualClockAdapter,
   startCaptureUiVisualDriver,
   stopCaptureDriver,
+  stopCaptureUiVisualClockAdapter,
   stopCaptureUiVisualDriver,
 } from './runtime.js';
 
@@ -32,6 +37,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
+  let visualClockAdapter=createCaptureUiVisualClockAdapterState();
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -73,6 +79,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get notices(){return captureUiNoticeFeedNotices(noticeFeed);},
     get noticeFeed(){return structuredClone(noticeFeed);},
     get visualDriver(){return structuredClone(visualDriver);},
+    get visualClockAdapter(){return structuredClone(visualClockAdapter);},
     beginBattle(options={}){
       const result=beginCaptureBattleSession(session,options);
       if(result.ok) session=result.session;
@@ -93,25 +100,30 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     },
     startNoticeVisualClock(){
       visualDriver=startCaptureUiVisualDriver(visualDriver);
-      return structuredClone(visualDriver);
+      visualClockAdapter=startCaptureUiVisualClockAdapter(visualClockAdapter);
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
     },
     pauseNoticeVisualClock(){
       visualDriver=pauseCaptureUiVisualDriver(visualDriver);
-      return structuredClone(visualDriver);
+      visualClockAdapter=pauseCaptureUiVisualClockAdapter(visualClockAdapter);
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
     },
     resumeNoticeVisualClock(){
       visualDriver=resumeCaptureUiVisualDriver(visualDriver);
-      return structuredClone(visualDriver);
+      visualClockAdapter=resumeCaptureUiVisualClockAdapter(visualClockAdapter);
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
     },
     stopNoticeVisualClock(){
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
-      return structuredClone(visualDriver);
+      visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
     },
-    advanceNoticeVisualTime(delta=0){
-      const result=advanceCaptureUiVisualDriver(noticeFeed,visualDriver,{delta});
+    sampleNoticeVisualClock(sample){
+      const result=sampleCaptureUiVisualClock(noticeFeed,visualDriver,visualClockAdapter,{sample});
       if(result.ok){
         noticeFeed=result.feed;
-        visualDriver=result.driver;
+        visualDriver=result.visualDriver;
+        visualClockAdapter=result.adapter;
         renderFeed();
       }
       return {...result,notices:captureUiNoticeFeedNotices(noticeFeed)};
@@ -125,6 +137,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     dispose(){
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
+      visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
       noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
       host.innerHTML='';
     },

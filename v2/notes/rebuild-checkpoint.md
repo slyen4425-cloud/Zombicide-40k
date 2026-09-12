@@ -8,72 +8,47 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 
 - Séparation stricte Survie / RPG / Monster Capture / VS-PVP.
 - RPG data-driven : stats, ressources, jets/tests, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
-- Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
-- Créateur de salle : portes, interactions, jets réutilisables, tentatives persistantes et obstacles/couverture configurables sans saisie d’ID technique.
-- Combat tactique : mouvement, portée, LOS, murs/portes, équipement, couverture directionnelle et portée d’entraide.
-- Statuts persistants : recomposition ordonnée par source pour `add`, `subtract`, `multiply`, `percent` et `set`, avec conservation des changements externes de la statistique pendant la durée des statuts et compatibilité des sauvegardes V2 antérieures.
-- Donjon multi-héros : `heroLocations`, focus individuel, transitions séparées, retour arrière et réutilisation de l’instance de salle sans respawn.
-- World Builder : passages authored jouables depuis la vue Donjon, avec objets requis et conditions.
-- Quêtes/événements/PNJ/alliés/loot : raccordés au vrai `roomRuntime`, sans second runtime parallèle.
-- Combat Donjon réel : ennemis actifs de la salle + héros réellement présents/proches, vrai `combatState`, fin de combat réconciliée automatiquement vers salle/héros/loot/boss-key.
-- Actions héros : compétences réelles du runtime héros (base + équipement + sets + formes), coûts/cooldowns/jets/effets du moteur existant.
-- Tours ennemis : automatiques sur la même timeline sauf en `MJ contrôle total`.
-- Présentation combat : timeline, KO, PV/ressources, journal moteur, ciblage vivant, consommables et fuite dans la vraie vue Donjon.
-- Contrôle du combat : `interaction.directCombat` et `interaction.gmFullControl` sont appliqués dans la vraie vue Donjon. Direct OFF masque les actions héros automatiques/consommables ; MJ total bloque aussi les tours ennemis automatiques.
-- Contrôles MJ manuels : runtime et panneau réel dans la vue Donjon, sur le même `combatState`, pour modifier les ressources/PV, KO/réactiver, effectuer un jet manuel et passer le tour.
-- Sécurité d’interface MJ : le panneau MJ exige `gmFullControl=true` et un appareil explicitement désigné MJ.
-- Rôle appareil MJ persistant localement : le téléphone mémorise `gm` ou `player` dans son propre `localStorage`. La règle de partie et le rôle du téléphone restent séparés ; un autre téléphone ne récupère pas ce rôle automatiquement.
-- Lancement RPG : avant d’ouvrir l’espace RPG, l’appareil affiche maintenant un choix explicite `Ce téléphone est MJ` / `Ce téléphone est Joueur`. Le rôle mémorisé est indiqué et le choix sélectionné est sauvegardé localement avant le montage de la page RPG.
-- Ergonomie mobile combat : feuille de style dédiée au bloc de combat Donjon réel, sans changement moteur. Timeline horizontale tactile avec snap, cartes/action zones mieux séparées, cible tactile minimale 46–48 px, consommables/fuite et panneau MJ adaptés aux petits écrans, et boutons MJ réorganisés en 2 colonnes puis 1 colonne sous 390 px.
-- Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
-- Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
-- Audit Monster Capture engagé : architecture autonome confirmée, bootstrap legacy global interdit en V2, table de canonicalisation des créatures créée et stockage V2 Capture isolé défini.
-- Monster Capture doit réutiliser la même base technique de déplacement spatial et de World Builder que RPG : grille, pathfinding, portes/passages, primitives obstacles/couverture, géométrie/graphes de salles et interactions de carte génériques peuvent être partagés comme services neutres.
-- Cette réutilisation ne partage aucun état gameplay : créatures, dresseurs, inventaires, progression, règles de combat, profils et sauvegardes Capture restent sous le namespace Capture exclusivement.
+- Combat D100/tours RPG protégé par ses régressions existantes.
+- Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
+- Rôle appareil MJ, panneau MJ, ergonomie mobile combat, audio RPG et stockage abstrait déjà présents.
+- Monster Capture est un mode autonome : aucun état gameplay mutable n’est partagé avec RPG, Survie ou PVP.
+- Monster Capture réutilisera en revanche la base technique neutre de déplacement spatial et World Builder : grille, pathfinding, portes/passages, obstacles/couverture, géométrie/graphes de salles et interactions de carte génériques.
+- Le futur combat Capture sera un runtime dédié : pas de `turnSequence` RPG, pas de timeline D100 RPG. La cible est une exploration plus libre et un combat dynamique, à affiner plus tard.
+- Bootstrap global Capture interdit : initialisation seulement à l’ouverture du mode.
+- Bibliothèque Capture en cours de nettoyage : IDs canoniques uniques, alias legacy préservés, doublons connus fusionnés au niveau migration uniquement, familles générées legacy mises en quarantaine.
+- Stockage Capture V2 exclusivement sous `gensrpg:v2:capture:*`; anciennes clés legacy en lecture seule pour migration.
 
 ## Jalons CI récents validés
 
-- actions/compétences réelles héros : `34653973093` success
-- tours ennemis automatiques : `34655064237` success
-- renderer intégré dans vraie vue Donjon : `34656592813` success
-- contrats de cible `enemy/ally/self/any` : `34656913323` success
-- consommables combat Donjon : `34658191700` success
-- fuite combat Donjon : `34658702948` success
-- configuration combat direct / MJ : `34658933290` success
-- application combat direct / MJ dans vraie vue Donjon : `34659348809` success
-- runtime contrôles manuels MJ : `34672484172` success
-- panneau MJ manuel dans vraie vue Donjon : `34673068558` success
-- restriction panneau MJ au seul appareil MJ : `34673262305` success
-- persistance locale du rôle appareil MJ : `34673462295` success
-- choix du rôle téléphone au lancement RPG : `34673652441` success
-- ergonomie mobile du bloc combat réel : `34677838395` success
-- statuts persistants non additifs + dérive externe : `34678647180` success
-- audit/document architecture Capture : `34679003790` success
 - canonicalisation/déduplication créatures Capture : `34679224508` success
+- stockage Capture isolé + partage spatial neutre : `34679382483` success
+- contrats gameplay Capture : `34679477548` success
 
 ## Dernière étape terminée
 
-Audit stockage Capture + règle de partage du socle spatial/World Builder :
-- `v2/docs/capture-storage-migration.json` cartographie les anciennes sources Capture et leur destination V2 ;
-- les anciennes clés `gensrpg_shared_entities_v1__<profileId>` et `gensrpg_shared_entities_v1__family__creature` deviennent lecture seule pour migration ;
-- les anciennes règles `gensrpg_capture_wild_rules_v1_*`, `gensrpg_capture_mj_rules_v137_*` et `gensrpg_capture_battle_mode_v1_*` sont traduites vers des réglages Capture propres ;
-- le namespace V2 est exclusivement `gensrpg:v2:capture:*` pour profils, sauvegardes, bibliothèques, roster, équipe active, réserve, progression et paramètres ;
-- équipe active limitée à 6 et surplus envoyé en réserve ;
-- les créatures possédées restent des instances distinctes : la déduplication de bibliothèque ne fusionne pas deux captures réelles ;
-- les espèces inconnues et familles générées en masse sont mises en quarantaine pour revue au lieu d’être injectées automatiquement ;
-- les dresseurs legacy stockés comme héros Dungeon et les objets Capture stockés comme équipement RPG sont extraits vers des bibliothèques Capture dédiées ;
-- Capture réutilisera le moteur spatial et le World Builder neutres déjà construits pour RPG, mais jamais l’état gameplay RPG ;
-- test `capture-storage-migration.test.mjs` verrouille isolation du namespace, lecture seule legacy, limite d’équipe, quarantaine, partage de la base spatiale/World Builder et interdiction du partage d’état RPG.
+Contrats fonctionnels Monster Capture avant création du runtime :
+- nouveau fichier `v2/docs/capture-gameplay-contracts.json` ;
+- taux de capture propre à chaque espèce conservé comme exigence ;
+- bonus de capture sous 30 % PV conservé, mais multiplicateur exact laissé volontairement `pending` tant qu’il n’est pas retrouvé ou redéfini ;
+- objets de capture par niveau/qualité prévus dans une bibliothèque Capture dédiée, jamais comme équipement RPG ;
+- équipe active limitée à 6, réserve illimitée par défaut et débordement des nouvelles captures vers la réserve ;
+- chaque créature possédée reste une instance distincte ; aucune fusion automatique de captures réelles lors de migration ;
+- capacités avec charges et/ou coûts conservées ; charges stockées par instance de créature ; valeurs exactes legacy laissées `pending` tant qu’elles ne sont pas confirmées ;
+- biomes, pourcentages d’apparition, tags élément/type et rareté restent des contrats du mode ;
+- combats VS IA et VS joueurs restent prévus ;
+- futur combat dynamique obligatoire comme direction, avec mouvement/positionnement, portée, esquive/placement et changement de créature, sans figer encore le timing temps réel ;
+- toute valeur legacy non retrouvée suit la règle `do_not_guess` ;
+- nouveau test `v2/tests/capture-gameplay-contracts.test.mjs` verrouille ces décisions et interdit toute réutilisation accidentelle du moteur de tours RPG.
 
 Commits de l’étape :
-- cartographie stockage Capture : `d1e3bd7e7c1ae3ac78daf54129f4b4bfc8105703`
-- régression isolation stockage : `b77a8d7b3db1280e469f38b4312ae26416508a9d`
-- règle de partage base spatiale/World Builder : `f3af8be5b3b1371fd0213970ba55771883c6f6f3`
-- régression du partage spatial sans partage d’état : `f1db7bfc1df7cf6de937a4a5439ed893dd220bb0`
+- contrats gameplay Capture : `4c13f3f5fa01e4d2bdac9d61274a35cea23d3bd9`
+- régression contrats gameplay : `ef5a2d8accaead8a2df650701584fcecc0fdc347`
+
+CI fonctionnelle de l’étape : `34679477548` success.
 
 ## Priorités ouvertes
 
-1. poursuivre l’audit legacy Capture sur les règles de combat/capture, objets `capture_orb_*`, capacités/charges et flux équipe active/réserve/invocation avant de créer le runtime Capture ;
-2. définir ensuite les contrats de `v2/src/modes/capture/` en branchant le moteur spatial/World Builder neutre déjà disponible, sans dépendance au runtime RPG ;
-3. poursuivre ensuite l’audit legacy systématique hors Capture : gros index restant, assets, audio, PWA/cache, sauvegardes/migrations, tests et UI cachées ;
-4. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.
+1. définir les premiers contrats de `v2/src/modes/capture/` sans encore construire le combat dynamique complet ;
+2. brancher Capture sur le socle spatial/World Builder neutre existant tout en gardant son état et son stockage séparés ;
+3. poursuivre l’audit des assets Capture, objets de capture et capacités exactes si des traces legacy supplémentaires sont retrouvées ;
+4. poursuivre ensuite l’audit legacy systématique hors Capture : PWA/cache, import/export, audio, assets, tests et UI cachées.

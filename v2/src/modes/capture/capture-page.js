@@ -4,6 +4,7 @@ import {
   attachCaptureUiVisualActivitySource,
   attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
+  buildCaptureCreatureInspection,
   captureUiNoticeFeedNotices,
   clearCaptureUiVisualPauseReasons,
   closeCaptureUiOverlay,
@@ -43,7 +44,7 @@ function escapeHtml(value){
     .replaceAll("'",'&#39;');
 }
 
-export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null}={}){
+export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null,speciesById={}}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
@@ -75,6 +76,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
           <p class="eyebrow" data-capture-overlay-kind></p>
           <h3 data-capture-overlay-title></h3>
           <p data-capture-overlay-message></p>
+          <dl class="capture-overlay-fields" data-capture-overlay-fields></dl>
           <button type="button" data-capture-overlay-close>Fermer</button>
         </div>
       </aside>
@@ -85,6 +87,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   const overlayKind=host.querySelector?.('[data-capture-overlay-kind]')||null;
   const overlayTitle=host.querySelector?.('[data-capture-overlay-title]')||null;
   const overlayMessage=host.querySelector?.('[data-capture-overlay-message]')||null;
+  const overlayFields=host.querySelector?.('[data-capture-overlay-fields]')||null;
   const overlayClose=host.querySelector?.('[data-capture-overlay-close]')||null;
 
   function renderFeed(){
@@ -99,6 +102,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(overlayKind) overlayKind.textContent=overlay.kind;
     if(overlayTitle) overlayTitle.textContent=overlay.title;
     if(overlayMessage) overlayMessage.textContent=overlay.message;
+    if(overlayFields){
+      const fields=Array.isArray(overlay.metadata?.fields)?overlay.metadata.fields:[];
+      overlayFields.innerHTML=fields.map(field=>`<div class="capture-overlay-field"><dt>${escapeHtml(field.label)}</dt><dd>${escapeHtml(field.value)}</dd></div>`).join('');
+    }
   }
 
   function flushUiEvents(){
@@ -137,6 +144,13 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       driver:structuredClone(visualDriver),
       adapter:structuredClone(visualClockAdapter),
     };
+  }
+
+  function findOwnedCreature(instanceId){
+    const id=String(instanceId??'');
+    if(!id) return null;
+    const candidates=[...(session.state?.roster||[]),...(session.state?.activeTeam||[]),...(session.state?.reserve||[])];
+    return candidates.find(entry=>String(entry?.instanceId||'')===id)||null;
   }
 
   const api={
@@ -185,6 +199,20 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       const blocking=api.setPresentationBlocking(result.presentationBlocked,{kind:overlay.kind,metadata:overlay.metadata});
       renderOverlay();
       return {...result,blocking,gameplayDriverStatus:session.driver?.status??null};
+    },
+    inspectCreature(instanceId,{speciesDef=null}={}){
+      const creature=findOwnedCreature(instanceId);
+      if(!creature) return {ok:false,reason:'capture-creature-not-owned'};
+      const species=speciesDef||speciesById?.[String(creature.speciesId)]||null;
+      const inspection=buildCaptureCreatureInspection(creature,{speciesDef:species});
+      if(!inspection.ok) return inspection;
+      const opened=api.openOverlay({
+        kind:inspection.kind,
+        title:inspection.title,
+        message:inspection.message,
+        metadata:inspection.metadata,
+      });
+      return {...inspection,overlay:opened.state,blocking:opened.blocking,gameplayDriverStatus:opened.gameplayDriverStatus};
     },
     advance(delta,options={}){
       const result=advanceCaptureBattleSession(session,{...options,delta});

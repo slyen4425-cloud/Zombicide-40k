@@ -21,6 +21,7 @@ import {
   createCaptureUiVisualDriverState,
   createCaptureUiVisualPauseControllerState,
   dispatchCaptureUiEvents,
+  executeCapturePlayerAbility,
   finishCaptureBattleSession,
   openCaptureUiOverlay,
   pauseCaptureUiVisualClockAdapter,
@@ -48,7 +49,7 @@ function escapeHtml(value){
     .replaceAll("'",'&#39;');
 }
 
-export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null,speciesById={},assetRegistry={}}={}){
+export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null,speciesById={},assetRegistry={},abilityDefs=[]}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
@@ -58,6 +59,9 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   let overlay=createCaptureUiOverlayState();
   let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
   let visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
+  const abilityDefIndex=new Map((Array.isArray(abilityDefs)?abilityDefs:[])
+    .filter(def=>def&&String(def.id||''))
+    .map(def=>[String(def.id),structuredClone(def)]));
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -116,14 +120,21 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-roster-status" data-capture-status="${escapeHtml(status.id||status.name)}">${escapeHtml(status.name||status.id)}${stacks}${remaining}</span>`;
   }
 
-  function rosterAbilityHtml(ability){
+  function rosterAbilityHtml(ability,{interactive=false}={}){
+    const def=abilityDefIndex.get(String(ability.id))||null;
     const charges=ability.charges!==null&&ability.chargeMax!==null
       ?` · charges ${escapeHtml(ability.charges)}/${escapeHtml(ability.chargeMax)}`
       :ability.charges!==null
         ?` · charges ${escapeHtml(ability.charges)}`
         :'';
     const cooldown=ability.cooldownRemaining!==null?` · recharge ${escapeHtml(ability.cooldownRemaining)}`:'';
-    return `<span class="capture-roster-ability" data-capture-ability="${escapeHtml(ability.id)}">${escapeHtml(ability.id)}${charges}${cooldown}</span>`;
+    const label=def?.name?String(def.name):String(ability.id);
+    const blockedByCooldown=ability.cooldownRemaining!==null&&ability.cooldownRemaining>0;
+    const blockedByCharges=ability.charges!==null&&ability.charges<=0;
+    const useButton=interactive&&def
+      ?` <button type="button" data-capture-use-ability="${escapeHtml(ability.id)}"${blockedByCooldown||blockedByCharges?' disabled':''}>Utiliser</button>`
+      :'';
+    return `<span class="capture-roster-ability" data-capture-ability="${escapeHtml(ability.id)}">${escapeHtml(label)}${charges}${cooldown}${useButton}</span>`;
   }
 
   function rosterReactionHtml(reaction){
@@ -145,7 +156,8 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const koBadge=entry.ko?'<span class="capture-roster-ko-badge" data-capture-ko-badge>KO</span>':'';
     const vitals=entry.hpLabel!==null?`<p class="capture-roster-vitals" data-capture-hp>PV : ${escapeHtml(entry.hpLabel)}</p>`:'';
     const statuses=entry.statuses.length?`<div class="capture-roster-statuses" data-capture-statuses>${entry.statuses.map(rosterStatusHtml).join('')}</div>`:'';
-    const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(rosterAbilityHtml).join('')}</div>`:'';
+    const canUseAbilities=battleActive&&entry.location==='active'&&entry.activeInBattle&&!entry.ko;
+    const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(ability=>rosterAbilityHtml(ability,{interactive:canUseAbilities})).join('')}</div>`:'';
     const reactions=entry.reactions.length?`<div class="capture-roster-reactions" data-capture-reactions>${entry.reactions.map(rosterReactionHtml).join('')}</div>`:'';
     const visual=entry.iconArt||entry.mainArt;
     const art=visual?.src?`<img class="capture-roster-art" data-capture-roster-art src="${escapeHtml(visual.src)}" alt="${escapeHtml(entry.displayName)}">`:'';
@@ -317,6 +329,18 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       }
       return result;
     },
+    usePlayerAbility(abilityId){
+      const id=String(abilityId??'');
+      const abilityDef=abilityDefIndex.get(id)||null;
+      if(!abilityDef) return {ok:false,reason:'capture-ability-definition-missing',state:session.state};
+      const result=executeCapturePlayerAbility(session.state,{abilityDef});
+      if(result.ok){
+        session={...session,state:result.state,driver:result.ended?stopCaptureDriver(session.driver):session.driver};
+        renderRosterLists();
+        renderOpponentSummary();
+      }
+      return result;
+    },
     setBlocking(blocking){
       const result=setCaptureBattleBlocking(session,blocking);
       if(result.ok) session=result.session;
@@ -423,6 +447,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       if(activeList&&typeof activeList.removeEventListener==='function'){
         activeList.removeEventListener('click',handleRosterInspectClick);
         activeList.removeEventListener('click',handleRosterSwitchClick);
+        activeList.removeEventListener('click',handleRosterAbilityClick);
       }
       if(reserveList&&typeof reserveList.removeEventListener==='function') reserveList.removeEventListener('click',handleRosterInspectClick);
       if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function') opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
@@ -453,6 +478,12 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(instanceId) api.switchActiveCreature(instanceId);
   }
 
+  function handleRosterAbilityClick(event){
+    const target=event?.target?.closest?.('[data-capture-use-ability]')||null;
+    const abilityId=target?.getAttribute?.('data-capture-use-ability')||target?.dataset?.captureUseAbility||null;
+    if(abilityId&&!target?.disabled) api.usePlayerAbility(abilityId);
+  }
+
   function handleOpponentInspectClick(event){
     const target=event?.target?.closest?.('[data-capture-inspect-opponent]')||event?.target||null;
     const inspect=target?.hasAttribute?.('data-capture-inspect-opponent')||target?.dataset?.captureInspectOpponent!=null;
@@ -462,6 +493,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   if(activeList&&typeof activeList.addEventListener==='function'){
     activeList.addEventListener('click',handleRosterInspectClick);
     activeList.addEventListener('click',handleRosterSwitchClick);
+    activeList.addEventListener('click',handleRosterAbilityClick);
   }
   if(reserveList&&typeof reserveList.addEventListener==='function') reserveList.addEventListener('click',handleRosterInspectClick);
   if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function') opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);

@@ -21,6 +21,7 @@ import {
   createCaptureBattleState,
   endCaptureBattle,
   moveCaptureBattleActor,
+  resolveCaptureAbilityAction,
   switchCaptureActiveCreature,
 } from './dynamic-combat.js';
 import {resolveCaptureAttempt} from './capture-attempt.js';
@@ -135,6 +136,43 @@ export function switchCaptureBattleCreature(state,nextInstanceId){
   const switched=switchCaptureActiveCreature(state.battle,state.activeTeam,nextInstanceId);
   if(!switched.ok) return {...switched,state};
   return {...switched,state:{...state,battle:switched.battle}};
+}
+
+export function useCaptureBattleAbility(state,{side='player',targetSide='opponent',abilityDef,abilityState,effectResolver=null,diagonal=false}={}){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state};
+  const result=resolveCaptureAbilityAction({
+    battle:state.battle,
+    side,
+    targetSide,
+    abilityDef,
+    abilityState,
+    effectResolver,
+    diagonal,
+    activeTeam:state.activeTeam,
+  });
+  if(!result.ok) return {...result,state};
+
+  const activeTeam=clone(result.activeTeam||state.activeTeam||[]);
+  const reserve=clone(state.reserve||[]);
+  const roster=[...activeTeam,...reserve].map(clone);
+  const ended=result.battle?.status==='ended';
+  const endReason=result.battle?.endReason||null;
+  const clearEncounter=ended&&(endReason==='opponent_ko'||endReason==='flee'||endReason==='capture_success');
+  const next={
+    ...state,
+    activeTeam,
+    reserve,
+    roster,
+    battle:ended?null:clone(result.battle),
+    encounter:clearEncounter?null:state.encounter,
+    exploration:{...(state.exploration||{}),freeMovement:ended?true:false},
+  };
+  return {
+    ...result,
+    ended,
+    endReason,
+    state:next,
+  };
 }
 
 export function attemptCaptureInBattle(state,{orbId,speciesCaptureRate,currentHp,maxHp,orbLibrary,lowHpMultiplier,rng=Math.random}={}){

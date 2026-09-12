@@ -33,11 +33,13 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Une interaction `chest` réussie est marquée `opened + completed` dans l'état de salle.
 - Le layout de salle est matérialisé avec l'état runtime avant rendu/pathfinding : ouvrir une porte modifie immédiatement son état visuel et libère immédiatement son arête.
 - Le spatial remonté par la vue après un déplacement est conservé par `rpg-page.js`.
-- Une sauvegarde/reprise minimale de la partie test existe maintenant via le provider de stockage V2, sans écrire ni remplacer les définitions de l'éditeur.
+- Une sauvegarde/reprise minimale de la partie test existe via le provider de stockage V2, sans écrire ni remplacer les définitions de l'éditeur.
 - Le snapshot de test est versionné et contient : univers courant (y compris univers de démo), roomRuntime, heroRuntimes, spatial, combat, inventaire, lootRecipients, eventWorld, spatialConfig et flag `demo`.
 - La page Donjon propose `Sauvegarder` lorsqu'une session est active et `Reprendre` lorsqu'aucune session n'est chargée.
 - La sauvegarde est volontairement manuelle pour ce premier cycle de test utilisateur ; aucun autosave permanent n'est encore activé.
 - Une reprise restaure aussi l'univers temporaire de démo, ce qui permet de fermer/réouvrir l'app même si l'éditeur est vide.
+- Une preview téléphone sans déploiement Pages est désormais validée via raw.githack sur un commit immuable ; elle ne touche ni `main` ni la V1 publique.
+- Preview figée du jalon : `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/32e3703889f9d3d0f881b13dafc59a342ecd9e72/v2/index.html`.
 
 ## Jalons CI récents validés
 
@@ -61,38 +63,26 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG : déplacement exploration par clic sur grille : `34702387637` success
 - RPG : interactions de proximité case/porte/coffre sur grille : `34702763858` success
 - RPG : sauvegarde/reprise minimale de partie test : `34703227141` success
+- RPG : smoke-test preview téléphone : `34703496395` success
 
 ## Dernière étape terminée
 
-Septième jalon du chantier `RPG → build testable` : sauvegarde/reprise minimale d'une partie test.
+Huitième jalon du chantier `RPG → build testable` : preview téléphone sûre sans modifier le déploiement GitHub Pages existant.
 
-- nouveau module `v2/src/modes/rpg/dungeon-test-save.js` ;
-- stockage via le provider V2 existant, scope `rpg-dungeon-test-session`, id `latest` ;
-- format versionné `version: 1` ;
-- snapshot détaché avec `universe`, `roomRuntime`, `heroRuntimes`, `spatial`, `combat`, `inventory`, `lootRecipients`, `eventWorld`, `spatialConfig`, `demo` et `savedAt` ;
-- validation stricte avant reprise ;
-- nouveau module UI `v2/src/modes/rpg/dungeon-test-save-ui.js` ;
-- session active : bouton `Sauvegarder` ; aucune session : bouton `Reprendre` ;
-- la reprise restaure toutes les briques de session puis rouvre directement l'onglet Donjon ;
-- le lancement d'une nouvelle partie test conserve maintenant explicitement `out.spatial` au niveau page ;
-- le texte du bandeau démo précise désormais que seules les définitions restent temporaires dans l'éditeur, car la session peut être sauvegardée localement ;
-- aucun autosave n'est activé à ce stade : comportement volontairement simple pour le premier test utilisateur.
+- GitHub Pages ne fournit pas encore de vraie preview publique de branche via `actions/deploy-pages` ; l'option `preview` reste non disponible publiquement.
+- Pour ne jamais remplacer la V1 publique, aucun nouveau workflow Pages n'a été ajouté et aucun déploiement `github-pages` n'a été déclenché depuis `rebuild/v2`.
+- La preview utilise raw.githack, qui sert les fichiers GitHub avec des Content-Type adaptés à HTML/CSS/JS.
+- URL immuable du commit testé : `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/32e3703889f9d3d0f881b13dafc59a342ecd9e72/v2/index.html`.
+- Nouveau test `v2/tests/rpg-phone-preview.test.mjs` : vérifie `v2/index.html`, l'entrée module `./src/app.js`, les CSS mobile/plateau, l'absence d'URL absolue dépendante de la racine du dépôt et l'absence de service worker enregistré depuis l'index de preview.
+- Batterie complète : `34703496395` completed + success.
 
-Régression :
-- nouveau `v2/tests/rpg-dungeon-test-save.test.mjs` ;
-- couvre construction du snapshot, round-trip provider mémoire, isolation contre mutations après écriture/lecture, persistance de l'univers de démo, suppression de sauvegarde, refus d'un runtime absent et présence du câblage UI/page ;
-- batterie complète : `34703227141` completed + success.
-
-Commits de l'étape :
-- moteur snapshot/save/load : `f943ce82d1ad6fa5676ed699685b250656d9d5de`
-- contrôles UI sauvegarde/reprise : `124b8afce84afa8d839054663110f64a68443d06`
-- raccordement page RPG : `26cb728d1d1ed5901a2ec2a11f1599f6dc4a1468`
-- régression : `21ca0a6bd12be31a741a13478f4c490191edf560`
+Commit de l'étape :
+- smoke-test preview téléphone : `32e3703889f9d3d0f881b13dafc59a342ecd9e72`
 
 ## Priorités ouvertes
 
-1. Préparer une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer le RPG sur téléphone, sans toucher `main` ;
-2. vérifier que cette preview charge bien `/v2/`, ses CSS/modules et la persistance locale sur mobile ;
-3. après le premier test utilisateur : corriger l'ergonomie/visuel réel observé ;
-4. ensuite reprendre assets/audio/PWA/parité finale et les interactions authored spécialisées (coffres avec loot/trap/puzzle/event attachés) ;
+1. Faire maintenant le premier test utilisateur réel sur téléphone via la preview figée et corriger uniquement ce qui est observé en situation réelle ;
+2. vérifier notamment Accueil → RPG → Donjon → Partie test, grille tactile, combat, sauvegarde/reprise et ergonomie mobile ;
+3. après ce premier retour : corriger l'ergonomie/visuel, puis reprendre assets/audio/PWA/parité finale ;
+4. vérifier ensuite les interactions authored spécialisées (coffres avec loot/trap/puzzle/event attachés) sans inventer de contenu ;
 5. Monster Capture reste en pause jusqu'à ce premier cycle de test RPG.

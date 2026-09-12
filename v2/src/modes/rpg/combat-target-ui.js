@@ -18,24 +18,36 @@ export function combatTargetLabel(universe={},combat=null,actor=null){
 export function combatTargetEntriesForSkill({universe={},combat=null,skill=null,spatial=null,source=null,config={}}={}){
   if(!combat||combat.phase!=='turn'||!combat.activeActorId||!skill) return [];
   const actorId=String(combat.activeActorId);
-  return validSkillTargets({combat,actorId,targetKind:skill.target||'enemy',spatial,source,config}).map(entry=>({
+  return validSkillTargets({combat,actorId,targetKind:skill.target||'enemy',spatial,source:source||skill,config}).map(entry=>({
     id:String(entry.actor.id),
     side:String(entry.actor.side||''),
     self:String(entry.actor.id)===actorId,
     name:combatTargetLabel(universe,combat,entry.actor),
+    distance:entry.distance,
+    modifier:entry.modifier||0,
   }));
 }
 
 export function syncCombatTargetSelect({select,universe={},combat=null,skill=null,spatial=null,source=null,config={}}={}){
   if(!select) return [];
+  const previous=String(select.value||'');
   const entries=combatTargetEntriesForSkill({universe,combat,skill,spatial,source,config});
-  select.innerHTML=entries.map(entry=>`<option value="${String(entry.id).replace(/"/g,'&quot;')}">${entry.self?'👤 ':entry.side==='heroes'?'🛡️ ':'👹 '}${entry.name}</option>`).join('');
+  select.innerHTML=entries.map(entry=>`<option value="${String(entry.id).replace(/"/g,'&quot;')}">${entry.self?'👤 ':entry.side==='heroes'?'🛡️ ':'👹 '}${entry.name}${Number.isFinite(entry.distance)?` · ${entry.distance} case${entry.distance>1?'s':''}`:''}</option>`).join('');
+  if(entries.some(entry=>entry.id===previous)) select.value=previous;
   select.disabled=!entries.length;
   return entries;
 }
 
 export function setCombatTargetUiContext({universe={},combat=null,spatial=null,source=null,config={}}={}){
   liveContext={universe:universe||{},combat:combat||null,spatial:spatial||null,source:source||null,config:config||{}};
+  return liveContext;
+}
+
+export function patchCombatTargetUiContext({combat,spatial,source,config}={}){
+  if(combat!==undefined) liveContext.combat=combat||null;
+  if(spatial!==undefined) liveContext.spatial=spatial||null;
+  if(source!==undefined) liveContext.source=source||null;
+  if(config!==undefined) liveContext.config=config||{};
   return liveContext;
 }
 
@@ -49,13 +61,14 @@ export function syncDungeonCombatTargetControls(root=globalThis.document){
   if(!root?.querySelector) return [];
   const targetSelect=root.querySelector('[data-dungeon-combat-target]');
   if(!targetSelect) return [];
+  const skill=selectedSkill(root);
   return syncCombatTargetSelect({
     select:targetSelect,
     universe:liveContext.universe,
     combat:liveContext.combat,
-    skill:selectedSkill(root),
+    skill,
     spatial:liveContext.spatial,
-    source:liveContext.source,
+    source:liveContext.source||skill,
     config:liveContext.config,
   });
 }

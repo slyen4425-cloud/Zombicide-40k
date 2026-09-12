@@ -59,8 +59,8 @@ export function createCaptureBattleState({
     status:'active',
     encounter:clone(encounter),
     mode:encounter.type==='wild'?'wild':'battle',
-    player:{activeInstanceId:String(selected.instanceId),actorId:playerActorId,creature:clone(selected),vitals:createCaptureVitals({currentHp:selected.currentHp,maxHp:selected.maxHp}),statuses:clone(selected.statuses||[])},
-    opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild),vitals:createCaptureVitals({currentHp:wild.currentHp,maxHp:wild.maxHp}),statuses:clone(wild.statuses||[])},
+    player:{activeInstanceId:String(selected.instanceId),actorId:playerActorId,creature:clone(selected),vitals:createCaptureVitals({currentHp:selected.currentHp,maxHp:selected.maxHp}),statuses:clone(selected.statuses||[]),reactionState:clone(selected.reactionState||{})},
+    opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild),vitals:createCaptureVitals({currentHp:wild.currentHp,maxHp:wild.maxHp}),statuses:clone(wild.statuses||[]),reactionState:clone(wild.reactionState||{})},
     spatial,
     pendingAction:null,
     actionLog:[],
@@ -112,16 +112,25 @@ export function resolveCaptureAbilityAction({battle,side='player',targetSide='op
   const action={type:'ability',side:String(side),targetSide:String(targetSide),abilityId:ability.id,effect:clone(ability.effect),resolved:false};
   const reaction=resolveCaptureReaction({battle,action,ability,reactionDef,evaluator:reactionResolver});
   if(!reaction.ok) return {ok:false,reason:reaction.reason,battle,abilityState:clone(abilityState||{}),reaction};
+
+  const reactionBattle=clone(battle);
+  if(reaction.reaction?.id&&reaction.reactionState&&reactionBattle[String(targetSide)]){
+    reactionBattle[String(targetSide)].reactionState={
+      ...(reactionBattle[String(targetSide)].reactionState||{}),
+      [reaction.reaction.id]:clone(reaction.reactionState),
+    };
+  }
+
   if(reaction.triggered&&reaction.reaction?.negatesEffect){
     const resolvedAction={...action,resolved:true,outcome:{type:'reaction',reactionId:reaction.reaction.id,reactionType:reaction.reaction.type,negated:true,reactionOutcome:clone(reaction.outcome)}};
-    const loggedBattle={...clone(battle),pendingAction:null,actionLog:[...(battle.actionLog||[]).map(clone),resolvedAction]};
+    const loggedBattle={...reactionBattle,pendingAction:null,actionLog:[...(reactionBattle.actionLog||[]).map(clone),resolvedAction]};
     return {ok:true,battle:loggedBattle,abilityState:spent.state,action:resolvedAction,koOutcome:'continue',activeTeam:clone(activeTeam),reaction};
   }
-  const resolution=typeof effectResolver==='function'?effectResolver({battle:clone(battle),action:clone(action),ability:clone(ability)}):{ok:true,outcome:{type:'declared_effect',effect:clone(ability.effect)}};
+  const resolution=typeof effectResolver==='function'?effectResolver({battle:clone(reactionBattle),action:clone(action),ability:clone(ability)}):{ok:true,outcome:{type:'declared_effect',effect:clone(ability.effect)}};
   if(resolution?.ok===false) return {ok:false,reason:resolution.reason||'capture-effect-resolution-failed',battle,abilityState:clone(abilityState||{})};
   const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null),reaction:reaction.triggered?clone(reaction):null};
-  const resolvedBattle=resolution?.battle?clone(resolution.battle):clone(battle);
-  const loggedBattle={...resolvedBattle,pendingAction:null,actionLog:[...(resolvedBattle.actionLog||battle.actionLog||[]).map(clone),resolvedAction]};
+  const resolvedBattle=resolution?.battle?clone(resolution.battle):clone(reactionBattle);
+  const loggedBattle={...resolvedBattle,pendingAction:null,actionLog:[...(resolvedBattle.actionLog||reactionBattle.actionLog||[]).map(clone),resolvedAction]};
   const ko=resolveCaptureKoState(loggedBattle,activeTeam);
   if(!ko.ok) return {...ko,abilityState:spent.state,action:resolvedAction,reaction};
   return {ok:true,battle:ko.battle,abilityState:spent.state,action:resolvedAction,koOutcome:ko.outcome,activeTeam:ko.activeTeam,reaction,...(ko.previousInstanceId?{previousInstanceId:ko.previousInstanceId}:{}),...(ko.activeInstanceId?{activeInstanceId:ko.activeInstanceId}:{})};
@@ -140,7 +149,7 @@ export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){
   let spatial=clone(battle.spatial);
   if(previousPosition) spatial=setActorPosition(spatial,nextActorId,previousPosition);
   if(spatial.positions) delete spatial.positions[previousActorId];
-  return {ok:true,previousInstanceId:String(battle.player.activeInstanceId),activeInstanceId:String(next.instanceId),battle:{...battle,player:{activeInstanceId:String(next.instanceId),actorId:nextActorId,creature:clone(next),vitals:nextVitals,statuses:clone(next.statuses||[])},spatial}};
+  return {ok:true,previousInstanceId:String(battle.player.activeInstanceId),activeInstanceId:String(next.instanceId),battle:{...battle,player:{activeInstanceId:String(next.instanceId),actorId:nextActorId,creature:clone(next),vitals:nextVitals,statuses:clone(next.statuses||[]),reactionState:clone(next.reactionState||{})},spatial}};
 }
 
 export function resolveCaptureKoState(battle,activeTeam=[]){
@@ -150,7 +159,7 @@ export function resolveCaptureKoState(battle,activeTeam=[]){
     return {ok:true,outcome:'opponent_ko',battle:ended.battle,activeTeam:clone(activeTeam)};
   }
   if(!battle.player?.vitals?.ko) return {ok:true,outcome:'continue',battle,activeTeam:clone(activeTeam)};
-  const syncedTeam=(activeTeam||[]).map(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)?clone(entry):{...clone(entry),currentHp:battle.player.vitals.currentHp,maxHp:battle.player.vitals.maxHp,statuses:clone(battle.player.statuses||[])});
+  const syncedTeam=(activeTeam||[]).map(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)?clone(entry):{...clone(entry),currentHp:battle.player.vitals.currentHp,maxHp:battle.player.vitals.maxHp,statuses:clone(battle.player.statuses||[]),reactionState:clone(battle.player.reactionState||{})});
   const replacement=syncedTeam.find(entry=>String(entry.instanceId)!==String(battle.player.activeInstanceId)&&!createCaptureVitals({currentHp:entry.currentHp,maxHp:entry.maxHp}).ko)||null;
   if(!replacement){
     const ended=endCaptureBattle(battle,'player_team_unavailable');

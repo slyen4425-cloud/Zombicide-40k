@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement et premier moteur générique de statuts/conditions.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, moteur générique de statuts/conditions et tick global explicite des statuts.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -40,38 +40,35 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - état global Capture après capacité : `34682576122` success
 - IA Capture routée par état global : `34682681387` success
 - moteur générique statuts/conditions : `34682807731` success
+- tick global explicite des statuts : `34682889435` success
 
 ## Dernière étape terminée
 
-Premier moteur générique de statuts/conditions Capture :
-- nouveau `v2/src/modes/capture/statuses.js` ;
-- statuts totalement indépendants du moteur RPG ;
-- normalisation avec `id`, durée, `stackMode`, `maxStacks` et effets déclaratifs ;
-- ajout, retrait et tick explicite ;
-- `stackMode:'stack'` incrémente jusqu'au plafond configuré ;
-- `stackMode:'refresh'` conserve une seule pile et rafraîchit la durée ;
-- expiration séparée en `active` / `expired` ;
-- collecte des effets déclaratifs avec nombre de piles, sans appliquer automatiquement de formule de poison/brûlure/mouvement ;
-- nouveau `resolveCaptureStatusEffect()` pour qu'une capacité puisse appliquer un statut au combattant ciblé ;
-- les acteurs du combat dynamique possèdent maintenant leur propre tableau `statuses` ;
-- le changement forcé de créature recharge les statuts de l'instance sélectionnée ;
-- lors d'un KO joueur, l'état des statuts de la créature tombée est synchronisé avec l'équipe possédée.
+Tick global explicite des statuts Capture :
+- nouveau `v2/src/modes/capture/status-tick.js` ;
+- `tickCaptureBattleStatuses()` fait avancer explicitement les statuts des deux combattants en une seule opération ;
+- le tick renvoie séparément les statuts expirés côté joueur et côté adversaire ;
+- aucune cadence temps réel n'est fixée : l'appel reste entièrement explicite ;
+- nouveau `v2/src/modes/capture/status-runtime.js` ;
+- `tickCaptureModeStatuses()` applique le tick au `battle` global puis synchronise les statuts de la créature active joueur vers `activeTeam` et `roster` ;
+- la réserve reste intacte ;
+- l'exploration reste bloquée tant que le combat existe ;
+- un appel sans combat actif est refusé avec `battle-missing` ;
+- aucun effet périodique n'est automatiquement exécuté à cette étape : le tick gère uniquement durée/expiration/synchronisation.
 
 Régression :
-- nouveau `v2/tests/capture-statuses.test.mjs` ;
-- couvre cumul plafonné, refresh de durée, expiration, retrait, collecte d'effets et application d'un statut par une vraie capacité ;
-- vérifie qu'un statut n'altère pas spontanément les PV tant qu'aucune résolution spécifique n'est définie ;
-- batterie complète V2 : `34682807731` success.
+- nouveau `v2/tests/capture-status-tick-global.test.mjs` ;
+- couvre diminution de durée des deux côtés, expiration séparée, synchronisation vers équipe/roster, second tick supprimant le dernier statut joueur et refus hors combat ;
+- batterie complète V2 : `34682889435` success.
 
 Commits de l'étape :
-- primitives de statuts : `93018cb42a737c07cebda555a4092dc4de6fb636`
-- resolver déclaratif : `15e62326290cc8c92ddd390abe853be873a49aa9`
-- raccord aux acteurs du combat : `238412e4b45132b8a1ed1e9ec9e7d765e6ae8025`
-- régression statuts : `ad9089bea59af8ee707c70dec010d47da7f7046f`
+- tick combat statuts : `dacac881747f90c8febf096db936d31cb24486d5`
+- synchronisation état global : `a96f979f74bcc32a13dd4bb4b0a8dffcf5167d42`
+- régression tick global : `1f5b2eab7b75400783ba511f16bf42ebf25c8e2f`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : brancher un tick de statuts explicite au runtime global, sans figer la cadence temps réel ;
+1. prochaine étape Capture : brancher une première résolution générique des effets périodiques de statut lors d'un tick explicite (dégâts/soins déclaratifs), toujours sans cadence temps réel figée ;
 2. ensuite ajouter une première esquive/réaction tactique configurable ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

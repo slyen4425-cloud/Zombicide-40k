@@ -22,6 +22,7 @@ import {
   createCaptureUiVisualPauseControllerState,
   dispatchCaptureUiEvents,
   executeCapturePlayerAbility,
+  executeCapturePlayerCaptureAttempt,
   executeCapturePlayerMove,
   finishCaptureBattleSession,
   openCaptureUiOverlay,
@@ -50,7 +51,7 @@ function escapeHtml(value){
     .replaceAll("'",'&#39;');
 }
 
-export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null,speciesById={},assetRegistry={},abilityDefs=[]}={}){
+export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null,speciesById={},assetRegistry={},abilityDefs=[],captureConfig={}}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
@@ -63,6 +64,9 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   const abilityDefIndex=new Map((Array.isArray(abilityDefs)?abilityDefs:[])
     .filter(def=>def&&String(def.id||''))
     .map(def=>[String(def.id),structuredClone(def)]));
+  const captureSpeciesRates=captureConfig?.speciesCaptureRates&&typeof captureConfig.speciesCaptureRates==='object'?structuredClone(captureConfig.speciesCaptureRates):{};
+  const captureOrbLibrary=Array.isArray(captureConfig?.orbLibrary)?structuredClone(captureConfig.orbLibrary):[];
+  const captureLowHpMultiplier=captureConfig?.lowHpMultiplier;
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -217,6 +221,25 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-opponent-status" data-capture-opponent-status="${escapeHtml(status.id||status.name)}">${escapeHtml(status.name||status.id)}${stacks}${remaining}</span>`;
   }
 
+  function captureControlsHtml(summary){
+    if(!summary||session.state?.battle?.status!=='active'||session.state?.battle?.mode!=='wild') return '';
+    const rate=Number(captureSpeciesRates?.[String(summary.speciesId||'')]);
+    const current=Number(summary.currentHp);
+    const max=Number(summary.maxHp);
+    if(!Number.isFinite(rate)||rate<0||!Number.isFinite(current)||!Number.isFinite(max)||max<=0) return '';
+    const lowHp=(current/max)*100<30;
+    if(lowHp&&(!Number.isFinite(Number(captureLowHpMultiplier))||Number(captureLowHpMultiplier)<=0)) return '';
+    const buttons=captureOrbLibrary.flatMap(orb=>{
+      const id=String(orb?.id||'');
+      const coefficient=Number(orb?.captureCoefficient);
+      const count=Math.max(0,Number(session.state?.inventory?.counts?.[id])||0);
+      if(!id||!Number.isFinite(coefficient)||coefficient<=0||count<=0) return [];
+      const label=orb?.name?String(orb.name):id;
+      return [`<button type="button" data-capture-use-orb="${escapeHtml(id)}">${escapeHtml(label)} ×${escapeHtml(count)}</button>`];
+    });
+    return buttons.length?`<div class="capture-orb-controls" data-capture-orb-controls aria-label="Tentative de capture">${buttons.join('')}</div>`:'';
+  }
+
   function renderOpponentSummary(){
     const summary=buildCaptureOpponentSummary(session.state,{assetRegistry});
     if(opponentSection) opponentSection.hidden=!summary;
@@ -234,13 +257,14 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const statuses=summary.statuses.length
       ?`<div data-capture-opponent-statuses>${summary.statuses.map(opponentStatusHtml).join('')}</div>`
       :'';
+    const captureControls=captureControlsHtml(summary);
     const visual=summary.iconArt||summary.mainArt;
     const art=visual?.src?`<img class="capture-opponent-art" data-capture-opponent-art src="${escapeHtml(visual.src)}" alt="${escapeHtml(summary.displayName)}">`:'';
     opponentSummaryNode.innerHTML=`<article class="capture-opponent-summary${summary.ko?' is-ko':''}" data-capture-opponent-instance="${escapeHtml(summary.instanceId)}">
       ${art}
       <div>
         <strong>${escapeHtml(summary.title)}</strong>
-        ${wildBadge}${koBadge}${hp}${position}${statuses}
+        ${wildBadge}${koBadge}${hp}${position}${statuses}${captureControls}
       </div>
       <button type="button" data-capture-inspect-opponent>Inspecter</button>
     </article>`;
@@ -363,6 +387,20 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       }
       return result;
     },
+    attemptCapture(orbId){
+      const result=executeCapturePlayerCaptureAttempt(session.state,{
+        orbId,
+        speciesCaptureRates:captureSpeciesRates,
+        orbLibrary:captureOrbLibrary,
+        lowHpMultiplier:captureLowHpMultiplier,
+      });
+      if(result.ok){
+        session={...session,state:result.state,driver:result.captured?stopCaptureDriver(session.driver):session.driver};
+        renderRosterLists();
+        renderOpponentSummary();
+      }
+      return result;
+    },
     setBlocking(blocking){
       const result=setCaptureBattleBlocking(session,blocking);
       if(result.ok) session=result.session;
@@ -439,15 +477,9 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       if(presentationBlock.blocked) applyVisualPauseReason('presentation-block',true);
       return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter),pauseController:structuredClone(visualPauseController)};
     },
-    pauseNoticeVisualClock(){
-      return applyVisualPauseReason('manual',true);
-    },
-    resumeNoticeVisualClock(){
-      return applyVisualPauseReason('manual',false);
-    },
-    setNoticeVisualPauseReason(reason,paused=true){
-      return applyVisualPauseReason(reason,paused);
-    },
+    pauseNoticeVisualClock(){return applyVisualPauseReason('manual',true);},
+    resumeNoticeVisualClock(){return applyVisualPauseReason('manual',false);},
+    setNoticeVisualPauseReason(reason,paused=true){return applyVisualPauseReason(reason,paused);},
     stopNoticeVisualClock(){
       visualPauseController=createCaptureUiVisualPauseControllerState();
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
@@ -473,7 +505,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         activeList.removeEventListener('click',handlePlayerMoveClick);
       }
       if(reserveList&&typeof reserveList.removeEventListener==='function') reserveList.removeEventListener('click',handleRosterInspectClick);
-      if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function') opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
+      if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function'){
+        opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
+        opponentSummaryNode.removeEventListener('click',handleCaptureOrbClick);
+      }
       visualActivitySourceAttachment.detach();
       visualClockSourceAttachment.detach();
       visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
@@ -519,6 +554,12 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(inspect) api.inspectOpponent();
   }
 
+  function handleCaptureOrbClick(event){
+    const target=event?.target?.closest?.('[data-capture-use-orb]')||null;
+    const orbId=target?.getAttribute?.('data-capture-use-orb')||target?.dataset?.captureUseOrb||null;
+    if(orbId&&!target?.disabled) api.attemptCapture(orbId);
+  }
+
   if(activeList&&typeof activeList.addEventListener==='function'){
     activeList.addEventListener('click',handleRosterInspectClick);
     activeList.addEventListener('click',handleRosterSwitchClick);
@@ -526,10 +567,11 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     activeList.addEventListener('click',handlePlayerMoveClick);
   }
   if(reserveList&&typeof reserveList.addEventListener==='function') reserveList.addEventListener('click',handleRosterInspectClick);
-  if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function') opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);
-  if(overlayClose&&typeof overlayClose.addEventListener==='function'){
-    overlayClose.addEventListener('click',()=>api.closeOverlay());
+  if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function'){
+    opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);
+    opponentSummaryNode.addEventListener('click',handleCaptureOrbClick);
   }
+  if(overlayClose&&typeof overlayClose.addEventListener==='function') overlayClose.addEventListener('click',()=>api.closeOverlay());
   if(visualClockSource){
     api.startNoticeVisualClock();
     visualClockSourceAttachment=attachCaptureUiVisualClockSource(visualClockSource,sample=>api.sampleNoticeVisualClock(sample));

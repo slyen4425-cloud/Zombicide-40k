@@ -1,3 +1,5 @@
+import {captureUiEventsFromResults} from './ui-events.js';
+
 const clone=value=>structuredClone(value);
 
 export const CAPTURE_APP_LIFECYCLE_CONTRACT=Object.freeze({
@@ -5,17 +7,19 @@ export const CAPTURE_APP_LIFECYCLE_CONTRACT=Object.freeze({
   pausesDriverForBlockingUi:true,
   resumesDriverAfterBlockingUi:true,
   stopsDriverWhenBattleEnds:true,
+  collectsPresentationEvents:true,
   ownsRealtimeLoop:false,
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
 });
 
-export function createCaptureAppSession({state,scheduler,driver}={}){
+export function createCaptureAppSession({state,scheduler,driver,uiEvents=[]}={}){
   return {
     state,
     scheduler:clone(scheduler),
     driver:clone(driver),
     blocking:false,
+    uiEvents:clone(uiEvents||[]),
   };
 }
 
@@ -54,14 +58,21 @@ export function advanceCaptureBattleSession(session,{delta=0,driverOptions={},ad
   const advanced=advanceDriver(session.state,session.scheduler,session.driver,{...driverOptions,delta});
   if(!advanced.ok) return {...advanced,session};
   const battleEnded=!advanced.state?.battle||advanced.results?.some(entry=>entry?.ended);
+  const emittedEvents=captureUiEventsFromResults(advanced.results||[]);
   const nextSession={
     ...session,
     state:advanced.state,
     scheduler:advanced.scheduler,
     driver:battleEnded?stopDriver(advanced.driver):advanced.driver,
     blocking:battleEnded?false:session.blocking,
+    uiEvents:[...(session.uiEvents||[]).map(clone),...emittedEvents.map(clone)],
   };
-  return {...advanced,battleEnded,session:nextSession};
+  return {...advanced,battleEnded,uiEvents:emittedEvents,session:nextSession};
+}
+
+export function consumeCaptureUiEvents(session){
+  const events=clone(session?.uiEvents||[]);
+  return {events,session:{...session,uiEvents:[]}};
 }
 
 export function finishCaptureBattleSession(session,reason,{finishBattle,stopDriver}={}){

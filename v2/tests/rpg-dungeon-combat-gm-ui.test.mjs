@@ -24,8 +24,13 @@ combat.metadata={kind:'dungeon-room-combat',roomId:'room-1'};
 assert.deepEqual(dungeonGmActorEntries(universe,combat).map(entry=>entry.name),['Lyra','Squelette']);
 assert.deepEqual(dungeonGmResourceEntries(universe,combat,'hero').map(entry=>[entry.id,entry.current,entry.max]),[['hp',7,10],['mana',3,5]]);
 
-const html=renderDungeonCombatGmControls({universe,combat});
+// Même si le mode MJ global est actif, un appareil joueur ne doit jamais recevoir le panneau MJ.
+assert.equal(renderDungeonCombatGmControls({universe,combat}), '');
+assert.equal(renderDungeonCombatGmControls({universe,combat,isGameMasterDevice:false}), '');
+
+const html=renderDungeonCombatGmControls({universe,combat,isGameMasterDevice:true});
 assert.match(html,/MJ contrôle total/);
+assert.match(html,/Appareil MJ/);
 assert.match(html,/data-dungeon-gm-actor/);
 assert.match(html,/Lyra/);
 assert.match(html,/Squelette/);
@@ -39,11 +44,13 @@ assert.match(html,/Force/);
 
 const disabled=structuredClone(universe);
 disabled.combat.interaction.gmFullControl=false;
-assert.equal(renderDungeonCombatGmControls({universe:disabled,combat}), '');
+assert.equal(renderDungeonCombatGmControls({universe:disabled,combat,isGameMasterDevice:true}), '');
 
 const pageSource=fs.readFileSync(new URL('../src/modes/rpg/rpg-page.js',import.meta.url),'utf8');
 assert.match(pageSource,/mountDungeonCombatGmControls/);
 assert.match(pageSource,/kind:'combat-gm'/);
 assert.match(pageSource,/dungeonView\.setCombat\(currentDungeonCombat\)/);
+assert.match(pageSource,/dungeonIsGameMasterDevice/);
+assert.match(pageSource,/isGameMasterDevice:currentDungeonIsGameMasterDevice/);
 
 console.log('rpg-dungeon-combat-gm-ui.test.mjs: OK');

@@ -47,42 +47,64 @@ La V1 fournit des repères utiles à conserver dans l'esprit, pas dans le code :
 - informations secondaires moins dominantes que l'action en cours ;
 - hiérarchie de jeu plus lisible que l'empilement actuel de `editor-section` V2.
 
-## Dernière étape terminée — première passe présentation Donjon
+## Présentation Donjon — état actuel
 
-Première étape du nouveau chantier `RPG UX / présentation` : restructuration visuelle de l'écran Donjon, sans modification du moteur.
+### Passe 1 — identité visuelle
 
-- nouveau stylesheet dédié `v2/src/ui/dungeon-gameplay-ui.css` ;
-- `v2/index.html` charge ce thème après les styles génériques existants ;
-- nouvelle identité visuelle Dungeon sombre/fantasy inspirée des points forts de la V1 ;
-- ordre visuel explicite des blocs :
-  1. héros actif / HUD compact ;
-  2. plateau ;
-  3. choix/événement ;
-  4. combat ;
-  5. passages ;
-  6. PNJ/loot ;
-  7. informations secondaires ;
-  8. état technique relégué tout en bas et masqué sur mobile ;
-- héros actif transformé en bandeau compact/sticky au lieu d'une grande carte d'éditeur ;
-- plateau transformé en scène principale : cases plus grandes, palette brun/pierre, héros vert, ennemi rouge, héros focalisé avec halo or ;
-- interactions de case visuellement intégrées au plateau ;
-- combat transformé en second point focal rouge/brun avec timeline et action principale plus visibles ;
-- événements en traitement narratif or/brun ;
-- passages/PNJ/loot volontairement plus discrets ;
-- copie du plateau corrigée : suppression de l'ancien texte `lecture seule`, remplacé par une consigne de déplacement tactile ;
-- breakpoints téléphone dédiés conservant la grille et les commandes lisibles ;
-- aucune règle de combat, déplacement, interaction ou sauvegarde n'a été changée.
+- stylesheet dédié `v2/src/ui/dungeon-gameplay-ui.css` ;
+- identité sombre/fantasy inspirée des points forts de la V1 ;
+- héros actif compact/sticky ;
+- plateau rendu comme scène principale ;
+- héros vert, ennemi rouge, héros focalisé halo or ;
+- interactions de case intégrées visuellement au plateau ;
+- combat rouge/brun avec timeline et action principale renforcées ;
+- événements narratifs or/brun ;
+- passages/PNJ/loot plus discrets ;
+- état technique masqué sur mobile ;
+- aucune règle gameplay modifiée.
 
-Régression :
-- nouveau `v2/tests/rpg-dungeon-gameplay-presentation.test.mjs` ;
-- protège le chargement du thème, la hiérarchie héros → plateau → combat → technique, la séparation visuelle héros/ennemi, le breakpoint mobile, l'absence de logique gameplay dans le CSS et la disparition du texte obsolète `lecture seule` ;
-- batterie complète : `34704516033` completed + success.
+CI : `34704516033` completed + success.
 
-Commits de l'étape :
+Commits :
 - thème Donjon gameplay : `26e24c3e496e5f95832b762796104300f318ab9c`
 - chargement du thème : `8c13273420b0babaf84fb375a9bf7c3cf455234d`
 - texte plateau orienté gameplay : `408e3c8cfffd46bf5595b081a57f09113472dc13`
 - régression présentation : `787c9946b53b6dcfb22ab060a98411db2dedceda`
+
+### Passe 2 — hiérarchie réelle de l'écran de jeu
+
+Le simple ordre CSS ne suffisait pas. Une couche de présentation dédiée restructure désormais le DOM après chaque rendu, sans modifier le renderer RPG ni ses règles.
+
+- nouveau `v2/src/ui/dungeon-layout-polish.js` ;
+- nouveau `v2/src/ui/dungeon-layout-polish.css` ;
+- le script observe les rerenders Donjon et reconstruit uniquement la hiérarchie visuelle ;
+- les listeners existants restent attachés aux éléments déplacés ;
+- la surface de jeu principale contient uniquement :
+  - héros actif ;
+  - plateau ;
+  - choix d'événement bloquant ;
+  - combat ;
+- tout le reste passe dans un panneau natif repliable `☰ Journal & détails` :
+  - état de partie ;
+  - journal d'événements ;
+  - passages ;
+  - PNJ ;
+  - butin ;
+  - quêtes et autres panneaux secondaires ;
+- le panneau secondaire est replié par défaut et devient une grille 2 colonnes sur écran large / 1 colonne sur téléphone ;
+- le plateau conserve une hauteur orientée viewport pour rester visuellement dominant ;
+- aucun moteur, calcul, déplacement, interaction, combat ou sauvegarde n'a été modifié.
+
+Régression :
+- `v2/tests/rpg-dungeon-layout-polish.test.mjs` ;
+- protège la surface primaire, le drawer secondaire, la survie aux rerenders et les breakpoints mobile ;
+- batterie complète : `34707068397` completed + success.
+
+Commits de la passe :
+- structure DOM présentation : `f7fe18d4d481e6c2af8b0f39f1ecf7bd8ec5d87d`
+- styles hiérarchie : `321e0ece8fce6ae331d660664bfc106966c389d1`
+- chargement dans `v2/index.html` : `a5b779e6ab4bc3521eab963562b872bc884cce11`
+- régression : `e898650b8a2188ba6dff37c865328e1b273c85c0`
 
 ## Jalons CI récents validés
 
@@ -95,6 +117,7 @@ Commits de l'étape :
 - RPG : sauvegarde/reprise minimale : `34703227141` success
 - RPG : preview téléphone : `34703496395` success
 - RPG UX : première refonte présentation Donjon : `34704516033` success
+- RPG UX : hiérarchie surface de jeu / Journal & détails : `34707068397` success
 
 ## Preview téléphone
 
@@ -105,8 +128,8 @@ Pour tester les prochaines passes UX, générer/communiquer une nouvelle URL raw
 
 ## Priorités ouvertes
 
-1. Restructurer la navigation RPG et ses sous-menus : séparer clairement `Jouer`, `Héros`, `Monde/World Builder` et `Configuration`, au lieu de la barre technique actuelle où tout paraît mélangé.
+1. Restructurer maintenant la navigation RPG et ses sous-menus : séparer clairement `Jouer`, `Héros`, `Monde/World Builder` et `Configuration`, au lieu de la barre technique actuelle où tout paraît mélangé.
 2. Refaire ensuite l'UX de combat Donjon : portraits/cartes, PV et ressources visibles, timeline lisible, compétences sous forme de commandes/cartes et ciblage visuel ; réduire au maximum les `select` bruts.
-3. Ranger quêtes, inventaire, loot, commandes MJ et informations secondaires dans panneaux/drawers/contextes adaptés plutôt que dans un long flux vertical.
+3. Revoir ensuite la fiche héros/inventaire/équipement pour qu'elle soit une interface de jeu et non une suite de formulaires.
 4. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
 5. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

@@ -21,6 +21,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Présentation combat : timeline, KO, PV/ressources, journal moteur, ciblage vivant, consommables et fuite dans la vraie vue Donjon.
 - Contrôle du combat : `interaction.directCombat` et `interaction.gmFullControl` sont appliqués dans la vraie vue Donjon. Direct OFF masque les actions héros automatiques/consommables ; MJ total bloque aussi les tours ennemis automatiques.
 - Contrôles MJ manuels : runtime et panneau réel dans la vue Donjon, sur le même `combatState`, pour modifier les ressources/PV, KO/réactiver, effectuer un jet manuel et passer le tour.
+- Sécurité d’interface MJ : le panneau MJ est désormais doublement conditionné. `gmFullControl=true` active les règles manuelles de la partie, mais le panneau n’est rendu/monté que sur un appareil explicitement marqué `dungeonIsGameMasterDevice=true`. Un téléphone joueur ne reçoit donc pas le panneau même si la partie est en MJ total.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -36,31 +37,29 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - application combat direct / MJ dans vraie vue Donjon : `34659348809` success
 - runtime contrôles manuels MJ : `34672484172` success
 - panneau MJ manuel dans vraie vue Donjon : `34673068558` success
+- restriction panneau MJ au seul appareil MJ : `34673262305` success
 
 ## Dernière étape terminée
 
-Panneau `MJ contrôle total` branché dans la vraie vue Donjon :
-- nouveau module `v2/src/modes/rpg/dungeon-combat-gm-ui.js` ;
-- le panneau n’existe que lorsque `gmFullControl=true`, sur un vrai `dungeon-room-combat` actif ;
-- sélection lisible du combattant (héros/ennemi, état KO et tour actif) ;
-- sélection des ressources réellement présentes sur l’acteur, avec nom/icône data-driven et valeur courante ;
-- bouton `Appliquer la ressource` qui appelle uniquement `gmSetCombatResource()` ;
-- boutons `Mettre KO` et `Réactiver` qui appellent uniquement `gmSetCombatKo()` ;
-- jet manuel configurable par stat, difficulté, dé et mode, via `gmRollCombatCheck()` ; résultat visible immédiatement (`jet / seuil / réussite-échec`) ;
-- bouton `Passer le tour` via `gmAdvanceCombatTurn()`, donc fin de tour, cooldowns et statuts restent ceux du moteur ;
-- chaque action réinjecte le nouveau `combatState` dans `dungeonView.setCombat()` puis propage `kind:'combat-gm'` ;
-- aucune copie parallèle des PV, KO, jets ou timeline dans l’UI ;
-- régression `rpg-dungeon-combat-gm-ui.test.mjs` : acteurs, ressources/PV, contrôles KO/réactivation, jet, passage de tour, absence du panneau hors MJ total, et montage réel dans `rpg-page.js`.
+Restriction du panneau `MJ contrôle total` au téléphone/appareil désigné MJ :
+- `gmFullControl` reste une règle de partie : elle coupe les automatismes et autorise les commandes manuelles côté moteur ;
+- le droit d’afficher/utiliser le panneau n’est plus déduit de ce drapeau global ;
+- `dungeon-combat-gm-ui.js` exige maintenant `isGameMasterDevice=true` en plus du mode MJ total ;
+- par défaut `isGameMasterDevice=false`, donc un appareil joueur n’affiche aucun contrôle MJ ;
+- `rpg-page.js` accepte `dungeonIsGameMasterDevice=false`, le transmet au panneau, et expose `setDungeonGameMasterDevice()` / `getDungeonGameMasterDevice()` afin que l’appareil puisse être désigné ou retiré comme MJ sans changer les règles de combat ;
+- la régression vérifie qu’un univers en `gmFullControl=true` n’affiche malgré tout rien sur un appareil joueur, puis affiche le panneau uniquement quand `isGameMasterDevice=true` ;
+- aucune logique moteur de PV, KO, jets ou timeline n’a été déplacée.
 
 Commits de l’étape :
-- panneau MJ : `bd2888cf99d6a4f06102ed0947495593d21e31ef`
-- montage dans la page Donjon : `9fc0b8b5569558fcc95a281a9a06e570d3df9c94`
-- régression UI/montage : `3b733e89d6beb9aba3e068759bedb6a56d559d8f`
+- restriction du panneau au rôle appareil MJ : `7a433fc8f47314b8dd3eda146da9707affbb7508`
+- régression appareil joueur/MJ : `9b26d7df3a5dd1757a73945c4495a9ca43a9f7c8`
+- propagation du rôle appareil dans la page RPG : `63a6b81709c183c549ab0ce76ef248b5e1d1eaba`
 
-CI finale : `34673068558` success.
+CI finale : `34673262305` success.
 
 ## Priorités ouvertes
 
-1. améliorer maintenant l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, panneau MJ) sans toucher à l’autorité moteur ;
-2. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-3. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. définir proprement le mécanisme de désignation/persistance de l’appareil MJ (session locale, profil ou future synchro multi-appareils) avant la vraie couche réseau/synchronisation ;
+2. améliorer ensuite l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, panneau MJ) sans toucher à l’autorité moteur ;
+3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

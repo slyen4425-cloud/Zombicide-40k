@@ -3,6 +3,7 @@ export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   readsAuthoritativeRosterData:true,
   readsAuthoritativeBattleActiveInstance:true,
   readsAuthoritativeVitals:true,
+  readsAuthoritativeStatuses:true,
   exposesInspectionTarget:true,
   mutatesRoster:false,
   mutatesBattle:false,
@@ -19,6 +20,20 @@ function finiteOrNull(value){
   if(value==null||value==='') return null;
   const number=Number(value);
   return Number.isFinite(number)?number:null;
+}
+
+function captureRosterStatusEntry(status={}){
+  const id=text(status?.id,'');
+  const name=text(status?.name,id);
+  if(!id&&!name) return null;
+  const stacks=finiteOrNull(status?.stacks);
+  const remainingDuration=finiteOrNull(status?.remainingDuration);
+  return {
+    id,
+    name,
+    stacks:stacks===null?null:Math.max(1,stacks),
+    remainingDuration:remainingDuration===null?null:Math.max(0,remainingDuration),
+  };
 }
 
 export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null}={}){
@@ -41,6 +56,9 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
         ?`? / ${Math.max(0,maxHp)}`
         :null;
   const ko=currentHp!==null&&currentHp<=0;
+  const statuses=Array.isArray(creature?.statuses)
+    ?creature.statuses.map(captureRosterStatusEntry).filter(Boolean)
+    :[];
   return {
     instanceId,
     speciesId,
@@ -54,6 +72,7 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     maxHp,
     hpLabel,
     ko,
+    statuses,
   };
 }
 

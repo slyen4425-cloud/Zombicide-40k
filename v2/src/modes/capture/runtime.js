@@ -116,6 +116,10 @@ import {
   buildCaptureOpponentInspection,
   buildCaptureOpponentSummary,
 } from './ui-opponent-summary.js';
+import {
+  CAPTURE_PLAYER_ABILITY_ACTION_CONTRACT,
+  executeCapturePlayerAbility,
+} from './player-ability-action.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -137,6 +141,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiRosterList:true,
   canonicalUiOpponentSummary:true,
   canonicalUiOpponentInspection:true,
+  canonicalPlayerAbilityAction:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -161,6 +166,7 @@ export {
   CAPTURE_CREATURE_INSPECTION_CONTRACT,
   CAPTURE_UI_ROSTER_LIST_CONTRACT,
   CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT,
+  CAPTURE_PLAYER_ABILITY_ACTION_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
@@ -190,6 +196,7 @@ export {
   createCaptureWorldIndex,
   dispatchCaptureUiEvents,
   enterCaptureRoom,
+  executeCapturePlayerAbility,
   finishCaptureBattle,
   initializeCaptureRoster,
   isCaptureUiVisualPaused,

@@ -1,0 +1,23 @@
+name: Validate GenSrpG V16.78.92 Firefox PWA
+
+on:
+  push:
+    branches:
+      - work/v16.78.92-firefox-pwa
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier les manifests Firefox/PWA
+        run: node tests/gens_firefox_pwa_v167892.test.cjs
+      - name: Régression du nettoyage des anciennes stats
+        run: node tests/gens_rpg_legacy_cleanup_v167891.test.cjs
+      - name: Régression du nouvel éditeur de stats
+        run: node tests/gens_clean_stats_rebuild_v167890.test.cjs
+      - name: Régression Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs

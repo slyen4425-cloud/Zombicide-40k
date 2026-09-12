@@ -124,6 +124,10 @@ import {
   CAPTURE_PLAYER_MOVE_ACTION_CONTRACT,
   executeCapturePlayerMove,
 } from './player-move-action.js';
+import {
+  CAPTURE_PLAYER_CAPTURE_ACTION_CONTRACT,
+  executeCapturePlayerCaptureAttempt,
+} from './player-capture-action.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -147,6 +151,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiOpponentInspection:true,
   canonicalPlayerAbilityAction:true,
   canonicalPlayerMoveAction:true,
+  canonicalPlayerCaptureAction:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -173,6 +178,7 @@ export {
   CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT,
   CAPTURE_PLAYER_ABILITY_ACTION_CONTRACT,
   CAPTURE_PLAYER_MOVE_ACTION_CONTRACT,
+  CAPTURE_PLAYER_CAPTURE_ACTION_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
@@ -204,6 +210,7 @@ export {
   enterCaptureRoom,
   executeCapturePlayerAbility,
   executeCapturePlayerMove,
+  executeCapturePlayerCaptureAttempt,
   finishCaptureBattle,
   initializeCaptureRoster,
   isCaptureUiVisualPaused,

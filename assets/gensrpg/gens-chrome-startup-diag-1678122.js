@@ -1,6 +1,20 @@
 (()=>{
   'use strict';
 
+  // V16.78.129 — raw-branch/bootstrap path.
+  // index.html always loads this file, so use it to load the restored HOME routing
+  // on every browser. The Chrome Android recovery below remains Chrome-only.
+  function ensureHomeRouting(){
+    if(window.GensHomeModes1678129 || document.querySelector('script[data-gens-home-modes="1678129"]')) return;
+    const s=document.createElement('script');
+    s.src='assets/gensrpg/gens-home-modes-1678129.js?v=1678129';
+    s.async=false;
+    s.dataset.gensHomeModes='1678129';
+    s.onload=()=>{try{window.GensHomeModes1678129?.install?.()}catch(_){}};
+    (document.head||document.documentElement).appendChild(s);
+  }
+  ensureHomeRouting();
+
   // V16.78.129 — bounded Chrome Android home navigation recovery.
   // Keep a touch fallback only when Chrome really drops the click.
   // Never hide the document or force synchronous layout/repaint loops.

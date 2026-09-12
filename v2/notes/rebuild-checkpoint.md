@@ -183,6 +183,38 @@ Commits :
 - régression : `c0c5904e3b0b5b2ff474d4cb5d335e9b60e37f23` ;
 - compatibilité historique : `c3d5ec13efdc6ea66a94332d76016dbf051eb8bc`.
 
+## UX Monde / World Builder / Créateur de salle
+
+La présentation du constructeur de monde a été restructurée sans modifier les moteurs d'édition ni le stockage.
+
+World Builder :
+- navigation locale `🌍 Vue du monde / 🚪 Zones & salles / 🔗 Passages` ;
+- résumé visible du nombre de zones, salles et passages ;
+- les cartes de salles sont organisées en grille responsive ;
+- les boutons et champs existants (`+ Zone`, `+ Salle`, `+ Liaison`, champs zone/salle/lien) sont conservés avec leurs listeners d'origine.
+
+Créateur de salle :
+- la grille devient l'élément principal de l'écran ;
+- la barre d'outils est placée juste au-dessus de la grille et devient scrollable/sticky sur téléphone ;
+- les réglages généraux et obstacles sont déplacés dans `⚙️ Réglages de la salle`, repliable ;
+- les interactions restent séparées sous la zone de construction ;
+- résumé visible du nombre de cases et d'interactions ;
+- aucun outil de peinture, clic de case, resize, porte, obstacle ou interaction n'est réimplémenté dans la couche UX.
+
+Fichiers :
+- `v2/src/ui/rpg-world-builder-ui.js` ;
+- `v2/src/ui/rpg-world-builder-ui.css` ;
+- chargement dans `v2/index.html` ;
+- régression `v2/tests/rpg-world-builder-presentation.test.mjs`.
+
+Batterie complète : `34710181887` completed + success.
+
+Commits :
+- structure présentation : `3e1a269439a4ab815600f7f217386afd9d8fc7a0` ;
+- styles : `19bcfb33fef44caa8107b0fa607b143465c1d1cd` ;
+- chargement V2 : `94ad00e23b88c400aaaed4e68f1ad1eb1fd6bfd9` ;
+- régression : `ae0c868bd36cb8351a39227004294b2a804c707e`.
+
 ## Jalons CI récents validés
 
 - RPG : preview téléphone : `34703496395` success
@@ -193,6 +225,7 @@ Commits :
 - RPG UX : commandes combat cartes/cibles : `34708334737` success
 - RPG UX : cibles synchronisées portée/LOS/layout : `34709303945` success
 - RPG UX : fiche héros/inventaire/équipement : `34709948494` success
+- RPG UX : Monde / World Builder / Salles : `34710181887` success
 
 ## Preview téléphone
 
@@ -203,7 +236,6 @@ Pour tester les prochaines passes UX, communiquer une nouvelle URL raw.githack f
 
 ## Priorités ouvertes
 
-1. Revoir maintenant `Monde / World Builder / Salles` avec une hiérarchie claire et mobile-first.
-2. Revoir ensuite `Configuration` pour séparer proprement les catégories au lieu d'une longue interface d'éditeur.
-3. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
-4. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.
+1. Revoir maintenant `Configuration` pour séparer proprement les catégories au lieu d'une longue interface d'éditeur.
+2. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
+3. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

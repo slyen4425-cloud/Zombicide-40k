@@ -160,6 +160,30 @@ Commits :
 - chargement V2 : `ba2b121e03ed4cf06d9781dd91d1115fa16054ff` ;
 - régression : `444029c3522ee7cc204c722a1f47a99c271b107b`.
 
+## Ciblage visuel tactique — synchronisation spatial/layout
+
+Le panneau de combat utilise maintenant le même contexte spatial que le déplacement tactique :
+
+- `combat-target-ui.js` utilise la compétence sélectionnée comme profil tactique lorsqu'aucune source explicite n'est fournie ;
+- les entrées de cible exposent aussi la distance courante ;
+- le select interne conserve la cible courante si elle reste valide ;
+- `patchCombatTargetUiContext()` permet de mettre à jour le spatial/layout sans écraser l'univers/combat déjà posés par la présentation ;
+- `dungeon-combat-movement-ui.js` injecte le `roomLayout` matérialisé, le `roomRuntime`, le `roomId` et le spatial courant dans le ciblage ;
+- le recalcul a lieu au montage du tour puis immédiatement après chaque déplacement tactique ;
+- les cartes de cible sont reconstruites automatiquement car elles restent dérivées du select moteur ;
+- une cible hors portée ou derrière un bloqueur de vision authored n'est plus proposée ;
+- après repositionnement dans une position valide, elle réapparaît automatiquement.
+
+Régression : `v2/tests/rpg-combat-target-spatial-ui.test.mjs`.
+Le test protège : cible absente à 4 cases pour une portée max 3, cible présente après déplacement à 2 cases, cible absente derrière un mur `blocksVision:true` même si le mur ne bloque pas le mouvement.
+
+Batterie complète : `34709303945` completed + success.
+
+Commits :
+- ciblage sur compétence sélectionnée + contexte patchable : `771c862b0b722218be13ffce3ef6b3258596ab3f` ;
+- resynchronisation après mouvement et propagation layout/spatial : `9d00aa47d2d01166ab52ebcaf5120ff5bed3779b` ;
+- régression : `0847f08647fc97f101d06b8d1d22ac044eed7620`.
+
 ## Jalons CI récents validés
 
 - RPG : création/lancement session test : `34700285175` success
@@ -175,6 +199,7 @@ Commits :
 - RPG UX : navigation Jouer / Héros / Monde / Configuration : `34707462937` success
 - RPG : déplacement tactique en combat raccordé : `34708055765` success
 - RPG UX : commandes combat cartes/cibles : `34708334737` success
+- RPG UX : cibles synchronisées portée/LOS/layout : `34709303945` success
 
 ## Preview téléphone
 
@@ -185,8 +210,7 @@ Pour tester les prochaines passes UX, générer/communiquer une nouvelle URL raw
 
 ## Priorités ouvertes
 
-1. Vérifier/raccorder explicitement le contexte spatial complet de la salle aux contrôles de ciblage UI pour que les boutons de cible reflètent immédiatement portée/LOS/couverture après chaque déplacement.
-2. Revoir ensuite la fiche héros/inventaire/équipement comme interface de jeu.
-3. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
-4. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
-5. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.
+1. Revoir maintenant la fiche héros/inventaire/équipement comme interface de jeu.
+2. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
+3. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
+4. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

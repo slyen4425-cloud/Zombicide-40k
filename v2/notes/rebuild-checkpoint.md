@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins, réactions/esquive configurables par créature, politique d'esquive data-driven et coût/cooldown de réaction par instance.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins, réactions/esquive configurables par créature, politique d'esquive data-driven, coût/cooldown de réaction par instance et première fenêtre temporelle explicite de réaction.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -46,39 +46,40 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - réactions configurables routées par joueur + IA : `34683246425` success
 - politique d'esquive data-driven : `34683578020` success
 - coût/cooldown de réaction par instance : `34683977742` success
+- fenêtre temporelle explicite de réaction : `34684261793` success
 
 ## Dernière étape terminée
 
-Coût et cooldown de réaction réellement consommables par instance :
-- nouveau `v2/src/modes/capture/reaction-state.js` ;
-- état de réaction stocké par `instanceId` dans chaque créature via `reactionState[reactionId]` ;
-- état minimal : `resource` optionnelle + `cooldownRemaining` ;
-- aucune réserve implicite n'est inventée : si une réaction possède un coût > 0 mais aucune ressource n'est configurée, elle est bloquée explicitement ;
-- `normalizeCaptureReaction()` supporte désormais `cooldown` en plus de `cost` ;
-- coût et cooldown ne sont consommés que si la réaction se déclenche réellement ;
-- une réaction en cooldown est refusée avant l'évaluateur ;
-- `resolveCaptureAbilityAction()` persiste l'état de réaction du combattant ciblé dans le `battle` ;
-- changement forcé/manuel recharge l'état propre de la nouvelle instance ;
-- synchronisation globale joueur conserve `reactionState` dans `activeTeam` et `roster` ;
-- nouvelle opération publique `tickCaptureBattleReactionCooldowns()` pour décrémenter explicitement les cooldowns des deux côtés sans imposer de timer temps réel ;
-- la créature capturée conserve aussi son état de réaction courant ;
-- l'état d'une autre créature de l'équipe reste strictement indépendant.
+Premier contrat de fenêtre temporelle de réaction Capture :
+- nouveau `v2/src/modes/capture/reaction-window.js` ;
+- une réaction peut déclarer une fenêtre `opensAt` / `closesAt` avec une unité libre et explicite ;
+- aucune cadence temps réel globale n'est imposée et aucune i-frame finale n'est créée ;
+- une fenêtre non configurée reste ouverte pour préserver le comportement existant ;
+- une fenêtre configurée exige un temps explicite ; aucun temps n'est deviné ;
+- avant l'ouverture ou après la fermeture, la réaction est bloquée avant l'évaluateur et ne consomme ni ressource ni cooldown ;
+- pendant la fenêtre, le flux normal réaction -> coût/cooldown -> annulation éventuelle de l'effet continue ;
+- nouveau `v2/src/modes/capture/battle-timing.js` avec `setCaptureBattleReactionTime()` / `clearCaptureBattleReactionTime()` pour injecter une horloge abstraite dans `battle.timing.reactionTime` ;
+- `resolveCaptureReaction()` lit explicitement `reactionTime` fourni ou `battle.timing.reactionTime` ;
+- ce mécanisme prépare le futur vrai timing dynamique sans figer millisecondes, ticks, frames ou i-frames.
 
 Régression :
-- nouveau `v2/tests/capture-reaction-state.test.mjs` ;
-- couvre consommation de ressource, pose du cooldown, blocage pendant cooldown, tick explicite, nouvelle esquive après récupération et indépendance de l'état d'une autre instance ;
-- batterie complète V2 : `34683977742` success.
+- nouveau `v2/tests/capture-reaction-window.test.mjs` ;
+- couvre avant fenêtre, fenêtre ouverte, après fermeture, temps manquant, fenêtre non configurée, non-consommation hors fenêtre et consommation correcte pendant la fenêtre ;
+- premier run `34684238008` en failure : `null` était converti en `0` par JavaScript, donc le temps manquant était confondu avec un instant avant ouverture ;
+- correction ciblée : `now==null` est désormais traité explicitement comme `capture-reaction-window-time-required` ;
+- batterie complète corrigée : `34684261793` success.
 
 Commits de l'étape :
-- primitives état réaction : `dc7ed488237ba5ee6264dbb62f7da5741902f23f`
-- coût/cooldown dans résolution réaction : `917be83a896c36f86a4dc0c097e401f04e777ae8`
-- persistance battle par instance : `cf5d550363f4e715bf3b519fafce14329d1e2da0`
-- synchronisation globale + tick cooldown : `84987a9d4fe7f542288e917f661e14e29eddec96`
-- régression état réaction : `acb1993465c99bf086204d711fd0ab0f4a6e957f`
+- contrat fenêtre réaction : `ab0714aea7ed465db4179da3efd5bc7b9c469215`
+- raccord fenêtre au moteur réaction : `c3ba5c5ea4ee6bda9a68cdf781d33628f904ad30`
+- lecture horloge battle dans réactions : `075230493db0c2d3a6712a82a8a13965c28f1822`
+- helpers horloge battle : `09841f1f9c9fec54c0641e8431838e3ddbd18dcd`
+- régression fenêtre : `c4158a0b04cf4617fada97676916b37e3e4abdce`
+- correction temps manquant : `cee8e29ef5c45c017511a434c20f5de0091f73fc`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : définir un premier contrat propre de fenêtre/réaction temporelle sans figer les i-frames finales, afin de préparer un vrai combat dynamique ;
+1. prochaine étape Capture : brancher cette horloge abstraite au chemin global joueur + IA avec une opération publique de progression temporelle, sans choisir encore secondes/frames/ticks définitifs ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

@@ -215,6 +215,35 @@ Commits :
 - chargement V2 : `94ad00e23b88c400aaaed4e68f1ad1eb1fd6bfd9` ;
 - régression : `ae0c868bd36cb8351a39227004294b2a804c707e`.
 
+## UX Configuration RPG — catégories
+
+La longue page `RPG · ÉDITEUR GÉNÉRIQUE` est maintenant réorganisée par une couche de présentation dédiée, sans modifier `rpg.js` ni les sous-éditeurs.
+
+- `🧱 Fondations` : statistiques, ressources, progression et éléments de base ;
+- `⚔️ Règles & combat` : jets/tests, pièges, déplacement/vision/spatial et configuration de combat ;
+- `✨ Capacités` : conditions, effets, compétences et transformations ;
+- `🎒 Contenu & monde` : objets, équipements, sets, économie, bestiaire, quêtes, alliés et contenu narratif ;
+- une seule catégorie est affichée à la fois ;
+- résumé du nombre de sections par catégorie ;
+- navigation horizontale mobile ;
+- formulaires ramenés en une colonne sur petit écran ;
+- les vraies `editor-section` sont déplacées dans les groupes : aucun champ, bouton, listener, stockage ou moteur n'est recréé ;
+- `MutationObserver` réapplique la hiérarchie après chaque rerender de l'éditeur.
+
+Fichiers :
+- `v2/src/ui/rpg-config-ui.js` ;
+- `v2/src/ui/rpg-config-ui.css` ;
+- chargement dans `v2/index.html` ;
+- régression `v2/tests/rpg-config-ui.test.mjs`.
+
+Batterie complète : `34710700809` completed + success.
+
+Commits :
+- structure Configuration : `8e8764eed5fcf1502b8c813e6aca5d47b5d01003` ;
+- styles : `568c2f1a9d462583087bcdeba8d4f8b950f0f916` ;
+- chargement V2 : `5853603ff64aa3a95bff227081f3f5577f81b528` ;
+- régression : `93bcb630a5a34f3de0199d7dd3248c594b9f4986`.
+
 ## Jalons CI récents validés
 
 - RPG : preview téléphone : `34703496395` success
@@ -226,6 +255,7 @@ Commits :
 - RPG UX : cibles synchronisées portée/LOS/layout : `34709303945` success
 - RPG UX : fiche héros/inventaire/équipement : `34709948494` success
 - RPG UX : Monde / World Builder / Salles : `34710181887` success
+- RPG UX : Configuration catégorisée : `34710700809` success
 
 ## Preview téléphone
 
@@ -236,6 +266,6 @@ Pour tester les prochaines passes UX, communiquer une nouvelle URL raw.githack f
 
 ## Priorités ouvertes
 
-1. Revoir maintenant `Configuration` pour séparer proprement les catégories au lieu d'une longue interface d'éditeur.
-2. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
+1. Faire maintenant la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
+2. Générer ensuite une nouvelle preview téléphone figée sur un commit UX récent pour validation utilisateur.
 3. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

@@ -8,6 +8,7 @@ export const CAPTURE_UI_EVENT_CONTRACT=Object.freeze({
   statusEvents:true,
   koEvents:true,
   switchEvents:true,
+  captureAttemptEvents:true,
   isolatedFromRpg:true,
 });
 
@@ -88,6 +89,28 @@ function appendKoAndSwitch(events,result){
       activeInstanceId:result?.activeInstanceId?String(result.activeInstanceId):null,
     }));
   }
+}
+
+export function captureUiEventsFromCaptureAttempt(result,{orbId=null}={}){
+  const canonicalOrbId=String(result?.attempt?.orbId||result?.itemId||orbId||'');
+  if(!result||result.ok===false){
+    return [event('capture_unavailable',{
+      reason:String(result?.reason||'capture-unavailable'),
+      orbId:canonicalOrbId||null,
+    })];
+  }
+  if(result.captured){
+    return [event('capture_success',{
+      orbId:canonicalOrbId||null,
+      destination:result?.destination?String(result.destination):null,
+      speciesId:result?.creature?.speciesId?String(result.creature.speciesId):null,
+    })];
+  }
+  return [event('capture_failed',{
+    orbId:canonicalOrbId||null,
+    chancePercent:Number.isFinite(Number(result?.attempt?.chancePercent))?Number(result.attempt.chancePercent):null,
+    roll:Number.isFinite(Number(result?.attempt?.roll))?Number(result.attempt.roll):null,
+  })];
 }
 
 export function captureUiEventsFromResult(result){

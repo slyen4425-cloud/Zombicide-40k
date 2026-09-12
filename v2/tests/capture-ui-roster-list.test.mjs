@@ -8,8 +8,10 @@ import {
 
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.presentationOnly,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeRosterData,true);
+assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeBattleActiveInstance,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.exposesInspectionTarget,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.mutatesRoster,false);
+assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.mutatesBattle,false);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.mutatesGameplayState,false);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.isolatedFromRpg,true);
 
@@ -23,7 +25,10 @@ assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.isolatedFromRpg,true);
     title:'Aqua',
     subtitle:'capture_aquafin · Niv. 3',
     inspectable:true,
+    activeInBattle:false,
   });
+  assert.deepEqual(captureRosterListEntry(creature,'active',{activeBattleInstanceId:'a1'}).activeInBattle,true);
+  assert.deepEqual(captureRosterListEntry(creature,'reserve',{activeBattleInstanceId:'a1'}).activeInBattle,false);
   assert.deepEqual(creature,before);
 }
 
@@ -34,23 +39,33 @@ assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.isolatedFromRpg,true);
       {instanceId:'a2',speciesId:'capture_braiseau',level:1},
     ],
     reserve:[{instanceId:'r1',speciesId:'capture_descendre',nickname:'Draco',level:7}],
+    battle:{player:{activeInstanceId:'a2'}},
   };
   const before=structuredClone(state);
   const lists=buildCaptureRosterLists(state);
   assert.equal(lists.counts.active,2);
   assert.equal(lists.counts.reserve,1);
-  assert.equal(lists.activeTeam[0].instanceId,'a1');
+  assert.equal(lists.activeBattleInstanceId,'a2');
+  assert.equal(lists.activeTeam[0].activeInBattle,false);
+  assert.equal(lists.activeTeam[1].activeInBattle,true);
+  assert.equal(lists.reserve[0].activeInBattle,false);
   assert.equal(lists.activeTeam[1].title,'capture_braiseau');
   assert.equal(lists.reserve[0].location,'reserve');
   assert.equal(lists.reserve[0].instanceId,'r1');
   assert.deepEqual(state,before);
 }
 
+{
+  const lists=buildCaptureRosterLists({activeTeam:[{instanceId:'a1',speciesId:'capture_aquafin'}],reserve:[],battle:null});
+  assert.equal(lists.activeBattleInstanceId,null);
+  assert.equal(lists.activeTeam[0].activeInBattle,false);
+}
+
 assert.equal(captureRosterListEntry({instanceId:'x'},'active'),null);
 assert.equal(captureRosterListEntry({speciesId:'capture_aquafin'},'active'),null);
 
 const presenterSource=fs.readFileSync(new URL('../src/modes/capture/ui-roster-list.js',import.meta.url),'utf8');
-for(const forbidden of ['moveCaptureRosterCreature','setCaptureTeam','setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','Math.random(','Date.now(']){
+for(const forbidden of ['moveCaptureRosterCreature','setCaptureTeam','switchCaptureBattleCreature','setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','Math.random(','Date.now(']){
   assert.equal(presenterSource.includes(forbidden),false,`roster list presenter must not include ${forbidden}`);
 }
 
@@ -58,13 +73,20 @@ const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',
 assert.match(pageSource,/data-capture-active-list/);
 assert.match(pageSource,/data-capture-reserve-list/);
 assert.match(pageSource,/data-capture-inspect-instance/);
+assert.match(pageSource,/data-capture-active-in-battle/);
+assert.match(pageSource,/data-capture-active-battle-badge/);
+assert.match(pageSource,/Actif en combat/);
 assert.match(pageSource,/buildCaptureRosterLists\(session\.state\)/);
 assert.match(pageSource,/api\.inspectCreature\(instanceId\)/);
+assert.match(pageSource,/beginCaptureBattleSession\(session,options\)/);
+assert.match(pageSource,/finishCaptureBattleSession\(session,reason\)/);
+assert.match(pageSource,/renderRosterLists\(\)/);
 assert.match(pageSource,/activeList\.addEventListener\('click',handleRosterInspectClick\)/);
 assert.match(pageSource,/reserveList\.addEventListener\('click',handleRosterInspectClick\)/);
 assert.match(pageSource,/activeList\.removeEventListener\('click',handleRosterInspectClick\)/);
 assert.match(pageSource,/reserveList\.removeEventListener\('click',handleRosterInspectClick\)/);
 assert.equal(pageSource.includes('moveCaptureRosterCreature('),false);
 assert.equal(pageSource.includes('setCaptureTeam('),false);
+assert.equal(pageSource.includes('switchCaptureBattleCreature('),false);
 
 console.log('capture-ui-roster-list.test.mjs: ok');

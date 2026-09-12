@@ -8,6 +8,7 @@ import { activeDungeonEnemies, startDungeonCombat, reconcileDungeonCombatResult,
 import { renderCombatPresentation } from './combat-presentation-ui.js';
 import { combatInteractionPolicy } from './combat-config.js';
 import { renderDungeonRoomGrid } from './dungeon-room-grid-view.js';
+import { moveFocusedDungeonHeroOnGrid } from './dungeon-grid-movement.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function clone(value){return structuredClone(value);}
@@ -235,6 +236,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
   let currentSpatialConfig=clone(spatialConfig||{});
   let currentCombat=activeCombat?clone(activeCombat):null;
   let currentCombatMessage='';
+  let currentMovementMessage='';
   let lastReconciledCombatKey=null;
   let currentEventPresentation=currentRuntime?.eventOrchestrator?.active?.eventState?clone(currentRuntime.eventOrchestrator.active.eventState):null;
 
@@ -274,7 +276,31 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
     reconcileCurrentCombat();
     const roomId=currentRuntime?.currentRoomId||null;
     const roomLayout=roomId&&typeof layoutProvider==='function'?layoutProvider(roomId):null;
-    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory,heroRuntimes:currentHeroRuntimes,spatial:currentSpatial,activeCombat:currentCombat,combatMessage:currentCombatMessage});
+    const effectiveSpatial=currentSpatial||currentRuntime?.spatial||null;
+    host.innerHTML=renderDungeonGameplayView(currentUniverse,currentRuntime,{lootRecipients:currentLootRecipients,selectedLootRecipientKey:currentLootRecipientKey,roomLayout,eventPresentationState:currentEventPresentation,worldIndex:currentWorldIndex,conditionEvaluator,inventory:currentInventory,heroRuntimes:currentHeroRuntimes,spatial:effectiveSpatial,activeCombat:currentCombat,combatMessage:currentCombatMessage});
+
+    const boardSection=host.querySelector('.dungeon-board-section');
+    if(boardSection&&currentMovementMessage) boardSection.insertAdjacentHTML('beforeend',`<p class="combat-result" data-dungeon-move-status aria-live="polite">${esc(currentMovementMessage)}</p>`);
+    if(boardSection&&effectiveSpatial&&(!currentCombat||currentCombat.phase==='ended')){
+      const moveToCell=cell=>{
+        const raw=String(cell.dataset.dungeonBoardCell||'');
+        const [xRaw,yRaw]=raw.split(',');
+        const out=moveFocusedDungeonHeroOnGrid({roomRuntime:currentRuntime,heroRuntimes:currentHeroRuntimes,spatial:effectiveSpatial,roomLayout,target:{x:Number(xRaw),y:Number(yRaw)},spatialConfig:currentSpatialConfig,activeCombat:currentCombat});
+        if(!out.ok){currentMovementMessage=`Déplacement refusé : ${out.reason}.`;render();return;}
+        currentSpatial=clone(out.spatial);
+        currentRuntime=out.roomRuntime;
+        currentMovementMessage=`Déplacement : ${out.distance} case${out.distance>1?'s':''} · arrivée ${out.target.x+1},${out.target.y+1}.`;
+        notify({...out,kind:'dungeon-grid-move',spatial:clone(currentSpatial)});
+        render();
+      };
+      host.querySelectorAll('[data-dungeon-board-cell]').forEach(cell=>{
+        cell.classList.add('dungeon-move-target');
+        cell.setAttribute('role','button');
+        cell.tabIndex=0;
+        cell.addEventListener('click',()=>moveToCell(cell));
+        cell.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();moveToCell(cell);}});
+      });
+    }
 
     host.querySelector('[data-dungeon-hero-focus]')?.addEventListener('change',event=>{
       if(!currentRuntime) return;
@@ -282,6 +308,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       const out=setFocusedDungeonHero(currentRuntime,event.target.value);
       if(!out.ok) return;
       currentRuntime=out.runtime;
+      currentMovementMessage='';
       if(String(previousRoomId)!==String(currentRuntime.currentRoomId)) currentEventPresentation=null;
       notify(out);
       render();
@@ -294,12 +321,13 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
         heroRuntimes:currentHeroRuntimes,
         engagerHeroId:currentRuntime.focusedHeroId,
         universe:currentUniverse,
-        spatial:currentSpatial,
+        spatial:effectiveSpatial,
         spatialConfig:currentSpatialConfig,
       });
       if(!out.ok) return;
       currentCombat=out.combat;
       currentCombatMessage='Combat engagé.';
+      currentMovementMessage='';
       lastReconciledCombatKey=null;
       onCombatStart?.(clone(currentCombat),out);
       render();
@@ -317,7 +345,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
         universe:currentUniverse,
         skillId,
         targetId,
-        spatial:currentSpatial,
+        spatial:effectiveSpatial,
         spatialConfig:currentSpatialConfig,
       });
       if(!out.ok){currentCombatMessage=`Action refusée : ${out.reason}.`;render();return;}
@@ -345,6 +373,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
       if(!out.ok) return;
       const previousRoomId=currentRuntime.currentRoomId;
       currentRuntime=out.runtime;
+      currentMovementMessage='';
       if(String(previousRoomId)!==String(currentRuntime.currentRoomId)) currentEventPresentation=null;
       notify(out);
       render();
@@ -420,7 +449,7 @@ export function mountDungeonGameplayView(host,{universe={},roomRuntime=null,loot
     getRoomRuntime:()=>currentRuntime,
     getLootRecipients:()=>clone(currentLootRecipients),
     getHeroRuntimes:()=>clone(currentHeroRuntimes),
-    getSpatial:()=>currentSpatial?clone(currentSpatial):null,
+    getSpatial:()=>currentSpatial?clone(currentSpatial):clone(currentRuntime?.spatial||null),
     getCombat:()=>currentCombat?clone(currentCombat):null,
     getEventWorld:()=>clone(currentEventWorld),
     getEventPresentation:()=>currentEventPresentation?clone(currentEventPresentation):null,

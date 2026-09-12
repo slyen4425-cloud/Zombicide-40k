@@ -5,12 +5,16 @@ import {
   buildCaptureCreatureInspection,
 } from '../src/modes/capture/runtime.js';
 
+const assetRegistry=JSON.parse(fs.readFileSync(new URL('../docs/capture-creature-assets.json',import.meta.url),'utf8'));
+
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.presentationOnly,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsAuthoritativeCreatureData,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsAuthoritativeVitals,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsAuthoritativeStatuses,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsAuthoritativeAbilityState,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsAuthoritativeReactionState,true);
+assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.readsCanonicalCaptureAssetRegistry,true);
+assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.neverUsesRpgOrDungeonFallback,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.derivesGameplayRules,false);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.supportsOptionalSpeciesData,true);
 assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.mutatesGameplayState,false);
@@ -39,7 +43,7 @@ assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.isolatedFromRpg,true);
     metadata:{capturedFrom:'wild_battle'},
   };
   const before=structuredClone(creature);
-  const result=buildCaptureCreatureInspection(creature,{speciesDef:{name:'Descendre',elements:['Feu','Vent']}});
+  const result=buildCaptureCreatureInspection(creature,{speciesDef:{name:'Descendre',elements:['Feu','Vent']},assetRegistry});
   assert.equal(result.ok,true);
   assert.equal(result.kind,'creature-inspection');
   assert.equal(result.title,'Draco');
@@ -79,10 +83,12 @@ assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.isolatedFromRpg,true);
 }
 
 {
-  const result=buildCaptureCreatureInspection({instanceId:'owned-2',speciesId:'capture_aquafin',level:1});
+  const result=buildCaptureCreatureInspection({instanceId:'owned-2',speciesId:'capture_aquafin',level:1},{assetRegistry});
   assert.equal(result.ok,true);
-  assert.equal(result.title,'capture_aquafin');
+  assert.equal(result.title,'Aquafin');
   assert.equal(result.message,'Détails de la créature');
+  assert.equal(result.metadata.speciesId,'capture_aquafin');
+  assert.equal(result.fields.find(field=>field.id==='species')?.value,'Aquafin');
   assert.equal(result.fields.some(field=>field.id==='hp'),false);
   assert.equal(result.fields.some(field=>field.id==='statuses'),false);
   assert.equal(result.fields.some(field=>field.id==='abilities'),false);
@@ -90,19 +96,38 @@ assert.equal(CAPTURE_CREATURE_INSPECTION_CONTRACT.isolatedFromRpg,true);
   assert.equal(result.fields.some(field=>field.id==='elements'),false);
 }
 
+{
+  const legacy={instanceId:'owned-legacy',speciesId:'crea_dracendre',level:2};
+  const before=structuredClone(legacy);
+  const result=buildCaptureCreatureInspection(legacy,{assetRegistry});
+  assert.equal(result.ok,true);
+  assert.equal(result.title,'Descendre');
+  assert.equal(result.fields.find(field=>field.id==='species')?.value,'Descendre');
+  assert.equal(result.metadata.speciesId,'capture_descendre');
+  assert.deepEqual(legacy,before);
+}
+
+{
+  const noRegistry=buildCaptureCreatureInspection({instanceId:'owned-old',speciesId:'capture_aquafin',level:1});
+  assert.equal(noRegistry.title,'capture_aquafin');
+  assert.equal(noRegistry.metadata.speciesId,'capture_aquafin');
+}
+
 assert.equal(buildCaptureCreatureInspection(null).reason,'capture-creature-inspection-creature-missing');
 assert.equal(buildCaptureCreatureInspection({instanceId:'x'}).reason,'capture-creature-inspection-identity-missing');
 
 const source=fs.readFileSync(new URL('../src/modes/capture/creature-inspection.js',import.meta.url),'utf8');
-for(const forbidden of ['setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','spendCaptureAbility','tickCaptureAbilityCooldowns','canUseCaptureAbility','spendCaptureReactionState','tickCaptureReactionStateMap','canUseCaptureReactionState','resolveCaptureReaction','addCaptureStatus','removeCaptureStatus','tickCaptureStatuses','resolveCaptureStatusEffect','setInterval(','requestAnimationFrame(','Date.now(','performance.now(','Math.random(']){
+assert.match(source,/resolveCaptureSpeciesAsset/);
+for(const forbidden of ['../rpg/','../dungeon/','setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','spendCaptureAbility','tickCaptureAbilityCooldowns','canUseCaptureAbility','spendCaptureReactionState','tickCaptureReactionStateMap','canUseCaptureReactionState','resolveCaptureReaction','addCaptureStatus','removeCaptureStatus','tickCaptureStatuses','resolveCaptureStatusEffect','setInterval(','requestAnimationFrame(','Date.now(','performance.now(','Math.random(']){
   assert.equal(source.includes(forbidden),false,`creature inspection must not include ${forbidden}`);
 }
 
 const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',import.meta.url),'utf8');
 assert.match(pageSource,/speciesById=\{\}/);
+assert.match(pageSource,/assetRegistry=\{\}/);
 assert.match(pageSource,/data-capture-overlay-fields/);
 assert.match(pageSource,/inspectCreature\(instanceId/);
-assert.match(pageSource,/buildCaptureCreatureInspection\(creature/);
+assert.match(pageSource,/buildCaptureCreatureInspection\(creature,\{speciesDef:species,assetRegistry\}\)/);
 assert.match(pageSource,/api\.openOverlay\(/);
 assert.equal(pageSource.includes("api.setBlocking(true)"),false);
 

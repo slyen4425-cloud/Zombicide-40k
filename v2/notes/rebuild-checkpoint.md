@@ -11,26 +11,20 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome, stockage `gensrpg:v2:capture:*`, aucun partage gameplay mutable avec RPG.
 - Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité, contrôleur multi-raisons de pause visuelle, blocage UI présentationnel, overlay concret non modal, inspection métier détaillée de créature, listes Équipe active/Réserve inspectables, état combat/PV/KO/statuts/capacités/réactions, résumé adverse actif et inspection adverse.
-- Le résumé adverse, les cartes Équipe active/Réserve et l’overlay d’inspection des créatures possédées utilisent désormais le registre canonique `capture-creature-assets.json` pour résoudre les IDs/noms canoniques.
-- Le registre Capture est chargé de façon lazy en parallèle du module Capture, uniquement à l’ouverture du mode.
-- Un art/icône ne peut être rendu que si le registre fournit un `path` autorisé dans `v2/assets/capture/creatures/` et que son statut n’est plus `pending_import`.
-- Aucun fallback RPG/Dungeon n’est accepté. Si le registre est absent, invalide ou encore `pending_import`, la vue reste sans image.
-- Les 14 visuels canoniques actuels restent tous `pending_import` avec `path:null`; les noms canoniques sont actifs, mais aucune image réelle n’est encore affichée.
-- Le temps visuel des notices reste strictement séparé du temps gameplay.
-- L’overlay concret suspend uniquement le temps visuel et n’appelle jamais le blocage gameplay.
-- Les inspections et résumés restent strictement consultatifs.
-- La page Capture expose maintenant trois commandes gameplay autoritaires déjà raccordées : switch manuel de créature active, utilisation de capacité explicitement définie, déplacement tactique cardinal d’une case.
-- Le bouton `Changer` n’apparaît que pour une créature de l’équipe active, vivante, différente de la créature actuellement active et pendant un combat actif ; la réserve n’expose jamais cette commande.
-- Le chemin autoritaire des capacités joueur utilise `executeCapturePlayerAbility()`, qui appelle `useCaptureBattleAbility()` et persiste le `abilityState` retourné dans `activeTeam`, `roster` et la copie de créature du combat.
-- La page Capture accepte une bibliothèque explicite `abilityDefs`. Une capacité n’est jouable dans l’UI que si son ID possède une définition exacte dans cette bibliothèque.
-- Le bouton `Utiliser` apparaît uniquement sur la créature actuellement active, pendant un combat actif, pour une capacité explicitement définie ; il est désactivé si le cooldown autoritaire est > 0 ou si les charges autoritaires sont à 0.
-- L’UI ne calcule ni portée, ni dégâts, ni coût, ni réaction, ni KO : le clic passe exclusivement par `executeCapturePlayerAbility()`.
-- Le déplacement joueur passe exclusivement par `executeCapturePlayerMove()` : quatre commandes cardinales `↑ ↓ ← →`, une case par commande, sans diagonale.
-- Les contrôles de déplacement n’apparaissent que sur la créature actuellement active, vivante et pendant un combat actif ; ils n’apparaissent ni sur les autres membres de l’équipe ni dans la réserve.
-- `executeCapturePlayerMove()` lit la position autoritaire avec le Core spatial puis appelle `moveCaptureBattleCreature()` ; murs/cases bloquées/pathfinding restent décidés par le moteur spatial.
-- Aucun accès direct de la page à `getActorPosition()`, `setActorPosition()` ou `moveCaptureBattleCreature()` n’est autorisé.
-- Aucun `abilityState` manquant, aucune charge, aucun cooldown et aucune définition de capacité ne sont inventés.
-- Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
+- Le résumé adverse, les cartes Équipe active/Réserve et l’overlay d’inspection des créatures possédées utilisent le registre canonique `capture-creature-assets.json` pour résoudre les IDs/noms canoniques.
+- Le registre Capture est chargé de façon lazy uniquement à l’ouverture du mode ; aucun fallback RPG/Dungeon n’est accepté.
+- Les 14 visuels canoniques actuels restent `pending_import` avec `path:null`; les noms canoniques sont actifs, mais aucune image réelle n’est encore affichée.
+- Le temps visuel des notices reste strictement séparé du temps gameplay et l’overlay ne bloque jamais le moteur.
+- La page Capture expose maintenant quatre commandes gameplay autoritaires : switch manuel, capacité explicitement définie, déplacement tactique cardinal d’une case et tentative de capture par orbe explicitement configurée.
+- Le bouton `Changer` n’apparaît que pour une créature active-team vivante, différente de l’actuelle et pendant un combat actif.
+- Le chemin capacité joueur utilise `executeCapturePlayerAbility()` et persiste charges/cooldowns dans `activeTeam`, `roster` et la créature de combat ; aucune définition/charge/cooldown absente n’est inventé.
+- `abilityDefs` reste une bibliothèque injectée explicitement ; une capacité sans définition exacte reste seulement consultative.
+- Le déplacement joueur passe exclusivement par `executeCapturePlayerMove()` : `↑ ↓ ← →`, une case, sans diagonale ; obstacles/pathfinding restent décidés par le Core spatial.
+- La capture joueur passe désormais par `executeCapturePlayerCaptureAttempt()` ; la page reçoit un `captureConfig` explicite contenant `speciesCaptureRates`, `orbLibrary` et éventuellement `lowHpMultiplier`.
+- Aucun bouton d’orbe n’est rendu si le taux de l’espèce manque, si le coefficient de l’orbe manque ou vaut <=0, si le stock est nul, si les PV adverses sont invalides, ou si l’adversaire est strictement sous 30 % PV sans multiplicateur bas PV explicite.
+- La règle bas PV reste strictement `<30%`, conforme au contrat existant ; aucun multiplicateur n’est inventé.
+- Une tentative refusée pour configuration incomplète ne consomme pas d’orbe ; une tentative valide ratée consomme une orbe et garde le combat ; une capture réussie consomme l’orbe, ajoute une instance distincte à l’équipe ou à la réserve, termine le combat et relibère l’exploration.
+- Les 4 IDs d’orbes reconnus restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients par défaut restent volontairement `null` tant qu’ils ne sont pas validés.
 
 ## Jalons CI récents validés
 
@@ -56,40 +50,39 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - persistance autoritaire des charges/cooldowns après capacité joueur : `34696817140` success
 - commande UI de capacité pour la créature active : `34698467186` success
 - déplacement tactique cardinal joueur : `34698850672` success
+- tentative de capture par orbe configurée explicitement : `34699118520` success
 
 ## Dernière étape terminée
 
-Déplacement tactique manuel de la créature active depuis la page Capture :
-- nouveau module `v2/src/modes/capture/player-move-action.js` ;
-- `executeCapturePlayerMove(state,{direction})` accepte seulement `up`, `down`, `left`, `right` ;
-- la position courante est lue depuis le Core spatial avec `getActorPosition()` ;
-- la cible est strictement la case cardinale voisine ;
-- le mouvement autoritaire passe par `moveCaptureBattleCreature(state,'player',target,{movement:1,diagonal:false})` ;
-- une direction invalide est refusée ;
-- un héros/créature KO ne peut pas se déplacer ;
-- une case bloquée est refusée par le moteur spatial existant ;
-- l’état source n’est pas muté ;
-- `capture/runtime.js` expose `CAPTURE_PLAYER_MOVE_ACTION_CONTRACT` et `executeCapturePlayerMove()` via la façade canonique ;
-- la carte de la créature active affiche `↑ ↓ ← →` pendant un combat actif uniquement ;
-- la page appelle seulement `executeCapturePlayerMove()` puis rerend roster et résumé adverse après succès ;
-- aucun calcul spatial direct n’a été ajouté dans l’UI.
+Tentative de capture par orbe depuis la page Capture, sans inventer aucune valeur :
+- nouveau module `v2/src/modes/capture/player-capture-action.js` ;
+- `executeCapturePlayerCaptureAttempt()` lit l’espèce et les PV adverses depuis le combat autoritaire puis appelle exclusivement `attemptCaptureInBattle()` ;
+- le taux d’espèce doit exister explicitement dans `speciesCaptureRates` ;
+- l’orbe doit exister dans l’`orbLibrary` injectée et posséder un `captureCoefficient` fini > 0 ;
+- si l’adversaire est strictement sous 30 % PV, `lowHpMultiplier` doit être explicitement fourni et > 0 ;
+- aucune configuration incomplète ne consomme d’orbe ;
+- la page n’affiche que les orbes avec configuration valide ET stock > 0 ;
+- une tentative ratée décrémente le stock de l’orbe mais conserve combat/rencontre ;
+- une capture réussie ajoute une instance distincte à l’équipe si elle contient moins de 6 créatures, sinon à la réserve, puis termine le combat et arrête le driver gameplay de la session ;
+- aucun coefficient de `CAPTURE_ORB_LIBRARY` n’a été modifié : les quatre coefficients intégrés restent `null`.
 
 Régression :
-- `v2/tests/capture-player-move-action.test.mjs` couvre déplacement droit/haut, blocage obstacle, KO, absence de combat, direction invalide et non-mutation ;
-- `v2/tests/capture-ui-player-move-action.test.mjs` protège l’exposition publique, les quatre contrôles cardinaux et l’absence d’accès spatial bas niveau dans la page ;
-- batterie complète : `34698850672` success.
+- `v2/tests/capture-player-capture-action.test.mjs` couvre taux manquant sans consommation, multiplicateur bas PV manquant sans consommation, échec valide avec consommation et combat conservé, réussite avec capture/roster/fin de combat ;
+- `v2/tests/capture-ui-player-capture-action.test.mjs` protège l’injection explicite de `captureConfig`, le gating du stock/coefficient/taux/bas-PV et l’absence de coefficient ou multiplicateur codé en dur dans la page ;
+- batterie complète : `34699118520` success.
 
 Commits de l’étape :
-- contrôleur déplacement cardinal : `d6e631e1995fb2a2a5de17c2e497ae00a835db5a`
-- façade runtime : `eb0230bafe02c360674a9ad1d33f3f2a1d65ca5a`
-- régression contrôleur : `939b5fb5e00bcd07df1b50312a5bc060f5e93903`
-- contrôles UI : `81459c8f5a4fa39ac87e7205abf1f25bb683729c`
-- régression UI : `134a3d08a2af2e8393eee5b884d7de56386f642b`
+- contrôleur tentative capture joueur : `d5ca587bfd1fd54ba1e0499816cd8057d3c5cac0`
+- façade runtime : `28ec7856e48cbacce576318c220e43ede108c909`
+- commande UI orbes : `1bc74d4ab332b9606ec043b58bb0d1cf48f44eb2`
+- régression contrôleur : `366e58812ff14fa045c90ec0767082a3f06a3488`
+- régression UI : `42891c7a090a2add61e4564a718cb17ff3e38b37`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : ajouter un retour visuel simple de position/distance pour aider le joueur à comprendre la portée sans calculer la règle dans l’UI ;
-2. ensuite raccorder la tentative de capture par orbe uniquement lorsque les coefficients/valeurs requis sont explicitement validés et disponibles ;
+1. prochaine étape Capture : ajouter un retour visuel simple de position/distance/portée pour aider à comprendre pourquoi une capacité ou un déplacement est refusé, sans recalculer les règles dans l’UI ;
+2. ensuite améliorer le retour utilisateur des tentatives de capture (ratée/réussie/configuration indisponible) via le système de notices existant, sans modal bloquante ;
 3. importer les vrais arts principaux + icônes quand les fichiers validés sont disponibles, une seule paire par espèce canonique ;
-4. enrichir les autres réactions/effets tactiques uniquement si leurs contrats sont validés ;
-5. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.
+4. figer les coefficients réels des 4 orbes et le multiplicateur bas PV uniquement quand leurs valeurs auront été validées ;
+5. enrichir les autres réactions/effets tactiques uniquement si leurs contrats sont validés ;
+6. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.

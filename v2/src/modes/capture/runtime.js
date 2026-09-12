@@ -80,6 +80,10 @@ import {
   CAPTURE_UI_VISUAL_CLOCK_SOURCE_CONTRACT,
   attachCaptureUiVisualClockSource,
 } from './ui-visual-clock-source.js';
+import {
+  CAPTURE_UI_VISUAL_ACTIVITY_SOURCE_CONTRACT,
+  attachCaptureUiVisualActivitySource,
+} from './ui-visual-activity-source.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -93,6 +97,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiVisualDriver:true,
   canonicalUiVisualClockAdapter:true,
   canonicalUiVisualClockSource:true,
+  canonicalUiVisualActivitySource:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -110,8 +115,10 @@ export {
   CAPTURE_UI_VISUAL_DRIVER_CONTRACT,
   CAPTURE_UI_VISUAL_CLOCK_ADAPTER_CONTRACT,
   CAPTURE_UI_VISUAL_CLOCK_SOURCE_CONTRACT,
+  CAPTURE_UI_VISUAL_ACTIVITY_SOURCE_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
+  attachCaptureUiVisualActivitySource,
   attachCaptureUiVisualClockSource,
   attemptCaptureInBattle,
   captureUiEventsFromResult,

@@ -52,6 +52,7 @@ assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.isolatedFromRpg,true);
       {id:'splash',charges:2,chargeMax:4,cooldownRemaining:1},
       {id:'dash',charges:null,chargeMax:null,cooldownRemaining:0},
     ],
+    reactions:[],
   });
   assert.equal(captureRosterListEntry(creature,'active',{activeBattleInstanceId:'a1'}).activeInBattle,true);
   assert.equal(captureRosterListEntry(creature,'reserve',{activeBattleInstanceId:'a1'}).activeInBattle,false);

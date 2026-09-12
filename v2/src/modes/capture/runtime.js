@@ -106,6 +106,11 @@ import {
   CAPTURE_CREATURE_INSPECTION_CONTRACT,
   buildCaptureCreatureInspection,
 } from './creature-inspection.js';
+import {
+  CAPTURE_UI_ROSTER_LIST_CONTRACT,
+  buildCaptureRosterLists,
+  captureRosterListEntry,
+} from './ui-roster-list.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -124,6 +129,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiPresentationBlock:true,
   canonicalUiOverlay:true,
   canonicalCreatureInspection:true,
+  canonicalUiRosterList:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -146,12 +152,15 @@ export {
   CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT,
   CAPTURE_UI_OVERLAY_CONTRACT,
   CAPTURE_CREATURE_INSPECTION_CONTRACT,
+  CAPTURE_UI_ROSTER_LIST_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
   attachCaptureUiVisualClockSource,
   attemptCaptureInBattle,
   buildCaptureCreatureInspection,
+  buildCaptureRosterLists,
+  captureRosterListEntry,
   captureUiEventsFromResult,
   captureUiEventsFromResults,
   captureUiNoticeFeedNotices,

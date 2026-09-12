@@ -101,6 +101,12 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   const overlayFields=host.querySelector?.('[data-capture-overlay-fields]')||null;
   const overlayClose=host.querySelector?.('[data-capture-overlay-close]')||null;
 
+  function rosterStatusHtml(status){
+    const stacks=status.stacks!==null&&status.stacks>1?` ×${escapeHtml(status.stacks)}`:'';
+    const remaining=status.remainingDuration!==null?` · reste ${escapeHtml(status.remainingDuration)}`:'';
+    return `<span class="capture-roster-status" data-capture-status="${escapeHtml(status.id||status.name)}">${escapeHtml(status.name||status.id)}${stacks}${remaining}</span>`;
+  }
+
   function rosterEntryHtml(entry){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
     const koClass=entry.ko?' is-ko':'';
@@ -109,11 +115,13 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const activeBadge=entry.activeInBattle?'<span class="capture-roster-active-badge" data-capture-active-battle-badge>Actif en combat</span>':'';
     const koBadge=entry.ko?'<span class="capture-roster-ko-badge" data-capture-ko-badge>KO</span>':'';
     const vitals=entry.hpLabel!==null?`<p class="capture-roster-vitals" data-capture-hp>PV : ${escapeHtml(entry.hpLabel)}</p>`:'';
+    const statuses=entry.statuses.length?`<div class="capture-roster-statuses" data-capture-statuses>${entry.statuses.map(rosterStatusHtml).join('')}</div>`:'';
     return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
         <p>${escapeHtml(entry.subtitle)}</p>
         ${vitals}
+        ${statuses}
         ${activeBadge}
         ${koBadge}
       </div>

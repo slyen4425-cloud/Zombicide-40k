@@ -1,6 +1,7 @@
 import {
   advanceCaptureBattleSession,
   appendCaptureUiNotices,
+  attachCaptureUiVisualActivitySource,
   attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
@@ -34,12 +35,13 @@ function escapeHtml(value){
     .replaceAll("'",'&#39;');
 }
 
-export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null}={}){
+export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null,visualActivitySource=null}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
   let visualClockAdapter=createCaptureUiVisualClockAdapterState();
   let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
+  let visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -94,6 +96,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get visualDriver(){return structuredClone(visualDriver);},
     get visualClockAdapter(){return structuredClone(visualClockAdapter);},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
+    get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
       const result=beginCaptureBattleSession(session,options);
       if(result.ok) session=result.session;
@@ -140,7 +143,9 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       return result;
     },
     dispose(){
+      visualActivitySourceAttachment.detach();
       visualClockSourceAttachment.detach();
+      visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
       visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
@@ -153,6 +158,12 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   if(visualClockSource){
     api.startNoticeVisualClock();
     visualClockSourceAttachment=attachCaptureUiVisualClockSource(visualClockSource,sample=>api.sampleNoticeVisualClock(sample));
+  }
+  if(visualActivitySource){
+    visualActivitySourceAttachment=attachCaptureUiVisualActivitySource(visualActivitySource,{
+      onInactive:()=>api.pauseNoticeVisualClock(),
+      onActive:()=>api.resumeNoticeVisualClock(),
+    });
   }
 
   return api;

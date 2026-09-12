@@ -20,7 +20,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Tours ennemis : automatiques sur la même timeline sauf en `MJ contrôle total`.
 - Présentation combat : timeline, KO, PV/ressources, journal moteur, ciblage vivant, consommables et fuite dans la vraie vue Donjon.
 - Contrôle du combat : `interaction.directCombat` et `interaction.gmFullControl` sont appliqués dans la vraie vue Donjon. Direct OFF masque les actions héros automatiques/consommables ; MJ total bloque aussi les tours ennemis automatiques.
-- Runtime MJ manuel : opérations dédiées sur le même `combatState` pour modifier une ressource, mettre KO/réactiver, effectuer un jet manuel et passer le tour via les fonctions moteur existantes.
+- Contrôles MJ manuels : runtime et panneau réel dans la vue Donjon, sur le même `combatState`, pour modifier les ressources/PV, KO/réactiver, effectuer un jet manuel et passer le tour.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -35,27 +35,32 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - configuration combat direct / MJ : `34658933290` success
 - application combat direct / MJ dans vraie vue Donjon : `34659348809` success
 - runtime contrôles manuels MJ : `34672484172` success
+- panneau MJ manuel dans vraie vue Donjon : `34673068558` success
 
 ## Dernière étape terminée
 
-Runtime de contrôle manuel MJ ajouté dans `v2/src/modes/rpg/dungeon-combat-gm-runtime.js` :
-- toutes les commandes sont refusées si `gmFullControl` n’est pas activé ;
-- `gmSetCombatResource()` modifie une ressource d’un combattant directement dans le vrai `combatState`, avec clamp `0..max` quand un max existe ;
-- `gmSetCombatKo()` permet au MJ de poser ou retirer un KO sans créer de second système de victoire/défaite ; la timeline reste sous contrôle manuel ;
-- `gmRollCombatCheck()` utilise le vrai `resolveCheck()` D100 et peut utiliser la stat réelle de l’acteur ;
-- `gmAdvanceCombatTurn()` passe par `endActiveTurn()` afin de conserver statuts de fin de tour, cooldowns et règle de défaite existante ;
-- chaque intervention MJ est journalisée (`gm-resource-set`, `gm-combatant-ko`, `gm-combatant-reactivated`, `gm-check`, `gm-turn-advanced`) dans le journal du même combat ;
-- régression dédiée : modification PV, KO puis réactivation, jet D100 déterministe avec stat, passage manuel du héros à l’ennemi, et refus complet hors mode MJ.
+Panneau `MJ contrôle total` branché dans la vraie vue Donjon :
+- nouveau module `v2/src/modes/rpg/dungeon-combat-gm-ui.js` ;
+- le panneau n’existe que lorsque `gmFullControl=true`, sur un vrai `dungeon-room-combat` actif ;
+- sélection lisible du combattant (héros/ennemi, état KO et tour actif) ;
+- sélection des ressources réellement présentes sur l’acteur, avec nom/icône data-driven et valeur courante ;
+- bouton `Appliquer la ressource` qui appelle uniquement `gmSetCombatResource()` ;
+- boutons `Mettre KO` et `Réactiver` qui appellent uniquement `gmSetCombatKo()` ;
+- jet manuel configurable par stat, difficulté, dé et mode, via `gmRollCombatCheck()` ; résultat visible immédiatement (`jet / seuil / réussite-échec`) ;
+- bouton `Passer le tour` via `gmAdvanceCombatTurn()`, donc fin de tour, cooldowns et statuts restent ceux du moteur ;
+- chaque action réinjecte le nouveau `combatState` dans `dungeonView.setCombat()` puis propage `kind:'combat-gm'` ;
+- aucune copie parallèle des PV, KO, jets ou timeline dans l’UI ;
+- régression `rpg-dungeon-combat-gm-ui.test.mjs` : acteurs, ressources/PV, contrôles KO/réactivation, jet, passage de tour, absence du panneau hors MJ total, et montage réel dans `rpg-page.js`.
 
 Commits de l’étape :
-- runtime MJ manuel : `41355339eccb7b2dfe1f6d6b3abf4783469f3ea8`
-- régression : `fcf77a9572604f2b7c5934236fc08cd66329b291`
+- panneau MJ : `bd2888cf99d6a4f06102ed0947495593d21e31ef`
+- montage dans la page Donjon : `9fc0b8b5569558fcc95a281a9a06e570d3df9c94`
+- régression UI/montage : `3b733e89d6beb9aba3e068759bedb6a56d559d8f`
 
-CI finale : `34672484172` success.
+CI finale : `34673068558` success.
 
 ## Priorités ouvertes
 
-1. brancher maintenant ces contrôles manuels dans la vraie vue Donjon quand `gmFullControl=true` : combattant, ressource/PV, KO/réactivation, jet manuel et bouton de passage de tour ;
-2. améliorer ensuite l’ergonomie mobile du bloc combat sans toucher à l’autorité moteur ;
-3. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-4. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. améliorer maintenant l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, panneau MJ) sans toucher à l’autorité moteur ;
+2. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+3. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.

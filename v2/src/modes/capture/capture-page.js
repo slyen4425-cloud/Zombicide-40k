@@ -5,6 +5,7 @@ import {
   attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
   buildCaptureCreatureInspection,
+  buildCaptureOpponentSummary,
   buildCaptureRosterLists,
   captureUiNoticeFeedNotices,
   clearCaptureUiVisualPauseReasons,
@@ -79,6 +80,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         <h3 id="capture-reserve-title">Réserve</h3>
         <div class="capture-roster-list" data-capture-reserve-list></div>
       </section>
+      <section class="capture-opponent-section" data-capture-opponent-section hidden aria-labelledby="capture-opponent-title">
+        <h3 id="capture-opponent-title">Adversaire sauvage</h3>
+        <div data-capture-opponent-summary></div>
+      </section>
       <div class="capture-combat-feed" data-capture-combat-feed aria-live="polite" aria-atomic="false"></div>
       <aside class="capture-overlay" data-capture-overlay hidden aria-live="polite" aria-modal="false">
         <div class="capture-overlay-card">
@@ -93,6 +98,8 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
 
   const activeList=host.querySelector?.('[data-capture-active-list]')||null;
   const reserveList=host.querySelector?.('[data-capture-reserve-list]')||null;
+  const opponentSection=host.querySelector?.('[data-capture-opponent-section]')||null;
+  const opponentSummaryNode=host.querySelector?.('[data-capture-opponent-summary]')||null;
   const feed=host.querySelector?.('[data-capture-combat-feed]')||null;
   const overlayNode=host.querySelector?.('[data-capture-overlay]')||null;
   const overlayKind=host.querySelector?.('[data-capture-overlay-kind]')||null;
@@ -166,6 +173,36 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         :'<p data-capture-roster-empty="reserve">Réserve vide.</p>';
     }
     return lists;
+  }
+
+  function opponentStatusHtml(status){
+    const stacks=status.stacks!==null&&status.stacks>1?` ×${escapeHtml(status.stacks)}`:'';
+    const remaining=status.remainingDuration!==null?` · reste ${escapeHtml(status.remainingDuration)}`:'';
+    return `<span class="capture-opponent-status" data-capture-opponent-status="${escapeHtml(status.id||status.name)}">${escapeHtml(status.name||status.id)}${stacks}${remaining}</span>`;
+  }
+
+  function renderOpponentSummary(){
+    const summary=buildCaptureOpponentSummary(session.state);
+    if(opponentSection) opponentSection.hidden=!summary;
+    if(!opponentSummaryNode) return summary;
+    if(!summary){
+      opponentSummaryNode.innerHTML='';
+      return null;
+    }
+    const koBadge=summary.ko?'<span class="capture-opponent-ko" data-capture-opponent-ko>KO</span>':'';
+    const wildBadge=summary.wild?'<span class="capture-opponent-wild" data-capture-opponent-wild>Sauvage</span>':'';
+    const hp=summary.hpLabel!==null?`<p data-capture-opponent-hp>PV : ${escapeHtml(summary.hpLabel)}</p>`:'';
+    const position=summary.position&&summary.position.x!=null&&summary.position.y!=null
+      ?`<p data-capture-opponent-position>Position : ${escapeHtml(summary.position.x)}, ${escapeHtml(summary.position.y)}</p>`
+      :'';
+    const statuses=summary.statuses.length
+      ?`<div data-capture-opponent-statuses>${summary.statuses.map(opponentStatusHtml).join('')}</div>`
+      :'';
+    opponentSummaryNode.innerHTML=`<article class="capture-opponent-summary${summary.ko?' is-ko':''}" data-capture-opponent-instance="${escapeHtml(summary.instanceId)}">
+      <strong>${escapeHtml(summary.title)}</strong>
+      ${wildBadge}${koBadge}${hp}${position}${statuses}
+    </article>`;
+    return summary;
   }
 
   function renderFeed(){
@@ -242,6 +279,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get presentationBlock(){return structuredClone(presentationBlock);},
     get overlay(){return structuredClone(overlay);},
     get rosterLists(){return buildCaptureRosterLists(session.state);},
+    get opponentSummary(){return buildCaptureOpponentSummary(session.state);},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
@@ -249,6 +287,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       if(result.ok){
         session=result.session;
         renderRosterLists();
+        renderOpponentSummary();
       }
       return result;
     },
@@ -297,12 +336,14 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       return {...inspection,overlay:opened.state,blocking:opened.blocking,gameplayDriverStatus:opened.gameplayDriverStatus};
     },
     refreshRosterLists(){return renderRosterLists();},
+    refreshOpponentSummary(){return renderOpponentSummary();},
     advance(delta,options={}){
       const result=advanceCaptureBattleSession(session,{...options,delta});
       if(result.ok){
         session=result.session;
         result.notices=flushUiEvents();
         renderRosterLists();
+        renderOpponentSummary();
       }
       return result;
     },
@@ -335,6 +376,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       if(result.ok){
         session=result.session;
         renderRosterLists();
+        renderOpponentSummary();
       }
       return result;
     },
@@ -379,6 +421,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   }
 
   renderRosterLists();
+  renderOpponentSummary();
   renderOverlay();
   return api;
 }

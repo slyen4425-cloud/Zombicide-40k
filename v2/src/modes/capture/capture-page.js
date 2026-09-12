@@ -6,16 +6,19 @@ import {
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
   clearCaptureUiVisualPauseReasons,
+  closeCaptureUiOverlay,
   consumeCaptureUiEvents,
   createCaptureAppSession,
   createCaptureModeState,
   createCaptureUiNoticeFeed,
+  createCaptureUiOverlayState,
   createCaptureUiPresentationBlockState,
   createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
   createCaptureUiVisualPauseControllerState,
   dispatchCaptureUiEvents,
   finishCaptureBattleSession,
+  openCaptureUiOverlay,
   pauseCaptureUiVisualClockAdapter,
   pauseCaptureUiVisualDriver,
   resumeCaptureUiVisualClockAdapter,
@@ -47,6 +50,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   let visualClockAdapter=createCaptureUiVisualClockAdapterState();
   let visualPauseController=createCaptureUiVisualPauseControllerState();
   let presentationBlock=createCaptureUiPresentationBlockState();
+  let overlay=createCaptureUiOverlayState();
   let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
   let visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
   const state=session.state;
@@ -66,13 +70,35 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         <p><strong>Combat :</strong> moteur dynamique dédié, cycle de vie driver piloté par l’application.</p>
       </div>
       <div class="capture-combat-feed" data-capture-combat-feed aria-live="polite" aria-atomic="false"></div>
+      <aside class="capture-overlay" data-capture-overlay hidden aria-live="polite" aria-modal="false">
+        <div class="capture-overlay-card">
+          <p class="eyebrow" data-capture-overlay-kind></p>
+          <h3 data-capture-overlay-title></h3>
+          <p data-capture-overlay-message></p>
+          <button type="button" data-capture-overlay-close>Fermer</button>
+        </div>
+      </aside>
     </section>`;
 
   const feed=host.querySelector?.('[data-capture-combat-feed]')||null;
+  const overlayNode=host.querySelector?.('[data-capture-overlay]')||null;
+  const overlayKind=host.querySelector?.('[data-capture-overlay-kind]')||null;
+  const overlayTitle=host.querySelector?.('[data-capture-overlay-title]')||null;
+  const overlayMessage=host.querySelector?.('[data-capture-overlay-message]')||null;
+  const overlayClose=host.querySelector?.('[data-capture-overlay-close]')||null;
+
   function renderFeed(){
     if(!feed) return;
     const notices=captureUiNoticeFeedNotices(noticeFeed);
     feed.innerHTML=notices.map(notice=>`<p class="capture-combat-notice" data-capture-event="${escapeHtml(notice.type)}">${escapeHtml(notice.message)}</p>`).join('');
+  }
+
+  function renderOverlay(){
+    if(!overlayNode) return;
+    overlayNode.hidden=!overlay.open;
+    if(overlayKind) overlayKind.textContent=overlay.kind;
+    if(overlayTitle) overlayTitle.textContent=overlay.title;
+    if(overlayMessage) overlayMessage.textContent=overlay.message;
   }
 
   function flushUiEvents(){
@@ -122,6 +148,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get visualClockAdapter(){return structuredClone(visualClockAdapter);},
     get visualPauseController(){return structuredClone(visualPauseController);},
     get presentationBlock(){return structuredClone(presentationBlock);},
+    get overlay(){return structuredClone(overlay);},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
@@ -144,6 +171,20 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         visual,
         gameplayDriverStatus:session.driver?.status??null,
       };
+    },
+    openOverlay(options={}){
+      const result=openCaptureUiOverlay(overlay,options);
+      overlay=result.state;
+      const blocking=api.setPresentationBlocking(result.presentationBlocked,{kind:overlay.kind,metadata:overlay.metadata});
+      renderOverlay();
+      return {...result,blocking,gameplayDriverStatus:session.driver?.status??null};
+    },
+    closeOverlay(){
+      const result=closeCaptureUiOverlay(overlay);
+      overlay=result.state;
+      const blocking=api.setPresentationBlocking(result.presentationBlocked,{kind:overlay.kind,metadata:overlay.metadata});
+      renderOverlay();
+      return {...result,blocking,gameplayDriverStatus:session.driver?.status??null};
     },
     advance(delta,options={}){
       const result=advanceCaptureBattleSession(session,{...options,delta});
@@ -188,6 +229,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
       visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
+      overlay=createCaptureUiOverlayState();
       presentationBlock=createCaptureUiPresentationBlockState();
       visualPauseController=createCaptureUiVisualPauseControllerState();
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
@@ -197,6 +239,9 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     },
   };
 
+  if(overlayClose&&typeof overlayClose.addEventListener==='function'){
+    overlayClose.addEventListener('click',()=>api.closeOverlay());
+  }
   if(visualClockSource){
     api.startNoticeVisualClock();
     visualClockSourceAttachment=attachCaptureUiVisualClockSource(visualClockSource,sample=>api.sampleNoticeVisualClock(sample));
@@ -208,5 +253,6 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     });
   }
 
+  renderOverlay();
   return api;
 }

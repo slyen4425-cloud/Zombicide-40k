@@ -20,7 +20,9 @@ assert.equal(registry.policy.doNotDuplicatePhysicalFilesForAliases,true);
 assert.equal(registry.policy.neverFallbackToRpgOrDungeonArt,true);
 assert.equal(registry.policy.preferValidatedCanonicalArt,true);
 assert.equal(registry.policy.generatedLegacyFamiliesStayQuarantined,true);
+assert.equal(registry.policy.validatedVisualsCanExistOutsideRepositoryUntilImported,true);
 assert.equal(registry.legacyRecovery.doNotGuessFilenames,true);
+assert.equal(registry.legacyRecovery.status,'validated_capture_visuals_not_yet_imported_into_v2_repository');
 
 assert.equal(registry.speciesAssets.length,canonical.species.length);
 assert.ok(registry.speciesAssets.length>=14);
@@ -34,6 +36,8 @@ const seenAliases=new Set();
 for(const record of registry.speciesAssets){
   assert.ok(record.mainArt && Object.hasOwn(record.mainArt,'status') && Object.hasOwn(record.mainArt,'path'));
   assert.ok(record.iconArt && Object.hasOwn(record.iconArt,'status') && Object.hasOwn(record.iconArt,'path'));
+  assert.equal(record.mainArt.status,'pending_import');
+  assert.equal(record.iconArt.status,'pending_import');
   assert.equal(captureAssetPathAllowed(record.mainArt.path,registry),true);
   assert.equal(captureAssetPathAllowed(record.iconArt.path,registry),true);
   for(const alias of record.legacyAliases||[]){

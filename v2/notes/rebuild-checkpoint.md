@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable et runtime dynamique de combat avec premières actions de capacités.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat et capture complète en combat sauvage.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -32,39 +32,40 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - contrat combat dynamique Capture : `34681468819` success
 - premier runtime combat dynamique Capture : `34681648425` success
 - premières actions de capacités dynamiques : `34681748038` success
+- capture complète en combat sauvage : `34681864744` success
 
 ## Dernière étape terminée
 
-Capacités/charges branchées au runtime dynamique avec première résolution d’action :
-- `v2/src/modes/capture/abilities.js` accepte désormais une portée `range` et une déclaration d’effet `effect` sans imposer de formule de dégâts ;
-- l’initialisation des charges réutilise `creature.abilityCharges[abilityId]` quand une instance possédée en conserve déjà une valeur, sinon elle part de `chargeMax` ;
-- nouveau `resolveCaptureAbilityAction()` dans `dynamic-combat.js` ;
-- une capacité ne part que si le combat est actif, la capacité existe, n’est pas en cooldown, possède encore ses charges et la cible est dans la portée configurée ;
-- un échec de portée/cooldown/charges ne consomme rien ;
-- une action valide consomme une charge et applique le cooldown configuré ;
-- la résolution d’effet est injectée via `effectResolver`, ce qui permet d’ajouter plus tard dégâts, soins, statuts, esquive et autres mécaniques sans hard-coder une formule prématurée ;
-- sans resolver spécifique, l’action retourne simplement l’effet déclaré comme `declared_effect` ;
-- chaque action résolue est ajoutée à `battle.actionLog` avec son résultat ;
-- aucun moteur RPG, aucun `turnSequence`, aucun D100 n’est utilisé.
+Tentative de capture complète branchée au combat sauvage :
+- `createCaptureModeState()` possède maintenant un inventaire Capture isolé ;
+- `consumeCaptureItem()` peut résoudre une bibliothèque d’orbes configurée, ce qui permet de tester/utiliser des coefficients validés sans modifier la bibliothèque legacy encore en `pending` ;
+- nouveau `attemptCaptureInBattle()` dans `capture.js` ;
+- la capture est refusée hors combat sauvage actif et vérifie que l’espèce de la rencontre correspond bien à l’adversaire du combat ;
+- le moteur `resolveCaptureAttempt()` reste l’autorité du calcul : taux d’espèce, coefficient d’orbe, bonus strictement sous 30 % PV ;
+- si un coefficient nécessaire est encore `pending`, la tentative est bloquée avant consommation et l’inventaire reste intact ;
+- une tentative valide consomme exactement une orbe, qu’elle réussisse ou échoue ;
+- en cas d’échec, le combat et la rencontre restent actifs ;
+- en cas de succès, une nouvelle instance possédée est créée avec un `instanceId` unique, l’espèce rencontrée, son niveau disponible et son état PV fourni ;
+- si l’équipe active contient moins de 6 créatures, la nouvelle capture la rejoint ; sinon elle part en réserve ;
+- le roster est recomposé sans fusionner les captures existantes ;
+- un succès termine le combat avec `capture_success`, nettoie la rencontre et rend l’exploration libre.
 
 Régression :
-- nouveau `v2/tests/capture-dynamic-ability-actions.test.mjs` ;
-- vérifie qu’une cible à 3 cases avec portée 2 est refusée sans consommation ;
-- après déplacement à portée, la capacité consomme 1 charge, applique son cooldown et inscrit le résultat configuré ;
-- une seconde utilisation pendant le cooldown est bloquée sans nouvelle consommation ;
-- la résolution par défaut conserve un effet déclaré sans inventer de formule de dégâts.
+- nouveau `v2/tests/capture-wild-battle-capture.test.mjs` ;
+- couvre succès vers équipe active, succès vers réserve quand l’équipe est pleine, échec consommant l’orbe mais conservant le combat, et coefficient `pending` bloquant sans aucune consommation ;
+- aucune dépendance RPG/D100/timeline n’est introduite.
 
 Commits de l’étape :
-- extension capacités : `21d889d0f27103944377dcef9d8b39facb8cc324`
-- résolution d’actions dynamiques : `40c111b5bb5395ff358cc53cd25b52dfd50fbb23`
-- régression actions capacités : `14ea483594d883ff81e395865cceff420565a69a`
+- inventaire avec bibliothèque d’orbes configurée : `10f57b4638bff7914efa1ccbc21b2b4e736983de`
+- capture complète branchée au combat : `c80f8830cf80955ee9e56e5bb0c9171be3a78de6`
+- régression combat/capture : `1474ddb5e5026634e581fa8d1551543628e6db48`
 
-CI fonctionnelle de l’étape : `34681748038` success.
+CI fonctionnelle de l’étape : `34681864744` success.
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : brancher la tentative de capture complète au combat sauvage avec consommation d’orbe et création d’une nouvelle instance possédée, équipe/réserve selon place disponible ;
-2. ensuite construire une première IA Capture dédiée sur le runtime dynamique, sans reprendre l’IA/timeline RPG ;
-3. définir ensuite progressivement les résolutions concrètes de dégâts/soins/statuts/esquive sans figer trop tôt la cadence temps réel ;
+1. prochaine étape Capture : construire une première IA dédiée au runtime dynamique, sans reprendre l’IA/timeline RPG ;
+2. ensuite définir progressivement les résolutions concrètes de dégâts/soins/statuts/esquive sans figer trop tôt la cadence temps réel ;
+3. compléter progressivement les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;
 5. avant de déclarer RPG terminé, faire la passe finale assets/visuels/PWA/cache/parité legacy/tests.

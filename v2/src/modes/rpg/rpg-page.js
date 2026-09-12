@@ -23,7 +23,7 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,onDungeonCombatStart=null,onDungeonCombatChange=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,dungeonIsGameMasterDevice=false,onDungeonCombatStart=null,onDungeonCombatChange=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
   let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
@@ -32,6 +32,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
   let currentDungeonSpatial=dungeonSpatial?structuredClone(dungeonSpatial):null;
   let currentDungeonSpatialConfig=structuredClone(dungeonSpatialConfig||{});
   let currentDungeonCombat=dungeonCombat?structuredClone(dungeonCombat):null;
+  let currentDungeonIsGameMasterDevice=Boolean(dungeonIsGameMasterDevice);
   let currentDungeonEventWorld={};
   let currentTab='editor';
   let dungeonView=null;
@@ -94,6 +95,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       });
       mountDungeonCombatGmControls(body,{
         universe,
+        isGameMasterDevice:currentDungeonIsGameMasterDevice,
         getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
         onChange(out){
           currentDungeonCombat=structuredClone(out.combat);
@@ -201,6 +203,11 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       }
       return currentDungeonCombat?structuredClone(currentDungeonCombat):null;
     },
+    setDungeonGameMasterDevice(isGameMasterDevice){
+      currentDungeonIsGameMasterDevice=Boolean(isGameMasterDevice);
+      if(currentTab==='dungeon') scheduleDungeonCombatUi();
+      return currentDungeonIsGameMasterDevice;
+    },
     refreshDungeonWorld(){
       const index=currentWorldIndex();
       if(currentTab==='dungeon'&&dungeonView) dungeonView.setWorldIndex(index);
@@ -217,6 +224,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     getDungeonHeroRuntimes:()=>structuredClone(currentDungeonHeroRuntimes),
     getDungeonSpatial:()=>currentDungeonSpatial?structuredClone(currentDungeonSpatial):null,
     getDungeonCombat:()=>currentDungeonCombat?structuredClone(currentDungeonCombat):null,
+    getDungeonGameMasterDevice:()=>currentDungeonIsGameMasterDevice,
     getDungeonEventWorld:()=>structuredClone(currentDungeonEventWorld),
     openTab:open,
     dispose:()=>pageRuntime.dispose(),

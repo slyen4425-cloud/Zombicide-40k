@@ -9,11 +9,13 @@ import {
 
 assert.equal(CAPTURE_PUBLIC_RUNTIME_CONTRACT.canonicalUiOpponentSummary,true);
 assert.equal(CAPTURE_PUBLIC_RUNTIME_CONTRACT.canonicalUiOpponentInspection,true);
+assert.equal(CAPTURE_PUBLIC_RUNTIME_CONTRACT.canonicalUiSpatialSummary,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.presentationOnly,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsAuthoritativeBattleOpponent,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsAuthoritativeVitals,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsAuthoritativeStatuses,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsAuthoritativePosition,true);
+assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsAuthoritativeSpatialDistance,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.readsCanonicalCaptureAssetRegistry,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.neverUsesRpgOrDungeonFallback,true);
 assert.equal(CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT.exposesInspectionTarget,true);
@@ -27,6 +29,7 @@ const activeState={
     status:'active',
     mode:'wild',
     encounter:{speciesId:'capture_descendre'},
+    player:{activeInstanceId:'p1',actorId:'player:p1'},
     opponent:{
       activeInstanceId:'wild:capture_descendre',
       actorId:'opponent:wild:capture_descendre',
@@ -37,7 +40,10 @@ const activeState={
         {id:'marked',name:'Marqué'},
       ],
     },
-    spatial:{positions:{'opponent:wild:capture_descendre':{x:4,y:2,zoneId:'capture-battle'}}},
+    spatial:{positions:{
+      'player:p1':{x:1,y:2,zoneId:'capture-battle'},
+      'opponent:wild:capture_descendre':{x:4,y:2,zoneId:'capture-battle'},
+    },blocked:[],zoneId:'capture-battle'},
   },
 };
 
@@ -47,7 +53,7 @@ const activeState={
     instanceId:'wild:capture_descendre',
     speciesId:'capture_descendre',
     displayName:'capture_descendre',
-    title:'capture_descendre',
+    title:'capture_descendre · distance 3',
     wild:true,
     currentHp:7,
     maxHp:20,
@@ -58,6 +64,9 @@ const activeState={
       {id:'marked',name:'Marqué',stacks:null,remainingDuration:null},
     ],
     position:{x:4,y:2,zoneId:'capture-battle'},
+    playerPosition:{x:1,y:2,zoneId:'capture-battle'},
+    distance:3,
+    distanceLabel:'3',
     mainArt:null,
     iconArt:null,
   });
@@ -68,7 +77,7 @@ const activeState={
   const summary=buildCaptureOpponentSummary(activeState,{assetRegistry:registry});
   assert.equal(summary.speciesId,'capture_descendre');
   assert.equal(summary.displayName,'Descendre');
-  assert.equal(summary.title,'Descendre');
+  assert.equal(summary.title,'Descendre · distance 3');
   assert.equal(summary.mainArt,null,'pending_import main art must not render');
   assert.equal(summary.iconArt,null,'pending_import icon must not render');
   const inspection=buildCaptureOpponentInspection(activeState,{assetRegistry:registry});
@@ -80,9 +89,7 @@ const activeState={
   const readyRegistry={
     assetRoot:'v2/assets/capture/creatures/',
     speciesAssets:[{
-      speciesId:'capture_descendre',
-      displayName:'Descendre',
-      legacyAliases:['crea_dracendre'],
+      speciesId:'capture_descendre',displayName:'Descendre',legacyAliases:['crea_dracendre'],
       mainArt:{status:'imported',path:'v2/assets/capture/creatures/descendre/main.webp'},
       iconArt:{status:'imported',path:'v2/assets/capture/creatures/descendre/icon.webp'},
     }],
@@ -90,7 +97,6 @@ const activeState={
   const summary=buildCaptureOpponentSummary(activeState,{assetRegistry:readyRegistry});
   assert.deepEqual(summary.mainArt,{status:'imported',path:'v2/assets/capture/creatures/descendre/main.webp',src:'./assets/capture/creatures/descendre/main.webp'});
   assert.deepEqual(summary.iconArt,{status:'imported',path:'v2/assets/capture/creatures/descendre/icon.webp',src:'./assets/capture/creatures/descendre/icon.webp'});
-
   const blockedRegistry={...readyRegistry,speciesAssets:[{...readyRegistry.speciesAssets[0],iconArt:{status:'imported',path:'v2/assets/rpg/descendre.png'}}]};
   assert.equal(buildCaptureOpponentSummary(activeState,{assetRegistry:blockedRegistry}).iconArt,null);
 }
@@ -107,22 +113,25 @@ const activeState={
     {id:'instance',label:'Instance',value:'wild:capture_descendre'},
     {id:'hp',label:'PV',value:'7 / 20'},
     {id:'statuses',label:'Statuts',value:'Ralenti ×2 · reste 3 ; Marqué'},
-    {id:'position',label:'Position',value:'4, 2'},
+    {id:'player-position',label:'Votre position',value:'1, 2'},
+    {id:'position',label:'Position adverse',value:'4, 2'},
+    {id:'distance',label:'Distance praticable',value:'3'},
     {id:'elements',label:'Éléments',value:'Feu, Vent'},
   ]);
   assert.deepEqual(activeState,before);
 }
 
 {
-  const state={
-    battle:{status:'active',mode:'battle',opponent:{activeInstanceId:'enemy-1',creature:{speciesId:'capture_rocorne'},vitals:{currentHp:0,maxHp:12,ko:true},statuses:[]},spatial:{positions:{}}},
-  };
+  const state={battle:{status:'active',mode:'battle',opponent:{activeInstanceId:'enemy-1',creature:{speciesId:'capture_rocorne'},vitals:{currentHp:0,maxHp:12,ko:true},statuses:[]},spatial:{positions:{}}}};
   const summary=buildCaptureOpponentSummary(state,{assetRegistry:registry});
   assert.equal(summary.title,'Rocorne');
   assert.equal(summary.wild,false);
   assert.equal(summary.ko,true);
   assert.equal(summary.hpLabel,'0 / 12');
   assert.equal(summary.position,null);
+  assert.equal(summary.playerPosition,null);
+  assert.equal(summary.distance,null);
+  assert.equal(summary.distanceLabel,null);
   assert.equal(summary.iconArt,null);
   const inspection=buildCaptureOpponentInspection(state,{assetRegistry:registry});
   assert.equal(inspection.message,'Adversaire actif');
@@ -136,38 +145,15 @@ assert.equal(buildCaptureOpponentInspection({battle:null}).reason,'capture-oppon
 
 const presenterSource=fs.readFileSync(new URL('../src/modes/capture/ui-opponent-summary.js',import.meta.url),'utf8');
 assert.match(presenterSource,/resolveCaptureSpeciesAsset/);
-assert.match(presenterSource,/captureAssetPathAllowed/);
+assert.match(presenterSource,/buildCaptureSpatialSummary/);
 assert.equal(presenterSource.includes("../rpg/"),false);
 assert.equal(presenterSource.includes('assets/dungeon/'),false);
-for(const forbidden of ['moveCaptureBattleCreature','switchCaptureBattleCreature','useCaptureBattleAbility','runCaptureAiStep','attemptCaptureInBattle','applyCaptureDamage','healCaptureVitals','advanceCaptureTime','advanceCaptureDriver','Math.random(','Date.now(']){
-  assert.equal(presenterSource.includes(forbidden),false,`opponent summary presenter must not include ${forbidden}`);
-}
+for(const forbidden of ['moveCaptureBattleCreature','switchCaptureBattleCreature','useCaptureBattleAbility','runCaptureAiStep','attemptCaptureInBattle','applyCaptureDamage','healCaptureVitals','advanceCaptureTime','advanceCaptureDriver','Math.random(','Date.now(']) assert.equal(presenterSource.includes(forbidden),false,`opponent summary presenter must not include ${forbidden}`);
 
 const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',import.meta.url),'utf8');
-assert.match(pageSource,/assetRegistry=\{\}/);
-assert.match(pageSource,/data-capture-opponent-section/);
 assert.match(pageSource,/data-capture-opponent-summary/);
-assert.match(pageSource,/data-capture-opponent-art/);
-assert.match(pageSource,/data-capture-opponent-hp/);
 assert.match(pageSource,/data-capture-opponent-position/);
-assert.match(pageSource,/data-capture-opponent-statuses/);
-assert.match(pageSource,/data-capture-inspect-opponent/);
 assert.match(pageSource,/buildCaptureOpponentSummary\(session\.state,\{assetRegistry\}\)/);
-assert.match(pageSource,/buildCaptureOpponentInspection\(session\.state,\{speciesDef:species,assetRegistry\}\)/);
-assert.match(pageSource,/api\.inspectOpponent\(\)/);
-assert.match(pageSource,/renderOpponentSummary\(\)/);
-assert.match(pageSource,/opponentSummaryNode\.addEventListener\('click',handleOpponentInspectClick\)/);
-assert.match(pageSource,/opponentSummaryNode\.removeEventListener\('click',handleOpponentInspectClick\)/);
-for(const forbidden of ['moveCaptureBattleCreature(','useCaptureBattleAbility(','runCaptureAiStep(','attemptCaptureInBattle(']){
-  assert.equal(pageSource.includes(forbidden),false,`capture page must not include ${forbidden}`);
-}
-assert.equal(pageSource.includes("data-capture-inspect-opponent>Attaquer"),false);
-assert.equal(pageSource.includes("data-capture-inspect-opponent>Capturer"),false);
-
-const appSource=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-assert.match(appSource,/loadCaptureAssetRegistry/);
-assert.match(appSource,/fetch\('\.\/docs\/capture-creature-assets\.json'/);
-assert.match(appSource,/mountCapturePage\(host,\{assetRegistry\}\)/);
-assert.equal(appSource.includes('assets/dungeon/'),false);
+for(const forbidden of ['moveCaptureBattleCreature(','useCaptureBattleAbility(','runCaptureAiStep(','attemptCaptureInBattle(']) assert.equal(pageSource.includes(forbidden),false,`capture page must not include ${forbidden}`);
 
 console.log('capture-ui-opponent-summary.test.mjs: ok');

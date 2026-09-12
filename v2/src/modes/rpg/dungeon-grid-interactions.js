@@ -48,7 +48,7 @@ export function executeFocusedDungeonGridAction({roomRuntime=null,heroRuntimes=[
   const hero=heroRuntimeFor(heroRuntimes,heroId);
   if(action.kind==='door'){
     const out=openRoomDoor(roomRuntime,roomRuntime.currentRoomId,action.targetId,inventory,{consumeKey:false});
-    return {...out,action:clone(action),heroId};
+    return {...out,roomRuntime:out.runtime,action:clone(action),heroId};
   }
   const interaction=(roomLayout.interactions||[]).find(entry=>String(entry.id)===String(action.targetId));
   if(!interaction) return {ok:false,reason:'interaction-missing',roomRuntime,inventory,action:clone(action),heroId};

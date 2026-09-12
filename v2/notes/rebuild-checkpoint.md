@@ -25,6 +25,11 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Les visuels Capture validés côté projet/utilisateur ne sont pas encore importés physiquement dans la V2 ; leur statut est `pending_import`, sans nom de fichier inventé.
 - Emplacement cible réservé : `v2/assets/capture/creatures/`.
 - `v2/src/modes/capture/assets.js` résout les anciens IDs vers l’espèce canonique et interdit tout fallback vers les arts RPG/Dungeon.
+- Les objets de capture sont maintenant isolés dans `v2/src/modes/capture/items.js` ; les 4 IDs legacy confirmés sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`.
+- Les coefficients de capture de ces orbes restent volontairement `pending_recovery_or_rebalance` : aucune valeur manquante n’est inventée.
+- Le bonus de capture sous 30 % PV reste une règle produit confirmée, mais son multiplicateur exact reste à définir/récupérer.
+- Les capacités Capture ont désormais leur runtime propre `v2/src/modes/capture/abilities.js` avec charges par instance, coûts et support de cooldown futur pour le combat dynamique.
+- Les anciennes familles `lib_*` / `cap_*` sont considérées comme traces legacy ; aucune capacité RPG mélangée n’est importée automatiquement.
 
 ## Jalons CI récents validés
 
@@ -35,30 +40,29 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - migration roster/équipe/réserve Capture : `34679980856` success
 - branchement roster + ouverture lazy Capture : `34680539893` success
 - premier registre canonique d’assets Capture : `34680830787` success
+- objets Capture + runtime charges capacités : `34681113738` success
 
 ## Dernière étape terminée
 
-Structure et résolution canonique des visuels Monster Capture :
-- nouveau `v2/docs/capture-creature-assets.json` couvrant toutes les espèces canoniques actuelles ;
-- nouveau `v2/src/modes/capture/assets.js` pour résoudre ID canonique ou alias legacy vers un unique enregistrement visuel ;
-- anciens IDs comme `crea_embercub` et `crea_braiseau` convergent vers la même paire d’assets Braiseau, sans copie physique supplémentaire ;
-- les familles générées/non validées restent hors registre canonique ;
-- aucun fallback vers `assets/dungeon/creatures` ou des arts RPG ;
-- les visuels ne sont pas déclarés absents : ils sont explicitement `pending_import` car ils n’ont pas encore été ajoutés physiquement dans le dépôt V2 ;
-- noms de fichiers non inventés ; les chemins seront renseignés seulement lors de l’import réel des arts validés ;
-- nouveau test `v2/tests/capture-creature-assets.test.mjs` verrouille les politiques de déduplication, d’isolation et d’import en attente.
+Objets de capture et capacités/charges :
+- nouveau `v2/docs/capture-items-abilities-map.json` séparant clairement traces legacy confirmées, règles produit validées et réglages encore inconnus ;
+- les 4 orbes historiques sont reconnues sans coefficient inventé ;
+- nouveau `v2/src/modes/capture/items.js` avec bibliothèque Capture propre, résolution d’alias, inventaire isolé et consommation immutable ;
+- un objet legacy inconnu est refusé/quarantainable au lieu de tomber sur l’inventaire RPG ;
+- nouveau `v2/src/modes/capture/abilities.js` avec normalisation des capacités, charges par créature possédée, coûts, cooldowns et consommation immutable ;
+- aucune dépendance `modes/rpg`, aucun D100, aucun `turnSequence` ;
+- nouveau test `v2/tests/capture-items-abilities.test.mjs` protège les 4 orbes, le seuil 30 %, l’absence de coefficients inventés, l’isolation RPG et les charges/cooldowns.
 
 Commits de l’étape :
-- registre canonique assets : `3c9f7fb40ce0ce976a02969f5f885bd7ce21dd10`
-- resolver assets Capture : `9d4feeccde9fcd94208f23606288352dea72dc92`
-- première régression assets : `fbf470e25f864fc68b48ac26a184cb4b7da77b80`
-- clarification visuels en attente d’import : `78c7b1fc9b2ad044a2c67997674b02e285792808`
-- régression `pending_import` : `d744e55afaf9e8cb6f409a09651a6a28ae905685`
+- map objets/capacités : `4091d222a2dfa3bb77b4609f66e1e200b4db236d`
+- runtime objets Capture : `d8e7ebc05d136d28a2d76c25f6b5ba2e458e622a`
+- runtime capacités/charges : `fe268f542b424f7b5a73ce0e11cedf7786ef7eff`
+- régression objets/capacités : `c3a74e100545d01009b9651b7896970e8730151c`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : reconstruire les objets de capture et capacités/charges avec valeurs confirmées uniquement ;
-2. ensuite préparer les biomes/rencontres et la boucle d’exploration libre sur le World Builder partagé ;
+1. prochaine étape Capture : préparer les biomes/rencontres et la boucle d’exploration libre sur le World Builder partagé ;
+2. ensuite brancher le calcul de tentative de capture autour du taux propre à l’espèce, du seuil <30 % PV et des orbes, en gardant les coefficients configurables tant qu’ils ne sont pas validés ;
 3. importer physiquement les arts principaux + icônes Capture quand les fichiers sont disponibles pour le dépôt, puis renseigner les chemins du registre sans doublonner les alias ;
 4. ne construire le moteur de combat dynamique complet qu’après définition détaillée de son comportement ;
 5. avant de déclarer RPG terminé, faire la passe finale dédiée assets/visuels/PWA/cache/parité legacy/tests.

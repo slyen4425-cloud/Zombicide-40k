@@ -1,4 +1,4 @@
-# GenSrpG V16.78.74 restored visuals on clean stats base — 2026-09-08
+# GenSrpG V16.78.91 RPG legacy stat cleanup — 2026-09-13
 name: Deploy GenSrpG to GitHub Pages
 
 on:
@@ -66,6 +66,9 @@ jobs:
 
       - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
+
+      - name: Tester le retrait des anciens coefficients RPG V16.78.91
+        run: node tests/gens_rpg_legacy_cleanup_v167891.test.cjs
 
       - name: Tester la stabilité visuelle source Dungeon
         run: node tests/dungeon_source_render_stability_v167877.test.cjs
@@ -158,6 +161,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
+              (Path("_site/assets/gensrpg/gens-rpg-legacy-cleanup-167891.js"), '<script src="assets/gensrpg/gens-rpg-legacy-cleanup-167891.js?v=167891"></script>', "GenSrpG RPG legacy stat cleanup missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
           ]
           html = index.read_text(encoding="utf-8")
@@ -193,6 +197,8 @@ jobs:
           grep -q 'gens-dungeon-hero-art-repair-167874.js?v=167874' _site/index.html
           grep -q 'dungeon-world-session-bridge-167832.js?v=167839' _site/assets/dungeon/dungeon-room-creator-feedback-167821.js
           grep -q 'gens-rpg-stats-clean-167874.js?v=167874' _site/index.html
+          grep -q 'gens-rpg-legacy-cleanup-167891.js?v=167891' _site/index.html
+          grep -q 'gensrpg-cache-16.78.91-rpg-legacy-stat-cleanup' _site/service-worker.js
           ! grep -q 'gens-custom-stats-167881' _site/index.html
           ! grep -q 'gens-rpg-stat-reconcile-167902' _site/index.html
           ! grep -q 'dungeon-grid-flicker-guard-167876.js?v=167876' _site/index.html
@@ -201,6 +207,7 @@ jobs:
           grep -q 'gensrpg-cache-16.78.73-clean-dynamic-stats' _site/service-worker.js
           grep -q 'gensrpg-cache-16.78.74-restored-visuals' _site/service-worker.js
           node tests/gens_clean_dynamic_stats_v167873.test.cjs
+          node tests/gens_rpg_legacy_cleanup_v167891.test.cjs
           node tests/dungeon_source_render_stability_v167877.test.cjs _site/index.html
           node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
           node tests/dungeon_large_room_v167834.test.cjs

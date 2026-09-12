@@ -67,6 +67,15 @@ import {
   startCaptureUiVisualDriver,
   stopCaptureUiVisualDriver,
 } from './ui-visual-driver.js';
+import {
+  CAPTURE_UI_VISUAL_CLOCK_ADAPTER_CONTRACT,
+  createCaptureUiVisualClockAdapterState,
+  pauseCaptureUiVisualClockAdapter,
+  resumeCaptureUiVisualClockAdapter,
+  sampleCaptureUiVisualClock as sampleCaptureUiVisualClockCore,
+  startCaptureUiVisualClockAdapter,
+  stopCaptureUiVisualClockAdapter,
+} from './ui-visual-clock-adapter.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -78,6 +87,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiDispatcher:true,
   canonicalUiNoticeFeed:true,
   canonicalUiVisualDriver:true,
+  canonicalUiVisualClockAdapter:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -93,6 +103,7 @@ export {
   CAPTURE_UI_DISPATCHER_CONTRACT,
   CAPTURE_UI_NOTICE_FEED_CONTRACT,
   CAPTURE_UI_VISUAL_DRIVER_CONTRACT,
+  CAPTURE_UI_VISUAL_CLOCK_ADAPTER_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attemptCaptureInBattle,
@@ -105,6 +116,7 @@ export {
   createCaptureModeState,
   createCaptureSchedulerState,
   createCaptureUiNoticeFeed,
+  createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
   createCaptureWorldIndex,
   dispatchCaptureUiEvents,
@@ -115,16 +127,20 @@ export {
   moveCaptureBattleCreature,
   moveCaptureRosterCreature,
   pauseCaptureDriver,
+  pauseCaptureUiVisualClockAdapter,
   pauseCaptureUiVisualDriver,
   resumeCaptureDriver,
+  resumeCaptureUiVisualClockAdapter,
   resumeCaptureUiVisualDriver,
   runCaptureAiStep,
   setCaptureSchedulerRunning,
   setCaptureTeam,
   startCaptureBattle,
   startCaptureDriver,
+  startCaptureUiVisualClockAdapter,
   startCaptureUiVisualDriver,
   stopCaptureDriver,
+  stopCaptureUiVisualClockAdapter,
   stopCaptureUiVisualDriver,
   switchCaptureBattleCreature,
   useCaptureBattleAbility,
@@ -144,6 +160,10 @@ export function advanceCaptureDriver(state,scheduler,driver,options={}){
 
 export function advanceCaptureUiVisualDriver(feed,driver,options={}){
   return pushCaptureUiVisualDelta(feed,driver,{...options,advanceVisualTime:advanceCaptureUiNoticeVisualTime});
+}
+
+export function sampleCaptureUiVisualClock(feed,visualDriver,adapter,options={}){
+  return sampleCaptureUiVisualClockCore(feed,visualDriver,adapter,{...options,advanceVisualDriver:advanceCaptureUiVisualDriver});
 }
 
 export function createCaptureAppSession({state=createCaptureModeState(),scheduler=createCaptureSchedulerState(),driver=createCaptureDriverState(),uiEvents=[]}={}){

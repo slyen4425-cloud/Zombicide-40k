@@ -7,6 +7,7 @@ import { mountHeroSheet } from './hero-sheet.js';
 import { mountDungeonGameplayView } from './dungeon-gameplay-view.js';
 import { mountDungeonCombatItemControls } from './dungeon-combat-item-ui.js';
 import { mountDungeonCombatFleeControl } from './dungeon-combat-flee-ui.js';
+import { mountDungeonCombatGmControls } from './dungeon-combat-gm-ui.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
 import { createRpgAudioSession } from './rpg-audio-session.js';
 
@@ -59,8 +60,9 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     if(currentTab!=='dungeon') return;
     const install=()=>{
       if(currentTab!=='dungeon'||!dungeonView) return;
+      const universe=loadRpgUniverse();
       mountDungeonCombatItemControls(body,{
-        universe:loadRpgUniverse(),
+        universe,
         getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
         getHeroRuntimes:()=>dungeonView?.getHeroRuntimes?.()||structuredClone(currentDungeonHeroRuntimes),
         onUse(out){
@@ -87,6 +89,16 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
           dungeonView.setRoomRuntime(currentDungeonRuntime);
           onDungeonCombatChange?.(fledCombat,{...out,kind:'combat-flee'});
           onDungeonRuntimeChange?.(currentDungeonRuntime,{...out,kind:'combat-flee'});
+          scheduleDungeonCombatUi();
+        },
+      });
+      mountDungeonCombatGmControls(body,{
+        universe,
+        getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
+        onChange(out){
+          currentDungeonCombat=structuredClone(out.combat);
+          dungeonView.setCombat(currentDungeonCombat);
+          onDungeonCombatChange?.(structuredClone(currentDungeonCombat),{...out,kind:'combat-gm'});
           scheduleDungeonCombatUi();
         },
       });

@@ -8,6 +8,7 @@ import {
   buildCaptureOpponentInspection,
   buildCaptureOpponentSummary,
   buildCaptureRosterLists,
+  captureUiEventsFromCaptureAttempt,
   captureUiNoticeFeedNotices,
   clearCaptureUiVisualPauseReasons,
   closeCaptureUiOverlay,
@@ -298,6 +299,13 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return dispatched;
   }
 
+  function appendResultNotices(events=[]){
+    const dispatched=dispatchCaptureUiEvents(events);
+    noticeFeed=appendCaptureUiNotices(noticeFeed,dispatched);
+    renderFeed();
+    return dispatched;
+  }
+
   function sampleNoticeVisualClock(sample){
     const result=sampleCaptureUiVisualClock(noticeFeed,visualDriver,visualClockAdapter,{sample});
     if(result.ok){
@@ -394,12 +402,13 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         orbLibrary:captureOrbLibrary,
         lowHpMultiplier:captureLowHpMultiplier,
       });
+      const notices=appendResultNotices(captureUiEventsFromCaptureAttempt(result,{orbId}));
       if(result.ok){
         session={...session,state:result.state,driver:result.captured?stopCaptureDriver(session.driver):session.driver};
         renderRosterLists();
         renderOpponentSummary();
       }
-      return result;
+      return {...result,notices};
     },
     setBlocking(blocking){
       const result=setCaptureBattleBlocking(session,blocking);

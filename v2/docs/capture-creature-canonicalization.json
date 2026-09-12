@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Canonicaliser les créatures Monster Capture connues avant reconstruction V2, supprimer les doublons legacy sans casser les anciennes sauvegardes.",
+  "policy": {
+    "oneCanonicalSpecies": true,
+    "preserveLegacyAliases": true,
+    "migrateLegacyIds": true,
+    "doNotMergeInventoryCountsAutomatically": true,
+    "preferValidatedDesignOverGeneratedLegacyLineages": true
+  },
+  "species": [
+    {
+      "canonicalId": "capture_braiseau",
+      "canonicalName": "Braiseau",
+      "legacyAliases": ["crea_embercub", "crea_braiseau"],
+      "elements": ["fire"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "Deux définitions legacy distinctes portent le même nom. La lignée générée Braiseau -> Pyrolynx -> Infernox ne doit pas être imposée à la définition validée sans évolution."
+    },
+    {
+      "canonicalId": "capture_aquafin",
+      "canonicalName": "Aquafin",
+      "legacyAliases": ["crea_aquafin"],
+      "elements": ["water"],
+      "evolutionTo": "capture_maraileron",
+      "classification": "validated_species"
+    },
+    {
+      "canonicalId": "capture_maraileron",
+      "canonicalName": "Maraileron",
+      "legacyAliases": ["crea_maraileron"],
+      "elements": ["water"],
+      "evolutionTo": null,
+      "classification": "validated_evolution",
+      "notes": "La poursuite legacy Maraileron -> Léviambre est considérée comme contenu généré à auditer séparément, pas comme canon V2 automatique."
+    },
+    {
+      "canonicalId": "capture_moussado",
+      "canonicalName": "Moussado",
+      "legacyAliases": ["crea_mossback"],
+      "legacyNames": ["Moussados"],
+      "elements": ["earth"],
+      "evolutionTo": null,
+      "classification": "validated_species"
+    },
+    {
+      "canonicalId": "capture_voltige",
+      "canonicalName": "Voltige",
+      "legacyAliases": ["crea_voltik"],
+      "elements": ["electric"],
+      "evolutionTo": "capture_fulguros",
+      "classification": "validated_species"
+    },
+    {
+      "canonicalId": "capture_fulguros",
+      "canonicalName": "Fulguros",
+      "legacyAliases": ["crea_fulguro"],
+      "legacyNames": ["Fulguro"],
+      "elements": ["electric"],
+      "evolutionTo": null,
+      "classification": "validated_evolution",
+      "notes": "Les prolongements générés vers Raijag restent hors canon tant qu'ils ne sont pas validés."
+    },
+    {
+      "canonicalId": "capture_ailevent",
+      "canonicalName": "Ailevent",
+      "legacyAliases": ["crea_galewing", "crea_ailevent"],
+      "elements": ["air"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "La lignée générée Ailevent -> Rafalcor -> Ouraganis n'est pas reprise automatiquement."
+    },
+    {
+      "canonicalId": "capture_lumino",
+      "canonicalName": "Lumino",
+      "legacyAliases": ["crea_lumipup", "crea_lumilo"],
+      "legacyNames": ["Lumilo"],
+      "elements": ["light"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "Deux entrées legacy représentent la même créature de lumière. La lignée Lumilo -> Solarys -> Héliarque reste non canonique par défaut."
+    },
+    {
+      "canonicalId": "capture_nocteceoc",
+      "canonicalName": "Nocteceoc",
+      "legacyAliases": ["crea_nightfang", "crea_noctecroc"],
+      "legacyNames": ["Noctecroc"],
+      "elements": ["shadow"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "Les deux définitions legacy sont fusionnées comme alias de sauvegarde ; la lignée Noctecroc -> Ombrage -> Noxferal n'est pas importée automatiquement."
+    },
+    {
+      "canonicalId": "capture_rocorne",
+      "canonicalName": "Rocorne",
+      "legacyAliases": ["crea_rockhorn", "crea_rocorne"],
+      "elements": ["earth"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster_with_lineage_conflict",
+      "notes": "crea_rocorne est aussi utilisé comme évolution de Rocabri dans une lignée générée. Pour la V2, les deux IDs sont des alias de Rocorne ; l'arête Rocabri -> Rocorne n'est pas canonique automatiquement."
+    },
+    {
+      "canonicalId": "capture_lucieclaire",
+      "canonicalName": "Luciéclaire",
+      "legacyAliases": ["crea_sparkmoth", "crea_lucieclair"],
+      "legacyNames": ["Luciéclair"],
+      "elements": ["electric", "air"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "La lignée générée Luciéclair -> Foudrillon reste hors canon par défaut."
+    },
+    {
+      "canonicalId": "capture_mirachat",
+      "canonicalName": "Mirachat",
+      "legacyAliases": ["crea_miragecat", "crea_mirachat"],
+      "elements": ["light", "shadow"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "La lignée générée Mirachat -> Chimérage reste hors canon par défaut."
+    },
+    {
+      "canonicalId": "capture_maremachoire",
+      "canonicalName": "Maremachoire",
+      "legacyAliases": ["crea_tidejaw"],
+      "legacyNames": ["Marémâchoire"],
+      "elements": ["water"],
+      "evolutionTo": null,
+      "classification": "validated_species"
+    },
+    {
+      "canonicalId": "capture_descendre",
+      "canonicalName": "Descendre",
+      "legacyAliases": ["crea_ashdrake", "crea_dracendre"],
+      "legacyNames": ["Dracendre"],
+      "elements": ["fire", "air"],
+      "evolutionTo": null,
+      "classification": "confirmed_duplicate_cluster",
+      "notes": "Les deux anciens IDs de jeune dragon sont traités comme alias. La lignée générée Dracendre -> Volcadrake n'est pas reprise automatiquement."
+    }
+  ],
+  "rejectedLegacyEvolutionEdges": [
+    ["crea_braiseau", "crea_pyrolynx"],
+    ["crea_maraileron", "crea_leviambre"],
+    ["crea_fulguro", "crea_raijag"],
+    ["crea_ailevent", "crea_rafalcor"],
+    ["crea_lumilo", "crea_solarys"],
+    ["crea_noctecroc", "crea_ombrage"],
+    ["crea_rocabri", "crea_rocorne"],
+    ["crea_lucieclair", "crea_foudrillon"],
+    ["crea_mirachat", "crea_chimerage"],
+    ["crea_dracendre", "crea_volcadrake"]
+  ],
+  "pendingLegacyFamilies": {
+    "status": "audit_required_before_import",
+    "rule": "Les familles générées en masse (poison, acier, psy, glace, ombre, lumière, roche, eau, feu, électrique, air, nature, spectre, cristal, boue, son, magma, mécha, guêpe, rêve, scarabée, méduse, corbeau, taupe, etc.) ne sont ni supprimées ni déclarées canoniques à ce stade. Elles doivent être distinguées du contenu réellement validé avant migration."
+  }
+}

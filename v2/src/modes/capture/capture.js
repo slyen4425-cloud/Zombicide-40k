@@ -7,6 +7,11 @@ import {
   buildWorldIndex,
   validateWorld,
 } from '../../core/world-graph.js';
+import {
+  importLegacyOwnedCreatures,
+  moveOwnedCreature,
+  splitRosterIntoTeamAndReserve,
+} from './roster.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -19,6 +24,7 @@ export const CAPTURE_RUNTIME_CONTRACT = Object.freeze({
   usesRpgTimeline: false,
   explorationModel: 'free_exploration_target',
   combatModel: 'dynamic_dedicated_target',
+  lazyInitializationRequired: true,
 });
 
 export const captureStorageKeys = Object.freeze({
@@ -36,8 +42,10 @@ export function createCaptureModeState({
   zoneId='zone-1',
   actorId='trainer-1',
   actorPosition={x:0,y:0,zoneId},
+  roster=[],
   activeTeam=[],
   reserve=[],
+  quarantine=[],
 }={}){
   if(activeTeam.length>6) throw new Error('capture-active-team-limit');
   let spatial=createSpatialState({zoneId});
@@ -50,8 +58,10 @@ export function createCaptureModeState({
     actorId:String(actorId),
     worldIndex:worldIndex?clone(worldIndex):null,
     spatial,
+    roster:clone(roster),
     activeTeam:clone(activeTeam),
     reserve:clone(reserve),
+    quarantine:clone(quarantine),
     encounter:null,
     battle:null,
     exploration:{freeMovement:true,turnSequence:null},
@@ -79,5 +89,32 @@ export function moveCaptureActor(state,target,{movement=999,diagonal=false}={}){
 
 export function setCaptureTeam(state,{activeTeam=[],reserve=state.reserve||[]}={}){
   if(activeTeam.length>6) throw new Error('capture-active-team-limit');
-  return {...state,activeTeam:clone(activeTeam),reserve:clone(reserve)};
+  const roster=[...activeTeam,...reserve].map(clone);
+  return {...state,roster,activeTeam:clone(activeTeam),reserve:clone(reserve)};
+}
+
+export function initializeCaptureRoster(state,{legacyOwned=[],canonicalization={},preferredActiveIds=[]}={}){
+  const imported=importLegacyOwnedCreatures(legacyOwned,canonicalization);
+  const split=splitRosterIntoTeamAndReserve(imported.roster,{preferredActiveIds,teamSize:6});
+  return {
+    ...state,
+    roster:clone(imported.roster),
+    activeTeam:clone(split.activeTeam),
+    reserve:clone(split.reserve),
+    quarantine:[...(state.quarantine||[]).map(clone),...imported.quarantine.map(clone)],
+  };
+}
+
+export function moveCaptureRosterCreature(state,instanceId,destination){
+  const moved=moveOwnedCreature({activeTeam:state.activeTeam,reserve:state.reserve},instanceId,destination);
+  if(!moved.ok) return {...moved,state};
+  return {
+    ...moved,
+    state:{
+      ...state,
+      activeTeam:clone(moved.activeTeam),
+      reserve:clone(moved.reserve),
+      roster:[...moved.activeTeam,...moved.reserve].map(clone),
+    },
+  };
 }

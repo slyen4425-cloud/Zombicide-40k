@@ -26,7 +26,10 @@ export function createDungeonDemoUniverse(){
     resources:[
       {id:'demo_hp',name:'Points de vie',icon:'❤️',enabled:true,visible:true,min:0,maxFormula:{kind:'fixed',value:12}},
     ],
-    conditions:[],checks:[],forms:[],items:[],sets:[],quests:[],
+    conditions:[],checks:[],forms:[],sets:[],quests:[],
+    items:[
+      {id:'demo_bone',name:'Os ancien',icon:'🦴',enabled:true,kind:'loot',description:'Butin temporaire de la démo Donjon.',tags:['demo']},
+    ],
     effects:[
       {id:'demo_hero_damage',name:'Coup d’épée',enabled:true,kind:'resource-modifier',resourceId:'demo_hp',operation:'subtract',value:4,valueMode:'fixed',duration:0,timing:'immediate',chance:100,stackable:false,maxStacks:1},
       {id:'demo_enemy_damage',name:'Griffe',enabled:true,kind:'resource-modifier',resourceId:'demo_hp',operation:'subtract',value:2,valueMode:'fixed',duration:0,timing:'immediate',chance:100,stackable:false,maxStacks:1},
@@ -39,7 +42,7 @@ export function createDungeonDemoUniverse(){
       {id:'demo_hero',name:'Aventurier de test',enabled:true,icon:'🧙',artId:null,audioId:null,statValues:{demo_initiative:8},resourceValues:{demo_hp:12},skillIds:['demo_sword'],inventorySlots:[],startingItems:[],startingEquipment:[],tags:['demo'],metadata:{demo:true}},
     ],
     bestiary:[
-      {id:'demo_enemy',name:'Squelette de test',enabled:true,boss:false,icon:'💀',artId:null,audioId:null,statValues:{demo_initiative:4},resourceValues:{demo_hp:8},skillIds:['demo_claw'],loot:[],ai:{kind:'basic',targetRule:'nearest'},tags:['demo'],xp:0},
+      {id:'demo_enemy',name:'Squelette de test',enabled:true,boss:false,icon:'💀',artId:null,audioId:null,statValues:{demo_initiative:4},resourceValues:{demo_hp:8},skillIds:['demo_claw'],loot:[{itemId:'demo_bone',quantityMin:1,quantityMax:1,chance:100}],ai:{kind:'basic',targetRule:'nearest'},tags:['demo'],xp:0},
     ],
     combat:{
       initiative:{mode:'stat',source:{kind:'stat',id:'demo_initiative'},base:0,die:20,modifier:0},

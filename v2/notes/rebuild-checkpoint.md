@@ -11,7 +11,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
 - Créateur de salle : portes, interactions, jets réutilisables, tentatives persistantes et obstacles/couverture configurables sans saisie d’ID technique.
 - Combat tactique : mouvement, portée, LOS, murs/portes, équipement, couverture directionnelle et portée d’entraide.
-- Statuts persistants : rollback par delta/source pour éviter que plusieurs bonus/malus sur la même stat se détruisent entre eux.
+- Statuts persistants : recomposition ordonnée par source pour `add`, `subtract`, `multiply`, `percent` et `set`, avec conservation des changements externes de la statistique pendant la durée des statuts et compatibilité des sauvegardes V2 antérieures.
 - Donjon multi-héros : `heroLocations`, focus individuel, transitions séparées, retour arrière et réutilisation de l’instance de salle sans respawn.
 - World Builder : passages authored jouables depuis la vue Donjon, avec objets requis et conditions.
 - Quêtes/événements/PNJ/alliés/loot : raccordés au vrai `roomRuntime`, sans second runtime parallèle.
@@ -44,31 +44,29 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - persistance locale du rôle appareil MJ : `34673462295` success
 - choix du rôle téléphone au lancement RPG : `34673652441` success
 - ergonomie mobile du bloc combat réel : `34677838395` success
+- statuts persistants non additifs + dérive externe : `34678647180` success
 
 ## Dernière étape terminée
 
-Amélioration mobile ciblée du vrai bloc combat Donjon :
-- nouveau fichier `v2/src/ui/dungeon-combat-mobile.css`, chargé après `app.css` pour rester isolé du moteur et des autres écrans ;
-- timeline tactile horizontale avec `scroll-snap-type:x proximity`, inertie mobile et éléments de tour avec cible tactile minimale ;
-- combattant actif mieux distingué visuellement sans modifier son état ;
-- actions de compétence, consommables et panneau MJ deviennent des blocs visuels distincts et lisibles ;
-- boutons de combat/MJ avec hauteur minimale 46 px sur bureau compact et 48 px sur téléphone ;
-- champs `select/input` de combat portés à 48 px sur petit écran ;
-- fuite empilée proprement sur mobile ;
-- boutons MJ disposés en 2 colonnes sur téléphone standard puis 1 colonne sous 390 px ;
-- journal et cartes de combattants compactés sans supprimer d’information ;
-- aucune logique de timeline, PV, ciblage, objets, fuite ou commandes MJ n’a été modifiée ;
-- régression dédiée `rpg-dungeon-combat-mobile-css.test.mjs` vérifiant le chargement de la feuille dédiée et les garde-fous mobile essentiels.
+Extension sûre des statuts persistants non additifs :
+- le moteur conserve une base sous-jacente par statistique affectée ;
+- chaque source persistante possède un ordre stable et est rejouée dans cet ordre ;
+- les opérations `add`, `subtract`, `multiply`, `percent` et `set` peuvent coexister et expirer indépendamment ;
+- avant ajout ou expiration, le moteur compare la valeur courante à la valeur théorique des statuts actifs et reporte toute dérive externe sur la base : une progression, un équipement ou une autre modification légitime de la statistique n’est donc pas effacée ;
+- la disparition d’un `set` révèle correctement la base actualisée avant de rejouer les sources plus récentes ;
+- les anciens statuts V2 sérialisés avec `appliedDelta` sont migrés à la volée ;
+- le fallback des toutes premières sauvegardes V2 à rollback absolu reste lisible ;
+- nouvelle régression `rpg-status-nonadditive.test.mjs` couvrant `multiply`, `percent`, `set`, ordre d’expiration, restauration de base et migration ;
+- l’ancienne régression `rpg-initiative-status.test.mjs` a volontairement bloqué une première implémentation qui perdait les changements externes de stat ; la correction finale la fait repasser.
 
 Commits de l’étape :
-- chargement de la feuille dédiée : `612c30a080da79ae8aacd6bdb06ce6a692a7ee6b`
-- ergonomie mobile combat : `0494f2f36f858bd655c067a35bd46828997c4cd5`
-- régression CSS : `ea592fc2490457bd9728ed5c3207306f6ff5eeb8`
+- première recomposition ordonnée : `fd7a8d9a6f0945bfa8cf2580be455a469ca12188`
+- régression non additive : `a08f18c86b2e1d118b85338cbd170f25759b5ac6`
+- conservation de la dérive externe : `6e2c9d0095d0236cf0b726762184ab4df8af7caa`
 
-CI finale : `34677838395` success.
+CI finale : `34678647180` success.
 
 ## Priorités ouvertes
 
-1. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-2. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées ;
-3. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.
+1. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées ;
+2. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.

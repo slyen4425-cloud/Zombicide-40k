@@ -10,28 +10,29 @@
     "neverFallbackToRpgOrDungeonArt": true,
     "extractLegacyEmbeddedArtOnce": true,
     "generatedLegacyFamiliesStayQuarantined": true,
-    "missingFilesAreExplicit": true
+    "missingFilesAreExplicit": true,
+    "validatedVisualsCanExistOutsideRepositoryUntilImported": true
   },
   "speciesAssets": [
-    {"speciesId":"capture_braiseau","displayName":"Braiseau","legacyAliases":["crea_embercub","crea_braiseau"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_aquafin","displayName":"Aquafin","legacyAliases":["crea_aquafin"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_maraileron","displayName":"Maraileron","legacyAliases":["crea_maraileron"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_moussado","displayName":"Moussado","legacyAliases":["crea_mossback"],"legacyNames":["Moussados"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_voltige","displayName":"Voltige","legacyAliases":["crea_voltik"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_fulguros","displayName":"Fulguros","legacyAliases":["crea_fulguro"],"legacyNames":["Fulguro"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_ailevent","displayName":"Ailevent","legacyAliases":["crea_galewing","crea_ailevent"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_lumino","displayName":"Lumino","legacyAliases":["crea_lumipup","crea_lumilo"],"legacyNames":["Lumilo"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_nocteceoc","displayName":"Nocteceoc","legacyAliases":["crea_nightfang","crea_noctecroc"],"legacyNames":["Noctecroc"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_rocorne","displayName":"Rocorne","legacyAliases":["crea_rockhorn","crea_rocorne"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_lucieclaire","displayName":"Lucieclaire","legacyAliases":["crea_sparkmoth","crea_lucieclair"],"legacyNames":["Lucieclair"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_mirachat","displayName":"Mirachat","legacyAliases":["crea_miragecat","crea_mirachat"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_maremachoire","displayName":"Maremachoire","legacyAliases":["crea_tidejaw"],"legacyNames":["Maremachoire"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
-    {"speciesId":"capture_descendre","displayName":"Descendre","legacyAliases":["crea_ashdrake","crea_dracendre"],"legacyNames":["Dracendre"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}}
+    {"speciesId":"capture_braiseau","displayName":"Braiseau","legacyAliases":["crea_embercub","crea_braiseau"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_aquafin","displayName":"Aquafin","legacyAliases":["crea_aquafin"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_maraileron","displayName":"Maraileron","legacyAliases":["crea_maraileron"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_moussado","displayName":"Moussado","legacyAliases":["crea_mossback"],"legacyNames":["Moussados"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_voltige","displayName":"Voltige","legacyAliases":["crea_voltik"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_fulguros","displayName":"Fulguros","legacyAliases":["crea_fulguro"],"legacyNames":["Fulguro"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_ailevent","displayName":"Ailevent","legacyAliases":["crea_galewing","crea_ailevent"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_lumino","displayName":"Lumino","legacyAliases":["crea_lumipup","crea_lumilo"],"legacyNames":["Lumilo"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_nocteceoc","displayName":"Nocteceoc","legacyAliases":["crea_nightfang","crea_noctecroc"],"legacyNames":["Noctecroc"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_rocorne","displayName":"Rocorne","legacyAliases":["crea_rockhorn","crea_rocorne"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_lucieclaire","displayName":"Lucieclaire","legacyAliases":["crea_sparkmoth","crea_lucieclair"],"legacyNames":["Lucieclair"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_mirachat","displayName":"Mirachat","legacyAliases":["crea_miragecat","crea_mirachat"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_maremachoire","displayName":"Maremachoire","legacyAliases":["crea_tidejaw"],"legacyNames":["Maremachoire"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}},
+    {"speciesId":"capture_descendre","displayName":"Descendre","legacyAliases":["crea_ashdrake","crea_dracendre"],"legacyNames":["Dracendre"],"mainArt":{"status":"pending_import","path":null},"iconArt":{"status":"pending_import","path":null}}
   ],
   "legacyRecovery": {
-    "status": "asset_files_not_found_in_repository_tree",
-    "rule": "Si un art legacy est retrouve plus tard dans un ancien index, un data-URL, une archive ou un fichier fourni, l'extraire une seule fois vers l'espece canonique. Ne jamais creer une copie par alias legacy.",
-    "sourceCandidates": ["legacy_index_embedded_data", "historical_archive", "user_provided_asset_pack"],
+    "status": "validated_capture_visuals_not_yet_imported_into_v2_repository",
+    "rule": "Les visuels Capture valides existent cote projet/utilisateur mais ne sont pas encore importes dans le depot V2. Lors de l'import, creer une seule paire art principal + icone par espece canonique. Ne jamais creer une copie par alias legacy.",
+    "sourceCandidates": ["user_validated_capture_art", "historical_archive", "user_provided_asset_pack"],
     "doNotGuessFilenames": true
   }
 }

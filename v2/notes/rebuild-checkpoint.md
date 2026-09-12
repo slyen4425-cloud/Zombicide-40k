@@ -36,7 +36,7 @@ Le premier test utilisateur a révélé que le socle fonctionnel ne suffit pas :
 - le combat reste trop proche de formulaires/selects techniques ;
 - l'écart de qualité perçue avec la V1 est encore très important.
 
-La passe UX reste prioritaire, mais un point gameplay indispensable a été rétabli avant de poursuivre le polish : le déplacement tactique en combat, nécessaire pour donner du sens aux attaques de mêlée/distance, à la portée et au placement.
+La passe UX reste prioritaire, avec comme principe : conserver les moteurs V2 propres et améliorer uniquement la couche de présentation/interaction sauf nécessité gameplay explicitement validée.
 
 ## Référence V1 auditée
 
@@ -96,121 +96,114 @@ La barre plate `Configuration / Donjon / Héros / World Builder / Salle / Combat
 
 CI : `34707462937` completed + success.
 
-## Déplacement tactique en combat — raccordement actuel
+## Déplacement tactique en combat
 
-Retour utilisateur : le tir à distance n'a pas de sens si le héros ne peut pas se repositionner pendant son tour.
+Le moteur existant `tactical-combat.js` est réutilisé, pas dupliqué.
 
-Audit effectué : `v2/src/modes/rpg/tactical-combat.js` possédait déjà le vrai moteur de déplacement combat :
-- `createCombatMovementState()` ;
-- `moveCombatActor()` ;
-- `resetActorCombatMovement()` ;
-- portée/LOS/couverture via `evaluateAttackPosition()`.
-
-Le raccordement Donjon ne crée donc PAS un second moteur :
-
-- `v2/src/modes/rpg/dungeon-combat-movement.js` adapte le moteur tactique existant à la session Donjon ;
-- budget de mouvement persistant pour le `turnSequence` courant ;
-- nouveau tour = nouveau budget ;
-- seuls les héros actifs peuvent cliquer la grille pendant leur tour ;
-- les autres combattants sont traités comme cases occupées ;
-- murs, portes et layout authored passent par le moteur tactique existant ;
-- déplacer ne termine pas automatiquement le tour : le héros peut ensuite utiliser sa compétence depuis sa nouvelle position ;
-- le spatial mis à jour est conservé dans le roomRuntime et renvoyé au combat ;
-- feedback mobile `👣 Déplacement tactique — X / Y cases restantes` ;
-- l'ancien déplacement exploration reste bloqué pendant un combat.
+- budget de mouvement par `turnSequence` ;
+- déplacement fractionnable pendant le tour ;
+- murs/portes/layout authored respectés ;
+- cases occupées refusées ;
+- le déplacement ne termine pas automatiquement le tour ;
+- portée/LOS réévaluées depuis la nouvelle position ;
+- feedback `👣 Déplacement tactique — X / Y cases restantes`.
 
 Régression : `v2/tests/rpg-dungeon-combat-movement.test.mjs`.
-Le test protège notamment une attaque distance invalide à 4 cases qui devient valide après un déplacement de 2 cases sans changer de combat/tour.
+CI : `34708055765` completed + success.
 
-Batterie complète : `34708055765` completed + success.
-
-Commits :
-- wrapper initial : `8313da2309ff77a38d42cb8f4d0cc85098391370` ;
+Commits principaux :
 - UI grille combat : `755e0ba7216831da55684d3311f877e1a30414b8` ;
 - raccordement page RPG : `ca1be4366f8440fbf077d165c8525bef0603e624` ;
-- feedback visuel : `465e89042cf8ded6a72a6bb1ce31bab8912771e1` ;
-- chargement CSS : `37fdaadb288f80e38cbd7604e49af548ff328a6a` ;
-- correction pour réutiliser `moveCombatActor()` existant : `56b46e43134439593f290a48b4e762359f0c8e74` ;
+- réutilisation du vrai `moveCombatActor()` : `56b46e43134439593f290a48b4e762359f0c8e74` ;
 - régression : `4fccd57a743b3de4c9c02127ad7494cc3535df1a`.
 
 ## UX combat Donjon — commandes de jeu
 
-Nouvelle passe présentation-only, sans modifier le moteur de résolution :
-
-- `v2/src/ui/dungeon-combat-command-ui.js` conserve les `<select>` compétence/cible existants comme source de vérité mais les masque visuellement ;
-- les options sont présentées sous forme de cartes/boutons `1 · Compétence` et `2 · Cible` ;
-- cliquer une carte met à jour le select natif puis émet son événement `change`, donc le ciblage dynamique existant continue de décider les cibles valides ;
-- le bouton principal devient `⚔️ Lancer l’action` ;
-- cartes héros/ennemis visuellement différenciées ;
-- cartes actives davantage mises en évidence ;
-- jauges visuelles ajoutées aux ressources qui possèdent un `current / max` ;
+- `<select>` compétence/cible conservés comme source de vérité mais masqués visuellement ;
+- compétences et cibles rendues sous forme de cartes/boutons ;
+- bouton principal `⚔️ Lancer l’action` ;
+- héros/ennemis mieux différenciés ;
+- jauges ressources ;
 - timeline numérotée et tour actif renforcé ;
-- bouton d'action principal sticky sur mobile ;
-- aucun calcul de portée, LOS, dégâts, effet, tour ou cible n'est implémenté dans cette couche UX.
+- aucun calcul de portée/LOS/dégâts/tours dans la couche UX.
 
-Styles : `v2/src/ui/dungeon-combat-command-ui.css`.
-Chargement V2 : `v2/index.html`.
-Régression : `v2/tests/rpg-dungeon-combat-command-ui.test.mjs`.
-
-Batterie complète : `34708334737` completed + success.
+CI : `34708334737` completed + success.
 
 Commits :
-- commandes combat : `430e4ad1feef68dbbfbc31d3bd56d9708820e0fa` ;
+- commandes : `430e4ad1feef68dbbfbc31d3bd56d9708820e0fa` ;
 - styles : `139ad407a72f799f94ba8fc691fb84b476f5e512` ;
-- chargement V2 : `ba2b121e03ed4cf06d9781dd91d1115fa16054ff` ;
+- chargement : `ba2b121e03ed4cf06d9781dd91d1115fa16054ff` ;
 - régression : `444029c3522ee7cc204c722a1f47a99c271b107b`.
 
 ## Ciblage visuel tactique — synchronisation spatial/layout
 
-Le panneau de combat utilise maintenant le même contexte spatial que le déplacement tactique :
+- compétence sélectionnée utilisée comme profil tactique ;
+- spatial courant + roomLayout matérialisé propagés aux contrôles de cible ;
+- recalcul au montage et immédiatement après mouvement ;
+- cible hors portée ou hors LOS non proposée ;
+- cible réapparaît après repositionnement valide.
 
-- `combat-target-ui.js` utilise la compétence sélectionnée comme profil tactique lorsqu'aucune source explicite n'est fournie ;
-- les entrées de cible exposent aussi la distance courante ;
-- le select interne conserve la cible courante si elle reste valide ;
-- `patchCombatTargetUiContext()` permet de mettre à jour le spatial/layout sans écraser l'univers/combat déjà posés par la présentation ;
-- `dungeon-combat-movement-ui.js` injecte le `roomLayout` matérialisé, le `roomRuntime`, le `roomId` et le spatial courant dans le ciblage ;
-- le recalcul a lieu au montage du tour puis immédiatement après chaque déplacement tactique ;
-- les cartes de cible sont reconstruites automatiquement car elles restent dérivées du select moteur ;
-- une cible hors portée ou derrière un bloqueur de vision authored n'est plus proposée ;
-- après repositionnement dans une position valide, elle réapparaît automatiquement.
-
-Régression : `v2/tests/rpg-combat-target-spatial-ui.test.mjs`.
-Le test protège : cible absente à 4 cases pour une portée max 3, cible présente après déplacement à 2 cases, cible absente derrière un mur `blocksVision:true` même si le mur ne bloque pas le mouvement.
-
-Batterie complète : `34709303945` completed + success.
+CI : `34709303945` completed + success.
 
 Commits :
-- ciblage sur compétence sélectionnée + contexte patchable : `771c862b0b722218be13ffce3ef6b3258596ab3f` ;
-- resynchronisation après mouvement et propagation layout/spatial : `9d00aa47d2d01166ab52ebcaf5120ff5bed3779b` ;
+- contexte ciblage : `771c862b0b722218be13ffce3ef6b3258596ab3f` ;
+- resynchronisation mouvement : `9d00aa47d2d01166ab52ebcaf5120ff5bed3779b` ;
 - régression : `0847f08647fc97f101d06b8d1d22ac044eed7620`.
+
+## UX fiche héros / inventaire / équipement
+
+La fiche héros n'affiche plus seulement les objets de départ sous forme de liste. Elle exploite désormais le snapshot runtime déjà produit par `hero-engine.js`.
+
+- `buildHeroSheetModel()` conserve les stats, ressources, compétences et progression existantes ;
+- l'inventaire affiché provient de `heroSheetSnapshot().inventory` ;
+- les entrées équipées sont identifiées à partir de `inventory.equipment` ;
+- les vrais slots du héros sont affichés séparément, avec slot vide, slot principal ou slot lié ;
+- l'inventaire affiche nom, icône, rareté, type, quantité et statut équipé ;
+- les bonus de set existants sont affichés via `setProgress` ;
+- navigation interne `État / Équipement / Inventaire / Compétences` ;
+- ressources et statistiques restent visibles immédiatement ;
+- responsive téléphone : grille 1 colonne pour les grandes sections, inventaire/compétences compactés ;
+- aucun moteur d'inventaire, équipement, bonus ou set n'a été réécrit ;
+- compatibilité `startingItems` conservée pour les consommateurs/tests existants.
+
+Fichiers :
+- `v2/src/modes/rpg/hero-sheet.js` ;
+- `v2/src/ui/hero-sheet-ui.css` ;
+- chargement dans `v2/index.html` ;
+- régression `v2/tests/rpg-hero-sheet-presentation.test.mjs`.
+
+Le premier run `34709890806` a échoué uniquement parce que l'ancien test attendait encore `model.startingItems`. Compatibilité rétablie sans retirer le nouveau modèle runtime.
+
+Batterie complète finale : `34709948494` completed + success.
+
+Commits :
+- fiche runtime inventaire/équipement : `7d282905720300c2a5da366f7c29a9a20363351e` ;
+- styles : `f4e26b526686069e83c2f8a1e59c4adb2b71b57d` ;
+- chargement CSS : `c695da592a27e4f6342852128d54b029de10710c` ;
+- régression : `c0c5904e3b0b5b2ff474d4cb5d335e9b60e37f23` ;
+- compatibilité historique : `c3d5ec13efdc6ea66a94332d76016dbf051eb8bc`.
 
 ## Jalons CI récents validés
 
-- RPG : création/lancement session test : `34700285175` success
-- RPG : fallback démo jusqu'au vrai combat : `34700599970` success
-- RPG : grille live mobile : `34701638751` success
-- RPG : combat démo complet victoire/loot : `34701834544` success
-- RPG : déplacement exploration grille : `34702387637` success
-- RPG : interactions proximité : `34702763858` success
-- RPG : sauvegarde/reprise minimale : `34703227141` success
 - RPG : preview téléphone : `34703496395` success
 - RPG UX : première refonte présentation Donjon : `34704516033` success
 - RPG UX : hiérarchie surface de jeu / Journal & détails : `34707068397` success
 - RPG UX : navigation Jouer / Héros / Monde / Configuration : `34707462937` success
-- RPG : déplacement tactique en combat raccordé : `34708055765` success
+- RPG : déplacement tactique en combat : `34708055765` success
 - RPG UX : commandes combat cartes/cibles : `34708334737` success
 - RPG UX : cibles synchronisées portée/LOS/layout : `34709303945` success
+- RPG UX : fiche héros/inventaire/équipement : `34709948494` success
 
 ## Preview téléphone
 
-La preview précédente reste utile comme référence du prototype archaïque :
+La preview initiale reste la référence du prototype archaïque :
 `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/32e3703889f9d3d0f881b13dafc59a342ecd9e72/v2/index.html`
 
-Pour tester les prochaines passes UX, générer/communiquer une nouvelle URL raw.githack figée sur le commit validé concerné ; ne jamais écraser la V1 publique pour une preview.
+Pour tester les prochaines passes UX, communiquer une nouvelle URL raw.githack figée sur le commit validé concerné ; ne jamais écraser la V1 publique pour une preview.
 
 ## Priorités ouvertes
 
-1. Revoir maintenant la fiche héros/inventaire/équipement comme interface de jeu.
-2. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
+1. Revoir maintenant `Monde / World Builder / Salles` avec une hiérarchie claire et mobile-first.
+2. Revoir ensuite `Configuration` pour séparer proprement les catégories au lieu d'une longue interface d'éditeur.
 3. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
 4. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

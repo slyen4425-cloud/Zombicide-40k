@@ -7,7 +7,20 @@
     "isolatedFrom": ["survival", "rpg", "pvp"],
     "noSharedMutableGameplayStorage": true,
     "lazyLoadOnly": true,
-    "legacyImportIsReadOnly": true
+    "legacyImportIsReadOnly": true,
+    "sharedNeutralServices": [
+      "spatial_grid",
+      "movement_pathfinding",
+      "doors_and_passages",
+      "obstacles_and_cover_primitives",
+      "world_builder_geometry",
+      "world_builder_room_graph",
+      "generic_map_interactions"
+    ],
+    "sharedSpatialBaseWithRpg": true,
+    "sharedWorldBuilderBaseWithRpg": true,
+    "sharedGameplayStateWithRpg": false,
+    "captureOwnsItsActorsAndRules": true
   },
   "legacySources": [
     {
@@ -86,7 +99,9 @@
     "unknownLegacyCreaturePolicy": "quarantine_pending_review",
     "generatedLegacyFamilyPolicy": "quarantine_pending_review",
     "trainerMustNotRemainRpgHero": true,
-    "captureItemsMustNotRemainRpgEquipment": true
+    "captureItemsMustNotRemainRpgEquipment": true,
+    "reuseNeutralSpatialEngineNotRpgState": true,
+    "reuseWorldBuilderGeometryNotRpgContent": true
   },
   "generatedLegacyFamilies": {
     "classification": "quarantine",

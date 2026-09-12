@@ -8,6 +8,7 @@ import { mountDungeonGameplayView } from './dungeon-gameplay-view.js';
 import { mountDungeonCombatItemControls } from './dungeon-combat-item-ui.js';
 import { mountDungeonCombatFleeControl } from './dungeon-combat-flee-ui.js';
 import { mountDungeonCombatGmControls } from './dungeon-combat-gm-ui.js';
+import { isDungeonGameMasterDevice, setDungeonGameMasterDeviceRole } from './dungeon-device-role.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
 import { createRpgAudioSession } from './rpg-audio-session.js';
 
@@ -23,7 +24,7 @@ export function createRpgPageRuntime({audioOutput=null}={}){
   return {audioSession,audioOutput:output,dispose,isDisposed:()=>disposed};
 }
 
-export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,dungeonIsGameMasterDevice=false,onDungeonCombatStart=null,onDungeonCombatChange=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
+export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootRecipients=[],dungeonInventory=null,dungeonConditionEvaluator=null,dungeonHeroRuntimes=[],dungeonSpatial=null,dungeonSpatialConfig={},dungeonCombat=null,dungeonIsGameMasterDevice=null,onDungeonCombatStart=null,onDungeonCombatChange=null,onDungeonCombatEnd=null,onDungeonRuntimeChange=null}={}){
   const pageRuntime=runtime||createRpgPageRuntime();
   let currentDungeonRuntime=dungeonRuntime||null;
   let currentDungeonLootRecipients=structuredClone(dungeonLootRecipients||[]);
@@ -32,7 +33,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
   let currentDungeonSpatial=dungeonSpatial?structuredClone(dungeonSpatial):null;
   let currentDungeonSpatialConfig=structuredClone(dungeonSpatialConfig||{});
   let currentDungeonCombat=dungeonCombat?structuredClone(dungeonCombat):null;
-  let currentDungeonIsGameMasterDevice=Boolean(dungeonIsGameMasterDevice);
+  let currentDungeonIsGameMasterDevice=dungeonIsGameMasterDevice==null?isDungeonGameMasterDevice():Boolean(dungeonIsGameMasterDevice);
   let currentDungeonEventWorld={};
   let currentTab='editor';
   let dungeonView=null;
@@ -204,7 +205,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
       return currentDungeonCombat?structuredClone(currentDungeonCombat):null;
     },
     setDungeonGameMasterDevice(isGameMasterDevice){
-      currentDungeonIsGameMasterDevice=Boolean(isGameMasterDevice);
+      currentDungeonIsGameMasterDevice=setDungeonGameMasterDeviceRole(Boolean(isGameMasterDevice));
       if(currentTab==='dungeon') scheduleDungeonCombatUi();
       return currentDungeonIsGameMasterDevice;
     },

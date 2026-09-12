@@ -1,0 +1,63 @@
+/* GenSrpG V2 — structural gameplay polish. Presentation only. */
+.dungeon-gameplay-grid{gap:14px}
+.dungeon-play-surface{display:grid;gap:12px}
+.dungeon-play-surface>.editor-section{margin-top:0}
+
+.dungeon-play-surface .dungeon-hero-focus{order:1}
+.dungeon-play-surface .dungeon-board-section{order:2}
+.dungeon-play-surface .dungeon-event-choice{order:3}
+.dungeon-play-surface .dungeon-combat-section{order:4}
+
+.dungeon-secondary-drawer{
+  border:1px solid #4d4637;
+  border-radius:16px;
+  background:linear-gradient(180deg,#15130f,#0f0e0b);
+  overflow:hidden;
+  box-shadow:0 8px 24px #0006;
+}
+.dungeon-secondary-drawer>summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:58px;
+  padding:12px 14px;
+  background:#18150f;
+  border-bottom:1px solid transparent;
+  user-select:none;
+}
+.dungeon-secondary-drawer>summary::-webkit-details-marker{display:none}
+.dungeon-secondary-drawer>summary span{font-weight:950;color:#e7cf98;font-size:15px}
+.dungeon-secondary-drawer>summary small{color:#a99f8a;text-align:right;line-height:1.25}
+.dungeon-secondary-drawer[open]>summary{border-bottom-color:#413927;background:#1c1811}
+.dungeon-secondary-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px}
+.dungeon-secondary-content>.editor-section,
+.dungeon-secondary-content>section{margin-top:0!important;min-width:0}
+.dungeon-secondary-content>.dungeon-gameplay-status{display:block!important;grid-column:1/-1;opacity:.72}
+.dungeon-secondary-content>.dungeon-event-presentation{grid-column:1/-1}
+.dungeon-secondary-content>.dungeon-transition-section{grid-column:1/-1}
+
+/* The live game should dominate the viewport. */
+.dungeon-play-surface>.dungeon-board-section{margin:0}
+.dungeon-play-surface>.dungeon-combat-section{margin:0}
+.dungeon-play-surface>.dungeon-event-choice{margin:0}
+.dungeon-play-surface .dungeon-board-wrap{max-height:min(62vh,620px)}
+
+/* Reduce editor-like framing in gameplay. */
+.dungeon-play-surface .editor-section{
+  border-radius:15px;
+}
+.dungeon-play-surface .section-title-row p.muted{max-width:48rem}
+
+@media(max-width:620px){
+  .dungeon-gameplay-grid{gap:10px}
+  .dungeon-play-surface{gap:9px}
+  .dungeon-secondary-drawer{border-radius:14px}
+  .dungeon-secondary-drawer>summary{display:grid;grid-template-columns:1fr;gap:3px;padding:10px 12px;min-height:52px}
+  .dungeon-secondary-drawer>summary small{text-align:left;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dungeon-secondary-content{grid-template-columns:1fr;padding:8px;gap:8px}
+  .dungeon-secondary-content>*{grid-column:1!important}
+  .dungeon-play-surface .dungeon-board-wrap{max-height:58vh}
+}

@@ -19,12 +19,14 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Le temps visuel des notices reste strictement séparé du temps gameplay.
 - L’overlay concret suspend uniquement le temps visuel et n’appelle jamais le blocage gameplay.
 - Les inspections et résumés restent strictement consultatifs : aucune attaque, IA, déplacement, dégâts, soin, capture ou progression du temps n’est déclenché depuis ces vues.
-- La liste Équipe active expose désormais une première commande gameplay réelle : le switch manuel de créature active pendant un combat, via `switchCaptureBattleCreature()` uniquement.
+- La liste Équipe active expose le switch manuel de créature active pendant un combat via `switchCaptureBattleCreature()`.
 - Le bouton `Changer` n’apparaît que pour une créature de l’équipe active, vivante, différente de la créature actuellement active et pendant un combat actif ; la réserve n’expose jamais cette commande.
-- Le switch réussi resynchronise l’état global autoritaire, puis rerend le roster et le résumé adverse ; aucun switch direct bas niveau n’est utilisé depuis l’UI.
-- Le chemin autoritaire des capacités joueur possède maintenant un contrôleur dédié `executeCapturePlayerAbility()` qui appelle `useCaptureBattleAbility()` et persiste le `abilityState` retourné dans `activeTeam`, `roster` et la copie de créature du combat.
-- Ce contrôleur utilise le resolver Capture de PV existant par défaut et refuse d’initialiser implicitement un `abilityState` absent : aucune charge, cooldown ou définition n’est inventée.
-- Le bouton UI de capacité n’est volontairement pas encore exposé tant que les définitions exactes de capacités Capture ne sont pas fournies explicitement à la page.
+- Le chemin autoritaire des capacités joueur utilise `executeCapturePlayerAbility()`, qui appelle `useCaptureBattleAbility()` et persiste le `abilityState` retourné dans `activeTeam`, `roster` et la copie de créature du combat.
+- La page Capture accepte maintenant une bibliothèque explicite `abilityDefs`. Une capacité n’est jouable dans l’UI que si son ID possède une définition exacte dans cette bibliothèque.
+- Le bouton `Utiliser` apparaît uniquement sur la créature actuellement active, pendant un combat actif, pour une capacité explicitement définie ; il est désactivé si le cooldown autoritaire est > 0 ou si les charges autoritaires sont à 0.
+- L’UI ne calcule ni portée, ni dégâts, ni coût, ni réaction, ni KO : le clic passe exclusivement par `executeCapturePlayerAbility()`.
+- Si la capacité termine réellement le combat, le driver gameplay de la session est arrêté avec l’état autoritaire retourné.
+- Aucun `abilityState` manquant, aucune charge, aucun cooldown et aucune définition de capacité ne sont inventés.
 - Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
 
 ## Jalons CI récents validés
@@ -49,32 +51,39 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - nom canonique dans inspection créature possédée : `34694675567` success
 - première commande gameplay UI — switch manuel de créature active : `34695849063` success
 - persistance autoritaire des charges/cooldowns après capacité joueur : `34696817140` success
+- commande UI de capacité pour la créature active : `34698467186` success
 
 ## Dernière étape terminée
 
-Persistance autoritaire de l’état des capacités joueur avant raccordement UI :
-- nouveau module `v2/src/modes/capture/player-ability-action.js` ;
-- `executeCapturePlayerAbility()` utilise exclusivement `useCaptureBattleAbility()` pour résoudre portée, charges, cooldown, réactions, effets et KO ;
-- `resolveCaptureVitalEffect()` reste le resolver Capture par défaut pour les effets PV déjà supportés ;
-- après une action valide, le `abilityState` retourné par le moteur est persisté sur l’instance active dans `activeTeam`, puis répercuté dans `roster` ;
-- tant que la même instance reste active, la copie `battle.player.creature` reçoit le même `abilityState` ;
-- l’état d’entrée n’est pas muté ;
-- si la créature active ne possède pas de `abilityState` explicite, l’action est refusée avec `capture-player-ability-state-missing` au lieu d’initialiser ou d’inventer des charges/cooldowns ;
-- aucun runtime RPG, aucune valeur aléatoire et aucune définition de capacité implicite n’est utilisé.
+Commande UI `Utiliser` pour les capacités de la créature active :
+- `capture/runtime.js` expose désormais publiquement `CAPTURE_PLAYER_ABILITY_ACTION_CONTRACT` et `executeCapturePlayerAbility()` ;
+- `CAPTURE_PUBLIC_RUNTIME_CONTRACT.canonicalPlayerAbilityAction` est actif ;
+- `mountCapturePage(...,{abilityDefs})` indexe uniquement les définitions explicitement fournies ;
+- une capacité sans définition explicite reste visible en lecture seule mais n’expose aucun bouton `Utiliser` ;
+- une capacité définie sur la créature actuellement active peut exposer `Utiliser` ;
+- cooldown > 0 ou charges = 0 désactivent le bouton à partir de l’état autoritaire déjà affiché ;
+- le clic appelle uniquement `executeCapturePlayerAbility(session.state,{abilityDef})` ;
+- après réussite, l’état autoritaire remplace celui de la session puis roster et résumé adverse sont rerendus ;
+- si l’action termine le combat, le driver gameplay est arrêté ;
+- aucun bouton de capacité n’est ajouté à la réserve ou aux créatures non actives ;
+- aucun `useCaptureBattleAbility()` direct, aucune initialisation implicite de capacité, aucun calcul RPG ni aléatoire n’existe dans la page.
 
 Régression :
-- `v2/tests/capture-player-ability-action.test.mjs` vérifie dégâts réels via le resolver Capture, décrément de charge, pose du cooldown, persistance dans `activeTeam`/`roster`/combat, non-mutation de l’état source, refus en cooldown, refus sans `abilityState` et refus sans combat ;
-- batterie complète : `34696817140` success.
+- `v2/tests/capture-ui-player-ability-action.test.mjs` vérifie l’exposition publique du contrôleur, une résolution de dégâts réelle, la persistance charge/cooldown et les garde-fous statiques de l’UI ;
+- `v2/tests/capture-ui-roster-list.test.mjs` a été ajusté pour reconnaître le nouveau rendu contextualisé des capacités sans relâcher ses protections ;
+- premier run `34698412692` bloqué uniquement par l’ancienne assertion statique `entry.abilities.map(rosterAbilityHtml)` ;
+- batterie complète corrigée : `34698467186` success.
 
 Commits de l’étape :
-- contrôleur capacité joueur + persistance : `c12c0d882d7f2027742ffeb9567d8d98252c49d4`
-- régression dédiée : `7eaeff3724a1618917e8b944eee889b3b950c487`
+- façade runtime capacité joueur : `a54c5127a4b7f2bb12830e970a01350ffe4c32ea`
+- commande UI capacité active : `b4244e769d69f7d32629160b7a2564a73ce8719b`
+- régression dédiée : `6426b02c74cc475c97a1e1f5e18aa3f504101984`
+- garde roster adapté : `1bc437828dcd7466c08732272ceb1911264427ce`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : raccorder le bouton/commande UI de capacité sur `executeCapturePlayerAbility()` uniquement quand une définition Capture explicite correspond à la capacité de l’instance active ;
-2. ne jamais afficher de capacité jouable si sa définition exacte n’est pas disponible ;
+1. prochaine étape Capture : exposer progressivement la commande de déplacement tactique autoritaire de la créature active, sans réécrire le moteur spatial ;
+2. ensuite raccorder la tentative de capture par orbe uniquement lorsque les coefficients/valeurs requis sont explicitement validés et disponibles ;
 3. importer les vrais arts principaux + icônes quand les fichiers validés sont disponibles, une seule paire par espèce canonique ;
-4. compléter les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
-5. enrichir les autres réactions/effets tactiques uniquement si leurs contrats sont validés ;
-6. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.
+4. enrichir les autres réactions/effets tactiques uniquement si leurs contrats sont validés ;
+5. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.

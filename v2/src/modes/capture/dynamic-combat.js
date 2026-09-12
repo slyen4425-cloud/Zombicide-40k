@@ -109,6 +109,7 @@ export function resolveCaptureAbilityAction({
   abilityState,
   effectResolver=null,
   diagonal=false,
+  activeTeam=[],
 }={}){
   if(!battle||battle.status!=='active') return {ok:false,reason:'battle-not-active',battle,abilityState:clone(abilityState||{})};
   const actor=battle[String(side)]?.actorId;
@@ -141,16 +142,22 @@ export function resolveCaptureAbilityAction({
   }
   const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null)};
   const resolvedBattle=resolution?.battle?clone(resolution.battle):clone(battle);
-  const nextBattle={
+  const loggedBattle={
     ...resolvedBattle,
     pendingAction:null,
     actionLog:[...(resolvedBattle.actionLog||battle.actionLog||[]).map(clone),resolvedAction],
   };
+  const ko=resolveCaptureKoState(loggedBattle,activeTeam);
+  if(!ko.ok) return {...ko,abilityState:spent.state,action:resolvedAction};
   return {
     ok:true,
-    battle:nextBattle,
+    battle:ko.battle,
     abilityState:spent.state,
     action:resolvedAction,
+    koOutcome:ko.outcome,
+    activeTeam:ko.activeTeam,
+    ...(ko.previousInstanceId?{previousInstanceId:ko.previousInstanceId}:{}),
+    ...(ko.activeInstanceId?{activeInstanceId:ko.activeInstanceId}:{}),
   };
 }
 
@@ -198,11 +205,7 @@ export function resolveCaptureKoState(battle,activeTeam=[]){
 
   const syncedTeam=(activeTeam||[]).map(entry=>{
     if(String(entry.instanceId)!==String(battle.player.activeInstanceId)) return clone(entry);
-    return {
-      ...clone(entry),
-      currentHp:battle.player.vitals.currentHp,
-      maxHp:battle.player.vitals.maxHp,
-    };
+    return {...clone(entry),currentHp:battle.player.vitals.currentHp,maxHp:battle.player.vitals.maxHp};
   });
   const replacement=syncedTeam.find(entry=>{
     if(String(entry.instanceId)===String(battle.player.activeInstanceId)) return false;

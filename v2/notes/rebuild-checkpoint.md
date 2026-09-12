@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée et première couche PV/dégâts/soins/KO.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO et flux post-KO.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -35,37 +35,37 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - capture complète en combat sauvage : `34681864744` success
 - première IA dynamique dédiée : `34681979266` success
 - PV/dégâts/soins/KO : `34682075802` success
+- flux post-KO / remplacement forcé : `34682302866` success
 
 ## Dernière étape terminée
 
-Première couche concrète de PV/dégâts/soins/KO dans le runtime Capture :
-- nouveau `v2/src/modes/capture/vitals.js` ;
-- `createCaptureVitals()` normalise `currentHp`, `maxHp` et l’état KO ;
-- `applyCaptureDamage()` réduit les PV jusqu’à 0 et marque KO automatiquement ;
-- `applyCaptureHealing()` soigne jusqu’au maximum sans dépasser `maxHp` ;
-- un soin simple ne réanime pas une créature déjà KO à ce stade ;
-- `resolveCaptureVitalEffect()` gère les effets déclaratifs `damage` et `heal`, et renvoie les autres effets sans inventer de formule ;
-- `createCaptureBattleState()` initialise maintenant les PV de la créature active joueur et de l’adversaire ;
-- `resolveCaptureAbilityAction()` accepte maintenant qu’un resolver renvoie un `battle` modifié, permettant aux effets de changer réellement les PV ;
-- une créature KO ne peut plus lancer de capacité ;
-- le changement de créature réinitialise correctement la créature active et ses PV à partir de son instance possédée ;
-- aucune défense, critique, esquive, résistance ou formule RPG n’est encore imposée.
+Flux post-KO du combat Capture :
+- `switchCaptureActiveCreature()` refuse désormais de sélectionner une créature déjà KO ;
+- nouveau `resolveCaptureKoState()` dans `dynamic-combat.js` ;
+- KO adverse => fin propre du combat avec `opponent_ko` ;
+- si la créature active joueur est KO, ses PV réels sont synchronisés dans l’équipe possédée avant toute décision ;
+- le moteur cherche ensuite une autre créature active encore vivante ;
+- si un remplaçant existe, changement forcé et combat maintenu actif ;
+- la nouvelle créature conserve son propre état PV et reprend la position spatiale de la précédente ;
+- si aucune créature de l’équipe active n’est encore apte, le combat se termine avec `player_team_unavailable` ;
+- un KO individuel n’est donc jamais traité comme une défaite globale tant qu’un membre vivant reste disponible.
 
 Régression :
-- nouveau `v2/tests/capture-vitals.test.mjs` ;
-- couvre dégâts réels, KO à 0 PV, blocage d’action d’une créature KO et soin plafonné ;
-- la batterie complète V2 passe sans régression.
+- nouveau `v2/tests/capture-ko-flow.test.mjs` ;
+- couvre KO adverse => fin de combat ;
+- couvre KO joueur => remplacement forcé par une créature vivante ;
+- couvre équipe entière KO => `player_team_unavailable` ;
+- couvre explicitement une équipe de 6 avec une seule créature KO pour empêcher toute régression vers une défaite globale prématurée.
 
 Commits de l’étape :
-- primitives PV/dégâts/soins/KO : `774aced644ede93af9aa3882643124df1c5565f5`
-- raccord au runtime dynamique : `9c51b96516b28676cd18b0e0a2f4c1f45dc947fa`
-- régression vitals : `5e5db1cd383fd39308cfead07e3e1cb05c366390`
+- flux post-KO et remplacement forcé : `684a00edcc097fb12d6105f3b8a95e107a1824fe`
+- régression KO : `efa0f1e453598fdfb9c728a9560b18c91394d9f1`
 
-CI fonctionnelle de l’étape : `34682075802` success.
+CI fonctionnelle de l’étape : `34682302866` success.
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : brancher le KO adverse sur la fin de combat et le KO joueur sur changement forcé / équipe indisponible ;
+1. prochaine étape Capture : brancher automatiquement ce flux post-KO à la résolution des actions, afin qu’un KO déclenche immédiatement fin/remplacement sans appel manuel séparé ;
 2. ensuite ajouter progressivement statuts/esquive et réactions tactiques de l’IA ;
 3. compléter les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

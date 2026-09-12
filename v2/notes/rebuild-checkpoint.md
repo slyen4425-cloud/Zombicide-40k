@@ -28,12 +28,19 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Le parcours de combat complet de cette mini-démo est couvert jusqu'à la réconciliation de victoire : première Frappe, riposte automatique Griffe, seconde Frappe, victoire, PV héros synchronisés, squelette vaincu, loot généré et pion ennemi retiré du plateau.
 - Le squelette de démo donne toujours `1 × Os ancien` (`demo_bone`) afin de rendre le bloc butin réellement testable.
 - La grille est mobile-first et défile horizontalement si une salle est plus large que l'écran.
-- Hors combat, la grille est maintenant interactive : toucher/clicker une case déplace le héros focalisé uniquement si le vrai pathfinding de salle l'autorise.
+- Hors combat, la grille est interactive : toucher/clicker une case déplace le héros focalisé uniquement si le vrai pathfinding de salle l'autorise.
 - Ce déplacement utilise le Spatial Core pour la position/allocation et `room-tactical-bridge.js` pour les chemins authored : cases bloquées, murs, portes fermées/verrouillées et détours sont donc respectés.
 - Un mur ou une porte fermée bloque bien son arête ; un détour reste valide s'il existe et tient dans l'allocation de mouvement. Une porte ouverte restaure le pas direct.
 - Chaque clic d'exploration peut cibler une case atteignable dans l'allocation courante du héros ; ce jalon ne crée pas encore de budget de tour d'exploration persistant.
 - Le déplacement libre par clic est volontairement désactivé pendant un combat actif afin de ne jamais contourner le moteur tactique/timeline.
 - Après un déplacement, le même état spatial est stocké dans `roomRuntime.spatial`, réaffiché sur la grille et transmis au prochain combat.
+- Les interactions de proximité sont maintenant raccordées à la grille hors combat : seule la case exacte du héros expose ses actions disponibles.
+- Les portes utilisent `openRoomDoor()` et les interactions authored utilisent `attemptRoomInteraction()` ; aucune seconde logique d'ouverture ou de jet n'a été créée dans l'UI.
+- Les interactions attachées directement à une case, à une porte de cette case ou imbriquées sous une interaction de cette case sont récupérées via `interactionsAtCell()`.
+- Une interaction déjà terminée disparaît des actions disponibles ; un héros KO/inactif n'a aucune action de grille ; toutes les actions de proximité disparaissent pendant un combat actif.
+- Une interaction `chest` réussie est maintenant marquée `opened + completed` dans l'état de salle, ce qui rend le coffre non répétable ; ce jalon ne crée pas encore une nouvelle table de loot pour les coffres authored.
+- Le layout de salle chargé par la page RPG est désormais matérialisé avec l'état runtime avant rendu/pathfinding : ouvrir une porte modifie immédiatement son état visuel et libère immédiatement son arête pour le déplacement.
+- Le spatial remonté par la vue après un déplacement est désormais aussi conservé par `rpg-page.js`, ce qui évite de perdre la dernière position lors d'un rerender externe.
 
 ## Jalons CI récents validés
 
@@ -55,40 +62,42 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG : grille Donjon live + pions runtime sur mobile : `34701638751` success
 - RPG : flux complet démo combat → victoire → loot → retrait du pion : `34701834544` success
 - RPG : déplacement exploration par clic sur grille : `34702387637` success
+- RPG : interactions de proximité case/porte/coffre sur grille : `34702763858` success
 
 ## Dernière étape terminée
 
-Cinquième jalon du chantier `RPG → build testable` : déplacement du héros directement sur la grille hors combat.
+Sixième jalon du chantier `RPG → build testable` : interactions de proximité directement liées à la position du héros sur la grille.
 
-- nouveau module `v2/src/modes/rpg/dungeon-grid-movement.js` ;
-- `moveFocusedDungeonHeroOnGrid()` ne déplace que le héros focalisé réellement présent, actif et non KO dans la salle courante ;
-- l'allocation est lue avec `actorMovementAllowance()` du Spatial Core ;
-- la distance/route est calculée par `shortestRoomPathDistance()` afin de respecter le vrai layout authored ;
-- une cible hors portée ou inaccessible est refusée sans mutation ;
-- succès : nouvelle position écrite via `setActorPosition()`, puis recopiée dans `roomRuntime.spatial` ;
-- combat actif : refus explicite `dungeon-move-combat-active` ; le déplacement de tour de combat reste la responsabilité du moteur tactique existant ;
-- `dungeon-gameplay-view.js` rend les cases tactiles/clavier uniquement hors combat, affiche un retour de déplacement/refus, puis rerend le pion à sa nouvelle position ;
-- le `effectiveSpatial` utilisé pour la grille est également celui envoyé à `startDungeonCombat()` et `executeDungeonHeroSkill()` ;
-- `dungeon-board.css` ajoute uniquement l'affordance tactile/focus, sans changer les règles.
+- nouveau contrôleur `v2/src/modes/rpg/dungeon-grid-interactions.js` ;
+- nouveau raccordement UI `v2/src/modes/rpg/dungeon-grid-interactions-ui.js` ;
+- `focusedDungeonGridActions()` lit la position authoritative du héros focalisé et ne retourne que les portes/interactions présentes sur sa case exacte ;
+- les interactions passent par `interactionsAtCell()`, donc les pièces attachées à une porte ou imbriquées restent compatibles ;
+- `executeFocusedDungeonGridAction()` route une porte vers `openRoomDoor()` et une interaction vers `attemptRoomInteraction()` ;
+- les résultats sont normalisés avec `roomRuntime` pour l'UI ;
+- une interaction de coffre réussie est marquée ouverte/terminée et disparaît ensuite ;
+- aucune interaction distante n'est proposée ;
+- héros KO/inactif ou combat actif : aucune action de proximité disponible ;
+- `rpg-page.js` matérialise maintenant le layout avec `materializeRoomLayout()` avant de le transmettre à la vue et au pathfinding ;
+- après ouverture d'une porte, la grille/pathfinding voient donc immédiatement `state:'open'` ;
+- l'état spatial émis par le déplacement est désormais conservé au niveau page.
 
 Régression :
-- nouveau `v2/tests/rpg-dungeon-grid-movement.test.mjs` ;
-- couvre déplacement valide, portée, case bloquée, mur, porte fermée, porte ouverte, détour, allocation insuffisante, héros KO, combat actif et non-mutation des sources ;
-- le premier run `34702292018` a échoué sur une attente de test incorrecte : le mur bloquait bien le pas direct mais un détour de 3 cases existait ;
-- assertion corrigée pour protéger le vrai comportement pathfinding ;
-- batterie complète finale : `34702387637` completed + success.
+- nouveau `v2/tests/rpg-dungeon-grid-interactions.test.mjs` ;
+- couvre même case obligatoire, interaction distante refusée, combat actif, ouverture porte, matérialisation runtime, déblocage immédiat du pathfinding, coffre ouvert/terminé et non-mutation des sources ;
+- run initial `34702711346` échoué sur une incohérence de forme de retour (`runtime` vs `roomRuntime`) ;
+- contrôleur normalisé, puis batterie complète finale : `34702763858` completed + success.
 
 Commits de l'étape :
-- contrôleur déplacement grille : `dd0118f0f62325bfceed5aa7779c5d5576650cc1`
-- raccordement vue Donjon : `9c1e8606021e1bc23acfd54e1d9fba40bf4443d8`
-- affordance CSS : `91aeae860f0aaa52edfdbb03227aa6849aa3d44e`
-- régression initiale : `ca48a0592ff1e180a68c547a389d3230204c6a99`
-- correction attente détour : `654961b2e73e69d7b90055a0d755e68d0ece50af`
+- contrôleur interactions grille : `0dc5b40ca3652e45a9ff46667917d72a6a5a83e5`
+- contrôles UI proximité : `d5fa150074ccd94a3918e71da2fa3b412b549759`
+- raccordement page + layout runtime : `85a92759f6434f527c10116105e0bb66ea831f03`
+- régression : `23354e6c2de0d637e4bdeb5d2b04b5841fd0bb00`
+- normalisation résultat runtime : `a08f91ada1733359b857455d14db07c0b6be1f27`
 
 ## Priorités ouvertes
 
-1. RPG testable : vérifier/raccorder les interactions de proximité utiles sur la vraie grille (portes/coffres/ennemis) sans dégrader le moteur stable ;
-2. ajouter le minimum de sauvegarde/reprise nécessaire au test utilisateur ;
-3. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
-4. après le premier test utilisateur : corriger l'ergonomie/visuel réel observé, puis reprendre assets/audio/PWA/parité finale ;
+1. RPG testable : ajouter le minimum de sauvegarde/reprise nécessaire pour conserver une partie de test (runtime, héros, spatial, combat si pertinent) sans polluer les définitions ;
+2. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
+3. après le premier test utilisateur : corriger l'ergonomie/visuel réel observé, puis reprendre assets/audio/PWA/parité finale ;
+4. vérifier ensuite les interactions authored plus spécialisées (coffres avec loot/trap/puzzle/event attachés) à partir des données réelles, sans inventer de contenu ;
 5. Monster Capture reste en pause jusqu'à ce premier cycle de test RPG.

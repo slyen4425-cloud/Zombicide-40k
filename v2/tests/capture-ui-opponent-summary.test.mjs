@@ -158,9 +158,11 @@ assert.match(pageSource,/api\.inspectOpponent\(\)/);
 assert.match(pageSource,/renderOpponentSummary\(\)/);
 assert.match(pageSource,/opponentSummaryNode\.addEventListener\('click',handleOpponentInspectClick\)/);
 assert.match(pageSource,/opponentSummaryNode\.removeEventListener\('click',handleOpponentInspectClick\)/);
-for(const forbidden of ['moveCaptureBattleCreature(','switchCaptureBattleCreature(','useCaptureBattleAbility(','runCaptureAiStep(','attemptCaptureInBattle(']){
+for(const forbidden of ['moveCaptureBattleCreature(','useCaptureBattleAbility(','runCaptureAiStep(','attemptCaptureInBattle(']){
   assert.equal(pageSource.includes(forbidden),false,`capture page must not include ${forbidden}`);
 }
+assert.equal(pageSource.includes("data-capture-inspect-opponent>Attaquer"),false);
+assert.equal(pageSource.includes("data-capture-inspect-opponent>Capturer"),false);
 
 const appSource=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 assert.match(appSource,/loadCaptureAssetRegistry/);

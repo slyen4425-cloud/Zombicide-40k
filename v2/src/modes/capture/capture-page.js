@@ -1,4 +1,4 @@
-import { createCaptureModeState } from './capture.js';
+import { createCaptureModeState } from './runtime.js';
 
 export function mountCapturePage(host,{initialState=null}={}){
   const state=initialState||createCaptureModeState();

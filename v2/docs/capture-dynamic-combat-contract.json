@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Verrouiller le contrat du futur combat dynamique Monster Capture avant implémentation complète du runtime, sans reprendre le moteur de tours/D100 RPG ni figer prématurément le timing temps réel.",
+  "architecture": {
+    "mode": "capture",
+    "runtime": "dedicated_capture_dynamic_runtime",
+    "sharesNeutralSpatialCore": true,
+    "sharesRpgTurnRuntime": false,
+    "usesTurnSequence": false,
+    "usesD100Timeline": false,
+    "exactRealtimeTiming": "future_design_not_frozen"
+  },
+  "entryExit": {
+    "startsFromActiveEncounter": true,
+    "requiresPlayerActiveCreature": true,
+    "wildEncounterCreatesOpponentActor": true,
+    "battleOwnsItsMutableState": true,
+    "explorationStatePausedNotDestroyed": true,
+    "battleCanEndBy": ["opponent_ko", "capture_success", "flee", "player_team_unavailable"],
+    "captureSuccessEndsWildBattle": true,
+    "returnToExplorationAfterBattle": true
+  },
+  "activeCreature": {
+    "oneActiveCreaturePerSideByDefault": true,
+    "playerChoosesFromActiveTeam": true,
+    "ownedInstanceStatePreserved": true,
+    "switchingAllowed": true,
+    "switchMustNotMergeCreatureInstances": true,
+    "exactSwitchDelayOrCost": "future_design_not_frozen"
+  },
+  "spatial": {
+    "movementExpected": true,
+    "positioningExpected": true,
+    "rangeExpected": true,
+    "lineOfSightPolicy": "future_design_not_frozen",
+    "usesNeutralSpatialCore": true,
+    "mustNotUseRpgCombatState": true
+  },
+  "defense": {
+    "dodgeOrPositioningExpected": true,
+    "exactDodgeFormula": "future_design_not_frozen",
+    "invulnerabilityFrames": "future_design_not_frozen"
+  },
+  "abilities": {
+    "usesCaptureAbilityRuntime": true,
+    "chargesPerOwnedInstance": true,
+    "costsSupported": true,
+    "cooldownsSupported": true,
+    "rangeCanBeDefinedPerAbility": true,
+    "exactCastTime": "future_design_not_frozen"
+  },
+  "capture": {
+    "captureAttemptAllowedDuringWildBattle": true,
+    "usesCaptureAttemptEngine": true,
+    "speciesRateRequired": true,
+    "orbCoefficientRequired": true,
+    "lowHpBonusThresholdPercent": 30,
+    "captureSuccessCreatesOwnedInstance": true,
+    "overflowGoesToReserve": true
+  },
+  "aiAndPvp": {
+    "vsAiSupported": true,
+    "vsPlayerSupported": true,
+    "aiDecisionModel": "future_design_not_frozen",
+    "networkSyncModel": "future_design_not_frozen"
+  },
+  "nonGoalsForThisStage": [
+    "final realtime tick rate",
+    "final dodge formula",
+    "final damage formula",
+    "final cast timings",
+    "final AI behavior",
+    "final PvP netcode"
+  ]
+}

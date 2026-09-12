@@ -46,19 +46,17 @@ function modifierOrder(status, fallbackIndex) {
   return Number.isFinite(explicit) ? explicit : fallbackIndex;
 }
 
-function recomposePersistentStat(actor, statId, definitions = {}) {
-  actor.state = actor.state || {};
-  actor.state.stats = actor.state.stats || {};
-  actor.statusModifierBases = actor.statusModifierBases || {};
-
-  const base = ensurePersistentBase(actor, statId);
-  const def = statDefinition(definitions, statId);
-  const modifiers = persistentStatStatuses(actor, statId)
+function orderedPersistentModifiers(actor, statId) {
+  return persistentStatStatuses(actor, statId)
     .map((status, index) => ({ status, index }))
     .sort((a, b) => modifierOrder(a.status, a.index) - modifierOrder(b.status, b.index));
+}
 
+function composePersistentStatValue(actor, statId, definitions = {}) {
+  const base = ensurePersistentBase(actor, statId);
+  const def = statDefinition(definitions, statId);
   let value = base;
-  for (const { status } of modifiers) {
+  for (const { status } of orderedPersistentModifiers(actor, statId)) {
     const modifier = status.modifier || {};
     value = clamp(
       applyNumericOperation(value, modifier.operation || 'add', modifier.value),
@@ -66,7 +64,29 @@ function recomposePersistentStat(actor, statId, definitions = {}) {
       def.max,
     );
   }
+  return value;
+}
 
+function reconcilePersistentBase(actor, statId, definitions = {}) {
+  actor.state = actor.state || {};
+  actor.state.stats = actor.state.stats || {};
+  actor.statusModifierBases = actor.statusModifierBases || {};
+  const expected = composePersistentStatValue(actor, statId, definitions);
+  const actual = Number(actor.state.stats[statId] ?? expected) || 0;
+  const drift = actual - expected;
+  if (drift !== 0) {
+    actor.statusModifierBases[statId] = (Number(actor.statusModifierBases[statId]) || 0) + drift;
+  }
+  return actor.statusModifierBases[statId];
+}
+
+function recomposePersistentStat(actor, statId, definitions = {}) {
+  actor.state = actor.state || {};
+  actor.state.stats = actor.state.stats || {};
+  actor.statusModifierBases = actor.statusModifierBases || {};
+
+  const modifiers = orderedPersistentModifiers(actor, statId);
+  const value = composePersistentStatValue(actor, statId, definitions);
   actor.state.stats[statId] = value;
   if (!modifiers.length) delete actor.statusModifierBases[statId];
   return value;
@@ -129,7 +149,7 @@ export function addPersistentStatus(actor, status, { definitions = {}, context =
     next.statusModifierBases = next.statusModifierBases || {};
     next.statusModifierBases[statId] = previousValue;
   } else {
-    ensurePersistentBase(next, statId);
+    reconcilePersistentBase(next, statId, definitions);
   }
 
   const applied = applyEffect(effect, next.state || {}, definitions, context);
@@ -210,7 +230,10 @@ export function decayStatuses(actor, amount = 1, { definitions = {} } = {}) {
       .filter(status => status?.persistent && status?.modifier?.kind === 'stat' && status?.modifier?.id)
       .map(status => String(status.modifier.id)),
   );
-  for (const statId of persistentStatIds) ensurePersistentBase(next, statId);
+  for (const statId of persistentStatIds) {
+    ensurePersistentBase(next, statId);
+    reconcilePersistentBase(next, statId, definitions);
+  }
 
   const kept = [];
   const affectedStats = new Set();

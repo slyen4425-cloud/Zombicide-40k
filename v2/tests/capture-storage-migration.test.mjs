@@ -8,6 +8,16 @@ const map = JSON.parse(fs.readFileSync(path.join(root, 'docs', 'capture-storage-
 assert.equal(map.architecture.mode, 'capture');
 assert.equal(map.architecture.noSharedMutableGameplayStorage, true);
 assert.equal(map.architecture.lazyLoadOnly, true);
+assert.equal(map.architecture.sharedSpatialBaseWithRpg, true);
+assert.equal(map.architecture.sharedWorldBuilderBaseWithRpg, true);
+assert.equal(map.architecture.sharedGameplayStateWithRpg, false);
+assert.equal(map.architecture.captureOwnsItsActorsAndRules, true);
+assert.ok(map.architecture.sharedNeutralServices.includes('spatial_grid'));
+assert.ok(map.architecture.sharedNeutralServices.includes('movement_pathfinding'));
+assert.ok(map.architecture.sharedNeutralServices.includes('world_builder_geometry'));
+assert.ok(map.architecture.sharedNeutralServices.includes('world_builder_room_graph'));
+assert.equal(map.migrationRules.reuseNeutralSpatialEngineNotRpgState, true);
+assert.equal(map.migrationRules.reuseWorldBuilderGeometryNotRpgContent, true);
 assert.equal(map.migrationRules.legacyReadOnly, true);
 assert.equal(map.migrationRules.neverWriteLegacyKeys, true);
 assert.equal(map.migrationRules.neverFallbackToRpgStorageAtRuntime, true);

@@ -1,6 +1,7 @@
 import {
   advanceCaptureBattleSession,
   appendCaptureUiNotices,
+  attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
   consumeCaptureUiEvents,
@@ -33,11 +34,12 @@ function escapeHtml(value){
     .replaceAll("'",'&#39;');
 }
 
-export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null}={}){
+export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noticeExpireAfterVisualTime=null,visualClockSource=null}={}){
   let session=createCaptureAppSession({state:initialState||createCaptureModeState()});
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
   let visualClockAdapter=createCaptureUiVisualClockAdapterState();
+  let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
   const state=session.state;
   host.innerHTML=`
     <section class="panel capture-page" data-capture-mounted="true">
@@ -73,13 +75,25 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return dispatched;
   }
 
-  return {
+  function sampleNoticeVisualClock(sample){
+    const result=sampleCaptureUiVisualClock(noticeFeed,visualDriver,visualClockAdapter,{sample});
+    if(result.ok){
+      noticeFeed=result.feed;
+      visualDriver=result.visualDriver;
+      visualClockAdapter=result.adapter;
+      renderFeed();
+    }
+    return {...result,notices:captureUiNoticeFeedNotices(noticeFeed)};
+  }
+
+  const api={
     get state(){return session.state;},
     get session(){return session;},
     get notices(){return captureUiNoticeFeedNotices(noticeFeed);},
     get noticeFeed(){return structuredClone(noticeFeed);},
     get visualDriver(){return structuredClone(visualDriver);},
     get visualClockAdapter(){return structuredClone(visualClockAdapter);},
+    get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     beginBattle(options={}){
       const result=beginCaptureBattleSession(session,options);
       if(result.ok) session=result.session;
@@ -118,16 +132,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
       return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
     },
-    sampleNoticeVisualClock(sample){
-      const result=sampleCaptureUiVisualClock(noticeFeed,visualDriver,visualClockAdapter,{sample});
-      if(result.ok){
-        noticeFeed=result.feed;
-        visualDriver=result.visualDriver;
-        visualClockAdapter=result.adapter;
-        renderFeed();
-      }
-      return {...result,notices:captureUiNoticeFeedNotices(noticeFeed)};
-    },
+    sampleNoticeVisualClock,
     flushUiEvents,
     finishBattle(reason){
       const result=finishCaptureBattleSession(session,reason);
@@ -135,6 +140,8 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       return result;
     },
     dispose(){
+      visualClockSourceAttachment.detach();
+      visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
@@ -142,4 +149,11 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       host.innerHTML='';
     },
   };
+
+  if(visualClockSource){
+    api.startNoticeVisualClock();
+    visualClockSourceAttachment=attachCaptureUiVisualClockSource(visualClockSource,sample=>api.sampleNoticeVisualClock(sample));
+  }
+
+  return api;
 }

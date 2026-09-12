@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const perf=fs.readFileSync('assets/gensrpg/gens-combat-runtime-performance-1678129.js','utf8');
+assert.match(perf,/APP_VERSION="16\.78\.129"/);
+assert.doesNotMatch(perf,/renderDungeonCombatRound.*wrapClearBefore/,'combat renders must not invalidate the stat cache');
+let attrCalls=0,valueCalls=0,enemyCalls=0,renders=0,mutations=0;
+const sandbox={console,Promise,setTimeout:(fn)=>{fn();return 1},clearTimeout(){},current:'hero1',dungeonAttributeValue(id){attrCalls++;return id==='force'?12:3},dungeonEnemyRpgStats(def){enemyCalls++;return {force:def.force||1}},GensCleanRpgStats167874:{value(hero,id){valueCalls++;return hero==='hero1'&&id==='force'?12:0},runtimeDefs(){return [{id:'force'}]}},renderDungeonCombatRound(){renders++},__dc302RenderCombat(){renders++},__dc214RenderCombat(){renders++},applyDungeonAttackDamage(){mutations++},silentHeroDamage023(){mutations++},changeDungeonAttribute(){mutations++},dc214Equip(){mutations++},dc214Reload(){mutations++},save(){mutations++},saveState(){mutations++},saveActiveEnemies(){mutations++},saveDungeonHeroState(){mutations++},saveDungeonHeroStats(){mutations++}};
+sandbox.window=sandbox;sandbox.globalThis=sandbox;
+vm.createContext(sandbox);vm.runInContext(perf,sandbox);
+for(let i=0;i<100;i++) assert.equal(sandbox.dungeonAttributeValue('force'),12);
+for(let i=0;i<100;i++) assert.equal(sandbox.GensCleanRpgStats167874.value('hero1','force'),12);
+const enemy={force:7};for(let i=0;i<100;i++) assert.equal(sandbox.dungeonEnemyRpgStats(enemy).force,7);
+assert.equal(attrCalls,1,'100 identical attr reads should resolve once');
+assert.equal(valueCalls,1,'100 identical canonical reads should resolve once');
+assert.equal(enemyCalls,1,'100 identical enemy reads should resolve once');
+for(let i=0;i<20;i++){sandbox.renderDungeonCombatRound();sandbox.__dc302RenderCombat();sandbox.__dc214RenderCombat();}
+assert.equal(attrCalls,1);assert.equal(valueCalls,1);assert.equal(enemyCalls,1);
+assert.equal(sandbox.dungeonAttributeValue('force'),12);assert.equal(attrCalls,1,'rendering must preserve cache');
+sandbox.applyDungeonAttackDamage();
+assert.equal(sandbox.dungeonAttributeValue('force'),12);assert.equal(attrCalls,2,'damage mutation must invalidate cache once');
+const m=sandbox.GensCombatRuntimePerformance1678129.metrics();
+assert.ok(m.attrHits>=100);assert.ok(m.valueHits>=99);assert.ok(m.enemyHits>=99);assert.ok(m.clears>=1);
+console.log('V16.78.129 combat latency cache regression OK', {attrCalls,valueCalls,enemyCalls,renders,mutations,metrics:m});

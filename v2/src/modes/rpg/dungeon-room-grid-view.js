@@ -60,9 +60,9 @@ function worldVisual(entry){
     const [assetKind,icon]=kinds[entry.interaction.kind]||[null,'⭐'];
     return {assetUrl:assetKind?resolveDungeonWorldAsset(assetKind):null,icon};
   }
-  if(entry.door){return {assetUrl:resolveDungeonWorldAsset(entry.door.open?'door_open':'door_closed'),icon:entry.door.entry?'⬅️':entry.door.exit?'➡️':entry.door.locked?'🔒':''};}
+  if(entry.door){return {assetUrl:resolveDungeonWorldAsset(entry.door.open?'door_open':'door_closed'),icon:entry.door.entry?'🚪⬅️':entry.door.exit?'🚪➡️':entry.door.locked?'🔒':'🚪'};}
   if(entry.marker){return {assetUrl:resolveDungeonWorldAsset(entry.marker.kind==='boss'?'boss':entry.marker.kind==='exit'?'exit':entry.marker.kind==='start'?'entry':null),icon:entry.marker.kind==='special'?'⭐':'📍'};}
-  if(entry.walls?.length) return {assetUrl:resolveDungeonWorldAsset('wall'),icon:entry.walls.some(w=>w.kind==='low-wall')?'🛡️':''};
+  if(entry.walls?.length) return {assetUrl:resolveDungeonWorldAsset('wall'),icon:entry.walls.some(w=>w.kind==='low-wall')?'🛡️':'🧱'};
   if(entry.cell?.blocked) return {assetUrl:resolveDungeonWorldAsset('rock'),icon:'⛔'};
   return {assetUrl:null,icon:terrainIcon(entry.cell?.terrain)};
 }

@@ -1,3 +1,5 @@
+import {resolveCaptureSpeciesAsset} from './assets.js';
+
 const clone=value=>structuredClone(value);
 
 export const CAPTURE_CREATURE_INSPECTION_CONTRACT=Object.freeze({
@@ -7,6 +9,8 @@ export const CAPTURE_CREATURE_INSPECTION_CONTRACT=Object.freeze({
   readsAuthoritativeStatuses:true,
   readsAuthoritativeAbilityState:true,
   readsAuthoritativeReactionState:true,
+  readsCanonicalCaptureAssetRegistry:true,
+  neverUsesRpgOrDungeonFallback:true,
   derivesGameplayRules:false,
   supportsOptionalSpeciesData:true,
   mutatesGameplayState:false,
@@ -81,18 +85,21 @@ function reactionLabels(creature={}){
   }).filter(Boolean);
 }
 
-export function buildCaptureCreatureInspection(creature,{speciesDef=null}={}){
+export function buildCaptureCreatureInspection(creature,{speciesDef=null,assetRegistry={}}={}){
   if(!creature||typeof creature!=='object'){
     return {ok:false,reason:'capture-creature-inspection-creature-missing'};
   }
   const instanceId=text(creature.instanceId);
-  const speciesId=text(creature.speciesId);
-  if(!instanceId||!speciesId){
+  const rawSpeciesId=text(creature.speciesId);
+  if(!instanceId||!rawSpeciesId){
     return {ok:false,reason:'capture-creature-inspection-identity-missing'};
   }
 
+  const resolvedAsset=resolveCaptureSpeciesAsset(rawSpeciesId,assetRegistry);
+  const speciesId=resolvedAsset?.speciesId||rawSpeciesId;
+  const canonicalName=resolvedAsset?.displayName||speciesId;
   const nickname=text(creature.nickname);
-  const speciesName=text(speciesDef?.name)||text(speciesDef?.displayName)||speciesId;
+  const speciesName=text(speciesDef?.name)||text(speciesDef?.displayName)||canonicalName;
   const currentHp=numericOrNull(creature.currentHp);
   const maxHp=numericOrNull(creature.maxHp);
   const ko=currentHp!=null&&currentHp<=0;

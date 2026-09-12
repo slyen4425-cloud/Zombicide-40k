@@ -42,7 +42,7 @@ function startedState(){
   const state=startedState();
   const result=switchCaptureBattleCreature(state,'p3');
   assert.equal(result.ok,false);
-  assert.equal(result.reason,'capture-battle-switch-creature-ko');
+  assert.equal(result.reason,'capture-creature-ko');
   assert.equal(result.state.battle.player.activeInstanceId,'p1');
 }
 

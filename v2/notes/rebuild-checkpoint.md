@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins, réactions/esquive configurables par créature et première politique d'esquive pilotée par les données.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins, réactions/esquive configurables par créature, politique d'esquive data-driven et coût/cooldown de réaction par instance.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -45,33 +45,40 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - premier socle réaction/esquive configurable : `34683114512` success
 - réactions configurables routées par joueur + IA : `34683246425` success
 - politique d'esquive data-driven : `34683578020` success
+- coût/cooldown de réaction par instance : `34683977742` success
 
 ## Dernière étape terminée
 
-Première politique d'évaluation d'esquive pilotée par les données :
-- nouveau `v2/src/modes/capture/dodge-policy.js` ;
-- aucune chance globale ou valeur par défaut n'est imposée ;
-- une réaction `dodge` peut porter `metadata.dodgePolicy.chancePercent` avec une valeur 0..100 ;
-- `normalizeCaptureDodgePolicy()` normalise uniquement les données fournies et conserve `chancePercent:null` si aucune valeur n'est configurée ;
-- `createCaptureDodgeEvaluator()` produit un évaluateur injecté dans le moteur de réactions existant ;
-- le RNG est injecté, ce qui rend la politique entièrement déterministe en test ;
-- la règle actuelle pour ce mode `chance` est volontairement minimale : `rollPercent < chancePercent` ; elle ne devient pas une formule universelle pour toutes les réactions Capture ;
-- si la chance n'est pas configurée, aucune esquive n'est déclenchée ;
-- les modes non supportés sont refusés explicitement plutôt que devinés ;
-- les chemins globaux joueur et IA peuvent utiliser exactement ce même évaluateur sans modification supplémentaire du runtime.
+Coût et cooldown de réaction réellement consommables par instance :
+- nouveau `v2/src/modes/capture/reaction-state.js` ;
+- état de réaction stocké par `instanceId` dans chaque créature via `reactionState[reactionId]` ;
+- état minimal : `resource` optionnelle + `cooldownRemaining` ;
+- aucune réserve implicite n'est inventée : si une réaction possède un coût > 0 mais aucune ressource n'est configurée, elle est bloquée explicitement ;
+- `normalizeCaptureReaction()` supporte désormais `cooldown` en plus de `cost` ;
+- coût et cooldown ne sont consommés que si la réaction se déclenche réellement ;
+- une réaction en cooldown est refusée avant l'évaluateur ;
+- `resolveCaptureAbilityAction()` persiste l'état de réaction du combattant ciblé dans le `battle` ;
+- changement forcé/manuel recharge l'état propre de la nouvelle instance ;
+- synchronisation globale joueur conserve `reactionState` dans `activeTeam` et `roster` ;
+- nouvelle opération publique `tickCaptureBattleReactionCooldowns()` pour décrémenter explicitement les cooldowns des deux côtés sans imposer de timer temps réel ;
+- la créature capturée conserve aussi son état de réaction courant ;
+- l'état d'une autre créature de l'équipe reste strictement indépendant.
 
 Régression :
-- nouveau `v2/tests/capture-dodge-policy.test.mjs` ;
-- couvre normalisation, RNG déterministe, réussite/échec selon les données de la créature, absence de chance sans esquive inventée, attaque joueur contre une créature sauvage avec politique d'esquive et attaque IA contre une créature joueur ;
-- batterie complète V2 : `34683578020` success.
+- nouveau `v2/tests/capture-reaction-state.test.mjs` ;
+- couvre consommation de ressource, pose du cooldown, blocage pendant cooldown, tick explicite, nouvelle esquive après récupération et indépendance de l'état d'une autre instance ;
+- batterie complète V2 : `34683977742` success.
 
 Commits de l'étape :
-- politique d'esquive pilotée par données : `f7f31ba48fc8ffe9081ca249aa52a9a39299ceb9`
-- régression politique d'esquive : `a843479a242ea3be956407e45d352ccb95b51a40`
+- primitives état réaction : `dc7ed488237ba5ee6264dbb62f7da5741902f23f`
+- coût/cooldown dans résolution réaction : `917be83a896c36f86a4dc0c097e401f04e777ae8`
+- persistance battle par instance : `cf5d550363f4e715bf3b519fafce14329d1e2da0`
+- synchronisation globale + tick cooldown : `84987a9d4fe7f542288e917f661e14e29eddec96`
+- régression état réaction : `acb1993465c99bf086204d711fd0ab0f4a6e957f`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : ajouter un premier coût/cooldown de réaction réellement consommable par instance, sans figer encore les i-frames ni la cadence temps réel ;
+1. prochaine étape Capture : définir un premier contrat propre de fenêtre/réaction temporelle sans figer les i-frames finales, afin de préparer un vrai combat dynamique ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

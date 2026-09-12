@@ -10,9 +10,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG data-driven et combat D100/tours protégés par leurs régressions existantes.
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome, stockage `gensrpg:v2:capture:*`, aucun partage gameplay mutable avec RPG.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur d’horloge visuelle externe, source d’horloge injectable et source d’activité/visibilité injectable.
-- Le temps visuel des notices est séparé du temps gameplay : il ne fait jamais avancer combat, cooldowns, statuts ou PV.
-- Masquer/inactiver la page peut maintenant suspendre uniquement le temps visuel ; la reprise repart avec une nouvelle ancre et ne rattrape pas le temps masqué.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité et contrôleur multi-raisons de pause visuelle.
+- Le temps visuel des notices reste strictement séparé du temps gameplay.
+- Plusieurs raisons de pause visuelle peuvent coexister ; le temps visuel ne reprend que lorsque toutes les raisons sont levées.
 - Aucun driver/source Capture ne choisit encore de cadence finale réelle ni d’API navigateur imposée.
 - Les visuels Capture validés restent `pending_import` sous `v2/assets/capture/creatures/`.
 - Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
@@ -28,36 +28,41 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - adaptateur d’horloge visuelle externe : `34686140413` success
 - source d’horloge visuelle injectable : `34686275777` success
 - visibilité/activité UI : `34686417842` success
+- contrôleur multi-raisons de pause visuelle : `34686742880` success
 
 ## Dernière étape terminée
 
-Adaptateur de visibilité/activité pour le temps visuel Capture :
-- nouveau `v2/src/modes/capture/ui-visual-activity-source.js` ;
-- contrat `CAPTURE_UI_VISUAL_ACTIVITY_SOURCE_CONTRACT` : présentation uniquement, source injectée, pause du temps visuel uniquement, aucune mutation gameplay, aucune API navigateur détenue ;
-- `attachCaptureUiVisualActivitySource()` accepte des événements booléens ou `{active}` / `{visible}` ;
-- les doublons d’état sont ignorés ;
-- passage inactif/masqué -> `pauseNoticeVisualClock()` ;
-- retour actif/visible -> `resumeNoticeVisualClock()` ;
-- la pause et la reprise remettent `lastSample=null` dans l’adaptateur d’horloge : le premier sample après retour sert donc d’ancre et aucun temps masqué n’est rattrapé ;
-- `mountCapturePage()` accepte désormais `visualActivitySource` et expose son état d’attachement ;
-- `dispose()` détache d’abord la source d’activité puis la source d’horloge, avant le nettoyage visuel ;
-- aucune utilisation de `setInterval`, `requestAnimationFrame`, `Date.now`, `performance.now`, `advanceCaptureTime` ou `advanceCaptureDriver` dans cette couche.
+Contrôleur unifié des raisons de pause visuelle Capture :
+- nouveau `v2/src/modes/capture/ui-visual-pause-controller.js` ;
+- contrat `CAPTURE_UI_VISUAL_PAUSE_CONTROLLER_CONTRACT` : présentation uniquement, plusieurs raisons simultanées, reprise uniquement lorsque la liste est vide, noms de raisons data-driven, aucune mutation gameplay ;
+- état `reasons[]` dédupliqué ;
+- `setCaptureUiVisualPauseReason(controller, reason, paused)` renvoie une transition `pause`, `resume` ou `none` ;
+- ajouter une seconde raison alors que le visuel est déjà en pause ne repause pas le driver ;
+- retirer une raison ne reprend pas le visuel si une autre raison reste active ;
+- `pauseNoticeVisualClock()` et `resumeNoticeVisualClock()` utilisent désormais la raison `manual` ;
+- la source de visibilité utilise la raison `activity` ;
+- `setNoticeVisualPauseReason(reason,paused)` est exposé côté page pour les futurs blocages de présentation ;
+- le driver visuel et l’adaptateur d’horloge ne sont pausés/repris que lors d’une vraie transition globale ;
+- le reset d’ancre à la reprise est donc conservé, sans rattrapage caché ;
+- `startNoticeVisualClock()` et `stopNoticeVisualClock()` réinitialisent proprement le contrôleur ;
+- aucune API navigateur, aucun timer et aucune logique gameplay ajoutés.
 
 Régression :
-- nouveau `v2/tests/capture-ui-visual-activity-source.test.mjs` ;
-- couvre active -> inactive -> active, filtrage des doublons, désabonnement idempotent et erreurs d’interface source ;
-- vérifie explicitement qu’un long intervalle masqué ne fait pas progresser le feed et que le premier sample au retour ré-ancre sans delta ;
-- batterie complète : `34686417842` success.
+- nouveau `v2/tests/capture-ui-visual-pause-controller.test.mjs` ;
+- couvre `activity + manual`, suppression d’une seule raison sans reprise, reprise seulement après suppression de la dernière raison, déduplication et raison invalide ;
+- le garde d’activité a été aligné avec le nouveau routage par raison ;
+- batterie complète : `34686742880` success.
 
 Commits de l’étape :
-- source activité/visibilité : `1b3bd82db29eaf4f74899b9f3e73ba7c765399bd`
-- façade runtime : `6f421bacc2f20ad30d02671c7a85d828e152046b`
-- page Capture : `0469ee9a5269af2262d205b41b90f872d61a4916`
-- régression : `a3e9479a82da46a56a4f43d22cdc3452bec394f4`
+- contrôleur de pause : `4505f0a914506de0db3aa96dfa522f7b1ad042ac`
+- façade runtime : `3a9570bbfdcc3303ea70b0c32d4e57248a00917f`
+- page Capture : `42c407f872774425ea09db76d5b10eaead887109`
+- garde activité mis à jour : `9ef155c8611b8b251cb0cac26fbf784823e544b1`
+- régression contrôleur : `27ce40d50a37aed8d14c915c80837e7e717a497d`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : unifier proprement les états pause visuelle (activité page + éventuel blocage UI futur) dans un petit contrôleur de présentation, sans toucher au driver gameplay ;
+1. prochaine étape Capture : raccorder un premier **blocage UI de présentation** au contrôleur via une raison dédiée, sans jamais suspendre le gameplay ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles ;

@@ -6,7 +6,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 
 ## État important au 2026-09-12
 
-- Séparation Survie / RPG conservée.
+- Séparation stricte Survie / RPG / Monster Capture / VS-PVP.
 - RPG data-driven : stats, ressources, jets/tests, conditions, effets, compétences, formes, inventaire, sets, marchands, progression, bestiaire, quêtes, alliés, salles et événements.
 - Combat D100/tours : `turnSequence`, rejet `stale-turn`, résolution unique, régressions KO/timeline historiques protégées.
 - Créateur de salle : portes, interactions, jets réutilisables, tentatives persistantes et obstacles/couverture configurables sans saisie d’ID technique.
@@ -27,7 +27,9 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Ergonomie mobile combat : feuille de style dédiée au bloc de combat Donjon réel, sans changement moteur. Timeline horizontale tactile avec snap, cartes/action zones mieux séparées, cible tactile minimale 46–48 px, consommables/fuite et panneau MJ adaptés aux petits écrans, et boutons MJ réorganisés en 2 colonnes puis 1 colonne sous 390 px.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
-- Audit Monster Capture engagé : architecture autonome confirmée, bootstrap legacy global interdit en V2 et table de canonicalisation des créatures validées créée avant reconstruction du runtime.
+- Audit Monster Capture engagé : architecture autonome confirmée, bootstrap legacy global interdit en V2, table de canonicalisation des créatures créée et stockage V2 Capture isolé défini.
+- Monster Capture doit réutiliser la même base technique de déplacement spatial et de World Builder que RPG : grille, pathfinding, portes/passages, primitives obstacles/couverture, géométrie/graphes de salles et interactions de carte génériques peuvent être partagés comme services neutres.
+- Cette réutilisation ne partage aucun état gameplay : créatures, dresseurs, inventaires, progression, règles de combat, profils et sauvegardes Capture restent sous le namespace Capture exclusivement.
 
 ## Jalons CI récents validés
 
@@ -51,27 +53,27 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 
 ## Dernière étape terminée
 
-Audit et verrouillage initial de la bibliothèque de créatures Monster Capture :
-- `v2/docs/CAPTURE_LEGACY_AUDIT.md` documente les contraintes de séparation du mode Capture et les contaminations legacy à ne pas recopier ;
-- le bloc legacy `MC162_ENTITIES` contient plusieurs définitions en double de créatures déjà validées ;
-- les doublons confirmés incluent notamment Braiseau, Ailevent, Lumino/Lumilo, Nocteceoc/Noctecroc, Rocorne, Luciéclaire/Luciéclair, Mirachat et Descendre/Dracendre ;
-- `v2/docs/capture-creature-canonicalization.json` définit un `canonicalId` unique, les alias legacy et les migrations nécessaires pour les espèces déjà validées ;
-- les anciennes sauvegardes pourront migrer leurs IDs vers un ID canonique sans dupliquer automatiquement le nombre de créatures possédées ;
-- les deux évolutions actuellement retenues dans ce noyau sont Aquafin -> Maraileron et Voltige -> Fulguros ;
-- les lignées supplémentaires générées automatiquement par l’ancien système (ex. Braiseau -> Pyrolynx, Ailevent -> Rafalcor, Dracendre -> Volcadrake) restent explicitement hors canon tant qu’elles ne sont pas validées ;
-- les nombreuses familles générées en masse dans le legacy restent en `audit_required_before_import` : elles ne sont ni supprimées ni intégrées aveuglément ;
-- nouvelle régression `capture-creature-canonicalization.test.mjs` : IDs canoniques uniques, noms canoniques uniques, alias legacy non ambigus, cibles d’évolution existantes et arêtes legacy générées bloquées.
+Audit stockage Capture + règle de partage du socle spatial/World Builder :
+- `v2/docs/capture-storage-migration.json` cartographie les anciennes sources Capture et leur destination V2 ;
+- les anciennes clés `gensrpg_shared_entities_v1__<profileId>` et `gensrpg_shared_entities_v1__family__creature` deviennent lecture seule pour migration ;
+- les anciennes règles `gensrpg_capture_wild_rules_v1_*`, `gensrpg_capture_mj_rules_v137_*` et `gensrpg_capture_battle_mode_v1_*` sont traduites vers des réglages Capture propres ;
+- le namespace V2 est exclusivement `gensrpg:v2:capture:*` pour profils, sauvegardes, bibliothèques, roster, équipe active, réserve, progression et paramètres ;
+- équipe active limitée à 6 et surplus envoyé en réserve ;
+- les créatures possédées restent des instances distinctes : la déduplication de bibliothèque ne fusionne pas deux captures réelles ;
+- les espèces inconnues et familles générées en masse sont mises en quarantaine pour revue au lieu d’être injectées automatiquement ;
+- les dresseurs legacy stockés comme héros Dungeon et les objets Capture stockés comme équipement RPG sont extraits vers des bibliothèques Capture dédiées ;
+- Capture réutilisera le moteur spatial et le World Builder neutres déjà construits pour RPG, mais jamais l’état gameplay RPG ;
+- test `capture-storage-migration.test.mjs` verrouille isolation du namespace, lecture seule legacy, limite d’équipe, quarantaine, partage de la base spatiale/World Builder et interdiction du partage d’état RPG.
 
 Commits de l’étape :
-- audit Capture initial : `eb3eee43503628903d294120ce2964a80649a55f`
-- doublons confirmés documentés : `e900a8e043bde54176b188a63cf21ca58739ef78`
-- table de canonicalisation : `9848f2d65496239617f6cceeeeb29d0c2c27be48`
-- régression de canonicalisation : `961648adf7a5512788f5e6976705d1fdd95c9900`
-
-CI de validation fonctionnelle de l’étape : `34679224508` success.
+- cartographie stockage Capture : `d1e3bd7e7c1ae3ac78daf54129f4b4bfc8105703`
+- régression isolation stockage : `b77a8d7b3db1280e469f38b4312ae26416508a9d`
+- règle de partage base spatiale/World Builder : `f3af8be5b3b1371fd0213970ba55771883c6f6f3`
+- régression du partage spatial sans partage d’état : `f1db7bfc1df7cf6de937a4a5439ed893dd220bb0`
 
 ## Priorités ouvertes
 
-1. poursuivre l’audit legacy Capture sur les familles générées en masse, les clés de stockage/sauvegardes et les règles de combat/capture avant de créer `v2/src/modes/capture/` ;
-2. poursuivre ensuite l’audit legacy systématique hors Capture : gros index restant, assets, audio, PWA/cache, sauvegardes/migrations, tests et UI cachées ;
-3. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.
+1. poursuivre l’audit legacy Capture sur les règles de combat/capture, objets `capture_orb_*`, capacités/charges et flux équipe active/réserve/invocation avant de créer le runtime Capture ;
+2. définir ensuite les contrats de `v2/src/modes/capture/` en branchant le moteur spatial/World Builder neutre déjà disponible, sans dépendance au runtime RPG ;
+3. poursuivre ensuite l’audit legacy systématique hors Capture : gros index restant, assets, audio, PWA/cache, sauvegardes/migrations, tests et UI cachées ;
+4. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.

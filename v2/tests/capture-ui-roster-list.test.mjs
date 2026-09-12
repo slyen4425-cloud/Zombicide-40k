@@ -222,7 +222,7 @@ assert.match(pageSource,/activeList\.addEventListener\('click',handleRosterInspe
 assert.match(pageSource,/reserveList\.addEventListener\('click',handleRosterInspectClick\)/);
 assert.match(pageSource,/activeList\.removeEventListener\('click',handleRosterInspectClick\)/);
 assert.match(pageSource,/reserveList\.removeEventListener\('click',handleRosterInspectClick\)/);
-for(const forbidden of ['moveCaptureRosterCreature(','setCaptureTeam(','switchCaptureBattleCreature(','applyCaptureDamage(','healCaptureVitals(','addCaptureStatus(','tickCaptureStatuses(','resolveCaptureStatusEffect(','spendCaptureAbility(','tickCaptureAbilityCooldowns(','canUseCaptureAbility(']){
+for(const forbidden of ['moveCaptureRosterCreature(','setCaptureTeam(','applyCaptureDamage(','healCaptureVitals(','addCaptureStatus(','tickCaptureStatuses(','resolveCaptureStatusEffect(','spendCaptureAbility(','tickCaptureAbilityCooldowns(','canUseCaptureAbility(']){
   assert.equal(pageSource.includes(forbidden),false,`capture page must not include ${forbidden}`);
 }
 

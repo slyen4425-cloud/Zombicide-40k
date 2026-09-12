@@ -36,10 +36,16 @@ import {
   CAPTURE_APP_LIFECYCLE_CONTRACT,
   advanceCaptureBattleSession as advanceCaptureBattleSessionCore,
   beginCaptureBattleSession as beginCaptureBattleSessionCore,
+  consumeCaptureUiEvents as consumeCaptureUiEventsCore,
   createCaptureAppSession as createCaptureAppSessionCore,
   finishCaptureBattleSession as finishCaptureBattleSessionCore,
   setCaptureBattleBlocking as setCaptureBattleBlockingCore,
 } from './app-lifecycle.js';
+import {
+  CAPTURE_UI_EVENT_CONTRACT,
+  captureUiEventsFromResult,
+  captureUiEventsFromResults,
+} from './ui-events.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -47,6 +53,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalSchedulerAdvance:'advanceCaptureScheduler',
   canonicalDriverAdvance:'advanceCaptureDriver',
   canonicalAppLifecycle:true,
+  canonicalUiEvents:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -58,7 +65,10 @@ export {
   CAPTURE_SCHEDULER_CONTRACT,
   CAPTURE_DRIVER_CONTRACT,
   CAPTURE_APP_LIFECYCLE_CONTRACT,
+  CAPTURE_UI_EVENT_CONTRACT,
   attemptCaptureInBattle,
+  captureUiEventsFromResult,
+  captureUiEventsFromResults,
   clearCaptureEncounter,
   createCaptureDriverState,
   createCaptureModeState,
@@ -94,8 +104,8 @@ export function advanceCaptureDriver(state,scheduler,driver,options={}){
   return pushCaptureDriverDelta(state,scheduler,driver,{...options,advanceScheduler:advanceCaptureScheduler});
 }
 
-export function createCaptureAppSession({state=createCaptureModeState(),scheduler=createCaptureSchedulerState(),driver=createCaptureDriverState()}={}){
-  return createCaptureAppSessionCore({state,scheduler,driver});
+export function createCaptureAppSession({state=createCaptureModeState(),scheduler=createCaptureSchedulerState(),driver=createCaptureDriverState(),uiEvents=[]}={}){
+  return createCaptureAppSessionCore({state,scheduler,driver,uiEvents});
 }
 
 export function beginCaptureBattleSession(session,battleOptions={}){
@@ -108,6 +118,10 @@ export function setCaptureBattleBlocking(session,blocking){
 
 export function advanceCaptureBattleSession(session,options={}){
   return advanceCaptureBattleSessionCore(session,{...options,advanceDriver:advanceCaptureDriver,stopDriver:stopCaptureDriver});
+}
+
+export function consumeCaptureUiEvents(session){
+  return consumeCaptureUiEventsCore(session);
 }
 
 export function finishCaptureBattleSession(session,reason){

@@ -30,6 +30,7 @@ import {
 } from './ai.js';
 import {resolveCaptureAttempt} from './capture-attempt.js';
 import {consumeCaptureItem,createCaptureInventory} from './items.js';
+import {tickCaptureReactionStateMap} from './reaction-state.js';
 
 function clone(value){return structuredClone(value);}
 function makeId(){
@@ -157,7 +158,13 @@ export function useCaptureBattleAbility(state,{side='player',targetSide='opponen
   });
   if(!result.ok) return {...result,state};
 
-  const activeTeam=clone(result.activeTeam||state.activeTeam||[]);
+  let activeTeam=clone(result.activeTeam||state.activeTeam||[]);
+  const battlePlayer=result.battle?.player||null;
+  if(battlePlayer?.activeInstanceId){
+    activeTeam=activeTeam.map(entry=>String(entry.instanceId)!==String(battlePlayer.activeInstanceId)
+      ? clone(entry)
+      : {...clone(entry),reactionState:clone(battlePlayer.reactionState||{})});
+  }
   const reserve=clone(state.reserve||[]);
   const roster=[...activeTeam,...reserve].map(clone);
   const ended=result.battle?.status==='ended';
@@ -215,6 +222,20 @@ export function runCaptureAiStep(state,{abilityDefs=[],abilityState={},effectRes
   };
 }
 
+export function tickCaptureBattleReactionCooldowns(state,{amount=1}={}){
+  if(!state?.battle) return {ok:false,reason:'battle-missing',state};
+  const battle=clone(state.battle);
+  battle.player.reactionState=tickCaptureReactionStateMap(battle.player?.reactionState||{},amount);
+  battle.opponent.reactionState=tickCaptureReactionStateMap(battle.opponent?.reactionState||{},amount);
+  const activeId=String(battle.player?.activeInstanceId||'');
+  const activeTeam=(state.activeTeam||[]).map(entry=>String(entry.instanceId)!==activeId
+    ? clone(entry)
+    : {...clone(entry),reactionState:clone(battle.player.reactionState||{})});
+  const reserve=clone(state.reserve||[]);
+  const roster=[...activeTeam,...reserve].map(clone);
+  return {ok:true,amount:Math.max(0,Number(amount)||0),state:{...state,battle,activeTeam,reserve,roster}};
+}
+
 export function attemptCaptureInBattle(state,{orbId,speciesCaptureRate,currentHp,maxHp,orbLibrary,lowHpMultiplier,rng=Math.random}={}){
   if(!state.battle) return {ok:false,reason:'battle-missing',state};
   if(state.battle.status!=='active'||state.battle.mode!=='wild') return {ok:false,reason:'capture-attempt-requires-active-wild-battle',state};
@@ -242,6 +263,7 @@ export function attemptCaptureInBattle(state,{orbId,speciesCaptureRate,currentHp
     currentHp:Number.isFinite(Number(currentHp))?Math.max(0,Number(currentHp)):null,
     maxHp:Number.isFinite(Number(maxHp))?Math.max(0,Number(maxHp)):null,
     abilityCharges:clone(state.battle.opponent?.creature?.abilityCharges||{}),
+    reactionState:clone(state.battle.opponent?.reactionState||{}),
     metadata:{capturedFrom:'wild_battle'},
   };
 

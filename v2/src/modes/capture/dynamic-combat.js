@@ -10,6 +10,7 @@ import {
   normalizeCaptureAbility,
   spendCaptureAbility,
 } from './abilities.js';
+import {createCaptureVitals} from './vitals.js';
 
 const clone=value=>structuredClone(value);
 
@@ -57,8 +58,18 @@ export function createCaptureBattleState({
     status:'active',
     encounter:clone(encounter),
     mode:encounter.type==='wild'?'wild':'battle',
-    player:{activeInstanceId:String(selected.instanceId),actorId:playerActorId},
-    opponent:{activeInstanceId:String(wild.instanceId),actorId:opponentActorId,creature:clone(wild)},
+    player:{
+      activeInstanceId:String(selected.instanceId),
+      actorId:playerActorId,
+      creature:clone(selected),
+      vitals:createCaptureVitals({currentHp:selected.currentHp,maxHp:selected.maxHp}),
+    },
+    opponent:{
+      activeInstanceId:String(wild.instanceId),
+      actorId:opponentActorId,
+      creature:clone(wild),
+      vitals:createCaptureVitals({currentHp:wild.currentHp,maxHp:wild.maxHp}),
+    },
     spatial,
     pendingAction:null,
     actionLog:[],
@@ -103,6 +114,7 @@ export function resolveCaptureAbilityAction({
   const actor=battle[String(side)]?.actorId;
   const targetActor=battle[String(targetSide)]?.actorId;
   if(!actor||!targetActor) return {ok:false,reason:'battle-side-missing',battle,abilityState:clone(abilityState||{})};
+  if(battle[String(side)]?.vitals?.ko) return {ok:false,reason:'capture-actor-ko',battle,abilityState:clone(abilityState||{})};
   const ability=normalizeCaptureAbility(abilityDef||{});
   if(!ability.id) return {ok:false,reason:'capture-ability-id-required',battle,abilityState:clone(abilityState||{})};
   const usable=canUseCaptureAbility(abilityState,ability.id);
@@ -128,10 +140,11 @@ export function resolveCaptureAbilityAction({
     return {ok:false,reason:resolution.reason||'capture-effect-resolution-failed',battle,abilityState:clone(abilityState||{})};
   }
   const resolvedAction={...action,resolved:true,outcome:clone(resolution?.outcome??null)};
+  const resolvedBattle=resolution?.battle?clone(resolution.battle):clone(battle);
   const nextBattle={
-    ...battle,
+    ...resolvedBattle,
     pendingAction:null,
-    actionLog:[...(battle.actionLog||[]).map(clone),resolvedAction],
+    actionLog:[...(resolvedBattle.actionLog||battle.actionLog||[]).map(clone),resolvedAction],
   };
   return {
     ok:true,
@@ -158,7 +171,12 @@ export function switchCaptureActiveCreature(battle,activeTeam,nextInstanceId){
     activeInstanceId:String(next.instanceId),
     battle:{
       ...battle,
-      player:{activeInstanceId:String(next.instanceId),actorId:nextActorId},
+      player:{
+        activeInstanceId:String(next.instanceId),
+        actorId:nextActorId,
+        creature:clone(next),
+        vitals:createCaptureVitals({currentHp:next.currentHp,maxHp:next.maxHp}),
+      },
       spatial,
     },
   };

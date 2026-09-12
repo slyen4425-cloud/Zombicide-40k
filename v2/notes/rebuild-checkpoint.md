@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins, réactions/esquive configurables par créature, politique d'esquive data-driven, coût/cooldown de réaction par instance, fenêtre temporelle explicite et progression globale de l'horloge de réaction.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, effets périodiques, réactions/esquive configurables, politique d'esquive data-driven, coût/cooldown par instance, fenêtre temporelle explicite et désormais un pas temporel unifié réactions + cooldowns + statuts.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -48,35 +48,37 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - coût/cooldown de réaction par instance : `34683977742` success
 - fenêtre temporelle explicite de réaction : `34684261793` success
 - progression globale horloge réaction : `34684443173` success
+- pas temporel unifié Capture : `34684569147` success
 
 ## Dernière étape terminée
 
-Progression globale de l'horloge abstraite Capture :
-- nouvelle opération publique `advanceCaptureBattleTime(state,{amount,tickReactionCooldowns})` dans `capture.js` ;
-- elle avance `battle.timing.reactionTime` à partir de zéro uniquement quand une progression explicite est demandée ;
-- elle peut décrémenter les cooldowns de réaction des deux combattants avec le même delta ;
-- `useCaptureBattleAbility()` et `runCaptureAiStep()` utilisent automatiquement cette horloge via le `battle`, donc joueur et IA voient exactement la même fenêtre temporelle ;
-- avant toute progression, une fenêtre configurée renvoie volontairement `capture-reaction-window-time-required` : aucun instant initial n'est inventé ;
-- après progression jusqu'à l'ouverture, la réaction peut se déclencher ;
-- à la borne `closesAt`, elle reste valide ; après cette borne elle est bloquée ;
-- l'état de cooldown joueur reste synchronisé dans `activeTeam`/`roster` via le tick global existant ;
-- aucune unité définitive, milliseconde, frame ou cadence réelle n'est imposée.
+Pas temporel unifié Capture :
+- nouveau `v2/src/modes/capture/time-runtime.js` ;
+- nouvelle opération publique `advanceCaptureModeTime(state,{amount,tickReactionCooldowns,tickStatuses})` ;
+- un seul appel avance maintenant `battle.timing.reactionTime`, les cooldowns de réaction et les statuts/effets périodiques avec le même delta ;
+- la cadence reste entièrement explicite et abstraite : aucune seconde, frame, fréquence ou i-frame n'est imposée ;
+- l'état de cooldown de la créature joueur reste synchronisé dans `activeTeam` et `roster` ;
+- les effets périodiques réutilisent le moteur de statuts existant et donc le même flux KO/remplacement/fin de combat ;
+- si un effet périodique met l'adversaire KO, le combat est terminé, la rencontre est nettoyée et l'exploration est réouverte dans le même pas temporel ;
+- `tickStatuses:false` permet de faire avancer uniquement horloge + cooldowns quand le futur design aura besoin de séparer ces couches ;
+- `tickReactionCooldowns:false` reste également possible ;
+- aucun moteur parallèle RPG/D100/timeline n'est introduit.
 
 Régression :
-- nouveau `v2/tests/capture-global-reaction-time.test.mjs` ;
-- couvre temps absent, ouverture après progression explicite, cooldown décrémenté par le même delta, borne de fermeture, fermeture dépassée, chemin IA et refus hors combat ;
-- premier run `34684418110` en failure : le test attendait `not-open` avant initialisation de l'horloge, alors que le contrat correct est `time-required` ;
-- correction ciblée du test : `229ca91fc27be9c6e10c6cfdcddeb59504c9bc52` ;
-- batterie complète corrigée : `34684443173` success.
+- nouveau `v2/tests/capture-unified-time-runtime.test.mjs` ;
+- couvre progression simultanée horloge + cooldown joueur/adversaire + dégâts périodiques + durée de statut ;
+- couvre KO adverse déclenché par statut avec fin automatique du combat et retour exploration ;
+- couvre progression horloge/cooldowns sans tick des statuts ;
+- batterie complète : `34684569147` success.
 
 Commits de l'étape :
-- opération publique de progression temporelle : `5a3646b17f4798f855881b88bed92e09009c3bd3`
-- régression progression globale : `5f2d898aec1b0e433f4dbaf88c7ada9a95eb49e2`
-- correction attente pré-horloge : `229ca91fc27be9c6e10c6cfdcddeb59504c9bc52`
+- runtime temps unifié : `b08248c2e0798475e1926b6a7859cdc646fec948`
+- alignement du résultat de statuts : `f56fd87086a1d4318bf7e54c05980b89123585b0`
+- régression temps unifié : `19d3398f409adf8f121f4e67416725bb90079b4e`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : unifier la progression temporelle des réactions avec le tick explicite des statuts/effets périodiques sans imposer de cadence temps réel ;
+1. prochaine étape Capture : raccorder ce pas temporel unifié comme chemin public principal à la place des ticks séparés, sans retirer encore les helpers bas niveau utiles aux tests ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

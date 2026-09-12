@@ -2,6 +2,7 @@ export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   presentationOnly:true,
   readsAuthoritativeRosterData:true,
   readsAuthoritativeBattleActiveInstance:true,
+  readsAuthoritativeVitals:true,
   exposesInspectionTarget:true,
   mutatesRoster:false,
   mutatesBattle:false,
@@ -14,6 +15,12 @@ function text(value,fallback=''){
   return normalized||fallback;
 }
 
+function finiteOrNull(value){
+  if(value==null||value==='') return null;
+  const number=Number(value);
+  return Number.isFinite(number)?number:null;
+}
+
 export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null}={}){
   const instanceId=text(creature?.instanceId,'');
   const speciesId=text(creature?.speciesId,'');
@@ -23,6 +30,17 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
   const normalizedLocation=location==='reserve'?'reserve':'active';
   const battleActiveId=text(activeBattleInstanceId,'');
   const activeInBattle=normalizedLocation==='active'&&Boolean(battleActiveId)&&instanceId===battleActiveId;
+  const currentHp=finiteOrNull(creature?.currentHp);
+  const maxHp=finiteOrNull(creature?.maxHp);
+  const hasVitals=currentHp!==null||maxHp!==null;
+  const hpLabel=currentHp!==null&&maxHp!==null
+    ?`${Math.max(0,currentHp)} / ${Math.max(0,maxHp)}`
+    :currentHp!==null
+      ?String(Math.max(0,currentHp))
+      :maxHp!==null
+        ?`? / ${Math.max(0,maxHp)}`
+        :null;
+  const ko=currentHp!==null&&currentHp<=0;
   return {
     instanceId,
     speciesId,
@@ -31,6 +49,11 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     subtitle:`${speciesId} · Niv. ${level}`,
     inspectable:true,
     activeInBattle,
+    hasVitals,
+    currentHp,
+    maxHp,
+    hpLabel,
+    ko,
   };
 }
 

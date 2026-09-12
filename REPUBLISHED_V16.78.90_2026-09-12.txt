@@ -1,0 +1,2 @@
+GenSrpG V16.78.90 stable stats editor restored and republished on 2026-09-12.
+Runtime/application files are unchanged from commit 5e8dac2ad1beea03d8539410051ab22710b1d534.

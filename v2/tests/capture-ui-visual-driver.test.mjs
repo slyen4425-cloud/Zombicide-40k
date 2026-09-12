@@ -77,7 +77,7 @@ assert.match(pageSource,/startNoticeVisualClock/);
 assert.match(pageSource,/pauseNoticeVisualClock/);
 assert.match(pageSource,/resumeNoticeVisualClock/);
 assert.match(pageSource,/stopNoticeVisualClock/);
-assert.match(pageSource,/advanceCaptureUiVisualDriver\(noticeFeed,visualDriver/);
+assert.match(pageSource,/sampleCaptureUiVisualClock\(noticeFeed,visualDriver,visualClockAdapter/);
 assert.equal(pageSource.includes('setInterval('),false);
 assert.equal(pageSource.includes('requestAnimationFrame('),false);
 

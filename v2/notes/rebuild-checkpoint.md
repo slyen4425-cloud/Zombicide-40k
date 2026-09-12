@@ -12,7 +12,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Monster Capture est autonome : aucun état gameplay mutable partagé avec RPG, Survie ou PVP.
 - Moteur spatial neutre partagé dans `v2/src/core/spatial-engine.js` ; graphe World Builder neutre dans `v2/src/core/world-graph.js`.
 - Capture reste lazy : aucun bootstrap global ; stockage exclusivement `gensrpg:v2:capture:*`.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, moteur générique de statuts/conditions, tick global explicite, effets périodiques dégâts/soins et premier socle configurable d'esquive/réaction tactique.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs canoniques, quarantaine legacy, registre assets canonique, objets de capture isolés, capacités/charges par instance, biomes/rencontres, exploration libre, tentative de capture configurable, runtime dynamique de combat, capture complète en combat sauvage, IA dédiée, PV/dégâts/soins/KO, post-KO automatique, synchronisation globale, IA routée globalement, statuts/conditions, tick global explicite, effets périodiques dégâts/soins et réactions/esquive configurables par créature.
 - Les visuels Capture validés ne sont pas encore importés physiquement ; registre `pending_import` sous cible `v2/assets/capture/creatures/`.
 - Les 4 orbes legacy reconnues sont `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; leurs coefficients restent non inventés.
 - Le combat Capture utilise son runtime dédié `v2/src/modes/capture/dynamic-combat.js` et reste indépendant du `turnSequence`/D100 RPG.
@@ -43,33 +43,35 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - tick global explicite des statuts : `34682889435` success
 - effets périodiques dégâts/soins sur tick explicite : `34683019572` success
 - premier socle réaction/esquive configurable : `34683114512` success
+- réactions configurables routées par joueur + IA : `34683246425` success
 
 ## Dernière étape terminée
 
-Premier socle configurable d'esquive/réaction tactique :
-- nouveau `v2/src/modes/capture/reactions.js` ;
-- aucune formule d'esquive fixe, aucun pourcentage par défaut et aucune i-frame ne sont imposés ;
-- une réaction possède un `id`, un `type`, un état `enabled`, un comportement `negatesEffect`, un coût optionnel et des métadonnées ;
-- l'évaluation est injectée via un `evaluator` externe : sans évaluateur, aucune esquive n'est inventée ;
-- `resolveCaptureAbilityAction()` accepte désormais `reactionDef` + `reactionResolver` ;
-- la réaction est évaluée après validation portée/charges et après consommation de la capacité : une attaque réellement tentée consomme donc bien son usage même si elle est esquivée ;
-- si la réaction se déclenche avec `negatesEffect:true`, l'effet principal n'est pas exécuté, les PV/statuts ne changent pas et l'action est journalisée comme réaction ayant annulé l'effet ;
-- si la réaction ne se déclenche pas, le resolver d'effet normal continue exactement comme avant ;
-- aucun chemin RPG n'est introduit et la cadence temps réel finale reste non figée.
+Réactions/esquive configurables routées par les chemins globaux joueur + IA :
+- `captureReactionFromCreature()` lit désormais une configuration portée directement par la créature via `reaction` ou `reactions[]` ;
+- seule la première réaction valide et activée est proposée au resolver à cette étape ;
+- `resolveCaptureReaction()` utilise automatiquement la configuration de la créature ciblée quand aucun `reactionDef` explicite n'est fourni ;
+- `useCaptureBattleAbility()` accepte et transmet maintenant `reactionResolver` ;
+- `runCaptureAiStep()` accepte et transmet le même `reactionResolver` lorsqu'une capacité IA est choisie ;
+- joueur et IA passent donc par la même résolution autoritaire, sans moteur parallèle ;
+- sans resolver injecté, une créature configurée pour esquiver n'esquive pas automatiquement : aucune formule ou probabilité n'est inventée ;
+- une réaction déclenchée continue de consommer la charge de la capacité tentée et annule uniquement son effet selon `negatesEffect`.
 
 Régression :
-- nouveau `v2/tests/capture-reactions.test.mjs` ;
-- couvre réaction normalisée, absence d'évaluateur sans esquive automatique, esquive déclenchée annulant les dégâts tout en consommant une charge, et réaction non déclenchée laissant passer les dégâts ;
-- batterie complète V2 : `34683114512` success.
+- nouveau `v2/tests/capture-global-reactions.test.mjs` ;
+- couvre attaque joueur -> réaction configurée sur la créature sauvage ;
+- couvre attaque IA -> réaction configurée sur la créature active joueur ;
+- couvre l'absence de resolver : aucune esquive automatique et dégâts normaux ;
+- batterie complète V2 : `34683246425` success.
 
 Commits de l'étape :
-- primitives de réaction : `5b4e048a4c1db216e92c68e51af00eed092864c5`
-- raccord à la résolution de capacité : `0817a5106b27cdf19909a6266b01e20ba8c271fe`
-- régression réactions : `c714d2f31741ca438ccb43643affeb9ec739fd89`
+- configuration réaction portée par créature : `98b15806d7cb13f6667448c5375c3f2f8921756a`
+- routage global joueur + IA : `9812d4bddaa1b0548e27f94bb2a27affc369f22e`
+- régression globale réactions : `b4b66c8361f979ede6ed0ceec882c3f58d7abf99`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : raccorder ce socle de réaction au chemin global joueur + IA et préparer une première politique d'esquive configurable par créature sans imposer la formule finale ;
+1. prochaine étape Capture : ajouter une première politique d'évaluation d'esquive configurable et déterministe par données, sans imposer encore une formule universelle ni des i-frames ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d'orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles, puis renseigner le registre canonique ;

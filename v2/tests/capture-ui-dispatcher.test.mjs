@@ -44,7 +44,8 @@ const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',
 assert.match(pageSource,/data-capture-combat-feed/);
 assert.match(pageSource,/aria-live="polite"/);
 assert.match(pageSource,/consumeCaptureUiEvents\(session\)/);
-assert.match(pageSource,/dispatchCaptureUiEvents\(consumed\.events,renderNotice\)/);
+assert.match(pageSource,/dispatchCaptureUiEvents\(consumed\.events\)/);
+assert.match(pageSource,/appendCaptureUiNotices\(noticeFeed,dispatched\)/);
 const flushBody=pageSource.slice(pageSource.indexOf('function flushUiEvents'),pageSource.indexOf('return {',pageSource.indexOf('function flushUiEvents')));
 assert.equal(flushBody.includes('setCaptureBattleBlocking'),false);
 assert.equal(pageSource.includes('alert('),false);

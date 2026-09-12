@@ -42,7 +42,7 @@ assert.equal(CAPTURE_DRIVER_CONTRACT.fixedRealtimeCadence,false);
   assert.equal(result.driver.totalDelta,0);
   assert.equal(result.driver.frames,0);
   assert.equal(result.scheduler.accumulated,0);
-  assert.equal(result.state.battle.timing.reactionTime,null);
+  assert.equal(result.state.battle.timing.reactionTime,undefined);
 }
 
 {

@@ -10,7 +10,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG data-driven et combat D100/tours protégés par leurs régressions existantes.
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome, stockage `gensrpg:v2:capture:*`, aucun partage gameplay mutable avec RPG.
-- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité, contrôleur multi-raisons de pause visuelle, blocage UI présentationnel, overlay concret non modal, inspection métier détaillée de créature, listes Équipe active/Réserve inspectables, marquage visuel de la créature active en combat, affichage PV/KO, statuts actifs, charges/cooldowns des capacités, état réactions/esquive du roster et résumé visuel de l’adversaire actif.
+- Runtime Capture actuel : roster/équipe/réserve, migration IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts/effets périodiques, réactions/esquive, coût/cooldown, fenêtres temporelles, pas temporel unifié, scheduler, driver gameplay, lifecycle UI/app, événements UI, dispatcher non bloquant, feed borné, driver visuel UI isolé, adaptateur/source d’horloge visuelle, source activité/visibilité, contrôleur multi-raisons de pause visuelle, blocage UI présentationnel, overlay concret non modal, inspection métier détaillée de créature, listes Équipe active/Réserve inspectables, marquage visuel de la créature active en combat, affichage PV/KO, statuts actifs, charges/cooldowns des capacités, état réactions/esquive du roster, résumé visuel de l’adversaire actif et inspection adverse en overlay.
 - Le temps visuel des notices reste strictement séparé du temps gameplay.
 - Plusieurs raisons de pause visuelle peuvent coexister ; le temps visuel ne reprend que lorsque toutes les raisons sont levées.
 - L’overlay concret suspend uniquement le temps visuel et n’appelle jamais le blocage gameplay.
@@ -22,6 +22,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Les capacités affichées viennent uniquement de `abilityState` déjà présent sur l’instance ; en absence de cet état, les anciennes `abilityCharges` persistées peuvent encore être lues comme charges seules. Aucun maximum, cooldown ou coût manquant n’est inventé.
 - Les réactions affichées viennent uniquement de `reactionState` déjà présent sur l’instance. L’indication `prête côté cooldown` dépend exclusivement d’un `cooldownRemaining` connu à zéro et ne prétend pas valider les autres conditions métier éventuelles.
 - Le résumé d’adversaire actif lit uniquement `battle.opponent`, ses `vitals`, ses `statuses` et sa position déjà stockée dans `battle.spatial.positions`; il n’appelle aucune action de combat et disparaît hors combat actif.
+- L’inspection adverse utilise le même état autoritaire : espèce, instance, PV/KO, statuts, position et éléments uniquement si une définition d’espèce existante les fournit. Le bouton d’inspection ouvre seulement l’overlay présentationnel existant.
 - Aucun driver/source Capture ne choisit encore de cadence finale réelle ni d’API navigateur imposée.
 - Les visuels Capture validés restent `pending_import` sous `v2/assets/capture/creatures/`.
 - Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
@@ -49,33 +50,34 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - affichage état réactions / esquive : `34692442765` success
 - inspection détaillée PV/KO/statuts/capacités/réactions : `34692774662` success
 - résumé visuel adversaire actif : `34693245713` success
+- inspection adverse depuis le résumé : `34693630321` success
 
 ## Dernière étape terminée
 
-Résumé visuel de l’adversaire actif dans la page Capture :
-- nouveau presenter `v2/src/modes/capture/ui-opponent-summary.js` ;
-- le contrat `CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT` précise lecture autoritaire de l’adversaire, des PV/KO, statuts et position, avec `mutatesBattle:false` et `mutatesGameplayState:false` ;
-- `buildCaptureOpponentSummary(state)` retourne `null` hors combat actif ;
-- pendant un combat actif, le résumé lit l’instance/espèce adverse, l’état sauvage, les PV/KO, les statuts déjà présents et la position déjà enregistrée dans `battle.spatial.positions` ;
-- les effets des statuts ne sont jamais propagés ni exécutés ;
-- `capture-page.js` rend une section `Adversaire sauvage` avec PV, badge KO, badge Sauvage, position et statuts déjà autoritaires ;
-- la section apparaît au démarrage du combat, se rafraîchit après les avancées autoritaires et disparaît après la fin du combat ;
-- aucun ciblage, déplacement, switch, capacité, IA ou tentative de capture n’est déclenché depuis cette vue.
+Inspection de l’adversaire actif depuis son résumé :
+- `v2/src/modes/capture/ui-opponent-summary.js` expose maintenant `buildCaptureOpponentInspection(state,{speciesDef})` ;
+- le contrat indique `exposesInspectionTarget:true` ;
+- l’inspection reprend uniquement les informations déjà autoritaires du résumé adverse : espèce, instance, PV, KO, statuts et position ;
+- les éléments sont ajoutés uniquement si `speciesDef.elements` existe réellement ; aucun type, faiblesse ou donnée de combat n’est inventé ;
+- `capture/runtime.js` exporte ce presenter via `canonicalUiOpponentInspection:true` ;
+- `capture-page.js` ajoute un bouton `Inspecter` dans le résumé adverse et une méthode `inspectOpponent()` ;
+- l’ouverture utilise l’overlay non modal existant et ne bloque que le temps visuel de présentation ;
+- l’écouteur du bouton adverse est retiré au `dispose()` ;
+- aucun ciblage, déplacement, switch, capacité, IA, dégâts, soin ou tentative de capture n’est déclenché depuis l’inspection.
 
 Régression :
-- test dédié `v2/tests/capture-ui-opponent-summary.test.mjs` ;
-- couvre combat sauvage actif, PV/KO, statuts, position, absence de combat/fin de combat, non-mutation et gardes statiques contre les actions de combat ;
-- batterie complète : `34693245713` success.
+- `v2/tests/capture-ui-opponent-summary.test.mjs` couvre l’inspection sauvage, le cas KO, le nom/éléments optionnels, la position, les statuts, l’absence de combat, la non-mutation et les gardes statiques contre les actions de combat ;
+- batterie complète : `34693630321` success.
 
 Commits de l’étape :
-- presenter adversaire : `5b4967103c4efa44ecd3776ef99caebfc222e742`
-- façade runtime : `ee2c99e4d029275214dd77e34c0a5294726d2177`
-- intégration page : `92039af149addfe1e5884bff75086bf307cba1f0`
-- régression : `e0a51d18051967dd0cf4232d72b8b0d890437243`
+- presenter inspection adverse : `83c2710c2578d0907b91449a80aa574f02d1496a`
+- façade runtime : `53161ff43a430efd6d694d752749500194c4d4d0`
+- intégration page : `4d37e4f27e8c8cf7fc53e5a637198969a52a4dd6`
+- régression : `5fcdca963f73d89c7d87edbf029b8435c127d9fe`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : relier au résumé adverse le **nom d’espèce et éventuellement son art/icône uniquement lorsque le registre d’assets canonique fournit réellement un fichier disponible**, sans fallback RPG ni nom de fichier inventé ;
+1. prochaine étape Capture : relier au résumé adverse le **nom d’espèce canonique**, puis éventuellement l’art/icône uniquement lorsque le registre d’assets fournit réellement un fichier `ready`; aucun nom de fichier ne doit être inventé ;
 2. ensuite enrichir progressivement les autres réactions/effets tactiques seulement si leurs contrats sont validés ;
 3. compléter les règles d’orbes/coefficient uniquement à partir de valeurs validées ;
 4. importer les arts principaux + icônes quand les fichiers sont disponibles ;

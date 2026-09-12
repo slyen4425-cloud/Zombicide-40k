@@ -2,9 +2,17 @@ import { dungeonHeroCombatItems, useDungeonHeroCombatItem } from './dungeon-comb
 import { validSkillTargets } from './targeting-engine.js';
 import { combatTargetLabel } from './combat-target-ui.js';
 import { combatInteractionPolicy } from './combat-config.js';
+import { resolveDungeonItemAsset } from './dungeon-asset-resolver.js';
 
 function esc(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function list(value){return Array.isArray(value)?value:Object.values(value||{});}
+
+function renderItemPreview(entry){
+  if(!entry?.item) return '';
+  const item=entry.item;
+  const url=resolveDungeonItemAsset(item);
+  const visual=url?`<span class="dungeon-combat-item-art has-art"><img src="${esc(url)}" alt="${esc(item.name||'Objet')}" loading="lazy"></span>`:`<span class="dungeon-combat-item-art">${esc(item.icon||'🧪')}</span>`;
+  return `${visual}<span class="dungeon-combat-item-copy"><strong>${esc(item.name||'Objet')}</strong><small>x${Number(entry.quantity||0)}</small></span>`;
+}
 
 export function dungeonCombatItemTargetEntries({universe={},combat=null,itemEntry=null}={}){
   if(!combat||combat.phase!=='turn'||!combat.activeActorId||!itemEntry) return [];
@@ -23,7 +31,7 @@ export function renderDungeonCombatItemControls({universe={},combat=null,heroRun
   if(!items.length) return '';
   const first=items[0];
   const targets=dungeonCombatItemTargetEntries({universe,combat,itemEntry:first});
-  return `<div class="combat-actions dungeon-combat-item-actions" data-dungeon-combat-items><label>Objet<select data-dungeon-combat-item>${items.map(entry=>`<option value="${esc(entry.itemId)}">${esc(entry.item.icon||'🧪')} ${esc(entry.item.name||'Objet')} · x${entry.quantity}</option>`).join('')}</select></label><label>Cible de l'objet<select data-dungeon-combat-item-target ${targets.length?'':'disabled'}>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="secondary-button" data-dungeon-use-item ${targets.length?'':'disabled'}>Utiliser l'objet</button></div>`;
+  return `<div class="combat-actions dungeon-combat-item-actions" data-dungeon-combat-items><div class="dungeon-combat-item-preview" data-dungeon-item-preview>${renderItemPreview(first)}</div><label>Objet<select data-dungeon-combat-item>${items.map(entry=>`<option value="${esc(entry.itemId)}">${esc(entry.item.icon||'🧪')} ${esc(entry.item.name||'Objet')} · x${entry.quantity}</option>`).join('')}</select></label><label>Cible de l'objet<select data-dungeon-combat-item-target ${targets.length?'':'disabled'}>${targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('')}</select></label><button type="button" class="secondary-button" data-dungeon-use-item ${targets.length?'':'disabled'}>Utiliser l'objet</button></div>`;
 }
 
 export function mountDungeonCombatItemControls(root,{universe={},getCombat=()=>null,getHeroRuntimes=()=>[],onUse=null,onError=null}={}){
@@ -40,11 +48,13 @@ export function mountDungeonCombatItemControls(root,{universe={},getCombat=()=>n
   const itemSelect=block?.querySelector('[data-dungeon-combat-item]');
   const targetSelect=block?.querySelector('[data-dungeon-combat-item-target]');
   const useButton=block?.querySelector('[data-dungeon-use-item]');
+  const preview=block?.querySelector('[data-dungeon-item-preview]');
   const syncTargets=()=>{
     const currentCombat=getCombat();
     const entries=dungeonHeroCombatItems({combat:currentCombat,heroRuntimes:getHeroRuntimes(),universe});
     const selected=entries.find(entry=>String(entry.itemId)===String(itemSelect?.value||''))||entries[0]||null;
     const targets=dungeonCombatItemTargetEntries({universe,combat:currentCombat,itemEntry:selected});
+    if(preview) preview.innerHTML=renderItemPreview(selected);
     if(targetSelect){
       targetSelect.innerHTML=targets.map(target=>`<option value="${esc(target.id)}">${target.self?'👤 ':target.side==='heroes'?'🛡️ ':'👹 '}${esc(target.name)}</option>`).join('');
       targetSelect.disabled=!targets.length;

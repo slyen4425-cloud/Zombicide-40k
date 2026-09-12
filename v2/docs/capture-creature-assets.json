@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Registre canonique des assets Monster Capture V2. Les alias legacy pointent vers une seule espece/paire d'assets et ne creent jamais de doublons physiques.",
+  "assetRoot": "v2/assets/capture/creatures/",
+  "policy": {
+    "oneAssetRecordPerCanonicalSpecies": true,
+    "doNotDuplicatePhysicalFilesForAliases": true,
+    "preferValidatedCanonicalArt": true,
+    "neverFallbackToRpgOrDungeonArt": true,
+    "extractLegacyEmbeddedArtOnce": true,
+    "generatedLegacyFamiliesStayQuarantined": true,
+    "missingFilesAreExplicit": true
+  },
+  "speciesAssets": [
+    {"speciesId":"capture_braiseau","displayName":"Braiseau","legacyAliases":["crea_embercub","crea_braiseau"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_aquafin","displayName":"Aquafin","legacyAliases":["crea_aquafin"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_maraileron","displayName":"Maraileron","legacyAliases":["crea_maraileron"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_moussado","displayName":"Moussado","legacyAliases":["crea_mossback"],"legacyNames":["Moussados"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_voltige","displayName":"Voltige","legacyAliases":["crea_voltik"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_fulguros","displayName":"Fulguros","legacyAliases":["crea_fulguro"],"legacyNames":["Fulguro"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_ailevent","displayName":"Ailevent","legacyAliases":["crea_galewing","crea_ailevent"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_lumino","displayName":"Lumino","legacyAliases":["crea_lumipup","crea_lumilo"],"legacyNames":["Lumilo"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_nocteceoc","displayName":"Nocteceoc","legacyAliases":["crea_nightfang","crea_noctecroc"],"legacyNames":["Noctecroc"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_rocorne","displayName":"Rocorne","legacyAliases":["crea_rockhorn","crea_rocorne"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_lucieclaire","displayName":"Lucieclaire","legacyAliases":["crea_sparkmoth","crea_lucieclair"],"legacyNames":["Lucieclair"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_mirachat","displayName":"Mirachat","legacyAliases":["crea_miragecat","crea_mirachat"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_maremachoire","displayName":"Maremachoire","legacyAliases":["crea_tidejaw"],"legacyNames":["Maremachoire"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}},
+    {"speciesId":"capture_descendre","displayName":"Descendre","legacyAliases":["crea_ashdrake","crea_dracendre"],"legacyNames":["Dracendre"],"mainArt":{"status":"missing_file","path":null},"iconArt":{"status":"missing_file","path":null}}
+  ],
+  "legacyRecovery": {
+    "status": "asset_files_not_found_in_repository_tree",
+    "rule": "Si un art legacy est retrouve plus tard dans un ancien index, un data-URL, une archive ou un fichier fourni, l'extraire une seule fois vers l'espece canonique. Ne jamais creer une copie par alias legacy.",
+    "sourceCandidates": ["legacy_index_embedded_data", "historical_archive", "user_provided_asset_pack"],
+    "doNotGuessFilenames": true
+  }
+}

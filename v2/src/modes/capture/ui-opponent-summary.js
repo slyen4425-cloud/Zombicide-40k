@@ -4,6 +4,7 @@ export const CAPTURE_UI_OPPONENT_SUMMARY_CONTRACT=Object.freeze({
   readsAuthoritativeVitals:true,
   readsAuthoritativeStatuses:true,
   readsAuthoritativePosition:true,
+  exposesInspectionTarget:true,
   mutatesBattle:false,
   mutatesGameplayState:false,
   isolatedFromRpg:true,
@@ -73,5 +74,42 @@ export function buildCaptureOpponentSummary(state={}){
     ko,
     statuses,
     position,
+  };
+}
+
+export function buildCaptureOpponentInspection(state={}, {speciesDef=null}={}){
+  const summary=buildCaptureOpponentSummary(state);
+  if(!summary) return {ok:false,reason:'capture-opponent-inspection-unavailable'};
+  const speciesName=text(speciesDef?.name)||text(speciesDef?.displayName)||summary.speciesId||summary.instanceId;
+  const fields=[
+    {id:'species',label:'Espèce',value:speciesName},
+    {id:'instance',label:'Instance',value:summary.instanceId||'—'},
+  ];
+  if(summary.hpLabel!==null) fields.push({id:'hp',label:'PV',value:summary.hpLabel});
+  if(summary.ko) fields.push({id:'ko',label:'État',value:'KO'});
+  if(summary.statuses.length){
+    fields.push({
+      id:'statuses',
+      label:'Statuts',
+      value:summary.statuses.map(status=>{
+        const stacks=status.stacks!==null&&status.stacks>1?` ×${status.stacks}`:'';
+        const remaining=status.remainingDuration!==null?` · reste ${status.remainingDuration}`:'';
+        return `${status.name||status.id}${stacks}${remaining}`;
+      }).join(' ; '),
+    });
+  }
+  if(summary.position&&summary.position.x!=null&&summary.position.y!=null){
+    fields.push({id:'position',label:'Position',value:`${summary.position.x}, ${summary.position.y}`});
+  }
+  if(speciesDef&&Array.isArray(speciesDef.elements)&&speciesDef.elements.length){
+    fields.push({id:'elements',label:'Éléments',value:speciesDef.elements.map(String).join(', ')});
+  }
+  return {
+    ok:true,
+    kind:'opponent-inspection',
+    title:speciesName,
+    message:summary.wild?'Adversaire sauvage':'Adversaire actif',
+    fields:structuredClone(fields),
+    metadata:{instanceId:summary.instanceId,speciesId:summary.speciesId,fields:structuredClone(fields)},
   };
 }

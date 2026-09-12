@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Séparer les objets et capacités Monster Capture du RPG en ne conservant que les traces legacy confirmées et les règles produit validées.",
+  "captureItems": {
+    "ownership": "capture_only",
+    "legacyOrbIdsConfirmed": [
+      {"legacyId":"capture_orb_basic","canonicalId":"capture_orb_basic","tier":1,"coefficient":"pending_recovery_or_rebalance"},
+      {"legacyId":"capture_orb_plus","canonicalId":"capture_orb_plus","tier":2,"coefficient":"pending_recovery_or_rebalance"},
+      {"legacyId":"capture_orb_ultra","canonicalId":"capture_orb_ultra","tier":3,"coefficient":"pending_recovery_or_rebalance"},
+      {"legacyId":"capture_orb_master","canonicalId":"capture_orb_master","tier":4,"coefficient":"pending_recovery_or_rebalance"}
+    ],
+    "speciesOwnCaptureRate": true,
+    "lowHpBonus": {"thresholdPercent":30,"multiplier":"pending_recovery_or_design"},
+    "inventoryCounts": "capture_player_inventory_only",
+    "neverRpgEquipment": true,
+    "unknownLegacyItem": "quarantine_pending_review"
+  },
+  "abilities": {
+    "ownership": "capture_only",
+    "legacyFamiliesObserved": ["lib_*", "cap_*"],
+    "rule": "Ne pas importer automatiquement les capacités RPG mélangées dans l'ancien tableau.",
+    "chargesPerOwnedCreatureInstance": true,
+    "costsSupported": true,
+    "cooldownsSupportedForFutureDynamicCombat": true,
+    "exactLegacyCharges": "pending_recovery",
+    "exactLegacyCosts": "pending_recovery",
+    "unknownLegacyAbility": "quarantine_pending_review"
+  },
+  "runtimeRules": {
+    "noRpgTurnRuntimeDependency": true,
+    "noRpgD100Dependency": true,
+    "noRpgInventoryDependency": true,
+    "captureValuesMustNotBeGuessed": true
+  }
+}

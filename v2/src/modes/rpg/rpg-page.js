@@ -5,6 +5,7 @@ import { buildWorldIndex } from './world-engine.js';
 import { mountRoomEditor, loadRoomLayout } from './room-editor.js';
 import { mountHeroSheet } from './hero-sheet.js';
 import { mountDungeonGameplayView } from './dungeon-gameplay-view.js';
+import { createDungeonTestSession } from './dungeon-test-session.js';
 import { mountDungeonCombatItemControls } from './dungeon-combat-item-ui.js';
 import { mountDungeonCombatFleeControl } from './dungeon-combat-flee-ui.js';
 import { mountDungeonCombatGmControls } from './dungeon-combat-gm-ui.js';
@@ -56,6 +57,24 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
 
   function currentWorldIndex(){
     return buildWorldIndex(loadWorldDraft());
+  }
+
+  function installDungeonTestLauncher(){
+    if(currentTab!=='dungeon'||currentDungeonRuntime) return;
+    const universe=loadRpgUniverse();
+    const enabledHeroes=(Array.isArray(universe.heroes)?universe.heroes:Object.values(universe.heroes||{})).filter(hero=>hero&&hero.enabled!==false&&hero.id);
+    body.insertAdjacentHTML('afterbegin',`<section class="editor-section dungeon-test-launch" data-dungeon-test-launch><div class="section-title-row"><div><h3>▶️ Partie test</h3><p class="muted">Démarre immédiatement le World Builder actuel avec les héros configurés, sans créer de sauvegarde.</p></div><button type="button" class="primary-button" data-start-dungeon-test ${enabledHeroes.length?'':'disabled'}>Lancer une partie test</button></div><p class="muted" data-dungeon-test-status>${enabledHeroes.length?`${enabledHeroes.length} héros prêt${enabledHeroes.length>1?'s':''} pour le test.`:'Crée au moins un héros dans Configuration avant de lancer le test.'}</p></section>`);
+    body.querySelector('[data-start-dungeon-test]')?.addEventListener('click',()=>{
+      const status=body.querySelector('[data-dungeon-test-status]');
+      const out=createDungeonTestSession({universe:loadRpgUniverse(),worldDraft:loadWorldDraft(),layoutProvider:dungeonLayoutProvider});
+      if(!out.ok){if(status) status.textContent=`Impossible de lancer : ${out.reason}.`;return;}
+      currentDungeonRuntime=out.roomRuntime;
+      currentDungeonHeroRuntimes=structuredClone(out.heroRuntimes||[]);
+      currentDungeonCombat=null;
+      currentDungeonEventWorld={};
+      onDungeonRuntimeChange?.(currentDungeonRuntime,{kind:'dungeon-test-start',heroRuntimes:structuredClone(currentDungeonHeroRuntimes)});
+      open('dungeon');
+    });
   }
 
   function scheduleDungeonCombatUi(){
@@ -155,6 +174,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
           scheduleDungeonCombatUi();
         },
       });
+      installDungeonTestLauncher();
       scheduleDungeonCombatUi();
     }
     else if(tab==='heroes') mountHeroSheet(body,loadRpgUniverse());

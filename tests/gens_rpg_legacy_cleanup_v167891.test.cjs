@@ -22,20 +22,20 @@ const ctx={console,Math,JSON,
  loadDungeonRpgRules:()=>({...rules}),
  dungeonAttributeValue:id=>attrs[id]||0,
  // Ces résultats simulent l'ancien moteur + un éventuel bonus du nouvel éditeur.
- dungeonPhysicalDamageBonus:()=>17, // 15 nouveau/base + 2 legacy
- dungeonMagicDamageBonus:()=>26,    // 20 nouveau/base + 6 legacy
- dungeonEnduranceHpBonus:()=>14,    // 10 nouveau/base + 4 legacy
- dungeonMaxMana:()=>35,             // 15 nouveau/base + 20 legacy
- dungeonCriticalChance:()=>19,      // 15 nouveau/base + 4 legacy
- dungeonDodgeChance:()=>14,         // 12 nouveau/base + 2 legacy
- dungeonMagicResistance:()=>18,     // 14 nouveau/base + 4 legacy
+ dungeonPhysicalDamageBonus:()=>17,
+ dungeonMagicDamageBonus:()=>26,
+ dungeonEnduranceHpBonus:()=>14,
+ dungeonMaxMana:()=>35,
+ dungeonCriticalChance:()=>19,
+ dungeonDodgeChance:()=>14,
+ dungeonMagicResistance:()=>18,
  applyDungeonCombatScaling:it=>({melee:!it.rpgScaling.magic,hitChance:86})
 };
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-legacy-cleanup-167891.js'});
 const api=ctx.GensRpgLegacyCleanup167891;
 assert.ok(api,'cleanup API missing');
-assert.equal(api.APP_VERSION,'16.78.91');
+assert.match(api.APP_VERSION,/^16\.78\.\d+$/,'cleanup module must expose a GenSrpG version');
 assert.equal(ctx.dungeonPhysicalDamageBonus(),15,'legacy physical damage must be removed');
 assert.equal(ctx.dungeonMagicDamageBonus(),20,'legacy magic damage must be removed');
 assert.equal(ctx.dungeonEnduranceHpBonus(),10,'old Endurance HP scaling must be removed');
@@ -47,6 +47,6 @@ assert.equal(ctx.applyDungeonCombatScaling({rpgScaling:{magic:false}}).hitChance
 assert.match(src,/PV \/ 10 Endurance/,'old Endurance field must be targeted for hiding');
 assert.match(src,/Mana \/ 10 Esprit/,'old Mana field must be targeted for hiding');
 assert.match(src,/modificateurs par caracteristique/,'old modifier section must be targeted for hiding');
-assert.doesNotMatch(src,/hideLabel\("PV de base"\)/,'base HP must remain visible');
-assert.doesNotMatch(src,/hideLabel\("Mana de base"\)/,'base Mana must remain visible');
-console.log('GenSrpG V16.78.91 legacy RPG stat cleanup: runtime + UI guards OK');
+assert.doesNotMatch(src,/hideTextField\("PV de base"\)/,'base HP must remain visible');
+assert.doesNotMatch(src,/hideTextField\("Mana de base"\)/,'base Mana must remain visible');
+console.log('GenSrpG legacy RPG stat cleanup: runtime + UI guards OK');

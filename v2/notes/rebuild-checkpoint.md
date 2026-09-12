@@ -106,13 +106,13 @@ Audit effectué : `v2/src/modes/rpg/tactical-combat.js` possédait déjà le vra
 - `resetActorCombatMovement()` ;
 - portée/LOS/couverture via `evaluateAttackPosition()`.
 
-Le nouveau raccordement ne crée donc PAS un second moteur :
+Le raccordement Donjon ne crée donc PAS un second moteur :
 
 - `v2/src/modes/rpg/dungeon-combat-movement.js` adapte le moteur tactique existant à la session Donjon ;
 - budget de mouvement persistant pour le `turnSequence` courant ;
 - nouveau tour = nouveau budget ;
 - seuls les héros actifs peuvent cliquer la grille pendant leur tour ;
-- les autres combattants sont traités comme cases occupées pour la destination/pathfinding du wrapper ;
+- les autres combattants sont traités comme cases occupées ;
 - murs, portes et layout authored passent par le moteur tactique existant ;
 - déplacer ne termine pas automatiquement le tour : le héros peut ensuite utiliser sa compétence depuis sa nouvelle position ;
 - le spatial mis à jour est conservé dans le roomRuntime et renvoyé au combat ;
@@ -120,24 +120,45 @@ Le nouveau raccordement ne crée donc PAS un second moteur :
 - l'ancien déplacement exploration reste bloqué pendant un combat.
 
 Régression : `v2/tests/rpg-dungeon-combat-movement.test.mjs`.
-Le test protège notamment :
-- budget 3 cases cumulé dans un même tour ;
-- budget épuisé refusé ;
-- case occupée refusée ;
-- nouveau `turnSequence` réinitialise le budget ;
-- une attaque distance invalide à 4 cases devient valide après un déplacement de 2 cases, sans changer de combat/tour ;
-- intégration page + CSS.
+Le test protège notamment une attaque distance invalide à 4 cases qui devient valide après un déplacement de 2 cases sans changer de combat/tour.
 
 Batterie complète : `34708055765` completed + success.
 
 Commits :
-- premier wrapper (supersédé) : `8313da2309ff77a38d42cb8f4d0cc85098391370` ;
+- wrapper initial : `8313da2309ff77a38d42cb8f4d0cc85098391370` ;
 - UI grille combat : `755e0ba7216831da55684d3311f877e1a30414b8` ;
 - raccordement page RPG : `ca1be4366f8440fbf077d165c8525bef0603e624` ;
 - feedback visuel : `465e89042cf8ded6a72a6bb1ce31bab8912771e1` ;
 - chargement CSS : `37fdaadb288f80e38cbd7604e49af548ff328a6a` ;
-- correction importante pour réutiliser `moveCombatActor()` existant : `56b46e43134439593f290a48b4e762359f0c8e74` ;
+- correction pour réutiliser `moveCombatActor()` existant : `56b46e43134439593f290a48b4e762359f0c8e74` ;
 - régression : `4fccd57a743b3de4c9c02127ad7494cc3535df1a`.
+
+## UX combat Donjon — commandes de jeu
+
+Nouvelle passe présentation-only, sans modifier le moteur de résolution :
+
+- `v2/src/ui/dungeon-combat-command-ui.js` conserve les `<select>` compétence/cible existants comme source de vérité mais les masque visuellement ;
+- les options sont présentées sous forme de cartes/boutons `1 · Compétence` et `2 · Cible` ;
+- cliquer une carte met à jour le select natif puis émet son événement `change`, donc le ciblage dynamique existant continue de décider les cibles valides ;
+- le bouton principal devient `⚔️ Lancer l’action` ;
+- cartes héros/ennemis visuellement différenciées ;
+- cartes actives davantage mises en évidence ;
+- jauges visuelles ajoutées aux ressources qui possèdent un `current / max` ;
+- timeline numérotée et tour actif renforcé ;
+- bouton d'action principal sticky sur mobile ;
+- aucun calcul de portée, LOS, dégâts, effet, tour ou cible n'est implémenté dans cette couche UX.
+
+Styles : `v2/src/ui/dungeon-combat-command-ui.css`.
+Chargement V2 : `v2/index.html`.
+Régression : `v2/tests/rpg-dungeon-combat-command-ui.test.mjs`.
+
+Batterie complète : `34708334737` completed + success.
+
+Commits :
+- commandes combat : `430e4ad1feef68dbbfbc31d3bd56d9708820e0fa` ;
+- styles : `139ad407a72f799f94ba8fc691fb84b476f5e512` ;
+- chargement V2 : `ba2b121e03ed4cf06d9781dd91d1115fa16054ff` ;
+- régression : `444029c3522ee7cc204c722a1f47a99c271b107b`.
 
 ## Jalons CI récents validés
 
@@ -153,6 +174,7 @@ Commits :
 - RPG UX : hiérarchie surface de jeu / Journal & détails : `34707068397` success
 - RPG UX : navigation Jouer / Héros / Monde / Configuration : `34707462937` success
 - RPG : déplacement tactique en combat raccordé : `34708055765` success
+- RPG UX : commandes combat cartes/cibles : `34708334737` success
 
 ## Preview téléphone
 
@@ -163,8 +185,8 @@ Pour tester les prochaines passes UX, générer/communiquer une nouvelle URL raw
 
 ## Priorités ouvertes
 
-1. Reprendre maintenant l'UX du combat Donjon : cartes/portraits, PV et ressources visibles, timeline claire, compétences et ciblage sans formulaires bruts.
-2. Vérifier dans cette passe que la configuration spatiale de la salle (LOS/couverture authored) est bien propagée aux contrôles de ciblage UI, pas seulement au moteur de déplacement.
-3. Revoir ensuite la fiche héros/inventaire/équipement comme interface de jeu.
-4. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
-5. Puis assets réels, audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.
+1. Vérifier/raccorder explicitement le contexte spatial complet de la salle aux contrôles de ciblage UI pour que les boutons de cible reflètent immédiatement portée/LOS/couverture après chaque déplacement.
+2. Revoir ensuite la fiche héros/inventaire/équipement comme interface de jeu.
+3. Revoir Monde/Salles et Configuration avec la même hiérarchie de sous-menus.
+4. Après cette structure, faire la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
+5. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.

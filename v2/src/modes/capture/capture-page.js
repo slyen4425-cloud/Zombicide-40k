@@ -36,6 +36,7 @@ import {
   stopCaptureDriver,
   stopCaptureUiVisualClockAdapter,
   stopCaptureUiVisualDriver,
+  switchCaptureBattleCreature,
 } from './runtime.js';
 
 function escapeHtml(value){
@@ -135,7 +136,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-roster-reaction" data-capture-reaction="${escapeHtml(reaction.id)}" data-capture-reaction-ready="${reaction.readyByCooldown===true?'true':reaction.readyByCooldown===false?'false':'unknown'}">${escapeHtml(reaction.id)}${cooldown}${resource}</span>`;
   }
 
-  function rosterEntryHtml(entry){
+  function rosterEntryHtml(entry,{battleActive=false}={}){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
     const koClass=entry.ko?' is-ko':'';
     const activeAttr=entry.activeInBattle?'true':'false';
@@ -148,6 +149,8 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const reactions=entry.reactions.length?`<div class="capture-roster-reactions" data-capture-reactions>${entry.reactions.map(rosterReactionHtml).join('')}</div>`:'';
     const visual=entry.iconArt||entry.mainArt;
     const art=visual?.src?`<img class="capture-roster-art" data-capture-roster-art src="${escapeHtml(visual.src)}" alt="${escapeHtml(entry.displayName)}">`:'';
+    const canSwitch=battleActive&&entry.location==='active'&&!entry.activeInBattle&&!entry.ko;
+    const switchButton=canSwitch?`<button type="button" data-capture-switch-instance="${escapeHtml(entry.instanceId)}">Changer</button>`:'';
     return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
       ${art}
       <div>
@@ -160,20 +163,24 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         ${activeBadge}
         ${koBadge}
       </div>
-      <button type="button" data-capture-inspect-instance="${escapeHtml(entry.instanceId)}">Inspecter</button>
+      <div class="capture-roster-actions">
+        ${switchButton}
+        <button type="button" data-capture-inspect-instance="${escapeHtml(entry.instanceId)}">Inspecter</button>
+      </div>
     </article>`;
   }
 
   function renderRosterLists(){
     const lists=buildCaptureRosterLists(session.state,{assetRegistry});
+    const battleActive=session.state?.battle?.status==='active';
     if(activeList){
       activeList.innerHTML=lists.activeTeam.length
-        ?lists.activeTeam.map(rosterEntryHtml).join('')
+        ?lists.activeTeam.map(entry=>rosterEntryHtml(entry,{battleActive})).join('')
         :'<p data-capture-roster-empty="active">Aucune créature active.</p>';
     }
     if(reserveList){
       reserveList.innerHTML=lists.reserve.length
-        ?lists.reserve.map(rosterEntryHtml).join('')
+        ?lists.reserve.map(entry=>rosterEntryHtml(entry,{battleActive})).join('')
         :'<p data-capture-roster-empty="reserve">Réserve vide.</p>';
     }
     return lists;
@@ -301,6 +308,15 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       }
       return result;
     },
+    switchActiveCreature(instanceId){
+      const result=switchCaptureBattleCreature(session.state,instanceId);
+      if(result.ok){
+        session={...session,state:result.state};
+        renderRosterLists();
+        renderOpponentSummary();
+      }
+      return result;
+    },
     setBlocking(blocking){
       const result=setCaptureBattleBlocking(session,blocking);
       if(result.ok) session=result.session;
@@ -404,7 +420,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       return result;
     },
     dispose(){
-      if(activeList&&typeof activeList.removeEventListener==='function') activeList.removeEventListener('click',handleRosterInspectClick);
+      if(activeList&&typeof activeList.removeEventListener==='function'){
+        activeList.removeEventListener('click',handleRosterInspectClick);
+        activeList.removeEventListener('click',handleRosterSwitchClick);
+      }
       if(reserveList&&typeof reserveList.removeEventListener==='function') reserveList.removeEventListener('click',handleRosterInspectClick);
       if(opponentSummaryNode&&typeof opponentSummaryNode.removeEventListener==='function') opponentSummaryNode.removeEventListener('click',handleOpponentInspectClick);
       visualActivitySourceAttachment.detach();
@@ -428,13 +447,22 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     if(instanceId) api.inspectCreature(instanceId);
   }
 
+  function handleRosterSwitchClick(event){
+    const target=event?.target?.closest?.('[data-capture-switch-instance]')||null;
+    const instanceId=target?.getAttribute?.('data-capture-switch-instance')||target?.dataset?.captureSwitchInstance||null;
+    if(instanceId) api.switchActiveCreature(instanceId);
+  }
+
   function handleOpponentInspectClick(event){
     const target=event?.target?.closest?.('[data-capture-inspect-opponent]')||event?.target||null;
     const inspect=target?.hasAttribute?.('data-capture-inspect-opponent')||target?.dataset?.captureInspectOpponent!=null;
     if(inspect) api.inspectOpponent();
   }
 
-  if(activeList&&typeof activeList.addEventListener==='function') activeList.addEventListener('click',handleRosterInspectClick);
+  if(activeList&&typeof activeList.addEventListener==='function'){
+    activeList.addEventListener('click',handleRosterInspectClick);
+    activeList.addEventListener('click',handleRosterSwitchClick);
+  }
   if(reserveList&&typeof reserveList.addEventListener==='function') reserveList.addEventListener('click',handleRosterInspectClick);
   if(opponentSummaryNode&&typeof opponentSummaryNode.addEventListener==='function') opponentSummaryNode.addEventListener('click',handleOpponentInspectClick);
   if(overlayClose&&typeof overlayClose.addEventListener==='function'){

@@ -5,12 +5,14 @@ import {
   attachCaptureUiVisualClockSource,
   beginCaptureBattleSession,
   captureUiNoticeFeedNotices,
+  clearCaptureUiVisualPauseReasons,
   consumeCaptureUiEvents,
   createCaptureAppSession,
   createCaptureModeState,
   createCaptureUiNoticeFeed,
   createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
+  createCaptureUiVisualPauseControllerState,
   dispatchCaptureUiEvents,
   finishCaptureBattleSession,
   pauseCaptureUiVisualClockAdapter,
@@ -19,6 +21,7 @@ import {
   resumeCaptureUiVisualDriver,
   sampleCaptureUiVisualClock,
   setCaptureBattleBlocking,
+  setCaptureUiVisualPauseReason,
   startCaptureUiVisualClockAdapter,
   startCaptureUiVisualDriver,
   stopCaptureDriver,
@@ -40,6 +43,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   let noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
   let visualDriver=createCaptureUiVisualDriverState();
   let visualClockAdapter=createCaptureUiVisualClockAdapterState();
+  let visualPauseController=createCaptureUiVisualPauseControllerState();
   let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
   let visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
   const state=session.state;
@@ -88,6 +92,24 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return {...result,notices:captureUiNoticeFeedNotices(noticeFeed)};
   }
 
+  function applyVisualPauseReason(reason,paused){
+    const result=setCaptureUiVisualPauseReason(visualPauseController,reason,paused);
+    if(!result.ok) return result;
+    visualPauseController=result.controller;
+    if(result.transition==='pause'){
+      visualDriver=pauseCaptureUiVisualDriver(visualDriver);
+      visualClockAdapter=pauseCaptureUiVisualClockAdapter(visualClockAdapter);
+    }else if(result.transition==='resume'){
+      visualDriver=resumeCaptureUiVisualDriver(visualDriver);
+      visualClockAdapter=resumeCaptureUiVisualClockAdapter(visualClockAdapter);
+    }
+    return {
+      ...result,
+      driver:structuredClone(visualDriver),
+      adapter:structuredClone(visualClockAdapter),
+    };
+  }
+
   const api={
     get state(){return session.state;},
     get session(){return session;},
@@ -95,6 +117,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get noticeFeed(){return structuredClone(noticeFeed);},
     get visualDriver(){return structuredClone(visualDriver);},
     get visualClockAdapter(){return structuredClone(visualClockAdapter);},
+    get visualPauseController(){return structuredClone(visualPauseController);},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
@@ -116,24 +139,25 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       return result;
     },
     startNoticeVisualClock(){
+      visualPauseController=clearCaptureUiVisualPauseReasons(visualPauseController).controller;
       visualDriver=startCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=startCaptureUiVisualClockAdapter(visualClockAdapter);
-      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter),pauseController:structuredClone(visualPauseController)};
     },
     pauseNoticeVisualClock(){
-      visualDriver=pauseCaptureUiVisualDriver(visualDriver);
-      visualClockAdapter=pauseCaptureUiVisualClockAdapter(visualClockAdapter);
-      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
+      return applyVisualPauseReason('manual',true);
     },
     resumeNoticeVisualClock(){
-      visualDriver=resumeCaptureUiVisualDriver(visualDriver);
-      visualClockAdapter=resumeCaptureUiVisualClockAdapter(visualClockAdapter);
-      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
+      return applyVisualPauseReason('manual',false);
+    },
+    setNoticeVisualPauseReason(reason,paused=true){
+      return applyVisualPauseReason(reason,paused);
     },
     stopNoticeVisualClock(){
+      visualPauseController=createCaptureUiVisualPauseControllerState();
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
-      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter)};
+      return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter),pauseController:structuredClone(visualPauseController)};
     },
     sampleNoticeVisualClock,
     flushUiEvents,
@@ -148,6 +172,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
       visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
+      visualPauseController=createCaptureUiVisualPauseControllerState();
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);
       noticeFeed=createCaptureUiNoticeFeed({maxVisible:noticeMaxVisible,expireAfterVisualTime:noticeExpireAfterVisualTime});
@@ -161,8 +186,8 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   }
   if(visualActivitySource){
     visualActivitySourceAttachment=attachCaptureUiVisualActivitySource(visualActivitySource,{
-      onInactive:()=>api.pauseNoticeVisualClock(),
-      onActive:()=>api.resumeNoticeVisualClock(),
+      onInactive:()=>api.setNoticeVisualPauseReason('activity',true),
+      onActive:()=>api.setNoticeVisualPauseReason('activity',false),
     });
   }
 

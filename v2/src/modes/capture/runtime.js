@@ -91,6 +91,11 @@ import {
   isCaptureUiVisualPaused,
   setCaptureUiVisualPauseReason,
 } from './ui-visual-pause-controller.js';
+import {
+  CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT,
+  createCaptureUiPresentationBlockState,
+  setCaptureUiPresentationBlocked,
+} from './ui-presentation-block.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -106,6 +111,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiVisualClockSource:true,
   canonicalUiVisualActivitySource:true,
   canonicalUiVisualPauseController:true,
+  canonicalUiPresentationBlock:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -125,6 +131,7 @@ export {
   CAPTURE_UI_VISUAL_CLOCK_SOURCE_CONTRACT,
   CAPTURE_UI_VISUAL_ACTIVITY_SOURCE_CONTRACT,
   CAPTURE_UI_VISUAL_PAUSE_CONTROLLER_CONTRACT,
+  CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
@@ -140,6 +147,7 @@ export {
   createCaptureModeState,
   createCaptureSchedulerState,
   createCaptureUiNoticeFeed,
+  createCaptureUiPresentationBlockState,
   createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
   createCaptureUiVisualPauseControllerState,
@@ -161,6 +169,7 @@ export {
   runCaptureAiStep,
   setCaptureSchedulerRunning,
   setCaptureTeam,
+  setCaptureUiPresentationBlocked,
   setCaptureUiVisualPauseReason,
   startCaptureBattle,
   startCaptureDriver,

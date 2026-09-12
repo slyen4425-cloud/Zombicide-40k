@@ -16,7 +16,7 @@ function startedState({team,opponent}){
 }
 
 {
-  const team=[{instanceId:'p1',speciesId:'capture_braiseau',currentHp:20,maxHp:20}];
+  const team=[{instanceId:'p1',speciesId:'capture_braiseau',currentHp:20,maxHp:20,abilityIds:['hit']}];
   let state=startedState({team,opponent:{instanceId:'w1',speciesId:'capture_aquafin',wild:true,currentHp:20,maxHp:20}});
   const ability={id:'hit',range:1,chargeMax:2,cooldown:0,effect:{type:'damage',amount:5}};
   const abilityState=initializeCreatureAbilityState(team[0],[ability]);
@@ -47,7 +47,7 @@ function startedState({team,opponent}){
 }
 
 {
-  const team=[{instanceId:'p1',speciesId:'capture_braiseau',currentHp:20,maxHp:20}];
+  const team=[{instanceId:'p1',speciesId:'capture_braiseau',currentHp:20,maxHp:20,abilityIds:['finish']}];
   let state=startedState({team,opponent:{instanceId:'w1',speciesId:'capture_aquafin',wild:true,currentHp:6,maxHp:20}});
   const ability={id:'finish',range:1,chargeMax:1,cooldown:0,effect:{type:'damage',amount:99}};
   const abilityState=initializeCreatureAbilityState(team[0],[ability]);

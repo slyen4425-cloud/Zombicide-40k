@@ -24,6 +24,7 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Sécurité d’interface MJ : le panneau MJ exige `gmFullControl=true` et un appareil explicitement désigné MJ.
 - Rôle appareil MJ persistant localement : le téléphone mémorise `gm` ou `player` dans son propre `localStorage`. La règle de partie et le rôle du téléphone restent séparés ; un autre téléphone ne récupère pas ce rôle automatiquement.
 - Lancement RPG : avant d’ouvrir l’espace RPG, l’appareil affiche maintenant un choix explicite `Ce téléphone est MJ` / `Ce téléphone est Joueur`. Le rôle mémorisé est indiqué et le choix sélectionné est sauvegardé localement avant le montage de la page RPG.
+- Ergonomie mobile combat : feuille de style dédiée au bloc de combat Donjon réel, sans changement moteur. Timeline horizontale tactile avec snap, cartes/action zones mieux séparées, cible tactile minimale 46–48 px, consommables/fuite et panneau MJ adaptés aux petits écrans, et boutons MJ réorganisés en 2 colonnes puis 1 colonne sous 390 px.
 - Audio RPG : lifecycle de salle, sortie navigateur, session audio unique et cleanup.
 - Stockage cloud réel différé ; import/export manuel reste le filet de sécurité.
 
@@ -42,27 +43,32 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - restriction panneau MJ au seul appareil MJ : `34673262305` success
 - persistance locale du rôle appareil MJ : `34673462295` success
 - choix du rôle téléphone au lancement RPG : `34673652441` success
+- ergonomie mobile du bloc combat réel : `34677838395` success
 
 ## Dernière étape terminée
 
-Choix explicite du rôle du téléphone dans le flux de lancement RPG :
-- nouveau module `v2/src/modes/rpg/dungeon-device-role-launch-ui.js` ;
-- à l’ouverture du mode RPG, la page RPG n’est plus montée immédiatement : l’utilisateur choisit d’abord `📱 Ce téléphone est MJ` ou `🎮 Ce téléphone est Joueur` ;
-- le rôle local déjà mémorisé est lu et affiché avec `Rôle mémorisé`, sans imposer silencieusement ce rôle ;
-- le clic sauvegarde `gm` ou `player` via le module de persistance existant puis monte `mountRpgPage()` avec `dungeonIsGameMasterDevice` explicite ;
-- le choix ne modifie pas `gmFullControl` : rôle appareil et règle de partie restent indépendants ;
-- un téléphone Joueur reste donc sans panneau MJ même si le monde est configuré en MJ total ;
-- la régression vérifie les deux choix, le rôle mémorisé et le fait que `app.js` passe bien le rôle explicite à la page RPG.
+Amélioration mobile ciblée du vrai bloc combat Donjon :
+- nouveau fichier `v2/src/ui/dungeon-combat-mobile.css`, chargé après `app.css` pour rester isolé du moteur et des autres écrans ;
+- timeline tactile horizontale avec `scroll-snap-type:x proximity`, inertie mobile et éléments de tour avec cible tactile minimale ;
+- combattant actif mieux distingué visuellement sans modifier son état ;
+- actions de compétence, consommables et panneau MJ deviennent des blocs visuels distincts et lisibles ;
+- boutons de combat/MJ avec hauteur minimale 46 px sur bureau compact et 48 px sur téléphone ;
+- champs `select/input` de combat portés à 48 px sur petit écran ;
+- fuite empilée proprement sur mobile ;
+- boutons MJ disposés en 2 colonnes sur téléphone standard puis 1 colonne sous 390 px ;
+- journal et cartes de combattants compactés sans supprimer d’information ;
+- aucune logique de timeline, PV, ciblage, objets, fuite ou commandes MJ n’a été modifiée ;
+- régression dédiée `rpg-dungeon-combat-mobile-css.test.mjs` vérifiant le chargement de la feuille dédiée et les garde-fous mobile essentiels.
 
 Commits de l’étape :
-- UI de choix du rôle : `8c121bb04d1cb632b4c436dfff8bfe2dd94e0e39`
-- branchement dans le lancement RPG : `cd1193d534d86eb1dbd74785d33ebda4ae332e01`
-- régression : `66b3bec821cba172500fcc1f3813eb4d772c345b`
+- chargement de la feuille dédiée : `612c30a080da79ae8aacd6bdb06ce6a692a7ee6b`
+- ergonomie mobile combat : `0494f2f36f858bd655c067a35bd46828997c4cd5`
+- régression CSS : `ea592fc2490457bd9728ed5c3207306f6ff5eeb8`
 
-CI finale : `34673652441` success.
+CI finale : `34677838395` success.
 
 ## Priorités ouvertes
 
-1. améliorer maintenant l’ergonomie mobile du bloc combat réel (timeline, ressources, actions, consommables et panneau MJ) sans toucher à l’autorité moteur ;
-2. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
-3. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées.
+1. étendre si besoin les statuts non additifs (`multiply`, `percent`, `set`) avec recomposition ordonnée ;
+2. poursuivre l’audit legacy systématique : gros index, assets, audio, PWA/cache, sauvegardes/migrations, tests, historique Capture et UI cachées ;
+3. continuer les améliorations visuelles mobile seulement après vérification sur vrai téléphone, sans déplacer l’autorité moteur dans l’interface.

@@ -96,6 +96,12 @@ import {
   createCaptureUiPresentationBlockState,
   setCaptureUiPresentationBlocked,
 } from './ui-presentation-block.js';
+import {
+  CAPTURE_UI_OVERLAY_CONTRACT,
+  closeCaptureUiOverlay,
+  createCaptureUiOverlayState,
+  openCaptureUiOverlay,
+} from './ui-overlay.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -112,6 +118,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiVisualActivitySource:true,
   canonicalUiVisualPauseController:true,
   canonicalUiPresentationBlock:true,
+  canonicalUiOverlay:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -132,6 +139,7 @@ export {
   CAPTURE_UI_VISUAL_ACTIVITY_SOURCE_CONTRACT,
   CAPTURE_UI_VISUAL_PAUSE_CONTROLLER_CONTRACT,
   CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT,
+  CAPTURE_UI_OVERLAY_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
@@ -143,10 +151,12 @@ export {
   captureUiNoticeFromEvent,
   clearCaptureEncounter,
   clearCaptureUiVisualPauseReasons,
+  closeCaptureUiOverlay,
   createCaptureDriverState,
   createCaptureModeState,
   createCaptureSchedulerState,
   createCaptureUiNoticeFeed,
+  createCaptureUiOverlayState,
   createCaptureUiPresentationBlockState,
   createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
@@ -160,6 +170,7 @@ export {
   moveCaptureActor,
   moveCaptureBattleCreature,
   moveCaptureRosterCreature,
+  openCaptureUiOverlay,
   pauseCaptureDriver,
   pauseCaptureUiVisualClockAdapter,
   pauseCaptureUiVisualDriver,

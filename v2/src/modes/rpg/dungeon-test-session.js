@@ -1,6 +1,7 @@
 import {createDungeonRuntime} from './room-runtime.js';
 import {createHeroRuntime} from './hero-engine.js';
 import {buildWorldIndex,validateWorld} from './world-engine.js';
+import {createSpatialState,setActorPosition} from './spatial-engine.js';
 import {createDungeonDemoLaunch,hasConfiguredDungeonHeroes} from './dungeon-demo-content.js';
 
 function list(source,key){return Array.isArray(source?.[key])?source[key]:Object.values(source?.[key]||{});}
@@ -48,6 +49,14 @@ export function createDungeonTestSession({universe={},worldDraft={},layoutProvid
   });
   if(!created.ok) return {ok:false,reason:created.reason||'dungeon-test-runtime-failed'};
 
+  let spatial=null;
+  if(demo){
+    spatial=createSpatialState({zoneId:String(startRoomId)});
+    spatial=setActorPosition(spatial,String(heroes[0].id),{x:1,y:1,zoneId:String(startRoomId)});
+    spatial=setActorPosition(spatial,'demo_enemy_instance',{x:4,y:1,zoneId:String(startRoomId)});
+    created.runtime.spatial=clone(spatial);
+  }
+
   return {
     ok:true,
     demo,
@@ -55,6 +64,7 @@ export function createDungeonTestSession({universe={},worldDraft={},layoutProvid
     worldIndex,
     roomRuntime:created.runtime,
     heroRuntimes:clone(heroRuntimes),
+    spatial:spatial?clone(spatial):null,
     focusedHeroId:String(heroes[0].id),
     startRoomId:String(startRoomId),
   };

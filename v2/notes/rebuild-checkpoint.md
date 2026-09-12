@@ -4,268 +4,187 @@ Branche de travail : `rebuild/v2`
 
 La V2 reste isolée de `main` tant que la parité et la validation utilisateur ne sont pas suffisantes.
 
-## État important au 2026-09-12
+## État au 2026-09-12
 
 - Séparation stricte Survie / RPG / Monster Capture / VS-PVP.
-- RPG data-driven et combat D100/tours protégés par leurs régressions existantes.
-- Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
-- Monster Capture autonome et très avancé ; le chantier Capture reste volontairement en pause.
-- Après le premier test réel sur téléphone, l'utilisateur a jugé l'interface V2 trop archaïque, les sous-menus mal structurés et le Donjon/combat très en retrait par rapport à la V1.
-- Priorité actuelle : rendre le RPG réellement jouable et lisible sur téléphone avant de reprendre les autres modes.
+- RPG data-driven ; moteurs stats, ressources, D100, combat, inventaire, sets, progression, bestiaire, quêtes, alliés, salles, événements et spatial protégés par régressions.
+- Monster Capture reste volontairement en pause pendant la passe UX RPG.
+- Priorité actuelle : rendre le RPG réellement jouable, lisible et visuellement proche de la qualité attendue avant de reprendre les autres modes.
+- `main` n'est pas utilisé pour la V2.
 
-## RPG — socle testable déjà présent
+## RPG — socle jouable déjà raccordé
 
-- Accueil → RPG → rôle appareil → page RPG raccordé.
-- Partie Donjon test depuis le World Builder courant.
-- Héros configurés utilisés avec leurs vraies données ; fallback démo en mémoire si aucun héros.
-- Grille Donjon live avec positions runtime.
-- Déplacement exploration tactile via Spatial Core + pathfinding authored, murs/portes/obstacles respectés.
-- Déplacement tactique pendant le combat maintenant raccordé au moteur tactique existant.
-- Interactions de proximité case/porte/coffre raccordées au vrai moteur.
-- Combat réel, IA ennemie, victoire, réconciliation, loot et retrait du pion couverts par régression.
-- Sauvegarde/reprise manuelle de session test via le provider V2.
-- Preview téléphone indépendante de `main` disponible via raw.githack.
+- Accueil → RPG → rôle appareil → page RPG.
+- Donjon test depuis le World Builder courant.
+- Héros configurés + fallback démo en mémoire.
+- Grille live avec positions runtime.
+- Déplacement exploration tactile via Spatial Core.
+- Déplacement tactique en combat via le moteur `tactical-combat.js` existant.
+- Murs, portes, obstacles, portée, LOS, couverture, cases occupées.
+- Interactions exact-cell / portes / coffres.
+- Combat réel, IA ennemie, victoire, réconciliation, loot et retrait des pions.
+- Sauvegarde/reprise manuelle du test Donjon.
 
-## Retour utilisateur — présentation
+## UX RPG — jalons validés
 
-Le premier test utilisateur a révélé que le socle fonctionnel ne suffit pas :
+### Donjon / navigation
 
-- les sections RPG ressemblent encore à des outils de développement empilés ;
-- les sous-menus manquent de hiérarchie ;
-- la partie Donjon ne donne pas encore l'impression d'un écran de jeu ;
-- le combat reste trop proche de formulaires/selects techniques ;
-- l'écart de qualité perçue avec la V1 est encore très important.
+- identité sombre/fantasy ; plateau prioritaire ; héros/ennemis différenciés ;
+- surface principale séparée du panneau `☰ Journal & détails` ;
+- navigation RPG regroupée en `🎮 Jouer / 🧙 Héros / 🗺️ Monde / ⚙️ Configuration` ;
+- entrée RPG orientée vers Donjon/Jouer.
 
-La passe UX reste prioritaire, avec comme principe : conserver les moteurs V2 propres et améliorer uniquement la couche de présentation/interaction sauf nécessité gameplay explicitement validée.
+CI :
+- identité Donjon `34704516033` success ;
+- hiérarchie Donjon `34707068397` success ;
+- navigation RPG `34707462937` success.
 
-## Référence V1 auditée
+### Déplacement tactique combat
 
-La V1 fournit des repères utiles à conserver dans l'esprit, pas dans le code :
-
-- identité Dungeon sombre/fantasy avec tons pierre, brun et or ;
-- plateau clairement séparé du reste de l'interface ;
-- héros et ennemis immédiatement différenciés visuellement ;
-- combat compact avec timeline, cartes combattants, PV/stats visibles et bouton d'action principal ;
-- informations secondaires moins dominantes que l'action en cours ;
-- hiérarchie de jeu plus lisible que l'empilement actuel de `editor-section` V2.
-
-## Présentation Donjon — état actuel
-
-### Passe 1 — identité visuelle
-
-- stylesheet dédié `v2/src/ui/dungeon-gameplay-ui.css` ;
-- identité sombre/fantasy inspirée des points forts de la V1 ;
-- héros actif compact/sticky ;
-- plateau rendu comme scène principale ;
-- héros vert, ennemi rouge, héros focalisé halo or ;
-- interactions de case intégrées visuellement au plateau ;
-- combat rouge/brun avec timeline et action principale renforcées ;
-- événements narratifs or/brun ;
-- passages/PNJ/loot plus discrets ;
-- état technique masqué sur mobile ;
-- aucune règle gameplay modifiée.
-
-CI : `34704516033` completed + success.
-
-### Passe 2 — hiérarchie réelle de l'écran de jeu
-
-Une couche de présentation dédiée restructure désormais le DOM après chaque rendu, sans modifier le renderer RPG ni ses règles.
-
-- `v2/src/ui/dungeon-layout-polish.js` + `.css` ;
-- surface principale : héros actif, plateau, choix bloquant, combat ;
-- panneau repliable `☰ Journal & détails` : état, événements, passages, PNJ, butin, quêtes et panneaux secondaires ;
-- listeners existants conservés ;
-- plateau dominant sur mobile ;
-- aucune mécanique modifiée.
-
-CI : `34707068397` completed + success.
-
-### Passe 3 — navigation RPG structurée
-
-La barre plate `Configuration / Donjon / Héros / World Builder / Salle / Combat test` est remplacée visuellement par quatre catégories cohérentes :
-
-1. `🎮 Jouer` → Donjon ;
-2. `🧙 Héros` → Fiche héros ;
-3. `🗺️ Monde` → World Builder + Salles ;
-4. `⚙️ Configuration` → Règles & contenu + Laboratoire combat.
-
-- `v2/src/ui/rpg-navigation-ui.js` déplace les boutons existants sans recréer leurs listeners ;
-- `v2/src/ui/rpg-navigation-ui.css` ajoute la hiérarchie mobile/desktop ;
-- entrée RPG orientée vers Donjon/Jouer ;
-- aucun moteur RPG, stockage, World Builder ou combat modifié.
-
-CI : `34707462937` completed + success.
-
-## Déplacement tactique en combat
-
-Le moteur existant `tactical-combat.js` est réutilisé, pas dupliqué.
-
-- budget de mouvement par `turnSequence` ;
-- déplacement fractionnable pendant le tour ;
-- murs/portes/layout authored respectés ;
-- cases occupées refusées ;
-- le déplacement ne termine pas automatiquement le tour ;
-- portée/LOS réévaluées depuis la nouvelle position ;
+- budget par `turnSequence`, fractionnable ;
+- déplacement ne termine pas automatiquement le tour ;
+- murs/portes/layout authored et cases occupées respectés ;
+- portée/LOS recalculées après déplacement ;
 - feedback `👣 Déplacement tactique — X / Y cases restantes`.
 
-Régression : `v2/tests/rpg-dungeon-combat-movement.test.mjs`.
-CI : `34708055765` completed + success.
+CI : `34708055765` success.
 
-Commits principaux :
-- UI grille combat : `755e0ba7216831da55684d3311f877e1a30414b8` ;
-- raccordement page RPG : `ca1be4366f8440fbf077d165c8525bef0603e624` ;
-- réutilisation du vrai `moveCombatActor()` : `56b46e43134439593f290a48b4e762359f0c8e74` ;
-- régression : `4fccd57a743b3de4c9c02127ad7494cc3535df1a`.
+### Commandes combat
 
-## UX combat Donjon — commandes de jeu
-
-- `<select>` compétence/cible conservés comme source de vérité mais masqués visuellement ;
-- compétences et cibles rendues sous forme de cartes/boutons ;
+- selects compétence/cible conservés comme source de vérité mais masqués ;
+- compétences/cibles présentées en cartes/boutons ;
 - bouton principal `⚔️ Lancer l’action` ;
-- héros/ennemis mieux différenciés ;
-- jauges ressources ;
-- timeline numérotée et tour actif renforcé ;
-- aucun calcul de portée/LOS/dégâts/tours dans la couche UX.
+- timeline, ressources et tour actif mieux lisibles ;
+- cibles recalculées depuis le spatial + roomLayout courant ; une cible hors portée/LOS n'est plus proposée et réapparaît après repositionnement valide.
 
-CI : `34708334737` completed + success.
+CI :
+- commandes combat `34708334737` success ;
+- ciblage spatial `34709303945` success.
 
-Commits :
-- commandes : `430e4ad1feef68dbbfbc31d3bd56d9708820e0fa` ;
-- styles : `139ad407a72f799f94ba8fc691fb84b476f5e512` ;
-- chargement : `ba2b121e03ed4cf06d9781dd91d1115fa16054ff` ;
-- régression : `444029c3522ee7cc204c722a1f47a99c271b107b`.
+### Fiche héros / inventaire / équipement
 
-## Ciblage visuel tactique — synchronisation spatial/layout
-
-- compétence sélectionnée utilisée comme profil tactique ;
-- spatial courant + roomLayout matérialisé propagés aux contrôles de cible ;
-- recalcul au montage et immédiatement après mouvement ;
-- cible hors portée ou hors LOS non proposée ;
-- cible réapparaît après repositionnement valide.
-
-CI : `34709303945` completed + success.
-
-Commits :
-- contexte ciblage : `771c862b0b722218be13ffce3ef6b3258596ab3f` ;
-- resynchronisation mouvement : `9d00aa47d2d01166ab52ebcaf5120ff5bed3779b` ;
-- régression : `0847f08647fc97f101d06b8d1d22ac044eed7620`.
-
-## UX fiche héros / inventaire / équipement
-
-La fiche héros n'affiche plus seulement les objets de départ sous forme de liste. Elle exploite désormais le snapshot runtime déjà produit par `hero-engine.js`.
-
-- `buildHeroSheetModel()` conserve les stats, ressources, compétences et progression existantes ;
-- l'inventaire affiché provient de `heroSheetSnapshot().inventory` ;
-- les entrées équipées sont identifiées à partir de `inventory.equipment` ;
-- les vrais slots du héros sont affichés séparément, avec slot vide, slot principal ou slot lié ;
-- l'inventaire affiche nom, icône, rareté, type, quantité et statut équipé ;
-- les bonus de set existants sont affichés via `setProgress` ;
+- affiche le vrai `heroSheetSnapshot()` ;
+- slots réellement équipés, inventaire, rareté, quantités, sets, compétences, progression ;
 - navigation interne `État / Équipement / Inventaire / Compétences` ;
-- ressources et statistiques restent visibles immédiatement ;
-- responsive téléphone : grille 1 colonne pour les grandes sections, inventaire/compétences compactés ;
-- aucun moteur d'inventaire, équipement, bonus ou set n'a été réécrit ;
-- compatibilité `startingItems` conservée pour les consommateurs/tests existants.
+- responsive mobile ;
+- compatibilité historique `startingItems` conservée.
 
-Fichiers :
-- `v2/src/modes/rpg/hero-sheet.js` ;
-- `v2/src/ui/hero-sheet-ui.css` ;
-- chargement dans `v2/index.html` ;
-- régression `v2/tests/rpg-hero-sheet-presentation.test.mjs`.
+CI : `34709948494` success.
 
-Le premier run `34709890806` a échoué uniquement parce que l'ancien test attendait encore `model.startingItems`. Compatibilité rétablie sans retirer le nouveau modèle runtime.
+### Monde / World Builder / Salle
 
-Batterie complète finale : `34709948494` completed + success.
+- navigation locale `Vue du monde / Zones & salles / Passages` ;
+- grille de salle promue comme surface principale ;
+- barre d'outils sticky/scrollable mobile ;
+- réglages techniques rangés dans un panneau repliable ;
+- interactions séparées ;
+- vrais contrôles/listeners d'origine conservés.
 
-Commits :
-- fiche runtime inventaire/équipement : `7d282905720300c2a5da366f7c29a9a20363351e` ;
-- styles : `f4e26b526686069e83c2f8a1e59c4adb2b71b57d` ;
-- chargement CSS : `c695da592a27e4f6342852128d54b029de10710c` ;
-- régression : `c0c5904e3b0b5b2ff474d4cb5d335e9b60e37f23` ;
-- compatibilité historique : `c3d5ec13efdc6ea66a94332d76016dbf051eb8bc`.
+CI : `34710181887` success.
 
-## UX Monde / World Builder / Créateur de salle
+### Configuration RPG
 
-La présentation du constructeur de monde a été restructurée sans modifier les moteurs d'édition ni le stockage.
+- longue page d'éditeur regroupée en :
+  - `🧱 Fondations` ;
+  - `⚔️ Règles & combat` ;
+  - `✨ Capacités` ;
+  - `🎒 Contenu & monde` ;
+- une catégorie visible à la fois ;
+- vraies `editor-section` déplacées, aucun moteur ou stockage recréé.
 
-World Builder :
-- navigation locale `🌍 Vue du monde / 🚪 Zones & salles / 🔗 Passages` ;
-- résumé visible du nombre de zones, salles et passages ;
-- les cartes de salles sont organisées en grille responsive ;
-- les boutons et champs existants (`+ Zone`, `+ Salle`, `+ Liaison`, champs zone/salle/lien) sont conservés avec leurs listeners d'origine.
+CI : `34710700809` success.
 
-Créateur de salle :
-- la grille devient l'élément principal de l'écran ;
-- la barre d'outils est placée juste au-dessus de la grille et devient scrollable/sticky sur téléphone ;
-- les réglages généraux et obstacles sont déplacés dans `⚙️ Réglages de la salle`, repliable ;
-- les interactions restent séparées sous la zone de construction ;
-- résumé visible du nombre de cases et d'interactions ;
-- aucun outil de peinture, clic de case, resize, porte, obstacle ou interaction n'est réimplémenté dans la couche UX.
+## Passe assets réels — jalon actuel
 
-Fichiers :
-- `v2/src/ui/rpg-world-builder-ui.js` ;
-- `v2/src/ui/rpg-world-builder-ui.css` ;
-- chargement dans `v2/index.html` ;
-- régression `v2/tests/rpg-world-builder-presentation.test.mjs`.
+Objectif : réutiliser les vrais assets Dungeon déjà présents dans le dépôt sans réintroduire la logique V1.
 
-Batterie complète : `34710181887` completed + success.
+### Resolver centralisé
 
-Commits :
-- structure présentation : `3e1a269439a4ab815600f7f217386afd9d8fc7a0` ;
-- styles : `19bcfb33fef44caa8107b0fa607b143465c1d1cd` ;
-- chargement V2 : `94ad00e23b88c400aaaed4e68f1ad1eb1fd6bfd9` ;
-- régression : `ae0c868bd36cb8351a39227004294b2a804c707e`.
+Nouveau fichier `v2/src/modes/rpg/dungeon-asset-resolver.js` :
 
-## UX Configuration RPG — catégories
+- `resolveDungeonCharacterAsset()` ;
+- `resolveDungeonWorldAsset()` ;
+- `dungeonAssetStyle()` ;
+- `artId` explicite prioritaire lorsqu'il existe ;
+- fallback par noms canoniques pour Aldren, Lyra, Brom, squelettes, gobelins, orcs, Nécromancien, Liche, Wyvern, Troll, Minotaure, Golem, Harpie, Araignée, Spectre, Goule, Loup sinistre, etc. ;
+- mapping décor : sol pierre/eau/lave/rocher, murs, portes ouvertes/fermées, coffres, pièges, portail, switch, boss, entrée et sortie.
 
-La longue page `RPG · ÉDITEUR GÉNÉRIQUE` est maintenant réorganisée par une couche de présentation dédiée, sans modifier `rpg.js` ni les sous-éditeurs.
+Commit resolver : `dc50d5cc2ffc69faafe95924c931e845e52e84c4`.
 
-- `🧱 Fondations` : statistiques, ressources, progression et éléments de base ;
-- `⚔️ Règles & combat` : jets/tests, pièges, déplacement/vision/spatial et configuration de combat ;
-- `✨ Capacités` : conditions, effets, compétences et transformations ;
-- `🎒 Contenu & monde` : objets, équipements, sets, économie, bestiaire, quêtes, alliés et contenu narratif ;
-- une seule catégorie est affichée à la fois ;
-- résumé du nombre de sections par catégorie ;
-- navigation horizontale mobile ;
-- formulaires ramenés en une colonne sur petit écran ;
-- les vraies `editor-section` sont déplacées dans les groupes : aucun champ, bouton, listener, stockage ou moteur n'est recréé ;
-- `MutationObserver` réapplique la hiérarchie après chaque rerender de l'éditeur.
+### Plateau Donjon
 
-Fichiers :
-- `v2/src/ui/rpg-config-ui.js` ;
-- `v2/src/ui/rpg-config-ui.css` ;
-- chargement dans `v2/index.html` ;
-- régression `v2/tests/rpg-config-ui.test.mjs`.
+`v2/src/modes/rpg/dungeon-room-grid-view.js` :
 
-Batterie complète : `34710700809` completed + success.
+- vrais portraits utilisés pour les pions lorsque disponibles ;
+- texture de sol sur les cases ;
+- portes, murs et certains éléments interactifs utilisent les assets existants ;
+- emoji conservé en fallback et pour la compatibilité/accessibilité ;
+- aucune règle de déplacement, collision ou interaction modifiée.
 
 Commits :
-- structure Configuration : `8e8764eed5fcf1502b8c813e6aca5d47b5d01003` ;
-- styles : `568c2f1a9d462583087bcdeba8d4f8b950f0f916` ;
-- chargement V2 : `5853603ff64aa3a95bff227081f3f5577f81b528` ;
-- régression : `93bcb630a5a34f3de0199d7dd3248c594b9f4986`.
+- rendu assets : `87d6de0ad84f0b807cbc19ceca8febe43c1d5ad2` ;
+- compatibilité anciens symboles portes/murs : `f0dbc14ed8cdf375633373e316fc7283c5891e1a`.
 
-## Jalons CI récents validés
+### Fiche héros / objets
 
-- RPG : preview téléphone : `34703496395` success
-- RPG UX : première refonte présentation Donjon : `34704516033` success
-- RPG UX : hiérarchie surface de jeu / Journal & détails : `34707068397` success
-- RPG UX : navigation Jouer / Héros / Monde / Configuration : `34707462937` success
-- RPG : déplacement tactique en combat : `34708055765` success
-- RPG UX : commandes combat cartes/cibles : `34708334737` success
-- RPG UX : cibles synchronisées portée/LOS/layout : `34709303945` success
-- RPG UX : fiche héros/inventaire/équipement : `34709948494` success
-- RPG UX : Monde / World Builder / Salles : `34710181887` success
-- RPG UX : Configuration catégorisée : `34710700809` success
+`v2/src/modes/rpg/hero-sheet.js` :
+
+- portrait réel du héros si `artId` ou asset canonique disponible ;
+- images des objets si leur `artId` pointe vers un asset ;
+- fallback icône conservé ;
+- inventaire et équipement restent dérivés du runtime existant.
+
+Commit : `53712f2f3b11da0c8acc71e8925f50c141a6d2f8`.
+
+### Cadrage visuel
+
+Nouveau `v2/src/ui/dungeon-assets-ui.css` :
+
+- cadrage portraits sur les pions ;
+- portrait héros dans la fiche ;
+- images d'objets en `contain` ;
+- textures de plateau ;
+- tailles adaptées mobile.
+
+Commit styles : `b9bbe3ae92a31025e67512c488007e8fc39624fc`.
+Chargement V2 : `5ebdf995e271564f4f08195a2599dc1e8a7a8521`.
+Régression : `v2/tests/rpg-dungeon-assets-presentation.test.mjs`, commit `456b331cf8722e05b514159af0fa99eb2179b0c9`.
+
+### Validation CI
+
+Premier run : `34711555501` — failure de compatibilité uniquement : l'ancien test attendait encore le symbole littéral `🚪⬅️` pour une porte d'entrée, alors que l'image de porte l'avait remplacé visuellement.
+
+Correction : les symboles historiques restent présents avec les vrais assets affichés en même temps.
+
+Batterie complète finale : `34711595969` — completed + success.
+
+Aucun moteur de gameplay n'a été modifié pendant cette passe.
+
+## Jalons CI récents
+
+- preview téléphone initiale : `34703496395` success
+- identité Donjon : `34704516033` success
+- hiérarchie Donjon : `34707068397` success
+- navigation RPG : `34707462937` success
+- déplacement tactique combat : `34708055765` success
+- commandes combat : `34708334737` success
+- cibles spatial/LOS : `34709303945` success
+- fiche héros/inventaire : `34709948494` success
+- World Builder/Salles : `34710181887` success
+- Configuration : `34710700809` success
+- assets réels Donjon : `34711595969` success
 
 ## Preview téléphone
 
-La preview initiale reste la référence du prototype archaïque :
+Ancienne référence archaïque :
 `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/32e3703889f9d3d0f881b13dafc59a342ecd9e72/v2/index.html`
 
-Pour tester les prochaines passes UX, communiquer une nouvelle URL raw.githack figée sur le commit validé concerné ; ne jamais écraser la V1 publique pour une preview.
+Ne pas utiliser GitHub Pages pour `rebuild/v2` afin de ne pas écraser la V1 publique.
 
 ## Priorités ouvertes
 
-1. Faire maintenant la passe assets réels : héros, ennemis, boss, tuiles, murs, portes, obstacles, icônes et cadrages.
-2. Générer ensuite une nouvelle preview téléphone figée sur un commit UX récent pour validation utilisateur.
-3. Puis audio/PWA/cache/parité finale. Monster Capture reste en pause pendant ce cycle RPG UX.
+1. Étendre les vrais portraits/assets aux cartes de combattants et à la timeline de combat.
+2. Vérifier ensuite les assets des objets/sets et les cadrages restants dans les interfaces secondaires.
+3. Générer une nouvelle preview téléphone figée sur un commit UX récent pour validation utilisateur.
+4. Puis audio/PWA/cache/parité finale.
+5. Monster Capture reste en pause pendant ce cycle RPG UX.

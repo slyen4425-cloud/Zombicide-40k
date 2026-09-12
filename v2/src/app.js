@@ -1,4 +1,5 @@
 import { mountRpgPage } from './modes/rpg/rpg-page.js';
+import { mountDungeonDeviceRoleLaunch } from './modes/rpg/dungeon-device-role-launch-ui.js';
 import { mountSurvivalPage } from './modes/survival/survival-page.js';
 
 const MODES = [
@@ -39,7 +40,15 @@ function renderModes(){const host=document.querySelector('#modeGrid');host.inner
 function renderStatus(){document.querySelector('#buildStatus').innerHTML='<ul class="status-list"><li><strong>Branche :</strong> rebuild/v2</li><li><strong>Stable :</strong> main reste intact</li><li><strong>UI :</strong> mobile-first + aide contextuelle</li><li><strong>Core :</strong> stockage isolé + conditions + effets + compétences + formes</li><li><strong>Survie :</strong> moteur/données/interface séparés du RPG</li><li><strong>RPG :</strong> combat + déplacement + vision/furtivité + World Builder + salle + interactions structurées</li></ul>';}
 function openHelp(key){const help=HELP[key]||HELP.home;const drawer=document.querySelector('#helpDrawer');document.querySelector('#helpTitle').textContent=help.title;document.querySelector('#helpBody').innerHTML=help.html;drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');document.querySelector('#drawerBackdrop').hidden=false;}
 function closeHelp(){const drawer=document.querySelector('#helpDrawer');drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');document.querySelector('#drawerBackdrop').hidden=true;}
-function openMode(modeId){const home=document.querySelector('#homeView');const workspace=document.querySelector('#workspaceView');const host=document.querySelector('#workspaceHost');disposeWorkspace();home.hidden=true;workspace.hidden=false;host.innerHTML='';if(modeId==='rpg')workspaceController=mountRpgPage(host);else if(modeId==='survival')workspaceController=mountSurvivalPage(host)||null;else host.innerHTML='<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre des autres moteurs de jeu.</p></section>';window.scrollTo({top:0,behavior:'instant'});}
+function mountRpgLaunch(host){
+  workspaceController=null;
+  mountDungeonDeviceRoleLaunch(host,{onSelect:({isGameMasterDevice})=>{
+    host.innerHTML='';
+    workspaceController=mountRpgPage(host,{dungeonIsGameMasterDevice:isGameMasterDevice});
+    window.scrollTo({top:0,behavior:'instant'});
+  }});
+}
+function openMode(modeId){const home=document.querySelector('#homeView');const workspace=document.querySelector('#workspaceView');const host=document.querySelector('#workspaceHost');disposeWorkspace();home.hidden=true;workspace.hidden=false;host.innerHTML='';if(modeId==='rpg')mountRpgLaunch(host);else if(modeId==='survival')workspaceController=mountSurvivalPage(host)||null;else host.innerHTML='<section class="panel"><h2>Migration en préparation</h2><p>Ce mode sera branché ici sans dépendre des autres moteurs de jeu.</p></section>';window.scrollTo({top:0,behavior:'instant'});}
 function backHome(){disposeWorkspace();document.querySelector('#workspaceView').hidden=true;document.querySelector('#homeView').hidden=false;document.querySelector('#workspaceHost').innerHTML='';window.scrollTo({top:0,behavior:'instant'});}
 document.addEventListener('click',event=>{const help=event.target.closest('[data-help]');if(help){event.stopPropagation();openHelp(help.dataset.help);return;}const mode=event.target.closest('[data-mode]');if(mode)openMode(mode.dataset.mode);});
 document.querySelector('#helpClose').addEventListener('click',closeHelp);document.querySelector('#drawerBackdrop').addEventListener('click',closeHelp);document.querySelector('#backHome').addEventListener('click',backHome);document.addEventListener('keydown',event=>{if(event.key==='Escape')closeHelp();});

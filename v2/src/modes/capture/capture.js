@@ -17,6 +17,12 @@ import {
   buildCaptureBiomeIndex,
   rollCaptureWildEncounter,
 } from './encounters.js';
+import {
+  createCaptureBattleState,
+  endCaptureBattle,
+  moveCaptureBattleActor,
+  switchCaptureActiveCreature,
+} from './dynamic-combat.js';
 
 function clone(value){return structuredClone(value);}
 
@@ -111,6 +117,53 @@ export function enterCaptureRoom(state,roomId,{biomes=[],rng=Math.random}={}){
 
 export function clearCaptureEncounter(state){
   return {...state,encounter:null};
+}
+
+export function startCaptureBattle(state,{playerActiveInstanceId=null,opponent=null,zoneId='capture-battle',playerPosition,opponentPosition}={}){
+  if(state.battle) return {ok:false,reason:'battle-active',state};
+  if(!state.encounter) return {ok:false,reason:'capture-battle-encounter-required',state};
+  try{
+    const battle=createCaptureBattleState({
+      encounter:state.encounter,
+      activeTeam:state.activeTeam,
+      playerActiveInstanceId,
+      opponent,
+      zoneId,
+      ...(playerPosition?{playerPosition}:{}),
+      ...(opponentPosition?{opponentPosition}:{}),
+    });
+    return {ok:true,battle,state:{...state,battle,exploration:{...(state.exploration||{}),freeMovement:false}}};
+  }catch(error){
+    return {ok:false,reason:error?.message||'capture-battle-start-failed',state};
+  }
+}
+
+export function moveCaptureBattleCreature(state,side,target,options={}){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state};
+  const moved=moveCaptureBattleActor(state.battle,side,target,options);
+  if(!moved.ok) return {...moved,state};
+  return {...moved,state:{...state,battle:moved.battle}};
+}
+
+export function switchCaptureBattleCreature(state,nextInstanceId){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state};
+  const switched=switchCaptureActiveCreature(state.battle,state.activeTeam,nextInstanceId);
+  if(!switched.ok) return {...switched,state};
+  return {...switched,state:{...state,battle:switched.battle}};
+}
+
+export function finishCaptureBattle(state,reason){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state};
+  const ended=endCaptureBattle(state.battle,reason);
+  if(!ended.ok) return {...ended,state};
+  const clearEncounter=reason==='capture_success'||reason==='opponent_ko'||reason==='flee';
+  const next={
+    ...state,
+    battle:null,
+    encounter:clearEncounter?null:state.encounter,
+    exploration:{...(state.exploration||{}),freeMovement:true},
+  };
+  return {ok:true,endReason:String(reason),endedBattle:ended.battle,state:next};
 }
 
 export function setCaptureTeam(state,{activeTeam=[],reserve=state.reserve||[]}={}){

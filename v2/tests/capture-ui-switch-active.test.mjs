@@ -50,7 +50,7 @@ function startedState(){
   const state=startedState();
   const result=switchCaptureBattleCreature(state,'missing');
   assert.equal(result.ok,false);
-  assert.equal(result.reason,'capture-battle-switch-creature-missing');
+  assert.equal(result.reason,'capture-active-creature-not-in-team');
   assert.equal(result.state.battle.player.activeInstanceId,'p1');
 }
 

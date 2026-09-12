@@ -99,7 +99,8 @@ export function combatJournalEntries(universe={},combat=null,{limit=8}={}){
 function renderCombatPortrait(entry,{timeline=false}={}){
   const base=timeline?'combat-turn-portrait':'combatant-portrait';
   if(entry.assetUrl) return `<span class="${base} has-art" aria-hidden="true"><img src="${esc(entry.assetUrl)}" alt="" loading="lazy"></span>`;
-  return `<span class="${base} fallback" aria-hidden="true">${esc(entry.icon||entry.side==='heroes'?'🛡️':'👹')}</span>`;
+  const fallbackIcon=entry.icon||(entry.side==='heroes'?'🛡️':'👹');
+  return `<span class="${base} fallback" aria-hidden="true">${esc(fallbackIcon)}</span>`;
 }
 
 export function renderCombatPresentation(universe={},combat=null,{journalLimit=8}={}){

@@ -117,6 +117,16 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     return `<span class="capture-roster-ability" data-capture-ability="${escapeHtml(ability.id)}">${escapeHtml(ability.id)}${charges}${cooldown}</span>`;
   }
 
+  function rosterReactionHtml(reaction){
+    const cooldown=reaction.cooldownRemaining===null
+      ?''
+      :reaction.readyByCooldown
+        ?' · prête côté cooldown'
+        :` · recharge ${escapeHtml(reaction.cooldownRemaining)}`;
+    const resource=reaction.resource!==null?` · ressource ${escapeHtml(reaction.resource)}`:'';
+    return `<span class="capture-roster-reaction" data-capture-reaction="${escapeHtml(reaction.id)}" data-capture-reaction-ready="${reaction.readyByCooldown===true?'true':reaction.readyByCooldown===false?'false':'unknown'}">${escapeHtml(reaction.id)}${cooldown}${resource}</span>`;
+  }
+
   function rosterEntryHtml(entry){
     const activeClass=entry.activeInBattle?' is-active-in-battle':'';
     const koClass=entry.ko?' is-ko':'';
@@ -127,6 +137,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     const vitals=entry.hpLabel!==null?`<p class="capture-roster-vitals" data-capture-hp>PV : ${escapeHtml(entry.hpLabel)}</p>`:'';
     const statuses=entry.statuses.length?`<div class="capture-roster-statuses" data-capture-statuses>${entry.statuses.map(rosterStatusHtml).join('')}</div>`:'';
     const abilities=entry.abilities.length?`<div class="capture-roster-abilities" data-capture-abilities>${entry.abilities.map(rosterAbilityHtml).join('')}</div>`:'';
+    const reactions=entry.reactions.length?`<div class="capture-roster-reactions" data-capture-reactions>${entry.reactions.map(rosterReactionHtml).join('')}</div>`:'';
     return `<article class="capture-roster-entry${activeClass}${koClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}" data-capture-ko="${koAttr}">
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
@@ -134,6 +145,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
         ${vitals}
         ${statuses}
         ${abilities}
+        ${reactions}
         ${activeBadge}
         ${koBadge}
       </div>

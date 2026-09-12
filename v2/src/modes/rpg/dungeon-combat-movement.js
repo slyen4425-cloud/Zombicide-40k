@@ -1,5 +1,5 @@
-import { actorMovementAllowance, getActorPosition, setActorPosition } from './spatial-engine.js';
-import { shortestRoomPathDistance } from './room-tactical-bridge.js';
+import { getActorPosition } from './spatial-engine.js';
+import { createCombatMovementState, moveCombatActor } from './tactical-combat.js';
 
 function clone(value){return structuredClone(value);}
 function list(value){return Array.isArray(value)?value:Object.values(value||{});}
@@ -11,18 +11,12 @@ function finiteCell(value){const n=Number(value);return Number.isInteger(n)?n:nu
 
 export const DUNGEON_COMBAT_MOVEMENT_CONTRACT=Object.freeze({
   sameCombatEngine:true,
+  reusesTacticalCombatMoveActor:true,
   usesSpatialCore:true,
-  usesRoomTacticalBridge:true,
   budgetPerTurnSequence:true,
   attackDoesNotAutoTrigger:true,
   mutatesDefinitions:false,
 });
-
-function movementLedger(combat,actorId){
-  const row=combat?.metadata?.tacticalMovement||null;
-  if(!row||Number(row.turnSequence)!==Number(combat?.turnSequence)||String(row.actorId)!==String(actorId)) return {spent:0};
-  return {spent:Math.max(0,Number(row.spent)||0)};
-}
 
 function occupiedLayout(layout,combat,spatial,actorId){
   const next=clone(layout||{});
@@ -37,19 +31,27 @@ function occupiedLayout(layout,combat,spatial,actorId){
   return next;
 }
 
-export function dungeonCombatMovementState({combat=null,heroRuntimes=[],spatialConfig={}}={}){
+function currentMoveState(combat,config){
+  const saved=combat?.metadata?.tacticalMoveState||null;
+  if(saved&&Number(saved.turnSequence)===Number(combat?.turnSequence)&&saved.state) return clone(saved.state);
+  return createCombatMovementState(combat,config);
+}
+
+export function dungeonCombatMovementState({combat=null,heroRuntimes=[],spatialConfig={},roomLayout=null}={}){
   if(!combat||combat.phase!=='turn'||!combat.activeActorId) return {enabled:false,reason:'not-in-turn',actorId:null,allowance:0,spent:0,remaining:0};
   const actor=combat.actors?.[combat.activeActorId];
   if(!actor||actor.side!=='heroes'||actor.ko) return {enabled:false,reason:'not-hero-turn',actorId:actor?.id||null,allowance:0,spent:0,remaining:0};
   const runtime=heroRuntimeFor(heroRuntimes,actor.id);
   if(!runtime||runtime.ko||runtime.dead||runtime.active===false) return {enabled:false,reason:'hero-unavailable',actorId:String(actor.id),allowance:0,spent:0,remaining:0};
-  const allowance=actorMovementAllowance(runtime,{...spatialConfig,actor:runtime});
-  const spent=movementLedger(combat,actor.id).spent;
-  return {enabled:true,reason:null,actorId:String(actor.id),allowance,spent,remaining:Math.max(0,allowance-spent)};
+  const config={...spatialConfig,roomLayout};
+  const moveState=currentMoveState(combat,config);
+  const remaining=Math.max(0,Number(moveState?.remaining?.[actor.id])||0);
+  const spent=Math.max(0,Number(moveState?.spent?.[actor.id])||0);
+  return {enabled:true,reason:null,actorId:String(actor.id),allowance:remaining+spent,spent,remaining,moveState};
 }
 
 export function moveActiveDungeonHeroInCombat({combat=null,roomRuntime=null,heroRuntimes=[],spatial=null,roomLayout=null,target=null,spatialConfig={}}={}){
-  const state=dungeonCombatMovementState({combat,heroRuntimes,spatialConfig});
+  const state=dungeonCombatMovementState({combat,heroRuntimes,spatialConfig,roomLayout});
   if(!state.enabled) return {ok:false,reason:state.reason,combat,roomRuntime,spatial,movement:state};
   if(!roomLayout) return {ok:false,reason:'combat-move-layout-missing',combat,roomRuntime,spatial,movement:state};
   const activeSpatial=spatial||roomRuntime?.spatial||null;
@@ -66,16 +68,18 @@ export function moveActiveDungeonHeroInCombat({combat=null,roomRuntime=null,hero
     if(pos&&Number(pos.x)===x&&Number(pos.y)===y&&String(pos.zoneId??'')===String(to.zoneId??'')) return {ok:false,reason:'combat-move-cell-occupied',combat,roomRuntime,spatial:activeSpatial,movement:state};
   }
   if(state.remaining<=0) return {ok:false,reason:'combat-move-budget-spent',combat,roomRuntime,spatial:activeSpatial,movement:state};
+
   const tacticalLayout=occupiedLayout(roomLayout,combat,activeSpatial,state.actorId);
-  const distance=shortestRoomPathDistance(tacticalLayout,from,to,{diagonal:Boolean(spatialConfig?.diagonal),maxDistance:state.remaining});
-  if(!Number.isFinite(distance)||distance>state.remaining) return {ok:false,reason:'combat-move-out-of-range',combat,roomRuntime,spatial:activeSpatial,distance,movement:state};
-  const nextSpatial=setActorPosition(activeSpatial,state.actorId,to);
+  const config={...spatialConfig,roomLayout:tacticalLayout};
+  const moved=moveCombatActor({spatial:activeSpatial,combat,actorId:state.actorId,target:to,moveState:state.moveState,config});
+  if(!moved.ok) return {ok:false,reason:`combat-move-${moved.reason||'refused'}`,combat,roomRuntime,spatial:activeSpatial,distance:moved.distance,movement:state};
+
   const nextCombat=clone(combat);
   nextCombat.metadata=nextCombat.metadata||{};
-  nextCombat.metadata.tacticalMovement={actorId:state.actorId,turnSequence:Number(combat.turnSequence)||0,spent:state.spent+distance};
-  nextCombat.log=[...(nextCombat.log||[]),{type:'combat-move',actorId:state.actorId,turnSequence:Number(combat.turnSequence)||0,distance,to:clone(to)}];
+  nextCombat.metadata.tacticalMoveState={turnSequence:Number(combat.turnSequence)||0,state:clone(moved.moveState)};
+  nextCombat.log=[...(nextCombat.log||[]),{type:'combat-move',actorId:state.actorId,turnSequence:Number(combat.turnSequence)||0,distance:moved.distance,to:clone(to)}];
   const nextRuntime=roomRuntime?clone(roomRuntime):null;
-  if(nextRuntime) nextRuntime.spatial=clone(nextSpatial);
-  const movement={...state,spent:state.spent+distance,remaining:Math.max(0,state.allowance-state.spent-distance)};
-  return {ok:true,reason:null,combat:nextCombat,roomRuntime:nextRuntime,spatial:nextSpatial,actorId:state.actorId,from:clone(from),target:to,distance,movement};
+  if(nextRuntime) nextRuntime.spatial=clone(moved.spatial);
+  const movement={enabled:true,reason:null,actorId:state.actorId,allowance:state.allowance,spent:Number(moved.moveState?.spent?.[state.actorId])||0,remaining:Number(moved.remaining)||0,moveState:clone(moved.moveState)};
+  return {ok:true,reason:null,combat:nextCombat,roomRuntime:nextRuntime,spatial:moved.spatial,actorId:state.actorId,from:clone(from),target:to,distance:moved.distance,movement};
 }

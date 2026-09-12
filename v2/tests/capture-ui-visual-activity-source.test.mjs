@@ -93,8 +93,8 @@ for(const forbidden of ['setInterval(','requestAnimationFrame(','Date.now(','per
 const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',import.meta.url),'utf8');
 assert.match(pageSource,/visualActivitySource=null/);
 assert.match(pageSource,/attachCaptureUiVisualActivitySource\(visualActivitySource/);
-assert.match(pageSource,/onInactive:\(\)=>api\.pauseNoticeVisualClock\(\)/);
-assert.match(pageSource,/onActive:\(\)=>api\.resumeNoticeVisualClock\(\)/);
+assert.match(pageSource,/onInactive:\(\)=>api\.setNoticeVisualPauseReason\('activity',true\)/);
+assert.match(pageSource,/onActive:\(\)=>api\.setNoticeVisualPauseReason\('activity',false\)/);
 assert.match(pageSource,/visualActivitySourceAttachment\.detach\(\)/);
 
 console.log('capture-ui-visual-activity-source.test.mjs: ok');

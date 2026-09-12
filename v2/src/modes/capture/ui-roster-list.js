@@ -1,3 +1,5 @@
+import {captureAssetPathAllowed,resolveCaptureSpeciesAsset} from './assets.js';
+
 export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   presentationOnly:true,
   readsAuthoritativeRosterData:true,
@@ -6,6 +8,8 @@ export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   readsAuthoritativeStatuses:true,
   readsAuthoritativeAbilityState:true,
   readsAuthoritativeReactionState:true,
+  readsCanonicalCaptureAssetRegistry:true,
+  neverUsesRpgOrDungeonFallback:true,
   exposesInspectionTarget:true,
   mutatesRoster:false,
   mutatesBattle:false,
@@ -22,6 +26,20 @@ function finiteOrNull(value){
   if(value==null||value==='') return null;
   const number=Number(value);
   return Number.isFinite(number)?number:null;
+}
+
+function availableAssetPart(part,registry){
+  if(!part||typeof part!=='object') return null;
+  const path=text(part.path,'');
+  const status=text(part.status,'');
+  if(!path||status==='pending_import'||!captureAssetPathAllowed(path,registry)) return null;
+  return {status,path};
+}
+
+function captureAssetPathToUiSrc(path){
+  const value=text(path,'');
+  if(!value) return null;
+  return value.startsWith('v2/')?`./${value.slice(3)}`:value;
 }
 
 function captureRosterStatusEntry(status={}){
@@ -84,10 +102,15 @@ function captureRosterReactions(creature={}){
   return Object.entries(state).map(([reactionId,slot])=>captureRosterReactionEntry(reactionId,slot)).filter(Boolean);
 }
 
-export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null}={}){
+export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null,assetRegistry={}}={}){
   const instanceId=text(creature?.instanceId,'');
-  const speciesId=text(creature?.speciesId,'');
-  if(!instanceId||!speciesId) return null;
+  const rawSpeciesId=text(creature?.speciesId,'');
+  if(!instanceId||!rawSpeciesId) return null;
+  const resolvedAsset=resolveCaptureSpeciesAsset(rawSpeciesId,assetRegistry);
+  const speciesId=resolvedAsset?.speciesId||rawSpeciesId;
+  const displayName=resolvedAsset?.displayName||speciesId;
+  const mainArt=availableAssetPart(resolvedAsset?.mainArt,assetRegistry);
+  const iconArt=availableAssetPart(resolvedAsset?.iconArt,assetRegistry);
   const nickname=text(creature?.nickname,'');
   const level=Math.max(1,Number(creature?.level)||1);
   const normalizedLocation=location==='reserve'?'reserve':'active';
@@ -112,9 +135,10 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
   return {
     instanceId,
     speciesId,
+    displayName,
     location:normalizedLocation,
-    title:nickname||speciesId,
-    subtitle:`${speciesId} · Niv. ${level}`,
+    title:nickname||displayName,
+    subtitle:`${displayName} · Niv. ${level}`,
     inspectable:true,
     activeInBattle,
     hasVitals,
@@ -125,12 +149,14 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     statuses,
     abilities,
     reactions,
+    mainArt:mainArt?{...mainArt,src:captureAssetPathToUiSrc(mainArt.path)}:null,
+    iconArt:iconArt?{...iconArt,src:captureAssetPathToUiSrc(iconArt.path)}:null,
   };
 }
 
-export function buildCaptureRosterLists(state={}){
+export function buildCaptureRosterLists(state={}, {assetRegistry={}}={}){
   const activeBattleInstanceId=state?.battle?.player?.activeInstanceId??null;
-  const options={activeBattleInstanceId};
+  const options={activeBattleInstanceId,assetRegistry};
   const activeTeam=(state?.activeTeam||[]).map(creature=>captureRosterListEntry(creature,'active',options)).filter(Boolean);
   const reserve=(state?.reserve||[]).map(creature=>captureRosterListEntry(creature,'reserve',options)).filter(Boolean);
   return {

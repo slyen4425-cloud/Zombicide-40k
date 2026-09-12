@@ -34,6 +34,8 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
   let currentDungeonSpatial=dungeonSpatial?structuredClone(dungeonSpatial):null;
   let currentDungeonSpatialConfig=structuredClone(dungeonSpatialConfig||{});
   let currentDungeonCombat=dungeonCombat?structuredClone(dungeonCombat):null;
+  let currentDungeonUniverse=loadRpgUniverse();
+  let currentDungeonIsDemo=false;
   let currentDungeonIsGameMasterDevice=dungeonIsGameMasterDevice==null?isDungeonGameMasterDevice():Boolean(dungeonIsGameMasterDevice);
   let currentDungeonEventWorld={};
   let currentTab='editor';
@@ -63,16 +65,19 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     if(currentTab!=='dungeon'||currentDungeonRuntime) return;
     const universe=loadRpgUniverse();
     const enabledHeroes=(Array.isArray(universe.heroes)?universe.heroes:Object.values(universe.heroes||{})).filter(hero=>hero&&hero.enabled!==false&&hero.id);
-    body.insertAdjacentHTML('afterbegin',`<section class="editor-section dungeon-test-launch" data-dungeon-test-launch><div class="section-title-row"><div><h3>▶️ Partie test</h3><p class="muted">Démarre immédiatement le World Builder actuel avec les héros configurés, sans créer de sauvegarde.</p></div><button type="button" class="primary-button" data-start-dungeon-test ${enabledHeroes.length?'':'disabled'}>Lancer une partie test</button></div><p class="muted" data-dungeon-test-status>${enabledHeroes.length?`${enabledHeroes.length} héros prêt${enabledHeroes.length>1?'s':''} pour le test.`:'Crée au moins un héros dans Configuration avant de lancer le test.'}</p></section>`);
+    const usingDemo=enabledHeroes.length===0;
+    body.insertAdjacentHTML('afterbegin',`<section class="editor-section dungeon-test-launch" data-dungeon-test-launch><div class="section-title-row"><div><h3>▶️ Partie test</h3><p class="muted">${usingDemo?'Aucun héros configuré : une mini-démo temporaire sera utilisée, sans modifier tes données.':'Démarre immédiatement le World Builder actuel avec les héros configurés, sans créer de sauvegarde.'}</p></div><button type="button" class="primary-button" data-start-dungeon-test>Lancer une partie test</button></div><p class="muted" data-dungeon-test-status>${usingDemo?'Démo prête : 1 aventurier, 1 squelette et un combat simple.':`${enabledHeroes.length} héros prêt${enabledHeroes.length>1?'s':''} pour le test.`}</p></section>`);
     body.querySelector('[data-start-dungeon-test]')?.addEventListener('click',()=>{
       const status=body.querySelector('[data-dungeon-test-status]');
-      const out=createDungeonTestSession({universe:loadRpgUniverse(),worldDraft:loadWorldDraft(),layoutProvider:dungeonLayoutProvider});
+      const out=createDungeonTestSession({universe:loadRpgUniverse(),worldDraft:loadWorldDraft(),layoutProvider:dungeonLayoutProvider,allowDemoFallback:true});
       if(!out.ok){if(status) status.textContent=`Impossible de lancer : ${out.reason}.`;return;}
+      currentDungeonUniverse=structuredClone(out.universe||loadRpgUniverse());
+      currentDungeonIsDemo=out.demo===true;
       currentDungeonRuntime=out.roomRuntime;
       currentDungeonHeroRuntimes=structuredClone(out.heroRuntimes||[]);
       currentDungeonCombat=null;
       currentDungeonEventWorld={};
-      onDungeonRuntimeChange?.(currentDungeonRuntime,{kind:'dungeon-test-start',heroRuntimes:structuredClone(currentDungeonHeroRuntimes)});
+      onDungeonRuntimeChange?.(currentDungeonRuntime,{kind:'dungeon-test-start',demo:currentDungeonIsDemo,heroRuntimes:structuredClone(currentDungeonHeroRuntimes)});
       open('dungeon');
     });
   }
@@ -81,7 +86,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     if(currentTab!=='dungeon') return;
     const install=()=>{
       if(currentTab!=='dungeon'||!dungeonView) return;
-      const universe=loadRpgUniverse();
+      const universe=currentDungeonUniverse;
       mountDungeonCombatItemControls(body,{
         universe,
         getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
@@ -135,8 +140,9 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     body.innerHTML='';
     if(tab==='combat') mountCombatLab(body,loadRpgUniverse());
     else if(tab==='dungeon'){
+      if(!currentDungeonRuntime&&!currentDungeonIsDemo) currentDungeonUniverse=loadRpgUniverse();
       dungeonView=mountDungeonGameplayView(body,{
-        universe:loadRpgUniverse(),
+        universe:currentDungeonUniverse,
         roomRuntime:currentDungeonRuntime,
         lootRecipients:currentDungeonLootRecipients,
         layoutProvider:dungeonLayoutProvider,
@@ -174,6 +180,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
           scheduleDungeonCombatUi();
         },
       });
+      if(currentDungeonIsDemo&&currentDungeonRuntime) body.insertAdjacentHTML('afterbegin','<p class="status-pill" data-dungeon-demo-banner>Démo temporaire · aucune donnée enregistrée</p>');
       installDungeonTestLauncher();
       scheduleDungeonCombatUi();
     }
@@ -190,6 +197,7 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     audioSession:pageRuntime.audioSession,
     setDungeonRuntime(nextRuntime){
       currentDungeonRuntime=nextRuntime||null;
+      if(!currentDungeonRuntime){currentDungeonIsDemo=false;currentDungeonUniverse=loadRpgUniverse();}
       if(currentTab==='dungeon'&&dungeonView){dungeonView.setRoomRuntime(currentDungeonRuntime);scheduleDungeonCombatUi();}
       return currentDungeonRuntime;
     },
@@ -247,6 +255,8 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
     getDungeonCombat:()=>currentDungeonCombat?structuredClone(currentDungeonCombat):null,
     getDungeonGameMasterDevice:()=>currentDungeonIsGameMasterDevice,
     getDungeonEventWorld:()=>structuredClone(currentDungeonEventWorld),
+    getDungeonUniverse:()=>structuredClone(currentDungeonUniverse),
+    isDungeonDemo:()=>currentDungeonIsDemo,
     openTab:open,
     dispose:()=>pageRuntime.dispose(),
     isDisposed:()=>pageRuntime.isDisposed(),

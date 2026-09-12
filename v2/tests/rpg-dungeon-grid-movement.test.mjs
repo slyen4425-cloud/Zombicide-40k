@@ -42,17 +42,26 @@ const before=structuredClone({roomRuntime,heroRuntimes,spatial,layout});
 
 {
   const walled={...layout,walls:[{id:'wall-1',x:0,y:0,edge:'east',kind:'wall',blocksMovement:true,blocksVision:true}]};
-  const out=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes,spatial,roomLayout:walled,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
-  assert.equal(out.ok,false,'solid authored wall must block the direct move');
+  const detour=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes,spatial,roomLayout:walled,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
+  assert.equal(detour.ok,true,'a wall blocks its edge but a valid path may go around it');
+  assert.equal(detour.distance,3,'wall must force the three-cell detour instead of direct distance 1');
+  const shortMoveHeroes=[{...heroRuntimes[0],state:{...heroRuntimes[0].state,stats:{move:2}}}];
+  const denied=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes:shortMoveHeroes,spatial,roomLayout:walled,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
+  assert.equal(denied.ok,false,'wall detour must be refused when movement allowance is too short');
 }
 
 {
   const closedDoor={...layout,doors:[{id:'door-1',x:0,y:0,edge:'east',state:'closed',locked:false}]};
-  const denied=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes,spatial,roomLayout:closedDoor,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
-  assert.equal(denied.ok,false,'closed door must block movement');
+  const detour=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes,spatial,roomLayout:closedDoor,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
+  assert.equal(detour.ok,true,'closed door blocks its edge but does not erase legitimate routes around it');
+  assert.equal(detour.distance,3,'closed door must force a detour instead of direct distance 1');
+  const shortMoveHeroes=[{...heroRuntimes[0],state:{...heroRuntimes[0].state,stats:{move:2}}}];
+  const denied=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes:shortMoveHeroes,spatial,roomLayout:closedDoor,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
+  assert.equal(denied.ok,false,'closed-door detour must be refused when allowance is too short');
   const openDoor={...layout,doors:[{id:'door-1',x:0,y:0,edge:'east',state:'open',locked:false}]};
   const allowed=moveFocusedDungeonHeroOnGrid({roomRuntime,heroRuntimes,spatial,roomLayout:openDoor,target:{x:1,y:0},spatialConfig:{movementStatId:'move'}});
   assert.equal(allowed.ok,true,'open unlocked door must allow movement');
+  assert.equal(allowed.distance,1,'open door restores the direct step');
 }
 
 {

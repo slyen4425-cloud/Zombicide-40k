@@ -11,6 +11,7 @@ import { mountDungeonCombatItemControls } from './dungeon-combat-item-ui.js';
 import { mountDungeonCombatFleeControl } from './dungeon-combat-flee-ui.js';
 import { mountDungeonCombatGmControls } from './dungeon-combat-gm-ui.js';
 import { mountDungeonGridInteractionControls } from './dungeon-grid-interactions-ui.js';
+import { mountDungeonCombatMovementUi } from './dungeon-combat-movement-ui.js';
 import { materializeRoomLayout } from './room-runtime.js';
 import { isDungeonGameMasterDevice, setDungeonGameMasterDeviceRole } from './dungeon-device-role.js';
 import { createBrowserAudioOutput } from '../../core/browser-audio-output.js';
@@ -143,6 +144,25 @@ export function mountRpgPage(host,{runtime=null,dungeonRuntime=null,dungeonLootR
           dungeonView.setInventory(currentDungeonInventory);
           dungeonView.setRoomRuntime(currentDungeonRuntime);
           onDungeonRuntimeChange?.(currentDungeonRuntime,{...out,kind:'dungeon-grid-interaction'});
+          scheduleDungeonCombatUi();
+        },
+      });
+      mountDungeonCombatMovementUi(body,{
+        getCombat:()=>dungeonView?.getCombat?.()||currentDungeonCombat,
+        getRoomRuntime:()=>dungeonView?.getRoomRuntime?.()||currentDungeonRuntime,
+        getHeroRuntimes:()=>dungeonView?.getHeroRuntimes?.()||structuredClone(currentDungeonHeroRuntimes),
+        getSpatial:()=>dungeonView?.getSpatial?.()||currentDungeonSpatial,
+        getSpatialConfig:()=>structuredClone(currentDungeonSpatialConfig),
+        getRoomLayout:roomId=>roomId?dungeonLayoutProvider(roomId):null,
+        onMove(out){
+          currentDungeonCombat=structuredClone(out.combat);
+          currentDungeonRuntime=out.roomRuntime||currentDungeonRuntime;
+          currentDungeonSpatial=structuredClone(out.spatial);
+          dungeonView.setSpatial(currentDungeonSpatial,currentDungeonSpatialConfig);
+          dungeonView.setRoomRuntime(currentDungeonRuntime);
+          dungeonView.setCombat(currentDungeonCombat);
+          onDungeonCombatChange?.(structuredClone(currentDungeonCombat),{...out,kind:'combat-move'});
+          onDungeonRuntimeChange?.(currentDungeonRuntime,{...out,kind:'combat-move',spatial:structuredClone(currentDungeonSpatial)});
           scheduleDungeonCombatUi();
         },
       });

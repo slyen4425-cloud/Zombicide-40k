@@ -22,10 +22,12 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Le squelette de démo est injecté uniquement dans le layout temporaire de la salle de départ, puis matérialisé dans le vrai `roomRuntime`.
 - L'univers de démo est conservé seulement dans la session Donjon courante afin que les compétences, l'IA, la règle de KO et les noms soient disponibles pendant le combat.
 - Aucun contenu de démo n'est écrit dans l'éditeur ou le stockage ; dès que des héros configurés existent, ils prennent toujours priorité sur la démo.
-- La vue Donjon affiche désormais une vraie grille de salle en lecture seule, basée sur le layout actuel et les positions du runtime spatial.
-- La grille rend le terrain, les cases bloquées, portes, interactions/marqueurs, obstacles simples et surtout les pions héros/ennemis.
+- La vue Donjon affiche une vraie grille de salle en lecture seule, basée sur le layout actuel et les positions du runtime spatial.
+- La grille rend le terrain, les cases bloquées, portes, interactions/marqueurs, obstacles simples et les pions héros/ennemis.
 - Les positions ne sont jamais recalculées par l'UI : le renderer lit `spatial.positions`, avec seulement les coordonnées explicites des entités comme fallback pour les ennemis authored.
-- La mini-démo reçoit des positions déterministes temporaires dans son runtime spatial : héros case 2,2 ; squelette case 5,2.
+- La mini-démo utilise des positions temporaires déterministes : héros case 2,2 ; squelette case 5,2.
+- Le parcours de combat complet de cette mini-démo est maintenant couvert jusqu'à la réconciliation de victoire : première Frappe, riposte automatique Griffe, seconde Frappe, victoire, PV héros synchronisés, squelette vaincu, loot généré et pion ennemi retiré du plateau.
+- Le squelette de démo donne désormais toujours `1 × Os ancien` (`demo_bone`) afin de rendre le bloc butin réellement testable.
 - La grille est mobile-first et défile horizontalement si une salle est plus large que l'écran.
 
 ## Jalons CI récents validés
@@ -46,38 +48,37 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG : création/lancement d'une session Donjon test depuis l'UI : `34700285175` success
 - RPG : fallback démo en mémoire jusqu'au vrai `startDungeonCombat()` : `34700599970` success
 - RPG : grille Donjon live + pions runtime sur mobile : `34701638751` success
+- RPG : flux complet démo combat → victoire → loot → retrait du pion : `34701834544` success
 
 ## Dernière étape terminée
 
-Troisième jalon du chantier `RPG → build testable` : affichage réel de la salle/grille et des pions de la partie.
+Quatrième jalon du chantier `RPG → build testable` : verrouillage du parcours complet de combat de la mini-démo.
 
-- nouveau module `v2/src/modes/rpg/dungeon-room-grid-view.js` ;
-- `buildDungeonRoomGridModel()` lit le layout de salle, le `roomRuntime` et le runtime spatial sans modifier aucune donnée ;
-- héros affichés uniquement s'ils sont réellement localisés dans la salle courante et disposent d'une position runtime valide ;
-- ennemis affichés uniquement s'ils sont actifs, non vaincus/non retirés, dans la salle courante et disposent d'une position spatiale ou de coordonnées explicites d'entité ;
-- `renderDungeonRoomGrid()` produit une grille lecture seule avec terrain, portes, marqueurs/interactions, obstacles et pions ;
-- nouveau style `v2/src/ui/dungeon-board.css`, chargé par `v2/index.html`, dimensionné pour téléphone avec scroll horizontal contrôlé ;
-- `dungeon-gameplay-view.js` affiche le plateau directement dans l'onglet Donjon avant les blocs état/combat/passages ;
-- le renderer utilise le `spatial` fourni à la vue ou, pour la démo, le `roomRuntime.spatial` temporaire ;
-- `createDungeonTestSession()` initialise uniquement pour la démo un `createSpatialState()` avec `demo_hero` en 1,1 interne (case affichée 2,2) et `demo_enemy_instance` en 4,1 interne (case affichée 5,2).
+- `dungeon-demo-content.js` contient maintenant l'objet temporaire `demo_bone` / `Os ancien` ;
+- `Squelette de test` possède un drop déterministe à 100 %, quantité 1 ;
+- nouveau test d'intégration `v2/tests/rpg-dungeon-demo-flow.test.mjs` ;
+- le test crée la vraie session Donjon de démo à partir d'un univers vide ;
+- il vérifie que la grille initiale contient bien `demo_hero` + `demo_enemy_instance` ;
+- il appelle le vrai `startDungeonCombat()` ;
+- première `Frappe` : squelette 8 → 4 PV et passage du tour au squelette ;
+- `advanceDungeonEnemyTurns()` fait réellement jouer `Griffe` et descend le héros 12 → 10 PV ;
+- seconde `Frappe` : squelette 4 → 0 PV, KO, combat `ended`, victoire héros ;
+- `reconcileDungeonCombatResult()` marque la salle nettoyée, synchronise les 10 PV du héros et marque l'ennemi vaincu ;
+- loot vérifié : `[{itemId:'demo_bone',quantity:1}]` ;
+- `activeDungeonEnemies()` retourne ensuite 0 ;
+- le modèle de grille final ne contient plus que `demo_hero`, ce qui protège explicitement la disparition du pion ennemi après victoire.
 
 Régression :
-- `v2/tests/rpg-dungeon-room-grid-view.test.mjs` vérifie 64 cases sur le layout 8×8, positions exactes des deux pions, terrain, porte, obstacle, noms et raccordement à la vue Donjon ;
-- le test protège aussi le chargement du CSS dédié ;
-- batterie complète : `34701638751` completed + success.
+- batterie complète : `34701834544` completed + success.
 
 Commits de l'étape :
-- renderer grille : `9cb0ef2f5891804b4d30099e9c5f11f20e58cea5`
-- CSS mobile : `4367c369ddfe2804f44e829848f98f2f2c96ce58`
-- chargement CSS : `ee20d52c58fb2a76c4a0a5484efe0b862665b7e5`
-- positions runtime démo : `9991a4cd7eb52b421c96023482777fae2e17a046`
-- raccordement vue Donjon : `96e4b46ff025f46b5667de253454069548c24dca`
-- régression : `275a78e6e7f40e2068b63c2562efa0d51262aa6e`
+- loot de démonstration déterministe : `81246f2d7ffb843055468607957d0ca15690237c`
+- test d'intégration du flux complet : `dc3d7da4f2c6a837258af684deeb4e432dcc066c`
 
 ## Priorités ouvertes
 
-1. RPG testable : vérifier/raccorder maintenant le flux complet salle → ennemi → engager combat → compétence → tour ennemi → victoire/loot dans la page réelle, en s'assurant que la grille reste cohérente après KO/victoire ;
-2. raccorder ensuite le déplacement du héros à la grille via le Spatial Core existant, sans créer une seconde logique de mouvement ;
+1. RPG testable : raccorder maintenant le déplacement du héros à la grille via le Spatial Core existant, sans créer une seconde logique de mouvement ;
+2. vérifier ensuite les interactions de proximité utiles sur la vraie grille (portes/coffres/ennemis) sans dégrader le moteur stable ;
 3. ajouter le minimum de sauvegarde/reprise nécessaire au test utilisateur ;
 4. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
 5. seulement après ce test utilisateur : reprendre assets/audio/PWA/parité finale puis le chantier Capture.

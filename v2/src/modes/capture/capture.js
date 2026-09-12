@@ -23,8 +23,14 @@ import {
   moveCaptureBattleActor,
   switchCaptureActiveCreature,
 } from './dynamic-combat.js';
+import {resolveCaptureAttempt} from './capture-attempt.js';
+import {consumeCaptureItem,createCaptureInventory} from './items.js';
 
 function clone(value){return structuredClone(value);}
+function makeId(){
+  if(globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 export const CAPTURE_RUNTIME_CONTRACT = Object.freeze({
   mode: 'capture',
@@ -58,6 +64,7 @@ export function createCaptureModeState({
   activeTeam=[],
   reserve=[],
   quarantine=[],
+  inventory=createCaptureInventory(),
   currentRoomId=null,
 }={}){
   if(activeTeam.length>6) throw new Error('capture-active-team-limit');
@@ -75,6 +82,7 @@ export function createCaptureModeState({
     activeTeam:clone(activeTeam),
     reserve:clone(reserve),
     quarantine:clone(quarantine),
+    inventory:clone(inventory),
     encounter:null,
     battle:null,
     exploration:{freeMovement:true,turnSequence:null,currentRoomId:currentRoomId?String(currentRoomId):null},
@@ -88,16 +96,9 @@ export function createCaptureWorldIndex({world=null,zones=[],rooms=[],links=[]}=
 }
 
 export function moveCaptureActor(state,target,{movement=999,diagonal=false}={}){
-  const result=moveActor(state.spatial,state.actorId,target,{
-    defaultMovement:movement,
-    diagonal,
-    actor:{},
-  });
+  const result=moveActor(state.spatial,state.actorId,target,{defaultMovement:movement,diagonal,actor:{}});
   if(!result.moved) return {...result,state};
-  return {
-    ...result,
-    state:{...state,spatial:result.spatial},
-  };
+  return {...result,state:{...state,spatial:result.spatial}};
 }
 
 export function enterCaptureRoom(state,roomId,{biomes=[],rng=Math.random}={}){
@@ -107,35 +108,19 @@ export function enterCaptureRoom(state,roomId,{biomes=[],rng=Math.random}={}){
   const biomeIndex=buildCaptureBiomeIndex(biomes);
   const biome=biomeForCaptureRoom(room,biomeIndex);
   const rolled=biome?rollCaptureWildEncounter({biome,rng}):{ok:true,reason:'room-without-biome',encounter:null};
-  const next={
-    ...state,
-    exploration:{...(state.exploration||{}),freeMovement:true,turnSequence:null,currentRoomId:String(roomId)},
-    encounter:rolled.encounter?clone(rolled.encounter):null,
-  };
+  const next={...state,exploration:{...(state.exploration||{}),freeMovement:true,turnSequence:null,currentRoomId:String(roomId)},encounter:rolled.encounter?clone(rolled.encounter):null};
   return {ok:true,reason:rolled.reason,room:clone(room),biome:biome?clone(biome):null,roll:rolled.roll??null,encounter:next.encounter,state:next};
 }
 
-export function clearCaptureEncounter(state){
-  return {...state,encounter:null};
-}
+export function clearCaptureEncounter(state){return {...state,encounter:null};}
 
 export function startCaptureBattle(state,{playerActiveInstanceId=null,opponent=null,zoneId='capture-battle',playerPosition,opponentPosition}={}){
   if(state.battle) return {ok:false,reason:'battle-active',state};
   if(!state.encounter) return {ok:false,reason:'capture-battle-encounter-required',state};
   try{
-    const battle=createCaptureBattleState({
-      encounter:state.encounter,
-      activeTeam:state.activeTeam,
-      playerActiveInstanceId,
-      opponent,
-      zoneId,
-      ...(playerPosition?{playerPosition}:{}),
-      ...(opponentPosition?{opponentPosition}:{}),
-    });
+    const battle=createCaptureBattleState({encounter:state.encounter,activeTeam:state.activeTeam,playerActiveInstanceId,opponent,zoneId,...(playerPosition?{playerPosition}:{}),...(opponentPosition?{opponentPosition}:{})});
     return {ok:true,battle,state:{...state,battle,exploration:{...(state.exploration||{}),freeMovement:false}}};
-  }catch(error){
-    return {ok:false,reason:error?.message||'capture-battle-start-failed',state};
-  }
+  }catch(error){return {ok:false,reason:error?.message||'capture-battle-start-failed',state};}
 }
 
 export function moveCaptureBattleCreature(state,side,target,options={}){
@@ -152,17 +137,61 @@ export function switchCaptureBattleCreature(state,nextInstanceId){
   return {...switched,state:{...state,battle:switched.battle}};
 }
 
+export function attemptCaptureInBattle(state,{orbId,speciesCaptureRate,currentHp,maxHp,orbLibrary,lowHpMultiplier,rng=Math.random}={}){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state};
+  if(state.battle.status!=='active'||state.battle.mode!=='wild') return {ok:false,reason:'capture-attempt-requires-active-wild-battle',state};
+  const encounterSpecies=String(state.battle.encounter?.speciesId||state.encounter?.speciesId||'');
+  const opponentSpecies=String(state.battle.opponent?.creature?.speciesId||'');
+  if(!encounterSpecies||encounterSpecies!==opponentSpecies) return {ok:false,reason:'capture-battle-species-mismatch',state};
+
+  const attempt=resolveCaptureAttempt({speciesCaptureRate,currentHp,maxHp,orbId,orbLibrary,lowHpMultiplier},rng);
+  if(!attempt.ok) return {...attempt,state};
+
+  const consumed=consumeCaptureItem(state.inventory,attempt.orbId,1,orbLibrary);
+  if(!consumed.ok) return {...consumed,state};
+
+  if(!attempt.captured){
+    return {ok:true,captured:false,attempt,state:{...state,inventory:consumed.inventory}};
+  }
+
+  const creature={
+    instanceId:makeId(),
+    speciesId:encounterSpecies,
+    legacySpeciesId:null,
+    nickname:'',
+    level:Math.max(1,Number(state.battle.opponent?.creature?.level)||1),
+    xp:0,
+    currentHp:Number.isFinite(Number(currentHp))?Math.max(0,Number(currentHp)):null,
+    maxHp:Number.isFinite(Number(maxHp))?Math.max(0,Number(maxHp)):null,
+    abilityCharges:clone(state.battle.opponent?.creature?.abilityCharges||{}),
+    metadata:{capturedFrom:'wild_battle'},
+  };
+
+  const activeTeam=clone(state.activeTeam||[]);
+  const reserve=clone(state.reserve||[]);
+  const destination=activeTeam.length<6?'active':'reserve';
+  if(destination==='active') activeTeam.push(creature); else reserve.push(creature);
+  const roster=[...activeTeam,...reserve].map(clone);
+  const ended=endCaptureBattle(state.battle,'capture_success');
+  const next={
+    ...state,
+    inventory:consumed.inventory,
+    activeTeam,
+    reserve,
+    roster,
+    battle:null,
+    encounter:null,
+    exploration:{...(state.exploration||{}),freeMovement:true},
+  };
+  return {ok:true,captured:true,attempt,destination,creature:clone(creature),endedBattle:ended.battle,state:next};
+}
+
 export function finishCaptureBattle(state,reason){
   if(!state.battle) return {ok:false,reason:'battle-missing',state};
   const ended=endCaptureBattle(state.battle,reason);
   if(!ended.ok) return {...ended,state};
   const clearEncounter=reason==='capture_success'||reason==='opponent_ko'||reason==='flee';
-  const next={
-    ...state,
-    battle:null,
-    encounter:clearEncounter?null:state.encounter,
-    exploration:{...(state.exploration||{}),freeMovement:true},
-  };
+  const next={...state,battle:null,encounter:clearEncounter?null:state.encounter,exploration:{...(state.exploration||{}),freeMovement:true}};
   return {ok:true,endReason:String(reason),endedBattle:ended.battle,state:next};
 }
 
@@ -175,25 +204,11 @@ export function setCaptureTeam(state,{activeTeam=[],reserve=state.reserve||[]}={
 export function initializeCaptureRoster(state,{legacyOwned=[],canonicalization={},preferredActiveIds=[]}={}){
   const imported=importLegacyOwnedCreatures(legacyOwned,canonicalization);
   const split=splitRosterIntoTeamAndReserve(imported.roster,{preferredActiveIds,teamSize:6});
-  return {
-    ...state,
-    roster:clone(imported.roster),
-    activeTeam:clone(split.activeTeam),
-    reserve:clone(split.reserve),
-    quarantine:[...(state.quarantine||[]).map(clone),...imported.quarantine.map(clone)],
-  };
+  return {...state,roster:clone(imported.roster),activeTeam:clone(split.activeTeam),reserve:clone(split.reserve),quarantine:[...(state.quarantine||[]).map(clone),...imported.quarantine.map(clone)]};
 }
 
 export function moveCaptureRosterCreature(state,instanceId,destination){
   const moved=moveOwnedCreature({activeTeam:state.activeTeam,reserve:state.reserve},instanceId,destination);
   if(!moved.ok) return {...moved,state};
-  return {
-    ...moved,
-    state:{
-      ...state,
-      activeTeam:clone(moved.activeTeam),
-      reserve:clone(moved.reserve),
-      roster:[...moved.activeTeam,...moved.reserve].map(clone),
-    },
-  };
+  return {...moved,state:{...state,activeTeam:clone(moved.activeTeam),reserve:clone(moved.reserve),roster:[...moved.activeTeam,...moved.reserve].map(clone)}};
 }

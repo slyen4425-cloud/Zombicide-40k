@@ -102,10 +102,14 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   const overlayClose=host.querySelector?.('[data-capture-overlay-close]')||null;
 
   function rosterEntryHtml(entry){
-    return `<article class="capture-roster-entry" data-capture-roster-location="${escapeHtml(entry.location)}">
+    const activeClass=entry.activeInBattle?' is-active-in-battle':'';
+    const activeAttr=entry.activeInBattle?'true':'false';
+    const badge=entry.activeInBattle?'<span class="capture-roster-active-badge" data-capture-active-battle-badge>Actif en combat</span>':'';
+    return `<article class="capture-roster-entry${activeClass}" data-capture-roster-location="${escapeHtml(entry.location)}" data-capture-active-in-battle="${activeAttr}">
       <div>
         <strong>${escapeHtml(entry.title)}</strong>
         <p>${escapeHtml(entry.subtitle)}</p>
+        ${badge}
       </div>
       <button type="button" data-capture-inspect-instance="${escapeHtml(entry.instanceId)}">Inspecter</button>
     </article>`;
@@ -204,7 +208,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
       const result=beginCaptureBattleSession(session,options);
-      if(result.ok) session=result.session;
+      if(result.ok){
+        session=result.session;
+        renderRosterLists();
+      }
       return result;
     },
     setBlocking(blocking){
@@ -287,7 +294,10 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     flushUiEvents,
     finishBattle(reason){
       const result=finishCaptureBattleSession(session,reason);
-      if(result.ok) session=result.session;
+      if(result.ok){
+        session=result.session;
+        renderRosterLists();
+      }
       return result;
     },
     dispose(){

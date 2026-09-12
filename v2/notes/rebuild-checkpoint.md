@@ -12,12 +12,13 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Rôle appareil MJ, panneau MJ, ergonomie mobile combat, audio RPG et stockage abstrait déjà présents.
 - Monster Capture est un mode autonome : aucun état gameplay mutable n’est partagé avec RPG, Survie ou PVP.
-- Le moteur spatial a maintenant été extrait dans `v2/src/core/spatial-engine.js`. RPG y accède via un re-export et Capture l’importe directement depuis Core : les deux modes utilisent donc réellement la même base sans dépendance Capture -> RPG.
-- Un noyau neutre de World Builder/graphe a été ajouté dans `v2/src/core/world-graph.js` pour les mondes, zones, salles, passages, index et validation structurelle. Les règles RPG d’inventaire/traversée ne sont pas incluses dans ce noyau.
+- Le moteur spatial est neutre dans `v2/src/core/spatial-engine.js` et partagé réellement par RPG et Capture.
+- Le graphe World Builder neutre est dans `v2/src/core/world-graph.js` pour mondes, zones, salles, passages, index et validation structurelle.
 - Le futur combat Capture sera un runtime dédié : pas de `turnSequence` RPG, pas de timeline D100 RPG. La cible reste une exploration plus libre et un combat dynamique, à affiner plus tard.
 - Bootstrap global Capture interdit : initialisation seulement à l’ouverture du mode.
-- Bibliothèque Capture en cours de nettoyage : IDs canoniques uniques, alias legacy préservés, doublons connus fusionnés au niveau migration uniquement, familles générées legacy mises en quarantaine.
 - Stockage Capture V2 exclusivement sous `gensrpg:v2:capture:*`; anciennes clés legacy en lecture seule pour migration.
+- Bibliothèque Capture nettoyée par IDs canoniques : alias legacy préservés, familles générées non validées mises en quarantaine.
+- Le runtime roster Capture existe maintenant dans `v2/src/modes/capture/roster.js` : migration d’IDs, instances possédées distinctes, équipe max 6, réserve, quarantaine des espèces inconnues/non canoniques.
 
 ## Jalons CI récents validés
 
@@ -25,35 +26,32 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - stockage Capture isolé + partage spatial neutre : `34679382483` success
 - contrats gameplay Capture : `34679477548` success
 - squelette runtime Capture isolé + Core spatial partagé : `34679708898` success
+- migration roster/équipe/réserve Capture : `34679980856` success
 
 ## Dernière étape terminée
 
-Premier squelette réel `v2/src/modes/capture/` :
-- création de `v2/src/modes/capture/capture.js` ;
-- contrat runtime explicite : mode `capture`, état gameplay isolé, Core spatial partagé, Core world-graph partagé, aucun runtime de tours RPG ;
-- namespace de stockage Capture dédié pour profil, sauvegarde, roster, équipe et réserve ;
-- création d’un état Capture minimal avec profil/joueur/dresseur, monde, état spatial, équipe active, réserve, rencontre et bataille ;
-- exploration marquée libre et `turnSequence` fixé à `null` dans ce squelette ;
-- déplacement Capture branché sur le moteur spatial Core neutre ;
-- construction/validation d’un monde Capture branchée sur les primitives World Builder neutres ;
-- limite d’équipe active de 6 protégée ;
-- `v2/src/modes/rpg/spatial-engine.js` est maintenant un simple re-export du moteur spatial Core, afin d’éviter deux implémentations divergentes ;
-- nouveau test `v2/tests/capture-runtime-scaffold.test.mjs` vérifie l’absence d’import vers `modes/rpg`, l’absence de dépendance à `turn-runtime`, le namespace Capture, le partage du même moteur spatial Core, le graphe de monde, le déplacement et la limite d’équipe.
+Runtime roster / équipe / réserve / migration des IDs canoniques :
+- création de `v2/src/modes/capture/roster.js` ;
+- construction d’un index alias legacy -> espèce canonique à partir de `capture-creature-canonicalization.json` ;
+- les IDs legacy confirmés (`crea_embercub`, `crea_braiseau`, etc.) convergent vers un seul `speciesId` canonique ;
+- chaque créature possédée garde son `instanceId`, son niveau, XP, PV, charges de capacités et métadonnées : deux captures de la même espèce ne sont jamais fusionnées ;
+- l’ancien `speciesId` est conservé dans `legacySpeciesId` pour traçabilité/migration ;
+- espèces ou lignées non canoniques/non validées envoyées en `quarantine` plutôt qu’importées silencieusement ;
+- exemple protégé : `crea_pyrolynx` reste hors canon automatique ;
+- séparation roster -> équipe active + réserve, avec priorité facultative aux anciens IDs actifs ;
+- limite stricte de 6 actifs ;
+- déplacement d’une créature entre équipe et réserve protégé par le même plafond ;
+- nouveau test `v2/tests/capture-roster-migration.test.mjs` couvre alias, doublons possédés, quarantaine, priorité d’équipe et limite de 6.
 
 Commits de l’étape :
-- extraction moteur spatial Core : `8fa572476d75148fb4b262c93ce20562903677f7`
-- RPG basculé sur Core spatial : `3cdda7070e8415329a2bcbdba9879e23f33211e2`
-- primitives neutres World Builder : `3e2ebe5869171326c01c8c1cef05d3c83174d595`
-- squelette Capture : `b21b269eef47411b49134c83747ec70cca17857e`
-- régression runtime Capture : `4ac7d9dc18db20a6a4408c6c0badb488146f4d44`
-- raffinement test isolation : `9d55b90af75ed651e71bf2a66888588960563cfb`
+- runtime roster Capture : `045380048c036d756441817fc4847ca5e0f09cee`
+- régression migration roster : `aea61f485f82c26003152e65ced8efa1f58eff97`
 
-CI fonctionnelle de l’étape : `34679708898` success.
+CI fonctionnelle de l’étape : `34679980856` success.
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : séparer proprement roster/équipe/réserve en petits moteurs dédiés et brancher la canonicalisation des IDs de créatures ;
-2. ensuite ajouter l’initialisation lazy du mode Capture depuis l’accueil sans bootstrap global ;
-3. poursuivre l’audit des assets Capture, objets de capture et capacités exactes si des traces legacy supplémentaires sont retrouvées ;
-4. ne construire le moteur de combat dynamique complet qu’après définition détaillée de son comportement ;
-5. avant de déclarer RPG terminé, faire la passe finale dédiée assets/visuels/PWA/cache/parité legacy/tests.
+1. prochaine étape Capture : brancher ce roster dans `capture.js` et préparer l’initialisation lazy du mode depuis l’accueil sans bootstrap global ;
+2. ensuite poursuivre l’audit/liaison des assets Capture, objets de capture et capacités exactes ;
+3. ne construire le moteur de combat dynamique complet qu’après définition détaillée de son comportement ;
+4. avant de déclarer RPG terminé, faire la passe finale dédiée assets/visuels/PWA/cache/parité legacy/tests.

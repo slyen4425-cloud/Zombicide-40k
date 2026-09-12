@@ -52,7 +52,8 @@ export function resolveCaptureReaction({battle,action,ability,reactionDef=null,e
   const reaction=normalizeCaptureReaction(configured||{});
   if(!reaction.id||!reaction.enabled) return {ok:true,triggered:false,reaction:null,reactionState:null,reactionWindow:null};
 
-  const window=evaluateCaptureReactionWindow(reaction.window,reactionTime);
+  const effectiveReactionTime=reactionTime??battle?.timing?.reactionTime??null;
+  const window=evaluateCaptureReactionWindow(reaction.window,effectiveReactionTime);
   if(!window.ok) return {ok:true,triggered:false,reaction,reactionState:null,reactionWindow:window,reason:window.reason};
   if(!window.open) return {ok:true,triggered:false,reaction,reactionState:null,reactionWindow:window,reason:window.reason};
 

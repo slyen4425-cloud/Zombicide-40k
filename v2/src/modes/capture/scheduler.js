@@ -1,5 +1,3 @@
-import {advanceCaptureTime} from './runtime.js';
-
 const clone=value=>structuredClone(value);
 
 export const CAPTURE_SCHEDULER_CONTRACT=Object.freeze({
@@ -24,10 +22,11 @@ export function setCaptureSchedulerRunning(scheduler,running){
   return {...clone(scheduler||createCaptureSchedulerState()),running:!!running};
 }
 
-export function pushCaptureSchedulerDelta(state,scheduler,{delta=0,stepSize=1,maxSteps=Infinity,timeOptions={}}={}){
+export function pushCaptureSchedulerDelta(state,scheduler,{delta=0,stepSize=1,maxSteps=Infinity,timeOptions={},advance}={}){
   const current=createCaptureSchedulerState(scheduler||{});
   if(!current.running) return {ok:true,reason:'scheduler-paused',processedSteps:0,state,scheduler:current,results:[]};
   if(!state?.battle) return {ok:false,reason:'battle-missing',processedSteps:0,state,scheduler:current,results:[]};
+  if(typeof advance!=='function') return {ok:false,reason:'capture-time-advance-missing',processedSteps:0,state,scheduler:current,results:[]};
 
   const incoming=Math.max(0,Number(delta)||0);
   const quantum=Math.max(Number.EPSILON,Number(stepSize)||1);
@@ -38,7 +37,7 @@ export function pushCaptureSchedulerDelta(state,scheduler,{delta=0,stepSize=1,ma
   const results=[];
 
   while(accumulated>=quantum&&processedSteps<limit&&nextState?.battle){
-    const result=advanceCaptureTime(nextState,{...timeOptions,amount:quantum});
+    const result=advance(nextState,{...timeOptions,amount:quantum});
     if(!result.ok){
       return {ok:false,reason:result.reason||'capture-time-advance-failed',processedSteps,state:nextState,scheduler:{...current,accumulated,steps:current.steps+processedSteps},results};
     }

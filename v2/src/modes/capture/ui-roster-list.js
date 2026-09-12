@@ -4,6 +4,7 @@ export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   readsAuthoritativeBattleActiveInstance:true,
   readsAuthoritativeVitals:true,
   readsAuthoritativeStatuses:true,
+  readsAuthoritativeAbilityState:true,
   exposesInspectionTarget:true,
   mutatesRoster:false,
   mutatesBattle:false,
@@ -36,6 +37,32 @@ function captureRosterStatusEntry(status={}){
   };
 }
 
+function captureRosterAbilityEntry(abilityId,slot={}){
+  const id=text(abilityId||slot?.id,'');
+  if(!id) return null;
+  const charges=finiteOrNull(slot?.charges);
+  const chargeMax=finiteOrNull(slot?.chargeMax);
+  const cooldownRemaining=finiteOrNull(slot?.cooldownRemaining);
+  return {
+    id,
+    charges:charges===null?null:Math.max(0,charges),
+    chargeMax:chargeMax===null?null:Math.max(0,chargeMax),
+    cooldownRemaining:cooldownRemaining===null?null:Math.max(0,cooldownRemaining),
+  };
+}
+
+function captureRosterAbilities(creature={}){
+  const state=creature?.abilityState;
+  if(state&&typeof state==='object'&&!Array.isArray(state)){
+    return Object.entries(state).map(([abilityId,slot])=>captureRosterAbilityEntry(abilityId,slot)).filter(Boolean);
+  }
+  const charges=creature?.abilityCharges;
+  if(charges&&typeof charges==='object'&&!Array.isArray(charges)){
+    return Object.entries(charges).map(([abilityId,value])=>captureRosterAbilityEntry(abilityId,{charges:value})).filter(Boolean);
+  }
+  return [];
+}
+
 export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null}={}){
   const instanceId=text(creature?.instanceId,'');
   const speciesId=text(creature?.speciesId,'');
@@ -59,6 +86,7 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
   const statuses=Array.isArray(creature?.statuses)
     ?creature.statuses.map(captureRosterStatusEntry).filter(Boolean)
     :[];
+  const abilities=captureRosterAbilities(creature);
   return {
     instanceId,
     speciesId,
@@ -73,6 +101,7 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     hpLabel,
     ko,
     statuses,
+    abilities,
   };
 }
 

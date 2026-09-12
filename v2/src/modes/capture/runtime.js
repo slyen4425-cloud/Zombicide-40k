@@ -102,6 +102,10 @@ import {
   createCaptureUiOverlayState,
   openCaptureUiOverlay,
 } from './ui-overlay.js';
+import {
+  CAPTURE_CREATURE_INSPECTION_CONTRACT,
+  buildCaptureCreatureInspection,
+} from './creature-inspection.js';
 
 export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalEntry:'capture/runtime.js',
@@ -119,6 +123,7 @@ export const CAPTURE_PUBLIC_RUNTIME_CONTRACT=Object.freeze({
   canonicalUiVisualPauseController:true,
   canonicalUiPresentationBlock:true,
   canonicalUiOverlay:true,
+  canonicalCreatureInspection:true,
   legacyTimingHelpers:'internal_or_regression_only',
   fixedRealtimeCadence:false,
   isolatedFromRpg:true,
@@ -140,11 +145,13 @@ export {
   CAPTURE_UI_VISUAL_PAUSE_CONTROLLER_CONTRACT,
   CAPTURE_UI_PRESENTATION_BLOCK_CONTRACT,
   CAPTURE_UI_OVERLAY_CONTRACT,
+  CAPTURE_CREATURE_INSPECTION_CONTRACT,
   advanceCaptureUiNoticeVisualTime,
   appendCaptureUiNotices,
   attachCaptureUiVisualActivitySource,
   attachCaptureUiVisualClockSource,
   attemptCaptureInBattle,
+  buildCaptureCreatureInspection,
   captureUiEventsFromResult,
   captureUiEventsFromResults,
   captureUiNoticeFeedNotices,

@@ -12,6 +12,8 @@ assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeBattleActiveInsta
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeVitals,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeStatuses,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsAuthoritativeAbilityState,true);
+assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.readsCanonicalCaptureAssetRegistry,true);
+assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.neverUsesRpgOrDungeonFallback,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.exposesInspectionTarget,true);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.mutatesRoster,false);
 assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.mutatesBattle,false);
@@ -57,6 +59,37 @@ assert.equal(CAPTURE_UI_ROSTER_LIST_CONTRACT.isolatedFromRpg,true);
   assert.equal(captureRosterListEntry(creature,'active',{activeBattleInstanceId:'a1'}).activeInBattle,true);
   assert.equal(captureRosterListEntry(creature,'reserve',{activeBattleInstanceId:'a1'}).activeInBattle,false);
   assert.deepEqual(creature,before);
+}
+
+{
+  const assetRegistry={
+    assetRoot:'v2/assets/capture/creatures/',
+    speciesAssets:[
+      {speciesId:'capture_aquafin',displayName:'Aquafin',legacyAliases:['crea_aquafin'],mainArt:{status:'pending_import',path:null},iconArt:{status:'pending_import',path:null}},
+      {speciesId:'capture_descendre',displayName:'Descendre',legacyAliases:['crea_dracendre'],mainArt:{status:'ready',path:'v2/assets/capture/creatures/descendre-main.webp'},iconArt:{status:'ready',path:'v2/assets/capture/creatures/descendre-icon.webp'}},
+      {speciesId:'capture_rocorne',displayName:'Rocorne',legacyAliases:[],mainArt:{status:'ready',path:'v2/assets/rpg/rocorne.webp'},iconArt:{status:'ready',path:'assets/dungeon/creatures/rocorne.webp'}},
+    ],
+  };
+  const pending=captureRosterListEntry({instanceId:'a1',speciesId:'crea_aquafin',level:2},'active',{assetRegistry});
+  assert.equal(pending.speciesId,'capture_aquafin');
+  assert.equal(pending.displayName,'Aquafin');
+  assert.equal(pending.title,'Aquafin');
+  assert.equal(pending.subtitle,'Aquafin · Niv. 2');
+  assert.equal(pending.mainArt,null);
+  assert.equal(pending.iconArt,null);
+
+  const ready=captureRosterListEntry({instanceId:'d1',speciesId:'crea_dracendre',nickname:'Draco',level:7},'reserve',{assetRegistry});
+  assert.equal(ready.speciesId,'capture_descendre');
+  assert.equal(ready.displayName,'Descendre');
+  assert.equal(ready.title,'Draco');
+  assert.equal(ready.subtitle,'Descendre · Niv. 7');
+  assert.equal(ready.iconArt.src,'./assets/capture/creatures/descendre-icon.webp');
+  assert.equal(ready.mainArt.src,'./assets/capture/creatures/descendre-main.webp');
+
+  const blocked=captureRosterListEntry({instanceId:'r1',speciesId:'capture_rocorne'},'active',{assetRegistry});
+  assert.equal(blocked.displayName,'Rocorne');
+  assert.equal(blocked.mainArt,null);
+  assert.equal(blocked.iconArt,null);
 }
 
 {
@@ -151,7 +184,7 @@ assert.equal(captureRosterListEntry({instanceId:'x'},'active'),null);
 assert.equal(captureRosterListEntry({speciesId:'capture_aquafin'},'active'),null);
 
 const presenterSource=fs.readFileSync(new URL('../src/modes/capture/ui-roster-list.js',import.meta.url),'utf8');
-for(const forbidden of ['moveCaptureRosterCreature','setCaptureTeam','switchCaptureBattleCreature','setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','applyCaptureDamage','healCaptureVitals','addCaptureStatus','removeCaptureStatus','tickCaptureStatuses','collectCaptureStatusEffects','resolveCaptureStatusEffect','spendCaptureAbility','tickCaptureAbilityCooldowns','canUseCaptureAbility','Math.random(','Date.now(']){
+for(const forbidden of ['moveCaptureRosterCreature','setCaptureTeam','switchCaptureBattleCreature','setCaptureBattleBlocking','advanceCaptureTime','advanceCaptureDriver','applyCaptureDamage','healCaptureVitals','addCaptureStatus','removeCaptureStatus','tickCaptureStatuses','collectCaptureStatusEffects','resolveCaptureStatusEffect','spendCaptureAbility','tickCaptureAbilityCooldowns','canUseCaptureAbility','Math.random(','Date.now(','../rpg/','assets/dungeon/creatures']){
   assert.equal(presenterSource.includes(forbidden),false,`roster list presenter must not include ${forbidden}`);
 }
 
@@ -178,7 +211,9 @@ assert.match(pageSource,/capture-roster-ability/);
 assert.match(pageSource,/entry\.abilities\.map\(rosterAbilityHtml\)/);
 assert.match(pageSource,/charges/);
 assert.match(pageSource,/recharge/);
-assert.match(pageSource,/buildCaptureRosterLists\(session\.state\)/);
+assert.match(pageSource,/buildCaptureRosterLists\(session\.state,\{assetRegistry\}\)/);
+assert.match(pageSource,/data-capture-roster-art/);
+assert.match(pageSource,/entry\.iconArt\|\|entry\.mainArt/);
 assert.match(pageSource,/api\.inspectCreature\(instanceId\)/);
 assert.match(pageSource,/beginCaptureBattleSession\(session,options\)/);
 assert.match(pageSource,/finishCaptureBattleSession\(session,reason\)/);

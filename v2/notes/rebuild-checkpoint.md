@@ -10,25 +10,31 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - RPG data-driven et combat D100/tours protégés par leurs régressions existantes.
 - Donjon/World Builder/tactique déjà construits : déplacement individuel, pathfinding, portes/passages, obstacles/couverture, LOS/portée, salles authored, quêtes/événements/PNJ/alliés/loot et combats réels.
 - Monster Capture autonome, stockage `gensrpg:v2:capture:*`, aucun partage gameplay mutable avec RPG.
-- Runtime Capture : roster/équipe/réserve, migrations IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts, réactions/esquive, temps abstrait, scheduler/driver, UI events/notices, overlay/inspection, commandes gameplay et résumé spatial.
+- Runtime Capture avancé : roster/équipe/réserve, migrations IDs, assets canoniques, objets/capacités, biomes/rencontres, exploration, capture, combat dynamique dédié, IA, PV/KO, statuts, réactions/esquive, temps abstrait, scheduler/driver, UI events/notices, overlay/inspection, commandes gameplay et résumé spatial.
+- Le chantier Capture est volontairement mis en pause à ce checkpoint pour concentrer la suite sur un RPG réellement testable par l'utilisateur.
 - Registre assets Capture lazy, aucun fallback RPG/Dungeon ; les 14 visuels restent `pending_import` avec `path:null`.
-- La page Capture expose quatre commandes gameplay autoritaires : switch manuel, capacité explicitement définie, déplacement tactique cardinal d’une case et tentative de capture par orbe explicitement configurée.
-- `abilityDefs` reste injecté explicitement ; aucune capacité absente n’est rendue jouable.
-- Le déplacement joueur passe exclusivement par `executeCapturePlayerMove()` ; obstacles/pathfinding restent décidés par le Core spatial.
-- La capture joueur passe par `executeCapturePlayerCaptureAttempt()` ; taux d’espèce, coefficient d’orbe et multiplicateur bas PV éventuel restent explicitement requis.
-- La règle bas PV reste strictement `<30%`; aucun coefficient/multiplicateur n’est inventé.
-- Le résumé adverse affiche la distance praticable réelle jusqu’à l’adversaire, calculée par `shortestPathDistance()` dans un presenter dédié. Les détours autour des obstacles sont pris en compte ; absence de chemin => `inaccessible`.
-- L’inspection adverse affiche `Votre position`, `Position adverse` et `Distance praticable` sans modifier le combat ni déduire une règle de portée.
-- Les tentatives de capture alimentent désormais le feed non bloquant existant : réussite, échec et configuration indisponible produisent des notices `aria-live` sans popup ni pause gameplay.
+- Les tentatives de capture alimentent le feed non bloquant existant : réussite, échec et configuration indisponible produisent des notices `aria-live` sans popup ni pause gameplay.
+- Nouveau cap prioritaire : obtenir rapidement un flux RPG jouable/testable sur téléphone avant de reprendre les finitions Capture.
+
+## RPG — état testable en cours
+
+- Le parcours Accueil → RPG → choix rôle appareil → page RPG est déjà raccordé.
+- L'onglet Donjon savait afficher et piloter un runtime existant, mais aucun chemin UI ne créait encore la partie : `roomRuntime` restait `null` et `heroRuntimes` vide, d'où `Aucune partie Donjon active`.
+- Ce blocage est désormais levé avec `createDungeonTestSession()` et un bouton `Lancer une partie test` dans l'onglet Donjon.
+- La partie test utilise uniquement le World Builder actuel et les héros RPG configurés ; elle n'invente aucune définition gameplay et ne crée aucune sauvegarde persistante.
+- Les héros désactivés sont exclus ; les héros actifs reçoivent leur vrai `createHeroRuntime()` avec stats, ressources, inventaire/équipement de départ et compétences configurés.
+- Le runtime Donjon est créé à partir de la salle de départ du monde courant avec `createDungeonRuntime()` ; le premier héros actif devient héros focalisé.
+- S'il n'existe aucun héros configuré, le bouton est désactivé et l'UI explique quoi faire.
+- Une fois la session créée, l'onglet Donjon se recharge sur le vrai runtime et peut utiliser les systèmes déjà construits : passages, événements, PNJ, loot et combats selon le contenu du monde.
 
 ## Jalons CI récents validés
 
 - runtime Capture isolé : `34679708898` success
-- capture/IA/KO/statuts/réactions : jalons success jusqu’à `34684569147`
-- façade/scheduler/driver/lifecycle UI : success jusqu’à `34685171946`
+- capture/IA/KO/statuts/réactions : jalons success jusqu'à `34684569147`
+- façade/scheduler/driver/lifecycle UI : success jusqu'à `34685171946`
 - événements/dispatcher UI : `34685389994`, `34685525379` success
-- feed / temps visuel / visibilité / overlay : success jusqu’à `34687557658`
-- inspection/listes/états combat : success jusqu’à `34694675567`
+- feed / temps visuel / visibilité / overlay : success jusqu'à `34687557658`
+- inspection/listes/états combat : success jusqu'à `34694675567`
 - switch manuel de créature active : `34695849063` success
 - persistance capacités joueur : `34696817140` success
 - commande UI capacité : `34698467186` success
@@ -36,37 +42,35 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - tentative de capture par orbe configurée explicitement : `34699118520` success
 - retour spatial position/distance praticable : `34699538838` success
 - notices non bloquantes des tentatives de capture : `34699910099` success
+- RPG : création/lancement d'une session Donjon test depuis l'UI : `34700285175` success
 
 ## Dernière étape terminée
 
-Retour utilisateur non bloquant des tentatives de capture :
-- `CAPTURE_UI_EVENT_CONTRACT.captureAttemptEvents` est actif ;
-- nouveau `captureUiEventsFromCaptureAttempt()` transforme un résultat autoritaire en `capture_success`, `capture_failed` ou `capture_unavailable` ;
-- une configuration indisponible conserve le `reason` réel (`missing_species_capture_rate`, `pending_orb_coefficient`, `pending_low_hp_multiplier`, etc.) ;
-- `ui-dispatcher.js` transforme ces événements en messages français lisibles ;
-- toutes ces notices ont `blocking:false` et ne suspendent jamais le combat ;
-- `capture/runtime.js` expose le nouvel event builder via la façade canonique ;
-- `capture-page.js` injecte le résultat de chaque `attemptCapture()` dans le feed existant avec `appendCaptureUiNotices()` ;
-- une capture réussie affiche `Capture réussie !`, une tentative ratée `Capture ratée. Le combat continue.`, et une configuration manquante explique le blocage ;
-- aucun `alert`, `confirm`, overlay, `setCaptureBattleBlocking()` ou timer supplémentaire n’a été ajouté.
+Premier jalon du chantier `RPG → build testable` :
+- nouveau module `v2/src/modes/rpg/dungeon-test-session.js` ;
+- contrat : utilise le monde configuré + les héros configurés, ne persiste rien et n'invente aucune définition ;
+- `createDungeonTestSession()` valide présence d'au moins un héros actif et validité du World Builder ;
+- construit les `heroRuntimes` réels via `createHeroRuntime()` ;
+- construit le runtime de salle via `createDungeonRuntime()` à partir de la salle de départ ;
+- `rpg-page.js` ajoute dans l'onglet Donjon un bloc `Partie test` et le bouton `Lancer une partie test` lorsqu'aucun runtime n'est chargé ;
+- si aucun héros n'existe, le bouton est désactivé avec message explicite ;
+- après lancement réussi, le runtime Donjon + les heroRuntimes sont injectés dans la vraie vue gameplay, sans sauvegarde persistante.
 
 Régression :
-- `v2/tests/capture-ui-events.test.mjs` couvre les trois événements capture ;
-- `v2/tests/capture-ui-dispatcher.test.mjs` couvre les textes, le caractère non bloquant et le raccordement de la page au feed ;
-- batterie complète : `34699910099` success.
+- `v2/tests/rpg-dungeon-test-session.test.mjs` couvre absence de héros, création réelle d'une session, exclusion des héros désactivés, stats/ressources du runtime et non-mutation des définitions ;
+- le même test protège la présence du bouton UI et l'absence de sauvegarde forcée ;
+- batterie complète : `34700285175` success.
 
-Commits de l’étape :
-- événements capture UI : `4a54a4e2bd5e83e8429cb8fc407b0dc10bfa9ec0`
-- dispatcher notices capture : `1bc0c5e66c57fae2398f56fd905b4073a4ba240f`
-- façade runtime : `8db645fb0f217265483249dfc5899bac7dfa560f`
-- raccordement page/feed : `93675ba8bb74c45c6b2dd1d14e769194e94c02c9`
-- régression événements : `9797feba01471fe2444cfd054778085df4fae901`
-- régression dispatcher/page : `7e27d5fb95659dee19ce9eada7788ce95d4118db`
+Commits de l'étape :
+- constructeur session test : `e751598557dc003d1e7dcc0e5ab7e6d3aad3fe70`
+- raccordement UI Donjon : `7d2aafb926a7ab3f0963d931c45536235d738ef8`
+- régression : `89e8e7524eb741ed308ba522a8b58be92886c2eb`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : afficher la portée explicite des capacités définies à côté de leur commande, sans calculer leur utilisabilité dans l’UI ;
-2. ensuite améliorer le retour des actions refusées (capacité hors portée, déplacement impossible) via les notices existantes, sans modal bloquante ;
-3. importer les vrais arts principaux + icônes quand les fichiers validés sont disponibles ;
-4. figer les coefficients réels des 4 orbes et le multiplicateur bas PV uniquement quand leurs valeurs auront été validées ;
-5. finalisation V2 globale : sons, PWA/cache, mobile, parité legacy, multiplayer restant, nettoyage des comportements cachés et batterie finale avant toute publication.
+1. RPG testable : fournir un contenu de démonstration minimal immédiatement jouable si l'univers local est encore vide, sans écraser les données utilisateur ;
+2. afficher visuellement la salle/grille Donjon et les positions héros/ennemis de façon claire sur mobile ;
+3. vérifier le flux complet salle → ennemi → engager combat → compétence → tour ennemi → victoire/loot ;
+4. ajouter le minimum de sauvegarde/reprise nécessaire au test utilisateur ;
+5. préparer ensuite une URL/preview V2 sûre pour que l'utilisateur puisse réellement essayer sur téléphone, sans toucher `main` ;
+6. seulement après ce test utilisateur : reprendre assets/audio/PWA/parité finale puis le chantier Capture.

@@ -335,7 +335,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       const creature=findOwnedCreature(instanceId);
       if(!creature) return {ok:false,reason:'capture-creature-not-owned'};
       const species=speciesDef||speciesById?.[String(creature.speciesId)]||null;
-      const inspection=buildCaptureCreatureInspection(creature,{speciesDef:species});
+      const inspection=buildCaptureCreatureInspection(creature,{speciesDef:species,assetRegistry});
       if(!inspection.ok) return inspection;
       const opened=api.openOverlay({
         kind:inspection.kind,

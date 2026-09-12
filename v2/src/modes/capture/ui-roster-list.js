@@ -5,6 +5,7 @@ export const CAPTURE_UI_ROSTER_LIST_CONTRACT=Object.freeze({
   readsAuthoritativeVitals:true,
   readsAuthoritativeStatuses:true,
   readsAuthoritativeAbilityState:true,
+  readsAuthoritativeReactionState:true,
   exposesInspectionTarget:true,
   mutatesRoster:false,
   mutatesBattle:false,
@@ -63,6 +64,26 @@ function captureRosterAbilities(creature={}){
   return [];
 }
 
+function captureRosterReactionEntry(reactionId,slot={}){
+  const id=text(reactionId||slot?.id,'');
+  if(!id) return null;
+  const resource=finiteOrNull(slot?.resource);
+  const cooldownRemaining=finiteOrNull(slot?.cooldownRemaining);
+  const normalizedCooldown=cooldownRemaining===null?null:Math.max(0,cooldownRemaining);
+  return {
+    id,
+    resource:resource===null?null:Math.max(0,resource),
+    cooldownRemaining:normalizedCooldown,
+    readyByCooldown:normalizedCooldown===null?null:normalizedCooldown<=0,
+  };
+}
+
+function captureRosterReactions(creature={}){
+  const state=creature?.reactionState;
+  if(!state||typeof state!=='object'||Array.isArray(state)) return [];
+  return Object.entries(state).map(([reactionId,slot])=>captureRosterReactionEntry(reactionId,slot)).filter(Boolean);
+}
+
 export function captureRosterListEntry(creature={},location='active',{activeBattleInstanceId=null}={}){
   const instanceId=text(creature?.instanceId,'');
   const speciesId=text(creature?.speciesId,'');
@@ -87,6 +108,7 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     ?creature.statuses.map(captureRosterStatusEntry).filter(Boolean)
     :[];
   const abilities=captureRosterAbilities(creature);
+  const reactions=captureRosterReactions(creature);
   return {
     instanceId,
     speciesId,
@@ -102,6 +124,7 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     ko,
     statuses,
     abilities,
+    reactions,
   };
 }
 

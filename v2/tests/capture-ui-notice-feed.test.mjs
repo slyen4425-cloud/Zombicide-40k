@@ -52,8 +52,9 @@ assert.equal(source.includes('Date.now('),false);
 assert.equal(source.includes('performance.now('),false);
 
 const pageSource=fs.readFileSync(new URL('../src/modes/capture/capture-page.js',import.meta.url),'utf8');
-assert.equal(pageSource.includes('advanceNoticeVisualTime'),true);
+assert.equal(pageSource.includes('sampleNoticeVisualClock(sample)'),true);
 assert.equal(pageSource.includes('noticeMaxVisible=6'),true);
 assert.equal(pageSource.includes('noticeExpireAfterVisualTime=null'),true);
+assert.equal(pageSource.includes('sampleCaptureUiVisualClock'),true);
 
 console.log('capture-ui-notice-feed.test.mjs: ok');

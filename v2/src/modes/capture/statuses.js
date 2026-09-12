@@ -65,3 +65,17 @@ export function collectCaptureStatusEffects(statuses=[]){
   }
   return effects;
 }
+
+export function resolveCaptureStatusEffect({battle,action,ability}={}){
+  const effect=ability?.effect||action?.effect||null;
+  if(!effect||effect.type!=='status') return {ok:true,outcome:{type:'declared_effect',effect:clone(effect)}};
+  const targetSide=String(action?.targetSide||'opponent');
+  if(!battle?.[targetSide]) return {ok:false,reason:'capture-status-target-missing'};
+  const statusDef=effect.status||effect.statusDef||null;
+  if(!statusDef) return {ok:false,reason:'capture-status-definition-required'};
+  const added=addCaptureStatus(battle[targetSide].statuses||[],statusDef);
+  if(!added.ok) return added;
+  const nextBattle=clone(battle);
+  nextBattle[targetSide].statuses=added.statuses;
+  return {ok:true,battle:nextBattle,outcome:{type:'status',targetSide,status:added.status}};
+}

@@ -1,0 +1,26 @@
+.dungeon-combat-section .combat-native-control{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.dungeon-combat-section .combat-actions-polished{display:grid;grid-template-columns:1fr;gap:12px;background:linear-gradient(180deg,#17120f,#111318);border-color:#5f4332}
+.combat-command-panel{display:grid;gap:12px}
+.combat-command-step{display:grid;gap:8px}
+.combat-command-step-label{font-size:11px;font-weight:950;letter-spacing:.09em;text-transform:uppercase;color:#d9b27a}
+.combat-command-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.combat-command-card{min-height:52px;border:1px solid #4b382d;border-radius:13px;background:#1b1715;padding:10px 11px;text-align:left;font-weight:850;line-height:1.25;transition:transform .1s ease,border-color .1s ease,background .1s ease}
+.combat-command-card:active{transform:scale(.985)}
+.combat-command-card.active{background:#6b452b;border-color:#d3a260;box-shadow:0 0 0 1px #d3a260 inset}
+.combat-command-target{background:#171b20;border-color:#38414d}
+.combat-command-target.active{background:#324b65;border-color:#7ca7d8;box-shadow:0 0 0 1px #7ca7d8 inset}
+.combat-command-card:disabled{opacity:.45;cursor:not-allowed}
+.combat-command-launch{width:100%;min-height:54px!important;font-size:16px;background:linear-gradient(180deg,#9c3e2f,#6d261f)!important;border-color:#c96b5a!important;box-shadow:0 6px 18px #0005}
+.combat-command-empty{margin:0;padding:10px;border:1px dashed #4a4f56;border-radius:11px}
+.dungeon-combat-section .combatant-card{position:relative;overflow:hidden}
+.dungeon-combat-section .combatant-card.combatant-hero{border-color:#355f4a;background:linear-gradient(180deg,#17241e,#171b20)}
+.dungeon-combat-section .combatant-card.combatant-enemy{border-color:#6c3838;background:linear-gradient(180deg,#2a1717,#1b1717)}
+.dungeon-combat-section .combatant-card.active{box-shadow:0 0 0 2px #d3a260 inset,0 0 24px #d3a26022}
+.dungeon-combat-section .combat-chip{position:relative;overflow:hidden;min-width:110px}
+.combat-resource-meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:#0008;pointer-events:none}
+.combat-resource-meter>span{display:block;height:100%;background:currentColor;opacity:.75}
+.dungeon-combat-section .combat-turn{position:relative;padding-left:30px}
+.dungeon-combat-section .combat-turn::before{content:attr(data-turn-position);position:absolute;left:8px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:17px;height:17px;border-radius:999px;background:#0b0d11;border:1px solid #59616d;font-size:9px;color:#c9d1dc}
+.dungeon-combat-section .combat-turn.active{background:#6b452b;border-color:#d3a260;color:#fff}
+@media(max-width:620px){.combat-command-list{grid-template-columns:1fr 1fr}.combat-command-card{min-height:56px}.combat-command-launch{position:sticky;bottom:max(8px,env(safe-area-inset-bottom));z-index:3}.dungeon-combat-section .combat-grid{grid-template-columns:1fr}.dungeon-combat-section .combatant-card{min-height:0}}
+@media(max-width:390px){.combat-command-list{grid-template-columns:1fr}}

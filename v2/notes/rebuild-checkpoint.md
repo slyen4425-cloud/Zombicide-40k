@@ -18,14 +18,17 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - Les 14 visuels canoniques actuels restent tous `pending_import` avec `path:null`; les noms canoniques sont actifs, mais aucune image réelle n’est encore affichée.
 - Le temps visuel des notices reste strictement séparé du temps gameplay.
 - L’overlay concret suspend uniquement le temps visuel et n’appelle jamais le blocage gameplay.
-- Les inspections et résumés restent strictement consultatifs : aucune attaque, IA, déplacement, dégâts, soin, capture ou progression du temps n’est déclenché depuis ces vues.
-- La liste Équipe active expose le switch manuel de créature active pendant un combat via `switchCaptureBattleCreature()`.
+- Les inspections et résumés restent strictement consultatifs.
+- La page Capture expose maintenant trois commandes gameplay autoritaires déjà raccordées : switch manuel de créature active, utilisation de capacité explicitement définie, déplacement tactique cardinal d’une case.
 - Le bouton `Changer` n’apparaît que pour une créature de l’équipe active, vivante, différente de la créature actuellement active et pendant un combat actif ; la réserve n’expose jamais cette commande.
 - Le chemin autoritaire des capacités joueur utilise `executeCapturePlayerAbility()`, qui appelle `useCaptureBattleAbility()` et persiste le `abilityState` retourné dans `activeTeam`, `roster` et la copie de créature du combat.
-- La page Capture accepte maintenant une bibliothèque explicite `abilityDefs`. Une capacité n’est jouable dans l’UI que si son ID possède une définition exacte dans cette bibliothèque.
+- La page Capture accepte une bibliothèque explicite `abilityDefs`. Une capacité n’est jouable dans l’UI que si son ID possède une définition exacte dans cette bibliothèque.
 - Le bouton `Utiliser` apparaît uniquement sur la créature actuellement active, pendant un combat actif, pour une capacité explicitement définie ; il est désactivé si le cooldown autoritaire est > 0 ou si les charges autoritaires sont à 0.
 - L’UI ne calcule ni portée, ni dégâts, ni coût, ni réaction, ni KO : le clic passe exclusivement par `executeCapturePlayerAbility()`.
-- Si la capacité termine réellement le combat, le driver gameplay de la session est arrêté avec l’état autoritaire retourné.
+- Le déplacement joueur passe exclusivement par `executeCapturePlayerMove()` : quatre commandes cardinales `↑ ↓ ← →`, une case par commande, sans diagonale.
+- Les contrôles de déplacement n’apparaissent que sur la créature actuellement active, vivante et pendant un combat actif ; ils n’apparaissent ni sur les autres membres de l’équipe ni dans la réserve.
+- `executeCapturePlayerMove()` lit la position autoritaire avec le Core spatial puis appelle `moveCaptureBattleCreature()` ; murs/cases bloquées/pathfinding restent décidés par le moteur spatial.
+- Aucun accès direct de la page à `getActorPosition()`, `setActorPosition()` ou `moveCaptureBattleCreature()` n’est autorisé.
 - Aucun `abilityState` manquant, aucune charge, aucun cooldown et aucune définition de capacité ne sont inventés.
 - Les 4 orbes reconnues restent `capture_orb_basic`, `capture_orb_plus`, `capture_orb_ultra`, `capture_orb_master`; coefficients non inventés.
 
@@ -49,40 +52,43 @@ La V2 reste isolée de `main` tant que la parité et la validation utilisateur n
 - nom canonique + gating assets adversaire : `34693958720` success
 - nom canonique + gating assets roster : `34694300782` success
 - nom canonique dans inspection créature possédée : `34694675567` success
-- première commande gameplay UI — switch manuel de créature active : `34695849063` success
+- switch manuel de créature active : `34695849063` success
 - persistance autoritaire des charges/cooldowns après capacité joueur : `34696817140` success
 - commande UI de capacité pour la créature active : `34698467186` success
+- déplacement tactique cardinal joueur : `34698850672` success
 
 ## Dernière étape terminée
 
-Commande UI `Utiliser` pour les capacités de la créature active :
-- `capture/runtime.js` expose désormais publiquement `CAPTURE_PLAYER_ABILITY_ACTION_CONTRACT` et `executeCapturePlayerAbility()` ;
-- `CAPTURE_PUBLIC_RUNTIME_CONTRACT.canonicalPlayerAbilityAction` est actif ;
-- `mountCapturePage(...,{abilityDefs})` indexe uniquement les définitions explicitement fournies ;
-- une capacité sans définition explicite reste visible en lecture seule mais n’expose aucun bouton `Utiliser` ;
-- une capacité définie sur la créature actuellement active peut exposer `Utiliser` ;
-- cooldown > 0 ou charges = 0 désactivent le bouton à partir de l’état autoritaire déjà affiché ;
-- le clic appelle uniquement `executeCapturePlayerAbility(session.state,{abilityDef})` ;
-- après réussite, l’état autoritaire remplace celui de la session puis roster et résumé adverse sont rerendus ;
-- si l’action termine le combat, le driver gameplay est arrêté ;
-- aucun bouton de capacité n’est ajouté à la réserve ou aux créatures non actives ;
-- aucun `useCaptureBattleAbility()` direct, aucune initialisation implicite de capacité, aucun calcul RPG ni aléatoire n’existe dans la page.
+Déplacement tactique manuel de la créature active depuis la page Capture :
+- nouveau module `v2/src/modes/capture/player-move-action.js` ;
+- `executeCapturePlayerMove(state,{direction})` accepte seulement `up`, `down`, `left`, `right` ;
+- la position courante est lue depuis le Core spatial avec `getActorPosition()` ;
+- la cible est strictement la case cardinale voisine ;
+- le mouvement autoritaire passe par `moveCaptureBattleCreature(state,'player',target,{movement:1,diagonal:false})` ;
+- une direction invalide est refusée ;
+- un héros/créature KO ne peut pas se déplacer ;
+- une case bloquée est refusée par le moteur spatial existant ;
+- l’état source n’est pas muté ;
+- `capture/runtime.js` expose `CAPTURE_PLAYER_MOVE_ACTION_CONTRACT` et `executeCapturePlayerMove()` via la façade canonique ;
+- la carte de la créature active affiche `↑ ↓ ← →` pendant un combat actif uniquement ;
+- la page appelle seulement `executeCapturePlayerMove()` puis rerend roster et résumé adverse après succès ;
+- aucun calcul spatial direct n’a été ajouté dans l’UI.
 
 Régression :
-- `v2/tests/capture-ui-player-ability-action.test.mjs` vérifie l’exposition publique du contrôleur, une résolution de dégâts réelle, la persistance charge/cooldown et les garde-fous statiques de l’UI ;
-- `v2/tests/capture-ui-roster-list.test.mjs` a été ajusté pour reconnaître le nouveau rendu contextualisé des capacités sans relâcher ses protections ;
-- premier run `34698412692` bloqué uniquement par l’ancienne assertion statique `entry.abilities.map(rosterAbilityHtml)` ;
-- batterie complète corrigée : `34698467186` success.
+- `v2/tests/capture-player-move-action.test.mjs` couvre déplacement droit/haut, blocage obstacle, KO, absence de combat, direction invalide et non-mutation ;
+- `v2/tests/capture-ui-player-move-action.test.mjs` protège l’exposition publique, les quatre contrôles cardinaux et l’absence d’accès spatial bas niveau dans la page ;
+- batterie complète : `34698850672` success.
 
 Commits de l’étape :
-- façade runtime capacité joueur : `a54c5127a4b7f2bb12830e970a01350ffe4c32ea`
-- commande UI capacité active : `b4244e769d69f7d32629160b7a2564a73ce8719b`
-- régression dédiée : `6426b02c74cc475c97a1e1f5e18aa3f504101984`
-- garde roster adapté : `1bc437828dcd7466c08732272ceb1911264427ce`
+- contrôleur déplacement cardinal : `d6e631e1995fb2a2a5de17c2e497ae00a835db5a`
+- façade runtime : `eb0230bafe02c360674a9ad1d33f3f2a1d65ca5a`
+- régression contrôleur : `939b5fb5e00bcd07df1b50312a5bc060f5e93903`
+- contrôles UI : `81459c8f5a4fa39ac87e7205abf1f25bb683729c`
+- régression UI : `134a3d08a2af2e8393eee5b884d7de56386f642b`
 
 ## Priorités ouvertes
 
-1. prochaine étape Capture : exposer progressivement la commande de déplacement tactique autoritaire de la créature active, sans réécrire le moteur spatial ;
+1. prochaine étape Capture : ajouter un retour visuel simple de position/distance pour aider le joueur à comprendre la portée sans calculer la règle dans l’UI ;
 2. ensuite raccorder la tentative de capture par orbe uniquement lorsque les coefficients/valeurs requis sont explicitement validés et disponibles ;
 3. importer les vrais arts principaux + icônes quand les fichiers validés sont disponibles, une seule paire par espèce canonique ;
 4. enrichir les autres réactions/effets tactiques uniquement si leurs contrats sont validés ;

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-12",
+  "purpose": "Cartographier les anciennes sources de stockage Monster Capture avant migration V2, sans réutiliser les clés partagées qui mélangeaient Capture avec RPG/Dungeon.",
+  "architecture": {
+    "mode": "capture",
+    "isolatedFrom": ["survival", "rpg", "pvp"],
+    "noSharedMutableGameplayStorage": true,
+    "lazyLoadOnly": true,
+    "legacyImportIsReadOnly": true
+  },
+  "legacySources": [
+    {
+      "pattern": "gensrpg_shared_entities_v1__<profileId>",
+      "kind": "entity_library",
+      "risk": "shared_cross_mode_storage",
+      "action": "read_for_migration_only",
+      "notes": "Ancienne source de créatures liée au profil ; ne devient jamais une clé runtime V2."
+    },
+    {
+      "pattern": "gensrpg_shared_entities_v1__family__creature",
+      "kind": "entity_library",
+      "risk": "global_creature_family_shared_storage",
+      "action": "read_for_migration_only",
+      "notes": "Bibliothèque globale historique susceptible de contenir doublons et contenu généré. Passage obligatoire par la table de canonicalisation."
+    },
+    {
+      "pattern": "starter_capture",
+      "kind": "legacy_universe_marker",
+      "risk": "mixed_profile_namespace",
+      "action": "translate_not_preserve_as_runtime_namespace"
+    },
+    {
+      "pattern": "gensrpg_capture_wild_rules_v1_<profileId>",
+      "kind": "capture_rules",
+      "risk": "profile_suffix_legacy",
+      "action": "migrate_to_capture_settings"
+    },
+    {
+      "pattern": "gensrpg_capture_mj_rules_v137_<profileId>",
+      "kind": "gm_capture_rules",
+      "risk": "versioned_legacy_key",
+      "action": "migrate_to_capture_settings"
+    },
+    {
+      "pattern": "gensrpg_capture_battle_mode_v1_<profileId>",
+      "kind": "battle_mode",
+      "risk": "versioned_legacy_key",
+      "action": "migrate_to_capture_settings"
+    },
+    {
+      "pattern": "legacy_capture_trainer_in_custom_heroes",
+      "kind": "trainer_data",
+      "risk": "trainer_stored_as_rpg_dungeon_hero",
+      "action": "extract_into_capture_trainers"
+    },
+    {
+      "pattern": "gensStarterCaptureItems()+contentFamily:creature",
+      "kind": "capture_items",
+      "risk": "items_assembled_from_shared_equipment_sources",
+      "action": "canonicalize_into_capture_item_library"
+    }
+  ],
+  "v2Namespaces": {
+    "profile": "gensrpg:v2:capture:profile:<profileId>",
+    "save": "gensrpg:v2:capture:save:<saveId>",
+    "creatureLibrary": "gensrpg:v2:capture:library:creatures",
+    "abilityLibrary": "gensrpg:v2:capture:library:abilities",
+    "itemLibrary": "gensrpg:v2:capture:library:items",
+    "trainerLibrary": "gensrpg:v2:capture:library:trainers",
+    "playerRoster": "gensrpg:v2:capture:player:<playerId>:roster",
+    "activeTeam": "gensrpg:v2:capture:player:<playerId>:team",
+    "reserve": "gensrpg:v2:capture:player:<playerId>:reserve",
+    "progression": "gensrpg:v2:capture:player:<playerId>:progression",
+    "settings": "gensrpg:v2:capture:profile:<profileId>:settings"
+  },
+  "migrationRules": {
+    "legacyReadOnly": true,
+    "neverWriteLegacyKeys": true,
+    "neverFallbackToRpgStorageAtRuntime": true,
+    "canonicalizeCreatureIdsBeforeRosterImport": true,
+    "preserveOwnedInstances": true,
+    "doNotMergeDistinctOwnedInstances": true,
+    "teamSizeLimit": 6,
+    "overflowOwnedCreaturesGoToReserve": true,
+    "unknownLegacyCreaturePolicy": "quarantine_pending_review",
+    "generatedLegacyFamilyPolicy": "quarantine_pending_review",
+    "trainerMustNotRemainRpgHero": true,
+    "captureItemsMustNotRemainRpgEquipment": true
+  },
+  "generatedLegacyFamilies": {
+    "classification": "quarantine",
+    "families": [
+      "poison",
+      "steel",
+      "psy",
+      "ice",
+      "shadow_generated",
+      "light_generated",
+      "earth_generated",
+      "water_generated",
+      "fire_generated",
+      "electric_generated",
+      "air_generated",
+      "nature",
+      "spirit",
+      "crystal",
+      "mud",
+      "sound",
+      "magma",
+      "mecha",
+      "wasp",
+      "dream",
+      "scarab",
+      "jellyfish",
+      "crow",
+      "mole"
+    ],
+    "rule": "Ces familles sont conservées comme matière legacy mais ne sont pas injectées dans la bibliothèque canonique V2 tant qu'elles n'ont pas été revues individuellement."
+  }
+}

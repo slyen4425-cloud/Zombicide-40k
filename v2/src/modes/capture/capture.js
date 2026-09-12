@@ -24,6 +24,10 @@ import {
   resolveCaptureAbilityAction,
   switchCaptureActiveCreature,
 } from './dynamic-combat.js';
+import {
+  chooseCaptureAiAction,
+  executeCaptureAiAction,
+} from './ai.js';
 import {resolveCaptureAttempt} from './capture-attempt.js';
 import {consumeCaptureItem,createCaptureInventory} from './items.js';
 
@@ -172,6 +176,40 @@ export function useCaptureBattleAbility(state,{side='player',targetSide='opponen
     ended,
     endReason,
     state:next,
+  };
+}
+
+export function runCaptureAiStep(state,{abilityDefs=[],abilityState={},effectResolver=null}={}){
+  if(!state.battle) return {ok:false,reason:'battle-missing',state,abilityState:clone(abilityState)};
+  const decision=chooseCaptureAiAction({battle:state.battle,abilityDefs,abilityState});
+  if(decision.type==='ability'){
+    const abilityDef=(abilityDefs||[]).find(entry=>String(entry.id)===String(decision.abilityId));
+    const result=useCaptureBattleAbility(state,{
+      side:'opponent',
+      targetSide:'player',
+      abilityDef,
+      abilityState,
+      effectResolver,
+    });
+    return {...result,decision};
+  }
+
+  const result=executeCaptureAiAction({
+    battle:state.battle,
+    abilityDefs,
+    abilityState,
+    effectResolver,
+  });
+  if(!result.ok) return {...result,state};
+  return {
+    ...result,
+    ended:false,
+    endReason:null,
+    state:{
+      ...state,
+      battle:clone(result.battle),
+      exploration:{...(state.exploration||{}),freeMovement:false},
+    },
   };
 }
 

@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const src=fs.readFileSync('assets/gensrpg/gens-rpg-legacy-cleanup-167891.js','utf8');
+assert.match(src,/APP_VERSION="16\.78\.93"/);
+assert.match(src,/PV \/ 10 Endurance/);
+assert.match(src,/Mana \/ 10 Esprit/);
+assert.match(src,/LEGACY_KEYS/);
+assert.match(src,/input,select,textarea/);
+assert.match(src,/style\.setProperty\("display","none","important"\)/);
+assert.match(src,/smallestFieldRow/);
+assert.doesNotMatch(src,/hideNode\(label\)/);
+assert.match(src,/!text\.includes\("pv de base"\)/);
+assert.match(src,/!text\.includes\("mana de base"\)/);
+console.log('GenSrpG V16.78.93 stat UI cleanup guards OK');

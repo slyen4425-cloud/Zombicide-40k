@@ -107,10 +107,11 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
   const rawSpeciesId=text(creature?.speciesId,'');
   if(!instanceId||!rawSpeciesId) return null;
   const resolvedAsset=resolveCaptureSpeciesAsset(rawSpeciesId,assetRegistry);
+  const hasCanonicalAssetRecord=resolvedAsset?.found===true;
   const speciesId=resolvedAsset?.speciesId||rawSpeciesId;
-  const displayName=resolvedAsset?.displayName||speciesId;
-  const mainArt=availableAssetPart(resolvedAsset?.mainArt,assetRegistry);
-  const iconArt=availableAssetPart(resolvedAsset?.iconArt,assetRegistry);
+  const displayName=hasCanonicalAssetRecord?(resolvedAsset.displayName||speciesId):speciesId;
+  const mainArt=hasCanonicalAssetRecord?availableAssetPart(resolvedAsset?.mainArt,assetRegistry):null;
+  const iconArt=hasCanonicalAssetRecord?availableAssetPart(resolvedAsset?.iconArt,assetRegistry):null;
   const nickname=text(creature?.nickname,'');
   const level=Math.max(1,Number(creature?.level)||1);
   const normalizedLocation=location==='reserve'?'reserve':'active';
@@ -132,10 +133,9 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     :[];
   const abilities=captureRosterAbilities(creature);
   const reactions=captureRosterReactions(creature);
-  return {
+  const entry={
     instanceId,
     speciesId,
-    displayName,
     location:normalizedLocation,
     title:nickname||displayName,
     subtitle:`${displayName} · Niv. ${level}`,
@@ -149,9 +149,13 @@ export function captureRosterListEntry(creature={},location='active',{activeBatt
     statuses,
     abilities,
     reactions,
-    mainArt:mainArt?{...mainArt,src:captureAssetPathToUiSrc(mainArt.path)}:null,
-    iconArt:iconArt?{...iconArt,src:captureAssetPathToUiSrc(iconArt.path)}:null,
   };
+  if(hasCanonicalAssetRecord){
+    entry.displayName=displayName;
+    entry.mainArt=mainArt?{...mainArt,src:captureAssetPathToUiSrc(mainArt.path)}:null;
+    entry.iconArt=iconArt?{...iconArt,src:captureAssetPathToUiSrc(iconArt.path)}:null;
+  }
+  return entry;
 }
 
 export function buildCaptureRosterLists(state={}, {assetRegistry={}}={}){

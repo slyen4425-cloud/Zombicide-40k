@@ -48,12 +48,25 @@ function mountRpgLaunch(host){
     window.scrollTo({top:0,behavior:'instant'});
   }});
 }
+async function loadCaptureAssetRegistry(){
+  try{
+    const response=await fetch('./docs/capture-creature-assets.json',{cache:'no-store'});
+    if(!response.ok) return {};
+    const registry=await response.json();
+    return registry&&typeof registry==='object'?registry:{};
+  }catch{
+    return {};
+  }
+}
 async function mountCaptureLazy(host){
   host.innerHTML='<section class="panel"><h2>Capture de créatures</h2><p>Chargement du mode…</p></section>';
-  const { mountCapturePage }=await import('./modes/capture/capture-page.js');
+  const [{ mountCapturePage },assetRegistry]=await Promise.all([
+    import('./modes/capture/capture-page.js'),
+    loadCaptureAssetRegistry(),
+  ]);
   if(!document.body.contains(host)) return;
   host.innerHTML='';
-  workspaceController=mountCapturePage(host)||null;
+  workspaceController=mountCapturePage(host,{assetRegistry})||null;
 }
 async function openMode(modeId){
   const home=document.querySelector('#homeView');const workspace=document.querySelector('#workspaceView');const host=document.querySelector('#workspaceHost');

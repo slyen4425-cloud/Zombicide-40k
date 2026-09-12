@@ -10,6 +10,7 @@ import {
   createCaptureAppSession,
   createCaptureModeState,
   createCaptureUiNoticeFeed,
+  createCaptureUiPresentationBlockState,
   createCaptureUiVisualClockAdapterState,
   createCaptureUiVisualDriverState,
   createCaptureUiVisualPauseControllerState,
@@ -21,6 +22,7 @@ import {
   resumeCaptureUiVisualDriver,
   sampleCaptureUiVisualClock,
   setCaptureBattleBlocking,
+  setCaptureUiPresentationBlocked,
   setCaptureUiVisualPauseReason,
   startCaptureUiVisualClockAdapter,
   startCaptureUiVisualDriver,
@@ -44,6 +46,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
   let visualDriver=createCaptureUiVisualDriverState();
   let visualClockAdapter=createCaptureUiVisualClockAdapterState();
   let visualPauseController=createCaptureUiVisualPauseControllerState();
+  let presentationBlock=createCaptureUiPresentationBlockState();
   let visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
   let visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
   const state=session.state;
@@ -118,6 +121,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
     get visualDriver(){return structuredClone(visualDriver);},
     get visualClockAdapter(){return structuredClone(visualClockAdapter);},
     get visualPauseController(){return structuredClone(visualPauseController);},
+    get presentationBlock(){return structuredClone(presentationBlock);},
     get visualClockSourceAttached(){return visualClockSourceAttachment.attached===true;},
     get visualActivitySourceAttached(){return visualActivitySourceAttachment.attached===true;},
     beginBattle(options={}){
@@ -129,6 +133,17 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       const result=setCaptureBattleBlocking(session,blocking);
       if(result.ok) session=result.session;
       return result;
+    },
+    setPresentationBlocking(blocking,options={}){
+      const result=setCaptureUiPresentationBlocked(presentationBlock,blocking,options);
+      if(!result.ok) return result;
+      presentationBlock=result.state;
+      const visual=applyVisualPauseReason(result.pauseReason,result.paused);
+      return {
+        ...result,
+        visual,
+        gameplayDriverStatus:session.driver?.status??null,
+      };
     },
     advance(delta,options={}){
       const result=advanceCaptureBattleSession(session,{...options,delta});
@@ -142,6 +157,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       visualPauseController=clearCaptureUiVisualPauseReasons(visualPauseController).controller;
       visualDriver=startCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=startCaptureUiVisualClockAdapter(visualClockAdapter);
+      if(presentationBlock.blocked) applyVisualPauseReason('presentation-block',true);
       return {driver:structuredClone(visualDriver),adapter:structuredClone(visualClockAdapter),pauseController:structuredClone(visualPauseController)};
     },
     pauseNoticeVisualClock(){
@@ -172,6 +188,7 @@ export function mountCapturePage(host,{initialState=null,noticeMaxVisible=6,noti
       visualActivitySourceAttachment={ok:true,attached:false,detach:()=>{}};
       visualClockSourceAttachment={ok:true,attached:false,detach:()=>{}};
       session={...session,driver:stopCaptureDriver(session.driver),blocking:false,uiEvents:[]};
+      presentationBlock=createCaptureUiPresentationBlockState();
       visualPauseController=createCaptureUiVisualPauseControllerState();
       visualDriver=stopCaptureUiVisualDriver(visualDriver);
       visualClockAdapter=stopCaptureUiVisualClockAdapter(visualClockAdapter);

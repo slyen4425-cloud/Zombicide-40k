@@ -1,9 +1,9 @@
-name: Validate V16.78.107 Tactical UI
+name: Validate V16.78.107.1 Tactical UI
 
 on:
   push:
     branches:
-      - work/v16.78.107-tactical-actions-dice-terrain
+      - work/v16.78.107.1-tactical-readability-roll-walls
       - main
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
       - name: Test real Runtime 2.00 renderer seam and Dungeon dedupe
         run: node tests/gens_rpg_runtime_repair_v1678106.test.cjs
-      - name: Test tactical actions dice and terrain UI
+      - name: Test tactical portraits persistent dice roll rule and walls
         run: node tests/gens_rpg_tactical_combat_v2_ui_v1678107.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs

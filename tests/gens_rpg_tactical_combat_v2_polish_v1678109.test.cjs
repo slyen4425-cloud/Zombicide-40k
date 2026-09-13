@@ -53,6 +53,8 @@ assert.equal(P.UNARMED_VALUE,'-1');
 }
 
 const source=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2-polish-1678109.js'),'utf8');
+const integration=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
+const sw=fs.readFileSync(path.join(__dirname,'..','service-worker.js'),'utf8');
 assert.match(source,/\.gtv2Hud\{display:none!important\}/,'les cartes Tour/Cible redondantes doivent être masquées');
 assert.match(source,/gtv2109Timeline/,'la timeline visuelle doit être présente');
 assert.match(source,/data-v109-quick-attack/,'le raccourci d’attaque fixe doit être présent');
@@ -60,5 +62,8 @@ assert.match(source,/Mains nues/,'le choix Mains nues doit être prévu');
 assert.match(source,/\.gtv2Cell\.blocked/,'les murs de la carte tactique doivent être repeints');
 assert.match(source,/dng_wall_block\.jpg/,'la couche finale doit reprendre la texture du Builder');
 assert.doesNotMatch(source,/dungeon_wall\.png/,'la couche V109 ne doit plus référencer l’ancien mur tactique');
+assert.match(integration,/gens-rpg-tactical-combat-v2-polish-1678109\.js\?v=16\.78\.109/,'la V109 doit être réellement chargée après V108');
+assert.match(sw,/gensrpg-cache-16\.78\.109-timeline-range-wall-ux/,'le cache PWA doit changer');
+assert.match(sw,/gens-rpg-tactical-combat-v2-polish-1678109\.js/,'la couche V109 doit être pré-cachée');
 
 console.log('V16.78.109 timeline + compact HUD + quick attack + unarmed + ranged weapon + authoritative wall regressions OK');

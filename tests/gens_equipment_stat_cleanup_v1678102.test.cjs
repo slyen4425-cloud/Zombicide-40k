@@ -8,7 +8,7 @@ const src=fs.readFileSync(file,'utf8');
 const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-hero-art-repair-167874.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.doesNotThrow(()=>new Function(src),'equipment cleanup syntax');
-assert.match(src,/APP_VERSION="16\.78\.102"/);
+assert.match(src,/APP_VERSION="16\.78\.102(?:\.1)?"/);
 assert.match(src,/deuiEquipmentEditorStats167817/,'legacy fixed RPG equipment block must be hidden');
 assert.match(src,/eqBonusKind/,'legacy single-stat selector must be hidden');
 assert.match(src,/eqEvo"\+lv\+"Force/,'legacy evolution Force field must be hidden, while combat dice/result stay intact');

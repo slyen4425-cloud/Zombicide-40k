@@ -12,7 +12,7 @@ assert.match(source,/resetLifecycle/);
 assert.match(source,/dc200StartCombat/);
 assert.match(source,/dc104FinishVictory/);
 assert.match(html,/gens-mobile-combat-performance-16781022\.js/);
-assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
+assert.match(sw,/gensrpg-cache-16\.78\.102\.5-combat-lifecycle-reset/);
 class Element{constructor(){this.className="";this.dataset={};this.style={};this.children=[];this.textContent=""}appendChild(c){this.children.push(c);return c}append(...c){this.children.push(...c)}replaceChildren(...c){this.children=[...c]}animate(){return {}}}
 const boxes={d6:new Element(),d100:new Element()};
 const document={readyState:"complete",createElement:()=>new Element(),createDocumentFragment:()=>new Element(),getElementById:id=>boxes[id]||null,addEventListener(){}};
@@ -28,8 +28,7 @@ for(let i=0;i<100;i++)assert.equal(sandbox.dungeonAttributeValue("force"),14);as
 sandbox.changeDungeonAttribute("force",1);assert.equal(sandbox.dungeonAttributeValue("force"),15);assert.equal(attributeCalls,2);
 sandbox.decorate211();sandbox.decorate211();assert.equal(detectResolve,1);assert.equal(detectPaint,1);
 sandbox.dungeonTurn156={active:true,order:[1],index:4,aiBusy:true,lastSig:"stale"};const tokenBefore=sandbox.dc023AiToken;sandbox.dc200StartCombat();assert.equal(starts,1);assert.ok(sandbox.dc023AiToken>tokenBefore);assert.equal(sandbox.dungeonTurn156.aiBusy,false);assert.equal(sandbox.dungeonTurn156.lastSig,"");
-sandbox.dungeonTurn156={active:true,order:[1],index:2,aiBusy:true,lastSig:"again"};sandbox.dc104FinishVictory();assert.equal(finishes,1);assert.equal(sandbox.dungeonTurn156.active,false);assert.deepEqual(sandbox.dungeonTurn156.order,[]);assert.equal(sandbox.dungeonTurn156.aiBusy,false);
-// Second encounter must start from a clean turn state as well.
+sandbox.dungeonTurn156={active:true,order:[1],index:2,aiBusy:true,lastSig:"again"};sandbox.dc104FinishVictory();assert.equal(finishes,1);assert.equal(sandbox.dungeonTurn156.active,false);assert.equal(sandbox.dungeonTurn156.order.length,0);assert.equal(sandbox.dungeonTurn156.aiBusy,false);
 sandbox.dungeonTurn156={active:true,order:[9],index:9,aiBusy:true,lastSig:"dirty"};sandbox.dc200StartCombat();assert.equal(starts,2);assert.equal(sandbox.dungeonTurn156.aiBusy,false);assert.equal(sandbox.dungeonTurn156.lastSig,"");
 pending=[];clock=0;let done=null;sandbox.animateDice("d6",3,[2,5,6],4,()=>done=clock);runUntil(()=>done!==null);assert.ok(done<=520);
 console.log("V16.78.102.5 lifecycle reset OK",sandbox.GensMobileCombatPerformance16781022.metrics());

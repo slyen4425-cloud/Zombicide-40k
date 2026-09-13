@@ -1,4 +1,4 @@
-name: Validate V16.78.109 Tactical UI
+name: Validate V16.78.110 Tactical Stats
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - work/v16.78.107.1-tactical-readability-roll-walls
       - work/v16.78.108-detection-texture-pawn-actions
       - work/v16.78.109-timeline-range-wall-ux
+      - work/v16.78.110-full-stat-tactical
       - main
 
 permissions:
@@ -23,6 +24,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js
           node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
       - name: Test global Dungeon combat entry routing
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
@@ -34,6 +36,8 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
       - name: Test V16.78.109 timeline compact HUD quick attack unarmed range and walls
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678109.test.cjs
+      - name: Test V16.78.110 cached canonical stats combat rules and fixed action dock
+        run: node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
       - name: Test tactical adapter
@@ -44,7 +48,13 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
       - name: Preserve Survival isolation
         run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
-      - name: Preserve mode-aware dice
+      - name: Preserve mode-aware dice and mobile combat performance guard
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
+      - name: Preserve equipment combat cache
+        run: node tests/gens_equipment_combat_cache_v1678102hf1.test.cjs
+      - name: Preserve canonical stat runtime link
+        run: node tests/gens_clean_stats_runtime_link_v167892.test.cjs
+      - name: Preserve single-authority stat engine
+        run: node tests/gens_stat_engine_cleanup_v167894.test.cjs
       - name: Preserve Dungeon runtime
         run: node tests/dungeon_runtime_regression.test.cjs

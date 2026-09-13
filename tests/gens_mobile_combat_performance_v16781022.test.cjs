@@ -15,9 +15,10 @@ assert.doesNotMatch(source,/setInterval\s*\(/,"optimized Dungeon dice must not u
 assert.match(source,/nativeAnimateDice/,'Survival native dice renderer must be preserved');
 assert.match(source,/gens-survival-mode-isolation-1678104\.js/);
 assert.match(source,/translate3d/,"Dungeon dice motion must stay compositor-friendly");
-assert.match(sw,/gensrpg-cache-16\.78\.105-tactical-entry-routing/);
+assert.match(sw,/gensrpg-cache-16\.78\.106-real-tactical-runtime/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.match(sw,/gens-survival-mode-isolation-1678104\.js/);
+assert.match(sw,/gens-rpg-runtime-repair-1678106\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance bridge must load after the final Dungeon core");
 if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance bridge must be the final runtime script")}
 const hookAll=(ui.match(/function hookAll\(\)\{[^\n]+/)||[""])[0];
@@ -65,4 +66,4 @@ assert.equal(nativeD100,1,'Survival must keep original RPG-die function if invok
 
 const legacyD6Ms=1250+(3-1)*65+4*105+260,legacyD100Ms=10*90+180;
 assert.ok(d6DoneAt<legacyD6Ms/3);assert.ok(d100DoneAt<legacyD100Ms/2);
-console.log("V16.78.105 mode-aware mobile combat profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});
+console.log("V16.78.106 mode-aware mobile combat profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});

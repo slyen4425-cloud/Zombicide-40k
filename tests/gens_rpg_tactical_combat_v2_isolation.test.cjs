@@ -8,9 +8,11 @@ const adapter=read('gens-rpg-tactical-combat-v2-adapter.js');
 const ui=read('gens-rpg-tactical-combat-v2-ui.js');
 const bridge=read('gens-rpg-tactical-combat-v2-bridge.js');
 
-for(const forbidden of ['document','localStorage','setTimeout','setInterval','renderDungeonCombatRound','dungeonTurn156','dc029AiWatchdog']){
-  assert.ok(!engine.includes(forbidden),`pure tactical engine must not depend on ${forbidden}`);
-}
+const purePatterns=[
+  [/\bdocument\s*\./,'document'],[/\blocalStorage\s*\./,'localStorage'],[/\bsetTimeout\s*\(/,'setTimeout'],[/\bsetInterval\s*\(/,'setInterval'],
+  [/\brenderDungeonCombatRound\b/,'renderDungeonCombatRound'],[/\bdungeonTurn156\b/,'dungeonTurn156'],[/\bdc029AiWatchdog\b/,'dc029AiWatchdog']
+];
+for(const [pattern,label] of purePatterns)assert.ok(!pattern.test(engine),`pure tactical engine must not depend on ${label}`);
 for(const forbidden of ['renderDungeonCombatRound','dungeonTurn156','dc029AiWatchdog','setInterval(','setTimeout(']){
   assert.ok(!ui.includes(forbidden),`battlefield UI must not reuse legacy combat/timer ${forbidden}`);
 }

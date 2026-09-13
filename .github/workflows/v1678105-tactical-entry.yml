@@ -1,9 +1,9 @@
-name: Validate V16.78.105 Tactical Entry
+name: Validate V16.78.106 Tactical Runtime
 
 on:
   push:
     branches:
-      - work/v16.78.105-tactical-entry-routing
+      - work/v16.78.106-real-runtime-route-dedupe
       - main
 
 permissions:
@@ -17,9 +17,12 @@ jobs:
       - name: Syntax tactical routing modules
         run: |
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js
+          node --check assets/gensrpg/gens-rpg-runtime-repair-1678106.js
           node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
-      - name: Test actual Dungeon combat entry routing
+      - name: Test global Dungeon combat entry routing
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
+      - name: Test real Runtime 2.00 renderer seam and Dungeon dedupe
+        run: node tests/gens_rpg_runtime_repair_v1678106.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
       - name: Test tactical adapter

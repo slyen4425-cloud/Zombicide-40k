@@ -33,7 +33,7 @@ reinstall();
 
 /* V16.78.103 tactical combat loader. This file is already the final script in index.html,
    so the V2 bridge is installed only after the stable Dungeon runtime has finished loading. */
-if(D&&!R.__gensTacticalV2Loader103){
+if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader103){
   R.__gensTacticalV2Loader103=true;
   const files=[
     "assets/gensrpg/gens-rpg-tactical-combat-v2.js",

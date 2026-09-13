@@ -10,12 +10,12 @@ const html=fs.readFileSync(builtIndex,"utf8");
 const sw=fs.readFileSync(path.join(root,"service-worker.js"),"utf8");
 const ui=fs.readFileSync(path.join(root,"assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js"),"utf8");
 
-assert.match(source,/APP_VERSION="16\.78\.104"/);
+assert.match(source,/APP_VERSION="16\.78\.105"/);
 assert.doesNotMatch(source,/setInterval\s*\(/,"optimized Dungeon dice must not use main-thread interval ticks");
 assert.match(source,/nativeAnimateDice/,'Survival native dice renderer must be preserved');
 assert.match(source,/gens-survival-mode-isolation-1678104\.js/);
 assert.match(source,/translate3d/,"Dungeon dice motion must stay compositor-friendly");
-assert.match(sw,/gensrpg-cache-16\.78\.104-survival-isolation/);
+assert.match(sw,/gensrpg-cache-16\.78\.105-tactical-entry-routing/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.match(sw,/gens-survival-mode-isolation-1678104\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance bridge must load after the final Dungeon core");
@@ -65,4 +65,4 @@ assert.equal(nativeD100,1,'Survival must keep original RPG-die function if invok
 
 const legacyD6Ms=1250+(3-1)*65+4*105+260,legacyD100Ms=10*90+180;
 assert.ok(d6DoneAt<legacyD6Ms/3);assert.ok(d100DoneAt<legacyD100Ms/2);
-console.log("V16.78.104 mode-aware mobile combat profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});
+console.log("V16.78.105 mode-aware mobile combat profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});

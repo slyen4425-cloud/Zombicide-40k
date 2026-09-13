@@ -8,7 +8,7 @@
   if(root)root.GensRpgRuntimeRepair1678106=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.0",APP_VERSION="16.78.106";
+  const VERSION="1.0.1",APP_VERSION="16.78.106";
   const FAMILY_KEY="gensrpg_session_family_guard_v1";
   const PROFILES_KEY="gensrpg_game_profiles_v1";
   const ACTIVE_KEY="gensrpg_game_profile_active_v1";
@@ -98,7 +98,12 @@
     try{if(rt?.document?.body?.style)rt.document.body.style.overflow=""}catch(e){}
     try{rt.dungeonCombatActive=false}catch(e){}
   }
+  function currentBattle(rt=R){
+    try{const b=rt?.GensRpgTacticalCombatV2Bridge?.currentBattle?.(rt);if(b)return b}catch(e){}
+    try{return rt?.GensRpgTacticalCombatV2Ui?.getBattle?.()||null}catch(e){return null}
+  }
   function openTactical(rt=R,entry="renderer"){
+    const existing=currentBattle(rt);if(existing)return {ok:true,battle:existing,existing:true};
     if(opening)return {ok:false,reason:"already-opening"};
     const bridge=rt?.GensRpgTacticalCombatV2Bridge;
     const ui=rt?.GensRpgTacticalCombatV2Ui;
@@ -123,9 +128,12 @@
   function makeRendererWrapper(rt,name,original){
     const wrapped=function(...args){
       if(!isDungeonContext(rt))return original.apply(this,args);
-      ensureLegacyHostNonEmpty(rt);
       const opened=openTactical(rt,name);
-      if(opened?.ok){closeLegacyCombat(rt);return opened.battle||true}
+      if(opened?.ok){
+        closeLegacyCombat(rt);
+        ensureLegacyHostNonEmpty(rt);
+        return opened.battle||true;
+      }
       try{rt?.console?.warn?.("V16.78.106 tactical intercept fallback",name,opened?.reason)}catch(e){}
       return original.apply(this,args);
     };
@@ -154,5 +162,5 @@
     return installed;
   }
   function status(rt=R){return {installed,dungeon:isDungeonContext(rt),wrapped:RENDER_NAMES.filter(n=>!!rt?.[n]?.__gensRpg106RealRuntime),last:rt?.__gensRpg106LastIntercept||null}}
-  return {VERSION,APP_VERSION,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,openTactical,install,status};
+  return {VERSION,APP_VERSION,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,currentBattle,openTactical,install,status};
 });

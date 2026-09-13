@@ -36,14 +36,29 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadRuntime111(){
+    const D=R.document;if(!D||R.__gensTacticalRuntimeLoader111)return false;
+    R.__gensTacticalRuntimeLoader111=true;
+    const install=()=>{try{R.GensRpgTacticalRuntimeFixes1678111?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V111 tactical runtime install",e)}};
+    if(R.GensRpgTacticalRuntimeFixes1678111){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js?v=16.78.111";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V111 tactical runtime load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadStats110(){
-    const D=R.document;if(!D||R.__gensTacticalStatsLoader110)return false;
+    const D=R.document;if(!D)return false;
+    const after110=()=>{
+      try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}
+      loadRuntime111();
+    };
+    if(R.GensRpgTacticalStats1678110){after110();return true}
+    if(R.__gensTacticalStatsLoader110){loadRuntime111();return true}
     R.__gensTacticalStatsLoader110=true;
-    const install=()=>{try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}};
-    if(R.GensRpgTacticalStats1678110){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js?v=16.78.110";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V110 tactical stats load failed");
+    s.async=false;s.onload=after110;s.onerror=()=>{console.error("GenSrpG V110 tactical stats load failed");loadRuntime111()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -62,9 +77,9 @@
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
-  /* V108 remains the movement/action bridge. V109 owns the final wall/timeline
-     presentation. V110 loads last and only snapshots canonical RPG stats plus
-     the fixed action dock; it never adds stat recalculation to the hot loop. */
+  /* V108 remains the movement/action bridge. V109 owns wall/timeline presentation.
+     V110 snapshots canonical RPG stats. V111 loads last and repairs the live runtime:
+     stable wall scaling, fixed action dock, weapon dice and immediate enemy detection. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

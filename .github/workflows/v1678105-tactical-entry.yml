@@ -1,10 +1,11 @@
-name: Validate V16.78.108 Tactical UI
+name: Validate V16.78.109 Tactical UI
 
 on:
   push:
     branches:
       - work/v16.78.107.1-tactical-readability-roll-walls
       - work/v16.78.108-detection-texture-pawn-actions
+      - work/v16.78.109-timeline-range-wall-ux
       - main
 
 permissions:
@@ -21,6 +22,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-runtime-repair-1678106.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js
           node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
       - name: Test global Dungeon combat entry routing
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
@@ -30,6 +32,8 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_v2_ui_v1678107.test.cjs
       - name: Test V16.78.108 detection texture pawn framing and action selectors
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
+      - name: Test V16.78.109 timeline compact HUD quick attack unarmed range and walls
+        run: node tests/gens_rpg_tactical_combat_v2_polish_v1678109.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
       - name: Test tactical adapter

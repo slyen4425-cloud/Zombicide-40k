@@ -28,6 +28,7 @@ assert.deepEqual(P.cellXY(state(),6),{x:1,y:1});
 assert.equal(P.pathDistance(state(),6,8,4),2);
 assert.equal(P.lineOfSightCells(state(),6,8),true);
 const blocked=state(Array.from({length:25},(_,i)=>i===7?'wall':'floor'));
+blocked.heroRooms.h2=2;
 assert.equal(P.lineOfSightCells(blocked,6,8),false,'wall must block enemy vision');
 
 assert.deepEqual(P.detectionEnemyIds(rt,state(),enemies),['e1'],'only the enemy with range+LOS should detect a hero');

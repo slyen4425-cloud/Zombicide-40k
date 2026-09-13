@@ -7,12 +7,13 @@
   if(root)root.GensRpgTacticalCombatV2Adapter=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.2.0",APP_VERSION="16.78.103";
+  const VERSION="0.3.0",APP_VERSION="16.78.103";
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const call=(rt,name,...args)=>typeof rt?.[name]==="function"?rt[name](...args):undefined;
+  const cellKey=(x,y)=>`${x},${y}`;
 
   function engine(rt=R){return rt?.GensRpgTacticalCombatV2||R?.GensRpgTacticalCombatV2||null}
   function heroRecord(rt,id){return rt?.CHARS?.[id]||call(rt,"findCustomHero",id)||{id,name:id}}
@@ -122,10 +123,38 @@
     const rows=Math.max(6,Math.min(12,Math.max(heroCount,enemyCount)+3));
     return {width:10,height:rows,blocked:[]};
   }
+  function dungeonMap(rt){
+    try{const s=call(rt,"loadDungeonState")||{};return s?.last?.map||null}catch(e){return null}
+  }
+  function gridFromDungeonMap(rt){
+    const map=dungeonMap(rt),cells=arr(map?.cells);if(!cells.length)return null;
+    let size=Math.trunc(num(map?.size,Math.sqrt(cells.length)));
+    if(!Number.isFinite(size)||size<4||size*size>cells.length+size)size=Math.max(4,Math.round(Math.sqrt(cells.length)));
+    size=clamp(size,4,40);
+    const blocked=[],cover=[];
+    for(let i=0;i<Math.min(cells.length,size*size);i++){
+      const type=str(cells[i]||"floor"),x=i%size,y=Math.floor(i/size);
+      if(type==="wall"||type==="void")blocked.push({x,y});
+      if(type==="cover")cover.push({x,y});
+    }
+    return {width:size,height:size,blocked,cover,sourceMap:{shape:map?.shape||"",roomKind:map?.kind||""}};
+  }
   function spread(count,x,height){
     if(count<=0)return [];
     const out=[],step=height/(count+1);
     for(let i=0;i<count;i++)out.push({x,y:clamp(Math.round(step*(i+1))-1,0,height-1)});
+    return out;
+  }
+  function spawnCells(grid,count,side,used=new Set()){
+    const blocked=new Set(arr(grid?.blocked).map(p=>cellKey(p.x,p.y))),cells=[];
+    for(let y=0;y<grid.height;y++)for(let x=0;x<grid.width;x++){
+      const k=cellKey(x,y);if(blocked.has(k)||used.has(k))continue;
+      const edge=side==="hero"?x:(grid.width-1-x),center=Math.abs(y-(grid.height-1)/2);
+      cells.push({x,y,score:edge*100+center});
+    }
+    cells.sort((a,b)=>a.score-b.score||a.y-b.y||a.x-b.x);
+    const out=[];
+    for(const c of cells){if(out.length>=count)break;const k=cellKey(c.x,c.y);if(used.has(k))continue;used.add(k);out.push({x:c.x,y:c.y})}
     return out;
   }
   function participants(rt){
@@ -137,7 +166,9 @@
   function buildInput(rt=R,options={}){
     const heroIds=arr(options.heroIds).length?arr(options.heroIds).map(String):participants(rt);
     const enemies=activeEnemies(rt).filter(x=>!arr(options.enemyIds).length||arr(options.enemyIds).map(String).includes(str(x.id)));
-    const grid=options.grid||defaultGrid(heroIds.length,enemies.length),hp=spread(heroIds.length,1,grid.height),ep=spread(enemies.length,grid.width-2,grid.height);
+    const grid=options.grid||gridFromDungeonMap(rt)||defaultGrid(heroIds.length,enemies.length),used=new Set();
+    let hp=spawnCells(grid,heroIds.length,"hero",used),ep=spawnCells(grid,enemies.length,"enemy",used);
+    if(hp.length<heroIds.length||ep.length<enemies.length){const fallback=defaultGrid(heroIds.length,enemies.length);used.clear();hp=spawnCells(fallback,heroIds.length,"hero",used);ep=spawnCells(fallback,enemies.length,"enemy",used);grid.width=fallback.width;grid.height=fallback.height;grid.blocked=[]}
     const actors=[...heroIds.map((id,i)=>heroActor(rt,id,hp[i])),...enemies.map((x,i)=>enemyActor(rt,x,ep[i]))];
     return {id:options.id||`gens_${Date.now().toString(36)}`,grid,actors,rngSeed:num(options.rngSeed,0),config:{actionsPerTurn:1},meta:{source:"gensrpg",heroIds,enemyInstanceIds:enemies.map(x=>str(x.id))}};
   }
@@ -165,5 +196,5 @@
     return {heroes,enemies};
   }
 
-  return {VERSION,APP_VERSION,accuracyPercent,heroSnapshot,equippedWeaponEntries,heroAttacks,heroActor,enemyAttacks,enemyActor,defaultGrid,spread,participants,activeEnemies,buildInput,createBattle,commitBattle};
+  return {VERSION,APP_VERSION,accuracyPercent,heroSnapshot,equippedWeaponEntries,heroAttacks,heroActor,enemyAttacks,enemyActor,defaultGrid,dungeonMap,gridFromDungeonMap,spread,spawnCells,participants,activeEnemies,buildInput,createBattle,commitBattle};
 });

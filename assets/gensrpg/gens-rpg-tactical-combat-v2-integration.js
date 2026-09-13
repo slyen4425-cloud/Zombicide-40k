@@ -36,19 +36,35 @@
   };
   A.__gensTacticalIntegration103=true;
 
-  function loadPolish109(){
-    const D=R.document;if(!D||R.__gensTacticalPolishLoader109)return false;
-    R.__gensTacticalPolishLoader109=true;
-    const install=()=>{try{R.GensRpgTacticalPolish1678109?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V109 polish install",e)}};
-    if(R.GensRpgTacticalPolish1678109){install();return true}
+  function loadStats110(){
+    const D=R.document;if(!D||R.__gensTacticalStatsLoader110)return false;
+    R.__gensTacticalStatsLoader110=true;
+    const install=()=>{try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}};
+    if(R.GensRpgTacticalStats1678110){install();return true}
     const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V109 polish load failed");
+    s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js?v=16.78.110";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V110 tactical stats load failed");
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
-  /* V108 remains the movement/action bridge. V109 is loaded after it and owns
-     the final combat HUD/wall presentation plus ranged-weapon normalization. */
+  function loadPolish109(){
+    const D=R.document;if(!D)return false;
+    const after109=()=>{
+      try{R.GensRpgTacticalPolish1678109?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V109 polish install",e)}
+      loadStats110();
+    };
+    if(R.GensRpgTacticalPolish1678109){after109();return true}
+    if(R.__gensTacticalPolishLoader109){loadStats110();return true}
+    R.__gensTacticalPolishLoader109=true;
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";
+    s.async=false;s.onload=after109;s.onerror=()=>{console.error("GenSrpG V109 polish load failed");loadStats110()};
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
+  /* V108 remains the movement/action bridge. V109 owns the final wall/timeline
+     presentation. V110 loads last and only snapshots canonical RPG stats plus
+     the fixed action dock; it never adds stat recalculation to the hot loop. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

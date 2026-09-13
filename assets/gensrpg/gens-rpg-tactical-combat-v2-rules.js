@@ -4,10 +4,15 @@
   "use strict";
   const R=root||globalThis,E=R.GensRpgTacticalCombatV2;if(!E)return;
   if(E.__gensTacticalRules103)return;
-  const basePreview=E.attackPreview;
+  const baseCreate=E.createBattle,basePreview=E.attackPreview;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const key=(x,y)=>`${x},${y}`;
+  function createBattle(input={}){
+    const state=baseCreate(input),seen=new Set();
+    state.grid.cover=(Array.isArray(input?.grid?.cover)?input.grid.cover:[]).map(p=>({x:Math.trunc(num(p?.x,-1)),y:Math.trunc(num(p?.y,-1))})).filter(p=>p.x>=0&&p.y>=0&&p.x<state.grid.width&&p.y<state.grid.height&&!seen.has(key(p.x,p.y))&&seen.add(key(p.x,p.y)));
+    return state;
+  }
   function coverAt(state,actor){
     const set=new Set((state?.grid?.cover||[]).map(p=>key(p.x,p.y)));
     return set.has(key(actor?.x,actor?.y))?20:0;
@@ -51,5 +56,5 @@
     if(state.status==="active")E.endTurn(state);
     return {ok:true,type:attack?"move-attack":"move",attack,position:{x:actor.x,y:actor.y}};
   }
-  E.attackPreview=preview;E.resolveAttack=resolveAttack;E.aiStep=aiStep;E.coverAt=coverAt;E.__gensTacticalRules103=true;
+  E.createBattle=createBattle;E.attackPreview=preview;E.resolveAttack=resolveAttack;E.aiStep=aiStep;E.coverAt=coverAt;E.__gensTacticalRules103=true;
 })(typeof globalThis!=="undefined"?globalThis:this);

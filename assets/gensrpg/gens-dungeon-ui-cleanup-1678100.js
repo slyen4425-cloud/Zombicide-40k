@@ -1,10 +1,10 @@
-/* GenSrpG V16.78.100 — targeted Dungeon UI cleanup.
+/* GenSrpG V16.78.102.2 — targeted Dungeon UI cleanup outside combat hot paths.
    Fixes built-in hero art in the party card, keeps legacy hero-editor inputs hidden,
    and trims obsolete rule-summary lines without changing engine calculations. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.100";
+const VERSION="1.1.0",APP_VERSION="16.78.102.2";
 const ART={dungeon_aldren:"assets/dungeon/creatures/dng_aldren.png",dungeon_lyra:"assets/dungeon/creatures/dng_lyra.png",dungeon_brom:"assets/dungeon/creatures/dng_brom.png"};
 const NAMES={Aldren:"dungeon_aldren",Lyra:"dungeon_lyra",Brom:"dungeon_brom"};
 const LEGACY_IDS=["hcRpgForce","hcRpgAgility","hcRpgIntelligence","hcRpgSpirit","hcRpgEndurance","hcRpgDefense","hcRpgArmor","hcRpgInitiative","hcRpgMovement"];
@@ -16,10 +16,10 @@ function repairPartyCards(){if(!D)return 0;const host=D.getElementById("dc01Hero
 function hideLegacyHeroInputs(){if(!D)return 0;let n=0;for(const id of LEGACY_IDS){const input=D.getElementById(id),label=input?.closest?.("label");if(!label)continue;label.hidden=true;label.setAttribute("aria-hidden","true");label.dataset.gensLegacyHeroStat="1";label.style.setProperty("display","none","important");n++}return n}
 function cleanRuleSummary(){if(!D)return 0;const host=D.getElementById("dungeonCombatFormula");if(!host)return 0;let n=0;for(const line of host.querySelectorAll(".dungeonRuleLine")){const t=String(line.textContent||"").trim();const keep=/^(⭐|🎯\s*D100|🔷|❤️)/.test(t);line.hidden=!keep;line.style.display=keep?"":"none";if(!keep)n++}return n}
 function run(){repairPartyCards();hideLegacyHeroInputs();cleanRuleSummary();return true}
-function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;try{run()}catch(e){}},0);setTimeout(()=>{try{run()}catch(e){}},80)}
+function schedule(){if(scheduled)return;scheduled=true;const fn=()=>{scheduled=false;try{run()}catch(e){}};typeof R.requestAnimationFrame==="function"?R.requestAnimationFrame(fn):setTimeout(fn,0)}
 function wrap(obj,name){const old=obj?.[name];if(typeof old!=="function"||old.__gduc1678100)return false;const w=function(){const out=old.apply(this,arguments);schedule();return out};w.__gduc1678100=true;w.__original=old;obj[name]=w;return true}
-function hookAll(){for(const n of ["openHeroCreator","hcRenderRpgStatsUsage","renderDungeonHeroStats","renderDungeonAttributes","openChar"])wrap(R,n);const core=R.DungeonCore01;if(core){for(const n of ["render","show"])wrap(core,n)}return true}
-function install(){if(installed)return true;installed=true;hookAll();schedule();let tries=0;const retry=()=>{hookAll();schedule();if(tries++<30)setTimeout(retry,100)};setTimeout(retry,50);return true}
+function hookAll(){for(const n of ["openHeroCreator","hcRenderRpgStatsUsage","openChar","loadGame","loadDungeonGame","resumeDungeonGame"])wrap(R,n);const core=R.DungeonCore01;if(core){for(const n of ["render","show"])wrap(core,n)}return true}
+function install(){if(installed)return true;installed=true;hookAll();schedule();setTimeout(hookAll,250);setTimeout(hookAll,1200);return true}
 R.GensDungeonUiCleanup1678100={VERSION,APP_VERSION,ART,LEGACY_IDS,repairPartyCards,hideLegacyHeroInputs,cleanRuleSummary,run,install};
 if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",install,{once:true}):install()}
 })();

@@ -73,6 +73,9 @@ jobs:
       - name: Tester la restauration des arts héros Dungeon
         run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs
 
+      - name: Tester le profil mobile et la latence des combats V16.78.102.2
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
+
       - name: Préparer le site
         run: |
           rm -rf _site
@@ -159,10 +162,15 @@ jobs:
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
+              (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
               raise SystemExit("Cannot inject GenSrpG modules: </body> missing")
+          # This bridge must be the final runtime layer even when source index.html
+          # already contains it for raw branch previews.
+          perf_tag = '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
+          html = html.replace(perf_tag + "\n", "").replace(perf_tag, "")
           for module, tag, error in modules:
               if not module.exists():
                   raise SystemExit(error)
@@ -182,6 +190,11 @@ jobs:
 
       - name: Tester le chargement final Dungeon
         run: node tests/dungeon_final_load_regression.test.cjs _site/index.html
+
+      - name: Vérifier le chargement final du correctif de combat mobile
+        run: |
+          grep -q 'gens-mobile-combat-performance-16781022.js' _site/index.html
+          node tests/gens_mobile_combat_performance_v16781022.test.cjs _site/index.html
 
       - name: Tester le chargement final du moteur construit dédié
         run: |

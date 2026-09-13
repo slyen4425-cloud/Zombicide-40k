@@ -1,9 +1,10 @@
-name: Test Builder Events V16.78.102
+name: Test Builder Events V16.78.102.2
 on:
   push:
     branches:
       - main
       - work/v16.78.102-equipment-stat-cleanup
+      - work/v16.78.102.2-mobile-combat-performance
 permissions:
   contents: read
 jobs:
@@ -27,6 +28,10 @@ jobs:
         run: node --check assets/gensrpg/gens-stat-upgrade-policy-167898.js
       - name: Vérifier le nettoyage UI ciblé V16.78.100
         run: node --check assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js
+      - name: Vérifier le correctif de combat mobile V16.78.102.2
+        run: node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
+      - name: Tester le profil mobile et la latence des combats V16.78.102.2
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
       - name: Tester le nettoyage équipements et stats de set/évolution V16.78.102
         run: node tests/gens_equipment_stat_cleanup_v1678102.test.cjs
       - name: Tester la consolidation stats héros objets capacités V16.78.101

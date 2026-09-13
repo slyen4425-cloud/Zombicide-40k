@@ -1,0 +1,36 @@
+name: Validate V16.78.105 Tactical Entry
+
+on:
+  push:
+    branches:
+      - work/v16.78.105-tactical-entry-routing
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax tactical routing modules
+        run: |
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js
+          node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
+      - name: Test actual Dungeon combat entry routing
+        run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
+      - name: Test tactical grid engine
+        run: node tests/gens_rpg_tactical_combat_v2.test.cjs
+      - name: Test tactical adapter
+        run: node tests/gens_rpg_tactical_combat_v2_adapter.test.cjs
+      - name: Test tactical bridge and cover
+        run: node tests/gens_rpg_tactical_combat_v2_default.test.cjs
+      - name: Guard tactical isolation
+        run: node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
+      - name: Preserve Survival isolation
+        run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
+      - name: Preserve mode-aware dice
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
+      - name: Preserve Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs

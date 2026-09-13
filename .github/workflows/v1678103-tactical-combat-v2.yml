@@ -14,9 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Syntax tactical combat V2
-        run: node --check assets/gensrpg/gens-rpg-tactical-combat-v2.js
+        run: |
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
+      - name: Test GenSrpG tactical adapter
+        run: node tests/gens_rpg_tactical_combat_v2_adapter.test.cjs
       - name: Preserve stable Dungeon runtime
         run: node tests/dungeon_runtime_regression.test.cjs
       - name: Preserve canonical RPG stats

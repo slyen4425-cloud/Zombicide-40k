@@ -53,17 +53,17 @@ const sandbox={
   GensCleanRpgStats167874:{value(hero,id){canonicalCalls++;return hero==="hero1"&&id==="force"?14:0}},
   renderHands(){handCalls++},renderAttackButtons(){buttonCalls++},renderDungeonAttributes(){attributeRenderCalls++},
   __dc214RenderCombat(){baseRenderCalls++},
-  renderDungeonCombatRound(){combatControllerCalls++;this.__dc214RenderCombat()},
   renderActiveEnemies(){activeEnemyRenders++},
-  applyDungeonAttackDamage(){this.renderActiveEnemies();this.renderDungeonCombatRound();return 7},
-  applyBossAttackDamage(){this.renderActiveEnemies();this.renderDungeonCombatRound();return 5},
-  dungeonConfirmPendingHeroDamage(){this.renderDungeonCombatRound();return true},
-  closeAttackRoll(){this.renderDungeonCombatRound();return true},
-  closeSpecialRoll(){this.renderDungeonCombatRound();return true},
-  closeEffectPopup(){this.renderDungeonCombatRound();return true},
   save(){saves++},saveActiveEnemies(){saves++},
   changeDungeonAttribute(){},dc214Equip(){},dc214Reload(){},saveDungeonHeroStats(){},saveGameProfiles(){},awardDungeonDefeatXp(){}
 };
+sandbox.renderDungeonCombatRound=function(){combatControllerCalls++;sandbox.__dc214RenderCombat()};
+sandbox.applyDungeonAttackDamage=function(){sandbox.renderActiveEnemies();sandbox.renderDungeonCombatRound();return 7};
+sandbox.applyBossAttackDamage=function(){sandbox.renderActiveEnemies();sandbox.renderDungeonCombatRound();return 5};
+sandbox.dungeonConfirmPendingHeroDamage=function(){sandbox.renderDungeonCombatRound();return true};
+sandbox.closeAttackRoll=function(){sandbox.renderDungeonCombatRound();return true};
+sandbox.closeSpecialRoll=function(){sandbox.renderDungeonCombatRound();return true};
+sandbox.closeEffectPopup=function(){sandbox.renderDungeonCombatRound();return true};
 sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);vm.runInContext(source,sandbox);
 
@@ -83,7 +83,6 @@ assert.equal(attributeCalls,2,"a real stat mutation must invalidate cached stats
 
 pending=[];clock=0;let d6DoneAt=null;
 sandbox.animateDice("d6",3,[2,5,6],4,()=>{d6DoneAt=clock});
-// These are the exact synchronous refreshes rollAttack performs immediately after starting the dice animation.
 sandbox.renderHands();sandbox.renderAttackButtons();sandbox.renderDungeonAttributes();
 assert.equal(handCalls,0,"hand redraw must not run while dice result callback is waiting");
 assert.equal(buttonCalls,0,"attack button redraw must not run while dice result callback is waiting");
@@ -101,7 +100,6 @@ runUntil(()=>d100DoneAt!==null);
 assert.ok(d100DoneAt<=500,`D100 callback too slow: ${d100DoneAt}ms`);
 runAll();
 
-// Damage result must return before full enemy/combat renders execute.
 pending=[];clock=0;activeEnemyRenders=0;baseRenderCalls=0;combatControllerCalls=0;
 assert.equal(sandbox.applyDungeonAttackDamage(),7);
 assert.equal(activeEnemyRenders,0,"enemy list render must be deferred out of damage calculation");
@@ -110,7 +108,6 @@ runAll();
 assert.ok(activeEnemyRenders>=1,"enemy list still refreshes after damage result");
 assert.ok(combatControllerCalls>=1,"combat still refreshes after damage result");
 
-// Closing a result must let the timeline controller run immediately, while only its heavy base renderer is deferred.
 pending=[];clock=0;baseRenderCalls=0;combatControllerCalls=0;
 sandbox.closeAttackRoll();
 assert.equal(combatControllerCalls,1,"timeline controller must still run synchronously on close");
@@ -118,13 +115,12 @@ assert.equal(baseRenderCalls,0,"heavy combat DOM render must not block player-to
 runAll();
 assert.equal(baseRenderCalls,1,"heavy combat DOM render must still happen after handoff");
 
-// Same principle for AI damage confirmation: no timeline suppression, only heavy renderer deferral.
 pending=[];clock=0;baseRenderCalls=0;combatControllerCalls=0;
 sandbox.dungeonConfirmPendingHeroDamage();
 assert.equal(combatControllerCalls,1,"AI damage confirmation must keep timeline controller alive");
 assert.equal(baseRenderCalls,0,"heavy combat DOM render must not block AI-to-player handoff");
 runAll();
-assert.ok(baseRenderCalls>=1,"combat view must refresh after AI handoff");
+assert.equal(baseRenderCalls,1,"combat view must refresh after AI handoff");
 
 const legacyD6Ms=1250+(3-1)*65+4*105+260;
 const legacyD100Ms=10*90+180;

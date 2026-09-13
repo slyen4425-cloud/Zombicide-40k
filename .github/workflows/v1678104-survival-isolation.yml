@@ -1,0 +1,43 @@
+name: Validate V16.78.104 Survival Isolation
+
+on:
+  push:
+    branches:
+      - work/v16.78.104-survival-isolation-repair
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax V104 isolation and tactical modules
+        run: |
+          node --check assets/gensrpg/gens-survival-mode-isolation-1678104.js
+          node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js
+      - name: Test Survival and RPG hard isolation
+        run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
+      - name: Test mode-aware dice renderer
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
+      - name: Test tactical grid engine
+        run: node tests/gens_rpg_tactical_combat_v2.test.cjs
+      - name: Test tactical adapter
+        run: node tests/gens_rpg_tactical_combat_v2_adapter.test.cjs
+      - name: Test tactical bridge and cover
+        run: node tests/gens_rpg_tactical_combat_v2_default.test.cjs
+      - name: Guard tactical isolation from legacy combat
+        run: node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
+      - name: Preserve Dungeon runtime
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Preserve canonical stats
+        run: node tests/gens_canonical_stats_consolidation_v1678101.test.cjs
+      - name: Preserve equipment stats
+        run: node tests/gens_equipment_stat_cleanup_v1678102.test.cjs

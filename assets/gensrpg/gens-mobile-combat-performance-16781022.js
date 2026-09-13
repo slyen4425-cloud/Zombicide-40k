@@ -4,7 +4,7 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.1.0",APP_VERSION="16.78.104";
+const VERSION="1.2.0",APP_VERSION="16.78.105";
 const D6_MS=440,D100_MS=420,CALLBACK_DELAY=8,WATCHDOG_MS=700,REEL_STEPS=11;
 const nativeAnimateDice=typeof R.animateDice==="function"?R.animateDice:null;
 const nativeAnimateRpgDice=typeof R.animateRpgDice==="function"?R.animateRpgDice:null;
@@ -29,6 +29,7 @@ function animateCard(el,duration,delay=0){try{if(typeof el?.animate==="function"
 function animateDiceFast(containerId,count,finalRolls,threshold,onDone){const box=D?.getElementById?.(containerId);if(!box){if(onDone)setTimeout(onDone,0);return false}const n=Math.max(0,num(count,0)),frag=D.createDocumentFragment(),dice=[];for(let i=0;i<n;i++){const finalValue=num(finalRolls?.[i],1),die=D.createElement("div");die.className="die rolling";die.dataset.value="rolling";const reel=makeReel(6,finalValue,34,25,"2.2em");die.appendChild(reel.win);frag.appendChild(die);dice.push({el:die,...reel,threshold:Math.max(1,num(threshold,1))})}box.replaceChildren(frag);dice.forEach((rec,i)=>{const delay=Math.min(i*12,48);animateTrack(rec.track,rec.lineHeight,rec.values.length,D6_MS,delay);animateCard(rec.el,D6_MS,delay)});finishTimer(()=>{for(const rec of dice){const ok=rec.finalValue>=rec.threshold;rec.el.className="die finalPop "+(ok?"success":"fail");rec.el.dataset.value=String(rec.finalValue);rec.el.textContent=String(rec.finalValue)}safeVibrate();if(onDone)setTimeout(onDone,CALLBACK_DELAY)},D6_MS+50);return true}
 function animateRpgDiceFast(containerId,count,finalRolls,threshold,sides,onDone){const box=D?.getElementById?.(containerId);if(!box){if(onDone)setTimeout(onDone,0);return false}Object.assign(box.style,{display:"flex",flexWrap:"wrap",gap:"10px",justifyContent:"center",alignItems:"center",minHeight:"86px"});const n=Math.max(0,num(count,0)),max=Math.max(6,Math.min(100,num(sides,100))),target=Math.max(1,Math.min(max,num(threshold,1))),frag=D.createDocumentFragment(),cards=[];for(let i=0;i<n;i++){const finalValue=num(finalRolls?.[i],1),card=D.createElement("div");card.className="rpgD100Card rolling";const label=D.createElement("div");label.className="rpgD100Label";label.textContent="D"+max;const reel=makeReel(max,finalValue,38,29,"2.5em"),targetEl=D.createElement("div");targetEl.className="rpgD100Target";targetEl.textContent="Objectif : "+target+" ou plus";card.append(label,reel.win,targetEl);frag.appendChild(card);cards.push({el:card,label,...reel})}box.replaceChildren(frag);cards.forEach((rec,i)=>{const delay=Math.min(i*10,40);animateTrack(rec.track,rec.lineHeight,rec.values.length,D100_MS,delay);animateCard(rec.el,D100_MS,delay)});finishTimer(()=>{for(const rec of cards){const ok=rec.finalValue>=target;rec.el.className="rpgD100Card "+(ok?"success":"fail");rec.el.replaceChildren(rec.label);const value=D.createElement("div");value.className="rpgD100Value";value.textContent=String(rec.finalValue);const result=D.createElement("div");result.className="rpgD100Target";result.textContent=ok?"✅ RÉUSSITE · "+rec.finalValue+" ≥ "+target:"❌ ÉCHEC · "+rec.finalValue+" < "+target;rec.el.append(value,result)}safeVibrate();if(onDone)setTimeout(onDone,CALLBACK_DELAY)},D100_MS+45);return true}
 function dungeonDiceContext(){
+  try{const p=R.getActiveGameProfile?.()||R.activeGameProfileRaw?.();if(p?.gameStyle)return p.gameStyle==="dungeon"}catch(e){}
   try{const f=R.localStorage?.getItem?.("gensrpg_session_family_guard_v1");if(f==="survival")return false;if(f==="adventure")return true}catch(e){}
   try{if(typeof R.currentGameStyle==="function")return R.currentGameStyle()==="dungeon"}catch(e){}
   try{if(typeof R.isDungeonMode==="function")return !!R.isDungeonMode()}catch(e){}
@@ -41,9 +42,9 @@ function reinstall(){install();setTimeout(install,250);setTimeout(install,1200)}
 R.GensMobileCombatPerformance16781022={VERSION,APP_VERSION,D6_MS,D100_MS,WATCHDOG_MS,REEL_STEPS,clear,install,makeReel,animateDiceFast,animateRpgDiceFast,animateDiceDispatch,animateRpgDiceDispatch,dungeonDiceContext,metrics:()=>({...metrics})};
 reinstall();
 
-/* V16.78.104 tactical combat + mode-isolation loader. This file is already the final script in index.html. */
-if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader103){
-  R.__gensTacticalV2Loader103=true;
+/* V16.78.105 tactical combat + mode-isolation loader. This file is already the final script in index.html. */
+if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
+  R.__gensTacticalV2Loader105=true;
   const files=[
     "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
@@ -53,9 +54,13 @@ if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader103){
     "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
     "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
   ];
+  const finalize=()=>{
+    const apply=()=>{try{R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG V105 install",e)}};
+    apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
+  };
   const load=(i)=>{
-    if(i>=files.length){try{R.GensRpgTacticalCombatV2Bridge?.install?.(R);R.GensSurvivalModeIsolation1678104?.install?.()}catch(e){console.error("GenSrpG V104 install",e)}return}
-    const s=D.createElement("script");s.src=files[i]+"?v=16.78.104";s.async=false;s.onload=()=>load(i+1);s.onerror=()=>console.error("GenSrpG V104 load failed",files[i]);(D.head||D.documentElement).appendChild(s);
+    if(i>=files.length){finalize();return}
+    const s=D.createElement("script");s.src=files[i]+"?v=16.78.105";s.async=false;s.onload=()=>load(i+1);s.onerror=()=>{console.error("GenSrpG V105 load failed",files[i]);load(i+1)};(D.head||D.documentElement).appendChild(s);
   };
   load(0);
 }

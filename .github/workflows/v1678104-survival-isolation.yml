@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - work/v16.78.104-survival-isolation-repair
+      - main
 
 permissions:
   contents: read

@@ -13,8 +13,8 @@ require(path.join(root,'gens-rpg-tactical-combat-v2-rules.js'));
     {id:'e',side:'enemy',x:6,y:2,hp:10,initiative:1,attacks:[{id:'claw',range:1,hit:70,power:2}]}
   ]});
   const p=E.attackPreview(s,'h','e','bow');
-  assert.equal(p.ok,true);assert.equal(p.cellCover,20);assert.equal(p.hitChance,70);
-  const r=E.resolveAttack(s,'h','e','bow',75);assert.equal(r.hit,false,'cover must affect actual resolution, not only preview');
+  assert.equal(p.ok,true);assert.equal(p.cellCover,20);assert.equal(p.hitChance,60);
+  const r=E.resolveAttack(s,'h','e','bow',65);assert.equal(r.hit,false,'cover must affect actual resolution, not only preview');
 }
 
 // Default bridge must intercept legacy combat entry without needing a feature flag.

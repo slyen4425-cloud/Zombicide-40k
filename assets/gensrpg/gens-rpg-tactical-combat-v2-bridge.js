@@ -1,5 +1,5 @@
 /* GenSrpG Tactical Combat V2 — hard Dungeon combat router.
-   V16.78.105: the tactical engine owns every RPG/Dungeon combat entry point.
+   V16.78.106: the tactical engine owns RPG/Dungeon combat, including the real Runtime 2.00 renderer seam.
    Legacy combat is kept only for non-Dungeon contexts and as inert rollback code. */
 (function(root,factory){
   const api=factory(root||globalThis);
@@ -7,8 +7,8 @@
   if(root)root.GensRpgTacticalCombatV2Bridge=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.4.0",APP_VERSION="16.78.105";
-  let opening=false,installed=false;
+  const VERSION="0.5.0",APP_VERSION="16.78.106";
+  let opening=false,installed=false,repairLoading=false;
   let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -19,13 +19,13 @@
     return null;
   }
   function dungeonContext(rt=R){
-    const p=activeProfile(rt);
-    if(p?.gameStyle)return p.gameStyle==="dungeon";
     try{
       const fam=rt?.localStorage?.getItem?.("gensrpg_session_family_guard_v1");
       if(fam==="adventure")return true;
       if(fam==="survival")return false;
     }catch(e){}
+    const p=activeProfile(rt);
+    if(p?.gameStyle)return p.gameStyle==="dungeon";
     try{if(typeof rt?.currentGameStyle==="function"){const s=rt.currentGameStyle();if(s)return s==="dungeon"}}catch(e){}
     try{if(typeof rt?.isDungeonMode==="function")return !!rt.isDungeonMode()}catch(e){}
     return false;
@@ -109,6 +109,24 @@
     if(kind==="launch"&&!legacyLaunch)legacyLaunch=current;
     if(kind==="startCombat"&&!legacyStartCombatFn)legacyStartCombatFn=current;
   }
+  function installRepair(rt=R){
+    try{if(rt?.GensRpgRuntimeRepair1678106?.install)return !!rt.GensRpgRuntimeRepair1678106.install(rt)}catch(e){try{rt.console?.error?.("V106 runtime repair install",e)}catch(_){} }
+    return false;
+  }
+  function ensureRuntimeRepair(rt=R){
+    if(installRepair(rt))return true;
+    const D=rt?.document;if(!D?.createElement||repairLoading)return false;
+    repairLoading=true;
+    try{
+      const s=D.createElement("script");
+      s.src="assets/gensrpg/gens-rpg-runtime-repair-1678106.js?v=16.78.106";
+      s.async=false;
+      s.onload=()=>{repairLoading=false;installRepair(rt);setTimeout(()=>installRepair(rt),250);setTimeout(()=>installRepair(rt),1200)};
+      s.onerror=()=>{repairLoading=false;try{rt.console?.error?.("GenSrpG V106 runtime repair load failed")}catch(e){}};
+      (D.head||D.documentElement)?.appendChild?.(s);
+      return true;
+    }catch(e){repairLoading=false;return false}
+  }
   function install(rt=R){
     if(!rt?.GensRpgTacticalCombatV2||!rt?.GensRpgTacticalCombatV2Adapter||!rt?.GensRpgTacticalCombatV2Ui)return false;
     rememberLegacy(rt.dc200StartCombat,"start");
@@ -135,9 +153,10 @@
     rt.GENS_TACTICAL_V2_DEFAULT=true;
     rt.GENS_TACTICAL_V2_ROUTER_VERSION=APP_VERSION;
     installed=true;
+    ensureRuntimeRepair(rt);
     try{rt.dispatchEvent?.(new CustomEvent("gensrpg:tactical-combat-ready",{detail:{version:APP_VERSION}}))}catch(e){}
     return true;
   }
-  function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,startDefault,setupDefault,launchDefault,install,status};
+  function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

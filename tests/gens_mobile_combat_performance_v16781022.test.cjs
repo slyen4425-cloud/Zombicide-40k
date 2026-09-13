@@ -10,10 +10,13 @@ const html=fs.readFileSync(builtIndex,"utf8");
 const sw=fs.readFileSync(path.join(root,"service-worker.js"),"utf8");
 const ui=fs.readFileSync(path.join(root,"assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js"),"utf8");
 
-assert.match(source,/APP_VERSION="16\.78\.102\.2"/);
+assert.match(source,/APP_VERSION="16\.78\.102\.6"/);
+assert.match(source,/AI_RESULT_MS=650/);
+assert.doesNotMatch(source,/2800/,"root-fix bridge must not reintroduce the legacy 2.8s AI hold");
 assert.doesNotMatch(source,/setInterval\s*\(/,"mobile dice must not use main-thread interval ticks");
 assert.match(source,/translate3d/,"dice motion must stay compositor-friendly");
-assert.match(sw,/gensrpg-cache-16\.78\.102\.2-mobile-combat-performance/);
+assert.match(source,/wrapDamageResolution\("applyDungeonAttackDamage"\)/);
+assert.match(sw,/gensrpg-cache-16\.78\.102\.6-combat-transition-root-fix/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance bridge must load after the final Dungeon core");
 if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance bridge must be the final runtime script")}
@@ -22,35 +25,73 @@ assert.ok(hookAll&&!hookAll.includes("renderDungeonHeroStats")&&!hookAll.include
 assert.doesNotMatch(ui,/tries\+\+<30|setTimeout\(retry,100\)/,"UI cleanup must not poll every 100ms during combat startup");
 
 class Element{
-  constructor(tag="div"){this.tagName=tag.toUpperCase();this.className="";this.dataset={};this.style={};this.children=[];this.textContent=""}
+  constructor(tag="div"){this.tagName=tag.toUpperCase();this.className="";this.dataset={};this.style={};this.children=[];this.textContent="";this.classList={remove(){},add(){},contains(){return false}}}
   appendChild(child){this.children.push(child);return child}
   append(...children){this.children.push(...children)}
   replaceChildren(...children){this.children=[...children]}
   animate(){return {}}
 }
-const boxes={d6:new Element(),d100:new Element()};
+const boxes={d6:new Element(),d100:new Element(),dc032AiPopup:new Element()};
 const document={readyState:"complete",createElement:tag=>new Element(tag),createDocumentFragment:()=>new Element("fragment"),getElementById:id=>boxes[id]||null,addEventListener(){}};
 let clock=0,nextTimer=1,pending=[];
 function setTimeoutFake(fn,delay=0){const id=nextTimer++;pending.push({id,at:clock+Math.max(0,Number(delay)||0),fn,cancelled:false});return id}
 function clearTimeoutFake(id){const timer=pending.find(x=>x.id===id);if(timer)timer.cancelled=true}
-function runUntil(predicate){for(let guard=0;guard<1000&&!predicate();guard++){pending.sort((a,b)=>a.at-b.at);const timer=pending.shift();assert.ok(timer,"expected a pending timer");if(timer.cancelled)continue;clock=timer.at;timer.fn()}return clock}
+function runNext(){pending.sort((a,b)=>a.at-b.at);const timer=pending.shift();assert.ok(timer,"expected a pending timer");if(timer.cancelled)return runNext();clock=timer.at;timer.fn()}
+function runUntil(predicate){for(let guard=0;guard<1000&&!predicate();guard++)runNext();return clock}
 
-let equipmentCalls=0,attributeCalls=0,canonicalCalls=0,enemyCalls=0,renders=0,saves=0;
-const sandbox={console,document,setTimeout:setTimeoutFake,clearTimeout:clearTimeoutFake,current:"hero1",state:{xp:20,rpgAttributes:{force:12}},navigator:{vibrate(){}},dungeonEquipmentBonus(){equipmentCalls++;return 2},dungeonAttributeValue(id){attributeCalls++;return Number(this.state.rpgAttributes[id])+(this.dungeonEquipmentBonus(id)||0)},dungeonEnemyRpgStats(def){enemyCalls++;return {force:def.force}},GensCleanRpgStats167874:{value(hero,id){canonicalCalls++;return hero==="hero1"&&id==="force"?14:0}},renderDungeonCombatRound(){renders++},save(){saves++},saveActiveEnemies(){saves++}};
+let equipmentCalls=0,attributeCalls=0,canonicalCalls=0,enemyCalls=0,enemyRenders=0,combatRenders=0,resultWrites=0,saves=0,statChanges=0;
+let popupCalls=0,advanceCalls=0;
+let currentActor={kind:"enemy",id:"e1"};
+const enemy={id:"e1",enemyId:"gob",hp:5};
+const sandbox={console,document,setTimeout:setTimeoutFake,clearTimeout:clearTimeoutFake,requestAnimationFrame:fn=>setTimeoutFake(fn,16),current:"hero1",state:{xp:20,rpgAttributes:{force:12}},navigator:{vibrate(){}},
+  dungeonEquipmentBonus(){equipmentCalls++;return 2},
+  dungeonAttributeValue(id){attributeCalls++;return Number(this.state.rpgAttributes[id])+(this.dungeonEquipmentBonus(id)||0)},
+  dungeonEnemyRpgStats(def){enemyCalls++;return {force:def.force||5}},
+  GensCleanRpgStats167874:{value(hero,id){canonicalCalls++;return hero==="hero1"&&id==="force"?14:0}},
+  changeDungeonAttribute(id,d){statChanges++;this.state.rpgAttributes[id]+=d;return true},
+  save(){saves++},saveActiveEnemies(){saves++},
+  renderActiveEnemies(){enemyRenders++},renderDungeonCombatRound(){combatRenders++},
+  applyDungeonAttackDamage(){this.renderActiveEnemies();this.renderDungeonCombatRound();resultWrites++;return 9},
+  applyBossAttackDamage(){this.renderActiveEnemies();resultWrites++;return 7},
+  dungeonTurn156:{active:true,aiBusy:false},
+  dungeonCurrentTurn156(){return currentActor},
+  dungeonAdvanceTurn156(){advanceCalls++;currentActor={kind:"hero",id:"hero1"}},
+  dungeonRunAi156(){throw new Error("legacy AI runner should be overridden")},
+  checkGameOver(){return false},loadActiveEnemies(){return [enemy]},activeEnemyDefinition(){return {name:"Gobelin"}},dungeonEnemyAttackSkills(){return [{id:"hit",name:"Coup",power:1}]},dungeonAiTarget156(){return "hero1"},dungeonMjRules151(){return {}},resolveReadable(){return {hits:1,dodges:0,crits:0,total:2,rolls:[77]}},showAiPopup(){popupCalls++}
+};
 sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);vm.runInContext(source,sandbox);
 
 for(let i=0;i<200;i++)assert.equal(sandbox.dungeonAttributeValue("force"),14);
 for(let i=0;i<200;i++)assert.equal(sandbox.GensCleanRpgStats167874.value("hero1","force"),14);
-const enemy={force:7};for(let i=0;i<200;i++)assert.equal(sandbox.dungeonEnemyRpgStats(enemy).force,7);
-for(let i=0;i<50;i++)sandbox.renderDungeonCombatRound();
-assert.equal(attributeCalls,1,"repeated combat renders must resolve a hero attribute once");
-assert.equal(equipmentCalls,1,"repeated combat renders must scan equipment once");
+const enemyDef={force:7};for(let i=0;i<200;i++)assert.equal(sandbox.dungeonEnemyRpgStats(enemyDef).force,7);
+assert.equal(attributeCalls,1,"repeated combat reads must resolve a hero attribute once");
+assert.equal(equipmentCalls,1,"repeated combat reads must scan equipment once");
 assert.equal(canonicalCalls,1,"repeated canonical stat reads must resolve once");
 assert.equal(enemyCalls,1,"repeated enemy stat reads must resolve once");
-sandbox.save();
+
+sandbox.save();sandbox.saveActiveEnemies();
 assert.equal(sandbox.dungeonAttributeValue("force"),14);
-assert.equal(attributeCalls,2,"a state mutation must invalidate cached stats");
+assert.equal(attributeCalls,1,"HP/enemy persistence must not invalidate combat stat caches");
+sandbox.changeDungeonAttribute("force",1);
+assert.equal(sandbox.dungeonAttributeValue("force"),15);
+assert.equal(attributeCalls,2,"real stat mutation must invalidate cached stats");
+
+const damageRet=sandbox.applyDungeonAttackDamage("e1",2,1,2);
+assert.equal(damageRet,9);
+assert.equal(resultWrites,1,"damage/result calculation must complete synchronously");
+assert.equal(enemyRenders,0,"enemy rerender must not block damage text");
+assert.equal(combatRenders,0,"full combat rerender must not block damage text");
+runUntil(()=>enemyRenders===1&&combatRenders===1);
+assert.equal(clock,32,"heavy rerenders must flush only after a paint opportunity");
+
+clock=0;pending=[];popupCalls=0;advanceCalls=0;combatRenders=0;currentActor={kind:"enemy",id:"e1"};sandbox.dungeonTurn156.active=true;sandbox.dungeonTurn156.aiBusy=false;
+sandbox.dungeonRunAi156(currentActor);
+runUntil(()=>popupCalls===1);
+assert.ok(clock<=80,`AI result popup too late: ${clock}ms`);
+runUntil(()=>advanceCalls===1);
+assert.ok(clock<=750,`AI timeline advance too late: ${clock}ms`);
+assert.equal(sandbox.dungeonTurn156.aiBusy,false);
 
 pending=[];clock=0;let d6DoneAt=null;
 sandbox.animateDice("d6",3,[2,5,6],4,()=>{d6DoneAt=clock});
@@ -61,8 +102,4 @@ sandbox.animateRpgDice("d100",1,[73],51,100,()=>{d100DoneAt=clock});
 runUntil(()=>d100DoneAt!==null);
 assert.ok(d100DoneAt<=500,`D100 callback too slow: ${d100DoneAt}ms`);
 
-const legacyD6Ms=1250+(3-1)*65+4*105+260;
-const legacyD100Ms=10*90+180;
-assert.ok(d6DoneAt<legacyD6Ms/3,"D6 optimized path should be over 3x faster than the legacy 3-dice path");
-assert.ok(d100DoneAt<legacyD100Ms/2,"D100 optimized path should be over 2x faster than the legacy path");
-console.log("V16.78.102.2 mobile combat profile OK",{legacyD6Ms,d6DoneAt,legacyD100Ms,d100DoneAt,equipmentCalls,attributeCalls,canonicalCalls,enemyCalls,renders,metrics:sandbox.GensMobileCombatPerformance16781022.metrics()});
+console.log("V16.78.102.6 combat transition root regression OK",{d6DoneAt,d100DoneAt,attributeCalls,equipmentCalls,canonicalCalls,enemyCalls,enemyRenders,combatRenders,popupCalls,advanceCalls,metrics:sandbox.GensMobileCombatPerformance16781022.metrics()});

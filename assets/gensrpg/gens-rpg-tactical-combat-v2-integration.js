@@ -36,14 +36,29 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadCoherence112(){
+    const D=R.document;if(!D||R.__gensTacticalCoherenceLoader112)return false;
+    R.__gensTacticalCoherenceLoader112=true;
+    const install=()=>{try{R.GensRpgTacticalCombatCoherence1678112?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V112 combat coherence install",e)}};
+    if(R.GensRpgTacticalCombatCoherence1678112){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js?v=16.78.112";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V112 combat coherence load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadRuntime111(){
-    const D=R.document;if(!D||R.__gensTacticalRuntimeLoader111)return false;
+    const D=R.document;if(!D)return false;
+    const after111=()=>{
+      try{R.GensRpgTacticalRuntimeFixes1678111?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V111 tactical runtime install",e)}
+      loadCoherence112();
+    };
+    if(R.GensRpgTacticalRuntimeFixes1678111){after111();return true}
+    if(R.__gensTacticalRuntimeLoader111){loadCoherence112();return true}
     R.__gensTacticalRuntimeLoader111=true;
-    const install=()=>{try{R.GensRpgTacticalRuntimeFixes1678111?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V111 tactical runtime install",e)}};
-    if(R.GensRpgTacticalRuntimeFixes1678111){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js?v=16.78.111";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V111 tactical runtime load failed");
+    s.async=false;s.onload=after111;s.onerror=()=>{console.error("GenSrpG V111 tactical runtime load failed");loadCoherence112()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -78,8 +93,9 @@
   }
 
   /* V108 remains the movement/action bridge. V109 owns wall/timeline presentation.
-     V110 snapshots canonical RPG stats. V111 loads last and repairs the live runtime:
-     stable wall scaling, fixed action dock, weapon dice and immediate enemy detection. */
+     V110 snapshots canonical RPG stats. V111 preserves weapon dice and the fixed dock.
+     V112 loads last and owns room/perception/vision coherence, full actor details,
+     readable dice resolution and the final zoom-stable wall layer. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

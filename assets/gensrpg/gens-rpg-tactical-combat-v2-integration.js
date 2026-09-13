@@ -36,17 +36,31 @@
   };
   A.__gensTacticalIntegration103=true;
 
-  /* V16.78.108 isolated polish loader. Integration loads before the UI in the
-     existing V105 chain, so the module installs with retries and attaches once
-     the tactical UI/bridge and Dungeon movement seam are available. */
+  function loadPolish109(){
+    const D=R.document;if(!D||R.__gensTacticalPolishLoader109)return false;
+    R.__gensTacticalPolishLoader109=true;
+    const install=()=>{try{R.GensRpgTacticalPolish1678109?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V109 polish install",e)}};
+    if(R.GensRpgTacticalPolish1678109){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V109 polish load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
+  /* V108 remains the movement/action bridge. V109 is loaded after it and owns
+     the final combat HUD/wall presentation plus ranged-weapon normalization. */
   function loadPolish108(){
-    const D=R.document;if(!D||R.__gensTacticalPolishLoader108)return false;
+    const D=R.document;if(!D)return false;
+    const after108=()=>{
+      try{R.GensRpgTacticalPolish1678108?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V108 polish install",e)}
+      loadPolish109();
+    };
+    if(R.GensRpgTacticalPolish1678108){after108();return true}
+    if(R.__gensTacticalPolishLoader108){loadPolish109();return true}
     R.__gensTacticalPolishLoader108=true;
-    const install=()=>{try{R.GensRpgTacticalPolish1678108?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V108 polish install",e)}};
-    if(R.GensRpgTacticalPolish1678108){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js?v=16.78.108";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V108 polish load failed");
+    s.async=false;s.onload=after108;s.onerror=()=>{console.error("GenSrpG V108 polish load failed");loadPolish109()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
   loadPolish108();

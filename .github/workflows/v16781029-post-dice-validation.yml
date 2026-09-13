@@ -1,0 +1,24 @@
+name: Validate V16.78.102.9 Post Dice Fast Path
+on:
+  push:
+    branches:
+      - work/v16.78.102.9-post-dice-mainthread-profile
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax combat performance bridge
+        run: node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
+      - name: Test post-dice and timeline handoff ordering
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
+      - name: Dungeon runtime regression
+        run: node tests/dungeon_runtime_regression.test.cjs
+      - name: Canonical stat consolidation regression
+        run: node tests/gens_canonical_stats_consolidation_v1678101.test.cjs
+      - name: Equipment stat regression
+        run: node tests/gens_equipment_stat_cleanup_v1678102.test.cjs
+      - name: Stability guard
+        run: node tests/gens_stability_guard_v167897.test.cjs

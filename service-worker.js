@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.102.2-mobile-combat-performance";
+const CACHE_NAME = "gensrpg-cache-16.78.102.6-combat-transition-root-fix";
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

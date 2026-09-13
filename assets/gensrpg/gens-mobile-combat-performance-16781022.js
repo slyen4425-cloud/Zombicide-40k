@@ -30,4 +30,23 @@ function install(){wrapValue("dungeonEquipmentBonus",valueCaches.equipment,"equi
 function reinstall(){install();setTimeout(install,250);setTimeout(install,1200)}
 R.GensMobileCombatPerformance16781022={VERSION,APP_VERSION,D6_MS,D100_MS,WATCHDOG_MS,REEL_STEPS,clear,install,makeReel,animateDiceFast,animateRpgDiceFast,metrics:()=>({...metrics})};
 reinstall();
+
+/* V16.78.103 tactical combat loader. This file is already the final script in index.html,
+   so the V2 bridge is installed only after the stable Dungeon runtime has finished loading. */
+if(D&&!R.__gensTacticalV2Loader103){
+  R.__gensTacticalV2Loader103=true;
+  const files=[
+    "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"
+  ];
+  const load=(i)=>{
+    if(i>=files.length){try{R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("Tactical V2 install",e)}return}
+    const s=D.createElement("script");s.src=files[i]+"?v=16.78.103";s.async=false;s.onload=()=>load(i+1);s.onerror=()=>console.error("Tactical V2 load failed",files[i]);(D.head||D.documentElement).appendChild(s);
+  };
+  load(0);
+}
 })();

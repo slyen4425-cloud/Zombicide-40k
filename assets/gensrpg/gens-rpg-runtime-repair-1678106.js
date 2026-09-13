@@ -8,7 +8,7 @@
   if(root)root.GensRpgRuntimeRepair1678106=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.1",APP_VERSION="16.78.106";
+  const VERSION="1.0.2",APP_VERSION="16.78.106";
   const FAMILY_KEY="gensrpg_session_family_guard_v1";
   const PROFILES_KEY="gensrpg_game_profiles_v1";
   const ACTIVE_KEY="gensrpg_game_profile_active_v1";
@@ -45,9 +45,12 @@
     if(candidates.length<=1)return {list:input,removed:[],keep:candidates[0]?.id||null,changed:false};
     const canonical=candidates.find(p=>str(p.id)===CANONICAL_DUNGEON_ID)||candidates[0];
     const keepId=str(canonical.id),removed=[];
-    const out=[];
+    const out=[];let kept=false;
     for(const p of input){
-      if(isBuiltinDungeon(p)&&str(p.id)!==keepId){removed.push(str(p.id));continue}
+      if(isBuiltinDungeon(p)){
+        if(!kept&&str(p.id)===keepId){out.push(p);kept=true;continue}
+        removed.push(str(p.id));continue;
+      }
       out.push(p);
     }
     try{

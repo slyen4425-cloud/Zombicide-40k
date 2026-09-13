@@ -15,7 +15,7 @@ assert.doesNotMatch(source,/setInterval\s*\(/,"mobile dice must not use main-thr
 assert.match(source,/translate3d/,"dice motion must stay compositor-friendly");
 assert.match(source,/wrapSaveActiveEnemies/,'enemy persistence UI side effects must be batchable');
 assert.match(source,/wrapDamageHotPath/,'post-roll combat renders must be moved out of the synchronous damage path');
-assert.match(sw,/gensrpg-cache-16\.78\.102\.2-mobile-combat-performance/);
+assert.match(sw,/gensrpg-cache-16\.78\.102\.3-post-roll-latency/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance bridge must load after the final Dungeon core");
 if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance bridge must be the final runtime script")}

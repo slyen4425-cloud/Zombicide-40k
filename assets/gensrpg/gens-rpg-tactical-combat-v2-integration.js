@@ -35,4 +35,19 @@
     return {...result,rewards};
   };
   A.__gensTacticalIntegration103=true;
+
+  /* V16.78.108 isolated polish loader. Integration loads before the UI in the
+     existing V105 chain, so the module installs with retries and attaches once
+     the tactical UI/bridge and Dungeon movement seam are available. */
+  function loadPolish108(){
+    const D=R.document;if(!D||R.__gensTacticalPolishLoader108)return false;
+    R.__gensTacticalPolishLoader108=true;
+    const install=()=>{try{R.GensRpgTacticalPolish1678108?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V108 polish install",e)}};
+    if(R.GensRpgTacticalPolish1678108){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js?v=16.78.108";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V108 polish load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+  loadPolish108();
 })(typeof globalThis!=="undefined"?globalThis:this);

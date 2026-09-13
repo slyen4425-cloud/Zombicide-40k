@@ -1,5 +1,6 @@
-/* GenSrpG Tactical Combat V2 — tactile battlefield UI.
-   V16.78.107: playable mobile actions, D100 roll feedback, terrain texture and actor art.
+/* GenSrpG Tactical Combat V2 — polished tactile battlefield UI.
+   V16.78.107.1: portrait-only pawns, readable actor cards/statuses, persistent D100 results,
+   configurable roll-high/roll-low Dungeon rule and corrected wall texture for tactical/random rooms.
    No legacy combat renderer/timeline dependency. */
 (function(root,factory){
   const api=factory(root||globalThis);
@@ -7,167 +8,171 @@
   if(root)root.GensRpgTacticalCombatV2Ui=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.5.1",APP_VERSION="16.78.107";
-  let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="";
+  const VERSION="0.6.0",APP_VERSION="16.78.107.1";
+  const RULE_STORAGE_KEY="gensrpg_dungeon_roll_high_to_hit_v1";
+  const WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
+  const FLOOR_ASSET="assets/dungeon/creatures/dng_floor_stone_01.png";
+  const HERO_ART={
+    dungeon_aldren:"assets/dungeon/creatures/dng_aldren.png",
+    dungeon_lyra:"assets/dungeon/creatures/dng_lyra.png",
+    dungeon_brom:"assets/dungeon/creatures/dng_brom.png"
+  };
+  const HERO_NAMES={dungeon_aldren:"Aldren",dungeon_lyra:"Lyra",dungeon_brom:"Brom"};
+  let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="",detailActorId="",wallObserver=null,mapPatched=false,editorHooked=false;
   const E=()=>R.GensRpgTacticalCombatV2;
   const A=()=>R.GensRpgTacticalCombatV2Adapter;
+  const D=()=>R.document||null;
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const key=(x,y)=>`${x},${y}`;
-  async function waitAnimation(anim){try{if(anim?.finished)await anim.finished}catch(e){}}
+  const arr=v=>Array.isArray(v)?v:[];
+  const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  function canonicalHeroId(value){
+    const raw=String(value||"").toLowerCase();
+    for(const id of Object.keys(HERO_ART))if(raw===id||raw.endsWith(id)||raw.includes(id.replace("dungeon_","")))return id;
+    return "";
+  }
+  function actorDisplayName(a){const id=canonicalHeroId(a?.meta?.heroId||a?.id);return id?HERO_NAMES[id]:String(a?.name||a?.id||"?")}
+  function actorArt(a){
+    const id=canonicalHeroId(a?.meta?.heroId||a?.id);if(id)return HERO_ART[id];
+    const art=String(a?.meta?.art||"");
+    if(art&&!/compass|dungeon[_-]?icon|logo/i.test(art))return art;
+    const enemyId=String(a?.meta?.enemyId||"");
+    if(enemyId)return "assets/dungeon/creatures/"+enemyId+".png";
+    return "";
+  }
+  function currentProfile(){try{return R.currentRpgProfile?.()||R.getActiveGameProfile?.()||null}catch(e){return null}}
+  function profileCombatRules(create=false){
+    const p=currentProfile();if(!p)return null;
+    if(!p.rpgUniverse&&create)p.rpgUniverse={};
+    if(!p.rpgUniverse)return null;
+    if(!p.rpgUniverse.combatRules&&create)p.rpgUniverse.combatRules={};
+    return p.rpgUniverse.combatRules||null;
+  }
+  function getRollHighToHit(){
+    const rules=profileCombatRules(false);if(typeof rules?.rollHighToHit==="boolean")return rules.rollHighToHit;
+    try{const raw=R.localStorage?.getItem?.(RULE_STORAGE_KEY);if(raw==="0")return false;if(raw==="1")return true}catch(e){}
+    return true;
+  }
+  function persistProfile(){
+    try{
+      const p=currentProfile(),list=R.loadGameProfiles?.()||[];if(!p||!Array.isArray(list))return false;
+      const i=list.findIndex(x=>String(x?.id||"")===String(p.id||""));if(i<0)return false;
+      list[i]=p;R.saveGameProfiles?.(list);return true;
+    }catch(e){return false}
+  }
+  function setRollHighToHit(value,{persist=true}={}){
+    const v=!!value;try{R.localStorage?.setItem?.(RULE_STORAGE_KEY,v?"1":"0")}catch(e){}
+    const rules=profileCombatRules(true);if(rules)rules.rollHighToHit=v;
+    if(persist)persistProfile();
+    if(battle?.config)battle.config.rollHighToHit=v;
+    return v;
+  }
+  function ruleTarget(hitChance,rollHigh=getRollHighToHit()){const chance=clamp(Math.round(num(hitChance,50)),1,99);return rollHigh?101-chance:chance}
+  function hitByRule(roll,hitChance,rollHigh=getRollHighToHit()){const r=clamp(Math.round(num(roll,1)),1,100),t=ruleTarget(hitChance,rollHigh);return rollHigh?r>=t:r<=t}
+  function engineRoll(displayRoll,rollHigh=getRollHighToHit()){const r=clamp(Math.round(num(displayRoll,1)),1,100);return rollHigh?101-r:r}
+  function ruleText(hitChance,rollHigh=getRollHighToHit()){const t=ruleTarget(hitChance,rollHigh);return rollHigh?`D100 ≥ ${t}`:`D100 ≤ ${t}`}
+
+  function injectGeneralRuleControl(){
+    const doc=D(),host=doc?.getElementById?.("rpgStatsList");if(!doc||!host)return false;
+    let card=doc.getElementById("gtv271GeneralCombatRule");
+    if(!card){
+      card=doc.createElement("div");card.id="gtv271GeneralCombatRule";card.className="smodCard";card.style.margin="0 0 10px";
+      card.innerHTML='<div style="font-weight:900;margin-bottom:7px">🎲 Règle générale de combat — D100</div><label style="display:grid;gap:5px">Jet pour toucher<select id="gtv271RollRule" style="width:100%;padding:8px"><option value="high">Jet haut — il faut faire au moins le seuil</option><option value="low">Jet bas — il faut faire au plus la chance</option></select></label><div class="small" style="margin-top:6px">La probabilité ne change pas : seule la lecture du D100 est inversée.</div>';
+      host.parentNode?.insertBefore?.(card,host);
+      card.querySelector("#gtv271RollRule")?.addEventListener?.("change",e=>setRollHighToHit(e.target.value!=="low"));
+    }
+    const select=card.querySelector?.("#gtv271RollRule");if(select)select.value=getRollHighToHit()?"high":"low";
+    return true;
+  }
+  function hookEditor(){
+    if(editorHooked)return true;let found=false;
+    for(const name of ["renderRpgUniverseEditor","openRpgUniverseEditor","saveRpgUniverseStats"]){
+      const old=R[name];if(typeof old!=="function")continue;found=true;
+      if(old.__gtv271RuleHook)continue;
+      const w=function(){const out=old.apply(this,arguments);try{injectGeneralRuleControl()}catch(e){}return out};w.__gtv271RuleHook=true;w.__original=old;R[name]=w;
+    }
+    editorHooked=found;injectGeneralRuleControl();return found;
+  }
+
+  function runtimeState(){try{return R.loadDungeonState?.()||JSON.parse(R.localStorage?.getItem?.("gensrpg_dungeon_runtime_v2")||"null")||null}catch(e){return null}}
+  function actorRuntimeState(a){
+    if(a?.side==="hero")try{return R.loadState?.(a.meta?.heroId||a.id)||null}catch(e){return null}
+    if(a?.side==="enemy")try{return arr(R.loadActiveEnemies?.()).find(x=>String(x?.id||"")===String(a.meta?.instanceId||""))||null}catch(e){return null}
+    return null;
+  }
+  function rawStatuses(a){
+    const rt=actorRuntimeState(a)||{},sources=[a?.meta?.statuses,a?.meta?.effects,a?.meta?.dots,a?.statuses,rt.statusEffects,rt.activeEffects,rt.effects,rt.conditions,rt.dots,rt.rpgEffects];
+    const out=[];for(const src of sources)for(const row of arr(src))if(row&&typeof row==="object")out.push(row);return out;
+  }
+  function statusRows(a){
+    const seen=new Set(),out=[];
+    for(const s of rawStatuses(a)){
+      const kind=String(s.kind||s.type||s.status||"effect").toLowerCase(),label=String(s.label||s.name||s.effectName||s.status||s.type||s.kind||"Effet"),remaining=num(s.remaining??s.duration??s.turns,0),amount=num(s.amount??s.damage??s.value,0),id=label+"|"+kind+"|"+remaining+"|"+amount;
+      if(seen.has(id))continue;seen.add(id);out.push({kind,label,remaining,amount});
+    }
+    return out.slice(0,8);
+  }
+  function statusClass(s){if(/dot|poison|venin|burn|brûl|bleed|saign/.test(s.kind+" "+s.label.toLowerCase()))return "dot";if(/hot|heal|soin|regen/.test(s.kind+" "+s.label.toLowerCase()))return "hot";return "buff"}
+  function statusBadges(a,compact=false){const rows=statusRows(a);if(!rows.length)return compact?"":'<span class="gtv271NoStatus">Aucun effet actif</span>';return rows.map(s=>`<span class="gtv271Status ${statusClass(s)}">${esc(s.label)}${s.amount?` ${s.amount>0?"+":""}${s.amount}`:""}${s.remaining?` · ${s.remaining}t`:""}</span>`).join("")}
 
   function ensureStyle(){
-    if(!R.document||R.document.getElementById("gensTacticalV2Style"))return;
-    const s=R.document.createElement("style");s.id="gensTacticalV2Style";s.textContent=`
-    .gtv2Overlay{position:fixed;inset:0;z-index:30000;background:#090b0ff2;color:#f4f1e8;overflow:auto;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    .gtv2Shell{width:min(100%,960px);margin:auto;padding:10px 10px 28px}.gtv2Top{position:sticky;top:0;z-index:5;background:#10141bf5;border:1px solid #343c48;border-radius:14px;padding:9px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 30px #0008}.gtv2Top strong{flex:1}.gtv2Btn{border:0;border-radius:10px;padding:11px 12px;background:#303946;color:#fff;font-weight:800;font-size:14px;min-height:44px}.gtv2Btn:disabled{opacity:.38}.gtv2Btn.danger{background:#6f2925}.gtv2Btn.good{background:#286b48}.gtv2Btn.warn{background:#765d20}.gtv2Btn.active{outline:2px solid #e6b542;outline-offset:1px}.gtv2Hud{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.gtv2Card{background:#151a22;border:1px solid #333d4a;border-radius:12px;padding:9px;min-width:0}.gtv2Card small{color:#b9c0ca}.gtv2BattleWrap{overflow:auto;background:#0d1117;border:1px solid #343c48;border-radius:14px;padding:8px;box-shadow:inset 0 0 30px #0007}.gtv2Grid{display:grid;gap:2px;margin:auto;width:max-content;touch-action:manipulation}.gtv2Cell{position:relative;width:52px;height:52px;border:1px solid #26303b;background:#151b24 url('assets/dungeon/creatures/dng_floor_stone_01.png') center/cover no-repeat;border-radius:7px;padding:0;color:#fff;overflow:hidden;box-shadow:inset 0 0 12px #0006}.gtv2Cell.blocked{background:#1b1d20 url('assets/dungeon/creatures/dng_wall_block.jpg') center/cover no-repeat;filter:saturate(.7) brightness(.75)}.gtv2Cell.cover{box-shadow:inset 0 0 0 3px #9a8749,inset 0 0 12px #0007}.gtv2Cell.cover:after{content:'◈';position:absolute;right:3px;top:1px;font-size:12px;color:#f4d86f;text-shadow:0 1px 2px #000;opacity:.95}.gtv2Cell.reachable{outline:3px solid #45bf78;outline-offset:-4px}.gtv2Cell.targetable{box-shadow:inset 0 0 0 4px #d94a3e,inset 0 0 12px #0007}.gtv2Cell.selected{outline:4px solid #f3bf3f;outline-offset:-4px}.gtv2Cell.current{box-shadow:inset 0 0 0 4px #5ca8ff,inset 0 0 12px #0007}.gtv2Pawn{position:absolute;inset:3px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;text-align:center;line-height:1.05;border:2px solid #fff9;background:#334;z-index:2;overflow:hidden;text-shadow:0 1px 3px #000}.gtv2Pawn.hero{background:#244d72}.gtv2Pawn.enemy{background:#762f2c}.gtv2Pawn.dead{filter:grayscale(1);opacity:.4}.gtv2Pawn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gtv2Pawn b{position:absolute;left:1px;right:1px;bottom:5px;z-index:3;background:#0009;border-radius:5px;padding:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gtv2Hp{position:absolute;left:3px;right:3px;bottom:2px;height:4px;background:#000b;border-radius:99px;overflow:hidden;z-index:4}.gtv2Hp>i{display:block;height:100%;background:#70bd7c}.gtv2Actions{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.gtv2Actions .gtv2Btn{flex:1 1 130px}.gtv2Targets{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px}.gtv2Target{flex:0 0 auto;min-width:130px;text-align:left}.gtv2Target em{display:block;font-style:normal;font-size:11px;color:#c7ced7;margin-top:2px}.gtv2Hint{margin:8px 0;padding:9px 10px;border-radius:10px;background:#171f29;border:1px solid #354559;font-size:13px}.gtv2Hint.warn{background:#332919;border-color:#7a6128}.gtv2Log{max-height:170px;overflow:auto;font-size:13px;line-height:1.4}.gtv2Legend{font-size:12px;color:#b9c0ca;margin:8px 2px}.gtv2Winner{padding:10px;border:1px solid #4d7c5f;background:#163424;border-radius:10px;font-weight:900;text-align:center;margin-top:8px}.gtv2DiceBackdrop{position:fixed;inset:0;z-index:31000;background:#05070bc9;display:grid;place-items:center;padding:20px}.gtv2DiceCard{width:min(92vw,360px);background:#151a22;border:2px solid #566171;border-radius:18px;padding:20px;text-align:center;box-shadow:0 18px 60px #000c}.gtv2DiceTitle{font-size:15px;color:#ccd3dc}.gtv2Die{width:112px;height:112px;margin:16px auto;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,#f4efe2,#bfc8d5);color:#161a20;font-size:30px;font-weight:1000;box-shadow:inset 0 0 0 5px #ffffff66,0 12px 30px #0008}.gtv2DiceResult{font-size:18px;font-weight:900}.gtv2DiceResult.ok{color:#79d796}.gtv2DiceResult.fail{color:#f07c72}@media(max-width:600px){.gtv2Hud{grid-template-columns:1fr}.gtv2Cell{width:44px;height:44px}.gtv2Shell{padding:6px 6px 22px}.gtv2Top{border-radius:10px}.gtv2Pawn{font-size:9px}.gtv2Pawn b{font-size:7px}.gtv2Btn{font-size:13px;padding:10px}}
-    `;R.document.head.appendChild(s);
+    const doc=D();if(!doc||doc.getElementById("gensTacticalV2Style"))return;
+    const s=doc.createElement("style");s.id="gensTacticalV2Style";s.textContent=`
+    .gtv2Overlay{position:fixed;inset:0;z-index:30000;background:#090b0ff2;color:#f4f1e8;overflow:auto;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.gtv2Shell{width:min(100%,960px);margin:auto;padding:8px 8px 28px}.gtv2Top{position:sticky;top:0;z-index:5;background:#10141bf7;border:1px solid #343c48;border-radius:13px;padding:9px;display:flex;align-items:center;gap:7px;box-shadow:0 8px 30px #0008}.gtv2Top strong{flex:1}.gtv2Btn{border:0;border-radius:10px;padding:10px 11px;background:#303946;color:#fff;font-weight:800;font-size:14px;min-height:43px}.gtv2Btn:disabled{opacity:.38}.gtv2Btn.danger{background:#6f2925}.gtv2Btn.good{background:#286b48}.gtv2Btn.warn{background:#765d20}.gtv2Btn.active{outline:2px solid #e6b542;outline-offset:1px}.gtv2Hud{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}.gtv2Card{background:#151a22;border:1px solid #333d4a;border-radius:12px;padding:9px;min-width:0}.gtv2Card small{color:#b9c0ca}.gtv2BattleWrap{overflow:auto;background:#0d1117;border:1px solid #343c48;border-radius:14px;padding:8px;box-shadow:inset 0 0 30px #0007}.gtv2Grid{display:grid;gap:2px;margin:auto;width:max-content;touch-action:manipulation}.gtv2Cell{position:relative;width:52px;height:52px;border:1px solid #26303b;background:#151b24 url('${FLOOR_ASSET}') center/cover no-repeat;border-radius:7px;padding:0;color:#fff;overflow:hidden;box-shadow:inset 0 0 12px #0006}.gtv2Cell.blocked{background:#191714 url('${WALL_ASSET}') center/cover no-repeat!important;filter:saturate(.9) brightness(.72)}.gtv2Cell.cover{box-shadow:inset 0 0 0 3px #9a8749,inset 0 0 12px #0007}.gtv2Cell.cover:after{content:'◈';position:absolute;right:3px;top:1px;font-size:12px;color:#f4d86f;text-shadow:0 1px 2px #000}.gtv2Cell.reachable{outline:3px solid #45bf78;outline-offset:-4px}.gtv2Cell.targetable{box-shadow:inset 0 0 0 4px #d94a3e,inset 0 0 12px #0007}.gtv2Cell.selected{outline:4px solid #f3bf3f;outline-offset:-4px}.gtv2Cell.current{box-shadow:inset 0 0 0 4px #5ca8ff,inset 0 0 12px #0007}.gtv2Pawn{position:absolute;inset:3px;border-radius:50%;display:grid;place-items:center;border:2px solid #fff9;background:#334;z-index:2;overflow:hidden}.gtv2Pawn.hero{background:#244d72}.gtv2Pawn.enemy{background:#762f2c}.gtv2Pawn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}.gtv271Silhouette{font-size:25px;line-height:1;color:#fff}.gtv2Hp{position:absolute;left:3px;right:3px;bottom:2px;height:4px;background:#000b;border-radius:99px;overflow:hidden;z-index:4}.gtv2Hp>i{display:block;height:100%;background:#70bd7c}.gtv271EffectDot{position:absolute;right:2px;top:2px;width:8px;height:8px;border-radius:50%;background:#d8554f;border:1px solid #fff;z-index:5}.gtv2Actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.gtv2Actions .gtv2Btn{flex:1 1 130px}.gtv2Targets{display:flex;gap:6px;overflow-x:auto;padding:2px 0 7px}.gtv2Target{flex:0 0 auto;min-width:130px;text-align:left}.gtv2Target em{display:block;font-style:normal;font-size:11px;color:#c7ced7;margin-top:2px}.gtv2Hint{margin:8px 0;padding:9px 10px;border-radius:10px;background:#171f29;border:1px solid #354559;font-size:13px}.gtv2Hint.warn{background:#332919;border-color:#7a6128}.gtv2Log{max-height:165px;overflow:auto;font-size:13px;line-height:1.4}.gtv2Legend{font-size:12px;color:#b9c0ca;margin:7px 2px}.gtv2Winner{padding:10px;border:1px solid #4d7c5f;background:#163424;border-radius:10px;font-weight:900;text-align:center;margin-top:8px}.gtv271Roster{margin:9px 0}.gtv271RosterTitle{font-size:12px;font-weight:900;color:#cbd3dd;margin:6px 2px}.gtv271RosterRow{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 6px}.gtv271ActorCard{flex:0 0 112px;background:#151a22;border:1px solid #364150;border-radius:12px;padding:7px;color:#fff;text-align:left}.gtv271ActorCard.current{outline:2px solid #5ca8ff}.gtv271Portrait{width:58px;height:58px;border-radius:12px;overflow:hidden;background:#252b35;border:1px solid #5a6573;margin:0 auto 5px;display:grid;place-items:center;font-size:26px}.gtv271Portrait img{width:100%;height:100%;object-fit:cover}.gtv271ActorName{font-weight:900;font-size:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gtv271ActorHp{font-size:11px;text-align:center;color:#c9d0d8}.gtv271StatusRow{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px}.gtv271Status{display:inline-block;border-radius:99px;padding:2px 5px;font-size:9px;font-weight:800;background:#354250;border:1px solid #617185}.gtv271Status.dot{background:#4a2424;border-color:#a64f4f}.gtv271Status.hot{background:#21432f;border-color:#4e9669}.gtv271Status.buff{background:#28384d;border-color:#5779a7}.gtv271NoStatus{font-size:11px;color:#88919c}.gtv271DetailBackdrop,.gtv2DiceBackdrop{position:fixed;inset:0;z-index:31500;background:#05070bd8;display:grid;place-items:center;padding:14px}.gtv271DetailCard,.gtv2DiceCard{width:min(94vw,430px);max-height:90vh;overflow:auto;background:#151a22;border:2px solid #566171;border-radius:18px;padding:16px;box-shadow:0 18px 60px #000c}.gtv271DetailHero{display:flex;gap:12px;align-items:center}.gtv271DetailHero .gtv271Portrait{width:92px;height:92px;margin:0;flex:0 0 92px}.gtv271Stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.gtv271Stat{background:#0e1218;border-radius:8px;padding:6px;text-align:center;font-size:11px}.gtv271Stat strong{display:block;font-size:14px}.gtv271AttackLine{background:#0f141b;border:1px solid #303a46;border-radius:9px;padding:7px;margin-top:5px;font-size:12px}.gtv2DiceCard{text-align:center}.gtv2DicePhase{font-size:12px;font-weight:900;letter-spacing:.07em;color:#f0c96f;text-transform:uppercase}.gtv2DiceTitle{font-size:17px;font-weight:900;margin-top:5px}.gtv2DiceSub{font-size:12px;color:#bfc7d1;margin-top:4px}.gtv2Die{width:112px;height:112px;margin:15px auto;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,#f4efe2,#bfc8d5);color:#161a20;font-size:31px;font-weight:1000;box-shadow:inset 0 0 0 5px #ffffff66,0 12px 30px #0008}.gtv2DiceResult{font-size:19px;font-weight:1000;margin:8px 0}.gtv2DiceResult.ok{color:#79d796}.gtv2DiceResult.fail{color:#f07c72}.gtv2DiceRule{font-size:12px;color:#cbd3dc;margin-bottom:10px}.drc100Cell.wall,.dc047Cell.dav167870WallCell{background-image:url('${WALL_ASSET}')!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}@media(max-width:600px){.gtv2Hud{grid-template-columns:1fr}.gtv2Cell{width:44px;height:44px}.gtv2Shell{padding:5px 5px 22px}.gtv2Top{border-radius:10px}.gtv2Btn{font-size:13px;padding:9px}.gtv271ActorCard{flex-basis:100px}.gtv271Stats{grid-template-columns:repeat(2,1fr)}}`;
+    doc.head?.appendChild(s);
   }
-  function actorLabel(a){return a?.name||a?.id||"?"}
+
   function current(){return E()?.currentActor?.(battle)||null}
   function targetActor(){return E()?.actorById?.(battle,selectedTarget)||null}
   function selectedAttackActor(){const cur=current();return cur?.attacks?.find(a=>a.id===selectedAttack)||cur?.attacks?.[0]||null}
-  function canTarget(cur,a){if(!cur||!a||!a.alive||cur.side===a.side)return false;const attacks=cur.attacks||[];return attacks.some(x=>E().attackPreview(battle,cur.id,a.id,x.id).ok)}
-  function refreshSelection(){
-    const cur=current();if(!cur){selectedTarget="";selectedAttack="";return}
-    if(!cur.attacks.some(x=>x.id===selectedAttack))selectedAttack=cur.attacks[0]?.id||"";
-    const t=targetActor();if(!t||!t.alive||t.side===cur.side)selectedTarget="";
-  }
-  function logText(row){
-    if(row.type==="turn")return `Tour : ${actorLabel(E().actorById(battle,row.actorId))}`;
-    if(row.type==="move")return `${actorLabel(E().actorById(battle,row.actorId))} se déplace de ${row.cost} case(s).`;
-    if(row.type==="attack")return `${actorLabel(E().actorById(battle,row.attackerId))} → ${actorLabel(E().actorById(battle,row.targetId))} : ${row.hit?`${row.damage} dégât(s) [D100 ${row.roll} ≤ ${row.hitChance}]${row.cellCover?` · couvert -${row.cellCover}%`:""}`:`raté [D100 ${row.roll} > ${row.hitChance}]${row.cellCover?` · couvert -${row.cellCover}%`:""}`}`;
-    return row.type||"événement";
-  }
+  function canTarget(cur,a){if(!cur||!a||!a.alive||cur.side===a.side)return false;return arr(cur.attacks).some(x=>E().attackPreview(battle,cur.id,a.id,x.id).ok)}
+  function refreshSelection(){const cur=current();if(!cur){selectedTarget="";selectedAttack="";return}if(!arr(cur.attacks).some(x=>x.id===selectedAttack))selectedAttack=cur.attacks?.[0]?.id||"";const t=targetActor();if(!t||!t.alive||t.side===cur.side)selectedTarget=""}
+  function pawnHtml(a){const hp=Math.max(0,Math.min(100,(a.hp/a.maxHp)*100)),art=actorArt(a),hasStatus=statusRows(a).length>0;return `<span class="gtv2Pawn ${a.side}">${art?`<img src="${esc(art)}" alt="" onerror="this.style.display='none'">`:'<span class="gtv271Silhouette">◆</span>'}${hasStatus?'<i class="gtv271EffectDot"></i>':''}<span class="gtv2Hp"><i style="width:${hp}%"></i></span></span>`}
   function reachableSet(){const cur=current();if(!cur||cur.side!=="hero"||busy)return new Map();return new Map(E().reachableCells(battle,cur.id).map(c=>[key(c.x,c.y),c]))}
-  function pawnHtml(a){
-    const hp=Math.max(0,Math.min(100,(a.hp/a.maxHp)*100)),art=a.meta?.art?esc(a.meta.art):"",short=esc((a.name||a.id||"?").split(" ")[0]);
-    return `<span class="gtv2Pawn ${a.side}">${art?`<img src="${art}" alt="">`:short}<b>${short}</b><span class="gtv2Hp"><i style="width:${hp}%"></i></span></span>`;
-  }
   function renderGrid(){
-    const grid=battle.grid,reach=reachableSet(),blocked=new Set((grid.blocked||[]).map(p=>key(p.x,p.y))),cover=new Set((grid.cover||[]).map(p=>key(p.x,p.y))),cur=current();
-    let h=`<div class="gtv2Grid" style="grid-template-columns:repeat(${grid.width},52px)" data-grid>`;
-    for(let y=0;y<grid.height;y++)for(let x=0;x<grid.width;x++){
-      const k=key(x,y),a=battle.actors.find(q=>q.alive&&q.x===x&&q.y===y),cls=["gtv2Cell"];
-      if(blocked.has(k))cls.push("blocked");if(cover.has(k))cls.push("cover");if(reach.has(k)&&(!a||a.id===cur?.id))cls.push("reachable");
-      if(a&&canTarget(cur,a))cls.push("targetable");if(a&&a.id===selectedTarget)cls.push("selected");if(a&&a.id===cur?.id)cls.push("current");
-      h+=`<button class="${cls.join(" ")}" data-x="${x}" data-y="${y}" ${blocked.has(k)||busy?"disabled":""}>`;
-      if(a)h+=pawnHtml(a);
-      h+=`</button>`;
-    }
-    return h+`</div>`;
+    const grid=battle.grid,reach=reachableSet(),blocked=new Set(arr(grid.blocked).map(p=>key(p.x,p.y))),cover=new Set(arr(grid.cover).map(p=>key(p.x,p.y))),cur=current();let h=`<div class="gtv2Grid" style="grid-template-columns:repeat(${grid.width},52px)" data-grid>`;
+    for(let y=0;y<grid.height;y++)for(let x=0;x<grid.width;x++){const k=key(x,y),a=battle.actors.find(q=>q.alive&&q.x===x&&q.y===y),cls=["gtv2Cell"];if(blocked.has(k))cls.push("blocked");if(cover.has(k))cls.push("cover");if(reach.has(k)&&(!a||a.id===cur?.id))cls.push("reachable");if(a&&canTarget(cur,a))cls.push("targetable");if(a&&a.id===selectedTarget)cls.push("selected");if(a&&a.id===cur?.id)cls.push("current");h+=`<button class="${cls.join(" ")}" data-x="${x}" data-y="${y}" ${blocked.has(k)||busy?"disabled":""}>${a?pawnHtml(a):""}</button>`}return h+"</div>"
   }
-  function previewReason(p){
-    if(!p)return "Choisis une cible.";
-    if(p.ok)return `${p.hitChance}% de toucher · ${p.damage} dégât(s) · distance ${p.distance}`;
-    if(p.reason==="out-of-range")return `Hors de portée : ${p.distance} case(s), portée ${p.minRange}-${p.maxRange}.`;
-    if(p.reason==="line-of-sight")return "Ligne de vue bloquée par le terrain.";
-    if(p.reason==="no-action")return "Aucune action restante.";
-    return "Cette attaque n'est pas possible depuis cette case.";
+  function renderRosterGroup(side,label){const cur=current(),actors=battle.actors.filter(a=>a.side===side);if(!actors.length)return "";return `<div class="gtv271RosterTitle">${label}</div><div class="gtv271RosterRow">${actors.map(a=>{const art=actorArt(a),st=statusRows(a);return `<button class="gtv271ActorCard ${a.id===cur?.id?"current":""}" data-detail="${esc(a.id)}"><span class="gtv271Portrait">${art?`<img src="${esc(art)}" alt="">`:'◆'}</span><div class="gtv271ActorName">${esc(actorDisplayName(a))}</div><div class="gtv271ActorHp">PV ${Math.max(0,a.hp)}/${a.maxHp}</div><div class="gtv271StatusRow">${st.length?statusBadges(a,true):'<span class="gtv271NoStatus">—</span>'}</div></button>`}).join("")}</div>`}
+  function renderRoster(){return `<div class="gtv271Roster">${renderRosterGroup("hero","HÉROS — touche une fiche pour les détails")}${renderRosterGroup("enemy","ENNEMIS")}</div>`}
+  function previewReason(p){if(!p)return "Choisis une cible.";if(p.ok)return `${p.hitChance}% · réussite sur ${ruleText(p.hitChance,battle?.config?.rollHighToHit)} · ${p.damage} dégât(s) · distance ${p.distance}`;if(p.reason==="out-of-range")return `Hors de portée : ${p.distance} case(s), portée ${p.minRange}-${p.maxRange}.`;if(p.reason==="line-of-sight")return "Ligne de vue bloquée par le terrain.";return "Cette attaque n'est pas possible depuis cette case."}
+  function renderTargets(){const cur=current();if(!cur||cur.side!=="hero"||battle.status!=="active")return "";const atk=selectedAttackActor(),targets=battle.actors.filter(a=>a.alive&&a.side!==cur.side);return `<div class="gtv2Targets">${targets.map(t=>{const p=atk?E().attackPreview(battle,cur.id,t.id,atk.id):null,txt=p?.ok?`${ruleText(p.hitChance,battle.config.rollHighToHit)} · ${p.damage} dmg`:p?.reason==="out-of-range"?`distance ${p.distance}`:"non attaquable";return `<button class="gtv2Btn gtv2Target ${t.id===selectedTarget?"active":""}" data-target="${esc(t.id)}" ${busy?"disabled":""}>🎯 ${esc(actorDisplayName(t))}<em>PV ${t.hp}/${t.maxHp} · ${txt}</em></button>`}).join("")}</div>`}
+  function renderActions(){const cur=current();if(!cur||battle.status!=="active")return "";if(cur.side!=="hero")return '<div class="gtv2Actions"><button class="gtv2Btn" disabled>Tour ennemi en cours…</button></div>';const target=targetActor(),attacks=arr(cur.attacks).map(a=>{const p=target?E().attackPreview(battle,cur.id,target.id,a.id):null,label=`⚔️ ${esc(a.name)} · portée ${a.minRange}-${a.maxRange}${p?.ok?` · ${ruleText(p.hitChance,battle.config.rollHighToHit)} · ${p.damage} dmg`:""}`;return `<button class="gtv2Btn ${a.id===selectedAttack?"good":""}" data-attack="${esc(a.id)}" ${busy||cur.actionsLeft<1?"disabled":""}>${label}</button>`}).join(""),p=target&&selectedAttackActor()?E().attackPreview(battle,cur.id,target.id,selectedAttackActor().id):null,approach=target&&!p?.ok&&p?.reason==="out-of-range"&&cur.movementLeft>0?`<button class="gtv2Btn warn" data-approach ${busy?"disabled":""}>👣 Approcher la cible</button>`:"";return `<div class="gtv2Actions">${attacks}${approach}<button class="gtv2Btn" data-end ${busy?"disabled":""}>Fin du tour</button></div>`}
+  function renderHint(){const cur=current();if(!cur)return "";if(notice)return `<div class="gtv2Hint warn">${esc(notice)}</div>`;if(cur.side!=="hero")return '<div class="gtv2Hint">Tour de l’ennemi : son action sera annoncée avant le résultat. Ce n’est pas une riposte automatique.</div>';const target=targetActor(),atk=selectedAttackActor();if(!target)return '<div class="gtv2Hint">Choisis une cible, déplace-toi sur une case verte si nécessaire, puis choisis ton attaque.</div>';return `<div class="gtv2Hint">${esc(previewReason(atk?E().attackPreview(battle,cur.id,target.id,atk.id):null))}</div>`}
+  function renderDetail(){const a=E()?.actorById?.(battle,detailActorId);if(!a)return "";const art=actorArt(a),attacks=arr(a.attacks).map(x=>`<div class="gtv271AttackLine"><strong>${esc(x.name)}</strong> · portée ${x.minRange}-${x.maxRange} · base ${x.hit}% · puissance ${x.power}</div>`).join("");return `<div class="gtv271DetailBackdrop"><div class="gtv271DetailCard"><div class="gtv271DetailHero"><span class="gtv271Portrait">${art?`<img src="${esc(art)}" alt="">`:'◆'}</span><div><h2 style="margin:0">${esc(actorDisplayName(a))}</h2><div>PV ${a.hp}/${a.maxHp}</div><div class="gtv271StatusRow" style="justify-content:flex-start">${statusBadges(a,false)}</div></div></div><div class="gtv271Stats"><div class="gtv271Stat"><strong>${a.movement}</strong>Mouvement</div><div class="gtv271Stat"><strong>${a.initiative}</strong>Initiative</div><div class="gtv271Stat"><strong>${a.defense}</strong>Défense</div><div class="gtv271Stat"><strong>${a.armor}</strong>Armure</div><div class="gtv271Stat"><strong>${a.dodge}%</strong>Esquive</div><div class="gtv271Stat"><strong>${a.actionsLeft}</strong>Action</div></div><h3 style="margin:8px 0 3px">Attaques</h3>${attacks||'<div class="small">Aucune attaque.</div>'}<div class="gtv2Actions"><button class="gtv2Btn good" data-detail-close>Fermer</button></div></div></div>`}
+  function logText(row){if(row.type==="turn")return `Tour : ${actorDisplayName(E().actorById(battle,row.actorId))}`;if(row.type==="move")return `${actorDisplayName(E().actorById(battle,row.actorId))} se déplace de ${row.cost} case(s).`;if(row.type==="attack"){const high=row.rollHighToHit!==false,t=row.hitTarget??ruleTarget(row.hitChance,high);return `${actorDisplayName(E().actorById(battle,row.attackerId))} → ${actorDisplayName(E().actorById(battle,row.targetId))} : ${row.hit?`${row.damage} dégât(s)`:"raté"} [D100 ${row.roll} ${high?"≥":"≤"} ${t}]`}return row.type||"événement"}
+  function render(){if(!rootEl||!battle)return;refreshSelection();const cur=current(),target=targetActor();rootEl.innerHTML=`<div class="gtv2Shell"><div class="gtv2Top"><strong>⚔️ Combat tactique · manche ${battle.round}</strong><button class="gtv2Btn" data-roll-rule>🎲 ${battle.config.rollHighToHit?"Jet haut":"Jet bas"}</button><button class="gtv2Btn danger" data-close>Quitter</button></div><div class="gtv2Hud"><div class="gtv2Card"><strong>${cur?`Tour : ${esc(actorDisplayName(cur))}`:"Combat terminé"}</strong><br><small>${cur?`Mouvement ${cur.movementLeft}/${cur.movement} · Action ${cur.actionsLeft}`:""}</small></div><div class="gtv2Card"><strong>${target?`Cible : ${esc(actorDisplayName(target))}`:"Aucune cible"}</strong><br><small>${target?`PV ${target.hp}/${target.maxHp} · DEF ${target.defense} · ARM ${target.armor}`:`Règle D100 : ${battle.config.rollHighToHit?"plus le résultat est haut, mieux c’est":"jet bas classique"}`}</small></div></div><div class="gtv2BattleWrap">${renderGrid()}</div><div class="gtv2Legend">Vert = déplacement · rouge = cible possible · ◈ = couvert · les murs bloquent déplacement et tir.</div>${renderRoster()}${renderTargets()}${renderHint()}${renderActions()}${battle.status==="ended"?`<div class="gtv2Winner">${battle.winner==="hero"?"🏆 Victoire":"💀 Défaite"}</div><div class="gtv2Actions"><button class="gtv2Btn good" data-commit>Appliquer le résultat et revenir au donjon</button></div>`:""}<div class="gtv2Card gtv2Log">${battle.log.slice(-20).reverse().map(x=>`<div>${esc(logText(x))}</div>`).join("")}</div></div>${renderDetail()}`;const g=rootEl.querySelector("[data-grid]");if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`;paintLiveWalls()}
+
+  function nextDisplayRoll(){if(!battle?.rngSeed)return Math.floor(Math.random()*100)+1;let t=(battle.rngSeed=(battle.rngSeed+0x6D2B79F5)>>>0);t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return Math.floor((((t^t>>>14)>>>0)/4294967296)*100)+1}
+  function resolveVisibleAttack(attacker,target,attackId){const p=E().attackPreview(battle,attacker.id,target.id,attackId);if(!p.ok)return p;const high=battle.config.rollHighToHit!==false,displayRoll=nextDisplayRoll(),translated=engineRoll(displayRoll,high),res=E().resolveAttack(battle,attacker.id,target.id,attackId,translated);if(!res?.ok)return res;res.roll=displayRoll;res.rollHighToHit=high;res.hitTarget=ruleTarget(res.hitChance,high);const row=[...battle.log].reverse().find(x=>x?.type==="attack"&&x.attackerId===attacker.id&&x.targetId===target.id);if(row){row.roll=displayRoll;row.rollHighToHit=high;row.hitTarget=res.hitTarget}return res}
+  async function waitAnimation(anim){try{if(anim?.finished)await anim.finished}catch(e){}}
+  async function showDiceResult(attacker,target,result,phase){
+    const doc=D();if(!doc||!result?.ok)return;const overlay=doc.createElement("div");overlay.className="gtv2DiceBackdrop";const high=result.rollHighToHit!==false,threshold=result.hitTarget??ruleTarget(result.hitChance,high);overlay.innerHTML=`<div class="gtv2DiceCard"><div class="gtv2DicePhase">${esc(phase)}</div><div class="gtv2DiceTitle">${esc(actorDisplayName(attacker))} attaque ${esc(actorDisplayName(target))}</div><div class="gtv2DiceSub">${attacker.side==="enemy"?"Tour d’initiative ennemi — ce n’est pas une riposte automatique.":"Attaque du héros"}</div><div class="gtv2Die" data-die>…</div><div class="gtv2DiceResult ${result.hit?"ok":"fail"}" data-result style="visibility:hidden">${result.hit?`TOUCHÉ · ${result.damage} dégât(s)`:"RATÉ"}</div><div class="gtv2DiceRule">Réussite si ${high?"D100 ≥":"D100 ≤"} ${threshold} · jet obtenu : <strong>${result.roll}</strong></div><button class="gtv2Btn good" data-dice-continue disabled>Continuer</button></div>`;doc.body.appendChild(overlay);const die=overlay.querySelector("[data-die]"),button=overlay.querySelector("[data-dice-continue]"),resultEl=overlay.querySelector("[data-result]");if(die?.animate){const anim=die.animate([{transform:"rotate(-12deg) scale(.84)"},{transform:"rotate(10deg) scale(1.08)"},{transform:"rotate(-5deg) scale(.98)"},{transform:"rotate(0) scale(1)"}],{duration:520,easing:"cubic-bezier(.15,.8,.25,1)"});await waitAnimation(anim)}if(die)die.textContent=String(result.roll);if(resultEl)resultEl.style.visibility="visible";if(button)button.disabled=false;await new Promise(resolve=>{if(!button){resolve();return}button.addEventListener("click",()=>{overlay.remove();resolve()},{once:true})})
   }
-  function renderTargets(){
-    const cur=current();if(!cur||cur.side!=="hero"||battle.status!=="active")return "";
-    const atk=selectedAttackActor();
-    const targets=battle.actors.filter(a=>a.alive&&a.side!==cur.side);
-    if(!targets.length)return "";
-    return `<div class="gtv2Targets">${targets.map(t=>{const p=atk?E().attackPreview(battle,cur.id,t.id,atk.id):null;const txt=p?.ok?`${p.hitChance}% · ${p.damage} dmg`:p?.reason==="out-of-range"?`distance ${p.distance}`:"non attaquable";return `<button class="gtv2Btn gtv2Target ${t.id===selectedTarget?"active":""}" data-target="${esc(t.id)}" ${busy?"disabled":""}>🎯 ${esc(actorLabel(t))}<em>PV ${t.hp}/${t.maxHp} · ${txt}</em></button>`}).join("")}</div>`;
-  }
-  function renderActions(){
-    const cur=current();if(!cur||battle.status!=="active")return "";
-    if(cur.side!=="hero")return `<div class="gtv2Actions"><button class="gtv2Btn" disabled>IA en résolution…</button></div>`;
-    const target=targetActor();
-    const attacks=(cur.attacks||[]).map(a=>{const p=target?E().attackPreview(battle,cur.id,target.id,a.id):null;const disabled=busy||cur.actionsLeft<1;const label=`⚔️ ${esc(a.name)} · portée ${a.minRange}-${a.maxRange}${p?.ok?` · ${p.hitChance}% · ${p.damage} dmg`:""}`;return `<button class="gtv2Btn ${a.id===selectedAttack?"good":""}" data-attack="${esc(a.id)}" ${disabled?"disabled":""}>${label}</button>`}).join("");
-    const p=target&&selectedAttackActor()?E().attackPreview(battle,cur.id,target.id,selectedAttackActor().id):null;
-    const approach=target&&!p?.ok&&p?.reason==="out-of-range"&&cur.movementLeft>0?`<button class="gtv2Btn warn" data-approach ${busy?"disabled":""}>👣 Approcher la cible</button>`:"";
-    return `<div class="gtv2Actions">${attacks}${approach}<button class="gtv2Btn" data-end ${busy?"disabled":""}>Fin du tour</button></div>`;
-  }
-  function renderHint(){
-    const cur=current();if(!cur)return "";
-    if(notice)return `<div class="gtv2Hint warn">${esc(notice)}</div>`;
-    if(cur.side!=="hero")return `<div class="gtv2Hint">L'ennemi joue. Le lancer D100 apparaît avant l'application du résultat.</div>`;
-    const target=targetActor(),atk=selectedAttackActor();
-    if(!target)return `<div class="gtv2Hint">1. Choisis une cible ci-dessous ou touche son pion. 2. Déplace-toi sur une case verte si nécessaire. 3. Appuie sur ton attaque.</div>`;
-    const p=atk?E().attackPreview(battle,cur.id,target.id,atk.id):null;
-    return `<div class="gtv2Hint ${p?.ok?"":"warn"}">${esc(previewReason(p))}</div>`;
-  }
-  function render(){
-    if(!rootEl||!battle)return;refreshSelection();const cur=current(),target=targetActor();
-    rootEl.innerHTML=`<div class="gtv2Shell"><div class="gtv2Top"><strong>⚔️ Combat tactique · manche ${battle.round}</strong><button class="gtv2Btn danger" data-close ${busy?"disabled":""}>Quitter le combat</button></div>
-      <div class="gtv2Hud"><div class="gtv2Card"><strong>${cur?`Tour : ${esc(actorLabel(cur))}`:"Combat terminé"}</strong><br><small>${cur?`Mouvement ${cur.movementLeft}/${cur.movement} · Action ${cur.actionsLeft}`:""}</small></div><div class="gtv2Card"><strong>${target?`Cible : ${esc(actorLabel(target))}`:"Aucune cible"}</strong><br><small>${target?`PV ${target.hp}/${target.maxHp} · DEF ${target.defense} · ARM ${target.armor}`:"Touchez un ennemi ou utilisez la liste des cibles."}</small></div></div>
-      <div class="gtv2BattleWrap">${renderGrid()}</div><div class="gtv2Legend">Vert = déplacement · Rouge = ennemi attaquable maintenant · Or = cible sélectionnée · ◈ = couvert.</div>${renderTargets()}${renderHint()}${renderActions()}
-      ${battle.status==="ended"?`<div class="gtv2Winner">${battle.winner==="hero"?"🏆 Victoire":"💀 Défaite"}</div><div class="gtv2Actions"><button class="gtv2Btn good" data-commit>Appliquer le résultat et revenir au donjon</button></div>`:""}
-      <div class="gtv2Card gtv2Log">${battle.log.slice(-20).reverse().map(x=>`<div>${esc(logText(x))}</div>`).join("")}</div></div>`;
-    const g=rootEl.querySelector("[data-grid]");if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`;
-  }
-  async function showRoll(result){
-    if(!rootEl||!result?.ok)return;
-    const attacker=E().actorById(battle,result.attackerId),target=E().actorById(battle,result.targetId),ok=!!result.hit;
-    const layer=R.document.createElement("div");layer.className="gtv2DiceBackdrop";layer.innerHTML=`<div class="gtv2DiceCard"><div class="gtv2DiceTitle">${esc(actorLabel(attacker))} → ${esc(actorLabel(target))}</div><div class="gtv2Die">D100</div><div class="gtv2DiceResult">Jet en cours…</div></div>`;rootEl.appendChild(layer);
-    const die=layer.querySelector(".gtv2Die"),res=layer.querySelector(".gtv2DiceResult"),card=layer.querySelector(".gtv2DiceCard");
-    if(die?.animate)await waitAnimation(die.animate([{transform:"rotate(-12deg) scale(.82)"},{transform:"rotate(10deg) scale(1.08)",offset:.35},{transform:"rotate(-8deg) scale(.96)",offset:.7},{transform:"rotate(0deg) scale(1)"}],{duration:380,easing:"cubic-bezier(.15,.8,.25,1)",fill:"forwards"}));
-    if(die)die.textContent=String(result.roll);if(res){res.className=`gtv2DiceResult ${ok?"ok":"fail"}`;res.textContent=ok?`✅ Touché · ${result.roll} ≤ ${result.hitChance} · ${result.damage} dégât(s)`:`❌ Raté · ${result.roll} > ${result.hitChance}`}
-    if(card?.animate)await waitAnimation(card.animate([{transform:"scale(1)"},{transform:"scale(1.025)",offset:.45},{transform:"scale(1)"}],{duration:420,easing:"ease-out"}));
-    layer.remove();
-  }
-  async function runAiUntilHero(){
-    let guard=0;busy=true;render();
-    while(battle?.status==="active"&&current()?.side==="enemy"&&guard++<50){
-      const r=E().aiStep(battle);
-      if(r?.attack?.ok)await showRoll(r.attack);
-      if(battle?.status==="active"&&current()?.side==="enemy")render();
-    }
-    busy=false;notice="";render();
-  }
-  function clickCell(x,y){
-    const cur=current();if(!cur||cur.side!=="hero"||battle.status!=="active"||busy)return;
-    const a=battle.actors.find(q=>q.alive&&q.x===x&&q.y===y);
-    if(a&&a.side!==cur.side){selectedTarget=a.id;notice="";render();return}
-    if(a&&a.id!==cur.id)return;
-    const r=E().moveActor(battle,cur.id,{x,y});if(r.ok){notice="";render()}else{notice=r.reason==="insufficient-movement"?"Pas assez de mouvement pour cette case.":"Case inaccessible.";render()}
-  }
-  function selectTarget(id){const cur=current(),a=E().actorById(battle,id);if(!cur||!a||!a.alive||a.side===cur.side)return;selectedTarget=a.id;notice="";render()}
-  function moveTowardTarget(){
-    const cur=current(),target=targetActor();if(!cur||!target||busy)return;
-    const cells=E().reachableCells(battle,cur.id).filter(c=>c.cost>0);if(!cells.length){notice="Aucune case atteignable.";render();return}
-    cells.sort((a,b)=>E().distance(a,target)-E().distance(b,target)||a.cost-b.cost);
-    const best=cells[0],r=E().moveActor(battle,cur.id,best);if(r.ok){notice="";render()}else{notice="Impossible de s'approcher davantage.";render()}
-  }
-  async function doAttack(id){
-    const cur=current();if(!cur||busy||cur.side!=="hero")return;
-    selectedAttack=id;let target=targetActor();
-    if(!target){
-      const candidates=battle.actors.filter(a=>a.alive&&a.side!==cur.side).map(a=>({a,p:E().attackPreview(battle,cur.id,a.id,id)}));
-      const valid=candidates.filter(x=>x.p.ok).sort((x,y)=>x.p.distance-y.p.distance)[0];
-      if(valid){selectedTarget=valid.a.id;target=valid.a}else{notice="Choisis une cible, puis déplace-toi si elle est hors de portée.";render();return}
-    }
-    const preview=E().attackPreview(battle,cur.id,target.id,id);if(!preview.ok){notice=previewReason(preview);render();return}
-    busy=true;notice="";render();
-    const r=E().resolveAttack(battle,cur.id,target.id,id);if(!r.ok){busy=false;notice=previewReason(r);render();return}
-    await showRoll(r);
-    if(battle.status==="active"&&cur.actionsLeft<=0)E().endTurn(battle);
-    if(battle.status==="active")await runAiUntilHero();else{busy=false;render()}
-  }
-  async function endHeroTurn(){if(battle?.status!=="active"||busy)return;const cur=current();if(cur?.side!=="hero")return;E().endTurn(battle);await runAiUntilHero()}
-  function close(apply=false){
-    if(busy)return null;const b=battle;let summary=null;
-    if(apply&&b)try{summary=A()?.commitBattle?.(R,b,{removeDefeatedEnemies:true})||null}catch(e){console.error("tactical commit",e)}
-    rootEl?.remove();rootEl=null;battle=null;selectedTarget="";selectedAttack="";notice="";
-    const cb=options?.onFinish;const cancel=options?.onCancel;const oldOptions=options;options={};
-    try{if(apply&&typeof cb==="function")cb({battle:b,summary,options:oldOptions});else if(!apply&&typeof cancel==="function")cancel({battle:b,options:oldOptions})}catch(e){console.error("tactical finish callback",e)}
-    return b;
-  }
-  function onClick(ev){
-    const btn=ev.target.closest?.("button");if(!btn)return;
-    if(btn.hasAttribute("data-close")){close(false);return}if(btn.hasAttribute("data-commit")){close(true);return}if(btn.hasAttribute("data-end")){endHeroTurn();return}if(btn.hasAttribute("data-approach")){moveTowardTarget();return}
-    if(btn.dataset.target){selectTarget(btn.dataset.target);return}if(btn.dataset.attack){doAttack(btn.dataset.attack);return}
-    if(btn.dataset.x!==undefined&&btn.dataset.y!==undefined)clickCell(Number(btn.dataset.x),Number(btn.dataset.y));
-  }
-  function open(input,opts={}){
-    if(!R.document)throw new Error("Tactical UI requires a document");if(!E())throw new Error("Tactical engine unavailable");
-    ensureStyle();options=opts||{};battle=input?.actors?E().createBattle(input):A()?.createBattle?.(R,input||{});if(!battle)throw new Error("Cannot create tactical battle");
-    rootEl=R.document.createElement("div");rootEl.className="gtv2Overlay";rootEl.setAttribute("data-gens-tactical-v2","1");rootEl.addEventListener("click",onClick);R.document.body.appendChild(rootEl);render();if(current()?.side==="enemy")runAiUntilHero();return battle;
-  }
+  function nearestOpponent(actor){return battle.actors.filter(a=>a.alive&&a.side!==actor.side).sort((a,b)=>E().distance(actor,a)-E().distance(actor,b)||a.hp-b.hp)[0]||null}
+  function bestAttack(actor,target){return arr(actor.attacks).map(a=>({a,p:E().attackPreview(battle,actor.id,target.id,a.id)})).filter(x=>x.p.ok).sort((x,y)=>y.p.damage-x.p.damage||y.p.hitChance-x.p.hitChance)[0]||null}
+  function bestApproach(actor,target){const cells=E().reachableCells(battle,actor.id).filter(c=>c.cost>0);return cells.sort((a,b)=>E().distance(a,target)-E().distance(b,target)||a.cost-b.cost)[0]||null}
+  async function runAiUntilHero(){busy=true;let guard=0;while(battle?.status==="active"&&current()?.side==="enemy"&&guard++<50){const ai=current();notice=`Tour de ${actorDisplayName(ai)}.`;render();let target=nearestOpponent(ai),choice=target?bestAttack(ai,target):null;if(!choice&&target){const cell=bestApproach(ai,target);if(cell)E().moveActor(battle,ai.id,cell);target=nearestOpponent(ai);choice=target?bestAttack(ai,target):null}if(choice&&target&&ai.actionsLeft>0){const result=resolveVisibleAttack(ai,target,choice.a.id);render();await showDiceResult(ai,target,result,"Tour ennemi")}if(battle.status==="active")E().endTurn(battle);notice="";render()}busy=false;notice="";render()}
+  async function doAttack(id){const cur=current(),target=targetActor();if(!cur||cur.side!=="hero")return;selectedAttack=id;const p=target?E().attackPreview(battle,cur.id,target.id,id):null;if(!target){notice="Choisis d’abord une cible.";render();return}if(!p?.ok){notice=previewReason(p);render();return}busy=true;notice="";const result=resolveVisibleAttack(cur,target,id);render();await showDiceResult(cur,target,result,"Tour du héros");if(battle.status==="active"&&cur.actionsLeft<=0)E().endTurn(battle);render();if(battle.status==="active"&&current()?.side==="enemy")await runAiUntilHero();else{busy=false;render()}}
+  async function endHeroTurn(){const cur=current();if(!cur||cur.side!=="hero"||battle.status!=="active")return;E().endTurn(battle);render();if(current()?.side==="enemy")await runAiUntilHero()}
+  function approachTarget(){const cur=current(),target=targetActor();if(!cur||!target)return;const cells=E().reachableCells(battle,cur.id).filter(c=>c.cost>0).sort((a,b)=>E().distance(a,target)-E().distance(b,target)||a.cost-b.cost),atk=selectedAttackActor();for(const c of cells){const old={x:cur.x,y:cur.y};cur.x=c.x;cur.y=c.y;const ok=atk&&E().attackPreview(battle,cur.id,target.id,atk.id).ok;cur.x=old.x;cur.y=old.y;if(ok){E().moveActor(battle,cur.id,c);notice="";render();return}}const best=cells[0];if(best){E().moveActor(battle,cur.id,best);notice="Rapproché au maximum avec le mouvement restant.";render()}}
+  function clickCell(x,y){const cur=current();if(!cur||cur.side!=="hero"||battle.status!=="active"||busy)return;const a=battle.actors.find(q=>q.alive&&q.x===x&&q.y===y);if(a&&a.side!==cur.side){selectedTarget=a.id;notice="";render();return}if(a&&a.id===cur.id){detailActorId=a.id;render();return}if(a)return;const r=E().moveActor(battle,cur.id,{x,y});if(r.ok){notice="";render()}}
+  function close(apply=false){const b=battle;let summary=null;if(apply&&b)try{summary=A()?.commitBattle?.(R,b,{removeDefeatedEnemies:true})||null}catch(e){console.error("tactical commit",e)}rootEl?.remove?.();rootEl=null;battle=null;selectedTarget="";selectedAttack="";detailActorId="";busy=false;const cb=options?.onFinish,cancel=options?.onCancel,oldOptions=options;options={};try{if(apply&&typeof cb==="function")cb({battle:b,summary,options:oldOptions});else if(!apply&&typeof cancel==="function")cancel({battle:b,options:oldOptions})}catch(e){console.error("tactical finish callback",e)}return b}
+  function onClick(ev){const btn=ev.target.closest?.("button");if(!btn)return;if(btn.hasAttribute("data-close")){close(false);return}if(btn.hasAttribute("data-commit")){close(true);return}if(btn.hasAttribute("data-detail-close")){detailActorId="";render();return}if(btn.dataset.detail){detailActorId=btn.dataset.detail;render();return}if(btn.hasAttribute("data-roll-rule")){const v=setRollHighToHit(!battle.config.rollHighToHit);battle.config.rollHighToHit=v;notice=`Règle D100 : ${v?"jet haut":"jet bas"}.`;render();return}if(btn.hasAttribute("data-end")){void endHeroTurn();return}if(btn.hasAttribute("data-approach")){approachTarget();return}if(btn.dataset.target){selectedTarget=btn.dataset.target;notice="";render();return}if(btn.dataset.attack){void doAttack(btn.dataset.attack);return}if(btn.dataset.x!==undefined&&btn.dataset.y!==undefined)clickCell(Number(btn.dataset.x),Number(btn.dataset.y))}
+
+  function open(input,opts={}){const doc=D();if(!doc)throw new Error("Tactical UI requires a document");if(!E())throw new Error("Tactical engine unavailable");ensureStyle();hookEditor();patchDungeonMapHtml();installWallObserver();options=opts||{};battle=input?.actors?E().createBattle(input):A()?.createBattle?.(R,input||{});if(!battle)throw new Error("Cannot create tactical battle");battle.config=battle.config||{};battle.config.rollHighToHit=getRollHighToHit();rootEl=doc.createElement("div");rootEl.className="gtv2Overlay";rootEl.setAttribute("data-gens-tactical-v2","1");rootEl.addEventListener("click",onClick);doc.body.appendChild(rootEl);render();if(current()?.side==="enemy")void runAiUntilHero();return battle}
   function openCurrentEncounter(opts={}){return open(opts,opts)}
   function getBattle(){return battle}
 
-  return {VERSION,APP_VERSION,open,openCurrentEncounter,close,getBattle,render,runAiUntilHero,showRoll,clickCell,doAttack,moveTowardTarget};
+  function patchDungeonMapHtml(){if(mapPatched)return true;const old=R.dungeonMapHtml;if(typeof old!=="function")return false;if(old.__gtv271WallPatch){mapPatched=true;return true}const w=function(map){const html=old.apply(this,arguments),doc=D();if(!doc||typeof html!=="string"||!html)return html;try{const tpl=doc.createElement("template");tpl.innerHTML=html;const cells=[...tpl.content.querySelectorAll(".dc047Grid > .dc047Cell")],kinds=arr(map?.cells);for(let i=0;i<cells.length;i++)if(String(kinds[i]||"").toLowerCase()==="wall"){cells[i].style.setProperty("background-image",`url("${WALL_ASSET}")`);cells[i].style.setProperty("background-size","cover");cells[i].style.setProperty("background-position","center");cells[i].style.setProperty("background-repeat","no-repeat")}return tpl.innerHTML}catch(e){return html}};w.__gtv271WallPatch=true;w.__original=old;R.dungeonMapHtml=w;mapPatched=true;return true}
+  function paintLiveWalls(){const doc=D();if(!doc)return 0;let count=0;for(const el of doc.querySelectorAll?.("#drc100Grid .drc100Cell.wall")||[]){el.style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");count++}const map=runtimeState()?.last?.map,kinds=arr(map?.cells),cells=[...(doc.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];for(let i=0;i<cells.length;i++)if(String(kinds[i]||"").toLowerCase()==="wall"){cells[i].style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");cells[i].style?.setProperty?.("background-size","cover","important");cells[i].style?.setProperty?.("background-position","center","important");count++}return count}
+  function installWallObserver(){const doc=D();if(!doc||wallObserver||typeof R.MutationObserver!=="function")return false;wallObserver=new R.MutationObserver(()=>paintLiveWalls());wallObserver.observe(doc.body||doc.documentElement,{childList:true,subtree:true});paintLiveWalls();return true}
+  function hookDungeonRender(){const core=R.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__gtv271WallRender)continue;const w=function(){const out=old.apply(this,arguments);paintLiveWalls();patchDungeonMapHtml();return out};w.__gtv271WallRender=true;w.__original=old;core[name]=w}return true}
+  function installGlobalPolish(){ensureStyle();hookEditor();patchDungeonMapHtml();hookDungeonRender();installWallObserver();paintLiveWalls();R.GENS_RPG_TACTICAL_UI_VERSION=APP_VERSION;return true}
+
+  const api={VERSION,APP_VERSION,RULE_STORAGE_KEY,WALL_ASSET,HERO_ART,canonicalHeroId,actorDisplayName,actorArt,getRollHighToHit,setRollHighToHit,ruleTarget,hitByRule,engineRoll,ruleText,statusRows,injectGeneralRuleControl,patchDungeonMapHtml,paintLiveWalls,installGlobalPolish,open,openCurrentEncounter,close,getBattle,render,runAiUntilHero};
+  if(D()){if(D().readyState==="loading")D().addEventListener("DOMContentLoaded",installGlobalPolish,{once:true});else installGlobalPolish()}
+  return api;
 });

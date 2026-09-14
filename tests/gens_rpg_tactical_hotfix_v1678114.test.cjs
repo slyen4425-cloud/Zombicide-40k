@@ -4,10 +4,9 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const P=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-hotfix-1678114.js'));
 
-assert.equal(P.APP_VERSION,'16.78.114');
-assert.equal(P.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
+assert.equal(P.APP_VERSION,'16.78.114.1');
 assert.equal(P.DEFAULT_ENEMY_VISION,3);
-assert.ok(P.ROLL_DURATION>=800,'the D100 animation must remain visibly readable');
+assert.equal(P.HEARTBEAT_MS,450);
 
 function storage(initial={}){const data={...initial};return {getItem:k=>Object.prototype.hasOwnProperty.call(data,k)?data[k]:null,setItem:(k,v)=>{data[k]=String(v)}}}
 function liveState(){return {
@@ -33,7 +32,7 @@ assert.equal(P.enemyVision(rt,enemies[0]),3,'melee range 1 must not collapse def
 assert.deepEqual(P.detectionPairs(rt).map(x=>[x.enemyId,x.heroId,x.distance]),[['e1','h1',2]],'enemy must see the in-room hero while ignoring the hero in another room');
 let started=null;rt.dc200StartCombat=(ids,reason)=>{started={ids,reason};return true};
 assert.deepEqual(P.scanDetection(rt,'ambush-runtime-test',true),['e1']);
-assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'V114 must bypass the broken V113 detection pre-filter while retaining V113 scoped combat startup');
+assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'live V114 detection remains active');
 
 {
   const blocked=liveState();blocked.last.map.cells[7]='wall';rt.localStorage=storage({gensrpg_dungeon_runtime_v2:JSON.stringify(blocked)});
@@ -46,27 +45,21 @@ assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'V114 must bypas
   assert.deepEqual(P.detectionPairs(explicit),[],'explicit vision 1 cannot see a hero two cells away');
 }
 
-assert.deepEqual(P.rowRolls({rollsDisplay:[12,88]}),[12,88]);
-assert.deepEqual(P.rowRolls({roll:42}),[42]);
-
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-hotfix-1678114.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/dng_wall_block\.jpg/,'validated wall asset must be restored');
-assert.doesNotMatch(source,/WALL_ASSET="assets\/dungeon\/creatures\/dungeon_wall\.png"/,'V114 must never replace the validated wall with the old PNG');
-assert.match(source,/gtv2114Wall::before,.gtv2114Wall::after\{display:none!important/,'old pseudo wall artefacts must be neutralized');
-assert.match(source,/gtv2114Wall>\*\{visibility:hidden!important/,'tiny legacy wall child/icon must stay hidden');
-assert.match(source,/background-size","cover"/,'zoom-safe wall framing must use cover');
-assert.match(source,/saveActiveEnemies/,'ambush spawn persistence must trigger a detection rescan');
-assert.match(source,/DungeonCore01/,'post-render detection must use the real Dungeon board seam');
-assert.match(source,/HEARTBEAT_MS=450/,'a low-frequency exploration fallback must recover missed runtime events without touching the combat hot loop');
-assert.match(source,/gtv2114RollStage/,'dice result must be covered by a dedicated rolling stage');
-assert.match(source,/setInterval\(tick,48\)/,'D100 values must visibly change during the roll');
-assert.match(source,/setTimeout\(settle,ROLL_DURATION\)/,'final result must only settle after the animation duration');
+assert.match(source,/saveActiveEnemies/,'ambush spawn persistence must keep triggering a detection rescan');
+assert.match(source,/DungeonCore01/,'post-render detection must keep using the real Dungeon board seam');
+assert.match(source,/HEARTBEAT_MS=450/,'low-frequency exploration fallback remains active only outside combat');
+assert.match(source,/coherence\(rt\)\?\.markWallCells/,'wall rendering must be handed back to the pre-V114 V112 layer');
+assert.match(source,/coherence\(rt\)\?\.patchDice/,'dice/result presentation must be handed back to the pre-V114 V112 layer');
+assert.doesNotMatch(source,/setInterval\(tick,48\)/,'V114 synthetic D100 cycling must be removed');
+assert.doesNotMatch(source,/function paintWalls/,'V114 must no longer own wall painting');
+assert.doesNotMatch(source,/ROLL_DURATION/,'V114 must no longer lengthen dice rolls');
+assert.match(source,/\.gtv2113DiceRow,.gtv2114RollStage\{display:none!important\}/,'V113/V114 extra dice animation layers must be suppressed without touching the base V112 result UI');
 assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 room scope layer must remain loaded');
-assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114/,'V114 final layer must be loaded');
-assert.match(integration,/const after113=\(\)=>\{[\s\S]*?loadHotfix114\(\);/,'V114 must be installed by the V113 completion callback');
-assert.match(sw,/gensrpg-cache-16\.78\.114-wall-detection-dice/);
+assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114/,'the final vision hotfix module must remain loaded');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.1-keep-vision-revert-wall-dice/);
 assert.match(sw,/gens-rpg-tactical-hotfix-1678114\.js/);
 
-console.log('V16.78.114 wall + live detection + delayed D100 reveal regressions: OK');
+console.log('V16.78.114.1 live enemy vision retained; wall and dice visuals rolled back to V112: OK');

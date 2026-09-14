@@ -1,4 +1,4 @@
-/* GenSrpG V16.78.113 — authoritative tactical runtime fixes.
+/* GenSrpG V16.78.114.10 — authoritative tactical runtime fixes.
    Fixes the real seams that V112 could not own reliably:
    - branch-aware room/sub-room combat scopes;
    - enemy vision detection after the actual board interaction/movement seam;
@@ -11,7 +11,7 @@
   if(root)root.GensRpgTacticalRuntimeAuthority1678113=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.0",APP_VERSION="16.78.113";
+  const VERSION="1.1.0",APP_VERSION="16.78.114.10";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const STYLE_ID="gensRpgTacticalRuntimeAuthority1678113Style";
   const DEFAULT_PERCEPTION=3,MAX_SENSE=12,ROLL_DURATION=680;
@@ -39,6 +39,10 @@
     const active=activeHeroId(state);if(str(id)===active&&state?.branch?.active&&Number.isFinite(Number(state?.positions?.[id])))return num(state.positions[id],-1);
     const bs=state?.heroBranchStates?.[id];if(bs?.branch?.active&&Number.isFinite(Number(bs?.cell)))return num(bs.cell,-1);
     return num(state?.positions?.[id],-1);
+  }
+  function heroEntered(state,id){
+    const rawRoom=state?.heroRooms?.[str(id)],room=Number.isFinite(Number(rawRoom))?num(rawRoom,0):0,cell=heroCell(state,id);
+    return room>0&&Number.isInteger(cell)&&cell>=0;
   }
   function heroScope(state,id,rt=R){
     id=str(id);const active=activeHeroId(state,rt);let b=null,room=roomOfHero(state,id);
@@ -90,7 +94,7 @@
     return clamp(Math.round(vision),1,MAX_SENSE);
   }
 
-  function heroesInScope(state,scope,rt=R){return participants(state,rt).filter(id=>sameScope(heroScope(state,id,rt),scope)&&heroCell(state,id)>=0)}
+  function heroesInScope(state,scope,rt=R){return participants(state,rt).filter(id=>heroEntered(state,id)&&sameScope(heroScope(state,id,rt),scope))}
   function enemiesInScope(rt,state,scope){return activeEnemies(rt).filter(e=>sameScope(enemyScope(state,e),scope))}
   function detectionPairs(rt=R,state=runtimeState(rt),list=null){
     if(!state?.last?.map)return [];const scope=activeScope(state,rt),heroes=heroesInScope(state,scope,rt);if(!heroes.length)return [];const enemies=Array.isArray(list)?list.filter(e=>sameScope(enemyScope(state,e),scope)):enemiesInScope(rt,state,scope),pairs=[];
@@ -176,7 +180,7 @@
   function observe(rt=R){const D=doc(rt);if(!D?.body||observer||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
   function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoardClicks(rt);observe(rt);paintWalls(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

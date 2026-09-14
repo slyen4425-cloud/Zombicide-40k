@@ -7,7 +7,7 @@
   if(root)root.GensRpgTacticalCombatV2Bridge=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.5.0",APP_VERSION="16.78.106";
+  const VERSION="0.6.0",APP_VERSION="16.78.114.10";
   let opening=false,installed=false,repairLoading=false;
   let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
   const arr=v=>Array.isArray(v)?v:[];
@@ -40,9 +40,9 @@
     reconcileAdventureFamily(rt);
     const A=rt?.GensRpgTacticalCombatV2Adapter,U=rt?.GensRpgTacticalCombatV2Ui;
     if(!rt?.GensRpgTacticalCombatV2||!A||!U)return {ok:false,reason:"modules-missing"};
-    const heroes=arr(options.heroIds).length?arr(options.heroIds):arr(A.participants?.(rt));
+    const requestedHeroes=arr(options.heroIds).length?arr(options.heroIds):arr(A.participants?.(rt)),heroes=typeof A.enteredParticipants==="function"?arr(A.enteredParticipants(rt,requestedHeroes,options.scope)):requestedHeroes;
     const wanted=arr(options.enemyIds).map(str),all=arr(A.activeEnemies?.(rt)),enemies=wanted.length?all.filter(e=>wanted.includes(str(e.id))):all;
-    if(!heroes.length)return {ok:false,reason:"no-heroes"};
+    if(!heroes.length)return {ok:false,reason:"no-entered-heroes"};
     if(!enemies.length)return {ok:false,reason:"no-enemies"};
     return {ok:true,heroes:heroes.length,enemies:enemies.length,heroIds:heroes.map(str),enemyIds:enemies.map(e=>str(e.id))};
   }

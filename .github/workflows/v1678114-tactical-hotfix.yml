@@ -1,4 +1,4 @@
-name: Validate V16.78.114.9 Browser Profiled Combat
+name: Validate V16.78.114.10 D100 Entry Walls
 
 on:
   push:
@@ -16,6 +16,7 @@ on:
       - work/v16.78.114.7-builder-stats-test-align
       - work/v16.78.114.8-wall-hit-clarity
       - work/v16.78.114.9-browser-profile-fix
+      - work/v16.78.114.10-hit-entry-wall
       - main
   pull_request:
     branches:
@@ -41,7 +42,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
-      - name: Exact V114.9 observer-free touch and wall scenarios
+      - name: Exact V114.10 D100 origin and wall ownership scenarios
         run: |
           node tests/gens_rpg_tactical_hit_wall_v16781148.test.cjs
           node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
@@ -77,9 +78,14 @@ jobs:
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
       - name: Real Chromium mobile engagement, wall zoom, D100 and stats
         run: |
-          npm install --no-save --no-package-lock playwright@1.55.0
+          npm install --no-save --no-package-lock playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
           node tests/gens_rpg_tactical_browser_v16781149.test.cjs
+      - name: Exact adapter D100 scale and entered-hero boundary
+        run: |
+          node tests/gens_rpg_tactical_combat_v2.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_adapter.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_default.test.cjs
       - name: Preserve Dungeon runtime
         run: node tests/dungeon_runtime_regression.test.cjs
       - name: Preserve Survival isolation

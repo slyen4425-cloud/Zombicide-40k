@@ -1,4 +1,4 @@
-/* GenSrpG V16.78.114.9 — browser-profiled tactical D100/session authority.
+/* GenSrpG V16.78.114.10 — browser-profiled tactical D100/session authority.
    Keeps V114.1 engagement, V113 room/sub-room scope, V114.4 recovery and V114.7 canonical stats.
    V114.9 removes the global body observer which could recursively mutate the tactical overlay.
    Walls are emitted once by the base Tactical UI/Dungeon map renderer; this module never repaints them.
@@ -9,10 +9,10 @@
   if(root)root.GensRpgTacticalVisualDice16781142=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="2.1.0",APP_VERSION="16.78.114.9";
+  const VERSION="2.2.0",APP_VERSION="16.78.114.10";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const WRONG_WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
-  const STYLE_ID="gensRpgTacticalVisualDice16781149Style";
+  const STYLE_ID="gensRpgTacticalVisualDice167811410Style";
   const ESCAPE_KEY="gensrpg_tactical_menu_escape_until_v1";
   const ESCAPE_MS=5000,TRANSITION_MS=420,DICE_WATCHDOG_MS=0;
   const arr=v=>Array.isArray(v)?v:[];
@@ -70,12 +70,12 @@
     const listedChance=clamp(rawChance,5,95);
     const finalChance=clamp(Math.round(num(preview?.hitChance,listedChance)),5,95);
     const otherModifier=finalChance-listedChance;
-    return {baseHit,defensePenalty,dodgePenalty,lineCoverPenalty,cellCoverPenalty,rawChance,listedChance,otherModifier,finalChance,high:high!==false,threshold:thresholdForChance(finalChance,high!==false),clampMin:5,clampMax:95};
+    const hitOrigin=attack?.meta?.hitBreakdown||null;return {baseHit,defensePenalty,dodgePenalty,lineCoverPenalty,cellCoverPenalty,rawChance,listedChance,otherModifier,finalChance,high:high!==false,threshold:thresholdForChance(finalChance,high!==false),clampMin:5,clampMax:95,...(hitOrigin?{hitOrigin}:{})};
   }
 
   function patchHitResolver(rt=R){
     const E=engine(rt);if(!E?.attackPreview||!E?.currentActor||!E?.actorById||!E?.refreshOutcome)return false;
-    if(E.resolveAttack?.__gensRpg1149DirectD100){hitPatched=true;return true}
+    if(E.resolveAttack?.__gensRpg11410DirectD100){hitPatched=true;return true}
     const previous=E.resolveAttack;
     const resolve=function(state,attackerId,targetId,attackId,forcedRoll=null){
       if(state?.status!=="active")return {ok:false,reason:"battle-ended"};
@@ -96,7 +96,7 @@
       const result={ok:true,hit:hits>0,roll:rolls[0],rolls,rollsDisplay:rolls.slice(),hitsRoll,dice,hits,crits,crit:crits>0,critRolls,rollHighToHit:high,hitTarget:calculation.threshold,hitChance:calculation.finalChance,hitCalculation:calculation,damage,damagePerHit:Math.max(0,num(p.damage,0)),targetHp:target.hp,targetDefeated:!target.alive,attackId:attack?.id||str(attackId),attackerId:cur.id,targetId:target.id,cellCover:calculation.cellCoverPenalty,totalCover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,damageType:p.damageType||attack?.damageType||"physical",resistance:p.resistance||0,resistanceKind:p.resistanceKind||"",rawDamage:num(p.rawDamage??attack?.power,p.damage??0),armor:num(p.armor,0),distance:num(p.distance,0),cover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,targetDefense:calculation.defensePenalty,targetDodge:calculation.dodgePenalty,baseHit:calculation.baseHit,critChance:p.critChance||0,critMultiplier:p.critMultiplier||2};
       state.log?.push?.({type:"attack",...result});E.refreshOutcome(state);return result;
     };
-    resolve.__gensRpg1149DirectD100=true;resolve.__gensRpg1148DirectD100=true;resolve.__original=previous;E.resolveAttack=resolve;hitPatched=true;return true;
+    resolve.__gensRpg11410DirectD100=true;resolve.__gensRpg1149DirectD100=true;resolve.__gensRpg1148DirectD100=true;resolve.__original=previous;E.resolveAttack=resolve;hitPatched=true;return true;
   }
 
   function diceInfo(rt=R){

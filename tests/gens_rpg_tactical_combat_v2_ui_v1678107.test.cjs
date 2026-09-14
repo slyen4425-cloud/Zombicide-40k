@@ -8,7 +8,7 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const U=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-ui.js'));
 const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 
-assert.equal(U.APP_VERSION,'16.78.114.9');
+assert.equal(U.APP_VERSION,'16.78.114.10');
 assert.match(ui,/gtv271ActorCard/,'readable actor cards must be rendered below the grid');
 assert.match(ui,/data-detail=/,'actor cards must open a detail view');
 assert.match(ui,/statusRows/,'actor cards/detail must expose status and DoT slots');
@@ -63,4 +63,4 @@ const hit=E.resolveAttack(battle,'hero','enemy:1','blade',U.engineRoll(displayed
 assert.equal(hit.ok,true);assert.equal(hit.hit,true,'90 must hit in high-roll mode for an 80% chance');assert.equal(hit.damage,4);
 
 assert.match(sw,/gensrpg-cache-16\.78\.114\.9-browser-profiled-combat/);
-console.log('V16.78.114.9 tactical UI: direct wall IMG + audited event-driven D100 + no observer loop OK');
+console.log('V16.78.114.10 tactical UI: direct wall IMG + audited event-driven D100 + no observer loop OK');

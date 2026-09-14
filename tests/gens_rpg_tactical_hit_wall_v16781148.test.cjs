@@ -5,7 +5,7 @@ const root=path.join(__dirname,'..');
 const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 const V=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js'));
 
-assert.equal(V.APP_VERSION,'16.78.114.9');
+assert.equal(V.APP_VERSION,'16.78.114.10');
 assert.equal(V.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(V.DICE_WATCHDOG_MS,0);
 assert.equal(V.observeWalls(),false,'V114.9 must not create a global wall/body observer');
@@ -43,6 +43,6 @@ assert.match(ui,/gtv2WallTile/,'base UI must emit the stable wall bitmap directl
 assert.match(ui,/blocked\.has\(k\)\?wallTileHtml\(\)/,'tactical wall image must exist in initial render HTML');
 assert.match(ui,/insertAdjacentHTML\("afterbegin",wallTileHtml\(\)\)/,'Dungeon wall image must exist before live DOM insertion');
 assert.match(ui,/calculationSummary/,'calculation summary must be visible in tactical UI');
-assert.match(ui,/Défense, Esquive et Couvert sont retirés une seule fois/,'calculation UI must explain single application');
+assert.match(ui,/Conversion de l’arme une seule fois, puis Défense, Esquive et Couvert une seule fois chacun/,'calculation UI must explain single application');
 assert.match(ui,/getAnimations/,'dice result must await the one CSS animation without another overlay timer');
-console.log('V16.78.114.9 observer-free engagement + single-render walls + audited visible D100 OK');
+console.log('V16.78.114.10 canonical weapon D100 + entered heroes + compositor-safe walls OK');

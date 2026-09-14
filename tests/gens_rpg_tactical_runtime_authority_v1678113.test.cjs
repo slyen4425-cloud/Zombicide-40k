@@ -4,7 +4,7 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const P=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-authority-1678113.js'));
 
-assert.equal(P.APP_VERSION,'16.78.113');
+assert.equal(P.APP_VERSION,'16.78.114.10');
 assert.equal(P.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(P.ROLL_DURATION,680,'historical constant may remain exported but V113 no longer owns dice animation');
 
@@ -28,6 +28,10 @@ const rt={
   currentRpgProfile:()=>({rpgUniverse:{movement:{combatAssistRange:3}}}),
   GensCleanRpgStats167874:{runtimeDefs:()=>[],extraTotal:()=>0}
 };
+
+const outside=baseState();outside.heroRooms.h2=0;outside.positions.h2=0;delete outside.heroBranchStates.h2;
+assert.equal(P.heroEntered(outside,'h1'),true);
+assert.equal(P.heroEntered(outside,'h2'),false,'a selected hero still at the dungeon entrance room 0 is not a combatant');
 
 assert.deepEqual(P.heroScope(baseState(),'h1',rt),{room:1,branchSourceId:''});
 assert.deepEqual(P.heroScope(baseState(),'h2',rt),{room:1,branchSourceId:'cache'});
@@ -95,7 +99,7 @@ assert.match(source,/#dc047RoomBoard \.dc047Cell/,'real board cell interactions 
 assert.match(source,/dc318BranchSourceId/,'sub-room scope must use Core 3.18 branch ownership');
 assert.match(source,/__gensRpg112Spatial=true/,'V113 must prevent V112 retry from re-wrapping combat creation');
 assert.match(source,/GensRpgTacticalStats1678110\?\.decorateBattle/,'V113 must reassert V110 canonical snapshots after final spatial scoping');
-assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 must load after V112');
+assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113 must load after V112');
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 

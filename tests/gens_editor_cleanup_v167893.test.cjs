@@ -13,8 +13,8 @@ assert.match(src,/cleanupLegacyRpgEditor/,'cleanup must run from the existing al
 assert.match(src,/renderRpgUniverseEditor/,'system editor cleanup must be tied to its explicit lifecycle');
 assert.match(src,/openHeroCreator/,'hero editor cleanup must be tied to its explicit lifecycle');
 assert.doesNotMatch(src,/MutationObserver|\.observe\s*\(/,'cleanup bridge must not observe unrelated UI panels globally');
-assert.match(stats,/APP_VERSION="16\.78\.95"/,'single stats module must remain on validated V16.78.95 engine');
+assert.match(stats,/APP_VERSION="16\.78\.114\.7"/,'single stats module must remain on validated V16.78.114.7 canonical engine');
 assert.match(stats,/DUNGEON_DEFAULT_ATTRIBUTES/,'canonical runtime link must remain intact');
 assert.match(stats,/legacyEffectsMigrated94/,'legacy hidden coefficients must remain neutralized');
 assert.doesNotMatch(src,/delete\s+R\.|delete\s+.*rpgBaseHp|delete\s+.*rpgBaseMana/,'visual cleanup must not delete runtime settings');
-console.log('GenSrpG V16.78.102 scoped editor cleanup/stability bridge + V16.78.95 stats engine: OK');
+console.log('GenSrpG V16.78.102 scoped editor cleanup/stability bridge + V16.78.114.7 canonical stats engine: OK');

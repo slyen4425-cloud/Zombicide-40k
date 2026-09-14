@@ -48,14 +48,25 @@
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
+  function loadFinal1145(){
+    const D=R.document;if(!D||R.__gensTacticalWallDiceStatsLoader1145)return false;
+    R.__gensTacticalWallDiceStatsLoader1145=true;
+    const install=()=>{try{R.GensRpgTacticalWallDiceStats16781145?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.5 wall/dice/stats install",e)}};
+    if(R.GensRpgTacticalWallDiceStats16781145){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js?v=16.78.114.5";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.5 wall/dice/stats load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadVisualDice1143(){
     const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader1143)return false;
     R.__gensTacticalVisualDiceLoader1143=true;
-    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.3 tactical UX install",e)}};
+    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.3 tactical UX install",e)}loadFinal1145()};
     if(R.GensRpgTacticalVisualDice16781142){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.3";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.3 tactical UX load failed");
+    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114.3 tactical UX load failed");loadFinal1145()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -150,8 +161,9 @@
      V112 keeps detailed sheets and readable result explanations.
      V113 owns room/sub-room participant scope.
      V114.1 keeps the validated live enemy vision.
-     V114.3 owns final wall visuals, short D100 sequencing, combat transition and emergency menu exit.
-     V114.4 loads before the chain and blocks stale menu combat + every Dungeon legacy fallback. */
+     V114.3 owns final wall visuals, combat transition and emergency menu exit.
+     V114.4 loads before the chain and blocks stale menu combat + every Dungeon legacy fallback.
+     V114.5 loads last: pre-painted wall cells, one short D100 animation and current canonical hero stats link. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

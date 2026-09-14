@@ -24,22 +24,45 @@ function nearWhiteRatio(buffer){const png=PNG.sync.read(buffer);let white=0,tota
     await page.goto(`http://127.0.0.1:${port}/tests/fixtures/tactical-browser-v1149.html`,{waitUntil:"load"});await page.waitForFunction(()=>window.__browserProfileReady===true);
     assert.equal(await page.evaluate(()=>window.GensRpgTacticalCombatV2Adapter.APP_VERSION),"16.78.114.10");
     assert.equal(await page.evaluate(()=>window.GensRpgTacticalCombatV2Ui.APP_VERSION),"16.78.114.10");
+    assert.equal(await page.evaluate(()=>window.GensRpgDungeonInteractionWallReset167811413.APP_VERSION),"16.78.114.13");
     assert.equal((await page.evaluate(()=>window.GensRpgTacticalVisualDice16781142.status())).observer,false);
+
+    // Real exploration interactions: hero card must open the existing sheet, not be swallowed by decoration/guards.
+    await page.locator("#dc01Heroes .dc01Hero").first().click();
+    await page.waitForFunction(()=>window.__openedHero==="dungeon_aldren"&&getComputedStyle(document.getElementById("sheet")).display!=="none");
+    assert.equal(await page.evaluate(()=>getComputedStyle(document.getElementById("gensDungeonCore01")).display),"none");
+
+    // Save & Quit must really leave exploration and expose root home.
+    await page.evaluate(()=>window.resetExplorationUi());
+    await page.locator("#saveQuit").click();
+    await page.waitForFunction(()=>window.DungeonCore01.active===false&&getComputedStyle(document.getElementById("gensRootHome")).display!=="none");
+    assert.equal(await page.evaluate(()=>getComputedStyle(document.getElementById("gensDungeonCore01")).display),"none");
+
+    // Exploration wall: exactly the floor model — bitmap is the cell background; old child floor/wall imagery cannot paint over it.
+    await page.evaluate(()=>window.resetExplorationUi());
+    const explorationWall=page.locator("#dc047RoomBoard .dc047Cell.wall").first();
+    const explorationAudit=await explorationWall.evaluate(cell=>{const cs=getComputedStyle(cell),child=cell.firstElementChild;return {bg:cs.backgroundImage,contain:cs.contain,isolation:cs.isolation,childVisibility:child?getComputedStyle(child).visibility:"none",childPointer:child?getComputedStyle(child).pointerEvents:"none"}});
+    assert.match(explorationAudit.bg,/dng_wall_block\.jpg/);
+    assert.equal(explorationAudit.contain,"none");
+    assert.equal(explorationAudit.isolation,"auto");
+    assert.equal(explorationAudit.childVisibility,"hidden");
+    assert.equal(explorationAudit.childPointer,"none");
+    assert.ok(nearWhiteRatio(await explorationWall.screenshot({animations:"disabled"}))<0.35,"exploration wall must not render as white");
 
     const openings=[];
     for(let i=0;i<6;i++){
-      const sample=await page.evaluate(async()=>{const started=performance.now(),battle=window.startProfiledEncounter();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const heroes=battle.actors.filter(a=>a.side==="hero");return {elapsed:performance.now()-started,heroIds:heroes.map(a=>a.id),hit:heroes[0].attacks[0].hit,origin:heroes[0].attacks[0].meta.hitBreakdown,overlays:document.querySelectorAll(".gtv2Overlay").length,walls:document.querySelectorAll(".gtv2Cell.blocked>.gtv2WallTile").length}});
-      openings.push(sample.elapsed);assert.deepEqual(sample.heroIds,["dungeon_aldren"],"Lyra room 0 must never enter combat");assert.equal(sample.hit,70,"sword must be 55% + Force bonus, not legacy 5%");assert.equal(sample.origin.baseChance,55);assert.equal(sample.origin.statBonus,15);assert.equal(sample.overlays,1);assert.equal(sample.walls,2);await page.evaluate(()=>window.closeProfiledEncounter());await page.waitForFunction(()=>!document.querySelector(".gtv2Overlay"));
+      const sample=await page.evaluate(async()=>{const started=performance.now(),battle=window.startProfiledEncounter();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const heroes=battle.actors.filter(a=>a.side==="hero"),cell=document.querySelector(".gtv2Cell.blocked"),tile=cell?.querySelector(":scope>.gtv2WallTile");return {elapsed:performance.now()-started,heroIds:heroes.map(a=>a.id),hit:heroes[0].attacks[0].hit,origin:heroes[0].attacks[0].meta.hitBreakdown,overlays:document.querySelectorAll(".gtv2Overlay").length,wallBg:cell?getComputedStyle(cell).backgroundImage:"",tileDisplay:tile?getComputedStyle(tile).display:"absent"}});
+      openings.push(sample.elapsed);assert.deepEqual(sample.heroIds,["dungeon_aldren"],"Lyra room 0 must never enter combat");assert.equal(sample.hit,70,"sword must be 55% + Force bonus, not legacy 5%");assert.equal(sample.origin.baseChance,55);assert.equal(sample.origin.statBonus,15);assert.equal(sample.overlays,1);assert.match(sample.wallBg,/dng_wall_block\.jpg/);assert.ok(sample.tileDisplay==="none"||sample.tileDisplay==="absent","old wall IMG must not be a visible texture owner");await page.evaluate(()=>window.closeProfiledEncounter());await page.waitForFunction(()=>!document.querySelector(".gtv2Overlay"));
     }
     assert.ok(Math.max(...openings)<1500,`mobile engagement too slow: ${Math.max(...openings).toFixed(1)} ms`);
 
     await page.evaluate(()=>window.startProfiledEncounter());
     const wall=page.locator(".gtv2Cell.blocked").first(),ratios=[],wallAudit=[];
     for(const scale of [.73,.86,1,1.17,1.33,.91,1]){
-      const audit=await page.evaluate(async scale=>{const cell=document.querySelector(".gtv2Cell.blocked"),img=cell.querySelector(":scope>.gtv2WallTile");window.__stableWallImg=window.__stableWallImg||img;cell.parentElement.style.transform=`scale(${scale})`;cell.parentElement.style.transformOrigin="top left";await new Promise(resolve=>requestAnimationFrame(resolve));const cs=getComputedStyle(img),owner=getComputedStyle(cell),cr=cell.getBoundingClientRect(),ir=img.getBoundingClientRect();return {same:img===window.__stableWallImg,complete:img.complete,naturalWidth:img.naturalWidth,src:img.currentSrc||img.src,visibility:cs.visibility,opacity:cs.opacity,transform:cs.transform,ownerBg:owner.backgroundImage,appearance:owner.appearance,covers:ir.width>=cr.width&&ir.height>=cr.height}},scale);
+      const audit=await page.evaluate(async scale=>{const cell=document.querySelector(".gtv2Cell.blocked"),tile=cell.querySelector(":scope>.gtv2WallTile");cell.parentElement.style.transform=`scale(${scale})`;cell.parentElement.style.transformOrigin="top left";await new Promise(resolve=>requestAnimationFrame(resolve));const cs=getComputedStyle(cell),ts=tile?getComputedStyle(tile):null;return {bg:cs.backgroundImage,contain:cs.contain,isolation:cs.isolation,transformStyle:cs.transformStyle,tileDisplay:ts?.display||"absent"}},scale);
       wallAudit.push(audit);ratios.push(nearWhiteRatio(await wall.screenshot({animations:"disabled"})));
     }
-    for(const [i,audit] of wallAudit.entries()){assert.equal(audit.same,true,`zoom ${i} replaced the wall`);assert.equal(audit.complete,true);assert.ok(audit.naturalWidth>0);assert.match(audit.src,/dng_wall_block\.jpg/);assert.equal(audit.visibility,"visible");assert.equal(audit.opacity,"1");assert.equal(audit.transform,"none","per-cell GPU layer must be removed");assert.equal(audit.ownerBg,"none","V114.12 uses the single child IMG as wall texture owner");assert.equal(audit.covers,true)}
+    for(const [i,audit] of wallAudit.entries()){assert.match(audit.bg,/dng_wall_block\.jpg/,`zoom ${i} lost wall texture`);assert.equal(audit.contain,"none");assert.equal(audit.isolation,"auto");assert.equal(audit.transformStyle,"flat");assert.ok(audit.tileDisplay==="none"||audit.tileDisplay==="absent",`zoom ${i} re-enabled old wall IMG`)}
     assert.ok(Math.max(...ratios)<0.35,`wall became near-white during zoom: ${ratios.map(x=>(x*100).toFixed(1)+"%").join(", ")}`);
 
     await page.locator('[data-x="3"][data-y="2"]').click();await page.locator('[data-target="enemy:e"]').click();await page.locator(".gtv2Hint .gtv21149Calc summary").click();
@@ -63,6 +86,6 @@ function nearWhiteRatio(buffer){const png=PNG.sync.read(buffer);let white=0,tota
     await page.evaluate(()=>window.closeProfiledEncounter());
 
     assert.deepEqual(errors,[],"Chromium console/page errors");
-    console.log(JSON.stringify({scenario:"V114.12 real Chromium mobile",viewport:"412x915 @2.625x touch",engagements:6,maxOpenMs:Number(Math.max(...openings).toFixed(1)),participants:"Lyra excluded in room 0, included after entry",weapons:"sword 70%, bow 80%, origins visible",walls:`7 zooms, max near-white ${(Math.max(...ratios)*100).toFixed(1)}%`,dice:"one overlay and one animation row"}));
+    console.log(JSON.stringify({scenario:"V114.13 real Chromium mobile",viewport:"412x915 @2.625x touch",exploration:"hero sheet opens + save/quit reaches root",engagements:6,maxOpenMs:Number(Math.max(...openings).toFixed(1)),participants:"Lyra excluded in room 0, included after entry",weapons:"sword 70%, bow 80%, origins visible",walls:`direct cell background, 7 zooms, max near-white ${(Math.max(...ratios)*100).toFixed(1)}%`,dice:"one overlay and one animation row"}));
   }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

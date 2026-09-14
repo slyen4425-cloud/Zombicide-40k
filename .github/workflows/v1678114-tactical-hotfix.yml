@@ -1,4 +1,4 @@
-name: Validate V16.78.114.5 Wall + Dice + Canonical Combat Stats
+name: Validate V16.78.114.6 Consolidated Tactical Runtime
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - work/v16.78.114.3-wall-dice-transition-menu
       - work/v16.78.114.4-combat-session-recovery
       - work/v16.78.114.5-wall-dice-stats
+      - work/v16.78.114.6-consolidate-wall-dice-stats
       - main
   pull_request:
     branches:
@@ -22,25 +23,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Syntax tactical hotfix chain
+      - name: Syntax tactical runtime chain
         run: |
-          node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
           node --check assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
-          node --check assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js
+          node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
-          node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
-      - name: Exact V114.5 prepaint short-dice canonical-stat scenarios
-        run: node tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs
-      - name: Exact V114.4 menu recovery and no-legacy scenarios
+      - name: Exact V114.6 consolidated wall dice stats scenarios
+        run: node tests/gens_rpg_tactical_consolidation_v16781146.test.cjs
+      - name: Preserve V114.4 menu recovery and no-legacy scenarios
         run: node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
-      - name: Exact V114.3 live-vision wall fast-dice transition and menu scenarios
+      - name: Preserve V114 live vision transition and menu scenarios
         run: node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
       - name: Preserve V113 room and sub-room scoping
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
       - name: Preserve V112 combat coherence and result explanations
         run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
-      - name: Preserve weapon dice and tactical runtime fixes
+      - name: Preserve weapon multi-dice resolution and tactical runtime fixes
         run: node tests/gens_rpg_tactical_runtime_fixes_v1678111.test.cjs
       - name: Preserve canonical tactical stats
         run: node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs

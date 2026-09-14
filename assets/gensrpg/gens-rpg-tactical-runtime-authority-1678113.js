@@ -12,7 +12,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
   const VERSION="1.0.0",APP_VERSION="16.78.113";
-  const WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
+  const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const STYLE_ID="gensRpgTacticalRuntimeAuthority1678113Style";
   const DEFAULT_PERCEPTION=3,MAX_SENSE=12,ROLL_DURATION=680;
   const arr=v=>Array.isArray(v)?v:[];
@@ -126,7 +126,7 @@
   function unwrap112Create(fn){return fn?.__gensRpg112Spatial&&typeof fn.__original==="function"?fn.__original:fn}
   function hookAdapter(rt=R){
     const A=adapter(rt);if(!A?.createBattle)return false;if(A.createBattle.__gensRpg113Scope){adapterHooked=true;return true}const base=unwrap112Create(A.createBattle);if(typeof base!=="function")return false;
-    const wrapped=function(runtime,options={}){const realRt=runtime||rt,sel=selectCombatants(realRt,options||{}),next={...(options||{}),heroIds:sel.heroIds,enemyIds:sel.enemyIds},battle=base.call(this,realRt,next);applyRuntimePositions(realRt,battle,sel);return battle};
+    const wrapped=function(runtime,options={}){const realRt=runtime||rt,sel=selectCombatants(realRt,options||{}),next={...(options||{}),heroIds:sel.heroIds,enemyIds:sel.enemyIds},battle=base.call(this,realRt,next);applyRuntimePositions(realRt,battle,sel);try{realRt?.GensRpgTacticalStats1678110?.decorateBattle?.(realRt,battle,{force:true})}catch(e){}return battle};
     wrapped.__gensRpg113Scope=true;wrapped.__gensRpg112Spatial=true;wrapped.__original=base;A.createBattle=wrapped;adapterHooked=true;return true;
   }
 
@@ -156,7 +156,7 @@
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
     .gtv2112WallCell::before{display:none!important;content:none!important;background:none!important}
-    .gtv2113Wall,.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:100% 100%!important;background-position:center!important;background-repeat:no-repeat!important}
+    .gtv2113Wall,.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
     .gtv2113DiceRow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
     .gtv2113DiceRow .gtv2Die{width:64px;height:64px;font-size:27px;will-change:transform;animation:gtv2113DiceShake .17s linear infinite alternate}
     .gtv2113DiceRow.settled .gtv2Die{animation:gtv2113DiceLand .22s ease-out both}
@@ -165,17 +165,11 @@
     @media(max-width:430px){.gtv2113DiceRow .gtv2Die{width:56px;height:56px;font-size:24px}}
   `;(D.head||D.documentElement||D.body)?.appendChild(s);return true}
   function wallTargets(rt=R){const D=doc(rt),out=[];if(!D)return out;for(const sel of [".gtv2Cell.blocked","#drc100Grid .drc100Cell.wall","#dc047RoomBoard .dav167870WallCell"]){for(const el of D.querySelectorAll?.(sel)||[])if(!out.includes(el))out.push(el)}const state=runtimeState(rt),kinds=arr(state?.last?.map?.cells),cells=[...(D.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];for(let i=0;i<cells.length;i++)if(norm(kinds[i])==="wall"&&!out.includes(cells[i]))out.push(cells[i]);return out}
-  function paintWalls(rt=R){let n=0;const D=doc(rt);for(const old of D?.querySelectorAll?.(".gtv2112WallCell")||[])old.classList?.remove?.("gtv2112WallCell");for(const el of wallTargets(rt)){el.classList?.add?.("gtv2113Wall");if(el?.style?.setProperty){el.style.setProperty("background-image",`url("${WALL_ASSET}")`,"important");el.style.setProperty("background-size","100% 100%","important");el.style.setProperty("background-position","center","important");el.style.setProperty("background-repeat","no-repeat","important")}n++}return n}
+  function paintWalls(rt=R){let n=0;for(const el of wallTargets(rt)){el.classList?.add?.("gtv2113Wall");if(el?.style?.setProperty){el.style.setProperty("background-image",`url("${WALL_ASSET}")`,"important");el.style.setProperty("background-size","cover","important");el.style.setProperty("background-position","center","important");el.style.setProperty("background-repeat","no-repeat","important")}n++}return n}
 
   function latestAttackRow(rt=R){const b=currentBattle(rt);return [...arr(b?.log)].reverse().find(x=>x?.type==="attack"&&(arr(x?.rollsDisplay).length||Number.isFinite(Number(x?.roll))))||null}
   function rowRolls(row){const xs=arr(row?.rollsDisplay).filter(v=>Number.isFinite(Number(v))).map(v=>clamp(Math.round(num(v,1)),1,100));if(xs.length)return xs;if(Number.isFinite(Number(row?.roll)))return [clamp(Math.round(num(row.roll,1)),1,100)];return []}
-  function animateDiceOverlay(rt=R){
-    const D=doc(rt),card=D?.querySelector?.(".gtv2DiceCard");if(!card||card.hasAttribute?.("data-v113-dice"))return false;const row=latestAttackRow(rt),rolls=rowRolls(row);if(!rolls.length)return false;const anchor=card.querySelector?.(".gtv2111DiceRow")||card.querySelector?.("[data-die]");if(!anchor)return false;
-    const box=D.createElement("div");box.className="gtv2113DiceRow";box.setAttribute("data-dice-row-v113","1");box.innerHTML=rolls.map(v=>`<div class="gtv2Die" data-v113-target="${v}">…</div>`).join("");anchor.replaceWith?.(box);card.setAttribute?.("data-v113-dice","1");
-    const faces=[...box.querySelectorAll?.(".gtv2Die")||[]],started=Date.now();const tick=()=>{for(const face of faces)face.textContent=String(Math.floor(Math.random()*100)+1)};tick();let timer=null;if(typeof setInterval==="function")timer=setInterval(tick,55);
-    const settle=()=>{if(timer!=null&&typeof clearInterval==="function")clearInterval(timer);faces.forEach((face,i)=>face.textContent=String(rolls[i]));box.classList?.add?.("settled")};if(typeof setTimeout==="function")setTimeout(settle,ROLL_DURATION);else settle();
-    return Date.now()>=started;
-  }
+  function animateDiceOverlay(rt=R){return false}
 
   function maintain(rt=R){maintainQueued=false;ensureStyle(rt);ensureDetectionHooks(rt);paintWalls(rt);animateDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintainQueued)return;maintainQueued=true;const run=()=>maintain(rt);if(typeof requestAnimationFrame==="function")requestAnimationFrame(run);else if(typeof setTimeout==="function")setTimeout(run,0);else run()}

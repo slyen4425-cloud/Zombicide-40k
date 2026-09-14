@@ -36,14 +36,29 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadAuthority113(){
+    const D=R.document;if(!D||R.__gensTacticalAuthorityLoader113)return false;
+    R.__gensTacticalAuthorityLoader113=true;
+    const install=()=>{try{R.GensRpgTacticalRuntimeAuthority1678113?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V113 tactical runtime authority install",e)}};
+    if(R.GensRpgTacticalRuntimeAuthority1678113){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js?v=16.78.113";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V113 tactical runtime authority load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadCoherence112(){
-    const D=R.document;if(!D||R.__gensTacticalCoherenceLoader112)return false;
+    const D=R.document;if(!D)return false;
+    const after112=()=>{
+      try{R.GensRpgTacticalCombatCoherence1678112?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V112 combat coherence install",e)}
+      loadAuthority113();
+    };
+    if(R.GensRpgTacticalCombatCoherence1678112){after112();return true}
+    if(R.__gensTacticalCoherenceLoader112){loadAuthority113();return true}
     R.__gensTacticalCoherenceLoader112=true;
-    const install=()=>{try{R.GensRpgTacticalCombatCoherence1678112?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V112 combat coherence install",e)}};
-    if(R.GensRpgTacticalCombatCoherence1678112){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js?v=16.78.112";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V112 combat coherence load failed");
+    s.async=false;s.onload=after112;s.onerror=()=>{console.error("GenSrpG V112 combat coherence load failed");loadAuthority113()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -92,10 +107,11 @@
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
-  /* V108 remains the movement/action bridge. V109 owns wall/timeline presentation.
+  /* V108 remains the movement/action bridge. V109 owns timeline/range polish.
      V110 snapshots canonical RPG stats. V111 preserves weapon dice and the fixed dock.
-     V112 loads last and owns room/perception/vision coherence, full actor details,
-     readable dice resolution and the final zoom-stable wall layer. */
+     V112 keeps detailed sheets and readable result explanations.
+     V113 loads last and owns the actual runtime seams: room/sub-room scope, detection,
+     visible dice animation and the final wall texture authority. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

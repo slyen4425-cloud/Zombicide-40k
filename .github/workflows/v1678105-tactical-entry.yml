@@ -1,4 +1,4 @@
-name: Validate V16.78.112 Combat Coherence
+name: Validate V16.78.113 Authoritative Runtime
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - work/v16.78.110-full-stat-tactical
       - work/v16.78.111-tactical-runtime-fixes
       - work/v16.78.112-combat-coherence
+      - work/v16.78.113-authoritative-runtime-fixes
       - main
 
 permissions:
@@ -29,6 +30,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
           node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
       - name: Test global Dungeon combat entry routing
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
@@ -46,6 +48,10 @@ jobs:
         run: node tests/gens_rpg_tactical_runtime_fixes_v1678111.test.cjs
       - name: Test V16.78.112 room perception vision sheets dice and walls
         run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
+      - name: Test V16.78.113 branch scope real detection seam dice animation and wall authority
+        run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
+      - name: Test V16.78.113 bridge to adapter authoritative participant scope
+        run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
       - name: Test tactical adapter

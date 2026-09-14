@@ -36,6 +36,18 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadSessionGuard1144(next){
+    const done=()=>{try{R.GensRpgTacticalSessionGuard16781144?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.4 combat session guard install",e)}try{next?.()}catch(e){console.error("GenSrpG V114.4 continuation",e)}};
+    const D=R.document;if(!D){done();return false}
+    if(R.GensRpgTacticalSessionGuard16781144){done();return true}
+    if(R.__gensTacticalSessionGuardLoader1144)return false;
+    R.__gensTacticalSessionGuardLoader1144=true;
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js?v=16.78.114.4";
+    s.async=false;s.onload=done;s.onerror=()=>{console.error("GenSrpG V114.4 combat session guard load failed");try{next?.()}catch(e){}};
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadVisualDice1143(){
     const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader1143)return false;
     R.__gensTacticalVisualDiceLoader1143=true;
@@ -138,7 +150,8 @@
      V112 keeps detailed sheets and readable result explanations.
      V113 owns room/sub-room participant scope.
      V114.1 keeps the validated live enemy vision.
-     V114.3 loads last and owns final wall visuals, short D100 sequencing, combat transition and emergency menu exit. */
+     V114.3 owns final wall visuals, short D100 sequencing, combat transition and emergency menu exit.
+     V114.4 loads before the chain and blocks stale menu combat + every Dungeon legacy fallback. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{
@@ -153,5 +166,5 @@
     s.async=false;s.onload=after108;s.onerror=()=>{console.error("GenSrpG V108 polish load failed");loadPolish109()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
-  loadPolish108();
+  loadSessionGuard1144(loadPolish108);
 })(typeof globalThis!=="undefined"?globalThis:this);

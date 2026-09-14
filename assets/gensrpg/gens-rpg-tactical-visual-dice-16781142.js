@@ -10,7 +10,7 @@
   if(root)root.GensRpgTacticalVisualDice16781142=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="2.0.0",APP_VERSION="16.78.114.8";
+  const VERSION="2.0.1",APP_VERSION="16.78.114.8";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const WRONG_WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
   const STYLE_ID="gensRpgTacticalVisualDice16781148Style";
@@ -38,10 +38,10 @@
     if(D.getElementById?.(STYLE_ID))return true;
     const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
       .gtv21148StableWall{position:relative!important;overflow:hidden!important;isolation:isolate!important;background-color:#171512!important;-webkit-backface-visibility:hidden!important;backface-visibility:hidden!important;transform:translateZ(0)}
-      .gtv21148WallTile{display:block!important;visibility:visible!important;position:absolute!important;inset:-1px!important;width:calc(100% + 2px)!important;height:calc(100% + 2px)!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;pointer-events:none!important;user-select:none!important;z-index:0!important;background:#171512!important;-webkit-backface-visibility:hidden!important;backface-visibility:hidden!important;transform:translateZ(0)!important;contain:paint!important}
+      .gtv21148StableWall>.gtv21148WallTile{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;inset:-1px!important;width:calc(100% + 2px)!important;height:calc(100% + 2px)!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;pointer-events:none!important;user-select:none!important;z-index:0!important;background:#171512!important;-webkit-backface-visibility:hidden!important;backface-visibility:hidden!important;transform:translateZ(0)!important;contain:paint!important}
       .gtv21148StableWall>*:not(.gtv21148WallTile){visibility:hidden!important}
       .gtv21148StableWall::before,.gtv21148StableWall::after,.gtv2Cell.blocked.cover::after{content:none!important;display:none!important}
-      .gtv21143DiceRow{display:none!important}
+      .gtv2113DiceRow{display:none!important}
       .gtv21143FastDiceHost{display:none!important}
       .gtv21148Transition{position:fixed;inset:0;z-index:40050;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle at center,#4f1717aa,#05070bea 66%);animation:gtv21148TransitionFade ${TRANSITION_MS}ms ease-out both}
       .gtv21148TransitionCard{text-align:center;padding:20px 28px;border:1px solid #a44d45;border-radius:18px;background:#120d12e8;box-shadow:0 18px 55px #000d;animation:gtv21148TransitionCard ${TRANSITION_MS}ms cubic-bezier(.2,.8,.25,1) both}
@@ -62,17 +62,18 @@
     for(let i=0;i<cells.length;i++)if(norm(kinds[i])==="wall"&&!out.includes(cells[i]))out.push(cells[i]);
     return out;
   }
+  function styleWallTile(img){if(!img?.style?.setProperty)return img;for(const [p,v] of [["display","block"],["visibility","visible"],["opacity","1"],["position","absolute"],["inset","-1px"],["width","calc(100% + 2px)"],["height","calc(100% + 2px)"],["object-fit","cover"],["object-position","center"],["pointer-events","none"],["z-index","0"],["background","#171512"]])img.style.setProperty(p,v,"important");return img}
   function attachWallTile(rt=R,el=null){
     const D=doc(rt);if(!D||!el)return false;el.classList?.add?.("gtv21148StableWall");
-    if(el.querySelector?.(":scope > .gtv21148WallTile"))return true;
-    const img=D.createElement("img");img.className="gtv21148WallTile";img.src=WALL_ASSET;img.alt="";img.draggable=false;img.setAttribute?.("aria-hidden","true");img.setAttribute?.("decoding","sync");img.setAttribute?.("fetchpriority","high");
+    const existing=el.querySelector?.(":scope > .gtv21148WallTile");if(existing){styleWallTile(existing);return true}
+    const img=D.createElement("img");img.className="gtv21148WallTile";img.src=WALL_ASSET;img.alt="";img.draggable=false;img.setAttribute?.("aria-hidden","true");img.setAttribute?.("decoding","sync");img.setAttribute?.("fetchpriority","high");styleWallTile(img);
     try{el.prepend?.(img)}catch(e){try{el.insertBefore?.(img,el.firstChild||null)}catch(_){return false}}return true;
   }
   function stabilizeWalls(rt=R){ensureStyle(rt);preloadWallBitmap(rt);let n=0;for(const el of wallTargets(rt))if(attachWallTile(rt,el))n++;return n}
 
   function patchDungeonMapHtml(rt=R){
     const old=rt?.dungeonMapHtml;if(typeof old!=="function")return false;if(old.__gensRpg1148StableWall){mapPatched=true;return true}
-    const wrapped=function(map){const html=old.apply(this,arguments),D=doc(rt);if(typeof html!=="string"||!html||!D)return html;try{const tpl=D.createElement("template");tpl.innerHTML=html;const cells=[...tpl.content.querySelectorAll(".dc047Grid > .dc047Cell")],kinds=arr(map?.cells);for(let i=0;i<cells.length;i++){const wall=norm(kinds[i])==="wall"||cells[i].classList.contains("dav167870WallCell")||cells[i].classList.contains("gtv2112WallCell")||cells[i].classList.contains("gtv2113Wall");if(!wall)continue;cells[i].classList.add("gtv21148StableWall");const img=D.createElement("img");img.className="gtv21148WallTile";img.src=WALL_ASSET;img.alt="";img.draggable=false;img.setAttribute("aria-hidden","true");img.setAttribute("decoding","sync");img.setAttribute("fetchpriority","high");cells[i].prepend(img)}return tpl.innerHTML}catch(e){return html}};
+    const wrapped=function(map){const html=old.apply(this,arguments),D=doc(rt);if(typeof html!=="string"||!html||!D)return html;try{const tpl=D.createElement("template");tpl.innerHTML=html;const cells=[...tpl.content.querySelectorAll(".dc047Grid > .dc047Cell")],kinds=arr(map?.cells);for(let i=0;i<cells.length;i++){const wall=norm(kinds[i])==="wall"||cells[i].classList.contains("dav167870WallCell")||cells[i].classList.contains("gtv2112WallCell")||cells[i].classList.contains("gtv2113Wall");if(!wall)continue;cells[i].classList.add("gtv21148StableWall");const img=D.createElement("img");img.className="gtv21148WallTile";img.src=WALL_ASSET;img.alt="";img.draggable=false;img.setAttribute("aria-hidden","true");img.setAttribute("decoding","sync");img.setAttribute("fetchpriority","high");styleWallTile(img);cells[i].prepend(img)}return tpl.innerHTML}catch(e){return html}};
     wrapped.__gensRpg1148StableWall=true;wrapped.__original=old;rt.dungeonMapHtml=wrapped;mapPatched=true;return true;
   }
   function patchRenderHooks(rt=R){
@@ -86,7 +87,7 @@
   function displayHit(roll,hitChance,high=true){const r=clamp(Math.round(num(roll,1)),1,100),t=thresholdForChance(hitChance,high);return high?r>=t:r<=t}
   function forcedToDisplay(value,high=true){const r=clamp(Math.round(num(value,1)),1,100);return high?101-r:r}
   function nextRandom(state){if(!state?.rngSeed)return Math.random();let t=state.rngSeed=(state.rngSeed+0x6D2B79F5)>>>0;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296}
-  function attackDice(rt,attack){try{return clamp(Math.round(num(rt?.GensRpgTacticalRuntimeFixes1678111?.attackDice?.(attack),1)),1,12)}catch(e){}for(const tag of arr(attack?.tags)){const m=str(tag).match(/^dice:(\d+)$/i);if(m)return clamp(Number(m[1]),1,12)}return clamp(Math.round(num(attack?.meta?.dice??attack?.dice,1)),1,12)}
+  function attackDice(rt,attack){try{const fn=rt?.GensRpgTacticalRuntimeFixes1678111?.attackDice;if(typeof fn==="function")return clamp(Math.round(num(fn(attack),1)),1,12)}catch(e){}for(const tag of arr(attack?.tags)){const m=str(tag).match(/^dice:(\d+)$/i);if(m)return clamp(Number(m[1]),1,12)}return clamp(Math.round(num(attack?.meta?.dice??attack?.dice,1)),1,12)}
   function patchHitResolver(rt=R){
     const E=engine(rt);if(!E?.attackPreview||!E?.currentActor||!E?.actorById||!E?.refreshOutcome)return false;if(E.resolveAttack?.__gensRpg1148DirectD100){hitPatched=true;return true}
     const previous=E.resolveAttack;
@@ -123,7 +124,7 @@
 
   function install(rt=R){ensureStyle(rt);preloadWallBitmap(rt);patchDungeonMapHtml(rt);patchRenderHooks(rt);observeWalls(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);stabilizeWalls(rt);decorateCombatUi(rt);try{rt.GENS_RPG_TACTICAL_VISUAL_DICE_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,8000,11000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,thresholdForChance,displayHit,forcedToDisplay,attackDice,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:!!observer,uiRenderPatched,mapPatched,corePatched,hitPatched,menuBound,uiOpenPatched,transitionCount})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,thresholdForChance,displayHit,forcedToDisplay,attackDice,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:!!observer,uiRenderPatched,mapPatched,corePatched,hitPatched,menuBound,uiOpenPatched,transitionCount})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

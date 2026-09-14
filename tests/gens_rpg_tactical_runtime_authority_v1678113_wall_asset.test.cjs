@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-authority-1678113.js'),'utf8');
+assert.match(source,/const WALL_ASSET="assets\/dungeon\/creatures\/dungeon_wall\.png"/);
+assert.doesNotMatch(source,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/);
+assert.match(source,/background-size:100% 100%!important/);
+assert.match(source,/gtv2112WallCell::before\{display:none!important/);
+console.log('V16.78.113 final wall asset authority: OK');

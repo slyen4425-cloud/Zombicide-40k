@@ -13,6 +13,7 @@ on:
       - work/v16.78.114.7-root-wall-dice-stats
       - work/v16.78.114.7-pages-test-align-2
       - work/v16.78.114.7-final-stats-test-align
+      - work/v16.78.114.7-builder-stats-test-align
       - main
   pull_request:
     branches:
@@ -43,6 +44,10 @@ jobs:
         run: node tests/gens_rpg_tactical_root_stats_v16781147.test.cjs
       - name: Preserve clean canonical stats and native Defense Armor Movement migrations
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
+      - name: Preserve canonical stat editor and rebuild compatibility
+        run: |
+          node tests/gens_editor_cleanup_v167893.test.cjs
+          node tests/gens_clean_stats_rebuild_v167890.test.cjs
       - name: Preserve canonical stat runtime link and single-authority migration
         run: |
           node tests/gens_clean_stats_runtime_link_v167892.test.cjs

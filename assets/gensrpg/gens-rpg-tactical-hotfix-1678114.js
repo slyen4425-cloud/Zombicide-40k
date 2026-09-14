@@ -101,7 +101,7 @@
     return enemyIds;
   }
   function scheduleDetection(rt=R,reason="runtime-v114",force=false,delays=[0,80,180]){
-    for(const delay of delays){if(typeof setTimeout==="function")setTimeout(()=>scanDetection(rt,reason,force),Math.max(0,delay));else scanDetection(rt,reason,force)}return true;
+    if(currentBattle(rt))return false;for(const delay of delays){if(typeof setTimeout==="function")setTimeout(()=>scanDetection(rt,reason,force),Math.max(0,delay));else scanDetection(rt,reason,force)}return true;
   }
 
   function wrapGlobal(rt,name){
@@ -137,7 +137,8 @@
     const D=doc(rt),out=[];if(!D)return out;for(const sel of [".gtv2Cell.blocked","#drc100Grid .drc100Cell.wall","#dc047RoomBoard .dav167870WallCell"]){for(const el of D.querySelectorAll?.(sel)||[])if(!out.includes(el))out.push(el)}
     const state=runtimeState(rt),kinds=arr(state?.last?.map?.cells),cells=[...(D.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];for(let i=0;i<cells.length;i++)if(norm(kinds[i])==="wall"&&!out.includes(cells[i]))out.push(cells[i]);return out;
   }
-  function paintWalls(rt=R){let n=0;for(const el of wallTargets(rt)){el.classList?.remove?.("gtv2112WallCell","gtv2113Wall");el.classList?.add?.("gtv2114Wall");if(el?.style?.setProperty){el.style.setProperty("background-image",`url("${WALL_ASSET}")`,"important");el.style.setProperty("background-size","cover","important");el.style.setProperty("background-position","center center","important");el.style.setProperty("background-repeat","no-repeat","important");el.style.setProperty("background-color","#181818","important");el.style.setProperty("font-size","0","important");el.style.setProperty("color","transparent","important")}n++}return n}
+  function wallCorrect(el){const bg=str(el?.style?.backgroundImage||el?.style?.getPropertyValue?.("background-image"));const size=str(el?.style?.backgroundSize||el?.style?.getPropertyValue?.("background-size"));return !!el?.classList?.contains?.("gtv2114Wall")&&bg.includes("dng_wall_block.jpg")&&size==="cover"}
+  function paintWalls(rt=R){let n=0;for(const el of wallTargets(rt)){if(wallCorrect(el))continue;el.classList?.remove?.("gtv2112WallCell","gtv2113Wall");el.classList?.add?.("gtv2114Wall");if(el?.style?.setProperty){el.style.setProperty("background-image",`url("${WALL_ASSET}")`,"important");el.style.setProperty("background-size","cover","important");el.style.setProperty("background-position","center center","important");el.style.setProperty("background-repeat","no-repeat","important");el.style.setProperty("background-color","#181818","important");el.style.setProperty("font-size","0","important");el.style.setProperty("color","transparent","important")}n++}return n}
 
   function latestAttackRow(rt=R){const b=currentBattle(rt);return [...arr(b?.log)].reverse().find(x=>x?.type==="attack"&&(arr(x?.rollsDisplay).length||Number.isFinite(Number(x?.roll))))||null}
   function rowRolls(row){const xs=arr(row?.rollsDisplay).filter(v=>Number.isFinite(Number(v))).map(v=>clamp(Math.round(num(v,1)),1,100));if(xs.length)return xs;if(Number.isFinite(Number(row?.roll)))return [clamp(Math.round(num(row.roll,1)),1,100)];return []}
@@ -151,7 +152,7 @@
 
   function maintain(rt=R){queued=false;ensureStyle(rt);ensureDetectionHooks(rt);paintWalls(rt);animateDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(queued)return;queued=true;const run=()=>maintain(rt);if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else if(typeof setTimeout==="function")setTimeout(run,0);else run()}
-  function observe(rt=R){const D=doc(rt);if(!D?.body||observer||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(muts=>{let board=false;for(const m of muts){if(boardTouched(m.target)){board=true;break}for(const n of m.addedNodes||[])if(boardTouched(n)){board=true;break}if(board)break}queueMaintain(rt);if(board)scheduleDetection(rt,"board-mutation-v114",false,[0,100])});observer.observe(D.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class","style"]});return true}
+  function observe(rt=R){const D=doc(rt);if(!D?.body||observer||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(muts=>{let board=false,dice=false;for(const m of muts){for(const n of m.addedNodes||[]){if(boardTouched(n))board=true;if(n?.nodeType===1&&(n.matches?.(".gtv2DiceBackdrop,.gtv2DiceCard")||n.querySelector?.(".gtv2DiceBackdrop,.gtv2DiceCard")))dice=true}if(board&&dice)break}if(board||dice)queueMaintain(rt);if(board)scheduleDetection(rt,"board-mutation-v114",false,[0,100])});observer.observe(D.body,{childList:true,subtree:true});return true}
   function startHeartbeat(rt=R){if(heartbeat!=null||typeof setInterval!=="function")return !!heartbeat;heartbeat=setInterval(()=>{if(currentBattle(rt))return;const D=doc(rt);if(!D?.querySelector?.("#dc047RoomBoard"))return;ensureDetectionHooks(rt);scanDetection(rt,"heartbeat-v114",false);paintWalls(rt)},HEARTBEAT_MS);return true}
   function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoard(rt);observe(rt);paintWalls(rt);animateDiceOverlay(rt);scheduleDetection(rt,"install-v114",false,[0,120]);startHeartbeat(rt);try{rt.GENS_RPG_TACTICAL_HOTFIX_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,8000,11000])setTimeout(()=>install(rt),ms);return true}

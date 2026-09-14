@@ -6,7 +6,7 @@ const P=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-fix
 
 assert.equal(P.APP_VERSION,'16.78.111');
 assert.equal(P.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
-assert.equal(P.WALL_SIZE,'100% 100%');
+assert.equal(P.WALL_SIZE,'cover');
 
 {
   const sword={id:'sword',name:'Épée',tags:['melee'],meta:{dice:2}};
@@ -67,15 +67,18 @@ assert.equal(P.WALL_SIZE,'100% 100%');
   assert.deepEqual(P.detectionEnemyIds(rt,state),['e1'],'enemy detection must consider every hero in the room, not only the active hero');
 }
 
+assert.equal(P.paintDiceOverlay({},null),false,'V111 keeps multi-die engine resolution but no longer owns the visual dice DOM');
+
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-fixes-1678111.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/background-size:\$\{WALL_SIZE\}/,'wall sizing must be overridden by the final runtime layer');
+assert.match(source,/const WALL_SIZE="cover"/,'wall sizing must match Builder floor-style cover');
+assert.match(source,/function paintDiceOverlay\(rt=R\)\{return false\}/,'V111 visual dice renderer must stay retired');
 assert.match(source,/drc100Launcher/,'runtime creator tab must be removable during play');
 assert.match(source,/data-v111-attack/,'fixed Attack dock must be maintained independently of tactical rerenders');
 assert.match(source,/applyDungeonTurnEvent/,'event/ambush path must schedule an immediate detection scan');
 assert.match(integration,/gens-rpg-tactical-runtime-fixes-1678111\.js\?v=16\.78\.111/,'V111 must load after V110');
-assert.match(sw,/gensrpg-cache-16\.78\.111-tactical-runtime-fixes/);
+assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-fixes-1678111\.js/);
 
-console.log('V16.78.111 runtime walls + fixed dock + weapon dice + all-hero detection regressions OK');
+console.log('V16.78.111 weapon multi-dice + dock + detection preserved; V114.6 owns direct cover wall and single visual dice flow: OK');

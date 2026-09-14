@@ -67,15 +67,18 @@ assert.match(P.explainAttack({hit:true,damage:0,damageType:'fire',rawDamage:4,re
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-coherence-1678112.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/gtv2112WallCell/,'final wall layer must be explicit');
-assert.match(source,/::before/,'wall texture must live on a stable per-cell layer');
+assert.match(source,/gtv2112WallCell/,'V112 wall tagging remains explicit');
+assert.match(source,/background:#171512 url\("\$\{WALL_ASSET\}"\) center\/cover no-repeat!important/,'V112 must paint the Builder wall texture directly on the cell');
+assert.doesNotMatch(source,/background-image:none!important/,'V112 must never blank a wall before repaint');
+assert.match(source,/::before\{content:none!important;display:none!important/,'obsolete pseudo wall layer must stay disabled');
 assert.match(source,/min-height:38px/,'mobile fixed actions must be more compact');
 assert.match(source,/data-v112-sheet/,'actor click detail must expose the full tactical sheet');
-assert.match(source,/gtv2112DiceRoll/,'dice must have an explicit animation');
+assert.doesNotMatch(source,/gtv2112DiceRoll/,'V112 no longer owns dice animation; base tactical UI owns the single short roll');
+assert.match(source,/function patchDice\(rt=R\).*gtv2112Explain/s,'V112 must keep result explanations');
 assert.match(source,/lineOfSightCells/,'detection must use real LOS');
 assert.match(source,/heroPerception/,'hero combat joining must use perception');
 assert.match(integration,/gens-rpg-tactical-combat-coherence-1678112\.js\?v=16\.78\.112/,'V112 must load after V111');
-assert.match(sw,/gensrpg-cache-16\.78\.112-combat-coherence/);
+assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-combat-coherence-1678112\.js/);
 
-console.log('V16.78.112 spatial participants + LOS detection + full sheets + dice explanations + stable wall layer OK');
+console.log('V16.78.112 spatial participants + LOS + sheets + explanations preserved; V114.6 owns direct walls and dice animation: OK');

@@ -5,8 +5,8 @@ const root=path.join(__dirname,'..');
 const P=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-authority-1678113.js'));
 
 assert.equal(P.APP_VERSION,'16.78.113');
-assert.equal(P.WALL_ASSET,'assets/dungeon/creatures/dungeon_wall.png');
-assert.equal(P.ROLL_DURATION,680);
+assert.equal(P.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
+assert.equal(P.ROLL_DURATION,680,'historical constant may remain exported but V113 no longer owns dice animation');
 
 function baseState(){
   return {
@@ -59,7 +59,7 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
 }
 
 {
-  let received=null;
+  let received=null,canonicalDecorations=0;
   function base(runtime,opts){
     received=opts;
     return {grid:{width:5,height:5,blocked:[]},actors:[
@@ -69,30 +69,34 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   }
   function old112(){throw new Error('V112 numeric selector must be bypassed by V113');}
   old112.__gensRpg112Spatial=true;old112.__original=base;
-  const local={...rt,GensRpgTacticalCombatV2Adapter:{createBattle:old112},GensRpgTacticalCombatV2Ui:{getBattle:()=>null}};
+  const local={...rt,GensRpgTacticalCombatV2Adapter:{createBattle:old112},GensRpgTacticalCombatV2Ui:{getBattle:()=>null},GensRpgTacticalStats1678110:{decorateBattle(runtime,battle,opts){canonicalDecorations++;assert.equal(opts.force,true);battle.meta.canonical='v110';return battle}}};
   assert.equal(P.hookAdapter(local),true);
   assert.equal(local.GensRpgTacticalCombatV2Adapter.createBattle.__gensRpg113Scope,true);
   assert.equal(local.GensRpgTacticalCombatV2Adapter.createBattle.__gensRpg112Spatial,true,'marker prevents V112 retry from wrapping V113 again');
-  local.GensRpgTacticalCombatV2Adapter.createBattle(local,{enemyIds:['ep'],heroIds:['h1','h2','h3']});
+  const battle=local.GensRpgTacticalCombatV2Adapter.createBattle(local,{enemyIds:['ep'],heroIds:['h1','h2','h3']});
   assert.deepEqual(received.heroIds,['h1']);
   assert.deepEqual(received.enemyIds,['ep']);
+  assert.equal(canonicalDecorations,1,'final scoped battle must receive exactly one final canonical V110 snapshot pass');
+  assert.equal(battle.meta.canonical,'v110');
 }
 
 assert.deepEqual(P.rowRolls({rollsDisplay:[12,88]}),[12,88]);
 assert.deepEqual(P.rowRolls({roll:42}),[42]);
+assert.equal(P.animateDiceOverlay(rt),false,'V113 no longer owns visual dice animation');
 
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-authority-1678113.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/dungeon_wall\.png/,'V113 wall authority must use the full wall PNG');
-assert.match(source,/gtv2112WallCell::before\{display:none!important/,'V112 pseudo wall layer must be neutralized');
-assert.match(source,/data-dice-row-v113/,'V113 must render its own animated multi-die row');
-assert.match(source,/setInterval\(tick,55\)/,'dice animation must remain visible even without Web Animations API');
+assert.match(source,/dng_wall_block\.jpg/,'V113 must agree with the Builder wall asset');
+assert.doesNotMatch(source,/const WALL_ASSET="assets\/dungeon\/creatures\/dungeon_wall\.png"/);
+assert.match(source,/function animateDiceOverlay\(rt=R\)\{return false\}/,'V113 must not start a second dice animation');
+assert.doesNotMatch(source,/setInterval\(tick,55\)/);
 assert.match(source,/#dc047RoomBoard \.dc047Cell/,'real board cell interactions must schedule detection');
 assert.match(source,/dc318BranchSourceId/,'sub-room scope must use Core 3.18 branch ownership');
 assert.match(source,/__gensRpg112Spatial=true/,'V113 must prevent V112 retry from re-wrapping combat creation');
+assert.match(source,/GensRpgTacticalStats1678110\?\.decorateBattle/,'V113 must reassert V110 canonical snapshots after final spatial scoping');
 assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 must load after V112');
-assert.match(sw,/gensrpg-cache-16\.78\.113-authoritative-runtime-fixes/);
+assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 
-console.log('V16.78.113 branch scope + real detection seam + dice animation + wall authority: OK');
+console.log('V16.78.113 scope/detection preserved; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');

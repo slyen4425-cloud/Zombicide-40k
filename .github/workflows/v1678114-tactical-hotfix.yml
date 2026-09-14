@@ -18,6 +18,7 @@ on:
       - work/v16.78.114.9-browser-profile-fix
       - work/v16.78.114.10-hit-entry-wall
       - work/v16.78.114.11-armor-damage
+      - work/v16.78.114.11-entry-test-align
       - main
   pull_request:
     branches:
@@ -43,6 +44,8 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
+      - name: Preserve current tactical global entry routing
+        run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
       - name: Exact V114.11 melee bonus and armor-zero scenarios
         run: node tests/gens_rpg_tactical_damage_v167811411.test.cjs
       - name: Exact V114.10 D100 origin and wall ownership scenarios

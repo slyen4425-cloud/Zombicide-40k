@@ -11,6 +11,7 @@ on:
       - work/v16.78.114.5-wall-dice-stats
       - work/v16.78.114.6-consolidate-wall-dice-stats
       - work/v16.78.114.7-root-wall-dice-stats
+      - work/v16.78.114.7-pages-test-align-2
       - main
   pull_request:
     branches:
@@ -39,6 +40,8 @@ jobs:
         run: node tests/gens_rpg_tactical_consolidation_v16781146.test.cjs
       - name: Real rebuilt current-hero stats into Tactical V110 snapshot
         run: node tests/gens_rpg_tactical_root_stats_v16781147.test.cjs
+      - name: Preserve clean canonical stats and native Defense Armor Movement migrations
+        run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
       - name: Preserve no-timer no-legacy tactical UI isolation
         run: |
           node tests/gens_rpg_tactical_combat_v2_ui_v1678107.test.cjs

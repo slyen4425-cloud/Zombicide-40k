@@ -19,10 +19,10 @@ vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[{id:"force",name:"Force"},{id
 vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
-assert.equal(api.APP_VERSION,'16.78.95');
+assert.equal(api.APP_VERSION,'16.78.114.7');
 api.syncCanonicalRuntime();
 const initial=Array.from(vm.runInContext('DUNGEON_DEFAULT_ATTRIBUTES.map(x=>x.id)',ctx));
-assert.ok(initial.includes('defense')&&initial.includes('armor')&&initial.includes('movement'),'V16.78.95 native migration must expose Defense, Armor and Movement');
+assert.ok(initial.includes('defense')&&initial.includes('armor')&&initial.includes('movement'),'native migration compatibility must expose Defense, Armor and Movement');
 const s=profiles[0].rpgUniverse.stats;
 s.dynamicDefinitions.push({id:'epuisement',name:'Épuisement',icon:'🥵',defaultValue:2,min:0,max:20,visible:true,description:'Fatigue du héros'});
 s.active=['force','epuisement'];s.nativeCoreMigrated95=true;
@@ -35,4 +35,4 @@ s.active=[];api.syncCanonicalRuntime();
 assert.deepEqual(Array.from(vm.runInContext('DUNGEON_DEFAULT_ATTRIBUTES.map(x=>x.id)',ctx)),[],'unchecking all stats after migration must clear the game build');
 assert.match(src,/DUNGEON_DEFAULT_ATTRIBUTES/,'module must attach to the existing canonical Dungeon stat list');
 assert.doesNotMatch(src,/GensUnifiedStats167885|GensStatsActionsDirect167887|GensRpgStatsEditorActions167888/,'must remain a single clean stats module');
-console.log('GenSrpG V16.78.95 canonical stat runtime link: OK');
+console.log('GenSrpG V16.78.114.7 canonical stat runtime link compatibility: OK');

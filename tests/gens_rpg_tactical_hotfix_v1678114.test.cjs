@@ -63,7 +63,9 @@ assert.match(source,/HEARTBEAT_MS=450/,'a low-frequency exploration fallback mus
 assert.match(source,/gtv2114RollStage/,'dice result must be covered by a dedicated rolling stage');
 assert.match(source,/setInterval\(tick,48\)/,'D100 values must visibly change during the roll');
 assert.match(source,/setTimeout\(settle,ROLL_DURATION\)/,'final result must only settle after the animation duration');
-assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113[\s\S]*gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114/,'V114 must load after V113 so room scoping stays authoritative and V114 is the final visual/detection layer');
+assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 room scope layer must remain loaded');
+assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114/,'V114 final layer must be loaded');
+assert.match(integration,/const after113=\(\)=>\{[\s\S]*?loadHotfix114\(\);/,'V114 must be installed by the V113 completion callback');
 assert.match(sw,/gensrpg-cache-16\.78\.114-wall-detection-dice/);
 assert.match(sw,/gens-rpg-tactical-hotfix-1678114\.js/);
 

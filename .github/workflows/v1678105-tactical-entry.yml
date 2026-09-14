@@ -50,6 +50,8 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
       - name: Test V16.78.113 branch scope real detection seam dice animation and wall authority
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
+      - name: Test V16.78.113 bridge to adapter authoritative participant scope
+        run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs
       - name: Test tactical grid engine
         run: node tests/gens_rpg_tactical_combat_v2.test.cjs
       - name: Test tactical adapter

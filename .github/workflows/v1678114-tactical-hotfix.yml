@@ -1,4 +1,4 @@
-name: Validate V16.78.114.8 Touch + Stable Walls
+name: Validate V16.78.114.9 Wall + Engagement Freeze
 
 on:
   push:
@@ -15,6 +15,7 @@ on:
       - work/v16.78.114.7-final-stats-test-align
       - work/v16.78.114.7-builder-stats-test-align
       - work/v16.78.114.8-wall-hit-clarity
+      - work/v16.78.114.9-wall-engagement-freeze
       - main
   pull_request:
     branches:
@@ -39,7 +40,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
-      - name: Exact V114.8 visible touch and stable wall scenarios
+      - name: Exact V114.9 engagement freeze and wall overlay scenarios
         run: |
           node tests/gens_rpg_tactical_hit_wall_v16781148.test.cjs
           node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs

@@ -1,9 +1,9 @@
-/* GenSrpG V16.78.95 — canonical RPG stats: native Defense, Armor and Movement + dynamic hero editor.
+/* GenSrpG V16.78.114.7 — canonical RPG stats: rebuilt hero stats remain authoritative in every runtime context.
    Keeps one authoritative stat/effect layer, preserves legacy migration, and reuses Dungeon runtime values. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="3.4.0",APP_VERSION="16.78.95",EFFECT_KEY="dynamicEffects90",LEGACY_MIGRATION_KEY="legacyEffectsMigrated94",NATIVE_MIGRATION_KEY="nativeCoreMigrated95";
+const VERSION="3.5.0",APP_VERSION="16.78.114.7",EFFECT_KEY="dynamicEffects90",LEGACY_MIGRATION_KEY="legacyEffectsMigrated94",NATIVE_MIGRATION_KEY="nativeCoreMigrated95";
 const ALIAS={agility:"agilite",spirit:"esprit",strength:"force",dexterity:"agilite",wisdom:"esprit",constitution:"endurance",defence:"defense",armour:"armor",move:"movement"};
 const CORE=[
  ["force","Force","💪",10,0,999,"Dégâts physiques et précision de mêlée."],
@@ -77,7 +77,7 @@ function specialRaw(hero,id){const d=def(id),st=stFor(hero),rec=heroDef(hero),fa
 function specialBaseTotal(hero,id){let n=specialRaw(hero,id);if(hero===String(R.current||"")&&(id==="defense"||id==="armor")){try{n+=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}try{n+=num(R.dungeonSkillEffectTotal?.(id),0)}catch(e){}}return n}
 let nativeAttr=null,nativeChange=null,sheetObserver=null,heroEditorId=null;
 function customBase(hero,id){const d=def(id),st=stFor(hero),heroBase=num(heroDef(hero)?.dungeonStats?.[id],d?.defaultValue??0);if(!d)return 0;if(!st)return heroBase;st.rpgAttributes=st.rpgAttributes&&typeof st.rpgAttributes==="object"?st.rpgAttributes:{};if(!Number.isFinite(Number(st.rpgAttributes[id])))st.rpgAttributes[id]=heroBase;return clamp(num(st.rpgAttributes[id],heroBase),d.min,d.max)}
-function baseValue(hero,id){id=canon(id);const d=def(id);if(!d||!active(id))return 0;if(SPECIAL_NATIVE.has(id))return specialBaseTotal(hero,id);if(CORE_IDS.has(id)&&hero===String(R.current||"")&&typeof nativeAttr==="function")return num(nativeAttr.call(R,id),0);let n=customBase(hero,id);try{n+=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}try{n+=num(R.dungeonSkillEffectTotal?.("attribute",null,id),0)}catch(e){}try{n+=num(R.dungeonChallengeDebuffTotal067?.(id,stFor(hero)),0)}catch(e){}return n}
+function baseValue(hero,id){id=canon(id);const d=def(id);if(!d||!active(id))return 0;if(SPECIAL_NATIVE.has(id))return specialBaseTotal(hero,id);let n=customBase(hero,id);try{n+=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}try{n+=num(R.dungeonSkillEffectTotal?.("attribute",null,id),0)}catch(e){}try{n+=num(R.dungeonChallengeDebuffTotal067?.(id,stFor(hero)),0)}catch(e){}return n}
 function compare(v,c,t){return c==="gte"?v>=t:c==="lte"?v<=t:c==="lt"?v<t:c==="eq"?v===t:v>t}
 function effectAmount(e,hero,seen){if(!e?.enabled)return 0;const v=value(hero,e.source,seen);if(e.mode==="threshold")return compare(v,e.comparator,e.threshold)?e.gain:0;return Math.floor(v/Math.max(1,e.step))*e.gain}
 function statEffectTotal(id,hero,seen=new Set()){const target="stat:"+canon(id);return effects().filter(e=>e.enabled&&e.target===target).reduce((n,e)=>n+effectAmount(e,hero,seen),0)}

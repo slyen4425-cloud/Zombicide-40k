@@ -7,7 +7,7 @@ const R=require(path.join(root,'assets','gensrpg','gens-rpg-dungeon-interaction-
 assert.equal(R.APP_VERSION,'16.78.114.13');
 assert.equal(R.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.ok(Math.max(...R.RETRIES)>600,'reset must run after V114.12 wall-hook retries');
-assert.ok(R.NAV_RETRIES.length>=3,'hero/quit routes need post-click verification');
+assert.ok(R.QUIT_RETRIES.length>=3,'quit route needs post-click verification against stale UI callbacks');
 
 function native(){return 'native'}
 function oldWall(){return 'old-wall'}
@@ -24,10 +24,11 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.doesNotMatch(source,/MutationObserver|setInterval\s*\(/,'reset must not add another observer or interval');
 assert.match(source,/background-image:url\('\$\{WALL_ASSET\}'\)!important/,'wall texture must be a direct cell background like floor');
 assert.match(source,/\.dc047Cell\.wall>\*\{visibility:hidden!important/,'old floor/image children cannot cover exploration walls');
-assert.match(source,/\.gtv2Cell\.blocked>\.gtv2WallTile[^\n]*display:none!important/,'old tactical wall IMG cannot remain a visible owner');
+assert.match(source,/\.gtv2Cell\.blocked>\.gtv2WallTile[^\n]*display:none!important/,'old tactical wall IMG cannot remain a visible texture owner');
 assert.match(source,/restoreNativeMapRenderer/);
 assert.match(source,/restoreDungeonRenderers/);
 assert.match(source,/stopImmediatePropagation/,'hero card capture route must bypass stale click owners');
+assert.match(source,/verifyHeroRoute\(id\)/,'hero sheet fallback must be synchronous and must not reopen later after user navigation');
 assert.match(source,/forceRootHome/,'save/quit must have a deterministic root-home fallback');
 assert.match(source,/verifyQuitRoute/);
 assert.match(integration,/gens-rpg-dungeon-interaction-wall-reset-167811413\.js\?v=16\.78\.114\.13/,'V114.13 reset must load last after tactical UX');

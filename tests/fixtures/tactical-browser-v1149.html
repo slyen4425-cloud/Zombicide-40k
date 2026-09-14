@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.9 browser profile</title>
+<style>html,body{margin:0;min-height:100%;background:#111;color:#fff}#dc047RoomBoard{display:none}</style>
+<script>
+window.__offCombat={movement:4,initiative:31,defense:12,armor:7,dodge:9};
+window.__heroState={rpgAttributes:{movement:4,initiative:31,defense:12,armor:7},wounds:0,mana:8};
+window.CHARS={h:{name:"Aldren",dungeonStats:{...window.__offCombat}}};
+window.loadState=id=>id==="h"?window.__heroState:{};
+window.GensCleanRpgStats167874={
+  runtimeDefs:()=>[
+    {id:"movement",name:"Mouvement",icon:"👣",defaultValue:3},
+    {id:"initiative",name:"Initiative",icon:"⚡",defaultValue:10},
+    {id:"defense",name:"Défense",icon:"🛡️",defaultValue:0},
+    {id:"armor",name:"Armure",icon:"🥋",defaultValue:0}
+  ],
+  value:(id,stat)=>window.__offCombat[stat]??0
+};
+window.effectiveMaxWounds=()=>24;
+window.dungeonHeroMoveValue083=()=>window.__offCombat.movement;
+window.dungeonDerivedInitiative=()=>window.__offCombat.initiative;
+window.dungeonDerivedDefense=()=>window.__offCombat.defense;
+window.dungeonArmorScore=()=>window.__offCombat.armor;
+window.dungeonDodgeChance=()=>window.__offCombat.dodge;
+window.dungeonCriticalChance=()=>10;
+window.dungeonMagicResistance=()=>3;
+window.dungeonMaxMana=()=>10;
+window.loadDungeonRpgRules=()=>({critMultiplier:2});
+window.currentRpgProfile=()=>({id:"browser-profile",rpgUniverse:{combatRules:{rollHighToHit:true}}});
+window.loadGameProfiles=()=>[];
+window.saveGameProfiles=()=>{};
+window.makeEncounterInput=()=>({
+  id:"browser-"+Date.now(),
+  rngSeed:123456,
+  config:{actionsPerTurn:1},
+  grid:{width:5,height:4,blocked:[{x:0,y:0},{x:0,y:1}],cover:[{x:3,y:1}]},
+  actors:[
+    {id:"h",name:"Aldren",side:"hero",x:1,y:1,hp:24,maxHp:24,movement:1,initiative:20,defense:1,armor:1,dodge:1,attacks:[{id:"arc",name:"Arc de test",minRange:1,maxRange:4,hit:92,power:5,lineOfSight:true,tags:["ranged","dice:3"],meta:{dice:3}}],meta:{heroId:"h"}},
+    {id:"e",name:"Cible",side:"enemy",x:3,y:1,hp:50,maxHp:50,movement:1,initiative:1,defense:20,armor:2,dodge:16,attacks:[{id:"claw",name:"Griffe",minRange:0,maxRange:1,hit:80,power:2,lineOfSight:false}],meta:{enemyId:"dng_skeleton"}}
+  ]
+});
+</script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js"></script>
+<script>
+window.dc200StartCombat=function(ids,reason){
+  return window.GensRpgTacticalCombatV2Ui.open(window.makeEncounterInput(),{reason:reason||"auto-engage-v1149"});
+};
+window.startProfiledEncounter=function(){
+  const battle=window.dc200StartCombat(["e"],"auto-engage-v1149");
+  window.GensRpgTacticalStats1678110.decorateBattle(window,battle,{force:true});
+  window.GensRpgTacticalCombatV2Ui.render();
+  window.GensRpgTacticalVisualDice16781142.decorateCombatUi(window);
+  return battle;
+};
+window.closeProfiledEncounter=function(){return window.GensRpgTacticalCombatV2Ui.close(false)};
+window.addEventListener("DOMContentLoaded",()=>{
+  window.GensRpgTacticalStats1678110.install(window);
+  window.GensRpgTacticalVisualDice16781142.install(window);
+  window.__browserProfileReady=true;
+});
+</script>
+</head><body><main id="exploration">Exploration mobile simulée</main></body></html>

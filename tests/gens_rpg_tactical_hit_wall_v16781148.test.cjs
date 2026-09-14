@@ -5,11 +5,10 @@ const root=path.join(__dirname,'..');
 const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 const V=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js'));
 
-assert.equal(V.APP_VERSION,'16.78.114.11');
+assert.equal(V.APP_VERSION,'16.78.114.12');
 assert.equal(V.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(V.DICE_WATCHDOG_MS,0);
-assert.equal(V.observeWalls(),false,'V114.9+ must not create a global wall/body observer');
-assert.equal(V.patchRenderHooks(),false,'V114.9+ must not stack another tactical render wrapper');
+assert.equal(V.observeWalls(),false,'V114.12 must not create a global wall/body observer');
 
 const chance=36,threshold=65;
 assert.equal(V.thresholdForChance(chance,true),threshold);
@@ -37,12 +36,17 @@ for(const displayRoll of [1,20,44]){
 
 const visual=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js'),'utf8');
 const ui=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-ui.js'),'utf8');
-assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'final authority must not observe document.body');
-assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'final authority must not wrap renderers');
-assert.match(ui,/gtv2WallTile/,'base UI must emit the stable wall bitmap directly');
+assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'V114.12 must not observe document.body');
+assert.match(visual,/background-image:none!important/,'wall owner must have no CSS bitmap competitor');
+assert.match(visual,/contain:none!important/,'wall owner must not force a paint containment layer during pinch zoom');
+assert.match(visual,/isolation:auto!important/,'wall owner must not force an isolated compositor layer');
+assert.match(visual,/restoreDungeonMapHtml/,'V114.12 must restore the native Dungeon map HTML renderer');
+assert.match(visual,/__gtv271WallPatch&&typeof cur\.__original===\"function\"/,'old template-reserializing wall wrapper must be explicitly removed');
+assert.match(visual,/__gensRpg11412WallPostRender/,'wall bitmap must be attached after the native renderer in the same task');
+assert.match(visual,/__gensRpgStableWallBitmap11412/,'decoded wall bitmap must keep a persistent runtime reference');
+assert.match(ui,/gtv2WallTile/,'base UI must still emit the stable wall bitmap directly for tactical cells');
 assert.match(ui,/blocked\.has\(k\)\?wallTileHtml\(\)/,'tactical wall image must exist in initial render HTML');
-assert.match(ui,/insertAdjacentHTML\("afterbegin",wallTileHtml\(\)\)/,'Dungeon wall image must exist before live DOM insertion');
 assert.match(ui,/calculationSummary/,'calculation summary must be visible in tactical UI');
 assert.match(ui,/Conversion de l’arme une seule fois, puis Défense, Esquive et Couvert une seule fois chacun/,'calculation UI must explain single application');
 assert.match(ui,/getAnimations/,'dice result must await the one CSS animation without another overlay timer');
-console.log('V16.78.114.11 preserves canonical D100 + entered heroes + compositor-safe walls');
+console.log('V16.78.114.12 preserves canonical D100 and uses native-render + image-only stable walls');

@@ -48,14 +48,25 @@
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
+  function loadReset11413(){
+    const D=R.document;if(!D||R.__gensDungeonInteractionWallResetLoader11413)return false;
+    R.__gensDungeonInteractionWallResetLoader11413=true;
+    const install=()=>{try{R.GensRpgDungeonInteractionWallReset167811413?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.13 interaction/wall reset install",e)}};
+    if(R.GensRpgDungeonInteractionWallReset167811413){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-dungeon-interaction-wall-reset-167811413.js?v=16.78.114.13";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.13 interaction/wall reset load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadVisualDice11412(){
     const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader11412)return false;
     R.__gensTacticalVisualDiceLoader11412=true;
-    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.12 tactical UX install",e)}};
+    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.12 tactical UX install",e)}loadReset11413()};
     if(R.GensRpgTacticalVisualDice16781142){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.12";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.12 tactical UX load failed");
+    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114.12 tactical UX load failed");loadReset11413()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -117,7 +128,8 @@
      V113 owns room/sub-room participant scope. V114.1 keeps validated live enemy vision.
      V114.10 owns canonical D100 origin and entered-hero safety.
      V114.11 reconnects canonical melee raw damage and Core 3.17 armor-zero behavior.
-     V114.12 owns damage-source clarity and native-render/image-only wall stability.
+     V114.12 owns damage-source clarity.
+     V114.13 removes stacked wall renderers and restores exploration hero/quit interactions.
      V114.4 blocks stale menu combat + every Dungeon legacy fallback. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;

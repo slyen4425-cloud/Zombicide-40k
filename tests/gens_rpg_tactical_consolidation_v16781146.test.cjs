@@ -30,10 +30,13 @@ const diceEnd=ui.indexOf('function nearestOpponent',diceStart);
 assert.ok(diceStart>0&&diceEnd>diceStart);
 const diceFn=ui.slice(diceStart,diceEnd);
 assert.match(diceFn,/gtv21147DiceRow/);
-assert.match(diceFn,/animationend/);
+assert.match(diceFn,/getAnimations/);
+assert.match(diceFn,/animation\.finished/);
 assert.doesNotMatch(diceFn,/setTimeout\s*\(/);
 assert.doesNotMatch(diceFn,/setInterval\s*\(/);
 assert.doesNotMatch(diceFn,/\.animate\(/);
+assert.match(ui,/gtv2WallTile/,'base UI must emit the wall bitmap directly');
+assert.match(ui,/calculationSummary/,'base UI must expose the D100 calculation summary');
 assert.match(ui,/const result=resolveVisibleAttack\(cur,target,id\);await showDiceResult\(cur,target,result,"Tour du héros"\);render\(\)/);
 assert.match(ui,/const result=resolveVisibleAttack\(ai,target,choice\.a\.id\);await showDiceResult\(ai,target,result,"Tour ennemi"\);render\(\)/);
 assert.match(v111,/function paintDiceOverlay\(rt=R\)\{return false\}/);
@@ -73,6 +76,6 @@ assert.equal(snap.values.force,19);assert.equal(snap.values.agilite,14);assert.e
 assert.equal(rt.current,'other');assert.deepEqual(rt.state,{marker:'old'});
 assert.match(v113,/GensRpgTacticalStats1678110\?\.decorateBattle\?\.\(realRt,battle,\{force:true\}\)/,'final V113 scope wrapper must reassert the canonical V110 snapshot once');
 
-assert.match(sw,/gensrpg-cache-16\.78\.114\.7-root-wall-dice-stats/);
+assert.match(sw,/gensrpg-cache-16\.78\.114\.9-browser-profiled-combat/);
 assert.doesNotMatch(sw,/"\.\/assets\/gensrpg\/gens-rpg-tactical-wall-dice-stats-16781145\.js"/);
-console.log('V16.78.114.7 root wall + event D100 + canonical current-hero stats guards: OK');
+console.log('V16.78.114.9 single-render walls + one D100 animation + canonical stats guards: OK');

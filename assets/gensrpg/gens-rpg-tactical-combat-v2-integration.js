@@ -48,25 +48,25 @@
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
-  function loadVisualDice1143(){
-    const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader1143)return false;
-    R.__gensTacticalVisualDiceLoader1143=true;
-    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.3 tactical UX install",e)}};
+  function loadVisualDice1149(){
+    const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader1149)return false;
+    R.__gensTacticalVisualDiceLoader1149=true;
+    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.9 tactical UX install",e)}};
     if(R.GensRpgTacticalVisualDice16781142){install();return true}
     const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.3";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.3 tactical UX load failed");
+    s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.9";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.9 tactical UX load failed");
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
   function loadHotfix114(){
     const D=R.document;if(!D||R.__gensTacticalHotfixLoader114)return false;
     R.__gensTacticalHotfixLoader114=true;
-    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}loadVisualDice1143()};
+    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}loadVisualDice1149()};
     if(R.GensRpgTacticalHotfix1678114){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js?v=16.78.114.1";
-    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114 tactical hotfix load failed");loadVisualDice1143()};
+    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114 tactical hotfix load failed");loadVisualDice1149()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -150,7 +150,7 @@
      V112 keeps detailed sheets and readable result explanations.
      V113 owns room/sub-room participant scope.
      V114.1 keeps the validated live enemy vision.
-     V114.3 owns final wall visuals, combat transition and emergency menu exit.
+     V114.9 owns final D100/session UX; the base UI is the sole wall renderer.
      V114.4 loads before the chain and blocks stale menu combat + every Dungeon legacy fallback.
      V114.6 consolidates wall and dice ownership in the base tactical UI; V110 remains the sole canonical stats bridge. */
   function loadPolish108(){

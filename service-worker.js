@@ -1,4 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.114.8-touch-stable-walls";
+const CACHE_NAME = "gensrpg-cache-16.78.114.9-browser-profiled-combat";
+// gensrpg-cache-16.78.114.8-touch-stable-walls
 // Compatibility markers kept for existing deployment guards:
 // gensrpg-cache-16.78.40-authored-movement
 // gensrpg-cache-16.78.72-perceptual-actor-scale

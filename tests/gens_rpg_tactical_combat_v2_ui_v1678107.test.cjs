@@ -8,7 +8,7 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const U=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-ui.js'));
 const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 
-assert.equal(U.APP_VERSION,'16.78.114.7');
+assert.equal(U.APP_VERSION,'16.78.114.9');
 assert.match(ui,/gtv271ActorCard/,'readable actor cards must be rendered below the grid');
 assert.match(ui,/data-detail=/,'actor cards must open a detail view');
 assert.match(ui,/statusRows/,'actor cards/detail must expose status and DoT slots');
@@ -22,7 +22,8 @@ assert.match(ui,/data-dice-continue/,'D100 result must require explicit confirma
 assert.match(ui,/Tour d’initiative ennemi — ce n’est pas une riposte automatique/,'enemy action must be clearly identified');
 assert.doesNotMatch(ui,/setTimeout\s*\(/,'tactical flow must not hide results through timeout timers');
 assert.doesNotMatch(ui,/setInterval\s*\(/,'tactical flow must not use interval loops');
-assert.match(ui,/animationend/,'D100 must settle from its visual animation event');
+assert.match(ui,/getAnimations/,'D100 must await the single browser animation');
+assert.match(ui,/animation\.finished/,'D100 must settle from the Web Animation completion promise');
 assert.match(ui,/await showDiceResult\(cur,target,result,"Tour du héros"\);render\(\)/,'hero result must not render before the D100 animation');
 assert.match(ui,/await showDiceResult\(ai,target,result,"Tour ennemi"\);render\(\)/,'enemy result must not render before the D100 animation');
 
@@ -41,6 +42,8 @@ assert.match(ui,/dng_floor_stone_01\.png/,'battlefield must render a Dungeon flo
 assert.match(ui,/dng_wall_block\.jpg/,'walls must use the exact Dungeon Builder wall texture');
 assert.doesNotMatch(ui,/dungeon_wall\.png/,'retired wall texture must not be used by tactical UI');
 assert.match(ui,/patchDungeonMapHtml/,'random Dungeon map renderer must be patched before insertion');
+assert.match(ui,/gtv2WallTile/,'wall IMG must be emitted directly by the base renderer');
+assert.match(ui,/calculationSummary/,'real D100 chance and threshold must be understandable before rolling');
 assert.match(ui,/gensTacticalWallPreload1147/,'wall texture must be preloaded before zoom/re-render');
 assert.match(ui,/gtv2Cell\.blocked\.cover:after\{content:none!important;display:none!important\}/,'blocked wall cells must not show the useless cover icon');
 assert.doesNotMatch(ui,/new\s+(?:R\.)?MutationObserver/,'base tactical UI must not repaint walls from a DOM observer');
@@ -59,5 +62,5 @@ const displayedRoll=90;
 const hit=E.resolveAttack(battle,'hero','enemy:1','blade',U.engineRoll(displayedRoll,true));
 assert.equal(hit.ok,true);assert.equal(hit.hit,true,'90 must hit in high-roll mode for an 80% chance');assert.equal(hit.damage,4);
 
-assert.match(sw,/gensrpg-cache-16\.78\.114\.7-root-wall-dice-stats/);
-console.log('V16.78.114.7 tactical UI: builder wall + event-driven D100 + no timer/repaint loop OK');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.9-browser-profiled-combat/);
+console.log('V16.78.114.9 tactical UI: direct wall IMG + audited event-driven D100 + no observer loop OK');

@@ -24,7 +24,7 @@ const rt={
 
 assert.equal(B.install(rt),true);
 assert.equal(B.status(rt).dungeon,false,'explicit Survival family must block stale Dungeon profile state');
-assert.equal(rt.GENS_TACTICAL_V2_ROUTER_VERSION,'16.78.106');
+assert.equal(rt.GENS_TACTICAL_V2_ROUTER_VERSION,'16.78.114.10');
 
 family='adventure';
 assert.equal(B.dungeonContext(rt),true);
@@ -52,4 +52,4 @@ assert.equal(B.dungeonContext(rt),false);
 rt.dc200StartCombat(['z1'],'survival');
 assert.equal(legacyStart,1,'non-Dungeon context must keep its native route');
 
-console.log('V16.78.106 Tactical V2 global entry routing OK');
+console.log('V16.78.114.10 Tactical V2 global entry routing OK');

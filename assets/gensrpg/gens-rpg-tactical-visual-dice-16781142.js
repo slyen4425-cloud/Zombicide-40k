@@ -1,18 +1,18 @@
-/* GenSrpG V16.78.114.11 — browser-profiled tactical D100/session authority.
+/* GenSrpG V16.78.114.12 — tactical D100, damage clarity and stable wall ownership.
    Keeps V114.1 engagement, V113 room/sub-room scope, V114.4 recovery and V114.7 canonical stats.
-   V114.9 removes the global body observer which could recursively mutate the tactical overlay.
-   Walls are emitted once by the base Tactical UI/Dungeon map renderer; this module never repaints them.
-   V114.11 reconnects canonical melee raw-damage bonuses and the Core 3.17 configurable armor-zero floor. */
+   V114.11 melee raw-damage bonuses and configurable armor-zero floor are preserved.
+   V114.12 explains every raw-damage component and removes the exploration wall HTML reserialization path:
+   one persistent child image owns the texture, with a dark solid fallback and synchronous post-render attachment. */
 (function(root,factory){
   const api=factory(root||globalThis);
   if(typeof module!=="undefined"&&module.exports)module.exports=api;
   if(root)root.GensRpgTacticalVisualDice16781142=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="2.3.0",APP_VERSION="16.78.114.11";
+  const VERSION="2.4.0",APP_VERSION="16.78.114.12";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const WRONG_WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
-  const STYLE_ID="gensRpgTacticalVisualDice167811411Style";
+  const STYLE_ID="gensRpgTacticalVisualDice167811412Style";
   const ESCAPE_KEY="gensrpg_tactical_menu_escape_until_v1";
   const ESCAPE_MS=5000,TRANSITION_MS=420,DICE_WATCHDOG_MS=0;
   const arr=v=>Array.isArray(v)?v:[];
@@ -20,7 +20,7 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const norm=v=>str(v).trim().toLowerCase().normalize?.("NFD").replace(/[\u0300-\u036f]/g,"")||str(v).trim().toLowerCase();
-  let installed=false,hitPatched=false,menuBound=false,uiOpenPatched=false,transitionCount=0;
+  let installed=false,hitPatched=false,menuBound=false,uiOpenPatched=false,transitionCount=0,wallBitmap=null,mapRestored=false,wallHookCount=0;
 
   function doc(rt=R){return rt?.document||null}
   function ui(rt=R){return rt?.GensRpgTacticalCombatV2Ui||null}
@@ -33,10 +33,15 @@
 
   function ensureStyle(rt=R){
     const D=doc(rt);if(!D)return false;
-    for(const id of ["gensRpgTacticalVisualDice16781142Style","gensRpgTacticalVisualDice16781143Style","gensRpgTacticalVisualDice16781148Style","gensRpgTacticalVisualDice167811410Style"])D.getElementById?.(id)?.remove?.();
+    for(const id of ["gensRpgTacticalVisualDice16781142Style","gensRpgTacticalVisualDice16781143Style","gensRpgTacticalVisualDice16781148Style","gensRpgTacticalVisualDice167811410Style","gensRpgTacticalVisualDice167811411Style"])D.getElementById?.(id)?.remove?.();
     if(D.getElementById?.(STYLE_ID))return true;
     const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
       .gtv2113DiceRow,.gtv21143FastDiceHost{display:none!important}
+      .gtv2Cell.blocked,.drc100Cell.wall,.dc047Cell.dav167870WallCell,.gtv2112WallCell,.gtv2113Wall,.gtv2WallOwner{background-color:#171512!important;background-image:none!important;filter:none!important;isolation:auto!important;contain:none!important;transform-style:flat!important}
+      .gtv2WallTile{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;inset:-2px!important;width:calc(100% + 4px)!important;height:calc(100% + 4px)!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important;pointer-events:none!important;user-select:none!important;z-index:0!important;background:#171512!important;transform:none!important;will-change:auto!important;image-rendering:auto!important}
+      #dc01Heroes .dc01Hero img,.dc310Hero img,[data-gens-hero-art-167898]{pointer-events:none!important;user-select:none!important;-webkit-user-drag:none!important}
+      .gtv211412DamageDetails{margin:8px 0 2px;padding:9px 10px;border:1px solid #4a5360;border-radius:10px;background:#0d1219;text-align:left;font-size:12px;line-height:1.45;color:#dfe6ef}
+      .gtv211412DamageDetails strong{color:#fff}.gtv211412DamageLine+.gtv211412DamageLine{margin-top:3px}.gtv211412DamageMuted{color:#aeb8c5}
       .gtv21149Transition{position:fixed;inset:0;z-index:40050;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle at center,#4f1717aa,#05070bea 66%);animation:gtv21149TransitionFade ${TRANSITION_MS}ms ease-out both}
       .gtv21149TransitionCard{text-align:center;padding:18px 25px;border:1px solid #a44d45;border-radius:18px;background:#120d12e8;box-shadow:0 18px 55px #000d;animation:gtv21149TransitionCard ${TRANSITION_MS}ms cubic-bezier(.2,.8,.25,1) both}
       .gtv21149TransitionTitle{font-size:13px;font-weight:900;letter-spacing:.13em;color:#f09b8f}.gtv21149TransitionMain{font-size:27px;font-weight:1000;margin-top:5px;color:#fff}
@@ -44,14 +49,44 @@
     `;(D.head||D.documentElement||D.body)?.appendChild(s);return true;
   }
 
-  /* Compatibility facade: the base UI is the sole wall renderer in V114.9+. */
-  function preloadWallBitmap(rt=R){try{return Promise.resolve(!!ui(rt)?.preloadWall?.())}catch(e){return Promise.resolve(false)}}
+  function preloadWallBitmap(rt=R){
+    try{
+      if(wallBitmap&&wallBitmap.src)return Promise.resolve(true);
+      const Img=rt?.Image;if(typeof Img!=="function")return Promise.resolve(!!ui(rt)?.preloadWall?.());
+      const img=new Img();img.decoding="sync";img.src=WALL_ASSET;wallBitmap=img;rt.__gensRpgStableWallBitmap11412=img;
+      const decoded=typeof img.decode==="function"?img.decode().then(()=>true).catch(()=>true):Promise.resolve(true);
+      try{ui(rt)?.preloadWall?.()}catch(e){}
+      return decoded;
+    }catch(e){return Promise.resolve(false)}
+  }
   function wallTargets(rt=R){const D=doc(rt);if(!D)return [];return [...(D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell")||[])]}
-  function styleWallTile(img){return img||null}
-  function attachWallTile(rt=R,el=null){try{return !!ui(rt)?.ensureWallTile?.(el)}catch(e){return false}}
-  function stabilizeWalls(rt=R){try{return num(ui(rt)?.paintLiveWalls?.(),0)}catch(e){return 0}}
-  function patchDungeonMapHtml(rt=R){try{return !!ui(rt)?.patchDungeonMapHtml?.()}catch(e){return false}}
-  function patchRenderHooks(){return false}
+  function styleWallTile(img){if(!img)return null;try{img.draggable=false;img.setAttribute?.("draggable","false");img.setAttribute?.("decoding","sync");img.style.pointerEvents="none";img.style.userSelect="none";img.style.webkitUserDrag="none";img.style.display="block";img.style.visibility="visible";img.style.opacity="1"}catch(e){}return img}
+  function attachWallTile(rt=R,el=null){
+    if(!el)return false;let ok=false;try{ok=!!ui(rt)?.ensureWallTile?.(el)}catch(e){}
+    try{el.classList?.add?.("gtv2WallOwner");el.style?.setProperty?.("background-color","#171512","important");el.style?.setProperty?.("background-image","none","important");el.style?.setProperty?.("contain","none","important");el.style?.setProperty?.("isolation","auto","important");styleWallTile(el.querySelector?.(":scope > .gtv2WallTile"))}catch(e){}
+    return ok||!!el.querySelector?.(":scope > .gtv2WallTile");
+  }
+  function stabilizeWalls(rt=R){
+    let count=0;try{count+=num(ui(rt)?.paintLiveWalls?.(),0)}catch(e){}
+    for(const el of wallTargets(rt))if(attachWallTile(rt,el))count++;
+    return count;
+  }
+  function restoreDungeonMapHtml(rt=R){
+    const cur=rt?.dungeonMapHtml;if(typeof cur!=="function")return false;
+    if(cur.__gtv271WallPatch&&typeof cur.__original==="function"){rt.dungeonMapHtml=cur.__original;mapRestored=true;return true}
+    mapRestored=mapRestored||!cur.__gtv271WallPatch;return mapRestored;
+  }
+  function patchDungeonMapHtml(rt=R){return restoreDungeonMapHtml(rt)}
+  function afterWallRender(rt=R){stabilizeWalls(rt);try{rt?.queueMicrotask?.(()=>stabilizeWalls(rt))}catch(e){}return true}
+  function wrapWallRender(rt,obj,name){
+    const old=obj?.[name];if(typeof old!=="function"||old.__gensRpg11412WallPostRender)return false;
+    const w=function(){const out=old.apply(this,arguments);afterWallRender(rt);return out};w.__gensRpg11412WallPostRender=true;w.__original=old;obj[name]=w;wallHookCount++;return true;
+  }
+  function patchRenderHooks(rt=R){
+    const core=rt?.DungeonCore01;if(core){wrapWallRender(rt,core,"render");wrapWallRender(rt,core,"show")}
+    for(const name of ["renderDungeonMap","renderDungeonRoom","renderDungeon"])wrapWallRender(rt,rt,name);
+    return wallHookCount>0;
+  }
   function observeWalls(){return false}
 
   function thresholdForChance(hitChance,high=true){const chance=clamp(Math.round(num(hitChance,50)),1,99);return high?101-chance:chance}
@@ -84,30 +119,57 @@
     if(!physicalType(type)&&mode==="magic")return Math.max(0,num(d.magicDamageBonus,0));
     return 0;
   }
+  function itemDefinition(rt=R,id=""){try{return typeof rt?.itemById==="function"?rt.itemById(id):null}catch(e){return null}}
+  function attackDamageSource(rt=R,attack=null){
+    const effectiveWeaponDamage=Math.max(0,Math.round(num(attack?.power,0))),it=itemDefinition(rt,str(attack?.meta?.itemId||""));
+    const rawItemValue=it?(it.damage??it.power??it.strength):null;
+    const itemBaseDamage=Number.isFinite(Number(rawItemValue))?Math.max(0,Math.round(num(rawItemValue))):effectiveWeaponDamage;
+    const weaponEffectBonus=effectiveWeaponDamage-itemBaseDamage;
+    return {itemBaseDamage,effectiveWeaponDamage,weaponEffectBonus};
+  }
   function armorRules(rt=R){try{return rt?.loadDungeonRpgRules?.()||{}}catch(e){return {}}}
   function resolvePhysicalDamage(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
     const baseWeaponDamage=Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0));
     const statDamageBonus=canonicalDamageBonus(attacker,attack,preview);
     const rawDamage=Math.max(0,Math.round(baseWeaponDamage+statDamageBonus));
     const armor=attack?.ignoreArmor?0:Math.max(0,num(preview?.armor,target?.armor??0));
-    const rules=armorRules(rt),armorZeroBlockChance=clamp(num(rules?.armorZeroBlockChance,75),0,100);
+    const source=attackDamageSource(rt,attack),rules=armorRules(rt),armorZeroBlockChance=clamp(num(rules?.armorZeroBlockChance,75),0,100);
     let armorRoll=null,damage=Math.max(0,rawDamage-armor),armorBlocked=false,armorFloorTriggered=false;
     if(rawDamage>0&&damage<=0){
       armorFloorTriggered=true;armorRoll=Number.isFinite(Number(forcedArmorRoll))?Number(forcedArmorRoll):Math.floor(nextRandom(state)*100);
       try{if(typeof rt?.DungeonCore317?.resolveArmorFloor==="function")damage=Math.max(0,num(rt.DungeonCore317.resolveArmorFloor(rawDamage,armor,1,"physical",rules,armorRoll),0));else damage=armorRoll<armorZeroBlockChance?0:1}catch(e){damage=armorRoll<armorZeroBlockChance?0:1}
       armorBlocked=damage<=0;
     }
-    return {baseWeaponDamage,statDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,armorRoll,armorBlocked,armorFloorTriggered};
+    return {...source,baseWeaponDamage,statDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,armorRoll,armorBlocked,armorFloorTriggered};
   }
   function resolveDamagePerHit(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
     const type=str(preview?.damageType||attack?.damageType||"physical");
     if(physicalType(type))return {...resolvePhysicalDamage(rt,state,attacker,target,attack,preview,forcedArmorRoll),damageType:"physical"};
-    return {baseWeaponDamage:Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0)),statDamageBonus:0,rawDamage:Math.max(0,num(preview?.rawDamage??attack?.power,preview?.damage??0)),armor:0,damage:Math.max(0,num(preview?.damage,0)),armorZeroBlockChance:0,armorRoll:null,armorBlocked:false,armorFloorTriggered:false,damageType:type};
+    const source=attackDamageSource(rt,attack);return {...source,baseWeaponDamage:Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0)),statDamageBonus:0,rawDamage:Math.max(0,num(preview?.rawDamage??attack?.power,preview?.damage??0)),armor:0,damage:Math.max(0,num(preview?.damage,0)),armorZeroBlockChance:0,armorRoll:null,armorBlocked:false,armorFloorTriggered:false,damageType:type};
   }
+
+  function signedPart(value,label){const n=Math.round(num(value,0));if(!n)return "";return `${n>0?"+":"−"} ${Math.abs(n)} ${label}`}
+  function damageDetailsHtml(row){
+    if(!row?.ok)return "";const first=arr(row.damageRolls).find(Boolean)||row,raw=Math.max(0,Math.round(num(first.rawDamage,row.rawDamage))),base=Math.max(0,Math.round(num(first.itemBaseDamage,first.baseWeaponDamage))),effect=Math.round(num(first.weaponEffectBonus,0)),stat=Math.round(num(first.statDamageBonus,0)),parts=[`${base} arme`];
+    const ep=signedPart(effect,"effets arme/équipement"),sp=signedPart(stat,attackMode({tags:[String(row.damageType||"").toLowerCase()==="physical"?"melee":"magic"]})==="magic"?"bonus magie (stats)":"bonus mêlée (stats)");if(ep)parts.push(ep);if(sp)parts.push(sp);
+    let html=`<div class="gtv211412DamageLine"><strong>⚔️ Dégâts bruts ${raw}</strong> = ${parts.join(" ")}</div>`;
+    const armor=Math.max(0,Math.round(num(first.armor,row.armor))),perHit=Math.max(0,Math.round(num(first.damage,row.damagePerHit)));
+    if(first.armorFloorTriggered){const roll=Math.max(0,Math.round(num(first.armorRoll,row.armorRoll)))+1,chance=Math.round(num(first.armorZeroBlockChance,row.armorZeroBlockChance));html+=`<div class="gtv211412DamageLine">🛡️ Armure ${armor} annule le brut → jet blocage ${roll}/100 (blocage ${chance} %) → <strong>${first.armorBlocked?"bloqué : 0 dégât":"1 dégât minimum"}</strong></div>`}
+    else if(armor>0)html+=`<div class="gtv211412DamageLine">🛡️ Armure ${armor} → <strong>${perHit} dégât${perHit>1?"s":""} par touche</strong></div>`;
+    const landed=arr(row.damageRolls).filter(Boolean);if(landed.length>1){const vals=landed.map(x=>Math.max(0,Math.round(num(x.finalDamage,x.damage))));html+=`<div class="gtv211412DamageLine gtv211412DamageMuted">${landed.length} touches : ${vals.join(" + ")} = <strong>${Math.round(num(row.damage,0))} dégâts total</strong></div>`}
+    else if(landed[0]?.crit&&num(landed[0].finalDamage)!==num(landed[0].damage))html+=`<div class="gtv211412DamageLine gtv211412DamageMuted">Critique : ${Math.round(num(landed[0].damage))} → <strong>${Math.round(num(landed[0].finalDamage))}</strong></div>`;
+    return html;
+  }
+  function decorateDamageDetails(rt=R){
+    const D=doc(rt),card=D?.querySelector?.(".gtv2DiceCard");if(!card||card.querySelector?.(".gtv211412DamageDetails"))return false;
+    const row=[...arr(currentBattle(rt)?.log)].reverse().find(x=>x?.type==="attack");if(!row)return false;const html=damageDetailsHtml(row);if(!html)return false;
+    const box=D.createElement("div");box.className="gtv211412DamageDetails";box.setAttribute("data-v11412-damage-details","1");box.innerHTML=html;const btn=card.querySelector?.("button");card.insertBefore(box,btn||null);return true;
+  }
+  function scheduleDamageDetails(rt=R){if(typeof setTimeout!=="function")return decorateDamageDetails(rt);for(const ms of [0,25,90])setTimeout(()=>decorateDamageDetails(rt),ms);return true}
 
   function patchHitResolver(rt=R){
     const E=engine(rt);if(!E?.attackPreview||!E?.currentActor||!E?.actorById||!E?.refreshOutcome)return false;
-    if(E.resolveAttack?.__gensRpg11411Damage){hitPatched=true;return true}
+    if(E.resolveAttack?.__gensRpg11412Damage){hitPatched=true;return true}
     const previous=E.resolveAttack;
     const resolve=function(state,attackerId,targetId,attackId,forcedRoll=null){
       if(state?.status!=="active")return {ok:false,reason:"battle-ended"};
@@ -126,10 +188,10 @@
       if(damage>0){target.hp=clamp(num(target.hp)-damage,0,num(target.maxHp,1));if(target.hp<=0)target.alive=false}
       cur.actionsLeft=Math.max(0,num(cur.actionsLeft,0)-Math.max(1,num(attack?.actionCost,1)));
       const firstDamage=damageRolls.find(Boolean)||resolveDamagePerHit(rt,state,cur,target,attack,p,0);
-      const result={ok:true,hit:hits>0,roll:rolls[0],rolls,rollsDisplay:rolls.slice(),hitsRoll,dice,hits,crits,crit:crits>0,critRolls,damageRolls,rollHighToHit:high,hitTarget:calculation.threshold,hitChance:calculation.finalChance,hitCalculation:calculation,damage,damagePerHit:Math.max(0,num(firstDamage.damage,0)),targetHp:target.hp,targetDefeated:!target.alive,attackId:attack?.id||str(attackId),attackerId:cur.id,targetId:target.id,cellCover:calculation.cellCoverPenalty,totalCover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,damageType:firstDamage.damageType||p.damageType||attack?.damageType||"physical",resistance:p.resistance||0,resistanceKind:p.resistanceKind||"",baseWeaponDamage:firstDamage.baseWeaponDamage,statDamageBonus:firstDamage.statDamageBonus,rawDamage:firstDamage.rawDamage,armor:firstDamage.armor,armorZeroBlockChance:firstDamage.armorZeroBlockChance,armorRoll:firstDamage.armorRoll,armorBlocked:firstDamage.armorBlocked,armorFloorTriggered:firstDamage.armorFloorTriggered,distance:num(p.distance,0),cover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,targetDefense:calculation.defensePenalty,targetDodge:calculation.dodgePenalty,baseHit:calculation.baseHit,critChance:p.critChance||0,critMultiplier:p.critMultiplier||2};
-      state.log?.push?.({type:"attack",...result});E.refreshOutcome(state);return result;
+      const result={ok:true,hit:hits>0,roll:rolls[0],rolls,rollsDisplay:rolls.slice(),hitsRoll,dice,hits,crits,crit:crits>0,critRolls,damageRolls,rollHighToHit:high,hitTarget:calculation.threshold,hitChance:calculation.finalChance,hitCalculation:calculation,damage,damagePerHit:Math.max(0,num(firstDamage.damage,0)),targetHp:target.hp,targetDefeated:!target.alive,attackId:attack?.id||str(attackId),attackerId:cur.id,targetId:target.id,cellCover:calculation.cellCoverPenalty,totalCover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,damageType:firstDamage.damageType||p.damageType||attack?.damageType||"physical",resistance:p.resistance||0,resistanceKind:p.resistanceKind||"",itemBaseDamage:firstDamage.itemBaseDamage,effectiveWeaponDamage:firstDamage.effectiveWeaponDamage,weaponEffectBonus:firstDamage.weaponEffectBonus,baseWeaponDamage:firstDamage.baseWeaponDamage,statDamageBonus:firstDamage.statDamageBonus,rawDamage:firstDamage.rawDamage,armor:firstDamage.armor,armorZeroBlockChance:firstDamage.armorZeroBlockChance,armorRoll:firstDamage.armorRoll,armorBlocked:firstDamage.armorBlocked,armorFloorTriggered:firstDamage.armorFloorTriggered,distance:num(p.distance,0),cover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,targetDefense:calculation.defensePenalty,targetDodge:calculation.dodgePenalty,baseHit:calculation.baseHit,critChance:p.critChance||0,critMultiplier:p.critMultiplier||2};
+      state.log?.push?.({type:"attack",...result});E.refreshOutcome(state);scheduleDamageDetails(rt);return result;
     };
-    resolve.__gensRpg11411Damage=true;resolve.__gensRpg11410DirectD100=true;resolve.__gensRpg1149DirectD100=true;resolve.__gensRpg1148DirectD100=true;resolve.__original=previous;E.resolveAttack=resolve;hitPatched=true;return true;
+    resolve.__gensRpg11412Damage=true;resolve.__gensRpg11411Damage=true;resolve.__gensRpg11410DirectD100=true;resolve.__gensRpg1149DirectD100=true;resolve.__gensRpg1148DirectD100=true;resolve.__original=previous;E.resolveAttack=resolve;hitPatched=true;return true;
   }
 
   function diceInfo(rt=R){
@@ -169,11 +231,11 @@
   }
 
   function install(rt=R){
-    ensureStyle(rt);preloadWallBitmap(rt);patchDungeonMapHtml(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);
+    ensureStyle(rt);preloadWallBitmap(rt);restoreDungeonMapHtml(rt);patchRenderHooks(rt);stabilizeWalls(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);decorateDamageDetails(rt);
     try{rt.GENS_RPG_TACTICAL_VISUAL_DICE_VERSION=APP_VERSION}catch(e){}installed=true;return true;
   }
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,armorRules,resolvePhysicalDamage,resolveDamagePerHit,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:false,uiRenderPatched:false,mapPatched:false,corePatched:false,hitPatched,menuBound,uiOpenPatched,transitionCount})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,restoreDungeonMapHtml,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,attackDamageSource,armorRules,resolvePhysicalDamage,resolveDamagePerHit,damageDetailsHtml,decorateDamageDetails,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:false,uiRenderPatched:false,mapRestored,wallHookCount,hitPatched,menuBound,uiOpenPatched,transitionCount})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

@@ -1,4 +1,4 @@
-name: Validate V16.78.114.2 Vision + Wall + Survival Dice
+name: Validate V16.78.114.3 Vision + Wall + Fast Dice + Combat UX
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - work/v16.78.114-wall-detection-dice
       - work/v16.78.114.1-keep-vision-revert-wall-dice
       - work/v16.78.114.2-builder-wall-survival-dice
+      - work/v16.78.114.3-wall-dice-transition-menu
       - main
   pull_request:
     branches:
@@ -25,7 +26,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
-      - name: Exact V114.2 live-vision wall and Survival-dice scenarios
+      - name: Exact V114.3 live-vision wall fast-dice transition and menu scenarios
         run: node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
       - name: Preserve V113 room and sub-room scoping
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs

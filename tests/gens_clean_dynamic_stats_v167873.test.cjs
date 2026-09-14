@@ -10,7 +10,7 @@ const profile={id:'dungeon',gameStyle:'dungeon',rpgUniverse:{progression:{attrib
  dynamicRules:[{id:'chance_phys',source:'chance',target:'damage:physical',step:10,gain:1,enabled:true}]
 }}};
 savedProfiles=[profile];
-const heroState={statPoints:2,rpgStatSpent:0,rpgAttributes:{chance:10}};
+const heroState={statPoints:2,rpgStatSpent:0,rpgAttributes:{force:17,chance:10}};
 const rules={physicalDamageStep:10,physicalDamageGain:1,magicDamageStep:10,magicDamageGain:1,enduranceHpStep:10,hpGain:2,spiritManaStep:10,manaGain:10,agilityCritStep:10,critGain:5,agilityDodgeStep:10,dodgeGain:3,meleeHitStep:10,meleeHitGain:5,rangedHitStep:10,rangedHitGain:5,magicHitStep:10,magicHitGain:5,spiritMagicResistStep:20,magicResistGain:1,critCap:50,dodgeCap:40};
 let nativeCoreCalls=0;
 const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'dungeon_aldren',state:heroState,
@@ -27,13 +27,13 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;assert.ok(api,'clean stat API missing');api.install();
-assert.equal(api.APP_VERSION,'16.78.95');
+assert.equal(api.APP_VERSION,'16.78.114.7');
 assert.equal(api.def('chance').name,'Chance');
 assert.equal(api.active('chance'),true);
 assert.equal(api.value('dungeon_aldren','chance'),13,'unknown stat must include equipment and talent bonuses');
 assert.equal(ctx.dungeonAttributeValue('chance'),13,'runtime lookup must accept an unknown stat id');
-assert.equal(ctx.dungeonAttributeValue('force'),17,'core Force must keep the stable native runtime');
-assert.ok(nativeCoreCalls>=1,'stable core function must still be called');
+assert.equal(ctx.dungeonAttributeValue('force'),17,'core Force must read the rebuilt canonical rpgAttributes authority');
+assert.equal(nativeCoreCalls,0,'current hero core stats must not fall back to the retired native attribute reader');
 assert.equal(rules.physicalDamageGain,0,'legacy physical gain must be neutralized after migration');
 assert.ok(api.effects().some(r=>r.id==='migrated_legacy_phys'&&r.step===10&&r.gain===1),'old Force rule must be preserved as a normal visible effect');
 assert.equal(api.legacyEffects().length,0,'legacy effect source must no longer stay live after migration');
@@ -47,5 +47,5 @@ assert.equal(heroState.rpgAttributes.chance,10);
 assert.equal(heroState.statPoints,2,'-1 must refund the point through stable progression sync');
 const before=ctx.dungeonPhysicalDamageBonus();profile.rpgUniverse.stats.active=profile.rpgUniverse.stats.active.filter(x=>x!=='chance');assert.equal(api.active('chance'),false);assert.equal(ctx.dungeonPhysicalDamageBonus(),1,'inactive custom stat must stop influencing combat while migrated Force remains');assert.equal(before,2);
 assert.doesNotMatch(src,/GensRpgStatService167901|gens-rpg-stat-reconcile-167902|gens-custom-stats-167881/,'V16.79 stat layers must not be reused');
-console.log('GenSrpG V16.78.95 clean stats: canonical +/- + unknown stat + points + single-authority influences OK');
+console.log('GenSrpG V16.78.114.7 clean stats: rebuilt core + custom stats + points + single-authority influences OK');
 require('./gens_native_defense_armor_movement_v167895.test.cjs');

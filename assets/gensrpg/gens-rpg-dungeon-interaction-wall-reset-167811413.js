@@ -8,11 +8,11 @@
   if(root)root.GensRpgDungeonInteractionWallReset167811413=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.1",APP_VERSION="16.78.114.13";
+  const VERSION="1.0.2",APP_VERSION="16.78.114.13";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const STYLE_ID="gensRpgWallReset167811413Style";
   const RETRIES=[0,110,280,720,1100,1800];
-  const NAV_RETRIES=[0,40,140,360];
+  const QUIT_RETRIES=[0,40,140,360];
   let installed=false,cardBound=false,quitPatched=false,heroPatched=false,resetCount=0;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -100,16 +100,10 @@
     if(sheet&&!visible(sheet)){if(core)core.style.display="block";return false}
     return true;
   }
-  function verifyHeroRoute(id){
-    const sheet=D()?.getElementById?.("sheet");if(visible(sheet))return true;return forceOpenHero(id)
-  }
+  function verifyHeroRoute(id){const sheet=D()?.getElementById?.("sheet");if(visible(sheet))return true;return forceOpenHero(id)}
   function patchOpenHero(){
     const core=R.DungeonCore01,old=core?.openHero;if(typeof old!=="function")return false;if(old.__gensRpg11413HeroOpen){heroPatched=true;return true}
-    const wrapped=function(id){
-      const out=old.apply(this,arguments);if(!allowedHero(id))return out;
-      for(const ms of NAV_RETRIES){const fn=()=>verifyHeroRoute(id);if(ms===0)fn();else if(typeof R.setTimeout==="function")R.setTimeout(fn,ms)}
-      return out;
-    };
+    const wrapped=function(id){const out=old.apply(this,arguments);if(allowedHero(id))verifyHeroRoute(id);return out};
     wrapped.__gensRpg11413HeroOpen=true;wrapped.__original=old;core.openHero=wrapped;heroPatched=true;return true;
   }
   function bindHeroCards(){
@@ -129,24 +123,21 @@
     if(core)core.style.display="none";if(sheet)sheet.style.display="none";if(family)family.style.display="none";if(game)game.style.display="none";if(root)root.style.display="block";
     try{R.scrollTo?.(0,0)}catch(e){}return !!root;
   }
-  function verifyQuitRoute(){
-    let active=false;try{active=!!R.DungeonCore01?.active}catch(e){}
-    if(active)return false;return forceRootHome()
-  }
+  function verifyQuitRoute(){let active=false;try{active=!!R.DungeonCore01?.active}catch(e){}if(active)return false;return forceRootHome()}
   function patchQuit(){
     const core=R.DungeonCore01,old=core?.quit;if(typeof old!=="function")return false;if(old.__gensRpg11413Quit){quitPatched=true;return true}
     const wrapped=function(){
       let before=false;try{before=!!core.active}catch(e){}
       const out=old.apply(this,arguments);
       let after=before;try{after=!!core.active}catch(e){}
-      if(before&&!after)for(const ms of NAV_RETRIES){const fn=verifyQuitRoute;if(ms===0)fn();else if(typeof R.setTimeout==="function")R.setTimeout(fn,ms)}
+      if(before&&!after)for(const ms of QUIT_RETRIES){const fn=verifyQuitRoute;if(ms===0)fn();else if(typeof R.setTimeout==="function")R.setTimeout(fn,ms)}
       return out;
     };
     wrapped.__gensRpg11413Quit=true;wrapped.__original=old;core.quit=wrapped;quitPatched=true;return true;
   }
   function install(){resetWalls();patchOpenHero();bindHeroCards();patchQuit();try{R.GENS_RPG_DUNGEON_INTERACTION_WALL_RESET_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(){for(const ms of RETRIES){if(ms===0)install();else if(typeof R.setTimeout==="function")R.setTimeout(install,ms)}return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,STYLE_ID,RETRIES,NAV_RETRIES,runtimeState,visible,unwrapMarked,restoreNativeMapRenderer,restoreDungeonRenderers,cleanWallCells,resetWalls,participants,cardHeroId,allowedHero,forceOpenHero,verifyHeroRoute,patchOpenHero,bindHeroCards,forceRootHome,verifyQuitRoute,patchQuit,install,installWithRetries,status:()=>({installed,cardBound,quitPatched,heroPatched,resetCount})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,STYLE_ID,RETRIES,QUIT_RETRIES,runtimeState,visible,unwrapMarked,restoreNativeMapRenderer,restoreDungeonRenderers,cleanWallCells,resetWalls,participants,cardHeroId,allowedHero,forceOpenHero,verifyHeroRoute,patchOpenHero,bindHeroCards,forceRootHome,verifyQuitRoute,patchQuit,install,installWithRetries,status:()=>({installed,cardBound,quitPatched,heroPatched,resetCount})};
   if(D()){if(D().readyState==="loading")D().addEventListener?.("DOMContentLoaded",installWithRetries,{once:true});else installWithRetries()}
   return api;
 });

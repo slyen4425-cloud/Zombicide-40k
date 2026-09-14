@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Repair patcher nested-template escaping
+        run: node tools/fix-v1147-patcher-escaping.cjs
       - name: Apply V114.7 consolidation
         run: node tools/apply-v1147-single-authority.cjs
       - name: Commit patched runtime

@@ -1,4 +1,4 @@
-name: Validate V16.78.114.6 Consolidated Tactical Runtime
+name: Validate V16.78.114.7 Root Tactical Runtime
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
       - work/v16.78.114.4-combat-session-recovery
       - work/v16.78.114.5-wall-dice-stats
       - work/v16.78.114.6-consolidate-wall-dice-stats
+      - work/v16.78.114.7-root-wall-dice-stats
       - main
   pull_request:
     branches:
@@ -23,8 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Syntax tactical runtime chain
+      - name: Syntax tactical runtime chain and canonical stats
         run: |
+          node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
@@ -33,8 +35,14 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
-      - name: Exact V114.6 consolidated wall dice stats scenarios
+      - name: Exact V114.7 consolidated wall dice stats scenarios
         run: node tests/gens_rpg_tactical_consolidation_v16781146.test.cjs
+      - name: Real rebuilt current-hero stats into Tactical V110 snapshot
+        run: node tests/gens_rpg_tactical_root_stats_v16781147.test.cjs
+      - name: Preserve no-timer no-legacy tactical UI isolation
+        run: |
+          node tests/gens_rpg_tactical_combat_v2_ui_v1678107.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
       - name: Preserve V114.4 menu recovery and no-legacy scenarios
         run: node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
       - name: Preserve V114 live vision transition and menu scenarios

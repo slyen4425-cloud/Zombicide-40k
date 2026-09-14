@@ -1,4 +1,4 @@
-name: Validate V16.78.114.10 D100 Entry Walls
+name: Validate V16.78.114.11 Armor + Melee Damage
 
 on:
   push:
@@ -17,6 +17,7 @@ on:
       - work/v16.78.114.8-wall-hit-clarity
       - work/v16.78.114.9-browser-profile-fix
       - work/v16.78.114.10-hit-entry-wall
+      - work/v16.78.114.11-armor-damage
       - main
   pull_request:
     branches:
@@ -42,6 +43,8 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
+      - name: Exact V114.11 melee bonus and armor-zero scenarios
+        run: node tests/gens_rpg_tactical_damage_v167811411.test.cjs
       - name: Exact V114.10 D100 origin and wall ownership scenarios
         run: |
           node tests/gens_rpg_tactical_hit_wall_v16781148.test.cjs

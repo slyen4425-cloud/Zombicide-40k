@@ -1,0 +1,35 @@
+name: Apply V16.78.114.6 Tactical Consolidation
+
+on:
+  push:
+    branches:
+      - work/v16.78.114.6-consolidate-wall-dice-stats
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/v16.78.114.6-consolidate-wall-dice-stats
+          fetch-depth: 0
+      - name: Apply exact consolidation patch
+        run: node tools/apply-v1146-consolidation.cjs
+      - name: Syntax check patched tactical files
+        run: |
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
+      - name: Commit patched runtime
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js service-worker.js
+          git commit -m "GenSrpG V16.78.114.6: consolidate tactical wall dice stats authorities"
+          git push origin HEAD:work/v16.78.114.6-consolidate-wall-dice-stats

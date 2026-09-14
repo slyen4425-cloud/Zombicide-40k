@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
-<head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.10 browser profile</title>
-<style>html,body{margin:0;min-height:100%;background:#111;color:#fff}#dc047RoomBoard{display:none}</style>
+<head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.13 browser profile</title>
+<style>html,body{margin:0;min-height:100%;background:#111;color:#fff}#gensDungeonCore01{display:block;padding:8px}#gensRootHome,#sheet{display:none}.dc047Grid{display:grid;grid-template-columns:52px}.dc047Cell{position:relative;width:52px;height:52px;background:#222}.dc055Floor{width:100%;height:100%}#dc01Heroes{display:flex;gap:8px}.dc01Hero{width:120px}.dc01Hero img{width:100%;height:70px;object-fit:cover}</style>
 <script>
 window.__runtime={room:1,index:0,participants:["dungeon_aldren","dungeon_lyra"],heroRooms:{dungeon_aldren:1,dungeon_lyra:0},positions:{dungeon_aldren:6},heroBranchStates:{},branch:null,enemyCells:{e:8},last:{kind:"enemy",map:{size:5,cells:Array(25).fill("floor")}}};
 window.__runtime.last.map.cells[0]="wall";window.__runtime.last.map.cells[4]="wall";
@@ -42,6 +42,16 @@ window.dungeonEnemyAttackSkills=()=>[{id:"claw",name:"Griffe",mode:"melee"}];
 window.dungeonEnemyAttackProfile=()=>({mode:"melee",range:1,chance:70,power:1});
 window.isDungeonMode=()=>true;window.getActiveGameProfile=()=>({gameStyle:"dungeon",rpgUniverse:{combatRules:{rollHighToHit:true}}});window.currentRpgProfile=window.getActiveGameProfile;
 window.saveGameProfiles=()=>{};window.loadGameProfiles=()=>[];window.dispatchEvent=()=>true;window.dc200StartCombat=()=>false;window.openDungeonCombatSetup=()=>false;
+window.__activeCore=true;window.__openedHero="";
+window.openChar=id=>{window.__openedHero=String(id);document.getElementById("gensDungeonCore01").style.display="none";document.getElementById("sheet").style.display="block"};
+window.showGensRootHome=()=>{document.getElementById("gensRootHome").style.display="block"};
+window.confirm=()=>true;
+window.DungeonCore01={
+ get active(){return window.__activeCore},
+ render(){return true},show(){document.getElementById("gensDungeonCore01").style.display="block";return true},
+ openHero(id){document.getElementById("gensDungeonCore01").style.display="none";window.openChar(String(id))},
+ quit(){if(!window.confirm("Quitter ?"))return false;window.__activeCore=false;document.getElementById("gensDungeonCore01").style.display="none";window.showGensRootHome();return true}
+};
 </script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js"></script>
@@ -50,10 +60,23 @@ window.saveGameProfiles=()=>{};window.loadGameProfiles=()=>[];window.dispatchEve
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js"></script>
+<script src="/assets/gensrpg/gens-rpg-dungeon-interaction-wall-reset-167811413.js"></script>
 <script>
-window.startProfiledEncounter=function(){const out=window.GensRpgTacticalCombatV2Bridge.openCurrent(window,{enemyIds:["e"],reason:"browser-v11410"});if(!out.ok)throw new Error(out.reason);return out.battle};
+window.startProfiledEncounter=function(){const out=window.GensRpgTacticalCombatV2Bridge.openCurrent(window,{enemyIds:["e"],reason:"browser-v11413"});if(!out.ok)throw new Error(out.reason);return out.battle};
 window.closeProfiledEncounter=()=>window.GensRpgTacticalCombatV2Ui.close(false);
 window.enterLyra=function(){window.__runtime.heroRooms.dungeon_lyra=1;window.__runtime.positions.dungeon_lyra=7;window.__runtime.index=1;localStorage.setItem("gensrpg_dungeon_runtime_v2",JSON.stringify(window.__runtime));return true};
-window.addEventListener("DOMContentLoaded",()=>{window.GensRpgTacticalStats1678110.install(window);window.GensRpgTacticalCombatV2Bridge.install(window);window.GensRpgTacticalVisualDice16781142.install(window);window.__browserProfileReady=true});
+window.resetExplorationUi=function(){window.__activeCore=true;window.__openedHero="";document.getElementById("gensRootHome").style.display="none";document.getElementById("sheet").style.display="none";document.getElementById("gensDungeonCore01").style.display="block"};
+window.addEventListener("DOMContentLoaded",()=>{window.GensRpgTacticalStats1678110.install(window);window.GensRpgTacticalCombatV2Bridge.install(window);window.GensRpgTacticalVisualDice16781142.install(window);window.GensRpgDungeonInteractionWallReset167811413.installWithRetries(window);setTimeout(()=>window.__browserProfileReady=true,1900)});
 </script>
-</head><body><main id="exploration">Exploration mobile simulée</main></body></html>
+</head><body>
+<div id="gensRootHome">ACCUEIL</div>
+<div id="sheet">FICHE HÉROS</div>
+<section id="gensDungeonCore01">
+  <div class="dc01Top"><button id="saveQuit" type="button" onclick="DungeonCore01.quit()">💾 SAUVEGARDER ET QUITTER</button></div>
+  <select id="dc01Role"><option value="player" selected>Joueur</option></select>
+  <select id="dc01DeviceHero"><option value="dungeon_aldren" selected>Aldren</option></select>
+  <div id="dc01Heroes"><button class="dc01Hero" type="button"><img src="/assets/dungeon/creatures/dng_aldren.png" alt=""><span>Aldren</span></button><button class="dc01Hero" type="button"><img src="/assets/dungeon/creatures/dng_lyra.png" alt=""><span>Lyra</span></button></div>
+  <div id="dc047RoomBoard"><div class="dc047Grid"><div class="dc047Cell wall"><img class="dc055Floor" src="/assets/dungeon/creatures/dng_floor_stone_01.png" alt=""></div></div></div>
+</section>
+<main id="exploration">Exploration mobile simulée</main>
+</body></html>

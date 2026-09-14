@@ -20,6 +20,17 @@ jobs:
         run: node tools/fix-v1147-patcher-escaping.cjs
       - name: Apply V114.7 consolidation
         run: node tools/apply-v1147-single-authority.cjs
+      - name: Update V110 regression guard for snapshotValue
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const p='tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs';
+          let s=fs.readFileSync(p,'utf8');
+          const old="assert.equal((source.match(/api\\.value\\(/g)||[]).length,1,'canonical value() must only be called by the snapshot builder');";
+          const neu="assert.match(source,/api\\?\\.snapshotValue/,'snapshot builder must prefer the canonical snapshot reader');assert.doesNotMatch(source,/api\\.value\\(/,'tactical snapshot must not hard-code the obsolete value() seam');";
+          if(!s.includes(old)) throw new Error('V110 legacy source assertion not found');
+          fs.writeFileSync(p,s.replace(old,neu));
+          NODE
       - name: Syntax affected runtime
         run: |
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js

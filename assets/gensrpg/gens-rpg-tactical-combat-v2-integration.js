@@ -36,14 +36,25 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadVisualDice1142(){
+    const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader1142)return false;
+    R.__gensTacticalVisualDiceLoader1142=true;
+    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.2 visual/dice install",e)}};
+    if(R.GensRpgTacticalVisualDice16781142){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.2";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.2 visual/dice load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadHotfix114(){
     const D=R.document;if(!D||R.__gensTacticalHotfixLoader114)return false;
     R.__gensTacticalHotfixLoader114=true;
-    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}};
+    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}loadVisualDice1142()};
     if(R.GensRpgTacticalHotfix1678114){install();return true}
     const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js?v=16.78.114";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114 tactical hotfix load failed");
+    s.src="assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js?v=16.78.114.1";
+    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114 tactical hotfix load failed");loadVisualDice1142()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -126,7 +137,8 @@
      V110 snapshots canonical RPG stats. V111 preserves weapon dice and the fixed dock.
      V112 keeps detailed sheets and readable result explanations.
      V113 owns room/sub-room participant scope.
-     V114 loads last and owns only the validated wall art, live enemy detection and delayed dice reveal. */
+     V114.1 keeps the validated live enemy vision.
+     V114.2 loads last and owns only wall visuals + Survival dice presentation. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

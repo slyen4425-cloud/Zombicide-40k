@@ -20,14 +20,39 @@ jobs:
         run: node tools/fix-v1147-patcher-escaping.cjs
       - name: Apply V114.7 consolidation
         run: node tools/apply-v1147-single-authority.cjs
+      - name: Syntax affected runtime
+        run: |
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
+          node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
+          node --check assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js
+          node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
+          node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+          node --check assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js
+      - name: Validate single-authority behavior
+        run: |
+          node tests/gens_rpg_tactical_single_authority_v16781147.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_ui_v1678107.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs
+          node tests/gens_rpg_tactical_runtime_fixes_v1678111.test.cjs
+          node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
+          node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
+          node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+          node tests/gens_mobile_combat_performance_v16781022.test.cjs
+          node tests/dungeon_runtime_regression.test.cjs
+          node tests/gens_survival_mode_isolation_v1678104.test.cjs
+          node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
       - name: Commit patched runtime
         run: |
-          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all)" ]; then
-            echo "No patch changes needed"
+          git checkout -- .github/workflows/v1678114-tactical-hotfix.yml
+          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all | grep -v '^?? tools/' || true)" ]; then
+            echo "No runtime patch changes needed"
             exit 0
           fi
           git config user.name "slyen4425-cloud"
           git config user.email "slyen4425@gmail.com"
-          git add assets/gensrpg service-worker.js tests .github/workflows/v1678114-tactical-hotfix.yml
+          git add assets/gensrpg service-worker.js tests
           git commit -m "GenSrpG V16.78.114.7: single authority wall dice stats [v1147-patched]"
           git push origin HEAD:work/v16.78.114.7-single-authority

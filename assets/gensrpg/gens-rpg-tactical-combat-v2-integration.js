@@ -36,14 +36,29 @@
   };
   A.__gensTacticalIntegration103=true;
 
+  function loadHotfix114(){
+    const D=R.document;if(!D||R.__gensTacticalHotfixLoader114)return false;
+    R.__gensTacticalHotfixLoader114=true;
+    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}};
+    if(R.GensRpgTacticalHotfix1678114){install();return true}
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js?v=16.78.114";
+    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114 tactical hotfix load failed");
+    (D.head||D.documentElement).appendChild(s);return true;
+  }
+
   function loadAuthority113(){
-    const D=R.document;if(!D||R.__gensTacticalAuthorityLoader113)return false;
+    const D=R.document;if(!D)return false;
+    const after113=()=>{
+      try{R.GensRpgTacticalRuntimeAuthority1678113?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V113 tactical runtime authority install",e)}
+      loadHotfix114();
+    };
+    if(R.GensRpgTacticalRuntimeAuthority1678113){after113();return true}
+    if(R.__gensTacticalAuthorityLoader113){loadHotfix114();return true}
     R.__gensTacticalAuthorityLoader113=true;
-    const install=()=>{try{R.GensRpgTacticalRuntimeAuthority1678113?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V113 tactical runtime authority install",e)}};
-    if(R.GensRpgTacticalRuntimeAuthority1678113){install();return true}
     const s=D.createElement("script");
     s.src="assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js?v=16.78.113";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V113 tactical runtime authority load failed");
+    s.async=false;s.onload=after113;s.onerror=()=>{console.error("GenSrpG V113 tactical runtime authority load failed");loadHotfix114()};
     (D.head||D.documentElement).appendChild(s);return true;
   }
 
@@ -110,8 +125,8 @@
   /* V108 remains the movement/action bridge. V109 owns timeline/range polish.
      V110 snapshots canonical RPG stats. V111 preserves weapon dice and the fixed dock.
      V112 keeps detailed sheets and readable result explanations.
-     V113 loads last and owns the actual runtime seams: room/sub-room scope, detection,
-     visible dice animation and the final wall texture authority. */
+     V113 owns room/sub-room participant scope.
+     V114 loads last and owns only the validated wall art, live enemy detection and delayed dice reveal. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{

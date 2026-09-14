@@ -8,7 +8,7 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const U=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-ui.js'));
 const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 
-assert.equal(U.APP_VERSION,'16.78.107.1');
+assert.equal(U.APP_VERSION,'16.78.114.7');
 assert.match(ui,/gtv271ActorCard/,'readable actor cards must be rendered below the grid');
 assert.match(ui,/data-detail=/,'actor cards must open a detail view');
 assert.match(ui,/statusRows/,'actor cards/detail must expose status and DoT slots');
@@ -22,13 +22,15 @@ assert.match(ui,/data-dice-continue/,'D100 result must require explicit confirma
 assert.match(ui,/Tour d’initiative ennemi — ce n’est pas une riposte automatique/,'enemy action must be clearly identified');
 assert.doesNotMatch(ui,/setTimeout\s*\(/,'tactical flow must not hide results through timeout timers');
 assert.doesNotMatch(ui,/setInterval\s*\(/,'tactical flow must not use interval loops');
+assert.match(ui,/animationend/,'D100 must settle from its visual animation event');
+assert.match(ui,/await showDiceResult\(cur,target,result,"Tour du héros"\);render\(\)/,'hero result must not render before the D100 animation');
+assert.match(ui,/await showDiceResult\(ai,target,result,"Tour ennemi"\);render\(\)/,'enemy result must not render before the D100 animation');
 
-// High-roll is the new default reading without changing probability.
+// High-roll remains configurable without changing probability.
 assert.equal(U.ruleTarget(75,true),26);
 assert.equal(U.hitByRule(80,75,true),true);
 assert.equal(U.hitByRule(20,75,true),false);
 assert.equal(U.engineRoll(80,true),21,'80 high-roll must translate to 21 for the unchanged low-roll engine');
-// Low-roll remains configurable.
 assert.equal(U.ruleTarget(75,false),75);
 assert.equal(U.hitByRule(20,75,false),true);
 assert.equal(U.hitByRule(80,75,false),false);
@@ -36,12 +38,13 @@ assert.match(ui,/rpgStatsList/,'D100 rule must be injected into the general RPG/
 assert.match(ui,/rollHighToHit/,'D100 reading must persist as a Dungeon combat rule');
 
 assert.match(ui,/dng_floor_stone_01\.png/,'battlefield must render a Dungeon floor texture');
-assert.match(ui,/dungeon_wall\.png/,'walls must use the corrected wall texture');
-assert.doesNotMatch(ui,/dng_wall_block\.jpg/,'white/legacy wall block asset must not be used by tactical UI');
-assert.match(ui,/patchDungeonMapHtml/,'random Dungeon map renderer must be patched too');
-assert.match(ui,/#dc047RoomBoard \.dc047Grid > \.dc047Cell/,'live random Dungeon board walls must be repainted');
+assert.match(ui,/dng_wall_block\.jpg/,'walls must use the exact Dungeon Builder wall texture');
+assert.doesNotMatch(ui,/dungeon_wall\.png/,'retired wall texture must not be used by tactical UI');
+assert.match(ui,/patchDungeonMapHtml/,'random Dungeon map renderer must be patched before insertion');
+assert.match(ui,/gensTacticalWallPreload1147/,'wall texture must be preloaded before zoom/re-render');
+assert.match(ui,/gtv2Cell\.blocked\.cover:after\{content:none!important;display:none!important\}/,'blocked wall cells must not show the useless cover icon');
+assert.doesNotMatch(ui,/new\s+(?:R\.)?MutationObserver/,'base tactical UI must not repaint walls from a DOM observer');
 
-// Pure engine remains isolated and the translated high-roll keeps identical hit probability semantics.
 const battle=E.createBattle({
   grid:{width:6,height:4,blocked:[]},
   actors:[
@@ -56,5 +59,5 @@ const displayedRoll=90;
 const hit=E.resolveAttack(battle,'hero','enemy:1','blade',U.engineRoll(displayedRoll,true));
 assert.equal(hit.ok,true);assert.equal(hit.hit,true,'90 must hit in high-roll mode for an 80% chance');assert.equal(hit.damage,4);
 
-assert.match(sw,/gensrpg-cache-16\.78\.107-tactical-actions-dice-terrain|gensrpg-cache-16\.78\.107\.1-tactical-readability-roll-walls/);
-console.log('V16.78.107.1 tactical readability + persistent dice + roll rule + walls OK');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.7-root-wall-dice-stats/);
+console.log('V16.78.114.7 tactical UI: builder wall + event-driven D100 + no timer/repaint loop OK');

@@ -9,7 +9,7 @@
   "use strict";
 
   const VERSION="0.1.0";
-  const APP_VERSION="16.78.103";
+  const APP_VERSION="16.78.114.10";
   const SIDE_HERO="hero";
   const SIDE_ENEMY="enemy";
   const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
@@ -45,7 +45,8 @@
       ignoreArmor:!!a.ignoreArmor,
       actionCost:Math.max(1,Math.trunc(num(a.actionCost,1))),
       lineOfSight:a.lineOfSight!==false,
-      tags:Array.isArray(a.tags)?a.tags.map(String):[]
+      tags:Array.isArray(a.tags)?a.tags.map(String):[],
+      meta:a.meta&&typeof a.meta==="object"?copy(a.meta):{}
     };
   }
 

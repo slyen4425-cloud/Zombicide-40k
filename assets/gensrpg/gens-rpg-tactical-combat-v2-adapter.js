@@ -1,13 +1,14 @@
 /* GenSrpG Tactical Combat V2 — runtime adapter.
-   Snapshots current Dungeon heroes/enemies once, then feeds the isolated engine.
-   Legacy combat/timeline is never called from this adapter. */
+   V16.78.114.10 converts legacy D6 accuracy exactly once at the D100 boundary,
+   derives Dungeon RPG weapon precision from its canonical scaling, and refuses heroes
+   that have not entered the current room. Legacy combat/timeline is never called. */
 (function(root,factory){
   const api=factory(root||globalThis);
   if(typeof module!=="undefined"&&module.exports)module.exports=api;
   if(root)root.GensRpgTacticalCombatV2Adapter=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.3.0",APP_VERSION="16.78.103";
+  const VERSION="0.4.0",APP_VERSION="16.78.114.10";
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const arr=v=>Array.isArray(v)?v:[];
@@ -27,6 +28,30 @@
     if(!Number.isFinite(n)||n<=0)return 75;
     if(n<=6)return clamp(Math.round(((7-n)/6)*100),5,95);
     return clamp(n,5,95);
+  }
+  function weaponHitProfile(rt,id,it={},st={}){
+    const melee=st.melee===true||it.melee===true||num(st.range??it.range,1)<=1;
+    const scaling=it.rpgScaling&&typeof it.rpgScaling==="object"?it.rpgScaling:null;
+    const explicit=st.hitChance??it.rpgHitChance??it.hitChance??it.rpgBaseChance;
+    if(scaling?.attribute){
+      const mode=scaling.magic?"magic":(melee?"melee":"ranged"),attribute=str(scaling.attribute),baseChance=clamp(Math.round(num(scaling.baseChance,50)),1,99);
+      let attributeValue=0,statBonus=0;
+      try{withHero(rt,id,()=>{
+        attributeValue=num(call(rt,"dungeonAttributeValue",attribute),canonicalStat(rt,id,attribute,0));
+        const derived=call(rt,"dungeonHitBonusForMode",mode,attributeValue);
+        statBonus=Number.isFinite(Number(derived))?num(derived):Math.max(0,attributeValue)*num(scaling.chancePerPoint,0);
+      })}catch(e){}
+      const returned=Number(explicit),effective=Number.isFinite(returned)&&returned>6?returned:baseChance+statBonus;
+      const hit=clamp(Math.round(effective),5,95),otherBonus=Math.round(effective-baseChance-statBonus);
+      return {hit,breakdown:{kind:"rpg-d100",baseChance,attribute,attributeValue,statBonus,otherBonus,effectiveHit:hit,source:Number.isFinite(returned)&&returned>6?"effectiveAttackStats":"rpgScaling"}};
+    }
+    if(Number.isFinite(Number(explicit))&&Number(explicit)>6){
+      const hit=clamp(Math.round(num(explicit)),5,95);
+      return {hit,breakdown:{kind:"d100",baseChance:hit,effectiveHit:hit,source:"explicitD100"}};
+    }
+    const rawThreshold=explicit??st.accuracy??it.accuracy,threshold=clamp(parseInt(String(rawThreshold??"4").replace(/\D/g,""),10)||4,2,6);
+    const hit=accuracyPercent(threshold);
+    return {hit,breakdown:{kind:"legacy-d6",legacyThreshold:threshold,successFaces:7-threshold,dieSides:6,baseChance:hit,effectiveHit:hit,source:"legacyAccuracy"}};
   }
   function withHero(rt,id,fn){
     const hadCurrent=Object.prototype.hasOwnProperty.call(rt,"current"),hadState=Object.prototype.hasOwnProperty.call(rt,"state");
@@ -70,8 +95,7 @@
     const rawRange=num(st.range??it.range,melee?1:4);
     const maxRange=melee?1:clamp(Math.round(rawRange||4),2,12);
     const minRange=Math.max(0,Math.trunc(num(it.minRange??it.rpgMinRange,melee?0:1)));
-    const explicitHit=st.hitChance??it.rpgHitChance??it.hitChance;
-    const hit=Number.isFinite(Number(explicitHit))?clamp(num(explicitHit),5,95):accuracyPercent(st.accuracy??it.accuracy);
+    const hitProfile=weaponHitProfile(rt,id,it,st),hit=hitProfile.hit;
     const power=Math.max(1,Math.round(num(st.damage??st.power??st.strength??it.damage??it.strength,1)));
     return {
       id:`item:${str(it.id||entry.itemId||index)}`,
@@ -79,7 +103,7 @@
       damageType:str(st.damageType||it.damageType||(st.magic?"magic":"physical")),
       ignoreArmor:!!(st.ignoreArmor||it.ignoreArmor),lineOfSight:!melee,
       tags:[melee?"melee":"ranged"],
-      meta:{itemId:str(it.id||entry.itemId||""),inventoryIndex:row.idx,dice:num(st.dice??it.dice,1),ammo:entry.ammo??null}
+      meta:{itemId:str(it.id||entry.itemId||""),inventoryIndex:row.idx,dice:num(st.dice??it.dice,1),ammo:entry.ammo??null,hitBreakdown:hitProfile.breakdown}
     };
   }
   function heroAttacks(rt,id){
@@ -162,9 +186,32 @@
     try{const x=call(rt,"normalizeGameParticipants");if(Array.isArray(x)&&x.length)return x.map(String)}catch(e){}
     return Object.keys(rt?.CHARS||{}).filter(id=>/^dungeon_/i.test(id));
   }
+  function dungeonRuntimeState(rt){
+    try{const raw=rt?.localStorage?.getItem?.("gensrpg_dungeon_runtime_v2"),x=raw?JSON.parse(raw):null;if(x?.participants&&x?.last?.map)return x}catch(e){}
+    try{const x=call(rt,"loadDungeonState");if(x?.participants&&x?.last?.map)return x}catch(e){}
+    return null;
+  }
+  function runtimeHeroCell(state,id){
+    const p=state?.participants||[],active=str(p[clamp(Math.trunc(num(state?.index,0)),0,Math.max(0,p.length-1))]);
+    if(str(id)===active&&state?.branch?.active&&Number.isInteger(Number(state?.positions?.[id])))return Number(state.positions[id]);
+    const saved=state?.heroBranchStates?.[id];if(saved?.branch?.active&&Number.isInteger(Number(saved.cell)))return Number(saved.cell);
+    return Number.isInteger(Number(state?.positions?.[id]))?Number(state.positions[id]):-1;
+  }
+  function runtimeHeroScope(state,id){
+    id=str(id);const p=state?.participants||[],active=str(p[clamp(Math.trunc(num(state?.index,0)),0,Math.max(0,p.length-1))]);
+    const rawRoom=state?.heroRooms?.[id],room=Number.isFinite(Number(rawRoom))?Math.max(0,Number(rawRoom)):0;let branchSourceId="";
+    if(id===active&&state?.branch?.active)branchSourceId=str(state.branch.sourceId||state.branch.branchSourceId||"");
+    else{const saved=state?.heroBranchStates?.[id];if(saved?.branch?.active)branchSourceId=str(saved.branch.sourceId||saved.branch.branchSourceId||"")}
+    return {room,branchSourceId};
+  }
+  function enteredParticipants(rt,ids=participants(rt),wantedScope=null){
+    const requested=[...new Set(arr(ids).map(str).filter(Boolean))],state=dungeonRuntimeState(rt);if(!state)return requested;
+    const p=arr(state.participants).map(str),active=p[clamp(Math.trunc(num(state.index,0)),0,Math.max(0,p.length-1))]||"",scope=wantedScope||runtimeHeroScope(state,active);
+    return requested.filter(id=>{const own=runtimeHeroScope(state,id),cell=runtimeHeroCell(state,id);return own.room>0&&cell>=0&&own.room===num(scope?.room,0)&&own.branchSourceId===str(scope?.branchSourceId)});
+  }
   function activeEnemies(rt){try{return arr(call(rt,"loadActiveEnemies")).filter(x=>!x?.removed&&!x?.defeated&&num(x?.hp,1)>0)}catch(e){return []}}
   function buildInput(rt=R,options={}){
-    const heroIds=arr(options.heroIds).length?arr(options.heroIds).map(String):participants(rt);
+    const requestedHeroIds=arr(options.heroIds).length?arr(options.heroIds).map(String):participants(rt),heroIds=enteredParticipants(rt,requestedHeroIds,options.scope);
     const enemies=activeEnemies(rt).filter(x=>!arr(options.enemyIds).length||arr(options.enemyIds).map(String).includes(str(x.id)));
     const grid=options.grid||gridFromDungeonMap(rt)||defaultGrid(heroIds.length,enemies.length),used=new Set();
     let hp=spawnCells(grid,heroIds.length,"hero",used),ep=spawnCells(grid,enemies.length,"enemy",used);
@@ -196,5 +243,5 @@
     return {heroes,enemies};
   }
 
-  return {VERSION,APP_VERSION,accuracyPercent,heroSnapshot,equippedWeaponEntries,heroAttacks,heroActor,enemyAttacks,enemyActor,defaultGrid,dungeonMap,gridFromDungeonMap,spread,spawnCells,participants,activeEnemies,buildInput,createBattle,commitBattle};
+  return {VERSION,APP_VERSION,accuracyPercent,weaponHitProfile,heroSnapshot,equippedWeaponEntries,heroAttacks,heroActor,enemyAttacks,enemyActor,defaultGrid,dungeonMap,gridFromDungeonMap,spread,spawnCells,participants,dungeonRuntimeState,runtimeHeroCell,runtimeHeroScope,enteredParticipants,activeEnemies,buildInput,createBattle,commitBattle};
 });

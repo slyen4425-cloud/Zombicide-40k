@@ -4,7 +4,7 @@ const path=require('node:path');
 const E=require(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 const A=require(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2-adapter.js'));
 
-assert.equal(A.APP_VERSION,'16.78.103');
+assert.equal(A.APP_VERSION,'16.78.114.10');
 
 function fakeRuntime(){
   const states={
@@ -89,7 +89,32 @@ function fakeRuntime(){
   assert.equal(rt.enemyList.length,0,'defeated tactical enemies can be removed on commit');
 }
 
-{
+// Real Dungeon boundary: legacy 5+ is never treated as 5%, RPG scaling owns D100,
+ // and a selected hero still outside room 0 cannot enter the tactical snapshot.
+ {
+  const legacy=A.weaponHitProfile({},'legacy',{accuracy:'5+',hitChance:5},{accuracy:'5+',hitChance:5});
+  assert.equal(legacy.hit,33,'legacy 5+ on D6 must become 2/6 = 33%, never 5%');
+  assert.deepEqual(legacy.breakdown,{kind:'legacy-d6',legacyThreshold:5,successFaces:2,dieSides:6,baseChance:33,effectiveHit:33,source:'legacyAccuracy'});
+
+  const dungeonState={room:1,index:0,participants:['dungeon_aldren','dungeon_lyra'],heroRooms:{dungeon_aldren:1,dungeon_lyra:0},positions:{dungeon_aldren:6},heroBranchStates:{},branch:null,last:{kind:'enemy',map:{size:5,cells:Array(25).fill('floor')}}};
+  const states={
+    dungeon_aldren:{wounds:0,rightHand:0,leftHand:null,inventory:[{itemId:'dng_longsword'}]},
+    dungeon_lyra:{wounds:0,rightHand:0,leftHand:null,inventory:[{itemId:'dng_bow'}]}
+  };
+  const sword={id:'dng_longsword',name:'Épée longue',type:'Arme',range:1,dice:2,accuracy:5,strength:2,rpgScaling:{attribute:'force',baseChance:55,chancePerPoint:2,diceSides:100}};
+  const bow={id:'dng_bow',name:'Arc de chasseur',type:'Arme',range:6,dice:2,accuracy:5,strength:1,rpgScaling:{attribute:'agilite',baseChance:60,chancePerPoint:2,diceSides:100}};
+  const rt={GensRpgTacticalCombatV2:E,CHARS:{dungeon_aldren:{name:'Aldren'},dungeon_lyra:{name:'Lyra'}},localStorage:{getItem:k=>k==='gensrpg_dungeon_runtime_v2'?JSON.stringify(dungeonState):null},loadDungeonState:()=>dungeonState,dungeonParticipants:()=>dungeonState.participants,loadState:id=>states[id],getItemFromEntry:e=>e.itemId==='dng_bow'?bow:sword,effectiveAttackStats:it=>({range:it.range,dice:it.dice,accuracy:5,hitChance:5,strength:it.strength,melee:it.range<=1}),dungeonAttributeValue:id=>id==='force'?6:8,dungeonHitBonusForMode:(mode,value)=>Math.floor(value/2)*5,dungeonCombatHeroSnapshot:id=>({hp:12,maxHp:12,movement:4,initiative:id==='dungeon_lyra'?20:15,defense:2,armor:1,dodge:3}),loadActiveEnemies:()=>[{id:'e1',enemyId:'skeleton',hp:8,maxHp:8,dungeonRoom:1}],activeEnemyDefinition:()=>({name:'Squelette',rule:{hp:8,range:1,damage:2}}),dungeonEnemyDerivedForInstance:()=>({initiative:1,defense:0,armor:0,dodge:0,movement:2}),dungeonEnemyAttackSkills:()=>[null],dungeonEnemyAttackProfile:()=>({mode:'melee',range:1,chance:70,power:2})};
+  assert.deepEqual(A.enteredParticipants(rt,dungeonState.participants),['dungeon_aldren']);
+  const input=A.buildInput(rt,{enemyIds:['e1']});
+  assert.deepEqual(input.meta.heroIds,['dungeon_aldren'],'Lyra room 0 must be excluded even if the bridge requested the full party');
+  assert.equal(input.actors.length,2);
+  assert.equal(input.actors[0].attacks[0].hit,70,'sword must use 55% base + 15% Force bonus');
+  assert.deepEqual(input.actors[0].attacks[0].meta.hitBreakdown,{kind:'rpg-d100',baseChance:55,attribute:'force',attributeValue:6,statBonus:15,otherBonus:0,effectiveHit:70,source:'rpgScaling'});
+  const battle=A.createBattle(rt,{enemyIds:['e1']});
+  assert.equal(battle.actors.find(a=>a.side==='hero').attacks[0].meta.hitBreakdown.effectiveHit,70,'engine normalization must preserve calculation origin');
+ }
+
+ {
   const {rt}=fakeRuntime();
   const t0=performance.now();
   for(let i=0;i<500;i++)A.createBattle(rt,{rngSeed:i+1});

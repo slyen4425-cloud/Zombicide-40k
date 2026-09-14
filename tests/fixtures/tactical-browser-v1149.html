@@ -1,67 +1,59 @@
 <!doctype html>
 <html lang="fr">
-<head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.9 browser profile</title>
+<head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.10 browser profile</title>
 <style>html,body{margin:0;min-height:100%;background:#111;color:#fff}#dc047RoomBoard{display:none}</style>
 <script>
-window.__offCombat={movement:4,initiative:31,defense:12,armor:7,dodge:9};
-window.__heroState={rpgAttributes:{movement:4,initiative:31,defense:12,armor:7},wounds:0,mana:8};
-window.CHARS={h:{name:"Aldren",dungeonStats:{...window.__offCombat}}};
-window.loadState=id=>id==="h"?window.__heroState:{};
-window.GensCleanRpgStats167874={
-  runtimeDefs:()=>[
-    {id:"movement",name:"Mouvement",icon:"👣",defaultValue:3},
-    {id:"initiative",name:"Initiative",icon:"⚡",defaultValue:10},
-    {id:"defense",name:"Défense",icon:"🛡️",defaultValue:0},
-    {id:"armor",name:"Armure",icon:"🥋",defaultValue:0}
-  ],
-  value:(id,stat)=>window.__offCombat[stat]??0
+window.__runtime={room:1,index:0,participants:["dungeon_aldren","dungeon_lyra"],heroRooms:{dungeon_aldren:1,dungeon_lyra:0},positions:{dungeon_aldren:6},heroBranchStates:{},branch:null,enemyCells:{e:8},last:{kind:"enemy",map:{size:5,cells:Array(25).fill("floor")}}};
+window.__runtime.last.map.cells[0]="wall";window.__runtime.last.map.cells[4]="wall";
+window.__states={
+ dungeon_aldren:{wounds:0,rightHand:0,leftHand:null,inventory:[{itemId:"dng_longsword"}],rpgAttributes:{movement:4,initiative:30,defense:3,armor:2,force:6}},
+ dungeon_lyra:{wounds:0,rightHand:0,leftHand:null,inventory:[{itemId:"dng_bow",ammo:6}],rpgAttributes:{movement:5,initiative:35,defense:2,armor:1,agilite:8}}
 };
+window.__items={
+ dng_longsword:{id:"dng_longsword",name:"Épée longue",type:"Arme",range:1,dice:2,accuracy:5,strength:3,rpgScaling:{attribute:"force",baseChance:55,chancePerPoint:2,diceSides:100}},
+ dng_bow:{id:"dng_bow",name:"Arc de chasseur",type:"Arme",range:6,dice:2,accuracy:5,strength:2,ammoCapacity:6,rpgScaling:{attribute:"agilite",baseChance:60,chancePerPoint:2,diceSides:100}}
+};
+window.CHARS={dungeon_aldren:{name:"Aldren",dungeonBuiltin:true,image:"/assets/dungeon/creatures/dng_aldren.png"},dungeon_lyra:{name:"Lyra",dungeonBuiltin:true,image:"/assets/dungeon/creatures/dng_lyra.png"}};
+window.localStorage.setItem("gensrpg_dungeon_runtime_v2",JSON.stringify(window.__runtime));
+window.loadDungeonState=()=>window.__runtime;
+window.dungeonParticipants=()=>window.__runtime.participants.slice();
+window.loadState=id=>window.__states[id]||{};
+window.getItemFromEntry=e=>window.__items[e?.itemId]||null;
+window.itemById=id=>window.__items[id]||null;
 window.effectiveMaxWounds=()=>24;
-window.dungeonHeroMoveValue083=()=>window.__offCombat.movement;
-window.dungeonDerivedInitiative=()=>window.__offCombat.initiative;
-window.dungeonDerivedDefense=()=>window.__offCombat.defense;
-window.dungeonArmorScore=()=>window.__offCombat.armor;
-window.dungeonDodgeChance=()=>window.__offCombat.dodge;
-window.dungeonCriticalChance=()=>10;
-window.dungeonMagicResistance=()=>3;
-window.dungeonMaxMana=()=>10;
+window.dungeonAttributeValue=id=>Number(window.__states[window.current]?.rpgAttributes?.[id])||0;
+window.dungeonHitBonusForMode=(mode,value)=>Math.floor(Number(value||0)/2)*5;
+window.effectiveAttackStats=it=>{const melee=Number(it.range)<=1,mode=melee?"melee":"ranged",value=window.dungeonAttributeValue(it.rpgScaling.attribute),hitChance=Number(it.rpgScaling.baseChance)+window.dungeonHitBonusForMode(mode,value);return {range:it.range,dice:it.dice,accuracy:it.accuracy,hitChance,strength:it.strength,melee}};
+window.dungeonCombatHeroSnapshot=id=>{const a=window.__states[id].rpgAttributes;return {hp:24,maxHp:24,movement:a.movement,initiative:a.initiative,defense:a.defense,armor:a.armor,dodge:id==="dungeon_aldren"?4:6}};
+window.dungeonHeroMoveValue083=id=>window.__states[id||window.current]?.rpgAttributes?.movement||4;
+window.dungeonDerivedInitiative=()=>window.__states[window.current]?.rpgAttributes?.initiative||10;
+window.dungeonDerivedDefense=()=>window.__states[window.current]?.rpgAttributes?.defense||0;
+window.dungeonArmorScore=()=>window.__states[window.current]?.rpgAttributes?.armor||0;
+window.dungeonDodgeChance=()=>window.current==="dungeon_lyra"?6:4;
+window.dungeonCriticalChance=()=>10;window.dungeonMagicResistance=()=>0;window.dungeonMaxMana=()=>0;
 window.loadDungeonRpgRules=()=>({critMultiplier:2});
-window.currentRpgProfile=()=>({id:"browser-profile",rpgUniverse:{combatRules:{rollHighToHit:true}}});
-window.loadGameProfiles=()=>[];
-window.saveGameProfiles=()=>{};
-window.makeEncounterInput=()=>({
-  id:"browser-"+Date.now(),
-  rngSeed:123456,
-  config:{actionsPerTurn:1},
-  grid:{width:5,height:4,blocked:[{x:0,y:0},{x:0,y:1}],cover:[{x:3,y:1}]},
-  actors:[
-    {id:"h",name:"Aldren",side:"hero",x:1,y:1,hp:24,maxHp:24,movement:1,initiative:20,defense:1,armor:1,dodge:1,attacks:[{id:"arc",name:"Arc de test",minRange:1,maxRange:4,hit:92,power:5,lineOfSight:true,tags:["ranged","dice:3"],meta:{dice:3}}],meta:{heroId:"h"}},
-    {id:"e",name:"Cible",side:"enemy",x:3,y:1,hp:50,maxHp:50,movement:1,initiative:1,defense:20,armor:2,dodge:16,attacks:[{id:"claw",name:"Griffe",minRange:1,maxRange:4,hit:80,power:2,lineOfSight:true}],meta:{enemyId:"dng_skeleton"}}
-  ]
-});
+window.GensCleanRpgStats167874={runtimeDefs:()=>[{id:"movement",name:"Mouvement",defaultValue:3},{id:"initiative",name:"Initiative",defaultValue:10},{id:"defense",name:"Défense",defaultValue:0},{id:"armor",name:"Armure",defaultValue:0},{id:"force",name:"Force",defaultValue:0},{id:"agilite",name:"Agilité",defaultValue:0}],value:(id,stat)=>window.__states[id]?.rpgAttributes?.[stat]??0};
+window.__enemy={id:"e",enemyId:"dng_skeleton",hp:50,maxHp:50,dungeonRoom:1};
+window.loadActiveEnemies=()=>[window.__enemy];
+window.saveActiveEnemies=()=>{};
+window.activeEnemyDefinition=()=>({name:"Squelette",rule:{hp:50,range:1,damage:1}});
+window.dungeonEnemyDerivedForInstance=()=>({initiative:1,defense:5,armor:0,dodge:5,movement:1});
+window.dungeonEnemyAttackSkills=()=>[{id:"claw",name:"Griffe",mode:"melee"}];
+window.dungeonEnemyAttackProfile=()=>({mode:"melee",range:1,chance:70,power:1});
+window.isDungeonMode=()=>true;window.getActiveGameProfile=()=>({gameStyle:"dungeon",rpgUniverse:{combatRules:{rollHighToHit:true}}});window.currentRpgProfile=window.getActiveGameProfile;
+window.saveGameProfiles=()=>{};window.loadGameProfiles=()=>[];window.dispatchEvent=()=>true;window.dc200StartCombat=()=>false;window.openDungeonCombatSetup=()=>false;
 </script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js"></script>
 <script>
-window.dc200StartCombat=function(ids,reason){
-  return window.GensRpgTacticalCombatV2Ui.open(window.makeEncounterInput(),{reason:reason||"auto-engage-v1149"});
-};
-window.startProfiledEncounter=function(){
-  const battle=window.dc200StartCombat(["e"],"auto-engage-v1149");
-  window.GensRpgTacticalStats1678110.decorateBattle(window,battle,{force:true});
-  window.GensRpgTacticalCombatV2Ui.render();
-  window.GensRpgTacticalVisualDice16781142.decorateCombatUi(window);
-  return battle;
-};
-window.closeProfiledEncounter=function(){return window.GensRpgTacticalCombatV2Ui.close(false)};
-window.addEventListener("DOMContentLoaded",()=>{
-  window.GensRpgTacticalStats1678110.install(window);
-  window.GensRpgTacticalVisualDice16781142.install(window);
-  window.__browserProfileReady=true;
-});
+window.startProfiledEncounter=function(){const out=window.GensRpgTacticalCombatV2Bridge.openCurrent(window,{enemyIds:["e"],reason:"browser-v11410"});if(!out.ok)throw new Error(out.reason);return out.battle};
+window.closeProfiledEncounter=()=>window.GensRpgTacticalCombatV2Ui.close(false);
+window.enterLyra=function(){window.__runtime.heroRooms.dungeon_lyra=1;window.__runtime.positions.dungeon_lyra=7;window.__runtime.index=1;localStorage.setItem("gensrpg_dungeon_runtime_v2",JSON.stringify(window.__runtime));return true};
+window.addEventListener("DOMContentLoaded",()=>{window.GensRpgTacticalStats1678110.install(window);window.GensRpgTacticalCombatV2Bridge.install(window);window.GensRpgTacticalVisualDice16781142.install(window);window.__browserProfileReady=true});
 </script>
 </head><body><main id="exploration">Exploration mobile simulée</main></body></html>

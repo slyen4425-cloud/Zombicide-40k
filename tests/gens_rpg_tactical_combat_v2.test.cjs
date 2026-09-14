@@ -3,7 +3,7 @@ const {performance}=require('node:perf_hooks');
 const path=require('node:path');
 const E=require(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 
-assert.equal(E.APP_VERSION,'16.78.103');
+assert.equal(E.APP_VERSION,'16.78.114.10');
 
 function baseBattle(extra={}){
   return E.createBattle({
@@ -15,6 +15,11 @@ function baseBattle(extra={}){
       {id:'skeleton',name:'Squelette',side:'enemy',x:6,y:6,hp:8,maxHp:8,movement:2,initiative:9,defense:6,armor:1,attacks:[{id:'rusty',name:'Lame rouillée',range:1,hit:70,power:4}]}
     ],...extra
   });
+}
+
+{
+  const s=E.createBattle({grid:{width:4,height:4},actors:[{id:'h',side:'hero',x:0,y:0,hp:1,attacks:[{id:'a',hit:70,meta:{hitBreakdown:{kind:'rpg-d100',baseChance:55}}}]},{id:'e',side:'enemy',x:3,y:3,hp:1}]});
+  assert.equal(E.actorById(s,'h').attacks[0].meta.hitBreakdown.baseChance,55,'attack calculation metadata must survive normalization');
 }
 
 {

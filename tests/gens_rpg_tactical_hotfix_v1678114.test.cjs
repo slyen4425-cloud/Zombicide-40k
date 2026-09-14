@@ -9,10 +9,10 @@ const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.j
 assert.equal(P.APP_VERSION,'16.78.114.1');
 assert.equal(P.DEFAULT_ENEMY_VISION,3);
 assert.equal(P.HEARTBEAT_MS,450);
-assert.equal(V.APP_VERSION,'16.78.114.9');
+assert.equal(V.APP_VERSION,'16.78.114.10');
 assert.equal(V.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(V.WRONG_WALL_ASSET,'assets/dungeon/creatures/dungeon_wall.png');
-assert.equal(V.DICE_WATCHDOG_MS,0,'V114.9 must not start a second dice animation/watchdog');
+assert.equal(V.DICE_WATCHDOG_MS,0,'V114.10 must not start a second dice animation/watchdog');
 assert.ok(V.TRANSITION_MS<=650,'exploration-to-combat transition must stay short');
 
 function storage(initial={}){const data={...initial};return {getItem:k=>Object.prototype.hasOwnProperty.call(data,k)?data[k]:null,setItem:(k,v)=>{data[k]=String(v)}}}
@@ -104,21 +104,21 @@ assert.match(ui,/gtv2WallTile/,'the base tactical UI must own the real wall IMG'
 assert.match(ui,/object-fit:cover!important/,'stable wall bitmap must scale like the Builder tiles');
 assert.match(ui,/decoding="sync"/,'wall bitmap must be decoded from initial render HTML');
 assert.match(ui,/insertAdjacentHTML\("afterbegin",wallTileHtml\(\)\)/,'Dungeon wall image must exist before live DOM insertion');
-assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'V114.9 final authority must not observe document.body');
-assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'V114.9 must not wrap renderers again');
-assert.doesNotMatch(visual,/patchStyleSetProperty/,'V114.9 must not globally intercept CSS style writes');
-assert.doesNotMatch(visual,/animateRpgDiceFast/,'V114.9 must not layer another dice animation');
-assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.9 must never animate D100 with an interval');
-assert.match(visual,/__gensRpg1149DirectD100/,'V114.9 must own hit resolution once after older wrappers');
+assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'V114.10 final authority must not observe document.body');
+assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'V114.10 must not wrap renderers again');
+assert.doesNotMatch(visual,/patchStyleSetProperty/,'V114.10 must not globally intercept CSS style writes');
+assert.doesNotMatch(visual,/animateRpgDiceFast/,'V114.10 must not layer another dice animation');
+assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.10 must never animate D100 with an interval');
+assert.match(visual,/__gensRpg1149DirectD100/,'V114.10 must own hit resolution once after older wrappers');
 assert.match(visual,/displayHit\(shown,calculation\.finalChance,high\)/,'actual hit must use final visible chance exactly once');
 assert.match(ui,/36 % de toucher|calculationSummary/,'UI must expose the real hit percentage and visible threshold');
 
 assert.match(visual,/ENNEMI REPÉRÉ/,'automatic engagement keeps a readable transition');
 assert.match(visual,/Retour menu/,'emergency Retour menu remains available');
-assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 room scope layer must remain loaded');
+assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113 room scope layer must remain loaded');
 assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114\.1/,'validated V114.1 live vision must remain loaded');
-assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final V114.9 authority still loads last through the established visual module path');
-assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.9/,'V114.9 cache-busted final authority must load last');
-assert.match(sw,/gensrpg-cache-16\.78\.114\.9-browser-profiled-combat/,'V114.9 must rotate the PWA cache');
+assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final V114.10 authority still loads last through the established visual module path');
+assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.10/,'V114.10 cache-busted final authority must load last');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.10-hit-entry-compositor-walls/,'V114.10 must rotate the PWA cache');
 
-console.log('V16.78.114.9: observer-free engagement + single-render IMG walls + audited D100 UX OK');
+console.log('V16.78.114.10: observer-free engagement + single-render IMG walls + audited D100 UX OK');

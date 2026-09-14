@@ -36,7 +36,7 @@ window.makeEncounterInput=()=>({
   grid:{width:5,height:4,blocked:[{x:0,y:0},{x:0,y:1}],cover:[{x:3,y:1}]},
   actors:[
     {id:"h",name:"Aldren",side:"hero",x:1,y:1,hp:24,maxHp:24,movement:1,initiative:20,defense:1,armor:1,dodge:1,attacks:[{id:"arc",name:"Arc de test",minRange:1,maxRange:4,hit:92,power:5,lineOfSight:true,tags:["ranged","dice:3"],meta:{dice:3}}],meta:{heroId:"h"}},
-    {id:"e",name:"Cible",side:"enemy",x:3,y:1,hp:50,maxHp:50,movement:1,initiative:1,defense:20,armor:2,dodge:16,attacks:[{id:"claw",name:"Griffe",minRange:0,maxRange:1,hit:80,power:2,lineOfSight:false}],meta:{enemyId:"dng_skeleton"}}
+    {id:"e",name:"Cible",side:"enemy",x:3,y:1,hp:50,maxHp:50,movement:1,initiative:1,defense:20,armor:2,dodge:16,attacks:[{id:"claw",name:"Griffe",minRange:1,maxRange:4,hit:80,power:2,lineOfSight:true}],meta:{enemyId:"dng_skeleton"}}
   ]
 });
 </script>

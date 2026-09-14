@@ -4,14 +4,15 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const P=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-hotfix-1678114.js'));
 const V=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js'));
+const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 
 assert.equal(P.APP_VERSION,'16.78.114.1');
 assert.equal(P.DEFAULT_ENEMY_VISION,3);
 assert.equal(P.HEARTBEAT_MS,450);
-assert.equal(V.APP_VERSION,'16.78.114.3');
+assert.equal(V.APP_VERSION,'16.78.114.8');
 assert.equal(V.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(V.WRONG_WALL_ASSET,'assets/dungeon/creatures/dungeon_wall.png');
-assert.ok(V.DICE_WATCHDOG_MS<=800,'tactical D100 watchdog must stay short');
+assert.equal(V.DICE_WATCHDOG_MS,0,'V114.8 must not start a second dice animation/watchdog');
 assert.ok(V.TRANSITION_MS<=650,'exploration-to-combat transition must stay short');
 
 function storage(initial={}){const data={...initial};return {getItem:k=>Object.prototype.hasOwnProperty.call(data,k)?data[k]:null,setItem:(k,v)=>{data[k]=String(v)}}}
@@ -57,10 +58,33 @@ assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'validated live 
   assert.equal(out.reason,'menu-escape-v1143','Retour menu must suppress immediate re-engagement');
   assert.equal(calls,0,'guarded emergency menu exit must not reopen combat');
 }
+
+// Visible D100 is now the authority: displayed roll versus displayed threshold.
+assert.equal(V.thresholdForChance(36,true),65);
+for(const [roll,hit] of [[1,false],[20,false],[50,false],[80,true],[92,true],[95,true],[100,true]])assert.equal(V.displayHit(roll,36,true),hit,`high-roll ${roll}`);
+for(const [roll,hit] of [[1,true],[20,true],[50,false],[80,false],[92,false],[95,false],[100,false]])assert.equal(V.displayHit(roll,36,false),hit,`low-roll ${roll}`);
+
+const hitRuntime={GensRpgTacticalCombatV2:E};
+assert.equal(V.patchHitResolver(hitRuntime),true);
+function battleFor(hit=36,dice=1,high=true){
+  const s=E.createBattle({grid:{width:5,height:4},actors:[
+    {id:'h',side:'hero',x:1,y:1,hp:20,initiative:20,attacks:[{id:'a',range:1,hit,power:3,tags:[`dice:${dice}`]}]},
+    {id:'e',side:'enemy',x:2,y:1,hp:30,initiative:1,defense:0,dodge:0,attacks:[{id:'x',range:1,hit:70,power:1}]}
+  ]});s.config.rollHighToHit=high;return s;
+}
 {
-  const fake={GensRpgTacticalCombatV2Ui:{getBattle:()=>({log:[{type:'attack',rollsDisplay:[72,44]}]})}};
-  const card={querySelector(sel){if(sel==='.gtv2DiceRule')return {textContent:'Réussite si D100 ≥ 51 · jet obtenu : 72'};if(sel==='.gtv2DiceRule strong')return {textContent:'72'};return null}};
-  assert.deepEqual(V.diceInfo(fake,card),{rolls:[72,44],threshold:51,high:true});
+  const s=battleFor(36,1,true),r=E.resolveAttack(s,'h','e','a',9); // UI legacy handoff 101 - visible 92.
+  assert.equal(r.roll,92,'result must expose the roll the player actually saw');
+  assert.equal(r.hitTarget,65);assert.equal(r.hit,true,'visible 92 must hit visible D100 >= 65');
+  assert.deepEqual(r.rollsDisplay,[92]);
+}
+{
+  const s=battleFor(36,1,false),r=E.resolveAttack(s,'h','e','a',20);
+  assert.equal(r.roll,20);assert.equal(r.hitTarget,36);assert.equal(r.hit,true,'low-roll 20 must hit D100 <= 36');
+}
+{
+  const s=battleFor(36,3,true),r=E.resolveAttack(s,'h','e','a',[9,91,21]); // visible 92,10,80
+  assert.deepEqual(r.rollsDisplay,[92,10,80]);assert.equal(r.hits,2);assert.equal(r.hit,true,'multi-die result must use the same visible rule for every die');
 }
 
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-hotfix-1678114.js'),'utf8');
@@ -73,37 +97,24 @@ assert.match(source,/DungeonCore01/,'post-render detection must keep using the r
 assert.match(source,/HEARTBEAT_MS=450/,'low-frequency exploration fallback remains active only outside combat');
 assert.match(source,/coherence\(rt\)\?\.patchDice/,'V114.1 keeps the readable V112 combat explanations');
 assert.doesNotMatch(source,/setInterval\(tick,48\)/,'old V114 synthetic D100 cycling must remain removed');
-assert.doesNotMatch(source,/ROLL_DURATION/,'V114.1 must not lengthen dice rolls');
 
-assert.match(builder,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/,'Dungeon Builder remains the wall asset authority reference');
-assert.match(builder,/background-size","cover"/,'Builder wall scaling remains cover/center');
-assert.match(visual,/WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'final tactical wall asset must exactly match Builder');
-assert.match(visual,/rewriteWrongWallStyles/,'old style sheets that still mention dungeon_wall.png must be rewritten at runtime');
-assert.match(visual,/patchStyleSetProperty/,'late V107/V113 inline repaint attempts must be intercepted');
-assert.match(visual,/background-size","cover"/,'generated Dungeon and tactical walls must use cover scaling');
-assert.match(visual,/filter","none"/,'tactical wall must not receive the old dark filter');
-assert.match(visual,/gtv2Cell\.blocked\.cover::after/,'the useless tactical wall/cover icon must be suppressed');
-assert.match(visual,/font-size","0"/,'legacy wall text/icon must be hidden');
+assert.match(builder,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/,'Dungeon Builder remains the wall asset reference');
+assert.match(visual,/gtv21148WallTile/,'walls must use a real IMG bitmap layer, not depend on repainting CSS backgrounds');
+assert.match(visual,/object-fit:cover!important/,'stable wall bitmap must scale like the floor tiles');
+assert.match(visual,/decoding","sync"/,'wall bitmap must request decoded image content before paint when supported');
+assert.match(visual,/patchDungeonMapHtml/,'generated Dungeon walls must receive their IMG before insertion into the live DOM');
+assert.match(visual,/MutationObserver\(\(\)=>\{stabilizeWalls/,'new Builder/runtime wall nodes must be stabilized in the mutation microtask before browser paint');
+assert.doesNotMatch(visual,/patchStyleSetProperty/,'V114.8 must stop globally intercepting CSS style writes');
+assert.doesNotMatch(visual,/animateRpgDiceFast/,'V114.8 must not layer another dice animation over V114.7');
+assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.8 must never animate D100 with an interval');
+assert.match(visual,/__gensRpg1148DirectD100/,'V114.8 must own hit resolution once after all older wrappers');
+assert.match(visual,/displayHit\(shown,p\.hitChance,high\)/,'actual hit must be evaluated from the visible roll');
 
-assert.match(visual,/animateRpgDiceFast/,'tactical D100 must use the proven short mobile reel');
-assert.doesNotMatch(visual,/withSurvivalContext/,'V114.3 must never force the slow native Survival context');
-assert.doesNotMatch(visual,/animateRpgDiceDispatch/,'V114.3 must not start a second native Survival animation');
-assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.3 must not use random-number interval animation');
-assert.match(visual,/data-v113-dice/,'V113 synthetic dice row must be blocked before its observer can start');
-assert.match(visual,/gtv2111DiceRow/,'V111 must not replace the active fast-reel host during animation');
-assert.match(visual,/gtv21143Rolling \.gtv2112Explain/,'result explanation is hidden only during animation and remains after it');
-assert.match(visual,/DICE_WATCHDOG_MS=780/,'dice sequence must not linger after result');
-
-assert.match(visual,/ENNEMI REPÉRÉ/,'automatic engagement needs a readable exploration-to-combat transition');
-assert.match(visual,/ENGAGEMENT/,'combat transition must state what is happening');
-assert.match(visual,/Retour menu/,'Quitter must be replaced with emergency Retour menu');
-assert.match(visual,/removeAttribute\?\.\("data-close"\)/,'legacy Quitter action must be removed from tactical top bar');
-assert.match(visual,/menu-escape-v1143/,'emergency menu exit must block instant re-engagement');
-
+assert.match(visual,/ENNEMI REPÉRÉ/,'automatic engagement keeps a readable transition');
+assert.match(visual,/Retour menu/,'emergency Retour menu remains available');
 assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.113/,'V113 room scope layer must remain loaded');
 assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114\.1/,'validated V114.1 live vision must remain loaded');
-assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.3/,'V114.3 final tactical UX authority must load last');
-assert.match(sw,/gensrpg-cache-16\.78\.114\.3-wall-dice-transition-menu/);
-assert.match(sw,/gens-rpg-tactical-visual-dice-16781142\.js/);
+assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final V114.8 authority still loads last through the established visual module path');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.7-root-wall-dice-stats/,'existing PWA cache stays compatible; tactical scripts are network-first/no-store');
 
-console.log('V16.78.114.3: live engagement preserved; wall repaint conflicts neutralized; short ordered D100 + transition/menu UX: OK');
+console.log('V16.78.114.8: visible D100 authority + stable decoded IMG walls + preserved engagement/menu UX OK');

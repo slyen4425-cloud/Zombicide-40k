@@ -1,4 +1,4 @@
-name: Validate V16.78.114.7 Root Tactical Runtime
+name: Validate V16.78.114.8 Touch + Stable Walls
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
       - work/v16.78.114.7-pages-test-align-2
       - work/v16.78.114.7-final-stats-test-align
       - work/v16.78.114.7-builder-stats-test-align
+      - work/v16.78.114.8-wall-hit-clarity
       - main
   pull_request:
     branches:
@@ -38,6 +39,10 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
+      - name: Exact V114.8 visible touch and stable wall scenarios
+        run: |
+          node tests/gens_rpg_tactical_hit_wall_v16781148.test.cjs
+          node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
       - name: Exact V114.7 consolidated wall dice stats scenarios
         run: node tests/gens_rpg_tactical_consolidation_v16781146.test.cjs
       - name: Real rebuilt current-hero stats into Tactical V110 snapshot
@@ -58,8 +63,6 @@ jobs:
           node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
       - name: Preserve V114.4 menu recovery and no-legacy scenarios
         run: node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
-      - name: Preserve V114 live vision transition and menu scenarios
-        run: node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
       - name: Preserve V113 room and sub-room scoping
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
       - name: Preserve V112 combat coherence and result explanations

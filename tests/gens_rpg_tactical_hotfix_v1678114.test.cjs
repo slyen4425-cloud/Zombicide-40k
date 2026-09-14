@@ -9,10 +9,10 @@ const E=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.j
 assert.equal(P.APP_VERSION,'16.78.114.1');
 assert.equal(P.DEFAULT_ENEMY_VISION,3);
 assert.equal(P.HEARTBEAT_MS,450);
-assert.equal(V.APP_VERSION,'16.78.114.10');
+assert.equal(V.APP_VERSION,'16.78.114.11');
 assert.equal(V.WALL_ASSET,'assets/dungeon/creatures/dng_wall_block.jpg');
 assert.equal(V.WRONG_WALL_ASSET,'assets/dungeon/creatures/dungeon_wall.png');
-assert.equal(V.DICE_WATCHDOG_MS,0,'V114.10 must not start a second dice animation/watchdog');
+assert.equal(V.DICE_WATCHDOG_MS,0,'V114.11 must not start a second dice animation/watchdog');
 assert.ok(V.TRANSITION_MS<=650,'exploration-to-combat transition must stay short');
 
 function storage(initial={}){const data={...initial};return {getItem:k=>Object.prototype.hasOwnProperty.call(data,k)?data[k]:null,setItem:(k,v)=>{data[k]=String(v)}}}
@@ -59,7 +59,7 @@ assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'validated live 
   assert.equal(calls,0,'guarded emergency menu exit must not reopen combat');
 }
 
-// Visible D100 is now the authority: displayed roll versus displayed threshold.
+// Visible D100 remains the authority.
 assert.equal(V.thresholdForChance(36,true),65);
 for(const [roll,hit] of [[1,false],[20,false],[50,false],[80,true],[92,true],[95,true],[100,true]])assert.equal(V.displayHit(roll,36,true),hit,`high-roll ${roll}`);
 for(const [roll,hit] of [[1,true],[20,true],[50,false],[80,false],[92,false],[95,false],[100,false]])assert.equal(V.displayHit(roll,36,false),hit,`low-roll ${roll}`);
@@ -73,7 +73,7 @@ function battleFor(hit=36,dice=1,high=true){
   ]});s.config.rollHighToHit=high;return s;
 }
 {
-  const s=battleFor(36,1,true),r=E.resolveAttack(s,'h','e','a',9); // UI legacy handoff 101 - visible 92.
+  const s=battleFor(36,1,true),r=E.resolveAttack(s,'h','e','a',9);
   assert.equal(r.roll,92,'result must expose the roll the player actually saw');
   assert.equal(r.hitTarget,65);assert.equal(r.hit,true,'visible 92 must hit visible D100 >= 65');
   assert.deepEqual(r.rollsDisplay,[92]);
@@ -83,7 +83,7 @@ function battleFor(hit=36,dice=1,high=true){
   assert.equal(r.roll,20);assert.equal(r.hitTarget,36);assert.equal(r.hit,true,'low-roll 20 must hit D100 <= 36');
 }
 {
-  const s=battleFor(36,3,true),r=E.resolveAttack(s,'h','e','a',[9,91,21]); // visible 92,10,80
+  const s=battleFor(36,3,true),r=E.resolveAttack(s,'h','e','a',[9,91,21]);
   assert.deepEqual(r.rollsDisplay,[92,10,80]);assert.equal(r.hits,2);assert.equal(r.hit,true,'multi-die result must use the same visible rule for every die');
 }
 
@@ -104,21 +104,23 @@ assert.match(ui,/gtv2WallTile/,'the base tactical UI must own the real wall IMG'
 assert.match(ui,/object-fit:cover!important/,'stable wall bitmap must scale like the Builder tiles');
 assert.match(ui,/decoding="sync"/,'wall bitmap must be decoded from initial render HTML');
 assert.match(ui,/insertAdjacentHTML\("afterbegin",wallTileHtml\(\)\)/,'Dungeon wall image must exist before live DOM insertion');
-assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'V114.10 final authority must not observe document.body');
-assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'V114.10 must not wrap renderers again');
-assert.doesNotMatch(visual,/patchStyleSetProperty/,'V114.10 must not globally intercept CSS style writes');
-assert.doesNotMatch(visual,/animateRpgDiceFast/,'V114.10 must not layer another dice animation');
-assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.10 must never animate D100 with an interval');
-assert.match(visual,/__gensRpg1149DirectD100/,'V114.10 must own hit resolution once after older wrappers');
+assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'V114.11 final authority must not observe document.body');
+assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'V114.11 must not wrap renderers again');
+assert.doesNotMatch(visual,/patchStyleSetProperty/,'V114.11 must not globally intercept CSS style writes');
+assert.doesNotMatch(visual,/animateRpgDiceFast/,'V114.11 must not layer another dice animation');
+assert.doesNotMatch(visual,/setInterval\s*\(/,'V114.11 must never animate D100 with an interval');
+assert.match(visual,/__gensRpg11411Damage/,'V114.11 must own final damage resolution after old wrappers');
 assert.match(visual,/displayHit\(shown,calculation\.finalChance,high\)/,'actual hit must use final visible chance exactly once');
+assert.match(visual,/resolveArmorFloor/,'historical armor-zero floor must be reconnected');
+assert.match(visual,/physicalDamageBonus/,'canonical physical/melee damage bonus must be consumed');
 assert.match(ui,/36 % de toucher|calculationSummary/,'UI must expose the real hit percentage and visible threshold');
 
 assert.match(visual,/ENNEMI REPÉRÉ/,'automatic engagement keeps a readable transition');
 assert.match(visual,/Retour menu/,'emergency Retour menu remains available');
 assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113 room scope layer must remain loaded');
 assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114\.1/,'validated V114.1 live vision must remain loaded');
-assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final V114.10 authority still loads last through the established visual module path');
-assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.10/,'V114.10 cache-busted final authority must load last');
-assert.match(sw,/gensrpg-cache-16\.78\.114\.10-hit-entry-compositor-walls/,'V114.10 must rotate the PWA cache');
+assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final tactical authority still loads last through the established module path');
+assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.11/,'V114.11 cache-busted final authority must load last');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.11-armor-melee-damage/,'V114.11 must rotate the PWA cache');
 
-console.log('V16.78.114.10: observer-free engagement + single-render IMG walls + audited D100 UX OK');
+console.log('V16.78.114.11: D100 + stable walls + canonical melee damage + armor floor OK');

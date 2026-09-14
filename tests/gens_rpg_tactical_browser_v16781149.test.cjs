@@ -79,7 +79,15 @@ const server=http.createServer((req,res)=>{
     const diceText=await page.locator(".gtv2DiceCard").innerText();
     assert.match(diceText,/36 % de toucher — réussite sur D100 ≥ 65/);
     assert.match(diceText,/Détail du calcul/);
+    const heroDice=await page.locator(".gtv2DiceBackdrop").elementHandle();
     await page.locator("[data-dice-continue]").click();
+    await page.waitForFunction(el=>!el?.isConnected,heroDice);
+    await page.waitForSelector(".gtv2DiceBackdrop");
+    await page.waitForFunction(()=>!document.querySelector("[data-dice-continue]")?.disabled);
+    assert.equal(await page.locator(".gtv2DiceBackdrop").count(),1,"enemy initiative may open one sequential dice overlay, never a second simultaneous overlay");
+    const enemyDice=await page.locator(".gtv2DiceBackdrop").elementHandle();
+    await page.locator("[data-dice-continue]").click();
+    await page.waitForFunction(el=>!el?.isConnected,enemyDice);
     await page.waitForFunction(()=>!document.querySelector(".gtv2DiceBackdrop"));
     await page.evaluate(()=>window.closeProfiledEncounter());
 

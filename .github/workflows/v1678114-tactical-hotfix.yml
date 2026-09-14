@@ -1,4 +1,4 @@
-name: Validate V16.78.114.4 Combat Session Recovery + Tactical UX
+name: Validate V16.78.114.5 Wall + Dice + Canonical Combat Stats
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - work/v16.78.114.2-builder-wall-survival-dice
       - work/v16.78.114.3-wall-dice-transition-menu
       - work/v16.78.114.4-combat-session-recovery
+      - work/v16.78.114.5-wall-dice-stats
       - main
   pull_request:
     branches:
@@ -26,8 +27,11 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
+          node --check assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
+      - name: Exact V114.5 prepaint short-dice canonical-stat scenarios
+        run: node tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs
       - name: Exact V114.4 menu recovery and no-legacy scenarios
         run: node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
       - name: Exact V114.3 live-vision wall fast-dice transition and menu scenarios

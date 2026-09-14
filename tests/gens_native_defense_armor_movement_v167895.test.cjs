@@ -51,8 +51,8 @@ const api=context.GensCleanRpgStats167874;
 assert.ok(api,'API stats absente');
 api.install();
 
-assert.equal(api.APP_VERSION,'16.78.95');
-assert.match(sw,/gensrpg-cache-16\.78\.95-native-defense-armor-movement/,'cache PWA V16.78.95 manquant');
+assert.equal(api.APP_VERSION,'16.78.114.7');
+assert.match(sw,/gensrpg-cache-16\.78\.95-native-defense-armor-movement/,'marqueur de compatibilité cache V16.78.95 manquant');
 const ids=api.CORE.map(x=>x.id);
 for(const id of ['defense','armor','movement'])assert.ok(ids.includes(id),id+' doit être natif');
 for(const id of ['defense','armor','movement'])assert.ok(api.active(id),id+' doit être activé lors de la migration 95');
@@ -78,4 +78,4 @@ assert.match(src,/data-gens-dynamic-hero-stat/,'champs de stats personnalisées 
 assert.match(src,/hcRpgElementsWrap/,'le bloc élémentaire doit rester séparé dans l’éditeur héros');
 assert.match(src,/\["legacy_hit_ranged","agilite","hit:ranged","rangedHitStep","rangedHitGain"\]/,'migration toucher distance incorrecte');
 assert.match(src,/addEventListener\("input",live\)/,'le résumé des effets doit se mettre à jour pendant la saisie');
-console.log('V16.78.95 native Defense/Armor/Movement + dynamic hero stats: OK');
+console.log('V16.78.114.7 native Defense/Armor/Movement + dynamic hero stats compatibility: OK');

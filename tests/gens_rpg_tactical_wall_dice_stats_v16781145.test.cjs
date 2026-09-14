@@ -81,7 +81,7 @@ assert.equal(battle.meta.canonicalStatsLinkVersion,'16.78.114.5');
   assert.match(source,/dungeonMapHtml/,'wall fix must patch the map HTML seam, not only repaint after render');
   assert.doesNotMatch(source,/WALL_ASSET="assets\/dungeon\/creatures\/dungeon_wall\.png"/);
   assert.match(integration,/gens-rpg-tactical-wall-dice-stats-16781145\.js\?v=16\.78\.114\.5/);
-  assert.ok(integration.indexOf('loadFinal1145()')>integration.indexOf('GensRpgTacticalVisualDice16781142'),'V114.5 must load after the previous tactical UX layer');
+  assert.match(integration,/GensRpgTacticalVisualDice16781142\?\.installWithRetries\?\.\(R\)[\s\S]{0,220}loadFinal1145\(\)/,'V114.5 must be started from the V114.3 install continuation');
   assert.match(sw,/gensrpg-cache-16\.78\.114\.5-wall-dice-stats/);
   assert.match(sw,/gens-rpg-tactical-wall-dice-stats-16781145\.js/);
   console.log('V16.78.114.5 wall prepaint + short D100 + canonical combat stats link OK');

@@ -65,6 +65,7 @@ const server=http.createServer((req,res)=>{
     for(const [i,frame] of wallAudit.entries()){assert.equal(frame.same,true,`zoom frame ${i} replaced the wall bitmap`);assert.equal(frame.connected,true);assert.equal(frame.complete,true);assert.ok(frame.naturalWidth>0);assert.equal(frame.visibility,"visible");assert.equal(frame.opacity,"1");assert.equal(frame.covers,true)}
 
     await page.locator('[data-target="e"]').click();
+    await page.locator(".gtv2Hint .gtv21149Calc summary").click();
     const hint=await page.locator(".gtv2Hint").innerText();
     assert.match(hint,/36 % de toucher — réussite sur D100 ≥ 65/);
     assert.match(hint,/92 précision − 20 Défense − 16 Esquive − 20 Couvert = 36 %/);

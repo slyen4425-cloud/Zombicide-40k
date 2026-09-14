@@ -1,4 +1,4 @@
-name: Validate V16.78.114.3 Vision + Wall + Fast Dice + Combat UX
+name: Validate V16.78.114.4 Combat Session Recovery + Tactical UX
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - work/v16.78.114.1-keep-vision-revert-wall-dice
       - work/v16.78.114.2-builder-wall-survival-dice
       - work/v16.78.114.3-wall-dice-transition-menu
+      - work/v16.78.114.4-combat-session-recovery
       - main
   pull_request:
     branches:
@@ -22,10 +23,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Syntax tactical hotfix chain
         run: |
+          node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
           node --check assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js
+      - name: Exact V114.4 menu recovery and no-legacy scenarios
+        run: node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
       - name: Exact V114.3 live-vision wall fast-dice transition and menu scenarios
         run: node tests/gens_rpg_tactical_hotfix_v1678114.test.cjs
       - name: Preserve V113 room and sub-room scoping

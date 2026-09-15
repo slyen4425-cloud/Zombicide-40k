@@ -3,7 +3,7 @@ name: GenSrpG architecture sentinels
 on:
   push:
     branches:
-      - 'work/gensrpg-architecture-sentinels-2026-09-15'
+      - 'work/gensrpg-*'
   pull_request:
     branches:
       - main
@@ -27,6 +27,9 @@ jobs:
 
       - name: Vérifier l'autorité UI Dungeon native V114.11
         run: node tests/gens_v11411_native_ui_authority.test.cjs
+
+      - name: Vérifier Force canonique vers snapshot Tactical
+        run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 
   browser-sentinel:
     needs: architecture-sentinels

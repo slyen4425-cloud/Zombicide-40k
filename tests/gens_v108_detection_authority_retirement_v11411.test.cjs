@@ -12,12 +12,15 @@ assert.match(v108,/function hookDetection\(rt=R\)/,'historical V108 detection se
 assert.match(v108,/function scanImmediateDetection\(rt=R\)/,'historical V108 detection calculation remains available for characterization tests');
 assert.match(v108,/scanImmediateDetection,hookDetection/,'historical V108 detection helpers remain exported for rollback characterization');
 
-for(const required of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','bindControls(rt)','hookUiRender(rt)','paintWalls(rt)','enhanceActions(rt)']){
+for(const required of ['ensureStyle(rt)','bindControls(rt)','hookUiRender(rt)','enhanceActions(rt)']){
   assert.ok(install.includes(required),`V108 detection retirement must preserve non-detection behavior: missing ${required}`);
+}
+for(const retiredWall of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)']){
+  assert.ok(!install.includes(retiredWall),`V108 detection guard must not require retired wall behavior: found ${retiredWall}`);
 }
 
 assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must remain the active movement/event/start detection authority');
 assert.match(v113,/movement-detection-v113/,'V113 movement detection must remain active');
 assert.match(v113,/board-cell-detection-v113/,'V113 board-cell detection must remain active');
 
-console.log('GenSrpG V114.11: V108 detection authority retired; V113 remains sole final detection owner');
+console.log('GenSrpG V114.11: V108 detection authority retired; V113 remains sole final detection owner; retired wall behavior not required');

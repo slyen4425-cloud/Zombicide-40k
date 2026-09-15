@@ -21,3 +21,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Enforce GenSrpG Charter boundaries
         run: node tests/gens_architecture_charter_guard.test.cjs
+      - name: Validate pure Core RPG rules contract
+        run: node tests/gens_core_rpg_rules_contract.test.cjs

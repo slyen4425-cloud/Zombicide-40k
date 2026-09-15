@@ -22,8 +22,8 @@ const profile={
   },
 };
 const customRules={
-  physicalDamageFormula:'step',physicalDamageStep:5,physicalDamageGain:2,
-  magicDamageFormula:'step',magicDamageStep:8,magicDamageGain:3,
+  physicalDamageFormula:'step',physicalDamageStep:5,physicalDamageGain:2,physicalDamagePercentPerPoint:0,
+  magicDamageFormula:'step',magicDamageStep:8,magicDamageGain:3,magicDamagePercentPerPoint:0,
   magicResistFormula:'perPoint',magicResistPerPoint:0.5,
   armorZeroBlockChance:25,minPhysicalDamage:2,critMultiplier:2,
 };
@@ -103,10 +103,41 @@ assert.equal(physical.statDamageBonus,6,'Tactical attack must consume the canoni
 assert.equal(physical.rawDamage,8,'2 weapon + 6 Force-derived damage must reach the damage resolver');
 assert.equal(physical.damage,3,'8 raw - 5 armor must deal 3');
 
-const magicPreview={ok:true,attack:{power:12,damageType:'magic'},damage:12};
-const magic=Stats.adjustedDamage(magicPreview,actor);
+const magicTarget={id:'enemy',side:'enemy',meta:{rpgStats:{derived:{magicResistance:9},resistances:{}}}};
+const magicPreview={ok:true,attack:{power:12,damageType:'magic',tags:['magic']},damage:12};
+const magic=Stats.adjustedDamage(magicPreview,magicTarget,actor);
 assert.equal(magic.resistance,9,'Tactical magic damage must consume canonical Spirit/equipment/talent resistance');
 assert.equal(magic.damage,3,'12 magic - 9 resistance must deal 3');
+
+// Percent formulas are already editable in GenSrpG and must traverse the same real runtime path.
+customRules.physicalDamageFormula='percent';
+customRules.physicalDamagePercentPerPoint=2;
+customRules.magicDamageFormula='percent';
+customRules.magicDamagePercentPerPoint=5;
+const percentActor={id:'hero',side:'hero',hp:24,maxHp:25,movement:0,initiative:0,defense:0,armor:0,dodge:0,meta:{heroId:'hero'}};
+const percentSnap=Stats.buildHeroSnapshot(ctx,'hero',percentActor);
+Stats.applyHeroSnapshot(percentActor,percentSnap);
+assert.equal(percentSnap.rules.physicalDamageFormula,'percent');
+assert.equal(percentSnap.rules.physicalDamagePercentPerPoint,2);
+assert.equal(percentSnap.rules.magicDamageFormula,'percent');
+assert.equal(percentSnap.rules.magicDamagePercentPerPoint,5);
+assert.equal(percentSnap.derived.physicalDamageBonus,0,'percent mode must not masquerade as a flat bonus');
+assert.equal(percentSnap.derived.magicDamageBonus,0,'percent magic mode must not masquerade as a flat bonus');
+
+const percentSword={power:10,damageType:'physical',tags:['melee'],ignoreArmor:false};
+const percentPhysical=Visual.resolvePhysicalDamage(ctx,null,percentActor,skeleton,percentSword,{damageType:'physical',armor:5,damage:0,rawDamage:10},0);
+assert.equal(percentPhysical.statDamagePercent,38,'19 Force × 2% must expose 38% physical scaling');
+assert.equal(percentPhysical.statDamageBonus,4,'38% of weapon 10 rounds to +4');
+assert.equal(percentPhysical.rawDamage,14,'10 weapon + 38% Force scaling must produce 14 raw');
+assert.equal(percentPhysical.damage,9,'14 raw - 5 armor must deal 9');
+
+const percentMagicPreview={ok:true,attack:{power:10,damageType:'magic',tags:['magic']},damage:10};
+const percentMagic=Stats.adjustedDamage(percentMagicPreview,magicTarget,percentActor);
+assert.equal(percentMagic.statDamagePercent,80,'16 Intelligence × 5% must expose 80% magic scaling');
+assert.equal(percentMagic.statDamageBonus,8,'80% of magic base 10 must add 8');
+assert.equal(percentMagic.rawDamage,18,'10 magic + 80% Intelligence scaling must produce 18 raw');
+assert.equal(percentMagic.resistance,9);
+assert.equal(percentMagic.damage,9,'18 raw magic - 9 resistance must deal 9');
 
 assert.equal(ctx.current,'hero','snapshot builder must restore active hero context');
 assert.equal(ctx.state,state,'snapshot builder must restore active hero state');

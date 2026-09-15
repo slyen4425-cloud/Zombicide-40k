@@ -22,6 +22,11 @@ assert.equal(previewSrcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-1
 assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,'preview must remove the source performance tag before reinjecting the Pages order');
 assert.ok(preview.includes('const base=new URL(\'./\',location.href).href;'),'preview must derive its immutable commit-root base URL');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
-assert.ok(preview.includes('gensrpg-preview-ready'),'preview must emit an explicit runtime-ready signal');
+assert.ok(preview.includes('document.open();')&&preview.includes('document.write(html);')&&preview.includes('document.close();'),'preview must render into the top-level document so reload/restart returns to preview.html');
+assert.doesNotMatch(preview,/<iframe\b/i,'restart-safe preview must not use an iframe/srcdoc');
+assert.ok(preview.includes('__GENSRPG_PREVIEW__'),'preview must mark its isolated runtime');
+assert.ok(preview.includes('Object.defineProperty(navigator.serviceWorker,"register"'),'preview must prevent PWA worker registration');
+assert.ok(preview.includes('gensrpg-cache-'),'preview must clear GenSrpG preview caches without touching unrelated cache names');
+assert.ok(preview.includes('gensrpgPreviewReady'),'preview must emit an explicit runtime-ready marker');
 
-console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'existing modules in exact order + explicit ready signal');
+console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'existing modules in exact order + top-level restart-safe PWA isolation');

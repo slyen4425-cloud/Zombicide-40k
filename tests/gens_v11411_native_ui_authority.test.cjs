@@ -1,0 +1,12 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const integration=fs.readFileSync('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js','utf8');
+const dice=fs.readFileSync('assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js','utf8');
+assert.ok(!integration.includes('loadSessionGuard1144('),'V114.11 integration must not load the global V114.4 session guard');
+assert.ok(!integration.includes('GensRpgTacticalSessionGuard16781144?.installWithRetries'),'V114.11 integration must not install the global V114.4 session guard');
+assert.ok(integration.includes('loadPolish108();'),'tactical V108+ chain must still load');
+assert.ok(integration.includes('v=16.78.114.11'),'V114.11 tactical UX must remain loaded');
+assert.ok(dice.includes('__gensRpg11411Damage'),'V114.11 corrected combat damage resolver must remain present');
+assert.ok(dice.includes('armorZeroBlockChance'),'V114.11 armor-zero rule must remain present');
+assert.ok(dice.includes('thresholdForChance'),'V114.11 D100 hit calculation must remain present');
+console.log('V16.78.114.11 native Dungeon UI authority isolation OK');

@@ -25,6 +25,8 @@ jobs:
         run: node tests/gens_core_rpg_rules_contract.test.cjs
       - name: Validate pure Core asset resolver contract
         run: node tests/gens_core_asset_resolver_contract.test.cjs
+      - name: Validate pure Core storage and migrations contract
+        run: node tests/gens_core_storage_migrations_contract.test.cjs
       - name: Validate Core Assets browser wiring
         run: node tests/gens_core_asset_browser_wiring_contract.test.cjs
       - name: Validate Core Assets Tactical runtime authority

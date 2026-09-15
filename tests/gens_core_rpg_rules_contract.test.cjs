@@ -2,14 +2,28 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const Core=require(path.join(__dirname,'..','assets','gensrpg','core','rpg-rules.js'));
 
-assert.equal(Core.VERSION,'1.0.0');
+assert.equal(Core.VERSION,'1.1.0');
 assert.equal(Core.DEFAULTS.armorZeroBlockChance,50,'new target rule is 50/50 when armor cancels damage');
+assert.equal(Core.DEFAULTS.spiritMagicResistStep,20,'legacy default: every 20 Spirit grants magic resistance');
+assert.equal(Core.DEFAULTS.magicResistGain,1,'legacy default: +1 magic resistance per Spirit step');
 
 assert.equal(Core.physicalDamageBonus(0),0);
 assert.equal(Core.physicalDamageBonus(9),0);
 assert.equal(Core.physicalDamageBonus(10),1);
 assert.equal(Core.physicalDamageBonus(16),1,'16 Force must provide +1 melee physical damage');
 assert.equal(Core.physicalDamageBonus(20),2);
+
+assert.equal(Core.magicDamageBonus(0),0);
+assert.equal(Core.magicDamageBonus(9),0);
+assert.equal(Core.magicDamageBonus(10),1);
+assert.equal(Core.magicDamageBonus(20),2);
+
+assert.equal(Core.magicResistanceBonus(0),0);
+assert.equal(Core.magicResistanceBonus(19),0);
+assert.equal(Core.magicResistanceBonus(20),1,'20 Spirit must provide +1 magic resistance');
+assert.equal(Core.magicResistanceBonus(39),1);
+assert.equal(Core.magicResistanceBonus(40),2);
+assert.equal(Core.magicResistanceBonus(40,{spiritMagicResistStep:10,magicResistGain:2}),8,'magic resistance must follow configurable RPG rules');
 
 const base=Core.resolvePhysicalDamage({weaponDamage:2,force:16,armor:1,armorRoll:0});
 assert.equal(base.baseWeaponDamage,2);

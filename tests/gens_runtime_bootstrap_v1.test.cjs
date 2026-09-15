@@ -28,9 +28,10 @@ const expected=[
   'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-runtime-repair-1678106.js?v=16.78.105',
   'assets/gensrpg/gens-survival-mode-isolation-1678104.js?v=16.78.105'
 ];
-assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve the exact historical base load order');
+assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve deterministic Tactical -> Bridge -> runtime repair -> Survival load order');
 assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical loader guard must remain active');
 assert.equal(survivalInstalls,4,'Survival isolation must keep immediate + 3 retry installs');
 assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
@@ -42,4 +43,4 @@ const before=loaded.length;
 sandbox.GensRuntimeBootstrapV1.install();
 assert.equal(loaded.length,before,'RuntimeBootstrap install must be idempotent after the guard is set');
 
-console.log('GenSrpG RuntimeBootstrap V1 load order + idempotence OK');
+console.log('GenSrpG RuntimeBootstrap V1 explicit Tactical + runtime-repair + Survival order and idempotence OK');

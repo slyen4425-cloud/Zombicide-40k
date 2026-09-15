@@ -37,6 +37,9 @@ jobs:
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 
+      - name: Caractériser l'autorité de démarrage et des participants combat
+        run: node tests/gens_combat_authority_characterization_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

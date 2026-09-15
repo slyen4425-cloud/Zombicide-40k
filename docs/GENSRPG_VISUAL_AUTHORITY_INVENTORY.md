@@ -32,7 +32,7 @@ Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs a
 |---|---|---|---|
 | V108 | active | `patchDungeonMapHtml`, `hookDungeonRender`, `paintWalls` | retirer du `install()` après validation |
 | V109 | active | `hookDungeonRender`, `enhance()` → `paintBuilderWalls` | retirer uniquement le repaint mural, conserver timeline/portée/mains nues/attaque rapide |
-| V111 | active | `maintain()` → `paintWalls` | retirer uniquement le repaint mural, conserver multi-dés/dock/refresh |
+| V111 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `maintain()` | multi-dés, dock, reconstruction des attaques, onglets runtime et maintenance UI conservés ; murs délégués au Tactical UI canonique |
 | V112 | **retirée** | fonction `markWallCells` conservée mais plus appelée par `maintain()` ; son ancien hook de détection reste lui-même inactif | détails/explications/spatial conservés ; murs délégués au Tactical UI canonique |
 | V113 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `install()` ni `maintain()` | scope/détection V113 conservés ; murs délégués au Tactical UI canonique |
 
@@ -40,7 +40,7 @@ Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs a
 
 1. ✅ V113 `paintWalls` retiré de l'exécution active ;
 2. ✅ V112 `markWallCells` retiré de `maintain()` ;
-3. V111 `paintWalls` ;
+3. ✅ V111 `paintWalls` retiré de `maintain()` ;
 4. V109 `paintBuilderWalls` et hook Dungeon mural ;
 5. V108 `paintWalls` / patch/hook mural historiques ;
 6. verrou global : aucun repaint historique actif, seul `GensRpgTacticalCombatV2Ui` possède les murs.

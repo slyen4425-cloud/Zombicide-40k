@@ -9,12 +9,15 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const VERSION="1.0.0";
+  const VERSION="1.1.0";
   const DEFAULTS=Object.freeze({
     physicalDamageStep:10,
     physicalDamageGain:1,
     magicDamageStep:10,
     magicDamageGain:1,
+    spiritMagicResistStep:20,
+    magicResistGain:1,
+    minMagicDamage:1,
     armorZeroBlockChance:50,
     minPhysicalDamageOnArmorFail:1,
   });
@@ -28,6 +31,9 @@
       physicalDamageGain:Math.max(0,num(r.physicalDamageGain,DEFAULTS.physicalDamageGain)),
       magicDamageStep:Math.max(1,num(r.magicDamageStep,DEFAULTS.magicDamageStep)),
       magicDamageGain:Math.max(0,num(r.magicDamageGain,DEFAULTS.magicDamageGain)),
+      spiritMagicResistStep:Math.max(1,num(r.spiritMagicResistStep,DEFAULTS.spiritMagicResistStep)),
+      magicResistGain:Math.max(0,num(r.magicResistGain,DEFAULTS.magicResistGain)),
+      minMagicDamage:Math.max(0,num(r.minMagicDamage,DEFAULTS.minMagicDamage)),
       armorZeroBlockChance:clamp(num(r.armorZeroBlockChance,DEFAULTS.armorZeroBlockChance),0,100),
       minPhysicalDamageOnArmorFail:Math.max(0,num(r.minPhysicalDamageOnArmorFail,DEFAULTS.minPhysicalDamageOnArmorFail)),
     };
@@ -45,6 +51,11 @@
   function magicDamageBonus(intelligence,rules={}){
     const r=normalizeRules(rules);
     return stepBonus(intelligence,r.magicDamageStep,r.magicDamageGain);
+  }
+
+  function magicResistanceBonus(spirit,rules={}){
+    const r=normalizeRules(rules);
+    return stepBonus(spirit,r.spiritMagicResistStep,r.magicResistGain);
   }
 
   function resolvePhysicalDamage({weaponDamage=0,force=0,armor=0,rules={},armorRoll=null}={}){
@@ -101,5 +112,15 @@
     return lines;
   }
 
-  return {VERSION,DEFAULTS,normalizeRules,stepBonus,physicalDamageBonus,magicDamageBonus,resolvePhysicalDamage,describePhysicalDamage};
+  return {
+    VERSION,
+    DEFAULTS,
+    normalizeRules,
+    stepBonus,
+    physicalDamageBonus,
+    magicDamageBonus,
+    magicResistanceBonus,
+    resolvePhysicalDamage,
+    describePhysicalDamage,
+  };
 });

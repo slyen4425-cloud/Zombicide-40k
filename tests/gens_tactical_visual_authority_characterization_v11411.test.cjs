@@ -17,7 +17,7 @@ const v112=read('assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js');
 const v113=read('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js');
 const doc=read('docs/GENSRPG_VISUAL_AUTHORITY_INVENTORY.md');
 
-// Canonical base UI already owns direct wall emission + live Dungeon repair.
+// Canonical base UI owns direct wall emission + live Dungeon repair.
 assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'base Tactical UI must own the validated wall asset');
 assert.match(ui,/function wallTileHtml\(\).*gtv2WallTile/,'base Tactical UI must emit a real wall image tile');
 assert.match(ui,/function ensureWallTile\(el\)/,'base Tactical UI must own idempotent wall tile attachment');
@@ -29,7 +29,7 @@ assert.match(ui,/function hookDungeonRender\(\)/,'base Tactical UI must own Dung
 const globalPolish=block(ui,'function installGlobalPolish(){','const api=','base Tactical UI installGlobalPolish');
 for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRender()','paintLiveWalls()'])assert.ok(globalPolish.includes(required),`base Tactical UI canonical wall pipeline missing ${required}`);
 
-// Characterize the remaining active historical wall debt before subtractive cleanup.
+// Remaining active historical wall debt after retiring V113.
 const i108=block(v108,'function install(rt=R){','function installWithRetries','V108 install');
 for(const required of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(i108.includes(required),`V108 wall debt changed unexpectedly: missing ${required}`);
 
@@ -49,10 +49,17 @@ assert.ok(i112.includes('maintain(rt)'),'V112 maintenance must still be active b
 const maintain112=block(v112,'function maintain(rt=R){','function queueMaintain','V112 maintain');
 assert.ok(maintain112.includes('markWallCells(rt)'),'V112 maintenance must characterize active wall repaint debt');
 
+// V113 historical painter remains inspectable, but it is no longer an active wall owner.
+assert.match(v113,/function paintWalls\(rt=R\)/,'V113 historical wall painter must remain inspectable for rollback');
+const maintain113=block(v113,'function maintain(rt=R){','function queueMaintain','V113 maintain');
 const i113=block(v113,'function install(rt=R){','function installWithRetries','V113 install');
-assert.ok(i113.includes('paintWalls(rt)'),'V113 final historical wall repaint must be characterized before removal');
+assert.doesNotMatch(maintain113,/paintWalls\(rt\)/,'V113 maintenance must no longer repaint walls');
+assert.doesNotMatch(i113,/paintWalls\(rt\)/,'V113 install must no longer repaint walls');
+assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 detection authority must remain active');
+assert.ok(i113.includes('bindBoardClicks(rt)'),'V113 board detection must remain active');
 
 for(const name of ['V108','V109','V111','V112','V113'])assert.match(doc,new RegExp(name),`visual authority inventory must document ${name}`);
+assert.match(doc,/V113 \| \*\*retirée\*\*/,'visual authority inventory must mark V113 wall authority retired');
 assert.match(doc,/GensRpgTacticalCombatV2Ui/,'visual authority inventory must name base Tactical UI as target authority');
 
-console.log('GenSrpG V114.11 visual authority characterized: base Tactical UI is canonical; V108/V109/V111/V112/V113 wall repaint debt frozen');
+console.log('GenSrpG V114.11 visual authority: base Tactical UI canonical; V113 wall repaint retired; V108/V109/V111/V112 debt remains');

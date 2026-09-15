@@ -9,7 +9,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const VERSION="1.1.0";
+  const VERSION="1.2.0";
   const DEFAULTS=Object.freeze({
     physicalDamageStep:10,
     physicalDamageGain:1,
@@ -61,7 +61,8 @@
   function resolvePhysicalDamage({weaponDamage=0,force=0,armor=0,rules={},armorRoll=null}={}){
     const r=normalizeRules(rules);
     const baseWeaponDamage=Math.max(0,num(weaponDamage,0));
-    const statDamageBonus=physicalDamageBonus(force,r);
+    const resolvedForce=Math.max(0,num(force,0));
+    const statDamageBonus=physicalDamageBonus(resolvedForce,r);
     const rawDamage=Math.max(0,Math.round(baseWeaponDamage+statDamageBonus));
     const armorValue=Math.max(0,num(armor,0));
     const reducedDamage=Math.max(0,rawDamage-armorValue);
@@ -82,13 +83,16 @@
 
     return {
       baseWeaponDamage,
-      force:Math.max(0,num(force,0)),
+      force:resolvedForce,
+      physicalDamageStep:r.physicalDamageStep,
+      physicalDamageGain:r.physicalDamageGain,
       statDamageBonus,
       rawDamage,
       armor:armorValue,
       reducedDamage,
       armorFloorTriggered,
       armorZeroBlockChance:r.armorZeroBlockChance,
+      minPhysicalDamageOnArmorFail:r.minPhysicalDamageOnArmorFail,
       armorRoll:resolvedArmorRoll,
       armorBlocked,
       finalDamage,
@@ -96,17 +100,23 @@
   }
 
   function describePhysicalDamage(result={}){
+    const step=Math.max(1,num(result.physicalDamageStep,DEFAULTS.physicalDamageStep));
+    const gain=Math.max(0,num(result.physicalDamageGain,DEFAULTS.physicalDamageGain));
+    const minOnFail=Math.max(0,num(result.minPhysicalDamageOnArmorFail,DEFAULTS.minPhysicalDamageOnArmorFail));
     const lines=[
       `Arme : ${num(result.baseWeaponDamage,0)}`,
-      `Force ${num(result.force,0)} : +${num(result.statDamageBonus,0)}`,
+      `Force ${num(result.force,0)} (règle ${step}/+${gain}) : +${num(result.statDamageBonus,0)}`,
       `Dégâts bruts : ${num(result.rawDamage,0)}`,
       `Armure : -${num(result.armor,0)}`,
       `Après armure : ${num(result.reducedDamage,0)}`,
     ];
     if(result.armorFloorTriggered){
       const chance=clamp(num(result.armorZeroBlockChance,DEFAULTS.armorZeroBlockChance),0,100);
-      lines.push(`Jet d’armure : ${chance}% blocage / ${100-chance}% minimum 1 dégât`);
-      if(result.armorRoll!=null)lines.push(`Jet : ${result.armorRoll} → ${result.armorBlocked?"bloqué":"1 dégât"}`);
+      lines.push(`Jet d’armure : ${chance}% blocage / ${100-chance}% minimum ${minOnFail} dégât${minOnFail>1?"s":""}`);
+      if(result.armorRoll!=null){
+        const outcome=result.armorBlocked?"bloqué":`${minOnFail} dégât${minOnFail>1?"s":""}`;
+        lines.push(`Jet : ${result.armorRoll} → ${outcome}`);
+      }
     }
     lines.push(`Résultat final : ${num(result.finalDamage,0)} dégât${num(result.finalDamage,0)>1?"s":""}`);
     return lines;

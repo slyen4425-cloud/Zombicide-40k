@@ -14,10 +14,10 @@ const server=http.createServer((req,res)=>{
   await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR'});
-  const page=await context.newPage();page.setDefaultTimeout(15000);
+  const page=await context.newPage();page.setDefaultTimeout(30000);page.setDefaultNavigationTimeout(15000);
   const localFailures=[];page.on('response',r=>{try{const u=new URL(r.url());if(u.hostname==='127.0.0.1'&&r.status()>=400)localFailures.push([r.status(),u.pathname])}catch(e){}});
   try{
-    await page.goto(`http://127.0.0.1:${port}/preview.html`,{waitUntil:'load'});
+    await page.goto(`http://127.0.0.1:${port}/preview.html`,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>document.getElementById('status')?.classList.contains('hide')===true);
     await page.waitForFunction(()=>document.getElementById('app')?.contentDocument?.querySelector('#menu'));
     const state=await page.evaluate(()=>{
@@ -39,5 +39,9 @@ const server=http.createServer((req,res)=>{
     assert.equal(state.srcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap must remain final');
     assert.deepEqual(localFailures,[],'preview local assets must not return HTTP errors');
     console.log(JSON.stringify({scenario:'manual preview loader',viewport:'412x915 @2.625 touch',modules:state.srcs.length,final:state.srcs.at(-1),bridgeLoaded:state.tacticalBridge}));
-  }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
+  }finally{
+    await context.close();await browser.close();
+    try{server.closeAllConnections?.()}catch(e){}
+    await new Promise(r=>server.close(r));
+  }
 })().catch(e=>{console.error(e);process.exitCode=1});

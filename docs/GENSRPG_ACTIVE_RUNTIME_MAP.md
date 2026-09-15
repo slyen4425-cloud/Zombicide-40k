@@ -2,104 +2,67 @@
 
 Date : 2026-09-15
 Base production auditée : `main` au commit `e8681f9823573ced8aec59c8ddc47a72b02bc663` (V16.78.114.11)
-Branche de refonte courante : `work/gensrpg-runtime-bootstrap-extraction-2026-09-15`
+Branche de refonte courante : `work/gensrpg-wall-css-authority-cleanup-2026-09-15`
 
-## Objectif
+## Principe de sécurité
 
-Documenter le chemin réellement exécuté et chaque transfert d'autorité pendant la restructuration, sans confondre :
+La restructuration reste progressive et soustractive. `main` n'est pas modifié pendant les travaux d'architecture.
 
-1. le `index.html` source ;
-2. le `_site/index.html` construit par GitHub Pages ;
-3. les scripts chargés dynamiquement au runtime.
+La référence de retour arrière complète est :
+
+`backup/gensrpg-v16.78.114.11-architecture-baseline-2026-09-15`
+
+Elle conserve exactement le gros `index.html` de V16.78.114.11 ainsi que tous les assets et tests correspondants.
+
+Chaque jalon structurel validé possède en plus son propre checkpoint Git. Parmi les jalons principaux :
+
+- `checkpoint/gensrpg-architecture-sentinels-green-2026-09-15`
+- `checkpoint/gensrpg-force-snapshot-green-2026-09-15`
+- `checkpoint/gensrpg-runtime-bootstrap-green-2026-09-15`
+- `checkpoint/gensrpg-combat-authority-characterized-green-2026-09-15`
+- `checkpoint/gensrpg-v112-start-authority-removed-green-2026-09-15`
+- `checkpoint/gensrpg-bridge-single-entry-green-2026-09-15`
+- `checkpoint/gensrpg-combat-callsite-inventory-green-2026-09-15`
+- `checkpoint/gensrpg-single-detection-authority-final-green-2026-09-15`
+- `checkpoint/gensrpg-observer-guard-retired-green-2026-09-15`
+- `checkpoint/gensrpg-single-js-wall-authority-green-2026-09-15`
+- `checkpoint/gensrpg-single-wall-authority-green-2026-09-15`
+
+## 1. Les trois niveaux à ne pas confondre
+
+Le runtime réel reste composé de trois niveaux :
+
+1. `index.html` source ;
+2. `_site/index.html` construit par GitHub Pages ;
+3. modules chargés dynamiquement au runtime.
 
 Invariant :
 
 `index.html source != _site/index.html construit != runtime après chargements dynamiques`
 
-## Sauvegardes de référence
+Le titre HTML historique n'est pas une autorité de version. Le SHA Git, la composition testée et les modules effectivement chargés font foi.
 
-La base de production V16.78.114.11 est figée sur :
+## 2. Composition statique Pages
 
-`backup/gensrpg-v16.78.114.11-architecture-baseline-2026-09-15`
+Le workflow Pages garantit toujours la chaîne Dungeon historique puis les modules GenSrpG nécessaires. Le module :
 
-Elle pointe directement sur le commit sûr `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Le gros `index.html` d'environ 8,2 Mo reste donc récupérable exactement, avec tous les autres fichiers correspondant à cette version.
+`assets/gensrpg/gens-mobile-combat-performance-16781022.js`
 
-Checkpoints de restructuration validés :
+reste la dernière entrée statique GenSrpG de transition.
 
-- `checkpoint/gensrpg-architecture-sentinels-green-2026-09-15`
-- `checkpoint/gensrpg-force-snapshot-green-2026-09-15`
-- `checkpoint/gensrpg-runtime-bootstrap-green-2026-09-15`
+Cette position n'a pas été modifiée pendant la restructuration afin de ne pas mélanger nettoyage d'architecture et changement d'ordre de chargement.
 
-Le principe pour la suite est de créer un checkpoint après chaque jalon structurel vert plutôt que de dupliquer physiquement le HTML à chaque modification.
+## 3. RuntimeBootstrap — séparation validée
 
-## 1. Source `index.html`
+Avant restructuration, le module performance mobile cumulait cache/dés/performance et composition dynamique Tactical/Survie.
 
-La source reste pour l'instant le monolithe historique. Ses scripts externes directs sont toujours :
-
-1. `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2`
-2. `https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js`
-3. `assets/dungeon/dungeon-core-316.js`
-4. `assets/dungeon/dungeon-core-317.js`
-5. `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
-
-Le titre HTML `GenSrpG V16.78.11` est obsolète et n'est pas une autorité de version. Le SHA Git et la composition runtime testée font foi.
-
-## 2. Composition GitHub Pages
-
-Le workflow `.github/workflows/main.yml` reconstruit `_site/index.html` et garantit actuellement, dans cet ordre :
-
-1. `dungeon-core-318.js`
-2. `dungeon-large-room-support-167834.js`
-3. `dungeon-room-creator-100.js`
-4. `dungeon-room-creator-v2-167819.js`
-5. `dungeon-room-creator-feedback-167821.js`
-6. `dungeon-world-builder-167821.js`
-7. `dungeon-room-runtime-167822.js`
-8. `dungeon-world-runtime-167823.js`
-9. `dungeon-zone-content-167824.js`
-10. `dungeon-authored-runtime-167839.js`
-11. `dungeon-authored-cache-visual-167852.js`
-12. `dungeon-source-render-stability-167877.js`
-13. `dungeon-equipment-ui.js`
-14. `dungeon-equipment-hotfix-167817.js`
-15. `dungeon-set-editor-167818.js`
-16. `gens-world-summary-167820.js`
-17. `gens-rpg-stats-clean-167874.js`
-18. `gens-dungeon-hero-art-repair-167874.js`
-19. `gens-mobile-combat-performance-16781022.js`
-
-Le module performance reste temporairement la dernière entrée statique afin de ne pas modifier en même temps l'ordre du build et la composition dynamique.
-
-## 3. Jalon validé — séparation Performance / Bootstrap
-
-Avant le refactor, `gens-mobile-combat-performance-16781022.js` cumulait :
-
-- cache et invalidation des valeurs ;
-- dés rapides D6/D100 ;
-- wrappers de performance ;
-- chargement de Tactical V2 ;
-- chargement de l'isolation Survie ;
-- réinstallation du bridge Tactical et de l'isolation Survie.
-
-Cette responsabilité de composition est désormais extraite sur la branche de refonte.
-
-### `gens-mobile-combat-performance-16781022.js`
-
-Il conserve uniquement :
-
-- cache de valeurs dérivées ;
-- invalidation ;
-- dés rapides ;
-- routage du renderer de dés Dungeon/Survie ;
-- wrappers liés au hot-path de performance.
-
-Il ne connaît plus les sept modules Tactical/Survie. Il effectue seulement un handoff idempotent vers :
+La composition dynamique appartient maintenant à :
 
 `assets/gensrpg/core/runtime-bootstrap-v1.js`
 
-### `core/runtime-bootstrap-v1.js`
+Le module performance conserve uniquement ses responsabilités de performance et effectue un handoff vers ce bootstrap.
 
-Il est maintenant l'unique propriétaire autorisé de la composition dynamique de cette chaîne de transition :
+Le bootstrap garde volontairement l'ordre historique de transition :
 
 1. `gens-rpg-tactical-combat-v2.js`
 2. `gens-rpg-tactical-combat-v2-adapter.js`
@@ -109,101 +72,109 @@ Il est maintenant l'unique propriétaire autorisé de la composition dynamique d
 6. `gens-rpg-tactical-combat-v2-bridge.js`
 7. `gens-survival-mode-isolation-1678104.js`
 
-Le refactor préserve volontairement :
+Ordre, `async=false`, idempotence et retries sont protégés par sentinelles. Aucun nouveau module d'architecture n'a le droit de devenir un second chargeur caché de scripts.
 
-- l'ordre historique ;
-- `async=false` ;
-- le garde `__gensTacticalV2Loader105` ;
-- installation immédiate du bridge/isolation ;
-- retries 250 / 1200 / 3000 ms.
-
-Ce comportement est caractérisé par test avant toute future suppression des retries.
-
-Le service worker met également `runtime-bootstrap-v1.js` en cache afin de conserver le fonctionnement PWA/hors ligne.
-
-## 4. Chaîne Tactical V108 → V114.11 encore active
-
-`gens-rpg-tactical-combat-v2-integration.js` conserve pour l'instant :
-
-1. V108 — polish ;
-2. V109 — polish ;
-3. V110 — stats/snapshot ;
-4. V111 — runtime fixes ;
-5. V112 — combat coherence ;
-6. V113 — runtime authority ;
-7. V114.11 — visual dice / protection UI.
-
-Cette chaîne reste une dette historique à consolider progressivement.
-
-V114.11 continue de bloquer les `MutationObserver` globaux `body/html` pendant l'installation de ces couches, puis restaure le constructeur natif. V114.1 et V114.4 ne sont pas réintroduits dans la chaîne active.
-
-## 5. Autorités caractérisées
+## 4. Autorités actuellement consolidées
 
 ### Navigation / fiche héros / Save & Quit
 
 Autorité : runtime Dungeon natif.
 
-Sentinelles vertes : Tactical ne doit pas reprendre l'accueil, la fiche héros, Save & Quit ou le renderer global après sortie du combat.
+Tactical ne doit pas reprendre l'accueil, la fiche héros, Save & Quit ou le renderer global après sortie du combat. La sentinelle navigateur V114.11 protège cette frontière.
 
-### Composition du runtime
+### Stats / Force / snapshot Tactical
 
-Autorité de transition : `core/runtime-bootstrap-v1.js`.
-
-Une sentinelle interdit désormais aux nouveaux modules d'introduire une deuxième injection cachée de scripts. Le bootstrap est l'unique exception explicitement autorisée.
-
-### Performance mobile
-
-Autorité : `gens-mobile-combat-performance-16781022.js`.
-
-La séparation du bootstrap n'a pas modifié le profil des dés/cache dans les tests.
-
-### Stats et Force
-
-Le vrai chemin a été caractérisé :
+Le chemin réel est caractérisé et protégé :
 
 `Force canonique -> effets configurés -> bridge Dungeon historique -> snapshot Tactical`
 
-Cas testés :
+Les tests couvrent notamment Force 20 -> bonus physique +2 et Force 30 -> +3 avec la règle configurée `+1 / 10 Force`.
 
-- Force 20 avec `+1 dégâts physiques / 10 Force` -> bonus +2 dans le snapshot ;
-- Force 30 -> bonus +3.
+### Détection Tactical
 
-Le comportement est donc fonctionnel et doit être préservé pendant la suppression future du raccord global historique.
+Autorité active unique : V113.
 
-### Survie
+Les autorités de détection V108, V111 et V112 ont été retirées du chemin actif. Les scénarios de salle, sous-salle, portée, LOS et héros non encore entré restent protégés.
 
-L'isolation Survie n'est plus déclarée dans le fichier de performance ; sa composition appartient au RuntimeBootstrap de transition. À terme, le bootstrap de mode devra rendre son cycle de vie indépendant de Tactical Dungeon.
+### Démarrage de combat / participants
 
-## 6. Sentinelles actives
+Le Bridge possède désormais une seule entrée interne explicite :
 
-La CI de restructuration vérifie désormais :
+`GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
 
-- composition source/build/runtime ;
-- RuntimeBootstrap : ordre exact, idempotence et retries ;
-- interdiction de toute nouvelle autorité globale GenSrpG hors allowlist ;
-- performance mobile inchangée ;
-- autorité UI Dungeon native ;
-- vrai chemin Force canonique -> snapshot Tactical ;
-- scénario navigateur Chromium V114.11.
+Les quatre noms historiques restent encore des adaptateurs de compatibilité :
 
-Le jalon RuntimeBootstrap est vert sur le run GitHub Actions `35002978859`.
+- `dc200StartCombat`
+- `openDungeonCombatSetup`
+- `launchCombat200`
+- `startCombat`
 
-## 7. Prochain chantier
+V112 ne reprend plus l'autorité de démarrage. V113 reste l'autorité finale de scope/participants avant le lancement Tactical.
 
-La prochaine consolidation doit porter sur les deux responsabilités qui se chevauchent le plus dans V108/V109/V111/V112/V113 :
+Le monolithe possède encore des appels historiques à migrer progressivement ; ils sont figés par `GENSRPG_COMBAT_CALLSITE_INVENTORY.md`.
 
-1. **un seul propriétaire du démarrage de combat** ;
-2. **un seul propriétaire du calcul des participants**.
+### Observers globaux
 
-Ordre prévu :
+La chaîne Tactical V108 -> V113 ne dépend plus d'un `MutationObserver` global actif sur `body/html`.
 
-1. caractériser par tests qui prend actuellement chaque décision ;
-2. figer les cas Dungeon (héros dans la salle, portée d'entraide, héros non encore entré, héros ailleurs/KO) ;
-3. désigner une autorité unique ;
-4. transformer les autres couches en délégation ou supprimer leur doublon ;
-5. vérifier UI, navigation, performance, Force/snapshot et navigateur ;
-6. créer un nouveau checkpoint avant le chantier suivant.
+Le garde constructeur temporaire qui avait été nécessaire dans V114.11 n'est plus requis pour compenser ces couches historiques dans la branche restructurée.
+
+### Murs Tactical / Dungeon
+
+Autorité visuelle active unique :
+
+`assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js`
+
+Consolidation terminée :
+
+- V108 : repaint JS retiré + CSS mural retiré ;
+- V109 : repaint JS retiré + CSS mural retiré ;
+- V111 : repaint JS retiré + CSS mural retiré ;
+- V112 : repaint JS retiré + CSS mural retiré ;
+- V113 : repaint JS retiré + CSS mural retiré.
+
+Les fonctions historiques restent inspectables pour rollback, mais aucune de ces couches n'est propriétaire actif du rendu mural.
+
+Deux verrous distincts empêchent une régression :
+
+- autorité JS unique des murs ;
+- autorité CSS unique des murs.
+
+La sentinelle Chromium vérifie le vrai asset, son décodage, l'unicité des tuiles et le raccord Dungeon.
+
+Checkpoint final :
+
+`checkpoint/gensrpg-single-wall-authority-green-2026-09-15`
+
+Run final architecture + Chromium : `35017431951`.
+
+## 5. Dette encore active
+
+La chaîne V108 -> V114.11 existe toujours physiquement. Plusieurs fonctions historiques restent exportées pour rollback et caractérisation, même lorsqu'elles ne sont plus installées.
+
+La dette principale n'est donc plus le rendu mural ni la détection. Elle se concentre maintenant sur :
+
+1. les appels historiques de démarrage de combat encore présents dans `index.html` ;
+2. les adaptateurs de compatibilité du Bridge ;
+3. le mélange multi-dés / dock / maintenance UI encore contenu dans V111 ;
+4. les auto-installs et retries historiques encore présents dans plusieurs couches ;
+5. le gros monolithe `index.html`, qui ne sera découpé qu'après stabilisation des contrats.
+
+## 6. Prochain chantier
+
+Le prochain chantier est la réduction progressive des points d'entrée combat historiques vers :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
+
+Inventaire actuel figé dans le monolithe :
+
+- `dc200StartCombat` : 13 occurrences ;
+- `openDungeonCombatSetup` : 17 occurrences ;
+- `launchCombat200` : 2 occurrences ;
+- `startCombat` : 6 occurrences.
+
+Règle : migrer un petit groupe homogène à la fois, diminuer le compteur attendu, préserver `enemyIds`, `reason`, embuscades, mode MJ, participants et retour exploration, puis valider architecture + Chromium avant checkpoint.
 
 ## Statut
 
-Premier refactor structurel validé sur branche de travail. `main` reste sur V16.78.114.11 et n'a pas été modifié par la restructuration.
+La consolidation des autorités de composition, UI Dungeon, détection, observers globaux et rendu mural a franchi des checkpoints verts. La production `main` reste volontairement sur V16.78.114.11 et n'a pas été publiée avec ces changements de restructuration.

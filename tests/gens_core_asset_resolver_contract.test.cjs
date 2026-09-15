@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const Assets=require(path.join(__dirname,'..','assets','gensrpg','core','asset-resolver.js'));
 
-assert.equal(Assets.VERSION,'1.0.0');
+assert.equal(Assets.VERSION,'1.1.0');
 assert.deepEqual([...Assets.MODULES],['common','survival','dungeon','capture','pvp']);
 
 // Validated current Dungeon defaults.
@@ -30,6 +30,21 @@ out=Assets.resolveAsset({module:'dungeon',kind:'hero',id:'dungeon_aldren',artId:
 assert.equal(out.path,'custom/catalog/knight.png');
 assert.equal(out.resolvedId,'custom_knight');
 assert.equal(out.source,'catalog');
+
+// Runtime/editor entities expose which field supplied their direct art.
+out=Assets.resolveEntityAsset({module:'dungeon',kind:'hero',id:'dungeon_aldren',entity:{artId:'custom_knight',image_data:'custom/entity/direct.png'},catalog:customCatalog});
+assert.equal(out.path,'custom/entity/direct.png');
+assert.equal(out.source,'entity-field');
+assert.equal(out.sourceField,'image_data');
+
+out=Assets.resolveEntityAsset({module:'dungeon',kind:'hero',id:'dungeon_aldren',entity:{artId:'custom_knight'},catalog:customCatalog});
+assert.equal(out.path,'custom/catalog/knight.png');
+assert.equal(out.source,'catalog');
+assert.equal(out.sourceField,'');
+
+out=Assets.resolveEntityAsset({module:'dungeon',kind:'creature',id:'dng_necromancer',entity:{art:'javascript:bad()'}});
+assert.equal(out.path,'assets/dungeon/creatures/dng_necromancer.png','invalid entity art must fall through to the safe module convention');
+assert.equal(out.source,'module-convention');
 
 // User-supplied image payloads and HTTPS assets are valid explicit choices.
 assert.equal(Assets.resolvePath({module:'dungeon',kind:'hero',id:'x',explicitPath:'data:image/png;base64,AAAA'}),'data:image/png;base64,AAAA');

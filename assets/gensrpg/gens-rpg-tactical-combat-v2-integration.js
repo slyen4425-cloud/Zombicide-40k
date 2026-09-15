@@ -38,7 +38,7 @@
   A.__gensTacticalIntegration103=true;
 
   /* V99 established that character-sheet/navigation lifecycle cannot be owned by a global DOM observer.
-     V108/V109/V112/V113 later introduced body-wide observers for tactical polish. Keep their combat logic,
+     V108/V109/V111/V112/V113 introduced body-wide observers for tactical polish. Keep their combat logic,
      but make body/documentElement observation inert; local tactical targets still delegate to native MO. */
   function installWithoutGlobalObserver(api,label="tactical"){
     const install=api?.installWithRetries;if(typeof install!=="function")return false;
@@ -80,11 +80,11 @@
     if(R.GensRpgTacticalCombatCoherence1678112){after112();return true}
     if(R.__gensTacticalCoherenceLoader112){loadAuthority113();return true}
     R.__gensTacticalCoherenceLoader112=true;
-    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js?v=16.78.112";s.async=false;s.onload=after112;s.onerror=()=>{console.error("GenSrpG V112 combat coherence load failed");loadAuthority113()};(D.head||D.documentElement).appendChild(s);return true;
+    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js?v=16.78.112";s.async=false;s.onload=after112;s.onerror=()=>{console.error("GenSrpG V112 tactical combat coherence load failed");loadAuthority113()};(D.head||D.documentElement).appendChild(s);return true;
   }
   function loadRuntime111(){
     const D=R.document;if(!D)return false;
-    const after111=()=>{try{R.GensRpgTacticalRuntimeFixes1678111?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V111 tactical runtime install",e)}loadCoherence112()};
+    const after111=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeFixes1678111,"V111 tactical runtime");loadCoherence112()};
     if(R.GensRpgTacticalRuntimeFixes1678111){after111();return true}
     if(R.__gensTacticalRuntimeLoader111){loadCoherence112();return true}
     R.__gensTacticalRuntimeLoader111=true;

@@ -7,7 +7,7 @@
   if(root)root.GensRpgTacticalStats1678110=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.0",APP_VERSION="16.78.110",SNAPSHOT_VERSION="16.78.110";
+  const VERSION="1.1.0",APP_VERSION="16.78.110",SNAPSHOT_VERSION="16.78.110-core-rules-1";
   const STYLE_ID="gensRpgTacticalStats1678110Style";
   const dirtyHeroes=new Set();
   const metrics={snapshotsBuilt:0,canonicalReads:0,derivedReads:0,previewSnapshotReads:0,renderSnapshotReads:0};
@@ -22,6 +22,7 @@
   function adapter(rt=R){return rt?.GensRpgTacticalCombatV2Adapter||null}
   function ui(rt=R){return rt?.GensRpgTacticalCombatV2Ui||null}
   function statsApi(rt=R){return rt?.GensCleanRpgStats167874||null}
+  function rulesApi(rt=R){return rt?.GensRpgCoreRules||null}
   function heroState(rt,id){try{return rt?.loadState?.(id)||null}catch(e){return null}}
   function heroRecord(rt,id){try{return rt?.CHARS?.[id]||rt?.findCustomHero?.(id)||null}catch(e){return rt?.CHARS?.[id]||null}}
   function currentBattle(rt=R){try{return ui(rt)?.getBattle?.()||null}catch(e){return null}}
@@ -49,9 +50,10 @@
     return collectResistanceObjects(state?.resistances,state?.rpgResistances,state?.elementResistances,state?.elements?.resistances,rec?.resistances,rec?.rpgResistances,rec?.elementResistances,rec?.elements?.resistances);
   }
   function rulesSnapshot(rt){
-    let r={};try{r=rt?.loadDungeonRpgRules?.()||{}}catch(e){}
-    const criticalMultiplier=clamp(num(r.critMultiplier??r.criticalMultiplier??r.critDamageMultiplier,2),1,5);
-    return {criticalMultiplier};
+    let raw={};try{raw=rt?.loadDungeonRpgRules?.()||{}}catch(e){}
+    const criticalMultiplier=clamp(num(raw.critMultiplier??raw.criticalMultiplier??raw.critDamageMultiplier,2),1,5),core=rulesApi(rt);
+    if(core?.normalizeRules){try{return {...core.normalizeRules(raw),criticalMultiplier,source:"core"}}catch(e){}}
+    return {criticalMultiplier,source:"legacy"};
   }
   function buildHeroSnapshot(rt=R,heroId="",actor=null){
     const id=str(heroId);if(!id)return null;
@@ -71,15 +73,28 @@
       const armor=Math.max(0,num(values.armor,safeCall(rt,"dungeonArmorScore",num(actor?.armor,0))));
       const dodge=clamp(num(safeCall(rt,"dungeonDodgeChance",num(actor?.dodge,0))),0,100);
       const crit=clamp(num(safeCall(rt,"dungeonCriticalChance",0)),0,100);
-      const magicResistance=Math.max(0,num(safeCall(rt,"dungeonMagicResistance",0)));
       const maxMana=Math.max(0,num(safeCall(rt,"dungeonMaxMana",0)));
       const mana=Math.max(0,num(st?.mana??st?.mp??st?.currentMana,maxMana));
-      let physicalDamageBonus=0,magicDamageBonus=0;
-      try{if(typeof rt?.dungeonPhysicalDamageBonus==="function"){metrics.derivedReads++;physicalDamageBonus=num(rt.dungeonPhysicalDamageBonus(),0)}}catch(e){}
-      try{if(typeof rt?.dungeonMagicDamageBonus==="function"){metrics.derivedReads++;magicDamageBonus=num(rt.dungeonMagicDamageBonus(),0)}}catch(e){}
+      const rules=rulesSnapshot(rt),core=rulesApi(rt);
+      let physicalDamageBonus=0,magicDamageBonus=0,magicResistance=0,magicResistanceBreakdown=null;
+      if(core?.physicalDamageBonus&&core?.magicDamageBonus&&core?.resolveMagicResistance){
+        physicalDamageBonus=Math.max(0,num(core.physicalDamageBonus(values.force,rules),0));
+        magicDamageBonus=Math.max(0,num(core.magicDamageBonus(values.intelligence,rules),0));
+        magicResistanceBreakdown=core.resolveMagicResistance({
+          spirit:values.esprit,
+          equipmentBonus:safeCall(rt,"dungeonEquipmentBonus",0,"magicDefense"),
+          skillBonus:safeCall(rt,"dungeonSkillEffectTotal",0,"magicDefense"),
+          rules,
+        });
+        magicResistance=Math.max(0,num(magicResistanceBreakdown?.total,0));
+      }else{
+        magicResistance=Math.max(0,num(safeCall(rt,"dungeonMagicResistance",0)));
+        try{if(typeof rt?.dungeonPhysicalDamageBonus==="function"){metrics.derivedReads++;physicalDamageBonus=num(rt.dungeonPhysicalDamageBonus(),0)}}catch(e){}
+        try{if(typeof rt?.dungeonMagicDamageBonus==="function"){metrics.derivedReads++;magicDamageBonus=num(rt.dungeonMagicDamageBonus(),0)}}catch(e){}
+      }
       const snap={version:SNAPSHOT_VERSION,heroId:id,builtAt:Date.now(),canonical,values,
-        derived:{hp,maxHp,mana,maxMana,crit,dodge,magicResistance,defense,armor,initiative,movement,physicalDamageBonus,magicDamageBonus},
-        resistances:resistanceSnapshot(rt,id,st,rec),rules:rulesSnapshot(rt)};
+        derived:{hp,maxHp,mana,maxMana,crit,dodge,magicResistance,magicResistanceBreakdown,defense,armor,initiative,movement,physicalDamageBonus,magicDamageBonus},
+        resistances:resistanceSnapshot(rt,id,st,rec),rules};
       metrics.snapshotsBuilt++;return snap;
     });
   }

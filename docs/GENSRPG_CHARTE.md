@@ -276,3 +276,28 @@ Un chantier n’est terminé que si :
 Quand deux solutions sont possibles, choisir celle qui réduit les effets globaux, réutilise l’existant, sépare les modules, garde une seule source de vérité, facilite les tests et le rollback, et minimise le risque pour les autres modes.
 
 Cette charte prime sur la solution la plus rapide.
+
+## 23. Priorité au diagnostic de conflit d’affichage avant toute modification fonctionnelle
+
+Lorsqu’une nouvelle interface, map, overlay, popup, panneau ou couche visuelle apparaît puis qu’une ancienne fonction UI cesse de répondre (par exemple : fiche personnage impossible à ouvrir après ajout de la map de combat), il faut d’abord considérer le problème comme un conflit d’affichage ou d’événement, pas comme une panne du système métier.
+
+Avant de modifier la fiche personnage, la navigation, les stats ou tout autre système protégé, vérifier obligatoirement :
+
+- `z-index` et ordre réel des couches ;
+- présence d’un overlay transparent ou invisible encore actif ;
+- `display`, `visibility`, `opacity`, `pointer-events`, `position` et taille des conteneurs ;
+- backdrop ou `div` plein écran resté monté après fermeture ;
+- classe CSS d’état non retirée ;
+- verrouillage `overflow` du `body` ;
+- élément invisible qui intercepte les clics ;
+- listener en phase capture ;
+- `preventDefault`, `stopPropagation` ou `stopImmediatePropagation` ;
+- focus trap ou modal encore actif ;
+- observer DOM qui réaffiche la couche ;
+- fonction de rendu du nouveau module qui remonte par-dessus l’ancienne vue après le clic.
+
+Règle stricte : si le défaut est apparu après l’ajout d’une nouvelle couche UI, corriger uniquement le conflit de couche ou d’événement démontré. Ne pas réécrire la fiche personnage, le routeur, le système de clic ou le moteur concerné tant qu’ils ne sont pas prouvés fautifs.
+
+Exemple de diagnostic attendu : « Depuis l’ajout de la map de combat, la fiche personnage ne s’ouvre plus. Vérifier d’abord overlay/z-index/pointer-events/listeners de la map, puis corriger cette couche uniquement. »
+
+Toute correction de ce type doit être accompagnée d’un test navigateur qui prouve simultanément que la nouvelle couche fonctionne et que l’ancienne fonction UI reste cliquable après ouverture/fermeture.

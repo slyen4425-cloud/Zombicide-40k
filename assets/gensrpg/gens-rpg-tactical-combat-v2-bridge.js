@@ -8,10 +8,8 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
   const VERSION="0.6.0",APP_VERSION="16.78.114.10";
-  const CORE_RULES_SRC="assets/gensrpg/core/rpg-rules.js?v=1.3.0",CORE_RULES_SCRIPT_ID="gensRpgCoreRulesScript";
-  let opening=false,installed=false,repairLoading=false,coreLoading=false;
+  let opening=false,installed=false,repairLoading=false;
   let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
-  const coreReadyCallbacks=[];
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
 
@@ -36,43 +34,6 @@
     if(!dungeonContext(rt))return false;
     try{rt?.GensSurvivalModeIsolation1678104?.rememberFamily?.("adventure")}catch(e){}
     return true;
-  }
-  function coreRules(rt=R){return rt?.GensRpgCoreRules||null}
-  function flushCoreReady(rt=R){
-    if(!coreRules(rt))return false;
-    const queued=coreReadyCallbacks.splice(0);
-    for(const fn of queued){try{fn()}catch(e){try{rt.console?.error?.("GenSrpG Core RPG ready callback",e)}catch(_){}}}
-    return true;
-  }
-  function ensureCoreRules(rt=R,onReady=null){
-    if(typeof onReady==="function")coreReadyCallbacks.push(onReady);
-    if(coreRules(rt)){flushCoreReady(rt);return true}
-    const D=rt?.document;
-    if(!D?.createElement)return false;
-    const existing=D.getElementById?.(CORE_RULES_SCRIPT_ID);
-    if(existing){
-      if(!coreLoading){
-        coreLoading=true;
-        existing.addEventListener?.("load",()=>{coreLoading=false;flushCoreReady(rt)},{once:true});
-        existing.addEventListener?.("error",()=>{coreLoading=false},{once:true});
-      }
-      return false;
-    }
-    if(coreLoading)return false;
-    coreLoading=true;
-    try{
-      const s=D.createElement("script");
-      s.id=CORE_RULES_SCRIPT_ID;
-      s.src=CORE_RULES_SRC;
-      s.async=false;
-      s.onload=()=>{
-        coreLoading=false;
-        if(!flushCoreReady(rt)){try{rt.console?.error?.("GenSrpG Core RPG rules loaded without global API")}catch(e){}}
-      };
-      s.onerror=()=>{coreLoading=false;try{rt.console?.error?.("GenSrpG Core RPG rules load failed")}catch(e){}};
-      (D.head||D.documentElement)?.appendChild?.(s);
-      return false;
-    }catch(e){coreLoading=false;return false}
   }
   function eligible(rt=R,options={}){
     if(!dungeonContext(rt))return {ok:false,reason:"not-dungeon"};
@@ -106,11 +67,6 @@
   }
   function openCurrent(rt=R,options={}){
     if(opening||currentBattle(rt))return {ok:false,reason:"battle-already-open"};
-    if(!coreRules(rt)&&rt?.document?.createElement){
-      const queuedOptions={...options};
-      ensureCoreRules(rt,()=>openCurrent(rt,queuedOptions));
-      return {ok:true,pending:true,reason:"core-rules-loading"};
-    }
     const e=eligible(rt,options);if(!e.ok)return e;
     opening=true;
     try{
@@ -173,7 +129,6 @@
   }
   function install(rt=R){
     if(!rt?.GensRpgTacticalCombatV2||!rt?.GensRpgTacticalCombatV2Adapter||!rt?.GensRpgTacticalCombatV2Ui)return false;
-    ensureCoreRules(rt);
     rememberLegacy(rt.dc200StartCombat,"start");
     rememberLegacy(rt.openDungeonCombatSetup,"setup");
     rememberLegacy(rt.launchCombat200,"launch");
@@ -202,6 +157,6 @@
     try{rt.dispatchEvent?.(new CustomEvent("gensrpg:tactical-combat-ready",{detail:{version:APP_VERSION}}))}catch(e){}
     return true;
   }
-  function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),coreReady:!!coreRules(rt),coreLoading,repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,CORE_RULES_SRC,dungeonContext,eligible,currentBattle,coreRules,ensureCoreRules,openCurrent,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

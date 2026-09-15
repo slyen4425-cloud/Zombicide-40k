@@ -52,6 +52,9 @@ jobs:
       - name: Vérifier la cohérence spatiale V112 historique
         run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
 
+      - name: Vérifier le retrait de l'observer global V112
+        run: node tests/gens_v112_observer_retirement_v11411.test.cjs
+
       - name: Vérifier l'autorité runtime V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
 

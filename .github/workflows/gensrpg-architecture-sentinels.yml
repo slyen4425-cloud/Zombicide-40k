@@ -22,8 +22,14 @@ jobs:
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 
+      - name: Vérifier RuntimeBootstrap V1
+        run: node tests/gens_runtime_bootstrap_v1.test.cjs
+
       - name: Bloquer toute nouvelle autorité globale GenSrpG
         run: node tests/gens_architecture_global_side_effect_guard.test.cjs
+
+      - name: Vérifier le profil performance mobile inchangé
+        run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
 
       - name: Vérifier l'autorité UI Dungeon native V114.11
         run: node tests/gens_v11411_native_ui_authority.test.cjs

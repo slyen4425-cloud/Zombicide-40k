@@ -39,7 +39,7 @@ assert.equal(P.enemyVision(rt,enemies[0]),3,'melee range 1 must not collapse def
 assert.deepEqual(P.detectionPairs(rt).map(x=>[x.enemyId,x.heroId,x.distance]),[['e1','h1',2]],'enemy must see the in-room hero while ignoring the hero in another room');
 let started=null;rt.dc200StartCombat=(ids,reason)=>{started={ids,reason};return true};
 assert.deepEqual(P.scanDetection(rt,'ambush-runtime-test',true),['e1']);
-assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'validated live V114 engagement must remain active');
+assert.deepEqual(started,{ids:['e1'],reason:'auto-engage-v114'},'legacy V114.1 detection behavior stays covered as a unit fixture');
 
 {
   const blocked=liveState();blocked.last.map.cells[7]='wall';rt.localStorage=storage({gensrpg_dungeon_runtime_v2:JSON.stringify(blocked)});
@@ -93,10 +93,11 @@ const ui=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-co
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const builder=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-authored-cache-visual-167852.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/saveActiveEnemies/,'ambush spawn persistence must keep triggering a detection rescan');
-assert.match(source,/DungeonCore01/,'post-render detection must keep using the real Dungeon board seam');
-assert.match(source,/HEARTBEAT_MS=450/,'low-frequency exploration fallback remains active only outside combat');
-assert.match(source,/coherence\(rt\)\?\.patchDice/,'V114.1 keeps the readable V112 combat explanations');
+assert.match(source,/saveActiveEnemies/,'legacy V114.1 unit fixture keeps spawn/detection behavior documented');
+assert.match(source,/DungeonCore01/,'legacy V114.1 unit fixture keeps the historical board seam documented');
+assert.match(source,/HEARTBEAT_MS=450/,'retired V114.1 file must continue documenting the heartbeat being removed from runtime');
+assert.match(source,/observer\.observe\(D\.body/,'retired V114.1 file must continue documenting its body-wide observer');
+assert.match(source,/coherence\(rt\)\?\.patchDice/,'V114.1 fixture keeps the historical V112 explanation bridge covered');
 assert.doesNotMatch(source,/setInterval\(tick,48\)/,'old V114 synthetic D100 cycling must remain removed');
 
 assert.match(builder,/WALL_ASSET=FLOOR_ROOT\+"dng_wall_block\.jpg"/,'Dungeon Builder remains the wall asset reference');
@@ -117,10 +118,12 @@ assert.match(ui,/36 % de toucher|calculationSummary/,'UI must expose the real hi
 
 assert.match(visual,/ENNEMI REPÉRÉ/,'automatic engagement keeps a readable transition');
 assert.match(visual,/Retour menu/,'emergency Retour menu remains available');
-assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113 room scope layer must remain loaded');
-assert.match(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114\.1/,'validated V114.1 live vision must remain loaded');
+assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113/V114.10 scope authority must remain loaded');
+assert.doesNotMatch(integration,/gens-rpg-tactical-hotfix-1678114\.js\?v=16\.78\.114\.1/,'retired V114.1 must no longer be dynamically loaded at runtime');
+assert.doesNotMatch(integration,/GensRpgTacticalHotfix1678114\?\.installWithRetries/,'retired V114.1 must no longer be installed at runtime');
 assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js/,'final tactical authority still loads last through the established module path');
 assert.match(integration,/gens-rpg-tactical-visual-dice-16781142\.js\?v=16\.78\.114\.11/,'V114.11 cache-busted final authority must load last');
-assert.match(sw,/gensrpg-cache-16\.78\.114\.11-armor-melee-damage/,'V114.11 must rotate the PWA cache');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.11-armor-melee-damage/,'V114.11 compatibility cache marker must remain present');
+assert.match(sw,/gensrpg-cache-16\.78\.114\.11-native-ui-authority/,'native UI authority cleanup must rotate the active PWA cache');
 
-console.log('V16.78.114.11: D100 + stable walls + canonical melee damage + armor floor OK');
+console.log('V16.78.114.11: D100 + stable walls + canonical melee damage + armor floor + native UI authority OK');

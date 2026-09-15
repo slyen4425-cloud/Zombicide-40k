@@ -1,0 +1,45 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'assets/gensrpg/core/runtime-bootstrap-v1.js'),'utf8');
+const loaded=[];
+const timers=[];
+let survivalInstalls=0,bridgeInstalls=0;
+
+const head={appendChild(s){loaded.push(s.src);if(typeof s.onload==='function')s.onload();return s}};
+const document={head,documentElement:head,createElement(tag){assert.equal(tag,'script');return {src:'',async:true,onload:null,onerror:null}}};
+const sandbox={
+  console,document,
+  setTimeout(fn,ms){timers.push(ms);if(typeof fn==='function')fn();return timers.length},
+  GensSurvivalModeIsolation1678104:{install(){survivalInstalls++}},
+  GensRpgTacticalCombatV2Bridge:{install(){bridgeInstalls++}}
+};
+sandbox.window=sandbox;sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+vm.runInContext(src,sandbox,{filename:'runtime-bootstrap-v1.js'});
+
+const expected=[
+  'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js?v=16.78.105',
+  'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
+  'assets/gensrpg/gens-survival-mode-isolation-1678104.js?v=16.78.105'
+];
+assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve the exact historical base load order');
+assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical loader guard must remain active');
+assert.equal(survivalInstalls,4,'Survival isolation must keep immediate + 3 retry installs');
+assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
+assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap retry timings must remain unchanged');
+assert.ok(sandbox.GensRuntimeBootstrapV1,'RuntimeBootstrap API missing');
+assert.deepEqual(Array.from(sandbox.GensRuntimeBootstrapV1.files),expected.map(x=>x.replace('?v=16.78.105','')),'RuntimeBootstrap API must expose the owned composition');
+
+const before=loaded.length;
+sandbox.GensRuntimeBootstrapV1.install();
+assert.equal(loaded.length,before,'RuntimeBootstrap install must be idempotent after the guard is set');
+
+console.log('GenSrpG RuntimeBootstrap V1 load order + idempotence OK');

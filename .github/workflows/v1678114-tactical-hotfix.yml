@@ -1,4 +1,4 @@
-name: Validate V16.78.114.13 Interaction + Wall Reset
+name: Validate V16.78.114.14 Clean Repair
 
 on:
   push:
@@ -19,7 +19,7 @@ on:
       - work/v16.78.114.10-hit-entry-wall
       - work/v16.78.114.11-armor-damage
       - work/v16.78.114.11-entry-test-align
-      - work/v16.78.114.13-interaction-wall-reset
+      - work/v16.78.114.14-clean-repair
       - main
   pull_request:
     branches:
@@ -34,9 +34,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Exact V114.14 sheet and Save Quit view authority
+        run: node tests/gens_ui_view_authority_v167811414.test.cjs
       - name: Syntax tactical runtime chain and canonical stats
         run: |
           node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+          node --check assets/gensrpg/gens-ui-recovery-167843.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js
@@ -44,10 +47,7 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js
           node --check assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js
           node --check assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js
-          node --check assets/gensrpg/gens-rpg-dungeon-interaction-wall-reset-167811413.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
-      - name: Exact V114.13 interaction and wall reset scenarios
-        run: node tests/gens_rpg_dungeon_interaction_wall_reset_v167811413.test.cjs
       - name: Preserve current tactical global entry routing
         run: node tests/gens_rpg_tactical_combat_v2_entry_v1678105.test.cjs
       - name: Exact V114.11 melee bonus and armor-zero scenarios
@@ -86,7 +86,7 @@ jobs:
         run: node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs
       - name: Preserve mobile combat performance
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
-      - name: Real Chromium mobile interaction, wall zoom, D100 and stats
+      - name: Real Chromium mobile engagement, wall zoom, D100 and stats
         run: |
           npm install --no-save --no-package-lock playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium

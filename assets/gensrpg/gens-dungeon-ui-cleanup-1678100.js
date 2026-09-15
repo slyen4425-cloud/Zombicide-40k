@@ -1,17 +1,17 @@
-/* GenSrpG V16.78.114.12 — targeted Dungeon UI cleanup outside combat hot paths.
-   Keeps decorative hero art transparent to touch/click so the parent exploration card remains the interaction owner,
-   keeps legacy hero-editor inputs hidden, and trims obsolete rule-summary lines without changing engine calculations. */
+/* GenSrpG V16.78.102.2 — targeted Dungeon UI cleanup outside combat hot paths.
+   Fixes built-in hero art in the party card, keeps legacy hero-editor inputs hidden,
+   and trims obsolete rule-summary lines without changing engine calculations. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.2.0",APP_VERSION="16.78.114.12";
+const VERSION="1.1.0",APP_VERSION="16.78.102.2";
 const ART={dungeon_aldren:"assets/dungeon/creatures/dng_aldren.png",dungeon_lyra:"assets/dungeon/creatures/dng_lyra.png",dungeon_brom:"assets/dungeon/creatures/dng_brom.png"};
 const NAMES={Aldren:"dungeon_aldren",Lyra:"dungeon_lyra",Brom:"dungeon_brom"};
 const LEGACY_IDS=["hcRpgForce","hcRpgAgility","hcRpgIntelligence","hcRpgSpirit","hcRpgEndurance","hcRpgDefense","hcRpgArmor","hcRpgInitiative","hcRpgMovement"];
 let installed=false,scheduled=false;
 function same(a,b){return String(a||"").split("?")[0].split("#")[0].endsWith(String(b||""))}
 function idFromText(v){const s=String(v||"");for(const [name,id] of Object.entries(NAMES))if(new RegExp("\\b"+name+"\\b","i").test(s))return id;return ""}
-function forceImg(img,src,name){if(!img||!src)return 0;let n=0;try{const before=img.getAttribute?.("src")||img.src||"";if(!same(before,src)){img.src=src;img.setAttribute?.("src",src);n++}img.alt=name||img.alt||"";img.hidden=false;img.draggable=false;img.setAttribute?.("draggable","false");img.style.display="";img.style.visibility="visible";img.style.pointerEvents="none";img.style.userSelect="none";img.style.webkitUserDrag="none"}catch(e){}return n}
+function forceImg(img,src,name){if(!img||!src)return 0;let n=0;try{const before=img.getAttribute?.("src")||img.src||"";if(!same(before,src)){img.src=src;img.setAttribute?.("src",src);n++}img.alt=name||img.alt||"";img.hidden=false;img.style.display="";img.style.visibility="visible"}catch(e){}return n}
 function repairPartyCards(){if(!D)return 0;const host=D.getElementById("dc01Heroes");if(!host)return 0;let n=0;for(const card of host.querySelectorAll(".dc01Hero")){const id=idFromText(card.textContent),src=ART[id];if(!src)continue;const name=Object.keys(NAMES).find(k=>NAMES[k]===id)||id;let img=card.querySelector("img");if(!img){img=D.createElement("img");card.insertBefore(img,card.firstChild||null);n++}n+=forceImg(img,src,name)}return n}
 function hideLegacyHeroInputs(){if(!D)return 0;let n=0;for(const id of LEGACY_IDS){const input=D.getElementById(id),label=input?.closest?.("label");if(!label)continue;label.hidden=true;label.setAttribute("aria-hidden","true");label.dataset.gensLegacyHeroStat="1";label.style.setProperty("display","none","important");n++}return n}
 function cleanRuleSummary(){if(!D)return 0;const host=D.getElementById("dungeonCombatFormula");if(!host)return 0;let n=0;for(const line of host.querySelectorAll(".dungeonRuleLine")){const t=String(line.textContent||"").trim();const keep=/^(⭐|🎯\s*D100|🔷|❤️)/.test(t);line.hidden=!keep;line.style.display=keep?"":"none";if(!keep)n++}return n}

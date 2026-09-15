@@ -6,12 +6,12 @@ const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-dungeon-ui-cleanup-1678100.js'),'utf8');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.doesNotThrow(()=>new Function(src),'V16.78.114.12 cleanup syntax');
-assert.match(src,/APP_VERSION="16\.78\.114\.12"/,'guard must follow the current interaction-safe UI cleanup module');
+assert.doesNotThrow(()=>new Function(src),'V16.78.102.2 cleanup syntax');
+assert.match(src,/APP_VERSION="16\.78\.102\.2"/);
 assert.match(index,/id="dc01Heroes"/,'Dungeon party cards must exist');
 assert.match(index,/function renderHeroes\(x\)/,'Dungeon party renderer must remain present');
 assert.match(index,/id="dungeonCombatFormula"/,'legacy rule summary container must remain present for compatibility');
-assert.match(sw,/gensrpg-cache-16\.78\.100-ui-cleanup/,'historical cache marker remains for compatibility');
+assert.match(sw,/gensrpg-cache-16\.78\.100-ui-cleanup/);
 assert.ok(sw.includes('gens-dungeon-ui-cleanup-1678100.js'));
 
 let partySrc='assets/old/crossed-swords.png';
@@ -32,7 +32,6 @@ const ctx={console,document,setTimeout,clearTimeout};ctx.window=ctx;ctx.globalTh
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-dungeon-ui-cleanup-1678100.js'});
 const api=ctx.GensDungeonUiCleanup1678100;assert.ok(api);
 api.repairPartyCards();assert.equal(partySrc,'assets/dungeon/creatures/dng_aldren.png','party card must use official Aldren art');
-assert.equal(partyImg.style.pointerEvents,'none','decorative hero image must not swallow the parent card tap');
 api.hideLegacyHeroInputs();for(const id of Object.keys(labels)){assert.equal(labels[id].hidden,true,id+' legacy label hidden');assert.equal(labels[id].style.value,'none');assert.equal(labels[id].style.priority,'important')}
 api.cleanRuleSummary();
 assert.equal(lines[0].hidden,false,'XP summary stays');
@@ -45,4 +44,4 @@ assert.equal(lines[5].hidden,true,'legacy Crit summary hidden');
 const hookAll=(src.match(/function hookAll\(\)\{[^\n]+/)||[''])[0];
 assert.ok(!hookAll.includes('renderDungeonHeroStats')&&!hookAll.includes('renderDungeonAttributes'),'combat stat renderers stay outside UI cleanup hooks');
 assert.doesNotMatch(src,/tries\+\+<30|setTimeout\(retry,100\)/,'UI cleanup polling must stay removed');
-console.log('V16.78.114.12 guard: party Aldren art + tap transparency + no hero stat duplicate + combat-hot isolation OK');
+console.log('V16.78.102.2 guard: party Aldren art + no hero stat duplicate + combat-hot isolation OK');

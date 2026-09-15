@@ -301,3 +301,90 @@ Règle stricte : si le défaut est apparu après l’ajout d’une nouvelle couc
 Exemple de diagnostic attendu : « Depuis l’ajout de la map de combat, la fiche personnage ne s’ouvre plus. Vérifier d’abord overlay/z-index/pointer-events/listeners de la map, puis corriger cette couche uniquement. »
 
 Toute correction de ce type doit être accompagnée d’un test navigateur qui prouve simultanément que la nouvelle couche fonctionne et que l’ancienne fonction UI reste cliquable après ouverture/fermeture.
+
+## 24. Aucune règle de gameplay importante codée en dur : tout doit être éditable, transparent et explicable
+
+GenSrpG est un moteur de création de jeux paramétrable. Son objectif n’est pas d’imposer des règles cachées, mais de permettre au créateur de comprendre, modifier, sauvegarder, exporter et réutiliser les règles de son jeu.
+
+Par conséquent, aucune valeur de gameplay autoritaire ne doit être enfermée dans le code si elle appartient au design du jeu.
+
+Cela concerne notamment :
+
+- caractéristiques et statistiques ;
+- statistiques dérivées ;
+- formules, paliers, gains, multiplicateurs, minimums, maximums et caps ;
+- précision et chances de toucher ;
+- dégâts physiques, magiques ou élémentaires ;
+- armure, défense et résistances ;
+- PV, mana et autres ressources ;
+- critique, esquive et initiative lorsqu’ils dépendent d’une règle ;
+- mouvement, portée et distances configurables ;
+- XP, niveaux et progression ;
+- coûts, cooldowns, charges et consommations ;
+- économie, valeurs, drops et récompenses ;
+- toute autre règle exposée au créateur ou susceptible de varier selon un monde/profil.
+
+### Configuration avant code
+
+Le runtime doit lire ces valeurs depuis une configuration normalisée appartenant au profil, au monde ou au module concerné.
+
+Les nombres de gameplay ne doivent pas être dispersés comme des « nombres magiques » dans les fonctions du runtime.
+
+Une valeur par défaut peut exister dans le Core uniquement pour :
+
+1. initialiser un nouveau profil ;
+2. migrer une ancienne sauvegarde ;
+3. fournir un fallback technique contrôlé lorsqu’une configuration est absente ou invalide.
+
+Dès qu’une configuration valide existe, elle devient l’autorité. Le défaut du code ne doit jamais reprendre silencieusement le dessus sur une valeur sauvegardée par l’utilisateur.
+
+### Les statistiques doivent être pilotées par les données
+
+Lorsqu’une statistique ou une caractéristique est créée, son nom, son identifiant, sa valeur de base, ses limites, ses liens avec les statistiques dérivées et ses règles doivent être décrits autant que possible par des données configurables plutôt que par des branches de code spécifiques à son nom.
+
+Les primitives réellement génériques du moteur peuvent être codées (`step`, pourcentage, addition, multiplicateur, cap, minimum, etc.), mais leurs paramètres de gameplay doivent venir de la configuration.
+
+Exemple autorisé :
+
+`bonus = floor(Force / physicalDamageStep) * physicalDamageGain`
+
+à condition que `physicalDamageStep` et `physicalDamageGain` proviennent de la règle active et soient éditables.
+
+Exemple interdit :
+
+`if (force >= 10) damage += 1`
+
+si le `10` et le `1` sont des décisions de gameplay impossibles à modifier dans la configuration.
+
+### Transparence obligatoire
+
+Toute règle utilisée pour produire un résultat important doit pouvoir être expliquée à l’utilisateur.
+
+Le moteur doit pouvoir fournir les valeurs ayant participé au calcul : valeur de départ, caractéristique utilisée, règle active, bonus/malus, équipement ou effet appliqué, réduction, seuil, jet éventuel et résultat final.
+
+L’interface ne doit pas afficher uniquement « 3 dégâts » si le moteur peut expliquer :
+
+`Arme 2 + Force 16 avec règle 10/+1 = 3 dégâts bruts - Armure 3 = 0 -> test d’armure 50/50 -> 1 dégât final`.
+
+### Édition, sauvegarde et portabilité
+
+Une règle annoncée comme configurable doit réellement être :
+
+- modifiable depuis l’éditeur ou le réglage approprié ;
+- sauvegardée dans les données du profil/monde ;
+- restaurée après reprise ;
+- exportable/importable lorsque le profil ou le monde l’est ;
+- respectée par tous les modules qui consomment cette règle via le Core.
+
+### Tests obligatoires contre le codage en dur
+
+Pour chaque nouvelle règle Core configurable, les tests doivent vérifier au minimum :
+
+1. le comportement avec les valeurs par défaut ;
+2. le comportement avec des valeurs personnalisées différentes ;
+3. que la valeur personnalisée gagne réellement sur le fallback ;
+4. que le détail explicatif reflète la règle réellement utilisée.
+
+Un test qui ne passe qu’avec les valeurs par défaut ne suffit pas à prouver qu’une règle est réellement configurable.
+
+Cette règle s’applique à toute la restructuration actuelle et aux développements futurs de GenSrpG.

@@ -130,6 +130,9 @@ jobs:
       - name: Vérifier le raccord Bridge vers V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs
 
+      - name: Vérifier le scope V113 sur le contrat Bridge explicite
+        run: node tests/gens_bridge_v113_explicit_scope_v11411.test.cjs
+
       - name: Caractériser l'autorité de démarrage et des participants combat
         run: node tests/gens_combat_authority_characterization_v11411.test.cjs
 

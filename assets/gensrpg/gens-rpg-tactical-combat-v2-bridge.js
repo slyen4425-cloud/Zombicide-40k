@@ -164,7 +164,7 @@
     rememberLegacy(rt.startCombat,"startCombat");
 
     const start=function(enemyIds,reason){return startDefault(rt,enemyIds,reason)};
-    start.__gensTacticalV2Default=true;start.__legacy=legacyStart;rt.dc200StartCombat=start;
+    start.__gensTacticalV2Default=true;start.__gensRpg113Start=true;start.__gensRpg112Start=true;start.__legacy=legacyStart;rt.dc200StartCombat=start;
 
     const setup=function(){return setupDefault(rt)};
     setup.__gensTacticalV2Default=true;setup.__legacy=legacySetup;rt.openDungeonCombatSetup=setup;

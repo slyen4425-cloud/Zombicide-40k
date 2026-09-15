@@ -10,7 +10,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
 
-  const VERSION="1.0.0";
+  const VERSION="1.1.0";
   const SPECIAL_NATIVE=Object.freeze(["defense","armor","movement"]);
   const SPECIAL_SET=new Set(SPECIAL_NATIVE);
   let installed=false;
@@ -18,12 +18,14 @@
 
   const str=value=>String(value??"");
   const num=(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback;
+  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
   function core(rt=R){return rt?.GensRpgCoreStats||null}
   function legacy(rt=R){return rt?.GensCleanRpgStats167874||null}
   function profile(rt=R){
     try{return rt?.currentRpgProfile?.()||rt?.getActiveGameProfile?.()||null}catch(e){return null}
   }
+  function dungeon(rt=R){try{return !!rt?.isDungeonMode?.()}catch(e){return false}}
   function heroState(rt,heroId){
     const id=str(heroId);
     try{if(id===str(rt?.current)&&rt?.state)return rt.state}catch(e){}
@@ -32,9 +34,6 @@
   function heroRecord(rt,heroId){
     const id=str(heroId);
     try{return rt?.CHARS?.[id]||rt?.findCustomHero?.(id)||null}catch(e){return rt?.CHARS?.[id]||null}
-  }
-  function definitionMap(api){
-    return new Map((api?.defs?.()||[]).map(def=>[str(def?.id),def]).filter(([id])=>!!id));
   }
   function activeIds(api,p){
     try{
@@ -57,19 +56,19 @@
   function effectiveBase(rt,api,heroId,id,defs){
     const cid=str(id),st=heroState(rt,heroId);
     if(!defs.has(cid)||!api?.active?.(cid))return 0;
-    let value=rawBase(rt,api,heroId,cid,defs);
+    let result=rawBase(rt,api,heroId,cid,defs);
     const current=str(heroId)===str(rt?.current);
     if(SPECIAL_SET.has(cid)){
       if(current&&(cid==="defense"||cid==="armor")){
-        try{value+=num(rt?.dungeonEquipmentBonus?.(cid),0)}catch(e){}
-        try{value+=num(rt?.dungeonSkillEffectTotal?.(cid),0)}catch(e){}
+        try{result+=num(rt?.dungeonEquipmentBonus?.(cid),0)}catch(e){}
+        try{result+=num(rt?.dungeonSkillEffectTotal?.(cid),0)}catch(e){}
       }
-      return value;
+      return result;
     }
-    try{value+=num(rt?.dungeonEquipmentBonus?.(cid),0)}catch(e){}
-    try{value+=num(rt?.dungeonSkillEffectTotal?.("attribute",null,cid),0)}catch(e){}
-    try{value+=num(rt?.dungeonChallengeDebuffTotal067?.(cid,st),0)}catch(e){}
-    return value;
+    try{result+=num(rt?.dungeonEquipmentBonus?.(cid),0)}catch(e){}
+    try{result+=num(rt?.dungeonSkillEffectTotal?.("attribute",null,cid),0)}catch(e){}
+    try{result+=num(rt?.dungeonChallengeDebuffTotal067?.(cid,st),0)}catch(e){}
+    return result;
   }
   function createEvaluator(rt=R,heroId=str(rt?.current||"")){
     const Core=core(rt),Legacy=legacy(rt),p=profile(rt);
@@ -102,17 +101,104 @@
     const evaluator=createEvaluator(rt,heroId);
     return evaluator?.breakdown?.(id)||null;
   }
+
+  function baseFunction(fn){
+    let current=fn,guard=0;
+    while(typeof current?.__original==="function"&&guard++<12)current=current.__original;
+    return current;
+  }
+  function replaceRuntime(rt,name,maker){
+    const current=rt?.[name];
+    if(typeof current!=="function")return false;
+    if(current.__gensCoreStatsRuntime)return true;
+    const base=baseFunction(current);
+    const wrapped=maker(base,current);
+    if(typeof wrapped!=="function")return false;
+    wrapped.__gensCoreStatsRuntime=true;
+    wrapped.__clean795=true;
+    wrapped.__original=base;
+    rt[name]=wrapped;
+    return true;
+  }
+  function coreStatAvailable(rt,id){
+    const Legacy=legacy(rt),cid=Legacy?.canon?.(id)??str(id);
+    return {Legacy,cid,available:!!(dungeon(rt)&&Legacy?.def?.(cid)),active:!!Legacy?.active?.(cid)};
+  }
+  function installRuntime(rt=R){
+    const hero=()=>str(rt?.current||"");
+    replaceRuntime(rt,"dungeonAttributeValue",base=>function(id){
+      const info=coreStatAvailable(rt,id);
+      if(info.available)return info.active?value(rt,hero(),info.cid):0;
+      return base.apply(this,arguments);
+    });
+    replaceRuntime(rt,"dungeonPhysicalDamageBonus",base=>function(){
+      return num(base.apply(this,arguments),0)+extraTotal(rt,"damage:physical",hero())+extraTotal(rt,"damage:melee",hero());
+    });
+    replaceRuntime(rt,"dungeonMagicDamageBonus",base=>function(){
+      return num(base.apply(this,arguments),0)+extraTotal(rt,"damage:magic",hero());
+    });
+    replaceRuntime(rt,"dungeonEnduranceHpBonus",base=>function(){
+      return num(base.apply(this,arguments),0)+extraTotal(rt,"max_hp",hero());
+    });
+    replaceRuntime(rt,"dungeonMaxMana",base=>function(){
+      return Math.max(0,num(base.apply(this,arguments),0)+extraTotal(rt,"max_mana",hero()));
+    });
+    replaceRuntime(rt,"dungeonCriticalChance",base=>function(){
+      const rules=rt?.loadDungeonRpgRules?.()||{};
+      return clamp(num(base.apply(this,arguments),0)+extraTotal(rt,"crit",hero()),0,num(rules.critCap,100));
+    });
+    replaceRuntime(rt,"dungeonDodgeChance",base=>function(){
+      const rules=rt?.loadDungeonRpgRules?.()||{};
+      return clamp(num(base.apply(this,arguments),0)+extraTotal(rt,"dodge",hero()),0,num(rules.dodgeCap,100));
+    });
+    replaceRuntime(rt,"dungeonMagicResistance",base=>function(){
+      return Math.max(0,num(base.apply(this,arguments),0)+extraTotal(rt,"magic_resistance",hero()));
+    });
+    replaceRuntime(rt,"dungeonDerivedDefense",base=>function(){
+      const info=coreStatAvailable(rt,"defense");
+      if(info.available)return info.active?Math.max(0,value(rt,hero(),"defense")):0;
+      return base.apply(this,arguments);
+    });
+    replaceRuntime(rt,"dungeonArmorScore",base=>function(){
+      const info=coreStatAvailable(rt,"armor");
+      if(info.available)return info.active?Math.max(0,value(rt,hero(),"armor")):0;
+      return base.apply(this,arguments);
+    });
+    replaceRuntime(rt,"dungeonDerivedInitiative",base=>function(){
+      return num(base.apply(this,arguments),0)+extraTotal(rt,"initiative",hero());
+    });
+    replaceRuntime(rt,"dungeonHeroMoveValue083",base=>function(heroId){
+      const info=coreStatAvailable(rt,"movement");
+      if(info.available&&info.active)return Math.max(0,value(rt,str(heroId||rt?.current||""),"movement"));
+      return base.apply(this,arguments);
+    });
+    replaceRuntime(rt,"applyDungeonCombatScaling",base=>function(it,st){
+      const out=base.apply(this,arguments);
+      if(!dungeon(rt)||!out||!it?.rpgScaling)return out;
+      const mode=it.rpgScaling.magic?"magic":(out.melee?"melee":"ranged");
+      const hit=extraTotal(rt,"hit:"+mode,hero());
+      if(hit){out.hitChance=Math.max(0,num(out.hitChance,0)+hit);if(Array.isArray(out.mods))out.mods.push("Stat : "+(hit>0?"+":"")+hit+"% toucher")}
+      if(mode==="ranged"){const damage=extraTotal(rt,"damage:ranged",hero());if(damage)out.damage=num(out.damage,0)+damage}
+      return out;
+    });
+    return true;
+  }
+
   function install(rt=R){
     const Core=core(rt),Legacy=legacy(rt);
     if(!Core?.createEvaluator||!Legacy?.value||!Legacy?.extraTotal||!Legacy?.runtimeDefs)return false;
-    if(Legacy.__gensCoreStatsRuntimeAdapter){installed=true;return true}
-    originals={value:Legacy.value,extraTotal:Legacy.extraTotal,runtimeDefs:Legacy.runtimeDefs};
-    Legacy.value=function(heroId,id,seen){return value(rt,heroId,id,seen)};
-    Legacy.extraTotal=function(target,heroId,seen){return extraTotal(rt,target,heroId,seen)};
-    Legacy.runtimeDefs=function(){return runtimeDefinitions(rt)};
-    Legacy.breakdown=function(heroId,id){return breakdown(rt,heroId,id)};
-    Legacy.__gensCoreStatsRuntimeAdapter=true;
-    Legacy.__gensCoreStatsOriginals=originals;
+    if(!Legacy.__gensCoreStatsRuntimeAdapter){
+      originals={value:Legacy.value,extraTotal:Legacy.extraTotal,runtimeDefs:Legacy.runtimeDefs};
+      Legacy.value=function(heroId,id,seen){return value(rt,heroId,id,seen)};
+      Legacy.extraTotal=function(target,heroId,seen){return extraTotal(rt,target,heroId,seen)};
+      Legacy.runtimeDefs=function(){return runtimeDefinitions(rt)};
+      Legacy.breakdown=function(heroId,id){return breakdown(rt,heroId,id)};
+      Legacy.__gensCoreStatsRuntimeAdapter=true;
+      Legacy.__gensCoreStatsOriginals=originals;
+    }else if(!originals){
+      originals=Legacy.__gensCoreStatsOriginals||null;
+    }
+    installRuntime(rt);
     installed=true;
     try{rt?.GensMobileCombatPerformance16781022?.install?.()}catch(e){}
     return true;
@@ -122,10 +208,11 @@
       installed:!!legacy(rt)?.__gensCoreStatsRuntimeAdapter&&installed,
       coreVersion:core(rt)?.VERSION||"",
       legacyVersion:legacy(rt)?.VERSION||"",
+      runtimeOwned:["dungeonAttributeValue","dungeonPhysicalDamageBonus","dungeonMagicDamageBonus","dungeonDerivedDefense","dungeonArmorScore","dungeonHeroMoveValue083"].filter(name=>!!rt?.[name]?.__gensCoreStatsRuntime),
     };
   }
 
-  const api={VERSION,SPECIAL_NATIVE,createEvaluator,value,extraTotal,runtimeDefinitions,breakdown,install,status};
+  const api={VERSION,SPECIAL_NATIVE,createEvaluator,value,extraTotal,runtimeDefinitions,breakdown,installRuntime,install,status};
   if(core(R)?.createEvaluator&&legacy(R)?.value)install(R);
   return api;
 });

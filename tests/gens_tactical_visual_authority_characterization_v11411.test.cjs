@@ -29,7 +29,7 @@ assert.match(ui,/function hookDungeonRender\(\)/,'base Tactical UI must own Dung
 const globalPolish=block(ui,'function installGlobalPolish(){','const api=','base Tactical UI installGlobalPolish');
 for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRender()','paintLiveWalls()'])assert.ok(globalPolish.includes(required),`base Tactical UI canonical wall pipeline missing ${required}`);
 
-// Remaining active historical wall debt after retiring V113 and V112.
+// Remaining active historical wall debt after retiring V113/V112/V111.
 const i108=block(v108,'function install(rt=R){','function installWithRetries','V108 install');
 for(const required of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(i108.includes(required),`V108 wall debt changed unexpectedly: missing ${required}`);
 
@@ -39,10 +39,13 @@ assert.ok(i109.includes('enhance(rt)'),'V109 wall debt changed unexpectedly: enh
 const enhance109=block(v109,'function enhance(rt=R){','function hookUi','V109 enhance');
 assert.ok(enhance109.includes('paintBuilderWalls(rt)'),'V109 enhance must still characterize active wall repaint debt');
 
+// V111 historical painter remains inspectable, but maintenance no longer owns walls.
+assert.match(v111,/function paintWalls\(rt=R\)/,'V111 historical wall painter must remain inspectable for rollback');
 const i111=block(v111,'function install(rt=R){','function installWithRetries','V111 install');
-assert.ok(i111.includes('maintain(rt)'),'V111 maintenance must still be active before wall retirement');
+assert.ok(i111.includes('maintain(rt)'),'V111 maintenance must remain active');
 const maintain111=block(v111,'function maintain(rt=R){','function queueMaintain','V111 maintain');
-assert.ok(maintain111.includes('paintWalls(rt)'),'V111 maintenance must characterize active wall repaint debt');
+assert.doesNotMatch(maintain111,/paintWalls\(rt\)/,'V111 maintenance must no longer repaint walls');
+for(const required of ['hideRuntimeTabs(rt)','ensureDock(rt)','paintDiceOverlay(rt)'])assert.ok(maintain111.includes(required),`V111 maintenance lost ${required}`);
 
 // V112 historical marker remains inspectable, but it is no longer an active wall owner.
 assert.match(v112,/function markWallCells\(rt=R\)/,'V112 historical wall marker must remain inspectable for rollback');
@@ -63,8 +66,9 @@ assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 detection authority mu
 assert.ok(i113.includes('bindBoardClicks(rt)'),'V113 board detection must remain active');
 
 for(const name of ['V108','V109','V111','V112','V113'])assert.match(doc,new RegExp(name),`visual authority inventory must document ${name}`);
+assert.match(doc,/V111 \| \*\*retirée\*\*/,'visual authority inventory must mark V111 wall authority retired');
 assert.match(doc,/V112 \| \*\*retirée\*\*/,'visual authority inventory must mark V112 wall authority retired');
 assert.match(doc,/V113 \| \*\*retirée\*\*/,'visual authority inventory must mark V113 wall authority retired');
 assert.match(doc,/GensRpgTacticalCombatV2Ui/,'visual authority inventory must name base Tactical UI as target authority');
 
-console.log('GenSrpG V114.11 visual authority: base Tactical UI canonical; V112/V113 wall repaint retired; V108/V109/V111 debt remains');
+console.log('GenSrpG V114.11 visual authority: base Tactical UI canonical; V111/V112/V113 wall repaint retired; V108/V109 debt remains');

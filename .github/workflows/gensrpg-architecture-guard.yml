@@ -27,6 +27,10 @@ jobs:
         run: node tests/gens_core_asset_resolver_contract.test.cjs
       - name: Validate pure Core storage and migrations contract
         run: node tests/gens_core_storage_migrations_contract.test.cjs
+      - name: Validate Core Storage browser wiring
+        run: node tests/gens_core_storage_browser_wiring_contract.test.cjs
+      - name: Validate Core Storage profile repair runtime path
+        run: node tests/gens_core_storage_profile_repair_runtime_contract.test.cjs
       - name: Validate Core Assets browser wiring
         run: node tests/gens_core_asset_browser_wiring_contract.test.cjs
       - name: Validate Core Assets Tactical runtime authority

@@ -1,10 +1,10 @@
 /* GenSrpG architecture bootstrap V1 — extracted from the mobile performance layer.
-   Transitional owner of Tactical V2 + Survival isolation composition.
-   Keeps the exact V16.78.105 load order and retry timings while architecture is consolidated. */
+   Transitional owner of Tactical V2 + runtime repair + Survival isolation composition.
+   Keeps deterministic sequential loading and the historical retry timings while architecture is consolidated. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.114.11-architecture-bootstrap-1";
+const VERSION="1.1.0",APP_VERSION="16.78.114.11-architecture-bootstrap-2";
 const files=[
   "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
@@ -12,6 +12,7 @@ const files=[
   "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
+  "assets/gensrpg/gens-rpg-runtime-repair-1678106.js",
   "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
 ];
 function finalize(){

@@ -23,11 +23,11 @@ for(const [name,file] of files){
   const ownsWallCss=/WALL_ASSET|gtv2Cell\.blocked|drc100Grid|dav167870WallCell|gtv2112WallCell/.test(style);
   if(ownsWallCss)debt.push(name);
 }
-assert.deepEqual(debt,['V108'],'CSS wall debt inventory changed: V109/V111/V112/V113 must remain clean; V108 is the last historical CSS wall owner');
+assert.deepEqual(debt,[],'historical Tactical layers must not own any residual wall CSS');
 
 const ui=read('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js');
 assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'canonical Tactical UI wall asset missing');
 assert.match(ui,/function ensureWallTile\(el\)/,'canonical Tactical UI wall tile owner missing');
 assert.match(ui,/function paintLiveWalls\(\)/,'canonical Tactical UI live wall owner missing');
 
-console.log('GenSrpG V114.11 CSS wall debt characterized:',debt.join(', '),'with V109/V111/V112/V113 CSS authority retired and Tactical UI canonical');
+console.log('GenSrpG V114.11 CSS wall debt cleared: V108/V109/V111/V112/V113 clean; Tactical UI canonical');

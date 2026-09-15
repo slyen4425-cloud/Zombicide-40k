@@ -25,5 +25,22 @@ jobs:
       - name: Vérifier l'autorité UI Dungeon native V114.11
         run: node tests/gens_v11411_native_ui_authority.test.cjs
 
+  browser-sentinel:
+    needs: architecture-sentinels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Préparer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer Playwright pour la sentinelle navigateur
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
       - name: Vérifier l'isolation navigateur V114.11
         run: node tests/gens_v11411_native_ui_browser.test.cjs

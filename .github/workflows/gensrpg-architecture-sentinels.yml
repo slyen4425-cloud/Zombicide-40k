@@ -52,6 +52,9 @@ jobs:
       - name: Vérifier le retrait de l'observer global V109
         run: node tests/gens_v109_observer_retirement_v11411.test.cjs
 
+      - name: Vérifier le retrait de l'autorité murale V109
+        run: node tests/gens_v109_wall_authority_retirement_v11411.test.cjs
+
       - name: Vérifier les snapshots Tactical V110 historiques
         run: node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs
 

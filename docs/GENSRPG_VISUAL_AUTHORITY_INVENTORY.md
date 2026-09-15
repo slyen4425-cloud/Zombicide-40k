@@ -26,15 +26,15 @@ C'est donc le renderer Tactical UI de base qui doit devenir l'unique autorité v
 
 ## Dette murale historique
 
-Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs appels actifs disparaissent progressivement.
+Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs appels actifs ont été retirés progressivement.
 
-| Couche | État | Autorité murale | Cible |
+| Couche | État | Autorité murale | Responsabilités conservées |
 |---|---|---|---|
-| V108 | active | `patchDungeonMapHtml`, `hookDungeonRender`, `paintWalls` | retirer du `install()` après validation |
-| V109 | **retirée** | fonctions `paintBuilderWalls` et `hookDungeonRender` conservées mais plus appelées par `enhance()`/`install()` | timeline, portée, mains nues et attaque rapide conservées ; murs délégués au Tactical UI canonique |
-| V111 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `maintain()` | multi-dés, dock, reconstruction des attaques, onglets runtime et maintenance UI conservés ; murs délégués au Tactical UI canonique |
-| V112 | **retirée** | fonction `markWallCells` conservée mais plus appelée par `maintain()` ; son ancien hook de détection reste lui-même inactif | détails/explications/spatial conservés ; murs délégués au Tactical UI canonique |
-| V113 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `install()` ni `maintain()` | scope/détection V113 conservés ; murs délégués au Tactical UI canonique |
+| V108 | **retirée** | fonctions `paintWalls`, `patchDungeonMapHtml` et `hookDungeonRender` conservées mais plus appelées par `install()` ; `hookUiRender()` ne repeint plus les murs | cadrage pions, panneau actions, équipement, rechargement, consommables |
+| V109 | **retirée** | fonctions `paintBuilderWalls` et `hookDungeonRender` conservées mais plus appelées par `enhance()`/`install()` | timeline, portée, mains nues, attaque rapide |
+| V111 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `maintain()` | multi-dés, dock, reconstruction des attaques, onglets runtime, maintenance UI |
+| V112 | **retirée** | fonction `markWallCells` conservée mais plus appelée par `maintain()` ; son ancien hook de détection reste lui-même inactif | détails, explications de dégâts, spatial |
+| V113 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `install()` ni `maintain()` | scope et détection V113 |
 
 ## Ordre de retrait
 
@@ -42,8 +42,8 @@ Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs a
 2. ✅ V112 `markWallCells` retiré de `maintain()` ;
 3. ✅ V111 `paintWalls` retiré de `maintain()` ;
 4. ✅ V109 `paintBuilderWalls` retiré de `enhance()` et hook Dungeon mural retiré de `install()` ;
-5. V108 `paintWalls` / patch/hook mural historiques ;
-6. verrou global : aucun repaint historique actif, seul `GensRpgTacticalCombatV2Ui` possède les murs.
+5. ✅ V108 `paintWalls` / patch / hook mural retirés du chemin actif ;
+6. 🔒 verrou global : le pipeline JS actif des murs appartient uniquement à `GensRpgTacticalCombatV2Ui`.
 
 Chaque retrait doit :
 
@@ -52,6 +52,10 @@ Chaque retrait doit :
 3. passer les tests historiques, architecture et Chromium ;
 4. créer un checkpoint vert avant le retrait suivant.
 
-La sentinelle Chromium `gens_tactical_wall_browser_v11411.test.cjs` vérifie désormais le vrai asset, son décodage, l'unicité des tuiles et le patch Dungeon avant/après chaque retrait.
+La sentinelle Chromium `gens_tactical_wall_browser_v11411.test.cjs` vérifie le vrai asset, son décodage, l'unicité des tuiles et le patch Dungeon avant/après chaque retrait.
+
+### Point restant après le retrait JS
+
+Les couches historiques contiennent encore certaines **règles CSS murales** dans leurs blocs `ensureStyle()`. Elles utilisent actuellement le même asset canonique et ne sont plus accompagnées de repaint JS, mais elles constituent encore une autorité visuelle résiduelle. Elles seront retirées séparément, module par module, avec la même discipline de checkpoint et Chromium. Le verrou final “un seul propriétaire total des murs” ne sera déclaré qu'après cette seconde passe CSS.
 
 Aucun changement de texture, taille, collision ou gameplay ne doit être mélangé à cette consolidation.

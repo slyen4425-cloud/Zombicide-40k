@@ -64,6 +64,9 @@ jobs:
       - name: Vérifier le retrait de l'autorité détection V111
         run: node tests/gens_v111_detection_authority_retirement_v11411.test.cjs
 
+      - name: Vérifier le retrait de l'autorité murale V111
+        run: node tests/gens_v111_wall_authority_retirement_v11411.test.cjs
+
       - name: Vérifier la cohérence spatiale V112 historique
         run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
 

@@ -1,4 +1,5 @@
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
 const path=require('node:path');
 const root=path.join(__dirname,'..');
 const Bridge=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-bridge.js'));
@@ -36,7 +37,7 @@ const rt={
   dispatchEvent(){},showToast(){},console
 };
 
-// Bridge is the historical global router and replaces the four legacy entry points.
+// Bridge remains the compatibility router for the four historical global entry points.
 assert.equal(Bridge.install(rt),true);
 assert.equal(rt.dc200StartCombat.__gensTacticalV2Default,true);
 assert.equal(rt.openDungeonCombatSetup.__gensTacticalV2Default,true);
@@ -44,23 +45,28 @@ assert.equal(rt.launchCombat200.__gensTacticalV2Default,true);
 assert.equal(rt.startCombat.__gensTacticalV2Default,true);
 const bridgeStart=rt.dc200StartCombat;
 
-// V112 then wraps the bridge start entry.
-assert.equal(V112.hookStart(rt),true);
-assert.equal(rt.dc200StartCombat.__gensRpg112Start,true);
-assert.notEqual(rt.dc200StartCombat,bridgeStart);
-const v112Start=rt.dc200StartCombat;
+// Architectural cleanup: V112 keeps spatial selection but must no longer install a
+// second global dc200StartCombat owner. Its hookStart remains exported only as rollback
+// compatibility while the active chain goes directly Bridge -> V113.
+const v112Source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-coherence-1678112.js'),'utf8');
+const v112Install=(v112Source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
+assert.ok(v112Install,'V112 install function missing');
+assert.doesNotMatch(v112Install,/hookStart\(rt\)/,'V112 install must not take global combat-start authority');
+assert.doesNotMatch(v112Install,/adapterHooked&&startHooked&&resultHooked/,'V112 readiness must not depend on start ownership');
+assert.equal(typeof V112.hookStart,'function','V112 historical start hook remains available for rollback characterization');
 
-// V113 deliberately unwraps V112 and becomes the final start authority in V114.11.
+// V113 is now the only active spatial start wrapper after the bridge.
 assert.equal(V113.hookStart(rt),true);
 assert.equal(rt.dc200StartCombat.__gensRpg113Start,true);
-assert.equal(rt.dc200StartCombat.__gensRpg112Start,true,'compatibility marker prevents V112 retry from wrapping again');
-assert.equal(rt.dc200StartCombat.__original,bridgeStart,'V113 must bypass the V112 start wrapper and delegate to the bridge');
-assert.notEqual(rt.dc200StartCombat,v112Start);
+assert.equal(rt.dc200StartCombat.__gensRpg112Start,true,'compatibility marker prevents any historical V112 retry from wrapping V113');
+assert.equal(rt.dc200StartCombat.__original,bridgeStart,'V113 must delegate directly to the bridge');
 const finalStart=rt.dc200StartCombat;
 assert.equal(V112.hookStart(rt),true);
-assert.equal(rt.dc200StartCombat,finalStart,'V112 retry must not retake final start authority');
+assert.equal(rt.dc200StartCombat,finalStart,'even an explicit historical V112 retry must not retake final start authority');
 
-// Final participant authority is V113 scoped selection, not the bridge's broad participant list.
+// V112 still owns its older createBattle spatial safety until V113 replaces that seam.
+assert.equal(V112.hookAdapter(rt),true);
+assert.equal(rt.GensRpgTacticalCombatV2Adapter.createBattle.__gensRpg112Spatial,true);
 assert.equal(V113.hookAdapter(rt),true);
 assert.equal(rt.GensRpgTacticalCombatV2Adapter.createBattle.__gensRpg113Scope,true);
 assert.equal(rt.GensRpgTacticalCombatV2Adapter.createBattle.__gensRpg112Spatial,true,'marker blocks later V112 createBattle ownership');
@@ -92,4 +98,4 @@ assert.ok(opened,'Tactical encounter must open');
 assert.deepEqual(opened.enemyIds,['gob']);
 assert.deepEqual(opened.heroIds,['aldren'],'bridge eligibility must still reject non-entered/different-scope heroes');
 
-console.log('GenSrpG V114.11 combat authority characterized: Bridge globals -> V112 -> final V113 scoped authority');
+console.log('GenSrpG V114.11 combat authority clean path: Bridge -> final V113; V112 remains spatial createBattle safety only');

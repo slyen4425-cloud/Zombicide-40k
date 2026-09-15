@@ -253,7 +253,7 @@
     observer=new rt.MutationObserver(()=>{try{enhanceActions(rt);paintWalls(rt)}catch(e){}});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
   }
   function install(rt=R){
-    ensureStyle(rt);patchDungeonMapHtml(rt);hookDungeonRender(rt);hookDetection(rt);bindControls(rt);hookUiRender(rt);paintWalls(rt);enhanceActions(rt);
+    ensureStyle(rt);patchDungeonMapHtml(rt);hookDungeonRender(rt);bindControls(rt);hookUiRender(rt);paintWalls(rt);enhanceActions(rt);
     try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}
     installed=true;return true;
   }

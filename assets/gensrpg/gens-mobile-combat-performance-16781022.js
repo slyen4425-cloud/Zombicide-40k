@@ -42,30 +42,18 @@ function reinstall(){install();setTimeout(install,250);setTimeout(install,1200)}
 R.GensMobileCombatPerformance16781022={VERSION,APP_VERSION,D6_MS,D100_MS,WATCHDOG_MS,REEL_STEPS,clear,install,makeReel,animateDiceFast,animateRpgDiceFast,animateDiceDispatch,animateRpgDiceDispatch,dungeonDiceContext,metrics:()=>({...metrics})};
 reinstall();
 
-/* V16.78.105 tactical combat + mode-isolation loader. This file is already the final script in index.html. */
-if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
-  R.__gensTacticalV2Loader105=true;
-  const files=[
-    "assets/gensrpg/core/asset-resolver.js",
-    "assets/gensrpg/core/storage.js",
-    "assets/gensrpg/core/stats.js",
-    "assets/gensrpg/core/stats-runtime-adapter.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
-    "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
-  ];
-  const finalize=()=>{
-    const apply=()=>{try{R.GensRpgCoreStatsRuntimeAdapter?.install?.(R);R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG V105 install",e)}};
-    apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
-  };
-  const load=(i)=>{
-    if(i>=files.length){finalize();return}
-    const s=D.createElement("script");s.src=files[i]+"?v=16.78.105";s.async=false;s.onload=()=>load(i+1);s.onerror=()=>{console.error("GenSrpG V105 load failed",files[i]);load(i+1)};(D.head||D.documentElement).appendChild(s);
-  };
-  load(0);
+/* Temporary handoff: index.html still loads this file last; Shell now owns runtime composition. */
+if(D&&(D.head||D.documentElement)&&!R.__gensRuntimeBootstrapLoader){
+  R.__gensRuntimeBootstrapLoader=true;
+  const installBootstrap=()=>{try{R.GensRpgRuntimeBootstrap?.install?.(R)}catch(e){console.error("GenSrpG runtime bootstrap install",e)}};
+  if(R.GensRpgRuntimeBootstrap){installBootstrap()}
+  else{
+    const script=D.createElement("script");
+    script.src="assets/gensrpg/shell/runtime-bootstrap.js?v=1.0.0";
+    script.async=false;
+    script.onload=installBootstrap;
+    script.onerror=()=>console.error("GenSrpG runtime bootstrap load failed");
+    (D.head||D.documentElement).appendChild(script);
+  }
 }
 })();

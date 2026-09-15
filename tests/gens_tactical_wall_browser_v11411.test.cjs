@@ -22,6 +22,7 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       for(let i=0;i<5;i++)api.paintLiveWalls();
       const ids=['liveWall','builderWall','tacticalWall'];
       const rows=ids.map(id=>{const el=document.getElementById(id),tiles=[...el.querySelectorAll(':scope > .gtv2WallTile')],img=tiles[0]||null,cs=getComputedStyle(el);return {id,count:tiles.length,owner:el.classList.contains('gtv2WallOwner'),src:img?.getAttribute('src')||'',complete:!!img?.complete,naturalWidth:Number(img?.naturalWidth||0),background:cs.backgroundImage}});
+      window.dungeonMapHtml=map=>'<div class="dc047Grid">'+(map.cells||[]).map(kind=>`<div class="dc047Cell">${kind}</div>`).join('')+'</div>';
       const patched=api.patchDungeonMapHtml();
       const html=window.dungeonMapHtml(window.__runtime.last.map);
       const tpl=document.createElement('template');tpl.innerHTML=html;const patchedWalls=[...tpl.content.querySelectorAll('.gtv2WallOwner > .gtv2WallTile')].length;

@@ -4,7 +4,7 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.2.0",APP_VERSION="16.78.105";
+const VERSION="1.3.0",APP_VERSION="16.78.114.11-architecture-performance-1";
 const D6_MS=440,D100_MS=420,CALLBACK_DELAY=8,WATCHDOG_MS=700,REEL_STEPS=11;
 const nativeAnimateDice=typeof R.animateDice==="function"?R.animateDice:null;
 const nativeAnimateRpgDice=typeof R.animateRpgDice==="function"?R.animateRpgDice:null;
@@ -39,29 +39,17 @@ function animateDiceDispatch(){if(!dungeonDiceContext()&&nativeAnimateDice)retur
 function animateRpgDiceDispatch(){if(!dungeonDiceContext()&&nativeAnimateRpgDice)return nativeAnimateRpgDice.apply(this,arguments);return animateRpgDiceFast.apply(this,arguments)}
 function install(){wrapValue("dungeonEquipmentBonus",valueCaches.equipment,"equipmentHits","equipmentMisses");wrapValue("dungeonAttributeValue",valueCaches.attribute,"attributeHits","attributeMisses");wrapCanonical();wrapEnemy();for(const name of ["applyDungeonAttackDamage","applyBossAttackDamage","silentHeroDamage023","changeDungeonAttribute","dc214Equip","dc214Reload","save","saveState","saveActiveEnemies","saveDungeonHeroState","saveDungeonHeroStats","saveGameProfiles"])wrapInvalidator(name);if(D){R.animateDice=animateDiceDispatch;R.animateRpgDice=animateRpgDiceDispatch}return true}
 function reinstall(){install();setTimeout(install,250);setTimeout(install,1200)}
-R.GensMobileCombatPerformance16781022={VERSION,APP_VERSION,D6_MS,D100_MS,WATCHDOG_MS,REEL_STEPS,clear,install,makeReel,animateDiceFast,animateRpgDiceFast,animateDiceDispatch,animateRpgDiceDispatch,dungeonDiceContext,metrics:()=>({...metrics})};
-reinstall();
-
-/* V16.78.105 tactical combat + mode-isolation loader. This file is already the final script in index.html. */
-if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
-  R.__gensTacticalV2Loader105=true;
-  const files=[
-    "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
-    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
-    "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
-  ];
-  const finalize=()=>{
-    const apply=()=>{try{R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG V105 install",e)}};
-    apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
-  };
-  const load=(i)=>{
-    if(i>=files.length){finalize();return}
-    const s=D.createElement("script");s.src=files[i]+"?v=16.78.105";s.async=false;s.onload=()=>load(i+1);s.onerror=()=>{console.error("GenSrpG V105 load failed",files[i]);load(i+1)};(D.head||D.documentElement).appendChild(s);
-  };
-  load(0);
+function loadRuntimeBootstrap(){
+  if(!D||!(D.head||D.documentElement)||R.__gensRuntimeBootstrapEntryV1)return false;
+  R.__gensRuntimeBootstrapEntryV1=true;
+  const s=D.createElement("script");
+  s.src="assets/gensrpg/core/runtime-bootstrap-v1.js?v=1";
+  s.async=false;
+  s.onerror=()=>console.error("GenSrpG RuntimeBootstrap V1 entry load failed");
+  (D.head||D.documentElement).appendChild(s);
+  return true;
 }
+R.GensMobileCombatPerformance16781022={VERSION,APP_VERSION,D6_MS,D100_MS,WATCHDOG_MS,REEL_STEPS,clear,install,makeReel,animateDiceFast,animateRpgDiceFast,animateDiceDispatch,animateRpgDiceDispatch,dungeonDiceContext,loadRuntimeBootstrap,metrics:()=>({...metrics})};
+reinstall();
+loadRuntimeBootstrap();
 })();

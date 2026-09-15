@@ -8,6 +8,7 @@ const v108=read('assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js');
 const v111=read('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js');
 const v112=read('assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js');
 const v113=read('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js');
+const bridge=read('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js');
 
 function installBlock(source,label){
   const start=source.indexOf('function install(rt=R){');
@@ -30,15 +31,19 @@ for(const [label,source,install] of [['V108',v108,i108],['V111',v111,i111],['V11
 assert.doesNotMatch(i112,/scheduleDetection\(rt,"install-vision-v112",true\)/,'V112 must not perform an install-time detection scan');
 assert.doesNotMatch(i112,/hookStart\(rt\)/,'V112 must not retake combat-start authority');
 
-// V113 is the one active owner for movement, event, board and start/scope detection.
+// V113 remains the one active detection/scope owner for movement, events and board
+// interactions. Combat-start routing itself is now the Bridge explicit contract.
 for(const required of ['ensureDetectionHooks(rt)','bindBoardClicks(rt)']){
   assert.ok(i113.includes(required),`V113 install must keep ${required}`);
 }
-assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must own movement, events, start and adapter scope');
+assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must keep movement/events/scope readiness');
 assert.match(v113,/wrapped\.__gensRpg113Detection=true;wrapped\.__original=old;rt\.dungeonMoveHero098=wrapped/,'V113 must be the active movement detection wrapper');
 assert.match(v113,/event-detection-v113:/,'V113 must own event-triggered detection');
 assert.match(v113,/board-cell-detection-v113/,'V113 must own board-cell detection');
-assert.match(v113,/wrapped\.__gensRpg113Start=true;wrapped\.__gensRpg112Start=true/,'V113 must remain the final combat-start wrapper while blocking historical V112 retries');
+assert.match(v113,/if\(cur\.__gensRpg113Start\)\{startHooked=true;return true\}/,'V113 start hook must short-circuit when the Bridge already carries equivalent authority');
+assert.match(bridge,/start\.__gensRpg113Start=true;start\.__gensRpg112Start=true/,'Bridge global start adapter must advertise V113-equivalent scope/detection semantics and block V112 retries');
+assert.match(bridge,/function prepareV113Detection\(/,'Bridge explicit request must preserve V113 detection visibility/source semantics');
+assert.match(bridge,/authority\.selectCombatants\(rt,prepared\.options\|\|\{\}\)/,'Bridge explicit request must delegate final participant scope to V113');
 assert.match(v113,/function heroScope\(/,'V113 must own branch-aware hero scope');
 assert.match(v113,/function enemyScope\(/,'V113 must own branch-aware enemy scope');
 assert.match(v113,/function selectCombatants\(/,'V113 must remain final combatant selector');
@@ -47,4 +52,4 @@ assert.match(v113,/function selectCombatants\(/,'V113 must remain final combatan
 const legacyInstalls=[i108,i111,i112].join('\n');
 assert.doesNotMatch(legacyInstalls,/detection-immediate|detection-v111|vision-v112|hookDetection|scheduleDetection/,'legacy detection must not be activated by install');
 
-console.log('GenSrpG V114.11 single detection authority OK: V113 alone owns active detection and branch-aware scope');
+console.log('GenSrpG V114.11 single detection authority OK: V113 owns detection/scope; Bridge owns the final global start adapter through the explicit V113 contract');

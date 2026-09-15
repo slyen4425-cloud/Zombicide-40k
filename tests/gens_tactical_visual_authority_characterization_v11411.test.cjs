@@ -28,11 +28,15 @@ assert.match(ui,/function hookDungeonRender\(\)/,'base Tactical UI must own Dung
 const globalPolish=block(ui,'function installGlobalPolish(){','const api=','base Tactical UI installGlobalPolish');
 for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRender()','paintLiveWalls()'])assert.ok(globalPolish.includes(required),`base Tactical UI canonical wall pipeline missing ${required}`);
 
-// V108 is the last active historical JS wall-painting debt.
+// V108 historical painters remain inspectable, but the active JS path no longer owns walls.
+for(const sig of ['function paintWalls(rt=R)','function patchDungeonMapHtml(rt=R)','function hookDungeonRender(rt=R)'])assert.ok(v108.includes(sig),`V108 historical wall seam missing: ${sig}`);
 const i108=block(v108,'function install(rt=R){','function installWithRetries','V108 install');
-for(const required of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(i108.includes(required),`V108 wall debt changed unexpectedly: missing ${required}`);
+for(const retired of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(!i108.includes(retired),`V108 install still owns walls: ${retired}`);
+for(const required of ['ensureStyle(rt)','bindControls(rt)','hookUiRender(rt)','enhanceActions(rt)'])assert.ok(i108.includes(required),`V108 non-wall behavior lost ${required}`);
+const hookUi108=block(v108,'function hookUiRender(rt=R){','function observe(rt=R){','V108 hookUiRender');
+assert.match(hookUi108,/enhanceActions\(rt\)/,'V108 render hook must preserve action enhancement');
+assert.doesNotMatch(hookUi108,/paintWalls\(rt\)/,'V108 render hook must no longer repaint walls');
 
-// V109 historical painters remain inspectable, but timeline/range polish no longer owns walls.
 assert.match(v109,/function paintBuilderWalls\(rt=R\)/,'V109 historical wall painter must remain inspectable for rollback');
 assert.match(v109,/function hookDungeonRender\(rt=R\)/,'V109 historical Dungeon wall hook must remain inspectable for rollback');
 const i109=block(v109,'function install(rt=R){','function installWithRetries','V109 install');
@@ -65,7 +69,10 @@ assert.doesNotMatch(i113,/paintWalls\(rt\)/,'V113 install must no longer repaint
 assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 detection authority must remain active');
 assert.ok(i113.includes('bindBoardClicks(rt)'),'V113 board detection must remain active');
 
-for(const name of ['V108','V109','V111','V112','V113'])assert.match(doc,new RegExp(name),`visual authority inventory must document ${name}`);
-for(const name of ['V109','V111','V112','V113'])assert.match(doc,new RegExp(name+' \\| \\*\\*retirée\\*\\*'),`visual authority inventory must mark ${name} wall authority retired`);
+for(const name of ['V108','V109','V111','V112','V113']){
+  assert.match(doc,new RegExp(name),`visual authority inventory must document ${name}`);
+  assert.match(doc,new RegExp(name+' \\| \\*\\*retirée\\*\\*'),`visual authority inventory must mark ${name} JS wall authority retired`);
+}
+assert.match(doc,/Point restant après le retrait JS/,'inventory must explicitly track residual historical wall CSS');
 assert.match(doc,/GensRpgTacticalCombatV2Ui/,'visual authority inventory must name base Tactical UI as target authority');
-console.log('GenSrpG V114.11 visual authority: base Tactical UI canonical; V109/V111/V112/V113 wall repaint retired; V108 remains');
+console.log('GenSrpG V114.11 visual authority: canonical Tactical UI owns active JS wall pipeline; V108/V109/V111/V112/V113 JS repaint retired');

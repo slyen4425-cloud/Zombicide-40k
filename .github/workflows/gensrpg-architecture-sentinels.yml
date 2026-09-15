@@ -52,6 +52,9 @@ jobs:
       - name: Vérifier le contrat unique d'entrée du Bridge Tactical
         run: node tests/gens_bridge_single_entry_contract_v11411.test.cjs
 
+      - name: Figer l'inventaire des anciens points d'entrée combat
+        run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

@@ -159,8 +159,6 @@
   function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;const onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
-    .gtv2112WallCell::before{display:none!important;content:none!important;background:none!important}
-    .gtv2113Wall,.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
     .gtv2113DiceRow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
     .gtv2113DiceRow .gtv2Die{width:64px;height:64px;font-size:27px;will-change:transform;animation:gtv2113DiceShake .17s linear infinite alternate}
     .gtv2113DiceRow.settled .gtv2Die{animation:gtv2113DiceLand .22s ease-out both}

@@ -9,7 +9,7 @@
   if(root)root.GensRpgTacticalVisualDice16781142=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="2.3.0",APP_VERSION="16.78.114.11";
+  const VERSION="2.4.0",APP_VERSION="16.78.114.11";
   const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
   const WRONG_WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
   const STYLE_ID="gensRpgTacticalVisualDice167811411Style";
@@ -87,22 +87,44 @@
   function armorRules(rt=R){try{return rt?.loadDungeonRpgRules?.()||{}}catch(e){return {}}}
   function resolvePhysicalDamage(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
     const baseWeaponDamage=Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0));
+    const armor=attack?.ignoreArmor?0:Math.max(0,num(preview?.armor,target?.armor??0));
+    const snap=attacker?.meta?.rpgStats||{},core=rt?.GensRpgCoreRules,rules=snap?.rules||armorRules(rt),mode=attackMode(attack);
+    if(core?.resolvePhysicalDamage){
+      const force=mode==="melee"?Math.max(0,num(snap?.values?.force,0)):0;
+      let resolved=core.resolvePhysicalDamage({weaponDamage:baseWeaponDamage,force,armor,rules,armorRoll:Number.isFinite(Number(forcedArmorRoll))?Number(forcedArmorRoll):null});
+      if(resolved?.armorFloorTriggered&&resolved?.armorRoll==null){
+        const roll=Math.floor(nextRandom(state)*100);
+        resolved=core.resolvePhysicalDamage({weaponDamage:baseWeaponDamage,force,armor,rules,armorRoll:roll});
+      }
+      return {
+        baseWeaponDamage,
+        statDamagePercent:Math.max(0,num(resolved?.statDamagePercent,0)),
+        statDamageBonus:Math.max(0,num(resolved?.statDamageBonus,0)),
+        rawDamage:Math.max(0,num(resolved?.rawDamage,baseWeaponDamage)),
+        armor:Math.max(0,num(resolved?.armor,armor)),
+        damage:Math.max(0,num(resolved?.finalDamage,0)),
+        armorZeroBlockChance:clamp(num(resolved?.armorZeroBlockChance,rules?.armorZeroBlockChance??50),0,100),
+        minPhysicalDamageOnArmorFail:Math.max(0,num(resolved?.minPhysicalDamageOnArmorFail,rules?.minPhysicalDamageOnArmorFail??rules?.minPhysicalDamage??1)),
+        armorRoll:resolved?.armorRoll??null,
+        armorBlocked:!!resolved?.armorBlocked,
+        armorFloorTriggered:!!resolved?.armorFloorTriggered,
+      };
+    }
     const statDamageBonus=canonicalDamageBonus(attacker,attack,preview);
     const rawDamage=Math.max(0,Math.round(baseWeaponDamage+statDamageBonus));
-    const armor=attack?.ignoreArmor?0:Math.max(0,num(preview?.armor,target?.armor??0));
-    const rules=armorRules(rt),armorZeroBlockChance=clamp(num(rules?.armorZeroBlockChance,75),0,100);
+    const armorZeroBlockChance=clamp(num(rules?.armorZeroBlockChance,75),0,100),minPhysicalDamageOnArmorFail=Math.max(0,num(rules?.minPhysicalDamageOnArmorFail??rules?.minPhysicalDamage,1));
     let armorRoll=null,damage=Math.max(0,rawDamage-armor),armorBlocked=false,armorFloorTriggered=false;
     if(rawDamage>0&&damage<=0){
       armorFloorTriggered=true;armorRoll=Number.isFinite(Number(forcedArmorRoll))?Number(forcedArmorRoll):Math.floor(nextRandom(state)*100);
-      try{if(typeof rt?.DungeonCore317?.resolveArmorFloor==="function")damage=Math.max(0,num(rt.DungeonCore317.resolveArmorFloor(rawDamage,armor,1,"physical",rules,armorRoll),0));else damage=armorRoll<armorZeroBlockChance?0:1}catch(e){damage=armorRoll<armorZeroBlockChance?0:1}
+      try{if(typeof rt?.DungeonCore317?.resolveArmorFloor==="function")damage=Math.max(0,num(rt.DungeonCore317.resolveArmorFloor(rawDamage,armor,minPhysicalDamageOnArmorFail,"physical",rules,armorRoll),0));else damage=armorRoll<armorZeroBlockChance?0:minPhysicalDamageOnArmorFail}catch(e){damage=armorRoll<armorZeroBlockChance?0:minPhysicalDamageOnArmorFail}
       armorBlocked=damage<=0;
     }
-    return {baseWeaponDamage,statDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,armorRoll,armorBlocked,armorFloorTriggered};
+    return {baseWeaponDamage,statDamagePercent:0,statDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,minPhysicalDamageOnArmorFail,armorRoll,armorBlocked,armorFloorTriggered};
   }
   function resolveDamagePerHit(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
     const type=str(preview?.damageType||attack?.damageType||"physical");
     if(physicalType(type))return {...resolvePhysicalDamage(rt,state,attacker,target,attack,preview,forcedArmorRoll),damageType:"physical"};
-    return {baseWeaponDamage:Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0)),statDamageBonus:0,rawDamage:Math.max(0,num(preview?.rawDamage??attack?.power,preview?.damage??0)),armor:0,damage:Math.max(0,num(preview?.damage,0)),armorZeroBlockChance:0,armorRoll:null,armorBlocked:false,armorFloorTriggered:false,damageType:type};
+    return {baseWeaponDamage:Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0)),statDamagePercent:Math.max(0,num(preview?.statDamagePercent,0)),statDamageBonus:Math.max(0,num(preview?.statDamageBonus,0)),rawDamage:Math.max(0,num(preview?.rawDamage??attack?.power,preview?.damage??0)),armor:0,damage:Math.max(0,num(preview?.damage,0)),armorZeroBlockChance:0,minPhysicalDamageOnArmorFail:0,armorRoll:null,armorBlocked:false,armorFloorTriggered:false,damageType:type};
   }
 
   function patchHitResolver(rt=R){
@@ -126,7 +148,7 @@
       if(damage>0){target.hp=clamp(num(target.hp)-damage,0,num(target.maxHp,1));if(target.hp<=0)target.alive=false}
       cur.actionsLeft=Math.max(0,num(cur.actionsLeft,0)-Math.max(1,num(attack?.actionCost,1)));
       const firstDamage=damageRolls.find(Boolean)||resolveDamagePerHit(rt,state,cur,target,attack,p,0);
-      const result={ok:true,hit:hits>0,roll:rolls[0],rolls,rollsDisplay:rolls.slice(),hitsRoll,dice,hits,crits,crit:crits>0,critRolls,damageRolls,rollHighToHit:high,hitTarget:calculation.threshold,hitChance:calculation.finalChance,hitCalculation:calculation,damage,damagePerHit:Math.max(0,num(firstDamage.damage,0)),targetHp:target.hp,targetDefeated:!target.alive,attackId:attack?.id||str(attackId),attackerId:cur.id,targetId:target.id,cellCover:calculation.cellCoverPenalty,totalCover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,damageType:firstDamage.damageType||p.damageType||attack?.damageType||"physical",resistance:p.resistance||0,resistanceKind:p.resistanceKind||"",baseWeaponDamage:firstDamage.baseWeaponDamage,statDamageBonus:firstDamage.statDamageBonus,rawDamage:firstDamage.rawDamage,armor:firstDamage.armor,armorZeroBlockChance:firstDamage.armorZeroBlockChance,armorRoll:firstDamage.armorRoll,armorBlocked:firstDamage.armorBlocked,armorFloorTriggered:firstDamage.armorFloorTriggered,distance:num(p.distance,0),cover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,targetDefense:calculation.defensePenalty,targetDodge:calculation.dodgePenalty,baseHit:calculation.baseHit,critChance:p.critChance||0,critMultiplier:p.critMultiplier||2};
+      const result={ok:true,hit:hits>0,roll:rolls[0],rolls,rollsDisplay:rolls.slice(),hitsRoll,dice,hits,crits,crit:crits>0,critRolls,damageRolls,rollHighToHit:high,hitTarget:calculation.threshold,hitChance:calculation.finalChance,hitCalculation:calculation,damage,damagePerHit:Math.max(0,num(firstDamage.damage,0)),targetHp:target.hp,targetDefeated:!target.alive,attackId:attack?.id||str(attackId),attackerId:cur.id,targetId:target.id,cellCover:calculation.cellCoverPenalty,totalCover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,damageType:firstDamage.damageType||p.damageType||attack?.damageType||"physical",resistance:p.resistance||0,resistanceKind:p.resistanceKind||"",baseWeaponDamage:firstDamage.baseWeaponDamage,statDamagePercent:firstDamage.statDamagePercent||0,statDamageBonus:firstDamage.statDamageBonus,rawDamage:firstDamage.rawDamage,armor:firstDamage.armor,armorZeroBlockChance:firstDamage.armorZeroBlockChance,minPhysicalDamageOnArmorFail:firstDamage.minPhysicalDamageOnArmorFail||0,armorRoll:firstDamage.armorRoll,armorBlocked:firstDamage.armorBlocked,armorFloorTriggered:firstDamage.armorFloorTriggered,distance:num(p.distance,0),cover:calculation.lineCoverPenalty+calculation.cellCoverPenalty,targetDefense:calculation.defensePenalty,targetDodge:calculation.dodgePenalty,baseHit:calculation.baseHit,critChance:p.critChance||0,critMultiplier:p.critMultiplier||2};
       state.log?.push?.({type:"attack",...result});E.refreshOutcome(state);return result;
     };
     resolve.__gensRpg11411Damage=true;resolve.__gensRpg11410DirectD100=true;resolve.__gensRpg1149DirectD100=true;resolve.__gensRpg1148DirectD100=true;resolve.__original=previous;E.resolveAttack=resolve;hitPatched=true;return true;

@@ -80,27 +80,29 @@
       return {ok:false,reason:"open-failed",error:err};
     }finally{opening=false}
   }
+  function requestCombat(rt=R,options={}){
+    const entry=str(options.entry||"requestCombat")||"requestCombat";
+    const enemyIds=arr(options.enemyIds).map(str).filter(Boolean);
+    const result=openCurrent(rt,{...options,enemyIds,entry});
+    return result.ok?result:reportBlocked(rt,result,entry);
+  }
   function startDefault(rt=R,enemyIds=[],reason="manual"){
     if(!dungeonContext(rt))return typeof legacyStart==="function"?legacyStart.call(rt,enemyIds,reason):{ok:false,reason:"not-dungeon"};
-    const ids=arr(enemyIds).map(str);const result=openCurrent(rt,{enemyIds:ids,reason,entry:"dc200StartCombat"});
-    return result.ok?result:reportBlocked(rt,result,"dc200StartCombat");
+    return requestCombat(rt,{enemyIds:arr(enemyIds).map(str),reason,entry:"dc200StartCombat"});
   }
   function setupDefault(rt=R){
     if(!dungeonContext(rt))return typeof legacySetup==="function"?legacySetup.call(rt):{ok:false,reason:"not-dungeon"};
-    const result=openCurrent(rt,{reason:"manual-setup",entry:"openDungeonCombatSetup"});
-    return result.ok?result:reportBlocked(rt,result,"openDungeonCombatSetup");
+    return requestCombat(rt,{reason:"manual-setup",entry:"openDungeonCombatSetup"});
   }
   function launchDefault(rt=R,x=null,chosen=[]){
     if(!dungeonContext(rt))return typeof legacyLaunch==="function"?legacyLaunch.apply(rt,[x,chosen]):false;
     const ids=arr(chosen).map(e=>str(e?.id??e)).filter(Boolean);
-    const result=openCurrent(rt,{enemyIds:ids,reason:"legacy-launch",entry:"launchCombat200"});
-    if(result.ok)return true;
-    reportBlocked(rt,result,"launchCombat200");
-    return false;
+    const result=requestCombat(rt,{enemyIds:ids,reason:"legacy-launch",entry:"launchCombat200"});
+    return !!result.ok;
   }
   function directStartDefault(rt=R,ids=[],reason="manual"){
     if(!dungeonContext(rt))return typeof legacyStartCombatFn==="function"?legacyStartCombatFn.apply(rt,[ids,reason]):false;
-    return startDefault(rt,ids,reason);
+    return requestCombat(rt,{enemyIds:arr(ids).map(str),reason,entry:"dc200StartCombat"});
   }
   function rememberLegacy(current,kind){
     if(typeof current!=="function"||current.__gensTacticalV2Default)return;
@@ -149,7 +151,7 @@
       direct.__gensTacticalV2Default=true;direct.__legacy=legacyStartCombatFn;rt.startCombat=direct;
     }
 
-    rt.openTacticalCombatV2=(opts={})=>openCurrent(rt,{...opts,entry:opts.entry||"openTacticalCombatV2"});
+    rt.openTacticalCombatV2=(opts={})=>requestCombat(rt,{...opts,entry:opts.entry||"openTacticalCombatV2"});
     rt.GENS_TACTICAL_V2_DEFAULT=true;
     rt.GENS_TACTICAL_V2_ROUTER_VERSION=APP_VERSION;
     installed=true;
@@ -158,5 +160,5 @@
     return true;
   }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

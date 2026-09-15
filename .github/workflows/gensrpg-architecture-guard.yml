@@ -27,3 +27,5 @@ jobs:
         run: node tests/gens_core_rpg_runtime_path_contract.test.cjs
       - name: Validate Tactical RPG armor and ranged boundaries
         run: node tests/gens_core_rpg_tactical_boundaries_contract.test.cjs
+      - name: Validate Core RPG browser wiring
+        run: node tests/gens_core_rpg_browser_wiring_contract.test.cjs

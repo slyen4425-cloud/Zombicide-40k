@@ -8,7 +8,7 @@
   if(root)root.GensRpgRuntimeRepair1678106=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.0.2",APP_VERSION="16.78.106";
+  const VERSION="1.1.0",APP_VERSION="16.78.106";
   const FAMILY_KEY="gensrpg_session_family_guard_v1";
   const PROFILES_KEY="gensrpg_game_profiles_v1";
   const ACTIVE_KEY="gensrpg_game_profile_active_v1";
@@ -19,9 +19,26 @@
   const str=v=>String(v??"");
   const arr=v=>Array.isArray(v)?v:[];
 
-  function readFamily(rt=R){
-    try{return str(rt?.localStorage?.getItem?.(FAMILY_KEY)).trim().toLowerCase()}catch(e){return ""}
+  function storageApi(rt=R){return rt?.GensRpgCoreStorage||null}
+  function storageOwner(rt=R){try{return rt?.localStorage||null}catch(e){return null}}
+  function readText(rt,key,fallback=""){
+    const api=storageApi(rt),storage=storageOwner(rt);if(!api?.readText||!storage)return fallback;
+    const out=api.readText(storage,key,{fallback});return out?.ok?out.value:fallback;
   }
+  function writeText(rt,key,value){
+    const api=storageApi(rt),storage=storageOwner(rt);if(!api?.writeText||!storage)return false;
+    return !!api.writeText(storage,key,value)?.ok;
+  }
+  function readJson(rt,key,fallback){
+    const api=storageApi(rt),storage=storageOwner(rt);if(!api?.readJson||!storage)return {ok:false,exists:false,value:fallback,error:"core-storage-unavailable"};
+    return api.readJson(storage,key,{fallback});
+  }
+  function writeJson(rt,key,value){
+    const api=storageApi(rt),storage=storageOwner(rt);if(!api?.writeJson||!storage)return false;
+    return !!api.writeJson(storage,key,value)?.ok;
+  }
+
+  function readFamily(rt=R){return str(readText(rt,FAMILY_KEY,"")).trim().toLowerCase()}
   function activeProfile(rt=R){
     try{const p=rt?.getActiveGameProfile?.();if(p)return p}catch(e){}
     try{const p=rt?.activeGameProfileRaw?.();if(p)return p}catch(e){}
@@ -53,19 +70,21 @@
       }
       out.push(p);
     }
-    try{
-      const active=str(rt?.localStorage?.getItem?.(ACTIVE_KEY));
-      if(removed.includes(active))rt?.localStorage?.setItem?.(ACTIVE_KEY,keepId);
-    }catch(e){}
+    const active=str(readText(rt,ACTIVE_KEY,""));
+    if(removed.includes(active))writeText(rt,ACTIVE_KEY,keepId);
     return {list:out,removed,keep:keepId,changed:removed.length>0};
   }
   function repairStoredProfiles(rt=R){
     try{
-      const raw=rt?.localStorage?.getItem?.(PROFILES_KEY);
-      if(!raw)return {changed:false,removed:[]};
-      const parsed=JSON.parse(raw),fixed=dedupeProfiles(parsed,rt);
+      const stored=readJson(rt,PROFILES_KEY,null);
+      if(!stored.ok){
+        if(stored.exists)try{rt?.console?.warn?.("V16.78.106 profile repair",stored.error)}catch(_){}
+        return {changed:false,removed:[]};
+      }
+      if(!stored.exists||!stored.value)return {changed:false,removed:[]};
+      const fixed=dedupeProfiles(stored.value,rt);
       if(fixed.changed){
-        rt.localStorage.setItem(PROFILES_KEY,JSON.stringify(fixed.list));
+        if(!writeJson(rt,PROFILES_KEY,fixed.list))return {changed:false,removed:[],error:"profile-write-failed"};
         try{rt.renderGensFamilyGamesIfVisible?.()}catch(e){}
         try{rt.console?.warn?.("V16.78.106 removed duplicate built-in Dungeon profiles",fixed.removed)}catch(e){}
       }
@@ -157,6 +176,7 @@
     return count;
   }
   function install(rt=R){
+    if(!storageApi(rt))return false;
     repairStoredProfiles(rt);
     wrapSaveProfiles(rt);
     const wrapped=wrapRenderers(rt);
@@ -164,6 +184,6 @@
     installed=wrapped>0;
     return installed;
   }
-  function status(rt=R){return {installed,dungeon:isDungeonContext(rt),wrapped:RENDER_NAMES.filter(n=>!!rt?.[n]?.__gensRpg106RealRuntime),last:rt?.__gensRpg106LastIntercept||null}}
-  return {VERSION,APP_VERSION,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,currentBattle,openTactical,install,status};
+  function status(rt=R){return {installed,dungeon:isDungeonContext(rt),storage:storageApi(rt)?.VERSION||"",wrapped:RENDER_NAMES.filter(n=>!!rt?.[n]?.__gensRpg106RealRuntime),last:rt?.__gensRpg106LastIntercept||null}}
+  return {VERSION,APP_VERSION,FAMILY_KEY,PROFILES_KEY,ACTIVE_KEY,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,currentBattle,openTactical,install,status};
 });

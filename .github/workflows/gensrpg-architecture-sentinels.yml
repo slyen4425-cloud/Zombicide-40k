@@ -1,0 +1,29 @@
+name: GenSrpG architecture sentinels
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-architecture-sentinels-2026-09-15'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  architecture-sentinels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Verrouiller la composition réelle du runtime V114.11
+        run: node tests/gens_runtime_composition_guard_v11411.test.cjs
+
+      - name: Vérifier l'autorité UI Dungeon native V114.11
+        run: node tests/gens_v11411_native_ui_authority.test.cjs
+
+      - name: Vérifier l'isolation navigateur V114.11
+        run: node tests/gens_v11411_native_ui_browser.test.cjs

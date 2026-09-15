@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const legacySource=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
 const adapterSource=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-runtime-adapter.js'),'utf8');
-const bootstrapSource=fs.readFileSync(path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js'),'utf8');
+const bootstrapSource=fs.readFileSync(path.join(root,'assets','gensrpg','shell','runtime-bootstrap.js'),'utf8');
 const Core=require(path.join(root,'assets','gensrpg','core','stats.js'));
 
 let evaluatorBuilds=0;
@@ -86,10 +86,10 @@ assert.ok(evaluatorBuilds>=7,'canonical runtime calculations must delegate repea
 const statsPath='assets/gensrpg/core/stats.js';
 const adapterPath='assets/gensrpg/core/stats-runtime-adapter.js';
 const tacticalPath='assets/gensrpg/gens-rpg-tactical-combat-v2.js';
-assert.equal((bootstrapSource.match(/assets\/gensrpg\/core\/stats\.js/g)||[]).length,1,'browser bootstrap must have one Core Stats owner');
-assert.equal((bootstrapSource.match(/assets\/gensrpg\/core\/stats-runtime-adapter\.js/g)||[]).length,1,'browser bootstrap must have one Core Stats runtime adapter owner');
+assert.equal((bootstrapSource.match(/assets\/gensrpg\/core\/stats\.js/g)||[]).length,1,'Shell bootstrap must have one Core Stats owner');
+assert.equal((bootstrapSource.match(/assets\/gensrpg\/core\/stats-runtime-adapter\.js/g)||[]).length,1,'Shell bootstrap must have one Core Stats runtime adapter owner');
 assert.ok(bootstrapSource.indexOf(statsPath)<bootstrapSource.indexOf(adapterPath),'pure Core Stats must load before its runtime adapter');
 assert.ok(bootstrapSource.indexOf(adapterPath)<bootstrapSource.indexOf(tacticalPath),'Core Stats runtime adapter must be available before Tactical');
 assert.ok(adapterSource.includes('GensRpgCoreStats'),'runtime adapter must use the Core Stats API');
 
-console.log('GenSrpG Core Stats canonical runtime + browser delegation contract OK');
+console.log('GenSrpG Core Stats canonical runtime + Shell browser delegation contract OK');

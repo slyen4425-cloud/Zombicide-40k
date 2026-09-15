@@ -106,8 +106,10 @@ assert.equal(physical.damage,3,'8 raw - 5 armor must deal 3');
 const magicTarget={id:'enemy',side:'enemy',meta:{rpgStats:{derived:{magicResistance:9},resistances:{}}}};
 const magicPreview={ok:true,attack:{power:12,damageType:'magic',tags:['magic']},damage:12};
 const magic=Stats.adjustedDamage(magicPreview,magicTarget,actor);
+assert.equal(magic.statDamageBonus,6,'Tactical magic attack must consume the canonical Intelligence bonus');
+assert.equal(magic.rawDamage,18,'12 magic + 6 Intelligence-derived damage must reach resistance resolution');
 assert.equal(magic.resistance,9,'Tactical magic damage must consume canonical Spirit/equipment/talent resistance');
-assert.equal(magic.damage,3,'12 magic - 9 resistance must deal 3');
+assert.equal(magic.damage,9,'18 magic - 9 resistance must deal 9');
 
 // Percent formulas are already editable in GenSrpG and must traverse the same real runtime path.
 customRules.physicalDamageFormula='percent';
@@ -123,6 +125,8 @@ assert.equal(percentSnap.rules.magicDamageFormula,'percent');
 assert.equal(percentSnap.rules.magicDamagePercentPerPoint,5);
 assert.equal(percentSnap.derived.physicalDamageBonus,0,'percent mode must not masquerade as a flat bonus');
 assert.equal(percentSnap.derived.magicDamageBonus,0,'percent magic mode must not masquerade as a flat bonus');
+assert.equal(percentSnap.derived.physicalDamagePercent,38,'snapshot must expose active Force percent scaling');
+assert.equal(percentSnap.derived.magicDamagePercent,80,'snapshot must expose active Intelligence percent scaling');
 
 const percentSword={power:10,damageType:'physical',tags:['melee'],ignoreArmor:false};
 const percentPhysical=Visual.resolvePhysicalDamage(ctx,null,percentActor,skeleton,percentSword,{damageType:'physical',armor:5,damage:0,rawDamage:10},0);

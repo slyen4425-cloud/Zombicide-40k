@@ -173,7 +173,7 @@
     const run=()=>{queued=false;try{enhance(rt)}catch(e){}};
     observer=new rt.MutationObserver(()=>{if(queued)return;queued=true;if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
   }
-  function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);hookDungeonRender(rt);bind(rt);observe(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
+  function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);hookDungeonRender(rt);bind(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms);return true}
 
   const api={VERSION,APP_VERSION,WALL_ASSET,BOW_RANGE,STAFF_RANGE,UNARMED_VALUE,rangedKind,normalizeRangedAttack,normalizeActorRanges,normalizeBattleRanges,turnSequence,timelineHtml,paintBuilderWalls,isUnarmedState,equipUnarmed,quickAttackState,ensureUnarmedOption,ensureQuickAttack,enhance,install,installWithRetries,status:()=>({installed,wall:WALL_ASSET})};

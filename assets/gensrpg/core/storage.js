@@ -9,7 +9,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const VERSION="1.0.0";
+  const VERSION="1.1.0";
   const str=v=>String(v??"");
   const int=(v,f=0)=>Number.isFinite(Number(v))?Math.trunc(Number(v)):f;
 
@@ -120,9 +120,14 @@
     return {...out,value};
   }
 
+  function restoreText(storage,key,previous){
+    if(previous?.exists)storage.setItem(key,previous.raw);
+    else storage.removeItem(key);
+  }
+
   function migrateStoredJson({storage,key,versionKey,fallback=null,targetVersion=0,migrations=[],validate=null}={}){
     const dataKey=validKey(key),schemaKey=validKey(versionKey),target=Math.max(0,int(targetVersion,0));
-    if(!validStorage(storage)||!dataKey||!schemaKey)return {ok:false,changed:false,key:dataKey,versionKey:schemaKey,error:"invalid-storage-or-key"};
+    if(!validStorage(storage)||!dataKey||!schemaKey||dataKey===schemaKey)return {ok:false,changed:false,key:dataKey,versionKey:schemaKey,error:"invalid-storage-or-key"};
 
     const data=readJson(storage,dataKey,{fallback,validate:null});
     if(!data.ok&&data.exists)return {ok:false,changed:false,key:dataKey,versionKey:schemaKey,error:data.error};
@@ -138,14 +143,21 @@
     const serialized=serializeJson(migrated.value);
     if(!serialized.ok)return {...migrated,ok:false,changed:false,key:dataKey,versionKey:schemaKey,error:serialized.error,written:false};
 
-    // Commit only after every migration and validation succeeded. Data shape is preserved as plain JSON;
-    // schema ownership lives in the separate, explicitly supplied version key.
+    // localStorage has no multi-key transaction. Keep the original data until the schema write succeeds,
+    // and roll the data key back if the second write fails so data/schema can never be left mismatched.
+    let dataWritten=false;
     try{
       storage.setItem(dataKey,serialized.raw);
+      dataWritten=true;
       storage.setItem(schemaKey,String(target));
-      return {...migrated,key:dataKey,versionKey:schemaKey,storedVersion:target,written:true,error:null};
+      return {...migrated,key:dataKey,versionKey:schemaKey,storedVersion:target,written:true,rolledBack:false,error:null};
     }catch(error){
-      return {...migrated,ok:false,key:dataKey,versionKey:schemaKey,error,written:false};
+      let rolledBack=!dataWritten,rollbackError=null;
+      if(dataWritten){
+        try{restoreText(storage,dataKey,data);rolledBack=true;}
+        catch(e){rolledBack=false;rollbackError=e;}
+      }
+      return {...migrated,ok:false,changed:false,key:dataKey,versionKey:schemaKey,storedVersion:version.value,error,written:false,rolledBack,rollbackError};
     }
   }
 

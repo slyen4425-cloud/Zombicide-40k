@@ -65,13 +65,27 @@
     try{rt.console?.error?.("Combat tactique V2 route blocked",{entry,detail,result})}catch(e){}
     return result||{ok:false,reason:detail};
   }
+  function isV113DetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
+  function prepareV113Detection(rt=R,authority=null,options={}){
+    if(!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};
+    const pairs=arr(authority.detectionPairs(rt)),visible=new Set(pairs.map(p=>str(p?.enemyId)).filter(Boolean));
+    let enemyIds=arr(options.enemyIds).map(str).filter(Boolean);if(!enemyIds.length)enemyIds=[...visible];
+    enemyIds=enemyIds.filter(id=>visible.has(id));if(!enemyIds.length)return {ok:false,reason:"not-detected-v113",pairs};
+    const relevant=pairs.filter(p=>enemyIds.includes(str(p?.enemyId))),sourceHeroIds=[...new Set(relevant.map(p=>str(p?.heroId)).filter(Boolean))],scope=relevant.find(p=>p?.scope)?.scope||options.scope;
+    const prepared={...options,enemyIds,scope,sourceHeroIds};
+    if(scope&&sourceHeroIds.length){
+      rt.__gensTacticalV113Context={scope,sourceHeroIds,enemyIds,reason:options.reason,at:Date.now()};
+    }
+    return {ok:true,options:prepared,pairs};
+  }
   function scopedRequest(rt=R,options={}){
     const authority=rt?.GensRpgTacticalRuntimeAuthority1678113;
     if(typeof authority?.selectCombatants!=="function")return {ok:true,options};
     try{
-      const selection=authority.selectCombatants(rt,options||{}),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),enemyIds=arr(selection?.enemyIds).map(str).filter(Boolean);
+      const prepared=prepareV113Detection(rt,authority,options);if(!prepared.ok)return prepared;
+      const selection=authority.selectCombatants(rt,prepared.options||{}),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),enemyIds=arr(selection?.enemyIds).map(str).filter(Boolean);
       if(!heroIds.length||!enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113",selection};
-      return {ok:true,options:{...options,heroIds,enemyIds,scope:selection?.scope||options.scope,sourceHeroIds:arr(selection?.sourceHeroIds).map(str).filter(Boolean)},selection};
+      return {ok:true,options:{...prepared.options,heroIds,enemyIds,scope:selection?.scope||prepared.options?.scope,sourceHeroIds:arr(selection?.sourceHeroIds).map(str).filter(Boolean)},selection};
     }catch(error){
       try{rt?.console?.error?.("Combat tactique V2 V113 scope",error)}catch(e){}
       return {ok:false,reason:"scope-failed-v113",error};
@@ -173,5 +187,5 @@
     return true;
   }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

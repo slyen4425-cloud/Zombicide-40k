@@ -145,6 +145,9 @@ jobs:
       - name: Figer l'inventaire des anciens points d'entrée combat
         run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
 
+      - name: Vérifier la composition de la preview manuelle
+        run: node tests/gens_preview_composition_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest
@@ -167,3 +170,6 @@ jobs:
 
       - name: Vérifier le rendu canonique des murs dans Chromium
         run: node tests/gens_tactical_wall_browser_v11411.test.cjs
+
+      - name: Vérifier la preview manuelle dans Chromium
+        run: node tests/gens_preview_browser_v11411.test.cjs

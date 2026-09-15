@@ -17,10 +17,6 @@ function walk(dir){
 
 function rel(file){return path.relative(path.join(__dirname,'..'),file).replaceAll(path.sep,'/');}
 
-// Existing legacy files are deliberately frozen as historical debt. This list is not a
-// permission to add more global authority inside them; it only prevents this first guard
-// from trying to rewrite the current V114.11 runtime before characterization is complete.
-// Any NEW module is clean-by-default and must use explicit contracts/lifecycle.
 const legacyFiles=new Set([
   'assets/gensrpg/gens-dungeon-hero-art-repair-167874.js',
   'assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js',
@@ -56,12 +52,15 @@ const legacyFiles=new Set([
   'assets/gensrpg/gens-world-summary-167820.js'
 ]);
 
+const RUNTIME_BOOTSTRAP='assets/gensrpg/core/runtime-bootstrap-v1.js';
+const explicitRuleExceptions=new Map([[RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])]]);
+
 const allFiles=walk(root).map(rel).sort();
 for(const old of legacyFiles) assert.ok(allFiles.includes(old),`legacy architecture baseline changed: missing ${old}`);
+assert.ok(allFiles.includes(RUNTIME_BOOTSTRAP),'explicit RuntimeBootstrap V1 must exist');
 
 const newFiles=allFiles.filter(f=>!legacyFiles.has(f));
 const violations=[];
-
 const rules=[
   ['global MutationObserver target',/\.observe\s*\(\s*(?:document\.|D\.)?(?:body|documentElement)\b/g],
   ['global capture listener',/(?:document|window|D|R)\.addEventListener\s*\([^\n;]{0,240},\s*true\s*\)/g],
@@ -73,19 +72,19 @@ const rules=[
   ['protected Dungeon combat global replacement',/(?:window|R)\.(?:dc200StartCombat|openDungeonCombatSetup|launchCombat200|startCombat)\s*=/g]
 ];
 
+function allowed(file,name){return explicitRuleExceptions.get(file)?.has(name)===true}
+
 for(const file of newFiles){
   const text=fs.readFileSync(path.join(__dirname,'..',file),'utf8');
   for(const [name,re] of rules){
     re.lastIndex=0;
-    if(re.test(text)) violations.push(`${file}: ${name}`);
+    if(re.test(text)&&!allowed(file,name))violations.push(`${file}: ${name}`);
   }
 }
 
 assert.deepEqual(violations,[],
-  'new GenSrpG modules must not introduce hidden/global runtime authority; use explicit contracts, install()/dispose(), or update the architecture decision deliberately:\n'+violations.join('\n'));
+  'new GenSrpG modules must not introduce hidden/global runtime authority; only the explicit RuntimeBootstrap may compose scripts:\n'+violations.join('\n'));
 
-// Target architecture folders are additionally required to remain explicit even when
-// an old top-level filename is later moved there.
 const targetPrefixes=[
   'assets/gensrpg/core/',
   'assets/gensrpg/shell/',
@@ -100,8 +99,10 @@ for(const file of allFiles.filter(f=>targetPrefixes.some(p=>f.startsWith(p)))){
   const text=fs.readFileSync(path.join(__dirname,'..',file),'utf8');
   for(const [name,re] of rules){
     re.lastIndex=0;
+    if(allowed(file,name))continue;
     assert.equal(re.test(text),false,`${file}: target architecture cannot contain ${name}`);
   }
 }
 
-console.log(`GenSrpG global side-effect guard OK (${allFiles.length} legacy/current modules, ${newFiles.length} new modules)`);
+assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP],'RuntimeBootstrap must remain the only new architecture exception');
+console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; script composition owned only by RuntimeBootstrap V1)`);

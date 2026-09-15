@@ -65,6 +65,18 @@
     try{rt.console?.error?.("Combat tactique V2 route blocked",{entry,detail,result})}catch(e){}
     return result||{ok:false,reason:detail};
   }
+  function scopedRequest(rt=R,options={}){
+    const authority=rt?.GensRpgTacticalRuntimeAuthority1678113;
+    if(typeof authority?.selectCombatants!=="function")return {ok:true,options};
+    try{
+      const selection=authority.selectCombatants(rt,options||{}),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),enemyIds=arr(selection?.enemyIds).map(str).filter(Boolean);
+      if(!heroIds.length||!enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113",selection};
+      return {ok:true,options:{...options,heroIds,enemyIds,scope:selection?.scope||options.scope,sourceHeroIds:arr(selection?.sourceHeroIds).map(str).filter(Boolean)},selection};
+    }catch(error){
+      try{rt?.console?.error?.("Combat tactique V2 V113 scope",error)}catch(e){}
+      return {ok:false,reason:"scope-failed-v113",error};
+    }
+  }
   function openCurrent(rt=R,options={}){
     if(opening||currentBattle(rt))return {ok:false,reason:"battle-already-open"};
     const e=eligible(rt,options);if(!e.ok)return e;
@@ -82,8 +94,9 @@
   }
   function requestCombat(rt=R,options={}){
     const entry=str(options.entry||"requestCombat")||"requestCombat";
-    const enemyIds=arr(options.enemyIds).map(str).filter(Boolean);
-    const result=openCurrent(rt,{...options,enemyIds,entry});
+    const enemyIds=arr(options.enemyIds).map(str).filter(Boolean),scoped=scopedRequest(rt,{...options,enemyIds,entry});
+    if(!scoped.ok)return reportBlocked(rt,scoped,entry);
+    const result=openCurrent(rt,{...scoped.options,entry});
     return result.ok?result:reportBlocked(rt,result,entry);
   }
   function startDefault(rt=R,enemyIds=[],reason="manual"){
@@ -160,5 +173,5 @@
     return true;
   }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

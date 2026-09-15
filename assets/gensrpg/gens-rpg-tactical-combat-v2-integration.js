@@ -37,19 +37,15 @@
   };
   A.__gensTacticalIntegration103=true;
 
-  /* V99 established that the character sheet/navigation must not be driven by global DOM observers.
-     Tactical V108/V109/V112/V113 later reintroduced observers on document.body. Install those layers
-     with a scoped MutationObserver facade: observers aimed at the global page are retained as inert
-     handles, while any observer aimed at a tactical/local host still delegates to the browser native API. */
+  /* V99 established that character-sheet/navigation lifecycle cannot be owned by a global DOM observer.
+     V108/V109/V112/V113 later introduced body-wide observers for tactical polish. Keep their combat logic,
+     but make body/documentElement observation inert; local tactical targets still delegate to native MO. */
   function installWithoutGlobalObserver(api,label="tactical"){
     const install=api?.installWithRetries;if(typeof install!=="function")return false;
     const Native=R.MutationObserver,D=R.document;
     if(typeof Native!=="function"||!D){install.call(api,R);return true}
     function ScopedObserver(callback){this.__native=new Native(callback);this.__blockedGlobal=false}
-    ScopedObserver.prototype.observe=function(target,options){
-      if(target===D.body||target===D.documentElement){this.__blockedGlobal=true;return}
-      return this.__native.observe(target,options);
-    };
+    ScopedObserver.prototype.observe=function(target,options){if(target===D.body||target===D.documentElement){this.__blockedGlobal=true;return}return this.__native.observe(target,options)};
     ScopedObserver.prototype.disconnect=function(){return this.__native.disconnect()};
     ScopedObserver.prototype.takeRecords=function(){return this.__native.takeRecords?.()||[]};
     R.MutationObserver=ScopedObserver;
@@ -63,22 +59,12 @@
     R.__gensTacticalVisualDiceLoader11411=true;
     const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.11 tactical UX install",e)}};
     if(R.GensRpgTacticalVisualDice16781142){install();return true}
-    const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.11";
-    s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.11 tactical UX load failed");
-    (D.head||D.documentElement).appendChild(s);return true;
+    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.11";s.async=false;s.onload=install;s.onerror=()=>console.error("GenSrpG V114.11 tactical UX load failed");(D.head||D.documentElement).appendChild(s);return true;
   }
 
-  function loadHotfix114(){
-    const D=R.document;if(!D||R.__gensTacticalHotfixLoader114)return false;
-    R.__gensTacticalHotfixLoader114=true;
-    const install=()=>{try{R.GensRpgTacticalHotfix1678114?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114 tactical hotfix install",e)}loadVisualDice11411()};
-    if(R.GensRpgTacticalHotfix1678114){install();return true}
-    const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js?v=16.78.114.1";
-    s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114 tactical hotfix load failed");loadVisualDice11411()};
-    (D.head||D.documentElement).appendChild(s);return true;
-  }
+  /* V114.1 used a body observer + 450 ms heartbeat. V114.10 now owns entered-hero safety,
+     room/sub-room scope and live detection, so V114.1 is deliberately NOT installed at runtime. */
+  function loadHotfix114(){return loadVisualDice11411()}
 
   function loadAuthority113(){
     const D=R.document;if(!D)return false;
@@ -102,7 +88,7 @@
     if(R.GensRpgTacticalRuntimeFixes1678111){after111();return true}
     if(R.__gensTacticalRuntimeLoader111){loadCoherence112();return true}
     R.__gensTacticalRuntimeLoader111=true;
-    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js?v=16.78.111";s.async=false;s.onload=after111;s.onerror=()=>{console.error("GenSrpG V111 tactical runtime load failed");loadCoherence112()};(D.head||D.documentElement).appendChild(s);return true;
+    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js?v=16.78.111";s.async=false;s.onload=after111;s.onerror=()=>{console.error("GenSrpG V111 tactical runtime install failed");loadCoherence112()};(D.head||D.documentElement).appendChild(s);return true;
   }
   function loadStats110(){
     const D=R.document;if(!D)return false;
@@ -121,13 +107,9 @@
     const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";s.async=false;s.onload=after109;s.onerror=()=>{console.error("GenSrpG V109 polish load failed");loadStats110()};(D.head||D.documentElement).appendChild(s);return true;
   }
 
-  /* V108 remains the movement/action bridge. V109 owns timeline/range polish.
-     V110 snapshots canonical RPG stats. V111 preserves weapon dice and the fixed dock.
-     V112 keeps detailed sheets and readable result explanations.
-     V113 owns room/sub-room participant scope. V114.1 keeps validated live enemy vision.
-     V114.10 owns canonical D100 origin, entered-hero safety and compositor-safe walls.
-     V114.11 reconnects canonical melee raw damage and Core 3.17 armor-zero behavior.
-     General Dungeon navigation remains native: no V114.4 session guard and no body-wide tactical observer. */
+  /* V108 movement/action bridge; V109 timeline/range; V110 canonical stats; V111 weapon dice;
+     V112 details; V113/V114.10 scope + detection; V114.11 D100/damage/armor.
+     Native Dungeon alone owns hero sheet, Save & Quit and menu navigation. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678108,"V108 polish");loadPolish109()};

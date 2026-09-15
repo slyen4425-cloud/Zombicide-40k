@@ -10,8 +10,9 @@ assert.match(source,/observer\.observe\(D\.body\|\|D\.documentElement,\{childLis
 const install=(source.match(/function install\(rt=R\)\{\n\s*[^\n]+/)||[''])[0];
 assert.ok(install,'V108 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V108 must no longer activate a body/html MutationObserver');
-for(const required of ['ensureStyle(rt)','patchDungeonMapHtml(rt)','hookDungeonRender(rt)','hookDetection(rt)','bindControls(rt)','hookUiRender(rt)','paintWalls(rt)','enhanceActions(rt)'])assert.ok(install.includes(required),`observer retirement must preserve V108 behavior: missing ${required}`);
+assert.doesNotMatch(install,/hookDetection\(rt\)/,'V108 detection authority must remain retired');
+for(const required of ['ensureStyle(rt)','patchDungeonMapHtml(rt)','hookDungeonRender(rt)','bindControls(rt)','hookUiRender(rt)','paintWalls(rt)','enhanceActions(rt)'])assert.ok(install.includes(required),`V108 cleanup must preserve UI/equipment/wall behavior: missing ${required}`);
 
 assert.match(integration,/GensRpgTacticalPolish1678108\?\.installWithRetries\?\.\(R\)/,'clean V108 must install directly');
 assert.doesNotMatch(integration,/installWithoutGlobalObserver|R\.MutationObserver\s*=/,'V108 must no longer require or trigger a global observer shim');
-console.log('GenSrpG V114.11: V108 observer retired and direct install preserved');
+console.log('GenSrpG V114.11: V108 observer and detection authorities retired; UI/equipment/walls preserved');

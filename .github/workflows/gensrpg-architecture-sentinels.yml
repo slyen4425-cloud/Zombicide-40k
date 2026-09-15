@@ -37,6 +37,15 @@ jobs:
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 
+      - name: Vérifier la cohérence spatiale V112 historique
+        run: node tests/gens_rpg_tactical_combat_coherence_v1678112.test.cjs
+
+      - name: Vérifier l'autorité runtime V113
+        run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
+
+      - name: Vérifier le raccord Bridge vers V113
+        run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs
+
       - name: Caractériser l'autorité de démarrage et des participants combat
         run: node tests/gens_combat_authority_characterization_v11411.test.cjs
 

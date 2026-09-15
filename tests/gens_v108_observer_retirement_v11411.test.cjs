@@ -11,8 +11,16 @@ const install=(source.match(/function install\(rt=R\)\{\n\s*[^\n]+/)||[''])[0];
 assert.ok(install,'V108 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V108 must no longer activate a body/html MutationObserver');
 assert.doesNotMatch(install,/hookDetection\(rt\)/,'V108 detection authority must remain retired');
-for(const required of ['ensureStyle(rt)','patchDungeonMapHtml(rt)','hookDungeonRender(rt)','bindControls(rt)','hookUiRender(rt)','paintWalls(rt)','enhanceActions(rt)'])assert.ok(install.includes(required),`V108 cleanup must preserve UI/equipment/wall behavior: missing ${required}`);
+for(const required of ['ensureStyle(rt)','bindControls(rt)','hookUiRender(rt)','enhanceActions(rt)'])assert.ok(install.includes(required),`V108 cleanup must preserve UI/equipment behavior: missing ${required}`);
+for(const retired of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(!install.includes(retired),`V108 install must no longer own walls: found ${retired}`);
+
+const hookUiStart=source.indexOf('function hookUiRender(rt=R){');
+const hookUiEnd=source.indexOf('function observe(rt=R){',hookUiStart);
+assert.ok(hookUiStart>=0&&hookUiEnd>hookUiStart,'V108 hookUiRender block missing');
+const hookUi=source.slice(hookUiStart,hookUiEnd);
+assert.match(hookUi,/enhanceActions\(rt\)/,'V108 UI render hook must still restore tactical actions');
+assert.doesNotMatch(hookUi,/paintWalls\(rt\)/,'V108 UI render hook must no longer repaint walls');
 
 assert.match(integration,/GensRpgTacticalPolish1678108\?\.installWithRetries\?\.\(R\)/,'clean V108 must install directly');
 assert.doesNotMatch(integration,/installWithoutGlobalObserver|R\.MutationObserver\s*=/,'V108 must no longer require or trigger a global observer shim');
-console.log('GenSrpG V114.11: V108 observer and detection authorities retired; UI/equipment/walls preserved');
+console.log('GenSrpG V114.11: V108 observer/detection/wall authorities retired; action and equipment UI preserved');

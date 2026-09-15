@@ -1,4 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.114.11-armor-melee-damage";
+const CACHE_NAME = "gensrpg-cache-16.78.114.14-view-wall-authority";
+// gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls
 // gensrpg-cache-16.78.114.9-browser-profiled-combat
 // gensrpg-cache-16.78.114.8-touch-stable-walls

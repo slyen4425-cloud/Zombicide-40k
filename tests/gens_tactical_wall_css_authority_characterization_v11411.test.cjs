@@ -5,7 +5,7 @@ const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const block=(source,startSig,nextSig,label)=>{
   const start=source.indexOf(startSig);assert.ok(start>=0,`${label}: missing ${startSig}`);
-  const end=source.indexOf(nextSig,start);assert.ok(end>start,`${label}: missing ${nextSig}`);
+  const end=source.indexOf(nextSig,start+startSig.length);assert.ok(end>start,`${label}: missing ${nextSig}`);
   return source.slice(start,end);
 };
 

@@ -9,16 +9,18 @@ const v111=read('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js');
 const v112=read('assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js');
 const v113=read('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js');
 
-function installLine(source,label){
-  const line=(source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
-  assert.ok(line,`${label}: install function missing`);
-  return line;
+function installBlock(source,label){
+  const start=source.indexOf('function install(rt=R){');
+  assert.ok(start>=0,`${label}: install function missing`);
+  const end=source.indexOf('function installWithRetries',start);
+  assert.ok(end>start,`${label}: installWithRetries boundary missing`);
+  return source.slice(start,end);
 }
 
-const i108=installLine(v108,'V108');
-const i111=installLine(v111,'V111');
-const i112=installLine(v112,'V112');
-const i113=installLine(v113,'V113');
+const i108=installBlock(v108,'V108');
+const i111=installBlock(v111,'V111');
+const i112=installBlock(v112,'V112');
+const i113=installBlock(v113,'V113');
 
 // Historical detectors stay inspectable, but V108/V111/V112 no longer activate them.
 for(const [label,source,install] of [['V108',v108,i108],['V111',v111,i111],['V112',v112,i112]]){

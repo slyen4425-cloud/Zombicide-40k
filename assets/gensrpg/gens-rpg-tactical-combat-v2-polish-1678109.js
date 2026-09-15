@@ -83,7 +83,6 @@
       .gtv2109TurnChip .init{position:absolute;left:1px;top:1px;padding:1px 3px;border-radius:4px;background:#06080bd9;color:#dfe8f2;font-size:8px;font-weight:800}
       .${QUICK_CLASS}{position:fixed;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:30040;min-width:112px;min-height:48px;border:2px solid #e1b545;border-radius:14px;background:#7b2f25;color:#fff;font-weight:950;font-size:15px;box-shadow:0 8px 25px #000a;padding:9px 13px}
       .${QUICK_CLASS}:disabled{opacity:.4;filter:grayscale(.45)}
-      .gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
       @media(max-width:540px){.${TIMELINE_CLASS}{margin:6px 0;padding:6px}.gtv2109TurnChip{flex-basis:40px;height:40px}.gtv2109TurnChip.current{flex-basis:47px;height:47px}.${QUICK_CLASS}{right:9px;min-width:104px}}
     `;
     (D.head||D.documentElement||D.body)?.appendChild(s);return true;

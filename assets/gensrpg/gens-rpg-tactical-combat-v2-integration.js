@@ -36,18 +36,6 @@
   };
   A.__gensTacticalIntegration103=true;
 
-  function loadSessionGuard1144(next){
-    const done=()=>{try{R.GensRpgTacticalSessionGuard16781144?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.4 combat session guard install",e)}try{next?.()}catch(e){console.error("GenSrpG V114.4 continuation",e)}};
-    const D=R.document;if(!D){done();return false}
-    if(R.GensRpgTacticalSessionGuard16781144){done();return true}
-    if(R.__gensTacticalSessionGuardLoader1144)return false;
-    R.__gensTacticalSessionGuardLoader1144=true;
-    const s=D.createElement("script");
-    s.src="assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js?v=16.78.114.4";
-    s.async=false;s.onload=done;s.onerror=()=>{console.error("GenSrpG V114.4 combat session guard load failed");try{next?.()}catch(e){}};
-    (D.head||D.documentElement).appendChild(s);return true;
-  }
-
   function loadVisualDice11411(){
     const D=R.document;if(!D||R.__gensTacticalVisualDiceLoader11411)return false;
     R.__gensTacticalVisualDiceLoader11411=true;
@@ -117,7 +105,7 @@
      V113 owns room/sub-room participant scope. V114.1 keeps validated live enemy vision.
      V114.10 owns canonical D100 origin, entered-hero safety and compositor-safe walls.
      V114.11 reconnects canonical melee raw damage and Core 3.17 armor-zero behavior.
-     V114.4 blocks stale menu combat + every Dungeon legacy fallback. */
+     General Dungeon navigation remains native: no V114.4 body/session guard is loaded here. */
   function loadPolish108(){
     const D=R.document;if(!D)return false;
     const after108=()=>{try{R.GensRpgTacticalPolish1678108?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V108 polish install",e)}loadPolish109()};
@@ -126,5 +114,5 @@
     R.__gensTacticalPolishLoader108=true;
     const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js?v=16.78.108";s.async=false;s.onload=after108;s.onerror=()=>{console.error("GenSrpG V108 polish load failed");loadPolish109()};(D.head||D.documentElement).appendChild(s);return true;
   }
-  loadSessionGuard1144(loadPolish108);
+  loadPolish108();
 })(typeof globalThis!=="undefined"?globalThis:this);

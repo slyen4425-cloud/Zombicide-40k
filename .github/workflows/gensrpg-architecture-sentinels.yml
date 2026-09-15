@@ -43,6 +43,9 @@ jobs:
       - name: Vérifier le retrait de l'observer global V108
         run: node tests/gens_v108_observer_retirement_v11411.test.cjs
 
+      - name: Vérifier le retrait de l'autorité détection V108
+        run: node tests/gens_v108_detection_authority_retirement_v11411.test.cjs
+
       - name: Vérifier le polish Tactical V109 historique
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678109.test.cjs
 

@@ -49,6 +49,9 @@ jobs:
       - name: Vérifier le retrait de l'observer global V109
         run: node tests/gens_v109_observer_retirement_v11411.test.cjs
 
+      - name: Vérifier les snapshots Tactical V110 historiques
+        run: node tests/gens_rpg_tactical_combat_v2_stats_v1678110.test.cjs
+
       - name: Vérifier les corrections runtime V111 historiques
         run: node tests/gens_rpg_tactical_runtime_fixes_v1678111.test.cjs
 
@@ -66,6 +69,9 @@ jobs:
 
       - name: Vérifier le retrait de l'observer global V113
         run: node tests/gens_v113_observer_retirement_v11411.test.cjs
+
+      - name: Vérifier que toute la chaîne Tactical est sans observer global actif
+        run: node tests/gens_tactical_observer_chain_clean_v11411.test.cjs
 
       - name: Vérifier le raccord Bridge vers V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs

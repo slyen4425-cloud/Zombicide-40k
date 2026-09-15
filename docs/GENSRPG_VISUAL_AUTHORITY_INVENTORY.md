@@ -32,7 +32,7 @@ Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs a
 |---|---|---|---|
 | V108 | **retiré** | présent | cadrage pions, panneau actions, équipement, rechargement, consommables |
 | V109 | **retiré** | présent | timeline, portée, mains nues, attaque rapide |
-| V111 | **retiré** | présent | multi-dés, dock, reconstruction des attaques, onglets runtime, maintenance UI |
+| V111 | **retiré** | **retiré** | multi-dés, dock, reconstruction des attaques, onglets runtime, maintenance UI |
 | V112 | **retiré** | **retiré** | détails, explications de dégâts, spatial, styles de fiche/dock |
 | V113 | **retiré** | **retiré** | scope, détection et présentation D100 |
 
@@ -57,7 +57,7 @@ Ordre prévu, une couche à la fois :
 
 1. ✅ V113 : règles murales retirées de `ensureStyle()` ; styles D100 conservés ;
 2. ✅ V112 : règles murales retirées de `ensureStyle()` ; fiche, explications, dock et responsive conservés ;
-3. V111 ;
+3. ✅ V111 : règle murale retirée de `ensureStyle()` ; multi-dés, dock, boutons et responsive conservés ;
 4. V109 ;
 5. V108 ;
 6. verrou final : aucune couche historique ne possède de règle CSS murale, seul `GensRpgTacticalCombatV2Ui` possède le rendu total.

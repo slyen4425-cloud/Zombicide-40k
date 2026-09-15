@@ -23,3 +23,5 @@ jobs:
         run: node tests/gens_architecture_charter_guard.test.cjs
       - name: Validate pure Core RPG rules contract
         run: node tests/gens_core_rpg_rules_contract.test.cjs
+      - name: Validate canonical stats to Tactical runtime path
+        run: node tests/gens_core_rpg_runtime_path_contract.test.cjs

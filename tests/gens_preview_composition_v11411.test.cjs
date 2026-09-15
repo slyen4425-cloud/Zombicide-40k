@@ -14,9 +14,14 @@ const previewSrcs=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 
 assert.ok(pageSrcs.length>=10,'unexpectedly small Pages module list');
 assert.deepEqual(previewSrcs,pageSrcs,'preview.html must reproduce the exact GitHub Pages injected module order');
+for(const src of previewSrcs){
+  const file=src.split('?')[0];
+  assert.equal(fs.existsSync(path.join(root,file)),true,`preview runtime asset missing: ${file}`);
+}
 assert.equal(previewSrcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap handoff must remain the final injected runtime layer');
 assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,'preview must remove the source performance tag before reinjecting the Pages order');
 assert.ok(preview.includes('const base=new URL(\'./\',location.href).href;'),'preview must derive its immutable commit-root base URL');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
+assert.ok(preview.includes('gensrpg-preview-ready'),'preview must emit an explicit runtime-ready signal');
 
-console.log('GenSrpG manual preview composition matches GitHub Pages injected module order:',previewSrcs.length,'modules');
+console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'existing modules in exact order + explicit ready signal');

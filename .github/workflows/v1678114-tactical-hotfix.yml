@@ -34,11 +34,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Temporary root-cause diagnostic
-        run: node tests/diag_v11414_root_causes.cjs
+      - name: Exact V114.14 sheet and Save Quit view authority
+        run: node tests/gens_ui_view_authority_v167811414.test.cjs
       - name: Syntax tactical runtime chain and canonical stats
         run: |
           node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+          node --check assets/gensrpg/gens-ui-recovery-167843.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js

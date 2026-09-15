@@ -8,7 +8,7 @@
   if(root)root.GensRpgTacticalCombatV2Adapter=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="0.4.0",APP_VERSION="16.78.114.10";
+  const VERSION="0.5.0",APP_VERSION="16.78.114.10";
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const arr=v=>Array.isArray(v)?v:[];
@@ -17,11 +17,20 @@
   const cellKey=(x,y)=>`${x},${y}`;
 
   function engine(rt=R){return rt?.GensRpgTacticalCombatV2||R?.GensRpgTacticalCombatV2||null}
+  function assetsApi(rt=R){return rt?.GensRpgCoreAssets||R?.GensRpgCoreAssets||null}
   function heroRecord(rt,id){return rt?.CHARS?.[id]||call(rt,"findCustomHero",id)||{id,name:id}}
   function heroState(rt,id){try{return call(rt,"loadState",id)||{}}catch(e){return {}}}
   function itemFromEntry(rt,entry){
     try{if(typeof rt?.getItemFromEntry==="function")return rt.getItemFromEntry(entry)}catch(e){}
     const id=entry?.itemId??entry?.id;try{return typeof rt?.itemById==="function"?rt.itemById(id):null}catch(e){return null}
+  }
+  function resolveActorArt(rt,kind,id,entity={}){
+    const A=assetsApi(rt);
+    if(A?.resolveEntityPath){
+      try{return str(A.resolveEntityPath({module:"dungeon",kind,id:str(id),entity}))}catch(e){return ""}
+    }
+    if(kind==="hero")return str(entity?.image_data||entity?.imageData||entity?.image||entity?.avatar||entity?.portrait||entity?.art||"");
+    return str(entity?.image_data||entity?.imageData||entity?.art||entity?.image||entity?.avatar||entity?.portrait||"");
   }
   function accuracyPercent(v){
     const n=parseInt(String(v??"").replace(/\D/g,""),10);
@@ -116,7 +125,7 @@
     const rec=heroRecord(rt,id),s=heroSnapshot(rt,id),movement=Math.max(1,Math.round(num(s.movement,canonicalStat(rt,id,"movement",3))));
     return {id:str(id),name:str(rec.name||id),side:"hero",x:pos.x,y:pos.y,hp:Math.max(0,num(s.hp,1)),maxHp:Math.max(1,num(s.maxHp,s.hp||1)),movement,
       initiative:num(s.initiative,canonicalStat(rt,id,"initiative",10)),defense:num(s.defense,canonicalStat(rt,id,"defense",0)),armor:num(s.armor,canonicalStat(rt,id,"armor",0)),dodge:num(s.dodge,0),
-      attacks:heroAttacks(rt,id),meta:{kind:"hero",heroId:str(id),art:rec.image||rec.avatar||rec.portrait||rec.art||""}};
+      attacks:heroAttacks(rt,id),meta:{kind:"hero",heroId:str(id),art:resolveActorArt(rt,"hero",id,rec)}};
   }
   function enemyDef(rt,inst){try{return call(rt,"activeEnemyDefinition",inst?.enemyId)||null}catch(e){return null}}
   function enemyDerived(rt,inst,def){
@@ -141,7 +150,7 @@
     const def=enemyDef(rt,inst)||{},d=enemyDerived(rt,inst,def),maxHp=Math.max(1,num(inst?.maxHp??def?.rule?.hp??d.maxHp,1));
     return {id:`enemy:${str(inst?.id||inst?.enemyId)}`,name:str(def.name||inst?.name||inst?.enemyId||"Ennemi"),side:"enemy",x:pos.x,y:pos.y,hp:clamp(num(inst?.hp,maxHp),0,maxHp),maxHp,
       movement:Math.max(1,Math.round(num(d.movement??def?.rule?.movement,2))),initiative:num(d.initiative,8),defense:num(d.defense,0),armor:num(d.armor,0),dodge:num(d.dodge,0),attacks:enemyAttacks(rt,inst,def),
-      meta:{kind:"enemy",instanceId:str(inst?.id||""),enemyId:str(inst?.enemyId||""),art:def.art||def.image_data||def.image||""}};
+      meta:{kind:"enemy",instanceId:str(inst?.id||""),enemyId:str(inst?.enemyId||""),art:resolveActorArt(rt,"creature",inst?.enemyId||def?.id||"",def)}};
   }
   function defaultGrid(heroCount,enemyCount){
     const rows=Math.max(6,Math.min(12,Math.max(heroCount,enemyCount)+3));
@@ -243,5 +252,5 @@
     return {heroes,enemies};
   }
 
-  return {VERSION,APP_VERSION,accuracyPercent,weaponHitProfile,heroSnapshot,equippedWeaponEntries,heroAttacks,heroActor,enemyAttacks,enemyActor,defaultGrid,dungeonMap,gridFromDungeonMap,spread,spawnCells,participants,dungeonRuntimeState,runtimeHeroCell,runtimeHeroScope,enteredParticipants,activeEnemies,buildInput,createBattle,commitBattle};
+  return {VERSION,APP_VERSION,accuracyPercent,weaponHitProfile,heroSnapshot,equippedWeaponEntries,heroAttacks,resolveActorArt,heroActor,enemyAttacks,enemyActor,defaultGrid,dungeonMap,gridFromDungeonMap,spread,spawnCells,participants,dungeonRuntimeState,runtimeHeroCell,runtimeHeroScope,enteredParticipants,activeEnemies,buildInput,createBattle,commitBattle};
 });

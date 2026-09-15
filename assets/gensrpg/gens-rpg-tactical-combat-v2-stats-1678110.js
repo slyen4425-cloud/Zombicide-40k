@@ -7,7 +7,7 @@
   if(root)root.GensRpgTacticalStats1678110=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
-  const VERSION="1.1.0",APP_VERSION="16.78.110",SNAPSHOT_VERSION="16.78.110-core-rules-1";
+  const VERSION="1.2.0",APP_VERSION="16.78.110",SNAPSHOT_VERSION="16.78.110-core-rules-2";
   const STYLE_ID="gensRpgTacticalStats1678110Style";
   const dirtyHeroes=new Set();
   const metrics={snapshotsBuilt:0,canonicalReads:0,derivedReads:0,previewSnapshotReads:0,renderSnapshotReads:0};
@@ -76,10 +76,12 @@
       const maxMana=Math.max(0,num(safeCall(rt,"dungeonMaxMana",0)));
       const mana=Math.max(0,num(st?.mana??st?.mp??st?.currentMana,maxMana));
       const rules=rulesSnapshot(rt),core=rulesApi(rt);
-      let physicalDamageBonus=0,magicDamageBonus=0,magicResistance=0,magicResistanceBreakdown=null;
+      let physicalDamageBonus=0,magicDamageBonus=0,physicalDamagePercent=0,magicDamagePercent=0,magicResistance=0,magicResistanceBreakdown=null;
       if(core?.physicalDamageBonus&&core?.magicDamageBonus&&core?.resolveMagicResistance){
         physicalDamageBonus=Math.max(0,num(core.physicalDamageBonus(values.force,rules),0));
         magicDamageBonus=Math.max(0,num(core.magicDamageBonus(values.intelligence,rules),0));
+        if(core?.physicalDamagePercent)physicalDamagePercent=Math.max(0,num(core.physicalDamagePercent(values.force,rules),0));
+        if(core?.magicDamagePercent)magicDamagePercent=Math.max(0,num(core.magicDamagePercent(values.intelligence,rules),0));
         magicResistanceBreakdown=core.resolveMagicResistance({
           spirit:values.esprit,
           equipmentBonus:safeCall(rt,"dungeonEquipmentBonus",0,"magicDefense"),
@@ -93,7 +95,7 @@
         try{if(typeof rt?.dungeonMagicDamageBonus==="function"){metrics.derivedReads++;magicDamageBonus=num(rt.dungeonMagicDamageBonus(),0)}}catch(e){}
       }
       const snap={version:SNAPSHOT_VERSION,heroId:id,builtAt:Date.now(),canonical,values,
-        derived:{hp,maxHp,mana,maxMana,crit,dodge,magicResistance,magicResistanceBreakdown,defense,armor,initiative,movement,physicalDamageBonus,magicDamageBonus},
+        derived:{hp,maxHp,mana,maxMana,crit,dodge,magicResistance,magicResistanceBreakdown,defense,armor,initiative,movement,physicalDamageBonus,magicDamageBonus,physicalDamagePercent,magicDamagePercent},
         resistances:resistanceSnapshot(rt,id,st,rec),rules};
       metrics.snapshotsBuilt++;return snap;
     });
@@ -145,13 +147,26 @@
     if(type==="magic")return {kind:"flat",value:Math.max(0,num(snap?.derived?.magicResistance,0))};
     const pct=num(snap?.resistances?.[type],0);return {kind:"percent",value:clamp(pct,-100,100)};
   }
-  function adjustedDamage(preview,target){
+  function adjustedDamage(preview,target,attacker=null){
     if(!preview?.ok)return preview;const attack=preview.attack||{},type=normalizeDamageType(attack.damageType);
     if(type==="physical")return {...preview,damageType:type,resistance:0};
-    const raw=Math.max(0,num(attack.power,preview.damage)),res=resistanceFor(target,type);let damage=raw;
+    const attackerSnap=snapshotOf(attacker),core=rulesApi(R),base=Math.max(0,num(attack.power,preview.damage));
+    let raw=base,statDamagePercent=0,statDamageBonus=0;
+    if(type==="magic"&&attackerSnap&&core?.magicDamageScaling){
+      try{
+        const scaling=core.magicDamageScaling(base,attackerSnap?.values?.intelligence,attackerSnap?.rules||{});
+        raw=Math.max(0,num(scaling?.scaledDamage,base));
+        statDamagePercent=Math.max(0,num(scaling?.percent,0));
+        statDamageBonus=Math.max(0,num(scaling?.bonus,0));
+      }catch(e){}
+    }else if(type==="magic"&&attackerSnap){
+      statDamageBonus=Math.max(0,num(attackerSnap?.derived?.magicDamageBonus,0));
+      raw=Math.max(0,Math.round(base+statDamageBonus));
+    }
+    const res=resistanceFor(target,type);let damage=raw;
     if(res.kind==="flat")damage=Math.max(0,Math.round(raw-res.value));
     else if(res.kind==="percent")damage=Math.max(0,Math.round(raw*(1-res.value/100)));
-    return {...preview,damageType:type,rawDamage:raw,resistance:res.value,resistanceKind:res.kind,damage};
+    return {...preview,damageType:type,rawDamage:raw,statDamagePercent,statDamageBonus,resistance:res.value,resistanceKind:res.kind,damage};
   }
   function nextRandom(state){
     if(!state?.rngSeed)return Math.random();let t=state.rngSeed=(state.rngSeed+0x6D2B79F5)>>>0;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;
@@ -159,7 +174,7 @@
   function hookRules(rt=R){
     if(rulesHooked)return true;const E=engine(rt);if(!E?.attackPreview||!E?.resolveAttack)return false;if(E.__gensRpg110StatsRules){rulesHooked=true;return true}
     const basePreview=E.attackPreview;
-    const preview=function(state,attackerId,targetId,attackId){const p=basePreview.call(E,state,attackerId,targetId,attackId);if(!p?.ok)return p;const attacker=E.actorById?.(state,attackerId),target=E.actorById?.(state,targetId);const out=adjustedDamage(p,target);const snap=snapshotOf(attacker);return {...out,critChance:clamp(num(snap?.derived?.crit,0),0,100),critMultiplier:clamp(num(snap?.rules?.criticalMultiplier,2),1,5)}};
+    const preview=function(state,attackerId,targetId,attackId){const p=basePreview.call(E,state,attackerId,targetId,attackId);if(!p?.ok)return p;const attacker=E.actorById?.(state,attackerId),target=E.actorById?.(state,targetId);const out=adjustedDamage(p,target,attacker);const snap=snapshotOf(attacker);return {...out,critChance:clamp(num(snap?.derived?.crit,0),0,100),critMultiplier:clamp(num(snap?.rules?.criticalMultiplier,2),1,5)}};
     const resolve=function(state,attackerId,targetId,attackId,forcedRoll=null){
       if(state?.status!=="active")return {ok:false,reason:"battle-ended"};const cur=E.currentActor?.(state);if(!cur||cur.id!==str(attackerId))return {ok:false,reason:"not-current-actor"};if(cur.actionsLeft<1)return {ok:false,reason:"no-action"};
       const p=preview(state,attackerId,targetId,attackId);if(!p?.ok)return p;const target=E.actorById?.(state,targetId);if(!target)return {ok:false,reason:"actor-missing"};

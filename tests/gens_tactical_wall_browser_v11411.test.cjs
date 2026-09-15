@@ -20,6 +20,8 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       const builder=document.createElement('div');builder.id='drc100Grid';builder.innerHTML='<div id="builderWall" class="drc100Cell wall"></div>';document.body.appendChild(builder);
       const tactical=document.createElement('div');tactical.id='tacticalWall';tactical.className='gtv2Cell blocked';document.body.appendChild(tactical);
       for(let i=0;i<5;i++)api.paintLiveWalls();
+      const wallImages=[...document.querySelectorAll('.gtv2WallTile')];
+      await Promise.all(wallImages.map(img=>typeof img.decode==='function'?img.decode().catch(()=>{}):img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true})})));
       const ids=['liveWall','builderWall','tacticalWall'];
       const rows=ids.map(id=>{const el=document.getElementById(id),tiles=[...el.querySelectorAll(':scope > .gtv2WallTile')],img=tiles[0]||null,cs=getComputedStyle(el);return {id,count:tiles.length,owner:el.classList.contains('gtv2WallOwner'),src:img?.getAttribute('src')||'',complete:!!img?.complete,naturalWidth:Number(img?.naturalWidth||0),background:cs.backgroundImage}});
       window.dungeonMapHtml=map=>'<div class="dc047Grid">'+(map.cells||[]).map(kind=>`<div class="dc047Cell">${kind}</div>`).join('')+'</div>';

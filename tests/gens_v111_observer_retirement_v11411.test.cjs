@@ -10,8 +10,9 @@ assert.match(source,/observer\.observe\(D\.body,\{childList:true,subtree:true\}\
 const install=(source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
 assert.ok(install,'V111 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V111 must no longer activate a document.body MutationObserver');
-for(const required of ['ensureStyle(rt)','hookAdapter(rt)','hookMultiDice(rt)','hookDetection(rt)','bindClicks(rt)','maintain(rt)'])assert.ok(install.includes(required),`observer retirement must preserve V111 behavior: missing ${required}`);
+assert.doesNotMatch(install,/hookDetection\(rt\)/,'V111 detection authority must remain retired');
+for(const required of ['ensureStyle(rt)','hookAdapter(rt)','hookMultiDice(rt)','bindClicks(rt)','refreshBattleAttacks(rt,b)','maintain(rt)'])assert.ok(install.includes(required),`V111 cleanup must preserve combat/UI behavior: missing ${required}`);
 
 assert.match(integration,/GensRpgTacticalRuntimeFixes1678111\?\.installWithRetries\?\.\(R\)/,'clean V111 must install directly');
 assert.doesNotMatch(integration,/installWithoutGlobalObserver|R\.MutationObserver\s*=/,'V111 must no longer require or trigger a global observer shim');
-console.log('GenSrpG V114.11: V111 observer retired and direct install preserved');
+console.log('GenSrpG V114.11: V111 observer and detection authorities retired; multi-dice/dock/refresh preserved');

@@ -12,7 +12,7 @@ const style=source.slice(start,end);
 for(const forbidden of [/WALL_ASSET/,/gtv2Cell\.blocked/,/drc100Grid/,/dav167870WallCell/]){
   assert.doesNotMatch(style,forbidden,`V109 ensureStyle must no longer own wall CSS: ${forbidden}`);
 }
-for(const required of [/gtv2Hud/,/gtv2109Timeline/,/gtv2109TurnChip/,/gtv2109QuickAttack/,/@media\(max-width:540px\)/]){
+for(const required of [/gtv2Hud/,/TIMELINE_CLASS/,/gtv2109TurnChip/,/QUICK_CLASS/,/@media\(max-width:540px\)/]){
   assert.match(style,required,`V109 non-wall presentation must remain intact: ${required}`);
 }
 assert.match(source,/function paintBuilderWalls\(rt=R\)/,'historical V109 wall painter must remain inspectable');

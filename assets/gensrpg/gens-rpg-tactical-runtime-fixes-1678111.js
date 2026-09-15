@@ -120,7 +120,6 @@
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
     .gtv2109QuickAttack,.gtv2110Dock{display:none!important}
-    .gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:${WALL_SIZE}!important;background-position:center!important;background-repeat:no-repeat!important}
     .gtv2111Dock{position:fixed;left:50%;bottom:calc(7px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:31850;width:min(94vw,520px);display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:7px;background:#0d121bf2;border:1px solid #48566a;border-radius:14px;box-shadow:0 10px 32px #000c;backdrop-filter:blur(8px)}
     .gtv2111Dock.hasAbility{grid-template-columns:1fr 1fr 1fr}.gtv2111Dock button{min-height:48px;border:0;border-radius:10px;font-weight:900;color:#fff;background:#303946;font-size:14px}.gtv2111Dock .attack{background:#286b48}.gtv2111Dock .ability{background:#604d86}.gtv2111Dock button:disabled{opacity:.42}.gtv2Overlay{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important}
     .gtv2111DiceRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:8px 0}.gtv2111DiceRow .gtv2Die{width:62px;height:62px;font-size:26px}

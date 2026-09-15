@@ -6,14 +6,14 @@
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="2.0.1",APP_VERSION="16.78.114.14";
+const VERSION="2.0.2",APP_VERSION="16.78.114.14";
 const STYLE_ID="gensUiRecovery167843Styles";
 const VIEW_ATTR="data-gens-dungeon-view";
 const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
 const BUILDER_MODALS=["drc300Modal","drc100Modal"];
 const TRAP_SCRIPT_ID="dungeonExactTrapRuntime167845Script";
 const ZONE_LINK_SCRIPT_ID="dungeonZoneLinks167846Script";
-let patchedOpenChar=false,patchedDungeonCore=false;
+let patchedOpenChar=false,patchedCloseChar=false,patchedDungeonCore=false;
 function ensureStyle(){
   if(!DOC)return false;
   let style=DOC.getElementById(STYLE_ID);
@@ -22,7 +22,6 @@ function ensureStyle(){
     #drc300Modal:not(.open),#drc100Modal:not(.open){display:none!important}
     #drc300Modal.open,#drc100Modal.open{display:block!important}
     body[${VIEW_ATTR}="sheet"] #gensDungeonCore01{display:none!important}
-    body[${VIEW_ATTR}="sheet"] #sheet{display:block!important}
     body[${VIEW_ATTR}="home"] #gensDungeonCore01{display:none!important}
     body[${VIEW_ATTR}="home"] #sheet{display:none!important}
     body[${VIEW_ATTR}="home"] #gensRootHome{display:block!important}
@@ -56,7 +55,6 @@ function enforceView(mode=view()){
   const dungeon=DOC.getElementById("gensDungeonCore01"),sheet=DOC.getElementById("sheet"),home=DOC.getElementById("gensRootHome");
   if(mode==="sheet"){
     if(dungeon)dungeon.style.setProperty("display","none","important");
-    if(sheet)sheet.style.setProperty("display","block","important");
   }else if(mode==="home"){
     if(dungeon)dungeon.style.setProperty("display","none","important");
     if(sheet)sheet.style.setProperty("display","none","important");
@@ -75,12 +73,32 @@ function patchOpenChar(){
   if(old.__gens11414ViewAuthority){patchedOpenChar=true;return true}
   const wrapped=function(){
     const fromDungeon=dungeonVisible()||view()==="dungeon";
-    if(fromDungeon)setView("sheet");
     const out=old.apply(this,arguments);
-    if(fromDungeon){enforceView("sheet");if(typeof queueMicrotask==="function")queueMicrotask(()=>enforceView("sheet"));if(typeof setTimeout==="function")setTimeout(()=>enforceView("sheet"),80)}
+    if(fromDungeon){
+      setView("sheet");enforceView("sheet");
+      if(typeof queueMicrotask==="function")queueMicrotask(()=>enforceView("sheet"));
+      if(typeof setTimeout==="function")setTimeout(()=>enforceView("sheet"),80);
+    }
     return out;
   };
   wrapped.__gens11414ViewAuthority=true;wrapped.__original=old;ROOT.openChar=wrapped;patchedOpenChar=true;return true;
+}
+function patchCloseChar(){
+  const old=ROOT.closeChar;if(typeof old!=="function")return false;
+  if(old.__gens11414ViewAuthority){patchedCloseChar=true;return true}
+  const wrapped=function(){
+    const wasSheet=view()==="sheet";
+    const out=old.apply(this,arguments);
+    if(wasSheet&&out!==false){
+      setView("dungeon");enforceView("dungeon");
+      const core=ROOT.DungeonCore01;
+      if(core&&typeof core.render==="function"){
+        try{core.render()}catch(e){}
+      }
+    }
+    return out;
+  };
+  wrapped.__gens11414ViewAuthority=true;wrapped.__original=old;ROOT.closeChar=wrapped;patchedCloseChar=true;return true;
 }
 function patchDungeonCore(){
   const core=ROOT.DungeonCore01;if(!core)return false;
@@ -107,10 +125,10 @@ function loadZoneLinksRuntime(){
 }
 function install(){
   try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
-  ensureStyle();closeUnexpectedBuilderModals();loadExactTrapRuntime();loadZoneLinksRuntime();patchOpenChar();patchDungeonCore();
+  ensureStyle();closeUnexpectedBuilderModals();loadExactTrapRuntime();loadZoneLinksRuntime();patchOpenChar();patchCloseChar();patchDungeonCore();
   return true;
 }
 function installWithRetries(){install();if(typeof setTimeout==="function")for(const ms of [50,200,700,1800,4000])setTimeout(install,ms);return true}
-ROOT.GenSrpGUiRecovery167843={VERSION,APP_VERSION,STYLE_ID,VIEW_ATTR,WALL_ASSET,BUILDER_MODALS,TRAP_SCRIPT_ID,ZONE_LINK_SCRIPT_ID,ensureStyle,closeUnexpectedBuilderModals,setView,view,enforceView,dungeonVisible,patchOpenChar,patchDungeonCore,loadExactTrapRuntime,loadZoneLinksRuntime,install,installWithRetries,status:()=>({view:view(),patchedOpenChar,patchedDungeonCore})};
+ROOT.GenSrpGUiRecovery167843={VERSION,APP_VERSION,STYLE_ID,VIEW_ATTR,WALL_ASSET,BUILDER_MODALS,TRAP_SCRIPT_ID,ZONE_LINK_SCRIPT_ID,ensureStyle,closeUnexpectedBuilderModals,setView,view,enforceView,dungeonVisible,patchOpenChar,patchCloseChar,patchDungeonCore,loadExactTrapRuntime,loadZoneLinksRuntime,install,installWithRetries,status:()=>({view:view(),patchedOpenChar,patchedCloseChar,patchedDungeonCore})};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",installWithRetries,{once:true});else installWithRetries()}else install();
 })();

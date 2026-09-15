@@ -69,9 +69,9 @@ assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 detection authority mu
 assert.ok(i113.includes('bindBoardClicks(rt)'),'V113 board detection must remain active');
 
 for(const name of ['V108','V109','V111','V112','V113']){
-  assert.match(doc,new RegExp('\\| '+name+' \\| \\*\\*retiré\\*\\* \\|'),`visual authority inventory must mark ${name} JS wall authority retired`);
+  assert.match(doc,new RegExp('\\| '+name+' \\| \\*\\*retiré\\*\\* \\| \\*\\*retiré\\*\\* \\|'),`visual authority inventory must mark ${name} JS and CSS wall authority retired`);
 }
-assert.match(doc,/Retrait CSS — en cours/,'inventory must explicitly track residual historical wall CSS');
-assert.match(doc,/V113 \| \*\*retiré\*\* \| \*\*retiré\*\*/,'inventory must mark V113 CSS wall authority retired');
+assert.match(doc,/Retrait CSS — terminé/,'inventory must record completed historical wall CSS retirement');
+assert.match(doc,/aucune couche V108\/V109\/V111\/V112\/V113 ne peut reprendre de règle CSS murale/,'inventory must record the final CSS authority lock');
 assert.match(doc,/GensRpgTacticalCombatV2Ui/,'visual authority inventory must name base Tactical UI as target authority');
-console.log('GenSrpG V114.11 visual authority: canonical Tactical UI owns active JS wall pipeline; V108/V109/V111/V112/V113 JS repaint retired; CSS cleanup tracked separately');
+console.log('GenSrpG V114.11 visual authority consolidated: Tactical UI owns JS+CSS wall pipeline; V108/V109/V111/V112/V113 historical wall authority retired');

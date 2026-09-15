@@ -27,6 +27,8 @@ jobs:
         run: node tests/gens_core_asset_resolver_contract.test.cjs
       - name: Validate Core Assets browser wiring
         run: node tests/gens_core_asset_browser_wiring_contract.test.cjs
+      - name: Validate Core Assets Tactical runtime authority
+        run: node tests/gens_core_asset_tactical_runtime_contract.test.cjs
       - name: Validate canonical stats to Tactical runtime path
         run: node tests/gens_core_rpg_runtime_path_contract.test.cjs
       - name: Validate Tactical RPG armor and ranged boundaries

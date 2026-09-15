@@ -19,10 +19,10 @@ function assertOrdered(text,needles,label){
 const source=read('index.html');
 const workflow=read('.github/workflows/main.yml');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
+const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 
-// 1. Source index remains a known shell/legacy monolith entry point.
-// The deployed Pages runtime is completed later by the workflow and dynamic loaders.
+// 1. Source index remains the known legacy shell entry point.
 const directSrcs=[...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.deepEqual(directSrcs,[
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
@@ -32,7 +32,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
 ],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
 
-// 2. Pages build must keep its current deterministic injection order.
+// 2. Pages build keeps the same deterministic static order.
 const pagesModules=[
   'dungeon-core-318.js',
   'dungeon-large-room-support-167834.js',
@@ -59,12 +59,11 @@ const perfTag='assets/gensrpg/gens-mobile-combat-performance-16781022.js';
 const removePos=workflow.indexOf('html = html.replace(perf_tag');
 const injectPos=workflow.indexOf('for module, tag, error in modules');
 assert.ok(removePos>=0 && injectPos>removePos,'Pages build must remove the source performance tag before reinjecting the ordered module list');
-assert.ok(workflow.includes("perf_tag = '<script src=\"assets/gensrpg/gens-mobile-combat-performance-16781022.js\"></script>'"),'Pages build must explicitly identify the performance/Tactical loader tag');
-assert.equal(pagesModules.at(-1),'gens-mobile-combat-performance-16781022.js','performance/Tactical loader must remain the final statically injected module');
-assert.ok(workflow.lastIndexOf(perfTag)>workflow.indexOf('gens-dungeon-hero-art-repair-167874.js'),'performance/Tactical loader must remain after canonical stats and hero-art layers in the build definition');
+assert.ok(workflow.includes("perf_tag = '<script src=\"assets/gensrpg/gens-mobile-combat-performance-16781022.js\"></script>'"),'Pages build must explicitly identify the final performance entry tag');
+assert.equal(pagesModules.at(-1),'gens-mobile-combat-performance-16781022.js','performance entry must remain the final statically injected module during this transition');
+assert.ok(workflow.lastIndexOf(perfTag)>workflow.indexOf('gens-dungeon-hero-art-repair-167874.js'),'performance entry must remain after canonical stats and hero-art layers');
 
-// 3. The performance file currently owns the base Tactical bootstrap.
-// Freeze this composition until RuntimeBootstrap replaces it deliberately.
+// 3. Performance may start ONE explicit bootstrap, but it no longer owns Tactical composition.
 const baseTactical=[
   'gens-rpg-tactical-combat-v2.js',
   'gens-rpg-tactical-combat-v2-adapter.js',
@@ -74,13 +73,19 @@ const baseTactical=[
   'gens-rpg-tactical-combat-v2-bridge.js',
   'gens-survival-mode-isolation-1678104.js'
 ];
-assertOrdered(perf,baseTactical,'mobile-performance dynamic bootstrap');
-assert.ok(perf.includes('R.__gensTacticalV2Loader105=true'),'dynamic Tactical bootstrap guard must remain idempotent');
-assert.ok(perf.includes('setTimeout(apply,250)') && perf.includes('setTimeout(apply,1200)') && perf.includes('setTimeout(apply,3000)'),
-  'known bridge/isolation retry debt changed: update the audit before modifying this behavior');
+assert.ok(perf.includes('assets/gensrpg/core/runtime-bootstrap-v1.js?v=1'),'performance layer must delegate runtime composition to RuntimeBootstrap V1');
+assert.ok(perf.includes('R.__gensRuntimeBootstrapEntryV1=true'),'performance-to-bootstrap handoff must be idempotent');
+for(const file of baseTactical)assert.equal(perf.includes(file),false,`performance layer must not own ${file}`);
+assert.equal(perf.includes('setTimeout(apply,3000)'),false,'performance layer must not own Tactical/Survival install retries');
 
-// 4. Integration must preserve the real runtime call chain V108 -> V114.11.
-// Loader functions are declared in reverse nesting order in the source, so textual filename order is NOT runtime order.
+// 4. RuntimeBootstrap is the one documented owner of base Tactical + Survival composition.
+assertOrdered(bootstrap,baseTactical,'RuntimeBootstrap V1 base Tactical composition');
+assert.ok(bootstrap.includes('R.__gensTacticalV2Loader105=true'),'RuntimeBootstrap must preserve the historical idempotency guard');
+assert.ok(bootstrap.includes('setTimeout(apply,250)') && bootstrap.includes('setTimeout(apply,1200)') && bootstrap.includes('setTimeout(apply,3000)'),
+  'RuntimeBootstrap must preserve the known bridge/isolation retry timings during extraction');
+assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve ordered sequential script loading');
+
+// 5. Integration must preserve the real runtime call chain V108 -> V114.11.
 for(const file of [
   'gens-rpg-tactical-combat-v2-polish-1678108.js',
   'gens-rpg-tactical-combat-v2-polish-1678109.js',
@@ -91,22 +96,15 @@ for(const file of [
   'gens-rpg-tactical-visual-dice-16781142.js'
 ]) assert.ok(integration.includes(file),`Tactical runtime chain missing ${file}`);
 
-assert.ok(integration.includes('const after108=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678108,"V108 polish");loadPolish109()}'),
-  'V108 must hand off to V109');
-assert.ok(integration.includes('const after109=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678109,"V109 polish");loadStats110()}'),
-  'V109 must hand off to V110');
-assert.ok(integration.includes('const after110=()=>{try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}loadRuntime111()}'),
-  'V110 must hand off to V111');
-assert.ok(integration.includes('const after111=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeFixes1678111,"V111 tactical runtime");loadCoherence112()}'),
-  'V111 must hand off to V112');
-assert.ok(integration.includes('const after112=()=>{installWithoutGlobalObserver(R.GensRpgTacticalCombatCoherence1678112,"V112 combat coherence");loadAuthority113()}'),
-  'V112 must hand off to V113');
-assert.ok(integration.includes('const after113=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeAuthority1678113,"V113 runtime authority");loadHotfix114()}'),
-  'V113 must hand off to the V114.11 visual layer selector');
-assert.ok(integration.includes('function loadHotfix114(){return loadVisualDice11411()}'),
-  'V114.1 global-observer hotfix must remain bypassed in favor of V114.11 visual dice');
+assert.ok(integration.includes('const after108=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678108,"V108 polish");loadPolish109()}'),'V108 must hand off to V109');
+assert.ok(integration.includes('const after109=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678109,"V109 polish");loadStats110()}'),'V109 must hand off to V110');
+assert.ok(integration.includes('const after110=()=>{try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}loadRuntime111()}'),'V110 must hand off to V111');
+assert.ok(integration.includes('const after111=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeFixes1678111,"V111 tactical runtime");loadCoherence112()}'),'V111 must hand off to V112');
+assert.ok(integration.includes('const after112=()=>{installWithoutGlobalObserver(R.GensRpgTacticalCombatCoherence1678112,"V112 combat coherence");loadAuthority113()}'),'V112 must hand off to V113');
+assert.ok(integration.includes('const after113=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeAuthority1678113,"V113 runtime authority");loadHotfix114()}'),'V113 must hand off to the V114.11 visual layer selector');
+assert.ok(integration.includes('function loadHotfix114(){return loadVisualDice11411()}'),'V114.1 global-observer hotfix must remain bypassed in favor of V114.11 visual dice');
 
-// 5. Legacy Tactical scripts may still exist, but their global observers must stay blocked by V114.11.
+// 6. V114.11 observer boundaries stay untouched.
 assert.ok(integration.includes('target===D.body||target===D.documentElement'),'V114.11 must continue blocking body/html MutationObserver targets in the legacy Tactical chain');
 assert.ok(integration.includes('R.MutationObserver=NativeMutationObserver'),'native MutationObserver must be restored after the Tactical chain guard');
 const guardPos=integration.lastIndexOf('beginChainObserverGuard();');
@@ -115,4 +113,4 @@ assert.ok(guardPos>=0 && startPos>guardPos,'the chain observer guard must be est
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 
-console.log('GenSrpG V16.78.114.11 runtime composition guard OK');
+console.log('GenSrpG runtime composition guard OK: performance-only entry -> explicit RuntimeBootstrap V1');

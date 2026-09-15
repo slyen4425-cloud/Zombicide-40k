@@ -2,8 +2,11 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const Core=require(path.join(__dirname,'..','assets','gensrpg','core','rpg-rules.js'));
 
-assert.equal(Core.VERSION,'1.2.0');
+assert.equal(Core.VERSION,'1.3.0');
 assert.equal(Core.DEFAULTS.armorZeroBlockChance,50,'new target rule is 50/50 when armor cancels damage');
+assert.equal(Core.DEFAULTS.physicalDamageFormula,'step');
+assert.equal(Core.DEFAULTS.magicDamageFormula,'step');
+assert.equal(Core.DEFAULTS.magicResistFormula,'step');
 assert.equal(Core.DEFAULTS.spiritMagicResistStep,20,'legacy default: every 20 Spirit grants magic resistance');
 assert.equal(Core.DEFAULTS.magicResistGain,1,'legacy default: +1 magic resistance per Spirit step');
 
@@ -17,6 +20,13 @@ assert.equal(
   6,
   'custom Force damage rules must override defaults'
 );
+assert.equal(Core.physicalDamageBonus(20,{physicalDamageFormula:'percent',physicalDamagePercentPerPoint:1.5}),0,'percent formula must not leak into flat bonus');
+assert.equal(Core.physicalDamagePercent(20,{physicalDamageFormula:'percent',physicalDamagePercentPerPoint:1.5}),30);
+const physicalPercent=Core.physicalDamageScaling(10,20,{physicalDamageFormula:'percent',physicalDamagePercentPerPoint:1.5});
+assert.equal(physicalPercent.formula,'percent');
+assert.equal(physicalPercent.percent,30);
+assert.equal(physicalPercent.bonus,3);
+assert.equal(physicalPercent.scaledDamage,13);
 
 assert.equal(Core.magicDamageBonus(0),0);
 assert.equal(Core.magicDamageBonus(9),0);
@@ -27,6 +37,12 @@ assert.equal(
   9,
   'custom Intelligence damage rules must override defaults'
 );
+assert.equal(Core.magicDamageBonus(10,{magicDamageFormula:'percent',magicDamagePercentPerPoint:2.5}),0);
+assert.equal(Core.magicDamagePercent(10,{magicDamageFormula:'percent',magicDamagePercentPerPoint:2.5}),25);
+const magicPercent=Core.magicDamageScaling(4,10,{magicDamageFormula:'percent',magicDamagePercentPerPoint:2.5});
+assert.equal(magicPercent.percent,25);
+assert.equal(magicPercent.bonus,1);
+assert.equal(magicPercent.scaledDamage,5);
 
 assert.equal(Core.magicResistanceBonus(0),0);
 assert.equal(Core.magicResistanceBonus(19),0);
@@ -38,6 +54,17 @@ assert.equal(
   8,
   'magic resistance must follow configurable RPG rules'
 );
+assert.equal(Core.magicResistanceBonus(12,{magicResistFormula:'perPoint',magicResistPerPoint:0.5}),6,'per-point Spirit resistance mode must be preserved');
+const magicResistance=Core.resolveMagicResistance({
+  spirit:12,
+  equipmentBonus:2,
+  skillBonus:1,
+  rules:{magicResistFormula:'perPoint',magicResistPerPoint:0.5},
+});
+assert.equal(magicResistance.derived,6);
+assert.equal(magicResistance.equipmentBonus,2);
+assert.equal(magicResistance.skillBonus,1);
+assert.equal(magicResistance.total,9,'Spirit-derived resistance + equipment + talent must remain transparent');
 
 const base=Core.resolvePhysicalDamage({weaponDamage:2,force:16,armor:1,armorRoll:0});
 assert.equal(base.baseWeaponDamage,2);
@@ -47,9 +74,22 @@ assert.equal(base.armor,1);
 assert.equal(base.reducedDamage,2);
 assert.equal(base.finalDamage,2);
 assert.equal(base.armorFloorTriggered,false);
+assert.equal(base.physicalDamageFormula,'step');
 assert.equal(base.physicalDamageStep,10);
 assert.equal(base.physicalDamageGain,1);
 assert.equal(base.minPhysicalDamageOnArmorFail,1);
+
+const percentDamage=Core.resolvePhysicalDamage({
+  weaponDamage:10,
+  force:20,
+  armor:12,
+  armorRoll:0,
+  rules:{physicalDamageFormula:'percent',physicalDamagePercentPerPoint:1.5},
+});
+assert.equal(percentDamage.statDamagePercent,30);
+assert.equal(percentDamage.statDamageBonus,3);
+assert.equal(percentDamage.rawDamage,13);
+assert.equal(percentDamage.finalDamage,1,'percent Force formula must flow into physical damage before armor');
 
 const blocked=Core.resolvePhysicalDamage({weaponDamage:2,force:16,armor:3,armorRoll:49});
 assert.equal(blocked.rawDamage,3);
@@ -125,6 +165,9 @@ assert.ok(lines.some(x=>x.includes('Dégâts bruts : 3')));
 assert.ok(lines.some(x=>x.includes('Armure : -3')));
 assert.ok(lines.some(x=>x.includes('50% blocage / 50% minimum 1 dégât')));
 assert.ok(lines.some(x=>x.includes('Résultat final : 1 dégât')));
+
+const percentLines=Core.describePhysicalDamage(percentDamage);
+assert.ok(percentLines.some(x=>x.includes('Force 20 (règle +1.5%/point = 30%) : +3')),'percent explanation must expose the configured formula');
 
 const customLines=Core.describePhysicalDamage(customWounded);
 assert.ok(customLines.some(x=>x.includes('Force 10 (règle 5/+2) : +4')),'explanation must show the active custom Force rule');

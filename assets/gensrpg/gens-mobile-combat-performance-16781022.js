@@ -47,6 +47,7 @@ if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
   R.__gensTacticalV2Loader105=true;
   const files=[
     "assets/gensrpg/core/asset-resolver.js",
+    "assets/gensrpg/core/storage.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",

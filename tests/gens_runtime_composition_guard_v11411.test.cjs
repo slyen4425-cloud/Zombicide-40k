@@ -79,8 +79,9 @@ assert.ok(perf.includes('R.__gensTacticalV2Loader105=true'),'dynamic Tactical bo
 assert.ok(perf.includes('setTimeout(apply,250)') && perf.includes('setTimeout(apply,1200)') && perf.includes('setTimeout(apply,3000)'),
   'known bridge/isolation retry debt changed: update the audit before modifying this behavior');
 
-// 4. Integration must keep the V108 -> V114.11 chain ordered and globally observer-scoped.
-const tacticalLegacyChain=[
+// 4. Integration must preserve the real runtime call chain V108 -> V114.11.
+// Loader functions are declared in reverse nesting order in the source, so textual filename order is NOT runtime order.
+for(const file of [
   'gens-rpg-tactical-combat-v2-polish-1678108.js',
   'gens-rpg-tactical-combat-v2-polish-1678109.js',
   'gens-rpg-tactical-combat-v2-stats-1678110.js',
@@ -88,12 +89,29 @@ const tacticalLegacyChain=[
   'gens-rpg-tactical-combat-coherence-1678112.js',
   'gens-rpg-tactical-runtime-authority-1678113.js',
   'gens-rpg-tactical-visual-dice-16781142.js'
-];
-assertOrdered(integration,tacticalLegacyChain,'Tactical V108-V114.11 chain');
+]) assert.ok(integration.includes(file),`Tactical runtime chain missing ${file}`);
+
+assert.ok(integration.includes('const after108=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678108,"V108 polish");loadPolish109()}'),
+  'V108 must hand off to V109');
+assert.ok(integration.includes('const after109=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678109,"V109 polish");loadStats110()}'),
+  'V109 must hand off to V110');
+assert.ok(integration.includes('const after110=()=>{try{R.GensRpgTacticalStats1678110?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V110 tactical stats install",e)}loadRuntime111()}'),
+  'V110 must hand off to V111');
+assert.ok(integration.includes('const after111=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeFixes1678111,"V111 tactical runtime");loadCoherence112()}'),
+  'V111 must hand off to V112');
+assert.ok(integration.includes('const after112=()=>{installWithoutGlobalObserver(R.GensRpgTacticalCombatCoherence1678112,"V112 combat coherence");loadAuthority113()}'),
+  'V112 must hand off to V113');
+assert.ok(integration.includes('const after113=()=>{installWithoutGlobalObserver(R.GensRpgTacticalRuntimeAuthority1678113,"V113 runtime authority");loadHotfix114()}'),
+  'V113 must hand off to the V114.11 visual layer selector');
+assert.ok(integration.includes('function loadHotfix114(){return loadVisualDice11411()}'),
+  'V114.1 global-observer hotfix must remain bypassed in favor of V114.11 visual dice');
+
+// 5. Legacy Tactical scripts may still exist, but their global observers must stay blocked by V114.11.
 assert.ok(integration.includes('target===D.body||target===D.documentElement'),'V114.11 must continue blocking body/html MutationObserver targets in the legacy Tactical chain');
 assert.ok(integration.includes('R.MutationObserver=NativeMutationObserver'),'native MutationObserver must be restored after the Tactical chain guard');
-assert.ok(integration.includes('beginChainObserverGuard();') && integration.includes('loadPolish108();'),'the observer guard must be established before the legacy Tactical chain starts');
-assert.ok(integration.includes('function loadHotfix114(){return loadVisualDice11411()}'),'V114.1 global-observer hotfix must remain bypassed');
+const guardPos=integration.lastIndexOf('beginChainObserverGuard();');
+const startPos=integration.lastIndexOf('loadPolish108();');
+assert.ok(guardPos>=0 && startPos>guardPos,'the chain observer guard must be established immediately before the legacy Tactical chain starts');
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 

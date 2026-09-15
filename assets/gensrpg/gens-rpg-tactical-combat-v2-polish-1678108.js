@@ -101,7 +101,6 @@
     const style=D.createElement("style");style.id=STYLE_ID;
     style.textContent=`
       .gtv2Pawn img{object-fit:contain!important;object-position:center top!important;transform:scale(.96);transform-origin:center top;background:transparent!important}
-      .gtv2Cell.blocked,#drc100Grid .drc100Cell.wall{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
       .gtv2108Panel{display:grid;gap:8px;margin:8px 0;padding:9px;border:1px solid #3b4657;border-radius:12px;background:rgba(10,15,24,.92)}
       .gtv2108Row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center}
       .gtv2108Row.weapon{grid-template-columns:minmax(0,1fr) auto auto}

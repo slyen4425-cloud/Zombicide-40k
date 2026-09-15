@@ -70,6 +70,9 @@ jobs:
       - name: Vérifier le retrait de l'observer global V112
         run: node tests/gens_v112_observer_retirement_v11411.test.cjs
 
+      - name: Vérifier le retrait de l'autorité détection V112
+        run: node tests/gens_v112_detection_authority_retirement_v11411.test.cjs
+
       - name: Vérifier l'autorité runtime V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
 

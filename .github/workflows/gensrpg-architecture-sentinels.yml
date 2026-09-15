@@ -106,6 +106,9 @@ jobs:
       - name: Caractériser la dette CSS murale historique
         run: node tests/gens_tactical_wall_css_authority_characterization_v11411.test.cjs
 
+      - name: Vérifier le retrait CSS mural V113
+        run: node tests/gens_v113_wall_css_authority_retirement_v11411.test.cjs
+
       - name: Vérifier le retrait de l'autorité murale V113
         run: node tests/gens_v113_wall_authority_retirement_v11411.test.cjs
 

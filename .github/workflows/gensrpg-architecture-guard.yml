@@ -25,3 +25,5 @@ jobs:
         run: node tests/gens_core_rpg_rules_contract.test.cjs
       - name: Validate canonical stats to Tactical runtime path
         run: node tests/gens_core_rpg_runtime_path_contract.test.cjs
+      - name: Validate Tactical RPG armor and ranged boundaries
+        run: node tests/gens_core_rpg_tactical_boundaries_contract.test.cjs

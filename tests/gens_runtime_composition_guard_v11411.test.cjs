@@ -63,7 +63,7 @@ assert.ok(workflow.includes("perf_tag = '<script src=\"assets/gensrpg/gens-mobil
 assert.equal(pagesModules.at(-1),'gens-mobile-combat-performance-16781022.js','performance entry must remain the final statically injected module during this transition');
 assert.ok(workflow.lastIndexOf(perfTag)>workflow.indexOf('gens-dungeon-hero-art-repair-167874.js'),'performance entry must remain after canonical stats and hero-art layers');
 
-// 3. Performance may start ONE explicit bootstrap, but it no longer owns Tactical composition.
+// 3. Performance may start ONE explicit bootstrap, but it no longer owns runtime composition.
 const baseTactical=[
   'gens-rpg-tactical-combat-v2.js',
   'gens-rpg-tactical-combat-v2-adapter.js',
@@ -71,15 +71,16 @@ const baseTactical=[
   'gens-rpg-tactical-combat-v2-integration.js',
   'gens-rpg-tactical-combat-v2-ui.js',
   'gens-rpg-tactical-combat-v2-bridge.js',
+  'gens-rpg-runtime-repair-1678106.js',
   'gens-survival-mode-isolation-1678104.js'
 ];
 assert.ok(perf.includes('assets/gensrpg/core/runtime-bootstrap-v1.js?v=1'),'performance layer must delegate runtime composition to RuntimeBootstrap V1');
 assert.ok(perf.includes('R.__gensRuntimeBootstrapEntryV1=true'),'performance-to-bootstrap handoff must be idempotent');
 for(const file of baseTactical)assert.equal(perf.includes(file),false,`performance layer must not own ${file}`);
-assert.equal(perf.includes('setTimeout(apply,3000)'),false,'performance layer must not own Tactical/Survival install retries');
+assert.equal(perf.includes('setTimeout(apply,3000)'),false,'performance layer must not own Tactical/runtime-repair/Survival install retries');
 
-// 4. RuntimeBootstrap is the one documented owner of base Tactical + Survival composition.
-assertOrdered(bootstrap,baseTactical,'RuntimeBootstrap V1 base Tactical composition');
+// 4. RuntimeBootstrap is the one documented owner of Tactical + runtime repair + Survival composition.
+assertOrdered(bootstrap,baseTactical,'RuntimeBootstrap V1 explicit runtime composition');
 assert.ok(bootstrap.includes('R.__gensTacticalV2Loader105=true'),'RuntimeBootstrap must preserve the historical idempotency guard');
 assert.ok(bootstrap.includes('setTimeout(apply,250)') && bootstrap.includes('setTimeout(apply,1200)') && bootstrap.includes('setTimeout(apply,3000)'),
   'RuntimeBootstrap must preserve the known bridge/isolation retry timings during extraction');
@@ -114,4 +115,4 @@ assert.ok(integration.includes('loadPolish108();'),'clean Tactical chain must st
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 
-console.log('GenSrpG runtime composition guard OK: deterministic direct Tactical chain without global observer shim');
+console.log('GenSrpG runtime composition guard OK: RuntimeBootstrap alone owns explicit Tactical + runtime-repair + Survival composition');

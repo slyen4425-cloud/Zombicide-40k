@@ -9,8 +9,9 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const VERSION="1.0.0";
+  const VERSION="1.1.0";
   const MODULES=Object.freeze(["common","survival","dungeon","capture","pvp"]);
+  const ENTITY_PATH_FIELDS=Object.freeze(["image_data","imageData","art","image","avatar","portrait","tokenImage","token_image","token"]);
 
   const DEFAULT_CATALOG=Object.freeze({
     dungeon:Object.freeze({
@@ -68,6 +69,15 @@
     return "";
   }
 
+  function entityExplicitPath(entity={}){
+    if(!entity||typeof entity!=="object")return {path:"",field:""};
+    for(const field of ENTITY_PATH_FIELDS){
+      const path=validPath(entity[field]);
+      if(path)return {path,field};
+    }
+    return {path:"",field:""};
+  }
+
   function resolveAsset({module,kind,id="",artId="",explicitPath="",overrides=null,catalog=null,allowConvention=true}={}){
     const m=normalizeModule(module),k=normalizeKind(kind),baseId=normalizeId(id),preferredId=normalizeId(artId)||baseId;
     const detail={module:m,kind:k,id:baseId,artId:normalizeId(artId),resolvedId:preferredId,path:"",source:"none"};
@@ -92,18 +102,32 @@
     return detail;
   }
 
+  function resolveEntityAsset({module,kind,id="",entity=null,overrides=null,catalog=null,allowConvention=true}={}){
+    const artId=normalizeId(entity?.artId??entity?.art_id??"");
+    const explicit=entityExplicitPath(entity);
+    const out=resolveAsset({module,kind,id,artId,explicitPath:explicit.path,overrides,catalog,allowConvention});
+    if(out.source==="explicit")return {...out,source:"entity-field",sourceField:explicit.field};
+    return {...out,sourceField:""};
+  }
+
   function resolvePath(input={}){return resolveAsset(input).path}
+  function resolveEntityPath(input={}){return resolveEntityAsset(input).path}
 
   return {
     VERSION,
     MODULES,
+    ENTITY_PATH_FIELDS,
     DEFAULT_CATALOG,
     normalizeModule,
     normalizeKind,
     normalizeId,
     validPath,
+    entryFrom,
     conventionPath,
+    entityExplicitPath,
     resolveAsset,
+    resolveEntityAsset,
     resolvePath,
+    resolveEntityPath,
   };
 });

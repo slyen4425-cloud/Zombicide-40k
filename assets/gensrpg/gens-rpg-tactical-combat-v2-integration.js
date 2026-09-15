@@ -113,16 +113,32 @@
     R.__gensTacticalStatsLoader110=true;
     const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js?v=16.78.110";s.async=false;s.onload=after110;s.onerror=()=>{console.error("GenSrpG V110 tactical stats load failed");loadRuntime111()};(D.head||D.documentElement).appendChild(s);return true;
   }
-  function loadPolish109(){
-    const D=R.document;if(!D)return false;
-    const after109=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678109,"V109 polish");loadStats110()};
-    if(R.GensRpgTacticalPolish1678109){after109();return true}
-    if(R.__gensTacticalPolishLoader109){loadStats110();return true}
-    R.__gensTacticalPolishLoader109=true;
-    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";s.async=false;s.onload=after109;s.onerror=()=>{console.error("GenSrpG V109 polish load failed");loadStats110()};(D.head||D.documentElement).appendChild(s);return true;
+
+  const coreReadyCallbacks=[];
+  function loadCoreRpgRules(next=loadStats110){
+    if(typeof next==="function")coreReadyCallbacks.push(next);
+    const finish=()=>{const pending=coreReadyCallbacks.splice(0);for(const fn of pending){try{fn()}catch(e){console.error("GenSrpG Core RPG continuation",e)}}};
+    const D=R.document;
+    if(R.GensRpgCoreRules){finish();return true}
+    if(!D){finish();return false}
+    if(R.__gensCoreRpgRulesLoader)return true;
+    R.__gensCoreRpgRulesLoader=true;
+    const s=D.createElement("script");s.src="assets/gensrpg/core/rpg-rules.js?v=1.3.0";s.async=false;
+    s.onload=()=>{if(!R.GensRpgCoreRules)console.error("GenSrpG Core RPG rules loaded without API");finish()};
+    s.onerror=()=>{console.error("GenSrpG Core RPG rules load failed");finish()};
+    (D.head||D.documentElement).appendChild(s);return true;
   }
 
-  /* V108 movement/action bridge; V109 timeline/range; V110 canonical stats; V111 weapon dice;
+  function loadPolish109(){
+    const D=R.document;if(!D)return false;
+    const after109=()=>{installWithoutGlobalObserver(R.GensRpgTacticalPolish1678109,"V109 polish");loadCoreRpgRules(loadStats110)};
+    if(R.GensRpgTacticalPolish1678109){after109();return true}
+    if(R.__gensTacticalPolishLoader109){loadCoreRpgRules(loadStats110);return true}
+    R.__gensTacticalPolishLoader109=true;
+    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js?v=16.78.109";s.async=false;s.onload=after109;s.onerror=()=>{console.error("GenSrpG V109 polish load failed");loadCoreRpgRules(loadStats110)};(D.head||D.documentElement).appendChild(s);return true;
+  }
+
+  /* V108 movement/action bridge; V109 timeline/range; Core RPG rules; V110 canonical stats; V111 weapon dice;
      V112 details; V113/V114.10 scope + detection; V114.11 D100/damage/armor.
      Native Dungeon alone owns hero sheet, Save & Quit and menu navigation. */
   function loadPolish108(){

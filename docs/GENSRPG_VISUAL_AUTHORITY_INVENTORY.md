@@ -33,13 +33,13 @@ Les fonctions historiques restent utiles pour comparaison/rollback, mais leurs a
 | V108 | active | `patchDungeonMapHtml`, `hookDungeonRender`, `paintWalls` | retirer du `install()` après validation |
 | V109 | active | `hookDungeonRender`, `enhance()` → `paintBuilderWalls` | retirer uniquement le repaint mural, conserver timeline/portée/mains nues/attaque rapide |
 | V111 | active | `maintain()` → `paintWalls` | retirer uniquement le repaint mural, conserver multi-dés/dock/refresh |
-| V112 | active | `maintain()` → `markWallCells` | retirer uniquement le repaint mural, conserver détails/explications/spatial |
+| V112 | **retirée** | fonction `markWallCells` conservée mais plus appelée par `maintain()` ; son ancien hook de détection reste lui-même inactif | détails/explications/spatial conservés ; murs délégués au Tactical UI canonique |
 | V113 | **retirée** | fonction `paintWalls` conservée mais plus appelée par `install()` ni `maintain()` | scope/détection V113 conservés ; murs délégués au Tactical UI canonique |
 
 ## Ordre de retrait
 
 1. ✅ V113 `paintWalls` retiré de l'exécution active ;
-2. V112 `markWallCells` ;
+2. ✅ V112 `markWallCells` retiré de `maintain()` ;
 3. V111 `paintWalls` ;
 4. V109 `paintBuilderWalls` et hook Dungeon mural ;
 5. V108 `paintWalls` / patch/hook mural historiques ;

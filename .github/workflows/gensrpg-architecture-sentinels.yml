@@ -58,6 +58,9 @@ jobs:
       - name: Vérifier l'autorité runtime V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs
 
+      - name: Vérifier le retrait de l'observer global V113
+        run: node tests/gens_v113_observer_retirement_v11411.test.cjs
+
       - name: Vérifier le raccord Bridge vers V113
         run: node tests/gens_rpg_tactical_runtime_authority_v1678113_bridge.test.cjs
 

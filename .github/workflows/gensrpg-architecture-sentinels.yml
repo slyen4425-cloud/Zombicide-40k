@@ -103,6 +103,9 @@ jobs:
       - name: Verrouiller l'unique autorité JS des murs Tactical
         run: node tests/gens_tactical_single_js_wall_authority_v11411.test.cjs
 
+      - name: Caractériser la dette CSS murale historique
+        run: node tests/gens_tactical_wall_css_authority_characterization_v11411.test.cjs
+
       - name: Vérifier le retrait de l'autorité murale V113
         run: node tests/gens_v113_wall_authority_retirement_v11411.test.cjs
 

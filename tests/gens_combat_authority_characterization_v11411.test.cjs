@@ -24,6 +24,7 @@ const rt={
   loadActiveEnemies:()=>[enemy],
   activeEnemyDefinition:()=>({rule:{vision:3}}),dungeonEnemyDerivedForInstance:()=>({}),
   GensCleanRpgStats167874:{runtimeDefs:()=>[],extraTotal:()=>0},
+  GensRpgTacticalRuntimeAuthority1678113:V113,
   GensRpgTacticalCombatV2:{},
   GensRpgTacticalCombatV2Adapter:{
     participants:()=>['aldren','lyra','brom'],
@@ -47,7 +48,7 @@ const bridgeStart=rt.dc200StartCombat;
 
 // Architectural cleanup: V112 keeps spatial selection but must no longer install a
 // second global dc200StartCombat owner. Its hookStart remains exported only as rollback
-// compatibility while the active chain goes directly Bridge -> V113.
+// compatibility while the active chain uses the Bridge explicit request contract.
 const v112Source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-coherence-1678112.js'),'utf8');
 const v112Install=(v112Source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
 assert.ok(v112Install,'V112 install function missing');
@@ -55,14 +56,14 @@ assert.doesNotMatch(v112Install,/hookStart\(rt\)/,'V112 install must not take gl
 assert.doesNotMatch(v112Install,/adapterHooked&&startHooked&&resultHooked/,'V112 readiness must not depend on start ownership');
 assert.equal(typeof V112.hookStart,'function','V112 historical start hook remains available for rollback characterization');
 
-// V113 is now the only active spatial start wrapper after the bridge.
+// Bridge now carries the V113-compatible scope/detection contract itself. V113 sees
+// the marker and must not add another global wrapper around dc200StartCombat.
+assert.equal(bridgeStart.__gensRpg113Start,true,'Bridge final start adapter must advertise V113-equivalent scope/detection semantics');
+assert.equal(bridgeStart.__gensRpg112Start,true,'Bridge final start adapter must block historical V112 retries');
 assert.equal(V113.hookStart(rt),true);
-assert.equal(rt.dc200StartCombat.__gensRpg113Start,true);
-assert.equal(rt.dc200StartCombat.__gensRpg112Start,true,'compatibility marker prevents any historical V112 retry from wrapping V113');
-assert.equal(rt.dc200StartCombat.__original,bridgeStart,'V113 must delegate directly to the bridge');
-const finalStart=rt.dc200StartCombat;
+assert.equal(rt.dc200StartCombat,bridgeStart,'V113 must not wrap the scope-safe Bridge start adapter');
 assert.equal(V112.hookStart(rt),true);
-assert.equal(rt.dc200StartCombat,finalStart,'even an explicit historical V112 retry must not retake final start authority');
+assert.equal(rt.dc200StartCombat,bridgeStart,'historical V112 retry must not wrap the final Bridge adapter');
 
 // V112 still owns its older createBattle spatial safety until V113 replaces that seam.
 assert.equal(V112.hookAdapter(rt),true);
@@ -90,12 +91,13 @@ currentState=state();currentState.heroRooms.lyra=1;currentState.positions.lyra=3
 sel=V113.selectCombatants(rt,{enemyIds:['gob'],heroIds:['aldren','lyra','brom']});
 assert.deepEqual(sel.heroIds,['aldren'],'same room is insufficient when the helper is outside assist range');
 
-// The final global start must pass only scoped enemy ids to the bridge.
+// The final global compatibility start is the Bridge itself; its explicit V113 scope
+// must pass only the valid participants into Tactical.
 currentState=state();opened=null;
 const result=rt.dc200StartCombat(['gob'],'manual');
 assert.equal(result.ok,true);
 assert.ok(opened,'Tactical encounter must open');
 assert.deepEqual(opened.enemyIds,['gob']);
-assert.deepEqual(opened.heroIds,['aldren'],'bridge eligibility must still reject non-entered/different-scope heroes');
+assert.deepEqual(opened.heroIds,['aldren'],'Bridge explicit V113 scope must reject non-entered/different-scope heroes');
 
-console.log('GenSrpG V114.11 combat authority clean path: Bridge -> final V113; V112 remains spatial createBattle safety only');
+console.log('GenSrpG V114.11 combat authority clean path: historical globals -> Bridge requestCombat -> V113 scope; no extra V112/V113 start wrapper');

@@ -25,6 +25,9 @@ jobs:
       - name: Vérifier RuntimeBootstrap V1
         run: node tests/gens_runtime_bootstrap_v1.test.cjs
 
+      - name: Vérifier le retrait du chargeur runtime-repair caché du Bridge
+        run: node tests/gens_bridge_runtime_repair_loader_retirement_v11411.test.cjs
+
       - name: Bloquer toute nouvelle autorité globale GenSrpG
         run: node tests/gens_architecture_global_side_effect_guard.test.cjs
 

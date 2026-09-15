@@ -5,22 +5,28 @@ const vm=require("node:vm");
 
 const root=path.join(__dirname,"..");
 const source=fs.readFileSync(path.join(root,"assets/gensrpg/gens-mobile-combat-performance-16781022.js"),"utf8");
+const bootstrap=fs.readFileSync(path.join(root,"assets/gensrpg/core/runtime-bootstrap-v1.js"),"utf8");
 const builtIndex=path.resolve(process.argv[2]||path.join(root,"index.html"));
 const html=fs.readFileSync(builtIndex,"utf8");
 const sw=fs.readFileSync(path.join(root,"service-worker.js"),"utf8");
 const ui=fs.readFileSync(path.join(root,"assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js"),"utf8");
 
-assert.match(source,/APP_VERSION="16\.78\.105"/);
+assert.match(source,/APP_VERSION="16\.78\.114\.11-architecture-performance-1"/);
 assert.doesNotMatch(source,/setInterval\s*\(/,"optimized Dungeon dice must not use main-thread interval ticks");
 assert.match(source,/nativeAnimateDice/,'Survival native dice renderer must be preserved');
-assert.match(source,/gens-survival-mode-isolation-1678104\.js/);
+assert.match(source,/assets\/gensrpg\/core\/runtime-bootstrap-v1\.js\?v=1/,'performance layer must delegate composition to RuntimeBootstrap');
+for(const legacyOwned of [
+  'gens-rpg-tactical-combat-v2.js','gens-rpg-tactical-combat-v2-adapter.js','gens-rpg-tactical-combat-v2-rules.js',
+  'gens-rpg-tactical-combat-v2-integration.js','gens-rpg-tactical-combat-v2-ui.js','gens-rpg-tactical-combat-v2-bridge.js','gens-survival-mode-isolation-1678104.js'
+]) assert.equal(source.includes(legacyOwned),false,`performance layer must no longer own ${legacyOwned}`);
+assert.match(bootstrap,/gens-survival-mode-isolation-1678104\.js/,'RuntimeBootstrap must own Survival isolation composition');
 assert.match(source,/translate3d/,"Dungeon dice motion must stay compositor-friendly");
 assert.match(sw,/gensrpg-cache-16\.78\.106-real-tactical-runtime/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.match(sw,/gens-survival-mode-isolation-1678104\.js/);
 assert.match(sw,/gens-rpg-runtime-repair-1678106\.js/);
-assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance bridge must load after the final Dungeon core");
-if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance bridge must be the final runtime script")}
+assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance entry must load after the final Dungeon core");
+if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance entry must remain the final static runtime script during bootstrap extraction")}
 const hookAll=(ui.match(/function hookAll\(\)\{[^\n]+/)||[""])[0];
 assert.ok(hookAll&&!hookAll.includes("renderDungeonHeroStats")&&!hookAll.includes("renderDungeonAttributes"),"combat stat renderers must not trigger full UI cleanup scans");
 assert.doesNotMatch(ui,/tries\+\+<30|setTimeout\(retry,100\)/,"UI cleanup must not poll every 100ms during combat startup");
@@ -66,4 +72,4 @@ assert.equal(nativeD100,1,'Survival must keep original RPG-die function if invok
 
 const legacyD6Ms=1250+(3-1)*65+4*105+260,legacyD100Ms=10*90+180;
 assert.ok(d6DoneAt<legacyD6Ms/3);assert.ok(d100DoneAt<legacyD100Ms/2);
-console.log("V16.78.106 mode-aware mobile combat profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});
+console.log("GenSrpG mobile combat performance-only profile OK",{d6DoneAt,d100DoneAt,nativeD6,nativeD100});

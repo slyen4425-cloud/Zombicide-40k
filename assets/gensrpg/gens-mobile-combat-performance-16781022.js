@@ -48,6 +48,8 @@ if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
   const files=[
     "assets/gensrpg/core/asset-resolver.js",
     "assets/gensrpg/core/storage.js",
+    "assets/gensrpg/core/stats.js",
+    "assets/gensrpg/core/stats-runtime-adapter.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
     "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
@@ -57,7 +59,7 @@ if(D&&(D.head||D.documentElement)&&!R.__gensTacticalV2Loader105){
     "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
   ];
   const finalize=()=>{
-    const apply=()=>{try{R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG V105 install",e)}};
+    const apply=()=>{try{R.GensRpgCoreStatsRuntimeAdapter?.install?.(R);R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG V105 install",e)}};
     apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
   };
   const load=(i)=>{

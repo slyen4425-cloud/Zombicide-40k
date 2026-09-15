@@ -7,8 +7,10 @@ const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),
 
 const block=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(block,'Pages module injection list missing');
+const previewBlock=(preview.match(/const tags=\[(.*?)\n\s*\];/s)||[])[1];
+assert.ok(previewBlock,'preview module injection list missing');
 const pageSrcs=[...block.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>m[1]);
-const previewSrcs=[...preview.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>m[1]);
+const previewSrcs=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>m[1]);
 
 assert.ok(pageSrcs.length>=10,'unexpectedly small Pages module list');
 assert.deepEqual(previewSrcs,pageSrcs,'preview.html must reproduce the exact GitHub Pages injected module order');

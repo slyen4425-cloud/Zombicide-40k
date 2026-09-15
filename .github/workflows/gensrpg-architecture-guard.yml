@@ -1,0 +1,23 @@
+name: GenSrpG Architecture Guard
+
+on:
+  push:
+    branches:
+      - work/gensrpg-restructure-phase-1
+      - nettoyage-bugs
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce GenSrpG Charter boundaries
+        run: node tests/gens_architecture_charter_guard.test.cjs

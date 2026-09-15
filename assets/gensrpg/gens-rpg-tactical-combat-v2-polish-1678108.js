@@ -246,14 +246,14 @@
   }
   function hookUiRender(rt=R){
     const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
-    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt);paintWalls(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
+    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
   function observe(rt=R){
     const D=doc(rt);if(!D||observer||typeof rt?.MutationObserver!=="function")return false;
     observer=new rt.MutationObserver(()=>{try{enhanceActions(rt);paintWalls(rt)}catch(e){}});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
   }
   function install(rt=R){
-    ensureStyle(rt);patchDungeonMapHtml(rt);hookDungeonRender(rt);bindControls(rt);hookUiRender(rt);paintWalls(rt);enhanceActions(rt);
+    ensureStyle(rt);bindControls(rt);hookUiRender(rt);enhanceActions(rt);
     try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}
     installed=true;return true;
   }

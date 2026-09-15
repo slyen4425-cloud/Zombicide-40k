@@ -153,7 +153,7 @@
     const st=quickAttackState(rt);btn.style.display=st.visible?"block":"none";btn.disabled=st.disabled;return true;
   }
 
-  function enhance(rt=R){ensureStyle(rt);const battle=ui(rt)?.getBattle?.();if(battle)normalizeBattleRanges(battle);paintBuilderWalls(rt);renderTimeline(rt);ensureUnarmedOption(rt);ensureQuickAttack(rt);return true}
+  function enhance(rt=R){ensureStyle(rt);const battle=ui(rt)?.getBattle?.();if(battle)normalizeBattleRanges(battle);renderTimeline(rt);ensureUnarmedOption(rt);ensureQuickAttack(rt);return true}
   function hookUi(rt=R){
     const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg109Ui)return true;
     const wrapped=function(){try{normalizeBattleRanges(U.getBattle?.())}catch(e){}const out=old.apply(this,arguments);try{enhance(rt)}catch(e){}return out};wrapped.__gensRpg109Ui=true;wrapped.__original=old;U.render=wrapped;return true;
@@ -173,7 +173,7 @@
     const run=()=>{queued=false;try{enhance(rt)}catch(e){}};
     observer=new rt.MutationObserver(()=>{if(queued)return;queued=true;if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
   }
-  function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);hookDungeonRender(rt);bind(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
+  function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);bind(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms);return true}
 
   const api={VERSION,APP_VERSION,WALL_ASSET,BOW_RANGE,STAFF_RANGE,UNARMED_VALUE,rangedKind,normalizeRangedAttack,normalizeActorRanges,normalizeBattleRanges,turnSequence,timelineHtml,paintBuilderWalls,isUnarmedState,equipUnarmed,quickAttackState,ensureUnarmedOption,ensureQuickAttack,enhance,install,installWithRetries,status:()=>({installed,wall:WALL_ASSET})};

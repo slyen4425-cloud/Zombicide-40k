@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const Core=require(path.join(__dirname,'..','assets','gensrpg','core','storage.js'));
 
-assert.equal(Core.VERSION,'1.0.0');
+assert.equal(Core.VERSION,'1.1.0');
 
 function memoryStorage(seed={}){
   const map=new Map(Object.entries(seed).map(([k,v])=>[String(k),String(v)]));
@@ -99,6 +99,7 @@ const migrations=[
   assert.equal(out.ok,true);
   assert.equal(out.changed,true);
   assert.equal(out.written,true);
+  assert.equal(out.rolledBack,false);
   assert.equal(storage.getItem('hero_schema'),'3');
   assert.deepEqual(JSON.parse(storage.getItem('hero')),{id:'hero',stats:{force:10},mode:'dungeon'});
   const writesAfterFirst=storage.writes.length;
@@ -148,6 +149,31 @@ const migrations=[
   assert.equal(out.error,'missing-migration-4');
   assert.deepEqual(storage.snapshot(),before);
   assert.equal(storage.writes.length,0);
+}
+
+{
+  const base=memoryStorage({hero:JSON.stringify({id:'hero'}),hero_schema:'0'});
+  const before=base.snapshot();
+  let failSchemaWrite=true;
+  const storage={
+    ...base,
+    setItem(key,value){
+      if(String(key)==='hero_schema'&&failSchemaWrite){failSchemaWrite=false;throw new Error('schema-write-failed')}
+      return base.setItem(key,value);
+    },
+  };
+  const out=Core.migrateStoredJson({storage,key:'hero',versionKey:'hero_schema',targetVersion:3,migrations});
+  assert.equal(out.ok,false,'schema write failure must fail the migration');
+  assert.equal(out.written,false);
+  assert.equal(out.rolledBack,true,'data write must be rolled back when schema write fails');
+  assert.deepEqual(base.snapshot(),before,'partial migration write must restore original data and schema version');
+}
+
+{
+  const storage=memoryStorage({hero:JSON.stringify({id:'hero'})});
+  const out=Core.migrateStoredJson({storage,key:'hero',versionKey:'hero',targetVersion:1,migrations});
+  assert.equal(out.ok,false,'data and schema keys must be distinct');
+  assert.equal(out.error,'invalid-storage-or-key');
 }
 
 assert.equal(globalThis.localStorage,undefined,'Core contract test must not require a browser localStorage global');

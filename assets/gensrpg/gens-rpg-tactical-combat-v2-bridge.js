@@ -8,7 +8,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
   const VERSION="0.6.0",APP_VERSION="16.78.114.10";
-  let opening=false,installed=false,repairLoading=false;
+  let opening=false,installed=false;
   let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -142,20 +142,7 @@
     try{if(rt?.GensRpgRuntimeRepair1678106?.install)return !!rt.GensRpgRuntimeRepair1678106.install(rt)}catch(e){try{rt.console?.error?.("V106 runtime repair install",e)}catch(_){} }
     return false;
   }
-  function ensureRuntimeRepair(rt=R){
-    if(installRepair(rt))return true;
-    const D=rt?.document;if(!D?.createElement||repairLoading)return false;
-    repairLoading=true;
-    try{
-      const s=D.createElement("script");
-      s.src="assets/gensrpg/gens-rpg-runtime-repair-1678106.js?v=16.78.106";
-      s.async=false;
-      s.onload=()=>{repairLoading=false;installRepair(rt);setTimeout(()=>installRepair(rt),250);setTimeout(()=>installRepair(rt),1200)};
-      s.onerror=()=>{repairLoading=false;try{rt.console?.error?.("GenSrpG V106 runtime repair load failed")}catch(e){}};
-      (D.head||D.documentElement)?.appendChild?.(s);
-      return true;
-    }catch(e){repairLoading=false;return false}
-  }
+  function ensureRuntimeRepair(rt=R){return installRepair(rt)}
   function install(rt=R){
     if(!rt?.GensRpgTacticalCombatV2||!rt?.GensRpgTacticalCombatV2Adapter||!rt?.GensRpgTacticalCombatV2Ui)return false;
     rememberLegacy(rt.dc200StartCombat,"start");

@@ -1,4 +1,4 @@
-name: Validate V16.78.114.11 Armor + Melee Damage
+name: Validate V16.78.114.14 Clean Repair
 
 on:
   push:
@@ -19,6 +19,7 @@ on:
       - work/v16.78.114.10-hit-entry-wall
       - work/v16.78.114.11-armor-damage
       - work/v16.78.114.11-entry-test-align
+      - work/v16.78.114.14-clean-repair
       - main
   pull_request:
     branches:
@@ -33,9 +34,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Exact V114.14 sheet and Save Quit view authority
+        run: node tests/gens_ui_view_authority_v167811414.test.cjs
       - name: Syntax tactical runtime chain and canonical stats
         run: |
           node --check assets/gensrpg/gens-rpg-stats-clean-167874.js
+          node --check assets/gensrpg/gens-ui-recovery-167843.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js

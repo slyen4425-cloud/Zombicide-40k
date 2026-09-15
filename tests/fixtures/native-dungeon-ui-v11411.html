@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head><base href="/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V114.11 native Dungeon navigation</title>
+<style>html,body{margin:0;background:#111;color:#fff;font-family:sans-serif}main,section{padding:16px}#sheet,#home{display:none}.hero{padding:12px}.save{padding:12px}</style>
+<script>
+window.__globalObserverTargets=[];
+const NativeMutationObserver=window.MutationObserver;
+window.MutationObserver=class TrackingMutationObserver{
+  constructor(cb){this.inner=new NativeMutationObserver(cb)}
+  observe(target,opts){window.__globalObserverTargets.push(target===document.body?'body':target===document.documentElement?'html':target?.id||target?.className||target?.tagName||'other');return this.inner.observe(target,opts)}
+  disconnect(){return this.inner.disconnect()}
+  takeRecords(){return this.inner.takeRecords()}
+};
+window.__runtime={room:0,index:0,participants:['dungeon_aldren'],heroRooms:{dungeon_aldren:0},positions:{},heroBranchStates:{},branch:null,enemyCells:{},last:{kind:'entry',map:{size:5,cells:Array(25).fill('floor')}}};
+window.CHARS={dungeon_aldren:{name:'Aldren',dungeonBuiltin:true,image:'/assets/dungeon/creatures/dng_aldren.png'}};
+window.__states={dungeon_aldren:{wounds:0,rightHand:null,leftHand:null,inventory:[],rpgAttributes:{movement:3,initiative:10,defense:0,armor:0,force:5}}};
+window.localStorage.setItem('gensrpg_dungeon_runtime_v2',JSON.stringify(window.__runtime));
+window.loadDungeonState=()=>window.__runtime;window.dungeonParticipants=()=>window.__runtime.participants.slice();window.loadState=id=>window.__states[id]||{};window.loadActiveEnemies=()=>[];window.saveActiveEnemies=()=>{};
+window.isDungeonMode=()=>true;window.getActiveGameProfile=()=>({gameStyle:'dungeon',rpgUniverse:{combatRules:{rollHighToHit:true},movement:{combatAssistRange:3}}});window.currentRpgProfile=window.getActiveGameProfile;
+window.loadGameProfiles=()=>[];window.saveGameProfiles=()=>{};window.updateDungeonExploreButtons=()=>{};window.renderActiveEnemies=()=>{};window.dc200StartCombat=()=>false;window.openDungeonCombatSetup=()=>false;
+window.GensCleanRpgStats167874={runtimeDefs:()=>[{id:'movement',name:'Mouvement',defaultValue:3},{id:'force',name:'Force',defaultValue:0}],value:(id,stat)=>window.__states[id]?.rpgAttributes?.[stat]??0};
+window.current='dungeon_aldren';
+window.__native={open:0,close:0,quit:0,render:0};
+window.openChar=function(id){window.current=id;window.__native.open++;document.getElementById('gensDungeonCore01').style.display='none';document.getElementById('sheet').style.display='block';return true};
+window.closeChar=function(){window.__native.close++;document.getElementById('sheet').style.display='none';document.getElementById('gensDungeonCore01').style.display='block';return true};
+window.DungeonCore01={
+ render(){window.__native.render++;document.getElementById('gensDungeonCore01').style.display='block';return true},
+ show(){document.getElementById('gensDungeonCore01').style.display='block';return true},
+ quit(){window.__native.quit++;document.getElementById('gensDungeonCore01').style.display='none';document.getElementById('sheet').style.display='none';document.getElementById('home').style.display='block';return true}
+};
+</script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{window.GensRpgTacticalCombatV2Bridge?.install?.(window);setTimeout(()=>{window.__nativeUiReady=true},900)});
+</script>
+</head>
+<body>
+<main id="gensDungeonCore01"><button id="heroAldren" class="hero" onclick="openChar('dungeon_aldren')">Aldren</button><button id="saveQuit" class="save" onclick="DungeonCore01.quit()">Save & Quit</button><div id="dc047RoomBoard"></div></main>
+<section id="sheet"><h1>Fiche Aldren</h1><div id="stats">Stats / Compétences / Inventaire</div><button id="closeSheet" onclick="closeChar()">Retour</button></section>
+<section id="home"><h1>Accueil</h1></section>
+</body></html>

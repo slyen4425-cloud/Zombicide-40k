@@ -49,6 +49,9 @@ jobs:
       - name: Caractériser l'autorité de démarrage et des participants combat
         run: node tests/gens_combat_authority_characterization_v11411.test.cjs
 
+      - name: Vérifier le contrat unique d'entrée du Bridge Tactical
+        run: node tests/gens_bridge_single_entry_contract_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

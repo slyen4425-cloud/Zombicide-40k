@@ -1,14 +1,15 @@
 /* GenSrpG V16.78.114.14 — UI/PWA recovery + single Dungeon view authority.
    The Dungeon page, character sheet and root home are mutually exclusive views.
-   This fixes the real regression where an older Dungeon renderer re-showed exploration
-   immediately after openChar() or Save & Quit. No click interception is used. */
+   Exploration walls keep a dark native-cell fallback during redraw/zoom: no extra IMG,
+   no wall observer, no post-render injection. */
 (function(){
 "use strict";
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
-const VERSION="2.0.0",APP_VERSION="16.78.114.14";
+const VERSION="2.0.1",APP_VERSION="16.78.114.14";
 const STYLE_ID="gensUiRecovery167843Styles";
 const VIEW_ATTR="data-gens-dungeon-view";
+const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
 const BUILDER_MODALS=["drc300Modal","drc100Modal"];
 const TRAP_SCRIPT_ID="dungeonExactTrapRuntime167845Script";
 const ZONE_LINK_SCRIPT_ID="dungeonZoneLinks167846Script";
@@ -25,6 +26,16 @@ function ensureStyle(){
     body[${VIEW_ATTR}="home"] #gensDungeonCore01{display:none!important}
     body[${VIEW_ATTR}="home"] #sheet{display:none!important}
     body[${VIEW_ATTR}="home"] #gensRootHome{display:block!important}
+    #dc047RoomBoard,#dc047RoomBoard .dc047Grid{background-color:#0f0e0c!important}
+    #dc047RoomBoard .dc047Grid>.dc047Cell{background-color:#171512!important}
+    #dc047RoomBoard .dc047Grid>.dc047Cell.wall,
+    #dc047RoomBoard .dc047Grid>.dc047Cell.dav167870WallCell,
+    #dc047RoomBoard .dc047Grid>.dc047Cell.gtv2111WallCell,
+    #dc047RoomBoard .dc047Grid>.dc047Cell.gtv2112WallCell,
+    #dc047RoomBoard .dc047Grid>.dc047Cell.gtv2113Wall{
+      background-color:#171512!important;background-image:url("${WALL_ASSET}")!important;
+      background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important
+    }
   `;
   return true;
 }
@@ -100,6 +111,6 @@ function install(){
   return true;
 }
 function installWithRetries(){install();if(typeof setTimeout==="function")for(const ms of [50,200,700,1800,4000])setTimeout(install,ms);return true}
-ROOT.GenSrpGUiRecovery167843={VERSION,APP_VERSION,STYLE_ID,VIEW_ATTR,BUILDER_MODALS,TRAP_SCRIPT_ID,ZONE_LINK_SCRIPT_ID,ensureStyle,closeUnexpectedBuilderModals,setView,view,enforceView,dungeonVisible,patchOpenChar,patchDungeonCore,loadExactTrapRuntime,loadZoneLinksRuntime,install,installWithRetries,status:()=>({view:view(),patchedOpenChar,patchedDungeonCore})};
+ROOT.GenSrpGUiRecovery167843={VERSION,APP_VERSION,STYLE_ID,VIEW_ATTR,WALL_ASSET,BUILDER_MODALS,TRAP_SCRIPT_ID,ZONE_LINK_SCRIPT_ID,ensureStyle,closeUnexpectedBuilderModals,setView,view,enforceView,dungeonVisible,patchOpenChar,patchDungeonCore,loadExactTrapRuntime,loadZoneLinksRuntime,install,installWithRetries,status:()=>({view:view(),patchedOpenChar,patchedDungeonCore})};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",installWithRetries,{once:true});else installWithRetries()}else install();
 })();

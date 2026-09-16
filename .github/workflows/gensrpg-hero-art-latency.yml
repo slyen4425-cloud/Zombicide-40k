@@ -1,0 +1,24 @@
+name: GenSrpG hero art latency sentinel
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-hero-art-latency-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hero-art-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caractériser l'autorité des portraits personnalisés
+        run: node tests/gens_hero_art_custom_authority_v11411.test.cjs
+      - name: Verrouiller l'autorité historique de fiche héros
+        run: node tests/gens_single_hero_sheet_art_authority_v11411.test.cjs
+      - name: Vérifier le runtime de fiche héros
+        run: node tests/gens_hero_sheet_art_runtime_v11411.test.cjs
+      - name: Vérifier le bridge visuel Dungeon
+        run: node tests/gens_dungeon_hero_art_repair_v167874.test.cjs

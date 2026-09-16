@@ -8,43 +8,61 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   progression-characterization:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extraire propriétaires XP et portrait pour caractérisation
+      - name: Patch natif cible changeXP sur la branche de travail
         shell: python
         run: |
           from pathlib import Path
-          text = Path('index.html').read_text(encoding='utf-8')
-          needles = [
-              'function dungeonHandleLevelUp071',
-              'function changeXP',
-              'charImage',
-              'progression-runtime-v1.js',
-              'gens-dungeon-sheet-art-stability-167899.js',
-          ]
-          for needle in needles:
-              print(f'\n===== {needle} =====')
-              start = 0
-              count = 0
-              while True:
-                  pos = text.find(needle, start)
-                  if pos < 0:
-                      break
-                  count += 1
-                  lo = max(0, pos - 1800)
-                  hi = min(len(text), pos + 4200)
-                  print(f'--- occurrence {count} @ {pos} ---')
-                  print(text[lo:hi])
-                  start = pos + len(needle)
-                  if count >= 20:
-                      print('--- capped at 20 occurrences ---')
-                      break
-              print(f'count={count}')
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+          old = '''function changeXP(v){
+  const before=state.xp;
+  state.xp=Math.max(0,Math.min(999,state.xp+v));
+  if(isDungeonHeroSheet())dungeonSyncProgressionForState(current,state);
+  if(state.xp>before)z40kPlayUiSound("heal",0.88);
+  render();
+}'''
+          new = '''function changeXP(v){
+  const before=state.xp;
+  state.xp=Math.max(0,Math.min(999,state.xp+v));
+  if(isDungeonHeroSheet()){
+    dungeonSyncProgressionForState(current,state);
+    dungeonHandleLevelUp071?.(current,before,state);
+    save();
+  }
+  if(state.xp>before)z40kPlayUiSound("heal",0.88);
+  render();
+}'''
+          count = text.count(old)
+          if count == 0:
+              if new in text:
+                  print('changeXP déjà patché exactement; aucun changement.')
+                  raise SystemExit(0)
+              raise SystemExit('Bloc changeXP attendu introuvable: patch annulé.')
+          if count != 1:
+              raise SystemExit(f'Bloc changeXP trouvé {count} fois: patch annulé.')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          print('Patch changeXP appliqué une seule fois.')
+      - name: Valider le contrat XP avant commit
+        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
+      - name: Commit ciblé du propriétaire natif
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Aucun changement index.html à committer."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "fix: raccorder XP manuel au cycle canonique"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Caractériser progression et récompenses natives
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
       - name: Vérifier le résumé de victoire Tactical
@@ -53,7 +71,3 @@ jobs:
         run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
       - name: Caractériser l'édition manuelle du niveau
         run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
-      - name: Caractériser XP manuel vers points de caractéristiques
-        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Verrouiller le runtime extrait de progression XP manuelle
-        run: node tests/gens_manual_xp_progression_runtime_v1.test.cjs

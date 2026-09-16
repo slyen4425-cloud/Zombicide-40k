@@ -1,0 +1,18 @@
+name: GenSrpG progression characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-progression-victory-reconnect-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  progression-characterization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caractériser progression et récompenses natives
+        run: node tests/gens_progression_authority_characterization_v11411.test.cjs

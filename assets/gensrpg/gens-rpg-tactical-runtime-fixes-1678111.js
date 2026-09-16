@@ -22,7 +22,7 @@
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let installed=false,observer=null,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false;
+  let installed=false,observer=null,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false,uiRenderHooked=false;
   let lastDetectionStamp="",lastDetectionAt=0;
 
   function doc(rt=R){return rt?.document||null}
@@ -141,10 +141,11 @@
   function maintain(rt=R){maintenanceQueued=false;hideRuntimeTabs(rt);ensureDock(rt);paintDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintenanceQueued)return;maintenanceQueued=true;if(typeof requestAnimationFrame==="function")requestAnimationFrame(()=>maintain(rt));else setTimeout(()=>maintain(rt),0)}
   function observe(rt=R){const D=doc(rt);if(!D?.body||typeof MutationObserver==="undefined")return false;if(observer)return true;observer=new MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
+  function hookUiRender(rt=R){const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg111DockRefresh){uiRenderHooked=true;return true}const wrapped=function(){const out=old.apply(this,arguments);try{maintain(rt)}catch(e){}return out};wrapped.__gensRpg111DockRefresh=true;wrapped.__original=old;U.render=wrapped;uiRenderHooked=true;return true}
 
-  function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookMultiDice(rt);bindClicks(rt);const b=currentBattle(rt);if(b)refreshBattleAttacks(rt,b);maintain(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_FIXES_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}
+  function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookMultiDice(rt);bindClicks(rt);hookUiRender(rt);const b=currentBattle(rt);if(b)refreshBattleAttacks(rt,b);maintain(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_FIXES_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WALL_SIZE,MAX_ATTACK_DICE,attackDice,preserveDiceTag,refreshBattleAttacks,hookAdapter,hookMultiDice,runtimeState,heroCells,enemyRange,detectionEnemyIds,scanDetection,hookDetection,paintWalls,hideRuntimeTabs,ensureDock,paintDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,rulesHooked,detectionHooked})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,WALL_SIZE,MAX_ATTACK_DICE,attackDice,preserveDiceTag,refreshBattleAttacks,hookAdapter,hookMultiDice,runtimeState,heroCells,enemyRange,detectionEnemyIds,scanDetection,hookDetection,paintWalls,hideRuntimeTabs,ensureDock,paintDiceOverlay,hookUiRender,install,installWithRetries,status:()=>({installed,adapterHooked,rulesHooked,detectionHooked,uiRenderHooked})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

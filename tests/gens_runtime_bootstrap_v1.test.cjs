@@ -7,13 +7,14 @@ const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets/gensrpg/core/runtime-bootstrap-v1.js'),'utf8');
 const loaded=[];
 const timers=[];
-let survivalInstalls=0,bridgeInstalls=0;
+let progressionInstalls=0,survivalInstalls=0,bridgeInstalls=0;
 
 const head={appendChild(s){loaded.push(s.src);if(typeof s.onload==='function')s.onload();return s}};
 const document={head,documentElement:head,createElement(tag){assert.equal(tag,'script');return {src:'',async:true,onload:null,onerror:null}}};
 const sandbox={
   console,document,
   setTimeout(fn,ms){timers.push(ms);if(typeof fn==='function')fn();return timers.length},
+  GensRpgProgressionRuntimeV1:{install(){progressionInstalls++}},
   GensSurvivalModeIsolation1678104:{install(){survivalInstalls++}},
   GensRpgTacticalCombatV2Bridge:{install(){bridgeInstalls++}}
 };
@@ -22,6 +23,7 @@ vm.createContext(sandbox);
 vm.runInContext(src,sandbox,{filename:'runtime-bootstrap-v1.js'});
 
 const expected=[
+  'assets/gensrpg/dungeon/progression-runtime-v1.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
@@ -30,8 +32,9 @@ const expected=[
   'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
   'assets/gensrpg/gens-survival-mode-isolation-1678104.js?v=16.78.105'
 ];
-assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve the exact historical base load order');
+assert.deepEqual(loaded,expected,'RuntimeBootstrap must load extracted progression first and preserve Tactical/Survival order');
 assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical loader guard must remain active');
+assert.equal(progressionInstalls,4,'progression runtime must keep deterministic immediate + 3 retry install attempts');
 assert.equal(survivalInstalls,4,'Survival isolation must keep immediate + 3 retry installs');
 assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
 assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap retry timings must remain unchanged');
@@ -42,4 +45,4 @@ const before=loaded.length;
 sandbox.GensRuntimeBootstrapV1.install();
 assert.equal(loaded.length,before,'RuntimeBootstrap install must be idempotent after the guard is set');
 
-console.log('GenSrpG RuntimeBootstrap V1 load order + idempotence OK');
+console.log('GenSrpG RuntimeBootstrap V1 progression + Tactical + Survival load order and idempotence OK');

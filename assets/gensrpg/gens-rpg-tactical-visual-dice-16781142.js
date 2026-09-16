@@ -104,6 +104,15 @@
     if(physicalType(type))return {...resolvePhysicalDamage(rt,state,attacker,target,attack,preview,forcedArmorRoll),damageType:"physical"};
     return {baseWeaponDamage:Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0)),statDamageBonus:0,rawDamage:Math.max(0,num(preview?.rawDamage??attack?.power,preview?.damage??0)),armor:0,damage:Math.max(0,num(preview?.damage,0)),armorZeroBlockChance:0,armorRoll:null,armorBlocked:false,armorFloorTriggered:false,damageType:type};
   }
+  function damageCalculationFormula(result){
+    if(!result?.hit)return "Aucun dégât : attaque ratée.";
+    const base=Math.max(0,num(result.baseWeaponDamage,result.rawDamage??result.damagePerHit??0)),bonus=num(result.statDamageBonus,0),raw=Math.max(0,num(result.rawDamage,base+bonus)),armor=Math.max(0,num(result.armor,0)),perHit=Math.max(0,num(result.damagePerHit,result.damage??0)),hits=Math.max(1,Math.round(num(result.hits,1))),total=Math.max(0,num(result.damage,perHit*hits));
+    const left=bonus?`Puissance arme ${base} + bonus stat ${bonus} = ${raw} brut`:`Puissance arme ${base} = ${raw} brut`;
+    let out=left;if(str(result.damageType||"physical")==="physical"&&armor>0)out+=` − armure ${armor}`;out+=` = ${perHit} dégât(s) par touche`;
+    if(hits>1)out+=` ; ${hits} touche(s) = ${total} dégâts infligés`;else out+=` ; ${total} dégât(s) infligé(s)`;
+    if(result.armorFloorTriggered)out+=result.armorBlocked?" ; blocage d’armure réussi":" ; plancher d’armure : 1 dégât minimum";
+    return out+".";
+  }
 
   function patchHitResolver(rt=R){
     const E=engine(rt);if(!E?.attackPreview||!E?.currentActor||!E?.actorById||!E?.refreshOutcome)return false;
@@ -173,7 +182,7 @@
     try{rt.GENS_RPG_TACTICAL_VISUAL_DICE_VERSION=APP_VERSION}catch(e){}installed=true;return true;
   }
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,armorRules,resolvePhysicalDamage,resolveDamagePerHit,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:false,uiRenderPatched:false,mapPatched:false,corePatched:false,hitPatched,menuBound,uiOpenPatched,transitionCount})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,armorRules,resolvePhysicalDamage,resolveDamagePerHit,damageCalculationFormula,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:false,uiRenderPatched:false,mapPatched:false,corePatched:false,hitPatched,menuBound,uiOpenPatched,transitionCount})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

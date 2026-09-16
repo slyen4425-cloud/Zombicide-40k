@@ -6,6 +6,9 @@
   const api=factory(root||globalThis);
   if(typeof module!=="undefined"&&module.exports)module.exports=api;
   if(root)root.GensRpgProgressionRuntimeV1=api;
+  if(root&&root.document&&typeof api?.install==="function"){
+    try{api.install(root)}catch(e){try{root.console?.error?.("GenSrpG progression runtime install",e)}catch(_){} }
+  }
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
   const VERSION="1.0.0",APP_VERSION="16.78.114.11-progression-runtime-1";

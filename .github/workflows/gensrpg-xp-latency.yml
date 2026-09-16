@@ -1,0 +1,24 @@
+name: GenSrpG XP latency sentinel
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-xp-portrait-latency-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  xp-latency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caractériser le découplage XP du bootstrap Tactical
+        run: node tests/gens_progression_bootstrap_decoupling_v11411.test.cjs
+      - name: Verrouiller le runtime XP manuel existant
+        run: node tests/gens_manual_xp_progression_runtime_v1.test.cjs
+      - name: Caractériser l'autorité progression
+        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
+      - name: Caractériser XP vers points de caractéristiques
+        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs

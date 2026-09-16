@@ -28,11 +28,23 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       const patched=api.patchDungeonMapHtml();
       const html=window.dungeonMapHtml(window.__runtime.last.map);
       const tpl=document.createElement('template');tpl.innerHTML=html;const patchedWalls=[...tpl.content.querySelectorAll('.gtv2WallOwner > .gtv2WallTile')].length;
-      return {asset:api.WALL_ASSET,rows,patched,patchedWalls};
+
+      window.DungeonCore01={render(){board.innerHTML='<div class="dc047Grid"><div id="lateWall" class="dc047Cell"></div><div class="dc047Cell"></div></div>';return true}};
+      api.installGlobalPolish();
+      window.DungeonCore01.render();
+      const late=document.getElementById('lateWall'),lateTiles=[...late.querySelectorAll(':scope > .gtv2WallTile')],lateImg=lateTiles[0]||null;
+      if(lateImg&&typeof lateImg.decode==='function')await lateImg.decode().catch(()=>{});
+      const lateRender={count:lateTiles.length,owner:late.classList.contains('gtv2WallOwner'),src:lateImg?.getAttribute('src')||'',naturalWidth:Number(lateImg?.naturalWidth||0)};
+      return {asset:api.WALL_ASSET,rows,patched,patchedWalls,lateRender};
     });
     assert.equal(result.asset,'assets/dungeon/creatures/dng_wall_block.jpg');
     for(const row of result.rows){assert.equal(row.count,1,`${row.id}: canonical wall painter must keep exactly one direct wall tile`);assert.equal(row.owner,true,`${row.id}: canonical owner class missing`);assert.equal(row.src,'assets/dungeon/creatures/dng_wall_block.jpg',`${row.id}: wrong wall asset`);assert.equal(row.complete,true,`${row.id}: wall image did not finish loading`);assert.ok(row.naturalWidth>0,`${row.id}: wall asset failed to decode`);assert.match(row.background,/dng_wall_block\.jpg/,`${row.id}: canonical wall background missing`)}
-    assert.equal(result.patched,true);assert.equal(result.patchedWalls,1,'Dungeon HTML patch must inject one canonical wall tile for one wall cell');assert.deepEqual(errors,[],'wall sentinel browser console/page errors');
-    console.log(JSON.stringify({scenario:'V114.11 canonical Tactical walls',viewport:'412x915 @2.625 touch',asset:result.asset,walls:result.rows.map(r=>({id:r.id,tiles:r.count,naturalWidth:r.naturalWidth})),patchedWalls:result.patchedWalls}));
+    assert.equal(result.patched,true);assert.equal(result.patchedWalls,1,'Dungeon HTML patch must inject one canonical wall tile for one wall cell');
+    assert.equal(result.lateRender.count,1,'a late Dungeon render must be post-painted by the canonical wall authority');
+    assert.equal(result.lateRender.owner,true,'late Dungeon wall must receive the canonical owner class');
+    assert.equal(result.lateRender.src,'assets/dungeon/creatures/dng_wall_block.jpg','late Dungeon wall must use the canonical wall asset');
+    assert.ok(result.lateRender.naturalWidth>0,'late Dungeon wall asset must decode');
+    assert.deepEqual(errors,[],'wall sentinel browser console/page errors');
+    console.log(JSON.stringify({scenario:'V114.11 canonical Tactical walls including late Dungeon render',viewport:'412x915 @2.625 touch',asset:result.asset,walls:result.rows.map(r=>({id:r.id,tiles:r.count,naturalWidth:r.naturalWidth})),patchedWalls:result.patchedWalls,lateRender:result.lateRender}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -14,10 +14,14 @@ function scriptBody(id){
 
 const core=scriptBody('dungeonCore201Stability');
 
-assert.match(core,/GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:ids,reason:["']manual["'],entry:["']dc200StartCombat["']\}\)/,
-  'Core 2.01 same-room ENGAGER LE COMBAT must call the canonical Bridge directly with the existing enemy ids and manual reason');
-assert.match(core,/GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:\[String\(on\.id\)\],reason:["']cell["'],entry:["']dc200StartCombat["']\}\)/,
-  'Core 2.01 ATTAQUER must call the canonical Bridge directly with the targeted enemy id and cell reason');
+assert.match(core,/function\s+requestCombat201\s*\(enemyIds,reason\)/,
+  'Core 2.01 must use one local stateless helper for its two encounter buttons');
+assert.match(core,/GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:Array\.isArray\(enemyIds\)\?enemyIds\.map\(String\):\[\],reason:reason,entry:["']dc200StartCombat["']\}\)/,
+  'Core 2.01 local helper must forward only enemyIds and reason to the canonical Bridge while preserving the historical diagnostic entry');
+assert.match(core,/requestCombat201\([^\n]*JSON\.stringify\(ids\)[^\n]*manual/,
+  'same-room ENGAGER LE COMBAT must preserve its full enemy id list and manual reason');
+assert.match(core,/requestCombat201\([^\n]*String\(on\.id\)[^\n]*cell/,
+  'positional ATTAQUER must preserve the enemy on the active hero cell and cell reason');
 assert.doesNotMatch(core,/\bdc200StartCombat\s*\(/,
   'Core 2.01 must no longer depend on the historical dc200StartCombat adapter');
 
@@ -26,4 +30,4 @@ assert.match(core,/const positional=movementEnabled201\(\)/,
 assert.match(core,/const on=live\.find\(e=>Number\(x\.enemyCells\?\.\[e\.id\]\)===pos\)/,
   'Core 2.01 must still target only the enemy on the active hero cell in positional mode');
 
-console.log('GenSrpG combat migration lot 4A OK: Core 2.01 encounter buttons -> Bridge.requestCombat');
+console.log('GenSrpG combat migration lot 4A OK: Core 2.01 encounter buttons -> canonical Bridge');

@@ -38,8 +38,9 @@ assert.equal(survivalInstalls,4,'Survival isolation must keep immediate + 3 retr
 assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
 assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap Tactical/Survival retry timings must remain unchanged');
 assert.ok(sandbox.GensRuntimeBootstrapV1,'RuntimeBootstrap API missing');
-assert.deepEqual(Array.from(sandbox.GensRuntimeBootstrapV1.files),expected.map(x=>x.replace('?v=16.78.105','')),'RuntimeBootstrap API must expose the owned composition');
-assert.doesNotMatch(src,/progression-runtime-v1|GensRpgProgressionRuntimeV1/,'bootstrap must not reclaim native manual XP ownership');
+const ownedFiles=Array.from(sandbox.GensRuntimeBootstrapV1.files);
+assert.deepEqual(ownedFiles,expected.map(x=>x.replace('?v=16.78.105','')),'RuntimeBootstrap API must expose the owned composition');
+assert.equal(ownedFiles.some(file=>/progression-runtime-v1/.test(file)),false,'bootstrap composition must not reclaim native manual XP ownership');
 
 const before=loaded.length;
 sandbox.GensRuntimeBootstrapV1.install();

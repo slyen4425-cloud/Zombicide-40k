@@ -15,15 +15,17 @@ assert.match(sw,/gensrpg-cache-16\.78\.100-ui-cleanup/);
 assert.ok(sw.includes('gens-dungeon-hero-ingame-art-167898.js'));
 assert.ok(sw.includes('gens-stat-upgrade-policy-167898.js'));
 
-// Built-in art must repair every source commonly used by game renderers, not only selection image/avatar.
-const chars={dungeon_aldren:{name:'Aldren',image:'old.png',avatar:'old2.png',portrait:'',art:'',image_data:'',token:''}};
-const artCtx={console,setTimeout,clearTimeout,requestAnimationFrame:f=>f(),CHARS:chars,current:'dungeon_aldren'};artCtx.window=artCtx;artCtx.globalThis=artCtx;
+// In-game art repair must use canonical hero data and keep built-in art only as a fallback.
+const custom='data:image/png;base64,ALDREN_CUSTOM';
+const chars={dungeon_aldren:{name:'Aldren',image:custom,avatar:custom,portrait:custom,art:'',image_data:'',token:''}};
+const artCtx={console,CHARS:chars,current:'dungeon_aldren'};artCtx.window=artCtx;artCtx.globalThis=artCtx;
 vm.createContext(artCtx);vm.runInContext(artSrc,artCtx);
-const artApi=artCtx.GensDungeonHeroIngameArt167898;assert.ok(artApi);artApi.repairDefs();
-for(const key of artApi.FIELDS)assert.equal(chars.dungeon_aldren[key],'assets/dungeon/creatures/dng_aldren.png','Aldren art field '+key+' must be pinned');
+const artApi=artCtx.GensDungeonHeroIngameArt167898;assert.ok(artApi);assert.equal(artApi.repairDefs(),0);
+assert.equal(chars.dungeon_aldren.image,custom,'custom canonical art must not be pinned back to built-in');
+assert.equal(artApi.canonicalArt('dungeon_aldren'),custom);
 const fakeImg={tagName:'IMG',attrs:{src:'broken.png'},style:{display:'none'},hidden:true,getAttribute(k){return this.attrs[k]||''},setAttribute(k,v){this.attrs[k]=v;if(k==='src')this.src=v}};
 assert.ok(artApi.ensureTokenArt(fakeImg,'dungeon_aldren')>=1);
-assert.equal(fakeImg.attrs.src,'assets/dungeon/creatures/dng_aldren.png');
+assert.equal(fakeImg.attrs.src,custom);
 assert.equal(fakeImg.hidden,false);
 
 // Movement: default 10 characteristic points for +1, configurable and lockable.
@@ -43,4 +45,4 @@ assert.equal(ctx.changeDungeonAttribute('movement',1),true);assert.equal(st.rpgA
 assert.equal(ctx.changeDungeonAttribute('movement',1),true);assert.equal(st.rpgAttributes.movement,5);assert.equal(st.rpgStatSpent,20);assert.equal(st.statPoints,0);
 assert.equal(ctx.changeDungeonAttribute('movement',1),false);assert.equal(st.rpgAttributes.movement,5);
 pApi.savePolicy('movement',{enabled:false,cost:10});assert.equal(ctx.changeDungeonAttribute('movement',-1),false,'locked stat must block +/-');
-console.log('V16.78.100 compatibility guard: in-game Aldren map art + configurable stat lock/cost + Movement 10 points OK');
+console.log('V16.78.100 compatibility guard: canonical in-game hero art + configurable stat lock/cost + Movement 10 points OK');

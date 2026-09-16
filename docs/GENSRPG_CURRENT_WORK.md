@@ -2,102 +2,120 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — XP manuel + portrait fiche héros
+## Chantier courant — migration des points d'entrée combat, lot UI manuel 1
 
-- Branche de travail : `work/gensrpg-xp-portrait-cleanfix-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-xp-portrait-cleanfix-2026-09-16`
-- Base exacte : `84344017659cc909ded580bc39d0c8d103deb5df`
-- Checkpoint vert de départ : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
+- Branche de travail : `work/gensrpg-combat-callsite-migration-1-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-2026-09-16`
+- Base exacte : `695be0e029fb49ee70966729474b35aa0a2d9c63`
+- Checkpoint vert précédent : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 
-## Périmètre strict
+## Validation utilisateur du jalon précédent
 
-Deux régressions seulement sont traitées dans ce chantier :
+Le 16/09/2026, la preview figée sur `695be0e029fb49ee70966729474b35aa0a2d9c63` a été retestée sur Firefox par l'utilisateur :
 
-1. les boutons XP manuel `+/-` de la fiche héros doivent passer par le cycle canonique de progression déjà existant, y compris level-up et persistance ;
-2. le portrait de la fiche doit être rendu par son propriétaire natif et ne plus être repris ensuite par une ancienne couche visuelle concurrente.
+- arts / portrait fiche héros : corrigés ;
+- XP manuel / progression : corrigés ;
+- aucune publication sur `main`.
 
-Aucun changement de règles de progression, seuils XP, calculs de stats, combat, déplacement, navigation globale, cache/PWA ou World Builder n'est autorisé dans ce chantier.
+Le jalon XP + portrait est donc fermé. Il ne doit pas être rouvert dans le chantier courant.
 
-## Propriétaires retenus
+## Périmètre strict du chantier courant
 
-### XP manuel
+Ce premier lot de migration combat ne traite que les deux boutons UI natifs suivants :
 
-- propriétaire : `changeXP()` dans le runtime natif de la fiche ;
-- systèmes existants à réutiliser : `dungeonSyncProgressionForState`, `dungeonHandleLevelUp071`, `save()` et le rendu natif ;
-- interdiction : ne pas installer un second `changeXP`, wrapper permanent, observer, retry ou boucle de maintenance pour rattraper le résultat.
+1. `#dungeonCombatMenuBtn` — bouton « ENGAGER LE COMBAT » ;
+2. `#dungeonCombatSheetBtn` — bouton « Combat RPG » de la fiche.
 
-### Portrait de fiche
+Aujourd'hui, ces deux boutons appellent encore l'adaptateur historique global `openDungeonCombatSetup()`.
 
-- propriétaire : rendu natif de la fiche qui écrit `charImage` ;
-- resolver d'art existant à réutiliser ;
-- interdiction : aucune couche chargée après le rendu ne doit réécrire `#charImage`, wrapper l'ouverture/rendu de la fiche ou utiliser des retries pour reprendre cette autorité.
+Cible : ils doivent appeler directement l'unique contrat du Bridge :
 
-Les correctifs visuels du plateau/pions qui n'écrivent pas la fiche restent hors périmètre et doivent être préservés.
+`GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`
 
-## État caractérisé avant correction
+avec `reason: "manual-setup"` et une valeur `entry` propre à chaque bouton.
 
-### XP
+## Propriétaires et systèmes réutilisés
 
-Le `changeXP()` natif modifie bien `state.xp`, appelle `dungeonSyncProgressionForState(current, state)`, joue le son puis rend la fiche. En revanche il ne raccorde pas actuellement le résultat `leveled` à `dungeonHandleLevelUp071` et ne persiste pas directement via `save()`.
+- propriétaire du routage combat : `GensRpgTacticalCombatV2Bridge.requestCombat()` ;
+- autorité de scope / participants : V113 via le Bridge ;
+- moteur / UI combat : Tactical V2 existant ;
+- retour exploration : contrat existant du Bridge ;
+- aucun nouveau helper global, wrapper, observer, timer, retry ou renderer n'est autorisé.
 
-Les récompenses de combat possèdent déjà le chemin canonique attendu : sync progression -> traitement level-up -> persistance. Ce chemin existant doit être réutilisé, pas réinventé.
+## Fonctions et comportements protégés — interdiction de toucher dans ce lot
 
-Le fichier `assets/gensrpg/dungeon/progression-runtime-v1.js` installe encore un wrapper de `changeXP`. Il peut servir de trace historique mais ne doit pas devenir l'autorité finale du correctif.
+- `dc200StartCombat()` ;
+- `startCombat()` ;
+- `launchCombat200()` ;
+- détection automatique ;
+- embuscades ;
+- furtivité / échec de furtivité ;
+- sélection et renforts ennemis ;
+- règles de participants V113 ;
+- mode MJ ;
+- calculs stats / touche / dégâts / armure / résistances ;
+- XP, récompenses et loot ;
+- navigation, fiche héros, Save & Quit ;
+- déplacement Dungeon ;
+- cache/PWA ;
+- Survie, Capture, PvP et World Builder.
 
-### Portrait
+## État caractérisé avant modification
 
-`assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js` écrit directement `#charImage`, wrappe plusieurs fonctions de fiche et tente de réinstaller ses hooks avec des timers. `assets/gensrpg/gens-dungeon-hero-art-repair-167874.js` référence encore ce module via `SHEET_ART_SRC`.
+Inventaire actuel dans `index.html` :
 
-Cette chaîne constitue une autorité concurrente de la fiche et doit être supprimée du chemin de fiche de manière soustractive, tout en conservant les responsabilités visuelles réellement utiles au plateau.
+- `dc200StartCombat` : 13 occurrences ;
+- `openDungeonCombatSetup` : 17 occurrences ;
+- `launchCombat200` : 2 occurrences ;
+- `startCombat` : 6 occurrences.
 
-## Fonctions / zones protégées touchées
+Les deux boutons du lot courant représentent exactement 2 des 17 occurrences de `openDungeonCombatSetup`.
 
-- `changeXP()` natif ;
-- traitement canonique de level-up uniquement par appel, sans modifier sa règle ;
-- persistance uniquement par l'API existante ;
-- rendu natif du portrait de fiche / `charImage` ;
-- bootstrap visuel uniquement pour retirer l'ancienne autorité de fiche si nécessaire.
+Après migration, le compteur attendu doit devenir :
 
-## Tests exigés avant validation
+- `openDungeonCombatSetup` : 15 ;
+- tous les autres compteurs inchangés.
 
-### XP
+## Tests exigés avant checkpoint vert
 
-- exécuter le vrai `changeXP()` extrait du runtime, pas une fonction simulée injectant le résultat ;
-- vérifier qu'un gain sans niveau persiste et rend correctement ;
-- vérifier qu'un gain avec niveau appelle une seule fois le traitement canonique avec le bon `beforeLevel`, attribue les points via le moteur existant, persiste puis rend ;
-- vérifier qu'une baisse XP ne fabrique aucun level-up ;
-- vérifier qu'aucun wrapper parallèle de `changeXP()` n'est nécessaire à l'autorité finale.
-
-### Portrait
-
-- vérifier que le rendu natif choisit immédiatement le portrait du héros courant lors d'un changement de héros ;
-- vérifier qu'aucun module aval ne réécrit `#charImage` ou ne wrappe les fonctions de fiche ;
-- attendre au-delà des anciennes fenêtres de retry et confirmer que le portrait reste celui du héros courant ;
-- vérifier séparément que les visuels/pions Dungeon encore nécessaires restent fonctionnels.
-
-### Inter-modules / architecture
-
-- sentinelles architecture globales vertes ;
-- tests Stats du checkpoint précédent toujours verts ;
-- aucune nouvelle MutationObserver globale, timer permanent, renderer concurrent, seconde source de vérité ou auto-réparation ajoutée.
+- test dédié des deux boutons réels : ils doivent appeler directement `requestCombat(window, ...)` ;
+- `reason` doit rester `manual-setup` ;
+- chaque bouton doit fournir une `entry` identifiable ;
+- les deux boutons ne doivent plus référencer `openDungeonCombatSetup` ;
+- test du contrat Bridge unique vert ;
+- inventaire de dette mis à jour de 17 vers 15 uniquement ;
+- sentinelles V112/V113/Bridge vertes ;
+- architecture globale verte ;
+- Chromium / preview verte ;
+- Firefox wall sentinel verte ;
+- aucune autre occurrence historique ne doit changer dans ce lot.
 
 ## Risque inter-module principal
 
-Le bridge Hero Art mélange encore historique de fiche et corrections visuelles du plateau. La suppression doit viser uniquement l'autorité concurrente de la fiche ; elle ne doit pas retirer les resolvers/images utilisés légitimement par les pions Dungeon.
+Le risque est de court-circuiter le scope V113 en lançant Tactical directement depuis l'UI. Le bouton ne doit donc jamais appeler l'UI Tactical ni le moteur Tactical lui-même : il passe exclusivement par `GensRpgTacticalCombatV2Bridge.requestCombat()`, qui conserve le filtrage Dungeon, participants, ennemis et retour exploration.
 
 ## Séquence de travail
 
-1. caractériser précisément `dungeonHandleLevelUp071` et le rendu natif de `charImage` ;
-2. corriger `changeXP()` dans son propriétaire natif, avec test de raccord réel ;
-3. valider ce jalon XP avant de toucher au portrait ;
-4. supprimer de façon soustractive l'autorité concurrente de fiche et valider le portrait ;
-5. relancer sentinelles architecture + Stats + navigateur ;
-6. créer un checkpoint vert seulement sur le SHA final entièrement validé.
+1. figer le test des deux boutons avant correction ;
+2. remplacer uniquement leurs deux `onclick` ;
+3. diminuer l'inventaire `openDungeonCombatSetup` de 17 à 15 ;
+4. relancer Bridge + inventaire + architecture + navigateurs ;
+5. créer un checkpoint vert ;
+6. seulement ensuite choisir un autre petit groupe homogène de points d'entrée historiques.
 
-## Chantier précédent — éditeur de statistiques (vert)
+## Chantier précédent — XP manuel + portrait fiche héros (vert)
 
-Le correctif Stats est terminé au checkpoint `84344017659cc909ded580bc39d0c8d103deb5df` : le renderer Stats canonique reste l'unique renderer riche, la policy ne fait que décorer les cartes, et le bridge Hero Art ne wrappe plus le cycle Stats. Ce chantier ne doit pas être rouvert ici.
+Checkpoint final : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` sur `695be0e029fb49ee70966729474b35aa0a2d9c63`.
+
+Résultat :
+
+- `changeXP()` natif reste propriétaire du XP manuel et passe par le moteur canonique de progression ;
+- aucun runtime progression parallèle n'est chargé ;
+- le portrait de fiche possède une seule autorité active ;
+- anciennes couches de réparation de fiche neutralisées sans retirer les arts du plateau ;
+- architecture, Chromium, Firefox et progression verts ;
+- validation utilisateur Firefox positive sur arts + XP.
 
 ## Règle permanente de continuité
 

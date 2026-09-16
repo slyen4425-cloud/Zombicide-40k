@@ -76,9 +76,12 @@ assert.match(source,/const WALL_SIZE="cover"/,'wall sizing must match Builder fl
 assert.match(source,/function paintDiceOverlay\(rt=R\)\{return false\}/,'V111 visual dice renderer must stay retired');
 assert.match(source,/drc100Launcher/,'runtime creator tab must be removable during play');
 assert.match(source,/data-v111-attack/,'fixed Attack dock must be maintained independently of tactical rerenders');
+assert.match(source,/function hookUiRender\(rt=R\)/,'V111 dock must have an explicit event-driven Tactical UI render hook');
+assert.match(source,/old\.apply\(this,arguments\).*maintain\(rt\)/s,'V111 Tactical UI render hook must refresh the dock after each canonical render');
+assert.match(source,/function install\(rt=R\)\{[^}]*hookUiRender\(rt\)/s,'V111 install must activate the deterministic UI render hook without a global observer');
 assert.match(source,/applyDungeonTurnEvent/,'event/ambush path must schedule an immediate detection scan');
 assert.match(integration,/gens-rpg-tactical-runtime-fixes-1678111\.js\?v=16\.78\.111/,'V111 must load after V110');
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-fixes-1678111\.js/);
 
-console.log('V16.78.111 weapon multi-dice + dock + detection preserved; V114.6 owns direct cover wall and single visual dice flow: OK');
+console.log('V16.78.111 weapon multi-dice + deterministic dock + detection preserved; no global observer required: OK');

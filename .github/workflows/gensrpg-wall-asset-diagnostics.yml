@@ -1,0 +1,41 @@
+name: GenSrpG wall asset diagnostics
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-damage-display-2026-09-16'
+    paths:
+      - '.github/workflows/gensrpg-wall-asset-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-wall-asset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspecter le JPEG mural canonique
+        run: |
+          set -eux
+          WALL='assets/dungeon/creatures/dng_wall_block.jpg'
+          ls -lh "$WALL"
+          file "$WALL"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/dungeon/creatures/dng_wall_block.jpg')
+          b=p.read_bytes()
+          print('size=',len(b))
+          print('first16=',b[:16].hex())
+          print('last32=',b[-32:].hex())
+          print('SOI=',b[:2]==b'\xff\xd8')
+          print('EOI=',b[-2:]==b'\xff\xd9')
+          print('EOI_count=',b.count(b'\xff\xd9'))
+          print('PNG_magic=',b.startswith(b'\x89PNG\r\n\x1a\n'))
+          assert b[:2]==b'\xff\xd8', 'wall asset is not a JPEG SOI'
+          assert b[-2:]==b'\xff\xd9', 'wall JPEG has no final EOI marker (truncated)'
+          PY
+      - name: Vérifier le décodage système si ImageMagick est disponible
+        run: |
+          if command -v identify >/dev/null 2>&1; then identify -verbose assets/dungeon/creatures/dng_wall_block.jpg | head -80; else echo 'identify unavailable'; fi

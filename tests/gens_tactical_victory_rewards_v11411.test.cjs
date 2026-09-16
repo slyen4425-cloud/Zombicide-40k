@@ -16,9 +16,10 @@ const html=B.rewardSummaryHtml(rt,{rewards:[
   {enemyId:'skeleton',killerId:'dungeon_aldren',xp:{total:5,shares:[{id:'dungeon_aldren',xp:3},{id:'dungeon_lyra',xp:2}]},drops:[{itemId:'coin',name:'Pièce ancienne',qty:1}]},
   {enemyId:'skeleton2',killerId:'dungeon_aldren',xp:{total:5,shares:[{id:'dungeon_aldren',xp:3},{id:'dungeon_lyra',xp:2}]},drops:[{itemId:'coin',name:'Pièce ancienne',qty:2}]}
 ]});
-assert.match(html,/Aldren[^<]*\+6 XP/,'victory summary must aggregate Aldren XP');
-assert.match(html,/Lyra[^<]*\+4 XP/,'victory summary must aggregate Lyra XP');
-assert.match(html,/Pièce ancienne[^<]*×3/,'victory summary must aggregate identical drops');
+const visible=html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+assert.match(visible,/Aldren\s*:\s*⭐\s*\+6 XP/,'victory summary must aggregate Aldren XP');
+assert.match(visible,/Lyra\s*:\s*⭐\s*\+4 XP/,'victory summary must aggregate Lyra XP');
+assert.match(visible,/Pièce ancienne\s*×3/,'victory summary must aggregate identical drops');
 
 assert.match(bridge,/showOutcomeModal/,'bridge must own presentation of the committed Tactical result back in Dungeon');
 assert.match(bridge,/DungeonCore01\?\.modal/,'bridge must reuse the existing Dungeon modal instead of creating a second victory UI system');

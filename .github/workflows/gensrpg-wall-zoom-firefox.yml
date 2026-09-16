@@ -21,10 +21,21 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Installer Firefox et le lecteur PNG de test
+      - name: Installer Firefox et les outils de test
         run: |
           npm install --no-save playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps firefox
+          python3 -m pip install --quiet pillow
+
+      - name: Convertir la texture murale JPG en PNG de diagnostic
+        run: |
+          python3 - <<'PY'
+          from PIL import Image
+          src='assets/dungeon/creatures/dng_wall_block.jpg'
+          dst='assets/dungeon/creatures/dng_wall_block_converted_test.png'
+          with Image.open(src) as im:
+              im.convert('RGBA').save(dst, 'PNG', optimize=True)
+          PY
 
       - name: Reproduire l'explication dégâts du test manuel
         continue-on-error: true

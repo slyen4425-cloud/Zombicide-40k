@@ -34,6 +34,9 @@ jobs:
       - name: Vérifier l'autorité UI Dungeon native V114.11
         run: node tests/gens_v11411_native_ui_authority.test.cjs
 
+      - name: Verrouiller l'unique autorité d'image de fiche héros
+        run: node tests/gens_single_hero_sheet_art_authority_v11411.test.cjs
+
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 

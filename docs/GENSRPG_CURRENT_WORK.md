@@ -2,71 +2,102 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — régression éditeur de statistiques
+## Chantier courant — XP manuel + portrait fiche héros
 
-- Branche de travail : `work/gensrpg-stats-editor-regression-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-stats-editor-regression-2026-09-16`
-- Base exacte : `8d35fc5bbff9d30ee146d72c8ab7e34c68d16d90`
-- Dernier checkpoint vert utilisateur : `checkpoint/gensrpg-wall-zoom-damage-display-green-2026-09-16`
-- Checkpoint vert cible : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
+- Branche de travail : `work/gensrpg-xp-portrait-cleanfix-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-xp-portrait-cleanfix-2026-09-16`
+- Base exacte : `84344017659cc909ded580bc39d0c8d103deb5df`
+- Checkpoint vert de départ : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 
-## Symptôme manuel
+## Périmètre strict
 
-Dans Réglages RPG > Statistiques, seuls les anciens interrupteurs/cases à cocher restaient visibles. Les paramètres détaillés d'une stat et les effets configurables avaient disparu de l'interface finale, empêchant par exemple d'ajouter un effet `Dégâts mêlée` ou `Dégâts distance` à Force.
+Deux régressions seulement sont traitées dans ce chantier :
 
-## Cause caractérisée
+1. les boutons XP manuel `+/-` de la fiche héros doivent passer par le cycle canonique de progression déjà existant, y compris level-up et persistance ;
+2. le portrait de la fiche doit être rendu par son propriétaire natif et ne plus être repris ensuite par une ancienne couche visuelle concurrente.
 
-Le moteur et les données n'avaient pas perdu les paramètres. Deux rendus coexistaient encore :
+Aucun changement de règles de progression, seuils XP, calculs de stats, combat, déplacement, navigation globale, cache/PWA ou World Builder n'est autorisé dans ce chantier.
 
-1. `index.html` possède l'ancien fallback natif qui remplit `#rpgStatsList` avec une simple liste de cases à cocher ;
-2. `assets/gensrpg/gens-rpg-stats-clean-167874.js` possède le renderer canonique riche : nom, icône, valeur par défaut, min/max, description, activation et effets configurables.
+## Propriétaires retenus
 
-En plus, `gens-dungeon-hero-art-repair-167874.js` et `gens-stat-upgrade-policy-167898.js` participaient tous deux au cycle `renderRpgUniverseEditor` avec des retries périodiques. Le bridge Hero Art pouvait donc entrer dans une chaîne de wrappers qui n'avait aucune raison architecturale d'exister.
+### XP manuel
 
-## Correction appliquée
+- propriétaire : `changeXP()` dans le runtime natif de la fiche ;
+- systèmes existants à réutiliser : `dungeonSyncProgressionForState`, `dungeonHandleLevelUp071`, `save()` et le rendu natif ;
+- interdiction : ne pas installer un second `changeXP`, wrapper permanent, observer, retry ou boucle de maintenance pour rattraper le résultat.
 
-Correction minimale conforme à la charte :
+### Portrait de fiche
 
-- `gens-rpg-stats-clean-167874.js` reste le renderer canonique complet ;
-- `gens-stat-upgrade-policy-167898.js` reste uniquement un décorateur des cartes canoniques (coût/verrouillage), sans remplacer `#rpgStatsList` ;
-- `gens-dungeon-hero-art-repair-167874.js` ne wrappe plus `renderRpgUniverseEditor` ni `saveRpgUniverseStats` ; il reste limité à ses responsabilités visuelles et non-Stats ;
-- aucune règle de gameplay, formule de stat, effet existant ou valeur de combat n'a été changée ;
-- aucun nouvel observer, renderer ou timer n'a été ajouté.
+- propriétaire : rendu natif de la fiche qui écrit `charImage` ;
+- resolver d'art existant à réutiliser ;
+- interdiction : aucune couche chargée après le rendu ne doit réécrire `#charImage`, wrapper l'ouverture/rendu de la fiche ou utiliser des retries pour reprendre cette autorité.
 
-## Preuve rouge avant correction
+Les correctifs visuels du plateau/pions qui n'écrivent pas la fiche restent hors périmètre et doivent être préservés.
 
-Workflow dédié : `GenSrpG stats editor authority`, run `35114858851`.
+## État caractérisé avant correction
 
-- caractérisation de l'état historique : verte ;
-- contrat cible « autorité finale unique » : rouge avant correction.
+### XP
 
-## Sentinelles permanentes
+Le `changeXP()` natif modifie bien `state.xp`, appelle `dungeonSyncProgressionForState(current, state)`, joue le son puis rend la fiche. En revanche il ne raccorde pas actuellement le résultat `leveled` à `dungeonHandleLevelUp071` et ne persiste pas directement via `save()`.
 
-- `tests/gens_stats_editor_authority_characterization_v11411.test.cjs`
-- `tests/gens_stats_editor_single_authority_v11411.test.cjs`
-- `tests/gens_stats_editor_browser_v11411.test.cjs`
-- `.github/workflows/gensrpg-stats-editor-authority.yml`
+Les récompenses de combat possèdent déjà le chemin canonique attendu : sync progression -> traitement level-up -> persistance. Ce chemin existant doit être réutilisé, pas réinventé.
 
-Le test navigateur mobile Chromium reproduit explicitement l'ancien rendu à cases, charge ensuite les modules réels Stats / Policy / Hero Art, puis vérifie que l'éditeur riche reste final après plus de 3 secondes, au-delà des anciennes fenêtres de retry. Il vérifie également que les cibles `damage:melee`, `damage:ranged` et `hit:ranged` sont encore disponibles via `Ajouter un effet`.
+Le fichier `assets/gensrpg/dungeon/progression-runtime-v1.js` installe encore un wrapper de `changeXP`. Il peut servir de trace historique mais ne doit pas devenir l'autorité finale du correctif.
 
-## Validation avant commit documentaire final
+### Portrait
 
-Candidat code/tests : `7d95b403ff2d329a808b7d22c3df84d35b274748`.
+`assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js` écrit directement `#charImage`, wrappe plusieurs fonctions de fiche et tente de réinstaller ses hooks avec des timers. `assets/gensrpg/gens-dungeon-hero-art-repair-167874.js` référence encore ce module via `SHEET_ART_SRC`.
 
-- autorité Stats statique : verte ;
-- navigateur Stats : vert ;
-- architecture globale : verte sur ses sentinelles statiques ;
-- Chromium global/preview et Firefox doivent être verts sur le SHA final contenant ce document avant création du checkpoint vert.
+Cette chaîne constitue une autorité concurrente de la fiche et doit être supprimée du chemin de fiche de manière soustractive, tout en conservant les responsabilités visuelles réellement utiles au plateau.
 
-## Chantier suivant déjà identifié mais séparé
+## Fonctions / zones protégées touchées
 
-Ne pas mélanger avec ce correctif. Une fois l'éditeur Stats validé manuellement, reprendre séparément :
+- `changeXP()` natif ;
+- traitement canonique de level-up uniquement par appel, sans modifier sa règle ;
+- persistance uniquement par l'API existante ;
+- rendu natif du portrait de fiche / `charImage` ;
+- bootstrap visuel uniquement pour retirer l'ancienne autorité de fiche si nécessaire.
 
-- latence XP manuel → popup de niveau ;
-- latence changement de héros → portrait correct (ex. Aldren visible brièvement avant Lyra).
+## Tests exigés avant validation
 
-Créer un nouveau checkpoint de départ avant toute modification de ces latences.
+### XP
+
+- exécuter le vrai `changeXP()` extrait du runtime, pas une fonction simulée injectant le résultat ;
+- vérifier qu'un gain sans niveau persiste et rend correctement ;
+- vérifier qu'un gain avec niveau appelle une seule fois le traitement canonique avec le bon `beforeLevel`, attribue les points via le moteur existant, persiste puis rend ;
+- vérifier qu'une baisse XP ne fabrique aucun level-up ;
+- vérifier qu'aucun wrapper parallèle de `changeXP()` n'est nécessaire à l'autorité finale.
+
+### Portrait
+
+- vérifier que le rendu natif choisit immédiatement le portrait du héros courant lors d'un changement de héros ;
+- vérifier qu'aucun module aval ne réécrit `#charImage` ou ne wrappe les fonctions de fiche ;
+- attendre au-delà des anciennes fenêtres de retry et confirmer que le portrait reste celui du héros courant ;
+- vérifier séparément que les visuels/pions Dungeon encore nécessaires restent fonctionnels.
+
+### Inter-modules / architecture
+
+- sentinelles architecture globales vertes ;
+- tests Stats du checkpoint précédent toujours verts ;
+- aucune nouvelle MutationObserver globale, timer permanent, renderer concurrent, seconde source de vérité ou auto-réparation ajoutée.
+
+## Risque inter-module principal
+
+Le bridge Hero Art mélange encore historique de fiche et corrections visuelles du plateau. La suppression doit viser uniquement l'autorité concurrente de la fiche ; elle ne doit pas retirer les resolvers/images utilisés légitimement par les pions Dungeon.
+
+## Séquence de travail
+
+1. caractériser précisément `dungeonHandleLevelUp071` et le rendu natif de `charImage` ;
+2. corriger `changeXP()` dans son propriétaire natif, avec test de raccord réel ;
+3. valider ce jalon XP avant de toucher au portrait ;
+4. supprimer de façon soustractive l'autorité concurrente de fiche et valider le portrait ;
+5. relancer sentinelles architecture + Stats + navigateur ;
+6. créer un checkpoint vert seulement sur le SHA final entièrement validé.
+
+## Chantier précédent — éditeur de statistiques (vert)
+
+Le correctif Stats est terminé au checkpoint `84344017659cc909ded580bc39d0c8d103deb5df` : le renderer Stats canonique reste l'unique renderer riche, la policy ne fait que décorer les cartes, et le bridge Hero Art ne wrappe plus le cycle Stats. Ce chantier ne doit pas être rouvert ici.
 
 ## Règle permanente de continuité
 

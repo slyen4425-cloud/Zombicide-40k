@@ -1,0 +1,39 @@
+name: GenSrpG apply validated canonical wall PNG
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-damage-display-2026-09-16'
+    paths:
+      - '.github/workflows/gensrpg-apply-canonical-wall-png.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-wall-zoom-damage-display-2026-09-16
+      - name: Basculer uniquement l'asset de l'autorité murale canonique
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js')
+          s=p.read_text()
+          old='const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";'
+          new='const WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";'
+          assert s.count(old)==1, f'canonical WALL_ASSET occurrences={s.count(old)}'
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Committer la substitution unique
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
+          git diff --cached --check
+          git commit -m 'fix: use healthy PNG for canonical Dungeon walls'
+          git push origin HEAD:work/gensrpg-wall-zoom-damage-display-2026-09-16

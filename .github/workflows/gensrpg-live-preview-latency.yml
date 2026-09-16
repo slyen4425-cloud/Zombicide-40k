@@ -1,0 +1,24 @@
+name: GenSrpG live preview latency sentinel
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-live-preview-latency-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-preview-latency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduire la course XP et le portrait stale sur la vraie composition
+        run: node tests/gens_live_preview_latency_v11411.test.cjs
+      - name: Verrouiller le runtime XP manuel
+        run: node tests/gens_manual_xp_progression_runtime_v1.test.cjs
+      - name: Verrouiller l'autorité portrait héros
+        run: node tests/gens_hero_sheet_art_runtime_v11411.test.cjs
+      - name: Vérifier la composition preview existante
+        run: node tests/gens_preview_composition_v11411.test.cjs

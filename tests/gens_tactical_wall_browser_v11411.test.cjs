@@ -37,12 +37,12 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       const lateRender={count:lateTiles.length,owner:late.classList.contains('gtv2WallOwner'),src:lateImg?.getAttribute('src')||'',naturalWidth:Number(lateImg?.naturalWidth||0)};
       return {asset:api.WALL_ASSET,rows,patched,patchedWalls,lateRender};
     });
-    assert.equal(result.asset,'assets/dungeon/creatures/dng_wall_block.jpg');
-    for(const row of result.rows){assert.equal(row.count,1,`${row.id}: canonical wall painter must keep exactly one direct wall tile`);assert.equal(row.owner,true,`${row.id}: canonical owner class missing`);assert.equal(row.src,'assets/dungeon/creatures/dng_wall_block.jpg',`${row.id}: wrong wall asset`);assert.equal(row.complete,true,`${row.id}: wall image did not finish loading`);assert.ok(row.naturalWidth>0,`${row.id}: wall asset failed to decode`);assert.match(row.background,/dng_wall_block\.jpg/,`${row.id}: canonical wall background missing`)}
+    assert.equal(result.asset,'assets/dungeon/creatures/dng_wall_block.png');
+    for(const row of result.rows){assert.equal(row.count,1,`${row.id}: canonical wall painter must keep exactly one direct wall tile`);assert.equal(row.owner,true,`${row.id}: canonical owner class missing`);assert.equal(row.src,'assets/dungeon/creatures/dng_wall_block.png',`${row.id}: wrong wall asset`);assert.equal(row.complete,true,`${row.id}: wall image did not finish loading`);assert.ok(row.naturalWidth>0,`${row.id}: wall asset failed to decode`);assert.match(row.background,/dng_wall_block\.png/,`${row.id}: canonical wall background missing`)}
     assert.equal(result.patched,true);assert.equal(result.patchedWalls,1,'Dungeon HTML patch must inject one canonical wall tile for one wall cell');
     assert.equal(result.lateRender.count,1,'a late Dungeon render must be post-painted by the canonical wall authority');
     assert.equal(result.lateRender.owner,true,'late Dungeon wall must receive the canonical owner class');
-    assert.equal(result.lateRender.src,'assets/dungeon/creatures/dng_wall_block.jpg','late Dungeon wall must use the canonical wall asset');
+    assert.equal(result.lateRender.src,'assets/dungeon/creatures/dng_wall_block.png','late Dungeon wall must use the canonical wall asset');
     assert.ok(result.lateRender.naturalWidth>0,'late Dungeon wall asset must decode');
     assert.deepEqual(errors,[],'wall sentinel browser console/page errors');
     console.log(JSON.stringify({scenario:'V114.11 canonical Tactical walls including late Dungeon render',viewport:'412x915 @2.625 touch',asset:result.asset,walls:result.rows.map(r=>({id:r.id,tiles:r.count,naturalWidth:r.naturalWidth})),patchedWalls:result.patchedWalls,lateRender:result.lateRender}));

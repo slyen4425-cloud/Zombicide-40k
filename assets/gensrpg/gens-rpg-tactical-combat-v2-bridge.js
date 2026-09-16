@@ -12,6 +12,8 @@
   let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
+  const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+  const esc=v=>str(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
   function activeProfile(rt=R){
     try{const p=rt?.getActiveGameProfile?.();if(p)return p}catch(e){}
@@ -47,10 +49,39 @@
     return {ok:true,heroes:heroes.length,enemies:enemies.length,heroIds:heroes.map(str),enemyIds:enemies.map(e=>str(e.id))};
   }
   function currentBattle(rt=R){try{return rt?.GensRpgTacticalCombatV2Ui?.getBattle?.()||null}catch(e){return null}}
+  function rewardHeroName(rt=R,id=""){
+    const key=str(id);
+    try{return str(rt?.CHARS?.[key]?.name||rt?.findCustomHero?.(key)?.name||key||"Héros")}catch(e){return key||"Héros"}
+  }
+  function rewardSummaryHtml(rt=R,summary=null){
+    const rewards=arr(summary?.rewards),xp=new Map(),drops=new Map();
+    for(const reward of rewards){
+      for(const share of arr(reward?.xp?.shares)){
+        const id=str(share?.id);if(!id)continue;xp.set(id,(xp.get(id)||0)+Math.max(0,num(share?.xp,0)));
+      }
+      for(const drop of arr(reward?.drops)){
+        const heroId=str(reward?.killerId),itemId=str(drop?.itemId||drop?.name||"drop"),key=heroId+"|"+itemId;
+        const row=drops.get(key)||{heroId,itemId,name:str(drop?.name||itemId||"Objet"),qty:0};
+        row.qty+=Math.max(1,Math.round(num(drop?.qty,1)));drops.set(key,row);
+      }
+    }
+    const xpLines=[...xp.entries()].filter(([,value])=>value>0).map(([id,value])=>'<div class="dungeonVictoryLine"><span class="dungeonVictoryHero">'+esc(rewardHeroName(rt,id))+'</span> : ⭐ +'+value+' XP</div>').join("");
+    const dropLines=[...drops.values()].map(row=>'<div class="dungeonVictoryLine">🎁 '+esc(row.name)+' ×'+row.qty+(row.heroId?' → <span class="dungeonVictoryHero">'+esc(rewardHeroName(rt,row.heroId))+'</span>':'')+'</div>').join("");
+    return '<div class="dungeonVictorySummary">'+
+      '<div class="dungeonVictoryBlock"><strong>⭐ Expérience</strong>'+(xpLines||'<div class="dungeonVictoryLine">Aucun XP gagné.</div>')+'</div>'+
+      '<div class="dungeonVictoryBlock"><strong>🎁 Butin</strong>'+(dropLines||'<div class="dungeonVictoryLine">Aucun objet obtenu.</div>')+'</div>'+
+      '</div>';
+  }
+  function showOutcomeModal(rt=R,battle=null,summary=null){
+    if(battle?.winner!=="hero")return false;
+    const modal=rt?.DungeonCore01?.modal;if(typeof modal!=="function")return false;
+    try{modal.call(rt.DungeonCore01,"🏆 Victoire — récompenses",rewardSummaryHtml(rt,summary));return true}catch(e){try{rt?.console?.error?.("Combat tactique V2 reward modal",e)}catch(_){}return false}
+  }
   function finishExploration(rt,battle,summary,reason){
     try{rt.document?.body?.style&&(rt.document.body.style.overflow="")}catch(e){}
     try{rt.updateDungeonExploreButtons?.()}catch(e){}
     try{rt.DungeonCore01?.render?.()}catch(e){try{rt.renderDungeonCore01?.()}catch(_){}}
+    showOutcomeModal(rt,battle,summary);
     try{
       const win=battle?.winner;
       if(win==="hero")rt.showToast?.("🏆 Combat tactique remporté");
@@ -187,5 +218,5 @@
     return true;
   }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,rewardSummaryHtml,showOutcomeModal,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
 });

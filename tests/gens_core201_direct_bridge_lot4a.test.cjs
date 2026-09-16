@@ -29,8 +29,8 @@ assert.equal((core.match(/requestCombat201\s*\(/g)||[]).length,3,
 assert.doesNotMatch(core,/\bdc200StartCombat\b/,
   'Core 2.01 must contain no remaining reference to the historical dc200StartCombat adapter');
 
-assert.match(core,/const positional=movementEnabled201\(\)/,
-  'Core 2.01 positional movement gate must remain intact');
+assert.match(core,/const positional=typeof window\.dc305PositionalGameplay===["']function["']&&window\.dc305PositionalGameplay\(\)/,
+  'Core 2.01 canonical positional-gameplay gate must remain intact');
 assert.match(core,/const on=live\.find\(e=>Number\(x\.enemyCells\?\.\[e\.id\]\)===pos\)/,
   'Core 2.01 must still target only the enemy on the active hero cell in positional mode');
 assert.ok(core.includes('JSON.stringify(ids)'),

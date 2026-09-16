@@ -2,111 +2,121 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Dernier jalon vert — migration des points d'entrée combat, lot UI manuel 1
+## Chantier courant — migration combat, lot 2 : retrait Core 0.99 désactivé
 
-- Branche de travail : `work/gensrpg-combat-callsite-migration-1-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-2026-09-16`
-- Base exacte : `695be0e029fb49ee70966729474b35aa0a2d9c63`
-- SHA validé avant fermeture documentaire : `23947dddc32e80d165ad0ec5670a1e8a23a061b3`
-- Checkpoint vert précédent : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16`
+- Branche : `work/gensrpg-combat-callsite-migration-2-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-2-2026-09-16`
+- Base exacte : `2aa6ba574923229af105cbee1635eeb9efab18cb`
+- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- `main` n'a pas été modifié.
+- `main` ne doit pas être modifié.
 
-## Résultat du lot UI manuel 1
+## Décision de périmètre
 
-Deux points d'entrée UI natifs ont été migrés vers l'unique contrat de combat :
+Le lot 2 retire uniquement le script historique désactivé :
 
-1. `#dungeonCombatMenuBtn` — « ENGAGER LE COMBAT » ;
-2. `#dungeonCombatSheetBtn` — « Combat RPG » de la fiche.
+`<script type="application/x-gensrpg-disabled" id="dungeonCore099FinalTacticalAuthority"> ... </script>`
 
-Ils appellent maintenant directement :
+Ce bloc n'est pas exécuté par le navigateur. Il contient pourtant encore de vieilles autorités : wrappers `DungeonCore01`, listener document capture, timer, fonctions `dc099*` et fallback vers `openDungeonCombatSetup()`.
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`
+La carte runtime active et les sentinelles modernes placent l'autorité combat sur :
 
-avec :
+`GensRpgTacticalCombatV2Bridge.requestCombat(...) -> V113 scope/participants -> Tactical V2`
 
-- `reason: "manual-setup"` ;
-- une `entry` propre à chaque bouton.
+Core 0.99 n'appartient pas à cette chaîne active. Conformément à la charte, une couche morte n'est pas modernisée : elle est retirée de façon soustractive après caractérisation.
 
-Ils ne dépendent plus de l'adaptateur historique global `openDungeonCombatSetup()`.
+## Ce qui reste volontairement hors périmètre
 
-## Périmètre réellement modifié
+Le CSS historique voisin reste intact dans ce lot :
 
-Comparaison depuis le checkpoint vert précédent :
+- `#dungeonCore099FinalTacticalCss` ;
+- `#dungeonCore100UiCleanup` et sa référence `.dc099Reachable`.
 
-- `index.html` : exactement 2 lignes remplacées, correspondant aux deux `onclick` ci-dessus ;
-- inventaire des points d'entrée mis à jour ;
-- nouveau test de régression ciblé ;
-- documentation mise à jour ;
-- sentinelle architecture raccordée au nouveau test.
+Même s'il semble historique, son retrait serait un chantier visuel distinct. Il sera caractérisé séparément avant toute suppression.
 
-Aucun fichier de moteur gameplay, Tactical, stats, XP, déplacement, sauvegarde, inventaire, équipement, cache/PWA, Survie, Capture, PvP ou World Builder n'a été modifié dans ce lot.
+Ne pas toucher non plus à :
 
-## Dette réduite
+- `dc030EngageCombat` et ses fallbacks actifs ;
+- embuscades ;
+- détection ;
+- `dc200StartCombat`, `startCombat`, `launchCombat200` ;
+- adaptateurs de compatibilité Bridge ;
+- V112/V113 ;
+- mode MJ ;
+- participants / enemyIds / reasons ;
+- stats, XP, récompenses, loot ;
+- déplacement, navigation, fiche héros, Save & Quit ;
+- cache/PWA ;
+- Survival, Capture, PvP, World Builder.
 
-Inventaire après ce lot :
+## Effet attendu sur l'inventaire
 
-- `dc200StartCombat` : 13 occurrences — inchangé ;
-- `openDungeonCombatSetup` : 15 occurrences — 17 auparavant ;
-- `launchCombat200` : 2 occurrences — inchangé ;
-- `startCombat` : 6 occurrences — inchangé.
+Avant lot 2 :
 
-## Validation
+- `dc200StartCombat` : 13 ;
+- `openDungeonCombatSetup` : 15 ;
+- `launchCombat200` : 2 ;
+- `startCombat` : 6.
 
-Le lot a été validé avec :
+Le bloc Core 0.99 contient exactement une référence à `openDungeonCombatSetup`.
 
-- test réel des deux boutons vers `requestCombat(window, ...)` ;
-- contrat Bridge unique ;
-- inventaire exact des anciens points d'entrée ;
-- sentinelles V112/V113/Bridge ;
-- garde des autorités globales ;
-- progression/XP/récompenses inchangés ;
-- architecture complète verte ;
-- preview Chromium verte ;
-- Firefox wall sentinel verte.
+Après retrait :
 
-Les workflows temporaires d'écriture utilisés uniquement pour modifier le gros `index.html` ont été retirés. Le workflow progression est revenu à son état lecture/test uniquement.
+- `dc200StartCombat` : 13 — inchangé ;
+- `openDungeonCombatSetup` : 14 ;
+- `launchCombat200` : 2 — inchangé ;
+- `startCombat` : 6 — inchangé.
 
-## Prochaine étape du plan — pas encore modifiée
+## Tests exigés
 
-Continuer la réduction progressive des anciens points d'entrée combat vers :
+Avant suppression, poser un test qui devient vert uniquement si :
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
+1. `#dungeonCore099FinalTacticalAuthority` a disparu ;
+2. `window.dc099EngageCombat`, `window.dc099Paint` et `window.dc099SyncMainAction` ont disparu avec ce bloc ;
+3. `#dungeonCore099FinalTacticalCss` reste présent ;
+4. `#dungeonCore100UiCleanup` reste présent ;
+5. le compteur `openDungeonCombatSetup` passe uniquement de 15 à 14 ;
+6. les autres compteurs historiques sont inchangés ;
+7. Bridge/V113 et les sentinelles architecture restent verts ;
+8. Chromium et Firefox restent verts.
 
-Toujours par petits groupes homogènes, avec caractérisation avant correction.
+## Séquence
 
-Avant de choisir le lot 2, séparer explicitement :
+1. checkpoint de départ — fait ;
+2. test rouge de retrait Core 0.99 ;
+3. suppression exacte d'un seul bloc désactivé ;
+4. mise à jour inventaire 15 -> 14 ;
+5. raccord du test aux sentinelles ;
+6. comparaison complète avec le checkpoint de départ ;
+7. architecture + Chromium + Firefox ;
+8. checkpoint vert ;
+9. seulement ensuite caractériser le prochain groupe actif.
 
-- les fallbacks manuels de `dc030EngageCombat` ;
-- le fallback d'embuscade ;
-- les anciennes définitions/wrappers de `openDungeonCombatSetup` ;
-- les couches historiques désactivées.
+## Jalon vert précédent — lot UI manuel 1
 
-Ne pas mélanger ces catégories dans un même lot sans test prouvant que leurs raisons, ennemis, participants, mode MJ et retour exploration sont identiques.
+Checkpoint : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16`
+SHA : `2aa6ba574923229af105cbee1635eeb9efab18cb`
 
-## Chantier précédent — XP manuel + portrait fiche héros (vert et validé utilisateur)
+Deux boutons natifs ont été migrés vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` :
+
+- `#dungeonCombatMenuBtn` ;
+- `#dungeonCombatSheetBtn`.
+
+Inventaire après lot 1 : `dc200StartCombat=13`, `openDungeonCombatSetup=15`, `launchCombat200=2`, `startCombat=6`.
+Architecture, Chromium et Firefox verts. Aucun autre runtime gameplay modifié.
+
+## Jalon XP + portrait
 
 Checkpoint : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` sur `695be0e029fb49ee70966729474b35aa0a2d9c63`.
-
-Validation utilisateur Firefox le 16/09/2026 : arts/portrait et XP corrigés.
-
-Résultat :
-
-- `changeXP()` natif reste propriétaire du XP manuel et passe par le moteur canonique de progression ;
-- aucun runtime progression parallèle n'est chargé ;
-- le portrait de fiche possède une seule autorité active ;
-- anciennes couches de réparation de fiche neutralisées sans retirer les arts du plateau ;
-- architecture, Chromium, Firefox et progression verts.
+Validation utilisateur Firefox positive le 16/09/2026.
 
 ## Règle permanente de continuité
 
-À chaque nouveau chantier :
+À chaque chantier :
 
 1. lire `docs/GENSRPG_CHARTE.md` puis ce fichier ;
-2. créer le checkpoint de départ AVANT le premier changement ;
-3. créer la branche depuis exactement ce checkpoint ;
+2. checkpoint de départ avant le premier changement ;
+3. branche créée depuis exactement ce checkpoint ;
 4. caractériser/tester avant correction ;
-5. créer un checkpoint vert sur le SHA exact validé ;
-6. mettre ce fichier à jour avant de passer au chantier suivant.
-
-Ne jamais reprendre un chantier à partir d'une branche historique ambiguë si un checkpoint vert plus récent est indiqué ici.
+5. checkpoint vert sur le SHA exact validé ;
+6. mettre ce fichier à jour avant le chantier suivant.

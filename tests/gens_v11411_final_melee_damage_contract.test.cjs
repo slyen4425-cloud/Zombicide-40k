@@ -52,4 +52,12 @@ assert.equal(result.targetHp,14);
 assert.equal(target.hp,14,'resolved target HP must reflect canonical stat bonus after armor');
 assert.equal(state.log.at(-1)?.statDamageBonus,3,'combat log must expose the canonical stat bonus used');
 
-console.log('GenSrpG V114.11 final melee damage contract OK: 5 weapon + 3 canonical stat - 2 armor = 6 final damage');
+assert.equal(typeof mod.damageCalculationFormula,'function','canonical dice authority must expose the visible damage formula');
+const formula=mod.damageCalculationFormula(result);
+assert.match(formula,/5/,'damage explanation must show raw weapon power');
+assert.match(formula,/3/,'damage explanation must show canonical stat bonus');
+assert.match(formula,/8/,'damage explanation must show raw damage before armor');
+assert.match(formula,/2/,'damage explanation must show target armor');
+assert.match(formula,/6/,'damage explanation must show final inflicted damage');
+
+console.log('GenSrpG V114.11 final melee damage contract OK: 5 weapon + 3 canonical stat - 2 armor = 6 final damage, visibly explainable');

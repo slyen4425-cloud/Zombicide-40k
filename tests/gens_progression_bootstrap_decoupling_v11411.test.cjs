@@ -13,7 +13,7 @@ assert.ok(!filesBlock[1].includes('progression-runtime-v1.js'),'progression must
 const finalize=bootstrap.match(/function finalize\(\)\{([\s\S]*?)\n\}/);
 assert.ok(finalize,'RuntimeBootstrap finalize missing');
 assert.ok(!finalize[1].includes('GensRpgProgressionRuntimeV1'),'delayed retry finalize must not reinstall progression');
-assert.match(bootstrap,/loadProgression\([^)]*\)[\s\S]*load\(0\)/,'progression prerequisite must complete before Tactical loading starts');
+assert.match(bootstrap,/loadProgression\(\(\)=>load\(0\)\)/,'progression prerequisite must complete before Tactical loading starts');
 
 let legacyCalls=0,syncs=0,levelUps=0,saves=0,renders=0,sounds=0;
 const ctx={

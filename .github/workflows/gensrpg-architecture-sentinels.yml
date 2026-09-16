@@ -46,6 +46,15 @@ jobs:
       - name: Extraire les autorités exactes progression et victoire
         run: node tests/gens_progression_victory_authority_extract_v11411.test.cjs
 
+      - name: Verrouiller XP manuel vers progression canonique
+        run: node tests/gens_manual_xp_progression_runtime_v1.test.cjs
+
+      - name: Vérifier le résumé de victoire Tactical
+        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
+
+      - name: Exécuter victoire Tactical vers XP et butin Dungeon
+        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
+
       - name: Vérifier le polish Tactical V108 historique
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
 

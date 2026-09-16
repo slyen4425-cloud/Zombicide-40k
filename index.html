@@ -39640,6 +39640,7 @@ try{const b=document.querySelector('.dc01Badge');if(b)b.textContent='MOTEUR DUNG
 <script id="dungeonCore201Stability">
 (function(){
 "use strict";
+function requestCombat201(enemyIds,reason){return window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:Array.isArray(enemyIds)?enemyIds.map(String):[],reason:reason,entry:"dc201EncounterPanel"})}
 const RT_KEY="gensrpg_dungeon_runtime_v2";
 
 function clone201(v){return JSON.parse(JSON.stringify(v))}
@@ -39860,8 +39861,8 @@ function encounterPanel201(){
   const ids=live.map(e=>String(e.id));
   host.innerHTML='<div class="dc200SceneCard"><div>⚔️</div><div class="grow"><strong>'+live.length+' ennemi'+(live.length>1?'s':'')+' dans la salle</strong><small>'+live.map(enemyName201).join(", ")+'</small></div>'+
     (!positional
-      ?'<button type="button" class="dc01Btn primary" onclick=\'dc200StartCombat('+JSON.stringify(ids)+',"manual")\'>⚔️ ENGAGER LE COMBAT</button>'
-      :(on?'<button type="button" class="dc01Btn primary" onclick="dc200StartCombat([\''+String(on.id).replace(/'/g,"")+'\'],\'cell\')">ATTAQUER</button>':'<span class="badge">Va sur une case ennemie</span>'))+
+      ?'<button type="button" class="dc01Btn primary" onclick=\'requestCombat201('+JSON.stringify(ids)+',"manual")\'>⚔️ ENGAGER LE COMBAT</button>'
+      :(on?'<button type="button" class="dc01Btn primary" onclick="requestCombat201([\''+String(on.id).replace(/'/g,"")+'\'],\'cell\')">ATTAQUER</button>':'<span class="badge">Va sur une case ennemie</span>'))+
     '</div>';
 }
 

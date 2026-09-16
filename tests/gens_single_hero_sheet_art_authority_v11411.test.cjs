@@ -19,8 +19,11 @@ assert.ok(hook,'V102 hookAll seam missing');
 for(const name of ['openChar','openCharacter','openHeroSheet','showHeroSheet','renderCharacterSheet','renderDungeonHeroSheet','renderDungeonHeroStats','renderDungeonAttributes']){
   assert.ok(!hook[1].includes('"'+name+'"'),'V102 must not stack the V99 sheet lifecycle hook: '+name);
 }
-for(const name of ['ensureDungeonHeroes','renderParticipantSelector','renderMenu','renderRpgUniverseEditor','saveRpgUniverseStats','openHeroCreator','hcRenderRpgStatsUsage','openEquipmentEditor']){
-  assert.ok(hook[1].includes('"'+name+'"'),'V102 non-sheet responsibility must remain: '+name);
+for(const name of ['ensureDungeonHeroes','renderParticipantSelector','renderMenu','openHeroCreator','hcRenderRpgStatsUsage','openEquipmentEditor']){
+  assert.ok(hook[1].includes('"'+name+'"'),'V102 visual/non-sheet responsibility must remain: '+name);
+}
+for(const name of ['renderRpgUniverseEditor','saveRpgUniverseStats']){
+  assert.ok(!hook[1].includes('"'+name+'"'),'V102 visual bridge must not own the canonical stats-editor lifecycle: '+name);
 }
 assert.match(bridge,/SHEET_ART_SRC/,'V102 must continue loading the V99 sheet owner');
 assert.doesNotMatch(bridge,/MutationObserver|\.observe\s*\(/,'V102 bridge must stay observer-free');

@@ -1,0 +1,51 @@
+name: GenSrpG repair canonical wall JPEG once
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-damage-display-2026-09-16'
+
+permissions:
+  contents: write
+
+jobs:
+  repair-wall-jpeg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-wall-zoom-damage-display-2026-09-16
+          fetch-depth: 1
+
+      - name: Ajouter uniquement le marqueur JPEG EOI manquant
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/dungeon/creatures/dng_wall_block.jpg')
+          b = p.read_bytes()
+          if not b.startswith(b'\xff\xd8'):
+              raise SystemExit('Le fichier mural canonique ne commence pas par JPEG SOI')
+          if b.endswith(b'\xff\xd9'):
+              print('JPEG déjà complet, aucune modification')
+          else:
+              if b.count(b'\xff\xd9'):
+                  raise SystemExit('EOI trouvé ailleurs mais pas en fin de fichier: arrêt par sécurité')
+              p.write_bytes(b + b'\xff\xd9')
+              print(f'JPEG réparé sans recompression: {len(b)} -> {len(b)+2} octets')
+          out = p.read_bytes()
+          assert out.startswith(b'\xff\xd8')
+          assert out.endswith(b'\xff\xd9')
+          PY
+          file assets/dungeon/creatures/dng_wall_block.jpg
+
+      - name: Committer seulement si les deux octets ont été ajoutés
+        run: |
+          if git diff --quiet -- assets/dungeon/creatures/dng_wall_block.jpg; then
+            echo 'Aucun changement à committer.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/dungeon/creatures/dng_wall_block.jpg
+          git commit -m 'fix: repair truncated canonical Dungeon wall JPEG'
+          git push origin HEAD:work/gensrpg-wall-zoom-damage-display-2026-09-16

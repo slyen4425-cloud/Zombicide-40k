@@ -27,13 +27,15 @@ jobs:
           npx playwright install --with-deps firefox
           python3 -m pip install --quiet pillow
 
-      - name: Convertir la texture murale JPG en PNG de diagnostic
+      - name: Convertir la texture murale JPG tronquée en PNG de diagnostic
         run: |
           python3 - <<'PY'
-          from PIL import Image
+          from PIL import Image, ImageFile
+          ImageFile.LOAD_TRUNCATED_IMAGES = True
           src='assets/dungeon/creatures/dng_wall_block.jpg'
           dst='assets/dungeon/creatures/dng_wall_block_converted_test.png'
           with Image.open(src) as im:
+              im.load()
               im.convert('RGBA').save(dst, 'PNG', optimize=True)
           PY
 

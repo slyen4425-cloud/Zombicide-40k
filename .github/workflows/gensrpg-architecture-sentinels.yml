@@ -37,6 +37,9 @@ jobs:
       - name: Verrouiller l'unique autorité d'image de fiche héros
         run: node tests/gens_single_hero_sheet_art_authority_v11411.test.cjs
 
+      - name: Exécuter la stabilité image de fiche héros
+        run: node tests/gens_hero_sheet_art_runtime_v11411.test.cjs
+
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 

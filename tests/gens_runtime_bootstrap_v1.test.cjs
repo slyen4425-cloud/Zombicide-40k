@@ -23,7 +23,6 @@ vm.createContext(sandbox);
 vm.runInContext(src,sandbox,{filename:'runtime-bootstrap-v1.js'});
 
 const expected=[
-  'assets/gensrpg/dungeon/progression-runtime-v1.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
   'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
@@ -32,17 +31,18 @@ const expected=[
   'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
   'assets/gensrpg/gens-survival-mode-isolation-1678104.js?v=16.78.105'
 ];
-assert.deepEqual(loaded,expected,'RuntimeBootstrap must load extracted progression first and preserve Tactical/Survival order');
+assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve Tactical/Survival order without loading a second changeXP owner');
 assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical loader guard must remain active');
-assert.equal(progressionInstalls,4,'progression runtime must keep deterministic immediate + 3 retry install attempts');
+assert.equal(progressionInstalls,0,'progression-runtime-v1 must stay inactive; native changeXP owns manual XP');
 assert.equal(survivalInstalls,4,'Survival isolation must keep immediate + 3 retry installs');
 assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
-assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap retry timings must remain unchanged');
+assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap Tactical/Survival retry timings must remain unchanged');
 assert.ok(sandbox.GensRuntimeBootstrapV1,'RuntimeBootstrap API missing');
 assert.deepEqual(Array.from(sandbox.GensRuntimeBootstrapV1.files),expected.map(x=>x.replace('?v=16.78.105','')),'RuntimeBootstrap API must expose the owned composition');
+assert.doesNotMatch(src,/progression-runtime-v1|GensRpgProgressionRuntimeV1/,'bootstrap must not reclaim native manual XP ownership');
 
 const before=loaded.length;
 sandbox.GensRuntimeBootstrapV1.install();
 assert.equal(loaded.length,before,'RuntimeBootstrap install must be idempotent after the guard is set');
 
-console.log('GenSrpG RuntimeBootstrap V1 progression + Tactical + Survival load order and idempotence OK');
+console.log('GenSrpG RuntimeBootstrap V1 OK: native manual XP owner + Tactical/Survival deterministic load order');

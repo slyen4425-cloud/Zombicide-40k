@@ -1,11 +1,13 @@
 /* GenSrpG architecture bootstrap V1 — extracted from the mobile performance layer.
-   Transitional owner of Tactical V2 + Survival isolation composition.
-   Keeps the exact V16.78.105 load order and retry timings while architecture is consolidated. */
+   Transitional owner of extracted runtime modules + Tactical V2 + Survival isolation.
+   Preserves the historical Tactical load order and retry timings while responsibilities
+   progressively leave the monolithic index.html. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.0.0",APP_VERSION="16.78.114.11-architecture-bootstrap-1";
+const VERSION="1.1.0",APP_VERSION="16.78.114.11-architecture-bootstrap-2";
 const files=[
+  "assets/gensrpg/dungeon/progression-runtime-v1.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
@@ -15,7 +17,7 @@ const files=[
   "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
 ];
 function finalize(){
-  const apply=()=>{try{R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG RuntimeBootstrap V1 install",e)}};
+  const apply=()=>{try{R.GensRpgProgressionRuntimeV1?.install?.(R);R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG RuntimeBootstrap V1 install",e)}};
   apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
 }
 function load(i){

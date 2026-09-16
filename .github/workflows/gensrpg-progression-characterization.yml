@@ -72,14 +72,6 @@ jobs:
           if marker not in text:
             raise SystemExit('Inventory documentation insertion marker missing')
           doc.write_text(text.replace(marker, note + marker, 1), encoding='utf-8')
-
-          wf = Path('.github/workflows/gensrpg-architecture-sentinels.yml')
-          text = wf.read_text(encoding='utf-8')
-          old = '''      - name: Figer l'inventaire des anciens points d'entrée combat\n        run: node tests/gens_combat_callsite_inventory_v11411.test.cjs\n\n      - name: Vérifier la composition de la preview manuelle\n'''
-          new = '''      - name: Figer l'inventaire des anciens points d'entrée combat\n        run: node tests/gens_combat_callsite_inventory_v11411.test.cjs\n\n      - name: Vérifier la migration directe des deux boutons combat UI\n        run: node tests/gens_combat_ui_direct_entry_migration_1.test.cjs\n\n      - name: Vérifier la composition de la preview manuelle\n'''
-          if text.count(old) != 1:
-            raise SystemExit('Architecture workflow insertion precondition failed')
-          wf.write_text(text.replace(old, new), encoding='utf-8')
           PY
 
       - name: Validate migrated real path
@@ -92,7 +84,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html tests/gens_combat_callsite_inventory_v11411.test.cjs docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md .github/workflows/gensrpg-architecture-sentinels.yml
+          git add index.html tests/gens_combat_callsite_inventory_v11411.test.cjs docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md
           git diff --cached --check
           git commit -m 'refactor: route two combat UI buttons through Bridge'
           git push origin HEAD:work/gensrpg-combat-callsite-migration-1-2026-09-16

@@ -8,68 +8,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   progression-characterization:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch exact du propriétaire natif changeXP
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          text=p.read_text(encoding='utf-8')
-          old='''function changeXP(v){
-            const before=state.xp;
-            state.xp=Math.max(0,Math.min(999,state.xp+v));
-            if(isDungeonHeroSheet())dungeonSyncProgressionForState(current,state);
-            if(state.xp>before)z40kPlayUiSound("heal",0.88);
-            render();
-          }'''
-          new='''function changeXP(v){
-            const before=state.xp;
-            state.xp=Math.max(0,Math.min(999,state.xp+v));
-            if(isDungeonHeroSheet()){
-              dungeonSyncProgressionForState(current,state);
-              dungeonHandleLevelUp071?.(current,before,state);
-              save();
-            }
-            if(state.xp>before)z40kPlayUiSound("heal",0.88);
-            render();
-          }'''
-          # YAML block indentation is removed before the shell sees this script;
-          # normalize the literal indentation used above to the runtime's two-space style.
-          old='\n'.join(line[10:] if line.startswith('          ') else line for line in old.splitlines())
-          new='\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines())
-          count=text.count(old)
-          if count==0:
-              if new in text:
-                  print('changeXP already patched exactly')
-                  raise SystemExit(0)
-              raise SystemExit('expected native changeXP block not found; refusing broad patch')
-          if count!=1:
-              raise SystemExit(f'expected one native changeXP block, found {count}')
-          p.write_text(text.replace(old,new,1),encoding='utf-8')
-          print('native changeXP patched exactly once')
-          PY
-      - name: Validate native manual XP runtime before commit
+      - name: Validate native manual XP runtime
         run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Commit only native index owner change
-        shell: bash
-        run: |
-          if git diff --quiet -- index.html; then
-            echo "No index.html change to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "fix: reconnect native manual XP lifecycle"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Characterize native progression and rewards
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
       - name: Verify Tactical victory rewards summary

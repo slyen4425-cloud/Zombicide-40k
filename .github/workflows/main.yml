@@ -150,7 +150,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
               (Path("_site/assets/dungeon/dungeon-world-builder-167821.js"), '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>', "Dungeon World Builder Phase 3 asset missing"),
-              (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>', "Dungeon room runtime integration missing"),
+              (Path("_site/assets/dungeon/dungeon-room-runtime-167822.js"), '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167838"></script>', "Dungeon room runtime integration missing"),
               (Path("_site/assets/dungeon/dungeon-world-runtime-167823.js"), '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>', "Dungeon compatibility World Runtime missing"),
               (Path("_site/assets/dungeon/dungeon-zone-content-167824.js"), '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>', "Dungeon exact zone content missing"),
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
@@ -161,6 +161,8 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
+              (Path("_site/assets/gensrpg/dungeon/progression-runtime-v1.js"), '<script src="assets/gensrpg/dungeon/progression-runtime-v1.js"></script>', "GenSrpG progression runtime missing"),
+              (Path("_site/assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js"), '<script src="assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js"></script>', "Dungeon hero sheet art authority missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
               (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
           ]

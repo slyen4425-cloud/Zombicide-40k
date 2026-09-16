@@ -15,34 +15,37 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     await page.goto(`http://127.0.0.1:${port}/tests/fixtures/native-dungeon-ui-v11411.html`,{waitUntil:'load'});await page.waitForFunction(()=>window.__nativeUiReady===true);
     const result=await page.evaluate(async()=>{
       const api=window.GensRpgTacticalCombatV2Ui;if(!api)throw new Error('Tactical UI missing');
+      if(api.WALL_ASSET!=='assets/dungeon/creatures/dng_wall_block.jpg')throw new Error(`Unexpected canonical wall asset: ${api.WALL_ASSET}`);
       window.__runtime.room=1;window.__runtime.heroRooms.dungeon_aldren=1;window.__runtime.positions.dungeon_aldren=1;window.__runtime.last.map={width:2,height:1,cells:['wall','floor']};
       const board=document.getElementById('dc047RoomBoard');board.innerHTML='<div id="zoomGrid" class="dc047Grid" style="width:240px;grid-template-columns:repeat(2,1fr);transform-origin:0 0"><div id="zoomWall" class="dc047Cell"></div><div class="dc047Cell"></div></div>';
       api.paintLiveWalls();
       const grid=document.getElementById('zoomGrid'),wall=document.getElementById('zoomWall'),img=wall.querySelector(':scope > .gtv2WallTile');
-      if(img&&typeof img.decode==='function')await img.decode().catch(()=>{});
+      if(!img)throw new Error('Canonical wall tile missing');
+      if(typeof img.decode==='function')await img.decode();
       const scales=[0.67,0.8,0.9,1,1.1,1.25,1.5,1.75];const rows=[];
       for(const scale of scales){
         grid.style.transform=`scale(${scale})`;
         await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
         const cs=getComputedStyle(wall),ics=getComputedStyle(img),wr=wall.getBoundingClientRect(),ir=img.getBoundingClientRect();
-        rows.push({scale,owner:wall.classList.contains('gtv2WallOwner'),tiles:wall.querySelectorAll(':scope > .gtv2WallTile').length,complete:!!img?.complete,naturalWidth:Number(img?.naturalWidth||0),background:cs.backgroundImage,contain:cs.contain,isolation:cs.isolation,imgDisplay:ics.display,imgVisibility:ics.visibility,imgOpacity:ics.opacity,wallWidth:wr.width,imgWidth:ir.width});
+        rows.push({scale,owner:wall.classList.contains('gtv2WallOwner'),tiles:wall.querySelectorAll(':scope > .gtv2WallTile').length,complete:!!img.complete,naturalWidth:Number(img.naturalWidth||0),naturalHeight:Number(img.naturalHeight||0),background:cs.backgroundImage,imgSrc:img.getAttribute('src')||'',imgDisplay:ics.display,imgVisibility:ics.visibility,imgOpacity:ics.opacity,wallWidth:wr.width,imgWidth:ir.width});
       }
-      return rows;
+      return {asset:api.WALL_ASSET,rows};
     });
-    for(const row of result){
+    assert.equal(result.asset,'assets/dungeon/creatures/dng_wall_block.jpg');
+    for(const row of result.rows){
       assert.equal(row.owner,true,`scale ${row.scale}: canonical wall owner missing`);
       assert.equal(row.tiles,1,`scale ${row.scale}: wall tile count changed during zoom`);
       assert.equal(row.complete,true,`scale ${row.scale}: wall image not complete`);
-      assert.ok(row.naturalWidth>0,`scale ${row.scale}: wall image failed to decode`);
-      assert.match(row.background,/dungeon_wall\.png/,`scale ${row.scale}: healthy canonical fallback background lost`);
+      assert.equal(row.naturalWidth,256,`scale ${row.scale}: wall JPEG width changed or failed to decode`);
+      assert.equal(row.naturalHeight,256,`scale ${row.scale}: wall JPEG height changed or failed to decode`);
+      assert.equal(row.imgSrc,'assets/dungeon/creatures/dng_wall_block.jpg',`scale ${row.scale}: wrong wall tile source`);
+      assert.match(row.background,/dng_wall_block\.jpg/,`scale ${row.scale}: canonical wall background lost`);
       assert.equal(row.imgDisplay,'block',`scale ${row.scale}: wall image display changed`);
       assert.equal(row.imgVisibility,'visible',`scale ${row.scale}: wall image visibility changed`);
       assert.equal(row.imgOpacity,'1',`scale ${row.scale}: wall image opacity changed`);
       assert.ok(row.wallWidth>0&&row.imgWidth>0,`scale ${row.scale}: wall collapsed`);
-      assert.doesNotMatch(row.contain,/paint/,`scale ${row.scale}: paint containment creates a fragile Firefox zoom compositing layer`);
-      assert.notEqual(row.isolation,'isolate',`scale ${row.scale}: isolated wall compositing is forbidden for Firefox zoom stability`);
     }
     assert.deepEqual(errors,[],'Firefox wall zoom browser errors');
-    console.log(JSON.stringify({scenario:'V114.11 canonical PNG wall survives Firefox fractional zoom without isolated paint layers',viewport:'412x915 @2.625',scales:result.map(r=>({scale:r.scale,contain:r.contain,isolation:r.isolation,width:r.wallWidth}))}));
+    console.log(JSON.stringify({scenario:'V114.11 repaired canonical JPEG survives Firefox fractional zoom',viewport:'412x915 @2.625',asset:result.asset,scales:result.rows.map(r=>({scale:r.scale,width:r.wallWidth,naturalWidth:r.naturalWidth}))}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

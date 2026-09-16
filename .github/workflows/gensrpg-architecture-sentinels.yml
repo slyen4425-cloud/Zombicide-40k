@@ -43,6 +43,9 @@ jobs:
       - name: Caractériser progression, victoire et récompenses natives
         run: node tests/gens_progression_victory_characterization_v11411.test.cjs
 
+      - name: Extraire les autorités exactes progression et victoire
+        run: node tests/gens_progression_victory_authority_extract_v11411.test.cjs
+
       - name: Vérifier le polish Tactical V108 historique
         run: node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
 

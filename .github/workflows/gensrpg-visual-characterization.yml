@@ -1,0 +1,16 @@
+name: GenSrpG visual characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-visual-stability-survival-2026-09-16'
+  workflow_dispatch:
+
+jobs:
+  visual-characterization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Caractériser fiche héros et visuels Survie
+        run: node tests/gens_visual_reconnect_characterization_v11411.test.cjs

@@ -37,6 +37,12 @@ jobs:
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 
+      - name: Vérifier Agilité canonique vers toucher distance expliqué
+        run: node tests/gens_agility_ranged_hit_attribution_v11411.test.cjs
+
+      - name: Vérifier la cohérence Base héros et Total en jeu
+        run: node tests/gens_stat_editor_game_display_semantics_v11411.test.cjs
+
       - name: Vérifier le calcul final dégâts mêlée V114.11
         run: node tests/gens_v11411_final_melee_damage_contract.test.cjs
 

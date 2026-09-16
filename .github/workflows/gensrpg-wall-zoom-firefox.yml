@@ -30,5 +30,9 @@ jobs:
         continue-on-error: true
         run: node tests/gens_damage_explanation_consistency_v11411.test.cjs
 
-      - name: Vérifier les pixels des murs pendant le zoom Firefox
+      - name: Reproduire le mur blanc pendant le zoom Firefox
+        continue-on-error: true
         run: node tests/gens_tactical_wall_zoom_pixels_firefox_v11411.test.cjs
+
+      - name: Comparer les représentations murales par pixels
+        run: node tests/gens_wall_zoom_candidate_matrix_firefox_v11411.test.cjs

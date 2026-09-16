@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'work/gensrpg-progression-victory-reconnect-*'
+      - 'work/gensrpg-xp-portrait-cleanfix-*'
   workflow_dispatch:
 
 permissions:
@@ -14,6 +15,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Extraire propriétaires XP et portrait pour caractérisation
+        shell: python
+        run: |
+          from pathlib import Path
+          text = Path('index.html').read_text(encoding='utf-8')
+          needles = [
+              'function dungeonHandleLevelUp071',
+              'function changeXP',
+              'charImage',
+              'progression-runtime-v1.js',
+              'gens-dungeon-sheet-art-stability-167899.js',
+          ]
+          for needle in needles:
+              print(f'\n===== {needle} =====')
+              start = 0
+              count = 0
+              while True:
+                  pos = text.find(needle, start)
+                  if pos < 0:
+                      break
+                  count += 1
+                  lo = max(0, pos - 1800)
+                  hi = min(len(text), pos + 4200)
+                  print(f'--- occurrence {count} @ {pos} ---')
+                  print(text[lo:hi])
+                  start = pos + len(needle)
+                  if count >= 20:
+                      print('--- capped at 20 occurrences ---')
+                      break
+              print(f'count={count}')
       - name: Caractériser progression et récompenses natives
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
       - name: Vérifier le résumé de victoire Tactical

@@ -20,3 +20,5 @@ jobs:
         run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
       - name: Caractériser l'édition manuelle du niveau
         run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
+      - name: Caractériser XP manuel vers points de caractéristiques
+        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs

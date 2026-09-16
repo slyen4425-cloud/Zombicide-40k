@@ -20,6 +20,8 @@ function regionPixels(buffer,box){const png=PNG.sync.read(buffer),sx=png.width/v
       {id:'baseline'},
       {id:'jpg-no-isolation',contain:'none',isolation:'auto'},
       {id:'jpg-background-only',contain:'none',isolation:'auto',hideImg:true,bg:'assets/dungeon/creatures/dng_wall_block.jpg'},
+      {id:'converted-png-image',contain:'none',isolation:'auto',img:'assets/dungeon/creatures/dng_wall_block_converted_test.png'},
+      {id:'converted-png-background',contain:'none',isolation:'auto',hideImg:true,bg:'assets/dungeon/creatures/dng_wall_block_converted_test.png'},
       {id:'png-image-no-isolation',contain:'none',isolation:'auto',img:'assets/dungeon/creatures/dungeon_wall.png'},
       {id:'png-background-only',contain:'none',isolation:'auto',hideImg:true,bg:'assets/dungeon/creatures/dungeon_wall.png'}
     ];

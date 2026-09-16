@@ -14,7 +14,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
 | `dc200StartCombat` | 13 | entrée Core 2.x, détection/embuscade, boutons de combat, anciens wrappers timeline |
-| `openDungeonCombatSetup` | 15 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés vers le contrat Bridge |
+| `openDungeonCombatSetup` | 13 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés et le Core 0.99 désactivé retiré |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
 
@@ -49,6 +49,12 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 Les deux boutons natifs `#dungeonCombatMenuBtn` et `#dungeonCombatSheetBtn` sont migrés directement vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` avec `reason: "manual-setup"`.
 
 Ce lot ne modifie ni détection, ni embuscade, ni `dc200StartCombat`, ni `startCombat`, ni `launchCombat200`.
+
+## Migration validée — lot 2, Core 0.99 désactivé
+
+Le script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son unique ligne de fallback comportait deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel), ainsi que des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.
+
+Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.
 
 ## Contrat cible déjà disponible
 

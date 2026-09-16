@@ -18,7 +18,22 @@ for(const src of previewSrcs){
   const file=src.split('?')[0];
   assert.equal(fs.existsSync(path.join(root,file)),true,`preview runtime asset missing: ${file}`);
 }
-assert.equal(previewSrcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap handoff must remain the final injected runtime layer');
+
+// Interactive hero-sheet owners must be parser-blocking prerequisites, not late dynamic children
+// of the mobile-performance or legacy visual bridge. On a slow mobile connection the user can
+// otherwise open a sheet before the XP/art authority has arrived.
+const progression='assets/gensrpg/dungeon/progression-runtime-v1.js';
+const sheetArt='assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js';
+const artBridge='assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874';
+const perf='assets/gensrpg/gens-mobile-combat-performance-16781022.js';
+assert.ok(pageSrcs.includes(progression),'manual XP owner must be loaded directly by the final Pages composition');
+assert.ok(pageSrcs.includes(sheetArt),'hero-sheet art owner must be loaded directly by the final Pages composition');
+assert.ok(pageSrcs.indexOf(progression)<pageSrcs.indexOf(perf),'manual XP owner must exist before the performance/bootstrap handoff');
+assert.ok(pageSrcs.indexOf(sheetArt)<pageSrcs.indexOf(artBridge),'hero-sheet art owner must exist before the legacy visual bridge starts its dynamic repairs');
+assert.equal(previewSrcs.indexOf(progression),pageSrcs.indexOf(progression),'preview must preserve the direct XP prerequisite position');
+assert.equal(previewSrcs.indexOf(sheetArt),pageSrcs.indexOf(sheetArt),'preview must preserve the direct sheet-art prerequisite position');
+
+assert.equal(previewSrcs.at(-1),perf,'performance/bootstrap handoff must remain the final injected runtime layer');
 assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,'preview must remove the source performance tag before reinjecting the Pages order');
 assert.ok(preview.includes('const base=new URL(\'./\',location.href).href;'),'preview must derive its immutable commit-root base URL');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
@@ -29,4 +44,4 @@ assert.ok(preview.includes('Object.defineProperty(navigator.serviceWorker,"regis
 assert.ok(preview.includes('gensrpg-cache-'),'preview must clear GenSrpG preview caches without touching unrelated cache names');
 assert.ok(preview.includes('gensrpgPreviewReady'),'preview must emit an explicit runtime-ready marker');
 
-console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'existing modules in exact order + top-level restart-safe PWA isolation');
+console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'existing modules in exact order + direct XP/art prerequisites + top-level restart-safe PWA isolation');

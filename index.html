@@ -18506,7 +18506,11 @@ function render(){
 function changeXP(v){
   const before=state.xp;
   state.xp=Math.max(0,Math.min(999,state.xp+v));
-  if(isDungeonHeroSheet())dungeonSyncProgressionForState(current,state);
+  if(isDungeonHeroSheet()){
+    dungeonSyncProgressionForState(current,state);
+    dungeonHandleLevelUp071?.(current,before,state);
+    save();
+  }
   if(state.xp>before)z40kPlayUiSound("heal",0.88);
   render();
 }

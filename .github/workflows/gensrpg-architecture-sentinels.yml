@@ -187,6 +187,9 @@ jobs:
       - name: Vérifier le retrait des dépendances actives à l'ancien setup Dungeon
         run: node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
 
+      - name: Vérifier la migration des boutons de rencontre Core 2.01
+        run: node tests/gens_core201_direct_bridge_lot4a.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

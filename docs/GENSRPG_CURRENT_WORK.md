@@ -2,54 +2,71 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Dernier chantier validé
+## Chantier courant — régression éditeur de statistiques
 
-- Chantier : murs blancs au zoom + cohérence visuelle de l'explication des dégâts
-- Branche de travail : `work/gensrpg-wall-zoom-damage-display-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-wall-zoom-damage-display-2026-09-16`
-- Base du chantier : `0c396bf7c0879cfde9f0ffa7a6324eb4e9a11ffd`
-- Checkpoint vert à créer sur le SHA final validé : `checkpoint/gensrpg-wall-zoom-damage-display-green-2026-09-16`
+- Branche de travail : `work/gensrpg-stats-editor-regression-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-stats-editor-regression-2026-09-16`
+- Base exacte : `8d35fc5bbff9d30ee146d72c8ab7e34c68d16d90`
+- Dernier checkpoint vert utilisateur : `checkpoint/gensrpg-wall-zoom-damage-display-green-2026-09-16`
+- Checkpoint vert cible : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 
-## Résultat du chantier
+## Symptôme manuel
 
-### Explication des dégâts
+Dans Réglages RPG > Statistiques, seuls les anciens interrupteurs/cases à cocher restaient visibles. Les paramètres détaillés d'une stat et les effets configurables avaient disparu de l'interface finale, empêchant par exemple d'ajouter un effet `Dégâts mêlée` ou `Dégâts distance` à Force.
 
-Le moteur de dégâts était correct. Seule la formule affichée pouvait réutiliser une ancienne valeur `rawDamage` et produire par exemple :
+## Cause caractérisée
 
-`Puissance arme 3 + bonus stat 1 = 3 brut`
+Le moteur et les données n'avaient pas perdu les paramètres. Deux rendus coexistaient encore :
 
-L'affichage recalcule désormais le brut à partir des deux composantes réellement expliquées :
+1. `index.html` possède l'ancien fallback natif qui remplit `#rpgStatsList` avec une simple liste de cases à cocher ;
+2. `assets/gensrpg/gens-rpg-stats-clean-167874.js` possède le renderer canonique riche : nom, icône, valeur par défaut, min/max, description, activation et effets configurables.
 
-`Puissance arme 3 + bonus stat 1 = 4 brut`
+En plus, `gens-dungeon-hero-art-repair-167874.js` et `gens-stat-upgrade-policy-167898.js` participaient tous deux au cycle `renderRpgUniverseEditor` avec des retries périodiques. Le bridge Hero Art pouvait donc entrer dans une chaîne de wrappers qui n'avait aucune raison architecturale d'exister.
 
-puis applique l'armure et le nombre de touches. Le moteur de dégâts n'a pas été modifié.
+## Correction appliquée
 
-### Murs blancs au zoom Firefox
+Correction minimale conforme à la charte :
 
-Cause racine démontrée : `assets/dungeon/creatures/dng_wall_block.jpg` était un JPEG 256×256 physiquement tronqué. Il commençait correctement par JPEG SOI mais ne possédait aucun marqueur final EOI. Firefox remontait explicitement `Image corrupt or truncated` pendant le test de zoom fractionnaire.
+- `gens-rpg-stats-clean-167874.js` reste le renderer canonique complet ;
+- `gens-stat-upgrade-policy-167898.js` reste uniquement un décorateur des cartes canoniques (coût/verrouillage), sans remplacer `#rpgStatsList` ;
+- `gens-dungeon-hero-art-repair-167874.js` ne wrappe plus `renderRpgUniverseEditor` ni `saveRpgUniverseStats` ; il reste limité à ses responsabilités visuelles et non-Stats ;
+- aucune règle de gameplay, formule de stat, effet existant ou valeur de combat n'a été changée ;
+- aucun nouvel observer, renderer ou timer n'a été ajouté.
 
-Correction appliquée : ajout des deux octets JPEG EOI `FF D9` uniquement, sans recompression, sans changement de texture, de résolution ou de chemin.
+## Preuve rouge avant correction
 
-Le renderer Tactical UI est revenu exactement à son état du checkpoint de départ : même asset canonique `dng_wall_block.jpg`, même CSS et même autorité murale unique. Les expérimentations PNG/compositing et leurs workflows temporaires ont été supprimés.
+Workflow dédié : `GenSrpG stats editor authority`, run `35114858851`.
 
-## Sentinelles permanentes ajoutées
+- caractérisation de l'état historique : verte ;
+- contrat cible « autorité finale unique » : rouge avant correction.
 
-- `tests/gens_damage_explanation_consistency_v11411.test.cjs`
-- `tests/gens_wall_asset_integrity_v11411.test.cjs`
-- `tests/gens_tactical_wall_zoom_firefox_v11411.test.cjs`
-- `.github/workflows/gensrpg-firefox-wall-sentinel.yml`
+## Sentinelles permanentes
 
-Le test Firefox couvre les zooms fractionnaires `0.67 / 0.8 / 0.9 / 1 / 1.1 / 1.25 / 1.5 / 1.75` sur viewport mobile 412×915, DPR 2.625.
+- `tests/gens_stats_editor_authority_characterization_v11411.test.cjs`
+- `tests/gens_stats_editor_single_authority_v11411.test.cjs`
+- `tests/gens_stats_editor_browser_v11411.test.cjs`
+- `.github/workflows/gensrpg-stats-editor-authority.yml`
 
-## Validation du candidat propre
+Le test navigateur mobile Chromium reproduit explicitement l'ancien rendu à cases, charge ensuite les modules réels Stats / Policy / Hero Art, puis vérifie que l'éditeur riche reste final après plus de 3 secondes, au-delà des anciennes fenêtres de retry. Il vérifie également que les cibles `damage:melee`, `damage:ranged` et `hit:ranged` sont encore disponibles via `Ajouter un effet`.
 
-Candidat avant cette mise à jour documentaire : `702d2ef9bc6a8117f9cef027b385b5ac4c1c2524`.
+## Validation avant commit documentaire final
 
-- Architecture : run `35095770379` — architecture verte ; Chromium natif, murs et preview verts.
-- Firefox : run `35095770205` — intégrité JPEG verte, explication dégâts verte, zoom fractionnaire Firefox vert, aucune erreur `Image corrupt or truncated`.
+Candidat code/tests : `7d95b403ff2d329a808b7d22c3df84d35b274748`.
 
-La CI doit repasser une dernière fois sur le SHA contenant ce document avant création du checkpoint vert.
+- autorité Stats statique : verte ;
+- navigateur Stats : vert ;
+- architecture globale : verte sur ses sentinelles statiques ;
+- Chromium global/preview et Firefox doivent être verts sur le SHA final contenant ce document avant création du checkpoint vert.
+
+## Chantier suivant déjà identifié mais séparé
+
+Ne pas mélanger avec ce correctif. Une fois l'éditeur Stats validé manuellement, reprendre séparément :
+
+- latence XP manuel → popup de niveau ;
+- latence changement de héros → portrait correct (ex. Aldren visible brièvement avant Lyra).
+
+Créer un nouveau checkpoint de départ avant toute modification de ces latences.
 
 ## Règle permanente de continuité
 

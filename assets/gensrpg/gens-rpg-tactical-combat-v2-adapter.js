@@ -38,8 +38,10 @@
       let attributeValue=0,statBonus=0;
       try{withHero(rt,id,()=>{
         attributeValue=num(call(rt,"dungeonAttributeValue",attribute),canonicalStat(rt,id,attribute,0));
+        let canonicalDerived=NaN;
+        try{canonicalDerived=rt?.GensCleanRpgStats167874?.sourceEffectTotal?.("hit:"+mode,attribute,id)}catch(e){}
         const derived=call(rt,"dungeonHitBonusForMode",mode,attributeValue);
-        statBonus=Number.isFinite(Number(derived))?num(derived):Math.max(0,attributeValue)*num(scaling.chancePerPoint,0);
+        statBonus=Number.isFinite(Number(canonicalDerived))&&Number(canonicalDerived)!==0?num(canonicalDerived):(Number.isFinite(Number(derived))&&Number(derived)!==0?num(derived):Math.max(0,attributeValue)*num(scaling.chancePerPoint,0));
       })}catch(e){}
       const returned=Number(explicit),effective=Number.isFinite(returned)&&returned>6?returned:baseChance+statBonus;
       const hit=clamp(Math.round(effective),5,95),otherBonus=Math.round(effective-baseChance-statBonus);

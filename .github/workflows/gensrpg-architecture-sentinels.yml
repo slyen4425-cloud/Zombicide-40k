@@ -175,6 +175,9 @@ jobs:
       - name: Figer l'inventaire des anciens points d'entrée combat
         run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
 
+      - name: Vérifier la migration directe des deux boutons combat UI
+        run: node tests/gens_combat_ui_direct_entry_migration_1.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

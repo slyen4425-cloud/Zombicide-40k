@@ -1,6 +1,6 @@
 # GenSrpG — Inventaire des points d’entrée combat historiques
 
-Date : 2026-09-15
+Date : 2026-09-16
 Base : restructuration issue de V16.78.114.11
 
 ## But
@@ -13,7 +13,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
-| `dc200StartCombat` | 13 | entrée Core 2.x, détection/embuscade, boutons de combat, anciens wrappers timeline |
+| `dc200StartCombat` | 11 | entrée Core 2.x, détection/embuscade et anciens wrappers timeline ; les deux boutons Core 2.01 ne l’utilisent plus |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
@@ -23,21 +23,16 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 ### A. Entrée Core 2.x (`dc200StartCombat` / `startCombat`)
 
 - alias historique `window.dc200StartCombat = startCombat` ;
-- bouton « Engager le combat » ;
-- bouton « Attaquer » sur case ennemie ;
 - déclenchements détection ;
 - déclenchement embuscade ;
 - détection Core 2.11 ;
 - deux anciens wrappers de timeline autour de `window.dc200StartCombat`.
 
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A.
+
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
-- deux boutons UI historiques ;
-- définition originale du setup ;
-- redéfinition globale ultérieure ;
-- appels d’embuscade / combat depuis plusieurs couches Core historiques ;
-- wrapper « combat héros activé » ;
-- fallback de plusieurs anciens chemins `dc030EngageCombat`.
+Une seule définition historique reste pour rollback capturé par le Bridge. Aucun consommateur Dungeon actif ne doit la réinstaller ou l’appeler.
 
 ### C. Lancement interne (`launchCombat200`)
 
@@ -60,13 +55,21 @@ Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent vo
 
 Le chemin normal du bouton principal reste `dc030EngageCombat()`. Uniquement si cette entrée historique est absente, le fallback de Core 0.53 appelle maintenant `GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`. Les gardes `combatOn53()` et `coreCanAct53()` restent en amont.
 
-Aucun appel d'embuscade, wrapper `dc030`, définition native de `openDungeonCombatSetup` ou règle de mouvement n'est modifié dans ce lot.
-
 ## Migration validée — lot 3, retrait des dépendances actives à `openDungeonCombatSetup`
 
 Les consommateurs actifs ne dépendent plus de l’ancien setup : Core 0.34 délègue à `Bridge.requestCombat`, l’embuscade conserve son chemin `dc030` et dispose d’un fallback Bridge explicite avec `reason: "embuscade"`, Core 0.45 ne wrappe plus l’ancien setup, et l’autorité Core 0.30 écrasée ainsi que la réinstallation Flow 171 sont retirées.
 
 Une unique définition historique de `openDungeonCombatSetup` reste dans le monolithe uniquement comme rollback capturé par le Bridge. Aucun chemin Dungeon actif ne l’appelle.
+
+## Migration validée — lot 4A, boutons de rencontre Core 2.01
+
+Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — ne dépendent plus du global `dc200StartCombat`.
+
+Core 2.01 utilise un helper local sans état ni règle métier, `requestCombat201(enemyIds, reason)`, qui transmet uniquement les identifiants d’ennemis et la raison existante au contrat canonique `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`. Le mode positionnel reste contrôlé par `dc305PositionalGameplay()` et l’attaque positionnelle conserve la cible située sur la case du héros actif.
+
+Le diagnostic utilise `entry: "dc201EncounterPanel"`, afin qu’aucune référence textuelle à l’ancien adaptateur ne subsiste dans Core 2.01.
+
+Ce lot ne modifie ni détection, ni embuscade, ni timeline, ni le moteur `startCombat` / `launchCombat200`.
 
 ## Contrat cible déjà disponible
 
@@ -74,7 +77,7 @@ Le Bridge Tactical dispose maintenant d’une seule entrée interne :
 
 `GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
 
-Les quatre noms historiques restent pour le moment des adaptateurs de compatibilité. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage.
+Les noms historiques restants sont des adaptateurs de compatibilité ou des consommateurs à migrer progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage.
 
 ## Règle de migration
 

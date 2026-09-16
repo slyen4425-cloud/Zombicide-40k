@@ -11,13 +11,19 @@ let profiles=[{
   id:'dungeon',name:'Dungeon',gameStyle:'dungeon',
   rpgUniverse:{stats:{
     nativeCoreMigrated95:true,legacyEffectsMigrated94:true,
-    active:['agilite'],
-    dynamicDefinitions:[{id:'agilite',name:'Agilité',icon:'🏃',defaultValue:10,min:0,max:999,visible:true}],
-    dynamicEffects90:[{id:'agi_ranged',source:'agilite',target:'hit:ranged',mode:'step',step:10,gain:20,enabled:true}],
+    active:['agilite','force'],
+    dynamicDefinitions:[
+      {id:'agilite',name:'Agilité',icon:'🏃',defaultValue:10,min:0,max:999,visible:true},
+      {id:'force',name:'Force',icon:'💪',defaultValue:10,min:0,max:999,visible:true}
+    ],
+    dynamicEffects90:[
+      {id:'agi_ranged',source:'agilite',target:'hit:ranged',mode:'step',step:10,gain:20,enabled:true},
+      {id:'force_ranged_misc',source:'force',target:'hit:ranged',mode:'step',step:10,gain:5,enabled:true}
+    ],
     dynamicRules:[]
   }}
 }];
-const states={dungeon_lyra:{rpgAttributes:{agilite:10}}};
+const states={dungeon_lyra:{rpgAttributes:{agilite:10,force:10}}};
 const item={
   id:'dng_bow',name:'Arc',type:'Arme',range:6,dice:1,strength:2,
   rpgScaling:{attribute:'agilite',baseChance:55,chancePerPoint:0,diceSides:100}
@@ -26,7 +32,7 @@ const ctx={
   console,Math,Date,JSON,Set,Map,
   setTimeout(fn){if(typeof fn==='function')fn();return 1},clearTimeout(){},
   current:'dungeon_lyra',state:states.dungeon_lyra,
-  CHARS:{dungeon_lyra:{name:'Lyra',dungeonStats:{agilite:10}}},
+  CHARS:{dungeon_lyra:{name:'Lyra',dungeonStats:{agilite:10,force:10}}},
   isDungeonMode:()=>true,
   currentRpgProfile:()=>profiles[0],getActiveGameProfile:()=>profiles[0],
   loadGameProfiles:()=>profiles,saveGameProfiles:next=>{profiles=JSON.parse(JSON.stringify(next))},
@@ -45,14 +51,17 @@ vm.runInContext(statsSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 ctx.GensCleanRpgStats167874.install();
 
 const scaled=ctx.applyDungeonCombatScaling(item,{range:6,melee:false,hitChance:55,damage:2,dice:1,strength:2});
-assert.equal(scaled.hitChance,75,'canonical Agility -> hit:ranged effect must reach the effective attack stats');
-assert.equal(ctx.GensCleanRpgStats167874.extraTotal('hit:ranged','dungeon_lyra'),20,'canonical stat engine must own the +20 ranged hit effect');
+assert.equal(scaled.hitChance,80,'all canonical hit:ranged effects must reach the final attack chance once');
+assert.equal(ctx.GensCleanRpgStats167874.extraTotal('hit:ranged','dungeon_lyra'),25,'canonical stat engine must own the complete +25 ranged hit effect');
+assert.equal(ctx.GensCleanRpgStats167874.sourceEffectTotal('hit:ranged','agilite','dungeon_lyra'),20,'source-specific attribution must isolate Agility at +20');
+assert.equal(ctx.GensCleanRpgStats167874.sourceEffectTotal('hit:ranged','force','dungeon_lyra'),5,'another stat contribution must remain distinguishable');
 
 const profile=A.weaponHitProfile(ctx,'dungeon_lyra',item,scaled);
-assert.equal(profile.hit,75,'Tactical final hit chance must preserve the canonical 75% result');
+assert.equal(profile.hit,80,'Tactical final hit chance must preserve the already-computed canonical 80% result');
 assert.equal(profile.breakdown.attribute,'agilite');
 assert.equal(profile.breakdown.attributeValue,10);
-assert.equal(profile.breakdown.statBonus,20,'the visible Tactical breakdown must attribute the canonical +20% to Agility, not hide it as an unrelated bonus');
-assert.equal(profile.breakdown.otherBonus,0,'no phantom “other bonus” must absorb the canonical Agility effect');
+assert.equal(profile.breakdown.statBonus,20,'visible Tactical breakdown must attribute only the Agility contribution to Agility');
+assert.equal(profile.breakdown.otherBonus,5,'other canonical effects must remain visible as other bonus instead of being mislabeled Agility');
+assert.equal(profile.breakdown.baseChance+profile.breakdown.statBonus+profile.breakdown.otherBonus,profile.hit,'visible breakdown must reconcile exactly to the final chance without double counting');
 
 console.log('GenSrpG V114.11 Agility ranged hit attribution contract OK');

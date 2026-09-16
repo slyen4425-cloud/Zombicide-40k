@@ -17,7 +17,7 @@ const v112=read('assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js');
 const v113=read('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js');
 const doc=read('docs/GENSRPG_VISUAL_AUTHORITY_INVENTORY.md');
 
-assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'base Tactical UI must own the validated wall asset');
+assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.png"/,'base Tactical UI must own the validated wall asset');
 assert.match(ui,/function wallTileHtml\(\).*gtv2WallTile/,'base Tactical UI must emit a real wall image tile');
 assert.match(ui,/function ensureWallTile\(el\)/,'base Tactical UI must own idempotent wall tile attachment');
 const renderGrid=block(ui,'function renderGrid(){','function renderRosterGroup','base Tactical UI renderGrid');

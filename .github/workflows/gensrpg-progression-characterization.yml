@@ -45,13 +45,13 @@ jobs:
           anchor='"use strict";\n'
           if body.count(anchor) != 1:
               raise SystemExit('Core 2.01 strict-mode anchor is not unique')
-          helper='function requestCombat201(enemyIds,reason){return window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:Array.isArray(enemyIds)?enemyIds.map(String):[],reason:reason,entry:"dc200StartCombat"})}\n'
+          helper='function requestCombat201(enemyIds,reason){return window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:Array.isArray(enemyIds)?enemyIds.map(String):[],reason:reason,entry:"dc201EncounterPanel"})}\n'
           if 'function requestCombat201(' in body:
               raise SystemExit('Core 2.01 helper already exists unexpectedly')
           body=body.replace(anchor,anchor+helper,1)
           body=body.replace('dc200StartCombat(','requestCombat201(')
-          if body.count('dc200StartCombat(') != 0:
-              raise SystemExit('Historical Core 2.01 adapter calls remain')
+          if 'dc200StartCombat' in body:
+              raise SystemExit('Historical Core 2.01 adapter reference remains')
           if body.count('requestCombat201(') != 3:
               raise SystemExit('Expected one helper definition plus two Core 2.01 calls')
           text=text[:start]+body+text[end:]
@@ -63,11 +63,11 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const s=fs.readFileSync('index.html','utf8');
-          const n=(s.match(/dc200StartCombat/g)||[]).length;
-          if(n!==11) throw new Error(`dc200StartCombat inventory must be 11 after lot 4A, got ${n}`);
-          for(const [name,expected] of [['openDungeonCombatSetup',1],['launchCombat200',2],['startCombat',6]]){
-            const c=(s.match(new RegExp(name,'g'))||[]).length;
-            if(c!==expected) throw new Error(`${name} inventory changed unexpectedly: ${c} != ${expected}`);
+          const count=n=>(s.match(new RegExp('\\b'+n+'\\b','g'))||[]).length;
+          const expected={dc200StartCombat:11,openDungeonCombatSetup:1,launchCombat200:2,startCombat:6};
+          for(const [name,n] of Object.entries(expected)){
+            const got=count(name);
+            if(got!==n) throw new Error(`${name} inventory changed unexpectedly: ${got} != ${n}`);
           }
           NODE
       - name: Commit exact Core 2.01 migration

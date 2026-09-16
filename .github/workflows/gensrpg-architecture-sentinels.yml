@@ -178,6 +178,9 @@ jobs:
       - name: Vérifier la migration directe des deux boutons combat UI
         run: node tests/gens_combat_ui_direct_entry_migration_1.test.cjs
 
+      - name: Vérifier le retrait du Core 0.99 désactivé
+        run: node tests/gens_disabled_core099_retirement_lot2.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

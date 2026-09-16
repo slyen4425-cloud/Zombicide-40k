@@ -1,0 +1,21 @@
+name: GenSrpG wall reference inventory
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-damage-display-2026-09-16'
+    paths:
+      - '.github/workflows/gensrpg-wall-reference-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lister les références du JPEG mural historique
+        run: |
+          grep -RIn --exclude-dir=.git -- 'dng_wall_block.jpg' assets tests docs .github || true

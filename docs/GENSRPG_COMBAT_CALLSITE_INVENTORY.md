@@ -14,7 +14,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
 | `dc200StartCombat` | 13 | entrée Core 2.x, détection/embuscade, boutons de combat, anciens wrappers timeline |
-| `openDungeonCombatSetup` | 11 | ancien setup de combat, embuscade et bridges Core historiques ; boutons UI migrés, Core 0.99 retiré et fallback Core 0.53 routé vers le Bridge |
+| `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
 
@@ -61,6 +61,12 @@ Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent vo
 Le chemin normal du bouton principal reste `dc030EngageCombat()`. Uniquement si cette entrée historique est absente, le fallback de Core 0.53 appelle maintenant `GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`. Les gardes `combatOn53()` et `coreCanAct53()` restent en amont.
 
 Aucun appel d'embuscade, wrapper `dc030`, définition native de `openDungeonCombatSetup` ou règle de mouvement n'est modifié dans ce lot.
+
+## Migration validée — lot 3, retrait des dépendances actives à `openDungeonCombatSetup`
+
+Les consommateurs actifs ne dépendent plus de l’ancien setup : Core 0.34 délègue à `Bridge.requestCombat`, l’embuscade conserve son chemin `dc030` et dispose d’un fallback Bridge explicite avec `reason: "embuscade"`, Core 0.45 ne wrappe plus l’ancien setup, et l’autorité Core 0.30 écrasée ainsi que la réinstallation Flow 171 sont retirées.
+
+Une unique définition historique de `openDungeonCombatSetup` reste dans le monolithe uniquement comme rollback capturé par le Bridge. Aucun chemin Dungeon actif ne l’appelle.
 
 ## Contrat cible déjà disponible
 

@@ -30421,28 +30421,6 @@ if(typeof window.saveDungeonMj151==="function"){
   window.saveDungeonMj151=function(){const r=old.apply(this,arguments);gensApplyDungeonAccess171();return r};
 }
 
-/* Combat : les héros ont déjà été choisis pour la partie.
-   On engage donc automatiquement TOUS les participants contre TOUS les ennemis vivants. */
-window.openDungeonCombatSetup=function(){
-  if(manualMj171())return;
-  const heroes=(typeof dungeonParticipants==="function"?dungeonParticipants():[]).filter(Boolean);
-  const enemies=(typeof dungeonLivingEnemies==="function"?dungeonLivingEnemies():[]).filter(e=>e&&!e.defeated&&Number(e.hp)>0);
-  if(!heroes.length){alert("Aucun héros participant à cette partie.");return}
-  if(!enemies.length){alert("Aucun ennemi vivant dans cette salle.");return}
-
-  dungeonCombatSelection={heroes:[...heroes],enemies:enemies.map(e=>String(e.id))};
-  resetDungeonCombatRewards();
-  dungeonCombatForcedTargetId=null;
-  dungeonCombatEnemyTargetHeroId=null;
-  dungeonPendingHeroDamage=null;
-  dungeonCombatActive=true;
-
-  const modal=document.getElementById("dungeonCombatModal");
-  if(modal)modal.style.display="block";
-  document.body.style.overflow="hidden";
-  renderDungeonCombatRound();
-};
-
 /* Victoire : affichage fiable à chaque affrontement, au-dessus du popup de dés. */
 window.openDungeonCombatVictoryPopup=function(){
   if(!dungeonCombatActive)return;
@@ -30682,7 +30660,7 @@ window.dc076StartAmbushCombat=function(){
     }
     DungeonCore01.closeModal?.();
     if(typeof dc030EngageCombat==='function')dc030EngageCombat();
-    else if(typeof openDungeonCombatSetup==='function')openDungeonCombatSetup();
+    else if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==='function')window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:living.map(e=>String(e.id)),reason:'embuscade',entry:'dc076AmbushFallback'});
   }catch(e){
     console.warn('Core 0.76 embuscade',e);
     try{DungeonCore01.modal?.('⚠️ Embuscade','Impossible d’ouvrir le combat : '+z40kEscHtml(String(e?.message||e)))}catch(_){}
@@ -31099,29 +31077,6 @@ function dc030Living(){
   try{return (typeof dungeonLivingEnemies==="function"?dungeonLivingEnemies():[]).filter(e=>e&&!e.defeated&&Number(e.hp)>0)}
   catch(e){return[]}
 }
-
-window.dc030EngageCombat=function(){
-  try{
-    const enemies=dc030Living();
-    if(!enemies.length){
-      DungeonCore01.modal?.("⚔️ Combat","Aucun ennemi vivant dans cette salle.");
-      DungeonCore01.render?.();
-      return;
-    }
-    /* Ferme uniquement les overlays parasites avant d'ouvrir le vrai combat. */
-    document.getElementById("dc01Modal")?.classList.remove("open");
-    document.getElementById("specialDiceModal")?.classList.remove("open");
-    document.body.style.overflow="";
-    if(typeof openDungeonCombatSetup==="function"){
-      openDungeonCombatSetup();
-    }else{
-      DungeonCore01.modal?.("⚠️ Combat","Le moteur de combat est introuvable.");
-    }
-  }catch(e){
-    console.error("Core 0.30 engage",e);
-    DungeonCore01.modal?.("⚠️ Combat","Erreur à l’ouverture du combat : "+String(e?.message||e));
-  }
-};
 
 function dc030RefreshCombatButton(){
   const b=document.getElementById("dc030Combat");
@@ -31743,7 +31698,7 @@ if(window.DungeonCore01){
   };
 }
 
-/* Entrée combat : le Core reste l'écran de fond et le host doit toujours être visible. */
+/* Entrée combat Dungeon : préparation minimale, résolution exclusivement Tactical. */
 window.dc030EngageCombat=function(){
   try{
     const living=(typeof dungeonLivingEnemies==="function"?dungeonLivingEnemies():[])
@@ -31757,31 +31712,16 @@ window.dc030EngageCombat=function(){
     if(sheet)sheet.style.display="none";
     const menu=document.getElementById("menu");
     if(menu)menu.style.display="none";
-
     const core=document.getElementById("gensDungeonCore01");
     if(core)core.style.display="block";
+    document.getElementById("dc01Modal")?.classList.remove("open");
+    document.getElementById("specialDiceModal")?.classList.remove("open");
+    document.body.style.overflow="";
 
-    const host=document.getElementById("dungeonCombatSetupView");
-    if(host){
-      host.style.removeProperty("display");
-      host.style.display="block";
-      host.innerHTML="";
+    if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
+      return window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:living.map(e=>String(e.id)),reason:"manual-setup",entry:"dc030EngageCombat"});
     }
-
-    const modal=document.getElementById("dungeonCombatModal");
-    if(modal)modal.style.display="block";
-
-    document.body.style.overflow="hidden";
-
-    /* Utilise le moteur existant, puis force son rendu dans le host visible. */
-    if(typeof openDungeonCombatSetup==="function"){
-      openDungeonCombatSetup();
-    }else{
-      DungeonCore01.modal?.("⚠️ Combat","Le moteur de combat est introuvable.");
-      return;
-    }
-    if(typeof renderDungeonCombatSetup==="function")renderDungeonCombatSetup();
-
+    DungeonCore01.modal?.("⚠️ Combat","Le moteur de combat tactique est introuvable.");
   }catch(e){
     console.error("Core 0.34 engage",e);
     try{DungeonCore01.modal("⚠️ Combat","Erreur : "+String(e?.message||e))}catch(_){}
@@ -32802,13 +32742,6 @@ if(typeof window.dc030EngageCombat==="function"){
   };
 }
 
-if(typeof window.openDungeonCombatSetup==="function"){
-  const prev=window.openDungeonCombatSetup;
-  window.openDungeonCombatSetup=function(){
-    if(!dc045HeroCombatEnabled())return;
-    return prev.apply(this,arguments);
-  };
-}
 
 if(typeof window.startDungeonClassicCombat==="function"){
   const prev=window.startDungeonClassicCombat;

@@ -18,6 +18,8 @@ jobs:
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
       - name: Vérifier le résumé de victoire Tactical
         run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
+      - name: Exécuter victoire Tactical vers XP et butin Dungeon
+        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
       - name: Caractériser l'édition manuelle du niveau
         run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
       - name: Caractériser XP manuel vers points de caractéristiques

@@ -1,0 +1,20 @@
+name: GenSrpG stats consistency characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-stats-consistency-reconnect-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stats-characterization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier Agilité vers toucher distance et son explication
+        run: node tests/gens_agility_ranged_hit_attribution_v11411.test.cjs
+      - name: Vérifier la sémantique éditeur héros versus fiche en jeu
+        run: node tests/gens_stat_editor_game_display_semantics_v11411.test.cjs

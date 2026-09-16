@@ -12,62 +12,49 @@ permissions:
 
 jobs:
   progression-characterization:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch natif cible changeXP sur la branche de travail
-        shell: python
+      - name: Patch exact du propriétaire natif changeXP
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
-          p = Path('index.html')
-          text = p.read_text(encoding='utf-8')
-          old = '''function changeXP(v){
-  const before=state.xp;
-  state.xp=Math.max(0,Math.min(999,state.xp+v));
-  if(isDungeonHeroSheet())dungeonSyncProgressionForState(current,state);
-  if(state.xp>before)z40kPlayUiSound("heal",0.88);
-  render();
-}'''
-          new = '''function changeXP(v){
-  const before=state.xp;
-  state.xp=Math.max(0,Math.min(999,state.xp+v));
-  if(isDungeonHeroSheet()){
-    dungeonSyncProgressionForState(current,state);
-    dungeonHandleLevelUp071?.(current,before,state);
-    save();
-  }
-  if(state.xp>before)z40kPlayUiSound("heal",0.88);
-  render();
-}'''
-          count = text.count(old)
-          if count == 0:
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          old='function changeXP(v){ const before=state.xp; state.xp=Math.max(0,Math.min(999,state.xp+v)); if(isDungeonHeroSheet())dungeonSyncProgressionForState(current,state); if(state.xp>before)z40kPlayUiSound("heal",0.88); render(); }'
+          new='function changeXP(v){ const before=state.xp; state.xp=Math.max(0,Math.min(999,state.xp+v)); if(isDungeonHeroSheet()){ dungeonSyncProgressionForState(current,state); dungeonHandleLevelUp071?.(current,before,state,80); save(); } if(state.xp>before)z40kPlayUiSound("heal",0.88); render(); }'
+          count=text.count(old)
+          if count==0:
               if new in text:
-                  print('changeXP déjà patché exactement; aucun changement.')
+                  print('changeXP already patched exactly')
                   raise SystemExit(0)
-              raise SystemExit('Bloc changeXP attendu introuvable: patch annulé.')
-          if count != 1:
-              raise SystemExit(f'Bloc changeXP trouvé {count} fois: patch annulé.')
-          p.write_text(text.replace(old, new, 1), encoding='utf-8')
-          print('Patch changeXP appliqué une seule fois.')
-      - name: Valider le contrat XP avant commit
+              raise SystemExit('expected native changeXP block not found; refusing broad patch')
+          if count!=1:
+              raise SystemExit(f'expected one native changeXP block, found {count}')
+          p.write_text(text.replace(old,new,1),encoding='utf-8')
+          print('native changeXP patched exactly once')
+          PY
+      - name: Validate native manual XP runtime before commit
         run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Commit ciblé du propriétaire natif
+      - name: Commit only native index owner change
         shell: bash
         run: |
           if git diff --quiet -- index.html; then
-            echo "Aucun changement index.html à committer."
+            echo "No index.html change to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "fix: raccorder XP manuel au cycle canonique"
+          git commit -m "fix: reconnect native manual XP lifecycle"
           git push origin "HEAD:${GITHUB_REF_NAME}"
-      - name: Caractériser progression et récompenses natives
+      - name: Characterize native progression and rewards
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
-      - name: Vérifier le résumé de victoire Tactical
+      - name: Verify Tactical victory rewards summary
         run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
-      - name: Exécuter victoire Tactical vers XP et butin Dungeon
+      - name: Execute Tactical victory to Dungeon XP and loot
         run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
-      - name: Caractériser l'édition manuelle du niveau
+      - name: Characterize manual level authority
         run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs

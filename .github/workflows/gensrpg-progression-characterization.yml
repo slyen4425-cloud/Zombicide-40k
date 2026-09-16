@@ -5,106 +5,12 @@ on:
     branches:
       - 'work/gensrpg-progression-victory-reconnect-*'
       - 'work/gensrpg-xp-portrait-cleanfix-*'
-      - 'work/gensrpg-combat-callsite-migration-2-2026-09-16'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  core099-retirement-one-shot:
-    if: github.ref == 'refs/heads/work/gensrpg-combat-callsite-migration-2-2026-09-16' && github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: work/gensrpg-combat-callsite-migration-2-2026-09-16
-          fetch-depth: 0
-
-      - name: Prove Core 0.99 retirement test is red before cleanup
-        run: |
-          if node tests/gens_disabled_core099_retirement_lot2.test.cjs; then
-            echo 'Expected Core 0.99 retirement test to fail before cleanup.'
-            exit 1
-          fi
-
-      - name: Remove exactly one disabled Core 0.99 authority block
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          index=Path('index.html')
-          html=index.read_text(encoding='utf-8')
-          start='<script type="application/x-gensrpg-disabled" id="dungeonCore099FinalTacticalAuthority">'
-          if html.count(start)!=1:
-            raise SystemExit(f'Core 0.99 start marker count must be 1, got {html.count(start)}')
-          a=html.index(start)
-          b=html.find('</script>',a)
-          if b<0:
-            raise SystemExit('Core 0.99 closing script marker missing')
-          b+=len('</script>')
-          block=html[a:b]
-          required=[
-            'window.dc099EngageCombat=engage99',
-            'window.dc099Paint=paint99',
-            'window.dc099SyncMainAction=syncMain99',
-            'document.addEventListener("click"',
-            'setTimeout(()=>{paint99();syncMain99()},0)',
-            'openDungeonCombatSetup'
-          ]
-          for needle in required:
-            if needle not in block:
-              raise SystemExit(f'Core 0.99 exact precondition missing: {needle}')
-          if block.count('openDungeonCombatSetup')!=2:
-            raise SystemExit(f'Core 0.99 must contain exactly two textual openDungeonCombatSetup occurrences in its one fallback line, got {block.count("openDungeonCombatSetup")}')
-          for symbol in ('dc200StartCombat','launchCombat200','startCombat'):
-            if block.count(symbol)!=0:
-              raise SystemExit(f'Core 0.99 unexpectedly contains protected symbol {symbol}')
-          if html.count('id="dungeonCore099FinalTacticalCss"')!=1 or html.count('id="dungeonCore100UiCleanup"')!=1:
-            raise SystemExit('Adjacent Core 0.99/1.00 CSS precondition failed')
-          html=html[:a]+html[b:]
-          if html.count('id="dungeonCore099FinalTacticalCss"')!=1 or html.count('id="dungeonCore100UiCleanup"')!=1:
-            raise SystemExit('Adjacent CSS changed unexpectedly')
-          index.write_text(html,encoding='utf-8')
-
-          inv=Path('tests/gens_combat_callsite_inventory_v11411.test.cjs')
-          text=inv.read_text(encoding='utf-8')
-          old='const expected={dc200StartCombat:13,openDungeonCombatSetup:15,launchCombat200:2,startCombat:6};'
-          new='const expected={dc200StartCombat:13,openDungeonCombatSetup:13,launchCombat200:2,startCombat:6};'
-          if text.count(old)!=1:
-            raise SystemExit('Combat inventory test precondition failed')
-          inv.write_text(text.replace(old,new),encoding='utf-8')
-
-          doc=Path('docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md')
-          text=doc.read_text(encoding='utf-8')
-          old='| `openDungeonCombatSetup` | 15 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés vers le contrat Bridge |'
-          new='| `openDungeonCombatSetup` | 13 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés et le Core 0.99 désactivé retiré |'
-          if text.count(old)!=1:
-            raise SystemExit('Combat inventory documentation precondition failed')
-          text=text.replace(old,new)
-          marker='## Contrat cible déjà disponible\n'
-          note='''## Migration validée — lot 2, Core 0.99 désactivé\n\nLe script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son unique ligne de fallback comportait deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel), ainsi que des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.\n\nLe CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.\n\n'''
-          if marker not in text:
-            raise SystemExit('Combat inventory insertion marker missing')
-          doc.write_text(text.replace(marker,note+marker,1),encoding='utf-8')
-          PY
-
-      - name: Validate exact subtractive cleanup
-        run: |
-          node tests/gens_disabled_core099_retirement_lot2.test.cjs
-          node tests/gens_combat_callsite_inventory_v11411.test.cjs
-          node tests/gens_bridge_single_entry_contract_v11411.test.cjs
-          node tests/gens_combat_authority_characterization_v11411.test.cjs
-
-      - name: Commit Core 0.99 retirement
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html tests/gens_combat_callsite_inventory_v11411.test.cjs docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md
-          git diff --cached --check
-          git commit -m 'refactor: retire disabled Core 0.99 combat authority'
-          git push origin HEAD:work/gensrpg-combat-callsite-migration-2-2026-09-16
-
   progression-characterization:
     runs-on: ubuntu-latest
     steps:

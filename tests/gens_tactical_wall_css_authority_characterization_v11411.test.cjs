@@ -26,7 +26,7 @@ for(const [name,file] of files){
 assert.deepEqual(debt,[],'historical Tactical layers must not own any residual wall CSS');
 
 const ui=read('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js');
-assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'canonical Tactical UI wall asset missing');
+assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.png"/,'canonical Tactical UI wall asset missing');
 assert.match(ui,/function ensureWallTile\(el\)/,'canonical Tactical UI wall tile owner missing');
 assert.match(ui,/function paintLiveWalls\(\)/,'canonical Tactical UI live wall owner missing');
 

@@ -1,0 +1,32 @@
+name: GenSrpG damage and Firefox wall zoom characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-damage-display-2026-09-16'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  damage-explanation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduire le calcul visuel observé sur Firefox
+        run: node tests/gens_damage_explanation_consistency_v11411.test.cjs
+
+  firefox-wall-zoom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Firefox Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps firefox
+      - name: Reproduire le contrat mural sous zoom fractionnaire Firefox
+        run: node tests/gens_tactical_wall_zoom_firefox_v11411.test.cjs

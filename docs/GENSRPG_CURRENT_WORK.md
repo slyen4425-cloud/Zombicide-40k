@@ -7,34 +7,71 @@ Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est pl
 - Branche : `work/gensrpg-combat-callsite-migration-2-2026-09-16`
 - Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-2-2026-09-16`
 - Base exacte : `2aa6ba574923229af105cbee1635eeb9efab18cb`
+- Commit runtime du retrait : `c22e147b492691685cb92c009b80bd7dee00c0d7`
 - Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- `main` ne doit pas être modifié.
+- `main` n'a pas été modifié.
 
-## Décision de périmètre
+## Résultat du lot 2
 
-Le lot 2 retire uniquement le script historique désactivé :
+Le lot retire uniquement le script historique désactivé :
 
 `<script type="application/x-gensrpg-disabled" id="dungeonCore099FinalTacticalAuthority"> ... </script>`
 
-Ce bloc n'est pas exécuté par le navigateur. Il contient pourtant encore de vieilles autorités : wrappers `DungeonCore01`, listener document capture, timer, fonctions `dc099*` et fallback vers `openDungeonCombatSetup()`.
+Ce bloc n'était pas exécuté par le navigateur et n'appartenait pas à la chaîne runtime active. Il contenait encore :
 
-La carte runtime active et les sentinelles modernes placent l'autorité combat sur :
+- wrappers de `DungeonCore01` ;
+- listener document en capture ;
+- timer de réparation ;
+- affectations `dc099*` historiques ;
+- fallback vers `openDungeonCombatSetup()`.
+
+La chaîne active reste :
 
 `GensRpgTacticalCombatV2Bridge.requestCombat(...) -> V113 scope/participants -> Tactical V2`
 
-Core 0.99 n'appartient pas à cette chaîne active. Conformément à la charte, une couche morte n'est pas modernisée : elle est retirée de façon soustractive après caractérisation.
+Conformément à la charte, la couche morte a été retirée au lieu d'être modernisée ou raccordée une nouvelle fois.
 
-## Ce qui reste volontairement hors périmètre
+## Découverte protégée par les gardes
 
-Le CSS historique voisin reste intact dans ce lot :
+La première tentative de retrait a été refusée avant écriture : le contrat initial supposait une seule occurrence de `openDungeonCombatSetup` dans Core 0.99.
+
+La caractérisation exacte a montré qu'une unique ligne de fallback contient deux occurrences textuelles :
+
+1. le test `typeof window.openDungeonCombatSetup === "function"` ;
+2. l'appel `window.openDungeonCombatSetup()`.
+
+Le garde a donc empêché une mise à jour d'inventaire incorrecte. Le contrat a été corrigé avant relance.
+
+Autre précision : les noms globaux `dc099EngageCombat`, `dc099Paint` et `dc099SyncMainAction` sont encore repris plus tard par d'autres couches historiques. Le test du lot 2 vérifie donc la disparition des affectations propres à Core 0.99 (`engage99`, `paint99`, `syncMain99`) sans supprimer ces alias ultérieurs hors périmètre.
+
+## Inventaire après retrait
+
+Avant lot 2 :
+
+- `dc200StartCombat` : 13 ;
+- `openDungeonCombatSetup` : 15 ;
+- `launchCombat200` : 2 ;
+- `startCombat` : 6.
+
+Après retrait Core 0.99 :
+
+- `dc200StartCombat` : 13 — inchangé ;
+- `openDungeonCombatSetup` : 13 — deux occurrences textuelles retirées ;
+- `launchCombat200` : 2 — inchangé ;
+- `startCombat` : 6 — inchangé.
+
+## Hors périmètre confirmé
+
+Le CSS historique voisin reste intact :
 
 - `#dungeonCore099FinalTacticalCss` ;
-- `#dungeonCore100UiCleanup` et sa référence `.dc099Reachable`.
+- `#dungeonCore100UiCleanup` ;
+- la référence `.dc099Reachable`.
 
-Même s'il semble historique, son retrait serait un chantier visuel distinct. Il sera caractérisé séparément avant toute suppression.
+Ils seront caractérisés séparément si le plan les traite plus tard.
 
-Ne pas toucher non plus à :
+Restent également hors périmètre :
 
 - `dc030EngageCombat` et ses fallbacks actifs ;
 - embuscades ;
@@ -49,48 +86,34 @@ Ne pas toucher non plus à :
 - cache/PWA ;
 - Survival, Capture, PvP, World Builder.
 
-## Effet attendu sur l'inventaire
+## Tests du lot 2
 
-Avant lot 2 :
+Test dédié : `tests/gens_disabled_core099_retirement_lot2.test.cjs`.
 
-- `dc200StartCombat` : 13 ;
-- `openDungeonCombatSetup` : 15 ;
-- `launchCombat200` : 2 ;
-- `startCombat` : 6.
+Il vérifie :
 
-Le bloc Core 0.99 contient exactement une référence à `openDungeonCombatSetup`.
+1. disparition de `#dungeonCore099FinalTacticalAuthority` ;
+2. disparition des affectations Core 0.99 `engage99`, `paint99`, `syncMain99` ;
+3. maintien du CSS Core 0.99 ;
+4. maintien du nettoyage UI Core 1.00 ;
+5. maintien de `.dc099Reachable` pour un chantier visuel séparé ;
+6. inventaire combat exact `13 / 13 / 2 / 6` ;
+7. Bridge et autorité combat existante inchangés.
 
-Après retrait :
+Le retrait exact, l'inventaire, le contrat Bridge et la caractérisation combat ont déjà passé dans le one-shot. La batterie XP/progression/récompenses est également restée verte.
 
-- `dc200StartCombat` : 13 — inchangé ;
-- `openDungeonCombatSetup` : 14 ;
-- `launchCombat200` : 2 — inchangé ;
-- `startCombat` : 6 — inchangé.
+Le workflow progression a ensuite été restauré à son état canonique lecture/test uniquement (`contents: read`) et le test Lot 2 a été raccordé à la sentinelle architecture permanente.
 
-## Tests exigés
+## Validation finale avant checkpoint
 
-Avant suppression, poser un test qui devient vert uniquement si :
+Il reste uniquement à confirmer sur le SHA final propre :
 
-1. `#dungeonCore099FinalTacticalAuthority` a disparu ;
-2. `window.dc099EngageCombat`, `window.dc099Paint` et `window.dc099SyncMainAction` ont disparu avec ce bloc ;
-3. `#dungeonCore099FinalTacticalCss` reste présent ;
-4. `#dungeonCore100UiCleanup` reste présent ;
-5. le compteur `openDungeonCombatSetup` passe uniquement de 15 à 14 ;
-6. les autres compteurs historiques sont inchangés ;
-7. Bridge/V113 et les sentinelles architecture restent verts ;
-8. Chromium et Firefox restent verts.
+- architecture complète ;
+- Chromium / preview ;
+- Firefox ;
+- comparaison exacte avec le checkpoint de départ.
 
-## Séquence
-
-1. checkpoint de départ — fait ;
-2. test rouge de retrait Core 0.99 ;
-3. suppression exacte d'un seul bloc désactivé ;
-4. mise à jour inventaire 15 -> 14 ;
-5. raccord du test aux sentinelles ;
-6. comparaison complète avec le checkpoint de départ ;
-7. architecture + Chromium + Firefox ;
-8. checkpoint vert ;
-9. seulement ensuite caractériser le prochain groupe actif.
+Aucun nouveau lot ne doit être ouvert avant ce checkpoint vert.
 
 ## Jalon vert précédent — lot UI manuel 1
 

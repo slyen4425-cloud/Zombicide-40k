@@ -34,7 +34,7 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       assert.equal(row.tiles,1,`scale ${row.scale}: wall tile count changed during zoom`);
       assert.equal(row.complete,true,`scale ${row.scale}: wall image not complete`);
       assert.ok(row.naturalWidth>0,`scale ${row.scale}: wall image failed to decode`);
-      assert.match(row.background,/dng_wall_block\.jpg/,`scale ${row.scale}: fallback background lost`);
+      assert.match(row.background,/dungeon_wall\.png/,`scale ${row.scale}: healthy canonical fallback background lost`);
       assert.equal(row.imgDisplay,'block',`scale ${row.scale}: wall image display changed`);
       assert.equal(row.imgVisibility,'visible',`scale ${row.scale}: wall image visibility changed`);
       assert.equal(row.imgOpacity,'1',`scale ${row.scale}: wall image opacity changed`);
@@ -43,6 +43,6 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       assert.notEqual(row.isolation,'isolate',`scale ${row.scale}: isolated wall compositing is forbidden for Firefox zoom stability`);
     }
     assert.deepEqual(errors,[],'Firefox wall zoom browser errors');
-    console.log(JSON.stringify({scenario:'V114.11 canonical wall survives Firefox fractional zoom without isolated paint layers',viewport:'412x915 @2.625',scales:result.map(r=>({scale:r.scale,contain:r.contain,isolation:r.isolation,width:r.wallWidth}))}));
+    console.log(JSON.stringify({scenario:'V114.11 canonical PNG wall survives Firefox fractional zoom without isolated paint layers',viewport:'412x915 @2.625',scales:result.map(r=>({scale:r.scale,contain:r.contain,isolation:r.isolation,width:r.wallWidth}))}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -106,7 +106,7 @@
   }
   function damageCalculationFormula(result){
     if(!result?.hit)return "Aucun dégât : attaque ratée.";
-    const base=Math.max(0,num(result.baseWeaponDamage,result.rawDamage??result.damagePerHit??0)),bonus=num(result.statDamageBonus,0),raw=Math.max(0,num(result.rawDamage,base+bonus)),armor=Math.max(0,num(result.armor,0)),perHit=Math.max(0,num(result.damagePerHit,result.damage??0)),hits=Math.max(1,Math.round(num(result.hits,1))),total=Math.max(0,num(result.damage,perHit*hits));
+    const base=Math.max(0,num(result.baseWeaponDamage,result.rawDamage??result.damagePerHit??0)),bonus=num(result.statDamageBonus,0),raw=Math.max(0,Math.round(base+bonus)),armor=Math.max(0,num(result.armor,0)),perHit=Math.max(0,num(result.damagePerHit,result.damage??0)),hits=Math.max(1,Math.round(num(result.hits,1))),total=Math.max(0,num(result.damage,perHit*hits));
     const left=bonus?`Puissance arme ${base} + bonus stat ${bonus} = ${raw} brut`:`Puissance arme ${base} = ${raw} brut`;
     let out=left;if(str(result.damageType||"physical")==="physical"&&armor>0)out+=` − armure ${armor}`;out+=` = ${perHit} dégât(s) par touche`;
     if(hits>1)out+=` ; ${hits} touche(s) = ${total} dégâts infligés`;else out+=` ; ${total} dégât(s) infligé(s)`;

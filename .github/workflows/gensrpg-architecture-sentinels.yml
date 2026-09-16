@@ -181,6 +181,12 @@ jobs:
       - name: Vérifier le retrait du Core 0.99 désactivé
         run: node tests/gens_disabled_core099_retirement_lot2.test.cjs
 
+      - name: Vérifier le fallback Bridge Core 0.53
+        run: node tests/gens_core053_bridge_fallback_lot3.test.cjs
+
+      - name: Vérifier le retrait des dépendances actives à l'ancien setup Dungeon
+        run: node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

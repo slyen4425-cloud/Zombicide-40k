@@ -16,3 +16,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Caractériser progression et récompenses natives
         run: node tests/gens_progression_authority_characterization_v11411.test.cjs
+      - name: Vérifier le résumé de victoire Tactical
+        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs

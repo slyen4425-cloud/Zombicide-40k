@@ -11,21 +11,21 @@ assert.match(src,/dng_brom\.png/);
 assert.match(src,/dungeon-authored-final-exit-167875\.js\?v=167879/);
 assert.match(src,/dungeon-authored-event-cells-167877\.js\?v=167879/);
 assert.match(src,/dungeon-event-runtime-fix-167878\.js\?v=167879/);
+const custom='data:image/png;base64,CUSTOM';
 const chars={
- dungeon_aldren:{image:'assets/old/generic_hero.png',avatar:'data:image/svg+xml;base64,BBB'},
+ dungeon_aldren:{image:custom,avatar:custom},
  dungeon_lyra:{image:'assets/dungeon/creatures/dng_lyra.png',avatar:''},
- dungeon_brom:{image:'',avatar:'assets/old/brom-placeholder.png'}
+ dungeon_brom:{image:'',avatar:''}
 };
 const ctx={console,setTimeout,clearTimeout,requestAnimationFrame:f=>f(),CHARS:chars,current:'dungeon_aldren'};
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-dungeon-hero-art-repair-167874.js'});
 const api=ctx.GensDungeonHeroArtRepair167874;assert.ok(api);
-api.repairDefs();
-assert.equal(chars.dungeon_aldren.image,'assets/dungeon/creatures/dng_aldren.png');
-assert.equal(chars.dungeon_aldren.avatar,'assets/dungeon/creatures/dng_aldren.png');
-assert.equal(chars.dungeon_lyra.image,'assets/dungeon/creatures/dng_lyra.png');
-assert.equal(chars.dungeon_lyra.avatar,'assets/dungeon/creatures/dng_lyra.png');
-assert.equal(chars.dungeon_brom.image,'assets/dungeon/creatures/dng_brom.png');
-assert.equal(chars.dungeon_brom.avatar,'assets/dungeon/creatures/dng_brom.png');
-console.log('Dungeon built-in hero art repair + V16.78.79 runtime loader: OK');
+assert.equal(api.repairDefs(),0,'visual bridge must not mutate canonical hero data');
+assert.equal(chars.dungeon_aldren.image,custom);
+assert.equal(chars.dungeon_aldren.avatar,custom);
+assert.equal(api.canonicalArt('dungeon_aldren'),custom,'custom configured art must win');
+assert.equal(api.canonicalArt('dungeon_lyra'),'assets/dungeon/creatures/dng_lyra.png','configured built-in art remains valid');
+assert.equal(api.canonicalArt('dungeon_brom'),'assets/dungeon/creatures/dng_brom.png','built-in art is fallback only when no configured art exists');
+console.log('Dungeon hero art bridge: canonical custom art preserved, built-in fallback retained, V16.78.79 runtime loader OK');
 require('./dungeon_authored_final_exit_v167878.test.cjs');

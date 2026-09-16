@@ -1,9 +1,12 @@
-name: GenSrpG Firefox wall zoom proof
+name: GenSrpG Firefox wall zoom sentinel
 
 on:
   push:
     branches:
-      - 'work/gensrpg-wall-zoom-*'
+      - 'work/gensrpg-*'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -21,31 +24,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Installer Firefox et les outils de test
+      - name: Installer Firefox et le lecteur PNG de test
         run: |
           npm install --no-save playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps firefox
-          python3 -m pip install --quiet pillow
 
-      - name: Convertir la texture murale JPG tronquée en PNG de diagnostic
-        run: |
-          python3 - <<'PY'
-          from PIL import Image, ImageFile
-          ImageFile.LOAD_TRUNCATED_IMAGES = True
-          src='assets/dungeon/creatures/dng_wall_block.jpg'
-          dst='assets/dungeon/creatures/dng_wall_block_converted_test.png'
-          with Image.open(src) as im:
-              im.load()
-              im.convert('RGBA').save(dst, 'PNG', optimize=True)
-          PY
-
-      - name: Reproduire l'explication dégâts du test manuel
-        continue-on-error: true
+      - name: Vérifier l'explication visible des dégâts
         run: node tests/gens_damage_explanation_consistency_v11411.test.cjs
 
-      - name: Reproduire le mur blanc pendant le zoom Firefox
-        continue-on-error: true
+      - name: Vérifier les pixels des murs pendant le zoom Firefox
         run: node tests/gens_tactical_wall_zoom_pixels_firefox_v11411.test.cjs
-
-      - name: Comparer les représentations murales par pixels
-        run: node tests/gens_wall_zoom_candidate_matrix_firefox_v11411.test.cjs

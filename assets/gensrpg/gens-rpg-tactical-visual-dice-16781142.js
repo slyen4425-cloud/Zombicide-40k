@@ -10,7 +10,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(R){
   "use strict";
   const VERSION="2.3.0",APP_VERSION="16.78.114.11";
-  const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
+  const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.png";
   const WRONG_WALL_ASSET="assets/dungeon/creatures/dungeon_wall.png";
   const STYLE_ID="gensRpgTacticalVisualDice167811411Style";
   const ESCAPE_KEY="gensrpg_tactical_menu_escape_until_v1";
@@ -106,7 +106,7 @@
   }
   function damageCalculationFormula(result){
     if(!result?.hit)return "Aucun dégât : attaque ratée.";
-    const base=Math.max(0,num(result.baseWeaponDamage,result.rawDamage??result.damagePerHit??0)),bonus=num(result.statDamageBonus,0),raw=Math.max(0,num(result.rawDamage,base+bonus)),armor=Math.max(0,num(result.armor,0)),perHit=Math.max(0,num(result.damagePerHit,result.damage??0)),hits=Math.max(1,Math.round(num(result.hits,1))),total=Math.max(0,num(result.damage,perHit*hits));
+    const base=Math.max(0,num(result.baseWeaponDamage,result.rawDamage??result.damagePerHit??0)),bonus=num(result.statDamageBonus,0),raw=bonus?Math.max(0,Math.round(base+bonus)):Math.max(0,num(result.rawDamage,base)),armor=Math.max(0,num(result.armor,0)),perHit=Math.max(0,num(result.damagePerHit,result.damage??0)),hits=Math.max(1,Math.round(num(result.hits,1))),total=Math.max(0,num(result.damage,perHit*hits));
     const left=bonus?`Puissance arme ${base} + bonus stat ${bonus} = ${raw} brut`:`Puissance arme ${base} = ${raw} brut`;
     let out=left;if(str(result.damageType||"physical")==="physical"&&armor>0)out+=` − armure ${armor}`;out+=` = ${perHit} dégât(s) par touche`;
     if(hits>1)out+=` ; ${hits} touche(s) = ${total} dégâts infligés`;else out+=` ; ${total} dégât(s) infligé(s)`;

@@ -9,7 +9,7 @@
   "use strict";
   const VERSION="0.9.0",APP_VERSION="16.78.114.10";
   const RULE_STORAGE_KEY="gensrpg_dungeon_roll_high_to_hit_v1";
-  const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.jpg";
+  const WALL_ASSET="assets/dungeon/creatures/dng_wall_block.png";
   const FLOOR_ASSET="assets/dungeon/creatures/dng_floor_stone_01.png";
   const HERO_ART={
     dungeon_aldren:"assets/dungeon/creatures/dng_aldren.png",

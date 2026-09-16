@@ -25,7 +25,7 @@ for(const [name,file] of historical){
 }
 
 const ui=read('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js');
-assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.jpg"/,'Tactical UI must own the canonical wall asset');
+assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.png"/,'Tactical UI must own the canonical wall asset');
 assert.match(ui,/function wallTileHtml\(/,'Tactical UI must own wall tile HTML');
 assert.match(ui,/function ensureWallTile\(el\)/,'Tactical UI must own wall tile idempotence');
 assert.match(ui,/function paintLiveWalls\(\)/,'Tactical UI must own live wall rendering');

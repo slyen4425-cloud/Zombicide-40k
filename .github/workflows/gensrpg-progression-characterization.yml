@@ -55,11 +55,12 @@ jobs:
           for needle in required:
             if needle not in block:
               raise SystemExit(f'Core 0.99 exact precondition missing: {needle}')
-          if block.count('openDungeonCombatSetup')!=1:
-            raise SystemExit(f'Core 0.99 must contain exactly one openDungeonCombatSetup reference, got {block.count("openDungeonCombatSetup")}')
-          before_css=html.count('id="dungeonCore099FinalTacticalCss"')
-          before_cleanup=html.count('id="dungeonCore100UiCleanup"')
-          if before_css!=1 or before_cleanup!=1:
+          if block.count('openDungeonCombatSetup')!=2:
+            raise SystemExit(f'Core 0.99 must contain exactly two textual openDungeonCombatSetup occurrences in its one fallback line, got {block.count("openDungeonCombatSetup")}')
+          for symbol in ('dc200StartCombat','launchCombat200','startCombat'):
+            if block.count(symbol)!=0:
+              raise SystemExit(f'Core 0.99 unexpectedly contains protected symbol {symbol}')
+          if html.count('id="dungeonCore099FinalTacticalCss"')!=1 or html.count('id="dungeonCore100UiCleanup"')!=1:
             raise SystemExit('Adjacent Core 0.99/1.00 CSS precondition failed')
           html=html[:a]+html[b:]
           if html.count('id="dungeonCore099FinalTacticalCss"')!=1 or html.count('id="dungeonCore100UiCleanup"')!=1:
@@ -69,7 +70,7 @@ jobs:
           inv=Path('tests/gens_combat_callsite_inventory_v11411.test.cjs')
           text=inv.read_text(encoding='utf-8')
           old='const expected={dc200StartCombat:13,openDungeonCombatSetup:15,launchCombat200:2,startCombat:6};'
-          new='const expected={dc200StartCombat:13,openDungeonCombatSetup:14,launchCombat200:2,startCombat:6};'
+          new='const expected={dc200StartCombat:13,openDungeonCombatSetup:13,launchCombat200:2,startCombat:6};'
           if text.count(old)!=1:
             raise SystemExit('Combat inventory test precondition failed')
           inv.write_text(text.replace(old,new),encoding='utf-8')
@@ -77,12 +78,12 @@ jobs:
           doc=Path('docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md')
           text=doc.read_text(encoding='utf-8')
           old='| `openDungeonCombatSetup` | 15 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés vers le contrat Bridge |'
-          new='| `openDungeonCombatSetup` | 14 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés et le Core 0.99 désactivé retiré |'
+          new='| `openDungeonCombatSetup` | 13 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés et le Core 0.99 désactivé retiré |'
           if text.count(old)!=1:
             raise SystemExit('Combat inventory documentation precondition failed')
           text=text.replace(old,new)
           marker='## Contrat cible déjà disponible\n'
-          note='''## Migration validée — lot 2, Core 0.99 désactivé\n\nLe script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Il contenait encore un fallback `openDungeonCombatSetup`, des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.\n\nLe CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.\n\n'''
+          note='''## Migration validée — lot 2, Core 0.99 désactivé\n\nLe script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son unique ligne de fallback comportait deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel), ainsi que des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.\n\nLe CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.\n\n'''
           if marker not in text:
             raise SystemExit('Combat inventory insertion marker missing')
           doc.write_text(text.replace(marker,note+marker,1),encoding='utf-8')

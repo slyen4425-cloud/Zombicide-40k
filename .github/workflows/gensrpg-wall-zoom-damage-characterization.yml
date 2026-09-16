@@ -30,3 +30,17 @@ jobs:
           npx playwright install --with-deps firefox
       - name: Reproduire le contrat mural sous zoom fractionnaire Firefox
         run: node tests/gens_tactical_wall_zoom_firefox_v11411.test.cjs
+
+  firefox-wall-png-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Firefox Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps firefox
+      - name: Vérifier dungeon_wall.png sous zoom fractionnaire Firefox
+        run: node tests/gens_wall_png_candidate_firefox_v11411.test.cjs

@@ -2,71 +2,81 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — régression éditeur de statistiques
+## Chantier courant — latence XP manuel de la fiche héros
 
-- Branche de travail : `work/gensrpg-stats-editor-regression-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-stats-editor-regression-2026-09-16`
-- Base exacte : `8d35fc5bbff9d30ee146d72c8ab7e34c68d16d90`
-- Dernier checkpoint vert utilisateur : `checkpoint/gensrpg-wall-zoom-damage-display-green-2026-09-16`
-- Checkpoint vert cible : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
+- Branche de travail : `work/gensrpg-xp-portrait-latency-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-xp-portrait-latency-2026-09-16`
+- Base exacte : `84344017659cc909ded580bc39d0c8d103deb5df`
+- Dernier checkpoint vert validé utilisateur : `checkpoint/gensrpg-stats-editor-regression-green-2026-09-16`
+- Checkpoint vert cible : `checkpoint/gensrpg-xp-latency-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
+
+## Périmètre déclaré
+
+- Module concerné : Dungeon / fiche héros.
+- Propriétaire : `assets/gensrpg/dungeon/progression-runtime-v1.js` pour l'action XP manuelle ; les formules restent dans les fonctions canoniques historiques de progression.
+- Systèmes réutilisés : `changeXP`, `dungeonSyncProgressionForState`, `dungeonHandleLevelUp071`, sauvegarde et rendu existants.
+- Fonctions protégées non modifiées : formule XP/niveau, attribution des points de caractéristiques/compétences, récompenses de combat, Tactical, stats, inventaire, dégâts, sauvegardes persistantes.
+- Risque inter-module : faible ; hors Dungeon, `changeXP` continue de déléguer au handler historique.
 
 ## Symptôme manuel
 
-Dans Réglages RPG > Statistiques, seuls les anciens interrupteurs/cases à cocher restaient visibles. Les paramètres détaillés d'une stat et les effets configurables avaient disparu de l'interface finale, empêchant par exemple d'ajouter un effet `Dégâts mêlée` ou `Dégâts distance` à Force.
+Sur la fiche héros Dungeon, le bouton `+` d'XP pouvait répondre avec retard et, pendant le chantier précédent, ne plus produire immédiatement le cycle complet XP -> niveau. Le comportement attendu est que le clic déclenche immédiatement l'autorité Dungeon et, lors d'un franchissement de seuil, le même cycle canonique de level-up que les gains d'XP normaux.
 
 ## Cause caractérisée
 
-Le moteur et les données n'avaient pas perdu les paramètres. Deux rendus coexistaient encore :
+Le moteur de progression extrait existait déjà et son test unitaire était correct. Le défaut venait du raccord de chargement :
 
-1. `index.html` possède l'ancien fallback natif qui remplit `#rpgStatsList` avec une simple liste de cases à cocher ;
-2. `assets/gensrpg/gens-rpg-stats-clean-167874.js` possède le renderer canonique riche : nom, icône, valeur par défaut, min/max, description, activation et effets configurables.
+1. `progression-runtime-v1.js` était placé dans la même chaîne de chargement que toute la pile Tactical V2 et l'isolation Survie ;
+2. son `install()` n'était appelé qu'une fois cette chaîne terminée ;
+3. le bootstrap réessayait ensuite Progression avec les fenêtres historiques `250 / 1200 / 3000 ms` destinées aux anciens raccords Tactical/Survie.
 
-En plus, `gens-dungeon-hero-art-repair-167874.js` et `gens-stat-upgrade-policy-167898.js` participaient tous deux au cycle `renderRpgUniverseEditor` avec des retries périodiques. Le bridge Hero Art pouvait donc entrer dans une chaîne de wrappers qui n'avait aucune raison architecturale d'exister.
-
-## Correction appliquée
-
-Correction minimale conforme à la charte :
-
-- `gens-rpg-stats-clean-167874.js` reste le renderer canonique complet ;
-- `gens-stat-upgrade-policy-167898.js` reste uniquement un décorateur des cartes canoniques (coût/verrouillage), sans remplacer `#rpgStatsList` ;
-- `gens-dungeon-hero-art-repair-167874.js` ne wrappe plus `renderRpgUniverseEditor` ni `saveRpgUniverseStats` ; il reste limité à ses responsabilités visuelles et non-Stats ;
-- aucune règle de gameplay, formule de stat, effet existant ou valeur de combat n'a été changée ;
-- aucun nouvel observer, renderer ou timer n'a été ajouté.
+Avant installation, le bouton HTML `+` appelait encore le `changeXP` historique du monolithe. Ce handler ne possédait pas le cycle complet du runtime extrait. Le raccord utilisateur dépendait donc du moment où la pile Tactical finissait de se charger, alors que l'XP manuel n'a aucune raison de dépendre de Tactical.
 
 ## Preuve rouge avant correction
 
-Workflow dédié : `GenSrpG stats editor authority`, run `35114858851`.
+Workflow dédié : `GenSrpG XP latency sentinel`, run `35121633599`.
 
-- caractérisation de l'état historique : verte ;
-- contrat cible « autorité finale unique » : rouge avant correction.
+Le test cible échouait exactement sur l'absence d'un propriétaire Progression disponible indépendamment de la chaîne Tactical.
 
-## Sentinelles permanentes
+## Correction appliquée
 
-- `tests/gens_stats_editor_authority_characterization_v11411.test.cjs`
-- `tests/gens_stats_editor_single_authority_v11411.test.cjs`
-- `tests/gens_stats_editor_browser_v11411.test.cjs`
-- `.github/workflows/gensrpg-stats-editor-authority.yml`
+Correction minimale et soustractive conforme à la charte :
 
-Le test navigateur mobile Chromium reproduit explicitement l'ancien rendu à cases, charge ensuite les modules réels Stats / Policy / Hero Art, puis vérifie que l'éditeur riche reste final après plus de 3 secondes, au-delà des anciennes fenêtres de retry. Il vérifie également que les cibles `damage:melee`, `damage:ranged` et `hit:ranged` sont encore disponibles via `Ajouter un effet`.
+- `progression-runtime-v1.js` s'installe une seule fois dès son chargement navigateur ;
+- `runtime-bootstrap-v1.js` déclare Progression comme prérequis explicite avant le démarrage de la chaîne Tactical ;
+- Progression a été retiré de la liste `files` Tactical/Survie ;
+- Progression a été retiré des retries `250 / 1200 / 3000 ms` ;
+- les retries historiques encore nécessaires à Survival/Tactical restent inchangés ;
+- aucune formule XP/niveau, valeur, récompense, point de caractéristique, popup ou règle de gameplay n'a été modifiée ;
+- aucun observer, interval, heartbeat ou nouveau retry n'a été ajouté.
 
-## Validation avant commit documentaire final
+## Sentinelles
 
-Candidat code/tests : `7d95b403ff2d329a808b7d22c3df84d35b274748`.
+- `tests/gens_progression_bootstrap_decoupling_v11411.test.cjs`
+- `tests/gens_manual_xp_progression_runtime_v1.test.cjs`
+- `tests/gens_runtime_bootstrap_v1.test.cjs`
+- `tests/gens_progression_authority_characterization_v11411.test.cjs`
+- `tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs`
+- `.github/workflows/gensrpg-xp-latency.yml`
 
-- autorité Stats statique : verte ;
-- navigateur Stats : vert ;
-- architecture globale : verte sur ses sentinelles statiques ;
-- Chromium global/preview et Firefox doivent être verts sur le SHA final contenant ce document avant création du checkpoint vert.
+Le nouveau test traverse le raccord réel d'autorité : chargement du module Progression -> installation immédiate de `changeXP` -> clic logique `+1 XP` sur Lyra à 9 XP -> 10 XP -> niveau 2 -> 1 point de caractéristique -> callback level-up -> sauvegarde -> rendu, sans passage par le handler legacy Dungeon.
 
-## Chantier suivant déjà identifié mais séparé
+## Validation du candidat avant documentation finale
 
-Ne pas mélanger avec ce correctif. Une fois l'éditeur Stats validé manuellement, reprendre séparément :
+Candidat code/tests : `7131ed6e78e17697691b8e7040a37d5e56052dfd`.
 
-- latence XP manuel → popup de niveau ;
-- latence changement de héros → portrait correct (ex. Aldren visible brièvement avant Lyra).
+- XP latency sentinel : run `35122001990` — success ;
+- architecture complète + navigateur : run `35122001994` — success ;
+- Firefox : run `35122002007` — success.
 
-Créer un nouveau checkpoint de départ avant toute modification de ces latences.
+Après ce commit documentaire, ces validations doivent repasser sur le SHA final avant création du checkpoint vert.
+
+## Chantier suivant — portrait héros, strictement séparé
+
+Ne pas mélanger avec XP. Après création du checkpoint XP vert, ouvrir un nouveau checkpoint/une nouvelle branche pour le retard de portrait lors d'un changement de héros.
+
+Diagnostic déjà établi sans modification : le rendu canonique `openChar -> current -> render -> CHARS[current].image` choisit déjà le bon héros immédiatement, y compris l'avatar personnalisé fourni par `ensureDungeonHeroes()`. En revanche plusieurs anciens modules Hero Art continuent à réécrire des arts par défaut, wrapper `openChar/render`, utiliser des retries et, pour l'un d'eux, un `MutationObserver` global. Le chantier portrait devra caractériser précisément ces doubles autorités puis les retirer de façon soustractive, sans recréer un renderer de fiche.
 
 ## Règle permanente de continuité
 

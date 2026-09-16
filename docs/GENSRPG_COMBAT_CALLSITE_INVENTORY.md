@@ -14,7 +14,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
 | `dc200StartCombat` | 13 | entrée Core 2.x, détection/embuscade, boutons de combat, anciens wrappers timeline |
-| `openDungeonCombatSetup` | 13 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés et le Core 0.99 désactivé retiré |
+| `openDungeonCombatSetup` | 11 | ancien setup de combat, embuscade et bridges Core historiques ; boutons UI migrés, Core 0.99 retiré et fallback Core 0.53 routé vers le Bridge |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
 
@@ -55,6 +55,12 @@ Ce lot ne modifie ni détection, ni embuscade, ni `dc200StartCombat`, ni `startC
 Le script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son unique ligne de fallback comportait deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel), ainsi que des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.
 
 Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.
+
+## Migration validée — lot 3, fallback Core 0.53
+
+Le chemin normal du bouton principal reste `dc030EngageCombat()`. Uniquement si cette entrée historique est absente, le fallback de Core 0.53 appelle maintenant `GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`. Les gardes `combatOn53()` et `coreCanAct53()` restent en amont.
+
+Aucun appel d'embuscade, wrapper `dc030`, définition native de `openDungeonCombatSetup` ou règle de mouvement n'est modifié dans ce lot.
 
 ## Contrat cible déjà disponible
 

@@ -34904,7 +34904,7 @@ function mainAction53(){
       b.onclick=function(){
         if(this.disabled)return;
         if(typeof dc030EngageCombat==="function")dc030EngageCombat();
-        else if(typeof openDungeonCombatSetup==="function")openDungeonCombatSetup();
+        else if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function")window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"});
       };
     }else{
       b.disabled=true;

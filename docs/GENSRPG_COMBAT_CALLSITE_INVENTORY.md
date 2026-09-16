@@ -14,7 +14,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
 | `dc200StartCombat` | 13 | entrée Core 2.x, détection/embuscade, boutons de combat, anciens wrappers timeline |
-| `openDungeonCombatSetup` | 17 | ancien setup de combat, boutons UI, embuscade et bridges Core historiques |
+| `openDungeonCombatSetup` | 15 | ancien setup de combat, embuscade et bridges Core historiques ; 2 boutons UI natifs migrés vers le contrat Bridge |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
 
@@ -43,6 +43,12 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 - définition du lanceur ;
 - rappel après calcul des renforts.
+
+## Migration validée — lot UI manuel 1
+
+Les deux boutons natifs `#dungeonCombatMenuBtn` et `#dungeonCombatSheetBtn` sont migrés directement vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` avec `reason: "manual-setup"`.
+
+Ce lot ne modifie ni détection, ni embuscade, ni `dc200StartCombat`, ni `startCombat`, ni `launchCombat200`.
 
 ## Contrat cible déjà disponible
 

@@ -4056,7 +4056,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
         <div style="font-size:28px">🏰</div>
         <div style="flex:1"><strong>Dungeon RPG</strong><div id="dungeonRoomLabel" class="hint" style="text-align:left">Salle 0</div></div>
       </div>
-      <button id="dungeonCombatMenuBtn" type="button" class="startGameBtn dungeonCombatMainBtn" onclick="openDungeonCombatSetup()">⚔️ ENGAGER LE COMBAT</button><button id="dungeonMjMenuBtn" type="button" class="dungeonMjBtn" onclick="openDungeonMasterPanel()">🎛️ MJ — CONTRÔLE COMPLET</button><div class="dungeonCodexButtons"><button type="button" onclick="openDungeonSkillBook()">📘 LIVRE DE COMPÉTENCES</button><button type="button" onclick="openDungeonBestiary()">🐉 BESTIAIRE</button></div>
+      <button id="dungeonCombatMenuBtn" type="button" class="startGameBtn dungeonCombatMainBtn" onclick="GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:'manual-setup',entry:'dungeonCombatMenuBtn'})">⚔️ ENGAGER LE COMBAT</button><button id="dungeonMjMenuBtn" type="button" class="dungeonMjBtn" onclick="openDungeonMasterPanel()">🎛️ MJ — CONTRÔLE COMPLET</button><div class="dungeonCodexButtons"><button type="button" onclick="openDungeonSkillBook()">📘 LIVRE DE COMPÉTENCES</button><button type="button" onclick="openDungeonBestiary()">🐉 BESTIAIRE</button></div>
       <div class="hint" style="margin-top:6px">Pas de vague automatique : l’exploration déclenche rencontres, pièges, coffres, repos ou Boss.</div>
       <div id="dungeonCurrentNarrative" class="dungeonNarrative" style="display:none"></div>
       <div id="dungeonCurrentMap"></div>
@@ -4171,7 +4171,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
       <button id="sheetWaveBtn" class="zombieBtn" style="flex:2;margin:0" onclick="generateZombieWaveQuick()">⚡ GÉNÉRER UNE APPARITION</button>
       <button id="sheetZombieReserveBtn" style="flex:1;min-width:130px" onclick="openZombieManager('sheet')">🧟 Réserve</button>
       <button id="activeEnemiesSheetBtn" style="display:none;flex:1;min-width:130px;background:#5b3f78" onclick="openActiveEnemies('sheet')">👹 Ennemis</button>
-      <button id="dungeonCombatSheetBtn" style="display:none;flex:1;min-width:150px;background:#783c26" onclick="openDungeonCombatSetup()">⚔️ Combat RPG</button><button id="dungeonMjSheetBtn" class="dungeonMjBtn" style="display:none;flex:1;min-width:150px;margin-top:0" onclick="openDungeonMasterPanel()">🎛️ MJ / Ajouter</button>
+      <button id="dungeonCombatSheetBtn" style="display:none;flex:1;min-width:150px;background:#783c26" onclick="GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:'manual-setup',entry:'dungeonCombatSheetBtn'})">⚔️ Combat RPG</button><button id="dungeonMjSheetBtn" class="dungeonMjBtn" style="display:none;flex:1;min-width:150px;margin-top:0" onclick="openDungeonMasterPanel()">🎛️ MJ / Ajouter</button>
     </div>
 
 

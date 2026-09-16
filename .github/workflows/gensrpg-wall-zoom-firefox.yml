@@ -1,0 +1,33 @@
+name: GenSrpG Firefox wall zoom proof
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-wall-zoom-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firefox-wall-zoom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Préparer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer Firefox et le lecteur PNG de test
+        run: |
+          npm install --no-save playwright@1.55.0 pngjs@7.0.0
+          npx playwright install --with-deps firefox
+
+      - name: Reproduire l'explication dégâts du test manuel
+        run: node tests/gens_damage_explanation_consistency_v11411.test.cjs
+
+      - name: Vérifier les pixels des murs pendant le zoom Firefox
+        run: node tests/gens_tactical_wall_zoom_pixels_firefox_v11411.test.cjs

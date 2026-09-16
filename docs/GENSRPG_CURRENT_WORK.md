@@ -2,136 +2,112 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 2 : retrait Core 0.99 désactivé
+## Chantier courant — migration combat, lot 3 : fallback Core 0.53
 
-- Branche : `work/gensrpg-combat-callsite-migration-2-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-2-2026-09-16`
-- Base exacte : `2aa6ba574923229af105cbee1635eeb9efab18cb`
-- Commit runtime du retrait : `c22e147b492691685cb92c009b80bd7dee00c0d7`
-- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16`
+- Branche : `work/gensrpg-combat-callsite-migration-3-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-3-2026-09-16`
+- Base exacte : `b77225582f9b854b2b0e658029ebb783fc31aab7`
+- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- `main` n'a pas été modifié.
+- `main` ne doit pas être modifié.
 
-## Résultat du lot 2
+## Cartographie avant modification
 
-Le lot retire uniquement le script historique désactivé :
+Après les lots 1 et 2, `openDungeonCombatSetup` reste présent 13 fois dans le monolithe. Ces références ne sont pas homogènes :
 
-`<script type="application/x-gensrpg-disabled" id="dungeonCore099FinalTacticalAuthority"> ... </script>`
+- 1 définition native historique ;
+- 1 redéfinition `gensrpgDungeonFlowFix171` ;
+- 4 occurrences dans les anciennes entrées Core 0.30 / 0.34 ;
+- 3 occurrences dans le wrapper du module « Combat direct des héros » Core 0.45 ;
+- 2 occurrences dans le fallback du bouton principal Core 0.53 ;
+- 2 occurrences dans le fallback d'embuscade Core 0.76.
 
-Ce bloc n'était pas exécuté par le navigateur et n'appartenait pas à la chaîne runtime active. Il contenait encore :
+Le Bridge couvre le scope V113, participants, ennemis et raisons de détection, mais ne remplace pas à lui seul toutes les gardes historiques de module/mouvement. Il est donc interdit dans ce lot de migrer `dc030EngageCombat`, l'embuscade ou le wrapper Core 0.45.
 
-- wrappers de `DungeonCore01` ;
-- listener document en capture ;
-- timer de réparation ;
-- affectations `dc099*` historiques ;
-- fallback vers `openDungeonCombatSetup()`.
+## Périmètre strict du lot 3
 
-La chaîne active reste :
+Modifier uniquement le fallback exceptionnel de `dungeonCore053Stability` :
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(...) -> V113 scope/participants -> Tactical V2`
+Chemin normal conservé :
 
-Conformément à la charte, la couche morte a été retirée au lieu d'être modernisée ou raccordée une nouvelle fois.
+`dc01Explore -> dc030EngageCombat()`
 
-## Découverte protégée par les gardes
+Chemin de secours actuel :
 
-La première tentative de retrait a été refusée avant écriture : le contrat initial supposait une seule occurrence de `openDungeonCombatSetup` dans Core 0.99.
+`else if(typeof openDungeonCombatSetup==="function") openDungeonCombatSetup()`
 
-La caractérisation exacte a montré qu'une unique ligne de fallback contient deux occurrences textuelles :
+Cible :
 
-1. le test `typeof window.openDungeonCombatSetup === "function"` ;
-2. l'appel `window.openDungeonCombatSetup()`.
+`else if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function") window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`
 
-Le garde a donc empêché une mise à jour d'inventaire incorrecte. Le contrat a été corrigé avant relance.
+Le fallback ne doit s'exécuter que lorsque `dc030EngageCombat` est absent. Le chemin normal et ses wrappers de mouvement restent inchangés.
 
-Autre précision : les noms globaux `dc099EngageCombat`, `dc099Paint` et `dc099SyncMainAction` sont encore repris plus tard par d'autres couches historiques. Le test du lot 2 vérifie donc la disparition des affectations propres à Core 0.99 (`engage99`, `paint99`, `syncMain99`) sans supprimer ces alias ultérieurs hors périmètre.
+## Gardes déjà présentes avant le fallback
 
-## Inventaire après retrait
+Core 0.53 vérifie déjà avant le clic :
 
-Avant lot 2 :
+- `combatOn53()` -> `dc045HeroCombatEnabled()` : module « Combat direct des héros » ;
+- `coreCanAct53()` : appareil/héros autorisé pour le tour courant ;
+- présence d'ennemis vivants.
 
-- `dc200StartCombat` : 13 ;
-- `openDungeonCombatSetup` : 15 ;
-- `launchCombat200` : 2 ;
-- `startCombat` : 6.
+Ces gardes doivent rester textuellement présentes et dans le même ordre logique.
 
-Après retrait Core 0.99 :
+## Hors périmètre
 
-- `dc200StartCombat` : 13 — inchangé ;
-- `openDungeonCombatSetup` : 13 — deux occurrences textuelles retirées ;
-- `launchCombat200` : 2 — inchangé ;
-- `startCombat` : 6 — inchangé.
+Ne pas toucher à :
 
-## Hors périmètre confirmé
-
-Le CSS historique voisin reste intact :
-
-- `#dungeonCore099FinalTacticalCss` ;
-- `#dungeonCore100UiCleanup` ;
-- la référence `.dc099Reachable`.
-
-Ils seront caractérisés séparément si le plan les traite plus tard.
-
-Restent également hors périmètre :
-
-- `dc030EngageCombat` et ses fallbacks actifs ;
-- embuscades ;
-- détection ;
+- `dc030EngageCombat` et ses wrappers Core 0.34 / 0.45 / 0.91 / 0.98 ;
+- `dc076StartAmbushCombat` et l'embuscade ;
+- la définition native ou la redéfinition FlowFix de `openDungeonCombatSetup` ;
 - `dc200StartCombat`, `startCombat`, `launchCombat200` ;
-- adaptateurs de compatibilité Bridge ;
 - V112/V113 ;
-- mode MJ ;
-- participants / enemyIds / reasons ;
+- participants, enemyIds, détection, mouvement, mode MJ ;
 - stats, XP, récompenses, loot ;
-- déplacement, navigation, fiche héros, Save & Quit ;
+- navigation, fiche héros, Save & Quit ;
 - cache/PWA ;
 - Survival, Capture, PvP, World Builder.
 
-## Tests du lot 2
+## Inventaire attendu
 
-Test dédié : `tests/gens_disabled_core099_retirement_lot2.test.cjs`.
+Avant lot 3 :
 
-Il vérifie :
+- `dc200StartCombat` : 13 ;
+- `openDungeonCombatSetup` : 13 ;
+- `launchCombat200` : 2 ;
+- `startCombat` : 6.
 
-1. disparition de `#dungeonCore099FinalTacticalAuthority` ;
-2. disparition des affectations Core 0.99 `engage99`, `paint99`, `syncMain99` ;
-3. maintien du CSS Core 0.99 ;
-4. maintien du nettoyage UI Core 1.00 ;
-5. maintien de `.dc099Reachable` pour un chantier visuel séparé ;
-6. inventaire combat exact `13 / 13 / 2 / 6` ;
-7. Bridge et autorité combat existante inchangés.
+Le fallback Core 0.53 contient deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel).
 
-Le retrait exact, l'inventaire, le contrat Bridge et la caractérisation combat ont déjà passé dans le one-shot. La batterie XP/progression/récompenses est également restée verte.
+Après lot 3 :
 
-Le workflow progression a ensuite été restauré à son état canonique lecture/test uniquement (`contents: read`) et le test Lot 2 a été raccordé à la sentinelle architecture permanente.
+- `dc200StartCombat` : 13 — inchangé ;
+- `openDungeonCombatSetup` : 11 ;
+- `launchCombat200` : 2 — inchangé ;
+- `startCombat` : 6 — inchangé.
 
-## Validation finale avant checkpoint
+## Tests exigés avant correction puis checkpoint vert
 
-Il reste uniquement à confirmer sur le SHA final propre :
+1. poser un test rouge ciblé sur le vrai script `#dungeonCore053Stability` ;
+2. vérifier que le chemin normal `dc030EngageCombat()` reste prioritaire ;
+3. vérifier que `combatOn53()` et `coreCanAct53()` restent en place ;
+4. vérifier que le fallback passe directement par `GensRpgTacticalCombatV2Bridge.requestCombat` avec `reason: "manual-setup"` et `entry: "dc053MainActionFallback"` ;
+5. vérifier qu'aucune référence `openDungeonCombatSetup` ne reste dans Core 0.53 ;
+6. inventaire exact `13 / 11 / 2 / 6` ;
+7. Bridge/V113/architecture verts ;
+8. Chromium/preview et Firefox verts ;
+9. comparaison complète avec le checkpoint de départ avant checkpoint vert.
 
-- architecture complète ;
-- Chromium / preview ;
-- Firefox ;
-- comparaison exacte avec le checkpoint de départ.
+## Jalon vert précédent — lot 2
 
-Aucun nouveau lot ne doit être ouvert avant ce checkpoint vert.
+Checkpoint : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16`
+SHA : `b77225582f9b854b2b0e658029ebb783fc31aab7`
 
-## Jalon vert précédent — lot UI manuel 1
+Le script désactivé `#dungeonCore099FinalTacticalAuthority` a été retiré sans toucher au CSS voisin. Inventaire après lot 2 : `dc200StartCombat=13`, `openDungeonCombatSetup=13`, `launchCombat200=2`, `startCombat=6`. Architecture, Chromium et Firefox verts.
 
-Checkpoint : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16`
-SHA : `2aa6ba574923229af105cbee1635eeb9efab18cb`
+## Jalons antérieurs
 
-Deux boutons natifs ont été migrés vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` :
-
-- `#dungeonCombatMenuBtn` ;
-- `#dungeonCombatSheetBtn`.
-
-Inventaire après lot 1 : `dc200StartCombat=13`, `openDungeonCombatSetup=15`, `launchCombat200=2`, `startCombat=6`.
-Architecture, Chromium et Firefox verts. Aucun autre runtime gameplay modifié.
-
-## Jalon XP + portrait
-
-Checkpoint : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` sur `695be0e029fb49ee70966729474b35aa0a2d9c63`.
-Validation utilisateur Firefox positive le 16/09/2026.
+- Lot 1 : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16` — `2aa6ba574923229af105cbee1635eeb9efab18cb`.
+- XP + portrait : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` — `695be0e029fb49ee70966729474b35aa0a2d9c63`, validé utilisateur Firefox.
 
 ## Règle permanente de continuité
 

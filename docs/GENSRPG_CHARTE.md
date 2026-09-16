@@ -388,3 +388,32 @@ Pour chaque nouvelle règle Core configurable, les tests doivent vérifier au mi
 Un test qui ne passe qu’avec les valeurs par défaut ne suffit pas à prouver qu’une règle est réellement configurable.
 
 Cette règle s’applique à toute la restructuration actuelle et aux développements futurs de GenSrpG.
+
+## 25. Checkpoint obligatoire au début de chaque chantier et point de reprise unique
+
+À chaque nouveau chantier, avant le premier changement de code, de configuration ou d’asset :
+
+1. identifier le SHA exact servant de base ;
+2. créer un checkpoint de départ lisible sur ce SHA, au format `checkpoint/gensrpg-start-<chantier>-YYYY-MM-DD` ;
+3. créer la branche de travail dédiée depuis exactement ce checkpoint ;
+4. mettre à jour `docs/GENSRPG_CURRENT_WORK.md` avec au minimum : chantier, branche, checkpoint de départ, SHA de base, dernier checkpoint vert, périmètre, fonctions protégées, tests prévus, risques et prochaine étape.
+
+Si le checkpoint de départ a été oublié, il doit être recréé rétroactivement sur le véritable SHA de base. Il est interdit de créer un checkpoint tardif sur un état déjà modifié en le présentant comme le début du chantier.
+
+Lorsqu’un chantier est long, créer des checkpoints intermédiaires pour chaque jalon structurel vert important.
+
+À la fin d’un jalon validé :
+
+1. CI/tests requis verts ;
+2. créer un checkpoint final lisible au format `checkpoint/gensrpg-<chantier>-green-YYYY-MM-DD` sur le SHA exact validé ;
+3. mettre à jour `GENSRPG_CURRENT_WORK.md` avec le résultat, les tests/runs utiles et le prochain chantier ;
+4. fournir un lien de test manuel lorsque le comportement utilisateur doit être vérifié ;
+5. ne pas commencer le chantier suivant avant d’avoir créé son propre checkpoint de départ.
+
+En cas de changement de fil de discussion, la reprise doit pouvoir se faire en lisant seulement :
+
+1. `docs/GENSRPG_CHARTE.md` ;
+2. `docs/GENSRPG_CURRENT_WORK.md` ;
+3. le checkpoint indiqué dans ce fichier.
+
+La procédure détaillée est conservée dans `docs/GENSRPG_CHECKPOINT_POLICY.md`.

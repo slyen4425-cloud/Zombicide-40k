@@ -2,191 +2,120 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — Combat 4L `ambush` Runtime 2.00
+## Chantier courant — fermeture Combat 4M `cell` Runtime 2.00
 
 - Fil directeur : **COORDINATEUR actif**.
-- Branche : `work/gensrpg-combat-callsite-migration-4l-ambush-entry-post-dock-2026-09-17`.
-- Base exacte : checkpoint Dock post-PWA vert `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
-- Checkpoint de base : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17`.
+- Branche : `work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17`.
+- Base exacte : checkpoint Combat 4L vert `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
+- Checkpoint de base : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17`.
 - Production sûre `main` : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
-- Périmètre 4L : **`ambush` uniquement**. `cell` reste hors périmètre.
+- Périmètre 4M : **`cell` uniquement**.
 
-## Chaîne directrice verte avant 4L
+## Chaîne directrice verte avant 4M
 
-### Combat 4K
-- checkpoint : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` ;
-- SHA : `c672726b69aa5895d252e2f31084c20740bcc699`.
+- Combat 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` — `c672726b69aa5895d252e2f31084c20740bcc699`.
+- Talent post-4K : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` — `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
+- Preview/PWA post-Talent : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` — `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+- Dock Tactical post-PWA : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17` — `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
+- Combat 4L `ambush` : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17` — `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
 
-Inventaire après 4K :
-- `dc200StartCombat` : 1 ;
-- `openDungeonCombatSetup` : 1 ;
-- `launchCombat200` : 2 ;
-- `startCombat` : 4 — définition historique + alias + `cell` + `ambush`.
+Le jalon Dock reste protégé : l'UI Tactical canonique expose `onAfterRender()` et V111 s'y abonne sans wrapper `render()`, sans `MutationObserver` global et sans retry de réparation.
 
-### Talent post-4K
-- checkpoint : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` ;
-- SHA : `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
+## Combat 4M — caractérisation avant correction
 
-Cause : `renderDungeonSkillTree()` écrivait la visibilité de `#dungeonSkillTreePanel`, alors que `applyDungeonSheetTabs()` en est le propriétaire canonique.
+L'ancien callsite Runtime 2.00 était :
 
-Correction : retrait de cette autorité de visibilité du renderer Talent, sans Observer, timer, retry, wrapper de réparation ou second renderer.
+`startCombat([String(target.id)],'cell')`
 
-### Preview/PWA post-Talent
-- checkpoint : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` ;
-- SHA : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+La caractérisation a établi que le propriétaire Dungeon devait conserver avant l'entrée Tactical :
 
-Caractérisation rouge : `59b027209ca23b3b741fc5ae89910ba21051550f`, run `35250790568`.
+- la cible exacte sur la case ;
+- le filtrage par `liveEnemies()` ;
+- les renforts calculés par `nearbyInterveners()` ;
+- les probabilités réellement présentes dans ce chemin : **65 % à distance Manhattan 1, 30 % à distance 2, 0 % au-delà** ;
+- la déduplication cible/renforts ;
+- la popup `⚔️ RENFORTS ENNEMIS` lorsqu'au moins un renfort rejoint le combat ;
+- l'ensemble final d'`enemyIds` transmis au combat.
 
-Correction limitée à `preview.html` : attendre la suppression des caches `gensrpg-cache-*` avant `fetch('index.html',{cache:'no-store'})`.
+Important : contrairement à une ancienne hypothèse documentaire, ce chemin Runtime 2.00 ne possède pas de `reinforcementRange` configurable. Le lot 4M fige le comportement réel et n'invente aucun réglage.
 
-Limite : ce lot prouve une course de preview/PWA, pas à lui seul la cause exacte d'un éventuel symptôme Chrome Android réel en production.
+Test permanent : `tests/gens_core200_cell_entry_characterization_lot4m.test.cjs`.
 
-### Dock Tactical post-PWA
+Run de caractérisation dédié : `35260234398` — **success**.
 
-Le test utilisateur a révélé que la chaîne directrice n'avait pas intégré le jalon Dock parallèle pourtant déjà vert. Il s'agissait d'une **omission de composition de branches vertes**, pas d'une suppression par Talent ou PWA.
+## Combat 4M — risque identifié et contrat cible
 
-Restauration propre :
-- branche : `work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17` ;
-- caractérisation rouge : `c3e792da5f2b7b8e6ec346ce16c87e17b406725e`, run `35257199026` ;
-- correction propriétaire : UI Tactical canonique expose `onAfterRender()` et V111 s'y abonne avec `U.onAfterRender(()=>maintain(rt))` ;
-- aucun `MutationObserver` global, nouveau timer/retry ou changement gameplay ;
-- commit propriétaire : `efd966a4e8eee210db90f674a6dd05fd1d430fe4` ;
-- candidat technique : `ce1fb0491ffe9c82f3a59f7791a3b74abc8dae20` ;
-- SHA final : `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72` ;
-- checkpoint : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17`.
+`reason:'cell'` n'est pas une raison de détection V113. Cependant `V113.selectCombatants()` peut retourner d'autres ennemis visibles du scope que ceux déjà sélectionnés par Dungeon.
 
-Validation finale du SHA `1cff0ec...` :
-- Dock contrat + Chromium + Firefox — **success**, run `35257681260` ;
-- architecture + Chromium/preview — **success**, run `35257681298` ;
-- Firefox général — **success**, run `35257681447`.
+Une migration mécanique du callsite aurait donc pu élargir le combat à un ennemi que le tirage Dungeon n'avait pas retenu comme renfort.
 
-## Combat 4L — caractérisation avant correction
+Le contrat retenu sépare les propriétaires :
 
-Runtime 2.00 possédait :
+- **Dungeon** reste propriétaire de la cible, du tirage des renforts et de la popup ;
+- **V113/Tactical** reste propriétaire du scope et des héros participants ;
+- le Bridge peut uniquement **réduire** la sélection ennemie de V113 aux `enemyIds` explicitement préparés par Dungeon lorsque `limitEnemyIdsToRequest:true` est demandé.
 
-`startCombat(live.map(e=>String(e.id)),'ambush')`
+Le test cible a été posé rouge avant correction : run `35260392523`.
 
-sous la garde `x.last?.kind==='ambush' && live.length`, avec le bouton `⚔️ EMBUSCADE — COMBATTRE`.
+Test permanent : `tests/gens_core200_cell_bridge_contract_lot4m.test.cjs`.
 
-La caractérisation a établi que :
-- Runtime 2.00 construit historiquement son seed avec **tous** les ennemis de `liveEnemies()` ;
-- l'ancien `startCombat(...,'ambush')` n'a aucune branche métier propre `ambush` et ne recroise pas ce seed avec la visibilité ;
-- le Bridge classe normalement `ambush` comme motif de détection V113 ;
-- `prepareV113Detection()` croise alors les `enemyIds` avec `V113.detectionPairs()` ;
-- `detectionPairs()` dépend de la portée de vision et de la ligne de vue ;
-- un remplacement mécanique aurait donc pu retirer des ennemis demandés par l'embuscade Runtime 2.00.
+## Combat 4M — correction appliquée
 
-Test permanent : `tests/gens_core200_ambush_entry_characterization_lot4l.test.cjs`.
+Runtime 2.00 délègue désormais le bouton `cell` à un helper local `startCellCombat(target,x)` qui conserve la préparation Dungeon, puis appelle :
 
-SHA de caractérisation : `231d7313a85832050fd7f4b63c1ca9fc69b2b33c`.
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true})`
 
-Validation de caractérisation : architecture/Chromium-preview, Firefox et Dock verts.
+Dans le Bridge, `V113.selectCombatants()` reste toujours appelé. Le flag `limitEnemyIdsToRequest:true` ne remplace pas V113 : il intersecte seulement ses `enemyIds` avec la liste déjà décidée par Dungeon.
 
-## Combat 4L — contrat cible rouge avant correction
+Le vieux traitement `cell` est retiré de `startCombat()` afin d'éviter deux propriétaires actifs de la préparation des renforts.
 
-Test permanent : `tests/gens_core200_ambush_bridge_contract_lot4l.test.cjs`.
+Aucun observer global, timer de réparation, wrapper de rendu ou nouvelle autorité combat n'a été ajouté.
 
-SHA cible rouge : `bc6ec271602396c6a021c5398a18ed3c0b8b23e9`.
+## Inventaire après 4M
 
-Run architecture : `35258543144`.
+Inventaire attendu dans `index.html` :
 
-Rouge attendu confirmé exactement à l'étape `Figer l'inventaire des anciens points d'entrée combat`, les contrôles précédents restant verts.
+- `dc200StartCombat` : 1 — alias historique caractérisé ;
+- `openDungeonCombatSetup` : 1 — fallback historique capturé ;
+- `launchCombat200` : 2 — fallback historique caractérisé ;
+- `startCombat` : 2 — fonction historique + alias, **aucun callsite Dungeon actif restant**.
 
-Le contrat cible exige :
-- les embuscades ordinaires restent soumises à la préparation détection V113 ;
-- Runtime 2.00 peut déclarer explicitement que son seed d'ennemis est déjà sélectionné ;
-- cette exception ne doit pas contourner `V113.selectCombatants()`.
+Le but n'est pas de forcer ces compteurs à zéro : les références restantes sont des contrats de compatibilité déjà caractérisés et leur retrait nécessitera un lot d'extraction séparé.
 
-## Combat 4L — correction appliquée
+## Validation technique 4M
 
-Le Bridge accepte désormais l'option étroite :
+Candidat technique exact : `10a64990d6eeac101cab8c6484ca0465cb4b2d67`.
 
-`preserveEnemyIds:true`
+Deux sentinelles historiques ont été adaptées sans modification runtime car elles vérifiaient littéralement l'ancienne expression `prepared.options||{}` au lieu du contrat V113. Elles vérifient maintenant le vrai invariant : `preparedOptions` est transmis à `V113.selectCombatants()`, puis le filtrage ennemi 4M ne peut que réduire la sélection lorsque le flag explicite est présent.
 
-Cette option saute **uniquement** l'intersection préalable avec `detectionPairs()` pour l'appel qui possède déjà son seed d'ennemis. Le passage par `V113.selectCombatants()` reste actif.
+CI technique sur `10a64990...` :
 
-Le callsite Runtime 2.00 devient :
+- Combat 4M dédié — **success**, run `35264148227` ;
+- architecture + Chromium/preview — **success**, run `35264148205` ;
+- Firefox général — **success**, run `35264148110` ;
+- Dock contrat + Chromium + Firefox — **success**, run `35264148122`.
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true})`
-
-Les autres embuscades ne passent pas ce flag et conservent leur comportement V113 de détection.
-
-Le lot conserve :
-- la garde d'événement ambush ;
-- le bouton et son libellé ;
-- la source `liveEnemies()` ;
-- les exclusions `dc200Bypassed` / `dc200BypassedBy[heroActif]` ;
-- les mêmes `enemyIds` ;
-- `reason:'ambush'`.
-
-Commit runtime 4L : `17966476d88c122e5711192b48f857bab29deceb`.
-
-Le writer temporaire borné utilisé pour appliquer exactement les deux remplacements a été supprimé et est absent du diff net.
-
-## Inventaire après 4L
-
-Candidat technique : `600a6d1d48c684f3f2aad3ae341a8c8cfa61a3ff`.
-
-Inventaire attendu :
-- `dc200StartCombat` : 1 ;
-- `openDungeonCombatSetup` : 1 ;
-- `launchCombat200` : 2 ;
-- `startCombat` : 3 — définition historique + alias `dc200StartCombat` + `cell`.
-
-Le compteur `startCombat` baisse de 4 à 3 uniquement parce que le callsite `ambush` a réellement quitté ce chemin.
-
-Diff net depuis le checkpoint Dock `1cff0ec...` avant les présents documents :
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js` : +1/-1 ;
-- `index.html` : +1/-1 ;
-- inventaire combat ;
-- deux tests 4L nouveaux ;
-- adaptations des sentinelles 4I/inventaire.
-
-Aucun writer temporaire ne subsiste.
-
-Validation technique sur `600a6d1d...` :
-- architecture + Chromium/preview — **success**, run `35258869825` ;
-- Firefox général — **success**, run `35258869882` ;
-- Dock contrat + Chromium + Firefox — **success**, run `35258869773`.
-
-## Fermeture 4L
+## Fermeture 4M
 
 Les présents documents créent un nouveau SHA final documentaire. Il doit être revalidé intégralement avant checkpoint.
 
 Checkpoint cible :
 
-`checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17`
+`checkpoint/gensrpg-combat-callsite-migration-4m-green-2026-09-17`
 
 Avant création :
-1. revalider le SHA documentaire exact par architecture + Chromium/preview, Firefox général et Dock ;
-2. vérifier le diff net depuis `1cff0ec...` ;
+
+1. revalider le SHA documentaire exact par Combat 4M, architecture + Chromium/preview, Firefox général et Dock ;
+2. vérifier le diff net depuis le checkpoint 4L `45bbca1c...` ;
 3. vérifier `main` = `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
 4. créer le checkpoint sur le SHA final exact.
 
-## Suite après checkpoint 4L
+## Suite après checkpoint 4M
 
-Le prochain lot combat est **4M — `cell` uniquement**.
+Ne pas supprimer mécaniquement `startCombat`, `dc200StartCombat`, `launchCombat200` ou `openDungeonCombatSetup` uniquement pour faire tomber les compteurs. Les callsites Dungeon actifs ont quitté `startCombat`, mais les fallbacks historiques restants sont protégés pour les contextes non-Dungeon.
 
-Ne pas le démarrer depuis le candidat technique 4L : partir exclusivement du checkpoint 4L final vert.
-
-`cell` doit être caractérisé avant toute modification car l'ancien `startCombat()` lui ajoute :
-- les renforts de proximité ;
-- la portée de renfort configurée ;
-- la popup `⚔️ COMBAT ENGAGÉ` ;
-- la sélection finale transmise au lanceur.
-
-Aucun remplacement mécanique n'est autorisé.
-
-## Jalons directeurs verts précédents
-
-- Dock post-PWA : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17` — `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
-- Preview/PWA post-Talent : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` — `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
-- Talent post-4K : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` — `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
-- Combat 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` — `c672726b69aa5895d252e2f31084c20740bcc699`.
-- Combat 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17` — `b8f5b14f0651479165d35545f3a22db6df8d391f`.
-- Combat 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17` — `b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`.
-- Combat 4H : `checkpoint/gensrpg-combat-callsite-migration-4h-green-2026-09-17` — `2e51e7063b0fca2610b8fd9c1078008cd32a9a34`.
+Le prochain lot doit être choisi depuis le checkpoint 4M vert en relisant la charte, la roadmap et l'inventaire. Toute extraction d'un fallback historique doit d'abord caractériser son contrat hors Dungeon.
 
 ## Règle permanente de continuité
 

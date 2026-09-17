@@ -77,7 +77,8 @@
     for(let qi=0;qi<q.length;qi++){const cur=q[qi],d=dist.get(cur)||0;if(d>=max)continue;const p=cellXY(state,cur);if(!p)continue;for(const [dx,dy] of dirs){const n=xyCell(state,p.x+dx,p.y+dy);if(n<0||dist.has(n)||blockedCell(state,n))continue;const nd=d+1;if(n===b)return nd;dist.set(n,nd);q.push(n)}}return Infinity;
   }
 
-  function activeEnemies(rt=R){try{return arr(rt?.loadActiveEnemies?.()).filter(e=>num(e?.hp,1)>0&&!e?.removed&&!e?.defeated)}catch(e){return []}}
+  function enemyAvailableForActiveHero(state,enemy,rt=R){const hero=activeHeroId(state,rt);return !!enemy&&num(enemy?.hp,1)>0&&!enemy?.removed&&!enemy?.defeated&&!enemy?.dc200Bypassed&&!(hero&&enemy?.dc200BypassedBy?.[hero])}
+  function activeEnemies(rt=R,state=runtimeState(rt)){try{return arr(rt?.loadActiveEnemies?.()).filter(e=>enemyAvailableForActiveHero(state,e,rt))}catch(e){return []}}
   function enemyCell(state,enemy){return num(state?.enemyCells?.[str(enemy?.id)],num(enemy?.dungeonCell200??enemy?.dungeonCell104,-1))}
   function perceptionDef(rt=R){let defs=[];try{defs=arr(rt?.GensCleanRpgStats167874?.runtimeDefs?.())}catch(e){}return defs.find(d=>/perception|vision|vigilance|awareness/.test(norm(d?.id)+" "+norm(d?.name)))||null}
   function fallbackPerception(rt=R){const mv=profile(rt)?.rpgUniverse?.movement||{},v=mv.combatAssistRange??mv.assistRange??mv.helpRange??mv.perceptionRange??DEFAULT_PERCEPTION;return clamp(Math.round(num(v,DEFAULT_PERCEPTION)),1,MAX_SENSE)}
@@ -95,9 +96,9 @@
   }
 
   function heroesInScope(state,scope,rt=R){return participants(state,rt).filter(id=>heroEntered(state,id)&&sameScope(heroScope(state,id,rt),scope))}
-  function enemiesInScope(rt,state,scope){return activeEnemies(rt).filter(e=>sameScope(enemyScope(state,e),scope))}
+  function enemiesInScope(rt,state,scope){return activeEnemies(rt,state).filter(e=>sameScope(enemyScope(state,e),scope))}
   function detectionPairs(rt=R,state=runtimeState(rt),list=null){
-    if(!state?.last?.map)return [];const scope=activeScope(state,rt),heroes=heroesInScope(state,scope,rt);if(!heroes.length)return [];const enemies=Array.isArray(list)?list.filter(e=>sameScope(enemyScope(state,e),scope)):enemiesInScope(rt,state,scope),pairs=[];
+    if(!state?.last?.map)return [];const scope=activeScope(state,rt),heroes=heroesInScope(state,scope,rt);if(!heroes.length)return [];const enemies=Array.isArray(list)?list.filter(e=>enemyAvailableForActiveHero(state,e,rt)&&sameScope(enemyScope(state,e),scope)):enemiesInScope(rt,state,scope),pairs=[];
     for(const enemy of enemies){const ec=enemyCell(state,enemy);if(ec<0)continue;for(const id of heroes){const hc=heroCell(state,id),vision=enemyVision(rt,enemy,id),distance=manhattan(state,ec,hc);if(distance>vision||!lineOfSightCells(state,ec,hc))continue;pairs.push({enemyId:str(enemy.id),heroId:id,scope,enemyCell:ec,heroCell:hc,distance,vision})}}
     return pairs;
   }
@@ -106,7 +107,7 @@
   function context(rt=R){const c=rt?.__gensTacticalV113Context;return c&&Date.now()-num(c.at,0)<3000?c:null}
   function setContext(rt=R,data={}){rt.__gensTacticalV113Context={...data,at:Date.now()};return rt.__gensTacticalV113Context}
   function targetScopeForOptions(rt,state,options={}){
-    const wanted=new Set(arr(options.enemyIds).map(str)),all=activeEnemies(rt),seed=all.filter(e=>wanted.has(str(e.id)));const scopes=[...new Set(seed.map(e=>scopeKey(enemyScope(state,e))))];
+    const wanted=new Set(arr(options.enemyIds).map(str)),all=activeEnemies(rt,state),seed=all.filter(e=>wanted.has(str(e.id)));const scopes=[...new Set(seed.map(e=>scopeKey(enemyScope(state,e))))];
     if(scopes.length===1)return enemyScope(state,seed[0]);const c=context(rt);if(c?.scope)return c.scope;return activeScope(state,rt);
   }
   function selectCombatants(rt=R,options={}){
@@ -124,7 +125,7 @@
 
   function applyRuntimePositions(rt=R,battle=null,sel=null){
     const state=runtimeState(rt);if(!state||!battle?.actors)return 0;const m=mapInfo(state),w=num(battle.grid?.width,0),h=num(battle.grid?.height,0),blocked=new Set(arr(battle.grid?.blocked).map(p=>`${p.x},${p.y}`)),used=new Set();let count=0;
-    const enemies=activeEnemies(rt);for(const actor of battle.actors){let cell=-1;if(actor.side==="hero")cell=heroCell(state,str(actor?.meta?.heroId||actor.id));else{const inst=enemies.find(e=>str(e.id)===str(actor?.meta?.instanceId));if(inst)cell=enemyCell(state,inst)}const p=cellXY(state,cell);if(!p||p.x>=w||p.y>=h)continue;const k=`${p.x},${p.y}`;if(blocked.has(k)||used.has(k))continue;actor.x=p.x;actor.y=p.y;used.add(k);count++}
+    const enemies=activeEnemies(rt,state);for(const actor of battle.actors){let cell=-1;if(actor.side==="hero")cell=heroCell(state,str(actor?.meta?.heroId||actor.id));else{const inst=enemies.find(e=>str(e.id)===str(actor?.meta?.instanceId));if(inst)cell=enemyCell(state,inst)}const p=cellXY(state,cell);if(!p||p.x>=w||p.y>=h)continue;const k=`${p.x},${p.y}`;if(blocked.has(k)||used.has(k))continue;actor.x=p.x;actor.y=p.y;used.add(k);count++}
     battle.meta=battle.meta&&typeof battle.meta==="object"?battle.meta:{};battle.meta.scopeV113={scope:sel?.scope,heroIds:arr(sel?.heroIds),enemyIds:arr(sel?.enemyIds),realPositions:count,mapWidth:m.width,mapHeight:m.height};return count;
   }
   function unwrap112Create(fn){return fn?.__gensRpg112Spatial&&typeof fn.__original==="function"?fn.__original:fn}

@@ -39,4 +39,9 @@ require('./gens_core200_manual_entry_characterization_lot4k.test.cjs');
 // compatibility contract is introduced; never replace the callsite mechanically.
 require('./gens_core200_ambush_entry_characterization_lot4l.test.cjs');
 
+// Lot 4L target contract: ordinary ambush routes must remain detection-owned by V113,
+// while the Runtime 2.00 action may explicitly preserve its already-selected live enemy
+// seed before V113 performs its canonical selectCombatants scope/participant selection.
+require('./gens_core200_ambush_bridge_contract_lot4l.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

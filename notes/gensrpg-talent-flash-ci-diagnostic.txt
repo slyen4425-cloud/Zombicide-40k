@@ -1,9 +1,0 @@
-Temporary CI diagnostic after applying only the scoped Talent-panel visibility removal in the worktree.
-
-page.goto: Timeout 15000ms exceeded.
-Call log:
-  - navigating to "http://127.0.0.1:40915/index.html", waiting until "domcontentloaded"
-
-    at /home/runner/work/Zombicide-40k/Zombicide-40k/tests/gens_hero_sheet_talent_flash_v11411.test.cjs:47:16 {
-  name: 'TimeoutError'
-}

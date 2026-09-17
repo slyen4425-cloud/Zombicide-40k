@@ -98,7 +98,7 @@
   }
   function isV113DetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
   function prepareV113Detection(rt=R,authority=null,options={}){
-    if(!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};
+    if(options.preserveEnemyIds===true||!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};
     const pairs=arr(authority.detectionPairs(rt)),visible=new Set(pairs.map(p=>str(p?.enemyId)).filter(Boolean));
     let enemyIds=arr(options.enemyIds).map(str).filter(Boolean);if(!enemyIds.length)enemyIds=[...visible];
     enemyIds=enemyIds.filter(id=>visible.has(id));if(!enemyIds.length)return {ok:false,reason:"not-detected-v113",pairs};

@@ -39373,7 +39373,7 @@ function mainAction(x){
     b.textContent=chest.challenge&&!chest.challengeDone?'🧩 DÉVERROUILLER LE COFFRE':'🔍 FOUILLER LE COFFRE';
     b.onclick=()=>window.DungeonCore01?.searchChest?.(String(chest.id));return
   }
-  if(x.last?.kind==='ambush'&&live.length){b.classList.add('dc053CombatAction');b.textContent='⚔️ EMBUSCADE — COMBATTRE';b.onclick=()=>startCombat(live.map(e=>String(e.id)),'ambush');return}
+  if(x.last?.kind==='ambush'&&live.length){b.classList.add('dc053CombatAction');b.textContent='⚔️ EMBUSCADE — COMBATTRE';b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true});return}
   if(x.branch?.active){
     if(exitLocked(x)){b.textContent='🔑 SORTIE DE CACHE VERROUILLÉE';b.onclick=()=>modal('🔑 Sortie verrouillée','Vaincs le gardien de la cache.');return}
     const bx=exitIndex(x.last?.map);

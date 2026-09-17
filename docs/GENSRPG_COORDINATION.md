@@ -70,115 +70,105 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu'il n'entre pas en c
 
 ### Fil directeur
 - Rôle : **COORDINATEUR actif**.
-- Chantier courant : Combat **4L — `ambush` Runtime 2.00 uniquement**.
-- Branche : `work/gensrpg-combat-callsite-migration-4l-ambush-entry-post-dock-2026-09-17`.
-- Base exacte : checkpoint Dock post-PWA vert.
-- Checkpoint de base : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17`.
-- SHA de base : `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
-- Propriétaires verrouillés pendant 4L : callsite ambush Runtime 2.00 et préparation Bridge associée.
-- `cell` est explicitement hors périmètre.
-- Candidat technique 4L : `600a6d1d48c684f3f2aad3ae341a8c8cfa61a3ff`.
-- Checkpoint cible : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17` après revalidation du SHA documentaire final.
+- Chantier courant : fermeture Combat **4M — `cell` Runtime 2.00 uniquement**.
+- Branche : `work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17`.
+- Base exacte : checkpoint Combat 4L vert.
+- Checkpoint de base : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17`.
+- SHA de base : `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
+- Propriétaires verrouillés pendant 4M : préparation `cell` Runtime 2.00 et contrat Bridge de limitation de la sélection ennemie.
+- Candidat technique vert : `10a64990d6eeac101cab8c6484ca0465cb4b2d67`.
+- Checkpoint cible : `checkpoint/gensrpg-combat-callsite-migration-4m-green-2026-09-17` après revalidation du SHA documentaire final.
 
 ### Production sûre
 - `main` : V16.78.114.11.
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
 
-### Talent — intégré et checkpoint vert
-- checkpoint : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` ;
-- SHA : `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
-- correction : retrait de l'autorité de visibilité Talent de `renderDungeonSkillTree()` ; `applyDungeonSheetTabs()` reste propriétaire.
-- validation : test Talent dédié + architecture/Chromium-preview + Firefox verts.
+### Chaîne directrice verte
+- Combat 4K : `c672726b69aa5895d252e2f31084c20740bcc699`.
+- Talent post-4K : `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
+- Preview/PWA post-Talent : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+- Dock Tactical post-PWA : `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
+- Combat 4L `ambush` : `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
 
-### Preview/PWA — intégré et checkpoint vert
-- checkpoint : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` ;
-- SHA : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
-- caractérisation rouge : `59b027209ca23b3b741fc5ae89910ba21051550f`, run `35250790568`.
-- correction : suppression attendue des caches GenSrpG avant le fetch source de `preview.html`.
-- limite : durcissement preview/PWA, pas preuve autonome du symptôme Android production.
+### Dock Tactical — protégé
+Le jalon Dock reste obligatoire dans les validations de composition. L'UI Tactical canonique expose `onAfterRender()` et V111 s'y abonne ; aucun wrapper `render()`, `MutationObserver` global ou retry de réparation n'est autorisé.
 
-### Dock Tactical — composition restaurée et checkpoint vert
-- cause du signalement utilisateur : omission de composition entre lignes vertes, pas suppression par Talent/PWA.
-- branche propre : `work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17`.
-- caractérisation rouge : `c3e792da5f2b7b8e6ec346ce16c87e17b406725e`, run `35257199026`.
-- correction : UI Tactical canonique expose `onAfterRender()` ; V111 s'abonne au hook sans wrapper `render()` ni Observer global.
-- commit propriétaire : `efd966a4e8eee210db90f674a6dd05fd1d430fe4`.
-- checkpoint final : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17`.
-- SHA final : `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
-- validations finales : Dock `35257681260`, architecture/Chromium-preview `35257681298`, Firefox `35257681447` — success.
-
-### Combat 4L — caractérisation
-
+### Combat 4M — caractérisation
 Ancien callsite Runtime 2.00 :
 
-`startCombat(live.map(e=>String(e.id)),'ambush')`
+`startCombat([String(target.id)],'cell')`
 
-La caractérisation a démontré que Runtime 2.00 fournissait le seed complet de `liveEnemies()`, tandis qu'un passage mécanique par `requestCombat(... reason:'ambush')` activait `prepareV113Detection()` et pouvait réduire ce seed via `detectionPairs()` selon vision/LOS.
+La caractérisation a confirmé que Dungeon possède :
+- la cible exacte ;
+- le filtre `liveEnemies()` ;
+- le tirage de renforts `nearbyInterveners()` ;
+- 65 % de renfort à distance Manhattan 1, 30 % à distance 2, 0 % au-delà ;
+- la déduplication ;
+- la popup `⚔️ RENFORTS ENNEMIS` ;
+- le seed final d'ennemis.
 
-- test : `tests/gens_core200_ambush_entry_characterization_lot4l.test.cjs` ;
-- SHA : `231d7313a85832050fd7f4b63c1ca9fc69b2b33c` ;
-- résultat : architecture/Chromium-preview, Firefox et Dock verts ;
-- conclusion : remplacement mécanique interdit.
+Il n'existe pas de `reinforcementRange` configurable dans ce chemin Runtime 2.00 ; aucune nouvelle règle n'a été inventée.
 
-### Combat 4L — contrat cible rouge
+Test : `tests/gens_core200_cell_entry_characterization_lot4m.test.cjs`.
+Run de caractérisation : `35260234398` — success.
 
-- test : `tests/gens_core200_ambush_bridge_contract_lot4l.test.cjs` ;
-- SHA : `bc6ec271602396c6a021c5398a18ed3c0b8b23e9` ;
-- run architecture : `35258543144` ;
-- rouge attendu confirmé à l'étape inventaire combat.
+### Combat 4M — contrat cible
+Le risque était qu'un passage mécanique au Bridge laisse `V113.selectCombatants()` élargir les `enemyIds` au-delà de la cible + des renforts réellement sélectionnés par Dungeon.
 
-Contrat retenu : `preserveEnemyIds:true` saute seulement l'intersection préalable `detectionPairs()` pour un seed déjà sélectionné ; `V113.selectCombatants()` reste appelé.
+Contrat retenu :
+- Dungeon prépare la cible et les renforts ;
+- le Bridge appelle toujours V113 pour scope/héros ;
+- `limitEnemyIdsToRequest:true` autorise seulement une intersection finale avec la liste d'ennemis explicitement demandée ;
+- aucun ennemi supplémentaire ne peut être ajouté par ce contrat `cell`.
 
-### Combat 4L — correction et candidat technique
+Le test cible a été posé rouge avant correction : run `35260392523`.
+Test permanent : `tests/gens_core200_cell_bridge_contract_lot4m.test.cjs`.
 
-Commit runtime : `17966476d88c122e5711192b48f857bab29deceb`.
+### Combat 4M — correction
+Runtime 2.00 appelle maintenant un helper local `startCellCombat(target,x)` qui conserve la préparation Dungeon puis entre par :
 
-Modifications runtime strictes :
-1. Bridge : `options.preserveEnemyIds===true` court-circuite uniquement `prepareV113Detection()` ;
-2. Runtime 2.00 : le bouton ambush appelle `requestCombat()` avec `entry:'dc200AmbushAction'` et `preserveEnemyIds:true`.
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true})`
 
-Les autres embuscades ne passent pas ce flag et conservent la préparation V113 existante.
+Le traitement `cell` a été retiré de l'ancien `startCombat()` pour éviter une double autorité de préparation.
 
-Le writer temporaire borné a été supprimé et est absent du diff net.
+Le Bridge conserve `V113.selectCombatants()` comme autorité de scope/participants et ne fait que borner sa sélection ennemie à la demande Dungeon lorsque le flag explicite est présent.
 
-Candidat technique : `600a6d1d48c684f3f2aad3ae341a8c8cfa61a3ff`.
+Aucun observer global, timer de réparation, wrapper de rendu ou nouveau système de combat n'a été ajouté.
 
-Inventaire après migration :
+### Inventaire après 4M
 - `dc200StartCombat` = 1 ;
 - `openDungeonCombatSetup` = 1 ;
 - `launchCombat200` = 2 ;
-- `startCombat` = 3 — définition historique + alias + `cell`.
+- `startCombat` = 2 — fonction historique + alias de compatibilité ; aucun callsite Dungeon actif restant.
 
-CI technique sur `600a6d1d...` :
-- architecture + Chromium/preview — success, run `35258869825` ;
-- Firefox général — success, run `35258869882` ;
-- Dock contrat + Chromium + Firefox — success, run `35258869773`.
+Les fallbacks historiques ne doivent pas être supprimés pour réduire artificiellement les compteurs. Leur éventuelle extraction devra préserver les modes non-Dungeon et constituer un lot séparé.
 
-Les documents créent désormais le SHA final documentaire, qui doit être revalidé avant checkpoint.
+### Validation technique 4M
+Candidat technique : `10a64990d6eeac101cab8c6484ca0465cb4b2d67`.
 
-### Prochain lot après checkpoint 4L
+CI :
+- 4M dédié — success, run `35264148227` ;
+- architecture + Chromium/preview — success, run `35264148205` ;
+- Firefox général — success, run `35264148110` ;
+- Dock contrat + Chromium + Firefox — success, run `35264148122`.
 
-Combat **4M — `cell` uniquement**.
+Deux anciennes assertions source ont été alignées sur le contrat réel `preparedOptions -> V113.selectCombatants()` ; ces commits de test n'ont modifié aucun runtime.
 
-Il devra partir du checkpoint 4L final vert et caractériser avant toute correction :
-- sélection de la cible ;
-- renforts de proximité ;
-- `reinforcementRange` ;
-- popup `⚔️ COMBAT ENGAGÉ` ;
-- ensemble final d'ennemis transmis au lanceur.
-
-Aucun remplacement mécanique de `startCombat([String(target.id)],'cell')` n'est autorisé.
+### Fermeture en cours
+Les documents créent un SHA final documentaire distinct. Ce SHA doit repasser les quatre validations avant création du checkpoint 4M.
 
 ## 6. Ordre d'intégration décidé
 
 Ordre actuel :
 1. Combat 4K — fermé vert ;
-2. Talent post-4K — intégré et fermé vert ;
-3. preview/PWA post-Talent — intégré et fermé vert ;
-4. Dock Tactical post-PWA — intégré et fermé vert ;
-5. Combat 4L `ambush` — candidat technique vert, clôture documentaire en cours ;
-6. Combat 4M `cell` — seulement après checkpoint 4L.
+2. Talent post-4K — fermé vert ;
+3. Preview/PWA post-Talent — fermé vert ;
+4. Dock Tactical post-PWA — fermé vert ;
+5. Combat 4L `ambush` — fermé vert ;
+6. Combat 4M `cell` — candidat technique vert, clôture documentaire en cours.
+
+Le lot suivant ne doit être ouvert qu'après le checkpoint 4M final. Il doit être choisi depuis la roadmap et l'inventaire, sans supprimer mécaniquement les fallbacks historiques restants.
 
 Ne pas fusionner les anciennes branches agents ou lignes parallèles en bloc. Reporter uniquement les changements caractérisés et compatibles sur la dernière base verte directrice.
 

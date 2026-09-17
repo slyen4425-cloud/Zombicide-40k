@@ -5,16 +5,60 @@ on:
     branches:
       - 'work/gensrpg-progression-victory-reconnect-*'
       - 'work/gensrpg-xp-portrait-cleanfix-*'
+      - 'work/gensrpg-combat-callsite-migration-4c-*'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   progression-characterization:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Retire exact Core 3.03 combat-start wrapper lot 4C
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script id="dungeonCore303TimelineRootFix">'
+          start=s.find(marker)
+          assert start >= 0, 'Core 3.03 script missing'
+          end=s.find('</script>', start)
+          assert end > start, 'Core 3.03 script end missing'
+          core=s[start:end]
+          assert core.count('dc200StartCombat') == 2, f'Core 3.03 expected 2 dc200StartCombat refs, got {core.count("dc200StartCombat")}'
+          assert s.count('dc200StartCombat') == 9, f'global expected 9 dc200StartCombat refs, got {s.count("dc200StartCombat")}'
+          wrapper='''/* Quand Core 2.14 lance un nouveau combat, force une nouvelle timeline. */
+          const oldStart301=window.dc200StartCombat;
+          if(typeof oldStart301==="function"){
+            window.dc200StartCombat=function(){
+              T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
+              const r=oldStart301.apply(this,arguments);
+              setTimeout(()=>{init(true);render()},0);
+              return r;
+            };
+          }
+          '''
+          assert core.count(wrapper) == 1, f'exact Core 3.03 wrapper count must be 1, got {core.count(wrapper)}'
+          core2=core.replace(wrapper,'',1)
+          assert 'dc200StartCombat' not in core2, 'Core 3.03 still contains dc200StartCombat after exact removal'
+          for token in ('let T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};','function init(force=false)','function advance()','function applyTurnUi()','window.dungeonDebug303=function()'):
+              assert token in core2, f'Core 3.03 protected timeline token missing: {token}'
+          s2=s[:start]+core2+s[end:]
+          assert s2.count('dc200StartCombat') == 7, f'global expected 7 dc200StartCombat refs after patch, got {s2.count("dc200StartCombat")}'
+          p.write_text(s2,encoding='utf-8')
+          PY
+
+      - name: Verify lot 4C target guard after patch
+        run: node tests/gens_core303_start_wrapper_retirement_lot4c.test.cjs
+
       - name: Validate native manual XP runtime
         run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
       - name: Characterize native progression and rewards
@@ -25,3 +69,14 @@ jobs:
         run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
       - name: Characterize manual level authority
         run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
+
+      - name: Commit only runtime index change
+        shell: bash
+        run: |
+          test "$(git status --short | awk '{print $2}' | grep -v '^index.html$' | wc -l)" -eq 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && { echo 'No runtime change to commit'; exit 1; }
+          git commit -m "refactor: retire Core 3.03 combat-start wrapper lot 4C"
+          git push origin "HEAD:${{ github.ref_name }}"

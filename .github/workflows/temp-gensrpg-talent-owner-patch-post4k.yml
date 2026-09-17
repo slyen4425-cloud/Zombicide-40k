@@ -1,0 +1,44 @@
+name: TEMP GenSrpG Talent owner patch post-4K
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-integrate-talent-after-4k-2026-09-17'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-integrate-talent-after-4k-2026-09-17
+          fetch-depth: 0
+      - name: Apply exact owner patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='''function renderDungeonSkillTree(){\n const d=isDungeonHeroSheet(),p=document.getElementById("dungeonSkillTreePanel"),z=document.getElementById("zombicideSkillPanel");\n if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":"block";'''
+          new='''function renderDungeonSkillTree(){\n const d=isDungeonHeroSheet(),z=document.getElementById("zombicideSkillPanel");\n if(z)z.style.display=d?"none":"block";'''
+          count=s.count(old)
+          if count==0:
+              if new in s:
+                  print('Talent owner patch already applied; no change.')
+                  raise SystemExit(0)
+              raise SystemExit('Expected Talent owner block not found')
+          if count!=1:
+              raise SystemExit(f'Expected exactly one Talent owner block, got {count}')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+          if git diff --quiet; then exit 0; fi
+          test "$(git diff --name-only)" = "index.html"
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: leave Talent visibility to hero sheet tabs post-4K'
+          git push origin HEAD:work/gensrpg-integrate-talent-after-4k-2026-09-17

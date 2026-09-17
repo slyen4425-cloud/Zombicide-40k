@@ -1,27 +1,70 @@
-name: GenSrpG progression characterization
+name: GenSrpG temporary Tactical dock lifecycle writer
 
 on:
   push:
     branches:
-      - 'work/gensrpg-progression-victory-reconnect-*'
-      - 'work/gensrpg-xp-portrait-cleanfix-*'
+      - 'work/gensrpg-tactical-dock-render-reconnect-2026-09-17'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  progression-characterization:
+  patch-dock-lifecycle-once:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate native manual XP runtime
-        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Characterize native progression and rewards
-        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
-      - name: Verify Tactical victory rewards summary
-        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
-      - name: Execute Tactical victory to Dungeon XP and loot
-        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
-      - name: Characterize manual level authority
-        run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
+        with:
+          ref: work/gensrpg-tactical-dock-render-reconnect-2026-09-17
+      - name: Add canonical post-render lifecycle and V111 subscription
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          ui=Path('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js')
+          text=ui.read_text(encoding='utf-8')
+          replacements=[
+            (
+              'let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="",detailActorId="",mapPatched=false,editorHooked=false;',
+              'let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="",detailActorId="",mapPatched=false,editorHooked=false;\n  const afterRenderHooks=new Set();'
+            ),
+            (
+              '  function current(){return E()?.currentActor?.(battle)||null}',
+              '  function onAfterRender(fn){if(typeof fn!=="function")return ()=>{};afterRenderHooks.add(fn);return ()=>afterRenderHooks.delete(fn)}\n  function notifyAfterRender(){for(const fn of [...afterRenderHooks])try{fn({root:rootEl,battle})}catch(e){try{R.console?.warn?.("Tactical afterRender",e)}catch(_){}}}\n  function current(){return E()?.currentActor?.(battle)||null}'
+            ),
+            (
+              'const g=rootEl.querySelector("[data-grid]");if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`}',
+              'const g=rootEl.querySelector("[data-grid]");if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`;notifyAfterRender()}'
+            ),
+            (
+              'getBattle,render,runAiUntilHero};',
+              'getBattle,render,onAfterRender,runAiUntilHero};'
+            )
+          ]
+          for old,new in replacements:
+              count=text.count(old)
+              if count!=1:
+                  raise SystemExit(f'UI patch refused: expected 1 occurrence, found {count}: {old[:80]}')
+              text=text.replace(old,new,1)
+          ui.write_text(text,encoding='utf-8')
+
+          v111=Path('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js')
+          text=v111.read_text(encoding='utf-8')
+          old='function hookUiRender(rt=R){const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg111DockRefresh){uiRenderHooked=true;return true}const wrapped=function(){const out=old.apply(this,arguments);try{maintain(rt)}catch(e){}return out};wrapped.__gensRpg111DockRefresh=true;wrapped.__original=old;U.render=wrapped;uiRenderHooked=true;return true}'
+          new='function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}'
+          count=text.count(old)
+          if count!=1:
+              raise SystemExit(f'V111 patch refused: expected 1 hookUiRender occurrence, found {count}')
+          text=text.replace(old,new,1)
+          v111.write_text(text,encoding='utf-8')
+          PY
+          git diff --check
+          if git diff --quiet -- assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js; then
+            echo 'No runtime changes produced'
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
+          git commit -m 'fix: reconnect Tactical dock to canonical render lifecycle'
+          git push origin HEAD:work/gensrpg-tactical-dock-render-reconnect-2026-09-17

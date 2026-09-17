@@ -2,126 +2,80 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 3 : retrait des dépendances actives à l'ancien setup Dungeon
+## Chantier courant — migration combat, lot 4A : boutons de rencontre Core 2.01
 
-- Branche : `work/gensrpg-combat-callsite-migration-3-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-3-2026-09-16`
-- Base exacte : `b77225582f9b854b2b0e658029ebb783fc31aab7`
-- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16`
-- Commit runtime du retrait actif : `f3e8ebb9489520602b1f37ce64853750fde3e09e`
+- Branche : `work/gensrpg-combat-callsite-migration-4-2026-09-16`
+- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-4-2026-09-16`
+- Base exacte : `8c2c225674ed66212e1025a827e3ca078354f9e9`
+- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16`
+- Commit runtime lot 4A : `99598988eba1d135c012e3af862773c234de1ce5`
+- SHA vert avant cette mise à jour documentaire : `a5dd5d20793ac3ebe449814d521d42405dcfefe9`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- `main` ne doit pas être modifié.
+- `main` ne doit pas être modifié pendant la restructuration.
 
-## Résultat du lot 3
+## Résultat lot 4A
 
-Le lot 3 a été réalisé progressivement, sans migration en masse.
+Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — ne passent plus par l'alias historique `dc200StartCombat`.
 
-### 1. Fallback Core 0.53
+Core 2.01 utilise maintenant un helper local sans état ni règle métier qui transmet au contrat canonique :
 
-Le chemin normal du bouton principal reste `dc030EngageCombat()`.
+`GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`
 
-Son ancien fallback vers `openDungeonCombatSetup()` a été remplacé par :
+Le helper conserve les `enemyIds`, la raison existante et un `entry` de diagnostic propre au panneau de rencontre.
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`
+Le mode positionnel reste contrôlé par le garde existant et l'attaque sur case ennemie conserve la cible réellement située sur la case du héros actif.
 
-Les gardes `combatOn53()` / `dc045HeroCombatEnabled()` et `coreCanAct53()` restent en amont.
+## Dette combat après lot 4A
 
-### 2. Core 0.30
+Inventaire attendu dans `index.html` :
 
-L'ancienne définition de `dc030EngageCombat` de Core 0.30, déjà écrasée plus loin, a été retirée au lieu d'être modernisée. La navigation et `dc030RefreshCombatButton()` restent en place.
+- `dc200StartCombat` : 11 ;
+- `openDungeonCombatSetup` : 1 — définition historique rollback uniquement ;
+- `launchCombat200` : 2 ;
+- `startCombat` : 6.
 
-### 3. Core 0.34
-
-Core 0.34 reste le seam Dungeon de déclenchement manuel : il prépare uniquement l'UI Dungeon et les ennemis vivants puis délègue au propriétaire Tactical via :
-
-`GensRpgTacticalCombatV2Bridge.requestCombat(...)`
-
-avec `reason: "manual-setup"` et `entry: "dc030EngageCombat"`.
-
-Il ne rouvre plus ni ne rerend l'ancien setup.
-
-### 4. Core 0.45
-
-Le garde du module « Combat direct des héros » reste appliqué à `dc030EngageCombat`.
-
-Le wrapper séparé de `openDungeonCombatSetup` a été retiré : il constituait une deuxième couche de contrôle devenue inutile.
-
-### 5. Embuscade Core 0.76
-
-Le chemin normal reste `dc030EngageCombat()` afin de conserver la chaîne d'embuscade existante.
-
-Uniquement si cette entrée manque, le fallback passe directement par le Bridge avec :
-
-- les `enemyIds` vivants ;
-- `reason: "embuscade"` ;
-- `entry: "dc076AmbushFallback"`.
-
-### 6. Flow 171
-
-La réinstallation ultérieure de `window.openDungeonCombatSetup` a été retirée. Flow 171 conserve ses règles de victoire, d'accès et de flux, mais ne reprend plus l'autorité sur le démarrage Tactical.
-
-## État de l'ancien setup
-
-Après ce lot :
-
-- `openDungeonCombatSetup` : **1 occurrence** ;
-- cette occurrence est la définition historique native conservée comme rollback capturé par le Bridge ;
-- aucun Core Dungeon actif ne l'appelle ou ne la réinstalle.
-
-Inventaire attendu :
-
-- `dc200StartCombat` : 13 — inchangé ;
-- `openDungeonCombatSetup` : 1 ;
-- `launchCombat200` : 2 — inchangé ;
-- `startCombat` : 6 — inchangé.
-
-## Propriétaires après le lot
-
-- Dungeon : décide qu'un combat doit commencer, applique les gardes de module/mouvement et fournit le scope ennemi ;
-- `GensRpgTacticalCombatV2Bridge.requestCombat(...)` : contrat unique entre Dungeon et Tactical ;
-- Tactical/V113 : scope final, participants et résolution du combat ;
-- l'ancien `openDungeonCombatSetup` n'est plus un propriétaire actif.
-
-## Tests permanents du lot 3
-
-- `tests/gens_core053_bridge_fallback_lot3.test.cjs` ;
-- `tests/gens_open_dungeon_setup_retirement_lot3.test.cjs` ;
-- inventaire des callsites ;
-- contrat Bridge unique ;
-- autorité combat ;
-- scope/détection V113 ;
-- progression / XP / récompenses ;
-- architecture ;
-- Chromium / preview ;
-- Firefox.
-
-Les deux tests spécifiques du lot 3 sont raccordés aux sentinelles d'architecture permanentes.
+Le groupe suivant doit être caractérisé avant modification. Ne pas migrer en masse détection, embuscade, furtivité ou wrappers timeline.
 
 ## Ce qui n'a pas été touché
 
-- `dc200StartCombat`, `startCombat`, `launchCombat200` ;
-- logique Tactical V112/V113 ;
-- calcul des participants et règles de combat ;
-- stats, XP, récompenses, loot ;
-- déplacement hors des gardes existantes ;
+- détection / portée V113 ;
+- embuscade ;
+- timeline ;
+- `startCombat` et `launchCombat200` ;
+- participants et règles de combat ;
+- stats, XP, récompenses et loot ;
+- déplacement ;
 - navigation générale, fiche héros, Save & Quit ;
-- cache/PWA ;
 - Survival, Capture, PvP, World Builder ;
-- CSS historique Core 0.99/1.00.
+- cache/PWA.
 
-## Validation finale avant checkpoint vert
+## Validation lot 4A
 
-Le checkpoint vert du lot 3 ne doit être créé que lorsque, sur le même SHA final :
+Sur `a5dd5d20793ac3ebe449814d521d42405dcfefe9` :
 
-1. architecture et les deux sentinelles lot 3 sont vertes ;
-2. Chromium / preview est vert ;
-3. Firefox est vert ;
-4. la comparaison avec `b77225582f9b854b2b0e658029ebb783fc31aab7` confirme le périmètre ;
-5. aucun workflow temporaire d'écriture ne reste ;
-6. `main` est intact.
+- sentinelles architecture : vertes ;
+- test permanent Core 2.01 -> Bridge : vert ;
+- Chromium / preview : vert ;
+- Firefox : vert ;
+- workflow progression revenu en lecture seule ;
+- `main` intact.
+
+## Observations utilisateur à conserver hors périmètre
+
+Ces points sont signalés mais ne doivent pas être corrigés à l'aveugle pendant la migration combat :
+
+1. Les commandes flottantes de combat `Attaque / Fin de tour / Capacité` ont complètement disparu de l'interface. Elles ne sont pas simplement devenues non flottantes : elles ne sont plus présentes.
+2. Lors d'une ouverture de fiche personnage, des éléments de `Talent` sont apparus brièvement puis ont disparu. Le phénomène n'a pas été reproduit au second essai.
+
+Pour ces deux anomalies, appliquer la charte : identifier d'abord le propriétaire et le premier changement responsable ; vérifier rendu/couches/CSS/autorités avant toute réparation fonctionnelle ; aucun observer, timer ou rerender correctif ajouté.
+
+## Prochaine étape
+
+Caractériser les 11 références restantes à `dc200StartCombat` et les 6 références `startCombat`, puis choisir le plus petit groupe homogène suivant. Priorité à un lot soustractif qui retire un intermédiaire historique sans modifier les règles Dungeon/Tactical.
 
 ## Jalons verts précédents
 
+- Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.
 - Lot 2 : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16` — `b77225582f9b854b2b0e658029ebb783fc31aab7`.
 - Lot 1 : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16` — `2aa6ba574923229af105cbee1635eeb9efab18cb`.
 - XP + portrait : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` — `695be0e029fb49ee70966729474b35aa0a2d9c63`, validé utilisateur Firefox.

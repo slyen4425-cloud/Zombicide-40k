@@ -2,90 +2,115 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 4H : caractérisation `launchCombat200`
+## Chantier courant — combat lot 4J : scope V113 et ennemis contournés
 
-- Branche : `work/gensrpg-combat-callsite-migration-4h-2026-09-17`
-- Base exacte / checkpoint vert lot 4G : `f97b345419d8ce855237cf47dc4dc83f07b10978`
-- Checkpoint vert 4G : `checkpoint/gensrpg-combat-callsite-migration-4g-green-2026-09-17`
-- Test 4H : `tests/gens_legacy_launch200_fallback_contract_lot4h.test.cjs`
-- Sentinelle d'inventaire : `tests/gens_combat_callsite_inventory_v11411.test.cjs`
-- Coordination multi-fils : `docs/GENSRPG_COORDINATION.md`
+- Branche : `work/gensrpg-combat-callsite-migration-4j-bypass-scope-2026-09-17`
+- Base exacte / checkpoint vert lot 4I : `6aa1a682220f0439d0f6b9679a3f6dd5d9182eff`
+- Checkpoint vert 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17`
+- Checkpoint de départ 4J : `checkpoint/gensrpg-start-combat-callsite-4j-bypass-scope-2026-09-17`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
-## Résultat de caractérisation 4H
+## Lot 4I fermé vert
 
-Les deux occurrences brutes de `launchCombat200` dans `index.html` ne sont pas un simple appel Dungeon oublié à supprimer.
+Le lot 4I a migré uniquement l'échec de furtivité Runtime 2.00 vers l'entrée canonique :
 
-L'implémentation historique Core 2.x conserve encore plusieurs responsabilités legacy et le Bridge la traite explicitement comme compatibilité :
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:'stealth_fail',entry:'dc200StealthFailure'})`
 
-- `Bridge.install()` capture `rt.launchCombat200` via `rememberLegacy(...,"launch")` avant de remplacer le global ;
-- hors Dungeon, l'adaptateur Bridge rappelle exactement le lanceur historique capturé avec les deux arguments, leur identité, la liaison `this` et la valeur de retour ;
-- en Dungeon, le lanceur historique n'est jamais rappelé ;
-- en Dungeon, l'adaptateur transforme `chosen` en `enemyIds` puis passe par `requestCombat` avec `reason:"legacy-launch"` et `entry:"launchCombat200"` ;
-- participants et scope restent sous l'autorité canonique Bridge/V113/Tactical.
+Comportement conservé :
 
-Conséquence conforme à la charte : **aucune modification runtime dans le lot 4H**. Supprimer les deux occurrences uniquement pour diminuer le compteur risquerait de casser le fallback hors Dungeon et mélangerait extraction du monolithe et changement de contrat.
+- même source `liveEnemies()` ;
+- même popup `🥷 REPÉRAGE ÉCHOUÉ` ;
+- combat seulement après validation ;
+- aucun combat si aucun ennemi vivant ;
+- scope et participants restent propriétaires V113 via le Bridge.
 
-La nouvelle sentinelle 4H verrouille le comportement hors Dungeon et Dungeon. Elle est appelée par la sentinelle d'inventaire existante, elle-même déjà raccordée à la batterie architecture : aucun workflow supplémentaire n'est nécessaire.
-
-## Inventaire après 4H
-
-Inventaire attendu volontairement inchangé :
+Inventaire après 4I :
 
 - `dc200StartCombat` : 1 — seed de compatibilité historique caractérisé au lot 4G ;
-- `openDungeonCombatSetup` : 1 — définition rollback historique capturée par le Bridge ;
-- `launchCombat200` : 2 — implémentation historique / rappel Core 2.x caractérisés au lot 4H comme fallback non-Dungeon derrière l'adaptateur Bridge ;
-- `startCombat` : 6 — prochain groupe à caractériser séparément.
+- `openDungeonCombatSetup` : 1 — rollback historique capturé par le Bridge ;
+- `launchCombat200` : 2 — fallback non-Dungeon caractérisé au lot 4H ;
+- `startCombat` : 5 — définition + alias `dc200StartCombat` + actions de contexte `manual` / `cell` / `ambush`.
 
-Ne pas diminuer artificiellement `launchCombat200` à 0. Le prochain lot combat doit traiter `startCombat` comme un groupe distinct et commencer par cartographier ses six occurrences avant toute modification.
+Validation exacte du SHA `6aa1a682220f0439d0f6b9679a3f6dd5d9182eff` :
+
+- Architecture : run `35242206835` — success ;
+- Firefox : run `35242206872` — success ;
+- workflow architecture revenu à `permissions: contents: read` ;
+- `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Diagnostic préalable 4J
+
+La migration directe des trois actions restantes n'est pas sûre en bloc.
+
+`startCombat(ids,reason)` possède encore une règle propre pour `cell` : renforts de proximité aléatoires + popup avant le lancement. Cette action reste hors périmètre 4J.
+
+Les actions `manual` et `ambush` transmettent les ennemis retournés par `liveEnemies()`. Cette fonction exclut explicitement :
+
+- `dc200Bypassed` ;
+- `dc200BypassedBy[hero]` ;
+- les ennemis hors salle / hors branche ;
+- les ennemis morts, supprimés ou déjà vaincus.
+
+La réussite de furtivité écrit réellement `dc200BypassedBy[hero]=true`. Il s'agit donc d'une règle métier active.
+
+Or l'autorité V113 utilise actuellement `activeEnemies()` pour construire `roomEnemies`, puis peut élargir les `enemyIds` demandés à d'autres ennemis visibles du même scope. `activeEnemies()` filtre les morts/supprimés/vaincus mais ne filtre pas encore `dc200Bypassed` ni `dc200BypassedBy`.
+
+Risque démontré à caractériser avant correction : un ennemi contourné par le héros actif pourrait être réajouté au combat par V113 lors d'une future migration directe vers le Bridge.
+
+## Périmètre strict 4J
+
+Module concerné : Tactical / autorité de scope V113, avec donnée Dungeon de contournement déjà existante.
+
+Propriétaire à modifier uniquement si le test reproduit le défaut :
+
+`assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js`
+
+Systèmes réutilisés :
+
+- état Dungeon existant ;
+- `dc200Bypassed` / `dc200BypassedBy` ;
+- `GensRpgTacticalRuntimeAuthority1678113.selectCombatants()` ;
+- Bridge canonique existant.
+
+Ne pas toucher dans 4J :
+
+- les callsites `manual`, `cell`, `ambush` ;
+- `startCombat()` / `launchCombat200()` ;
+- calcul de participants hors filtrage de contournement ;
+- mouvement ;
+- stats ;
+- dégâts / touche / armure ;
+- XP / loot ;
+- fiche héros ;
+- dock Tactical ;
+- Save & Quit ;
+- Survie / Capture / PvP.
+
+Ordre obligatoire :
+
+1. ajouter une caractérisation comportementale prouvant le cas contourné ;
+2. vérifier le vrai propriétaire ;
+3. corriger V113 uniquement si la cause est confirmée ;
+4. ajouter/mettre à jour la sentinelle permanente ;
+5. architecture + Chromium + Firefox sur le même SHA ;
+6. workflow read-only ;
+7. vérifier `main` intact ;
+8. créer le checkpoint vert 4J seulement ensuite.
 
 ## Coordination multi-fils
 
-`docs/GENSRPG_COORDINATION.md` définit désormais la règle de coordination :
+`docs/GENSRPG_COORDINATION.md` reste la règle : un fil coordinateur, un agent = une branche = un périmètre, aucun agent ne fusionne seul son travail.
 
-- un seul fil coordinateur ;
-- un agent = une branche = un périmètre ;
-- aucun agent ne fusionne son travail de lui-même ;
-- les agents rendent branche, SHA, diff et tests au coordinateur ;
-- les propriétaires critiques ne doivent pas être travaillés en parallèle par plusieurs agents.
+Agent séparé actuel : diagnostic du flash/disparition Talent de la fiche héros sur `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`. Ne pas mélanger son travail au lot combat 4J.
 
-Agent 1 actuel : diagnostic séparé du flash/disparition Talent de la fiche héros sur `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`. Son travail ne doit pas être mélangé au lot combat 4H.
+## Jalons verts utiles
 
-## Jalons UI séparés
-
-Le chantier UI du dock `Attaquer / Fin du tour / Capacité` reste séparé de la migration combat.
-
-Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17` — SHA `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
-
-Validation manuelle utilisateur le 2026-09-17 : « parfait ras tout fonctionne très bien ».
-
-Cette validation ne doit pas être mélangée automatiquement à 4H.
-
-## Validation de fermeture 4H
-
-Avant de déclarer le checkpoint vert 4H, exiger sur le même SHA final :
-
-1. architecture complète verte, incluant V112/V113/Bridge, inventaire, contrat fallback 4G et contrat `launchCombat200` 4H ;
-2. Chromium / preview verts ;
-3. Firefox vert ;
-4. workflow progression toujours en lecture seule ;
-5. diff depuis 4G limité à documentation + tests/sentinelles du lot, sans runtime ;
-6. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
-
-Checkpoint à créer seulement après ces contrôles : `checkpoint/gensrpg-combat-callsite-migration-4h-green-2026-09-17`.
-
-## Jalons verts précédents
-
+- Lot 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17` — `6aa1a682220f0439d0f6b9679a3f6dd5d9182eff`.
+- Lot 4H : `checkpoint/gensrpg-combat-callsite-migration-4h-green-2026-09-17` — `2e51e7063b0fca2610b8fd9c1078008cd32a9a34`.
 - Lot 4G : `checkpoint/gensrpg-combat-callsite-migration-4g-green-2026-09-17` — `f97b345419d8ce855237cf47dc4dc83f07b10978`.
 - Lot 4F : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17` — `96043b4b04a069fc571aca38634df221341bb411`.
-- Lot 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17` — `0315edb74a428594fa02d8d9fd74639779b8df07`.
-- Lot 4D : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17` — `e9ee86b128d8954629163ee264dc5e950421e9e9`.
-- Lot 4C : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17` — `8ce140c924d259091a6c9838b82d669256a104f3`.
-- Lot 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
-- Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.
-- Lot 2 : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16` — `b77225582f9b854b2b0e658029ebb783fc31aab7`.
-- Lot 1 : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16` — `2aa6ba574923229af105cbee1635eeb9efab18cb`.
+- Dock Tactical : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17` — `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`, validé manuellement utilisateur.
 - XP + portrait : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` — `695be0e029fb49ee70966729474b35aa0a2d9c63`, validé utilisateur Firefox.
 
 ## Règle permanente de continuité

@@ -11,7 +11,9 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
 (async()=>{
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const port=server.address().port,browser=await browserType.launch(engineName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true});
-  const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR'}),page=await context.newPage();
+  const contextOptions={viewport:{width:412,height:915},deviceScaleFactor:2.625,hasTouch:true,locale:'fr-FR'};
+  if(engineName==='chromium')contextOptions.isMobile=true;
+  const context=await browser.newContext(contextOptions),page=await context.newPage();
   page.setDefaultTimeout(12000);const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   try{
     await page.goto(`http://127.0.0.1:${port}/tests/fixtures/tactical-dock-render-v11411.html`,{waitUntil:'load'});

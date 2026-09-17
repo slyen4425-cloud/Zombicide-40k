@@ -15,28 +15,33 @@ function scriptBody(id){
 }
 
 const core200=scriptBody('dungeonCore200Rebuild');
-const manualCall="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'manual')";
+const oldManualCall="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'manual')";
+const bridgeManualCall="b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'})";
 
-assert.equal((core200.match(/startCombat\(live\.map\(e=>String\(e\.id\)\),'manual'\)/g)||[]).length,1,
-  'lot 4K must start from exactly one Runtime 2.00 manual lexical startCombat callsite');
-assert.ok(core200.includes(manualCall),
-  'the non-positional ENGAGER LE COMBAT button must still use the characterized lexical manual call before migration');
-assert.match(core200,/if\(!positional&&live\.length\)\{[\s\S]*?if\(!combatEnabled200\(\)\)[\s\S]*?b\.textContent='⚔️ ENGAGER LE COMBAT · '[\s\S]*?startCombat\(live\.map\(e=>String\(e\.id\)\),'manual'\)/,
-  'manual entry must remain guarded by non-positional mode, live enemies, and combatEnabled200');
+assert.equal((core200.match(/startCombat\(live\.map\(e=>String\(e\.id\)\),'manual'\)/g)||[]).length,0,
+  'lot 4K must remove the Runtime 2.00 manual lexical startCombat callsite');
+assert.equal((core200.match(/entry:'dc200ManualAction'/g)||[]).length,1,
+  'lot 4K must expose exactly one canonical manual Bridge entry');
+assert.ok(!core200.includes(oldManualCall),
+  'the non-positional ENGAGER LE COMBAT button must not fall back to lexical startCombat');
+assert.ok(core200.includes(bridgeManualCall),
+  'the non-positional ENGAGER LE COMBAT button must call the canonical Tactical Bridge directly');
+assert.match(core200,/if\(!positional&&live\.length\)\{[\s\S]*?if\(!combatEnabled200\(\)\)[\s\S]*?b\.textContent='⚔️ ENGAGER LE COMBAT · '[\s\S]*?GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:live\.map\(e=>String\(e\.id\)\),reason:'manual',entry:'dc200ManualAction'\}\)/,
+  'manual Bridge entry must preserve non-positional mode, live enemies, combatEnabled200, enemyIds and reason');
 
 const startMatch=core200.match(/function startCombat\(ids,reason\)\{([\s\S]*?)\}\nfunction cleanupCombat\(/);
-assert.ok(startMatch,'Runtime 2.00 startCombat body must remain characterizable');
+assert.ok(startMatch,'Runtime 2.00 startCombat body must remain available for the still-characterized cell/ambush compatibility debt');
 const startBody=startMatch[1];
 assert.match(startBody,/let chosen=liveEnemies\(\)\.filter\(e=>ids\.map\(String\)\.includes\(String\(e\.id\)\)\)/,
-  'legacy manual path re-filters requested ids through the authoritative Runtime 2.00 liveEnemies set');
+  'remaining legacy paths must still re-filter requested ids through Runtime 2.00 liveEnemies');
 assert.match(startBody,/const begin=\(\)=>launchCombat200\(x,chosen\)/,
-  'legacy manual path ultimately delegates the selected enemies to launchCombat200');
+  'remaining legacy paths must still delegate selected enemies to launchCombat200');
 assert.match(startBody,/reason==='cell'/,
   'cell-specific reinforcement behavior must remain explicit and outside lot 4K');
 assert.match(startBody,/reason==='detection'\|\|reason==='stealth_fail'/,
-  'detection popup behavior must remain explicit and outside lot 4K');
+  'historical detection popup behavior must remain explicit and outside lot 4K');
 assert.doesNotMatch(startBody,/reason==='manual'/,
-  'manual must have no hidden reason-specific behavior inside legacy startCombat');
+  'manual must not gain hidden reason-specific behavior inside legacy startCombat');
 
 assert.match(core200,/function liveEnemies\(\)[\s\S]*?!e\.dc200Bypassed[\s\S]*?!e\.dc200BypassedBy\?\.\[hero\]/,
   'manual enemy source must preserve Runtime 2.00 bypass semantics fixed across V113 in lot 4J');
@@ -48,6 +53,6 @@ assert.equal(Bridge.isV113DetectionReason('ambush'),true,
 assert.match(bridgeSource,/function requestCombat\(rt=R,options=\{\}\)[\s\S]*?scopedRequest\(rt,\{\.\.\.options,enemyIds,entry\}\)[\s\S]*?openCurrent\(rt,\{\.\.\.scoped\.options,entry\}\)/,
   'canonical requestCombat must preserve options while applying V113 scope before opening Tactical');
 assert.match(bridgeSource,/function startDefault\(rt=R,enemyIds=\[\],reason="manual"\)[\s\S]*?requestCombat\(rt,\{enemyIds:arr\(enemyIds\)\.map\(str\),reason,entry:"dc200StartCombat"\}\)/,
-  'Bridge already defines the canonical manual-compatible Dungeon entry contract');
+  'Bridge must retain the characterized compatibility entry contract');
 
-console.log('GenSrpG combat lot 4K characterization OK: Runtime 2.00 manual is a single guarded lexical call with no manual-specific legacy behavior; Bridge keeps reason/enemy ids and V113 scope');
+console.log('GenSrpG combat lot 4K OK: Runtime 2.00 manual is Bridge-backed with guards/enemyIds/reason preserved; cell and ambush remain separate debt');

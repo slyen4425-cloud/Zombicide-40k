@@ -1,0 +1,31 @@
+name: GenSrpG preview PWA post-Talent
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-integrate-preview-pwa-after-talent-2026-09-17'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  characterize-preview-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright Chromium and Firefox
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium firefox
+
+      - name: Compare fresh and pre-controlled preview states
+        run: node tests/gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs

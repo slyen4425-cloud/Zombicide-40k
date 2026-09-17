@@ -20,11 +20,17 @@ assert.ok(legacyCombatZ>dockZ,'legacy Dungeon combat host can cover the floating
 assert.ok(legacyDiceZ>dockZ,'legacy Dungeon dice layer can cover the floating Dock if it stays open');
 
 assert.match(repair,/function closeLegacyCombat\(rt=R\)/,'V106 must retain the existing legacy combat cleanup owner');
+assert.match(repair,/return \{VERSION,APP_VERSION,[^}]*closeLegacyCombat,/,'V106 must expose its existing cleanup instead of duplicating it elsewhere');
 assert.match(repair,/if\(opened\?\.ok\)\{\s*closeLegacyCombat\(rt\)/,'legacy renderer interception must still close the legacy host after Tactical opens');
-assert.doesNotMatch(bridge,/GensRpgRuntimeRepair1678106\?\.closeLegacyCombat|GensRpgRuntimeRepair1678106\.closeLegacyCombat/,
-  'characterization: direct Bridge routing currently does not reuse the existing V106 legacy-layer cleanup');
+assert.match(bridge,/GensRpgRuntimeRepair1678106\?\.closeLegacyCombat\?\.\(rt\)/,
+  'direct Bridge routing must reuse the V106 legacy-layer cleanup owner');
+assert.match(bridge,/function retireLegacyCombatLayer\(rt=R,options=\{\}\)\{[\s\S]*?runtime-renderer:/,
+  'Bridge cleanup must skip only the historical renderer path that already performs the same cleanup');
+assert.doesNotMatch(bridge,/getElementById\?\.\("dungeonCombatModal"\)|classList\?\.remove\?\.\("dc200CombatOpen"/,
+  'Bridge must not duplicate V106 DOM cleanup internals');
 
-console.log('GenSrpG Tactical Dock legacy-layer characterization OK',{
+console.log('GenSrpG Tactical Dock legacy-layer authority OK',{
   tacticalZ,dockZ,legacyCombatZ,legacyDiceZ,
-  directBridgeCleanup:false
+  directBridgeCleanup:true,
+  cleanupOwner:'GensRpgRuntimeRepair1678106.closeLegacyCombat'
 });

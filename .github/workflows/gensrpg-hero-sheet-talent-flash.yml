@@ -28,7 +28,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Apply scoped native Talent visibility fix
+      - name: Apply scoped native Talent visibility fix in worktree
         id: patch
         shell: bash
         run: |
@@ -54,11 +54,42 @@ jobs:
               out.write(f'changed={changed}\n')
           PY
 
-      - name: Characterize hero sheet Talent visibility
-        run: node tests/gens_hero_sheet_talent_flash_v11411.test.cjs
+      - name: Run true-path Talent characterization and capture failure
+        id: talent_test
+        shell: bash
+        run: |
+          set +e
+          node tests/gens_hero_sheet_talent_flash_v11411.test.cjs > /tmp/talent-test.log 2>&1
+          status=$?
+          cat /tmp/talent-test.log
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" -ne 0 ]; then
+            mkdir -p notes
+            {
+              echo "Temporary CI diagnostic after applying only the scoped Talent-panel visibility removal in the worktree."
+              echo
+              cat /tmp/talent-test.log
+            } > notes/gensrpg-talent-flash-ci-diagnostic.txt
+          fi
+          exit 0
+
+      - name: Persist diagnostic only when the scoped fix is still red
+        if: steps.talent_test.outputs.status != '0'
+        shell: bash
+        run: |
+          if git log -1 --pretty=%s | grep -q '^diagnostic: capture Talent true-path failure$'; then
+            exit 0
+          fi
+          git restore --staged . || true
+          git add notes/gensrpg-talent-flash-ci-diagnostic.txt
+          git config user.name "slyen4425-cloud"
+          git config user.email "slyen4425@gmail.com"
+          git commit -m "diagnostic: capture Talent true-path failure"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          exit 1
 
       - name: Commit scoped runtime fix to work branch
-        if: steps.patch.outputs.changed == 'true'
+        if: steps.talent_test.outputs.status == '0' && steps.patch.outputs.changed == 'true'
         run: |
           git config user.name "slyen4425-cloud"
           git config user.email "slyen4425@gmail.com"
@@ -67,3 +98,7 @@ jobs:
           test "$(git diff --cached --name-only)" = "index.html"
           git commit -m "fix: keep Talent visibility under sheet tabs"
           git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Fail if Talent characterization remains red
+        if: steps.talent_test.outputs.status != '0'
+        run: exit 1

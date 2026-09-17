@@ -25,4 +25,8 @@ require('./gens_legacy_dc200_fallback_contract_lot4g.test.cjs');
 // locked before any later extraction from the monolith.
 require('./gens_legacy_launch200_fallback_contract_lot4h.test.cjs');
 
+// Lot 4I characterization: Runtime 2.00 still owns six explicit startCombat roles.
+// Freeze them before migrating the stealth-failure callsite independently.
+require('./gens_core200_startcombat_characterization_lot4i.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   patch-runtime:
-    if: github.event_name == 'push' && github.event.head_commit.message == 'activate-4m-runtime-patch'
+    if: github.event_name == 'push' && github.event.head_commit.message == 'activate-4m-runtime-patch-v2'
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer la branche 4M
@@ -40,9 +40,7 @@ jobs:
           s=s.replace(old_click,"b.onclick=()=>startCellCombat(target,x)")
 
           anchor=" return out}\nfunction launchCombat200(x,chosen)"
-          helper=""" return out}
-function startCellCombat(target,x=rt()){if(!x||!target)return false;let chosen=liveEnemies().filter(e=>String(e.id)===String(target.id));if(!chosen.length)return false;const extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))];const begin=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true});if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}return begin()}
-function launchCombat200(x,chosen)"""
+          helper=" return out}\nfunction startCellCombat(target,x=rt()){if(!x||!target)return false;let chosen=liveEnemies().filter(e=>String(e.id)===String(target.id));if(!chosen.length)return false;const extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))];const begin=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true});if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}return begin()}\nfunction launchCombat200(x,chosen)"
           assert s.count(anchor)==1, f'helper insertion seam count={s.count(anchor)}'
           s=s.replace(anchor,helper)
 
@@ -53,6 +51,7 @@ function launchCombat200(x,chosen)"""
           s=s.replace(cell_select,'').replace(cell_modal,'')
           index.write_text(s)
           PY
+
           git diff --check
           node tests/gens_core200_cell_bridge_contract_lot4m.test.cjs
 

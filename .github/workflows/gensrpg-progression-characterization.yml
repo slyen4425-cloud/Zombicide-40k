@@ -22,27 +22,18 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           text=p.read_text(encoding='utf-8')
-          old='''  if(typeof dc200StartCombat==="function"){
-            ambushStarting=true;
-            setTimeout(()=>{
-              try{dc200StartCombat(live.map(e=>String(e.id)),"ambush")}
-              finally{setTimeout(()=>{ambushStarting=false},250)}
-            },120)
-          }'''
-          new='''  if(typeof GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
-            ambushStarting=true;
-            setTimeout(()=>{
-              try{GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}
-              finally{setTimeout(()=>{ambushStarting=false},250)}
-            },120)
-          }'''
-          count=text.count(old)
-          if count==0:
-              print('bounded Core 2.09 ambush source already absent; no write')
+          old_guard='if(typeof dc200StartCombat==="function")'
+          new_guard='if(typeof GensRpgTacticalCombatV2Bridge?.requestCombat==="function")'
+          old_call='try{dc200StartCombat(live.map(e=>String(e.id)),"ambush")}'
+          new_call='try{GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}'
+          cg=text.count(old_guard)
+          cc=text.count(old_call)
+          if cg==0 and cc==0:
+              print('bounded Core 2.09 ambush source already migrated; no write')
               raise SystemExit(0)
-          if count!=1:
-              raise SystemExit(f'expected exactly one Core 2.09 ambush block, found {count}')
-          text=text.replace(old,new,1)
+          if cg!=1 or cc!=1:
+              raise SystemExit(f'expected one ambush guard/call, found guard={cg}, call={cc}')
+          text=text.replace(old_guard,new_guard,1).replace(old_call,new_call,1)
           p.write_text(text,encoding='utf-8')
           PY
           if git diff --quiet -- index.html; then

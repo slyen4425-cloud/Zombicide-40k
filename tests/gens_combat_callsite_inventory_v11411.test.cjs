@@ -33,4 +33,9 @@ require('./gens_core200_startcombat_characterization_lot4i.test.cjs');
 // original guards, live-enemy source, enemyIds and reason while cell/ambush stay separate.
 require('./gens_core200_manual_entry_characterization_lot4k.test.cjs');
 
+// Lot 4L: Runtime 2.00 ambush is deliberately NOT migrated yet. The canonical Bridge
+// classifies reason="ambush" as V113 detection and can filter requested enemies, while
+// the historical Runtime 2.00 lexical path keeps the whole requested live-enemy set.
+require('./gens_core200_ambush_entry_characterization_lot4l.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

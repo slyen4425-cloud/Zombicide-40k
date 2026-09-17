@@ -2,26 +2,20 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — intégration contrôlée du correctif Talent après Combat 4K
+## Chantier courant — intégration preview/PWA après Talent
 
 - Fil directeur : **COORDINATEUR actif**.
-- Branche : `work/gensrpg-integrate-talent-after-4k-2026-09-17`.
-- Base exacte : checkpoint vert Combat 4K `c672726b69aa5895d252e2f31084c20740bcc699`.
-- Checkpoint 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17`.
+- Branche : `work/gensrpg-integrate-preview-pwa-after-talent-2026-09-17`.
+- Base exacte : checkpoint vert Talent post-4K `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
+- Checkpoint Talent : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17`.
 - Production sûre `main` : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
 
 ## Combat 4K fermé vert
 
-Le lot 4K a migré uniquement l'entrée Runtime 2.00 `manual` vers `GensRpgTacticalCombatV2Bridge.requestCombat(...)` après caractérisation permanente.
+Checkpoint : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17`.
 
-Checkpoint vert :
-
-`checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17`
-
-SHA exact :
-
-`c672726b69aa5895d252e2f31084c20740bcc699`
+SHA : `c672726b69aa5895d252e2f31084c20740bcc699`.
 
 Inventaire après 4K :
 
@@ -30,122 +24,92 @@ Inventaire après 4K :
 - `launchCombat200` : 2 ;
 - `startCombat` : 4 — définition historique, alias, `cell`, `ambush`.
 
-Ne pas chercher à réduire ces compteurs artificiellement. Le prochain lot combat reste **4L — `ambush` uniquement**, mais il est suspendu le temps de fermer les intégrations Agent 1.
+Ne pas chercher à réduire ces compteurs artificiellement. Le prochain lot combat reste **4L — `ambush` uniquement** ; `cell` reste séparé.
 
-## Audit Agent 1 — Talent
+## Talent post-4K — intégré et vert
 
-Branche auditée :
+Le correctif Talent a été reporté proprement depuis la branche Agent 1 sur la base 4K, après caractérisation rouge sur cette base.
 
-`work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`
+Cause : `renderDungeonSkillTree()` écrivait la visibilité de `#dungeonSkillTreePanel`, alors que `applyDungeonSheetTabs()` en est le propriétaire canonique.
 
-Checkpoint agent :
+Correction : retrait uniquement de cette écriture de visibilité ; aucun Observer, timer, retry, wrapper de réparation ou second renderer ajouté.
 
-`checkpoint/gensrpg-hero-sheet-talent-flash-green-2026-09-17`
-
-SHA agent :
-
-`410d63b4800e298dad277b8ce153b7726bd5ab7c`
-
-Cause confirmée : conflit d'autorité visuelle dans la fiche héros native.
-
-- `renderDungeonSkillTree()` rend le contenu Talent ;
-- `applyDungeonSheetTabs()` est le propriétaire canonique de la visibilité des sections ;
-- l'ancien renderer Talent forçait également `#dungeonSkillTreePanel` visible, puis les onglets le remasquaient sur `character`, provoquant le flash.
-
-La correction agent a été jugée compatible avec la charte, mais sa branche entière n'a pas été fusionnée car elle partait d'un checkpoint Combat 4F ancien.
-
-## Intégration Talent post-4K — caractérisation avant correction
-
-Le test permanent a été reporté seul sur la base 4K :
-
-`tests/gens_hero_sheet_talent_flash_v11411.test.cjs`
-
-Workflow lecture seule :
-
-`.github/workflows/gensrpg-hero-sheet-talent-flash-post4k.yml`
-
-La caractérisation a été lancée avant toute modification runtime sur le SHA :
-
-`fb2b292db00d05a255a947b86834896518ece906`
-
-Run rouge attendu : `35250002420`.
-
-Le test a reproduit le conflit sur la base post-4K et a échoué avant correction.
-
-## Correction Talent post-4K
-
-Correction strictement soustractive dans `renderDungeonSkillTree()` :
-
-- suppression de la récupération de `#dungeonSkillTreePanel` ;
-- suppression de son écriture `style.display` ;
-- conservation du rendu Talent ;
-- conservation du comportement `#zombicideSkillPanel` ;
-- `applyDungeonSheetTabs()` reste seul propriétaire de la visibilité Talent.
-
-Commit runtime :
-
-`f34da9391730bc8c83a6d166feeb8efdcff421a1`
-
-Aucun Observer, timer, retry, wrapper de réparation ou second renderer n'a été ajouté.
-
-Le workflow temporaire utilisé uniquement pour modifier chirurgicalement le gros `index.html` a été retiré. Il ne fait pas partie du diff net.
-
-## Diff net 4K → candidat Talent
-
-Le diff net est limité à trois fichiers :
-
-1. `index.html` — 2 lignes ajoutées / 2 supprimées dans le propriétaire Talent ;
-2. `tests/gens_hero_sheet_talent_flash_v11411.test.cjs` ;
-3. `.github/workflows/gensrpg-hero-sheet-talent-flash-post4k.yml`.
-
-Aucun fichier combat, V113, Bridge, dock, déplacement, XP, stats, sauvegarde ou gameplay n'est modifié par ce lot.
-
-## Validation technique Talent
-
-Candidat technique propre avant documentation :
-
-`e6d03dba0ba225eb3b35625d783cf58011ea22c0`
-
-Validations vertes sur ce SHA exact :
-
-- régression Talent dédiée — success ;
-- architecture + Chromium/preview — success ;
-- Firefox — success.
-
-Les présents documents créent maintenant le SHA final documentaire. Ce nouveau SHA doit être revalidé intégralement avant création du checkpoint vert.
-
-Checkpoint cible :
+Checkpoint vert :
 
 `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17`
 
-## Travail Agent 1 Chrome/PWA — audité mais pas encore intégré
+SHA exact :
 
-Branche auditée :
+`c52fd9abf8f19c345d1cd7088e86ae3179b42401`
 
-`work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`
+Le SHA final Talent a été validé par : régression Talent dédiée, architecture + Chromium/preview et Firefox.
 
-Checkpoint agent :
+## Preview/PWA post-Talent — caractérisation
 
-`checkpoint/gensrpg-chrome-white-screen-green-2026-09-17`
+Test permanent :
 
-SHA agent :
+`tests/gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs`
 
-`369d70edc7cb4506d368171e6a6fff6ad89b9766`
+Workflow lecture seule :
 
-Le travail prouve un problème de course dans **`preview.html`** avec un cache PWA `gensrpg-cache-*` préexistant : la suppression du cache était lancée mais non attendue avant le `fetch('index.html')`.
+`.github/workflows/gensrpg-preview-pwa-post-talent.yml`
 
-Ce travail est validé comme **durcissement preview/PWA**, mais ne doit pas être présenté comme preuve que le symptôme Chrome Android réel en production avait exactement cette cause.
+Caractérisation avant correction :
 
-Il sera intégré dans un **lot séparé**, uniquement après checkpoint vert du lot Talent, avec nouvelle caractérisation sur la base post-Talent.
+`59b027209ca23b3b741fc5ae89910ba21051550f`
 
-## Suite après checkpoint Talent
+Run rouge attendu : `35250790568`.
 
-1. créer une branche propre depuis le checkpoint Talent final ;
-2. caractériser le scénario stale-cache Chromium/Firefox avant correction ;
-3. si le rouge est reproduit, intégrer uniquement l'attente de suppression des caches dans `preview.html` ;
-4. revalider architecture, Chromium/preview, Firefox et le dock Tactical ;
-5. créer un checkpoint vert séparé ;
-6. reprendre ensuite Combat 4L `ambush` uniquement.
+Résultat reproduit :
+
+- profil neuf Chromium : `index.html` frais chargé ;
+- profil neuf Firefox : `index.html` frais chargé ;
+- avec Service Worker/cache GenSrpG préexistant, Chromium et Firefox pouvaient charger l'ancien `index.html` en cache ;
+- la preview lançait la suppression des caches `gensrpg-cache-*` sans l'attendre avant `fetch('index.html')`.
+
+Cette caractérisation prouve une course dans **`preview.html`**. Elle ne doit pas être présentée comme preuve définitive que le symptôme Chrome Android réel en production avait exactement cette cause.
+
+## Correction preview/PWA
+
+Correction homogène et limitée à `preview.html` :
+
+- récupérer les clés de cache avant le chargement de la source ;
+- attendre la suppression de tous les caches `gensrpg-cache-*` ;
+- seulement ensuite exécuter `fetch('index.html', {cache:'no-store'})`.
+
+Commit runtime preview :
+
+`48f1f50261a88b71bce30fa520bffeeedaa9ff36`
+
+Diff technique depuis le checkpoint Talent :
+
+1. `preview.html` — +4 lignes ;
+2. `tests/gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs` ;
+3. `.github/workflows/gensrpg-preview-pwa-post-talent.yml`.
+
+Aucun `index.html`, gameplay, combat, déplacement, stats, XP, sauvegarde, dock Tactical ou Bridge n'est modifié par ce lot.
+
+## Validation technique preview/PWA
+
+Sur `48f1f50261a88b71bce30fa520bffeeedaa9ff36` :
+
+- test stale-cache Chromium/Firefox — **success**, run `35253552569` ;
+- architecture + Chromium/preview — **success**, run `35253552456` ;
+- Firefox — **success**, run `35253552690`.
+
+Les présents documents créent maintenant le SHA final documentaire. Ce nouveau SHA doit être revalidé intégralement avant checkpoint.
+
+Checkpoint cible :
+
+`checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17`
+
+## Suite après checkpoint preview/PWA
+
+1. vérifier une dernière fois `main` = `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
+2. créer le checkpoint vert preview/PWA sur le SHA documentaire exact validé ;
+3. reprendre ensuite Combat **4L — `ambush` uniquement** depuis ce checkpoint ;
+4. caractériser `ambush` avant toute modification ;
+5. conserver `cell` hors de 4L.
 
 ## Jalon UI utilisateur protégé
 
@@ -159,6 +123,7 @@ Ne pas casser ce jalon.
 
 ## Jalons directeurs verts précédents
 
+- Talent post-4K : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` — `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
 - Combat 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` — `c672726b69aa5895d252e2f31084c20740bcc699`.
 - Combat 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17` — `b8f5b14f0651479165d35545f3a22db6df8d391f`.
 - Combat 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17` — `b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`.

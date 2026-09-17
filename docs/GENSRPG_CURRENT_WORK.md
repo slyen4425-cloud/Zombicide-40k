@@ -2,12 +2,12 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — intégration preview/PWA après Talent
+## Chantier courant — restauration du Dock Tactical sur la chaîne directrice
 
 - Fil directeur : **COORDINATEUR actif**.
-- Branche : `work/gensrpg-integrate-preview-pwa-after-talent-2026-09-17`.
-- Base exacte : checkpoint vert Talent post-4K `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
-- Checkpoint Talent : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17`.
+- Branche : `work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17`.
+- Base exacte : checkpoint vert preview/PWA post-Talent `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+- Checkpoint de base : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17`.
 - Production sûre `main` : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
 
@@ -44,7 +44,7 @@ SHA exact :
 
 Le SHA final Talent a été validé par : régression Talent dédiée, architecture + Chromium/preview et Firefox.
 
-## Preview/PWA post-Talent — caractérisation
+## Preview/PWA post-Talent — fermé vert
 
 Test permanent :
 
@@ -60,69 +60,110 @@ Caractérisation avant correction :
 
 Run rouge attendu : `35250790568`.
 
-Résultat reproduit :
+Résultat reproduit : avec un Service Worker/cache `gensrpg-cache-*` préexistant, la preview pouvait charger l'ancien `index.html` avant la fin de la suppression asynchrone du cache.
 
-- profil neuf Chromium : `index.html` frais chargé ;
-- profil neuf Firefox : `index.html` frais chargé ;
-- avec Service Worker/cache GenSrpG préexistant, Chromium et Firefox pouvaient charger l'ancien `index.html` en cache ;
-- la preview lançait la suppression des caches `gensrpg-cache-*` sans l'attendre avant `fetch('index.html')`.
-
-Cette caractérisation prouve une course dans **`preview.html`**. Elle ne doit pas être présentée comme preuve définitive que le symptôme Chrome Android réel en production avait exactement cette cause.
-
-## Correction preview/PWA
-
-Correction homogène et limitée à `preview.html` :
-
-- récupérer les clés de cache avant le chargement de la source ;
-- attendre la suppression de tous les caches `gensrpg-cache-*` ;
-- seulement ensuite exécuter `fetch('index.html', {cache:'no-store'})`.
+Correction limitée à `preview.html` : attendre la suppression des caches GenSrpG avant `fetch('index.html', {cache:'no-store'})`.
 
 Commit runtime preview :
 
 `48f1f50261a88b71bce30fa520bffeeedaa9ff36`
 
-Diff technique depuis le checkpoint Talent :
-
-1. `preview.html` — +4 lignes ;
-2. `tests/gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs` ;
-3. `.github/workflows/gensrpg-preview-pwa-post-talent.yml`.
-
-Aucun `index.html`, gameplay, combat, déplacement, stats, XP, sauvegarde, dock Tactical ou Bridge n'est modifié par ce lot.
-
-## Validation technique preview/PWA
-
-Sur `48f1f50261a88b71bce30fa520bffeeedaa9ff36` :
-
-- test stale-cache Chromium/Firefox — **success**, run `35253552569` ;
-- architecture + Chromium/preview — **success**, run `35253552456` ;
-- Firefox — **success**, run `35253552690`.
-
-Les présents documents créent maintenant le SHA final documentaire. Ce nouveau SHA doit être revalidé intégralement avant checkpoint.
-
-Checkpoint cible :
+Checkpoint vert final :
 
 `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17`
 
-## Suite après checkpoint preview/PWA
+SHA exact :
 
-1. vérifier une dernière fois `main` = `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
-2. créer le checkpoint vert preview/PWA sur le SHA documentaire exact validé ;
-3. reprendre ensuite Combat **4L — `ambush` uniquement** depuis ce checkpoint ;
-4. caractériser `ambush` avant toute modification ;
-5. conserver `cell` hors de 4L.
+`4c1c1e60b4e06a82986babc435ac07d48dff4833`
 
-## Jalon UI utilisateur protégé
+Limite maintenue : ce lot prouve et corrige une course de **preview/PWA** ; il ne prouve pas à lui seul que le symptôme Chrome Android réel en production avait exactement cette cause.
 
-Dock Tactical `Attaquer / Fin du tour / Capacité` :
+## Régression détectée au test utilisateur — Dock Tactical absent
+
+Après test du checkpoint preview/PWA, l'utilisateur a signalé que les commandes flottantes `Attaquer / Fin du tour / Capacité` avaient disparu.
+
+Diagnostic directeur :
+
+- Talent n'a pas supprimé le Dock ;
+- le lot preview/PWA n'a pas supprimé le Dock ;
+- la chaîne directrice Combat 4K → Talent → preview/PWA avait été construite sans reporter le jalon Dock Tactical vert déjà validé sur sa ligne parallèle ;
+- il s'agit donc d'une **omission de composition de branches vertes**, pas d'une nouvelle régression introduite dans le code du Dock.
+
+Le jalon historique restait :
 
 - checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17` ;
 - SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9` ;
 - validation utilisateur : « parfait ras tout fonctionne très bien ».
 
-Ne pas casser ce jalon.
+4L a été suspendu immédiatement dès ce signalement.
+
+## Restauration Dock Tactical post-PWA — caractérisation puis correction
+
+Branche propre :
+
+`work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17`
+
+Base exacte : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+
+Tests permanents reportés **avant** correction :
+
+- `tests/gens_tactical_dock_canonical_render_hook_v11411.test.cjs` ;
+- `tests/gens_tactical_dock_browser_v11411.test.cjs` ;
+- `tests/fixtures/tactical-dock-render-v11411.html` ;
+- workflow `.github/workflows/gensrpg-tactical-dock-sentinel.yml`.
+
+SHA de caractérisation :
+
+`c3e792da5f2b7b8e6ec346ce16c87e17b406725e`
+
+Run rouge attendu : `35257199026` — le contrat canonique du Dock échoue avant correction, les jobs navigateur étant alors bloqués derrière ce contrat.
+
+Correction propriétaire appliquée :
+
+1. `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js` reste le renderer canonique Tactical et expose un contrat explicite `onAfterRender()` ;
+2. ce renderer appelle `notifyAfterRender()` après son rendu local ;
+3. `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` abonne `maintain()` à `onAfterRender()` ;
+4. V111 ne wrappe plus `U.render` pour maintenir le Dock ;
+5. aucun `MutationObserver` global n'est réactivé ;
+6. aucun changement de règles combat, participants, dégâts, déplacement ou Bridge.
+
+Commit propriétaire :
+
+`efd966a4e8eee210db90f674a6dd05fd1d430fe4`
+
+Le writer temporaire borné utilisé uniquement pour appliquer les deux remplacements exacts a été supprimé ; il n'existe pas dans le diff net final.
+
+Candidat technique propre :
+
+`ce1fb0491ffe9c82f3a59f7791a3b74abc8dae20`
+
+Diff net depuis `4c1c1e60...` : deux fichiers propriétaires Dock + deux tests + une fixture + un workflow de sentinelle ; aucun `index.html`, Bridge ou fichier 4L.
+
+Validation technique sur `ce1fb049...` :
+
+- Dock contrat + Chromium + Firefox — **success**, run `35257375684` ;
+- architecture + Chromium/preview — **success**, run `35257375692` ;
+- Firefox général — **success**, run `35257375764`.
+
+Les présents documents créent maintenant le SHA final documentaire. Ce SHA doit être revalidé intégralement avant checkpoint.
+
+Checkpoint cible :
+
+`checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17`
+
+## Suite après checkpoint Dock post-PWA
+
+1. revalider le SHA documentaire exact : Dock, architecture/Chromium-preview et Firefox ;
+2. vérifier `main` = `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
+3. créer `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17` sur le SHA final exact ;
+4. fournir ce checkpoint au test utilisateur ;
+5. reprendre ensuite Combat **4L — `ambush` uniquement** depuis ce nouveau checkpoint ;
+6. caractériser `ambush` avant toute modification ;
+7. conserver `cell` hors de 4L.
 
 ## Jalons directeurs verts précédents
 
+- Preview/PWA post-Talent : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` — `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
 - Talent post-4K : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` — `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
 - Combat 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` — `c672726b69aa5895d252e2f31084c20740bcc699`.
 - Combat 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17` — `b8f5b14f0651479165d35545f3a22db6df8d391f`.

@@ -52,5 +52,10 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     assert.equal(result.status?.uiRenderHooked,true,'V111 must report the canonical render lifecycle hook as installed');
     assert.deepEqual(errors,[],'Tactical dock browser console/page errors');
     console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,observerTargets:result.observerTargets,status:result.status}));
-  }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
+  }finally{
+    await context.close();
+    await browser.close();
+    server.close();
+    if(typeof server.closeAllConnections==='function')server.closeAllConnections();
+  }
 })().catch(e=>{console.error(e);process.exitCode=1});

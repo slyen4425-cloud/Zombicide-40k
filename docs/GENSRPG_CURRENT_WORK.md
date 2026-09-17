@@ -7,6 +7,8 @@ Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est pl
 - Branche : `work/gensrpg-combat-callsite-migration-4c-2026-09-17`
 - Base exacte / lot 4B vert : `9c1b939ed7e7b34108882be933a99f2151529c79`
 - Commit runtime lot 4C : `1819f012e0509648015f2af695905078168210a1`
+- SHA validé avant figer le mémo : `89b461bd6a6392cad2c7c6d54924b87b60e53c55`
+- Checkpoint vert visé : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
@@ -26,7 +28,7 @@ SHA vert de référence 4B : `9c1b939ed7e7b34108882be933a99f2151529c79`.
 
 ### Lot 4C
 
-Core 3.03 a été caractérisé avant modification. Le test permanent a d'abord été rouge exactement sur son wrapper `window.dc200StartCombat` tandis que les 60 gardes précédents restaient verts.
+Core 3.03 a été caractérisé avant modification. Le test permanent a d'abord été rouge exactement sur son wrapper `window.dc200StartCombat` tandis que les gardes précédents restaient verts.
 
 Le Bridge Tactical est chargé après Core 3.03 par `RuntimeBootstrap` et réinstalle `rt.dc200StartCombat` comme adaptateur final vers `requestCombat()`. Le wrapper Core 3.03 était donc une reprise d'autorité historique immédiatement supplantée.
 
@@ -42,6 +44,8 @@ Le lot retire uniquement ce petit wrapper :
 - participants, résolution Tactical, XP et récompenses non modifiés.
 
 Le workflow progression temporaire utilisé pour écrire le gros `index.html` a été remis immédiatement à son blob canonique lecture seule `31c5043f8352b656f1d015bc4888332e738bf913`.
+
+Un garde historique du lot 4B exigeait encore la présence du wrapper Core 3.03. Il a été corrigé uniquement côté test pour rester borné au retrait du Core 3.01 désactivé. Aucun runtime n'a été modifié par cette correction. Le SHA `89b461bd6a6392cad2c7c6d54924b87b60e53c55` a ensuite passé architecture, Chromium/preview et Firefox.
 
 ## Dette combat après lot 4C
 
@@ -59,7 +63,22 @@ Les 7 références `dc200StartCombat` restantes appartiennent désormais aux che
 - `tests/gens_core303_start_wrapper_retirement_lot4c.test.cjs` ;
 - inventaire combat mis à jour à 7/1/2/6 ;
 - garde 4C raccordé aux sentinelles architecture ;
-- le test protège explicitement les responsabilités actives de Core 3.03 et l'autorité finale du Bridge.
+- le test protège explicitement les responsabilités actives de Core 3.03 et l'autorité finale du Bridge ;
+- le garde 4B reste désormais strictement limité au Core 3.01 désactivé.
+
+## Validation finale 4C
+
+Sur le SHA `89b461bd6a6392cad2c7c6d54924b87b60e53c55` :
+
+1. test spécifique 4C : vert ;
+2. job architecture : vert — run `35178989671` ;
+3. Chromium / preview : vert dans le job `browser-sentinel` du même run ;
+4. Firefox : vert — run `35178989684` ;
+5. périmètre runtime inchangé après la correction du garde 4B ;
+6. `.github/workflows/gensrpg-progression-characterization.yml` reste hors du diff net final ;
+7. `main` reste intact.
+
+Le présent commit ne doit modifier que ce mémo. Après son propre passage vert des mêmes sentinelles, figer exactement son SHA dans `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17`.
 
 ## Ce qui n'a pas été touché
 
@@ -83,21 +102,9 @@ Ces points sont signalés mais ne doivent pas être corrigés à l'aveugle penda
 
 Pour ces deux anomalies, appliquer la charte : identifier d'abord le propriétaire et le premier changement responsable ; vérifier rendu/couches/CSS/autorités avant toute réparation ; aucun observer, timer ou rerender correctif ajouté.
 
-## Validation finale requise avant checkpoint vert 4C
+## Prochaine étape après checkpoint vert 4C
 
-Sur un même SHA final :
-
-1. le test spécifique 4C doit être vert ;
-2. tout le job architecture doit être vert ;
-3. Chromium / preview doit être vert ;
-4. Firefox doit être vert ;
-5. la comparaison avec `9c1b939ed7e7b34108882be933a99f2151529c79` doit confirmer le périmètre ;
-6. `.github/workflows/gensrpg-progression-characterization.yml` ne doit pas apparaître dans le diff net ;
-7. `main` doit rester intact.
-
-## Prochaine étape après validation 4C
-
-Créer le checkpoint vert exact, puis caractériser le plus petit groupe homogène parmi les 7 références Core 2.x restantes. Ne pas mélanger alias, détection et embuscade. Les chemins détection/embuscade doivent conserver la sélection V113 et leur raison métier avant toute migration.
+Caractériser le plus petit groupe homogène parmi les 7 références Core 2.x restantes. Ne pas mélanger alias, détection et embuscade. Les chemins détection/embuscade doivent conserver la sélection V113 et leur raison métier avant toute migration.
 
 ## Jalons verts précédents
 

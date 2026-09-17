@@ -16,7 +16,7 @@ Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro 
 | `dc200StartCombat` | 1 | alias historique Core 2.x caractérisé au lot 4G comme seed de fallback non-Dungeon capturé par le Bridge ; aucun consommateur Dungeon actif ne l’appelle |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | lanceur historique Core 2.x caractérisé au lot 4H comme seed de fallback non-Dungeon capturé par le Bridge ; le nom public Dungeon est remplacé par l’adaptateur `requestCombat` |
-| `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` ; groupe restant à caractériser séparément |
+| `startCombat` | 5 | fonction Core 2.x, trois actions de contexte `manual` / `cell` / `ambush` et alias vers `dc200StartCombat` ; l’échec de furtivité a quitté ce groupe au lot 4I |
 
 ## Groupes à migrer
 
@@ -26,7 +26,7 @@ Le dernier alias `window.dc200StartCombat = startCombat` a été caractérisé a
 
 Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
 
-Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, et l’embuscade Core 2.09 depuis le lot 4F.
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, l’embuscade Core 2.09 depuis le lot 4F et l’échec de furtivité Runtime 2.00 depuis le lot 4I.
 
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
@@ -127,6 +127,28 @@ Le test permanent `tests/gens_legacy_launch200_fallback_contract_lot4h.test.cjs`
 - le nom historique restant est donc un adaptateur de compatibilité, pas une deuxième autorité Dungeon.
 
 Conclusion du lot : ne pas supprimer les deux occurrences uniquement pour réduire l’inventaire. Leur retrait devra être un futur lot d’extraction explicite qui préserve les modes non-Dungeon.
+
+## Migration validée — lot 4I, échec de furtivité Runtime 2.00
+
+Le lot 4I retire uniquement le callsite lexical `startCombat(ids,'stealth_fail')` du résolveur `window.dc047ResolveStealth`.
+
+Le comportement qui précédait réellement le lancement est conservé dans le propriétaire Runtime 2.00 :
+
+- même source d’ennemis vivants `liveEnemies()` ;
+- mêmes `enemyIds` convertis en chaînes ;
+- fermeture de la modale de test de furtivité avant le résultat ;
+- même popup `🥷 REPÉRAGE ÉCHOUÉ` ;
+- même liste des ennemis et même héros actif dans le message ;
+- aucun combat si aucun ennemi vivant n’est présent, avec retour au `render()` ;
+- lancement seulement après validation de la popup.
+
+L’entrée finale passe désormais directement par :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:'stealth_fail',entry:'dc200StealthFailure'})`
+
+Le scope et les participants restent donc calculés par l’autorité canonique V113 via le Bridge. Les trois autres actions de contexte `manual`, `cell` et `ambush` restent volontairement hors périmètre de 4I.
+
+Le lot fait passer l’inventaire brut de `startCombat` de 6 à 5 : définition historique + alias `dc200StartCombat` + trois actions de contexte.
 
 ## Contrat cible déjà disponible
 

@@ -15,8 +15,8 @@ Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro 
 |---|---:|---|
 | `dc200StartCombat` | 1 | alias historique Core 2.x caractérisé au lot 4G comme seed de fallback non-Dungeon capturé par le Bridge ; aucun consommateur Dungeon actif ne l’appelle |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
-| `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
-| `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` |
+| `launchCombat200` | 2 | lanceur historique Core 2.x caractérisé au lot 4H comme seed de fallback non-Dungeon capturé par le Bridge ; le nom public Dungeon est remplacé par l’adaptateur `requestCombat` |
+| `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` ; groupe restant à caractériser séparément |
 
 ## Groupes à migrer
 
@@ -24,7 +24,7 @@ Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro 
 
 Le dernier alias `window.dc200StartCombat = startCombat` a été caractérisé au lot 4G. Il est volontairement conservé : lors de l’installation, le Bridge capture ce starter historique avant de remplacer le global ; hors Dungeon son adaptateur le rappelle, tandis qu’en Dungeon le même adaptateur passe par `requestCombat` et le scope canonique.
 
-Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` / `launchCombat200` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
+Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
 
 Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, et l’embuscade Core 2.09 depuis le lot 4F.
 
@@ -34,8 +34,11 @@ Une seule définition historique reste pour rollback capturé par le Bridge. Auc
 
 ### C. Lancement interne (`launchCombat200`)
 
-- définition du lanceur ;
-- rappel après calcul des renforts.
+Les deux occurrences du monolithe correspondent à la définition historique du lanceur et à son rappel depuis le flux Core 2.x après préparation/sélection.
+
+Le lot 4H a établi que ce lanceur historique n’est pas une seconde autorité Dungeon active à supprimer brutalement : `Bridge.install()` le capture comme `legacyLaunch`, puis remplace le nom global par son adaptateur. Hors Dungeon, cet adaptateur rappelle exactement le lanceur historique ; en Dungeon, il ne rappelle jamais le legacy et délègue à `requestCombat` avec `entry:"launchCombat200"`.
+
+Le compteur reste donc volontairement à 2 tant qu’un futur lot d’extraction ne retire pas réellement l’implémentation historique tout en préservant les autres modes.
 
 ## Migration validée — lot UI manuel 1
 
@@ -109,6 +112,21 @@ Le test permanent `tests/gens_legacy_dc200_fallback_contract_lot4g.test.cjs`, ex
 - l’alias restant n’est donc pas une seconde autorité de combat Dungeon.
 
 Conclusion du lot : conserver l’alias est actuellement plus conforme à la charte que le supprimer. Son compteur reste volontairement à 1.
+
+## Caractérisation validée — lot 4H, fallback historique `launchCombat200`
+
+Le lot 4H n’effectue aucune modification du runtime. Il verrouille le rôle des deux occurrences historiques de `launchCombat200` avant toute extraction future.
+
+Le test permanent `tests/gens_legacy_launch200_fallback_contract_lot4h.test.cjs`, exécuté depuis la sentinelle d’inventaire, vérifie que :
+
+- `Bridge.install()` capture l’ancien `launchCombat200` comme `legacyLaunch` avant de remplacer le global ;
+- hors Dungeon, l’adaptateur rappelle exactement ce lanceur historique en préservant les deux arguments, leurs identités, le retour et la liaison `this` ;
+- hors Dungeon, ce fallback n’ouvre pas Tactical V2 ;
+- en Dungeon, le lanceur historique n’est pas rappelé ;
+- en Dungeon, les `enemyIds` issus de `chosen` sont transmis à `requestCombat` avec `reason:"legacy-launch"` et `entry:"launchCombat200"` ;
+- le nom historique restant est donc un adaptateur de compatibilité, pas une deuxième autorité Dungeon.
+
+Conclusion du lot : ne pas supprimer les deux occurrences uniquement pour réduire l’inventaire. Leur retrait devra être un futur lot d’extraction explicite qui préserve les modes non-Dungeon.
 
 ## Contrat cible déjà disponible
 

@@ -7,13 +7,13 @@ Base : restructuration issue de V16.78.114.11
 
 Avant de remplacer les anciens noms globaux par le contrat unique `GensRpgTacticalCombatV2Bridge.requestCombat()`, figer les appels encore présents dans le monolithe `index.html`.
 
-Le but n’est pas de garder ces noms : cette liste est une dette à faire diminuer progressivement. Toute migration doit préserver les règles de participants, la détection, l’embuscade, les modes MJ et le retour exploration.
+Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro : un nom historique peut rester lorsqu’il constitue un adaptateur de compatibilité caractérisé, sans autorité Dungeon propre. Toute migration doit préserver les règles de participants, la détection, l’embuscade, les modes MJ et le retour exploration.
 
 ## Comptage actuel dans `index.html`
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
-| `dc200StartCombat` | 1 | alias historique Core 2.x uniquement ; boutons, détections Core 2.09/2.11, embuscade Core 2.09, timeline Core 3.01 désactivée et wrapper Core 3.03 ne l’utilisent plus |
+| `dc200StartCombat` | 1 | alias historique Core 2.x caractérisé au lot 4G comme seed de fallback non-Dungeon capturé par le Bridge ; aucun consommateur Dungeon actif ne l’appelle |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` |
@@ -22,7 +22,9 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 ### A. Entrée Core 2.x (`dc200StartCombat` / `startCombat`)
 
-Il ne reste plus qu’un alias historique `window.dc200StartCombat = startCombat`. Il doit être caractérisé séparément avant toute suppression ou modification. Ne pas le mélanger avec `startCombat` ou `launchCombat200`.
+Le dernier alias `window.dc200StartCombat = startCombat` a été caractérisé au lot 4G. Il est volontairement conservé : lors de l’installation, le Bridge capture ce starter historique avant de remplacer le global ; hors Dungeon son adaptateur le rappelle, tandis qu’en Dungeon le même adaptateur passe par `requestCombat` et le scope canonique.
+
+Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` / `launchCombat200` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
 
 Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, et l’embuscade Core 2.09 depuis le lot 4F.
 
@@ -92,22 +94,37 @@ devient :
 
 Les participants et le scope restent calculés par l’autorité V113 via le Bridge. Aucune règle V113 n’est recopiée dans Core 2.09.
 
-Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 3 à 1. La référence restante est uniquement l’alias historique Core 2.x et doit être traitée dans un lot distinct.
+Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 3 à 1.
+
+## Caractérisation validée — lot 4G, alias historique `dc200StartCombat`
+
+Le lot 4G n’effectue aucune modification du runtime. Il caractérise la dernière occurrence brute, `window.dc200StartCombat = startCombat`, et verrouille son rôle de compatibilité.
+
+Le test permanent `tests/gens_legacy_dc200_fallback_contract_lot4g.test.cjs`, exécuté par la sentinelle d’inventaire, vérifie que :
+
+- une seule occurrence de cet alias subsiste ;
+- `Bridge.install()` capture l’ancien `dc200StartCombat` avant de poser son propre adaptateur ;
+- hors Dungeon, l’adaptateur Bridge rappelle exactement le starter historique capturé, en préservant arguments, retour et liaison `this` ;
+- en Dungeon, le starter historique n’est pas appelé et l’entrée passe par `requestCombat` vers Tactical/V113 ;
+- l’alias restant n’est donc pas une seconde autorité de combat Dungeon.
+
+Conclusion du lot : conserver l’alias est actuellement plus conforme à la charte que le supprimer. Son compteur reste volontairement à 1.
 
 ## Contrat cible déjà disponible
 
-Le Bridge Tactical dispose maintenant d’une seule entrée interne :
+Le Bridge Tactical dispose maintenant d’une seule entrée interne Dungeon :
 
 `GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
 
-Les noms historiques restants sont des adaptateurs de compatibilité ou des fonctions internes à caractériser progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage.
+Les noms historiques restants sont des adaptateurs de compatibilité ou des fonctions internes caractérisés progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage Dungeon.
 
 ## Règle de migration
 
 1. migrer un petit groupe d’appels à la fois ;
 2. conserver les mêmes `enemyIds`, `reason` et comportements de retour ;
 3. faire passer les sentinelles V112/V113/Bridge + navigateur ;
-4. diminuer le compteur attendu dans le test d’inventaire ;
-5. créer un checkpoint vert avant le groupe suivant.
+4. ne diminuer un compteur que lorsque le runtime correspondant a réellement été retiré ;
+5. conserver et documenter un adaptateur si sa suppression casserait un autre mode ;
+6. créer un checkpoint vert avant le groupe suivant.
 
 Aucune suppression en masse du gros `index.html` n’est autorisée sans cette progression testée.

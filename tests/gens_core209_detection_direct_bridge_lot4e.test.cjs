@@ -44,17 +44,14 @@ assert.match(detection,/GensRpgTacticalCombatV2Bridge\?\.requestCombat/,
 assert.match(detection,/requestCombat\(window,\{enemyIds:detectors\.map\(z=>String\(z\.e\.id\)\),reason:"detection",entry:"dc209EnemyDetection"\}\)/,
   'Core 2.09 must preserve detected enemyIds/reason while entering through requestCombat');
 
-// Ambush is deliberately outside lot 4E and must remain on the old adapter path.
+// Ambush was deliberately outside lot 4E. Keep its gameplay invariants protected here,
+// while the entry mechanism itself is owned by the later dedicated lot 4F test.
 assert.match(ambush,/if\(ambushStarting\|\|!x\|\|x\.last\?\.kind!=="ambush"\|\|Number\(x\.room\|\|0\)<=0\)return/,
   'Core 2.09 ambush guards must remain intact');
 assert.match(ambush,/const live=living\(x\);if\(!live\.length\)return/,
   'Core 2.09 ambush must keep the exact live enemy source');
 assert.match(ambush,/x\.dc209AmbushDone\[x\.room\]=true;save\(x\)/,
   'Core 2.09 ambush de-duplication/persistence must remain intact');
-assert.match(ambush,/typeof dc200StartCombat==="function"/,
-  'Core 2.09 ambush remains outside lot 4E');
-assert.match(ambush,/dc200StartCombat\(live\.map\(e=>String\(e\.id\)\),"ambush"\)/,
-  'Core 2.09 ambush enemyIds/reason must not change in lot 4E');
 assert.match(ambush,/\},120\)/,
   'Core 2.09 ambush delay must remain 120ms');
 assert.match(ambush,/setTimeout\(\(\)=>\{ambushStarting=false\},250\)/,

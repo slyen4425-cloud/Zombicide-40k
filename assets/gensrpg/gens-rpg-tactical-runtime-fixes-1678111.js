@@ -141,7 +141,7 @@
   function maintain(rt=R){maintenanceQueued=false;hideRuntimeTabs(rt);ensureDock(rt);paintDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintenanceQueued)return;maintenanceQueued=true;if(typeof requestAnimationFrame==="function")requestAnimationFrame(()=>maintain(rt));else setTimeout(()=>maintain(rt),0)}
   function observe(rt=R){const D=doc(rt);if(!D?.body||typeof MutationObserver==="undefined")return false;if(observer)return true;observer=new MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
-  function hookUiRender(rt=R){const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg111DockRefresh){uiRenderHooked=true;return true}const wrapped=function(){const out=old.apply(this,arguments);try{maintain(rt)}catch(e){}return out};wrapped.__gensRpg111DockRefresh=true;wrapped.__original=old;U.render=wrapped;uiRenderHooked=true;return true}
+  function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}
 
   function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookMultiDice(rt);bindClicks(rt);hookUiRender(rt);const b=currentBattle(rt);if(b)refreshBattleAttacks(rt,b);maintain(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_FIXES_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000])setTimeout(()=>install(rt),ms);return true}

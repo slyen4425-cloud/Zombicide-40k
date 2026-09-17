@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   patch-runtime:
-    if: github.event_name == 'push' && github.event.head_commit.message == 'ci: activate exact Combat 4M runtime patch'
+    if: github.event_name == 'push' && github.event.head_commit.message == 'activate-4m-runtime-patch'
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer la branche 4M

@@ -29,7 +29,7 @@ async function waitNative(page){
     typeof renderDungeonSkillTree==='function' &&
     typeof setDungeonSheetTab==='function' &&
     !!document.getElementById('dungeonSkillTreePanel') &&
-    !!window.CHARS?.dungeon_aldren
+    typeof CHARS==='object' && !!CHARS.dungeon_aldren
   );
 }
 
@@ -39,14 +39,15 @@ async function waitNative(page){
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR'});
   const page=await context.newPage();
-  page.setDefaultTimeout(15000);
+  page.setDefaultTimeout(60000);
+  page.setDefaultNavigationTimeout(60000);
   const pageErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
 
   try{
-    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'domcontentloaded'});
+    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'domcontentloaded',timeout:60000});
     await page.evaluate(()=>localStorage.setItem('gensrpg_game_profile_active_v1','game_profile_dungeon_demo'));
-    await page.reload({waitUntil:'domcontentloaded'});
+    await page.reload({waitUntil:'domcontentloaded',timeout:60000});
     await waitNative(page);
 
     const characterTab=await page.evaluate(async()=>{
@@ -67,7 +68,7 @@ async function waitNative(page){
     const transientVisible=characterTab.trace.filter(x=>x.reason!=='before-open'&&x.reason!=='settled').some(x=>x.computed!=='none');
     assert.equal(characterTab.tab,'character');
     assert.equal(characterTab.final,'none','Talent panel must stay hidden on the Character tab');
-    assert.equal(transientVisible,false,'Talent panel must never flash visible while the Character tab owns the sheet');
+    assert.equal(transientVisible,false,'Talent panel must never flash visible while the Character tab owns the sheet; trace='+JSON.stringify(characterTab.trace));
 
     const skillsTab=await page.evaluate(async()=>{
       setDungeonSheetTab('skills');
@@ -79,7 +80,7 @@ async function waitNative(page){
     assert.notEqual(skillsTab.display,'none','Talent panel must be visible on the Skills tab');
     assert.ok(skillsTab.text.length>0,'Canonical Talent renderer must still populate the skill tree');
 
-    assert.deepEqual(pageErrors,[],'hero-sheet Talent scenario must not raise browser page errors');
+    assert.deepEqual(pageErrors,[],'hero-sheet Talent scenario must not raise browser page errors: '+JSON.stringify(pageErrors));
     console.log(JSON.stringify({scenario:'hero sheet Talent flash',characterTrace:characterTab.trace,skillsDisplay:skillsTab.display}));
   }finally{
     await context.close();

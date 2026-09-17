@@ -43,7 +43,8 @@ assert.match(v113,/board-cell-detection-v113/,'V113 must own board-cell detectio
 assert.match(v113,/if\(cur\.__gensRpg113Start\)\{startHooked=true;return true\}/,'V113 start hook must short-circuit when the Bridge already carries equivalent authority');
 assert.match(bridge,/start\.__gensRpg113Start=true;start\.__gensRpg112Start=true/,'Bridge global start adapter must advertise V113-equivalent scope/detection semantics and block V112 retries');
 assert.match(bridge,/function prepareV113Detection\(/,'Bridge explicit request must preserve V113 detection visibility/source semantics');
-assert.match(bridge,/authority\.selectCombatants\(rt,prepared\.options\|\|\{\}\)/,'Bridge explicit request must delegate final participant scope to V113');
+assert.match(bridge,/const preparedOptions=prepared\.options\|\|\{\},selection=authority\.selectCombatants\(rt,preparedOptions\)/,'Bridge explicit request must delegate final participant scope to V113 using the prepared options');
+assert.match(bridge,/preparedOptions\.limitEnemyIdsToRequest===true[\s\S]*?selectedEnemyIds\.filter\(id=>requestedEnemyIds\.includes\(id\)\)/,'Bridge may only narrow V113 enemy selection when the explicit Dungeon-owned lot 4M contract requests it');
 assert.match(v113,/function heroScope\(/,'V113 must own branch-aware hero scope');
 assert.match(v113,/function enemyScope\(/,'V113 must own branch-aware enemy scope');
 assert.match(v113,/function selectCombatants\(/,'V113 must remain final combatant selector');

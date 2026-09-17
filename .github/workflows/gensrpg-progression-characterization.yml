@@ -1,27 +1,55 @@
-name: GenSrpG progression characterization
+name: GenSrpG temporary combat lot 4F writer
 
 on:
   push:
     branches:
-      - 'work/gensrpg-progression-victory-reconnect-*'
-      - 'work/gensrpg-xp-portrait-cleanfix-*'
+      - 'work/gensrpg-combat-callsite-migration-4f-2026-09-17'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  progression-characterization:
+  patch-index-once:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate native manual XP runtime
-        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Characterize native progression and rewards
-        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
-      - name: Verify Tactical victory rewards summary
-        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
-      - name: Execute Tactical victory to Dungeon XP and loot
-        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
-      - name: Characterize manual level authority
-        run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
+        with:
+          ref: work/gensrpg-combat-callsite-migration-4f-2026-09-17
+      - name: Replace only Core 2.09 ambush combat entry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          old='''  if(typeof dc200StartCombat==="function"){
+            ambushStarting=true;
+            setTimeout(()=>{
+              try{dc200StartCombat(live.map(e=>String(e.id)),"ambush")}
+              finally{setTimeout(()=>{ambushStarting=false},250)}
+            },120)
+          }'''
+          new='''  if(typeof GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
+            ambushStarting=true;
+            setTimeout(()=>{
+              try{GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}
+              finally{setTimeout(()=>{ambushStarting=false},250)}
+            },120)
+          }'''
+          count=text.count(old)
+          if count==0:
+              print('bounded Core 2.09 ambush source already absent; no write')
+              raise SystemExit(0)
+          if count!=1:
+              raise SystemExit(f'expected exactly one Core 2.09 ambush block, found {count}')
+          text=text.replace(old,new,1)
+          p.write_text(text,encoding='utf-8')
+          PY
+          if git diff --quiet -- index.html; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'refactor: route Core 2.09 ambush through tactical Bridge'
+          git push origin HEAD:work/gensrpg-combat-callsite-migration-4f-2026-09-17

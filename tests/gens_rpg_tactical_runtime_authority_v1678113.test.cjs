@@ -49,9 +49,9 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   assert.deepEqual(sel.enemyIds,['eb']);
 }
 
-// Lot 4J characterization: Runtime 2.00 deliberately excludes enemies bypassed
-// globally or by the active hero. Before changing V113, capture the current mismatch:
-// selectCombatants still expands a valid seed to nearby bypassed enemies.
+// Lot 4J permanent sentinel: Runtime 2.00 deliberately excludes enemies bypassed
+// globally or by the active hero. V113 must preserve that semantic when it expands
+// a valid seed to nearby enemies in the same combat scope.
 {
   const state=baseState();
   state.enemyCells.eg=11;
@@ -63,8 +63,10 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   ];
   const local={...rt,loadDungeonState:()=>state,loadActiveEnemies:()=>scopedEnemies};
   const sel=P.selectCombatants(local,{enemyIds:['ep'],heroIds:['h1']});
-  assert.deepEqual(sel.enemyIds,['ep','eg','eh'],
-    'lot 4J characterization: current V113 expands the requested combat to globally/per-hero bypassed enemies');
+  assert.deepEqual(sel.enemyIds,['ep'],
+    'lot 4J: V113 must not reintroduce globally/per-active-hero bypassed enemies during scope expansion');
+  assert.deepEqual(P.detectionEnemyIds(local,state,scopedEnemies),['ep'],
+    'lot 4J: bypassed enemies must also remain excluded from V113 detection');
 }
 
 {
@@ -121,4 +123,4 @@ assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 
-console.log('V16.78.113 scope/detection preserved; lot 4J bypass mismatch characterized; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');
+console.log('V16.78.113 scope/detection preserved; lot 4J bypass semantics locked; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');

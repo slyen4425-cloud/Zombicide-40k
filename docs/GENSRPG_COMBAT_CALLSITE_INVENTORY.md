@@ -13,7 +13,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
-| `dc200StartCombat` | 9 | alias Core 2.x, détection/embuscade et wrapper timeline actif Core 3.03 ; les boutons Core 2.01 et la timeline Core 3.01 désactivée ne l’utilisent plus |
+| `dc200StartCombat` | 7 | alias Core 2.x et déclenchements détection/embuscade ; les boutons Core 2.01, la timeline Core 3.01 désactivée et le wrapper Core 3.03 ne l’utilisent plus |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` |
@@ -25,10 +25,9 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 - alias historique `window.dc200StartCombat = startCombat` ;
 - déclenchements détection ;
 - déclenchement embuscade ;
-- détection Core 2.11 ;
-- wrapper timeline actif Core 3.03 autour de `window.dc200StartCombat`.
+- détection Core 2.11.
 
-Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B.
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C sans toucher à ses responsabilités de timeline/IA.
 
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
@@ -73,9 +72,17 @@ Le diagnostic utilise `entry: "dc201EncounterPanel"`, afin qu’aucune référen
 
 Le script `#dungeonCore301Timeline`, déjà marqué `type="application/x-gensrpg-disabled"`, est supprimé au lieu d’être modernisé. Il contenait deux références à `dc200StartCombat` et n’appartenait pas au runtime actif.
 
-Le lot est volontairement limité au script : le CSS historique `#dungeonCore301TimelineCss` reste hors périmètre. Surtout, le wrapper actif `#dungeonCore303TimelineRootFix` est conservé intact et devra être caractérisé séparément avant toute modification.
+Le lot est volontairement limité au script : le CSS historique `#dungeonCore301TimelineCss` reste hors périmètre. Le wrapper actif `#dungeonCore303TimelineRootFix` a été caractérisé séparément au lot 4C.
 
 Ce lot ne modifie ni détection, ni embuscade, ni participants, ni résolution Tactical, ni `startCombat` / `launchCombat200`.
+
+## Migration validée — lot 4C, wrapper de démarrage Core 3.03
+
+Core 3.03 reste actif et conserve ses responsabilités de timeline, changement de tour, IA et UI de tour. Seul son petit wrapper autour de `window.dc200StartCombat` est retiré.
+
+Le Bridge Tactical est chargé ensuite par `RuntimeBootstrap` et réinstalle déjà `rt.dc200StartCombat` comme adaptateur final vers `requestCombat()`. Le wrapper Core 3.03 était donc seulement capturé comme ancien rollback puis supplanté. Le retirer évite une reprise d’autorité inutile sans changer la résolution Tactical ni la timeline active.
+
+Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 9 à 7. Les fonctions `init`, `advance`, `applyTurnUi`, l’état `T` et `dungeonDebug303` sont protégés par le test dédié.
 
 ## Contrat cible déjà disponible
 

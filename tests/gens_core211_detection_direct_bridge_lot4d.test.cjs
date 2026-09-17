@@ -47,7 +47,7 @@ assert.match(bridge,/function prepareV113Detection\(/,
   'Bridge must retain V113 detection preparation');
 assert.match(bridge,/const prepared=prepareV113Detection\(rt,authority,options\)/,
   'Bridge scopedRequest must still pass detection through V113 preparation');
-assert.match(bridge,/authority\.selectCombatants\(rt,prepared\.options\|\|\{\}\)/,
-  'Bridge must retain V113 participant selection');
+assert.match(bridge,/const preparedOptions=prepared\.options\|\|\{\},selection=authority\.selectCombatants\(rt,preparedOptions\)/,
+  'Bridge must retain V113 participant selection through the prepared options contract');
 
 console.log('GenSrpG Core 2.11 direct detection Bridge lot 4D OK');

@@ -20,4 +20,9 @@ assert.match(doc,/Aucune suppression en masse/,'inventory must keep the progress
 // behavioral contract permanently coupled to the inventory sentinel.
 require('./gens_legacy_dc200_fallback_contract_lot4g.test.cjs');
 
+// Lot 4H: launchCombat200 is likewise captured by the Bridge for exact non-Dungeon
+// compatibility while Dungeon routing stays on requestCombat. Keep that distinction
+// locked before any later extraction from the monolith.
+require('./gens_legacy_launch200_fallback_contract_lot4h.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

@@ -29,7 +29,9 @@ async function waitNative(page){
     typeof renderDungeonSkillTree==='function' &&
     typeof setDungeonSheetTab==='function' &&
     !!document.getElementById('dungeonSkillTreePanel') &&
-    typeof CHARS==='object' && !!CHARS.dungeon_aldren
+    typeof CHARS==='object' && !!CHARS.dungeon_aldren,
+    null,
+    {timeout:120000}
   );
 }
 
@@ -38,16 +40,17 @@ async function waitNative(page){
   const port=server.address().port;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR'});
+  await context.addInitScript(()=>localStorage.setItem('gensrpg_game_profile_active_v1','game_profile_dungeon_demo'));
   const page=await context.newPage();
-  page.setDefaultTimeout(60000);
-  page.setDefaultNavigationTimeout(60000);
+  page.setDefaultTimeout(120000);
+  page.setDefaultNavigationTimeout(120000);
   const pageErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
 
   try{
-    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'domcontentloaded',timeout:60000});
-    await page.evaluate(()=>localStorage.setItem('gensrpg_game_profile_active_v1','game_profile_dungeon_demo'));
-    await page.reload({waitUntil:'domcontentloaded',timeout:60000});
+    // The production index is a very large monolith. Waiting for DOMContentLoaded makes
+    // this test measure full-page load time instead of the native hero-sheet behavior.
+    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'commit',timeout:120000});
     await waitNative(page);
 
     const characterTab=await page.evaluate(async()=>{

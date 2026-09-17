@@ -2,13 +2,15 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const http=require('node:http');
 const path=require('node:path');
-const {chromium}=require('playwright');
+const {chromium,firefox}=require('playwright');
 const root=path.join(__dirname,'..');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg'};
+const engineName=String(process.env.GENS_BROWSER||'chromium').toLowerCase();
+const browserType=engineName==='firefox'?firefox:chromium;
 const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname),rel=pathname==='/'?'/tests/fixtures/tactical-dock-render-v11411.html':pathname,file=path.resolve(root,'.'+rel);if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);res.end('not found');return}res.writeHead(200,{'content-type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','cache-control':'no-store'});res.end(data)})});
 (async()=>{
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
-  const port=server.address().port,browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  const port=server.address().port,browser=await browserType.launch(engineName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true});
   const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR'}),page=await context.newPage();
   page.setDefaultTimeout(12000);const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   try{
@@ -49,6 +51,6 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     assert.deepEqual(result.observerTargets,[],'dock restoration must not install any MutationObserver');
     assert.equal(result.status?.uiRenderHooked,true,'V111 must report the canonical render lifecycle hook as installed');
     assert.deepEqual(errors,[],'Tactical dock browser console/page errors');
-    console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',viewport:'412x915 @2.625 touch',before:result.before,after:result.after,status:result.status}));
+    console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,status:result.status}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   characterize-talent-visibility:
@@ -26,5 +26,55 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Characterize hero sheet Talent visibility
+      - name: Apply exact Talent visibility owner fix in worktree
+        id: patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old1='const d=isDungeonHeroSheet(),p=document.getElementById("dungeonSkillTreePanel"),z=document.getElementById("zombicideSkillPanel");'
+          new1='const d=isDungeonHeroSheet(),z=document.getElementById("zombicideSkillPanel");'
+          old2='if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":"block";'
+          new2='if(z)z.style.display=d?"none":"block";'
+          c1=s.count(old1); c2=s.count(old2)
+          if c1==1 and c2==1:
+              s=s.replace(old1,new1,1).replace(old2,new2,1)
+              p.write_text(s,encoding='utf-8')
+              print('patched exact Talent visibility conflict')
+          elif c1==0 and c2==0 and new1 in s and new2 in s:
+              print('exact Talent visibility fix already present')
+          else:
+              raise SystemExit(f'unexpected Talent owner patterns: old1={c1} old2={c2} new1={s.count(new1)} new2={s.count(new2)}')
+          PY
+          git diff --check
+          git diff -- index.html
+
+      - name: Talent regression
         run: node tests/gens_hero_sheet_talent_flash_v11411.test.cjs
+
+      - name: Hero sheet and protected-neighbor regressions
+        run: |
+          node tests/gens_v11411_native_ui_browser.test.cjs
+          node tests/gens_hero_sheet_art_runtime_v11411.test.cjs
+          node tests/gens_single_hero_sheet_art_authority_v11411.test.cjs
+          node tests/gens_manual_xp_progression_runtime_v1.test.cjs
+          node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
+          node tests/gens_stats_editor_authority_characterization_v11411.test.cjs
+          node tests/gens_stats_editor_single_authority_v11411.test.cjs
+
+      - name: Commit exact runtime correction if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No runtime diff to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- index.html
+          test "$(git diff --cached --name-only | wc -l)" -eq 1
+          test "$(git diff --cached --name-only)" = "index.html"
+          git commit -m 'fix: leave Talent visibility to hero sheet tabs'
+          git push origin HEAD:work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17

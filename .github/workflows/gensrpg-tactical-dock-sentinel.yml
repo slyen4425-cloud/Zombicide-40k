@@ -1,0 +1,56 @@
+name: GenSrpG Tactical dock sentinel
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dock-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Vérifier le contrat source du dock Tactical
+        run: node tests/gens_tactical_dock_canonical_render_hook_v11411.test.cjs
+
+  dock-chromium:
+    needs: dock-contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Préparer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Chromium Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Vérifier le dock sur le vrai rendu Tactical Chromium
+        run: GENS_BROWSER=chromium node tests/gens_tactical_dock_browser_v11411.test.cjs
+
+  dock-firefox:
+    needs: dock-contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Préparer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Firefox Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps firefox
+      - name: Vérifier le dock sur le vrai rendu Tactical Firefox
+        run: GENS_BROWSER=firefox node tests/gens_tactical_dock_browser_v11411.test.cjs

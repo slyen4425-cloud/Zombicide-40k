@@ -42721,16 +42721,6 @@ try{
   if(typeof window.dungeonAdvanceTurn156==="function")window.dungeonAdvanceTurn156=function(){};
 }catch(e){}
 
-/* Quand Core 2.14 lance un nouveau combat, force une nouvelle timeline. */
-const oldStart301=window.dc200StartCombat;
-if(typeof oldStart301==="function"){
-  window.dc200StartCombat=function(){
-    T={sig:"",order:[],index:0,aiBusy:false,pendingHero:false};
-    const r=oldStart301.apply(this,arguments);
-    setTimeout(()=>{init(true);render()},0);
-    return r;
-  };
-}
 
 window.dungeonDebug303=function(){
   return {

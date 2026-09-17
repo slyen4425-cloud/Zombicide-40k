@@ -2,7 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/"><title>Tactical dock true render path</title>
-<style>html,body{margin:0;background:#111;color:#fff;font-family:sans-serif}</style>
+<style>
+html,body{margin:0;background:#111;color:#fff;font-family:sans-serif}
+#dungeonCombatModal{position:fixed;inset:0;z-index:100900;display:none;background:rgba(0,0,0,.01);pointer-events:auto}
+#dungeonCombatModal.dc200CombatOpen{display:block}
+</style>
 <script>
 window.__globalObserverTargets=[];
 const NativeMutationObserver=window.MutationObserver;
@@ -15,6 +19,8 @@ window.MutationObserver=class TrackingMutationObserver{
 </script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js"></script>
+<script src="/assets/gensrpg/gens-rpg-runtime-repair-1678106.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js"></script>
 <script>
 window.__dockBattleInput={
@@ -26,6 +32,23 @@ window.__dockBattleInput={
   ],
   config:{actionsPerTurn:1}
 };
+window.GensRpgTacticalCombatV2Adapter={
+  participants(){return ['dungeon_aldren']},
+  enteredParticipants(_rt,ids){return Array.isArray(ids)?ids:[]},
+  activeEnemies(){return [{id:'enemy_1',hp:6}]}
+};
+try{localStorage.setItem('gensrpg_session_family_guard_v1','adventure')}catch(e){}
+window.__armLegacyCombatLayer=()=>{
+  const modal=document.getElementById('dungeonCombatModal');
+  modal.classList.add('dc200CombatOpen','open');modal.style.display='block';window.dungeonCombatActive=true;
+  return getComputedStyle(modal).display;
+};
+window.__openDockViaBridge=seq=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{
+  ...window.__dockBattleInput,
+  id:'dock_browser_contract_'+seq,
+  enemyIds:['enemy_1'],reason:'manual',entry:'dock-repeat-'+seq
+});
+window.__closeDockBattle=()=>window.GensRpgTacticalCombatV2Ui.close(false);
 window.addEventListener('DOMContentLoaded',()=>{
   // V111 historically schedules bounded startup retries through 5000 ms.
   // The browser characterization waits past them before opening Tactical so a late retry cannot mask a broken render lifecycle.
@@ -33,5 +56,5 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 </head>
-<body><main id="fixture">Tactical dock render lifecycle fixture</main></body>
+<body><main id="fixture">Tactical dock render lifecycle fixture</main><div id="dungeonCombatModal" aria-hidden="true"></div></body>
 </html>

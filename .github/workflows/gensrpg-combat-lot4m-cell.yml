@@ -19,6 +19,9 @@ jobs:
       - name: Caractériser le déclenchement cell Runtime 2.00
         run: node tests/gens_core200_cell_entry_characterization_lot4m.test.cjs
 
+      - name: Vérifier le contrat cible Bridge du lot 4M
+        run: node tests/gens_core200_cell_bridge_contract_lot4m.test.cjs
+
       - name: Figer l'inventaire des anciens points d'entrée combat
         run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
 

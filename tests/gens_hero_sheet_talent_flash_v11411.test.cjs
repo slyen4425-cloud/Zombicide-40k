@@ -20,11 +20,11 @@ const tabOwner=extractFunction('function applyDungeonSheetTabs(){','\n}\nfunctio
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const page=await browser.newPage({viewport:{width:412,height:915}});
   try{
-    await page.setContent(`<!doctype html><body class="dungeon-sheet">
+    await page.setContent(`<!doctype html><body class="dungeon-sheet"><div id="sheet">
       <div id="dungeonSheetTabs"><button data-dtab="character"></button><button data-dtab="skills"></button></div>
       <div class="panel" id="dungeonSkillTreePanel" style="display:none"></div>
       <div class="panel" id="zombicideSkillPanel" style="display:block"></div>
-    </body>`);
+    </div></body>`);
 
     await page.addScriptTag({content:`
       let dungeonSheetTab='character';

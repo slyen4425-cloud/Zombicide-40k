@@ -39,9 +39,9 @@ Validation exacte du SHA `6aa1a682220f0439d0f6b9679a3f6dd5d9182eff` :
 - workflow architecture revenu à `permissions: contents: read` ;
 - `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-## Diagnostic préalable 4J
+## Lot 4J — diagnostic confirmé et correction propriétaire
 
-La migration directe des trois actions restantes n'est pas sûre en bloc.
+La migration directe des trois actions `manual` / `cell` / `ambush` n'était pas sûre en bloc.
 
 `startCombat(ids,reason)` possède encore une règle propre pour `cell` : renforts de proximité aléatoires + popup avant le lancement. Cette action reste hors périmètre 4J.
 
@@ -52,32 +52,59 @@ Les actions `manual` et `ambush` transmettent les ennemis retournés par `liveEn
 - les ennemis hors salle / hors branche ;
 - les ennemis morts, supprimés ou déjà vaincus.
 
-La réussite de furtivité écrit réellement `dc200BypassedBy[hero]=true`. Il s'agit donc d'une règle métier active.
+La réussite de furtivité écrit réellement `dc200BypassedBy[hero]=true`. Il s'agit donc d'une règle métier active et individuelle par héros.
 
-Or l'autorité V113 utilise actuellement `activeEnemies()` pour construire `roomEnemies`, puis peut élargir les `enemyIds` demandés à d'autres ennemis visibles du même scope. `activeEnemies()` filtre les morts/supprimés/vaincus mais ne filtre pas encore `dc200Bypassed` ni `dc200BypassedBy`.
+La caractérisation ajoutée dans `tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs` a reproduit le défaut : avant correction, `GensRpgTacticalRuntimeAuthority1678113.selectCombatants()` pouvait partir d'un ennemi valide puis réajouter au même combat un ennemi `dc200Bypassed` ou `dc200BypassedBy[heroActif]` visible dans le même scope.
 
-Risque démontré à caractériser avant correction : un ennemi contourné par le héros actif pourrait être réajouté au combat par V113 lors d'une future migration directe vers le Bridge.
+Cause exacte : V113 construisait `roomEnemies` à partir de `activeEnemies()`, qui ne filtrait que PV/suppression/défaite et ignorait les marqueurs de contournement Dungeon.
 
-## Périmètre strict 4J
+### Correction 4J
 
-Module concerné : Tactical / autorité de scope V113, avec donnée Dungeon de contournement déjà existante.
-
-Propriétaire à modifier uniquement si le test reproduit le défaut :
+Propriétaire corrigé uniquement :
 
 `assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js`
 
-Systèmes réutilisés :
+Commit runtime : `43dbac3a4084f8f677c8ad14bfc1cdf3c96d8222`.
 
-- état Dungeon existant ;
-- `dc200Bypassed` / `dc200BypassedBy` ;
-- `GensRpgTacticalRuntimeAuthority1678113.selectCombatants()` ;
-- Bridge canonique existant.
+V113 possède maintenant une seule fonction interne d'éligibilité pour le héros actif :
 
-Ne pas toucher dans 4J :
+- ennemi vivant ;
+- non supprimé ;
+- non vaincu ;
+- non `dc200Bypassed` ;
+- non `dc200BypassedBy[heroActif]`.
+
+Cette même éligibilité est utilisée par :
+
+- `activeEnemies()` ;
+- `enemiesInScope()` ;
+- la branche avec liste explicite de `detectionPairs()` ;
+- `targetScopeForOptions()` ;
+- le placement runtime final via `applyRuntimePositions()`.
+
+Aucune règle de portée, ligne de vue, perception, participants, dégâts, stats ou mouvement n'a été modifiée.
+
+### Sentinelle permanente 4J
+
+Le test V113 vérifie désormais simultanément que :
+
+- un ennemi `dc200Bypassed` est exclu ;
+- un ennemi `dc200BypassedBy.h1=true` est exclu quand h1 est actif ;
+- un ennemi `dc200BypassedBy.h2=true` reste éligible quand h1 est actif ;
+- la détection V113 applique la même sémantique que l'expansion du scope combat.
+
+Commit test : `bc3e56a329b2ca2935ac43799eec3f7878daa609`.
+
+Le lot 4J ne modifie aucun callsite `startCombat` et l'inventaire reste donc inchangé : `startCombat = 5`.
+
+## Périmètre strict 4J respecté
+
+Aucun changement dans :
 
 - les callsites `manual`, `cell`, `ambush` ;
 - `startCombat()` / `launchCombat200()` ;
-- calcul de participants hors filtrage de contournement ;
+- `index.html` ;
+- calcul des participants hors filtrage de contournement ;
 - mouvement ;
 - stats ;
 - dégâts / touche / armure ;
@@ -87,22 +114,24 @@ Ne pas toucher dans 4J :
 - Save & Quit ;
 - Survie / Capture / PvP.
 
-Ordre obligatoire :
+Diff attendu depuis 4I : trois fichiers seulement — V113, son test permanent et ce document.
 
-1. ajouter une caractérisation comportementale prouvant le cas contourné ;
-2. vérifier le vrai propriétaire ;
-3. corriger V113 uniquement si la cause est confirmée ;
-4. ajouter/mettre à jour la sentinelle permanente ;
-5. architecture + Chromium + Firefox sur le même SHA ;
-6. workflow read-only ;
-7. vérifier `main` intact ;
-8. créer le checkpoint vert 4J seulement ensuite.
+## Suite après checkpoint vert 4J
+
+Ne pas migrer `cell` avec `manual` : `cell` possède encore sa logique propre de renforts de proximité et doit être caractérisé séparément.
+
+Pour le prochain lot, reprendre les 5 occurrences `startCombat` restantes depuis le checkpoint vert 4J et caractériser séparément :
+
+1. `manual` — candidat le plus simple après la correction bypass ;
+2. `ambush` — attention : le Bridge/V113 considère actuellement `ambush` comme une raison de détection, donc sa sémantique doit être vérifiée avant migration ;
+3. `cell` — renforts aléatoires + popup, lot séparé ;
+4. définition historique `startCombat` + alias `dc200StartCombat` — ne pas retirer tant que les consommateurs et fallbacks caractérisés en dépendent.
 
 ## Coordination multi-fils
 
 `docs/GENSRPG_COORDINATION.md` reste la règle : un fil coordinateur, un agent = une branche = un périmètre, aucun agent ne fusionne seul son travail.
 
-Agent séparé actuel : diagnostic du flash/disparition Talent de la fiche héros sur `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`. Ne pas mélanger son travail au lot combat 4J.
+Agent séparé actuel : diagnostic du flash/disparition Talent de la fiche héros sur `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`. Ne pas mélanger son travail au lot combat.
 
 ## Jalons verts utiles
 

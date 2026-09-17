@@ -190,6 +190,9 @@ jobs:
       - name: Vérifier la migration des boutons de rencontre Core 2.01
         run: node tests/gens_core201_direct_bridge_lot4a.test.cjs
 
+      - name: Vérifier le retrait de la timeline Core 3.01 désactivée
+        run: node tests/gens_core301_disabled_timeline_retirement_lot4b.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

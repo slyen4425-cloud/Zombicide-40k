@@ -16,32 +16,35 @@ function scriptBody(id){
 }
 
 const core200=scriptBody('dungeonCore200Rebuild');
-const ambushCall="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'ambush')";
-assert.ok(core200.includes(ambushCall),
-  'pre-migration Runtime 2.00 ambush action must remain a lexical startCombat callsite during characterization');
-assert.match(core200,/if\(x\.last\?\.kind==='ambush'&&live\.length\)[\s\S]*?b\.textContent='⚔️ EMBUSCADE — COMBATTRE'[\s\S]*?startCombat\(live\.map\(e=>String\(e\.id\)\),'ambush'\)/,
+const oldAmbushCall="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'ambush')";
+const newAmbushCall="b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true})";
+assert.ok(!core200.includes(oldAmbushCall),
+  'post-migration Runtime 2.00 ambush action must not retain a lexical startCombat callsite');
+assert.ok(core200.includes(newAmbushCall),
+  'Runtime 2.00 ambush must enter through the Bridge with its full live-enemy seed explicitly preserved');
+assert.match(core200,/if\(x\.last\?\.kind==='ambush'&&live\.length\)[\s\S]*?b\.textContent='⚔️ EMBUSCADE — COMBATTRE'[\s\S]*?entry:'dc200AmbushAction'[\s\S]*?preserveEnemyIds:true/,
   'Runtime 2.00 ambush action must keep its event guard, full live-enemy source and label');
 
 const startMatch=core200.match(/function startCombat\(ids,reason\)\{([\s\S]*?)\}\nfunction cleanupCombat\(/);
-assert.ok(startMatch,'Runtime 2.00 startCombat body must be available for 4L characterization');
+assert.ok(startMatch,'Runtime 2.00 startCombat body must remain available as characterized compatibility code');
 const startBody=startMatch[1];
 assert.match(startBody,/let chosen=liveEnemies\(\)\.filter\(e=>ids\.map\(String\)\.includes\(String\(e\.id\)\)\)/,
-  'legacy ambush must re-filter requested ids only through liveEnemies');
+  'legacy startCombat still re-filters requested ids through liveEnemies for remaining compatibility/cell use');
 assert.match(startBody,/const begin=\(\)=>launchCombat200\(x,chosen\)/,
-  'legacy ambush must delegate the chosen full live set to the Runtime 2.00 launcher');
+  'legacy startCombat still delegates its chosen set to the Runtime 2.00 launcher');
 assert.doesNotMatch(startBody,/reason==='ambush'/,
-  'Runtime 2.00 startCombat must not contain hidden ambush-specific participant filtering');
+  'Runtime 2.00 startCombat must not grow a new ambush-specific compatibility branch');
 assert.match(core200,/function liveEnemies\(\)[\s\S]*?!e\.dc200Bypassed[\s\S]*?!e\.dc200BypassedBy\?\.\[hero\]/,
-  'legacy ambush enemy source must retain the bypass exclusions fixed in lot 4J');
+  'Runtime 2.00 ambush enemy source must retain the bypass exclusions fixed in lot 4J');
 
 assert.equal(Bridge.isV113DetectionReason('ambush'),true,
-  'Bridge classifies ambush as a V113 detection reason');
+  'Bridge must continue classifying ordinary ambush as a V113 detection reason');
 assert.equal(Bridge.isV113DetectionReason('legacy-launch'),false,
   'legacy-launch must remain outside V113 detection preparation');
-assert.match(bridgeSource,/function prepareV113Detection\([\s\S]*?isV113DetectionReason\(options\.reason\)[\s\S]*?detectionPairs[\s\S]*?enemyIds=enemyIds\.filter\(id=>visible\.has\(id\)\)/,
-  'Bridge ambush preparation must visibly intersect requested enemies with V113 detection pairs');
+assert.match(bridgeSource,/function prepareV113Detection\([\s\S]*?options\.preserveEnemyIds===true\|\|!isV113DetectionReason\(options\.reason\)[\s\S]*?detectionPairs[\s\S]*?enemyIds=enemyIds\.filter\(id=>visible\.has\(id\)\)/,
+  'Bridge must expose only a narrow preserveEnemyIds opt-out before the normal V113 detection-pair intersection');
 assert.match(authoritySource,/function detectionPairs\([\s\S]*?distance>vision\|\|!lineOfSightCells\(state,ec,hc\)/,
-  'V113 detection pairs must be governed by vision range and line of sight');
+  'V113 detection pairs must remain governed by vision range and line of sight');
 
 function makeRuntime(){
   const enemies=[{id:'e-near',hp:5},{id:'e-far',hp:5}];
@@ -75,17 +78,17 @@ function makeRuntime(){
 
 {
   const {rt,opened}=makeRuntime();
-  const result=Bridge.requestCombat(rt,{enemyIds:['e-near','e-far'],reason:'ambush',entry:'lot4l-characterization'});
-  assert.equal(result.ok,true,'mock ambush Bridge route should remain openable');
+  const result=Bridge.requestCombat(rt,{enemyIds:['e-near','e-far'],reason:'ambush',entry:'lot4l-characterization-default'});
+  assert.equal(result.ok,true,'ordinary mock ambush Bridge route should remain openable');
   assert.deepEqual(opened[0].enemyIds,['e-near'],
-    'direct reason=ambush Bridge routing currently removes a requested enemy absent from V113 detectionPairs');
+    'ordinary reason=ambush Bridge routing must still remove a requested enemy absent from V113 detectionPairs');
 }
 {
   const {rt,opened}=makeRuntime();
-  const result=Bridge.requestCombat(rt,{enemyIds:['e-near','e-far'],reason:'legacy-launch',entry:'lot4l-control'});
-  assert.equal(result.ok,true,'non-detection control route should remain openable');
+  const result=Bridge.requestCombat(rt,{enemyIds:['e-near','e-far'],reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true});
+  assert.equal(result.ok,true,'Runtime 2.00 preserved-seed ambush route should remain openable');
   assert.deepEqual(opened[0].enemyIds,['e-near','e-far'],
-    'without V113 detection preparation the same requested live set must remain intact');
+    'Runtime 2.00 preserveEnemyIds contract must keep the full already-selected live enemy seed');
 }
 
-console.log('GenSrpG combat lot 4L characterization OK: Runtime 2.00 ambush requests the full live set, while direct reason=ambush Bridge routing can narrow it through V113 detection; mechanical migration is forbidden');
+console.log('GenSrpG combat lot 4L characterization/migration OK: ordinary ambush stays V113 detection-owned while Runtime 2.00 preserves its already-selected live enemy seed through the canonical Bridge');

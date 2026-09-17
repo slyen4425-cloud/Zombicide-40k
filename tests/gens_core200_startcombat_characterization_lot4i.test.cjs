@@ -15,8 +15,8 @@ function scriptBody(id){
 const core200=scriptBody('dungeonCore200Rebuild');
 const core201=scriptBody('dungeonCore201Stability');
 
-assert.equal((core200.match(/\bstartCombat\b/g)||[]).length,4,
-  'Runtime 2.00 startCombat debt must be exactly definition + dc200 alias + cell/ambush after lot 4K');
+assert.equal((core200.match(/\bstartCombat\b/g)||[]).length,3,
+  'Runtime 2.00 startCombat debt must be exactly definition + dc200 alias + cell after lot 4L');
 assert.match(core200,/function\s+startCombat\s*\(ids,reason\)/,
   'Runtime 2.00 must still expose the characterized legacy startCombat implementation');
 assert.match(core200,/window\.dc200StartCombat\s*=\s*startCombat\s*;/,
@@ -26,9 +26,11 @@ assert.doesNotMatch(core200,/b\.onclick\s*=\s*\(\)=>startCombat\(live\.map\(e=>S
 assert.match(core200,/b\.onclick\s*=\s*\(\)=>window\.GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:live\.map\(e=>String\(e\.id\)\),reason:'manual',entry:'dc200ManualAction'\}\)/,
   'Lot 4K manual action must enter through the canonical Tactical Bridge');
 assert.match(core200,/b\.onclick\s*=\s*\(\)=>startCombat\(\[String\(target\.id\)\],'cell'\)/,
-  'Runtime 2.00 cell attack context action remains a lexical startCombat callsite');
-assert.match(core200,/b\.onclick\s*=\s*\(\)=>startCombat\(live\.map\(e=>String\(e\.id\)\),'ambush'\)/,
-  'Runtime 2.00 ambush context action remains a lexical startCombat callsite');
+  'Runtime 2.00 cell attack context action remains the sole lexical startCombat callsite');
+assert.doesNotMatch(core200,/b\.onclick\s*=\s*\(\)=>startCombat\(live\.map\(e=>String\(e\.id\)\),'ambush'\)/,
+  'Lot 4L must remove the Runtime 2.00 ambush lexical startCombat callsite');
+assert.match(core200,/b\.onclick\s*=\s*\(\)=>window\.GensRpgTacticalCombatV2Bridge\.requestCombat\(window,\{enemyIds:live\.map\(e=>String\(e\.id\)\),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true\}\)/,
+  'Lot 4L ambush action must enter through the canonical Tactical Bridge with its already-selected enemy seed preserved');
 
 const stealthLine=core200.split('\n').find(line=>line.includes('window.dc047ResolveStealth=function(success)'));
 assert.ok(stealthLine,'Runtime 2.00 stealth resolver must remain present');
@@ -46,6 +48,8 @@ assert.equal((core200.match(/entry:'dc200StealthFailure'/g)||[]).length,1,
   'Runtime 2.00 must expose exactly one canonical stealth-failure Bridge entry');
 assert.equal((core200.match(/entry:'dc200ManualAction'/g)||[]).length,1,
   'Runtime 2.00 must expose exactly one canonical manual Bridge entry after lot 4K');
+assert.equal((core200.match(/entry:'dc200AmbushAction'/g)||[]).length,1,
+  'Runtime 2.00 must expose exactly one canonical ambush Bridge entry after lot 4L');
 
 assert.match(core201,/function\s+requestCombat201\s*\(enemyIds,reason\).*GensRpgTacticalCombatV2Bridge\.requestCombat\(window/,
   'Core 2.01 encounter panel must already use the canonical Bridge');
@@ -54,4 +58,4 @@ assert.equal((core201.match(/requestCombat201\s*\(/g)||[]).length,3,
 assert.doesNotMatch(core201,/\bstartCombat\b/,
   'Core 2.01 must not reintroduce Runtime 2.00 startCombat');
 
-console.log('GenSrpG combat lot 4I/4K OK: stealth failure and manual are Bridge-backed; Runtime 2.00 retains only cell/ambush + definition + dc200 alias');
+console.log('GenSrpG combat lot 4I/4K/4L OK: stealth failure, manual and ambush are Bridge-backed; Runtime 2.00 retains only cell + definition + dc200 alias');

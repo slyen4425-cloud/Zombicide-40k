@@ -70,55 +70,67 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu’il n’entre pas 
 
 ### Fil directeur
 - Rôle : **COORDINATEUR actif**.
-- Chantier directeur : fermeture du lot combat 4K, action manuelle Runtime 2.00.
-- Branche : `work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17`.
-- Base : checkpoint vert 4J.
-- Checkpoint vert 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17`.
-- SHA 4J : `b8f5b14f0651479165d35545f3a22db6df8d391f`.
-- Propriétaire verrouillé : entrée combat Dungeon Runtime 2.00 / Bridge autour du callsite `manual`.
-- Commit runtime 4K : `989f6f197c7e56dd62393bec8849cf5770d3d63b`.
-- Candidat technique 4K : `c6a9e5ac740b7aa1d18b298d4ec10441df4f1be3`, vert architecture + Chromium/preview + Firefox.
-- `startCombat` est passé de 5 à 4 occurrences : définition historique + alias + `cell` + `ambush`.
-- Checkpoint cible : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` après revalidation du SHA final documentaire.
+- Chantier courant : intégration contrôlée du correctif Talent après Combat 4K.
+- Branche : `work/gensrpg-integrate-talent-after-4k-2026-09-17`.
+- Base : checkpoint vert Combat 4K.
+- Checkpoint 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17`.
+- SHA 4K : `c672726b69aa5895d252e2f31084c20740bcc699`.
+- Propriétaire verrouillé : visibilité de la section Talent dans la fiche héros native.
+- Candidat technique Talent : `e6d03dba0ba225eb3b35625d783cf58011ea22c0`, vert régression Talent + architecture/Chromium-preview + Firefox.
+- Checkpoint cible : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` après revalidation du SHA documentaire final.
 
-### Prochain lot directeur envisagé
-- Lot : **4L `ambush` uniquement**.
-- Ne pas démarrer avant checkpoint vert 4K.
-- Créer une branche propre depuis le SHA exact du checkpoint vert 4K final.
-- Caractériser avant toute modification la sémantique Runtime 2.00 de `startCombat(...,'ambush')` et son interaction avec V113, qui classe `ambush` comme raison de détection.
-- Préserver source d'ennemis, héros source, scope, guards et comportement UI/contexte.
-- `cell` reste strictement hors périmètre de 4L à cause de sa logique spécifique de renforts/popup.
-- La définition historique et l'alias `dc200StartCombat` restent protégés tant que les fallbacks caractérisés 4G/4H en dépendent.
+### Combat directeur suspendu proprement
+- Combat 4K est officiellement checkpoint vert sur `c672726b69aa5895d252e2f31084c20740bcc699`.
+- Inventaire après 4K : `startCombat` = 4 — définition historique + alias + `cell` + `ambush`.
+- Prochain lot combat prévu : **4L `ambush` uniquement**.
+- 4L ne doit pas démarrer avant fermeture des intégrations Agent 1 en cours.
+- `cell` reste hors périmètre de 4L.
 
-### Branches historiques à ne pas reprendre
-- `work/gensrpg-combat-callsite-migration-4k-manual-entry-2026-09-17` pointe sur l'ancien essai 4J divergent `64f104e3a435e31726be62a890affab15baa9bf6` et ne doit pas servir de base.
-- Seule la branche propre `work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17` fait autorité pour 4K.
+### Agent 1 — Talent : audité et en cours d’intégration contrôlée
+- Branche agent auditée : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`.
+- Checkpoint agent : `checkpoint/gensrpg-hero-sheet-talent-flash-green-2026-09-17`.
+- SHA agent : `410d63b4800e298dad277b8ce153b7726bd5ab7c`.
+- Cause confirmée : `renderDungeonSkillTree()` écrivait la visibilité de `#dungeonSkillTreePanel` alors que `applyDungeonSheetTabs()` en est le propriétaire canonique.
+- La branche agent entière n'a pas été fusionnée.
+- La sentinelle a d'abord été reportée sur la base 4K et a reproduit le défaut en rouge — run `35250002420`.
+- Correction post-4K : commit `f34da9391730bc8c83a6d166feeb8efdcff421a1`.
+- Diff net post-4K : `index.html` + test Talent + workflow lecture seule uniquement.
+- Aucun Observer, timer, retry ou wrapper de réparation ajouté.
 
-### Agent 1 — ancien travail Talent
-- Branche : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`.
-- Mission : diagnostic/correction ciblée du flash/disparition Talent de la fiche héros.
-- Statut : annoncé terminé par l’utilisateur ; **non intégré** tant que branche, SHA, diff et tests n’ont pas été vérifiés par le coordinateur.
+### Agent 1 — Chrome/PWA : audité, intégration différée dans un lot séparé
+- Branche agent auditée : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`.
+- Checkpoint agent : `checkpoint/gensrpg-chrome-white-screen-green-2026-09-17`.
+- SHA agent : `369d70edc7cb4506d368171e6a6fff6ad89b9766`.
+- Résultat retenu : problème reproductible dans `preview.html` lorsqu'un cache PWA GenSrpG préexistant peut répondre avant que sa suppression asynchrone soit terminée.
+- Correction agent : attendre explicitement la suppression des caches `gensrpg-cache-*` avant le `fetch('index.html')`.
+- Aucune modification gameplay ou `index.html` dans ce lot agent.
+- Limite : ce résultat est un durcissement preview/PWA ; il ne prouve pas à lui seul la cause du symptôme Chrome Android réel en production.
+- Règle d’intégration : ne rien reporter avant checkpoint Talent ; repartir ensuite du checkpoint Talent, caractériser en rouge, puis n'intégrer que `preview.html` + test/workflow si l'équivalence est confirmée.
 
-### Agent 1 — diagnostic Chrome actif
-- Branche : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`.
-- Base : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
-- Mission : diagnostiquer l’écran blanc/figé observé sous Chrome Android alors que le même jalon fonctionne sous Firefox.
-- Interdictions : aucun gameplay, aucun observer/timer/retry global, aucune modification du propriétaire combat directeur, aucun `main`.
-- Statut : séparé du fil directeur ; résultat à rapporter avant toute intégration.
-
-### Jalon UI séparé validé utilisateur
+### Jalon UI protégé
 - Dock Tactical `Attaquer / Fin du tour / Capacité`.
 - Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17`.
 - SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
 - Validation utilisateur : « parfait ras tout fonctionne très bien ».
-- Ce jalon reste séparé des lots combat tant que le coordinateur n’a pas décidé de son intégration.
+- Toute intégration Chrome/PWA doit repasser la sentinelle dock.
 
 ### Production sûre
 - `main` : V16.78.114.11.
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
 
-## 6. Compte rendu obligatoire d’un agent
+## 6. Ordre d’intégration décidé
+
+Ordre obligatoire actuel :
+
+1. Combat 4K — fermé vert ;
+2. intégration Talent post-4K — chantier courant ;
+3. durcissement preview/PWA Chrome — lot séparé après checkpoint Talent ;
+4. reprise Combat 4L `ambush` uniquement.
+
+Ne pas fusionner les anciennes branches agents en bloc. Reporter uniquement les changements caractérisés et compatibles sur la dernière base verte directrice.
+
+## 7. Compte rendu obligatoire d’un agent
 
 À la fin de son lot, un agent doit fournir :
 - cause exacte ;
@@ -133,7 +145,7 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu’il n’entre pas 
 
 Le coordinateur ne considère jamais un travail intégré simplement parce qu’un agent dit qu’il est terminé : il vérifie le dépôt et les tests.
 
-## 7. Règle de succession
+## 8. Règle de succession
 
 Quand un nouveau fil devient directeur, l’ancien fil ne doit plus lancer de nouveau chantier concurrent.
 

@@ -2,90 +2,82 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 4C : retrait du wrapper de démarrage Core 3.03
+## Chantier courant — migration combat, lot 4D : détection Core 2.11 vers Bridge canonique
 
-- Branche : `work/gensrpg-combat-callsite-migration-4c-2026-09-17`
-- Base exacte / lot 4B vert : `9c1b939ed7e7b34108882be933a99f2151529c79`
-- Commit runtime lot 4C : `1819f012e0509648015f2af695905078168210a1`
-- SHA validé avant figer le mémo : `89b461bd6a6392cad2c7c6d54924b87b60e53c55`
-- Checkpoint vert visé : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17`
+- Branche : `work/gensrpg-combat-callsite-migration-4d-2026-09-17`
+- Base exacte / checkpoint vert lot 4C : `8ce140c924d259091a6c9838b82d669256a104f3`
+- Commit runtime lot 4D : `308fd5ac8e511faa8f285cb6dcc69c5e960d9270`
+- Workflow temporaire restauré en lecture seule : `399024ed68198220ed36dde6474f0bfa11b3b0f5`
+- Inventaire 4D aligné : `dc200StartCombat` 7 → 5
+- Checkpoint vert visé : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
-## Résultats conservés
+## Résultat du lot 4D
 
-### Lot 4A
+Core 2.11 a été caractérisé avant modification. Son comportement de détection reste propriétaire uniquement de son bookkeeping local :
 
-Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — passent directement par le contrat canonique `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` via un helper local sans règle métier.
+- garde `enemyDetection` / `detectBusy211` conservée ;
+- filtre spatial `DungeonSpatial313.sameView()` conservé ;
+- déduplication et persistance `dc211EnemyDetection` conservées ;
+- sélection exacte des `enemyIds` conservée ;
+- délai de déclenchement 80 ms conservé ;
+- libération du verrou à 250 ms conservée.
 
-Checkpoint vert 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
+Seule l'entrée finale du combat a été migrée :
 
-### Lot 4B
+`dc200StartCombat(ids,"detection")`
 
-Le script `#dungeonCore301Timeline`, déjà désactivé par `type="application/x-gensrpg-disabled"`, a été supprimé au lieu d'être modernisé. Le CSS historique voisin et Core 3.03 sont restés hors périmètre.
+devient :
 
-SHA vert de référence 4B : `9c1b939ed7e7b34108882be933a99f2151529c79`.
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:"detection",entry:"dc211EnemyDetection"})`
 
-### Lot 4C
+Le scope et les participants restent calculés par l'autorité V113 via le Bridge. Aucune logique V113 n'a été recopiée dans Core 2.11.
 
-Core 3.03 a été caractérisé avant modification. Le test permanent a d'abord été rouge exactement sur son wrapper `window.dc200StartCombat` tandis que les gardes précédents restaient verts.
+Le test permanent `tests/gens_core211_detection_direct_bridge_lot4d.test.cjs` protège explicitement ces invariants et est raccordé aux sentinelles architecture.
 
-Le Bridge Tactical est chargé après Core 3.03 par `RuntimeBootstrap` et réinstalle `rt.dc200StartCombat` comme adaptateur final vers `requestCombat()`. Le wrapper Core 3.03 était donc une reprise d'autorité historique immédiatement supplantée.
-
-Le lot retire uniquement ce petit wrapper :
-
-- état timeline `T` conservé ;
-- `init(force=false)` conservé ;
-- `advance()` conservé ;
-- `applyTurnUi()` conservé ;
-- IA / changements de tour conservés ;
-- `dungeonDebug303` conservé ;
-- détection / embuscade non modifiées ;
-- participants, résolution Tactical, XP et récompenses non modifiés.
-
-Le workflow progression temporaire utilisé pour écrire le gros `index.html` a été remis immédiatement à son blob canonique lecture seule `31c5043f8352b656f1d015bc4888332e738bf913`.
-
-Un garde historique du lot 4B exigeait encore la présence du wrapper Core 3.03. Il a été corrigé uniquement côté test pour rester borné au retrait du Core 3.01 désactivé. Aucun runtime n'a été modifié par cette correction. Le SHA `89b461bd6a6392cad2c7c6d54924b87b60e53c55` a ensuite passé architecture, Chromium/preview et Firefox.
-
-## Dette combat après lot 4C
+## Dette combat après lot 4D
 
 Inventaire attendu dans `index.html` :
 
-- `dc200StartCombat` : 7 ;
+- `dc200StartCombat` : 5 ;
 - `openDungeonCombatSetup` : 1 — définition historique rollback uniquement ;
 - `launchCombat200` : 2 ;
 - `startCombat` : 6.
 
-Les 7 références `dc200StartCombat` restantes appartiennent désormais aux chemins Core 2.x : alias historique et détection / embuscade. Aucun de ces chemins gameplay-critiques ne doit être modifié sans caractérisation dédiée de ses `enemyIds`, `reason`, scope V113 et comportement d'embuscade.
+Les cinq références `dc200StartCombat` restantes doivent être caractérisées par rôle avant migration. Ne pas mélanger alias, détection restante et embuscade dans un même lot.
 
-## Tests permanents lot 4C
+## Discipline charte appliquée
 
-- `tests/gens_core303_start_wrapper_retirement_lot4c.test.cjs` ;
-- inventaire combat mis à jour à 7/1/2/6 ;
-- garde 4C raccordé aux sentinelles architecture ;
-- le test protège explicitement les responsabilités actives de Core 3.03 et l'autorité finale du Bridge ;
-- le garde 4B reste désormais strictement limité au Core 3.01 désactivé.
+- aucun changement sur `main` ;
+- lot homogène et borné ;
+- caractérisation/test avant modification ;
+- aucune nouvelle couche de réparation ;
+- aucun observer, timer de réparation ou wrapper ajouté ;
+- `enemyIds` et `reason:"detection"` préservés ;
+- sélection V113 centralisée dans le Bridge ;
+- workflow temporaire d'écriture du gros `index.html` retiré immédiatement après usage ;
+- `.github/workflows/gensrpg-progression-characterization.yml` est revenu à son blob canonique lecture seule `31c5043f8352b656f1d015bc4888332e738bf913`.
 
-## Validation finale 4C
+## Validation 4D à figer
 
-Sur le SHA `89b461bd6a6392cad2c7c6d54924b87b60e53c55` :
+Le runtime 4D et son garde spécifique sont en place. Le premier passage des sentinelles a atteint le garde d'inventaire et a échoué uniquement parce qu'il attendait encore la dette précédente `dc200StartCombat:7` alors que le runtime contient désormais 5 occurrences. Le garde et la documentation sont maintenant alignés à 5.
 
-1. test spécifique 4C : vert ;
-2. job architecture : vert — run `35178989671` ;
-3. Chromium / preview : vert dans le job `browser-sentinel` du même run ;
-4. Firefox : vert — run `35178989684` ;
-5. périmètre runtime inchangé après la correction du garde 4B ;
-6. `.github/workflows/gensrpg-progression-characterization.yml` reste hors du diff net final ;
-7. `main` reste intact.
+Avant création du checkpoint vert 4D, exiger sur le SHA final :
 
-Le présent commit ne doit modifier que ce mémo. Après son propre passage vert des mêmes sentinelles, figer exactement son SHA dans `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17`.
+1. sentinelles architecture vertes ;
+2. Chromium / preview verts ;
+3. Firefox vert ;
+4. workflow progression toujours lecture seule ;
+5. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
 ## Ce qui n'a pas été touché
 
-- détection / portée V113 ;
 - embuscade ;
-- responsabilités timeline/IA actives Core 3.03 ;
+- autres chemins de détection Core 2.x ;
 - `startCombat` et `launchCombat200` ;
+- résolution Tactical ;
+- timeline/IA Core 3.03 ;
 - participants et règles de combat ;
 - stats, XP, récompenses et loot ;
 - déplacement ;
@@ -95,19 +87,18 @@ Le présent commit ne doit modifier que ce mémo. Après son propre passage vert
 
 ## Observations utilisateur à conserver hors périmètre
 
-Ces points sont signalés mais ne doivent pas être corrigés à l'aveugle pendant la migration combat :
+1. Les commandes flottantes de combat `Attaque / Fin de tour / Capacité` ont disparu de l'interface.
+2. Lors d'une ouverture de fiche personnage, des éléments de `Talent` sont apparus brièvement puis ont disparu ; non reproduit au second essai.
 
-1. Les commandes flottantes de combat `Attaque / Fin de tour / Capacité` ont complètement disparu de l'interface. Elles ne sont pas simplement devenues non flottantes : elles ne sont plus présentes.
-2. Lors d'une ouverture de fiche personnage, des éléments de `Talent` sont apparus brièvement puis ont disparu. Le phénomène n'a pas été reproduit au second essai.
+Ne pas corriger ces anomalies pendant la migration combat sans diagnostic propriétaire conforme à la charte.
 
-Pour ces deux anomalies, appliquer la charte : identifier d'abord le propriétaire et le premier changement responsable ; vérifier rendu/couches/CSS/autorités avant toute réparation ; aucun observer, timer ou rerender correctif ajouté.
+## Prochaine étape après checkpoint vert 4D
 
-## Prochaine étape après checkpoint vert 4C
-
-Caractériser le plus petit groupe homogène parmi les 7 références Core 2.x restantes. Ne pas mélanger alias, détection et embuscade. Les chemins détection/embuscade doivent conserver la sélection V113 et leur raison métier avant toute migration.
+Caractériser le plus petit groupe homogène parmi les cinq références `dc200StartCombat` restantes. Préserver strictement `enemyIds`, `reason`, portée/scope V113 et comportement d'embuscade. Aucun changement de runtime ne commence avant le checkpoint vert 4D.
 
 ## Jalons verts précédents
 
+- Lot 4C : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17` — `8ce140c924d259091a6c9838b82d669256a104f3`.
 - Lot 4B : `9c1b939ed7e7b34108882be933a99f2151529c79`.
 - Lot 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
 - Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.

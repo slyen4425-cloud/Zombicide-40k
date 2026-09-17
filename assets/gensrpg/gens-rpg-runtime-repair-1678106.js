@@ -165,5 +165,5 @@
     return installed;
   }
   function status(rt=R){return {installed,dungeon:isDungeonContext(rt),wrapped:RENDER_NAMES.filter(n=>!!rt?.[n]?.__gensRpg106RealRuntime),last:rt?.__gensRpg106LastIntercept||null}}
-  return {VERSION,APP_VERSION,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,currentBattle,openTactical,install,status};
+  return {VERSION,APP_VERSION,isDungeonContext,isBuiltinDungeon,dedupeProfiles,repairStoredProfiles,wrapSaveProfiles,wrapRenderers,closeLegacyCombat,currentBattle,openTactical,install,status};
 });

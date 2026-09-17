@@ -5,55 +5,23 @@ on:
     branches:
       - 'work/gensrpg-progression-victory-reconnect-*'
       - 'work/gensrpg-xp-portrait-cleanfix-*'
-      - 'work/gensrpg-combat-callsite-migration-4d-2026-09-17'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   progression-characterization:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-      - name: Apply exact Core 2.11 detection entry migration
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
-          old='''  if(ex.enemyDetectionAutoCombat!==false&&typeof dc200StartCombat==="function"){
-    const ids=[...new Set(spotted.flatMap(s=>s.by.map(z=>String(z.e.id))))];
-    detectBusy211=true;
-    setTimeout(()=>{try{dc200StartCombat(ids,"detection")}finally{setTimeout(()=>detectBusy211=false,250)}},80)
-  }'''
-          new='''  if(ex.enemyDetectionAutoCombat!==false&&typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
-    const ids=[...new Set(spotted.flatMap(s=>s.by.map(z=>String(z.e.id))))];
-    detectBusy211=true;
-    setTimeout(()=>{try{window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:"detection",entry:"dc211EnemyDetection"})}finally{setTimeout(()=>detectBusy211=false,250)}},80)
-  }'''
-          count=s.count(old)
-          if count==0:
-            if s.count(new)==1:
-              print('Core 2.11 migration already applied; no-op')
-              raise SystemExit(0)
-            raise SystemExit('exact Core 2.11 source block not found')
-          if count!=1:
-            raise SystemExit(f'expected exactly one Core 2.11 source block, found {count}')
-          out=s.replace(old,new,1)
-          if out.count('dc200StartCombat')!=s.count('dc200StartCombat')-2:
-            raise SystemExit('unexpected dc200StartCombat count delta')
-          p.write_text(out)
-          print('Core 2.11 direct Bridge migration applied')
-          PY
-          if git diff --quiet -- index.html; then
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          git commit -m 'refactor: route Core 2.11 detection through tactical Bridge'
-          git push origin HEAD:${{ github.ref_name }}
+      - name: Validate native manual XP runtime
+        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
+      - name: Characterize native progression and rewards
+        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
+      - name: Verify Tactical victory rewards summary
+        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
+      - name: Execute Tactical victory to Dungeon XP and loot
+        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
+      - name: Characterize manual level authority
+        run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs

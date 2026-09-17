@@ -19,11 +19,9 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     await page.goto(`http://127.0.0.1:${port}/tests/fixtures/tactical-dock-render-v11411.html`,{waitUntil:'load'});
     await page.waitForFunction(()=>window.__dockHarnessReady===true);
     const result=await page.evaluate(async()=>{
-      const ui=window.GensRpgTacticalCombatV2Ui,v111=window.GensRpgTacticalRuntimeFixes1678111;
-      if(!ui||!v111)throw new Error('Tactical UI/V111 missing');
-      ui.open(window.__dockBattleInput);
-      await new Promise(r=>setTimeout(r,80));
-      const first=document.querySelector('[data-v111-dock]');
+      const ui=window.GensRpgTacticalCombatV2Ui,v111=window.GensRpgTacticalRuntimeFixes1678111,bridge=window.GensRpgTacticalCombatV2Bridge;
+      if(!ui||!v111||!bridge)throw new Error('Tactical UI/V111/Bridge missing');
+      const sleep=ms=>new Promise(r=>setTimeout(r,ms));
       const snapshot=dock=>dock?{
         count:document.querySelectorAll('[data-v111-dock]').length,
         text:dock.textContent.replace(/\s+/g,' ').trim(),
@@ -32,11 +30,37 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
         endDisabled:!!dock.querySelector('[data-v111-end]')?.disabled,
         abilityPresent:!!dock.querySelector('[data-v111-ability]')
       }:null;
-      const before=snapshot(first);
+
+      // Historical canonical render lifecycle contract.
+      ui.open(window.__dockBattleInput);
+      await sleep(80);
+      const before=snapshot(document.querySelector('[data-v111-dock]'));
       document.querySelector('.gtv2Overlay [data-roll-rule]')?.click();
-      await new Promise(r=>setTimeout(r,50));
+      await sleep(50);
       const after=snapshot(document.querySelector('[data-v111-dock]'));
-      return {before,after,observerTargets:window.__globalObserverTargets.slice(),status:v111.status?.()||null};
+      ui.close(false);v111.ensureDock(window);await sleep(30);
+
+      // Regression reported manually: repeat several combats with a stale high-z legacy combat host armed each time.
+      const repeats=[];
+      for(let seq=1;seq<=3;seq++){
+        const armed=window.__armLegacyCombatLayer();
+        const preTop=document.elementFromPoint(206,850);
+        const opened=window.__openDockViaBridge(seq);
+        await sleep(90);
+        const dock=document.querySelector('[data-v111-dock]'),modal=document.getElementById('dungeonCombatModal'),rect=dock?.getBoundingClientRect?.();
+        const top=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+        repeats.push({
+          seq,armed,openedOk:opened?.ok===true,
+          legacyCoveredBefore:preTop===modal||!!preTop?.closest?.('#dungeonCombatModal'),
+          legacyDisplayAfter:getComputedStyle(modal).display,
+          legacyActiveAfter:!!window.dungeonCombatActive,
+          bodyOverflow:document.body.style.overflow,
+          dock:snapshot(dock),
+          dockOwnsPoint:!!top?.closest?.('[data-v111-dock]')
+        });
+        window.__closeDockBattle();v111.ensureDock(window);await sleep(30);
+      }
+      return {before,after,repeats,observerTargets:window.__globalObserverTargets.slice(),status:v111.status?.()||null};
     });
     assert.ok(result.before,'dock must exist after the real local Tactical open/render path');
     assert.equal(result.before.count,1,'exactly one floating dock must exist');
@@ -50,10 +74,23 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     assert.ok(result.after,'dock must survive a true local Tactical rerender');
     assert.equal(result.after.count,1,'rerender must not duplicate the floating dock');
     assert.match(result.after.text,/Attaquer/);assert.match(result.after.text,/Fin du tour/);assert.match(result.after.text,/Capacité/);
+    assert.equal(result.repeats.length,3);
+    for(const row of result.repeats){
+      assert.equal(row.armed,'block',`combat ${row.seq}: legacy layer must be physically armed before the Bridge request`);
+      assert.equal(row.legacyCoveredBefore,true,`combat ${row.seq}: fixture must prove the high-z legacy host can cover the Dock area`);
+      assert.equal(row.openedOk,true,`combat ${row.seq}: direct Bridge request must open Tactical`);
+      assert.equal(row.legacyDisplayAfter,'none',`combat ${row.seq}: Bridge transition must retire the legacy combat host`);
+      assert.equal(row.legacyActiveAfter,false,`combat ${row.seq}: legacy combat active flag must be cleared`);
+      assert.equal(row.bodyOverflow,'hidden',`combat ${row.seq}: Tactical scroll lock must be restored after legacy cleanup`);
+      assert.ok(row.dock,`combat ${row.seq}: floating Dock must exist`);
+      assert.equal(row.dock.count,1,`combat ${row.seq}: repeated opens must not duplicate the Dock`);
+      assert.notEqual(row.dock.display,'none',`combat ${row.seq}: Dock must be visible on the hero turn`);
+      assert.equal(row.dockOwnsPoint,true,`combat ${row.seq}: hit-testing at the Dock center must resolve to the Dock, not a stale overlay`);
+    }
     assert.equal(result.observerTargets.some(x=>x==='body'||x==='html'),false,'dock restoration must not install a global body/html MutationObserver');
     assert.equal(result.status?.uiRenderHooked,true,'V111 must report the canonical render lifecycle hook as installed');
     assert.deepEqual(errors,[],'Tactical dock browser console/page errors');
-    console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,observerTargets:result.observerTargets,status:result.status}));
+    console.log(JSON.stringify({scenario:'V114.11 Tactical dock canonical render + repeated legacy-layer retirement',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,repeats:result.repeats,observerTargets:result.observerTargets,status:result.status}));
   }finally{
     await context.close();
     await browser.close();

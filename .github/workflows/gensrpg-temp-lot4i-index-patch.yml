@@ -1,0 +1,49 @@
+name: TEMP GenSrpG lot 4I index patch
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-combat-callsite-migration-4i-2026-09-17'
+    paths:
+      - '.github/workflows/gensrpg-temp-lot4i-index-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact 4I branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-combat-callsite-migration-4i-2026-09-17
+
+      - name: Apply exact stealth-failure owner patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="const ids=liveEnemies().map(e=>String(e.id));const m=ensureModal();m.classList.remove('open');if(ids.length)startCombat(ids,'stealth_fail');else render()"
+          new="const enemies=liveEnemies(),ids=enemies.map(e=>String(e.id));const m=ensureModal();m.classList.remove('open');if(ids.length){const names=enemies.map(e=>esc(enemyName(e))).join(', ');modal('🥷 REPÉRAGE ÉCHOUÉ','<strong>'+esc(heroName(activeHero(x)))+' est détecté.</strong><br><br>'+names+(enemies.length>1?' attaquent et engagent le combat.':' attaque et engage le combat.'),()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:'stealth_fail',entry:'dc200StealthFailure'}))}else render()"
+          count=s.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one Runtime 2.00 stealth callsite, found {count}')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+      - name: Verify surgical diff
+        run: |
+          git diff --check
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = "index.html"
+          grep -F "entry:'dc200StealthFailure'" index.html
+
+      - name: Commit exact owner patch
+        run: |
+          git config user.name "slyen4425-cloud"
+          git config user.email "slyen4425@gmail.com"
+          git add index.html
+          git commit -m "fix: route Runtime 2.00 stealth failure through Tactical Bridge"
+          git push origin HEAD:work/gensrpg-combat-callsite-migration-4i-2026-09-17

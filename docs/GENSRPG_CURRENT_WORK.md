@@ -2,121 +2,158 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — fermeture Combat 4M `cell` Runtime 2.00
+## Chantier courant — régression Dock Tactical sur combats répétés
 
 - Fil directeur : **COORDINATEUR actif**.
-- Branche : `work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17`.
-- Base exacte : checkpoint Combat 4L vert `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
-- Checkpoint de base : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17`.
+- Branche : `work/gensrpg-tactical-dock-repeat-layer-diagnostic-2026-09-17`.
+- Base exacte : checkpoint Combat 4M vert `402c66efa3f129d3719b8ce74b0f0dcd78f7bace`.
+- Checkpoint de base : `checkpoint/gensrpg-combat-callsite-migration-4m-green-2026-09-17`.
 - Production sûre `main` : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
-- Périmètre 4M : **`cell` uniquement**.
+- Périmètre du lot : **Dock flottant Tactical + conflit de couche legacy lors des entrées directes par le Bridge uniquement**.
 
-## Chaîne directrice verte avant 4M
+## Chaîne directrice verte avant ce lot
 
 - Combat 4K : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` — `c672726b69aa5895d252e2f31084c20740bcc699`.
 - Talent post-4K : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17` — `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
 - Preview/PWA post-Talent : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` — `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
 - Dock Tactical post-PWA : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17` — `1cff0ec5628f79f8cc1bb556fd6bd2f14b691d72`.
 - Combat 4L `ambush` : `checkpoint/gensrpg-combat-callsite-migration-4l-green-2026-09-17` — `45bbca1c1f146732f4ae366c2ab74b9ec9263b2b`.
+- Combat 4M `cell` : `checkpoint/gensrpg-combat-callsite-migration-4m-green-2026-09-17` — `402c66efa3f129d3719b8ce74b0f0dcd78f7bace`.
 
 Le jalon Dock reste protégé : l'UI Tactical canonique expose `onAfterRender()` et V111 s'y abonne sans wrapper `render()`, sans `MutationObserver` global et sans retry de réparation.
 
-## Combat 4M — caractérisation avant correction
+## Signalement utilisateur
 
-L'ancien callsite Runtime 2.00 était :
+Après plusieurs combats sur le checkpoint 4M, le Dock flottant `Attaquer / Fin du tour / Capacité` pouvait sembler absent de façon intermittente. Le signalement demandait explicitement de vérifier la profondeur d'affichage avant toute modification fonctionnelle.
 
-`startCombat([String(target.id)],'cell')`
+Conformément à la charte, l'audit Phase 1 a été suspendu et une branche corrective dédiée a été ouverte depuis le checkpoint 4M exact.
 
-La caractérisation a établi que le propriétaire Dungeon devait conserver avant l'entrée Tactical :
+## Caractérisation avant correction
 
-- la cible exacte sur la case ;
-- le filtrage par `liveEnemies()` ;
-- les renforts calculés par `nearbyInterveners()` ;
-- les probabilités réellement présentes dans ce chemin : **65 % à distance Manhattan 1, 30 % à distance 2, 0 % au-delà** ;
-- la déduplication cible/renforts ;
-- la popup `⚔️ RENFORTS ENNEMIS` lorsqu'au moins un renfort rejoint le combat ;
-- l'ensemble final d'`enemyIds` transmis au combat.
+Le Dock V111 a un `z-index` de `31850`.
 
-Important : contrairement à une ancienne hypothèse documentaire, ce chemin Runtime 2.00 ne possède pas de `reinforcementRange` configurable. Le lot 4M fige le comportement réel et n'invente aucun réglage.
+Les couches Tactical canoniques restent en dessous :
+- overlay Tactical principal : `30000` ;
+- fenêtres/détails Tactical : environ `31500`.
 
-Test permanent : `tests/gens_core200_cell_entry_characterization_lot4m.test.cjs`.
+Le problème n'était donc pas un z-index insuffisant face au Tactical lui-même.
 
-Run de caractérisation dédié : `35260234398` — **success**.
+En revanche, le shell legacy Dungeon conserve des couches nettement supérieures :
+- `#dungeonCombatModal` : `100900` ;
+- anciens modals de dés : `101500` ;
+- d'autres couches legacy sont également au-dessus du Dock.
 
-## Combat 4M — risque identifié et contrat cible
+Une couche legacy combat restée ouverte peut donc recouvrir physiquement le Dock alors que celui-ci existe bien dans le DOM.
 
-`reason:'cell'` n'est pas une raison de détection V113. Cependant `V113.selectCombatants()` peut retourner d'autres ennemis visibles du scope que ceux déjà sélectionnés par Dungeon.
+Test permanent : `tests/gens_tactical_dock_legacy_layer_characterization_v11411.test.cjs`.
 
-Une migration mécanique du callsite aurait donc pu élargir le combat à un ennemi que le tirage Dungeon n'avait pas retenu comme renfort.
+## Cause exacte
 
-Le contrat retenu sépare les propriétaires :
+`assets/gensrpg/gens-rpg-runtime-repair-1678106.js` possède déjà le propriétaire historique de fermeture de l'ancien combat : `closeLegacyCombat(rt)`.
 
-- **Dungeon** reste propriétaire de la cible, du tirage des renforts et de la popup ;
-- **V113/Tactical** reste propriétaire du scope et des héros participants ;
-- le Bridge peut uniquement **réduire** la sélection ennemie de V113 aux `enemyIds` explicitement préparés par Dungeon lorsque `limitEnemyIdsToRequest:true` est demandé.
+L'ancien chemin d'interception par renderer V106 faisait :
 
-Le test cible a été posé rouge avant correction : run `35260392523`.
+1. ouverture Tactical ;
+2. `closeLegacyCombat(rt)` ;
+3. nettoyage du host legacy.
 
-Test permanent : `tests/gens_core200_cell_bridge_contract_lot4m.test.cjs`.
+Après les migrations 4K/4L/4M, plusieurs entrées Dungeon passent directement par `GensRpgTacticalCombatV2Bridge.requestCombat(...)`. Ce chemin direct ouvrait le Tactical mais ne réutilisait pas `closeLegacyCombat()`.
 
-## Combat 4M — correction appliquée
+La migration n'avait donc pas cassé le renderer du Dock ; elle avait contourné une étape de transition qui neutralisait une couche legacy à z-index supérieur.
 
-Runtime 2.00 délègue désormais le bouton `cell` à un helper local `startCellCombat(target,x)` qui conserve la préparation Dungeon, puis appelle :
+## Preuve RED avant correction
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true})`
+Un test cible permanent a été ajouté :
 
-Dans le Bridge, `V113.selectCombatants()` reste toujours appelé. Le flag `limitEnemyIdsToRequest:true` ne remplace pas V113 : il intersecte seulement ses `enemyIds` avec la liste déjà décidée par Dungeon.
+`tests/gens_tactical_bridge_legacy_layer_target_v11411.test.cjs`
 
-Le vieux traitement `cell` est retiré de `startCombat()` afin d'éviter deux propriétaires actifs de la préparation des renforts.
+Il exige qu'une entrée directe par le Bridge :
+- ouvre le Tactical ;
+- réutilise le nettoyage V106 exactement une fois ;
+- ferme le host legacy immédiatement après l'ouverture Tactical ;
+- neutralise `dungeonCombatActive`.
 
-Aucun observer global, timer de réparation, wrapper de rendu ou nouvelle autorité combat n'a été ajouté.
+Run RED attendu avant correction : `35266713487` sur `4ea3ff2f1643168edce0603765eda8c09a9ab33c`.
 
-## Inventaire après 4M
+Dans ce run :
+- contrat source Dock : success ;
+- caractérisation des couches : success ;
+- contrat de nettoyage Bridge : failure attendue ;
+- navigateurs non lancés car le contrat cible bloquait la suite.
 
-Inventaire attendu dans `index.html` :
+## Correction appliquée
 
-- `dc200StartCombat` : 1 — alias historique caractérisé ;
-- `openDungeonCombatSetup` : 1 — fallback historique capturé ;
-- `launchCombat200` : 2 — fallback historique caractérisé ;
-- `startCombat` : 2 — fonction historique + alias, **aucun callsite Dungeon actif restant**.
+Aucun z-index du Dock n'a été augmenté.
 
-Le but n'est pas de forcer ces compteurs à zéro : les références restantes sont des contrats de compatibilité déjà caractérisés et leur retrait nécessitera un lot d'extraction séparé.
+Deux changements runtime seulement :
 
-## Validation technique 4M
+1. `gens-rpg-runtime-repair-1678106.js` expose son propriétaire existant `closeLegacyCombat` dans son API ;
+2. `gens-rpg-tactical-combat-v2-bridge.js` réutilise ce propriétaire après une ouverture Tactical directe, puis réapplique le verrou de scroll Tactical.
 
-Candidat technique exact : `10a64990d6eeac101cab8c6484ca0465cb4b2d67`.
+Le Bridge ne duplique aucune manipulation DOM de fermeture. Le chemin historique `runtime-renderer:` est explicitement exclu de cet appel car le wrapper V106 réalise déjà le même nettoyage après le retour du Bridge ; cela évite une double fermeture.
 
-Deux sentinelles historiques ont été adaptées sans modification runtime car elles vérifiaient littéralement l'ancienne expression `prepared.options||{}` au lieu du contrat V113. Elles vérifient maintenant le vrai invariant : `preparedOptions` est transmis à `V113.selectCombatants()`, puis le filtrage ennemi 4M ne peut que réduire la sélection lorsque le flag explicite est présent.
+Aucun observer, timer, retry, wrapper de rendu ou nouveau système de couche n'a été ajouté.
 
-CI technique sur `10a64990...` :
+## Sentinelle navigateur renforcée
 
-- Combat 4M dédié — **success**, run `35264148227` ;
-- architecture + Chromium/preview — **success**, run `35264148205` ;
-- Firefox général — **success**, run `35264148110` ;
-- Dock contrat + Chromium + Firefox — **success**, run `35264148122`.
+Le test `tests/gens_tactical_dock_browser_v11411.test.cjs` conserve son contrat historique et ajoute un scénario mobile répété :
 
-## Fermeture 4M
+- trois combats successifs ;
+- avant chaque combat, un ancien `#dungeonCombatModal` est volontairement armé à `z-index:100900` ;
+- un hit-test prouve qu'il couvre réellement la zone du Dock avant la transition ;
+- le combat est ouvert par le Bridge direct ;
+- le test vérifie ensuite que le host legacy est masqué, que `dungeonCombatActive=false`, que le Dock existe une seule fois et reste visible ;
+- `document.elementFromPoint()` au centre du Dock doit résoudre vers le Dock ou l'un de ses enfants, ce qui prouve qu'aucun overlay legacy ne le recouvre ;
+- Chromium et Firefox exécutent ce scénario.
 
-Les présents documents créent un nouveau SHA final documentaire. Il doit être revalidé intégralement avant checkpoint.
+Fixture : `tests/fixtures/tactical-dock-render-v11411.html`.
+
+## Validation technique
+
+Candidat technique exact : `456106fe37798e59fac413d9d67a9b9503d9e909`.
+
+CI sur ce SHA :
+- Dock dédié, contrat + Chromium + Firefox — **success**, run `35267218985` ;
+- architecture + Chromium/preview — **success**, run `35267218727` ;
+- Firefox général — **success**, run `35267218722`.
+
+Diff net depuis 4M :
+- 2 fichiers runtime modifiés de façon ciblée ;
+- workflow Dock ;
+- 2 tests permanents dédiés ;
+- fixture et test navigateur renforcés ;
+- aucun changement de `index.html` ;
+- aucun changement du z-index du Dock ;
+- aucune modification de la préparation 4M `cell`, des règles de combat, des dégâts, de la timeline ou du déplacement.
+
+## Fermeture du lot
+
+Les présents documents créent un nouveau SHA documentaire. Ce SHA doit repasser les validations obligatoires avant création du checkpoint.
 
 Checkpoint cible :
 
-`checkpoint/gensrpg-combat-callsite-migration-4m-green-2026-09-17`
+`checkpoint/gensrpg-tactical-dock-legacy-layer-green-2026-09-17`
 
 Avant création :
-
-1. revalider le SHA documentaire exact par Combat 4M, architecture + Chromium/preview, Firefox général et Dock ;
-2. vérifier le diff net depuis le checkpoint 4L `45bbca1c...` ;
+1. revalider le SHA documentaire exact par Dock, architecture + Chromium/preview et Firefox général ;
+2. vérifier le diff depuis `402c66efa3f129d3719b8ce74b0f0dcd78f7bace` ;
 3. vérifier `main` = `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
 4. créer le checkpoint sur le SHA final exact.
 
-## Suite après checkpoint 4M
+## Suite après checkpoint
 
-Ne pas supprimer mécaniquement `startCombat`, `dc200StartCombat`, `launchCombat200` ou `openDungeonCombatSetup` uniquement pour faire tomber les compteurs. Les callsites Dungeon actifs ont quitté `startCombat`, mais les fallbacks historiques restants sont protégés pour les contextes non-Dungeon.
+Reprendre l'audit Phase 1 depuis le checkpoint vert du Dock corrigé. Ne pas ouvrir de nouveau lot runtime tant que la matrice des sentinelles n'a pas identifié le plus petit manque suivant.
 
-Le prochain lot doit être choisi depuis le checkpoint 4M vert en relisant la charte, la roadmap et l'inventaire. Toute extraction d'un fallback historique doit d'abord caractériser son contrat hors Dungeon.
+État de l'audit déjà établi avant interruption :
+- Tactical combat : fortement couvert ;
+- déplacement Dungeon : couvert par `dungeon_runtime_regression.test.cjs` ;
+- D6/D100 : couverts par les sentinelles performance/Tactical ;
+- Save & Quit : navigation après quit couverte, mais vraie reprise complète encore à distinguer ;
+- Survie : isolation couverte, lancement navigateur complet à distinguer ;
+- PvP : comportement actuel « À VENIR » à préserver, ne pas inventer un moteur ;
+- Capture : gameplay réel mais absence de sentinelle dédiée clairement identifiée à confirmer comme candidat Phase 1.
 
 ## Règle permanente de continuité
 
-À chaque chantier : lire la charte puis ce fichier, partir d'un checkpoint vert exact, branche dédiée, caractériser avant correction, petit lot homogène, aucun mécanisme de réparation, tests permanents, checkpoint vert sur le SHA exact validé, puis mettre les documents de reprise à jour avant le chantier suivant.
+À chaque chantier : lire la charte puis ce fichier, partir d'un checkpoint vert exact, branche dédiée, caractériser avant correction, petit lot homogène, aucun mécanisme de réparation ajouté pour masquer le problème, tests permanents, checkpoint vert sur le SHA exact validé, puis mettre les documents de reprise à jour avant le chantier suivant.

@@ -33,4 +33,10 @@ require('./gens_core200_startcombat_characterization_lot4i.test.cjs');
 // original guards, live-enemy source, enemyIds and reason while cell/ambush stay separate.
 require('./gens_core200_manual_entry_characterization_lot4k.test.cjs');
 
+// Lot 4L characterization: Runtime 2.00 ambush currently asks for the complete live
+// enemy set, while requestCombat(reason:'ambush') activates V113 detection preparation
+// and can narrow that set. Keep this proof coupled to the inventory until a deliberate
+// compatibility contract is introduced; never replace the callsite mechanically.
+require('./gens_core200_ambush_entry_characterization_lot4l.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

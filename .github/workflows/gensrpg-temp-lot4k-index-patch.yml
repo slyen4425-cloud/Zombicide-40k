@@ -1,0 +1,50 @@
+name: TEMP GenSrpG lot 4K index patch
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17'
+    paths:
+      - '.github/workflows/gensrpg-temp-lot4k-index-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact 4K branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17
+
+      - name: Apply exact manual-entry owner patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'manual');"
+          new="b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'});"
+          count=s.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one Runtime 2.00 manual callsite, found {count}')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+      - name: Verify surgical diff
+        run: |
+          git diff --check
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = "index.html"
+          grep -F "entry:'dc200ManualAction'" index.html
+          ! grep -F "b.onclick=()=>startCombat(live.map(e=>String(e.id)),'manual');" index.html
+
+      - name: Commit exact owner patch
+        run: |
+          git config user.name "slyen4425-cloud"
+          git config user.email "slyen4425@gmail.com"
+          git add index.html
+          git commit -m "fix: route Runtime 2.00 manual combat through Tactical Bridge"
+          git push origin HEAD:work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17

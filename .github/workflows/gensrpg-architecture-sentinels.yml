@@ -202,6 +202,9 @@ jobs:
       - name: Vérifier la migration directe de la détection Core 2.09
         run: node tests/gens_core209_detection_direct_bridge_lot4e.test.cjs
 
+      - name: Vérifier la migration directe de l'embuscade Core 2.09
+        run: node tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

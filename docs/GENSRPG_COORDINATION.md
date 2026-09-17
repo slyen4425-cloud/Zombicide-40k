@@ -69,46 +69,53 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu’il n’entre pas 
 ## 5. État de coordination — 2026-09-17
 
 ### Fil directeur
-- Rôle : **COORDINATEUR actif**
-- Chantier directeur : fermeture du lot combat 4J, cohérence des ennemis contournés entre Runtime 2.00 et scope V113.
-- Branche : `work/gensrpg-combat-callsite-migration-4j-bypass-scope-clean-2026-09-17`
-- Base : checkpoint vert 4I.
-- Checkpoint vert 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17`
-- SHA 4I : `b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`
-- Propriétaire verrouillé : sélection/détection des ennemis dans `GensRpgTacticalRuntimeAuthority1678113`.
-- Candidat runtime/tests 4J : `05837bce39e673334d4125b99b9171a6ebb4e867`, vert architecture + Chromium/preview + Firefox.
-- Checkpoint cible : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17` après revalidation du SHA final documentaire.
-- `startCombat` reste à 5 occurrences ; aucun callsite n'est modifié par 4J.
+- Rôle : **COORDINATEUR actif**.
+- Chantier directeur : fermeture du lot combat 4K, action manuelle Runtime 2.00.
+- Branche : `work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17`.
+- Base : checkpoint vert 4J.
+- Checkpoint vert 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17`.
+- SHA 4J : `b8f5b14f0651479165d35545f3a22db6df8d391f`.
+- Propriétaire verrouillé : entrée combat Dungeon Runtime 2.00 / Bridge autour du callsite `manual`.
+- Commit runtime 4K : `989f6f197c7e56dd62393bec8849cf5770d3d63b`.
+- Candidat technique 4K : `c6a9e5ac740b7aa1d18b298d4ec10441df4f1be3`, vert architecture + Chromium/preview + Firefox.
+- `startCombat` est passé de 5 à 4 occurrences : définition historique + alias + `cell` + `ambush`.
+- Checkpoint cible : `checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17` après revalidation du SHA final documentaire.
 
 ### Prochain lot directeur envisagé
-- Lot : 4K `manual` uniquement.
-- Ne pas démarrer avant checkpoint vert 4J.
-- L'ancienne branche `work/gensrpg-combat-callsite-migration-4k-manual-entry-2026-09-17` pointe sur l'ancien essai 4J divergent `64f104e3a435e31726be62a890affab15baa9bf6` et ne doit pas être utilisée comme base.
-- Le vrai 4K devra partir du SHA exact du checkpoint vert 4J final sur une branche propre.
-- `ambush` et `cell` restent hors périmètre de ce futur lot.
+- Lot : **4L `ambush` uniquement**.
+- Ne pas démarrer avant checkpoint vert 4K.
+- Créer une branche propre depuis le SHA exact du checkpoint vert 4K final.
+- Caractériser avant toute modification la sémantique Runtime 2.00 de `startCombat(...,'ambush')` et son interaction avec V113, qui classe `ambush` comme raison de détection.
+- Préserver source d'ennemis, héros source, scope, guards et comportement UI/contexte.
+- `cell` reste strictement hors périmètre de 4L à cause de sa logique spécifique de renforts/popup.
+- La définition historique et l'alias `dc200StartCombat` restent protégés tant que les fallbacks caractérisés 4G/4H en dépendent.
+
+### Branches historiques à ne pas reprendre
+- `work/gensrpg-combat-callsite-migration-4k-manual-entry-2026-09-17` pointe sur l'ancien essai 4J divergent `64f104e3a435e31726be62a890affab15baa9bf6` et ne doit pas servir de base.
+- Seule la branche propre `work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17` fait autorité pour 4K.
 
 ### Agent 1 — ancien travail Talent
-- Branche : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`
+- Branche : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`.
 - Mission : diagnostic/correction ciblée du flash/disparition Talent de la fiche héros.
 - Statut : annoncé terminé par l’utilisateur ; **non intégré** tant que branche, SHA, diff et tests n’ont pas été vérifiés par le coordinateur.
 
 ### Agent 1 — diagnostic Chrome actif
-- Branche : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`
-- Base : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
+- Branche : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`.
+- Base : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
 - Mission : diagnostiquer l’écran blanc/figé observé sous Chrome Android alors que le même jalon fonctionne sous Firefox.
 - Interdictions : aucun gameplay, aucun observer/timer/retry global, aucune modification du propriétaire combat directeur, aucun `main`.
 - Statut : séparé du fil directeur ; résultat à rapporter avant toute intégration.
 
 ### Jalon UI séparé validé utilisateur
-- Dock Tactical `Attaquer / Fin du tour / Capacité`
-- Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17`
-- SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
-- Validation utilisateur : « parfait ras tout fonctionne très bien »
+- Dock Tactical `Attaquer / Fin du tour / Capacité`.
+- Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17`.
+- SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
+- Validation utilisateur : « parfait ras tout fonctionne très bien ».
 - Ce jalon reste séparé des lots combat tant que le coordinateur n’a pas décidé de son intégration.
 
 ### Production sûre
-- `main` : V16.78.114.11
-- SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
+- `main` : V16.78.114.11.
+- SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - `main` reste gelé pendant la restructuration.
 
 ## 6. Compte rendu obligatoire d’un agent

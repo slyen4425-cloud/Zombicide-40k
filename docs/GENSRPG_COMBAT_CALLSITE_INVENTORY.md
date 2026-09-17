@@ -13,7 +13,7 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
-| `dc200StartCombat` | 3 | alias Core 2.x et embuscade Core 2.09 ; les boutons Core 2.01, les détections Core 2.09/2.11, la timeline Core 3.01 désactivée et le wrapper Core 3.03 ne l’utilisent plus |
+| `dc200StartCombat` | 1 | alias historique Core 2.x uniquement ; boutons, détections Core 2.09/2.11, embuscade Core 2.09, timeline Core 3.01 désactivée et wrapper Core 3.03 ne l’utilisent plus |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
 | `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` |
@@ -22,10 +22,9 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 ### A. Entrée Core 2.x (`dc200StartCombat` / `startCombat`)
 
-- alias historique `window.dc200StartCombat = startCombat` ;
-- déclenchement embuscade Core 2.09.
+Il ne reste plus qu’un alias historique `window.dc200StartCombat = startCombat`. Il doit être caractérisé séparément avant toute suppression ou modification. Ne pas le mélanger avec `startCombat` ou `launchCombat200`.
 
-Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D et la détection Core 2.09 depuis le lot 4E.
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, et l’embuscade Core 2.09 depuis le lot 4F.
 
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
@@ -40,63 +39,60 @@ Une seule définition historique reste pour rollback capturé par le Bridge. Auc
 
 Les deux boutons natifs `#dungeonCombatMenuBtn` et `#dungeonCombatSheetBtn` sont migrés directement vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` avec `reason: "manual-setup"`.
 
-Ce lot ne modifie ni détection, ni embuscade, ni `dc200StartCombat`, ni `startCombat`, ni `launchCombat200`.
-
 ## Migration validée — lot 2, Core 0.99 désactivé
 
-Le script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son unique ligne de fallback comportait deux occurrences textuelles de `openDungeonCombatSetup` (`typeof` + appel), ainsi que des wrappers `DungeonCore01`, un listener capture et un timer, sans appartenir au runtime actif.
+Le script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son fallback historique vers `openDungeonCombatSetup` n’appartient plus au runtime.
 
-Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 restent volontairement hors périmètre de ce lot.
+Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 sont restés hors périmètre.
 
-## Migration validée — lot 3, fallback Core 0.53
+## Migration validée — lot 3, ancien setup Dungeon
 
-Le chemin normal du bouton principal reste `dc030EngageCombat()`. Uniquement si cette entrée historique est absente, le fallback de Core 0.53 appelle maintenant `GensRpgTacticalCombatV2Bridge.requestCombat(window,{reason:"manual-setup",entry:"dc053MainActionFallback"})`. Les gardes `combatOn53()` et `coreCanAct53()` restent en amont.
-
-## Migration validée — lot 3, retrait des dépendances actives à `openDungeonCombatSetup`
-
-Les consommateurs actifs ne dépendent plus de l’ancien setup : Core 0.34 délègue à `Bridge.requestCombat`, l’embuscade conserve son chemin `dc030` et dispose d’un fallback Bridge explicite avec `reason: "embuscade"`, Core 0.45 ne wrappe plus l’ancien setup, et l’autorité Core 0.30 écrasée ainsi que la réinstallation Flow 171 sont retirées.
-
-Une unique définition historique de `openDungeonCombatSetup` reste dans le monolithe uniquement comme rollback capturé par le Bridge. Aucun chemin Dungeon actif ne l’appelle.
+Le fallback Core 0.53 et les consommateurs actifs ont été reconnectés au Bridge sans modifier les gardes métier. Une unique définition historique de `openDungeonCombatSetup` reste uniquement comme rollback capturé par le Bridge.
 
 ## Migration validée — lot 4A, boutons de rencontre Core 2.01
 
-Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — ne dépendent plus du global `dc200StartCombat`.
-
-Core 2.01 utilise un helper local sans état ni règle métier, `requestCombat201(enemyIds, reason)`, qui transmet uniquement les identifiants d’ennemis et la raison existante au contrat canonique `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`. Le mode positionnel reste contrôlé par `dc305PositionalGameplay()` et l’attaque positionnelle conserve la cible située sur la case du héros actif.
-
-Le diagnostic utilise `entry: "dc201EncounterPanel"`, afin qu’aucune référence textuelle à l’ancien adaptateur ne subsiste dans Core 2.01.
+Les commandes `ENGAGER LE COMBAT` et `ATTAQUER` passent par un helper local sans état, qui transmet uniquement `enemyIds` et `reason` au Bridge. Le mode positionnel et la cible sur case restent inchangés.
 
 ## Migration validée — lot 4B, timeline Core 3.01 désactivée
 
-Le script `#dungeonCore301Timeline`, déjà marqué `type="application/x-gensrpg-disabled"`, est supprimé au lieu d’être modernisé. Il contenait deux références à `dc200StartCombat` et n’appartenait pas au runtime actif.
-
-Le lot est volontairement limité au script : le CSS historique `#dungeonCore301TimelineCss` reste hors périmètre. Le wrapper actif `#dungeonCore303TimelineRootFix` a été caractérisé séparément au lot 4C.
-
-Ce lot ne modifie ni détection, ni embuscade, ni participants, ni résolution Tactical, ni `startCombat` / `launchCombat200`.
+Le script `#dungeonCore301Timeline`, déjà désactivé, est supprimé au lieu d’être modernisé. Son CSS historique reste hors périmètre.
 
 ## Migration validée — lot 4C, wrapper de démarrage Core 3.03
 
-Core 3.03 reste actif et conserve ses responsabilités de timeline, changement de tour, IA et UI de tour. Seul son petit wrapper autour de `window.dc200StartCombat` est retiré.
-
-Le Bridge Tactical est chargé ensuite par `RuntimeBootstrap` et réinstalle déjà `rt.dc200StartCombat` comme adaptateur final vers `requestCombat()`. Le wrapper Core 3.03 était donc seulement capturé comme ancien rollback puis supplanté. Le retirer évite une reprise d’autorité inutile sans changer la résolution Tactical ni la timeline active.
-
-Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 9 à 7. Les fonctions `init`, `advance`, `applyTurnUi`, l’état `T` et `dungeonDebug303` sont protégés par le test dédié.
+Core 3.03 conserve timeline, changement de tour, IA et UI de tour. Seul son wrapper inutile autour de `window.dc200StartCombat` est retiré, le Bridge réinstallant ensuite l’adaptateur final.
 
 ## Migration validée — lot 4D, détection Core 2.11
 
-Core 2.11 conserve ses responsabilités de détection : garde d’activation, filtre `sameView`, déduplication/persistance, sélection exacte des `enemyIds`, délai de 80 ms et verrou `detectBusy211` avec libération à 250 ms.
-
-Seule l’entrée finale du combat change : au lieu d’appeler l’adaptateur historique `dc200StartCombat(ids,"detection")`, Core 2.11 appelle désormais `GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:"detection",entry:"dc211EnemyDetection"})`.
-
-La sélection des participants et la préparation de détection V113 restent centralisées dans le Bridge ; elles ne sont pas réimplémentées dans Core 2.11. Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 7 à 5.
+Core 2.11 conserve garde d’activation, filtre `sameView`, déduplication/persistance, sélection exacte des `enemyIds`, délai 80 ms et libération à 250 ms. Seule l’entrée finale passe de `dc200StartCombat(ids,"detection")` à `Bridge.requestCombat(... reason:"detection" ...)`.
 
 ## Migration validée — lot 4E, détection Core 2.09
 
-Core 2.09 conserve ses responsabilités propres : garde `triggering`, héros actif et position courante, sélection des détecteurs via leur zone, marquage visuel, déduplication/persistance `dc209Detected`, délai de 80 ms et libération du verrou à 250 ms.
+Core 2.09 conserve garde `triggering`, héros actif, position courante, sélection des détecteurs, déduplication/persistance `dc209Detected`, délai 80 ms et libération à 250 ms. Seule l’entrée finale de détection passe au Bridge avec `entry:"dc209EnemyDetection"`.
 
-Seule l’entrée finale de la détection change : `dc200StartCombat(detectors.map(...),"detection")` est remplacé par `GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:detectors.map(...),reason:"detection",entry:"dc209EnemyDetection"})`.
+Pendant 4E, l’embuscade était volontairement hors périmètre ; son entrée est traitée séparément au lot 4F.
 
-L’embuscade Core 2.09 reste volontairement sur l’adaptateur historique pendant ce lot et est protégée par le test 4E. Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 5 à 3.
+## Migration validée — lot 4F, embuscade Core 2.09
+
+Core 2.09 conserve intégralement les responsabilités propres à l’embuscade :
+
+- garde `ambushStarting`, événement `kind==="ambush"` et salle valide ;
+- source exacte `living(x)` ;
+- déduplication/persistance `dc209AmbushDone` ;
+- verrou `ambushStarting` ;
+- délai de déclenchement 120 ms ;
+- libération du verrou à 250 ms.
+
+Seule l’entrée finale du combat change :
+
+`dc200StartCombat(live.map(e=>String(e.id)),"ambush")`
+
+devient :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})`
+
+Les participants et le scope restent calculés par l’autorité V113 via le Bridge. Aucune règle V113 n’est recopiée dans Core 2.09.
+
+Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 3 à 1. La référence restante est uniquement l’alias historique Core 2.x et doit être traitée dans un lot distinct.
 
 ## Contrat cible déjà disponible
 
@@ -104,7 +100,7 @@ Le Bridge Tactical dispose maintenant d’une seule entrée interne :
 
 `GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
 
-Les noms historiques restants sont des adaptateurs de compatibilité ou des consommateurs à migrer progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage.
+Les noms historiques restants sont des adaptateurs de compatibilité ou des fonctions internes à caractériser progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage.
 
 ## Règle de migration
 

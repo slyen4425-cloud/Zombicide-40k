@@ -1,6 +1,6 @@
 # GenSrpG — Inventaire des points d’entrée combat historiques
 
-Date : 2026-09-16
+Date : 2026-09-17
 Base : restructuration issue de V16.78.114.11
 
 ## But
@@ -13,10 +13,10 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
-| `dc200StartCombat` | 11 | entrée Core 2.x, détection/embuscade et anciens wrappers timeline ; les deux boutons Core 2.01 ne l’utilisent plus |
+| `dc200StartCombat` | 9 | alias Core 2.x, détection/embuscade et wrapper timeline actif Core 3.03 ; les boutons Core 2.01 et la timeline Core 3.01 désactivée ne l’utilisent plus |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | fonction interne Core 2.x et appel de lancement après sélection/renforts |
-| `startCombat` | 6 | fonction Core 2.x, boutons de combat, échec de furtivité, alias vers `dc200StartCombat` |
+| `startCombat` | 6 | fonction Core 2.x, échec de furtivité et alias vers `dc200StartCombat` |
 
 ## Groupes à migrer
 
@@ -26,9 +26,9 @@ Le but n’est pas de garder ces noms : cette liste est une dette à faire dimin
 - déclenchements détection ;
 - déclenchement embuscade ;
 - détection Core 2.11 ;
-- deux anciens wrappers de timeline autour de `window.dc200StartCombat`.
+- wrapper timeline actif Core 3.03 autour de `window.dc200StartCombat`.
 
-Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A.
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B.
 
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
@@ -69,7 +69,13 @@ Core 2.01 utilise un helper local sans état ni règle métier, `requestCombat20
 
 Le diagnostic utilise `entry: "dc201EncounterPanel"`, afin qu’aucune référence textuelle à l’ancien adaptateur ne subsiste dans Core 2.01.
 
-Ce lot ne modifie ni détection, ni embuscade, ni timeline, ni le moteur `startCombat` / `launchCombat200`.
+## Migration validée — lot 4B, timeline Core 3.01 désactivée
+
+Le script `#dungeonCore301Timeline`, déjà marqué `type="application/x-gensrpg-disabled"`, est supprimé au lieu d’être modernisé. Il contenait deux références à `dc200StartCombat` et n’appartenait pas au runtime actif.
+
+Le lot est volontairement limité au script : le CSS historique `#dungeonCore301TimelineCss` reste hors périmètre. Surtout, le wrapper actif `#dungeonCore303TimelineRootFix` est conservé intact et devra être caractérisé séparément avant toute modification.
+
+Ce lot ne modifie ni détection, ni embuscade, ni participants, ni résolution Tactical, ni `startCombat` / `launchCombat200`.
 
 ## Contrat cible déjà disponible
 

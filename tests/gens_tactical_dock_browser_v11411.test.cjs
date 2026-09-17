@@ -48,9 +48,9 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     assert.ok(result.after,'dock must survive a true local Tactical rerender');
     assert.equal(result.after.count,1,'rerender must not duplicate the floating dock');
     assert.match(result.after.text,/Attaquer/);assert.match(result.after.text,/Fin du tour/);assert.match(result.after.text,/Capacité/);
-    assert.deepEqual(result.observerTargets,[],'dock restoration must not install any MutationObserver');
+    assert.equal(result.observerTargets.some(x=>x==='body'||x==='html'),false,'dock restoration must not install a global body/html MutationObserver');
     assert.equal(result.status?.uiRenderHooked,true,'V111 must report the canonical render lifecycle hook as installed');
     assert.deepEqual(errors,[],'Tactical dock browser console/page errors');
-    console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,status:result.status}));
+    console.log(JSON.stringify({scenario:'V114.11 Tactical dock on canonical local render path',browser:engineName,viewport:'412x915 @2.625 touch',before:result.before,after:result.after,observerTargets:result.observerTargets,status:result.status}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

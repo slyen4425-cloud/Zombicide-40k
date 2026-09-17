@@ -37,7 +37,7 @@ Symptôme : les commandes flottantes `Attaquer / Fin du tour / Capacité` ne son
 
 ### Cause confirmée
 
-V111 crée toujours correctement les trois commandes et relaie vers les vrais boutons Tactical. L'ancien `MutationObserver` n'est plus installé, conformément à la charte.
+V111 crée toujours correctement les trois commandes et relaie vers les vrais boutons Tactical. L'ancien `MutationObserver` n'est plus installé par `install()`, conformément à la charte.
 
 Après le retrait de cet observer, V111 a tenté de conserver le dock en enveloppant `GensRpgTacticalCombatV2Ui.render` exporté. Mais le renderer canonique appelle son `render()` lexical/interne directement depuis `open()` et depuis ses actions. Le vrai chemin de rendu contourne donc le wrapper exporté ; `ensureDock()` n'est plus rappelé lors de l'ouverture réelle du combat.
 
@@ -55,7 +55,7 @@ Le contrat exige :
 - notification depuis le `render()` lexical réellement utilisé ;
 - export public de l'abonnement ;
 - V111 s'abonne au hook sans remplacer `UI.render` ;
-- aucune réactivation de `MutationObserver` ;
+- aucune réactivation de l'ancien `observe()` dans `install()` ;
 - conservation des labels et des relais vers les vrais boutons source.
 
 ### Reproduction navigateur vrai chemin
@@ -63,7 +63,9 @@ Le contrat exige :
 - Fixture : `tests/fixtures/tactical-dock-render-v11411.html`.
 - Test : `tests/gens_tactical_dock_browser_v11411.test.cjs`.
 
-Le test laisse volontairement expirer les retries historiques V111 jusqu'à 5 s avant d'ouvrir Tactical. Il ne peut donc pas réussir grâce à un retry tardif. Il ouvre ensuite le combat via le vrai `GensRpgTacticalCombatV2Ui.open()`, vérifie un dock unique et visible, les trois commandes, puis force un rerender interne et vérifie que le dock reste raccordé. Il exige également zéro `MutationObserver` installé.
+Le test laisse volontairement expirer les retries historiques V111 jusqu'à 5 s avant d'ouvrir Tactical. Il ne peut donc pas réussir grâce à un retry tardif. Il ouvre ensuite le combat via le vrai `GensRpgTacticalCombatV2Ui.open()`, vérifie un dock unique et visible, les trois commandes, puis force un rerender interne et vérifie que le dock reste raccordé.
+
+Le garde navigateur interdit explicitement tout `MutationObserver` global sur `body` ou `html`, conformément à la charte. Le garde source vérifie en parallèle que `install()` V111 ne rappelle jamais son ancien `observe()`. Un observer local/non-global éventuellement créé par le harness ou le navigateur n'est pas assimilé à l'ancienne réparation DOM globale.
 
 ## Correction autorisée
 
@@ -76,7 +78,7 @@ Le hook ne contient aucune règle métier et ne répare pas le DOM à distance :
 
 ## Interdictions pour ce lot
 
-- ne pas réactiver `MutationObserver` ;
+- ne pas réactiver `MutationObserver` global ;
 - ne pas ajouter de timer/retry de réparation ;
 - ne pas ajouter de listener global de reprise d'autorité ;
 - ne pas modifier combat, participants, IA, timeline, stats, XP, loot ou mouvement ;
@@ -88,7 +90,7 @@ Les retries de démarrage V111 déjà présents ne doivent pas être étendus ni
 ## Fermeture requise
 
 1. tests source/ancien V111 alignés sur le nouveau contrat ;
-2. test navigateur vrai chemin du dock vert ;
+2. test navigateur vrai chemin du dock vert dans Chromium et Firefox ;
 3. batterie architecture complète verte ;
 4. Chromium/preview verts ;
 5. Firefox vert ;

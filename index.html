@@ -39362,7 +39362,7 @@ function mainAction(x){
     if(!combatEnabled200()){b.textContent='⚔️ ENNEMIS PRÉSENTS — GESTION MJ';b.disabled=true;b.onclick=null;return}
     b.classList.add('dc053CombatAction');
     b.textContent='⚔️ ENGAGER LE COMBAT · '+live.length+' ENNEMI'+(live.length>1?'S':'');
-    b.onclick=()=>startCombat(live.map(e=>String(e.id)),'manual');
+    b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'});
     return
   }
   if(target){

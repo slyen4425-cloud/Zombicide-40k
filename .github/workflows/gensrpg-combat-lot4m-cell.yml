@@ -35,6 +35,13 @@ jobs:
 
           index=Path('index.html')
           s=index.read_text()
+
+          cell_select="let extras=[];if(reason==='cell'&&chosen[0]){extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}"
+          cell_modal="if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}"
+          assert s.count(cell_select)==1, f'legacy cell selector seam count={s.count(cell_select)}'
+          assert s.count(cell_modal)==1, f'legacy cell modal seam count={s.count(cell_modal)}'
+          s=s.replace(cell_select,'').replace(cell_modal,'')
+
           old_click="b.onclick=()=>startCombat([String(target.id)],'cell')"
           assert s.count(old_click)==1, f'cell click seam count={s.count(old_click)}'
           s=s.replace(old_click,"b.onclick=()=>startCellCombat(target,x)")
@@ -44,11 +51,6 @@ jobs:
           assert s.count(anchor)==1, f'helper insertion seam count={s.count(anchor)}'
           s=s.replace(anchor,helper)
 
-          cell_select="let extras=[];if(reason==='cell'&&chosen[0]){extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}"
-          cell_modal="if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}"
-          assert s.count(cell_select)==1, f'legacy cell selector seam count={s.count(cell_select)}'
-          assert s.count(cell_modal)==1, f'legacy cell modal seam count={s.count(cell_modal)}'
-          s=s.replace(cell_select,'').replace(cell_modal,'')
           index.write_text(s)
           PY
 

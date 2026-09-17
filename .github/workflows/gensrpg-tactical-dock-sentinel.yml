@@ -20,6 +20,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Vérifier le contrat source du dock Tactical
         run: node tests/gens_tactical_dock_canonical_render_hook_v11411.test.cjs
+      - name: Caractériser le risque de couche legacy au-dessus du Dock
+        run: node tests/gens_tactical_dock_legacy_layer_characterization_v11411.test.cjs
 
   dock-chromium:
     needs: dock-contract

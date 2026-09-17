@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tactical dock true render path</title>
+<style>html,body{margin:0;background:#111;color:#fff;font-family:sans-serif}</style>
+<script>
+window.__globalObserverTargets=[];
+const NativeMutationObserver=window.MutationObserver;
+window.MutationObserver=class TrackingMutationObserver{
+  constructor(cb){this.inner=new NativeMutationObserver(cb)}
+  observe(target,opts){window.__globalObserverTargets.push(target===document.body?'body':target===document.documentElement?'html':target?.id||target?.className||target?.tagName||'other');return this.inner.observe(target,opts)}
+  disconnect(){return this.inner.disconnect()}
+  takeRecords(){return this.inner.takeRecords()}
+};
+</script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js"></script>
+<script src="/assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js"></script>
+<script>
+window.__dockBattleInput={
+  id:'dock_browser_contract',
+  grid:{width:4,height:4,blocked:[]},
+  actors:[
+    {id:'dungeon_aldren',name:'Aldren',side:'hero',x:0,y:0,hp:10,maxHp:10,movement:3,initiative:20,defense:0,armor:0,dodge:0,attacks:[{id:'sword',name:'Épée',minRange:1,maxRange:2,hit:80,power:3}]},
+    {id:'enemy_1',name:'Squelette',side:'enemy',x:1,y:0,hp:6,maxHp:6,movement:1,initiative:5,defense:0,armor:0,dodge:0,attacks:[{id:'claw',name:'Griffe',minRange:1,maxRange:1,hit:60,power:1}]}
+  ],
+  config:{actionsPerTurn:1}
+};
+window.addEventListener('DOMContentLoaded',()=>{
+  // V111 historically schedules bounded startup retries through 5000 ms.
+  // The browser characterization waits past them before opening Tactical so a late retry cannot mask a broken render lifecycle.
+  setTimeout(()=>{window.__dockHarnessReady=true},5400);
+});
+</script>
+</head>
+<body><main id="fixture">Tactical dock render lifecycle fixture</main></body>
+</html>

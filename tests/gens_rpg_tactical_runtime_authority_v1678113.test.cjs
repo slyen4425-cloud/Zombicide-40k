@@ -49,22 +49,26 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   assert.deepEqual(sel.enemyIds,['eb']);
 }
 
-// Lot 4J characterization: Runtime 2.00 deliberately excludes enemies bypassed
-// globally or by the active hero. Before changing V113, capture the current mismatch:
-// selectCombatants still expands a valid seed to nearby bypassed enemies.
+// Lot 4J permanent contract: Runtime 2.00 stealth/bypass semantics must survive
+// V113 scope expansion. Global bypass applies to everyone; dc200BypassedBy applies
+// only to the currently active hero.
 {
   const state=baseState();
   state.enemyCells.eg=11;
   state.enemyCells.eh=12;
+  state.enemyCells.e2=10;
   const scopedEnemies=[
     enemies[0],
     {id:'eg',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200Bypassed:true},
-    {id:'eh',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200BypassedBy:{h1:true}}
+    {id:'eh',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200BypassedBy:{h1:true}},
+    {id:'e2',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200BypassedBy:{h2:true}}
   ];
   const local={...rt,loadDungeonState:()=>state,loadActiveEnemies:()=>scopedEnemies};
   const sel=P.selectCombatants(local,{enemyIds:['ep'],heroIds:['h1']});
-  assert.deepEqual(sel.enemyIds,['ep','eg','eh'],
-    'lot 4J characterization: current V113 expands the requested combat to globally/per-hero bypassed enemies');
+  assert.deepEqual(sel.enemyIds,['ep','e2'],
+    'V113 must exclude globally bypassed and active-hero-bypassed enemies while preserving another hero\'s bypass semantics');
+  assert.deepEqual(P.detectionEnemyIds(local,state,scopedEnemies),['ep','e2'],
+    'V113 detection must use the same bypass eligibility as combat scope expansion');
 }
 
 {
@@ -115,10 +119,11 @@ assert.match(source,/function animateDiceOverlay\(rt=R\)\{return false\}/,'V113 
 assert.doesNotMatch(source,/setInterval\(tick,55\)/);
 assert.match(source,/#dc047RoomBoard \.dc047Cell/,'real board cell interactions must schedule detection');
 assert.match(source,/dc318BranchSourceId/,'sub-room scope must use Core 3.18 branch ownership');
+assert.match(source,/dc200BypassedBy/,'V113 must preserve per-active-hero bypass semantics');
 assert.match(source,/__gensRpg112Spatial=true/,'V113 must prevent V112 retry from re-wrapping combat creation');
 assert.match(source,/GensRpgTacticalStats1678110\?\.decorateBattle/,'V113 must reassert V110 canonical snapshots after final spatial scoping');
 assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\.78\.114\.10/,'V113 must load after V112');
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 
-console.log('V16.78.113 scope/detection preserved; lot 4J bypass mismatch characterized; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');
+console.log('V16.78.113 scope/detection preserved; lot 4J bypass contract locked; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');

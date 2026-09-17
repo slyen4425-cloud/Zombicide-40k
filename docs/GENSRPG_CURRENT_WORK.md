@@ -2,125 +2,109 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 4E : détection Core 2.09
+## Chantier courant — migration combat, lot 4F : embuscade Core 2.09
 
-- Branche : `work/gensrpg-combat-callsite-migration-4e-2026-09-17`
-- Base exacte / checkpoint vert lot 4D : `e9ee86b128d8954629163ee264dc5e950421e9e9`
-- Checkpoint de départ 4E : `checkpoint/gensrpg-start-combat-callsite-migration-4e-2026-09-17`
-- Test 4E : `tests/gens_core209_detection_direct_bridge_lot4e.test.cjs`
-- Commit runtime 4E : `cf5d4ac7527f276ebeddd81dedcfbd3ea1de7f58`
-- Workflow temporaire restauré : `fa3a7a23f00b63dd035ce12112501cf39c06b444`
-- Workflow progression canonique : blob `31c5043f8352b656f1d015bc4888332e738bf913`, `contents: read`
-- Inventaire combat après runtime 4E : `3 / 1 / 2 / 6`
-- Checkpoint vert visé : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17`
+- Branche : `work/gensrpg-combat-callsite-migration-4f-2026-09-17`
+- Base exacte / checkpoint vert lot 4E : `0315edb74a428594fa02d8d9fd74639779b8df07`
+- Checkpoint vert 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17`
+- Checkpoint de départ 4F : `checkpoint/gensrpg-start-combat-callsite-migration-4f-2026-09-17`
+- Test de caractérisation 4F : `tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
-## Lot 4D — état figé vert
+## Lot 4E — état figé vert
 
-Checkpoint : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17` — `e9ee86b128d8954629163ee264dc5e950421e9e9`.
+Core 2.09 détection passe directement par `GensRpgTacticalCombatV2Bridge.requestCombat()` tout en conservant son bookkeeping, ses délais et ses `enemyIds`.
 
-Validation : architecture + Chromium/preview verts sur run `35204985777`, Firefox vert sur run `35204985756`, workflow progression lecture seule et `main` intact.
+Validation finale 4E sur `0315edb74a428594fa02d8d9fd74639779b8df07` : architecture + Chromium/preview verts, Firefox vert, workflow progression lecture seule et `main` intact.
 
-## Caractérisation 4E avant correction
-
-Les cinq références `dc200StartCombat` restantes ont été séparées avant modification runtime :
-
-1. une référence = alias historique `window.dc200StartCombat=startCombat` ;
-2. deux références = détection Core 2.09 ;
-3. deux références = embuscade Core 2.09.
-
-Le lot 4E est volontairement limité aux **deux références de détection Core 2.09**. L'alias et l'embuscade sont hors périmètre.
-
-Le test de caractérisation a été créé avant correction et a été rouge exactement sur l'entrée historique de détection. Il verrouille :
-
-- garde `triggering` et salle valide ;
-- héros actif et position courante ;
-- sélection exacte via `zones.filter(z=>z.zone.has(hp))` ;
-- déduplication/persistance `dc209Detected` ;
-- délai 80 ms ;
-- libération `triggering=false` à 250 ms ;
-- `enemyIds` issus de `detectors.map(z=>String(z.e.id))` ;
-- `reason:"detection"`.
-
-Le même test protège l'embuscade comme hors périmètre : `ambushStarting`, `kind==="ambush"`, `living(x)`, `dc209AmbushDone`, délai 120 ms, libération 250 ms et appel historique `dc200StartCombat(...,"ambush")` encore requis.
-
-## Correction runtime 4E appliquée
-
-Seule l'entrée finale de la détection Core 2.09 a changé :
-
-`dc200StartCombat(detectors.map(z=>String(z.e.id)),"detection")`
-
-est remplacé par :
-
-`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:detectors.map(z=>String(z.e.id)),reason:"detection",entry:"dc209EnemyDetection"})`
-
-Aucune sélection de participants n'a été recopiée dans Core 2.09 : le scope V113 reste centralisé dans le Bridge.
-
-Le compteur brut `dc200StartCombat` est passé exactement de 5 à 3. Le test d'inventaire et `docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md` sont alignés à :
+Dette après 4E :
 
 - `dc200StartCombat` : 3 ;
 - `openDungeonCombatSetup` : 1 ;
 - `launchCombat200` : 2 ;
 - `startCombat` : 6.
 
-Le garde 4E est raccordé aux sentinelles architecture.
+Les trois références `dc200StartCombat` restantes sont séparées en deux rôles :
 
-## Discipline charte appliquée
+1. alias historique Core 2.x `window.dc200StartCombat=startCombat` — hors lot 4F ;
+2. deux références dans l'embuscade Core 2.09 — seul périmètre du lot 4F.
+
+## Caractérisation 4F avant correction
+
+Le test `tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs` a été créé avant toute modification runtime.
+
+Il protège l'embuscade Core 2.09 :
+
+- garde `ambushStarting`, événement `kind==="ambush"` et salle valide ;
+- source exacte `living(x)` ;
+- initialisation et déduplication `dc209AmbushDone` ;
+- persistance avant déclenchement ;
+- verrou `ambushStarting=true` ;
+- délai de déclenchement 120 ms ;
+- libération du verrou à 250 ms ;
+- `enemyIds` issus exactement de `live.map(e=>String(e.id))` ;
+- `reason:"ambush"`.
+
+Le même test protège la détection 4E déjà migrée et exige que l'alias `window.dc200StartCombat=startCombat` reste intact pendant 4F.
+
+## Correction autorisée pour 4F
+
+Uniquement remplacer l'entrée finale de l'embuscade :
+
+`dc200StartCombat(live.map(e=>String(e.id)),"ambush")`
+
+par :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})`
+
+Aucune règle de participants/scope n'est recopiée dans Core 2.09 : V113 reste propriétaire via le Bridge.
+
+Après ce changement exact, le compteur `dc200StartCombat` doit passer de 3 à 1. L'unique référence restante sera l'alias historique, à traiter séparément dans un futur lot.
+
+## Diagnostic UI séparé — dock flottant Tactical
+
+Observation utilisateur : les boutons flottants `Attaquer / Fin du tour / Capacité` ont disparu.
+
+Cause maintenant identifiée sans modifier le runtime :
+
+- le propriétaire historique du dock est V111, `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` ;
+- `ensureDock()` existe toujours et crée bien les trois boutons ;
+- l'ancien `MutationObserver` n'est plus installé, conformément à la charte ;
+- V111 tente désormais de rafraîchir le dock via un wrapper de `GensRpgTacticalCombatV2Ui.render` ;
+- mais le renderer Tactical de base appelle son `render()` lexical/interne directement depuis `open()` et ses actions ; ces rendus contournent donc le wrapper exporté V111 ;
+- les vrais boutons source `data-attack` et `data-end` existent toujours dans `renderActions()`, mais `ensureDock()` n'est plus rappelé lorsque le combat s'affiche.
+
+Ne pas réactiver de `MutationObserver`, timer global ou retry pour corriger cela. La réparation sera un lot UI séparé, avec raccord explicite appartenant au renderer Tactical et test navigateur. Ce lot UI devra produire une version test utilisateur après validation verte.
+
+## Discipline charte 4F
 
 - checkpoint de départ avant modification ;
-- branche créée depuis exactement le checkpoint vert 4D ;
+- branche créée depuis exactement le checkpoint vert 4E ;
 - caractérisation/test avant correction ;
-- un seul groupe homogène migré ;
-- aucun observer, timer de réparation, wrapper ou rerender ajouté ;
-- aucun changement d'embuscade ;
-- aucun changement d'alias Core 2.x ;
-- `enemyIds` et `reason` préservés ;
-- V113 reste propriétaire du scope via le Bridge ;
-- workflow temporaire d'écriture retiré immédiatement après la modification du gros `index.html` ;
+- un seul groupe homogène : embuscade Core 2.09 ;
+- aucun observer, timer de réparation ou wrapper global ajouté ;
+- alias Core 2.x hors périmètre ;
+- détection 4E hors périmètre ;
+- participants et scope V113 centralisés dans le Bridge ;
+- aucun changement de gameplay ;
 - `main` non touché.
 
-## Ce qui n'a pas été touché
+## Fermeture requise 4F
 
-- embuscade Core 2.09 ;
-- alias `window.dc200StartCombat=startCombat` ;
-- `startCombat` et `launchCombat200` ;
-- détection Core 2.11 déjà validée ;
-- résolution Tactical ;
-- timeline/IA Core 3.03 ;
-- participants et règles de combat ;
-- stats, XP, récompenses et loot ;
-- déplacement ;
-- navigation générale, fiche héros, Save & Quit ;
-- Survival, Capture, PvP, World Builder ;
-- cache/PWA.
-
-## Validation finale 4E requise
-
-Avant de créer le checkpoint vert 4E, exiger sur le même SHA final :
-
-1. architecture verte, y compris le garde 4E ;
-2. Chromium / preview verts ;
-3. Firefox vert ;
-4. workflow progression toujours lecture seule ;
-5. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
-
-## Prochaine étape seulement après checkpoint vert 4E
-
-Il restera exactement trois références `dc200StartCombat` : une pour l'alias historique et deux pour l'embuscade Core 2.09. Les caractériser séparément ; ne pas mélanger retrait d'alias et migration d'embuscade.
-
-## Observations utilisateur hors périmètre
-
-1. Les commandes flottantes de combat `Attaque / Fin de tour / Capacité` ont disparu de l'interface.
-2. Des éléments de `Talent` ont brièvement clignoté une fois sur la fiche héros puis ont disparu ; non reproduit au second essai.
-
-Ne pas les corriger pendant ce lot sans diagnostic de propriétaire conforme à la charte.
+1. appliquer uniquement la migration d'embuscade Core 2.09 ;
+2. raccorder le test 4F aux sentinelles architecture ;
+3. aligner l'inventaire 3 → 1 uniquement si la source contient réellement une référence ;
+4. restaurer immédiatement tout workflow temporaire utilisé pour modifier le gros `index.html` ;
+5. exiger architecture + Chromium/preview + Firefox verts sur le même SHA ;
+6. vérifier `main` intact ;
+7. créer `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17`.
 
 ## Jalons verts précédents
 
+- Lot 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17` — `0315edb74a428594fa02d8d9fd74639779b8df07`.
 - Lot 4D : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17` — `e9ee86b128d8954629163ee264dc5e950421e9e9`.
 - Lot 4C : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17` — `8ce140c924d259091a6c9838b82d669256a104f3`.
-- Lot 4B : `9c1b939ed7e7b34108882be933a99f2151529c79`.
 - Lot 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
 - Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.
 - Lot 2 : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16` — `b77225582f9b854b2b0e658029ebb783fc31aab7`.
@@ -129,11 +113,4 @@ Ne pas les corriger pendant ce lot sans diagnostic de propriétaire conforme à 
 
 ## Règle permanente de continuité
 
-À chaque chantier :
-
-1. lire `docs/GENSRPG_CHARTE.md` puis ce fichier ;
-2. checkpoint de départ avant le premier changement ;
-3. branche créée depuis exactement ce checkpoint ;
-4. caractériser/tester avant correction ;
-5. checkpoint vert sur le SHA exact validé ;
-6. mettre ce fichier à jour avant le chantier suivant.
+À chaque chantier : lire la charte puis ce fichier, checkpoint avant changement, branche dédiée, caractériser avant correction, checkpoint vert sur le SHA exact validé, puis mettre ce fichier à jour avant le chantier suivant.

@@ -14,4 +14,10 @@ for(const [name,count] of Object.entries(expected)){
 
 assert.match(doc,/requestCombat\(runtime, options\)/,'inventory must name the target single-entry contract');
 assert.match(doc,/Aucune suppression en masse/,'inventory must keep the progressive monolith migration rule');
+
+// Lot 4G: the final raw dc200StartCombat occurrence is an intentional compatibility
+// seed for the Bridge non-Dungeon fallback, not an active Dungeon callsite. Keep this
+// behavioral contract permanently coupled to the inventory sentinel.
+require('./gens_legacy_dc200_fallback_contract_lot4g.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

@@ -1,0 +1,59 @@
+name: TEMP GenSrpG Dock post-PWA owner patch
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17'
+
+permissions:
+  contents: write
+
+jobs:
+  bounded-owner-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply exact canonical lifecycle patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          ui=Path('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js')
+          rt=Path('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js')
+          u=ui.read_text()
+          r=rt.read_text()
+          if 'function onAfterRender(fn)' in u and 'U.onAfterRender(()=>maintain(rt))' in r:
+              print('Owner patch already present; no-op.')
+              raise SystemExit(0)
+          reps=[
+            ('let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="",detailActorId="",mapPatched=false,editorHooked=false;\n  const E=',
+             'let battle=null,options={},selectedTarget="",selectedAttack="",rootEl=null,busy=false,notice="",detailActorId="",mapPatched=false,editorHooked=false;\n  const afterRenderHooks=new Set();\n  const E='),
+            ('  function current(){return E()?.currentActor?.(battle)||null}',
+             '  function onAfterRender(fn){if(typeof fn!=="function")return ()=>{};afterRenderHooks.add(fn);return ()=>afterRenderHooks.delete(fn)}\n  function notifyAfterRender(){for(const fn of [...afterRenderHooks])try{fn({root:rootEl,battle})}catch(e){try{R.console?.warn?.("Tactical afterRender",e)}catch(_){}}}\n  function current(){return E()?.currentActor?.(battle)||null}'),
+            ('if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`}',
+             'if(g)g.style.gridTemplateColumns=`repeat(${battle.grid.width},min(52px,11vw))`;notifyAfterRender()}'),
+            ('close,getBattle,render,runAiUntilHero};',
+             'close,getBattle,render,onAfterRender,runAiUntilHero};')
+          ]
+          for old,new in reps:
+              c=u.count(old)
+              if c!=1: raise SystemExit(f'UI bounded replacement expected 1 occurrence, got {c}: {old[:80]}')
+              u=u.replace(old,new,1)
+          old='function hookUiRender(rt=R){const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg111DockRefresh){uiRenderHooked=true;return true}const wrapped=function(){const out=old.apply(this,arguments);try{maintain(rt)}catch(e){}return out};wrapped.__gensRpg111DockRefresh=true;wrapped.__original=old;U.render=wrapped;uiRenderHooked=true;return true}'
+          new='function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}'
+          c=r.count(old)
+          if c!=1: raise SystemExit(f'V111 bounded replacement expected 1 occurrence, got {c}')
+          r=r.replace(old,new,1)
+          ui.write_text(u)
+          rt.write_text(r)
+          PY
+      - name: Commit only owner files
+        run: |
+          if git diff --quiet; then exit 0; fi
+          test "$(git diff --name-only | sort)" = $'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js\nassets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js
+          git commit -m 'fix: restore Tactical dock canonical render lifecycle post-PWA'
+          git push

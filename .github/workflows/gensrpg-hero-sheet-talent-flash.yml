@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   characterize-talent-visibility:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,5 +28,42 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
+      - name: Apply scoped native Talent visibility fix
+        id: patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          old = ' if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":"block";'
+          new = ' if(z)z.style.display=d?"none":"block";'
+          count = text.count(old)
+
+          if count == 1:
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+              changed = 'true'
+          elif count == 0 and new in text:
+              changed = 'false'
+          else:
+              raise SystemExit(f'Expected exactly one scoped Talent visibility writer, found {count}')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write(f'changed={changed}\n')
+          PY
+
       - name: Characterize hero sheet Talent visibility
         run: node tests/gens_hero_sheet_talent_flash_v11411.test.cjs
+
+      - name: Commit scoped runtime fix to work branch
+        if: steps.patch.outputs.changed == 'true'
+        run: |
+          git config user.name "slyen4425-cloud"
+          git config user.email "slyen4425@gmail.com"
+          git add index.html
+          git diff --cached --check
+          test "$(git diff --cached --name-only)" = "index.html"
+          git commit -m "fix: keep Talent visibility under sheet tabs"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

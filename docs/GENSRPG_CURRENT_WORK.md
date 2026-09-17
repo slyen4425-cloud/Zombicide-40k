@@ -2,45 +2,70 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 4A : boutons de rencontre Core 2.01
+## Chantier courant — migration combat, lot 4B : retrait de la timeline Core 3.01 désactivée
 
-- Branche : `work/gensrpg-combat-callsite-migration-4-2026-09-16`
-- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-4-2026-09-16`
-- Base exacte : `8c2c225674ed66212e1025a827e3ca078354f9e9`
-- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16`
-- Commit runtime lot 4A : `99598988eba1d135c012e3af862773c234de1ce5`
-- SHA vert avant cette mise à jour documentaire : `a5dd5d20793ac3ebe449814d521d42405dcfefe9`
+- Branche : `work/gensrpg-combat-callsite-migration-4b-2026-09-17`
+- Checkpoint de départ : `checkpoint/gensrpg-start-combat-callsite-migration-4b-2026-09-17`
+- Base exacte : `498ab21e9e52746160a5a6de2cb158393a06a7d1`
+- Checkpoint vert précédent : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17`
+- Commit runtime lot 4B : `06c93772b614ff8d226b9c0cd461ce1b78775b64`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
-## Résultat lot 4A
+## Résultat lot 4A conservé
 
-Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — ne passent plus par l'alias historique `dc200StartCombat`.
+Les deux commandes du panneau de rencontre Core 2.01 — `ENGAGER LE COMBAT` et `ATTAQUER` — passent directement par le contrat canonique `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` via un helper local sans règle métier.
 
-Core 2.01 utilise maintenant un helper local sans état ni règle métier qui transmet au contrat canonique :
+Checkpoint vert 4A :
 
-`GensRpgTacticalCombatV2Bridge.requestCombat(window, options)`
+`checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
 
-Le helper conserve les `enemyIds`, la raison existante et un `entry` de diagnostic propre au panneau de rencontre.
+## Résultat lot 4B
 
-Le mode positionnel reste contrôlé par le garde existant et l'attaque sur case ennemie conserve la cible réellement située sur la case du héros actif.
+Le script `#dungeonCore301Timeline`, déjà désactivé par `type="application/x-gensrpg-disabled"`, a été supprimé au lieu d'être modernisé.
 
-## Dette combat après lot 4A
+Ce script contenait exactement deux références historiques à `dc200StartCombat`. Le test 4B a d'abord prouvé la présence du bloc, puis le one-shot a refusé toute suppression plus large que ce bloc exact.
+
+Le périmètre est volontairement strict :
+
+- le CSS historique `#dungeonCore301TimelineCss` reste présent ;
+- le wrapper actif `#dungeonCore303TimelineRootFix` reste présent et intact ;
+- aucune détection, embuscade ou règle de participation n'a été modifiée ;
+- `startCombat` / `launchCombat200` restent inchangés ;
+- XP / récompenses ont été caractérisés verts après le retrait.
+
+## Dette combat après lot 4B
 
 Inventaire attendu dans `index.html` :
 
-- `dc200StartCombat` : 11 ;
+- `dc200StartCombat` : 9 ;
 - `openDungeonCombatSetup` : 1 — définition historique rollback uniquement ;
 - `launchCombat200` : 2 ;
 - `startCombat` : 6.
 
-Le groupe suivant doit être caractérisé avant modification. Ne pas migrer en masse détection, embuscade, furtivité ou wrappers timeline.
+Les 9 références `dc200StartCombat` restantes se répartissent encore entre :
+
+- alias historique Core 2.x ;
+- détection / embuscade Core 2.09 ;
+- détection Core 2.11 ;
+- wrapper timeline actif Core 3.03.
+
+Aucun de ces groupes ne doit être modifié sans caractérisation dédiée.
+
+## Tests permanents lot 4B
+
+- `tests/gens_core301_disabled_timeline_retirement_lot4b.test.cjs` ;
+- inventaire des callsites mis à jour à 9/1/2/6 ;
+- garde permanent raccordé aux sentinelles architecture ;
+- le test protège explicitement le wrapper actif Core 3.03 et le CSS voisin.
+
+Le workflow progression temporairement utilisé pour écrire le gros `index.html` est revenu à son blob canonique lecture seule `31c5043f8352b656f1d015bc4888332e738bf913` après le commit runtime.
 
 ## Ce qui n'a pas été touché
 
 - détection / portée V113 ;
 - embuscade ;
-- timeline ;
+- timeline active Core 3.03 ;
 - `startCombat` et `launchCombat200` ;
 - participants et règles de combat ;
 - stats, XP, récompenses et loot ;
@@ -48,17 +73,6 @@ Le groupe suivant doit être caractérisé avant modification. Ne pas migrer en 
 - navigation générale, fiche héros, Save & Quit ;
 - Survival, Capture, PvP, World Builder ;
 - cache/PWA.
-
-## Validation lot 4A
-
-Sur `a5dd5d20793ac3ebe449814d521d42405dcfefe9` :
-
-- sentinelles architecture : vertes ;
-- test permanent Core 2.01 -> Bridge : vert ;
-- Chromium / preview : vert ;
-- Firefox : vert ;
-- workflow progression revenu en lecture seule ;
-- `main` intact.
 
 ## Observations utilisateur à conserver hors périmètre
 
@@ -69,12 +83,25 @@ Ces points sont signalés mais ne doivent pas être corrigés à l'aveugle penda
 
 Pour ces deux anomalies, appliquer la charte : identifier d'abord le propriétaire et le premier changement responsable ; vérifier rendu/couches/CSS/autorités avant toute réparation fonctionnelle ; aucun observer, timer ou rerender correctif ajouté.
 
-## Prochaine étape
+## Validation finale requise avant checkpoint vert 4B
 
-Caractériser les 11 références restantes à `dc200StartCombat` et les 6 références `startCombat`, puis choisir le plus petit groupe homogène suivant. Priorité à un lot soustractif qui retire un intermédiaire historique sans modifier les règles Dungeon/Tactical.
+Sur un même SHA final :
+
+1. le test spécifique 4B doit être vert ;
+2. tout le job architecture doit être vert ;
+3. Chromium / preview doit être vert ;
+4. Firefox doit être vert ;
+5. la comparaison avec `498ab21e9e52746160a5a6de2cb158393a06a7d1` doit confirmer le périmètre ;
+6. aucun workflow temporaire d'écriture ne doit rester ;
+7. `main` doit rester intact.
+
+## Prochaine étape après validation 4B
+
+Ne pas supprimer automatiquement le wrapper actif Core 3.03. Le caractériser d'abord : vérifier s'il produit encore une responsabilité utilisateur réelle sur la timeline ou s'il est déjà supplanté par Tactical/Bridge. Les chemins détection/embuscade restent également séparés car ils sont gameplay-critiques.
 
 ## Jalons verts précédents
 
+- Lot 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
 - Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.
 - Lot 2 : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16` — `b77225582f9b854b2b0e658029ebb783fc31aab7`.
 - Lot 1 : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16` — `2aa6ba574923229af105cbee1635eeb9efab18cb`.

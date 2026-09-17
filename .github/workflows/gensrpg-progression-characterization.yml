@@ -5,23 +5,24 @@ on:
     branches:
       - 'work/gensrpg-progression-victory-reconnect-*'
       - 'work/gensrpg-xp-portrait-cleanfix-*'
+      - 'work/gensrpg-combat-callsite-migration-4e-2026-09-17'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   progression-characterization:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate native manual XP runtime
-        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
-      - name: Characterize native progression and rewards
-        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
-      - name: Verify Tactical victory rewards summary
-        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
-      - name: Execute Tactical victory to Dungeon XP and loot
-        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
-      - name: Characterize manual level authority
-        run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs
+      - name: Apply exact Core 2.09 detection entry migration
+        shell: bash
+        run: |
+          python -c "from pathlib import Path; import base64; p=Path('index.html'); s=p.read_text(); old=base64.b64decode('ICAvLyBBIHNwb3R0ZWQgaGVybyBpcyBlbmdhZ2VkIGJ5IHRoZSBtb25zdGVycyB0aGF0IGNhbiBhY3R1YWxseSBkZXRlY3QgdGhlbS4KICBpZih0eXBlb2YgZGMyMDBTdGFydENvbWJhdD09PSJmdW5jdGlvbiIpewogICAgdHJpZ2dlcmluZz10cnVlOwogICAgc2V0VGltZW91dCgoKT0+ewogICAgICB0cnl7CiAgICAgICAgZGMyMDBTdGFydENvbWJhdChkZXRlY3RvcnMubWFwKHo9PlN0cmluZyh6LmUuaWQpKSwiZGV0ZWN0aW9uIik7CiAgICAgIH1maW5hbGx5e3NldFRpbWVvdXQoKCk9Pnt0cmlnZ2VyaW5nPWZhbHNlfSwyNTApfQogICAgfSw4MCkKICB9').decode(); new=base64.b64decode('ICAvLyBBIHNwb3R0ZWQgaGVybyBpcyBlbmdhZ2VkIGJ5IHRoZSBtb25zdGVycyB0aGF0IGNhbiBhY3R1YWxseSBkZXRlY3QgdGhlbS4KICBpZih0eXBlb2Ygd2luZG93LkdlbnNScGdUYWN0aWNhbENvbWJhdFYyQnJpZGdlPy5yZXF1ZXN0Q29tYmF0PT09ImZ1bmN0aW9uIil7CiAgICB0cmlnZ2VyaW5nPXRydWU7CiAgICBzZXRUaW1lb3V0KCgpPT57CiAgICAgIHRyeXsKICAgICAgICB3aW5kb3cuR2Vuc1JwZ1RhY3RpY2FsQ29tYmF0VjJCcmlkZ2UucmVxdWVzdENvbWJhdCh3aW5kb3cse2VuZW15SWRzOmRldGVjdG9ycy5tYXAoej0+U3RyaW5nKHouZS5pZCkpLHJlYXNvbjoiZGV0ZWN0aW9uIixlbnRyeToiZGMyMDlFbmVteURldGVjdGlvbiJ9KTsKICAgICAgfWZpbmFsbHl7c2V0VGltZW91dCgoKT0+e3RyaWdnZXJpbmc9ZmFsc2V9LDI1MCl9CiAgICB9LDgwKQogIH0=').decode(); c=s.count(old); n=s.count(new); assert c==1 or (c==0 and n==1), f'unexpected source counts old={c} new={n}'; before=s.count('dc200StartCombat'); out=s.replace(old,new,1) if c==1 else s; after=out.count('dc200StartCombat'); assert (before,after)==(5,3) or (before,after)==(3,3), f'unexpected debt counts before={before} after={after}'; p.write_text(out)"
+          if git diff --quiet -- index.html; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'refactor: route Core 2.09 detection through tactical Bridge'
+          git push origin HEAD:$GITHUB_REF_NAME

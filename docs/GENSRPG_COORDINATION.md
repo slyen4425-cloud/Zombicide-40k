@@ -70,14 +70,15 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu'il n'entre pas en c
 
 ### Fil directeur
 - Rôle : **COORDINATEUR actif**.
-- Chantier courant : intégration contrôlée du durcissement preview/PWA après Talent.
-- Branche : `work/gensrpg-integrate-preview-pwa-after-talent-2026-09-17`.
-- Base : checkpoint vert Talent post-4K.
-- Checkpoint Talent : `checkpoint/gensrpg-talent-integration-post-4k-green-2026-09-17`.
-- SHA Talent : `c52fd9abf8f19c345d1cd7088e86ae3179b42401`.
-- Propriétaire verrouillé : chargement de source dans `preview.html` face à un cache PWA GenSrpG préexistant.
-- Candidat technique preview/PWA : `48f1f50261a88b71bce30fa520bffeeedaa9ff36`.
-- Checkpoint cible : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17` après revalidation du SHA documentaire final.
+- Chantier courant : restauration contrôlée du Dock Tactical sur la chaîne directrice post-PWA.
+- Branche : `work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17`.
+- Base : checkpoint vert preview/PWA post-Talent.
+- Checkpoint de base : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17`.
+- SHA de base : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+- Propriétaires verrouillés pendant ce lot : cycle de rendu de l'UI Tactical canonique et raccord du Dock V111 à ce cycle.
+- Candidat technique Dock : `ce1fb0491ffe9c82f3a59f7791a3b74abc8dae20`.
+- Checkpoint cible : `checkpoint/gensrpg-tactical-dock-post-pwa-green-2026-09-17` après revalidation du SHA documentaire final.
+- Combat 4L reste suspendu jusqu'à ce checkpoint.
 
 ### Talent — intégré et checkpoint vert
 - Branche d'intégration : `work/gensrpg-integrate-talent-after-4k-2026-09-17`.
@@ -89,7 +90,7 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu'il n'entre pas en c
 - Validation finale : Talent dédié + architecture/Chromium-preview + Firefox verts.
 - L'ancienne branche Agent 1 n'a pas été fusionnée en bloc.
 
-### Preview/PWA — caractérisée puis corrigée sur base post-Talent
+### Preview/PWA — intégré et checkpoint vert
 - Branche Agent 1 auditée : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`.
 - Agent checkpoint : `checkpoint/gensrpg-chrome-white-screen-green-2026-09-17`.
 - Agent SHA : `369d70edc7cb4506d368171e6a6fff6ad89b9766`.
@@ -100,23 +101,41 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu'il n'entre pas en c
 - Problème reproduit : avec un Service Worker/cache `gensrpg-cache-*` préexistant, la preview pouvait charger l'ancien `index.html` avant la fin de la suppression asynchrone du cache.
 - Correction : attendre explicitement la suppression des caches GenSrpG avant `fetch('index.html')`.
 - Commit correctif : `48f1f50261a88b71bce30fa520bffeeedaa9ff36`.
-- Diff technique : `preview.html` +4 lignes, test dédié, workflow dédié uniquement.
-- Validation technique sur ce SHA : PWA Chromium/Firefox success (`35253552569`), architecture + Chromium/preview success (`35253552456`), Firefox success (`35253552690`).
+- Checkpoint final : `checkpoint/gensrpg-preview-pwa-post-talent-green-2026-09-17`.
+- SHA final : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
 - Limite : ce lot prouve et corrige une course de **preview/PWA** ; il ne prouve pas à lui seul que le symptôme Chrome Android réel en production avait exactement cette cause.
+
+### Régression de composition détectée par l'utilisateur — Dock Tactical
+- Le checkpoint preview/PWA était vert techniquement mais ne contenait pas le jalon Dock Tactical issu d'une ligne parallèle antérieure.
+- L'utilisateur a constaté l'absence des commandes flottantes `Attaquer / Fin du tour / Capacité`.
+- Audit : Talent et preview/PWA n'ont pas supprimé le Dock ; la chaîne directrice n'avait simplement jamais intégré le jalon Dock vert `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
+- Classification : **omission de composition entre branches vertes**.
+- Conséquence : Combat 4L stoppé immédiatement ; aucune correction 4L n'a été appliquée.
+
+### Dock Tactical — restauration contrôlée sur la base post-PWA
+- Branche : `work/gensrpg-tactical-dock-post-pwa-regression-clean-2026-09-17`.
+- Base exacte : `4c1c1e60b4e06a82986babc435ac07d48dff4833`.
+- Ancien jalon utilisateur : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17` — `642a0e3276f07f2d3089047d1dd5c1b72f8353b9` — validation utilisateur « parfait ras tout fonctionne très bien ».
+- Tests permanents reportés avant runtime : contrat canonique, vrai rendu Tactical Chromium/Firefox et fixture mobile.
+- SHA de caractérisation rouge : `c3e792da5f2b7b8e6ec346ce16c87e17b406725e`.
+- Run rouge attendu : `35257199026`.
+- Propriétaire retenu : `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js` reste l'unique renderer Tactical ; il expose un hook explicite `onAfterRender()`.
+- Consommateur : V111 s'abonne avec `U.onAfterRender(()=>maintain(rt))` au lieu de capturer/remplacer `U.render`.
+- Aucun `MutationObserver` global n'est réactivé ; aucun nouveau timer/retry n'est ajouté ; aucune règle de combat n'est modifiée.
+- Commit propriétaire : `efd966a4e8eee210db90f674a6dd05fd1d430fe4`.
+- Writer temporaire borné supprimé ; absent du diff net final.
+- Candidat technique propre : `ce1fb0491ffe9c82f3a59f7791a3b74abc8dae20`.
+- CI technique : Dock contrat + Chromium + Firefox success (`35257375684`), architecture + Chromium/preview success (`35257375692`), Firefox général success (`35257375764`).
+- Les documents doivent maintenant être revalidés sur leur SHA final avant création du checkpoint cible.
 
 ### Combat directeur suspendu proprement
 - Combat 4K est checkpoint vert sur `c672726b69aa5895d252e2f31084c20740bcc699`.
 - Inventaire après 4K : `startCombat` = 4 — définition historique + alias + `cell` + `ambush`.
 - Prochain lot combat prévu : **4L `ambush` uniquement**.
-- 4L ne démarre qu'après checkpoint vert du lot preview/PWA.
+- Une branche 4L avait été ouverte depuis l'ancien checkpoint, mais aucun runtime 4L n'a été modifié avant le signalement Dock.
+- Cette branche ne doit pas être reprise comme base.
+- 4L redémarrera depuis le nouveau checkpoint Dock post-PWA final.
 - `cell` reste hors périmètre de 4L.
-
-### Jalon UI protégé
-- Dock Tactical `Attaquer / Fin du tour / Capacité`.
-- Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17`.
-- SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`.
-- Validation utilisateur : « parfait ras tout fonctionne très bien ».
-- Toute intégration doit préserver ce jalon.
 
 ### Production sûre
 - `main` : V16.78.114.11.
@@ -129,10 +148,11 @@ Ordre actuel :
 
 1. Combat 4K — fermé vert ;
 2. Talent post-4K — intégré et fermé vert ;
-3. preview/PWA post-Talent — candidat technique vert, fermeture documentaire en cours ;
-4. Combat 4L — `ambush` uniquement, après checkpoint preview/PWA.
+3. preview/PWA post-Talent — intégré et fermé vert ;
+4. Dock Tactical — restauration de composition sur la chaîne directrice, candidat technique vert ;
+5. Combat 4L — `ambush` uniquement, seulement après checkpoint Dock post-PWA.
 
-Ne pas fusionner les anciennes branches agents en bloc. Reporter uniquement les changements caractérisés et compatibles sur la dernière base verte directrice.
+Ne pas fusionner les anciennes branches agents ou jalons parallèles en bloc. Reporter uniquement les changements caractérisés et compatibles sur la dernière base verte directrice.
 
 ## 7. Compte rendu obligatoire d'un agent
 

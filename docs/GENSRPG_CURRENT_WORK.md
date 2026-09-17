@@ -2,131 +2,128 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — fermeture combat lot 4J : scope V113 et ennemis contournés
+## Chantier courant — fermeture combat lot 4K : action manuelle Runtime 2.00
 
-- Branche : `work/gensrpg-combat-callsite-migration-4j-bypass-scope-clean-2026-09-17`
-- Base exacte / checkpoint vert lot 4I : `b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`
-- Checkpoint vert 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17`
+- Branche : `work/gensrpg-combat-callsite-migration-4k-manual-entry-clean-2026-09-17`
+- Base exacte / checkpoint vert lot 4J : `b8f5b14f0651479165d35545f3a22db6df8d391f`
+- Checkpoint vert 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- `main` ne doit pas être modifié pendant la restructuration.
+- `main` reste gelé pendant la restructuration.
 
-## Lot 4I fermé vert
+## Lot 4J fermé vert
 
-Le lot 4I a migré uniquement l'échec de furtivité Runtime 2.00 vers l'entrée canonique du Bridge. Le checkpoint final est :
+Le lot 4J a corrigé uniquement la cohérence des ennemis contournés entre Runtime 2.00 et le scope V113.
 
-`checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17`
+Checkpoint :
+
+`checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17`
 
 SHA exact :
 
-`b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`
+`b8f5b14f0651479165d35545f3a22db6df8d391f`
 
-Inventaire après 4I :
+Le filtre V113 respecte désormais `dc200Bypassed` et `dc200BypassedBy[heroActif]`. Architecture, Chromium/preview et Firefox sont verts sur ce SHA.
 
-- `dc200StartCombat` : 1 ;
-- `openDungeonCombatSetup` : 1 ;
-- `launchCombat200` : 2 ;
-- `startCombat` : 5 — définition + alias `dc200StartCombat` + actions de contexte `manual` / `cell` / `ambush`.
+## Lot 4K — caractérisation avant modification
 
-Ne pas chercher à mettre ces compteurs à zéro artificiellement.
+Le lot 4K ne traite qu'un seul callsite lexical Runtime 2.00 : le bouton non positionnel `⚔️ ENGAGER LE COMBAT` avec `reason:'manual'`.
 
-## Lot 4J — diagnostic confirmé
+La caractérisation permanente a prouvé que :
 
-La migration directe des trois actions `manual` / `cell` / `ambush` n'était pas sûre en bloc.
+- le bouton n'existe que si le mode est non positionnel et qu'il reste des ennemis vivants ;
+- `combatEnabled200()` reste la garde d'activation ;
+- la source des ennemis est `liveEnemies()` ;
+- `startCombat()` n'a aucune branche métier spécifique à `reason:'manual'` ;
+- l'ancien chemin re-filtrait seulement les mêmes ids puis déléguait à `launchCombat200` ;
+- `manual` n'est pas une raison de détection V113 ;
+- `ambush` est au contraire une raison de détection V113 et reste donc hors du lot ;
+- `cell` possède encore une logique spécifique de renforts/popup et reste hors du lot.
 
-Le Runtime 2.00 possède une règle métier active : `liveEnemies()` exclut les ennemis :
+Test permanent :
 
-- `dc200Bypassed` ;
-- `dc200BypassedBy[heroActif]` ;
-- morts, supprimés ou déjà vaincus ;
-- hors salle / hors branche.
+`tests/gens_core200_manual_entry_characterization_lot4k.test.cjs`
 
-La réussite de furtivité écrit réellement `dc200BypassedBy[hero]=true`.
+La phase de caractérisation, raccordée à `tests/gens_combat_callsite_inventory_v11411.test.cjs`, a été verte avant modification runtime.
 
-Le test de caractérisation 4J a reproduit un conflit de propriétaire : V113 pouvait recevoir un ennemi valide puis, pendant l'expansion spatiale du combat, réajouter un ennemi `dc200Bypassed` ou `dc200BypassedBy[heroActif]` visible dans le même scope.
+## Migration runtime 4K
 
-Cause exacte : `GensRpgTacticalRuntimeAuthority1678113` construisait `roomEnemies` depuis `activeEnemies()`, qui ne filtrait que PV/suppression/défaite et ignorait les marqueurs de contournement Dungeon.
+Une seule ligne runtime de `index.html` a été remplacée.
 
-## Correction propriétaire 4J
+Ancien chemin :
 
-Propriétaire corrigé uniquement :
+`startCombat(live.map(e=>String(e.id)),'manual')`
 
-`assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js`
+Nouveau chemin :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'})`
 
 Commit runtime :
 
-`01a9e84c58f85dd2aa50eea8a327025280ce8db1`
+`989f6f197c7e56dd62393bec8849cf5770d3d63b`
 
-V113 possède maintenant une fonction interne unique d'éligibilité pour le héros actif :
+La modification conserve exactement :
 
-- ennemi vivant ;
-- non supprimé ;
-- non vaincu ;
-- non `dc200Bypassed` ;
-- non `dc200BypassedBy[heroActif]`.
+- le mode non positionnel ;
+- la garde `live.length` ;
+- `combatEnabled200()` ;
+- le même bouton et son comportement ;
+- la source `liveEnemies()` ;
+- les exclusions `dc200Bypassed` / `dc200BypassedBy[heroActif]` ;
+- les mêmes `enemyIds` convertis en chaînes ;
+- `reason:'manual'`.
 
-Cette éligibilité est utilisée par le scope V113, la détection explicite, la sélection des ennemis et le placement runtime final. Aucune règle de portée, ligne de vue, perception, participants, dégâts, stats ou mouvement n'a été modifiée.
+Le scope et les participants restent sous l'autorité canonique V113 via le Bridge. Aucun calcul de combat, mouvement, stats, XP, loot, fiche héros, Save & Quit, Survie, Capture ou PvP n'a été modifié.
 
-## Sentinelle permanente 4J
+Le workflow temporaire utilisé uniquement pour écrire chirurgicalement dans le gros `index.html` a été retiré avant la fermeture du lot. Il ne fait pas partie du diff net.
 
-Test :
+## Inventaire après 4K
 
-`tests/gens_rpg_tactical_runtime_authority_v1678113.test.cjs`
+- `dc200StartCombat` : 1 — seed de compatibilité historique caractérisé au lot 4G ;
+- `openDungeonCombatSetup` : 1 — rollback historique capturé par le Bridge ;
+- `launchCombat200` : 2 — fallback historique caractérisé au lot 4H ;
+- `startCombat` : 4 — définition historique, alias `dc200StartCombat`, action `cell`, action `ambush`.
 
-Commit test :
+Ne pas chercher à réduire ces compteurs artificiellement.
 
-`05837bce39e673334d4125b99b9171a6ebb4e867`
+Les dettes lexicales Runtime 2.00 encore actives sont uniquement :
 
-La sentinelle vérifie qu'un ennemi `dc200Bypassed` et un ennemi `dc200BypassedBy.h1=true` restent exclus lorsque `h1` est le héros actif, y compris pendant l'expansion du scope et la détection V113.
+1. `ambush` ;
+2. `cell`.
 
-Le lot 4J ne modifie aucun callsite `startCombat`. L'inventaire reste donc : `startCombat = 5`.
+La définition historique et l'alias restent protégés tant que les fallbacks de compatibilité caractérisés en dépendent.
 
-## Validation du candidat runtime/tests 4J
+## Validation technique 4K
 
-SHA candidat :
+Candidat runtime/tests/document d'inventaire :
 
-`05837bce39e673334d4125b99b9171a6ebb4e867`
+`c6a9e5ac740b7aa1d18b298d4ec10441df4f1be3`
 
 Validations vertes sur ce même SHA :
 
 - `GenSrpG architecture sentinels` — success ;
-- navigateur Chromium / preview inclus — success ;
+- Chromium / preview — success ;
 - `GenSrpG Firefox wall sentinel` — success.
 
-Le SHA final de fermeture inclura les présents documents. Il doit être revalidé avant création du checkpoint vert 4J.
+Les présents documents de reprise créent le SHA final de fermeture. Ce SHA final doit être revalidé intégralement avant création du checkpoint vert.
 
 Checkpoint cible :
 
-`checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17`
+`checkpoint/gensrpg-combat-callsite-migration-4k-green-2026-09-17`
 
-## Périmètre strict 4J
+## Suite recommandée après checkpoint vert 4K
 
-Aucun changement dans :
+Prochain lot directeur : **4L — `ambush` uniquement**.
 
-- `index.html` ;
-- les callsites `manual`, `cell`, `ambush` ;
-- `startCombat()` / `launchCombat200()` ;
-- règles de dégâts / touche / armure ;
-- stats / XP / loot ;
-- mouvement ;
-- fiche héros ;
-- dock Tactical ;
-- Save & Quit ;
-- Survie / Capture / PvP.
+Règles du lot 4L :
 
-Aucun Observer, timer, retry ou wrapper de réparation n'a été ajouté par le lot 4J.
+- partir du checkpoint vert 4K final exact sur une branche propre ;
+- caractériser l'appel Runtime 2.00 `startCombat(...,'ambush')` avant toute modification ;
+- vérifier spécialement la sémantique V113, car `ambush` est classé comme raison de détection ;
+- préserver source d'ennemis, héros source, scope, guards et comportement du bouton/contexte ;
+- ne pas toucher à `cell` dans le même lot ;
+- ne modifier le runtime que si l'équivalence avec le Bridge est prouvée.
 
-## Suite après checkpoint vert 4J
-
-Les cinq occurrences `startCombat` restantes doivent continuer à être traitées par petits lots.
-
-Ordre recommandé :
-
-1. `manual` — candidat homogène le plus simple après correction du bypass ;
-2. `ambush` — à caractériser séparément car V113 considère actuellement `ambush` comme une raison de détection ;
-3. `cell` — lot séparé car `startCombat(...,'cell')` possède encore sa logique de renforts de proximité + popup ;
-4. définition historique `startCombat` + alias `dc200StartCombat` — conserver tant que les fallbacks caractérisés en dépendent.
-
-Une ancienne branche `work/gensrpg-combat-callsite-migration-4k-manual-entry-2026-09-17` existe mais pointe sur l'ancien essai 4J divergent (`64f104e3...`). Elle ne doit pas être utilisée comme base. Le prochain lot 4K devra partir du checkpoint vert 4J final exact, sur une branche propre.
+Le lot `cell` restera séparé ensuite, car l'ancien `startCombat(...,'cell')` possède une logique spécifique de renforts de proximité et de popup.
 
 ## Coordination multi-fils
 
@@ -135,7 +132,7 @@ Le présent fil reste le **COORDINATEUR / FIL DIRECTEUR**.
 ### Agent 1 — travail Talent terminé, non intégré
 
 - Branche : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`
-- Statut : annoncé terminé ; résultat à contrôler par le coordinateur avant toute intégration.
+- Statut : annoncé terminé ; résultat encore à contrôler par le coordinateur avant toute intégration.
 
 ### Agent 1 — diagnostic Chrome séparé
 
@@ -156,13 +153,11 @@ Ce jalon reste séparé des lots combat tant qu'une intégration explicite n'est
 
 ## Jalons verts précédents
 
+- Lot 4J : `checkpoint/gensrpg-combat-callsite-migration-4j-green-2026-09-17` — `b8f5b14f0651479165d35545f3a22db6df8d391f`.
 - Lot 4I : `checkpoint/gensrpg-combat-callsite-migration-4i-green-2026-09-17` — `b01f1c5fc2ccdbb406abb3fee4cdaab064a27687`.
 - Lot 4H : `checkpoint/gensrpg-combat-callsite-migration-4h-green-2026-09-17` — `2e51e7063b0fca2610b8fd9c1078008cd32a9a34`.
 - Lot 4G : `checkpoint/gensrpg-combat-callsite-migration-4g-green-2026-09-17` — `f97b345419d8ce855237cf47dc4dc83f07b10978`.
 - Lot 4F : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17` — `96043b4b04a069fc571aca38634df221341bb411`.
-- Lot 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17` — `0315edb74a428594fa02d8d9fd74639779b8df07`.
-- Lot 4D : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17` — `e9ee86b128d8954629163ee264dc5e950421e9e9`.
-- Lot 4C : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17` — `8ce140c924d259091a6c9838b82d669256a104f3`.
 
 ## Règle permanente de continuité
 

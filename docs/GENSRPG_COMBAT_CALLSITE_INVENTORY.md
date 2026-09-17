@@ -16,7 +16,7 @@ Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro 
 | `dc200StartCombat` | 1 | alias historique Core 2.x caractérisé au lot 4G comme seed de fallback non-Dungeon capturé par le Bridge ; aucun consommateur Dungeon actif ne l’appelle |
 | `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
 | `launchCombat200` | 2 | lanceur historique Core 2.x caractérisé au lot 4H comme seed de fallback non-Dungeon capturé par le Bridge ; le nom public Dungeon est remplacé par l’adaptateur `requestCombat` |
-| `startCombat` | 5 | fonction Core 2.x, trois actions de contexte `manual` / `cell` / `ambush` et alias vers `dc200StartCombat` ; l’échec de furtivité a quitté ce groupe au lot 4I |
+| `startCombat` | 4 | fonction Core 2.x, actions de contexte `cell` / `ambush` et alias vers `dc200StartCombat` ; `stealth_fail` a quitté ce groupe au lot 4I et `manual` au lot 4K |
 
 ## Groupes à migrer
 
@@ -26,7 +26,9 @@ Le dernier alias `window.dc200StartCombat = startCombat` a été caractérisé a
 
 Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
 
-Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, l’embuscade Core 2.09 depuis le lot 4F et l’échec de furtivité Runtime 2.00 depuis le lot 4I.
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, l’embuscade Core 2.09 depuis le lot 4F, l’échec de furtivité Runtime 2.00 depuis le lot 4I et l’action manuelle Runtime 2.00 depuis le lot 4K.
+
+Les seuls callsites lexicaux Runtime 2.00 encore à caractériser/migrer sont désormais `cell` et `ambush`. Ils restent séparés car ils n’ont pas le même comportement : `cell` possède une logique de renforts de proximité et `ambush` est classé comme raison de détection par V113.
 
 ### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
 
@@ -146,9 +148,33 @@ L’entrée finale passe désormais directement par :
 
 `GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:'stealth_fail',entry:'dc200StealthFailure'})`
 
-Le scope et les participants restent donc calculés par l’autorité canonique V113 via le Bridge. Les trois autres actions de contexte `manual`, `cell` et `ambush` restent volontairement hors périmètre de 4I.
+Le scope et les participants restent donc calculés par l’autorité canonique V113 via le Bridge. Les trois autres actions de contexte `manual`, `cell` et `ambush` restaient volontairement hors périmètre de 4I.
 
-Le lot fait passer l’inventaire brut de `startCombat` de 6 à 5 : définition historique + alias `dc200StartCombat` + trois actions de contexte.
+Le lot faisait passer l’inventaire brut de `startCombat` de 6 à 5.
+
+## Migration validée — lot 4K, action manuelle Runtime 2.00
+
+Le lot 4K caractérise d’abord l’unique bouton non positionnel `⚔️ ENGAGER LE COMBAT` de Runtime 2.00, puis retire uniquement son callsite lexical :
+
+`startCombat(live.map(e=>String(e.id)),'manual')`
+
+devient :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'})`
+
+La caractérisation préalable a établi que `reason:'manual'` n’avait aucune branche métier propre dans `startCombat()`. Le lot conserve exactement :
+
+- la garde mode non positionnel `!positional` ;
+- la présence d’ennemis `live.length` ;
+- la garde `combatEnabled200()` ;
+- le libellé et le comportement du bouton ;
+- la source `liveEnemies()` et donc les exclusions `dc200Bypassed` / `dc200BypassedBy[heroActif]` ;
+- les mêmes `enemyIds` convertis en chaînes ;
+- `reason:'manual'`.
+
+Le scope et les participants restent calculés par V113 via le Bridge. `ambush` n’est pas inclus dans ce lot car V113 le classe comme raison de détection. `cell` n’est pas inclus car l’ancien `startCombat()` lui ajoute des renforts de proximité et une popup dédiée.
+
+Le lot fait passer l’inventaire brut de `startCombat` de 5 à 4 : définition historique + alias `dc200StartCombat` + actions `cell` / `ambush`.
 
 ## Contrat cible déjà disponible
 

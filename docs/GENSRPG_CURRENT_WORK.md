@@ -8,8 +8,29 @@ Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est pl
 - Base exacte / checkpoint vert combat 4F : `96043b4b04a069fc571aca38634df221341bb411`
 - Checkpoint vert 4F : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17`
 - Checkpoint de départ UI : `checkpoint/gensrpg-start-tactical-dock-render-reconnect-2026-09-17`
+- SHA runtime/tests validé : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
+
+## État final du lot dock — vert
+
+Le dock flottant `Attaquer / Fin du tour / Capacité` est de nouveau raccordé au vrai cycle de rendu Tactical sans réintroduire d'autorité globale.
+
+Validation du SHA `642a0e3276f07f2d3089047d1dd5c1b72f8353b9` :
+
+- contrat source du dock : vert ;
+- vrai chemin navigateur dock Chromium : vert ;
+- vrai chemin navigateur dock Firefox : vert ;
+- batterie architecture complète : verte ;
+- Chromium/preview historique : vert ;
+- Firefox historique : vert ;
+- aucun `MutationObserver` global `body/html` réintroduit ;
+- aucun timer/retry de réparation ajouté ;
+- gameplay combat, participants, IA, timeline, stats, XP, loot et mouvement inchangés ;
+- workflow progression toujours lecture seule ;
+- `main` intact.
+
+Le test Firefox dédié utilise les options supportées par Playwright : même viewport/touch/DPR que Chromium, mais `isMobile:true` seulement sur Chromium.
 
 ## Lot combat 4F — état figé vert
 
@@ -28,7 +49,7 @@ Cette dette reste hors du chantier UI courant.
 
 ## Anomalie utilisateur — dock flottant disparu
 
-Symptôme : les commandes flottantes `Attaquer / Fin du tour / Capacité` ne sont plus visibles pendant le combat Tactical.
+Symptôme initial : les commandes flottantes `Attaquer / Fin du tour / Capacité` n'étaient plus visibles pendant le combat Tactical.
 
 ### Propriétaires identifiés
 
@@ -37,9 +58,9 @@ Symptôme : les commandes flottantes `Attaquer / Fin du tour / Capacité` ne son
 
 ### Cause confirmée
 
-V111 crée toujours correctement les trois commandes et relaie vers les vrais boutons Tactical. L'ancien `MutationObserver` n'est plus installé par `install()`, conformément à la charte.
+V111 créait toujours correctement les trois commandes et relayait vers les vrais boutons Tactical. L'ancien `MutationObserver` n'était plus installé par `install()`, conformément à la charte.
 
-Après le retrait de cet observer, V111 a tenté de conserver le dock en enveloppant `GensRpgTacticalCombatV2Ui.render` exporté. Mais le renderer canonique appelle son `render()` lexical/interne directement depuis `open()` et depuis ses actions. Le vrai chemin de rendu contourne donc le wrapper exporté ; `ensureDock()` n'est plus rappelé lors de l'ouverture réelle du combat.
+Après le retrait de cet observer, V111 avait tenté de conserver le dock en enveloppant `GensRpgTacticalCombatV2Ui.render` exporté. Mais le renderer canonique appelle son `render()` lexical/interne directement depuis `open()` et depuis ses actions. Le vrai chemin de rendu contournait donc le wrapper exporté ; `ensureDock()` n'était plus rappelé lors de l'ouverture réelle du combat.
 
 L'ancien test V111 ne détectait pas cette régression car il vérifiait seulement l'existence du wrapper dans le source, pas le chemin `open() -> render()` réellement exécuté.
 
@@ -67,16 +88,16 @@ Le test laisse volontairement expirer les retries historiques V111 jusqu'à 5 s 
 
 Le garde navigateur interdit explicitement tout `MutationObserver` global sur `body` ou `html`, conformément à la charte. Le garde source vérifie en parallèle que `install()` V111 ne rappelle jamais son ancien `observe()`. Un observer local/non-global éventuellement créé par le harness ou le navigateur n'est pas assimilé à l'ancienne réparation DOM globale.
 
-## Correction autorisée
+## Correction appliquée
 
 Petit lot à deux propriétaires uniquement :
 
-1. le renderer Tactical canonique obtient un mécanisme minimal `onAfterRender(fn)` détenu par lui-même et déclenché à la fin du vrai `render()` ;
-2. V111 remplace son wrapper de `UI.render` par un abonnement unique à `onAfterRender`, qui appelle son `maintain()` existant.
+1. le renderer Tactical canonique possède maintenant un mécanisme minimal `onAfterRender(fn)` détenu par lui-même et déclenché à la fin du vrai `render()` ;
+2. V111 utilise cet abonnement au lieu de remplacer `UI.render`, et appelle son `maintain()` existant.
 
 Le hook ne contient aucune règle métier et ne répare pas le DOM à distance : le propriétaire du renderer annonce explicitement qu'un rendu vient de finir.
 
-## Interdictions pour ce lot
+## Interdictions maintenues
 
 - ne pas réactiver `MutationObserver` global ;
 - ne pas ajouter de timer/retry de réparation ;
@@ -85,19 +106,15 @@ Le hook ne contient aucune règle métier et ne répare pas le DOM à distance :
 - ne pas toucher à l'alias `dc200StartCombat` restant ;
 - ne pas toucher `main`.
 
-Les retries de démarrage V111 déjà présents ne doivent pas être étendus ni utilisés comme mécanisme de correction du dock.
+Les retries de démarrage V111 déjà présents n'ont pas été étendus ni utilisés comme mécanisme de correction du dock.
 
-## Fermeture requise
+## Agent parallèle autorisé
 
-1. tests source/ancien V111 alignés sur le nouveau contrat ;
-2. test navigateur vrai chemin du dock vert dans Chromium et Firefox ;
-3. batterie architecture complète verte ;
-4. Chromium/preview verts ;
-5. Firefox vert ;
-6. workflow progression toujours lecture seule ;
-7. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
-8. checkpoint vert dédié ;
-9. fournir à l'utilisateur une preview de test sur le SHA vert avant toute décision concernant `main`.
+Une branche séparée a été créée depuis le checkpoint vert 4F pour un premier agent parallèle :
+
+`work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`
+
+Périmètre : diagnostic du flash/disparition de la zone Talent sur la fiche héros. Cette branche ne doit pas toucher au dock Tactical, au combat ni à `main`.
 
 ## Jalons verts précédents
 

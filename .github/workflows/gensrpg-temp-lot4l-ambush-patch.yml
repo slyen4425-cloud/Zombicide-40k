@@ -1,0 +1,50 @@
+name: TEMP GenSrpG Combat 4L ambush patch
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-combat-callsite-migration-4l-ambush-entry-post-dock-2026-09-17'
+
+permissions:
+  contents: write
+
+jobs:
+  bounded-ambush-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply exact 4L Bridge and Runtime 2.00 patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          bridge=Path('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js')
+          index=Path('index.html')
+          b=bridge.read_text()
+          h=index.read_text()
+          old_bridge='if(!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};'
+          new_bridge='if(options.preserveEnemyIds===true||!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};'
+          old_ambush="b.onclick=()=>startCombat(live.map(e=>String(e.id)),'ambush');"
+          new_ambush="b.onclick=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true});"
+          if new_bridge in b and new_ambush in h:
+              print('4L patch already present; no-op.')
+              raise SystemExit(0)
+          if b.count(old_bridge)!=1:
+              raise SystemExit(f'Bridge bounded replacement expected 1 occurrence, got {b.count(old_bridge)}')
+          if h.count(old_ambush)!=1:
+              raise SystemExit(f'Ambush bounded replacement expected 1 occurrence, got {h.count(old_ambush)}')
+          b=b.replace(old_bridge,new_bridge,1)
+          h=h.replace(old_ambush,new_ambush,1)
+          bridge.write_text(b)
+          index.write_text(h)
+          PY
+      - name: Commit only 4L owner and callsite files
+        run: |
+          if git diff --quiet; then exit 0; fi
+          test "$(git diff --name-only | sort)" = $'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js\nindex.html'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js index.html
+          git commit -m 'fix: migrate Runtime 2.00 ambush through Bridge without narrowing enemy seed'
+          git push

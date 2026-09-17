@@ -27,4 +27,4 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Characterize hero sheet Talent visibility
-        run: node tests/gens_hero_sheet_talent_flash_browser_v11411.test.cjs
+        run: node tests/gens_hero_sheet_talent_flash_v11411.test.cjs

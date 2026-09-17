@@ -1,0 +1,87 @@
+name: GenSrpG TEMP 4M inventory doc sync
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17'
+    paths:
+      - '.github/workflows/gensrpg-temp-4m-doc-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17
+          fetch-depth: 0
+
+      - name: Synchroniser uniquement l'inventaire combat 4M
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md')
+          s=p.read_text()
+
+          old_row="| `startCombat` | 3 | fonction Core 2.x, action de contexte `cell` et alias vers `dc200StartCombat` ; `stealth_fail` a quitté ce groupe au lot 4I, `manual` au lot 4K et `ambush` au lot 4L |"
+          new_row="| `startCombat` | 2 | fonction Core 2.x historique + alias vers `dc200StartCombat` ; tous les callsites Dungeon actifs ont quitté ce groupe (`stealth_fail` 4I, `manual` 4K, `ambush` 4L, `cell` 4M) |"
+          assert s.count(old_row)==1, f'startCombat row count={s.count(old_row)}'
+          s=s.replace(old_row,new_row)
+
+          old_remaining="Le seul callsite lexical Runtime 2.00 restant à caractériser/migrer est désormais `cell`. Il reste séparé car l’ancien `startCombat()` lui ajoute une logique de renforts de proximité et une popup dédiée."
+          new_remaining="Le lot 4M a migré le dernier callsite lexical Runtime 2.00, `cell`, après caractérisation de sa logique de cible et de renforts. `startCombat` ne subsiste désormais que comme fonction historique et alias de compatibilité capturé par le Bridge."
+          assert s.count(old_remaining)==1, f'remaining cell paragraph count={s.count(old_remaining)}'
+          s=s.replace(old_remaining,new_remaining)
+
+          old_l4="Le lot fait passer l’inventaire brut de `startCombat` de 4 à 3 : définition historique + alias `dc200StartCombat` + action `cell`."
+          lot4m="""Le lot fait passer l’inventaire brut de `startCombat` de 4 à 3 : définition historique + alias `dc200StartCombat` + action `cell`.
+
+## Migration validée — lot 4M, action `cell` Runtime 2.00
+
+Le lot 4M caractérise d’abord l’action `⚔️ ATTAQUER` déclenchée lorsqu’un ennemi occupe la case du héros actif. Dungeon reste propriétaire de la préparation spécifique à cette interaction :
+
+- cible revalidée via `liveEnemies()` ;
+- renforts calculés autour de la case de la cible par distance de Manhattan ;
+- probabilité inchangée : 65 % à distance 1, 30 % à distance 2, 0 au-delà ;
+- fusion sans doublon du seul ensemble cible + renforts sélectionnés ;
+- popup `⚔️ RENFORTS ENNEMIS` conservée avant l’ouverture du combat lorsqu’un renfort rejoint l’affrontement.
+
+Une migration mécanique vers le Bridge n’était pas équivalente : `V113.selectCombatants()` peut ajouter d’autres ennemis visibles au seed demandé. Le Bridge reçoit donc un contrat étroit :
+
+`limitEnemyIdsToRequest:true`
+
+Ce flag ne remplace pas l’autorité V113. `selectCombatants()` reste appelée pour calculer le scope et les participants, puis sa liste d’ennemis est limitée à l’ensemble déjà sélectionné par Dungeon. Un ennemi demandé mais refusé par V113 n’est jamais forcé à revenir ; seuls les ajouts hors seed Dungeon sont écartés.
+
+Le bouton Runtime 2.00 délègue désormais à `startCellCombat(target,x)`, qui conserve la préparation Dungeon ci-dessus puis entre par :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true})`
+
+La branche `reason==='cell'` et la popup de renforts sont retirées de l’ancien `startCombat()`. Le lot fait passer l’inventaire brut de `startCombat` de 3 à 2 : définition historique + alias `dc200StartCombat`, sans callsite Dungeon actif.
+"""
+          assert s.count(old_l4)==1, f'lot 4L ending count={s.count(old_l4)}'
+          s=s.replace(old_l4,lot4m.rstrip())
+
+          old_contract="Le contrat `preserveEnemyIds:true` est une option étroite de cette même entrée : il signifie uniquement que le caller a déjà sélectionné son seed d’ennemis et qu’il ne faut pas le recroiser avec `detectionPairs()` avant `selectCombatants()`."
+          new_contract="Le contrat `preserveEnemyIds:true` reste l’option étroite de l’embuscade 4L : le caller a déjà sélectionné son seed et celui-ci ne doit pas être recroisé avec `detectionPairs()` avant `selectCombatants()`. Le contrat `limitEnemyIdsToRequest:true` ajouté en 4M est distinct : V113 sélectionne toujours canoniquement les combattants, puis aucun ennemi extérieur au seed Dungeon déjà préparé n’est ajouté à la route `cell`."
+          assert s.count(old_contract)==1, f'contract paragraph count={s.count(old_contract)}'
+          s=s.replace(old_contract,new_contract)
+
+          p.write_text(s)
+          PY
+
+          git diff --check
+          node tests/gens_combat_callsite_inventory_v11411.test.cjs
+
+      - name: Commit documentation 4M
+        shell: bash
+        run: |
+          git config user.name 'gensrpg-coordinator'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/GENSRPG_COMBAT_CALLSITE_INVENTORY.md
+          git diff --cached --quiet && exit 1
+          git commit -m 'docs: close combat callsite inventory lot 4M'
+          git push origin HEAD:work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17

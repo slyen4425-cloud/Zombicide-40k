@@ -114,7 +114,7 @@
     if(typeof authority?.selectCombatants!=="function")return {ok:true,options};
     try{
       const prepared=prepareV113Detection(rt,authority,options);if(!prepared.ok)return prepared;
-      const selection=authority.selectCombatants(rt,prepared.options||{}),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),enemyIds=arr(selection?.enemyIds).map(str).filter(Boolean);
+      const preparedOptions=prepared.options||{},selection=authority.selectCombatants(rt,preparedOptions),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),requestedEnemyIds=arr(preparedOptions.enemyIds).map(str).filter(Boolean),selectedEnemyIds=arr(selection&&selection.enemyIds).map(str).filter(Boolean),enemyIds=preparedOptions.limitEnemyIdsToRequest===true&&requestedEnemyIds.length?selectedEnemyIds.filter(id=>requestedEnemyIds.includes(id)):selectedEnemyIds;
       if(!heroIds.length||!enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113",selection};
       return {ok:true,options:{...prepared.options,heroIds,enemyIds,scope:selection?.scope||prepared.options?.scope,sourceHeroIds:arr(selection?.sourceHeroIds).map(str).filter(Boolean)},selection};
     }catch(error){

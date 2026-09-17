@@ -17677,8 +17677,8 @@ function unlockDungeonSkill(id){
 function gainDungeonSkillPoint(){if(!isDungeonHeroSheet())return;state.bonusSkillPoints=Math.max(0,Number(state.bonusSkillPoints)||0)+1;dungeonSyncProgressionForState(current,state);save();renderDungeonSkillTree()}
 function resetDungeonSkillTree(){if(!isDungeonHeroSheet()||!confirm("Réinitialiser cet arbre ?"))return;const refund=dungeonTreeNodes().filter(n=>dungeonNodeUnlocked(n.id)).reduce((a,n)=>a+(+n.cost||1),0);state.skillPoints=(state.skillPoints||0)+refund;state.skillTreeUnlocked=[];save();renderDungeonSkillTree()}
 function renderDungeonSkillTree(){
- const d=isDungeonHeroSheet(),p=document.getElementById("dungeonSkillTreePanel"),z=document.getElementById("zombicideSkillPanel");
- if(p)p.style.display=d?"block":"none";if(z)z.style.display=d?"none":"block";
+ const d=isDungeonHeroSheet(),z=document.getElementById("zombicideSkillPanel");
+ if(z)z.style.display=d?"none":"block";
  const xb=document.getElementById("zombicideXpBar"),xm=document.getElementById("xpMarker"),dp=document.getElementById("dungeonProgressText");
  if(xb)xb.style.display=d?"none":"flex";if(xm)xm.style.display=d?"none":"block";
  if(d){try{dungeonSyncProgressionForState(current,state)}catch(e){console.warn("Core 0.72 progression sheet",e)}}

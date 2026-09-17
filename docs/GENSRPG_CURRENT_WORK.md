@@ -2,86 +2,111 @@
 
 Ce fichier est le point d'entrée prioritaire lorsqu'un fil de discussion est plein ou qu'un chantier doit être repris dans un nouveau fil.
 
-## Chantier courant — migration combat, lot 4F : embuscade Core 2.09
+## Chantier courant — dock flottant Tactical : raccord au renderer canonique
 
-- Branche : `work/gensrpg-combat-callsite-migration-4f-2026-09-17`
-- Base exacte / checkpoint vert lot 4E : `0315edb74a428594fa02d8d9fd74639779b8df07`
-- Checkpoint vert 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17`
-- Checkpoint de départ 4F : `checkpoint/gensrpg-start-combat-callsite-migration-4f-2026-09-17`
-- Commit runtime 4F : `e473571bd80a5a61c9258c16e43d9472d5a395db`
-- Test 4F : `tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs`
+- Branche : `work/gensrpg-tactical-dock-render-reconnect-2026-09-17`
+- Base exacte / checkpoint vert combat 4F : `96043b4b04a069fc571aca38634df221341bb411`
+- Checkpoint vert 4F : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17`
+- Checkpoint de départ UI : `checkpoint/gensrpg-start-tactical-dock-render-reconnect-2026-09-17`
 - Production `main` sûre : V16.78.114.11 — `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` ne doit pas être modifié pendant la restructuration.
 
-## Résultat appliqué du lot 4F
+## Lot combat 4F — état figé vert
 
-La caractérisation a été écrite avant la correction. Core 2.09 conserve intégralement sa logique d'embuscade : garde d'événement/salle, source `living(x)`, déduplication et persistance `dc209AmbushDone`, verrou `ambushStarting`, délai 120 ms et libération à 250 ms.
+Core 2.09 embuscade entre maintenant directement par `GensRpgTacticalCombatV2Bridge.requestCombat()` en conservant ses gardes, sa déduplication/persistance, `living(x)`, son délai 120 ms, sa libération à 250 ms, les mêmes `enemyIds` et `reason:"ambush"`.
 
-Seule l'entrée finale du combat a été migrée :
+Validation finale 4F sur `96043b4b04a069fc571aca38634df221341bb411` : architecture + Chromium/preview verts, Firefox vert, workflow progression lecture seule et `main` intact.
 
-`dc200StartCombat(live.map(e=>String(e.id)),"ambush")`
+Dette combat après 4F :
 
-devient :
-
-`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})`
-
-Les participants et le scope restent calculés par V113 via le Bridge. Aucune règle V113 n'est recopiée dans Core 2.09.
-
-Le writer temporaire utilisé pour le gros `index.html` a été restauré immédiatement au workflow progression canonique en lecture seule, blob `31c5043f8352b656f1d015bc4888332e738bf913`.
-
-## Dette combat après application 4F
-
-Inventaire attendu :
-
-- `dc200StartCombat` : 1 — uniquement `window.dc200StartCombat=startCombat` ;
+- `dc200StartCombat` : 1 — alias historique uniquement ;
 - `openDungeonCombatSetup` : 1 — définition rollback historique ;
 - `launchCombat200` : 2 ;
 - `startCombat` : 6.
 
-Le test d'inventaire a été abaissé de 3 à 1 uniquement après la modification réelle du runtime. Le test 4E a été recentré sur son contrat de détection et le test 4F est désormais seul propriétaire des assertions d'entrée d'embuscade.
+Cette dette reste hors du chantier UI courant.
 
-L'alias Core 2.x restant doit être caractérisé séparément. Ne pas le retirer avec `startCombat` ou `launchCombat200` sans nouveau lot dédié.
+## Anomalie utilisateur — dock flottant disparu
 
-## Diagnostic UI séparé — dock flottant Tactical
+Symptôme : les commandes flottantes `Attaquer / Fin du tour / Capacité` ne sont plus visibles pendant le combat Tactical.
 
-Observation utilisateur : les boutons flottants `Attaquer / Fin du tour / Capacité` ont disparu.
+### Propriétaires identifiés
 
-Cause confirmée :
+- Renderer canonique : `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js`.
+- Dock : `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` (V111), fonction `ensureDock()`.
 
-- le dock appartient au module V111 `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` ;
-- `ensureDock()` existe toujours et crée les trois boutons ;
-- l'ancien `MutationObserver` n'est plus installé, conformément à la charte ;
-- V111 tente de maintenir le dock via un wrapper de `GensRpgTacticalCombatV2Ui.render` exporté ;
-- le renderer Tactical de base appelle cependant son `render()` lexical/interne depuis `open()` et depuis ses actions ; ces rendus contournent donc le wrapper exporté ;
-- les boutons source `data-attack` et `data-end` existent toujours, mais `ensureDock()` n'est plus rappelé sur le vrai chemin de rendu.
+### Cause confirmée
 
-Ne pas réactiver `MutationObserver`, timer global ou retry. Après le checkpoint vert 4F, ouvrir un lot UI séparé avec un raccord post-rendu explicite appartenant au renderer Tactical, un test navigateur vrai chemin, puis fournir une preview de test à l'utilisateur.
+V111 crée toujours correctement les trois commandes et relaie vers les vrais boutons Tactical. L'ancien `MutationObserver` n'est plus installé, conformément à la charte.
 
-## Validation de fermeture 4F
+Après le retrait de cet observer, V111 a tenté de conserver le dock en enveloppant `GensRpgTacticalCombatV2Ui.render` exporté. Mais le renderer canonique appelle son `render()` lexical/interne directement depuis `open()` et depuis ses actions. Le vrai chemin de rendu contourne donc le wrapper exporté ; `ensureDock()` n'est plus rappelé lors de l'ouverture réelle du combat.
 
-Le runtime, les gardes 4E/4F, l'inventaire à 1 et la documentation sont alignés. Le test 4F est raccordé aux sentinelles architecture.
+L'ancien test V111 ne détectait pas cette régression car il vérifiait seulement l'existence du wrapper dans le source, pas le chemin `open() -> render()` réellement exécuté.
 
-Avant le checkpoint vert 4F, exiger sur le même SHA final :
+## Caractérisation créée avant correction
 
-1. architecture complète verte, incluant V112/V113/Bridge, inventaire et 4F ;
-2. Chromium / preview verts ;
-3. Firefox vert ;
-4. workflow progression toujours sur le blob lecture seule `31c5043f8352b656f1d015bc4888332e738bf913` ;
-5. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+### Contrat source
 
-Checkpoint à créer seulement après ces contrôles : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17`.
+`tests/gens_tactical_dock_canonical_render_hook_v11411.test.cjs`
+
+Le contrat exige :
+
+- un hook explicite de fin de rendu appartenant au renderer Tactical canonique ;
+- notification depuis le `render()` lexical réellement utilisé ;
+- export public de l'abonnement ;
+- V111 s'abonne au hook sans remplacer `UI.render` ;
+- aucune réactivation de `MutationObserver` ;
+- conservation des labels et des relais vers les vrais boutons source.
+
+### Reproduction navigateur vrai chemin
+
+- Fixture : `tests/fixtures/tactical-dock-render-v11411.html`.
+- Test : `tests/gens_tactical_dock_browser_v11411.test.cjs`.
+
+Le test laisse volontairement expirer les retries historiques V111 jusqu'à 5 s avant d'ouvrir Tactical. Il ne peut donc pas réussir grâce à un retry tardif. Il ouvre ensuite le combat via le vrai `GensRpgTacticalCombatV2Ui.open()`, vérifie un dock unique et visible, les trois commandes, puis force un rerender interne et vérifie que le dock reste raccordé. Il exige également zéro `MutationObserver` installé.
+
+## Correction autorisée
+
+Petit lot à deux propriétaires uniquement :
+
+1. le renderer Tactical canonique obtient un mécanisme minimal `onAfterRender(fn)` détenu par lui-même et déclenché à la fin du vrai `render()` ;
+2. V111 remplace son wrapper de `UI.render` par un abonnement unique à `onAfterRender`, qui appelle son `maintain()` existant.
+
+Le hook ne contient aucune règle métier et ne répare pas le DOM à distance : le propriétaire du renderer annonce explicitement qu'un rendu vient de finir.
+
+## Interdictions pour ce lot
+
+- ne pas réactiver `MutationObserver` ;
+- ne pas ajouter de timer/retry de réparation ;
+- ne pas ajouter de listener global de reprise d'autorité ;
+- ne pas modifier combat, participants, IA, timeline, stats, XP, loot ou mouvement ;
+- ne pas toucher à l'alias `dc200StartCombat` restant ;
+- ne pas toucher `main`.
+
+Les retries de démarrage V111 déjà présents ne doivent pas être étendus ni utilisés comme mécanisme de correction du dock.
+
+## Fermeture requise
+
+1. tests source/ancien V111 alignés sur le nouveau contrat ;
+2. test navigateur vrai chemin du dock vert ;
+3. batterie architecture complète verte ;
+4. Chromium/preview verts ;
+5. Firefox vert ;
+6. workflow progression toujours lecture seule ;
+7. `main` toujours sur `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
+8. checkpoint vert dédié ;
+9. fournir à l'utilisateur une preview de test sur le SHA vert avant toute décision concernant `main`.
 
 ## Jalons verts précédents
 
+- Lot 4F : `checkpoint/gensrpg-combat-callsite-migration-4f-green-2026-09-17` — `96043b4b04a069fc571aca38634df221341bb411`.
 - Lot 4E : `checkpoint/gensrpg-combat-callsite-migration-4e-green-2026-09-17` — `0315edb74a428594fa02d8d9fd74639779b8df07`.
 - Lot 4D : `checkpoint/gensrpg-combat-callsite-migration-4d-green-2026-09-17` — `e9ee86b128d8954629163ee264dc5e950421e9e9`.
 - Lot 4C : `checkpoint/gensrpg-combat-callsite-migration-4c-green-2026-09-17` — `8ce140c924d259091a6c9838b82d669256a104f3`.
 - Lot 4A : `checkpoint/gensrpg-combat-callsite-migration-4a-green-2026-09-17` — `498ab21e9e52746160a5a6de2cb158393a06a7d1`.
 - Lot 3 : `checkpoint/gensrpg-combat-callsite-migration-3-green-2026-09-16` — `8c2c225674ed66212e1025a827e3ca078354f9e9`, validé utilisateur.
-- Lot 2 : `checkpoint/gensrpg-combat-callsite-migration-2-green-2026-09-16` — `b77225582f9b854b2b0e658029ebb783fc31aab7`.
-- Lot 1 : `checkpoint/gensrpg-combat-callsite-migration-1-green-2026-09-16` — `2aa6ba574923229af105cbee1635eeb9efab18cb`.
 - XP + portrait : `checkpoint/gensrpg-xp-portrait-cleanfix-green-2026-09-16` — `695be0e029fb49ee70966729474b35aa0a2d9c63`, validé utilisateur Firefox.
 
 ## Règle permanente de continuité
 
-À chaque chantier : lire la charte puis ce fichier, checkpoint avant changement, branche dédiée, caractériser avant correction, checkpoint vert sur le SHA exact validé, puis mettre ce fichier à jour avant le chantier suivant.
+Lire la charte puis ce fichier, checkpoint avant changement, branche dédiée, caractériser avant correction, lot borné, checkpoint vert sur le SHA exact validé, puis mettre ce fichier à jour avant le chantier suivant.

@@ -24,13 +24,13 @@ Les autres fils sont des **AGENTS EXÉCUTANTS**. Ils ne deviennent jamais coordi
 
 ## 2. Procédure de reprise dans un nouveau fil directeur
 
-Quand le fil directeur change, le nouveau fil doit lire dans cet ordre :
+Lire dans cet ordre :
 1. `docs/GENSRPG_CHARTE.md`
 2. `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`
 3. `docs/GENSRPG_CURRENT_WORK.md`
 4. `docs/GENSRPG_COORDINATION.md`
 
-Puis il doit vérifier :
+Puis vérifier :
 - le SHA exact de `main` ;
 - le dernier checkpoint vert ;
 - les branches agents encore actives ;
@@ -54,7 +54,7 @@ Deux agents ne doivent jamais modifier le même propriétaire critique en parall
 
 ## 4. Verrous de coordination
 
-Tant qu’un lot est actif, son propriétaire critique est considéré comme verrouillé pour les autres agents.
+Tant qu’un lot est actif, son propriétaire critique est verrouillé pour les autres agents.
 
 Avant de lancer un nouvel agent, le coordinateur vérifie qu’il n’entre pas en conflit avec :
 - navigation / fiche héros ;
@@ -64,40 +64,47 @@ Avant de lancer un nouvel agent, le coordinateur vérifie qu’il n’entre pas 
 - déplacement Dungeon ;
 - sauvegarde / reprise ;
 - inventaire / équipement / sets ;
-- shell / index.html si le même bloc est concerné.
+- shell / `index.html` si le même bloc est concerné.
 
 ## 5. État de coordination — 2026-09-17
 
 ### Fil directeur
 - Rôle : **COORDINATEUR actif**
-- Chantier directeur : poursuite de la restructuration combat après lot 4G
-- Branche de travail suivante : `work/gensrpg-combat-callsite-migration-4h-2026-09-17`
-- Base : checkpoint vert 4G
-- Checkpoint vert 4G : `checkpoint/gensrpg-combat-callsite-migration-4g-green-2026-09-17`
-- SHA 4G : `f97b345419d8ce855237cf47dc4dc83f07b10978`
+- Chantier directeur : fermeture du lot combat 4I, échec de furtivité Runtime 2.00
+- Branche : `work/gensrpg-combat-callsite-migration-4i-2026-09-17`
+- Base : checkpoint vert 4H
+- Checkpoint vert 4H : `checkpoint/gensrpg-combat-callsite-migration-4h-green-2026-09-17`
+- SHA 4H : `2e51e7063b0fca2610b8fd9c1078008cd32a9a34`
+- Propriétaire verrouillé : ancien déclenchement combat Core/Runtime 2.00 autour de `startCombat`
+- Le prochain lot ne peut démarrer qu’après création du checkpoint vert 4I sur un SHA entièrement revalidé.
 
-### Agent 1
-- Rôle : **AGENT EXÉCUTANT**
+### Agent 1 — ancien travail Talent
 - Branche : `work/gensrpg-hero-sheet-talent-flash-diagnostic-2026-09-17`
-- Base : checkpoint vert 4F `96043b4b04a069fc571aca38634df221341bb411`
-- Mission : diagnostiquer puis, seulement si parfaitement identifié et dans le périmètre, corriger le flash/disparition des éléments Talent de la fiche héros.
-- Interdictions : ne pas toucher au combat Tactical, dock, stats, XP, déplacement, sauvegarde, navigation globale ou `main`.
-- Statut : séparé du fil directeur ; résultat à rapporter au coordinateur avant toute intégration.
+- Mission : diagnostic/correction ciblée du flash/disparition Talent de la fiche héros.
+- Statut : annoncé terminé par l’utilisateur ; **non intégré** tant que branche, SHA, diff et tests n’ont pas été vérifiés par le coordinateur.
+
+### Agent 1 — diagnostic Chrome actif
+- Branche : `work/gensrpg-chrome-white-screen-diagnostic-2026-09-17`
+- Base : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
+- Mission : diagnostiquer l’écran blanc/figé observé sous Chrome Android alors que le même jalon fonctionne sous Firefox.
+- Interdictions : aucun gameplay, aucun observer/timer/retry global, aucune modification du propriétaire combat 4I, aucun `main`.
+- Statut : séparé du fil directeur ; résultat à rapporter avant toute intégration.
 
 ### Jalon UI séparé validé utilisateur
 - Dock Tactical `Attaquer / Fin du tour / Capacité`
-- SHA testé : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
+- Checkpoint : `checkpoint/gensrpg-tactical-dock-render-reconnect-green-2026-09-17`
+- SHA : `642a0e3276f07f2d3089047d1dd5c1b72f8353b9`
 - Validation utilisateur : « parfait ras tout fonctionne très bien »
 - Ce jalon reste séparé des lots combat tant que le coordinateur n’a pas décidé de son intégration.
 
 ### Production sûre
 - `main` : V16.78.114.11
-- SHA : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
+- SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - `main` reste gelé pendant la restructuration.
 
 ## 6. Compte rendu obligatoire d’un agent
 
-À la fin de son lot, un agent doit fournir au coordinateur :
+À la fin de son lot, un agent doit fournir :
 - cause exacte ;
 - branche ;
 - SHA final ;

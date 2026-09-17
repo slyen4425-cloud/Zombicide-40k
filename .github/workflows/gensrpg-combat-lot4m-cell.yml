@@ -7,76 +7,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch-runtime:
-    if: github.event_name == 'push' && github.event.head_commit.message == 'activate-4m-runtime-patch-v2'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Récupérer la branche 4M
-        uses: actions/checkout@v4
-        with:
-          ref: work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17
-          fetch-depth: 0
-
-      - name: Appliquer uniquement le contrat cell 4M
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          bridge=Path('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js')
-          bs=bridge.read_text()
-          old="const selection=authority.selectCombatants(rt,prepared.options||{}),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),enemyIds=arr(selection?.enemyIds).map(str).filter(Boolean);"
-          new="const preparedOptions=prepared.options||{},selection=authority.selectCombatants(rt,preparedOptions),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),requestedEnemyIds=arr(preparedOptions.enemyIds).map(str).filter(Boolean),selectedEnemyIds=arr(selection&&selection.enemyIds).map(str).filter(Boolean),enemyIds=preparedOptions.limitEnemyIdsToRequest===true&&requestedEnemyIds.length?selectedEnemyIds.filter(id=>requestedEnemyIds.includes(id)):selectedEnemyIds;"
-          assert bs.count(old)==1, f'Bridge scopedRequest seam count={bs.count(old)}'
-          bridge.write_text(bs.replace(old,new))
-
-          index=Path('index.html')
-          s=index.read_text()
-
-          cell_select="let extras=[];if(reason==='cell'&&chosen[0]){extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))]}"
-          cell_modal="if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}"
-          assert s.count(cell_select)==1, f'legacy cell selector seam count={s.count(cell_select)}'
-          assert s.count(cell_modal)==1, f'legacy cell modal seam count={s.count(cell_modal)}'
-          s=s.replace(cell_select,'').replace(cell_modal,'')
-
-          old_click="b.onclick=()=>startCombat([String(target.id)],'cell')"
-          assert s.count(old_click)==1, f'cell click seam count={s.count(old_click)}'
-          s=s.replace(old_click,"b.onclick=()=>startCellCombat(target,x)")
-
-          anchor=" return out}\nfunction launchCombat200(x,chosen)"
-          helper=" return out}\nfunction startCellCombat(target,x=rt()){if(!x||!target)return false;let chosen=liveEnemies().filter(e=>String(e.id)===String(target.id));if(!chosen.length)return false;const extras=nearbyInterveners(chosen[0],x);chosen=[...chosen,...extras.filter(e=>!chosen.some(c=>String(c.id)===String(e.id)))];const begin=()=>window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true});if(extras.length){const names=extras.map(e=>esc(enemyName(e))).join(', ');modal('⚔️ RENFORTS ENNEMIS','<strong>'+extras.length+' ennemi'+(extras.length>1?'s rejoignent':' rejoint')+' le combat.</strong><br><br>'+names,begin);return true}return begin()}\nfunction launchCombat200(x,chosen)"
-          assert s.count(anchor)==1, f'helper insertion seam count={s.count(anchor)}'
-          s=s.replace(anchor,helper)
-
-          index.write_text(s)
-          PY
-
-          git diff --check
-          node tests/gens_core200_cell_bridge_contract_lot4m.test.cjs
-
-      - name: Commit du seul correctif runtime 4M
-        shell: bash
-        run: |
-          git config user.name 'gensrpg-coordinator'
-          git config user.email 'actions@users.noreply.github.com'
-          git add index.html assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js
-          git diff --cached --quiet && exit 1
-          git commit -m 'refactor: route Runtime 2.00 cell combat through Bridge [4m-runtime-patch]'
-          git push origin HEAD:work/gensrpg-combat-callsite-migration-4m-cell-2026-09-17
-
-  cell-characterization:
+  cell-contract:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
-      - name: Caractériser le déclenchement cell Runtime 2.00
+      - name: Vérifier les invariants permanents du déclenchement cell Runtime 2.00
         run: node tests/gens_core200_cell_entry_characterization_lot4m.test.cjs
 
-      - name: Vérifier le contrat cible Bridge du lot 4M
+      - name: Vérifier le contrat Bridge du lot 4M
         run: node tests/gens_core200_cell_bridge_contract_lot4m.test.cjs
 
       - name: Figer l'inventaire des anciens points d'entrée combat

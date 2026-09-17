@@ -40697,11 +40697,11 @@ function resolveDetection(x,zones,dom){
   x.dc209Detected[key]=Date.now();save(x);
 
   // A spotted hero is engaged by the monsters that can actually detect them.
-  if(typeof dc200StartCombat==="function"){
+  if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
     triggering=true;
     setTimeout(()=>{
       try{
-        dc200StartCombat(detectors.map(z=>String(z.e.id)),"detection");
+        window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:detectors.map(z=>String(z.e.id)),reason:"detection",entry:"dc209EnemyDetection"});
       }finally{setTimeout(()=>{triggering=false},250)}
     },80)
   }

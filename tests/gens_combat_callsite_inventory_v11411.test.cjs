@@ -29,4 +29,8 @@ require('./gens_legacy_launch200_fallback_contract_lot4h.test.cjs');
 // manual/cell/ambush plus the legacy definition/alias remain explicit debt.
 require('./gens_core200_startcombat_characterization_lot4i.test.cjs');
 
+// Lot 4K characterization phase: lock the sole non-positional manual lexical entry
+// and prove it has no manual-specific legacy behavior before any runtime migration.
+require('./gens_core200_manual_entry_characterization_lot4k.test.cjs');
+
 console.log('GenSrpG V114.11 legacy combat callsite inventory OK',expected);

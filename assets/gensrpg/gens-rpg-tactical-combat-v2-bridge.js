@@ -80,7 +80,7 @@
   function finishExploration(rt,battle,summary,reason){
     try{rt.document?.body?.style&&(rt.document.body.style.overflow="")}catch(e){}
     try{rt.updateDungeonExploreButtons?.()}catch(e){}
-    try{rt.DungeonCore01?.render?.()}catch(e){try{rt.renderDungeonCore01?.()}catch(_){}}
+    try{rt.DungeonCore01?.render?.()}catch(e){try{rt.renderDungeonCore01?.()}catch(_){} }
     showOutcomeModal(rt,battle,summary);
     try{
       const win=battle?.winner;
@@ -122,6 +122,10 @@
       return {ok:false,reason:"scope-failed-v113",error};
     }
   }
+  function retireLegacyCombatLayer(rt=R,options={}){
+    if(str(options.entry).startsWith("runtime-renderer:"))return false;
+    try{rt?.GensRpgRuntimeRepair1678106?.closeLegacyCombat?.(rt);return true}catch(e){try{rt?.console?.error?.("Combat tactique V2 legacy layer cleanup",e)}catch(_){}return false}
+  }
   function openCurrent(rt=R,options={}){
     if(opening||currentBattle(rt))return {ok:false,reason:"battle-already-open"};
     const e=eligible(rt,options);if(!e.ok)return e;
@@ -129,6 +133,7 @@
     try{
       const merged={...options,heroIds:e.heroIds,enemyIds:e.enemyIds,onFinish:({battle,summary}={})=>finishExploration(rt,battle,summary,options.reason)};
       const battle=rt.GensRpgTacticalCombatV2Ui.openCurrentEncounter(merged);
+      retireLegacyCombatLayer(rt,options);
       try{rt.document?.body?.style&&(rt.document.body.style.overflow="hidden")}catch(_){ }
       rt.__gensTacticalV2LastRoute={entry:options.entry||"openCurrent",reason:options.reason||"",at:Date.now(),enemyIds:e.enemyIds,heroIds:e.heroIds};
       return {ok:true,battle};

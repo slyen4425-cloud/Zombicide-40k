@@ -41097,10 +41097,10 @@ function resolveEnemyDetection211(x,zones,dom){
   const sig=String(x.room)+"|"+spotted.map(s=>s.id+":"+s.by.map(z=>z.e.id).sort().join(",")).sort().join("|");
   if(x.dc211EnemyDetection[sig])return;
   x.dc211EnemyDetection[sig]=Date.now();saveRt211(x);
-  if(ex.enemyDetectionAutoCombat!==false&&typeof dc200StartCombat==="function"){
+  if(ex.enemyDetectionAutoCombat!==false&&typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
     const ids=[...new Set(spotted.flatMap(s=>s.by.map(z=>String(z.e.id))))];
     detectBusy211=true;
-    setTimeout(()=>{try{dc200StartCombat(ids,"detection")}finally{setTimeout(()=>detectBusy211=false,250)}},80)
+    setTimeout(()=>{try{window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:"detection",entry:"dc211EnemyDetection"})}finally{setTimeout(()=>detectBusy211=false,250)}},80)
   }
 }
 

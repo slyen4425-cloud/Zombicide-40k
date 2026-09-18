@@ -16,14 +16,14 @@ const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-167810
 let productionHtml=indexSource.split(perfTag).join('');
 let inlineSeq=0;
 productionHtml=productionHtml.replace(
-  /<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi,
+  /<script\b([^>]*)>([\s\S]*?)<\/script>/gi,
   (whole,attrs,body)=>{
-    if(/\\bsrc\\s*=/i.test(attrs))return whole;
-    const type=(attrs.match(/\\btype=["']([^"']+)["']/i)||[])[1]||'';
+    if(/\bsrc\s*=/i.test(attrs))return whole;
+    const type=(attrs.match(/\btype=["']([^"']+)["']/i)||[])[1]||'';
     if(type&&!/(?:java|ecma)script|module/i.test(type))return whole;
     inlineSeq++;
-    const id=(attrs.match(/\\bid=["']([^"']+)["']/i)||[])[1]||'no-id';
-    const label=String(inlineSeq).padStart(3,'0')+':'+String(id).replace(/["\\\\]/g,'_');
+    const id=(attrs.match(/\bid=["']([^"']+)["']/i)||[])[1]||'no-id';
+    const label=String(inlineSeq).padStart(3,'0')+':'+String(id).replace(/["\\]/g,'_');
     return '<script'+attrs+'>'+ `console.log("[phase2-inline-enter] ${label}");` +body+'</script>';
   }
 );

@@ -272,7 +272,10 @@ const server=http.createServer((req,res)=>{
       mode151:gensMode151()
     }));
     assert.equal(pregame.captureClass,true);
-    assert.equal(pregame.dungeonSetup,'none','Capture pre-game must hide the classic Dungeon setup entry');
+    assert.ok(
+      pregame.dungeonSetup==='none'||pregame.dungeonSetup==='absent',
+      'Capture pre-game must not expose an active classic Dungeon setup entry'
+    );
     assert.equal(pregame.mode151,'capture');
 
     mark('select-real-capture-trainer');

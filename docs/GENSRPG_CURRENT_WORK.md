@@ -477,3 +477,84 @@ Validation documentaire finale :
 2. ouvrir une branche Phase 4 dédiée au resolver d'assets depuis ce checkpoint ;
 3. appliquer la règle 26 si le contenu exact de `index.html` est requis ;
 4. ne rien fusionner sur `main`.
+
+
+## Chantier prioritaire utilisateur — Dungeon après Survie : état initial incohérent
+
+Ce chantier **suspend le démarrage de la Phase 4** jusqu'à caractérisation/validation.
+
+Branche :
+`work/gensrpg-dungeon-after-survival-start-state-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-after-survival-start-state-2026-09-18`
+
+Base exacte :
+`080a45a904590a2b24a2cbc87b9c270913f427e6`
+(`checkpoint/gensrpg-phase3-target-structure-green-2026-09-18`)
+
+Production sûre inchangée :
+- `main` : V16.78.114.11 ;
+- SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Scénario utilisateur à reproduire
+
+Dans la preview Firefox du checkpoint Phase 3 :
+1. lancer d'abord le mode Survie ;
+2. revenir / recharger puis choisir Dungeon ;
+3. démarrer une nouvelle partie Dungeon ;
+4. état observé :
+   - grille de déplacement absente ;
+   - le jeu se comporte comme si le héros/groupe était déjà engagé dans une salle ;
+   - une action de retour vers une salle précédente est proposée alors que la nouvelle partie ne devrait pas avoir cet historique ;
+   - impossible de progresser normalement puisque la grille/mouvement manque ;
+5. fermer/réouvrir ou recharger ne corrige pas l'état.
+
+### Périmètre
+
+Autorisé dans un premier temps :
+- caractérisation navigateur du vrai chemin Survie -> Dungeon ;
+- inspection des propriétaires Dungeon du démarrage, de la position spatiale et de la persistance ;
+- comparaison nouvelle partie Dungeon seule vs nouvelle partie Dungeon après Survie ;
+- caractérisation du stockage avant/après chaque transition.
+
+Interdit avant preuve :
+- aucune rustine de grille ;
+- aucun reset global de stockage ;
+- aucun nouveau wrapper, observer, timer/retry ;
+- aucune modification de `isDungeonMode()` ;
+- aucune réécriture du moteur de mouvement ;
+- aucune modification de Save & Quit/reprise ;
+- aucune modification des arts Survie ;
+- aucune Phase 4 ;
+- aucun changement sur `main`.
+
+### Systèmes protégés
+
+- Shell : `openGensFamily`, `openGensBuiltInGame`, `startConfiguredGame`, `resumeGame` ;
+- autorité mouvement Dungeon / modèle spatial ;
+- persistance Dungeon ;
+- nouvelle partie / reprise ;
+- Tactical ;
+- Capture ;
+- Survie.
+
+### Tests exigés
+
+1. reproduire le vrai scénario utilisateur dans Firefox/Chromium via le Shell/preview ;
+2. contrôler le stockage et l'état spatial avant et après Survie ;
+3. contrôler qu'une nouvelle partie Dungeon seule reste saine ;
+4. contrôler grille/mouvement/entrée initiale et absence de faux retour ;
+5. Save & Quit/reprise reste GREEN ;
+6. non-interférence quatre modules ;
+7. Architecture ;
+8. Firefox ;
+9. Tactical Dock.
+
+### Dette séparée
+
+Le défaut visuel Survie signalé simultanément (arts/images non liés) est enregistré mais **hors périmètre** de ce chantier. Il aura son propre lot.
+
+### Prochaine action
+
+Créer un test de caractérisation du vrai chemin Survie -> Dungeon. Si un défaut réel est prouvé, identifier le propriétaire exact avant toute correction.

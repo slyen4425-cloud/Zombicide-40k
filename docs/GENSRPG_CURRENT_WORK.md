@@ -206,3 +206,39 @@ Tests obligatoires :
 ## Dette séparée
 
 La détection ennemie hors embuscade reste un chantier de caractérisation fonctionnelle distinct ; elle n'est pas corrigée dans cette cartographie.
+
+
+## Mise à jour opérationnelle — Core Stats validé, routage Capture à isoler
+
+Correctif Core Stats :
+- runtime `cf64814122e45ae1815a6ea8cf853043757acf0b` ;
+- test de propriété de profil `535be759dc550c0c4768fd1c487e371046259d2d` ;
+- `saveProfile(p)` remplace désormais prioritairement le profil portant `p.id`.
+
+CI sur `535be759dc550c0c4768fd1c487e371046259d2d` :
+- Architecture statique : SUCCESS ;
+- Firefox : SUCCESS ;
+- Tactical Dock : SUCCESS ;
+- navigateur Pages complet : atteint désormais le lancement final Capture puis échoue sur un défaut ultérieur indépendant.
+
+Le stockage reste correctement `Base, Dungeon, Capture` après l'installation Core Stats : la récursion de profils est supprimée.
+
+Nouveau défaut caractérisé :
+- contexte juste avant lancement : mode `capture`, famille `creature`, profil Capture actif ;
+- `isDungeonMode() === true` reste attendu car Capture utilise le substrat Dungeon ;
+- après `startConfiguredGame()` : `DungeonCore01` est affiché et `captureGameHub` reste masqué ;
+- la couche tardive `dungeonCore200Rebuild` route actuellement tout `isDungeonMode()` vers son `start()`, ce qui intercepte Capture avant la chaîne dédiée de `captureFix139`.
+
+Décision :
+- ne pas élargir le lot Core Stats ;
+- ouvrir un lot séparé de routage Capture/Dungeon ;
+- ne pas modifier globalement `isDungeonMode()` ;
+- ne pas recréer un chemin Capture ;
+- corriger uniquement le guard du propriétaire tardif après caractérisation.
+
+Prochaine action :
+1. checkpoint de départ ;
+2. branche dédiée routage Capture/Dungeon ;
+3. test ciblé du guard final ;
+4. correctif minimal ;
+5. CI complète.

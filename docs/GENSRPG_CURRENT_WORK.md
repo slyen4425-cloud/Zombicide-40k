@@ -166,30 +166,84 @@ Fichier reçu et vérifié le 2026-09-18 :
 
 Le contenu exact de `index.html` est donc désormais disponible localement conformément à la règle 26.
 
-## Diagnostic en cours — granularité bloc 030
+## Caractérisation bloc 030 — défaut fonctionnel confirmé
 
-Le fichier exact a été vérifié et `builtinMonsterCapture162` a été isolé.
+Le `index.html` exact a été vérifié :
+- taille : 8 175 610 octets ;
+- blob : `a515c3d34a1f5c4973159457090e4437a33c2630`.
 
-Le Chromium local de l'environnement de travail refuse toute navigation (`ERR_BLOCKED_BY_ADMINISTRATOR`), y compris localhost/file/data. Cette limitation n'est pas interprétée comme un défaut GenSrpG.
+Le scénario navigateur Pages complet a prouvé que le gel commence dans :
 
-Le test de caractérisation navigateur a donc été instrumenté **sans modifier le runtime** pour tracer :
-- la construction des constantes Capture 162 ;
-- l'entrée dans `ensureBuiltinMonsterCapture162()` ;
-- les étapes profil / dresseur / roster / capacités / gameplay / règles ;
-- `refreshCustomEquipmentIntoItems()` ;
-- `applyCustomHeroesMulti()` ;
-- `renderGameProfileLibrary()`.
+`builtinMonsterCapture162 -> ensureBuiltinMonsterCapture162() -> refreshCustomEquipmentIntoItems()`.
 
-Commit diagnostic :
-`e7f629e4b04d5938db950f16a09e4597c3cba47f`
+Chaîne récursive exacte observée :
 
-## Prochaine étape
+```text
+refreshCustomEquipmentIntoItems
+→ gensCurrentContentFamily
+→ getActiveGameProfile
+→ loadGameProfiles
+→ ensureBaseGameProfile
+→ captureCurrentGameProfile(game_profile_zombicide_base)
+→ currentAllHeroIds
+→ applyCustomHeroesMulti
+→ gensContentCompatible(hero)
+→ gensCurrentContentFamily
+→ ...
+```
 
-1. lire le run CI de ce commit instrumenté ;
-2. identifier le dernier marqueur `[phase2-mc162]` atteint ;
-3. resserrer la caractérisation sur l'appel exact si nécessaire ;
-4. reproduire la cause sans modifier le runtime ;
-5. si défaut fonctionnel réel confirmé, arrêter ce lot de cartographie et ouvrir un lot correctif dédié.
+Le traceur borné a enregistré 80 appels successifs de cette boucle avant watchdog.
+
+Cause :
+- le profil Capture est seedé via `loadGameProfilesRaw()` alors que Base/Dungeon sont absents ;
+- le dresseur Capture est ensuite seedé ;
+- le refresh équipement déclenche le bootstrap canonique des profils ;
+- pendant la construction Base, le dresseur Capture exige une résolution de famille qui réentre dans le même bootstrap avant sa persistance.
+
+Commit de caractérisation :
+`8c25a0940374ff36ff6754a8bd4aa4d59cf51afb`.
+
+Résultat CI important :
+- gardes Architecture Phase 2 : SUCCESS ;
+- UI native / Survie / Save & Quit-Reprise / PvP / Capture réduit : SUCCESS ;
+- composition Pages complète Capture : RED sur cette récursion, avant toute assertion gameplay.
+
+## Décision de périmètre
+
+Il s'agit d'un **vrai défaut fonctionnel** découvert par un lot de cartographie.
+
+Conformément à la charte :
+- **aucun correctif runtime dans ce lot Phase 2** ;
+- la cartographie s'arrête sur cette caractérisation ;
+- le correctif doit être traité dans un lot dédié, avec checkpoint et branche propres.
+
+## Prochain chantier
+
+**Correctif dédié — bootstrap à froid des profils avant seed Monster Capture 162.**
+
+Objectif :
+- supprimer la récursion au vrai propriétaire / bon ordre de bootstrap ;
+- ne pas créer de deuxième système ;
+- aucun nouveau wrapper, observer, timer ou retry ;
+- conserver les données/règles Capture existantes ;
+- valider le vrai chemin Pages complet.
+
+Tests obligatoires :
+- `gens_phase2_full_composition_capture_browser_v11411.test.cjs` (doit atteindre les assertions gameplay) ;
+- sentinelle Capture courante ;
+- Survie ;
+- Save & Quit / reprise ;
+- PvP ;
+- non-interférence quatre modules ;
+- gardes Phase 2 ;
+- Firefox / Tactical Dock.
+
+Prochaine action :
+1. créer le checkpoint de départ sur le SHA de clôture documentaire de cette caractérisation ;
+2. créer une branche dédiée de correctif ;
+3. appliquer le correctif minimal au vrai propriétaire ;
+4. valider entièrement avant tout checkpoint GREEN ;
+5. ne rien fusionner sur `main`.
 
 Aucun correctif runtime dans ce lot de cartographie.
 

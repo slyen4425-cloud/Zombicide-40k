@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "note": "These files are physically present but outside the current production execution graph. Status does not authorize deletion.",
+  "files": [
+    {
+      "file": "assets/gensrpg/dungeon/progression-runtime-v1.js",
+      "status": "tests-docs-only",
+      "serviceWorkerCached": false,
+      "workflowReferenced": false,
+      "refs": [
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "tests/gens_manual_xp_progression_runtime_v1.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js",
+      "status": "tests-docs-only",
+      "serviceWorkerCached": false,
+      "workflowReferenced": false,
+      "refs": [
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_visual_reconnect_characterization_v11411.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js",
+      "status": "cached-historical-not-executed",
+      "serviceWorkerCached": true,
+      "workflowReferenced": true,
+      "refs": [
+        ".github/workflows/test-builder-events-v167877.yml",
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "service-worker.js",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_hero_sheet_art_runtime_v11411.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_single_hero_sheet_art_authority_v11411.test.cjs",
+        "tests/gens_stability_guard_v167897.test.cjs",
+        "tests/gens_v167899_ui_sheet_guard.test.cjs",
+        "tests/gens_visual_reconnect_characterization_v11411.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js",
+      "status": "cached-historical-not-executed",
+      "serviceWorkerCached": true,
+      "workflowReferenced": true,
+      "refs": [
+        ".github/workflows/v1678114-tactical-hotfix.yml",
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "service-worker.js",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_rpg_tactical_hotfix_v1678114.test.cjs",
+        "tests/gens_runtime_composition_guard_v11411.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js",
+      "status": "cached-historical-not-executed",
+      "serviceWorkerCached": true,
+      "workflowReferenced": true,
+      "refs": [
+        ".github/workflows/v1678114-tactical-hotfix.yml",
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "service-worker.js",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_rpg_tactical_session_guard_v16781144.test.cjs",
+        "tests/gens_runtime_composition_guard_v11411.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js",
+      "status": "tests-docs-only",
+      "serviceWorkerCached": false,
+      "workflowReferenced": false,
+      "refs": [
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs"
+      ]
+    },
+    {
+      "file": "assets/gensrpg/gens-stat-manual-cost-167898.js",
+      "status": "tests-docs-only",
+      "serviceWorkerCached": false,
+      "workflowReferenced": false,
+      "refs": [
+        "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
+        "tests/gens_architecture_global_side_effect_guard.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs"
+      ]
+    }
+  ]
+}

@@ -17,52 +17,49 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Phase 2 — cartographie runtime initiale :
-`checkpoint/gensrpg-phase2-runtime-cartography-initial-green-2026-09-18`
+Routage Capture / Dungeon GREEN :
+`checkpoint/gensrpg-capture-start-routing-green-2026-09-18`
 
 SHA :
-`d247b277ebadc0457b9ff463993d5fd3bafae7b8`
+`8ce4f4cfec785aa48ca81942629a60589461090f`
 
-CI :
-- Architecture `35326145505` — SUCCESS
-- Firefox `35326145516` — SUCCESS
-- Tactical Dock `35326145484` — SUCCESS
-
-Livrables déjà verts :
-- `docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md`
-- `tests/gens_phase2_runtime_load_graph_v11411.test.cjs`
+Validation de référence :
+- Architecture `35346984569` — SUCCESS ;
+- navigateur Pages complet dans ce run — SUCCESS ;
+- Firefox `35346984602` — SUCCESS ;
+- Tactical Dock `35346984616` — SUCCESS ;
+- commit documentaire final `8ce4f4cfec785aa48ca81942629a60589461090f` : Architecture `35347217768` SUCCESS + navigateur complet SUCCESS, Firefox `35347217650` SUCCESS.
 
 ## Chantier courant
 
-**Correctif dédié — routage final Capture / Dungeon dans startConfiguredGame**
+**Phase 2 — reprise de la cartographie réelle du runtime après correctifs dédiés**
 
 Branche :
-`work/gensrpg-capture-start-routing-2026-09-18`
+`work/gensrpg-phase2-runtime-cartography-resume-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-capture-dungeon-routing-2026-09-18`
+`checkpoint/gensrpg-start-phase2-runtime-cartography-resume-2026-09-18`
 
 Base exacte :
-`b15567342c1fbdeb33a7559187c3670ba3e184de`
+`8ce4f4cfec785aa48ca81942629a60589461090f`
 
-## Périmètre actif du lot routage
+Objectifs immédiats de cartographie :
+1. établir la responsabilité dominante de chaque bloc inline actif ;
+2. compléter la table « fonction globale -> dernier propriétaire actif » ;
+3. distinguer timers gameplay et retries d'installation ;
+4. cartographier les accès stockage par domaine ;
+5. confirmer le statut des 7 fichiers hors graphe de production ;
+6. identifier les doublons de responsabilité encore actifs avant toute extraction Phase 3/4.
 
-Propriétaire à caractériser :
-- couche tardive `dungeonCore200Rebuild` qui réassigne `startConfiguredGame`.
-
-Invariant :
-- Capture conserve son substrat Dungeon (`isDungeonMode() === true`) ;
-- Capture doit néanmoins déléguer au chemin Capture déjà existant ;
-- Dungeon normal doit continuer à entrer dans `DungeonCore01`.
-
-Interdictions :
-- ne pas changer globalement `isDungeonMode()` ;
-- ne pas recréer un lanceur Capture ;
-- ne pas modifier le gameplay ;
+Règles du lot :
+- cartographie et sentinelles uniquement ;
+- aucune correction runtime dans ce lot ;
+- si un défaut fonctionnel réel apparaît, le caractériser puis ouvrir un lot correctif dédié ;
 - aucun nouveau wrapper, observer, timer ou retry ;
-- aucun changement sur `main`.
+- ne pas traiter ici la dette « détection ennemie hors embuscade » ;
+- ne rien fusionner sur `main`.
 
-## Défaut caractérisé à corriger
+## Historique — défauts fonctionnels découverts pendant la cartographie
 
 Le correctif Capture précédent a supprimé la récursion du bloc 030.
 
@@ -312,3 +309,20 @@ Conclusion :
 3. reprendre la cartographie runtime au point où la composition Pages complète était bloquée ;
 4. conserver la dette « détection ennemie hors embuscade » dans un chantier fonctionnel séparé ;
 5. ne rien fusionner sur `main` tant que la restructuration n'a pas atteint le jalon prévu par la roadmap.
+
+
+## Reprise Phase 2 après correctifs GREEN
+
+Les trois défauts qui bloquaient la composition Pages complète sont maintenant corrigés dans des lots séparés et validés :
+- bootstrap à froid Capture ;
+- persistance Core Stats Base/Dungeon ;
+- routage final Capture/Dungeon.
+
+La composition Pages complète est GREEN. La Phase 2 peut donc reprendre depuis le checkpoint :
+`checkpoint/gensrpg-capture-start-routing-green-2026-09-18`.
+
+Prochaine action opérationnelle :
+1. inspecter le manifeste `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json` ;
+2. compléter l'inventaire de responsabilité des 120 blocs inline exécutables ;
+3. renforcer les sentinelles de propriétaire sans toucher au runtime ;
+4. mettre à jour `docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md` au fur et à mesure.

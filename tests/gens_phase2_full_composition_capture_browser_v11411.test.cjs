@@ -14,7 +14,7 @@ const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 assert.equal(pageTags.length,19,'Pages-equivalent characterization expects 19 injected modules');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\\/script>';
 let productionHtml=indexSource.split(perfTag).join('');
-productionHtml=productionHtml.replace(/<\\/body>/i,pageTags.join('\n')+'\n</body>');
+productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';

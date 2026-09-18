@@ -562,3 +562,44 @@ Diff depuis le checkpoint de départ :
 - base Phase 3 GREEN : Firefox et Tactical Dock repassés SUCCESS ;
 - HEAD correctif `a209e74...` : Architecture en cours, Firefox/Tactical Dock en attente ;
 - aucun checkpoint GREEN final ne doit être créé avant succès des trois validations requises et test utilisateur ciblé.
+
+## Chantier correctif isolé — retour depuis une cache authored
+
+Branche :
+`work/gensrpg-authored-cache-return-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-authored-cache-return-2026-09-18`
+
+Base exacte :
+`4f38720de29edb255f498d28b9e7013d181a0313`
+(`checkpoint/gensrpg-dungeon-builder-visibility-green-2026-09-18`)
+
+### Propriétaire
+
+- autorité de navigation des branches secondaires : `assets/dungeon/dungeon-zone-links-167846.js` ;
+- `DungeonAuthoredBranchNavCleanup167863` ne doit que supprimer les contrôles legacy concurrents.
+
+### Cause caractérisée
+
+- `branchReturnActive()` considère le retour actif tant que la pile de retour vise le node courant, indépendamment de la case du héros ;
+- pendant ce temps il masque `#dc01Explore` ;
+- `DungeonZoneLinks167846.topReturn()` exige en plus que la case courante soit littéralement `entry` ;
+- après déplacement ou interaction dans la branche secondaire, le bouton Retour disparaît alors que Explore reste masqué : le joueur peut être bloqué dans la cache.
+
+### Correctif attendu
+
+Faire de la pile de retour authored l'unique autorité d'éligibilité du retour dans une branche secondaire :
+- tant que le node courant correspond au sommet de pile, le bouton Retour reste disponible ;
+- le retour restaure toujours la case source exacte via `sourceIndex` ;
+- aucune modification du mouvement, de la géométrie, du contenu, des pièges ou du rendu.
+
+### Tests
+
+1. entrée cache à la vraie case entry ;
+2. déplacement simulé hors entry ;
+3. retour toujours disponible ;
+4. retour vers le node source et la case cache exacte ;
+5. pile dépilée ;
+6. navigation inverse normale inchangée ;
+7. Architecture / Firefox / Tactical Dock avant GREEN.

@@ -5,83 +5,102 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const stripQuery=value=>String(value||'').replace(/\?.*$/,'');
+const exists=rel=>fs.existsSync(path.join(root,rel));
 
 const index=read('index.html');
-const mobile=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
-const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
-const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
-const bridge=read('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js');
+const preview=read('preview.html');
+const workflow=read('.github/workflows/main.yml');
 const core317=read('assets/dungeon/dungeon-core-317.js');
 
-const direct=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
+const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
   .map(m=>m[1])
   .filter(src=>/^assets\/(?:gensrpg|dungeon)\//.test(src))
   .map(stripQuery);
 
-assert.deepEqual(direct,[
+assert.deepEqual(rawDirect,[
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
-],'index.html local JS entries must remain explicit and ordered');
+],'raw index local JS entries must remain explicit and ordered');
+
+const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
+assert.ok(workflowBlock,'GitHub Pages module injection list missing');
+const previewBlock=(preview.match(/const tags=\[(.*?)\n\s*\];/s)||[])[1];
+assert.ok(previewBlock,'preview module injection list missing');
+
+const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
+  .map(m=>stripQuery(m[1]));
+const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
+  .map(m=>stripQuery(m[1]));
+
+assert.equal(injected.length,19,'GitHub Pages must inject the current 19-module production list');
+assert.deepEqual(previewInjected,injected,'preview must reproduce the exact GitHub Pages module order');
+assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
+
+const productionDirect=[
+  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...injected
+];
+assert.equal(new Set(productionDirect).size,21,'production composition must expose 21 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');
 
-const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'`\s)]+\.js(?:\?[^"'`\s)]*)?/g)]
-  .map(m=>stripQuery(m[0]));
+const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
+  .map(m=>stripQuery(m[0]))
+  .filter(exists);
 
-assert.deepEqual([...new Set(assetRefs(mobile))],[
-  'assets/gensrpg/core/runtime-bootstrap-v1.js'
-],'mobile performance file must remain the single current RuntimeBootstrap entry');
+const reachable=new Set();
+const queue=[...productionDirect];
+while(queue.length){
+  const rel=queue.shift();
+  if(reachable.has(rel))continue;
+  assert.equal(exists(rel),true,'production graph references missing asset: '+rel);
+  reachable.add(rel);
+  const source=read(rel);
+  for(const dep of assetRefs(source))if(!reachable.has(dep))queue.push(dep);
+}
 
-const expectedBootstrap=[
-  'assets/gensrpg/gens-rpg-tactical-combat-v2.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js',
-  'assets/gensrpg/gens-survival-mode-isolation-1678104.js'
-];
-for(const rel of expectedBootstrap)assert.ok(bootstrap.includes(rel),'RuntimeBootstrap must still reference '+rel);
-assert.ok(expectedBootstrap.every((rel,i)=>i===0||bootstrap.indexOf(rel)>bootstrap.indexOf(expectedBootstrap[i-1])),'RuntimeBootstrap order must remain stable');
+const allJs=[];
+for(const base of['assets/gensrpg','assets/dungeon']){
+  const walk=dir=>{
+    for(const entry of fs.readdirSync(path.join(root,dir),{withFileTypes:true})){
+      const rel=path.posix.join(dir,entry.name);
+      if(entry.isDirectory())walk(rel);
+      else if(entry.isFile()&&/\.js$/i.test(entry.name))allJs.push(rel);
+    }
+  };
+  walk(base);
+}
+allJs.sort();
 
-const expectedIntegration=[
-  'assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js',
-  'assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js',
-  'assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js'
-];
-assert.deepEqual([...new Set(assetRefs(integration))],expectedIntegration,'Tactical integration load chain must remain mapped exactly');
-
-assert.deepEqual([...new Set(assetRefs(bridge))],[
-  'assets/gensrpg/gens-rpg-runtime-repair-1678106.js'
-],'Tactical bridge must keep its mapped runtime-repair dependency');
+const notReachable=allJs.filter(rel=>!reachable.has(rel));
+assert.equal(allJs.length,72,'Phase 2 JS inventory size drifted');
+assert.equal(reachable.size,65,'production-reachable JS graph must currently contain 65 files');
+assert.deepEqual(notReachable,[
+  'assets/gensrpg/dungeon/progression-runtime-v1.js',
+  'assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js',
+  'assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js',
+  'assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js',
+  'assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js',
+  'assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js',
+  'assets/gensrpg/gens-stat-manual-cost-167898.js'
+],'non-reachable production JS inventory drifted');
 
 assert.match(core317,/new\s+MutationObserver\(scheduleBackButton\)/,'Phase 2 must keep the known Core 3.17 observer debt visible until a dedicated cleanup lot');
 assert.match(core317,/observe\(document\.documentElement,\{childList:true,subtree:true\}\)/,'Core 3.17 observer debt target must remain characterized');
 assert.match(core317,/merchantRetryTimer=setInterval\(/,'Core 3.17 merchant retry debt must remain characterized');
 
-const active=[
-  ...direct,
-  'assets/gensrpg/core/runtime-bootstrap-v1.js',
-  ...expectedBootstrap,
-  ...expectedIntegration,
-  'assets/gensrpg/gens-rpg-runtime-repair-1678106.js'
-];
-const unique=[...new Set(active)];
-assert.equal(unique.length,19,'Phase 2 initial external active graph must contain 19 local JS files');
-
 console.log(JSON.stringify({
-  scenario:'Phase 2 runtime load graph cartography',
-  directLocalJs:direct.length,
+  scenario:'Phase 2 production runtime load graph cartography',
+  rawDirectLocalJs:rawDirect.length,
+  pagesInjectedModules:injected.length,
+  productionDirectLocalJs:new Set(productionDirect).size,
   inlineIdScripts:inlineIds.length,
-  activeExternalLocalJs:unique.length,
+  productionReachableLocalJs:reachable.size,
+  nonReachableLocalJs:notReachable.length,
   knownDebt:{
     core317DocumentElementObserver:true,
     core317MerchantRetryInterval:true
   }
-}));
+},null,2));

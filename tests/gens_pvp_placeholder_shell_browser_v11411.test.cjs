@@ -18,8 +18,15 @@ const shellOwner=indexSource.indexOf(shellOwnerMarker);
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owner block must have an exact boundary');
 
+const customHeroesMarker='function loadCustomHeroesMulti(){';
+const customHeroesOwner=indexSource.indexOf(customHeroesMarker);
+const customHeroesScriptStart=indexSource.lastIndexOf('<script',customHeroesOwner);
+const customHeroesScriptEnd=indexSource.indexOf('</script>',customHeroesOwner);
+assert.ok(customHeroesOwner>shellScriptEnd&&customHeroesScriptStart>shellScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
+
 const realPvpShellHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
   '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={

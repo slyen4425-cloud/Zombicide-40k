@@ -697,3 +697,28 @@ Interdit avant preuve :
 ### Prochaine action
 
 Créer une sentinelle navigateur ciblée reproduisant l'ouverture du vrai éditeur Dungeon et capturant l'état exact des deux launchers avant toute correction.
+
+### Cause propriétaire identifiée — conflit Tactical V111 / éditeur Dungeon
+
+Inspection du runtime actif :
+- `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` expose encore `hideRuntimeTabs()` ;
+- son `TAB_SELECTORS` contient directement `#drc100Launcher` et `[data-drc100-launcher]` ;
+- quand `runtimeVisible()` est vrai, V111 applique `display:none!important` et `data-v111-hidden-tab` à ce conteneur ;
+- le bouton World Builder `#drc300Launch` est enfant de `#drc100Launcher` : il disparaît donc avec son parent ;
+- V111 ne possède aucun hook de navigation vers l'éditeur Dungeon ; après sortie du runtime, la restauration n'est donc pas garantie au moment où l'utilisateur ouvre l'éditeur.
+
+Ce comportement est une violation de frontière :
+- Tactical ne doit pas piloter l'UI structurelle du Builder/Room Creator ;
+- `openDungeonAdvancedEditor()` protège déjà l'éditeur structurel pendant une session active ;
+- le Builder et le Room Creator eux-mêmes sont inchangés depuis `main`.
+
+Correctif autorisé :
+- soustractif uniquement dans V111 ;
+- retirer `#drc100Launcher` et `[data-drc100-launcher]` de l'autorité `hideRuntimeTabs()` ;
+- conserver les autres comportements V111 (multi-dés, Dock, murs, hooks Tactical) ;
+- ne modifier ni Builder, ni Room Creator, ni Shell, ni gameplay Dungeon.
+
+Tests :
+- mettre à jour la sentinelle V111 historique pour interdire cette reprise d'autorité sur le launcher Builder ;
+- conserver la sentinelle navigateur du vrai chemin Éditeurs -> Dungeon -> World Builder ;
+- Architecture / Firefox / Tactical Dock avant GREEN.

@@ -15,19 +15,9 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert
+## Dernier lot validé
 
-Phase 1 — lancement Survie par le vrai Shell :
-`checkpoint/gensrpg-phase1-survival-shell-sentinel-green-2026-09-18`
-
-SHA :
-`0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
-
-CI de fermeture : Architecture, Firefox et Tactical Dock GREEN.
-
-## Chantier courant
-
-**Phase 1 — sentinelle Save & Quit + vraie reprise complète par le Shell**
+**Phase 1 — Save & Quit + vraie reprise complète par le Shell**
 
 Branche :
 `work/gensrpg-phase1-savequit-resume-sentinel-2026-09-18`
@@ -38,60 +28,51 @@ Checkpoint de départ :
 Base exacte :
 `0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
 
-## Périmètre déclaré
+SHA fonctionnel vert avant fermeture documentaire :
+`4bf7203703e2002562ed2d074771519abf4b1e0c`
 
-Première intention **test-only** :
-- partir d'une vraie session lancée par le Shell ;
-- traverser le vrai propriétaire de Save & Quit ;
-- fermer/recréer réellement le contexte navigateur ou recharger comme un retour utilisateur réel ;
-- cliquer réellement sur **Reprendre** ;
-- vérifier que la session, le module actif et l'état persistant reviennent sous la bonne autorité ;
-- brancher la sentinelle à la CI si elle est stable.
+Checkpoint final :
+`checkpoint/gensrpg-phase1-savequit-resume-sentinel-green-2026-09-18`
 
-Aucun correctif runtime dans ce lot si le test révèle un vrai défaut fonctionnel : caractériser d'abord, puis ouvrir un lot dédié.
+## Résultat du lot Save & Quit / reprise
 
-## Propriétaires à identifier avant test
+La sentinelle navigateur `tests/gens_savequit_resume_shell_browser_v11411.test.cjs` traverse le vrai chemin utilisateur :
 
-- propriétaire exact du bouton Save & Quit ;
-- fonction(s) de persistance réellement appelées ;
-- `resumeGame()` comme propriétaire Shell générique déjà identifié par l'audit ;
-- garde famille/session existant ;
-- état module réellement restauré après reprise.
+`Accueil -> Adventure -> Dungeon -> pré-game -> sélection héros -> startConfiguredGame() -> Dungeon -> Save & Quit -> recréation de page -> Adventure -> Dungeon -> Reprendre`
 
-## Fonctions/systèmes protégés
+Elle vérifie notamment :
+- vraie session Dungeon créée par le Shell ;
+- vrai bouton Save & Quit de `DungeonCore01.quit` (Core 3.10) ;
+- conservation du marqueur de session et du runtime persistant ;
+- vraie recréation de page avec le stockage navigateur conservé, sans injection de sauvegarde ;
+- bouton `Reprendre` réellement activé puis cliqué ;
+- retour d'autorité au runtime Dungeon ;
+- profil `game_profile_dungeon_demo`, famille `adventure`, participants et état runtime conservés ;
+- guard famille/session de production toujours utilisé ;
+- lancement Dungeon depuis le Shell désormais couvert par le même scénario.
 
-Ne pas modifier dans ce lot :
-- gameplay Survie/Dungeon/Tactical/Capture/PvP ;
-- moteurs de stats, dés, dégâts, inventaire ;
-- déplacement/spawn/détection ;
-- règles de sauvegarde ou structures persistantes ;
-- navigation globale hors besoin de caractérisation ;
-- PWA/cache ;
-- aucun MutationObserver global, timer/retry de réparation, wrapper permanent ou monkey-patch.
+Le harnais est construit à partir de blocs source exacts de `index.html`. Le seul état simulé hors périmètre est l'état réseau/Supabase hors-ligne par défaut (`z40kRoomId=null`, code vide, remote=false), après assertions statiques sur ses définitions de production.
 
-## Tests prévus
+Aucun runtime, gameplay, asset, structure persistante ou règle n'a été modifié.
 
-1. identifier le vrai chemin Save & Quit dans `index.html` ;
-2. réutiliser le vrai chemin de lancement déjà protégé ;
-3. lancer une session réelle ;
-4. provoquer Save & Quit par le vrai contrôle UI ;
-5. vérifier la persistance attendue ;
-6. recréer/recharger le navigateur ;
-7. cliquer sur Reprendre ;
-8. vérifier module/famille/session/état ;
-9. vérifier non-prise d'autorité Dungeon quand le scénario n'est pas Dungeon, et inversement selon le scénario choisi ;
-10. relancer Architecture + navigateur + sentinelles existantes.
+CI sur `4bf7203703e2002562ed2d074771519abf4b1e0c` :
+- Architecture : run `35316032731` — SUCCESS
+- Firefox : run `35316032787` — SUCCESS
+- Tactical Dock : run `35316032860` — SUCCESS
 
-## Risques
+## Prochain chantier Phase 1
 
-- plusieurs anciens chemins Save/Resume peuvent coexister ;
-- un test trop synthétique pourrait injecter artificiellement l'état et masquer le vrai raccord ;
-- le gros `index.html` peut imposer un harnais navigateur ciblé, sans recopier la logique métier ;
-- une vraie régression de reprise doit être caractérisée sans rustine dans ce lot.
+**Sentinelle du placeholder PvP actuel.**
 
-## Prochaine étape
+Périmètre prévu :
+- nouveau checkpoint de départ et nouvelle branche ;
+- test-only en première intention ;
+- traverser le vrai Shell jusqu'à Duel/PvP ;
+- protéger le comportement actuel `PVP — À VENIR` / moteur non construit ;
+- ne pas inventer ni commencer un moteur PvP ;
+- aucun correctif runtime si le test révèle un défaut avant caractérisation dédiée.
 
-Cartographier dans le vrai `index.html` le bouton Save & Quit, sa fonction propriétaire, les clés persistantes touchées et le chemin `resumeGame()`, puis écrire la sentinelle minimale du vrai round-trip Shell.
+Après PvP : Capture actuel, puis non-interférence explicite des quatre modules. Le lancement Dungeon Shell n'a plus besoin d'un lot séparé sauf régression future.
 
 ## Dette explicitement différée
 

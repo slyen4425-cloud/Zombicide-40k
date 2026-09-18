@@ -538,3 +538,27 @@ Interdit :
 ### Prochaine action
 
 Appliquer un correctif soustractif dans V111 uniquement, puis lancer les sentinelles.
+
+### Audit de conformité charte — lot Builder isolé
+
+Contrôle effectué après rappel utilisateur :
+- le premier changement responsable est identifié : `d2f102a7be11094cb89b488732e40c8c51cf9e5a` (V16.78.111), qui introduit l'autorité Tactical sur `#drc100Launcher` ;
+- le défaut est déjà présent dans le checkpoint Phase 3 GREEN `080a45a904590a2b24a2cbc87b9c270913f427e6` et dans `main` V16.78.114.11 ;
+- le lot Builder précédent basé sur `deb87df...` est abandonné comme base de validation car il héritait du lot Dungeon-après-Survie non encore clôturé GREEN ;
+- le présent lot repart de Phase 3 GREEN avec checkpoint propre avant toute modification runtime ;
+- le correctif `a209e74a1a96abd6a8bfbb6351ebe3beb7475900` est soustractif : V111 perd uniquement les sélecteurs structurels Builder/Room Creator ;
+- aucun nouveau launcher, wrapper, observer, timer, retry, système de navigation ou stockage n'est ajouté ;
+- `index.html`, World Builder, Room Creator, Shell, mouvement, persistance et gameplay restent inchangés ;
+- le vrai chemin navigateur Éditeurs -> Dungeon -> Builder est couvert par une sentinelle dédiée ;
+- le test historique V111 verrouille désormais la frontière : Tactical ne peut plus écrire la visibilité du launcher Builder.
+
+Diff depuis le checkpoint de départ :
+- runtime : 1 fichier V111, 1 ligne d'autorité retirée + commentaire ajusté ;
+- tests : 1 sentinelle navigateur ajoutée, 1 sentinelle V111 renforcée ;
+- CI : 1 étape navigateur ajoutée ;
+- documentation uniquement en complément.
+
+État CI au moment de l'audit :
+- base Phase 3 GREEN : Firefox et Tactical Dock repassés SUCCESS ;
+- HEAD correctif `a209e74...` : Architecture en cours, Firefox/Tactical Dock en attente ;
+- aucun checkpoint GREEN final ne doit être créé avant succès des trois validations requises et test utilisateur ciblé.

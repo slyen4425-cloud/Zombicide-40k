@@ -37,3 +37,8 @@ jobs:
 
       - name: Vérifier les murs sous zoom fractionnaire Firefox
         run: node tests/gens_tactical_wall_zoom_firefox_v11411.test.cjs
+
+      - name: Caractériser Dungeon après Survie dans Firefox
+        env:
+          GENSRPG_BROWSER: firefox
+        run: node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs

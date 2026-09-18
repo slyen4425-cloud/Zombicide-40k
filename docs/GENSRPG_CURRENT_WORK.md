@@ -15,88 +15,88 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert
+## Phase 1 — état
 
-Phase 1 — Capture :
-`checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
+**Phase 1 complète et GREEN.**
 
-SHA :
-`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
-
-## RED de référence
-
-Checkpoint :
-`checkpoint/gensrpg-phase1-four-module-noninterference-red-characterized-2026-09-18`
-
-SHA :
-`6c73c598c7cee070056397bc51592e01cbb6275b`
-
-Défaut :
-transition réelle `Capture -> PvP placeholder` conservant `gensDungeonTheme` et `gensCapturePregame` sur `body`.
-
-## Chantier courant
-
-**Phase 1 — correctif Shell ciblé de nettoyage de contexte**
-
-Branche :
+Lot de fermeture :
 `work/gensrpg-phase1-shell-context-cleanup-fix-2026-09-18`
 
 Checkpoint de départ :
 `checkpoint/gensrpg-start-phase1-shell-context-cleanup-fix-2026-09-18`
 
-Sauvegarde avant runtime :
-`backup/gensrpg-before-shell-context-cleanup-fix-2026-09-18`
-
-Base exacte :
+Base du correctif :
 `6c73c598c7cee070056397bc51592e01cbb6275b`
 
-## Propriétaire identifié
+SHA fonctionnel GREEN :
+`08220589eb89a06c73f5777050bbcc90275e48fd`
 
-`openGensFamily(family)` dans le Shell principal.
+CI :
+- Architecture `35324953366` — SUCCESS
+- Firefox `35324953326` — SUCCESS
+- Tactical Dock `35324953417` — SUCCESS
 
-Diagnostic :
-- cette fonction possède le passage vers une famille racine ;
-- elle masque les anciennes vues et affiche la nouvelle famille ;
-- elle ne retire actuellement aucune classe de contexte transitoire du `body` ;
-- `gensCapturePregame` est posé par le wizard Capture ;
-- `gensAdventurePregame` est posé par le wizard Adventure ;
-- `gensDungeonTheme` est posé par le contexte Adventure/Dungeon ;
-- le placeholder PvP n'a aucun runtime qui puisse nettoyer ces classes après coup.
+## Correctif de fermeture Phase 1
 
-## Périmètre autorisé
+Le RED de non-interférence Capture -> PvP était causé par le propriétaire Shell `openGensFamily(family)`.
 
-Correctif soustractif et local au propriétaire Shell :
-- nettoyer les classes de contexte de **pré-game** lorsqu'on quitte une vue de jeu pour une famille ;
-- empêcher un thème Adventure/Dungeon de rester actif dans une famille non-Adventure, notamment PvP ;
-- ne pas effacer profil, sauvegarde, session ou données persistantes ;
-- ne pas créer de nouvel état, wrapper, observer, timer ou retry ;
-- ne pas modifier les moteurs Capture, Dungeon, Survie, Tactical ou PvP ;
-- ne pas changer les règles de gameplay.
+Correctif appliqué :
+- retrait de `gensCapturePregame` ;
+- retrait de `gensAdventurePregame` ;
+- retrait de `gensDungeonTheme` uniquement lorsqu'on entre dans une famille autre que `adventure`.
 
-## Correctif envisagé
+Le changement runtime est strictement limité à **deux lignes** dans `openGensFamily()`.
 
-Dans `openGensFamily(family)` :
-- retirer systématiquement `gensCapturePregame` et `gensAdventurePregame` car aucune famille racine n'est un pré-game ;
-- retirer `gens-pure-capture` car aucune famille racine n'est le runtime Capture actif ;
-- synchroniser `gensDungeonTheme` avec la famille demandée : actif uniquement pour `adventure`, absent pour `survival` et `pvp`.
+Non modifié :
+- profil actif ;
+- sauvegardes ;
+- session ;
+- runtimes Survie/Dungeon/Tactical/Capture/PvP ;
+- gameplay ;
+- `gens-pure-capture` ;
+- règles ou données persistantes.
 
-Aucune autre autorité ne doit être ajoutée.
+La sentinelle `gens_four_module_noninterference_shell_browser_v11411.test.cjs` traverse désormais GREEN :
 
-## Tests obligatoires
+`Survie -> Dungeon -> Survie -> Capture -> PvP placeholder`
 
-1. la sentinelle quatre modules doit devenir GREEN ;
-2. Survie Shell reste GREEN ;
-3. Save & Quit / reprise reste GREEN ;
-4. PvP placeholder reste GREEN ;
-5. Capture actuel reste GREEN ;
-6. Architecture reste GREEN ;
-7. Firefox et Tactical Dock restent GREEN ;
-8. diff runtime limité au propriétaire Shell attendu.
+Elle confirme qu'aucune autorité visuelle/runtime parasite majeure ne fuit entre ces contextes.
 
-## Prochaine étape
+## Critère de sortie Phase 1
 
-Appliquer le nettoyage minimal dans `openGensFamily()`, puis relancer la CI complète avant toute clôture.
+La matrice obligatoire est couverte :
+- lancement Survie ;
+- lancement Dungeon ;
+- fiche héros Dungeon ;
+- Save & Quit + reprise ;
+- mouvement Dungeon ;
+- stats canoniques ;
+- dés D100/D6 ;
+- calcul de touche ;
+- dégâts + armure + résistances ;
+- Tactical entrée/sortie ;
+- Monster Capture ;
+- Duel/PvP ;
+- sauvegarde ;
+- PWA/cache ;
+- non-interférence des quatre modules.
+
+La Phase 1 peut donc être clôturée avant tout déplacement structurel important.
+
+## Prochain chantier
+
+**Phase 2 — cartographie réelle du runtime actif.**
+
+Avant toute modification :
+- créer un nouveau checkpoint de départ depuis le checkpoint Phase 1 GREEN ;
+- créer une nouvelle branche dédiée ;
+- cartographier les scripts réellement chargés, leurs propriétaires et dépendances ;
+- classer chaque fichier/bloc : Core, Shell, Survie, Dungeon, Tactical, Capture, PvP, Builders, legacy/inactif ;
+- identifier les fonctions globales et responsabilités encore dupliquées ;
+- ne déplacer aucun gameplay dans ce premier lot de cartographie.
+
+Critère de sortie Phase 2 : aucun runtime actif sans propriétaire connu.
 
 ## Dette explicitement différée
 
-La détection ennemie hors embuscade reste réservée à un chantier de caractérisation dédié après la Phase 1.
+La détection ennemie hors embuscade reste réservée à un chantier de caractérisation dédié après la Phase 1 ; elle ne doit pas être mélangée à la cartographie structurelle.

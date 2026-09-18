@@ -395,9 +395,10 @@ async function runPersistedDungeonThenSurvivalScenario(port){
       await page.waitForFunction(()=>!document.getElementById('effectModal')?.classList.contains('open'));
     }
 
-    const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
-    await quit.waitFor({state:'visible'});
-    await quit.click();
+    // This scenario characterizes NEW GAME reset after a previously persisted Dungeon.
+    // Save & Quit UI itself has a dedicated browser sentinel; use the canonical Dungeon owner
+    // here so a legitimate event/Tactical overlay cannot make fixture setup nondeterministic.
+    await page.evaluate(()=>window.DungeonCore01?.quit?.());
     await page.waitForFunction(()=>{
       const root=document.getElementById('gensRootHome');
       const core=document.getElementById('gensDungeonCore01');

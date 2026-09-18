@@ -192,7 +192,7 @@ const server=http.createServer((req,res)=>{
   },CAPTURE_ID,{timeout:90000});
 
   const waitFullBoot=async()=>{
-    await waitFullBoot();
+    await waitFullOwners();
     await page.waitForLoadState('domcontentloaded',{timeout:90000});
   };
 
@@ -204,7 +204,7 @@ const server=http.createServer((req,res)=>{
   try{
     mark('navigate-pages-equivalent-composition');
     await page.goto(url,{waitUntil:'commit',timeout:20000});
-    await waitFullOwners();
+    await waitFullBoot();
 
     const composition=await page.evaluate(()=>({
       startSource:String(window.startConfiguredGame||'').slice(0,500),

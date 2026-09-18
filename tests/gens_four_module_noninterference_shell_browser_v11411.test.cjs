@@ -324,6 +324,7 @@ const server=http.createServer((req,res)=>{
     await openFamily('pvp');
     const pvp=await snapshot();
     const pvpText=await page.locator('#gensFamilyGames').textContent();
+    console.log('[four-module] pvp-diagnostic',JSON.stringify({beforePvp,pvp,pvpText}));
     assert.match(pvpText,/PVP — À VENIR/);
     assert.equal(pvp.session,beforePvp.session,'PvP placeholder must not create/replace a session');
     assert.equal(pvp.active,beforePvp.active,'PvP placeholder must not activate another game profile');

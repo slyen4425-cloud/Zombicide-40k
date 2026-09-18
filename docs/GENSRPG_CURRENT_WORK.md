@@ -609,3 +609,39 @@ Base exacte :
 ### Prochaine action
 
 Appliquer uniquement les deux corrections runtime du lot map sur la base Builder GREEN, réaligner les empreintes Phase 2, réintroduire la sentinelle Dungeon après Survie et valider l'ensemble.
+
+### Clôture GREEN — lot d'intégration Dungeon
+
+SHA validé :
+`3558831ed126e292278c867dd17491cabf0f29ad`
+
+Checkpoint GREEN :
+`checkpoint/gensrpg-dungeon-integrated-fixes-green-2026-09-18`
+
+Validation :
+- Architecture `35381845451` — SUCCESS ;
+- navigateur complet du même run — SUCCESS ;
+- Firefox `35381845376` — SUCCESS ;
+- Tactical Dock `35381845438` — SUCCESS.
+
+Le navigateur complet valide ensemble :
+- Survie ;
+- Dungeon après Survie avec retour en entrée/grille ;
+- Dungeon Builder visible et ouvrable ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence ;
+- rendu murs ;
+- preview.
+
+Le scénario Dungeon après Survie utilise `DungeonCore01.quit()` uniquement pour préparer de façon déterministe un ancien état Dungeon persisté ; le vrai Save & Quit UI reste couvert par sa sentinelle dédiée.
+
+Prochaine étape autorisée :
+ouvrir un chantier authored-runtime séparé pour les problèmes utilisateur suivants :
+1. cache/sous-pièce : retour vers la salle parente impossible ou demande de relire/réutiliser la cache ;
+2. affichage authored instable ;
+3. pièges parfois visibles/invisibles ;
+4. pièges non authored apparaissant alors que le donjon construit ne doit pas recevoir d'aléatoire.
+
+Ne pas modifier ces sujets sur le présent lot désormais GREEN.

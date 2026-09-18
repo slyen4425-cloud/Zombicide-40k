@@ -497,3 +497,59 @@ Prochaine action de caractérisation :
 5. reproduire le point d'arrêt sans modifier le runtime ;
 6. seulement ensuite décider s'il s'agit d'un coût de harnais, d'une boucle réelle ou d'une autorité Capture problématique.
 
+
+
+## Caractérisation fine du bloc 030 — cause prouvée
+
+Run navigateur instrumenté sur la composition Pages complète, avec le `index.html` exact vérifié (blob `a515c3d34a1f5c4973159457090e4437a33c2630`).
+
+Résultat :
+- `builtinMonsterCapture162` construit toutes ses constantes ;
+- `ensureBuiltinMonsterCapture162()` entre normalement ;
+- le chargement brut des profils retourne **0 profil** ;
+- le chargement des dresseurs retourne **0 héros** avant seed ;
+- les seeds roster / capacités / gameplay / règles terminent ;
+- le gel commence exactement à `refreshCustomEquipmentIntoItems()` ;
+- aucun marqueur `refresh-after` n'est atteint.
+
+Chaîne récursive observée directement par instrumentation bornée :
+```text
+refreshCustomEquipmentIntoItems
+→ gensCurrentContentFamily
+→ getActiveGameProfile
+→ loadGameProfiles
+→ ensureBaseGameProfile
+→ captureCurrentGameProfile(game_profile_zombicide_base)
+→ currentAllHeroIds
+→ applyCustomHeroesMulti
+→ gensContentCompatible(hero)
+→ gensCurrentContentFamily
+→ ...
+```
+
+La même séquence recommence immédiatement. Le traceur a enregistré 80 appels imbriqués successifs avant sa limite de journalisation, puis le watchdog navigateur a expiré sans sortie du bloc 030.
+
+Cause structurelle caractérisée :
+- `builtinMonsterCapture162` utilise `loadGameProfilesRaw()` et enregistre le profil Capture avant que le bootstrap canonique Base/Dungeon ne soit garanti ;
+- il enregistre ensuite le dresseur Capture ;
+- `refreshCustomEquipmentIntoItems()` demande la famille de contenu courante ;
+- cette résolution passe par `loadGameProfiles()`, qui doit alors créer Base/Dungeon ;
+- la construction du profil Base appelle `currentAllHeroIds()` ;
+- le dresseur Capture déjà enregistré force `gensContentCompatible()` à redemander la famille courante ;
+- les profils Base/Dungeon ne sont pas encore persistés, donc `ensureBaseGameProfile()` est réentré avant sa fin.
+
+Ce résultat est un **défaut fonctionnel réel de bootstrap à froid**, découvert pendant la cartographie. Conformément à la charte, il n'est **pas corrigé dans ce lot Phase 2**.
+
+Preuve CI :
+- branche : `work/gensrpg-phase2-runtime-cartography-2026-09-18`
+- commit de caractérisation : `8c25a0940374ff36ff6754a8bd4aa4d59cf51afb`
+- Architecture statique : SUCCESS avant le scénario navigateur ;
+- sentinelles navigateur précédentes : UI native, Survie, Save & Quit/Reprise, PvP et Capture réduit — SUCCESS ;
+- scénario Pages complet : RED uniquement sur le défaut ci-dessus.
+
+Décision de lot :
+1. arrêter ici toute tentative de correction dans la cartographie ;
+2. ouvrir un lot correctif dédié avec checkpoint de départ ;
+3. corriger le bootstrap au vrai propriétaire sans ajouter de wrapper/observer/timer ;
+4. exiger comme preuve le passage de la composition Pages complète et des sentinelles inter-modules ;
+5. reprendre ensuite la Phase 2 depuis un état vert documenté.

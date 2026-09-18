@@ -1,0 +1,248 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const http=require('node:http');
+const path=require('node:path');
+const {chromium}=require('playwright');
+
+const root=path.join(__dirname,'..');
+const CAPTURE_ID='gp_mt7ker7t_m2iw9';
+const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
+const mime={
+  '.html':'text/html; charset=utf-8',
+  '.js':'text/javascript; charset=utf-8',
+  '.css':'text/css; charset=utf-8',
+  '.json':'application/json',
+  '.webmanifest':'application/manifest+json',
+  '.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp',
+  '.mp3':'audio/mpeg'
+};
+
+const server=http.createServer((req,res)=>{
+  const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
+  const rel=pathname==='/'?'/index.html':pathname;
+  const file=path.resolve(root,'.'+rel);
+  if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
+  fs.readFile(file,(err,data)=>{
+    if(err){res.writeHead(404);res.end('not found');return}
+    res.writeHead(200,{
+      'content-type':mime[path.extname(file).toLowerCase()]||'application/octet-stream',
+      'cache-control':'no-store'
+    });
+    res.end(data);
+  });
+});
+
+(async()=>{
+  let stage='boot';
+  const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
+  const watchdog=setTimeout(()=>{
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage);
+    process.exit(1);
+  },150000);
+
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const port=server.address().port;
+  const url=`http://127.0.0.1:${port}/index.html?phase2-full-capture=1`;
+  const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},
+    deviceScaleFactor:2.625,
+    isMobile:true,
+    hasTouch:true,
+    locale:'fr-FR',
+    serviceWorkers:'block'
+  });
+
+  await context.addInitScript(()=>{
+    try{
+      if(!sessionStorage.getItem('__phase2FullCaptureBooted')){
+        localStorage.clear();
+        sessionStorage.clear();
+        sessionStorage.setItem('__phase2FullCaptureBooted','1');
+      }
+    }catch(e){}
+    window.supabase={createClient:()=>({})};
+    window.QRCode=function(){return {}};
+  });
+
+  const page=await context.newPage();
+  page.setDefaultTimeout(25000);
+  const browserErrors=[];
+  const dialogs=[];
+  page.on('pageerror',error=>browserErrors.push(String(error)));
+  page.on('console',message=>{
+    if(message.type()!=='error')return;
+    const value=message.text();
+    if(/Failed to load resource|ERR_FAILED|RuntimeBootstrap V1 load failed/.test(value))return;
+    browserErrors.push(value);
+  });
+  page.on('dialog',async dialog=>{
+    dialogs.push({type:dialog.type(),message:dialog.message()});
+    await dialog.accept();
+  });
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+
+  const waitFullOwners=()=>page.waitForFunction((captureId)=>{
+    const profiles=typeof loadGameProfiles==='function'?loadGameProfiles():[];
+    return typeof window.openGensFamily==='function' &&
+      typeof window.openGensBuiltInGame==='function' &&
+      typeof window.startConfiguredGame==='function' &&
+      typeof window.gensMode151==='function' &&
+      typeof window.ensureBuiltinMonsterCapture162==='function' &&
+      !!window.DungeonCore01 &&
+      profiles.some(p=>String(p.id)===captureId);
+  },CAPTURE_ID,{timeout:30000});
+
+  const openAdventure=async()=>{
+    await page.locator('button.gensRootModeCard.adventure').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+  };
+
+  try{
+    mark('navigate-full-index');
+    await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+    await waitFullOwners();
+
+    const composition=await page.evaluate(()=>({
+      startSource:String(window.startConfiguredGame||'').slice(0,500),
+      coreVersion:window.DUNGEON_CORE_VERSION||'',
+      gensVersion:window.GENSRPG_VERSION||'',
+      runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
+      tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
+      familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||''
+    }));
+    console.log('[phase2-full-capture] composition',JSON.stringify(composition));
+
+    mark('open-adventure');
+    await openAdventure();
+    let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
+    await captureCard.waitFor({state:'visible'});
+
+    const sw=await page.evaluate((captureId)=>({
+      active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+      from:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(activeGameProfileId()):'',
+      to:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(captureId):''
+    }),CAPTURE_ID);
+
+    if(sw.active&&sw.active!==CAPTURE_ID&&sw.from!==sw.to){
+      mark('select-capture-through-production-v155-reload');
+      await Promise.all([
+        page.waitForNavigation({waitUntil:'domcontentloaded',timeout:20000}),
+        captureCard.click()
+      ]);
+      await waitFullOwners();
+      const reloadState=await page.evaluate(()=>({
+        active:activeGameProfileId(),
+        forced:localStorage.getItem('gensrpg_forced_mode_reload_155')
+      }));
+      assert.equal(reloadState.active,CAPTURE_ID,'full composition V16.155 reload must preserve Capture profile');
+      assert.equal(reloadState.forced,null,'full composition V16.155 handoff must be consumed');
+      await openAdventure();
+      captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
+      await captureCard.waitFor({state:'visible'});
+    }
+
+    mark('open-capture-profile-full-composition');
+    await captureCard.click();
+    await page.waitForFunction((captureId)=>
+      activeGameProfileId()===captureId &&
+      getComputedStyle(document.getElementById('gensGameHome')).display!=='none',
+      CAPTURE_ID
+    );
+
+    const profileState=await page.evaluate(()=>({
+      active:activeGameProfileId(),
+      mode151:gensMode151(),
+      contentFamily:gensCurrentContentFamily(),
+      dungeonMode:!!isDungeonMode(),
+      startSource:String(window.startConfiguredGame||'').slice(0,900)
+    }));
+    console.log('[phase2-full-capture] profile-state',JSON.stringify(profileState));
+    assert.equal(profileState.active,CAPTURE_ID);
+    assert.equal(profileState.mode151,'capture');
+    assert.equal(profileState.contentFamily,'creature');
+    assert.equal(profileState.dungeonMode,true,'current Capture substrate remains dungeon-style');
+
+    mark('open-capture-pregame-full-composition');
+    await page.locator('#gensGameHomeActions .newGameBtn').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
+
+    mark('select-trainer-and-starter-full-composition');
+    await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+
+    let trainer=page.locator(`#participantList input[type="checkbox"][value="${CAPTURE_TRAINER}"]`);
+    if(!(await trainer.count()))trainer=page.locator('#participantList input[type="checkbox"]').first();
+    await trainer.waitFor({state:'visible'});
+    if(!(await trainer.isChecked()))await trainer.check();
+
+    const starterChoices=page.locator('#participantList .captureStarterChoice');
+    await starterChoices.first().waitFor({state:'visible'});
+    if(!(await page.locator('#participantList .captureStarterChoice.selected').count())){
+      await starterChoices.first().click();
+    }
+    await page.waitForFunction(()=>typeof gensCaptureParticipantsReady==='function'&&gensCaptureParticipantsReady()===true);
+
+    await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>{
+      const btn=document.querySelector('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]');
+      return !!btn&&!btn.disabled;
+    });
+
+    mark('start-capture-through-final-production-startConfiguredGame');
+    await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
+
+    let launch;
+    try{
+      await page.waitForFunction(()=>
+        localStorage.getItem('z40k_session_active_v1')==='1' &&
+        (
+          getComputedStyle(document.getElementById('captureGameHub')).display!=='none' ||
+          getComputedStyle(document.getElementById('gensDungeonCore01')).display!=='none'
+        ),
+        null,{timeout:10000}
+      );
+    }catch(e){}
+
+    launch=await page.evaluate(()=>({
+      active:activeGameProfileId(),
+      mode151:gensMode151(),
+      contentFamily:gensCurrentContentFamily(),
+      session:localStorage.getItem('z40k_session_active_v1'),
+      captureHub:document.getElementById('captureGameHub')?getComputedStyle(document.getElementById('captureGameHub')).display:'absent',
+      dungeonCore:document.getElementById('gensDungeonCore01')?getComputedStyle(document.getElementById('gensDungeonCore01')).display:'absent',
+      dungeonPanel:document.getElementById('dungeonMenuPanel')?getComputedStyle(document.getElementById('dungeonMenuPanel')).display:'absent',
+      pureCapture:document.body.classList.contains('gens-pure-capture'),
+      capturePregame:document.body.classList.contains('gensCapturePregame'),
+      dungeonTheme:document.body.classList.contains('gensDungeonTheme')
+    }));
+    console.log('[phase2-full-capture] launch-diagnostic',JSON.stringify({launch,dialogs,browserErrors}));
+
+    assert.equal(launch.active,CAPTURE_ID);
+    assert.equal(launch.mode151,'capture');
+    assert.equal(launch.contentFamily,'creature');
+    assert.equal(launch.session,'1','full production launch must activate the session');
+    assert.notEqual(launch.captureHub,'none','full production startConfiguredGame chain must end in Capture hub');
+    assert.equal(launch.dungeonCore,'none','full production Capture launch must not enter DungeonCore01');
+    assert.equal(launch.dungeonPanel,'none','full production Capture launch must keep classic Dungeon panel inactive');
+    assert.equal(launch.pureCapture,true,'full production Capture launch must assert Capture runtime class');
+    assert.deepEqual(browserErrors,[],'full production Capture characterization must not raise runtime errors');
+
+    mark('assertions-passed');
+    console.log(JSON.stringify({
+      scenario:'Phase 2 full production Capture composition',
+      profile:CAPTURE_ID,
+      finalMode:launch.mode151,
+      captureHub:launch.captureHub,
+      dungeonCore:launch.dungeonCore
+    }));
+  }finally{
+    clearTimeout(watchdog);
+    mark('cleanup');
+    server.closeAllConnections?.();
+    server.closeIdleConnections?.();
+    server.close();
+    await browser.close();
+  }
+})().catch(error=>{console.error(error);process.exitCode=1});

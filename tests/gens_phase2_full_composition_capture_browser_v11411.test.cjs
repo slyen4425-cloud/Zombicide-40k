@@ -83,14 +83,18 @@ const server=http.createServer((req,res)=>{
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   const waitFullOwners=()=>page.waitForFunction((captureId)=>{
-    const profiles=typeof loadGameProfiles==='function'?loadGameProfiles():[];
-    return typeof window.openGensFamily==='function' &&
-      typeof window.openGensBuiltInGame==='function' &&
-      typeof window.startConfiguredGame==='function' &&
-      typeof window.gensMode151==='function' &&
-      typeof window.ensureBuiltinMonsterCapture162==='function' &&
-      !!window.DungeonCore01 &&
-      profiles.some(p=>String(p.id)===captureId);
+    try{
+      if(typeof window.loadGameProfiles!=='function')return false;
+      if(typeof window.loadCustomHeroesMulti!=='function')return false;
+      if(typeof window.openGensFamily!=='function')return false;
+      if(typeof window.openGensBuiltInGame!=='function')return false;
+      if(typeof window.startConfiguredGame!=='function')return false;
+      if(typeof window.gensMode151!=='function')return false;
+      if(typeof window.ensureBuiltinMonsterCapture162!=='function')return false;
+      if(!window.DungeonCore01)return false;
+      const profiles=window.loadGameProfiles();
+      return Array.isArray(profiles)&&profiles.some(p=>String(p.id)===captureId);
+    }catch(e){return false}
   },CAPTURE_ID,{timeout:90000});
 
   const openAdventure=async()=>{

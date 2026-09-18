@@ -46,7 +46,7 @@ const phase2CaptureTraceReplacements=[
   ['try{refreshCustomEquipmentIntoItems?.()}catch(e){}', 'console.log("[phase2-mc162] refresh-before");try{refreshCustomEquipmentIntoItems?.();console.log("[phase2-mc162] refresh-after")}catch(e){console.log("[phase2-mc162] refresh-error",String(e))}'],
   ['try{applyCustomHeroesMulti?.()}catch(e){}', 'console.log("[phase2-mc162] apply-heroes-before");try{applyCustomHeroesMulti?.();console.log("[phase2-mc162] apply-heroes-after")}catch(e){console.log("[phase2-mc162] apply-heroes-error",String(e))}'],
   ['try{renderGameProfileLibrary?.()}catch(e){}', 'console.log("[phase2-mc162] render-profiles-before");try{renderGameProfileLibrary?.();console.log("[phase2-mc162] render-profiles-after")}catch(e){console.log("[phase2-mc162] render-profiles-error",String(e))}console.log("[phase2-mc162] ensure-end");'],
-  ['ensureBuiltinMonsterCapture162();\\ndocument.addEventListener', 'console.log("[phase2-mc162] first-call-before");ensureBuiltinMonsterCapture162();console.log("[phase2-mc162] first-call-after");\\ndocument.addEventListener']
+  ['ensureBuiltinMonsterCapture162();', 'console.log("[phase2-mc162] first-call-before");ensureBuiltinMonsterCapture162();console.log("[phase2-mc162] first-call-after");']
 ];
 for(const [needle,replacement] of phase2CaptureTraceReplacements){
   assert.ok(productionHtml.includes(needle),'Phase 2 Capture trace anchor missing: '+needle);

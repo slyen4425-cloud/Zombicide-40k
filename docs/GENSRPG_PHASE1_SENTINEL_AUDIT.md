@@ -27,7 +27,7 @@ Audit uniquement. Aucun runtime, gameplay, asset ou valeur de règle n'est modif
 | Duel/PvP | COUVERT | `gens_pvp_placeholder_shell_browser_v11411.test.cjs` traverse la vraie carte PvP du Shell et protège `PVP — À VENIR`, le message moteur non construit et l'absence de session/runtime parasite | aucun manque Phase 1 identifié |
 | Sauvegarde | COUVERT | `dungeon_authored_return_persist_v167862.test.cjs` protège la persistance spatiale ; `gens_savequit_resume_shell_browser_v11411.test.cjs` protège désormais le round-trip Shell complet Save & Quit -> recréation de page -> Reprendre | aucun manque Phase 1 identifié |
 | PWA/cache | COUVERT | `gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs` + preview composition/browser | aucun manque Phase 1 identifié |
-| Non-interférence 4 modules | PARTIEL | Survival/Dungeon et Tactical/legacy sont fortement isolés ; Capture est filtré dans plusieurs données Dungeon | aucune sentinelle unique couvrant les frontières Survie/Dungeon/Capture/PvP |
+| Non-interférence 4 modules | RED CARACTÉRISÉ | `gens_four_module_noninterference_shell_browser_v11411.test.cjs` traverse Survie -> Dungeon -> Survie -> Capture -> PvP et révèle une fuite de classes de contexte au passage Capture -> PvP | `gensDungeonTheme` et `gensCapturePregame` restent actifs sur `body` ; correctif Shell dédié requis avant sortie Phase 1 |
 
 ## Propriétaires vérifiés
 
@@ -47,16 +47,11 @@ Le placeholder PvP actuel et le comportement actuel Monster Capture sont désorm
 
 Preuve Capture : SHA fonctionnel `97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef`, Architecture `35321411358`, Firefox `35321411333`, Tactical Dock `35321411366` — tous SUCCESS.
 
-Prochain lot test-only retenu : **non-interférence explicite des quatre modules**.
+Le lot de non-interférence a désormais une sentinelle unique et un RED fonctionnel caractérisé sur la transition **Capture -> PvP**. Le Shell affiche bien le placeholder PvP sans session/runtime parasite, mais conserve les classes `gensDungeonTheme` et `gensCapturePregame` du contexte précédent.
 
-Périmètre attendu :
-- tests/workflow/documentation en première intention ;
-- vérifier les frontières Survie / Dungeon / Capture / PvP dans un scénario explicite ;
-- vérifier qu’un module ne laisse pas d’autorité, thème, profil, session ou runtime parasite dans le suivant ;
-- réutiliser les vrais propriétaires déjà couverts ;
-- aucun correctif runtime dans ce lot si un vrai défaut fonctionnel est découvert.
+Prochain lot : **correctif Shell dédié de nettoyage de contexte**, avec `openGensFamily()` comme propriétaire identifié. Aucun correctif n’est appliqué dans le lot sentinelle lui-même.
 
-Après ce lot : revue finale de la matrice Phase 1 et décision de passage en Phase 2.
+Après ce correctif GREEN : relancer la sentinelle quatre modules, refaire la matrice Phase 1 complète et décider du passage en Phase 2.
 
 ## Signalement hors périmètre conservé
 

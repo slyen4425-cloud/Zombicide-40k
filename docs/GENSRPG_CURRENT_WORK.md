@@ -643,3 +643,27 @@ Interdit avant preuve :
 ### Prochaine action
 
 Lire les propriétaires runtime authored existants et les tests historiques cache/piège/retour afin d'identifier le premier conflit exact avant toute modification fonctionnelle.
+
+### Recentrage obligatoire après diagnostic
+
+Le périmètre initial contient en réalité trois propriétaires distincts :
+1. retour de cache / branche secondaire : `DungeonZoneLinks167846` + contrat avec `DungeonAuthoredBranchNavCleanup167863` ;
+2. pièges authored : `DungeonExactTrapRuntime167845` + contenu exact `DungeonZoneContent167824` ;
+3. stabilité visuelle : `Dungeon Authored Visual`, notamment `DungeonAuthoredCacheVisual167852` et `DungeonSourceRenderStability167877`.
+
+Conformément à la charte « 1 lot = 1 périmètre homogène », aucun correctif runtime n'est appliqué sur cette branche diagnostic.
+
+Constats prouvés :
+- cache : `branchReturnActive()` masque Explore pendant toute une branche secondaire, mais `topReturn()` dans Zone Links n'autorise Retour que si la position courante est encore une case `entry` ; après déplacement/interactions dans la cache, le héros peut donc rester sans action de sortie ;
+- pièges : la sentinelle historique `dungeon_exact_trap_runtime_v167845.test.cjs` exige actuellement qu'un piège de scène étranger non authored soit conservé dans la salle construite ; ce contrat est incompatible avec l'autorité Builder demandée par l'utilisateur ;
+- visuel : deux couches du même domaine agissent encore sur la grille authored, une pré-DOM (`DungeonSourceRenderStability167877`) et une post-DOM (`DungeonAuthoredCacheVisual167852`) ; cette dette doit être caractérisée séparément avant retrait d'une autorité.
+
+Ordre de traitement :
+1. lot cache/retour ;
+2. checkpoint GREEN ;
+3. lot pièges exacts sans aléatoire ;
+4. checkpoint GREEN ;
+5. lot stabilité visuelle ;
+6. checkpoint GREEN.
+
+Aucune modification de gameplay n'a été faite sur cette branche diagnostic.

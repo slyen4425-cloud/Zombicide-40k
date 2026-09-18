@@ -477,3 +477,102 @@ Validation documentaire finale :
 2. ouvrir une branche Phase 4 dédiée au resolver d'assets depuis ce checkpoint ;
 3. appliquer la règle 26 si le contenu exact de `index.html` est requis ;
 4. ne rien fusionner sur `main`.
+
+
+## Chantier courant — Phase 4 / Lot 1 — resolver d'assets
+
+Branche :
+`work/gensrpg-phase4-asset-resolver-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-asset-resolver-2026-09-18`
+
+Base exacte :
+`080a45a904590a2b24a2cbc87b9c270913f427e6`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase3-target-structure-green-2026-09-18`
+
+Production sûre :
+- `main` reste `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
+- aucune fusion restructuration sur `main`.
+
+### Périmètre déclaré
+
+Module concerné :
+- Core, uniquement pour la primitive générique de résolution d'assets ;
+- Dungeon uniquement comme premier consommateur à caractériser/raccorder.
+
+Propriétaires actifs cartographiés à préserver jusqu'au vrai raccord :
+- `dungeonGithubArts164` — catalogue/binding Dungeon ;
+- `dungeonArtRenderFix165` — compatibilité/rendu visuel Dungeon ;
+- `dungeonDirectImageBinding166` — binding direct des images Dungeon ;
+- `dungeonHeroItemAssets168Marker` — bindings héros/objets Dungeon ;
+- bridges visuels externes Dungeon déjà cartographiés.
+
+Objectif :
+1. identifier la primitive de résolution réellement commune ;
+2. créer un service Core d'assets strictement générique ;
+3. laisser les catalogues, noms, chemins et fallbacks spécifiques dans leur module ;
+4. raccorder un premier chemin réel sans dupliquer le calcul ;
+5. retirer l'ancienne primitive commune seulement après validation du vrai raccord.
+
+Interdit dans ce lot :
+- aucun déplacement global de tous les assets ;
+- aucun renommage/déplacement physique PNG/JPG/WebP ;
+- aucun fallback Dungeon -> Survie/Capture/PvP ;
+- aucun changement de gameplay ;
+- aucun changement de navigation ;
+- aucun stockage/migration ;
+- aucun changement stats/dés/combat ;
+- aucun nouveau wrapper global permanent ;
+- aucun observer/timer/retry ;
+- aucun auto-install implicite ;
+- aucune correction de la dette « détection ennemie hors embuscade ».
+
+Fonctions/systèmes protégés :
+- Shell/navigation et fiche héros ;
+- stats, dés, touche, dégâts, armure, résistances ;
+- inventaire/équipement/sets ;
+- Save & Quit/reprise ;
+- déplacement/spawn Dungeon ;
+- Tactical ;
+- Capture ;
+- PvP ;
+- cache PWA.
+
+### Tests obligatoires
+
+- caractérisation du propriétaire actuel du resolver ;
+- test du service Core avec plusieurs contextes/modules et absence de fallback inter-module ;
+- test du vrai raccord consommateur extrait ;
+- sentinelles visuelles Dungeon existantes ;
+- Phase 2 load graph / propriétaires ;
+- Phase 3 structure ;
+- navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Risques
+
+- confondre catalogue Dungeon et resolver générique ;
+- conserver deux autorités de résolution actives ;
+- casser les arts héros/ennemis/items lors du raccord ;
+- laisser un fallback inter-module historique devenir API Core ;
+- toucher au gros `index.html` par une méthode non fiable.
+
+### Règle 26 — index.html
+
+Le blob runtime courant reste attendu à `3a3db76d12ae511f6293e8ff25d124616731a08b`.
+Avant toute inspection/modification exacte de son contenu :
+1. confirmer le blob sur le checkpoint Phase 4 ;
+2. utiliser une copie exacte vérifiée si elle est déjà disponible ;
+3. sinon demander immédiatement le fichier au moyen du permalink SHA, sans multiplier les lectures GitHub du gros HTML.
+
+### Prochaine action
+
+1. caractériser le resolver et ses consommateurs externes sans modification runtime ;
+2. confirmer le blob `index.html` courant ;
+3. obtenir/utiliser le fichier exact conformément à la règle 26 pour les propriétaires inline ;
+4. écrire un test de contrat avant extraction ;
+5. seulement ensuite créer le service Core.

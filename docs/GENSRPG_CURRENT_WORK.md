@@ -637,3 +637,21 @@ Le RED Architecture `35370641322` était uniquement ce décalage d'empreinte ; a
 4. créer un checkpoint GREEN seulement si toute la validation requise est verte ;
 5. ne rien fusionner sur `main`.
 
+### Blocage CI Firefox diagnostiqué — 2026-09-18
+
+Observation :
+- tous les runs Firefox créés avant l'ajout du scénario Dungeon -> Survie -> Dungeon terminaient normalement ;
+- depuis le commit `6e48d2cd6b4d0a4027ff3c9bbf9b87a3813eecae`, qui ajoute uniquement ce scénario à la sentinelle Firefox, plusieurs runs restent indéfiniment `in_progress` exactement sur cette dernière étape ;
+- les étapes précédentes (intégrité murale, cohérence dégâts, installation Firefox, zoom mural) sont GREEN.
+
+Mesure CI uniquement :
+- le scénario Firefox est désormais exécuté avec un timeout shell de 300 s et kill-after 15 s ;
+- aucun runtime ni gameplay n'est modifié par cette mesure ;
+- un workflow one-shot `gensrpg-cancel-superseded-validation-once.yml` est actuellement en attente pour annuler les runs de validation obsolètes de cette branche puis se supprimer lui-même.
+
+Prochaine validation :
+1. laisser le nettoyage libérer les runners obsolètes ;
+2. relancer un seul jeu de sentinelles sur le HEAD propre ;
+3. si Firefox passe avant 300 s : poursuivre la clôture GREEN du lot ;
+4. si Firefox termine RED/124 : exploiter les logs de cette exécution bornée pour corriger uniquement le harnais ou le propriétaire fonctionnel réellement en cause ;
+5. ne rien publier sur `main`.

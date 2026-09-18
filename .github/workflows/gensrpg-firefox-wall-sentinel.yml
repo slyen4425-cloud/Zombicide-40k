@@ -41,4 +41,4 @@ jobs:
       - name: Caractériser Dungeon après Survie dans Firefox
         env:
           GENSRPG_BROWSER: firefox
-        run: node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs
+        run: timeout --signal=TERM --kill-after=15s 300s node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs

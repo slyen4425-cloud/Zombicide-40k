@@ -637,3 +637,63 @@ Le RED Architecture `35370641322` était uniquement ce décalage d'empreinte ; a
 4. créer un checkpoint GREEN seulement si toute la validation requise est verte ;
 5. ne rien fusionner sur `main`.
 
+## Chantier prioritaire utilisateur — Dungeon Builder disparu de l'éditeur Dungeon
+
+Ce chantier suspend la reprise Phase 4 et reste séparé du lot précédent Dungeon après Survie.
+
+Branche :
+`work/gensrpg-dungeon-builder-visibility-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-builder-visibility-2026-09-18`
+
+Base exacte :
+`deb87df43ad2bfdcbe797203912dfe46682741a4`
+
+Dernier checkpoint GREEN structurel :
+`checkpoint/gensrpg-phase3-target-structure-green-2026-09-18`
+SHA `080a45a904590a2b24a2cbc87b9c270913f427e6`.
+
+État du lot précédent Dungeon après Survie :
+- correction de routage Capture `d4678aa9656dbf1fcec2e9db5840409d6bef087f` ;
+- garde Core 2.09 `0409947b1de743c152c99e67a3e90ffbcea866e6` ;
+- utilisateur : grille revenue lors du test manuel du 18/09 ;
+- CI complète de clôture non terminée à cause de plusieurs runs Firefox suspendus ; ne pas présenter ce lot comme checkpoint GREEN final.
+
+### Signalement utilisateur
+
+Dans l'éditeur Dungeon de la preview de travail :
+- l'éditeur Dungeon s'ouvre ;
+- le Dungeon Builder / bouton « CONSTRUIRE UN DONJON » n'est plus visible.
+
+### Périmètre
+
+Propriétaire candidat :
+- `assets/dungeon/dungeon-room-creator-100.js` pour le montage de `#drc100Launcher` ;
+- `assets/dungeon/dungeon-world-builder-167821.js` pour `#drc300Launch` et `#drc300Modal`.
+
+Constats source avant modification :
+- le module World Builder existe toujours et reste chargé par la composition Pages/preview ;
+- `DungeonWorldBuilder167821.ensureLauncher()` n'ajoute `#drc300Launch` que si `#drc100Launcher` existe ;
+- `DungeonRoomCreator100.ensureLauncher()` ne crée `#drc100Launcher` que si `#dungeonAdvancedEditor .panel` existe ;
+- aucun des deux fichiers n'a été modifié entre le checkpoint Phase 3 et le signalement.
+
+Interdit avant preuve :
+- aucun nouveau observer global ;
+- aucun timer/retry permanent ;
+- aucun wrapper d'éditeur ;
+- aucune modification du Shell, du gameplay Dungeon, du mouvement, de Tactical ou de Capture ;
+- ne pas déplacer le Builder ni recréer un second lanceur concurrent.
+
+### Tests requis
+
+1. caractérisation navigateur de l'ouverture réelle Éditeurs -> Dungeon ;
+2. vérifier présence/visibilité de `#drc100Launcher`, `#drc300Launch` et `#drc300Modal` ;
+3. vérifier l'ouverture réelle du World Builder ;
+4. vérifier que Créateur de pièces et Builder coexistent ;
+5. conserver les sentinelles Dungeon/Save & Quit/non-interférence ;
+6. Architecture, Firefox et Tactical Dock avant checkpoint GREEN.
+
+### Prochaine action
+
+Créer une sentinelle navigateur ciblée reproduisant l'ouverture du vrai éditeur Dungeon et capturant l'état exact des deux launchers avant toute correction.

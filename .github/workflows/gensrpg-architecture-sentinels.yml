@@ -205,6 +205,9 @@ jobs:
       - name: Vérifier la migration directe de l'embuscade Core 2.09
         run: node tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs
 
+      - name: Vérifier le retour des caches authored
+        run: node tests/dungeon_zone_links_v167846.test.cjs
+
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 

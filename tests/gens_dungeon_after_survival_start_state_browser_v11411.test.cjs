@@ -215,6 +215,9 @@ function fingerprint(s){
     heroRooms:s.runtime.heroRooms,
     roomStateKeys:s.runtime.roomStateKeys,
     branchStateKeys:s.runtime.branchStateKeys,
+    dungeonStateRoom:s.dungeonState?.room??null,
+    dungeonStateLastKind:s.dungeonState?.last?.kind??null,
+    dungeonStateLastRoom:s.dungeonState?.last?.room??null,
     returnControls:s.returnControls,
     gridVisible:s.gridLike.length>0
   };
@@ -263,18 +266,97 @@ async function runScenario(port,survivalFirst){
   }
 }
 
+async function runPersistedDungeonThenSurvivalScenario(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+
+    await selectProfile(
+      page,'adventure',
+      '#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',
+      DUNGEON_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+
+    const entrance=await dungeonSnapshot(page,'persisted-control-entrance');
+    assert.equal(Number(entrance.dungeonState?.room),0,'real prior Dungeon must begin at room 0 before exploring');
+    assert.equal(entrance.dungeonState?.last??null,null,'real prior Dungeon entrance must have no generated room yet');
+
+    const explore=page.locator('#gensDungeonCore01 button').filter({hasText:/EXPLORER/i}).first();
+    await explore.waitFor({state:'visible'});
+    await explore.click();
+    await page.waitForFunction(()=>{
+      try{
+        const st=JSON.parse(localStorage.getItem('gensrpg_dungeon_state_v1')||'null');
+        return Number(st?.room)>=1 && st?.last;
+      }catch(e){return false}
+    },null,{timeout:15000});
+    await page.waitForTimeout(500);
+
+    const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
+    assert.ok(Number(persisted.dungeonState?.room)>=1,'real explored Dungeon must persist a room beyond the entrance');
+    assert.ok(persisted.dungeonState?.last,'real explored Dungeon must persist the generated room snapshot');
+
+    const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
+    await quit.waitFor({state:'visible'});
+    await quit.click();
+    await page.waitForFunction(()=>{
+      const root=document.getElementById('gensRootHome');
+      const core=document.getElementById('gensDungeonCore01');
+      return root&&getComputedStyle(root).display!=='none'&&core&&getComputedStyle(core).display==='none';
+    },null,{timeout:10000});
+
+    await selectProfile(
+      page,'survival',
+      '#gensFamilyGames button.gensFamilyGameCard[onclick*="'+SURVIVAL_ID+'"]',
+      SURVIVAL_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await waitSurvivalStarted(page);
+
+    await page.close();
+    page=await preparePage(context,port,errors);
+
+    await selectProfile(
+      page,'adventure',
+      '#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',
+      DUNGEON_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+
+    const afterNewGame=await dungeonSnapshot(page,'new-dungeon-after-persisted-dungeon-and-survival');
+    return {entrance,persisted,afterNewGame,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
 (async()=>{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
   try{
     const control=await runScenario(port,false);
     const afterSurvival=await runScenario(port,true);
+    const persistedThenSurvival=await runPersistedDungeonThenSurvivalScenario(port);
 
     console.log(JSON.stringify({
       scenario:'Dungeon new game after Survival characterization',
       browser:browserName,
       control:control.snap,
       afterSurvival:afterSurvival.snap,
+      persistedThenSurvival,
       controlErrors:control.errors,
       afterSurvivalErrors:afterSurvival.errors
     },null,2));
@@ -287,17 +369,28 @@ async function runScenario(port,survivalFirst){
     assert.equal(afterSurvival.snap.dungeonMode,true);
 
     assert.equal(control.snap.session,'1','fresh direct Dungeon must activate the common session');
-    assert.equal(Number(control.snap.runtime.room),0,'fresh direct Dungeon must start at room 0');
+    assert.equal(Number(control.snap.dungeonState?.room),0,'fresh direct Dungeon must start at room 0');
+    assert.equal(control.snap.dungeonState?.last??null,null,'fresh direct Dungeon must have no generated room at the entrance');
     assert.equal(afterSurvival.snap.session,'1','Dungeon after Survival must activate the common session');
-    assert.equal(Number(afterSurvival.snap.runtime.room),0,'Dungeon after Survival must start at room 0');
+    assert.equal(Number(afterSurvival.snap.dungeonState?.room),0,'Dungeon after Survival must start at room 0');
+    assert.equal(afterSurvival.snap.dungeonState?.last??null,null,'Dungeon after Survival must have no generated room on a clean browser');
 
     assert.deepEqual(
       fingerprint(afterSurvival.snap),
       fingerprint(control.snap),
       'Dungeon new-game initial state must be identical after Survival and on a fresh direct launch'
     );
+
+    const restarted=persistedThenSurvival.afterNewGame;
+    assert.equal(restarted.session,'1','new Dungeon after an old saved Dungeon and Survival must activate the session');
+    assert.equal(Number(restarted.dungeonState?.room),0,'NEW GAME must reset a previously persisted Dungeon room back to the entrance');
+    assert.equal(restarted.dungeonState?.last??null,null,'NEW GAME must remove the previously persisted generated room');
+    assert.deepEqual(restarted.returnControls,control.snap.returnControls,'NEW GAME must not keep stale room-return controls');
+    assert.equal(restarted.gridLike.length>0,control.snap.gridLike.length>0,'NEW GAME must restore the same initial grid surface as a clean launch');
+
     assert.deepEqual(control.errors,[],'fresh direct Dungeon must not raise browser errors');
     assert.deepEqual(afterSurvival.errors,[],'Dungeon after Survival must not raise browser errors');
+    assert.deepEqual(persistedThenSurvival.errors,[],'persisted Dungeon -> Survival -> new Dungeon must not raise browser errors');
   }finally{
     server.closeAllConnections?.();server.closeIdleConnections?.();server.close();
   }

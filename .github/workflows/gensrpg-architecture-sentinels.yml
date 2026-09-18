@@ -241,6 +241,9 @@ jobs:
       - name: Vérifier la structure cible inerte Phase 3
         run: node tests/gens_phase3_target_structure_contracts_v1.test.cjs
 
+      - name: Caractériser le resolver d'assets Phase 4
+        run: node tests/gens_phase4_asset_resolver_characterization_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

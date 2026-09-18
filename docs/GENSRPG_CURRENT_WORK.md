@@ -136,12 +136,35 @@ Caractérisation encore en cours :
 - le blocage actuel se produit pendant le boot complet du gros runtime ;
 - instrumentation ajoutée pour remonter le dernier bloc inline exécuté avant gel.
 
+## Caractérisation boot complet — résultat actuel
+
+Le run instrumenté a identifié le point d'arrêt exact du boot complet Pages :
+
+- blocs 001 à 029 : atteints ;
+- bloc 030 : `builtinMonsterCapture162` — entrée confirmée ;
+- aucun bloc 031 atteint avant watchdog 90 s ;
+- aucune assertion gameplay atteinte ;
+- requêtes HTML/CDN stub/assets terminées.
+
+Le blocage est donc situé pendant l'exécution synchrone de `builtinMonsterCapture162` ou d'un appel synchrone effectué avant son retour.
+
+Ce constat est **caractérisé mais non corrigé** dans ce lot.
+
+`index.html` requis pour la suite :
+- SHA de travail : `95db8780eeecdd33a662fbe99c260ecec2cb24a0`
+- blob `index.html` : `a515c3d34a1f5c4973159457090e4437a33c2630`
+- taille : 8 175 610 octets.
+
+Conformément à la règle 26, le contenu exact doit maintenant être fourni par l'utilisateur depuis ce SHA précis avant inspection du bloc 30.
+
 ## Prochaine étape
 
-Lire le prochain run instrumenté, identifier le dernier bloc inline réellement exécuté avant blocage, puis décider s'il s'agit :
-- d'un coût/synchronisation du harnais ;
-- d'une boucle synchrone réelle de composition ;
-- ou d'un effet global actif à documenter.
+1. recevoir le `index.html` exact du SHA indiqué ;
+2. vérifier son blob ;
+3. isoler `builtinMonsterCapture162` ;
+4. inventorier ses appels synchrones et la cause du gel ;
+5. reproduire sans modifier le runtime ;
+6. si défaut fonctionnel réel confirmé, arrêter ce lot de cartographie et ouvrir un lot correctif dédié.
 
 Aucun correctif runtime dans ce lot de cartographie.
 

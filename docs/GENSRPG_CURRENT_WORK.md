@@ -17,47 +17,107 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Routage Capture / Dungeon GREEN :
-`checkpoint/gensrpg-capture-start-routing-green-2026-09-18`
+Phase 2 — cartographie runtime complète GREEN :
+`checkpoint/gensrpg-phase2-runtime-cartography-complete-green-2026-09-18`
 
 SHA :
-`8ce4f4cfec785aa48ca81942629a60589461090f`
+`557cc86681053c389ac85c43be87d130586cf502`
 
-Validation de référence :
-- Architecture `35346984569` — SUCCESS ;
-- navigateur Pages complet dans ce run — SUCCESS ;
-- Firefox `35346984602` — SUCCESS ;
-- Tactical Dock `35346984616` — SUCCESS ;
-- commit documentaire final `8ce4f4cfec785aa48ca81942629a60589461090f` : Architecture `35347217768` SUCCESS + navigateur complet SUCCESS, Firefox `35347217650` SUCCESS.
+Validation finale :
+- Architecture `35353714007` — SUCCESS ;
+- navigateur complet dans ce run — SUCCESS ;
+- Firefox `35353713978` — SUCCESS ;
+- Tactical Dock `35353713979` — SUCCESS.
 
 ## Chantier courant
 
-**Phase 2 — reprise de la cartographie réelle du runtime après correctifs dédiés**
+**Phase 3 — créer l'arborescence cible et les contrats sans déplacer le gameplay**
 
 Branche :
-`work/gensrpg-phase2-runtime-cartography-resume-2026-09-18`
+`work/gensrpg-phase3-target-structure-contracts-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase2-runtime-cartography-resume-2026-09-18`
+`checkpoint/gensrpg-start-phase3-target-structure-contracts-2026-09-18`
 
 Base exacte :
-`8ce4f4cfec785aa48ca81942629a60589461090f`
+`557cc86681053c389ac85c43be87d130586cf502`
 
-Objectifs immédiats de cartographie :
-1. établir la responsabilité dominante de chaque bloc inline actif ;
-2. compléter la table « fonction globale -> dernier propriétaire actif » ;
-3. distinguer timers gameplay et retries d'installation ;
-4. cartographier les accès stockage par domaine ;
-5. confirmer le statut des 7 fichiers hors graphe de production ;
-6. identifier les doublons de responsabilité encore actifs avant toute extraction Phase 3/4.
+## Périmètre actif Phase 3
 
-Règles du lot :
-- cartographie et sentinelles uniquement ;
-- aucune correction runtime dans ce lot ;
-- si un défaut fonctionnel réel apparaît, le caractériser puis ouvrir un lot correctif dédié ;
-- aucun nouveau wrapper, observer, timer ou retry ;
-- ne pas traiter ici la dette « détection ennemie hors embuscade » ;
-- ne rien fusionner sur `main`.
+Module concerné :
+- architecture physique GenSrpG uniquement ;
+- aucun runtime Survie/Dungeon/Tactical/Capture/PvP n'est déplacé dans ce premier lot.
+
+Propriétaire du lot :
+- structure/contrats de modules ;
+- aucun nouveau propriétaire runtime actif.
+
+Systèmes existants réutilisés comme autorité :
+- cartographie Phase 2 des 65 fichiers externes atteignables ;
+- cartographie des 130 blocs inline ;
+- load graph Pages actuel ;
+- sentinelles Phase 1/2 existantes.
+
+Objectif :
+- matérialiser les dossiers cibles `core/`, `shell/`, `survival/`, `dungeon/`, `tactical/`, `capture/`, `pvp/`, `builders/` ;
+- préparer des contrats / points d'entrée **inertes** ;
+- ne rien raccorder à la production dans ce premier lot ;
+- préparer les extractions Phase 4 sans créer une deuxième autorité.
+
+Interdictions :
+- aucun changement de `index.html` ;
+- aucun changement du load graph GitHub Pages / `preview.html` ;
+- aucun déplacement ou copie de gameplay actif ;
+- aucun auto-install ;
+- aucun wrapper global ;
+- aucun `MutationObserver`, timer/retry, listener global ou accès stockage dans les nouveaux points d'entrée ;
+- aucun changement de règle, stat, dé, combat, navigation, sauvegarde, asset ou cache PWA ;
+- aucune correction de la dette « détection ennemie hors embuscade » ;
+- aucun changement sur `main`.
+
+Fonctions / systèmes protégés :
+- Shell : `openGensFamily`, `openGensBuiltInGame`, `startConfiguredGame`, `resumeGame` ;
+- UI native / fiche héros ;
+- stats, dés, calcul de touche, dégâts, armure, résistances ;
+- inventaire / équipement / sets ;
+- Save & Quit / reprise / stockage ;
+- mouvement Dungeon ;
+- entrée/sortie Tactical ;
+- Capture ;
+- PvP ;
+- composition Pages et service worker.
+
+Tests prévus :
+1. vérifier l'existence des huit domaines cibles ;
+2. vérifier que chaque nouveau point d'entrée est inerte et sans effet global ;
+3. vérifier qu'aucun nouveau point d'entrée n'est chargé par `index.html`, `preview.html`, `.github/workflows/main.yml` ou RuntimeBootstrap ;
+4. vérifier que les 65 fichiers externes du graphe production restent exactement inchangés ;
+5. conserver toutes les sentinelles Architecture ;
+6. navigateur complet ;
+7. Firefox ;
+8. Tactical Dock.
+
+Risques :
+- introduire accidentellement un second bootstrap ;
+- faire entrer un squelette Phase 3 dans le runtime production ;
+- créer un contrat qui empiète sur un propriétaire existant ;
+- traiter trop tôt un service Phase 4.
+
+Critère de sortie :
+- structure cible matérialisée ;
+- contrats/entrypoints inertes documentés et testés ;
+- graphe runtime production inchangé ;
+- aucun gameplay déplacé ;
+- toute la CI reste GREEN ;
+- checkpoint GREEN Phase 3 créé avant Phase 4.
+
+## Prochaine action
+
+1. créer les points d'entrée/contrats inertes des huit domaines ;
+2. ajouter une sentinelle de structure et de non-chargement ;
+3. vérifier le diff : aucun runtime existant modifié ;
+4. relancer la CI complète ;
+5. seulement après GREEN, fermer Phase 3.
 
 ## Historique — défauts fonctionnels découverts pendant la cartographie
 

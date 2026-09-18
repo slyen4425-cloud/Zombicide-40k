@@ -389,6 +389,12 @@ async function runPersistedDungeonThenSurvivalScenario(port){
 
     const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
 
+    const effectClose=page.locator('#effectModal.open .effectClose');
+    if(await effectClose.count()){
+      await effectClose.click();
+      await page.waitForFunction(()=>!document.getElementById('effectModal')?.classList.contains('open'));
+    }
+
     const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
     await quit.waitFor({state:'visible'});
     await quit.click();

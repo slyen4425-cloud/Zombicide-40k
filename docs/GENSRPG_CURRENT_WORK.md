@@ -15,22 +15,9 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert
+## Dernier lot validé
 
-Phase 1 — placeholder PvP actuel :
-`checkpoint/gensrpg-phase1-pvp-placeholder-sentinel-green-2026-09-18`
-
-SHA :
-`cd797172ec1b32a6edcc84b743a45794d5dfbd32`
-
-CI de fermeture :
-- Architecture `35318887146` — SUCCESS
-- Firefox `35318887102` — SUCCESS
-- Tactical Dock `35318887116` — SUCCESS
-
-## Chantier courant
-
-**Phase 1 — Capture : protéger le comportement actuel uniquement**
+**Phase 1 — Capture : protection du comportement actuel uniquement**
 
 Branche :
 `work/gensrpg-phase1-capture-current-sentinel-2026-09-18`
@@ -41,52 +28,50 @@ Checkpoint de départ :
 Base exacte :
 `cd797172ec1b32a6edcc84b743a45794d5dfbd32`
 
-## Périmètre déclaré
+SHA fonctionnel vert avant fermeture documentaire :
+`97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef`
 
-Première intention **test-only** :
-- traverser le vrai Shell jusqu'au flux Capture actuellement exposé ;
-- identifier les vrais propriétaires du lancement Capture et de son écran/runtime actuel ;
-- protéger uniquement le comportement qui existe aujourd'hui ;
-- vérifier que Capture ne prend pas l'autorité sur Survie/Dungeon/PvP en dehors de son contexte ;
-- brancher une sentinelle stable à la CI.
+Checkpoint final :
+`checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
 
-Interdictions du lot :
-- ne pas restaurer Capture ;
-- ne pas réécrire Capture ;
-- ne pas ajouter de créatures, règles, combats, capture, biomes ou progression ;
-- ne pas corriger un défaut fonctionnel découvert avant caractérisation dédiée ;
-- aucun MutationObserver global, timer/retry de réparation, wrapper permanent ou monkey-patch ;
-- ne pas toucher au gameplay Survie/Dungeon/Tactical/PvP ;
-- ne pas toucher à `main`.
+CI sur le SHA fonctionnel :
+- Architecture `35321411358` — SUCCESS
+- Firefox `35321411333` — SUCCESS
+- Tactical Dock `35321411366` — SUCCESS
 
-## Propriétaires à identifier avant test
+## Résultat du lot Capture
 
-- entrée Shell exacte vers Capture ;
-- profil/famille ou route réellement utilisée par Capture ;
-- écran/host Capture actuel ;
-- fonctions de lancement et état persistant réellement lus/écrits ;
-- éventuels guards empêchant Dungeon/Survie de reprendre l'autorité.
+La sentinelle navigateur `tests/gens_capture_current_shell_browser_v11411.test.cjs` traverse le comportement actuel réel :
 
-## Tests prévus
+`Accueil -> Adventure -> Monster Capture -> reload V16.155 -> Adventure -> Monster Capture -> pré-game -> dresseur -> créature de départ -> startConfiguredGame() -> Hub Capture -> Jour 1 -> Jour 2`
 
-1. localiser le vrai point d'entrée Capture dans `index.html` ;
-2. vérifier le comportement actuel sans supposer qu'il est complet ;
-3. construire un harnais à partir des blocs source exacts nécessaires ;
-4. traverser la vraie UI Shell jusqu'à Capture ;
-5. vérifier les invariants observés (vue active, absence de runtime parasite, état/famille/profil si applicable) ;
-6. relancer Architecture + navigateur + sentinelles existantes ;
-7. si GREEN, mettre à jour l'audit et créer le checkpoint final.
+Elle protège notamment :
+- profil embarqué actuel `Monster Capture` (`gp_mt7ker7t_m2iw9`) ;
+- classification actuelle : Shell `adventure`, contenu `creature`, mode V16.151 `capture`, substrat historique `gameStyle="dungeon"` ;
+- vrai changement d'univers V16.155 avec reload lorsqu'une famille de contenu change ;
+- pré-game Capture courant et absence d'une entrée Dungeon classique active ;
+- sélection réelle du dresseur puis d'une créature de départ via l'UI ;
+- activation réelle de session par `startConfiguredGame()` ;
+- affichage du Hub Capture et masquage du panneau Dungeon classique ;
+- progression réelle du monde Capture de Jour 1 à Jour 2 via son état persistant.
 
-## Risques
+Le harnais réutilise les blocs source exacts nécessaires du Shell et les propriétaires Capture de production. Aucun état de partie Capture n'est injecté pour forcer le succès.
 
-- Capture peut être partiellement historique ou exposé par un chemin différent des familles Survie/Adventure ;
-- un vieux bloc UI peut exister sans runtime complet ;
-- un test qui invente une session Capture serait invalide ;
-- un RED fonctionnel réel devra être caractérisé sans correctif dans ce lot.
+Aucun runtime, gameplay, asset, règle ou structure persistante n'a été modifié.
 
-## Prochaine étape
+## Prochain chantier Phase 1
 
-Cartographier dans le vrai `index.html` le point d'entrée Capture, son propriétaire UI/runtime et les clés persistantes touchées, puis écrire la plus petite sentinelle réelle.
+**Sentinelle explicite de non-interférence des quatre modules.**
+
+Périmètre prévu :
+- nouveau checkpoint de départ et nouvelle branche ;
+- test-only en première intention ;
+- vérifier explicitement les frontières Survie / Dungeon / Capture / PvP ;
+- prouver qu'un passage par un module ne laisse pas d'autorité, thème, session ou runtime parasite dans le suivant ;
+- réutiliser les vrais propriétaires et les sentinelles déjà établies ;
+- ne corriger aucun runtime si un défaut réel est découvert avant caractérisation dédiée.
+
+Une fois ce lot GREEN, refaire la matrice complète Phase 1 pour vérifier le critère de sortie avant de passer à la Phase 2.
 
 ## Dette explicitement différée
 

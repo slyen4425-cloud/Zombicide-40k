@@ -442,7 +442,7 @@ Les commits documentaires de fermeture doivent repasser par la CI avant créatio
 La dette « détection ennemie hors embuscade » reste un chantier fonctionnel séparé.
 
 
-## Clôture Phase 3 — structure cible GREEN en attente du commit documentaire final
+## Clôture Phase 3 — structure cible GREEN
 
 Résultat du chantier :
 - huit domaines cibles matérialisés ;
@@ -464,10 +464,16 @@ Validation :
 Document de clôture :
 `docs/GENSRPG_PHASE3_TARGET_STRUCTURE.md`
 
+Validation documentaire finale :
+- HEAD `a613fde6d67f20c9b75564faa1f416d98611f12a` ;
+- Architecture `35354985029` — SUCCESS ;
+- navigateur complet du même run — SUCCESS ;
+- Firefox `35354985012` — SUCCESS ;
+- Tactical Dock `35354985051` — SUCCESS.
+
 ### Prochaine action
 
-1. faire valider ce commit documentaire final par la CI ;
-2. créer `checkpoint/gensrpg-phase3-target-structure-green-2026-09-18` ;
-3. ouvrir une branche Phase 4 dédiée au resolver d'assets ;
-4. appliquer la règle 26 si le contenu exact de `index.html` est requis ;
-5. ne rien fusionner sur `main`.
+1. créer `checkpoint/gensrpg-phase3-target-structure-green-2026-09-18` sur le HEAD documentaire final validé ;
+2. ouvrir une branche Phase 4 dédiée au resolver d'assets depuis ce checkpoint ;
+3. appliquer la règle 26 si le contenu exact de `index.html` est requis ;
+4. ne rien fusionner sur `main`.

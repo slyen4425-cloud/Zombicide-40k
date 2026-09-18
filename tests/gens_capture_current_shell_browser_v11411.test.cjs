@@ -287,8 +287,19 @@ const server=http.createServer((req,res)=>{
     await trainer.waitFor({state:'visible'});
     if(!(await trainer.isChecked()))await trainer.check();
 
+    mark('select-real-capture-starter');
+    const starterChoices=page.locator('#participantList .captureStarterChoice');
+    await starterChoices.first().waitFor({state:'visible'});
+    assert.ok(await starterChoices.count()>=1,'current Capture pre-game must expose at least one real starter creature');
+    await starterChoices.first().click();
+    await page.waitForFunction(()=>typeof gensCaptureParticipantsReady==='function'&&gensCaptureParticipantsReady()===true);
+
     await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
+    await page.waitForFunction(()=>{
+      const btn=document.querySelector('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]');
+      return !!btn && btn.disabled===false;
+    });
 
     mark('start-current-capture-session');
     await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();

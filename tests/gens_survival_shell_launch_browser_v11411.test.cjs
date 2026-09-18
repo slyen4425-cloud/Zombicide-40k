@@ -81,8 +81,10 @@ const server=http.createServer((req,res)=>{
   const page=await context.newPage();
   page.setDefaultTimeout(20000);
   const browserErrors=[];
+  const dialogs=[];
   page.on('pageerror',error=>browserErrors.push(String(error)));
   page.on('console',message=>{if(message.type()==='error')browserErrors.push(message.text())});
+  page.on('dialog',async dialog=>{dialogs.push({type:dialog.type(),message:dialog.message()});await dialog.dismiss()});
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   try{
@@ -179,7 +181,24 @@ const server=http.createServer((req,res)=>{
     await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
 
     mark('wait-session-active');
-    await page.waitForFunction(()=>localStorage.getItem('z40k_session_active_v1')==='1');
+    try{
+      await page.waitForFunction(()=>localStorage.getItem('z40k_session_active_v1')==='1',null,{timeout:5000});
+    }catch(error){
+      const launchDiag=await page.evaluate(()=>({
+        session:localStorage.getItem('z40k_session_active_v1'),
+        participantsRaw:localStorage.getItem('gensrpg_game_participants_v1'),
+        participants:typeof loadGameParticipants==='function'?loadGameParticipants():[],
+        normalized:typeof normalizeGameParticipants==='function'?normalizeGameParticipants():[],
+        activeProfileId:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+        activeProfile:typeof getActiveGameProfile==='function'?(()=>{const p=getActiveGameProfile();return p?{id:p.id,name:p.name,style:p.gameStyle,heroPool:p.heroPool}:null})():null,
+        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
+        pregame:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        menu:document.getElementById('menu')?getComputedStyle(document.getElementById('menu')).display:'absent'
+      })).catch(e=>({diagnosticError:String(e)}));
+      console.error('[survival-shell] launch-diagnostic',JSON.stringify({launchDiag,dialogs,browserErrors}));
+      throw error;
+    }
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
 
     const launched=await page.evaluate(()=>({

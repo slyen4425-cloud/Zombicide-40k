@@ -86,6 +86,9 @@ const server=http.createServer((req,res)=>{
   });
   await context.addInitScript(()=>{
     try{localStorage.clear();sessionStorage.clear();}catch(e){}
+    // External online client is outside this sentinel's scope. Keep the real online
+    // Shell block executable without making Phase 1 depend on CDN/network availability.
+    window.supabase={createClient:()=>({})};
   });
   const page=await context.newPage();
   page.setDefaultTimeout(20000);

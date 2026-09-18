@@ -14,6 +14,10 @@ const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 assert.equal(pageTags.length,19,'Pages-equivalent characterization expects 19 injected modules');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 let productionHtml=indexSource.split(perfTag).join('');
+productionHtml=productionHtml.replace(
+  /(<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>)/gi,
+  (_m,open,id)=>open+`console.log("[phase2-inline-enter] ${String(id).replace(/["\\\\]/g,'_')}");`
+);
 productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';

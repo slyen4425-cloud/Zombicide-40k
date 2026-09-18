@@ -12113,6 +12113,8 @@ function renderGensFamilyGamesIfVisible(){
 
 function openGensFamily(family){
   gensSelectedFamily=family;
+  document.body.classList.remove("gensCapturePregame","gensAdventurePregame");
+  if(family!=="adventure")document.body.classList.remove("gensDungeonTheme");
   gensHideHomeLevels();
   const page=document.getElementById("gensFamilyHome");if(page)page.style.display="block";
   const title=document.getElementById("gensFamilyTitle"),heading=document.getElementById("gensFamilyHeading"),hint=document.getElementById("gensFamilyHint"),host=document.getElementById("gensFamilyGames");

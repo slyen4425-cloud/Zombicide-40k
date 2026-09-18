@@ -722,3 +722,24 @@ Tests :
 - mettre à jour la sentinelle V111 historique pour interdire cette reprise d'autorité sur le launcher Builder ;
 - conserver la sentinelle navigateur du vrai chemin Éditeurs -> Dungeon -> World Builder ;
 - Architecture / Firefox / Tactical Dock avant GREEN.
+
+### Correctif ciblé appliqué — V111 ne possède plus le launcher Builder
+
+Commit :
+`c69462fe23941260063e0c34f88365164be3399b`
+
+Modification runtime unique :
+- dans `gens-rpg-tactical-runtime-fixes-1678111.js`, retrait de `#drc100Launcher` et `[data-drc100-launcher]` de `TAB_SELECTORS` ;
+- `hideRuntimeTabs()` conserve seulement ses contrôles legacy runtime : `#drv167826Toggle`, `#dzc167824Launch`, `#drr167822Panel` ;
+- aucun changement Builder, Room Creator, Shell, mouvement, combat ou persistance.
+
+Sentinelles renforcées :
+- `gens_rpg_tactical_runtime_fixes_v1678111.test.cjs` interdit désormais explicitement toute reprise d'autorité V111 sur le launcher structurel ;
+- test fonctionnel owner-level exécuté directement depuis le source du commit : launcher structurel = 0 écriture / 0 marqueur V111 pendant que le contrôle legacy reste masqué ;
+- `gens_dungeon_builder_visibility_browser_v11411.test.cjs` contrôle le vrai chemin Éditeurs -> Dungeon -> World Builder et vérifie également que V111 ne peut plus masquer le launcher ;
+- syntaxe des deux tests vérifiée.
+
+Validation restante :
+- test manuel utilisateur sur preview du commit ;
+- CI Architecture / browser, Firefox et Tactical Dock encore nécessaire avant checkpoint GREEN ;
+- GitHub Actions reste encombré par les anciens Firefox suspendus : ne pas présenter ce lot comme GREEN avant les résultats requis.

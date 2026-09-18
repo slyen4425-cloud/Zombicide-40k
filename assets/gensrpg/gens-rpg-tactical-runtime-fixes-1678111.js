@@ -1,7 +1,7 @@
 /* GenSrpG V16.78.111 — tactical/runtime corrections after V110.
    Keeps expensive RPG stat derivation outside the hot combat loop.
    - Stable Dungeon+tactical wall texture sizing at every zoom.
-   - Removes creator/runtime launcher tabs while an actual Dungeon board/combat is visible.
+   - Keeps legacy runtime-only controls out of active Dungeon board/combat without owning structural editor launchers.
    - Restores a persistent fixed Attack / End turn / Ability dock.
    - Preserves weapon dice count through the V2 adapter and resolves all attack dice in one action.
    - Rebuilds hero attacks once when a battle is created so canonical equipment/stat scaling is authoritative.
@@ -130,7 +130,7 @@
     for(const el of targets){if(!el?.style?.setProperty)continue;el.style.setProperty("background-image",`url("${WALL_ASSET}")`,"important");el.style.setProperty("background-size",WALL_SIZE,"important");el.style.setProperty("background-position","center","important");el.style.setProperty("background-repeat","no-repeat","important");count++}return count}
   function visible(el,rt=R){if(!el)return false;try{const cs=rt?.getComputedStyle?.(el);if(cs&&(cs.display==="none"||cs.visibility==="hidden"))return false;const r=el.getBoundingClientRect?.();return !r||(r.width>0&&r.height>0)}catch(e){return true}}
   function runtimeVisible(rt=R){const D=doc(rt);if(!D)return false;if(D.querySelector?.(".gtv2Overlay"))return true;return visible(D.getElementById?.("dc047RoomBoard"),rt)&&!!D.querySelector?.("#dc047RoomBoard .dc047Grid")}
-  const TAB_SELECTORS=["#drc100Launcher","#drv167826Toggle","#dzc167824Launch","#drr167822Panel","[data-drc100-launcher]"];
+  const TAB_SELECTORS=["#drv167826Toggle","#dzc167824Launch","#drr167822Panel"];
   function hideRuntimeTabs(rt=R){const D=doc(rt);if(!D)return 0;const hide=runtimeVisible(rt);let n=0;for(const sel of TAB_SELECTORS)for(const el of D.querySelectorAll?.(sel)||[]){if(hide){if(!el.hasAttribute?.("data-v111-hidden-tab")){el.setAttribute?.("data-v111-hidden-tab","1");el.style?.setProperty?.("display","none","important")}n++}else if(el.hasAttribute?.("data-v111-hidden-tab")){el.style?.removeProperty?.("display");el.removeAttribute?.("data-v111-hidden-tab")}}return n}
 
   function sourceButton(rt,kind){const D=doc(rt);if(!D)return null;if(kind==="attack")return D.querySelector?.(".gtv2Overlay [data-v108-attack-go]")||D.querySelector?.(".gtv2Overlay .gtv2Actions button[data-attack]");if(kind==="end")return D.querySelector?.(".gtv2Overlay .gtv2Actions button[data-end]");if(kind==="ability")return D.querySelector?.(".gtv2Overlay [data-v110-ability-go],.gtv2Overlay [data-v108-ability-go]");return null}

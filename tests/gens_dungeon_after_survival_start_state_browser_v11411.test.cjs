@@ -207,6 +207,20 @@ async function dungeonSnapshot(page,label){
           text:(el.innerText||'').trim().replace(/\s+/g,' ').slice(0,700)
         })),
       authorities:{
+        captureContext:typeof window.isCaptureContext138==='function'?!!window.isCaptureContext138():null,
+        capturePregame:typeof window.gensCapturePregameMode==='function'?!!window.gensCapturePregameMode():null,
+        pureCapture:typeof window.gensPureCaptureSheetMode==='function'?!!window.gensPureCaptureSheetMode():null,
+        activeProfileShape:(()=>{
+          const p=typeof window.getActiveGameProfile==='function'?window.getActiveGameProfile():null;
+          return {
+            id:p?.id||'',
+            family:typeof window.gensCurrentContentFamily==='function'?window.gensCurrentContentFamily():'',
+            gameplayProfile:p?.rpgUniverse?.gameplay?.profile??null,
+            gameplayCapture:p?.rpgUniverse?.gameplay?.modules?.capture??null,
+            topCapture:p?.modules?.capture??null,
+            captureCombatPresent:!!p?.rpgUniverse?.captureCombat
+          };
+        })(),
         startConfiguredGame:String(window.startConfiguredGame||'').slice(0,1200),
         coreStart:String(window.DungeonCore01?.start||'').slice(0,1200),
         coreShow:String(window.DungeonCore01?.show||'').slice(0,1200),

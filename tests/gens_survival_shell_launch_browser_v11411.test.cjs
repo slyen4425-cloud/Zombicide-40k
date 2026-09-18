@@ -97,12 +97,16 @@ function displayed(page,id){
 
     stage='preview-navigation';
     await page.goto(`http://127.0.0.1:${port}/preview.html`,{waitUntil:'domcontentloaded'});
-    stage='preview-ready';
-    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1');
+    stage='shell-owner-ready';
     await page.waitForFunction(()=>(
+      !!document.querySelector('.gensRootModeCard.survival') &&
       typeof window.openGensFamily==='function' &&
       typeof window.openGensBuiltInGame==='function' &&
-      typeof window.startConfiguredGame==='function' &&
+      typeof window.startConfiguredGame==='function'
+    ));
+    assert.equal(await page.evaluate(()=>window.__GENSRPG_PREVIEW__===true),true,'test must run through the real preview isolation layer');
+    stage='survival-isolation-ready';
+    await page.waitForFunction(()=>(
       !!window.GensSurvivalModeIsolation1678104 &&
       window.openGensFamily.__gensIsolation104===true
     ));

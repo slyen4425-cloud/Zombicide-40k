@@ -77,10 +77,11 @@ const server=http.createServer((req,res)=>{
   let lastExternal='none';
   let lastMutationObserver='none';
   let lastDomContentLoaded='none';
+  let lastStatsCall='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal+' lastMutationObserver='+lastMutationObserver+' lastDomContentLoaded='+lastDomContentLoaded);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal+' lastMutationObserver='+lastMutationObserver+' lastDomContentLoaded='+lastDomContentLoaded+' lastStatsCall='+lastStatsCall);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -133,6 +134,36 @@ const server=http.createServer((req,res)=>{
           console.log('[phase2-dcl-create] id='+id+' '+stack);
           const wrapped=function(event){
             console.log('[phase2-dcl-before] id='+id);
+            if(id===38&&!window.__phase2StatsGlobalsInstrumented){
+              window.__phase2StatsGlobalsInstrumented=true;
+              const names=[
+                'currentRpgProfile','getActiveGameProfile','loadGameProfiles','saveGameProfiles',
+                'loadDungeonRpgRules','saveDungeonRpgRules','loadState','saveState','save','render',
+                'findCustomHero','dungeonEquipmentBonus','dungeonSkillEffectTotal',
+                'dungeonChallengeDebuffTotal067','dungeonActiveProgressionConfig',
+                'dungeonSyncProgressionForState','renderDungeonAttributes','renderRpgUniverseEditor'
+              ];
+              let seq=0,depth=0;
+              for(const name of names){
+                const original=window[name];
+                if(typeof original!=='function')continue;
+                window[name]=function(){
+                  const call=++seq;
+                  if(call<=120)console.log('[phase2-stats-call] '+call+' '+'>'.repeat(Math.min(depth,20))+name);
+                  depth++;
+                  try{
+                    const out=original.apply(this,arguments);
+                    depth--;
+                    if(call<=120)console.log('[phase2-stats-return] '+call+' '+name);
+                    return out;
+                  }catch(error){
+                    depth--;
+                    console.log('[phase2-stats-throw] '+call+' '+name+' '+String(error));
+                    throw error;
+                  }
+                };
+              }
+            }
             try{
               if(typeof listener==='function')return listener.call(this,event);
               return listener?.handleEvent?.(event);
@@ -214,6 +245,11 @@ const server=http.createServer((req,res)=>{
     }
     if(value.startsWith('[phase2-dcl-create]')||value.startsWith('[phase2-dcl-before]')||value.startsWith('[phase2-dcl-after]')){
       lastDomContentLoaded=value;
+      console.log(value);
+      return;
+    }
+    if(value.startsWith('[phase2-stats-call]')||value.startsWith('[phase2-stats-return]')||value.startsWith('[phase2-stats-throw]')){
+      lastStatsCall=value;
       console.log(value);
       return;
     }

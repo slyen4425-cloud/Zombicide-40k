@@ -206,6 +206,31 @@ async function dungeonSnapshot(page,label){
           class:String(el.className||'').slice(0,160),
           text:(el.innerText||'').trim().replace(/\s+/g,' ').slice(0,700)
         })),
+      authorities:{
+        startConfiguredGame:String(window.startConfiguredGame||'').slice(0,1200),
+        coreStart:String(window.DungeonCore01?.start||'').slice(0,1200),
+        coreShow:String(window.DungeonCore01?.show||'').slice(0,1200),
+        coreRender:String(window.DungeonCore01?.render||'').slice(0,1600),
+        coreExplore:String(window.DungeonCore01?.explore||'').slice(0,1600),
+        coreStartFlags:{
+          dc318:!!window.DungeonCore01?.start?.__dc318,
+          dlr:!!window.DungeonCore01?.start?.__dlr167835,
+          dar:!!window.DungeonCore01?.start?.__dar167839
+        },
+        coreRenderFlags:{
+          dlr:!!window.DungeonCore01?.render?.__dlr167835,
+          dwr:!!window.DungeonCore01?.render?.__dwr167838,
+          dsr:!!window.DungeonCore01?.render?.__dsr167877
+        },
+        coreExploreFlags:{
+          dlr:!!window.DungeonCore01?.explore?.__dlr167835,
+          drr:!!window.DungeonCore01?.explore?.__drr167822,
+          dwr:!!window.DungeonCore01?.explore?.__dwr167823,
+          dar:!!window.DungeonCore01?.explore?.__dar167839
+        },
+        debug200:typeof window.dungeonDebug200==='function'?window.dungeonDebug200():null,
+        legacyCore:parse('gensrpg_dungeon_core02_v1')
+      },
       dc200Modal:(()=>{
         const m=document.getElementById('dc200Modal');
         const title=document.getElementById('dc200ModalTitle');
@@ -286,6 +311,7 @@ async function runScenario(port,survivalFirst){
     await settleDungeonLaunch(page);
 
     const snap=await dungeonSnapshot(page,survivalFirst?'after-survival':'fresh-direct');
+    console.log('[dungeon-after-survival] launch-'+(survivalFirst?'after-survival':'fresh-direct'),JSON.stringify(snap,null,2));
     return {snap,errors};
   }finally{
     await context.close();
@@ -316,6 +342,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     await settleDungeonLaunch(page);
 
     const entrance=await dungeonSnapshot(page,'persisted-control-entrance');
+    console.log('[dungeon-after-survival] persisted-control-entrance',JSON.stringify(entrance,null,2));
     assert.equal(Number(entrance.dungeonState?.room),0,'real prior Dungeon must begin at room 0 before exploring');
     assert.equal(entrance.dungeonState?.last??null,null,'real prior Dungeon entrance must have no generated room yet');
 

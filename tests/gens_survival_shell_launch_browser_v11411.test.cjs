@@ -15,7 +15,7 @@ const customHeroSupportStart=indexSource.indexOf('function loadCustomHeroesMulti
 const customHeroSupportEnd=indexSource.indexOf('function openPlayableHeroCard(heroId){',customHeroSupportStart);
 assert.ok(customHeroSupportStart>shellScriptEnd && customHeroSupportEnd>customHeroSupportStart,'real index.html must expose the late custom-hero Shell support cluster');
 const realCustomHeroShellSupport=indexSource.slice(customHeroSupportStart,customHeroSupportEnd);
-assert.doesNotMatch(realCustomHeroShellSupport,/<\\/script/i,'extracted Shell support must stay inside one script');
+assert.equal(realCustomHeroShellSupport.includes('</script>'),false,'extracted Shell support must stay inside one script');
 const realSurvivalShellHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n<script>'+realCustomHeroShellSupport+'</script>\n</body></html>';

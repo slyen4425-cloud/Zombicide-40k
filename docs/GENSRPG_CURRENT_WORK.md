@@ -17,16 +17,20 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Phase 1 complète :
-`checkpoint/gensrpg-phase1-complete-green-2026-09-18`
+Phase 2 — cartographie runtime initiale :
+`checkpoint/gensrpg-phase2-runtime-cartography-initial-green-2026-09-18`
 
 SHA :
-`04cce98e79252a791bd7130fe6993f00916fa5dc`
+`d247b277ebadc0457b9ff463993d5fd3bafae7b8`
 
-CI de clôture :
-- Architecture `35325172047` — SUCCESS
-- Firefox `35325172074` — SUCCESS
-- Tactical Dock `35325172035` — SUCCESS
+CI :
+- Architecture `35326145505` — SUCCESS
+- Firefox `35326145516` — SUCCESS
+- Tactical Dock `35326145484` — SUCCESS
+
+Livrables déjà verts :
+- `docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md`
+- `tests/gens_phase2_runtime_load_graph_v11411.test.cjs`
 
 ## Chantier courant
 
@@ -155,16 +159,37 @@ Ce constat est **caractérisé mais non corrigé** dans ce lot.
 - blob `index.html` : `a515c3d34a1f5c4973159457090e4437a33c2630`
 - taille : 8 175 610 octets.
 
-Conformément à la règle 26, le contenu exact doit maintenant être fourni par l'utilisateur depuis ce SHA précis avant inspection du bloc 30.
+Fichier reçu et vérifié le 2026-09-18 :
+- taille : 8 175 610 octets ;
+- blob recalculé : `a515c3d34a1f5c4973159457090e4437a33c2630` ;
+- correspondance exacte avec le blob attendu : OUI.
+
+Le contenu exact de `index.html` est donc désormais disponible localement conformément à la règle 26.
+
+## Diagnostic en cours — granularité bloc 030
+
+Le fichier exact a été vérifié et `builtinMonsterCapture162` a été isolé.
+
+Le Chromium local de l'environnement de travail refuse toute navigation (`ERR_BLOCKED_BY_ADMINISTRATOR`), y compris localhost/file/data. Cette limitation n'est pas interprétée comme un défaut GenSrpG.
+
+Le test de caractérisation navigateur a donc été instrumenté **sans modifier le runtime** pour tracer :
+- la construction des constantes Capture 162 ;
+- l'entrée dans `ensureBuiltinMonsterCapture162()` ;
+- les étapes profil / dresseur / roster / capacités / gameplay / règles ;
+- `refreshCustomEquipmentIntoItems()` ;
+- `applyCustomHeroesMulti()` ;
+- `renderGameProfileLibrary()`.
+
+Commit diagnostic :
+`e7f629e4b04d5938db950f16a09e4597c3cba47f`
 
 ## Prochaine étape
 
-1. recevoir le `index.html` exact du SHA indiqué ;
-2. vérifier son blob ;
-3. isoler `builtinMonsterCapture162` ;
-4. inventorier ses appels synchrones et la cause du gel ;
-5. reproduire sans modifier le runtime ;
-6. si défaut fonctionnel réel confirmé, arrêter ce lot de cartographie et ouvrir un lot correctif dédié.
+1. lire le run CI de ce commit instrumenté ;
+2. identifier le dernier marqueur `[phase2-mc162]` atteint ;
+3. resserrer la caractérisation sur l'appel exact si nécessaire ;
+4. reproduire la cause sans modifier le runtime ;
+5. si défaut fonctionnel réel confirmé, arrêter ce lot de cartographie et ouvrir un lot correctif dédié.
 
 Aucun correctif runtime dans ce lot de cartographie.
 

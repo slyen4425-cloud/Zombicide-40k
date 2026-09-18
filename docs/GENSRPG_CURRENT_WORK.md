@@ -34,22 +34,25 @@ Livrables déjà verts :
 
 ## Chantier courant
 
-**Correctif dédié — bootstrap à froid des profils avant seed Monster Capture 162**
+**Correctif dédié — Core Stats saveProfile ne doit jamais écraser un autre profil**
 
 Branche :
-`work/gensrpg-capture-cold-boot-profile-bootstrap-fix-2026-09-18`
+`work/gensrpg-core-stats-save-fix-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-capture-cold-boot-fix-2026-09-18`
+`checkpoint/gensrpg-start-core-stats-save-2026-09-18`
 
 Base exacte :
-`c4eca0275c83e6b5ffc6a61a10100858d5277228`
+`f20dd805938456643681aaa3d11e2ee4dbdf8765`
 
 ## Défaut caractérisé à corriger
 
-La composition Pages complète gèle au premier boot dans :
+Le correctif Capture précédent a supprimé la récursion du bloc 030.
 
-`builtinMonsterCapture162 -> ensureBuiltinMonsterCapture162() -> refreshCustomEquipmentIntoItems()`.
+Le défaut courant appartient désormais au propriétaire Core Stats :
+`assets/gensrpg/gens-rpg-stats-clean-167874.js -> saveProfile(p)`.
+
+Quand le profil actif est Base et que `p` est Dungeon, `saveProfile(p)` mélange `p.id` et l'ID actif dans la même recherche. Il trouve Base avant Dungeon et remplace donc Base par Dungeon.
 
 Chaîne récursive prouvée :
 

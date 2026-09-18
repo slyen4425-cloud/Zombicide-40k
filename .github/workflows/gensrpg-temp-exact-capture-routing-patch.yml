@@ -1,0 +1,49 @@
+name: GenSrpG temporary exact Capture routing patch
+on:
+  push:
+    branches:
+      - work/gensrpg-capture-start-routing-2026-09-18
+
+permissions:
+  contents: write
+
+jobs:
+  apply-exact-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-capture-start-routing-2026-09-18
+          fetch-depth: 0
+      - name: Apply exact guarded replacement and self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          path=Path("index.html")
+          expected_before="437fb42c36e6583842d4b72f06159fdf013c0fd2"
+          expected_after="3a3db76d12ae511f6293e8ff25d124616731a08b"
+          old='if(isDungeonMode?.())return start();'
+          new='if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();'
+
+          before=subprocess.check_output(["git","hash-object",str(path)], text=True).strip()
+          if before != expected_before:
+              raise SystemExit(f"Unexpected source blob: {before}")
+          text=path.read_text(encoding="utf-8")
+          if text.count(old) != 1:
+              raise SystemExit(f"Expected one routing guard, found {text.count(old)}")
+          path.write_text(text.replace(old,new,1),encoding="utf-8",newline="")
+          after=subprocess.check_output(["git","hash-object",str(path)], text=True).strip()
+          if after != expected_after:
+              raise SystemExit(f"Unexpected patched blob: {after}")
+          print(f"Verified exact blob transition {before} -> {after}")
+          PY
+          git rm .github/workflows/gensrpg-temp-exact-capture-routing-patch.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "fix: preserve Capture start routing from Dungeon Core"
+          git push origin HEAD:work/gensrpg-capture-start-routing-2026-09-18

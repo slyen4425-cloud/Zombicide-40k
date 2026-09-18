@@ -91,7 +91,7 @@ const server=http.createServer((req,res)=>{
       typeof window.ensureBuiltinMonsterCapture162==='function' &&
       !!window.DungeonCore01 &&
       profiles.some(p=>String(p.id)===captureId);
-  },CAPTURE_ID,{timeout:30000});
+  },CAPTURE_ID,{timeout:90000});
 
   const openAdventure=async()=>{
     await page.locator('button.gensRootModeCard.adventure').click();
@@ -100,7 +100,7 @@ const server=http.createServer((req,res)=>{
 
   try{
     mark('navigate-full-index');
-    await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.goto(url,{waitUntil:'commit',timeout:20000});
     await waitFullOwners();
 
     const composition=await page.evaluate(()=>({

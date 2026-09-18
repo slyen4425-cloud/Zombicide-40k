@@ -235,6 +235,9 @@ jobs:
       - name: Caractériser les fichiers hors graphe de production Phase 2
         run: node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
 
+      - name: Verrouiller les responsabilités stratifiées Phase 2
+        run: node tests/gens_phase2_layered_responsibilities_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

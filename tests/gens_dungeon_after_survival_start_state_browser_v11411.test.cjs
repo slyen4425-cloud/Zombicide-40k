@@ -312,12 +312,21 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const afterExplore=await dungeonSnapshot(page,'after-first-explore-click');
     console.log('[dungeon-after-survival] after-first-explore',JSON.stringify(afterExplore,null,2));
 
-    assert.ok(
-      Number(afterExplore.dungeonState?.room)>=1 && afterExplore.dungeonState?.last,
-      'characterization: first EXPLORE did not yet persist a generated room; inspect visible buttons/dialogs before extending the real path'
-    );
+    const continueBtn=page.locator('#dc200ModalOk');
+    await continueBtn.waitFor({state:'visible',timeout:5000});
+    await continueBtn.click();
+    await page.waitForFunction(()=>{
+      try{
+        const st=JSON.parse(localStorage.getItem('gensrpg_dungeon_state_v1')||'null');
+        return Number(st?.room)>=1 && !!st?.last;
+      }catch(e){return false}
+    },null,{timeout:15000});
+    await page.waitForTimeout(500);
 
-    const persisted=afterExplore;
+    const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
+    console.log('[dungeon-after-survival] persisted-room',JSON.stringify(persisted,null,2));
+    assert.ok(Number(persisted.dungeonState?.room)>=1,'real explored Dungeon must persist a room beyond the entrance');
+    assert.ok(persisted.dungeonState?.last,'real explored Dungeon must persist the generated room snapshot');
 
     const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
     await quit.waitFor({state:'visible'});

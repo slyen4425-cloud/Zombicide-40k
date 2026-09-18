@@ -232,6 +232,9 @@ jobs:
       - name: Caractériser les propriétaires du stockage Phase 2
         run: node tests/gens_phase2_storage_ownership_characterization_v11411.test.cjs
 
+      - name: Caractériser les fichiers hors graphe de production Phase 2
+        run: node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

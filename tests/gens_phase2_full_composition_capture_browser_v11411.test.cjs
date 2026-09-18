@@ -61,13 +61,14 @@ const server=http.createServer((req,res)=>{
 
 (async()=>{
   let stage='boot';
+  let lastInline='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
-  },150000);
+  },90000);
 
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
@@ -123,10 +124,16 @@ const server=http.createServer((req,res)=>{
     console.error('[phase2-full-capture] pageerror',value);
   });
   page.on('console',message=>{
-    if(message.type()!=='error')return;
     const value=message.text();
+    if(value.startsWith('[phase2-inline-enter] ')){
+      lastInline=value.slice('[phase2-inline-enter] '.length);
+      console.log(value);
+      return;
+    }
+    if(message.type()!=='error')return;
     if(/Failed to load resource|ERR_FAILED|RuntimeBootstrap V1 load failed/.test(value))return;
     browserErrors.push(value);
+    console.error('[phase2-full-capture] browser-console-error',value);
   });
   page.on('dialog',async dialog=>{
     dialogs.push({type:dialog.type(),message:dialog.message()});

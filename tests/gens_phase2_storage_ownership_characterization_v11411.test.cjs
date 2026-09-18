@@ -11,6 +11,7 @@ const preview=read('preview.html');
 const workflow=read('.github/workflows/main.yml');
 const externalOwners=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
 const inlineOwners=JSON.parse(read('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'));
+const storageManifest=JSON.parse(read('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 
 const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
   .map(m=>m[1]).filter(src=>/^assets\/(?:gensrpg|dungeon)\//.test(src)).map(stripQuery);
@@ -104,12 +105,29 @@ for(const required of ['gensrpg_dungeon_runtime_v2','gensrpg_game_profile_active
   assert.ok(keys.some(x=>x.key===required),required+' must be resolved by storage characterization');
 }
 
-console.log(JSON.stringify({
-  scenario:'Phase 2 storage ownership characterization',
+const totals={
   totalAccesses:rows.length,
   resolvedAccesses:resolved.length,
   unresolvedAccesses:unresolved.length,
-  distinctResolvedKeys:keys.length,
+  distinctResolvedKeys:keys.length
+};
+const unresolvedBySource={};
+for(const x of unresolved){
+  if(!unresolvedBySource[x.source])unresolvedBySource[x.source]={source:x.source,domain:x.domain,count:0,expressions:{}};
+  const rec=unresolvedBySource[x.source];
+  rec.count++;
+  rec.expressions[x.expr]=(rec.expressions[x.expr]||0)+1;
+}
+const unresolvedSummary=Object.values(unresolvedBySource).sort((a,b)=>a.source.localeCompare(b.source));
+
+assert.deepEqual(totals,storageManifest.totals,'storage totals drifted');
+assert.deepEqual(byDomain,storageManifest.byDomain,'storage domain ownership drifted');
+assert.deepEqual(keys,storageManifest.resolvedKeys,'resolved storage key ownership drifted');
+assert.deepEqual(unresolvedSummary,storageManifest.unresolvedBySource,'dynamic storage access inventory drifted');
+
+console.log(JSON.stringify({
+  scenario:'Phase 2 storage ownership characterization',
+  ...totals,
   byDomain,
   keys,
   unresolved

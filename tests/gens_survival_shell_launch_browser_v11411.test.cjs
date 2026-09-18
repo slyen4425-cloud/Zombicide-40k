@@ -151,9 +151,9 @@ const server=http.createServer((req,res)=>{
       sessionActive:launched.active
     }));
   }finally{
-    await context.close();
-    await browser.close();
     server.closeAllConnections?.();
-    await new Promise(resolve=>server.close(resolve));
+    server.closeIdleConnections?.();
+    server.close();
+    await browser.close();
   }
 })().catch(error=>{console.error(error);process.exitCode=1;});

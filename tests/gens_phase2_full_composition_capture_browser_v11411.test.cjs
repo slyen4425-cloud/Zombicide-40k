@@ -191,6 +191,11 @@ const server=http.createServer((req,res)=>{
     }catch(e){return false}
   },CAPTURE_ID,{timeout:90000});
 
+  const waitFullBoot=async()=>{
+    await waitFullBoot();
+    await page.waitForLoadState('domcontentloaded',{timeout:90000});
+  };
+
   const openAdventure=async()=>{
     await page.locator('button.gensRootModeCard.adventure').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
@@ -230,7 +235,7 @@ const server=http.createServer((req,res)=>{
         page.waitForNavigation({waitUntil:'commit',timeout:20000}),
         captureCard.click()
       ]);
-      await waitFullOwners();
+      await waitFullBoot();
       const reloadState=await page.evaluate(()=>({
         active:activeGameProfileId(),
         forced:localStorage.getItem('gensrpg_forced_mode_reload_155')

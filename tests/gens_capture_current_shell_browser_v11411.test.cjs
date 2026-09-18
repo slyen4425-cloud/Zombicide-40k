@@ -47,24 +47,12 @@ function exactScript(id){
 }
 
 const captureScriptIds=[
-  'captureGameplayModalMount',
-  'capturePlaytestFix128',
-  'captureFix129',
-  'captureFix130',
-  'captureFix131',
-  'captureFix132',
-  'captureFix133',
-  'captureFix134',
-  'captureFix135',
-  'captureFix136',
-  'captureFix137',
+  // Current owners for this Phase 1 scenario only:
+  // V138 defines the Capture context, V139 owns Capture launch,
+  // V151 owns Capture/Dungeon UI reconciliation, V155 owns universe reload,
+  // V162 owns the built-in Monster Capture seed.
   'captureFix138',
   'captureFix139',
-  'captureFix140',
-  'captureItems141',
-  'captureBuffs142',
-  'captureBuffFx143',
-  'captureAbilityTruth144',
   'gensStability151',
   'forceReload155',
   'builtinMonsterCapture162'

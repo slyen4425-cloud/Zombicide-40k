@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
+  "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
+  "expected": {
+    "externalReachableFiles": 65,
+    "externalTimerSources": 53,
+    "externalSetTimeoutSyntax": 148,
+    "externalSetIntervalSyntax": 1,
+    "activeInlineBlocks": 120,
+    "inlineTimerSources": 66,
+    "inlineSetTimeoutSyntax": 146,
+    "inlineSetIntervalSyntax": 1
+  },
+  "defaultClassification": "deferred-ui-runtime",
+  "persistentIntervals": [
+    {
+      "source": "assets/dungeon/dungeon-core-317.js",
+      "class": "bootstrap-retry",
+      "bounded": true,
+      "detail": "merchant override retry: 12 attempts max, every 250 ms"
+    },
+    {
+      "source": "inline:dungeonCore029AiTurnFix",
+      "class": "gameplay-watchdog",
+      "bounded": false,
+      "detail": "AI watchdog interval installed globally; work is gated by active combat"
+    }
+  ],
+  "bootstrapRetryExternal": [
+    "assets/gensrpg/core/runtime-bootstrap-v1.js",
+    "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
+    "assets/gensrpg/gens-survival-mode-isolation-1678104.js",
+    "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js",
+    "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js",
+    "assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js",
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
+    "assets/gensrpg/gens-stat-upgrade-policy-167898.js",
+    "assets/gensrpg/gens-hero-editor-dynamic-167897.js",
+    "assets/gensrpg/gens-equipment-stat-cleanup-1678102.js",
+    "assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js",
+    "assets/dungeon/dungeon-core-317.js",
+    "assets/dungeon/dungeon-zone-content-167824.js"
+  ],
+  "bootstrapRetryInline": [
+    "captureFix131",
+    "builtinMonsterCapture162",
+    "gensrpgDungeonFlowFix171",
+    "dungeonCore071ColdStart"
+  ],
+  "gameplayPacingInline": [
+    "capturePlaytestFix128",
+    "captureFix136",
+    "captureBuffFx143",
+    "captureAbilityTruth144",
+    "coreCombatPoolFix156",
+    "rpgTurnTargetFlow157",
+    "dungeonCore023StabilityFix",
+    "dungeonCore029AiTurnFix",
+    "dungeonCore031CombatUiAndAiPopup",
+    "dungeonCore032RpgLifeAndReadableAi",
+    "dungeonCore036CombatPacing",
+    "dungeonCore037PlayerTurnGate",
+    "dungeonCore071LevelUp",
+    "dungeonCore073RpDice",
+    "dungeonCore209TacticalSense",
+    "dungeonCore211Consolidation",
+    "dungeonCore303TimelineRootFix",
+    "dungeonCore312TurnAndPopupFixes"
+  ],
+  "mixedExternal": [
+    "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
+    "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js",
+    "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js",
+    "assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js",
+    "assets/dungeon/dungeon-core-317.js",
+    "assets/dungeon/dungeon-zone-content-167824.js"
+  ],
+  "mixedInline": [
+    "captureFix137",
+    "captureFix138",
+    "captureFix139",
+    "dungeonCore213Stability"
+  ]
+}

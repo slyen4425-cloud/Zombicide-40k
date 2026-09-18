@@ -39,7 +39,7 @@ Le shell actuel utilise :
 
 Les futurs tests doivent traverser ces propriétaires réels et ne pas recopier leur logique.
 
-## Plus petit manque suivant
+Preuve de fermeture Save & Quit / reprise : SHA fonctionnel `47d84f35c802dbe5f15d2f0bca158b82583ed9a8`, Architecture `35317905997`, Firefox `35317906010`, Tactical Dock `35317905939` — tous SUCCESS.\n\n## Plus petit manque suivant
 
 Les lots **lancement Survie par le vrai Shell** et **Save & Quit + vraie reprise complète par le Shell** sont désormais couverts et branchés à la CI. La sentinelle Save/Resume couvre également le lancement Dungeon depuis le Shell racine.
 

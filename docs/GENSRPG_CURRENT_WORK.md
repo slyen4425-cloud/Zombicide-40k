@@ -15,63 +15,80 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier lot validé
+## Dernier checkpoint vert
 
-**Phase 1 — Capture : protection du comportement actuel uniquement**
-
-Branche :
-`work/gensrpg-phase1-capture-current-sentinel-2026-09-18`
-
-Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-capture-current-sentinel-2026-09-18`
-
-Base exacte :
-`cd797172ec1b32a6edcc84b743a45794d5dfbd32`
-
-SHA fonctionnel vert avant fermeture documentaire :
-`97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef`
-
-Checkpoint final :
+Phase 1 — comportement actuel Monster Capture :
 `checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
 
-CI sur le SHA fonctionnel :
-- Architecture `35321411358` — SUCCESS
-- Firefox `35321411333` — SUCCESS
-- Tactical Dock `35321411366` — SUCCESS
+SHA :
+`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Résultat du lot Capture
+CI de fermeture :
+- Architecture `35321622307` — SUCCESS
+- Firefox `35321622222` — SUCCESS
+- Tactical Dock `35321622236` — SUCCESS
 
-La sentinelle navigateur `tests/gens_capture_current_shell_browser_v11411.test.cjs` traverse le comportement actuel réel :
+## Chantier courant
 
-`Accueil -> Adventure -> Monster Capture -> reload V16.155 -> Adventure -> Monster Capture -> pré-game -> dresseur -> créature de départ -> startConfiguredGame() -> Hub Capture -> Jour 1 -> Jour 2`
+**Phase 1 — non-interférence explicite des quatre modules**
 
-Elle protège notamment :
-- profil embarqué actuel `Monster Capture` (`gp_mt7ker7t_m2iw9`) ;
-- classification actuelle : Shell `adventure`, contenu `creature`, mode V16.151 `capture`, substrat historique `gameStyle="dungeon"` ;
-- vrai changement d'univers V16.155 avec reload lorsqu'une famille de contenu change ;
-- pré-game Capture courant et absence d'une entrée Dungeon classique active ;
-- sélection réelle du dresseur puis d'une créature de départ via l'UI ;
-- activation réelle de session par `startConfiguredGame()` ;
-- affichage du Hub Capture et masquage du panneau Dungeon classique ;
-- progression réelle du monde Capture de Jour 1 à Jour 2 via son état persistant.
+Branche :
+`work/gensrpg-phase1-four-module-noninterference-2026-09-18`
 
-Le harnais réutilise les blocs source exacts nécessaires du Shell et les propriétaires Capture de production. Aucun état de partie Capture n'est injecté pour forcer le succès.
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-four-module-noninterference-2026-09-18`
 
-Aucun runtime, gameplay, asset, règle ou structure persistante n'a été modifié.
+Base exacte :
+`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Prochain chantier Phase 1
+## Périmètre déclaré
 
-**Sentinelle explicite de non-interférence des quatre modules.**
+Première intention **test-only** :
+- traverser les vrais points d'entrée déjà couverts de Survie, Dungeon, Capture et PvP ;
+- vérifier explicitement qu'un module ne laisse pas de thème, profil, session, runtime, overlay ou autorité UI parasite dans le suivant ;
+- réutiliser les propriétaires réels et les sentinelles existantes plutôt que recopier leur logique ;
+- couvrir les transitions représentatives qui exposent le risque de contamination inter-module.
 
-Périmètre prévu :
-- nouveau checkpoint de départ et nouvelle branche ;
-- test-only en première intention ;
-- vérifier explicitement les frontières Survie / Dungeon / Capture / PvP ;
-- prouver qu'un passage par un module ne laisse pas d'autorité, thème, session ou runtime parasite dans le suivant ;
-- réutiliser les vrais propriétaires et les sentinelles déjà établies ;
-- ne corriger aucun runtime si un défaut réel est découvert avant caractérisation dédiée.
+Interdictions :
+- aucun correctif runtime dans ce lot ;
+- aucune nouvelle logique de navigation ;
+- aucun moteur PvP ;
+- aucune restauration/réécriture Capture ;
+- aucun changement gameplay Survie/Dungeon/Tactical ;
+- aucun MutationObserver global, timer/retry de réparation ou monkey-patch ;
+- ne pas toucher à `main`.
 
-Une fois ce lot GREEN, refaire la matrice complète Phase 1 pour vérifier le critère de sortie avant de passer à la Phase 2.
+## Invariants à protéger
+
+- Survie : famille `survival`, pas de mode/thème/runtime Dungeon ;
+- Dungeon : famille `adventure`, profil Dungeon, autorité Dungeon active uniquement dans son contexte ;
+- Capture : famille Shell `adventure`, contenu `creature`, mode V16.151 `capture`, Hub Capture sans panneau Dungeon classique ;
+- PvP : placeholder seulement, aucune session/profil/runtime créé ;
+- quitter/changer de module ne doit pas laisser d'overlay ou de vue d'un autre module au-dessus ;
+- la clé de guard famille ne doit pas être détournée par PvP ;
+- les états persistants d'un module ne doivent pas être écrasés par l'ouverture d'un autre.
+
+## Tests prévus
+
+1. réutiliser un harnais Shell réel commun minimal ;
+2. établir un état Survie et vérifier absence d'autorité Dungeon/Capture/PvP ;
+3. passer vers Adventure/Dungeon et vérifier nettoyage de l'état visuel Survie ;
+4. passer vers Monster Capture et vérifier mode `capture`, Hub Capture et masquage Dungeon ;
+5. revenir au Shell puis ouvrir PvP et vérifier qu'aucune session/profil/runtime parasite n'est créé ;
+6. vérifier la conservation des états persistants propres aux modules lorsqu'ils ne doivent pas être modifiés ;
+7. relancer toutes les sentinelles navigateur existantes ;
+8. si GREEN, mettre à jour la matrice Phase 1 et vérifier le critère de sortie complet avant Phase 2.
+
+## Risques
+
+- les transitions de famille peuvent provoquer le reload V16.155 ;
+- certains anciens états persistants peuvent légitimement rester stockés sans être actifs : le test doit distinguer persistance inactive et autorité active ;
+- PvP n'appartient pas au guard Survie/Adventure et ne doit pas être forcé dedans ;
+- un RED réel devra être caractérisé sans correction dans ce lot.
+
+## Prochaine étape
+
+Construire la sentinelle de frontières en réutilisant les blocs source exacts déjà validés par les lots Survie, Save/Resume, PvP et Capture, puis tester les transitions une par une.
 
 ## Dette explicitement différée
 

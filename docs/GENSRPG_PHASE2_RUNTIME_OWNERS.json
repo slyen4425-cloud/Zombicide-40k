@@ -1,0 +1,343 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "baseCheckpoint": "checkpoint/gensrpg-phase1-complete-green-2026-09-18",
+  "note": "This manifest classifies production-reachable JS files. It documents current ownership; it does not authorize extraction or deletion.",
+  "allowedDomains": [
+    "core",
+    "shell",
+    "survival",
+    "dungeon",
+    "tactical",
+    "capture",
+    "pvp",
+    "builders"
+  ],
+  "files": {
+    "assets/dungeon/dungeon-authored-action-fix-167857.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authoring action refresh and obsolete chest control guard"
+    },
+    "assets/dungeon/dungeon-authored-bootstrap-167849.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "production bootstrap for authored-world runtime extensions"
+    },
+    "assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored branch navigation cleanup"
+    },
+    "assets/dungeon/dungeon-authored-cache-guard-167849.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored cache marker isolation from random Dungeon"
+    },
+    "assets/dungeon/dungeon-authored-cache-ux-167853.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored cache contextual UI refresh"
+    },
+    "assets/dungeon/dungeon-authored-cache-visual-167852.js": {
+      "owner": "Dungeon Authored Visual",
+      "domain": "dungeon",
+      "role": "authored terrain and actor visual bridge"
+    },
+    "assets/dungeon/dungeon-authored-event-cells-167877.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "configured authored event cells"
+    },
+    "assets/dungeon/dungeon-authored-final-exit-167875.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "terminal authored-world exit"
+    },
+    "assets/dungeon/dungeon-authored-return-persist-167862.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "return-position persistence"
+    },
+    "assets/dungeon/dungeon-authored-runtime-167839.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "built-world start and authored room transitions"
+    },
+    "assets/dungeon/dungeon-cache-editor-stability-167851.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "secondary-cache editor stability"
+    },
+    "assets/dungeon/dungeon-core-316.js": {
+      "owner": "Dungeon Equipment",
+      "domain": "dungeon",
+      "role": "equipment catalogue and generic set bonus engine"
+    },
+    "assets/dungeon/dungeon-core-317.js": {
+      "owner": "Dungeon Core",
+      "domain": "dungeon",
+      "role": "merchant stock, armor floor and spatial return; mixed debt"
+    },
+    "assets/dungeon/dungeon-core-318.js": {
+      "owner": "Dungeon Core",
+      "domain": "dungeon",
+      "role": "enemy room ownership and branch initialization"
+    },
+    "assets/dungeon/dungeon-equipment-hotfix-167817.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "equipment editor and set visibility UI bridge"
+    },
+    "assets/dungeon/dungeon-equipment-ui.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "equipment/set editor UI adapter"
+    },
+    "assets/dungeon/dungeon-event-runtime-fix-167878.js": {
+      "owner": "Dungeon Event Runtime",
+      "domain": "dungeon",
+      "role": "event-spawn placement"
+    },
+    "assets/dungeon/dungeon-exact-trap-runtime-167845.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "exact authored trap resolution"
+    },
+    "assets/dungeon/dungeon-grid-display-recovery-167856.js": {
+      "owner": "Dungeon Runtime UI",
+      "domain": "dungeon",
+      "role": "tactical grid display recovery"
+    },
+    "assets/dungeon/dungeon-large-room-support-167834.js": {
+      "owner": "Dungeon Session Boundary",
+      "domain": "dungeon",
+      "role": "room size and World Builder selection authority"
+    },
+    "assets/dungeon/dungeon-random-library-content-167832.js": {
+      "owner": "Dungeon Content Runtime",
+      "domain": "dungeon",
+      "role": "random choices backed by canonical Dungeon libraries"
+    },
+    "assets/dungeon/dungeon-room-content-ui-167831.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "exact-content editor controls"
+    },
+    "assets/dungeon/dungeon-room-creator-100.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator base editor"
+    },
+    "assets/dungeon/dungeon-room-creator-feedback-167821.js": {
+      "owner": "Dungeon Builders Bootstrap",
+      "domain": "builders",
+      "role": "Room Creator feedback plus production extension loader; mixed debt"
+    },
+    "assets/dungeon/dungeon-room-creator-v2-167819.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator attachments and cache links"
+    },
+    "assets/dungeon/dungeon-room-grid-capture-167830.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator configuration grid capture"
+    },
+    "assets/dungeon/dungeon-room-runtime-167822.js": {
+      "owner": "Dungeon Room Runtime",
+      "domain": "dungeon",
+      "role": "custom-room runtime integration"
+    },
+    "assets/dungeon/dungeon-room-template-content-167828.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "direct exact-content room-template editing"
+    },
+    "assets/dungeon/dungeon-room-visual-config-167826.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "visual exact-content configuration"
+    },
+    "assets/dungeon/dungeon-room-visual-hotfix-167827.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator visual presentation"
+    },
+    "assets/dungeon/dungeon-secondary-branch-content-fix-167860.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "secondary authored branch exact-content isolation"
+    },
+    "assets/dungeon/dungeon-set-editor-167818.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "generic set editor"
+    },
+    "assets/dungeon/dungeon-source-render-stability-167877.js": {
+      "owner": "Dungeon Authored Visual",
+      "domain": "dungeon",
+      "role": "pre-DOM authored terrain/token render stability"
+    },
+    "assets/dungeon/dungeon-world-builder-167821.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "zone graph / world builder"
+    },
+    "assets/dungeon/dungeon-world-runtime-167823.js": {
+      "owner": "Dungeon World Runtime",
+      "domain": "dungeon",
+      "role": "built-world activation and geometry runtime"
+    },
+    "assets/dungeon/dungeon-world-session-bridge-167832.js": {
+      "owner": "Dungeon Session Boundary",
+      "domain": "dungeon",
+      "role": "generated-vs-authored session separation"
+    },
+    "assets/dungeon/dungeon-zone-content-167824.js": {
+      "owner": "Dungeon Content Runtime",
+      "domain": "dungeon",
+      "role": "exact content per built-world zone; mixed runtime/editor seam"
+    },
+    "assets/dungeon/dungeon-zone-links-167846.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored main/secondary graph links and return stacks"
+    },
+    "assets/gensrpg/core/runtime-bootstrap-v1.js": {
+      "owner": "Core Bootstrap",
+      "domain": "core",
+      "role": "runtime dependency loader"
+    },
+    "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js": {
+      "owner": "Dungeon Visual Bridge",
+      "domain": "dungeon",
+      "role": "board/editor visual compatibility; sheet portrait explicitly excluded"
+    },
+    "assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js": {
+      "owner": "Dungeon Visual Bridge",
+      "domain": "dungeon",
+      "role": "built-in hero art on Dungeon boards only"
+    },
+    "assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js": {
+      "owner": "Dungeon UI",
+      "domain": "dungeon",
+      "role": "targeted non-combat Dungeon UI cleanup"
+    },
+    "assets/gensrpg/gens-equipment-stat-cleanup-1678102.js": {
+      "owner": "Core Stats / Builders Bridge",
+      "domain": "core",
+      "role": "equipment editor cleanup and canonical set/evolution stats; mixed seam"
+    },
+    "assets/gensrpg/gens-hero-editor-dynamic-167897.js": {
+      "owner": "Core Stats / Builders Bridge",
+      "domain": "core",
+      "role": "canonical hero-editor stats and runtime sheet completion"
+    },
+    "assets/gensrpg/gens-mobile-combat-performance-16781022.js": {
+      "owner": "Core Performance / Bootstrap Handoff",
+      "domain": "core",
+      "role": "combat hot-path cache/dice performance plus RuntimeBootstrap entry; mixed debt"
+    },
+    "assets/gensrpg/gens-multiplayer-entry-167831.js": {
+      "owner": "Shell Multiplayer UI",
+      "domain": "shell",
+      "role": "host/join UI bridge to existing online system"
+    },
+    "assets/gensrpg/gens-rpg-runtime-repair-1678106.js": {
+      "owner": "Tactical / Dungeon Compatibility Bridge",
+      "domain": "tactical",
+      "role": "Runtime 2.00 combat seam repair and duplicate-profile repair; mixed debt"
+    },
+    "assets/gensrpg/gens-rpg-stats-clean-167874.js": {
+      "owner": "Core Stats",
+      "domain": "core",
+      "role": "canonical RPG stat/effect authority"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V112 spatial/readability compatibility still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js": {
+      "owner": "Tactical Adapter",
+      "domain": "tactical",
+      "role": "Dungeon-to-Tactical actor/weapon/runtime adapter"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js": {
+      "owner": "Tactical Bridge",
+      "domain": "tactical",
+      "role": "hard Dungeon combat router into Tactical V2"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js": {
+      "owner": "Tactical Integration",
+      "domain": "tactical",
+      "role": "combat outcome/reward integration and historical Tactical loader"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V108 interaction/readability layer still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V109 timeline/HUD/ranged layer still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js": {
+      "owner": "Tactical Rules",
+      "domain": "tactical",
+      "role": "cell cover and deterministic tactical rules"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js": {
+      "owner": "Tactical Stats Bridge",
+      "domain": "tactical",
+      "role": "cached canonical RPG stat snapshots"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js": {
+      "owner": "Tactical UI",
+      "domain": "tactical",
+      "role": "battlefield UI and current base wall rendering"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2.js": {
+      "owner": "Tactical Engine",
+      "domain": "tactical",
+      "role": "isolated deterministic combat state engine"
+    },
+    "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js": {
+      "owner": "Tactical Runtime Authority",
+      "domain": "tactical",
+      "role": "room scope, detection and final runtime seam authority"
+    },
+    "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V111 dock/dice/runtime compatibility still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js": {
+      "owner": "Tactical Final Resolution",
+      "domain": "tactical",
+      "role": "V114.11 visible D100/session/damage authority"
+    },
+    "assets/gensrpg/gens-stat-upgrade-policy-167898.js": {
+      "owner": "Core Stats / Progression Policy",
+      "domain": "core",
+      "role": "per-stat upgrade lock and characteristic-point cost policy"
+    },
+    "assets/gensrpg/gens-survival-mode-isolation-1678104.js": {
+      "owner": "Shell Module Boundary",
+      "domain": "shell",
+      "role": "Survival vs Adventure/Dungeon isolation guard"
+    },
+    "assets/gensrpg/gens-ui-recovery-167843.js": {
+      "owner": "Shell UI Recovery / Dungeon Bootstrap",
+      "domain": "shell",
+      "role": "UI recovery plus authored Dungeon exact-trap/zone-link bootstrap; mixed debt"
+    },
+    "assets/gensrpg/gens-world-summary-167820.js": {
+      "owner": "Shell World Summary",
+      "domain": "shell",
+      "role": "live world-card summaries from content sources"
+    }
+  }
+}

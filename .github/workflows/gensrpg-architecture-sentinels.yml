@@ -285,6 +285,9 @@ jobs:
       - name: Vérifier le Dungeon Builder dans le vrai éditeur
         run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
 
+      - name: Vérifier cache, retour et pièges authored dans Chromium
+        run: node tests/gens_authored_cache_trap_browser_v11411.test.cjs
+
       - name: Vérifier Save & Quit puis reprise par le vrai Shell
         run: node tests/gens_savequit_resume_shell_browser_v11411.test.cjs
 

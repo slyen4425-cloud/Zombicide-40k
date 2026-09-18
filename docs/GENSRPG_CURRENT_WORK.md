@@ -17,74 +17,76 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Phase 1 — Save & Quit + vraie reprise complète par le Shell :
-`checkpoint/gensrpg-phase1-savequit-resume-sentinel-green-2026-09-18`
-
-SHA :
-`578f8fb5cf6ea05682b2ac10329ae6666d38a01e`
-
-CI de fermeture :
-- Architecture `35318065938` — SUCCESS
-- Firefox `35318066103` — SUCCESS
-- Tactical Dock `35318066006` — SUCCESS
-
-## Dernier lot validé
-
-**Phase 1 — sentinelle du placeholder PvP actuel**
-
-Branche :
-`work/gensrpg-phase1-pvp-placeholder-sentinel-2026-09-18`
-
-Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-pvp-placeholder-sentinel-2026-09-18`
-
-Base exacte :
-`578f8fb5cf6ea05682b2ac10329ae6666d38a01e`
-
-SHA fonctionnel vert avant fermeture documentaire :
-`fe5eec3cfcfb0973ae5edab5ab8888a48fd761b7`
-
-Checkpoint final :
+Phase 1 — placeholder PvP actuel :
 `checkpoint/gensrpg-phase1-pvp-placeholder-sentinel-green-2026-09-18`
 
-## Résultat du lot PvP
+SHA :
+`cd797172ec1b32a6edcc84b743a45794d5dfbd32`
 
-La sentinelle navigateur `tests/gens_pvp_placeholder_shell_browser_v11411.test.cjs` traverse le vrai Shell :
+CI de fermeture :
+- Architecture `35318887146` — SUCCESS
+- Firefox `35318887102` — SUCCESS
+- Tactical Dock `35318887116` — SUCCESS
 
-`Accueil -> Duel / PvP -> placeholder`
+## Chantier courant
 
-Elle vérifie :
-- présence de la vraie carte PvP racine ;
-- affichage de `PVP — À VENIR` ;
-- texte `Le moteur PvP n’est pas encore construit.` ;
-- une seule carte placeholder désactivée ;
-- aucune ouverture de game home, pré-game ou menu de jeu ;
-- aucune création de session active ;
-- aucun profil de jeu activé ;
-- aucun runtime/état Dungeon créé ;
-- aucun thème Dungeon activé ;
-- aucun écrasement du guard famille Survie/Adventure.
+**Phase 1 — Capture : protéger le comportement actuel uniquement**
 
-Le harnais réutilise le bloc Shell réel et le bloc custom-content exact de `index.html`. Aucun moteur PvP, runtime, gameplay, asset ou persistance n'a été créé ou modifié.
+Branche :
+`work/gensrpg-phase1-capture-current-sentinel-2026-09-18`
 
-CI sur `fe5eec3cfcfb0973ae5edab5ab8888a48fd761b7` :
-- Architecture : run `35318561984` — SUCCESS
-- Firefox : run `35318561927` — SUCCESS
-- Tactical Dock : run `35318561939` — SUCCESS
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-capture-current-sentinel-2026-09-18`
 
-## Prochain chantier Phase 1
+Base exacte :
+`cd797172ec1b32a6edcc84b743a45794d5dfbd32`
 
-**Capture — protéger le comportement actuel uniquement.**
+## Périmètre déclaré
 
-Périmètre prévu :
-- nouveau checkpoint de départ et nouvelle branche ;
-- sentinelle test-only en première intention ;
-- traverser le vrai Shell / flux Capture actuel ;
-- caractériser et protéger ce qui fonctionne aujourd'hui ;
-- ne restaurer, réécrire ni étendre Capture pendant Phase 1 ;
-- aucun correctif runtime si un défaut réel apparaît avant caractérisation dédiée.
+Première intention **test-only** :
+- traverser le vrai Shell jusqu'au flux Capture actuellement exposé ;
+- identifier les vrais propriétaires du lancement Capture et de son écran/runtime actuel ;
+- protéger uniquement le comportement qui existe aujourd'hui ;
+- vérifier que Capture ne prend pas l'autorité sur Survie/Dungeon/PvP en dehors de son contexte ;
+- brancher une sentinelle stable à la CI.
 
-Après Capture : sentinelle explicite de non-interférence des quatre modules.
+Interdictions du lot :
+- ne pas restaurer Capture ;
+- ne pas réécrire Capture ;
+- ne pas ajouter de créatures, règles, combats, capture, biomes ou progression ;
+- ne pas corriger un défaut fonctionnel découvert avant caractérisation dédiée ;
+- aucun MutationObserver global, timer/retry de réparation, wrapper permanent ou monkey-patch ;
+- ne pas toucher au gameplay Survie/Dungeon/Tactical/PvP ;
+- ne pas toucher à `main`.
+
+## Propriétaires à identifier avant test
+
+- entrée Shell exacte vers Capture ;
+- profil/famille ou route réellement utilisée par Capture ;
+- écran/host Capture actuel ;
+- fonctions de lancement et état persistant réellement lus/écrits ;
+- éventuels guards empêchant Dungeon/Survie de reprendre l'autorité.
+
+## Tests prévus
+
+1. localiser le vrai point d'entrée Capture dans `index.html` ;
+2. vérifier le comportement actuel sans supposer qu'il est complet ;
+3. construire un harnais à partir des blocs source exacts nécessaires ;
+4. traverser la vraie UI Shell jusqu'à Capture ;
+5. vérifier les invariants observés (vue active, absence de runtime parasite, état/famille/profil si applicable) ;
+6. relancer Architecture + navigateur + sentinelles existantes ;
+7. si GREEN, mettre à jour l'audit et créer le checkpoint final.
+
+## Risques
+
+- Capture peut être partiellement historique ou exposé par un chemin différent des familles Survie/Adventure ;
+- un vieux bloc UI peut exister sans runtime complet ;
+- un test qui invente une session Capture serait invalide ;
+- un RED fonctionnel réel devra être caractérisé sans correctif dans ce lot.
+
+## Prochaine étape
+
+Cartographier dans le vrai `index.html` le point d'entrée Capture, son propriétaire UI/runtime et les clés persistantes touchées, puis écrire la plus petite sentinelle réelle.
 
 ## Dette explicitement différée
 

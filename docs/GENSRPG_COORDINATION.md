@@ -71,10 +71,34 @@ Résultat :
 - aucun runtime/gameplay/asset/règle Capture n'a été modifié ;
 - sentinelle branchée à la CI.
 
-## Ordre Phase 1 restant
+## Lot non-interférence validé
 
-1. non-interférence explicite des quatre modules ;
-2. revue finale de la matrice et validation du critère de sortie Phase 1.
+- branche `work/gensrpg-phase1-four-module-noninterference-2026-09-18` ;
+- checkpoint de départ `checkpoint/gensrpg-start-phase1-four-module-noninterference-2026-09-18` ;
+- base `8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c` ;
+- SHA fonctionnel vert `1a4cac626592360ac676042c67f5568bfb5e5276` ;
+- Architecture `35322217121` — success ;
+- Firefox `35322217184` — success ;
+- Tactical Dock `35322217172` — success ;
+- checkpoint final `checkpoint/gensrpg-phase1-four-module-noninterference-green-2026-09-18`.
+
+Résultat :
+- Survie -> Dungeon -> Capture -> PvP -> Survie traversé par le vrai Shell ;
+- reloads V16.155 réels protégés ;
+- guards et autorités UI vérifiés ;
+- états persistants Dungeon/Capture conservés sans devenir des autorités actives hors contexte ;
+- aucun runtime/gameplay/asset/règle modifié.
+
+## Phase 1 — clôture
+
+La matrice des sentinelles ne contient plus de manque majeur identifié.
+Le critère de sortie Phase 1 est atteint.
+
+## Prochain ordre de travail
+
+1. **Phase 2 — cartographie réelle du runtime** ;
+2. inventaire/documentation avant tout déplacement ;
+3. classer chaque runtime actif : Core, Shell, Survie, Dungeon, Tactical, Capture, PvP, Builders, legacy/inactif.
 
 Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la sentinelle Save/Resume reste verte.
 

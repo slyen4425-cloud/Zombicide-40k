@@ -155,8 +155,7 @@ const server=http.createServer((req,res)=>{
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
-    mark('open-pregame-settings');
-    await page.locator('#pregameProfileStep .pregameContinue').click();
+    mark('wait-pregame-settings');
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
 
     mark('open-hero-session-setup');

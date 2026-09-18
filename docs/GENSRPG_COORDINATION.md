@@ -52,10 +52,29 @@ Résultat :
 - aucune session/profil/runtime parasite n'est activé ;
 - sentinelle branchée à la CI.
 
+## Lot Capture validé
+
+- branche `work/gensrpg-phase1-capture-current-sentinel-2026-09-18` ;
+- checkpoint de départ `checkpoint/gensrpg-start-phase1-capture-current-sentinel-2026-09-18` ;
+- base `cd797172ec1b32a6edcc84b743a45794d5dfbd32` ;
+- SHA fonctionnel vert `97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef` ;
+- Architecture `35321411358` — success ;
+- Firefox `35321411333` — success ;
+- Tactical Dock `35321411366` — success ;
+- checkpoint final `checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`.
+
+Résultat :
+- le vrai Shell traverse Adventure -> Monster Capture ;
+- le reload V16.155 de changement de famille est protégé ;
+- le pré-game Capture, le choix dresseur/créature, le lancement et le Hub Capture sont protégés ;
+- Jour 1 -> Jour 2 est vérifié via l'état persistant Capture ;
+- aucun runtime/gameplay/asset/règle Capture n'a été modifié ;
+- sentinelle branchée à la CI.
+
 ## Ordre Phase 1 restant
 
-1. Capture sur comportement actuel uniquement ;
-2. non-interférence explicite des quatre modules.
+1. non-interférence explicite des quatre modules ;
+2. revue finale de la matrice et validation du critère de sortie Phase 1.
 
 Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la sentinelle Save/Resume reste verte.
 

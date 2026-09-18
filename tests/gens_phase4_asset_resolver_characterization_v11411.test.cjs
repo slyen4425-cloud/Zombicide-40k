@@ -6,9 +6,9 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 
+const inlineScriptRe=/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi;
 const inlineBlocks=new Map(
-  [...index.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
-    .map(m=>[m[1],m[2]])
+  [...index.matchAll(inlineScriptRe)].map(m=>[m[1],m[2]])
 );
 function block(id){
   const source=inlineBlocks.get(id);

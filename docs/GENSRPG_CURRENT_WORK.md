@@ -562,3 +562,50 @@ Diff depuis le checkpoint de départ :
 - base Phase 3 GREEN : Firefox et Tactical Dock repassés SUCCESS ;
 - HEAD correctif `a209e74...` : Architecture en cours, Firefox/Tactical Dock en attente ;
 - aucun checkpoint GREEN final ne doit être créé avant succès des trois validations requises et test utilisateur ciblé.
+
+## Lot d'intégration — Builder GREEN + correction Dungeon après Survie
+
+Objectif : réunir proprement deux corrections déjà caractérisées séparément avant d'ouvrir le chantier authored-runtime caches/pièges.
+
+Branche :
+`work/gensrpg-dungeon-integrated-fixes-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-integrated-fixes-2026-09-18`
+
+Base exacte :
+`4f38720de29edb255f498d28b9e7013d181a0313`
+(`checkpoint/gensrpg-dungeon-builder-visibility-green-2026-09-18`)
+
+### Correctifs à intégrer
+
+1. Builder GREEN déjà présent dans la base :
+- Tactical V111 ne possède plus `#drc100Launcher` ;
+- vrai chemin Éditeurs -> Dungeon -> World Builder validé.
+
+2. Correction Dungeon après Survie à réintroduire depuis le lot précédent :
+- `isCaptureContext138()` doit utiliser uniquement la famille canonique `creature` ;
+- Core 2.09 doit utiliser `window.GensRpgTacticalCombatV2Bridge` pour le garde/appel d'embuscade ;
+- empreintes Phase 2 doivent correspondre au blob `index.html` corrigé `917c1a38fa605d53de9a8a9f03b8b76a96b379e3`.
+
+### Règles d'intégration
+
+- ne pas reprendre les workflows one-shot de nettoyage ;
+- ne pas reprendre les commits documentaires historiques du lot map ;
+- ne pas modifier Builder, Room Creator, Tactical V111 au-delà du correctif déjà GREEN ;
+- ne pas commencer caches/pièges avant validation de cette base commune ;
+- aucun merge sur `main`.
+
+### Validation requise
+
+- Architecture statique ;
+- vrai scénario navigateur Chromium Dungeon après Survie ;
+- vrai scénario Builder ;
+- Save & Quit / Capture / non-interférence ;
+- Firefox ;
+- Tactical Dock ;
+- test utilisateur déjà acquis pour la grille et le Builder, à conserver comme validation manuelle de comportement.
+
+### Prochaine action
+
+Appliquer uniquement les deux corrections runtime du lot map sur la base Builder GREEN, réaligner les empreintes Phase 2, réintroduire la sentinelle Dungeon après Survie et valider l'ensemble.

@@ -139,3 +139,17 @@ Il doit avoir :
 - une caractérisation du propriétaire actif ;
 - une extraction progressive ;
 - suppression de l'ancienne autorité uniquement après vrai raccord et validation.
+
+
+## Validation documentaire finale
+
+HEAD :
+`a613fde6d67f20c9b75564faa1f416d98611f12a`
+
+CI :
+- Architecture `35354985029` — SUCCESS ;
+- navigateur complet dans le même run — SUCCESS ;
+- Firefox `35354985012` — SUCCESS ;
+- Tactical Dock `35354985051` — SUCCESS.
+
+Ce HEAD ne modifie aucun runtime existant par rapport au HEAD fonctionnel déjà validé ; il ajoute uniquement la documentation de clôture Phase 3.

@@ -228,6 +228,9 @@ jobs:
       - name: Vérifier l'isolation navigateur V114.11
         run: node tests/gens_v11411_native_ui_browser.test.cjs
 
+      - name: Vérifier le lancement Survie par le vrai shell
+        run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
+
       - name: Vérifier le rendu canonique des murs dans Chromium
         run: node tests/gens_tactical_wall_browser_v11411.test.cjs
 

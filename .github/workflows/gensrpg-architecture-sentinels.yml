@@ -226,6 +226,9 @@ jobs:
       - name: Inventorier les effets globaux et le stockage Phase 2
         run: node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
 
+      - name: Classer timers gameplay, UI et retries Phase 2
+        run: node tests/gens_phase2_timer_classification_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

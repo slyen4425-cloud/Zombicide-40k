@@ -27,7 +27,11 @@ const disabled=new Set([
   'dungeonCore097StabilityRollbackDisabled'
 ]);
 
-const blocks=[...source.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
+const inlineScriptRe=new RegExp(
+  '<script\\\\b[^>]*\\\\bid=["\\\']([^"\\\']+)["\\\'][^>]*>([\\\\s\\\\S]*?)<\\\\/script>',
+  'gi'
+);
+const blocks=[...source.matchAll(inlineScriptRe)]
   .map((m,i)=>({id:m[1],source:m[2],order:i+1}));
 
 assert.equal(blocks.length,manifest.expected.total,'inline block total drifted');

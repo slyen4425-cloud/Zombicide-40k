@@ -24,10 +24,10 @@ Lot Save & Quit / reprise validé fonctionnellement :
 - branche `work/gensrpg-phase1-savequit-resume-sentinel-2026-09-18` ;
 - checkpoint de départ `checkpoint/gensrpg-start-phase1-savequit-resume-sentinel-2026-09-18` ;
 - base `0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e` ;
-- SHA fonctionnel vert avant fermeture documentaire `4bf7203703e2002562ed2d074771519abf4b1e0c` ;
-- Architecture `35316032731` — success ;
-- Firefox `35316032787` — success ;
-- Tactical Dock `35316032860` — success ;
+- SHA fonctionnel vert avant fermeture documentaire `47d84f35c802dbe5f15d2f0bca158b82583ed9a8` ;
+- Architecture `35317905997` — success ;
+- Firefox `35317906010` — success ;
+- Tactical Dock `35317905939` — success ;
 - checkpoint final `checkpoint/gensrpg-phase1-savequit-resume-sentinel-green-2026-09-18`.
 
 Résultat :

@@ -36,13 +36,28 @@ Résultat :
 - aucun runtime/gameplay/asset/stockage modifié ;
 - sentinelle branchée à `.github/workflows/gensrpg-architecture-sentinels.yml`.
 
+## Lot PvP validé
+
+- branche `work/gensrpg-phase1-pvp-placeholder-sentinel-2026-09-18` ;
+- checkpoint de départ `checkpoint/gensrpg-start-phase1-pvp-placeholder-sentinel-2026-09-18` ;
+- base `578f8fb5cf6ea05682b2ac10329ae6666d38a01e` ;
+- SHA fonctionnel vert `fe5eec3cfcfb0973ae5edab5ab8888a48fd761b7` ;
+- Architecture `35318561984` — success ;
+- Firefox `35318561927` — success ;
+- Tactical Dock `35318561939` — success ;
+- aucun moteur/runtime PvP créé.
+
+Résultat :
+- le vrai Shell affiche toujours `PVP — À VENIR` ;
+- aucune session/profil/runtime parasite n'est activé ;
+- sentinelle branchée à la CI.
+
 ## Ordre Phase 1 restant
 
-1. placeholder PvP actuel ;
-2. Capture sur comportement actuel uniquement ;
-3. non-interférence explicite des quatre modules.
+1. Capture sur comportement actuel uniquement ;
+2. non-interférence explicite des quatre modules.
 
-Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que cette sentinelle reste verte.
+Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la sentinelle Save/Resume reste verte.
 
 ## Invariants
 

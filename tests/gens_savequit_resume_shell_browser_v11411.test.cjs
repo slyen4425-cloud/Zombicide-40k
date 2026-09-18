@@ -189,12 +189,6 @@ const server=http.createServer((req,res)=>{
         core && getComputedStyle(core).display!=='none';
     });
 
-    mark('enter-dungeon-room-through-real-action');
-    await page.locator('#dc01Explore').click();
-    await page.waitForFunction(()=>{
-      try{return Number(JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')?.room)===1}catch(e){return false}
-    });
-
     const savedBeforeQuit=await page.evaluate(()=>{
       const rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
       return {
@@ -212,7 +206,7 @@ const server=http.createServer((req,res)=>{
         family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||''
       };
     });
-    assert.equal(savedBeforeQuit.room,1,'real Dungeon action must create room 1 before Save & Quit');
+    assert.equal(savedBeforeQuit.room,0,'fresh real Dungeon runtime must remain at the entrance before Save & Quit');
     assert.ok(savedBeforeQuit.participants.length>=1);
     assert.equal(savedBeforeQuit.session,'1');
     assert.equal(savedBeforeQuit.profile,'game_profile_dungeon_demo');
@@ -273,7 +267,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>{
       const core=document.getElementById('gensDungeonCore01');
       let rt=null;try{rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')}catch(e){}
-      return core && getComputedStyle(core).display!=='none' && Number(rt?.room)===1;
+      return core && getComputedStyle(core).display!=='none' && Number(rt?.room)===0;
     });
 
     const resumed=await page.evaluate(()=>({

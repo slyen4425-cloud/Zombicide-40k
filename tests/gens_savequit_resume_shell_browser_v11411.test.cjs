@@ -14,6 +14,9 @@ assert.match(indexSource,/DungeonCore01\.quit=function\(\)\{[\s\S]*Sauvegarder e
 assert.match(indexSource,/const previousResume310=window\.resumeGame;[\s\S]*window\.resumeGame=function\(\)/,'Core 3.10 must own the final inline Dungeon resume wrapper');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production RuntimeBootstrap must keep the family/session guard');
 assert.match(mobilePerformance,/runtime-bootstrap-v1\.js/,'production mobile bootstrap must still load RuntimeBootstrap');
+assert.match(indexSource,/let z40kRoomId = localStorage\.getItem\('z40k_online_room_id'\) \|\| null;/,'production online block must define optional room id from localStorage');
+assert.match(indexSource,/let z40kRoomCode = localStorage\.getItem\('z40k_online_room_code'\) \|\| '';/,'production online block must define optional room code from localStorage');
+assert.match(indexSource,/let z40kApplyingRemote = false;/,'production online block must default remote-application guard to false');
 
 const core310Pos=indexSource.indexOf('id="dungeonCore310PersistenceAndTokens"');
 const core310End=indexSource.indexOf('</script>',core310Pos);
@@ -50,6 +53,7 @@ const roundTripHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(dungeonChunkStart,mobileTagPos)+
+  '\n<script>var z40kRoomId=null,z40kRoomCode="",z40kApplyingRemote=false;</script>'+
   '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={

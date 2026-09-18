@@ -28,6 +28,14 @@ productionHtml=productionHtml.replace(
   }
 );
 productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
+productionHtml=productionHtml.replace(
+  /<script\b([^>]*\bsrc=["'](assets\/[^"']+)["'][^>]*)>\s*<\/script>/gi,
+  (whole,attrs,src)=>{
+    const safe=String(src).replace(/["\\]/g,'_');
+    return '<script>console.log("[phase2-external-before] '+safe+'")</script>'+whole+
+      '<script>console.log("[phase2-external-after] '+safe+'")</script>';
+  }
+);
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
@@ -66,10 +74,11 @@ const server=http.createServer((req,res)=>{
 (async()=>{
   let stage='boot';
   let lastInline='none';
+  let lastExternal='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -137,6 +146,11 @@ const server=http.createServer((req,res)=>{
     const value=message.text();
     if(value.startsWith('[phase2-inline-enter] ')){
       lastInline=value.slice('[phase2-inline-enter] '.length);
+      console.log(value);
+      return;
+    }
+    if(value.startsWith('[phase2-external-before] ')||value.startsWith('[phase2-external-after] ')){
+      lastExternal=value;
       console.log(value);
       return;
     }

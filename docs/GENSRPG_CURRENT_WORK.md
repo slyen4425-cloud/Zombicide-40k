@@ -15,20 +15,7 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert
-
-Phase 1 — comportement actuel Monster Capture :
-`checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
-
-SHA :
-`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
-
-CI de fermeture :
-- Architecture `35321622307` — SUCCESS
-- Firefox `35321622222` — SUCCESS
-- Tactical Dock `35321622236` — SUCCESS
-
-## Chantier courant
+## Dernier lot validé
 
 **Phase 1 — non-interférence explicite des quatre modules**
 
@@ -41,54 +28,77 @@ Checkpoint de départ :
 Base exacte :
 `8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Périmètre déclaré
+SHA fonctionnel vert avant fermeture documentaire :
+`1a4cac626592360ac676042c67f5568bfb5e5276`
 
-Première intention **test-only** :
-- traverser les vrais points d'entrée déjà couverts de Survie, Dungeon, Capture et PvP ;
-- vérifier explicitement qu'un module ne laisse pas de thème, profil, session, runtime, overlay ou autorité UI parasite dans le suivant ;
-- réutiliser les propriétaires réels et les sentinelles existantes plutôt que recopier leur logique ;
-- couvrir les transitions représentatives qui exposent le risque de contamination inter-module.
+Checkpoint final :
+`checkpoint/gensrpg-phase1-four-module-noninterference-green-2026-09-18`
 
-Interdictions :
-- aucun correctif runtime dans ce lot ;
-- aucune nouvelle logique de navigation ;
-- aucun moteur PvP ;
-- aucune restauration/réécriture Capture ;
-- aucun changement gameplay Survie/Dungeon/Tactical ;
-- aucun MutationObserver global, timer/retry de réparation ou monkey-patch ;
-- ne pas toucher à `main`.
+CI sur le SHA fonctionnel :
+- Architecture `35322217121` — SUCCESS
+- Firefox `35322217184` — SUCCESS
+- Tactical Dock `35322217172` — SUCCESS
 
-## Invariants à protéger
+## Résultat du lot non-interférence
 
-- Survie : famille `survival`, pas de mode/thème/runtime Dungeon ;
-- Dungeon : famille `adventure`, profil Dungeon, autorité Dungeon active uniquement dans son contexte ;
-- Capture : famille Shell `adventure`, contenu `creature`, mode V16.151 `capture`, Hub Capture sans panneau Dungeon classique ;
-- PvP : placeholder seulement, aucune session/profil/runtime créé ;
-- quitter/changer de module ne doit pas laisser d'overlay ou de vue d'un autre module au-dessus ;
-- la clé de guard famille ne doit pas être détournée par PvP ;
-- les états persistants d'un module ne doivent pas être écrasés par l'ouverture d'un autre.
+La sentinelle `tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs` traverse le vrai Shell :
 
-## Tests prévus
+`Survie -> Dungeon -> Capture -> PvP -> Survie`
 
-1. réutiliser un harnais Shell réel commun minimal ;
-2. établir un état Survie et vérifier absence d'autorité Dungeon/Capture/PvP ;
-3. passer vers Adventure/Dungeon et vérifier nettoyage de l'état visuel Survie ;
-4. passer vers Monster Capture et vérifier mode `capture`, Hub Capture et masquage Dungeon ;
-5. revenir au Shell puis ouvrir PvP et vérifier qu'aucune session/profil/runtime parasite n'est créé ;
-6. vérifier la conservation des états persistants propres aux modules lorsqu'ils ne doivent pas être modifiés ;
-7. relancer toutes les sentinelles navigateur existantes ;
-8. si GREEN, mettre à jour la matrice Phase 1 et vérifier le critère de sortie complet avant Phase 2.
+Elle vérifie notamment :
+- les reloads V16.155 réels entre familles de contenu différentes ;
+- le guard `survival/adventure` correct selon le module actif ;
+- Survie sans thème/autorité Dungeon ou Capture ;
+- Dungeon en `adventure / rpg / dungeon` ;
+- Capture en `adventure / creature / capture` sans panneau Dungeon classique actif ;
+- PvP limité au placeholder, sans création de session ou de profil ;
+- retour final en Survie sans fuite du thème Adventure/Dungeon ;
+- aucun Hub Capture ou panneau Dungeon visible hors contexte ;
+- conservation des états persistants Dungeon/Capture lorsqu'ils sont inactifs, sans les confondre avec une autorité active.
 
-## Risques
+Aucun runtime, gameplay, asset, règle ou structure persistante n'a été modifié.
 
-- les transitions de famille peuvent provoquer le reload V16.155 ;
-- certains anciens états persistants peuvent légitimement rester stockés sans être actifs : le test doit distinguer persistance inactive et autorité active ;
-- PvP n'appartient pas au guard Survie/Adventure et ne doit pas être forcé dedans ;
-- un RED réel devra être caractérisé sans correction dans ce lot.
+## Phase 1 — statut
 
-## Prochaine étape
+**Phase 1 terminée fonctionnellement.**
 
-Construire la sentinelle de frontières en réutilisant les blocs source exacts déjà validés par les lots Survie, Save/Resume, PvP et Capture, puis tester les transitions une par une.
+La matrice `GENSRPG_PHASE1_SENTINEL_AUDIT.md` ne contient plus de manque majeur identifié :
+- lancement Survie ;
+- lancement Dungeon ;
+- fiche héros ;
+- Save & Quit / vraie reprise ;
+- mouvement ;
+- stats ;
+- dés ;
+- touche ;
+- dégâts / armure / résistances ;
+- Tactical entrée/sortie ;
+- Monster Capture actuel ;
+- PvP placeholder actuel ;
+- sauvegarde ;
+- PWA/cache ;
+- non-interférence des quatre modules.
+
+Le critère de sortie de Phase 1 est atteint : une régression majeure sur ces chemins est désormais couverte par la CI.
+
+## Prochain chantier prévu
+
+**Phase 2 — cartographie réelle du runtime.**
+
+Avant tout déplacement physique de code :
+- nouveau checkpoint de départ et nouvelle branche ;
+- inventaire des scripts réellement chargés ;
+- auto-installs ;
+- wrappers / monkey-patches ;
+- MutationObserver ;
+- listeners document/window ;
+- timers/retries ;
+- accès directs localStorage/IndexedDB ;
+- fonctions globales remplacées ;
+- responsabilités dupliquées ;
+- classement de chaque runtime actif : Core, Shell, Survie, Dungeon, Tactical, Capture, PvP, Builders, legacy/inactif.
+
+Phase 2 reste d'abord un chantier de **cartographie/documentation**. Aucun déplacement massif ni correction gameplay ne doit être mélangé à l'inventaire.
 
 ## Dette explicitement différée
 

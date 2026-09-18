@@ -269,6 +269,9 @@ jobs:
           GENSRPG_BROWSER: chromium
         run: node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs
 
+      - name: Caractériser la visibilité du Dungeon Builder dans le vrai éditeur
+        run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+
       - name: Vérifier Save & Quit puis reprise par le vrai Shell
         run: node tests/gens_savequit_resume_shell_browser_v11411.test.cjs
 

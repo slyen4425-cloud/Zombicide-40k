@@ -69,6 +69,9 @@ const server=http.createServer((req,res)=>{
   });
   const page=await context.newPage();
   page.setDefaultTimeout(20000);
+  const browserErrors=[];
+  page.on('pageerror',error=>browserErrors.push(String(error)));
+  page.on('console',message=>{if(message.type()==='error')browserErrors.push(message.text())});
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   try{
@@ -106,7 +109,17 @@ const server=http.createServer((req,res)=>{
     assert.equal(shell.dungeonTheme,false,'Survival family must not activate Dungeon theme');
 
     const survivalGames=page.locator('#gensFamilyGames button.gensFamilyGameCard:not(.disabled)');
-    await survivalGames.first().waitFor({state:'visible'});
+    try{
+      await survivalGames.first().waitFor({state:'visible',timeout:5000});
+    }catch(error){
+      const familyDiag=await page.evaluate(()=>({
+        host:document.getElementById('gensFamilyGames')?.innerHTML||'',
+        profiles:typeof survivalProfiles==='function'?survivalProfiles().map(p=>({id:p.id,name:p.name,style:p.gameStyle})):[],
+        selected:typeof gensSelectedFamily==='undefined'?'undefined':gensSelectedFamily
+      })).catch(e=>({diagnosticError:String(e)}));
+      console.error('[survival-shell] family-render-diagnostic',JSON.stringify({familyDiag,browserErrors}));
+      throw error;
+    }
     assert.ok(await survivalGames.count()>=1,'the real Survival family must expose at least one playable universe');
     mark('select-survival-profile');
     await survivalGames.first().click();

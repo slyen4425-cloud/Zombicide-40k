@@ -1,6 +1,6 @@
 # GenSrpG — Coordination
 
-Ce document complète la charte, la roadmap et `GENSRPG_CURRENT_WORK.md`.
+Ce document complète la charte, la roadmap, `GENSRPG_CURRENT_WORK.md` et l'audit Phase 1.
 
 ## Rôle du fil directeur
 
@@ -16,51 +16,57 @@ Production :
 - `main` attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - production gelée.
 
-Dernier checkpoint vert utilisateur :
-- `checkpoint/gensrpg-tactical-dock-legacy-layer-green-2026-09-17`
-- SHA `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
-- validation manuelle Dock : concluante.
+Chaîne verte récente :
+- Dock utilisateur : `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+- audit Phase 1 : `fcc9e6378263b0498170dbb7f4d110a7fe169f93`
+- charte index handoff : `6680b800490492edf5bca587e0de6bd8d68be56f`.
 
-Lot actif :
-- Phase 1 sentinel gap audit ;
-- branche `work/gensrpg-phase1-sentinel-gap-audit-post-dock-2026-09-17` ;
-- base exacte `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb` ;
-- checkpoint de départ : `checkpoint/gensrpg-start-phase1-sentinel-gap-audit-2026-09-18` ;
-- runtime verrouillé : **aucun changement autorisé dans ce lot**.
+## Lot actif
 
-Matrice : `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`.
+**Sentinelle lancement Survie par le vrai Shell**
 
-## Ordre décidé après audit
+- branche : `work/gensrpg-phase1-survival-launch-sentinel-post-charter-2026-09-18`
+- checkpoint de départ : `checkpoint/gensrpg-start-phase1-survival-launch-sentinel-post-charter-2026-09-18`
+- base exacte : `6680b800490492edf5bca587e0de6bd8d68be56f`
+- nature : tests/workflow/docs uniquement
+- runtime modifiable : aucun.
 
-1. sentinelle test-only lancement Survie ;
-2. sentinelle Save & Quit + vraie reprise ;
-3. sentinelle placeholder PvP actuel ;
-4. sentinelle Capture sur comportement actuel uniquement ;
-5. sentinelle explicite de non-interférence des quatre modules.
+Propriétaires observés, mais non modifiés :
+- Shell : `openGensFamily`, `openGensBuiltInGame`, `newGame`, `startConfiguredGame`
+- isolation Survie : guard de famille existant.
 
-Le lancement Dungeon shell complet reste identifié comme partiellement couvert et sera rattaché à un petit lot Shell compatible, sans élargir artificiellement un chantier.
+## Contrat cible
 
-## Invariants protégés
+Le test doit traverser le vrai shell :
+`Accueil -> MODE SURVIE -> univers Survie -> JOUER / PRÉPARER -> participant -> DÉMARRER LA PARTIE`.
 
-- aucun nouveau MutationObserver global, timer de réparation, retry long ou wrapper global ;
-- un propriétaire par responsabilité ;
-- aucune règle gameplay codée en dur ;
-- aucun changement de combat/détection dans les lots sentinelles ;
-- aucune restauration Capture avant son chantier dédié ;
-- aucun moteur PvP inventé ;
-- `main` reste gelé.
+Il doit prouver :
+- famille Survie conservée ;
+- session active ;
+- menu de jeu visible ;
+- aucun écran Dungeon actif ;
+- aucun fallback Dungeon déclenché.
 
-## Signalement à conserver
+Interdictions :
+- pas de mock réimplémentant le métier ;
+- pas de nouveau wrapper runtime ;
+- pas d'observer/timer de réparation ;
+- pas de modification de `index.html` ;
+- pas de correction gameplay dans ce lot.
 
-Détection ennemie hors embuscade : doute utilisateur à caractériser plus tard dans une branche dédiée.
+## Ordre après ce lot
 
-## Reprise dans un nouveau fil
+1. Save & Quit + vraie reprise ;
+2. sentinelle placeholder PvP ;
+3. sentinelle Capture sur comportement actuel ;
+4. non-interférence 4 modules.
 
-Lire :
-1. `GENSRPG_CHARTE.md`
-2. `GENSRPG_RESTRUCTURATION_ROADMAP.md`
-3. `GENSRPG_CURRENT_WORK.md`
-4. `GENSRPG_COORDINATION.md`
-5. `GENSRPG_PHASE1_SENTINEL_AUDIT.md`
+Le lancement Dungeon shell complet reste un gap partiel à traiter dans un petit lot compatible.
 
-Puis vérifier le SHA de `main`, le checkpoint vert et la branche active avant toute écriture.
+## Signalement conservé
+
+Détection ennemie hors embuscade : doute utilisateur à caractériser plus tard dans une branche dédiée, sans mélange avec Phase 1.
+
+## Règle index.html
+
+Si le blob exact devient inaccessible ou trop lourd pour les outils, appliquer la section 26 de la charte : fournir immédiatement à l'utilisateur le lien direct du `index.html` de la branche/SHA et demander son upload.

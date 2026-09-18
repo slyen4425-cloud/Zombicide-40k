@@ -13,7 +13,7 @@ Audit uniquement. Aucun runtime, gameplay, asset ou valeur de règle n'est modif
 
 | Ligne roadmap | État | Preuve actuelle | Manque restant |
 | --- | --- | --- | --- |
-| Lancement Survie | PARTIEL | `gens_survival_mode_isolation_v1678104.test.cjs` protège l'isolation et la reprise Survie face à un runtime Dungeon stale | pas de sentinelle navigateur qui traverse le vrai shell Survie |
+| Lancement Survie | COUVERT | `gens_survival_mode_isolation_v1678104.test.cjs` protège le guard ; `gens_survival_shell_launch_browser_v11411.test.cjs` traverse le vrai Shell, le profil Survie, le pré-game et `startConfiguredGame()` | aucun manque Phase 1 identifié |
 | Lancement Dungeon | PARTIEL FORT | `dungeon_world_session_bridge_v167832.test.cjs` traverse `startConfiguredGame()` et le handoff authored ; plusieurs tests protègent le runtime | pas de sentinelle navigateur depuis le shell racine jusqu'au lancement Dungeon |
 | Fiche héros Dungeon | COUVERT | `gens_v11411_native_ui_browser.test.cjs`, `gens_hero_sheet_art_runtime_v11411.test.cjs`, `gens_hero_sheet_talent_flash_v11411.test.cjs` | aucun manque Phase 1 identifié |
 | Save & Quit + reprise | PARTIEL | `gens_v11411_native_ui_browser.test.cjs` vérifie Save & Quit, retour accueil et non-réapparition Dungeon après mutation DOM | aucune vraie recréation/rechargement de session suivie d'un clic Reprendre |
@@ -41,16 +41,19 @@ Les futurs tests doivent traverser ces propriétaires réels et ne pas recopier 
 
 ## Plus petit manque suivant
 
-Premier lot test-only retenu : **sentinelle de lancement Survie par le vrai shell**.
+Le lot **lancement Survie par le vrai Shell** est désormais couvert et branché à la CI.
 
-Périmètre :
-- tests/workflow uniquement ;
-- aucun changement runtime ;
-- traverser le vrai chemin `openGensFamily('survival') -> openGensBuiltInGame(...,'survival')` puis le chemin de préparation/lancement utile ;
-- vérifier que le guard de famille reste Survie et qu'aucun écran/runtime Dungeon ne prend l'autorité ;
-- brancher la sentinelle dans `gensrpg-architecture-sentinels.yml`.
+Prochain lot test-only retenu : **Save & Quit + vraie reprise complète par le Shell**.
 
-Après ce lot : Save & Quit + reprise réelle, PvP placeholder, Capture actuel, puis non-interférence 4 modules, un lot homogène à la fois.
+Périmètre attendu :
+- tests/workflow/documentation en première intention ;
+- vraie session active puis Save & Quit ;
+- recréation/rechargement du contexte navigateur ;
+- clic réel sur Reprendre ;
+- vérification que le bon module et le bon état reprennent l'autorité ;
+- aucun correctif runtime dans ce lot si un vrai défaut fonctionnel est découvert.
+
+Après ce lot : PvP placeholder, Capture actuel, puis non-interférence 4 modules, un lot homogène à la fois.
 
 ## Signalement hors périmètre conservé
 

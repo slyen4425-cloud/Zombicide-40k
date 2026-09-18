@@ -15,17 +15,9 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier état vert de référence
+## Dernier lot validé
 
-- audit Phase 1 documenté depuis le checkpoint Dock validé ;
-- règle permanente d'accès à `index.html` ajoutée et validée ;
-- checkpoint : `checkpoint/gensrpg-charte-index-recovery-green-2026-09-18`
-- SHA : `cadc1a133e1513218bed7f3af19fe176805bf871`
-- CI sur ce SHA : architecture, Dock et Firefox vertes.
-
-## Chantier courant
-
-**Phase 1 — sentinelle test-only de lancement Survie par le vrai shell**
+**Phase 1 — sentinelle test-only de lancement Survie par le vrai Shell**
 
 Branche :
 `work/gensrpg-phase1-survival-shell-sentinel-2026-09-18`
@@ -33,44 +25,47 @@ Branche :
 Checkpoint de départ :
 `checkpoint/gensrpg-start-phase1-survival-shell-sentinel-2026-09-18`
 
-SHA de base :
+Base exacte :
 `cadc1a133e1513218bed7f3af19fe176805bf871`
 
-## Périmètre déclaré
+SHA fonctionnel validé avant fermeture documentaire :
+`aca4d8b449c37367525644781500f8972aae645d`
 
-Module concerné : **Survie / Shell**, test uniquement.
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase1-survival-shell-sentinel-green-2026-09-18`
 
-Propriétaires à traverser sans les remplacer :
-- `openGensFamily('survival')` ;
-- `openGensBuiltInGame(...,'survival')` ;
-- chemin réel de préparation/lancement Survie ;
-- guard de famille/session existant.
+## Résultat du lot Survie
 
-Systèmes réutilisés :
-- Shell actuel ;
-- isolation Survie existante ;
-- workflow `gensrpg-architecture-sentinels.yml`.
+La sentinelle navigateur traverse désormais le vrai chemin Shell :
 
-Interdictions :
-- aucun changement runtime ;
-- aucun changement gameplay ;
-- aucun changement Dungeon/Tactical ;
-- aucun observer, timer, retry ou wrapper ajouté ;
-- aucune restauration Capture ;
-- aucun moteur PvP ;
-- ne pas modifier `main`.
+`openGensFamily('survival') -> openGensBuiltInGame(...,'survival') -> préparation réelle -> startConfiguredGame()`
 
-Tests prévus :
-- sentinelle utilisant le vrai code shell ;
-- vérification que la famille active reste `survival` ;
-- vérification qu'aucun runtime/écran Dungeon ne prend l'autorité ;
-- branchement CI architecture.
+Elle vérifie notamment :
+- famille/session conservée à `survival` ;
+- profil 40K Survie réellement sélectionné ;
+- participant réellement choisi dans le pré-game ;
+- session commune activée ;
+- `isDungeonMode() === false` ;
+- thème/overlay/runtime Dungeon non activés ni remplacés ;
+- composition production toujours reliée au guard `gens-survival-mode-isolation-1678104.js`.
 
-Risque inter-module : faible si le lot reste test-only.
+Le lot est resté **test/workflow/documentation uniquement**. Aucun runtime ni gameplay n'a été modifié.
 
-## Prochaine étape
+CI sur `aca4d8b449c37367525644781500f8972aae645d` :
+- Architecture : run `35311890710` — SUCCESS
+- Firefox : run `35311890711` — SUCCESS
+- Tactical Dock : run `35311890705` — SUCCESS
 
-Caractériser le vrai chemin shell Survie dans `index.html`, écrire la sentinelle sans recopier la logique métier, obtenir un RED uniquement si le raccord actuel est réellement incomplet, puis ne corriger aucun runtime dans ce lot.
+## Prochain chantier Phase 1
+
+**Save & Quit + vraie reprise complète par le Shell.**
+
+Ce chantier n'est pas encore démarré dans ce commit de fermeture. Il devra avoir :
+- son propre checkpoint de départ ;
+- sa propre branche ;
+- un périmètre test-only en première intention ;
+- une vraie recréation/rechargement de session suivie du clic Reprendre ;
+- aucun correctif runtime si le test révèle un vrai défaut avant caractérisation dédiée.
 
 ## Dette explicitement différée
 

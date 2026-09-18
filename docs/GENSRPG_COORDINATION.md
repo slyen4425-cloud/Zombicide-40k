@@ -71,10 +71,17 @@ Résultat :
 - aucun runtime/gameplay/asset/règle Capture n'a été modifié ;
 - sentinelle branchée à la CI.
 
+## Non-interférence quatre modules — RED caractérisé
+
+La sentinelle dédiée traverse `Survie -> Dungeon -> Survie -> Capture -> PvP` dans un même contexte. Elle confirme les transitions jusqu’à Capture, puis révèle une fuite Shell sur Capture -> PvP : `gensDungeonTheme` et `gensCapturePregame` restent actifs sur `body` alors que le placeholder PvP est affiché. Aucun runtime/session parasite n’est créé.
+
+Cause ciblée : `openGensFamily()` change la vue mais ne retire pas les classes transitoires laissées par le contexte précédent.
+
 ## Ordre Phase 1 restant
 
-1. non-interférence explicite des quatre modules ;
-2. revue finale de la matrice et validation du critère de sortie Phase 1.
+1. correctif Shell dédié de nettoyage de contexte ;
+2. rendre la sentinelle quatre modules GREEN ;
+3. revue finale de la matrice et validation du critère de sortie Phase 1.
 
 Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la sentinelle Save/Resume reste verte.
 

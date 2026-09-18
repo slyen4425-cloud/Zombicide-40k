@@ -1,0 +1,94 @@
+name: GenSrpG generate Phase 2 inline global owners
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase2-runtime-cartography-resume-2026-09-18
+    paths:
+      - .github/workflows/gensrpg-generate-phase2-inline-global-owners-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase2-runtime-cartography-resume-2026-09-18
+          fetch-depth: 0
+
+      - name: Verify source blob
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD:index.html)" = "3a3db76d12ae511f6293e8ff25d124616731a08b"
+
+      - name: Generate factual last-owner table
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          source=Path("index.html").read_text(encoding="utf-8")
+          blocks=re.finditer(r'<script\b[^>]*\bid=["\']([^"\']+)["\'][^>]*>([\s\S]*?)</script>',source,re.I)
+          disabled={
+            "dungeonCore081TacticalMovementDisabled",
+            "dungeonCore084MovementRuntimeFixDisabled",
+            "dungeonCore086MovementStabilityDisabled",
+            "dungeonCore087InteractionRulesDisabled",
+            "dungeonCore087ChestGuardDisabled",
+            "dungeonCore089TacticalInteractionsDisabled",
+            "dungeonCore090MovementV2Disabled",
+            "dungeonCore094EndTurnFinalDisabled",
+            "dungeonCore095SoloTurnFinalDisabled",
+            "dungeonCore097StabilityRollbackDisabled",
+          }
+          assignment=re.compile(r'\bwindow\.([A-Za-z_$][\w$]*)\s*=')
+          chains={}
+          for block in blocks:
+              block_id=block.group(1)
+              if block_id in disabled:
+                  continue
+              for name in assignment.findall(block.group(2)):
+                  chains.setdefault(name,[]).append(block_id)
+
+          distinct=len(chains)
+          total=sum(len(chain) for chain in chains.values())
+          multi=sum(len(chain)>1 for chain in chains.values())
+          if (distinct,total,multi)!=(438,773,123):
+              raise SystemExit(f"Refus: compteurs globals inattendus {(distinct,total,multi)}")
+
+          lines=[
+            "# GenSrpG Phase 2 — inline global last owners",
+            "# sourceIndexBlob=3a3db76d12ae511f6293e8ff25d124616731a08b",
+            "# scope=explicit window.<name> assignments in 120 active inline blocks",
+            "# distinctGlobals=438 assignments=773 multiOwnerGlobals=123",
+            "# name\tassignmentCount\tlastOwner",
+          ]
+          for name in sorted(chains):
+              chain=chains[name]
+              lines.append(f"{name}\t{len(chain)}\t{chain[-1]}")
+          Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv").write_text("\n".join(lines)+"\n",encoding="utf-8")
+          PY
+
+      - name: Validate generated table
+        shell: bash
+        run: |
+          test "$(grep -vc '^#' docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv)" = "438"
+          grep -F $'renderDungeonCombatRound\t30\tdungeonCore303TimelineRootFix' docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+          grep -F $'captureRenderBattleLive\t15\tcoreCombatPoolFix156' docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+          grep -F $'startConfiguredGame\t6\tdungeonCore200Rebuild' docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+          grep -F $'resumeGame\t3\tdungeonCore310PersistenceAndTokens' docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+
+      - name: Commit generated table and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/gensrpg-generate-phase2-inline-global-owners-temp.yml
+          git config user.name "gensrpg-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv .github/workflows/gensrpg-generate-phase2-inline-global-owners-temp.yml
+          git commit -m "docs: map inline global last owners"
+          git push origin HEAD:work/gensrpg-phase2-runtime-cartography-resume-2026-09-18

@@ -15,63 +15,99 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier lot validé
+## Dernier checkpoint vert
 
-**Phase 1 — Capture : protection du comportement actuel uniquement**
-
-Branche :
-`work/gensrpg-phase1-capture-current-sentinel-2026-09-18`
-
-Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-capture-current-sentinel-2026-09-18`
-
-Base exacte :
-`cd797172ec1b32a6edcc84b743a45794d5dfbd32`
-
-SHA fonctionnel vert avant fermeture documentaire :
-`97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef`
-
-Checkpoint final :
+Phase 1 — Capture : protection du comportement actuel :
 `checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
 
-CI sur le SHA fonctionnel :
-- Architecture `35321411358` — SUCCESS
-- Firefox `35321411333` — SUCCESS
-- Tactical Dock `35321411366` — SUCCESS
+SHA :
+`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Résultat du lot Capture
+CI de fermeture : Architecture, Firefox et Tactical Dock GREEN.
 
-La sentinelle navigateur `tests/gens_capture_current_shell_browser_v11411.test.cjs` traverse le comportement actuel réel :
+## Chantier courant
 
-`Accueil -> Adventure -> Monster Capture -> reload V16.155 -> Adventure -> Monster Capture -> pré-game -> dresseur -> créature de départ -> startConfiguredGame() -> Hub Capture -> Jour 1 -> Jour 2`
+**Phase 1 — sentinelle explicite de non-interférence des quatre modules**
 
-Elle protège notamment :
-- profil embarqué actuel `Monster Capture` (`gp_mt7ker7t_m2iw9`) ;
-- classification actuelle : Shell `adventure`, contenu `creature`, mode V16.151 `capture`, substrat historique `gameStyle="dungeon"` ;
-- vrai changement d'univers V16.155 avec reload lorsqu'une famille de contenu change ;
-- pré-game Capture courant et absence d'une entrée Dungeon classique active ;
-- sélection réelle du dresseur puis d'une créature de départ via l'UI ;
-- activation réelle de session par `startConfiguredGame()` ;
-- affichage du Hub Capture et masquage du panneau Dungeon classique ;
-- progression réelle du monde Capture de Jour 1 à Jour 2 via son état persistant.
+Branche :
+`work/gensrpg-phase1-four-module-noninterference-sentinel-2026-09-18`
 
-Le harnais réutilise les blocs source exacts nécessaires du Shell et les propriétaires Capture de production. Aucun état de partie Capture n'est injecté pour forcer le succès.
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-four-module-noninterference-sentinel-2026-09-18`
 
-Aucun runtime, gameplay, asset, règle ou structure persistante n'a été modifié.
+Base exacte :
+`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Prochain chantier Phase 1
+## Périmètre déclaré
 
-**Sentinelle explicite de non-interférence des quatre modules.**
+Première intention **test-only** :
+- traverser plusieurs modules successivement dans un même contexte navigateur ;
+- réutiliser les vrais propriétaires Shell déjà identifiés ;
+- vérifier que le module quitté ne conserve pas une autorité UI/runtime sur le module suivant ;
+- protéger explicitement les frontières Survie / Dungeon / Capture / PvP ;
+- brancher la sentinelle à la CI si elle est stable.
 
-Périmètre prévu :
-- nouveau checkpoint de départ et nouvelle branche ;
-- test-only en première intention ;
-- vérifier explicitement les frontières Survie / Dungeon / Capture / PvP ;
-- prouver qu'un passage par un module ne laisse pas d'autorité, thème, session ou runtime parasite dans le suivant ;
-- réutiliser les vrais propriétaires et les sentinelles déjà établies ;
-- ne corriger aucun runtime si un défaut réel est découvert avant caractérisation dédiée.
+Ce lot ne doit pas devenir quatre tests indépendants collés ensemble : il doit vérifier les transitions et l'absence de fuite d'autorité entre contextes.
 
-Une fois ce lot GREEN, refaire la matrice complète Phase 1 pour vérifier le critère de sortie avant de passer à la Phase 2.
+## Invariants visés
+
+### Survie -> Adventure/Dungeon
+- le guard famille passe de `survival` à `adventure` ;
+- `isDungeonMode()` reflète le profil Dungeon actif ;
+- aucun runtime Dungeon ne doit être créé avant lancement réel ;
+- le thème/état Survie ne doit pas reprendre l'autorité après le switch.
+
+### Dungeon -> Survie
+- le guard revient à `survival` ;
+- `isDungeonMode() === false` ;
+- le thème Dungeon doit être retiré ;
+- aucun overlay/runtime Dungeon ne doit apparaître spontanément.
+
+### Adventure/Dungeon -> Capture
+- le changement de famille de contenu passe par le vrai mécanisme V16.155 si requis ;
+- Capture reste classé aujourd'hui Shell `adventure`, contenu `creature`, mode V16.151 `capture` ;
+- le Hub/pré-game Capture ne doit pas être remplacé par le panneau Dungeon classique ;
+- aucune session/runtime Dungeon classique ne doit être créé artificiellement.
+
+### Capture/Adventure -> PvP placeholder
+- le placeholder PvP ne crée ni session, ni profil actif supplémentaire, ni runtime Dungeon/Capture ;
+- il n'active pas un thème Dungeon/Capture ;
+- il ne remplace pas le guard Survie/Adventure existant par une valeur PvP non supportée.
+
+## Fonctions/systèmes protégés
+
+Ne pas modifier dans ce lot :
+- runtimes Survie, Dungeon, Tactical, Capture ou PvP ;
+- navigation Shell ;
+- guards famille/session ;
+- persistance ;
+- gameplay, stats, dés, combat, déplacement, spawn, capture ;
+- assets ;
+- PWA/cache ;
+- aucun observer global, timer/retry de réparation, wrapper permanent ou monkey-patch ;
+- `main`.
+
+## Tests prévus
+
+1. construire le harnais depuis les blocs source exacts déjà caractérisés ;
+2. ouvrir Survie puis Adventure/Dungeon dans le même contexte ;
+3. revenir vers Survie et vérifier le retrait de l'autorité Dungeon ;
+4. basculer vers Monster Capture, y compris le reload V16.155 lorsqu'il s'applique ;
+5. vérifier les prédicats Capture et l'absence de panneau/runtime Dungeon classique ;
+6. ouvrir le placeholder PvP et vérifier qu'il ne crée aucune autorité/session supplémentaire ;
+7. relancer toutes les sentinelles existantes ;
+8. si GREEN, mettre à jour la matrice Phase 1 et décider formellement si le critère de sortie Phase 1 est atteint.
+
+## Risques
+
+- certaines transitions conservent volontairement des données persistantes non actives ; le test doit distinguer persistance légitime et autorité active ;
+- Capture utilise encore historiquement `gameStyle="dungeon"` : cela ne doit pas être traité comme une fuite par erreur ;
+- PvP ne possède pas encore de famille persistante propre : le guard existant peut rester inchangé sans que PvP prenne l'autorité ;
+- un RED réel doit être caractérisé avant toute correction dédiée.
+
+## Prochaine étape
+
+Inspecter les propriétaires de retour vers le Shell et de changement de profil/famille afin de construire une seule sentinelle de transition réelle entre les quatre modules.
 
 ## Dette explicitement différée
 

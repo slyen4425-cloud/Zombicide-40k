@@ -15,64 +15,76 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier lot validé
+## Dernier checkpoint vert
 
-**Phase 1 — Save & Quit + vraie reprise complète par le Shell**
-
-Branche :
-`work/gensrpg-phase1-savequit-resume-sentinel-2026-09-18`
-
-Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-savequit-resume-sentinel-2026-09-18`
-
-Base exacte :
-`0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
-
-SHA fonctionnel vert avant fermeture documentaire :
-`47d84f35c802dbe5f15d2f0bca158b82583ed9a8`
-
-Checkpoint final :
+Phase 1 — Save & Quit + vraie reprise complète par le Shell :
 `checkpoint/gensrpg-phase1-savequit-resume-sentinel-green-2026-09-18`
 
-## Résultat du lot Save & Quit / reprise
+SHA :
+`578f8fb5cf6ea05682b2ac10329ae6666d38a01e`
 
-La sentinelle navigateur `tests/gens_savequit_resume_shell_browser_v11411.test.cjs` traverse le vrai chemin utilisateur :
+CI de fermeture :
+- Architecture `35318065938` — SUCCESS
+- Firefox `35318066103` — SUCCESS
+- Tactical Dock `35318066006` — SUCCESS
 
-`Accueil -> Adventure -> Dungeon -> pré-game -> sélection héros -> startConfiguredGame() -> Dungeon -> Save & Quit -> recréation de page -> Adventure -> Dungeon -> Reprendre`
+## Chantier courant
 
-Elle vérifie notamment :
-- vraie session Dungeon créée par le Shell ;
-- vrai bouton Save & Quit de `DungeonCore01.quit` (Core 3.10) ;
-- conservation du marqueur de session et du runtime persistant ;
-- vraie recréation de page avec le stockage navigateur conservé, sans injection de sauvegarde ;
-- bouton `Reprendre` réellement activé puis cliqué ;
-- retour d'autorité au runtime Dungeon ;
-- profil `game_profile_dungeon_demo`, famille `adventure`, participants et état runtime conservés ;
-- guard famille/session de production toujours utilisé ;
-- lancement Dungeon depuis le Shell désormais couvert par le même scénario.
+**Phase 1 — sentinelle du placeholder PvP actuel**
 
-Le harnais est construit à partir de blocs source exacts de `index.html` : Shell, support de session online, custom-content, Spatial 3.13, Core 2.00, wrappers 3.04/3.07/3.08, Core 3.10 et guard famille/session. Seul le transport Supabase externe est neutralisé par un stub de fabrique afin que la sentinelle reste strictement hors ligne ; aucune logique de jeu ou de persistance n'est recopiée.
+Branche :
+`work/gensrpg-phase1-pvp-placeholder-sentinel-2026-09-18`
 
-Aucun runtime, gameplay, asset, structure persistante ou règle n'a été modifié.
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-pvp-placeholder-sentinel-2026-09-18`
 
-CI sur `47d84f35c802dbe5f15d2f0bca158b82583ed9a8` :
-- Architecture : run `35317905997` — SUCCESS
-- Firefox : run `35317906010` — SUCCESS
-- Tactical Dock : run `35317905939` — SUCCESS
+Base exacte :
+`578f8fb5cf6ea05682b2ac10329ae6666d38a01e`
 
-## Prochain chantier Phase 1
+## Périmètre déclaré
 
-**Sentinelle du placeholder PvP actuel.**
+Première intention **test-only** :
+- traverser le vrai Shell jusqu'au mode Duel/PvP ;
+- vérifier que le comportement actuel reste explicitement un placeholder ;
+- protéger les textes actuels `PVP — À VENIR` et `Le moteur PvP n’est pas encore construit.` ;
+- vérifier qu'aucune session de jeu ni autorité Dungeon/Survie/Tactical n'est activée par ce choix ;
+- brancher la sentinelle à la CI.
 
-Périmètre prévu :
-- nouveau checkpoint de départ et nouvelle branche ;
-- test-only en première intention ;
-- traverser le vrai Shell jusqu'à Duel/PvP ;
-- protéger le comportement actuel `PVP — À VENIR` / moteur non construit ;
-- ne pas inventer ni commencer un moteur PvP ;
-- aucun correctif runtime si le test révèle un défaut avant caractérisation dédiée.
+Aucun moteur PvP ne doit être créé, démarré ou simulé dans ce lot.
 
-Après PvP : Capture actuel, puis non-interférence explicite des quatre modules. Le lancement Dungeon Shell n'a plus besoin d'un lot séparé sauf régression future.
+## Propriétaire identifié
+
+- `openGensFamily('pvp')` dans le Shell actuel ;
+- ce propriétaire affiche le placeholder et ne délègue pas à un runtime PvP.
+
+## Fonctions/systèmes protégés
+
+Ne pas modifier dans ce lot :
+- runtime Survie/Dungeon/Tactical/Capture ;
+- navigation globale hors besoin strict de caractérisation ;
+- combat, stats, dés, inventaire, persistance ;
+- PWA/cache ;
+- aucun nouveau wrapper global, observer, timer/retry ou monkey-patch ;
+- aucun fichier runtime PvP à créer.
+
+## Tests prévus
+
+1. charger le vrai Shell ;
+2. cliquer sur la vraie carte Duel/PvP ;
+3. vérifier le titre/texte placeholder actuels ;
+4. vérifier qu'aucun profil/session de jeu n'est activé ;
+5. vérifier qu'aucune UI/runtime Dungeon/Tactical n'acquiert l'autorité ;
+6. relancer Architecture + navigateur + sentinelles existantes.
+
+## Risques
+
+- un sélecteur de test peut être obsolète ; ne jamais remplacer cela par une valeur injectée ;
+- ne pas transformer ce chantier de protection en début d'implémentation PvP ;
+- si le Shell actuel fait autre chose qu'un placeholder, caractériser avant toute correction runtime.
+
+## Prochaine étape
+
+Créer la sentinelle navigateur minimale du vrai Shell pour le placeholder PvP et l'ajouter à la CI.
 
 ## Dette explicitement différée
 

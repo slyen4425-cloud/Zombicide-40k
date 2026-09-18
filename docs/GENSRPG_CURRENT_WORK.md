@@ -29,7 +29,7 @@ Base exacte :
 `0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
 
 SHA fonctionnel vert avant fermeture documentaire :
-`4bf7203703e2002562ed2d074771519abf4b1e0c`
+`47d84f35c802dbe5f15d2f0bca158b82583ed9a8`
 
 Checkpoint final :
 `checkpoint/gensrpg-phase1-savequit-resume-sentinel-green-2026-09-18`
@@ -51,14 +51,14 @@ Elle vérifie notamment :
 - guard famille/session de production toujours utilisé ;
 - lancement Dungeon depuis le Shell désormais couvert par le même scénario.
 
-Le harnais est construit à partir de blocs source exacts de `index.html`. Le seul état simulé hors périmètre est l'état réseau/Supabase hors-ligne par défaut (`z40kRoomId=null`, code vide, remote=false), après assertions statiques sur ses définitions de production.
+Le harnais est construit à partir de blocs source exacts de `index.html` : Shell, support de session online, custom-content, Spatial 3.13, Core 2.00, wrappers 3.04/3.07/3.08, Core 3.10 et guard famille/session. Seul le transport Supabase externe est neutralisé par un stub de fabrique afin que la sentinelle reste strictement hors ligne ; aucune logique de jeu ou de persistance n'est recopiée.
 
 Aucun runtime, gameplay, asset, structure persistante ou règle n'a été modifié.
 
-CI sur `4bf7203703e2002562ed2d074771519abf4b1e0c` :
-- Architecture : run `35316032731` — SUCCESS
-- Firefox : run `35316032787` — SUCCESS
-- Tactical Dock : run `35316032860` — SUCCESS
+CI sur `47d84f35c802dbe5f15d2f0bca158b82583ed9a8` :
+- Architecture : run `35317905997` — SUCCESS
+- Firefox : run `35317906010` — SUCCESS
+- Tactical Dock : run `35317905939` — SUCCESS
 
 ## Prochain chantier Phase 1
 

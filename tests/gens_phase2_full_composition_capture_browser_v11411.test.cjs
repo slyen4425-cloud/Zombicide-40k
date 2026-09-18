@@ -10,9 +10,9 @@ const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),
 const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
 const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
-  .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"><\\/script>');
+  .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"></script>');
 assert.equal(pageTags.length,19,'Pages-equivalent characterization expects 19 injected modules');
-const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\\/script>';
+const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 let productionHtml=indexSource.split(perfTag).join('');
 productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
 

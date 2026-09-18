@@ -44,7 +44,8 @@ const server=http.createServer((req,res)=>{
     deviceScaleFactor:2.625,
     isMobile:true,
     hasTouch:true,
-    locale:'fr-FR'
+    locale:'fr-FR',
+    serviceWorkers:'block'
   });
   await context.addInitScript(()=>{
     try{localStorage.clear();sessionStorage.clear();}catch(e){}
@@ -152,6 +153,7 @@ const server=http.createServer((req,res)=>{
   }finally{
     await context.close();
     await browser.close();
+    server.closeAllConnections?.();
     await new Promise(resolve=>server.close(resolve));
   }
 })().catch(error=>{console.error(error);process.exitCode=1;});

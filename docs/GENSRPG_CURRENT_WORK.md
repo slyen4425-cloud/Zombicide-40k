@@ -15,88 +15,99 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Phase 1 — état
+## Dernier checkpoint vert
 
-**Phase 1 complète et GREEN.**
+Phase 1 complète :
+`checkpoint/gensrpg-phase1-complete-green-2026-09-18`
 
-Lot de fermeture :
-`work/gensrpg-phase1-shell-context-cleanup-fix-2026-09-18`
+SHA :
+`04cce98e79252a791bd7130fe6993f00916fa5dc`
+
+CI de clôture :
+- Architecture `35325172047` — SUCCESS
+- Firefox `35325172074` — SUCCESS
+- Tactical Dock `35325172035` — SUCCESS
+
+## Chantier courant
+
+**Phase 2 — cartographie réelle du runtime actif**
+
+Branche :
+`work/gensrpg-phase2-runtime-cartography-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-shell-context-cleanup-fix-2026-09-18`
+`checkpoint/gensrpg-start-phase2-runtime-cartography-2026-09-18`
 
-Base du correctif :
-`6c73c598c7cee070056397bc51592e01cbb6275b`
+Base exacte :
+`04cce98e79252a791bd7130fe6993f00916fa5dc`
 
-SHA fonctionnel GREEN :
-`08220589eb89a06c73f5777050bbcc90275e48fd`
+## Périmètre déclaré
 
-CI :
-- Architecture `35324953366` — SUCCESS
-- Firefox `35324953326` — SUCCESS
-- Tactical Dock `35324953417` — SUCCESS
+Lot documentaire/diagnostic en première intention.
 
-## Correctif de fermeture Phase 1
+Inventorier :
+- scripts réellement chargés par `index.html` ;
+- chargements dynamiques ;
+- auto-installs ;
+- wrappers / monkey-patches ;
+- `MutationObserver` ;
+- listeners `document` / `window` ;
+- timers / retries ;
+- accès directs à `localStorage` / IndexedDB ;
+- fonctions globales remplacées ;
+- responsabilités potentiellement dupliquées.
 
-Le RED de non-interférence Capture -> PvP était causé par le propriétaire Shell `openGensFamily(family)`.
+Classer les fichiers/blocs actifs :
+- Core ;
+- Shell ;
+- Survie ;
+- Dungeon ;
+- Tactical ;
+- Capture ;
+- PvP ;
+- Builders ;
+- legacy/inactif.
 
-Correctif appliqué :
-- retrait de `gensCapturePregame` ;
-- retrait de `gensAdventurePregame` ;
-- retrait de `gensDungeonTheme` uniquement lorsqu'on entre dans une famille autre que `adventure`.
+## Interdictions du lot
 
-Le changement runtime est strictement limité à **deux lignes** dans `openGensFamily()`.
+- aucun déplacement de fichier runtime ;
+- aucun changement de gameplay ;
+- aucun correctif de dette découvert pendant l'audit ;
+- aucun nouveau wrapper/observer/timer ;
+- aucune modification de `main`;
+- aucune suppression de code historique avant cartographie complète.
 
-Non modifié :
-- profil actif ;
-- sauvegardes ;
-- session ;
-- runtimes Survie/Dungeon/Tactical/Capture/PvP ;
-- gameplay ;
-- `gens-pure-capture` ;
-- règles ou données persistantes.
+## Source index.html
 
-La sentinelle `gens_four_module_noninterference_shell_browser_v11411.test.cjs` traverse désormais GREEN :
+La copie locale fournie par l'utilisateur et déjà vérifiée contre le blob GitHub est utilisée pour l'inspection du gros `index.html`, conformément à la règle 26.
 
-`Survie -> Dungeon -> Survie -> Capture -> PvP placeholder`
+Le changement de fermeture Phase 1 dans `openGensFamily()` est connu et limité à deux lignes ; la copie locale de travail correspond à cet état.
 
-Elle confirme qu'aucune autorité visuelle/runtime parasite majeure ne fuit entre ces contextes.
+## Livrables du lot
 
-## Critère de sortie Phase 1
+1. inventaire des scripts externes chargés ;
+2. inventaire des blocs inline identifiables ;
+3. table des propriétaires probables ;
+4. inventaire des mécanismes globaux à risque ;
+5. liste des fichiers actifs sans propriétaire clair ;
+6. liste des blocs probablement legacy/inactifs ;
+7. recommandations de découpage pour la suite, sans déplacement dans ce lot.
 
-La matrice obligatoire est couverte :
-- lancement Survie ;
-- lancement Dungeon ;
-- fiche héros Dungeon ;
-- Save & Quit + reprise ;
-- mouvement Dungeon ;
-- stats canoniques ;
-- dés D100/D6 ;
-- calcul de touche ;
-- dégâts + armure + résistances ;
-- Tactical entrée/sortie ;
-- Monster Capture ;
-- Duel/PvP ;
-- sauvegarde ;
-- PWA/cache ;
-- non-interférence des quatre modules.
+## Risques
 
-La Phase 1 peut donc être clôturée avant tout déplacement structurel important.
+- `index.html` contient encore de nombreuses couches historiques ;
+- certains scripts sont chargés dynamiquement et non visibles dans les seules balises `script src` ;
+- un nom de version historique ne signifie pas automatiquement qu'un bloc est inactif ;
+- la présence d'une fonction globale n'implique pas qu'elle soit propriétaire : il faut suivre les callsites/chargements.
 
-## Prochain chantier
+## Critère de sortie Phase 2
 
-**Phase 2 — cartographie réelle du runtime actif.**
+Aucun fichier runtime actif sans propriétaire connu.
 
-Avant toute modification :
-- créer un nouveau checkpoint de départ depuis le checkpoint Phase 1 GREEN ;
-- créer une nouvelle branche dédiée ;
-- cartographier les scripts réellement chargés, leurs propriétaires et dépendances ;
-- classer chaque fichier/bloc : Core, Shell, Survie, Dungeon, Tactical, Capture, PvP, Builders, legacy/inactif ;
-- identifier les fonctions globales et responsabilités encore dupliquées ;
-- ne déplacer aucun gameplay dans ce premier lot de cartographie.
+## Prochaine étape
 
-Critère de sortie Phase 2 : aucun runtime actif sans propriétaire connu.
+Produire une première cartographie automatique du Shell/index et de l'arbre `assets/gensrpg`, puis approfondir les zones ambiguës avant toute extraction physique.
 
-## Dette explicitement différée
+## Dette séparée
 
-La détection ennemie hors embuscade reste réservée à un chantier de caractérisation dédié après la Phase 1 ; elle ne doit pas être mélangée à la cartographie structurelle.
+La détection ennemie hors embuscade reste un chantier de caractérisation fonctionnelle distinct ; elle n'est pas corrigée dans cette cartographie.

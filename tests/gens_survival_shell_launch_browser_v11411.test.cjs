@@ -49,7 +49,13 @@ function displayed(page,id){
 }
 
 (async()=>{
+  let stage='server-start';
+  const watchdog=setTimeout(()=>{
+    console.error('Survival shell sentinel watchdog timeout at stage:',stage);
+    process.exit(124);
+  },60000);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  stage='browser-launch';
   const port=server.address().port;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({
@@ -89,7 +95,9 @@ function displayed(page,id){
       }));
     });
 
+    stage='preview-navigation';
     await page.goto(`http://127.0.0.1:${port}/preview.html`,{waitUntil:'domcontentloaded'});
+    stage='preview-ready';
     await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1');
     await page.waitForFunction(()=>(
       typeof window.openGensFamily==='function' &&
@@ -99,7 +107,9 @@ function displayed(page,id){
       window.openGensFamily.__gensIsolation104===true
     ));
 
+    stage='root-home';
     assert.equal(await displayed(page,'#gensRootHome'),true,'root GenSrpG home must be visible on a clean launch');
+    stage='select-survival-family';
     await page.locator('.gensRootModeCard.survival').click();
 
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#gensFamilyHome')).display!=='none');
@@ -109,6 +119,7 @@ function displayed(page,id){
     await survivalCards.first().waitFor({state:'visible'});
     assert.ok(await survivalCards.count()>=1,'at least one real Survival universe must be rendered');
     assert.match(await survivalCards.first().getAttribute('onclick'),/survival/,'real Survival card must route through openGensBuiltInGame(..., survival)');
+    stage='open-survival-universe';
     await survivalCards.first().click();
 
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#gensGameHome')).display!=='none');
@@ -128,32 +139,38 @@ function displayed(page,id){
     assert.ok(shell.staleDungeon,'selecting Survival must preserve dormant Dungeon save data');
     assert.equal(shell.dungeonTheme,false,'Dungeon body theme must not leak into Survival');
 
+    stage='open-preparation';
     await page.locator('#gensGameHome .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#pregameSetup')).display!=='none');
+    stage='open-participants';
     await page.locator('#sessionHeroSetupBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#sessionHeroSetup')).display!=='none');
 
     const participantBoxes=page.locator('#participantList input[type="checkbox"]');
     await participantBoxes.first().waitFor({state:'attached'});
     assert.ok(await participantBoxes.count()>=1,'real Survival preparation must expose at least one participant');
+    stage='select-participant';
     if(!(await participantBoxes.first().isChecked())) await participantBoxes.first().check();
     await page.waitForFunction(()=>typeof window.normalizeGameParticipants==='function'&&window.normalizeGameParticipants().length>=1);
 
     const selected=await page.evaluate(()=>window.normalizeGameParticipants().map(String));
     assert.ok(selected.length>=1,'Survival launch must use the participant selected through the real preparation UI');
 
+    stage='close-participants';
     await page.locator('#sessionHeroSetup button[onclick="closeSessionHeroSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#pregameSetup')).display!=='none');
 
     const start=page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]');
     await start.waitFor({state:'visible'});
     assert.equal(await start.isDisabled(),false,'Survival start button must be enabled once a participant is selected');
+    stage='start-configured-game';
     await start.click();
 
     await page.waitForFunction(()=>window.hasActiveSession?.()===true);
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('#menu')).display!=='none');
     await page.waitForTimeout(120);
 
+    stage='assert-final-survival-state';
     const final=await page.evaluate(()=>{
       const layer=id=>{
         const el=document.getElementById(id);
@@ -205,9 +222,11 @@ function displayed(page,id){
       pageErrors
     }));
   }finally{
+    stage='shutdown';
     try{await context.close()}catch(e){}
     try{await browser.close()}catch(e){}
     try{server.closeAllConnections?.()}catch(e){}
     await new Promise(resolve=>server.close(resolve));
+    clearTimeout(watchdog);
   }
 })().catch(e=>{console.error(e);process.exitCode=1});

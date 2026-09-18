@@ -1,0 +1,935 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
+  "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
+  "totals": {
+    "totalAccesses": 221,
+    "resolvedAccesses": 147,
+    "unresolvedAccesses": 74,
+    "distinctResolvedKeys": 30
+  },
+  "byDomain": {
+    "dungeon": {
+      "accesses": 176,
+      "resolved": 126,
+      "unresolved": 50,
+      "distinctKeys": 20
+    },
+    "builders": {
+      "accesses": 7,
+      "resolved": 4,
+      "unresolved": 3,
+      "distinctKeys": 2
+    },
+    "tactical": {
+      "accesses": 2,
+      "resolved": 1,
+      "unresolved": 1,
+      "distinctKeys": 1
+    },
+    "core": {
+      "accesses": 4,
+      "resolved": 3,
+      "unresolved": 1,
+      "distinctKeys": 2
+    },
+    "shell": {
+      "accesses": 4,
+      "resolved": 3,
+      "unresolved": 1,
+      "distinctKeys": 1
+    },
+    "capture": {
+      "accesses": 28,
+      "resolved": 10,
+      "unresolved": 18,
+      "distinctKeys": 5
+    }
+  },
+  "resolvedKeys": [
+    {
+      "key": "gensrpg_challenge_library_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore051ExplorationPolish",
+        "inline:dungeonCore200Rebuild",
+        "inline:dungeonCore202ContentDensity"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant",
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_dc048_pending_trap_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore048ExplorationTests"
+      ],
+      "ops": [
+        "getItem",
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dc052_special_branch_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore052SpecialExploration"
+      ],
+      "ops": [
+        "getItem",
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dc064_door_challenge_",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore051ExplorationPolish"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dc064_door_challenge_*",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore051ExplorationPolish",
+        "inline:dungeonCore103StabilityPass",
+        "inline:dungeonCore200Rebuild"
+      ],
+      "ops": [
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "dynamic-prefix"
+      ]
+    },
+    {
+      "key": "gensrpg_dc067_challenge_history",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore051ExplorationPolish"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_core01_device_hero_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore053Stability",
+        "inline:dungeonCore200Rebuild",
+        "inline:gensDungeonCore01Js"
+      ],
+      "ops": [
+        "getItem",
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant",
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_core02_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore047LivingExploration",
+        "inline:dungeonCore048ExplorationTests",
+        "inline:dungeonCore051ExplorationPolish",
+        "inline:dungeonCore053Stability",
+        "inline:dungeonCore096SoloPartyGuard",
+        "inline:dungeonCore098IsolatedMovement",
+        "inline:dungeonCore103StabilityPass",
+        "inline:dungeonCore104Coherence",
+        "inline:dungeonCore105MovementRenderFix",
+        "inline:dungeonCore200Rebuild",
+        "inline:gensDungeonCore01Js"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant",
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_deck_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonMj72_2Script"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_economy_rules_160",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonEconomy160"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_mj_rules_v145",
+      "domains": [
+        "core",
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonMj72_2Script",
+        "inline:gensStability151"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_primary_selection_v167833",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "file:assets/dungeon/dungeon-authored-action-fix-167857.js",
+        "file:assets/dungeon/dungeon-authored-bootstrap-167849.js",
+        "file:assets/dungeon/dungeon-large-room-support-167834.js",
+        "file:assets/dungeon/dungeon-world-session-bridge-167832.js"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_room_interactions_v2",
+      "domains": [
+        "builders"
+      ],
+      "sources": [
+        "file:assets/dungeon/dungeon-room-creator-v2-167819.js"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_runtime_v2",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "file:assets/dungeon/dungeon-authored-action-fix-167857.js",
+        "file:assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js",
+        "file:assets/dungeon/dungeon-authored-cache-guard-167849.js",
+        "file:assets/dungeon/dungeon-authored-cache-ux-167853.js",
+        "file:assets/dungeon/dungeon-authored-cache-visual-167852.js",
+        "file:assets/dungeon/dungeon-authored-final-exit-167875.js",
+        "file:assets/dungeon/dungeon-authored-return-persist-167862.js",
+        "file:assets/dungeon/dungeon-core-317.js",
+        "file:assets/dungeon/dungeon-core-318.js",
+        "file:assets/dungeon/dungeon-event-runtime-fix-167878.js",
+        "file:assets/dungeon/dungeon-exact-trap-runtime-167845.js",
+        "file:assets/dungeon/dungeon-large-room-support-167834.js",
+        "file:assets/dungeon/dungeon-secondary-branch-content-fix-167860.js",
+        "file:assets/dungeon/dungeon-source-render-stability-167877.js",
+        "file:assets/dungeon/dungeon-zone-links-167846.js",
+        "inline:dungeonCore200Rebuild",
+        "inline:dungeonCore201Stability",
+        "inline:dungeonCore202ContentDensity",
+        "inline:dungeonCore204Diagnostics",
+        "inline:dungeonCore205FinalCoherence",
+        "inline:dungeonCore206ChestInteraction",
+        "inline:dungeonCore207ChestAlignment",
+        "inline:dungeonCore208SingleChestAuthority",
+        "inline:dungeonCore209TacticalSense",
+        "inline:dungeonCore211Consolidation",
+        "inline:dungeonCore212RenderVictory",
+        "inline:dungeonCore213Stability",
+        "inline:dungeonCore214SingleAuthority",
+        "inline:dungeonCore306NarrativeDebug",
+        "inline:dungeonCore307CriticalResumeFix",
+        "inline:dungeonCore309VisualFixes",
+        "inline:dungeonCore310PersistenceAndTokens"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant",
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_scene_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonMj72_2Script"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_session_eco_160_",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonEconomy160"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_dungeon_tactical098_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore098IsolatedMovement",
+        "inline:dungeonCore100ResumeAndInteractionFix",
+        "inline:dungeonCore103StabilityPass",
+        "inline:dungeonCore104Coherence",
+        "inline:dungeonCore105MovementRenderFix"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_forced_mode_reload_155",
+      "domains": [
+        "shell"
+      ],
+      "sources": [
+        "inline:forceReload155"
+      ],
+      "ops": [
+        "getItem",
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_game_profile_active_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore098IsolatedMovement"
+      ],
+      "ops": [
+        "getItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_game_profiles_v1",
+      "domains": [
+        "tactical"
+      ],
+      "sources": [
+        "file:assets/gensrpg/gens-rpg-runtime-repair-1678106.js"
+      ],
+      "ops": [
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_last_html_build",
+      "domains": [
+        "core"
+      ],
+      "sources": [
+        "inline:gensBuildMarker163"
+      ],
+      "ops": [
+        "setItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_manual_mj_effects_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore046ManualMjAssist"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_rpg_gameplay_by_profile_v1",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_session_profile_100_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "inline:dungeonCore100ResumeAndInteractionFix"
+      ],
+      "ops": [
+        "getItem",
+        "removeItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_shared_entities_scoped_v1__*",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "setItem"
+      ],
+      "kinds": [
+        "dynamic-prefix"
+      ]
+    },
+    {
+      "key": "gensrpg_shared_entities_scoped_v1__family__creature",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "setItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_shared_entities_v1__",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_shared_entities_v1__family__creature",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "gensrpg_zone_graphs_v1",
+      "domains": [
+        "builders"
+      ],
+      "sources": [
+        "file:assets/dungeon/dungeon-world-builder-167821.js"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
+      ]
+    },
+    {
+      "key": "z40k_session_active_v1",
+      "domains": [
+        "dungeon"
+      ],
+      "sources": [
+        "file:assets/dungeon/dungeon-authored-final-exit-167875.js",
+        "inline:dungeonCore310PersistenceAndTokens"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "literal"
+      ]
+    }
+  ],
+  "unresolvedBySource": [
+    {
+      "source": "file:assets/dungeon/dungeon-authored-event-cells-167877.js",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "k": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-authored-runtime-167839.js",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "k": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-core-316.js",
+      "domain": "dungeon",
+      "count": 6,
+      "expressions": {
+        "DUNGEON_DECK_KEY": 2,
+        "key(heroId": 3,
+        "key(id": 1
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-core-317.js",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(hid": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-room-creator-100.js",
+      "domain": "builders",
+      "count": 2,
+      "expressions": {
+        "STORAGE_KEY": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-room-runtime-167822.js",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-room-visual-config-167826.js",
+      "domain": "builders",
+      "count": 1,
+      "expressions": {
+        "key": 1
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-world-runtime-167823.js",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key": 2
+      }
+    },
+    {
+      "source": "file:assets/dungeon/dungeon-zone-content-167824.js",
+      "domain": "dungeon",
+      "count": 3,
+      "expressions": {
+        "key": 2,
+        "heroStorageKey(hero": 1
+      }
+    },
+    {
+      "source": "file:assets/gensrpg/gens-rpg-stats-clean-167874.js",
+      "domain": "core",
+      "count": 1,
+      "expressions": {
+        "R.key(hero": 1
+      }
+    },
+    {
+      "source": "file:assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
+      "domain": "tactical",
+      "count": 1,
+      "expressions": {
+        "rt.key(id": 1
+      }
+    },
+    {
+      "source": "file:assets/gensrpg/gens-world-summary-167820.js",
+      "domain": "shell",
+      "count": 1,
+      "expressions": {
+        "key": 1
+      }
+    },
+    {
+      "source": "inline:builtinMonsterCapture162",
+      "domain": "capture",
+      "count": 2,
+      "expressions": {
+        "k": 2
+      }
+    },
+    {
+      "source": "inline:captureFix129",
+      "domain": "capture",
+      "count": 2,
+      "expressions": {
+        "key(id": 2
+      }
+    },
+    {
+      "source": "inline:captureFix130",
+      "domain": "capture",
+      "count": 1,
+      "expressions": {
+        "captureCreatureProgressRulesKey(": 1
+      }
+    },
+    {
+      "source": "inline:captureFix134",
+      "domain": "capture",
+      "count": 3,
+      "expressions": {
+        "captureTrainerDifficultyKey134(": 2,
+        "captureCreatureProgressRulesKey(": 1
+      }
+    },
+    {
+      "source": "inline:captureFix137",
+      "domain": "capture",
+      "count": 3,
+      "expressions": {
+        "captureMjRulesKey137(": 2,
+        "captureCreatureProgressRulesKey(": 1
+      }
+    },
+    {
+      "source": "inline:captureFix140",
+      "domain": "capture",
+      "count": 2,
+      "expressions": {
+        "captureMjRulesKey137(": 1,
+        "captureCreatureProgressRulesKey(": 1
+      }
+    },
+    {
+      "source": "inline:captureItems141",
+      "domain": "capture",
+      "count": 2,
+      "expressions": {
+        "key(heroId": 2
+      }
+    },
+    {
+      "source": "inline:capturePlaytestFix128",
+      "domain": "capture",
+      "count": 3,
+      "expressions": {
+        "captureCreatureProgressRulesKey(": 1,
+        "key(heroId": 2
+      }
+    },
+    {
+      "source": "inline:dungeonCore023StabilityFix",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore032RpgLifeAndReadableAi",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(id": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore036CombatPacing",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(targetHeroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore043MjCombatFlow",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(targetHeroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore051ExplorationPolish",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore061CombatItems",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore071CombatErgo",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore071LevelUp",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore071Merchant",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(hid": 2
+      }
+    },
+    {
+      "source": "inline:dungeonCore083MovementBalance",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "GAME_PROFILES_KEY": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore100ResumeAndInteractionFix",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "storageKey": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore101CacheGuard",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "k": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore200Rebuild",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(id": 1,
+        "key(ended": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore211Consolidation",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(heroId": 2
+      }
+    },
+    {
+      "source": "inline:dungeonCore213Stability",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(id": 2
+      }
+    },
+    {
+      "source": "inline:dungeonCore214SingleAuthority",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(id": 1
+      }
+    },
+    {
+      "source": "inline:dungeonCore308NewRunReset",
+      "domain": "dungeon",
+      "count": 2,
+      "expressions": {
+        "key(id": 2
+      }
+    },
+    {
+      "source": "inline:dungeonCore312TurnAndPopupFixes",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonEconomy160",
+      "domain": "dungeon",
+      "count": 1,
+      "expressions": {
+        "key(heroId": 1
+      }
+    },
+    {
+      "source": "inline:dungeonMj72_2Script",
+      "domain": "dungeon",
+      "count": 4,
+      "expressions": {
+        "key(heroId": 1,
+        "key(id": 1,
+        "key(current": 2
+      }
+    },
+    {
+      "source": "inline:gensDungeonCore01Js",
+      "domain": "dungeon",
+      "count": 3,
+      "expressions": {
+        "k": 1,
+        "key(ended": 1,
+        "key(id": 1
+      }
+    }
+  ]
+}

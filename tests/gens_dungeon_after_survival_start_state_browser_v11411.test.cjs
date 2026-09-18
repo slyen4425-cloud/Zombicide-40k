@@ -360,7 +360,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.equal(Number(entrance.dungeonState?.room),0,'real prior Dungeon must begin at room 0 before exploring');
     assert.equal(entrance.dungeonState?.last??null,null,'real prior Dungeon entrance must have no generated room yet');
 
-    const explore=page.locator('#gensDungeonCore01 button').filter({hasText:/EXPLORER/i}).first();
+    const explore=page.locator('#dc01Explore');
     await explore.waitFor({state:'visible'});
     await explore.click();
     await page.waitForTimeout(1800);

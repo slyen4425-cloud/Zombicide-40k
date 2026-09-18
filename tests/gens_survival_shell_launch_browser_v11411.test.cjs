@@ -5,6 +5,8 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
+const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
+assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
 const mime={
   '.html':'text/html; charset=utf-8',
   '.js':'text/javascript; charset=utf-8',
@@ -69,7 +71,11 @@ const server=http.createServer((req,res)=>{
       typeof window.isDungeonMode==='function'
     ));
 
-    mark('wait-survival-guard');
+    mark('ensure-survival-guard');
+    const guardReady=await page.evaluate(()=>window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
+    if(!guardReady){
+      await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
+    }
     await page.waitForFunction(()=>window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
 
     mark('open-survival-family');

@@ -553,3 +553,152 @@ Décision de lot :
 3. corriger le bootstrap au vrai propriétaire sans ajouter de wrapper/observer/timer ;
 4. exiger comme preuve le passage de la composition Pages complète et des sentinelles inter-modules ;
 5. reprendre ensuite la Phase 2 depuis un état vert documenté.
+
+
+## Clôture de la Phase 2 — cartographie runtime complète
+
+La reprise de cartographie après les trois correctifs dédiés est terminée sur la branche :
+`work/gensrpg-phase2-runtime-cartography-resume-2026-09-18`.
+
+Le runtime n'a pas été modifié dans ce lot de reprise. Le diff depuis le checkpoint GREEN de routage Capture/Dungeon ne contient que :
+- documentation Phase 2 ;
+- tests/sentinelles de cartographie ;
+- ajout de ces sentinelles au workflow Architecture.
+
+### Propriétaires inline
+
+Livrables :
+- `docs/GENSRPG_PHASE2_INLINE_OWNERS.json`
+- `tests/gens_phase2_inline_owner_manifest_v11411.test.cjs`
+
+Résultat :
+- 130 blocs inline identifiés ;
+- 120 actifs ;
+- 10 explicitement désactivés ;
+- chaque bloc possède une responsabilité dominante documentée ;
+- 10 blocs actifs sont explicitement marqués transverses plutôt que forcés artificiellement dans un seul sous-module.
+
+### Globals et derniers propriétaires
+
+Livrables :
+- `docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv`
+- `tests/gens_phase2_inline_global_last_owner_v11411.test.cjs`
+
+Résultat :
+- 438 globals `window.*` distincts explicitement assignés ;
+- 773 affectations explicites ;
+- 123 globals ont plusieurs couches/propriétaires inline ;
+- le dernier propriétaire inline est verrouillé pour chaque global.
+
+### Timers / retries
+
+Livrables :
+- `docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json`
+- `tests/gens_phase2_timer_classification_v11411.test.cjs`
+
+Résultat statique :
+- externes atteignables : 148 syntaxes `setTimeout`, 1 `setInterval` ;
+- inline actifs : 146 syntaxes `setTimeout`, 1 `setInterval` ;
+- 13 sources externes contiennent un vrai mécanisme de bootstrap/réinstallation différée ;
+- 4 blocs inline sont classés bootstrap/réassertion ;
+- les deux seuls `setInterval` actifs sont :
+  - `assets/dungeon/dungeon-core-317.js` : retry marchand borné à 12 tentatives / 250 ms ;
+  - `dungeonCore029AiTurnFix` : watchdog IA permanent à 700 ms, travail conditionné par un combat actif.
+
+Aucun timer n'est supprimé dans cette phase.
+
+### Stockage direct
+
+Livrables :
+- `docs/GENSRPG_PHASE2_STORAGE_OWNERS.json`
+- `tests/gens_phase2_storage_ownership_characterization_v11411.test.cjs`
+
+Résultat :
+- 221 accès directs à `localStorage` observables statiquement ;
+- 147 accès résolus ;
+- 30 clés/familles de clés résolues ;
+- 74 accès dynamiques restent explicitement inventoriés, répartis sur 41 sources ;
+- Dungeon concentre 176 accès directs.
+
+Ces accès dynamiques constituent une contrainte d'extraction pour la future étape stockage/migrations ; ils ne sont pas devinés ni migrés pendant la Phase 2.
+
+### Fichiers hors graphe de production
+
+Livrables :
+- `docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json`
+- `tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs`
+
+Les 7 fichiers déjà identifiés restent hors graphe d'exécution actuel :
+- 4 sont référencés uniquement par tests/docs ;
+- 3 restent présents dans le cache du service worker et/ou des workflows historiques, mais ne sont pas exécutés par la composition production.
+
+Statut : **hors graphe de production**, jamais « supprimables » par cette seule cartographie.
+
+### Responsabilités stratifiées
+
+Livrables :
+- `docs/GENSRPG_PHASE2_LAYERED_RESPONSIBILITIES.json`
+- `tests/gens_phase2_layered_responsibilities_v11411.test.cjs`
+
+16 hotspots à forte densité sont verrouillés, notamment :
+- `renderDungeonCombatRound` — 30 affectations, dernier propriétaire `dungeonCore303TimelineRootFix` ;
+- `captureRenderBattleLive` — 15, dernier propriétaire `coreCombatPoolFix156` ;
+- `dungeonRunAi156` — 12 ;
+- `dungeonAdvanceTurn156` — 9 ;
+- `finishDungeonCombatVictory` — 9 ;
+- `startConfiguredGame` — 6.
+
+Ils sont classés comme chaînes de wrappers, états stratifiés, frontières inter-modules ou dette runtime historique. Cette classification n'implique aucune suppression automatique.
+
+### Préparation Phase 3 / 4
+
+Livrable :
+- `docs/GENSRPG_PHASE2_EXTRACTION_READINESS.md`
+
+L'arborescence cible n'est pas encore construite réellement :
+- `core/` ne contient actuellement que `runtime-bootstrap-v1.js` ;
+- `dungeon/` contient `progression-runtime-v1.js`, hors graphe production ;
+- `shell/`, `survival/`, `tactical/`, `capture/`, `pvp/`, `builders/` sont encore vides.
+
+La Phase 3 doit donc créer uniquement structure, contrats et points d'entrée sans déplacer le gameplay ni changer le graphe production.
+
+Ordre Phase 4 conservé conformément à la roadmap :
+1. resolver d'assets ;
+2. stockage/migrations ;
+3. moteur de stats ;
+4. inventaire/équipement/sets ;
+5. dés ;
+6. progression/XP ;
+7. bus d'événements/utilitaires communs.
+
+### Validation de fermeture avant documentation finale
+
+HEAD validé :
+`a58eab3d60357c7739d5ee03c1aa8887b07ee97b`
+
+CI :
+- Architecture `35353401883` — SUCCESS ;
+- navigateur complet dans le même run — SUCCESS ;
+- Firefox `35353401955` — SUCCESS ;
+- Tactical Dock `35353402052` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- UI native ;
+- Survie ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture courant ;
+- composition Pages complète Capture ;
+- non-interférence des quatre modules ;
+- murs Chromium ;
+- preview.
+
+### Critère de sortie Phase 2
+
+Le critère « aucun fichier runtime actif sans propriétaire connu » est satisfait par :
+- manifeste des 65 fichiers externes atteignables ;
+- manifeste des 130 blocs inline ;
+- table des derniers propriétaires globaux ;
+- inventaires timers, stockage, fichiers hors graphe et responsabilités stratifiées.
+
+La dette fonctionnelle « détection ennemie hors embuscade » reste volontairement hors de ce lot.

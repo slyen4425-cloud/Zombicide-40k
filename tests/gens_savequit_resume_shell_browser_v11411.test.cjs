@@ -40,20 +40,27 @@ const customHeroesScriptStart=indexSource.lastIndexOf('<script',customHeroesOwne
 const customHeroesScriptEnd=indexSource.indexOf('</script>',customHeroesOwner);
 assert.ok(customHeroesOwner>shellScriptEnd&&customHeroesScriptStart>shellScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
 
-const dungeonChunkStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
-assert.ok(dungeonChunkStart>customHeroesScriptEnd&&mobileTagPos>dungeonChunkStart,'exact Dungeon runtime chunk must exist');
+const dungeonUiStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
+const dungeonBaseScriptStart=indexSource.indexOf('<script id="gensDungeonCore01Js">',dungeonUiStart);
+const dungeonBaseScriptEnd=indexSource.indexOf('</script>',dungeonBaseScriptStart);
+const core310ScriptStart=indexSource.lastIndexOf('<script',core310Pos);
+assert.ok(dungeonUiStart>customHeroesScriptEnd,'exact Dungeon Core01 UI must exist after the Shell/custom-content blocks');
+assert.ok(dungeonBaseScriptStart>dungeonUiStart&&dungeonBaseScriptEnd>dungeonBaseScriptStart,'exact Dungeon Core01 owner script must have a boundary');
+assert.ok(core310ScriptStart>dungeonBaseScriptEnd&&core310End>core310ScriptStart,'exact Core 3.10 persistence owner script must have a boundary');
 
 // Browser harness built only from exact production source blocks:
 // 1) full real document through the Shell owner block;
 // 2) exact custom-content dependency block used by profile rendering;
-// 3) exact Dungeon chain through dungeon-core-316/317 and Core 3.10/3.12.
-// The unrelated Tactical bootstrap is not started; its exact production family
-// guard is attached directly at the same final stage.
+// 3) exact native Dungeon Core01 markup + owner script;
+// 4) exact final Core 3.10 Save & Quit / resume owner;
+// 5) exact production family/session guard.
+// No historical repair/runtime layers are copied or reimplemented.
 const roundTripHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(dungeonChunkStart,mobileTagPos)+
-  '\n<script>var z40kRoomId=null,z40kRoomCode="",z40kApplyingRemote=false;</script>'+
+  '\n'+indexSource.slice(dungeonUiStart,dungeonBaseScriptStart)+
+  '\n'+indexSource.slice(dungeonBaseScriptStart,dungeonBaseScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(core310ScriptStart,core310End+'</script>'.length)+
   '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={

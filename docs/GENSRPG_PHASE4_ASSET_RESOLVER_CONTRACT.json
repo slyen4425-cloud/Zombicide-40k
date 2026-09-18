@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "phase": 4,
+  "owner": "Core Asset Resolver",
+  "publicApi": "GensAssetResolverV1",
+  "source": "assets/gensrpg/core/asset-resolver-v1.js",
+  "status": "prepared-not-yet-loaded",
+  "responsibilities": [
+    "normalize explicit asset source strings",
+    "select the first non-empty candidate by caller-provided precedence",
+    "join a caller-owned module root and file name",
+    "resolve candidates then generated module path then explicit fallback"
+  ],
+  "forbidden": [
+    "module-specific roots",
+    "Dungeon/Capture/Survival/PvP asset IDs or catalogs",
+    "cross-module fallback",
+    "DOM rendering",
+    "storage",
+    "network existence checks",
+    "MutationObserver",
+    "listeners",
+    "timers or retries",
+    "auto-install"
+  ],
+  "precedence": [
+    "caller candidates",
+    "caller module root + file",
+    "caller fallback"
+  ],
+  "note": "The Core resolver never guesses another module's asset path. Broken-image presentation remains owned by the rendering module."
+}

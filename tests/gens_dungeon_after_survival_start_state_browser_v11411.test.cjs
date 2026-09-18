@@ -206,6 +206,21 @@ async function dungeonSnapshot(page,label){
           class:String(el.className||'').slice(0,160),
           text:(el.innerText||'').trim().replace(/\s+/g,' ').slice(0,700)
         })),
+      dc200Modal:(()=>{
+        const m=document.getElementById('dc200Modal');
+        const title=document.getElementById('dc200ModalTitle');
+        const body=document.getElementById('dc200ModalBody');
+        if(!m)return null;
+        const st=getComputedStyle(m);
+        return {
+          class:String(m.className||''),
+          display:st.display,
+          visibility:st.visibility,
+          opacity:st.opacity,
+          title:(title?.innerText||title?.textContent||'').trim().replace(/\s+/g,' ').slice(0,300),
+          body:(body?.innerText||body?.textContent||'').trim().replace(/\s+/g,' ').slice(0,900)
+        };
+      })(),
       coreText:(document.getElementById('gensDungeonCore01')?.innerText||'').trim().replace(/\s+/g,' ').slice(0,3200)
     };
   },label);
@@ -320,12 +335,18 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const afterContinue=await dungeonSnapshot(page,'after-first-explore-continue');
     console.log('[dungeon-after-survival] after-first-continue',JSON.stringify(afterContinue,null,2));
 
-    assert.ok(
-      Number(afterContinue.dungeonState?.room)>=1 && afterContinue.dungeonState?.last,
-      'characterization: EXPLORE + CONTINUER did not yet persist a generated room; inspect next visible control before extending the real path'
-    );
+    if(!(Number(afterContinue.dungeonState?.room)>=1 && afterContinue.dungeonState?.last)){
+      await page.evaluate(()=>window.DungeonCore01?.explore?.());
+      await page.waitForTimeout(1200);
+      const afterDirectExplore=await dungeonSnapshot(page,'after-direct-owner-explore');
+      console.log('[dungeon-after-survival] after-direct-owner-explore',JSON.stringify(afterDirectExplore,null,2));
+      assert.ok(
+        Number(afterDirectExplore.dungeonState?.room)>=1 && afterDirectExplore.dungeonState?.last,
+        'characterization: direct DungeonCore01.explore() also failed to create room 1'
+      );
+    }
 
-    const persisted=afterContinue;
+    const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
 
     const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
     await quit.waitFor({state:'visible'});

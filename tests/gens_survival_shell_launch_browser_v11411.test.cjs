@@ -16,9 +16,13 @@ const customHeroSupportEnd=indexSource.indexOf('function openPlayableHeroCard(he
 assert.ok(customHeroSupportStart>shellScriptEnd && customHeroSupportEnd>customHeroSupportStart,'real index.html must expose the late custom-hero Shell support cluster');
 const realCustomHeroShellSupport=indexSource.slice(customHeroSupportStart,customHeroSupportEnd);
 assert.equal(realCustomHeroShellSupport.includes('</script>'),false,'extracted Shell support must stay inside one script');
+const escapeSupportStart=indexSource.indexOf('function z40kEscHtml(s){',customHeroSupportEnd);
+const escapeSupportEnd=indexSource.indexOf('function hcRenderSavedHeroes(){',escapeSupportStart);
+assert.ok(escapeSupportStart>customHeroSupportEnd && escapeSupportEnd>escapeSupportStart,'real index.html must expose the late Shell escaping helpers');
+const realShellEscapeSupport=indexSource.slice(escapeSupportStart,escapeSupportEnd);
 const realSurvivalShellHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
-  '\n<script>'+realCustomHeroShellSupport+'</script>\n</body></html>';
+  '\n<script>'+realCustomHeroShellSupport+'\n'+realShellEscapeSupport+'</script>\n</body></html>';
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
 const mime={

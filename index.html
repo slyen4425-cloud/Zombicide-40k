@@ -40717,10 +40717,10 @@ function resolveAmbush(x){
   x.dc209AmbushDone=x.dc209AmbushDone||{};
   if(x.dc209AmbushDone[x.room])return;
   x.dc209AmbushDone[x.room]=true;save(x);
-  if(typeof GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
+  if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function"){
     ambushStarting=true;
     setTimeout(()=>{
-      try{GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}
+      try{window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}
       finally{setTimeout(()=>{ambushStarting=false},250)}
     },120)
   }

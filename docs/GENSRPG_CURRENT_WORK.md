@@ -562,3 +562,84 @@ Diff depuis le checkpoint de départ :
 - base Phase 3 GREEN : Firefox et Tactical Dock repassés SUCCESS ;
 - HEAD correctif `a209e74...` : Architecture en cours, Firefox/Tactical Dock en attente ;
 - aucun checkpoint GREEN final ne doit être créé avant succès des trois validations requises et test utilisateur ciblé.
+
+## Chantier prioritaire utilisateur — runtime des donjons construits : caches / affichage / pièges
+
+Branche :
+`work/gensrpg-authored-runtime-cache-trap-stability-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-authored-runtime-cache-trap-stability-2026-09-18`
+
+Base exacte :
+`4f38720de29edb255f498d28b9e7013d181a0313`
+(`checkpoint/gensrpg-dungeon-builder-visibility-green-2026-09-18`)
+
+Production sûre inchangée :
+- `main` : V16.78.114.11 ;
+- SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Signalement utilisateur
+
+Dans un donjon construit via le World Builder :
+1. caches / sous-pièces :
+   - l'entrée dans une cache fonctionne ;
+   - la sortie / retour vers la salle précédente ne fonctionne pas correctement ;
+   - le runtime peut redemander de lire/interagir au lieu de permettre le retour canonique ;
+2. affichage :
+   - la map authored présente une instabilité visuelle intermittente ;
+3. pièges :
+   - certains pièges sont parfois visibles puis invisibles ;
+   - des pièges non placés dans le Builder peuvent apparaître ;
+   - en mode authored/Builder, l'utilisateur attend zéro génération aléatoire de pièges : la donnée authored doit être l'unique autorité.
+
+### Périmètre déclaré
+
+Modules concernés :
+- Dungeon authored runtime ;
+- World/zone runtime construit ;
+- contenu authored cache/piège ;
+- rendu authored associé.
+
+Propriétaires à confirmer avant code :
+- `assets/dungeon/dungeon-authored-runtime-167839.js` ;
+- `assets/dungeon/dungeon-authored-cache-visual-167852.js` ;
+- `assets/dungeon/dungeon-authored-return-persist-167862.js` ou propriétaire équivalent ;
+- `assets/dungeon/dungeon-exact-trap-runtime-167845.js` ;
+- `assets/dungeon/dungeon-zone-content-167824.js` ;
+- `assets/dungeon/dungeon-world-runtime-167823.js`.
+
+Interdit avant preuve :
+- aucun reset global ;
+- aucun nouveau renderer concurrent ;
+- aucun observer/timer/retry de réparation ;
+- aucune génération aléatoire masquée pour un donjon authored ;
+- aucun changement du Shell, Tactical, Capture, Survie, stats ou inventaire ;
+- ne pas réécrire le World Builder si le défaut est dans le runtime consommateur ;
+- ne pas toucher à `index.html` sans appliquer la règle 26.
+
+### Tests prévus
+
+1. caractériser un cache authored : salle principale -> cache -> retour salle principale ;
+2. vérifier persistance du node/room/hero position au retour ;
+3. vérifier que la cache n'est pas réinterprétée comme une nouvelle salle séquentielle ;
+4. caractériser la stabilité du rendu authored après entrée/sortie de cache et rerender ;
+5. construire une room authored sans piège et prouver qu'aucun piège aléatoire n'apparaît ;
+6. construire une room authored avec piège exact et prouver que seul ce piège existe et garde sa visibilité attendue ;
+7. Save & Quit/reprise ;
+8. non-interférence quatre modules ;
+9. Architecture / Firefox / Tactical Dock avant checkpoint GREEN.
+
+### Risques protégés
+
+- mouvement et positions Dungeon ;
+- graphe World Builder ;
+- contenu authored déjà sauvegardé ;
+- retour arrière/cache existant ;
+- déclenchement d'événements/pièges ;
+- rendu de grille ;
+- reprise de partie.
+
+### Prochaine action
+
+Lire les propriétaires runtime authored existants et les tests historiques cache/piège/retour afin d'identifier le premier conflit exact avant toute modification fonctionnelle.

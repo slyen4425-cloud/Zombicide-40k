@@ -562,3 +562,33 @@ Diff depuis le checkpoint de départ :
 - base Phase 3 GREEN : Firefox et Tactical Dock repassés SUCCESS ;
 - HEAD correctif `a209e74...` : Architecture en cours, Firefox/Tactical Dock en attente ;
 - aucun checkpoint GREEN final ne doit être créé avant succès des trois validations requises et test utilisateur ciblé.
+
+### Clôture GREEN — Dungeon Builder visible
+
+Checkpoint GREEN :
+`checkpoint/gensrpg-dungeon-builder-visibility-green-2026-09-18`
+
+SHA exact validé :
+`4f38720de29edb255f498d28b9e7013d181a0313`
+
+Validation :
+- Architecture statique : SUCCESS dans le run `35377871196` ;
+- navigateur complet du même run : SUCCESS ;
+- sentinelle Builder Éditeurs -> Dungeon -> World Builder : SUCCESS ;
+- Save & Quit / reprise : SUCCESS ;
+- Capture composition complète : SUCCESS ;
+- non-interférence quatre modules : SUCCESS ;
+- Firefox `35377871184` : SUCCESS ;
+- Tactical Dock `35377871431` : SUCCESS ;
+- validation utilisateur : le Builder est de nouveau visible.
+
+Conclusion :
+- Tactical V111 ne possède plus la visibilité du launcher Builder/Room Creator ;
+- aucun second launcher ni couche de réparation n'a été ajouté ;
+- `main` reste inchangé sur V16.78.114.11 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Prochain chantier utilisateur, séparé :
+- runtime des donjons construits ;
+- caches : entrée/sortie et retour vers la salle précédente ;
+- stabilité visuelle du rendu authored ;
+- pièges : présence/visibilité strictement authored, sans génération aléatoire.

@@ -30,7 +30,7 @@ productionHtml=productionHtml.replace(
 productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
 
 const phase2CaptureTraceReplacements=[
-  ['const MC162_PROFILE=', 'console.log("[phase2-mc162] const-profile");const MC162_PROFILE='],
+  ['const MC162_PROFILE=', 'window.__phase2CallTraceCount=0;window.__phase2CallTrace=function(label){window.__phase2CallTraceCount=(window.__phase2CallTraceCount||0)+1;if(window.__phase2CallTraceCount<=80)console.log("[phase2-chain] "+window.__phase2CallTraceCount+" "+label)};console.log("[phase2-mc162] const-profile");const MC162_PROFILE='],
   ['const MC162_TRAINER=', 'console.log("[phase2-mc162] const-trainer");const MC162_TRAINER='],
   ['const MC162_ENTITIES=', 'console.log("[phase2-mc162] const-entities");const MC162_ENTITIES='],
   ['const MC162_ABILITIES=', 'console.log("[phase2-mc162] const-abilities");const MC162_ABILITIES='],
@@ -59,6 +59,26 @@ productionHtml=productionHtml.replace(
   phase2CaptureBlockMatch[0],
   phase2CaptureBlockMatch[1]+phase2CaptureBlockBody+phase2CaptureBlockMatch[3]
 );
+
+const phase2CaptureCallTraceReplacements=[
+  ['function refreshCustomEquipmentIntoItems(){','function refreshCustomEquipmentIntoItems(){window.__phase2CallTrace?.("refreshCustomEquipmentIntoItems");'],
+  ['function gensCurrentContentFamily(){','function gensCurrentContentFamily(){window.__phase2CallTrace?.("gensCurrentContentFamily");'],
+  ['function getActiveGameProfile(){','function getActiveGameProfile(){window.__phase2CallTrace?.("getActiveGameProfile");'],
+  ['function loadGameProfiles(){','function loadGameProfiles(){window.__phase2CallTrace?.("loadGameProfiles");'],
+  ['function ensureBaseGameProfile(){','function ensureBaseGameProfile(){window.__phase2CallTrace?.("ensureBaseGameProfile");'],
+  ['function captureCurrentGameProfile(name,id,builtIn=false){','function captureCurrentGameProfile(name,id,builtIn=false){window.__phase2CallTrace?.("captureCurrentGameProfile:"+String(id||""));'],
+  ['function currentAllHeroIds(){','function currentAllHeroIds(){window.__phase2CallTrace?.("currentAllHeroIds");'],
+  ['function applyCustomHeroesMulti(){','function applyCustomHeroesMulti(){window.__phase2CallTrace?.("applyCustomHeroesMulti");'],
+  ['function gensContentCompatible(record,kind){','function gensContentCompatible(record,kind){window.__phase2CallTrace?.("gensContentCompatible:"+String(kind||""));'],
+  ['function customHeroesForMode(dungeon=isDungeonMode()){','function customHeroesForMode(dungeon=isDungeonMode()){window.__phase2CallTrace?.("customHeroesForMode:"+String(dungeon));'],
+  ['function itemsForMode(dungeon=isDungeonMode()){','function itemsForMode(dungeon=isDungeonMode()){window.__phase2CallTrace?.("itemsForMode:"+String(dungeon));'],
+  ['function gensGameplayModules(){','function gensGameplayModules(){window.__phase2CallTrace?.("gensGameplayModules");']
+];
+for(const [needle,replacement] of phase2CaptureCallTraceReplacements){
+  assert.ok(productionHtml.includes(needle),'Phase 2 Capture call-trace anchor missing: '+needle);
+  productionHtml=productionHtml.replace(needle,replacement);
+}
+
 
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
@@ -95,10 +115,11 @@ const server=http.createServer((req,res)=>{
   let stage='boot';
   let lastInline='none';
   let lastCaptureTrace='none';
+  let lastCaptureCallTrace='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastCaptureTrace='+lastCaptureTrace);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastCaptureTrace='+lastCaptureTrace+' lastCaptureCallTrace='+lastCaptureCallTrace);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -165,6 +186,11 @@ const server=http.createServer((req,res)=>{
     }
     if(value.startsWith('[phase2-mc162]')){
       lastCaptureTrace=value;
+      console.log(value);
+      return;
+    }
+    if(value.startsWith('[phase2-chain]')){
+      lastCaptureCallTrace=value;
       console.log(value);
       return;
     }

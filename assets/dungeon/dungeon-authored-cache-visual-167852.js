@@ -19,7 +19,8 @@ const UI_ENEMY_SUMMARY_SELECTOR="#dc01Enemies";
 const UI_GHOST_CHEST_SELECTOR="#dc200Scene .dc200SceneCard:has(> .dc309SceneChest)";
 let retries=0;
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
-function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}\nfunction sourceRenderOwner(){return !!ROOT.DungeonSourceRenderStability167877}
+function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
+function sourceRenderOwner(){return !!ROOT.DungeonSourceRenderStability167877}
 function cacheCells(x){return new Set((Array.isArray(x?.last?.authoredCacheCells167849)?x.last.authoredCacheCells167849:[]).map(Number).filter(Number.isInteger))}
 function floorAsset(themeName,index){const t=String(themeName||"").toLowerCase();if(!FLOOR_THEMES.has(t))return "";const variant=String((Math.max(0,Number(index)||0)%6)+1).padStart(2,"0");return FLOOR_ROOT+"dng_floor_"+t+"_"+variant+".png"}
 function authoredRoom(x){const id=String(x?.last?.customRoomId||"");if(!id)return null;try{return ROOT.DungeonRoomCreator100?.findRoom?.(id)||null}catch(e){return null}}

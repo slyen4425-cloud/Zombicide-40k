@@ -5,6 +5,11 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
+const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const shellCutMarker='function gensCleanDungeonBaseHeroesFromOtherRpgProfiles(){';
+const shellCut=indexSource.indexOf(shellCutMarker);
+assert.ok(shellCut>0,'real index.html must expose the expected post-launch Shell boundary');
+const realSurvivalShellHtml=indexSource.slice(0,shellCut)+'\n</script></body></html>';
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
 const mime={
@@ -22,6 +27,11 @@ const mime={
 
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
+  if(pathname==='/__gens_survival_shell_real.html'){
+    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});
+    res.end(realSurvivalShellHtml);
+    return;
+  }
   const rel=pathname==='/'?'/index.html':pathname;
   const file=path.resolve(root,'.'+rel);
   if(!file.startsWith(root+path.sep)){
@@ -60,8 +70,8 @@ const server=http.createServer((req,res)=>{
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   try{
-    mark('navigate-index');
-    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'commit',timeout:45000});
+    mark('navigate-real-shell-prefix');
+    await page.goto(`http://127.0.0.1:${port}/__gens_survival_shell_real.html`,{waitUntil:'domcontentloaded',timeout:45000});
 
     mark('wait-shell-owners');
     await page.waitForFunction(()=>(

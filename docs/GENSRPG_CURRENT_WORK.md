@@ -79,9 +79,17 @@ Classer les fichiers/blocs actifs :
 
 ## Source index.html
 
-La copie locale fournie par l'utilisateur et déjà vérifiée contre le blob GitHub est utilisée pour l'inspection du gros `index.html`, conformément à la règle 26.
+Appliquer strictement la règle 26 de la charte.
 
-Le changement de fermeture Phase 1 dans `openGensFamily()` est connu et limité à deux lignes ; la copie locale de travail correspond à cet état.
+Si le contenu exact de `index.html` doit être consulté ou modifié :
+- identifier d'abord le SHA exact requis ;
+- fournir immédiatement à l'utilisateur le lien direct GitHub vers ce `index.html` précis ;
+- lui demander de le télécharger, le compresser et le joindre ;
+- vérifier ensuite le fichier reçu avant utilisation.
+
+Ne pas réutiliser automatiquement une ancienne copie locale si le chantier exige un état plus récent.
+
+Pour les analyses qui n'exigent pas son contenu exact, GitHub reste utilisé pour SHA, diff, CI, workflow Pages et métadonnées.
 
 ## Livrables du lot
 
@@ -104,9 +112,38 @@ Le changement de fermeture Phase 1 dans `openGensFamily()` est connu et limité 
 
 Aucun fichier runtime actif sans propriétaire connu.
 
+## État Phase 2 actuel
+
+Cartographie déjà établie :
+- 72 fichiers JS physiques sous `assets/gensrpg` + `assets/dungeon` ;
+- 21 entrées locales directes dans la composition GitHub Pages ;
+- 65 fichiers JS atteignables dans le graphe de production ;
+- 7 fichiers hors graphe de production actuel ;
+- 130 blocs inline identifiés dans `index.html` ;
+- 120 blocs exécutables / 10 explicitement désactivés ;
+- chaînes d'autorité/global wrappers cartographiées pour les fonctions critiques ;
+- dettes observer/timers/storages documentées.
+
+Gardes Phase 2 :
+- graphe runtime production : GREEN ;
+- inventaire des chaînes d'autorité : GREEN ;
+- manifeste des propriétaires runtime : GREEN ;
+- inventaire effets globaux / stockage : GREEN.
+
+Caractérisation encore en cours :
+- Capture dans la composition Pages complète ;
+- le test n'a pas encore atteint une assertion gameplay ;
+- le blocage actuel se produit pendant le boot complet du gros runtime ;
+- instrumentation ajoutée pour remonter le dernier bloc inline exécuté avant gel.
+
 ## Prochaine étape
 
-Produire une première cartographie automatique du Shell/index et de l'arbre `assets/gensrpg`, puis approfondir les zones ambiguës avant toute extraction physique.
+Lire le prochain run instrumenté, identifier le dernier bloc inline réellement exécuté avant blocage, puis décider s'il s'agit :
+- d'un coût/synchronisation du harnais ;
+- d'une boucle synchrone réelle de composition ;
+- ou d'un effet global actif à documenter.
+
+Aucun correctif runtime dans ce lot de cartographie.
 
 ## Dette séparée
 

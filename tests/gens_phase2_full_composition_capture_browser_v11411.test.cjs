@@ -48,9 +48,11 @@ const server=http.createServer((req,res)=>{
 
 (async()=>{
   let stage='boot';
+  const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
     console.error('[phase2-full-capture] WATCHDOG stage='+stage);
+    console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },150000);
 
@@ -83,7 +85,30 @@ const server=http.createServer((req,res)=>{
   page.setDefaultTimeout(25000);
   const browserErrors=[];
   const dialogs=[];
-  page.on('pageerror',error=>browserErrors.push(String(error)));
+  page.on('request',request=>{
+    try{
+      const u=new URL(request.url());
+      requestLog.push({kind:'request',path:u.pathname,host:u.host});
+    }catch(e){}
+  });
+  page.on('requestfinished',request=>{
+    try{
+      const u=new URL(request.url());
+      requestLog.push({kind:'finished',path:u.pathname,host:u.host});
+    }catch(e){}
+  });
+  page.on('requestfailed',request=>{
+    try{
+      const u=new URL(request.url());
+      requestLog.push({kind:'failed',path:u.pathname,host:u.host,error:request.failure()?.errorText||''});
+    }catch(e){}
+  });
+  page.on('pageerror',error=>{
+    const value=String(error);
+    browserErrors.push(value);
+    console.error('[phase2-full-capture] console-error',value);
+    console.error('[phase2-full-capture] pageerror',value);
+  });
   page.on('console',message=>{
     if(message.type()!=='error')return;
     const value=message.text();

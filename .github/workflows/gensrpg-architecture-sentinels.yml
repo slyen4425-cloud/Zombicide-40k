@@ -220,6 +220,9 @@ jobs:
       - name: Vérifier le manifeste des propriétaires inline Phase 2
         run: node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
 
+      - name: Vérifier les derniers propriétaires globaux inline Phase 2
+        run: node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+
       - name: Inventorier les effets globaux et le stockage Phase 2
         run: node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
 

@@ -75,10 +75,11 @@ const server=http.createServer((req,res)=>{
   let stage='boot';
   let lastInline='none';
   let lastExternal='none';
+  let lastMutationObserver='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal+' lastMutationObserver='+lastMutationObserver);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -97,6 +98,28 @@ const server=http.createServer((req,res)=>{
   });
 
   await context.addInitScript(()=>{
+    try{
+      const NativeMutationObserver=window.MutationObserver;
+      if(typeof NativeMutationObserver==='function'&&!window.__phase2MoInstrumented){
+        window.__phase2MoInstrumented=true;
+        let phase2MoSeq=0;
+        window.MutationObserver=function(callback){
+          const id=++phase2MoSeq;
+          const stack=String(new Error('phase2-mo-'+id).stack||'').split('\n').slice(1,6).join(' | ');
+          console.log('[phase2-mo-create] id='+id+' '+stack);
+          let calls=0;
+          const wrapped=function(){
+            calls++;
+            if(calls<=8||(calls&(calls-1))===0){
+              console.log('[phase2-mo-call] id='+id+' calls='+calls);
+            }
+            return callback.apply(this,arguments);
+          };
+          return new NativeMutationObserver(wrapped);
+        };
+        window.MutationObserver.prototype=NativeMutationObserver.prototype;
+      }
+    }catch(e){}
     try{
       if(!sessionStorage.getItem('__phase2FullCaptureBooted')){
         localStorage.clear();
@@ -151,6 +174,11 @@ const server=http.createServer((req,res)=>{
     }
     if(value.startsWith('[phase2-external-before] ')||value.startsWith('[phase2-external-after] ')){
       lastExternal=value;
+      console.log(value);
+      return;
+    }
+    if(value.startsWith('[phase2-mo-create]')||value.startsWith('[phase2-mo-call]')){
+      lastMutationObserver=value;
       console.log(value);
       return;
     }

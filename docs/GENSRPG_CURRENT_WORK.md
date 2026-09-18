@@ -34,16 +34,33 @@ Livrables déjà verts :
 
 ## Chantier courant
 
-**Correctif dédié — Core Stats saveProfile ne doit jamais écraser un autre profil**
+**Correctif dédié — routage final Capture / Dungeon dans startConfiguredGame**
 
 Branche :
-`work/gensrpg-core-stats-save-fix-2026-09-18`
+`work/gensrpg-capture-start-routing-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-core-stats-save-2026-09-18`
+`checkpoint/gensrpg-start-capture-dungeon-routing-2026-09-18`
 
 Base exacte :
-`f20dd805938456643681aaa3d11e2ee4dbdf8765`
+`b15567342c1fbdeb33a7559187c3670ba3e184de`
+
+## Périmètre actif du lot routage
+
+Propriétaire à caractériser :
+- couche tardive `dungeonCore200Rebuild` qui réassigne `startConfiguredGame`.
+
+Invariant :
+- Capture conserve son substrat Dungeon (`isDungeonMode() === true`) ;
+- Capture doit néanmoins déléguer au chemin Capture déjà existant ;
+- Dungeon normal doit continuer à entrer dans `DungeonCore01`.
+
+Interdictions :
+- ne pas changer globalement `isDungeonMode()` ;
+- ne pas recréer un lanceur Capture ;
+- ne pas modifier le gameplay ;
+- aucun nouveau wrapper, observer, timer ou retry ;
+- aucun changement sur `main`.
 
 ## Défaut caractérisé à corriger
 

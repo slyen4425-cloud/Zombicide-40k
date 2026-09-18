@@ -255,14 +255,35 @@ Quatre blocs contiennent la construction d'un `MutationObserver` :
 
 Aucun de ces quatre blocs inline n'attache actuellement un observer à `document.body` ou `document.documentElement`.
 
-### Externe actif — dette forte
+### Externes de production — dettes globales actives
 
-`assets/dungeon/dungeon-core-317.js`
+Trois fichiers du graphe de production installent automatiquement un observer global sur `body` ou `documentElement`.
+
+#### `assets/dungeon/dungeon-core-317.js`
+
 - attache un `MutationObserver` à `document.documentElement` avec `childList:true, subtree:true` ;
 - appelle `scheduleBackButton()` après mutations ;
-- possède également un retry `setInterval` de 12 tentatives toutes les 250 ms pour réimposer les overrides marchand.
+- possède également un retry `setInterval` de 12 tentatives toutes les 250 ms pour réimposer les overrides marchand ;
+- `install()` est exécuté automatiquement au chargement/DOMContentLoaded.
 
-**Classification : dette architecturale active, forte priorité future.**
+#### `assets/dungeon/dungeon-zone-content-167824.js`
+
+- `installRuntimeObserver()` choisit `document.body || document.documentElement` ;
+- observe `childList:true, subtree:true` ;
+- surveille l'apparition de `#dc01Explore`, `#dc047RoomBoard` et `#dc200Scene` ;
+- reprogramme `ensureLauncher()` et `wrapCore()` après détection ;
+- `installRuntimeObserver()` est appelé automatiquement au chargement/DOMContentLoaded ;
+- un listener global de clic reprogramme également le rebind.
+
+#### `assets/gensrpg/gens-world-summary-167820.js`
+
+- `install()` choisit `document.body || document.documentElement` ;
+- attache un `MutationObserver(schedulePatch)` avec `childList:true, subtree:true` ;
+- l'observer rescane/patch les cartes de résumé ;
+- `install()` est appelé automatiquement au chargement/DOMContentLoaded.
+
+**Classification : 3 dettes architecturales globales actives à traiter dans des lots dédiés ultérieurs.**  
+Elles sont incompatibles avec l'architecture cible de la charte, mais leur suppression ne fait pas partie du lot de cartographie.
 
 ### Tactical V111
 

@@ -1,18 +1,14 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
 
 const root=path.join(__dirname,'..');
-const indexPath=path.join(root,'index.html');
-const source=fs.readFileSync(indexPath,'utf8');
-const bytes=fs.readFileSync(indexPath);
+const source=execFileSync('git',['show','HEAD:index.html'],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
-const gitBlobSha=crypto.createHash('sha1')
-  .update(Buffer.concat([Buffer.from('blob '+bytes.length+'\\0'),bytes]))
-  .digest('hex');
-assert.equal(gitBlobSha,manifest.sourceIndexBlob,'inline-owner manifest must target the exact current index.html blob');
+const gitBlobSha=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
+assert.equal(gitBlobSha,manifest.sourceIndexBlob,'inline-owner manifest must target the exact committed index.html blob');
 
 const disabled=new Set([
   'dungeonCore081TacticalMovementDisabled',

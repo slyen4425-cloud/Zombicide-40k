@@ -12,54 +12,69 @@ Lire avant tout changement :
 
 - `main` gelé : V16.78.114.11
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- ne pas travailler directement sur `main`
+- ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert utilisateur
+## Dernier checkpoint vert
 
-`checkpoint/gensrpg-tactical-dock-legacy-layer-green-2026-09-17`  
-SHA : `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+`checkpoint/gensrpg-phase1-sentinel-gap-audit-green-2026-09-18`  
+SHA : `fcc9e6378263b0498170dbb7f4d110a7fe169f93`
 
-Le test manuel utilisateur du Dock après combats répétés est concluant.
+Audit détaillé :
+`docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
 ## Chantier courant
 
-**Phase 1 — audit des gaps de sentinelles après Dock**
+**Phase 1 — sentinelle de lancement Survie par le vrai shell**
 
 Branche :
-`work/gensrpg-phase1-sentinel-gap-audit-post-dock-2026-09-17`
+`work/gensrpg-phase1-survival-launch-sentinel-2026-09-18`
 
-Checkpoint de départ rétroactif conforme :
-`checkpoint/gensrpg-start-phase1-sentinel-gap-audit-2026-09-18`
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-survival-launch-sentinel-2026-09-18`
 
 SHA de base :
-`ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+`fcc9e6378263b0498170dbb7f4d110a7fe169f93`
 
-Périmètre : documentation/audit uniquement. Aucun runtime ou gameplay.
+## Périmètre déclaré
 
-Matrice détaillée :
-`docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
+Module : Shell + Survie, **tests uniquement**.
 
-## Conclusion de l'audit
+Propriétaires traversés sans modification :
+- `openGensFamily('survival')`
+- `openGensBuiltInGame(profileId,'survival')`
+- préparation de partie via `newGame()`
+- lancement via `startConfiguredGame()`
+- guard de famille `GensSurvivalModeIsolation1678104`
 
-Couverture forte : fiche héros, mouvement Dungeon, stats, D100/D6, toucher, dégâts/armure, Tactical, persistance Dungeon, PWA/cache.
+Systèmes protégés et interdits à la modification :
+- runtime Survie ;
+- runtime Dungeon ;
+- Tactical / combat / détection ;
+- stats / dés / dégâts ;
+- sauvegarde / reprise ;
+- Capture ;
+- PvP ;
+- `index.html` runtime.
 
-Gaps confirmés :
-- lancement Survie : pas de sentinelle shell réelle ;
-- lancement Dungeon : runtime fortement couvert, shell complet non couvert ;
-- Save & Quit : sortie couverte, vraie reprise complète non couverte ;
-- Capture : données couvertes, lancement/gameplay non couvert ;
-- PvP : placeholder actuel non protégé ;
-- non-interférence entre les quatre modules : partielle.
+## Test prévu
 
-## Prochaine étape
+Sentinelle Playwright mobile sur la composition réelle de `preview.html` + `index.html` :
+1. partir de l'accueil racine ;
+2. ouvrir MODE SURVIE ;
+3. ouvrir un univers Survie réel ;
+4. entrer dans JOUER / PRÉPARER ;
+5. sélectionner un vrai participant disponible ;
+6. cliquer DÉMARRER LA PARTIE ;
+7. prouver que la session devient active en Survie ;
+8. prouver que le guard reste `survival` ;
+9. prouver qu'aucun overlay/runtime Dungeon ne prend l'autorité.
 
-Après validation CI de ce SHA documentaire :
-1. créer le checkpoint vert de l'audit ;
-2. créer le checkpoint de départ du lot suivant ;
-3. ouvrir une branche **test-only** dédiée à la sentinelle de lancement Survie ;
-4. ne modifier aucun runtime ;
-5. brancher uniquement la nouvelle sentinelle au workflow d'architecture.
+Le test doit être branché dans `gensrpg-architecture-sentinels.yml`.
 
-## Dette explicitement différée
+## Risque
 
-La détection ennemie hors embuscade fera l'objet d'un chantier de caractérisation dédié après la Phase 1.
+Le seul risque est de rendre le test artificiel en mockant le shell. Interdit : la sentinelle doit charger le vrai `index.html` via la preview restructuration.
+
+## Dette différée
+
+Détection ennemie hors embuscade : lot de caractérisation séparé après Phase 1.

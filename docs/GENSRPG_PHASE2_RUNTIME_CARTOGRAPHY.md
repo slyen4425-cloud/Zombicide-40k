@@ -18,44 +18,117 @@ Cette cartographie décrit ce qui est **présent**, **chargé** et **installé**
 Un fichier non chargé n'est pas automatiquement supprimable.  
 Un mécanisme présent dans le code n'est pas automatiquement actif : l'appel d'installation doit être vérifié.
 
-## 1. Entrées JS réellement chargées par index.html
+## 1. HTML brut versus composition réelle GitHub Pages
+
+Le `index.html` source ne représente **pas à lui seul** la composition réellement déployée sur GitHub Pages.
+
+### HTML brut — entrées directes
 
 Scripts tiers :
 - `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2`
 - `https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js`
 
-Scripts locaux directs :
+Scripts locaux directement présents dans le source :
 1. `assets/dungeon/dungeon-core-316.js`
 2. `assets/dungeon/dungeon-core-317.js`
 3. `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
 
-Aucun autre chemin local `.js` n'est directement référencé dans le HTML actuel.
+### Build GitHub Pages
 
-## 2. Graphe de chargement externe actif
+`.github/workflows/main.yml` retire d'abord le tag source de `gens-mobile-combat-performance-16781022.js`, puis injecte avant `</body>` une liste ordonnée de **19 modules**.
 
-### Niveau 0 — index.html
+`preview.html` reproduit exactement cette même liste et ce même ordre ; cette parité est déjà protégée par `gens_preview_composition_v11411.test.cjs`.
 
-`index.html`
-- charge `dungeon-core-316.js`
-- charge `dungeon-core-317.js`
-- charge `gens-mobile-combat-performance-16781022.js`
+La composition locale directe finale de production comporte donc **21 fichiers JS locaux uniques** :
+- les deux entrées source `dungeon-core-316.js` et `dungeon-core-317.js` ;
+- les 19 modules injectés par Pages, avec mobile-performance en dernière couche.
 
-### Niveau 1 — entrée architecture/performance
+## 2. Modules directement injectés par GitHub Pages
 
-`gens-mobile-combat-performance-16781022.js`
-- optimise les animations D6/D100 ;
-- met en cache plusieurs valeurs combat ;
-- wrappe plusieurs fonctions d'invalidation ;
-- appelle `reinstall()` avec retries 250 ms / 1200 ms ;
-- charge dynamiquement :
-  - `assets/gensrpg/core/runtime-bootstrap-v1.js`
+Ordre de production :
+
+1. `assets/dungeon/dungeon-core-318.js`
+2. `assets/dungeon/dungeon-large-room-support-167834.js`
+3. `assets/dungeon/dungeon-room-creator-100.js`
+4. `assets/dungeon/dungeon-room-creator-v2-167819.js`
+5. `assets/dungeon/dungeon-room-creator-feedback-167821.js`
+6. `assets/dungeon/dungeon-world-builder-167821.js`
+7. `assets/dungeon/dungeon-room-runtime-167822.js`
+8. `assets/dungeon/dungeon-world-runtime-167823.js`
+9. `assets/dungeon/dungeon-zone-content-167824.js`
+10. `assets/dungeon/dungeon-authored-runtime-167839.js`
+11. `assets/dungeon/dungeon-authored-cache-visual-167852.js`
+12. `assets/dungeon/dungeon-source-render-stability-167877.js`
+13. `assets/dungeon/dungeon-equipment-ui.js`
+14. `assets/dungeon/dungeon-equipment-hotfix-167817.js`
+15. `assets/dungeon/dungeon-set-editor-167818.js`
+16. `assets/gensrpg/gens-world-summary-167820.js`
+17. `assets/gensrpg/gens-rpg-stats-clean-167874.js`
+18. `assets/gensrpg/gens-dungeon-hero-art-repair-167874.js`
+19. `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
+
+Conséquence importante : plusieurs fichiers initialement classés « non chargés » lors de la première lecture du HTML brut sont en réalité **directement chargés en production par le build Pages**.
+
+## 3. Graphe dynamique de production
+
+Le garde `gens_phase2_runtime_load_graph_v11411.test.cjs` reconstruit désormais la composition Pages puis suit récursivement les références locales JS.
+
+### Chaîne Room Creator / authored Dungeon
+
+`dungeon-room-creator-feedback-167821.js` référence notamment :
+- `gens-multiplayer-entry-167831.js`
+- `dungeon-random-library-content-167832.js`
+- `dungeon-world-session-bridge-167832.js`
+- `dungeon-authored-bootstrap-167849.js`
+- `dungeon-room-content-ui-167831.js`
+- `dungeon-room-grid-capture-167830.js`
+- `dungeon-room-template-content-167828.js`
+- `dungeon-room-visual-hotfix-167827.js`
+- `dungeon-room-visual-config-167826.js`
+
+`dungeon-authored-bootstrap-167849.js` référence ensuite :
+- `dungeon-zone-links-167846.js`
+- `dungeon-cache-editor-stability-167851.js`
+- `dungeon-authored-cache-visual-167852.js`
+- `dungeon-authored-cache-ux-167853.js`
+- `dungeon-grid-display-recovery-167856.js`
+- `dungeon-authored-action-fix-167857.js`
+- `dungeon-secondary-branch-content-fix-167860.js`
+- `dungeon-authored-return-persist-167862.js`
+- `dungeon-authored-branch-nav-cleanup-167863.js`
+- `dungeon-authored-cache-guard-167849.js`
+
+`dungeon-room-grid-capture-167830.js` référence `gens-ui-recovery-167843.js`, qui référence à son tour :
+- `dungeon-exact-trap-runtime-167845.js`
+- `dungeon-zone-links-167846.js`
+
+`dungeon-authored-cache-visual-167852.js` référence :
+- `dungeon-authored-event-cells-167877.js`
+
+### Chaîne art/UI/stats Dungeon
+
+`gens-dungeon-hero-art-repair-167874.js` référence :
+- `dungeon-authored-final-exit-167875.js`
+- `dungeon-authored-event-cells-167877.js`
+- `dungeon-event-runtime-fix-167878.js`
+- `dungeon-grid-display-recovery-167856.js`
+- `gens-hero-editor-dynamic-167897.js`
+- `gens-dungeon-hero-ingame-art-167898.js`
+- `gens-stat-upgrade-policy-167898.js`
+- `gens-dungeon-ui-cleanup-1678100.js`
+- `gens-equipment-stat-cleanup-1678102.js`
+
+### Chaîne architecture / Tactical
+
+`gens-mobile-combat-performance-16781022.js` :
+- optimise D6/D100 et plusieurs caches ;
+- wrappe des invalidateurs ;
+- appelle `reinstall()` ;
+- charge `assets/gensrpg/core/runtime-bootstrap-v1.js`.
 
 Cette responsabilité est **mixte** : performance combat + bootstrap runtime.
 
-### Niveau 2 — RuntimeBootstrap
-
-`assets/gensrpg/core/runtime-bootstrap-v1.js` charge, dans l'ordre :
-
+`runtime-bootstrap-v1.js` charge dans l'ordre :
 1. `gens-rpg-tactical-combat-v2.js`
 2. `gens-rpg-tactical-combat-v2-adapter.js`
 3. `gens-rpg-tactical-combat-v2-rules.js`
@@ -66,10 +139,7 @@ Cette responsabilité est **mixte** : performance combat + bootstrap runtime.
 
 Puis `finalize()` réinstalle guard/Bridge immédiatement et après 250 / 1200 / 3000 ms.
 
-### Niveau 3 — chaîne Tactical historique encore réellement chargée
-
-`gens-rpg-tactical-combat-v2-integration.js` charge :
-
+`gens-rpg-tactical-combat-v2-integration.js` référence :
 1. `gens-rpg-tactical-visual-dice-16781142.js`
 2. `gens-rpg-tactical-runtime-authority-1678113.js`
 3. `gens-rpg-tactical-combat-coherence-1678112.js`
@@ -78,107 +148,40 @@ Puis `finalize()` réinstalle guard/Bridge immédiatement et après 250 / 1200 /
 6. `gens-rpg-tactical-combat-v2-polish-1678109.js`
 7. `gens-rpg-tactical-combat-v2-polish-1678108.js`
 
-Le nom historique V108/V109/V110/V111/V112/V113 ne signifie donc pas « legacy inactif » : ces fichiers sont encore chargés dans le runtime courant.
-
-`gens-rpg-tactical-combat-v2-bridge.js` charge en plus :
+`gens-rpg-tactical-combat-v2-bridge.js` référence :
 - `gens-rpg-runtime-repair-1678106.js`
 
-Aucun de ces fichiers de niveau 3 ne charge ensuite d'autre fichier JS GenSrpG/Dungeon.
+Les noms historiques V108/V109/V110/V111/V112/V113 ne signifient donc pas « legacy inactif » : ils restent dans le graphe atteignable de production.
 
-## 3. Ensemble externe actif identifié
+## 4. Fermeture statique du graphe de production
 
-19 fichiers locaux appartiennent au graphe de chargement courant :
+Inventaire physique sous `assets/gensrpg/` + `assets/dungeon/` :
+- **72 fichiers JS**.
 
-### Dungeon
-- `assets/dungeon/dungeon-core-316.js`
-- `assets/dungeon/dungeon-core-317.js`
+Graphe local **atteignable statiquement depuis la composition GitHub Pages** :
+- **65 fichiers JS**.
 
-### Core / bootstrap / frontière
-- `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
-- `assets/gensrpg/core/runtime-bootstrap-v1.js`
-- `assets/gensrpg/gens-survival-mode-isolation-1678104.js`
+Cette notion signifie : le fichier est soit directement chargé par la composition Pages, soit référencé par un fichier déjà atteignable.  
+Elle ne signifie pas que les 65 fichiers installent tous une autorité simultanément sur chaque écran.
 
-### Tactical
-- `assets/gensrpg/gens-rpg-tactical-combat-v2.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js`
-- `assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js`
-- `assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js`
-- `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js`
-- `assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js`
-- `assets/gensrpg/gens-rpg-runtime-repair-1678106.js`
-
-## 4. Fichiers présents mais non chargés par le graphe courant
-
-53 fichiers JS existent sous `assets/gensrpg` / `assets/dungeon` sans appartenir au graphe de chargement identifié.
-
-### Dungeon — non chargés par le graphe courant
-
-- `assets/dungeon/dungeon-authored-action-fix-167857.js`
-- `assets/dungeon/dungeon-authored-bootstrap-167849.js`
-- `assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js`
-- `assets/dungeon/dungeon-authored-cache-guard-167849.js`
-- `assets/dungeon/dungeon-authored-cache-ux-167853.js`
-- `assets/dungeon/dungeon-authored-cache-visual-167852.js`
-- `assets/dungeon/dungeon-authored-event-cells-167877.js`
-- `assets/dungeon/dungeon-authored-final-exit-167875.js`
-- `assets/dungeon/dungeon-authored-return-persist-167862.js`
-- `assets/dungeon/dungeon-authored-runtime-167839.js`
-- `assets/dungeon/dungeon-cache-editor-stability-167851.js`
-- `assets/dungeon/dungeon-core-318.js`
-- `assets/dungeon/dungeon-equipment-hotfix-167817.js`
-- `assets/dungeon/dungeon-equipment-ui.js`
-- `assets/dungeon/dungeon-event-runtime-fix-167878.js`
-- `assets/dungeon/dungeon-exact-trap-runtime-167845.js`
-- `assets/dungeon/dungeon-grid-display-recovery-167856.js`
-- `assets/dungeon/dungeon-large-room-support-167834.js`
-- `assets/dungeon/dungeon-random-library-content-167832.js`
-- `assets/dungeon/dungeon-room-content-ui-167831.js`
-- `assets/dungeon/dungeon-room-creator-100.js`
-- `assets/dungeon/dungeon-room-creator-feedback-167821.js`
-- `assets/dungeon/dungeon-room-creator-v2-167819.js`
-- `assets/dungeon/dungeon-room-grid-capture-167830.js`
-- `assets/dungeon/dungeon-room-runtime-167822.js`
-- `assets/dungeon/dungeon-room-template-content-167828.js`
-- `assets/dungeon/dungeon-room-visual-config-167826.js`
-- `assets/dungeon/dungeon-room-visual-hotfix-167827.js`
-- `assets/dungeon/dungeon-secondary-branch-content-fix-167860.js`
-- `assets/dungeon/dungeon-set-editor-167818.js`
-- `assets/dungeon/dungeon-source-render-stability-167877.js`
-- `assets/dungeon/dungeon-world-builder-167821.js`
-- `assets/dungeon/dungeon-world-runtime-167823.js`
-- `assets/dungeon/dungeon-world-session-bridge-167832.js`
-- `assets/dungeon/dungeon-zone-content-167824.js`
-- `assets/dungeon/dungeon-zone-links-167846.js`
-
-### GenSrpG — non chargés par le graphe courant
+Les **7 fichiers non atteignables** par le graphe de production actuel sont :
 
 - `assets/gensrpg/dungeon/progression-runtime-v1.js`
-- `assets/gensrpg/gens-dungeon-hero-art-repair-167874.js`
-- `assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js`
 - `assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js`
 - `assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js`
-- `assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js`
-- `assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`
-- `assets/gensrpg/gens-hero-editor-dynamic-167897.js`
-- `assets/gensrpg/gens-multiplayer-entry-167831.js`
-- `assets/gensrpg/gens-rpg-stats-clean-167874.js`
 - `assets/gensrpg/gens-rpg-tactical-hotfix-1678114.js`
 - `assets/gensrpg/gens-rpg-tactical-session-guard-16781144.js`
 - `assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js`
 - `assets/gensrpg/gens-stat-manual-cost-167898.js`
-- `assets/gensrpg/gens-stat-upgrade-policy-167898.js`
-- `assets/gensrpg/gens-ui-recovery-167843.js`
-- `assets/gensrpg/gens-world-summary-167820.js`
 
-**Statut : NON CHARGÉ PAR LE GRAPHE COURANT**, pas « supprimable ».  
-Avant suppression future, vérifier tests, tooling, documentation, Pages/preview et éventuels chargements hors `index.html`.
+**Statut : NON ATTEIGNABLE PAR LE GRAPHE DE PRODUCTION ACTUEL**, pas « supprimable ».
+
+Avant toute suppression future, vérifier encore :
+- tests et fixtures ;
+- tooling ;
+- documentation ;
+- imports manuels éventuels ;
+- historique de migration/rollback.
 
 ## 5. Runtime inline dans index.html
 

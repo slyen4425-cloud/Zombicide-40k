@@ -192,13 +192,32 @@ const server=http.createServer((req,res)=>{
 
     mark('start-real-dungeon-session');
     await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
-    await page.waitForFunction(()=>{
-      let rt=null;try{rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')}catch(e){}
-      const core=document.getElementById('gensDungeonCore01');
-      return localStorage.getItem('z40k_session_active_v1')==='1' &&
-        Array.isArray(rt?.participants) && rt.participants.length>0 &&
-        core && getComputedStyle(core).display!=='none';
-    });
+    try{
+      await page.waitForFunction(()=>{
+        let rt=null;try{rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')}catch(e){}
+        const core=document.getElementById('gensDungeonCore01');
+        return localStorage.getItem('z40k_session_active_v1')==='1' &&
+          Array.isArray(rt?.participants) && rt.participants.length>0 &&
+          core && getComputedStyle(core).display!=='none';
+      },{timeout:5000});
+    }catch(error){
+      const startDiag=await page.evaluate(()=>({
+        activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        eligible:typeof window.DungeonCore01?.eligible==='function'?window.DungeonCore01.eligible():null,
+        participants:typeof loadGameParticipants==='function'?loadGameParticipants():[],
+        session:localStorage.getItem('z40k_session_active_v1'),
+        runtime:localStorage.getItem('gensrpg_dungeon_runtime_v2'),
+        coreDisplay:document.getElementById('gensDungeonCore01')?getComputedStyle(document.getElementById('gensDungeonCore01')).display:'absent',
+        pregameDisplay:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        startWrapped:!!window.startConfiguredGame,
+        coreActive:window.DungeonCore01?.active??null
+      })).catch(e=>({diagnosticError:String(e)}));
+      console.error('[savequit-resume] start-diagnostic',JSON.stringify({startDiag,browserErrors}));
+      throw error;
+    }
 
     const savedBeforeQuit=await page.evaluate(()=>{
       const rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');

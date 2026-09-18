@@ -28,7 +28,7 @@ CI de fermeture :
 - Firefox `35318066103` — SUCCESS
 - Tactical Dock `35318066006` — SUCCESS
 
-## Chantier courant
+## Dernier lot validé
 
 **Phase 1 — sentinelle du placeholder PvP actuel**
 
@@ -41,50 +41,50 @@ Checkpoint de départ :
 Base exacte :
 `578f8fb5cf6ea05682b2ac10329ae6666d38a01e`
 
-## Périmètre déclaré
+SHA fonctionnel vert avant fermeture documentaire :
+`fe5eec3cfcfb0973ae5edab5ab8888a48fd761b7`
 
-Première intention **test-only** :
-- traverser le vrai Shell jusqu'au mode Duel/PvP ;
-- vérifier que le comportement actuel reste explicitement un placeholder ;
-- protéger les textes actuels `PVP — À VENIR` et `Le moteur PvP n’est pas encore construit.` ;
-- vérifier qu'aucune session de jeu ni autorité Dungeon/Survie/Tactical n'est activée par ce choix ;
-- brancher la sentinelle à la CI.
+Checkpoint final :
+`checkpoint/gensrpg-phase1-pvp-placeholder-sentinel-green-2026-09-18`
 
-Aucun moteur PvP ne doit être créé, démarré ou simulé dans ce lot.
+## Résultat du lot PvP
 
-## Propriétaire identifié
+La sentinelle navigateur `tests/gens_pvp_placeholder_shell_browser_v11411.test.cjs` traverse le vrai Shell :
 
-- `openGensFamily('pvp')` dans le Shell actuel ;
-- ce propriétaire affiche le placeholder et ne délègue pas à un runtime PvP.
+`Accueil -> Duel / PvP -> placeholder`
 
-## Fonctions/systèmes protégés
+Elle vérifie :
+- présence de la vraie carte PvP racine ;
+- affichage de `PVP — À VENIR` ;
+- texte `Le moteur PvP n’est pas encore construit.` ;
+- une seule carte placeholder désactivée ;
+- aucune ouverture de game home, pré-game ou menu de jeu ;
+- aucune création de session active ;
+- aucun profil de jeu activé ;
+- aucun runtime/état Dungeon créé ;
+- aucun thème Dungeon activé ;
+- aucun écrasement du guard famille Survie/Adventure.
 
-Ne pas modifier dans ce lot :
-- runtime Survie/Dungeon/Tactical/Capture ;
-- navigation globale hors besoin strict de caractérisation ;
-- combat, stats, dés, inventaire, persistance ;
-- PWA/cache ;
-- aucun nouveau wrapper global, observer, timer/retry ou monkey-patch ;
-- aucun fichier runtime PvP à créer.
+Le harnais réutilise le bloc Shell réel et le bloc custom-content exact de `index.html`. Aucun moteur PvP, runtime, gameplay, asset ou persistance n'a été créé ou modifié.
 
-## Tests prévus
+CI sur `fe5eec3cfcfb0973ae5edab5ab8888a48fd761b7` :
+- Architecture : run `35318561984` — SUCCESS
+- Firefox : run `35318561927` — SUCCESS
+- Tactical Dock : run `35318561939` — SUCCESS
 
-1. charger le vrai Shell ;
-2. cliquer sur la vraie carte Duel/PvP ;
-3. vérifier le titre/texte placeholder actuels ;
-4. vérifier qu'aucun profil/session de jeu n'est activé ;
-5. vérifier qu'aucune UI/runtime Dungeon/Tactical n'acquiert l'autorité ;
-6. relancer Architecture + navigateur + sentinelles existantes.
+## Prochain chantier Phase 1
 
-## Risques
+**Capture — protéger le comportement actuel uniquement.**
 
-- un sélecteur de test peut être obsolète ; ne jamais remplacer cela par une valeur injectée ;
-- ne pas transformer ce chantier de protection en début d'implémentation PvP ;
-- si le Shell actuel fait autre chose qu'un placeholder, caractériser avant toute correction runtime.
+Périmètre prévu :
+- nouveau checkpoint de départ et nouvelle branche ;
+- sentinelle test-only en première intention ;
+- traverser le vrai Shell / flux Capture actuel ;
+- caractériser et protéger ce qui fonctionne aujourd'hui ;
+- ne restaurer, réécrire ni étendre Capture pendant Phase 1 ;
+- aucun correctif runtime si un défaut réel apparaît avant caractérisation dédiée.
 
-## Prochaine étape
-
-Créer la sentinelle navigateur minimale du vrai Shell pour le placeholder PvP et l'ajouter à la CI.
+Après Capture : sentinelle explicite de non-interférence des quatre modules.
 
 ## Dette explicitement différée
 

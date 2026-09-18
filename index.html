@@ -39959,6 +39959,7 @@ try{
 const RT_KEY="gensrpg_dungeon_runtime_v2";
 
 function rt202(){try{return JSON.parse(localStorage.getItem(RT_KEY)||"null")}catch(e){return null}}
+function authored202(x){return !!x?.last?.authoredRuntime167839}
 function save202(x){if(!x)return;localStorage.setItem(RT_KEY,JSON.stringify(x));try{saveDungeonState?.({room:x.room||0,last:x.last||null})}catch(e){}}
 function cfg202(){try{return loadDungeonConfig?.()||{}}catch(e){return {}}}
 function clone202(v){return JSON.parse(JSON.stringify(v))}
@@ -40011,7 +40012,7 @@ function recentNoPuzzle202(x,n=3){
    réellement après génération, recréer une rencontre immédiatement.
 ------------------------------------------------------------------- */
 function ensureEncounter202(x){
-  if(!x||!["enemy","ambush","boss"].includes(String(x.last?.kind||"")))return;
+  if(authored202(x)||!x||!["enemy","ambush","boss"].includes(String(x.last?.kind||"")))return;
   if(live202().length)return;
   try{
     if(x.last.kind==="boss")dungeonBossRoom?.(x.room);
@@ -40041,7 +40042,7 @@ function chooseFree202(x){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 function ensureTrap202(x){
-  if(!x||String(x.last?.kind)!=="trap")return;
+  if(authored202(x)||!x||String(x.last?.kind)!=="trap")return;
   const m=x.last?.map;if(!m||!Array.isArray(m.cells))return;
   let idx=m.cells.findIndex(v=>String(v)==="trap");
   if(idx<0){
@@ -40096,7 +40097,7 @@ function selectedChallenges202(){
   }catch(e){return []}
 }
 function ensurePuzzle202(x){
-  if(!x||!x.last?.map||x.last.kind==="boss"||x.last.exitLocked)return;
+  if(authored202(x)||!x||!x.last?.map||x.last.kind==="boss"||x.last.exitLocked)return;
   const obj=x.last.map.objective;
   if(obj?.type==="challenge"){
     const h=history202(x);const row=h.find(e=>Number(e.room)===Number(x.room));if(row)row.puzzle=true;
@@ -40129,7 +40130,7 @@ function ensurePuzzle202(x){
    une rencontre normale, sauf boss explicite.
 ------------------------------------------------------------------- */
 function maybeForceCombatRoom202(x){
-  if(!x||x.room<=1||x.last?.kind==="boss")return false;
+  if(authored202(x)||!x||x.room<=1||x.last?.kind==="boss")return false;
   if(!recentNoCombat202(x,2))return false;
   if(["enemy","ambush"].includes(String(x.last?.kind||"")))return false;
 
@@ -40179,6 +40180,7 @@ if(window.DungeonCore01&&typeof DungeonCore01.explore==="function"){
     const before=Number(rt202()?.room)||0;
     const r=prev.apply(this,arguments);
     const x=rt202();
+    if(authored202(x))return r;
     const transition=x?.dc313LastTransition;
     if(x&&Number(x.room)>before&&transition?.created===true&&Number(transition.to)===Number(x.room)){
       recordRoom202(x);
@@ -40203,6 +40205,7 @@ if(window.DungeonCore01&&typeof DungeonCore01.explore==="function"){
 function decorate202(){
   const x=rt202();if(!x)return;
   try{
+    if(authored202(x)){paintTrap202();return}
     recordRoom202(x);
     /*
       Une rencontre ne doit être réparée qu'au moment où la salle vient

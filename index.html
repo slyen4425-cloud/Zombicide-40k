@@ -29822,7 +29822,7 @@ function mc162MergeById(existing,seed){
 window.ensureBuiltinMonsterCapture162=function(){
   /* Profil */
   try{
-    const profiles=loadGameProfilesRaw();
+    const profiles=loadGameProfiles();
     if(!profiles.some(p=>String(p?.id)===MC162_ID)){
       profiles.push(JSON.parse(JSON.stringify(MC162_PROFILE)));
       saveGameProfiles(profiles);

@@ -94,7 +94,42 @@ const server=http.createServer((req,res)=>{
     dialogs.push({type:dialog.type(),message:dialog.message()});
     await dialog.accept();
   });
-  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  await page.route('https://cdn.jsdelivr.net/**',async route=>{
+    const url=route.request().url();
+    if(url.includes('@supabase/supabase-js')){
+      await route.fulfill({
+        status:200,
+        contentType:'text/javascript; charset=utf-8',
+        body:`window.supabase={createClient:()=>({
+          auth:{
+            getSession:async()=>({data:{session:null}}),
+            signInAnonymously:async()=>({data:{session:{user:{id:'phase2-test'}}},error:null})
+          },
+          channel:()=>({on(){return this},subscribe(){return this}}),
+          removeChannel:async()=>{},
+          rpc:async()=>({data:null,error:null}),
+          from:()=>({
+            select(){return this},eq(){return this},order(){return this},limit(){return this},
+            maybeSingle:async()=>({data:null,error:null}),
+            single:async()=>({data:null,error:null}),
+            insert:async()=>({data:null,error:null}),
+            upsert:async()=>({data:null,error:null}),
+            update(){return this},delete(){return this}
+          })
+        })};`
+      });
+      return;
+    }
+    if(url.includes('qrcodejs')){
+      await route.fulfill({
+        status:200,
+        contentType:'text/javascript; charset=utf-8',
+        body:`window.QRCode=function(){};window.QRCode.CorrectLevel={M:0};`
+      });
+      return;
+    }
+    await route.abort();
+  });
 
   const waitFullOwners=()=>page.waitForFunction((captureId)=>{
     try{

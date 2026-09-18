@@ -558,3 +558,48 @@ Le défaut visuel Survie signalé simultanément (arts/images non liés) est enr
 ### Prochaine action
 
 Créer un test de caractérisation du vrai chemin Survie -> Dungeon. Si un défaut réel est prouvé, identifier le propriétaire exact avant toute correction.
+
+## Avancement réel — Dungeon après Survie (2026-09-18, reprise fil)
+
+Branche active :
+`work/gensrpg-dungeon-after-survival-start-state-2026-09-18`
+
+Checkpoint GREEN de départ :
+`checkpoint/gensrpg-phase3-target-structure-green-2026-09-18`
+
+Base du chantier :
+`080a45a904590a2b24a2cbc87b9c270913f427e6`
+
+HEAD constaté avant cette mise à jour :
+`e2b86b50036921a2c29ee181e42b503ff2b960fd`
+
+Correction fonctionnelle déjà appliquée :
+- `d4678aa9656dbf1fcec2e9db5840409d6bef087f` — `isCaptureContext138()` utilise désormais uniquement la famille canonique `creature` pour le routage Capture ;
+- le scénario navigateur confirme qu'un nouveau Dungeon après Survie revient à l'Entrée : `room = 0`, `last = null`, aucun faux contrôle de retour et surface de grille initiale présente.
+
+Validation au HEAD `e2b86b5...` :
+- Tactical Dock `35368031895` — SUCCESS ;
+- Architecture statique du run `35368031844` — SUCCESS ;
+- browser-sentinel du même run — FAILURE ;
+- Firefox `35368031787` — encore en cours au dernier contrôle.
+
+Cause exacte du RED navigateur :
+- le scénario de persistance a généré une vraie embuscade en Salle 1, puis l'a rechargée avant que le Bridge Tactical dynamique ne soit disponible ;
+- Core 2.09 contient depuis le commit `e473571bd80a5a61c9258c16e43d9472d5a395db` le garde non sûr `typeof GensRpgTacticalCombatV2Bridge?.requestCombat` ;
+- sur un identifiant global non encore déclaré, cette expression lève `ReferenceError: GensRpgTacticalCombatV2Bridge is not defined` ;
+- la détection Core 2.09 voisine utilise déjà la forme sûre `window.GensRpgTacticalCombatV2Bridge?.requestCombat`.
+
+Règle 26 / gros `index.html` :
+- le fichier utilisateur disponible `index_work_2.zip` correspond au blob historique `a515c3d34a1f5c4973159457090e4437a33c2630` (8 175 610 octets) ;
+- le `index.html` du HEAD courant correspond au blob `f34363d426e6fa9c58cb14ca1dd0dabd9b794872` (8 175 614 octets) ;
+- le fichier fourni n'est donc pas autorisé pour modifier le runtime courant.
+
+### Prochaine action exacte
+
+1. obtenir le `index.html` exact correspondant au HEAD courant conformément à la règle 26 ;
+2. corriger uniquement le callsite Core 2.09 au vrai propriétaire, sans wrapper/observer/timer supplémentaire ;
+3. conserver strictement le contrat Bridge, les enemyIds et les temporisations existantes ;
+4. relancer le test Core 2.09, le scénario Dungeon après Survie, Architecture, Firefox et Tactical Dock ;
+5. créer un checkpoint GREEN seulement si toute la validation requise est verte ;
+6. ne rien fusionner sur `main`.
+

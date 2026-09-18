@@ -41,6 +41,7 @@ const mime={
   '.mp3':'audio/mpeg'
 };
 
+const phase2Epoch=Date.now();
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
   if(pathname==='/'||pathname==='/__phase2_pages_equivalent.html'){
@@ -49,13 +50,16 @@ const server=http.createServer((req,res)=>{
   }
   const file=path.resolve(root,'.'+pathname);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
+  const traceRuntime=/\/assets\/gensrpg\/(?:core\/runtime-bootstrap-v1\.js|gens-rpg-tactical|gens-survival)/.test(pathname);
+  if(traceRuntime)console.log('[phase2-server-js] request t='+(Date.now()-phase2Epoch)+' '+pathname);
   fs.readFile(file,(err,data)=>{
+    if(traceRuntime)console.log('[phase2-server-js] read t='+(Date.now()-phase2Epoch)+' '+pathname+' err='+(err?String(err.code||err):'none')+' bytes='+(data?.length||0));
     if(err){res.writeHead(404);res.end('not found');return}
     res.writeHead(200,{
       'content-type':mime[path.extname(file).toLowerCase()]||'application/octet-stream',
       'cache-control':'no-store'
     });
-    res.end(data);
+    res.end(data,()=>{if(traceRuntime)console.log('[phase2-server-js] sent t='+(Date.now()-phase2Epoch)+' '+pathname)});
   });
 });
 
@@ -102,19 +106,25 @@ const server=http.createServer((req,res)=>{
   page.on('request',request=>{
     try{
       const u=new URL(request.url());
-      requestLog.push({kind:'request',path:u.pathname,host:u.host});
+      requestLog.push({kind:'request',path:u.pathname,host:u.host,t:Date.now()-phase2Epoch});
+      if(/\/assets\/gensrpg\/(?:core\/runtime-bootstrap-v1\.js|gens-rpg-tactical|gens-survival)/.test(u.pathname)){
+        console.log('[phase2-browser-js] request t='+(Date.now()-phase2Epoch)+' '+u.pathname);
+      }
     }catch(e){}
   });
   page.on('requestfinished',request=>{
     try{
       const u=new URL(request.url());
-      requestLog.push({kind:'finished',path:u.pathname,host:u.host});
+      requestLog.push({kind:'finished',path:u.pathname,host:u.host,t:Date.now()-phase2Epoch});
+      if(/\/assets\/gensrpg\/(?:core\/runtime-bootstrap-v1\.js|gens-rpg-tactical|gens-survival)/.test(u.pathname)){
+        console.log('[phase2-browser-js] finished t='+(Date.now()-phase2Epoch)+' '+u.pathname);
+      }
     }catch(e){}
   });
   page.on('requestfailed',request=>{
     try{
       const u=new URL(request.url());
-      requestLog.push({kind:'failed',path:u.pathname,host:u.host,error:request.failure()?.errorText||''});
+      requestLog.push({kind:'failed',path:u.pathname,host:u.host,error:request.failure()?.errorText||'',t:Date.now()-phase2Epoch});
     }catch(e){}
   });
   page.on('pageerror',error=>{

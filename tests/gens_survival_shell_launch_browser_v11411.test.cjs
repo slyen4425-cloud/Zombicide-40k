@@ -36,6 +36,9 @@ const server=http.createServer((req,res)=>{
 });
 
 (async()=>{
+  let stage='boot';
+  const mark=name=>{stage=name;console.log('[survival-shell]',name)};
+  const watchdog=setTimeout(()=>{console.error('[survival-shell] WATCHDOG stage='+stage);process.exit(1)},120000);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
@@ -55,8 +58,10 @@ const server=http.createServer((req,res)=>{
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   try{
+    mark('navigate-index');
     await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'commit',timeout:45000});
 
+    mark('wait-shell-owners');
     await page.waitForFunction(()=>(
       typeof window.openGensFamily==='function' &&
       typeof window.openGensBuiltInGame==='function' &&
@@ -64,8 +69,10 @@ const server=http.createServer((req,res)=>{
       typeof window.isDungeonMode==='function'
     ));
 
+    mark('wait-survival-guard');
     await page.waitForFunction(()=>window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
 
+    mark('open-survival-family');
     const rootSurvival=page.locator('button.gensRootModeCard.survival');
     assert.equal(await rootSurvival.count(),1,'the real root shell must expose exactly one Survival card');
     await rootSurvival.click();
@@ -83,8 +90,10 @@ const server=http.createServer((req,res)=>{
     const survivalGames=page.locator('#gensFamilyGames button.gensFamilyGameCard:not(.disabled)');
     await survivalGames.first().waitFor({state:'visible'});
     assert.ok(await survivalGames.count()>=1,'the real Survival family must expose at least one playable universe');
+    mark('select-survival-profile');
     await survivalGames.first().click();
 
+    mark('wait-game-home');
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
     shell=await page.evaluate(()=>({
       activeId:window.activeGameProfileId?.()||'',
@@ -100,6 +109,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(shell.dungeonTheme,false,'game home must remain outside Dungeon theme');
     assert.notEqual(shell.style,'dungeon','active profile style must remain non-Dungeon');
 
+    mark('open-pregame');
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
@@ -112,8 +122,10 @@ const server=http.createServer((req,res)=>{
       state:localStorage.getItem('gensrpg_dungeon_state_v1')
     }));
 
+    mark('start-configured-game');
     await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
 
+    mark('wait-session-active');
     await page.waitForFunction(()=>localStorage.getItem('z40k_session_active_v1')==='1');
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
 
@@ -142,6 +154,7 @@ const server=http.createServer((req,res)=>{
     assert.ok(launched.dungeonOverlay==='none'||launched.dungeonOverlay==='absent','Dungeon overlay must stay inactive in Survival');
     assert.ok(launched.dungeonCombat==='none'||launched.dungeonCombat==='absent','legacy Dungeon combat host must stay inactive in Survival');
 
+    mark('assertions-passed');
     console.log(JSON.stringify({
       scenario:'Phase 1 real Survival shell launch',
       viewport:'412x915 @2.625 touch',
@@ -151,6 +164,8 @@ const server=http.createServer((req,res)=>{
       sessionActive:launched.active
     }));
   }finally{
+    clearTimeout(watchdog);
+    mark('cleanup');
     server.closeAllConnections?.();
     server.closeIdleConnections?.();
     server.close();

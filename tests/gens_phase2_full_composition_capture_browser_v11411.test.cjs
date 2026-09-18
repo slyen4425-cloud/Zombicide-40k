@@ -29,62 +29,6 @@ productionHtml=productionHtml.replace(
 );
 productionHtml=productionHtml.replace('</body>',pageTags.join('\n')+'\n</body>');
 
-const phase2CaptureTraceReplacements=[
-  ['const MC162_PROFILE=', 'window.__phase2CallTraceCount=0;window.__phase2CallTrace=function(label){window.__phase2CallTraceCount=(window.__phase2CallTraceCount||0)+1;if(window.__phase2CallTraceCount<=80)console.log("[phase2-chain] "+window.__phase2CallTraceCount+" "+label)};console.log("[phase2-mc162] const-profile");const MC162_PROFILE='],
-  ['const MC162_TRAINER=', 'console.log("[phase2-mc162] const-trainer");const MC162_TRAINER='],
-  ['const MC162_ENTITIES=', 'console.log("[phase2-mc162] const-entities");const MC162_ENTITIES='],
-  ['const MC162_ABILITIES=', 'console.log("[phase2-mc162] const-abilities");const MC162_ABILITIES='],
-  ['const MC162_GAMEPLAY=', 'console.log("[phase2-mc162] const-gameplay");const MC162_GAMEPLAY='],
-  ['const MC162_RULE_KEYS=', 'console.log("[phase2-mc162] const-rules");const MC162_RULE_KEYS='],
-  ['window.ensureBuiltinMonsterCapture162=function(){', 'window.ensureBuiltinMonsterCapture162=function(){console.log("[phase2-mc162] ensure-start");'],
-  ['const profiles=loadGameProfilesRaw();', 'console.log("[phase2-mc162] profile-load-before");const profiles=loadGameProfilesRaw();console.log("[phase2-mc162] profile-load-after",profiles.length);'],
-  ['const heroes=loadCustomHeroesMulti();', 'console.log("[phase2-mc162] trainer-load-before");const heroes=loadCustomHeroesMulti();console.log("[phase2-mc162] trainer-load-after",heroes.length);'],
-  ['const familyKey="gensrpg_shared_entities_v1__family__creature";', 'console.log("[phase2-mc162] roster-before");const familyKey="gensrpg_shared_entities_v1__family__creature";'],
-  ['const key="gensrpg_ability_library_v1";', 'console.log("[phase2-mc162] abilities-before");const key="gensrpg_ability_library_v1";'],
-  ['const key="gensrpg_rpg_gameplay_by_profile_v1";', 'console.log("[phase2-mc162] gameplay-before");const key="gensrpg_rpg_gameplay_by_profile_v1";'],
-  ['Object.entries(MC162_RULE_KEYS).forEach', 'console.log("[phase2-mc162] rules-before");Object.entries(MC162_RULE_KEYS).forEach'],
-  ['try{refreshCustomEquipmentIntoItems?.()}catch(e){}', 'console.log("[phase2-mc162] refresh-before");try{refreshCustomEquipmentIntoItems?.();console.log("[phase2-mc162] refresh-after")}catch(e){console.log("[phase2-mc162] refresh-error",String(e))}'],
-  ['try{applyCustomHeroesMulti?.()}catch(e){}', 'console.log("[phase2-mc162] apply-heroes-before");try{applyCustomHeroesMulti?.();console.log("[phase2-mc162] apply-heroes-after")}catch(e){console.log("[phase2-mc162] apply-heroes-error",String(e))}'],
-  ['try{renderGameProfileLibrary?.()}catch(e){}', 'console.log("[phase2-mc162] render-profiles-before");try{renderGameProfileLibrary?.();console.log("[phase2-mc162] render-profiles-after")}catch(e){console.log("[phase2-mc162] render-profiles-error",String(e))}console.log("[phase2-mc162] ensure-end");'],
-  ['ensureBuiltinMonsterCapture162();', 'console.log("[phase2-mc162] first-call-before");ensureBuiltinMonsterCapture162();console.log("[phase2-mc162] first-call-after");']
-];
-const phase2CaptureBlockStartTag='<script id="builtinMonsterCapture162">';
-const phase2CaptureBlockStart=productionHtml.indexOf(phase2CaptureBlockStartTag);
-assert.notEqual(phase2CaptureBlockStart,-1,'Phase 2 Capture inline block missing');
-const phase2CaptureBlockBodyStart=phase2CaptureBlockStart+phase2CaptureBlockStartTag.length;
-const phase2CaptureBlockEnd=productionHtml.indexOf('</script>',phase2CaptureBlockBodyStart);
-assert.notEqual(phase2CaptureBlockEnd,-1,'Phase 2 Capture inline block end missing');
-let phase2CaptureBlockBody=productionHtml.slice(phase2CaptureBlockBodyStart,phase2CaptureBlockEnd);
-for(const [needle,replacement] of phase2CaptureTraceReplacements){
-  assert.ok(phase2CaptureBlockBody.includes(needle),'Phase 2 Capture trace anchor missing inside builtinMonsterCapture162: '+needle);
-  phase2CaptureBlockBody=phase2CaptureBlockBody.replace(needle,replacement);
-}
-productionHtml=
-  productionHtml.slice(0,phase2CaptureBlockBodyStart)+
-  phase2CaptureBlockBody+
-  productionHtml.slice(phase2CaptureBlockEnd);
-
-const phase2CaptureCallTraceReplacements=[
-  ['function refreshCustomEquipmentIntoItems(){','function refreshCustomEquipmentIntoItems(){window.__phase2CallTrace?.("refreshCustomEquipmentIntoItems");'],
-  ['function gensCurrentContentFamily(){','function gensCurrentContentFamily(){window.__phase2CallTrace?.("gensCurrentContentFamily");'],
-  ['function getActiveGameProfile(){','function getActiveGameProfile(){window.__phase2CallTrace?.("getActiveGameProfile");'],
-  ['function loadGameProfiles(){','function loadGameProfiles(){window.__phase2CallTrace?.("loadGameProfiles");'],
-  ['function ensureBaseGameProfile(){','function ensureBaseGameProfile(){window.__phase2CallTrace?.("ensureBaseGameProfile");'],
-  ['function captureCurrentGameProfile(name,id,builtIn=false){','function captureCurrentGameProfile(name,id,builtIn=false){window.__phase2CallTrace?.("captureCurrentGameProfile:"+String(id||""));'],
-  ['function currentAllHeroIds(){','function currentAllHeroIds(){window.__phase2CallTrace?.("currentAllHeroIds");'],
-  ['function applyCustomHeroesMulti(){','function applyCustomHeroesMulti(){window.__phase2CallTrace?.("applyCustomHeroesMulti");'],
-  ['function gensContentCompatible(record,kind){','function gensContentCompatible(record,kind){window.__phase2CallTrace?.("gensContentCompatible:"+String(kind||""));'],
-  ['function customHeroesForMode(dungeon=isDungeonMode()){','function customHeroesForMode(dungeon=isDungeonMode()){window.__phase2CallTrace?.("customHeroesForMode:"+String(dungeon));'],
-  ['function itemsForMode(dungeon=isDungeonMode()){','function itemsForMode(dungeon=isDungeonMode()){window.__phase2CallTrace?.("itemsForMode:"+String(dungeon));'],
-  ['function gensGameplayModules(){','function gensGameplayModules(){window.__phase2CallTrace?.("gensGameplayModules");']
-];
-for(const [needle,replacement] of phase2CaptureCallTraceReplacements){
-  assert.ok(productionHtml.includes(needle),'Phase 2 Capture call-trace anchor missing: '+needle);
-  productionHtml=productionHtml.replace(needle,replacement);
-}
-
-
-
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 const mime={
@@ -118,12 +62,10 @@ const server=http.createServer((req,res)=>{
 (async()=>{
   let stage='boot';
   let lastInline='none';
-  let lastCaptureTrace='none';
-  let lastCaptureCallTrace='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastCaptureTrace='+lastCaptureTrace+' lastCaptureCallTrace='+lastCaptureCallTrace);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -185,16 +127,6 @@ const server=http.createServer((req,res)=>{
     const value=message.text();
     if(value.startsWith('[phase2-inline-enter] ')){
       lastInline=value.slice('[phase2-inline-enter] '.length);
-      console.log(value);
-      return;
-    }
-    if(value.startsWith('[phase2-mc162]')){
-      lastCaptureTrace=value;
-      console.log(value);
-      return;
-    }
-    if(value.startsWith('[phase2-chain]')){
-      lastCaptureCallTrace=value;
       console.log(value);
       return;
     }

@@ -594,12 +594,29 @@ Règle 26 / gros `index.html` :
 - le `index.html` du HEAD courant correspond au blob `f34363d426e6fa9c58cb14ca1dd0dabd9b794872` (8 175 614 octets) ;
 - le fichier fourni n'est donc pas autorisé pour modifier le runtime courant.
 
+### Correction Core 2.09 appliquée
+
+Fichier utilisateur vérifié :
+- taille : 8 175 614 octets ;
+- blob Git : `f34363d426e6fa9c58cb14ca1dd0dabd9b794872` ;
+- correspondance exacte avec le `index.html` du HEAD avant correction.
+
+Commit correctif :
+`0409947b1de743c152c99e67a3e90ffbcea866e6`
+
+Modification strictement locale au propriétaire Core 2.09 :
+- garde : `typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat` ;
+- appel : `window.GensRpgTacticalCombatV2Bridge.requestCombat(...)` ;
+- aucun changement de `enemyIds`, raison, délais 120/250 ms, persistance d'embuscade ou gameplay ;
+- aucun wrapper, observer, timer supplémentaire ou nouveau système ;
+- workflow one-shot supprimé dans le même commit ;
+- test `gens_core209_ambush_direct_bridge_lot4f.test.cjs` passé dans le workflow one-shot `35370574692` — SUCCESS.
+
 ### Prochaine action exacte
 
-1. obtenir le `index.html` exact correspondant au HEAD courant conformément à la règle 26 ;
-2. corriger uniquement le callsite Core 2.09 au vrai propriétaire, sans wrapper/observer/timer supplémentaire ;
-3. conserver strictement le contrat Bridge, les enemyIds et les temporisations existantes ;
-4. relancer le test Core 2.09, le scénario Dungeon après Survie, Architecture, Firefox et Tactical Dock ;
-5. créer un checkpoint GREEN seulement si toute la validation requise est verte ;
-6. ne rien fusionner sur `main`.
+1. valider le HEAD contenant `0409947...` via un nouveau push documentaire déclenchant les sentinelles normales ;
+2. vérifier le scénario Dungeon après Survie dans Chromium, Architecture, Firefox et Tactical Dock ;
+3. vérifier Save & Quit/reprise et non-interférence via la batterie Architecture ;
+4. créer un checkpoint GREEN seulement si toute la validation requise est verte ;
+5. ne rien fusionner sur `main`.
 

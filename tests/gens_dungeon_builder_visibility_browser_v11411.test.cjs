@@ -162,7 +162,7 @@ async function openDungeonGameHome(page){
     await page.waitForFunction(()=>document.getElementById('drc300Modal')?.classList.contains('open'));
     assert.match(await page.locator('#drc300Modal').innerText(),/Constructeur de donjon/i,'real Dungeon Builder modal must open');
 
-    const rooms=page.locator('#drc100Launcher .drc100Launch');
+    const rooms=page.locator('#drc100Launcher button[onclick="DungeonRoomCreator100.open()"]');
     assert.equal(await visible(rooms),true,'Room Creator launcher must remain visible next to Dungeon Builder');
 
     assert.deepEqual(errors,[],'Dungeon Builder editor path must not raise browser/runtime errors');

@@ -34,11 +34,17 @@ const shellOwner=indexSource.indexOf(shellOwnerMarker);
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owning script must have an exact boundary');
 
+const onlineRoomMarker="let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;";
+const onlineRoomOwner=indexSource.indexOf(onlineRoomMarker);
+const onlineScriptStart=indexSource.lastIndexOf('<script',onlineRoomOwner);
+const onlineScriptEnd=indexSource.indexOf('</script>',onlineRoomOwner);
+assert.ok(onlineRoomOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineRoomOwner,'exact optional online/session support block must exist');
+
 const customHeroesMarker='function loadCustomHeroesMulti(){';
 const customHeroesOwner=indexSource.indexOf(customHeroesMarker);
 const customHeroesScriptStart=indexSource.lastIndexOf('<script',customHeroesOwner);
 const customHeroesScriptEnd=indexSource.indexOf('</script>',customHeroesOwner);
-assert.ok(customHeroesOwner>shellScriptEnd&&customHeroesScriptStart>shellScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
+assert.ok(customHeroesOwner>onlineScriptEnd&&customHeroesScriptStart>onlineScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
 
 const dungeonUiStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
 const dungeonBaseScriptStart=indexSource.indexOf('<script id="gensDungeonCore01Js">',dungeonUiStart);
@@ -57,6 +63,7 @@ assert.ok(core310ScriptStart>dungeonBaseScriptEnd&&core310End>core310ScriptStart
 // No historical repair/runtime layers are copied or reimplemented.
 const roundTripHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(dungeonUiStart,dungeonBaseScriptStart)+
   '\n'+indexSource.slice(dungeonBaseScriptStart,dungeonBaseScriptEnd+'</script>'.length)+
@@ -112,6 +119,11 @@ const server=http.createServer((req,res)=>{
     hasTouch:true,
     locale:'fr-FR',
     serviceWorkers:'block'
+  });
+  // The production online-support block is loaded exactly, but this sentinel is
+  // intentionally offline. Stub only its external Supabase transport factory.
+  await context.addInitScript(()=>{
+    window.supabase={createClient:()=>({})};
   });
 
   const browserErrors=[];

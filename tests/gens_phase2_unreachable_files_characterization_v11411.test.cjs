@@ -6,6 +6,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const exists=rel=>fs.existsSync(path.join(root,rel));
 const stripQuery=v=>String(v||'').replace(/\?.*$/,'');
+const manifest=JSON.parse(read('docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json'));
 
 const targets=[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
@@ -75,6 +76,19 @@ for(const target of targets){
   };
   report.push({file:target,refs,buckets});
 }
+const expected=(manifest.files||[]).map(x=>({file:x.file,refs:x.refs}));
+assert.deepEqual(
+  report.map(x=>({file:x.file,refs:x.refs})),
+  expected,
+  'non-production file references drifted'
+);
+for(const rec of manifest.files||[]){
+  const row=report.find(x=>x.file===rec.file);
+  assert.ok(row,rec.file+' missing from characterization');
+  assert.equal(rec.serviceWorkerCached,row.refs.includes('service-worker.js'),rec.file+' service-worker cache classification drifted');
+  assert.equal(rec.workflowReferenced,row.refs.some(x=>x.startsWith('.github/workflows/')),rec.file+' workflow-reference classification drifted');
+}
+
 console.log(JSON.stringify({
   scenario:'Phase 2 non-production file characterization',
   productionReachable:reachable.size,

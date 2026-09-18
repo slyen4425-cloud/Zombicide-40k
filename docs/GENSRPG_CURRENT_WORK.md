@@ -477,3 +477,64 @@ Validation documentaire finale :
 2. ouvrir une branche Phase 4 dédiée au resolver d'assets depuis ce checkpoint ;
 3. appliquer la règle 26 si le contenu exact de `index.html` est requis ;
 4. ne rien fusionner sur `main`.
+
+## Chantier correctif isolé — Dungeon Builder invisible dans l'éditeur Dungeon
+
+Ce lot repart volontairement du dernier checkpoint Phase 3 entièrement GREEN afin de ne pas dépendre du lot Dungeon après Survie encore non clôturé.
+
+Branche :
+`work/gensrpg-dungeon-builder-visibility-clean-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-builder-visibility-clean-2026-09-18`
+
+Base exacte :
+`080a45a904590a2b24a2cbc87b9c270913f427e6`
+(`checkpoint/gensrpg-phase3-target-structure-green-2026-09-18`)
+
+Production sûre inchangée :
+- `main` : V16.78.114.11 ;
+- SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Régression caractérisée
+
+Le World Builder n'a pas été supprimé :
+- `assets/dungeon/dungeon-world-builder-167821.js` reste le propriétaire du Builder ;
+- `#drc300Launch` est créé dans `#drc100Launcher` ;
+- `assets/dungeon/dungeon-room-creator-100.js` reste propriétaire de `#drc100Launcher`.
+
+Cause historique exacte :
+- commit d'introduction : `d2f102a7be11094cb89b488732e40c8c51cf9e5a` (V16.78.111) ;
+- `assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js` a ajouté `#drc100Launcher` et `[data-drc100-launcher]` à `TAB_SELECTORS` ;
+- `hideRuntimeTabs()` peut donc appliquer `display:none!important` au conteneur structurel du Builder ;
+- ce fichier est cartographié Phase 2 comme `Tactical Historical Layer`, alors que le World Builder appartient au domaine `Dungeon Builders`.
+
+### Périmètre déclaré
+
+Autorisé :
+- retirer uniquement l'autorité V111 sur le launcher structurel Builder/Room Creator ;
+- ajouter une sentinelle owner-level ;
+- ajouter une sentinelle navigateur du vrai chemin Éditeurs -> Dungeon -> Builder ;
+- brancher la sentinelle à Architecture.
+
+Interdit :
+- modifier le World Builder ou le Room Creator ;
+- modifier le Shell, `index.html`, la navigation, le mouvement, le stockage ou le gameplay ;
+- ajouter wrapper, observer, timer/retry ou second launcher ;
+- toucher au lot Dungeon après Survie.
+
+### Tests requis
+
+1. V111 ne doit plus écrire `display` ni `data-v111-hidden-tab` sur `#drc100Launcher` ;
+2. les contrôles legacy runtime V111 peuvent continuer à être masqués pendant le runtime ;
+3. vrai chemin navigateur Éditeurs -> Dungeon : Room Creator visible ;
+4. vrai chemin navigateur Éditeurs -> Dungeon : bouton « CONSTRUIRE UN DONJON » visible ;
+5. ouverture réelle de `#drc300Modal` ;
+6. Architecture / navigateur complet ;
+7. Firefox ;
+8. Tactical Dock ;
+9. aucune publication sur `main` avant GREEN.
+
+### Prochaine action
+
+Appliquer un correctif soustractif dans V111 uniquement, puis lancer les sentinelles.

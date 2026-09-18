@@ -609,3 +609,81 @@ Base exacte :
 ### Prochaine action
 
 Appliquer uniquement les deux corrections runtime du lot map sur la base Builder GREEN, réaligner les empreintes Phase 2, réintroduire la sentinelle Dungeon après Survie et valider l'ensemble.
+
+## Chantier authored-runtime — caches, stabilité visuelle et pièges non aléatoires
+
+Branche :
+`work/gensrpg-authored-cache-trap-runtime-2026-09-18`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-authored-cache-trap-runtime-2026-09-18`
+
+Base exacte :
+`3558831ed126e292278c867dd17491cabf0f29ad`
+(`checkpoint/gensrpg-dungeon-integrated-fixes-green-2026-09-18`)
+
+Production `main` reste inchangée sur V16.78.114.11.
+
+### Signalements utilisateur
+
+Dans un donjon construit via World Builder :
+1. entrer dans une cache/sous-pièce peut empêcher de revenir vers la salle parente ;
+2. le runtime peut demander de « lire »/réutiliser la cache alors qu'après entrée le retour vers la salle précédente doit être disponible ;
+3. l'affichage authored paraît parfois instable ;
+4. des pièges authored peuvent être visibles à certains moments puis disparaître ;
+5. des pièges non placés dans le Builder peuvent apparaître ;
+6. en mode donjon construit/authored, aucun piège ou contenu aléatoire ne doit être ajouté au-dessus des données authored.
+
+### Périmètre initial autorisé
+
+Diagnostic uniquement avant preuve :
+- navigation cache -> sous-pièce -> salle parente ;
+- persistance de l'origine/parent de branche ;
+- rendu des cellules authored et des interactions ;
+- application des pièges authored ;
+- recherche de tout générateur/fallback aléatoire encore actif dans un World Builder authored.
+
+Propriétaires candidats à confirmer :
+- `dungeon-authored-runtime-167839.js` ;
+- `dungeon-authored-cache-ux-167853.js` ;
+- `dungeon-authored-cache-visual-167852.js` ;
+- `dungeon-authored-branch-nav-cleanup-167863.js` ;
+- `dungeon-source-render-stability-167877.js` ;
+- `dungeon-exact-trap-runtime-167845.js` ;
+- `dungeon-authored-event-cells-167877.js` ;
+- World/Room/Zone runtime uniquement si la preuve remonte à leur contrat.
+
+### Interdit avant preuve
+
+- aucune rustine globale de navigation ;
+- aucun reset global de Dungeon state ;
+- aucun nouveau observer ;
+- aucun timer/retry permanent ;
+- aucun piège forcé par CSS ;
+- aucune désactivation générale des événements du Dungeon classique ;
+- ne pas modifier Tactical, Capture, Survie, Shell ou le Builder éditeur sauf preuve directe ;
+- ne pas mélanger les trois symptômes si leurs propriétaires sont distincts.
+
+### Invariants à protéger
+
+- donjon authored = structure et contenu définis par les données du Builder ;
+- cache liée = branche vers une sous-pièce précise, avec retour déterministe vers son parent ;
+- une interaction déjà consommée ne doit pas redevenir une nouvelle entrée aléatoire ;
+- pièges authored uniquement aux cellules/targets configurés ;
+- aucun fallback random dans une zone authored valide ;
+- état/rendu d'une salle déjà visitée doit rester stable au retour.
+
+### Tests prévus
+
+1. caractérisation cache parent -> sous-pièce -> retour parent ;
+2. caractérisation retour après consommation/lecture de cache ;
+3. re-render de la même zone authored sans changement de cellules ;
+4. piège authored présent = stable après render/reload local ;
+5. absence de piège authored = aucun piège généré ;
+6. plusieurs retours/re-renders n'ajoutent aucun contenu aléatoire ;
+7. tests existants authored cache/trap/runtime ;
+8. Architecture, navigateur complet, Firefox, Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Lire les propriétaires et tests authored existants, puis construire des reproductions ciblées avant toute correction.

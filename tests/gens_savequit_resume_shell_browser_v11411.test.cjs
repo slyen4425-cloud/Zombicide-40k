@@ -66,7 +66,8 @@ const core307Script=exactScript('dungeonCore307CriticalResumeFix');
 const core308Script=exactScript('dungeonCore308NewRunReset');
 const core310Script=exactScript('dungeonCore310PersistenceAndTokens');
 assert.match(core200Script,/localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\)/,'Core 2.00 must remain the creator/persister of the Dungeon runtime');
-assert.match(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)\)return start\(\)/,'Core 2.00 must own the Dungeon start interception');
+assert.match(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,'Core 2.00 must own true Dungeon launches while preserving Capture routing');
+assert.doesNotMatch(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)\)return start\(\)/,'Core 2.00 must not steal Capture launches from the dedicated Capture owner');
 
 // Browser harness built only from exact production source blocks:
 // Shell + offline session support + custom-content + native Dungeon markup,

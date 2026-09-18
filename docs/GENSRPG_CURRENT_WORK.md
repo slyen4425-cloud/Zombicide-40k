@@ -612,9 +612,26 @@ Modification strictement locale au propriétaire Core 2.09 :
 - workflow one-shot supprimé dans le même commit ;
 - test `gens_core209_ambush_direct_bridge_lot4f.test.cjs` passé dans le workflow one-shot `35370574692` — SUCCESS.
 
+### Empreintes Phase 2 réalignées
+
+Le correctif Core 2.09 change le blob `index.html` de :
+- ancien : `f34363d426e6fa9c58cb14ca1dd0dabd9b794872` ;
+- nouveau : `917c1a38fa605d53de9a8a9f03b8b76a96b379e3`.
+
+Commit documentaire/test :
+`a805e177eb742684024238e7dfe6f93859b569fd`
+
+Fichiers réalignés uniquement sur cette nouvelle empreinte :
+- `docs/GENSRPG_PHASE2_INLINE_OWNERS.json` ;
+- `tests/gens_phase2_inline_global_last_owner_v11411.test.cjs` ;
+- `docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv` ;
+- `docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json`.
+
+Le RED Architecture `35370641322` était uniquement ce décalage d'empreinte ; aucune nouvelle dérive fonctionnelle n'a été signalée avant cet arrêt de sentinelle.
+
 ### Prochaine action exacte
 
-1. valider le HEAD contenant `0409947...` via un nouveau push documentaire déclenchant les sentinelles normales ;
+1. valider le HEAD contenant `0409947...` + les empreintes `a805e17...` via les sentinelles normales ;
 2. vérifier le scénario Dungeon après Survie dans Chromium, Architecture, Firefox et Tactical Dock ;
 3. vérifier Save & Quit/reprise et non-interférence via la batterie Architecture ;
 4. créer un checkpoint GREEN seulement si toute la validation requise est verte ;

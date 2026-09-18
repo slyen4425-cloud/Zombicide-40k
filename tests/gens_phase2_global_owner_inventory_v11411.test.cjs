@@ -65,6 +65,15 @@ assert.match(capture156,/const oldCaptureRender156=window\.captureRenderBattleLi
 
 const start200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 assert.match(start200,/const startOutside200=window\.startConfiguredGame/,'Dungeon Core 2.00 must preserve the previous shared launch chain');
-assert.match(start200,/if\(isDungeonMode\?\.\(\)\)return start\(\)/,'Phase 2 must keep the current Dungeon launch interception visible for boundary characterization');
+assert.match(
+  start200,
+  /if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,
+  'Phase 2 must keep Dungeon launch interception while preserving the dedicated Capture chain'
+);
+assert.doesNotMatch(
+  start200,
+  /if\(isDungeonMode\?\.\(\)\)return start\(\)/,
+  'Dungeon Core 2.00 must not steal Capture launches from the dedicated Capture owner'
+);
 
 console.log(JSON.stringify({scenario:'Phase 2 global owner inventory',report},null,2));

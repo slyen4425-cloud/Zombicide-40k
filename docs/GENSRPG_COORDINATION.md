@@ -71,19 +71,28 @@ Résultat :
 - aucun runtime/gameplay/asset/règle Capture n'a été modifié ;
 - sentinelle branchée à la CI.
 
-## Non-interférence quatre modules — RED caractérisé
+## Non-interférence quatre modules — GREEN
 
-La sentinelle dédiée traverse `Survie -> Dungeon -> Survie -> Capture -> PvP` dans un même contexte. Elle confirme les transitions jusqu’à Capture, puis révèle une fuite Shell sur Capture -> PvP : `gensDungeonTheme` et `gensCapturePregame` restent actifs sur `body` alors que le placeholder PvP est affiché. Aucun runtime/session parasite n’est créé.
+Le RED Capture -> PvP a été corrigé au propriétaire Shell `openGensFamily()` par un changement de deux lignes :
+- suppression des classes de pré-game `gensCapturePregame` et `gensAdventurePregame` lors de l'entrée dans une famille ;
+- suppression de `gensDungeonTheme` pour les familles non-`adventure`.
 
-Cause ciblée : `openGensFamily()` change la vue mais ne retire pas les classes transitoires laissées par le contexte précédent.
+Preuve GREEN :
+- SHA fonctionnel `08220589eb89a06c73f5777050bbcc90275e48fd` ;
+- Architecture `35324953366` — success ;
+- Firefox `35324953326` — success ;
+- Tactical Dock `35324953417` — success ;
+- sentinelle quatre modules GREEN sur `Survie -> Dungeon -> Survie -> Capture -> PvP`.
 
-## Ordre Phase 1 restant
+Aucun profil, sauvegarde, session, moteur ou règle gameplay n'a été modifié.
 
-1. correctif Shell dédié de nettoyage de contexte ;
-2. rendre la sentinelle quatre modules GREEN ;
-3. revue finale de la matrice et validation du critère de sortie Phase 1.
+## Phase 1 — sortie validée
 
-Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la sentinelle Save/Resume reste verte.
+Toutes les lignes de la matrice Phase 1 sont désormais couvertes, y compris la frontière inter-modules.
+
+Prochaine phase selon la roadmap : **Phase 2 — cartographie réelle du runtime actif**.
+
+Le premier lot Phase 2 doit rester documentaire/diagnostic en première intention : scripts chargés, ordre, dépendances, globals, propriétaires, classification par domaine et legacy/inactif.
 
 ## Invariants
 
@@ -96,4 +105,4 @@ Le lot séparé de lancement Dungeon Shell n'est plus nécessaire tant que la se
 
 ## Signalement différé
 
-Détection ennemie hors embuscade : caractérisation dédiée après Phase 1.
+Détection ennemie hors embuscade : caractérisation dédiée après Phase 1, séparée de la cartographie structurelle.

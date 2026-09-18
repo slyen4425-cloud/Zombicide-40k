@@ -7,59 +7,86 @@ Lire avant tout changement :
 2. `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`
 3. ce fichier
 4. `docs/GENSRPG_COORDINATION.md`
+5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
 ## Production sûre
 
 - `main` gelé : V16.78.114.11
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
-- ne pas travailler directement sur `main`
+- ne jamais travailler directement sur `main`
 
-## Dernier checkpoint vert utilisateur
+## Base verte
 
-`checkpoint/gensrpg-tactical-dock-legacy-layer-green-2026-09-17`  
-SHA : `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+Dernier checkpoint fonctionnel validé utilisateur :
+- `checkpoint/gensrpg-tactical-dock-legacy-layer-green-2026-09-17`
+- SHA `ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+- test manuel Dock : concluant.
 
-Le test manuel utilisateur du Dock après combats répétés est concluant.
+Audit Phase 1 fermé :
+- `checkpoint/gensrpg-phase1-sentinel-gap-audit-green-2026-09-18`
+- SHA `fcc9e6378263b0498170dbb7f4d110a7fe169f93`.
+
+Charte / remise manuelle de `index.html` :
+- `checkpoint/gensrpg-charter-index-html-handoff-green-2026-09-18`
+- SHA `6680b800490492edf5bca587e0de6bd8d68be56f`.
 
 ## Chantier courant
 
-**Phase 1 — audit des gaps de sentinelles après Dock**
+**Phase 1 — sentinelle de lancement Survie par le vrai Shell**
 
 Branche :
-`work/gensrpg-phase1-sentinel-gap-audit-post-dock-2026-09-17`
+`work/gensrpg-phase1-survival-launch-sentinel-post-charter-2026-09-18`
 
-Checkpoint de départ rétroactif conforme :
-`checkpoint/gensrpg-start-phase1-sentinel-gap-audit-2026-09-18`
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase1-survival-launch-sentinel-post-charter-2026-09-18`
 
 SHA de base :
-`ea1ffe059a62bdae88dca46b2aeb28cbf3c784bb`
+`6680b800490492edf5bca587e0de6bd8d68be56f`
 
-Périmètre : documentation/audit uniquement. Aucun runtime ou gameplay.
+## Périmètre
 
-Matrice détaillée :
-`docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
+Lot **test-only** :
+- nouveau test permanent du chemin réel Shell -> Survie ;
+- raccord au workflow `gensrpg-architecture-sentinels.yml` ;
+- documentation de reprise.
 
-## Conclusion de l'audit
+Aucun changement autorisé dans :
+- `index.html` runtime ;
+- runtime Survie ;
+- Dungeon / mouvement / combat ;
+- Tactical / Bridge / détection ;
+- stats / dés / dégâts ;
+- sauvegarde ;
+- Capture ;
+- PvP.
 
-Couverture forte : fiche héros, mouvement Dungeon, stats, D100/D6, toucher, dégâts/armure, Tactical, persistance Dungeon, PWA/cache.
+## Propriétaires réels à traverser
 
-Gaps confirmés :
-- lancement Survie : pas de sentinelle shell réelle ;
-- lancement Dungeon : runtime fortement couvert, shell complet non couvert ;
-- Save & Quit : sortie couverte, vraie reprise complète non couverte ;
-- Capture : données couvertes, lancement/gameplay non couvert ;
-- PvP : placeholder actuel non protégé ;
-- non-interférence entre les quatre modules : partielle.
+La sentinelle doit utiliser le code réel et prouver :
+1. `openGensFamily('survival')` ;
+2. sélection d'un univers Survie via `openGensBuiltInGame(...,'survival')` ;
+3. préparation réelle par `newGame()` ;
+4. sélection d'au moins un participant depuis l'UI ;
+5. lancement par `startConfiguredGame()` ;
+6. famille active = Survie ;
+7. session active ;
+8. menu Survie visible ;
+9. aucun écran/runtime Dungeon ne prend l'autorité.
 
-## Prochaine étape
+Le test ne doit pas recopier la logique métier de ces fonctions.
 
-Après validation CI de ce SHA documentaire :
-1. créer le checkpoint vert de l'audit ;
-2. créer le checkpoint de départ du lot suivant ;
-3. ouvrir une branche **test-only** dédiée à la sentinelle de lancement Survie ;
-4. ne modifier aucun runtime ;
-5. brancher uniquement la nouvelle sentinelle au workflow d'architecture.
+## Règle index.html
 
-## Dette explicitement différée
+Le blob exact actuel de `index.html` est `8aa918ba7da41be41fb369ccc522bb217c97bfa1` (8 175 453 octets).
 
-La détection ennemie hors embuscade fera l'objet d'un chantier de caractérisation dédié après la Phase 1.
+Si l'accès exact redevient bloquant, appliquer immédiatement la section 26 de la charte et fournir le lien direct de la branche/SHA à l'utilisateur au lieu d'utiliser une copie locale incertaine.
+
+## Après ce lot
+
+Ordre prévu :
+1. Save & Quit + vraie reprise ;
+2. placeholder PvP actuel ;
+3. Capture actuel sans restauration ;
+4. non-interférence explicite des quatre modules.
+
+La détection ennemie hors embuscade reste différée vers un chantier de caractérisation dédié après la Phase 1.

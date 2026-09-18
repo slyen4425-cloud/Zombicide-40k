@@ -6,11 +6,14 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 
+const inlineBlocks=new Map(
+  [...index.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
+    .map(m=>[m[1],m[2]])
+);
 function block(id){
-  const re=new RegExp('<script\\b[^>]*\\bid=["\\']'+id+'["\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
-  const m=index.match(re);
-  assert.ok(m,'inline block missing: '+id);
-  return m[1];
+  const source=inlineBlocks.get(id);
+  assert.ok(source,'inline block missing: '+id);
+  return source;
 }
 
 const b164=block('dungeonGithubArts164');

@@ -29902,9 +29902,13 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(ensureBuiltinMonster
 </script>
 
 
+<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 <script id="dungeonGithubArts164">
 (function(){
 "use strict";
+const assetResolver164=window.GensAssetResolverV1;
+if(!assetResolver164)throw new Error("Core Asset Resolver V1 missing before dungeonGithubArts164");
+const DUNGEON_CREATURE_ROOT_164="assets/dungeon/creatures/";
 
 /* V16.164 — visuels Dungeon depuis GitHub
    Convention : assets/dungeon/creatures/<ID>.png
@@ -29913,7 +29917,7 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(ensureBuiltinMonster
 window.dungeonAutoArtPath164=function(id){
   id=String(id||"").trim();
   if(!/^dng_[a-z0-9_]+$/i.test(id))return "";
-  return "assets/dungeon/creatures/"+id+".png";
+  return assetResolver164.join(DUNGEON_CREATURE_ROOT_164,id+".png");
 };
 
 window.dungeonApplyGithubArts164=function(){
@@ -29938,7 +29942,7 @@ window.dungeonApplyGithubArts164=function(){
       ? ov.image_data.trim()
       : "";
 
-    z.art=custom || dungeonAutoArtPath164(id);
+    z.art=assetResolver164.resolve({candidates:[custom],root:DUNGEON_CREATURE_ROOT_164,file:id+".png"});
     if(!custom)z._gensGithubDungeonArt=true;
     else delete z._gensGithubDungeonArt;
   });
@@ -29962,7 +29966,7 @@ if(typeof window.dungeonEnemies==="function"){
       const custom=(ov&&typeof ov.image_data==="string"&&ov.image_data.trim())
         ? ov.image_data.trim()
         : "";
-      return {...z,art:custom||dungeonAutoArtPath164(z.id)};
+      return {...z,art:assetResolver164.resolve({candidates:[custom],root:DUNGEON_CREATURE_ROOT_164,file:String(z.id)+".png"})};
     });
   };
 }
@@ -30020,7 +30024,9 @@ document.addEventListener("error",function(ev){
 <script id="dungeonArtRenderFix165">
 (function(){
 "use strict";
-const artPath=id=>"assets/dungeon/creatures/"+String(id||"").trim()+".png";
+const assetResolver165=window.GensAssetResolverV1;
+if(!assetResolver165)throw new Error("Core Asset Resolver V1 missing before dungeonArtRenderFix165");
+const DUNGEON_CREATURE_ROOT_165="assets/dungeon/creatures/";
 const isDungeonId=id=>/^dng_[a-z0-9_]+$/i.test(String(id||""));
 
 function customOverride(id){
@@ -30032,7 +30038,7 @@ function customOverride(id){
 window.gensDungeonCreatureArt165=function(defOrId){
   const id=typeof defOrId==="object"?defOrId?.id:defOrId;
   if(!isDungeonId(id))return typeof defOrId==="object"?(defOrId?.art||""):"";
-  return customOverride(id)||artPath(id);
+  return assetResolver165.resolve({candidates:[customOverride(id)],root:DUNGEON_CREATURE_ROOT_165,file:String(id||"").trim()+".png"});
 };
 function apply(){
   try{
@@ -30095,11 +30101,13 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(apply,100));
 <script id="dungeonDirectImageBinding166">
 (function(){
 "use strict";
+const assetResolver166=window.GensAssetResolverV1;
+if(!assetResolver166)throw new Error("Core Asset Resolver V1 missing before dungeonDirectImageBinding166");
+const DUNGEON_CREATURE_ROOT_166="assets/dungeon/creatures/";
 
 /* V16.166 — liaison directe par ID au moment du rendu.
    Ne dépend plus de def.art pour afficher les PNG GitHub. */
 
-const dungeonPath166=id=>"assets/dungeon/creatures/"+String(id||"")+".png";
 const isDng166=id=>/^dng_[a-z0-9_]+$/i.test(String(id||""));
 
 function customArt166(id,def){
@@ -30115,7 +30123,7 @@ function customArt166(id,def){
   return "";
 }
 function art166(id,def){
-  return customArt166(id,def)||dungeonPath166(id);
+  return assetResolver166.resolve({candidates:[customArt166(id,def)],root:DUNGEON_CREATURE_ROOT_166,file:String(id||"")+".png"});
 }
 function safeImg166(src,cls=""){
   const esc=typeof z40kEscAttr==="function"?z40kEscAttr(src):String(src).replace(/"/g,"&quot;");
@@ -30235,7 +30243,7 @@ if(typeof oldCombat166==="function"){
 
 /* Debug helper accessible from console if needed. */
 window.dungeonTestArt166=function(id="dng_skeleton"){
-  const src=dungeonPath166(id);
+  const src=assetResolver166.join(DUNGEON_CREATURE_ROOT_166,String(id||"")+".png");
   const img=new Image();
   img.onload=()=>alert("✅ Image trouvée : "+src+" ("+img.naturalWidth+"×"+img.naturalHeight+")");
   img.onerror=()=>alert("❌ Image introuvable : "+src);

@@ -26,12 +26,31 @@ const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-1678
 const mobileTagPos=indexSource.indexOf(mobileTag);
 assert.ok(mobileTagPos>core310End,'production mobile bootstrap tag must remain after the final inline Dungeon owner');
 
-// Browser harness: exact production HTML through the final inline Dungeon layers,
-// including dungeon-core-316/317. The unrelated Tactical bootstrap is not started
-// here; instead the exact production family guard it would load is attached directly.
+const shellOwnerMarker='async function startConfiguredGame(){';
+const shellOwner=indexSource.indexOf(shellOwnerMarker);
+const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
+assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owning script must have an exact boundary');
+
+const customHeroesMarker='function loadCustomHeroesMulti(){';
+const customHeroesOwner=indexSource.indexOf(customHeroesMarker);
+const customHeroesScriptStart=indexSource.lastIndexOf('<script',customHeroesOwner);
+const customHeroesScriptEnd=indexSource.indexOf('</script>',customHeroesOwner);
+assert.ok(customHeroesOwner>shellScriptEnd&&customHeroesScriptStart>shellScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
+
+const dungeonChunkStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
+assert.ok(dungeonChunkStart>customHeroesScriptEnd&&mobileTagPos>dungeonChunkStart,'exact Dungeon runtime chunk must exist');
+
+// Browser harness built only from exact production source blocks:
+// 1) full real document through the Shell owner block;
+// 2) exact custom-content dependency block used by profile rendering;
+// 3) exact Dungeon chain through dungeon-core-316/317 and Core 3.10/3.12.
+// The unrelated Tactical bootstrap is not started; its exact production family
+// guard is attached directly at the same final stage.
 const roundTripHtml=
-  indexSource.slice(0,mobileTagPos)+
-  '<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
+  indexSource.slice(0,shellScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(dungeonChunkStart,mobileTagPos)+
+  '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={
   '.html':'text/html; charset=utf-8',

@@ -240,6 +240,9 @@ jobs:
       - name: Vérifier Monster Capture actuel par le vrai Shell
         run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
 
+      - name: Vérifier la non-interférence des quatre modules
+        run: node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+
       - name: Vérifier le rendu canonique des murs dans Chromium
         run: node tests/gens_tactical_wall_browser_v11411.test.cjs
 

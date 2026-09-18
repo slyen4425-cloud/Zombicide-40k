@@ -168,9 +168,16 @@ const server=http.createServer((req,res)=>{
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
+    mark('open-real-hero-selection');
+    await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+
     const firstParticipant=page.locator('#participantList input[type="checkbox"]').first();
-    await firstParticipant.waitFor({state:'attached'});
+    await firstParticipant.waitFor({state:'visible'});
     if(!(await firstParticipant.isChecked()))await firstParticipant.check();
+
+    await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
     mark('start-real-dungeon-session');
     await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();

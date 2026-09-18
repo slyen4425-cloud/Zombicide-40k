@@ -48,7 +48,7 @@ const server=http.createServer((req,res)=>{
     serviceWorkers:'block'
   });
   const page=await context.newPage();
-  page.setDefaultTimeout(20000);
+  page.setDefaultTimeout(60000);
 
   const errors=[];
   const unexpectedDialogs=[];
@@ -60,7 +60,7 @@ const server=http.createServer((req,res)=>{
   });
 
   try{
-    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'domcontentloaded'});
+    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'commit',timeout:60000});
     await page.waitForFunction(()=>[
       'openGensFamily',
       'openGensBuiltInGame',

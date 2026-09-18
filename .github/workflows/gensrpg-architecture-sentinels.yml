@@ -217,6 +217,9 @@ jobs:
       - name: Vérifier le manifeste des propriétaires runtime Phase 2
         run: node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
 
+      - name: Inventorier les effets globaux et le stockage Phase 2
+        run: node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

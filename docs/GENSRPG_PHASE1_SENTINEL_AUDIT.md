@@ -24,7 +24,7 @@ Audit uniquement. Aucun runtime, gameplay, asset ou valeur de règle n'est modif
 | Dégâts + armure + résistances | COUVERT | `gens_v11411_final_melee_damage_contract.test.cjs`, `gens_rpg_tactical_damage_v167811411.test.cjs`, sentinelles d'explication | aucun manque Phase 1 identifié |
 | Combat Tactical entrée/sortie | COUVERT FORT | Bridge, V113, callsites 4K/4L/4M, Dock, browser Tactical | aucun manque Phase 1 identifié |
 | Monster Capture | PARTIEL | `gens_world_summary_v167820.test.cjs` protège seulement les données Capture ; le runtime actif contient exploration, équipe/réserve, combats et capture | aucune sentinelle de lancement/gameplay Capture ; ne pas restaurer/réécrire Capture pendant Phase 1 |
-| Duel/PvP | MANQUE CIBLÉ | le shell actuel affiche explicitement `PVP — À VENIR` et « Le moteur PvP n'est pas encore construit » | pas de sentinelle dédiée protégeant ce placeholder ; ne pas inventer un moteur |
+| Duel/PvP | COUVERT | `gens_pvp_placeholder_shell_browser_v11411.test.cjs` traverse la vraie carte PvP du Shell et protège `PVP — À VENIR`, le message moteur non construit et l'absence de session/runtime parasite | aucun manque Phase 1 identifié |
 | Sauvegarde | COUVERT | `dungeon_authored_return_persist_v167862.test.cjs` protège la persistance spatiale ; `gens_savequit_resume_shell_browser_v11411.test.cjs` protège désormais le round-trip Shell complet Save & Quit -> recréation de page -> Reprendre | aucun manque Phase 1 identifié |
 | PWA/cache | COUVERT | `gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs` + preview composition/browser | aucun manque Phase 1 identifié |
 | Non-interférence 4 modules | PARTIEL | Survival/Dungeon et Tactical/legacy sont fortement isolés ; Capture est filtré dans plusieurs données Dungeon | aucune sentinelle unique couvrant les frontières Survie/Dungeon/Capture/PvP |
@@ -43,7 +43,7 @@ Preuve de fermeture Save & Quit / reprise : SHA fonctionnel `47d84f35c802dbe5f15
 
 Les lots **lancement Survie par le vrai Shell** et **Save & Quit + vraie reprise complète par le Shell** sont désormais couverts et branchés à la CI. La sentinelle Save/Resume couvre également le lancement Dungeon depuis le Shell racine.
 
-Prochain lot test-only retenu : **placeholder PvP actuel**.
+Le placeholder PvP actuel est désormais couvert et branché à la CI.\n\nProchain lot test-only retenu : **Capture sur comportement actuel uniquement**.
 
 Périmètre attendu :
 - tests/workflow/documentation en première intention ;
@@ -52,7 +52,7 @@ Périmètre attendu :
 - ne pas inventer ni commencer un moteur PvP ;
 - aucun correctif runtime dans ce lot si un vrai défaut fonctionnel est découvert.
 
-Après ce lot : Capture actuel, puis non-interférence 4 modules, un lot homogène à la fois.
+Après ce lot : non-interférence 4 modules, un lot homogène à la fois.
 
 ## Signalement hors périmètre conservé
 

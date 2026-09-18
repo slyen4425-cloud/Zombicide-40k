@@ -33,4 +33,17 @@ assert.equal(api.legacyEffects().length,10,'pre-migration historical Dungeon rul
 assert.match(src,/data-add-stat/,'editor must own its new-stat button');
 assert.match(src,/data-add-effect/,'editor must own per-stat add-effect buttons');
 assert.doesNotMatch(src,/GensUnifiedStats167885|GensStatsActionsDirect167887|GensRpgStatsEditorActions167888/,'clean rebuild must not depend on stacked stat patch modules');
-console.log('GenSrpG V16.78.114.7 clean stat rebuild compatibility: persistence + reload + effects OK');
+
+let mixedProfiles=[
+ {id:'base',name:'Base',gameStyle:'zombicide'},
+ {id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{dynamicDefinitions:[],active:[]}}}
+];
+const mixedCtx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function')fn();return 0},clearTimeout:()=>{},
+ currentRpgProfile:()=>mixedProfiles[1],getActiveGameProfile:()=>mixedProfiles[0],loadGameProfiles:()=>mixedProfiles,
+ saveGameProfiles:a=>{mixedProfiles=JSON.parse(JSON.stringify(a))},activeGameProfileId:()=>mixedProfiles[0].id,getActiveGameProfileId:()=>mixedProfiles[0].id,
+ loadDungeonRpgRules:()=>({physicalDamageStep:10,physicalDamageGain:1}),saveDungeonRpgRules:()=>{},isDungeonMode:()=>false};
+mixedCtx.window=mixedCtx;mixedCtx.globalThis=mixedCtx;vm.createContext(mixedCtx);vm.runInContext(src,mixedCtx,{filename:'gens-rpg-stats-clean-167874.js'});
+assert.equal(mixedCtx.GensCleanRpgStats167874.install(),true,'Core Stats install should complete with Base active and Dungeon profile selected by its owner');
+assert.deepEqual(mixedProfiles.map(p=>p.id),['base','dungeon'],'saving Dungeon stats must never overwrite the active Base profile');
+
+console.log('GenSrpG V16.78.114.7 clean stat rebuild compatibility: persistence + reload + effects + profile ownership OK');

@@ -259,3 +259,56 @@ Prochaine action :
 3. test ciblé du guard final ;
 4. correctif minimal ;
 5. CI complète.
+
+
+## Mise à jour opérationnelle — routage Capture/Dungeon GREEN
+
+Lot dédié :
+- branche : `work/gensrpg-capture-start-routing-2026-09-18` ;
+- checkpoint de départ : `checkpoint/gensrpg-start-capture-dungeon-routing-2026-09-18` ;
+- base du lot : `b15567342c1fbdeb33a7559187c3670ba3e184de`.
+
+Correctif runtime :
+- commit : `b601f507cab884c9a427cf523bf671d53fb075bb` ;
+- propriétaire modifié : `dungeonCore200Rebuild` ;
+- diff runtime : **1 ligne** dans `index.html` ;
+- l'interception finale conserve Dungeon, mais délègue Capture à la chaîne dédiée `captureFix139` ;
+- aucun changement global de `isDungeonMode()` ;
+- aucun wrapper, observer, timer ou retry ajouté ;
+- blob final `index.html` : `3a3db76d12ae511f6293e8ff25d124616731a08b`.
+
+Sentinelles :
+- test ciblé du propriétaire : `tests/gens_capture_start_routing_owner_v11411.test.cjs` ;
+- inventaire Phase 2 mis à jour pour verrouiller « Dungeon oui / Capture non » ;
+- sentinelle Save & Quit mise à jour avec le même contrat, sans modification du scénario navigateur.
+
+Validation finale sur `301f2f814e35648bed22fe4fb0dd6580c5e68d80` :
+- Architecture `35346984569` — SUCCESS ;
+- navigateur Pages complet dans ce run — SUCCESS ;
+- Firefox `35346984602` — SUCCESS ;
+- Tactical Dock `35346984616` — SUCCESS.
+
+Le navigateur complet valide désormais successivement :
+- UI native ;
+- Survie ;
+- Save & Quit / reprise Dungeon ;
+- PvP ;
+- Monster Capture courant ;
+- composition Pages complète Capture ;
+- non-interférence des quatre modules ;
+- rendu/preview navigateur prévus par la sentinelle.
+
+Conclusion :
+- la récursion initiale Capture est corrigée ;
+- l'écrasement Base/Dungeon par Core Stats est corrigé ;
+- le détournement final Capture vers Dungeon est corrigé ;
+- les trois défauts fonctionnels découverts pendant la cartographie ont été traités dans des lots dédiés ;
+- `main` reste gelé sur V16.78.114.11 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Prochaine action après checkpoint GREEN
+
+1. créer le checkpoint GREEN du lot routage Capture/Dungeon ;
+2. repartir de ce checkpoint sur une branche neuve de poursuite Phase 2 ;
+3. reprendre la cartographie runtime au point où la composition Pages complète était bloquée ;
+4. conserver la dette « détection ennemie hors embuscade » dans un chantier fonctionnel séparé ;
+5. ne rien fusionner sur `main` tant que la restructuration n'a pas atteint le jalon prévu par la roadmap.

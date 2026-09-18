@@ -11,18 +11,27 @@ const shellOwner=indexSource.indexOf(shellOwnerMarker);
 assert.ok(shellOwner>0,'real index.html must expose startConfiguredGame()');
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellScriptEnd>shellOwner,'real index.html must close the script block that owns startConfiguredGame()');
-const customHeroSupportStart=indexSource.indexOf('function loadCustomHeroesMulti(){',shellScriptEnd);
-const customHeroSupportEnd=indexSource.indexOf('function openPlayableHeroCard(heroId){',customHeroSupportStart);
-assert.ok(customHeroSupportStart>shellScriptEnd && customHeroSupportEnd>customHeroSupportStart,'real index.html must expose the late custom-hero Shell support cluster');
-const realCustomHeroShellSupport=indexSource.slice(customHeroSupportStart,customHeroSupportEnd);
-assert.equal(realCustomHeroShellSupport.includes('</script>'),false,'extracted Shell support must stay inside one script');
-const escapeSupportStart=indexSource.indexOf('function z40kEscHtml(s){',customHeroSupportEnd);
-const escapeSupportEnd=indexSource.indexOf('function hcRenderSavedHeroes(){',escapeSupportStart);
-assert.ok(escapeSupportStart>customHeroSupportEnd && escapeSupportEnd>escapeSupportStart,'real index.html must expose the late Shell escaping helpers');
-const realShellEscapeSupport=indexSource.slice(escapeSupportStart,escapeSupportEnd);
+const onlineMarker="let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;";
+const onlineOwner=indexSource.indexOf(onlineMarker,shellScriptEnd);
+assert.ok(onlineOwner>shellScriptEnd,'real index.html must expose the online Shell support block');
+const onlineScriptStart=indexSource.lastIndexOf('<script',onlineOwner);
+const onlineScriptEnd=indexSource.indexOf('</script>',onlineOwner);
+assert.ok(onlineScriptStart>shellScriptEnd && onlineScriptEnd>onlineOwner,'real index.html must close the online Shell support block');
+const realOnlineShellSupport=indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length);
+
+const customHeroMarker='function loadCustomHeroesMulti(){';
+const customHeroOwner=indexSource.indexOf(customHeroMarker,onlineScriptEnd);
+assert.ok(customHeroOwner>onlineScriptEnd,'real index.html must expose the custom-content Shell support block');
+const customHeroScriptStart=indexSource.lastIndexOf('<script',customHeroOwner);
+const customHeroScriptEnd=indexSource.indexOf('</script>',customHeroOwner);
+assert.ok(customHeroScriptStart>onlineScriptEnd && customHeroScriptEnd>customHeroOwner,'real index.html must close the custom-content Shell support block');
+const realCustomHeroShellSupport=indexSource.slice(customHeroScriptStart,customHeroScriptEnd+'</script>'.length);
+
 const realSurvivalShellHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
-  '\n<script>'+realCustomHeroShellSupport+'\n'+realShellEscapeSupport+'</script>\n</body></html>';
+  '\n'+realOnlineShellSupport+
+  '\n'+realCustomHeroShellSupport+
+  '\n</body></html>';
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
 const mime={

@@ -417,3 +417,20 @@ En cas de changement de fil de discussion, la reprise doit pouvoir se faire en l
 3. le checkpoint indiqué dans ce fichier.
 
 La procédure détaillée est conservée dans `docs/GENSRPG_CHECKPOINT_POLICY.md`.
+
+
+## 26. Accès à `index.html` : demander le fichier à l'utilisateur si l'accès dépôt devient bloquant
+
+`index.html` est un fichier historique très volumineux et certains outils de lecture GitHub peuvent échouer, tronquer le contenu ou rendre son inspection inutilement lente.
+
+Règle obligatoire : si un chantier nécessite le contenu exact de `index.html` et que l'accès via le dépôt devient un blocage réel, ne pas perdre du temps à contourner indéfiniment cette limite et ne pas travailler à partir d'une copie incertaine.
+
+Dans ce cas :
+
+1. identifier la branche, le checkpoint ou le SHA exact à inspecter ;
+2. fournir à l'utilisateur un **lien direct** vers le `index.html` correspondant ;
+3. demander explicitement à l'utilisateur de récupérer ce fichier et de le joindre à la conversation ;
+4. vérifier ensuite que le fichier reçu correspond bien à la référence demandée avant de l'utiliser ;
+5. continuer à considérer GitHub comme l'autorité pour la branche, le SHA, le diff et la publication.
+
+Cette demande de fichier est un mécanisme de récupération d'accès, pas une permission pour remplacer la source de vérité du dépôt par une copie locale.

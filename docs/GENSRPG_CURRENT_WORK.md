@@ -17,81 +17,85 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Phase 1 — Capture : protection du comportement actuel :
+Phase 1 — Capture :
 `checkpoint/gensrpg-phase1-capture-current-sentinel-green-2026-09-18`
 
 SHA :
 `8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Lot caractérisé RED
+## RED de référence
 
-**Phase 1 — sentinelle explicite de non-interférence des quatre modules**
+Checkpoint :
+`checkpoint/gensrpg-phase1-four-module-noninterference-red-characterized-2026-09-18`
+
+SHA :
+`6c73c598c7cee070056397bc51592e01cbb6275b`
+
+Défaut :
+transition réelle `Capture -> PvP placeholder` conservant `gensDungeonTheme` et `gensCapturePregame` sur `body`.
+
+## Chantier courant
+
+**Phase 1 — correctif Shell ciblé de nettoyage de contexte**
 
 Branche :
-`work/gensrpg-phase1-four-module-noninterference-sentinel-2026-09-18`
+`work/gensrpg-phase1-shell-context-cleanup-fix-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-four-module-noninterference-sentinel-2026-09-18`
+`checkpoint/gensrpg-start-phase1-shell-context-cleanup-fix-2026-09-18`
+
+Sauvegarde avant runtime :
+`backup/gensrpg-before-shell-context-cleanup-fix-2026-09-18`
 
 Base exacte :
-`8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
+`6c73c598c7cee070056397bc51592e01cbb6275b`
 
-SHA de caractérisation :
-`c098eb1c110e31a01269810d1e9f8117028f7c5f`
+## Propriétaire identifié
 
-## Résultat de la sentinelle
+`openGensFamily(family)` dans le Shell principal.
 
-La sentinelle traverse correctement dans un même contexte navigateur :
+Diagnostic :
+- cette fonction possède le passage vers une famille racine ;
+- elle masque les anciennes vues et affiche la nouvelle famille ;
+- elle ne retire actuellement aucune classe de contexte transitoire du `body` ;
+- `gensCapturePregame` est posé par le wizard Capture ;
+- `gensAdventurePregame` est posé par le wizard Adventure ;
+- `gensDungeonTheme` est posé par le contexte Adventure/Dungeon ;
+- le placeholder PvP n'a aucun runtime qui puisse nettoyer ces classes après coup.
 
-`Survie -> Dungeon -> Survie -> Capture -> PvP placeholder`
+## Périmètre autorisé
 
-Les transitions suivantes sont conformes :
-- Survie -> Dungeon ;
-- Dungeon -> Survie ;
-- Survie -> Capture ;
-- aucun runtime/session Dungeon parasite n'est créé pendant ces changements ;
-- le placeholder PvP n'active ni nouvelle session ni nouveau profil.
+Correctif soustractif et local au propriétaire Shell :
+- nettoyer les classes de contexte de **pré-game** lorsqu'on quitte une vue de jeu pour une famille ;
+- empêcher un thème Adventure/Dungeon de rester actif dans une famille non-Adventure, notamment PvP ;
+- ne pas effacer profil, sauvegarde, session ou données persistantes ;
+- ne pas créer de nouvel état, wrapper, observer, timer ou retry ;
+- ne pas modifier les moteurs Capture, Dungeon, Survie, Tactical ou PvP ;
+- ne pas changer les règles de gameplay.
 
-Le RED fonctionnel est précis sur **Capture -> PvP** :
-- `gensDungeonTheme` reste actif sur `body` ;
-- `gensCapturePregame` reste actif sur `body` ;
-- le profil actif reste Monster Capture, ce qui est acceptable pour un placeholder sans profil propre ;
-- le guard famille reste `adventure`, ce qui est acceptable car PvP n'a pas de famille persistante supportée ;
-- Hub Capture et panneau Dungeon restent cachés ;
-- aucune session ou runtime Dungeon n'est créé.
+## Correctif envisagé
 
-## Cause identifiée
+Dans `openGensFamily(family)` :
+- retirer systématiquement `gensCapturePregame` et `gensAdventurePregame` car aucune famille racine n'est un pré-game ;
+- retirer `gens-pure-capture` car aucune famille racine n'est le runtime Capture actif ;
+- synchroniser `gensDungeonTheme` avec la famille demandée : actif uniquement pour `adventure`, absent pour `survival` et `pvp`.
 
-Le propriétaire Shell `openGensFamily(family)` :
-- masque les niveaux d'accueil ;
-- affiche la famille demandée ;
-- rend les cartes de famille ;
-- **ne nettoie pas les classes transitoires de contexte laissées par le pré-game précédent**.
+Aucune autre autorité ne doit être ajoutée.
 
-Les classes sont posées ailleurs par les propriétaires normaux :
-- `gensDungeonTheme` par le profil/style Adventure-Dungeon ;
-- `gensCapturePregame` par le wizard de pré-game Capture ;
-- `gensAdventurePregame` par le wizard Adventure ;
-- `gens-pure-capture` par le runtime Capture actif.
+## Tests obligatoires
 
-Le lot sentinelle reste test/workflow/documentation uniquement. Aucun runtime n'est corrigé ici.
+1. la sentinelle quatre modules doit devenir GREEN ;
+2. Survie Shell reste GREEN ;
+3. Save & Quit / reprise reste GREEN ;
+4. PvP placeholder reste GREEN ;
+5. Capture actuel reste GREEN ;
+6. Architecture reste GREEN ;
+7. Firefox et Tactical Dock restent GREEN ;
+8. diff runtime limité au propriétaire Shell attendu.
 
-## Prochain chantier dédié
+## Prochaine étape
 
-**Correctif Shell — nettoyage de contexte lors d'un changement de famille hors gameplay.**
-
-Périmètre :
-- nouveau checkpoint de départ depuis la caractérisation RED ;
-- nouvelle branche dédiée ;
-- propriétaire modifié : `openGensFamily()` uniquement, sauf preuve contraire ;
-- correction soustractive : retirer les classes de contexte transitoires lorsqu'on quitte leur vue ;
-- ne pas effacer les données persistantes ni les profils ;
-- ne pas toucher aux moteurs Survie/Dungeon/Capture/PvP ;
-- aucune nouvelle couche, observer, timer ou wrapper ;
-- la sentinelle quatre modules doit passer GREEN ;
-- toutes les sentinelles existantes doivent rester GREEN.
-
-Après ce correctif GREEN : clôturer la non-interférence et refaire la matrice complète Phase 1.
+Appliquer le nettoyage minimal dans `openGensFamily()`, puis relancer la CI complète avant toute clôture.
 
 ## Dette explicitement différée
 

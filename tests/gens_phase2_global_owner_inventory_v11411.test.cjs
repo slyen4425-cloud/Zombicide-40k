@@ -8,9 +8,7 @@ const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2],offset:m.index}));
 
-function assignmentChain(name){
-  const re=new RegExp('window\\.'+name.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')+'\\\\s*=','g');
-  const chain=[];
+function assignmentChain(name){\n  const re=new RegExp('window\\\\.'+name+'\\\\s*=','g');\n  const chain=[];
   for(const block of blocks){
     const hits=block.body.match(re);
     if(hits?.length)chain.push({id:block.id,count:hits.length,offset:block.offset});

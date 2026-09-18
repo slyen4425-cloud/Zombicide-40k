@@ -129,12 +129,76 @@ Aucune autre modification runtime n'est autorisée tant que ce correctif minimal
 - checkpoint GREEN créé seulement après validation ;
 - aucune fusion sur `main`.
 
+## Résultat du correctif Capture
+
+Correctif runtime appliqué :
+- commit `e7701e47ff6e44c61f53d62c9d7464b540da49c6` ;
+- diff runtime : **1 ligne** dans `builtinMonsterCapture162` ;
+- `loadGameProfilesRaw()` -> `loadGameProfiles()`.
+
+Effet confirmé :
+- la récursion initiale du bloc 030 a disparu ;
+- le boot traverse désormais les 119 blocs inline et atteint les modules Pages externes ;
+- les gardes Architecture restent GREEN ;
+- Firefox et Tactical Dock restent GREEN sur les commits de caractérisation.
+
+## Nouveau défaut indépendant découvert
+
+Le boot complet bloque ensuite dans le callback `DOMContentLoaded` du propriétaire Core Stats :
+`assets/gensrpg/gens-rpg-stats-clean-167874.js`.
+
+Trace prouvée :
+1. stockage avant Stats : `Base, Dungeon, Capture` ;
+2. `currentRpgProfile()` choisit le profil Dungeon alors que le profil actif reste Base ;
+3. `saveProfile(p)` construit une liste d'identifiants contenant à la fois `p.id` (Dungeon) et `activeGameProfileId()` (Base) ;
+4. `findIndex()` trouve donc Base en premier ;
+5. le profil Dungeon remplace Base ;
+6. stockage après sauvegarde : `Dungeon, Dungeon, Capture` ;
+7. `loadGameProfiles()` tente alors de recréer Base via `ensureBaseGameProfile()` et retombe dans une récursion.
+
+Preuve de caractérisation :
+- commit test `ff7dcf501087bde42315eac18a529ae993c23c0e` ;
+- trace stockage : `game_profile_zombicide_base,game_profile_dungeon_demo,gp_mt7ker7t_m2iw9` puis `game_profile_dungeon_demo,game_profile_dungeon_demo,gp_mt7ker7t_m2iw9`.
+
+## Décision de périmètre
+
+Ce défaut appartient au propriétaire **Core Stats / persistance de profil**, pas à `builtinMonsterCapture162`.
+
+Conformément à la charte :
+- ne pas élargir ce lot Capture ;
+- conserver le correctif Capture d'une ligne ;
+- ouvrir un chantier dédié pour `saveProfile(p)` du Core Stats ;
+- aucun wrapper/observer/timer de réparation.
+
+## Prochain chantier
+
+**Correctif dédié — Core Stats saveProfile doit remplacer uniquement le profil demandé.**
+
+Correctif attendu :
+- `p.id` doit être l'autorité primaire pour le remplacement ;
+- l'identifiant actif ne peut servir de fallback que si `p.id` est absent/non exploitable ;
+- ne jamais écraser Base lorsqu'on sauvegarde Dungeon, ni l'inverse.
+
+Tests obligatoires :
+- reproduction directe Base actif + sauvegarde Dungeon ;
+- composition Pages complète Capture ;
+- Capture courant ;
+- UI native ;
+- Survie ;
+- Save & Quit / reprise ;
+- PvP ;
+- non-interférence quatre modules ;
+- gardes Phase 2 ;
+- Firefox ;
+- Tactical Dock.
+
 ## Prochaine action
 
-1. mettre à jour le `index.html` exact avec le correctif minimal ;
-2. vérifier que le diff runtime se limite à ce changement ;
-3. relancer la CI complète du lot ;
-4. si RED, diagnostiquer sans ajouter de couche de réparation.
+1. créer le checkpoint de départ sur le SHA documentaire courant ;
+2. créer une branche Core Stats dédiée ;
+3. corriger `saveProfile(p)` au propriétaire ;
+4. transformer la caractérisation en test de régression ciblé ;
+5. relancer toute la CI avant tout checkpoint GREEN.
 
 ## Dette séparée
 

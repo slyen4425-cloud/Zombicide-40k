@@ -33,6 +33,9 @@ jobs:
           node tests/dungeon_zone_content_authored_trap_authority_v167824.test.cjs
           node tests/dungeon_exact_trap_runtime_v167845.test.cjs
 
+      - name: Bloquer la densité aléatoire Core 2.02 dans les mondes authored
+        run: node tests/gens_authored_core202_boundary_v11411.test.cjs
+
       - name: Verrouiller l'autorité visuelle authored
         run: |
           node tests/dungeon_authored_cache_visual_source_owner_v167877.test.cjs

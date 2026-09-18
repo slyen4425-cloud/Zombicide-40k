@@ -687,3 +687,28 @@ Propriétaires candidats à confirmer :
 ### Prochaine action
 
 Lire les propriétaires et tests authored existants, puis construire des reproductions ciblées avant toute correction.
+
+### Diagnostic confirmé — conflit Core 2.02 / authored
+
+Le vrai scénario navigateur a confirmé qu'un piège de scène non-authored survivait dans une zone World Builder malgré l'autorité `DungeonExactTrapRuntime167845`.
+
+Cause exacte trouvée dans l'`index.html` vérifié :
+- bloc inline `dungeonCore202ContentDensity` ;
+- `ensureTrap202()` recréait un piège `dc202` dès que `last.kind === "trap"` ;
+- la même couche pouvait aussi forcer une rencontre après deux salles sans combat et injecter une énigme selon sa cadence ;
+- ces mécanismes sont légitimes pour le Dungeon généré, jamais pour un monde authored.
+
+Correction exacte appliquée sur le blob source vérifié :
+- ancien blob `917c1a38fa605d53de9a8a9f03b8b76a96b379e3` ;
+- nouveau blob `55453138449d07bde731ff6934acc442f56bae32` ;
+- Core 2.02 reconnaît désormais `last.authoredRuntime167839` ;
+- en authored : aucune réparation/génération de rencontre, piège, énigme ou combat forcé ;
+- seul `paintTrap202()` reste autorisé pour afficher un piège exact déjà détecté ;
+- aucun changement pour le Dungeon généré classique.
+
+Le patch du gros `index.html` a été appliqué par workflow one-shot avec vérification stricte des blobs avant/après, puis ce workflow s'est supprimé dans le même commit.
+
+SHA du patch index :
+`65fac9d803f71ecf7c8c3f82aa15a80861276d71`
+
+La validation globale reste requise avant tout checkpoint GREEN.

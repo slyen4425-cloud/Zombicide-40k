@@ -76,10 +76,11 @@ const server=http.createServer((req,res)=>{
   let lastInline='none';
   let lastExternal='none';
   let lastMutationObserver='none';
+  let lastDomContentLoaded='none';
   const requestLog=[];
   const mark=name=>{stage=name;console.log('[phase2-full-capture]',name)};
   const watchdog=setTimeout(()=>{
-    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal+' lastMutationObserver='+lastMutationObserver);
+    console.error('[phase2-full-capture] WATCHDOG stage='+stage+' lastInline='+lastInline+' lastExternal='+lastExternal+' lastMutationObserver='+lastMutationObserver+' lastDomContentLoaded='+lastDomContentLoaded);
     console.error('[phase2-full-capture] requests='+JSON.stringify(requestLog.slice(-120)));
     process.exit(1);
   },90000);
@@ -119,6 +120,35 @@ const server=http.createServer((req,res)=>{
         };
         window.MutationObserver.prototype=NativeMutationObserver.prototype;
       }
+    }catch(e){}
+    try{
+      const nativeAdd=EventTarget.prototype.addEventListener;
+      const nativeRemove=EventTarget.prototype.removeEventListener;
+      const dclMap=new WeakMap();
+      let dclSeq=0;
+      EventTarget.prototype.addEventListener=function(type,listener,options){
+        if(this===document&&type==='DOMContentLoaded'&&listener){
+          const id=++dclSeq;
+          const stack=String(new Error('phase2-dcl-'+id).stack||'').split('\n').slice(1,6).join(' | ');
+          console.log('[phase2-dcl-create] id='+id+' '+stack);
+          const wrapped=function(event){
+            console.log('[phase2-dcl-before] id='+id);
+            try{
+              if(typeof listener==='function')return listener.call(this,event);
+              return listener?.handleEvent?.(event);
+            }finally{
+              console.log('[phase2-dcl-after] id='+id);
+            }
+          };
+          if((typeof listener==='function'||typeof listener==='object')&&listener)dclMap.set(listener,wrapped);
+          return nativeAdd.call(this,type,wrapped,options);
+        }
+        return nativeAdd.call(this,type,listener,options);
+      };
+      EventTarget.prototype.removeEventListener=function(type,listener,options){
+        const mapped=(this===document&&type==='DOMContentLoaded'&&listener)?dclMap.get(listener):null;
+        return nativeRemove.call(this,type,mapped||listener,options);
+      };
     }catch(e){}
     try{
       if(!sessionStorage.getItem('__phase2FullCaptureBooted')){
@@ -179,6 +209,11 @@ const server=http.createServer((req,res)=>{
     }
     if(value.startsWith('[phase2-mo-create]')||value.startsWith('[phase2-mo-call]')){
       lastMutationObserver=value;
+      console.log(value);
+      return;
+    }
+    if(value.startsWith('[phase2-dcl-create]')||value.startsWith('[phase2-dcl-before]')||value.startsWith('[phase2-dcl-after]')){
+      lastDomContentLoaded=value;
       console.log(value);
       return;
     }

@@ -315,7 +315,7 @@ const server=http.createServer((req,res)=>{
     assert.ok(capPre.dungeonBtn==='none'||capPre.dungeonBtn==='absent','Capture pre-game must not expose active Dungeon setup');
     assert.notEqual(capPre.session,'1');
     assert.equal(capPre.dungeonRuntime,null);
-    await page.locator('#pregameSetup .pregameBackStep').click();
+    await page.locator('#pregameHeroStep .pregameBackStep').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
     await rootFromGame();
 

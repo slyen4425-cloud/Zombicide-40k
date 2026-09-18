@@ -48,10 +48,17 @@ const phase2CaptureTraceReplacements=[
   ['try{renderGameProfileLibrary?.()}catch(e){}', 'console.log("[phase2-mc162] render-profiles-before");try{renderGameProfileLibrary?.();console.log("[phase2-mc162] render-profiles-after")}catch(e){console.log("[phase2-mc162] render-profiles-error",String(e))}console.log("[phase2-mc162] ensure-end");'],
   ['ensureBuiltinMonsterCapture162();', 'console.log("[phase2-mc162] first-call-before");ensureBuiltinMonsterCapture162();console.log("[phase2-mc162] first-call-after");']
 ];
+const phase2CaptureBlockMatch=productionHtml.match(/(<script\\b[^>]*\\bid=["']builtinMonsterCapture162["'][^>]*>)([\\s\\S]*?)(<\\/script>)/i);
+assert.ok(phase2CaptureBlockMatch,'Phase 2 Capture inline block missing');
+let phase2CaptureBlockBody=phase2CaptureBlockMatch[2];
 for(const [needle,replacement] of phase2CaptureTraceReplacements){
-  assert.ok(productionHtml.includes(needle),'Phase 2 Capture trace anchor missing: '+needle);
-  productionHtml=productionHtml.replace(needle,replacement);
+  assert.ok(phase2CaptureBlockBody.includes(needle),'Phase 2 Capture trace anchor missing inside builtinMonsterCapture162: '+needle);
+  phase2CaptureBlockBody=phase2CaptureBlockBody.replace(needle,replacement);
 }
+productionHtml=productionHtml.replace(
+  phase2CaptureBlockMatch[0],
+  phase2CaptureBlockMatch[1]+phase2CaptureBlockBody+phase2CaptureBlockMatch[3]
+);
 
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';

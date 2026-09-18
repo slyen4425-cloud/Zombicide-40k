@@ -25,6 +25,9 @@ jobs:
       - name: Vérifier RuntimeBootstrap V1
         run: node tests/gens_runtime_bootstrap_v1.test.cjs
 
+      - name: Vérifier le retour immédiat des caches authored
+        run: node tests/dungeon_zone_links_transition_actions_v167846.test.cjs
+
       - name: Bloquer toute nouvelle autorité globale GenSrpG
         run: node tests/gens_architecture_global_side_effect_guard.test.cjs
 

@@ -471,3 +471,29 @@ Avant toute correction, il faut exécuter une caractérisation avec la **composi
 Ce document ne recommande encore aucune suppression de fichier.
 
 Les constats « non chargé », « code dormant » ou « responsabilité mixte » sont des résultats de cartographie, pas des autorisations de nettoyage.
+
+## Caractérisation boot complet — point d'arrêt identifié
+
+La caractérisation navigateur de la composition Pages complète est instrumentée avec un marqueur avant chaque bloc inline exécutable.
+
+Résultat au SHA `aab1aa5f6e362765e8ba2433bb7539d72b34452f` :
+
+- blocs 001 à 029 : atteints immédiatement ;
+- bloc 030 : `builtinMonsterCapture162` — entrée confirmée ;
+- aucun bloc 031 atteint pendant le watchdog de 90 secondes ;
+- les requêtes HTML, Supabase stub, QRCode stub et premiers assets se terminent ;
+- aucune assertion gameplay n'est atteinte ;
+- le gel est donc situé **pendant l'exécution synchrone du bloc inline `builtinMonsterCapture162` ou dans une fonction synchrone qu'il appelle avant son retour**.
+
+Ce résultat ne constitue pas encore une preuve de bug utilisateur :
+- le bloc exact doit être inspecté sur le `index.html` correspondant au SHA courant ;
+- conformément à la règle 26, cette inspection doit utiliser le fichier exact téléchargé par l'utilisateur, pas une nouvelle tentative de lecture du gros HTML via le connecteur GitHub.
+
+Prochaine action de caractérisation :
+1. obtenir le `index.html` exact du SHA courant ;
+2. vérifier son blob ;
+3. isoler le corps exact de `builtinMonsterCapture162` ;
+4. inventorier ses appels synchrones / boucles / accès stockage / génération de contenu ;
+5. reproduire le point d'arrêt sans modifier le runtime ;
+6. seulement ensuite décider s'il s'agit d'un coût de harnais, d'une boucle réelle ou d'une autorité Capture problématique.
+

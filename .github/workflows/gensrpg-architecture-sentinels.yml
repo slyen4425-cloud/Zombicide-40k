@@ -214,6 +214,9 @@ jobs:
       - name: Vérifier l'inventaire des chaînes d'autorité Phase 2
         run: node tests/gens_phase2_global_owner_inventory_v11411.test.cjs
 
+      - name: Vérifier le manifeste des propriétaires runtime Phase 2
+        run: node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

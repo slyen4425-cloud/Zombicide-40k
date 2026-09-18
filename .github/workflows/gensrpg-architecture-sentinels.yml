@@ -33,6 +33,11 @@ jobs:
           node tests/dungeon_zone_content_authored_trap_authority_v167824.test.cjs
           node tests/dungeon_exact_trap_runtime_v167845.test.cjs
 
+      - name: Verrouiller l'autorité visuelle authored
+        run: |
+          node tests/dungeon_authored_cache_visual_source_owner_v167877.test.cjs
+          node tests/dungeon_source_render_stability_v167877.test.cjs
+
       - name: Bloquer toute nouvelle autorité globale GenSrpG
         run: node tests/gens_architecture_global_side_effect_guard.test.cjs
 

@@ -15,57 +15,62 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
-## Dernier lot validé
+## Dernier checkpoint vert
 
-**Phase 1 — sentinelle test-only de lancement Survie par le vrai Shell**
+- `checkpoint/gensrpg-phase1-survival-shell-sentinel-green-2026-09-18`
+- SHA : `0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
+- lancement Survie par le vrai Shell : couvert ;
+- Architecture `35312077754` — SUCCESS ;
+- Firefox `35312077693` — SUCCESS ;
+- Tactical Dock `35312077713` — SUCCESS.
+
+## Chantier courant
+
+**Phase 1 — sentinelle test-only Save & Quit + vraie reprise Shell**
 
 Branche :
-`work/gensrpg-phase1-survival-shell-sentinel-2026-09-18`
+`work/gensrpg-phase1-save-quit-resume-shell-sentinel-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase1-survival-shell-sentinel-2026-09-18`
+`checkpoint/gensrpg-start-phase1-save-quit-resume-shell-sentinel-2026-09-18`
 
-Base exacte :
-`cadc1a133e1513218bed7f3af19fe176805bf871`
+SHA de base :
+`0e8301fb4555279c4ea47b23e23e2d91f7eb4e5e`
 
-SHA fonctionnel validé avant fermeture documentaire :
-`aca4d8b449c37367525644781500f8972aae645d`
+## Périmètre déclaré
 
-Checkpoint final prévu :
-`checkpoint/gensrpg-phase1-survival-shell-sentinel-green-2026-09-18`
+Propriétaires à traverser sans les remplacer :
+- chemin réel de lancement d'une session ;
+- vrai Save & Quit ;
+- persistance/session existante ;
+- `resumeGame()` et bouton Reprendre du vrai Shell ;
+- guard de famille/session déjà présent.
 
-## Résultat du lot Survie
+Le test doit :
+- créer une vraie session ;
+- modifier un état observable pertinent ;
+- exécuter Save & Quit par le vrai bouton/propriétaire ;
+- recréer ou recharger réellement le contexte navigateur ;
+- revenir par le vrai Shell ;
+- cliquer réellement sur Reprendre ;
+- vérifier que le bon module et le bon état reprennent l'autorité.
 
-La sentinelle navigateur traverse désormais le vrai chemin Shell :
+## Interdictions
 
-`openGensFamily('survival') -> openGensBuiltInGame(...,'survival') -> préparation réelle -> startConfiguredGame()`
+- aucun changement runtime/gameplay dans ce lot tant qu'un défaut n'est pas prouvé et caractérisé ;
+- aucun wrapper global ;
+- aucun MutationObserver global ;
+- aucun timer/retry de réparation ;
+- aucun changement Dungeon/Tactical hors caractérisation ;
+- aucune restauration Capture ;
+- aucun moteur PvP ;
+- ne jamais modifier `main`.
 
-Elle vérifie notamment :
-- famille/session conservée à `survival` ;
-- profil 40K Survie réellement sélectionné ;
-- participant réellement choisi dans le pré-game ;
-- session commune activée ;
-- `isDungeonMode() === false` ;
-- thème/overlay/runtime Dungeon non activés ni remplacés ;
-- composition production toujours reliée au guard `gens-survival-mode-isolation-1678104.js`.
+Risque inter-module : moyen, car la reprise est un raccord Shell/storage/module. Le test doit donc identifier précisément l'autorité fautive en cas de RED.
 
-Le lot est resté **test/workflow/documentation uniquement**. Aucun runtime ni gameplay n'a été modifié.
+## Prochaine étape
 
-CI sur `aca4d8b449c37367525644781500f8972aae645d` :
-- Architecture : run `35311890710` — SUCCESS
-- Firefox : run `35311890711` — SUCCESS
-- Tactical Dock : run `35311890705` — SUCCESS
-
-## Prochain chantier Phase 1
-
-**Save & Quit + vraie reprise complète par le Shell.**
-
-Ce chantier n'est pas encore démarré dans ce commit de fermeture. Il devra avoir :
-- son propre checkpoint de départ ;
-- sa propre branche ;
-- un périmètre test-only en première intention ;
-- une vraie recréation/rechargement de session suivie du clic Reprendre ;
-- aucun correctif runtime si le test révèle un vrai défaut avant caractérisation dédiée.
+Lire les vrais propriétaires Save & Quit / `resumeGame()` dans `index.html`, inventorier les sentinelles existantes, puis écrire le plus petit scénario navigateur complet sans recopier leur logique.
 
 ## Dette explicitement différée
 

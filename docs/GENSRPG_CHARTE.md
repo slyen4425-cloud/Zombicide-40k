@@ -417,3 +417,18 @@ En cas de changement de fil de discussion, la reprise doit pouvoir se faire en l
 3. le checkpoint indiqué dans ce fichier.
 
 La procédure détaillée est conservée dans `docs/GENSRPG_CHECKPOINT_POLICY.md`.
+
+## 26. Règle de remise manuelle de `index.html` en cas de blocage d'accès
+
+`index.html` est un fichier historique très volumineux. Si les outils disponibles n'arrivent pas à lire, extraire ou inspecter de façon fiable le `index.html` exact de la branche ou du SHA en cours, il est interdit de rester bloqué à répéter les mêmes tentatives ou de travailler à partir d'une copie incertaine.
+
+Procédure obligatoire :
+
+1. identifier la branche ou le SHA exact actuellement audité ;
+2. fournir à l'utilisateur un lien direct vers le `index.html` correspondant, de préférence sous la forme :
+   `https://raw.githubusercontent.com/slyen4425-cloud/Zombicide-40k/<BRANCHE_OU_SHA>/index.html` ;
+3. demander à l'utilisateur de récupérer ce fichier et de le joindre à la conversation ;
+4. reprendre l'analyse sur le fichier remis par l'utilisateur en vérifiant qu'il correspond bien à la branche ou au SHA attendu ;
+5. ne jamais remplacer silencieusement ce fichier par une ancienne copie locale, un export historique ou le `index.html` de `main` si le chantier porte sur une autre référence.
+
+Cette remise manuelle est un mécanisme de transfert de fichier, pas une dérogation aux règles de branche, de checkpoint ou de source de vérité. Le but est d'éviter qu'un chantier reste bloqué uniquement à cause de la taille ou de l'accessibilité de `index.html`.

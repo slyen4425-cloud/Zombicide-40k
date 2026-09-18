@@ -46,28 +46,43 @@ const customHeroesScriptStart=indexSource.lastIndexOf('<script',customHeroesOwne
 const customHeroesScriptEnd=indexSource.indexOf('</script>',customHeroesOwner);
 assert.ok(customHeroesOwner>onlineScriptEnd&&customHeroesScriptStart>onlineScriptEnd&&customHeroesScriptEnd>customHeroesOwner,'exact custom-content dependency block must exist');
 
+function exactScript(id){
+  const marker='id="'+id+'"';
+  const owner=indexSource.indexOf(marker);
+  const start=indexSource.lastIndexOf('<script',owner);
+  const end=indexSource.indexOf('</script>',owner);
+  assert.ok(owner>0&&start>=0&&end>owner,'exact production script '+id+' must have a boundary');
+  return indexSource.slice(start,end+'</script>'.length);
+}
+
 const dungeonUiStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
-const dungeonBaseScriptStart=indexSource.indexOf('<script id="gensDungeonCore01Js">',dungeonUiStart);
-const dungeonBaseScriptEnd=indexSource.indexOf('</script>',dungeonBaseScriptStart);
-const core310ScriptStart=indexSource.lastIndexOf('<script',core310Pos);
-assert.ok(dungeonUiStart>customHeroesScriptEnd,'exact Dungeon Core01 UI must exist after the Shell/custom-content blocks');
-assert.ok(dungeonBaseScriptStart>dungeonUiStart&&dungeonBaseScriptEnd>dungeonBaseScriptStart,'exact Dungeon Core01 owner script must have a boundary');
-assert.ok(core310ScriptStart>dungeonBaseScriptEnd&&core310End>core310ScriptStart,'exact Core 3.10 persistence owner script must have a boundary');
+const dungeonLegacyScriptStart=indexSource.indexOf('<script id="gensDungeonCore01Js">',dungeonUiStart);
+assert.ok(dungeonUiStart>customHeroesScriptEnd&&dungeonLegacyScriptStart>dungeonUiStart,'exact native Dungeon Core01 markup must exist');
+
+const spatial313Script=exactScript('dungeonCore313SpatialModel');
+const core200Script=exactScript('dungeonCore200Rebuild');
+const core304Script=exactScript('dungeonCore304DefeatExit');
+const core307Script=exactScript('dungeonCore307CriticalResumeFix');
+const core308Script=exactScript('dungeonCore308NewRunReset');
+const core310Script=exactScript('dungeonCore310PersistenceAndTokens');
+assert.match(core200Script,/localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\)/,'Core 2.00 must remain the creator/persister of the Dungeon runtime');
+assert.match(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)\)return start\(\)/,'Core 2.00 must own the Dungeon start interception');
 
 // Browser harness built only from exact production source blocks:
-// 1) full real document through the Shell owner block;
-// 2) exact custom-content dependency block used by profile rendering;
-// 3) exact native Dungeon Core01 markup + owner script;
-// 4) exact final Core 3.10 Save & Quit / resume owner;
-// 5) exact production family/session guard.
-// No historical repair/runtime layers are copied or reimplemented.
+// Shell + offline session support + custom-content + native Dungeon markup,
+// then the current runtime/persistence owner chain needed for this round-trip.
+// Historical visual/combat layers are intentionally not reimplemented.
 const roundTripHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(dungeonUiStart,dungeonBaseScriptStart)+
-  '\n'+indexSource.slice(dungeonBaseScriptStart,dungeonBaseScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(core310ScriptStart,core310End+'</script>'.length)+
+  '\n'+indexSource.slice(dungeonUiStart,dungeonLegacyScriptStart)+
+  '\n'+spatial313Script+
+  '\n'+core200Script+
+  '\n'+core304Script+
+  '\n'+core307Script+
+  '\n'+core308Script+
+  '\n'+core310Script+
   '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={

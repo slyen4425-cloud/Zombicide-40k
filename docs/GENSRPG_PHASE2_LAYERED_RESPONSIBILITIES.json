@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
+  "note": "High-density active responsibility hotspots. Descriptive only; listing does not authorize deletion or consolidation.",
+  "hotspots": [
+    {
+      "name": "renderDungeonCombatRound",
+      "assignmentCount": 30,
+      "lastOwner": "dungeonCore303TimelineRootFix",
+      "classification": "layered-wrapper-chain",
+      "domain": "dungeon",
+      "responsibility": "combat rendering plus timeline/turn decoration remain physically layered"
+    },
+    {
+      "name": "captureRenderBattleLive",
+      "assignmentCount": 15,
+      "lastOwner": "coreCombatPoolFix156",
+      "classification": "cross-domain-wrapper-chain",
+      "domain": "capture",
+      "responsibility": "Capture renderer remains layered through Capture 128-144 then cross-mode combat-pool compatibility"
+    },
+    {
+      "name": "dc304DefeatExited",
+      "assignmentCount": 12,
+      "lastOwner": "dungeonCore308NewRunReset",
+      "classification": "layered-state-flag",
+      "domain": "dungeon",
+      "responsibility": "defeat-exit state is reassigned across recovery, defeat authority and new-run reset layers"
+    },
+    {
+      "name": "dungeonRunAi156",
+      "assignmentCount": 12,
+      "lastOwner": "dungeonCore303TimelineRootFix",
+      "classification": "legacy-duplicate-runtime",
+      "domain": "dungeon",
+      "responsibility": "AI turn authority has many historical replacements; Core 3.03 is final inline owner"
+    },
+    {
+      "name": "closeDungeonCombat",
+      "assignmentCount": 9,
+      "lastOwner": "dungeonCore200Rebuild",
+      "classification": "layered-flow-wrapper",
+      "domain": "dungeon",
+      "responsibility": "combat close flow is wrapped by navigation, pacing, popup, unlock and rebuilt runtime layers"
+    },
+    {
+      "name": "dungeonAdvanceTurn156",
+      "assignmentCount": 9,
+      "lastOwner": "dungeonCore303TimelineRootFix",
+      "classification": "legacy-duplicate-runtime",
+      "domain": "dungeon",
+      "responsibility": "turn advancement remains stratified across AI/player gate and final timeline root"
+    },
+    {
+      "name": "finishDungeonCombatVictory",
+      "assignmentCount": 9,
+      "lastOwner": "dungeonCore212RenderVictory",
+      "classification": "layered-victory-flow",
+      "domain": "dungeon",
+      "responsibility": "victory completion is composed through reward, room-cycle, movement and final victory-render authority"
+    },
+    {
+      "name": "captureBattleApplyAbility",
+      "assignmentCount": 8,
+      "lastOwner": "captureAbilityTruth144",
+      "classification": "layered-rule-chain",
+      "domain": "capture",
+      "responsibility": "Capture ability resolution is layered; Ability Truth 144 is the final inline rule owner"
+    },
+    {
+      "name": "dc305PositionalGameplay",
+      "assignmentCount": 8,
+      "lastOwner": "dungeonCore213Stability",
+      "classification": "layered-feature-state",
+      "domain": "dungeon",
+      "responsibility": "positional gameplay enablement/state is reassigned by multiple Dungeon layers"
+    },
+    {
+      "name": "openDungeonCombatVictoryPopup",
+      "assignmentCount": 8,
+      "lastOwner": "dungeonCore212RenderVictory",
+      "classification": "layered-victory-ui",
+      "domain": "dungeon",
+      "responsibility": "victory popup ownership crosses economy, loot, flow, coherence and final victory layer"
+    },
+    {
+      "name": "renderParticipantSelector",
+      "assignmentCount": 8,
+      "lastOwner": "coreCombatPoolFix156",
+      "classification": "cross-domain-shared-ui",
+      "domain": "core",
+      "responsibility": "participant selector is shared across Capture, Shell stability and combat-pool compatibility"
+    },
+    {
+      "name": "saveDungeonMj151",
+      "assignmentCount": 8,
+      "lastOwner": "dungeonCore050CombatAndEntrance",
+      "classification": "layered-persistence-wrapper",
+      "domain": "dungeon",
+      "responsibility": "MJ settings persistence is wrapped by stability, economy, gameplay, flow and combat-entry layers"
+    },
+    {
+      "name": "state",
+      "assignmentCount": 8,
+      "lastOwner": "dungeonCore200Rebuild",
+      "classification": "shared-global-state",
+      "domain": "dungeon",
+      "responsibility": "generic global state binding is overwritten by native and rebuilt Dungeon runtime"
+    },
+    {
+      "name": "current",
+      "assignmentCount": 7,
+      "lastOwner": "dungeonCore200Rebuild",
+      "classification": "shared-global-state",
+      "domain": "dungeon",
+      "responsibility": "generic current-hero binding is overwritten by native and rebuilt Dungeon runtime"
+    },
+    {
+      "name": "dungeonMapHtml",
+      "assignmentCount": 7,
+      "lastOwner": "dungeonCore080FinalMapRenderer",
+      "classification": "layered-render-chain",
+      "domain": "dungeon",
+      "responsibility": "map HTML is progressively replaced from living exploration through final map renderer"
+    },
+    {
+      "name": "startConfiguredGame",
+      "assignmentCount": 6,
+      "lastOwner": "dungeonCore200Rebuild",
+      "classification": "cross-domain-boundary-chain",
+      "domain": "shell",
+      "responsibility": "shared launch path is layered by Capture then Dungeon; final guard now preserves dedicated Capture routing"
+    }
+  ]
+}

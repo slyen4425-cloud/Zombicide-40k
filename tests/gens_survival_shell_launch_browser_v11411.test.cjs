@@ -51,9 +51,10 @@ const server=http.createServer((req,res)=>{
   });
   const page=await context.newPage();
   page.setDefaultTimeout(20000);
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
   try{
-    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`http://127.0.0.1:${port}/index.html`,{waitUntil:'commit',timeout:45000});
 
     await page.waitForFunction(()=>(
       typeof window.openGensFamily==='function' &&

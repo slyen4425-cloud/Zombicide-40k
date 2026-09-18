@@ -155,9 +155,21 @@ const server=http.createServer((req,res)=>{
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
+    mark('open-pregame-settings');
+    await page.locator('#pregameProfileStep .pregameContinue').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
+
+    mark('open-hero-session-setup');
+    await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+
     const firstParticipant=page.locator('#participantList input[type="checkbox"]').first();
-    await firstParticipant.waitFor({state:'attached'});
+    await firstParticipant.waitFor({state:'visible'});
     if(!(await firstParticipant.isChecked()))await firstParticipant.check();
+
+    mark('validate-hero-session-setup');
+    await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
 
     const dungeonBefore=await page.evaluate(()=>({
       runtime:localStorage.getItem('gensrpg_dungeon_runtime_v2'),

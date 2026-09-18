@@ -58,13 +58,14 @@ function walk(dir,out=[]){
 }
 const files=walk(root).filter(abs=>textExt.has(path.extname(abs).toLowerCase()));
 const self='tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs';
+const manifestPath='docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json';
 const report=[];
 for(const target of targets){
   const base=path.basename(target);
   const refs=[];
   for(const abs of files){
     const rel=path.relative(root,abs).replace(/\\/g,'/');
-    if(rel===target||rel===self)continue;
+    if(rel===target||rel===self||rel===manifestPath)continue;
     let src;try{src=fs.readFileSync(abs,'utf8')}catch(e){continue}
     if(src.includes(target)||src.includes(base))refs.push(rel);
   }

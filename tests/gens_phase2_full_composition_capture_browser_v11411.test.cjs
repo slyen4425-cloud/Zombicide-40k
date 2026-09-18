@@ -104,7 +104,7 @@ const server=http.createServer((req,res)=>{
 
   try{
     mark('navigate-production-preview');
-    await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+    await page.goto(url,{waitUntil:'commit',timeout:20000});
     await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:90000});
     await waitFullOwners();
 

@@ -108,6 +108,7 @@ async function openDungeonGameHome(page){
 
     // Give the existing click-lifecycle installers one event-loop turn.
     await page.waitForTimeout(150);
+    await page.waitForFunction(()=>typeof window.GensRpgTacticalRuntimeFixes1678111?.hideRuntimeTabs==='function',null,{timeout:30000});
 
     const state=await page.evaluate(()=>({
       active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
@@ -134,6 +135,26 @@ async function openDungeonGameHome(page){
     assert.equal(state.roomModal,true,'Room Creator modal must be mounted');
     assert.equal(state.builderModal,true,'Dungeon Builder modal must be mounted');
     assert.equal(state.builderParent,'drc100Launcher','Dungeon Builder launcher must remain owned by the Room Creator launcher');
+
+    const ownership=await page.evaluate(()=>{
+      const launcher=document.getElementById('drc100Launcher');
+      const existing=document.getElementById('dc047RoomBoard');
+      const previous=existing?{display:existing.style.display,html:existing.innerHTML}:null;
+      const board=existing||document.createElement('div');
+      if(!existing){board.id='dc047RoomBoard';document.body.appendChild(board)}
+      board.style.display='block';board.style.width='120px';board.style.height='120px';
+      board.innerHTML='<div class="dc047Grid" style="width:100px;height:100px"></div>';
+      window.GensRpgTacticalRuntimeFixes1678111.hideRuntimeTabs(window);
+      const during={
+        hidden:launcher?.hasAttribute('data-v111-hidden-tab')||false,
+        display:launcher?.style.getPropertyValue('display')||'',
+        priority:launcher?.style.getPropertyPriority('display')||''
+      };
+      if(existing){board.style.display=previous.display;board.innerHTML=previous.html}else board.remove();
+      window.GensRpgTacticalRuntimeFixes1678111.hideRuntimeTabs(window);
+      return during;
+    });
+    assert.deepEqual(ownership,{hidden:false,display:'',priority:''},'Tactical V111 must never take display ownership of the structural Dungeon editor launcher');
 
     const build=page.locator('#drc300Launch');
     assert.equal(await visible(build),true,'CONSTRUIRE UN DONJON must be visible in the Dungeon editor');

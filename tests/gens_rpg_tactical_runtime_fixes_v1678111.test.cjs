@@ -74,7 +74,34 @@ const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-ta
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.match(source,/const WALL_SIZE="cover"/,'wall sizing must match Builder floor-style cover');
 assert.match(source,/function paintDiceOverlay\(rt=R\)\{return false\}/,'V111 visual dice renderer must stay retired');
-assert.match(source,/drc100Launcher/,'runtime creator tab must be removable during play');
+assert.doesNotMatch(source,/const TAB_SELECTORS=\[[^\]]*(?:drc100Launcher|data-drc100-launcher)/,'V111 Tactical must not own Room Creator / World Builder launcher visibility');
+assert.match(source,/const TAB_SELECTORS=\["#drv167826Toggle","#dzc167824Launch","#drr167822Panel"\]/,'V111 may still hide its legacy runtime-only controls during play');
+
+{
+  const attrs=new Map(),writes=[];
+  const launcher={
+    hasAttribute:k=>attrs.has(k),setAttribute:(k,v)=>attrs.set(k,String(v)),removeAttribute:k=>attrs.delete(k),
+    style:{setProperty:(k,v,p)=>writes.push([k,v,p]),removeProperty:k=>writes.push(['remove',k])}
+  };
+  const legacyAttrs=new Map(),legacyWrites=[];
+  const legacy={
+    hasAttribute:k=>legacyAttrs.has(k),setAttribute:(k,v)=>legacyAttrs.set(k,String(v)),removeAttribute:k=>legacyAttrs.delete(k),
+    style:{setProperty:(k,v,p)=>legacyWrites.push([k,v,p]),removeProperty:k=>legacyWrites.push(['remove',k])}
+  };
+  const board={getBoundingClientRect:()=>({width:100,height:100})};
+  const rt={
+    getComputedStyle:()=>({display:'block',visibility:'visible'}),
+    document:{
+      getElementById:id=>id==='dc047RoomBoard'?board:null,
+      querySelector:sel=>sel==='#dc047RoomBoard .dc047Grid'?{}:null,
+      querySelectorAll:sel=>sel==='#drc100Launcher'?[launcher]:sel==='#drv167826Toggle'?[legacy]:[]
+    }
+  };
+  P.hideRuntimeTabs(rt);
+  assert.deepEqual(writes,[],'active Tactical runtime must not mutate the structural Room Creator / World Builder launcher');
+  assert.equal(attrs.has('data-v111-hidden-tab'),false,'structural launcher must not receive V111 hidden ownership');
+  assert.ok(legacyWrites.some(x=>x[0]==='display'&&x[1]==='none'&&x[2]==='important'),'legacy runtime-only control may still be hidden');
+}
 assert.match(source,/data-v111-attack/,'fixed Attack dock must be maintained independently of tactical rerenders');
 assert.match(source,/function hookUiRender\(rt=R\)/,'V111 dock must have an explicit event-driven Tactical UI render hook');
 assert.match(source,/old\.apply\(this,arguments\).*maintain\(rt\)/s,'V111 Tactical UI render hook must refresh the dock after each canonical render');

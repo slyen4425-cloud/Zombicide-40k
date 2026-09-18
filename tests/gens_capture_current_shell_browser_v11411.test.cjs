@@ -41,9 +41,14 @@ function exactScript(id){
   const marker='<script id="'+id+'"';
   const start=indexSource.indexOf(marker);
   assert.ok(start>customScriptEnd,'production script '+id+' must exist after custom-content support');
-  const end=indexSource.indexOf('</script>',start);
-  assert.ok(end>start,'production script '+id+' must have an exact boundary');
-  return indexSource.slice(start,end+'</script>'.length);
+  const openEnd=indexSource.indexOf('>',start);
+  const end=indexSource.indexOf('</script>',openEnd);
+  assert.ok(openEnd>start&&end>openEnd,'production script '+id+' must have an exact boundary');
+  return {
+    id,
+    start,
+    source:indexSource.slice(openEnd+1,end)
+  };
 }
 
 const captureScriptIds=[
@@ -58,12 +63,16 @@ const captureScriptIds=[
   'builtinMonsterCapture162'
 ];
 
+const captureOwnerScripts=captureScriptIds.map(exactScript);
+for(let i=1;i<captureOwnerScripts.length;i++){
+  assert.ok(captureOwnerScripts[i].start>captureOwnerScripts[i-1].start,'Capture owner scripts must keep production order');
+}
+
 const realCaptureHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)+
-  '\n'+captureScriptIds.map(exactScript).join('\n')+
-  '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
+  '\n</body></html>';
 
 const mime={
   '.html':'text/html; charset=utf-8',
@@ -137,6 +146,16 @@ const server=http.createServer((req,res)=>{
   });
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
+  const installCaptureOwners=async()=>{
+    for(const owner of captureOwnerScripts){
+      mark('install-'+owner.id);
+      await page.addScriptTag({content:owner.source});
+    }
+    mark('install-family-guard');
+    await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
+    await page.evaluate(()=>{try{window.gensReconcile151?.('sentinel-install')}catch(e){}});
+  };
+
   const waitOwners=()=>page.waitForFunction((captureId)=>{
     const p=typeof loadGameProfiles==='function'?loadGameProfiles().find(x=>String(x.id)===captureId):null;
     return typeof window.openGensFamily==='function' &&
@@ -151,6 +170,9 @@ const server=http.createServer((req,res)=>{
   try{
     mark('navigate-real-capture-shell');
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+
+    mark('install-current-capture-owners');
+    await installCaptureOwners();
 
     mark('wait-current-capture-owners');
     await waitOwners();
@@ -196,6 +218,8 @@ const server=http.createServer((req,res)=>{
         page.waitForNavigation({waitUntil:'domcontentloaded',timeout:15000}),
         captureCard.click()
       ]);
+      mark('reinstall-current-capture-owners-after-v155-reload');
+      await installCaptureOwners();
       await waitOwners();
       const reloaded=await page.evaluate((captureId)=>({
         active:activeGameProfileId(),

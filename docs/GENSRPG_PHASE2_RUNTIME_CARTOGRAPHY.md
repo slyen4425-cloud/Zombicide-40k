@@ -337,6 +337,100 @@ Cette liste n'indique pas automatiquement une erreur ; elle indique les zones o�
 | blocs Capture 128–162 | Capture inline | Capture | actifs, extraction future Phase 9 |
 | blocs Dungeon Core historiques | Dungeon inline | Dungeon | actifs pour beaucoup, à cartographier par responsabilité |
 
+## 9 bis. Densité de réécriture des globals inline
+
+Le scan des 130 blocs inline identifiés trouve :
+- **438 noms `window.*` distincts** explicitement assignés ;
+- **773 affectations explicites `window.<nom> = ...`** au total.
+
+Ces nombres mesurent la **densité de couches**, pas le nombre de bugs. Une même fonction peut être réassignée plusieurs fois dans un même bloc pour installer/restaurer un wrapper.
+
+### Hotspots principaux
+
+| Global | Affectations explicites | Dernière couche inline trouvée | Lecture architecturale |
+| --- | ---: | --- | --- |
+| `renderDungeonCombatRound` | 30 | `dungeonCore303TimelineRootFix` | hotspot Dungeon majeur ; Core 3.03 appelle explicitement `__dc214RenderCombat`, donc dernier wrapper != moteur de rendu sous-jacent |
+| `captureRenderBattleLive` | 15 | `coreCombatPoolFix156` | hotspot Capture ; dernière couche ajoute le ciblage MJ par-dessus le renderer Capture précédent |
+| `dc304DefeatExited` | 12 | à confirmer | état/flux défaite très stratifié |
+| `dungeonRunAi156` | 12 | couche Dungeon tardive à confirmer | ancien axe timeline/IA fortement recouvert |
+| `closeDungeonCombat` | 9 | `dungeonCore200Rebuild` | fermeture combat reprise par le runtime Dungeon reconstruit |
+| `dungeonAdvanceTurn156` | 9 | `dungeonCore303TimelineRootFix` | timeline/tour encore stratifiés |
+| `finishDungeonCombatVictory` | 9 | `dungeonCore212RenderVictory` | victoire composée de plusieurs couches |
+| `captureBattleApplyAbility` | 8 | à confirmer | moteur capacités Capture stratifié |
+| `openDungeonCombatVictoryPopup` | 8 | à confirmer | UI victoire stratifiée |
+| `renderParticipantSelector` | 8 | à confirmer | sélection participants partagée/historique |
+| `saveDungeonMj151` | 8 | à confirmer | état MJ stratifié |
+| `startConfiguredGame` | 6 | `dungeonCore200Rebuild` | chemin de lancement commun recouvert par Capture puis Dungeon |
+| `resumeGame` | 3 | `dungeonCore310PersistenceAndTokens` | reprise Dungeon finale déjà validée en Phase 1 |
+| `openChar` | 3 | `dungeonCore028HeroExploreGuard` | fiche héros enveloppée pour garde UI |
+| `DungeonCore01` | 2 | `dungeonCore200Rebuild` | API Dungeon remplacée, pas simplement étendue |
+
+### Chaînes déjà caractérisées
+
+#### `renderDungeonCombatRound`
+
+La dernière couche inline est `dungeonCore303TimelineRootFix`, mais elle délègue explicitement au renderer conservé :
+
+`dungeonCore303TimelineRootFix.render() -> window.__dc214RenderCombat()`
+
+Puis elle applique la timeline/les tours et redevient la fonction globale `renderDungeonCombatRound`.
+
+Conclusion actuelle :
+- **dernier wrapper chargé** : Core 3.03 ;
+- **renderer Dungeon sous-jacent conservé** : Core 2.14 ;
+- responsabilité à séparer plus tard : rendu combat vs timeline/tour.
+
+#### `captureRenderBattleLive`
+
+La dernière couche inline est `coreCombatPoolFix156`.
+
+Elle appelle d'abord le renderer Capture précédent, puis ajoute le ciblage MJ des créatures joueur pendant le tour d'un ennemi contrôlé par le MJ.
+
+Conclusion actuelle :
+- dernière couche chargée : `coreCombatPoolFix156` ;
+- elle n'est pas le renderer Capture de base ;
+- le renderer Capture réel reste une chaîne de wrappers 128 -> 144 avant cette couche.
+
+#### `resumeGame`
+
+La dernière couche inline est `dungeonCore310PersistenceAndTokens`.
+
+Elle restaure le runtime Dungeon persistant puis délègue au `previousResume310` si le contexte Dungeon ne s'applique pas.
+
+Conclusion actuelle :
+- dernier wrapper Dungeon : Core 3.10 ;
+- comportement réel Save & Quit / reprise déjà protégé par la sentinelle Phase 1.
+
+#### `DungeonCore01`
+
+Le premier objet global est installé par `gensDungeonCore01Js`, puis `dungeonCore200Rebuild` **remplace** l'API publique par un runtime reconstruit.
+
+Conclusion actuelle :
+- dernière API publique inline : `dungeonCore200Rebuild` ;
+- les anciennes fonctions restent néanmoins capturées/utilisées dans plusieurs couches historiques.
+
+#### `startConfiguredGame` — risque de frontière à caractériser
+
+Affectations inline, dans l'ordre :
+1. `captureFix131`
+2. `captureFix135`
+3. `captureFix138`
+4. `captureFix139`
+5. `gensDungeonCore01Js`
+6. `dungeonCore200Rebuild`
+
+`captureFix139` possède un chemin Capture dédié et délègue sinon à la fonction précédente.
+
+Les deux couches Dungeon tardives enveloppent ensuite ce chemin commun. `dungeonCore200Rebuild` utilise :
+
+`if(isDungeonMode?.()) return start(); else return startOutside200(...)`
+
+Or le comportement Capture actuel conserve historiquement `gameStyle="dungeon"` et `isDungeonMode() === true`.
+
+**Statut : risque de frontière détecté par cartographie, pas défaut fonctionnel déclaré.**
+
+Avant toute correction, il faut exécuter une caractérisation avec la **composition complète de production**, car les sentinelles Capture Phase 1 utilisent volontairement un harnais réduit aux propriétaires nécessaires et ne suffisent pas, à elles seules, à prouver l'ordre complet des 130 blocs inline.
+
 ## 10. Points à approfondir avant critère de sortie Phase 2
 
 1. établir pour chaque bloc inline actif sa responsabilité dominante ;

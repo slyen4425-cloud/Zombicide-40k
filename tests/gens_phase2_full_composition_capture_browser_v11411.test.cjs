@@ -137,7 +137,7 @@ const server=http.createServer((req,res)=>{
             if(id===38&&!window.__phase2StatsGlobalsInstrumented){
               window.__phase2StatsGlobalsInstrumented=true;
               const names=[
-                'currentRpgProfile','getActiveGameProfile','loadGameProfiles','saveGameProfiles',
+                'currentRpgProfile','getActiveGameProfile','loadGameProfiles','ensureBaseGameProfile','saveGameProfiles',
                 'loadDungeonRpgRules','saveDungeonRpgRules','loadState','saveState','save','render',
                 'findCustomHero','dungeonEquipmentBonus','dungeonSkillEffectTotal',
                 'dungeonChallengeDebuffTotal067','dungeonActiveProgressionConfig',
@@ -149,6 +149,12 @@ const server=http.createServer((req,res)=>{
                 if(typeof original!=='function')continue;
                 window[name]=function(){
                   const call=++seq;
+                  if(call<=20&&(name==='loadGameProfiles'||name==='saveGameProfiles'||name==='ensureBaseGameProfile')){
+                    try{
+                      const raw=JSON.parse(localStorage.getItem('gensrpg_game_profiles_v1')||'[]');
+                      console.log('[phase2-profile-store] '+call+' '+name+' raw='+raw.map(p=>String(p?.id||'?')).join(','));
+                    }catch(e){}
+                  }
                   if(call<=120)console.log('[phase2-stats-call] '+call+' '+'>'.repeat(Math.min(depth,20))+name);
                   depth++;
                   try{
@@ -248,7 +254,7 @@ const server=http.createServer((req,res)=>{
       console.log(value);
       return;
     }
-    if(value.startsWith('[phase2-stats-call]')||value.startsWith('[phase2-stats-return]')||value.startsWith('[phase2-stats-throw]')){
+    if(value.startsWith('[phase2-stats-call]')||value.startsWith('[phase2-stats-return]')||value.startsWith('[phase2-stats-throw]')||value.startsWith('[phase2-profile-store]')){
       lastStatsCall=value;
       console.log(value);
       return;

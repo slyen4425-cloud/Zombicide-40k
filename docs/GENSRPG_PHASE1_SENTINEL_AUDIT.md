@@ -27,7 +27,7 @@ Audit uniquement. Aucun runtime, gameplay, asset ou valeur de règle n'est modif
 | Duel/PvP | COUVERT | `gens_pvp_placeholder_shell_browser_v11411.test.cjs` traverse la vraie carte PvP du Shell et protège `PVP — À VENIR`, le message moteur non construit et l'absence de session/runtime parasite | aucun manque Phase 1 identifié |
 | Sauvegarde | COUVERT | `dungeon_authored_return_persist_v167862.test.cjs` protège la persistance spatiale ; `gens_savequit_resume_shell_browser_v11411.test.cjs` protège désormais le round-trip Shell complet Save & Quit -> recréation de page -> Reprendre | aucun manque Phase 1 identifié |
 | PWA/cache | COUVERT | `gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs` + preview composition/browser | aucun manque Phase 1 identifié |
-| Non-interférence 4 modules | PARTIEL | Survival/Dungeon et Tactical/legacy sont fortement isolés ; Capture est filtré dans plusieurs données Dungeon | aucune sentinelle unique couvrant les frontières Survie/Dungeon/Capture/PvP |
+| Non-interférence 4 modules | COUVERT | `gens_four_module_noninterference_shell_browser_v11411.test.cjs` traverse Survie -> Dungeon -> Capture -> PvP -> Survie, protège les reloads V16.155, les guards, l'absence d'UI parasite et la conservation des persistances inactives | aucun manque Phase 1 identifié |
 
 ## Propriétaires vérifiés
 
@@ -39,27 +39,23 @@ Le shell actuel utilise :
 
 Les futurs tests doivent traverser ces propriétaires réels et ne pas recopier leur logique.
 
-Preuve de fermeture Save & Quit / reprise : SHA fonctionnel `47d84f35c802dbe5f15d2f0bca158b82583ed9a8`, Architecture `35317905997`, Firefox `35317906010`, Tactical Dock `35317905939` — tous SUCCESS.\n\n## Plus petit manque suivant
+Preuve de fermeture Save & Quit / reprise : SHA fonctionnel `47d84f35c802dbe5f15d2f0bca158b82583ed9a8`, Architecture `35317905997`, Firefox `35317906010`, Tactical Dock `35317905939` — tous SUCCESS.\n\n## Clôture Phase 1
 
-Les lots **lancement Survie par le vrai Shell** et **Save & Quit + vraie reprise complète par le Shell** sont désormais couverts et branchés à la CI. La sentinelle Save/Resume couvre également le lancement Dungeon depuis le Shell racine.
+La matrice ne contient plus de manque majeur identifié.
 
-Le placeholder PvP actuel et le comportement actuel Monster Capture sont désormais couverts et branchés à la CI.
+Preuve du dernier lot :
+- SHA fonctionnel `1a4cac626592360ac676042c67f5568bfb5e5276` ;
+- Architecture `35322217121` — SUCCESS ;
+- Firefox `35322217184` — SUCCESS ;
+- Tactical Dock `35322217172` — SUCCESS ;
+- sentinelle `gens_four_module_noninterference_shell_browser_v11411.test.cjs`.
 
-Preuve Capture : SHA fonctionnel `97ad8aa05ccd7422f08c1bf1715fcb487d98c0ef`, Architecture `35321411358`, Firefox `35321411333`, Tactical Dock `35321411366` — tous SUCCESS.
+Critère de sortie Phase 1 : **atteint**.
 
-Prochain lot test-only retenu : **non-interférence explicite des quatre modules**.
-
-Périmètre attendu :
-- tests/workflow/documentation en première intention ;
-- vérifier les frontières Survie / Dungeon / Capture / PvP dans un scénario explicite ;
-- vérifier qu’un module ne laisse pas d’autorité, thème, profil, session ou runtime parasite dans le suivant ;
-- réutiliser les vrais propriétaires déjà couverts ;
-- aucun correctif runtime dans ce lot si un vrai défaut fonctionnel est découvert.
-
-Après ce lot : revue finale de la matrice Phase 1 et décision de passage en Phase 2.
+Le prochain chantier est la **Phase 2 — cartographie réelle du runtime**, en documentation/inventaire d'abord, sans déplacement massif ni correction gameplay mélangée.
 
 ## Signalement hors périmètre conservé
 
 Doute utilisateur : détection des ennemis hors embuscade semble parfois ne pas fonctionner.
 
-Ce point n'est pas corrigé pendant Phase 1. Il devra avoir un lot de caractérisation dédié après les sentinelles.
+Ce point n'a pas été corrigé pendant Phase 1. Il devra avoir un lot de caractérisation dédié après les sentinelles.

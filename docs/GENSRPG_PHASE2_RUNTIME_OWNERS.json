@@ -22,7 +22,7 @@
     "assets/dungeon/dungeon-authored-bootstrap-167849.js": {
       "owner": "Dungeon Authored Runtime",
       "domain": "dungeon",
-      "role": "production bootstrap for authored-world runtime extensions"
+      "role": "sole production bootstrap for authored-world runtime extensions, including exact traps and zone links"
     },
     "assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js": {
       "owner": "Dungeon Authored Runtime",
@@ -330,9 +330,9 @@
       "role": "Survival vs Adventure/Dungeon isolation guard"
     },
     "assets/gensrpg/gens-ui-recovery-167843.js": {
-      "owner": "Shell UI Recovery / Dungeon Bootstrap",
+      "owner": "Shell UI Recovery",
       "domain": "shell",
-      "role": "UI recovery plus authored Dungeon exact-trap/zone-link bootstrap; mixed debt"
+      "role": "Builder modal visibility recovery only"
     },
     "assets/gensrpg/gens-world-summary-167820.js": {
       "owner": "Shell World Summary",

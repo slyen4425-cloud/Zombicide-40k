@@ -9,12 +9,12 @@ const gridPath=path.join(root,'assets','dungeon','dungeon-room-grid-capture-1678
 const swPath=path.join(root,'service-worker.js');
 for(const p of [recoveryPath,gridPath,swPath])assert.ok(fs.existsSync(p),`missing ${p}`);
 
-const styles=[];
+const styles=[];const appendedScripts=[];
 function classList(initial=[]){const s=new Set(initial);return {contains:v=>s.has(v),add:v=>s.add(v),remove:v=>s.delete(v),values:()=>[...s]}}
 const modal300={id:'drc300Modal',classList:classList(['open'])};
 const modal100={id:'drc100Modal',classList:classList([])};
 const byId=new Map([['drc300Modal',modal300],['drc100Modal',modal100]]);
-const head={appendChild(el){styles.push(el);if(el.id)byId.set(el.id,el)}};
+const head={appendChild(el){styles.push(el);if(String(el.tagName||'').toUpperCase()==='SCRIPT')appendedScripts.push(el);if(el.id)byId.set(el.id,el)}};
 const document={readyState:'complete',head,documentElement:head,getElementById(id){return byId.get(id)||null},createElement(tag){return {tagName:String(tag).toUpperCase(),id:'',textContent:''}},addEventListener(){}};
 const context={console,document,window:null,globalThis:null};context.window=context;context.globalThis=context;
 vm.createContext(context);
@@ -27,6 +27,9 @@ assert.ok(byId.has('gensUiRecovery167843Styles'),'recovery style missing');
 const css=byId.get('gensUiRecovery167843Styles').textContent;
 assert.match(css,/#drc300Modal:not\(\.open\)/,'Phase 3 hidden guard missing');
 assert.match(css,/#drc100Modal:not\(\.open\)/,'Room Creator hidden guard missing');
+assert.equal(appendedScripts.length,0,'UI recovery must remain UI-only and must not bootstrap Dungeon runtimes');
+assert.equal(typeof context.GenSrpGUiRecovery167843.loadExactTrapRuntime,'undefined','Shell UI recovery must not own exact-trap loading');
+assert.equal(typeof context.GenSrpGUiRecovery167843.loadZoneLinksRuntime,'undefined','Shell UI recovery must not own zone-link loading');
 
 const grid=fs.readFileSync(gridPath,'utf8');
 assert.match(grid,/gens-ui-recovery-167843\.js\?v=167843/,'network-first bootstrap missing');

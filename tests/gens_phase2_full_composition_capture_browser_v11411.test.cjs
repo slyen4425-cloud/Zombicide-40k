@@ -19,7 +19,7 @@ const mime={
 
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
-  const rel=pathname==='/'?'/index.html':pathname;
+  const rel=pathname==='/'?'/preview.html':pathname;
   const file=path.resolve(root,'.'+rel);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
   fs.readFile(file,(err,data)=>{
@@ -42,7 +42,7 @@ const server=http.createServer((req,res)=>{
 
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
-  const url=`http://127.0.0.1:${port}/index.html?phase2-full-capture=1`;
+  const url=`http://127.0.0.1:${port}/preview.html?phase2-full-capture=1`;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({
     viewport:{width:412,height:915},
@@ -103,8 +103,9 @@ const server=http.createServer((req,res)=>{
   };
 
   try{
-    mark('navigate-full-index');
-    await page.goto(url,{waitUntil:'commit',timeout:20000});
+    mark('navigate-production-preview');
+    await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:90000});
     await waitFullOwners();
 
     const composition=await page.evaluate(()=>({
@@ -113,9 +114,13 @@ const server=http.createServer((req,res)=>{
       gensVersion:window.GENSRPG_VERSION||'',
       runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
       tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
-      familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||''
+      familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||'',
+      preview:window.__GENSRPG_PREVIEW__===true,
+      previewReady:document.documentElement?.dataset?.gensrpgPreviewReady||''
     }));
     console.log('[phase2-full-capture] composition',JSON.stringify(composition));
+    assert.equal(composition.preview,true,'full production characterization must run through preview composition');
+    assert.equal(composition.previewReady,'1','preview production composition must be fully injected');
 
     mark('open-adventure');
     await openAdventure();
@@ -131,9 +136,10 @@ const server=http.createServer((req,res)=>{
     if(sw.active&&sw.active!==CAPTURE_ID&&sw.from!==sw.to){
       mark('select-capture-through-production-v155-reload');
       await Promise.all([
-        page.waitForNavigation({waitUntil:'domcontentloaded',timeout:20000}),
+        page.waitForNavigation({waitUntil:'commit',timeout:20000}),
         captureCard.click()
       ]);
+      await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:90000});
       await waitFullOwners();
       const reloadState=await page.evaluate(()=>({
         active:activeGameProfileId(),

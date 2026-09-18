@@ -181,6 +181,19 @@ async function chooseParticipantAndStart(page){
     assert.equal(state.foreign,0,'real Core render must remove stale/random trap scenes from authored room');
     assert.equal(state.exact,1,'cleanup must preserve the configured exact trap');
 
+    const parentVisualBefore=await page.evaluate(()=>{
+      const cells=[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')];
+      return {
+        count:cells.length,
+        cells:cells.map(c=>({
+          bg:c.style.backgroundImage||getComputedStyle(c).backgroundImage||'',
+          wall:c.classList.contains('dav167870WallCell')
+        }))
+      };
+    });
+    assert.equal(parentVisualBefore.count,15,'authored parent room must render its exact 5×3 board');
+    assert.ok(parentVisualBefore.cells.some(c=>/dng_floor_stone_/i.test(c.bg)),'SourceRenderStability must paint the authored stone-room source before cache travel');
+
     // Movement itself is covered elsewhere: put the active hero on the authored cache cell, then use the real visible cache action.
     await page.evaluate(()=>{
       const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
@@ -229,7 +242,16 @@ async function chooseParticipantAndStart(page){
         cacheButton:!!document.getElementById('dwr167846Cache'),
         exact:scenes.filter(e=>e?.exactTrap167845&&Number(e?.room||0)===Number(y?.room||0)).map(e=>({id:e.exactTrapId167845,detected:e.detected,cell:e.cellIndex})),
         foreign:scenes.filter(e=>e?.kind==='trap'&&Number(e?.room||0)===Number(y?.room||0)&&e?.exactTrap167845!==true).length,
-        gridRoom:document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset?.dav167870Room||''
+        visual:(()=>{
+          const cells=[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')];
+          return {
+            count:cells.length,
+            cells:cells.map(c=>({
+              bg:c.style.backgroundImage||getComputedStyle(c).backgroundImage||'',
+              wall:c.classList.contains('dav167870WallCell')
+            }))
+          };
+        })()
       };
     });
     assert.equal(returned.node,fixture.nodeId,'return must restore the exact parent node');
@@ -240,7 +262,7 @@ async function chooseParticipantAndStart(page){
     assert.deepEqual(returned.cellsAfter,returned.cellsBefore,'repeated authored renders must not rewrite semantic room cells');
     assert.deepEqual(returned.exact,[{id:'reg_exact_trap',detected:false,cell:8}],'exact trap must stay stable across return and repeated renders');
     assert.equal(returned.foreign,0,'no random/foreign trap may reappear after return/re-render');
-    assert.equal(returned.gridRoom,fixture.parentRoomId,'visual source owner must keep the live board bound to the authored parent room');
+    assert.deepEqual(returned.visual,parentVisualBefore,'return + repeated renders must restore the exact authored parent visual fingerprint');
 
     assert.deepEqual(errors,[],'authored cache/trap real browser path must raise no runtime errors');
     console.log(JSON.stringify({scenario:'Authored cache -> branch -> return + exact trap ownership',fixture,entryState:state,branchState,returned},null,2));

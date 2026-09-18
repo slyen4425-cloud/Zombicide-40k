@@ -326,3 +326,57 @@ Prochaine action opérationnelle :
 2. compléter l'inventaire de responsabilité des 120 blocs inline exécutables ;
 3. renforcer les sentinelles de propriétaire sans toucher au runtime ;
 4. mettre à jour `docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md` au fur et à mesure.
+
+
+## Clôture opérationnelle Phase 2 — validation finale en cours
+
+La cartographie réelle du runtime est complète.
+
+Branche :
+`work/gensrpg-phase2-runtime-cartography-resume-2026-09-18`
+
+Base sûre du lot :
+`checkpoint/gensrpg-capture-start-routing-green-2026-09-18`
+SHA `8ce4f4cfec785aa48ca81942629a60589461090f`.
+
+Le lot de reprise Phase 2 ne modifie **aucun fichier runtime** depuis cette base : uniquement docs, tests et workflow de sentinelles.
+
+Livrables finaux :
+- `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json` — 65 fichiers externes atteignables ;
+- `docs/GENSRPG_PHASE2_INLINE_OWNERS.json` — 130 blocs inline / 120 actifs / 10 désactivés ;
+- `docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv` — 438 globals / 773 affectations / 123 multi-propriétaires ;
+- `docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json` ;
+- `docs/GENSRPG_PHASE2_STORAGE_OWNERS.json` ;
+- `docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json` ;
+- `docs/GENSRPG_PHASE2_LAYERED_RESPONSIBILITIES.json` ;
+- `docs/GENSRPG_PHASE2_EXTRACTION_READINESS.md`.
+
+Résultats principaux :
+- timers externes : 148 `setTimeout`, 1 `setInterval` ;
+- timers inline actifs : 146 `setTimeout`, 1 `setInterval` ;
+- stockage direct : 221 accès, 147 résolus, 30 clés/familles, 74 dynamiques ;
+- 7 fichiers physiques hors graphe : 4 tests/docs uniquement, 3 cache/workflows historiques non exécutés ;
+- 16 hotspots de responsabilités stratifiées ;
+- arborescence Phase 3 encore largement absente : ne pas prétendre qu'elle est déjà construite.
+
+Dernier HEAD fonctionnellement validé avant les deux commits documentaires de fermeture :
+`a58eab3d60357c7739d5ee03c1aa8887b07ee97b`
+
+CI de référence :
+- Architecture `35353401883` — SUCCESS ;
+- navigateur complet du même run — SUCCESS ;
+- Firefox `35353401955` — SUCCESS ;
+- Tactical Dock `35353402052` — SUCCESS.
+
+Les commits documentaires de fermeture doivent repasser par la CI avant création du checkpoint GREEN final Phase 2.
+
+### Prochaine action après validation documentaire
+
+1. créer `checkpoint/gensrpg-phase2-runtime-cartography-complete-green-2026-09-18` sur le HEAD documentaire final validé ;
+2. créer une branche neuve Phase 3 depuis ce checkpoint ;
+3. mettre à jour ce fichier sur la branche Phase 3 avec le nouveau chantier ;
+4. Phase 3 premier lot : structure + contrats + points d'entrée inertes uniquement ;
+5. ne pas modifier le load graph production et ne déplacer aucun gameplay dans ce premier lot ;
+6. ne rien fusionner sur `main`.
+
+La dette « détection ennemie hors embuscade » reste un chantier fonctionnel séparé.

@@ -603,3 +603,35 @@ Faire de la pile de retour authored l'unique autorité d'éligibilité du retour
 5. pile dépilée ;
 6. navigation inverse normale inchangée ;
 7. Architecture / Firefox / Tactical Dock avant GREEN.
+
+### Validation CI — retour de cache authored
+
+Caractérisation RED avant correctif :
+- commit de sentinelle `66e86f25109eff412c4829ebeac32421e972b0c3` ;
+- Architecture `35378621315` : échec ciblé sur « Vérifier le retour des caches authored » ;
+- assertion reproduite : après déplacement/interactions hors de la case d'entrée de la branche secondaire, `travelReturn()` retournait `false`.
+
+Correctif :
+- commit `9c3571933a271c7055d8d0494980b0ed28c820e5` ;
+- seul propriétaire runtime modifié : `DungeonZoneLinks167846.topReturn()` ;
+- la pile de retour + le node courant deviennent l'autorité du retour ;
+- suppression uniquement de l'exigence artificielle « position courante = entry » ;
+- restauration de la case source via `sourceIndex` et dépilage existants inchangés.
+
+Validation après correctif :
+- Architecture + sentinelle cache + navigateur complet : run `35378696054` — SUCCESS ;
+- Firefox `35378696065` — SUCCESS ;
+- Tactical Dock `35378696112` — SUCCESS.
+
+Checkpoint intermédiaire CI :
+`checkpoint/gensrpg-authored-cache-return-ci-green-2026-09-18`
+sur SHA `9c3571933a271c7055d8d0494980b0ed28c820e5`.
+
+Validation utilisateur ciblée encore requise avant checkpoint GREEN final :
+1. lancer directement le Dungeon et sélectionner le donjon construit ;
+2. entrer dans une cache ;
+3. se déplacer / lire / interagir hors de la case d'entrée ;
+4. vérifier que « Retour vers … » reste disponible ;
+5. revenir et vérifier que le héros retrouve la case cache exacte de la salle source.
+
+Les lots « pièges authored » et « stabilité visuelle » restent séparés et ne démarrent pas avant clôture GREEN de ce lot.

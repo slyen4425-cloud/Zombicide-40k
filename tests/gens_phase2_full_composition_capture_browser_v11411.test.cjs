@@ -48,17 +48,21 @@ const phase2CaptureTraceReplacements=[
   ['try{renderGameProfileLibrary?.()}catch(e){}', 'console.log("[phase2-mc162] render-profiles-before");try{renderGameProfileLibrary?.();console.log("[phase2-mc162] render-profiles-after")}catch(e){console.log("[phase2-mc162] render-profiles-error",String(e))}console.log("[phase2-mc162] ensure-end");'],
   ['ensureBuiltinMonsterCapture162();', 'console.log("[phase2-mc162] first-call-before");ensureBuiltinMonsterCapture162();console.log("[phase2-mc162] first-call-after");']
 ];
-const phase2CaptureBlockMatch=productionHtml.match(/(<script\\b[^>]*\\bid=["']builtinMonsterCapture162["'][^>]*>)([\\s\\S]*?)(<\\/script>)/i);
-assert.ok(phase2CaptureBlockMatch,'Phase 2 Capture inline block missing');
-let phase2CaptureBlockBody=phase2CaptureBlockMatch[2];
+const phase2CaptureBlockStartTag='<script id="builtinMonsterCapture162">';
+const phase2CaptureBlockStart=productionHtml.indexOf(phase2CaptureBlockStartTag);
+assert.notEqual(phase2CaptureBlockStart,-1,'Phase 2 Capture inline block missing');
+const phase2CaptureBlockBodyStart=phase2CaptureBlockStart+phase2CaptureBlockStartTag.length;
+const phase2CaptureBlockEnd=productionHtml.indexOf('</script>',phase2CaptureBlockBodyStart);
+assert.notEqual(phase2CaptureBlockEnd,-1,'Phase 2 Capture inline block end missing');
+let phase2CaptureBlockBody=productionHtml.slice(phase2CaptureBlockBodyStart,phase2CaptureBlockEnd);
 for(const [needle,replacement] of phase2CaptureTraceReplacements){
   assert.ok(phase2CaptureBlockBody.includes(needle),'Phase 2 Capture trace anchor missing inside builtinMonsterCapture162: '+needle);
   phase2CaptureBlockBody=phase2CaptureBlockBody.replace(needle,replacement);
 }
-productionHtml=productionHtml.replace(
-  phase2CaptureBlockMatch[0],
-  phase2CaptureBlockMatch[1]+phase2CaptureBlockBody+phase2CaptureBlockMatch[3]
-);
+productionHtml=
+  productionHtml.slice(0,phase2CaptureBlockBodyStart)+
+  phase2CaptureBlockBody+
+  productionHtml.slice(phase2CaptureBlockEnd);
 
 const phase2CaptureCallTraceReplacements=[
   ['function refreshCustomEquipmentIntoItems(){','function refreshCustomEquipmentIntoItems(){window.__phase2CallTrace?.("refreshCustomEquipmentIntoItems");'],

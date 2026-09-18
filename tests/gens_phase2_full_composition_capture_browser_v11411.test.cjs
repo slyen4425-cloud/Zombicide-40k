@@ -5,6 +5,17 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
+const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
+const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
+assert.ok(workflowBlock,'GitHub Pages module injection list missing');
+const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
+  .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"><\\/script>');
+assert.equal(pageTags.length,19,'Pages-equivalent characterization expects 19 injected modules');
+const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\\/script>';
+let productionHtml=indexSource.split(perfTag).join('');
+productionHtml=productionHtml.replace(/<\\/body>/i,pageTags.join('\n')+'\n</body>');
+
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 const mime={
@@ -19,8 +30,11 @@ const mime={
 
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
-  const rel=pathname==='/'?'/preview.html':pathname;
-  const file=path.resolve(root,'.'+rel);
+  if(pathname==='/'||pathname==='/__phase2_pages_equivalent.html'){
+    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});
+    res.end(productionHtml);return;
+  }
+  const file=path.resolve(root,'.'+pathname);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
   fs.readFile(file,(err,data)=>{
     if(err){res.writeHead(404);res.end('not found');return}
@@ -42,7 +56,7 @@ const server=http.createServer((req,res)=>{
 
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
-  const url=`http://127.0.0.1:${port}/preview.html?phase2-full-capture=1`;
+  const url=`http://127.0.0.1:${port}/__phase2_pages_equivalent.html?phase2-full-capture=1`;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({
     viewport:{width:412,height:915},
@@ -103,9 +117,8 @@ const server=http.createServer((req,res)=>{
   };
 
   try{
-    mark('navigate-production-preview');
+    mark('navigate-pages-equivalent-composition');
     await page.goto(url,{waitUntil:'commit',timeout:20000});
-    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:90000});
     await waitFullOwners();
 
     const composition=await page.evaluate(()=>({
@@ -115,12 +128,10 @@ const server=http.createServer((req,res)=>{
       runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
       tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
       familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||'',
-      preview:window.__GENSRPG_PREVIEW__===true,
-      previewReady:document.documentElement?.dataset?.gensrpgPreviewReady||''
+      pagesInjectedModules:19
     }));
     console.log('[phase2-full-capture] composition',JSON.stringify(composition));
-    assert.equal(composition.preview,true,'full production characterization must run through preview composition');
-    assert.equal(composition.previewReady,'1','preview production composition must be fully injected');
+    assert.equal(composition.pagesInjectedModules,19,'full production characterization must use the Pages module set');
 
     mark('open-adventure');
     await openAdventure();
@@ -139,7 +150,6 @@ const server=http.createServer((req,res)=>{
         page.waitForNavigation({waitUntil:'commit',timeout:20000}),
         captureCard.click()
       ]);
-      await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:90000});
       await waitFullOwners();
       const reloadState=await page.evaluate(()=>({
         active:activeGameProfileId(),

@@ -315,18 +315,17 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const continueBtn=page.locator('#dc200ModalOk');
     await continueBtn.waitFor({state:'visible',timeout:5000});
     await continueBtn.click();
-    await page.waitForFunction(()=>{
-      try{
-        const st=JSON.parse(localStorage.getItem('gensrpg_dungeon_state_v1')||'null');
-        return Number(st?.room)>=1 && !!st?.last;
-      }catch(e){return false}
-    },null,{timeout:15000});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1800);
 
-    const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
-    console.log('[dungeon-after-survival] persisted-room',JSON.stringify(persisted,null,2));
-    assert.ok(Number(persisted.dungeonState?.room)>=1,'real explored Dungeon must persist a room beyond the entrance');
-    assert.ok(persisted.dungeonState?.last,'real explored Dungeon must persist the generated room snapshot');
+    const afterContinue=await dungeonSnapshot(page,'after-first-explore-continue');
+    console.log('[dungeon-after-survival] after-first-continue',JSON.stringify(afterContinue,null,2));
+
+    assert.ok(
+      Number(afterContinue.dungeonState?.room)>=1 && afterContinue.dungeonState?.last,
+      'characterization: EXPLORE + CONTINUER did not yet persist a generated room; inspect next visible control before extending the real path'
+    );
+
+    const persisted=afterContinue;
 
     const quit=page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]');
     await quit.waitFor({state:'visible'});

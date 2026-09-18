@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "dungeon",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/dungeon/entry-v1.js",
+  "owns": [
+    "Dungeon world state",
+    "exploration",
+    "movement",
+    "events",
+    "combat trigger",
+    "Dungeon persistence state"
+  ],
+  "consumes": [
+    "core public contracts",
+    "future Tactical public combat contract"
+  ],
+  "forbidden": [
+    "Tactical combat resolution",
+    "Capture runtime",
+    "Survival runtime",
+    "PvP runtime"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

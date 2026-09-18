@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "capture",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/capture/entry-v1.js",
+  "owns": [
+    "Monster Capture runtime",
+    "creatures",
+    "biomes",
+    "capture",
+    "team/reserve",
+    "Capture combat"
+  ],
+  "consumes": [
+    "core public contracts"
+  ],
+  "forbidden": [
+    "Dungeon private runtime",
+    "Survival private runtime",
+    "PvP private runtime"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

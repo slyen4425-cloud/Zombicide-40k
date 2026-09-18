@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "tactical",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/tactical/entry-v1.js",
+  "owns": [
+    "isolated tactical combat session",
+    "tactical rules",
+    "tactical UI",
+    "tactical AI"
+  ],
+  "consumes": [
+    "core public contracts",
+    "explicit combat snapshot"
+  ],
+  "forbidden": [
+    "Dungeon world navigation",
+    "Dungeon exploration state ownership",
+    "global character sheet ownership"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

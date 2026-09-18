@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "pvp",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/pvp/entry-v1.js",
+  "owns": [
+    "PvP session",
+    "PvP rules",
+    "PvP UI"
+  ],
+  "consumes": [
+    "core public contracts"
+  ],
+  "forbidden": [
+    "Survival private runtime",
+    "Dungeon private runtime",
+    "Capture private runtime"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

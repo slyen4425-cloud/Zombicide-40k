@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "shell",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/shell/entry-v1.js",
+  "owns": [
+    "root navigation",
+    "active module/session routing",
+    "global screen transitions"
+  ],
+  "consumes": [
+    "core public contracts",
+    "module public entry contracts"
+  ],
+  "forbidden": [
+    "module gameplay rules",
+    "private module runtime state"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

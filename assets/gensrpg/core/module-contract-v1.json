@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "core",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/core/entry-v1.js",
+  "owns": [
+    "generic shared services only",
+    "service contracts shared by multiple modules"
+  ],
+  "consumes": [],
+  "forbidden": [
+    "module-private gameplay",
+    "global navigation ownership",
+    "module UI ownership"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

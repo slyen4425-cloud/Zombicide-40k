@@ -1,0 +1,53 @@
+name: GenSrpG one-shot Core209 ambush bridge guard
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-after-survival-start-state-2026-09-18'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-dungeon-after-survival-start-state-2026-09-18
+          fetch-depth: 0
+
+      - name: Patch exact Core 2.09 ambush Bridge lookup
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old_guard='if(typeof GensRpgTacticalCombatV2Bridge?.requestCombat==="function")'
+          new_guard='if(typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==="function")'
+          old_call='try{GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}'
+          new_call='try{window.GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})}'
+          if s.count(old_guard) != 1:
+              raise SystemExit(f'expected one unsafe Core209 ambush guard, found {s.count(old_guard)}')
+          if s.count(old_call) != 1:
+              raise SystemExit(f'expected one unsafe Core209 ambush call, found {s.count(old_call)}')
+          s=s.replace(old_guard,new_guard,1).replace(old_call,new_call,1)
+          if old_guard in s or old_call in s:
+              raise SystemExit('unsafe Core209 ambush Bridge lookup remains')
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate Core 2.09 contract
+        run: node tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs
+
+      - name: Commit patch and remove one-shot workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/gensrpg-core209-ambush-bridge-guard-once.yml
+          git add index.html
+          git diff --cached --check
+          git commit -m 'fix: guard Core 2.09 ambush Bridge lookup'
+          git push origin HEAD:work/gensrpg-dungeon-after-survival-start-state-2026-09-18

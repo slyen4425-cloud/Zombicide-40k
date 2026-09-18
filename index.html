@@ -26922,7 +26922,7 @@ window.isCaptureContext138=function(){
     if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return true;
     const p=getActiveGameProfile?.();
     const fam=typeof gensCurrentContentFamily==="function"?gensCurrentContentFamily():"";
-    return fam==="creature" || !!p?.rpgUniverse?.captureCombat || !!p?.modules?.capture;
+    return fam==="creature";
   }catch(e){return false}
 };
 

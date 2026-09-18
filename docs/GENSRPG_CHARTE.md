@@ -419,18 +419,56 @@ En cas de changement de fil de discussion, la reprise doit pouvoir se faire en l
 La procédure détaillée est conservée dans `docs/GENSRPG_CHECKPOINT_POLICY.md`.
 
 
-## 26. Accès à `index.html` : demander le fichier à l'utilisateur si l'accès dépôt devient bloquant
+## 26. Accès à `index.html` : demander directement le fichier exact à l'utilisateur
 
-`index.html` est un fichier historique très volumineux et certains outils de lecture GitHub peuvent échouer, tronquer le contenu ou rendre son inspection inutilement lente.
+`index.html` est un fichier historique très volumineux. Les outils de lecture ou de modification GitHub peuvent l'échouer, le tronquer, retourner un contenu inutilisable ou provoquer des tentatives répétées coûteuses et peu fiables.
 
-Règle obligatoire : si un chantier nécessite le contenu exact de `index.html` et que l'accès via le dépôt devient un blocage réel, ne pas perdre du temps à contourner indéfiniment cette limite et ne pas travailler à partir d'une copie incertaine.
+### Règle obligatoire
 
-Dans ce cas :
+Dès qu'un chantier nécessite de **consulter, comparer ou modifier le contenu exact de `index.html`**, ne pas commencer par multiplier les tentatives de lecture du fichier via les connecteurs GitHub.
 
-1. identifier la branche, le checkpoint ou le SHA exact à inspecter ;
-2. fournir à l'utilisateur un **lien direct** vers le `index.html` correspondant ;
-3. demander explicitement à l'utilisateur de récupérer ce fichier et de le joindre à la conversation ;
-4. vérifier ensuite que le fichier reçu correspond bien à la référence demandée avant de l'utiliser ;
-5. continuer à considérer GitHub comme l'autorité pour la branche, le SHA, le diff et la publication.
+La procédure normale est désormais :
 
-Cette demande de fichier est un mécanisme de récupération d'accès, pas une permission pour remplacer la source de vérité du dépôt par une copie locale.
+1. identifier d'abord la **branche / le checkpoint / le SHA exact actuellement requis par le chantier** ;
+2. résoudre le **SHA exact** de cet état ;
+3. fournir immédiatement à l'utilisateur le lien GitHub direct vers ce fichier précis, de préférence sous forme de permalink SHA :
+
+   `https://github.com/slyen4425-cloud/Zombicide-40k/blob/<SHA_EXACT>/index.html`
+
+4. demander explicitement à l'utilisateur :
+   - d'ouvrir ce lien ;
+   - de télécharger le fichier `index.html` correspondant ;
+   - de le compresser en ZIP si nécessaire ;
+   - de joindre ce ZIP à la conversation ;
+5. vérifier le fichier reçu avant utilisation :
+   - SHA / blob Git si possible ;
+   - taille/cohérence ;
+   - correspondance avec le checkpoint ou SHA demandé ;
+6. utiliser ensuite **le fichier reçu et vérifié** pour toute inspection ou modification locale du gros HTML ;
+7. continuer à utiliser GitHub comme autorité pour :
+   - la branche ;
+   - les checkpoints ;
+   - les SHA ;
+   - les commits ;
+   - les diffs ;
+   - la CI ;
+   - la publication.
+
+### Interdictions
+
+- ne pas répéter plusieurs fois une méthode de lecture GitHub déjà connue comme défaillante sur ce gros fichier ;
+- ne pas tenter de faire transiter les ~8 Mo de `index.html` par une API/connecteur qui vient déjà d'échouer ;
+- ne pas utiliser une vieille copie locale simplement parce qu'elle est disponible si le chantier exige un état plus récent ;
+- ne jamais supposer qu'un fichier reçu précédemment correspond encore au HEAD courant : vérifier sa référence.
+
+### Exception
+
+Une lecture légère de métadonnées GitHub reste autorisée pour :
+- résoudre le SHA courant ;
+- vérifier le blob ;
+- comparer des commits ;
+- confirmer qu'`index.html` a ou non changé.
+
+Mais si le **contenu exact** du fichier est nécessaire, la demande du fichier à l'utilisateur devient la voie normale, pas une solution de dernier recours.
+
+Cette procédure est un mécanisme d'accès contrôlé au gros fichier ; elle ne remplace pas GitHub comme source de vérité du projet.

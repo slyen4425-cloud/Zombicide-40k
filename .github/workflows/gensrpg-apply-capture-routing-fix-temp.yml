@@ -1,0 +1,68 @@
+name: GenSrpG apply Capture routing fix
+
+on:
+  push:
+    branches:
+      - work/gensrpg-capture-start-routing-2026-09-18
+    paths:
+      - .github/workflows/gensrpg-apply-capture-routing-fix-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-capture-start-routing-2026-09-18
+          fetch-depth: 0
+
+      - name: Apply exact owner guard fix
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          p = Path("index.html")
+          data = p.read_bytes()
+          text = data.decode("utf-8")
+
+          old = 'window.startConfiguredGame=async function(){if(isDungeonMode?.())return start();return startOutside200?.apply(this,arguments)};'
+          new = 'window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};'
+
+          if text.count(old) != 1:
+              raise SystemExit(f"Refus: ancien guard attendu 1 fois, trouvé {text.count(old)}")
+          if text.count(new) != 0:
+              raise SystemExit(f"Refus: nouveau guard déjà présent {text.count(new)} fois")
+
+          text = text.replace(old, new, 1)
+          out = text.encode("utf-8")
+          p.write_bytes(out)
+
+          git_sha = hashlib.sha1(b"blob " + str(len(out)).encode() + b"\0" + out).hexdigest()
+          expected = "3a3db76d12ae511f6293e8ff25d124616731a08b"
+          print("git blob sha:", git_sha)
+          if git_sha != expected:
+              raise SystemExit(f"Refus: SHA final {git_sha} != attendu {expected}")
+          PY
+
+      - name: Validate exact diff
+        shell: bash
+        run: |
+          git diff --check
+          git diff --numstat -- index.html
+          git diff -- index.html
+
+      - name: Commit runtime fix and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/gensrpg-apply-capture-routing-fix-temp.yml
+          git config user.name "gensrpg-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html .github/workflows/gensrpg-apply-capture-routing-fix-temp.yml
+          git commit -m "fix: preserve Capture start routing after Dungeon Core 2.00"
+          git push origin HEAD:work/gensrpg-capture-start-routing-2026-09-18

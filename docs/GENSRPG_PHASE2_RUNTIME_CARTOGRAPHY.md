@@ -195,6 +195,37 @@ Environ 10 blocs sont explicitement marqués désactivés/remplacés par leur pr
 
 Conséquence : l'essentiel du runtime reste encore inline dans `index.html`. La présence des fichiers externes ne signifie pas que le découpage physique est déjà effectif.
 
+## 5 bis. Partition logique des blocs inline actifs
+
+Sur les 130 blocs inline identifiés :
+- 120 sont exécutables dans le HTML actuel ;
+- 10 sont explicitement marqués désactivés/remplacés.
+
+Répartition des 120 blocs exécutables :
+- Dungeon : **93**
+- Capture : **19**
+- bridge Tactical/Dungeon : **4**
+- Shell : **2**
+- Core/Dungeon bridge : **1**
+- build marker : **1**
+
+Aucun bloc exécutable ne reste sans domaine dans cette première passe de classification.
+
+### Blocs explicitement désactivés
+
+- `dungeonCore081TacticalMovementDisabled`
+- `dungeonCore084MovementRuntimeFixDisabled`
+- `dungeonCore086MovementStabilityDisabled`
+- `dungeonCore087InteractionRulesDisabled`
+- `dungeonCore087ChestGuardDisabled`
+- `dungeonCore089TacticalInteractionsDisabled`
+- `dungeonCore090MovementV2Disabled`
+- `dungeonCore094EndTurnFinalDisabled`
+- `dungeonCore095SoloTurnFinalDisabled`
+- `dungeonCore097StabilityRollbackDisabled`
+
+Ces blocs sont classés **legacy/inactif explicite** pour la cartographie actuelle.
+
 ## 6. MutationObserver — présence vs activation
 
 ### Inline

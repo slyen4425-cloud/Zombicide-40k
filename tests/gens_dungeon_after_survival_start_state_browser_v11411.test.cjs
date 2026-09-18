@@ -131,15 +131,17 @@ async function waitSurvivalStarted(page){
   ,null,{timeout:15000});
 }
 
-async function waitDungeonStarted(page){
-  await page.waitForFunction(()=>{
-    let rt=null;
-    try{rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')}catch(e){}
-    const core=document.getElementById('gensDungeonCore01');
-    return localStorage.getItem('z40k_session_active_v1')==='1' &&
-      Array.isArray(rt?.participants) && rt.participants.length>0 &&
-      core && getComputedStyle(core).display!=='none';
-  },null,{timeout:20000});
+async function settleDungeonLaunch(page){
+  try{
+    await page.waitForFunction(()=>{
+      const session=localStorage.getItem('z40k_session_active_v1')==='1';
+      const runtime=!!localStorage.getItem('gensrpg_dungeon_runtime_v2');
+      const core=document.getElementById('gensDungeonCore01');
+      const coreVisible=!!(core&&getComputedStyle(core).display!=='none');
+      return session||runtime||coreVisible;
+    },null,{timeout:12000});
+  }catch(e){}
+  await page.waitForTimeout(1200);
 }
 
 async function dungeonSnapshot(page,label){
@@ -251,7 +253,7 @@ async function runScenario(port,survivalFirst){
       DUNGEON_ID
     );
     await chooseFirstParticipantAndStart(page);
-    await waitDungeonStarted(page);
+    await settleDungeonLaunch(page);
 
     const snap=await dungeonSnapshot(page,survivalFirst?'after-survival':'fresh-direct');
     return {snap,errors};
@@ -280,8 +282,13 @@ async function runScenario(port,survivalFirst){
     assert.equal(control.snap.activeProfile,DUNGEON_ID);
     assert.equal(control.snap.family,'adventure');
     assert.equal(control.snap.dungeonMode,true);
-    assert.equal(control.snap.session,'1');
+    assert.equal(afterSurvival.snap.activeProfile,DUNGEON_ID);
+    assert.equal(afterSurvival.snap.family,'adventure');
+    assert.equal(afterSurvival.snap.dungeonMode,true);
+
+    assert.equal(control.snap.session,'1','fresh direct Dungeon must activate the common session');
     assert.equal(Number(control.snap.runtime.room),0,'fresh direct Dungeon must start at room 0');
+    assert.equal(afterSurvival.snap.session,'1','Dungeon after Survival must activate the common session');
     assert.equal(Number(afterSurvival.snap.runtime.room),0,'Dungeon after Survival must start at room 0');
 
     assert.deepEqual(

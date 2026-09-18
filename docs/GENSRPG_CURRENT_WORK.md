@@ -17,97 +17,103 @@ Lire avant tout changement :
 
 ## Dernier checkpoint vert
 
-Phase 1 complète :
-`checkpoint/gensrpg-phase1-complete-green-2026-09-18`
+Phase 2 — cartographie runtime initiale :
+`checkpoint/gensrpg-phase2-runtime-cartography-initial-green-2026-09-18`
 
 SHA :
-`04cce98e79252a791bd7130fe6993f00916fa5dc`
+`d247b277ebadc0457b9ff463993d5fd3bafae7b8`
 
-CI de clôture :
-- Architecture `35325172047` — SUCCESS
-- Firefox `35325172074` — SUCCESS
-- Tactical Dock `35325172035` — SUCCESS
+CI :
+- Architecture `35326145505` — SUCCESS
+- Firefox `35326145516` — SUCCESS
+- Tactical Dock `35326145484` — SUCCESS
+
+Livrables déjà verts :
+- `docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md`
+- `tests/gens_phase2_runtime_load_graph_v11411.test.cjs`
 
 ## Chantier courant
 
-**Phase 2 — cartographie réelle du runtime actif**
+**Phase 2 — 2A : cartographie des autorités globales actives**
 
 Branche :
-`work/gensrpg-phase2-runtime-cartography-2026-09-18`
+`work/gensrpg-phase2-runtime-map-2a-2026-09-18`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase2-runtime-cartography-2026-09-18`
+`checkpoint/gensrpg-start-phase2-global-authority-cartography-2026-09-18`
 
 Base exacte :
-`04cce98e79252a791bd7130fe6993f00916fa5dc`
+`d247b277ebadc0457b9ff463993d5fd3bafae7b8`
 
 ## Périmètre déclaré
 
-Lot documentaire/diagnostic en première intention.
+Lot documentaire/diagnostic uniquement.
 
-Inventorier :
-- scripts réellement chargés par `index.html` ;
-- chargements dynamiques ;
-- auto-installs ;
-- wrappers / monkey-patches ;
-- `MutationObserver` ;
-- listeners `document` / `window` ;
-- timers / retries ;
-- accès directs à `localStorage` / IndexedDB ;
-- fonctions globales remplacées ;
-- responsabilités potentiellement dupliquées.
+Objectifs :
+- dresser la table `fonction globale/protégée -> wrappers successifs -> propriétaire final actif` ;
+- distinguer les wrappers réellement installés du code dormant ;
+- cartographier les accès directs à `localStorage` et IndexedDB par domaine ;
+- identifier les responsabilités encore réellement dupliquées ;
+- vérifier si les fichiers hors graphe principal sont legacy, tooling/tests ou points d'entrée alternatifs ;
+- préparer l'ordre des futurs nettoyages sans en appliquer aucun dans ce lot.
 
-Classer les fichiers/blocs actifs :
-- Core ;
-- Shell ;
-- Survie ;
-- Dungeon ;
-- Tactical ;
-- Capture ;
-- PvP ;
-- Builders ;
-- legacy/inactif.
+## Fonctions/domaines prioritaires à cartographier
+
+- navigation Shell : `openGensFamily`, `openGensBuiltInGame`, `resumeGame`, `isDungeonMode` ;
+- dés : `animateDice`, `animateRpgDice` ;
+- combat Dungeon/Tactical : `dc200StartCombat`, adapter `createBattle`, fonctions d'entrée Bridge ;
+- déplacement/détection : `dungeonMoveHero098` et hooks V113 ;
+- dégâts/équipement : `applyDungeonAttackDamage`, `dungeonEquipmentBonus` ;
+- sauvegarde/persistance : fonctions `save*`, runtime Dungeon, profils, sessions ;
+- rendu fiche/navigation globale uniquement si des wrappers actifs sont prouvés.
 
 ## Interdictions du lot
 
-- aucun déplacement de fichier runtime ;
-- aucun changement de gameplay ;
-- aucun correctif de dette découvert pendant l'audit ;
-- aucun nouveau wrapper/observer/timer ;
-- aucune modification de `main`;
-- aucune suppression de code historique avant cartographie complète.
+- aucun correctif runtime ;
+- aucune suppression de fichier ;
+- aucun déplacement physique ;
+- aucune extraction Core/Shell/module ;
+- aucun changement gameplay ;
+- aucun nouvel observer/timer/retry/wrapper ;
+- aucun changement de `main`.
+
+Si une dette fonctionnelle ou architecturale est découverte, elle est seulement documentée et réservée à un lot dédié ultérieur.
 
 ## Source index.html
 
-La copie locale fournie par l'utilisateur et déjà vérifiée contre le blob GitHub est utilisée pour l'inspection du gros `index.html`, conformément à la règle 26.
+Utiliser la copie locale actuelle vérifiée, blob :
+`a515c3d34a1f5c4973159457090e4437a33c2630`.
 
-Le changement de fermeture Phase 1 dans `openGensFamily()` est connu et limité à deux lignes ; la copie locale de travail correspond à cet état.
+Ne pas repasser par l'API Contents GitHub pour ce gros fichier.
 
-## Livrables du lot
+GitHub reste l'autorité pour les branches, SHA, diff et CI.
 
-1. inventaire des scripts externes chargés ;
-2. inventaire des blocs inline identifiables ;
-3. table des propriétaires probables ;
-4. inventaire des mécanismes globaux à risque ;
-5. liste des fichiers actifs sans propriétaire clair ;
-6. liste des blocs probablement legacy/inactifs ;
-7. recommandations de découpage pour la suite, sans déplacement dans ce lot.
+## Tests prévus
+
+- sentinelle statique de cartographie des propriétaires finaux si les chaînes peuvent être vérifiées sans recopier le gameplay ;
+- maintien de `gens_phase2_runtime_load_graph_v11411.test.cjs` ;
+- toutes les sentinelles Phase 1 restent obligatoirement GREEN.
 
 ## Risques
 
-- `index.html` contient encore de nombreuses couches historiques ;
-- certains scripts sont chargés dynamiquement et non visibles dans les seules balises `script src` ;
-- un nom de version historique ne signifie pas automatiquement qu'un bloc est inactif ;
-- la présence d'une fonction globale n'implique pas qu'elle soit propriétaire : il faut suivre les callsites/chargements.
+- un wrapper portant un numéro historique peut encore être actif ;
+- un symbole global peut être remplacé plusieurs fois après le boot ;
+- un fichier non chargé par le graphe principal peut être utilisé par tests/builders/preview ;
+- compter les occurrences de stockage ne suffit pas : il faut attribuer chaque clé et chaque écriture à son propriétaire.
+
+## Critère de sortie du sous-lot 2A
+
+Pour les fonctions prioritaires et le stockage critique :
+- chaîne de wrappers connue ;
+- propriétaire final actif connu ;
+- code dormant distingué du code installé ;
+- duplication réelle signalée ;
+- aucune ambiguïté critique non documentée.
 
 ## Critère de sortie Phase 2
 
 Aucun fichier runtime actif sans propriétaire connu.
 
-## Prochaine étape
-
-Produire une première cartographie automatique du Shell/index et de l'arbre `assets/gensrpg`, puis approfondir les zones ambiguës avant toute extraction physique.
-
 ## Dette séparée
 
-La détection ennemie hors embuscade reste un chantier de caractérisation fonctionnelle distinct ; elle n'est pas corrigée dans cette cartographie.
+La détection ennemie hors embuscade reste un chantier fonctionnel distinct. Ce sous-lot peut cartographier ses hooks V113 mais ne corrige pas son comportement.

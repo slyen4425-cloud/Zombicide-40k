@@ -6,10 +6,12 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const shellCutMarker='function gensCleanDungeonBaseHeroesFromOtherRpgProfiles(){';
-const shellCut=indexSource.indexOf(shellCutMarker);
-assert.ok(shellCut>0,'real index.html must expose the expected post-launch Shell boundary');
-const realSurvivalShellHtml=indexSource.slice(0,shellCut)+'\n</script></body></html>';
+const shellOwnerMarker='async function startConfiguredGame(){';
+const shellOwner=indexSource.indexOf(shellOwnerMarker);
+assert.ok(shellOwner>0,'real index.html must expose startConfiguredGame()');
+const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
+assert.ok(shellScriptEnd>shellOwner,'real index.html must close the script block that owns startConfiguredGame()');
+const realSurvivalShellHtml=indexSource.slice(0,shellScriptEnd+'</script>'.length)+'\n</body></html>';
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
 const mime={

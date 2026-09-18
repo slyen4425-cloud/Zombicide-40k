@@ -23,9 +23,7 @@ Phase 1 — Capture : protection du comportement actuel :
 SHA :
 `8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-CI de fermeture : Architecture, Firefox et Tactical Dock GREEN.
-
-## Chantier courant
+## Lot caractérisé RED
 
 **Phase 1 — sentinelle explicite de non-interférence des quatre modules**
 
@@ -38,76 +36,62 @@ Checkpoint de départ :
 Base exacte :
 `8d6e9523e1cf9f13f9131b8f4b74f797154ebc7c`
 
-## Périmètre déclaré
+SHA de caractérisation :
+`c098eb1c110e31a01269810d1e9f8117028f7c5f`
 
-Première intention **test-only** :
-- traverser plusieurs modules successivement dans un même contexte navigateur ;
-- réutiliser les vrais propriétaires Shell déjà identifiés ;
-- vérifier que le module quitté ne conserve pas une autorité UI/runtime sur le module suivant ;
-- protéger explicitement les frontières Survie / Dungeon / Capture / PvP ;
-- brancher la sentinelle à la CI si elle est stable.
+## Résultat de la sentinelle
 
-Ce lot ne doit pas devenir quatre tests indépendants collés ensemble : il doit vérifier les transitions et l'absence de fuite d'autorité entre contextes.
+La sentinelle traverse correctement dans un même contexte navigateur :
 
-## Invariants visés
+`Survie -> Dungeon -> Survie -> Capture -> PvP placeholder`
 
-### Survie -> Adventure/Dungeon
-- le guard famille passe de `survival` à `adventure` ;
-- `isDungeonMode()` reflète le profil Dungeon actif ;
-- aucun runtime Dungeon ne doit être créé avant lancement réel ;
-- le thème/état Survie ne doit pas reprendre l'autorité après le switch.
+Les transitions suivantes sont conformes :
+- Survie -> Dungeon ;
+- Dungeon -> Survie ;
+- Survie -> Capture ;
+- aucun runtime/session Dungeon parasite n'est créé pendant ces changements ;
+- le placeholder PvP n'active ni nouvelle session ni nouveau profil.
 
-### Dungeon -> Survie
-- le guard revient à `survival` ;
-- `isDungeonMode() === false` ;
-- le thème Dungeon doit être retiré ;
-- aucun overlay/runtime Dungeon ne doit apparaître spontanément.
+Le RED fonctionnel est précis sur **Capture -> PvP** :
+- `gensDungeonTheme` reste actif sur `body` ;
+- `gensCapturePregame` reste actif sur `body` ;
+- le profil actif reste Monster Capture, ce qui est acceptable pour un placeholder sans profil propre ;
+- le guard famille reste `adventure`, ce qui est acceptable car PvP n'a pas de famille persistante supportée ;
+- Hub Capture et panneau Dungeon restent cachés ;
+- aucune session ou runtime Dungeon n'est créé.
 
-### Adventure/Dungeon -> Capture
-- le changement de famille de contenu passe par le vrai mécanisme V16.155 si requis ;
-- Capture reste classé aujourd'hui Shell `adventure`, contenu `creature`, mode V16.151 `capture` ;
-- le Hub/pré-game Capture ne doit pas être remplacé par le panneau Dungeon classique ;
-- aucune session/runtime Dungeon classique ne doit être créé artificiellement.
+## Cause identifiée
 
-### Capture/Adventure -> PvP placeholder
-- le placeholder PvP ne crée ni session, ni profil actif supplémentaire, ni runtime Dungeon/Capture ;
-- il n'active pas un thème Dungeon/Capture ;
-- il ne remplace pas le guard Survie/Adventure existant par une valeur PvP non supportée.
+Le propriétaire Shell `openGensFamily(family)` :
+- masque les niveaux d'accueil ;
+- affiche la famille demandée ;
+- rend les cartes de famille ;
+- **ne nettoie pas les classes transitoires de contexte laissées par le pré-game précédent**.
 
-## Fonctions/systèmes protégés
+Les classes sont posées ailleurs par les propriétaires normaux :
+- `gensDungeonTheme` par le profil/style Adventure-Dungeon ;
+- `gensCapturePregame` par le wizard de pré-game Capture ;
+- `gensAdventurePregame` par le wizard Adventure ;
+- `gens-pure-capture` par le runtime Capture actif.
 
-Ne pas modifier dans ce lot :
-- runtimes Survie, Dungeon, Tactical, Capture ou PvP ;
-- navigation Shell ;
-- guards famille/session ;
-- persistance ;
-- gameplay, stats, dés, combat, déplacement, spawn, capture ;
-- assets ;
-- PWA/cache ;
-- aucun observer global, timer/retry de réparation, wrapper permanent ou monkey-patch ;
-- `main`.
+Le lot sentinelle reste test/workflow/documentation uniquement. Aucun runtime n'est corrigé ici.
 
-## Tests prévus
+## Prochain chantier dédié
 
-1. construire le harnais depuis les blocs source exacts déjà caractérisés ;
-2. ouvrir Survie puis Adventure/Dungeon dans le même contexte ;
-3. revenir vers Survie et vérifier le retrait de l'autorité Dungeon ;
-4. basculer vers Monster Capture, y compris le reload V16.155 lorsqu'il s'applique ;
-5. vérifier les prédicats Capture et l'absence de panneau/runtime Dungeon classique ;
-6. ouvrir le placeholder PvP et vérifier qu'il ne crée aucune autorité/session supplémentaire ;
-7. relancer toutes les sentinelles existantes ;
-8. si GREEN, mettre à jour la matrice Phase 1 et décider formellement si le critère de sortie Phase 1 est atteint.
+**Correctif Shell — nettoyage de contexte lors d'un changement de famille hors gameplay.**
 
-## Risques
+Périmètre :
+- nouveau checkpoint de départ depuis la caractérisation RED ;
+- nouvelle branche dédiée ;
+- propriétaire modifié : `openGensFamily()` uniquement, sauf preuve contraire ;
+- correction soustractive : retirer les classes de contexte transitoires lorsqu'on quitte leur vue ;
+- ne pas effacer les données persistantes ni les profils ;
+- ne pas toucher aux moteurs Survie/Dungeon/Capture/PvP ;
+- aucune nouvelle couche, observer, timer ou wrapper ;
+- la sentinelle quatre modules doit passer GREEN ;
+- toutes les sentinelles existantes doivent rester GREEN.
 
-- certaines transitions conservent volontairement des données persistantes non actives ; le test doit distinguer persistance légitime et autorité active ;
-- Capture utilise encore historiquement `gameStyle="dungeon"` : cela ne doit pas être traité comme une fuite par erreur ;
-- PvP ne possède pas encore de famille persistante propre : le guard existant peut rester inchangé sans que PvP prenne l'autorité ;
-- un RED réel doit être caractérisé avant toute correction dédiée.
-
-## Prochaine étape
-
-Inspecter les propriétaires de retour vers le Shell et de changement de profil/famille afin de construire une seule sentinelle de transition réelle entre les quatre modules.
+Après ce correctif GREEN : clôturer la non-interférence et refaire la matrice complète Phase 1.
 
 ## Dette explicitement différée
 

@@ -1,0 +1,78 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {execFileSync}=require('node:child_process');
+
+const root=path.join(__dirname,'..');
+const source=execFileSync('git',['show','HEAD:index.html'],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
+const blob=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
+const table=fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
+
+const disabled=new Set([
+  'dungeonCore081TacticalMovementDisabled',
+  'dungeonCore084MovementRuntimeFixDisabled',
+  'dungeonCore086MovementStabilityDisabled',
+  'dungeonCore087InteractionRulesDisabled',
+  'dungeonCore087ChestGuardDisabled',
+  'dungeonCore089TacticalInteractionsDisabled',
+  'dungeonCore090MovementV2Disabled',
+  'dungeonCore094EndTurnFinalDisabled',
+  'dungeonCore095SoloTurnFinalDisabled',
+  'dungeonCore097StabilityRollbackDisabled'
+]);
+
+const blockRe=/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi;
+const assignmentRe=/\bwindow\.([A-Za-z_$][\w$]*)\s*=/g;
+const chains=new Map();
+
+for(const match of source.matchAll(blockRe)){
+  const id=match[1];
+  if(disabled.has(id))continue;
+  for(const hit of match[2].matchAll(assignmentRe)){
+    const name=hit[1];
+    if(!chains.has(name))chains.set(name,[]);
+    chains.get(name).push(id);
+  }
+}
+
+const distinctGlobals=chains.size;
+const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
+const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
+
+assert.equal(blob,'3a3db76d12ae511f6293e8ff25d124616731a08b','Phase 2 inline global table must target the current committed index blob');
+assert.equal(distinctGlobals,438,'distinct explicit inline globals drifted');
+assert.equal(assignments,773,'explicit inline global assignments drifted');
+assert.equal(multiOwnerGlobals,123,'multi-owner inline globals drifted');
+
+const expected=[
+  '# GenSrpG Phase 2 — inline global last owners',
+  '# sourceIndexBlob='+blob,
+  '# scope=explicit window.<name> assignments in 120 active inline blocks',
+  '# distinctGlobals='+distinctGlobals+' assignments='+assignments+' multiOwnerGlobals='+multiOwnerGlobals,
+  '# name\tassignmentCount\tlastOwner',
+  ...[...chains.keys()].sort().map(name=>{
+    const chain=chains.get(name);
+    return name+'\t'+chain.length+'\t'+chain.at(-1);
+  })
+].join('\n')+'\n';
+
+assert.equal(table,expected,'inline global last-owner table drifted from the committed runtime');
+
+for(const [name,count,lastOwner] of [
+  ['renderDungeonCombatRound',30,'dungeonCore303TimelineRootFix'],
+  ['captureRenderBattleLive',15,'coreCombatPoolFix156'],
+  ['startConfiguredGame',6,'dungeonCore200Rebuild'],
+  ['resumeGame',3,'dungeonCore310PersistenceAndTokens']
+]){
+  const chain=chains.get(name)||[];
+  assert.equal(chain.length,count,name+' assignment count drifted');
+  assert.equal(chain.at(-1),lastOwner,name+' last owner drifted');
+}
+
+console.log(JSON.stringify({
+  scenario:'Phase 2 inline global last-owner table',
+  sourceIndexBlob:blob,
+  distinctGlobals,
+  assignments,
+  multiOwnerGlobals
+},null,2));

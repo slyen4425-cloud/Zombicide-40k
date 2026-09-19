@@ -24,21 +24,16 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import hashlib
+          import subprocess
 
           path=Path("index.html")
           old_blob="d942934741ca200319de02116c4dd384722d39c7"
-          new_blob="286e427df42bc1a04cc981ecbdf90ecb4de547ab"
 
-          def git_blob(data):
-              return hashlib.sha1(f"blob {len(data)}\\0".encode()+data).hexdigest()
-
-          data=path.read_bytes()
-          actual=git_blob(data)
+          actual=subprocess.check_output(["git","rev-parse","HEAD:index.html"],text=True).strip()
           if actual!=old_blob:
-              raise SystemExit(f"Unexpected index blob before Phase 4 raccord: {actual}")
+              raise SystemExit(f"Unexpected committed index blob before Phase 4 raccord: {actual}")
 
-          text=data.decode("utf-8")
+          text=path.read_text(encoding="utf-8")
           replacements=[
               (
                   '<script id="dungeonGithubArts164">',
@@ -69,10 +64,7 @@ jobs:
               text=text.replace(old,new,1)
 
           path.write_text(text,encoding="utf-8")
-          final=git_blob(path.read_bytes())
-          if final!=new_blob:
-              raise SystemExit(f"Unexpected index blob after Phase 4 raccord: {final}")
-          print("Phase 4 index blob:",final)
+          print("Phase 4 source blob verified:",actual)
           PY
 
       - name: Commit raccord and retire one-shot workflow
@@ -82,6 +74,9 @@ jobs:
           git config user.name "GenSrpG Phase 4"
           git config user.email "actions@users.noreply.github.com"
           git add index.html .github/workflows/phase4-asset-resolver-raccord-once.yml
+          final_blob="$(git rev-parse :index.html)"
+          test "$final_blob" = "286e427df42bc1a04cc981ecbdf90ecb4de547ab"
+          echo "Phase 4 staged index blob: $final_blob"
           git diff --cached --check
           git commit -m "refactor: route Dungeon creature paths through Core resolver"
           git push origin HEAD:work/gensrpg-phase4-asset-resolver-2026-09-19

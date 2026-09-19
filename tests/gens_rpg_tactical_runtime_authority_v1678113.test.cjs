@@ -115,7 +115,8 @@ assert.match(source,/dng_wall_block\.jpg/,'V113 must agree with the Builder wall
 assert.doesNotMatch(source,/const WALL_ASSET="assets\/dungeon\/creatures\/dungeon_wall\.png"/);
 assert.match(source,/function animateDiceOverlay\(rt=R\)\{return false\}/,'V113 must not start a second dice animation');
 assert.doesNotMatch(source,/setInterval\(tick,55\)/);
-assert.match(source,/#dc047RoomBoard \.dc047Cell/,'real board cell interactions must schedule detection');
+assert.match(source,/if\(out!==false\)scanDetection\(rt,"movement-detection-v113",true\)/,'successful legacy movement must scan detection synchronously');
+assert.doesNotMatch(source,/board-cell-detection-v113/,'board click/pointer must not be a second movement detection authority');
 assert.match(source,/dc318BranchSourceId/,'sub-room scope must use Core 3.18 branch ownership');
 assert.match(source,/__gensRpg112Spatial=true/,'V113 must prevent V112 retry from re-wrapping combat creation');
 assert.match(source,/GensRpgTacticalStats1678110\?\.decorateBattle/,'V113 must reassert V110 canonical snapshots after final spatial scoping');
@@ -123,4 +124,4 @@ assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 
-console.log('V16.78.113 scope/detection preserved; lot 4J bypass semantics locked; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');
+console.log('V16.78.113 scope/detection preserved with synchronous movement scan and no board-click duplicate; lot 4J bypass semantics locked: OK');

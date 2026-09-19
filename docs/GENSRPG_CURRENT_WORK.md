@@ -103,6 +103,44 @@ Conclusion :
 - la correction doit viser le propriétaire inline natif de l'ouverture/visibilité de fiche, pas ajouter une couche de masquage externe ;
 - aucun correctif runtime ne doit être écrit sans inspection du `index.html` exact.
 
+### Correctif propriétaire appliqué — candidat à valider
+
+Fichier exact fourni par l'utilisateur et vérifié :
+- taille : `8 175 835` octets ;
+- blob Git attendu/reçu : `55453138449d07bde731ff6934acc442f56bae32`.
+
+Diagnostic confirmé dans `index.html` :
+- `openChar()` rend `#sheet` visible avant le premier rendu ;
+- `render()` différéait l'identité Dungeon avec `setTimeout(...,0)` ;
+- pendant ce délai, le panneau `#zombicideSkillPanel` restait visible ;
+- `renderDungeonSkillTree()` et `applyDungeonSheetTabs()` reprenaient ensuite l'autorité.
+
+Correctif runtime :
+- commit `e105f9f0adad20bce43edae928f3412dfd61f1f7` ;
+- ancien blob `index.html` : `55453138449d07bde731ff6934acc442f56bae32` ;
+- nouveau blob `index.html` : `d942934741ca200319de02116c4dd384722d39c7` ;
+- changement fonctionnel : suppression du `setTimeout(...,0)` qui retardait l'identité RPG dans le propriétaire natif `render()` ;
+- les mêmes fonctions existantes `applyDungeonSheetIdentity()`, `renderDungeonHeroStats()`, `renderDungeonSkillTree()` et `updateDungeonSearchUi()` sont appelées synchroniquement ;
+- aucun nouveau renderer, masque, observer, wrapper, timer/retry, stockage ou règle de gameplay ajouté ;
+- workflow one-shot supprimé dans le même commit.
+
+Effet attendu :
+- le même appel `openChar()` conserve l'ouverture de la fiche ;
+- avant le premier paint, le renderer propriétaire a déjà masqué l'état Zombicide et posé l'identité Dungeon ;
+- aucune autorité externe n'est ajoutée.
+
+Validation requise :
+1. sentinelle navigateur `gens_rpg_sheet_survival_flash_browser_v11411.test.cjs` GREEN ;
+2. UI native / fiche héros ;
+3. Dungeon après Survie ;
+4. Config objet ;
+5. cache/pièges authored ;
+6. Save & Quit / reprise ;
+7. Capture / PvP / non-interférence ;
+8. Firefox ;
+9. Tactical Dock ;
+10. aucun merge sur `main`.
+
 ### Règle 26 déclenchée
 
 Le contenu exact de `index.html` est maintenant nécessaire pour inspecter le bloc `dungeonCore028HeroExploreGuard` et la chaîne native `openChar -> rendu Dungeon`.

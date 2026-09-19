@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "d942934741ca200319de02116c4dd384722d39c7",
+  "sourceIndexBlob": "286e427df42bc1a04cc981ecbdf90ecb4de547ab",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",
@@ -260,28 +260,28 @@
       "order": 30,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon GitHub-hosted art catalogue/binding",
+      "responsibility": "Dungeon art catalogue/binding consuming canonical creature paths from Core asset resolver",
       "crossDomains": []
     },
     "dungeonArtRenderFix165": {
       "order": 31,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon art rendering compatibility and visual binding fixes",
+      "responsibility": "Dungeon art rendering compatibility consuming canonical creature paths from Core asset resolver",
       "crossDomains": []
     },
     "dungeonDirectImageBinding166": {
       "order": 32,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon direct image binding layer",
+      "responsibility": "Dungeon direct image binding consuming canonical creature paths from Core asset resolver",
       "crossDomains": []
     },
     "dungeonHeroItemAssets168Marker": {
       "order": 33,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon hero/item asset build marker and bindings",
+      "responsibility": "Legacy Dungeon asset-root alias delegated to Core asset resolver",
       "crossDomains": []
     },
     "gensrpgDungeonGameplayFix169": {

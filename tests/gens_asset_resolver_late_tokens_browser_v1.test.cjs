@@ -134,6 +134,7 @@ async function enterFirstRoom(page){
     });
 
     console.log('[late-token-assets]',JSON.stringify(state,null,2));
+    console.log('[late-token-assets-errors]',JSON.stringify(errors,null,2));
     assert.equal(state.heroSrc,state.heroExpected,'final Core 3.10 hero token must keep the canonical Aldren art');
     assert.ok(state.enemyId,'first generated Dungeon room must expose at least one live enemy for token parity');
     assert.ok(/^dng_/i.test(state.enemyId),'characterization expects a canonical built-in Dungeon enemy');

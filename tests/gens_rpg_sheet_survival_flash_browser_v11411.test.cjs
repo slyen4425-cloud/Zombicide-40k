@@ -108,8 +108,14 @@ async function startDungeon(page){
     assert.equal(trace.family,'adventure');assert.equal(trace.active,DUNGEON_ID);assert.equal(trace.dungeonMode,true);
     const visibleSheet=trace.trace.filter(x=>x.sheetVisible);
     assert.ok(visibleSheet.length>0,'real hero sheet must become visible');
-    const transient=visibleSheet.filter(x=>x.zombicideVisible&&!x.dungeonTabsVisible);
-    assert.equal(transient.length,0,'RPG sheet must never expose a Survival/Zombicide-only visible state before Dungeon tabs; transient='+JSON.stringify(transient));
+    const paintPhases=new Set(['sync-after-click','raf1','raf2','timeout0','final']);
+    const paintVisible=visibleSheet.filter(x=>paintPhases.has(x.phase));
+    assert.ok(paintVisible.some(x=>x.phase==='raf1')&&paintVisible.some(x=>x.phase==='raf2'),'the regression must sample real animation-frame boundaries');
+    const survivalFrames=paintVisible.filter(x=>x.zombicideVisible);
+    assert.equal(survivalFrames.length,0,'RPG sheet must never paint a Survival/Zombicide skill panel; frames='+JSON.stringify(survivalFrames));
+    const openAfter=trace.trace.find(x=>x.phase==='call:openChar:after');
+    assert.ok(openAfter&&openAfter.sheetVisible,'openChar must finish with the real hero sheet visible');
+    assert.equal(openAfter.zombicideVisible,false,'openChar must finish with Survival/Zombicide skills already hidden before the browser can paint');
     const final=trace.trace.at(-1);assert.equal(final.sheetVisible,true);assert.equal(final.dungeonTabsVisible,true,'final Dungeon hero sheet must expose Dungeon tabs');
     assert.deepEqual(errors,[],'browser console/page errors');
   }finally{

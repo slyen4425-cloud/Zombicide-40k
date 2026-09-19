@@ -41606,8 +41606,7 @@ function heroName(id){return CHARS?.[id]?.name||findCustomHero?.(id)?.name||Stri
 function heroImg(id){
   const c=CHARS?.[id]||findCustomHero?.(id)||{};
   if(c.image||c.avatar)return c.image||c.avatar;
-  const map={dungeon_aldren:"dng_aldren.png",dungeon_lyra:"dng_lyra.png",dungeon_brom:"dng_brom.png"};
-  return map[String(id)]?"assets/dungeon/creatures/"+map[String(id)]:""
+  return window.GensAssetResolverV1.dungeonHeroPath(id)
 }
 function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
 function liveEnemies(x){
@@ -42084,8 +42083,7 @@ function heroName(id){return heroDef(id).name||String(id)}
 function heroArt(id){
   const c=heroDef(id);
   if(c.image||c.avatar)return c.image||c.avatar;
-  const f={dungeon_aldren:"dng_aldren.png",dungeon_lyra:"dng_lyra.png",dungeon_brom:"dng_brom.png"}[String(id)];
-  return f?"assets/dungeon/creatures/"+f:""
+  return window.GensAssetResolverV1.dungeonHeroPath(id)
 }
 function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
 function live(x){
@@ -42944,7 +42942,9 @@ const RT="gensrpg_dungeon_runtime_v2",ROOT="assets/dungeon/creatures/";
 function runtime(){try{return JSON.parse(localStorage.getItem(RT)||"null")}catch(e){return null}}
 function enemyArt(e){
   let d=null;try{d=activeEnemyDefinition?.(e?.enemyId)||null}catch(_){}
-  return d?.art||d?.image_data||d?.image||d?.avatar||(e?.enemyId?ROOT+String(e.enemyId)+".png":"")
+  const id=String(e?.enemyId||"");
+  const canonical=window.GensAssetResolverV1.dungeonCreaturePath(id);
+  return d?.art||d?.image_data||d?.image||d?.avatar||canonical||(id?ROOT+id+".png":"")
 }
 function decorateEnemies(){
   const x=runtime(),cells=[...document.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")];
@@ -43022,7 +43022,7 @@ function runtime(){try{return JSON.parse(localStorage.getItem(RT)||"null")}catch
 function cells(){return [...document.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")]}
 function heroDef(id){return CHARS?.[id]||findCustomHero?.(id)||{}}
 function heroName(id){return heroDef(id).name||String(id||"Héros")}
-function heroArt(id){const d=heroDef(id);return d.image||d.avatar||({dungeon_aldren:ROOT+"dng_aldren.png",dungeon_lyra:ROOT+"dng_lyra.png",dungeon_brom:ROOT+"dng_brom.png"}[String(id)]||"")}
+function heroArt(id){const d=heroDef(id);return d.image||d.avatar||window.GensAssetResolverV1.dungeonHeroPath(id)}
 function initials(id){return heroName(id).split(/\s+/).filter(Boolean).map(v=>v[0]).join("").slice(0,2).toUpperCase()}
 function enemies(x){
   const branch=!!x?.branch?.active;
@@ -43031,7 +43031,9 @@ function enemies(x){
 function enemyArt(e){
   let d=null;try{d=activeEnemyDefinition?.(e?.enemyId)||null}catch(_){}
   try{if(typeof gensDungeonCreatureArt165==="function")return gensDungeonCreatureArt165(d||e?.enemyId)||""}catch(_){}
-  return e?.enemyId?ROOT+String(e.enemyId)+".png":(d?.image_data||d?.art||"")
+  const id=String(e?.enemyId||"");
+  const canonical=window.GensAssetResolverV1.dungeonCreaturePath(id);
+  return canonical||(id?ROOT+id+".png":(d?.image_data||d?.art||""))
 }
 function imageToken(cls,src,fallback,title){
   const t=document.createElement("span");t.className=cls;t.title=title||"";

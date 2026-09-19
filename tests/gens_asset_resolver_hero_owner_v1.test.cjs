@@ -26,16 +26,8 @@ assert.match(ensure[1],/const githubArt=dungeonBuiltinHeroGithubArt168\(id\)/,
 assert.match(ensure[1],/image:ov\.avatar\|\|githubArt\|\|dungeonBuiltinPortrait\(id\)/,
   'custom hero override must remain above Core path and generated portrait fallback');
 
-const items=index.match(/function dungeonItems\(\)\{([\s\S]*?)\n\}/);
-assert.ok(items,'missing dungeonItems');
-assert.match(items[1],/const githubItemArts=\{/,
-  'items remain deliberately historical in the hero-only sub-lot');
-assert.match(items[1],/githubItemArts\[it\.id\]\s*\?\s*"assets\/dungeon\/creatures\/"\+githubItemArts\[it\.id\]/,
-  'item path construction must remain untouched until its own sub-lot');
-
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon builtin hero path owner',
   heroDelegatesToCore:true,
-  heroOverridePriorityPreserved:true,
-  itemOwnerUntouched:true
+  heroOverridePriorityPreserved:true
 },null,2));

@@ -712,3 +712,59 @@ SHA du patch index :
 `65fac9d803f71ecf7c8c3f82aa15a80861276d71`
 
 La validation globale reste requise avant tout checkpoint GREEN.
+
+## Chantier isolé — Édition pièce / Config objet moderne
+
+Branche :
+`work/gensrpg-object-config-editor-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-object-config-editor-2026-09-19`
+
+Base exacte :
+`3b7aba98d6d3bb87168a1853383c5c8093974a54`
+(`checkpoint/gensrpg-authored-cache-trap-runtime-green-2026-09-19`)
+
+### Signalement utilisateur
+
+Dans Édition pièce -> Config objet :
+- la première ouverture peut afficher l'UI moderne avec menus déroulants ;
+- après sortie puis retour dans l'éditeur, l'ancienne UI peut réapparaître ;
+- cette ancienne UI redemande des ID/références manuelles ;
+- besoin UX : un objet déjà configuré doit rester visuellement distinct d'un objet seulement placé.
+
+### Propriétaires identifiés à diagnostiquer
+
+- `DungeonRoomTemplateContent167828` : propriétaire de la configuration directe sur le modèle de pièce ;
+- `DungeonRoomContentUI167831` : couche UI moderne qui simplifie/remplace les champs par menus déroulants ;
+- `DungeonRoomVisualConfig167826` : variante de configuration par instance de zone ;
+- `DungeonRoomCreator100` : grille et cycle open/edit/save uniquement.
+
+### Contraintes
+
+- ne pas créer une deuxième UI de configuration ;
+- ne pas ajouter MutationObserver, heartbeat, timer/retry permanent ou réparation globale ;
+- ne pas modifier World Builder/runtime gameplay ;
+- ne pas traiter ici événements, performance déplacement ou fiche Zombicide/RPG ;
+- conserver les données et schémas existants ;
+- la couleur "configuré" doit être dérivée de la configuration réellement persistée, pas d'un état UI temporaire.
+
+### Hypothèse à prouver avant correction
+
+`DungeonRoomContentUI167831.patch()` remplace `openEditor` une seule fois sur l'objet API courant.
+Si un propriétaire chargé/réinstallé plus tard republie ou remplace `DungeonRoomTemplateContent167828.openEditor`, le flag `__dui167831Patched` reste posé sur l'API et la couche moderne ne reprend plus la nouvelle fonction. Le symptôme attendu est exactement : première ouverture moderne, puis après cycle éditeur retour à l'ancienne UI avec champs ID.
+
+### Tests requis
+
+1. vrai chemin navigateur : Éditeurs -> Dungeon -> Créateur de pièces ;
+2. placer/configurer un objet via l'UI moderne ;
+3. vérifier que l'objet configuré porte un état visuel distinct dérivé du contenu persisté ;
+4. fermer puis rouvrir le créateur ;
+5. rouvrir le même objet ;
+6. vérifier que les menus déroulants modernes sont toujours présents et que les champs ID legacy ne réapparaissent pas ;
+7. répéter au moins deux cycles ouverture/fermeture ;
+8. Architecture, navigateur complet, Firefox, Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Construire la reproduction navigateur exacte avant toute modification runtime.

@@ -43,7 +43,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,65);
+assert.equal(reachable.size,66);
 for(const rel of targets)assert.equal(reachable.has(rel),false,rel+' unexpectedly entered production graph');
 
 const textExt=new Set(['.js','.cjs','.mjs','.html','.md','.json','.yml','.yaml','.txt','.webmanifest']);

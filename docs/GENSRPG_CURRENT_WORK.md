@@ -67,6 +67,55 @@ Interdit :
 Propriétaire attendu par la charte :
 - fiche personnage : Shell/module actif selon contexte, jamais Tactical.
 
+### Diagnostic navigateur confirmé — flash Survie dans la fiche RPG
+
+Sentinelle :
+`tests/gens_rpg_sheet_survival_flash_browser_v11411.test.cjs`
+
+Commit de caractérisation :
+`edf99d16285d9a0dd7f7d8facdf188b56865bee6`
+
+Résultat :
+- le vrai bouton `#dc01Heroes .dc01Hero` ouvre la fiche par la fonction native `openChar()` ;
+- `openChar()` rend `#sheet` visible immédiatement ;
+- à la sortie de `openChar()`, en contexte `adventure` + profil `game_profile_dungeon_demo`, `#zombicideSkillPanel` reste visible alors que `#dungeonSheetTabs` est encore masqué ;
+- cet état reste visible pendant plusieurs frames ;
+- `renderDungeonAttributes()` n'arrive qu'environ 230 ms plus tard ;
+- `renderDungeonHeroStats()` puis `renderDungeonSkillTree()` arrivent ensuite ;
+- `renderDungeonSkillTree()` finit par masquer `#zombicideSkillPanel` ;
+- `applyDungeonSheetTabs()` arrive environ 525 ms après l'entrée dans `openChar()` et installe finalement l'état RPG attendu.
+
+Cartographie Phase 2 :
+- dernier propriétaire global de `openChar` : bloc inline `dungeonCore028HeroExploreGuard` ;
+- ordre inline : 38 ;
+- domaine déclaré : Dungeon.
+
+Modules externes contrôlés :
+- `gens-rpg-stats-clean-167874.js` : décorateur/normalisation stats, ne possède pas l'ouverture de fiche ;
+- `gens-stat-upgrade-policy-167898.js` : décorateur de progression/stat, ne possède pas `openChar` ;
+- `gens-dungeon-hero-art-repair-167874.js` : réparation visuelle hors propriétaire de fiche ;
+- `gens-hero-editor-dynamic-167897.js` : éditeur/décoration différée ;
+- `gens-dungeon-ui-cleanup-1678100.js` : wrappe `openChar` uniquement pour programmer son nettoyage UI, sans installer l'état RPG ;
+- les couches art de fiche V99/V102 sont déjà retirées/inertes selon les sentinelles existantes.
+
+Conclusion :
+- le flash utilisateur est reproduit et expliqué ;
+- la correction doit viser le propriétaire inline natif de l'ouverture/visibilité de fiche, pas ajouter une couche de masquage externe ;
+- aucun correctif runtime ne doit être écrit sans inspection du `index.html` exact.
+
+### Règle 26 déclenchée
+
+Le contenu exact de `index.html` est maintenant nécessaire pour inspecter le bloc `dungeonCore028HeroExploreGuard` et la chaîne native `openChar -> rendu Dungeon`.
+
+SHA exact demandé :
+`edf99d16285d9a0dd7f7d8facdf188b56865bee6`
+
+Permalink :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/edf99d16285d9a0dd7f7d8facdf188b56865bee6/index.html`
+
+Le fichier reçu doit être vérifié avant toute modification.
+Aucun ancien `index.html` local ne doit être utilisé.
+
 ### Diagnostic obligatoire avant correction
 
 1. traverser le vrai Shell vers Adventure -> Dungeon ;

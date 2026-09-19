@@ -34,36 +34,46 @@ jobs:
               raise SystemExit(f"Unexpected committed index blob before Phase 4 raccord: {actual}")
 
           text=path.read_text(encoding="utf-8")
-          import re
-
           marker='<script id="dungeonGithubArts164">'
           if text.count(marker)!=1:
               raise SystemExit(f"Expected one dungeonGithubArts164 marker, got {text.count(marker)}")
           text=text.replace(marker,'<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\\n\\n'+marker,1)
 
-          patterns=[
-              (
-                  r'window\\.dungeonAutoArtPath164=function\\(id\\)\\{[\\s\\S]*?\\n\\};',
-                  'window.dungeonAutoArtPath164=function(id){\\n  return window.GensAssetResolverV1.dungeonCreaturePath(id);\\n};'
-              ),
-              (
-                  r'const artPath=id=>[^;]+;',
-                  'const artPath=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
-              ),
-              (
-                  r'const dungeonPath166=id=>[^;]+;',
-                  'const dungeonPath166=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
-              ),
-              (
-                  r'window\\.GENSRPG_DUNGEON_ASSET_ROOT_168=[^;]+;',
-                  'window.GENSRPG_DUNGEON_ASSET_ROOT_168=window.GensAssetResolverV1.ROOTS.dungeon.creatures;'
-              )
-          ]
+          def replace_statement(source,anchor,replacement,must_contain):
+              if source.count(anchor)!=1:
+                  raise SystemExit(f"Expected one anchor, got {source.count(anchor)}: {anchor}")
+              start=source.index(anchor)
+              end=source.index(';',start)+1
+              fragment=source[start:end]
+              if must_contain not in fragment:
+                  raise SystemExit(f"Unexpected historical fragment for {anchor}: {fragment[:180]}")
+              return source[:start]+replacement+source[end:]
 
-          for pattern,replacement in patterns:
-              text,count=re.subn(pattern,replacement,text,count=1)
-              if count!=1:
-                  raise SystemExit(f"Expected exactly one Phase 4 regex replacement, got {count}: {pattern}")
+          start=text.index('window.dungeonAutoArtPath164=function(id){')
+          end=text.index('};',start)+2
+          fragment=text[start:end]
+          if 'assets/dungeon/creatures/' not in fragment:
+              raise SystemExit('dungeonAutoArtPath164 no longer owns the expected historical path')
+          text=text[:start]+'window.dungeonAutoArtPath164=function(id){\\n  return window.GensAssetResolverV1.dungeonCreaturePath(id);\\n};'+text[end:]
+
+          text=replace_statement(
+              text,
+              'const artPath=id=>',
+              'const artPath=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);',
+              'assets/dungeon/creatures/'
+          )
+          text=replace_statement(
+              text,
+              'const dungeonPath166=id=>',
+              'const dungeonPath166=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);',
+              'assets/dungeon/creatures/'
+          )
+          text=replace_statement(
+              text,
+              'window.GENSRPG_DUNGEON_ASSET_ROOT_168=',
+              'window.GENSRPG_DUNGEON_ASSET_ROOT_168=window.GensAssetResolverV1.ROOTS.dungeon.creatures;',
+              'assets/dungeon/creatures/'
+          )
 
           path.write_text(text,encoding="utf-8")
           print("Phase 4 source blob verified:",actual)

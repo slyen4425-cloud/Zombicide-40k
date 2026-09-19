@@ -240,9 +240,9 @@ async function chooseParticipantAndStart(page){
       };
     },{itemId:chosenItem.id});
     console.log('[object-config-editor] before-real-chest-open',JSON.stringify(beforeOpen,null,2));
-    const searchButton=page.locator('button[onclick^="DungeonCore01.searchChest"]').filter({hasText:/FOUILLER/i}).first();
-    assert.equal(await searchButton.count(),1,'the exact authored chest must expose the historical visible FOUILLER button');
-    await searchButton.click();
+    const exactButton=page.locator('#dzc167824Actions button').filter({hasText:/Ouvrir coffre/i}).first();
+    assert.equal(await exactButton.count(),1,'the exact authored chest must expose its visible exact open action');
+    await exactButton.click();
     await page.waitForTimeout(150);
     const afterOpen=await page.evaluate(({itemId,hero,key})=>{
       const st=JSON.parse(localStorage.getItem(key)||'{}'),x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
@@ -254,10 +254,10 @@ async function chooseParticipantAndStart(page){
       };
     },{itemId:chosenItem.id,hero:beforeOpen.hero,key:beforeOpen.key});
     console.log('[object-config-editor] after-real-chest-open',JSON.stringify(afterOpen,null,2));
-    assert.equal(beforeOpen.searchFlag,true,'the visible FOUILLER path must still be owned by exact-zone content');
-    assert.equal(afterOpen.gold,beforeOpen.gold+23,'FOUILLER must grant the configured exact gold');
-    assert.equal(afterOpen.itemCount,beforeOpen.itemCount+2,'FOUILLER must grant the configured exact item quantity');
-    assert.ok(Object.values(afterOpen.opened).some(Boolean),'real FOUILLER path must mark exact chest opened');
+    assert.equal(beforeOpen.searchFlag,true,'historical chest search hook must remain owned by exact-zone content');
+    assert.equal(afterOpen.gold,beforeOpen.gold+23,'visible exact chest action must grant the configured exact gold');
+    assert.equal(afterOpen.itemCount,beforeOpen.itemCount+2,'visible exact chest action must grant the configured exact item quantity');
+    assert.ok(Object.values(afterOpen.opened).some(Boolean),'visible exact chest action must mark exact chest opened');
     assert.deepEqual(errors,[]);
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();

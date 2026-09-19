@@ -9,6 +9,77 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-core-storage-service-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-core-storage-service-2026-09-19`
+
+Base exacte :
+`151e714c1373748ee6a42a03a8ec7fb44aded8c9`
+(`checkpoint/gensrpg-phase4-storage-builder-audit-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif du jalon
+
+Créer un service Core de mécanique JSON minimal, **hors graphe de production**, avant tout raccord Builder.
+
+API prévue :
+- `readJson(key, fallback, backend?)` ;
+- `writeJson(key, value, backend?)` ;
+- `remove(key, backend?)`.
+
+### Responsabilité Core autorisée
+
+Le service peut uniquement :
+- lire une chaîne depuis un backend compatible Storage ;
+- parser du JSON ;
+- retourner le fallback sur clé absente, JSON invalide ou valeur JSON `null` ;
+- sérialiser/écrire du JSON ;
+- supprimer une clé ;
+- accepter un backend injecté pour les tests.
+
+### Interdit
+
+- aucune clé métier codée dans le service ;
+- aucune connaissance de Room, Graph, Dungeon, Capture, Survie ou Tactical ;
+- aucune normalisation métier ;
+- aucune migration de format dans ce jalon ;
+- aucune interception silencieuse des erreurs d'écriture ;
+- aucun DOM, listener, observer, timer/retry ;
+- aucun chargement production dans `index.html`, `preview.html`, Pages ou bootstrap ;
+- aucun raccord Builder dans cette branche.
+
+### Parité à préserver pour les futurs raccords
+
+- lecture absente -> fallback du consommateur ;
+- JSON invalide -> fallback du consommateur ;
+- JSON `null` -> fallback du consommateur ;
+- écriture -> `JSON.stringify(value)` exactement ;
+- erreur `setItem` -> propagée au consommateur ;
+- normalizers et schémas restent au module.
+
+### Tests requis
+
+1. source syntaxiquement valide ;
+2. service sans UI/timer/observer/gameplay ;
+3. backend injecté et backend global ;
+4. absence / JSON invalide / `null` ;
+5. round-trip tableau et objet ;
+6. propagation d'une erreur d'écriture ;
+7. suppression ;
+8. preuve que le service reste hors production ;
+9. Architecture + navigateur complet + Firefox + Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Créer `assets/gensrpg/core/storage-v1.js` et son contrat de test, puis adapter uniquement le garde de graphe physique pour reconnaître ce deuxième service Phase 4 comme présent mais non chargé.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
 
 Branche :

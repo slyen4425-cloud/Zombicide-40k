@@ -288,6 +288,9 @@ jobs:
       - name: Vérifier le Dungeon Builder dans le vrai éditeur
         run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
 
+      - name: Caractériser la stabilité de Config objet moderne
+        run: node tests/gens_object_config_editor_browser_v11411.test.cjs
+
       - name: Vérifier cache, retour et pièges authored dans Chromium
         run: node tests/gens_authored_cache_trap_browser_v11411.test.cjs
 

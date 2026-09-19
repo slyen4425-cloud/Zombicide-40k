@@ -67,6 +67,49 @@ Interdit :
 Propriétaire attendu par la charte :
 - fiche personnage : Shell/module actif selon contexte, jamais Tactical.
 
+### Résultat final — fiche RPG sans flash Survie
+
+Correctif runtime propriétaire :
+- commit `e105f9f0adad20bce43edae928f3412dfd61f1f7` ;
+- fichier runtime : `index.html` ;
+- ancien blob : `55453138449d07bde731ff6934acc442f56bae32` ;
+- nouveau blob : `d942934741ca200319de02116c4dd384722d39c7` ;
+- diff fonctionnel : **1 ligne**.
+
+Correction :
+- suppression du `setTimeout(...,0)` qui différait la préparation RPG au début de `render()` ;
+- les propriétaires déjà existants `applyDungeonSheetIdentity()`, `renderDungeonHeroStats()`, `renderDungeonSkillTree()` et `updateDungeonSearchUi()` sont maintenant appelés synchroniquement ;
+- aucune nouvelle fiche, aucun masque, aucun observer, aucun timer/retry ou renderer concurrent ajouté.
+
+Preuve navigateur :
+- le vrai bouton héros Dungeon appelle toujours le chemin natif `openChar()` ;
+- à la sortie d'`openChar()`, le panneau `#zombicideSkillPanel` est déjà masqué ;
+- `raf1` et `raf2` ne montrent jamais le panneau Survie/Zombicide ;
+- les onglets Dungeon sont présents dans l'état final.
+
+HEAD propre validé après retrait des workflows one-shot :
+`86fe1c4b9c05359d668e48637bd4d7aa6a3d8e7a`
+
+Validation :
+- Architecture + navigateur complet `35433350018` — SUCCESS ;
+- Firefox `35433350007` — SUCCESS ;
+- Tactical Dock `35433350015` — SUCCESS.
+
+Aucun changement sur `main`.
+
+### Coordination après ce lot
+
+Agent 1 travaille séparément sur :
+- déclenchement tardif coffre après déplacement ;
+- détection / ligne de vue ennemie après déplacement.
+
+Ne pas ouvrir en parallèle un lot performance déplacement tant que ce diagnostic touche potentiellement le même propriétaire de fin de mouvement.
+
+Prochaine action locale :
+1. fermer ce lot avec checkpoint GREEN ;
+2. attendre le résultat propriétaire d'Agent 1 avant tout chantier touchant la fin de mouvement ;
+3. conserver la dette performance déplacement séparée et non modifiée.
+
 ### Diagnostic navigateur confirmé — flash Survie dans la fiche RPG
 
 Sentinelle :

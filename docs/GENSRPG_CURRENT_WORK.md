@@ -9,6 +9,72 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / Core stockage JSON — service pur — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-core-storage-json-service-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-core-storage-json-service-2026-09-20`
+
+Base exacte :
+`151e714c1373748ee6a42a03a8ec7fb44aded8c9`
+(`checkpoint/gensrpg-phase4-storage-builder-audit-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif
+
+Créer le premier jalon du service Phase 4 `stockage / migrations` :
+un service Core JSON minimal, générique et testable, **hors graphe de production**.
+
+Ce jalon ne raccorde encore aucun Builder et ne modifie aucune clé persistante.
+
+### Contrat autorisé
+
+Le service peut uniquement :
+- créer un adaptateur autour d'un stockage de type `getItem/setItem/removeItem` ;
+- lire du JSON avec fallback explicite ;
+- écrire du JSON en laissant remonter les erreurs d'écriture/sérialisation ;
+- supprimer une clé ;
+- considérer valeur absente, chaîne vide, JSON invalide ou `null` comme fallback.
+
+Le stockage réel est injecté explicitement au service. Le Core ne choisit pas silencieusement un module, une clé ou un schéma.
+
+### Interdit
+
+- aucune clé métier codée dans le Core ;
+- aucun `normalizeRoom`, `normalizeMeta`, `normalizeGraph` ;
+- aucune migration de format dans ce jalon ;
+- aucun accès implicite au runtime Dungeon ;
+- aucun DOM, observer, listener, timer/retry ;
+- aucun raccord `DungeonRoomCreator100` dans ce même lot ;
+- aucun changement de `index.html`, `preview.html`, Pages ou service worker ;
+- aucun merge sur `main`.
+
+### Sémantique à verrouiller
+
+- stockage absent / `getItem() === null` -> fallback ;
+- chaîne vide -> fallback ;
+- JSON invalide -> fallback ;
+- JSON `null` -> fallback ;
+- JSON valide non-null -> valeur parsée inchangée ;
+- `writeJson` écrit exactement `JSON.stringify(value)` ;
+- erreurs de `setItem` et de `JSON.stringify` propagées ;
+- `remove` délègue à `removeItem`.
+
+### Validation prévue
+
+1. test unitaire pur du service ;
+2. garde de pureté : aucun DOM/timer/listener/observer ;
+3. garde du graphe : service Phase 4 présent physiquement mais non atteignable ;
+4. aucune modification des Builders existants ;
+5. Architecture + navigateur complet + Firefox + Tactical Dock ;
+6. checkpoint GREEN du service pur ;
+7. sous-lot séparé ensuite pour `DungeonRoomCreator100`.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
 
 Branche :

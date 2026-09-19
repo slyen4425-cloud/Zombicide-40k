@@ -95,7 +95,10 @@ function blockEvent(ev){ev?.preventDefault?.();ev?.stopPropagation?.();ev?.stopI
 function activateCell(index){
   if(!visualMode)return false;
   const room=roomById(inferRoom()),idx=Number(index),obj=String(room?.cells?.[idx]?.object||"");
-  if(CONFIGURABLE.has(obj)){openEditor(idx,obj);return true}
+  if(CONFIGURABLE.has(obj)){
+    const api=ROOT.DungeonRoomVisualConfig167826||ROOT.DungeonRoomVisualConfig167825;
+    return !!api?.openEditor?.(idx,obj);
+  }
   try{ROOT.showToast?.("Sélectionne un ennemi, boss, coffre, piège ou énigme déjà placé.")}catch(e){}
   return false;
 }

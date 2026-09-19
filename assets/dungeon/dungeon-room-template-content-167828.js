@@ -60,7 +60,7 @@ function copyTemplateToZone(dungeonId,nodeId,roomId,force){
 }
 function propagateToInheritedZones(roomId,previousTemplate){
   const b=builderApi(),z=zoneApi();if(!b?.loadLibrary||!z?.getZoneContent||!z?.saveZoneContent)return 0;let n=0;const previous=previousTemplate?contentSignature(previousTemplate):"";
-  for(const g of b.loadLibrary()||[])for(const node of g.nodes||[])if(String(node.roomId||"")===String(roomId||"")){const current=z.getZoneContent(g.id,node.id);if(current?.mode==="inherit"){n++;continue}if(previous&&contentSignature(current)===previous){z.saveZoneContent(g.id,node.id,emptyContent());n++}}
+  for(const g of b.loadLibrary()||[])for(const node of g.nodes||[])if(String(node.roomId||"")===String(roomId||"")){const legacyState=z.legacyTemplateLinkState?.(g.id,node.id,roomId)||"none";if(legacyState==="linked"&&z.migrateLegacyTemplateLink?.(g.id,node.id,roomId)){n++;continue}if(legacyState==="detached")continue;const current=z.getZoneContent(g.id,node.id);if(current?.mode==="inherit"){n++;continue}if(previous&&contentSignature(current)===previous){z.saveZoneContent(g.id,node.id,emptyContent());n++}}
   return n
 }
 function wrapRoomSaves(){const api=roomApi();if(!api||api.__drt167828SaveWrapped||typeof api.saveCurrent!=="function")return false;const old=api.saveCurrent;api.saveCurrent=function(){const beforeId=inferRoomId(),before=beforeId?templateContent(beforeId):null,out=old.apply(this,arguments),id=String(out?.id||beforeId||"");if(id)try{reconcileTemplate(id,before)}catch(e){console.warn("GenSrpG template reconcile",e)}return out};api.__drt167828SaveWrapped=true;return true}

@@ -15,6 +15,69 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
+## État opérationnel prioritaire — 2026-09-19
+
+Ce bloc prime sur les sections historiques conservées plus bas.
+
+### Lot Config objet — validation fonctionnelle terminée
+
+Branche :
+`work/gensrpg-object-config-editor-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-object-config-editor-2026-09-19`
+
+Base exacte :
+`3b7aba98d6d3bb87168a1853383c5c8093974a54`
+
+HEAD fonctionnel validé :
+`e4c3ec4e3a6fc205274ffa6ae9b41651e8e04cc1`
+
+Corrections propriétaires validées :
+- la variante par zone passe par le seul `DungeonRoomVisualConfig167826.openEditor()` public décoré par l'UI moderne ;
+- l'état visuel « configuré » vient du même contenu persisté via `configured:true`, jamais d'un état UI temporaire ;
+- une ancienne copie automatique V16.78.44 portant `templateLinked:true` est migrée une seule fois vers `inherit` par le propriétaire `DungeonZoneContent167824` ;
+- une vraie variante de zone explicitement détachée reste indépendante et n'est jamais migrée ;
+- sur tactile, `DungeonRoomGridCapture167830` bloque la peinture au contact mais n'ouvre la fiche qu'après la fin du geste ; le même appui ne peut plus tomber sur « Annuler » ;
+- sur une case de coffre authored exact, l'action exacte reste l'autorité ; l'ancien contrôle générique ne doit pas masquer le contenu configuré.
+
+Preuve navigateur réelle :
+- ancien coffre V44 `common` / vide injecté comme copie `fixed + templateLinked:true` ;
+- reconfiguration du modèle ;
+- migration de la zone vers `inherit` ;
+- contenu effectif repris depuis le modèle ;
+- coffre effectif avec rareté/or/objets configurés ;
+- geste tactile complet validé ;
+- couleur persistante après fermeture/réouverture.
+
+Validation CI sur `e4c3ec4e3a6fc205274ffa6ae9b41651e8e04cc1` :
+- Architecture + navigateur complet `35429554196` — SUCCESS ;
+- Firefox `35429554183` — SUCCESS ;
+- Tactical Dock `35429554188` — SUCCESS.
+
+Validation utilisateur :
+- l'utilisateur a confirmé qu'une nouvelle pièce fonctionne ;
+- l'utilisateur a confirmé que le défaut `common` / coffre vide concerne les anciennes salles déjà créées ;
+- poursuite du développement autorisée le 2026-09-19.
+
+### Dettes séparées conservées
+
+Ne pas mélanger avec Config objet :
+1. flash bref d'une fiche personnage Zombicide/Survie en contexte RPG — prochain lot prioritaire ;
+2. déclenchement coffre / ligne de vue ennemie parfois tardif ou absent — lot événementiel séparé après la fiche ;
+3. ralentissement entre déplacements — lot performance séparé.
+
+### Prochaine action
+
+1. valider ce commit documentaire ;
+2. créer `checkpoint/gensrpg-object-config-editor-green-2026-09-19` sur le HEAD documentaire GREEN ;
+3. créer `checkpoint/gensrpg-start-rpg-sheet-shell-isolation-2026-09-19` sur ce même SHA ;
+4. ouvrir `work/gensrpg-rpg-sheet-shell-isolation-2026-09-19` ;
+5. caractériser le premier renderer qui affiche une fiche Survie/Zombicide avant la fiche RPG ;
+6. retirer cette autorité uniquement dans le contexte RPG ;
+7. aucune modification de stats, inventaire, Tactical, déplacement ou gameplay sans preuve ;
+8. si le propriétaire exact exige l'inspection de `index.html`, appliquer immédiatement la règle 26.
+
 ## Dernier checkpoint vert
 
 Phase 2 — cartographie runtime complète GREEN :

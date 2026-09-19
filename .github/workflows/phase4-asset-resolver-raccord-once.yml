@@ -1,0 +1,87 @@
+name: Phase 4 asset resolver raccord one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-asset-resolver-2026-09-19
+    paths:
+      - .github/workflows/phase4-asset-resolver-raccord-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch exact verified index
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          old_blob="d942934741ca200319de02116c4dd384722d39c7"
+          new_blob="286e427df42bc1a04cc981ecbdf90ecb4de547ab"
+
+          def git_blob(data):
+              return hashlib.sha1(f"blob {len(data)}\\0".encode()+data).hexdigest()
+
+          data=path.read_bytes()
+          actual=git_blob(data)
+          if actual!=old_blob:
+              raise SystemExit(f"Unexpected index blob before Phase 4 raccord: {actual}")
+
+          text=data.decode("utf-8")
+          replacements=[
+              (
+                  '<script id="dungeonGithubArts164">',
+                  '<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\\n\\n<script id="dungeonGithubArts164">'
+              ),
+              (
+                  'window.dungeonAutoArtPath164=function(id){\\n  id=String(id||"").trim();\\n  if(!/^dng_[a-z0-9_]+$/i.test(id))return "";\\n  return "assets/dungeon/creatures/"+id+".png";\\n};',
+                  'window.dungeonAutoArtPath164=function(id){\\n  return window.GensAssetResolverV1.dungeonCreaturePath(id);\\n};'
+              ),
+              (
+                  'const artPath=id=>"assets/dungeon/creatures/"+String(id||"").trim()+".png";',
+                  'const artPath=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
+              ),
+              (
+                  'const dungeonPath166=id=>"assets/dungeon/creatures/"+String(id||"")+".png";',
+                  'const dungeonPath166=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
+              ),
+              (
+                  'window.GENSRPG_DUNGEON_ASSET_ROOT_168="assets/dungeon/creatures/";',
+                  'window.GENSRPG_DUNGEON_ASSET_ROOT_168=window.GensAssetResolverV1.ROOTS.dungeon.creatures;'
+              )
+          ]
+
+          for old,new in replacements:
+              count=text.count(old)
+              if count!=1:
+                  raise SystemExit(f"Expected exactly one Phase 4 replacement, got {count}: {old[:90]}")
+              text=text.replace(old,new,1)
+
+          path.write_text(text,encoding="utf-8")
+          final=git_blob(path.read_bytes())
+          if final!=new_blob:
+              raise SystemExit(f"Unexpected index blob after Phase 4 raccord: {final}")
+          print("Phase 4 index blob:",final)
+          PY
+
+      - name: Commit raccord and retire one-shot workflow
+        shell: bash
+        run: |
+          rm .github/workflows/phase4-asset-resolver-raccord-once.yml
+          git config user.name "GenSrpG Phase 4"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html .github/workflows/phase4-asset-resolver-raccord-once.yml
+          git diff --cached --check
+          git commit -m "refactor: route Dungeon creature paths through Core resolver"
+          git push origin HEAD:work/gensrpg-phase4-asset-resolver-2026-09-19

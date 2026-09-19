@@ -22,7 +22,8 @@ assert.match(v112,/detectionPairs,detectionEnemyIds,scanDetection,selectCombatan
 assert.match(v112,/hookAdapter,hookStart,hookResultDetails/,'V112 historical wrappers must remain inspectable during progressive cleanup');
 
 assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must remain the final movement/event/start detection authority');
-assert.match(v113,/board-cell-detection-v113/,'V113 board-cell detection must remain active');
+assert.doesNotMatch(v113,/board-cell-detection-v113/,'V113 must not retain board click/pointer movement detection');
 assert.match(v113,/movement-detection-v113/,'V113 movement detection must remain active');
+assert.match(v113,/if\(out!==false\)scanDetection\(rt,"movement-detection-v113",true\)/,'V113 legacy movement hook must scan synchronously after successful movement');
 
-console.log('GenSrpG V114.11: V112 detection authority retired; spatial createBattle/details remain and V113 owns detection');
+console.log('GenSrpG V114.11: V112 detection authority retired; V113 owns LOS/detection without board-click movement duplication');

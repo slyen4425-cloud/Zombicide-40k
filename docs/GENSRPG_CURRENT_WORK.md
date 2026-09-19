@@ -712,3 +712,42 @@ SHA du patch index :
 `65fac9d803f71ecf7c8c3f82aa15a80861276d71`
 
 La validation globale reste requise avant tout checkpoint GREEN.
+
+### Clôture GREEN — authored cache / pièges / stabilité
+
+SHA validé :
+`3b7aba98d6d3bb87168a1853383c5c8093974a54`
+
+Checkpoint GREEN :
+`checkpoint/gensrpg-authored-cache-trap-runtime-green-2026-09-19`
+
+Validations automatiques :
+- Architecture `35408111386` — SUCCESS ;
+- Firefox `35408111345` — SUCCESS ;
+- Tactical Dock `35408111350` — SUCCESS ;
+- vrai navigateur authored cache -> sous-pièce -> retour + pièges exacts — SUCCESS ;
+- Dungeon après Survie, Builder, Save & Quit, Capture, PvP et non-interférence — SUCCESS.
+
+Validation utilisateur :
+- 2026-09-19 : « cela semble fixe » pour le lot cache/pièges/stabilité authored.
+
+### Nouveaux signalements — à traiter en lots séparés
+
+1. **Éditeur de pièce / Config objet**
+   - après sortie puis retour dans Édition pièce -> Config objet, retour à une vieille UI ;
+   - disparition des menus déroulants modernes ;
+   - retour d'une demande d'ID objet ;
+   - besoin UX : une case/objet déjà configuré doit apparaître dans une couleur distincte.
+
+2. **Événements runtime**
+   - passage sur coffre ;
+   - ligne de vue ennemie ;
+   - déclenchement parfois tardif ou absent.
+
+3. **Performance déplacement**
+   - sensation de ralentissement / latence entre les déplacements par rapport à avant.
+
+4. **Frontière UI Survie / RPG**
+   - apparition temporaire de la fiche personnage Zombicide en mode RPG, puis rétablissement.
+
+Règle : ne pas mélanger ces quatre sujets dans un même correctif. Le prochain lot traite uniquement la régression Config objet et son indicateur visuel.

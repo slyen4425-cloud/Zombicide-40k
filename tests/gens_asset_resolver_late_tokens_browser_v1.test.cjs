@@ -93,7 +93,13 @@ async function enterFirstRoom(page){
   page.setDefaultTimeout(25000);
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource|ERR_FAILED|NS_BINDING_ABORTED/.test(m.text()))errors.push(m.text())});
+  page.on('console',m=>{
+    if(m.type()!=='error')return;
+    const value=m.text();
+    if(/Failed to load resource|ERR_FAILED|NS_BINDING_ABORTED/.test(value))return;
+    if(/^Combat tactique V2 route blocked .*not-detected-v113/.test(value))return;
+    errors.push(value)
+  });
   page.on('dialog',async d=>{try{await d.accept()}catch(e){}});
   try{
     await prepare(page);

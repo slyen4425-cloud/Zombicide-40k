@@ -29902,6 +29902,8 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(ensureBuiltinMonster
 </script>
 
 
+<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
+
 <script id="dungeonGithubArts164">
 (function(){
 "use strict";
@@ -29911,9 +29913,7 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(ensureBuiltinMonster
    Priorité : image remplacée dans l'éditeur > image GitHub > comportement existant. */
 
 window.dungeonAutoArtPath164=function(id){
-  id=String(id||"").trim();
-  if(!/^dng_[a-z0-9_]+$/i.test(id))return "";
-  return "assets/dungeon/creatures/"+id+".png";
+  return window.GensAssetResolverV1.dungeonCreaturePath(id);
 };
 
 window.dungeonApplyGithubArts164=function(){
@@ -30020,7 +30020,7 @@ document.addEventListener("error",function(ev){
 <script id="dungeonArtRenderFix165">
 (function(){
 "use strict";
-const artPath=id=>"assets/dungeon/creatures/"+String(id||"").trim()+".png";
+const artPath=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);
 const isDungeonId=id=>/^dng_[a-z0-9_]+$/i.test(String(id||""));
 
 function customOverride(id){
@@ -30099,7 +30099,7 @@ document.addEventListener("DOMContentLoaded",()=>setTimeout(apply,100));
 /* V16.166 — liaison directe par ID au moment du rendu.
    Ne dépend plus de def.art pour afficher les PNG GitHub. */
 
-const dungeonPath166=id=>"assets/dungeon/creatures/"+String(id||"")+".png";
+const dungeonPath166=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);
 const isDng166=id=>/^dng_[a-z0-9_]+$/i.test(String(id||""));
 
 function customArt166(id,def){
@@ -30251,7 +30251,7 @@ window.dungeonTestArt166=function(id="dng_skeleton"){
 </style>
 
 <script id="dungeonHeroItemAssets168Marker">
-window.GENSRPG_DUNGEON_ASSET_ROOT_168="assets/dungeon/creatures/";
+window.GENSRPG_DUNGEON_ASSET_ROOT_168=window.GensAssetResolverV1.ROOTS.dungeon.creatures;
 </script>
 
 

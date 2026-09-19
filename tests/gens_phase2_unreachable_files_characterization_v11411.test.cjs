@@ -9,6 +9,7 @@ const stripQuery=v=>String(v||'').replace(/\?.*$/,'');
 const manifest=JSON.parse(read('docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json'));
 
 const targets=[
+  'assets/gensrpg/core/storage-json-v1.js',
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
   'assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js',
   'assets/gensrpg/gens-dungeon-sheet-art-stability-167899.js',

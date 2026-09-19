@@ -94,9 +94,38 @@ Ces blocs sont des candidats, pas encore déclarés propriétaires uniques.
 Agent 1 travaille séparément sur les événements après déplacement.
 Ne pas ouvrir le lot performance mouvement avant son diagnostic propriétaire.
 
+### Jalon A — service pur hors production — GREEN
+
+Checkpoint intermédiaire :
+`checkpoint/gensrpg-phase4-asset-resolver-service-green-2026-09-19`
+
+SHA :
+`8a653e9939a1c66f56160bba8373b5593763a66e`
+
+Résultat :
+- `assets/gensrpg/core/asset-resolver-v1.js` créé comme service pur ;
+- le service reste volontairement hors graphe production ;
+- résolution Dungeon couverte pour créatures, héros built-in et objets built-in ;
+- priorité d’un override explicite conservée ;
+- aucun fallback implicite Dungeon vers Survie/Capture/PvP ;
+- aucun DOM, stockage, observer, listener, timer ou gameplay dans le resolver ;
+- garde Phase 2 mis à jour pour distinguer 72 fichiers historiques + 8 entrypoints Phase 3 + 1 service Phase 4 hors production ;
+- graphe production inchangé à 65 fichiers atteignables.
+
+Validation :
+- Architecture + navigateur complet `35434977969` — SUCCESS ;
+- Firefox `35434977895` — SUCCESS ;
+- Tactical Dock `35434977920` — SUCCESS.
+
 ### Prochaine action
 
-Caractériser les blocs inline 30–33 et 65 dans l’index exact courant, puis identifier le plus petit service de résolution extractible sans changer le comportement.
+Jalon B :
+1. figer par test les résultats réels des resolvers historiques inline ;
+2. charger explicitement le resolver Core avant les consommateurs historiques ;
+3. migrer les consommateurs un par un vers ce propriétaire ;
+4. supprimer les tables/constructeurs de chemins devenus redondants, ou conserver uniquement des alias délégants si un consommateur réel l’exige ;
+5. ne déplacer aucun asset physique ;
+6. repasser toutes les sentinelles avant tout checkpoint suivant.
 
 ## Production sûre
 

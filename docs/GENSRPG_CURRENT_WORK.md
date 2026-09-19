@@ -128,6 +128,48 @@ Objectif :
 5. Architecture + navigateur complet + Firefox + Tactical Dock ;
 6. checkpoint B.5 GREEN avant d’ouvrir B.6 loots.
 
+### Résultat B.5 — GREEN fonctionnel
+
+RED propriétaire :
+- test `tests/gens_asset_resolver_late_token_owner_v1.test.cjs` ;
+- run Architecture `35455796033` — échec attendu uniquement sur l’étape 86 « Verrouiller l’autorité Core des chemins de tokens Dungeon tardifs » ;
+- Firefox `35455795905` — SUCCESS ;
+- Tactical Dock `35455795901` — SUCCESS.
+
+Raccord runtime :
+- workflow one-shot vérifié : run `35455873108` — SUCCESS ;
+- commit runtime `6707682d2d5cdd71dcd2995455bf67076bbc3562` ;
+- ancien blob `index.html` : `388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9` ;
+- nouveau blob : `207353f408d8c60213b512f73184bb9ec666b75d` ;
+- `dungeonCore213Stability.heroImg()`, `dungeonCore214SingleAuthority.heroArt()` et `dungeonCore310PersistenceAndTokens.heroArt()` délèguent aux chemins héros du Core ;
+- `dungeonCore309VisualFixes.enemyArt()` et `dungeonCore310PersistenceAndTokens.enemyArt()` passent d’abord par le resolver Core pour les IDs Dungeon built-in ;
+- les fallbacks legacy non-`dng_*` restent après le chemin canonique pour ne pas changer le comportement historique hors périmètre ;
+- aucun paint, positionnement, mouvement, combat, persistance, observer local ou règle de token modifié ;
+- workflow one-shot supprimé dans le même commit.
+
+Cartographie :
+- commit `561a960e15ea258d70ab48e98bc8d3e950c100e0` réaligne les empreintes Phase 2 sur le blob `207353f4...` et fait passer l’audit final en état « B.5 résolu / B.6 restant ».
+
+Parité navigateur :
+- `tests/gens_asset_resolver_late_tokens_browser_v1.test.cjs` traverse le vrai Shell -> Dungeon -> Salle -> tokens finaux ;
+- Aldren reste sur `assets/dungeon/creatures/dng_aldren.png` ;
+- un ennemi built-in reste sur le chemin renvoyé par `dungeonCreaturePath()` ;
+- l’entrée aléatoire de salle est figée uniquement dans la fixture de test afin d’exercer déterministement le vrai spawn/renderer, sans injecter d’asset ni de sortie moteur ;
+- le diagnostic Tactical normal `not-detected-v113` est exclu des erreurs de cette sentinelle d’assets.
+
+Validation fonctionnelle finale sur `4c19eb9a771d9f5bdde95419700ea618ad7b34d4` :
+- Architecture + navigateur complet `35456295767`, tentative 2 — SUCCESS ;
+- Firefox `35456295711` — SUCCESS ;
+- Tactical Dock `35456295720` — SUCCESS.
+La tentative 1 du navigateur a été interrompue par la dette préexistante du vieux scénario Dungeon -> Survie : overlay Tactical interceptant le clic. Le rerun du même SHA passe sans modification runtime.
+
+Prochaine action :
+1. valider la fermeture documentaire sur les trois workflows ;
+2. créer `checkpoint/gensrpg-phase4-asset-resolver-late-token-paths-green-2026-09-19` sur le HEAD documentaire exact ;
+3. ouvrir B.6 depuis ce checkpoint ;
+4. B.6 doit uniquement centraliser les 8 mappings `dloot_*` dans `dungeonItemPath()` et retirer la table/racine dupliquée de Core 0.23 ;
+5. aucun changement de `main`.
+
 
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 

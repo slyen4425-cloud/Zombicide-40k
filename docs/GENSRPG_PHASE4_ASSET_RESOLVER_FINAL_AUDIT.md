@@ -26,22 +26,22 @@ Le service `assets/gensrpg/core/asset-resolver-v1.js` possède désormais :
 
 Les blocs historiques V164/V165/V166, le helper héros principal et `dungeonItems()` délèguent au Core.
 
-## Duplications de resolver encore actives
+## État après B.5
 
-### B.5 — tokens tardifs héros / ennemis
+### B.5 — tokens tardifs héros / ennemis — RÉSOLU
 
-Trois couches Dungeon actives reconstruisent encore la table Aldren/Lyra/Brom :
-- `dungeonCore213Stability.heroImg()` ;
-- `dungeonCore214SingleAuthority.heroArt()` ;
-- `dungeonCore310PersistenceAndTokens.heroArt()`.
+Le sous-lot B.5 est raccordé au resolver central :
+- Core 2.13 / 2.14 / 3.10 ne possèdent plus leur table Aldren/Lyra/Brom ;
+- les chemins built-in héros passent par `GensAssetResolverV1.dungeonHeroPath()` ;
+- Core 3.09 / 3.10 consultent `GensAssetResolverV1.dungeonCreaturePath()` pour les IDs Dungeon built-in ;
+- la priorité des images/avatar personnalisés et définitions existantes est conservée ;
+- les fallbacks legacy non-`dng_*` restent en dernier recours, hors responsabilité du catalogue built-in ;
+- aucun gameplay/token layout/persistance n’a été déplacé.
 
-Deux couches gardent encore un fallback direct `ROOT + enemyId + ".png"` :
-- `dungeonCore309VisualFixes.enemyArt()` ;
-- `dungeonCore310PersistenceAndTokens.enemyArt()`.
+Blob `index.html` après B.5 :
+`207353f408d8c60213b512f73184bb9ec666b75d`.
 
-Ces chemins représentent les mêmes entités déjà couvertes par `GensAssetResolverV1.dungeonHeroPath()` et `dungeonCreaturePath()`. Ils doivent donc déléguer au Core dans un sous-lot homogène, sans toucher aux règles de tokens, positions, persistance ou combat.
-
-### B.6 — loot logique Dungeon
+### B.6 — loot logique Dungeon — RESTE À FAIRE
 
 `dungeonCore023StabilityFix` possède encore la table logique :
 - `dloot_old_coin` ;
@@ -74,10 +74,11 @@ Même règle pour les couches de sols/portes/map : leurs chemins physiques reste
 Le premier service Phase 4 « resolver d’assets » n’est pas encore clôturable.
 
 Ordre minimal restant :
-1. B.5 — supprimer les duplications de chemins héros/ennemis dans les couches de tokens tardives ;
-2. B.6 — extraire le mapping logique des loots `dloot_*` vers le Core ;
-3. audit final de non-duplication ;
-4. checkpoint de clôture du resolver ;
-5. passer ensuite au service Phase 4 suivant : **stockage / migrations**.
+1. B.6 — déplacer les 8 mappings `dloot_*` dans `DUNGEON_ITEM_FILES` / `dungeonItemPath()` ;
+2. retirer la table `DC023_LOOT_ART` et la reconstruction de racine de Core 0.23 ;
+3. valider la parité du vrai catalogue loot ;
+4. audit final de non-duplication ;
+5. checkpoint de clôture du resolver ;
+6. passer ensuite au service Phase 4 suivant : **stockage / migrations**.
 
 Aucun déplacement physique d’asset n’est effectué dans ce lot.

@@ -951,3 +951,69 @@ Les trois autres dettes signalées restent séparées et non modifiées :
 - déclenchement tardif coffre / ligne de vue ennemie ;
 - ralentissement entre déplacements ;
 - fiche Zombicide apparaissant brièvement en RPG.
+
+
+## Chantier isolé — Dungeon mouvement -> événements synchrones
+
+Branche :
+`work/gensrpg-dungeon-movement-events-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-movement-events-2026-09-19`
+
+Base diagnostic :
+`170a85e026d9e4308334666e9a143e4ea5bd941b`
+
+### Diagnostic confirmé
+
+Le vrai déplacement actif appartient au `moveTo()` lexical de `dungeonCore200Rebuild`.
+
+Le défaut provenait de deux rattrapages différés :
+- actions authored : `dungeon-authored-action-fix-167857.js` réagissait trop tôt via un wrapper de `DungeonSpatial313.persist()`, puis attendait `setTimeout(0)` pour relire la position réellement persistée ;
+- détection V113 : `gens-rpg-tactical-runtime-authority-1678113.js` utilisait des détections temporisées après `dungeonMoveHero098` et après les clics/pointerup du plateau, alors que le vrai Core 2.00 déplace par son `moveTo()` lexical.
+
+### Correction propriétaire
+
+Le raccord canonique est maintenant effectué une seule fois dans `dungeonCore200Rebuild.moveTo()`, après :
+`saveRt(x) -> render() -> handleCell(x,...)`.
+
+Il réutilise uniquement les consommateurs existants :
+- `DungeonAuthoredActionFix167857.syncActions()` ;
+- `GensRpgTacticalRuntimeAuthority1678113.scanDetection(..., "movement-detection-v113", true)`.
+
+Nettoyage associé :
+- retrait du wrapper mouvement sur `DungeonSpatial313.persist()` ;
+- retrait du `setTimeout(0)` de rattrapage mouvement des actions authored ;
+- `syncActions()` réutilise le rendu public décoré avec garde de réentrance, sans second renderer de coffre ;
+- `hookMovement()` V113 effectue une détection synchrone pour le chemin public historique ;
+- retrait de `bindBoardClicks()` comme autorité de détection du déplacement ;
+- aucun nouveau timer, observer, polling, retry, LOS, moteur de mouvement ou règle de combat.
+
+### Validation automatique
+
+HEAD fonctionnel validé avant clôture documentaire :
+`5b240e4a97ad3c28bf01fe80b7996e4a9a8afad7`
+
+Runs verts :
+- Architecture + navigateur complet : `35440021618` — SUCCESS ;
+- Firefox : `35440021678` — SUCCESS ;
+- Tactical Dock : `35440021637` — SUCCESS.
+
+Le vrai test navigateur valide dans le même cycle :
+- déplacement neutre : aucune action/combat parasite et exactement un scan ;
+- arrivée sur coffre : action coffre immédiatement présente ;
+- sortie du coffre : action retirée immédiatement ;
+- entrée en LOS ennemi : exactement une demande de combat immédiate ;
+- aucune seconde détection/combat tardif après les délais de garde.
+
+Les mêmes runs valident aussi :
+- caches / retour / pièges authored ;
+- Save & Quit puis reprise ;
+- Monster Capture ;
+- PvP ;
+- non-interférence des quatre modules ;
+- sentinelles Tactical historiques et unique autorité V113.
+
+### Prochaine action
+
+Clôture documentaire puis nouvelle CI sur le HEAD final. Ne créer le checkpoint GREEN que si cette CI est entièrement verte. Aucun merge sur `main`.

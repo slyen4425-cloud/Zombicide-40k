@@ -47,6 +47,39 @@ async function openEditor(page){
 async function openChest(page,cell){
   const el=page.locator('#drc100Grid [data-drc-index="'+cell+'"]');await el.waitFor({state:'visible'});await el.click();
 }
+async function modalStack(page,modalId,cardSelector){
+  return page.evaluate(({modalId,cardSelector})=>{
+    const modal=document.getElementById(modalId),card=document.querySelector(cardSelector);
+    if(!modal||!card)return null;
+    const r=card.getBoundingClientRect(),x=Math.max(1,Math.min(innerWidth-2,r.left+r.width/2)),y=Math.max(1,Math.min(innerHeight-2,r.top+Math.min(40,r.height/2)));
+    const stack=document.elementsFromPoint(x,y).slice(0,12).map(el=>({tag:el.tagName,id:el.id||'',cls:String(el.className||''),z:getComputedStyle(el).zIndex,pos:getComputedStyle(el).position,pointer:getComputedStyle(el).pointerEvents}));
+    return {modalZ:getComputedStyle(modal).zIndex,modalDisplay:getComputedStyle(modal).display,roomZ:getComputedStyle(document.getElementById('drc100Modal')).zIndex,stack,topInside:stack.length?document.getElementById(modalId).contains(document.elementFromPoint(x,y)):false};
+  },{modalId,cardSelector});
+}
+async function openDungeonHomeFromRoot(page){
+  const adventure=page.locator('button.gensRootModeCard.adventure');await adventure.waitFor({state:'visible'});await adventure.click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+  let card=page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn');await card.waitFor({state:'visible'});
+  const sw=await page.evaluate(id=>({active:activeGameProfileId?.()||'',from:gensProfileContentFamily155?.(activeGameProfileId?.())||'',to:gensProfileContentFamily155?.(id)||''}),DUNGEON_ID);
+  if(sw.active&&sw.active!==DUNGEON_ID&&sw.from!==sw.to){
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),card.click()]);
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    const a2=page.locator('button.gensRootModeCard.adventure');await a2.waitFor({state:'visible'});await a2.click();
+    card=page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn');await card.waitFor({state:'visible'});await card.click();
+  }else await card.click();
+  await page.waitForFunction(id=>activeGameProfileId?.()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',DUNGEON_ID,{timeout:30000});
+}
+async function chooseParticipantAndStart(page){
+  await page.locator('#gensGameHomeActions .newGameBtn').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+  await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+  const first=page.locator('#participantList input[type="checkbox"]').first();await first.waitFor({state:'visible'});if(!(await first.isChecked()))await first.check();
+  await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+  await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
+  await page.waitForFunction(()=>!!localStorage.getItem('gensrpg_dungeon_runtime_v2'),null,{timeout:15000});
+}
 
 (async()=>{
   const watchdog=setTimeout(()=>{console.error('[object-config-editor] WATCHDOG');process.exit(1)},140000);
@@ -90,11 +123,31 @@ async function openChest(page,cell){
       templatePatched:!!DungeonRoomTemplateContent167828.__dui167831Patched
     }));
     assert.equal(first.modal,true);assert.equal(first.modern,true,'first direct configuration must use modern item dropdown');assert.equal(first.legacyTextareaVisible,false,'legacy item-ID textarea must be hidden on first direct configuration');
+    const templateLayer=await modalStack(page,'drt167828Modal','#drt167828Modal .drtCard');
+    console.log('[object-config-editor] template-layer',JSON.stringify(templateLayer,null,2));
+    assert.equal(templateLayer?.topInside,true,'template config modal must be the top interactive layer when opened');
+    const chosenItem=await page.evaluate(()=>DungeonRoomContentUI167831.lootItems()[0]||null);
+    assert.ok(chosenItem?.id,'Dungeon item catalog must provide one concrete item for the chest regression');
+    await page.selectOption('#drtRarity','epic');await page.fill('#drtGold','37');
+    await page.selectOption('#dui167831Itemtemplate',chosenItem.id);await page.fill('#dui167831Qtytemplate','2');
+    await page.locator('#drt167828Modal button[onclick*="DungeonRoomContentUI167831.addItem"]').click();
     await page.locator('#drt167828Modal button[onclick="DungeonRoomTemplateContent167828.saveActive()"]').click();
     await page.waitForFunction(()=>!document.getElementById('drt167828Modal')?.classList.contains('open'));
     const configuredTemplate=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
     assert.equal(configuredTemplate.configured,true,'saved object must receive configured state');
     assert.notEqual(configuredTemplate.bg,beforeTemplate.bg,'saved object must use a visibly different configured color');
+    const savedTemplate=await page.evaluate(id=>DungeonRoomTemplateContent167828.templateContent(id),fixture.roomId);
+    const savedChest=savedTemplate.chests.find(x=>Number(x.cell)===7);
+    assert.equal(savedChest?.configured,true,'explicit editor save must persist configured=true');
+    assert.equal(savedChest?.rarity,'epic');assert.equal(savedChest?.gold,37);
+    assert.deepEqual(savedChest?.items,[{itemId:chosenItem.id,qty:2}],'exact chest item selection must persist in the room template');
+    const inherited=await page.evaluate(({worldId,nodeId,roomId})=>{
+      const g=DungeonWorldBuilder167821.findDungeon(worldId),n=g.nodes.find(x=>x.id===nodeId),r=DungeonRoomCreator100.findRoom(roomId);
+      return DungeonAuthoredRuntime167839.effectiveContent(g,n,r);
+    },fixture);
+    assert.equal(inherited?.chests?.[0]?.rarity,'epic','authored resolver must inherit configured template rarity');
+    assert.equal(inherited?.chests?.[0]?.gold,37,'authored resolver must inherit configured template gold');
+    assert.deepEqual(inherited?.chests?.[0]?.items,[{itemId:chosenItem.id,qty:2}],'authored resolver must inherit configured template items');
     await page.evaluate(()=>DungeonRoomCreator100.close());
     await page.waitForFunction(()=>!document.getElementById('drc100Modal')?.classList.contains('open'));
 
@@ -134,11 +187,43 @@ async function openChest(page,cell){
     assert.equal(zone.modal,true,'zone configuration modal must open');
     assert.equal(zone.modern,true,'zone Config objet must use modern item dropdown');
     assert.equal(zone.legacyTextareaVisible,false,'zone Config objet must never expose legacy item-ID textarea');
+    const zoneLayer=await modalStack(page,'drv167826Modal','#drv167826Modal .drv167826Card');
+    console.log('[object-config-editor] zone-layer',JSON.stringify(zoneLayer,null,2));
+    assert.equal(zoneLayer?.topInside,true,'zone config modal must be the top interactive layer when opened');
+    await page.selectOption('#drv167826Rarity','legendary');await page.fill('#drv167826Gold','23');
+    await page.selectOption('#dui167831Itemzone',chosenItem.id);await page.fill('#dui167831Qtyzone','2');
+    await page.locator('#drv167826Modal button[onclick*="DungeonRoomContentUI167831.addItem"]').click();
     await page.locator('#drv167826Modal button[onclick="DungeonRoomVisualConfig167826.saveActive()"]').click();
     await page.waitForFunction(()=>!document.getElementById('drv167826Modal')?.classList.contains('open'));
     const configuredZone=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drv167826Configured'),bg:getComputedStyle(el).backgroundColor}));
     assert.equal(configuredZone.configured,true,'zone-specific save must mark the object configured');
     assert.notEqual(configuredZone.bg,beforeTemplate.bg,'zone configured object must use the configured color');
+    const directZone=await page.evaluate(({worldId,nodeId})=>DungeonZoneContent167824.getZoneContent(worldId,nodeId),fixture);
+    const directChest=directZone.chests.find(x=>Number(x.cell)===7);
+    assert.equal(directChest?.configured,true);assert.equal(directChest?.rarity,'legendary');assert.equal(directChest?.gold,23);
+    assert.deepEqual(directChest?.items,[{itemId:chosenItem.id,qty:2}],'zone-specific chest configuration must persist exact item data');
+
+    // Reload from persisted editor data, then start the authored world through the real Dungeon shell.
+    await page.evaluate(({worldId})=>DungeonWorldSessionBridge167832.selectWorld(worldId,false),fixture);
+    await page.reload({waitUntil:'domcontentloaded',timeout:60000});await ready(page,port);await openDungeonHomeFromRoot(page);
+    await chooseParticipantAndStart(page);
+    await page.waitForFunction(()=>typeof window.DungeonAuthoredRuntime167839?.active==='function'&&window.DungeonAuthoredRuntime167839.active(),null,{timeout:15000});
+    await page.locator('#dc01Explore').waitFor({state:'visible'});await page.locator('#dc01Explore').click();
+    await page.waitForFunction(nodeId=>{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return x?.last?.worldNodeId===nodeId&&Number(x?.room)>0},fixture.nodeId,{timeout:15000});
+    await page.waitForTimeout(250);
+    const runtimeChest=await page.evaluate(({nodeId})=>{
+      const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),room=Number(x?.room)||0;
+      const content=x?.last?.worldZoneContent167824||null,scenes=(loadDungeonSceneElements?.()||[]).filter(e=>e?.kind==='chest'&&Number(e?.room||0)===room);
+      const chest=content?.chests?.find(c=>Number(c.cell)===7)||null;
+      return {node:x?.last?.worldNodeId||'',chest,scene:scenes.find(e=>e?.exactChest167824)||null,hero:x?.participants?.[Number(x?.index)||0]||''};
+    },fixture);
+    console.log('[object-config-editor] runtime-chest',JSON.stringify(runtimeChest,null,2));
+    assert.equal(runtimeChest.node,fixture.nodeId);
+    assert.equal(runtimeChest.chest?.rarity,'legendary','real authored runtime must receive the saved zone rarity');
+    assert.equal(runtimeChest.chest?.gold,23,'real authored runtime must receive the saved zone gold');
+    assert.deepEqual(runtimeChest.chest?.items,[{itemId:chosenItem.id,qty:2}],'real authored runtime must receive the saved zone items');
+    assert.equal(runtimeChest.scene?.rarity,'legendary','real chest scene must reflect configured rarity');
+    assert.ok(runtimeChest.scene?.exactChestId167824,'real chest scene must be linked to exact configured content');
     assert.deepEqual(errors,[]);
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();

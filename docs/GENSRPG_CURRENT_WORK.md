@@ -768,3 +768,71 @@ Si un propriétaire chargé/réinstallé plus tard republie ou remplace `Dungeon
 ### Prochaine action
 
 Construire la reproduction navigateur exacte avant toute modification runtime.
+
+### Diagnostic confirmé — Config objet
+
+La reproduction navigateur réelle a distingué les deux surfaces :
+- configuration directe du modèle : UI moderne présente avant et après fermeture/réouverture ;
+- variante par zone : retour à l'ancien formulaire malgré `DungeonRoomContentUI167831.__dui167831Patched === true`.
+
+Cause exacte :
+- `DungeonRoomVisualConfig167826.activateCell()` appelait le `openEditor()` lexical historique ;
+- cet appel contournait le `openEditor()` public volontairement décoré par `DungeonRoomContentUI167831` ;
+- résultat : l'ancien textarea / saisie d'ID réapparaissait sur ce chemin.
+
+Correction propriétaire :
+- commit `59764a6312f326f04c879d12d90e6d66e1cc0d13` ;
+- `activateCell()` délègue désormais au seul `DungeonRoomVisualConfig167826.openEditor()` public ;
+- aucun wrapper, observer, timer/retry ou second éditeur ajouté.
+
+### Indicateur visuel « configuré »
+
+L'ancien indicateur se basait sur la simple existence d'une spec. Or `reconcileTemplate()` crée automatiquement une spec par défaut pour tout objet placé, donc « spec existe » ne signifiait pas « configuré par l'utilisateur ».
+
+Correction :
+- commit `c6153b0cc76711db23fb874071630b625be11574` ;
+- les specs authored existantes portent désormais `configured:true/false` dans le même stockage de contenu ;
+- une spec automatique créée depuis un objet placé reste `configured:false` ;
+- une sauvegarde réelle via `configureElement()` écrit `configured:true` ;
+- les classes `drt167828Configured` / `drv167826Configured` sont appliquées uniquement à `configured:true` ;
+- l'état configuré utilise une teinte/contour vert nettement distincts ;
+- fermeture/réouverture du Room Creator relit cet état depuis le contenu persisté ;
+- le handler local Template délègue lui aussi au `openEditor()` public pour supprimer le dernier chemin de contournement potentiel.
+
+Compatibilité :
+- les anciennes specs sans champ `configured` sont normalisées en `false` ;
+- leur gameplay/données restent conservés ;
+- elles deviennent visuellement « configurées » après une nouvelle sauvegarde explicite dans l'éditeur moderne.
+
+### Validation automatique candidate
+
+SHA fonctionnel :
+`c6153b0cc76711db23fb874071630b625be11574`
+
+- Architecture + navigateur complet `35410257944` — SUCCESS ;
+- Firefox `35410257942` — SUCCESS ;
+- Tactical Dock `35410257970` — SUCCESS.
+
+Le navigateur réel valide :
+- UI moderne à la première ouverture ;
+- fermeture/réouverture du Créateur ;
+- UI moderne toujours présente ;
+- variante par zone moderne ;
+- aucun textarea legacy d'IDs visible ;
+- objet par défaut non marqué configuré ;
+- sauvegarde -> couleur configurée ;
+- couleur/configuration persistante après fermeture/réouverture ;
+- caches/pièges authored ;
+- Save & Quit ;
+- Capture ;
+- PvP ;
+- non-interférence.
+
+### État du lot
+
+Candidat automatiquement GREEN, en attente du test utilisateur réel avant création du checkpoint GREEN final.
+
+Les trois autres dettes signalées restent séparées et non modifiées :
+- déclenchement tardif coffre / ligne de vue ennemie ;
+- ralentissement entre déplacements ;
+- fiche Zombicide apparaissant brièvement en RPG.

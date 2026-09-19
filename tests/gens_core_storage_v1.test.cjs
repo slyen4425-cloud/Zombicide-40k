@@ -75,17 +75,21 @@ const throwing={
 };
 assert.throws(()=>api.writeJson('x',{a:1},throwing),/quota-test/,'write errors must propagate instead of being hidden');
 
-const composition=[
-  fs.readFileSync(path.join(root,'index.html'),'utf8'),
-  fs.readFileSync(path.join(root,'preview.html'),'utf8'),
-  fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8'),
-  fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8')
-].join('\n');
-assert.equal(composition.includes(rel),false,'first Core storage service jalon must remain outside production composition');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const preview=fs.readFileSync(path.join(root,'preview.html'),'utf8');
+const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
+const bootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
+assert.equal(index.includes(rel),false,'Core storage must not be injected into the historical source index');
+assert.equal(bootstrap.includes(rel),false,'Core storage must not be hidden behind the Tactical bootstrap');
+for(const composition of [preview,workflow]){
+  const storagePos=composition.indexOf(rel);
+  const roomPos=composition.indexOf('assets/dungeon/dungeon-room-creator-100.js');
+  assert.ok(storagePos>=0&&roomPos>storagePos,'Core storage must be explicitly loaded before Room Creator 1.0');
+}
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Core JSON storage service',
-  productionLoaded:false,
+  productionLoaded:true,
   api:['readJson','writeJson','remove'],
   ownsBusinessKeys:false,
   formatMigration:false

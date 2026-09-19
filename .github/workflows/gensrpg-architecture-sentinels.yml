@@ -269,6 +269,9 @@ jobs:
       - name: Verrouiller l’autorité Core des chemins d’objets Dungeon
         run: node tests/gens_asset_resolver_item_owner_v1.test.cjs
 
+      - name: Auditer les derniers propriétaires du resolver d’assets Phase 4
+        run: node tests/gens_asset_resolver_final_audit_v1.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

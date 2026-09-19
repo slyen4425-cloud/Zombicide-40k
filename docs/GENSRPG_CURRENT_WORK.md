@@ -53,6 +53,27 @@ Le lot d’audit doit produire une liste explicite :
 3. sous-lot suivant minimal, s’il existe ;
 4. si aucun resolver dupliqué ne reste, clôture du premier service Phase 4 et passage au service suivant de la roadmap : stockage / migrations.
 
+### Résultat de l’audit
+
+Audit dédié :
+`docs/GENSRPG_PHASE4_ASSET_RESOLVER_FINAL_AUDIT.md`
+
+Sentinelle :
+`tests/gens_asset_resolver_final_audit_v1.test.cjs`
+
+Classification prouvée :
+- B.5 requis : mappings héros dupliqués dans Core 2.13 / 2.14 / 3.10 et fallbacks ennemi directs dans 3.09 / 3.10 ;
+- B.6 requis : mapping logique des 8 loots `dloot_*` encore possédé par Core 0.23 ;
+- bloc 65 : propriétaire de présentation Dungeon exact, pas un second resolver d’entités ; ne pas le migrer vers le Core partagé ;
+- couches sols/portes/map : présentation Dungeon à traiter avec l’extraction du module/asset layout, pas comme logique commune.
+
+Prochaine action après validation de cet audit :
+1. checkpoint GREEN documentaire de l’audit ;
+2. branche neuve B.5 depuis ce checkpoint ;
+3. migrer uniquement les chemins d’entités des tokens tardifs vers les APIs Core existantes ;
+4. B.6 séparé pour les loots ;
+5. clôturer ensuite le resolver avant de passer à stockage/migrations.
+
 
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 

@@ -9,6 +9,68 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage Room Creator 1.0 — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-room-creator100-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-room-creator100-2026-09-19`
+
+Base exacte :
+`164e340ca589386378968b128ba1bb5fef50e3d6`
+(`checkpoint/gensrpg-phase4-storage-core-service-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre unique
+
+Raccorder uniquement `assets/dungeon/dungeon-room-creator-100.js` au service Core `GensStorageV1`.
+
+Clé historique à conserver exactement :
+`gensrpg_dungeon_custom_rooms_v1`
+
+Responsabilités :
+- Core `storage-v1.js` : lecture/écriture JSON générique ;
+- `DungeonRoomCreator100` : `STORAGE_KEY`, `normalizeRoom()`, validation, bibliothèque de pièces et logique Builder.
+
+### Invariants
+
+- aucune migration de format ;
+- même clé locale ;
+- même JSON persisté ;
+- même fallback `[]` pour absence/JSON invalide/`null`/type non-tableau ;
+- `normalizeRoom()` reste le seul normalizer métier ;
+- erreurs d'écriture restent propagées ;
+- aucun Room Creator V2, World Builder, Visual Config ou runtime Dungeon modifié fonctionnellement ;
+- aucun wrapper, observer, timer/retry ou fallback legacy ajouté ;
+- `storage-v1.js` doit être chargé explicitement avant Room Creator dans Pages et preview ;
+- cache PWA seulement si nécessaire pour rendre ce nouveau fichier production cohérent.
+
+### Tests requis
+
+1. caractérisation pré-raccord de la clé et du payload ;
+2. RED propriétaire : plus aucun accès direct `localStorage` dans Room Creator 1.0 après raccord ;
+3. service Core chargé avant Room Creator en composition Pages/preview ;
+4. tests Room Creator existants via le service Core ;
+5. JSON invalide / `null` / tableau valide / round-trip ;
+6. Builder navigateur réel ;
+7. Architecture + navigateur complet + Firefox + Tactical Dock ;
+8. aucun autre stockage migré dans ce sous-lot.
+
+### Interdit
+
+- `gensrpg_dungeon_room_interactions_v2` ;
+- `gensrpg_zone_graphs_v1` ;
+- `gensrpg_dungeon_runtime_v2` ;
+- Save & Quit ;
+- migrations de schéma ;
+- `index.html` ;
+- gameplay, mouvement, combat, Capture, Survie, Tactical ;
+- merge sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
 
 Branche :

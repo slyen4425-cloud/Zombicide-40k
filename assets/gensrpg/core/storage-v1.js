@@ -1,5 +1,5 @@
 /* GenSrpG Phase 4 — generic JSON storage service.
-   Jalon A: pure explicit API only; intentionally outside the production load graph. */
+   Pure explicit API; production-connected through declared module composition. */
 (function(ROOT){
 "use strict";
 const VERSION="1.0.0";

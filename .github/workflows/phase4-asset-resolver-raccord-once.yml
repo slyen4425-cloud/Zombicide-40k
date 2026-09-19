@@ -34,34 +34,36 @@ jobs:
               raise SystemExit(f"Unexpected committed index blob before Phase 4 raccord: {actual}")
 
           text=path.read_text(encoding="utf-8")
-          replacements=[
+          import re
+
+          marker='<script id="dungeonGithubArts164">'
+          if text.count(marker)!=1:
+              raise SystemExit(f"Expected one dungeonGithubArts164 marker, got {text.count(marker)}")
+          text=text.replace(marker,'<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\\n\\n'+marker,1)
+
+          patterns=[
               (
-                  '<script id="dungeonGithubArts164">',
-                  '<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\\n\\n<script id="dungeonGithubArts164">'
-              ),
-              (
-                  'window.dungeonAutoArtPath164=function(id){\\n  id=String(id||"").trim();\\n  if(!/^dng_[a-z0-9_]+$/i.test(id))return "";\\n  return "assets/dungeon/creatures/"+id+".png";\\n};',
+                  r'window\\.dungeonAutoArtPath164=function\\(id\\)\\{[\\s\\S]*?\\n\\};',
                   'window.dungeonAutoArtPath164=function(id){\\n  return window.GensAssetResolverV1.dungeonCreaturePath(id);\\n};'
               ),
               (
-                  'const artPath=id=>"assets/dungeon/creatures/"+String(id||"").trim()+".png";',
+                  r'const artPath=id=>[^;]+;',
                   'const artPath=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
               ),
               (
-                  'const dungeonPath166=id=>"assets/dungeon/creatures/"+String(id||"")+".png";',
+                  r'const dungeonPath166=id=>[^;]+;',
                   'const dungeonPath166=id=>window.GensAssetResolverV1.dungeonCreaturePath(id);'
               ),
               (
-                  'window.GENSRPG_DUNGEON_ASSET_ROOT_168="assets/dungeon/creatures/";',
+                  r'window\\.GENSRPG_DUNGEON_ASSET_ROOT_168=[^;]+;',
                   'window.GENSRPG_DUNGEON_ASSET_ROOT_168=window.GensAssetResolverV1.ROOTS.dungeon.creatures;'
               )
           ]
 
-          for old,new in replacements:
-              count=text.count(old)
+          for pattern,replacement in patterns:
+              text,count=re.subn(pattern,replacement,text,count=1)
               if count!=1:
-                  raise SystemExit(f"Expected exactly one Phase 4 replacement, got {count}: {old[:90]}")
-              text=text.replace(old,new,1)
+                  raise SystemExit(f"Expected exactly one Phase 4 regex replacement, got {count}: {pattern}")
 
           path.write_text(text,encoding="utf-8")
           print("Phase 4 source blob verified:",actual)

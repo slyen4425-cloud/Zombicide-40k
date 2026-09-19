@@ -108,6 +108,12 @@ async function chooseParticipantAndStart(page){
       const room=R.createRoom({id:'reg_config_room',name:'Régression config objet',width:5,height:3,theme:'stone'});
       room.cells=room.cells.map(c=>({...c,terrain:'floor',object:null}));room.cells[12].object='entry';room.cells[2].object='exit';room.cells[7].object='chest';R.upsertRoom(room);
       const world=B.createDungeon({name:'Régression config objet'}),added=B.addRoomInstance(world.id,room.id,'Salle config');
+      // Historical V16.78.44 state: the room template was copied into the zone as fixed/templateLinked.
+      // Simulate the persisted legacy payload exactly, before V16.78.45 switched zones to inheritance.
+      const key=window.DungeonZoneContent167824.CONTENT_KEY,all=JSON.parse(localStorage.getItem(key)||'{}');
+      all[world.id]=all[world.id]||{};
+      all[world.id][added.node.id]={mode:'fixed',templateLinked:true,templateRoomId:room.id,enemies:[],chests:[{id:'legacy-common',cell:7,rarity:'common',gold:0,items:[],label:''}],traps:[],puzzles:[],npcs:[],items:[],updatedAt:new Date().toISOString()};
+      localStorage.setItem(key,JSON.stringify(all));
       return {roomId:room.id,worldId:world.id,nodeId:added.node.id};
     });
 
@@ -147,10 +153,15 @@ async function chooseParticipantAndStart(page){
     assert.equal(savedChest?.configured,true,'explicit editor save must persist configured=true');
     assert.equal(savedChest?.rarity,'epic');assert.equal(savedChest?.gold,37);
     assert.deepEqual(savedChest?.items,[{itemId:chosenItem.id,qty:2}],'exact chest item selection must persist in the room template');
-    const inherited=await page.evaluate(({worldId,nodeId,roomId})=>{
+    const inheritedState=await page.evaluate(({worldId,nodeId,roomId})=>{
       const g=DungeonWorldBuilder167821.findDungeon(worldId),n=g.nodes.find(x=>x.id===nodeId),r=DungeonRoomCreator100.findRoom(roomId);
-      return DungeonAuthoredRuntime167839.effectiveContent(g,n,r);
+      const raw=JSON.parse(localStorage.getItem(DungeonZoneContent167824.CONTENT_KEY)||'{}')?.[worldId]?.[nodeId]||null;
+      return {direct:DungeonZoneContent167824.getZoneContent(worldId,nodeId),raw,effective:DungeonAuthoredRuntime167839.effectiveContent(g,n,r)};
     },fixture);
+    console.log('[object-config-editor] legacy-linked-after-template-save',JSON.stringify(inheritedState,null,2));
+    assert.equal(inheritedState.direct?.mode,'inherit','historical templateLinked automatic copy must migrate back to inheritance when the room template is saved');
+    assert.notEqual(inheritedState.raw?.templateLinked,true,'historical automatic template link marker must be consumed by the migration');
+    const inherited=inheritedState.effective;
     assert.equal(inherited?.chests?.[0]?.rarity,'epic','authored resolver must inherit configured template rarity');
     assert.equal(inherited?.chests?.[0]?.gold,37,'authored resolver must inherit configured template gold');
     assert.deepEqual(inherited?.chests?.[0]?.items,[{itemId:chosenItem.id,qty:2}],'authored resolver must inherit configured template items');

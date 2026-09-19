@@ -18329,7 +18329,7 @@ function updateDungeonSearchUi(){
  if(c)c.style.display=d?"block":"none";
 }
 function render(){
-  setTimeout(()=>{try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}},0);
+  try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}
   const c=CHARS[current];
   document.getElementById("charName").textContent=c.name+(c.custom?" · PERSO":"");
   if(!c.custom)document.getElementById("charImage").src=c.image;

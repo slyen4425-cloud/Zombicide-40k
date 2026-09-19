@@ -214,6 +214,11 @@
       "domain": "core",
       "role": "runtime dependency loader"
     },
+    "assets/gensrpg/core/storage-v1.js": {
+      "owner": "GenSrpG Core Storage",
+      "domain": "core",
+      "role": "canonical generic JSON storage mechanics; loaded before Builder consumers with no business keys, schemas or migrations"
+    },
     "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js": {
       "owner": "Dungeon Visual Bridge",
       "domain": "dungeon",

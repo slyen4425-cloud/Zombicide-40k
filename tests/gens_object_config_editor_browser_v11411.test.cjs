@@ -261,7 +261,7 @@ async function chooseParticipantAndStart(page){
 
     // Characterize the legacy generic search action that remains visible beside the exact authored chest action.
     const genericSearch=page.locator('button[onclick="searchItem()"]').filter({hasText:/FOUILLER/i}).first();
-    if(await genericSearch.count()){
+    if(await genericSearch.count() && await genericSearch.isVisible()){
       const beforeGeneric=await page.evaluate(({itemId,key})=>{const st=JSON.parse(localStorage.getItem(key)||'{}'),x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return {gold:Number(st.gold)||0,itemCount:(st.inventory||[]).filter(i=>String(i?.itemId||'')===String(itemId)).length,opened:x?.worldContentState167824?.[x?.last?.worldDungeonId]?.[x?.last?.worldNodeId]?.openedChests||{}}},{itemId:chosenItem.id,key:beforeOpen.key});
       await genericSearch.click();await page.waitForTimeout(120);
       const afterGeneric=await page.evaluate(({itemId,key})=>{

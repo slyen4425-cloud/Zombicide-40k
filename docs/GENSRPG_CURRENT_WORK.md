@@ -9,6 +9,70 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-migrations-audit-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-migrations-audit-2026-09-19`
+
+Base exacte :
+`9467429b7f195a24ec138cded7231f60b47ba5a4`
+(`checkpoint/gensrpg-phase4-asset-resolver-complete-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif
+
+Commencer le deuxième service commun de la Phase 4, `stockage / migrations`, uniquement par une caractérisation du sous-périmètre Builders avant toute extraction runtime.
+
+La cartographie Phase 2 recense 221 accès directs, dont 74 dynamiques. Le lot ne tentera donc aucune centralisation globale.
+
+### Sous-périmètre audité
+
+Builders Dungeon uniquement :
+- `assets/dungeon/dungeon-room-creator-100.js` ;
+- `assets/dungeon/dungeon-room-creator-v2-167819.js` ;
+- `assets/dungeon/dungeon-world-builder-167821.js` ;
+- `assets/dungeon/dungeon-room-visual-config-167826.js`.
+
+Clés réelles déjà confirmées :
+- `gensrpg_dungeon_custom_rooms_v1` — bibliothèque Room Creator 1.0 ;
+- `gensrpg_dungeon_room_interactions_v2` — métadonnées/attachements Room Creator V2 ;
+- `gensrpg_zone_graphs_v1` — graphes World Builder, lus aussi par Visual Config.
+
+La vieille cartographie Phase 2 n'avait résolu que deux de ces trois clés : `gensrpg_dungeon_custom_rooms_v1` avait été classée dynamique car `STORAGE_KEY` partage sa déclaration `const` avec d'autres constantes.
+
+### Invariants
+
+- conserver exactement les trois clés ;
+- aucune migration de format pendant le premier déplacement ;
+- `normalizeRoom`, `normalizeMeta`, `normalizeGraph` restent propriétaires des Builders ;
+- aucun runtime Dungeon de partie, Save & Quit, Tactical, Capture ou Survie touché ;
+- aucune suppression de compatibilité ;
+- aucune nouvelle fabrique de clé dynamique ;
+- aucun observer/timer/retry/wrapper ajouté.
+
+### Première décision à valider
+
+Si l'audit confirme l'absence d'autre propriétaire :
+1. créer un service Core de stockage JSON minimal et testable ;
+2. ne lui donner aucune connaissance métier des Rooms/Graphs ;
+3. migrer d'abord `DungeonRoomCreator100` sur un sous-lot séparé ;
+4. migrer ensuite V2 puis World Builder/Visual Config ;
+5. seulement après ces jalons, réévaluer les stockages runtime beaucoup plus risqués comme `gensrpg_dungeon_runtime_v2`.
+
+### Tests prévus
+
+- caractérisation exacte des trois clés et de leurs lecteurs/writers ;
+- parité lecture vide / JSON invalide / round-trip ;
+- conservation des normalizers module ;
+- sentinelles Builder existantes ;
+- Architecture + navigateur complet + Firefox + Tactical Dock avant GREEN.
+
+
 ## Chantier courant prioritaire — Phase 4 / audit final resolver d’assets — 2026-09-19
 
 Branche :

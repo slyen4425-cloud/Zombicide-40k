@@ -275,6 +275,9 @@ jobs:
       - name: Verrouiller l’autorité Core des chemins de tokens Dungeon tardifs
         run: node tests/gens_asset_resolver_late_token_owner_v1.test.cjs
 
+      - name: Verrouiller l’autorité Core des chemins de loots Dungeon
+        run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

@@ -261,7 +261,7 @@ Checkpoint B.3 créé :
 `checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`
 sur `c4e32b99185b8908aa645ba7c6fcaf7a706fafbb`.
 
-### Jalon B.4 — chemins objets built-in Dungeon — caractérisation
+### Jalon B.4 — chemins objets built-in Dungeon — GREEN
 
 Branche dédiée :
 `work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19`
@@ -285,14 +285,45 @@ Périmètre B.4 :
 - conserver la base gameplay des objets, les overrides, crop, équipements, loot et fallback SVG inchangés ;
 - ne pas toucher au bloc 65, aux assets UI exacts ni déplacer de fichiers.
 
+RED propriétaire B.4 :
+- test `tests/gens_asset_resolver_item_owner_v1.test.cjs` ;
+- Architecture `35446784367` : échec attendu uniquement sur l’étape 84 « autorité Core des chemins d’objets Dungeon » ;
+- Firefox `35446784379` — SUCCESS ;
+- Tactical Dock `35446784428` — SUCCESS.
+
+Raccord runtime :
+- commit `0e45d9659f99f03a8f3a52d631a21a6a6692421b` ;
+- ancien blob `index.html` : `ba47d9fb3b8aa1a2183e764455aae97e03965440` ;
+- nouveau blob : `388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9` ;
+- table locale `githubItemArts` supprimée de `dungeonItems()` ;
+- chemin built-in délégué à `GensAssetResolverV1.dungeonItemPath(it.id)` ;
+- priorité conservée : `ov.image_data || canonicalArt || dungeonItemArt(...)` ;
+- définitions gameplay, loot, crop, stockage et fallback généré inchangés ;
+- workflow one-shot supprimé dans le même commit.
+
+Cartographie :
+- commit `f0a245a226953cb77254fff61c477bbb13ecdc5d` réaligne uniquement les quatre empreintes Phase 2 liées au blob ;
+- le garde B.3 a été débarrassé de son ancienne assertion temporaire « objets encore historiques » au commit `1d40aabc13dc827fbd86166605570dc687a3a9f0` ; la responsabilité objets est désormais verrouillée par le garde B.4 dédié.
+
+Validation finale du candidat `1d40aabc13dc827fbd86166605570dc687a3a9f0` :
+- Architecture + navigateur complet `35446950829` — SUCCESS ;
+- Firefox `35446950803` — SUCCESS ;
+- Tactical Dock `35446950805` — SUCCESS.
+
+Le navigateur Phase 4 confirme :
+- chemins représentatifs longsword / potion / amulette inchangés ;
+- override personnalisé ennemi toujours prioritaire ;
+- override personnalisé objet toujours prioritaire ;
+- Survie/Capture ne deviennent pas des fallbacks Dungeon ;
+- non-interférence quatre modules, Save & Quit, authored, Builder, fiche RPG, murs et preview restent GREEN.
+
 ### Prochaine action
 
-1. poser un RED propriétaire B.4 avant runtime ;
-2. faire vérifier par navigateur les chemins représentatifs et la priorité d’un override objet ;
-3. appliquer un raccord unique dans `dungeonItems()` ;
-4. réaligner uniquement les empreintes Phase 2 liées au blob si nécessaire ;
-5. Architecture + navigateur complet + Firefox + Tactical Dock avant checkpoint ;
-6. aucun changement de `main`.
+1. faire valider cette fermeture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
+3. depuis ce checkpoint, auditer le reste du lot assets contre la roadmap avant d’ouvrir un nouveau sous-lot ;
+4. ne pas supposer que le bloc 65 doit être migré : confirmer d’abord s’il possède des assets UI exacts légitimes ou une résolution dupliquée ;
+5. aucun changement de `main`.
 
 ## Production sûre
 

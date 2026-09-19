@@ -126,7 +126,7 @@ async function chooseParticipantAndStart(page){
     await page.locator('#drt167828Toggle').click();
     const beforeTemplate=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
     assert.equal(beforeTemplate.configured,false,'a placed object with only automatic defaults must not look configured');
-    await touchOpenChest(page,7);
+    await openChest(page,7);
     const first=await page.evaluate(()=>({
       modal:document.getElementById('drt167828Modal')?.classList.contains('open')||false,
       modern:!!document.getElementById('dui167831Itemtemplate'),

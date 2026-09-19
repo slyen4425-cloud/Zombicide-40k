@@ -158,6 +158,25 @@ async function chooseParticipantAndStart(page){
     assert.equal(state.uiRecoveryOwnsLinks,false,'Shell UI recovery must not own authored links anymore');
     assert.equal(state.trapCell,'floor','authored trap must never remain as a raw visible map marker');
     assert.deepEqual(state.exact,[{id:'reg_exact_trap',cell:8,detected:false,trapId:'rune'}],'configured authored trap must exist once and remain hidden until detection');
+    if(state.foreign!==0){
+      const trapDiag=await page.evaluate(()=>{
+        const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),room=Number(x?.room)||0;
+        const scenes=typeof loadDungeonSceneElements==='function'?loadDungeonSceneElements():[];
+        return {
+          room,
+          mapCells:x?.last?.map?.cells||[],
+          scenes:scenes.filter(e=>e?.kind==='trap').map(e=>({...e})),
+          render:String(window.DungeonCore01?.render||'').slice(0,5000),
+          explore:String(window.DungeonCore01?.explore||'').slice(0,5000),
+          exactWrap:!!window.DungeonCore01?.render?.__exactTrap167845,
+          zoneWrap:!!window.DungeonCore01?.render?.__dzc167824,
+          cacheVisualWrap:!!window.DungeonCore01?.render?.__dac167852,
+          sourceWrap:!!window.DungeonCore01?.render?.__dsr167877,
+          legacyTrapFns:Object.keys(window).filter(k=>/trap/i.test(k)&&typeof window[k]==='function').slice(0,80)
+        };
+      });
+      console.log('[authored-cache-trap-browser] foreign-trap-diag',JSON.stringify(trapDiag,null,2));
+    }
     assert.equal(state.foreign,0,'authored room must contain no foreign/random trap scene');
     assert.equal(state.sourceOwner,true,'SourceRenderStability must own authored terrain/tokens');
 

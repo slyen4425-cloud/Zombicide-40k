@@ -39,6 +39,9 @@ function normalizeContent(raw){const r=raw&&typeof raw==="object"?raw:{};return 
  updatedAt:String(r.updatedAt||"")
 }}
 function contentStore(){const x=readJson(CONTENT_KEY,{});return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}
+function rawZoneContent(dungeonId,nodeId){const raw=contentStore()?.[String(dungeonId||"")]?.[String(nodeId||"")];return raw&&typeof raw==="object"&&!Array.isArray(raw)?clone(raw):null}
+function legacyTemplateLinkState(dungeonId,nodeId,roomId){const raw=rawZoneContent(dungeonId,nodeId);if(!raw||!Object.prototype.hasOwnProperty.call(raw,"templateLinked"))return "none";const rid=String(roomId||""),linkedRoom=String(raw.templateRoomId||"");if(linkedRoom&&rid&&linkedRoom!==rid)return "none";return raw.templateLinked===true?"linked":raw.templateLinked===false?"detached":"none"}
+function migrateLegacyTemplateLink(dungeonId,nodeId,roomId){if(legacyTemplateLinkState(dungeonId,nodeId,roomId)!=="linked")return false;saveZoneContent(dungeonId,nodeId,{mode:"inherit",enemies:[],chests:[],traps:[],puzzles:[],npcs:[],items:[]});return true}
 function getZoneContent(dungeonId,nodeId){return normalizeContent(contentStore()?.[String(dungeonId||"")]?.[String(nodeId||"")])}
 function saveZoneContent(dungeonId,nodeId,content){const d=String(dungeonId||""),n=String(nodeId||"");if(!d||!n)return null;const all=contentStore();all[d]=all[d]&&typeof all[d]==="object"?all[d]:{};all[d][n]={...normalizeContent(content),updatedAt:now()};writeJson(CONTENT_KEY,all);try{worldApi()?.saveZoneContent?.(d,n,all[d][n])}catch(e){}return clone(all[d][n])}
 function graph(id){try{return builder()?.findDungeon?.(String(id||""))||null}catch(e){return null}}
@@ -103,7 +106,7 @@ function ensureLauncher(){if(!DOC||DOC.getElementById("dzc167824Launch"))return;
 function open(){ensureStyles();ensureModal();const m=DOC?.getElementById("dzc167824Modal");if(m){m.classList.add("open");renderEditor()}}
 function close(){DOC?.getElementById("dzc167824Modal")?.classList.remove("open")}
 function install(){if(installing)return false;installing=true;try{ROOT.GENSRPG_VERSION=APP_VERSION;ensureStyles();ensureModal();ensureLauncher();wrapCore();return true}finally{installing=false}}
-ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,parseRewardItems,rewardItemsText,rewardItemsSummary,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};
+ROOT.DungeonZoneContent167824={VERSION,APP_VERSION,CONTENT_KEY,normalizeContent,rawZoneContent,legacyTemplateLinkState,migrateLegacyTemplateLink,getZoneContent,saveZoneContent,applyCurrentZone,openChest,pickItem,triggerTrap,solvePuzzle,talkNpc,parseRewardItems,rewardItemsText,rewardItemsSummary,open,close,install,renderEditor,addEnemy,addChest,addTrap,addPuzzle,addItem,addNpc,remove};
 let runtimeRebindQueued=false;
 function scheduleRuntimeRebind(){if(runtimeRebindQueued)return;runtimeRebindQueued=true;setTimeout(()=>{runtimeRebindQueued=false;try{ensureLauncher();wrapCore()}catch(e){}},0)}
 function installRuntimeObserver(){if(!DOC||typeof MutationObserver!=="function")return false;const target=DOC.body||DOC.documentElement;if(!target)return false;const observer=new MutationObserver(list=>{for(const m of list||[]){for(const n of Array.from(m.addedNodes||[])){if(!n||n.nodeType!==1)continue;const id=String(n.id||"");if(id==="dc01Explore"||id==="dc047RoomBoard"||id==="dc200Scene"||n.querySelector?.("#dc01Explore,#dc047RoomBoard,#dc200Scene")){scheduleRuntimeRebind();return}}}});observer.observe(target,{childList:true,subtree:true});return true}

@@ -263,6 +263,9 @@ jobs:
       - name: Verrouiller l’autorité Core des chemins de créatures Dungeon
         run: node tests/gens_asset_resolver_owner_raccord_v1.test.cjs
 
+      - name: Verrouiller l’autorité Core des chemins de héros Dungeon
+        run: node tests/gens_asset_resolver_hero_owner_v1.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

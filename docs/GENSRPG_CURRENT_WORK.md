@@ -9,6 +9,73 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit propriétaire — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-migrations-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-migrations-2026-09-19`
+
+Base exacte :
+`9467429b7f195a24ec138cded7231f60b47ba5a4`
+(`checkpoint/gensrpg-phase4-asset-resolver-complete-green-2026-09-19`)
+
+Dernier service GREEN :
+- resolver d’assets Phase 4 complet ;
+- checkpoint `checkpoint/gensrpg-phase4-asset-resolver-complete-green-2026-09-19`.
+
+### Objectif du premier sous-lot
+
+Audit uniquement avant toute extraction runtime :
+- repartir de `docs/GENSRPG_PHASE2_STORAGE_OWNERS.json` ;
+- recaractériser les clés/familles encore actives sur le runtime courant ;
+- identifier les fabriques de clés dynamiques réellement utilisées ;
+- distinguer stockage Core partagé, stockage Shell/session et stockage propre aux modules ;
+- inventorier les migrations/normalisations déjà actives et leur propriétaire réel ;
+- choisir ensuite un premier sous-périmètre homogène, petit et testable.
+
+### Invariants obligatoires
+
+- préserver exactement les clés existantes au premier déplacement ;
+- aucune migration de format dans le même lot que l’extraction de l’API ;
+- aucune suppression/renommage de clé sans migration versionnée, idempotente et testée ;
+- Save & Quit / reprise doit rester strictement inchangé ;
+- IndexedDB / export/import ne doivent pas être repris par une seconde autorité ;
+- aucune donnée Dungeon ne devient implicitement commune à Capture/Survie/PvP ;
+- aucune couche UI ne devient propriétaire du stockage.
+
+### Interdit pendant l’audit
+
+- aucun changement de `index.html` ;
+- aucune modification de format de sauvegarde ;
+- aucun nettoyage de clé legacy par opportunisme ;
+- aucun wrapper global de réparation ;
+- aucun observer, timer/retry ou polling ;
+- aucun merge sur `main`.
+
+### Risques déjà cartographiés
+
+Phase 2 comptait :
+- 221 accès statiquement observables ;
+- 147 accès résolus ;
+- 30 clés/familles résolues ;
+- 74 accès dynamiques ;
+- 176 accès attribués à Dungeon ;
+- `gensrpg_dungeon_runtime_v2` consommé par de nombreuses couches.
+
+La roadmap classe ce service **risque élevé** et impose de caractériser les clés dynamiques du sous-périmètre avant extraction.
+
+### Sortie attendue de l’audit
+
+1. inventaire actuel recaractérisé ;
+2. propriétaires par famille de données ;
+3. migrations actives séparées des simples lectures/écritures ;
+4. premier sous-lot recommandé avec périmètre explicite ;
+5. RED du vrai propriétaire avant toute extraction ;
+6. aucune modification runtime tant que ces cinq points ne sont pas établis.
+
+
 ## Chantier courant prioritaire — Phase 4 / audit final resolver d’assets — 2026-09-19
 
 Branche :

@@ -81,13 +81,14 @@ async function syncMove(page,cell){
       remaining:Number(after?.remaining?.[hero]),
       chestAction:!!action,
       chestText:action?.textContent||'',
-      detectionCalls:Array.isArray(window.__movementEventDetectionCalls)?window.__movementEventDetectionCalls.length:0
+      detectionCalls:Array.isArray(window.__movementEventDetectionCalls)?window.__movementEventDetectionCalls.length:0,
+      scanCalls:Array.isArray(window.__movementEventScanCalls)?window.__movementEventScanCalls.length:0
     };
   },cell);
 }
 
 (async()=>{
-  const watchdog=setTimeout(()=>{console.error('[dungeon-movement-events-red] WATCHDOG');process.exit(1)},150000);
+  const watchdog=setTimeout(()=>{console.error('[dungeon-movement-events-green] WATCHDOG');process.exit(1)},150000);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
@@ -141,6 +142,13 @@ async function syncMove(page,cell){
       const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),hero=x?.participants?.[Number(x?.index)||0]||'';
       const enemies=loadActiveEnemies?.()||[];for(const e of enemies){if(String(e?.id||'')&&Number(e?.dungeonRoom||0)===Number(x?.room||0)){e.vision=1;e.detectionRange=1}}saveActiveEnemies?.(enemies);
       window.__movementEventDetectionCalls=[];
+      window.__movementEventScanCalls=[];
+      const authority=window.GensRpgTacticalRuntimeAuthority1678113;
+      const originalScan=authority.scanDetection;
+      authority.scanDetection=function(rt,reason,force){
+        window.__movementEventScanCalls.push({reason:String(reason||''),force:!!force});
+        return originalScan.apply(this,arguments);
+      };
       const old=window.dc200StartCombat;
       const spy=function(ids,reason){window.__movementEventDetectionCalls.push({ids:(ids||[]).map(String),reason:String(reason||'')});return {ok:true,intercepted:true}};
       if(old?.__gensRpg113Start)spy.__gensRpg113Start=true;
@@ -160,28 +168,57 @@ async function syncMove(page,cell){
     assert.equal(setup.positional,true,'real Dungeon positional movement must be active');
 
     const neutralImmediate=await syncMove(page,13);
-    await page.waitForTimeout(120);
-    const neutralDelayed=await page.evaluate(()=>({action:!!document.querySelector('#dzc167824Actions button'),calls:window.__movementEventDetectionCalls.length}));
-
-    const chestImmediate=await syncMove(page,8);
-    await page.waitForTimeout(120);
-    const chestDelayed=await page.evaluate(()=>({action:!!document.querySelector('#dzc167824Actions button'),text:document.querySelector('#dzc167824Actions button')?.textContent||'',calls:window.__movementEventDetectionCalls.length}));
-
-    const detectionImmediate=await syncMove(page,7);
-    await page.waitForTimeout(140);
-    const detectionDelayed=await page.evaluate(()=>({calls:[...(window.__movementEventDetectionCalls||[])],action:!!document.querySelector('#dzc167824Actions button')}));
-
-    const diagnostic={fixture,setup,neutralImmediate,neutralDelayed,chestImmediate,chestDelayed,detectionImmediate,detectionDelayed,errors};
-    console.log('[dungeon-movement-events-red]',JSON.stringify(diagnostic,null,2));
-
     assert.equal(neutralImmediate.after,13,'neutral move must use the real board movement path');
     assert.equal(neutralImmediate.chestAction,false,'neutral move must not expose a chest action');
-    assert.equal(neutralImmediate.detectionCalls,0,'neutral move must not trigger enemy detection');
+    assert.equal(neutralImmediate.detectionCalls,0,'neutral move must not trigger combat detection');
+    assert.equal(neutralImmediate.scanCalls,1,'one real neutral movement must run exactly one synchronous V113 detection scan');
+    // Delay is diagnostic-only: the required result is already asserted above.
+    await page.waitForTimeout(120);
+    const neutralDelayed=await page.evaluate(()=>({
+      action:!!document.querySelector('#dzc167824Actions button'),
+      calls:window.__movementEventDetectionCalls.length,
+      scans:window.__movementEventScanCalls.length
+    }));
     assert.equal(neutralDelayed.action,false,'neutral move must stay free of parasite interaction');
-    assert.equal(neutralDelayed.calls,0,'neutral move must stay free of parasite detection');
+    assert.equal(neutralDelayed.calls,0,'neutral move must stay free of parasite combat detection');
+    assert.equal(neutralDelayed.scans,1,'neutral move must not schedule a later duplicate detection scan');
 
+    const chestImmediate=await syncMove(page,8);
     assert.equal(chestImmediate.after,8,'last movement must land on the authored chest cell');
+    assert.equal(chestImmediate.chestAction,true,'authored chest action must exist in the same movement cycle');
+    assert.equal(chestImmediate.detectionCalls,0,'chest move outside LOS must not start combat');
+    assert.equal(chestImmediate.scanCalls,2,'chest movement must add exactly one synchronous V113 detection scan');
+    // Delay is only a duplicate guard; it is not needed to obtain the chest action.
+    await page.waitForTimeout(120);
+    const chestDelayed=await page.evaluate(()=>({
+      action:!!document.querySelector('#dzc167824Actions button'),
+      text:document.querySelector('#dzc167824Actions button')?.textContent||'',
+      calls:window.__movementEventDetectionCalls.length,
+      scans:window.__movementEventScanCalls.length
+    }));
+    assert.equal(chestDelayed.action,true,'authored chest action must remain stable after the synchronous result');
+    assert.equal(chestDelayed.calls,0,'chest move must not create a delayed combat');
+    assert.equal(chestDelayed.scans,2,'chest move must not schedule a later duplicate detection scan');
+
+    const detectionImmediate=await syncMove(page,7);
     assert.equal(detectionImmediate.after,7,'last movement must enter the real enemy vision/LOS cell');
+    assert.equal(detectionImmediate.chestAction,false,'leaving the chest cell must remove the authored chest action synchronously');
+    assert.equal(detectionImmediate.detectionCalls,1,'entering enemy LOS must trigger exactly one combat request in the same movement cycle');
+    assert.equal(detectionImmediate.scanCalls,3,'LOS movement must add exactly one synchronous V113 detection scan');
+    // Again, the delay only proves absence of a late timer-based duplicate.
+    await page.waitForTimeout(140);
+    const detectionDelayed=await page.evaluate(()=>({
+      calls:[...(window.__movementEventDetectionCalls||[])],
+      scans:[...(window.__movementEventScanCalls||[])],
+      action:!!document.querySelector('#dzc167824Actions button')
+    }));
+    assert.equal(detectionDelayed.calls.length,1,'movement detection must not trigger a second delayed combat request');
+    assert.equal(detectionDelayed.scans.length,3,'three real movements must produce exactly three scans, with no delayed duplicate');
+    assert.equal(detectionDelayed.calls[0]?.reason,'movement-detection-v113','combat request must come from the canonical V113 movement detection');
+    assert.equal(detectionDelayed.action,false,'chest action must stay absent after leaving its cell');
+
+    const diagnostic={fixture,setup,neutralImmediate,neutralDelayed,chestImmediate,chestDelayed,detectionImmediate,detectionDelayed,errors};
+    console.log('[dungeon-movement-events-green]',JSON.stringify(diagnostic,null,2));
     const unexpectedErrors=errors.filter(value=>!(
       /Combat tactique V2 route blocked/.test(value) &&
       /not-detected-v113/.test(value) &&
@@ -189,8 +226,8 @@ async function syncMove(page,cell){
     ));
     assert.deepEqual(unexpectedErrors,[],'real Dungeon movement-event path must raise no unexpected browser/runtime errors');
 
-    // Desired contract. This is intentionally RED on the diagnostic base:
-    // both consumers must react in the same synchronous movement cycle, without timer/polling/retry.
+    // Permanent contract: both consumers react in the same synchronous movement cycle.
+    // The waits above are only guards against later duplicates; they are never needed to obtain the result.
     assert.deepEqual(
       {
         chestActionSameCycle:chestImmediate.chestAction,

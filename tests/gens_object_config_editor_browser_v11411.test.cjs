@@ -224,6 +224,40 @@ async function chooseParticipantAndStart(page){
     assert.deepEqual(runtimeChest.chest?.items,[{itemId:chosenItem.id,qty:2}],'real authored runtime must receive the saved zone items');
     assert.equal(runtimeChest.scene?.rarity,'legendary','real chest scene must reflect configured rarity');
     assert.ok(runtimeChest.scene?.exactChestId167824,'real chest scene must be linked to exact configured content');
+
+    // Use the same historical FOUILLER button the player sees, not the direct exact-content API.
+    const beforeOpen=await page.evaluate(({itemId})=>{
+      const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),hero=x?.participants?.[Number(x?.index)||0]||'';
+      x.positions=x.positions||{};x.positions[hero]=7;localStorage.setItem('gensrpg_dungeon_runtime_v2',JSON.stringify(x));
+      window.DungeonCore01?.render?.();
+      const key='z40k_'+hero+'_v1',st=JSON.parse(localStorage.getItem(key)||'{}');
+      return {
+        hero,key,gold:Number(st.gold)||0,
+        itemCount:(st.inventory||[]).filter(i=>String(i?.itemId||'')===String(itemId)).length,
+        searchFlag:!!window.DungeonCore01?.searchChest?.__dzcExactChest167824,
+        searchText:String(window.DungeonCore01?.searchChest||'').slice(0,2000),
+        buttons:[...document.querySelectorAll('button')].filter(b=>getComputedStyle(b).display!=='none'&&getComputedStyle(b).visibility!=='hidden').map(b=>({text:(b.textContent||'').trim(),onclick:b.getAttribute('onclick')||''})).filter(b=>/FOUILLER|Ouvrir coffre/i.test(b.text))
+      };
+    },{itemId:chosenItem.id});
+    console.log('[object-config-editor] before-real-chest-open',JSON.stringify(beforeOpen,null,2));
+    const searchButton=page.locator('button[onclick^="DungeonCore01.searchChest"]').filter({hasText:/FOUILLER/i}).first();
+    assert.equal(await searchButton.count(),1,'the exact authored chest must expose the historical visible FOUILLER button');
+    await searchButton.click();
+    await page.waitForTimeout(150);
+    const afterOpen=await page.evaluate(({itemId,hero,key})=>{
+      const st=JSON.parse(localStorage.getItem(key)||'{}'),x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
+      return {
+        gold:Number(st.gold)||0,
+        itemCount:(st.inventory||[]).filter(i=>String(i?.itemId||'')===String(itemId)).length,
+        opened:x?.worldContentState167824?.[x?.last?.worldDungeonId]?.[x?.last?.worldNodeId]?.openedChests||{},
+        visibleText:[...document.querySelectorAll('body *')].filter(e=>getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden').map(e=>(e.textContent||'').trim()).filter(t=>/Coffre ouvert|Coffre vide/.test(t)).slice(-10)
+      };
+    },{itemId:chosenItem.id,hero:beforeOpen.hero,key:beforeOpen.key});
+    console.log('[object-config-editor] after-real-chest-open',JSON.stringify(afterOpen,null,2));
+    assert.equal(beforeOpen.searchFlag,true,'the visible FOUILLER path must still be owned by exact-zone content');
+    assert.equal(afterOpen.gold,beforeOpen.gold+23,'FOUILLER must grant the configured exact gold');
+    assert.equal(afterOpen.itemCount,beforeOpen.itemCount+2,'FOUILLER must grant the configured exact item quantity');
+    assert.ok(Object.values(afterOpen.opened).some(Boolean),'real FOUILLER path must mark exact chest opened');
     assert.deepEqual(errors,[]);
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();

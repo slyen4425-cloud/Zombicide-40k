@@ -16,10 +16,11 @@ assert.doesNotMatch(install,/paintWalls\(rt\)/,'V113 install must not repaint wa
 
 // Detection/scope authority must remain untouched by this visual-only retirement.
 for(const required of ['ensureStyle(rt)','ensureDetectionHooks(rt)'])assert.ok(maintain.includes(required),`V113 maintain lost ${required}`);
-for(const required of ['ensureStyle(rt)','ensureDetectionHooks(rt)','bindBoardClicks(rt)','animateDiceOverlay(rt)'])assert.ok(install.includes(required),`V113 install lost ${required}`);
+for(const required of ['ensureStyle(rt)','ensureDetectionHooks(rt)','animateDiceOverlay(rt)'])assert.ok(install.includes(required),`V113 install lost ${required}`);
+assert.ok(!install.includes('bindBoardClicks(rt)'),'V113 install must not retain board click/pointer movement detection');
 assert.match(v113,/function selectCombatants\(/,'V113 combatant scope must remain');
 assert.match(v113,/function ensureDetectionHooks\(rt=R\)/,'V113 detection authority must remain');
-assert.match(v113,/function bindBoardClicks\(rt=R\)/,'V113 board detection must remain');
+assert.doesNotMatch(v113,/function bindBoardClicks\(rt=R\)/,'V113 board click/pointer movement detection must remain retired');
 
 // Canonical Tactical UI remains responsible for every wall surface.
 for(const required of [/function wallTileHtml\(/,/function ensureWallTile\(el\)/,/function paintLiveWalls\(\)/,/function patchDungeonMapHtml\(\)/,/function hookDungeonRender\(\)/])assert.match(ui,required,'canonical Tactical wall pipeline must remain intact');

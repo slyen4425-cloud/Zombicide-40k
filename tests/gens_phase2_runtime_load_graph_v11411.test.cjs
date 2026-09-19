@@ -18,9 +18,9 @@ const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g
   .map(stripQuery);
 
 assert.deepEqual(rawDirect,[
+  'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
-  'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
 ],'raw index local JS entries must remain explicit and ordered');
 

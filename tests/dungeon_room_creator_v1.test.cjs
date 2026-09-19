@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-100.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -19,6 +20,7 @@ const ctx={
 };
 ctx.globalThis=ctx;
 vm.createContext(ctx);
+vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
 vm.runInContext(src,ctx,{filename:'dungeon-room-creator-100.js'});
 
 const d=ctx.DungeonRoomCreator100;
@@ -26,6 +28,13 @@ assert.ok(d,'Room Creator API missing');
 assert.equal(d.VERSION,'1.0.0');
 assert.equal(d.APP_VERSION,'16.78.14');
 assert.equal(d.MAX_SIZE,30);
+assert.equal(d.STORAGE_KEY,'gensrpg_dungeon_custom_rooms_v1');
+assert.deepEqual(d.loadLibrary(),[],'missing room library must keep [] fallback');
+values.set(d.STORAGE_KEY,'{broken-json');
+assert.deepEqual(d.loadLibrary(),[],'invalid room JSON must keep [] fallback');
+values.set(d.STORAGE_KEY,'null');
+assert.deepEqual(d.loadLibrary(),[],'stored JSON null must keep [] fallback');
+values.delete(d.STORAGE_KEY);
 
 let room=d.createRoom({name:'Grande salle test',width:15,height:15});
 assert.equal(room.width,15);

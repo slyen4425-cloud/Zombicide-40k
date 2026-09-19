@@ -75,9 +75,40 @@ Le service peut uniquement :
 8. preuve que le service reste hors production ;
 9. Architecture + navigateur complet + Firefox + Tactical Dock avant GREEN.
 
-### Prochaine action
+### Résultat du service Core — GREEN fonctionnel
 
-Créer `assets/gensrpg/core/storage-v1.js` et son contrat de test, puis adapter uniquement le garde de graphe physique pour reconnaître ce deuxième service Phase 4 comme présent mais non chargé.
+Service :
+`assets/gensrpg/core/storage-v1.js`
+
+Contrat :
+`tests/gens_core_storage_v1.test.cjs`
+
+Documentation :
+`docs/GENSRPG_PHASE4_CORE_STORAGE_SERVICE.md`
+
+Résultat :
+- API minimale `readJson / writeJson / remove` ;
+- aucune clé métier ni normalizer dans le Core ;
+- aucun changement de format ;
+- erreurs d'écriture non masquées ;
+- backend injectable ;
+- service volontairement hors production ;
+- graphe production inchangé à 66 fichiers atteignables ;
+- inventaire physique désormais 82 JS : 72 baseline Phase 2 + 8 entrypoints Phase 3 + 2 services Phase 4.
+
+Validation du HEAD fonctionnel `5ea2c49c67977d84bd7d41d09d857377640e1a66` :
+- Architecture + navigateur complet `35464902327` — SUCCESS ;
+- Firefox `35464902315` — SUCCESS ;
+- Tactical Dock `35464902325` — SUCCESS.
+
+### Prochaine action après fermeture documentaire
+
+1. créer `checkpoint/gensrpg-phase4-core-storage-service-green-2026-09-19` ;
+2. créer un checkpoint de départ et une branche dédiés au raccord Room Creator 1.0 ;
+3. charger explicitement `storage-v1.js` avant Room Creator uniquement dans ce lot ;
+4. remplacer uniquement les deux accès directs de `DungeonRoomCreator100` ;
+5. conserver `STORAGE_KEY="gensrpg_dungeon_custom_rooms_v1"`, `normalizeRoom()` et le JSON inchangés ;
+6. RED propriétaire + round-trip existant + navigateur Builder avant GREEN.
 
 
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19

@@ -139,10 +139,13 @@ Validation sur `a351d084d0feb45493ce330fec75f5138ecf39c1` :
 - Firefox `35435294459` — SUCCESS ;
 - Tactical Dock `35435294469` — SUCCESS.
 
-### Jalon B.2 — raccord Core des chemins de créatures — candidat en validation
+### Jalon B.2 — raccord Core des chemins de créatures — GREEN
 
 Commit runtime :
 `7d0a38b94e60676b17eb9521c29f11018dff8456`
+
+HEAD fonctionnel validé :
+`cc1b6c729a9c96f929751db124783b4954a9169a`
 
 Blob `index.html` :
 - avant : `d942934741ca200319de02116c4dd384722d39c7` ;
@@ -160,18 +163,39 @@ Raccord appliqué :
 - les overrides personnalisés existants restent au-dessus du chemin canonique.
 
 Cartographie réalignée :
-- graphe production attendu : 66 fichiers JS atteignables ;
+- graphe production : 66 fichiers JS atteignables ;
 - le resolver Core possède désormais un propriétaire runtime explicite `GenSrpG Core Assets` ;
-- manifestes inline/timers réalignés sur le blob `286e427df42bc1a04cc981ecbdf90ecb4de547ab` ;
+- les 8 entrypoints Phase 3 restent inertes et hors production ;
+- manifestes inline/timers/effets globaux/stockage/hors-graphe réalignés sans changer leurs dettes fonctionnelles ;
+- le resolver n’ajoute aucun observer, timer, listener, stockage ou wrapper ; seule son API publique `GensAssetResolverV1` est exportée ;
 - RED propriétaire obtenu avant correction : Architecture `35439183155`, échec au seul nouveau garde de raccord.
+
+Validation sur `cc1b6c729a9c96f929751db124783b4954a9169a` :
+- Architecture + navigateur complet `35439871786` — SUCCESS ;
+- Firefox `35439871780` — SUCCESS ;
+- Tactical Dock `35439871790` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie ;
+- Dungeon après Survie ;
+- Builder Dungeon ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- preview ;
+- parité réelle du resolver d’assets et priorité des overrides.
 
 ### Prochaine action
 
-1. valider le commit documentaire courant sur le runtime `7d0a38b9...` ;
-2. exiger Architecture + navigateur complet + Firefox + Tactical Dock GREEN ;
-3. si GREEN, créer un checkpoint intermédiaire lisible pour B.2 ;
-4. seulement ensuite caractériser les vrais propriétaires héros/objets du gros script historique — ne pas supposer que le marqueur bloc 33 les possède ;
-5. ne pas toucher au bloc 65 ni déplacer d’assets dans ce sous-lot.
+1. faire valider cette clôture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
+3. repartir de ce checkpoint pour le sous-lot suivant du même chantier Phase 4 ;
+4. caractériser les vrais propriétaires héros/objets du gros script historique — ne pas supposer que le marqueur bloc 33 les possède ;
+5. ne pas toucher au bloc 65 ni déplacer d’assets tant que cette caractérisation n’est pas terminée.
 
 ## Production sûre
 

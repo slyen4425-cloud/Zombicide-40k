@@ -263,6 +263,9 @@ jobs:
       - name: Vérifier le resolver d’assets pur Phase 4
         run: node tests/gens_core_asset_resolver_v1.test.cjs
 
+      - name: Vérifier le service Core stockage JSON pur Phase 4
+        run: node tests/gens_core_storage_json_v1.test.cjs
+
       - name: Verrouiller l’autorité Core des chemins de créatures Dungeon
         run: node tests/gens_asset_resolver_owner_raccord_v1.test.cjs
 

@@ -28,6 +28,9 @@ assert.equal(api.dungeonHeroPath('custom_hero'),'','unknown heroes must not rece
 assert.equal(api.dungeonItemPath('dng_longsword'),'assets/dungeon/creatures/dng_longsword.png');
 assert.equal(api.dungeonItemPath('dng_heal_potion'),'assets/dungeon/creatures/dungeon_potion_hp.png');
 assert.equal(api.dungeonItemPath('dng_amulet'),'assets/dungeon/creatures/dungeon_relic.png');
+for(const id of ['dloot_old_coin','dloot_silver_idol','dloot_beast_fang','dloot_runic_shard','dloot_black_pearl','dloot_dragon_scale','dloot_royal_relic','dloot_void_gem']){
+  assert.equal(api.dungeonItemPath(id),'assets/dungeon/creatures/'+id+'.png','Dungeon loot ids must use the canonical item resolver');
+}
 assert.equal(api.dungeonItemPath('unknown_item'),'','unknown items must not receive an invented path');
 
 assert.equal(api.resolve({module:'dungeon',kind:'creature',id:'dng_wyvern'}),'assets/dungeon/creatures/dng_wyvern.png');

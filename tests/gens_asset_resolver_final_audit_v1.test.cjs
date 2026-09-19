@@ -11,7 +11,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(blob,'207353f408d8c60213b512f73184bb9ec666b75d','asset resolver final audit must target the exact B.5 runtime index blob');
+assert.equal(blob,'ff11682d74be7921a591a9b76080eaf337c071be','asset resolver final audit must target the exact B.6 runtime index blob');
 
 function block(id){
   const m=index.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -35,10 +35,9 @@ for(const [id,b] of [['3.09',b309],['3.10',b310]]){
   assert.match(b,/GensAssetResolverV1\.dungeonCreaturePath\(/,'B.5 resolved: Core '+id+' delegates built-in enemy paths to the Core resolver');
 }
 
-for(const id of ['dloot_old_coin','dloot_silver_idol','dloot_beast_fang','dloot_runic_shard','dloot_black_pearl','dloot_dragon_scale','dloot_royal_relic','dloot_void_gem']){
-  assert.match(b023,new RegExp(id+':"'+id+'\\.png"'),'B.6 debt: missing historical loot art mapping '+id);
-}
-assert.match(b023,/DC023_ASSET_ROOT="assets\/dungeon\/creatures\/"/,'B.6 debt: loot art owner still reconstructs the Dungeon root');
+assert.doesNotMatch(b023,/\\bDC023_LOOT_ART\\b/,'B.6 resolved: Core 0.23 no longer owns a duplicate loot asset table');
+assert.doesNotMatch(b023,/\\bDC023_ASSET_ROOT\\b/,'B.6 resolved: Core 0.23 no longer owns a duplicate Dungeon asset root');
+assert.match(b023,/GensAssetResolverV1\\.dungeonItemPath\\(/,'B.6 resolved: Core 0.23 delegates loot paths to the Core item resolver');
 
 assert.match(b055,/const ROOT55='assets\/dungeon\/creatures\/'/,'block 65 remains an exact Dungeon presentation asset owner');
 assert.match(b055,/dungeon_marker_start\.png/);
@@ -49,12 +48,11 @@ assert.doesNotMatch(b055,/dungeon_aldren|dng_longsword|dng_skeleton|dloot_/,'blo
 console.log(JSON.stringify({
   scenario:'Phase 4 asset resolver final audit',
   sourceIndexBlob:blob,
-  remainingResolverDebts:{
-    lootLogicalMap:['dungeonCore023StabilityFix']
-  },
+  remainingResolverDebts:{},
   resolvedSubLots:{
-    B5LateTokenEntityPaths:['dungeonCore213Stability','dungeonCore214SingleAuthority','dungeonCore309VisualFixes','dungeonCore310PersistenceAndTokens']
+    B5LateTokenEntityPaths:['dungeonCore213Stability','dungeonCore214SingleAuthority','dungeonCore309VisualFixes','dungeonCore310PersistenceAndTokens'],
+    B6LootLogicalPaths:['dungeonCore023StabilityFix']
   },
   retainedDungeonPresentationOwners:['dungeonCore055ExactAssets'],
-  nextSubLots:['B.6 loot logical paths']
+  nextSubLots:[]
 },null,2));

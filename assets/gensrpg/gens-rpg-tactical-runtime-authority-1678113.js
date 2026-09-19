@@ -19,7 +19,7 @@
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let installed=false,adapterHooked=false,startHooked=false,clickBound=false,observer=null,maintainQueued=false;
+  let installed=false,adapterHooked=false,startHooked=false,observer=null,maintainQueued=false;
   let moveWrapped=null,eventWrapped=new Map(),lastDetectionSignature="";
 
   function doc(rt=R){return rt?.document||null}
@@ -153,12 +153,10 @@
   }
   function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function")setTimeout(run,Math.max(0,delay));else run()}
   function hookMovement(rt=R){
-    const fn=rt?.dungeonMoveHero098;if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){moveWrapped=fn;return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,"movement-detection-v113",true,0);scheduleDetection(rt,"movement-detection-v113",true,90);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt.dungeonMoveHero098=wrapped;moveWrapped=wrapped;return true;
+    const fn=rt?.dungeonMoveHero098;if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){moveWrapped=fn;return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);if(out!==false)scanDetection(rt,"movement-detection-v113",true);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt.dungeonMoveHero098=wrapped;moveWrapped=wrapped;return true;
   }
   function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){eventWrapped.set(name,fn);return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
   function ensureDetectionHooks(rt=R){hookMovement(rt);for(const name of ["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"])hookEventFunction(rt,name);hookStart(rt);hookAdapter(rt);return true}
-  function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;const onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
-
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
     .gtv2113DiceRow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
     .gtv2113DiceRow .gtv2Die{width:64px;height:64px;font-size:27px;will-change:transform;animation:gtv2113DiceShake .17s linear infinite alternate}
@@ -177,7 +175,7 @@
   function maintain(rt=R){maintainQueued=false;ensureStyle(rt);ensureDetectionHooks(rt);animateDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintainQueued)return;maintainQueued=true;const run=()=>maintain(rt);if(typeof requestAnimationFrame==="function")requestAnimationFrame(run);else if(typeof setTimeout==="function")setTimeout(run,0);else run()}
   function observe(rt=R){const D=doc(rt);if(!D?.body||observer||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
-  function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoardClicks(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
+  function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000])setTimeout(()=>install(rt),ms);return true}
   const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}

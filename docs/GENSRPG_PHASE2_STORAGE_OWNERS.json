@@ -4,9 +4,9 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 221,
+    "totalAccesses": 219,
     "resolvedAccesses": 147,
-    "unresolvedAccesses": 74,
+    "unresolvedAccesses": 72,
     "distinctResolvedKeys": 30
   },
   "byDomain": {
@@ -17,9 +17,9 @@
       "distinctKeys": 20
     },
     "builders": {
-      "accesses": 7,
+      "accesses": 5,
       "resolved": 4,
-      "unresolved": 3,
+      "unresolved": 1,
       "distinctKeys": 2
     },
     "tactical": {
@@ -623,14 +623,6 @@
       "count": 2,
       "expressions": {
         "key(hid": 2
-      }
-    },
-    {
-      "source": "file:assets/dungeon/dungeon-room-creator-100.js",
-      "domain": "builders",
-      "count": 2,
-      "expressions": {
-        "STORAGE_KEY": 2
       }
     },
     {

@@ -12,14 +12,14 @@ Lire avant tout changement :
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :
-`work/gensrpg-phase4-asset-resolver-hero-item-owners-2026-09-19`
+`work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`
+`checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`
 
 Base exacte :
-`88150851852f6e9e27e6c756a472cac3a58d1e1a`
-(`checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`)
+`c4e32b99185b8908aa645ba7c6fcaf7a706fafbb`
+(`checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`)
 
 Production `main` reste gelée sur V16.78.114.11 :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
@@ -251,14 +251,48 @@ Le navigateur complet valide notamment :
 - preview ;
 - parité réelle du resolver d’assets.
 
+Validation documentaire finale B.3 :
+- HEAD `c4e32b99185b8908aa645ba7c6fcaf7a706fafbb` ;
+- Architecture + navigateur complet `35446436225` — SUCCESS ;
+- Firefox `35446436232` — SUCCESS ;
+- Tactical Dock `35446436226` — SUCCESS.
+
+Checkpoint B.3 créé :
+`checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`
+sur `c4e32b99185b8908aa645ba7c6fcaf7a706fafbb`.
+
+### Jalon B.4 — chemins objets built-in Dungeon — caractérisation
+
+Branche dédiée :
+`work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19`
+
+Blob source exact `index.html` :
+`ba47d9fb3b8aa1a2183e764455aae97e03965440`
+(taille vérifiée localement : 8 175 684 octets).
+
+Propriétaire réel :
+- `dungeonItems()` dans le gros script historique héros/objets ;
+- il possède encore une table locale `githubItemArts` de 13 objets ;
+- il reconstruit encore `assets/dungeon/creatures/<fichier>` ;
+- `GensAssetResolverV1.dungeonItemPath(id)` possède déjà la même table canonique dans le Core.
+
+Invariant à préserver :
+`image_data: ov.image_data || asset canonique || dungeonItemArt(...)`.
+
+Périmètre B.4 :
+- supprimer uniquement la table/concaténation d’asset dupliquée de `dungeonItems()` ;
+- déléguer le chemin built-in à `GensAssetResolverV1.dungeonItemPath(it.id)` ;
+- conserver la base gameplay des objets, les overrides, crop, équipements, loot et fallback SVG inchangés ;
+- ne pas toucher au bloc 65, aux assets UI exacts ni déplacer de fichiers.
+
 ### Prochaine action
 
-1. faire valider cette fermeture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
-2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
-3. ouvrir une branche neuve depuis ce checkpoint pour le sous-lot objets built-in ;
-4. caractériser puis migrer uniquement `dungeonItems()` / ses chemins built-in vers le resolver Core ;
-5. ne pas toucher au bloc 65 ni aux assets UI exacts ;
-6. ne rien fusionner sur `main`.
+1. poser un RED propriétaire B.4 avant runtime ;
+2. faire vérifier par navigateur les chemins représentatifs et la priorité d’un override objet ;
+3. appliquer un raccord unique dans `dungeonItems()` ;
+4. réaligner uniquement les empreintes Phase 2 liées au blob si nécessaire ;
+5. Architecture + navigateur complet + Firefox + Tactical Dock avant checkpoint ;
+6. aucun changement de `main`.
 
 ## Production sûre
 

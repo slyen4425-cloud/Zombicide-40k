@@ -9,6 +9,95 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-asset-resolver-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-asset-resolver-2026-09-19`
+
+Base exacte :
+`7dd1cf9a48b70e075faf4a6f8d4c0bd64e63d6f0`
+(`checkpoint/gensrpg-rpg-sheet-shell-isolation-green-2026-09-19`)
+
+Production `main` reste gelée sur V16.78.114.11 :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif du lot
+
+Phase 4, lot 1 conformément à la roadmap :
+- extraire / consolider le resolver d’assets commun ;
+- conserver exactement les chemins et résultats actuels ;
+- supprimer l’ancienne autorité inline seulement après vrai raccord GREEN ;
+- ne déplacer aucun asset physique dans ce premier lot.
+
+### État source `index.html`
+
+Le fichier fourni par l’utilisateur au blob `55453138449d07bde731ff6934acc442f56bae32` a été réconcilié avec l’unique correction fiche RPG validée.
+Copie locale exacte reconstruite et vérifiée contre le checkpoint courant :
+- taille : 8 175 814 octets ;
+- blob Git : `d942934741ca200319de02116c4dd384722d39c7`.
+
+### Propriétaires candidats à caractériser
+
+Cartographie Phase 2 inline :
+- bloc 30 : Dungeon GitHub-hosted art catalogue/binding ;
+- bloc 31 : Dungeon art rendering compatibility and visual binding fixes ;
+- bloc 32 : Dungeon direct image binding layer ;
+- bloc 33 : Dungeon hero/item asset build marker and bindings ;
+- bloc 65 : Dungeon exact assets.
+
+Ces blocs sont des candidats, pas encore déclarés propriétaires uniques.
+
+### Périmètre autorisé
+
+- inventorier les fonctions/globales réellement utilisées pour résoudre héros, ennemis, objets, tuiles et UI ;
+- identifier le vrai resolver et distinguer catalogue / consommateur / compatibilité ;
+- créer le service Core dans `assets/gensrpg/core/` uniquement après caractérisation ;
+- raccorder progressivement les consommateurs au service Core ;
+- ajouter des sentinelles de résolution et de non-interférence.
+
+### Interdit
+
+- aucun déplacement physique de PNG/JPG/WebP ;
+- aucun fallback inter-module nouveau ;
+- aucune modification de gameplay, combat, mouvement ou événements ;
+- aucune modification de la fiche héros ;
+- aucun observer, timer/retry, wrapper global de réparation ou second resolver permanent ;
+- aucun changement de `main`;
+- ne pas toucher au lot événements d’Agent 1.
+
+### Invariants
+
+- un `artId` explicite reste prioritaire lorsqu’il l’est déjà ;
+- les chemins Dungeon actuels restent identiques pendant l’extraction ;
+- aucun asset Dungeon ne devient fallback Survie/Capture/PvP ;
+- le resolver Core ne doit pas devenir propriétaire d’une règle de gameplay ;
+- l’UI consomme un chemin résolu, elle ne recrée pas sa propre table concurrente.
+
+### Tests requis avant GREEN
+
+1. caractérisation des résolutions actuelles par vrai chemin ;
+2. héros Dungeon : Aldren/Lyra/Brom ;
+3. ennemis/boss Dungeon ;
+4. objets avec `artId` ;
+5. murs/portes/coffres/tuiles déjà couverts ;
+6. fallback nominal existant uniquement là où il est aujourd’hui autorisé ;
+7. Survie/Capture/PvP inchangés ;
+8. Architecture + navigateur complet ;
+9. Firefox ;
+10. Tactical Dock.
+
+### Coordination
+
+Agent 1 travaille séparément sur les événements après déplacement.
+Ne pas ouvrir le lot performance mouvement avant son diagnostic propriétaire.
+
+### Prochaine action
+
+Caractériser les blocs inline 30–33 et 65 dans l’index exact courant, puis identifier le plus petit service de résolution extractible sans changer le comportement.
+
 ## Production sûre
 
 - `main` gelé : V16.78.114.11

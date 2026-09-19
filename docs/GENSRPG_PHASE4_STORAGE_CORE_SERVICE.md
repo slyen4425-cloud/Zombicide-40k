@@ -69,3 +69,14 @@ Les migrations versionnées seront définies plus tard, après raccord GREEN de 
 Ce premier jalon reste volontairement hors graphe de production. Il ne doit être ajouté ni à la composition Pages, ni à `preview.html`, ni au service worker.
 
 Le prochain lot, seulement après checkpoint GREEN, raccordera `DungeonRoomCreator100` sur sa clé historique `gensrpg_dungeon_custom_rooms_v1`.
+
+## Validation fonctionnelle
+
+Commit :
+`6f4a66a7b24e285d1ef62fc1f2b8d3d1cf22947e`
+
+- Architecture + navigateur complet : run `35469487437` — SUCCESS
+- Firefox : run `35469487438` — SUCCESS
+- Tactical Dock : run `35469487439` — SUCCESS
+
+Le service reste hors production. Le prochain lot pourra uniquement raccorder `DungeonRoomCreator100` après création du checkpoint GREEN de ce jalon.

@@ -60,6 +60,41 @@ API cible :
 
 Créer un checkpoint final de ce service, puis ouvrir un lot séparé pour raccorder uniquement `DungeonRoomCreator100` à la clé historique `gensrpg_dungeon_custom_rooms_v1`.
 
+### Résultat du jalon — GREEN fonctionnel
+
+Service :
+`assets/gensrpg/core/storage-v1.js`
+
+Commit fonctionnel :
+`6f4a66a7b24e285d1ef62fc1f2b8d3d1cf22947e`
+
+Résultat :
+- API Core générique `GensStorageV1` créée ;
+- `readJson(storage,key,fallback)`, `writeJson(storage,key,value)`, `create(storage)` ;
+- aucune clé métier ni schéma Room/Graph dans le Core ;
+- stockage injecté explicitement ;
+- lecture absente, vide, JSON invalide, `null` et erreur de lecture couvertes ;
+- round-trip objet/tableau couvert ;
+- erreurs de sérialisation/écriture propagées ;
+- service volontairement hors graphe production ;
+- inventaire Phase 2 mis à jour : 72 fichiers baseline + 8 entrypoints Phase 3 + 2 services Phase 4, dont seul le resolver d’assets est connecté ;
+- aucun changement de `index.html`, Pages, preview, service worker ou runtime module.
+
+Validation fonctionnelle sur `6f4a66a7...` :
+- Architecture + navigateur complet `35469487437` — SUCCESS ;
+- Firefox `35469487438` — SUCCESS ;
+- Tactical Dock `35469487439` — SUCCESS.
+
+Le premier échec Architecture `35469444554` provenait uniquement d'un `deepStrictEqual` entre objets de realms Node `vm` différents ; le test a été corrigé pour comparer le contenu sérialisé sans changer le service.
+
+Prochaine action après validation de cette fermeture documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-core-service-green-2026-09-19` sur le HEAD exact validé ;
+2. créer un checkpoint de départ et une branche neuve pour `DungeonRoomCreator100` ;
+3. raccorder uniquement sa clé historique `gensrpg_dungeon_custom_rooms_v1` au service Core ;
+4. charger `storage-v1.js` avant Room Creator dans Pages/preview et mettre à jour le cache PWA si nécessaire ;
+5. conserver `normalizeRoom()`, le JSON persisté et les comportements de fallback exactement identiques ;
+6. aucun autre Builder ni runtime Dungeon dans ce sous-lot.
+
 
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
 

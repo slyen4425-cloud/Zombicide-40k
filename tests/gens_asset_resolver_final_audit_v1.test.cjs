@@ -37,7 +37,7 @@ for(const [id,b] of [['3.09',b309],['3.10',b310]]){
 
 assert.doesNotMatch(b023,/\bDC023_LOOT_ART\b/,'B.6 resolved: Core 0.23 no longer owns a duplicate loot asset table');
 assert.doesNotMatch(b023,/\bDC023_ASSET_ROOT\b/,'B.6 resolved: Core 0.23 no longer owns a duplicate Dungeon asset root');
-assert.match(b023,/GensAssetResolverV1\\.dungeonItemPath\\(/,'B.6 resolved: Core 0.23 delegates loot paths to the Core item resolver');
+assert.match(b023,/GensAssetResolverV1\.dungeonItemPath\(/,'B.6 resolved: Core 0.23 delegates loot paths to the Core item resolver');
 
 assert.match(b055,/const ROOT55='assets\/dungeon\/creatures\/'/,'block 65 remains an exact Dungeon presentation asset owner');
 assert.match(b055,/dungeon_marker_start\.png/);

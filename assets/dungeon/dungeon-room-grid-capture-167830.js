@@ -7,7 +7,7 @@
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 const VERSION="1.0.2",APP_VERSION="16.78.30";
-let boundGrid=null,boundPointerHandler=null,boundPointerUpHandler=null,installed=false;
+let boundGrid=null,boundPointerHandler=null,boundClickHandler=null,installed=false;
 function templateActive(){return !!DOC?.getElementById("drt167828Toggle")?.classList?.contains("on")}
 function zoneActive(){return !!DOC?.getElementById("drv167826Toggle")?.classList?.contains("on")}
 function stop(ev){ev?.preventDefault?.();ev?.stopPropagation?.();ev?.stopImmediatePropagation?.()}
@@ -18,7 +18,7 @@ function roomObject(index){
 }
 function capture(ev){
   const el=ev?.target?.closest?.("[data-drc-index]");if(!el||(!templateActive()&&!zoneActive()))return false;
-  ev?.stopPropagation?.();ev?.stopImmediatePropagation?.();return true;
+  ev?.stopPropagation?.();return true;
 }
 function activate(ev){
   const el=ev?.target?.closest?.("[data-drc-index]");if(!el)return false;
@@ -33,12 +33,12 @@ function activate(ev){
 }
 function bindGrid(){
   if(!DOC)return false;const grid=DOC.getElementById("drc100Grid");if(!grid)return false;
-  if(boundGrid===grid&&boundPointerHandler&&boundPointerUpHandler)return true;
+  if(boundGrid===grid&&boundPointerHandler&&boundClickHandler)return true;
   if(boundGrid&&boundPointerHandler)try{boundGrid.removeEventListener("pointerdown",boundPointerHandler,true)}catch(e){}
-  if(boundGrid&&boundPointerUpHandler)try{boundGrid.removeEventListener("pointerup",boundPointerUpHandler,true)}catch(e){}
-  boundGrid=grid;boundPointerHandler=capture;boundPointerUpHandler=activate;
+  if(boundGrid&&boundClickHandler)try{boundGrid.removeEventListener("click",boundClickHandler,true)}catch(e){}
+  boundGrid=grid;boundPointerHandler=capture;boundClickHandler=activate;
   grid.addEventListener("pointerdown",boundPointerHandler,true);
-  grid.addEventListener("pointerup",boundPointerUpHandler,true);
+  grid.addEventListener("click",boundClickHandler,true);
   return true;
 }
 function wrapRoomOpen(){

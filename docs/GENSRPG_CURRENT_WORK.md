@@ -129,17 +129,32 @@ Effet attendu :
 - avant le premier paint, le renderer propriétaire a déjà masqué l'état Zombicide et posé l'identité Dungeon ;
 - aucune autorité externe n'est ajoutée.
 
-Validation requise :
-1. sentinelle navigateur `gens_rpg_sheet_survival_flash_browser_v11411.test.cjs` GREEN ;
-2. UI native / fiche héros ;
-3. Dungeon après Survie ;
-4. Config objet ;
-5. cache/pièges authored ;
-6. Save & Quit / reprise ;
-7. Capture / PvP / non-interférence ;
-8. Firefox ;
-9. Tactical Dock ;
-10. aucun merge sur `main`.
+Validation automatique obtenue :
+- HEAD candidat : `d35be1bd200aa17ba172d8cf8a8790790db7f2e9` ;
+- Architecture + navigateur complet `35432531222` — SUCCESS ;
+- Firefox `35432531231` — SUCCESS ;
+- Tactical Dock `35432531226` — SUCCESS ;
+- sentinelle `gens_rpg_sheet_survival_flash_browser_v11411.test.cjs` — SUCCESS ;
+- Dungeon après Survie — SUCCESS ;
+- Config objet — SUCCESS ;
+- cache / retour / pièges authored — SUCCESS ;
+- Save & Quit / reprise — SUCCESS ;
+- Capture courant + composition complète — SUCCESS ;
+- PvP — SUCCESS ;
+- non-interférence quatre modules — SUCCESS ;
+- murs / preview — SUCCESS.
+
+Précision sur la sentinelle :
+- le premier RED après correction venait de snapshots injectés au milieu du même appel JavaScript synchrone ;
+- ces états internes ne peuvent pas être peints par le navigateur ;
+- la sentinelle vérifie désormais les frontières réellement visibles : sortie de clic, `requestAnimationFrame` 1/2, `setTimeout(0)` et état final ;
+- le panneau `#zombicideSkillPanel` est déjà masqué à chacune de ces frontières ;
+- `openChar()` finit lui-même avec le panneau Zombicide masqué.
+
+État :
+- candidat automatiquement GREEN ;
+- test utilisateur manuel requis avant checkpoint final ;
+- aucun merge sur `main`.
 
 ### Règle 26 déclenchée
 

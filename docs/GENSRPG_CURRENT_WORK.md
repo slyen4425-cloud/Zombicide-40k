@@ -75,6 +75,60 @@ Prochaine action après validation de cet audit :
 5. clôturer ensuite le resolver avant de passer à stockage/migrations.
 
 
+## Chantier courant prioritaire — Phase 4 / B.5 chemins tokens tardifs — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-asset-resolver-late-token-paths-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-phase4-asset-resolver-final-audit-green-2026-09-19`
+
+Base exacte :
+`5777a7b1e4943c1a0d6e1196e360440b9462156c`
+
+Audit source :
+`docs/GENSRPG_PHASE4_ASSET_RESOLVER_FINAL_AUDIT.md`
+
+Blob exact `index.html` :
+`388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9`
+(vérifié localement, 8 175 046 octets).
+
+### Périmètre B.5
+
+Propriétaires historiques concernés uniquement :
+- `dungeonCore213Stability.heroImg()` ;
+- `dungeonCore214SingleAuthority.heroArt()` ;
+- `dungeonCore309VisualFixes.enemyArt()` ;
+- `dungeonCore310PersistenceAndTokens.heroArt()` ;
+- `dungeonCore310PersistenceAndTokens.enemyArt()`.
+
+Objectif :
+- supprimer les tables Aldren/Lyra/Brom dupliquées dans ces couches tardives ;
+- remplacer leurs constructions de chemins built-in par les APIs déjà existantes :
+  - `GensAssetResolverV1.dungeonHeroPath(id)` ;
+  - `GensAssetResolverV1.dungeonCreaturePath(id)` ;
+- conserver la priorité des images/avatar personnalisés et des définitions ennemies existantes ;
+- ne toucher à aucune position, paint/token layout, persistance, mouvement, combat, observer local ou navigation.
+
+### Interdit
+
+- aucun loot `dloot_*` dans ce sous-lot ;
+- aucun bloc 65 ;
+- aucun déplacement physique d’asset ;
+- aucun fallback inter-module ;
+- aucun nouveau wrapper/observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Validation prévue
+
+1. RED propriétaire dédié avant runtime ;
+2. test du vrai preview/DOM pour vérifier que les tokens tardifs gardent les mêmes sources d’images ;
+3. raccord minimal des cinq helpers ;
+4. réalignement des empreintes Phase 2 uniquement si le blob change ;
+5. Architecture + navigateur complet + Firefox + Tactical Dock ;
+6. checkpoint B.5 GREEN avant d’ouvrir B.6 loots.
+
+
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :

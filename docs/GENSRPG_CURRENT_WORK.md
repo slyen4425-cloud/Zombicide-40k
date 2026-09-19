@@ -205,20 +205,30 @@ RED dédié :
 - Architecture `35441301589` : échec uniquement sur la nouvelle étape d’autorité héros après succès des 82 étapes précédentes ;
 - Firefox et Tactical Dock restent GREEN sur le même état RED.
 
-Commit runtime :
-`a8e420df976a391e00438d7d6a2056fff46a48fe`
+Commits runtime :
+- délégation héros : `a8e420df976a391e00438d7d6a2056fff46a48fe` ;
+- ordre de chargement propriétaire : `8659cfeea3d07af6555ed5eef1e0cd628ef51a58`.
 
-Blob `index.html` :
-- avant : `286e427df42bc1a04cc981ecbdf90ecb4de547ab` ;
-- après : `04ca2b3803618694f8254e7b6a8fb103cfafa742`.
+Blobs `index.html` :
+- avant délégation héros : `286e427df42bc1a04cc981ecbdf90ecb4de547ab` ;
+- après délégation : `04ca2b3803618694f8254e7b6a8fb103cfafa742` ;
+- après raccord d’ordre de chargement : `ba47d9fb3b8aa1a2183e764455aae97e03965440`.
 
 Raccord appliqué :
 - `dungeonBuiltinHeroGithubArt168(id)` délègue maintenant à `GensAssetResolverV1.dungeonHeroPath(id)` ;
 - la table héroïque historique dupliquée est retirée de ce helper ;
 - `ensureDungeonHeroes()` conserve exactement la priorité existante `ov.avatar || githubArt || dungeonBuiltinPortrait(id)` ;
+- le resolver Core est désormais chargé avant le gros script historique qui contient `dungeonBuiltinHeroGithubArt168()` et `dungeonItems()` ;
+- l’ancien emplacement de chargement avant les blocs 30–32 est retiré, sans second chargement ;
 - `dungeonItems()` et sa table `githubItemArts` ne sont pas modifiés ;
 - aucun asset déplacé ;
 - aucun gameplay, stockage, observer, timer/retry ou wrapper ajouté.
+
+RED navigateur de load-order :
+- Architecture + navigateur `35441536699` : statique GREEN, échec au vrai lancement Survie ;
+- cause exacte : `dungeonBuiltinHeroGithubArt168()` était appelé avant le chargement du resolver, avec `GensAssetResolverV1 === undefined` ;
+- Firefox `35441536658` et Tactical Dock `35441536713` restaient GREEN ;
+- le garde statique `gens_asset_resolver_hero_owner_v1.test.cjs` verrouille désormais le chargement du Core avant le propriétaire historique héros/objets.
 
 ### Prochaine action
 

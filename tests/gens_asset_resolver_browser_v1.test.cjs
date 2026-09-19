@@ -29,7 +29,9 @@ const server=http.createServer((req,res)=>{
 
     const state=await page.evaluate(()=>{
       const before=loadBuiltinEnemyOverrides?.()||{};
+      const beforeItems=loadDungeonItemOverrides?.()||{};
       const id='dng_skeleton',custom='data:image/png;base64,PHASE4_OVERRIDE';
+      const itemId='dng_longsword',customItem='data:image/png;base64,PHASE4_ITEM_OVERRIDE';
       const cleanItems=()=>dungeonItems().reduce((o,x)=>(o[x.id]=x.image_data,o),{});
       const original={
         coreLoaded:!!window.GensAssetResolverV1,
@@ -46,9 +48,12 @@ const server=http.createServer((req,res)=>{
         const next={...before,[id]:{...(before[id]||{}),image_data:custom}};
         saveBuiltinEnemyOverrides(next);
         const override165=gensDungeonCreatureArt165(id);
-        return {original,override165,custom};
+        saveDungeonItemOverrides({...beforeItems,[itemId]:{...(beforeItems[itemId]||{}),image_data:customItem}});
+        const itemOverride=(dungeonItems().find(x=>x.id===itemId)||{}).image_data||'';
+        return {original,override165,custom,itemOverride,customItem};
       }finally{
         saveBuiltinEnemyOverrides(before);
+        saveDungeonItemOverrides(beforeItems);
         try{dungeonApplyGithubArts164?.()}catch(e){}
       }
     });
@@ -66,6 +71,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(state.original.survivalCollision,'');
     assert.equal(state.original.captureCollision,'');
     assert.equal(state.override165,state.custom,'custom enemy override must remain above canonical Dungeon asset');
+    assert.equal(state.itemOverride,state.customItem,'custom item override must remain above canonical Dungeon item asset');
   }finally{
     clearTimeout(watchdog);await context.close();await browser.close();await new Promise(r=>server.close(r));
   }

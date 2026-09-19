@@ -266,6 +266,12 @@ jobs:
       - name: Vérifier le service Core stockage JSON pur Phase 4
         run: node tests/gens_core_storage_v1.test.cjs
 
+      - name: Caractériser la parité stockage Room Creator 1.0
+        run: node tests/gens_phase4_storage_room_creator100_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Room Creator 1.0
+        run: node tests/gens_phase4_storage_room_creator100_owner_v1.test.cjs
+
       - name: Verrouiller l’autorité Core des chemins de créatures Dungeon
         run: node tests/gens_asset_resolver_owner_raccord_v1.test.cjs
 

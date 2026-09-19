@@ -34,7 +34,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,65);
+assert.equal(reachable.size,66);
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 
 const disabled=new Set([
@@ -71,6 +71,7 @@ function metrics(source){
   };
 }
 const hasSignal=m=>Object.values(m).some(Number);
+assert.equal(hasSignal(metrics(read('assets/gensrpg/core/asset-resolver-v1.js'))),false,'Core asset resolver must remain free of global side effects and storage access');
 
 const external=[...reachable].sort().map(rel=>({
   file:rel,

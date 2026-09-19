@@ -79,6 +79,8 @@ async function openChest(page,cell){
 
     // Cycle 1: direct template configuration must use the modern object selector.
     await page.locator('#drt167828Toggle').click();
+    const beforeTemplate=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
+    assert.equal(beforeTemplate.configured,false,'a placed object with only automatic defaults must not look configured');
     await openChest(page,7);
     const first=await page.evaluate(()=>({
       modal:document.getElementById('drt167828Modal')?.classList.contains('open')||false,
@@ -88,7 +90,11 @@ async function openChest(page,cell){
       templatePatched:!!DungeonRoomTemplateContent167828.__dui167831Patched
     }));
     assert.equal(first.modal,true);assert.equal(first.modern,true,'first direct configuration must use modern item dropdown');assert.equal(first.legacyTextareaVisible,false,'legacy item-ID textarea must be hidden on first direct configuration');
-    await page.evaluate(()=>DungeonRoomTemplateContent167828.closeEditor());
+    await page.locator('#drt167828Modal button[onclick="DungeonRoomTemplateContent167828.saveActive()"]').click();
+    await page.waitForFunction(()=>!document.getElementById('drt167828Modal')?.classList.contains('open'));
+    const configuredTemplate=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
+    assert.equal(configuredTemplate.configured,true,'saved object must receive configured state');
+    assert.notEqual(configuredTemplate.bg,beforeTemplate.bg,'saved object must use a visibly different configured color');
     await page.evaluate(()=>DungeonRoomCreator100.close());
     await page.waitForFunction(()=>!document.getElementById('drc100Modal')?.classList.contains('open'));
 
@@ -97,6 +103,9 @@ async function openChest(page,cell){
     await page.evaluate(id=>DungeonRoomCreator100.editRoom(id),fixture.roomId);
     await page.waitForFunction(()=>!!document.querySelector('#drc100Grid [data-drc-index="7"]'));
     await page.locator('#drt167828Toggle').click();
+    const reopenedConfigured=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
+    assert.equal(reopenedConfigured.configured,true,'configured color must survive closing and reopening the Room Creator');
+    assert.equal(reopenedConfigured.bg,configuredTemplate.bg,'configured color must be derived from persisted content');
     await openChest(page,7);
     const second=await page.evaluate(()=>({
       modern:!!document.getElementById('dui167831Itemtemplate'),
@@ -125,6 +134,11 @@ async function openChest(page,cell){
     assert.equal(zone.modal,true,'zone configuration modal must open');
     assert.equal(zone.modern,true,'zone Config objet must use modern item dropdown');
     assert.equal(zone.legacyTextareaVisible,false,'zone Config objet must never expose legacy item-ID textarea');
+    await page.locator('#drv167826Modal button[onclick="DungeonRoomVisualConfig167826.saveActive()"]').click();
+    await page.waitForFunction(()=>!document.getElementById('drv167826Modal')?.classList.contains('open'));
+    const configuredZone=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drv167826Configured'),bg:getComputedStyle(el).backgroundColor}));
+    assert.equal(configuredZone.configured,true,'zone-specific save must mark the object configured');
+    assert.notEqual(configuredZone.bg,beforeTemplate.bg,'zone configured object must use the configured color');
     assert.deepEqual(errors,[]);
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();

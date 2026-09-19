@@ -41,10 +41,10 @@ assert.ok(modal,'la fiche de configuration doit être créée après un toucher 
 assert.equal(modal.classList.contains('open'),true,'la fiche de configuration doit réellement s’ouvrir');
 
 api.configureElement('world-1','zone-1','room-a',5,'enemy',{enemyId:'dng_orc'});
-assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(content.enemies[0].hp,null,'sans réglage UI les PV doivent venir du monstre');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');
+assert.equal(content.enemies.length,1);assert.equal(content.enemies[0].enemyId,'dng_orc');assert.equal(content.enemies[0].configured,true,'a real user configuration must be marked explicitly');assert.equal(content.enemies[0].qty,1,'un marqueur ennemi simple doit rester quantité 1');assert.equal(content.enemies[0].hp,null,'sans réglage UI les PV doivent venir du monstre');assert.equal(content.enemies[0].hasKey,false,'sans réglage UI aucune clé forcée ne doit être ajoutée');
 api.configureElement('world-1','zone-1','room-a',9,'chest',{rarity:'epic',gold:25,itemsText:'potion_soin'});
-assert.equal(content.mode,'fixed');assert.equal(content.chests.length,1);assert.equal(content.chests[0].cell,9);
-assert.match(patch,/el\.onpointerdown=handler/,'le correctif doit brancher directement chaque case');
+assert.equal(content.mode,'fixed');assert.equal(content.chests.length,1);assert.equal(content.chests[0].cell,9);assert.equal(content.chests[0].configured,true);
+assert.match(patch,/el\.onpointerdown=handler/,'le correctif doit brancher directement chaque case');assert.match(patch,/api\?\.openEditor\?\.\(idx,obj\)/,'activateCell doit déléguer au seul openEditor public patchable');
 assert.doesNotMatch(patch,/DOC\.addEventListener\("pointerdown",intercept,true\)/,'l’ancien intercepteur global fragile ne doit plus être utilisé');
 assert.match(loader,/DungeonZoneContent167824/,'le loader doit attendre le runtime de contenu exact');
 assert.match(loader,/drv167826Script/,'le loader doit charger la configuration visuelle');

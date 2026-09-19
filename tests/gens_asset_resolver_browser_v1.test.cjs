@@ -41,6 +41,7 @@ const server=http.createServer((req,res)=>{
         heroL:dungeonBuiltinHeroGithubArt168('dungeon_lyra'),
         heroB:dungeonBuiltinHeroGithubArt168('dungeon_brom'),
         items:cleanItems(),
+        loot:(typeof dungeonLootCatalog160==='function'?dungeonLootCatalog160():[]).reduce((o,x)=>(o[x.id]=x.image_data||'',o),{}),
         survivalCollision:dungeonAutoArtPath164('walker'),
         captureCollision:dungeonAutoArtPath164('braiseau')
       };
@@ -68,6 +69,14 @@ const server=http.createServer((req,res)=>{
     assert.equal(state.original.items.dng_longsword,'assets/dungeon/creatures/dng_longsword.png');
     assert.equal(state.original.items.dng_heal_potion,'assets/dungeon/creatures/dungeon_potion_hp.png');
     assert.equal(state.original.items.dng_amulet,'assets/dungeon/creatures/dungeon_relic.png');
+    assert.equal(state.original.loot.dloot_old_coin,'assets/dungeon/creatures/dloot_old_coin.png');
+    assert.equal(state.original.loot.dloot_silver_idol,'assets/dungeon/creatures/dloot_silver_idol.png');
+    assert.equal(state.original.loot.dloot_beast_fang,'assets/dungeon/creatures/dloot_beast_fang.png');
+    assert.equal(state.original.loot.dloot_runic_shard,'assets/dungeon/creatures/dloot_runic_shard.png');
+    assert.equal(state.original.loot.dloot_black_pearl,'assets/dungeon/creatures/dloot_black_pearl.png');
+    assert.equal(state.original.loot.dloot_dragon_scale,'assets/dungeon/creatures/dloot_dragon_scale.png');
+    assert.equal(state.original.loot.dloot_royal_relic,'assets/dungeon/creatures/dloot_royal_relic.png');
+    assert.equal(state.original.loot.dloot_void_gem,'assets/dungeon/creatures/dloot_void_gem.png');
     assert.equal(state.original.survivalCollision,'');
     assert.equal(state.original.captureCollision,'');
     assert.equal(state.override165,state.custom,'custom enemy override must remain above canonical Dungeon asset');

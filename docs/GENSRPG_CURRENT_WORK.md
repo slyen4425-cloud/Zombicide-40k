@@ -9,6 +9,63 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / raccord stockage Room Creator 1.0 — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-room-creator-storage-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-room-creator-storage-2026-09-19`
+
+Base exacte :
+`e4992de45132d40b12cdbbd3ec757c8102f92c93`
+(`checkpoint/gensrpg-phase4-core-storage-service-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Propriétaire concerné
+
+`assets/dungeon/dungeon-room-creator-100.js`
+
+Clé :
+`gensrpg_dungeon_custom_rooms_v1`
+
+Accès directs actuels :
+- 1 lecture `localStorage.getItem(STORAGE_KEY)` ;
+- 1 écriture `localStorage.setItem(STORAGE_KEY,...)`.
+
+### Objectif
+
+- charger `assets/gensrpg/core/storage-v1.js` avant Room Creator dans Pages et `preview.html` ;
+- ajouter le service au precache PWA ;
+- faire déléguer uniquement `loadLibrary()` et `saveLibrary()` à `GensStorageV1` ;
+- conserver la clé, `normalizeRoom()`, le format JSON et les fallbacks strictement identiques.
+
+### Interdit
+
+- aucune migration de format ;
+- aucune nouvelle clé ;
+- aucun changement de Room schema ou `SCHEMA_VERSION` ;
+- aucun raccord Room Creator V2 / World Builder dans ce lot ;
+- aucun changement Dungeon runtime, Save & Quit, Tactical, Capture ou Survie ;
+- aucun fallback direct vers `localStorage` dans Room Creator après raccord ;
+- aucun wrapper/observer/timer/retry ;
+- aucun changement de `index.html`.
+
+### Tests requis
+
+1. RED : Room Creator possède encore ses deux accès directs ;
+2. Core chargé avant Room Creator dans Pages + preview ;
+3. service précaché ;
+4. round-trip historique `dungeon_room_creator_v1.test.cjs` ;
+5. clé absente / JSON invalide / JSON `null` inchangés ;
+6. normalisation `normalizeRoom()` toujours module-owned ;
+7. graphe/runtime manifests réalignés si le nombre de fichiers atteignables change ;
+8. Builder navigateur réel ;
+9. Architecture + navigateur complet + Firefox + Tactical Dock avant GREEN.
+
+
 ## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
 
 Branche :

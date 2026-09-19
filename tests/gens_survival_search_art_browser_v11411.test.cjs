@@ -71,7 +71,14 @@ async function startSurvival(page){
     mark('prepare');await prepare(page,port);
     mark('open-survival');await openSurvival(page);
     mark('start-survival');await startSurvival(page);
-    await page.waitForTimeout(250);
+    mark('open-survival-hero');
+    const heroPick=page.locator('#menu .charPick').first();
+    await heroPick.waitFor({state:'visible'});await heroPick.click();
+    await page.waitForFunction(()=>{
+      const b=document.getElementById('searchItemBtn');if(!b)return false;
+      const r=b.getBoundingClientRect();return r.width>0&&r.height>0;
+    },null,{timeout:5000}).catch(()=>{});
+    await page.waitForTimeout(100);
 
     mark('characterize');
     const state=await page.evaluate(()=>{

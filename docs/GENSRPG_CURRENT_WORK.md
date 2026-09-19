@@ -9,6 +9,58 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-core-service-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-core-service-2026-09-19`
+
+Base exacte :
+`151e714c1373748ee6a42a03a8ec7fb44aded8c9`
+(`checkpoint/gensrpg-phase4-storage-builder-audit-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif du jalon
+
+Créer `assets/gensrpg/core/storage-v1.js` comme service générique JSON pur, explicitement hors graphe de production.
+
+API cible :
+- `GensStorageV1.readJson(storage,key,fallback)` ;
+- `GensStorageV1.writeJson(storage,key,value)` ;
+- `GensStorageV1.create(storage)`.
+
+### Invariants
+
+- aucune clé métier dans le Core ;
+- aucune connaissance Room / Graph / Hero / module ;
+- aucune migration de format dans ce jalon ;
+- stockage injecté explicitement ;
+- lecture absente/invalide/null -> fallback ;
+- erreurs d'écriture et de sérialisation propagées ;
+- aucun DOM, observer, listener, timer/retry, gameplay ou navigation ;
+- aucune modification de `index.html`, Pages, preview ou service worker ;
+- aucun consommateur production raccordé dans ce lot.
+
+### Tests requis
+
+1. service syntaxiquement valide ;
+2. absence de clés/schémas métier ;
+3. missing / JSON invalide / chaîne vide / `null` ;
+4. round-trip objet et tableau ;
+5. erreur de lecture -> fallback ;
+6. erreur d'écriture et JSON circulaire -> erreur propagée ;
+7. service explicitement hors graphe production ;
+8. Architecture + navigateur complet + Firefox + Tactical Dock.
+
+### Suite autorisée uniquement après GREEN
+
+Créer un checkpoint final de ce service, puis ouvrir un lot séparé pour raccorder uniquement `DungeonRoomCreator100` à la clé historique `gensrpg_dungeon_custom_rooms_v1`.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
 
 Branche :

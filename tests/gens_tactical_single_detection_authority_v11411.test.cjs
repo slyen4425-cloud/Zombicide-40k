@@ -31,15 +31,16 @@ for(const [label,source,install] of [['V108',v108,i108],['V111',v111,i111],['V11
 assert.doesNotMatch(i112,/scheduleDetection\(rt,"install-vision-v112",true\)/,'V112 must not perform an install-time detection scan');
 assert.doesNotMatch(i112,/hookStart\(rt\)/,'V112 must not retake combat-start authority');
 
-// V113 remains the one active detection/scope owner for movement, events and board
-// interactions. Combat-start routing itself is now the Bridge explicit contract.
-for(const required of ['ensureDetectionHooks(rt)','bindBoardClicks(rt)']){
-  assert.ok(i113.includes(required),`V113 install must keep ${required}`);
-}
+// V113 remains the one active LOS/detection/scope owner for movement and events.
+// The real Core2 movement seam invokes scanDetection synchronously; board click/pointer
+// listeners must not become a second movement authority. Combat-start routing remains Bridge-owned.
+assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 install must keep canonical detection hooks');
+assert.ok(!i113.includes('bindBoardClicks(rt)'),'V113 install must not retain board click/pointer movement detection');
 assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must keep movement/events/scope readiness');
 assert.match(v113,/wrapped\.__gensRpg113Detection=true;wrapped\.__original=old;rt\.dungeonMoveHero098=wrapped/,'V113 must be the active movement detection wrapper');
 assert.match(v113,/event-detection-v113:/,'V113 must own event-triggered detection');
-assert.match(v113,/board-cell-detection-v113/,'V113 must own board-cell detection');
+assert.match(v113,/if\(out!==false\)scanDetection\(rt,"movement-detection-v113",true\)/,'V113 legacy movement wrapper must scan synchronously');
+assert.doesNotMatch(v113,/board-cell-detection-v113/,'V113 must not own a duplicate board click/pointer movement detector');
 assert.match(v113,/if\(cur\.__gensRpg113Start\)\{startHooked=true;return true\}/,'V113 start hook must short-circuit when the Bridge already carries equivalent authority');
 assert.match(bridge,/start\.__gensRpg113Start=true;start\.__gensRpg112Start=true/,'Bridge global start adapter must advertise V113-equivalent scope/detection semantics and block V112 retries');
 assert.match(bridge,/function prepareV113Detection\(/,'Bridge explicit request must preserve V113 detection visibility/source semantics');
@@ -53,4 +54,4 @@ assert.match(v113,/function selectCombatants\(/,'V113 must remain final combatan
 const legacyInstalls=[i108,i111,i112].join('\n');
 assert.doesNotMatch(legacyInstalls,/detection-immediate|detection-v111|vision-v112|hookDetection|scheduleDetection/,'legacy detection must not be activated by install');
 
-console.log('GenSrpG V114.11 single detection authority OK: V113 owns detection/scope; Bridge owns the final global start adapter through the explicit V113 contract');
+console.log('GenSrpG V114.11 single detection authority OK: V113 owns LOS/detection/scope without board-click duplication; Bridge owns final global start');

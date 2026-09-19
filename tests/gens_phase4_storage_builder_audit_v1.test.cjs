@@ -31,9 +31,9 @@ assert.equal((world.match(/localStorage\.setItem\(/g)||[]).length,1,'World Build
 assert.equal((visual.match(/localStorage\.getItem\(/g)||[]).length,1,'Visual Config must have one direct graph read before extraction');
 assert.equal((visual.match(/localStorage\.setItem\(/g)||[]).length,0,'Visual Config must remain read-only for graph storage');
 
-assert.match(room100,/JSON\.parse\(localStorage\.getItem\(STORAGE_KEY\)\|\|"\[\]"/,'Room Creator 1.0 empty/corrupt fallback semantics must be characterized');
+assert.match(room100,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\[\]\)/,'Room Creator 1.0 must preserve [] fallback through Core storage');
 assert.match(room100,/map\(normalizeRoom\)\.filter\(Boolean\)/,'Room normalization must remain module-owned');
-assert.match(room100,/JSON\.stringify\(clean\)/,'Room Creator 1.0 writes normalized module data');
+assert.match(room100,/GensStorageV1\.writeJson\(ROOT\.localStorage,STORAGE_KEY,clean\)/,'Room Creator 1.0 must write normalized module data through Core storage');
 
 assert.match(roomV2,/JSON\.parse\(localStorage\.getItem\(STORAGE_KEY\)\|\|"\{\}"/,'Room Creator V2 empty fallback semantics must be characterized');
 assert.match(roomV2,/normalizeMeta/,'Room Creator V2 normalization must remain module-owned');

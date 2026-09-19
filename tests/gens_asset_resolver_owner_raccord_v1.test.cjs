@@ -7,7 +7,7 @@ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const resolver=fs.readFileSync(path.join(root,'assets','gensrpg','core','asset-resolver-v1.js'),'utf8');
 
 function block(id){
-  const re=new RegExp('<script[^>]*id=["\\']'+id+'["\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
+  const re=new RegExp(`<script[^>]*id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/script>`,'i');
   const m=index.match(re);
   assert.ok(m,'missing inline block '+id);
   return m[1];

@@ -17,6 +17,58 @@ Lire avant tout changement :
 
 ## État opérationnel prioritaire — 2026-09-19
 
+### Lot Dungeon — déplacement -> interactions (diagnostic)
+
+Branche :
+`work/gensrpg-dungeon-movement-events-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-dungeon-movement-events-2026-09-19`
+
+Base exacte :
+`7b8173f7ca949f4592cacd51610d1c11f953f829`
+(`checkpoint/gensrpg-object-config-editor-green-2026-09-19`)
+
+Module concerné :
+- Dungeon exploration uniquement.
+
+Périmètre initial :
+- diagnostic du signal canonique de fin de déplacement ;
+- raccord immédiat des interactions authored de coffre / piège / événement de case ;
+- raccord de la détection ennemie / ligne de vue ;
+- reproduction navigateur RED avant toute correction runtime.
+
+Fonctions et domaines protégés :
+- fiche personnage RPG, `openChar()`, stats, progression ;
+- Tactical, Capture, Survie, PvP ;
+- règles de combat ;
+- performance de déplacement ;
+- `index.html` sauf preuve indispensable (copie exacte déjà fournie et vérifiée, blob `55453138449d07bde731ff6934acc442f56bae32`).
+
+Interdictions :
+- aucun `setInterval`, polling ou retry d'attente ;
+- aucun `MutationObserver` global ;
+- aucun second moteur de détection/interactions ;
+- aucun recalcul de mouvement dans l'UI ;
+- aucun raccord artificiel entre coffres et ennemis si leurs propriétaires sont distincts.
+
+Tests prévus :
+1. vrai chemin Dungeon authored jusqu'à une case coffre ;
+2. dernier pas sur la case -> action coffre disponible immédiatement, sans attente artificielle ;
+3. vrai scénario ennemi utilisant la règle réelle de détection/LOS ;
+4. réaction sur le même cycle de déplacement ;
+5. déplacement neutre -> aucune réaction parasite ;
+6. sentinelles Dungeon existantes ;
+7. Architecture / navigateur complet / Firefox / Tactical Dock avant tout GREEN.
+
+Risques :
+- confondre rendu tardif et absence de signal de fin de mouvement ;
+- faire porter la détection ennemie à Tactical alors que le déclenchement Dungeon appartient à Dungeon ;
+- réintroduire un wrapper/timer au lieu de raccorder le consommateur au propriétaire canonique.
+
+Prochaine étape :
+- identifier la chaîne exacte après un déplacement et produire le RED avant toute correction runtime.
+
 Ce bloc prime sur les sections historiques conservées plus bas.
 
 ### Lot Config objet — validation fonctionnelle terminée

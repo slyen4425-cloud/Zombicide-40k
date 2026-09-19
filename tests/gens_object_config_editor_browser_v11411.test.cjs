@@ -177,22 +177,18 @@ async function chooseParticipantAndStart(page){
     assert.equal(reopenedConfigured.configured,true,'configured color must survive closing and reopening the Room Creator');
     assert.equal(reopenedConfigured.bg,configuredTemplate.bg,'configured color must be derived from persisted content');
 
-    // Characterize the real pointerdown -> pointerup path: the modal currently opens on pointerdown.
+    // Completed-gesture invariant: pressing the cell must not expose modal buttons under the pointer.
     const touchPoint=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
     await page.mouse.move(touchPoint.x,touchPoint.y);await page.mouse.down();
+    const duringPressOpen=await page.evaluate(()=>document.getElementById('drt167828Modal')?.classList.contains('open')||false);
+    assert.equal(duringPressOpen,false,'object config modal must stay closed while the pointer is still pressed');
+    await page.mouse.up();
     await page.waitForFunction(()=>document.getElementById('drt167828Modal')?.classList.contains('open'));
-    const underFinger=await page.evaluate(({x,y})=>{
-      const el=document.elementFromPoint(x,y),stack=document.elementsFromPoint(x,y).slice(0,8);
-      return {
-        top:{tag:el?.tagName||'',id:el?.id||'',text:(el?.textContent||'').trim().slice(0,100),onclick:el?.getAttribute?.('onclick')||''},
-        stack:stack.map(e=>({tag:e.tagName,id:e.id||'',text:(e.textContent||'').trim().slice(0,80),onclick:e.getAttribute?.('onclick')||''}))
-      };
-    },touchPoint);
-    await page.mouse.up();await page.waitForTimeout(80);
+    await page.waitForTimeout(80);
     const afterReleaseOpen=await page.evaluate(()=>document.getElementById('drt167828Modal')?.classList.contains('open')||false);
-    console.log('[object-config-editor] pointer-modal-risk',JSON.stringify({touchPoint,underFinger,afterReleaseOpen},null,2));
-    if(afterReleaseOpen)await page.evaluate(()=>DungeonRoomTemplateContent167828.closeEditor());
-    else assert.fail('modal opened on pointerdown but closed again on the same pointer release');
+    console.log('[object-config-editor] completed-gesture-modal',JSON.stringify({touchPoint,duringPressOpen,afterReleaseOpen},null,2));
+    assert.equal(afterReleaseOpen,true,'object config modal must open and remain open after the completed gesture');
+    await page.evaluate(()=>DungeonRoomTemplateContent167828.closeEditor());
 
     await openChest(page,7);
     const second=await page.evaluate(()=>({

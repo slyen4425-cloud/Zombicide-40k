@@ -47,6 +47,12 @@ async function openEditor(page){
 async function openChest(page,cell){
   const el=page.locator('#drc100Grid [data-drc-index="'+cell+'"]');await el.waitFor({state:'visible'});await el.click();
 }
+async function touchOpenChest(page,cell){
+  const el=page.locator('#drc100Grid [data-drc-index="'+cell+'"]');await el.waitFor({state:'visible'});
+  const box=await el.boundingBox();assert.ok(box&&box.width>0&&box.height>0,'configured cell must have a real touch target');
+  await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);
+  await page.waitForTimeout(120);
+}
 async function modalStack(page,modalId,cardSelector){
   return page.evaluate(({modalId,cardSelector})=>{
     const modal=document.getElementById(modalId),card=document.querySelector(cardSelector);
@@ -114,7 +120,7 @@ async function chooseParticipantAndStart(page){
     await page.locator('#drt167828Toggle').click();
     const beforeTemplate=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
     assert.equal(beforeTemplate.configured,false,'a placed object with only automatic defaults must not look configured');
-    await openChest(page,7);
+    await touchOpenChest(page,7);
     const first=await page.evaluate(()=>({
       modal:document.getElementById('drt167828Modal')?.classList.contains('open')||false,
       modern:!!document.getElementById('dui167831Itemtemplate'),

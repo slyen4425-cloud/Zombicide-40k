@@ -117,15 +117,40 @@ Validation :
 - Firefox `35434977895` — SUCCESS ;
 - Tactical Dock `35434977920` — SUCCESS.
 
+### Jalon B.1 — parité historique réelle figée — GREEN
+
+Sentinelle navigateur :
+`tests/gens_asset_resolver_browser_v1.test.cjs`
+
+HEAD validé :
+`a351d084d0feb45493ce330fec75f5138ecf39c1`
+
+La vraie composition `preview.html` verrouille désormais avant migration :
+- `dungeonAutoArtPath164('dng_skeleton')` -> `assets/dungeon/creatures/dng_skeleton.png` ;
+- `gensDungeonCreatureArt165('dng_skeleton')` -> même chemin canonique ;
+- héros built-in Aldren/Lyra/Brom -> chemins actuels inchangés ;
+- objets built-in représentatifs -> chemins actuels inchangés ;
+- collisions Survie (`walker`) et Capture (`braiseau`) -> aucune résolution Dungeon ;
+- override ennemi explicite -> reste prioritaire sur le chemin canonique ;
+- le resolver Core Phase 4 reste encore hors graphe production à ce sous-jalon.
+
+Validation sur `a351d084d0feb45493ce330fec75f5138ecf39c1` :
+- Architecture + navigateur complet `35435294480` — SUCCESS ;
+- Firefox `35435294459` — SUCCESS ;
+- Tactical Dock `35435294469` — SUCCESS.
+
 ### Prochaine action
 
-Jalon B :
-1. figer par test les résultats réels des resolvers historiques inline ;
-2. charger explicitement le resolver Core avant les consommateurs historiques ;
-3. migrer les consommateurs un par un vers ce propriétaire ;
-4. supprimer les tables/constructeurs de chemins devenus redondants, ou conserver uniquement des alias délégants si un consommateur réel l’exige ;
-5. ne déplacer aucun asset physique ;
-6. repasser toutes les sentinelles avant tout checkpoint suivant.
+Jalon B.2 :
+1. travailler depuis l’`index.html` exact du HEAD Phase 4, blob `d942934741ca200319de02116c4dd384722d39c7` ;
+2. charger explicitement `assets/gensrpg/core/asset-resolver-v1.js` avant les consommateurs historiques inline concernés ;
+3. migrer d’abord le plus petit consommateur dont la parité est déjà verrouillée, sans wrapper global ni deuxième resolver ;
+4. garder les overrides explicites au-dessus du chemin canonique ;
+5. ne supprimer une table/constructeur historique qu’après preuve qu’aucun consommateur réel ne l’utilise encore ;
+6. ne déplacer aucun asset physique ;
+7. repasser Architecture + navigateur complet + Firefox + Tactical Dock avant tout checkpoint suivant.
+
+Règle 26 appliquée : le contenu exact du gros `index.html` est nécessaire pour ce raccord ; utiliser uniquement la copie correspondant au blob `d942934741ca200319de02116c4dd384722d39c7`.
 
 ## Production sûre
 

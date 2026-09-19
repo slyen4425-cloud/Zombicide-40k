@@ -6347,30 +6347,13 @@ function dungeonItems(){
     {id:"dng_amulet",name:"Amulette ancienne",type:"Équipement",rpgSlot:"neck",effect:"+2 Intelligence · +1 Défense magique.",rpgBonuses:{intelligence:2,magicDefense:1}}
   ];
   const ovs=loadDungeonItemOverrides();
-  const githubItemArts={
-    /* Nouveaux équipements — fichiers GitHub dans assets/dungeon/creatures/ */
-    dng_longsword:"dng_longsword.png",
-    dng_bow:"dng_bow.png",
-    dng_staff:"dng_staff.png",
-    dng_shield:"dng_shield.png",
-    dng_leather:"dng_leather.png",
-    dng_chain:"dng_chain.png",
-    /* Objets déjà existants */
-    dng_heal_potion:"dungeon_potion_hp.png",
-    dng_mana_potion:"dungeon_potion_mp.png",
-    dng_fire_scroll:"dungeon_scroll.png",
-    dng_torch:"dungeon_torch.png",
-    dng_amulet:"dungeon_relic.png",
-    dng_lockpick:"dungeon_key.png",
-    dng_arrows:"dungeon_arrows.png"
-  };
   return base.map(it=>{
     const ov=ovs[it.id]||{};
-    const githubArt=githubItemArts[it.id] ? "assets/dungeon/creatures/"+githubItemArts[it.id] : "";
+    const canonicalArt=window.GensAssetResolverV1.dungeonItemPath(it.id);
     return {
       ...it,...ov,id:it.id,dungeonBuiltin:true,
-      /* Priorité : image personnalisée éditeur > asset GitHub > ancien visuel généré */
-      image_data:ov.image_data||githubArt||dungeonItemArt(it.id,ov.name||it.name),
+      /* Priorité : image personnalisée éditeur > asset canonique > ancien visuel généré */
+      image_data:ov.image_data||canonicalArt||dungeonItemArt(it.id,ov.name||it.name),
       imageCrop:gensNormCrop(ov.imageCrop||{})
     };
   });

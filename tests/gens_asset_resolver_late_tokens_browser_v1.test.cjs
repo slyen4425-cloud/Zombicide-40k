@@ -31,10 +31,29 @@ async function openFamily(page,family){
 }
 async function selectDungeon(page){
   const id='game_profile_dungeon_demo';
+  await page.waitForFunction(()=>typeof window.gensProfileContentFamily155==='function'&&typeof window.activeGameProfileId==='function',null,{timeout:60000});
   await openFamily(page,'adventure');
-  const card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+  let card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
   await card.waitFor({state:'visible'});
-  await card.click();
+  const sw=await page.evaluate(id=>({
+    active:activeGameProfileId(),
+    from:gensProfileContentFamily155(activeGameProfileId()),
+    to:gensProfileContentFamily155(id)
+  }),id);
+  if(sw.active&&sw.active!==id&&sw.from!==sw.to){
+    await Promise.all([
+      page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),
+      card.click()
+    ]);
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    await page.waitForFunction(()=>typeof window.openGensFamily==='function'&&typeof window.gensProfileContentFamily155==='function'&&!!window.GensAssetResolverV1,null,{timeout:60000});
+    await openFamily(page,'adventure');
+    card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+    await card.waitFor({state:'visible'});
+    await card.click();
+  }else{
+    await card.click();
+  }
   await page.waitForFunction(id=>typeof activeGameProfileId==='function'&&activeGameProfileId()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',id,{timeout:30000});
 }
 async function startDungeon(page){

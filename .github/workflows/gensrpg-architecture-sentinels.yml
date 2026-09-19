@@ -335,3 +335,6 @@ jobs:
 
       - name: Caractériser la résolution réelle des assets Phase 4
         run: node tests/gens_asset_resolver_browser_v1.test.cjs
+
+      - name: Caractériser les tokens tardifs du resolver d’assets Phase 4
+        run: node tests/gens_asset_resolver_late_tokens_browser_v1.test.cjs

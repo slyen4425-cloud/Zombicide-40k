@@ -29,7 +29,15 @@ const DUNGEON_ITEM_FILES=Object.freeze({
   dng_torch:"dungeon_torch.png",
   dng_amulet:"dungeon_relic.png",
   dng_lockpick:"dungeon_key.png",
-  dng_arrows:"dungeon_arrows.png"
+  dng_arrows:"dungeon_arrows.png",
+  dloot_old_coin:"dloot_old_coin.png",
+  dloot_silver_idol:"dloot_silver_idol.png",
+  dloot_beast_fang:"dloot_beast_fang.png",
+  dloot_runic_shard:"dloot_runic_shard.png",
+  dloot_black_pearl:"dloot_black_pearl.png",
+  dloot_dragon_scale:"dloot_dragon_scale.png",
+  dloot_royal_relic:"dloot_royal_relic.png",
+  dloot_void_gem:"dloot_void_gem.png"
 });
 
 function clean(value){return typeof value==="string"?value.trim():""}

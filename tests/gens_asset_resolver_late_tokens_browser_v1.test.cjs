@@ -67,31 +67,35 @@ async function startDungeon(page){
   await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
   await page.waitForFunction(()=>!!window.DungeonCore01&&!!localStorage.getItem('gensrpg_dungeon_runtime_v2'),null,{timeout:15000});
 }
-async function enterFirstRoom(page){
-  const explore=page.locator('#dc01Explore');
-  await explore.waitFor({state:'visible'});
-  // Fixture déterministe uniquement sur l'entrée aléatoire : 0 sélectionne le vrai kind "enemy".
-  // Le spawn, le stockage, le renderer et la résolution d'assets restent les propriétaires production.
-  await page.evaluate(()=>{
-    window.__gensB5OriginalRandom=Math.random;
-    Math.random=()=>0;
-  });
-  try{
+async function enterRoomWithEnemy(page){
+  for(let attempt=0;attempt<10;attempt++){
+    const before=await page.evaluate(()=>{
+      try{return Number(JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')?.room||0)}
+      catch(e){return 0}
+    });
+    const explore=page.locator('#dc01Explore');
+    await explore.waitFor({state:'visible'});
     await explore.click();
+
     const ok=page.locator('#dc200ModalOk');
     try{await ok.waitFor({state:'visible',timeout:6000});await ok.click()}catch(e){}
-    await page.waitForFunction(()=>{
+
+    await page.waitForFunction(prev=>{
       try{
         const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
-        return Number(x?.room)>=1&&!!x?.last&&document.querySelectorAll('#dc047RoomBoard .dc047Grid>.dc047Cell').length>0;
+        return Number(x?.room||0)>Number(prev)&&!!x?.last&&document.querySelectorAll('#dc047RoomBoard .dc047Grid>.dc047Cell').length>0;
       }catch(e){return false}
-    },null,{timeout:15000});
-  }finally{
-    await page.evaluate(()=>{
-      if(typeof window.__gensB5OriginalRandom==='function')Math.random=window.__gensB5OriginalRandom;
-      delete window.__gensB5OriginalRandom;
+    },before,{timeout:15000});
+
+    const found=await page.evaluate(()=>{
+      const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
+      const enemies=(typeof loadActiveEnemies==='function'?loadActiveEnemies():[])
+        .filter(e=>!e.removed&&!e.defeated&&Number(e.hp)>0&&Number(e.dungeonRoom||0)===Number(x?.room||0));
+      return enemies.some(e=>Number.isInteger(Number(x?.enemyCells?.[e.id])));
     });
+    if(found)return;
   }
+  throw new Error('No live Dungeon enemy token reached through the real exploration path');
 }
 
 (async()=>{
@@ -121,7 +125,7 @@ async function enterFirstRoom(page){
     await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1'&&!!window.GensAssetResolverV1,null,{timeout:60000});
     await selectDungeon(page);
     await startDungeon(page);
-    await enterFirstRoom(page);
+    await enterRoomWithEnemy(page);
 
     await page.evaluate(()=>{
       const h=window.CHARS?.dungeon_aldren;
@@ -155,7 +159,7 @@ async function enterFirstRoom(page){
     console.log('[late-token-assets]',JSON.stringify(state,null,2));
     console.log('[late-token-assets-errors]',JSON.stringify(errors,null,2));
     assert.equal(state.heroSrc,state.heroExpected,'final Core 3.10 hero token must keep the canonical Aldren art');
-    assert.ok(state.enemyId,'first generated Dungeon room must expose at least one live enemy for token parity');
+    assert.ok(state.enemyId,'real Dungeon exploration must reach at least one live enemy for token parity');
     assert.ok(/^dng_/i.test(state.enemyId),'characterization expects a canonical built-in Dungeon enemy');
     assert.equal(state.enemySrc,state.enemyExpected,'final Core 3.10 enemy token must keep the canonical Dungeon enemy art');
     assert.equal(errors.length,0,'browser console/page errors');

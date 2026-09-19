@@ -72,6 +72,37 @@ Si l'audit confirme l'absence d'autre propriétaire :
 - sentinelles Builder existantes ;
 - Architecture + navigateur complet + Firefox + Tactical Dock avant GREEN.
 
+### Résultat audit Builders — GREEN
+
+Audit dédié :
+`docs/GENSRPG_PHASE4_STORAGE_BUILDER_AUDIT.md`
+
+Sentinelle :
+`tests/gens_phase4_storage_builder_audit_v1.test.cjs`
+
+Résultat :
+- trois clés Builders réelles confirmées :
+  - `gensrpg_dungeon_custom_rooms_v1` ;
+  - `gensrpg_dungeon_room_interactions_v2` ;
+  - `gensrpg_zone_graphs_v1` ;
+- correction de lecture de la cartographie Phase 2 : `gensrpg_dungeon_custom_rooms_v1` n'est pas dynamique ; elle avait seulement échappé au scanner à cause d'une déclaration `const` multiple ;
+- les normalizers métier restent dans leurs modules ;
+- aucune migration de format autorisée dans le premier déplacement ;
+- `gensrpg_dungeon_runtime_v2` reste explicitement hors périmètre.
+
+Validation du HEAD documentaire précédent :
+- Architecture + navigateur complet `35464195718` — SUCCESS ;
+- Firefox `35464195796` — SUCCESS ;
+- Tactical Dock `35464195777` — SUCCESS.
+
+Prochaine action après validation de cette fermeture documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-builder-audit-green-2026-09-19` ;
+2. ouvrir un nouveau sous-lot depuis ce checkpoint ;
+3. créer un service Core stockage JSON minimal, hors production au premier jalon ;
+4. le service ne doit connaître aucune clé métier ni aucun schéma Room/Graph ;
+5. valider lecture absente, JSON invalide, `null`, round-trip et propagation des erreurs d'écriture ;
+6. seulement après ce service GREEN, ouvrir un lot séparé pour raccorder `DungeonRoomCreator100`.
+
 
 ## Chantier courant prioritaire — Phase 4 / audit final resolver d’assets — 2026-09-19
 

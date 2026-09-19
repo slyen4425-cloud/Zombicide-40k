@@ -159,6 +159,24 @@ async function chooseParticipantAndStart(page){
     const reopenedConfigured=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drt167828Configured'),bg:getComputedStyle(el).backgroundColor}));
     assert.equal(reopenedConfigured.configured,true,'configured color must survive closing and reopening the Room Creator');
     assert.equal(reopenedConfigured.bg,configuredTemplate.bg,'configured color must be derived from persisted content');
+
+    // Characterize the real pointerdown -> pointerup path: the modal currently opens on pointerdown.
+    const touchPoint=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
+    await page.mouse.move(touchPoint.x,touchPoint.y);await page.mouse.down();
+    await page.waitForFunction(()=>document.getElementById('drt167828Modal')?.classList.contains('open'));
+    const underFinger=await page.evaluate(({x,y})=>{
+      const el=document.elementFromPoint(x,y),stack=document.elementsFromPoint(x,y).slice(0,8);
+      return {
+        top:{tag:el?.tagName||'',id:el?.id||'',text:(el?.textContent||'').trim().slice(0,100),onclick:el?.getAttribute?.('onclick')||''},
+        stack:stack.map(e=>({tag:e.tagName,id:e.id||'',text:(e.textContent||'').trim().slice(0,80),onclick:e.getAttribute?.('onclick')||''}))
+      };
+    },touchPoint);
+    await page.mouse.up();await page.waitForTimeout(80);
+    const afterReleaseOpen=await page.evaluate(()=>document.getElementById('drt167828Modal')?.classList.contains('open')||false);
+    console.log('[object-config-editor] pointer-modal-risk',JSON.stringify({touchPoint,underFinger,afterReleaseOpen},null,2));
+    if(afterReleaseOpen)await page.evaluate(()=>DungeonRoomTemplateContent167828.closeEditor());
+    else assert.fail('modal opened on pointerdown but closed again on the same pointer release');
+
     await openChest(page,7);
     const second=await page.evaluate(()=>({
       modern:!!document.getElementById('dui167831Itemtemplate'),
@@ -240,6 +258,21 @@ async function chooseParticipantAndStart(page){
       };
     },{itemId:chosenItem.id});
     console.log('[object-config-editor] before-real-chest-open',JSON.stringify(beforeOpen,null,2));
+
+    // Characterize the legacy generic search action that remains visible beside the exact authored chest action.
+    const genericSearch=page.locator('button[onclick="searchItem()"]').filter({hasText:/FOUILLER/i}).first();
+    if(await genericSearch.count()){
+      const beforeGeneric=await page.evaluate(({itemId,key})=>{const st=JSON.parse(localStorage.getItem(key)||'{}'),x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return {gold:Number(st.gold)||0,itemCount:(st.inventory||[]).filter(i=>String(i?.itemId||'')===String(itemId)).length,opened:x?.worldContentState167824?.[x?.last?.worldDungeonId]?.[x?.last?.worldNodeId]?.openedChests||{}}},{itemId:chosenItem.id,key:beforeOpen.key});
+      await genericSearch.click();await page.waitForTimeout(120);
+      const afterGeneric=await page.evaluate(({itemId,key})=>{
+        const st=JSON.parse(localStorage.getItem(key)||'{}'),x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
+        const visible=[...document.querySelectorAll('body *')].filter(e=>{const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'}).map(e=>(e.textContent||'').trim()).filter(t=>/Coffre vide|coffre|fouill/i.test(t)).slice(-20);
+        return {gold:Number(st.gold)||0,itemCount:(st.inventory||[]).filter(i=>String(i?.itemId||'')===String(itemId)).length,opened:x?.worldContentState167824?.[x?.last?.worldDungeonId]?.[x?.last?.worldNodeId]?.openedChests||{},visible};
+      },{itemId:chosenItem.id,key:beforeOpen.key});
+      console.log('[object-config-editor] generic-search-on-exact-chest',JSON.stringify({beforeGeneric,afterGeneric},null,2));
+      assert.deepEqual(afterGeneric.opened,beforeGeneric.opened,'generic FOUILLER must not consume the exact authored chest');
+    }
+
     const exactButton=page.locator('#dzc167824Actions button').filter({hasText:/Ouvrir coffre/i}).first();
     assert.equal(await exactButton.count(),1,'the exact authored chest must expose its visible exact open action');
     await exactButton.click();

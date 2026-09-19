@@ -15,6 +15,91 @@ Lire avant tout changement :
 - SHA attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`
 - ne jamais travailler directement sur `main`
 
+## Chantier courant prioritaire — Fiche RPG / isolation Shell — 2026-09-19
+
+Branche :
+`work/gensrpg-rpg-sheet-shell-isolation-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-rpg-sheet-shell-isolation-2026-09-19`
+
+Base exacte :
+`7b8173f7ca949f4592cacd51610d1c11f953f829`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-object-config-editor-green-2026-09-19`
+sur le même SHA.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Signalement utilisateur
+
+En contexte RPG/Dungeon, à l'ouverture de la fiche personnage :
+- une fiche ressemblant à la fiche Zombicide/Survie peut apparaître brièvement ;
+- la fiche RPG correcte reprend ensuite l'affichage ;
+- ce flash démontre qu'une ancienne autorité Survie/commune peut encore rendre avant le propriétaire RPG.
+
+### Périmètre
+
+Module concerné :
+- Shell / fiche personnage en contexte Adventure RPG / Dungeon.
+
+Responsabilité :
+- ouverture et premier rendu de la fiche personnage ;
+- choix du renderer selon le module actif.
+
+Autorisé :
+- caractériser le premier writer/renderer qui remplit ou affiche la fiche ;
+- caractériser l'ordre réel des couches et événements ;
+- retirer au propriétaire fautif son autorité en contexte RPG ;
+- renforcer les sentinelles de frontière fiche Survie / fiche RPG.
+
+Interdit :
+- aucune modification des stats, progression, équipement, inventaire ou talents sauf preuve directe du propriétaire ;
+- aucune modification Tactical ;
+- aucune modification mouvement, coffre, événements ou détection ennemie ;
+- aucun MutationObserver, heartbeat, polling, retry ou timer de réparation ;
+- aucun second renderer de fiche ;
+- aucune règle basée sur un simple délai d'affichage ;
+- aucun changement sur `main`.
+
+Propriétaire attendu par la charte :
+- fiche personnage : Shell/module actif selon contexte, jamais Tactical.
+
+### Diagnostic obligatoire avant correction
+
+1. traverser le vrai Shell vers Adventure -> Dungeon ;
+2. ouvrir une vraie fiche héros ;
+3. observer le DOM immédiatement au clic puis sur plusieurs frames ;
+4. identifier les marqueurs Survie/Zombicide éventuellement présents avant le rendu RPG ;
+5. identifier la fonction/fichier qui écrit ces marqueurs en premier ;
+6. vérifier overlays, z-index, display, pointer-events et listeners avant toute réécriture ;
+7. corriger uniquement l'autorité démontrée.
+
+### Tests requis
+
+- sentinelle navigateur du vrai chemin Dungeon -> fiche héros ;
+- assertion qu'aucun marqueur exclusivement Survie/Zombicide n'apparaît, même transitoirement ;
+- fiche RPG finale correcte ;
+- ouverture/fermeture/réouverture stable ;
+- Survie conserve sa propre fiche ;
+- Save & Quit / reprise ;
+- non-interférence quatre modules ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Règle 26
+
+Si le diagnostic prouve que le premier renderer fautif est inline dans `index.html`, ne pas tenter de lire/modifier le gros HTML par répétition de connecteurs.
+Résoudre le SHA exact, fournir le permalink `index.html` correspondant à l'utilisateur et demander le ZIP du fichier exact avant toute inspection/modification de contenu.
+
+### Dettes suivantes, hors périmètre
+
+1. déclenchement coffre / détection ennemie tardif ou absent ;
+2. ralentissement entre déplacements.
+
 ## État opérationnel prioritaire — 2026-09-19
 
 Ce bloc prime sur les sections historiques conservées plus bas.

@@ -139,18 +139,39 @@ Validation sur `a351d084d0feb45493ce330fec75f5138ecf39c1` :
 - Firefox `35435294459` — SUCCESS ;
 - Tactical Dock `35435294469` — SUCCESS.
 
+### Jalon B.2 — raccord Core des chemins de créatures — candidat en validation
+
+Commit runtime :
+`7d0a38b94e60676b17eb9521c29f11018dff8456`
+
+Blob `index.html` :
+- avant : `d942934741ca200319de02116c4dd384722d39c7` ;
+- après : `286e427df42bc1a04cc981ecbdf90ecb4de547ab`.
+
+Raccord appliqué :
+- `assets/gensrpg/core/asset-resolver-v1.js` est chargé explicitement avant les anciens consommateurs Dungeon ;
+- `dungeonAutoArtPath164()` délègue à `GensAssetResolverV1.dungeonCreaturePath()` ;
+- le constructeur `artPath` du bloc V165 délègue au même propriétaire Core ;
+- le constructeur `dungeonPath166` du bloc V166 délègue au même propriétaire Core ;
+- `GENSRPG_DUNGEON_ASSET_ROOT_168` reste uniquement comme alias délégué à `GensAssetResolverV1.ROOTS.dungeon.creatures` ;
+- le bloc `dungeonCore055ExactAssets` reste volontairement inchangé : il possède des assets UI exacts et n’appartient pas à ce sous-lot ;
+- aucun asset physique déplacé ;
+- aucun wrapper, observer, timer/retry, stockage ou gameplay ajouté ;
+- les overrides personnalisés existants restent au-dessus du chemin canonique.
+
+Cartographie réalignée :
+- graphe production attendu : 66 fichiers JS atteignables ;
+- le resolver Core possède désormais un propriétaire runtime explicite `GenSrpG Core Assets` ;
+- manifestes inline/timers réalignés sur le blob `286e427df42bc1a04cc981ecbdf90ecb4de547ab` ;
+- RED propriétaire obtenu avant correction : Architecture `35439183155`, échec au seul nouveau garde de raccord.
+
 ### Prochaine action
 
-Jalon B.2 :
-1. travailler depuis l’`index.html` exact du HEAD Phase 4, blob `d942934741ca200319de02116c4dd384722d39c7` ;
-2. charger explicitement `assets/gensrpg/core/asset-resolver-v1.js` avant les consommateurs historiques inline concernés ;
-3. migrer d’abord le plus petit consommateur dont la parité est déjà verrouillée, sans wrapper global ni deuxième resolver ;
-4. garder les overrides explicites au-dessus du chemin canonique ;
-5. ne supprimer une table/constructeur historique qu’après preuve qu’aucun consommateur réel ne l’utilise encore ;
-6. ne déplacer aucun asset physique ;
-7. repasser Architecture + navigateur complet + Firefox + Tactical Dock avant tout checkpoint suivant.
-
-Règle 26 appliquée : le contenu exact du gros `index.html` est nécessaire pour ce raccord ; utiliser uniquement la copie correspondant au blob `d942934741ca200319de02116c4dd384722d39c7`.
+1. valider le commit documentaire courant sur le runtime `7d0a38b9...` ;
+2. exiger Architecture + navigateur complet + Firefox + Tactical Dock GREEN ;
+3. si GREEN, créer un checkpoint intermédiaire lisible pour B.2 ;
+4. seulement ensuite caractériser les vrais propriétaires héros/objets du gros script historique — ne pas supposer que le marqueur bloc 33 les possède ;
+5. ne pas toucher au bloc 65 ni déplacer d’assets dans ce sous-lot.
 
 ## Production sûre
 

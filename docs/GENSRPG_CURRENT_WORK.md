@@ -12,14 +12,14 @@ Lire avant tout changement :
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :
-`work/gensrpg-phase4-asset-resolver-2026-09-19`
+`work/gensrpg-phase4-asset-resolver-hero-item-owners-2026-09-19`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase4-asset-resolver-2026-09-19`
+`checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`
 
 Base exacte :
-`7dd1cf9a48b70e075faf4a6f8d4c0bd64e63d6f0`
-(`checkpoint/gensrpg-rpg-sheet-shell-isolation-green-2026-09-19`)
+`88150851852f6e9e27e6c756a472cac3a58d1e1a`
+(`checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`)
 
 Production `main` reste gelée sur V16.78.114.11 :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
@@ -189,13 +189,44 @@ Le navigateur complet valide notamment :
 - preview ;
 - parité réelle du resolver d’assets et priorité des overrides.
 
+### Jalon B.3 — propriétaire chemins héros Dungeon — candidat en validation
+
+Checkpoint de départ créé :
+`checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`
+sur `88150851852f6e9e27e6c756a472cac3a58d1e1a`.
+
+Caractérisation :
+- `dungeonBuiltinHeroGithubArt168()` et `dungeonItems()` appartiennent au même gros script historique inline non identifié, pas au marqueur `dungeonHeroItemAssets168Marker` ;
+- le marqueur bloc 33 reste seulement un alias de racine délégué ;
+- ce sous-lot est limité aux héros ; les objets restent volontairement inchangés.
+
+RED dédié :
+- test `tests/gens_asset_resolver_hero_owner_v1.test.cjs` ;
+- Architecture `35441301589` : échec uniquement sur la nouvelle étape d’autorité héros après succès des 82 étapes précédentes ;
+- Firefox et Tactical Dock restent GREEN sur le même état RED.
+
+Commit runtime :
+`a8e420df976a391e00438d7d6a2056fff46a48fe`
+
+Blob `index.html` :
+- avant : `286e427df42bc1a04cc981ecbdf90ecb4de547ab` ;
+- après : `04ca2b3803618694f8254e7b6a8fb103cfafa742`.
+
+Raccord appliqué :
+- `dungeonBuiltinHeroGithubArt168(id)` délègue maintenant à `GensAssetResolverV1.dungeonHeroPath(id)` ;
+- la table héroïque historique dupliquée est retirée de ce helper ;
+- `ensureDungeonHeroes()` conserve exactement la priorité existante `ov.avatar || githubArt || dungeonBuiltinPortrait(id)` ;
+- `dungeonItems()` et sa table `githubItemArts` ne sont pas modifiés ;
+- aucun asset déplacé ;
+- aucun gameplay, stockage, observer, timer/retry ou wrapper ajouté.
+
 ### Prochaine action
 
-1. faire valider cette clôture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
-2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
-3. repartir de ce checkpoint pour le sous-lot suivant du même chantier Phase 4 ;
-4. caractériser les vrais propriétaires héros/objets du gros script historique — ne pas supposer que le marqueur bloc 33 les possède ;
-5. ne pas toucher au bloc 65 ni déplacer d’assets tant que cette caractérisation n’est pas terminée.
+1. valider ce candidat par Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. si tout est GREEN, documenter puis créer un checkpoint héros dédié ;
+3. seulement ensuite ouvrir le sous-lot objets built-in ;
+4. ne pas toucher au bloc 65 ni aux assets UI exacts ;
+5. ne rien fusionner sur `main`.
 
 ## Production sûre
 

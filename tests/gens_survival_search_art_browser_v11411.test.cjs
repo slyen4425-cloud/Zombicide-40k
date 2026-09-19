@@ -127,7 +127,17 @@ async function startSurvival(page){
     assert.equal(state.family,'survival','true Shell path must remain in Survival');
     assert.equal(state.dungeonMode,false,'Survival diagnosis must not run through Dungeon');
     const visibleSearch=state.searchNodes.filter(x=>x.visible&&/fouill/i.test(x.text));
-    assert.ok(visibleSearch.length>0,'RED: Survival must expose its existing Fouiller action visibly in the real game UI');
+    assert.equal(visibleSearch.length,1,'Survival must expose exactly one existing Fouiller action in the opened hero sheet');
+
+    mark('exercise-search');
+    const searchBefore=await page.evaluate(()=>({found:typeof state!=='undefined'?state?.found??null:null,deck:document.body.innerText.match(/Pioche\s*:\s*(\d+) cartes/i)?.[1]||''}));
+    await page.locator('#searchItemBtn').click();
+    const searchAfter=await page.evaluate(()=>({found:typeof state!=='undefined'?state?.found??null:null,deck:document.body.innerText.match(/Pioche\s*:\s*(\d+) cartes/i)?.[1]||'',foundText:String(document.body.innerText||'').replace(/\s+/g,' ').slice(0,7000)}));
+    console.log('[survival-search-art] search-action='+JSON.stringify({before:searchBefore,after:searchAfter},null,2));
+    assert.ok(searchAfter.found&&searchAfter.found!==searchBefore.found,'clicking the real Fouiller button must resolve through the existing searchItem() action');
+
+    const brokenSurvivalArts=diagnostic.badAssets.filter(x=>/\/assets\/img_\d+_/i.test(x.url||''));
+    assert.deepEqual(brokenSurvivalArts,[],'RED: Survival built-in art links must resolve without 404');
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();
   }

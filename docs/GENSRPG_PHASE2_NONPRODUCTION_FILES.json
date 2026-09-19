@@ -4,6 +4,17 @@
   "note": "These files are physically present but outside the current production execution graph. Status does not authorize deletion.",
   "files": [
     {
+      "file": "assets/gensrpg/core/storage-json-v1.js",
+      "status": "phase4-service-not-loaded",
+      "serviceWorkerCached": false,
+      "workflowReferenced": false,
+      "refs": [
+        "docs/GENSRPG_CURRENT_WORK.md",
+        "tests/gens_core_storage_json_v1.test.cjs",
+        "tests/gens_phase2_runtime_load_graph_v11411.test.cjs"
+      ]
+    },
+    {
       "file": "assets/gensrpg/dungeon/progression-runtime-v1.js",
       "status": "tests-docs-only",
       "serviceWorkerCached": false,

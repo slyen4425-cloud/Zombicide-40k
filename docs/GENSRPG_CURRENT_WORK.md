@@ -9,6 +9,77 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage IndexedDB des assets — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-idb-assets-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-idb-assets-2026-09-19`
+
+Base exacte :
+`cc502767b03ad0c0009bbf95f1938384fa3c4ad3`
+(`checkpoint/gensrpg-phase4-storage-migrations-audit-green-2026-09-19`)
+
+Blob exact `index.html` :
+`ff11682d74be7921a591a9b76080eaf337c071be`.
+
+### Propriétaire actuel
+
+Script inline anonyme d’ordre 5 :
+- DB `GenSrpG_Assets` version 1 ;
+- store `assets` ;
+- prefix `idbasset:` ;
+- `gensrpgOpenAssetDb()` ;
+- `gensrpgAssetPut()` / `gensrpgAssetGet()` ;
+- cache/load/résolution ;
+- externalisation des data URLs ;
+- export/import brut des blobs ;
+- migration localStorage -> IndexedDB ;
+- bootstrap migration + refresh UI.
+
+### Périmètre du sous-lot
+
+Extraire uniquement les **primitives de stockage d’assets** vers un propriétaire Core dédié.
+
+À préserver exactement :
+- nom DB ;
+- version DB ;
+- store ;
+- format de référence ;
+- valeurs stockées ;
+- comportement put/get/cache ;
+- export/import brut.
+
+À laisser au propriétaire historique dans ce sous-lot :
+- `GENSRPG_IDB_MIGRATION_FLAG` ;
+- `gensrpgMigrateLocalImagesToIndexedDb()` ;
+- `gensrpgBootstrapIndexedStorage()` ;
+- tous les refresh UI après migration ;
+- import/export global de sauvegarde du script anonyme 6 ;
+- monkey-patch quota `Storage.prototype.setItem`.
+
+### Interdit
+
+- aucune migration de format ;
+- aucun renommage DB/store/prefix ;
+- aucune suppression de compatibilité ;
+- aucune modification Save & Quit ;
+- aucun déplacement des migrations Dungeon ;
+- aucun nouveau timer/observer/retry ;
+- aucun merge sur `main`.
+
+### Validation
+
+1. caractérisation navigateur actuelle des primitives IndexedDB ;
+2. RED propriétaire ;
+3. service Core dédié, chargé explicitement avant le consommateur legacy ;
+4. délégation du legacy sans second stockage concurrent ;
+5. migration et bootstrap legacy encore fonctionnels ;
+6. Architecture + navigateur complet + Firefox + Tactical Dock ;
+7. checkpoint GREEN avant le sous-lot migration.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit propriétaire — 2026-09-19
 
 Branche :

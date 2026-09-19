@@ -34,7 +34,7 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,19,'GitHub Pages must inject the current 19-module production list');
+assert.equal(injected.length,20,'GitHub Pages must inject the current 20-module production list');
 assert.deepEqual(previewInjected,injected,'preview must reproduce the exact GitHub Pages module order');
 assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
 
@@ -42,7 +42,7 @@ const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,22,'production composition must expose 22 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,23,'production composition must expose 23 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');
@@ -96,15 +96,14 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,82,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and two Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,66,'production-reachable JS graph must currently contain 66 files');
+assert.equal(reachable.size,67,'production-reachable JS graph must currently contain 67 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
 }
 for(const rel of phase4ExtractedServices){
   assert.equal(allJs.includes(rel),true,'Phase 4 extracted service missing: '+rel);
-  const expectedReachable=rel==='assets/gensrpg/core/asset-resolver-v1.js';
-  assert.equal(reachable.has(rel),expectedReachable,'Phase 4 service reachability drifted: '+rel);
+  assert.equal(reachable.has(rel),true,'production-connected Phase 4 service must be reachable: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',

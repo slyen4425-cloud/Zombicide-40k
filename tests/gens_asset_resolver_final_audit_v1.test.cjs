@@ -11,7 +11,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(blob,'388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9','asset resolver final audit must target the exact B.4 GREEN index blob');
+assert.equal(blob,'207353f408d8c60213b512f73184bb9ec666b75d','asset resolver final audit must target the exact B.5 runtime index blob');
 
 function block(id){
   const m=index.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -26,11 +26,14 @@ const b310=block('dungeonCore310PersistenceAndTokens');
 const b023=block('dungeonCore023StabilityFix');
 const b055=block('dungeonCore055ExactAssets');
 
-assert.match(b213,/dungeon_aldren:"dng_aldren\.png"[\s\S]*assets\/dungeon\/creatures\//,'B.5 debt: Core 2.13 still duplicates built-in hero asset mapping');
-assert.match(b214,/dungeon_aldren:"dng_aldren\.png"[\s\S]*assets\/dungeon\/creatures\//,'B.5 debt: Core 2.14 still duplicates built-in hero asset mapping');
-assert.match(b310,/dungeon_aldren:ROOT\+"dng_aldren\.png"/,'B.5 debt: Core 3.10 still duplicates built-in hero asset mapping');
-assert.match(b309,/ROOT\+String\(e\.enemyId\)\+"\.png"/,'B.5 debt: Core 3.09 still owns a direct enemy path fallback');
-assert.match(b310,/ROOT\+String\(e\.enemyId\)\+"\.png"/,'B.5 debt: Core 3.10 still owns a direct enemy path fallback');
+for(const [id,b] of [['2.13',b213],['2.14',b214],['3.10',b310]]){
+  assert.doesNotMatch(b,/dungeon_aldren\s*:\s*(?:ROOT\+)?["']dng_aldren\.png["']/,'B.5 resolved: Core '+id+' no longer duplicates the built-in hero asset map');
+  assert.match(b,/GensAssetResolverV1\.dungeonHeroPath\(/,'B.5 resolved: Core '+id+' delegates built-in hero paths to the Core resolver');
+}
+for(const [id,b] of [['3.09',b309],['3.10',b310]]){
+  assert.doesNotMatch(b,/ROOT\+String\(e\.enemyId\)\+["']\.png["']/,'B.5 resolved: Core '+id+' no longer uses the historical direct built-in enemy expression');
+  assert.match(b,/GensAssetResolverV1\.dungeonCreaturePath\(/,'B.5 resolved: Core '+id+' delegates built-in enemy paths to the Core resolver');
+}
 
 for(const id of ['dloot_old_coin','dloot_silver_idol','dloot_beast_fang','dloot_runic_shard','dloot_black_pearl','dloot_dragon_scale','dloot_royal_relic','dloot_void_gem']){
   assert.match(b023,new RegExp(id+':"'+id+'\\.png"'),'B.6 debt: missing historical loot art mapping '+id);
@@ -47,10 +50,11 @@ console.log(JSON.stringify({
   scenario:'Phase 4 asset resolver final audit',
   sourceIndexBlob:blob,
   remainingResolverDebts:{
-    lateHeroTokenPaths:['dungeonCore213Stability','dungeonCore214SingleAuthority','dungeonCore310PersistenceAndTokens'],
-    lateEnemyFallbackPaths:['dungeonCore309VisualFixes','dungeonCore310PersistenceAndTokens'],
     lootLogicalMap:['dungeonCore023StabilityFix']
   },
+  resolvedSubLots:{
+    B5LateTokenEntityPaths:['dungeonCore213Stability','dungeonCore214SingleAuthority','dungeonCore309VisualFixes','dungeonCore310PersistenceAndTokens']
+  },
   retainedDungeonPresentationOwners:['dungeonCore055ExactAssets'],
-  nextSubLots:['B.5 late token entity paths','B.6 loot logical paths']
+  nextSubLots:['B.6 loot logical paths']
 },null,2));

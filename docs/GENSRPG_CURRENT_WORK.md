@@ -189,7 +189,7 @@ Le navigateur complet valide notamment :
 - preview ;
 - parité réelle du resolver d’assets et priorité des overrides.
 
-### Jalon B.3 — propriétaire chemins héros Dungeon — candidat en validation
+### Jalon B.3 — propriétaire chemins héros Dungeon — GREEN
 
 Checkpoint de départ créé :
 `checkpoint/gensrpg-phase4-asset-resolver-creature-paths-green-2026-09-19`
@@ -230,13 +230,35 @@ RED navigateur de load-order :
 - Firefox `35441536658` et Tactical Dock `35441536713` restaient GREEN ;
 - le garde statique `gens_asset_resolver_hero_owner_v1.test.cjs` verrouille désormais le chargement du Core avant le propriétaire historique héros/objets.
 
+Validation finale du candidat sur `f7f7a2f456e2d3eb9f24bb910e7f8e6fc9cd08d0` :
+- Architecture + navigateur complet `35441696020` — SUCCESS ;
+- Firefox `35441695942` — SUCCESS ;
+- Tactical Dock `35441695944` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- isolation V114.11 ;
+- lancement réel Survie ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence quatre modules ;
+- murs Tactical ;
+- preview ;
+- parité réelle du resolver d’assets.
+
 ### Prochaine action
 
-1. valider ce candidat par Architecture + navigateur complet + Firefox + Tactical Dock ;
-2. si tout est GREEN, documenter puis créer un checkpoint héros dédié ;
-3. seulement ensuite ouvrir le sous-lot objets built-in ;
-4. ne pas toucher au bloc 65 ni aux assets UI exacts ;
-5. ne rien fusionner sur `main`.
+1. faire valider cette fermeture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
+3. ouvrir une branche neuve depuis ce checkpoint pour le sous-lot objets built-in ;
+4. caractériser puis migrer uniquement `dungeonItems()` / ses chemins built-in vers le resolver Core ;
+5. ne pas toucher au bloc 65 ni aux assets UI exacts ;
+6. ne rien fusionner sur `main`.
 
 ## Production sûre
 

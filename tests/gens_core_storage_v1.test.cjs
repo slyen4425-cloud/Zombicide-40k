@@ -41,12 +41,12 @@ assert.equal(api.readJson(store,'number',0),42,'valid JSON primitives must be pr
 const payload={a:1,nested:{ok:true},items:['x','y']};
 assert.equal(api.writeJson(store,'object',payload),payload,'writeJson must return the original value');
 assert.equal(store.values.get('object'),JSON.stringify(payload),'writeJson must persist the exact JSON serialization');
-assert.deepEqual(api.readJson(store,'object',null),payload,'object round-trip must preserve data');
+assert.equal(JSON.stringify(api.readJson(store,'object',null)),JSON.stringify(payload),'object round-trip must preserve data');
 
 const bound=api.create(store);
 const list=[{id:'a'},{id:'b'}];
 assert.equal(bound.writeJson('list',list),list);
-assert.deepEqual(bound.readJson('list',[]),list,'bound adapter round-trip must preserve arrays');
+assert.equal(JSON.stringify(bound.readJson('list',[])),JSON.stringify(list),'bound adapter round-trip must preserve arrays');
 
 const denied={
   getItem(){throw new Error('read denied')},

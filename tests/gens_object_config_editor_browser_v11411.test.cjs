@@ -210,7 +210,7 @@ async function chooseParticipantAndStart(page){
     assert.equal(zoneLayer?.topInside,true,'zone config modal must be the top interactive layer when opened');
     await page.selectOption('#drv167826Rarity','legendary');await page.fill('#drv167826Gold','23');
     await page.selectOption('#dui167831Itemzone',chosenItem.id);await page.fill('#dui167831Qtyzone','2');
-    await page.locator('#drv167826Modal button[onclick*="DungeonRoomContentUI167831.addItem"]').click();
+    // Real user path: selecting an item then pressing Save must not silently persist an empty chest.
     await page.locator('#drv167826Modal button[onclick="DungeonRoomVisualConfig167826.saveActive()"]').click();
     await page.waitForFunction(()=>!document.getElementById('drv167826Modal')?.classList.contains('open'));
     const configuredZone=await page.locator('#drc100Grid [data-drc-index="7"]').evaluate(el=>({configured:el.classList.contains('drv167826Configured'),bg:getComputedStyle(el).backgroundColor}));

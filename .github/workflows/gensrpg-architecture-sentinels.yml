@@ -278,6 +278,9 @@ jobs:
       - name: Verrouiller l’autorité Core des chemins de loots Dungeon
         run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
 
+      - name: Auditer les propriétaires stockage et migrations Phase 4
+        run: node tests/gens_phase4_storage_migration_owner_audit_v1.test.cjs
+
   browser-sentinel:
     needs: architecture-sentinels
     runs-on: ubuntu-latest

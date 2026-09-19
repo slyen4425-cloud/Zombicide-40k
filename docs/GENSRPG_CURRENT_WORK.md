@@ -75,6 +75,25 @@ La roadmap classe ce service **risque élevé** et impose de caractériser les c
 5. RED du vrai propriétaire avant toute extraction ;
 6. aucune modification runtime tant que ces cinq points ne sont pas établis.
 
+### Premier résultat d’audit
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_MIGRATION_AUDIT.md`
+
+Sentinelle :
+`tests/gens_phase4_storage_migration_owner_audit_v1.test.cjs`
+
+Découverte :
+- le manifeste Phase 2 ne couvre pas les scripts inline anonymes ;
+- 12 scripts anonymes existent dans le runtime courant ;
+- 3 possèdent du stockage direct, pour 201 accès `localStorage` supplémentaires ;
+- le script anonyme 5 est le vrai propriétaire transversal des primitives IndexedDB d’assets et de leur migration ;
+- les scripts anonymes 6 et 7 sont des propriétaires mixtes à traiter séparément ;
+- les migrations défis/mouvement restent Dungeon métier.
+
+Premier sous-lot recommandé après validation :
+**extraire uniquement les primitives Core IndexedDB d’assets, sans déplacer la migration ni le bootstrap UI dans le même lot.**
+
 
 ## Chantier courant prioritaire — Phase 4 / audit final resolver d’assets — 2026-09-19
 

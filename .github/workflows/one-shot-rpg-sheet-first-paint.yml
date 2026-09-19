@@ -13,28 +13,41 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - name: Verify and patch exact index
+      - name: Verify source blob
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           SOURCE_BLOB="$(git hash-object index.html)"
+          echo "SOURCE_BLOB=$SOURCE_BLOB"
           test "$SOURCE_BLOB" = "55453138449d07bde731ff6934acc442f56bae32"
+      - name: Patch exact delayed RPG renderer
+        shell: bash
+        run: |
+          set -euxo pipefail
           python - <<'PY'
           from pathlib import Path
           p=Path("index.html")
-          s=p.read_text(encoding="utf-8")
-          old='  setTimeout(()=>{try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}},0);'
-          new='  try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}'
-          if s.count(old) != 1:
-              raise SystemExit(f"expected exactly one delayed RPG sheet renderer, got {s.count(old)}")
-          p.write_text(s.replace(old,new),encoding="utf-8")
+          b=p.read_bytes()
+          old=b'  setTimeout(()=>{try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}},0);'
+          new=b'  try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}'
+          count=b.count(old)
+          print("MATCH_COUNT="+str(count))
+          if count != 1:
+              raise SystemExit("expected exactly one delayed RPG sheet renderer")
+          p.write_bytes(b.replace(old,new))
           PY
+      - name: Verify target blob
+        shell: bash
+        run: |
+          set -euxo pipefail
           TARGET_BLOB="$(git hash-object index.html)"
+          echo "TARGET_BLOB=$TARGET_BLOB"
           test "$TARGET_BLOB" = "d942934741ca200319de02116c4dd384722d39c7"
+          git diff --check
       - name: Commit runtime patch and remove one-shot workflow
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           git config user.name "gensrpg-ci"
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/one-shot-rpg-sheet-first-paint.yml

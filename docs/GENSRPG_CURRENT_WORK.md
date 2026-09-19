@@ -12,14 +12,14 @@ Lire avant tout changement :
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :
-`work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19`
+`work/gensrpg-phase4-asset-resolver-remaining-audit-2026-09-19`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`
+`checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19`
 
 Base exacte :
-`c4e32b99185b8908aa645ba7c6fcaf7a706fafbb`
-(`checkpoint/gensrpg-phase4-asset-resolver-hero-paths-green-2026-09-19`)
+`c050f4516b6c3f312047929495e5e6f270139545`
+(`checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19`)
 
 Production `main` reste gelée sur V16.78.114.11 :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
@@ -317,13 +317,39 @@ Le navigateur Phase 4 confirme :
 - Survie/Capture ne deviennent pas des fallbacks Dungeon ;
 - non-interférence quatre modules, Save & Quit, authored, Builder, fiche RPG, murs et preview restent GREEN.
 
+Validation documentaire finale B.4 :
+- HEAD `c050f4516b6c3f312047929495e5e6f270139545` ;
+- Architecture + navigateur complet `35447212026` — SUCCESS ;
+- Firefox `35447212032` — SUCCESS ;
+- Tactical Dock `35447212058` — SUCCESS.
+
+Checkpoint B.4 créé :
+`checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19`
+sur `c050f4516b6c3f312047929495e5e6f270139545`.
+
+### Audit Phase 4 restant — resolver d’assets
+
+Document dédié :
+`docs/GENSRPG_PHASE4_ASSET_REMAINING_AUDIT.md`
+
+Source exacte auditée :
+- `index.html` blob `388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9` ;
+- aucun changement runtime sur la branche d’audit.
+
+Conclusion prioritaire :
+- le bloc 65 n’est pas l’unique ni la dernière autorité visuelle ;
+- Core 2.13 et 2.14 peignent encore des pions héros avec une table Aldren/Lyra/Brom locale ;
+- Core 3.10, chargé après eux, retire leurs pions et repeint les pions finaux, mais possède encore la même table héros locale ;
+- ces trois duplications sont un sous-lot homogène et plus prioritaire que les anciens blocs 052–080.
+
 ### Prochaine action
 
-1. faire valider cette fermeture documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
-2. créer ensuite `checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19` sur le HEAD documentaire exact validé ;
-3. depuis ce checkpoint, auditer le reste du lot assets contre la roadmap avant d’ouvrir un nouveau sous-lot ;
-4. ne pas supposer que le bloc 65 doit être migré : confirmer d’abord s’il possède des assets UI exacts légitimes ou une résolution dupliquée ;
-5. aucun changement de `main`.
+1. valider cette cartographie documentaire par Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. créer un checkpoint audit exact si GREEN ;
+3. ouvrir ensuite une branche neuve pour les consommateurs héros de pions 2.13 / 2.14 / 3.10 ;
+4. conserver leurs overrides `image || avatar` au-dessus du chemin canonique Core ;
+5. ne pas toucher encore aux ennemis 3.09/3.10, aux sols/portes/coffres ni au bloc 65 ;
+6. aucun changement de `main`.
 
 ## Production sûre
 

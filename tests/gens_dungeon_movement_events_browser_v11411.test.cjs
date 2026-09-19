@@ -102,6 +102,18 @@ async function syncMove(page,cell){
     await page.evaluate(()=>{localStorage.clear();sessionStorage.clear()});
     await page.reload({waitUntil:'domcontentloaded',timeout:60000});await prepare(page,port);await openDungeonHome(page);
 
+    // Movement is a scenario prerequisite, not the seam under test.
+    // Enable it through the canonical RPG profile data before starting the real Dungeon session.
+    await page.evaluate(id=>{
+      const profiles=loadGameProfiles(),index=profiles.findIndex(p=>String(p?.id||'')===String(id));
+      if(index<0)throw new Error('Dungeon profile missing');
+      const p=profiles[index];ensureRpgProfileData(p);
+      p.rpgUniverse.gameplay={...(p.rpgUniverse.gameplay||{}),modules:{...(p.rpgUniverse.gameplay?.modules||{}),movement:true}};
+      p.rpgUniverse.movement={...(p.rpgUniverse.movement||{}),enabled:true,mode:'tactical'};
+      profiles[index]=p;saveGameProfiles(profiles);
+    },DUNGEON_ID);
+    assert.equal(await page.evaluate(()=>window.dc305PositionalGameplay?.()===true),true,'fixture must enable movement through canonical profile configuration');
+
     const fixture=await page.evaluate(()=>{
       const R=DungeonRoomCreator100,B=DungeonWorldBuilder167821,Z=DungeonZoneContent167824;
       const room=R.createRoom({id:'reg_move_events_room',name:'Régression mouvement événements',width:5,height:3,theme:'stone'});

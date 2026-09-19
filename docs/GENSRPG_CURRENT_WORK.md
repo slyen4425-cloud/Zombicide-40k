@@ -9,6 +9,67 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-storage-core-json-service-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-core-json-service-2026-09-19`
+
+Base exacte :
+`151e714c1373748ee6a42a03a8ec7fb44aded8c9`
+(`checkpoint/gensrpg-phase4-storage-builder-audit-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre
+
+Créer uniquement :
+`assets/gensrpg/core/storage-json-v1.js`
+
+API minimale :
+- `readJson(key, fallback, storage?)` ;
+- `writeJson(key, value, storage?)` ;
+- `remove(key, storage?)`.
+
+Le service :
+- ne connaît aucune clé métier ;
+- ne connaît aucun schéma Room/Graph/Dungeon ;
+- ne normalise aucune donnée métier ;
+- ne migre aucun format ;
+- reste hors graphe de production dans ce jalon ;
+- accepte un adapter de stockage explicite pour les tests et utilise `localStorage` uniquement comme adapter par défaut.
+
+### Invariants
+
+- clé absente -> fallback du caller ;
+- JSON invalide -> fallback du caller ;
+- JSON `null` -> fallback du caller ;
+- valeurs JSON valides falsy (`false`, `0`) conservées ;
+- écriture = `JSON.stringify(value)` sans enveloppe/version implicite ;
+- erreurs d’écriture propagées au module propriétaire ;
+- aucun DOM, observer, listener, timer, IndexedDB ou navigation ;
+- aucun Builder raccordé dans ce lot.
+
+### Validation
+
+Test :
+`tests/gens_core_storage_json_v1.test.cjs`
+
+Garde de graphe :
+- le service doit exister physiquement ;
+- rester hors production ;
+- être classé dans `GENSRPG_PHASE2_NONPRODUCTION_FILES.json` comme `phase4-service-not-loaded`.
+
+Prochaine étape uniquement après GREEN :
+1. checkpoint service Core ;
+2. branche neuve depuis ce checkpoint ;
+3. premier raccord : `DungeonRoomCreator100` seulement ;
+4. conserver exactement `gensrpg_dungeon_custom_rooms_v1`, `normalizeRoom()` et le JSON actuel.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage & migrations — audit Builders — 2026-09-19
 
 Branche :

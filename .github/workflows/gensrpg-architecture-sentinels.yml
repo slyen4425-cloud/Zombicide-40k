@@ -251,6 +251,9 @@ jobs:
       - name: Auditer le sous-périmètre stockage Builders Phase 4
         run: node tests/gens_phase4_storage_builder_audit_v1.test.cjs
 
+      - name: Verrouiller le raccord stockage Core du Room Creator 1.0
+        run: node tests/gens_phase4_room_creator_storage_owner_v1.test.cjs
+
       - name: Vérifier le service Core stockage JSON Phase 4
         run: node tests/gens_core_storage_v1.test.cjs
 

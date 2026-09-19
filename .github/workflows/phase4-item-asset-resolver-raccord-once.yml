@@ -1,0 +1,84 @@
+name: Phase 4 item asset resolver raccord one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19
+    paths:
+      - .github/workflows/phase4-item-asset-resolver-raccord-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch exact verified index
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+
+          path=Path("index.html")
+          old_blob="ba47d9fb3b8aa1a2183e764455aae97e03965440"
+          actual=subprocess.check_output(["git","rev-parse","HEAD:index.html"],text=True).strip()
+          if actual!=old_blob:
+              raise SystemExit(f"Unexpected committed index blob before item raccord: {actual}")
+
+          text=path.read_text(encoding="utf-8")
+          start=text.index("function dungeonItems(){")
+          end=text.index("\nfunction ensureDungeonItems()",start)
+          src=text[start:end]
+
+          src,count=re.subn(
+              r'  const githubItemArts=\{[\s\S]*?\n  \};\n(?=  return base\.map\(it=>\{)',
+              '',
+              src,
+              count=1
+          )
+          if count!=1:
+              raise SystemExit(f"Expected one githubItemArts catalogue removal, got {count}")
+
+          old_line='    const githubArt=githubItemArts[it.id] ? "assets/dungeon/creatures/"+githubItemArts[it.id] : "";'
+          new_line='    const canonicalArt=window.GensAssetResolverV1.dungeonItemPath(it.id);'
+          if src.count(old_line)!=1:
+              raise SystemExit(f"Expected one historical item path line, got {src.count(old_line)}")
+          src=src.replace(old_line,new_line,1)
+
+          old_comment='      /* Priorité : image personnalisée éditeur > asset GitHub > ancien visuel généré */'
+          new_comment='      /* Priorité : image personnalisée éditeur > asset canonique > ancien visuel généré */'
+          if src.count(old_comment)!=1:
+              raise SystemExit(f"Expected one item priority comment, got {src.count(old_comment)}")
+          src=src.replace(old_comment,new_comment,1)
+
+          old_image='      image_data:ov.image_data||githubArt||dungeonItemArt(it.id,ov.name||it.name),'
+          new_image='      image_data:ov.image_data||canonicalArt||dungeonItemArt(it.id,ov.name||it.name),'
+          if src.count(old_image)!=1:
+              raise SystemExit(f"Expected one historical item image chain, got {src.count(old_image)}")
+          src=src.replace(old_image,new_image,1)
+
+          text=text[:start]+src+text[end:]
+          path.write_text(text,encoding="utf-8")
+          print("Item source blob verified:",actual)
+          PY
+
+      - name: Commit raccord and retire workflow
+        shell: bash
+        run: |
+          rm .github/workflows/phase4-item-asset-resolver-raccord-once.yml
+          git config user.name "GenSrpG Phase 4"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html .github/workflows/phase4-item-asset-resolver-raccord-once.yml
+          final_blob="$(git rev-parse :index.html)"
+          test "$final_blob" = "388d1b49adbe5d9ac80a4b5474f51b0b2b0b7fc9"
+          echo "Item staged index blob: $final_blob"
+          git diff --cached --check
+          git commit -m "refactor: route Dungeon item paths through Core resolver"
+          git push origin HEAD:work/gensrpg-phase4-asset-resolver-item-paths-2026-09-19

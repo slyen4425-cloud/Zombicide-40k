@@ -30670,16 +30670,9 @@ document.addEventListener('DOMContentLoaded',()=>{
    - L'IA n'utilise plus le popup/animation D100 historique : calcul + dégâts + avance de tour directs.
    - Aucun rerender de fiche héros pendant un tour IA.
 */
-const DC023_LOOT_ART={
-  dloot_old_coin:"dloot_old_coin.png",dloot_silver_idol:"dloot_silver_idol.png",
-  dloot_beast_fang:"dloot_beast_fang.png",dloot_runic_shard:"dloot_runic_shard.png",
-  dloot_black_pearl:"dloot_black_pearl.png",dloot_dragon_scale:"dloot_dragon_scale.png",
-  dloot_royal_relic:"dloot_royal_relic.png",dloot_void_gem:"dloot_void_gem.png"
-};
-const DC023_ASSET_ROOT="assets/dungeon/creatures/";
 if(typeof window.dungeonLootCatalog160==="function"){
   const oldCatalog=window.dungeonLootCatalog160;
-  window.dungeonLootCatalog160=function(){return (oldCatalog.apply(this,arguments)||[]).map(it=>{const f=DC023_LOOT_ART[String(it?.id||"")];return f?{...it,image_data:it.image_data||DC023_ASSET_ROOT+f}:it})};
+  window.dungeonLootCatalog160=function(){return (oldCatalog.apply(this,arguments)||[]).map(it=>{const canonical=window.GensAssetResolverV1.dungeonItemPath(String(it?.id||""));return canonical?{...it,image_data:it.image_data||canonical}:it})};
 }
 window.dungeonSyncLootImages023=function(){try{
   if(typeof ITEMS==="undefined")return;

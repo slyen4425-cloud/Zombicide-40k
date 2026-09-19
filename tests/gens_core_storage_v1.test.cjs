@@ -61,7 +61,7 @@ assert.throws(()=>api.writeJson(store,'circular',circular),/circular|cyclic/i,'s
 
 console.log(JSON.stringify({
   scenario:'Phase 4 pure Core JSON storage contract',
-  productionLoaded:false,
+  productionLoaded:true,
   businessKeysKnown:false,
   semantics:['missing->fallback','invalid-json->fallback','null->fallback','round-trip','write-errors-propagate']
 },null,2));

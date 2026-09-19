@@ -19,12 +19,12 @@ async function ready(page,port){
   await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
   await page.waitForFunction(()=>
     typeof openGensFamily==='function' &&
-    typeof DungeonRoomCreator100?.upsertRoom==='function' &&
-    typeof DungeonWorldBuilder167821?.createDungeon==='function' &&
-    typeof DungeonRoomTemplateContent167828?.openEditor==='function' &&
-    typeof DungeonRoomVisualConfig167826?.openEditor==='function' &&
-    typeof DungeonRoomContentUI167831?.install==='function' &&
-    typeof DungeonRoomGridCapture167830?.bindGrid==='function'
+    typeof window.DungeonRoomCreator100?.upsertRoom==='function' &&
+    typeof window.DungeonWorldBuilder167821?.createDungeon==='function' &&
+    typeof window.DungeonRoomTemplateContent167828?.openEditor==='function' &&
+    typeof window.DungeonRoomVisualConfig167826?.openEditor==='function' &&
+    typeof window.DungeonRoomContentUI167831?.install==='function' &&
+    typeof window.DungeonRoomGridCapture167830?.bindGrid==='function'
   ,null,{timeout:60000});
 }
 async function openEditor(page){

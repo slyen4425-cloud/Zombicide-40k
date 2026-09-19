@@ -20,8 +20,10 @@ assert.match(roomV2,/STORAGE_KEY="gensrpg_dungeon_room_interactions_v2"/,'Room C
 assert.match(world,/STORAGE_KEY="gensrpg_zone_graphs_v1"/,'World Builder key must remain explicit');
 assert.match(visual,/GRAPH_KEY="gensrpg_zone_graphs_v1"/,'Visual Config must read the same canonical World Builder key');
 
-assert.equal((room100.match(/localStorage\.getItem\(/g)||[]).length,1,'Room Creator 1.0 must have one direct read owner before extraction');
-assert.equal((room100.match(/localStorage\.setItem\(/g)||[]).length,1,'Room Creator 1.0 must have one direct write owner before extraction');
+assert.equal((room100.match(/localStorage\.getItem\(/g)||[]).length,0,'Room Creator 1.0 direct reads must be removed after Core raccord');
+assert.equal((room100.match(/localStorage\.setItem\(/g)||[]).length,0,'Room Creator 1.0 direct writes must be removed after Core raccord');
+assert.match(room100,/GensStorageV1\.readJson\(/,'Room Creator 1.0 must delegate reads to Core storage');
+assert.match(room100,/GensStorageV1\.writeJson\(/,'Room Creator 1.0 must delegate writes to Core storage');
 assert.equal((roomV2.match(/localStorage\.getItem\(/g)||[]).length,1,'Room Creator V2 must have one direct read owner before extraction');
 assert.equal((roomV2.match(/localStorage\.setItem\(/g)||[]).length,1,'Room Creator V2 must have one direct write owner before extraction');
 assert.equal((world.match(/localStorage\.getItem\(/g)||[]).length,1,'World Builder must have one direct read owner before extraction');
@@ -47,11 +49,11 @@ console.log(JSON.stringify({
   correctedPhase2KeyCount:3,
   keys,
   directAccesses:{
-    roomCreator100:{read:1,write:1},
+    roomCreator100:{directRead:0,directWrite:0,coreStorage:true},
     roomCreatorV2:{read:1,write:1},
     worldBuilder:{read:1,write:1},
     visualConfig:{read:1,write:0}
   },
-  migrationOrder:['core storage service','Room Creator 1.0','Room Creator V2','World Builder + Visual Config'],
+  migrationOrder:['Room Creator V2','World Builder + Visual Config'],
   formatMigrationInFirstMove:false
 },null,2));

@@ -37,7 +37,7 @@ jobs:
           marker='<script id="dungeonGithubArts164">'
           if text.count(marker)!=1:
               raise SystemExit(f"Expected one dungeonGithubArts164 marker, got {text.count(marker)}")
-          text=text.replace(marker,'<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\\n\\n'+marker,1)
+          text=text.replace(marker,'<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>'+chr(10)*2+marker,1)
 
           def replace_statement(source,anchor,replacement,must_contain):
               if source.count(anchor)!=1:
@@ -54,7 +54,7 @@ jobs:
           fragment=text[start:end]
           if 'assets/dungeon/creatures/' not in fragment:
               raise SystemExit('dungeonAutoArtPath164 no longer owns the expected historical path')
-          text=text[:start]+'window.dungeonAutoArtPath164=function(id){\\n  return window.GensAssetResolverV1.dungeonCreaturePath(id);\\n};'+text[end:]
+          text=text[:start]+'window.dungeonAutoArtPath164=function(id){'+chr(10)+'  return window.GensAssetResolverV1.dungeonCreaturePath(id);'+chr(10)+'};'+text[end:]
 
           text=replace_statement(
               text,

@@ -1,0 +1,76 @@
+name: Phase 4 hero asset resolver raccord one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-asset-resolver-hero-item-owners-2026-09-19
+    paths:
+      - .github/workflows/phase4-hero-asset-resolver-raccord-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch exact verified index
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          old_blob="286e427df42bc1a04cc981ecbdf90ecb4de547ab"
+          new_blob="04ca2b3803618694f8254e7b6a8fb103cfafa742"
+
+          def git_blob(data):
+              return hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
+
+          data=path.read_bytes()
+          actual=git_blob(data)
+          if actual!=old_blob:
+              raise SystemExit(f"Unexpected index blob before hero raccord: {actual}")
+
+          text=data.decode("utf-8")
+          old='''function dungeonBuiltinHeroGithubArt168(id){
+  const map={
+    dungeon_aldren:"dng_aldren.png",
+    dungeon_lyra:"dng_lyra.png",
+    dungeon_brom:"dng_brom.png"
+  };
+  const file=map[String(id||"")];
+  return file ? "assets/dungeon/creatures/"+file : "";
+}'''
+          new='''function dungeonBuiltinHeroGithubArt168(id){
+  return window.GensAssetResolverV1.dungeonHeroPath(id);
+}'''
+
+          count=text.count(old)
+          if count!=1:
+              raise SystemExit(f"Expected one hero helper replacement, got {count}")
+          text=text.replace(old,new,1)
+
+          path.write_text(text,encoding="utf-8")
+          final=git_blob(path.read_bytes())
+          if final!=new_blob:
+              raise SystemExit(f"Unexpected index blob after hero raccord: {final}")
+          print("Hero raccord index blob:",final)
+          PY
+
+      - name: Commit raccord and retire one-shot workflow
+        shell: bash
+        run: |
+          rm .github/workflows/phase4-hero-asset-resolver-raccord-once.yml
+          git config user.name "GenSrpG Phase 4"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html .github/workflows/phase4-hero-asset-resolver-raccord-once.yml
+          git diff --cached --check
+          git commit -m "refactor: route Dungeon hero paths through Core resolver"
+          git push origin HEAD:work/gensrpg-phase4-asset-resolver-hero-item-owners-2026-09-19

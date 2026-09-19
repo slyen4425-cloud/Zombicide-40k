@@ -85,15 +85,23 @@ const phase3Entrypoints=[
   'assets/gensrpg/tactical/entry-v1.js'
 ];
 const phase3Set=new Set(phase3Entrypoints);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel));
+const phase4ExtractedServices=[
+  'assets/gensrpg/core/asset-resolver-v1.js'
+];
+const phase4Set=new Set(phase4ExtractedServices);
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,80,'physical JS inventory must be Phase 2 baseline plus eight inert Phase 3 entries');
+assert.equal(allJs.length,81,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and the first extracted Phase 4 service');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
 assert.equal(reachable.size,65,'production-reachable JS graph must currently contain 65 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
+}
+for(const rel of phase4ExtractedServices){
+  assert.equal(allJs.includes(rel),true,'Phase 4 extracted service missing: '+rel);
+  assert.equal(reachable.has(rel),false,'Phase 4 Jalon A service must stay outside production until explicit raccord: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
@@ -118,6 +126,7 @@ console.log(JSON.stringify({
   currentPhysicalLocalJs:allJs.length,
   phase2BaselineLocalJs:phase2Js.length,
   phase3InertEntrypoints:phase3Entrypoints.length,
+  phase4ExtractedServices:phase4ExtractedServices.length,
   productionReachableLocalJs:reachable.size,
   phase2NonReachableLocalJs:notReachablePhase2.length,
   knownDebt:{

@@ -70,15 +70,28 @@ async function startDungeon(page){
 async function enterFirstRoom(page){
   const explore=page.locator('#dc01Explore');
   await explore.waitFor({state:'visible'});
-  await explore.click();
-  const ok=page.locator('#dc200ModalOk');
-  try{await ok.waitFor({state:'visible',timeout:6000});await ok.click()}catch(e){}
-  await page.waitForFunction(()=>{
-    try{
-      const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
-      return Number(x?.room)>=1&&!!x?.last&&document.querySelectorAll('#dc047RoomBoard .dc047Grid>.dc047Cell').length>0;
-    }catch(e){return false}
-  },null,{timeout:15000});
+  // Fixture déterministe uniquement sur l'entrée aléatoire : 0 sélectionne le vrai kind "enemy".
+  // Le spawn, le stockage, le renderer et la résolution d'assets restent les propriétaires production.
+  await page.evaluate(()=>{
+    window.__gensB5OriginalRandom=Math.random;
+    Math.random=()=>0;
+  });
+  try{
+    await explore.click();
+    const ok=page.locator('#dc200ModalOk');
+    try{await ok.waitFor({state:'visible',timeout:6000});await ok.click()}catch(e){}
+    await page.waitForFunction(()=>{
+      try{
+        const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
+        return Number(x?.room)>=1&&!!x?.last&&document.querySelectorAll('#dc047RoomBoard .dc047Grid>.dc047Cell').length>0;
+      }catch(e){return false}
+    },null,{timeout:15000});
+  }finally{
+    await page.evaluate(()=>{
+      if(typeof window.__gensB5OriginalRandom==='function')Math.random=window.__gensB5OriginalRandom;
+      delete window.__gensB5OriginalRandom;
+    });
+  }
 }
 
 (async()=>{

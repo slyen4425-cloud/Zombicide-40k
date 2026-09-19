@@ -1,0 +1,43 @@
+name: One-shot RPG sheet first paint
+on:
+  push:
+    branches:
+      - work/gensrpg-rpg-sheet-shell-isolation-2026-09-19
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify and patch exact index
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_BLOB="$(git hash-object index.html)"
+          test "$SOURCE_BLOB" = "55453138449d07bde731ff6934acc442f56bae32"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old='  setTimeout(()=>{try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}},0);'
+          new='  try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}'
+          if s.count(old) != 1:
+              raise SystemExit(f"expected exactly one delayed RPG sheet renderer, got {s.count(old)}")
+          p.write_text(s.replace(old,new),encoding="utf-8")
+          PY
+          TARGET_BLOB="$(git hash-object index.html)"
+          test "$TARGET_BLOB" = "d942934741ca200319de02116c4dd384722d39c7"
+      - name: Commit runtime patch and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "gensrpg-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/one-shot-rpg-sheet-first-paint.yml
+          git add index.html
+          git commit -m "fix: render RPG sheet state before first paint"
+          git push origin HEAD:work/gensrpg-rpg-sheet-shell-isolation-2026-09-19

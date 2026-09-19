@@ -6300,13 +6300,7 @@ function dungeonSkillTreeDefinition(id){
 }
 
 function dungeonBuiltinHeroGithubArt168(id){
-  const map={
-    dungeon_aldren:"dng_aldren.png",
-    dungeon_lyra:"dng_lyra.png",
-    dungeon_brom:"dng_brom.png"
-  };
-  const file=map[String(id||"")];
-  return file ? "assets/dungeon/creatures/"+file : "";
+  return window.GensAssetResolverV1.dungeonHeroPath(id);
 }
 function ensureDungeonHeroes(){
   DUNGEON_HERO_IDS.forEach(id=>{

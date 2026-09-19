@@ -21,6 +21,7 @@ for(const retiredWall of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','pai
 
 assert.match(v113,/function ensureDetectionHooks\(rt=R\)\{hookMovement\(rt\);for\(const name of \["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"\]\)hookEventFunction\(rt,name\);hookStart\(rt\);hookAdapter\(rt\);return true\}/,'V113 must remain the active movement/event/start detection authority');
 assert.match(v113,/movement-detection-v113/,'V113 movement detection must remain active');
-assert.match(v113,/board-cell-detection-v113/,'V113 board-cell detection must remain active');
+assert.match(v113,/if\(out!==false\)scanDetection\(rt,"movement-detection-v113",true\)/,'V113 legacy movement hook must detect synchronously after a successful movement');
+assert.doesNotMatch(v113,/board-cell-detection-v113/,'V113 must not keep a second board click/pointer movement detection authority');
 
-console.log('GenSrpG V114.11: V108 detection authority retired; V113 remains sole final detection owner; retired wall behavior not required');
+console.log('GenSrpG V114.11: V108 detection authority retired; V113 remains sole LOS owner with synchronous movement detection and no board-click duplicate');

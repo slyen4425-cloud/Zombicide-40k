@@ -9,6 +9,51 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / audit final resolver d’assets — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-asset-resolver-final-audit-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-asset-resolver-final-audit-2026-09-19`
+
+Base exacte :
+`c050f4516b6c3f312047929495e5e6f270139545`
+(`checkpoint/gensrpg-phase4-asset-resolver-item-paths-green-2026-09-19`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objectif
+
+Auditer le reste du lot resolver d’assets contre la Phase 4 de la roadmap avant d’ouvrir un nouveau sous-lot runtime.
+
+### Périmètre
+
+- inventorier les dernières constructions de chemins d’assets actives dans `index.html` ;
+- distinguer :
+  - résolution d’entités dupliquée qui doit déléguer au Core ;
+  - asset UI/tile exact appartenant légitimement au module Dungeon ;
+- vérifier en priorité les couches héros tardives `dungeonCore213Stability` / `dungeonCore214SingleAuthority` et le bloc `dungeonCore055ExactAssets` ;
+- ne modifier aucun runtime tant que la classification propriétaire n’est pas prouvée.
+
+### Interdit
+
+- aucun déplacement physique d’asset ;
+- aucune migration de bloc 65 sans preuve de duplication de responsabilité ;
+- aucune modification gameplay, mouvement, stockage, Tactical, Capture, Survie ou PvP ;
+- aucun wrapper, observer, timer/retry ou fallback inter-module ;
+- aucun merge sur `main`.
+
+### Tests / sortie
+
+Le lot d’audit doit produire une liste explicite :
+1. chemins encore dupliqués à migrer ;
+2. chemins exacts légitimes à conserver ;
+3. sous-lot suivant minimal, s’il existe ;
+4. si aucun resolver dupliqué ne reste, clôture du premier service Phase 4 et passage au service suivant de la roadmap : stockage / migrations.
+
+
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :

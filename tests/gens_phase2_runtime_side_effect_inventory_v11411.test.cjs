@@ -71,7 +71,18 @@ function metrics(source){
   };
 }
 const hasSignal=m=>Object.values(m).some(Number);
-assert.equal(hasSignal(metrics(read('assets/gensrpg/core/asset-resolver-v1.js'))),false,'Core asset resolver must remain free of global side effects and storage access');
+const coreAssetMetrics=metrics(read('assets/gensrpg/core/asset-resolver-v1.js'));
+assert.deepEqual(coreAssetMetrics,{
+  mutationObservers:0,
+  setIntervals:0,
+  setTimeouts:0,
+  documentListeners:0,
+  windowListeners:0,
+  localStorageRefs:0,
+  indexedDBRefs:0,
+  globalAssignments:1,
+  wrapperMarkers:0
+},'Core asset resolver may expose exactly one public API global and must own no other side effect');
 
 const external=[...reachable].sort().map(rel=>({
   file:rel,

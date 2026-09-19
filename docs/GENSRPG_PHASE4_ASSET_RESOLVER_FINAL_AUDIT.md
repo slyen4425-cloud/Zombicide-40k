@@ -41,19 +41,19 @@ Le sous-lot B.5 est raccordé au resolver central :
 Blob `index.html` après B.5 :
 `207353f408d8c60213b512f73184bb9ec666b75d`.
 
-### B.6 — loot logique Dungeon — RESTE À FAIRE
+### B.6 — loot logique Dungeon — RÉSOLU
 
-`dungeonCore023StabilityFix` possède encore la table logique :
-- `dloot_old_coin` ;
-- `dloot_silver_idol` ;
-- `dloot_beast_fang` ;
-- `dloot_runic_shard` ;
-- `dloot_black_pearl` ;
-- `dloot_dragon_scale` ;
-- `dloot_royal_relic` ;
-- `dloot_void_gem`.
+Les 8 IDs `dloot_*` appartiennent désormais à `DUNGEON_ITEM_FILES` et sont résolus par `GensAssetResolverV1.dungeonItemPath()`.
 
-C’est une vraie résolution ID logique -> fichier physique. Elle doit rejoindre le resolver Core dans un sous-lot séparé, avec parité navigateur et sans modifier loot/drop/gameplay.
+Core 0.23 :
+- ne possède plus `DC023_LOOT_ART` ;
+- ne possède plus `DC023_ASSET_ROOT` ;
+- conserve son rôle de décorateur/synchronisation loot ;
+- conserve la priorité d’un `image_data` explicite ;
+- ne modifie aucune règle de drop, rareté, prix ou économie.
+
+Blob `index.html` après B.6 :
+`ff11682d74be7921a591a9b76080eaf337c071be`.
 
 ## Ce qui reste légitimement Dungeon
 
@@ -71,14 +71,22 @@ Même règle pour les couches de sols/portes/map : leurs chemins physiques reste
 
 ## Décision
 
-Le premier service Phase 4 « resolver d’assets » n’est pas encore clôturable.
+Le premier service Phase 4 « resolver d’assets » est **clôturable**.
 
-Ordre minimal restant :
-1. B.6 — déplacer les 8 mappings `dloot_*` dans `DUNGEON_ITEM_FILES` / `dungeonItemPath()` ;
-2. retirer la table `DC023_LOOT_ART` et la reconstruction de racine de Core 0.23 ;
-3. valider la parité du vrai catalogue loot ;
-4. audit final de non-duplication ;
-5. checkpoint de clôture du resolver ;
-6. passer ensuite au service Phase 4 suivant : **stockage / migrations**.
+L’audit final ne trouve plus de duplication logique de résolution pour :
+- créatures Dungeon ;
+- héros built-in ;
+- objets built-in ;
+- tokens tardifs héros / ennemis ;
+- loots `dloot_*`.
+
+Les chemins UI/tuiles exacts du bloc 65 restent volontairement au module Dungeon : ils ne sont pas un resolver commun concurrent. Leur rangement physique appartient à la Phase 11.
+
+Validation fonctionnelle finale B.6 :
+- Architecture + navigateur complet `35461321604` — SUCCESS ;
+- Firefox `35461321689` — SUCCESS ;
+- Tactical Dock `35461321634` — SUCCESS.
+
+Étape suivante après checkpoint documentaire : **Phase 4 / stockage et migrations**.
 
 Aucun déplacement physique d’asset n’est effectué dans ce lot.

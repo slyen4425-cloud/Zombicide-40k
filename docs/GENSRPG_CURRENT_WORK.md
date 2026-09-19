@@ -223,6 +223,61 @@ Objectif :
 8. audit final de non-duplication puis clôture du service resolver.
 
 
+### Résultat B.6 — GREEN fonctionnel
+
+RED propriétaire :
+- test `tests/gens_asset_resolver_loot_owner_v1.test.cjs` ;
+- Architecture `35461112854` — échec attendu uniquement sur l’étape 87 « Verrouiller l’autorité Core des chemins de loots Dungeon » ;
+- Firefox `35461112846` — SUCCESS ;
+- Tactical Dock `35461112853` — SUCCESS.
+
+Raccord :
+- ajout des 8 IDs `dloot_*` à `DUNGEON_ITEM_FILES` dans le resolver Core au commit `2f4df4af4b63f1f80551994315495f9e72174d5c` ;
+- workflow one-shot `35461191517` — SUCCESS ;
+- commit runtime `66a85755c2729b45f4d0dfd3a047ea85bcf068f4` ;
+- ancien blob `index.html` : `207353f408d8c60213b512f73184bb9ec666b75d` ;
+- nouveau blob : `ff11682d74be7921a591a9b76080eaf337c071be` ;
+- `DC023_LOOT_ART` et `DC023_ASSET_ROOT` supprimés ;
+- `dungeonCore023StabilityFix` délègue à `GensAssetResolverV1.dungeonItemPath()` ;
+- priorité `it.image_data || canonical` conservée ;
+- aucune définition de loot, rareté, prix, chance, quantité, drop ou économie modifiée ;
+- workflow one-shot supprimé dans le même commit.
+
+Cartographie / audit :
+- commit `2ad16e7fab5e500ddb7b938f804b312160f488cd` réaligne les empreintes Phase 2 sur `ff11682d...` ;
+- le contrat pur couvre maintenant les 8 IDs loot ;
+- l’audit final ne contient plus de duplication logique de resolver à migrer ;
+- le bloc 65 reste explicitement classé comme propriétaire légitime de présentation Dungeon.
+
+Parité navigateur :
+- `tests/gens_asset_resolver_browser_v1.test.cjs` vérifie les 8 chemins `dloot_*` via le vrai `dungeonLootCatalog160()` ;
+- les chemins restent `assets/dungeon/creatures/<id>.png` ;
+- aucun changement visible attendu.
+
+Validation fonctionnelle finale sur `5f93c824c4142f2f18b11a784635c4ec38519372` :
+- Architecture + navigateur complet `35461321604` — SUCCESS ;
+- Firefox `35461321689` — SUCCESS ;
+- Tactical Dock `35461321634` — SUCCESS.
+
+### Sortie du service resolver d’assets
+
+Le premier service Phase 4 est fonctionnellement terminé :
+- créatures Dungeon -> Core ;
+- héros built-in -> Core ;
+- objets built-in -> Core ;
+- tokens tardifs héros/ennemis -> Core ;
+- loots `dloot_*` -> Core ;
+- overrides personnalisés conservés ;
+- aucun fallback inter-module ajouté ;
+- les assets UI/tuiles exacts restent au module Dungeon et seront rangés physiquement en Phase 11.
+
+Prochaine action :
+1. valider cette fermeture documentaire avec Architecture + navigateur complet + Firefox + Tactical Dock ;
+2. créer le checkpoint B.6 GREEN et le checkpoint de clôture du resolver sur le HEAD documentaire exact ;
+3. ouvrir ensuite le service Phase 4 suivant : **stockage / migrations** ;
+4. aucun changement de `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :

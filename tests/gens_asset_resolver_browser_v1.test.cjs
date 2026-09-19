@@ -54,6 +54,7 @@ const server=http.createServer((req,res)=>{
     });
 
     console.log('[asset-resolver] historical-parity',JSON.stringify(state,null,2));
+    assert.equal(state.original.coreLoaded,true,'Phase 4 Core asset resolver must be loaded in the real preview composition');
     assert.equal(state.original.creature164,'assets/dungeon/creatures/dng_skeleton.png');
     assert.equal(state.original.creature165,'assets/dungeon/creatures/dng_skeleton.png');
     assert.equal(state.original.heroA,'assets/dungeon/creatures/dng_aldren.png');

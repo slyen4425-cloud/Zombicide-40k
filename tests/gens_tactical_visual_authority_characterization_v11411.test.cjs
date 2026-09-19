@@ -66,7 +66,7 @@ const i113=block(v113,'function install(rt=R){','function installWithRetries','V
 assert.doesNotMatch(maintain113,/paintWalls\(rt\)/,'V113 maintenance must no longer repaint walls');
 assert.doesNotMatch(i113,/paintWalls\(rt\)/,'V113 install must no longer repaint walls');
 assert.ok(i113.includes('ensureDetectionHooks(rt)'),'V113 detection authority must remain active');
-assert.ok(i113.includes('bindBoardClicks(rt)'),'V113 board detection must remain active');
+assert.ok(!i113.includes('bindBoardClicks(rt)'),'V113 must not retain board click/pointer movement detection');
 
 for(const name of ['V108','V109','V111','V112','V113']){
   assert.match(doc,new RegExp('\\| '+name+' \\| \\*\\*retiré\\*\\* \\| \\*\\*retiré\\*\\* \\|'),`visual authority inventory must mark ${name} JS and CSS wall authority retired`);

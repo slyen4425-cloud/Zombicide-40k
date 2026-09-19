@@ -171,6 +171,58 @@ Prochaine action :
 5. aucun changement de `main`.
 
 
+## Chantier courant prioritaire — Phase 4 / B.6 chemins loots Dungeon — 2026-09-19
+
+Branche :
+`work/gensrpg-phase4-asset-resolver-loot-paths-2026-09-19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-asset-resolver-loot-paths-2026-09-19`
+
+Base exacte :
+`bd78c55aba0d98d6c7fde96420526d5ef88f0929`
+(`checkpoint/gensrpg-phase4-asset-resolver-late-token-paths-green-2026-09-19`)
+
+Blob exact `index.html` :
+`207353f408d8c60213b512f73184bb9ec666b75d`
+(copie locale déjà vérifiée).
+
+### Périmètre B.6
+
+Propriétaire historique concerné :
+- `dungeonCore023StabilityFix` ;
+- table locale `DC023_LOOT_ART` ;
+- racine locale `DC023_ASSET_ROOT` ;
+- décorateur `window.dungeonLootCatalog160`.
+
+Objectif :
+- ajouter les 8 IDs `dloot_*` au mapping existant `DUNGEON_ITEM_FILES` du resolver Core ;
+- faire déléguer Core 0.23 à `GensAssetResolverV1.dungeonItemPath(id)` ;
+- conserver la priorité `it.image_data || chemin canonique` ;
+- conserver strictement les définitions de loot, tables de drop, quantités, chances, prix et raretés.
+
+### Interdit
+
+- aucun changement de gameplay/drop/économie ;
+- aucun déplacement physique d’asset ;
+- aucun bloc 65 ;
+- aucun fallback inter-module ;
+- aucun nouveau resolver/API loot concurrent ;
+- aucun observer/timer/retry/wrapper global ;
+- aucun merge sur `main`.
+
+### Validation prévue
+
+1. RED propriétaire B.6 ;
+2. test Core resolver des 8 IDs ;
+3. vrai navigateur : `dungeonLootCatalog160()` conserve les mêmes chemins ;
+4. raccord minimal Core 0.23 ;
+5. réalignement des empreintes Phase 2 si le blob change ;
+6. Architecture + navigateur complet + Firefox + Tactical Dock ;
+7. checkpoint B.6 GREEN ;
+8. audit final de non-duplication puis clôture du service resolver.
+
+
 ## Chantier courant prioritaire — Phase 4 / resolver d’assets — 2026-09-19
 
 Branche :

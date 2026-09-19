@@ -204,6 +204,11 @@
       "domain": "dungeon",
       "role": "authored main/secondary graph links and return stacks"
     },
+    "assets/gensrpg/core/asset-resolver-v1.js": {
+      "owner": "GenSrpG Core Assets",
+      "domain": "core",
+      "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
+    },
     "assets/gensrpg/core/runtime-bootstrap-v1.js": {
       "owner": "Core Bootstrap",
       "domain": "core",

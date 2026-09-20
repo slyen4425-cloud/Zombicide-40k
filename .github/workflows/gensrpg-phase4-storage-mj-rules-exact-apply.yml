@@ -1,0 +1,58 @@
+name: GenSrpG Phase 4 MJ Rules exact apply
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-mj-rules-2026-09-20
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-storage-mj-rules-2026-09-20
+          fetch-depth: 0
+
+      - name: Apply exact MJ Rules storage raccord
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = "1545aba502777d9fb76decdcee90a89c7cf3f971"
+          test "$(wc -c < index.html)" = "8174580"
+
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old_read='JSON.parse(localStorage.getItem("gensrpg_dungeon_mj_rules_v145")||"{}")'
+          new_read='GensStorageV1.readJson(localStorage,"gensrpg_dungeon_mj_rules_v145",{})'
+          old_write='localStorage.setItem("gensrpg_dungeon_mj_rules_v145",JSON.stringify(r))'
+          new_write='GensStorageV1.writeJson(localStorage,"gensrpg_dungeon_mj_rules_v145",r)'
+          assert s.count(old_read)==1, s.count(old_read)
+          assert s.count(old_write)==2, s.count(old_write)
+          assert s.count(new_read)==0, s.count(new_read)
+          assert s.count(new_write)==0, s.count(new_write)
+          s=s.replace(old_read,new_read,1)
+          s=s.replace(old_write,new_write)
+          assert s.count(old_read)==0
+          assert s.count(old_write)==0
+          assert s.count(new_read)==1
+          assert s.count(new_write)==2
+          p.write_text(s,encoding="utf-8",newline="")
+          PY
+
+          test "$(wc -c < index.html)" = "8174580"
+          test "$(git hash-object index.html)" = "5b9b9ae780f735eadef049afeb10acf0b57441fe"
+          git diff --check
+          git diff --numstat -- index.html
+
+          git rm ".github/workflows/gensrpg-phase4-storage-mj-rules-exact-apply.yml"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "refactor: route MJ Rules through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-mj-rules-2026-09-20

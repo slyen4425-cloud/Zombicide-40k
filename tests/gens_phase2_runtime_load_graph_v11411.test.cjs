@@ -18,6 +18,7 @@ const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g
   .map(stripQuery);
 
 assert.deepEqual(rawDirect,[
+  'assets/gensrpg/core/indexed-asset-storage-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -42,7 +43,7 @@ const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,22,'production composition must expose 22 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,23,'production composition must expose 23 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');
@@ -96,14 +97,14 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,82,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and two extracted Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,66,'production-reachable JS graph must currently contain 66 files');
+assert.equal(reachable.size,67,'production-reachable JS graph must currently contain 67 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
 }
 for(const rel of phase4ExtractedServices)assert.equal(allJs.includes(rel),true,'Phase 4 extracted service missing: '+rel);
 assert.equal(reachable.has('assets/gensrpg/core/asset-resolver-v1.js'),true,'Phase 4 resolver service must remain production-reachable after explicit raccord');
-assert.equal(reachable.has('assets/gensrpg/core/indexed-asset-storage-v1.js'),false,'Phase 4 IndexedDB asset storage service must remain outside production until its explicit raccord');
+assert.equal(reachable.has('assets/gensrpg/core/indexed-asset-storage-v1.js'),true,'Phase 4 IndexedDB asset storage service must be production-reachable after explicit raccord');
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
   'assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js',

@@ -209,6 +209,11 @@
       "domain": "core",
       "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
     },
+    "assets/gensrpg/core/indexed-asset-storage-v1.js": {
+      "owner": "GenSrpG Core Storage",
+      "domain": "core",
+      "role": "canonical IndexedDB asset storage primitives; migration and UI bootstrap remain outside this service"
+    },
     "assets/gensrpg/core/runtime-bootstrap-v1.js": {
       "owner": "Core Bootstrap",
       "domain": "core",

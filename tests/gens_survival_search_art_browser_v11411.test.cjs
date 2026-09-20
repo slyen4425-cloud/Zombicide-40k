@@ -149,6 +149,11 @@ async function startSurvival(page){
     await page.locator('#menu button[onclick="openDeckSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('objectManager')).display!=='none');
     await page.waitForFunction(()=>document.querySelectorAll('#deckConfig img').length>0);
+    await page.evaluate(async()=>{
+      const imgs=[...document.querySelectorAll('#deckConfig img')]
+        .filter(img=>/assets\/img_(?:0[7-9]|1\d|2[0-6])_/.test(img.getAttribute('src')||''));
+      await Promise.all(imgs.map(img=>img.decode?.().catch(()=>null)));
+    });
     const itemArts=await page.evaluate(()=>[...document.querySelectorAll('#deckConfig img')]
       .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
       .filter(x=>/assets\/img_(?:0[7-9]|1\d|2[0-6])_/.test(x.src)));

@@ -29849,10 +29849,10 @@ window.ensureBuiltinMonsterCapture162=function(){
   try{
     const key="gensrpg_rpg_gameplay_by_profile_v1";
     let map={};
-    try{map=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(e){}
+    try{map=GensStorageV1.readJson(localStorage,key,{})||{}}catch(e){}
     if(!map[MC162_ID]){
       map[MC162_ID]=JSON.parse(JSON.stringify(MC162_GAMEPLAY));
-      localStorage.setItem(key,JSON.stringify(map));
+      GensStorageV1.writeJson(localStorage,key,map);
     }
   }catch(e){console.warn("Seed gameplay Capture",e)}
 

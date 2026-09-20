@@ -43,8 +43,7 @@ assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ 
 assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave direct-storage manifest');
 assert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave direct-storage manifest');
 for(const key of [
-  'gensrpg_rpg_gameplay_by_profile_v1',
-  'gensrpg_challenge_library_v1'
+  'gensrpg_rpg_gameplay_by_profile_v1'
 ]){
   assert.ok(keys.has(key),'candidate key missing from storage manifest: '+key);
 }
@@ -76,10 +75,9 @@ console.log(JSON.stringify({
   scenario:'Phase 4 storage next audit 3',
   indexBlob:blobSha,
   totals:manifest.totals,
-  migrated:['gensrpg_dungeon_deck_v1','gensrpg_manual_mj_effects_v1','gensrpg_dungeon_economy_rules_160'],
+  migrated:['gensrpg_dungeon_deck_v1','gensrpg_manual_mj_effects_v1','gensrpg_dungeon_economy_rules_160','gensrpg_challenge_library_v1'],
   candidates:[
-    'gensrpg_rpg_gameplay_by_profile_v1',
-    'gensrpg_challenge_library_v1'
+    'gensrpg_rpg_gameplay_by_profile_v1'
   ],
   deferred:['gensrpg_dungeon_runtime_v2','Stats dynamic state','Tactical mixed state','Runtime Repair mixed scalar/JSON']
 },null,2));

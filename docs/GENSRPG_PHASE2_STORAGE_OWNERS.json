@@ -7,7 +7,7 @@
     "totalAccesses": 194,
     "resolvedAccesses": 129,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 23
+    "distinctResolvedKeys": 24
   },
   "byDomain": {
     "dungeon": {
@@ -38,7 +38,7 @@
       "accesses": 21,
       "resolved": 8,
       "unresolved": 13,
-      "distinctKeys": 4
+      "distinctKeys": 5
     }
   },
   "resolvedKeys": [
@@ -370,6 +370,22 @@
       ],
       "kinds": [
         "literal"
+      ]
+    },
+    {
+      "key": "gensrpg_rpg_gameplay_by_profile_v1",
+      "domains": [
+        "capture"
+      ],
+      "sources": [
+        "inline:builtinMonsterCapture162"
+      ],
+      "ops": [
+        "getItem",
+        "setItem"
+      ],
+      "kinds": [
+        "constant"
       ]
     },
     {

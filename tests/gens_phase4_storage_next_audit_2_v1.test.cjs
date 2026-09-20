@@ -11,23 +11,21 @@ const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:208,
-  resolvedAccesses:143,
+  totalAccesses:203,
+  resolvedAccesses:138,
   unresolvedAccesses:65,
-  distinctResolvedKeys:28
-},'current Phase 4 storage totals must include the Capture progress Core raccord');
+  distinctResolvedKeys:27
+},'current Phase 4 storage totals must include the Dungeon Primary Selection Core raccord');
 
 const primary=manifest.resolvedKeys.find(x=>x.key==='gensrpg_dungeon_primary_selection_v167833');
-assert.ok(primary,'primary Dungeon selection key must remain mapped');
-assert.deepEqual(primary.sources.slice().sort(),[
-  'file:assets/dungeon/dungeon-authored-action-fix-167857.js',
-  'file:assets/dungeon/dungeon-authored-bootstrap-167849.js',
-  'file:assets/dungeon/dungeon-large-room-support-167834.js',
-  'file:assets/dungeon/dungeon-world-session-bridge-167832.js'
-].sort(),'primary selection key source set drifted');
+assert.equal(primary,undefined,'migrated primary Dungeon selection key must leave the direct-storage manifest');
 
-for(const source of primary.sources){
-  const rel=source.replace(/^file:/,'');
+for(const rel of [
+  'assets/dungeon/dungeon-authored-action-fix-167857.js',
+  'assets/dungeon/dungeon-authored-bootstrap-167849.js',
+  'assets/dungeon/dungeon-large-room-support-167834.js',
+  'assets/dungeon/dungeon-world-session-bridge-167832.js'
+]){
   assert.equal(owners.files?.[rel]?.domain,'dungeon',rel+' must remain Dungeon-owned');
 }
 
@@ -71,7 +69,7 @@ console.log(JSON.stringify({
     stats:'future Phase 4 Stats lot',
     tactical:'runtime state + dynamic hero state',
     runtimeRepair:'mixed JSON and scalar profile repair',
-    primarySelection:'bootstrap prerequisite is now satisfied; key remains unmigrated in this bootstrap-only lot'
+    primarySelection:'migrated through Core Storage; Dungeon remains business owner; runtime_v2 remains deferred'
   },
-  nextInspection:'continue with the next isolated storage family after Capture progress GREEN'
+  nextInspection:'continue with remaining isolated storage families; keep runtime_v2, Stats and Tactical deferred'
 },null,2));

@@ -63,6 +63,24 @@ Avant toute décision :
 Ne pas récupérer ou réécrire le gros `index.html` à l'aveugle.
 Utiliser le fichier exact fourni par Sylvain et vérifier le blob attendu avant inspection/modification.
 
+### Validation finale — GREEN
+
+HEAD validé avant clôture documentaire :
+`8de495ee94040cbc12913d9328f67c0689396e9d`
+
+Résultats :
+- Architecture + navigateur complet `35509834853` — SUCCESS ;
+- Firefox `35509834854` — SUCCESS ;
+- Tactical Dock `35509834852` — SUCCESS.
+
+Conclusion :
+- aucun runtime/gameplay/asset/stockage modifié ;
+- inventaire post-Primary Selection verrouillé ;
+- cinq familles inline prioritaires identifiées ;
+- `gensrpg_dungeon_runtime_v2`, Stats, Tactical, Runtime Repair et les scalaires restent explicitement différés ;
+- prochaine étape : inspecter le `index.html` exact blob `5d2b0a6da51fd70bd36f087cb9ab82a1af308226` selon la règle 26.
+
+
 
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Primary Selection — 2026-09-20
 

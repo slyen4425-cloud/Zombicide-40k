@@ -57,6 +57,27 @@ Résultat déterministe attendu :
 - aucun observer/timer/retry ;
 - aucun merge sur `main`.
 
+### Implémentation appliquée
+
+Micro-diff `index.html` :
+- commit fonctionnel : `2b8d52274abd4bbe6fbc72ff487bcd054ceab6b9` ;
+- compare Git : uniquement `index.html`, `3` additions / `3` suppressions ;
+- taille finale : `8 174 603` octets ;
+- blob final : `739ca52610308d085ecf2635c5bc748f70c79a11`.
+
+Raccord :
+- 1 lecture directe -> `GensStorageV1.readJson(..., null)` ;
+- 2 écritures directes -> `GensStorageV1.writeJson(..., ds)` ;
+- `try/catch` historiques des writers conservés ;
+- initialisation, quantités, consommation et reshuffle inchangés.
+
+Manifeste Phase 2 après raccord :
+- accès directs : `203 -> 200` ;
+- résolus : `138 -> 135` ;
+- non résolus : `65` inchangés ;
+- clés directes résolues : `27 -> 26` ;
+- Dungeon : `171 -> 168` accès, `121 -> 118` résolus, `50` non résolus inchangés.
+
 ### Validation requise
 
 Avant GREEN :

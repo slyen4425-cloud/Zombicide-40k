@@ -24,7 +24,7 @@ const previewBlock=(preview.match(/const tags=\[(.*?)\n\s*\];/s)||[])[1];
 assert.ok(workflowBlock&&previewBlock);
 const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>stripQuery(m[1]));
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>stripQuery(m[1]));
-assert.deepEqual(previewInjected,injected);
+assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'));
 
 const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),

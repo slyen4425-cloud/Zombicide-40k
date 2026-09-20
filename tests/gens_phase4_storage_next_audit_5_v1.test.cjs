@@ -53,7 +53,6 @@ assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Econo
 assert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave the direct-storage manifest');
 for(const key of [
   'gensrpg_rpg_gameplay_by_profile_v1',
-  'gensrpg_challenge_library_v1',
   'gensrpg_dungeon_runtime_v2'
 ]) assert.ok(keys.has(key),'candidate/deferred key missing from manifest: '+key);
 

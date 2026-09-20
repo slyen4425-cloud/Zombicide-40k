@@ -1,5 +1,74 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Challenge Library — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-challenge-library-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-challenge-library-2026-09-20`
+
+Base exacte :
+`c6d971d2de22c9e875e692102d9d1ac128a4ebf5`
+(`checkpoint/gensrpg-phase4-storage-next-audit-8-green-2026-09-20`).
+
+Audit 8 clôturé GREEN :
+- Architecture + navigateur complet `35521667254` — SUCCESS ;
+- Firefox `35521667264` — SUCCESS ;
+- Tactical Dock `35521667293` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_challenge_library_v1`.
+
+Propriétaires :
+- `dungeonCore051ExplorationPolish` ;
+- `dungeonCore200Rebuild` ;
+- `dungeonCore202ContentDensity`.
+
+Accès ciblés :
+- 3 lectures JSON ;
+- 2 écritures JSON.
+
+Source :
+- `index.html` : `8 174 580` octets ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+Cible déterministe :
+- taille : `8 174 580` ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83`.
+
+### Méthode
+
+1. parité + owner guard avant raccord ;
+2. parité attendue GREEN ;
+3. owner guard attendu RED avant raccord ;
+4. raccord exact de 5 expressions de transport ;
+5. contenu/fréquence/sélection des énigmes inchangés ;
+6. réalignement uniquement des empreintes/manifeste rendus obsolètes ;
+7. validation Architecture+navigateur + Firefox + Tactical.
+
+Gameplay-by-profile reste différé : aucun travail de cette branche n'est repris.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_CHALLENGE_LIBRARY.md`.
+
+### Interdits
+
+- aucun changement du contenu des 50 défis ;
+- aucune modification fréquence/portes/coffres/puzzles ;
+- aucun gameplay-by-profile ;
+- aucun runtime_v2 ;
+- aucun Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 8 — 2026-09-20
 
 Branche :

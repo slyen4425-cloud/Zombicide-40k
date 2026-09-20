@@ -269,6 +269,12 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage Dungeon Deck
         run: node tests/gens_phase4_storage_dungeon_deck_owner_v1.test.cjs
 
+      - name: Caractériser la parité stockage Manual MJ Effects
+        run: node tests/gens_phase4_storage_manual_mj_effects_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Manual MJ Effects
+        run: node tests/gens_phase4_storage_manual_mj_effects_owner_v1.test.cjs
+
       - name: Auditer le bootstrap stockage inline Phase 4
         run: node tests/gens_phase4_storage_inline_audit_v1.test.cjs
 

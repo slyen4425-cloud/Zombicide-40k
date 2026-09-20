@@ -9,6 +9,69 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage Room Creator V2 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-room-creator-v2-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-room-creator-v2-2026-09-20`
+
+Base exacte :
+`1ffc8672950c526a9fef8c0b7506f126f67137aa`
+(`checkpoint/gensrpg-phase4-storage-room-creator100-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre unique
+
+Raccorder uniquement `assets/dungeon/dungeon-room-creator-v2-167819.js` au service Core `GensStorageV1`.
+
+Clé historique à conserver exactement :
+`gensrpg_dungeon_room_interactions_v2`
+
+Responsabilités :
+- Core `storage-v1.js` : lecture/écriture JSON générique ;
+- `DungeonRoomCreatorV2` : `STORAGE_KEY`, `normalizeMeta()`, attachments, caches et logique Builder.
+
+### Invariants
+
+- aucune migration de format ;
+- même clé locale ;
+- même JSON persisté ;
+- même fallback `{}` pour absence/JSON invalide/`null`/type non-objet ;
+- `normalizeMeta()` reste le seul normalizer métier ;
+- erreurs d’écriture restent propagées ;
+- Room Creator 1.0 reste raccordé et inchangé ;
+- aucun World Builder, Visual Config, runtime Dungeon ou IndexedDB touché ;
+- aucun wrapper, observer, timer/retry ou fallback legacy ajouté ;
+- `storage-v1.js` est déjà chargé avant V1/V2 dans Pages et preview ;
+- aucun changement de `index.html`.
+
+### Tests requis
+
+1. RED propriétaire V2 : plus aucun accès direct `localStorage` après raccord ;
+2. clé historique et fallback `{}` conservés ;
+3. parité JSON invalide / `null` / objet valide / round-trip ;
+4. `normalizeMeta()` et schéma V2 inchangés ;
+5. test historique V2 exécuté avec le vrai `GensStorageV1` ;
+6. Room Creator 1.0 toujours GREEN ;
+7. Builder navigateur réel ;
+8. Architecture + navigateur complet + Firefox + Tactical Dock ;
+9. aucun autre stockage migré dans ce sous-lot.
+
+### Interdit
+
+- `gensrpg_zone_graphs_v1` ;
+- `gensrpg_dungeon_runtime_v2` ;
+- IndexedDB assets ;
+- Save & Quit ;
+- migration de schéma ;
+- gameplay, mouvement, combat, Capture, Survie, Tactical ;
+- merge sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator 1.0 — 2026-09-19
 
 Branche :

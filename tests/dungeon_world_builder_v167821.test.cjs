@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const feedbackSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');
 const builderSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-builder-167821.js'),'utf8');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -46,6 +47,7 @@ ctx.DungeonRoomCreatorV2={
   }
 };
 vm.createContext(ctx);
+vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
 vm.runInContext(feedbackSrc,ctx,{filename:'dungeon-room-creator-feedback-167821.js'});
 vm.runInContext(builderSrc,ctx,{filename:'dungeon-world-builder-167821.js'});
 

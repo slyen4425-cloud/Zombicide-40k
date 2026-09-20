@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
+const storageSrc=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','core','storage-v1.js'),'utf8');
 const patch=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-room-visual-config-167826.js'),'utf8');
 const loader=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-room-creator-feedback-167821.js'),'utf8');
 
@@ -23,7 +24,7 @@ let content={mode:'inherit',enemies:[],chests:[],traps:[],puzzles:[],npcs:[],ite
 const localStorage=storage({gensrpg_zone_graphs_v1:JSON.stringify([graph])});
 const context={console,Math,Date,localStorage,document,setTimeout(){return 1},MutationObserver:function(){this.observe=()=>{}},PointerEvent:function(){},showToast(){},DungeonRoomCreator100:{findRoom(id){return id==='room-a'?JSON.parse(JSON.stringify(room)):null},loadLibrary(){return [JSON.parse(JSON.stringify(room))]}},DungeonZoneContent167824:{getZoneContent(){return JSON.parse(JSON.stringify(content))},saveZoneContent(d,n,c){assert.equal(d,'world-1');assert.equal(n,'zone-1');content=JSON.parse(JSON.stringify(c));return content},parseRewardItems(text){return String(text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>({itemId:s,qty:1}))},rewardItemsText(items){return items.map(x=>x.itemId).join('\n')}}};
 context.window=context;context.globalThis=context;
-vm.createContext(context);vm.runInContext(patch,context);
+vm.createContext(context);vm.runInContext(storageSrc,context,{filename:'storage-v1.js'});vm.runInContext(patch,context);
 const api=context.DungeonRoomVisualConfig167826;
 assert.ok(api,'API V16.78.26 absente');
 assert.equal(api.APP_VERSION,'16.78.26');

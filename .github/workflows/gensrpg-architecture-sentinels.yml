@@ -275,6 +275,13 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage Dungeon Primary Selection
         run: node tests/gens_phase4_storage_primary_selection_owner_v1.test.cjs
 
+      - name: Rejouer les tests historiques Dungeon Primary Selection via Core
+        run: |
+          node tests/dungeon_world_session_bridge_v167832.test.cjs
+          node tests/dungeon_large_room_v167834.test.cjs
+          node tests/dungeon_authored_bootstrap_v167849.test.cjs
+          node tests/dungeon_authored_action_fix_v167857.test.cjs
+
       - name: Caractériser la parité stockage World Summary
         run: node tests/gens_phase4_storage_world_summary_parity_v1.test.cjs
 

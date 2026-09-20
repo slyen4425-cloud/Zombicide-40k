@@ -98,3 +98,28 @@ Avant raccord :
 - ouvrir un nouveau lot homogène ;
 - conserver Capture comme propriétaire métier et Core Storage comme seul transport JSON.
 
+## Validation finale GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`50c11cc34d6757a9340a5eecc9f212ff6ab1adbf`
+
+Nouveau blob exact de `index.html` après l'unique ajout de bootstrap :
+- taille : `8 174 618` octets ;
+- blob Git : `476f91b7a5921c9f02f17ba72c801f4bec16a809`.
+
+Sentinelles historiques réalignées sans changement runtime :
+- inventaire des effets globaux Phase 2 ;
+- caractérisation des propriétaires stockage Phase 2 ;
+- audits stockage suivants ;
+- caractérisation des fichiers hors graphe ;
+- owner guard Room Creator 1.0 ;
+- audit final du resolver d'assets (nouveau blob exact) ;
+- fixture navigateur de preview.
+
+Validation complète sur le même HEAD :
+- Architecture + navigateur complet : run `35502015406` — SUCCESS ;
+- Firefox : run `35502015416` — SUCCESS ;
+- Tactical Dock : run `35502015502` — SUCCESS.
+
+Aucune clé métier n'a été migrée dans ce lot.
+

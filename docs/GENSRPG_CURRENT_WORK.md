@@ -118,6 +118,31 @@ Runs :
 
 La nouvelle sentinelle Fouiller + arts Survie a passé dès cette validation stabilisée, puis toute la batterie navigateur a terminé GREEN.
 
+### Validation finale — GREEN
+
+HEAD validé :
+`5004d4cac4ff118448b6867d58092c49fa4e8dee`
+
+Résultats :
+- Architecture + navigateur complet `35506146562`, tentative 2 — SUCCESS ;
+- Firefox `35506146704` — SUCCESS ;
+- Tactical Dock `35506146608` — SUCCESS.
+
+La nouvelle sentinelle Survie valide :
+- `Fouiller` visible, unique et fonctionnel ;
+- clic réel -> `state.found` mis à jour ;
+- 6 arts héros décodés ;
+- 20 arts objets/cartes décodés ;
+- 7 arts ennemis décodés ;
+- couverture `img_01` à `img_32` ;
+- aucune 404 Survie ;
+- aucun fallback inter-module.
+
+Première tentative Architecture :
+- RED uniquement sur un timing ponctuel de décodage d'image dans la sentinelle ;
+- aucune modification de code entre les deux tentatives ;
+- tentative 2 totalement GREEN.
+
 ### Validation requise
 
 Avant GREEN :

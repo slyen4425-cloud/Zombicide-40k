@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:198,
-  resolvedAccesses:133,
+  totalAccesses:196,
+  resolvedAccesses:131,
   unresolvedAccesses:65,
-  distinctResolvedKeys:25
-},'post-Manual-MJ storage totals drifted');
+  distinctResolvedKeys:24
+},'post-Economy-Rules storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
-assert.equal(blob,'a070af09f9cb1fcda78987e83bc117d7544d1b6c','audit 5 must target the exact post-Deck index blob');
+assert.equal(blob,'16deeb169abbc31a7db04161902e9381fd6888ad','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -49,8 +49,8 @@ for(const id of ['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dung
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave the direct-storage manifest');
+assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave the direct-storage manifest');
 for(const key of [
-  'gensrpg_dungeon_economy_rules_160',
   'gensrpg_rpg_gameplay_by_profile_v1',
   'gensrpg_challenge_library_v1',
   'gensrpg_dungeon_runtime_v2'

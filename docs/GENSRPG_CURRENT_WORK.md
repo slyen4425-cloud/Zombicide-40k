@@ -77,6 +77,50 @@ Responsabilités :
 - merge sur `main`.
 
 
+### Résultat zone graphs — GREEN fonctionnel
+
+RED propriétaire :
+- parité `tests/gens_phase4_storage_zone_graphs_parity_v1.test.cjs` GREEN avant raccord ;
+- garde `tests/gens_phase4_storage_zone_graphs_owner_v1.test.cjs` RED uniquement sur les accès directs historiques ;
+- Architecture RED `35491583968` : échec attendu uniquement sur l’autorité Core des graphes Builder.
+
+Raccord :
+- commit runtime `6350c0bc7e3e73fd5854d0ce83c0d54713fc08c8` ;
+- `DungeonWorldBuilder167821` lit/écrit désormais `gensrpg_zone_graphs_v1` via `GensStorageV1` ;
+- `DungeonRoomVisualConfig167826` lit la même clé via `GensStorageV1` et reste strictement read-only ;
+- `normalizeGraph()`, schéma, validation, graphes et UI restent dans leurs propriétaires Builders ;
+- aucune migration de format, aucun changement de clé, aucun `index.html`, aucune règle gameplay.
+
+Cartographie Phase 2 :
+- commit de réalignement `0682d2e313944f1236b16c1e44e925751062c5c3` ;
+- accès directs stockage : `217 -> 214` ;
+- accès résolus directs : `145 -> 143` ;
+- accès dynamiques directs : `72 -> 71` ;
+- clés/familles directes résolues : `29 -> 28` ;
+- domaine Builders : `3 -> 0` accès directs.
+
+Validation ciblée :
+- le test historique World Builder est rejoué avec le vrai Core stockage ;
+- Visual Config est couvert par la parité `zone_graphs` et le vrai scénario navigateur Config objet ;
+- l’ancienne chaîne imbriquée Visual Config -> hotfix -> template content n’est pas utilisée comme critère de ce lot, car elle entraîne un test Template Content hors périmètre après avoir validé Visual Config lui-même.
+
+Validation fonctionnelle finale sur `85cc898e2e74165b304f55029e0db8ea736dd46c` :
+- Architecture + navigateur complet `35491789347` — SUCCESS ;
+- Firefox `35491789272` — SUCCESS ;
+- Tactical Dock `35491789293` — SUCCESS.
+
+État du sous-périmètre Builders stockage :
+- `gensrpg_dungeon_custom_rooms_v1` — Core storage ;
+- `gensrpg_dungeon_room_interactions_v2` — Core storage ;
+- `gensrpg_zone_graphs_v1` — Core storage ;
+- aucun accès direct `localStorage` ne reste dans le domaine Builders cartographié.
+
+Prochaine action après validation de cette fermeture documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-zone-graphs-green-2026-09-20` ;
+2. ouvrir un nouvel audit stockage depuis ce checkpoint ;
+3. choisir le prochain sous-périmètre minimal à partir des 214 accès directs restants ;
+4. ne pas attaquer `gensrpg_dungeon_runtime_v2` ni les 71 accès dynamiques sans caractérisation dédiée.
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator V2 — 2026-09-20
 
 Branche :

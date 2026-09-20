@@ -88,3 +88,31 @@ Les migrations versionnées seront ajoutées seulement après extraction stable 
 6. seulement ensuite choisir un autre sous-périmètre de stockage.
 
 Le runtime de partie `gensrpg_dungeon_runtime_v2` reste explicitement hors périmètre jusqu’à un audit séparé.
+
+## État après extraction Builders — 2026-09-20
+
+Les quatre jalons prévus ont été réalisés sans migration de format :
+
+1. `GensStorageV1` — service JSON générique ;
+2. `DungeonRoomCreator100` — `gensrpg_dungeon_custom_rooms_v1` ;
+3. `DungeonRoomCreatorV2` — `gensrpg_dungeon_room_interactions_v2` ;
+4. `DungeonWorldBuilder167821` + `DungeonRoomVisualConfig167826` — `gensrpg_zone_graphs_v1`.
+
+Résultat :
+- les noms de clés historiques sont inchangés ;
+- les JSON persistés et fallbacks sont inchangés ;
+- `normalizeRoom()`, `normalizeMeta()` et `normalizeGraph()` restent dans leurs modules ;
+- Visual Config reste lecteur uniquement du stockage des graphes ;
+- aucun accès direct `localStorage` ne reste dans le domaine Builders de la cartographie Phase 2 ;
+- le manifeste global passe à 214 accès directs, 143 résolus et 71 dynamiques ;
+- aucune migration de schéma n’a été introduite.
+
+Checkpoint fonctionnel de référence avant fermeture documentaire :
+`85cc898e2e74165b304f55029e0db8ea736dd46c`
+
+Validations :
+- Architecture + navigateur complet `35491789347` — SUCCESS ;
+- Firefox `35491789272` — SUCCESS ;
+- Tactical Dock `35491789293` — SUCCESS.
+
+La suite du service stockage doit repartir d’un checkpoint GREEN neuf et auditer un autre sous-périmètre. Le runtime `gensrpg_dungeon_runtime_v2` reste volontairement exclu tant que ses nombreux consommateurs et fabriques de clés n’ont pas fait l’objet d’un audit dédié.

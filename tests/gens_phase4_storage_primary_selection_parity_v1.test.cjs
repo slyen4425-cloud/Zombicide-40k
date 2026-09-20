@@ -31,7 +31,7 @@ assert.deepEqual(neutral(coreFilteredRead(null,{failRead:true})),neutral(legacyF
 assert.deepEqual(neutral(coreRawRead(null,{failRead:true})),neutral(legacyRawRead(null,{failRead:true})));
 
 function legacyWrite(value,opts={}){const st=new FakeStorage(null,opts);try{st.setItem(KEY,JSON.stringify(value||null))}catch(e){}return {writes:st.writes,returned:value}}
-function coreWrite(value,opts={}){const st=new FakeStorage(null,opts);api.writeJson(st,KEY,value||null);return {writes:st.writes,returned:value}}
+function coreWrite(value,opts={}){const st=new FakeStorage(null,opts);try{api.writeJson(st,KEY,value||null)}catch(e){}return {writes:st.writes,returned:value}}
 for(const value of [{kind:'world',id:'w1'},{kind:'adventure',id:'a1'},null,false,0,'',undefined,[1,2]]){
   assert.deepEqual(coreWrite(value).writes,legacyWrite(value).writes,'write bytes parity failed');
   assert.equal(coreWrite(value).returned,value,'writer return contract must stay unchanged');

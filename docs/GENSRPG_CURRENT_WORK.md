@@ -78,10 +78,28 @@ Sentinelle :
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
 
+### Validation finale Audit 10 — GREEN
+
+HEAD fonctionnel validé :
+`a66c9b13dfad62a0a32df35e6bbc3cbdf4403c7a`
+
+Runs :
+- Architecture + navigateur complet `35527922025` — SUCCESS ;
+- Firefox `35527921918` — SUCCESS ;
+- Tactical Dock `35527921947` — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+Décision confirmée :
+prochain lot = uniquement `gensrpg_dungeon_scene_v1`.
+
 ### Prochaine action
 
-Valider Audit 10 par Architecture+navigateur, Firefox et Tactical Dock.
-Si GREEN, checkpoint final puis lot neuf uniquement pour Dungeon Scene.
+1. valider ce commit documentaire ;
+2. créer le checkpoint GREEN final Audit 10 ;
+3. ouvrir une branche neuve Dungeon Scene ;
+4. poser parité + garde owner avant raccord ;
+5. ne toucher à aucun autre stockage Dungeon.
 
 
 

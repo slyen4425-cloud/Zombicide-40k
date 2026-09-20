@@ -1,5 +1,5 @@
 /* GenSrpG Phase 4 — canonical IndexedDB asset storage primitives.
-   Pure storage service: no localStorage migration, UI bootstrap, timers or gameplay. */
+   Pure storage service: no legacy migration, UI bootstrap, timers or gameplay. */
 (function(ROOT){
 "use strict";
 

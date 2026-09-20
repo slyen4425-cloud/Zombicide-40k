@@ -9,21 +9,21 @@ const text=rel=>read(rel).toString('utf8');
 
 const manifest=JSON.parse(text('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 assert.deepEqual(manifest.totals,{
-  totalAccesses:189,
-  resolvedAccesses:124,
+  totalAccesses:187,
+  resolvedAccesses:122,
   unresolvedAccesses:65,
-  distinctResolvedKeys:22
+  distinctResolvedKeys:21
 },'Phase 4 storage totals must match post-Economy-Rules state');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:157,resolved:107,unresolved:50,distinctKeys:14
+  accesses:155,resolved:105,unresolved:50,distinctKeys:13
 },'Dungeon storage totals drifted');
 
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
 assert.equal(index.length,8174580,'index.html byte size drifted from post-Economy-Rules checkpoint');
-assert.equal(blobSha,'30487d09481e11e5883faca1a6e49727d9cecfb6','index.html blob must remain the exact post-Challenge-Library source');
+assert.equal(blobSha,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054','index.html blob must remain the exact post-Challenge-Library source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');

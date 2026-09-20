@@ -21,11 +21,11 @@ for(const name of ['bridge','large','bootstrap','action']){
 }
 assert.equal(files.core.includes(KEY),false,'Core Storage must remain domain-agnostic');
 
-assert.equal((files.bridge.match(/GensStorageV1\.readJson\(localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Bridge must own one Core JSON read');
-assert.equal((files.bridge.match(/GensStorageV1\.writeJson\(localStorage,PRIMARY_KEY,x\|\|null\)/g)||[]).length,1,'Bridge must own one Core JSON write');
-assert.equal((files.large.match(/GensStorageV1\.readJson\(localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Large Room must own one Core JSON read');
-assert.equal((files.bootstrap.match(/GensStorageV1\.readJson\(localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Authored Bootstrap must own one Core JSON fallback read');
-assert.equal((files.action.match(/GensStorageV1\.readJson\(localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Authored Action Fix must own one Core JSON fallback read');
+assert.equal((files.bridge.match(/ROOT\.GensStorageV1\.readJson\(ROOT\.localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Bridge must own one Core JSON read');
+assert.equal((files.bridge.match(/ROOT\.GensStorageV1\.writeJson\(ROOT\.localStorage,PRIMARY_KEY,x\|\|null\)/g)||[]).length,1,'Bridge must own one Core JSON write');
+assert.equal((files.large.match(/ROOT\.GensStorageV1\.readJson\(ROOT\.localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Large Room must own one Core JSON read');
+assert.equal((files.bootstrap.match(/ROOT\.GensStorageV1\.readJson\(ROOT\.localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Authored Bootstrap must own one Core JSON fallback read');
+assert.equal((files.action.match(/ROOT\.GensStorageV1\.readJson\(ROOT\.localStorage,PRIMARY_KEY,null\)/g)||[]).length,1,'Authored Action Fix must own one Core JSON fallback read');
 
 assert.match(files.large,/function readRt\(\)\{try\{const x=JSON\.parse\(localStorage\.getItem\(RT_KEY\)\|\|"null"\);return x&&typeof x==="object"\?x:null\}catch\(e\)\{return null\}\}/,'Large Room runtime read must remain untouched');
 assert.match(files.large,/function writeRt\(x\)\{try\{localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\);return true\}catch\(e\)\{return false\}\}/,'Large Room runtime write must remain untouched');

@@ -1,5 +1,85 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 12 — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-storage-next-audit-12-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-storage-next-audit-12-2026-09-20`.
+- Base exacte et dernier GREEN : `08a93ef71f2d9fef656260e29bba812f376d2d0e`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-economy-session-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Economy Session définitivement clôturé
+
+Validation du HEAD documentaire final `08a93ef71f2d9fef656260e29bba812f376d2d0e` :
+- Architecture + navigateur complet : `35532788107` — SUCCESS ;
+- Firefox : `35532788046` — SUCCESS ;
+- Tactical Dock : `35532788073` — SUCCESS.
+
+Checkpoint final :
+`checkpoint/gensrpg-phase4-storage-economy-session-green-2026-09-20`.
+
+### État de départ Storage
+
+Manifeste direct Phase 2 :
+- accès directs : `185` ;
+- résolus : `120` ;
+- non résolus : `65` ;
+- clés directes résolues : `20`.
+
+Dungeon :
+- `153 / 103 / 50 / 12`.
+
+`index.html` exact :
+- taille : `8 174 580` octets ;
+- blob : `1545aba502777d9fb76decdcee90a89c7cf3f971`.
+
+### Mission Audit 12
+
+Audit uniquement, sans migration runtime.
+
+1. réexaminer toutes les familles directes restantes après Economy Session ;
+2. rechercher le prochain sous-périmètre JSON minimal avec propriétaire et contrat prouvés ;
+3. vérifier lecteurs/writers/fallbacks/erreurs/ordre d'effets et propriétaires externes/anonymes ;
+4. retenir un micro-lot seulement si sa frontière est homogène et compatible avec `GensStorageV1` sans créer une deuxième autorité.
+
+Priorité méthodologique :
+- préférer une famille JSON read/write simple ;
+- ne pas étendre `GensStorageV1` uniquement pour rendre un candidat commode ;
+- ne pas mélanger valeurs scalaires, removeItem, migrations ou compatibilités historiques dans un lot JSON simple.
+
+### Frontières conservées
+
+Différés tant qu'un audit dédié ne prouve pas leur frontière :
+- Pending Trap / Special Branch : get/set/remove ;
+- gameplay-by-profile : miroir principal + seed Capture + marqueur scalaire ;
+- `gensrpg_dungeon_runtime_v2` ;
+- Stats dynamique ;
+- Tactical mixed state ;
+- Runtime Repair.
+
+Interdits :
+- aucun runtime dans cet audit ;
+- aucun gameplay/UI/assets/navigation ;
+- aucun observer/timer/retry/wrapper ;
+- aucune modification Stats/Tactical/Capture/Survie ;
+- aucun merge sur `main`.
+
+### Accès au gros HTML
+
+Une copie locale exacte du blob `1545aba502777d9fb76decdcee90a89c7cf3f971`
+est déjà reconstruite et vérifiée à partir de la source utilisateur + micro-diffs Git
+officiels. GitHub reste l'autorité pour branches/SHA/diff/CI.
+Si cette correspondance cesse d'être vraie, réappliquer immédiatement la règle 26.
+
+### Prochaine action
+
+Inventorier les 20 familles directes restantes et leurs opérations/propriétaires,
+puis sélectionner le prochain candidat uniquement sur preuve. Aucun raccord
+runtime dans Audit 12.
+
+
 ## Chantier courant prioritaire — Phase 4 Storage / Economy Session — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

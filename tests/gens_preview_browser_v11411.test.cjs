@@ -55,9 +55,13 @@ async function waitReady(page){
     assert.match(first.href,/\/preview\.html$/,'document.write must preserve preview.html as the reload target');
     assert.ok(first.srcs.includes('assets/dungeon/dungeon-core-318.js'),'preview must include Pages-only Dungeon Core 3.18');
     assert.ok(first.srcs.includes('assets/dungeon/dungeon-authored-runtime-167839.js?v=167840'),'preview must include authored Dungeon runtime');
+    const storagePos=first.srcs.indexOf('assets/gensrpg/core/storage-v1.js');
+    const roomCreatorPos=first.srcs.indexOf('assets/dungeon/dungeon-room-creator-100.js');
+    assert.ok(storagePos>=0,'preview must include the production-connected Core storage service');
+    assert.ok(roomCreatorPos>storagePos,'Core storage must load before Room Creator');
     assert.equal(first.perfCount,1,'performance/bootstrap layer must occur exactly once in preview composition');
     assert.equal(first.srcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap must remain final');
-    assert.equal(first.stubScripts,19,'all 19 Pages runtime script slots must execute before preview-ready');
+    assert.equal(first.stubScripts,20,'all 20 Pages runtime script slots must execute before preview-ready');
     assert.equal(first.swAttempt,1,'fixture must exercise the source PWA registration path');
     assert.equal(first.swResolved,true,'preview must replace service-worker registration with a harmless resolved stub');
     assert.equal(first.swError,'','preview PWA isolation must not reject source startup');
@@ -70,7 +74,7 @@ async function waitReady(page){
     assert.equal(second.menu,true,'GenSrpG source UI must return after reload/restart');
     assert.equal(second.preview,true,'preview isolation must be restored after reload/restart');
     assert.match(second.href,/\/preview\.html$/,'reload/restart must remain on preview.html');
-    assert.equal(second.stubScripts,19,'runtime composition must execute exactly once after restart');
+    assert.equal(second.stubScripts,20,'runtime composition must execute exactly once after restart');
     assert.ok(previewRequests>=2,'browser restart test must request preview.html again');
     assert.equal(swRequests,0,'service-worker.js must still be isolated after restart');
     assert.deepEqual(localFailures,[],'preview local requests must not return HTTP errors');

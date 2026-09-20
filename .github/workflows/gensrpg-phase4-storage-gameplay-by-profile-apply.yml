@@ -1,0 +1,121 @@
+name: GenSrpG temporary gameplay-by-profile storage micro-diff
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-gameplay-by-profile-2026-09-20
+    paths:
+      - .github/workflows/gensrpg-phase4-storage-gameplay-by-profile-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-exact-index-micro-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer la branche exacte
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-storage-gameplay-by-profile-2026-09-20
+          fetch-depth: 0
+
+      - name: Vérifier puis appliquer uniquement le raccord gameplay-by-profile
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          raw=path.read_bytes()
+
+          def blob_sha(data):
+              return hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
+
+          source_sha=blob_sha(raw)
+          expected_source="16deeb169abbc31a7db04161902e9381fd6888ad"
+          expected_target="0b9c41c39db0d073c7b9ed580f66140b8d9bcda2"
+
+          if source_sha==expected_target:
+              print("Micro-diff déjà appliqué exactement.")
+              raise SystemExit(0)
+          if source_sha!=expected_source:
+              raise SystemExit(f"REFUS: blob index.html inattendu: {source_sha}")
+
+          text=raw.decode("utf-8")
+          old_read='try{map=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(e){}'
+          new_read='try{map=GensStorageV1.readJson(localStorage,key,{})||{}}catch(e){}'
+          old_write='localStorage.setItem(key,JSON.stringify(map));'
+          new_write='GensStorageV1.writeJson(localStorage,key,map);'
+
+          if text.count(old_read)!=1:
+              raise SystemExit(f"REFUS: anciennes lectures gameplay-by-profile: {text.count(old_read)}")
+          if text.count(old_write)!=1:
+              raise SystemExit(f"REFUS: anciennes écritures gameplay-by-profile: {text.count(old_write)}")
+
+          text=text.replace(old_read,new_read).replace(old_write,new_write)
+          target=text.encode("utf-8")
+          target_sha=blob_sha(target)
+
+          if len(target)!=8174580:
+              raise SystemExit(f"REFUS: taille cible inattendue: {len(target)}")
+          if target_sha!=expected_target:
+              raise SystemExit(f"REFUS: blob cible inattendu: {target_sha}")
+
+          block_start=text.index('<script id="builtinMonsterCapture162">')
+          block_end=text.index('</script>',block_start)
+          block=text[block_start:block_end]
+
+          seed_start=block.index('/* Configuration des modules du profil. */')
+          seed_end=block.index('/* Réglages Capture de démonstration',seed_start)
+          seed=block[seed_start:seed_end]
+
+          if "localStorage.getItem(key)" in seed:
+              raise SystemExit("REFUS: lecture directe gameplay-by-profile restante")
+          if "localStorage.setItem(key," in seed:
+              raise SystemExit("REFUS: écriture directe gameplay-by-profile restante")
+          if seed.count("GensStorageV1.readJson(localStorage,key,{})||{}")!=1:
+              raise SystemExit("REFUS: nombre de lectures Core gameplay-by-profile incorrect")
+          if seed.count("GensStorageV1.writeJson(localStorage,key,map)")!=1:
+              raise SystemExit("REFUS: nombre d'écritures Core gameplay-by-profile incorrect")
+          if "if(!map[MC162_ID])" not in seed:
+              raise SystemExit("REFUS: condition seed Capture modifiée")
+          if "map[MC162_ID]=JSON.parse(JSON.stringify(MC162_GAMEPLAY));" not in seed:
+              raise SystemExit("REFUS: clone gameplay Capture modifié")
+
+          if block.count("localStorage.getItem")!=4:
+              raise SystemExit(f"REFUS: autres lectures Capture modifiées: {block.count('localStorage.getItem')}")
+          if block.count("localStorage.setItem")!=6:
+              raise SystemExit(f"REFUS: autres écritures Capture modifiées: {block.count('localStorage.setItem')}")
+          for token in [
+              "gensrpg_shared_entities_v1__family__creature",
+              "gensrpg_shared_entities_scoped_v1__family__creature",
+              "gensrpg_ability_library_v1",
+              "gensrpg_capture_wild_rules_v1_",
+          ]:
+              if token not in block:
+                  raise SystemExit(f"REFUS: autre seed Capture disparu: {token}")
+          if "gensrpg_dungeon_runtime_v2" in block:
+              raise SystemExit("REFUS: runtime_v2 est hors périmètre")
+
+          path.write_bytes(target)
+          print("Micro-diff gameplay-by-profile vérifié:", target_sha)
+
+      - name: Vérifier le diff
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- index.html
+
+      - name: Committer uniquement index.html si nécessaire
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Aucun changement à committer."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          test "$(git diff --cached --name-only)" = "index.html"
+          git commit -m "refactor: route Capture gameplay profile JSON through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-gameplay-by-profile-2026-09-20

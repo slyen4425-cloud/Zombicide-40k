@@ -6,6 +6,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const manifest=JSON.parse(read('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 const owners=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
+const index=read('index.html');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
@@ -32,10 +33,11 @@ for(const source of primary.sources){
 
 const storage='assets/gensrpg/core/storage-v1.js';
 const large='assets/dungeon/dungeon-large-room-support-167834.js';
-assert.ok(workflow.indexOf(large)>=0&&workflow.indexOf(storage)>=0,'Pages composition must contain Large Room Support and Core storage');
-assert.ok(preview.indexOf(large)>=0&&preview.indexOf(storage)>=0,'Preview composition must contain Large Room Support and Core storage');
-assert.ok(workflow.indexOf(large)<workflow.indexOf(storage),'Pages currently loads Large Room Support before Core storage: migrating PRIMARY_KEY would require a composition change');
-assert.ok(preview.indexOf(large)<preview.indexOf(storage),'Preview currently loads Large Room Support before Core storage: migrating PRIMARY_KEY would require a composition change');
+assert.equal((index.match(/assets\/gensrpg\/core\/storage-v1\.js/g)||[]).length,1,'Source index must bootstrap Core storage exactly once');
+assert.ok(workflow.indexOf(storage)>=0&&workflow.indexOf(large)>=0,'Pages fallback composition must contain Core storage and Large Room Support');
+assert.ok(workflow.indexOf(storage)<workflow.indexOf(large),'Pages fallback must keep Core storage before Large Room Support');
+assert.ok(preview.indexOf(large)>=0,'Preview must still inject Large Room Support');
+assert.equal(preview.indexOf(storage),-1,'Preview must inherit Core storage from source index instead of injecting a duplicate');
 
 for(const rel of [
   'assets/dungeon/dungeon-room-runtime-167822.js',
@@ -69,7 +71,7 @@ console.log(JSON.stringify({
     stats:'future Phase 4 Stats lot',
     tactical:'runtime state + dynamic hero state',
     runtimeRepair:'mixed JSON and scalar profile repair',
-    primarySelection:'requires Pages/preview load-order change before Core raccord'
+    primarySelection:'bootstrap prerequisite is now satisfied; key remains unmigrated in this bootstrap-only lot'
   },
-  nextInspection:'inline index.html storage candidates via charter rule 26'
+  nextInspection:'fresh JSON-family migration lot after bootstrap GREEN'
 },null,2));

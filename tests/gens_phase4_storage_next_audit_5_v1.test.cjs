@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:187,
-  resolvedAccesses:122,
+  totalAccesses:185,
+  resolvedAccesses:120,
   unresolvedAccesses:65,
-  distinctResolvedKeys:21
+  distinctResolvedKeys:20
 },'post-Economy-Rules storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
-assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054','audit 5 must target the exact post-Deck index blob');
+assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -62,5 +62,6 @@ console.log(JSON.stringify({
   selected:'gensrpg_manual_mj_effects_v1',
   selectedOwner:'dungeonCore046ManualMjAssist',
   selectedCoreAccesses:{reads:1,writes:1},
-  deferred:['economy rules/session','gameplay mirror','challenge library','dungeon runtime v2']
+  migrated:['economy rules','economy session'],
+  deferred:['gameplay mirror','challenge library','dungeon runtime v2']
 },null,2));

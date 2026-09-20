@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-large-room-support-167834.js'),'utf8');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-large-room-support-167834.js'),'utf8');\nconst storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 const PRIMARY='gensrpg_dungeon_primary_selection_v167833';
 function storage(){const m=new Map();return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
@@ -36,7 +36,7 @@ const ctx={console,Math:math,Date,localStorage,globalThis:null,window:null,docum
  DungeonWorldRuntime167823:{saveConfig(c){worldSave={...c};return c},getConfig(){return worldSave||{enabled:false,dungeonId:''}},currentPlan(){const x=read(),cur=String(x?.world167823?.heroNodes?.hero||x?.last?.worldNodeId||'');if(!cur)return {targetNodeId:'A',currentNodeId:'',edge:null};if(cur==='A')return {targetNodeId:'B',currentNodeId:'A',edge:{fromNodeId:'A',toNodeId:'B',fromExitIndex:35,toEntryIndex:6}};return {targetNodeId:'',currentNodeId:cur,edge:null}}},
  DungeonWorldBuilder167821:{findDungeon(id){return id==='world-test'?JSON.parse(JSON.stringify(graph)):null}},DungeonRoomCreator100:{findRoom(id){const r=id==='room-a'?roomA:id==='room-b'?roomB:null;return r?JSON.parse(JSON.stringify(r)):null}},
  DungeonZoneContent167824:{applyCurrentZone(){zoneApply++;return true}}};ctx.globalThis=ctx;ctx.window=ctx;
-reset();vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-large-room-support-167834.js'});
+reset();vm.createContext(ctx);vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});vm.runInContext(src,ctx,{filename:'dungeon-large-room-support-167834.js'});
 const api=ctx.DungeonLargeRoom167834;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.36');assert.equal(api.MAX_SIZE,15);assert.equal(api.MIN_SIZE,6);assert.equal(api.PRIMARY_KEY,PRIMARY);
 assert.equal(api.gridSize(),15,'large must mean 15x15');let direct=api.generate('enemy',5,15);assert.equal(direct.cells.length,225);assert.equal(direct.largeRoom167835,true);
 

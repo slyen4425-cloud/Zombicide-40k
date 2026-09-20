@@ -1,5 +1,79 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 5 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-5-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-5-2026-09-20`
+
+Base exacte :
+`46bc90315b2cb1e60b39213f34a7a824e7d05e03`
+(`checkpoint/gensrpg-phase4-storage-dungeon-deck-green-2026-09-20`)
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase4-storage-dungeon-deck-green-2026-09-20`
+sur `46bc90315b2cb1e60b39213f34a7a824e7d05e03`.
+
+Validation de fermeture du lot précédent :
+- Architecture + navigateur complet `35513226017` — SUCCESS ;
+- Firefox `35513226010` — SUCCESS ;
+- Tactical Dock `35513225997` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### État de départ stockage
+
+Manifeste Phase 2 :
+- accès directs : `200` ;
+- résolus : `135` ;
+- non résolus : `65` ;
+- clés directes résolues : `26`.
+
+`index.html` exact post-Deck :
+- taille : `8 174 603` octets ;
+- blob : `739ca52610308d085ecf2635c5bc748f70c79a11`.
+
+Une copie locale exacte a été reconstruite et vérifiée depuis le fichier utilisateur + micro-diff Deck.
+
+### Mission
+
+Audit uniquement.
+Choisir le prochain micro-lot stockage JSON minimal après Dungeon Deck.
+
+Candidats conservés par l'audit précédent :
+- `gensrpg_dungeon_economy_rules_160` ;
+- `gensrpg_manual_mj_effects_v1` ;
+- `gensrpg_rpg_gameplay_by_profile_v1` ;
+- `gensrpg_challenge_library_v1`.
+
+### Exclusions maintenues
+
+- `gensrpg_dungeon_runtime_v2` : audit dédié obligatoire ;
+- Stats / état héros dynamique : futur service Stats ;
+- Tactical adapter : runtime Dungeon + état héros dynamique ;
+- Runtime Repair : mélange JSON et scalaires ;
+- aucune valeur scalaire dans `GensStorageV1` ;
+- aucun changement gameplay/UI ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Note de reprise
+
+Un brouillon `next-audit-4` a été créé depuis l'ancien checkpoint Primary Selection avant que l'ascendance Git révèle le lot Dungeon Deck déjà plus récent. Il a été abandonné avant toute modification runtime et ne constitue pas un point de reprise valide.
+
+### Prochaine action
+
+1. inspecter le `index.html` exact post-Deck ;
+2. caractériser les quatre familles restantes : read/write/fallback/schema/propriétaire ;
+3. retenir uniquement le candidat le plus isolé ;
+4. documenter et verrouiller la sélection sans migration runtime dans ce lot ;
+5. repasser Architecture + navigateur, Firefox et Tactical Dock avant checkpoint GREEN.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Deck — 2026-09-20
 
 Branche :

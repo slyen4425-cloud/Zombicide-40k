@@ -290,6 +290,9 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage Economy Session
         run: node tests/gens_phase4_storage_economy_session_owner_v1.test.cjs
 
+      - name: Auditer le prochain sous-périmètre stockage après Economy Session
+        run: node tests/gens_phase4_storage_next_audit_12_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

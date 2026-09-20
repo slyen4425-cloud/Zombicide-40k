@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:196,
-  resolvedAccesses:131,
+  totalAccesses:191,
+  resolvedAccesses:126,
   unresolvedAccesses:65,
-  distinctResolvedKeys:24
+  distinctResolvedKeys:23
 },'Audit 8 must start from Economy GREEN storage totals');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580);
-assert.equal(blob,'16deeb169abbc31a7db04161902e9381fd6888ad');
+assert.equal(blob,'bfe9149e8150f15017bfcffe1a00fb797791aa83');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -62,7 +62,7 @@ for(const b of [c51,c200,c202]){
 }
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
-assert.ok(keys.has('gensrpg_challenge_library_v1'));
+assert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave direct-storage manifest');
 assert.ok(keys.has('gensrpg_rpg_gameplay_by_profile_v1'));
 assert.ok(keys.has('gensrpg_dungeon_runtime_v2'));
 

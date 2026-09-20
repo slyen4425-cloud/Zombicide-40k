@@ -39,7 +39,7 @@ assert.equal((economy.match(/localStorage\.setItem\(DUNGEON_ECO_RULES_160/g)||[]
 assert.equal((economy.match(/localStorage\.getItem\(key\)/g)||[]).length,1,'dynamic Economy session read must remain distinct');
 assert.equal((economy.match(/localStorage\.setItem\(key,/g)||[]).length,1,'dynamic Economy session write must remain distinct');
 assert.equal((economy.match(/localStorage\.setItem\(key\(heroId\),/g)||[]).length,1,'hero inventory persistence must remain distinct');
-assert.match(economy,/const key="gensrpg_dungeon_session_eco_160_"+id/,'dynamic Economy session key must remain profile-scoped');
+assert.match(economy,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic Economy session key must remain profile-scoped');
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.ok(keys.has('gensrpg_dungeon_economy_rules_160'),'Economy rules candidate must remain in direct-storage manifest during audit');

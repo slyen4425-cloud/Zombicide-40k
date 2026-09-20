@@ -4,17 +4,17 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 208,
-    "resolvedAccesses": 143,
+    "totalAccesses": 203,
+    "resolvedAccesses": 138,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 28
+    "distinctResolvedKeys": 27
   },
   "byDomain": {
     "dungeon": {
-      "accesses": 176,
-      "resolved": 126,
+      "accesses": 171,
+      "resolved": 121,
       "unresolved": 50,
-      "distinctKeys": 20
+      "distinctKeys": 19
     },
     "tactical": {
       "accesses": 2,
@@ -240,25 +240,6 @@
       ],
       "kinds": [
         "literal"
-      ]
-    },
-    {
-      "key": "gensrpg_dungeon_primary_selection_v167833",
-      "domains": [
-        "dungeon"
-      ],
-      "sources": [
-        "file:assets/dungeon/dungeon-authored-action-fix-167857.js",
-        "file:assets/dungeon/dungeon-authored-bootstrap-167849.js",
-        "file:assets/dungeon/dungeon-large-room-support-167834.js",
-        "file:assets/dungeon/dungeon-world-session-bridge-167832.js"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant"
       ]
     },
     {

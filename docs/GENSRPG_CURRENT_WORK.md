@@ -44,6 +44,33 @@ Note de validation :
 - la relance du job échoué, sans changement de code, a passé le scénario `Dungeon après Survie` puis toute la batterie navigateur ;
 - aucune correction runtime n'a été ajoutée dans ce lot.
 
+### Résultat de l'audit inline
+
+Le fichier fourni par Sylvain a été vérifié byte-for-byte :
+- taille `8 174 560` octets ;
+- blob Git `ff11682d74be7921a591a9b76080eaf337c071be` ;
+- identique au `index.html` de la base exacte.
+
+Constat :
+- le `index.html` source ne charge pas encore `storage-v1.js` ;
+- Pages injecte le service Core en fin de document, après les scripts inline ;
+- Large Room Support est actuellement placé avant Core storage dans Pages et preview ;
+- migrer une clé inline maintenant créerait une dépendance de timing ou un fallback concurrent.
+
+Candidat futur confirmé :
+`gensrpg_capture_progress_v2_<profileId>`, objet JSON Capture par profil.
+
+Décision :
+fermer cet audit sans migration runtime puis ouvrir un lot homogène
+`Phase 4 — Core Storage Bootstrap Order`
+avant tout nouveau raccord inline.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_INLINE_AUDIT.md`
+
+Test :
+`tests/gens_phase4_storage_inline_audit_v1.test.cjs`
+
 ### Mission de l'audit inline
 
 Examiner uniquement les accès stockage inline encore présents dans `index.html` afin de sélectionner le prochain sous-périmètre JSON minimal.

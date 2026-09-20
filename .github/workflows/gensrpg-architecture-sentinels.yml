@@ -282,6 +282,12 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage Room Creator V2
         run: node tests/gens_phase4_storage_room_creator_v2_owner_v1.test.cjs
 
+      - name: Caractériser la parité stockage des graphes Builder
+        run: node tests/gens_phase4_storage_zone_graphs_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage des graphes Builder
+        run: node tests/gens_phase4_storage_zone_graphs_owner_v1.test.cjs
+
       - name: Verrouiller l’autorité Core des chemins de créatures Dungeon
         run: node tests/gens_asset_resolver_owner_raccord_v1.test.cjs
 

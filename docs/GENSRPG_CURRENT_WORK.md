@@ -74,10 +74,29 @@ Sentinelle :
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
 
+### Validation finale Audit 6 — GREEN
+
+HEAD fonctionnel validé :
+`4463350d8ab77b819494d9722cb5619678f9d1e5`
+
+Runs :
+- Architecture + navigateur complet `35516800895` — SUCCESS ;
+- Firefox `35516800810` — SUCCESS ;
+- Tactical Dock `35516800829` — SUCCESS.
+
+Aucun runtime n'a été modifié.
+Le seul RED initial provenait d'une regex trop stricte dans la nouvelle sentinelle Audit 6 ; elle a été corrigée sans changement de périmètre.
+
+Décision confirmée :
+prochain lot = uniquement `gensrpg_dungeon_economy_rules_160`.
+
 ### Prochaine action
 
-Valider l'audit 6 par Architecture + navigateur complet, Firefox et Tactical Dock.
-Si GREEN, checkpoint documentaire final puis lot neuf uniquement pour `gensrpg_dungeon_economy_rules_160`.
+1. valider ce commit documentaire ;
+2. créer le checkpoint GREEN final Audit 6 ;
+3. ouvrir une branche neuve Economy Rules ;
+4. caractériser la parité lecture/écriture avant raccord ;
+5. ne toucher ni à la session Economy dynamique ni à l'inventaire héros.
 
 
 

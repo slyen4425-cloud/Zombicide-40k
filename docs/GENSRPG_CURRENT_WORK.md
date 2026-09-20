@@ -72,6 +72,45 @@ Responsabilités :
 - merge sur `main`.
 
 
+### Résultat Room Creator V2 — GREEN
+
+RED propriétaire :
+- commit `14135d72054849e204825661c6e559032c000b7e` ;
+- `tests/gens_phase4_storage_room_creator_v2_parity_v1.test.cjs` passe sur le comportement historique ;
+- Architecture `35491030197` échoue uniquement sur « Verrouiller l’autorité Core du stockage Room Creator V2 » ;
+- Firefox `35491030150` — SUCCESS ;
+- Tactical Dock `35491030298` — SUCCESS.
+
+Raccord :
+- commit runtime `7a5e328af5317e306c20322e8dd81a89ac307b3a` ;
+- `DungeonRoomCreatorV2` ne lit/écrit plus directement `localStorage` ;
+- clé conservée exactement : `gensrpg_dungeon_room_interactions_v2` ;
+- fallback de lecture `{}` conservé ;
+- `normalizeMeta()`, schéma V2, attachments et cacheLinks restent propriétaires du module ;
+- aucune migration de format ;
+- aucun `index.html`, World Builder, Visual Config, runtime Dungeon ou gameplay modifié.
+
+Cartographie :
+- deux accès directs Builders retirés du manifeste Phase 2 ;
+- inventaire direct : 219 -> 217 accès ;
+- accès résolus : 147 -> 145 ;
+- clés/familles directes résolues : 30 -> 29 ;
+- Builders : 5 -> 3 accès directs, dont 2 résolus sur `gensrpg_zone_graphs_v1` et 1 lecture dynamique Visual Config.
+
+Validation :
+- `tests/dungeon_room_creator_v2_v167819.test.cjs` est désormais exécuté dans la CI restructuration avec le vrai `GensStorageV1` ;
+- SHA candidat : `c5b39441211c3bb74b65e7e0bb5470a071967c97` ;
+- Architecture + navigateur complet `35491128610` — SUCCESS ;
+- Firefox `35491128659` — SUCCESS ;
+- Tactical Dock `35491128619` — SUCCESS.
+
+Prochaine action après validation de cette fermeture documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-room-creator-v2-green-2026-09-20` ;
+2. ouvrir un sous-lot neuf pour la clé partagée `gensrpg_zone_graphs_v1` ;
+3. traiter ensemble son writer `DungeonWorldBuilder167821` et son lecteur `DungeonRoomVisualConfig167826`, sans déplacer `normalizeGraph()` ;
+4. aucun runtime de partie ni IndexedDB dans ce lot.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator 1.0 — 2026-09-19
 
 Branche :

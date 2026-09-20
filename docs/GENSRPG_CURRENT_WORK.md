@@ -9,6 +9,74 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage zone graphs Builders — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-zone-graphs-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-zone-graphs-2026-09-20`
+
+Base exacte :
+`a0e1f1fc75e0465392d21b1064881e1446dd4092`
+(`checkpoint/gensrpg-phase4-storage-room-creator-v2-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre unique
+
+Raccorder uniquement la clé historique partagée :
+`gensrpg_zone_graphs_v1`
+
+Consommateurs concernés :
+- writer/reader : `assets/dungeon/dungeon-world-builder-167821.js` ;
+- reader : `assets/dungeon/dungeon-room-visual-config-167826.js`.
+
+Responsabilités :
+- Core `GensStorageV1` : lecture/écriture JSON générique ;
+- `DungeonWorldBuilder167821` : `STORAGE_KEY`, `normalizeGraph()`, graphe, validation et logique Builder ;
+- `DungeonRoomVisualConfig167826` : `GRAPH_KEY`, sélection de contexte et UI de configuration ; lecture seule des graphes.
+
+### Invariants
+
+- aucune migration de format ;
+- même clé locale ;
+- même JSON persisté ;
+- même fallback `[]` pour absence / JSON invalide / `null` / type non-tableau ;
+- `normalizeGraph()` reste exclusivement module-owned ;
+- Visual Config reste lecture seule sur les graphes ;
+- erreurs d’écriture World Builder restent propagées ;
+- Room Creator 1.0 et V2 restent raccordés et inchangés ;
+- `GensStorageV1` est déjà chargé avant World Builder et avant le chargement dynamique de Visual Config ;
+- aucun changement de Pages/preview/cache requis si l’ordre de composition reste identique ;
+- aucun `index.html`.
+
+### Tests requis
+
+1. caractérisation de parité avant raccord ;
+2. RED propriétaire : aucun accès direct `localStorage` dans World Builder ni Visual Config après raccord ;
+3. World Builder lit/écrit `gensrpg_zone_graphs_v1` via `GensStorageV1` ;
+4. Visual Config lit la même clé via `GensStorageV1` sans writer ;
+5. JSON invalide / `null` / type non-tableau / tableau valide / round-trip ;
+6. `normalizeGraph()` et le schéma restent dans World Builder ;
+7. tests historiques World Builder + Visual Config exécutés avec le vrai service Core ;
+8. cartographie Phase 2 réalignée après retrait des trois accès directs Builders restants ;
+9. Builder navigateur réel + Config objet ;
+10. Architecture + navigateur complet + Firefox + Tactical Dock.
+
+### Interdit
+
+- `gensrpg_dungeon_runtime_v2` ;
+- IndexedDB ;
+- Save & Quit ;
+- migration de schéma ;
+- stockage de contenu de zone `DungeonZoneContent167824` ;
+- gameplay, mouvement, combat, Capture, Survie, Tactical ;
+- nouveau wrapper / observer / timer / retry ;
+- merge sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator V2 — 2026-09-20
 
 Branche :

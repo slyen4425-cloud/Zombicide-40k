@@ -302,6 +302,9 @@ jobs:
       - name: Auditer la sortie du sous-chantier Storage commun
         run: node tests/gens_phase4_storage_exit_audit_13_v1.test.cjs
 
+      - name: Caractériser les contrats Core Stats S1
+        run: node tests/gens_phase4_stats_s1_contracts_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

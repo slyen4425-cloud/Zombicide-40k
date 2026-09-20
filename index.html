@@ -29264,11 +29264,11 @@ window.dungeonEconomyRules160=function(){
     merchantMode:"event",         // event | always | disabled
     sellLootEnabled:true
   };
-  try{Object.assign(d,JSON.parse(localStorage.getItem(DUNGEON_ECO_RULES_160)||"{}"))}catch(e){}
+  try{Object.assign(d,GensStorageV1.readJson(localStorage,DUNGEON_ECO_RULES_160,{}))}catch(e){}
   return d;
 };
 window.saveDungeonEconomyRules160=function(r){
-  localStorage.setItem(DUNGEON_ECO_RULES_160,JSON.stringify(r||dungeonEconomyRules160()));
+  GensStorageV1.writeJson(localStorage,DUNGEON_ECO_RULES_160,r||dungeonEconomyRules160());
 };
 
 window.dungeonSessionEco160=function(){

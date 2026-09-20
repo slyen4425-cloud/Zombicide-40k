@@ -11,10 +11,10 @@ const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:187,
-  resolvedAccesses:122,
+  totalAccesses:185,
+  resolvedAccesses:120,
   unresolvedAccesses:65,
-  distinctResolvedKeys:21
+  distinctResolvedKeys:20
 },'current Phase 4 storage totals must include the Dungeon Primary Selection, Dungeon Deck, Manual MJ and Economy Rules and Challenge Library Core raccords');
 
 const primary=manifest.resolvedKeys.find(x=>x.key==='gensrpg_dungeon_primary_selection_v167833');

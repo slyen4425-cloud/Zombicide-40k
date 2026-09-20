@@ -54,7 +54,7 @@ assert.ok(keys.has('gensrpg_dungeon_runtime_v2'),'Dungeon runtime must remain de
 
 for(const token of [
   'gensrpg_shared_entities_v1__family__creature',
-  'gensrpg_skill_library_v1',
+  'gensrpg_ability_library_v1',
   'gensrpg_capture_wild_rules_v1_'
 ]){
   assert.ok(capture.includes(token),'other Capture seed ownership must remain visible: '+token);

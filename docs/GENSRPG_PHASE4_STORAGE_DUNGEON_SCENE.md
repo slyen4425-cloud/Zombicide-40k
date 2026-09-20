@@ -91,3 +91,80 @@ Après raccord : parité GREEN, owner guard GREEN.
 - aucun Stats/Tactical/Capture/Survie ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Implémentation appliquée
+
+Commit runtime :
+`f9f538e5144c1be7b66d06a59acc913d991a6f91`
+
+Micro-diff :
+- 1 lecture JSON directe -> Core Storage ;
+- 1 écriture JSON directe -> Core Storage ;
+- aucune autre ligne runtime modifiée.
+
+État final exact de `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054`.
+
+Dungeon MJ reste propriétaire :
+- des éléments de scène ;
+- de la validation tableau ;
+- des IDs/salles/coffres ;
+- du rendu après sauvegarde ;
+- des limites de `try/catch`.
+
+### Manifeste Phase 2
+
+Avant :
+- accès directs : `189` ;
+- résolus : `124` ;
+- non résolus : `65` ;
+- clés directes : `22`.
+
+Après :
+- accès directs : `187` ;
+- résolus : `122` ;
+- non résolus : `65` ;
+- clés directes : `21`.
+
+Dungeon :
+- accès : `157 -> 155` ;
+- résolus : `107 -> 105` ;
+- non résolus : `50` inchangés ;
+- clés directes : `14 -> 13`.
+
+`gensrpg_dungeon_scene_v1` a quitté le manifeste des accès directs.
+
+La garde owner dédiée impose :
+- 0 lecture/écriture `localStorage` directe ;
+- exactement 1 lecture Core ;
+- exactement 1 écriture Core ;
+- normalisation tableau et ordre écriture/rendu inchangés.
+
+## Validation fonctionnelle — GREEN
+
+HEAD fonctionnel validé :
+`1e9839018ed8a529c25049ac1c7729ab686d72c1`
+
+Runs :
+- Architecture + navigateur complet `35528901345` — SUCCESS ;
+- Firefox `35528901336` — SUCCESS ;
+- Tactical Dock `35528901320` — SUCCESS.
+
+Le navigateur complet a notamment repassé :
+- Survie / Fouiller / arts ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture et composition complète ;
+- non-interférence des quatre modules ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets et tokens tardifs.
+
+Aucun merge sur `main`.

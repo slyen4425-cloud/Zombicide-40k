@@ -100,10 +100,53 @@ Candidat exact vérifié :
 Document du lot :
 `docs/GENSRPG_PHASE4_STORAGE_MJ_RULES.md`.
 
+### Implémentation MJ Rules
+
+TDD :
+- parité Core dédiée posée et GREEN avant raccord ;
+- garde propriétaire posée et RED comme attendu avant raccord ;
+- aucun runtime modifié avant ce RED.
+
+Raccord runtime :
+- commit : `298506abcc08d0e013f640313dd3f5ca848981af` ;
+- 1 lecture directe -> `GensStorageV1.readJson` ;
+- 2 écritures directes -> `GensStorageV1.writeJson` ;
+- aucun autre changement fonctionnel dans `index.html`.
+
+Résultat exact :
+- taille : `8 174 580` octets ;
+- blob : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Cartographie Storage après raccord :
+- accès directs : `182` ;
+- résolus : `117` ;
+- non résolus : `65` ;
+- clés directes résolues : `19`.
+Dungeon :
+- `152 / 102 / 50 / 11`.
+Core :
+- `2 / 1 / 1 / 1`.
+
+Les anciennes empreintes Phase 2 et les audits Storage dépendant explicitement
+du blob/index précédent ont été réalignés sans modifier leurs contrats métier.
+
+### Validation fonctionnelle MJ Rules
+
+HEAD validé :
+`36cef9ad084f7c2c901dacf859d2d262d2d33198`.
+
+Runs :
+- Architecture + navigateur complet : `35534815605` — SUCCESS ;
+- Firefox : `35534815601` — SUCCESS ;
+- Tactical Dock : `35534815603` — SUCCESS.
+
 ### Prochaine action
 
-Poser parité + garde propriétaire, brancher Architecture et obtenir le RED attendu
-de la garde avant tout raccord runtime. Aucun checkpoint GREEN anticipé.
+Fermer la documentation du lot puis repasser les trois workflows sur le SHA
+documentaire final exact. Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-storage-mj-rules-green-2026-09-20` ;
+- ouvrir le prochain Audit Storage depuis ce checkpoint ;
+- conserver `main` inchangé.
 
 
 ## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 12 — 2026-09-20

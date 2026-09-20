@@ -13,7 +13,7 @@ let patchTimer=0;
 function arr(v){return Array.isArray(v)?v:[]}
 function idOf(v){return typeof v==="string"?v:String(v?.id||"")}
 function uniqueCount(values){const s=new Set();for(const v of arr(values)){const id=idOf(v).trim();if(id)s.add(id)}return s.size}
-function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||"");return v??fallback}catch(e){return fallback}}
+function readJson(key,fallback){return ROOT.GensStorageV1.readJson(ROOT.localStorage,key,fallback)}
 function call(name,args,fallback){try{const fn=ROOT[name];return typeof fn==="function"?(fn.apply(ROOT,arr(args))??fallback):fallback}catch(e){return fallback}}
 function profileById(id){const list=arr(call("rpgProfiles",[],[]));return list.find(p=>String(p?.id||"")===String(id||""))||null}
 function recordFamily(record){

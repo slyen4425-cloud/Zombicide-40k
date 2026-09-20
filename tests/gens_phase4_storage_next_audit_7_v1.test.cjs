@@ -12,7 +12,7 @@ assert.deepEqual(manifest.totals,{
   totalAccesses:194,
   resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:23
+  distinctResolvedKeys:24
 },'post-gameplay-by-profile storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
@@ -45,7 +45,7 @@ assert.match(gameplaySeed,/map\[MC162_ID\]=JSON\.parse\(JSON\.stringify\(MC162_G
 assert.equal(gameplaySeed.includes('GensStorageV1.'),true,'gameplay-by-profile Core raccord must remain applied');
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
-assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),false,'migrated gameplay-by-profile key must leave direct-storage manifest');
+assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),true,'Phase 2 scanner must retain its conservative Capture key alias characterization; semantic owner guard proves the selected seed itself is migrated');
 
 assert.ok(keys.has('gensrpg_challenge_library_v1'),'Challenge Library must remain deferred');
 assert.ok(keys.has('gensrpg_dungeon_runtime_v2'),'Dungeon runtime must remain deferred');

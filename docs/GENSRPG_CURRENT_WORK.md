@@ -79,6 +79,22 @@ sans migrer aucune clé métier.
 - aucun observer/timer/retry ;
 - aucun merge sur `main`.
 
+### Validation finale — GREEN
+
+HEAD fonctionnel validé :
+`50c11cc34d6757a9340a5eecc9f212ff6ab1adbf`
+
+Nouveau blob `index.html` :
+`476f91b7a5921c9f02f17ba72c801f4bec16a809`
+(`8 174 618` octets).
+
+Runs :
+- Architecture + navigateur complet `35502015406` — SUCCESS ;
+- Firefox `35502015416` — SUCCESS ;
+- Tactical Dock `35502015502` — SUCCESS.
+
+Les anciens gardes qui modélisaient l'injection Core Storage par preview/Pages ont été réalignés sur le nouveau bootstrap source. Aucun runtime métier supplémentaire n'a été modifié.
+
 ### Suite après GREEN
 
 Ouvrir un nouveau lot homogène pour la famille JSON Capture :

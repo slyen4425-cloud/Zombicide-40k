@@ -1,0 +1,32 @@
+name: GenSrpG storage audit 10 probe
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-next-audit-10-2026-09-20
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Dungeon Scene storage owner
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const b=fs.readFileSync('index.html');
+          const s=b.toString('utf8');
+          const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length+'\0'),b])).digest('hex');
+          console.log(JSON.stringify({size:b.length,blob},null,2));
+          const m=s.match(/<script[^>]*id=["']dungeonMj72_2Script["'][^>]*>([\s\S]*?)<\/script>/i);
+          if(!m) throw new Error('missing dungeonMj72_2Script');
+          const block=m[1];
+          for(const needle of ['gensrpg_dungeon_scene_v1','localStorage.getItem','localStorage.setItem','localStorage.removeItem']){
+            let from=0,i;
+            while((i=block.indexOf(needle,from))>=0){
+              console.log('\n--- '+needle+' @ '+i+' ---\n'+block.slice(Math.max(0,i-500),Math.min(block.length,i+900)));
+              from=i+needle.length;
+            }
+          }
+          NODE

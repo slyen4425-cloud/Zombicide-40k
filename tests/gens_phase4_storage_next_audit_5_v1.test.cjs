@@ -49,7 +49,8 @@ for(const id of ['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dung
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave the direct-storage manifest');
-assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave the direct-storage manifest');\nassert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave the direct-storage manifest');
+assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave the direct-storage manifest');
+assert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave the direct-storage manifest');
 for(const key of [
   'gensrpg_rpg_gameplay_by_profile_v1',
   'gensrpg_challenge_library_v1',

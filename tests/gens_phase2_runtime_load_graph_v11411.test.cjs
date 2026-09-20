@@ -18,6 +18,7 @@ const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g
   .map(stripQuery);
 
 assert.deepEqual(rawDirect,[
+  'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -35,7 +36,7 @@ const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>
   .map(m=>stripQuery(m[1]));
 
 assert.equal(injected.length,20,'GitHub Pages must inject the current 20-module production list');
-assert.deepEqual(previewInjected,injected,'preview must reproduce the exact GitHub Pages module order');
+assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
 
 const productionDirect=[

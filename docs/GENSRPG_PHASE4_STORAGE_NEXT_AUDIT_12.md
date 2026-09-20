@@ -221,7 +221,19 @@ Aucun observer, timer/retry, wrapper, monkey-patch ou seconde autorité.
 
 ## Validation Audit 12
 
-La sentinelle Audit 12 est branchée à Architecture et a passé sa première
-exécution après correction de son propre test. Les trois workflows complets
-Architecture+navigateur, Firefox et Tactical Dock doivent être SUCCESS sur le
-HEAD documentaire final avant création du checkpoint GREEN Audit 12.
+HEAD validé avant clôture documentaire :
+`daced49432f74752c48b8fb838302954c880ab7e`.
+
+Runs :
+- Architecture + navigateur complet : `35533486808` — SUCCESS ;
+- Firefox : `35533486747` — SUCCESS ;
+- Tactical Dock : `35533486690` — SUCCESS.
+
+Le navigateur complet a repassé notamment Dungeon après Survie, Builder,
+Config objet, fiche RPG, cache/pièges authored, Save & Quit/reprise, PvP,
+Capture, non-interférence quatre modules, murs, preview et resolver d'assets.
+
+Le diff Audit 12 ne contient aucun changement runtime.
+La clôture documentaire doit elle-même repasser les trois workflows sur son SHA
+exact avant création de
+`checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20`.

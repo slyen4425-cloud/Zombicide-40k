@@ -79,6 +79,33 @@ Raccorder uniquement la sérialisation JSON de cette famille à `GensStorageV1` 
 - aucun observer/timer/retry ;
 - aucun merge sur `main`.
 
+### Implémentation Capture progress
+
+Raccord appliqué exclusivement à :
+`gensrpg_capture_progress_v2_<profileId>`
+
+- 1 lecture directe -> `GensStorageV1.readJson(..., {})` ;
+- 6 écritures directes -> `GensStorageV1.writeJson(...)` ;
+- clé, defaults, normalisation et règles restent propriétaires Capture ;
+- taille `index.html` inchangée : `8 174 618` octets ;
+- nouveau blob exact : `5d2b0a6da51fd70bd36f087cb9ab82a1af308226` ;
+- commit fonctionnel : `6ef2ab5e7a8069c92ba722755ea7efeaeebb5d31`.
+
+Inventaire stockage Phase 2 attendu :
+- total `208` ;
+- résolus `143` ;
+- non résolus `65` ;
+- Capture `23 / 10 / 13` (accès / résolus / non résolus).
+
+Tests ajoutés :
+- `tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs` ;
+- `tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_CAPTURE_PROGRESS.md`.
+
+État : **EN VALIDATION**. Aucun checkpoint GREEN avant Architecture + navigateur, Firefox et Tactical Dock tous SUCCESS.
+
 ## Chantier courant prioritaire — Phase 4 / Core Storage Bootstrap Order — 2026-09-20
 
 Branche :

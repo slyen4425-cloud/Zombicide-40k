@@ -263,6 +263,12 @@ jobs:
       - name: Verrouiller l'ordre de bootstrap Core Storage Phase 4
         run: node tests/gens_phase4_storage_bootstrap_order_v1.test.cjs
 
+      - name: Caractériser la parité stockage Capture progress
+        run: node tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Capture / Core Storage
+        run: node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
+
       - name: Caractériser la parité stockage World Summary
         run: node tests/gens_phase4_storage_world_summary_parity_v1.test.cjs
 

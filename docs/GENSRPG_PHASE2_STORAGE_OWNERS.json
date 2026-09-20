@@ -4,9 +4,9 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 213,
+    "totalAccesses": 208,
     "resolvedAccesses": 143,
-    "unresolvedAccesses": 70,
+    "unresolvedAccesses": 65,
     "distinctResolvedKeys": 28
   },
   "byDomain": {
@@ -35,9 +35,9 @@
       "distinctKeys": 1
     },
     "capture": {
-      "accesses": 28,
+      "accesses": 23,
       "resolved": 10,
-      "unresolved": 18,
+      "unresolved": 13,
       "distinctKeys": 5
     }
   },
@@ -645,38 +645,27 @@
       }
     },
     {
-      "source": "inline:captureFix130",
-      "domain": "capture",
-      "count": 1,
-      "expressions": {
-        "captureCreatureProgressRulesKey(": 1
-      }
-    },
-    {
       "source": "inline:captureFix134",
       "domain": "capture",
-      "count": 3,
+      "count": 2,
       "expressions": {
-        "captureTrainerDifficultyKey134(": 2,
-        "captureCreatureProgressRulesKey(": 1
+        "captureTrainerDifficultyKey134(": 2
       }
     },
     {
       "source": "inline:captureFix137",
       "domain": "capture",
-      "count": 3,
+      "count": 2,
       "expressions": {
-        "captureMjRulesKey137(": 2,
-        "captureCreatureProgressRulesKey(": 1
+        "captureMjRulesKey137(": 2
       }
     },
     {
       "source": "inline:captureFix140",
       "domain": "capture",
-      "count": 2,
+      "count": 1,
       "expressions": {
-        "captureMjRulesKey137(": 1,
-        "captureCreatureProgressRulesKey(": 1
+        "captureMjRulesKey137(": 1
       }
     },
     {
@@ -690,9 +679,8 @@
     {
       "source": "inline:capturePlaytestFix128",
       "domain": "capture",
-      "count": 3,
+      "count": 2,
       "expressions": {
-        "captureCreatureProgressRulesKey(": 1,
         "key(heroId": 2
       }
     },

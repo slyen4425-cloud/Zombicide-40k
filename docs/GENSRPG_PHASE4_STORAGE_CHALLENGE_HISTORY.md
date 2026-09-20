@@ -109,3 +109,75 @@ Avant checkpoint GREEN :
 - Architecture+navigateur complet GREEN ;
 - Firefox GREEN ;
 - Tactical Dock GREEN.
+
+
+## Implémentation appliquée
+
+Commit runtime :
+`7d6d5897ec24959240ca3d9147e1ce6aeb2c5e82`
+
+Micro-diff :
+- lecture Challenge History -> `GensStorageV1.readJson(localStorage,hk,[])` ;
+- écriture Challenge History -> `GensStorageV1.writeJson(localStorage,hk,hist.slice(-24))` ;
+- aucune autre ligne runtime modifiée.
+
+État final exact de `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6`.
+
+Dungeon reste propriétaire :
+- du choix des défis ;
+- de la fenêtre anti-répétition de 12 IDs ;
+- du fallback au pool complet ;
+- de l'historique limité aux 24 dernières entrées ;
+- de la normalisation tableau ;
+- des `try/catch` historiques.
+
+### Manifeste Phase 2
+
+Avant :
+- accès directs : `191` ;
+- résolus : `126` ;
+- non résolus : `65` ;
+- clés directes : `23`.
+
+Après :
+- accès directs : `189` ;
+- résolus : `124` ;
+- non résolus : `65` ;
+- clés directes : `22`.
+
+Dungeon :
+- accès : `159 -> 157` ;
+- résolus : `109 -> 107` ;
+- non résolus : `50` inchangés ;
+- clés directes : `15 -> 14`.
+
+`gensrpg_dc067_challenge_history` a quitté le manifeste des accès directs.
+
+### Réalignements de sentinelles
+
+Les audits stockage historiques ont été réalignés uniquement sur :
+- le nouveau blob déterministe ;
+- les nouveaux compteurs ;
+- l'état migré de Challenge History.
+
+La garde owner dédiée impose :
+- 0 lecture/écriture `localStorage` directe ;
+- exactement 1 lecture Core ;
+- exactement 1 écriture Core ;
+- fenêtre 12 et historique 24 inchangés.
+
+## Validation fonctionnelle — GREEN
+
+HEAD fonctionnel validé :
+`71963332b45eabddc5b761678d17d7e1727353de`
+
+Runs :
+- Architecture + navigateur complet `35526358499`, tentative 2 — SUCCESS ;
+- Firefox `35526358631` — SUCCESS ;
+- Tactical Dock `35526358507` — SUCCESS.
+
+La première tentative navigateur a échoué uniquement sur le flake historique d'overlay Tactical qui interceptait le clic Survie ; la relance a passé ce scénario puis toute la batterie.
+
+Aucun merge sur `main`.

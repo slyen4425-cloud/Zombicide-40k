@@ -11,25 +11,22 @@ const preview=read('preview.html');
 const storageTag='<script src="assets/gensrpg/core/storage-v1.js"></script>';
 const largeTag='assets/dungeon/dungeon-large-room-support-167834.js';
 
-assert.equal(index.includes(storageTag),false,
-  'audit base: source index.html must not yet load Core storage directly');
+assert.equal(index.split(storageTag).length-1,1,
+  'source index.html must load Core storage exactly once after bootstrap');
 
 const wfLarge=workflow.indexOf(largeTag);
 const wfStorage=workflow.indexOf('assets/gensrpg/core/storage-v1.js');
 assert.ok(wfLarge>=0&&wfStorage>=0,'Pages composition must mention Large Room Support and Core storage');
-assert.ok(wfLarge<wfStorage,
-  'audit base: Pages module list currently puts Large Room Support before Core storage');
+assert.ok(wfStorage<wfLarge,
+  'Pages fallback order must keep Core storage before Large Room Support');
 
-const pvLarge=preview.indexOf(largeTag);
-const pvStorage=preview.indexOf('assets/gensrpg/core/storage-v1.js');
-assert.ok(pvLarge>=0&&pvStorage>=0,'preview must mention Large Room Support and Core storage');
-assert.ok(pvLarge<pvStorage,
-  'audit base: preview currently puts Large Room Support before Core storage');
+assert.equal(preview.includes('assets/gensrpg/core/storage-v1.js'),false,
+  'preview must not append a second Core storage tag; it relies on source index.html');
 
 const firstInlineStorage=index.indexOf('localStorage.getItem(GENSRPG_IDB_MIGRATION_FLAG)');
 assert.ok(firstInlineStorage>0,'expected early inline storage access is missing');
-assert.ok(index.indexOf('<script',0)<firstInlineStorage,
-  'inline application scripts execute before the first mapped localStorage access');
+assert.ok(index.indexOf(storageTag)<firstInlineStorage,
+  'Core storage must load before the first mapped inline storage access');
 
 assert.match(index,/function captureCreatureProgressRulesKey\(\)[\s\S]*?gensrpg_capture_progress_v2_/,
   'Capture progress dynamic JSON family must remain identifiable');
@@ -40,9 +37,9 @@ assert.match(index,/localStorage\.setItem\(captureCreatureProgressRulesKey\(\),J
 
 console.log(JSON.stringify({
   scenario:'Phase 4 inline storage audit',
-  sourceIndexLoadsCoreStorage:false,
-  pagesOrder:'large-room-before-storage',
-  previewOrder:'large-room-before-storage',
+  sourceIndexLoadsCoreStorage:true,
+  pagesOrder:'storage-before-large-room',
+  previewOrder:'source-bootstrap-no-duplicate',
   candidateFamily:'gensrpg_capture_progress_v2_<profile>',
   decision:'bootstrap Core storage before inline/business migrations'
 },null,2));

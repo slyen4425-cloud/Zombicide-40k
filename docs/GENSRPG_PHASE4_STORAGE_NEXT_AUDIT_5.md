@@ -88,3 +88,21 @@ Aucun runtime n'est modifié dans le présent audit.
 - aucune migration de schéma ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD validé :
+`18ea4077b3c82c1eda4e045c96c5d7430e143b1d`
+
+Runs :
+- Architecture + navigateur complet `35514239454` — SUCCESS ;
+- Firefox `35514239473` — SUCCESS ;
+- Tactical Dock `35514239486` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié.
+
+Prochaine étape autorisée :
+ouvrir un lot dédié exclusivement à
+`gensrpg_manual_mj_effects_v1`
+depuis le checkpoint GREEN final de cet audit.

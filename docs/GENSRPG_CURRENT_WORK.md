@@ -101,6 +101,24 @@ Sentinelle :
 
 
 
+### Validation finale — GREEN
+
+HEAD validé :
+`18ea4077b3c82c1eda4e045c96c5d7430e143b1d`
+
+Runs :
+- Architecture + navigateur complet `35514239454` — SUCCESS ;
+- Firefox `35514239473` — SUCCESS ;
+- Tactical Dock `35514239486` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Décision confirmée :
+le prochain micro-lot est uniquement
+`gensrpg_manual_mj_effects_v1`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Deck — 2026-09-20
 
 Branche :

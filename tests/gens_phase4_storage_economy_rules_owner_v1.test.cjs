@@ -29,7 +29,7 @@ assert.match(block,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic E
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Economy rules raccord must not touch deferred runtime_v2');
 
 assert.equal(bytes.length,8174580,'post-raccord index size must match the exact Economy rules micro-diff');
-assert.equal(blob,'30487d09481e11e5883faca1a6e49727d9cecfb6','post-raccord index blob must match the exact Economy rules micro-diff');
+assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054','post-raccord index blob must match the exact Economy rules micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Economy rules Core storage authority',

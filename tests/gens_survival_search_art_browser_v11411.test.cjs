@@ -158,7 +158,7 @@ async function startSurvival(page){
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
 
     mark('verify-survival-enemy-arts');
-    await page.locator('#menu button[onclick="openZombieManager(\\'menu\\')"]').click();
+    await page.locator("#menu button[onclick=\"openZombieManager('menu')\"]").click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('zombieManager')).display!=='none');
     await page.waitForFunction(()=>document.querySelectorAll('#zombieReserve img.zombieThumb').length>0);
     const enemyArts=await page.evaluate(()=>[...document.querySelectorAll('#zombieReserve img.zombieThumb')]

@@ -99,8 +99,16 @@ assert.equal(candidateStability.split(coreRead).length-1,1);
 assert.equal(candidateStability.split(coreWrite).length-1,1);
 assert.equal(candidateMj.split(coreWrite).length-1,1);
 
-assert.match(stability,/localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\);\s*const m=document\.getElementById\("dungeonMj151"\)/,'legacy saveDungeonMj151 write-before-close boundary must remain visible before raccord');
-assert.match(mj,/localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\);\s*try\{gensReconcile171/,'legacy unified write-before-reconcile boundary must remain visible before raccord');
+const save151Transport=directWrites?oldWrite:coreWrite;
+const save175Transport=directWrites?oldWrite:coreWrite;
+assert.ok(
+  stability.includes(save151Transport+';const m=document.getElementById("dungeonMj151")'),
+  'saveDungeonMj151 must preserve write-before-close ordering'
+);
+assert.ok(
+  mj.includes(save175Transport+';try{gensReconcile171'),
+  'unified MJ writer must preserve write-before-reconcile ordering'
+);
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core transport parity',

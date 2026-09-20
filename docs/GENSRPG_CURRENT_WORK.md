@@ -1,5 +1,92 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 7 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-7-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-7-2026-09-20`
+
+Base exacte :
+`d579cb0d1ec4e065e2baa9f6c7bd770fb391fcf1`
+(`checkpoint/gensrpg-phase4-storage-economy-rules-green-2026-09-20`).
+
+Lot Economy Rules clôturé GREEN :
+- Architecture + navigateur complet `35518030223` — SUCCESS ;
+- Firefox `35518030209` — SUCCESS ;
+- Tactical Dock `35518030186` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### État de départ stockage
+
+- accès directs : `196` ;
+- résolus : `131` ;
+- non résolus : `65` ;
+- clés directes résolues : `24`.
+
+`index.html` exact :
+- taille : `8 174 580` octets ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+### Mission
+
+Audit uniquement.
+Choisir le prochain micro-lot JSON minimal après Economy Rules.
+
+Candidat retenu :
+`gensrpg_rpg_gameplay_by_profile_v1`.
+
+Propriétaire unique :
+`builtinMonsterCapture162`.
+
+Contrat :
+- 1 lecture JSON directe ;
+- 1 écriture JSON conditionnelle ;
+- seed uniquement si `map[MC162_ID]` est absent ;
+- valeur utilisateur existante jamais remplacée ;
+- erreurs de write capturées par le `try/catch` externe historique.
+
+Les autres seeds Capture du même bloc restent hors périmètre.
+
+Micro-diff cible ultérieur :
+- lecture -> Core Storage + `||{}` historique ;
+- écriture -> Core Storage ;
+- logique `if(!map[MC162_ID])` et clone `MC162_GAMEPLAY` inchangés.
+
+Résultat déterministe préparé :
+- taille cible : `8 174 580` ;
+- blob cible : `0b9c41c39db0d073c7b9ed580f66140b8d9bcda2`.
+
+Différés :
+- Challenge Library ;
+- `gensrpg_dungeon_runtime_v2` ;
+- Stats/Tactical/Runtime Repair.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_7.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_7_v1.test.cjs`.
+
+### Interdits
+
+- aucun runtime dans cet audit ;
+- aucun autre stockage/seed Capture ;
+- aucun changement du profil Monster Capture ;
+- aucun Challenge Library / runtime_v2 / Stats / Tactical / Runtime Repair ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Valider l'Audit 7 par Architecture + navigateur complet, Firefox et Tactical Dock.
+Si GREEN, checkpoint final puis lot neuf uniquement pour `gensrpg_rpg_gameplay_by_profile_v1`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Economy Rules — 2026-09-20
 
 Branche :

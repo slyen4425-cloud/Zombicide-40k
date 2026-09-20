@@ -4,17 +4,17 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 196,
-    "resolvedAccesses": 131,
+    "totalAccesses": 191,
+    "resolvedAccesses": 126,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 24
+    "distinctResolvedKeys": 23
   },
   "byDomain": {
     "dungeon": {
-      "accesses": 164,
-      "resolved": 114,
+      "accesses": 159,
+      "resolved": 109,
       "unresolved": 50,
-      "distinctKeys": 16
+      "distinctKeys": 15
     },
     "tactical": {
       "accesses": 2,
@@ -42,25 +42,6 @@
     }
   },
   "resolvedKeys": [
-    {
-      "key": "gensrpg_challenge_library_v1",
-      "domains": [
-        "dungeon"
-      ],
-      "sources": [
-        "inline:dungeonCore051ExplorationPolish",
-        "inline:dungeonCore200Rebuild",
-        "inline:dungeonCore202ContentDensity"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant",
-        "literal"
-      ]
-    },
     {
       "key": "gensrpg_dc048_pending_trap_v1",
       "domains": [

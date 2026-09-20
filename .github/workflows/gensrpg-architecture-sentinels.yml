@@ -284,6 +284,12 @@ jobs:
       - name: Caractériser Economy Session par le vrai propriétaire (Audit 11)
         run: node tests/gens_phase4_storage_economy_session_characterization_v1.test.cjs
 
+      - name: Vérifier la parité Core du stockage Economy Session
+        run: node tests/gens_phase4_storage_economy_session_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Economy Session
+        run: node tests/gens_phase4_storage_economy_session_owner_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

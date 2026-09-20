@@ -1,0 +1,81 @@
+name: GenSrpG Phase 4 IndexedDB assets one-shot raccord
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-storage-idb-assets-2026-09-19'
+    paths:
+      - '.github/workflows/gensrpg-phase4-idb-assets-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  raccord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'work/gensrpg-phase4-storage-idb-assets-2026-09-19'
+          fetch-depth: 0
+
+      - name: Verify source blob and apply exact IndexedDB asset raccord
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:index.html)" = "ff11682d74be7921a591a9b76080eaf337c071be"
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path("index.html")
+          s=p.read_text("utf-8")
+
+          start=s.index('const GENSRPG_IDB_MIGRATION_FLAG="gensrpg_idb_assets_migrated_v1";')
+          mstart=s.index('async function gensrpgMigrateLocalImagesToIndexedDb(){',start)
+          export_start=s.index('async function gensrpgExportIndexedAssets(){',mstart)
+          bootstrap_start=s.index('async function gensrpgBootstrapIndexedStorage(){',export_start)
+          custom_start=s.index('const CUSTOM_EQUIPMENT_KEY="gensrpg_custom_equipment_v1";',bootstrap_start)
+
+          migration=s[mstart:export_start]
+          bootstrap=s[bootstrap_start:custom_start]
+          replacement='''const GENSRPG_IDB_MIGRATION_FLAG="gensrpg_idb_assets_migrated_v1";
+          const GENSRPG_ASSET_DB_NAME=window.GensIndexedAssetStorageV1.DB_NAME;
+          const GENSRPG_ASSET_DB_VERSION=window.GensIndexedAssetStorageV1.DB_VERSION;
+          const GENSRPG_ASSET_STORE=window.GensIndexedAssetStorageV1.STORE;
+          const GENSRPG_ASSET_PREFIX=window.GensIndexedAssetStorageV1.PREFIX;
+          const gensrpgAssetCache=window.GensIndexedAssetStorageV1.cache;
+          const gensrpgOpenAssetDb=window.GensIndexedAssetStorageV1.openDb;
+          const gensrpgAssetPut=window.GensIndexedAssetStorageV1.put;
+          const gensrpgAssetGet=window.GensIndexedAssetStorageV1.get;
+          const gensrpgLoadAllAssetCache=window.GensIndexedAssetStorageV1.loadAllCache;
+          const gensrpgAssetRef=window.GensIndexedAssetStorageV1.assetRef;
+          const gensrpgExternalizeAssetsSync=window.GensIndexedAssetStorageV1.externalizeSync;
+          const gensrpgHydrateAssets=window.GensIndexedAssetStorageV1.hydrate;
+          const gensrpgExternalizeAssetsAwait=window.GensIndexedAssetStorageV1.externalizeAwait;
+          '''+migration+'''const gensrpgExportIndexedAssets=window.GensIndexedAssetStorageV1.exportAll;
+          const gensrpgImportIndexedAssets=window.GensIndexedAssetStorageV1.importAll;
+          '''+bootstrap
+
+          s=s[:start]+replacement+s[custom_start:]
+          anchor='<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>\n'
+          if s.count(anchor)!=1:
+              raise SystemExit("unexpected asset resolver tag count")
+          tag='<script src="assets/gensrpg/core/indexed-asset-storage-v1.js"></script>\n'
+          s=s.replace(anchor,tag+anchor,1)
+          p.write_text(s,encoding="utf-8",newline="")
+          PY
+          test "$(git hash-object index.html)" = "37387cf0582adaccab0206a2b746784976304600"
+          git add index.html
+          test "$(git rev-parse :index.html)" = "37387cf0582adaccab0206a2b746784976304600"
+
+      - name: Commit raccord and self-delete
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/gensrpg-phase4-idb-assets-once.yml
+          git add -A
+          git commit -m "refactor: route IndexedDB asset primitives through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-idb-assets-2026-09-19

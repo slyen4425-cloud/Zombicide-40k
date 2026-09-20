@@ -13,7 +13,7 @@ assert.deepEqual(manifest.totals,{
   resolvedAccesses:126,
   unresolvedAccesses:65,
   distinctResolvedKeys:23
-},'Audit 8 must start from Economy GREEN storage totals');
+},'post-Challenge-Library storage totals must match the migrated state');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
@@ -47,19 +47,19 @@ const c51=block('dungeonCore051ExplorationPolish');
 const c200=block('dungeonCore200Rebuild');
 const c202=block('dungeonCore202ContentDensity');
 assert.match(c51,/const CHALLENGE_LIB_KEY_069="gensrpg_challenge_library_v1"/);
-assert.equal((c51.match(/localStorage\.getItem\(CHALLENGE_LIB_KEY_069\)/g)||[]).length,1);
-assert.equal((c51.match(/localStorage\.setItem\(CHALLENGE_LIB_KEY_069/g)||[]).length,2);
-assert.equal((c200.match(/localStorage\.getItem\('gensrpg_challenge_library_v1'\)/g)||[]).length,1);
-assert.equal((c202.match(/localStorage\.getItem\("gensrpg_challenge_library_v1"\)/g)||[]).length,1);
+assert.equal((c51.match(/localStorage\.getItem\(CHALLENGE_LIB_KEY_069\)/g)||[]).length,0);
+assert.equal((c51.match(/GensStorageV1\.readJson\(localStorage,CHALLENGE_LIB_KEY_069,\[\]\)/g)||[]).length,1);
+assert.equal((c51.match(/localStorage\.setItem\(CHALLENGE_LIB_KEY_069/g)||[]).length,0);
+assert.equal((c51.match(/GensStorageV1\.writeJson\(localStorage,CHALLENGE_LIB_KEY_069/g)||[]).length,2);
+assert.equal((c200.match(/localStorage\.getItem\('gensrpg_challenge_library_v1'\)/g)||[]).length,0);
+assert.equal((c200.match(/GensStorageV1\.readJson\(localStorage,'gensrpg_challenge_library_v1',\[\]\)/g)||[]).length,1);
+assert.equal((c202.match(/localStorage\.getItem\("gensrpg_challenge_library_v1"\)/g)||[]).length,0);
+assert.equal((c202.match(/GensStorageV1\.readJson\(localStorage,"gensrpg_challenge_library_v1",\[\]\)/g)||[]).length,1);
 
 assert.match(c51,/if\(!Array\.isArray\(lib\)\)lib=\[\]/);
 assert.match(c51,/DEFAULT_CHALLENGES\.forEach/);
 assert.match(c200,/typeof loadChallengeLibrary069==='function'\?loadChallengeLibrary069\(\):/);
 assert.match(c202,/typeof loadChallengeLibrary069==="function"\?loadChallengeLibrary069\(\):/);
-
-for(const b of [c51,c200,c202]){
-  assert.equal(b.includes('GensStorageV1.readJson(localStorage,CHALLENGE_LIB_KEY_069'),false);
-}
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_challenge_library_v1'),false,'migrated Challenge Library key must leave direct-storage manifest');
@@ -76,6 +76,6 @@ console.log(JSON.stringify({
   },
   selected:'gensrpg_challenge_library_v1',
   selectedOwners:['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dungeonCore202ContentDensity'],
-  selectedDirectAccesses:{reads:3,writes:2},
+  selectedCoreAccesses:{reads:3,writes:2},
   targetBlob:'bfe9149e8150f15017bfcffe1a00fb797791aa83'
 },null,2));

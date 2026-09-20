@@ -14,7 +14,7 @@ assert.deepEqual(manifest.totals,{
   totalAccesses:194,
   resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:23
+  distinctResolvedKeys:24
 },'current Phase 4 storage totals must include the Dungeon Primary Selection, Dungeon Deck, Manual MJ, Economy Rules and Capture gameplay-by-profile Core raccords');
 
 const primary=manifest.resolvedKeys.find(x=>x.key==='gensrpg_dungeon_primary_selection_v167833');

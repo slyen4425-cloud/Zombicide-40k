@@ -4,17 +4,17 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 203,
-    "resolvedAccesses": 138,
+    "totalAccesses": 200,
+    "resolvedAccesses": 135,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 27
+    "distinctResolvedKeys": 26
   },
   "byDomain": {
     "dungeon": {
-      "accesses": 171,
-      "resolved": 121,
+      "accesses": 168,
+      "resolved": 118,
       "unresolved": 50,
-      "distinctKeys": 19
+      "distinctKeys": 18
     },
     "tactical": {
       "accesses": 2,
@@ -190,22 +190,6 @@
       "kinds": [
         "constant",
         "literal"
-      ]
-    },
-    {
-      "key": "gensrpg_dungeon_deck_v1",
-      "domains": [
-        "dungeon"
-      ],
-      "sources": [
-        "inline:dungeonMj72_2Script"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant"
       ]
     },
     {

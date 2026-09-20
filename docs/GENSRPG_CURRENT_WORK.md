@@ -73,11 +73,49 @@ est déjà reconstruite et vérifiée à partir de la source utilisateur + micro
 officiels. GitHub reste l'autorité pour branches/SHA/diff/CI.
 Si cette correspondance cesse d'être vraie, réappliquer immédiatement la règle 26.
 
-### Prochaine action
+### Résultat Audit 12
 
-Inventorier les 20 familles directes restantes et leurs opérations/propriétaires,
-puis sélectionner le prochain candidat uniquement sur preuve. Aucun raccord
-runtime dans Audit 12.
+Candidat retenu pour un futur micro-lot distinct :
+`gensrpg_dungeon_mj_rules_v145`.
+
+Preuves :
+- propriétaires actifs : `dungeonMj72_2Script` + `gensStability151` ;
+- aucun propriétaire JS externe ;
+- 1 lecture JSON + 2 écritures JSON ;
+- 0 `removeItem` ;
+- Core Storage chargé avant les deux propriétaires ;
+- parité de transport Core démontrée sur lecture, fusion, erreurs et écritures ;
+- micro-diff futur simulé sans changement de taille ;
+- blob cible déterministe : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Contrats sensibles :
+- `dungeonMjRules151` garde ses defaults, `Object.assign` et son catch lecture ;
+- `saveDungeonMj151` propage les erreurs d'écriture et ne ferme pas l'UI après échec ;
+- `saveDungeonMjUnified175` avale historiquement ces erreurs via son catch externe
+  et ne lance pas les reconciles après échec.
+
+Dette documentaire détectée et corrigée dans l'audit :
+`GENSRPG_PHASE2_STORAGE_OWNERS.json.sourceIndexBlob` réaligné sur
+`1545aba502777d9fb76decdcee90a89c7cf3f971`. Aucun runtime modifié.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_12_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_12.md`.
+
+### Validation et prochaine action
+
+La caractérisation Audit 12 passe dans Architecture après correction de sa propre
+sentinelle. La fermeture documentaire doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun checkpoint GREEN anticipé. Après trois SUCCESS sur le même HEAD final :
+créer `checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20`,
+puis ouvrir un nouveau lot `MJ Rules` depuis ce checkpoint.
+Aucun raccord runtime dans Audit 12 et aucun merge sur `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Storage / Economy Session — 2026-09-20

@@ -51,12 +51,40 @@ Cible :
 Document :
 `docs/GENSRPG_PHASE4_STORAGE_DUNGEON_SCENE.md`.
 
+### Implémentation Dungeon Scene
+
+Runtime :
+`f9f538e5144c1be7b66d06a59acc913d991a6f91`
+
+Résultat :
+- `index.html` : `8 174 580` octets ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054` ;
+- 0 accès directs Dungeon Scene ;
+- 1 lecture Core + 1 écriture Core ;
+- normalisation tableau inchangée ;
+- rendu MJ toujours après écriture réussie ;
+- manifeste stockage : `187 / 122 / 65 / 21` ;
+- Dungeon : `155 / 105 / 50 / 13`.
+
+### Validation finale Dungeon Scene — GREEN
+
+HEAD fonctionnel validé :
+`1e9839018ed8a529c25049ac1c7729ab686d72c1`
+
+Runs :
+- Architecture + navigateur complet `35528901345` — SUCCESS ;
+- Firefox `35528901336` — SUCCESS ;
+- Tactical Dock `35528901320` — SUCCESS.
+
+Production `main` reste :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
 ### Prochaine action
 
-1. valider le RED TDD ciblé ;
-2. appliquer le micro-diff exact de deux expressions ;
-3. réaligner uniquement manifeste/empreintes obsolètes ;
-4. relancer Architecture+navigateur, Firefox et Tactical ;
+1. valider ce HEAD documentaire ;
+2. créer le checkpoint GREEN final Dungeon Scene ;
+3. ouvrir un nouvel audit stockage depuis ce checkpoint ;
+4. garder Pending Trap / Special Branch / gameplay-by-profile / runtime_v2 différés tant qu'ils n'ont pas leur audit dédié ;
 5. aucun merge sur `main`.
 
 

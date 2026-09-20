@@ -1,5 +1,89 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Storage / Audit de sortie 13 — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-storage-exit-audit-13-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-storage-exit-audit-13-2026-09-20`.
+- Base exacte et dernier GREEN : `db364007fcc452cfbb7a06b06c3c49007a8b4ddc`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-mj-rules-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### MJ Rules définitivement clôturé
+
+HEAD final :
+`db364007fcc452cfbb7a06b06c3c49007a8b4ddc`.
+
+Runs :
+- Architecture + navigateur complet : `35535815428` — SUCCESS ;
+- Firefox : `35535815388` — SUCCESS ;
+- Tactical Dock : `35535815374` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-storage-mj-rules-green-2026-09-20`.
+
+### État Storage actuel
+
+`index.html` :
+- taille : `8 174 580` octets ;
+- blob : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Cartographie directe :
+- accès : `182` ;
+- résolus : `117` ;
+- non résolus : `65` ;
+- familles résolues directes : `19`.
+
+Le service commun `GensStorageV1` existe déjà et possède uniquement le transport
+JSON générique explicite `readJson/writeJson`.
+
+### Mission Audit 13
+
+**Audit uniquement, sans migration runtime.**
+
+Objectif : décider si le sous-chantier Storage commun peut être clôturé sans
+transformer la migration des accès directs en objectif artificiel.
+
+Pour les 19 familles résolues restantes :
+1. attribuer la responsabilité future réelle ;
+2. distinguer service commun, état de module, session/navigation, réparation legacy
+   et état transitoire ;
+3. identifier tout éventuel dernier candidat Storage commun réellement autonome ;
+4. différer explicitement les familles qui doivent être traitées avec leur futur
+   propriétaire en Phase 5/7/8/9 ;
+5. ne pas étendre `GensStorageV1` pour absorber remove/scalaires/migrations seulement
+   afin de faire baisser un compteur.
+
+### Hypothèse à prouver
+
+Les familles restantes sont principalement :
+- état d'exploration/runtime Dungeon -> Phase 7 ;
+- session/navigation/profile -> Phase 5 ou Phase 7 ;
+- état Tactical -> Phase 8 ;
+- état Capture/shared entities -> Phase 9 ;
+- Runtime Repair / build marker -> dette legacy ou utilitaire à traiter avec son propriétaire.
+
+Si cette hypothèse est confirmée, **Storage commun est considéré suffisamment extrait**
+pour passer au prochain service recommandé par la roadmap : **Core Stats**.
+
+### Interdits
+
+- aucun changement runtime dans Audit 13 ;
+- aucun nouveau helper Storage ;
+- aucun `removeItem` déplacé sans audit propriétaire ;
+- aucune migration de `gensrpg_dungeon_runtime_v2` ;
+- aucun Stats/Tactical/Capture/Survie/Shell modifié ;
+- aucun observer, timer/retry, wrapper ou monkey-patch ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Documenter et verrouiller la classification des 19 familles restantes. Si aucun
+dernier micro-lot commun autonome n'est prouvé, clôturer le sous-chantier Storage,
+créer son checkpoint GREEN, puis reprendre **Stats** depuis ce nouveau GREEN.
+
+
 ## Chantier courant prioritaire — Phase 4 Storage / MJ Rules — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

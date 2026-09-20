@@ -1,5 +1,90 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 10 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-10-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-10-2026-09-20`
+
+Base exacte :
+`5259210bea918719603066057d3c64c4d68624eb`
+(`checkpoint/gensrpg-phase4-storage-challenge-history-green-2026-09-20`).
+
+Challenge History clôturé GREEN :
+- Architecture + navigateur complet `35527060380` — SUCCESS ;
+- Firefox `35527060340` — SUCCESS ;
+- Tactical Dock `35527060400` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### État de départ stockage
+
+- accès directs : `189` ;
+- résolus : `124` ;
+- non résolus : `65` ;
+- clés directes : `22`.
+
+Dungeon :
+- `157 / 107 / 50 / 14`.
+
+`index.html` exact :
+- taille : `8 174 580` ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6`.
+
+### Candidat retenu
+
+`gensrpg_dungeon_scene_v1`
+
+Propriétaire unique :
+`dungeonMj72_2Script`.
+
+Contrat :
+- 1 lecture JSON ;
+- 1 écriture JSON ;
+- aucun removeItem ;
+- fallback tableau vide ;
+- valeurs non-tableau normalisées vers `[]` ;
+- rendu MJ seulement après écriture réussie ;
+- erreur de rendu toujours capturée localement.
+
+Micro-diff cible ultérieur :
+- taille : `8 174 580` ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054`.
+
+Différés :
+- Pending Trap ;
+- Special Branch ;
+- Economy Session dynamique ;
+- gameplay-by-profile ;
+- `gensrpg_dungeon_runtime_v2` ;
+- autres familles larges Dungeon/Tactical/Capture.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_10.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_10_v1.test.cjs`.
+
+### Interdits
+
+- aucun runtime dans cet audit ;
+- aucun changement des éléments de scène MJ ;
+- aucun changement coffre/room/rendu ;
+- aucun Pending Trap/Special Branch/Economy Session ;
+- aucun gameplay-by-profile/runtime_v2/Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Valider Audit 10 par Architecture+navigateur, Firefox et Tactical Dock.
+Si GREEN, checkpoint final puis lot neuf uniquement pour Dungeon Scene.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Challenge History 0.67 — 2026-09-20
 
 Branche :

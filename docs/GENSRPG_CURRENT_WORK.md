@@ -77,10 +77,29 @@ Sentinelle :
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
 
+### Validation finale Audit 8 — GREEN
+
+HEAD fonctionnel validé :
+`fdd6c7178f5a3543f6dc826ca070c61d0cabdff0`
+
+Runs :
+- Architecture + navigateur complet `35521305083` — SUCCESS ;
+- Firefox `35521305080` — SUCCESS ;
+- Tactical Dock `35521305078` — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+Décision confirmée :
+- gameplay-by-profile différé ;
+- prochain lot = uniquement `gensrpg_challenge_library_v1`.
+
 ### Prochaine action
 
-Valider Audit 8 par Architecture+navigateur, Firefox et Tactical Dock.
-Si GREEN, checkpoint documentaire final puis branche neuve uniquement pour Challenge Library.
+1. valider ce commit documentaire ;
+2. créer le checkpoint GREEN final Audit 8 ;
+3. ouvrir une branche neuve Challenge Library ;
+4. poser parité + owner guards avant raccord ;
+5. ne toucher ni au contenu ni à la fréquence des énigmes.
 
 
 

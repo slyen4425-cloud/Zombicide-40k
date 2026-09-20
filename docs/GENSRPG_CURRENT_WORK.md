@@ -1,5 +1,98 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S1 Contrats — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s1-contracts-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s1-contracts-2026-09-20`.
+- Base exacte et dernier GREEN : `44e79de9afcb7c7cf47f2c3ad11d847e425274ae`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-exit-audit-13-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Storage commun clôturé
+
+Audit de sortie 13 final GREEN :
+- Architecture + navigateur complet : `35536488030` — SUCCESS ;
+- Firefox : `35536488028` — SUCCESS ;
+- Tactical Dock : `35536488034` — SUCCESS.
+
+Le service commun Storage reste `GensStorageV1.readJson/writeJson`.
+Les 19 familles restantes sont attribuées à leurs futurs propriétaires
+Shell/Dungeon/Tactical/Capture/diagnostic et ne sont plus traitées comme
+micro-lots Storage autonomes.
+
+### Mission S1
+
+Verrouiller le contrat réel du moteur Stats actuel sans modifier le runtime.
+
+Propriétaire actuel :
+`assets/gensrpg/gens-rpg-stats-clean-167874.js`
+via `GensCleanRpgStats167874`.
+
+Documentation :
+`docs/GENSRPG_PHASE4_STATS_S1_CONTRACTS.md`.
+
+Pré-audit repris comme documentation :
+`docs/GENSRPG_PHASE4_STATS_PREAUDIT_AGENT1.md`.
+
+Sa validité a été recontrôlée contre le nouveau GREEN Storage :
+aucun moteur Stats/Tactical/Equipment pertinent n'a changé depuis sa base.
+
+### Contrats verrouillés
+
+- aliases/canonisation ;
+- définition normalisée ;
+- effet normalisé ;
+- valeur canonique ;
+- providers équipement/talents/challenges ;
+- effet stat -> stat ;
+- effets step / threshold ;
+- clamp ;
+- cycle via `seen` et retour base ;
+- dérivées via `extraTotal` et `sourceEffectTotal`.
+
+Hors S1 :
+- aucune formule Armor ;
+- aucune formule finale de toucher ;
+- aucune normalisation résistances runtime ;
+- aucun snapshot Tactical nouveau ;
+- aucune UI/persistance extraite.
+
+### TDD S1
+
+Sentinelle :
+`tests/gens_phase4_stats_s1_contracts_v1.test.cjs`.
+
+Premier RED :
+fixture de test incorrecte : la même définition Force servait à tester un
+min/max volontairement invalide, ce qui clampait légitimement Force à 5.
+
+Correction :
+cas min/max invalide déplacé sur une stat custom indépendante.
+Aucun runtime n'a été modifié.
+
+Résultat de la sentinelle S1 corrigée :
+GREEN dans Architecture sur le commit `ae156dd8e11be1979ca569c17326fa8c6a788d46`.
+
+### Validation en cours
+
+HEAD technique courant :
+`ae156dd8e11be1979ca569c17326fa8c6a788d46`.
+
+Architecture complète, Firefox et Tactical Dock doivent être SUCCESS avant
+clôture documentaire S1 et création du checkpoint GREEN.
+
+### Suite autorisée
+
+Après S1 GREEN :
+**S2 — normalisation pure**.
+
+S2 pourra créer un premier service Core Stats pur dans
+`assets/gensrpg/core/`, limité à canonisation/normalisation.
+Aucune `value()` complète, aucun gameplay, aucune UI, aucune persistance.
+
+
 ## Chantier courant prioritaire — Phase 4 Storage / Audit de sortie 13 — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

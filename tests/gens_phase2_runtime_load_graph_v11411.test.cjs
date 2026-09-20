@@ -87,23 +87,23 @@ const phase3Entrypoints=[
 ];
 const phase3Set=new Set(phase3Entrypoints);
 const phase4ExtractedServices=[
-  'assets/gensrpg/core/asset-resolver-v1.js'
+  'assets/gensrpg/core/asset-resolver-v1.js',
+  'assets/gensrpg/core/indexed-asset-storage-v1.js'
 ];
 const phase4Set=new Set(phase4ExtractedServices);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,81,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and the first extracted Phase 4 service');
+assert.equal(allJs.length,82,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and two extracted Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
 assert.equal(reachable.size,66,'production-reachable JS graph must currently contain 66 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
 }
-for(const rel of phase4ExtractedServices){
-  assert.equal(allJs.includes(rel),true,'Phase 4 extracted service missing: '+rel);
-  assert.equal(reachable.has(rel),true,'Phase 4 resolver service must be production-reachable after explicit raccord: '+rel);
-}
+for(const rel of phase4ExtractedServices)assert.equal(allJs.includes(rel),true,'Phase 4 extracted service missing: '+rel);
+assert.equal(reachable.has('assets/gensrpg/core/asset-resolver-v1.js'),true,'Phase 4 resolver service must remain production-reachable after explicit raccord');
+assert.equal(reachable.has('assets/gensrpg/core/indexed-asset-storage-v1.js'),false,'Phase 4 IndexedDB asset storage service must remain outside production until its explicit raccord');
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
   'assets/gensrpg/gens-dungeon-ingame-hero-art-167898.js',

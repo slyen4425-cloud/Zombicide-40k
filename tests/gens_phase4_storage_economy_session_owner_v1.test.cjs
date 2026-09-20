@@ -41,7 +41,7 @@ assert.match(
 );
 assert.match(
   block,
-  /const d=\{chests:0,merchantPasses:0\};/,
+  /let d=\{chests:0,merchantPasses:0\};/,
   'Economy Session defaults must remain unchanged'
 );
 assert.match(
@@ -56,7 +56,7 @@ assert.match(
 );
 assert.match(
   block,
-  /if\(!d\?\.key\) return;\s*const \{key,\.\.\.rest\}=d;\s*GensStorageV1\.writeJson\(localStorage,key,rest\)/,
+  /if\(!d\?\.key\)\s*return;\s*const \{key,\.\.\.rest\}=d;\s*GensStorageV1\.writeJson\(localStorage,key,rest\)/,
   'writer must preserve carried key, no-op and payload exclusion contract'
 );
 

@@ -90,6 +90,38 @@ Avant GREEN :
 - Tactical Dock.
 
 
+### Validation finale — GREEN
+
+HEAD validé :
+`9b56b3a78948369e13a11848ae6ec78d6b482e47`
+
+Runs :
+- Architecture + navigateur complet `35512912950` — SUCCESS ;
+- Firefox `35512912966` — SUCCESS ;
+- Tactical Dock `35512912956` — SUCCESS.
+
+La validation a nécessité uniquement le réalignement de sentinelles/cartographies devenues obsolètes après le micro-diff :
+- empreintes Phase 2 inline/global/timers -> blob `739ca52610308d085ecf2635c5bc748f70c79a11` ;
+- audit stockage externe -> totaux post-Deck `200 / 135 / 65 / 26` ;
+- empreinte de l'audit final resolver d'assets -> blob courant.
+
+Aucun runtime n'a été modifié après le commit fonctionnel
+`2b8d52274abd4bbe6fbc72ff487bcd054ceab6b9`.
+
+Le vrai navigateur a repassé notamment :
+Survie + Fouiller/arts, Dungeon après Survie, Builder, Config objet, fiche RPG,
+authored caches/pièges, Save & Quit/reprise, PvP, Capture, non-interférence,
+murs, preview et resolver d'assets.
+
+### Prochaine action après fermeture
+
+1. créer `checkpoint/gensrpg-phase4-storage-dungeon-deck-green-2026-09-20` sur le HEAD documentaire final validé ;
+2. ouvrir un nouvel audit stockage depuis ce checkpoint ;
+3. repartir de l'inventaire `200 / 135 / 65 / 26` ;
+4. ne pas attaquer `gensrpg_dungeon_runtime_v2`, Stats ou Tactical sans audit dédié ;
+5. le `index.html` exact post-Deck est le blob `739ca52610308d085ecf2635c5bc748f70c79a11` (8 174 603 octets).
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 3 — 2026-09-20
 
 Branche :

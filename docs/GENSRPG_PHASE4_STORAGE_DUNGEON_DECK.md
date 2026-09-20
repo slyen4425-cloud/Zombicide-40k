@@ -135,3 +135,32 @@ Manifeste Phase 2 :
 - Dungeon clés directes `19 -> 18`.
 
 Le workflow temporaire est retiré après application ; il ne fait pas partie de l'architecture cible.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé :
+`9b56b3a78948369e13a11848ae6ec78d6b482e47`
+
+Runs :
+- Architecture + navigateur complet `35512912950` — SUCCESS ;
+- Firefox `35512912966` — SUCCESS ;
+- Tactical Dock `35512912956` — SUCCESS.
+
+Après le raccord runtime, trois gardes historiques ont été réalignés sans changement de runtime :
+- empreintes Phase 2 du gros `index.html` ;
+- totaux du vieil audit stockage externe ;
+- empreinte de l'audit final du resolver d'assets.
+
+Le commit runtime reste :
+`2b8d52274abd4bbe6fbc72ff487bcd054ceab6b9`.
+
+État final :
+- `index.html` : 8 174 603 octets ;
+- blob : `739ca52610308d085ecf2635c5bc748f70c79a11` ;
+- accès directs stockage : `200` ;
+- accès résolus : `135` ;
+- accès non résolus : `65` ;
+- clés directes résolues : `26`.
+
+Aucun merge sur `main`.

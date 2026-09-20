@@ -9,21 +9,21 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:189,
-  resolvedAccesses:124,
+  totalAccesses:187,
+  resolvedAccesses:122,
   unresolvedAccesses:65,
-  distinctResolvedKeys:22
+  distinctResolvedKeys:21
 },'Audit 9 must start from Challenge Library GREEN storage totals');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:157,resolved:107,unresolved:50,distinctKeys:14
+  accesses:155,resolved:105,unresolved:50,distinctKeys:13
 },'Audit 9 must start from Challenge Library GREEN Dungeon totals');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580);
-assert.equal(blob,'30487d09481e11e5883faca1a6e49727d9cecfb6');
+assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -46,10 +46,10 @@ assert.equal((c51.match(/GensStorageV1\.writeJson\(localStorage,hk,hist\.slice\(
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_dc067_challenge_history'),false,'migrated Challenge History key must leave direct-storage manifest');
 
+assert.equal(keys.has('gensrpg_dungeon_scene_v1'),false,'migrated Dungeon Scene key must leave direct-storage manifest');
 for(const key of [
   'gensrpg_dc048_pending_trap_v1',
   'gensrpg_dc052_special_branch_v1',
-  'gensrpg_dungeon_scene_v1',
   'gensrpg_dungeon_session_eco_160_',
   'gensrpg_dungeon_runtime_v2',
   'gensrpg_rpg_gameplay_by_profile_v1'
@@ -63,7 +63,7 @@ console.log(JSON.stringify({
   selectedDirectAccesses:{reads:0,writes:0},
   coreAccesses:{reads:1,writes:1},
   semantics:{recentWindow:12,persistedHistory:24},
-  targetBlob:'30487d09481e11e5883faca1a6e49727d9cecfb6',
+  targetBlob:'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054',
   state:'migrated',
-  deferred:['pending trap','special branch','dungeon scene','economy session dynamic','gameplay mirror','dungeon runtime v2']
+  deferred:['pending trap','special branch','economy session dynamic','gameplay mirror','dungeon runtime v2']
 },null,2));

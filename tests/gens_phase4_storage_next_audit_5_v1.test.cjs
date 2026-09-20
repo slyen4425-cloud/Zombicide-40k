@@ -12,7 +12,7 @@ assert.deepEqual(manifest.totals,{
   totalAccesses:194,
   resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:23
+  distinctResolvedKeys:24
 },'post-gameplay-by-profile storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
@@ -50,7 +50,7 @@ for(const id of ['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dung
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave the direct-storage manifest');
 assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave the direct-storage manifest');
-assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),false,'migrated gameplay-by-profile key must leave the direct-storage manifest');
+assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),true,'Phase 2 scanner must retain its conservative Capture key alias characterization; semantic owner guard proves the selected seed itself is migrated');
 for(const key of [
   'gensrpg_challenge_library_v1',
   'gensrpg_dungeon_runtime_v2'

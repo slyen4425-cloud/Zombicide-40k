@@ -196,3 +196,28 @@ Pas de merge de sa branche ni d'extraction Stats dans cet audit Storage.
 Préparer S1 (contrats) puis S2 (normalisation pure) après décision de clôture
 du périmètre Storage ; Armure / Toucher-Défense-Esquive / Résistances et cache
 exigent leurs caractérisations dédiées. Aucun changement de formule implicite.
+
+## Trace de validation
+
+Le HEAD de caractérisation `35dad53b924ea3afd8aff24a34d63361cec8f3b1`
+a passé les sentinelles Architecture, dont la nouvelle caractérisation du vrai
+propriétaire Economy Session, ainsi que Firefox `35530133891` et Tactical Dock
+`35530133906`.
+
+La première tentative du navigateur complet `35530133918`,
+job `106129254992`, a échoué sur le scénario historique
+`runPersistedDungeonThenSurvivalScenario` :
+`gtv2Overlay` intercepte le clic `button.gensRootModeCard.survival`
+jusqu'au timeout de 25 secondes.
+
+Le diff de l'audit ne contient aucun runtime ni changement de ce scénario.
+Le même défaut d'overlay était déjà consigné dans les audits Storage précédents.
+Une seule relance ciblée du job navigateur a été demandée sur le même SHA,
+sans modification du runtime ni du test.
+
+Le scénario précédemment bloqué a passé lors de cette relance ; la suite
+du navigateur était encore en cours au moment de cette note.
+La fermeture documentaire repasse intégralement les trois workflows :
+seul leur résultat sur le HEAD final autorisera le checkpoint GREEN.
+Aucune assertion, aucun scénario navigateur ni runtime n'a été changé pour
+obtenir un passage. Cette dette d'overlay reste hors du lot Storage.

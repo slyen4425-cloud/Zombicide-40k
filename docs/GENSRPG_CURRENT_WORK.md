@@ -85,6 +85,21 @@ Pas de merge Stats ici ; futurs S1 puis S2, sans unifier Armure/Toucher/Résista
   GREEN Audit 11, puis ouvrir un lot distinct Economy Session. Aucun raccord dans cet audit.
 
 
+### Trace de validation Audit 11
+
+Sur `35dad53b924ea3afd8aff24a34d63361cec8f3b1` :
+- nouvelles caractérisations Economy Session et Architecture statique : SUCCESS ;
+- Firefox `35530133891` : SUCCESS ;
+- Tactical Dock `35530133906` : SUCCESS ;
+- navigateur `35530133918`, tentative 1 : RED sur l'overlay Tactical interceptant le clic Survie ;
+- une seule relance du job navigateur sur le même SHA, sans changement de code ;
+- le scénario précédemment bloqué a passé cette relance ; suite navigateur encore en cours lors de la note.
+
+Ce rouge historique est conservé dans `GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_11.md`.
+La présente fermeture documentaire doit repasser les trois workflows avant checkpoint.
+Aucun runtime ni test navigateur modifié ; aucun résultat GREEN anticipé.
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Scene — 2026-09-20
 
 Branche :

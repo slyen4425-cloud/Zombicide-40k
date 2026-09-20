@@ -1,5 +1,89 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 8 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-8-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-8-2026-09-20`
+
+Base exacte :
+`d579cb0d1ec4e065e2baa9f6c7bd770fb391fcf1`
+(`checkpoint/gensrpg-phase4-storage-economy-rules-green-2026-09-20`).
+
+### Pourquoi cet audit remplace Audit 7
+
+Le lot partiel `gameplay-by-profile` a révélé un propriétaire réel hors du scanner Phase 2 :
+`loadRpgGameplayByProfile/saveRpgGameplayByProfile/setStoredRpgGameplay/clearOldGameplayMirrorOnce`
+dans le gros script principal anonyme.
+
+La famille `gensrpg_rpg_gameplay_by_profile_v1` mélange donc :
+- miroir historique de compatibilité ;
+- plusieurs écritures ;
+- `removeItem` ;
+- marqueur scalaire voisin ;
+- seed Monster Capture.
+
+La branche partielle est abandonnée sans merge et sans checkpoint GREEN.
+
+### État sûr de départ
+
+`index.html` :
+- taille : `8 174 580` ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+Stockage Phase 2 :
+- `196 / 131 / 65 / 24`.
+
+Production `main` reste :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Décision
+
+Gameplay-by-profile : **différé**.
+
+Nouveau candidat retenu :
+`gensrpg_challenge_library_v1`.
+
+Propriétaires :
+- `dungeonCore051ExplorationPolish` ;
+- `dungeonCore200Rebuild` ;
+- `dungeonCore202ContentDensity`.
+
+Accès directs :
+- 3 lectures ;
+- 2 écritures ;
+- JSON homogène ;
+- contenu/fréquence/logique des énigmes restent Dungeon-owned.
+
+Micro-diff cible :
+- taille : `8 174 580` ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83`.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_8.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_8_v1.test.cjs`.
+
+### Interdits
+
+- aucun runtime dans cet audit ;
+- aucun contenu d'énigme modifié ;
+- aucun gameplay-by-profile ;
+- aucun runtime_v2 ;
+- aucun Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Valider Audit 8 par Architecture+navigateur, Firefox et Tactical Dock.
+Si GREEN, checkpoint documentaire final puis branche neuve uniquement pour Challenge Library.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Economy Rules — 2026-09-20
 
 Branche :

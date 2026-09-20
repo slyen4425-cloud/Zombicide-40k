@@ -12,8 +12,8 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_
 const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
-const SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
-const TARGET_BLOB='5b9b9ae780f735eadef049afeb10acf0b57441fe';
+const HISTORICAL_SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
+const CURRENT_BLOB='5b9b9ae780f735eadef049afeb10acf0b57441fe';
 
 function gitBlob(buffer){
   return crypto.createHash('sha1').update(Buffer.concat([
@@ -27,15 +27,18 @@ function blockInfo(id){
   return {body:m[1],full:m[0],index:m.index};
 }
 
-assert.equal(manifest.sourceIndexBlob,SOURCE_BLOB,'Storage cartography fingerprint must follow the exact Economy Session GREEN index');
+assert.equal(manifest.sourceIndexBlob,CURRENT_BLOB,'Storage cartography fingerprint must follow MJ Rules GREEN candidate index');
 assert.deepEqual(manifest.totals,{
-  totalAccesses:185,resolvedAccesses:120,unresolvedAccesses:65,distinctResolvedKeys:20
-},'Audit 12 must start from Economy Session GREEN totals');
+  totalAccesses:182,resolvedAccesses:117,unresolvedAccesses:65,distinctResolvedKeys:19
+},'Audit 12 guard must follow the migrated MJ Rules storage totals');
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:153,resolved:103,unresolved:50,distinctKeys:12
-},'Audit 12 must start from Economy Session GREEN Dungeon totals');
+  accesses:152,resolved:102,unresolved:50,distinctKeys:11
+},'Audit 12 guard must follow the migrated MJ Rules Dungeon totals');
+assert.deepEqual(manifest.byDomain.core,{
+  accesses:2,resolved:1,unresolved:1,distinctKeys:1
+},'Audit 12 guard must follow the migrated MJ Rules Core totals');
 assert.equal(bytes.length,8174580);
-assert.equal(gitBlob(bytes),SOURCE_BLOB,'Audit 12 must inspect the exact Economy Session GREEN index');
+assert.equal(gitBlob(bytes),CURRENT_BLOB,'Audit 12 must follow the exact migrated MJ Rules index');
 
 const mj=blockInfo('dungeonMj72_2Script');
 const stability=blockInfo('gensStability151');
@@ -46,11 +49,11 @@ assert.equal(inlineOwners.blocks.gensStability151.primaryDomain,'core');
 
 const coreLoad=src.indexOf('assets/gensrpg/core/storage-v1.js');
 assert.ok(coreLoad>=0,'Core Storage load must exist');
-assert.ok(coreLoad<mj.index && coreLoad<stability.index,'Core Storage must load before both future MJ Rules consumers');
+assert.ok(coreLoad<mj.index && coreLoad<stability.index,'Core Storage must load before both MJ Rules consumers');
 
-assert.equal(src.split(KEY).length-1,3,'MJ Rules key must have exactly three occurrences');
-assert.equal(mj.body.split(KEY).length-1,1,'Dungeon MJ owner must contain one writer occurrence');
-assert.equal(stability.body.split(KEY).length-1,2,'Stability owner must contain reader + writer occurrences');
+assert.equal(src.split(KEY).length-1,3,'MJ Rules key must keep exactly three owner occurrences');
+assert.equal(mj.body.split(KEY).length-1,1,'Dungeon MJ owner must keep one writer occurrence');
+assert.equal(stability.body.split(KEY).length-1,2,'Stability owner must keep reader + writer occurrences');
 
 const readExpr='JSON.parse(localStorage.getItem("'+KEY+'")||"{}")';
 const writeExpr='localStorage.setItem("'+KEY+'",JSON.stringify(r))';
@@ -58,15 +61,15 @@ const coreRead='GensStorageV1.readJson(localStorage,"'+KEY+'",{})';
 const coreWrite='GensStorageV1.writeJson(localStorage,"'+KEY+'",r)';
 
 assert.equal(mj.body.split(readExpr).length-1,0);
-assert.equal(mj.body.split(writeExpr).length-1,1);
-assert.equal(stability.body.split(readExpr).length-1,1);
-assert.equal(stability.body.split(writeExpr).length-1,1);
+assert.equal(mj.body.split(writeExpr).length-1,0);
+assert.equal(stability.body.split(readExpr).length-1,0);
+assert.equal(stability.body.split(writeExpr).length-1,0);
+assert.equal(src.split(coreRead).length-1,1,'migrated MJ Rules must use one Core read');
+assert.equal(src.split(coreWrite).length-1,2,'migrated MJ Rules must use two Core writes');
 assert.equal(mj.body.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.body.includes('removeItem("'+KEY+'")'),false);
-assert.equal(src.split(coreRead).length-1,0,'Audit must remain pre-raccord');
-assert.equal(src.split(coreWrite).length-1,0,'Audit must remain pre-raccord');
 
-let outside=src.replace(mj.full,'').replace(stability.full,'');
+const outside=src.replace(mj.full,'').replace(stability.full,'');
 assert.equal(outside.includes(KEY),false,'no additional inline owner/call site is allowed');
 
 const jsFiles=cp.execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'})
@@ -77,9 +80,7 @@ for(const file of jsFiles){
 }
 
 const keyEntry=(manifest.resolvedKeys||[]).find(x=>x.key===KEY);
-assert.ok(keyEntry,'MJ Rules must remain in direct-storage manifest before migration');
-assert.deepEqual([...keyEntry.ops].sort(),['getItem','setItem']);
-assert.deepEqual([...keyEntry.sources].sort(),['inline:dungeonMj72_2Script','inline:gensStability151'].sort());
+assert.equal(keyEntry,undefined,'migrated MJ Rules key must leave the direct-storage manifest');
 
 const storageSrc=fs.readFileSync(path.join(root,'assets/gensrpg/core/storage-v1.js'),'utf8');
 const ctx={};vm.createContext(ctx);vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
@@ -133,17 +134,9 @@ const circular={};circular.self=circular;
 assert.deepEqual(coreCandidateWrite(circular),legacyWrite(circular),'serialization error parity');
 assert.deepEqual(coreCandidateWrite({x:1},{failWrite:true}),legacyWrite({x:1},{failWrite:true}),'write error parity');
 
-assert.match(stability.body,/try\{\s*const old=JSON\.parse\(localStorage\.getItem\("gensrpg_dungeon_mj_rules_v145"\)\|\|"\{\}"\);\s*Object\.assign\(d,old\|\|\{\}\);\s*\}catch\(e\)\{\}/,'reader fallback/merge boundary must remain characterized');
-assert.match(stability.body,/localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\);\s*const m=document\.getElementById\("dungeonMj151"\)/,'saveDungeonMj151 writes before closing UI');
-assert.match(mj.body,/try\{[\s\S]*?localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\);\s*try\{gensReconcile171/,'unified MJ writer keeps write + reconciles inside outer try');
-
-let candidate=src;
-assert.equal(candidate.split(readExpr).length-1,1);
-assert.equal(candidate.split(writeExpr).length-1,2);
-candidate=candidate.replace(readExpr,coreRead).replaceAll(writeExpr,coreWrite);
-const candidateBytes=Buffer.from(candidate,'utf8');
-assert.equal(candidateBytes.length,8174580,'future micro-diff must keep exact size');
-assert.equal(gitBlob(candidateBytes),TARGET_BLOB,'future MJ Rules micro-diff must be deterministic');
+assert.match(stability.body,/try\{\s*const old=GensStorageV1\.readJson\(localStorage,"gensrpg_dungeon_mj_rules_v145",\{\}\);\s*Object\.assign\(d,old\|\|\{\}\);\s*\}catch\(e\)\{\}/,'reader fallback/merge boundary must remain characterized');
+assert.match(stability.body,/GensStorageV1\.writeJson\(localStorage,"gensrpg_dungeon_mj_rules_v145",r\);\s*const m=document\.getElementById\("dungeonMj151"\)/,'saveDungeonMj151 writes before closing UI');
+assert.match(mj.body,/try\{[\s\S]*?GensStorageV1\.writeJson\(localStorage,"gensrpg_dungeon_mj_rules_v145",r\);\s*try\{gensReconcile171/,'unified MJ writer keeps write + reconciles inside outer try');
 
 for(const deferred of [
   'gensrpg_dc048_pending_trap_v1',
@@ -156,13 +149,14 @@ for(const deferred of [
 
 console.log(JSON.stringify({
   scenario:'Phase 4 storage Audit 12',
-  indexBlob:SOURCE_BLOB,
+  historicalSourceBlob:HISTORICAL_SOURCE_BLOB,
+  indexBlob:CURRENT_BLOB,
   totals:manifest.totals,
   selected:KEY,
   owners:['dungeonMj72_2Script','gensStability151'],
-  directAccesses:{reads:1,writes:2,removes:0},
+  directAccesses:{reads:0,writes:0,removes:0},
+  coreAccesses:{reads:1,writes:2},
   coreLoadBeforeOwners:true,
-  candidateBlob:TARGET_BLOB,
-  candidateSize:candidateBytes.length,
-  decision:'select MJ Rules for a separate micro-lot; no runtime change in Audit 12'
+  state:'migrated',
+  decision:'MJ Rules selected by Audit 12 and migrated in its separate micro-lot'
 },null,2));

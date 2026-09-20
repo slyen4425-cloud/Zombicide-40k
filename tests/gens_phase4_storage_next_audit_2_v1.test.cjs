@@ -11,11 +11,11 @@ const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:213,
+  totalAccesses:208,
   resolvedAccesses:143,
-  unresolvedAccesses:70,
+  unresolvedAccesses:65,
   distinctResolvedKeys:28
-},'World Summary GREEN storage totals must be the audit base');
+},'current Phase 4 storage totals must include the Capture progress Core raccord');
 
 const primary=manifest.resolvedKeys.find(x=>x.key==='gensrpg_dungeon_primary_selection_v167833');
 assert.ok(primary,'primary Dungeon selection key must remain mapped');
@@ -73,5 +73,5 @@ console.log(JSON.stringify({
     runtimeRepair:'mixed JSON and scalar profile repair',
     primarySelection:'bootstrap prerequisite is now satisfied; key remains unmigrated in this bootstrap-only lot'
   },
-  nextInspection:'fresh JSON-family migration lot after bootstrap GREEN'
+  nextInspection:'continue with the next isolated storage family after Capture progress GREEN'
 },null,2));

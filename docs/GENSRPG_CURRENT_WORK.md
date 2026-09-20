@@ -1,5 +1,74 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Dungeon Deck — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-dungeon-deck-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-dungeon-deck-2026-09-20`
+
+Base exacte :
+`b5c5b49a1b619b502b6a27764d9494852c0865cc`
+(`checkpoint/gensrpg-phase4-storage-next-audit-3-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_dungeon_deck_v1`
+
+État historique exact :
+- 1 lecture JSON directe ;
+- 2 écritures JSON directes ;
+- un seul bloc inline Dungeon ;
+- aucun `gensrpg_dungeon_runtime_v2`.
+
+Dungeon reste propriétaire :
+- du schéma `remaining/createdAt/dungeonSession` ;
+- de l'initialisation du deck ;
+- des quantités configurées ;
+- de la consommation, du reshuffle et du choix de loot.
+
+Core Storage possède uniquement la sérialisation JSON.
+
+### Règle 26
+
+Le fichier fourni a été revérifié :
+- taille `8 174 618` octets ;
+- blob `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`.
+
+Micro-diff préparé localement :
+- lecture -> `GensStorageV1.readJson(localStorage,DUNGEON_DECK_KEY,null)` ;
+- 2 writers -> `GensStorageV1.writeJson(localStorage,DUNGEON_DECK_KEY,ds)` sous les `try/catch` historiques.
+
+Résultat déterministe attendu :
+- taille `8 174 603` octets ;
+- blob `739ca52610308d085ecf2635c5bc748f70c79a11`.
+
+### Interdits
+
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun changement de loot, rareté, quantité ou deck config ;
+- aucun Economy/MJ/Challenge/Stats/Tactical/Capture ;
+- aucune migration de schéma ;
+- aucun observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Validation requise
+
+Avant GREEN :
+- test parité lecture/écriture/error swallowing ;
+- garde autorité Core pour les 3 accès ;
+- vrai raccord du bloc Deck ;
+- manifeste Phase 2 avancé uniquement de 3 accès ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 3 — 2026-09-20
 
 Branche :

@@ -9,6 +9,82 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage — audit suivant 2 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-2-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-2-2026-09-20`
+
+Base exacte :
+`3dcbc7e3954e607fd3db933dc41240b8dbe02641`
+(`checkpoint/gensrpg-phase4-storage-world-summary-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### État de départ
+
+World Summary est fermé GREEN sur :
+`3dcbc7e3954e607fd3db933dc41240b8dbe02641`
+
+Validation de fermeture :
+- Architecture + navigateur complet `35499281396` — SUCCESS ;
+- Firefox `35499281376` — SUCCESS ;
+- Tactical Dock `35499281356` — SUCCESS.
+
+Inventaire stockage direct :
+- 213 accès ;
+- 143 résolus ;
+- 70 dynamiques/non résolus ;
+- 28 clés/familles directes résolues.
+
+### Audit externe
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_2.md`
+
+Test :
+`tests/gens_phase4_storage_next_audit_2_v1.test.cjs`
+
+Résultat :
+- `gensrpg_dungeon_primary_selection_v167833` est cohérent mais son premier consommateur Large Room Support est chargé avant `storage-v1.js` dans Pages/preview : raccord non isolé sans changement de composition ;
+- Room Runtime / World Runtime / Authored Runtime partagent leurs helpers avec `gensrpg_dungeon_runtime_v2` : différés ;
+- `gens-rpg-stats-clean-167874.js` : persistance dynamique à garder pour le futur lot Stats ;
+- Tactical Adapter : mélange runtime Dungeon + état héros dynamique ;
+- Runtime Repair V106 : mélange JSON de profils et valeurs scalaires, non adapté au seul service JSON actuel.
+
+Aucun de ces candidats externes n'est migré dans ce lot.
+
+### Décision
+
+Le prochain audit minimal doit examiner les accès inline restants dans le gros `index.html` pour sélectionner une clé JSON autonome.
+
+La règle 26 s'applique désormais :
+- SHA exact requis : `3dcbc7e3954e607fd3db933dc41240b8dbe02641` ;
+- lien :
+  `https://github.com/slyen4425-cloud/Zombicide-40k/blob/3dcbc7e3954e607fd3db933dc41240b8dbe02641/index.html` ;
+- demander à Sylvain de télécharger ce fichier, le compresser en ZIP et l'envoyer ;
+- vérifier le fichier reçu avant toute inspection.
+
+### Interdit
+
+- aucune modification de `index.html` dans ce lot d'audit ;
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun changement Stats / Tactical / gameplay ;
+- aucun changement d'ordre Pages/preview ;
+- aucun nouveau wrapper / observer / timer / retry ;
+- aucun merge sur `main`.
+
+### Sortie attendue
+
+Si Architecture + navigateur complet + Firefox + Tactical Dock sont GREEN :
+1. créer `checkpoint/gensrpg-phase4-storage-next-audit-2-green-2026-09-20` ;
+2. utiliser le `index.html` exact fourni par Sylvain uniquement pour l'audit inline suivant ;
+3. ouvrir ensuite un nouveau lot de raccord seulement après choix du propriétaire et parité.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage World Summary — 2026-09-20
 
 Branche :

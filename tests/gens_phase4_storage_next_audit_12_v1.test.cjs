@@ -49,8 +49,8 @@ assert.ok(coreLoad>=0,'Core Storage load must exist');
 assert.ok(coreLoad<mj.index && coreLoad<stability.index,'Core Storage must load before both future MJ Rules consumers');
 
 assert.equal(src.split(KEY).length-1,3,'MJ Rules key must have exactly three occurrences');
-assert.equal(mj.split(KEY).length-1,1,'Dungeon MJ owner must contain one writer occurrence');
-assert.equal(stability.split(KEY).length-1,2,'Stability owner must contain reader + writer occurrences');
+assert.equal(mj.body.split(KEY).length-1,1,'Dungeon MJ owner must contain one writer occurrence');
+assert.equal(stability.body.split(KEY).length-1,2,'Stability owner must contain reader + writer occurrences');
 
 const readExpr='JSON.parse(localStorage.getItem("'+KEY+'")||"{}")';
 const writeExpr='localStorage.setItem("'+KEY+'",JSON.stringify(r))';

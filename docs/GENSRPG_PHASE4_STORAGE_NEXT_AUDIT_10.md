@@ -124,3 +124,24 @@ Elles ne sont pas mélangées à ce micro-lot.
 - aucun Stats/Tactical/Capture/Survie ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`a66c9b13dfad62a0a32df35e6bbc3cbdf4403c7a`
+
+Runs :
+- Architecture + navigateur complet `35527922025` — SUCCESS ;
+- Firefox `35527921918` — SUCCESS ;
+- Tactical Dock `35527921947` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Décision confirmée :
+le prochain micro-lot est exclusivement
+`gensrpg_dungeon_scene_v1`
+dans `dungeonMj72_2Script`.
+
+Prochaine étape autorisée :
+ouvrir un lot dédié Dungeon Scene depuis le checkpoint GREEN final de cet audit.

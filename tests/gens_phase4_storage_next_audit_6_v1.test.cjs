@@ -9,11 +9,11 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:196,
-  resolvedAccesses:131,
+  totalAccesses:194,
+  resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:24
-},'post-Economy-Rules storage totals drifted');
+  distinctResolvedKeys:23
+},'post-gameplay-by-profile storage totals drifted');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
   accesses:164,resolved:114,unresolved:50,distinctKeys:16
@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174580,'audit 6 must target the exact post-Economy-Rules index size');
-assert.equal(blob,'16deeb169abbc31a7db04161902e9381fd6888ad','audit 6 must target the exact post-Economy-Rules index blob');
+assert.equal(bytes.length,8174580,'audit 6 must target the exact post-gameplay-by-profile index size');
+assert.equal(blob,'0b9c41c39db0d073c7b9ed580f66140b8d9bcda2','audit 6 must target the exact post-gameplay-by-profile index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -45,7 +45,7 @@ assert.match(economy,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave direct-storage manifest');
-assert.ok(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),'gameplay mirror must remain deferred');
+assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),false,'migrated gameplay-by-profile key must leave direct-storage manifest');
 assert.ok(keys.has('gensrpg_challenge_library_v1'),'challenge library must remain deferred');
 assert.ok(keys.has('gensrpg_dungeon_runtime_v2'),'Dungeon runtime must remain deferred');
 
@@ -62,5 +62,5 @@ console.log(JSON.stringify({
     dynamicSession:{reads:1,writes:1},
     heroInventoryWrites:1
   },
-  deferred:['gameplay mirror','challenge library','dungeon runtime v2']
+  deferred:['challenge library','dungeon runtime v2']
 },null,2));

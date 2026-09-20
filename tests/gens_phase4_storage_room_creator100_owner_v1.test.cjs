@@ -6,6 +6,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const room=read('assets/dungeon/dungeon-room-creator-100.js');
 const storage=read('assets/gensrpg/core/storage-v1.js');
+const index=read('index.html');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 const sw=read('service-worker.js');
@@ -26,12 +27,9 @@ before(
   'assets/dungeon/dungeon-room-creator-100.js',
   'Pages composition must load Core storage before Room Creator'
 );
-before(
-  preview,
-  'assets/gensrpg/core/storage-v1.js',
-  'assets/dungeon/dungeon-room-creator-100.js',
-  'preview composition must load Core storage before Room Creator'
-);
+assert.equal((index.match(/assets\/gensrpg\/core\/storage-v1\.js/g)||[]).length,1,'source index must bootstrap Core storage exactly once');
+assert.equal(preview.indexOf('assets/gensrpg/core/storage-v1.js'),-1,'preview must inherit Core storage from source index instead of injecting a duplicate');
+assert.ok(preview.indexOf('assets/dungeon/dungeon-room-creator-100.js')>=0,'preview must still append Room Creator after source bootstrap');
 assert.match(sw,/assets\/gensrpg\/core\/storage-v1\.js/,'PWA cache must include the production-connected Core storage service');
 
 console.log(JSON.stringify({

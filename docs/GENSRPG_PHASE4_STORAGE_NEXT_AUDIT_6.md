@@ -109,3 +109,29 @@ les stockages de session dynamique et d'inventaire héros restent directs et int
 - aucune migration de schéma ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`4463350d8ab77b819494d9722cb5619678f9d1e5`
+
+Runs :
+- Architecture + navigateur complet `35516800895` — SUCCESS ;
+- Firefox `35516800810` — SUCCESS ;
+- Tactical Dock `35516800829` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Le premier run de l'audit a échoué uniquement sur une expression régulière de la nouvelle sentinelle qui ne littéralisait pas le caractère `+` de la clé dynamique de session. Le test a été corrigé sans modifier le runtime ni la décision d'audit.
+
+Décision confirmée :
+le prochain micro-lot est exclusivement
+`gensrpg_dungeon_economy_rules_160`.
+
+Les deux autres responsabilités de stockage du bloc `dungeonEconomy160` restent explicitement hors périmètre :
+- session Economy dynamique `gensrpg_dungeon_session_eco_160_<profileId>` ;
+- inventaire héros via `key(heroId)`.
+
+Prochaine étape autorisée :
+ouvrir un lot dédié Economy Rules depuis le checkpoint GREEN final de cet audit.

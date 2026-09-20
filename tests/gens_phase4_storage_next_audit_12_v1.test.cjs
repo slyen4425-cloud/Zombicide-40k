@@ -8,8 +8,8 @@ const cp=require('node:child_process');
 const root=path.join(__dirname,'..');
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const src=bytes.toString('utf8');
-const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8');
-const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8');
+const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
+const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
 const SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';

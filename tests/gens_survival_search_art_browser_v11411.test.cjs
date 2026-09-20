@@ -136,8 +136,44 @@ async function startSurvival(page){
     console.log('[survival-search-art] search-action='+JSON.stringify({before:searchBefore,after:searchAfter},null,2));
     assert.ok(searchAfter.found&&searchAfter.found!==searchBefore.found,'clicking the real Fouiller button must resolve through the existing searchItem() action');
 
-    const brokenSurvivalArts=diagnostic.badAssets.filter(x=>/\/assets\/img_\d+_/i.test(x.url||''));
-    assert.deepEqual(brokenSurvivalArts,[],'RED: Survival built-in art links must resolve without 404');
+    mark('verify-survival-hero-arts');
+    const heroArts=await page.evaluate(()=>[...document.querySelectorAll('#participantList img.participantAvatar')]
+      .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
+      .filter(x=>/assets\/img_0[1-6]_/.test(x.src)));
+    assert.equal(heroArts.length,6,'the real Survival participant renderer must expose all six built-in hero arts');
+    assert.ok(heroArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all six built-in Survival hero arts must decode');
+
+    mark('verify-survival-item-arts');
+    await page.locator('#sheet .topbar button[onclick="goMenu()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
+    await page.locator('#menu button[onclick="openDeckSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('objectManager')).display!=='none');
+    await page.waitForFunction(()=>document.querySelectorAll('#deckConfig img').length>0);
+    const itemArts=await page.evaluate(()=>[...document.querySelectorAll('#deckConfig img')]
+      .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
+      .filter(x=>/assets\/img_(?:0[7-9]|1\\d|2[0-6])_/.test(x.src)));
+    assert.equal(itemArts.length,20,'the real Survival deck renderer must expose the twenty built-in item/search-event arts');
+    assert.ok(itemArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all built-in Survival item arts must decode');
+    await page.locator('#objectManager .topbar button.back').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
+
+    mark('verify-survival-enemy-arts');
+    await page.locator('#menu button[onclick="openZombieManager(\\'menu\\')"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('zombieManager')).display!=='none');
+    await page.waitForFunction(()=>document.querySelectorAll('#zombieReserve img.zombieThumb').length>0);
+    const enemyArts=await page.evaluate(()=>[...document.querySelectorAll('#zombieReserve img.zombieThumb')]
+      .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
+      .filter(x=>/assets\/img_(?:2[6-9]|3[0-2])_/.test(x.src)));
+    assert.equal(enemyArts.length,7,'the real Survival reserve renderer must expose all seven built-in enemy arts');
+    assert.ok(enemyArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all built-in Survival enemy arts must decode');
+
+    const expected=Array.from({length:32},(_,i)=>String(i+1).padStart(2,'0'));
+    const loaded=[...heroArts,...itemArts,...enemyArts].map(x=>(x.src.match(/assets\/img_(\\d{2})_/)||[])[1]).filter(Boolean);
+    assert.deepEqual([...new Set(loaded)].sort(),expected,'real Survival renderers must collectively load img_01 through img_32 with no cross-module fallback');
+
+    const brokenSurvivalArts=badAssets.filter(x=>/\/assets\/img_\d+_/i.test(x.url||''));
+    assert.deepEqual(brokenSurvivalArts,[],'Survival built-in art links must resolve without 404');
+    assert.deepEqual(errors,[],'Survival search/art scenario must not raise browser runtime errors');
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();
   }

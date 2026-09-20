@@ -299,6 +299,9 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage MJ Rules
         run: node tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs
 
+      - name: Auditer la sortie du sous-chantier Storage commun
+        run: node tests/gens_phase4_storage_exit_audit_13_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

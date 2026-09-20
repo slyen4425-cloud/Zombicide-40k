@@ -104,17 +104,31 @@ Sentinelle :
 Document :
 `docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_12.md`.
 
-### Validation et prochaine action
+### Validation Audit 12 — GREEN fonctionnel
 
-La caractérisation Audit 12 passe dans Architecture après correction de sa propre
-sentinelle. La fermeture documentaire doit repasser :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+HEAD validé :
+`daced49432f74752c48b8fb838302954c880ab7e`.
 
-Aucun checkpoint GREEN anticipé. Après trois SUCCESS sur le même HEAD final :
-créer `checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20`,
-puis ouvrir un nouveau lot `MJ Rules` depuis ce checkpoint.
+Runs :
+- Architecture + navigateur complet : `35533486808` — SUCCESS ;
+- Firefox : `35533486747` — SUCCESS ;
+- Tactical Dock : `35533486690` — SUCCESS.
+
+Le diff depuis Economy Session GREEN ne contient aucun runtime :
+- 1 sentinelle Architecture ajoutée ;
+- 1 test Audit 12 ajouté ;
+- 1 document Audit 12 ajouté ;
+- CURRENT_WORK mis à jour ;
+- empreinte descriptive du manifeste Storage réalignée.
+
+### Prochaine action
+
+Cette clôture documentaire doit repasser les trois workflows sur son SHA exact.
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20` ;
+- ouvrir un checkpoint de départ et une branche distincte MJ Rules ;
+- ne raccorder que les 3 transports prouvés par Audit 12.
+
 Aucun raccord runtime dans Audit 12 et aucun merge sur `main`.
 
 

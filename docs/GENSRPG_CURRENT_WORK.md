@@ -9,6 +9,67 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage — audit suivant — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-2026-09-20`
+
+Base exacte :
+`ae2acee5bd2858363d2a66997f2aabf3acb46c80`
+(`checkpoint/gensrpg-phase4-storage-zone-graphs-green-2026-09-20`)
+
+### État de départ
+
+Après les trois raccords Builders :
+- Room Creator 1.0 : Core storage ;
+- Room Creator V2 : Core storage ;
+- World Builder / Visual Config : Core storage ;
+- aucun accès direct `localStorage` ne reste dans le domaine Builders cartographié.
+
+Inventaire direct restant :
+- 214 accès ;
+- 143 résolus ;
+- 71 dynamiques.
+
+### Candidat retenu
+
+`assets/gensrpg/gens-world-summary-167820.js`
+
+Motif :
+- un seul accès direct ;
+- lecture seule ;
+- helper JSON générique ;
+- aucune autorité métier sur les données Capture ;
+- `GensStorageV1` est déjà chargé avant World Summary dans Pages et preview.
+
+Familles lues :
+- `gensrpg_shared_entities_v1__<profileId>` ;
+- `gensrpg_shared_entities_v1__family__creature`.
+
+### Périmètre du prochain sous-lot
+
+Raccorder uniquement la lecture JSON de World Summary à `GensStorageV1`.
+
+Invariants :
+- aucune écriture ;
+- aucune migration de format ;
+- mêmes clés et mêmes fallbacks ;
+- aucun changement Capture ;
+- aucun changement de résumé utilisateur ;
+- aucun `index.html` ;
+- aucun runtime Dungeon / Tactical / Stats.
+
+### Tests
+
+- audit dédié `tests/gens_phase4_storage_next_audit_v1.test.cjs` ;
+- doc `docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT.md` ;
+- ordre Pages/preview Core storage -> World Summary ;
+- Architecture + navigateur complet + Firefox + Tactical Dock.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage zone graphs Builders — 2026-09-20
 
 Branche :

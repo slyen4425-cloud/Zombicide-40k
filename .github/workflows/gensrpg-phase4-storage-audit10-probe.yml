@@ -10,23 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect Dungeon Scene storage owner
+      - name: Compute Dungeon Scene target blob
         run: |
           node <<'NODE'
           const fs=require('fs');
           const crypto=require('crypto');
           const b=fs.readFileSync('index.html');
           const s=b.toString('utf8');
-          const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length+'\0'),b])).digest('hex');
-          console.log(JSON.stringify({size:b.length,blob},null,2));
-          const m=s.match(/<script[^>]*id=["']dungeonMj72_2Script["'][^>]*>([\s\S]*?)<\/script>/i);
-          if(!m) throw new Error('missing dungeonMj72_2Script');
-          const block=m[1];
-          for(const needle of ['gensrpg_dungeon_scene_v1','localStorage.getItem','localStorage.setItem','localStorage.removeItem']){
-            let from=0,i;
-            while((i=block.indexOf(needle,from))>=0){
-              console.log('\n--- '+needle+' @ '+i+' ---\n'+block.slice(Math.max(0,i-500),Math.min(block.length,i+900)));
-              from=i+needle.length;
-            }
-          }
+          const sourceRead='JSON.parse(localStorage.getItem(GENS_DUNGEON_SCENE_KEY)||"[]")';
+          const targetRead='GensStorageV1.readJson(localStorage,GENS_DUNGEON_SCENE_KEY,[])';
+          const sourceWrite='localStorage.setItem(GENS_DUNGEON_SCENE_KEY,JSON.stringify(a||[]))';
+          const targetWrite='GensStorageV1.writeJson(localStorage,GENS_DUNGEON_SCENE_KEY,a||[])';
+          const count=(hay,needle)=>hay.split(needle).length-1;
+          console.log({sourceRead:count(s,sourceRead),sourceWrite:count(s,sourceWrite)});
+          if(count(s,sourceRead)!==1||count(s,sourceWrite)!==1) throw new Error('unexpected Dungeon Scene source count');
+          const t=s.replace(sourceRead,targetRead).replace(sourceWrite,targetWrite);
+          const blob=x=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+Buffer.byteLength(x)+'\0'),Buffer.from(x)])).digest('hex');
+          console.log(JSON.stringify({
+            sourceSize:b.length,
+            sourceBlob:blob(s),
+            targetSize:Buffer.byteLength(t),
+            targetBlob:blob(t),
+            targetReadCount:count(t,targetRead),
+            targetWriteCount:count(t,targetWrite)
+          },null,2));
           NODE

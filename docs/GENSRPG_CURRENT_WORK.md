@@ -1,5 +1,69 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 3 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-3-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-3-2026-09-20`
+
+Base exacte :
+`bbe99430666bdd16d2807652f782ba3c6b293cb5`
+(`checkpoint/gensrpg-phase4-storage-primary-selection-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Mission
+
+Audit documentaire uniquement.
+Sélectionner le prochain sous-périmètre JSON minimal après le raccord
+`gensrpg_dungeon_primary_selection_v167833`.
+
+Aucune migration runtime dans ce lot.
+
+### État de départ
+
+Manifeste Phase 2 :
+- accès directs : `203` ;
+- résolus : `138` ;
+- non résolus : `65` ;
+- clés directes résolues : `27`.
+
+`index.html` exact :
+- taille : `8 174 618` octets ;
+- blob Git : `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`.
+
+### Exclusions maintenues
+
+- `gensrpg_dungeon_runtime_v2` : audit dédié obligatoire ;
+- Core Stats / état héros dynamique : futur lot Stats ;
+- Tactical adapter : mélange runtime Dungeon + état héros ;
+- Runtime Repair : mélange JSON et scalaires ;
+- clés manifestement scalaires (`active profile`, build marker, reload guard, etc.) : hors Core JSON actuel.
+
+### Candidats inline à inspecter précisément
+
+Priorité de lecture :
+- `gensrpg_dungeon_deck_v1` ;
+- `gensrpg_dungeon_economy_rules_160` ;
+- `gensrpg_manual_mj_effects_v1` ;
+- `gensrpg_rpg_gameplay_by_profile_v1` ;
+- éventuellement `gensrpg_challenge_library_v1` si les quatre précédents ne sont pas isolés.
+
+Avant toute décision :
+- vérifier read/write/fallback exacts dans le `index.html` source ;
+- vérifier propriétaire métier ;
+- vérifier absence de migration de schéma ;
+- vérifier absence de dépendance à `gensrpg_dungeon_runtime_v2`.
+
+### Règle 26
+
+Ne pas récupérer ou réécrire le gros `index.html` à l'aveugle.
+Utiliser le fichier exact fourni par Sylvain et vérifier le blob attendu avant inspection/modification.
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Primary Selection — 2026-09-20
 
 Branche :

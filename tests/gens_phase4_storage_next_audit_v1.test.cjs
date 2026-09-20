@@ -6,6 +6,7 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 
 const summary=read('assets/gensrpg/gens-world-summary-167820.js');
 const storage=read('assets/gensrpg/core/storage-v1.js');
+const index=read('index.html');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
@@ -21,8 +22,9 @@ assert.doesNotMatch(summary,/localStorage\.(?:setItem|removeItem)\(/,'World Summ
 assert.match(storage,/function readJson\(storage,key,fallback\)/,'Core storage JSON reader must exist');
 assert.ok(workflow.indexOf('assets/gensrpg/core/storage-v1.js')>=0,'Pages must load Core storage');
 assert.ok(workflow.indexOf('assets/gensrpg/gens-world-summary-167820.js')>workflow.indexOf('assets/gensrpg/core/storage-v1.js'),'Pages must load Core storage before World Summary');
-assert.ok(preview.indexOf('assets/gensrpg/core/storage-v1.js')>=0,'Preview must load Core storage');
-assert.ok(preview.indexOf('assets/gensrpg/gens-world-summary-167820.js')>preview.indexOf('assets/gensrpg/core/storage-v1.js'),'Preview must load Core storage before World Summary');
+assert.equal((index.match(/assets\/gensrpg\/core\/storage-v1\.js/g)||[]).length,1,'Source index must load Core storage exactly once for raw and preview bootstrap');
+assert.equal(preview.indexOf('assets/gensrpg/core/storage-v1.js'),-1,'Preview must inherit Core storage from source index instead of injecting a duplicate');
+assert.ok(preview.indexOf('assets/gensrpg/gens-world-summary-167820.js')>=0,'Preview must still inject World Summary after the source-index bootstrap');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 storage next-audit',

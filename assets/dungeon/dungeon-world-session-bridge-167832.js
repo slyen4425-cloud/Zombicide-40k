@@ -15,8 +15,8 @@ function worldRuntime(){return ROOT.DungeonWorldRuntime167823||null}
 function worlds(){try{return builder()?.loadLibrary?.()||[]}catch(e){return []}}
 function adventureId(){try{return String(ROOT.activeDungeonAdventureId?.()||"default")}catch(e){return "default"}}
 function activeAdventure(){try{return ROOT.activeDungeonAdventure?.()||null}catch(e){return null}}
-function readPrimary(){try{const x=JSON.parse(localStorage.getItem(PRIMARY_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
-function writePrimary(x){try{localStorage.setItem(PRIMARY_KEY,JSON.stringify(x||null))}catch(e){}return x}
+function readPrimary(){const x=ROOT.GensStorageV1.readJson(ROOT.localStorage,PRIMARY_KEY,null);return x&&typeof x==="object"?x:null}
+function writePrimary(x){ROOT.GensStorageV1.writeJson(ROOT.localStorage,PRIMARY_KEY,x||null);return x}
 function ensureAdventure(){try{const list=ROOT.ensureDungeonAdventureLibrary?.()||[];if(!ROOT.activeDungeonAdventureId?.()&&list[0]?.id)ROOT.applyDungeonAdventure?.(list[0].id,false)}catch(e){}return adventureId()}
 function validWorld(g){if(!g)return false;try{return !!builder()?.validation?.(g)?.valid}catch(e){return !!g.startNodeId&&Array.isArray(g.nodes)&&g.nodes.length>0}}
 function worldById(id){return worlds().find(x=>String(x.id)===String(id||""))||null}

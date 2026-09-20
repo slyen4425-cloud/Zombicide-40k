@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   restore-survival-assets:
-    if: github.event.head_commit.message != 'fix(survival): restore canonical built-in art files'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current work branch

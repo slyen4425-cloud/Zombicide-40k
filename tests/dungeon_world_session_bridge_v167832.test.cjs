@@ -3,7 +3,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-session-bridge-167832.js'),'utf8');\nconst storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-session-bridge-167832.js'),'utf8');
+const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 function storage(){const m=new Map();return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
 const localStorage=storage();
 let activeAdv='adv-100',ready=0,renders=0,started=0,authoredStarts=0;

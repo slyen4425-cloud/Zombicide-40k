@@ -269,6 +269,12 @@ jobs:
       - name: Verrouiller l’autorité Capture / Core Storage
         run: node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
 
+      - name: Caractériser la parité stockage Dungeon Primary Selection
+        run: node tests/gens_phase4_storage_primary_selection_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Dungeon Primary Selection
+        run: node tests/gens_phase4_storage_primary_selection_owner_v1.test.cjs
+
       - name: Caractériser la parité stockage World Summary
         run: node tests/gens_phase4_storage_world_summary_parity_v1.test.cjs
 

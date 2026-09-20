@@ -70,7 +70,7 @@ gens-dungeon-hero-art-repair-167874.js charge ensuite :
 - gens-equipment-stat-cleanup-1678102.js ;
 - plusieurs modules authored.
 
-Le fichier gens-stat-manual-cost-167898.js existe dans le dépôt mais aucun chemin de chargement actif n'a été trouvé dans la composition actuelle. Il doit être traité comme dette/doublon dormant tant qu'un inventaire global de chargement n'a pas démontré le contraire.
+Le fichier API historique GensStatManualCost167898 (fichier hors graphe) existe dans le dépôt mais aucun chemin de chargement actif n'a été trouvé dans la composition actuelle. Il doit être traité comme dette/doublon dormant tant qu'un inventaire global de chargement n'a pas démontré le contraire.
 
 ### 3.3 Tactical
 
@@ -94,7 +94,7 @@ L'intégration Tactical ajoute ensuite :
 - V113 runtime authority ;
 - V114.11 visual dice / résolution finale.
 
-gens-rpg-tactical-wall-dice-stats-16781145.js contient un autre mécanisme de snapshot/réparation de stats, mais aucun chemin de chargement actif n'a été trouvé dans cette composition. Il doit être documenté comme couche historique/dormante, pas comme propriétaire runtime actuel.
+API historique GensRpgTacticalWallDiceStats16781145 (fichier V114.5 hors graphe) contient un autre mécanisme de snapshot/réparation de stats, mais aucun chemin de chargement actif n'a été trouvé dans cette composition. Il doit être documenté comme couche historique/dormante, pas comme propriétaire runtime actuel.
 
 ## 4. Carte des propriétaires actuels
 
@@ -130,7 +130,7 @@ gens-rpg-tactical-wall-dice-stats-16781145.js contient un autre mécanisme de sn
 | Snapshot alternatif historique | V114.5 buildLinkedSnapshot/repairBattleStats | tests/historique ; pas de charge active trouvée | V114.5 | mêmes sources | dette à retirer/archiver après preuve |
 | Éditeur riche Stats | GensCleanRpgStats167874.renderEditor/syncEditor | utilisateur | profil | DOM + profile store | UI/Builders, pas moteur Core |
 | Politique coût/verrouillage progression active | gens-stat-upgrade-policy-167898.js | fiche/éditeur | profile.rpgUniverse.stats.upgradePolicy98 | changeDungeonAttribute | Progression/UI |
-| Politique manuelle alternative | gens-stat-manual-cost-167898.js | aucun chemin actif trouvé | manualProgression98/ledger | changeDungeonAttribute | dette dormant à caractériser, ne pas extraire |
+| Politique manuelle alternative | API historique GensStatManualCost167898 (fichier hors graphe) | aucun chemin actif trouvé | manualProgression98/ledger | changeDungeonAttribute | dette dormant à caractériser, ne pas extraire |
 | Persistance définitions/effets Stats | saveProfile dans Stats | profil RPG | saveGameProfiles | Core storage actuel via API historique | futur Core Storage, Stats ne doit pas posséder le backend |
 | Miroir de règles Dungeon legacy | syncRpgUniverseToDungeonRules + saveDungeonRpgRules | helpers Dungeon | localStorage gensrpg_dungeon_rpg_rules_v1 | profil RPG | compatibilité/migration à retirer tardivement, pas source finale |
 
@@ -317,7 +317,7 @@ Donc certaines résistances éditées peuvent ne pas entrer dans le snapshot Tac
 
 gens-stat-upgrade-policy-167898.js est chargé et actif.
 
-gens-stat-manual-cost-167898.js propose une seconde politique de coût/verrouillage et un second ledger, mais aucun chemin de chargement actif n'a été retrouvé dans la composition courante.
+API historique GensStatManualCost167898 (fichier hors graphe) propose une seconde politique de coût/verrouillage et un second ledger, mais aucun chemin de chargement actif n'a été retrouvé dans la composition courante.
 
 Avant extraction, il faut une sentinelle de graphe de chargement confirmant définitivement son statut puis conserver un seul propriétaire de progression.
 

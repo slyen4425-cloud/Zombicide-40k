@@ -1,5 +1,76 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Dungeon Primary Selection — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-primary-selection-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-primary-selection-2026-09-20`
+
+Base exacte :
+`193128afe716664021300d501d29c39ac8dc8ecd`
+(`checkpoint/gensrpg-survival-search-art-integration-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Périmètre unique
+
+Migrer uniquement la clé JSON :
+`gensrpg_dungeon_primary_selection_v167833`
+
+Propriétaires/consommateurs concernés :
+- `dungeon-world-session-bridge-167832.js` : reader + writer ;
+- `dungeon-large-room-support-167834.js` : reader secondaire ;
+- `dungeon-authored-bootstrap-167849.js` : fallback reader secondaire ;
+- `dungeon-authored-action-fix-167857.js` : fallback reader secondaire.
+
+Core Storage possède uniquement le transport JSON.
+Dungeon conserve :
+- la clé ;
+- l'inférence `world/adventure` ;
+- les validations ;
+- les fallbacks métier ;
+- les décisions de sélection.
+
+### Précondition désormais satisfaite
+
+Le lot GREEN `Core Storage Bootstrap Order` garantit que
+`assets/gensrpg/core/storage-v1.js`
+est disponible avant Large Room Support et les scripts inline/externes concernés.
+
+### Invariants
+
+- ne pas toucher `gensrpg_dungeon_runtime_v2` ;
+- ne pas modifier les helpers `readRt()/writeRt()` ;
+- ne pas modifier Stats/Tactical/Capture/Survie ;
+- aucune migration de schéma ;
+- aucun wrapper métier partagé ajouté ;
+- aucun observer/timer/retry ;
+- aucun changement gameplay ;
+- aucun merge sur `main`.
+
+### État de départ du manifeste stockage
+
+- accès directs : `208` ;
+- résolus : `143` ;
+- non résolus : `65` ;
+- clé Primary Selection : `5` accès directs répartis sur 4 fichiers.
+
+### Validation requise
+
+Avant GREEN :
+- parité historique read/write et fallbacks ;
+- autorité Core Storage pour cette clé dans les 4 fichiers ;
+- preuve que les accès `gensrpg_dungeon_runtime_v2` restent directs/intacts ;
+- tests historiques World Session / Large Room / Authored ;
+- manifeste Phase 2 mis à jour ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+
 ## Chantier courant prioritaire — Intégration Survie / Fouiller + arts — 2026-09-20
 
 Branche :

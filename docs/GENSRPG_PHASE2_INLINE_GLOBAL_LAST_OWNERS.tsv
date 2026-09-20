@@ -1,5 +1,5 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=ee7b474802d8bb3b1d20e3aaf2507c4666fbd054
+# sourceIndexBlob=1545aba502777d9fb76decdcee90a89c7cf3f971
 # scope=explicit window.<name> assignments in 120 active inline blocks
 # distinctGlobals=438 assignments=773 multiOwnerGlobals=123
 # name	assignmentCount	lastOwner

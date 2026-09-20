@@ -1,0 +1,101 @@
+name: GenSrpG temporary Challenge History storage micro-diff
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-challenge-history-2026-09-20
+    paths:
+      - .github/workflows/gensrpg-phase4-storage-challenge-history-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-exact-index-micro-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer la branche exacte
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-storage-challenge-history-2026-09-20
+          fetch-depth: 0
+
+      - name: Vérifier puis appliquer uniquement le raccord Challenge History
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          raw=path.read_bytes()
+
+          def blob_sha(data):
+              return hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
+
+          source_sha=blob_sha(raw)
+          expected_source="bfe9149e8150f15017bfcffe1a00fb797791aa83"
+          expected_target="30487d09481e11e5883faca1a6e49727d9cecfb6"
+
+          if source_sha==expected_target:
+              print("Micro-diff déjà appliqué exactement.")
+              raise SystemExit(0)
+          if source_sha!=expected_source:
+              raise SystemExit(f"REFUS: blob index.html inattendu: {source_sha}")
+
+          text=raw.decode("utf-8")
+          old_read='let hist=[];try{hist=JSON.parse(localStorage.getItem(hk)||"[]");if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}'
+          new_read='let hist=[];try{hist=GensStorageV1.readJson(localStorage,hk,[]);if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}'
+          old_write='try{localStorage.setItem(hk,JSON.stringify(hist.slice(-24)))}catch(e){}'
+          new_write='try{GensStorageV1.writeJson(localStorage,hk,hist.slice(-24))}catch(e){}'
+
+          if text.count(old_read)!=1:
+              raise SystemExit(f"REFUS: anciennes lectures Challenge History: {text.count(old_read)}")
+          if text.count(old_write)!=1:
+              raise SystemExit(f"REFUS: anciennes écritures Challenge History: {text.count(old_write)}")
+
+          text=text.replace(old_read,new_read).replace(old_write,new_write)
+          target=text.encode("utf-8")
+          target_sha=blob_sha(target)
+
+          if len(target)!=8174580:
+              raise SystemExit(f"REFUS: taille cible inattendue: {len(target)}")
+          if target_sha!=expected_target:
+              raise SystemExit(f"REFUS: blob cible inattendu: {target_sha}")
+
+          mstart=text.index('<script id="dungeonCore051ExplorationPolish">')
+          mend=text.index('</script>',mstart)
+          block=text[mstart:mend]
+          if "localStorage.getItem(hk)" in block:
+              raise SystemExit("REFUS: lecture directe Challenge History restante")
+          if "localStorage.setItem(hk," in block:
+              raise SystemExit("REFUS: écriture directe Challenge History restante")
+          if block.count("GensStorageV1.readJson(localStorage,hk,[])")!=1:
+              raise SystemExit("REFUS: nombre de lectures Core Challenge History incorrect")
+          if block.count("GensStorageV1.writeJson(localStorage,hk,hist.slice(-24))")!=1:
+              raise SystemExit("REFUS: nombre d'écritures Core Challenge History incorrect")
+          if "const recent=new Set(hist.slice(-12).map(String))" not in block:
+              raise SystemExit("REFUS: fenêtre anti-répétition 12 modifiée")
+          if "hist.push(String(chosen.id))" not in block:
+              raise SystemExit("REFUS: append challenge history modifié")
+
+          path.write_bytes(target)
+          print("Micro-diff Challenge History vérifié:", target_sha)
+
+      - name: Vérifier le diff
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- index.html
+
+      - name: Committer uniquement index.html si nécessaire
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Aucun changement à committer."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          test "$(git diff --cached --name-only)" = "index.html"
+          git commit -m "refactor: route Challenge History JSON through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-challenge-history-2026-09-20

@@ -48,7 +48,7 @@ function boot(entries={}){
   const familySeed=JSON.stringify([
     {id:'f1',contentFamily:'creature',universeId:PROFILE},
     {id:'f2',contentFamily:'creature',universeId:'starter_capture'},
-    {id:'f3',contentFamily:'creature',universeId:'other-world'},
+    {id:'f3',contentFamily:'rpg',universeId:'other-world'},
     {id:'f4',contentFamily:'creature'}
   ]);
   const {api,reads}=boot({[EXACT]:'[]',[FAMILY]:familySeed});

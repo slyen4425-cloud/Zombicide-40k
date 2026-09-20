@@ -137,3 +137,22 @@ La règle 26 impose donc d'utiliser le fichier exact du checkpoint, fourni par S
 
 Le fichier à vérifier doit correspondre au blob :
 `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`.
+
+
+## Validation finale — GREEN
+
+HEAD validé avant clôture documentaire :
+`8de495ee94040cbc12913d9328f67c0689396e9d`
+
+Runs :
+- Architecture + navigateur complet `35509834853` — SUCCESS ;
+- Firefox `35509834854` — SUCCESS ;
+- Tactical Dock `35509834852` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Décision :
+la prochaine migration ne doit pas être choisie à partir du manifeste seul.
+Il faut d'abord inspecter le `index.html` exact correspondant au blob
+`5d2b0a6da51fd70bd36f087cb9ab82a1af308226`
+et caractériser read/write/fallback/propriétaire du meilleur candidat.

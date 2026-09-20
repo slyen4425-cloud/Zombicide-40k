@@ -9,6 +9,83 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / Core Storage Bootstrap Order — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-core-bootstrap-order-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-core-bootstrap-order-2026-09-20`
+
+Base exacte :
+`38e047185b225de30c2e8a0cebe59adbc9c76ceb`
+(`checkpoint/gensrpg-phase4-storage-inline-audit-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Audit inline précédent — GREEN
+
+Validation :
+- Architecture + navigateur complet `35500424788` — SUCCESS ;
+- Firefox `35500424783` — SUCCESS ;
+- Tactical Dock `35500424784` — SUCCESS.
+
+Le `index.html` fourni a été vérifié exact :
+- taille `8 174 560` octets ;
+- blob `ff11682d74be7921a591a9b76080eaf337c071be`.
+
+Constat :
+Core Storage était chargé trop tard pour servir proprement les scripts inline et Large Room Support.
+
+### Périmètre unique
+
+Corriger seulement l'ordre de bootstrap de :
+`assets/gensrpg/core/storage-v1.js`
+
+sans migrer aucune clé métier.
+
+### Modifications
+
+1. `index.html`
+   - une seule balise Core Storage ajoutée après QRCode ;
+   - commit du micro-diff :
+     `2ddc2b8dcdb81ad6b0aa3a962cf898d73d57381c` ;
+   - aucune autre ligne fonctionnelle modifiée dans ce commit.
+
+2. `.github/workflows/main.yml`
+   - fallback Core Storage placé avant Dungeon Core / Large Room Support ;
+   - garde anti-doublon conservé.
+
+3. `preview.html`
+   - suppression de l'injection additionnelle Core Storage ;
+   - la preview hérite désormais de la balise du `index.html` source ;
+   - Large Room Support reste ajouté ensuite.
+
+### Tests
+
+- `tests/gens_phase4_storage_inline_audit_v1.test.cjs` avancé vers l'état post-bootstrap ;
+- `tests/gens_phase4_storage_bootstrap_order_v1.test.cjs` ajouté ;
+- CI Architecture verrouille désormais l'ordre de bootstrap.
+
+### Invariants
+
+- aucune migration de clé ;
+- aucun format stockage modifié ;
+- aucun gameplay modifié ;
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun changement Stats/Tactical ;
+- aucun fallback concurrent ;
+- aucun observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Suite après GREEN
+
+Ouvrir un nouveau lot homogène pour la famille JSON Capture :
+`gensrpg_capture_progress_v2_<profileId>`
+
+avec caractérisation de parité read/write/fallback avant raccord au Core Storage.
+
 ## Chantier courant prioritaire — Phase 4 / stockage — audit inline `index.html` — 2026-09-20
 
 Branche :

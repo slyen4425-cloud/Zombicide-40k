@@ -4,17 +4,17 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 198,
-    "resolvedAccesses": 133,
+    "totalAccesses": 196,
+    "resolvedAccesses": 131,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 25
+    "distinctResolvedKeys": 24
   },
   "byDomain": {
     "dungeon": {
-      "accesses": 166,
-      "resolved": 116,
+      "accesses": 164,
+      "resolved": 114,
       "unresolved": 50,
-      "distinctKeys": 17
+      "distinctKeys": 16
     },
     "tactical": {
       "accesses": 2,
@@ -190,22 +190,6 @@
       "kinds": [
         "constant",
         "literal"
-      ]
-    },
-    {
-      "key": "gensrpg_dungeon_economy_rules_160",
-      "domains": [
-        "dungeon"
-      ],
-      "sources": [
-        "inline:dungeonEconomy160"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant"
       ]
     },
     {

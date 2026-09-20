@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-session-bridge-167832.js'),'utf8');
+const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-session-bridge-167832.js'),'utf8');\nconst storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 function storage(){const m=new Map();return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
 const localStorage=storage();
 let activeAdv='adv-100',ready=0,renders=0,started=0,authoredStarts=0;
@@ -24,7 +24,7 @@ const context={console,document:null,localStorage,setTimeout(fn){fn();return 1},
  DungeonAuthoredRuntime167839:{async startConfigured(old,self,args){authoredStarts++;return old.apply(self,args)}},
  DungeonWorldBuilder167821:{loadLibrary(){return [built]},validation(g){return {valid:g.id==='world-test',errors:[],warnings:[]}}},
  DungeonWorldRuntime167823:{getConfig(id){return {...(cfgByAdv[id]||{enabled:false,dungeonId:''})}},saveConfig(next,id){cfgByAdv[id]={...next};return {...cfgByAdv[id]}}}};
-context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-world-session-bridge-167832.js'});
+context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(storageSrc,context,{filename:'storage-v1.js'});vm.runInContext(src,context,{filename:'dungeon-world-session-bridge-167832.js'});
 const api=context.DungeonWorldSessionBridge167832;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.39');assert.equal(api.VERSION,'2.2.0');
 assert.equal(api.worlds()[0].name,'Nouveau donjon');
 assert.equal(api.selectWorld('world-test',false),true,'un donjon construit valide doit devenir le choix principal');

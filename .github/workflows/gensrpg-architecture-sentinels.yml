@@ -254,6 +254,12 @@ jobs:
       - name: Auditer le prochain sous-périmètre stockage Phase 4
         run: node tests/gens_phase4_storage_next_audit_v1.test.cjs
 
+      - name: Caractériser la parité stockage World Summary
+        run: node tests/gens_phase4_storage_world_summary_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage World Summary
+        run: node tests/gens_phase4_storage_world_summary_owner_v1.test.cjs
+
       - name: Caractériser les fichiers hors graphe de production Phase 2
         run: node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
 

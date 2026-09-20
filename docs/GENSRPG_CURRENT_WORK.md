@@ -1,5 +1,88 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 9 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-9-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-9-2026-09-20`
+
+Base exacte :
+`f71065c03f28b8dacd6d5b449f7688fc948f925b`
+(`checkpoint/gensrpg-phase4-storage-challenge-library-green-2026-09-20`).
+
+Challenge Library clôturé GREEN :
+- Architecture + navigateur complet `35523748147` — SUCCESS ;
+- Firefox `35523748120` — SUCCESS ;
+- Tactical Dock `35523748084` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### État de départ stockage
+
+- accès directs : `191` ;
+- résolus : `126` ;
+- non résolus : `65` ;
+- clés directes : `23`.
+
+Dungeon :
+- `159 / 109 / 50 / 15`.
+
+`index.html` exact :
+- taille : `8 174 580` ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83`.
+
+### Candidat retenu
+
+`gensrpg_dc067_challenge_history`
+
+Propriétaire unique :
+`dungeonCore051ExplorationPolish`.
+
+Contrat :
+- 1 lecture JSON ;
+- 1 écriture JSON ;
+- fallback tableau vide ;
+- fenêtre anti-répétition : 12 ;
+- historique persisté : 24 ;
+- logique de sélection Dungeon inchangée.
+
+Micro-diff cible ultérieur :
+- taille : `8 174 580` ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6`.
+
+Différés :
+- Pending Trap ;
+- Special Branch ;
+- Dungeon Scene ;
+- Economy Session dynamique ;
+- gameplay-by-profile ;
+- `gensrpg_dungeon_runtime_v2`.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_9.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_9_v1.test.cjs`.
+
+### Interdits
+
+- aucun runtime dans cet audit ;
+- aucune modification fenêtre 12 / historique 24 ;
+- aucun autre stockage Dungeon ;
+- aucun gameplay-by-profile/runtime_v2/Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Valider Audit 9 par Architecture+navigateur, Firefox et Tactical Dock.
+Si GREEN, checkpoint final puis lot neuf uniquement pour Challenge History.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Challenge Library — 2026-09-20
 
 Branche :

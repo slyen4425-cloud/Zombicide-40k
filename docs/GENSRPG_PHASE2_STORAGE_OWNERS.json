@@ -4,10 +4,10 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 217,
-    "resolvedAccesses": 145,
-    "unresolvedAccesses": 72,
-    "distinctResolvedKeys": 29
+    "totalAccesses": 214,
+    "resolvedAccesses": 143,
+    "unresolvedAccesses": 71,
+    "distinctResolvedKeys": 28
   },
   "byDomain": {
     "dungeon": {
@@ -15,12 +15,6 @@
       "resolved": 126,
       "unresolved": 50,
       "distinctKeys": 20
-    },
-    "builders": {
-      "accesses": 3,
-      "resolved": 2,
-      "unresolved": 1,
-      "distinctKeys": 1
     },
     "tactical": {
       "accesses": 2,
@@ -541,22 +535,6 @@
       ]
     },
     {
-      "key": "gensrpg_zone_graphs_v1",
-      "domains": [
-        "builders"
-      ],
-      "sources": [
-        "file:assets/dungeon/dungeon-world-builder-167821.js"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant"
-      ]
-    },
-    {
       "key": "z40k_session_active_v1",
       "domains": [
         "dungeon"
@@ -615,14 +593,6 @@
       "count": 2,
       "expressions": {
         "key": 2
-      }
-    },
-    {
-      "source": "file:assets/dungeon/dungeon-room-visual-config-167826.js",
-      "domain": "builders",
-      "count": 1,
-      "expressions": {
-        "key": 1
       }
     },
     {

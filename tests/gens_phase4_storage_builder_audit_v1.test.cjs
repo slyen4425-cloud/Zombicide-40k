@@ -28,10 +28,14 @@ assert.equal((roomV2.match(/localStorage\.getItem\(/g)||[]).length,0,'Room Creat
 assert.equal((roomV2.match(/localStorage\.setItem\(/g)||[]).length,0,'Room Creator V2 direct writes must be removed after Core raccord');
 assert.match(roomV2,/GensStorageV1\.readJson\(/,'Room Creator V2 must delegate reads to Core storage');
 assert.match(roomV2,/GensStorageV1\.writeJson\(/,'Room Creator V2 must delegate writes to Core storage');
-assert.equal((world.match(/localStorage\.getItem\(/g)||[]).length,1,'World Builder must have one direct read owner before extraction');
-assert.equal((world.match(/localStorage\.setItem\(/g)||[]).length,1,'World Builder must have one direct write owner before extraction');
-assert.equal((visual.match(/localStorage\.getItem\(/g)||[]).length,1,'Visual Config must have one direct graph read before extraction');
+assert.equal((world.match(/localStorage\.getItem\(/g)||[]).length,0,'World Builder direct reads must be removed after Core raccord');
+assert.equal((world.match(/localStorage\.setItem\(/g)||[]).length,0,'World Builder direct writes must be removed after Core raccord');
+assert.match(world,/GensStorageV1\.readJson\(/,'World Builder must delegate reads to Core storage');
+assert.match(world,/GensStorageV1\.writeJson\(/,'World Builder must delegate writes to Core storage');
+assert.equal((visual.match(/localStorage\.getItem\(/g)||[]).length,0,'Visual Config direct reads must be removed after Core raccord');
 assert.equal((visual.match(/localStorage\.setItem\(/g)||[]).length,0,'Visual Config must remain read-only for graph storage');
+assert.match(visual,/GensStorageV1\.readJson\(/,'Visual Config must delegate its graph read to Core storage');
+assert.doesNotMatch(visual,/GensStorageV1\.writeJson\(/,'Visual Config must remain read-only through Core storage');
 
 assert.match(room100,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\[\]\)/,'Room Creator 1.0 must preserve [] fallback through Core storage');
 assert.match(room100,/map\(normalizeRoom\)\.filter\(Boolean\)/,'Room normalization must remain module-owned');
@@ -40,11 +44,11 @@ assert.match(room100,/GensStorageV1\.writeJson\(ROOT\.localStorage,STORAGE_KEY,c
 assert.match(roomV2,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\{\}\)/,'Room Creator V2 must preserve {} fallback through Core storage');
 assert.match(roomV2,/normalizeMeta/,'Room Creator V2 normalization must remain module-owned');
 
-assert.match(world,/JSON\.parse\(localStorage\.getItem\(STORAGE_KEY\)\|\|"\[\]"/,'World Builder empty fallback semantics must be characterized');
+assert.match(world,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\[\]\)/,'World Builder must preserve [] fallback through Core storage');
 assert.match(world,/map\(normalizeGraph\)\.filter\(Boolean\)/,'World graph normalization must remain module-owned');
+assert.match(world,/GensStorageV1\.writeJson\(ROOT\.localStorage,STORAGE_KEY,clean\)/,'World Builder must write normalized graphs through Core storage');
 
-assert.match(visual,/function readJson\(key,fallback\)/,'Visual Config currently owns only a generic read helper');
-assert.match(visual,/readJson\(GRAPH_KEY,\[\]\)/,'Visual Config reads graphs with [] fallback');
+assert.match(visual,/GensStorageV1\.readJson\(ROOT\.localStorage,GRAPH_KEY,\[\]\)/,'Visual Config must preserve [] fallback through Core storage');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 storage/migrations Builder audit',
@@ -52,10 +56,10 @@ console.log(JSON.stringify({
   keys,
   directAccesses:{
     roomCreator100:{directRead:0,directWrite:0,coreStorage:true},
-    roomCreatorV2:{read:1,write:1},
-    worldBuilder:{read:1,write:1},
-    visualConfig:{read:1,write:0}
+    roomCreatorV2:{directRead:0,directWrite:0,coreStorage:true},
+    worldBuilder:{directRead:0,directWrite:0,coreStorage:true},
+    visualConfig:{directRead:0,directWrite:0,coreStorage:true}
   },
-  migrationOrder:['Room Creator V2','World Builder + Visual Config'],
+  migrationOrder:[],
   formatMigrationInFirstMove:false
 },null,2));

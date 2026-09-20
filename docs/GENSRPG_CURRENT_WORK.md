@@ -63,6 +63,42 @@ Document :
 `docs/GENSRPG_PHASE4_STORAGE_MANUAL_MJ_EFFECTS.md`.
 
 
+### Implémentation Manual MJ
+
+Runtime :
+`6e1d975e3d4d87a4c16df734d474e10fdafd1784`
+
+Résultat :
+- `index.html` : `8 174 580` octets ;
+- blob : `a070af09f9cb1fcda78987e83bc117d7544d1b6c` ;
+- 0 accès directs Manual MJ ;
+- 1 lecture Core + 1 écriture Core ;
+- manifeste stockage : `198 / 133 / 65 / 25` ;
+- Dungeon : `166 / 116 / 50 / 17`.
+
+Le RED TDD initial était volontaire :
+- parité SUCCESS ;
+- garde owner FAILURE avant raccord sur le run `35515673649`.
+
+Aucun autre runtime n'a été modifié.
+
+### Validation finale Manual MJ — GREEN
+
+HEAD fonctionnel validé :
+`ab00bfeeecb1f55e5818044ffef0db29d447aa88`
+
+Runs :
+- Architecture + navigateur complet `35515980174` — SUCCESS ;
+- Firefox `35515980167` — SUCCESS ;
+- Tactical Dock `35515980168` — SUCCESS.
+
+Prochaine action après validation documentaire :
+1. checkpoint GREEN final Manual MJ ;
+2. branche neuve d'audit stockage ;
+3. inspection des familles restantes sans mélanger les responsabilités ;
+4. aucun merge sur `main`.
+
+
 
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 5 — 2026-09-20
 

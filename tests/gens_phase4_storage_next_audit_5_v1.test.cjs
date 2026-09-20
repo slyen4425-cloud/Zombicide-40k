@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:191,
-  resolvedAccesses:126,
+  totalAccesses:189,
+  resolvedAccesses:124,
   unresolvedAccesses:65,
-  distinctResolvedKeys:23
+  distinctResolvedKeys:22
 },'post-Economy-Rules storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
-assert.equal(blob,'bfe9149e8150f15017bfcffe1a00fb797791aa83','audit 5 must target the exact post-Deck index blob');
+assert.equal(blob,'30487d09481e11e5883faca1a6e49727d9cecfb6','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

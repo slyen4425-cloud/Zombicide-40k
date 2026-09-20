@@ -113,19 +113,36 @@ Manifeste Phase 2 après raccord :
 Les changements complémentaires depuis le checkpoint sont limités aux tests,
 empreintes et manifestes rendus obsolètes par ce micro-diff.
 
-### Validation et prochaine action
+### Validation fonctionnelle — GREEN
 
-HEAD fonctionnel courant :
-`eba69735dc963837d0bd5449b661f205d934ca85`.
+HEAD fonctionnel validé :
+`d627d2143885e3084075017891a7408e60ccb4c4`.
 
-La branche est en validation finale :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+Runs :
+- Architecture + navigateur complet `35532444858` — SUCCESS ;
+- Firefox `35532444849` — SUCCESS ;
+- Tactical Dock `35532444882` — SUCCESS.
 
-Aucun checkpoint GREEN ne doit être créé avant succès des trois validations sur
-un même HEAD final. En cas de RED fonctionnel hors périmètre, le caractériser
-sans élargir ce lot. Aucun merge sur `main`.
+Le navigateur complet a notamment repassé :
+- Survie + Fouiller/arts ;
+- Dungeon après Survie ;
+- Builder et Config objet ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture + composition complète ;
+- non-interférence quatre modules ;
+- murs, preview et resolver d'assets.
+
+Aucun élargissement de périmètre ni correction fonctionnelle annexe.
+
+### Fermeture documentaire en cours
+
+La présente mise à jour documentaire doit repasser les trois workflows sur son
+SHA exact. Le checkpoint GREEN Economy Session ne sera créé qu'après ces trois
+SUCCESS. Ensuite : nouvel audit Storage sur une branche neuve depuis ce checkpoint.
+Aucun merge sur `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 11 — 2026-09-20

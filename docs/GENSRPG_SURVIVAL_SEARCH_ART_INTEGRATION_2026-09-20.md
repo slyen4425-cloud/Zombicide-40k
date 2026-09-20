@@ -104,10 +104,24 @@ Commit :
 - aucun changement Storage/Stats/Tactical ;
 - aucun merge sur `main`.
 
+## Validation fonctionnelle
+
+HEAD :
+`5004d4cac4ff118448b6867d58092c49fa4e8dee`
+
+Runs :
+- Architecture + navigateur complet `35506146562`, tentative 2 — SUCCESS ;
+- Firefox `35506146704` — SUCCESS ;
+- Tactical Dock `35506146608` — SUCCESS.
+
+La tentative 1 du navigateur Architecture a rencontré un échec ponctuel lors du contrôle immédiat de décodage d'un art objet. Aucun code n'a été changé. La tentative 2 a passé :
+- Fouiller + arts Survie ;
+- Dungeon après Survie ;
+- toute la suite de la batterie navigateur.
+
+Conclusion :
+la restauration des 32 assets et la sentinelle sont fonctionnellement GREEN.
+
 ## Critère GREEN
 
-Le lot n'est GREEN qu'après :
-- sentinelle Fouiller + arts SUCCESS ;
-- Architecture + navigateur complet SUCCESS ;
-- Firefox SUCCESS ;
-- Tactical Dock SUCCESS.
+Atteint fonctionnellement. Le checkpoint final est créé seulement après revalidation du HEAD documentaire.

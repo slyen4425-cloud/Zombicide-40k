@@ -71,6 +71,28 @@ CI :
 
 Aucun `index.html`, runtime, gameplay ou stockage n'a été modifié.
 
+### Validation fonctionnelle — GREEN
+
+HEAD fonctionnel :
+`5004d4cac4ff118448b6867d58092c49fa4e8dee`
+
+Runs :
+- Architecture + navigateur complet `35506146562`, tentative 2 — SUCCESS ;
+- Firefox `35506146704` — SUCCESS ;
+- Tactical Dock `35506146608` — SUCCESS.
+
+La nouvelle sentinelle prouve :
+- Fouiller visible et unique ;
+- clic réel `searchItem()` fonctionnel ;
+- `state.found` modifié ;
+- arts héros, objets/cartes et ennemis chargés ;
+- couverture `img_01` à `img_32` ;
+- aucune 404 Survie ;
+- non-interférence des autres modes.
+
+Note :
+la tentative 1 du navigateur Architecture a échoué ponctuellement au contrôle immédiat du décodage d'un art objet. Sans aucun changement de code, la tentative 2 a passé cette sentinelle puis toute la batterie. Le runtime et le test ont été laissés inchangés.
+
 ### Validation requise
 
 Avant GREEN :

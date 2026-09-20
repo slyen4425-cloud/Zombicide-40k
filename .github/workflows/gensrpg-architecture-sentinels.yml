@@ -263,6 +263,9 @@ jobs:
       - name: Sélectionner le prochain micro-lot stockage après Dungeon Deck
         run: node tests/gens_phase4_storage_next_audit_5_v1.test.cjs
 
+      - name: Sélectionner le prochain micro-lot stockage après Manual MJ
+        run: node tests/gens_phase4_storage_next_audit_6_v1.test.cjs
+
       - name: Caractériser la parité stockage Dungeon Deck
         run: node tests/gens_phase4_storage_dungeon_deck_parity_v1.test.cjs
 

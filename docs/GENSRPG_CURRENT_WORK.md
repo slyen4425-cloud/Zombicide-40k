@@ -1,5 +1,75 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 4 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-4-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-4-2026-09-20`
+
+Base exacte :
+`bbe99430666bdd16d2807652f782ba3c6b293cb5`
+(`checkpoint/gensrpg-phase4-storage-primary-selection-green-2026-09-20`)
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase4-storage-primary-selection-green-2026-09-20`
+sur `bbe99430666bdd16d2807652f782ba3c6b293cb5`.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Audit uniquement du stockage direct restant après le raccord Dungeon Primary Selection.
+
+Objectif :
+- relire le manifeste Phase 2 de stockage au HEAD exact ;
+- identifier le prochain sous-périmètre JSON minimal avec propriétaire unique et parité démontrable ;
+- distinguer explicitement les accès JSON, scalaires et dynamiques ;
+- documenter readers, writers, clé/famille, fallback, ordre de chargement et propriétaire ;
+- ne modifier aucun runtime dans ce lot d'audit.
+
+### Systèmes protégés / interdits
+
+- ne pas attaquer `gensrpg_dungeon_runtime_v2` comme un bloc global ;
+- ne pas absorber la persistance Stats dans le Core Storage générique ;
+- ne pas mélanger Tactical et état héros dynamique ;
+- ne pas forcer les valeurs scalaires Runtime Repair dans le service JSON ;
+- aucun changement gameplay, UI, mouvement, combat, Capture ou Survie ;
+- aucun nouvel observer, timer/retry, wrapper ou monkey-patch ;
+- aucun merge sur `main`.
+
+### Tests / preuves prévus
+
+1. vérifier le manifeste `docs/GENSRPG_PHASE2_STORAGE_OWNERS.json` au HEAD courant ;
+2. caractériser les candidats restants sans changement runtime ;
+3. ajouter une sentinelle/audit documentaire uniquement si elle verrouille utilement le choix ;
+4. Architecture + navigateur complet ;
+5. Firefox ;
+6. Tactical Dock ;
+7. checkpoint GREEN uniquement après validation complète.
+
+### Risques
+
+- sélectionner une famille qui partage ses helpers avec `gensrpg_dungeon_runtime_v2` ;
+- confondre une valeur scalaire avec un contrat JSON ;
+- déplacer une décision métier dans le Core au lieu du seul transport ;
+- nécessiter le gros `index.html` sans vérifier sa correspondance exacte.
+
+### Fichier `index.html`
+
+Un ZIP a été fourni par Sylvain dans le fil courant.
+Il doit être vérifié contre le blob Git du HEAD exact avant toute inspection locale.
+S'il ne correspond pas, appliquer la règle 26 et ne pas l'utiliser.
+
+### Prochaine action
+
+1. vérifier le ZIP fourni contre le `index.html` du HEAD `bbe99430666bdd16d2807652f782ba3c6b293cb5` ;
+2. inspecter le manifeste stockage et les derniers audits ;
+3. sélectionner le prochain candidat minimal ou conclure qu'un nouveau service/lot préalable est nécessaire ;
+4. aucun raccord runtime dans cet audit.
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Primary Selection — 2026-09-20
 
 Branche :

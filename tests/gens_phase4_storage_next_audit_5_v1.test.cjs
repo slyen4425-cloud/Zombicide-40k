@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:200,
-  resolvedAccesses:135,
+  totalAccesses:198,
+  resolvedAccesses:133,
   unresolvedAccesses:65,
-  distinctResolvedKeys:26
-},'post-Dungeon-Deck storage totals drifted');
+  distinctResolvedKeys:25
+},'post-Manual-MJ storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174603,'post-Deck index byte size drifted');
-assert.equal(blob,'739ca52610308d085ecf2635c5bc748f70c79a11','audit 5 must target the exact post-Deck index blob');
+assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
+assert.equal(blob,'a070af09f9cb1fcda78987e83bc117d7544d1b6c','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -29,8 +29,10 @@ function block(id){
 
 const manual=block('dungeonCore046ManualMjAssist');
 assert.match(manual,/const KEY="gensrpg_manual_mj_effects_v1"/);
-assert.equal((manual.match(/localStorage\.getItem\(KEY\)/g)||[]).length,1);
-assert.equal((manual.match(/localStorage\.setItem\(KEY/g)||[]).length,1);
+assert.equal((manual.match(/localStorage\.getItem\(KEY\)/g)||[]).length,0);
+assert.equal((manual.match(/localStorage\.setItem\(KEY/g)||[]).length,0);
+assert.equal((manual.match(/GensStorageV1\.readJson\(localStorage,KEY,\[\]\)/g)||[]).length,1);
+assert.equal((manual.match(/GensStorageV1\.writeJson\(localStorage,KEY,a\|\|\[\]\)/g)||[]).length,1);
 assert.match(manual,/Array\.isArray\(a\)\?a:\[\]/);
 assert.equal(manual.includes('gensrpg_dungeon_runtime_v2'),false);
 
@@ -46,8 +48,8 @@ for(const id of ['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dung
 }
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
+assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave the direct-storage manifest');
 for(const key of [
-  'gensrpg_manual_mj_effects_v1',
   'gensrpg_dungeon_economy_rules_160',
   'gensrpg_rpg_gameplay_by_profile_v1',
   'gensrpg_challenge_library_v1',
@@ -59,6 +61,6 @@ console.log(JSON.stringify({
   indexBlob:blob,
   selected:'gensrpg_manual_mj_effects_v1',
   selectedOwner:'dungeonCore046ManualMjAssist',
-  selectedDirectAccesses:{reads:1,writes:1},
+  selectedCoreAccesses:{reads:1,writes:1},
   deferred:['economy rules/session','gameplay mirror','challenge library','dungeon runtime v2']
 },null,2));

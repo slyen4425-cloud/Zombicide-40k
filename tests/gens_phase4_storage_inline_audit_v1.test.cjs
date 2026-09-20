@@ -30,16 +30,20 @@ assert.ok(index.indexOf(storageTag)<firstInlineStorage,
 
 assert.match(index,/function captureCreatureProgressRulesKey\(\)[\s\S]*?gensrpg_capture_progress_v2_/,
   'Capture progress dynamic JSON family must remain identifiable');
-assert.match(index,/JSON\.parse\(localStorage\.getItem\(captureCreatureProgressRulesKey\(\)\)\|\|"\{\}"\)/,
-  'Capture progress reader semantics must remain JSON-object based');
-assert.match(index,/localStorage\.setItem\(captureCreatureProgressRulesKey\(\),JSON\.stringify\(/,
-  'Capture progress writers must remain JSON-object based');
+assert.equal((index.match(/localStorage\.getItem\(captureCreatureProgressRulesKey\(\)\)/g)||[]).length,0,
+  'Capture progress must have no direct localStorage read after Core raccord');
+assert.equal((index.match(/localStorage\.setItem\(captureCreatureProgressRulesKey\(\)/g)||[]).length,0,
+  'Capture progress must have no direct localStorage writer after Core raccord');
+assert.equal((index.match(/GensStorageV1\.readJson\(localStorage,captureCreatureProgressRulesKey\(\),\{\}\)/g)||[]).length,1,
+  'Capture progress must expose exactly one Core JSON read');
+assert.equal((index.match(/GensStorageV1\.writeJson\(localStorage,captureCreatureProgressRulesKey\(\),(?:r|pr)\)/g)||[]).length,6,
+  'Capture progress must expose exactly six Core JSON writes');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 inline storage audit',
   sourceIndexLoadsCoreStorage:true,
   pagesOrder:'storage-before-large-room',
   previewOrder:'source-bootstrap-no-duplicate',
-  candidateFamily:'gensrpg_capture_progress_v2_<profile>',
-  decision:'bootstrap Core storage before inline/business migrations'
+  migratedFamily:'gensrpg_capture_progress_v2_<profile>',
+  decision:'Capture progress now delegates JSON serialization to Core storage; continue with remaining isolated families'
 },null,2));

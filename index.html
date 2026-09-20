@@ -24876,8 +24876,8 @@ function dungeonItemRarity(it){
   const explicit=String(it?.rpgRarity||"").toLowerCase();if(DUNGEON_RARITY_ORDER[explicit]!==undefined)return explicit;
   const id=String(it?.id||"");if(id==="dng_amulet")return "epic";if(["dng_chain","dng_fire_scroll"].includes(id))return "rare";return "common";
 }
-function loadDungeonSceneElements(){try{const a=JSON.parse(localStorage.getItem(GENS_DUNGEON_SCENE_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
-function saveDungeonSceneElements(a){localStorage.setItem(GENS_DUNGEON_SCENE_KEY,JSON.stringify(a||[]));try{renderDungeonMasterScene()}catch(e){}}
+function loadDungeonSceneElements(){try{const a=GensStorageV1.readJson(localStorage,GENS_DUNGEON_SCENE_KEY,[]);return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveDungeonSceneElements(a){GensStorageV1.writeJson(localStorage,GENS_DUNGEON_SCENE_KEY,a||[]);try{renderDungeonMasterScene()}catch(e){}}
 function addDungeonSceneElement(data){const a=loadDungeonSceneElements(),el={id:"dse_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7),room:Number(data?.room??loadDungeonState()?.room)||0,createdAt:Date.now(),...data};a.push(el);saveDungeonSceneElements(a);return el}
 function removeDungeonSceneElement(id){
   const all=loadDungeonSceneElements();

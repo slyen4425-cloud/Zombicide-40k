@@ -161,6 +161,11 @@ async function startSurvival(page){
     await page.locator("#menu button[onclick=\"openZombieManager('menu')\"]").click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('zombieManager')).display!=='none');
     await page.waitForFunction(()=>document.querySelectorAll('#zombieReserve img.zombieThumb').length>0);
+    await page.evaluate(async()=>{
+      const imgs=[...document.querySelectorAll('#zombieReserve img.zombieThumb')]
+        .filter(img=>/assets\/img_(?:2[6-9]|3[0-2])_/.test(img.getAttribute('src')||''));
+      await Promise.all(imgs.map(img=>img.decode?.().catch(()=>null)));
+    });
     const enemyArts=await page.evaluate(()=>[...document.querySelectorAll('#zombieReserve img.zombieThumb')]
       .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
       .filter(x=>/assets\/img_(?:2[6-9]|3[0-2])_/.test(x.src)));

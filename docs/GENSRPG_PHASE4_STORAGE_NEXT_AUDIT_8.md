@@ -129,3 +129,27 @@ Micro-diff déterministe préparé :
 - aucun Stats/Tactical/Capture/Survie ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`fdd6c7178f5a3543f6dc826ca070c61d0cabdff0`
+
+Runs :
+- Architecture + navigateur complet `35521305083` — SUCCESS ;
+- Firefox `35521305080` — SUCCESS ;
+- Tactical Dock `35521305078` — SUCCESS.
+
+Le scénario navigateur intermittent Dungeon après Survie a passé sur ce run.
+
+Aucun runtime n'a été modifié dans cet audit.
+
+Décision finale :
+- `gensrpg_rpg_gameplay_by_profile_v1` reste différé ;
+- prochain lot = uniquement `gensrpg_challenge_library_v1` ;
+- 3 lectures + 2 écritures JSON ciblées ;
+- aucune logique d'énigme modifiée.
+
+Prochaine étape autorisée :
+checkpoint GREEN documentaire final, puis lot neuf Challenge Library.

@@ -1,20 +1,20 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "1545aba502777d9fb76decdcee90a89c7cf3f971",
+  "sourceIndexBlob": "5b9b9ae780f735eadef049afeb10acf0b57441fe",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 185,
-    "resolvedAccesses": 120,
+    "totalAccesses": 182,
+    "resolvedAccesses": 117,
     "unresolvedAccesses": 65,
-    "distinctResolvedKeys": 20
+    "distinctResolvedKeys": 19
   },
   "byDomain": {
     "dungeon": {
-      "accesses": 153,
-      "resolved": 103,
+      "accesses": 152,
+      "resolved": 102,
       "unresolved": 50,
-      "distinctKeys": 12
+      "distinctKeys": 11
     },
     "tactical": {
       "accesses": 2,
@@ -23,10 +23,10 @@
       "distinctKeys": 1
     },
     "core": {
-      "accesses": 4,
-      "resolved": 3,
+      "accesses": 2,
+      "resolved": 1,
       "unresolved": 1,
-      "distinctKeys": 2
+      "distinctKeys": 1
     },
     "shell": {
       "accesses": 3,
@@ -154,24 +154,6 @@
       ],
       "kinds": [
         "constant",
-        "literal"
-      ]
-    },
-    {
-      "key": "gensrpg_dungeon_mj_rules_v145",
-      "domains": [
-        "core",
-        "dungeon"
-      ],
-      "sources": [
-        "inline:dungeonMj72_2Script",
-        "inline:gensStability151"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
         "literal"
       ]
     },

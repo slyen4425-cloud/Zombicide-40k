@@ -304,3 +304,30 @@ avec parité contre le moteur historique.
 
 Aucun `value()` complet, aucune dérivée combat, aucune UI et aucune persistance
 ne devront entrer dans S2.
+
+
+## Validation S1
+
+HEAD fonctionnel validé avant clôture documentaire :
+`20ffce10f6282486dacb380d377fb4917260f89c`.
+
+Runs :
+- Architecture + navigateur complet : `35537827950` — SUCCESS ;
+- Firefox : `35537827965` — SUCCESS ;
+- Tactical Dock : `35537827948` — SUCCESS.
+
+La sentinelle S1 corrigée est GREEN et les batteries historiques Stats/Tactical
+restent GREEN.
+
+Diff S1 :
+- documentation du contrat ;
+- reprise documentaire du pré-audit Agent 1 ;
+- sentinelle de caractérisation ;
+- workflow CI ;
+- CURRENT_WORK.
+
+Aucun runtime ou gameplay n'a été modifié.
+
+La clôture documentaire doit repasser les trois workflows sur son SHA exact avant
+création du checkpoint
+`checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-20`.

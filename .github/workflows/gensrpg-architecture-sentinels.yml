@@ -275,6 +275,10 @@ jobs:
       - name: Caractériser la parité stockage Room Creator V2
         run: node tests/gens_phase4_storage_room_creator_v2_parity_v1.test.cjs
 
+      - name: Rejouer le test historique Room Creator V2 via le Core stockage
+        run: node tests/dungeon_room_creator_v2_v167819.test.cjs
+
+
       - name: Verrouiller l’autorité Core du stockage Room Creator V2
         run: node tests/gens_phase4_storage_room_creator_v2_owner_v1.test.cjs
 

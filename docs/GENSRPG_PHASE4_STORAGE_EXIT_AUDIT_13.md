@@ -202,3 +202,33 @@ Si la batterie finale est GREEN :
    de sa branche ancienne et sans court-circuiter le nouveau GREEN Storage.
 
 Aucun runtime n'est modifié par Audit 13.
+
+
+## Validation finale — GREEN fonctionnel
+
+HEAD validé avant clôture documentaire :
+`a5ebf2b46d131c2adac16407ecf486e4d4073ed6`.
+
+Runs :
+- Architecture + navigateur complet : `35536186331` — SUCCESS ;
+- Firefox : `35536186350` — SUCCESS ;
+- Tactical Dock : `35536186332` — SUCCESS.
+
+La sentinelle Audit 13 confirme :
+- les 19 familles restantes sont toutes classifiées exactement une fois ;
+- 9 relèvent de Phase 7 Dungeon ;
+- 2 de Phase 5 Shell/session ;
+- 2 de Phase 8 Tactical/compatibilité ;
+- 5 de Phase 9 Capture ;
+- 1 est un marqueur diagnostique Core scalaire ;
+- aucun candidat Storage commun JSON autonome ne reste ;
+- `GensStorageV1` n'a reçu aucune extension opportuniste.
+
+Aucun runtime n'a été modifié dans Audit 13.
+
+La clôture documentaire doit repasser les trois workflows sur son SHA exact
+avant création du checkpoint
+`checkpoint/gensrpg-phase4-storage-exit-audit-13-green-2026-09-20`.
+
+Après ce checkpoint, le prochain chantier Phase 4 est **Core Stats**, en
+commençant par S1 contrats/sentinelles puis S2 normalisation pure.

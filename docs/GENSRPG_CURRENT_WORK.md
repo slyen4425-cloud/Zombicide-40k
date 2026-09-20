@@ -77,11 +77,42 @@ pour passer au prochain service recommandé par la roadmap : **Core Stats**.
 - aucun observer, timer/retry, wrapper ou monkey-patch ;
 - aucun merge sur `main`.
 
+### Résultat Audit 13 — sortie Storage validée
+
+La classification exhaustive des 19 familles restantes est verrouillée :
+- Phase 7 Dungeon : 9 familles ;
+- Phase 5 Shell/session : 2 ;
+- Phase 8 Tactical/compatibilité : 2 ;
+- Phase 9 Capture : 5 ;
+- diagnostic Core scalaire : 1.
+
+Aucun candidat `core-json-autonomous` ne reste.
+`GensStorageV1` reste volontairement limité à `readJson/writeJson` : aucun
+remove/scalar/migration API n'a été ajouté pour faire baisser artificiellement
+les compteurs.
+
+HEAD fonctionnel validé :
+`a5ebf2b46d131c2adac16407ecf486e4d4073ed6`.
+
+Runs :
+- Architecture + navigateur complet : `35536186331` — SUCCESS ;
+- Firefox : `35536186350` — SUCCESS ;
+- Tactical Dock : `35536186332` — SUCCESS.
+
+Décision :
+**le sous-chantier Phase 4 / service commun Storage est clôturable**.
+Les 19 familles résiduelles restent explicitement attribuées à leurs futures
+phases propriétaires au lieu d'être migrées isolément.
+
 ### Prochaine action
 
-Documenter et verrouiller la classification des 19 familles restantes. Si aucun
-dernier micro-lot commun autonome n'est prouvé, clôturer le sous-chantier Storage,
-créer son checkpoint GREEN, puis reprendre **Stats** depuis ce nouveau GREEN.
+Cette clôture documentaire doit repasser les trois workflows sur son SHA exact.
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-storage-exit-audit-13-green-2026-09-20` ;
+- considérer le service commun Storage clôturé ;
+- ouvrir Phase 4 / Core Stats depuis ce checkpoint ;
+- reprendre le pré-audit Stats Agent 1 comme documentation, pas comme base Git ;
+- commencer par S1 contrats/sentinelles puis S2 normalisation pure.
 
 
 ## Chantier courant prioritaire — Phase 4 Storage / MJ Rules — 2026-09-20

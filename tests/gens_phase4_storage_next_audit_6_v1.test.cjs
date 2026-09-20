@@ -9,21 +9,21 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:187,
-  resolvedAccesses:122,
+  totalAccesses:185,
+  resolvedAccesses:120,
   unresolvedAccesses:65,
-  distinctResolvedKeys:21
+  distinctResolvedKeys:20
 },'post-Economy-Rules storage totals drifted');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:155,resolved:105,unresolved:50,distinctKeys:13
+  accesses:153,resolved:103,unresolved:50,distinctKeys:12
 },'post-Economy-Rules Dungeon storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'audit 6 must target the exact post-Economy-Rules index size');
-assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054','audit 6 must target the exact post-Economy-Rules index blob');
+assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','audit 6 must target the exact post-Economy-Rules index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -38,9 +38,11 @@ assert.equal((economy.match(/GensStorageV1\.readJson\(localStorage,DUNGEON_ECO_R
 assert.equal((economy.match(/localStorage\.setItem\(DUNGEON_ECO_RULES_160/g)||[]).length,0,'migrated Economy rules must have no direct write');
 assert.equal((economy.match(/GensStorageV1\.writeJson\(localStorage,DUNGEON_ECO_RULES_160,r\|\|dungeonEconomyRules160\(\)\)/g)||[]).length,1,'Economy rules must use one Core write');
 
-assert.equal((economy.match(/localStorage\.getItem\(key\)/g)||[]).length,1,'dynamic Economy session read must remain distinct');
-assert.equal((economy.match(/localStorage\.setItem\(key,/g)||[]).length,1,'dynamic Economy session write must remain distinct');
+assert.equal((economy.match(/localStorage\.getItem\(key\)/g)||[]).length,0,'migrated Economy session must have no direct read');
+assert.equal((economy.match(/localStorage\.setItem\(key,/g)||[]).length,0,'migrated Economy session must have no direct write');
 assert.equal((economy.match(/localStorage\.setItem\(key\(heroId\),/g)||[]).length,1,'hero inventory persistence must remain distinct');
+assert.equal((economy.match(/GensStorageV1\.readJson\(localStorage,key,\{\}\)/g)||[]).length,1,'Economy session must use one Core read');
+assert.equal((economy.match(/GensStorageV1\.writeJson\(localStorage,key,rest\)/g)||[]).length,1,'Economy session must use one Core write');
 assert.match(economy,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic Economy session key must remain profile-scoped');
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
@@ -58,8 +60,8 @@ console.log(JSON.stringify({
   selected:'gensrpg_dungeon_economy_rules_160',
   selectedOwner:'dungeonEconomy160',
   selectedCoreAccesses:{reads:1,writes:1},
-  untouchedSameBlock:{
-    dynamicSession:{reads:1,writes:1},
+  sameBlock:{
+    dynamicSessionCore:{reads:1,writes:1},
     heroInventoryWrites:1
   },
   deferred:['gameplay mirror','challenge library','dungeon runtime v2']

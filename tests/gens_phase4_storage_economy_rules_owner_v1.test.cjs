@@ -22,20 +22,22 @@ assert.equal((block.match(/GensStorageV1\.writeJson\(localStorage,DUNGEON_ECO_RU
 assert.match(block,/try\{Object\.assign\(d,GensStorageV1\.readJson\(localStorage,DUNGEON_ECO_RULES_160,\{\}\)\)\}catch\(e\)\{\}/,'Dungeon must retain default merge/error boundary');
 assert.match(block,/function\(r\)\{\s*GensStorageV1\.writeJson\(localStorage,DUNGEON_ECO_RULES_160,r\|\|dungeonEconomyRules160\(\)\);\s*\}/,'writer must preserve r || dungeonEconomyRules160() contract');
 
-assert.equal((block.match(/localStorage\.getItem\(key\)/g)||[]).length,1,'dynamic Economy session read must remain direct and untouched');
-assert.equal((block.match(/localStorage\.setItem\(key,/g)||[]).length,1,'dynamic Economy session write must remain direct and untouched');
+assert.equal((block.match(/localStorage\.getItem\(key\)/g)||[]).length,0,'migrated Economy session must have no direct read');
+assert.equal((block.match(/localStorage\.setItem\(key,/g)||[]).length,0,'migrated Economy session must have no direct write');
 assert.equal((block.match(/localStorage\.setItem\(key\(heroId\),/g)||[]).length,1,'hero inventory write must remain direct and untouched');
+assert.equal((block.match(/GensStorageV1\.readJson\(localStorage,key,\{\}\)/g)||[]).length,1,'migrated Economy session must use one Core read');
+assert.equal((block.match(/GensStorageV1\.writeJson\(localStorage,key,rest\)/g)||[]).length,1,'migrated Economy session must use one Core write');
 assert.match(block,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic Economy session key must remain profile-scoped');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Economy rules raccord must not touch deferred runtime_v2');
 
 assert.equal(bytes.length,8174580,'post-raccord index size must match the exact Economy rules micro-diff');
-assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054','post-raccord index blob must match the exact Economy rules micro-diff');
+assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','post-raccord index blob must match the exact Economy rules micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Economy rules Core storage authority',
   key:'gensrpg_dungeon_economy_rules_160',
   coreReads:1,
   coreWrites:1,
-  untouchedSameBlock:{dynamicSession:true,heroInventory:true},
+  sameBlock:{economyRulesCore:true,dynamicSessionCore:true,heroInventoryDirect:true},
   indexBlob:blob
 },null,2));

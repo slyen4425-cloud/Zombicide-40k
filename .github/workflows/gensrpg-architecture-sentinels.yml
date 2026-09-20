@@ -347,3 +347,6 @@ jobs:
 
       - name: Caractériser les tokens tardifs du resolver d’assets Phase 4
         run: node tests/gens_asset_resolver_late_tokens_browser_v1.test.cjs
+
+      - name: Caractériser le stockage IndexedDB des assets Phase 4
+        run: node tests/gens_phase4_indexed_asset_storage_browser_v1.test.cjs

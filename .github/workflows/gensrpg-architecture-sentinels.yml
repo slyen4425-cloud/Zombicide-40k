@@ -269,6 +269,9 @@ jobs:
       - name: Réauditer le gameplay mirror et sélectionner Challenge Library
         run: node tests/gens_phase4_storage_next_audit_8_v1.test.cjs
 
+      - name: Sélectionner Challenge History après Challenge Library
+        run: node tests/gens_phase4_storage_next_audit_9_v1.test.cjs
+
       - name: Caractériser la parité stockage Challenge Library
         run: node tests/gens_phase4_storage_challenge_library_parity_v1.test.cjs
 

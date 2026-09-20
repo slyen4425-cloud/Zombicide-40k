@@ -9,65 +9,95 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
-## Chantier courant prioritaire — Phase 4 / stockage — audit suivant — 2026-09-20
+## Chantier courant prioritaire — Phase 4 / stockage World Summary — 2026-09-20
 
 Branche :
-`work/gensrpg-phase4-storage-next-audit-2026-09-20`
+`work/gensrpg-phase4-storage-world-summary-2026-09-20`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase4-storage-next-audit-2026-09-20`
+`checkpoint/gensrpg-start-phase4-storage-world-summary-2026-09-20`
 
 Base exacte :
-`ae2acee5bd2858363d2a66997f2aabf3acb46c80`
-(`checkpoint/gensrpg-phase4-storage-zone-graphs-green-2026-09-20`)
+`5d021592867bdf83408aa6fb49e9633b4403a67c`
 
-### État de départ
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-Après les trois raccords Builders :
-- Room Creator 1.0 : Core storage ;
-- Room Creator V2 : Core storage ;
-- World Builder / Visual Config : Core storage ;
-- aucun accès direct `localStorage` ne reste dans le domaine Builders cartographié.
+### Périmètre unique
 
-Inventaire direct restant :
-- 214 accès ;
-- 143 résolus ;
-- 71 dynamiques.
-
-### Candidat retenu
-
+Raccorder uniquement la lecture JSON de :
 `assets/gensrpg/gens-world-summary-167820.js`
 
-Motif :
-- un seul accès direct ;
-- lecture seule ;
-- helper JSON générique ;
-- aucune autorité métier sur les données Capture ;
-- `GensStorageV1` est déjà chargé avant World Summary dans Pages et preview.
+au service Core existant :
+`GensStorageV1`.
 
-Familles lues :
+Familles de clés conservées exactement :
 - `gensrpg_shared_entities_v1__<profileId>` ;
 - `gensrpg_shared_entities_v1__family__creature`.
 
-### Périmètre du prochain sous-lot
+Responsabilités :
+- Core storage : lecture JSON générique ;
+- World Summary : résumé Shell en lecture seule ;
+- Capture : données et schémas créatures, inchangés.
 
-Raccorder uniquement la lecture JSON de World Summary à `GensStorageV1`.
+### Invariants
 
-Invariants :
 - aucune écriture ;
 - aucune migration de format ;
-- mêmes clés et mêmes fallbacks ;
+- mêmes clés et mêmes fallbacks `[]` ;
+- même priorité clé exacte -> famille ;
+- même contenu de résumé ;
 - aucun changement Capture ;
-- aucun changement de résumé utilisateur ;
+- aucun Dungeon / Tactical / Stats / Save & Quit ;
 - aucun `index.html` ;
-- aucun runtime Dungeon / Tactical / Stats.
+- aucun nouvel observer, timer, retry, wrapper ou monkey-patch ;
+- `main` non touché.
 
-### Tests
+### Parité / propriétaire
 
-- audit dédié `tests/gens_phase4_storage_next_audit_v1.test.cjs` ;
-- doc `docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT.md` ;
-- ordre Pages/preview Core storage -> World Summary ;
-- Architecture + navigateur complet + Firefox + Tactical Dock.
+Tests :
+- `tests/gens_phase4_storage_world_summary_parity_v1.test.cjs` ;
+- `tests/gens_phase4_storage_world_summary_owner_v1.test.cjs` ;
+- `tests/gens_world_summary_v167820.test.cjs` rejoué via le vrai Core.
+
+Le premier run RED `35498906343` s'est arrêté sur une erreur du fixture de parité avant d'atteindre le garde propriétaire. Le fixture a été corrigé. L'état pré-raccord `ac09d261195e8d4b4f89766ff636f498370cf199` contient bien 1 lecture directe, 0 appel Core et 0 écriture.
+
+### Raccord fonctionnel
+
+Commit runtime :
+`0ee4229dd6748e1672acdd59f77cb16d7b82200a`
+
+Le helper local délègue désormais à :
+`ROOT.GensStorageV1.readJson(ROOT.localStorage,key,fallback)`.
+
+Aucun autre comportement World Summary n'a été modifié.
+
+### Cartographie Phase 2
+
+Après raccord :
+- accès directs : `214 -> 213` ;
+- accès résolus : `143` inchangés ;
+- accès dynamiques/non résolus : `71 -> 70` ;
+- domaine Shell : `4 -> 3` accès directs ;
+- domaine Shell non résolu : `1 -> 0`.
+
+### Validation fonctionnelle
+
+SHA fonctionnel :
+`a7b4da7be7b11a7b31665bdcff536fce5fb0635c`
+
+- Architecture + navigateur complet `35499062048` — SUCCESS ;
+- Firefox `35499062042` — SUCCESS ;
+- Tactical Dock `35499062060` — SUCCESS.
+
+Doc de fermeture :
+`docs/GENSRPG_PHASE4_STORAGE_WORLD_SUMMARY.md`
+
+Prochaine action :
+1. valider la fermeture documentaire ;
+2. créer `checkpoint/gensrpg-phase4-storage-world-summary-green-2026-09-20` sur le HEAD exact validé ;
+3. créer un nouveau checkpoint de départ et une branche neuve d'audit stockage depuis ce GREEN ;
+4. ne pas attaquer `gensrpg_dungeon_runtime_v2` ni les accès dynamiques restants comme un bloc global.
 
 
 ## Chantier courant prioritaire — Phase 4 / stockage zone graphs Builders — 2026-09-20

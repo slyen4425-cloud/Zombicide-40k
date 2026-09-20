@@ -76,10 +76,28 @@ Sentinelle :
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
 
+### Validation finale Audit 9 — GREEN
+
+HEAD fonctionnel validé :
+`2a495184b6a3ac909f2c2022880d91faafda10c2`
+
+Runs :
+- Architecture + navigateur complet `35524201644` — SUCCESS ;
+- Firefox `35524201652` — SUCCESS ;
+- Tactical Dock `35524201663` — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+Décision confirmée :
+prochain lot = uniquement `gensrpg_dc067_challenge_history`.
+
 ### Prochaine action
 
-Valider Audit 9 par Architecture+navigateur, Firefox et Tactical Dock.
-Si GREEN, checkpoint final puis lot neuf uniquement pour Challenge History.
+1. valider ce commit documentaire ;
+2. créer le checkpoint GREEN final Audit 9 ;
+3. ouvrir une branche neuve Challenge History ;
+4. poser parité + garde owner avant raccord ;
+5. conserver fenêtre 12 / historique 24 inchangés.
 
 
 

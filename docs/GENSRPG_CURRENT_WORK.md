@@ -9,6 +9,75 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Lot d’intégration — Survie « Fouiller + arts » dans la ligne Phase 4 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-integrate-survival-search-art-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-integrate-survival-search-art-2026-09-20`
+
+Base Phase 4 exacte :
+`a0e1f1fc75e0465392d21b1064881e1446dd4092`
+(`checkpoint/gensrpg-phase4-storage-room-creator-v2-green-2026-09-20`)
+
+Source Survie validée :
+`checkpoint/gensrpg-survival-search-art-repair-green-2026-09-20`
+SHA :
+`024dd6a92d2af50d226e9432fbc038a92173e2a0`
+
+Base commune du lot Survie :
+`151e714c1373748ee6a42a03a8ec7fb44aded8c9`.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Objet de l’intégration
+
+Préserver tous les travaux Phase 4 stockage plus récents et réintroduire uniquement le diff utile du lot Survie déjà GREEN et validé manuellement :
+- 32 fichiers historiques `assets/img_01_...` à `assets/img_32_...` restaurés ;
+- `tests/gens_survival_search_art_browser_v11411.test.cjs` ;
+- raccord de cette sentinelle dans la CI Architecture navigateur ;
+- documentation du lot Survie.
+
+### Invariants
+
+- aucun `index.html` modifié ;
+- aucun runtime Survie modifié ;
+- aucun resolver Core modifié ;
+- aucun stockage, Builder, Dungeon, Tactical, Capture ou PvP modifié ;
+- aucun fallback inter-module ;
+- aucun merge direct de l’ancienne branche Survie ;
+- aucun merge sur `main`.
+
+### Preuve source Survie
+
+Checkpoint source :
+`024dd6a92d2af50d226e9432fbc038a92173e2a0`
+
+CI source :
+- Architecture + Chromium `35491156486` — SUCCESS ;
+- Firefox `35491156454` — SUCCESS ;
+- Tactical Dock `35491156458` — SUCCESS.
+
+Validation utilisateur source :
+« Ok parfait tout fonctionne après mes test ».
+
+### Validation requise de l’intégration
+
+Rejouer sur la base Phase 4 stockage V2 :
+1. la nouvelle sentinelle Fouiller + 32 arts Survie ;
+2. Dungeon Builder et Config objet ;
+3. Dungeon après Survie ;
+4. Save & Quit / reprise ;
+5. Capture / PvP / non-interférence ;
+6. resolver et stockage Phase 4 ;
+7. Firefox ;
+8. Tactical Dock.
+
+Aucun checkpoint d’intégration GREEN avant ces validations.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator V2 — 2026-09-20
 
 Branche :

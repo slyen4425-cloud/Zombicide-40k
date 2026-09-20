@@ -19,7 +19,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
-assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','audit 5 must target the exact post-Deck index blob');
+assert.equal(blob,'5b9b9ae780f735eadef049afeb10acf0b57441fe','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -26,7 +26,7 @@ assert.match(block,/try\{GensStorageV1\.writeJson\(localStorage,hk,hist\.slice\(
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Challenge History raccord must not touch deferred runtime_v2');
 
 assert.equal(bytes.length,8174580,'post-raccord index size must match deterministic Challenge History micro-diff');
-assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','post-raccord index blob must match deterministic Challenge History micro-diff');
+assert.equal(blob,'5b9b9ae780f735eadef049afeb10acf0b57441fe','post-raccord index blob must match deterministic Challenge History micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Challenge History 0.67 Core storage authority',

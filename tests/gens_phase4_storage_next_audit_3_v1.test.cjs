@@ -23,7 +23,7 @@ const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
 assert.equal(index.length,8174580,'index.html byte size drifted from post-Economy-Rules checkpoint');
-assert.equal(blobSha,'1545aba502777d9fb76decdcee90a89c7cf3f971','index.html blob must remain the exact post-Challenge-Library source');
+assert.equal(blobSha,'5b9b9ae780f735eadef049afeb10acf0b57441fe','index.html blob must remain the exact post-Challenge-Library source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');

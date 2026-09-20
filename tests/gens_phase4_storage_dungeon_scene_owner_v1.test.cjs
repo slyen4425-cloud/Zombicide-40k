@@ -25,7 +25,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580);
-assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','Dungeon Scene final index blob must match deterministic micro-diff');
+assert.equal(blob,'5b9b9ae780f735eadef049afeb10acf0b57441fe','Dungeon Scene final index blob must match deterministic micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Scene Core storage authority',

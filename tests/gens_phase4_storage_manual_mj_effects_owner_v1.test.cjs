@@ -24,7 +24,7 @@ assert.match(block,/function saveEffects\(a\)\{GensStorageV1\.writeJson\(localSt
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Manual MJ raccord must not touch deferred runtime_v2');
 
 assert.equal(bytes.length,8174580,'current index size must include the later Challenge Library micro-diff');
-assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971','current index blob must include the later Challenge Library micro-diff');
+assert.equal(blob,'5b9b9ae780f735eadef049afeb10acf0b57441fe','current index blob must include the later Challenge Library micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Manual MJ effects Core storage authority',

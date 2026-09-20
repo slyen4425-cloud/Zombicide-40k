@@ -29275,13 +29275,13 @@ window.dungeonSessionEco160=function(){
   const id=String(activeGameProfileId()||"dungeon");
   const key="gensrpg_dungeon_session_eco_160_"+id;
   let d={chests:0,merchantPasses:0};
-  try{Object.assign(d,JSON.parse(localStorage.getItem(key)||"{}"))}catch(e){}
+  try{Object.assign(d,GensStorageV1.readJson(localStorage,key,{}))}catch(e){}
   return {key,...d};
 };
 window.saveDungeonSessionEco160=function(d){
   if(!d?.key)return;
   const {key,...rest}=d;
-  localStorage.setItem(key,JSON.stringify(rest));
+  GensStorageV1.writeJson(localStorage,key,rest);
 };
 
 /* ---------- objets de butin à vendre ---------- */

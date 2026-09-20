@@ -54,6 +54,37 @@ Cible déterministe :
 Document :
 `docs/GENSRPG_PHASE4_STORAGE_CHALLENGE_HISTORY.md`.
 
+### Implémentation Challenge History
+
+Runtime :
+`7d6d5897ec24959240ca3d9147e1ce6aeb2c5e82`
+
+Résultat :
+- `index.html` : `8 174 580` octets ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6` ;
+- 0 accès directs Challenge History ;
+- 1 lecture Core + 1 écriture Core ;
+- fenêtre anti-répétition 12 inchangée ;
+- historique persisté 24 inchangé ;
+- manifeste stockage : `189 / 124 / 65 / 22` ;
+- Dungeon : `157 / 107 / 50 / 14`.
+
+### Validation finale Challenge History — GREEN
+
+HEAD fonctionnel validé :
+`71963332b45eabddc5b761678d17d7e1727353de`
+
+Runs :
+- Architecture + navigateur complet `35526358499`, tentative 2 — SUCCESS ;
+- Firefox `35526358631` — SUCCESS ;
+- Tactical Dock `35526358507` — SUCCESS.
+
+Prochaine action après validation documentaire :
+1. checkpoint GREEN final Challenge History ;
+2. nouvel audit stockage depuis ce checkpoint ;
+3. garder gameplay-by-profile et runtime_v2 différés ;
+4. aucun merge sur `main`.
+
 ### Interdits
 
 - aucun contenu Challenge modifié ;

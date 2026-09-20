@@ -1,5 +1,104 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S2 Normalisation pure — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s2-normalization-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s2-normalization-2026-09-20`.
+- Base exacte et dernier GREEN : `56c9889dbebf84281f11ed995bb442889ffc6812`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S1 définitivement clôturé
+
+Validation du HEAD final `56c9889dbebf84281f11ed995bb442889ffc6812` :
+- Architecture + navigateur complet : `35538165337` — SUCCESS ;
+- Firefox : `35538165366` — SUCCESS ;
+- Tactical Dock : `35538165333` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-20`.
+
+S1 n'a modifié aucun runtime ni aucune formule. Il a verrouillé le contrat réel
+du moteur Stats actuel.
+
+### Mission S2
+
+Créer le premier service Core Stats pur :
+
+`assets/gensrpg/core/stats-v1.js`
+
+et lui transférer uniquement les responsabilités pures déjà caractérisées :
+
+- alias/canonisation ;
+- slug d'identifiant ;
+- conversion numérique + clamp ;
+- validation/normalisation de définition ;
+- validation/normalisation d'effet ;
+- comparaison threshold ;
+- contribution élémentaire d'un effet à partir d'une valeur source déjà fournie.
+
+Le propriétaire historique
+`assets/gensrpg/gens-rpg-stats-clean-167874.js`
+doit consommer ce service pour ces responsabilités.
+
+### Frontière stricte
+
+S2 ne déplace PAS :
+
+- `profile()`, `root()`, `defs()`, `active()` ;
+- `baseValue(hero,id)` ;
+- `value(hero,id)` complet ;
+- providers Equipment/Talents/Challenges ;
+- dérivées Dungeon ;
+- snapshot Tactical ;
+- persistance ;
+- éditeur Stats ;
+- fiche héros ;
+- wrappers ;
+- MutationObserver ;
+- timers/retries ;
+- formules Armor/Toucher/Résistances.
+
+### Autorité
+
+Après raccord S2 :
+- `GensStatsV1` = unique autorité runtime pour la normalisation pure ;
+- le module historique Stats reste propriétaire de l'orchestration, état,
+  migrations, UI et adaptateurs ;
+- aucune copie active des fonctions pures ne doit rester dans le module historique.
+
+### TDD S2
+
+Avant raccord :
+1. inventorier tous les tests qui chargent directement le module Stats historique ;
+2. poser une parité legacy -> Core pour les fonctions pures ;
+3. poser une garde d'autorité attendue RED tant que les anciennes fonctions pures
+   restent propriétaires dans le module historique ;
+4. seulement ensuite créer/raccorder `stats-v1.js`.
+
+### Composition
+
+La preview restructurée doit charger :
+`assets/gensrpg/core/stats-v1.js`
+immédiatement avant
+`assets/gensrpg/gens-rpg-stats-clean-167874.js`.
+
+Pas de loader dynamique, retry, observer ou monkey-patch pour charger le service.
+
+### Critère de sortie
+
+GREEN uniquement si :
+- parité pure démontrée ;
+- module historique réellement raccordé au Core ;
+- tests directs du module historique chargent explicitement Core Stats ;
+- preview charge Core avant le propriétaire historique ;
+- aucun changement de résultat Stats/Tactical ;
+- Architecture+navigateur, Firefox et Tactical Dock GREEN ;
+- checkpoint S2 dédié créé.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S1 Contrats — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

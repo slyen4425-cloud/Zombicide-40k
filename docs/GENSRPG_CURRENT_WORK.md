@@ -53,6 +53,24 @@ Arts Survie :
 - aucun stockage/Stats/Tactical ;
 - aucun merge sur `main`.
 
+### Intégration appliquée
+
+Assets :
+- 32 blobs historiques exacts `assets/img_01_...` à `assets/img_32_...` ;
+- réutilisation directe des SHA de blobs validés par Agent 1 ;
+- aucun réencodage et aucun renommage ;
+- commit : `c360edef639e636465f625cdec83820a3cab4cb2`.
+
+Sentinelle :
+- `tests/gens_survival_search_art_browser_v11411.test.cjs` reprise byte-for-byte du lot Agent 1 ;
+- commit : `6fa7c40ed2f4e42d1365e1c296d1288b5248dc14`.
+
+CI :
+- sentinelle branchée après le lancement Survie réel ;
+- commit : `5f3b72b47b4080782615a1a7655a39e98d157c0b`.
+
+Aucun `index.html`, runtime, gameplay ou stockage n'a été modifié.
+
 ### Validation requise
 
 Avant GREEN :

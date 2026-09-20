@@ -1,5 +1,71 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Challenge History 0.67 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-challenge-history-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-challenge-history-2026-09-20`
+
+Base exacte :
+`d753527e04aa47191521255d58750718b15c6dff`
+(`checkpoint/gensrpg-phase4-storage-next-audit-9-green-2026-09-20`).
+
+Audit 9 clôturé GREEN :
+- Architecture + navigateur complet `35524506865` — SUCCESS après relance du flake d'overlay Tactical ;
+- Firefox `35524506772` — SUCCESS ;
+- Tactical Dock `35524506828` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_dc067_challenge_history`.
+
+Propriétaire :
+`dungeonCore051ExplorationPolish`.
+
+Accès ciblés :
+- 1 lecture JSON ;
+- 1 écriture JSON.
+
+Source :
+- `index.html` : `8 174 580` octets ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83`.
+
+Cible déterministe :
+- taille : `8 174 580` ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6`.
+
+### Méthode
+
+1. parité + owner guard avant raccord ;
+2. parité attendue GREEN ;
+3. owner guard attendu RED avant raccord ;
+4. raccord exact de deux expressions de transport ;
+5. fenêtre anti-répétition 12 inchangée ;
+6. historique persisté 24 inchangé ;
+7. réalignement uniquement des empreintes/manifeste obsolètes ;
+8. Architecture+navigateur, Firefox, Tactical avant GREEN.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_CHALLENGE_HISTORY.md`.
+
+### Interdits
+
+- aucun contenu Challenge modifié ;
+- aucun Pending Trap / Special Branch / Dungeon Scene ;
+- aucun Economy Session dynamique ;
+- aucun gameplay-by-profile/runtime_v2 ;
+- aucun Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 9 — 2026-09-20
 
 Branche :

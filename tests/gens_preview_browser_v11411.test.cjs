@@ -4,7 +4,7 @@ const http=require('node:http');
 const path=require('node:path');
 const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
-const fixture='<!doctype html><html><head><title>GenSrpG preview fixture</title></head><body><div id="menu">Menu fixture</div><script>window.__fixtureSwAttempt=(window.__fixtureSwAttempt||0)+1;if("serviceWorker" in navigator){navigator.serviceWorker.register("service-worker.js").then(()=>window.__fixtureSwResolved=true).catch(e=>window.__fixtureSwError=String(e&&e.name||e));}</script><script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script></body></html>';
+const fixture='<!doctype html><html><head><title>GenSrpG preview fixture</title></head><body><div id="menu">Menu fixture</div><script>window.__fixtureSwAttempt=(window.__fixtureSwAttempt||0)+1;if("serviceWorker" in navigator){navigator.serviceWorker.register("service-worker.js").then(()=>window.__fixtureSwResolved=true).catch(e=>window.__fixtureSwError=String(e&&e.name||e));}</script><script src="assets/gensrpg/core/storage-v1.js"></script><script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script></body></html>';
 let previewRequests=0,swRequests=0;
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);

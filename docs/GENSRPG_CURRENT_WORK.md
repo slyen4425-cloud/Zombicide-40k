@@ -1,5 +1,111 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Storage / MJ Rules — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-storage-mj-rules-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-storage-mj-rules-2026-09-20`.
+- Base exacte et dernier GREEN : `7dc5efd6eca596fdf58a1d391bcafa1685ceb633`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Audit 12 définitivement clôturé
+
+Validation du HEAD documentaire final `7dc5efd6eca596fdf58a1d391bcafa1685ceb633` :
+- Architecture + navigateur complet : `35533768644` — SUCCESS ;
+- Firefox : `35533768634` — SUCCESS ;
+- Tactical Dock : `35533768627` — SUCCESS.
+
+Checkpoint final :
+`checkpoint/gensrpg-phase4-storage-next-audit-12-green-2026-09-20`.
+
+Aucun runtime n'a été modifié dans Audit 12.
+
+### Périmètre unique MJ Rules
+
+Migrer uniquement le transport JSON de la clé :
+`gensrpg_dungeon_mj_rules_v145`.
+
+Propriétaires prouvés :
+- `dungeonMj72_2Script` ;
+- `gensStability151`.
+
+Accès ciblés :
+- 1 lecture JSON directe ;
+- 2 écritures JSON directes ;
+- 0 `removeItem`.
+
+Service Core existant :
+`GensStorageV1`.
+
+Le lot ne modifie ni les valeurs des règles MJ, ni leurs formulaires, ni les
+reconciles 151/171, ni Dungeon Scene, ni Economy, ni aucun autre stockage.
+
+### Contrats sensibles à préserver
+
+Lecteur `dungeonMjRules151` :
+- mêmes defaults ;
+- même `Object.assign(d,old||{})` ;
+- même catch englobant lecture/parse/fusion ;
+- absence, chaîne vide, null, JSON invalide et erreur de lecture conservent
+  exactement leurs comportements historiques.
+
+Writer `saveDungeonMj151` :
+- write avant fermeture UI ;
+- erreur de sérialisation/écriture propagée ;
+- UI non fermée après échec.
+
+Writer `saveDungeonMjUnified175` :
+- write avant `gensReconcile171` puis `gensReconcile151` ;
+- catch externe historique conservé ;
+- erreur de sérialisation/écriture avalée par ce catch ;
+- reconciles non exécutés après échec.
+
+### TDD obligatoire avant raccord
+
+1. conserver Audit 12 comme caractérisation source ;
+2. ajouter une parité dédiée au lot sur le vrai transport ;
+3. ajouter une garde propriétaire attendue RED tant que les 3 accès directs existent ;
+4. brancher ces gardes à Architecture ;
+5. obtenir le RED attendu ;
+6. seulement ensuite appliquer le micro-diff exact ;
+7. réaligner uniquement manifeste/empreintes/tests réellement obsolètes ;
+8. Architecture+navigateur, Firefox et Tactical Dock requis avant GREEN.
+
+### Source et cible exactes
+
+`index.html` source :
+- taille : `8 174 580` octets ;
+- blob : `1545aba502777d9fb76decdcee90a89c7cf3f971`.
+
+Candidat exact vérifié :
+- taille : `8 174 580` octets ;
+- blob : `5b9b9ae780f735eadef049afeb10acf0b57441fe`;
+- 1 `GensStorageV1.readJson(...MJ Rules...)` ;
+- 2 `GensStorageV1.writeJson(...MJ Rules...)` ;
+- 0 ancien transport direct ciblé.
+
+### Interdits
+
+- aucun autre accès `dungeonMj72_2Script` ou `gensStability151` ;
+- aucun changement de règles/valeurs/UI MJ ;
+- aucun Pending Trap / Special Branch ;
+- aucun gameplay-by-profile ;
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun Stats / Tactical / Capture / Survie ;
+- aucun observer, timer/retry, wrapper ou monkey-patch ;
+- aucun merge sur `main`.
+
+Document du lot :
+`docs/GENSRPG_PHASE4_STORAGE_MJ_RULES.md`.
+
+### Prochaine action
+
+Poser parité + garde propriétaire, brancher Architecture et obtenir le RED attendu
+de la garde avant tout raccord runtime. Aucun checkpoint GREEN anticipé.
+
+
 ## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 12 — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

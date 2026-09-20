@@ -13,10 +13,10 @@ const profile={
   rpgUniverse:{
     movement:{defaults:{hero:3}},
     stats:{
-      active:['strength','chance'],
+      active:['strength','chance','weird stat'],
       dynamicDefinitions:[
-        {id:'strength',name:'Force custom',icon:'X',defaultValue:99,min:5,max:2,visible:false,description:123},
-        {id:'chance',name:'Chance',icon:'🍀',defaultValue:10,min:0,max:20,visible:true,description:'Custom stat'}
+        {id:'chance',name:'Chance',icon:'🍀',defaultValue:10,min:0,max:20,visible:true,description:'Custom stat'},
+        {id:'weird stat',name:'Weird',icon:'X',defaultValue:99,min:5,max:2,visible:false,description:123}
       ],
       dynamicEffects90:[
         {id:'fx_force_to_chance',source:'strength',target:'stat:chance',mode:'step',step:10,gain:2,enabled:true},
@@ -93,15 +93,15 @@ assert.equal(api.canon('move'),'movement');
 const normalized=api.root(profile);
 assert.ok(normalized,'stats root missing');
 
-const force=api.def('force');
-assert.equal(force.id,'force');
-assert.equal(force.name,'Force custom');
-assert.equal(force.icon,'X');
-assert.equal(force.min,5);
-assert.equal(force.max,5,'max must never normalize below min');
-assert.equal(force.defaultValue,5,'default must clamp to normalized bounds');
-assert.equal(force.visible,false);
-assert.equal(force.description,'123');
+const weird=api.def('weird_stat');
+assert.equal(weird.id,'weird_stat');
+assert.equal(weird.name,'Weird');
+assert.equal(weird.icon,'X');
+assert.equal(weird.min,5);
+assert.equal(weird.max,5,'max must never normalize below min');
+assert.equal(weird.defaultValue,5,'default must clamp to normalized bounds');
+assert.equal(weird.visible,false);
+assert.equal(weird.description,'123');
 
 const chance=api.def('chance');
 assert.deepEqual(
@@ -150,7 +150,7 @@ assert.match(sentence,/≥ 14/);
 assert.match(sentence,/\+5/);
 
 const summary=api.summaryFor('strength');
-assert.match(summary,/Force custom/);
+assert.match(summary,/Force/);
 assert.match(summary,/Dégâts physiques bruts/);
 
 assert.ok(api.TARGETS.some(x=>x[0]==='damage:physical'));

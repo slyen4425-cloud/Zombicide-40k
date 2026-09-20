@@ -58,6 +58,24 @@ est disponible avant Large Room Support et les scripts inline/externes concerné
 - non résolus : `65` ;
 - clé Primary Selection : `5` accès directs répartis sur 4 fichiers.
 
+### Dette fonctionnelle détectée hors périmètre
+
+Le test historique `tests/dungeon_authored_action_fix_v167857.test.cjs`,
+désormais exécutable avec Core Storage chargé, révèle une assertion RED préexistante :
+le bouton générique `Fouiller` ne se réaffiche pas après avoir quitté la case d'un coffre exact authored.
+
+Vérification :
+- la logique `syncLegacyChestButton()` responsable est identique sur le checkpoint GREEN de départ ;
+- le raccord Storage n'a modifié que `primary()` dans ce fichier ;
+- parité Primary Selection et garde d'autorité Core sont GREEN ;
+- World Session Bridge, Large Room et Authored Bootstrap historiques sont GREEN.
+
+Décision conforme à la charte :
+- ne pas corriger cette logique UI dans le lot stockage ;
+- conserver la fixture Core adaptée ;
+- ne pas utiliser cette assertion fonctionnelle préexistante comme critère de sortie du lot Storage ;
+- ouvrir un lot fonctionnel séparé ultérieurement si ce comportement doit être corrigé.
+
 ### Validation requise
 
 Avant GREEN :

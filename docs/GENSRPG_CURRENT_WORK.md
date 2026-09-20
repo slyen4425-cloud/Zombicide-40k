@@ -78,6 +78,58 @@ Rejouer sur la base Phase 4 stockage V2 :
 Aucun checkpoint d’intégration GREEN avant ces validations.
 
 
+### Résultat intégration — GREEN
+
+Commit d’intégration initial :
+`391496926e025177f71f3337d08905ea4d64118a`
+
+Ajustement de sentinelle uniquement :
+`ef8d22f4c48eb575eb46b4fdee664ff130043677`
+
+Le premier run d’intégration a confirmé :
+- bouton `#searchItemBtn` unique, visible et fonctionnel ;
+- 20 arts d’objets présents ;
+- aucun 404 sur les arts Survie ;
+- échec uniquement parce que certaines images de cartes n’avaient pas encore terminé leur décodage au moment exact de l’assertion.
+
+Correction :
+- ajout d’un `img.decode()` explicite dans la sentinelle avant l’assertion des 20 cartes, comme déjà fait pour les ennemis ;
+- aucun runtime, asset, stockage ou comportement utilisateur modifié.
+
+Diff d’intégration final :
+- 32 assets historiques exacts restaurés depuis le checkpoint Survie validé ;
+- sentinelle Survie raccordée à la CI ;
+- documentation source Survie conservée ;
+- aucun `index.html`, runtime Survie, resolver Core, stockage, Dungeon, Tactical, Capture, PvP ou Builder modifié.
+
+Validation finale sur `ef8d22f4c48eb575eb46b4fdee664ff130043677` :
+- Architecture + navigateur complet `35492257158` — SUCCESS ;
+- Firefox `35492257142` — SUCCESS ;
+- Tactical Dock `35492257122` — SUCCESS.
+
+Le navigateur complet valide simultanément :
+- Fouiller + 32 arts Survie ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet ;
+- fiche RPG ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture ;
+- non-interférence des quatre modules ;
+- resolver d’assets Phase 4 ;
+- stockage Room Creator 1.0 et V2 via leurs gardes statiques.
+
+Prochaine action :
+1. valider cette fermeture documentaire ;
+2. créer `checkpoint/gensrpg-phase4-integrated-survival-art-storage-v2-green-2026-09-20` ;
+3. ouvrir le sous-lot stockage `gensrpg_zone_graphs_v1` depuis ce checkpoint ;
+4. traiter ensemble le writer `DungeonWorldBuilder167821` et le lecteur `DungeonRoomVisualConfig167826` ;
+5. conserver `normalizeGraph()`, le schéma et le JSON persisté dans le module Builder ;
+6. aucun runtime de partie ou IndexedDB dans ce lot.
+
+
 ## Chantier courant prioritaire — Phase 4 / stockage Room Creator V2 — 2026-09-20
 
 Branche :

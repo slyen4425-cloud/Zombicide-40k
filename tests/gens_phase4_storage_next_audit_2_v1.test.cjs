@@ -11,11 +11,11 @@ const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:198,
-  resolvedAccesses:133,
+  totalAccesses:196,
+  resolvedAccesses:131,
   unresolvedAccesses:65,
-  distinctResolvedKeys:25
-},'current Phase 4 storage totals must include the Dungeon Primary Selection, Dungeon Deck and Manual MJ Core raccords');
+  distinctResolvedKeys:24
+},'current Phase 4 storage totals must include the Dungeon Primary Selection, Dungeon Deck, Manual MJ and Economy Rules Core raccords');
 
 const primary=manifest.resolvedKeys.find(x=>x.key==='gensrpg_dungeon_primary_selection_v167833');
 assert.equal(primary,undefined,'migrated primary Dungeon selection key must leave the direct-storage manifest');

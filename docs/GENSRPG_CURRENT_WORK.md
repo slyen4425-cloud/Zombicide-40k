@@ -9,6 +9,81 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage — audit inline `index.html` — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-inline-audit-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-inline-audit-2026-09-20`
+
+Base exacte :
+`3e43e9220aeb762ee89edd39ad3d3f0fdd569b65`
+(`checkpoint/gensrpg-phase4-storage-next-audit-2-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Audit externe précédent — GREEN
+
+Le deuxième audit stockage a conclu qu'aucun candidat externe restant n'est un raccord JSON simple et isolé :
+- `gensrpg_dungeon_primary_selection_v167833` nécessite aussi un changement d'ordre Pages/preview ;
+- les runtimes Room/World/Authored touchent `gensrpg_dungeon_runtime_v2` ;
+- Stats doit rester pour le prochain service Phase 4 Stats ;
+- Tactical mélange runtime Dungeon et état héros ;
+- Runtime Repair V106 mélange JSON et valeurs scalaires.
+
+Validation :
+- Architecture + navigateur complet : run `35499679352`, tentative 2 — SUCCESS ;
+- Firefox : run `35499679351` — SUCCESS ;
+- Tactical Dock : run `35499679330` — SUCCESS.
+
+Note de validation :
+- la première tentative navigateur du run Architecture a rencontré une interception ponctuelle du clic Survie par un overlay Tactical existant ;
+- aucun runtime n'avait changé dans le lot d'audit ;
+- la relance du job échoué, sans changement de code, a passé le scénario `Dungeon après Survie` puis toute la batterie navigateur ;
+- aucune correction runtime n'a été ajoutée dans ce lot.
+
+### Mission de l'audit inline
+
+Examiner uniquement les accès stockage inline encore présents dans `index.html` afin de sélectionner le prochain sous-périmètre JSON minimal.
+
+Objectif :
+- identifier une clé/famille autonome ;
+- confirmer lecteur(s), writer(s), fallback et format exacts ;
+- distinguer JSON de valeurs scalaires ;
+- conserver le propriétaire métier ;
+- ne modifier aucun runtime pendant cet audit ;
+- ne pas toucher `gensrpg_dungeon_runtime_v2` ;
+- ne pas anticiper Stats/Tactical.
+
+### Règle 26 obligatoire
+
+Le contenu exact de `index.html` est requis.
+
+SHA exact demandé :
+`3e43e9220aeb762ee89edd39ad3d3f0fdd569b65`
+
+Lien :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/3e43e9220aeb762ee89edd39ad3d3f0fdd569b65/index.html`
+
+Procédure :
+1. Sylvain télécharge ce `index.html` exact ;
+2. le compresse en ZIP ;
+3. l'envoie dans la conversation ;
+4. vérifier taille/cohérence et correspondance avant inspection ;
+5. audit uniquement ; aucun raccord runtime tant que le candidat n'est pas caractérisé et qu'un nouveau lot n'est pas ouvert.
+
+### Interdit
+
+- aucune ancienne copie locale non vérifiée ;
+- aucune lecture répétée du gros fichier via GitHub ;
+- aucune modification de `index.html` dans ce lot d'audit ;
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucune migration de schéma ;
+- aucun nouveau wrapper / observer / timer / retry ;
+- aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / stockage — audit suivant 2 — 2026-09-20
 
 Branche :

@@ -22,11 +22,12 @@ const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 
-// 1. Source index remains the known legacy shell entry point.
+// 1. Source index remains the known legacy shell entry point, now with Core storage bootstrapped before inline storage.
 const directSrcs=[...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.deepEqual(directSrcs,[
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
   'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+  'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -35,6 +36,7 @@ assert.deepEqual(directSrcs,[
 
 // 2. Pages build keeps the same deterministic static order.
 const pagesModules=[
+  'storage-v1.js',
   'dungeon-core-318.js',
   'dungeon-large-room-support-167834.js',
   'dungeon-room-creator-100.js',

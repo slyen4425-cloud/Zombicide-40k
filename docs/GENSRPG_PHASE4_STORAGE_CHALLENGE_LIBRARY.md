@@ -91,3 +91,88 @@ Avant checkpoint GREEN :
 - Architecture+navigateur complet GREEN ;
 - Firefox GREEN ;
 - Tactical Dock GREEN.
+
+
+## Implémentation appliquée
+
+Commit runtime :
+`9e8e09e84011db286d1e82be24f1a2bbc7c87336`
+
+Micro-diff :
+- Core 0.51 : 1 lecture JSON -> Core Storage ;
+- Core 0.51 : 2 écritures JSON -> Core Storage ;
+- Core 2.00 : 1 lecture fallback -> Core Storage ;
+- Core 2.02 : 1 lecture fallback -> Core Storage ;
+- aucune autre ligne runtime modifiée.
+
+État final exact de `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83`.
+
+Dungeon reste propriétaire :
+- des 50 défis ;
+- du merge par ID ;
+- de la normalisation tableau ;
+- de la sélection/fréquence ;
+- des portes/coffres/puzzles ;
+- des `try/catch` historiques.
+
+### Manifeste Phase 2
+
+Avant :
+- accès directs : `196` ;
+- résolus : `131` ;
+- non résolus : `65` ;
+- clés directes : `24`.
+
+Après :
+- accès directs : `191` ;
+- résolus : `126` ;
+- non résolus : `65` ;
+- clés directes : `23`.
+
+Dungeon :
+- accès : `164 -> 159` ;
+- résolus : `114 -> 109` ;
+- non résolus : `50` inchangés ;
+- clés directes : `16 -> 15`.
+
+`gensrpg_challenge_library_v1` a quitté le manifeste des accès directs.
+
+### Réalignements de sentinelles
+
+Deux anciens audits conservaient encore Challenge Library comme candidat direct :
+- `gens_phase4_storage_next_audit_5_v1.test.cjs` ;
+- `gens_phase4_storage_next_audit_8_v1.test.cjs`.
+
+Ils ont été réalignés sans affaiblir les gardes de domaine :
+- le vrai owner guard Challenge impose 0 accès `localStorage` directs ;
+- il impose exactement 3 lectures Core et 2 écritures Core ;
+- le blob déterministe final reste verrouillé.
+
+## Validation fonctionnelle — GREEN
+
+HEAD validé :
+`c5d2ee9ad7c60894245aaa7a3e1c46d660cf4c09`
+
+Runs :
+- Architecture + navigateur complet `35523470101` — SUCCESS ;
+- Firefox `35523470108` — SUCCESS ;
+- Tactical Dock `35523470104` — SUCCESS.
+
+Le navigateur complet a notamment repassé :
+- Survie / Fouiller / arts ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture et composition complète ;
+- non-interférence des quatre modules ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets et tokens tardifs.
+
+Aucun merge sur `main`.

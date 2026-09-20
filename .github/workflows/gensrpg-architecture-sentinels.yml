@@ -266,6 +266,12 @@ jobs:
       - name: Sélectionner le prochain micro-lot stockage après Manual MJ
         run: node tests/gens_phase4_storage_next_audit_6_v1.test.cjs
 
+      - name: Caractériser la parité stockage Economy Rules
+        run: node tests/gens_phase4_storage_economy_rules_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Economy Rules
+        run: node tests/gens_phase4_storage_economy_rules_owner_v1.test.cjs
+
       - name: Caractériser la parité stockage Dungeon Deck
         run: node tests/gens_phase4_storage_dungeon_deck_parity_v1.test.cjs
 

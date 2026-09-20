@@ -115,3 +115,26 @@ Micro-diff déterministe préparé :
 - aucun Stats/Tactical/Capture/Survie ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`2a495184b6a3ac909f2c2022880d91faafda10c2`
+
+Runs :
+- Architecture + navigateur complet `35524201644` — SUCCESS ;
+- Firefox `35524201652` — SUCCESS ;
+- Tactical Dock `35524201663` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Décision confirmée :
+le prochain micro-lot est exclusivement
+`gensrpg_dc067_challenge_history`
+dans `dungeonCore051ExplorationPolish`.
+
+La fenêtre anti-répétition 12 et l'historique persisté 24 restent strictement Dungeon-owned.
+
+Prochaine étape autorisée :
+ouvrir un lot dédié Challenge History depuis le checkpoint GREEN final de cet audit.

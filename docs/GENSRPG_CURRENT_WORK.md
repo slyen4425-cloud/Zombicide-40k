@@ -1,5 +1,72 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Economy Rules — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-economy-rules-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-economy-rules-2026-09-20`
+
+Base exacte :
+`0cc5c00d340d8f46922e8ebb310859b6190e1ca4`
+(`checkpoint/gensrpg-phase4-storage-next-audit-6-green-2026-09-20`).
+
+Audit 6 clôturé GREEN :
+- Architecture + navigateur complet `35517119091` — SUCCESS ;
+- Firefox `35517116971` — SUCCESS ;
+- Tactical Dock `35517116978` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_dungeon_economy_rules_160`.
+
+Propriétaire :
+`dungeonEconomy160`.
+
+Source exacte :
+- `index.html` : `8 174 580` octets ;
+- blob : `a070af09f9cb1fcda78987e83bc117d7544d1b6c`.
+
+Sous-responsabilité ciblée :
+- 1 lecture JSON constante des règles ;
+- 1 écriture JSON constante des règles.
+
+Hors périmètre strict dans le même bloc :
+- session Economy dynamique `gensrpg_dungeon_session_eco_160_<profileId>` ;
+- inventaire héros via `key(heroId)`.
+
+Micro-diff déterministe :
+- taille cible : `8 174 580` octets ;
+- blob cible : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+### Méthode
+
+1. parité + owner guard avant raccord ;
+2. owner guard attendu RED tant que les deux accès directs existent ;
+3. raccord exact de deux lignes seulement ;
+4. session dynamique et inventaire héros inchangés ;
+5. réalignement uniquement des empreintes/manifeste obsolètes ;
+6. Architecture+navigateur, Firefox, Tactical avant GREEN.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_ECONOMY_RULES.md`.
+
+Interdits :
+- aucun changement loot/coffres/fouilles/marchands/UI MJ ;
+- aucune session Economy dynamique ;
+- aucun inventaire héros ;
+- aucun Dungeon runtime v2 ;
+- aucun Challenge/Gameplay-by-profile/Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 6 — 2026-09-20
 
 Branche :

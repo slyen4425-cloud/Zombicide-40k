@@ -1,0 +1,56 @@
+name: GenSrpG Phase 4 Economy Session exact apply
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-economy-session-2026-09-20
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-storage-economy-session-2026-09-20
+          fetch-depth: 0
+
+      - name: Apply exact Economy Session transport raccord
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = "ee7b474802d8bb3b1d20e3aaf2507c4666fbd054"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          start=s.index('<script id="dungeonEconomy160">')
+          end=s.index('</script>',start)
+          block=s[start:end]
+          pairs=[
+            ('JSON.parse(localStorage.getItem(key)||"{}")',
+             'GensStorageV1.readJson(localStorage,key,{})'),
+            ('localStorage.setItem(key,JSON.stringify(rest))',
+             'GensStorageV1.writeJson(localStorage,key,rest)'),
+          ]
+          for old,new in pairs:
+              if block.count(old) != 1:
+                  raise SystemExit(f"Expected exactly one owner occurrence: {old!r}; got {block.count(old)}")
+              block=block.replace(old,new,1)
+          s=s[:start]+block+s[end:]
+          p.write_text(s,encoding="utf-8",newline="")
+          PY
+          test "$(wc -c < index.html)" = "8174580"
+          test "$(git hash-object index.html)" = "1545aba502777d9fb76decdcee90a89c7cf3f971"
+          git diff --check
+          test "$(git diff --numstat -- index.html | awk '{print $1 " " $2}')" = "2 2"
+          git rm ".github/workflows/gensrpg-phase4-storage-economy-session-apply.yml"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "refactor: route Economy Session JSON through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-economy-session-2026-09-20

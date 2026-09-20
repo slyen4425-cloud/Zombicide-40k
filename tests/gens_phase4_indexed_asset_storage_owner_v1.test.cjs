@@ -23,8 +23,8 @@ const scripts=[...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map
   body:m[2],
   start:m.index
 }));
-const anon5=scripts.find(x=>x.order===5&&!x.id);
-assert.ok(anon5,'anonymous inline owner 5 missing');
+const anon5=scripts.find(x=>!x.id&&x.body.includes('async function gensrpgMigrateLocalImagesToIndexedDb('));
+assert.ok(anon5,'legacy anonymous asset migration/bootstrap owner missing');
 
 assert.match(anon5.body,/const GENSRPG_IDB_MIGRATION_FLAG="gensrpg_idb_assets_migrated_v1"/,'legacy migration flag must remain in anonymous owner 5');
 assert.match(anon5.body,/async function gensrpgMigrateLocalImagesToIndexedDb\(/,'legacy migration must remain in anonymous owner 5');

@@ -25078,7 +25078,7 @@ function saveDungeonMjUnified175(){
     r.difficulty=Math.max(1,Math.min(4,Number(g("dmj175Diff")?.value)||2));
     r.enemyControl=g("dmj175Control")?.value||"ai";r.initiativeMode=g("dmj175Init")?.value||"strict";
     r.aiTactics=g("dmj175Ai")?.value||"standard";r.mixedBossMj=!!g("dmj175Boss")?.checked;
-    localStorage.setItem("gensrpg_dungeon_mj_rules_v145",JSON.stringify(r));
+    GensStorageV1.writeJson(localStorage,"gensrpg_dungeon_mj_rules_v145",r);
     try{gensReconcile171?.("mj175-save")}catch(e){}
     try{gensReconcile151?.("mj175-save")}catch(e){}
   }catch(e){}
@@ -27989,7 +27989,7 @@ window.dungeonMjRules151=function(){
     mixedBossMj:true,eventFrequency:2
   };
   try{
-    const old=JSON.parse(localStorage.getItem("gensrpg_dungeon_mj_rules_v145")||"{}");
+    const old=GensStorageV1.readJson(localStorage,"gensrpg_dungeon_mj_rules_v145",{});
     Object.assign(d,old||{});
   }catch(e){}
   return d;
@@ -28006,7 +28006,7 @@ window.saveDungeonMj151=function(){
   r.aiTactics=g("dmj151Ai")?.value||"standard";
   r.mixedBossMj=!!g("dmj151Boss")?.checked;
   r.eventFrequency=Math.max(1,Math.min(3,Number(g("dmj151Events")?.value)||2));
-  localStorage.setItem("gensrpg_dungeon_mj_rules_v145",JSON.stringify(r));
+  GensStorageV1.writeJson(localStorage,"gensrpg_dungeon_mj_rules_v145",r);
   const m=document.getElementById("dungeonMj151");
   if(m){m.classList.remove("open");m.style.display="none"}
 };

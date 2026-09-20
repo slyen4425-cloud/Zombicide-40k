@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:196,
-  resolvedAccesses:131,
+  totalAccesses:194,
+  resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:24
-},'post-Economy-Rules storage totals drifted');
+  distinctResolvedKeys:23
+},'post-gameplay-by-profile storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174580,'audit 7 must target the exact post-Economy-Rules index size');
-assert.equal(blob,'16deeb169abbc31a7db04161902e9381fd6888ad','audit 7 must target the exact post-Economy-Rules index blob');
+assert.equal(bytes.length,8174580,'audit 7 must target the exact post-gameplay-by-profile index size');
+assert.equal(blob,'0b9c41c39db0d073c7b9ed580f66140b8d9bcda2','audit 7 must target the exact post-gameplay-by-profile index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -34,20 +34,18 @@ assert.ok(seedStart>=0&&seedEnd>seedStart,'Capture gameplay seed block must be l
 const gameplaySeed=capture.slice(seedStart,seedEnd);
 
 assert.match(gameplaySeed,/const key="gensrpg_rpg_gameplay_by_profile_v1"/);
-assert.equal((gameplaySeed.match(/localStorage\.getItem\(key\)/g)||[]).length,1,'gameplay mirror must have one direct read in audit');
-assert.equal((gameplaySeed.match(/localStorage\.setItem\(key,/g)||[]).length,1,'gameplay mirror must have one direct conditional write in audit');
-assert.match(gameplaySeed,/try\{map=JSON\.parse\(localStorage\.getItem\(key\)\|\|"\{\}"\)\|\|\{\}\}catch\(e\)\{\}/);
+assert.equal((gameplaySeed.match(/localStorage\.getItem\(key\)/g)||[]).length,0,'migrated gameplay-by-profile must have no direct read');
+assert.equal((gameplaySeed.match(/GensStorageV1\.readJson\(localStorage,key,\{\}\)\|\|\{\}/g)||[]).length,1,'gameplay-by-profile must use one Core read');
+assert.equal((gameplaySeed.match(/localStorage\.setItem\(key,/g)||[]).length,0,'migrated gameplay-by-profile must have no direct write');
+assert.equal((gameplaySeed.match(/GensStorageV1\.writeJson\(localStorage,key,map\)/g)||[]).length,1,'gameplay-by-profile must use one Core write');
+assert.match(gameplaySeed,/try\{map=GensStorageV1\.readJson\(localStorage,key,\{\}\)\|\|\{\}\}catch\(e\)\{\}/);
 assert.match(gameplaySeed,/if\(!map\[MC162_ID\]\)/);
 assert.match(gameplaySeed,/map\[MC162_ID\]=JSON\.parse\(JSON\.stringify\(MC162_GAMEPLAY\)\)/);
 
-assert.equal(gameplaySeed.includes('GensStorageV1.'),false,'audit must not pre-apply gameplay mirror Core raccord');
+assert.equal(gameplaySeed.includes('GensStorageV1.'),true,'gameplay-by-profile Core raccord must remain applied');
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
-const mirror=keys.get('gensrpg_rpg_gameplay_by_profile_v1');
-assert.ok(mirror,'gameplay mirror candidate must remain in direct-storage manifest during audit');
-assert.deepEqual(mirror.domains,['capture']);
-assert.deepEqual(mirror.sources,['inline:builtinMonsterCapture162']);
-assert.deepEqual(mirror.ops,['getItem','setItem']);
+assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),false,'migrated gameplay-by-profile key must leave direct-storage manifest');
 
 assert.ok(keys.has('gensrpg_challenge_library_v1'),'Challenge Library must remain deferred');
 assert.ok(keys.has('gensrpg_dungeon_runtime_v2'),'Dungeon runtime must remain deferred');
@@ -65,7 +63,7 @@ console.log(JSON.stringify({
   indexBlob:blob,
   selected:'gensrpg_rpg_gameplay_by_profile_v1',
   selectedOwner:'builtinMonsterCapture162',
-  selectedDirectAccesses:{reads:1,writes:1},
+  selectedCoreAccesses:{reads:1,writes:1},
   semantics:'seed-only-if-profile-missing',
   deferred:['challenge library','dungeon runtime v2','Stats dynamic state','Tactical mixed state','Runtime Repair mixed scalar/JSON']
 },null,2));

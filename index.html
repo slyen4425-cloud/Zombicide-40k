@@ -4292,6 +4292,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
   </div>
 </div>
 
+<script src="assets/gensrpg/core/indexed-asset-storage-v1.js"></script>
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 
 <script>
@@ -4583,97 +4584,19 @@ function renderHeroAvatarPreviewCrop(){
 
 
 const GENSRPG_IDB_MIGRATION_FLAG="gensrpg_idb_assets_migrated_v1";
-const GENSRPG_ASSET_DB_NAME="GenSrpG_Assets";
-const GENSRPG_ASSET_DB_VERSION=1;
-const GENSRPG_ASSET_STORE="assets";
-const GENSRPG_ASSET_PREFIX="idbasset:";
-const gensrpgAssetCache=new Map();
-
-function gensrpgOpenAssetDb(){
-  return new Promise((resolve,reject)=>{
-    const req=indexedDB.open(GENSRPG_ASSET_DB_NAME,GENSRPG_ASSET_DB_VERSION);
-    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(GENSRPG_ASSET_STORE))db.createObjectStore(GENSRPG_ASSET_STORE)};
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(req.error||new Error("IndexedDB indisponible"));
-  });
-}
-async function gensrpgAssetPut(ref,data){
-  if(!ref||!data)return;
-  gensrpgAssetCache.set(ref,data);
-  const db=await gensrpgOpenAssetDb();
-  await new Promise((resolve,reject)=>{
-    const tx=db.transaction(GENSRPG_ASSET_STORE,"readwrite");
-    tx.objectStore(GENSRPG_ASSET_STORE).put(data,ref);
-    tx.oncomplete=()=>resolve();
-    tx.onerror=()=>reject(tx.error||new Error("Écriture IndexedDB impossible"));
-  });
-  db.close();
-}
-async function gensrpgAssetGet(ref){
-  if(!ref)return "";
-  if(gensrpgAssetCache.has(ref))return gensrpgAssetCache.get(ref)||"";
-  const db=await gensrpgOpenAssetDb();
-  const val=await new Promise((resolve,reject)=>{
-    const tx=db.transaction(GENSRPG_ASSET_STORE,"readonly");
-    const req=tx.objectStore(GENSRPG_ASSET_STORE).get(ref);
-    req.onsuccess=()=>resolve(req.result||"");
-    req.onerror=()=>reject(req.error||new Error("Lecture IndexedDB impossible"));
-  });
-  db.close();gensrpgAssetCache.set(ref,val||"");return val||"";
-}
-async function gensrpgLoadAllAssetCache(){
-  try{
-    const db=await gensrpgOpenAssetDb();
-    const pairs=await new Promise((resolve,reject)=>{
-      const out=[];const tx=db.transaction(GENSRPG_ASSET_STORE,"readonly"),st=tx.objectStore(GENSRPG_ASSET_STORE);
-      const req=st.openCursor();
-      req.onsuccess=e=>{const c=e.target.result;if(c){out.push([c.key,c.value]);c.continue()}else resolve(out)};
-      req.onerror=()=>reject(req.error||new Error("Lecture IndexedDB impossible"));
-    });
-    db.close();pairs.forEach(([k,v])=>gensrpgAssetCache.set(k,v));
-    return pairs.length;
-  }catch(e){console.warn("IndexedDB cache",e);return 0}
-}
-function gensrpgAssetRef(){
-  return GENSRPG_ASSET_PREFIX+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);
-}
-function gensrpgExternalizeAssetsSync(value){
-  if(Array.isArray(value))return value.map(gensrpgExternalizeAssetsSync);
-  if(value&&typeof value==="object"){
-    const out={};
-    Object.entries(value).forEach(([k,v])=>out[k]=gensrpgExternalizeAssetsSync(v));
-    return out;
-  }
-  if(typeof value==="string" && /^data:image\//i.test(value)){
-    const ref=gensrpgAssetRef();
-    gensrpgAssetCache.set(ref,value);
-    gensrpgAssetPut(ref,value).catch(e=>console.warn("Asset IndexedDB",e));
-    return ref;
-  }
-  return value;
-}
-function gensrpgHydrateAssets(value){
-  if(Array.isArray(value))return value.map(gensrpgHydrateAssets);
-  if(value&&typeof value==="object"){
-    const out={};
-    Object.entries(value).forEach(([k,v])=>out[k]=gensrpgHydrateAssets(v));
-    return out;
-  }
-  if(typeof value==="string" && value.startsWith(GENSRPG_ASSET_PREFIX))return gensrpgAssetCache.has(value)?(gensrpgAssetCache.get(value)||""):value;
-  return value;
-}
-async function gensrpgExternalizeAssetsAwait(value){
-  if(Array.isArray(value)){
-    const out=[];for(const v of value)out.push(await gensrpgExternalizeAssetsAwait(v));return out;
-  }
-  if(value&&typeof value==="object"){
-    const out={};for(const [k,v] of Object.entries(value))out[k]=await gensrpgExternalizeAssetsAwait(v);return out;
-  }
-  if(typeof value==="string" && /^data:image\//i.test(value)){
-    const ref=gensrpgAssetRef();await gensrpgAssetPut(ref,value);return ref;
-  }
-  return value;
-}
+const GENSRPG_ASSET_DB_NAME=window.GensIndexedAssetStorageV1.DB_NAME;
+const GENSRPG_ASSET_DB_VERSION=window.GensIndexedAssetStorageV1.DB_VERSION;
+const GENSRPG_ASSET_STORE=window.GensIndexedAssetStorageV1.STORE;
+const GENSRPG_ASSET_PREFIX=window.GensIndexedAssetStorageV1.PREFIX;
+const gensrpgAssetCache=window.GensIndexedAssetStorageV1.cache;
+const gensrpgOpenAssetDb=window.GensIndexedAssetStorageV1.openDb;
+const gensrpgAssetPut=window.GensIndexedAssetStorageV1.put;
+const gensrpgAssetGet=window.GensIndexedAssetStorageV1.get;
+const gensrpgLoadAllAssetCache=window.GensIndexedAssetStorageV1.loadAllCache;
+const gensrpgAssetRef=window.GensIndexedAssetStorageV1.assetRef;
+const gensrpgExternalizeAssetsSync=window.GensIndexedAssetStorageV1.externalizeSync;
+const gensrpgHydrateAssets=window.GensIndexedAssetStorageV1.hydrate;
+const gensrpgExternalizeAssetsAwait=window.GensIndexedAssetStorageV1.externalizeAwait;
 async function gensrpgMigrateLocalImagesToIndexedDb(){
   if(localStorage.getItem(GENSRPG_IDB_MIGRATION_FLAG)==="1")return 0;
   const keys=[
@@ -4698,14 +4621,8 @@ async function gensrpgMigrateLocalImagesToIndexedDb(){
   if(migrated)console.info("GenSrpG : "+migrated+" bloc(s) image migré(s) vers IndexedDB.");
   return migrated;
 }
-async function gensrpgExportIndexedAssets(){
-  await gensrpgLoadAllAssetCache();
-  const out={};gensrpgAssetCache.forEach((v,k)=>out[k]=v);return out;
-}
-async function gensrpgImportIndexedAssets(assets){
-  if(!assets||typeof assets!=="object")return;
-  for(const [k,v] of Object.entries(assets))if(k&&typeof v==="string")await gensrpgAssetPut(k,v);
-}
+const gensrpgExportIndexedAssets=window.GensIndexedAssetStorageV1.exportAll;
+const gensrpgImportIndexedAssets=window.GensIndexedAssetStorageV1.importAll;
 async function gensrpgBootstrapIndexedStorage(){
   try{
     await gensrpgLoadAllAssetCache();

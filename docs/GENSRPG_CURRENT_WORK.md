@@ -71,6 +71,37 @@ Responsabilités :
 - merge sur `main`.
 
 
+### Résultat Room Creator 1.0 — GREEN
+
+Raccord fonctionnel :
+- `DungeonRoomCreator100` ne lit/écrit plus directement `localStorage` ;
+- la clé historique reste exactement `gensrpg_dungeon_custom_rooms_v1` ;
+- `normalizeRoom()`, validation, bibliothèque et logique Builder restent propriétaires du module ;
+- `GensStorageV1` est chargé avant Room Creator dans GitHub Pages et `preview.html` ;
+- le cache PWA référence le service Core connecté ;
+- aucune migration de format ;
+- aucun autre stockage Builder ou runtime Dungeon migré dans ce lot ;
+- `index.html` inchangé.
+
+Parité et garde propriétaire :
+- `tests/gens_phase4_storage_room_creator100_owner_v1.test.cjs` ;
+- `tests/gens_phase4_storage_room_creator100_parity_v1.test.cjs` ;
+- tests historiques Room Creator rejoués via le Core.
+
+Validation fonctionnelle sur `064dfed37869f1bb10a9f235c4cc870c0cc44610` :
+- Architecture + navigateur complet `35488911644` — SUCCESS ;
+- Firefox `35488911651` — SUCCESS ;
+- Tactical Dock `35488911647` — SUCCESS.
+
+Prochaine action :
+1. valider cette fermeture documentaire sur les trois workflows ;
+2. créer `checkpoint/gensrpg-phase4-storage-room-creator100-green-2026-09-20` ;
+3. ouvrir un lot séparé pour `DungeonRoomCreatorV2` ;
+4. conserver exactement `gensrpg_dungeon_room_interactions_v2`, son fallback `{}` et `normalizeMeta()` ;
+5. ne pas toucher encore à `gensrpg_zone_graphs_v1` ni au runtime Dungeon.
+
+
+
 ## Chantier courant prioritaire — Phase 4 / service Core stockage JSON — 2026-09-19
 
 Branche :

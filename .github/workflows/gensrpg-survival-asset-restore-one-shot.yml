@@ -1,0 +1,107 @@
+name: GenSrpG Survival asset restore one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-survival-search-art-repair-2026-09-20'
+
+permissions:
+  contents: write
+
+jobs:
+  restore-survival-assets:
+    if: github.event.head_commit.message != 'fix(survival): restore canonical built-in art files'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current work branch
+        uses: actions/checkout@v4
+
+      - name: Recover exact historical Survival assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f assets/img_01_53b38c99.png ] && [ -f assets/img_32_29232d11.jpg ]; then
+            echo "Survival assets already restored."
+            exit 0
+          fi
+
+          git fetch --no-tags --depth=1 origin 2d1d405006b8e3ec7e3c05fc8beda3e040451108
+          git show 2d1d405006b8e3ec7e3c05fc8beda3e040451108:Z40K_GITHUB_PAGES_READY.zip > /tmp/z40k-pages.zip
+          rm -rf /tmp/z40k-pages
+          mkdir -p /tmp/z40k-pages assets
+          unzip -q /tmp/z40k-pages.zip -d /tmp/z40k-pages
+
+          files=(
+            img_01_53b38c99.png img_02_289f15e8.png img_03_de27e5a7.png
+            img_04_25156b9a.jpg img_05_184ce6b8.jpg img_06_a737b5eb.jpg
+            img_07_1390c30b.png img_08_8a4a46dc.png img_09_00b03dce.png
+            img_10_e940d82d.png img_11_d5bcb253.png img_12_3cb0d253.png
+            img_13_dc98a4bc.png img_14_48aa449f.png img_15_450056b8.png
+            img_16_948b8374.png img_17_dac8fa45.png img_18_f09add3b.jpg
+            img_19_bf3fd8f3.jpg img_20_35f03b5e.jpg img_21_f4f05222.jpg
+            img_22_65b48717.jpg img_23_0095840d.jpg img_24_5ab892ea.jpg
+            img_25_4d75c641.jpg img_26_ff05a090.png img_27_f3d5c020.png
+            img_28_1395802a.png img_29_f102b709.png img_30_e02b021c.png
+            img_31_a7de1a50.jpg img_32_29232d11.jpg
+          )
+
+          for name in "${files[@]}"; do
+            src="$(find /tmp/z40k-pages -type f -name "$name" -print -quit)"
+            if [ -z "$src" ]; then
+              echo "Missing historical asset: $name" >&2
+              exit 1
+            fi
+            cp "$src" "assets/$name"
+          done
+
+          cat > /tmp/survival-assets.sha256 <<'EOF'
+          cbfa3953446d96f6fa598169f256126c2ce12d56d8d537211e2711bdc4d1fd68  assets/img_01_53b38c99.png
+          4dd1c8efa454c46882f5fa732791c950d82f8814468b69ec55479043066deaae  assets/img_02_289f15e8.png
+          cee9f1cc2b56ded3c14b5519b3233dc93c0f6eb043ea6b5c953b9d24cc277a36  assets/img_03_de27e5a7.png
+          3544e6b3b6ea041d74703a317d6959bc12761c31f89357b16fdbc13efd8380c5  assets/img_04_25156b9a.jpg
+          16c2b32c414b91a4bd66d98ca2d06948fcd77866bb12ba606d2460a744829c3e  assets/img_05_184ce6b8.jpg
+          61c7f70be7d60c45dbf558a112a7d25612583e41838a2366fcc832ea09f73382  assets/img_06_a737b5eb.jpg
+          830f8522047786857d89db66b3ed85ede4a6585408bff43dab4735d569dd8899  assets/img_07_1390c30b.png
+          320058076dddbc13ee0645c5c16a0cf6822c149eb51f53c64bb5e6cc4d8a2fe1  assets/img_08_8a4a46dc.png
+          629899ea486b8d7e16f8f8c132c9fb113ffcbfa4548e5e384dbef98adcd2e2ca  assets/img_09_00b03dce.png
+          4d46555f7d8d78e09a922c7a1d03dea856753aae4399df8d3b57fca52bcc2407  assets/img_10_e940d82d.png
+          1ca3389497573cc77c14437b802e80b877ba0761429fc7934d1436d3897af633  assets/img_11_d5bcb253.png
+          8d96866e73c3179d985810a4ade79452c6bd19dab846a598f5223d75dce47f55  assets/img_12_3cb0d253.png
+          eaba3a5c2e5bf0d12e3c87e1f2aa9b7a0a985d34891f2ca2be78ce025af0671f  assets/img_13_dc98a4bc.png
+          f2d04cda18f8bfbd978a8a90cee5b0a4c55124e5c81d76e59f5b6fb6358499b9  assets/img_14_48aa449f.png
+          574ae0498f04f58cd0f930bb37ab7cce9aee0c1517dbbe803aad4a8bee6bbaf4  assets/img_15_450056b8.png
+          8bfa9a08bdeb8ba3cf28cdfd79b2348e052652dd44e7db5d663b868ae4f241a6  assets/img_16_948b8374.png
+          4350672ff9f59127f38a1f4ee3013b6a619d3b659b5c09a72d8c754a9b4ff8d8  assets/img_17_dac8fa45.png
+          117a93bf09cf2be41343865ccdf193e9fae2c7cbba79686aea9b02fd4790a6d3  assets/img_18_f09add3b.jpg
+          9e34921ec1eaa30de3ba88a57333ed44826815f3565bee37b5774c01a1a4f3d1  assets/img_19_bf3fd8f3.jpg
+          a287d355106b16c219d0b0136b440f572a047c3ad3445e1234b700099eee6651  assets/img_20_35f03b5e.jpg
+          bb6ba9cf4ac39938afbb17f13334bad246aff784243e242ede98a774e22c3e66  assets/img_21_f4f05222.jpg
+          f42a7b7f391a388b6a39f41d4754f799b323f9145a0178d70fca15cd207bfded  assets/img_22_65b48717.jpg
+          9c64050c807ec40f4cfcfdd089c6eac9a66e0d6fdc2a85b1229ebd67213abeab  assets/img_23_0095840d.jpg
+          c74b8fe3beebb697608f45c8a6f5e44a9cd0f884edaec2e42fdb583feae53417  assets/img_24_5ab892ea.jpg
+          65e451ab22803c979f9aeaa26c1caf48daf161af2fac535ec4791c0039bf2cbe  assets/img_25_4d75c641.jpg
+          8c8a3a103f5729974818aec71ea35fbc7432346e4fb309754d864f2ccbd41692  assets/img_26_ff05a090.png
+          032690d22f5360c0089e9e57bff6e84617e7aba6a57e52502d339fc2db83a179  assets/img_27_f3d5c020.png
+          01c2ab937c200d689d5ffc593a07bc2d457dd2328e4f2ae88e1818e1218e6ac6  assets/img_28_1395802a.png
+          1c21246aafec649dddef33bb237f7180317750eb1b5cff83dbf7616b9501ec87  assets/img_29_f102b709.png
+          df5954f53240d42cf397cf4647484c1afb8e250ce9200d1c421154f96f705cb4  assets/img_30_e02b021c.png
+          301f9877ba86d8af874e7c0e90c0392e156b2c3dabcfb26a22ada8081f7d1d3a  assets/img_31_a7de1a50.jpg
+          9d73b2a1a8965aaa696efc2f4511e4724b85d22e4d937304f7aa1d2d0d3c3a86  assets/img_32_29232d11.jpg
+          EOF
+
+          sed -i 's/^          //' /tmp/survival-assets.sha256
+          sha256sum -c /tmp/survival-assets.sha256
+
+      - name: Commit restored assets on the isolated work branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- assets; then
+            echo "No asset changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/img_*.png assets/img_*.jpg
+          git commit -m "fix(survival): restore canonical built-in art files"
+          git push origin HEAD:${GITHUB_REF_NAME}

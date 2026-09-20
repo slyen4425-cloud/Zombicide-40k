@@ -154,7 +154,7 @@ async function startSurvival(page){
       .filter(x=>/assets\/img_(?:0[7-9]|1\d|2[0-6])_/.test(x.src)));
     assert.equal(itemArts.length,20,'the real Survival deck renderer must expose the twenty built-in item/search-event arts');
     assert.ok(itemArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all built-in Survival item arts must decode');
-    await page.locator('#objectManager .topbar button.back').click();
+    await page.locator('#objectManager .topbar button[onclick="closeObjectManager()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('menu')).display!=='none');
 
     mark('verify-survival-enemy-arts');

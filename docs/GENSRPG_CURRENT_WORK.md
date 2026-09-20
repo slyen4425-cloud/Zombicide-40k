@@ -76,6 +76,33 @@ Décision conforme à la charte :
 - ne pas utiliser cette assertion fonctionnelle préexistante comme critère de sortie du lot Storage ;
 - ouvrir un lot fonctionnel séparé ultérieurement si ce comportement doit être corrigé.
 
+### Validation finale — GREEN
+
+HEAD validé avant clôture documentaire :
+`f860f81cfa8063bcf8442ac76eca645e844e5c38`
+
+Résultats :
+- Architecture + navigateur complet `35508639664` — SUCCESS ;
+- Firefox `35508639662` — SUCCESS ;
+- Tactical Dock `35508639663` — SUCCESS.
+
+Raccord validé :
+- 4 lectures `PRIMARY_KEY` -> `GensStorageV1.readJson` ;
+- 1 écriture `PRIMARY_KEY` -> `GensStorageV1.writeJson` ;
+- clés, fallbacks et décisions métier Dungeon inchangés ;
+- `gensrpg_dungeon_runtime_v2` explicitement non migré ;
+- World Session Bridge, Large Room et Authored Bootstrap historiques GREEN ;
+- parité JSON et garde d’autorité Core GREEN.
+
+Manifeste Phase 2 :
+- accès directs `208 -> 203` ;
+- accès résolus `143 -> 138` ;
+- accès non résolus `65` inchangés ;
+- clés directes résolues `28 -> 27` ;
+- Dungeon `176 -> 171` accès, `126 -> 121` résolus, `50` non résolus inchangés.
+
+La dette UI Authored Search préexistante reste hors périmètre et n'a entraîné aucun changement runtime dans ce lot.
+
 ### Validation requise
 
 Avant GREEN :

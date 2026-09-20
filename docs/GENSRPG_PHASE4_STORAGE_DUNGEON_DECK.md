@@ -106,3 +106,32 @@ Aucun checkpoint GREEN avant :
 - Architecture + navigateur complet GREEN ;
 - Firefox GREEN ;
 - Tactical Dock GREEN.
+
+
+## Implémentation appliquée
+
+Commit fonctionnel :
+`2b8d52274abd4bbe6fbc72ff487bcd054ceab6b9`
+
+Le workflow temporaire d'application a refusé tout état autre que le blob source attendu et a vérifié le blob cible avant commit.
+
+Compare Git du commit fonctionnel :
+- fichier modifié : `index.html` uniquement ;
+- additions : `3` ;
+- suppressions : `3`.
+
+État final de `index.html` :
+- taille : `8 174 603` octets ;
+- blob : `739ca52610308d085ecf2635c5bc748f70c79a11`.
+
+Manifeste Phase 2 :
+- total direct `203 -> 200` ;
+- résolus `138 -> 135` ;
+- non résolus `65` inchangés ;
+- clés directes résolues `27 -> 26` ;
+- Dungeon `171 -> 168` accès ;
+- Dungeon résolus `121 -> 118` ;
+- Dungeon non résolus `50` inchangés ;
+- Dungeon clés directes `19 -> 18`.
+
+Le workflow temporaire est retiré après application ; il ne fait pas partie de l'architecture cible.

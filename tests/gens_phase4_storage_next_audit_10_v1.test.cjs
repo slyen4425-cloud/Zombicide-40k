@@ -9,21 +9,21 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:187,
-  resolvedAccesses:122,
+  totalAccesses:185,
+  resolvedAccesses:120,
   unresolvedAccesses:65,
-  distinctResolvedKeys:21
+  distinctResolvedKeys:20
 },'Audit 10 guard must follow the migrated Dungeon Scene storage totals');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:155,resolved:105,unresolved:50,distinctKeys:13
+  accesses:153,resolved:103,unresolved:50,distinctKeys:12
 },'Audit 10 guard must follow the migrated Dungeon Scene Dungeon totals');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580);
-assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054');
+assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -45,10 +45,10 @@ assert.match(mj,/function saveDungeonSceneElements\(a\)\{GensStorageV1\.writeJso
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_dungeon_scene_v1'),false,'migrated Dungeon Scene key must leave direct-storage manifest');
 
+assert.equal(keys.has('gensrpg_dungeon_session_eco_160_'),false,'migrated Economy Session key must leave direct-storage manifest');
 for(const key of [
   'gensrpg_dc048_pending_trap_v1',
   'gensrpg_dc052_special_branch_v1',
-  'gensrpg_dungeon_session_eco_160_',
   'gensrpg_dungeon_runtime_v2',
   'gensrpg_rpg_gameplay_by_profile_v1'
 ]) assert.ok(keys.has(key),'deferred key missing from manifest: '+key);
@@ -61,5 +61,6 @@ console.log(JSON.stringify({
   selectedDirectAccesses:{reads:0,writes:0,removes:0},
   coreAccesses:{reads:1,writes:1},
   state:'migrated',
-  deferred:['pending trap','special branch','economy session dynamic','gameplay mirror','dungeon runtime v2']
+  migrated:['economy session'],
+  deferred:['pending trap','special branch','gameplay mirror','dungeon runtime v2']
 },null,2));

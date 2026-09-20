@@ -156,3 +156,79 @@ la prochaine migration ne doit pas être choisie à partir du manifeste seul.
 Il faut d'abord inspecter le `index.html` exact correspondant au blob
 `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`
 et caractériser read/write/fallback/propriétaire du meilleur candidat.
+
+
+## Inspection exacte du index.html fourni
+
+Le fichier exact du checkpoint a été fourni puis vérifié avant inspection :
+- taille : `8 174 618` octets ;
+- blob Git : `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`.
+
+Il correspond exactement à la source attendue du checkpoint.
+
+### Candidat retenu : `gensrpg_dungeon_deck_v1`
+
+Bloc unique :
+- constante `DUNGEON_DECK_KEY` ;
+- 1 lecture directe ;
+- 2 écritures directes ;
+- aucun `gensrpg_dungeon_runtime_v2` dans le bloc ;
+- aucun autre propriétaire de la clé.
+
+Contrat historique exact :
+- lecture : `JSON.parse(localStorage.getItem(DUNGEON_DECK_KEY) || "null")` ;
+- erreur de lecture/parse avalée ;
+- si valeur absente/invalide ou sans `remaining`, le propriétaire Dungeon crée
+  `{remaining:{},createdAt:Date.now()}` ;
+- le propriétaire complète ensuite les nouveaux objets à partir de `loadDeckConfig()` ;
+- l'écriture de cette complétion est conditionnelle et avale les erreurs ;
+- `dungeonSaveDeckState(ds)` sérialise l'objet reçu et avale également les erreurs.
+
+Le schéma et l'initialisation restent donc entièrement propriété Dungeon.
+Core Storage peut remplacer uniquement la sérialisation JSON, avec les `try/catch`
+existants conservés autour de `writeJson`.
+
+### Candidats non retenus pour le prochain micro-lot
+
+`gensrpg_dungeon_economy_rules_160` :
+- règles JSON simples ;
+- mais le même bloc gère aussi la famille dynamique
+  `gensrpg_dungeon_session_eco_160_<profileId>` ;
+- moins isolé que Deck.
+
+`gensrpg_manual_mj_effects_v1` :
+- famille simple ;
+- mais nature session/configuration à clarifier avant migration ;
+- reste candidat ultérieur.
+
+`gensrpg_rpg_gameplay_by_profile_v1` :
+- plusieurs accès et un seed Capture séparé ;
+- ancienne fonction de miroir avec nettoyage/migration historique ;
+- ne pas traiter comme simple micro-lot avant audit dédié de cette compatibilité.
+
+`gensrpg_challenge_library_v1` :
+- bibliothèque principale + fallbacks dans plusieurs générations Dungeon ;
+- plusieurs lecteurs historiques ;
+- hors prochain micro-lot minimal.
+
+## Décision finale de l'audit
+
+Ouvrir ensuite un lot homogène dédié uniquement à :
+`gensrpg_dungeon_deck_v1`.
+
+Le lot devra :
+1. repartir du checkpoint GREEN final de cet audit ;
+2. caractériser parité lecture/écriture avant changement ;
+3. remplacer seulement les 3 accès directs par `GensStorageV1` ;
+4. conserver les `try/catch` historiques des writers ;
+5. conserver Dungeon comme propriétaire du schéma, de l'initialisation et des quantités ;
+6. mettre à jour le manifeste Phase 2 de `203` à `200` accès directs si et seulement si la migration est validée ;
+7. repasser Architecture + navigateur, Firefox et Tactical Dock.
+
+Toujours interdit :
+- `gensrpg_dungeon_runtime_v2` ;
+- Stats ;
+- Tactical ;
+- changements loot/gameplay/quantités ;
+- migration de schéma ;
+- correction de la dette Fouiller authored.

@@ -24917,17 +24917,17 @@ function dungeonResolveTrapAgainstHero(trapId,heroId,show=true){const trap=dunge
 const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";
 function dungeonLoadDeckState(){
   let ds=null;
-  try{ds=JSON.parse(localStorage.getItem(DUNGEON_DECK_KEY)||"null")}catch(e){}
+  ds=GensStorageV1.readJson(localStorage,DUNGEON_DECK_KEY,null)
   if(!ds||!ds.remaining)ds={remaining:{},createdAt:Date.now()};
   const cfg=loadDeckConfig();
   let changed=false;
   itemsForMode(true).forEach(it=>{
     if(ds.remaining[it.id]===undefined){ds.remaining[it.id]=Math.max(1,parseInt(cfg[it.id],10)||2);changed=true}
   });
-  if(changed)try{localStorage.setItem(DUNGEON_DECK_KEY,JSON.stringify(ds))}catch(e){}
+  if(changed)try{GensStorageV1.writeJson(localStorage,DUNGEON_DECK_KEY,ds)}catch(e){}
   return ds
 }
-function dungeonSaveDeckState(ds){try{localStorage.setItem(DUNGEON_DECK_KEY,JSON.stringify(ds))}catch(e){}}
+function dungeonSaveDeckState(ds){try{GensStorageV1.writeJson(localStorage,DUNGEON_DECK_KEY,ds)}catch(e){}}
 function dungeonBuildDeckState075(){
   try{refreshCustomEquipmentIntoItems?.()}catch(e){}
   const cfg=loadDeckConfig?.()||{},remaining={};

@@ -365,6 +365,9 @@ jobs:
       - name: Vérifier le lancement Survie par le vrai Shell
         run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
 
+      - name: Caractériser Fouiller et les arts Survie
+        run: node tests/gens_survival_search_art_browser_v11411.test.cjs
+
       - name: Caractériser Dungeon après Survie dans Chromium
         env:
           GENSRPG_BROWSER: chromium

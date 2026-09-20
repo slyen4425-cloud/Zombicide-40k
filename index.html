@@ -32788,8 +32788,8 @@ try{
 const KEY="gensrpg_manual_mj_effects_v1";
 
 function esc(s){try{return z40kEscHtml(String(s??""))}catch(e){return String(s??"")}}
-function loadEffects(){try{const a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return[]}}
-function saveEffects(a){localStorage.setItem(KEY,JSON.stringify(a||[]))}
+function loadEffects(){const a=GensStorageV1.readJson(localStorage,KEY,[]);return Array.isArray(a)?a:[]}
+function saveEffects(a){GensStorageV1.writeJson(localStorage,KEY,a||[])}
 function heroName46(id){return CHARS?.[id]?.name||findCustomHero?.(id)?.name||id}
 
 function skillRows(def){

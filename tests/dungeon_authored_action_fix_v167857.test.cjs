@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-authored-action-fix-167857.js'),'utf8');
+const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-authored-action-fix-167857.js'),'utf8');\nconst storageSrc=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','core','storage-v1.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2',PRIMARY='gensrpg_dungeon_primary_selection_v167833';
 const rt={room:3,index:0,participants:['lyra'],positions:{lyra:4},last:{authoredRuntime167839:true,worldDungeonId:'world-1',worldNodeId:'A'}};
 const store={[RT]:JSON.stringify(rt),[PRIMARY]:JSON.stringify({kind:'world',id:'world-1'})},listeners={},timers=[];let paints=0,syncs=0,visuals=0,renders=0,persists=0;
@@ -12,7 +12,7 @@ const legacy=control('🔍 FOUILLER LE COFFRE'),generic=control('🔎 FOUILLER')
 const document={readyState:'complete',addEventListener(n,fn){(listeners[n]||(listeners[n]=[])).push(fn)},querySelectorAll(){return [legacy,generic,exact,other]}};
 const spatial={persist(x){persists++;store[RT]=JSON.stringify(x);return true}};
 const context={console,JSON,Math,Date,document,localStorage:{getItem(k){return store[k]||null}},setTimeout(fn,ms){timers.push({fn,ms});return timers.length},DungeonZoneContent167824:{getZoneContent(){return {mode:'fixed',chests:[{id:'c1',cell:4}]}}},DungeonSpatial313:spatial,DungeonZoneLinks167846:{paintTravelButtons(){paints++}},DungeonAuthoredRuntime167839:{syncActionButton(){syncs++}},DungeonAuthoredCacheVisual167852:{sync(){visuals++}},DungeonCore01:{render(){renders++},show(){}}};context.window=context;context.globalThis=context;
-vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-action-fix-167857.js'});
+vm.createContext(context);vm.runInContext(storageSrc,context,{filename:'storage-v1.js'});vm.runInContext(src,context,{filename:'dungeon-authored-action-fix-167857.js'});
 const api=context.DungeonAuthoredActionFix167857;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.61');assert.equal(api.builtSelected(),true);assert.equal(context.DungeonSpatial313.persist.__daf167861,true);
 api.syncActions();assert.equal(api.exactChestAtActivePosition(),true);assert.equal(legacy.hidden,true);assert.equal(legacy.style.display,'none');assert.equal(generic.hidden,true,'generic search must be hidden on an exact authored chest cell');assert.equal(exact.hidden,false);assert.ok(paints>0&&syncs>0&&visuals>0);
 let prevented=false,stopped=false;api.blockLegacyChestClick({target:legacy,preventDefault(){prevented=true},stopImmediatePropagation(){stopped=true}});assert.equal(prevented,true);assert.equal(stopped,true);let genericPrevented=false;api.blockLegacyChestClick({target:generic,preventDefault(){genericPrevented=true},stopImmediatePropagation(){}});assert.equal(genericPrevented,true,'generic search click must be blocked on exact authored chest');

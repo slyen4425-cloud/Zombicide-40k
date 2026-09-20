@@ -64,13 +64,40 @@ Candidats conservés par l'audit précédent :
 
 Un brouillon `next-audit-4` a été créé depuis l'ancien checkpoint Primary Selection avant que l'ascendance Git révèle le lot Dungeon Deck déjà plus récent. Il a été abandonné avant toute modification runtime et ne constitue pas un point de reprise valide.
 
+### Inspection exacte terminée
+
+Le fichier post-Deck a été vérifié :
+- taille `8 174 603` octets ;
+- blob `739ca52610308d085ecf2635c5bc748f70c79a11`.
+
+Candidat retenu :
+`gensrpg_manual_mj_effects_v1`.
+
+Pourquoi :
+- un seul propriétaire `dungeonCore046ManualMjAssist` ;
+- 1 lecture JSON + 1 écriture JSON ;
+- fallback/type `[]` parfaitement caractérisé ;
+- aucune dépendance `gensrpg_dungeon_runtime_v2` ;
+- aucune migration ou compatibilité historique.
+
+Différés :
+- Economy : règles + état de session dynamique ;
+- RPG gameplay mirror : compatibilité historique + seed Capture ;
+- Challenge Library : plusieurs lecteurs historiques.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_5.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_5_v1.test.cjs`.
+
 ### Prochaine action
 
-1. inspecter le `index.html` exact post-Deck ;
-2. caractériser les quatre familles restantes : read/write/fallback/schema/propriétaire ;
-3. retenir uniquement le candidat le plus isolé ;
-4. documenter et verrouiller la sélection sans migration runtime dans ce lot ;
-5. repasser Architecture + navigateur, Firefox et Tactical Dock avant checkpoint GREEN.
+1. valider cet audit par Architecture + navigateur, Firefox et Tactical Dock ;
+2. créer `checkpoint/gensrpg-phase4-storage-next-audit-5-green-2026-09-20` ;
+3. ouvrir un lot neuf uniquement pour `gensrpg_manual_mj_effects_v1` ;
+4. caractériser la parité read/write avant tout raccord ;
+5. ne modifier aucun autre stockage.
 
 
 

@@ -281,6 +281,12 @@ jobs:
       - name: Sélectionner Dungeon Scene après Challenge History
         run: node tests/gens_phase4_storage_next_audit_10_v1.test.cjs
 
+      - name: Vérifier la parité stockage Dungeon Scene
+        run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core du stockage Dungeon Scene
+        run: node tests/gens_phase4_storage_dungeon_scene_owner_v1.test.cjs
+
       - name: Caractériser la parité stockage Challenge Library
         run: node tests/gens_phase4_storage_challenge_library_parity_v1.test.cjs
 

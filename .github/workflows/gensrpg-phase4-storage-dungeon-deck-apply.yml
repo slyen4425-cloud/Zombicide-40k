@@ -1,0 +1,91 @@
+name: GenSrpG temporary Dungeon deck storage micro-diff
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-storage-dungeon-deck-2026-09-20
+    paths:
+      - .github/workflows/gensrpg-phase4-storage-dungeon-deck-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-exact-index-micro-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer la branche exacte
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-storage-dungeon-deck-2026-09-20
+          fetch-depth: 0
+
+      - name: Vérifier puis appliquer uniquement le raccord Dungeon Deck
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          raw=path.read_bytes()
+          def blob_sha(data):
+              return hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
+
+          source_sha=blob_sha(raw)
+          expected_source="5d2b0a6da51fd70bd36f087cb9ab82a1af308226"
+          expected_target="739ca52610308d085ecf2635c5bc748f70c79a11"
+
+          if source_sha==expected_target:
+              print("Micro-diff déjà appliqué exactement.")
+              raise SystemExit(0)
+          if source_sha!=expected_source:
+              raise SystemExit(f"REFUS: blob index.html inattendu: {source_sha}")
+
+          text=raw.decode("utf-8")
+          old_read='try{ds=JSON.parse(localStorage.getItem(DUNGEON_DECK_KEY)||"null")}catch(e){}'
+          new_read='ds=GensStorageV1.readJson(localStorage,DUNGEON_DECK_KEY,null)'
+          old_write='try{localStorage.setItem(DUNGEON_DECK_KEY,JSON.stringify(ds))}catch(e){}'
+          new_write='try{GensStorageV1.writeJson(localStorage,DUNGEON_DECK_KEY,ds)}catch(e){}'
+
+          if text.count(old_read)!=1:
+              raise SystemExit(f"REFUS: anciennes lectures Deck: {text.count(old_read)}")
+          if text.count(old_write)!=2:
+              raise SystemExit(f"REFUS: anciennes écritures Deck: {text.count(old_write)}")
+
+          text=text.replace(old_read,new_read).replace(old_write,new_write)
+          target=text.encode("utf-8")
+          target_sha=blob_sha(target)
+          if len(target)!=8174603:
+              raise SystemExit(f"REFUS: taille cible inattendue: {len(target)}")
+          if target_sha!=expected_target:
+              raise SystemExit(f"REFUS: blob cible inattendu: {target_sha}")
+          if text.count("localStorage.getItem(DUNGEON_DECK_KEY)")!=0:
+              raise SystemExit("REFUS: lecture directe Deck restante")
+          if text.count("localStorage.setItem(DUNGEON_DECK_KEY")!=0:
+              raise SystemExit("REFUS: écriture directe Deck restante")
+          if text.count("GensStorageV1.readJson(localStorage,DUNGEON_DECK_KEY,null)")!=1:
+              raise SystemExit("REFUS: nombre de lectures Core Deck incorrect")
+          if text.count("GensStorageV1.writeJson(localStorage,DUNGEON_DECK_KEY,ds)")!=2:
+              raise SystemExit("REFUS: nombre d'écritures Core Deck incorrect")
+
+          path.write_bytes(target)
+          print("Micro-diff Deck vérifié:", target_sha)
+
+      - name: Vérifier le diff
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- index.html
+
+      - name: Committer uniquement index.html si nécessaire
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Aucun changement à committer."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          test "$(git diff --cached --name-only)" = "index.html"
+          git commit -m "refactor: route Dungeon deck JSON through Core storage"
+          git push origin HEAD:work/gensrpg-phase4-storage-dungeon-deck-2026-09-20

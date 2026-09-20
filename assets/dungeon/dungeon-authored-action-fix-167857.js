@@ -13,7 +13,7 @@ const PRIMARY_KEY="gensrpg_dungeon_primary_selection_v167833";
 const VERSION="1.5.0",APP_VERSION="16.78.61";
 let installed=false,postMovePending=false;
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
-function primary(){try{const p=ROOT.DungeonWorldSessionBridge167832?.primary?.();if(p)return p}catch(e){}try{return JSON.parse(localStorage.getItem(PRIMARY_KEY)||"null")}catch(e){return null}}
+function primary(){try{const p=ROOT.DungeonWorldSessionBridge167832?.primary?.();if(p)return p}catch(e){}return ROOT.GensStorageV1.readJson(ROOT.localStorage,PRIMARY_KEY,null)}
 function builtSelected(){const p=primary();return String(p?.kind||"")==="world"&&!!p?.id}
 function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
 function contextActive(){return builtSelected()||authored(readRt())}

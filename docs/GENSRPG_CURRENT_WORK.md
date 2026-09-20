@@ -1,5 +1,86 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / audit suivant 6 — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-next-audit-6-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-next-audit-6-2026-09-20`
+
+Base exacte :
+`d5cc8d0321e3f2a0b0de81c5d5eef018074870c8`
+(`checkpoint/gensrpg-phase4-storage-manual-mj-effects-green-2026-09-20`).
+
+Lot précédent Manual MJ clôturé GREEN :
+- Architecture + navigateur complet `35516286958` — SUCCESS ;
+- Firefox `35516286988` — SUCCESS ;
+- Tactical Dock `35516286973` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### État de départ stockage
+
+- accès directs : `198` ;
+- résolus : `133` ;
+- non résolus : `65` ;
+- clés directes résolues : `25`.
+
+`index.html` exact :
+- taille : `8 174 580` octets ;
+- blob : `a070af09f9cb1fcda78987e83bc117d7544d1b6c`.
+
+### Mission
+
+Audit uniquement.
+Choisir le prochain micro-lot JSON minimal après Manual MJ.
+
+Candidat retenu :
+`gensrpg_dungeon_economy_rules_160`.
+
+Frontière prouvée dans `dungeonEconomy160` :
+- règles Economy constantes : 1 lecture + 1 écriture ;
+- session Economy dynamique : 1 lecture + 1 écriture, hors périmètre ;
+- inventaire héros : 1 écriture dynamique, hors périmètre.
+
+Micro-diff cible ultérieur :
+- lecture règles -> Core Storage sous le `try/catch` historique ;
+- écriture règles -> Core Storage sans avaler les erreurs ;
+- session dynamique et inventaire strictement intacts.
+
+Résultat déterministe préparé :
+- taille cible : `8 174 580` ;
+- blob cible : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+Différés :
+- Gameplay-by-profile ;
+- Challenge Library ;
+- `gensrpg_dungeon_runtime_v2`.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_6.md`.
+
+Sentinelle :
+`tests/gens_phase4_storage_next_audit_6_v1.test.cjs`.
+
+### Interdits
+
+- aucun runtime dans cet audit ;
+- aucune session Economy dynamique ;
+- aucun inventaire héros ;
+- aucun gameplay/UI/loot/marchand/coffre ;
+- aucun Stats/Tactical/Capture/Survie ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Valider l'audit 6 par Architecture + navigateur complet, Firefox et Tactical Dock.
+Si GREEN, checkpoint documentaire final puis lot neuf uniquement pour `gensrpg_dungeon_economy_rules_160`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Manual MJ Effects — 2026-09-20
 
 Branche :

@@ -104,3 +104,26 @@ Les autres seeds Capture restent directs et intacts.
 - aucune migration de schéma ;
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
+
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`89e1cca79f7519f8525b02993f338831e056688b`
+
+Runs :
+- Architecture + navigateur complet `35518558729` — SUCCESS ;
+- Firefox `35518558755` — SUCCESS ;
+- Tactical Dock `35518558684` — SUCCESS.
+
+Aucun runtime, gameplay, asset ou stockage n'a été modifié dans cet audit.
+
+Décision confirmée :
+le prochain micro-lot est exclusivement
+`gensrpg_rpg_gameplay_by_profile_v1`
+dans le seed gameplay de `builtinMonsterCapture162`.
+
+Les autres seeds Capture restent hors périmètre.
+
+Prochaine étape autorisée :
+ouvrir un lot dédié depuis le checkpoint GREEN final de cet audit.

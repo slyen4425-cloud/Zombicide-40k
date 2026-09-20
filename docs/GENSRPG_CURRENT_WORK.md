@@ -75,11 +75,57 @@ Conformément à la règle 26, aucune modification du gros HTML ne sera effectu�
 Document du lot :
 `docs/GENSRPG_PHASE4_STORAGE_ECONOMY_SESSION.md`.
 
-### Prochaine action
+### Implémentation Economy Session
 
-Poser parité + garde propriétaire avant tout raccord runtime, obtenir le RED
-attendu de la garde, puis préparer le micro-diff exact des deux transports.
-Aucun checkpoint GREEN anticipé.
+Raccord runtime appliqué uniquement aux deux transports de session Economy :
+- lecture directe JSON -> `GensStorageV1.readJson(localStorage,key,{})` ;
+- écriture directe JSON -> `GensStorageV1.writeJson(localStorage,key,rest)`.
+
+Résultat exact `index.html` :
+- taille : `8 174 580` octets, inchangée ;
+- blob avant : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054` ;
+- blob après : `1545aba502777d9fb76decdcee90a89c7cf3f971`.
+
+Contrats conservés :
+- clé profile-scoped et fallback `dungeon` inchangés ;
+- defaults `chests / merchantPasses` inchangés ;
+- `Object.assign`, `{key,...d}`, clé portée par l'objet et exclusion du payload inchangés ;
+- erreurs de sérialisation/écriture propagées ;
+- ordre save -> UI/merchant inchangé ;
+- Economy Rules et inventaire héros du même bloc intacts.
+
+Validation ciblée locale du vrai propriétaire :
+- 13 cas de lecture ;
+- 7 variantes/fallbacks de profil ;
+- isolation profil A/B ;
+- comportement legacy d'une `key` persistée préservé ;
+- erreurs lecture/profil/sérialisation/écriture préservées ;
+- chemins MJ coffre, MJ marchand et ouverture marchand préservés ;
+- parité legacy/Core : GREEN.
+
+Manifeste Phase 2 après raccord :
+- accès directs : `185` ;
+- résolus : `120` ;
+- non résolus : `65` ;
+- clés directes : `20` ;
+- Dungeon : `153 / 103 / 50 / 12`.
+
+Les changements complémentaires depuis le checkpoint sont limités aux tests,
+empreintes et manifestes rendus obsolètes par ce micro-diff.
+
+### Validation et prochaine action
+
+HEAD fonctionnel courant :
+`eba69735dc963837d0bd5449b661f205d934ca85`.
+
+La branche est en validation finale :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun checkpoint GREEN ne doit être créé avant succès des trois validations sur
+un même HEAD final. En cas de RED fonctionnel hors périmètre, le caractériser
+sans élargir ce lot. Aucun merge sur `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 11 — 2026-09-20

@@ -20,7 +20,11 @@ const previewBlock=(preview.match(/const tags=\[(.*?)\n\s*\];/s)||[])[1];
 assert.ok(workflowBlock&&previewBlock,'Pages/preview composition blocks required');
 const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>stripQuery(m[1]));
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)].map(m=>stripQuery(m[1]));
-assert.deepEqual(previewInjected,injected);
+const CORE_STORAGE='assets/gensrpg/core/storage-v1.js';
+assert.equal(rawDirect.filter(x=>x===CORE_STORAGE).length,1,'Core storage must be loaded exactly once by source index.html');
+assert.equal(injected[0],CORE_STORAGE,'Pages fallback must keep Core storage first in the injected module list');
+assert.equal(previewInjected.includes(CORE_STORAGE),false,'preview must inherit Core storage from source index.html instead of injecting a duplicate');
+assert.deepEqual(previewInjected,injected.filter(x=>x!==CORE_STORAGE),'preview and Pages must otherwise share the same external module order');
 
 const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),

@@ -1,5 +1,66 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / Dungeon Scene — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-dungeon-scene-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-dungeon-scene-2026-09-20`
+
+Base exacte :
+`1caefc7bf572215ec1c62ad24d94b21bd42cbae4`
+(`checkpoint/gensrpg-phase4-storage-next-audit-10-green-2026-09-20`).
+
+Audit 10 clôturé GREEN :
+- Architecture + navigateur complet `35528190575` — SUCCESS ;
+- Firefox `35528190639` — SUCCESS ;
+- Tactical Dock `35528190624` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_dungeon_scene_v1`.
+
+Propriétaire :
+`dungeonMj72_2Script`.
+
+Accès ciblés :
+- 1 lecture JSON ;
+- 1 écriture JSON ;
+- 0 removeItem.
+
+Source :
+- `index.html` : `8 174 580` octets ;
+- blob : `30487d09481e11e5883faca1a6e49727d9cecfb6`.
+
+Cible :
+- taille : `8 174 580` ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054`.
+
+### TDD
+
+- parité ajoutée ;
+- owner guard ajouté ;
+- avant raccord : parité attendue GREEN, owner guard attendu RED ;
+- aucun autre stockage Dungeon ne doit être modifié.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_DUNGEON_SCENE.md`.
+
+### Prochaine action
+
+1. valider le RED TDD ciblé ;
+2. appliquer le micro-diff exact de deux expressions ;
+3. réaligner uniquement manifeste/empreintes obsolètes ;
+4. relancer Architecture+navigateur, Firefox et Tactical ;
+5. aucun merge sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 10 — 2026-09-20
 
 Branche :

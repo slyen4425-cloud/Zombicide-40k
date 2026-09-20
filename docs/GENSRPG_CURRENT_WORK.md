@@ -1,5 +1,67 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 stockage / gameplay-by-profile — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-gameplay-by-profile-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-gameplay-by-profile-2026-09-20`
+
+Base exacte :
+`3e549bc6d53cd8c93918f3c56781b8bd71c1c98b`
+(`checkpoint/gensrpg-phase4-storage-next-audit-7-green-2026-09-20`).
+
+Audit 7 clôturé GREEN :
+- Architecture + navigateur complet `35519108891` — SUCCESS après relance du timeout intermittent d'overlay Tactical ;
+- Firefox `35519108892` — SUCCESS ;
+- Tactical Dock `35519108890` — SUCCESS.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663` — V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement :
+`gensrpg_rpg_gameplay_by_profile_v1`.
+
+Propriétaire :
+`builtinMonsterCapture162`.
+
+Source exacte :
+- `index.html` : `8 174 580` octets ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+Sous-responsabilité ciblée :
+- 1 lecture JSON du seed gameplay Capture ;
+- 1 écriture JSON conditionnelle.
+
+Micro-diff déterministe :
+- taille cible : `8 174 580` ;
+- blob cible : `0b9c41c39db0d073c7b9ed580f66140b8d9bcda2`.
+
+### Méthode
+
+1. parité + owner guard avant raccord ;
+2. owner guard attendu RED tant que les deux accès directs existent ;
+3. raccord exact de deux lignes seulement ;
+4. `if(!map[MC162_ID])`, clone et warning externe inchangés ;
+5. autres stockages Capture inchangés ;
+6. réalignement uniquement des empreintes/manifeste obsolètes ;
+7. Architecture+navigateur, Firefox, Tactical avant GREEN.
+
+Document :
+`docs/GENSRPG_PHASE4_STORAGE_GAMEPLAY_BY_PROFILE.md`.
+
+Interdits :
+- aucun autre seed Capture ;
+- aucun changement Monster Capture/gameplay/UI ;
+- aucun Challenge Library / runtime_v2 / Stats / Tactical / Runtime Repair ;
+- aucun observer/timer/retry/wrapper ;
+- aucun merge sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / audit suivant 7 — 2026-09-20
 
 Branche :

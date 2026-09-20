@@ -195,3 +195,20 @@ HEAD documenté au moment de cette note :
 
 La validation finale Architecture + navigateur complet, Firefox et Tactical Dock
 reste obligatoire avant checkpoint GREEN. Aucun résultat GREEN n'est anticipé ici.
+
+## Validation fonctionnelle GREEN
+
+HEAD fonctionnel :
+`d627d2143885e3084075017891a7408e60ccb4c4`.
+
+Runs :
+- Architecture + navigateur complet `35532444858` — SUCCESS ;
+- Firefox `35532444849` — SUCCESS ;
+- Tactical Dock `35532444882` — SUCCESS.
+
+Le navigateur complet a repassé les sentinelles Survie, Dungeon après Survie,
+Builder, Config objet, fiche RPG, authored cache/traps, Save & Quit/reprise,
+PvP, Capture, non-interférence, murs, preview et resolver d'assets.
+
+Cette fermeture documentaire doit elle-même repasser les trois workflows avant
+création de `checkpoint/gensrpg-phase4-storage-economy-session-green-2026-09-20`.

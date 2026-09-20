@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const baseSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-100.js'),'utf8');
 const v2Src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-v2-167819.js'),'utf8');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -14,12 +15,13 @@ const values=new Map();
 const ctx={console,Math,Date,setTimeout,clearTimeout,localStorage:{getItem(k){return values.has(k)?values.get(k):null},setItem(k,v){values.set(k,String(v))},removeItem(k){values.delete(k)}}};
 ctx.globalThis=ctx;
 vm.createContext(ctx);
+vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
 vm.runInContext(baseSrc,ctx,{filename:'dungeon-room-creator-100.js'});
 vm.runInContext(v2Src,ctx,{filename:'dungeon-room-creator-v2-167819.js'});
 
 const base=ctx.DungeonRoomCreator100;
 const v2=ctx.DungeonRoomCreatorV2;
-assert.ok(base&&v2,'Room Creator V1 + V2 APIs must load');
+assert.ok(ctx.GensStorageV1&&base&&v2,'Core storage + Room Creator V1 + V2 APIs must load');
 assert.equal(v2.VERSION,'2.0.0');
 assert.equal(v2.APP_VERSION,'16.78.19');
 assert.equal(v2.SCHEMA_VERSION,2);

@@ -4,10 +4,10 @@
   "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
-    "totalAccesses": 219,
-    "resolvedAccesses": 147,
+    "totalAccesses": 217,
+    "resolvedAccesses": 145,
     "unresolvedAccesses": 72,
-    "distinctResolvedKeys": 30
+    "distinctResolvedKeys": 29
   },
   "byDomain": {
     "dungeon": {
@@ -17,10 +17,10 @@
       "distinctKeys": 20
     },
     "builders": {
-      "accesses": 5,
-      "resolved": 4,
+      "accesses": 3,
+      "resolved": 2,
       "unresolved": 1,
-      "distinctKeys": 2
+      "distinctKeys": 1
     },
     "tactical": {
       "accesses": 2,
@@ -258,22 +258,6 @@
         "file:assets/dungeon/dungeon-authored-bootstrap-167849.js",
         "file:assets/dungeon/dungeon-large-room-support-167834.js",
         "file:assets/dungeon/dungeon-world-session-bridge-167832.js"
-      ],
-      "ops": [
-        "getItem",
-        "setItem"
-      ],
-      "kinds": [
-        "constant"
-      ]
-    },
-    {
-      "key": "gensrpg_dungeon_room_interactions_v2",
-      "domains": [
-        "builders"
-      ],
-      "sources": [
-        "file:assets/dungeon/dungeon-room-creator-v2-167819.js"
       ],
       "ops": [
         "getItem",

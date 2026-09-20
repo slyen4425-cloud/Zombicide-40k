@@ -24,8 +24,10 @@ assert.equal((room100.match(/localStorage\.getItem\(/g)||[]).length,0,'Room Crea
 assert.equal((room100.match(/localStorage\.setItem\(/g)||[]).length,0,'Room Creator 1.0 direct writes must be removed after Core raccord');
 assert.match(room100,/GensStorageV1\.readJson\(/,'Room Creator 1.0 must delegate reads to Core storage');
 assert.match(room100,/GensStorageV1\.writeJson\(/,'Room Creator 1.0 must delegate writes to Core storage');
-assert.equal((roomV2.match(/localStorage\.getItem\(/g)||[]).length,1,'Room Creator V2 must have one direct read owner before extraction');
-assert.equal((roomV2.match(/localStorage\.setItem\(/g)||[]).length,1,'Room Creator V2 must have one direct write owner before extraction');
+assert.equal((roomV2.match(/localStorage\.getItem\(/g)||[]).length,0,'Room Creator V2 direct reads must be removed after Core raccord');
+assert.equal((roomV2.match(/localStorage\.setItem\(/g)||[]).length,0,'Room Creator V2 direct writes must be removed after Core raccord');
+assert.match(roomV2,/GensStorageV1\.readJson\(/,'Room Creator V2 must delegate reads to Core storage');
+assert.match(roomV2,/GensStorageV1\.writeJson\(/,'Room Creator V2 must delegate writes to Core storage');
 assert.equal((world.match(/localStorage\.getItem\(/g)||[]).length,1,'World Builder must have one direct read owner before extraction');
 assert.equal((world.match(/localStorage\.setItem\(/g)||[]).length,1,'World Builder must have one direct write owner before extraction');
 assert.equal((visual.match(/localStorage\.getItem\(/g)||[]).length,1,'Visual Config must have one direct graph read before extraction');
@@ -35,7 +37,7 @@ assert.match(room100,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\[
 assert.match(room100,/map\(normalizeRoom\)\.filter\(Boolean\)/,'Room normalization must remain module-owned');
 assert.match(room100,/GensStorageV1\.writeJson\(ROOT\.localStorage,STORAGE_KEY,clean\)/,'Room Creator 1.0 must write normalized module data through Core storage');
 
-assert.match(roomV2,/JSON\.parse\(localStorage\.getItem\(STORAGE_KEY\)\|\|"\{\}"/,'Room Creator V2 empty fallback semantics must be characterized');
+assert.match(roomV2,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\{\}\)/,'Room Creator V2 must preserve {} fallback through Core storage');
 assert.match(roomV2,/normalizeMeta/,'Room Creator V2 normalization must remain module-owned');
 
 assert.match(world,/JSON\.parse\(localStorage\.getItem\(STORAGE_KEY\)\|\|"\[\]"/,'World Builder empty fallback semantics must be characterized');

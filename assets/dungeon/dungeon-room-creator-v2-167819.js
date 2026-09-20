@@ -16,8 +16,8 @@ let currentRoomId="";
 function now(){return new Date().toISOString()}
 function uid(prefix){return String(prefix||"drc2")+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function readStore(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");return raw&&typeof raw==="object"&&!Array.isArray(raw)?raw:{}}catch(e){return {}}}
-function writeStore(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data&&typeof data==="object"?data:{}));return data}
+function readStore(){const raw=ROOT.GensStorageV1.readJson(ROOT.localStorage,STORAGE_KEY,{});return raw&&typeof raw==="object"&&!Array.isArray(raw)?raw:{}}
+function writeStore(data){const value=data&&typeof data==="object"?data:{};ROOT.GensStorageV1.writeJson(ROOT.localStorage,STORAGE_KEY,value);return data}
 function roomMeta(roomId){const id=String(roomId||"");const all=readStore();const raw=all[id]||{};return normalizeMeta({...raw,roomId:id})}
 function saveRoomMeta(meta){const clean=normalizeMeta(meta),all=readStore();all[clean.roomId]=clean;writeStore(all);return JSON.parse(JSON.stringify(clean))}
 function removeRoomMeta(roomId){const id=String(roomId||""),all=readStore();delete all[id];writeStore(all)}

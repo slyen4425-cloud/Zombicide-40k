@@ -1,5 +1,87 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Storage / Economy Session — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-storage-economy-session-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-storage-economy-session-2026-09-20`.
+- Base exacte et dernier GREEN : `b5ae8be05e0b5cf616781cefd0aa22b5ace2eec6`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-next-audit-11-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Périmètre unique
+
+Migrer uniquement le transport JSON de la famille dynamique :
+`gensrpg_dungeon_session_eco_160_<profileId>`.
+
+Propriétaire unique prouvé par Audit 11 :
+`dungeonEconomy160`.
+
+Service Core existant réutilisé :
+`GensStorageV1`.
+
+Accès ciblés :
+- 1 lecture JSON directe ;
+- 1 écriture JSON directe ;
+- 0 `removeItem`.
+
+Le lot ne modifie ni la clé, ni le schéma, ni les règles Economy, ni les compteurs,
+ni les coffres/fouilles/marchands, ni l'inventaire héros, ni l'UI MJ.
+
+### Contrats sensibles à préserver
+
+- la clé de lecture reste `gensrpg_dungeon_session_eco_160_<activeProfileId>` avec fallback `dungeon` ;
+- les defaults restent `{chests:0, merchantPasses:0}` ;
+- la fusion historique `Object.assign` et le retour `{key,...d}` restent inchangés ;
+- une propriété `key` déjà persistée conserve son comportement legacy et peut gagner sur la clé calculée ;
+- le writer utilise uniquement `d.key` et ne recalcule jamais le profil actif ;
+- `const {key,...rest}=d` continue d'exclure la clé du payload ;
+- absence de clé = no-op ;
+- erreurs de sérialisation/écriture propagées ;
+- les actions UI qui suivent une écriture restent interrompues en cas d'échec.
+
+### TDD avant raccord
+
+1. conserver la caractérisation réelle Audit 11 ;
+2. ajouter une parité qui applique en mémoire les deux remplacements Core au vrai propriétaire et rejoue le même contrat ;
+3. ajouter une garde propriétaire attendue RED tant que les deux accès directs existent ;
+4. brancher ces tests à Architecture ;
+5. seulement après le RED attendu, appliquer le micro-diff runtime exact ;
+6. réaligner uniquement les empreintes/manifeste rendus obsolètes ;
+7. Architecture + navigateur complet, Firefox et Tactical Dock requis avant GREEN.
+
+### Interdits
+
+- aucun autre accès de `dungeonEconomy160` ;
+- aucun inventaire héros `key(heroId)` ;
+- aucun Pending Trap / Special Branch ;
+- aucun gameplay-by-profile ;
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun Stats / Tactical / Capture / Survie ;
+- aucun observer, timer/retry ou wrapper ;
+- aucun changement de formule/valeur Economy ;
+- aucun merge sur `main`.
+
+### Source exacte
+
+Base `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054`.
+
+Conformément à la règle 26, aucune modification du gros HTML ne sera effectuée
+à partir d'une copie non vérifiée.
+
+Document du lot :
+`docs/GENSRPG_PHASE4_STORAGE_ECONOMY_SESSION.md`.
+
+### Prochaine action
+
+Poser parité + garde propriétaire avant tout raccord runtime, obtenir le RED
+attendu de la garde, puis préparer le micro-diff exact des deux transports.
+Aucun checkpoint GREEN anticipé.
+
+
 ## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 11 — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

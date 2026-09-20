@@ -151,7 +151,7 @@ async function startSurvival(page){
     await page.waitForFunction(()=>document.querySelectorAll('#deckConfig img').length>0);
     const itemArts=await page.evaluate(()=>[...document.querySelectorAll('#deckConfig img')]
       .map(img=>({src:img.getAttribute('src')||'',complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}))
-      .filter(x=>/assets\/img_(?:0[7-9]|1\\d|2[0-6])_/.test(x.src)));
+      .filter(x=>/assets\/img_(?:0[7-9]|1\d|2[0-6])_/.test(x.src)));
     assert.equal(itemArts.length,20,'the real Survival deck renderer must expose the twenty built-in item/search-event arts');
     assert.ok(itemArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all built-in Survival item arts must decode');
     await page.locator('#objectManager .topbar button.back').click();
@@ -168,7 +168,7 @@ async function startSurvival(page){
     assert.ok(enemyArts.every(x=>x.complete&&x.naturalWidth>0&&x.naturalHeight>0),'all built-in Survival enemy arts must decode');
 
     const expected=Array.from({length:32},(_,i)=>String(i+1).padStart(2,'0'));
-    const loaded=[...heroArts,...itemArts,...enemyArts].map(x=>(x.src.match(/assets\/img_(\\d{2})_/)||[])[1]).filter(Boolean);
+    const loaded=[...heroArts,...itemArts,...enemyArts].map(x=>(x.src.match(/assets\/img_(\d{2})_/)||[])[1]).filter(Boolean);
     assert.deepEqual([...new Set(loaded)].sort(),expected,'real Survival renderers must collectively load img_01 through img_32 with no cross-module fallback');
 
     const brokenSurvivalArts=badAssets.filter(x=>/\/assets\/img_\d+_/i.test(x.url||''));

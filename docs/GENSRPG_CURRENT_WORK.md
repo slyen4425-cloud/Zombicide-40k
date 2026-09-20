@@ -9,6 +9,76 @@ Lire avant tout changement :
 4. `docs/GENSRPG_COORDINATION.md`
 5. `docs/GENSRPG_PHASE1_SENTINEL_AUDIT.md`
 
+## Chantier courant prioritaire — Phase 4 / stockage — Capture progress JSON — 2026-09-20
+
+Branche :
+`work/gensrpg-phase4-storage-capture-progress-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase4-storage-capture-progress-2026-09-20`
+
+Base exacte :
+`54ba3c61af9e885239f1e3e397bf5386f6f6db41`
+(`checkpoint/gensrpg-phase4-storage-core-bootstrap-order-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Lot précédent — Core Storage Bootstrap Order — GREEN
+
+HEAD documentaire final :
+`54ba3c61af9e885239f1e3e397bf5386f6f6db41`
+
+Runs :
+- Architecture + navigateur complet `35502310229` — SUCCESS ;
+- Firefox `35502310251` — SUCCESS ;
+- Tactical Dock `35502310225` — SUCCESS.
+
+Core Storage est désormais chargé une seule fois depuis le `index.html` source avant les scripts inline métier.
+Pages conserve un fallback ordonné, et la preview hérite du bootstrap source sans injection concurrente.
+
+### Périmètre unique du lot courant
+
+Famille :
+`gensrpg_capture_progress_v2_<profileId>`
+
+Responsabilité métier :
+Capture progression / réglages MJ Capture.
+
+État historique caractérisé sur le `index.html` exact du checkpoint :
+- 1 lecture JSON historique ;
+- 6 écritures JSON historiques ;
+- clé dynamique par profil via `captureCreatureProgressRulesKey()` ;
+- fallback historique `{}`, fusionné dans les defaults de `captureCreatureProgressRules()` ;
+- writers conservant le même objet sérialisé ;
+- aucune migration de schéma demandée.
+
+Le `index.html` exact courant a été reconstruit depuis le fichier fourni par Sylvain + l'unique micro-diff Bootstrap puis vérifié :
+- taille : `8 174 618` octets ;
+- blob Git : `476f91b7a5921c9f02f17ba72c801f4bec16a809` ;
+- correspond exactement au `index.html` de la base GREEN.
+
+### Objectif
+
+Raccorder uniquement la sérialisation JSON de cette famille à `GensStorageV1` :
+- mêmes clés ;
+- mêmes objets ;
+- mêmes fallbacks ;
+- mêmes règles Capture ;
+- mêmes writers métier ;
+- aucun nouveau wrapper métier ;
+- aucun changement d'UI ;
+- aucune migration de format.
+
+### Interdit
+
+- aucun `gensrpg_dungeon_runtime_v2` ;
+- aucun état héros dynamique `key(heroId)` ;
+- aucun Stats/Tactical ;
+- aucun changement des valeurs Capture ;
+- aucun observer/timer/retry ;
+- aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / Core Storage Bootstrap Order — 2026-09-20
 
 Branche :

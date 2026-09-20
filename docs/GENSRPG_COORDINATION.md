@@ -16,8 +16,15 @@ Ce bloc prime sur les jalons historiques ci-dessous.
 - Base : Dungeon Scene GREEN, `c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5`.
 - Dernier checkpoint : `checkpoint/gensrpg-phase4-storage-dungeon-scene-green-2026-09-20`.
 - Audit uniquement ; famille Economy Session dynamique à caractériser avant sélection.
-- Agent 1 : pré-audit Core Stats uniquement sur `work/gensrpg-phase4-stats-preaudit-agent1-2026-09-20`,
+- Agent 1 : pré-audit Core Stats terminé et GREEN, gelé sur `work/gensrpg-phase4-stats-preaudit-agent1-2026-09-20`,
   base `5259210bea918719603066057d3c64c4d68624eb`.
+- SHA final Agent 1 : `73261adc723f2d7f4b5e3873e95debd2d908c8cd`.
+- Checkpoint Stats : `checkpoint/gensrpg-phase4-stats-preaudit-agent1-green-2026-09-20`.
+- Les trois runs finaux `35529371421 / 35529371532 / 35529371432` et le diff
+  d'un seul document (811 lignes) ont été vérifiés.
+- Le document Stats reste sur sa branche dédiée ; il n'est pas fusionné au lot Storage.
+- Futur point d'entrée Stats : S1 contrats, puis S2 normalisation pure.
+  Armure, Toucher/Défense/Esquive, Résistances et invalidation du cache restent des frontières explicites.
 - Le coordinateur ne duplique pas cet audit et n'ouvre aucune migration Stats sans décision coordonnée.
 - Production toujours gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - Phase 4 Storage en cours ; estimation globale fournie par Sylvain : environ 35 %,

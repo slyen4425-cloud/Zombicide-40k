@@ -57,11 +57,15 @@ et demander le fichier exact à Sylvain.
 - Risques à vérifier : propriétaire oublié dans un script anonyme, clé dynamique
   ou fallback implicite, effets de bord à la lecture, erreur avalée, mélange inventaire/session.
 
-Agent 1 reste seul chargé de l'audit préparatoire Core Stats :
+Pré-audit Core Stats Agent 1 reçu, lu et vérifié GREEN :
 `work/gensrpg-phase4-stats-preaudit-agent1-2026-09-20`,
 base `5259210bea918719603066057d3c64c4d68624eb`,
 HEAD observé `73261adc723f2d7f4b5e3873e95debd2d908c8cd`.
-Aucune duplication de cet audit ni intégration Stats dans Storage.
+Checkpoint Stats : `checkpoint/gensrpg-phase4-stats-preaudit-agent1-green-2026-09-20`.
+Runs `35529371421`, `35529371532`, `35529371432` : SUCCESS sur le SHA Agent 1.
+Diff vérifié : un seul document ajouté (811 lignes), aucun runtime ni Storage.
+Référence gelée : `docs/GENSRPG_PHASE4_STATS_PREAUDIT_AGENT1.md` sur ce SHA.
+Pas de merge Stats ici ; futurs S1 puis S2, sans unifier Armure/Toucher/Résistances.
 
 ### Validation et prochaine étape
 
@@ -71,7 +75,14 @@ Aucune duplication de cet audit ni intégration Stats dans Storage.
 - Retirer le workflow temporaire avant le HEAD final.
 - Architecture + navigateur complet, Firefox et Tactical Dock requis sur le HEAD documentaire final.
 - Aucun checkpoint GREEN anticipé ; aucun merge sur `main`.
-- Prochaine action : collecter les preuves Economy Session, puis documenter la décision.
+- Inspection contrôlée `35529853991` : SUCCESS ; workflow temporaire retiré.
+- Audit complet : Economy Session retenu, 1 lecture + 1 écriture, propriétaire unique.
+- Contrats sensibles : clé portée par l'objet (même après changement de profil),
+  spread `{key,...d}` et erreurs d'écriture avant UI conservés.
+- Document : `docs/GENSRPG_PHASE4_STORAGE_NEXT_AUDIT_11.md`.
+- Sentinelle réelle : `tests/gens_phase4_storage_economy_session_characterization_v1.test.cjs`.
+- Prochaine action : attendre les trois validations du HEAD final, créer le checkpoint
+  GREEN Audit 11, puis ouvrir un lot distinct Economy Session. Aucun raccord dans cet audit.
 
 
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Scene — 2026-09-20

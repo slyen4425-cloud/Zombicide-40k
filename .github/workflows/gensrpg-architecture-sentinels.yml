@@ -281,6 +281,9 @@ jobs:
       - name: Sélectionner Dungeon Scene après Challenge History
         run: node tests/gens_phase4_storage_next_audit_10_v1.test.cjs
 
+      - name: Caractériser Economy Session par le vrai propriétaire (Audit 11)
+        run: node tests/gens_phase4_storage_economy_session_characterization_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

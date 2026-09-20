@@ -1,5 +1,72 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Intégration Survie / Fouiller + arts — 2026-09-20
+
+Branche :
+`work/gensrpg-survival-search-art-integration-2026-09-20`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-survival-search-art-integration-2026-09-20`
+
+Base exacte :
+`9f3183ca1822e07089ea2ecdf399a18b3c3e051e`
+(`checkpoint/gensrpg-phase4-storage-capture-progress-green-2026-09-20`)
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Origine du lot
+
+Agent 1 avait validé séparément :
+`checkpoint/gensrpg-survival-search-art-repair-green-2026-09-20`
+SHA documentaire :
+`024dd6a92d2af50d226e9432fbc038a92173e2a0`
+
+Le lot Agent 1 est divergent de la chaîne Phase 4 actuelle et ne doit pas être fusionné en bloc.
+
+### Périmètre unique
+
+Réintégrer uniquement les éléments Survie déjà validés :
+- les 32 blobs historiques exacts `assets/img_01_...` à `assets/img_32_...` ;
+- la sentinelle `tests/gens_survival_search_art_browser_v11411.test.cjs` ;
+- son branchement dans la batterie navigateur Architecture.
+
+### Diagnostic Agent 1 conservé
+
+Fouiller :
+- aucune correction runtime n'avait été nécessaire ;
+- `#searchItemBtn` et `searchItem()` étaient fonctionnels sur la base auditée ;
+- ne pas ajouter de second bouton, wrapper, patch CSS ou nouveau propriétaire.
+
+Arts Survie :
+- les chemins historiques existaient toujours dans les renderers ;
+- les 32 fichiers physiques avaient disparu ;
+- la correction était uniquement la restauration des blobs historiques exacts.
+
+### Invariants
+
+- aucun changement de runtime Survie ;
+- aucun changement de règle gameplay ;
+- aucun fallback Dungeon/Capture/PvP ;
+- aucun déplacement physique des assets ;
+- aucun observer/timer/retry ;
+- aucun stockage/Stats/Tactical ;
+- aucun merge sur `main`.
+
+### Validation requise
+
+Avant GREEN :
+- vraie sentinelle Shell -> Survie -> fiche -> Fouiller ;
+- décodage des 6 arts héros ;
+- décodage des 20 arts objets/cartes ;
+- décodage des 7 arts ennemis ;
+- couverture collective `img_01` à `img_32` ;
+- aucune 404 Survie ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+
 ## Référence obligatoire
 
 Lire avant tout changement :

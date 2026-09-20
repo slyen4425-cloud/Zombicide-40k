@@ -75,9 +75,10 @@ assert.equal(contract.fresh.includes('13'),true);
 assert.equal(contract.fresh.includes('1'),false);
 assert.equal(contract.persisted.length,13);
 
-const allRecent=Array.from({length:15},(_,i)=>String(i+1));
-const fallback=chooseContract(lib,[...allRecent],'1');
-assert.equal(fallback.fresh.length,15,'full pool must become available when every challenge is recent');
+const smallLib=Array.from({length:12},(_,i)=>({id:String(i+1)}));
+const allRecent=Array.from({length:12},(_,i)=>String(i+1));
+const fallback=chooseContract(smallLib,[...allRecent],'1');
+assert.equal(fallback.fresh.length,12,'full pool must become available when every challenge is inside the 12-entry recent window');
 
 const longHist=Array.from({length:30},(_,i)=>String(i+1));
 const capped=chooseContract(lib,[...longHist],'1');

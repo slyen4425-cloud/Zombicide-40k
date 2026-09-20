@@ -33872,13 +33872,13 @@ function pickChallenge051(target){
   // Core 0.67 : mémoire anti-répétition. Une énigme utilisée reste hors du tirage
   // jusqu'à ce qu'au moins 12 autres défis aient été rencontrés.
   const hk="gensrpg_dc067_challenge_history";
-  let hist=[];try{hist=JSON.parse(localStorage.getItem(hk)||"[]");if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}
+  let hist=[];try{hist=GensStorageV1.readJson(localStorage,hk,[]);if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}
   const recent=new Set(hist.slice(-12).map(String));
   let fresh=p.filter(x=>!recent.has(String(x.id)));
   if(!fresh.length)fresh=p;
   const chosen=fresh[Math.floor(Math.random()*fresh.length)]||p[0];
   hist.push(String(chosen.id));
-  try{localStorage.setItem(hk,JSON.stringify(hist.slice(-24)))}catch(e){}
+  try{GensStorageV1.writeJson(localStorage,hk,hist.slice(-24))}catch(e){}
   return clone051(chosen);
 }
 

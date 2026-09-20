@@ -63,6 +63,32 @@ Avant toute décision :
 Ne pas récupérer ou réécrire le gros `index.html` à l'aveugle.
 Utiliser le fichier exact fourni par Sylvain et vérifier le blob attendu avant inspection/modification.
 
+
+### Inspection exacte terminée
+
+Le fichier fourni a été vérifié exact :
+- taille `8 174 618` octets ;
+- blob `5d2b0a6da51fd70bd36f087cb9ab82a1af308226`.
+
+Prochain micro-lot retenu :
+`gensrpg_dungeon_deck_v1`.
+
+Pourquoi :
+- 1 lecture JSON directe ;
+- 2 écritures JSON directes ;
+- un seul propriétaire inline Dungeon ;
+- aucune dépendance `gensrpg_dungeon_runtime_v2` ;
+- pas de migration de schéma ;
+- initialisation et quantités restent propriété Dungeon ;
+- erreurs d'écriture déjà avalées par les `try/catch` historiques.
+
+Les autres candidats restent différés :
+- Economy : bloc mêlé à état de session dynamique ;
+- Manual MJ effects : nature session/configuration à clarifier ;
+- RPG gameplay by profile : miroir historique + seed Capture ;
+- Challenge library : plusieurs lecteurs/fallbacks Dungeon.
+
+
 ### Validation finale — GREEN
 
 HEAD validé avant clôture documentaire :

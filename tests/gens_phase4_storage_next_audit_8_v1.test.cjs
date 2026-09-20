@@ -9,10 +9,10 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:185,
-  resolvedAccesses:120,
+  totalAccesses:182,
+  resolvedAccesses:117,
   unresolvedAccesses:65,
-  distinctResolvedKeys:20
+  distinctResolvedKeys:19
 },'post-Challenge-Library storage totals must match the migrated state');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([

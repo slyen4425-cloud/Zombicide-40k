@@ -9,14 +9,14 @@ const text=rel=>read(rel).toString('utf8');
 
 const manifest=JSON.parse(text('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 assert.deepEqual(manifest.totals,{
-  totalAccesses:185,
-  resolvedAccesses:120,
+  totalAccesses:182,
+  resolvedAccesses:117,
   unresolvedAccesses:65,
-  distinctResolvedKeys:20
+  distinctResolvedKeys:19
 },'Phase 4 storage totals must match post-Economy-Rules state');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:153,resolved:103,unresolved:50,distinctKeys:12
+  accesses:152,resolved:102,unresolved:50,distinctKeys:11
 },'Dungeon storage totals drifted');
 
 const index=read('index.html');

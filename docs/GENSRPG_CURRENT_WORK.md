@@ -80,10 +80,28 @@ Sentinelle :
 - aucun observer/timer/retry/wrapper ;
 - aucun merge sur `main`.
 
+### Validation finale Audit 7 — GREEN
+
+HEAD fonctionnel validé :
+`89e1cca79f7519f8525b02993f338831e056688b`
+
+Runs :
+- Architecture + navigateur complet `35518558729` — SUCCESS ;
+- Firefox `35518558755` — SUCCESS ;
+- Tactical Dock `35518558684` — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+Décision confirmée :
+prochain lot = uniquement `gensrpg_rpg_gameplay_by_profile_v1`.
+
 ### Prochaine action
 
-Valider l'Audit 7 par Architecture + navigateur complet, Firefox et Tactical Dock.
-Si GREEN, checkpoint final puis lot neuf uniquement pour `gensrpg_rpg_gameplay_by_profile_v1`.
+1. valider ce commit documentaire ;
+2. créer le checkpoint GREEN final Audit 7 ;
+3. ouvrir une branche neuve dédiée gameplay-by-profile ;
+4. poser la parité + garde owner avant raccord ;
+5. ne toucher à aucun autre seed Capture.
 
 
 

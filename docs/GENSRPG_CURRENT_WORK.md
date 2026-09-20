@@ -93,6 +93,31 @@ La nouvelle sentinelle prouve :
 Note :
 la tentative 1 du navigateur Architecture a échoué ponctuellement au contrôle immédiat du décodage d'un art objet. Sans aucun changement de code, la tentative 2 a passé cette sentinelle puis toute la batterie. Le runtime et le test ont été laissés inchangés.
 
+### Stabilisation de la sentinelle
+
+Le premier contrôle des arts objets testait `naturalWidth` immédiatement après création des balises `img`.
+Sur la composition actuelle, les fichiers lourds pouvaient être encore en décodage malgré une réponse valide.
+
+Correction uniquement dans le test :
+- attente explicite de `img.decode()` pour les 20 arts objets/cartes ;
+- les erreurs de décodage restent détectées par l'assertion finale ;
+- aucun runtime ni asset modifié.
+
+Commit :
+`dbe144f33d34081a722e433e5a64b3afcd816c84`.
+
+### Validation finale fonctionnelle — GREEN
+
+HEAD fonctionnel :
+`dbe144f33d34081a722e433e5a64b3afcd816c84`
+
+Runs :
+- Architecture + navigateur complet `35506567496` — SUCCESS ;
+- Firefox `35506567482` — SUCCESS ;
+- Tactical Dock `35506567367` — SUCCESS.
+
+La nouvelle sentinelle Fouiller + arts Survie a passé dès cette validation stabilisée, puis toute la batterie navigateur a terminé GREEN.
+
 ### Validation requise
 
 Avant GREEN :

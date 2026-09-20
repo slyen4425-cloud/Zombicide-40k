@@ -125,3 +125,35 @@ la restauration des 32 assets et la sentinelle sont fonctionnellement GREEN.
 ## Critère GREEN
 
 Atteint fonctionnellement. Le checkpoint final est créé seulement après revalidation du HEAD documentaire.
+
+## Stabilisation de la sentinelle après intégration
+
+Deux exécutions ont montré que les balises des arts objets pouvaient être présentes avant la fin de leur décodage navigateur.
+Le test Agent 1 vérifiait immédiatement `naturalWidth`, alors qu'il attendait déjà explicitement `img.decode()` pour les arts ennemis.
+
+Le test a été rendu déterministe en appliquant la même attente explicite aux 20 arts objets/cartes.
+
+Commit test uniquement :
+`dbe144f33d34081a722e433e5a64b3afcd816c84`
+
+Ce changement :
+- ne modifie aucun runtime ;
+- ne masque pas un asset cassé ;
+- attend seulement la fin du décodage avant l'assertion ;
+- conserve les contrôles `complete`, `naturalWidth > 0`, `naturalHeight > 0` et absence de 404.
+
+## Validation finale fonctionnelle
+
+HEAD :
+`dbe144f33d34081a722e433e5a64b3afcd816c84`
+
+Runs :
+- Architecture + navigateur complet `35506567496` — SUCCESS ;
+- Firefox `35506567482` — SUCCESS ;
+- Tactical Dock `35506567367` — SUCCESS.
+
+Résultat :
+- Fouiller fonctionne réellement ;
+- les 32 arts Survie sont restaurés et décodés ;
+- la chaîne Dungeon / Capture / PvP / Tactical reste verte ;
+- aucun runtime de jeu n'a été modifié.

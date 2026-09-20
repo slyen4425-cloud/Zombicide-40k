@@ -75,18 +75,25 @@ Aucun runtime n'a été modifié.
 Résultat de la sentinelle S1 corrigée :
 GREEN dans Architecture sur le commit `ae156dd8e11be1979ca569c17326fa8c6a788d46`.
 
-### Validation en cours
+### Validation S1 — GREEN fonctionnel
 
-HEAD technique courant :
-`ae156dd8e11be1979ca569c17326fa8c6a788d46`.
+HEAD validé :
+`20ffce10f6282486dacb380d377fb4917260f89c`.
 
-Architecture complète, Firefox et Tactical Dock doivent être SUCCESS avant
-clôture documentaire S1 et création du checkpoint GREEN.
+Runs :
+- Architecture + navigateur complet : `35537827950` — SUCCESS ;
+- Firefox : `35537827965` — SUCCESS ;
+- Tactical Dock : `35537827948` — SUCCESS.
+
+Aucun runtime, gameplay, formule, UI ou persistance n'a été modifié par S1.
 
 ### Suite autorisée
 
-Après S1 GREEN :
-**S2 — normalisation pure**.
+Cette clôture documentaire doit repasser les trois workflows sur son SHA exact.
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-20` ;
+- ouvrir S2 depuis ce checkpoint ;
+- S2 = normalisation pure uniquement.
 
 S2 pourra créer un premier service Core Stats pur dans
 `assets/gensrpg/core/`, limité à canonisation/normalisation.

@@ -27,6 +27,7 @@ function blockInfo(id){
   return {body:m[1],full:m[0],index:m.index};
 }
 
+assert.equal(manifest.sourceIndexBlob,SOURCE_BLOB,'Storage cartography fingerprint must follow the exact Economy Session GREEN index');
 assert.deepEqual(manifest.totals,{
   totalAccesses:185,resolvedAccesses:120,unresolvedAccesses:65,distinctResolvedKeys:20
 },'Audit 12 must start from Economy Session GREEN totals');

@@ -57,6 +57,38 @@ Gameplay-by-profile reste différé : aucun travail de cette branche n'est repri
 Document :
 `docs/GENSRPG_PHASE4_STORAGE_CHALLENGE_LIBRARY.md`.
 
+
+### Implémentation Challenge Library
+
+Runtime :
+`9e8e09e84011db286d1e82be24f1a2bbc7c87336`
+
+Résultat :
+- `index.html` : `8 174 580` octets ;
+- blob : `bfe9149e8150f15017bfcffe1a00fb797791aa83` ;
+- 0 accès directs Challenge Library ;
+- 3 lectures Core + 2 écritures Core ;
+- contenu/fréquence/sélection des énigmes inchangés ;
+- manifeste stockage : `191 / 126 / 65 / 23` ;
+- Dungeon : `159 / 109 / 50 / 15`.
+
+### Validation finale Challenge Library — GREEN
+
+HEAD fonctionnel validé :
+`c5d2ee9ad7c60894245aaa7a3e1c46d660cf4c09`
+
+Runs :
+- Architecture + navigateur complet `35523470101` — SUCCESS ;
+- Firefox `35523470108` — SUCCESS ;
+- Tactical Dock `35523470104` — SUCCESS.
+
+Prochaine action après validation documentaire :
+1. checkpoint GREEN final Challenge Library ;
+2. nouvel audit stockage depuis ce checkpoint ;
+3. gameplay-by-profile reste différé ;
+4. runtime_v2 reste différé ;
+5. aucun merge sur `main`.
+
 ### Interdits
 
 - aucun changement du contenu des 50 défis ;

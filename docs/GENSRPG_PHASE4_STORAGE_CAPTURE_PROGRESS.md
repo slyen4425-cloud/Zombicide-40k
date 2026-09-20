@@ -99,6 +99,23 @@ Les 2 accès de base sans identifiant inline sont également raccordés mais n'�
 - valeurs gameplay et UI ;
 - `main`.
 
+## Validation finale
+
+HEAD fonctionnel validé :
+`5b33877bcd1d9e7a3cd0699f0dffad876e543ebe`
+
+Runs :
+- Architecture + navigateur complet `35505304987` — SUCCESS ;
+- Firefox `35505305004` — SUCCESS ;
+- Tactical Dock `35505304993` — SUCCESS.
+
+Scénarios navigateur importants passés :
+- Monster Capture par le vrai Shell ;
+- Capture dans la composition complète Phase 2 ;
+- non-interférence des quatre modules ;
+- Save & Quit / reprise ;
+- preview Chromium.
+
 ## État
 
-Implémentation appliquée. Validation CI complète requise avant checkpoint GREEN.
+Raccord fonctionnel validé GREEN.

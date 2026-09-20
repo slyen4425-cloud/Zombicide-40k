@@ -71,7 +71,7 @@ function repairGenerated(before,desired){
   const hero=activeHero(x);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero)x.positions[hero]=Math.max(0,Number(map.entryIdx)||0);
   remapEnemies(x,map);remapScene(x,map);persist(x);return true;
 }
-function readPrimarySelection(){try{const x=JSON.parse(localStorage.getItem(PRIMARY_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
+function readPrimarySelection(){const x=ROOT.GensStorageV1.readJson(ROOT.localStorage,PRIMARY_KEY,null);return x&&typeof x==="object"?x:null}
 function selectedWorld(){
   let p=null;
   try{p=ROOT.DungeonWorldSessionBridge167832?.primary?.()||null}catch(e){}

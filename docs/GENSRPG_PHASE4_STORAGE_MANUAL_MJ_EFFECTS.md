@@ -115,3 +115,93 @@ Avant checkpoint GREEN :
 - Architecture + navigateur complet GREEN ;
 - Firefox GREEN ;
 - Tactical Dock GREEN.
+
+
+## Implémentation appliquée
+
+Commit runtime :
+`6e1d975e3d4d87a4c16df734d474e10fdafd1784`
+
+Micro-diff :
+- `loadEffects()` -> `GensStorageV1.readJson(localStorage,KEY,[])` puis garde `Array.isArray` conservé ;
+- `saveEffects(a)` -> `GensStorageV1.writeJson(localStorage,KEY,a||[])` ;
+- aucun autre code du bloc Manual MJ modifié ;
+- aucun `gensrpg_dungeon_runtime_v2`.
+
+État final exact de `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `a070af09f9cb1fcda78987e83bc117d7544d1b6c`.
+
+Le workflow temporaire d'application exacte a été retiré après le raccord.
+
+### Preuve TDD
+
+Avant le raccord :
+- parité Manual MJ : SUCCESS ;
+- garde d'autorité : RED attendu, car les deux accès directs existaient encore ;
+- run Architecture concerné : `35515673649`.
+
+Après raccord :
+- 0 lecture directe Manual MJ ;
+- 0 écriture directe Manual MJ ;
+- exactement 1 lecture Core ;
+- exactement 1 écriture Core ;
+- fallback tableau `[]` inchangé ;
+- erreurs d'écriture toujours propagées.
+
+### Manifeste Phase 2
+
+Avant :
+- accès directs : `200` ;
+- résolus : `135` ;
+- non résolus : `65` ;
+- clés directes résolues : `26`.
+
+Après :
+- accès directs : `198` ;
+- résolus : `133` ;
+- non résolus : `65` ;
+- clés directes résolues : `25`.
+
+Dungeon :
+- accès : `168 -> 166` ;
+- résolus : `118 -> 116` ;
+- non résolus : `50` inchangés ;
+- clés directes : `18 -> 17`.
+
+Les seuls réalignements supplémentaires concernent des sentinelles/cartographies qui figeaient l'ancien blob global ou les anciens totaux de stockage ; aucune règle métier de ces tests n'a été assouplie.
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`ab00bfeeecb1f55e5818044ffef0db29d447aa88`
+
+Runs :
+- Architecture + navigateur complet `35515980174` — SUCCESS ;
+- Firefox `35515980167` — SUCCESS ;
+- Tactical Dock `35515980168` — SUCCESS.
+
+Le navigateur complet a notamment repassé :
+- lancement Survie et Fouiller/arts ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture et composition complète ;
+- non-interférence quatre modules ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets et tokens tardifs.
+
+Aucun merge sur `main`.
+
+### Suite
+
+Après validation de ce commit documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-manual-mj-effects-green-2026-09-20` ;
+2. ouvrir un nouvel audit stockage depuis ce checkpoint ;
+3. ne pas attaquer `gensrpg_dungeon_runtime_v2` sans audit dédié ;
+4. conserver Stats/Tactical/Runtime Repair hors du Core JSON générique.

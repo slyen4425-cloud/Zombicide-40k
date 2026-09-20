@@ -17,10 +17,9 @@ let currentRoomId="",selectedDungeonId="",selectedNodeId="",visualMode=false,act
 function clone(v){try{return v==null?v:JSON.parse(JSON.stringify(v))}catch(e){return v}}
 function uid(prefix){return String(prefix||"vc")+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||"null");return v==null?fallback:v}catch(e){return fallback}}
 function roomApi(){return ROOT.DungeonRoomCreator100||null}
 function zoneApi(){return ROOT.DungeonZoneContent167824||null}
-function readGraphs(){const v=readJson(GRAPH_KEY,[]);return Array.isArray(v)?v:[]}
+function readGraphs(){const v=ROOT.GensStorageV1.readJson(ROOT.localStorage,GRAPH_KEY,[]);return Array.isArray(v)?v:[]}
 function roomById(id){return roomApi()?.findRoom?.(String(id||""))||null}
 function inferRoom(){
   if(currentRoomId&&roomById(currentRoomId))return currentRoomId;

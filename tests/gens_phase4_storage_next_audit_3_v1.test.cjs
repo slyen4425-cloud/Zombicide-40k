@@ -9,36 +9,37 @@ const text=rel=>read(rel).toString('utf8');
 
 const manifest=JSON.parse(text('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 assert.deepEqual(manifest.totals,{
-  totalAccesses:203,
-  resolvedAccesses:138,
+  totalAccesses:200,
+  resolvedAccesses:135,
   unresolvedAccesses:65,
-  distinctResolvedKeys:27
-},'Phase 4 storage totals must match post-Primary-Selection GREEN state');
+  distinctResolvedKeys:26
+},'Phase 4 storage totals must match post-Dungeon-Deck GREEN state');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:171,resolved:121,unresolved:50,distinctKeys:19
+  accesses:168,resolved:118,unresolved:50,distinctKeys:18
 },'Dungeon storage totals drifted');
 
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8174618,'index.html byte size drifted from audited checkpoint');
-assert.equal(blobSha,'5d2b0a6da51fd70bd36f087cb9ab82a1af308226','index.html blob must remain the exact audited source');
+assert.equal(index.length,8174603,'index.html byte size drifted from post-Deck checkpoint');
+assert.equal(blobSha,'739ca52610308d085ecf2635c5bc748f70c79a11','index.html blob must remain the exact post-Deck source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');
 const deckEnd=index.toString('utf8').indexOf('function dungeonEligibleLootItemsForRarity',deckStart);
 assert.ok(deckStart>=0&&deckEnd>deckStart,'Dungeon deck storage block must remain locatable');
 const deckBlock=index.toString('utf8').slice(deckStart,deckEnd);
-assert.equal((deckBlock.match(/localStorage\.getItem\(DUNGEON_DECK_KEY\)/g)||[]).length,1,'Dungeon deck candidate must have exactly one direct read before migration');
-assert.equal((deckBlock.match(/localStorage\.setItem\(DUNGEON_DECK_KEY/g)||[]).length,2,'Dungeon deck candidate must have exactly two direct writes before migration');
-assert.match(deckBlock,/JSON\.parse\(localStorage\.getItem\(DUNGEON_DECK_KEY\)\|\|"null"\)/,'Dungeon deck read fallback must remain null before migration');
+assert.equal((deckBlock.match(/localStorage\.getItem\(DUNGEON_DECK_KEY\)/g)||[]).length,0,'Migrated Dungeon deck must have no direct read');
+assert.equal((deckBlock.match(/localStorage\.setItem\(DUNGEON_DECK_KEY/g)||[]).length,0,'Migrated Dungeon deck must have no direct write');
+assert.equal((deckBlock.match(/GensStorageV1\.readJson\(localStorage,DUNGEON_DECK_KEY,null\)/g)||[]).length,1,'Dungeon deck must use one Core JSON read');
+assert.equal((deckBlock.match(/GensStorageV1\.writeJson\(localStorage,DUNGEON_DECK_KEY,ds\)/g)||[]).length,2,'Dungeon deck must use two Core JSON writes');
 assert.match(deckBlock,/if\(!ds\|\|!ds\.remaining\)ds=\{remaining:\{\},createdAt:Date\.now\(\)\}/,'Dungeon remains owner of deck initialization');
-assert.equal(deckBlock.includes('gensrpg_dungeon_runtime_v2'),false,'Dungeon deck candidate must not touch deferred runtime_v2');
+assert.equal(deckBlock.includes('gensrpg_dungeon_runtime_v2'),false,'Dungeon deck raccord must not touch deferred runtime_v2');
 
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
+assert.equal(keys.has('gensrpg_dungeon_deck_v1'),false,'migrated Dungeon deck key must leave direct-storage manifest');
 for(const key of [
-  'gensrpg_dungeon_deck_v1',
   'gensrpg_dungeon_economy_rules_160',
   'gensrpg_manual_mj_effects_v1',
   'gensrpg_rpg_gameplay_by_profile_v1',

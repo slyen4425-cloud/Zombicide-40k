@@ -1,5 +1,79 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Storage / Audit suivant 11 — 2026-09-20
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-storage-next-audit-11-2026-09-20`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-storage-next-audit-11-2026-09-20`.
+- Base exacte et dernier GREEN : `c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-storage-dungeon-scene-green-2026-09-20`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Dungeon Scene définitivement clôturé
+
+Validation du HEAD documentaire final `c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5` :
+- Architecture + navigateur complet : `35529245466` — SUCCESS ;
+- Firefox : `35529245543` — SUCCESS ;
+- Tactical Dock : `35529245555` — SUCCESS.
+
+Checkpoint final créé après vérification des trois runs sur ce SHA exact.
+Aucune nouvelle modification du lot Dungeon Scene.
+
+### Périmètre de l'audit
+
+Audit uniquement, sans migration runtime :
+1. réexaminer l'inventaire direct post-Scene : `187 / 122 / 65 / 21` ;
+2. caractériser en priorité la famille dynamique Economy Session
+   `gensrpg_dungeon_session_eco_160_<profileId>`, encore différée ;
+3. vérifier tous ses propriétaires, la fabrique de clé, les lecteurs/writers,
+   les fallbacks, les erreurs et l'isolation entre profils avant toute sélection ;
+4. retenir un nouveau micro-lot seulement si sa frontière est prouvée.
+
+Propriétaire candidat à vérifier : `dungeonEconomy160`.
+Service existant réutilisable : `GensStorageV1` (transport JSON uniquement).
+Les règles Economy déjà migrées, l'inventaire héros, les coffres/fouilles/marchands,
+le gameplay, la navigation et les autres familles ne sont pas à modifier.
+
+### Accès contrôlé à la source
+
+`index.html` de la base :
+- taille : `8 174 580` octets ;
+- blob : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054`.
+
+Diagnostic via workflow temporaire en lecture seule, checkout du SHA de base
+épinglé et vérification stricte du blob/taille avant extraction des preuves.
+Aucune récupération intégrale hasardeuse du HTML via connecteur.
+Si une copie locale complète devient nécessaire, appliquer la règle 26
+et demander le fichier exact à Sylvain.
+
+### Frontières et risques
+
+- Pending Trap / Special Branch : différés, get/set/remove.
+- Gameplay-by-profile : différé ; inclure impérativement le propriétaire principal
+  historique lors de son futur audit, pas seulement le seed Capture.
+- `gensrpg_dungeon_runtime_v2` : différé, audit dédié obligatoire.
+- Stats dynamique / Tactical mixed state / Runtime Repair : différés.
+- Risques à vérifier : propriétaire oublié dans un script anonyme, clé dynamique
+  ou fallback implicite, effets de bord à la lecture, erreur avalée, mélange inventaire/session.
+
+Agent 1 reste seul chargé de l'audit préparatoire Core Stats :
+`work/gensrpg-phase4-stats-preaudit-agent1-2026-09-20`,
+base `5259210bea918719603066057d3c64c4d68624eb`,
+HEAD observé `73261adc723f2d7f4b5e3873e95debd2d908c8cd`.
+Aucune duplication de cet audit ni intégration Stats dans Storage.
+
+### Validation et prochaine étape
+
+- Diagnostic sur le vrai propriétaire et recherche dans tous les scripts, y compris anonymes.
+- Tests de caractérisation/parité réutilisant les fonctions réelles si un candidat est confirmé.
+- Vérifier le diff : aucun runtime, asset, gameplay ni stockage modifié dans cet audit.
+- Retirer le workflow temporaire avant le HEAD final.
+- Architecture + navigateur complet, Firefox et Tactical Dock requis sur le HEAD documentaire final.
+- Aucun checkpoint GREEN anticipé ; aucun merge sur `main`.
+- Prochaine action : collecter les preuves Economy Session, puis documenter la décision.
+
+
 ## Chantier courant prioritaire — Phase 4 stockage / Dungeon Scene — 2026-09-20
 
 Branche :

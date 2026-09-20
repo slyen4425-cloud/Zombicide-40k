@@ -1,0 +1,43 @@
+name: GenSrpG Storage Audit 11 source inspection
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-storage-next-audit-11-2026-09-20'
+    paths:
+      - '.github/workflows/gensrpg-storage-audit-11-inspect.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5
+          persist-credentials: false
+      - name: Inspect pinned source without mutation
+        shell: python
+        run: |
+          import hashlib, pathlib, re, subprocess
+          raw = pathlib.Path('index.html').read_bytes()
+          blob = hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert len(raw) == 8174580 and blob == 'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054'
+          print('VERIFIED_SOURCE', len(raw), blob)
+          src = raw.decode('utf-8')
+          m = re.search(r'<script\b[^>]*\bid=["\x27]dungeonEconomy160["\x27][^>]*>([\s\S]*?)</script>', src, re.I)
+          assert m, 'missing owner'
+          print('OWNER_BEGIN')
+          print(m.group(1))
+          print('OWNER_END')
+          paths = subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          needles = ['gensrpg_dungeon_session_eco_160_', 'dungeonSessionEco160', 'saveDungeonSessionEco160']
+          for file in paths:
+              if not (file == 'index.html' or file.endswith('.js')):
+                  continue
+              content = pathlib.Path(file).read_text(encoding='utf-8')
+              for needle in needles:
+                  for hit in re.finditer(re.escape(needle), content):
+                      line = content.count('\n',0,hit.start())+1
+                      excerpt = content[max(0,hit.start()-140):hit.end()+180]
+                      print('REFERENCE', file, line, needle, repr(excerpt))
+          assert subprocess.check_output(['git','status','--porcelain']).decode() == ''

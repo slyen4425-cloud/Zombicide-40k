@@ -8,7 +8,23 @@ Un seul fil est coordinateur. Règle : **1 lot = 1 branche = 1 périmètre homog
 
 Aucun lot de restructuration ne fusionne directement dans `main`.
 
-## État — 2026-09-18
+## État actif — 2026-09-20
+
+Ce bloc prime sur les jalons historiques ci-dessous.
+
+- Coordinateur : Audit Storage 11, branche `work/gensrpg-phase4-storage-next-audit-11-2026-09-20`.
+- Base : Dungeon Scene GREEN, `c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5`.
+- Dernier checkpoint : `checkpoint/gensrpg-phase4-storage-dungeon-scene-green-2026-09-20`.
+- Audit uniquement ; famille Economy Session dynamique à caractériser avant sélection.
+- Agent 1 : pré-audit Core Stats uniquement sur `work/gensrpg-phase4-stats-preaudit-agent1-2026-09-20`,
+  base `5259210bea918719603066057d3c64c4d68624eb`.
+- Le coordinateur ne duplique pas cet audit et n'ouvre aucune migration Stats sans décision coordonnée.
+- Production toujours gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Phase 4 Storage en cours ; estimation globale fournie par Sylvain : environ 35 %,
+  sans métrique de complétude automatique.
+- Point de reprise détaillé : premier bloc de `GENSRPG_CURRENT_WORK.md`.
+
+## Historique — État du 2026-09-18
 
 Production :
 - `main` attendu : `e8681f9823573ced8aec59c8ddc47a72b02bc663`

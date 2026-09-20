@@ -308,6 +308,12 @@ jobs:
       - name: Inventorier les loaders directs du moteur Stats historique
         run: node tests/gens_phase4_stats_s2_loader_inventory_v1.test.cjs
 
+      - name: Vérifier la parité de normalisation Core Stats S2
+        run: node tests/gens_phase4_stats_s2_normalization_parity_v1.test.cjs
+
+      - name: Verrouiller l’autorité Core Stats S2
+        run: node tests/gens_phase4_stats_s2_owner_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

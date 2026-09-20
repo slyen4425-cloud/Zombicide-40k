@@ -118,3 +118,96 @@ Avant checkpoint GREEN :
 - Architecture + navigateur complet GREEN ;
 - Firefox GREEN ;
 - Tactical Dock GREEN.
+
+
+## Implémentation appliquée
+
+Commit runtime :
+`4f06178a0f6ba43caf46c28740494e93a5fbc11c`
+
+Micro-diff :
+- lecture `DUNGEON_ECO_RULES_160` -> `GensStorageV1.readJson(localStorage,DUNGEON_ECO_RULES_160,{})` sous le `try/catch` historique ;
+- écriture `DUNGEON_ECO_RULES_160` -> `GensStorageV1.writeJson(localStorage,DUNGEON_ECO_RULES_160,r||dungeonEconomyRules160())` ;
+- aucune autre ligne runtime modifiée.
+
+État final exact de `index.html` :
+- taille : `8 174 580` octets ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad`.
+
+Le workflow temporaire d'application exacte a refusé tout blob source inattendu puis a été retiré après le raccord.
+
+### Preuve TDD
+
+Avant raccord :
+- parité Economy Rules : SUCCESS ;
+- garde d'autorité : RED attendu car les deux accès directs existaient encore ;
+- run Architecture concerné : `35517534861`.
+
+Après raccord :
+- 0 lecture directe des règles ;
+- 0 écriture directe des règles ;
+- exactement 1 lecture Core ;
+- exactement 1 écriture Core.
+
+Restent inchangés dans le même bloc :
+- 1 lecture directe de session Economy dynamique ;
+- 1 écriture directe de session Economy dynamique ;
+- 1 écriture directe d'inventaire héros ;
+- clé de session toujours `gensrpg_dungeon_session_eco_160_<profileId>`.
+
+### Manifeste Phase 2
+
+Avant :
+- accès directs : `198` ;
+- résolus : `133` ;
+- non résolus : `65` ;
+- clés directes résolues : `25`.
+
+Après :
+- accès directs : `196` ;
+- résolus : `131` ;
+- non résolus : `65` ;
+- clés directes résolues : `24`.
+
+Dungeon :
+- accès : `166 -> 164` ;
+- résolus : `116 -> 114` ;
+- non résolus : `50` inchangés ;
+- clés directes : `17 -> 16`.
+
+Les réalignements supplémentaires concernent uniquement les empreintes globales et anciens audits qui figeaient le blob/totaux précédents.
+
+## Validation finale — GREEN
+
+HEAD fonctionnel validé avant clôture documentaire :
+`0c241f8fbc04fc6c91cfb74f28a0227cf9180f4e`
+
+Runs :
+- Architecture + navigateur complet `35517713333` — SUCCESS ;
+- Firefox `35517713280` — SUCCESS ;
+- Tactical Dock `35517713290` — SUCCESS.
+
+Le navigateur complet a repassé notamment :
+- Survie / Fouiller / arts ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture et composition complète ;
+- non-interférence des quatre modules ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets et tokens tardifs.
+
+Aucun merge sur `main`.
+
+### Suite
+
+Après validation de ce commit documentaire :
+1. créer `checkpoint/gensrpg-phase4-storage-economy-rules-green-2026-09-20` ;
+2. ouvrir un nouvel audit stockage depuis ce checkpoint ;
+3. conserver la session Economy dynamique et l'inventaire héros hors du Core JSON générique ;
+4. ne pas attaquer `gensrpg_dungeon_runtime_v2` sans audit dédié.

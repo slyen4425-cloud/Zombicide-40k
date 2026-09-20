@@ -181,3 +181,45 @@ GREEN uniquement si :
 - les trois validations requises passent sur le HEAD final ;
 - un checkpoint GREEN dédié est créé ;
 - `main` reste inchangé.
+
+
+## Implémentation réalisée
+
+TDD :
+- `tests/gens_phase4_storage_mj_rules_parity_v1.test.cjs` a passé avant raccord ;
+- `tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs` a échoué avant raccord comme attendu ;
+- aucun runtime n'a été modifié avant ce RED d'autorité.
+
+Raccord exact :
+- commit `298506abcc08d0e013f640313dd3f5ca848981af` ;
+- 1 reader direct remplacé ;
+- 2 writers directs remplacés ;
+- taille `index.html` inchangée : `8 174 580` octets ;
+- blob cible obtenu : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Le diff runtime est limité aux trois lignes de transport prévues.
+
+Cartographie Storage post-raccord :
+- total direct `182` ;
+- résolus `117` ;
+- non résolus `65` ;
+- clés directes résolues `19`.
+Dungeon : `152 / 102 / 50 / 11`.
+Core : `2 / 1 / 1 / 1`.
+
+Les empreintes historiques dépendant explicitement du précédent blob ont été
+réalignées sans changer leurs assertions fonctionnelles.
+
+## Validation
+
+HEAD fonctionnel validé :
+`36cef9ad084f7c2c901dacf859d2d262d2d33198`.
+
+Runs :
+- Architecture + navigateur complet : `35534815605` — SUCCESS ;
+- Firefox : `35534815601` — SUCCESS ;
+- Tactical Dock : `35534815603` — SUCCESS.
+
+La clôture documentaire doit repasser les trois workflows sur son SHA final
+exact avant création du checkpoint GREEN
+`checkpoint/gensrpg-phase4-storage-mj-rules-green-2026-09-20`.

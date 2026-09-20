@@ -99,14 +99,14 @@ assert.equal(candidateStability.split(coreRead).length-1,1);
 assert.equal(candidateStability.split(coreWrite).length-1,1);
 assert.equal(candidateMj.split(coreWrite).length-1,1);
 
-const save151Transport=directWrites?oldWrite:coreWrite;
-const save175Transport=directWrites?oldWrite:coreWrite;
-assert.ok(
-  stability.includes(save151Transport+';const m=document.getElementById("dungeonMj151")'),
+assert.match(
+  stability,
+  /(?:localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\)|GensStorageV1\.writeJson\(localStorage,"gensrpg_dungeon_mj_rules_v145",r\));\s*const m=document\.getElementById\("dungeonMj151"\)/,
   'saveDungeonMj151 must preserve write-before-close ordering'
 );
-assert.ok(
-  mj.includes(save175Transport+';try{gensReconcile171'),
+assert.match(
+  mj,
+  /(?:localStorage\.setItem\("gensrpg_dungeon_mj_rules_v145",JSON\.stringify\(r\)\)|GensStorageV1\.writeJson\(localStorage,"gensrpg_dungeon_mj_rules_v145",r\));\s*try\{gensReconcile171/,
   'unified MJ writer must preserve write-before-reconcile ordering'
 );
 

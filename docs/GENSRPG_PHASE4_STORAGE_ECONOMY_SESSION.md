@@ -143,3 +143,55 @@ Le lot est GREEN uniquement si :
 - les trois validations requises sont SUCCESS ;
 - un checkpoint final dédié est créé ;
 - `main` reste inchangé.
+
+## Implémentation réalisée
+
+Le micro-raccord runtime est appliqué sans autre changement fonctionnel du propriétaire :
+- `JSON.parse(localStorage.getItem(key)||"{}")` -> `GensStorageV1.readJson(localStorage,key,{})` ;
+- `localStorage.setItem(key,JSON.stringify(rest))` -> `GensStorageV1.writeJson(localStorage,key,rest)`.
+
+Empreinte exacte :
+- source : `ee7b474802d8bb3b1d20e3aaf2507c4666fbd054` ;
+- cible : `1545aba502777d9fb76decdcee90a89c7cf3f971` ;
+- taille : `8 174 580` octets avant/après.
+
+Le diff runtime est strictement limité à deux lignes du bloc `dungeonEconomy160`.
+Les accès Economy Rules déjà raccordés au Core et l'écriture inventaire héros du
+même bloc sont inchangés.
+
+## Résultat de parité ciblée
+
+Le contrat du vrai propriétaire a été rejoué avant/après substitution :
+- 13 cas de lecture/fusion ;
+- 7 variantes/fallbacks d'identifiant de profil ;
+- lecture sans écriture ;
+- no-op sans clé ;
+- round-trip et champs inconnus ;
+- isolation A/B et sauvegarde après changement de profil ;
+- comportement legacy d'une propriété `key` persistée ;
+- erreurs de lecture/profil/sérialisation/écriture ;
+- MJ coffre, MJ marchand et ouverture marchand ;
+- interruption des effets UI en cas d'échec d'écriture.
+
+Résultat : parité legacy/Core **GREEN** sur cette caractérisation ciblée.
+
+## Cartographie après raccord
+
+Manifeste direct Phase 2 :
+- total `185` ;
+- résolus `120` ;
+- non résolus `65` ;
+- clés directes `20`.
+
+Dungeon : `153 / 103 / 50 / 12`.
+
+La famille `gensrpg_dungeon_session_eco_160_` quitte le manifeste des accès directs.
+Aucun accès non résolu n'est reclassé artificiellement.
+
+## État de validation
+
+HEAD documenté au moment de cette note :
+`ecc6b58a87ffd5b3f51aa4e35f784fad1030d485`.
+
+La validation finale Architecture + navigateur complet, Firefox et Tactical Dock
+reste obligatoire avant checkpoint GREEN. Aucun résultat GREEN n'est anticipé ici.

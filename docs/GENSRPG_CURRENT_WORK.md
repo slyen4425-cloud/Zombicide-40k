@@ -58,6 +58,25 @@ Le `index.html` exact courant a été reconstruit depuis le fichier fourni par S
 - blob Git : `476f91b7a5921c9f02f17ba72c801f4bec16a809` ;
 - correspond exactement au `index.html` de la base GREEN.
 
+### Validation de la passe — GREEN
+
+HEAD fonctionnel :
+`5b33877bcd1d9e7a3cd0699f0dffad876e543ebe`
+
+Raccord :
+- 1 lecture JSON Capture via `GensStorageV1.readJson(...,{})` ;
+- 6 écritures JSON Capture via `GensStorageV1.writeJson(...)` ;
+- clé, fallback, objet et propriétaires métier inchangés ;
+- blob `index.html` : `5d2b0a6da51fd70bd36f087cb9ab82a1af308226` ;
+- taille : `8 174 618` octets.
+
+Runs :
+- Architecture + navigateur complet `35505304987` — SUCCESS ;
+- Firefox `35505305004` — SUCCESS ;
+- Tactical Dock `35505304993` — SUCCESS.
+
+Monster Capture réel, composition Capture complète et non-interférence des 4 modules sont GREEN.
+
 ### Objectif
 
 Raccorder uniquement la sérialisation JSON de cette famille à `GensStorageV1` :

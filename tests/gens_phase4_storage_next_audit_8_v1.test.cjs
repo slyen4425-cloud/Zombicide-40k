@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:187,
-  resolvedAccesses:122,
+  totalAccesses:185,
+  resolvedAccesses:120,
   unresolvedAccesses:65,
-  distinctResolvedKeys:21
+  distinctResolvedKeys:20
 },'post-Challenge-Library storage totals must match the migrated state');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580);
-assert.equal(blob,'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054');
+assert.equal(blob,'1545aba502777d9fb76decdcee90a89c7cf3f971');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -77,5 +77,5 @@ console.log(JSON.stringify({
   selected:'gensrpg_challenge_library_v1',
   selectedOwners:['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dungeonCore202ContentDensity'],
   selectedCoreAccesses:{reads:3,writes:2},
-  targetBlob:'ee7b474802d8bb3b1d20e3aaf2507c4666fbd054'
+  targetBlob:'1545aba502777d9fb76decdcee90a89c7cf3f971'
 },null,2));

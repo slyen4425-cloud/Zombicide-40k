@@ -9,17 +9,17 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:196,
-  resolvedAccesses:131,
+  totalAccesses:194,
+  resolvedAccesses:129,
   unresolvedAccesses:65,
-  distinctResolvedKeys:24
-},'post-Economy-Rules storage totals drifted');
+  distinctResolvedKeys:23
+},'post-gameplay-by-profile storage totals drifted');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
-assert.equal(blob,'16deeb169abbc31a7db04161902e9381fd6888ad','audit 5 must target the exact post-Deck index blob');
+assert.equal(blob,'0b9c41c39db0d073c7b9ed580f66140b8d9bcda2','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -50,8 +50,8 @@ for(const id of ['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dung
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave the direct-storage manifest');
 assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave the direct-storage manifest');
+assert.equal(keys.has('gensrpg_rpg_gameplay_by_profile_v1'),false,'migrated gameplay-by-profile key must leave the direct-storage manifest');
 for(const key of [
-  'gensrpg_rpg_gameplay_by_profile_v1',
   'gensrpg_challenge_library_v1',
   'gensrpg_dungeon_runtime_v2'
 ]) assert.ok(keys.has(key),'candidate/deferred key missing from manifest: '+key);
@@ -62,5 +62,5 @@ console.log(JSON.stringify({
   selected:'gensrpg_manual_mj_effects_v1',
   selectedOwner:'dungeonCore046ManualMjAssist',
   selectedCoreAccesses:{reads:1,writes:1},
-  deferred:['economy rules/session','gameplay mirror','challenge library','dungeon runtime v2']
+  deferred:['economy session','challenge library','dungeon runtime v2']
 },null,2));

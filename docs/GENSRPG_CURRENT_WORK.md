@@ -56,6 +56,42 @@ Micro-diff déterministe :
 Document :
 `docs/GENSRPG_PHASE4_STORAGE_ECONOMY_RULES.md`.
 
+
+### Implémentation Economy Rules
+
+Runtime :
+`4f06178a0f6ba43caf46c28740494e93a5fbc11c`
+
+Résultat :
+- `index.html` : `8 174 580` octets ;
+- blob : `16deeb169abbc31a7db04161902e9381fd6888ad` ;
+- règles Economy : 0 accès directs, 1 lecture Core + 1 écriture Core ;
+- session Economy dynamique et inventaire héros inchangés ;
+- manifeste stockage : `196 / 131 / 65 / 24` ;
+- Dungeon : `164 / 114 / 50 / 16`.
+
+Le RED TDD initial était volontaire :
+- parité SUCCESS ;
+- garde owner FAILURE avant raccord sur le run `35517534861`.
+
+Aucun autre runtime n'a été modifié.
+
+### Validation finale Economy Rules — GREEN
+
+HEAD fonctionnel validé :
+`0c241f8fbc04fc6c91cfb74f28a0227cf9180f4e`
+
+Runs :
+- Architecture + navigateur complet `35517713333` — SUCCESS ;
+- Firefox `35517713280` — SUCCESS ;
+- Tactical Dock `35517713290` — SUCCESS.
+
+Prochaine action après validation documentaire :
+1. checkpoint GREEN final Economy Rules ;
+2. branche neuve d'audit stockage ;
+3. inspection des familles restantes sans mélanger les responsabilités ;
+4. aucun merge sur `main`.
+
 Interdits :
 - aucun changement loot/coffres/fouilles/marchands/UI MJ ;
 - aucune session Economy dynamique ;

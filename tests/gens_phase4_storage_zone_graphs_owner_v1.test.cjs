@@ -13,7 +13,7 @@ assert.doesNotMatch(visual,/\blocalStorage\.(?:getItem|setItem|removeItem)\s*\(/
 
 assert.match(world,/GensStorageV1\.readJson\(ROOT\.localStorage,STORAGE_KEY,\[\]\)/,'World Builder reads zone graphs through Core with [] fallback');
 assert.match(world,/GensStorageV1\.writeJson\(ROOT\.localStorage,STORAGE_KEY,clean\)/,'World Builder writes normalized graphs through Core');
-assert.match(visual,/GensStorageV1\.readJson\(ROOT\.localStorage,key,fallback\)/,'Visual Config generic JSON read helper delegates to Core');
+assert.match(visual,/GensStorageV1\.readJson\(ROOT\.localStorage,GRAPH_KEY,\[\]\)/,'Visual Config reads zone graphs directly through Core with [] fallback');
 assert.doesNotMatch(visual,/GensStorageV1\.writeJson\(/,'Visual Config must remain read-only for zone graphs');
 
 assert.match(world,/function normalizeGraph\(raw\)/,'normalizeGraph remains owned by World Builder');

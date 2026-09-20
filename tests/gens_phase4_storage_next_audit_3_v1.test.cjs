@@ -9,21 +9,21 @@ const text=rel=>read(rel).toString('utf8');
 
 const manifest=JSON.parse(text('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'));
 assert.deepEqual(manifest.totals,{
-  totalAccesses:198,
-  resolvedAccesses:133,
+  totalAccesses:196,
+  resolvedAccesses:131,
   unresolvedAccesses:65,
-  distinctResolvedKeys:25
-},'Phase 4 storage totals must match post-Manual-MJ state');
+  distinctResolvedKeys:24
+},'Phase 4 storage totals must match post-Economy-Rules state');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:166,resolved:116,unresolved:50,distinctKeys:17
+  accesses:164,resolved:114,unresolved:50,distinctKeys:16
 },'Dungeon storage totals drifted');
 
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8174580,'index.html byte size drifted from post-Manual-MJ checkpoint');
-assert.equal(blobSha,'a070af09f9cb1fcda78987e83bc117d7544d1b6c','index.html blob must remain the exact post-Manual-MJ source');
+assert.equal(index.length,8174580,'index.html byte size drifted from post-Economy-Rules checkpoint');
+assert.equal(blobSha,'16deeb169abbc31a7db04161902e9381fd6888ad','index.html blob must remain the exact post-Manual-MJ source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');
@@ -40,8 +40,8 @@ assert.equal(deckBlock.includes('gensrpg_dungeon_runtime_v2'),false,'Dungeon dec
 const keys=new Map((manifest.resolvedKeys||[]).map(x=>[x.key,x]));
 assert.equal(keys.has('gensrpg_dungeon_deck_v1'),false,'migrated Dungeon deck key must leave direct-storage manifest');
 assert.equal(keys.has('gensrpg_manual_mj_effects_v1'),false,'migrated Manual MJ key must leave direct-storage manifest');
+assert.equal(keys.has('gensrpg_dungeon_economy_rules_160'),false,'migrated Economy rules key must leave direct-storage manifest');
 for(const key of [
-  'gensrpg_dungeon_economy_rules_160',
   'gensrpg_rpg_gameplay_by_profile_v1',
   'gensrpg_challenge_library_v1'
 ]){
@@ -75,9 +75,8 @@ console.log(JSON.stringify({
   scenario:'Phase 4 storage next audit 3',
   indexBlob:blobSha,
   totals:manifest.totals,
-  migrated:['gensrpg_dungeon_deck_v1','gensrpg_manual_mj_effects_v1'],
+  migrated:['gensrpg_dungeon_deck_v1','gensrpg_manual_mj_effects_v1','gensrpg_dungeon_economy_rules_160'],
   candidates:[
-    'gensrpg_dungeon_economy_rules_160',
     'gensrpg_rpg_gameplay_by_profile_v1',
     'gensrpg_challenge_library_v1'
   ],

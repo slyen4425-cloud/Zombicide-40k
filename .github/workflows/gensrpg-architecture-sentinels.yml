@@ -260,6 +260,9 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage World Summary
         run: node tests/gens_phase4_storage_world_summary_owner_v1.test.cjs
 
+      - name: Rejouer le test historique World Summary via le Core stockage
+        run: node tests/gens_world_summary_v167820.test.cjs
+
       - name: Caractériser les fichiers hors graphe de production Phase 2
         run: node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
 

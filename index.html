@@ -33888,7 +33888,7 @@ let challengeEditorCurrent069=null;
 
 function loadChallengeLibrary069(){
   let lib=[];
-  try{lib=JSON.parse(localStorage.getItem(CHALLENGE_LIB_KEY_069)||"[]")}catch(e){lib=[]}
+  try{lib=GensStorageV1.readJson(localStorage,CHALLENGE_LIB_KEY_069,[])}catch(e){lib=[]}
   if(!Array.isArray(lib))lib=[];
 
   // Toujours garantir les 50 énigmes intégrées, sans écraser les modifications utilisateur.
@@ -33898,11 +33898,11 @@ function loadChallengeLibrary069(){
     if(!byId.has(id))byId.set(id,clone051(x));
   });
   lib=[...byId.values()];
-  try{localStorage.setItem(CHALLENGE_LIB_KEY_069,JSON.stringify(lib))}catch(e){}
+  try{GensStorageV1.writeJson(localStorage,CHALLENGE_LIB_KEY_069,lib)}catch(e){}
   return lib;
 }
 function saveChallengeLibrary069(lib){
-  try{localStorage.setItem(CHALLENGE_LIB_KEY_069,JSON.stringify(Array.isArray(lib)?lib:[]))}catch(e){}
+  try{GensStorageV1.writeJson(localStorage,CHALLENGE_LIB_KEY_069,Array.isArray(lib)?lib:[])}catch(e){}
 }
 function challengeById069(id){
   return loadChallengeLibrary069().find(x=>String(x.id)===String(id))||null;
@@ -39413,7 +39413,7 @@ function chooseKind(room){const c=cfg(),explicit=String(c.bossRooms||'').split(/
 function selectedChallenges(){try{
  const c=cfg();
  const raw=Array.isArray(c.challenges)?c.challenges:null;
- const lib=(typeof loadChallengeLibrary069==='function'?loadChallengeLibrary069():JSON.parse(localStorage.getItem('gensrpg_challenge_library_v1')||'[]'))||[];
+ const lib=(typeof loadChallengeLibrary069==='function'?loadChallengeLibrary069():GensStorageV1.readJson(localStorage,'gensrpg_challenge_library_v1',[]))||[];
  // Valeur par défaut/null = bibliothèque intégrée active.
  if(raw===null)return lib.map(clone);
  if(!raw.length)return [];
@@ -40058,7 +40058,7 @@ function paintTrap202(){
 function selectedChallenges202(){
   try{
     const c=cfg202(),raw=Array.isArray(c.challenges)?c.challenges:null;
-    const lib=(typeof loadChallengeLibrary069==="function"?loadChallengeLibrary069():JSON.parse(localStorage.getItem("gensrpg_challenge_library_v1")||"[]"))||[];
+    const lib=(typeof loadChallengeLibrary069==="function"?loadChallengeLibrary069():GensStorageV1.readJson(localStorage,"gensrpg_challenge_library_v1",[]))||[];
     if(raw===null)return lib.map(clone202);
     if(!raw.length)return [];
     const objects=raw.filter(x=>x&&typeof x==="object"&&x.id);

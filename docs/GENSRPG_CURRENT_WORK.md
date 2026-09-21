@@ -140,10 +140,58 @@ Interdit :
 7. Tactical Dock ;
 8. checkpoint GREEN uniquement après trois SUCCESS sur le SHA final.
 
-### Prochaine action
+### Résultat du lot
 
-Créer les deux sentinelles dédiées et obtenir le RED propriétaire avant toute
-modification runtime.
+Caractérisation navigateur ciblée :
+- workflow isolé `35651278948` — SUCCESS ;
+- fixture corrigée pour charger le vrai Core
+  `GensInventoryEquippedViewV1` avant le hotfix Equipment ;
+- aucun runtime modifié pour corriger cette fixture.
+
+RED propriétaire :
+- SHA `2bddbef1f22e5a30736157a820ff246ea2efb066` ;
+- Architecture `35650600108` — FAILURE attendu ;
+- erreur : `Hero Art Repair must retire its unrelated openEquipmentEditor hook`.
+
+Correctif soustractif :
+- commit runtime `d2725f2a7bd515e7f37a6bf82435976d0e336e0d` ;
+- seul `"openEquipmentEditor"` a été retiré de
+  `GensDungeonHeroArtRepair167874.hookAll()` ;
+- aucun autre wrapper / observer / timer / retry / stockage ajouté ou modifié.
+
+Ré-alignement :
+- l'ancien pré-audit attend désormais quatre propriétaires Equipment réels ;
+- Hero Art Repair est explicitement exclu du cycle open Equipment ;
+- le workflow temporaire de caractérisation a été supprimé.
+
+Validation technique sur le SHA documentaire candidat
+`917497395ab3cbd06f86df70a2285e80a30d7dc1` :
+- Architecture + navigateur complet `35651753018` — SUCCESS ;
+- Firefox `35651752932` — SUCCESS ;
+- Tactical Dock `35651752858` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_HERO_ART_OPEN_HOOK_RETIREMENT.md`.
+
+### État de clôture
+
+La présente mise à jour de `CURRENT_WORK` change le SHA.
+
+Avant checkpoint GREEN :
+1. revalider Architecture + navigateur complet, Firefox et Tactical sur le SHA
+   documentaire exact de clôture ;
+2. créer uniquement après trois SUCCESS :
+   `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+
+### Prochaine dette séparée après GREEN
+
+Pré-auditer la compétition de réinstallation entre :
+- `GensHeroEditorDynamic167897` / marqueur `__canon101` / retries ;
+- `GensEquipmentStatCleanup1678102` / marqueur `__canonEq102` / single-install.
+
+Ce futur lot doit commencer par une caractérisation, sur une branche neuve depuis
+le checkpoint GREEN. Il ne doit pas modifier les retries ni consolider les wrappers
+sans preuve navigateur dédiée.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit wrapper openEquipmentEditor — 2026-09-21

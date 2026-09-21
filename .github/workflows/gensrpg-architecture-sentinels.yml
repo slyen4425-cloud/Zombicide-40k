@@ -344,6 +344,9 @@ jobs:
       - name: Vérifier la parité du contrat Armure Core Stats S9
         run: node tests/gens_phase4_stats_s9_armor_contract_parity_v1.test.cjs
 
+      - name: Caractériser Toucher Défense Esquive Core Stats S10
+        run: node tests/gens_phase4_stats_s10_hit_defense_dodge_characterization_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

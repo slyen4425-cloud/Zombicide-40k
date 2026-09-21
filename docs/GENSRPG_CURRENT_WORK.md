@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — raccord évolution — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture raccord évolution — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,86 +13,127 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Lot précédent clôturé GREEN
+### Résultat technique
 
-Service pur inert :
+Le service :
 
 `assets/gensrpg/core/equipment-evolution-v1.js`
 
-Export :
+est désormais connecté au cache évolution Equipment existant.
 
-`GensEquipmentEvolutionV1`.
-
-Validation finale sur le SHA documentaire exact
-`deb165f8588d2ae4ecb4b6dbfcea536f5073f81b` :
-- Architecture + navigateur complet : `35628121669` — SUCCESS ;
-- Firefox : `35628121584` — SUCCESS ;
-- Tactical Dock : `35628121601` — SUCCESS.
-
-### Mission du nouveau raccord
-
-Raccorder uniquement le calcul d'évolution Equipment au Core pur.
-
-Propriétaire runtime existant :
+Le propriétaire runtime reste :
 
 `assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
 
-Frontière exacte :
+La frontière raccordée est :
 
 `cachedEvolutionBonus(key)`.
 
-Le cache reste propriétaire de :
-- sa clé de contexte ;
-- son TTL 120 ms ;
-- ses hits/miss ;
-- son invalidation ;
-- sa vue équipée cachée.
-
-Sur un miss, il doit déléguer le calcul pur à :
+Sur cache miss, elle délègue à :
 
 `GensEquipmentEvolutionV1.totalBonus(items,key,xp)`.
 
-### Contraintes d'autorité
+### Autorité préservée
 
-- aucun nouveau wrapper sur `dungeonEquipmentBonus` ;
-- le wrapper Equipment existant reste inchangé dans son rôle ;
-- `cachedEvolutionBonus` reste le propriétaire du cache ;
-- le calcul local `evolutionBonusForItem` ne doit plus être exécuté par le chemin actif ;
-- l'API historique peut rester exposée temporairement pour compatibilité/tests, mais sans autorité runtime ;
-- le cache performance global reste en aval ;
-- Core Stats reste consommateur du seam final.
+`cachedEvolutionBonus` conserve :
+- la clé de cache ;
+- le TTL 120 ms ;
+- le cache ;
+- la vue équipée cachée ;
+- la normalisation XP ;
+- la lecture/écriture du cache.
 
-### Interdictions
+Le chemin actif n'appelle plus le calcul local
+`evolutionBonusForItem(item,key,xp)`.
 
-- ne pas modifier le TTL ;
-- ne pas modifier les invalidateurs dans ce lot ;
-- ne pas corriger leur couverture dans ce lot ;
-- pas de nouveau cache ;
-- pas de nouvelle boucle évolution concurrente ;
-- pas de `index.html` ;
-- pas de stockage ;
-- pas d'UI/Builders ;
-- pas de combat ;
-- pas de Stats/Tactical ;
-- aucun nouveau wrapper, observer, timer/retry ou monkey-patch ;
-- ne pas toucher `main`.
+Aucun nouveau wrapper `dungeonEquipmentBonus` n'a été créé.
 
-### TDD prévu
+Chaîne conservée :
+1. Core direct + sets ;
+2. cache évolution existant ;
+3. Core évolution sur miss ;
+4. cache performance global ;
+5. Core Stats.
 
-1. poser une sentinelle RED de raccord ;
-2. exiger Core évolution chargé avant le propriétaire runtime ;
-3. exiger que `cachedEvolutionBonus` délègue au Core sur miss ;
-4. prouver que le calcul local historique n'est plus appelé ;
-5. préserver clé cache, TTL, XP et vue équipée ;
-6. connecter Pages / preview / PWA et cartographie ;
-7. trois batteries GREEN ;
-8. documentation ;
-9. revalidation du SHA documentaire ;
-10. checkpoint GREEN final.
+### Composition raccordée
+
+- Pages : service chargé ;
+- preview : même ordre ;
+- PWA : précaché ;
+- Phase 2 : service **connected** ;
+- manifeste runtime : Core Equipment Evolution.
+
+Métriques :
+- Pages injectés : 29 ;
+- JS directs production uniques : 32 ;
+- graphe production : 76 fichiers ;
+- inventaire physique : 93 JS ;
+- services Phase 4 connus : 13.
+
+### TDD et exécution
+
+RED :
+- Architecture `35630671656` ;
+- échec ciblé : `Pages must publish the Core Equipment evolution service`.
+
+Sentinelle VM :
+- premier miss => 1 appel Core ;
+- hit avant TTL => 0 nouvel appel ;
+- expiration => nouvel appel Core ;
+- ancien calcul local => 0 appel.
+
+### Validation technique GREEN
+
+HEAD technique :
+`eb3fa9be1077fb065d24fe4c47e81103628c4891`.
+
+- Architecture + navigateur complet : `35631087083` — SUCCESS ;
+- Firefox : `35631087122` — SUCCESS ;
+- Tactical Dock : `35631087134` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_EVOLUTION_RACCORD.md`.
+
+### Périmètre respecté
+
+Aucun changement de :
+- `index.html` ;
+- TTL ;
+- invalidateurs ;
+- stockage ;
+- UI/Builders ;
+- combat ;
+- Stats/Tactical ;
+- cache performance global.
+
+Aucun nouvel observer, timer/retry ou monkey-patch.
+
+### Dette laissée au lot suivant
+
+La couverture réelle des invalidateurs Equipment reste à auditer séparément.
+Le pré-audit a montré un écart entre les noms wrappés et les vrais propriétaires
+`equip/unequip`.
+
+### État actuel
+
+Clôture documentaire en cours.
+
+Le SHA documentaire exact doit repasser :
+- Architecture + navigateur ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun checkpoint GREEN final avant ces trois SUCCESS.
 
 ### Prochaine action
 
-Créer la sentinelle RED du raccord évolution avant toute modification runtime.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-equipment-evolution-raccord-green-2026-09-21` ;
+3. ouvrir un checkpoint de départ et une branche neuve pour le lot
+   cache/invalidation Equipment ;
+4. commencer ce lot par un pré-audit TDD des vrais propriétaires de mutation ;
+5. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

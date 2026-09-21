@@ -1,175 +1,124 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment / Sets — pré-audit — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View & Slot Refs — contrat pur — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-sets-preaudit-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-sets-preaudit-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipped-view-slot-refs-contract-2026-09-21`.
 - Base exacte :
-  `7dd70d6fc78e0bd43d63f9fbf67e22571c8555e9`.
+  `e61638fa504d0050f80fbfd1b3a7192f797a986f`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-stats-s11-core-snapshot-raccord-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-sets-preaudit-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### S11 Core Stats définitivement clôturé
+### Pré-audit Inventory / Equipment / Sets clôturé
 
-SHA documentaire final :
-`7dd70d6fc78e0bd43d63f9fbf67e22571c8555e9`.
+SHA final :
+`e61638fa504d0050f80fbfd1b3a7192f797a986f`.
 
 Runs exacts :
-- Architecture + navigateur complet : `35604676238` — SUCCESS ;
-- Firefox : `35604676240` — SUCCESS ;
-- Tactical Dock : `35604676159` — SUCCESS.
+- Architecture + navigateur complet : `35608442745` — SUCCESS ;
+- Firefox : `35608442688` — SUCCESS ;
+- Tactical Dock : `35608442720` — SUCCESS.
 
-Résultat :
-- S3-S7 sont production-reachable ;
-- Stats owner fournit `coreSnapshot()` ;
-- V110 consomme les valeurs/dérivées Core ;
-- six relectures Dungeon dérivées ont été retirées de V110 ;
-- Initiative dérivée reste volontairement hors raccord ;
-- correctif d'application unique du bonus mêlée conservé ;
-- `index.html` inchangé, blob `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+### Mission du micro-lot
 
-### Mission du nouveau lot
+Extraire **uniquement un contrat pur et inert** pour :
 
-Pré-audit uniquement du service commun suivant prévu par la roadmap :
+1. normaliser/résoudre les références de slots par index ;
+2. produire la vue dédupliquée des objets équipés ;
+3. calculer la réindexation déterministe des références après suppression
+   d'une entrée d'inventaire.
 
-**Inventaire / Équipement / Sets**.
+Aucun raccord runtime dans ce lot.
 
-Aucun déplacement runtime ni création de service Core dans ce pré-audit.
+### Autorités historiques à caractériser
 
-Objectifs :
-1. identifier tous les propriétaires réellement actifs des objets, inventaires,
-   slots équipés, sets, évolution et bonus équipement ;
-2. séparer données/runtime/UI/Builders/Stats/Tactical ;
-3. reconstruire les chemins équip/unéquiper -> bonus -> Stats -> snapshot Tactical ;
-4. identifier la source de vérité de l'équipement porté ;
-5. identifier la source de vérité des définitions d'objets et sets ;
-6. cartographier les wrappers/hotfixs historiques encore actifs ;
-7. relever stockage, cache et invalidations ;
-8. déterminer les frontières d'un futur Core Inventory/Equipment sans dupliquer
-   Dungeon ni Builders.
-
-### Propriétaires déjà visibles à confirmer
-
-- `assets/dungeon/dungeon-core-316.js` :
-  catalogue/sets et moteur générique historique ;
-- `assets/dungeon/dungeon-equipment-ui.js` :
-  UI Builders, avec observer/wrapper historiques ;
-- `assets/dungeon/dungeon-equipment-hotfix-167817.js` :
-  wrappers d'éditeur et visibilité sets ;
-- `assets/dungeon/dungeon-set-editor-167818.js` :
-  éditeur/persistance de sets ;
-- `assets/gensrpg/gens-equipment-stat-cleanup-1678102.js` :
-  bridge Stats/Builders, évolution, cache et invalidation équipement ;
-- `GensCleanRpgStats167874` / S5 :
-  consomme uniquement le seam agrégé Equipment ; ne devient pas propriétaire
-  de l'inventaire.
-
-Cette liste est une hypothèse de départ, pas encore un contrat final.
-
-### Fonctions/systèmes protégés
-
-Ne pas modifier pendant le pré-audit :
-- equip / unequip et slots ;
-- inventaire héros ;
-- catalogue d'objets ;
-- sets et paliers ;
-- évolution d'équipement ;
-- `dungeonEquipmentBonus` ;
-- cache combat équipement ;
-- Stats S3-S7 ;
-- Tactical snapshot/dégâts ;
-- stockage ;
-- UI d'éditeur ;
-- loot/marchands/coffres ;
-- `index.html`.
-
-### Risques
-
-- plusieurs wrappers historiques sur les mêmes fonctions ;
-- mélange Builders/runtime dans les fichiers Equipment ;
-- set bonus + évolution agrégés dans le même seam Stats ;
-- cache court de combat dépendant des invalidations equip/unequip ;
-- persistance sets encore directe ;
-- dépendances possibles à des fonctions inline du gros `index.html` ;
-- risque d'une seconde autorité si Core recopie les fonctions existantes.
-
-### Tests prévus
-
-Pré-audit :
-- sentinelle de cartographie des propriétaires actifs ;
-- inventaire des wrappers/timers/observers/storage du périmètre ;
-- caractérisation réelle d'un héros qui équipe puis retire un objet ;
-- caractérisation set + évolution -> `dungeonEquipmentBonus` -> Core Stats ;
-- preuve du cache/invalidation existant ;
-- vérification de non-interférence Survie/Dungeon/Capture/PvP.
-
-Aucun test ne doit réimplémenter les formules ou injecter artificiellement le
-bonus final à l'endroit précisément audité.
-
-### Règle index.html
-
-Le blob de base reste :
-`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
-
-Si le corps exact d'une fonction inline devient nécessaire, appliquer la règle
-26 et demander le fichier exact ; ne pas multiplier les lectures API du gros HTML.
-
-### Résultat du pré-audit
-
-Pré-audit terminé sans modification runtime.
-
-Autorités prouvées :
+Source de vérité actuelle :
 - inventaire : `state.inventory[]` ;
-- slots : `rightHand / leftHand / rpgGear` ;
-- vue équipée : `dungeonEquippedItems()` + hotfix V16.78.17 ;
-- sets : `setState316()` / registry `DUNGEON_EQUIPMENT_SETS` ;
-- bonus équipement :
-  direct -> set -> évolution -> cache -> `dungeonEquipmentBonus` ;
-- Core Stats reste consommateur du seam Equipment via S5.
+- mains : `state.rightHand / state.leftHand` ;
+- équipement RPG : `state.rpgGear[slot]` ;
+- équipement non-Dungeon historique : `state.equipment`.
 
-Risques documentés :
-- références de slots par index ;
-- plusieurs wrappers éditeur ;
-- fallback set dans l'UI ;
-- double couche de persistance sets ;
-- caches empilés ;
-- invalidateurs historiques ne couvrant pas explicitement tous les vrais
-  propriétaires equip/unequip ;
-- mélange catalogue/sets/combat dans Core 3.16.
+Vue équipée historique :
+`dungeonEquippedItems()`.
 
-Le fichier inline exact a été contrôlé :
-- taille : 8 174 580 octets ;
-- blob : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+Compatibilité :
+`dungeon-equipment-hotfix-167817.js` reconstruit la vue depuis les slots
+quand la garde de fiche héros retourne vide.
 
-### Validation technique
+Suppression :
+- base `removeInventoryEntry(i)` réindexe les mains et `equipment` pour
+  les références strictement supérieures ;
+- Core 1.05 tardif wrappe `removeInventoryEntry` pour vider/réindexer
+  `rpgGear` ;
+- les chemins qui détruisent un objet tenu appellent `clearIndexFromHands`
+  avant la suppression ;
+- `dropItem` possède encore son propre chemin inline et n'est pas raccordé
+  dans ce micro-lot.
 
-SHA technique :
-`c540e0c033e85ecfa64721f16efb0aadecef308e`.
+### Contrat cible pur
 
-- Architecture + navigateur complet : `35607723774` — SUCCESS ;
-- Firefox : `35607723698` — SUCCESS ;
-- Tactical Dock : `35607723731` — SUCCESS.
+Entrées explicites uniquement :
+- `inventory` ;
+- `rightHand` ;
+- `leftHand` ;
+- `equipment` ;
+- `rpgGear` ;
+- resolver d'item fourni par l'appelant.
 
-Aucun gameplay/runtime/stockage n'a été modifié.
+Sorties pures :
+- refs normalisées ;
+- indices équipés uniques dans l'ordre mains puis RPG ;
+- items équipés résolus/dédupliqués ;
+- refs recalculées après suppression d'un index.
 
-### Clôture candidate
+Aucun accès à :
+- `window/state/current` ;
+- DOM ;
+- localStorage/Core Storage ;
+- Stats ;
+- Tactical/combat ;
+- catalogue global ;
+- sets/évolution ;
+- cache ;
+- timers/observers.
 
-Le SHA documentaire final doit maintenant repasser les trois batteries.
+### Règle de parité
 
-Après trois SUCCESS :
-1. créer
-   `checkpoint/gensrpg-phase4-inventory-equipment-sets-preaudit-green-2026-09-21` ;
-2. ouvrir un nouveau lot homogène :
-   **Core Inventory — contrat pur Equipped View / Slot Refs** ;
-3. aucun raccord runtime dans le premier commit de ce micro-lot ;
-4. ne pas toucher `main`.
+Le test doit exécuter les vrais propriétaires inline du blob vérifié
+`5b9b9ae780f735eadef049afeb10acf0b57441fe`
+et comparer le contrat pur sur les cas couverts.
 
-Audit :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SETS_PREAUDIT.md`.
+Les dettes historiques découvertes hors contrat ne doivent pas être réparées
+dans ce lot.
+
+### TDD
+
+1. ajouter une sentinelle qui exige l'API Core pure — RED attendu car le module
+   n'existe pas encore ;
+2. confirmer que le RED vient uniquement du module absent ;
+3. créer le module minimal ;
+4. vérifier la parité avec :
+   - deux mains sur le même objet 2 mains ;
+   - doublon main + rpgGear ;
+   - slots nuls/inconnus ;
+   - refs invalides/hors inventaire ;
+   - suppression avant/après/sur une ref ;
+5. intégrer la sentinelle Architecture ;
+6. trois batteries finales sur SHA documentaire avant GREEN.
+
+### Interdictions
+
+- ne pas modifier `index.html` ;
+- ne pas modifier `dungeonEquippedItems` ;
+- ne pas modifier equip/unequip/drop/remove runtime ;
+- ne pas modifier Stats/Tactical ;
+- ne pas ajouter de fallback/runtime bridge ;
+- ne pas corriger le gap d'invalidation cache dans ce lot ;
+- ne pas toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

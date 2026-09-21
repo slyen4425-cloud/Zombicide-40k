@@ -1,3 +1,88 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit compétition de réinstallation wrappers — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-reinstall-preaudit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-wrapper-reinstall-preaudit-2026-09-21`.
+- Base exacte :
+  `5b327836783f53819dcca603f486286c4df1576a`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent définitivement GREEN
+
+Retrait du hook `openEquipmentEditor` de Hero Art Repair validé sur le SHA exact
+`5b327836783f53819dcca603f486286c4df1576a` :
+
+- Architecture + navigateur complet `35652551286` — SUCCESS ;
+- Firefox `35652551303` — SUCCESS ;
+- Tactical Dock `35652551308` — SUCCESS.
+
+`main` est restée strictement inchangée.
+
+### Mission unique du présent pré-audit
+
+Caractériser la compétition de réinstallation entre :
+
+- `gens-hero-editor-dynamic-167897.js` :
+  - `installWrappers()` ;
+  - marqueur `__canon101` ;
+  - retry d'installation 50 ms puis jusqu'à 30 relances à 100 ms ;
+- `gens-equipment-stat-cleanup-1678102.js` :
+  - `wrapOpen()` ;
+  - invalidateur de `saveEquipmentEditor` ;
+  - marqueurs `__canonEq102` / `__eqCache1021` ;
+  - installation single-shot.
+
+Objectifs :
+1. figer l'ordre réel initial de composition ;
+2. figer l'ordre final après la fenêtre de retry du Hero Editor Dynamic ;
+3. déterminer si `openEquipmentEditor` ou `saveEquipmentEditor` sont wrappés
+   plusieurs fois par le même propriétaire ;
+4. distinguer duplication observable, simple ordre d'enveloppes et dépendance utile ;
+5. définir seulement ensuite un éventuel micro-lot soustractif séparé.
+
+### Périmètre strict
+
+Pré-audit / caractérisation uniquement.
+
+Ne pas modifier :
+- Hero Editor Dynamic ;
+- Equipment Stat Cleanup ;
+- hotfix Equipment ;
+- Set Editor ;
+- `renderDungeonGear` ;
+- observer/listeners Equipment UI ;
+- stockage ;
+- bonus/sets ;
+- évolution ;
+- cache/invalidation ;
+- Stats gameplay ;
+- Tactical/combat ;
+- `index.html` ;
+- `main`.
+
+Aucun nouveau wrapper, observer, timer/retry, fallback ou monkey-patch.
+
+### TDD / preuves prévues
+
+1. sentinelle statique des gardes, marqueurs et retries ;
+2. sentinelle runtime/VM ou navigateur qui capture la chaîne
+   `__original` juste après installation puis après > 3 s ;
+3. compter les appels réels des décorateurs open/save par propriétaire ;
+4. valider que le comportement fonctionnel Equipment reste stable ;
+5. Architecture + navigateur complet, Firefox et Tactical avant GREEN.
+
+### Prochaine action
+
+Créer les sentinelles de caractérisation de l'empilement initial/final, sans
+aucune modification runtime.
+
+
 ## ÉTAT ACTUEL — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21
 
 Ce bloc est le point de reprise opérationnel prioritaire. Les blocs suivants sont historiques.

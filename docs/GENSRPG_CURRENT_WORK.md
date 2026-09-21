@@ -1,3 +1,88 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S7 snapshot Core unique — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s7-core-snapshot-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s7-core-snapshot-2026-09-21`.
+- Base exacte et dernier GREEN : `a98c32968fbb32a32827c7f6d03b9666db392be8`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s6-derived-values-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S6 définitivement clôturé
+
+HEAD final :
+`a98c32968fbb32a32827c7f6d03b9666db392be8`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35582184736` — SUCCESS ;
+- Firefox : `35582184710` — SUCCESS ;
+- Tactical Dock : `35582184728` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s6-derived-values-green-2026-09-21`.
+
+`stats-derived-values-v1.js` reste Phase 4 inert.
+Aucun helper historique, aucun `index.html`, aucune formule de combat et aucun
+snapshot Tactical n'ont été modifiés.
+
+### Mission S7
+
+Caractériser puis préparer un **snapshot Core Stats unique et immuable** contenant
+uniquement les valeurs canoniques et dérivées déjà couvertes par S1 -> S6.
+
+La cible est d'éliminer à terme les doubles lectures Stats lors de la construction
+des acteurs Tactical, sans déplacer l'autorité combat.
+
+Chaînes historiques à caractériser avant toute implémentation :
+- `dungeonCombatHeroSnapshot` inline ;
+- Tactical Adapter / `heroSnapshot` / création d'acteur ;
+- V110 `buildHeroSnapshot` + `applyHeroSnapshot` ;
+- éventuelles relectures Stats/Dungeon après création de l'acteur ;
+- V114.5 snapshot/repair uniquement comme dette historique si toujours hors graphe.
+
+### Frontières obligatoires S7
+
+Le snapshot Core peut transporter les valeurs canoniques et dérivées S1-S6,
+mais S7 ne doit pas décider ni modifier :
+- la normalisation des résistances S8 ;
+- le contrat armorScore / armorReduction S9 ;
+- la formule finale toucher / Défense / Esquive S10 ;
+- les dégâts finaux S11 ;
+- l'ordre/tour, la ligne de vue, le couvert ou le D100 ;
+- HP/mana courants ;
+- Inventory/Equipment/Talents/Challenge ;
+- UI, stockage ou progression.
+
+Aucune ancienne lecture/snapshot ne doit être retirée avant preuve comparative
+explicite de parité et identification de son vrai propriétaire.
+
+### Première action obligatoire S7
+
+Avant toute création ou raccord de module :
+1. relire les propriétaires snapshot actifs et leurs sentinelles ;
+2. reconstruire le chemin exact héros -> Stats -> snapshot Dungeon -> Adapter ->
+   V110 -> acteur Tactical ;
+3. relever toutes les relectures de valeurs après le snapshot initial ;
+4. distinguer snapshot de données et résolution combat ;
+5. confirmer les fichiers réellement chargés par le graphe production ;
+6. classer V114.5 comme actif ou dormant par preuve de graphe ;
+7. définir seulement ensuite le contrat du snapshot immuable et le TDD ;
+8. si un corps inline exact de `index.html` est indispensable, appliquer
+   immédiatement la règle 26 avec le SHA exact.
+
+### Interdictions S7
+
+- aucun changement de formule ;
+- aucun changement Armor / toucher / D100 / résistances ;
+- aucun retrait de lecteur historique avant parité ;
+- aucun nouveau wrapper global ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement sur `main`.
+
+
 # GenSrpG — Travail courant
 
 

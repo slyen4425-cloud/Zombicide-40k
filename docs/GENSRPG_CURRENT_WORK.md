@@ -87,6 +87,56 @@ Avant toute création de module :
 
 
 
+### Audit S6 dérivées — résultat
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S6_DERIVED_AUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase4_stats_s6_derived_audit_v1.test.cjs`.
+
+Commit de branchement CI :
+`0fc7ba8aca7d908eea71677745123a87a825d8c6`.
+
+La sentinelle S6 passe SUCCESS dans Architecture sur le run
+`35578976608`.
+
+Classification :
+- additive stable : physical damage bonus, magic damage bonus, HP bonus,
+  initiative ;
+- plancher 0 stable : max mana, magic resistance ;
+- cap configurable stable : crit, dodge ;
+- exclus S6 : application Défense, application Armure, mouvement,
+  mutation d'attaque `applyDungeonCombatScaling`, D100, résistances
+  élémentaires/génériques, dégâts finaux.
+
+Le wrapper `applyDungeonCombatScaling` reste une frontière Combat/Equipment :
+S3 sait déjà produire les totaux `hit:*` et `damage:ranged`, mais S6 ne doit
+pas muter une attaque ni calculer le toucher final.
+
+### Règle 26 S6 — déclenchée
+
+Pour extraire les formules complètes sans approximation, le corps exact des
+helpers historiques inline est requis.
+
+SHA exact demandé :
+`8f6fa73c365a107e50fa759346955354ddfa59ea`.
+
+Permalink :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/8f6fa73c365a107e50fa759346955354ddfa59ea/index.html`.
+
+Procédure :
+1. télécharger ce `index.html` exact ;
+2. le compresser en ZIP ;
+3. l'envoyer dans le fil ;
+4. vérifier blob/taille avant inspection ;
+5. inspecter uniquement les helpers S6 ;
+6. poser ensuite le RED de parité et le moteur pur ;
+7. ne modifier aucun runtime historique dans l'extraction pure.
+
+Aucune ancienne copie locale ne doit être utilisée.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S5 providers de modificateurs — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

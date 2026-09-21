@@ -47,7 +47,8 @@ const context={
 };
 context.window=context;context.globalThis=context;
 vm.createContext(context);
-vm.runInContext(statsNormalizationSrc,context,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,context,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,context,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,context,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=context.GensCleanRpgStats167874;
 assert.ok(api,'API stats absente');
 api.install();

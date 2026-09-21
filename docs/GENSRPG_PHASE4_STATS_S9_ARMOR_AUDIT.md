@@ -242,3 +242,49 @@ Le futur module ne doit pas :
 4. Implémenter le module pur/inert.
 5. Obtenir parité avec les deux sémantiques historiques sans changer le gameplay.
 6. Repasser Architecture + navigateur, Firefox et Tactical Dock.
+
+
+## TDD et validation finale S9
+
+Caractérisation réelle :
+- commit test : `8a7510d195a9f1d1e1e1c62ac41473bbfbc9a159` ;
+- branchement CI : `4349013221a75560f9ad00f4e39e3ac686d3cea8` ;
+- test : `tests/gens_phase4_stats_s9_armor_characterization_v1.test.cjs` ;
+- résultat : SUCCESS ;
+- il exécute les propriétaires réels Dungeon/Tactical et ne réimplémente pas le
+  gameplay.
+
+RED TDD du contrat Core :
+- test : `tests/gens_phase4_stats_s9_armor_contract_parity_v1.test.cjs` ;
+- commit RED : `f8200858ffdd2774d76d6556db5e784549ec6d2f` ;
+- run Architecture : `35591023912` — FAILURE attendu ;
+- cause exacte :
+  `ENOENT assets/gensrpg/core/stats-armor-contract-v1.js`.
+
+Implémentation :
+- module : `assets/gensrpg/core/stats-armor-contract-v1.js` ;
+- commit : `6f25da84e83461f53d5d9b6171aed90768f44090` ;
+- API pure :
+  - `normalizeScore()` ;
+  - `dungeonReductionFromScore()` ;
+  - `tacticalReductionFromScore()` ;
+  - `floorPolicy()`.
+- aucun DOM, storage, RNG, PV, combat, équipement, talents ou challenge ;
+- aucun raccord runtime.
+
+Classification :
+- commit : `6db3b0ca36c5d91c420be961cf26eae416cd0b7b` ;
+- le module est explicitement Phase 4 inert dans
+  `gens_phase2_runtime_load_graph_v11411.test.cjs` ;
+- il reste hors graphe de production.
+
+Validation du HEAD technique `6db3b0ca36c5d91c420be961cf26eae416cd0b7b` :
+- Architecture + navigateur complet : `35591282497` — SUCCESS ;
+- Firefox : `35591282377` — SUCCESS ;
+- Tactical Dock : `35591282374` — SUCCESS.
+
+Conclusion :
+- S9 préserve explicitement la divergence historique Dungeon/Tactical ;
+- aucune formule de dégâts ou d'armure n'a été modifiée ;
+- aucune autorité gameplay n'a été transférée ;
+- `main` reste inchangée.

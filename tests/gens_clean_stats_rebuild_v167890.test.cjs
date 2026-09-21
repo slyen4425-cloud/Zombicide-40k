@@ -12,7 +12,8 @@ function makeCtx(){
   currentRpgProfile:()=>profiles[0],getActiveGameProfile:()=>profiles[0],loadGameProfiles:()=>profiles,
   saveGameProfiles:a=>{profiles=JSON.parse(JSON.stringify(a))},activeGameProfileId:()=>profiles[0].id,getActiveGameProfileId:()=>profiles[0].id,
   loadDungeonRpgRules:()=>({...rules}),saveDungeonRpgRules:r=>{rules={...r}},isDungeonMode:()=>false,showToast:()=>{}};
- ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});return ctx;
+ ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});return ctx;
 }
 let ctx=makeCtx(),api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'clean stats API missing');
@@ -43,7 +44,8 @@ const mixedCtx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function'
  currentRpgProfile:()=>mixedProfiles[1],getActiveGameProfile:()=>mixedProfiles[0],loadGameProfiles:()=>mixedProfiles,
  saveGameProfiles:a=>{mixedProfiles=JSON.parse(JSON.stringify(a))},activeGameProfileId:()=>mixedProfiles[0].id,getActiveGameProfileId:()=>mixedProfiles[0].id,
  loadDungeonRpgRules:()=>({physicalDamageStep:10,physicalDamageGain:1}),saveDungeonRpgRules:()=>{},isDungeonMode:()=>false};
-mixedCtx.window=mixedCtx;mixedCtx.globalThis=mixedCtx;vm.createContext(mixedCtx);vm.runInContext(statsNormalizationSrc,mixedCtx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,mixedCtx,{filename:'gens-rpg-stats-clean-167874.js'});
+mixedCtx.window=mixedCtx;mixedCtx.globalThis=mixedCtx;vm.createContext(mixedCtx);vm.runInContext(statsNormalizationSrc,mixedCtx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,mixedCtx,{filename:'gens-rpg-stats-clean-167874.js'});
 assert.equal(mixedCtx.GensCleanRpgStats167874.install(),true,'Core Stats install should complete with Base active and Dungeon profile selected by its owner');
 assert.deepEqual(mixedProfiles.map(p=>p.id),['base','dungeon'],'saving Dungeon stats must never overwrite the active Base profile');
 

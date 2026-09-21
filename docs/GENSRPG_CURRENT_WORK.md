@@ -1,5 +1,91 @@
 # GenSrpG — Travail courant
 
+
+## Chantier courant prioritaire — Phase 4 Core Stats / S5 providers de modificateurs — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s5-modifier-providers-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s5-modifier-providers-2026-09-21`.
+- Base exacte et dernier GREEN : `46276b1f9c946f179ea7b1fea3f5fad6420bfa66`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s4-hero-values-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S4 définitivement clôturé
+
+HEAD final :
+`46276b1f9c946f179ea7b1fea3f5fad6420bfa66`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35575846530` — SUCCESS ;
+- Firefox : `35575846469` — SUCCESS ;
+- Tactical Dock : `35575846460` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s4-hero-values-green-2026-09-21`.
+
+`stats-hero-values-v1.js` reste Phase 4 inert et ne déplace aucune autorité runtime.
+
+### Mission S5
+
+Préparer puis extraire le contrat de **modificateurs externes de caractéristiques**
+sans déplacer leurs systèmes propriétaires.
+
+Sources historiques à caractériser :
+- Equipment : `dungeonEquipmentBonus` et sa couche propriétaire active ;
+- Talents/skills : `dungeonSkillEffectTotal` ;
+- Challenges : `dungeonChallengeDebuffTotal067`.
+
+Le futur Core Stats doit recevoir des lignes explicites de modificateurs ; il ne
+doit jamais lire directement l'inventaire équipé, les talents, l'état challenge,
+`CHARS`, `state` ou un profil courant pour fabriquer ces bonus.
+
+### Frontière d'autorité S5
+
+Inventory/Equipment reste propriétaire :
+- des objets portés ;
+- des bonus objet ;
+- de l'évolution ;
+- des sets ;
+- de l'invalidation equip/unequip.
+
+Talents reste propriétaire :
+- des talents appris/actifs ;
+- de leur sémantique ;
+- de leurs valeurs.
+
+Challenge reste propriétaire :
+- de l'état challenge ;
+- de ses malus/bonus ;
+- de leur activation.
+
+Core Stats S5 ne connaît que des modificateurs normalisés :
+id / target / value / source / enabled.
+
+### Première action obligatoire
+
+Avant toute création de module :
+1. relire les propriétaires actifs Equipment/Talents/Challenge ;
+2. relire leurs sentinelles existantes ;
+3. déterminer si les fonctions Talent/Challenge sont externes ou inline ;
+4. confirmer le chemin réellement chargé par Pages/preview ;
+5. si l'inspection exacte de `index.html` devient nécessaire, appliquer
+   immédiatement la règle 26 de la charte au lieu de tenter de transférer 8 Mo ;
+6. seulement après cette cartographie S5, définir le TDD et le fichier Core.
+
+### Interdictions S5
+
+- aucune modification de formule Equipment/Talent/Challenge ;
+- aucune modification Armor / hit / D100 / résistances ;
+- aucune dérivée S6 ;
+- aucun snapshot Tactical ;
+- aucune UI/persistance ;
+- aucun nouveau wrapper global ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S4 provider valeurs héros — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

@@ -1,3 +1,101 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Hero Editor / Equipment Cleanup — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-wrapper-retry-preaudit-2026-09-21`.
+- Base exacte :
+  `0fd2909a488becc452439c27c8272e2b7b346f73`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent définitivement GREEN
+
+Le retrait du hook `openEquipmentEditor` de Hero Art Repair est officiellement
+GREEN sur le SHA exact :
+
+`0fd2909a488becc452439c27c8272e2b7b346f73`.
+
+Validations finales :
+- Architecture + navigateur complet `35652570940` — SUCCESS ;
+- Firefox `35652570917` — SUCCESS ;
+- Tactical Dock `35652570850` — SUCCESS.
+
+Le checkpoint GREEN cible existe et pointe sur ce SHA exact.
+
+### Gouvernance de reprise
+
+Une branche parallèle
+`work/gensrpg-phase4-inventory-equipment-wrapper-reinstall-preaudit-2026-09-21`
+a été détectée mais elle a été ouverte depuis un SHA antérieur au GREEN final.
+Elle n'est pas utilisée comme autorité pour ce chantier.
+
+Le présent lot repart exclusivement du checkpoint GREEN exact `0fd2909a…`.
+
+### Mission unique
+
+Caractériser, sans correction runtime, la compétition de réinstallation entre :
+
+- `gens-hero-editor-dynamic-167897.js` :
+  - `installWrappers()` ;
+  - marqueur générique `__canon101` ;
+  - retry après 50 ms puis jusqu'à 30 relances à 100 ms ;
+- `gens-equipment-stat-cleanup-1678102.js` :
+  - `wrapOpen()` marqué `__canonEq102` ;
+  - invalidateur `saveEquipmentEditor` marqué `__eqCache1021` ;
+  - installation single-shot.
+
+Objectifs :
+1. figer la chaîne `__original` initiale immédiatement après chargement ;
+2. figer la chaîne finale après > 3 s ;
+3. compter le nombre de couches du même propriétaire sur
+   `openEquipmentEditor` et `saveEquipmentEditor` ;
+4. mesurer les effets observables d'un appel open/save après la fenêtre de retry ;
+5. déterminer si le retry crée une simple enveloppe supplémentaire ou une vraie
+   duplication d'effets ;
+6. définir seulement ensuite un micro-lot correctif séparé, minimal et soustractif.
+
+### Périmètre strict
+
+Pré-audit / caractérisation uniquement.
+
+Ne pas modifier :
+- `gens-hero-editor-dynamic-167897.js` ;
+- `gens-equipment-stat-cleanup-1678102.js` ;
+- hotfix Equipment ;
+- Set Editor ;
+- `renderDungeonGear` ;
+- observer/listeners Equipment UI ;
+- stockage ;
+- bonus/sets ;
+- évolution ;
+- cache/invalidation ;
+- Stats gameplay ;
+- Tactical/combat ;
+- `index.html` ;
+- `main`.
+
+Aucun nouveau wrapper, observer, timer/retry, fallback ou monkey-patch runtime.
+
+### Preuves prévues
+
+1. garde statique sur marqueurs/retry/single-install ;
+2. sentinelle navigateur ciblée utilisant les vrais modules et capturant la chaîne
+   initiale puis finale ;
+3. compteurs d'appels des propriétaires open/save ;
+4. validation du comportement Equipment après > 3 s ;
+5. Architecture + navigateur complet, Firefox et Tactical avant checkpoint GREEN.
+
+### Prochaine action
+
+Créer les sentinelles de caractérisation statique et navigateur. Aucun changement
+runtime autorisé dans ce pré-audit.
+
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — Hero Art open hook retirement — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire.

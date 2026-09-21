@@ -115,6 +115,7 @@ const rt={
 physicalBonusCalls=0;
 const meleeAttack=Adapter.heroAttacks(rt,'hero')[0];
 assert.equal(meleeAttack.power,8,'current Equipment/Combat scaling must already place the physical bonus inside Tactical attack.power');
+assert.equal(meleeAttack.meta.rpgDamageBonus,3,'Adapter must expose the canonical bonus already embedded in Tactical power');
 assert.equal(physicalBonusCalls,1,'weapon scaling must read the current physical damage bonus once');
 
 const snap=V110.buildHeroSnapshot(rt,'hero',{hp:10,maxHp:10,movement:3,initiative:10,defense:0,armor:0,dodge:0});
@@ -140,14 +141,15 @@ assert.deepEqual(
     armor:physical.armor,
     finalDamage:physical.damage
   },
-  {attackPower:8,snapshotBonus:3,baseWeaponDamage:8,statDamageBonus:3,rawDamage:11,armor:2,finalDamage:9},
-  'current real boundary must remain characterized before any correction'
+  {attackPower:8,snapshotBonus:3,baseWeaponDamage:5,statDamageBonus:3,rawDamage:8,armor:2,finalDamage:6},
+  'corrected boundary must retain scaled preview power while applying the canonical melee bonus exactly once'
 );
 
 states.hero.inventory=[{itemId:'staff'}];
 magicBonusCalls=0;
 const magicAttack=Adapter.heroAttacks(rt,'hero')[0];
 assert.equal(magicAttack.power,9,'current magic scaling must place the magic damage bonus inside Tactical attack.power');
+assert.equal(magicAttack.meta.rpgDamageBonus,4,'Adapter must also expose the embedded magic bonus without changing magic resolution');
 assert.equal(magicBonusCalls,1);
 const magicSnap=V110.buildHeroSnapshot(rt,'hero',{hp:10,maxHp:10,movement:3,initiative:10,defense:0,armor:0,dodge:0});
 assert.equal(magicSnap.derived.magicDamageBonus,4);
@@ -180,11 +182,12 @@ console.log(JSON.stringify({
   physicalBonusReads:physicalBonusCalls,
   physicalAttackPowerAlreadyScaled:8,
   physicalSnapshotBonus:3,
-  physicalV11411RawDamage:11,
-  physicalFinalAfterArmor:9,
+  physicalV11411RawDamage:8,
+  physicalFinalAfterArmor:6,
   magicBonusReads:magicBonusCalls,
   magicAttackPowerAlreadyScaled:9,
   magicSnapshotBonus:4,
   magicV11411AddsSnapshotBonus:false,
-  gameplayChanged:false
+  meleeDoubleApplicationFixed:true,
+  rangedAndMagicSemanticsChanged:false
 },null,2));

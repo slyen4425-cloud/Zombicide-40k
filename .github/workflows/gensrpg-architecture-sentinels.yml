@@ -365,6 +365,9 @@ jobs:
       - name: Verrouiller le contrat pur Equipped View Slot Refs
         run: node tests/gens_phase4_inventory_equipped_view_slot_refs_contract_v1.test.cjs
 
+      - name: Verrouiller le raccord runtime Equipped View
+        run: node tests/gens_phase4_inventory_equipped_view_raccord_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

@@ -48,7 +48,8 @@ const ctx={
 };
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
-vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(statsSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(statsSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 ctx.GensCleanRpgStats167874.install();
 
 const scaled=ctx.applyDungeonCombatScaling(item,{range:6,melee:false,hitChance:55,damage:2,dice:1,strength:2});

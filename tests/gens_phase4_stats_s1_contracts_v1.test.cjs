@@ -5,6 +5,7 @@ const vm=require('node:vm');
 
 const rootDir=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(rootDir,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(rootDir,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 
 const profile={
   id:'dungeon',
@@ -78,7 +79,7 @@ const ctx={
 ctx.window=ctx;
 ctx.globalThis=ctx;
 vm.createContext(ctx);
-vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'canonical Stats API missing');

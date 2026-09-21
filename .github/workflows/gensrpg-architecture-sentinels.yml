@@ -591,3 +591,6 @@ jobs:
 
       - name: Caractériser les tokens tardifs du resolver d’assets Phase 4
         run: node tests/gens_asset_resolver_late_tokens_browser_v1.test.cjs
+
+      - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
+        run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs

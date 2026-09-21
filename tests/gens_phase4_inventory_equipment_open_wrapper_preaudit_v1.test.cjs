@@ -108,9 +108,9 @@ assert.ok(hotfix.includes('const bonuses=dungeon?readEditorBonuses():null;'));
 // Set-editor open/save are likewise coupled around membership state.
 assert.ok(setEditor.includes('persistItemMembership(id,setId,piece)'));
 
-// The Hero Editor retry can regain the outer wrapper after Cleanup because markers differ.
-// This is characterization only: no runtime repair belongs in this audit.
-assert.ok(heroDynamic.includes('if(typeof old!=="function"||old[flag])return false'));
+// The historical retry risk is now guarded across the __original chain.
+assert.ok(heroDynamic.includes('function hasWrapFlag(fn,flag)'));
+assert.ok(heroDynamic.includes('hasWrapFlag(old,flag)'));
 assert.ok(heroDynamic.includes('flag="__canon101"'));
 assert.ok(cleanup.includes('__canonEq102'));
 
@@ -123,7 +123,7 @@ console.log(JSON.stringify({
     'hero-editor-dynamic-167897',
     'equipment-stat-cleanup-1678102'
   ],
-  retryRisk:'hero-editor-dynamic may become outer wrapper again after cleanup because it retries with __canon101 while cleanup uses __canonEq102',
+  retryRisk:'retired by chain-aware __canon101 ownership guard; retry remains for genuinely late replacements',
   retiredParticipant:'hero-art-repair-167874',
   retirementProof:'dedicated owner guard + browser characterization required'
 },null,2));

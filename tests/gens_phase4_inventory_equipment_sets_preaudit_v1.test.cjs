@@ -171,10 +171,11 @@ assert.equal(evo.evolutionBonusForItem(evolved,'force',25),5,'real evolution own
 
 assert.match(core316,/const originalEquipmentBonus316=window\.dungeonEquipmentBonus/);
 assert.match(core316,/return itemBonus\+dungeonSetBonusTotal\(key\)/,'Core 3.16 must layer set bonus over direct item bonus');
-assert.match(cleanup,/const old=R\.dungeonEquipmentBonus,core=R\.GensEquipmentBonusSetsV1/);
-assert.match(cleanup,/core\.totalBonus\(items,key,R\.DUNGEON_EQUIPMENT_SETS\|\|\{\}\)/,'cleanup must delegate direct + set bonus to Core');
-assert.match(cleanup,/\+cachedEvolutionBonus\(key\)/,'cleanup must keep evolution layered after Core direct + sets');
-assert.equal(/old\.apply\(this,arguments\)/.test(cleanup),false,'active Equipment owner must not execute the historical direct + set chain after Core raccord');
+const equipmentBonusPatch=extractFunction(cleanup,'patchEquipmentBonus');
+assert.match(equipmentBonusPatch,/const old=R\.dungeonEquipmentBonus,core=R\.GensEquipmentBonusSetsV1/);
+assert.match(equipmentBonusPatch,/core\.totalBonus\(items,key,R\.DUNGEON_EQUIPMENT_SETS\|\|\{\}\)/,'cleanup must delegate direct + set bonus to Core');
+assert.match(equipmentBonusPatch,/\+cachedEvolutionBonus\(key\)/,'cleanup must keep evolution layered after Core direct + sets');
+assert.equal(/old\.apply\(this,arguments\)/.test(equipmentBonusPatch),false,'active Equipment owner must not execute the historical direct + set chain after Core raccord');
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance layer must cache the final equipment seam');
 assert.ok(statsNormalization.includes('GensStatsNormalizationV1'),'preaudit must retain the explicit Core Stats dependency before inspecting the Stats owner');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must consume Equipment through the explicit seam');

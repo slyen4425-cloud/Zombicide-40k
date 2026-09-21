@@ -389,6 +389,9 @@ jobs:
       - name: Pré-auditer les wrappers et UI historiques Equipment
         run: node tests/gens_phase4_inventory_equipment_legacy_ui_preaudit_v1.test.cjs
 
+      - name: Retirer le fallback set-state local Equipment UI
+        run: node tests/gens_phase4_inventory_equipment_setstate_fallback_retirement_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

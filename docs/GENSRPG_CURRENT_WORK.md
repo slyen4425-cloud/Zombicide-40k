@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Stats / S11 raccord Core Snapshot → Tactical — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Stats / S11 raccord Core Snapshot → Tactical — clôture candidate — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -6,61 +6,68 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
   `work/gensrpg-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
 - Checkpoint de départ :
   `checkpoint/gensrpg-start-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
-- Base exacte / dernier GREEN :
+- Base :
   `8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
-- Checkpoint précédent :
-  `checkpoint/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-green-2026-09-21`.
+- SHA technique GREEN avant documentation :
+  `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Correctif double application officiellement GREEN
+### Résultat S11
 
-SHA final :
-`8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
+Raccord runtime effectué :
 
-Runs :
-- Architecture + navigateur complet : `35597692405` — SUCCESS ;
-- Firefox : `35597692489` — SUCCESS ;
-- Tactical Dock : `35597692575` — SUCCESS.
+`S3 -> S4 -> S5 -> S6 -> S7 -> Stats owner coreSnapshot() -> V110 -> Tactical`.
 
-Contrat final :
-- preview Tactical conserve la puissance déjà scalée ;
-- Adapter transporte le bonus canonique incorporé ;
-- mêlée physique V114.11 applique le bonus canonique une seule fois ;
-- distance/magie/résistances/armure/critique restent inchangés.
+S3-S7 sont désormais production-reachable et chargés avant le propriétaire
+Stats dans Pages et preview.
 
-### Mission du raccord S11
+V110 ne relit plus directement :
+- physicalDamageBonus ;
+- magicDamageBonus ;
+- maxMana ;
+- crit ;
+- dodge ;
+- magicResistance
+depuis les helpers Dungeon.
 
-Remplacer progressivement les relectures Dungeon redondantes du snapshot V110
-par le pipeline Core Stats déjà extrait, sans changer les valeurs ni déplacer
-la résolution combat.
+HP/mana courants, résistances et règles restent dans l'enveloppe session V110.
 
-Chaîne cible :
-`S3/S4/S5 valeurs+modifiers -> S6 derived -> S7 snapshot -> adaptateur session V110 -> Tactical`.
+Initiative dérivée reste volontairement hors migration : la sentinelle prouve
+une divergence possible avec les effets cible `initiative`.
 
-### Première preuve obligatoire
+Le correctif S11 application unique des dégâts mêlée reste GREEN.
 
-Avant tout raccord runtime :
-1. dresser la liste exacte des champs V110 encore relus depuis Dungeon ;
-2. classer chaque champ en :
-   - Core S7 disponible ;
-   - valeur canonique Core mais hors derived ;
-   - donnée session/combat qui doit rester V110 ;
-3. construire une fixture comparative V110 historique vs composition Core ;
-4. mesurer le nombre de relectures Dungeon ;
-5. ne supprimer que les relectures dont la parité est démontrée ;
-6. conserver HP/mana courants, résistances, rules et ressources session hors S7 ;
-7. poser un RED de raccord avant toute modification V110.
+### Validation technique
 
-### Interdictions
+Sur `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3` :
 
-- aucune nouvelle formule ;
-- aucune modification dégâts/hit/armure/résistances/critique ;
-- aucune mutation PV dans Core ;
-- aucune lecture directe de CHARS/state ajoutée au Core ;
-- aucun changement du gros `index.html` sans nécessité prouvée ;
-- aucun wrapper/observer/timer/retry/monkey-patch ;
-- aucun changement sur `main`.
+- Architecture + navigateur complet : `35602684576` — SUCCESS ;
+- Firefox : `35602684564` — SUCCESS ;
+- Tactical Dock : `35602684558` — SUCCESS.
+
+### Architecture
+
+- graphe production-reachable : 73 fichiers ;
+- S3-S7 classés Core connected ;
+- propriétaires/timers/storage/side-effects Phase 2 réalignés ;
+- S3-S7 précachés par le Service Worker ;
+- `index.html` inchangé, blob :
+  `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+### Clôture candidate
+
+Le SHA documentaire final doit maintenant repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-stats-s11-core-snapshot-raccord-green-2026-09-21` ;
+2. utiliser ce SHA comme nouvelle base sûre ;
+3. ouvrir le prochain lot Phase 4 prévu par la roadmap ;
+4. ne pas toucher `main`.
+
+Audit :
+`docs/GENSRPG_PHASE4_STATS_S11_CORE_SNAPSHOT_RACCORD_AUDIT.md`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

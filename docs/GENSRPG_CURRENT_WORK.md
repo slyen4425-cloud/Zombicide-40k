@@ -115,6 +115,56 @@ GREEN seulement si :
 Document :
 `docs/GENSRPG_PHASE4_STATS_S2_AUTHORITY_RACCORD.md`.
 
+### Raccord réalisé
+
+Le raccord d'autorité est appliqué :
+- `stats-normalization-v1.js` est chargé avant `gens-rpg-stats-clean-167874.js`
+  dans GitHub Pages et `preview.html` ;
+- le Core normalization est production-reachable ;
+- le propriétaire Stats exige explicitement `GensStatsNormalizationV1` ;
+- ALIAS / slug / canon / normDef / targetValid / normEffect / compare ne sont plus
+  réimplémentés localement ;
+- aucun fallback local, nouveau loader, timer/retry ou wrapper ajouté ;
+- `index.html` n'a pas été modifié.
+
+Les tests VM historiques ont été réalignés sur la dépendance explicite Core -> Stats.
+
+### TDD du raccord
+
+RED attendu :
+`f0da210616e02879bc184a78cee8f1b75ac163bf`.
+
+Cause :
+le Core normalization n'était pas encore chargé dans la composition Pages.
+
+Les attentes historiques de composition Capture/preview ont ensuite été réalignées
+de façon purement sentinelle pour intégrer le 21e module.
+
+### Validation GREEN technique du raccord
+
+HEAD :
+`e490ce38ed654a328d588968ff55002c0ce6edf7`.
+
+Runs :
+- Architecture + navigateur complet : `35564423357` — SUCCESS ;
+- Firefox : `35564423354` — SUCCESS ;
+- Tactical Dock : `35564423345` — SUCCESS.
+
+Le navigateur complet valide notamment Survie, Dungeon après Survie, Builder,
+Config objet, fiche RPG, pièges/cache authored, Save & Quit/reprise, PvP,
+Monster Capture, composition complète Capture, preview et resolver d'assets.
+
+Aucune formule gameplay/Tactical/Armor/Hit n'a changé.
+
+### Prochaine action
+
+La clôture documentaire du raccord doit repasser les trois workflows sur son SHA
+exact. Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s2-authority-raccord-green-2026-09-21` ;
+- ouvrir S3 depuis ce checkpoint ;
+- S3 = moteur pur valeur/effets uniquement, sans déplacer les formules Tactical,
+  Armor, Hit, résistances ou UI/persistance.
+
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S2 Normalisation pure — 2026-09-21
 

@@ -404,6 +404,9 @@ jobs:
       - name: Exiger la garde de chaîne Hero Editor
         run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_owner_v1.test.cjs
 
+      - name: Pré-auditer les writers saveEquipmentEditor Equipment
+        run: node tests/gens_phase4_inventory_equipment_save_editor_static_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 
@@ -609,3 +612,6 @@ jobs:
 
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs
+
+      - name: Caractériser la chaîne saveEquipmentEditor dans Chromium
+        run: node tests/gens_phase4_inventory_equipment_save_editor_browser_preaudit_v1.test.cjs

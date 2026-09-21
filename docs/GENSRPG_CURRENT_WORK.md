@@ -1,88 +1,86 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View & Slot Refs — clôture candidate — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View — raccord runtime — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipped-view-raccord-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipped-view-slot-refs-contract-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipped-view-raccord-2026-09-21`.
 - Base exacte :
-  `e61638fa504d0050f80fbfd1b3a7192f797a986f`.
+  `db9d9d7de9dcd220920dcf99da032641940ea016`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-sets-preaudit-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat
+### Contrat pur clôturé
 
-Nouveau service Core pur et inert :
-
+Module :
 `assets/gensrpg/core/inventory-equipped-view-v1.js`.
 
-Il fournit uniquement :
-- normalisation refs de slots ;
-- indices équipés dédupliqués ;
-- résolution d'items via resolver explicite ;
-- réindexation pure après suppression.
+Il reste inert sur la base de départ.
 
-Parité prouvée avec les propriétaires inline exacts du blob
-`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+Validation exacte du contrat :
+- Architecture + navigateur : `35613421467` — SUCCESS ;
+- Firefox : `35613421549` — SUCCESS ;
+- Tactical Dock : `35613421507` — SUCCESS.
 
-Cas verrouillés :
-- deux mains sur le même index ;
-- doublons main/RPG ;
-- refs invalides ;
-- ordre mains -> rpgGear ;
-- suppression : égal -> null, supérieur -> -1.
+### Mission du raccord
 
-### Architecture
+Raccorder uniquement la **vue des objets équipés Dungeon** au service pur
+`GensInventoryEquippedViewV1`.
 
-Le module reste **Phase 4 inert** :
-- non chargé par Pages ;
-- non chargé par preview ;
-- non précaché ;
-- non raccordé au runtime.
+Dernier propriétaire runtime existant :
 
-Production-reachable : toujours 73 fichiers.
+`assets/dungeon/dungeon-equipment-hotfix-167817.js`.
 
-Inventaire physique : 91 JS.
-Services Phase 4 connus : 11.
+Ce fichier possède déjà la dernière autorité sur `dungeonEquippedItems`.
+Le lot doit transformer cette couche existante en adaptateur explicite vers Core,
+sans ajouter un nouveau wrapper.
 
-Aucun runtime historique, `index.html`, stockage, Stats, Tactical, set,
-évolution, cache ou UI n'a été modifié.
+### Contrat cible
+
+1. charger `inventory-equipped-view-v1.js` avant le hotfix Equipment ;
+2. le hotfix exige l'API Core ;
+3. la vue équipée vient de :
+   - `state.inventory` ;
+   - `state.rightHand` ;
+   - `state.leftHand` ;
+   - `state.rpgGear` ;
+   - resolver existant `getItemFromEntry/itemById` ;
+4. le garde `isDungeonHeroSheet()` du propriétaire inline ne doit plus
+   déterminer la vue ;
+5. hors mode Dungeon, la vue reste vide ;
+6. aucune mutation de state dans le Core ;
+7. aucun changement de `dungeonEquipmentBonus`, sets, évolution ou caches.
+
+### Interdictions
+
+- pas de nouveau wrapper ;
+- pas de modification `index.html` ;
+- pas de modification equip/unequip/remove/drop ;
+- pas de changement des refs de slots ;
+- pas de modification Stats/Tactical ;
+- pas de changement des formules de bonus ;
+- pas de nettoyage UI/éditeur dans ce lot ;
+- pas de correction du gap d'invalidation cache ;
+- ne pas toucher `main`.
 
 ### TDD
 
-Vrai RED :
-- run Architecture `35612350523` ;
-- assertion :
-  `Core Inventory equipped-view contract module must exist`.
+Créer une sentinelle RED qui exige :
+- module Core chargé avant le hotfix dans Pages et preview ;
+- module précaché PWA ;
+- `dungeon-equipment-hotfix-167817.js` délègue à
+  `GensInventoryEquippedViewV1.equippedItems` ;
+- la fonction inline historique peut renvoyer vide sans empêcher la vue Core ;
+- aucun nouvel owner/wrapper supplémentaire ;
+- runtime graph : module passe de Phase 4 inert à connected.
 
-Après création du module, la cartographie Phase 2 a correctement imposé son
-classement explicite comme service inert.
-
-### Validation technique
-
-SHA :
-`82af680ee15bafc6b9195266270d9d96d5049e0f`.
-
-- Architecture + navigateur : `35612621576` — SUCCESS ;
-- Firefox : `35612621700` — SUCCESS ;
-- Tactical Dock : `35612621668` — SUCCESS.
-
-### Clôture candidate
-
-Le SHA documentaire final doit repasser les trois batteries.
-
-Après trois SUCCESS :
-1. créer
-   `checkpoint/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-green-2026-09-21` ;
-2. ouvrir un nouveau lot séparé pour le raccord runtime de cette autorité pure ;
-3. ne pas mélanger mutation equip/unequip, sets, évolution, cache ou UI ;
-4. ne pas toucher `main`.
-
-Audit :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPPED_VIEW_SLOT_REFS_CONTRACT.md`.
+Après GREEN technique :
+- documenter ;
+- relancer les trois batteries sur SHA documentaire ;
+- checkpoint GREEN seulement ensuite.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

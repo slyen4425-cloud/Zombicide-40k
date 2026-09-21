@@ -103,7 +103,7 @@ const Clean=rt.GensCleanRpgStats167874;
 assert.ok(Clean&&Clean.install(),'Stats owner must install with Core dependencies');
 
 const defs=Clean.runtimeDefs();
-const oracleCanonical=defs.map(d=>({id:d.id,name:d.name,icon:d.icon,value:Clean.value('hero',d.id)}));
+const oracleCanonical=JSON.parse(JSON.stringify(defs.map(d=>({id:d.id,name:d.name,icon:d.icon,value:Clean.value('hero',d.id)}))));
 const oracleValues=Object.fromEntries(oracleCanonical.map(row=>[row.id,row.value]));
 const oracleDerived={
   physicalDamageBonus:rt.dungeonPhysicalDamageBonus(),

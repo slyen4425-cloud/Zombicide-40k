@@ -1,3 +1,106 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S11 frontière dégâts — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s11-damage-boundary-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s11-damage-boundary-2026-09-21`.
+- Base exacte et dernier GREEN :
+  `bf63fbfdc2203878016f41df73fa833e111a7baf`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s10-hit-defense-dodge-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S10 définitivement clôturé
+
+HEAD final :
+`bf63fbfdc2203878016f41df73fa833e111a7baf`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35595037282` — SUCCESS ;
+- Firefox : `35595037254` — SUCCESS ;
+- Tactical Dock : `35595037241` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s10-hit-defense-dodge-green-2026-09-21`.
+
+S10 n'a créé aucun nouveau moteur Core : la frontière d'autorité a été
+explicitement figée et Dungeon/Tactical conservent leurs résolutions distinctes.
+
+### Mission S11
+
+Caractériser puis sécuriser la **frontière dégâts finale** maintenant que
+S7-S10 sont stabilisés.
+
+Ordre cible défini par le pré-audit :
+- Core Stats fournit les bonus dérivés ;
+- Tactical applique l'arme, le mode/type, les résistances, l'armure et le
+  critique ;
+- les relectures Dungeon depuis le snapshot Tactical doivent ensuite être
+  retirées uniquement lorsqu'une parité réelle est démontrée.
+
+### Risque principal S11
+
+Le snapshot Tactical V110 lit encore plusieurs seams Dungeon globaux au moment
+de sa construction, notamment :
+- `dungeonPhysicalDamageBonus` ;
+- `dungeonMagicDamageBonus` ;
+- `dungeonCriticalChance` ;
+- `dungeonMagicResistance` ;
+- et d'autres dérivées historiques.
+
+Parallèlement, les modules Core S6/S7 existent déjà en version pure/inert.
+
+S11 ne doit surtout pas :
+- dupliquer les bonus ;
+- appliquer deux fois résistance/armure/critique ;
+- déplacer la mutation des PV dans Core Stats ;
+- modifier les formules V114.11 ;
+- raccorder S6/S7 mécaniquement sans preuve de parité.
+
+### Première action obligatoire S11
+
+Avant tout raccord :
+1. cartographier exactement la chaîne active
+   `Core/Stats -> V110 snapshot -> Tactical preview -> V114.11 final damage` ;
+2. distinguer les données de snapshot des opérations de résolution ;
+3. caractériser physique mêlée, physique distance, magique et élémentaire ;
+4. caractériser bonus stat, résistance, armure, critique et application PV ;
+5. mesurer les relectures Dungeon réellement effectuées par V110 ;
+6. comparer les dérivées S6/S7 avec le snapshot historique sur fixtures réelles ;
+7. identifier quelles relectures peuvent être supprimées sans changement ;
+8. poser un RED de raccord seulement après cette preuve.
+
+### Frontière S11
+
+Core Stats peut posséder :
+- bonus dégâts physique/magique dérivés ;
+- critique comme valeur ;
+- résistance magique comme valeur ;
+- snapshot immuable des valeurs canoniques/dérivées.
+
+Tactical reste propriétaire de :
+- puissance de l'arme ;
+- type/mode d'attaque ;
+- application des résistances ;
+- application de l'armure et de son floor ;
+- jet/résolution critique ;
+- total par touche / total multi-touches ;
+- mutation des PV et issue de combat.
+
+### Interdictions S11
+
+- aucune modification de formule dégâts pendant l'audit ;
+- aucun changement des pourcentages de résistances ;
+- aucun changement du contrat Armure S9 ;
+- aucun changement Toucher/Défense/Esquive S10 ;
+- aucune mutation PV dans Core Stats ;
+- aucune double lecture ou double application d'un bonus ;
+- aucun nouveau wrapper global, MutationObserver, timer/retry ou monkey-patch ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S10 Toucher-Défense-Esquive — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

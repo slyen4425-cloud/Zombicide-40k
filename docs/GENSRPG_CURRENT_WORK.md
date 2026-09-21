@@ -93,6 +93,61 @@ Avant toute création de module :
 - aucun changement sur `main`.
 
 
+### Audit, TDD et extraction S9 confirmés
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S9_ARMOR_AUDIT.md`.
+
+Caractérisation réelle :
+- test `gens_phase4_stats_s9_armor_characterization_v1.test.cjs` — SUCCESS ;
+- Dungeon conserve `armorScore -> armorReductionStep/gain` ;
+- Tactical V114.11 conserve `armorScore` comme réduction directe 1:1 ;
+- `armorZeroBlockChance` reste une politique de résolution combat séparée.
+
+RED TDD :
+- commit `f8200858ffdd2774d76d6556db5e784549ec6d2f` ;
+- run Architecture `35591023912` — FAILURE attendu ;
+- cause exacte :
+  `ENOENT assets/gensrpg/core/stats-armor-contract-v1.js`.
+
+Extraction :
+- module pur/inert :
+  `assets/gensrpg/core/stats-armor-contract-v1.js` ;
+- commit d'implémentation :
+  `6f25da84e83461f53d5d9b6171aed90768f44090` ;
+- classification Phase 4 inert :
+  `6db3b0ca36c5d91c420be961cf26eae416cd0b7b`.
+
+### Validation technique S9
+
+HEAD technique :
+`6db3b0ca36c5d91c420be961cf26eae416cd0b7b`.
+
+Runs :
+- Architecture + navigateur complet : `35591282497` — SUCCESS ;
+- Firefox : `35591282377` — SUCCESS ;
+- Tactical Dock : `35591282374` — SUCCESS.
+
+Aucun raccord runtime, aucune formule Armor/dégâts et aucun `index.html` n'ont
+été modifiés. Le nouveau contrat reste hors graphe de production.
+
+### Clôture S9 en cours
+
+Le document S9 a été mis à jour au commit
+`e0da919bdcadeade405466081d0b9d03900977bb`.
+
+Le présent commit documentaire final doit repasser les trois batteries avant :
+1. création du checkpoint
+   `checkpoint/gensrpg-phase4-stats-s9-armor-contract-green-2026-09-21` ;
+2. création du checkpoint de départ S10 sur exactement ce SHA ;
+3. ouverture d'une branche dédiée
+   `work/gensrpg-phase4-stats-s10-hit-defense-dodge-2026-09-21`.
+
+S10 devra commencer par la caractérisation comparative **Toucher / Défense /
+Esquive** Dungeon vs Tactical, sans modifier la formule et sans déplacer
+l'autorité de résolution combat vers Core Stats.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S8 normalisation des résistances — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

@@ -362,6 +362,9 @@ jobs:
       - name: Pré-auditer Inventory Equipment Sets Phase 4
         run: node tests/gens_phase4_inventory_equipment_sets_preaudit_v1.test.cjs
 
+      - name: Verrouiller le contrat pur Equipped View Slot Refs
+        run: node tests/gens_phase4_inventory_equipped_view_slot_refs_contract_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

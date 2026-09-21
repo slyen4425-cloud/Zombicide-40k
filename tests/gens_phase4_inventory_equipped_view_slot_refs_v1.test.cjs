@@ -156,7 +156,8 @@ assert.equal(Core.rebaseIndexAfterRemoval(0,0),null);
 assert.equal(Core.rebaseIndexAfterRemoval(1,0),0);
 assert.equal(Core.rebaseIndexAfterRemoval(0,2),0);
 assert.equal(Core.rebaseIndexAfterRemoval(null,2),null);
-assert.equal(Core.rebaseIndexAfterRemoval('2',1),null,'non-integer legacy garbage must not become a valid ref');
+assert.equal(Core.rebaseIndexAfterRemoval('2',1),1,'numeric-string legacy refs must preserve historical array-index compatibility');
+assert.equal(Core.rebaseIndexAfterRemoval('bad',1),null,'non-numeric legacy garbage must stay invalid');
 
 const rebased=JSON.parse(JSON.stringify(Core.rebaseSlotRefsAfterRemoval({
   rightHand:3,
@@ -189,6 +190,7 @@ console.log(JSON.stringify({
   slotOrder:'rightHand -> leftHand -> Object.entries(rpgGear)',
   duplicateIndexRemoved:true,
   duplicateItemCopiesPreserved:true,
+  numericStringRefsPreserved:true,
   removalRebasePure:true,
   productionReachable:false,
   runtimeChanged:false

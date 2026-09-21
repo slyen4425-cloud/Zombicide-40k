@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View — raccord runtime — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View — clôture documentaire — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,74 +13,90 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Contrat pur clôturé
+### Résultat technique du raccord
 
-Module :
-`assets/gensrpg/core/inventory-equipped-view-v1.js`.
+Le service pur :
 
-Il reste inert sur la base de départ.
+`assets/gensrpg/core/inventory-equipped-view-v1.js`
 
-Validation exacte du contrat :
-- Architecture + navigateur : `35613421467` — SUCCESS ;
-- Firefox : `35613421549` — SUCCESS ;
-- Tactical Dock : `35613421507` — SUCCESS.
+est désormais raccordé au dernier propriétaire runtime existant :
 
-### Mission du raccord
+`assets/dungeon/dungeon-equipment-hotfix-167817.js -> dungeonEquippedItems()`.
 
-Raccorder uniquement la **vue des objets équipés Dungeon** au service pur
-`GensInventoryEquippedViewV1`.
+Le hotfix reste l'unique dernier owner/wrapper et délègue la construction de la
+vue équipée à :
 
-Dernier propriétaire runtime existant :
+`GensInventoryEquippedViewV1.equippedItems(...)`.
 
-`assets/dungeon/dungeon-equipment-hotfix-167817.js`.
+Entrées :
+- `state.inventory` ;
+- `state.rightHand` ;
+- `state.leftHand` ;
+- `state.rpgGear` ;
+- resolver historique `getItemFromEntry/itemById`.
 
-Ce fichier possède déjà la dernière autorité sur `dungeonEquippedItems`.
-Le lot doit transformer cette couche existante en adaptateur explicite vers Core,
-sans ajouter un nouveau wrapper.
+Le propriétaire inline historique protégé par `isDungeonHeroSheet()` n'est
+plus exécuté pour construire cette vue.
 
-### Contrat cible
+### Composition raccordée
 
-1. charger `inventory-equipped-view-v1.js` avant le hotfix Equipment ;
-2. le hotfix exige l'API Core ;
-3. la vue équipée vient de :
-   - `state.inventory` ;
-   - `state.rightHand` ;
-   - `state.leftHand` ;
-   - `state.rpgGear` ;
-   - resolver existant `getItemFromEntry/itemById` ;
-4. le garde `isDungeonHeroSheet()` du propriétaire inline ne doit plus
-   déterminer la vue ;
-5. hors mode Dungeon, la vue reste vide ;
-6. aucune mutation de state dans le Core ;
-7. aucun changement de `dungeonEquipmentBonus`, sets, évolution ou caches.
+- Core Inventory chargé avant le hotfix Equipment dans GitHub Pages ;
+- même ordre dans `preview.html` ;
+- précache PWA ajouté ;
+- module classé Phase 4 **connected** dans le graphe runtime ;
+- manifeste propriétaire Phase 2 mis à jour.
 
-### Interdictions
+Conséquence descriptive :
+- Pages : 26 -> 27 modules injectés ;
+- graphe production : 73 -> 74 fichiers atteignables.
 
-- pas de nouveau wrapper ;
-- pas de modification `index.html` ;
-- pas de modification equip/unequip/remove/drop ;
-- pas de changement des refs de slots ;
-- pas de modification Stats/Tactical ;
-- pas de changement des formules de bonus ;
-- pas de nettoyage UI/éditeur dans ce lot ;
-- pas de correction du gap d'invalidation cache ;
-- ne pas toucher `main`.
+Les sentinelles de cartographie liées à ces cardinalités ont été réalignées.
+Aucun gameplay n'a été changé pour traiter ces RED.
 
-### TDD
+### Périmètre respecté
 
-Créer une sentinelle RED qui exige :
-- module Core chargé avant le hotfix dans Pages et preview ;
-- module précaché PWA ;
-- `dungeon-equipment-hotfix-167817.js` délègue à
-  `GensInventoryEquippedViewV1.equippedItems` ;
-- la fonction inline historique peut renvoyer vide sans empêcher la vue Core ;
-- aucun nouvel owner/wrapper supplémentaire ;
-- runtime graph : module passe de Phase 4 inert à connected.
+Aucun changement de :
+- `index.html` ;
+- equip / unequip / remove / drop ;
+- refs de slots ;
+- `dungeonEquipmentBonus` ;
+- sets / évolution / cache ;
+- Stats / Tactical ;
+- stockage ;
+- combat / loot.
 
-Après GREEN technique :
-- documenter ;
-- relancer les trois batteries sur SHA documentaire ;
-- checkpoint GREEN seulement ensuite.
+Aucun nouveau wrapper, observer, timer/retry ou monkey-patch ajouté.
+
+### Validation technique GREEN
+
+HEAD technique :
+`9f389c9dfef4458b216eca060358b041d069662a`.
+
+- Architecture + navigateur complet : `35617874824` — SUCCESS ;
+- Firefox : `35617874802` — SUCCESS ;
+- Tactical Dock : `35617874784` — SUCCESS.
+
+Document de clôture :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPPED_VIEW_RACCORD.md`.
+
+### État actuel
+
+La clôture documentaire est en cours.
+
+Le commit documentaire change le SHA. Aucun checkpoint GREEN final ne doit être
+créé avant SUCCESS des trois batteries sur le SHA documentaire exact.
+
+### Prochaine action
+
+1. relancer Architecture + navigateur, Firefox et Tactical Dock sur le HEAD
+   documentaire exact ;
+2. si les trois batteries sont SUCCESS, créer :
+   `checkpoint/gensrpg-phase4-inventory-equipped-view-raccord-green-2026-09-21` ;
+3. repartir de ce checkpoint avec un checkpoint de départ et une branche neuve ;
+4. prochain micro-lot selon le pré-audit :
+   **contrat pur bonus directs + sets**, sans raccord `dungeonEquipmentBonus`
+   dans le même lot ;
+5. ne jamais fusionner ce lot directement sur `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

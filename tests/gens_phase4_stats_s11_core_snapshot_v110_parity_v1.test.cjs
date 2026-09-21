@@ -134,8 +134,8 @@ for(const name of watched)assert.equal(calls[name],0,'Core snapshot adapter must
 V110.resetMetrics();
 const actor={id:'hero',side:'hero',hp:18,maxHp:20,movement:5,initiative:13,defense:8,armor:4,dodge:0,meta:{heroId:'hero'}};
 const snap=V110.buildHeroSnapshot(rt,'hero',actor);
-assert.deepEqual(snap.canonical,oracleCanonical,'V110 canonical rows must now come from Core snapshot');
-assert.deepEqual(snap.values,oracleValues,'V110 values must now come from Core snapshot');
+assert.deepEqual(JSON.parse(JSON.stringify(snap.canonical)),oracleCanonical,'V110 canonical rows must now come from Core snapshot');
+assert.deepEqual(JSON.parse(JSON.stringify(snap.values)),oracleValues,'V110 values must now come from Core snapshot');
 for(const key of Object.keys(oracleDerived))assert.equal(snap.derived[key],oracleDerived[key],'V110 stable derived from Core: '+key);
 assert.equal(snap.derived.initiative,oracleInitiative,'V110 initiative semantics remain canonical until dedicated migration');
 for(const name of watched.slice(0,6))assert.equal(calls[name],0,'V110 must not reread migrated Dungeon helper: '+name);

@@ -30,16 +30,18 @@ for(const p of Object.keys(owners).sort()){
   });
 }
 
-for(const expected of [
+const expected=[
   'assets/dungeon/dungeon-equipment-hotfix-167817.js',
   'assets/dungeon/dungeon-set-editor-167818.js',
-  'assets/gensrpg/gens-hero-editor-dynamic-167897.js',
-  'assets/gensrpg/gens-equipment-stat-cleanup-1678102.js'
-]){
-  assert.ok(hits.some(x=>x.path===expected),'expected saveEquipmentEditor participant missing: '+expected);
-}
+  'assets/gensrpg/gens-equipment-stat-cleanup-1678102.js',
+  'assets/gensrpg/gens-hero-editor-dynamic-167897.js'
+].sort();
 
-assert.ok(hits.length>=4,'saveEquipmentEditor runtime inventory unexpectedly too small');
+assert.deepEqual(
+  hits.map(x=>x.path).sort(),
+  expected,
+  'reachable external saveEquipmentEditor participants changed; re-audit ownership before editing wrappers'
+);
 
 console.log(JSON.stringify({
   scenario:'Phase 4 saveEquipmentEditor exhaustive runtime inventory',

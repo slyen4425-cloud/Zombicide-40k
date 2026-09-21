@@ -4,6 +4,7 @@ const vm=require('node:vm');
 const path=require('node:path');
 const rootDir=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(rootDir,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(rootDir,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 
 let profiles=[{id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{dynamicDefinitions:[
   {id:'force',name:'Force',icon:'💪',defaultValue:10,min:0,max:999,visible:true,description:''},
@@ -41,7 +42,7 @@ const ctx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function')fn()
 };
 ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);
 vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[];',ctx);
-vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
 assert.equal(api.APP_VERSION,'16.78.114.7');

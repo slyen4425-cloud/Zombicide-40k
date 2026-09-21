@@ -25,7 +25,6 @@ const reachableHits=Object.keys(owners)
 const expected=[
   'assets/dungeon/dungeon-equipment-hotfix-167817.js',
   'assets/dungeon/dungeon-set-editor-167818.js',
-  'assets/gensrpg/gens-dungeon-hero-art-repair-167874.js',
   'assets/gensrpg/gens-equipment-stat-cleanup-1678102.js',
   'assets/gensrpg/gens-hero-editor-dynamic-167897.js'
 ].sort();
@@ -71,10 +70,10 @@ assert.ok(setEditor.includes('const baseOpen=ROOT.openEquipmentEditor;'));
 assert.ok(setEditor.includes('const wrapped=function(){const result=baseOpen.apply(this,arguments);syncEditorFromCurrentItem();addNewButton();return result}'));
 assert.ok(setEditor.includes('wrapped.__setEditor167818=true;wrapped.__original=baseOpen'));
 
-// Hero-art repair also wraps this lifecycle even though its post-open work is generic repair/scheduling.
+// Hero Art Repair keeps its visual hook machinery but no longer owns the Equipment open lifecycle.
 assert.ok(artRepair.includes('function hook(name)'));
 assert.ok(artRepair.includes('repairDefs();schedule();return out'));
-assert.ok(artRepair.includes('"openEquipmentEditor"'));
+assert.ok(!artRepair.includes('"openEquipmentEditor"'));
 assert.ok(artRepair.includes('w.__gdar167874=true;w.__original=old'));
 
 // It then dynamically loads Hero Editor before Equipment Cleanup.
@@ -118,14 +117,13 @@ assert.ok(cleanup.includes('__canonEq102'));
 console.log(JSON.stringify({
   scenario:'Phase 4 Equipment openEquipmentEditor wrapper preaudit',
   reachableExternalParticipants:reachableHits,
-  initialComposition:[
+  currentComposition:[
     'equipment-hotfix-167817',
     'set-editor-167818',
-    'hero-art-repair-167874',
     'hero-editor-dynamic-167897',
     'equipment-stat-cleanup-1678102'
   ],
   retryRisk:'hero-editor-dynamic may become outer wrapper again after cleanup because it retries with __canon101 while cleanup uses __canonEq102',
-  safeImmediateRetirement:'none without a dedicated runtime/browser proof',
-  nextCandidate:'characterize and retire only the unrelated hero-art-repair openEquipmentEditor hook in a separate subtractive lot'
+  retiredParticipant:'hero-art-repair-167874',
+  retirementProof:'dedicated owner guard + browser characterization required'
 },null,2));

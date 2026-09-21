@@ -538,3 +538,74 @@ Ordre recommandé à confirmer par sentinelles :
 
 Le premier futur micro-lot ne doit pas toucher au combat des objets, aux
 Builders ni au stockage.
+
+
+## 15. Validation technique
+
+SHA technique du pré-audit :
+
+`c540e0c033e85ecfa64721f16efb0aadecef308e`.
+
+Validation exacte :
+
+- Architecture + navigateur complet : `35607723774` — SUCCESS ;
+- Firefox : `35607723698` — SUCCESS ;
+- Tactical Dock : `35607723731` — SUCCESS.
+
+La sentinelle dédiée
+`tests/gens_phase4_inventory_equipment_sets_preaudit_v1.test.cjs`
+est exécutée par la CI Architecture et est GREEN.
+
+Deux RED intermédiaires provenaient uniquement de la sentinelle :
+1. dépendance Stats explicite absente dans la fixture ;
+2. extracteur de fonction ne gérant pas un objet littéral dans un paramètre par défaut.
+
+Ils ont été corrigés uniquement dans le test. Aucun runtime n'a été modifié.
+
+## 16. Résultat de sortie du pré-audit
+
+Le pré-audit est suffisamment précis pour interdire une extraction monolithique.
+
+Contrats établis :
+
+1. source de vérité inventaire :
+   `state.inventory[]` ;
+2. source de vérité des slots :
+   `rightHand / leftHand / rpgGear` ;
+3. vue équipée historique :
+   `dungeonEquippedItems()` + hotfix de compatibilité ;
+4. composition bonus :
+   objet direct -> set -> évolution -> cache -> `dungeonEquipmentBonus` ;
+5. Core Stats consomme uniquement le seam agrégé Equipment ;
+6. moteur de sets actuel :
+   `setState316(items, registry)` ;
+7. stockage et UI restent hors du premier micro-lot Core ;
+8. les hooks combat des objets restent hors Inventory/Equipment Core.
+
+Premier micro-lot recommandé :
+
+**contrat pur Equipped View / Slot Refs**.
+
+Il devra caractériser puis extraire uniquement :
+- résolution des refs de slots ;
+- déduplication des objets équipés ;
+- correction déterministe des refs après suppression ;
+- aucune mutation stockage/DOM/combat/Stats.
+
+Le raccord au runtime des slots viendra dans un lot distinct après parité.
+
+## 17. Clôture candidate
+
+Le présent changement documentaire modifie le SHA final.
+
+Conformément à la charte, aucun checkpoint GREEN ne doit être créé avant
+SUCCESS des trois batteries sur le SHA documentaire exact.
+
+Si les trois batteries restent GREEN :
+
+1. créer
+   `checkpoint/gensrpg-phase4-inventory-equipment-sets-preaudit-green-2026-09-21` ;
+2. ouvrir un checkpoint de départ séparé pour le contrat pur Equipped View /
+   Slot Refs ;
+3. créer une nouvelle branche de micro-lot ;
+4. ne pas modifier `main`.

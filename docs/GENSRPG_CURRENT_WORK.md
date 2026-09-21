@@ -1,127 +1,79 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture pré-audit cache/invalidation — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — correctif cache/invalidation — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-cache-invalidation-preaudit-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-cache-invalidation-fix-2026-09-21`.
 - Base exacte :
-  `4707fb0ce3a7fa4cad688d81526323b916f80f6b`.
+  `70c679a8079094dd410a37b875ace6c47e6708c4`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-evolution-raccord-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat du pré-audit
-
-Le cache évolution local est dans :
-
-`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
-
-État local :
-- `equipmentBonusCache` ;
-- `equippedSnapshot` ;
-- TTL partagé : 120 ms.
-
-Les vrais propriétaires inline de slots sont :
-- `equipRight` ;
-- `equipLeft` ;
-- `equipTwoHands` ;
-- `unequip` ;
-- `equipRpgGear` ;
-- `unequipRpgGear`.
-
-Ils appellent tous `save()`.
-
-### Trou prouvé
-
-Les invalidateurs locaux actuels ciblent :
-- `dungeonEquipItem` ;
-- `dungeonUnequipItem` ;
-- `equipDungeonItem` ;
-- `unequipDungeonItem` ;
-- `toggleDungeonEquipment` ;
-- `saveEquipmentEditor`.
-
-Intersection avec les six vrais propriétaires inline :
-
-**0**.
-
-Le cache évolution local peut donc dépendre du TTL 120 ms après une mutation
-de slot.
-
-`dc214Equip` n'est pas couvert directement par le cache évolution local.
-
-`removeInventoryEntry` n'est pas couvert directement non plus et ne fait pas
-lui-même `save()`.
-
-### Cache performance final
-
-Le cache performance de
-`gens-mobile-combat-performance-16781022.js` est mieux couvert :
-
-- `save` invalide ;
-- `saveState` invalide ;
-- `saveDungeonHeroState` invalide ;
-- `dc214Equip` invalide directement.
-
-Les six propriétaires inline atteignent donc ce cache via `save()`.
-
-### removeInventoryEntry
-
-7 callsites caractérisés :
-- 6 avec une frontière `save()` proche ;
-- 1 sans `save()` proche.
-
-Le futur correctif doit verrouiller explicitement la suppression/réindexation
-et ne pas supposer que tous les appelants persistent.
-
-### Mutations éditeur déjà couvertes localement
-
-Invalidation explicite conservée pour :
-- évolution ;
-- sauvegarde de set ;
-- appartenance à un set.
-
-### Validation technique
-
-HEAD technique :
-`ca7107759bda94ac4fd780def075024ee490320c`.
-
-- Architecture statique : `35632915312` — SUCCESS ;
-- navigateur complet : premier passage en échec sur Dungeon après Survie,
-  rerun du même job sur le même SHA — SUCCESS ;
-- Firefox : `35632915398` — SUCCESS ;
-- Tactical Dock : `35632915285` — SUCCESS.
-
-Aucun fichier runtime n'a été modifié dans ce pré-audit.
+### Pré-audit GREEN
 
 Document :
 `docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CACHE_INVALIDATION_PREAUDIT.md`.
 
-### État actuel
+Constats verrouillés :
+- cache évolution local + snapshot : TTL 120 ms ;
+- aucun des six vrais propriétaires inline de slots n'est ciblé directement
+  par les invalidateurs locaux ;
+- les six propriétaires atteignent le cache performance final via `save()` ;
+- `dc214Equip` est couvert directement par le cache performance ;
+- `removeInventoryEntry` ne sauvegarde pas lui-même ;
+- 7 callsites de suppression : 6 avec save proche, 1 sans save proche ;
+- mutations évolution/set déjà invalidées localement.
 
-Clôture documentaire en cours.
+Validation finale du SHA documentaire exact
+`70c679a8079094dd410a37b875ace6c47e6708c4` :
+- Architecture + navigateur complet : `35636353120` — SUCCESS ;
+- Firefox : `35636353249` — SUCCESS ;
+- Tactical Dock : `35636353142` — SUCCESS.
 
-Le SHA documentaire exact doit repasser :
-- Architecture + navigateur ;
-- Firefox ;
-- Tactical Dock.
+### Mission du correctif
 
-Aucun checkpoint GREEN final avant ces trois SUCCESS.
+Obtenir une invalidation immédiate du cache évolution local lorsque la vue
+équipée peut changer, sans créer un second cache ni un nouveau système de
+wrappers.
+
+Frontières candidates à prouver :
+- `save` pour les propriétaires inline de slots ;
+- `dc214Equip` pour la mutation Tactical ;
+- `removeInventoryEntry` pour suppression/réindexation indépendante de
+  l'appelant.
+
+### Contraintes
+
+- TDD RED avant runtime ;
+- conserver `CACHE_TTL_MS=120` ;
+- conserver le cache performance final inchangé ;
+- ne pas modifier les propriétaires equip/unequip dans `index.html` ;
+- ne pas créer de nouveau wrapper générique ;
+- réutiliser uniquement le mécanisme d'invalidation local existant si sa
+  frontière est prouvée ;
+- éviter les doubles wrappers sur des alias équivalents ;
+- ne pas toucher stockage, UI/Builders, combat, Stats/Tactical ;
+- aucun observer/timer/retry ;
+- ne pas toucher `main`.
+
+### TDD prévu
+
+1. caractériser la présence réelle des anciens noms ciblés ;
+2. poser un RED exigeant les frontières canoniques ;
+3. exécuter les wrappers d'invalidation en VM ;
+4. prouver invalidation immédiate de snapshot + bonus ;
+5. modifier uniquement la liste/frontière minimale nécessaire ;
+6. trois batteries GREEN ;
+7. documentation puis revalidation ;
+8. checkpoint GREEN final.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-green-2026-09-21` ;
-3. ouvrir un checkpoint de départ et une branche neuve pour le correctif
-   d'invalidation minimal ;
-4. commencer par un RED qui exige l'invalidation immédiate sur les vrais
-   propriétaires de mutation, sans nouveau cache ni nouveau système de wrappers ;
-5. conserver le cache performance final inchangé ;
-6. ne jamais toucher `main`.
+Créer la sentinelle RED du correctif, sans modification runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

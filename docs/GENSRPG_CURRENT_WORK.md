@@ -1,3 +1,79 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Equipment — 2026-09-21
+
+Ce bloc est le point de reprise prioritaire. Les blocs suivants sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-2026-09-21`.
+- Base exacte :
+  `0fd2909a488becc452439c27c8272e2b7b346f73`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+La preuve statique et navigateur confirme :
+- Hero Editor Dynamic s'installe avant Equipment Cleanup ;
+- Cleanup devient ensuite wrapper extérieur avec `__canonEq102` sur open et
+  `__eqCache1021` sur save ;
+- le premier retry Hero Editor voit un wrapper extérieur qui ne porte pas
+  `__canon101` et réinstalle donc une seconde couche Hero Editor ;
+- la chaîne se stabilise ensuite : les retries suivants ne l'allongent plus ;
+- open natif reste exécuté une seule fois ;
+- l'UI canonique bonus, Set Editor et évolution reste unique ;
+- **un seul Save Equipment déclenche deux appels `saveCustomEquipment`** via les
+  deux couches Hero Editor Dynamic.
+
+Ce n'est donc pas une simple dette cosmétique : la duplication a un effet
+persistant observable.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_WRAPPER_RETRY_PREAUDIT.md`.
+
+Sentinelles :
+- `tests/gens_phase4_inventory_equipment_wrapper_retry_static_preaudit_v1.test.cjs` ;
+- `tests/gens_phase4_inventory_equipment_wrapper_retry_preaudit_v1.test.cjs` ;
+- `tests/gens_phase4_inventory_equipment_wrapper_retry_browser_preaudit_v1.test.cjs`.
+
+### Validation technique
+
+SHA technique :
+`dcabd657f61e87c8a1be8455ffee165b4d3ee979`.
+
+- Architecture + navigateur complet :
+  `35653724569` — SUCCESS ;
+- Firefox :
+  `35653724479` — SUCCESS ;
+- Tactical Dock :
+  `35653724449` — SUCCESS.
+
+### Clôture documentaire
+
+La présente mise à jour documentaire change le SHA. Le checkpoint GREEN ne doit être
+créé qu'après Architecture + navigateur complet, Firefox et Tactical Dock SUCCESS
+sur le SHA documentaire final exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-green-2026-09-21`.
+
+### Prochain lot correctif — séparé
+
+Après GREEN seulement, ouvrir un lot dédié depuis ce checkpoint pour empêcher
+le rewrap d'une responsabilité `__canon101` déjà présente dans la chaîne
+`__original`, tout en conservant le retry pour les globals réellement absents ou
+définis tardivement.
+
+Le correctif devra être TDD et minimal :
+1. RED : un seul wrapper Hero Editor par fonction après interposition Cleanup ;
+2. RED : un Save Equipment = une seule persistance Hero Editor ;
+3. conserver open/save natifs une seule fois ;
+4. conserver UI bonus/set/évolution ;
+5. aucun nouveau timer, wrapper, observer ou fallback ;
+6. aucune modification de `index.html` ni de `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Equipment — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

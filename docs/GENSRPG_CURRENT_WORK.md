@@ -1,3 +1,79 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-wrapper-retry-scope-fix-2026-09-21`.
+- Base exacte :
+  `6875be5259f4356e710b29ee6d75d715070847ec`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+Le pré-audit retry wrappers Equipment est officiellement GREEN sur
+`6875be5259f4356e710b29ee6d75d715070847ec`.
+
+Il a prouvé :
+- Hero Editor Dynamic installe une couche `__canon101` ;
+- Equipment Cleanup s'interpose ensuite avec `__canonEq102` / `__eqCache1021` ;
+- le retry Hero Editor ne voit que le wrapper extérieur et ajoute une seconde
+  couche `__canon101` ;
+- la chaîne se stabilise ensuite ;
+- un Save Equipment produit alors deux persistances Hero Editor
+  `saveCustomEquipment`.
+
+### Mission unique
+
+Corriger uniquement la logique de garde du wrapper générique Hero Editor afin
+qu'un retry reconnaisse une responsabilité `__canon101` déjà présente dans la
+chaîne `__original`.
+
+Le retry doit rester capable de :
+- wrapper une fonction absente au premier passage puis définie plus tard ;
+- wrapper une fonction réellement remplacée plus tard par un nouveau propriétaire
+  qui ne conserve pas l'ancienne chaîne.
+
+Il ne doit plus :
+- réinstaller une deuxième couche Hero Editor lorsque le propriétaire précédent
+  `__canon101` existe déjà sous un wrapper intermédiaire.
+
+### Périmètre strict
+
+Autorisé :
+- garde de chaîne bornée/cyclique dans `gens-hero-editor-dynamic-167897.js` ;
+- sentinelle owner-level RED/GREEN ;
+- caractérisation navigateur Equipment après retry ;
+- preuve qu'un global tardivement remplacé reste récupéré par le retry ;
+- réalignement des sentinelles du pré-audit ;
+- documentation / CI.
+
+Interdit :
+- supprimer ou raccourcir la boucle de retry ;
+- ajouter timer, observer, wrapper, fallback ou polling ;
+- modifier les responsabilités open/save Equipment ;
+- modifier Equipment Cleanup, Set Editor ou hotfix ;
+- modifier stockage, bonus, sets, évolution, cache, Stats gameplay, Tactical/combat ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### TDD obligatoire
+
+1. RED owner-level : le wrapper générique doit détecter `__canon101` dans toute
+   la chaîne `__original`, pas seulement sur le wrapper extérieur ;
+2. RED comportemental : après interposition Cleanup + retry, une seule couche
+   Hero Editor doit rester sur open/save et un Save doit déclencher une seule
+   persistance Hero Editor ;
+3. preuve positive : une fonction réellement remplacée après le premier passage
+   reste wrappable par le retry ;
+4. correctif minimal ;
+5. Architecture + navigateur complet, Firefox et Tactical sur le SHA final ;
+6. checkpoint GREEN seulement après trois SUCCESS.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Equipment — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les blocs suivants sont historiques.

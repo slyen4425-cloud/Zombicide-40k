@@ -320,6 +320,9 @@ jobs:
       - name: Vérifier la parité du provider valeurs héros Core Stats S4
         run: node tests/gens_phase4_stats_s4_hero_values_parity_v1.test.cjs
 
+      - name: Vérifier la parité des providers de modificateurs Core Stats S5
+        run: node tests/gens_phase4_stats_s5_modifier_providers_parity_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

@@ -1,3 +1,71 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — déduplication retry Hero Editor — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-dedup-fix-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-wrapper-retry-dedup-fix-2026-09-21`.
+- Base exacte :
+  `6875be5259f4356e710b29ee6d75d715070847ec`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit précédent GREEN
+
+Le pré-audit retry a prouvé :
+- Hero Editor Dynamic est déjà présent dans la chaîne avant Equipment Cleanup ;
+- Cleanup interpose `__canonEq102` / `__eqCache1021` ;
+- le retry Hero Editor ne regarde que le wrapper extérieur et ajoute alors une
+  seconde couche `__canon101` ;
+- un Save Equipment provoque deux persistences `saveCustomEquipment`.
+
+Validation finale du pré-audit :
+- Architecture + navigateur complet `35654420417` — SUCCESS ;
+- Firefox `35654420489` — SUCCESS ;
+- Tactical Dock `35654420467` — SUCCESS.
+
+### Mission unique
+
+Corriger uniquement le garde de réinstallation du propriétaire
+`gens-hero-editor-dynamic-167897.js` afin qu'une responsabilité `__canon101`
+déjà présente dans la chaîne `__original` ne soit pas réinstallée au-dessus d'un
+wrapper tiers.
+
+Le retry lui-même reste en place pour permettre le raccord de globals réellement
+absents ou définis tardivement.
+
+### Périmètre strict
+
+Autorisé :
+- garde owner-level / helper de détection dans la chaîne `__original` ;
+- sentinelle RED puis GREEN sur open/save Equipment ;
+- sentinelle navigateur vérifiant une seule persistance Hero Editor ;
+- réalignement de la caractérisation historique après preuve ;
+- documentation / CI.
+
+Interdit :
+- supprimer ou raccourcir le retry 50/100 ms ;
+- ajouter timer/retry/wrapper/observer/fallback ;
+- modifier Equipment Cleanup, Set Editor ou hotfix ;
+- modifier les données Equipment, bonus, sets, évolution ou cache ;
+- modifier Stats gameplay, Tactical/combat ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### TDD obligatoire
+
+1. RED owner-level : après une interposition tierce au-dessus de Hero Editor, le
+   retry ne doit pas recréer un second `__canon101` ;
+2. RED navigateur : après >3 s, open/save ne doivent contenir qu'une couche
+   Hero Editor et un Save doit produire une seule persistance Hero Editor ;
+3. correctif minimal dans Hero Editor Dynamic uniquement ;
+4. réaligner le pré-audit sur le nouvel état sans supprimer l'historique ;
+5. Architecture + navigateur complet, Firefox, Tactical Dock ;
+6. checkpoint GREEN seulement sur le SHA final exact.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Equipment — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les blocs suivants sont historiques.

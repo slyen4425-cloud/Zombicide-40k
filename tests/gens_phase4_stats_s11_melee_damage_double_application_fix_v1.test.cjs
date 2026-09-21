@@ -34,8 +34,22 @@ function runtime(){
     dungeonAttributeValue:id=>Number(values[id]||0),
     dungeonHitBonusForMode:()=>0,
     GensCleanRpgStats167874:{
-      runtimeDefs:()=>Object.keys(values).map(id=>({id,name:id,icon:'',defaultValue:0})),
-      value:(_hero,id)=>values[id]
+      coreSnapshot:id=>({
+        version:'1.0.0',
+        heroId:id,
+        canonical:Object.keys(values).map(key=>({id:key,name:key,icon:'',value:values[key]})),
+        values:{...values},
+        derived:{
+          physicalDamageBonus:3,
+          magicDamageBonus:4,
+          hpBonus:0,
+          maxMana:0,
+          crit:0,
+          dodge:0,
+          initiative:10,
+          magicResistance:0
+        }
+      })
     },
     effectiveMaxWounds:()=>10,
     dungeonHeroMoveValue083:()=>3,

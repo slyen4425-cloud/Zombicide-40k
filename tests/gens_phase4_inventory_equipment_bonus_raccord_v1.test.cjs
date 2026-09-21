@@ -2,6 +2,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
@@ -13,6 +14,7 @@ const graph=read('tests/gens_phase2_runtime_load_graph_v11411.test.cjs');
 const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
 const stats=read('assets/gensrpg/gens-rpg-stats-clean-167874.js');
+const coreSource=read('assets/gensrpg/core/equipment-bonus-sets-v1.js');
 
 const core='assets/gensrpg/core/equipment-bonus-sets-v1.js';
 const pageTag='<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"></script>';
@@ -67,6 +69,38 @@ assert.match(patch,/w\.__canon102=true/,'existing wrapper identity must remain u
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance cache must remain downstream of the Equipment owner');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must continue consuming the final Equipment seam');
 
+// Execute the active owner contract: historical direct+set seam must not be called.
+const items=[
+  {id:'helm',setId:'leather',setPieceId:'head',rpgBonuses:{armor:1}},
+  {id:'torso',setId:'leather',setPieceId:'torso',rpgBonuses:{armor:2}}
+];
+const registry={
+  leather:{id:'leather',thresholds:[{pieces:2,bonuses:{armor:3}}]}
+};
+let historicalCalls=0;
+const ctx={
+  console,Math,Number,Object,Array,Set,
+  __items:items,
+  __evolution:{armor:4},
+  DUNGEON_EQUIPMENT_SETS:registry,
+  dungeonEquipmentBonus:()=>{historicalCalls++;return 999}
+};
+ctx.globalThis=ctx;ctx.window=ctx;
+vm.createContext(ctx);
+vm.runInContext(coreSource,ctx,{filename:'equipment-bonus-sets-v1.js'});
+vm.runInContext(`
+  const R=globalThis;
+  const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+  function equippedItemsCached(){return __items}
+  function cachedEvolutionBonus(key){return Number(__evolution[key])||0}
+  ${patch}
+`,ctx,{filename:'cleanup#patchEquipmentBonus'});
+assert.equal(ctx.patchEquipmentBonus(),true,'existing Equipment owner must install against Core');
+assert.equal(ctx.dungeonEquipmentBonus('armor'),10,'runtime owner must return direct 3 + set 3 + evolution 4 exactly once');
+assert.equal(historicalCalls,0,'historical direct + set seam must not execute after Core raccord');
+assert.equal(ctx.dungeonEquipmentBonus.__canon102,true,'existing owner identity marker must be preserved');
+assert.equal(ctx.dungeonEquipmentBonus.__coreEquipmentBonusSetsV1,true,'Core Equipment authority marker missing');
+
 console.log(JSON.stringify({
   scenario:'Phase 4 Equipment bonus runtime Core raccord',
   coreLoadedByPages:true,
@@ -76,5 +110,7 @@ console.log(JSON.stringify({
   historicalDirectSetExecutionRemoved:true,
   evolutionPreserved:true,
   performanceCachePreserved:true,
-  statsConsumerPreserved:true
+  statsConsumerPreserved:true,
+  executedRuntimeParity:true,
+  historicalOwnerCalls:historicalCalls
 },null,2));

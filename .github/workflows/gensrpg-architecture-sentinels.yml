@@ -332,6 +332,9 @@ jobs:
       - name: Auditer la chaîne snapshot Core Stats S7
         run: node tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
 
+      - name: Vérifier la parité du snapshot immuable Core Stats S7
+        run: node tests/gens_phase4_stats_s7_snapshot_parity_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

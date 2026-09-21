@@ -1,6 +1,92 @@
 # GenSrpG — Travail courant
 
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S6 dérivées génériques — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s6-derived-values-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s6-derived-values-2026-09-21`.
+- Base exacte et dernier GREEN : `c96650bf133432091c0adcf1a2c1a85686d0079b`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s5-modifier-providers-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S5 définitivement clôturé
+
+HEAD final :
+`c96650bf133432091c0adcf1a2c1a85686d0079b`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35578208916` — SUCCESS ;
+- Firefox : `35578208932` — SUCCESS ;
+- Tactical Dock : `35578208847` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s5-modifier-providers-green-2026-09-21`.
+
+Le provider `stats-modifier-provider-v1.js` reste Phase 4 inert.
+Aucun propriétaire Equipment/Talents/Challenge n'a été déplacé.
+
+### Mission S6
+
+Caractériser puis extraire uniquement les **dérivées génériques dont la
+sémantique actuelle est déjà stable**, sans déplacer la résolution combat.
+
+Candidats issus du pré-audit :
+- bonus dégâts physiques / magiques ;
+- bonus / maximum HP ;
+- maximum mana ;
+- critique ;
+- esquive ;
+- initiative ;
+- résistance magique ;
+- modificateurs de toucher déjà exprimés comme cibles Stats.
+
+### Frontières obligatoires
+
+S6 ne doit pas décider ni modifier :
+- l'application finale de Défense ;
+- l'application/réduction finale d'Armure ;
+- la formule finale de toucher Dungeon ou Tactical ;
+- le D100 ;
+- les résistances élémentaires/génériques ;
+- les dégâts finaux Tactical ;
+- les HP/mana courants ;
+- le snapshot Tactical S7.
+
+Les divergences connues Défense/Armure/toucher/résistances restent réservées aux
+lots dédiés plus tard dans la roadmap.
+
+### Première action obligatoire S6
+
+Avant toute création de module :
+1. relire les wrappers de dérivées dans `gens-rpg-stats-clean-167874.js` ;
+2. relever les helpers historiques exacts et leurs règles/fallbacks ;
+3. relire les tests existants HP/mana/crit/dodge/initiative/magic resistance/
+   damage/hit ;
+4. distinguer une dérivée réellement générique d'une résolution combat ;
+5. vérifier quelles formules sont inline et lesquelles sont externes ;
+6. si le corps exact d'une formule inline est indispensable, appliquer
+   immédiatement la règle 26 avant toute inspection/modification de
+   `index.html` ;
+7. poser un document d'audit et un RED de caractérisation avant tout nouveau
+   module.
+
+### Interdictions S6
+
+- aucun changement de formule ;
+- aucun raccord Tactical ;
+- aucun changement Inventory/Equipment/Talents/Challenge ;
+- aucun stockage/UI/progression ;
+- aucun nouveau wrapper global ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement sur `main`.
+
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S5 providers de modificateurs — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

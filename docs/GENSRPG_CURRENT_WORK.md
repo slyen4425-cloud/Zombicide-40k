@@ -1,3 +1,68 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S11 raccord Core Snapshot → Tactical — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
+- Base exacte / dernier GREEN :
+  `8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
+- Checkpoint précédent :
+  `checkpoint/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Correctif double application officiellement GREEN
+
+SHA final :
+`8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
+
+Runs :
+- Architecture + navigateur complet : `35597692405` — SUCCESS ;
+- Firefox : `35597692489` — SUCCESS ;
+- Tactical Dock : `35597692575` — SUCCESS.
+
+Contrat final :
+- preview Tactical conserve la puissance déjà scalée ;
+- Adapter transporte le bonus canonique incorporé ;
+- mêlée physique V114.11 applique le bonus canonique une seule fois ;
+- distance/magie/résistances/armure/critique restent inchangés.
+
+### Mission du raccord S11
+
+Remplacer progressivement les relectures Dungeon redondantes du snapshot V110
+par le pipeline Core Stats déjà extrait, sans changer les valeurs ni déplacer
+la résolution combat.
+
+Chaîne cible :
+`S3/S4/S5 valeurs+modifiers -> S6 derived -> S7 snapshot -> adaptateur session V110 -> Tactical`.
+
+### Première preuve obligatoire
+
+Avant tout raccord runtime :
+1. dresser la liste exacte des champs V110 encore relus depuis Dungeon ;
+2. classer chaque champ en :
+   - Core S7 disponible ;
+   - valeur canonique Core mais hors derived ;
+   - donnée session/combat qui doit rester V110 ;
+3. construire une fixture comparative V110 historique vs composition Core ;
+4. mesurer le nombre de relectures Dungeon ;
+5. ne supprimer que les relectures dont la parité est démontrée ;
+6. conserver HP/mana courants, résistances, rules et ressources session hors S7 ;
+7. poser un RED de raccord avant toute modification V110.
+
+### Interdictions
+
+- aucune nouvelle formule ;
+- aucune modification dégâts/hit/armure/résistances/critique ;
+- aucune mutation PV dans Core ;
+- aucune lecture directe de CHARS/state ajoutée au Core ;
+- aucun changement du gros `index.html` sans nécessité prouvée ;
+- aucun wrapper/observer/timer/retry/monkey-patch ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

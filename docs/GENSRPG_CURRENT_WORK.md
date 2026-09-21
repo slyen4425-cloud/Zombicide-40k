@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View & Slot Refs — contrat pur — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View & Slot Refs — clôture candidate — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,112 +13,76 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Pré-audit Inventory / Equipment / Sets clôturé
+### Résultat
 
-SHA final :
-`e61638fa504d0050f80fbfd1b3a7192f797a986f`.
+Nouveau service Core pur et inert :
 
-Runs exacts :
-- Architecture + navigateur complet : `35608442745` — SUCCESS ;
-- Firefox : `35608442688` — SUCCESS ;
-- Tactical Dock : `35608442720` — SUCCESS.
+`assets/gensrpg/core/inventory-equipped-view-v1.js`.
 
-### Mission du micro-lot
+Il fournit uniquement :
+- normalisation refs de slots ;
+- indices équipés dédupliqués ;
+- résolution d'items via resolver explicite ;
+- réindexation pure après suppression.
 
-Extraire **uniquement un contrat pur et inert** pour :
+Parité prouvée avec les propriétaires inline exacts du blob
+`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
 
-1. normaliser/résoudre les références de slots par index ;
-2. produire la vue dédupliquée des objets équipés ;
-3. calculer la réindexation déterministe des références après suppression
-   d'une entrée d'inventaire.
+Cas verrouillés :
+- deux mains sur le même index ;
+- doublons main/RPG ;
+- refs invalides ;
+- ordre mains -> rpgGear ;
+- suppression : égal -> null, supérieur -> -1.
 
-Aucun raccord runtime dans ce lot.
+### Architecture
 
-### Autorités historiques à caractériser
+Le module reste **Phase 4 inert** :
+- non chargé par Pages ;
+- non chargé par preview ;
+- non précaché ;
+- non raccordé au runtime.
 
-Source de vérité actuelle :
-- inventaire : `state.inventory[]` ;
-- mains : `state.rightHand / state.leftHand` ;
-- équipement RPG : `state.rpgGear[slot]` ;
-- équipement non-Dungeon historique : `state.equipment`.
+Production-reachable : toujours 73 fichiers.
 
-Vue équipée historique :
-`dungeonEquippedItems()`.
+Inventaire physique : 91 JS.
+Services Phase 4 connus : 11.
 
-Compatibilité :
-`dungeon-equipment-hotfix-167817.js` reconstruit la vue depuis les slots
-quand la garde de fiche héros retourne vide.
-
-Suppression :
-- base `removeInventoryEntry(i)` réindexe les mains et `equipment` pour
-  les références strictement supérieures ;
-- Core 1.05 tardif wrappe `removeInventoryEntry` pour vider/réindexer
-  `rpgGear` ;
-- les chemins qui détruisent un objet tenu appellent `clearIndexFromHands`
-  avant la suppression ;
-- `dropItem` possède encore son propre chemin inline et n'est pas raccordé
-  dans ce micro-lot.
-
-### Contrat cible pur
-
-Entrées explicites uniquement :
-- `inventory` ;
-- `rightHand` ;
-- `leftHand` ;
-- `equipment` ;
-- `rpgGear` ;
-- resolver d'item fourni par l'appelant.
-
-Sorties pures :
-- refs normalisées ;
-- indices équipés uniques dans l'ordre mains puis RPG ;
-- items équipés résolus/dédupliqués ;
-- refs recalculées après suppression d'un index.
-
-Aucun accès à :
-- `window/state/current` ;
-- DOM ;
-- localStorage/Core Storage ;
-- Stats ;
-- Tactical/combat ;
-- catalogue global ;
-- sets/évolution ;
-- cache ;
-- timers/observers.
-
-### Règle de parité
-
-Le test doit exécuter les vrais propriétaires inline du blob vérifié
-`5b9b9ae780f735eadef049afeb10acf0b57441fe`
-et comparer le contrat pur sur les cas couverts.
-
-Les dettes historiques découvertes hors contrat ne doivent pas être réparées
-dans ce lot.
+Aucun runtime historique, `index.html`, stockage, Stats, Tactical, set,
+évolution, cache ou UI n'a été modifié.
 
 ### TDD
 
-1. ajouter une sentinelle qui exige l'API Core pure — RED attendu car le module
-   n'existe pas encore ;
-2. confirmer que le RED vient uniquement du module absent ;
-3. créer le module minimal ;
-4. vérifier la parité avec :
-   - deux mains sur le même objet 2 mains ;
-   - doublon main + rpgGear ;
-   - slots nuls/inconnus ;
-   - refs invalides/hors inventaire ;
-   - suppression avant/après/sur une ref ;
-5. intégrer la sentinelle Architecture ;
-6. trois batteries finales sur SHA documentaire avant GREEN.
+Vrai RED :
+- run Architecture `35612350523` ;
+- assertion :
+  `Core Inventory equipped-view contract module must exist`.
 
-### Interdictions
+Après création du module, la cartographie Phase 2 a correctement imposé son
+classement explicite comme service inert.
 
-- ne pas modifier `index.html` ;
-- ne pas modifier `dungeonEquippedItems` ;
-- ne pas modifier equip/unequip/drop/remove runtime ;
-- ne pas modifier Stats/Tactical ;
-- ne pas ajouter de fallback/runtime bridge ;
-- ne pas corriger le gap d'invalidation cache dans ce lot ;
-- ne pas toucher `main`.
+### Validation technique
+
+SHA :
+`82af680ee15bafc6b9195266270d9d96d5049e0f`.
+
+- Architecture + navigateur : `35612621576` — SUCCESS ;
+- Firefox : `35612621700` — SUCCESS ;
+- Tactical Dock : `35612621668` — SUCCESS.
+
+### Clôture candidate
+
+Le SHA documentaire final doit repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-green-2026-09-21` ;
+2. ouvrir un nouveau lot séparé pour le raccord runtime de cette autorité pure ;
+3. ne pas mélanger mutation equip/unequip, sets, évolution, cache ou UI ;
+4. ne pas toucher `main`.
+
+Audit :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPPED_VIEW_SLOT_REFS_CONTRACT.md`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

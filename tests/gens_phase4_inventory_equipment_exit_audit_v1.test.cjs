@@ -89,7 +89,7 @@ assert.ok(!/assets\/gensrpg\/core\/.*dice/i.test(pages),
 
 assert.match(
   roadmap,
-  /### 4\. Inventaire \/ équipement \/ sets[\s\S]*### 5\. Dés/,
+  /4\. inventaire\/équipement\/sets ;[\s\S]*5\. dés ;/i,
   'roadmap order must remain Inventory/Equipment/Sets then Dice'
 );
 

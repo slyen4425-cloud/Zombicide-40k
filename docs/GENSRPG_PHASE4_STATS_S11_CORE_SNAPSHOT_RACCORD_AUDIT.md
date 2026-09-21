@@ -1,4 +1,4 @@
-# GenSrpG — Phase 4 Core Stats — S11 audit raccord Core Snapshot → Tactical
+# GenSrpG — Phase 4 Core Stats — S11 raccord Core Snapshot → Tactical
 
 Date : 2026-09-21
 
@@ -6,193 +6,202 @@ Date : 2026-09-21
   `work/gensrpg-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
 - Checkpoint de départ :
   `checkpoint/gensrpg-start-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
-- Base exacte / dernier GREEN :
+- Base :
   `8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
-- Checkpoint précédent :
-  `checkpoint/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-green-2026-09-21`.
+- SHA technique validé avant documentation :
+  `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3`.
 - Production gelée :
-  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
 ## Objet
 
-Préparer le raccord réel des services Core Stats S3-S7 vers le snapshot Tactical
-V110 sans modifier les valeurs ni déplacer la résolution combat.
+Raccorder réellement les services Core Stats S3-S7 au snapshot Tactical V110,
+sans modifier les formules de gameplay ni déplacer la résolution combat.
 
-Aucun raccord runtime n'est effectué dans cet audit.
+Chaîne obtenue :
 
-## Snapshot V110 actuellement actif
+`S3 Value Engine -> S4 Hero Values -> S5 Modifier Provider -> S6 Derived Values -> S7 Snapshot -> Stats runtime adapter -> V110 session envelope -> Tactical`.
 
-`buildHeroSnapshot()` compose aujourd'hui plusieurs catégories.
+## Autorité obtenue
 
-### 1. Définitions et valeurs canoniques
+Le propriétaire runtime Stats `GensCleanRpgStats167874` expose désormais
+`coreSnapshot(hero)`.
 
-Pour chaque définition active :
-- V110 lit `GensCleanRpgStats167874.runtimeDefs()` ;
-- V110 appelle `GensCleanRpgStats167874.value(hero,id)` ;
-- il produit `canonical[]` et `values{}`.
+Cette façade collecte explicitement les sources runtime existantes puis délègue
+les calculs aux services Core déjà extraits :
 
-Ce rôle correspond structurellement au snapshot Core S7, mais le pipeline Core
-S3/S4/S5 n'est pas encore raccordé au runtime Tactical.
+- S3 : valeurs et effets ;
+- S4 : valeurs héros ;
+- S5 : modificateurs Equipment / Skills / Challenge ;
+- S6 : dérivées ;
+- S7 : snapshot immutable.
 
-### 2. Données session qui doivent rester hors Core S7
+V110 consomme ensuite ce snapshot Core.
 
-V110 compose :
-- `maxHp` depuis acteur / `effectiveMaxWounds` ;
-- `hp` depuis acteur ou wounds ;
-- `mana` courant depuis l'état héros ;
-- `resistances` depuis les formes runtime/record ;
-- `rules.criticalMultiplier` depuis les règles Dungeon ;
-- timestamp/version V110.
+## Relectures Dungeon supprimées de V110
 
-Ces données ne doivent pas être absorbées dans le snapshot pur S7.
+Les six relectures redondantes suivantes ne sont plus effectuées par V110 :
 
-### 3. Valeurs canoniques utilisées directement par V110
-
-V110 préfère actuellement `values.*` pour :
-- movement ;
-- initiative ;
-- defense ;
-- armor.
-
-Les helpers Dungeon correspondants ne sont que des fallbacks si la valeur
-canonique n'est pas finie/présente.
-
-Conséquence :
-- movement/defense/armor peuvent à terme venir de `S7.values` ;
-- ils ne doivent pas être transformés en nouvelles dérivées Core ;
-- le comportement de l'initiative demande une caractérisation spécifique.
-
-### 4. Dérivées relues depuis Dungeon
-
-V110 relit encore directement :
-- `dungeonDodgeChance` ;
-- `dungeonCriticalChance` ;
-- `dungeonMagicResistance` ;
-- `dungeonMaxMana` ;
 - `dungeonPhysicalDamageBonus` ;
-- `dungeonMagicDamageBonus`.
+- `dungeonMagicDamageBonus` ;
+- `dungeonMaxMana` ;
+- `dungeonCriticalChance` ;
+- `dungeonDodgeChance` ;
+- `dungeonMagicResistance`.
 
-Ces six valeurs appartiennent au sous-ensemble déjà modélisé par S6/S7.
+Les champs correspondants viennent de `core.derived`.
 
-## Correspondance Core disponible
+## Enveloppe session conservée dans V110
 
-S6 produit :
-- physicalDamageBonus ;
-- magicDamageBonus ;
-- hpBonus ;
-- maxMana ;
-- crit ;
-- dodge ;
-- initiative ;
-- magicResistance.
+S7 reste pur et n'absorbe pas :
 
-S7 transporte immuablement exactement ce sous-ensemble avec les valeurs
-canoniques.
+- HP courant ;
+- mana courant ;
+- résistances de session ;
+- règles combat ;
+- timestamp/version Tactical ;
+- mutation PV ;
+- état de tour.
 
-Les candidates naturelles au remplacement de relecture V110 sont donc :
-- physicalDamageBonus ;
-- magicDamageBonus ;
-- maxMana ;
-- crit ;
-- dodge ;
-- magicResistance.
+V110 reste propriétaire de cette enveloppe Tactical.
 
-Mais leur remplacement n'est autorisé qu'après une fixture runtime qui construit
-les entrées S3/S4/S5/S6 de façon identique aux propriétaires historiques.
+## Valeurs canoniques
 
-## Piège prouvé : initiative
+`canonical[]` et `values{}` viennent désormais du snapshot Core.
 
-V110 actuel fait conceptuellement :
+Movement, Defense et Armor conservent leur sémantique existante via les valeurs
+canoniques, avec les fallbacks historiques de V110 uniquement là où ils restent
+nécessaires.
+
+## Initiative volontairement exclue du raccord dérivé
+
+La caractérisation a prouvé que `S6.derived.initiative` peut intégrer un effet
+cible `initiative` que V110 historique n'applique pas lorsque
+`values.initiative` existe.
+
+Le raccord S11 conserve donc :
 
 `initiative = values.initiative ?? dungeonDerivedInitiative()`.
 
-Or :
-- `GensCleanRpgStats167874.value(...,"initiative")` fournit la valeur canonique
-  et les effets `stat:initiative` ;
-- le wrapper historique `dungeonDerivedInitiative` ajoute en plus
-  `extraTotal("initiative")` ;
-- S6 `derived.initiative` reproduit ce second chemin avec l'effet
-  `initiative`.
+Aucune migration de l'initiative dérivée n'est faite dans ce lot.
 
-Donc remplacer directement `values.initiative` par
-`S7.derived.initiative` pourrait changer le Tactical pour les profils qui
-utilisent un effet cible `initiative`.
+## Ordre de chargement
 
-Aucun raccord initiative n'est autorisé avant une sentinelle dédiée.
+Les services suivants sont désormais production-reachable et chargés avant le
+propriétaire Stats :
 
-## Autre contrainte : ordre de chargement
+1. `stats-normalization-v1.js`
+2. `stats-value-engine-v1.js`
+3. `stats-hero-values-v1.js`
+4. `stats-modifier-provider-v1.js`
+5. `stats-derived-values-v1.js`
+6. `stats-snapshot-v1.js`
+7. `gens-rpg-stats-clean-167874.js`
 
-Les modules :
-- stats-value-engine-v1 ;
-- stats-hero-values-v1 ;
-- stats-modifier-provider-v1 ;
-- stats-derived-values-v1 ;
-- stats-snapshot-v1
+Pages et `preview.html` utilisent le même ordre.
 
-restent actuellement Phase 4 inert et ne sont pas injectés dans la composition
-Pages/preview.
+Le Service Worker précache désormais S3-S7 et utilise une nouvelle clé de cache
+pour ce raccord.
 
-Seule la normalisation Core est déjà chargée dans cette chaîne.
+## Cartographie mise à jour
 
-Le raccord doit donc traiter explicitement :
-1. ordre de chargement ;
-2. dépendances Core ;
-3. fallback sûr si l'API Core n'est pas disponible pendant un audit ;
-4. absence de deuxième implémentation locale dans V110.
+Les cinq services S3-S7 passent de `Phase 4 inert` à
+`Phase 4 connected`.
 
-## Frontière autorisée
+Le graphe production-reachable passe de 68 à 73 fichiers.
 
-Core :
-- normalisation ;
-- calcul des valeurs à partir d'entrées explicites ;
-- composition des modifiers à partir de sources explicites ;
-- dérivées S6 ;
-- snapshot S7 immutable.
+Les documents/tests Phase 2 ont été réalignés sur ce changement d'architecture :
 
-Adaptateur runtime / Stats owner :
-- collecte des définitions ;
-- runtime attributes / définitions héros ;
-- sources Equipment/Talents/Challenge explicites ;
-- règles Dungeon explicites ;
-- effets Stats explicites ;
-- base HP explicite.
+- graphe runtime ;
+- propriétaires runtime ;
+- side effects ;
+- timers ;
+- stockage ;
+- fichiers non atteignables ;
+- composition complète Capture.
 
-V110 :
-- ajoute uniquement les données session/combat Tactical ;
-- reçoit le snapshot Core ;
-- applique les champs nécessaires à l'acteur.
+Les cinq nouveaux services Core n'ajoutent aucun timer, observer, stockage ou
+side effect autre que leur API publique attendue.
 
-Tactical final :
-- arme/type ;
-- hit ;
-- résistances ;
-- armure/floor ;
-- critique ;
-- dégâts finaux ;
-- mutation PV.
+## Parité et sentinelles
 
-## Prochaine sentinelle obligatoire
+La batterie valide notamment :
 
-Avant un RED de raccord production, créer une caractérisation qui compare sur
-les mêmes fixtures :
-1. snapshot V110 historique ;
-2. pipeline S3/S4/S5/S6/S7 pur alimenté explicitement ;
-3. canonical/values ;
-4. physicalDamageBonus ;
-5. magicDamageBonus ;
-6. maxMana ;
-7. crit ;
-8. dodge ;
-9. magicResistance ;
-10. cas initiative avec et sans effet cible `initiative`.
+- Force canonique -> Tactical ;
+- cache snapshot V110 ;
+- snapshot S7 immutable ;
+- S7 -> V110 canonical/values ;
+- physicalDamageBonus ;
+- magicDamageBonus ;
+- maxMana ;
+- crit ;
+- dodge ;
+- magicResistance ;
+- Armure S9 ;
+- Toucher/Défense/Esquive S10 ;
+- frontière dégâts S11 ;
+- correction application unique du bonus mêlée ;
+- composition Pages/preview ;
+- Capture pleine composition ;
+- graphe et propriétaires Phase 2.
 
-La sentinelle doit mesurer les appels aux six helpers dérivés Dungeon afin de
-prouver ensuite leur suppression réelle.
+La parité S11 confirme également que les six helpers Dungeon migrés ne sont plus
+relus par V110.
 
-## État
+## Correctif dégâts S11 préservé
 
-Audit initial du raccord : ouvert.
+Le raccord conserve le contrat déjà GREEN :
 
-Aucun fichier gameplay modifié.
-Aucun `index.html` modifié.
-Aucun changement sur `main`.
+- preview Tactical garde la puissance scalée ;
+- Adapter transporte `meta.rpgDamageBonus` ;
+- V114.11 applique le bonus canonique mêlée physique exactement une fois ;
+- distance et magie ne changent pas ;
+- armure/résistance/critique restent inchangés.
+
+## Fichiers gameplay/runtime modifiés
+
+- `assets/gensrpg/gens-rpg-stats-clean-167874.js`
+- `assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js`
+- `.github/workflows/main.yml`
+- `preview.html`
+- `service-worker.js`
+
+Le gros `index.html` n'a pas été modifié.
+Son blob vérifié reste :
+
+`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+## Interdictions respectées
+
+Aucun nouveau :
+
+- MutationObserver ;
+- timer/retry ;
+- wrapper runtime ;
+- monkey patch ;
+- moteur parallèle ;
+- accès stockage Core Stats ;
+- mutation HP Core.
+
+Aucune formule Hit / Dodge / Armor / Resistance / Crit / dégâts n'est modifiée
+par le raccord.
+
+## Validation technique avant documentation
+
+Sur `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3` :
+
+- Architecture + navigateur complet : `35602684576` — SUCCESS ;
+- Firefox : `35602684564` — SUCCESS ;
+- Tactical Dock : `35602684558` — SUCCESS.
+
+## Clôture
+
+Le présent commit documentaire change le SHA final.
+
+Conformément à la charte, le checkpoint GREEN S11 ne peut être créé qu'après
+SUCCESS des trois batteries sur le SHA documentaire exact.
+
+Après ce GREEN :
+1. figer le checkpoint S11 ;
+2. ouvrir uniquement le prochain lot prévu par la roadmap Phase 4 ;
+3. ne pas modifier `main`.

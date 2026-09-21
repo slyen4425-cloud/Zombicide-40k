@@ -9,6 +9,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 const core316=read('assets/dungeon/dungeon-core-316.js');
+const inventoryCore=read('assets/gensrpg/core/inventory-equipped-view-v1.js');
 const hotfix=read('assets/dungeon/dungeon-equipment-hotfix-167817.js');
 const ui=read('assets/dungeon/dungeon-equipment-ui.js');
 const setEditor=read('assets/dungeon/dungeon-set-editor-167818.js');
@@ -122,6 +123,7 @@ assert.equal(state.rightHand,0,'real hand equip owner must write inventory index
 assert.ok(saves>=4,'real slot mutation owners must persist changes');
 
 ctx.isDungeonHeroSheet=()=>false;
+vm.runInContext(inventoryCore,ctx,{filename:'inventory-equipped-view-v1.js'});
 vm.runInContext(hotfix,ctx,{filename:'dungeon-equipment-hotfix-167817.js'});
 assert.equal(ctx.dungeonEquippedItems.__equipmentHotfix167817,true,'hotfix must be active on equipped view');
 assert.deepEqual(

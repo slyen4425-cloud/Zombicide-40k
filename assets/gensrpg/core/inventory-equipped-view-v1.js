@@ -5,12 +5,13 @@
 const VERSION="1.0.0";
 
 const record=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
-const integer=value=>Number.isInteger(value)&&value>=0;
-
 function normalizedIndex(value,inventoryLength=null){
-  if(!integer(value))return null;
-  if(Number.isInteger(inventoryLength)&&inventoryLength>=0&&value>=inventoryLength)return null;
-  return value;
+  if(value===null||value===undefined||typeof value==="boolean")return null;
+  if(typeof value==="string"&&!value.trim())return null;
+  const index=Number(value);
+  if(!Number.isInteger(index)||index<0)return null;
+  if(Number.isInteger(inventoryLength)&&inventoryLength>=0&&index>=inventoryLength)return null;
+  return index;
 }
 
 function slotRefs(config={}){

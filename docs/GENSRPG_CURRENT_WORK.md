@@ -1,3 +1,57 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — audit de sortie — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-exit-audit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-exit-audit-2026-09-21`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Auditer la sortie du sous-chantier Phase 4 `Inventory / Equipment / Sets` avant
+de passer au point 5 de la roadmap (`Dés`).
+
+Aucun runtime ne doit être modifié dans cet audit.
+
+L'audit doit répondre à deux questions :
+
+1. les responsabilités de moteur commun prévues par le pré-audit initial sont-elles
+   maintenant toutes extraites/raccordées au Core sans calcul concurrent actif ?
+2. les dettes restantes appartiennent-elles au moteur commun, ou seulement aux
+   couches Builders/UI/runtime adapters explicitement hors du périmètre Core ?
+
+### Preuves à verrouiller
+
+- Equipped View / Slot Refs : service Core pur connecté au propriétaire runtime ;
+- bonus directs + sets : service Core pur connecté au seam `dungeonEquipmentBonus` ;
+- évolution : service Core pur utilisé sur cache miss ;
+- cache/invalidation : frontières canoniques uniques ;
+- fallback set-state local UI retiré ;
+- garde retry wrappers corrigée ;
+- aucun service Core Dés déjà présent ;
+- classification explicite des dettes restantes UI/Builders/persistance.
+
+### Décision de sortie attendue
+
+- si une responsabilité de moteur commun reste dupliquée/active : sélectionner le
+  dernier micro-lot Inventory obligatoire ;
+- sinon : fermer officiellement Phase 4.4 Inventory/Equipment/Sets et ouvrir un
+  pré-audit séparé Phase 4.5 Dés depuis le checkpoint GREEN de cet audit.
+
+Interdictions :
+- aucun changement runtime ;
+- aucun retrait d'observer/listener/writer UI dans ce lot ;
+- aucun début d'extraction Dés ;
+- aucun changement `index.html` ;
+- aucun changement `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

@@ -398,6 +398,9 @@ jobs:
       - name: Exiger le retrait du hook Equipment de Hero Art Repair
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_owner_v1.test.cjs
 
+      - name: Pré-auditer la compétition de réinstallation Equipment
+        run: node tests/gens_phase4_inventory_equipment_wrapper_reinstall_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 
@@ -597,3 +600,6 @@ jobs:
 
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs
+
+      - name: Caractériser la chaîne Equipment après retries
+        run: node tests/gens_phase4_inventory_equipment_wrapper_reinstall_browser_v1.test.cjs

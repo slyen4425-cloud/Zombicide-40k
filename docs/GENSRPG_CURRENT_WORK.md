@@ -1,3 +1,74 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s11-melee-damage-double-application-fix-2026-09-21`.
+- Base exacte / dernier GREEN de caractérisation :
+  `bb5844329f1e2e394ff2788168cc83e7e8eb38ac`.
+- Checkpoint précédent :
+  `checkpoint/gensrpg-phase4-stats-s11-damage-boundary-characterized-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Défaut prouvé
+
+Le chemin réel mêlée physique peut inclure le même bonus canonique deux fois :
+
+`effectiveAttackStats/applyDungeonCombatScaling`
+→ bonus déjà inclus dans `st.strength`
+→ Adapter copie cette valeur dans `attack.power`
+→ V110 relit le même bonus dans le snapshot
+→ V114.11 l'ajoute encore à `attack.power`.
+
+Fixture prouvée :
+`arme 5 + bonus 3` devient `attack.power=8`, puis V114.11 calcule
+`8 + 3 - armure 2 = 9`, au lieu de `5 + 3 - 2 = 6`.
+
+### Propriétaire de frontière identifié
+
+Le runtime inline expose déjà dans `effectiveAttackStats()` :
+`st.rpgDamageBonus`.
+
+Le correctif ne doit donc pas modifier `index.html`.
+
+Contrat cible :
+1. l'Adapter transporte le montant du bonus canonique déjà inclus dans
+   `attack.power` ;
+2. V114.11, uniquement pour la mêlée physique, retire ce montant incorporé de
+   la base puis ajoute la valeur canonique courante du snapshot une seule fois ;
+3. les autres bonus déjà intégrés à `attack.power` restent intacts ;
+4. distance physique et magie conservent leur sémantique actuelle ;
+5. l'explication redevient
+   `puissance hors bonus canonique + bonus stat = brut - armure = final`.
+
+### Interdictions
+
+- ne pas modifier `applyDungeonCombatScaling` ni le gameplay Dungeon classique ;
+- ne pas toucher `index.html` ;
+- ne pas changer dégâts distance/magie/élémentaires ;
+- ne pas changer résistances, armure/floor, critique, hit ou esquive ;
+- ne pas déplacer la mutation PV vers Core ;
+- aucun wrapper/observer/timer/retry/monkey-patch ;
+- aucun changement sur `main`.
+
+### TDD obligatoire
+
+Le prochain commit doit être un RED qui reproduit le chemin complet
+Adapter → V110 → V114.11 et exige :
+- arme 5 ;
+- bonus canonique 3 ;
+- `attack.power=8` conservé pour preview/AI ;
+- base V114.11 expliquée = 5 ;
+- bonus stat V114.11 = 3 ;
+- brut = 8 ;
+- armure 2 ;
+- final = 6 ;
+- aucune régression ranged/magic.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 frontière dégâts — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

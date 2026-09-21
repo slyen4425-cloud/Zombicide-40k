@@ -348,6 +348,11 @@
       "owner": "Shell World Summary",
       "domain": "shell",
       "role": "live world-card summaries from content sources"
+    },
+    "assets/gensrpg/core/stats-normalization-v1.js": {
+      "owner": "GenSrpG Core Stats Normalization",
+      "domain": "core",
+      "role": "canonical pure stat/effect normalization authority loaded before the legacy Stats runtime owner"
     }
   }
 }

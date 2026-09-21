@@ -83,10 +83,54 @@ S2 ne doit pas contenir :
 Document :
 `docs/GENSRPG_PHASE4_STATS_S2_NORMALIZATION.md`.
 
+### Implémentation S2
+
+TDD observé :
+- RED attendu sur le commit `e49a2fef992f0bb3e6e43caae05e39a3d4a5c163` ;
+- cause exacte : `ENOENT` sur
+  `assets/gensrpg/core/stats-normalization-v1.js` ;
+- toutes les étapes antérieures, dont S1, étaient GREEN.
+
+Module créé :
+`assets/gensrpg/core/stats-normalization-v1.js`.
+
+Commit d'extraction :
+`b7be17f8f0317405f92e6441d28d506f546529e2`.
+
+Le module expose uniquement :
+- slug/canon ;
+- normalizeDefinition ;
+- isValidTarget ;
+- normalizeEffect ;
+- compare ;
+- effectContribution.
+
+Aucun raccord runtime n'a été ajouté.
+
+La cartographie du graphe a ensuite été réalignée :
+`stats-normalization-v1.js` est explicitement classé **Phase 4 inert**.
+Il est physiquement présent mais absent du graphe production jusqu'au lot de raccord.
+
+### Validation S2 — GREEN technique
+
+HEAD technique validé :
+`5f1e7d69854d1bff2761e8bd236152b20e76156a`.
+
+Runs :
+- Architecture + navigateur complet : `35557595186` — SUCCESS ;
+- Firefox : `35557595179` — SUCCESS ;
+- Tactical Dock : `35557595165` — SUCCESS.
+
+Aucun runtime actif, gameplay, formule, UI ou persistance n'a changé.
+
 ### Prochaine action
 
-Poser le test de parité S2 et le brancher à Architecture pour obtenir le RED
-attendu **avant** création du module Core.
+Clôturer la documentation S2 puis repasser les trois workflows sur son SHA final
+exact. Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s2-normalization-green-2026-09-21` ;
+- ouvrir un lot dédié de raccord d'autorité de normalisation ;
+- ne pas commencer S3 value/effects tant que la frontière de raccord S2 n'est pas
+  explicitement prouvée.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S1 Contrats — 2026-09-20

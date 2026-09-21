@@ -314,6 +314,9 @@ jobs:
       - name: Verrouiller le raccord d’autorité de normalisation Stats
         run: node tests/gens_phase4_stats_s2_authority_raccord_v1.test.cjs
 
+      - name: Vérifier la parité du moteur pur Core Stats S3
+        run: node tests/gens_phase4_stats_s3_value_effects_parity_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

@@ -1,3 +1,93 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S10 Toucher-Défense-Esquive — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s10-hit-defense-dodge-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s10-hit-defense-dodge-2026-09-21`.
+- Base exacte et dernier GREEN :
+  `79744f111c9d4fd064c1dbd0dbfb599849cd06b2`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s9-armor-contract-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S9 définitivement clôturé
+
+HEAD final :
+`79744f111c9d4fd064c1dbd0dbfb599849cd06b2`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35592897503` — SUCCESS ;
+- Firefox : `35592897367` — SUCCESS ;
+- Tactical Dock : `35592897396` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s9-armor-contract-green-2026-09-21`.
+
+`stats-armor-contract-v1.js` reste Phase 4 inert.
+Aucune formule Armor/dégâts et aucun raccord runtime n'ont été modifiés dans S9.
+
+### Mission S10
+
+Caractériser puis figer le contrat **Toucher / Défense / Esquive** en rendant
+explicites les différences Dungeon/Tactical, sans modifier le résultat actuel.
+
+Divergences déjà observées :
+- Dungeon utilise un D100 haut : réussite sur `101 - chance` ou plus ;
+- Dungeon applique une pénalité Défense uniquement quand la Défense dépasse la
+  caractéristique d'attaque, via `defensePenaltyPerPoint` ;
+- Dungeon résout ensuite l'Esquive par un second jet séparé après une touche ;
+- Tactical V2 soustrait directement Défense + Esquive + couvert à la chance de
+  toucher, puis V114.11 affiche/résout aussi le D100 en mode haut ;
+- Tactical fixe actuellement les bornes finales à 5..95 dans sa chaîne ;
+- Dungeon peut configurer `hitChanceMin`, `hitChanceMax` et
+  `defensePenaltyPerPoint`.
+
+### Frontière architecturale S10
+
+Core Stats peut fournir :
+- caractéristiques canoniques ;
+- Défense canonique ;
+- Esquive canonique ;
+- modificateurs `hit:melee`, `hit:ranged`, `hit:magic`.
+
+Core Stats ne doit pas :
+- devenir propriétaire du jet D100 ;
+- appliquer Défense, Esquive ou couvert à une chance finale ;
+- choisir entre la formule Dungeon et la formule Tactical ;
+- lancer un RNG ;
+- appliquer une touche, un critique ou des dégâts.
+
+Dungeon et Tactical restent propriétaires de leur résolution tant qu'un moteur
+combat commun n'existe pas.
+
+### Première action obligatoire S10
+
+1. vérifier le graphe actif exact des propriétaires de toucher ;
+2. caractériser le même attaquant/cible dans Dungeon et Tactical ;
+3. faire varier caractéristique attaquante, Défense, Esquive, couvert,
+   `hitChanceMin/max`, `defensePenaltyPerPoint` et bonus hit ;
+4. prouver la sémantique D100 finale visible ;
+5. distinguer modificateurs Core et résolution combat ;
+6. ne créer aucun nouveau résolveur commun pendant la caractérisation ;
+7. utiliser le `index.html` local vérifié si son blob reste
+   `5b9b9ae780f735eadef049afeb10acf0b57441fe`, sinon règle 26 ;
+8. seulement après cette preuve décider si S10 nécessite un contrat Core de
+   données ou si les sentinelles suffisent.
+
+### Interdictions S10
+
+- aucune modification de formule Toucher/Défense/Esquive pendant l'audit ;
+- aucun changement du sens du D100 ;
+- aucune fusion de l'Esquive dans Dungeon ou séparation dans Tactical ;
+- aucun changement de couvert ;
+- aucun changement des bornes hit ;
+- aucun changement Armor/Résistances/S11 dégâts ;
+- aucun nouveau wrapper global, observer, timer/retry ou monkey-patch ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S9 contrat Armure — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

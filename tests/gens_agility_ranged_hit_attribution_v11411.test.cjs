@@ -5,6 +5,7 @@ const path=require('node:path');
 
 const root=path.join(__dirname,'..');
 const statsSrc=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 const A=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-adapter.js'));
 
 let profiles=[{
@@ -47,7 +48,7 @@ const ctx={
 };
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
-vm.runInContext(statsSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(statsSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 ctx.GensCleanRpgStats167874.install();
 
 const scaled=ctx.applyDungeonCombatScaling(item,{range:6,melee:false,hitChance:55,damage:2,dice:1,strength:2});

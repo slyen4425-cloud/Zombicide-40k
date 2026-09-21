@@ -1,3 +1,59 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — contrat pur persistance bonus — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-bonus-persistence-contract-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-bonus-persistence-contract-2026-09-21`.
+- Base exacte :
+  `2dcc02ab0f4ac04e357e732528add3e8303fdb51`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-save-wrapper-preaudit-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Créer un service Core **pur** de transition d'état pour la persistance des
+`rpgBonuses` Equipment.
+
+Le service doit :
+- recevoir explicitement `id`, `bonuses` et l'état cible ;
+- supporter une cible custom (liste equipment) ;
+- supporter une cible builtin (map d'overrides Dungeon) ;
+- préserver les autres champs de l'objet / override ;
+- remplacer le snapshot `rpgBonuses` par le snapshot canonique reçu ;
+- ne muter aucune entrée fournie ;
+- signaler si la cible a été trouvée.
+
+### Périmètre strict
+
+Autorisé :
+- `assets/gensrpg/core/equipment-bonus-persistence-v1.js` ;
+- test pur de contrat ;
+- entrée CI ;
+- documentation.
+
+Interdit :
+- tout DOM ;
+- localStorage / IndexedDB ;
+- timer / retry / observer ;
+- wrapper global ;
+- modification de Hero Editor / Hotfix / Set Editor / Cleanup ;
+- raccord à `saveEquipmentEditor` dans ce lot ;
+- modification `index.html` ;
+- modification `main`.
+
+### TDD
+
+1. RED : test exigeant le nouveau contrat Core absent ;
+2. implémentation minimale pure ;
+3. GREEN du contrat ;
+4. Architecture + navigateur complet, Firefox et Tactical ;
+5. checkpoint GREEN ;
+6. raccord runtime dans un lot séparé seulement.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

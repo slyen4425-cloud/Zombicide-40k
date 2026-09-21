@@ -330,3 +330,123 @@ l'application du pourcentage à une attaque appartient toujours à
 La règle 26 étant satisfaite, poser maintenant le TDD de parité S6 avant de
 créer le moteur pur. Le RED attendu doit être l'absence du nouveau fichier Core,
 et non une divergence des propriétaires historiques.
+
+
+## Résultat technique S6
+
+### TDD RED observé
+
+Commit pré-moteur :
+`aa67d61ff3afaa806163ceb6887f74dcc041a9d1`.
+
+Run Architecture :
+`35581291799` — FAILURE attendu.
+
+Cause exacte :
+`ENOENT` sur
+`assets/gensrpg/core/stats-derived-values-v1.js`.
+
+L'audit S6 était GREEN immédiatement avant ce RED.
+
+### Moteur pur créé
+
+Fichier :
+`assets/gensrpg/core/stats-derived-values-v1.js`.
+
+Commit :
+`32888007ac32352e30733983e3f8889915562efa`.
+
+API :
+`GensStatsDerivedValuesV1.derive(config)`.
+
+Le moteur reçoit uniquement :
+- valeurs de caractéristiques explicites ;
+- règles explicites ;
+- base HP explicite ;
+- totaux externes explicites ;
+- totaux d'effets explicites.
+
+Il conserve les deux étages historiques de floor/cap pour mana, critique,
+esquive et résistance magique.
+
+Il ne connaît ni Equipment, ni Talents, ni Challenge, ni Tactical, ni DOM,
+ni stockage, ni profil courant.
+
+### Parité démontrée
+
+La fixture extrait les huit helpers historiques depuis le `index.html` exact
+vérifié par la règle 26, les exécute comme oracle puis compare le Core pur.
+
+Couverture :
+- formules step ;
+- modes percent/perPoint ;
+- double floor/cap historique ;
+- aliases de caractéristiques ;
+- immutabilité des entrées ;
+- pureté du module.
+
+La sentinelle S6 passe dans Architecture avec :
+- `stepFormulas: true` ;
+- `percentAndPerPoint: true` ;
+- `stagedFloorsAndCaps: true` ;
+- `aliases: true` ;
+- `immutable: true` ;
+- `pure: true`.
+
+### Graphe Phase 2
+
+Commit :
+`a142c1cdf9c7a54816d50d59a53716ec2aed2f83`.
+
+`stats-derived-values-v1.js` est classé **Phase 4 inert**.
+
+Inventaire JS physique :
+`86 -> 87`.
+
+Le baseline Phase 2 reste à 72 fichiers.
+Le graphe production reste inchangé.
+Le moteur S6 n'est chargé ni par Pages, ni par `preview.html`.
+
+### Validation GREEN technique
+
+HEAD technique :
+`a142c1cdf9c7a54816d50d59a53716ec2aed2f83`.
+
+Runs :
+- Architecture + navigateur complet : `35581520003` — SUCCESS ;
+- Firefox : `35581520029` — SUCCESS ;
+- Tactical Dock : `35581520057` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie ;
+- Fouiller + arts ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- caches/retours/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence des quatre modules ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets et tokens tardifs.
+
+Aucun propriétaire runtime historique n'a été modifié.
+`index.html` n'a pas été modifié par S6.
+`main` reste gelée sur
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Clôture documentaire
+
+Le SHA documentaire final doit repasser :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s6-derived-values-green-2026-09-21` ;
+- ouvrir S7 depuis ce checkpoint ;
+- S7 = snapshot Core Stats unique, sans supprimer de lecture historique avant
+  preuve et sans modifier les formules combat.

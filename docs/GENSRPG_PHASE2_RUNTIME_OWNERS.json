@@ -353,6 +353,31 @@
       "owner": "GenSrpG Core Stats Normalization",
       "domain": "core",
       "role": "canonical pure stat/effect normalization authority loaded before the legacy Stats runtime owner"
+    },
+    "assets/gensrpg/core/stats-value-engine-v1.js": {
+      "owner": "GenSrpG Core Stats Value Engine",
+      "domain": "core",
+      "role": "canonical deterministic stat values and effect composition used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-hero-values-v1.js": {
+      "owner": "GenSrpG Core Stats Hero Values",
+      "domain": "core",
+      "role": "canonical explicit hero base-value provider used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-modifier-provider-v1.js": {
+      "owner": "GenSrpG Core Stats Modifier Provider",
+      "domain": "core",
+      "role": "canonical explicit Equipment, Skill and Challenge modifier composition used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-derived-values-v1.js": {
+      "owner": "GenSrpG Core Stats Derived Values",
+      "domain": "core",
+      "role": "canonical deterministic derived stat formulas feeding the Tactical snapshot boundary"
+    },
+    "assets/gensrpg/core/stats-snapshot-v1.js": {
+      "owner": "GenSrpG Core Stats Snapshot",
+      "domain": "core",
+      "role": "canonical immutable values and derived snapshot consumed through the active Stats runtime adapter"
     }
   }
 }

@@ -126,6 +126,65 @@ Un raccord d'autorité ultérieur sera séparé et checkpointé.
 Document :
 `docs/GENSRPG_PHASE4_STATS_S3_VALUE_EFFECTS.md`.
 
+### TDD S3 observé
+
+RED :
+`18289e84e46bc06271f1dc8717ad12701898d75c`.
+
+Cause exacte :
+`ENOENT` sur `assets/gensrpg/core/stats-value-engine-v1.js`.
+
+### Implémentation S3
+
+Module pur :
+`assets/gensrpg/core/stats-value-engine-v1.js`.
+
+Commit d'extraction :
+`0c7482dba1356221850ad1bc5fce858f0394c867`.
+
+Le moteur reçoit uniquement :
+definitions / active / baseValues / modifiers / effects / directValueTargets.
+
+Il expose :
+create, baseValue, modifierTotal, value, effectAmount, statEffectTotal,
+extraTotal, sourceEffectTotal et detail.
+
+Le module reste **Phase 4 inert** :
+aucun chargement Pages/preview et aucune autorité runtime déplacée.
+
+### Parité S3
+
+Fixture réelle :
+- force = 23 ;
+- chance = 14 ;
+- defense = 21 ;
+- damage:physical = +6 ;
+- max_hp = +5 ;
+- cycle, clamp, aliases et cible directe préservés ;
+- detail cohérent avec value.
+
+### Validation GREEN technique S3
+
+HEAD :
+`fd29280b8848fa78b095271f53c70aa8d88ccca8`.
+
+Runs :
+- Architecture + navigateur complet : `35565475568` — SUCCESS ;
+- Firefox : `35565475560` — SUCCESS ;
+- Tactical Dock : `35565475567` — SUCCESS.
+
+Aucun provider, aucune formule de combat, aucune UI/persistance et aucun snapshot
+Tactical n'a changé.
+
+### Prochaine action
+
+La clôture documentaire S3 doit repasser les trois workflows sur son SHA exact.
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s3-value-effects-green-2026-09-21` ;
+- ouvrir S4 depuis ce checkpoint ;
+- S4 = provider de valeurs héros uniquement ;
+- ne pas commencer Equipment/Talents/Challenges avant S5.
+
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / raccord autorité normalisation — 2026-09-21
 

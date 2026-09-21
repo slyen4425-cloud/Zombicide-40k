@@ -398,6 +398,9 @@ jobs:
       - name: Exiger le retrait du hook Equipment de Hero Art Repair
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_owner_v1.test.cjs
 
+      - name: Pré-auditer les retries de wrappers Equipment
+        run: node tests/gens_phase4_inventory_equipment_wrapper_retry_static_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 
@@ -594,6 +597,9 @@ jobs:
 
       - name: Caractériser les tokens tardifs du resolver d’assets Phase 4
         run: node tests/gens_asset_resolver_late_tokens_browser_v1.test.cjs
+
+      - name: Caractériser les retries de wrappers Equipment dans Chromium
+        run: node tests/gens_phase4_inventory_equipment_wrapper_retry_browser_preaudit_v1.test.cjs
 
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs

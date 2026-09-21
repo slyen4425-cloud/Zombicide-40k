@@ -5,6 +5,7 @@ const path=require('node:path');
 
 const root=path.join(__dirname,'..');
 const cleanSrc=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 const tacticalStatsSrc=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-stats-1678110.js'),'utf8');
 
 let profiles=[{
@@ -66,7 +67,7 @@ const ctx={
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
 
-vm.runInContext(cleanSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(cleanSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const clean=ctx.GensCleanRpgStats167874;
 assert.ok(clean,'canonical stats API missing');
 clean.installRuntime();

@@ -57,26 +57,22 @@
     const id=str(heroId);if(!id)return null;
     const api=statsApi(rt),rec=heroRecord(rt,id),st=heroState(rt,id)||{};
     return withHero(rt,id,()=>{
-      const defs=arr(api?.runtimeDefs?.()),canonical=[],values={};
-      for(const d of defs){
-        const sid=str(d?.id);if(!sid)continue;let value=num(st?.rpgAttributes?.[sid]??rec?.dungeonStats?.[sid],num(d?.defaultValue,0));
-        try{if(typeof api?.value==="function"){metrics.canonicalReads++;value=num(api.value(id,sid),value)}}catch(e){}
-        canonical.push({id:sid,name:str(d?.name||sid),icon:str(d?.icon||""),value});values[sid]=value;
-      }
+      if(typeof api?.coreSnapshot!=="function")throw new Error("Core Stats snapshot adapter unavailable");
+      const core=api.coreSnapshot(id);if(!core)throw new Error("Core Stats snapshot unavailable for "+id);
+      const canonical=arr(core.canonical).map(row=>({id:str(row?.id),name:str(row?.name||row?.id),icon:str(row?.icon||""),value:num(row?.value,0)}));
+      const values={...(core.values||{})},stable=core.derived||{};metrics.canonicalReads+=canonical.length;
       const maxHp=Math.max(1,num(actor?.maxHp,safeCall(rt,"effectiveMaxWounds",1)));
       const hp=clamp(num(actor?.hp,maxHp-num(st?.wounds,0)),0,maxHp);
       const movement=Math.max(0,num(values.movement, safeCall(rt,"dungeonHeroMoveValue083",num(actor?.movement,3),id)));
       const initiative=num(values.initiative,safeCall(rt,"dungeonDerivedInitiative",num(actor?.initiative,10)));
       const defense=Math.max(0,num(values.defense,safeCall(rt,"dungeonDerivedDefense",num(actor?.defense,0))));
       const armor=Math.max(0,num(values.armor,safeCall(rt,"dungeonArmorScore",num(actor?.armor,0))));
-      const dodge=clamp(num(safeCall(rt,"dungeonDodgeChance",num(actor?.dodge,0))),0,100);
-      const crit=clamp(num(safeCall(rt,"dungeonCriticalChance",0)),0,100);
-      const magicResistance=Math.max(0,num(safeCall(rt,"dungeonMagicResistance",0)));
-      const maxMana=Math.max(0,num(safeCall(rt,"dungeonMaxMana",0)));
+      const dodge=clamp(num(stable.dodge,num(actor?.dodge,0)),0,100);
+      const crit=clamp(num(stable.crit,0),0,100);
+      const magicResistance=Math.max(0,num(stable.magicResistance,0));
+      const maxMana=Math.max(0,num(stable.maxMana,0));
       const mana=Math.max(0,num(st?.mana??st?.mp??st?.currentMana,maxMana));
-      let physicalDamageBonus=0,magicDamageBonus=0;
-      try{if(typeof rt?.dungeonPhysicalDamageBonus==="function"){metrics.derivedReads++;physicalDamageBonus=num(rt.dungeonPhysicalDamageBonus(),0)}}catch(e){}
-      try{if(typeof rt?.dungeonMagicDamageBonus==="function"){metrics.derivedReads++;magicDamageBonus=num(rt.dungeonMagicDamageBonus(),0)}}catch(e){}
+      const physicalDamageBonus=num(stable.physicalDamageBonus,0),magicDamageBonus=num(stable.magicDamageBonus,0);
       const snap={version:SNAPSHOT_VERSION,heroId:id,builtAt:Date.now(),canonical,values,
         derived:{hp,maxHp,mana,maxMana,crit,dodge,magicResistance,defense,armor,initiative,movement,physicalDamageBonus,magicDamageBonus},
         resistances:resistanceSnapshot(rt,id,st,rec),rules:rulesSnapshot(rt)};

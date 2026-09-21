@@ -112,6 +112,7 @@ const {chromium}=require('playwright');
     </script>
   </body></html>`);
 
+  await page.addScriptTag({path:path.join(root,'assets','gensrpg','core','inventory-equipped-view-v1.js')});
   await page.addScriptTag({path:path.join(root,'assets','dungeon','dungeon-equipment-hotfix-167817.js')});
   await page.addScriptTag({path:path.join(root,'assets','dungeon','dungeon-set-editor-167818.js')});
   await page.addScriptTag({path:path.join(root,'assets','gensrpg','gens-dungeon-hero-art-repair-167874.js')});

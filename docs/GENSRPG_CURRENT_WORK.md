@@ -1,5 +1,132 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S3 moteur pur value-effects — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s3-value-effects-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s3-value-effects-2026-09-21`.
+- Base exacte et dernier GREEN : `128d80747a9987dd8b90dc72508dae9707f23aab`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s2-authority-raccord-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Raccord S2 définitivement clôturé
+
+HEAD final :
+`128d80747a9987dd8b90dc72508dae9707f23aab`.
+
+Runs sur ce SHA exact :
+- Architecture + navigateur complet : `35564807184` — SUCCESS ;
+- Firefox : `35564807186` — SUCCESS ;
+- Tactical Dock : `35564807337` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s2-authority-raccord-green-2026-09-21`.
+
+La normalisation Core est désormais l'autorité active pour alias/slug/définitions/effets/comparaison,
+chargée avant le propriétaire historique Stats.
+
+### Mission S3
+
+Créer un moteur **pur, déterministe et inactif en production** pour la composition
+des valeurs et effets Stats.
+
+Cible :
+`assets/gensrpg/core/stats-value-engine-v1.js`.
+
+API prévue :
+- `create(config)` ;
+- `baseValue(id)` ;
+- `modifierTotal(id)` ;
+- `value(id)` ;
+- `effectAmount(effect)` ;
+- `statEffectTotal(id)` ;
+- `extraTotal(target)` ;
+- `sourceEffectTotal(target,source)` ;
+- `detail(id)`.
+
+Entrées explicites :
+- definitions ;
+- active ;
+- baseValues ;
+- modifiers ;
+- effects ;
+- directValueTargets.
+
+### Sémantique à préserver
+
+`value(id)` :
+1. définition absente ou inactive -> 0 ;
+2. base brute clampée [min,max] ;
+3. modificateurs externes ajoutés à la base ;
+4. effets `stat:<id>` ajoutés ;
+5. effets directs de même cible seulement si `id` appartient à
+   `directValueTargets` ;
+6. clamp final [min,max].
+
+Cycle :
+si l'ID est déjà dans `seen`, retour du `baseValue` actuel, comme le propriétaire
+historique.
+
+### Contrat de modificateur S3
+
+`StatModifier` :
+- id optionnel ;
+- target : stat canonique ;
+- value : nombre additif ;
+- source optionnelle, descriptive seulement ;
+- enabled true sauf false explicite.
+
+S3 ne connaît pas Equipment/Talents/Challenges : les futurs providers S4/S5
+construiront simplement ces lignes.
+
+### Frontières strictes
+
+S3 ne doit lire aucun :
+- `CHARS` ;
+- `state` ;
+- profil actif ;
+- inventory/equipment ;
+- talent ;
+- challenge ;
+- DOM ;
+- localStorage ;
+- timer/retry ;
+- MutationObserver ;
+- Tactical.
+
+S3 ne décide aucune formule :
+- Armor ;
+- toucher/Défense/Esquive ;
+- résistances ;
+- dégâts finaux ;
+- critique final ;
+- HP/mana courants.
+
+### Stratégie d'autorité
+
+Le nouveau moteur S3 reste **inert** pendant ce lot.
+`GensCleanRpgStats167874.value()` reste l'unique autorité runtime.
+
+S3 démontre seulement la parité sur des fixtures réelles.
+Un raccord d'autorité ultérieur sera séparé et checkpointé.
+
+### TDD
+
+1. documenter le contrat ;
+2. ajouter une sentinelle de parité S3 avant le module ;
+3. obtenir RED parce que `stats-value-engine-v1.js` est absent ;
+4. créer le moteur pur minimal ;
+5. comparer bit à bit avec le moteur historique sur :
+   base, modifiers, stat->stat, dérivée, threshold, clamp et cycle ;
+6. vérifier `detail()` sans DOM ;
+7. classer le nouveau fichier Phase 4 inert dans le graphe ;
+8. repasser Architecture+navigateur, Firefox et Tactical Dock.
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S3_VALUE_EFFECTS.md`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / raccord autorité normalisation — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

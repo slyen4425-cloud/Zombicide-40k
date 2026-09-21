@@ -86,8 +86,10 @@
   }
   function armorRules(rt=R){try{return rt?.loadDungeonRpgRules?.()||{}}catch(e){return {}}}
   function resolvePhysicalDamage(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
-    const baseWeaponDamage=Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0));
+    const attackPower=Math.max(0,num(attack?.power,preview?.rawDamage??preview?.damage??0));
     const statDamageBonus=canonicalDamageBonus(attacker,attack,preview);
+    const embeddedStatDamageBonus=attackMode(attack)==="melee"?Math.max(0,num(attack?.meta?.rpgDamageBonus,0)):0;
+    const baseWeaponDamage=Math.max(0,attackPower-embeddedStatDamageBonus);
     const rawDamage=Math.max(0,Math.round(baseWeaponDamage+statDamageBonus));
     const armor=attack?.ignoreArmor?0:Math.max(0,num(preview?.armor,target?.armor??0));
     const rules=armorRules(rt),armorZeroBlockChance=clamp(num(rules?.armorZeroBlockChance,75),0,100);
@@ -97,7 +99,7 @@
       try{if(typeof rt?.DungeonCore317?.resolveArmorFloor==="function")damage=Math.max(0,num(rt.DungeonCore317.resolveArmorFloor(rawDamage,armor,1,"physical",rules,armorRoll),0));else damage=armorRoll<armorZeroBlockChance?0:1}catch(e){damage=armorRoll<armorZeroBlockChance?0:1}
       armorBlocked=damage<=0;
     }
-    return {baseWeaponDamage,statDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,armorRoll,armorBlocked,armorFloorTriggered};
+    return {baseWeaponDamage,statDamageBonus,embeddedStatDamageBonus,rawDamage,armor,damage,armorZeroBlockChance,armorRoll,armorBlocked,armorFloorTriggered};
   }
   function resolveDamagePerHit(rt=R,state=null,attacker=null,target=null,attack=null,preview=null,forcedArmorRoll=null){
     const type=str(preview?.damageType||attack?.damageType||"physical");

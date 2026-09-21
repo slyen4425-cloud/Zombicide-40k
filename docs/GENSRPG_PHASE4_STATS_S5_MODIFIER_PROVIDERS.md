@@ -225,3 +225,125 @@ S6 — dérivées génériques à sémantique stable.
 
 Ne pas inclure encore application finale Défense/Armure, toucher, D100 ou
 résistances.
+
+
+## Résultat S5
+
+### RED TDD observé
+
+Commit pré-provider :
+`5c8449234b829cb2a7c647b704f17c26253829ec`.
+
+Run Architecture :
+`35577545243` — FAILURE attendu.
+
+L'échec se produit exactement à l'étape :
+`Vérifier la parité des providers de modificateurs Core Stats S5`.
+
+Cause exacte :
+`ENOENT` sur
+`assets/gensrpg/core/stats-modifier-provider-v1.js`.
+
+S1, S2, raccord S2, S3 et S4 étaient GREEN avant ce RED.
+
+### Provider pur créé
+
+Fichier :
+`assets/gensrpg/core/stats-modifier-provider-v1.js`.
+
+Commit :
+`30234d1a76c80d7331ed1fbf95d8758c1141a420`.
+
+API :
+`GensStatsModifierProviderV1.collect(config)`.
+
+Le provider :
+- reçoit uniquement definitions + sources explicites ;
+- canonise les cibles via S2 ;
+- ignore les cibles inconnues et valeurs non finies ;
+- fusionne additivement les aliases d'une même source ;
+- conserve enabled ;
+- produit des lignes S3 déterministes ;
+- ne mute aucune entrée ;
+- ne connaît aucun système propriétaire.
+
+### Parité démontrée
+
+La fixture S5 utilise `GensCleanRpgStats167874.baseValue()` comme oracle.
+
+Les résultats agrégés des seams historiques sont fournis explicitement au Core,
+puis la chaîne S4 -> S5 -> S3 est comparée au moteur historique.
+
+Valeurs verrouillées :
+- force : 22 ;
+- chance : 9 ;
+- defense : 20 ;
+- armor : 11 ;
+- movement : 4.
+
+La fixture prouve notamment :
+- addition de plusieurs sources ;
+- malus négatif ;
+- alias `strength -> force` et `defence -> defense` ;
+- stat custom ;
+- source désactivée ;
+- cible inconnue ignorée ;
+- valeur non finie ignorée ;
+- mouvement inchangé lorsqu'aucun résultat externe applicable n'est fourni.
+
+Aucune règle spéciale de defense/armor/movement n'existe dans le provider.
+Le choix des résultats applicables reste responsabilité de l'adaptateur
+propriétaire.
+
+### Graphe Phase 2
+
+Commit :
+`661ab77e8a2ef9cefaec66c71d1c61d9c899d50d`.
+
+`stats-modifier-provider-v1.js` est classé **Phase 4 inert**.
+
+Inventaire JS physique :
+`85 -> 86`.
+
+Le graphe production reste inchangé.
+Le provider n'est chargé ni par Pages ni par `preview.html`.
+
+### Validation GREEN technique
+
+HEAD technique :
+`661ab77e8a2ef9cefaec66c71d1c61d9c899d50d`.
+
+Runs :
+- Architecture + navigateur complet : `35577612459` — SUCCESS ;
+- Firefox : `35577612420` — SUCCESS ;
+- Tactical Dock : `35577612410` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie ;
+- Fouiller + arts ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence quatre modules ;
+- murs ;
+- preview ;
+- resolver d'assets.
+
+Aucun propriétaire Equipment/Talents/Challenge n'a été modifié.
+Aucun `index.html`, gameplay, Tactical, stockage, UI ou formule combat n'a changé.
+
+## Clôture documentaire
+
+Le SHA documentaire final doit repasser Architecture + navigateur complet,
+Firefox et Tactical Dock.
+
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s5-modifier-providers-green-2026-09-21` ;
+- ouvrir S6 depuis ce checkpoint ;
+- S6 = dérivées génériques à sémantique stable ;
+- ne pas inclure l'application finale Défense/Armure, toucher, D100 ou résistances.

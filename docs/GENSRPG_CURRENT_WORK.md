@@ -88,6 +88,57 @@ combat commun n'existe pas.
 - aucun changement sur `main`.
 
 
+### Caractérisation S10 confirmée
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S10_HIT_DEFENSE_DODGE_AUDIT.md`.
+
+Sentinelle comparative :
+`tests/gens_phase4_stats_s10_hit_defense_dodge_characterization_v1.test.cjs`.
+
+Commits :
+- test : `e177bb3a109669c15a993ca04638c1937b5c6dbc` ;
+- CI : `8ace19da3992499f38b2c54ac195d3be3c81f9b7` ;
+- décision/documentation :
+  `17a3b41734ee748ab440349b76597fbd3b42e859`.
+
+Le test S10 passe dans le job Architecture `35594837513`.
+
+Contrat verrouillé :
+- Dungeon : pénalité Défense seulement au-dessus de la caractéristique
+  attaquante, Esquive sur second D100, bornes hit configurables ;
+- Tactical : Défense + Esquive + couvert retirés avant le D100,
+  bornes 5..95 ;
+- les deux affichent/résolvent actuellement le D100 final en réussite haute ;
+- Core Stats fournit uniquement valeurs/modificateurs et ne résout pas hit/miss.
+
+### Décision S10
+
+Aucun nouveau module Core n'est nécessaire ni autorisé dans ce lot.
+Créer un résolveur commun maintenant introduirait une seconde autorité de
+combat et violerait la charte.
+
+S10 est donc un lot de caractérisation/contrat d'autorité.
+
+Aucune formule gameplay et aucun `index.html` n'ont été modifiés.
+
+### Clôture S10 en cours
+
+Le présent commit documentaire final doit repasser :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-stats-s10-hit-defense-dodge-green-2026-09-21` ;
+2. créer le checkpoint de départ S11 exactement sur ce SHA ;
+3. ouvrir une branche dédiée
+   `work/gensrpg-phase4-stats-s11-damage-boundary-2026-09-21` ;
+4. démarrer S11 par la caractérisation de la frontière dégâts finale, sans
+   modifier arme, type, résistance, armure, critique ou PV pendant l'audit.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S9 contrat Armure — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

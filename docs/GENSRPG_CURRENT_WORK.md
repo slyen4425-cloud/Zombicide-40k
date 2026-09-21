@@ -1,3 +1,70 @@
+## ÉTAT ACTUEL — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21
+
+Ce bloc est le point de reprise opérationnel prioritaire. Les blocs suivants sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-hero-art-open-hook-retirement-2026-09-21`.
+- Base exacte :
+  `c5f8b60cc130d6df12651c317285ed209eddd5c2`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-open-wrapper-preaudit-green-2026-09-21`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### État technique
+
+Le RED propriétaire a été obtenu sur :
+`2bddbef1f22e5a30736157a820ff246ea2efb066`.
+
+Run Architecture RED :
+`35650600108`.
+
+Échec ciblé attendu :
+`Hero Art Repair must retire its unrelated openEquipmentEditor hook`.
+
+La caractérisation navigateur pré-correctif a ensuite été fiabilisée avec le vrai
+Core `GensInventoryEquippedViewV1` et est GREEN :
+- run ciblé `35651278948` — SUCCESS.
+
+Correctif runtime unique :
+`d2725f2a7bd515e7f37a6bf82435976d0e336e0d`.
+
+Modification :
+- retrait du seul token `"openEquipmentEditor"` dans
+  `GensDungeonHeroArtRepair167874.hookAll()`.
+
+Aucun autre runtime n'a été modifié.
+
+Après correctif :
+- le pré-audit `openEquipmentEditor` réaligné passe avec 4 propriétaires ;
+- le nouveau garde propriétaire passe ;
+- la sentinelle navigateur ciblée passe ;
+- le workflow temporaire d'isolation de cette sentinelle a été supprimé.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_HERO_ART_OPEN_HOOK_RETIREMENT.md`.
+
+### Prochaine action obligatoire
+
+1. lancer/attendre la validation finale sur le SHA documentaire propre :
+   - Architecture + navigateur complet ;
+   - Firefox ;
+   - Tactical Dock contrat + Chromium + Firefox ;
+2. si les trois workflows sont SUCCESS, reporter leurs IDs ici ;
+3. rerun final si une mise à jour documentaire change le SHA ;
+4. créer seulement alors :
+   `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`;
+5. ne pas toucher à `main`.
+
+### Dette suivante candidate — séparée
+
+Le retry de `GensHeroEditorDynamic167897.installWrappers()` et son interaction
+avec le marqueur `__canonEq102` d'Equipment Cleanup restent une dette séparée.
+Ne pas la corriger dans ce lot.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

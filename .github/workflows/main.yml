@@ -160,6 +160,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/gensrpg/core/inventory-equipped-view-v1.js"), '<script src="assets/gensrpg/core/inventory-equipped-view-v1.js?v=1"></script>', "GenSrpG Core Inventory equipped view missing"),
               (Path("_site/assets/gensrpg/core/equipment-bonus-sets-v1.js"), '<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"></script>', "GenSrpG Core Equipment bonus + sets missing"),
+              (Path("_site/assets/gensrpg/core/equipment-evolution-v1.js"), '<script src="assets/gensrpg/core/equipment-evolution-v1.js?v=1"></script>', "GenSrpG Core Equipment evolution missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),

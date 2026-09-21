@@ -81,6 +81,75 @@ Document :
 `docs/GENSRPG_PHASE4_STATS_S4_HERO_VALUES.md`.
 
 
+### TDD S4 observé
+
+RED :
+`5ca16a97bb02aecdc5880da2d8f8f0cd2a080b98`.
+
+Architecture `35575341495` a échoué exactement sur la nouvelle sentinelle S4 :
+`ENOENT` pour
+`assets/gensrpg/core/stats-hero-values-v1.js`.
+
+Les 100 étapes Architecture précédentes étaient SUCCESS.
+
+### Implémentation S4
+
+Module pur :
+`assets/gensrpg/core/stats-hero-values-v1.js`.
+
+Commit :
+`c8d21f488b43c3160465b34c1f5b4822fc37b523`.
+
+API :
+`GensStatsHeroValuesV1.resolve(config)`.
+
+Le provider reçoit uniquement :
+definitions / definitionValues / runtimeValues / fallbackValues /
+clampWithoutRuntime.
+
+Il retourne :
+baseValues + détails de provenance/clamp.
+
+Aucun ID spécial historique n'est codé dans le Core.
+Equipment / Talents / Challenges restent hors S4 et sont réservés à S5.
+
+### Graphe / inertie
+
+HEAD technique :
+`fc06b2e01ce19a22539f919514a7f22bf7f9dd5a`.
+
+Le nouveau provider est classé Phase 4 inert.
+Inventaire JS physique : 84 -> 85.
+Graphe production inchangé ; aucun chargement Pages/preview.
+
+### Validation GREEN technique S4
+
+Runs sur `fc06b2e01ce19a22539f919514a7f22bf7f9dd5a` :
+- Architecture + navigateur complet : `35575443549` — SUCCESS ;
+- Firefox : `35575443531` — SUCCESS ;
+- Tactical Dock : `35575443522` — SUCCESS.
+
+Parité verrouillée :
+- runtime ;
+- aliases ;
+- valeur runtime manquante ;
+- clamp avec runtime ;
+- clamp/non-clamp sans runtime ;
+- fallback explicite ;
+- defaultValue ;
+- provenance ;
+- absence de mutation.
+
+### Prochaine action
+
+1. faire repasser les trois workflows sur le SHA documentaire final ;
+2. après trois SUCCESS, créer
+   `checkpoint/gensrpg-phase4-stats-s4-hero-values-green-2026-09-21` ;
+3. ouvrir S5 sur une branche neuve depuis ce GREEN ;
+4. S5 = providers de modificateurs Equipment / Talents / Challenges uniquement ;
+5. ne pas commencer S6 dérivées, Tactical, Armor, Hit, D100 ou résistances.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S3 moteur pur value-effects — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

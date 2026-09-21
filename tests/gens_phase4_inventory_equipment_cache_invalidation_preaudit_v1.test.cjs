@@ -52,7 +52,17 @@ for(const [name,source] of Object.entries(slotSources)){
 }
 
 const removeSource=extractFunction(index,'removeInventoryEntry');
-assert.match(removeSource,/\bsave\s*\(/,'removeInventoryEntry must persist after inventory mutation');
+assert.doesNotMatch(removeSource,/\bsave\s*\(/,'removeInventoryEntry currently mutates/reindexes without persisting itself');
+const removeDefStart=index.indexOf(removeSource);
+const removeDefEnd=removeDefStart+removeSource.length;
+const removeCallsites=[...index.matchAll(/\bremoveInventoryEntry\s*\(/g)]
+  .map(m=>m.index)
+  .filter(pos=>pos<removeDefStart||pos>=removeDefEnd)
+  .map(pos=>{
+    const around=index.slice(Math.max(0,pos-240),Math.min(index.length,pos+420));
+    return {pos,nearSave:/\bsave\s*\(/.test(around)};
+  });
+assert.ok(removeCallsites.length>0,'removeInventoryEntry must have at least one runtime callsite to characterize');
 
 const localInstall=extractFunction(cleanup,'installCacheInvalidators');
 const localTargets=[...localInstall.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
@@ -94,8 +104,8 @@ for(const name of slotOwners){
     name+' reaches the performance invalidator indirectly through save');
 }
 
-assert.match(removeSource,/\bsave\s*\(/,
-  'inventory removal reaches the performance invalidator indirectly through save');
+assert.doesNotMatch(removeSource,/\bsave\s*\(/,
+  'inventory removal itself does not reach the performance save invalidator; caller behavior must remain explicit');
 
 const patchEvolution=extractFunction(cleanup,'patchEvolutionFunctions');
 assert.match(patchEvolution,/invalidateEquipmentBonusCache\(\)/,
@@ -124,12 +134,14 @@ console.log(JSON.stringify({
     saveBoundaryInvalidates:true,
     dc214EquipDirect:true,
     realSlotOwnersReachSave:true,
-    removeInventoryEntryReachesSave:true
+    removeInventoryEntryDirectSave:false,
+    removeInventoryEntryCallsites:removeCallsites
   },
   risk:{
     localEvolutionCacheCanRelyOnTtlAfterSlotMutation:true,
     equippedSnapshotCanRelyOnTtlAfterSlotMutation:true,
-    invalidatorNamesDoNotMatchRealInlineOwners:true
+    invalidatorNamesDoNotMatchRealInlineOwners:true,
+    removeInventoryEntryDependsOnCallerPersistence:true
   },
   runtimeChanged:false
 },null,2));

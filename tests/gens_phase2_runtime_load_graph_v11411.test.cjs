@@ -95,12 +95,12 @@ const phase4ConnectedServices=[
   'assets/gensrpg/core/stats-hero-values-v1.js',
   'assets/gensrpg/core/stats-modifier-provider-v1.js',
   'assets/gensrpg/core/stats-derived-values-v1.js',
-  'assets/gensrpg/core/stats-snapshot-v1.js'
+  'assets/gensrpg/core/stats-snapshot-v1.js',
+  'assets/gensrpg/core/inventory-equipped-view-v1.js'
 ];
 const phase4InertServices=[
   'assets/gensrpg/core/stats-resistance-normalization-v1.js',
-  'assets/gensrpg/core/stats-armor-contract-v1.js',
-  'assets/gensrpg/core/inventory-equipped-view-v1.js'
+  'assets/gensrpg/core/stats-armor-contract-v1.js'
 ];
 const phase4Set=new Set([...phase4ConnectedServices,...phase4InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
@@ -108,7 +108,7 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,91,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and eleven Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,73,'production-reachable JS graph must currently contain 73 files');
+assert.equal(reachable.size,74,'production-reachable JS graph must currently contain 74 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);

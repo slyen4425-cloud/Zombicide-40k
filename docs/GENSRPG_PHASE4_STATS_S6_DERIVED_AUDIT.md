@@ -223,3 +223,110 @@ Audit S6 : caractérisation externe terminée.
 
 Implémentation S6 : non commencée tant que le fichier exact requis par la règle
 26 n'a pas été vérifié.
+
+
+## Règle 26 satisfaite — source inline exacte vérifiée
+
+Le fichier fourni dans le fil a été vérifié avant inspection :
+
+- taille : `8 174 580` octets ;
+- blob Git : `5b9b9ae780f735eadef049afeb10acf0b57441fe` ;
+- blob identique au `index.html` du commit d'ouverture S6
+  `8f6fa73c365a107e50fa759346955354ddfa59ea`.
+
+Le fichier reçu porte le nom local `index_work_8.txt`, mais son contenu est
+bit à bit celui du `index.html` demandé.
+
+Helpers inline inspectés uniquement dans le périmètre S6 :
+- `dungeonPhysicalDamageBonus` ;
+- `dungeonMagicDamageBonus` ;
+- `dungeonEnduranceHpBonus` ;
+- `dungeonMaxMana` ;
+- `dungeonCriticalChance` ;
+- `dungeonDodgeChance` ;
+- `dungeonDerivedInitiative` ;
+- `dungeonMagicResistance`.
+
+### Formules historiques exactes confirmées
+
+Dégâts physiques :
+```text
+si physicalDamageFormula == percent -> 0
+sinon floor(force / max(1, physicalDamageStep)) * physicalDamageGain
+puis + damage:physical + damage:melee
+```
+
+Dégâts magiques :
+```text
+si magicDamageFormula == percent -> 0
+sinon floor(intelligence / max(1, magicDamageStep)) * magicDamageGain
+puis + damage:magic
+```
+
+Bonus PV :
+```text
+si hpFormula == percent
+  -> round(baseHp * (endurance * max(0, hpPercentPerPoint)) / 100)
+sinon
+  -> floor(endurance / max(1, enduranceHpStep)) * hpGain
+puis + max_hp
+```
+
+Mana maximum :
+```text
+historical =
+  max(0,
+    baseMana
+    + derived spirit
+    + external mana
+  )
+final = max(0, historical + max_mana)
+```
+
+Critique et esquive conservent obligatoirement **deux étages de cap** :
+```text
+historicalCrit  = clamp(baseCrit  + derived + external crit,  0, critCap)
+finalCrit       = clamp(historicalCrit  + effet crit,  0, critCap)
+
+historicalDodge = clamp(baseDodge + derived + external dodge, 0, dodgeCap)
+finalDodge      = clamp(historicalDodge + effet dodge, 0, dodgeCap)
+```
+
+Ces deux étages ne doivent pas être fusionnés : avec des modificateurs négatifs
+et des effets positifs/négatifs, une simplification algébrique changerait le
+résultat historique.
+
+Initiative :
+```text
+canonical initiative + effet initiative
+```
+
+Résistance magique :
+```text
+historical =
+  max(0, derived spirit + external magicDefense)
+final =
+  max(0, historical + magic_resistance)
+```
+
+### Contrat d'extraction autorisé
+
+Le futur moteur S6 reçoit explicitement :
+- valeurs canoniques de stats ;
+- règles Dungeon déjà normalisées par leur propriétaire ;
+- base HP déjà résolue par l'adaptateur ;
+- totaux externes déjà calculés pour mana/crit/dodge/magicDefense ;
+- totaux d'effets déjà calculés par Core Stats/S3.
+
+Il ne lit aucun global du jeu et ne sait pas si un total externe vient d'un
+équipement, d'un talent ou d'un autre propriétaire.
+
+Le mode percent des dégâts reste volontairement à 0 dans les helpers S6 :
+l'application du pourcentage à une attaque appartient toujours à
+`applyDungeonCombatScaling` et reste hors de ce lot.
+
+## Étape suivante autorisée
+
+La règle 26 étant satisfaite, poser maintenant le TDD de parité S6 avant de
+créer le moteur pur. Le RED attendu doit être l'absence du nouveau fichier Core,
+et non une divergence des propriétaires historiques.

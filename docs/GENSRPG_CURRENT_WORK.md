@@ -1,116 +1,95 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture raccord dungeonEquipmentBonus — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — contrat pur évolution — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-bonus-raccord-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-evolution-contract-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-bonus-raccord-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-evolution-contract-2026-09-21`.
 - Base exacte :
-  `b7e3df8547cfbe6e9609589219dd08b17ada50ea`.
+  `549a529278e1f03fd9b7e93ef6c1b559e41683ee`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-bonus-sets-contract-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-bonus-raccord-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique
+### Lot précédent clôturé GREEN
 
-Le service :
+Le calcul Equipment direct + sets est raccordé à
+`GensEquipmentBonusSetsV1`.
 
-`assets/gensrpg/core/equipment-bonus-sets-v1.js`
+Validation finale sur le SHA documentaire exact `549a529278e1f03fd9b7e93ef6c1b559e41683ee` :
+- Architecture + navigateur complet : `35625975245` — SUCCESS ;
+- Firefox : `35625975277` — SUCCESS ;
+- Tactical Dock : `35625975227` — SUCCESS.
 
-est désormais connecté au seam Equipment existant.
+### Mission du nouveau micro-lot
 
-Le propriétaire runtime reste :
+Extraire uniquement le **contrat pur d'évolution Equipment**.
 
-`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
+Propriétaire historique à caractériser :
 
-Son wrapper existant sur `dungeonEquipmentBonus` délègue désormais :
+`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`
 
-`direct + sets -> GensEquipmentBonusSetsV1.totalBonus(...)`.
+Fonction de référence :
 
-L'évolution reste ajoutée ensuite dans ce même propriétaire.
+`evolutionBonusForItem(item,key,xp)`.
 
-Le cache performance reste en aval, puis Core Stats S5 consomme toujours le
-seam final.
+Sémantique observée à verrouiller :
+- évolution inactive ou niveaux absents -> 0 ;
+- chaque niveau dont le seuil XP est atteint contribue ;
+- les bonus de tous les niveaux débloqués sont cumulés ;
+- valeurs non numériques -> 0 ;
+- seuil XP négatif normalisé à 0 ;
+- calcul par objet puis agrégation sur une liste équipée.
 
-### Autorité et absence de doublon
+### Contrat cible
 
-- aucun nouveau wrapper ;
-- ancien calcul direct + sets non exécuté ;
-- `w.__original=old` conservé uniquement comme traçabilité ;
-- Core Equipment reçoit la vue équipée existante et le registry de sets ;
-- marqueur `__coreEquipmentBonusSetsV1` ajouté à l'adaptateur existant.
+Le futur service Core doit être **pur et inert**.
 
-Sentinelle VM :
-- direct = 3 ;
-- set = 3 ;
-- évolution = 4 ;
-- total = 10 ;
-- appels ancien direct + sets = 0.
+Entrées explicites :
+- item ou liste d'items ;
+- clé de bonus ;
+- XP.
 
-### Composition raccordée
+Sorties candidates :
+- bonus évolution d'un item ;
+- bonus évolution agrégé d'une liste équipée.
 
-- Pages : Core Equipment chargé ;
-- preview : même composition ;
-- PWA : service précaché ;
-- Phase 2 : service **connected** ;
-- manifeste runtime : owner Core Equipment Bonus Sets.
+### Interdictions
 
-Métriques descriptives :
-- Pages injectés : 28 ;
-- JS directs production uniques : 31 ;
-- graphe production : 75 fichiers ;
-- inventaire physique : 92 JS.
+- aucun raccord runtime dans ce lot ;
+- ne pas modifier `dungeonEquipmentBonus` ;
+- ne pas modifier `cachedEvolutionBonus` ;
+- ne pas modifier le cache TTL ou ses invalidateurs ;
+- pas de Pages / preview / PWA ;
+- pas de `index.html` ;
+- pas de stockage ;
+- pas d'UI/Builders ;
+- pas de combat/capacités objets ;
+- pas de Stats/Tactical ;
+- aucun wrapper, observer, timer/retry ou monkey-patch ;
+- ne pas toucher `main`.
 
-### Validation technique GREEN
+### TDD prévu
 
-HEAD technique :
-`b1ad914f2dfe403a10de93fd9323aaf70ad2fe73`.
-
-- Architecture + navigateur complet : `35624628763` — SUCCESS ;
-- Firefox : `35624628545` — SUCCESS ;
-- Tactical Dock : `35624628686` — SUCCESS.
-
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_BONUS_RACCORD.md`.
-
-### Périmètre respecté
-
-Aucun changement de :
-- `index.html` ;
-- refs de slots ;
-- equip / unequip / remove / drop ;
-- moteur évolution ;
-- logique cache/invalidation ;
-- stockage ;
-- UI/Builders ;
-- combat/capacités objets ;
-- Core Stats ;
-- Tactical.
-
-Aucun nouvel observer, timer/retry ou monkey-patch.
-
-### État actuel
-
-Clôture documentaire en cours.
-
-Le SHA documentaire doit repasser :
-- Architecture + navigateur ;
-- Firefox ;
-- Tactical Dock.
-
-Aucun checkpoint GREEN final avant ces trois SUCCESS.
+1. exécuter le propriétaire historique réel ;
+2. poser une sentinelle RED exigeant un service Core pur ;
+3. verrouiller :
+   - évolution OFF ;
+   - seuils XP ;
+   - cumul de plusieurs niveaux ;
+   - plusieurs objets ;
+   - clés absentes ;
+   - valeurs non numériques ;
+4. créer uniquement le service pur ;
+5. le classer Phase 4 **inert** ;
+6. trois batteries GREEN ;
+7. documentation puis revalidation avant checkpoint.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-bonus-raccord-green-2026-09-21` ;
-3. repartir d'un nouveau checkpoint de départ et d'une nouvelle branche pour
-   le prochain micro-lot Inventory/Equipment ;
-4. conserver évolution et cache dans des lots séparés ;
-5. ne jamais toucher `main`.
+Caractériser `evolutionBonusForItem` et poser le RED sans modifier le runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

@@ -1,5 +1,94 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S2 Normalisation pure — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s2-normalization-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s2-normalization-2026-09-21`.
+- Base exacte et dernier GREEN : `56c9889dbebf84281f11ed995bb442889ffc6812`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S1 définitivement clôturé
+
+HEAD final S1 :
+`56c9889dbebf84281f11ed995bb442889ffc6812`.
+
+Runs :
+- Architecture + navigateur complet : `35538165337` — SUCCESS ;
+- Firefox : `35538165366` — SUCCESS ;
+- Tactical Dock : `35538165333` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s1-contracts-green-2026-09-21`.
+
+Aucun runtime, formule, UI, stockage ou gameplay n'a été modifié dans S1.
+
+### Mission S2
+
+Extraire uniquement les fonctions **pures** de normalisation Stats dans un module
+Core dédié, sans basculer encore l'autorité runtime.
+
+Cible :
+`assets/gensrpg/core/stats-normalization-v1.js`.
+
+API pure attendue :
+- `canon(id)` ;
+- `slug(value)` ;
+- `normalizeDefinition(definition)` ;
+- `isValidTarget(target)` ;
+- `normalizeEffect(effect,index)` ;
+- `compare(value,comparator,threshold)` ;
+- `effectContribution(effect,sourceValue)`.
+
+### Stratégie d'autorité
+
+S2 crée le moteur pur **inactif en production** et démontre sa parité avec
+les fonctions internes du propriétaire historique
+`GensCleanRpgStats167874`.
+
+Le propriétaire runtime historique reste unique pendant S2.
+Aucun fallback permanent ni double autorité active n'est introduit.
+
+Le raccord du propriétaire historique vers le nouveau Core sera un lot ultérieur,
+après parité GREEN.
+
+### Frontières strictes
+
+S2 ne doit pas contenir :
+- `value(hero,id)` complet ;
+- lecture `profile()`, `CHARS`, `state` ;
+- équipement, talents ou challenges ;
+- DOM ;
+- localStorage / Core Storage ;
+- MutationObserver ;
+- timer/retry ;
+- wrappers ;
+- snapshot Tactical ;
+- formule Armor ;
+- formule de toucher ;
+- résolution résistances/dégâts.
+
+### TDD
+
+1. ajouter une sentinelle de parité qui compare le futur module pur aux fonctions
+   internes actuelles sans modifier le runtime ;
+2. obtenir un RED attendu tant que le module Core n'existe pas ;
+3. créer le module pur minimal ;
+4. obtenir GREEN ;
+5. rejouer les tests historiques Stats/Tactical ;
+6. Architecture+navigateur, Firefox et Tactical Dock requis avant checkpoint.
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S2_NORMALIZATION.md`.
+
+### Prochaine action
+
+Poser le test de parité S2 et le brancher à Architecture pour obtenir le RED
+attendu **avant** création du module Core.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S1 Contrats — 2026-09-20
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

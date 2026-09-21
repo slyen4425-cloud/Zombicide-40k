@@ -1,5 +1,86 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / S4 provider valeurs héros — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s4-hero-values-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s4-hero-values-2026-09-21`.
+- Base exacte et dernier GREEN : `d6d186fa48d417e76ff8a51dbdb0e67b3be1a00b`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s3-value-effects-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S3 définitivement clôturé
+
+HEAD final :
+`d6d186fa48d417e76ff8a51dbdb0e67b3be1a00b`.
+
+Runs :
+- Architecture + navigateur complet : `35565851641` — SUCCESS ;
+- Firefox : `35565851627` — SUCCESS ;
+- Tactical Dock : `35565851625` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s3-value-effects-green-2026-09-21`.
+
+Le moteur pur `stats-value-engine-v1.js` reste Phase 4 inert.
+
+### Mission S4
+
+Créer un provider pur transformant des données héros explicites en `baseValues`
+pour S3.
+
+Cible :
+`assets/gensrpg/core/stats-hero-values-v1.js`.
+
+Entrées :
+- definitions ;
+- definitionValues ;
+- runtimeValues (objet ou null) ;
+- fallbackValues ;
+- clampWithoutRuntime.
+
+Sortie :
+- baseValues ;
+- détails de provenance/clamp.
+
+### Priorité
+
+Pour chaque définition :
+1. valeur runtime finie si un conteneur runtime existe ;
+2. sinon valeur de définition héros finie ;
+3. sinon fallback explicite ;
+4. sinon defaultValue de la définition.
+
+Quand un conteneur runtime existe, la valeur choisie est clampée [min,max].
+Sans conteneur runtime, seules les stats listées dans `clampWithoutRuntime` sont
+clampées. Cette entrée explicite permet de reproduire la distinction historique
+sans graver defense/armor/movement dans le Core.
+
+### Frontières
+
+S4 ne lit aucun global du jeu et ne mute aucune entrée.
+Il ne connaît ni Equipment/Talents/Challenges (S5), ni dérivées (S6), ni Tactical.
+
+S4 reste inert en production.
+Le propriétaire historique continue de fournir les valeurs runtime réelles.
+
+### TDD
+
+Comparer le provider pur aux fonctions historiques de résolution de base sur :
+- héros actif avec valeurs runtime ;
+- valeur runtime manquante ;
+- stat custom au-dessus du max ;
+- héros sans runtime ;
+- comportement clamp/non-clamp sans runtime ;
+- fallback mouvement explicite ;
+- aliases ;
+- absence de mutation.
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S4_HERO_VALUES.md`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S3 moteur pur value-effects — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

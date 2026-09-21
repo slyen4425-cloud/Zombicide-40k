@@ -13,6 +13,7 @@ const sw=read('service-worker.js');
 const graph=read('tests/gens_phase2_runtime_load_graph_v11411.test.cjs');
 const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
+const statsNormalization=read('assets/gensrpg/core/stats-normalization-v1.js');
 const stats=read('assets/gensrpg/gens-rpg-stats-clean-167874.js');
 
 const core='assets/gensrpg/core/equipment-evolution-v1.js';
@@ -68,6 +69,7 @@ assert.doesNotMatch(cached,/evolutionBonusForItem\(/,'active cache miss must no 
 const patch=extractFunction(cleanup,'patchEquipmentBonus');
 assert.match(patch,/\+cachedEvolutionBonus\(key\)/,'Equipment seam must still add evolution through the existing cached boundary');
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance cache must remain downstream');
+assert.ok(statsNormalization.includes('GensStatsNormalizationV1'),'raccord VM fixture must retain the explicit Core Stats dependency order');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must still consume the final Equipment seam');
 
 // Execute the cache owner contract: Core computes misses, cache owns reuse/expiry.

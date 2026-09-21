@@ -1,134 +1,79 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture pré-audit wrappers/UI historiques — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — retrait fallback set-state UI — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-legacy-ui-preaudit-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-setstate-fallback-retirement-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-legacy-ui-preaudit-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-setstate-fallback-retirement-2026-09-21`.
 - Base exacte :
-  `fc6e2fadea984869eef2435025c7b98851c1fd7e`.
+  `db3bdbd51e6ba32a9d81204e41fd0e6a95a2519e`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-legacy-ui-preaudit-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat du pré-audit
+### Pré-audit legacy UI GREEN
 
-Couches auditées :
-- `dungeon-equipment-ui.js` ;
-- `dungeon-equipment-hotfix-167817.js` ;
-- `dungeon-set-editor-167818.js` ;
-- `gens-equipment-stat-cleanup-1678102.js`.
+Le pré-audit a confirmé :
+- `dungeon-equipment-ui.js` préfère déjà le seam
+  `dungeonSetStateFromItems316(items)` ;
+- `fallbackSetStates(items)` reste une seconde implémentation locale ;
+- ce fallback diverge sur les pièces malformées sans id/piece id ;
+- les wrappers open/save, observer, listeners et timers appartiennent à des
+  chantiers séparés et ne doivent pas être touchés ici.
 
-### Fallback set-state restant
+Validation finale du SHA documentaire
+`db3bdbd51e6ba32a9d81204e41fd0e6a95a2519e` :
+- Architecture statique : SUCCESS ;
+- navigateur complet : rerun du même SHA — SUCCESS ;
+- Firefox : `35644624823` — SUCCESS ;
+- Tactical Dock : `35644624759` — SUCCESS.
 
-`dungeon-equipment-ui.js` possède encore :
+### Mission unique du lot
 
-`fallbackSetStates(items)`.
+Retirer uniquement l'implémentation locale :
 
-Le chemin actif préfère déjà :
+`fallbackSetStates(items)`
+
+dans :
+
+`assets/dungeon/dungeon-equipment-ui.js`.
+
+`setStates(items)` doit dépendre uniquement du seam canonique déjà garanti :
 
 `dungeonSetStateFromItems316(items)`.
 
-Sur pièces valides, le fallback est en parité avec le moteur Core.
+Si ce seam est indisponible ou invalide, l'UI ne doit pas recalculer localement
+les sets ; elle doit retourner une vue vide, sans créer une seconde autorité.
 
-Sur une pièce malformée sans id/piece id :
-- fallback UI : ignore ;
-- sémantique canonique historique/Core : compte le token vide.
+### Contraintes
 
-Le fallback local ne doit donc pas devenir une seconde autorité.
+- TDD RED avant modification runtime ;
+- retrait purement soustractif ;
+- ne pas modifier `index.html` ;
+- ne pas toucher `dungeon-core-316.js` ;
+- ne pas changer le Core Equipment bonus/sets ;
+- ne pas toucher wrappers `openEquipmentEditor` / `saveEquipmentEditor` ;
+- ne pas toucher `renderDungeonGear` ;
+- ne pas toucher observer/listeners/timers ;
+- ne pas toucher stockage, évolution, cache, Stats, Tactical ou combat ;
+- aucun nouveau wrapper/fallback/observer/timer ;
+- ne pas toucher `main`.
 
-### Empilements historiques
+### TDD prévu
 
-`openEquipmentEditor` :
-1. hotfix 167817 ;
-2. set-editor 167818 ;
-3. cleanup canonique 1678102.
-
-`saveEquipmentEditor` :
-1. hotfix 167817 ;
-2. set-editor 167818 ;
-3. invalidateur local cleanup.
-
-`renderDungeonGear` :
-- wrapper externe restant : `dungeon-equipment-ui.js`.
-
-### Side effects UI encore présents
-
-Equipment UI :
-- listener document `change` ;
-- MutationObserver documentElement ;
-- RAF / setTimeout refresh.
-
-Set Editor :
-- listeners document change/click ;
-- refresh click différé.
-
-Cleanup canonique :
-- décoration différée ;
-- retry install 25 ms ;
-- wrapper open editor.
-
-### Premier micro-lot soustractif recommandé
-
-Retirer uniquement le fallback local :
-
-`fallbackSetStates()`
-
-et rendre `setStates()` dépendant du seam set-state canonique déjà garanti.
-
-Ne pas mélanger ce retrait avec :
-- wrappers open/save ;
-- observer/listeners ;
-- stockage ;
-- UI/rendu.
-
-### Validation technique GREEN
-
-HEAD technique :
-`3ac7b8f7e2dd2887989495103cbc6d6ce38e2ea0`.
-
-- Architecture + navigateur complet :
-  `35643807612` — SUCCESS ;
-- Firefox :
-  `35643807408` — SUCCESS ;
-- Tactical Dock :
-  `35643807525` — SUCCESS.
-
-Le premier RED du pré-audit provenait uniquement d'une fixture VM qui lisait
-le Core sous le mauvais objet global ; correction test uniquement, aucun
-runtime modifié.
-
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_LEGACY_UI_PREAUDIT.md`.
-
-### Périmètre respecté
-
-Aucun changement runtime, index, rendu, stockage, bonus, sets, évolution,
-cache, Stats, Tactical ou combat.
-
-### État actuel
-
-Clôture documentaire en cours.
-
-Le SHA documentaire exact doit repasser :
-- Architecture + navigateur ;
-- Firefox ;
-- Tactical Dock.
-
-Aucun checkpoint GREEN final avant ces trois SUCCESS.
+1. poser un RED exigeant l'absence de `fallbackSetStates` ;
+2. verrouiller que `setStates` appelle uniquement le seam canonique ;
+3. exécuter la fonction en VM avec seam présent et absent ;
+4. retirer le fallback local, sans autre changement runtime ;
+5. trois batteries GREEN ;
+6. documenter et revalider le SHA documentaire ;
+7. checkpoint GREEN final.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-legacy-ui-preaudit-green-2026-09-21` ;
-3. ouvrir un checkpoint de départ et une branche neuve pour le retrait
-   soustractif du fallback set-state ;
-4. commencer ce lot par un RED qui exige le seam canonique sans fallback local ;
-5. ne pas toucher aux autres wrappers/UI dans ce même lot ;
-6. ne jamais toucher `main`.
+Créer la sentinelle RED du retrait soustractif, sans modification runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

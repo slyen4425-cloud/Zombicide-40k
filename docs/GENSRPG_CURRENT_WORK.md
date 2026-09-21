@@ -1,3 +1,87 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-21
+
+Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-save-wrapper-preaudit-2026-09-21`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+Inventaire exhaustif des 76 JS atteignables :
+- 4 participants `saveEquipmentEditor` exactement :
+  - Equipment Hotfix ;
+  - Set Editor ;
+  - Hero Editor Dynamic ;
+  - Equipment Cleanup.
+
+Chaîne runtime après la fenêtre de retry :
+1. `__eqCache1021` Equipment Cleanup ;
+2. `__canon101` Hero Editor ;
+3. `__setEditor167818` Set Editor ;
+4. `__equipmentHotfix167817` Hotfix ;
+5. natif.
+
+Cas custom :
+- 1 Save natif ;
+- 3 écritures `saveCustomEquipment` ;
+- résultat final canonique correct + membership set correcte.
+
+Cas builtin :
+- 1 Save natif ;
+- 2 écritures overrides Dungeon ;
+- l'UI canonique éditée à `9` ne persiste pas cette valeur ;
+- l'override conserve la valeur historique cachée `2`.
+
+Conclusion :
+- aucun wrapper save n'est retirable isolément aujourd'hui ;
+- Hotfix reste seul writer de bonus builtin ;
+- Set Editor reste propriétaire membership ;
+- Hero Editor reste writer canonique custom ;
+- Cleanup reste propriétaire invalidation cache.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SAVE_WRAPPER_PREAUDIT.md`.
+
+### Validation technique
+
+SHA technique :
+`a9f9baaed77026b8a427b1c1f46923146a8e890b`.
+
+- Architecture + navigateur complet `35658166447` — SUCCESS ;
+- Firefox `35658166405` — SUCCESS ;
+- Tactical Dock `35658166515` — SUCCESS.
+
+### Validation documentaire finale
+
+La présente mise à jour change le SHA.
+
+Avant checkpoint GREEN :
+1. Architecture + navigateur complet — SUCCESS ;
+2. Firefox — SUCCESS ;
+3. Tactical Dock — SUCCESS ;
+sur le SHA documentaire exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-inventory-equipment-save-wrapper-preaudit-green-2026-09-21`.
+
+### Prochain lot recommandé après GREEN
+
+Créer un lot séparé pour une autorité canonique de persistance des bonus
+Equipment, à entrée explicite, capable de cibler :
+- custom via `loadCustomEquipment/saveCustomEquipment` ;
+- builtin via `loadDungeonItemOverrides/saveDungeonItemOverrides`.
+
+Cette autorité ne doit pas lire le DOM. Elle doit être testée en pur puis raccordée
+au writer canonique existant avant tout retrait du hotfix historique.
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

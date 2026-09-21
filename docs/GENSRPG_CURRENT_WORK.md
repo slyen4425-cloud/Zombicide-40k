@@ -1,3 +1,84 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-hero-art-open-hook-retirement-2026-09-21`.
+- Base exacte :
+  `c5f8b60cc130d6df12651c317285ed209eddd5c2`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-open-wrapper-preaudit-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+Pré-audit wrappers `openEquipmentEditor` validé sur
+`c5f8b60cc130d6df12651c317285ed209eddd5c2` :
+
+- Architecture + navigateur complet `35649019277` — SUCCESS ;
+- Firefox `35649019437` — SUCCESS ;
+- Tactical Dock `35649019333` — SUCCESS.
+
+Le pré-audit a prouvé cinq participants externes atteignables et identifié
+`GensDungeonHeroArtRepair167874.hookAll()` comme premier candidat soustractif :
+son hook générique inclut `openEquipmentEditor` alors que le module ne possède ni
+les données Equipment ni l'UI canonique de l'éditeur.
+
+### Mission unique
+
+Caractériser puis retirer uniquement `openEquipmentEditor` de la liste gérée par
+`GensDungeonHeroArtRepair167874.hookAll()`, si la preuve navigateur confirme que
+les propriétaires Equipment dédiés conservent toutes leurs responsabilités.
+
+### Propriétaires à conserver
+
+- hotfix Equipment : section historique / compatibilité et writer associé ;
+- Set Editor : synchronisation membership / éditeur de sets ;
+- Hero Editor Dynamic : UI canonique `rpgBonuses` ;
+- Equipment Stat Cleanup : évolution / grilles set / masquage legacy.
+
+Hero Art Repair doit rester propriétaire uniquement de ses réparations héros /
+participants et de son chargement de bridges, pas du cycle d'ouverture Equipment.
+
+### Périmètre strict
+
+Autorisé :
+- sentinelle owner-level du hook Hero Art Repair ;
+- sentinelle navigateur ciblée de l'ouverture Equipment ;
+- retrait du seul token `"openEquipmentEditor"` dans `hookAll()` après RED ;
+- documentation / CURRENT_WORK / entrée CI correspondantes.
+
+Interdit :
+- modifier `saveEquipmentEditor` ;
+- modifier hotfix, Set Editor, Hero Editor Dynamic ou Equipment Cleanup ;
+- modifier leur retry/timers ;
+- modifier `renderDungeonGear`, observer/listeners Equipment UI ;
+- modifier stockage, bonus/sets, évolution, cache, Stats gameplay, Tactical, combat ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### TDD / validation
+
+1. sentinelle navigateur pré-correctif : l'ouverture réelle garde l'UI canonique
+   bonus, l'UI set, l'évolution canonique et les réparations héros attendues ;
+2. RED owner-level exigeant que Hero Art Repair ne hooke plus
+   `openEquipmentEditor` ;
+3. correctif soustractif d'une seule responsabilité ;
+4. revalidation de la sentinelle navigateur ;
+5. Architecture + navigateur complet ;
+6. Firefox ;
+7. Tactical Dock ;
+8. checkpoint GREEN uniquement après trois SUCCESS sur le SHA final.
+
+### Prochaine action
+
+Créer les deux sentinelles dédiées et obtenir le RED propriétaire avant toute
+modification runtime.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit wrapper openEquipmentEditor — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

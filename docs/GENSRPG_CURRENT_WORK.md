@@ -1,3 +1,91 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-save-editor-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-save-editor-preaudit-2026-09-22`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pourquoi ce lot vient avant Core Dice
+
+Le cycle moteur Core Inventory / Equipment est GREEN :
+- Equipped View / Slot Refs ;
+- bonus directs + sets ;
+- évolution ;
+- cache / invalidation ;
+- retrait du fallback local set-state ;
+- retrait du hook Equipment hors propriétaire Hero Art ;
+- garde de chaîne retry Hero Editor.
+
+Le pré-audit UI historique conserve cependant une dette explicite :
+la chaîne `saveEquipmentEditor` mélange encore plusieurs propriétaires.
+Cette dette doit être caractérisée avant de déclarer la frontière
+Inventory / Equipment suffisamment nettoyée pour passer au service Core Dice.
+
+### Mission unique
+
+Pré-auditer, sans correctif runtime, la chaîne réelle de
+`saveEquipmentEditor` et attribuer chaque effet à son propriétaire.
+
+Participants externes déjà identifiés à revalider :
+- native `index.html` : persistance objet builtin/custom ;
+- `dungeon-equipment-hotfix-167817.js` : champs/bonus historiques ;
+- `dungeon-set-editor-167818.js` : membership de set ;
+- `gens-hero-editor-dynamic-167897.js` : bonus RPG canoniques ;
+- `gens-equipment-stat-cleanup-1678102.js` : invalidation cache éditeur.
+
+### Périmètre strict
+
+Pré-audit / caractérisation uniquement.
+
+Autorisé :
+- cartographie exacte de la chaîne `__original` ;
+- caractérisation du nombre d'écritures par propriétaire ;
+- vérification builtin vs custom ;
+- vérification membership set ;
+- vérification bonus RPG canoniques ;
+- vérification invalidation cache ;
+- sentinelles statiques/navigateur ;
+- documentation / CURRENT_WORK / CI d'audit.
+
+Interdit :
+- modifier `saveEquipmentEditor` ;
+- modifier le stockage ou les formats persistés ;
+- modifier hotfix, Set Editor, Hero Editor Dynamic ou Equipment Cleanup ;
+- supprimer wrapper, listener, timer, observer ou fallback dans ce lot ;
+- modifier bonus/sets/évolution/cache ;
+- modifier Stats, Tactical, combat, Builders ou PWA ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### Règle 26 — index.html obligatoire
+
+Le propriétaire natif `saveEquipmentEditor` vit dans le gros `index.html`.
+L'inspection exacte doit donc utiliser le fichier correspondant au SHA de base
+`669a8b2ef1caeba2d75a97000b4716877e9e5fc9`, fourni par l'utilisateur via
+le permalink GitHub exact puis vérifié avant utilisation.
+
+Aucune vieille copie locale ne peut servir d'autorité.
+
+### Sortie attendue
+
+1. responsabilité exacte de chaque writer ;
+2. ordre réel des wrappers après la fenêtre de retry ;
+3. nombre d'écritures produit par un Save builtin et un Save custom ;
+4. dépendances open -> save encore nécessaires ;
+5. premier candidat soustractif prouvé, ou conclusion qu'aucun retrait isolé
+   n'est sûr ;
+6. aucun changement runtime dans ce pré-audit ;
+7. Architecture + navigateur complet, Firefox et Tactical GREEN avant
+   checkpoint final.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

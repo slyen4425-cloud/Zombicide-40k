@@ -1,0 +1,135 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
+
+const index=read('index.html');
+const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
+const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
+
+function extractFunction(source,name){
+  const token='function '+name+'(';
+  const start=source.indexOf(token);
+  assert.ok(start>=0,'missing owner function '+name);
+  const openParen=source.indexOf('(',start);
+  let parenDepth=0,quote=null,escaped=false,line=false,block=false,closeParen=-1;
+  for(let i=openParen;i<source.length;i++){
+    const c=source[i],n=source[i+1]||'';
+    if(line){if(c==='\n')line=false;continue}
+    if(block){if(c==='*'&&n==='/'){block=false;i++;}continue}
+    if(quote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===quote)quote=null;continue}
+    if(c==='/'&&n==='/'){line=true;i++;continue}
+    if(c==='/'&&n==='*'){block=true;i++;continue}
+    if(c==='"'||c==="'"||c==='\x60'){quote=c;continue}
+    if(c==='(')parenDepth++;
+    else if(c===')'&&--parenDepth===0){closeParen=i;break}
+  }
+  assert.ok(closeParen>openParen,'missing owner parameter close '+name);
+  const brace=source.indexOf('{',closeParen);
+  let depth=0;quote=null;escaped=false;line=false;block=false;
+  for(let i=brace;i<source.length;i++){
+    const c=source[i],n=source[i+1]||'';
+    if(line){if(c==='\n')line=false;continue}
+    if(block){if(c==='*'&&n==='/'){block=false;i++;}continue}
+    if(quote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===quote)quote=null;continue}
+    if(c==='/'&&n==='/'){line=true;i++;continue}
+    if(c==='/'&&n==='*'){block=true;i++;continue}
+    if(c==='"'||c==="'"||c==='\x60'){quote=c;continue}
+    if(c==='{')depth++;
+    if(c==='}'&&--depth===0)return source.slice(start,i+1);
+  }
+  throw new Error('unterminated '+name);
+}
+
+const slotOwners=['equipRight','equipLeft','equipTwoHands','unequip','equipRpgGear','unequipRpgGear'];
+const slotSources=Object.fromEntries(slotOwners.map(name=>[name,extractFunction(index,name)]));
+
+for(const [name,source] of Object.entries(slotSources)){
+  assert.match(source,/\bsave\s*\(/,name+' must persist through the historical save boundary');
+}
+
+const removeSource=extractFunction(index,'removeInventoryEntry');
+assert.match(removeSource,/\bsave\s*\(/,'removeInventoryEntry must persist after inventory mutation');
+
+const localInstall=extractFunction(cleanup,'installCacheInvalidators');
+const localTargets=[...localInstall.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
+assert.deepEqual(localTargets,[
+  'dungeonEquipItem','dungeonUnequipItem','equipDungeonItem',
+  'unequipDungeonItem','toggleDungeonEquipment','saveEquipmentEditor'
+],'local Equipment cache invalidator target list drifted');
+
+const localCoveredSlotOwners=slotOwners.filter(name=>localTargets.includes(name));
+assert.deepEqual(localCoveredSlotOwners,[],
+  'preaudit expects the real inline slot owners to remain absent from the local cache invalidator list');
+
+assert.equal(localTargets.includes('removeInventoryEntry'),false,
+  'removeInventoryEntry is not directly wrapped by the local Equipment cache invalidator');
+assert.equal(localTargets.includes('dc214Equip'),false,
+  'dc214Equip is not directly wrapped by the local Equipment cache invalidator');
+
+assert.match(cleanup,/const CACHE_TTL_MS=120/,'Equipment evolution cache TTL must stay characterized at 120 ms');
+assert.match(
+  extractFunction(cleanup,'equippedItemsCached'),
+  /\(t-equippedSnapshot\.at\)<=CACHE_TTL_MS/,
+  'equipped snapshot must use the same 120 ms TTL boundary'
+);
+assert.match(
+  extractFunction(cleanup,'cachedEvolutionBonus'),
+  /\(t-hit\.at\)<=CACHE_TTL_MS/,
+  'evolution bonus cache must use the same 120 ms TTL boundary'
+);
+
+const perfInstall=extractFunction(perf,'install');
+const perfTargets=[...perfInstall.matchAll(/\["([^\]]+)"\]/g)];
+assert.match(perfInstall,/"dc214Equip"/,'performance cache must directly invalidate on dc214Equip');
+assert.match(perfInstall,/"save"/,'performance cache must invalidate on the shared save boundary');
+assert.match(perfInstall,/"saveState"/,'performance cache must invalidate on saveState');
+assert.match(perfInstall,/"saveDungeonHeroState"/,'performance cache must invalidate on Dungeon hero state save');
+
+for(const name of slotOwners){
+  assert.match(slotSources[name],/\bsave\s*\(/,
+    name+' reaches the performance invalidator indirectly through save');
+}
+
+assert.match(removeSource,/\bsave\s*\(/,
+  'inventory removal reaches the performance invalidator indirectly through save');
+
+const patchEvolution=extractFunction(cleanup,'patchEvolutionFunctions');
+assert.match(patchEvolution,/invalidateEquipmentBonusCache\(\)/,
+  'evolution editor mutation must explicitly invalidate the local Equipment cache');
+assert.match(extractFunction(cleanup,'persistSetRaw'),/invalidateEquipmentBonusCache\(\)/,
+  'set definition save must explicitly invalidate the local Equipment cache');
+assert.match(cleanup,/persistItemMembership[\s\S]*invalidateEquipmentBonusCache\(\)/,
+  'set membership mutation path must explicitly invalidate the local Equipment cache');
+
+assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,
+  'final Equipment performance cache must stay characterized downstream');
+
+console.log(JSON.stringify({
+  scenario:'Phase 4 Equipment cache/invalidation preaudit',
+  localCache:{
+    ttlMs:120,
+    directInvalidatorTargets:localTargets,
+    directlyCoveredRealSlotOwners:localCoveredSlotOwners,
+    removeInventoryEntryDirect:false,
+    dc214EquipDirect:false,
+    evolutionEditorExplicit:true,
+    setSaveExplicit:true,
+    setMembershipExplicit:true
+  },
+  performanceCache:{
+    saveBoundaryInvalidates:true,
+    dc214EquipDirect:true,
+    realSlotOwnersReachSave:true,
+    removeInventoryEntryReachesSave:true
+  },
+  risk:{
+    localEvolutionCacheCanRelyOnTtlAfterSlotMutation:true,
+    equippedSnapshotCanRelyOnTtlAfterSlotMutation:true,
+    invalidatorNamesDoNotMatchRealInlineOwners:true
+  },
+  runtimeChanged:false
+},null,2));

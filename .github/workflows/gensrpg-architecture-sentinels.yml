@@ -401,6 +401,9 @@ jobs:
       - name: Pré-auditer les retries de wrappers Equipment
         run: node tests/gens_phase4_inventory_equipment_wrapper_retry_static_preaudit_v1.test.cjs
 
+      - name: Exiger la garde de chaîne Hero Editor
+        run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_owner_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 
@@ -600,6 +603,9 @@ jobs:
 
       - name: Caractériser les retries de wrappers Equipment dans Chromium
         run: node tests/gens_phase4_inventory_equipment_wrapper_retry_browser_preaudit_v1.test.cjs
+
+      - name: Vérifier la garde de chaîne retry Equipment dans Chromium
+        run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_browser_v1.test.cjs
 
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs

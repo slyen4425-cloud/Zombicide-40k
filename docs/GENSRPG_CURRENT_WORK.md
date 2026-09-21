@@ -1,3 +1,66 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
+
+Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-2026-09-21`.
+- Base exacte :
+  `6875be5259f4356e710b29ee6d75d715070847ec`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-green-2026-09-21`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat technique
+
+RED owner-level :
+- Architecture `35655960164` — FAILURE attendu.
+
+RED comportemental navigateur :
+- run isolé `35655960536` — FAILURE attendu ;
+- duplication observée : 2 couches Hero Editor sur open Equipment.
+
+Correctif runtime unique :
+`70c1cee972ec58c17792fc1979c07333115fb624`.
+
+Le wrapper générique Hero Editor utilise désormais une garde bornée/cyclique qui
+cherche le marqueur `__canon101` dans toute la chaîne `__original`.
+
+Conséquences validées :
+- pas de deuxième couche Hero Editor après interposition Cleanup ;
+- un Save Equipment = une persistance Hero Editor ;
+- open/save natifs exécutés une fois ;
+- le retry reste capable de récupérer une fonction réellement remplacée tardivement ;
+- cadence 50 ms + jusqu'à 30 × 100 ms inchangée.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_WRAPPER_RETRY_CHAIN_GUARD.md`.
+
+### Validation technique complète
+
+SHA technique :
+`283c921f240c6a7dac587aaa2b9fd01a9432ca66`.
+
+- Architecture + navigateur complet `35656277814` — SUCCESS ;
+- Firefox `35656277860` — SUCCESS ;
+- Tactical Dock `35656277841` — SUCCESS ;
+- navigateur ciblé `35656277861` — SUCCESS.
+
+Le workflow temporaire a été supprimé après obtention des preuves.
+
+### Validation documentaire finale
+
+La présente mise à jour change le SHA. Avant checkpoint GREEN :
+1. Architecture + navigateur complet — SUCCESS ;
+2. Firefox — SUCCESS ;
+3. Tactical Dock — SUCCESS ;
+sur le SHA documentaire exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+
+Aucun autre runtime ne doit être modifié pendant cette clôture.
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

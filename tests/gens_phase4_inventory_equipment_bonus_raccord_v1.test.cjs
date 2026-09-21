@@ -13,6 +13,7 @@ const sw=read('service-worker.js');
 const graph=read('tests/gens_phase2_runtime_load_graph_v11411.test.cjs');
 const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
+const statsNormalization=read('assets/gensrpg/core/stats-normalization-v1.js');
 const stats=read('assets/gensrpg/gens-rpg-stats-clean-167874.js');
 const coreSource=read('assets/gensrpg/core/equipment-bonus-sets-v1.js');
 
@@ -67,6 +68,7 @@ assert.match(patch,/w\.__original=old/,'existing wrapper lineage must remain ins
 assert.match(patch,/w\.__canon102=true/,'existing wrapper identity must remain unchanged');
 
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance cache must remain downstream of the Equipment owner');
+assert.ok(statsNormalization.includes('GensStatsNormalizationV1'),'raccord VM fixture must retain the explicit Core Stats dependency order');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must continue consuming the final Equipment seam');
 
 // Execute the active owner contract: historical direct+set seam must not be called.

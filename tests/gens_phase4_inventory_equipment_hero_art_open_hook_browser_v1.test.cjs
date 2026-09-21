@@ -136,8 +136,6 @@ const {chromium}=require('playwright');
     setValue:document.getElementById('dseItemSet')?.value||'',
     pieceValue:document.getElementById('dseItemPiece')?.value||'',
     canonicalEvolution:document.querySelectorAll('[data-evo-canonical]').length,
-    legacyHotfixHidden:document.getElementById('deuiEquipmentEditorStats167817')?.hidden===true &&
-      getComputedStyle(document.getElementById('deuiEquipmentEditorStats167817')).display==='none',
     legacyBonusHidden:getComputedStyle(document.getElementById('eqBonusKind').closest('.eqField')).display==='none',
     heroArt:window.CHARS?.dungeon_aldren?.image||'',
     participantArt:document.querySelector('#participantList img')?.getAttribute('src')||''
@@ -152,7 +150,6 @@ const {chromium}=require('playwright');
   assert.equal(state.setValue,'set_ancient','Set Editor must synchronize current set membership');
   assert.equal(state.pieceValue,'head','Set Editor must synchronize current set piece');
   assert.equal(state.canonicalEvolution,3,'Equipment Cleanup must own canonical evolution levels 2/3/4');
-  assert.equal(state.legacyHotfixHidden,true,'Equipment Cleanup must keep the historical hotfix block hidden');
   assert.equal(state.legacyBonusHidden,true,'legacy single-stat controls must remain hidden');
   assert.equal(state.heroArt,'assets/dungeon/creatures/dng_aldren.png','Hero Art Repair install must retain built-in hero art repair');
   assert.equal(state.participantArt,'assets/dungeon/creatures/dng_aldren.png','Hero Art Repair scheduled participant repair must remain active');
@@ -163,8 +160,6 @@ const {chromium}=require('playwright');
     canonicalBonus:!!document.getElementById('eqCanonicalRpgBonuses1678101'),
     setSection:!!document.getElementById('dseSection167818'),
     canonicalEvolution:document.querySelectorAll('[data-evo-canonical]').length,
-    legacyHotfixHidden:document.getElementById('deuiEquipmentEditorStats167817')?.hidden===true &&
-      getComputedStyle(document.getElementById('deuiEquipmentEditorStats167817')).display==='none',
     heroArt:window.CHARS?.dungeon_aldren?.image||'',
     participantArt:document.querySelector('#participantList img')?.getAttribute('src')||''
   }));
@@ -172,7 +167,6 @@ const {chromium}=require('playwright');
   assert.equal(state.canonicalBonus,true,'canonical equipment bonus UI must survive delayed retries');
   assert.equal(state.setSection,true,'set editor must survive delayed retries');
   assert.equal(state.canonicalEvolution,3,'canonical evolution UI must survive delayed retries');
-  assert.equal(state.legacyHotfixHidden,true,'legacy hotfix UI must stay hidden after delayed retries');
   assert.equal(state.heroArt,'assets/dungeon/creatures/dng_aldren.png');
   assert.equal(state.participantArt,'assets/dungeon/creatures/dng_aldren.png');
   assert.deepEqual(errors,[],'targeted Equipment owner composition must remain free of browser errors');

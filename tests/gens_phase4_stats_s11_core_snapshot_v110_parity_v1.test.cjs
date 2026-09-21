@@ -259,9 +259,10 @@ for(const key of ['physicalDamageBonus','magicDamageBonus','maxMana','crit','dod
 
 assert.equal(
   core.derived.initiative,
-  historical.derived.initiative+14,
+  historical.derived.initiative+effectTotals.initiative,
   'Core initiative intentionally includes target initiative effect that V110 currently ignores when canonical initiative exists'
 );
+assert.equal(effectTotals.initiative,7,'fixture must exercise one explicit +7 initiative target effect');
 assert.equal(historical.derived.initiative,historical.values.initiative,'V110 must keep canonical initiative semantics before dedicated migration');
 
 for(const name of ['dungeonPhysicalDamageBonus','dungeonMagicDamageBonus','dungeonMaxMana','dungeonCriticalChance','dungeonDodgeChance','dungeonMagicResistance']){
@@ -290,7 +291,7 @@ console.log(JSON.stringify({
   initiative:{
     v110:historical.derived.initiative,
     core:core.derived.initiative,
-    extraTargetEffect:14,
+    extraTargetEffect:effectTotals.initiative,
     migrationDeferred:true
   },
   sessionEnvelopeStaysV110:true,

@@ -37,8 +37,18 @@ assert.match(cleanup,/w\.__canonEq102=true;w\.__original=old/);
 assert.match(cleanup,/installed=true;.*wrapOpen\(\)/s);
 
 function base(){return 'base'}
+function hasWrapFlag(fn,flag){
+  const seen=new Set();
+  let cur=fn,depth=0;
+  while(typeof cur==='function'&&!seen.has(cur)&&depth++<32){
+    if(cur[flag])return true;
+    seen.add(cur);
+    cur=cur.__original;
+  }
+  return false;
+}
 function heroWrap(old){
-  if(typeof old!=='function'||old.__canon101)return old;
+  if(typeof old!=='function'||hasWrapFlag(old,'__canon101'))return old;
   const w=function(){return old.apply(this,arguments)};
   w.__canon101=true;
   w.__original=old;
@@ -79,13 +89,8 @@ assert.deepEqual(afterCleanup.slice(0,3),[
   {canon101:true,canonEq102:false},
   {canon101:false,canonEq102:false}
 ]);
-assert.deepEqual(afterFirstRetry.slice(0,4),[
-  {canon101:true,canonEq102:false},
-  {canon101:false,canonEq102:true},
-  {canon101:true,canonEq102:false},
-  {canon101:false,canonEq102:false}
-]);
-assert.deepEqual(afterSecondRetry,afterFirstRetry,'later retries must not keep growing the chain');
+assert.deepEqual(afterFirstRetry,afterCleanup,'first retry must preserve the existing Hero Editor owner below Cleanup');
+assert.deepEqual(afterSecondRetry,afterCleanup,'later retries must preserve the same chain');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Equipment wrapper retry preaudit',
@@ -94,5 +99,6 @@ console.log(JSON.stringify({
   afterCleanup,
   afterFirstHeroRetry:afterFirstRetry,
   stableAfterLaterRetries:true,
+  duplicateHeroOwnerRetired:true,
   runtimeModified:false
 },null,2));

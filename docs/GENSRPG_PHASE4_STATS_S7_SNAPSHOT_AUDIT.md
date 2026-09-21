@@ -228,3 +228,112 @@ Après GREEN du snapshot pur :
 
 Aucune suppression de `dungeonCombatHeroSnapshot` ou de V110 n'est autorisée
 dans l'extraction pure.
+
+
+## Contrat S7 figé avant TDD
+
+Le snapshot Core S7 ne reconstruit ni le snapshot Dungeon ni le snapshot V110.
+Il transporte uniquement les résultats déjà calculés par les propriétaires S1
+à S6.
+
+Fichier Core cible :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Global cible :
+`GensStatsSnapshotV1`.
+
+Dépendance pure :
+`GensStatsNormalizationV1`.
+
+### Entrée
+
+```text
+{
+  heroId,
+  definitions,
+  values,
+  derived
+}
+```
+
+- `definitions` : définitions Stats normalisées/normalisables ;
+- `values` : valeurs canoniques déjà calculées par S3/S4/S5 ;
+- `derived` : résultats S6 déjà calculés.
+
+S7 ne calcule aucun bonus métier et n'appelle aucun helper Dungeon/Tactical.
+
+### Sortie
+
+```text
+{
+  version,
+  heroId,
+  canonical: [{ id, name, icon, value }],
+  values: { [id]: number },
+  derived: {
+    physicalDamageBonus,
+    magicDamageBonus,
+    hpBonus,
+    maxMana,
+    crit,
+    dodge,
+    initiative,
+    magicResistance
+  }
+}
+```
+
+Règles :
+- les IDs de définition et de valeur sont canonisés via S2 ;
+- seuls les IDs connus des définitions entrent dans `values` ;
+- un alias de valeur peut alimenter son ID canonique ;
+- une valeur non finie retombe sur `definition.defaultValue`, puis 0 ;
+- l'ordre de `canonical` suit l'ordre des définitions normalisées ;
+- les définitions dupliquées après canonisation ne créent qu'une ligne ;
+- seules les huit dérivées S6 autorisées sont transportées ;
+- une dérivée non finie vaut 0 ;
+- la sortie et ses sous-structures sont immuables ;
+- aucune entrée n'est mutée.
+
+### Exclusions structurelles
+
+Même si elles sont fournies dans l'entrée, le snapshot Core ne doit jamais
+transporter :
+- hp courant ;
+- mana courant ;
+- wounds ;
+- resistances ;
+- rules ;
+- criticalMultiplier ;
+- armorReduction ;
+- hitChance / D100 ;
+- données d'équipement/arme ;
+- position / ressources de tour.
+
+Movement, Defense et Armor peuvent apparaître uniquement dans `values` et
+`canonical` lorsqu'ils existent comme définitions Stats ; S7 n'ajoute aucune
+sémantique dérivée à ces champs.
+
+### TDD
+
+Le RED doit vérifier :
+1. la composition déterministe de `canonical` ;
+2. la canonisation des aliases ;
+3. le fallback des valeurs non finies ;
+4. le sous-ensemble strict des huit dérivées S6 ;
+5. l'absence des ressources/session/résistances/règles ;
+6. l'immutabilité profonde du résultat ;
+7. l'absence de mutation des entrées ;
+8. la pureté du module ;
+9. l'absence de lecture Dungeon/Tactical.
+
+Le premier échec attendu est uniquement l'absence de
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+### Autorité
+
+Ce lot reste **Phase 4 inert**.
+
+Le snapshot Core S7 n'est pas chargé par Pages/preview et ne remplace aucun
+lecteur historique. Le raccord vers Tactical fera l'objet d'un lot séparé après
+GREEN de cette extraction pure.

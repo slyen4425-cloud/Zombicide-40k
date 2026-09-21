@@ -24,6 +24,16 @@ assert.ok(pages.includes(core),'Pages must publish the Core Equipment evolution 
 assert.ok(pages.includes(pageTag),'Pages must inject the Core Equipment evolution service');
 assert.ok(preview.includes(previewTag),'preview must inject the Core Equipment evolution service');
 assert.ok(sw.includes('./assets/gensrpg/core/equipment-evolution-v1.js'),'PWA must precache the Core Equipment evolution service');
+assert.ok(
+  pages.indexOf('assets/gensrpg/core/equipment-bonus-sets-v1.js') < pages.indexOf(core) &&
+  pages.indexOf(core) < pages.indexOf('assets/gensrpg/gens-dungeon-hero-art-repair-167874.js'),
+  'Pages must load Equipment evolution Core after direct+sets Core and before the cleanup loader'
+);
+assert.ok(
+  preview.indexOf('assets/gensrpg/core/equipment-bonus-sets-v1.js') < preview.indexOf(core) &&
+  preview.indexOf(core) < preview.indexOf('assets/gensrpg/gens-dungeon-hero-art-repair-167874.js'),
+  'preview must preserve the Equipment Core dependency order'
+);
 
 assert.match(
   graph,

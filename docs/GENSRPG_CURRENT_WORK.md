@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — raccord dungeonEquipmentBonus — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture raccord dungeonEquipmentBonus — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,73 +13,104 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Lot précédent clôturé GREEN
+### Résultat technique
 
-Contrat pur Core Equipment bonus directs + sets :
-`assets/gensrpg/core/equipment-bonus-sets-v1.js`.
+Le service :
 
-Validation finale sur le SHA documentaire exact `b7e3df8547cfbe6e9609589219dd08b17ada50ea` :
-- Architecture + navigateur complet : `35622137083` — SUCCESS ;
-- Firefox : `35622137114` — SUCCESS ;
-- Tactical Dock : `35622136990` — SUCCESS.
+`assets/gensrpg/core/equipment-bonus-sets-v1.js`
 
-### Mission du nouveau raccord
+est désormais connecté au seam Equipment existant.
 
-Raccorder uniquement le calcul **direct + sets** de `dungeonEquipmentBonus`
-au service pur `GensEquipmentBonusSetsV1`.
+Le propriétaire runtime reste :
 
-Le raccord doit préserver l'ordre historique des couches :
-1. bonus direct des objets équipés ;
-2. bonus des sets Core 3.16 ;
-3. évolution reste dans sa couche ultérieure existante ;
-4. cache performance reste dans sa couche ultérieure existante ;
-5. Core Stats S5 continue à consommer le seam final `dungeonEquipmentBonus`.
+`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
 
-### Contraintes d'autorité
+Son wrapper existant sur `dungeonEquipmentBonus` délègue désormais :
 
-- identifier le vrai propriétaire runtime qui doit devenir l'adaptateur Core ;
-- ne pas ajouter un nouveau wrapper autour de `dungeonEquipmentBonus` ;
-- ne pas dupliquer le calcul direct ou le moteur de sets ;
-- préserver les couches évolution et cache sans les déplacer ;
-- utiliser la vue équipée runtime déjà raccordée à
-  `GensInventoryEquippedViewV1`;
-- fournir explicitement `window.DUNGEON_EQUIPMENT_SETS` au Core ;
-- hors contexte applicable, conserver le comportement historique.
+`direct + sets -> GensEquipmentBonusSetsV1.totalBonus(...)`.
 
-### Interdictions
+L'évolution reste ajoutée ensuite dans ce même propriétaire.
 
-- pas de modification `index.html` ;
-- pas d'évolution dans le Core Equipment ;
-- pas de cache/invalidation dans ce lot ;
-- pas de changement des refs de slots ;
-- pas d'equip/unequip/remove/drop ;
-- pas de stockage ;
-- pas d'UI/Builders ;
-- pas de Stats/Tactical ;
-- pas de combat/capacités objets ;
-- aucun nouveau wrapper, observer, timer/retry ou monkey-patch ;
-- ne pas toucher `main`.
+Le cache performance reste en aval, puis Core Stats S5 consomme toujours le
+seam final.
 
-### TDD prévu
+### Autorité et absence de doublon
 
-1. caractériser la chaîne runtime exacte de `dungeonEquipmentBonus` ;
-2. écrire une sentinelle RED exigeant :
-   - Core chargé avant le propriétaire de raccord ;
-   - délégation direct + sets au Core ;
-   - parité avec la chaîne historique avant évolution/cache ;
-   - absence d'appel au calcul historique direct/sets doublonné ;
-   - évolution et cache toujours présents en aval ;
-3. raccord minimal ;
-4. réaligner seulement la cartographie structurelle nécessaire ;
-5. trois batteries GREEN ;
-6. documentation ;
-7. trois batteries sur SHA documentaire ;
-8. checkpoint GREEN final.
+- aucun nouveau wrapper ;
+- ancien calcul direct + sets non exécuté ;
+- `w.__original=old` conservé uniquement comme traçabilité ;
+- Core Equipment reçoit la vue équipée existante et le registry de sets ;
+- marqueur `__coreEquipmentBonusSetsV1` ajouté à l'adaptateur existant.
+
+Sentinelle VM :
+- direct = 3 ;
+- set = 3 ;
+- évolution = 4 ;
+- total = 10 ;
+- appels ancien direct + sets = 0.
+
+### Composition raccordée
+
+- Pages : Core Equipment chargé ;
+- preview : même composition ;
+- PWA : service précaché ;
+- Phase 2 : service **connected** ;
+- manifeste runtime : owner Core Equipment Bonus Sets.
+
+Métriques descriptives :
+- Pages injectés : 28 ;
+- JS directs production uniques : 31 ;
+- graphe production : 75 fichiers ;
+- inventaire physique : 92 JS.
+
+### Validation technique GREEN
+
+HEAD technique :
+`b1ad914f2dfe403a10de93fd9323aaf70ad2fe73`.
+
+- Architecture + navigateur complet : `35624628763` — SUCCESS ;
+- Firefox : `35624628545` — SUCCESS ;
+- Tactical Dock : `35624628686` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_BONUS_RACCORD.md`.
+
+### Périmètre respecté
+
+Aucun changement de :
+- `index.html` ;
+- refs de slots ;
+- equip / unequip / remove / drop ;
+- moteur évolution ;
+- logique cache/invalidation ;
+- stockage ;
+- UI/Builders ;
+- combat/capacités objets ;
+- Core Stats ;
+- Tactical.
+
+Aucun nouvel observer, timer/retry ou monkey-patch.
+
+### État actuel
+
+Clôture documentaire en cours.
+
+Le SHA documentaire doit repasser :
+- Architecture + navigateur ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun checkpoint GREEN final avant ces trois SUCCESS.
 
 ### Prochaine action
 
-Inspecter les propriétaires runtime exacts et la composition de chargement,
-puis poser le RED avant toute modification runtime.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-equipment-bonus-raccord-green-2026-09-21` ;
+3. repartir d'un nouveau checkpoint de départ et d'une nouvelle branche pour
+   le prochain micro-lot Inventory/Equipment ;
+4. conserver évolution et cache dans des lots séparés ;
+5. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

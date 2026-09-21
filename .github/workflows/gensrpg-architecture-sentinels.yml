@@ -350,6 +350,9 @@ jobs:
       - name: Caractériser la frontière dégâts Core Stats S11
         run: node tests/gens_phase4_stats_s11_damage_boundary_characterization_v1.test.cjs
 
+      - name: Verrouiller l'application unique des dégâts mêlée S11
+        run: node tests/gens_phase4_stats_s11_melee_damage_double_application_fix_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

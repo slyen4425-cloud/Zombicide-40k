@@ -1,139 +1,87 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture raccord évolution — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit cache/invalidation — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-evolution-raccord-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-evolution-raccord-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-cache-invalidation-preaudit-2026-09-21`.
 - Base exacte :
-  `deb165f8588d2ae4ecb4b6dbfcea536f5073f81b`.
+  `4707fb0ce3a7fa4cad688d81526323b916f80f6b`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-evolution-contract-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-evolution-raccord-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique
+### Lot précédent clôturé GREEN
 
-Le service :
-
-`assets/gensrpg/core/equipment-evolution-v1.js`
-
-est désormais connecté au cache évolution Equipment existant.
-
-Le propriétaire runtime reste :
-
-`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
-
-La frontière raccordée est :
-
-`cachedEvolutionBonus(key)`.
-
-Sur cache miss, elle délègue à :
-
-`GensEquipmentEvolutionV1.totalBonus(items,key,xp)`.
-
-### Autorité préservée
-
-`cachedEvolutionBonus` conserve :
-- la clé de cache ;
-- le TTL 120 ms ;
-- le cache ;
-- la vue équipée cachée ;
-- la normalisation XP ;
-- la lecture/écriture du cache.
-
-Le chemin actif n'appelle plus le calcul local
-`evolutionBonusForItem(item,key,xp)`.
-
-Aucun nouveau wrapper `dungeonEquipmentBonus` n'a été créé.
-
-Chaîne conservée :
+Le calcul Equipment est désormais :
 1. Core direct + sets ;
 2. cache évolution existant ;
-3. Core évolution sur miss ;
+3. Core évolution sur cache miss ;
 4. cache performance global ;
 5. Core Stats.
 
-### Composition raccordée
+Validation finale du raccord évolution sur le SHA documentaire exact
+`4707fb0ce3a7fa4cad688d81526323b916f80f6b` :
+- Architecture + navigateur complet : `35631683033` — SUCCESS ;
+- Firefox : `35631683044` — SUCCESS ;
+- Tactical Dock : `35631682947` — SUCCESS.
 
-- Pages : service chargé ;
-- preview : même ordre ;
-- PWA : précaché ;
-- Phase 2 : service **connected** ;
-- manifeste runtime : Core Equipment Evolution.
+### Mission du pré-audit
 
-Métriques :
-- Pages injectés : 29 ;
-- JS directs production uniques : 32 ;
-- graphe production : 76 fichiers ;
-- inventaire physique : 93 JS ;
-- services Phase 4 connus : 13.
+Caractériser uniquement la couverture réelle des caches et invalidateurs
+Equipment avant toute correction.
 
-### TDD et exécution
+Frontières à auditer :
+- `equipmentBonusCache` et `equippedSnapshot` dans
+  `gens-equipment-stat-cleanup-1678102.js` ;
+- invalidateurs actuellement wrappés par `installCacheInvalidators()` ;
+- vrais propriétaires historiques de mutation des mains et `rpgGear` ;
+- suppression/réindexation d'inventaire ;
+- édition d'objet / set / évolution ;
+- cache final de `dungeonEquipmentBonus` dans
+  `gens-mobile-combat-performance-16781022.js`.
 
-RED :
-- Architecture `35630671656` ;
-- échec ciblé : `Pages must publish the Core Equipment evolution service`.
+### Questions à trancher par preuve
 
-Sentinelle VM :
-- premier miss => 1 appel Core ;
-- hit avant TTL => 0 nouvel appel ;
-- expiration => nouvel appel Core ;
-- ancien calcul local => 0 appel.
+1. quelles mutations changent réellement la vue équipée ou le bonus Equipment ?
+2. lesquelles invalident aujourd'hui le cache évolution ?
+3. lesquelles invalident le cache performance final ?
+4. existe-t-il des mutations couvertes seulement par le TTL ?
+5. quels noms d'invalidateurs sont absents ou obsolètes ?
+6. quelle frontière minimale permettra un futur raccord sans wrapper
+   supplémentaire ni deuxième cache ?
 
-### Validation technique GREEN
+### Interdictions du lot
 
-HEAD technique :
-`eb3fa9be1077fb065d24fe4c47e81103628c4891`.
+- diagnostic / caractérisation uniquement ;
+- aucune modification des fonctions equip/unequip ;
+- aucune modification du TTL ;
+- aucune modification des invalidateurs ;
+- aucun nouveau wrapper ;
+- aucun nouveau cache ;
+- pas de `index.html` ;
+- pas de stockage ;
+- pas d'UI/Builders ;
+- pas de Stats/Tactical ;
+- aucun observer/timer/retry ;
+- ne pas toucher `main`.
 
-- Architecture + navigateur complet : `35631087083` — SUCCESS ;
-- Firefox : `35631087122` — SUCCESS ;
-- Tactical Dock : `35631087134` — SUCCESS.
+### TDD prévu
 
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_EVOLUTION_RACCORD.md`.
-
-### Périmètre respecté
-
-Aucun changement de :
-- `index.html` ;
-- TTL ;
-- invalidateurs ;
-- stockage ;
-- UI/Builders ;
-- combat ;
-- Stats/Tactical ;
-- cache performance global.
-
-Aucun nouvel observer, timer/retry ou monkey-patch.
-
-### Dette laissée au lot suivant
-
-La couverture réelle des invalidateurs Equipment reste à auditer séparément.
-Le pré-audit a montré un écart entre les noms wrappés et les vrais propriétaires
-`equip/unequip`.
-
-### État actuel
-
-Clôture documentaire en cours.
-
-Le SHA documentaire exact doit repasser :
-- Architecture + navigateur ;
-- Firefox ;
-- Tactical Dock.
-
-Aucun checkpoint GREEN final avant ces trois SUCCESS.
+1. inventorier les propriétaires actuels ;
+2. créer une sentinelle de caractérisation de la matrice mutation -> invalidation ;
+3. distinguer cache évolution et cache performance ;
+4. documenter les trous réels sans les corriger ;
+5. trois batteries GREEN ;
+6. documentation et revalidation ;
+7. checkpoint GREEN de pré-audit ;
+8. seulement ensuite ouvrir un lot correctif minimal si nécessaire.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-evolution-raccord-green-2026-09-21` ;
-3. ouvrir un checkpoint de départ et une branche neuve pour le lot
-   cache/invalidation Equipment ;
-4. commencer ce lot par un pré-audit TDD des vrais propriétaires de mutation ;
-5. ne jamais toucher `main`.
+Caractériser la matrice réelle mutation -> invalidation sans changer le runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

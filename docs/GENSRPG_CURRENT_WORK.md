@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — retrait fallback set-state UI — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture retrait fallback set-state UI — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,67 +13,92 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Pré-audit legacy UI GREEN
+### Résultat technique
 
-Le pré-audit a confirmé :
-- `dungeon-equipment-ui.js` préfère déjà le seam
-  `dungeonSetStateFromItems316(items)` ;
-- `fallbackSetStates(items)` reste une seconde implémentation locale ;
-- ce fallback diverge sur les pièces malformées sans id/piece id ;
-- les wrappers open/save, observer, listeners et timers appartiennent à des
-  chantiers séparés et ne doivent pas être touchés ici.
-
-Validation finale du SHA documentaire
-`db3bdbd51e6ba32a9d81204e41fd0e6a95a2519e` :
-- Architecture statique : SUCCESS ;
-- navigateur complet : rerun du même SHA — SUCCESS ;
-- Firefox : `35644624823` — SUCCESS ;
-- Tactical Dock : `35644624759` — SUCCESS.
-
-### Mission unique du lot
-
-Retirer uniquement l'implémentation locale :
+Le fallback local :
 
 `fallbackSetStates(items)`
 
-dans :
+a été retiré de :
 
 `assets/dungeon/dungeon-equipment-ui.js`.
 
-`setStates(items)` doit dépendre uniquement du seam canonique déjà garanti :
+`setStates(items)` dépend maintenant uniquement de :
 
 `dungeonSetStateFromItems316(items)`.
 
-Si ce seam est indisponible ou invalide, l'UI ne doit pas recalculer localement
-les sets ; elle doit retourner une vue vide, sans créer une seconde autorité.
+Si ce seam est absent, invalide ou lève une exception, l'UI retourne `[]`
+et ne recalcule plus une sémantique locale concurrente.
 
-### Contraintes
+### TDD
 
-- TDD RED avant modification runtime ;
-- retrait purement soustractif ;
-- ne pas modifier `index.html` ;
-- ne pas toucher `dungeon-core-316.js` ;
-- ne pas changer le Core Equipment bonus/sets ;
-- ne pas toucher wrappers `openEquipmentEditor` / `saveEquipmentEditor` ;
-- ne pas toucher `renderDungeonGear` ;
-- ne pas toucher observer/listeners/timers ;
-- ne pas toucher stockage, évolution, cache, Stats, Tactical ou combat ;
-- aucun nouveau wrapper/fallback/observer/timer ;
-- ne pas toucher `main`.
+RED initial :
+- SHA `031d38baf7f1a2ece5127b2d4e364509ed94a8ea` ;
+- Architecture `35645846830` — FAILURE attendu ;
+- erreur :
+  `local Equipment UI fallbackSetStates must be retired`.
 
-### TDD prévu
+Après suppression runtime, le pré-audit historique a échoué comme attendu car
+il cherchait encore la fonction retirée :
+- SHA `c4099932d4a1ee0c2d5d34997a1781ff4386cc04` ;
+- Architecture `35646076358` — FAILURE attendu ;
+- erreur :
+  `missing function fallbackSetStates`.
 
-1. poser un RED exigeant l'absence de `fallbackSetStates` ;
-2. verrouiller que `setStates` appelle uniquement le seam canonique ;
-3. exécuter la fonction en VM avec seam présent et absent ;
-4. retirer le fallback local, sans autre changement runtime ;
-5. trois batteries GREEN ;
-6. documenter et revalider le SHA documentaire ;
-7. checkpoint GREEN final.
+Sentinelles réalignées ensuite sur le nouvel état.
+
+### Validation technique GREEN
+
+HEAD technique :
+`d448b8052c5a9b01bfb239ecdb0b216ab951cdef`.
+
+- Architecture + navigateur complet :
+  `35646315077` — SUCCESS ;
+- Firefox :
+  `35646315049` — SUCCESS ;
+- Tactical Dock :
+  `35646315106` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SETSTATE_FALLBACK_RETIREMENT.md`.
+
+### Périmètre respecté
+
+Aucun changement de :
+- `index.html` ;
+- `dungeon-core-316.js` ;
+- Core Equipment bonus/sets ;
+- wrappers open/save ;
+- wrapper `renderDungeonGear` ;
+- observer/listeners/timers/RAF ;
+- stockage ;
+- évolution ;
+- cache/invalidation ;
+- Stats/Tactical/combat.
+
+Aucun nouveau wrapper, fallback, observer ou timer.
+
+### État actuel
+
+Clôture documentaire en cours.
+
+Le SHA documentaire exact doit repasser :
+- Architecture + navigateur ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun checkpoint GREEN final avant ces trois SUCCESS.
 
 ### Prochaine action
 
-Créer la sentinelle RED du retrait soustractif, sans modification runtime.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-equipment-setstate-fallback-retirement-green-2026-09-21` ;
+3. ouvrir un nouveau checkpoint de départ et une nouvelle branche pour le
+   prochain micro-lot legacy UI explicitement défini par un nouveau pré-audit
+   ou par le résultat de celui déjà clos ;
+4. ne pas mélanger wrappers open/save et side effects UI dans le même lot ;
+5. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

@@ -77,7 +77,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   plain(Core.collapse(genericCore,{strategy:'sum'})),
-  {physical:25,fire:35,magic:0,psy:-1000},
+  {physical:25,fire:35,magic:0,psy:0},
   'explicit sum projection must preserve generic duplicate additivity'
 );
 

@@ -308,6 +308,9 @@ jobs:
       - name: Vérifier la parité de normalisation Core Stats S2
         run: node tests/gens_phase4_stats_s2_normalization_parity_v1.test.cjs
 
+      - name: Verrouiller le raccord d’autorité de normalisation Stats
+        run: node tests/gens_phase4_stats_s2_authority_raccord_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

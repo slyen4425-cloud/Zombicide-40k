@@ -99,7 +99,7 @@ const project=states=>states.map(s=>({
 }));
 assert.deepEqual(
   JSON.parse(JSON.stringify(project(ctx.fallbackSetStates(validItems)))),
-  JSON.parse(JSON.stringify(project(ctx.ROOT.GensEquipmentBonusSetsV1.setState(validItems,registry)))),
+  JSON.parse(JSON.stringify(project(ctx.GensEquipmentBonusSetsV1.setState(validItems,registry)))),
   'local UI fallback must match Core set progress semantics for valid catalogue pieces'
 );
 
@@ -107,7 +107,7 @@ assert.deepEqual(
 const malformed=[{setId:'leather'}];
 assert.equal(ctx.fallbackSetStates(malformed).length,0,
   'local UI fallback skips an empty piece id');
-assert.equal(ctx.ROOT.GensEquipmentBonusSetsV1.setState(malformed,registry)[0]?.count,1,
+assert.equal(ctx.GensEquipmentBonusSetsV1.setState(malformed,registry)[0]?.count,1,
   'Core set-state semantics currently count the historical empty-piece token');
 
 // Wrapper stack characterization.

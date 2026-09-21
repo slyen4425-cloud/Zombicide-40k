@@ -1,3 +1,84 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-22
+
+Ce bloc est le point de reprise prioritaire ; les sections suivantes sont historiques.
+
+- Branche :
+  work/gensrpg-phase4-inventory-equipment-save-editor-preaudit-2026-09-22.
+- Base exacte :
+  669a8b2ef1caeba2d75a97000b4716877e9e5fc9.
+- Checkpoint GREEN de départ :
+  checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21.
+- Production :
+  main = e8681f9823573ced8aec59c8ddc47a72b02bc663, V16.78.114.11, inchangée.
+
+### Résultat du pré-audit
+
+index.html fourni par l'utilisateur vérifié contre le blob Git du SHA de base :
+5b9b9ae780f735eadef049afeb10acf0b57441fe, 8 174 580 octets.
+
+Chaîne saveEquipmentEditor finale, extérieur vers intérieur :
+
+1. Equipment Cleanup __eqCache1021 ;
+2. Hero Editor Dynamic __canon101 ;
+3. Set Editor __setEditor167818 ;
+4. Equipment Hotfix __equipmentHotfix167817 ;
+5. propriétaire natif index.html.
+
+Écritures par Save :
+- custom Dungeon : 4 écritures saveCustomEquipment
+  (natif -> hotfix -> Set Editor -> Hero canonique différé) ;
+- builtin Dungeon : 3 écritures saveDungeonItemOverrides
+  (natif -> hotfix -> Set Editor), puis aucun writer canonique Hero pour le builtin.
+
+Défaut fonctionnel caractérisé :
+- l'UI canonique Hero Editor peut demander rpgBonuses Force = 9 sur un builtin ;
+- le writer Hero ne cible que loadCustomEquipment ;
+- la valeur canonique builtin n'est donc pas persistée ;
+- la valeur historique du hotfix reste celle qui survit dans l'override.
+
+Le membership Set Editor reste, lui, correctement persisté.
+
+Décision soustractive :
+- aucun retrait isolé n'est sûr maintenant ;
+- le défaut builtin doit être corrigé dans un lot dédié avant tout retrait du writer historique bonus ;
+- le décalage cache Cleanup synchrone / writer Hero différé reste une dette de caractérisation séparée, non conclue ici.
+
+Document :
+docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SAVE_EDITOR_PREAUDIT.md.
+
+Sentinelles :
+- tests/gens_phase4_inventory_equipment_save_editor_static_preaudit_v1.test.cjs ;
+- tests/gens_phase4_inventory_equipment_save_editor_browser_preaudit_v1.test.cjs.
+
+### Validation technique obtenue
+
+SHA technique :
+a17ecc6b835b089db730742af7e35c7099ea01a4.
+
+- Architecture + navigateur complet 35665725105 — SUCCESS ;
+- Firefox 35665725045 — SUCCESS ;
+- Tactical Dock 35665725046 — SUCCESS ;
+- nouveau test Chromium saveEquipmentEditor — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+### Validation documentaire finale
+
+La présente mise à jour change le SHA. Avant checkpoint GREEN, exiger sur ce SHA documentaire exact :
+
+1. Architecture + navigateur complet — SUCCESS ;
+2. Firefox — SUCCESS ;
+3. Tactical Dock — SUCCESS.
+
+Checkpoint cible :
+checkpoint/gensrpg-phase4-inventory-equipment-save-editor-preaudit-green-2026-09-22.
+
+Après GREEN, prochaine branche dédiée :
+work/gensrpg-phase4-inventory-equipment-builtin-canonical-bonus-persistence-fix-2026-09-22.
+
+Mission suivante :
+corriger uniquement la persistance rpgBonuses canonique des équipements builtin chez le vrai propriétaire, sans nouveau système concurrent et sans mélanger le risque cache.
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

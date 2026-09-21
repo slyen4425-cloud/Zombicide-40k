@@ -79,11 +79,58 @@ Retirer une couche sans preuve pourrait supprimer :
 
 Le pré-audit ne doit donc effectuer aucun retrait runtime.
 
+### Résultat du pré-audit
+
+L'inventaire exhaustif des 76 fichiers externes atteignables Phase 2 a trouvé
+**5 participants** contenant `openEquipmentEditor` :
+
+1. `dungeon-equipment-hotfix-167817.js` ;
+2. `dungeon-set-editor-167818.js` ;
+3. `gens-dungeon-hero-art-repair-167874.js` ;
+4. `gens-hero-editor-dynamic-167897.js` ;
+5. `gens-equipment-stat-cleanup-1678102.js`.
+
+Le résumé historique à trois couches était donc incomplet.
+
+Ordre caractérisé :
+- Pages/preview chargent hotfix puis Set Editor, Stats, puis Hero Art Repair ;
+- Hero Art Repair wrappe `openEquipmentEditor`, puis charge dynamiquement
+  Hero Editor Dynamic avant Equipment Stat Cleanup ;
+- Hero Editor Dynamic possède en plus un retry d'installation (50 ms puis jusqu'à
+  30 relances à 100 ms) basé sur le marqueur `__canon101` ;
+- Equipment Cleanup utilise `__canonEq102` et est single-install ;
+- après le cleanup, un retry Hero Editor peut donc redevenir le wrapper extérieur.
+
+Responsabilités prouvées :
+- hotfix open : remplit la section historique RPG bonus encore consommée par son
+  writer ; pas de retrait open isolé ;
+- Set Editor open : synchronise l'appartenance de set utilisée par son writer ;
+  pas de retrait open isolé ;
+- Hero Editor Dynamic open : possède l'UI canonique des bonus RPG de base ;
+- Equipment Cleanup open : possède la décoration canonique évolution/set et
+  masque les contrôles legacy ;
+- Hero Art Repair open : hook générique non propriétaire de l'éditeur Equipment,
+  premier candidat soustractif.
+
+Aucun runtime n'a été modifié dans ce pré-audit.
+
+Sentinelle :
+`tests/gens_phase4_inventory_equipment_open_wrapper_preaudit_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_OPEN_WRAPPER_PREAUDIT.md`.
+
 ### Prochaine action
 
-Créer une sentinelle de caractérisation dédiée au wrapper `openEquipmentEditor`,
-documenter les responsabilités prouvées, puis lancer la CI complète. Aucun retrait
-runtime avant un futur lot séparé explicitement défini par ce pré-audit.
+1. valider ce pré-audit par Architecture + navigateur complet, Firefox et Tactical ;
+2. après trois SUCCESS sur le SHA documentaire exact, créer
+   `checkpoint/gensrpg-phase4-inventory-equipment-open-wrapper-preaudit-green-2026-09-21` ;
+3. ouvrir un lot distinct depuis ce checkpoint pour caractériser au navigateur puis
+   retirer uniquement `openEquipmentEditor` de
+   `GensDungeonHeroArtRepair167874.hookAll()` si la preuve est GREEN ;
+4. ne modifier aucun wrapper `saveEquipmentEditor`, aucun observer/listener/timer
+   et aucun autre wrapper open dans ce futur lot ;
+5. conserver `main` inchangée.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture retrait fallback set-state UI — 2026-09-21

@@ -30,7 +30,7 @@ assert.match(
 );
 assert.doesNotMatch(
   graph,
-  /phase4InertServices=\[[\s\S]*assets\/gensrpg\/core\/equipment-bonus-sets-v1\.js/,
+  /phase4InertServices=\[[^\]]*assets\/gensrpg\/core\/equipment-bonus-sets-v1\.js/,
   'Core Equipment bonus + sets must leave the inert set after raccord'
 );
 

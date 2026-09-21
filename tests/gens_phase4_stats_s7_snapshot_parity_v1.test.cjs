@@ -61,8 +61,22 @@ const v110Root={
   state:{rpgAttributes:{...values},mana:8,wounds:2},
   CHARS:{hero:{maxHp:15,dungeonStats:{...values}}},
   GensCleanRpgStats167874:{
-    runtimeDefs:()=>definitions,
-    value:(_hero,id)=>values[id]
+    coreSnapshot:id=>({
+      version:'1.0.0',
+      heroId:id,
+      canonical:definitions.map(d=>({id:d.id,name:d.name,icon:d.icon,value:values[d.id]})),
+      values:{...values},
+      derived:{
+        physicalDamageBonus:derived.physicalDamageBonus,
+        magicDamageBonus:derived.magicDamageBonus,
+        hpBonus:derived.hpBonus,
+        maxMana:derived.maxMana,
+        crit:derived.crit,
+        dodge:derived.dodge,
+        initiative:derived.initiative,
+        magicResistance:derived.magicResistance
+      }
+    })
   },
   loadState:()=>({rpgAttributes:{...values},mana:8,wounds:2}),
   effectiveMaxWounds:()=>23,

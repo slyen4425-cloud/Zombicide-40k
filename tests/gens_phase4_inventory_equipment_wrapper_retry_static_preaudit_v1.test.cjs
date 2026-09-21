@@ -20,8 +20,10 @@ assert.match(hero,/setTimeout\(retry,50\)/,
   'Hero Editor Dynamic initial retry delay changed');
 assert.match(hero,/if\(tries\+\+<30\)setTimeout\(retry,100\)/,
   'Hero Editor Dynamic retry loop changed');
-assert.match(hero,/if\(typeof old!=="function"\|\|old\[flag\]\)return false/,
-  'Hero Editor Dynamic wrapper guard changed');
+assert.match(hero,/function hasWrapFlag\(fn,flag\).*__original/s,
+  'Hero Editor Dynamic chain-aware wrapper guard changed');
+assert.match(hero,/if\(typeof old!=="function"\|\|hasWrapFlag\(old,flag\)\)return false/,
+  'Hero Editor Dynamic wrapper must consult the chain-aware guard');
 
 assert.match(cleanup,/function wrapOpen\(\)/,
   'Equipment Cleanup open wrapper must remain characterized');
@@ -48,5 +50,5 @@ console.log(JSON.stringify({
   cleanupSaveMarker:'__eqCache1021',
   heroEditorRetry:{initialMs:50,repeatMs:100,maxRepeatGuard:'tries++ < 30'},
   cleanupInstall:'single-shot',
-  risk:'a cleanup wrapper does not carry __canon101, so a later Hero Editor retry can wrap it again'
+  risk:'retired: an interposed cleanup wrapper no longer hides an existing __canon101 owner from retries'
 },null,2));

@@ -1,5 +1,121 @@
 # GenSrpG — Travail courant
 
+## Chantier courant prioritaire — Phase 4 Core Stats / raccord autorité normalisation — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s2-authority-raccord-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s2-authority-raccord-2026-09-21`.
+- Base exacte et dernier GREEN : `d9929477332b9436a3da12fddc2b13777d2b4e0d`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase4-stats-s2-normalization-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S2 normalisation pure définitivement clôturé
+
+HEAD final :
+`d9929477332b9436a3da12fddc2b13777d2b4e0d`.
+
+Runs :
+- Architecture + navigateur complet : `35557897360` — SUCCESS ;
+- Firefox : `35557897377` — SUCCESS ;
+- Tactical Dock : `35557897367` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s2-normalization-green-2026-09-21`.
+
+Le module pur existe :
+`assets/gensrpg/core/stats-normalization-v1.js`.
+
+Il est encore inactif dans le graphe production au départ de ce lot.
+
+### Mission du raccord
+
+Transférer l'autorité de normalisation au Core sans toucher au reste du moteur Stats.
+
+Le propriétaire historique
+`assets/gensrpg/gens-rpg-stats-clean-167874.js`
+reste propriétaire de :
+- profil/racine Stats ;
+- valeur canonique ;
+- effets stat -> stat ;
+- dérivées ;
+- migration ;
+- UI ;
+- persistance ;
+- wrappers.
+
+Mais il ne doit plus posséder une seconde implémentation de :
+- alias/canonisation ;
+- slug ;
+- normalisation de définition ;
+- validation de cible ;
+- normalisation d'effet ;
+- comparaison primitive.
+
+### Raccord de composition
+
+Le Core normalization doit être chargé immédiatement avant le propriétaire Stats dans :
+- `.github/workflows/main.yml` ;
+- `preview.html`.
+
+Aucun nouveau loader dynamique.
+Aucun changement de `index.html`.
+Le module devient alors production-reachable et doit quitter la liste Phase 4 inert.
+
+### Raccord du propriétaire historique
+
+Le propriétaire historique doit exiger explicitement :
+`GensStatsNormalizationV1`.
+
+Interdit :
+- fallback local ;
+- duplication des fonctions pures ;
+- second alias map local ;
+- wrapper/retry/timer pour attendre le Core.
+
+Les fonctions internes historiques deviennent des références/délégations vers le Core
+afin de préserver leurs callsites actuels sans réécrire le moteur complet dans ce lot.
+
+### Frontières
+
+Ne pas modifier :
+- `value(hero,id)` ;
+- `baseValue` ;
+- providers équipement/talents/challenges ;
+- `effectAmount` sauf utilisation de la comparaison déjà transférée ;
+- formules max HP/mana/crit/dodge/initiative ;
+- Armor ;
+- toucher ;
+- résistances ;
+- Tactical snapshot ;
+- UI/editor ;
+- persistance/migrations.
+
+### TDD
+
+Avant raccord :
+1. ajouter une garde d'autorité et de bootstrap ;
+2. la garde doit être RED tant que Core normalization reste inert et que le
+   propriétaire historique contient les implémentations locales ;
+3. seulement ensuite appliquer le raccord ;
+4. réaligner les tests qui chargent directement le propriétaire Stats afin qu'ils
+   chargent explicitement sa dépendance Core ;
+5. ne jamais ajouter de fallback de test dans le runtime.
+
+### Critère de sortie
+
+GREEN seulement si :
+- Core normalization est chargé avant Stats dans Pages et preview ;
+- graphe runtime le classe connecté/reachable ;
+- propriétaire historique délègue sans duplication locale ;
+- parité S1/S2 et tests historiques Stats/Tactical restent GREEN ;
+- navigateur complet, Firefox et Tactical Dock passent sur le HEAD final ;
+- `main` reste inchangé.
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S2_AUTHORITY_RACCORD.md`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S2 Normalisation pure — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

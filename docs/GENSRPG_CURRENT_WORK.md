@@ -1,104 +1,85 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture contrat bonus directs + sets — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — raccord dungeonEquipmentBonus — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-bonus-sets-contract-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-bonus-raccord-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-bonus-sets-contract-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-bonus-raccord-2026-09-21`.
 - Base exacte :
-  `7408d1d0d24b13c6dd28c09968fbf301704705db`.
+  `b7e3df8547cfbe6e9609589219dd08b17ada50ea`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipped-view-raccord-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-bonus-sets-contract-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique
+### Lot précédent clôturé GREEN
 
-Nouveau service pur et inert :
-
+Contrat pur Core Equipment bonus directs + sets :
 `assets/gensrpg/core/equipment-bonus-sets-v1.js`.
 
-Export :
+Validation finale sur le SHA documentaire exact `b7e3df8547cfbe6e9609589219dd08b17ada50ea` :
+- Architecture + navigateur complet : `35622137083` — SUCCESS ;
+- Firefox : `35622137114` — SUCCESS ;
+- Tactical Dock : `35622136990` — SUCCESS.
 
-`GensEquipmentBonusSetsV1`.
+### Mission du nouveau raccord
 
-API :
-- `thresholds(set)` ;
-- `directBonus(items,key)` ;
-- `setState(items,registry)` ;
-- `setBonus(items,key,registry)` ;
-- `totalBonus(items,key,registry)`.
+Raccorder uniquement le calcul **direct + sets** de `dungeonEquipmentBonus`
+au service pur `GensEquipmentBonusSetsV1`.
 
-Parité caractérisée contre :
-- bonus direct inline historique ;
-- `setState316(items, registry)` de Core 3.16.
+Le raccord doit préserver l'ordre historique des couches :
+1. bonus direct des objets équipés ;
+2. bonus des sets Core 3.16 ;
+3. évolution reste dans sa couche ultérieure existante ;
+4. cache performance reste dans sa couche ultérieure existante ;
+5. Core Stats S5 continue à consommer le seam final `dungeonEquipmentBonus`.
 
-Sémantiques verrouillées :
-- bonus directs numériques ;
-- déduplication set par `setPieceId || item.id` ;
-- seuils cumulés ;
-- plusieurs sets ;
-- registry inconnu ignoré ;
-- valeurs non numériques = 0.
+### Contraintes d'autorité
 
-### Inertie
+- identifier le vrai propriétaire runtime qui doit devenir l'adaptateur Core ;
+- ne pas ajouter un nouveau wrapper autour de `dungeonEquipmentBonus` ;
+- ne pas dupliquer le calcul direct ou le moteur de sets ;
+- préserver les couches évolution et cache sans les déplacer ;
+- utiliser la vue équipée runtime déjà raccordée à
+  `GensInventoryEquippedViewV1`;
+- fournir explicitement `window.DUNGEON_EQUIPMENT_SETS` au Core ;
+- hors contexte applicable, conserver le comportement historique.
 
-Le service est classé Phase 4 **inert**.
+### Interdictions
 
-- aucun chargement Pages ;
-- aucun chargement preview ;
-- aucun précache PWA ;
-- aucun raccord runtime ;
-- graphe production maintenu à 74 fichiers atteignables.
+- pas de modification `index.html` ;
+- pas d'évolution dans le Core Equipment ;
+- pas de cache/invalidation dans ce lot ;
+- pas de changement des refs de slots ;
+- pas d'equip/unequip/remove/drop ;
+- pas de stockage ;
+- pas d'UI/Builders ;
+- pas de Stats/Tactical ;
+- pas de combat/capacités objets ;
+- aucun nouveau wrapper, observer, timer/retry ou monkey-patch ;
+- ne pas toucher `main`.
 
-Inventaire physique :
-- 92 fichiers JS ;
-- 12 services Phase 4 connus.
+### TDD prévu
 
-### Validation technique GREEN
-
-HEAD technique :
-`070d772fe125767ebc3531cbe04543e4a66662ac`.
-
-- Architecture + navigateur complet : `35621365751` — SUCCESS ;
-- Firefox : `35621365581` — SUCCESS ;
-- Tactical Dock : `35621365736` — SUCCESS.
-
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_BONUS_SETS_CONTRACT.md`.
-
-### Périmètre respecté
-
-Aucun changement de :
-- `index.html` ;
-- composition production ;
-- `dungeonEquipmentBonus` ;
-- Core 3.16 ;
-- évolution ;
-- cache/invalidation ;
-- stockage ;
-- UI/Builders ;
-- combat ;
-- Stats/Tactical.
-
-### État actuel
-
-Clôture documentaire en cours.
-
-Le SHA documentaire doit repasser les trois batteries avant création du
-checkpoint GREEN final.
+1. caractériser la chaîne runtime exacte de `dungeonEquipmentBonus` ;
+2. écrire une sentinelle RED exigeant :
+   - Core chargé avant le propriétaire de raccord ;
+   - délégation direct + sets au Core ;
+   - parité avec la chaîne historique avant évolution/cache ;
+   - absence d'appel au calcul historique direct/sets doublonné ;
+   - évolution et cache toujours présents en aval ;
+3. raccord minimal ;
+4. réaligner seulement la cartographie structurelle nécessaire ;
+5. trois batteries GREEN ;
+6. documentation ;
+7. trois batteries sur SHA documentaire ;
+8. checkpoint GREEN final.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-bonus-sets-contract-green-2026-09-21` ;
-3. ouvrir un checkpoint de départ et une branche neuve pour le raccord
-   `dungeonEquipmentBonus` ;
-4. ce futur raccord doit rester limité à direct + sets ;
-5. évolution et cache resteront dans des lots ultérieurs ;
-6. ne jamais toucher `main`.
+Inspecter les propriétaires runtime exacts et la composition de chargement,
+puis poser le RED avant toute modification runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

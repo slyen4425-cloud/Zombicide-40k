@@ -69,6 +69,49 @@ Adapter → V110 → V114.11 et exige :
 - aucune régression ranged/magic.
 
 
+### Résultat du correctif
+
+RED :
+- test : `8533d748ab1408296a36cdccf289b0be9615b1a9` ;
+- CI : `2d68b3c7f7f944355a3b3681ebb9365c6ffef96d` ;
+- run Architecture `35597056337` — FAILURE attendu ;
+- erreur exacte : absence du transport `rpgDamageBonus` dans l'Adapter.
+
+Correctif :
+- Adapter : `b76ee9fa140bc811ced53db940a2577929773155` ;
+- V114.11 : `22cb5c19fe5cd26c3515481a835e07cb018ff151` ;
+- caractérisation S11 mise au nouvel état :
+  `d265b569dd085bde9f6c71bddad3042934ab1f36`.
+
+Contrat obtenu :
+- preview Tactical conserve `attack.power=8` ;
+- Adapter transporte `meta.rpgDamageBonus=3` ;
+- V114.11 mêlée physique reconstruit base 5 + bonus snapshot 3 = 8 brut ;
+- armure 2 -> 6 final ;
+- distance physique inchangée ;
+- magie inchangée ;
+- aucun changement de `index.html`.
+
+Validation technique sur `d265b569...` :
+- Architecture + navigateur complet : `35597196183` — SUCCESS ;
+- Firefox : `35597196186` — SUCCESS ;
+- Tactical Dock : `35597196182` — SUCCESS.
+
+Audit :
+`docs/GENSRPG_PHASE4_STATS_S11_MELEE_DAMAGE_FIX.md`.
+
+### Clôture corrective en cours
+
+Le SHA documentaire final doit repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-green-2026-09-21` ;
+2. créer un checkpoint de reprise S11 frontière dégâts sur ce SHA ;
+3. ouvrir une branche dédiée de raccord snapshot Core ;
+4. ne passer à S12 qu'après fermeture complète de S11.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 frontière dégâts — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

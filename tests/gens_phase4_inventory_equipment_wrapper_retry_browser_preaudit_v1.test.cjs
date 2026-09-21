@@ -178,25 +178,23 @@ const {chromium}=require('playwright');
   }));
 
   assert.deepEqual(finalChain.open,[
-    'hero-editor:__canon101',
     'equipment-cleanup:__canonEq102',
     'hero-editor:__canon101',
     'set-editor:__setEditor167818',
     'equipment-hotfix:__equipmentHotfix167817',
     'native'
-  ],'Hero Editor retry must be characterized as a second open wrapper around Cleanup');
+  ],'Hero Editor retry must preserve a single open owner through Cleanup');
 
   assert.deepEqual(finalChain.save,[
-    'hero-editor:__canon101',
     'equipment-cleanup:__eqCache1021',
     'hero-editor:__canon101',
     'set-editor:__setEditor167818',
     'equipment-hotfix:__equipmentHotfix167817',
     'native'
-  ],'Hero Editor retry must be characterized as a second save wrapper around Cleanup invalidation');
+  ],'Hero Editor retry must preserve a single save owner through Cleanup invalidation');
 
-  assert.equal(finalChain.open.filter(x=>x==='hero-editor:__canon101').length,2);
-  assert.equal(finalChain.save.filter(x=>x==='hero-editor:__canon101').length,2);
+  assert.equal(finalChain.open.filter(x=>x==='hero-editor:__canon101').length,1);
+  assert.equal(finalChain.save.filter(x=>x==='hero-editor:__canon101').length,1);
 
   const openResult=await page.evaluate(()=>window.openEquipmentEditor(window.__item.id));
   assert.equal(openResult,'native-open');
@@ -218,8 +216,8 @@ const {chromium}=require('playwright');
 
   assert.equal(effects.baseOpenCalls,1,'native open must still execute once through the duplicated wrappers');
   assert.equal(effects.baseSaveCalls,1,'native save must still execute once through the duplicated wrappers');
-  assert.equal(effects.saveCustomEquipmentCalls,2,
-    'one user save currently triggers two Hero Editor Dynamic persistence writes after retry rewrap');
+  assert.equal(effects.saveCustomEquipmentCalls,1,
+    'one user save must trigger one Hero Editor Dynamic persistence write after retry');
   assert.equal(effects.canonicalBonusBoxes,1,'duplicate wrappers must not create duplicate canonical bonus boxes');
   assert.equal(effects.setSections,1,'Set Editor section must remain unique');
   assert.equal(effects.canonicalEvolutionLevels,3,'canonical evolution decoration must remain unique');
@@ -232,6 +230,6 @@ const {chromium}=require('playwright');
     initial,
     finalChain,
     effects,
-    finding:'Hero Editor Dynamic owns two wrapper layers after retry; one save produces two saveCustomEquipment writes'
+    finding:'duplicate Hero Editor retry ownership retired; one save produces one Hero Editor persistence write'
   },null,2));
 })().catch(e=>{console.error(e);process.exit(1)});

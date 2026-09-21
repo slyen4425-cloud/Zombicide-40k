@@ -1,73 +1,132 @@
-## Chantier courant prioritaire — Phase 4 Core Stats / S11 raccord Core Snapshot → Tactical — clôture candidate — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment / Sets — pré-audit — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-sets-preaudit-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-stats-s11-core-snapshot-raccord-2026-09-21`.
-- Base :
-  `8ead920b56dcebc16c78ada38fa1481476bc9cc2`.
-- SHA technique GREEN avant documentation :
-  `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-sets-preaudit-2026-09-21`.
+- Base exacte :
+  `7dd70d6fc78e0bd43d63f9fbf67e22571c8555e9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s11-core-snapshot-raccord-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat S11
+### S11 Core Stats définitivement clôturé
 
-Raccord runtime effectué :
+SHA documentaire final :
+`7dd70d6fc78e0bd43d63f9fbf67e22571c8555e9`.
 
-`S3 -> S4 -> S5 -> S6 -> S7 -> Stats owner coreSnapshot() -> V110 -> Tactical`.
+Runs exacts :
+- Architecture + navigateur complet : `35604676238` — SUCCESS ;
+- Firefox : `35604676240` — SUCCESS ;
+- Tactical Dock : `35604676159` — SUCCESS.
 
-S3-S7 sont désormais production-reachable et chargés avant le propriétaire
-Stats dans Pages et preview.
+Résultat :
+- S3-S7 sont production-reachable ;
+- Stats owner fournit `coreSnapshot()` ;
+- V110 consomme les valeurs/dérivées Core ;
+- six relectures Dungeon dérivées ont été retirées de V110 ;
+- Initiative dérivée reste volontairement hors raccord ;
+- correctif d'application unique du bonus mêlée conservé ;
+- `index.html` inchangé, blob `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
 
-V110 ne relit plus directement :
-- physicalDamageBonus ;
-- magicDamageBonus ;
-- maxMana ;
-- crit ;
-- dodge ;
-- magicResistance
-depuis les helpers Dungeon.
+### Mission du nouveau lot
 
-HP/mana courants, résistances et règles restent dans l'enveloppe session V110.
+Pré-audit uniquement du service commun suivant prévu par la roadmap :
 
-Initiative dérivée reste volontairement hors migration : la sentinelle prouve
-une divergence possible avec les effets cible `initiative`.
+**Inventaire / Équipement / Sets**.
 
-Le correctif S11 application unique des dégâts mêlée reste GREEN.
+Aucun déplacement runtime ni création de service Core dans ce pré-audit.
 
-### Validation technique
+Objectifs :
+1. identifier tous les propriétaires réellement actifs des objets, inventaires,
+   slots équipés, sets, évolution et bonus équipement ;
+2. séparer données/runtime/UI/Builders/Stats/Tactical ;
+3. reconstruire les chemins équip/unéquiper -> bonus -> Stats -> snapshot Tactical ;
+4. identifier la source de vérité de l'équipement porté ;
+5. identifier la source de vérité des définitions d'objets et sets ;
+6. cartographier les wrappers/hotfixs historiques encore actifs ;
+7. relever stockage, cache et invalidations ;
+8. déterminer les frontières d'un futur Core Inventory/Equipment sans dupliquer
+   Dungeon ni Builders.
 
-Sur `dd0492108e188a28125ca3f5ecce5fcbc3bea7d3` :
+### Propriétaires déjà visibles à confirmer
 
-- Architecture + navigateur complet : `35602684576` — SUCCESS ;
-- Firefox : `35602684564` — SUCCESS ;
-- Tactical Dock : `35602684558` — SUCCESS.
+- `assets/dungeon/dungeon-core-316.js` :
+  catalogue/sets et moteur générique historique ;
+- `assets/dungeon/dungeon-equipment-ui.js` :
+  UI Builders, avec observer/wrapper historiques ;
+- `assets/dungeon/dungeon-equipment-hotfix-167817.js` :
+  wrappers d'éditeur et visibilité sets ;
+- `assets/dungeon/dungeon-set-editor-167818.js` :
+  éditeur/persistance de sets ;
+- `assets/gensrpg/gens-equipment-stat-cleanup-1678102.js` :
+  bridge Stats/Builders, évolution, cache et invalidation équipement ;
+- `GensCleanRpgStats167874` / S5 :
+  consomme uniquement le seam agrégé Equipment ; ne devient pas propriétaire
+  de l'inventaire.
 
-### Architecture
+Cette liste est une hypothèse de départ, pas encore un contrat final.
 
-- graphe production-reachable : 73 fichiers ;
-- S3-S7 classés Core connected ;
-- propriétaires/timers/storage/side-effects Phase 2 réalignés ;
-- S3-S7 précachés par le Service Worker ;
-- `index.html` inchangé, blob :
-  `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+### Fonctions/systèmes protégés
 
-### Clôture candidate
+Ne pas modifier pendant le pré-audit :
+- equip / unequip et slots ;
+- inventaire héros ;
+- catalogue d'objets ;
+- sets et paliers ;
+- évolution d'équipement ;
+- `dungeonEquipmentBonus` ;
+- cache combat équipement ;
+- Stats S3-S7 ;
+- Tactical snapshot/dégâts ;
+- stockage ;
+- UI d'éditeur ;
+- loot/marchands/coffres ;
+- `index.html`.
 
-Le SHA documentaire final doit maintenant repasser les trois batteries.
+### Risques
 
-Après trois SUCCESS :
-1. créer
-   `checkpoint/gensrpg-phase4-stats-s11-core-snapshot-raccord-green-2026-09-21` ;
-2. utiliser ce SHA comme nouvelle base sûre ;
-3. ouvrir le prochain lot Phase 4 prévu par la roadmap ;
-4. ne pas toucher `main`.
+- plusieurs wrappers historiques sur les mêmes fonctions ;
+- mélange Builders/runtime dans les fichiers Equipment ;
+- set bonus + évolution agrégés dans le même seam Stats ;
+- cache court de combat dépendant des invalidations equip/unequip ;
+- persistance sets encore directe ;
+- dépendances possibles à des fonctions inline du gros `index.html` ;
+- risque d'une seconde autorité si Core recopie les fonctions existantes.
 
-Audit :
-`docs/GENSRPG_PHASE4_STATS_S11_CORE_SNAPSHOT_RACCORD_AUDIT.md`.
+### Tests prévus
+
+Pré-audit :
+- sentinelle de cartographie des propriétaires actifs ;
+- inventaire des wrappers/timers/observers/storage du périmètre ;
+- caractérisation réelle d'un héros qui équipe puis retire un objet ;
+- caractérisation set + évolution -> `dungeonEquipmentBonus` -> Core Stats ;
+- preuve du cache/invalidation existant ;
+- vérification de non-interférence Survie/Dungeon/Capture/PvP.
+
+Aucun test ne doit réimplémenter les formules ou injecter artificiellement le
+bonus final à l'endroit précisément audité.
+
+### Règle index.html
+
+Le blob de base reste :
+`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Si le corps exact d'une fonction inline devient nécessaire, appliquer la règle
+26 et demander le fichier exact ; ne pas multiplier les lectures API du gros HTML.
+
+### Prochaine étape
+
+1. audit des fichiers externes et du graphe production ;
+2. identification des fonctions protégées/wrappers ;
+3. seulement si nécessaire, règle 26 pour les propriétaires inline ;
+4. produire `docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SETS_PREAUDIT.md` ;
+5. ajouter une sentinelle de caractérisation ;
+6. aucun service Core et aucun raccord runtime dans ce lot ;
+7. checkpoint GREEN uniquement après les trois batteries finales.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

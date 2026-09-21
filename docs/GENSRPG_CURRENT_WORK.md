@@ -1,139 +1,72 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture correctif cache/invalidation — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit wrappers/UI historiques — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-legacy-ui-preaudit-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-cache-invalidation-fix-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-legacy-ui-preaudit-2026-09-21`.
 - Base exacte :
-  `70c679a8079094dd410a37b875ace6c47e6708c4`.
+  `fc6e2fadea984869eef2435025c7b98851c1fd7e`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique
+### Cycle Core Inventory/Equipment déjà GREEN
 
-Le propriétaire canonique d'invalidation reste :
+- Equipped View / Slot Refs : Core pur + raccord runtime ;
+- bonus directs + sets : Core pur + raccord `dungeonEquipmentBonus` ;
+- évolution : Core pur + raccord sur cache miss ;
+- cache/invalidation : frontières canoniques corrigées et GREEN.
 
-`assets/gensrpg/gens-mobile-combat-performance-16781022.js`.
+### Mission du pré-audit
 
-Frontières Equipment classées :
-- `save` ;
-- `dc214Equip` ;
-- `removeInventoryEntry`.
+Caractériser les wrappers/UI historiques restants avant tout nettoyage.
 
-Après exécution de ces mutations, le wrapper performance existant appelle :
+Cibles prioritaires :
+- `assets/dungeon/dungeon-equipment-ui.js` ;
+- `assets/dungeon/dungeon-equipment-hotfix-167817.js` ;
+- `assets/dungeon/dungeon-set-editor-167818.js` ;
+- `assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
 
-`GensEquipmentStatCleanup1678102.invalidateEquipmentBonusCache()`.
+Questions à trancher :
+1. quels wrappers restent réellement propriétaires et lesquels sont devenus doublons ;
+2. quels fallbacks de calcul sets/bonus concurrencent désormais les Core raccordés ;
+3. quels listeners/observers/timers appartiennent uniquement à l'UI et ne doivent pas entrer dans Core ;
+4. quels wrappers `openEquipmentEditor` / `saveEquipmentEditor` sont empilés ;
+5. quel premier micro-lot de retrait peut être purement soustractif sans changer le gameplay.
 
-Le cache Equipment local invalide alors immédiatement :
-- `equipmentBonusCache` ;
-- `equippedSnapshot`.
+### Interdictions
 
-### Couverture des vrais propriétaires
+- diagnostic / caractérisation uniquement ;
+- aucune suppression runtime dans ce lot ;
+- aucun changement de rendu ;
+- aucun changement de stockage ;
+- aucun changement de sets/bonus/évolution/cache ;
+- pas de `index.html` ;
+- pas de nouveau wrapper ;
+- pas de nouvel observer/timer/retry ;
+- pas de Stats/Tactical/combat ;
+- ne pas toucher `main`.
 
-Les six propriétaires inline de slots :
-- `equipRight` ;
-- `equipLeft` ;
-- `equipTwoHands` ;
-- `unequip` ;
-- `equipRpgGear` ;
-- `unequipRpgGear`
+### TDD prévu
 
-atteignent déjà `save()`.
-
-`dc214Equip` est couvert directement.
-
-`removeInventoryEntry` est maintenant couvert directement pour
-l'invalidation, indépendamment de la persistance de son appelant.
-
-### Dette retirée
-
-Le cleanup Equipment ne tente plus de wrapper les anciens noms morts :
-- `dungeonEquipItem` ;
-- `dungeonUnequipItem` ;
-- `equipDungeonItem` ;
-- `unequipDungeonItem` ;
-- `toggleDungeonEquipment`.
-
-`saveEquipmentEditor` reste une invalidation locale spécifique à l'éditeur.
-
-Aucun second wrapper n'a été ajouté sur les frontières canoniques.
-
-### TDD
-
-RED initial :
-- Architecture `35637289338` — FAILURE attendu ;
-- erreur :
-  `local Equipment cache must invalidate at canonical mutation boundary save`.
-
-RED de retrait de dette :
-- Architecture `35637662040` — FAILURE attendu ;
-- erreur :
-  `dead local cache invalidator target must be retired: dungeonEquipItem`.
-
-La sentinelle VM finale prouve pour `save`, `dc214Equip` et
-`removeInventoryEntry` :
-- mutation réelle exactement une fois ;
-- cache performance invalidé ;
-- cache Equipment local invalidé ;
-- retour préservé ;
-- wrapper performance existant conservé ;
-- aucun second wrapper.
-
-### Validation technique GREEN
-
-HEAD technique :
-`4efaf9de71091d0b44fc9410525f521a54a6590f`.
-
-- Architecture + navigateur complet :
-  `35638123573` — SUCCESS ;
-- Firefox :
-  `35638123814` — SUCCESS ;
-- Tactical Dock :
-  `35638123988` — SUCCESS.
-
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CACHE_INVALIDATION_FIX.md`.
-
-### Périmètre respecté
-
-Aucun changement de :
-- `index.html` ;
-- fonctions inline equip/unequip ;
-- TTL 120 ms ;
-- calcul direct + sets ;
-- calcul évolution ;
-- stockage ;
-- UI/Builders ;
-- combat ;
-- Stats/Tactical ;
-- composition Pages ;
-- graphe runtime.
-
-Aucun nouvel observer, timer/retry, cache ou système de wrappers.
-
-### État actuel
-
-Clôture documentaire en cours.
-
-Le SHA documentaire exact doit repasser :
-- Architecture + navigateur ;
-- Firefox ;
-- Tactical Dock.
-
-Aucun checkpoint GREEN final avant ces trois SUCCESS.
+1. inventorier les wrappers/fallbacks/side effects des quatre couches ;
+2. identifier les chaînes exactes de `openEquipmentEditor`,
+   `saveEquipmentEditor`, `renderDungeonGear` et calcul de sets ;
+3. poser une sentinelle de caractérisation ;
+4. prouver quels doublons sont désormais inactifs ou remplaçables ;
+5. trois batteries GREEN ;
+6. documenter ;
+7. revalider le SHA documentaire ;
+8. checkpoint GREEN de pré-audit ;
+9. seulement ensuite ouvrir un micro-lot de retrait minimal.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-green-2026-09-21` ;
-3. ouvrir un nouveau checkpoint de départ et une nouvelle branche pour le
-   prochain micro-lot Inventory/Equipment défini par le pré-audit/roadmap ;
-4. ne jamais toucher `main`.
+Inspecter les quatre propriétaires historiques et poser la sentinelle de
+caractérisation sans modifier le runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

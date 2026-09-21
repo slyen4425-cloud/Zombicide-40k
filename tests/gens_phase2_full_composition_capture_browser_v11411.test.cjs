@@ -11,7 +11,7 @@ const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
 const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"></script>');
-assert.equal(pageTags.length,20,'Pages-equivalent characterization expects 20 injected modules');
+assert.equal(pageTags.length,21,'Pages-equivalent characterization expects 21 injected modules including Core Stats normalization');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 let productionHtml=indexSource.split(perfTag).join('');
 let inlineSeq=0;

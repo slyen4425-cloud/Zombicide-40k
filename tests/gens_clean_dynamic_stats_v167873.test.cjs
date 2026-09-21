@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 let savedProfiles=[];
 const profile={id:'dungeon',gameStyle:'dungeon',rpgUniverse:{progression:{attributeEditMode:'points'},stats:{
  active:['force','agility','intelligence','spirit','endurance','initiative','chance'],
@@ -25,7 +26,7 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
  applyDungeonCombatScaling:(_it,st)=>st
 };
 ctx.window=ctx;ctx.globalThis=ctx;
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;assert.ok(api,'clean stat API missing');api.install();
 assert.equal(api.APP_VERSION,'16.78.114.7');
 assert.equal(api.def('chance').name,'Chance');

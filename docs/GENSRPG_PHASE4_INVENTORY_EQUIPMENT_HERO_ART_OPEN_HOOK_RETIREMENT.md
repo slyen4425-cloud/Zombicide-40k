@@ -141,14 +141,35 @@ Non modifiés :
 - `index.html` ;
 - `main`.
 
-## Validation finale attendue
+## Validation technique avant clôture documentaire
 
-Le lot ne peut être déclaré GREEN qu'après, sur le SHA documentaire final :
-- Architecture + navigateur complet : SUCCESS ;
-- Firefox : SUCCESS ;
-- Tactical Dock contrat + Chromium + Firefox : SUCCESS.
+SHA documentaire candidat :
+`917497395ab3cbd06f86df70a2285e80a30d7dc1`.
 
-Ensuite seulement :
+Résultats :
+- Architecture + navigateur complet `35651753018` — SUCCESS ;
+- Firefox `35651752932` — SUCCESS ;
+- Tactical Dock contrat + Chromium + Firefox `35651752858` — SUCCESS.
+
+Le navigateur complet a notamment validé :
+- Dungeon après Survie ;
+- Builder ;
+- Config objet moderne ;
+- cache / retour / pièges authored ;
+- Save & Quit / reprise ;
+- Capture ;
+- PvP ;
+- non-interférence ;
+- murs Tactical ;
+- preview ;
+- resolver d'assets ;
+- la nouvelle caractérisation Equipment sans dépendance au hook Hero Art.
+
+La présente mise à jour documentaire change le SHA. Conformément à la charte,
+le checkpoint GREEN final ne sera créé qu'après revalidation des trois batteries
+sur le SHA documentaire exact de clôture.
+
+Checkpoint cible :
 `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
 
 ## Prochaine dette séparée

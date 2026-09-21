@@ -80,7 +80,7 @@ assert.equal(localTargets.includes('removeInventoryEntry'),false,
 assert.equal(localTargets.includes('dc214Equip'),false,
   'dc214Equip is not directly wrapped by the local Equipment cache invalidator');
 
-assert.match(cleanup,/const CACHE_TTL_MS=120/,'Equipment evolution cache TTL must stay characterized at 120 ms');
+assert.match(cleanup,/\bCACHE_TTL_MS=120\b/,'Equipment evolution cache TTL must stay characterized at 120 ms');
 assert.match(
   extractFunction(cleanup,'equippedItemsCached'),
   /\(t-equippedSnapshot\.at\)<=CACHE_TTL_MS/,

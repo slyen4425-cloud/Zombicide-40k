@@ -1,3 +1,62 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — Hero Art open hook retirement — 2026-09-21
+
+Ce bloc est le point de reprise prioritaire.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-2026-09-21`.
+- Base :
+  `c5f8b60cc130d6df12651c317285ed209eddd5c2`.
+- Dernier checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-inventory-equipment-open-wrapper-preaudit-green-2026-09-21`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat technique validé
+
+Correctif runtime unique :
+`d2725f2a7bd515e7f37a6bf82435976d0e336e0d`.
+
+Le seul changement runtime est le retrait de `"openEquipmentEditor"` dans
+`GensDungeonHeroArtRepair167874.hookAll()`.
+
+Validation technique complète sur :
+`52757bf2695fc8d6a9f9937246182707119ced8a`.
+
+- Architecture + navigateur complet :
+  `35651851130` — SUCCESS ;
+- Firefox :
+  `35651851190` — SUCCESS ;
+- Tactical Dock :
+  `35651851034` — SUCCESS
+  (contrat + Chromium + Firefox SUCCESS).
+
+La nouvelle sentinelle navigateur ciblée Equipment est SUCCESS dans le run
+Architecture complet.
+
+### Validation documentaire finale
+
+La présente mise à jour de `GENSRPG_CURRENT_WORK.md` crée volontairement un
+nouveau SHA documentaire. Ce SHA doit repasser les trois workflows avant création
+du checkpoint GREEN, conformément à la charte.
+
+Checkpoint à créer uniquement si les trois workflows du SHA documentaire sont
+SUCCESS :
+
+`checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+
+Règle de reprise :
+- si ce checkpoint existe et pointe sur le HEAD documentaire de ce bloc, le lot est
+  officiellement GREEN et clos ;
+- sinon reprendre uniquement la validation finale, sans retoucher le runtime.
+
+### Prochaine dette séparée
+
+Le prochain candidat reste le retry `installWrappers()` de
+`GensHeroEditorDynamic167897` et son interaction avec le marqueur
+`__canonEq102` d'Equipment Cleanup. Ouvrir un nouveau lot / checkpoint de départ
+avant toute modification.
+
+
 ## ÉTAT ACTUEL — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21
 
 Ce bloc est le point de reprise opérationnel prioritaire. Les blocs suivants sont historiques.

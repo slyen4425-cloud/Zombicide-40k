@@ -52,22 +52,22 @@ assert.equal(coreCtx.DungeonCore317.resolveArmorFloor(3,2,3,'physical',{armorZer
 const rt110={
   CHARS:{hero:{dungeonStats:{}}},
   loadState:()=>({}),
-  GensCleanRpgStats167874:{runtimeDefs:()=>[]},
+  GensCleanRpgStats167874:{
+    coreSnapshot:id=>({
+      version:'1.0.0',heroId:id,canonical:[],
+      values:{armor:7,movement:3,initiative:0,defense:0},
+      derived:{physicalDamageBonus:0,magicDamageBonus:0,hpBonus:0,maxMana:0,crit:0,dodge:0,initiative:0,magicResistance:0}
+    })
+  },
   effectiveMaxWounds:()=>10,
   dungeonHeroMoveValue083:()=>3,
   dungeonDerivedInitiative:()=>0,
   dungeonDerivedDefense:()=>0,
-  dungeonArmorScore:()=>7,
-  dungeonDodgeChance:()=>0,
-  dungeonCriticalChance:()=>0,
-  dungeonMagicResistance:()=>0,
-  dungeonMaxMana:()=>0,
-  dungeonPhysicalDamageBonus:()=>0,
-  dungeonMagicDamageBonus:()=>0,
+  dungeonArmorScore:()=>99,
   loadDungeonRpgRules:()=>({critMultiplier:2})
 };
 const snap=tactical110.buildHeroSnapshot(rt110,'hero',{hp:10,maxHp:10,armor:0,movement:3,initiative:0,defense:0,dodge:0});
-assert.equal(snap.derived.armor,7,'V110 must transport dungeonArmorScore, not Dungeon armorReduction');
+assert.equal(snap.derived.armor,7,'V110 must transport canonical Core armorScore, not Dungeon armorReduction or its legacy fallback');
 const actor={armor:0,meta:{}};
 tactical110.applyHeroSnapshot(actor,snap);
 assert.equal(actor.armor,7,'V110 actor armor must receive the transported armorScore');

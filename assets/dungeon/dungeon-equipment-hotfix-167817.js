@@ -47,29 +47,32 @@ function bonusText(bonuses){
   }).join(" · ")||"Bonus descriptif";
 }
 
-/* 1) Le moteur de set ne doit plus dépendre du garde isDungeonHeroSheet().
-      Si l'ancien helper renvoie vide, on reconstruit depuis state.rpgGear + mains. */
+/* 1) Le moteur de set ne dépend plus du garde isDungeonHeroSheet().
+      Le dernier propriétaire historique devient l'adaptateur explicite du Core Inventory. */
+const equippedView=ROOT.GensInventoryEquippedViewV1;
+if(!equippedView||typeof equippedView.equippedItems!=="function"){
+  throw new Error("GensInventoryEquippedViewV1 must load before dungeon-equipment-hotfix-167817.js");
+}
 const baseEquipped=ROOT.dungeonEquippedItems;
 if(typeof baseEquipped==="function"&&!baseEquipped.__equipmentHotfix167817){
   const wrapped=function(){
-    let list=[];
-    try{list=baseEquipped.apply(this,arguments);if(Array.isArray(list)&&list.filter(Boolean).length)return list.filter(Boolean)}catch(e){}
     try{
-      if(typeof ROOT.isDungeonMode==="function"&&!ROOT.isDungeonMode())return Array.isArray(list)?list:[];
+      if(typeof ROOT.isDungeonMode==="function"&&!ROOT.isDungeonMode())return [];
       const st=ROOT.state;
-      if(!st||!Array.isArray(st.inventory))return Array.isArray(list)?list:[];
-      const indexes=[st.rightHand,st.leftHand,...Object.values(st.rpgGear||{})].filter(Number.isInteger);
-      const seen=new Set(),out=[];
-      indexes.forEach(index=>{
-        if(seen.has(index))return;seen.add(index);
-        const entry=st.inventory[index];
-        let item=null;
-        try{if(typeof ROOT.getItemFromEntry==="function")item=ROOT.getItemFromEntry(entry)}catch(e){}
-        if(!item)item=findItem(entry?.itemId);
-        if(item)out.push(item);
-      });
-      return out;
-    }catch(e){return Array.isArray(list)?list:[]}
+      if(!st||!Array.isArray(st.inventory))return [];
+      return Array.from(equippedView.equippedItems({
+        inventory:st.inventory,
+        rightHand:st.rightHand,
+        leftHand:st.leftHand,
+        rpgGear:st.rpgGear,
+        resolveItem(entry){
+          let item=null;
+          try{if(typeof ROOT.getItemFromEntry==="function")item=ROOT.getItemFromEntry(entry)}catch(e){}
+          if(!item)item=findItem(entry?.itemId);
+          return item;
+        }
+      }));
+    }catch(e){return []}
   };
   wrapped.__equipmentHotfix167817=true;
   wrapped.__original=baseEquipped;

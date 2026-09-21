@@ -32,7 +32,7 @@ function extractFunction(source,name){
   for(let i=brace;i<source.length;i++){
     const c=source[i],n=source[i+1]||'';
     if(line){if(c==='\n')line=false;continue}
-    if(block){if(c==='*'&&n==='/'){block=false;i++;continue}
+    if(block){if(c==='*'&&n==='/'){block=false;i++}continue}
     if(quote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===quote)quote=null;continue}
     if(c==='/'&&n==='/'){line=true;i++;continue}
     if(c==='/'&&n==='*'){block=true;i++;continue}

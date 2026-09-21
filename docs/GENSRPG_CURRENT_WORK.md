@@ -82,6 +82,64 @@ Avant toute création ou raccord de module :
 - aucun timer/retry ;
 - aucun changement sur `main`.
 
+### Audit et TDD S7 confirmés
+
+Audit :
+`docs/GENSRPG_PHASE4_STATS_S7_SNAPSHOT_AUDIT.md`.
+
+Chaîne active prouvée :
+`dungeonCombatHeroSnapshot -> Tactical Adapter -> V110 build/apply snapshot`.
+
+V114.5 reste hors graphe production.
+
+RED TDD :
+- commit `10160ba820e906a6cc4392dfa1768fc8c56508b2` ;
+- Architecture `35585364039` — FAILURE attendu ;
+- cause exacte : `ENOENT assets/gensrpg/core/stats-snapshot-v1.js`.
+
+### Extraction S7 technique GREEN
+
+Module :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Commit module :
+`60d07a948e00ec887d119328a89ac3aeacd941c6`.
+
+Classification inert :
+`70c6290434ba9c4e06ac905e7105452126626810`.
+
+Le snapshot :
+- transporte uniquement valeurs canoniques + dérivées S6 stables ;
+- est immuable ;
+- exclut ressources de session, résistances, règles et résolution combat ;
+- ne lit aucun global Dungeon/Tactical.
+
+Runs du HEAD technique `70c6290434ba9c4e06ac905e7105452126626810` :
+- Architecture + navigateur complet : `35585530549` — SUCCESS ;
+- Firefox : `35585530588` — SUCCESS ;
+- Tactical Dock : `35585530540` — SUCCESS.
+
+Aucun fichier runtime historique ni `index.html` n'a été modifié.
+Le module S7 reste Phase 4 inert.
+
+### Clôture S7 en cours
+
+Document technique mis à jour au commit :
+`16ca979dd2ceb5ba06957908bdb0b386555fceee`.
+
+Le présent commit CURRENT_WORK devient le SHA documentaire final candidat.
+Il doit repasser :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Après trois SUCCESS :
+1. créer `checkpoint/gensrpg-phase4-stats-s7-core-snapshot-green-2026-09-21` ;
+2. ouvrir S8 depuis ce checkpoint ;
+3. S8 = normalisation des résistances array/object sans changer les pourcentages
+   ni leur application Dungeon/Tactical.
+
+
 
 # GenSrpG — Travail courant
 

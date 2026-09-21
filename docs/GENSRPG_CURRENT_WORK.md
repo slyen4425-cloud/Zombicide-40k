@@ -118,15 +118,58 @@ Le blob de base reste :
 Si le corps exact d'une fonction inline devient nécessaire, appliquer la règle
 26 et demander le fichier exact ; ne pas multiplier les lectures API du gros HTML.
 
-### Prochaine étape
+### Résultat du pré-audit
 
-1. audit des fichiers externes et du graphe production ;
-2. identification des fonctions protégées/wrappers ;
-3. seulement si nécessaire, règle 26 pour les propriétaires inline ;
-4. produire `docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SETS_PREAUDIT.md` ;
-5. ajouter une sentinelle de caractérisation ;
-6. aucun service Core et aucun raccord runtime dans ce lot ;
-7. checkpoint GREEN uniquement après les trois batteries finales.
+Pré-audit terminé sans modification runtime.
+
+Autorités prouvées :
+- inventaire : `state.inventory[]` ;
+- slots : `rightHand / leftHand / rpgGear` ;
+- vue équipée : `dungeonEquippedItems()` + hotfix V16.78.17 ;
+- sets : `setState316()` / registry `DUNGEON_EQUIPMENT_SETS` ;
+- bonus équipement :
+  direct -> set -> évolution -> cache -> `dungeonEquipmentBonus` ;
+- Core Stats reste consommateur du seam Equipment via S5.
+
+Risques documentés :
+- références de slots par index ;
+- plusieurs wrappers éditeur ;
+- fallback set dans l'UI ;
+- double couche de persistance sets ;
+- caches empilés ;
+- invalidateurs historiques ne couvrant pas explicitement tous les vrais
+  propriétaires equip/unequip ;
+- mélange catalogue/sets/combat dans Core 3.16.
+
+Le fichier inline exact a été contrôlé :
+- taille : 8 174 580 octets ;
+- blob : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+### Validation technique
+
+SHA technique :
+`c540e0c033e85ecfa64721f16efb0aadecef308e`.
+
+- Architecture + navigateur complet : `35607723774` — SUCCESS ;
+- Firefox : `35607723698` — SUCCESS ;
+- Tactical Dock : `35607723731` — SUCCESS.
+
+Aucun gameplay/runtime/stockage n'a été modifié.
+
+### Clôture candidate
+
+Le SHA documentaire final doit maintenant repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-inventory-equipment-sets-preaudit-green-2026-09-21` ;
+2. ouvrir un nouveau lot homogène :
+   **Core Inventory — contrat pur Equipped View / Slot Refs** ;
+3. aucun raccord runtime dans le premier commit de ce micro-lot ;
+4. ne pas toucher `main`.
+
+Audit :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_SETS_PREAUDIT.md`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

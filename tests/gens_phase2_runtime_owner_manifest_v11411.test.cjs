@@ -48,8 +48,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,75,'production graph size drifted before owner validation');
-assert.equal(mapped.size,75,'owner manifest must currently map all 75 production-reachable files');
+assert.equal(reachable.size,76,'production graph size drifted before owner validation');
+assert.equal(mapped.size,76,'owner manifest must currently map all 76 production-reachable files');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

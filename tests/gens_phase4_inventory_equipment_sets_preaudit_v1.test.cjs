@@ -14,6 +14,7 @@ const ui=read('assets/dungeon/dungeon-equipment-ui.js');
 const setEditor=read('assets/dungeon/dungeon-set-editor-167818.js');
 const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
+const statsNormalization=read('assets/gensrpg/core/stats-normalization-v1.js');
 const stats=read('assets/gensrpg/gens-rpg-stats-clean-167874.js');
 const pages=read('.github/workflows/main.yml');
 const preview=read('preview.html');
@@ -157,6 +158,7 @@ assert.match(core316,/return itemBonus\+dungeonSetBonusTotal\(key\)/,'Core 3.16 
 assert.match(cleanup,/const old=R\.dungeonEquipmentBonus/);
 assert.match(cleanup,/old\.apply\(this,arguments\),0\)\+cachedEvolutionBonus\(key\)/,'cleanup must layer evolution over previous equipment bonus');
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance layer must cache the final equipment seam');
+assert.ok(statsNormalization.includes('GensStatsNormalizationV1'),'preaudit must retain the explicit Core Stats dependency before inspecting the Stats owner');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must consume Equipment through the explicit seam');
 assert.match(stats,/\{source:"equipment",values:equipmentValues\}/,'S5 input must keep Equipment as an explicit modifier source');
 

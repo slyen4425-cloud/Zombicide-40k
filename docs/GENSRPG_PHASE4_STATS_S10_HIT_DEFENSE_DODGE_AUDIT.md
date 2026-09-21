@@ -292,3 +292,56 @@ La sentinelle S10 doit couvrir :
 7. bornes Tactical 5..95 ;
 8. seuil D100 haut ;
 9. absence de RNG/résolution hit dans Core Stats.
+
+
+## Sentinelle comparative S10
+
+Test :
+`tests/gens_phase4_stats_s10_hit_defense_dodge_characterization_v1.test.cjs`.
+
+Commits :
+- création de la sentinelle :
+  `e177bb3a109669c15a993ca04638c1937b5c6dbc` ;
+- branchement CI :
+  `8ace19da3992499f38b2c54ac195d3be3c81f9b7`.
+
+La sentinelle utilise :
+- les helpers inline réels `dungeonHitBonusForMode`,
+  `dungeonClampHitChance`, `d100ThresholdFromChance`,
+  `dungeonAttackerCharacteristic` et `dungeonDefenseReduction` ;
+- les vrais corps propriétaires `dungeonCombatBasicAttack`,
+  `rollEnemyAttack` et `applyDungeonAttackDamage` pour verrouiller
+  l'ordre hit → dodge ;
+- le vrai moteur Tactical V2 ;
+- le vrai module Tactical rules pour le couvert de case ;
+- le vrai V114.11 `hitCalculation / thresholdForChance / displayHit`.
+
+Résultat de la sentinelle dans Architecture `35594837513` :
+**SUCCESS**.
+
+Elle prouve :
+- D100 final haut dans les deux chemins ;
+- Défense « excès seulement » dans Dungeon ;
+- Défense directe dans Tactical ;
+- Esquive second jet dans Dungeon ;
+- Esquive incluse dans la chance Tactical ;
+- couvert Tactical inclus avant le jet ;
+- bornes Dungeon configurables ;
+- bornes Tactical 5..95 ;
+- aucune résolution hit/miss déplacée dans Core Stats.
+
+## Décision S10
+
+**Aucun nouveau module Core n'est créé dans S10.**
+
+Cette absence d'extraction est volontaire et conforme à la charte :
+- Core Stats possède déjà les valeurs et modificateurs communs nécessaires ;
+- créer un calcul final commun introduirait un deuxième moteur concurrent ;
+- Dungeon et Tactical ont des sémantiques historiques différentes ;
+- le plan exige de conserver la résolution dans les moteurs combat tant qu'un
+  moteur commun explicite n'existe pas.
+
+S10 verrouille donc la **frontière d'autorité**, pas une formule unique.
+
+Aucun fichier gameplay, aucune formule de hit, aucun D100, aucune Défense,
+aucune Esquive, aucun couvert et aucun `index.html` n'ont été modifiés.

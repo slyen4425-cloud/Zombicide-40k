@@ -61,7 +61,7 @@ async function waitReady(page){
     assert.ok(roomCreatorPos>storagePos,'Core storage must load before Room Creator');
     assert.equal(first.perfCount,1,'performance/bootstrap layer must occur exactly once in preview composition');
     assert.equal(first.srcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap must remain final');
-    assert.equal(first.stubScripts,26,'all 26 Pages runtime script slots must execute before preview-ready');
+    assert.equal(first.stubScripts,27,'all 27 Pages runtime script slots must execute before preview-ready');
     assert.equal(first.swAttempt,1,'fixture must exercise the source PWA registration path');
     assert.equal(first.swResolved,true,'preview must replace service-worker registration with a harmless resolved stub');
     assert.equal(first.swError,'','preview PWA isolation must not reject source startup');
@@ -74,7 +74,7 @@ async function waitReady(page){
     assert.equal(second.menu,true,'GenSrpG source UI must return after reload/restart');
     assert.equal(second.preview,true,'preview isolation must be restored after reload/restart');
     assert.match(second.href,/\/preview\.html$/,'reload/restart must remain on preview.html');
-    assert.equal(second.stubScripts,26,'runtime composition must execute exactly once after restart');
+    assert.equal(second.stubScripts,27,'runtime composition must execute exactly once after restart');
     assert.ok(previewRequests>=2,'browser restart test must request preview.html again');
     assert.equal(swRequests,0,'service-worker.js must still be isolated after restart');
     assert.deepEqual(localFailures,[],'preview local requests must not return HTTP errors');

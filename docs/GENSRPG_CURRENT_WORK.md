@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — contrat pur bonus directs + sets — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture contrat bonus directs + sets — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,75 +13,92 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Lot précédent clôturé GREEN
+### Résultat technique
 
-Core Inventory Equipped View est connecté au runtime via le propriétaire
-`dungeon-equipment-hotfix-167817.js`.
+Nouveau service pur et inert :
 
-Validation finale du SHA documentaire `7408d1d0...` :
-- Architecture + navigateur complet : `35620061917` — SUCCESS ;
-- Firefox : `35620061859` — SUCCESS ;
-- Tactical Dock : `35620061916` — SUCCESS.
+`assets/gensrpg/core/equipment-bonus-sets-v1.js`.
 
-### Mission du nouveau micro-lot
+Export :
 
-Extraire un contrat **pur et inert** pour les bonus Equipment directs + sets,
-sans raccorder encore `dungeonEquipmentBonus`.
+`GensEquipmentBonusSetsV1`.
 
-Sources historiques à caractériser :
-- bonus direct : `item.rpgBonuses[key]` sur la vue équipée ;
-- moteur de sets Core 3.16 : `setState316(items, registry)` ;
-- activation des paliers par nombre de pièces uniques ;
-- déduplication par `setPieceId || item.id` ;
-- cumul des bonus de tous les paliers actifs.
+API :
+- `thresholds(set)` ;
+- `directBonus(items,key)` ;
+- `setState(items,registry)` ;
+- `setBonus(items,key,registry)` ;
+- `totalBonus(items,key,registry)`.
 
-### Contrat cible
+Parité caractérisée contre :
+- bonus direct inline historique ;
+- `setState316(items, registry)` de Core 3.16.
 
-Le futur module Core doit recevoir uniquement des entrées explicites :
-- liste d'objets équipés ;
-- registry de sets ;
-- clé de bonus.
+Sémantiques verrouillées :
+- bonus directs numériques ;
+- déduplication set par `setPieceId || item.id` ;
+- seuils cumulés ;
+- plusieurs sets ;
+- registry inconnu ignoré ;
+- valeurs non numériques = 0.
 
-Sorties pures candidates à verrouiller par TDD :
-- bonus direct agrégé ;
-- état des sets ;
-- bonus de set par clé ;
-- total direct + set.
+### Inertie
 
-### Interdictions
+Le service est classé Phase 4 **inert**.
 
-- aucun raccord runtime dans ce lot ;
-- ne pas modifier `dungeonEquipmentBonus` ;
-- ne pas modifier Core 3.16 ;
-- ne pas modifier `index.html` ;
-- pas d'évolution ;
-- pas de cache / invalidation ;
-- pas de stockage ;
-- pas d'UI / Builders ;
-- pas de combat / capacités objets ;
-- pas de Stats / Tactical ;
-- aucun wrapper, observer, timer/retry ou monkey-patch ;
-- ne pas toucher `main`.
+- aucun chargement Pages ;
+- aucun chargement preview ;
+- aucun précache PWA ;
+- aucun raccord runtime ;
+- graphe production maintenu à 74 fichiers atteignables.
 
-### TDD prévu
+Inventaire physique :
+- 92 fichiers JS ;
+- 12 services Phase 4 connus.
 
-1. caractériser le propriétaire direct historique et `setState316` ;
-2. écrire une sentinelle RED exigeant un nouveau module Core pur ;
-3. verrouiller la parité :
-   - bonus directs ;
-   - pièces uniques ;
-   - arme/objet dupliqué ;
-   - seuils multiples actifs ;
-   - plusieurs sets simultanés ;
-   - clés absentes / valeurs non numériques ;
-4. créer uniquement le service pur ;
-5. conserver le service hors graphe production ;
-6. Architecture + navigateur, Firefox, Tactical Dock avant checkpoint GREEN.
+### Validation technique GREEN
+
+HEAD technique :
+`070d772fe125767ebc3531cbe04543e4a66662ac`.
+
+- Architecture + navigateur complet : `35621365751` — SUCCESS ;
+- Firefox : `35621365581` — SUCCESS ;
+- Tactical Dock : `35621365736` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_BONUS_SETS_CONTRACT.md`.
+
+### Périmètre respecté
+
+Aucun changement de :
+- `index.html` ;
+- composition production ;
+- `dungeonEquipmentBonus` ;
+- Core 3.16 ;
+- évolution ;
+- cache/invalidation ;
+- stockage ;
+- UI/Builders ;
+- combat ;
+- Stats/Tactical.
+
+### État actuel
+
+Clôture documentaire en cours.
+
+Le SHA documentaire doit repasser les trois batteries avant création du
+checkpoint GREEN final.
 
 ### Prochaine action
 
-Construire la caractérisation/TDD depuis les propriétaires existants sans
-modifier le runtime, puis obtenir un RED propre avant création du service.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-bonus-sets-contract-green-2026-09-21` ;
+3. ouvrir un checkpoint de départ et une branche neuve pour le raccord
+   `dungeonEquipmentBonus` ;
+4. ce futur raccord doit rester limité à direct + sets ;
+5. évolution et cache resteront dans des lots ultérieurs ;
+6. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

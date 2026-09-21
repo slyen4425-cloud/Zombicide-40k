@@ -56,6 +56,9 @@ jobs:
       - name: Exécuter la stabilité image de fiche héros
         run: node tests/gens_hero_sheet_art_runtime_v11411.test.cjs
 
+      - name: Auditer l’ordre de dépendance Core Stats dans les tests VM
+        run: node tests/gens_phase4_stats_dependency_order_v1.test.cjs
+
       - name: Vérifier Force canonique vers snapshot Tactical
         run: node tests/gens_force_to_tactical_snapshot_v11411.test.cjs
 

@@ -404,6 +404,9 @@ jobs:
       - name: Exiger la garde de chaîne Hero Editor
         run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_owner_v1.test.cjs
 
+      - name: Inventorier les participants saveEquipmentEditor
+        run: node tests/gens_phase4_inventory_equipment_save_wrapper_inventory_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

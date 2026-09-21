@@ -42,17 +42,24 @@ for(const text of [
 
 for(const text of [
   'function buildHeroSnapshot(rt=R,heroId="",actor=null){',
-  'api.value(id,sid)',
+  'api.coreSnapshot(id)',
+  'core.canonical',
+  'core.values',
+  'core.derived',
   'effectiveMaxWounds','dungeonDerivedInitiative','dungeonDerivedDefense',
-  'dungeonArmorScore','dungeonDodgeChance','dungeonCriticalChance',
-  'dungeonMagicResistance','dungeonMaxMana','dungeonPhysicalDamageBonus',
-  'dungeonMagicDamageBonus',
+  'dungeonArmorScore',
   'function applyHeroSnapshot(actor,snap,',
   'return decorateBattle(rt,b,{force:true})',
   'dirtyHeroes.has(id)',
   'actor?.meta?.rpgStats?.version!==SNAPSHOT_VERSION'
 ]){
   assert.ok(v110.includes(text),'V110 snapshot contract missing: '+text);
+}
+for(const removed of [
+  'dungeonDodgeChance','dungeonCriticalChance','dungeonMagicResistance',
+  'dungeonMaxMana','dungeonPhysicalDamageBonus','dungeonMagicDamageBonus'
+]){
+  assert.equal(v110.includes(removed),false,'S11 raccord must remove redundant V110 Dungeon read: '+removed);
 }
 
 for(const field of ['movement','initiative','defense','armor','dodge']){
@@ -85,7 +92,7 @@ console.log(JSON.stringify({
   verifiedInlineSource:true,
   dungeonSnapshotFirst:true,
   adapterConsumesDungeonSnapshot:true,
-  v110SecondSnapshot:true,
+  v110ConsumesCoreSnapshot:true,
   v110ReappliesActorStats:true,
   v110CachedAfterBuild:true,
   v1145Dormant:true,

@@ -35,7 +35,7 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,20,'GitHub Pages must inject the current 20-module production list');
+assert.equal(injected.length,21,'GitHub Pages must inject the current 20-module production list');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
 
@@ -43,7 +43,7 @@ const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,23,'production composition must expose 23 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,24,'production composition must expose 23 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');
@@ -89,18 +89,17 @@ const phase3Entrypoints=[
 const phase3Set=new Set(phase3Entrypoints);
 const phase4ConnectedServices=[
   'assets/gensrpg/core/asset-resolver-v1.js',
-  'assets/gensrpg/core/storage-v1.js'
-];
-const phase4InertServices=[
+  'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/stats-normalization-v1.js'
 ];
+const phase4InertServices=[];
 const phase4Set=new Set([...phase4ConnectedServices,...phase4InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,83,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and three Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,67,'production-reachable JS graph must currently contain 67 files');
+assert.equal(reachable.size,68,'production-reachable JS graph must currently contain 67 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);

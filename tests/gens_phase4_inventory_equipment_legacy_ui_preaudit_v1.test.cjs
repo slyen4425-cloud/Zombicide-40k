@@ -2,7 +2,6 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
@@ -13,7 +12,6 @@ const ui=read('assets/dungeon/dungeon-equipment-ui.js');
 const hotfix=read('assets/dungeon/dungeon-equipment-hotfix-167817.js');
 const setEditor=read('assets/dungeon/dungeon-set-editor-167818.js');
 const cleanup=read('assets/gensrpg/gens-equipment-stat-cleanup-1678102.js');
-const coreSets=read('assets/gensrpg/core/equipment-bonus-sets-v1.js');
 
 function extractFunction(source,name){
   const token='function '+name+'(';
@@ -57,58 +55,16 @@ assert.ok(workflow.includes('assets/dungeon/dungeon-equipment-ui.js'),
 assert.ok(workflow.includes('assets/gensrpg/core/equipment-bonus-sets-v1.js'),
   'Pages must inject Core Equipment bonus + sets');
 
-// Characterize the remaining local fallback and its canonical preference.
-const fallback=extractFunction(ui,'fallbackSetStates');
+// The first subtractive cleanup is now complete: no local set-state authority remains.
+assert.doesNotMatch(ui,/function\s+fallbackSetStates\s*\(/,
+  'Equipment UI local set-state fallback must remain retired');
 const setStates=extractFunction(ui,'setStates');
 assert.match(setStates,/dungeonSetStateFromItems316/,
-  'Equipment UI must currently prefer the historical canonical set-state seam');
-assert.match(setStates,/fallbackSetStates\(items\)/,
-  'Equipment UI local fallback must remain characterized before cleanup');
-
-const registry={
-  leather:{
-    id:'leather',name:'Leather',pieceCount:3,
-    thresholds:[
-      {pieces:2,bonuses:{armor:2}},
-      {pieces:3,bonuses:{armor:4}}
-    ]
-  }
-};
-const validItems=[
-  {id:'head',setId:'leather',setPieceId:'head'},
-  {id:'torso',setId:'leather',setPieceId:'torso'},
-  {id:'torso-copy',setId:'leather',setPieceId:'torso'}
-];
-
-const ctx={ROOT:{DUNGEON_EQUIPMENT_SETS:registry},console,Number,Object,Array,Set};
-vm.createContext(ctx);
-vm.runInContext(
-  extractFunction(ui,'numeric')+'\n'+
-  extractFunction(ui,'thresholds')+'\n'+
-  fallback,
-  ctx,
-  {filename:'dungeon-equipment-ui#set-fallback'}
-);
-vm.runInContext(coreSets,ctx,{filename:'equipment-bonus-sets-v1.js'});
-
-const project=states=>states.map(s=>({
-  setId:String(s.setId||''),
-  count:Number(s.count)||0,
-  items:(s.items||[]).map(x=>String(x.id||'')),
-  active:(s.activeThresholds||[]).map(x=>Number(x.pieces)||0)
-}));
-assert.deepEqual(
-  JSON.parse(JSON.stringify(project(ctx.fallbackSetStates(validItems)))),
-  JSON.parse(JSON.stringify(project(ctx.GensEquipmentBonusSetsV1.setState(validItems,registry)))),
-  'local UI fallback must match Core set progress semantics for valid catalogue pieces'
-);
-
-// Malformed piece exposes why the fallback must not become an authority.
-const malformed=[{setId:'leather'}];
-assert.equal(ctx.fallbackSetStates(malformed).length,0,
-  'local UI fallback skips an empty piece id');
-assert.equal(ctx.GensEquipmentBonusSetsV1.setState(malformed,registry)[0]?.count,1,
-  'Core set-state semantics currently count the historical empty-piece token');
+  'Equipment UI must depend on the canonical historical set-state seam');
+assert.doesNotMatch(setStates,/fallbackSetStates/,
+  'Equipment UI must not regain a local set-state fallback');
+assert.match(setStates,/return \[\];/,
+  'missing or invalid canonical set-state seam must degrade to an empty UI view');
 
 // Wrapper stack characterization.
 assert.match(hotfix,/ROOT\.openEquipmentEditor=wrapped/);
@@ -139,10 +95,10 @@ assert.match(cleanup,/setTimeout\(install,25\)/,
 console.log(JSON.stringify({
   scenario:'Phase 4 Equipment legacy wrappers/UI preaudit',
   setProgress:{
-    localFallbackPresent:true,
+    localFallbackPresent:false,
     productionCanonicalSeam:'dungeonSetStateFromItems316',
-    validPieceParityWithCore:true,
-    malformedEmptyPieceDivergence:true
+    canonicalOnly:true,
+    missingSeamReturnsEmpty:true
   },
   wrapperStack:{
     openEquipmentEditor:['hotfix-167817','set-editor-167818','cleanup-1678102'],
@@ -157,6 +113,6 @@ console.log(JSON.stringify({
     cleanupDelayedDecoration:true,
     cleanupInstallRetry:true
   },
-  firstSubtractiveCandidate:'remove local fallbackSetStates only after canonical set-state seam is guaranteed',
-  runtimeChanged:false
+  firstSubtractiveCandidateRetired:true,
+  runtimeChanged:true
 },null,2));

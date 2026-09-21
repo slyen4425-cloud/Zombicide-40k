@@ -77,10 +77,66 @@ Aucun nouveau wrapper, observer, timer/retry, fallback ou monkey-patch.
 4. valider que le comportement fonctionnel Equipment reste stable ;
 5. Architecture + navigateur complet, Firefox et Tactical avant GREEN.
 
-### Prochaine action
+### Résultat du pré-audit
 
-Créer les sentinelles de caractérisation de l'empilement initial/final, sans
-aucune modification runtime.
+Le défaut est confirmé sans modification runtime.
+
+Après la fenêtre de retries du Hero Editor Dynamic :
+- `openEquipmentEditor` contient **deux wrappers `__canon101`** ;
+- `saveEquipmentEditor` contient **deux wrappers `__canon101`** ;
+- le wrapper Cleanup open `__canonEq102` reste unique ;
+- l'invalidateur save `__eqCache1021` reste unique ;
+- Set Editor et hotfix restent uniques ;
+- les fonctions natives open/save ne sont appelées qu'une fois.
+
+Chaîne finale open :
+`__canon101 -> __canonEq102 -> __canon101 -> set-editor -> hotfix -> native`.
+
+Chaîne finale save :
+`__canon101 -> __eqCache1021 -> __canon101 -> set-editor -> hotfix -> native`.
+
+Cause :
+- le retry Hero Editor Dynamic regarde uniquement le wrapper courant ;
+- il ne reconnaît pas un `__canon101` déjà présent plus bas dans `__original` ;
+- les marqueurs Cleanup différents provoquent donc une réinstallation du même
+  propriétaire autour de la chaîne.
+
+Sentinelles :
+- `tests/gens_phase4_inventory_equipment_wrapper_reinstall_preaudit_v1.test.cjs` ;
+- `tests/gens_phase4_inventory_equipment_wrapper_reinstall_browser_v1.test.cjs`.
+
+Validation technique sur `3dbcd9d432fa6e722bb6da129e6537af90bf99ca` :
+- Architecture + navigateur complet `35653370078` — SUCCESS ;
+- Firefox `35653370055` — SUCCESS ;
+- Tactical Dock `35653370068` — SUCCESS.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_WRAPPER_REINSTALL_PREAUDIT.md`.
+
+### État de clôture
+
+La présente documentation change le SHA.
+
+Avant checkpoint GREEN :
+1. revalider Architecture + navigateur complet, Firefox et Tactical sur le SHA
+   documentaire exact ;
+2. créer après trois SUCCESS :
+   `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-reinstall-preaudit-green-2026-09-21`.
+
+### Prochaine action après GREEN
+
+Ouvrir un lot correctif séparé qui modifie uniquement le garde d'installation
+Hero Editor Dynamic afin qu'il détecte un `__canon101` déjà présent dans la chaîne
+`__original` et refuse de re-wrapper.
+
+Contraintes du futur lot :
+- ne pas supprimer le wrapper Hero Editor Dynamic ;
+- ne pas modifier Equipment Cleanup ;
+- ne pas retirer les retries globalement ;
+- ne pas toucher hotfix / Set Editor / stockage / cache / Stats / Tactical ;
+- obtenir un RED exigeant exactement un `__canon101` après >3 s ;
+- correction soustractive/minimale ;
+- validation navigateur réelle avant GREEN.
 
 
 ## ÉTAT ACTUEL — Phase 4 Core Inventory / Equipment — retrait du hook openEquipmentEditor de Hero Art Repair — 2026-09-21

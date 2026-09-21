@@ -353,6 +353,9 @@ jobs:
       - name: Verrouiller l'application unique des dégâts mêlée S11
         run: node tests/gens_phase4_stats_s11_melee_damage_double_application_fix_v1.test.cjs
 
+      - name: Comparer Core Snapshot S3-S7 au propriétaire V110
+        run: node tests/gens_phase4_stats_s11_core_snapshot_v110_parity_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

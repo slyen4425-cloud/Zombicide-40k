@@ -67,9 +67,8 @@ assert.ok(removeCallsites.length>0,'removeInventoryEntry must have at least one 
 const localInstall=extractFunction(cleanup,'installCacheInvalidators');
 const localTargets=[...localInstall.matchAll(/"([^"]+)"/g)].map(m=>m[1]);
 assert.deepEqual(localTargets,[
-  'dungeonEquipItem','dungeonUnequipItem','equipDungeonItem',
-  'unequipDungeonItem','toggleDungeonEquipment','saveEquipmentEditor'
-],'local Equipment cache invalidator target list drifted');
+  'saveEquipmentEditor'
+],'local Equipment cache invalidator list must retain only the editor-specific local boundary after canonical fix');
 
 const localCoveredSlotOwners=slotOwners.filter(name=>localTargets.includes(name));
 assert.deepEqual(localCoveredSlotOwners,[],
@@ -96,6 +95,8 @@ const perfInstall=extractFunction(perf,'install');
 const perfTargets=[...perfInstall.matchAll(/\["([^\]]+)"\]/g)];
 assert.match(perfInstall,/"dc214Equip"/,'performance cache must directly invalidate on dc214Equip');
 assert.match(perfInstall,/"save"/,'performance cache must invalidate on the shared save boundary');
+assert.match(perfInstall,/"removeInventoryEntry"/,'performance cache must directly own inventory removal invalidation after the dedicated fix');
+assert.match(perf,/GensEquipmentStatCleanup1678102\?\.invalidateEquipmentBonusCache/,'performance invalidator must cascade to the local Equipment cache');
 assert.match(perfInstall,/"saveState"/,'performance cache must invalidate on saveState');
 assert.match(perfInstall,/"saveDungeonHeroState"/,'performance cache must invalidate on Dungeon hero state save');
 
@@ -135,13 +136,14 @@ console.log(JSON.stringify({
     dc214EquipDirect:true,
     realSlotOwnersReachSave:true,
     removeInventoryEntryDirectSave:false,
+    removeInventoryEntryDirectPerformanceInvalidation:true,
     removeInventoryEntryCallsites:removeCallsites
   },
   risk:{
-    localEvolutionCacheCanRelyOnTtlAfterSlotMutation:true,
-    equippedSnapshotCanRelyOnTtlAfterSlotMutation:true,
-    invalidatorNamesDoNotMatchRealInlineOwners:true,
-    removeInventoryEntryDependsOnCallerPersistence:true
+    localEvolutionCacheCanRelyOnTtlAfterSlotMutation:false,
+    equippedSnapshotCanRelyOnTtlAfterSlotMutation:false,
+    canonicalInvalidationDelegatedThroughPerformanceOwner:true,
+    removeInventoryEntryPersistenceDependsOnCaller:true
   },
   runtimeChanged:false
 },null,2));

@@ -1,3 +1,97 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S8 normalisation des résistances — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s8-resistance-normalization-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s8-resistance-normalization-2026-09-21`.
+- Base exacte et dernier GREEN :
+  `e7443fbaf1bffb8f53685cc33d7af5858a54db4e`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s7-core-snapshot-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S7 définitivement clôturé
+
+HEAD final :
+`e7443fbaf1bffb8f53685cc33d7af5858a54db4e`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35586111254` — SUCCESS ;
+- Firefox : `35586111268` — SUCCESS ;
+- Tactical Dock : `35586111294` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s7-core-snapshot-green-2026-09-21`.
+
+`stats-snapshot-v1.js` reste Phase 4 inert.
+Aucun snapshot historique, aucun Adapter Tactical et aucune formule combat
+n'ont été remplacés dans S7.
+
+### Mission S8
+
+Normaliser le **contrat de données des résistances** sans modifier leur valeur,
+leur pourcentage ni leur application gameplay.
+
+Divergence déjà prouvée par le pré-audit :
+- l'éditeur / certaines données héros produisent une forme tableau
+  `[{kind,value}, ...]` ;
+- le snapshot Tactical V110 consomme historiquement des objets
+  `{ fire: 25, ... }` et ignore certaines formes tableau.
+
+S8 doit fournir une représentation canonique commune capable de lire les deux
+formes sans déplacer l'autorité des systèmes qui possèdent les résistances.
+
+### Frontières obligatoires S8
+
+S8 peut :
+- caractériser toutes les formes de résistances réellement chargées ;
+- normaliser array/object vers un contrat pur et déterministe ;
+- préserver exactement les valeurs numériques actuelles ;
+- préparer une API Core inert ;
+- comparer Dungeon et Tactical avant tout raccord.
+
+S8 ne doit pas :
+- changer un pourcentage ;
+- appliquer une résistance à un dégât ;
+- modifier la priorité ou le stacking gameplay sans preuve du comportement
+  historique ;
+- toucher Armor S9 ;
+- toucher hit/D100/Défense/Esquive S10 ;
+- toucher dégâts finaux S11 ;
+- ajouter HP/mana courants au snapshot S7 ;
+- modifier Equipment/Talents/Challenge ;
+- ajouter wrapper global, observer, timer/retry ;
+- modifier `main`.
+
+### Première action obligatoire S8
+
+Avant toute création de module :
+1. relire les producteurs de résistances héros/éditeur ;
+2. relire `gensNormalizeResistances` et ses callsites actifs ;
+3. relire V110 `collectResistanceObjects`, `resistanceSnapshot`,
+   `resistanceFor` et les tests Tactical associés ;
+4. relever les formes array/object réellement présentes et leurs règles en cas
+   de doublons/valeurs invalides ;
+5. distinguer **normalisation de données** et **application aux dégâts** ;
+6. confirmer le graphe de chargement réel ;
+7. réutiliser le `index.html` exact déjà vérifié si son blob est inchangé ;
+   sinon appliquer immédiatement la règle 26 ;
+8. seulement après cette cartographie, figer le contrat S8 et poser le TDD RED.
+
+### Interdictions S8
+
+- aucun raccord runtime avant audit + TDD ;
+- aucune modification de formule résistance ;
+- aucune suppression de lecteur historique avant preuve comparative ;
+- aucun changement Tactical final damage ;
+- aucun nouveau global de réparation ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S7 snapshot Core unique — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

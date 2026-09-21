@@ -26,7 +26,8 @@ const ctx={console,Math,Date,JSON,setTimeout,clearTimeout,alert:()=>{},current:'
  applyDungeonCombatScaling:(_it,st)=>st
 };
 ctx.window=ctx;ctx.globalThis=ctx;
-vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;assert.ok(api,'clean stat API missing');api.install();
 assert.equal(api.APP_VERSION,'16.78.114.7');
 assert.equal(api.def('chance').name,'Chance');

@@ -1,3 +1,68 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Equipment — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-wrapper-retry-preaudit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-wrapper-retry-preaudit-2026-09-21`.
+- Base exacte :
+  `0fd2909a488becc452439c27c8272e2b7b346f73`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-hero-art-open-hook-retirement-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+Le retrait du hook `openEquipmentEditor` de Hero Art Repair est officiellement
+GREEN sur le SHA exact `0fd2909a488becc452439c27c8272e2b7b346f73` :
+- Architecture + navigateur complet `35652570940` — SUCCESS ;
+- Firefox `35652570917` — SUCCESS ;
+- Tactical Dock `35652570850` — SUCCESS.
+
+### Mission unique
+
+Pré-auditer uniquement l'interaction entre :
+- le retry `GensHeroEditorDynamic167897.installWrappers()` utilisant
+  `__canon101` ;
+- le wrapper `openEquipmentEditor` de
+  `GensEquipmentStatCleanup1678102` utilisant `__canonEq102`.
+
+Objectif : prouver si, après installation complète des deux propriétaires, le retry
+Hero Editor recompose réellement la chaîne `openEquipmentEditor` au-dessus du
+Cleanup et si cette recomposition ajoute une responsabilité utile ou seulement
+une couche répétée.
+
+### Périmètre strict
+
+Audit / caractérisation uniquement.
+
+Autorisé :
+- sentinelle statique de la mécanique de retry et des marqueurs ;
+- caractérisation navigateur ciblée de la chaîne `__original` dans le temps ;
+- documentation / CURRENT_WORK / entrée CI d'audit.
+
+Interdit :
+- retirer ou modifier le retry ;
+- modifier `openEquipmentEditor` ou `saveEquipmentEditor` ;
+- modifier Equipment Cleanup, Set Editor ou hotfix ;
+- ajouter wrapper / observer / timer / retry / fallback ;
+- modifier stockage, bonus, sets, évolution, cache, Stats gameplay, Tactical ou combat ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### Preuve attendue avant tout lot correctif
+
+1. ordre de chargement réel Hero Editor -> Equipment Cleanup ;
+2. identité exacte du wrapper extérieur juste après Cleanup ;
+3. identité exacte après la fenêtre historique de retry Hero Editor ;
+4. nombre et ordre des marqueurs `__canon101` / `__canonEq102` dans la chaîne ;
+5. vérification que l'ouverture Equipment reste fonctionnelle pendant cette évolution ;
+6. conclusion explicite : retry nécessaire, retry redondant, ou responsabilité mixte à séparer.
+
+Aucun correctif runtime dans ce pré-audit.
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit retry wrappers Hero Editor / Equipment Cleanup — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

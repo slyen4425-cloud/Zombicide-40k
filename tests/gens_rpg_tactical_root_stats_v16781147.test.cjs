@@ -5,6 +5,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 const Stats=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-stats-1678110.js'));
 
 const state={rpgAttributes:{force:17,agilite:13,intelligence:11,esprit:9,endurance:15,initiative:8,defense:12,armor:2,movement:4},mana:6};
@@ -31,7 +32,7 @@ const ctx={
   setTimeout:fn=>{fn();return 1},clearTimeout:()=>{},
 };
 vm.createContext(ctx);
-vm.runInContext(source,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(source,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'canonical stats API must install');
 assert.equal(api.APP_VERSION,'16.78.114.7');

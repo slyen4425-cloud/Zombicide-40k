@@ -137,6 +137,80 @@ Procédure :
 Aucune ancienne copie locale ne doit être utilisée.
 
 
+### Règle 26 S6 — satisfaite
+
+Le fichier fourni dans le fil a été vérifié avant inspection :
+- taille : `8 174 580` octets ;
+- blob Git : `5b9b9ae780f735eadef049afeb10acf0b57441fe` ;
+- contenu exact du `index.html` du commit d'ouverture S6
+  `8f6fa73c365a107e50fa759346955354ddfa59ea`.
+
+Les huit helpers inline S6 ont été inspectés uniquement dans ce périmètre.
+Les formules exactes step / percent / perPoint et les doubles floor/cap
+historiques ont été figées dans le document S6.
+
+### TDD et extraction S6
+
+RED :
+`aa67d61ff3afaa806163ceb6887f74dcc041a9d1`.
+
+Run Architecture :
+`35581291799` — FAILURE attendu uniquement sur l'absence de
+`assets/gensrpg/core/stats-derived-values-v1.js`.
+
+Moteur pur :
+`assets/gensrpg/core/stats-derived-values-v1.js`.
+
+Commit d'extraction :
+`32888007ac32352e30733983e3f8889915562efa`.
+
+API :
+`GensStatsDerivedValuesV1.derive(config)`.
+
+Le moteur produit les dérivées stables :
+- bonus dégâts physique ;
+- bonus dégâts magie ;
+- bonus PV max ;
+- mana max ;
+- critique ;
+- esquive ;
+- initiative ;
+- résistance magique.
+
+Il reste source-agnostic et ne lit aucun global runtime.
+
+### Graphe et GREEN technique S6
+
+Commit de classification inert :
+`a142c1cdf9c7a54816d50d59a53716ec2aed2f83`.
+
+Le moteur S6 est **Phase 4 inert** :
+- non chargé par Pages ;
+- non chargé par `preview.html` ;
+- aucun raccord Tactical ;
+- aucun changement de propriétaire runtime.
+
+Runs du HEAD technique :
+- Architecture + navigateur complet : `35581520003` — SUCCESS ;
+- Firefox : `35581520029` — SUCCESS ;
+- Tactical Dock : `35581520057` — SUCCESS.
+
+Le navigateur complet valide Survie, Fouiller + arts, Dungeon après Survie,
+Builder, Config objet, fiche RPG, authored, Save & Quit/reprise, PvP, Capture,
+non-interférence, murs Tactical, preview et assets.
+
+### Prochaine action S6
+
+1. repasser Architecture+navigateur, Firefox et Tactical Dock sur le SHA
+   documentaire final ;
+2. si les trois sont SUCCESS, créer
+   `checkpoint/gensrpg-phase4-stats-s6-derived-values-green-2026-09-21` ;
+3. ouvrir S7 depuis ce checkpoint ;
+4. S7 = snapshot Core Stats unique ;
+5. ne supprimer aucun ancien snapshot/reader avant preuve de parité et ne pas
+   modifier les formules de combat.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S5 providers de modificateurs — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

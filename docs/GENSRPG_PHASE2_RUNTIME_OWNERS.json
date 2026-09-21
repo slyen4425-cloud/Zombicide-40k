@@ -349,6 +349,11 @@
       "domain": "shell",
       "role": "live world-card summaries from content sources"
     },
+    "assets/gensrpg/core/inventory-equipped-view-v1.js": {
+      "owner": "GenSrpG Core Inventory Equipped View",
+      "domain": "core",
+      "role": "canonical pure equipped-item view from explicit inventory and slot references, connected through the existing Dungeon Equipment runtime adapter"
+    },
     "assets/gensrpg/core/stats-normalization-v1.js": {
       "owner": "GenSrpG Core Stats Normalization",
       "domain": "core",

@@ -67,7 +67,8 @@ const ctx={
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
 
-vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(cleanSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(cleanSrc,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const clean=ctx.GensCleanRpgStats167874;
 assert.ok(clean,'canonical stats API missing');
 clean.installRuntime();

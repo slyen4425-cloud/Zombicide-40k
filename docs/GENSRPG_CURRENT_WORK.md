@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit cache/invalidation — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture pré-audit cache/invalidation — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,75 +13,115 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Lot précédent clôturé GREEN
+### Résultat du pré-audit
 
-Le calcul Equipment est désormais :
-1. Core direct + sets ;
-2. cache évolution existant ;
-3. Core évolution sur cache miss ;
-4. cache performance global ;
-5. Core Stats.
+Le cache évolution local est dans :
 
-Validation finale du raccord évolution sur le SHA documentaire exact
-`4707fb0ce3a7fa4cad688d81526323b916f80f6b` :
-- Architecture + navigateur complet : `35631683033` — SUCCESS ;
-- Firefox : `35631683044` — SUCCESS ;
-- Tactical Dock : `35631682947` — SUCCESS.
+`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
 
-### Mission du pré-audit
+État local :
+- `equipmentBonusCache` ;
+- `equippedSnapshot` ;
+- TTL partagé : 120 ms.
 
-Caractériser uniquement la couverture réelle des caches et invalidateurs
-Equipment avant toute correction.
+Les vrais propriétaires inline de slots sont :
+- `equipRight` ;
+- `equipLeft` ;
+- `equipTwoHands` ;
+- `unequip` ;
+- `equipRpgGear` ;
+- `unequipRpgGear`.
 
-Frontières à auditer :
-- `equipmentBonusCache` et `equippedSnapshot` dans
-  `gens-equipment-stat-cleanup-1678102.js` ;
-- invalidateurs actuellement wrappés par `installCacheInvalidators()` ;
-- vrais propriétaires historiques de mutation des mains et `rpgGear` ;
-- suppression/réindexation d'inventaire ;
-- édition d'objet / set / évolution ;
-- cache final de `dungeonEquipmentBonus` dans
-  `gens-mobile-combat-performance-16781022.js`.
+Ils appellent tous `save()`.
 
-### Questions à trancher par preuve
+### Trou prouvé
 
-1. quelles mutations changent réellement la vue équipée ou le bonus Equipment ?
-2. lesquelles invalident aujourd'hui le cache évolution ?
-3. lesquelles invalident le cache performance final ?
-4. existe-t-il des mutations couvertes seulement par le TTL ?
-5. quels noms d'invalidateurs sont absents ou obsolètes ?
-6. quelle frontière minimale permettra un futur raccord sans wrapper
-   supplémentaire ni deuxième cache ?
+Les invalidateurs locaux actuels ciblent :
+- `dungeonEquipItem` ;
+- `dungeonUnequipItem` ;
+- `equipDungeonItem` ;
+- `unequipDungeonItem` ;
+- `toggleDungeonEquipment` ;
+- `saveEquipmentEditor`.
 
-### Interdictions du lot
+Intersection avec les six vrais propriétaires inline :
 
-- diagnostic / caractérisation uniquement ;
-- aucune modification des fonctions equip/unequip ;
-- aucune modification du TTL ;
-- aucune modification des invalidateurs ;
-- aucun nouveau wrapper ;
-- aucun nouveau cache ;
-- pas de `index.html` ;
-- pas de stockage ;
-- pas d'UI/Builders ;
-- pas de Stats/Tactical ;
-- aucun observer/timer/retry ;
-- ne pas toucher `main`.
+**0**.
 
-### TDD prévu
+Le cache évolution local peut donc dépendre du TTL 120 ms après une mutation
+de slot.
 
-1. inventorier les propriétaires actuels ;
-2. créer une sentinelle de caractérisation de la matrice mutation -> invalidation ;
-3. distinguer cache évolution et cache performance ;
-4. documenter les trous réels sans les corriger ;
-5. trois batteries GREEN ;
-6. documentation et revalidation ;
-7. checkpoint GREEN de pré-audit ;
-8. seulement ensuite ouvrir un lot correctif minimal si nécessaire.
+`dc214Equip` n'est pas couvert directement par le cache évolution local.
+
+`removeInventoryEntry` n'est pas couvert directement non plus et ne fait pas
+lui-même `save()`.
+
+### Cache performance final
+
+Le cache performance de
+`gens-mobile-combat-performance-16781022.js` est mieux couvert :
+
+- `save` invalide ;
+- `saveState` invalide ;
+- `saveDungeonHeroState` invalide ;
+- `dc214Equip` invalide directement.
+
+Les six propriétaires inline atteignent donc ce cache via `save()`.
+
+### removeInventoryEntry
+
+7 callsites caractérisés :
+- 6 avec une frontière `save()` proche ;
+- 1 sans `save()` proche.
+
+Le futur correctif doit verrouiller explicitement la suppression/réindexation
+et ne pas supposer que tous les appelants persistent.
+
+### Mutations éditeur déjà couvertes localement
+
+Invalidation explicite conservée pour :
+- évolution ;
+- sauvegarde de set ;
+- appartenance à un set.
+
+### Validation technique
+
+HEAD technique :
+`ca7107759bda94ac4fd780def075024ee490320c`.
+
+- Architecture statique : `35632915312` — SUCCESS ;
+- navigateur complet : premier passage en échec sur Dungeon après Survie,
+  rerun du même job sur le même SHA — SUCCESS ;
+- Firefox : `35632915398` — SUCCESS ;
+- Tactical Dock : `35632915285` — SUCCESS.
+
+Aucun fichier runtime n'a été modifié dans ce pré-audit.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CACHE_INVALIDATION_PREAUDIT.md`.
+
+### État actuel
+
+Clôture documentaire en cours.
+
+Le SHA documentaire exact doit repasser :
+- Architecture + navigateur ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun checkpoint GREEN final avant ces trois SUCCESS.
 
 ### Prochaine action
 
-Caractériser la matrice réelle mutation -> invalidation sans changer le runtime.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-preaudit-green-2026-09-21` ;
+3. ouvrir un checkpoint de départ et une branche neuve pour le correctif
+   d'invalidation minimal ;
+4. commencer par un RED qui exige l'invalidation immédiate sur les vrais
+   propriétaires de mutation, sans nouveau cache ni nouveau système de wrappers ;
+5. conserver le cache performance final inchangé ;
+6. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

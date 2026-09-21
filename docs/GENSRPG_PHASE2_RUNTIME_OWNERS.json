@@ -354,6 +354,11 @@
       "domain": "core",
       "role": "canonical pure equipped-item view from explicit inventory and slot references, connected through the existing Dungeon Equipment runtime adapter"
     },
+    "assets/gensrpg/core/equipment-bonus-sets-v1.js": {
+      "owner": "GenSrpG Core Equipment Bonus Sets",
+      "domain": "core",
+      "role": "canonical pure direct equipment and set bonus authority used by the existing Equipment runtime owner before evolution and performance caching"
+    },
     "assets/gensrpg/core/stats-normalization-v1.js": {
       "owner": "GenSrpG Core Stats Normalization",
       "domain": "core",

@@ -32,9 +32,23 @@ function extractFunction(source,name){
   const token='function '+name+'(';
   const start=source.indexOf(token);
   assert.ok(start>=0,'missing owner function '+name);
-  const brace=source.indexOf('{',start);
-  assert.ok(brace>start,'missing owner body '+name);
-  let depth=0,quote=null,escaped=false,line=false,block=false;
+  const openParen=source.indexOf('(',start);
+  let parenDepth=0,quote=null,escaped=false,line=false,block=false,closeParen=-1;
+  for(let i=openParen;i<source.length;i++){
+    const c=source[i],n=source[i+1]||'';
+    if(line){if(c==='\n')line=false;continue}
+    if(block){if(c==='*'&&n==='/'){block=false;i++}continue}
+    if(quote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===quote)quote=null;continue}
+    if(c==='/'&&n==='/'){line=true;i++;continue}
+    if(c==='/'&&n==='*'){block=true;i++;continue}
+    if(c==='"'||c==="'"||c==='\x60'){quote=c;continue}
+    if(c==='(')parenDepth++;
+    else if(c===')'&&--parenDepth===0){closeParen=i;break}
+  }
+  assert.ok(closeParen>openParen,'missing owner parameter close '+name);
+  const brace=source.indexOf('{',closeParen);
+  assert.ok(brace>closeParen,'missing owner body '+name);
+  let depth=0;quote=null;escaped=false;line=false;block=false;
   for(let i=brace;i<source.length;i++){
     const c=source[i],n=source[i+1]||'';
     if(line){if(c==='\n')line=false;continue}

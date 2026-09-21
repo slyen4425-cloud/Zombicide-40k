@@ -1,3 +1,98 @@
+## Chantier courant prioritaire — Phase 4 Core Stats / S9 contrat Armure — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-stats-s9-armor-contract-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-stats-s9-armor-contract-2026-09-21`.
+- Base exacte et dernier GREEN :
+  `a1a7d7ccd4183db30b258898aed4c0207c4a30aa`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-stats-s8-resistance-normalization-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### S8 définitivement clôturé
+
+HEAD final :
+`a1a7d7ccd4183db30b258898aed4c0207c4a30aa`.
+
+Runs du SHA documentaire final :
+- Architecture + navigateur complet : `35589709948` — SUCCESS ;
+- Firefox : `35589709934` — SUCCESS ;
+- Tactical Dock : `35589709928` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-stats-s8-resistance-normalization-green-2026-09-21`.
+
+`stats-resistance-normalization-v1.js` reste Phase 4 inert.
+Aucun raccord runtime, aucune formule de résistance, aucun pourcentage et aucun
+`index.html` n'ont été modifiés dans S8.
+
+### Mission S9
+
+Caractériser puis figer le **contrat sémantique Armure** sans choisir
+arbitrairement une formule commune et sans modifier les résultats actuels.
+
+Divergence déjà prouvée par le pré-audit :
+- Dungeon classique calcule un `armorScore`, puis un `armorReduction` via
+  `armorReductionStep` / `armorReductionGain`, puis applique cette réduction ;
+- Tactical transporte historiquement un score d'armure puis le soustrait
+  directement aux dégâts physiques dans son chemin final ;
+- la règle de plancher/blocage `armorZeroBlockChance` appartient encore à la
+  résolution combat et ne doit pas être absorbée silencieusement par Core Stats.
+
+S9 doit rendre ces sens explicites et comparables avant toute consolidation.
+
+### Frontières obligatoires S9
+
+S9 peut :
+- cartographier les propriétaires actifs Armor Dungeon et Tactical ;
+- relever les sources/configurations de `armorScore`, `armorReductionStep`,
+  `armorReductionGain` et `armorZeroBlockChance` ;
+- caractériser les mêmes entrées dans Dungeon et Tactical ;
+- distinguer score, réduction calculée, plancher/blocage et dégâts finaux ;
+- préparer un contrat pur/inert uniquement après TDD RED et preuve comparative.
+
+S9 ne doit pas :
+- changer une valeur ou formule d'armure ;
+- décider que `armorScore === armorReduction` ;
+- toucher résistances S8 ;
+- toucher hit/D100/Défense/Esquive S10 ;
+- toucher la frontière dégâts finale S11 ;
+- modifier Equipment/Talents/Challenge ;
+- raccorder un nouveau lecteur Armor au runtime avant caractérisation ;
+- ajouter wrapper global, MutationObserver, timer/retry ou monkey-patch ;
+- modifier `main`.
+
+### Première action obligatoire S9
+
+Avant toute création de module :
+1. confirmer le graphe de chargement réel des propriétaires Armor ;
+2. relire les helpers Dungeon `dungeonArmorScore`,
+   `dungeonArmorReductionFromScore`, `dungeonMitigationForHero` et leurs
+   callsites actifs ;
+3. relire les snapshots/acteurs Tactical qui transportent `armor` ;
+4. relire le résolveur final Tactical V114.11 et les sentinelles dégâts/armure ;
+5. relever la provenance et la priorité des règles
+   `armorReductionStep`, `armorReductionGain`, `armorZeroBlockChance` ;
+6. construire une matrice comparative avec valeurs par défaut et personnalisées ;
+7. utiliser le `index.html` exact déjà vérifié si son blob est inchangé ;
+   sinon appliquer immédiatement la règle 26 ;
+8. seulement ensuite figer le contrat S9 et poser le TDD RED.
+
+### Interdictions S9
+
+- aucun changement de formule Armor pendant l'audit ;
+- aucune migration Dungeon/Tactical pendant la caractérisation ;
+- aucun retrait de lecteur historique avant preuve comparative ;
+- aucun changement des dégâts finaux ;
+- aucun nouveau global de réparation ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement sur `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S8 normalisation des résistances — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

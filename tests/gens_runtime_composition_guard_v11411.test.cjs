@@ -53,6 +53,7 @@ const pagesModules=[
   'dungeon-equipment-hotfix-167817.js',
   'dungeon-set-editor-167818.js',
   'gens-world-summary-167820.js',
+  'stats-normalization-v1.js',
   'gens-rpg-stats-clean-167874.js',
   'gens-dungeon-hero-art-repair-167874.js',
   'gens-mobile-combat-performance-16781022.js'

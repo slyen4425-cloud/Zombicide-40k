@@ -323,6 +323,9 @@ jobs:
       - name: Vérifier la parité des providers de modificateurs Core Stats S5
         run: node tests/gens_phase4_stats_s5_modifier_providers_parity_v1.test.cjs
 
+      - name: Auditer les dérivées génériques Core Stats S6
+        run: node tests/gens_phase4_stats_s6_derived_audit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

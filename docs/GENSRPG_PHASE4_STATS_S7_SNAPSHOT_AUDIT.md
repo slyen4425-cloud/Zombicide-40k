@@ -337,3 +337,97 @@ Ce lot reste **Phase 4 inert**.
 Le snapshot Core S7 n'est pas chargé par Pages/preview et ne remplace aucun
 lecteur historique. Le raccord vers Tactical fera l'objet d'un lot séparé après
 GREEN de cette extraction pure.
+
+
+## Résultat S7 — extraction pure
+
+### RED TDD observé
+
+Commit pré-module :
+`10160ba820e906a6cc4392dfa1768fc8c56508b2`.
+
+Run Architecture :
+`35585364039` — FAILURE attendu.
+
+La sentinelle S7 échoue exactement sur :
+`ENOENT assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Les sentinelles précédentes, l'audit S7, Firefox et Tactical Dock restent GREEN
+sur ce commit.
+
+### Snapshot Core pur créé
+
+Fichier :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Commit :
+`60d07a948e00ec887d119328a89ac3aeacd941c6`.
+
+API :
+`GensStatsSnapshotV1.create(config)`.
+
+Le snapshot :
+- dépend uniquement de `GensStatsNormalizationV1` ;
+- canonise definitions et valeurs ;
+- transporte uniquement les huit dérivées S6 autorisées ;
+- exclut hp/mana courants, wounds, résistances, règles et données combat ;
+- est immuable jusque dans `canonical`, `values`, `derived` et chaque ligne ;
+- ne mute aucune entrée ;
+- ne lit aucun global Dungeon/Tactical.
+
+La sentinelle de parité compare les lignes et valeurs canoniques à l'oracle V110
+et verrouille aliases, fallback non-fini, dérivées admises et exclusions.
+
+### Graphe Phase 2
+
+Commit :
+`70c6290434ba9c4e06ac905e7105452126626810`.
+
+`stats-snapshot-v1.js` est classé **Phase 4 inert**.
+
+Inventaire JS physique :
+`87 -> 88`.
+
+Le graphe production reste inchangé.
+Le snapshot S7 n'est chargé ni par Pages, ni par preview, ni par Tactical.
+
+### Validation GREEN technique
+
+HEAD technique :
+`70c6290434ba9c4e06ac905e7105452126626810`.
+
+Runs :
+- Architecture + navigateur complet : `35585530549` — SUCCESS ;
+- Firefox : `35585530588` — SUCCESS ;
+- Tactical Dock : `35585530540` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie ;
+- Fouiller + arts ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence des quatre modules ;
+- murs ;
+- preview ;
+- resolver d'assets ;
+- tokens tardifs.
+
+Aucun `index.html`, propriétaire Dungeon, Adapter Tactical, V110 ou formule de
+combat n'a été modifié.
+
+## Clôture documentaire
+
+Le SHA documentaire final doit repasser Architecture + navigateur complet,
+Firefox et Tactical Dock.
+
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s7-core-snapshot-green-2026-09-21` ;
+- ouvrir S8 depuis ce checkpoint ;
+- S8 = normalisation des résistances array/object, sans modifier les pourcentages
+  ni leur application Dungeon/Tactical.

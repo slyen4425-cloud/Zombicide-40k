@@ -86,6 +86,75 @@ Avant toute création de module :
 - aucun changement sur `main`.
 
 
+### Cartographie S5 confirmée
+
+- Equipment reste propriétaire de son seam agrégé `dungeonEquipmentBonus` ;
+- `dungeon-core-316.js` ajoute les sets ;
+- `gens-equipment-stat-cleanup-1678102.js` ajoute l'évolution et son invalidation ;
+- la couche performance cache le seam final sans changer son ownership ;
+- Talents reste derrière `dungeonSkillEffectTotal` ;
+- Challenge reste derrière `dungeonChallengeDebuffTotal067` ;
+- aucun de ces systèmes n'est recopié dans Core.
+
+La règle 26 n'a pas été déclenchée :
+S5 ne modifie aucun callsite inline du gros `index.html`.
+
+### TDD S5 observé
+
+RED :
+`5c8449234b829cb2a7c647b704f17c26253829ec`.
+
+Architecture `35577545243` a échoué exactement sur la nouvelle sentinelle S5 :
+`ENOENT` pour
+`assets/gensrpg/core/stats-modifier-provider-v1.js`.
+
+### Implémentation S5
+
+Module pur :
+`assets/gensrpg/core/stats-modifier-provider-v1.js`.
+
+Commit :
+`30234d1a76c80d7331ed1fbf95d8758c1141a420`.
+
+API :
+`GensStatsModifierProviderV1.collect(config)`.
+
+Entrées :
+definitions + sources explicites.
+
+Sortie :
+lignes `StatModifier` directement consommables par S3.
+
+Aucun nom Equipment/Talent/Challenge et aucun ID spécial de stat n'est codé dans
+le Core.
+
+### Graphe / inertie
+
+HEAD technique :
+`661ab77e8a2ef9cefaec66c71d1c61d9c899d50d`.
+
+Le nouveau provider est classé Phase 4 inert.
+Inventaire JS physique : 85 -> 86.
+Graphe production inchangé ; aucun chargement Pages/preview.
+
+### Validation GREEN technique S5
+
+Runs sur `661ab77e8a2ef9cefaec66c71d1c61d9c899d50d` :
+- Architecture + navigateur complet : `35577612459` — SUCCESS ;
+- Firefox : `35577612420` — SUCCESS ;
+- Tactical Dock : `35577612410` — SUCCESS.
+
+### Prochaine action
+
+1. faire repasser les trois workflows sur le SHA documentaire final ;
+2. après trois SUCCESS, créer
+   `checkpoint/gensrpg-phase4-stats-s5-modifier-providers-green-2026-09-21` ;
+3. ouvrir S6 sur une branche neuve depuis ce GREEN ;
+4. S6 = dérivées génériques à sémantique stable uniquement ;
+5. ne pas commencer application finale Défense/Armure, toucher, D100 ou
+   résistances.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S4 provider valeurs héros — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

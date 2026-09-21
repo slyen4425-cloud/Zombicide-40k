@@ -1,102 +1,98 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture contrat pur évolution — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — raccord évolution — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipment-evolution-contract-2026-09-21`.
+  `work/gensrpg-phase4-inventory-equipment-evolution-raccord-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipment-evolution-contract-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-evolution-raccord-2026-09-21`.
 - Base exacte :
-  `549a529278e1f03fd9b7e93ef6c1b559e41683ee`.
+  `deb165f8588d2ae4ecb4b6dbfcea536f5073f81b`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipment-bonus-raccord-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipment-evolution-contract-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique
+### Lot précédent clôturé GREEN
 
-Nouveau service pur et inert :
+Service pur inert :
 
-`assets/gensrpg/core/equipment-evolution-v1.js`.
+`assets/gensrpg/core/equipment-evolution-v1.js`
 
 Export :
 
 `GensEquipmentEvolutionV1`.
 
-API :
-- `itemBonus(item,key,xp)` ;
-- `totalBonus(items,key,xp)`.
+Validation finale sur le SHA documentaire exact
+`deb165f8588d2ae4ecb4b6dbfcea536f5073f81b` :
+- Architecture + navigateur complet : `35628121669` — SUCCESS ;
+- Firefox : `35628121584` — SUCCESS ;
+- Tactical Dock : `35628121601` — SUCCESS.
 
-Parité verrouillée contre le propriétaire historique :
+### Mission du nouveau raccord
 
-`evolutionBonusForItem(item,key,xp)`.
+Raccorder uniquement le calcul d'évolution Equipment au Core pur.
 
-Sémantiques couvertes :
-- évolution inactive ;
-- niveaux absents ;
-- seuils XP cumulés ;
-- seuil négatif/non numérique normalisé à 0 ;
-- bonus non numérique = 0 ;
-- clé absente = 0 ;
-- agrégation multi-objets.
+Propriétaire runtime existant :
 
-### Inertie
+`assets/gensrpg/gens-equipment-stat-cleanup-1678102.js`.
 
-Le service reste Phase 4 **inert**.
+Frontière exacte :
 
-- Pages : non chargé ;
-- preview : non chargé ;
-- PWA : non précaché ;
-- runtime : non raccordé ;
-- graphe production : 75 fichiers atteignables, inchangé ;
-- inventaire physique : 93 JS ;
-- services Phase 4 connus : 13.
+`cachedEvolutionBonus(key)`.
 
-### Validation technique GREEN
+Le cache reste propriétaire de :
+- sa clé de contexte ;
+- son TTL 120 ms ;
+- ses hits/miss ;
+- son invalidation ;
+- sa vue équipée cachée.
 
-HEAD technique :
-`31c84fc474f9d9c1fffc9cb766cf4477c21225d9`.
+Sur un miss, il doit déléguer le calcul pur à :
 
-- Architecture : `35627144923` — SUCCESS ;
-- Firefox : `35627144880` — SUCCESS ;
-- Tactical Dock : `35627144846` — SUCCESS.
+`GensEquipmentEvolutionV1.totalBonus(items,key,xp)`.
 
-La première tentative navigateur de `35627144923` a rencontré un timeout
-Playwright dans Dungeon après Survie : un overlay Tactical interceptait le clic.
-Le job a été relancé sur le **même SHA sans modification** et a alors passé
-l'intégralité de la batterie. Aucune rustine n'a été ajoutée.
+### Contraintes d'autorité
 
-Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_EVOLUTION_CONTRACT.md`.
+- aucun nouveau wrapper sur `dungeonEquipmentBonus` ;
+- le wrapper Equipment existant reste inchangé dans son rôle ;
+- `cachedEvolutionBonus` reste le propriétaire du cache ;
+- le calcul local `evolutionBonusForItem` ne doit plus être exécuté par le chemin actif ;
+- l'API historique peut rester exposée temporairement pour compatibilité/tests, mais sans autorité runtime ;
+- le cache performance global reste en aval ;
+- Core Stats reste consommateur du seam final.
 
-### Périmètre respecté
+### Interdictions
 
-Aucun changement de :
-- `index.html` ;
-- `dungeonEquipmentBonus` ;
-- `cachedEvolutionBonus` ;
-- cache / invalidation ;
-- composition production ;
-- stockage ;
-- UI/Builders ;
-- combat ;
-- Stats/Tactical.
+- ne pas modifier le TTL ;
+- ne pas modifier les invalidateurs dans ce lot ;
+- ne pas corriger leur couverture dans ce lot ;
+- pas de nouveau cache ;
+- pas de nouvelle boucle évolution concurrente ;
+- pas de `index.html` ;
+- pas de stockage ;
+- pas d'UI/Builders ;
+- pas de combat ;
+- pas de Stats/Tactical ;
+- aucun nouveau wrapper, observer, timer/retry ou monkey-patch ;
+- ne pas toucher `main`.
 
-### État actuel
+### TDD prévu
 
-Clôture documentaire en cours.
-
-Le SHA documentaire doit repasser les trois batteries avant création du
-checkpoint GREEN final.
+1. poser une sentinelle RED de raccord ;
+2. exiger Core évolution chargé avant le propriétaire runtime ;
+3. exiger que `cachedEvolutionBonus` délègue au Core sur miss ;
+4. prouver que le calcul local historique n'est plus appelé ;
+5. préserver clé cache, TTL, XP et vue équipée ;
+6. connecter Pages / preview / PWA et cartographie ;
+7. trois batteries GREEN ;
+8. documentation ;
+9. revalidation du SHA documentaire ;
+10. checkpoint GREEN final.
 
 ### Prochaine action
 
-1. valider le SHA documentaire exact ;
-2. créer :
-   `checkpoint/gensrpg-phase4-inventory-equipment-evolution-contract-green-2026-09-21` ;
-3. ouvrir un checkpoint de départ et une branche neuve pour le raccord évolution ;
-4. conserver cache/invalidation dans le lot suivant ;
-5. ne jamais toucher `main`.
+Créer la sentinelle RED du raccord évolution avant toute modification runtime.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

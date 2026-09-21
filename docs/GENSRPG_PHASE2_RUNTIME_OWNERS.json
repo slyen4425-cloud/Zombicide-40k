@@ -359,6 +359,11 @@
       "domain": "core",
       "role": "canonical pure direct equipment and set bonus authority used by the existing Equipment runtime owner before evolution and performance caching"
     },
+    "assets/gensrpg/core/equipment-evolution-v1.js": {
+      "owner": "GenSrpG Core Equipment Evolution",
+      "domain": "core",
+      "role": "canonical pure Equipment evolution bonus authority used by the existing cached evolution runtime boundary"
+    },
     "assets/gensrpg/core/stats-normalization-v1.js": {
       "owner": "GenSrpG Core Stats Normalization",
       "domain": "core",

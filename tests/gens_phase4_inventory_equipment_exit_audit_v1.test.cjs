@@ -87,9 +87,9 @@ assert.match(cleanup,/function persistSetRaw\(/);
 assert.ok(!/assets\/gensrpg\/core\/.*dice/i.test(pages),
   'Dice Core must not already be silently introduced before its own preaudit');
 
-assert.ok(
-  roadmap.indexOf('### 4. Inventaire / équipement / sets') <
-  roadmap.indexOf('### 5. Dés'),
+assert.match(
+  roadmap,
+  /### 4\. Inventaire \/ équipement \/ sets[\s\S]*### 5\. Dés/,
   'roadmap order must remain Inventory/Equipment/Sets then Dice'
 );
 

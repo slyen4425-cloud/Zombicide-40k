@@ -386,6 +386,9 @@ jobs:
       - name: Verrouiller les frontières canoniques d'invalidation Equipment
         run: node tests/gens_phase4_inventory_equipment_cache_invalidation_fix_v1.test.cjs
 
+      - name: Pré-auditer les wrappers et UI historiques Equipment
+        run: node tests/gens_phase4_inventory_equipment_legacy_ui_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

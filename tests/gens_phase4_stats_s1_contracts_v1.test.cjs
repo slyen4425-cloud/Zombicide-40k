@@ -79,7 +79,8 @@ const ctx={
 ctx.window=ctx;
 ctx.globalThis=ctx;
 vm.createContext(ctx);
-vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'canonical Stats API missing');
@@ -159,8 +160,8 @@ assert.ok(api.TARGETS.some(x=>x[0]==='hit:ranged'));
 assert.ok(api.TARGETS.some(x=>x[0]==='max_hp'));
 assert.ok(api.TARGETS.some(x=>x[0]==='magic_resistance'));
 
-assert.match(src,/function normDef\(/,'S1 must characterize the current definition normalizer');
-assert.match(src,/function normEffect\(/,'S1 must characterize the current effect normalizer');
+assert.match(src,/const normDef=StatsNorm\.normalizeDefinition/,'S1 definition normalization must now delegate to Core');
+assert.match(src,/normEffect=StatsNorm\.normalizeEffect/,'S1 effect normalization must now delegate to Core');
 assert.match(src,/function value\(hero,id,seen=new Set\(\)\)/,'S1 must characterize the current canonical value function');
 assert.match(src,/new R\.MutationObserver/,'current mixed Stats owner still contains UI observer debt');
 assert.match(src,/function renderEditor\(/,'current mixed Stats owner still contains editor UI');

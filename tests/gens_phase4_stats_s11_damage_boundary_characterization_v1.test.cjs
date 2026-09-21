@@ -95,8 +95,22 @@ const rt={
   dungeonPhysicalDamageBonus:()=>{physicalBonusCalls++;return 3},
   dungeonMagicDamageBonus:()=>{magicBonusCalls++;return 4},
   GensCleanRpgStats167874:{
-    runtimeDefs:()=>Object.keys(values).map(id=>({id,name:id,icon:'',defaultValue:0})),
-    value:(_hero,id)=>values[id],
+    coreSnapshot:id=>({
+      version:'1.0.0',
+      heroId:id,
+      canonical:Object.keys(values).map(key=>({id:key,name:key,icon:'',value:values[key]})),
+      values:{...values},
+      derived:{
+        physicalDamageBonus:3,
+        magicDamageBonus:4,
+        hpBonus:0,
+        maxMana:0,
+        crit:0,
+        dodge:0,
+        initiative:10,
+        magicResistance:0
+      }
+    }),
     sourceEffectTotal:()=>0,
     extraTotal:()=>0
   },
@@ -120,7 +134,7 @@ assert.equal(physicalBonusCalls,1,'weapon scaling must read the current physical
 
 const snap=V110.buildHeroSnapshot(rt,'hero',{hp:10,maxHp:10,movement:3,initiative:10,defense:0,armor:0,dodge:0});
 assert.equal(snap.derived.physicalDamageBonus,3);
-assert.equal(physicalBonusCalls,2,'V110 currently rereads the same physical damage bonus while building the snapshot');
+assert.equal(physicalBonusCalls,1,'V110 must receive the physical damage bonus from Core Snapshot without rereading Dungeon');
 
 const attacker={id:'hero',meta:{rpgStats:snap}};
 const target={id:'enemy',armor:2};
@@ -153,7 +167,7 @@ assert.equal(magicAttack.meta.rpgDamageBonus,4,'Adapter must also expose the emb
 assert.equal(magicBonusCalls,1);
 const magicSnap=V110.buildHeroSnapshot(rt,'hero',{hp:10,maxHp:10,movement:3,initiative:10,defense:0,armor:0,dodge:0});
 assert.equal(magicSnap.derived.magicDamageBonus,4);
-assert.equal(magicBonusCalls,2,'V110 currently also rereads magic damage bonus into the snapshot');
+assert.equal(magicBonusCalls,1,'V110 must receive the magic damage bonus from Core Snapshot without rereading Dungeon');
 
 const magicPerHit=V11411.resolveDamagePerHit(
   {},null,
@@ -171,23 +185,25 @@ const v110Src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactic
 const v11411Src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js'),'utf8');
 const adapterSrc=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-adapter.js'),'utf8');
 
-assert.match(v110Src,/dungeonPhysicalDamageBonus/);
-assert.match(v110Src,/dungeonMagicDamageBonus/);
+assert.match(v110Src,/api\.coreSnapshot\(id\)/);
+assert.doesNotMatch(v110Src,/dungeonPhysicalDamageBonus/);
+assert.doesNotMatch(v110Src,/dungeonMagicDamageBonus/);
 assert.match(v11411Src,/canonicalDamageBonus/);
 assert.match(v11411Src,/baseWeaponDamage\+statDamageBonus/);
 assert.match(adapterSrc,/st\.damage\?\?st\.power\?\?st\.strength/);
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Core Stats S11 current damage boundary characterization',
-  physicalBonusReads:physicalBonusCalls,
+  physicalDungeonBonusReads:physicalBonusCalls,
   physicalAttackPowerAlreadyScaled:8,
   physicalSnapshotBonus:3,
   physicalV11411RawDamage:8,
   physicalFinalAfterArmor:6,
-  magicBonusReads:magicBonusCalls,
+  magicDungeonBonusReads:magicBonusCalls,
   magicAttackPowerAlreadyScaled:9,
   magicSnapshotBonus:4,
   magicV11411AddsSnapshotBonus:false,
   meleeDoubleApplicationFixed:true,
+  v110DerivedDungeonRereads:false,
   rangedAndMagicSemanticsChanged:false
 },null,2));

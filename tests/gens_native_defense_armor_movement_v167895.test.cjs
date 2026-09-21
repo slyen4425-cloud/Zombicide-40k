@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 
 const p={id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{movement:{defaults:{hero:3}},stats:{
@@ -46,7 +47,7 @@ const context={
 };
 context.window=context;context.globalThis=context;
 vm.createContext(context);
-vm.runInContext(src,context,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,context,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,context,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=context.GensCleanRpgStats167874;
 assert.ok(api,'API stats absente');
 api.install();

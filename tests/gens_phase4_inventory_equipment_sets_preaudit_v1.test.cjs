@@ -171,8 +171,10 @@ assert.equal(evo.evolutionBonusForItem(evolved,'force',25),5,'real evolution own
 
 assert.match(core316,/const originalEquipmentBonus316=window\.dungeonEquipmentBonus/);
 assert.match(core316,/return itemBonus\+dungeonSetBonusTotal\(key\)/,'Core 3.16 must layer set bonus over direct item bonus');
-assert.match(cleanup,/const old=R\.dungeonEquipmentBonus/);
-assert.match(cleanup,/old\.apply\(this,arguments\),0\)\+cachedEvolutionBonus\(key\)/,'cleanup must layer evolution over previous equipment bonus');
+assert.match(cleanup,/const old=R\.dungeonEquipmentBonus,core=R\.GensEquipmentBonusSetsV1/);
+assert.match(cleanup,/core\.totalBonus\(items,key,R\.DUNGEON_EQUIPMENT_SETS\|\|\{\}\)/,'cleanup must delegate direct + set bonus to Core');
+assert.match(cleanup,/\+cachedEvolutionBonus\(key\)/,'cleanup must keep evolution layered after Core direct + sets');
+assert.equal(/old\.apply\(this,arguments\)/.test(cleanup),false,'active Equipment owner must not execute the historical direct + set chain after Core raccord');
 assert.match(perf,/wrapValue\("dungeonEquipmentBonus",valueCaches\.equipment/,'performance layer must cache the final equipment seam');
 assert.ok(statsNormalization.includes('GensStatsNormalizationV1'),'preaudit must retain the explicit Core Stats dependency before inspecting the Stats owner');
 assert.match(stats,/equipmentValues\[id\]=num\(R\.dungeonEquipmentBonus\?\.\(id\),0\)/,'Core Stats must consume Equipment through the explicit seam');
@@ -231,7 +233,7 @@ console.log(JSON.stringify({
   stateAuthority:['inventory','rightHand','leftHand','rpgGear'],
   equippedViewBaseOwner:'inline dungeonEquippedItems',
   equippedViewCompatibilityOwner:'dungeon-equipment-hotfix-167817',
-  bonusChain:['direct item','set 3.16','evolution 16.78.102.1','performance cache','Core Stats S5'],
+  bonusChain:['Core direct + set','evolution 16.78.102.1','performance cache','Core Stats S5'],
   setEngineExecuted:true,
   evolutionEngineExecuted:true,
   slotMutationOwnersExecuted:true,

@@ -262,3 +262,96 @@ S4 — provider de valeurs héros
 
 S4 sera séparé du moteur pur et Core Stats ne devra toujours pas lire directement
 `CHARS` ou `state`.
+
+
+## Résultat S3
+
+### RED TDD observé
+
+Commit pré-module :
+`18289e84e46bc06271f1dc8717ad12701898d75c`.
+
+La sentinelle S3 a échoué exactement comme prévu :
+`ENOENT` sur
+`assets/gensrpg/core/stats-value-engine-v1.js`.
+
+Les sentinelles S1, S2 et raccord de normalisation étaient GREEN juste avant.
+
+### Moteur pur créé
+
+Fichier :
+`assets/gensrpg/core/stats-value-engine-v1.js`.
+
+Commit d'extraction :
+`0c7482dba1356221850ad1bc5fce858f0394c867`.
+
+Le moteur dépend uniquement de `GensStatsNormalizationV1` et reçoit toutes ses
+données explicitement.
+
+Il implémente :
+- create ;
+- definition / isActive ;
+- rawBase ;
+- modifierTotal ;
+- baseValue ;
+- value ;
+- effectAmount ;
+- statEffectTotal ;
+- extraTotal ;
+- sourceEffectTotal ;
+- detail.
+
+### Parité démontrée
+
+La fixture S3 reproduit le moteur historique avec :
+- base runtime explicite ;
+- plusieurs modifiers positifs/négatifs ;
+- effet stat -> stat ;
+- cycle force <-> chance ;
+- effet dérivé damage:physical ;
+- effet threshold max_hp ;
+- effet direct defense ;
+- clamp final ;
+- alias source ;
+- sourceEffectTotal.
+
+Résultats verrouillés notamment :
+- force = 23 ;
+- chance = 14 ;
+- defense = 21 ;
+- damage:physical = +6 ;
+- max_hp = +5.
+
+`detail()` est cohérent avec `value()` et expose base, modifiers, contributions,
+subtotal et clamp sans DOM.
+
+### Graphe
+
+`stats-value-engine-v1.js` est explicitement classé **Phase 4 inert**.
+
+Il n'est chargé ni par GitHub Pages ni par `preview.html`.
+`GensCleanRpgStats167874.value()` reste donc l'unique autorité runtime.
+
+### Validation GREEN technique
+
+HEAD technique :
+`fd29280b8848fa78b095271f53c70aa8d88ccca8`.
+
+Runs :
+- Architecture + navigateur complet : `35565475568` — SUCCESS ;
+- Firefox : `35565475560` — SUCCESS ;
+- Tactical Dock : `35565475567` — SUCCESS.
+
+Aucune formule gameplay, aucun provider, aucune UI, aucune persistance et aucun
+snapshot Tactical n'a été déplacé.
+
+## Clôture documentaire
+
+Le SHA documentaire final doit repasser les trois workflows.
+Après trois SUCCESS, créer :
+
+`checkpoint/gensrpg-phase4-stats-s3-value-effects-green-2026-09-21`.
+
+Suite autorisée :
+S4 — provider pur de valeurs héros
+`hero definition + runtime attributes -> baseValues`.

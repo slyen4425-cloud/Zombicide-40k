@@ -288,3 +288,45 @@ Après S8 GREEN :
 S9 — contrat Armure, sur un lot distinct.
 
 Aucune décision Armor n'est incluse dans S8.
+
+
+## Validation technique S8
+
+Chaîne TDD observée :
+- RED : commit `f0ea7ad0d3ef12d3483465ebeba1ec3227a019b5` ;
+- Architecture `35587505339` — FAILURE attendu sur l'étape S8 ;
+- cause exacte : `ENOENT assets/gensrpg/core/stats-resistance-normalization-v1.js` ;
+- Firefox `35587505241` — SUCCESS ;
+- Tactical Dock `35587505324` — SUCCESS.
+
+Extraction :
+- module pur ajouté au commit `e123d195dbc06b892db82c5a56e629b14affd72b` ;
+- classification explicite Phase 4 inert au commit
+  `e55c6efb03c4c57b89c805d0ec3b453207b9a729` ;
+- correction de l'attente de test additive/clamp au commit
+  `e109ef34ef45941347f6e9d1f27cafc8827857b5`.
+
+Validation du HEAD technique `e109ef34ef45941347f6e9d1f27cafc8827857b5` :
+- Architecture + navigateur complet `35589043087` — SUCCESS ;
+- Firefox `35589043070` — SUCCESS ;
+- Tactical Dock `35589043075` — SUCCESS.
+
+Le diff S8 depuis la base S7 reste limité au contrat/documentation, au test TDD,
+au branchement CI du test, à la classification du graphe et au nouveau module
+Core inert. Aucun fichier Tactical, Dungeon gameplay ou `index.html` n'a été
+modifié.
+
+Le module :
+- normalise tableaux et objets vers des entrées immuables ;
+- ne choisit aucune stratégie de fusion implicitement ;
+- exige `sum` ou `last` explicitement lors de la projection ;
+- conserve les politiques historiques via options fournies par l'adaptateur ;
+- ne contient aucune application de résistance aux dégâts.
+
+## Clôture
+
+S8 est techniquement GREEN. Le SHA documentaire final doit repasser les trois
+batteries avant création du checkpoint GREEN.
+
+Après ce checkpoint, ouvrir S9 — contrat Armure — sur une branche dédiée, sans
+réutiliser la branche S8 et sans modifier les formules avant caractérisation.

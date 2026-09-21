@@ -1,102 +1,87 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipped View — clôture documentaire — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — contrat pur bonus directs + sets — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
 - Branche :
-  `work/gensrpg-phase4-inventory-equipped-view-raccord-2026-09-21`.
+  `work/gensrpg-phase4-inventory-bonus-sets-contract-2026-09-21`.
 - Checkpoint de départ :
-  `checkpoint/gensrpg-start-phase4-inventory-equipped-view-raccord-2026-09-21`.
+  `checkpoint/gensrpg-start-phase4-inventory-bonus-sets-contract-2026-09-21`.
 - Base exacte :
-  `db9d9d7de9dcd220920dcf99da032641940ea016`.
+  `7408d1d0d24b13c6dd28c09968fbf301704705db`.
 - Dernier checkpoint GREEN :
-  `checkpoint/gensrpg-phase4-inventory-equipped-view-slot-refs-contract-green-2026-09-21`.
+  `checkpoint/gensrpg-phase4-inventory-equipped-view-raccord-green-2026-09-21`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Résultat technique du raccord
+### Lot précédent clôturé GREEN
 
-Le service pur :
+Core Inventory Equipped View est connecté au runtime via le propriétaire
+`dungeon-equipment-hotfix-167817.js`.
 
-`assets/gensrpg/core/inventory-equipped-view-v1.js`
+Validation finale du SHA documentaire `7408d1d0...` :
+- Architecture + navigateur complet : `35620061917` — SUCCESS ;
+- Firefox : `35620061859` — SUCCESS ;
+- Tactical Dock : `35620061916` — SUCCESS.
 
-est désormais raccordé au dernier propriétaire runtime existant :
+### Mission du nouveau micro-lot
 
-`assets/dungeon/dungeon-equipment-hotfix-167817.js -> dungeonEquippedItems()`.
+Extraire un contrat **pur et inert** pour les bonus Equipment directs + sets,
+sans raccorder encore `dungeonEquipmentBonus`.
 
-Le hotfix reste l'unique dernier owner/wrapper et délègue la construction de la
-vue équipée à :
+Sources historiques à caractériser :
+- bonus direct : `item.rpgBonuses[key]` sur la vue équipée ;
+- moteur de sets Core 3.16 : `setState316(items, registry)` ;
+- activation des paliers par nombre de pièces uniques ;
+- déduplication par `setPieceId || item.id` ;
+- cumul des bonus de tous les paliers actifs.
 
-`GensInventoryEquippedViewV1.equippedItems(...)`.
+### Contrat cible
 
-Entrées :
-- `state.inventory` ;
-- `state.rightHand` ;
-- `state.leftHand` ;
-- `state.rpgGear` ;
-- resolver historique `getItemFromEntry/itemById`.
+Le futur module Core doit recevoir uniquement des entrées explicites :
+- liste d'objets équipés ;
+- registry de sets ;
+- clé de bonus.
 
-Le propriétaire inline historique protégé par `isDungeonHeroSheet()` n'est
-plus exécuté pour construire cette vue.
+Sorties pures candidates à verrouiller par TDD :
+- bonus direct agrégé ;
+- état des sets ;
+- bonus de set par clé ;
+- total direct + set.
 
-### Composition raccordée
+### Interdictions
 
-- Core Inventory chargé avant le hotfix Equipment dans GitHub Pages ;
-- même ordre dans `preview.html` ;
-- précache PWA ajouté ;
-- module classé Phase 4 **connected** dans le graphe runtime ;
-- manifeste propriétaire Phase 2 mis à jour.
+- aucun raccord runtime dans ce lot ;
+- ne pas modifier `dungeonEquipmentBonus` ;
+- ne pas modifier Core 3.16 ;
+- ne pas modifier `index.html` ;
+- pas d'évolution ;
+- pas de cache / invalidation ;
+- pas de stockage ;
+- pas d'UI / Builders ;
+- pas de combat / capacités objets ;
+- pas de Stats / Tactical ;
+- aucun wrapper, observer, timer/retry ou monkey-patch ;
+- ne pas toucher `main`.
 
-Conséquence descriptive :
-- Pages : 26 -> 27 modules injectés ;
-- graphe production : 73 -> 74 fichiers atteignables.
+### TDD prévu
 
-Les sentinelles de cartographie liées à ces cardinalités ont été réalignées.
-Aucun gameplay n'a été changé pour traiter ces RED.
-
-### Périmètre respecté
-
-Aucun changement de :
-- `index.html` ;
-- equip / unequip / remove / drop ;
-- refs de slots ;
-- `dungeonEquipmentBonus` ;
-- sets / évolution / cache ;
-- Stats / Tactical ;
-- stockage ;
-- combat / loot.
-
-Aucun nouveau wrapper, observer, timer/retry ou monkey-patch ajouté.
-
-### Validation technique GREEN
-
-HEAD technique :
-`9f389c9dfef4458b216eca060358b041d069662a`.
-
-- Architecture + navigateur complet : `35617874824` — SUCCESS ;
-- Firefox : `35617874802` — SUCCESS ;
-- Tactical Dock : `35617874784` — SUCCESS.
-
-Document de clôture :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPPED_VIEW_RACCORD.md`.
-
-### État actuel
-
-La clôture documentaire est en cours.
-
-Le commit documentaire change le SHA. Aucun checkpoint GREEN final ne doit être
-créé avant SUCCESS des trois batteries sur le SHA documentaire exact.
+1. caractériser le propriétaire direct historique et `setState316` ;
+2. écrire une sentinelle RED exigeant un nouveau module Core pur ;
+3. verrouiller la parité :
+   - bonus directs ;
+   - pièces uniques ;
+   - arme/objet dupliqué ;
+   - seuils multiples actifs ;
+   - plusieurs sets simultanés ;
+   - clés absentes / valeurs non numériques ;
+4. créer uniquement le service pur ;
+5. conserver le service hors graphe production ;
+6. Architecture + navigateur, Firefox, Tactical Dock avant checkpoint GREEN.
 
 ### Prochaine action
 
-1. relancer Architecture + navigateur, Firefox et Tactical Dock sur le HEAD
-   documentaire exact ;
-2. si les trois batteries sont SUCCESS, créer :
-   `checkpoint/gensrpg-phase4-inventory-equipped-view-raccord-green-2026-09-21` ;
-3. repartir de ce checkpoint avec un checkpoint de départ et une branche neuve ;
-4. prochain micro-lot selon le pré-audit :
-   **contrat pur bonus directs + sets**, sans raccord `dungeonEquipmentBonus`
-   dans le même lot ;
-5. ne jamais fusionner ce lot directement sur `main`.
+Construire la caractérisation/TDD depuis les propriétaires existants sans
+modifier le runtime, puis obtenir un RED propre avant création du service.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — correctif cache/invalidation — 2026-09-21
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture correctif cache/invalidation — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 
@@ -13,67 +13,127 @@ Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Pré-audit GREEN
+### Résultat technique
+
+Le propriétaire canonique d'invalidation reste :
+
+`assets/gensrpg/gens-mobile-combat-performance-16781022.js`.
+
+Frontières Equipment classées :
+- `save` ;
+- `dc214Equip` ;
+- `removeInventoryEntry`.
+
+Après exécution de ces mutations, le wrapper performance existant appelle :
+
+`GensEquipmentStatCleanup1678102.invalidateEquipmentBonusCache()`.
+
+Le cache Equipment local invalide alors immédiatement :
+- `equipmentBonusCache` ;
+- `equippedSnapshot`.
+
+### Couverture des vrais propriétaires
+
+Les six propriétaires inline de slots :
+- `equipRight` ;
+- `equipLeft` ;
+- `equipTwoHands` ;
+- `unequip` ;
+- `equipRpgGear` ;
+- `unequipRpgGear`
+
+atteignent déjà `save()`.
+
+`dc214Equip` est couvert directement.
+
+`removeInventoryEntry` est maintenant couvert directement pour
+l'invalidation, indépendamment de la persistance de son appelant.
+
+### Dette retirée
+
+Le cleanup Equipment ne tente plus de wrapper les anciens noms morts :
+- `dungeonEquipItem` ;
+- `dungeonUnequipItem` ;
+- `equipDungeonItem` ;
+- `unequipDungeonItem` ;
+- `toggleDungeonEquipment`.
+
+`saveEquipmentEditor` reste une invalidation locale spécifique à l'éditeur.
+
+Aucun second wrapper n'a été ajouté sur les frontières canoniques.
+
+### TDD
+
+RED initial :
+- Architecture `35637289338` — FAILURE attendu ;
+- erreur :
+  `local Equipment cache must invalidate at canonical mutation boundary save`.
+
+RED de retrait de dette :
+- Architecture `35637662040` — FAILURE attendu ;
+- erreur :
+  `dead local cache invalidator target must be retired: dungeonEquipItem`.
+
+La sentinelle VM finale prouve pour `save`, `dc214Equip` et
+`removeInventoryEntry` :
+- mutation réelle exactement une fois ;
+- cache performance invalidé ;
+- cache Equipment local invalidé ;
+- retour préservé ;
+- wrapper performance existant conservé ;
+- aucun second wrapper.
+
+### Validation technique GREEN
+
+HEAD technique :
+`4efaf9de71091d0b44fc9410525f521a54a6590f`.
+
+- Architecture + navigateur complet :
+  `35638123573` — SUCCESS ;
+- Firefox :
+  `35638123814` — SUCCESS ;
+- Tactical Dock :
+  `35638123988` — SUCCESS.
 
 Document :
-`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CACHE_INVALIDATION_PREAUDIT.md`.
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CACHE_INVALIDATION_FIX.md`.
 
-Constats verrouillés :
-- cache évolution local + snapshot : TTL 120 ms ;
-- aucun des six vrais propriétaires inline de slots n'est ciblé directement
-  par les invalidateurs locaux ;
-- les six propriétaires atteignent le cache performance final via `save()` ;
-- `dc214Equip` est couvert directement par le cache performance ;
-- `removeInventoryEntry` ne sauvegarde pas lui-même ;
-- 7 callsites de suppression : 6 avec save proche, 1 sans save proche ;
-- mutations évolution/set déjà invalidées localement.
+### Périmètre respecté
 
-Validation finale du SHA documentaire exact
-`70c679a8079094dd410a37b875ace6c47e6708c4` :
-- Architecture + navigateur complet : `35636353120` — SUCCESS ;
-- Firefox : `35636353249` — SUCCESS ;
-- Tactical Dock : `35636353142` — SUCCESS.
+Aucun changement de :
+- `index.html` ;
+- fonctions inline equip/unequip ;
+- TTL 120 ms ;
+- calcul direct + sets ;
+- calcul évolution ;
+- stockage ;
+- UI/Builders ;
+- combat ;
+- Stats/Tactical ;
+- composition Pages ;
+- graphe runtime.
 
-### Mission du correctif
+Aucun nouvel observer, timer/retry, cache ou système de wrappers.
 
-Obtenir une invalidation immédiate du cache évolution local lorsque la vue
-équipée peut changer, sans créer un second cache ni un nouveau système de
-wrappers.
+### État actuel
 
-Frontières candidates à prouver :
-- `save` pour les propriétaires inline de slots ;
-- `dc214Equip` pour la mutation Tactical ;
-- `removeInventoryEntry` pour suppression/réindexation indépendante de
-  l'appelant.
+Clôture documentaire en cours.
 
-### Contraintes
+Le SHA documentaire exact doit repasser :
+- Architecture + navigateur ;
+- Firefox ;
+- Tactical Dock.
 
-- TDD RED avant runtime ;
-- conserver `CACHE_TTL_MS=120` ;
-- conserver le cache performance final inchangé ;
-- ne pas modifier les propriétaires equip/unequip dans `index.html` ;
-- ne pas créer de nouveau wrapper générique ;
-- réutiliser uniquement le mécanisme d'invalidation local existant si sa
-  frontière est prouvée ;
-- éviter les doubles wrappers sur des alias équivalents ;
-- ne pas toucher stockage, UI/Builders, combat, Stats/Tactical ;
-- aucun observer/timer/retry ;
-- ne pas toucher `main`.
-
-### TDD prévu
-
-1. caractériser la présence réelle des anciens noms ciblés ;
-2. poser un RED exigeant les frontières canoniques ;
-3. exécuter les wrappers d'invalidation en VM ;
-4. prouver invalidation immédiate de snapshot + bonus ;
-5. modifier uniquement la liste/frontière minimale nécessaire ;
-6. trois batteries GREEN ;
-7. documentation puis revalidation ;
-8. checkpoint GREEN final.
+Aucun checkpoint GREEN final avant ces trois SUCCESS.
 
 ### Prochaine action
 
-Créer la sentinelle RED du correctif, sans modification runtime.
+1. valider le SHA documentaire exact ;
+2. créer :
+   `checkpoint/gensrpg-phase4-inventory-equipment-cache-invalidation-fix-green-2026-09-21` ;
+3. ouvrir un nouveau checkpoint de départ et une nouvelle branche pour le
+   prochain micro-lot Inventory/Equipment défini par le pré-audit/roadmap ;
+4. ne jamais toucher `main`.
 
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S11 correctif double application dégâts mêlée — 2026-09-21

@@ -17,7 +17,8 @@ const ctx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function')fn()
  renderDungeonAttributes:()=>{},renderRpgUniverseEditor:()=>{},saveRpgUniverseStats:()=>{},showToast:()=>{}};
 ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);
 vm.runInContext('const DUNGEON_DEFAULT_ATTRIBUTES=[{id:"force",name:"Force"},{id:"agilite",name:"Agilité"},{id:"intelligence",name:"Intelligence"},{id:"esprit",name:"Esprit"},{id:"endurance",name:"Endurance"}];',ctx);
-vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});\nvm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'stats API missing');
 assert.equal(api.APP_VERSION,'16.78.114.7');

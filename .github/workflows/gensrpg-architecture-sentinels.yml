@@ -604,5 +604,8 @@ jobs:
       - name: Caractériser les retries de wrappers Equipment dans Chromium
         run: node tests/gens_phase4_inventory_equipment_wrapper_retry_browser_preaudit_v1.test.cjs
 
+      - name: Vérifier l'autorité unique Hero Editor Equipment après retry
+        run: node tests/gens_phase4_inventory_equipment_wrapper_retry_fix_browser_v1.test.cjs
+
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs

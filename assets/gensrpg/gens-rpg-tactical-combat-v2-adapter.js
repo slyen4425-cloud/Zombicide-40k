@@ -105,7 +105,7 @@
       damageType:str(st.damageType||it.damageType||(st.magic?"magic":"physical")),
       ignoreArmor:!!(st.ignoreArmor||it.ignoreArmor),lineOfSight:!melee,
       tags:[melee?"melee":"ranged"],
-      meta:{itemId:str(it.id||entry.itemId||""),inventoryIndex:row.idx,dice:num(st.dice??it.dice,1),ammo:entry.ammo??null,hitBreakdown:hitProfile.breakdown}
+      meta:{itemId:str(it.id||entry.itemId||""),inventoryIndex:row.idx,dice:num(st.dice??it.dice,1),ammo:entry.ammo??null,hitBreakdown:hitProfile.breakdown,rpgDamageBonus:Math.max(0,num(st.rpgDamageBonus,0))}
     };
   }
   function heroAttacks(rt,id){

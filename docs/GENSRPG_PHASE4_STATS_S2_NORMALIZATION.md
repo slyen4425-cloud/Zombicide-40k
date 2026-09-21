@@ -198,3 +198,84 @@ de normalisation vers le Core, ou préparer S3 moteur pur selon la frontière la
 sûre établie par les sentinelles.
 
 Aucun raccord implicite ou fallback permanent ne doit être ajouté.
+
+
+## Implémentation réalisée
+
+### RED TDD
+
+Commit pré-module :
+`e49a2fef992f0bb3e6e43caae05e39a3d4a5c163`.
+
+La nouvelle étape Architecture a échoué exactement comme prévu :
+`ENOENT` sur
+`assets/gensrpg/core/stats-normalization-v1.js`.
+
+Le test S1 et toutes les étapes antérieures étaient GREEN.
+
+### Extraction pure
+
+Module :
+`assets/gensrpg/core/stats-normalization-v1.js`.
+
+Commit :
+`b7be17f8f0317405f92e6441d28d506f546529e2`.
+
+API :
+- `slug` ;
+- `canon` ;
+- `normalizeDefinition` ;
+- `isValidTarget` ;
+- `normalizeEffect` ;
+- `compare` ;
+- `effectContribution`.
+
+La sentinelle de parité S2 passe contre les fonctions historiques instrumentées
+uniquement en mémoire.
+
+Le module ne contient aucune dépendance DOM, stockage, runtime héros, timer,
+observer ou logique de combat.
+
+### Graphe runtime
+
+L'ajout physique du fichier a fait échouer la sentinelle Phase 2 sur le nombre
+de fichiers, comme attendu pour tout nouvel asset JS.
+
+La cartographie a été mise à jour sans raccorder le fichier :
+`stats-normalization-v1.js` est classé dans
+`phase4InertServices`.
+
+Donc :
+- présent physiquement ;
+- testé ;
+- propriétaire Core explicite par sa cible S2 ;
+- **non chargé en production** ;
+- aucune double autorité active.
+
+## Validation technique
+
+HEAD :
+`5f1e7d69854d1bff2761e8bd236152b20e76156a`.
+
+Runs :
+- Architecture + navigateur complet : `35557595186` — SUCCESS ;
+- Firefox : `35557595179` — SUCCESS ;
+- Tactical Dock : `35557595165` — SUCCESS.
+
+La clôture documentaire doit repasser ces trois validations sur son SHA final
+exact avant création de
+`checkpoint/gensrpg-phase4-stats-s2-normalization-green-2026-09-21`.
+
+## Décision de suite
+
+Ne pas passer directement à S3.
+
+Le prochain micro-lot doit auditer puis réaliser, si sûr, le **raccord d'autorité
+de normalisation** :
+- charger le Core avant le propriétaire historique ;
+- faire consommer l'API Core au propriétaire historique ;
+- supprimer les duplications pures devenues inutiles ;
+- adapter les tests qui chargent directement le propriétaire ;
+- ne laisser aucun fallback permanent.
+
+S3 `value/effects` ne commence qu'après GREEN de ce raccord.

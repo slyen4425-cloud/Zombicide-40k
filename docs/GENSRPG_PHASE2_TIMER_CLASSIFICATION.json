@@ -4,7 +4,7 @@
   "sourceIndexBlob": "5b9b9ae780f735eadef049afeb10acf0b57441fe",
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
-    "externalReachableFiles": 74,
+    "externalReachableFiles": 75,
     "externalTimerSources": 53,
     "externalSetTimeoutSyntax": 148,
     "externalSetIntervalSyntax": 1,

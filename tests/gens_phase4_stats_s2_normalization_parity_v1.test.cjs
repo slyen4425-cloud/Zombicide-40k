@@ -21,6 +21,7 @@ const legacyCtx={console};
 legacyCtx.window=legacyCtx;
 legacyCtx.globalThis=legacyCtx;
 vm.createContext(legacyCtx);
+vm.runInContext(coreSrc,legacyCtx,{filename:'stats-normalization-v1.js'});
 vm.runInContext(instrumented,legacyCtx,{filename:'gens-rpg-stats-clean-167874.js'});
 const legacy=legacyCtx.__GENS_STATS_S2_INTERNALS;
 assert.ok(legacy,'legacy pure internals missing');

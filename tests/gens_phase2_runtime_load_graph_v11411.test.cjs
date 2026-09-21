@@ -35,7 +35,7 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,26,'GitHub Pages must inject the current 26-module production list');
+assert.equal(injected.length,27,'GitHub Pages must inject the current 27-module production list');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
 
@@ -43,7 +43,7 @@ const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,29,'production composition must expose 29 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,30,'production composition must expose 30 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');

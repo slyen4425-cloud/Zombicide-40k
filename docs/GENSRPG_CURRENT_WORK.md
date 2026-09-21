@@ -1,3 +1,79 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit saveEquipmentEditor — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-save-wrapper-preaudit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-save-wrapper-preaudit-2026-09-21`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+La garde de chaîne retry Hero Editor est officiellement GREEN sur
+`669a8b2ef1caeba2d75a97000b4716877e9e5fc9` :
+- Architecture + navigateur complet `35656959541` — SUCCESS ;
+- Firefox `35656959359` — SUCCESS ;
+- Tactical Dock `35656959411` — SUCCESS.
+
+Le retry Hero Editor conserve sa cadence historique, mais n'ajoute plus une
+deuxième responsabilité `__canon101` lorsqu'elle existe déjà dans la chaîne
+`__original`.
+
+### Mission unique
+
+Pré-auditer uniquement la chaîne actuelle `saveEquipmentEditor`.
+
+Objectifs :
+1. inventorier exhaustivement tous les fichiers externes atteignables Phase 2
+   qui lisent/wrappent/remplacent `saveEquipmentEditor` ;
+2. identifier l'ordre réel de composition ;
+3. attribuer à chaque couche sa responsabilité observable :
+   - persistance objet / bonus RPG ;
+   - appartenance de set ;
+   - invalidation cache ;
+   - autres effets éventuels ;
+4. caractériser les marqueurs / `__original` et les appels différés ;
+5. déterminer si un retrait ou une consolidation est possible sans changer le
+   comportement ;
+6. définir seulement ensuite un micro-lot correctif séparé.
+
+### Périmètre strict
+
+Pré-audit / caractérisation uniquement.
+
+Autorisé :
+- sentinelle statique exhaustive basée sur
+  `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json` ;
+- caractérisation navigateur ciblée de save Equipment ;
+- documentation / CURRENT_WORK / entrée CI.
+
+Interdit :
+- modifier `saveEquipmentEditor` ou ses wrappers ;
+- modifier open Equipment ;
+- modifier Equipment Cleanup, Hero Editor Dynamic, Set Editor ou hotfix ;
+- modifier stockage, bonus, sets, évolution, cache/invalidation ;
+- modifier Stats gameplay, Tactical/combat ;
+- ajouter wrapper, observer, timer/retry ou fallback ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### Preuve attendue
+
+1. liste exhaustive des participants runtime atteignables ;
+2. ordre `__original` réel après >3 s ;
+3. nombre d'appels natifs et de persistances par un Save ;
+4. rôle exact de chaque wrapper ;
+5. dépendances open/save éventuelles ;
+6. candidat soustractif éventuel, ou conclusion qu'aucun retrait isolé n'est sûr.
+
+Aucun correctif runtime dans ce pré-audit.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

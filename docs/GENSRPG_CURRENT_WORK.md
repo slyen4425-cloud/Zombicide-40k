@@ -91,6 +91,64 @@ Avant toute création de module :
 - aucun timer/retry ;
 - aucun changement sur `main`.
 
+### Audit, TDD et extraction S8 confirmés
+
+Document de chantier :
+`docs/GENSRPG_PHASE4_STATS_S8_RESISTANCE_NORMALIZATION.md`.
+
+Contrat retenu :
+- représentation canonique ordonnée `{key,value}` immuable ;
+- array générique et object Tactical convergent sans appliquer de dégâts ;
+- doublons préservés jusqu'à projection explicite ;
+- `sum` reproduit la sémantique générique additive ;
+- `last` reproduit la priorité historique V110 ;
+- les tableaux Capture d'IDs ne sont pas interprétés comme résistances numériques.
+
+RED TDD :
+- commit `f0ea7ad0d3ef12d3483465ebeba1ec3227a019b5` ;
+- Architecture `35587505339` — FAILURE attendu ;
+- cause exacte : `ENOENT assets/gensrpg/core/stats-resistance-normalization-v1.js` ;
+- Firefox `35587505241` — SUCCESS ;
+- Tactical Dock `35587505324` — SUCCESS.
+
+Extraction :
+- module `assets/gensrpg/core/stats-resistance-normalization-v1.js` :
+  `e123d195dbc06b892db82c5a56e629b14affd72b` ;
+- classification Phase 4 inert :
+  `e55c6efb03c4c57b89c805d0ec3b453207b9a729` ;
+- correction de l'attente de test additive/clamp :
+  `e109ef34ef45941347f6e9d1f27cafc8827857b5`.
+
+### Validation technique S8
+
+HEAD fonctionnel technique :
+`e109ef34ef45941347f6e9d1f27cafc8827857b5`.
+
+Runs :
+- Architecture + navigateur complet : `35589043087` — SUCCESS ;
+- Firefox : `35589043070` — SUCCESS ;
+- Tactical Dock : `35589043075` — SUCCESS.
+
+Aucun `index.html`, runtime Tactical/Dungeon, formule de dégâts, pourcentage
+de résistance ou application gameplay n'a été modifié. Le nouveau module reste
+hors graphe de production.
+
+### Clôture S8 en cours
+
+Le document S8 a été fermé techniquement au commit :
+`1256899ce8c790f4e635cbf45ed644428da3cf5d`.
+
+Le présent commit `GENSRPG_CURRENT_WORK.md` devient le candidat documentaire
+final S8. Il doit repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer `checkpoint/gensrpg-phase4-stats-s8-resistance-normalization-green-2026-09-21`
+   sur le SHA documentaire final validé ;
+2. créer le checkpoint de départ S9 sur exactement ce SHA ;
+3. ouvrir une branche dédiée S9 — contrat Armure ;
+4. ne modifier aucune formule Armor avant caractérisation comparative
+   Dungeon/Tactical.
+
 
 ## Chantier courant prioritaire — Phase 4 Core Stats / S7 snapshot Core unique — 2026-09-21
 

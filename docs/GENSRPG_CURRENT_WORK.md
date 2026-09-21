@@ -101,6 +101,78 @@ Tactical reste propriétaire de :
 - aucun changement sur `main`.
 
 
+### Résultat de caractérisation S11
+
+Document :
+`docs/GENSRPG_PHASE4_STATS_S11_DAMAGE_BOUNDARY_AUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase4_stats_s11_damage_boundary_characterization_v1.test.cjs`.
+
+Commits :
+- test initial : `6fffae31ac381883516baf3ec2b3c2941cde06e4` ;
+- CI : `c8006dbf46f45f2084498c3764e9485a99014995` ;
+- correction syntaxique de la sentinelle :
+  `db813073bcb59ffe286816e4201fc9a28eccefdb` ;
+- audit documenté :
+  `27aa385a2f800bb49be6c3c8b1583069d0ad563a`.
+
+Le RED initial S11 était uniquement une erreur de syntaxe du test
+(`Unexpected end of input`) et n'a entraîné aucune modification gameplay.
+
+Le test corrigé passe dans Architecture `35596199137`.
+
+### Défaut fonctionnel caractérisé — ne pas corriger dans ce lot
+
+Le vrai chemin physique mêlée montre une double application possible du même
+bonus canonique :
+
+- arme brute 5 ;
+- `applyDungeonCombatScaling` ajoute +3 → `attack.power = 8` ;
+- V110 relit +3 dans `snapshot.derived.physicalDamageBonus` ;
+- V114.11 ajoute ce +3 au `attack.power` → 11 brut ;
+- armure 2 → 9 final.
+
+Le contrat V114.11 déjà documenté attend pourtant :
+`5 + 3 - 2 = 6`.
+
+La différence était masquée parce que l'ancien test final construisait une
+attaque `power=5` directement, sans passer par l'Adapter réel.
+
+Le chemin magique relit aussi son bonus dans V110 mais V114.11 ne le rajoute
+pas une seconde fois dans la branche non physique.
+
+### Décision de gouvernance
+
+Conformément à la charte, **aucun correctif gameplay n'est appliqué sur la
+branche de caractérisation S11**.
+
+Le présent lot doit être checkpointé GREEN après CI complète, puis ouvrir un
+lot correctif dédié au défaut de double application physique mêlée.
+
+Nom prévu :
+`work/gensrpg-phase4-stats-s11-melee-damage-double-application-fix-2026-09-21`.
+
+Ce correctif devra :
+1. conserver la formule cible `arme + bonus canonique une seule fois` ;
+2. corriger le vrai propriétaire de frontière Adapter/V114.11 ;
+3. ne pas retirer le bonus de `applyDungeonCombatScaling` pour Dungeon
+   classique ;
+4. vérifier mêlée, distance, magie, armure, résistance, critique et explication ;
+5. ne reprendre le raccord S11 Core Snapshot qu'après GREEN du correctif.
+
+### Clôture du lot de caractérisation S11
+
+Le présent commit documentaire final doit repasser les trois batteries.
+
+Après trois SUCCESS :
+1. créer
+   `checkpoint/gensrpg-phase4-stats-s11-damage-boundary-characterized-green-2026-09-21` ;
+2. créer un checkpoint de départ du correctif sur exactement ce SHA ;
+3. ouvrir la branche correctrice dédiée ci-dessus ;
+4. ne toucher ni S12 ni `main`.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Stats / S10 Toucher-Défense-Esquive — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

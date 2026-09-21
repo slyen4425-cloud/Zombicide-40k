@@ -1,3 +1,91 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — pré-audit wrapper openEquipmentEditor — 2026-09-21
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-open-wrapper-preaudit-2026-09-21`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-open-wrapper-preaudit-2026-09-21`.
+- Base exacte :
+  `405257244acf58e19e738048d95b07fcad9459d3`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-setstate-fallback-retirement-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent définitivement GREEN
+
+Le retrait du fallback local `fallbackSetStates(items)` est fermé sur le SHA exact
+`405257244acf58e19e738048d95b07fcad9459d3`.
+
+Validation documentaire finale :
+- Architecture + navigateur complet `35647009692` — SUCCESS, tentative 2 du même SHA ;
+- Firefox `35647009659` — SUCCESS ;
+- Tactical Dock `35647009672` — SUCCESS.
+
+La première tentative navigateur du run Architecture avait rencontré le flake déjà
+caractérisé sur Dungeon après Survie. La relance du seul job navigateur sur le même
+SHA a réussi sans modification de code.
+
+### Mission du présent pré-audit
+
+Caractériser uniquement l'empilement de wrappers de `openEquipmentEditor` avant
+tout retrait ou raccord supplémentaire.
+
+Chaîne à vérifier :
+1. `dungeon-equipment-hotfix-167817.js` ;
+2. `dungeon-set-editor-167818.js` ;
+3. `gens-equipment-stat-cleanup-1678102.js`.
+
+Objectifs :
+- identifier la responsabilité observable propre de chaque wrapper ;
+- vérifier l'ordre réel de composition ;
+- vérifier les marqueurs / `__original` et les dépendances ;
+- distinguer ce qui est encore nécessaire de ce qui est purement historique ;
+- définir, seulement après preuve, le prochain micro-lot soustractif minimal.
+
+### Périmètre
+
+Audit / caractérisation uniquement dans un premier temps.
+
+Ne pas modifier :
+- `saveEquipmentEditor` ;
+- le wrapper `renderDungeonGear` ;
+- MutationObserver / listeners / timers / RAF de l'Equipment UI ;
+- calcul bonus/sets/évolution/cache ;
+- stockage ;
+- Stats / Tactical / combat ;
+- `index.html` ;
+- `main`.
+
+Aucun wrapper, observer, timer/retry ou fallback nouveau.
+
+### Tests prévus
+
+1. figer l'ordre hotfix -> set-editor -> cleanup ;
+2. caractériser l'effet propre de chaque wrapper `openEquipmentEditor` ;
+3. vérifier que chaque couche appelle bien la précédente ;
+4. vérifier les marqueurs et chaînes `__original` ;
+5. caractériser les décorations différées sans les modifier ;
+6. vérifier le vrai ordre Pages / preview lorsque nécessaire ;
+7. Architecture + navigateur complet, Firefox et Tactical Dock avant GREEN.
+
+### Risque principal
+
+Retirer une couche sans preuve pourrait supprimer :
+- l'édition des `rpgBonuses` ;
+- l'UI / appartenance de set ;
+- la décoration canonique évolution/stats.
+
+Le pré-audit ne doit donc effectuer aucun retrait runtime.
+
+### Prochaine action
+
+Créer une sentinelle de caractérisation dédiée au wrapper `openEquipmentEditor`,
+documenter les responsabilités prouvées, puis lancer la CI complète. Aucun retrait
+runtime avant un futur lot séparé explicitement défini par ce pré-audit.
+
+
 ## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — clôture retrait fallback set-state UI — 2026-09-21
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

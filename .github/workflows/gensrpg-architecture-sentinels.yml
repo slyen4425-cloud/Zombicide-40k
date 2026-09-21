@@ -610,5 +610,8 @@ jobs:
       - name: Vérifier la garde de chaîne retry Equipment dans Chromium
         run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_browser_v1.test.cjs
 
+      - name: Caractériser saveEquipmentEditor custom et builtin dans Chromium
+        run: node tests/gens_phase4_inventory_equipment_save_wrapper_browser_preaudit_v1.test.cjs
+
       - name: Caractériser l'ouverture Equipment sans dépendance au hook Hero Art
         run: node tests/gens_phase4_inventory_equipment_hero_art_open_hook_browser_v1.test.cjs

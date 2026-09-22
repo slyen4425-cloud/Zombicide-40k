@@ -65,10 +65,16 @@ Priorité :
 
 Le résultat `per` est ensuite clampé à au moins 1.
 
-Conséquence historique à conserver :
+Le fallback explicite doit reproduire la place exacte de
+`loadDungeonRpgRules().xpPerLevel` dans l'expression legacy : il n'est pas
+pré-normalisé par `Number(...)` dans le Core. Un fallback truthy mais non
+numérique peut donc conduire à `NaN`, comme l'expression historique.
+
+Conséquences historiques à conserver :
 - `xpPerLevel=0` -> fallback ;
 - `xpPerLevel="bad"` -> fallback ;
-- `xpPerLevel=-5` -> truthy puis clamp à 1.
+- `xpPerLevel=-5` -> truthy puis clamp à 1 ;
+- fallback lui-même `"bad"` -> résultat `NaN`.
 
 ### Profil custom
 

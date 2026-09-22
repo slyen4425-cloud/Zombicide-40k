@@ -1,3 +1,74 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — contrat pur — 2026-09-22
+
+Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-contract-2026-09-22`.
+- Base exacte :
+  `b4af567cc93d8dac30e87131e7a1eb32e10c6486`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-preaudit-green-2026-09-22`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat technique
+
+RED :
+- commit CI `edb46632a1a3dfb16a77f547272bc0e3e2a5a758` ;
+- Architecture `35676025115` — FAILURE attendu ;
+- erreur : `Phase 4 pure Core Dice service must exist`.
+
+Service pur :
+- commit runtime `8fa6c7f3e23d8118744bb890e78101310edc8da9` ;
+- fichier `assets/gensrpg/core/dice-v1.js` ;
+- API : `roll`, `thresholdFromChance`, `rollChanceHigh`, `rollCheck` ;
+- RNG injectable, `Math.random` par défaut ;
+- aucun raccord runtime.
+
+Alignements :
+- cartographie Phase 2 : nouveau service classé Phase 4 inert ;
+- inventaire physique 94 JS, graphe production toujours 76 ;
+- pré-audit Dice réaligné sur Core existant mais non raccordé.
+
+Document :
+`docs/GENSRPG_PHASE4_DICE_CONTRACT.md`.
+
+### Validation technique complète
+
+SHA technique :
+`8d5eb68ebe6f24368f2192f8166fcc33bd1dcee6`.
+
+- Architecture + navigateur complet `35676212916` — SUCCESS ;
+- Firefox `35676212738` — SUCCESS ;
+- Tactical Dock `35676212751` — SUCCESS.
+
+### Validation documentaire finale
+
+La documentation de clôture change le SHA.
+
+Avant checkpoint GREEN :
+1. Architecture + navigateur complet — SUCCESS ;
+2. Firefox — SUCCESS ;
+3. Tactical Dock — SUCCESS ;
+sur le SHA documentaire final exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-dice-contract-green-2026-09-22`.
+
+Aucun autre runtime ne doit être modifié pendant cette clôture.
+
+### Prochain lot séparé
+
+Après GREEN seulement :
+**parité / sélection du premier raccord Core Dice**.
+
+Comparer au minimum :
+- `d100ThresholdFromChance` ;
+- `dungeonUniversalTest`.
+
+Ne raccorder qu'un propriétaire dans le premier lot. Tactical reste hors du premier
+raccord tant que la conservation de son RNG seedé n'est pas prouvée.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — contrat pur — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

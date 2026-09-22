@@ -63,6 +63,8 @@ const core044=scriptBody('dungeonCore044HeroProgression');
 const earnedFn=extractWindowFunction(core044,'dungeonRpgEarnedSkillPoints');
 const levelFn=extractWindowFunction(core044,'dungeonRpgLevelFromXp');
 const syncFn=extractFunction(index,'dungeonSyncProgressionForState');
+const defaultRulesFn=extractFunction(index,'defaultDungeonRpgRules');
+const normalizeRulesFn=extractFunction(index,'normalizeDungeonRpgRules');
 
 assert.match(owners,/^dungeonRpgEarnedSkillPoints\t1\tdungeonCore044HeroProgression$/m,
   'Core 0.44 must remain the active earned skill points owner');
@@ -101,11 +103,12 @@ function runtime({profile=ABSENT,gameStyle='dungeon',rules={xpPerLevel:10,starti
     document:{getElementById:()=>null,querySelector:()=>null},
     rpgEditingId:'p',
     loadGameProfiles:()=>{profilesCalls++;return profiles;},
-    activeGameProfileId:()=>{profileIdCalls++;return 'p';},
-    loadDungeonRpgRules:()=>{rulesCalls++;return rules;}
+    activeGameProfileId:()=>{profileIdCalls++;return 'p';}
   };
   ctx.window=ctx;ctx.globalThis=ctx;
   vm.createContext(ctx);
+  vm.runInContext(defaultRulesFn+'\n'+normalizeRulesFn,ctx,{filename:'dungeon-rules-normalization-owner'});
+  ctx.loadDungeonRpgRules=()=>{rulesCalls++;return ctx.normalizeDungeonRpgRules(rules);};
   vm.runInContext(coreSource,ctx,{filename:corePath});
   vm.runInContext(core044,ctx,{filename:'dungeonCore044HeroProgression'});
   const originalLevel=ctx.dungeonRpgLevelFromXp;
@@ -183,18 +186,21 @@ parityCases+=runCases('non-dungeon active profile falls back to rules',
   [[0,1],[9,1],[10,3],[20,5],[99,19],[100,21]],
   {profilesCalls:2,profileIdCalls:2,rulesCalls:2,levelCalls:1});
 
-// Preserve the legacy no-profile coercions exactly, including NaN propagation.
+// Exercise no-profile values through the real Dungeon rules normalization owner.
+assert.match(normalizeRulesFn,/pos\("xpPerLevel"\)/,'real rules owner must normalize xpPerLevel');
+assert.match(normalizeRulesFn,/non\("skillPointsPerLevel",99\)/,'real rules owner must normalize skillPointsPerLevel');
+assert.match(normalizeRulesFn,/non\("startingSkillPoints",99\)/,'real rules owner must normalize startingSkillPoints');
 parityCases+=runCases('legacy string rules coercion',
   {profile:ABSENT,rules:{xpPerLevel:'10',startingSkillPoints:'3',skillPointsPerLevel:'2'}},
   [[0,3],[10,5],[20,7],[99,21]],
   {profilesCalls:2,profileIdCalls:0,rulesCalls:2,levelCalls:1});
-parityCases+=runCases('legacy invalid starting points',
+parityCases+=runCases('normalized invalid starting points',
   {profile:ABSENT,rules:{xpPerLevel:10,startingSkillPoints:'bad',skillPointsPerLevel:2}},
-  [[0,NaN],[20,NaN]],
+  [[0,0],[20,4]],
   {profilesCalls:2,profileIdCalls:0,rulesCalls:2,levelCalls:1});
-parityCases+=runCases('legacy invalid xpPerLevel',
+parityCases+=runCases('normalized invalid xpPerLevel',
   {profile:ABSENT,rules:{xpPerLevel:'bad',startingSkillPoints:1,skillPointsPerLevel:2}},
-  [[0,NaN],[20,NaN]],
+  [[0,1],[20,5]],
   {profilesCalls:2,profileIdCalls:0,rulesCalls:2,levelCalls:1});
 parityCases+=runCases('legacy negative rules clamp',
   {profile:ABSENT,rules:{xpPerLevel:-5,startingSkillPoints:-3,skillPointsPerLevel:-2}},
@@ -219,7 +225,7 @@ const selection={
     'no-profile fallback fields: startingSkillPoints + skillPointsPerLevel',
     'configured empty progression object is not the same as no profile',
     'profile maxLevel/custom curve effects arrive only through dungeonRpgLevelFromXp',
-    'legacy fallback coercions, including NaN propagation, until a separately approved behavior-change lot'
+    'no-profile fallbacks pass through the real normalizeDungeonRpgRules owner before this seam'
   ],
   observedReads:{
     configuredProfile:'two active-profile reads via earned seam plus level seam; zero Dungeon-rules reads',
@@ -233,7 +239,7 @@ const selection={
     'changeXP/combat/objective distribution',
     'level-up UI/persistence'
   ],
-  nextAction:'create a separate pure Core contract from canonical level; do not raccord runtime in this preaudit lot'
+  nextAction:'guard the installed runtime raccord and keep rule normalization owned by normalizeDungeonRpgRules'
 };
 
 console.log(JSON.stringify({
@@ -242,5 +248,5 @@ console.log(JSON.stringify({
   coreBlob:gitBlob(coreBuf),
   parityCases,
   selection,
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

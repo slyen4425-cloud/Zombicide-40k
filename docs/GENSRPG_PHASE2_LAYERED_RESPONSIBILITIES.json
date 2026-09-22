@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "3a3db76d12ae511f6293e8ff25d124616731a08b",
+  "sourceIndexBlob": "f13835a2827dbfa9e2698cb026d3e732ad62aba4",
   "note": "High-density active responsibility hotspots. Descriptive only; listing does not authorize deletion or consolidation.",
   "hotspots": [
     {
@@ -123,14 +123,6 @@
       "classification": "layered-render-chain",
       "domain": "dungeon",
       "responsibility": "map HTML is progressively replaced from living exploration through final map renderer"
-    },
-    {
-      "name": "startConfiguredGame",
-      "assignmentCount": 6,
-      "lastOwner": "dungeonCore200Rebuild",
-      "classification": "cross-domain-boundary-chain",
-      "domain": "shell",
-      "responsibility": "shared launch path is layered by Capture then Dungeon; final guard now preserves dedicated Capture routing"
     }
   ]
 }

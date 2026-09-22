@@ -1,3 +1,121 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — contrat pur XP -> niveau — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-contract-clean-2026-09-22`.
+- Base exacte :
+  `79ca6dca0df93abd40c8443fad8fcfc9c6cc4c28`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-final-green-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-contract-clean-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### TDD / RED
+
+Sentinelle :
+`tests/gens_phase4_progression_xp_contract_v1.test.cjs`.
+
+RED :
+- commit `eef99bd5549a2729a8d08fb6d2fec8938aa6ff29` ;
+- Architecture `35703064109` — FAILURE attendue ;
+- échec exact sur
+  `Verrouiller le contrat pur Core Progression XP Phase 4` ;
+- le service Core n'existait pas encore.
+
+### Service pur créé
+
+Fichier :
+`assets/gensrpg/core/progression-v1.js`.
+
+Commit :
+`9691d83e5fbf18fe37a7328f07f828675f598372`.
+
+Blob :
+`b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+API unique :
+`GensProgressionV1.levelFromXp(xp, progressionConfig)`.
+
+Contrat conservé :
+- normalisation XP historique ;
+- courbe linéaire configurable ;
+- courbe custom configurable ;
+- `maxLevel` ;
+- fallback historique seuil custom absent/invalide :
+  `(level - 1) * xpPerLevel`.
+
+Aucun profil actif, DOM, stockage, popup, son, timer, observer, listener, RNG,
+héros courant ou mutation d'état dans le service.
+
+### Cartographie
+
+Le service est classé **Phase 4 inert** :
+- 95 fichiers JS physiques ;
+- 15 services Phase 4 ;
+- 3 services Phase 4 inert ;
+- graphe production-reachable inchangé : 77.
+
+Commit d'alignement :
+`c9819d693318459016f0a50cdf75391976b27754`.
+
+`index.html` reste byte-identique :
+`2d7677950f04e9a3290ff0062e157a126123891d`.
+
+Aucun chargement dans source index / preview / Pages / bootstrap.
+
+### Correction de sentinelle
+
+La sentinelle avait initialement une mauvaise attente sur un seuil custom invalide
+au niveau 5. Le legacy retombe à `(5-1)*10 = 40`, pas 50.
+
+Le test a été corrigé pour reproduire le legacy exact ; le service n'a pas été
+modifié.
+
+SHA technique GREEN :
+`ff91dac9f5d2285ec12f059107dd822d97d126d4`.
+
+### Validation technique GREEN
+
+Sur ce même SHA :
+- Architecture + navigateur complet :
+  `35703389599` — SUCCESS ;
+- Firefox :
+  `35703389466` — SUCCESS ;
+- Tactical Dock :
+  `35703389639` — SUCCESS.
+
+### Frontières toujours différées
+
+- `dungeonRpgXpIntoLevel` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- `changeXP` ;
+- partage XP / récompenses / persistance ;
+- `dungeonHandleLevelUp071` et popup/restauration level-up ;
+- `progression-runtime-v1.js` reste hors production.
+
+Les deux retours utilisateur restent eux aussi séparés :
+- détection ennemie tardive / LOS ;
+- confusion visuelle Stats d'Aldren.
+
+### Suite après GREEN
+
+Ouvrir un lot séparé de **pré-audit du premier raccord Core Progression**.
+Ne pas connecter automatiquement d'autres seams Progression.
+
+### Validation finale obligatoire
+
+La documentation de clôture change le SHA.
+Avant checkpoint GREEN, il faut trois SUCCESS sur le **même SHA documentaire final exact** :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP -> niveau — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

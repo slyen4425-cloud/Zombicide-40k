@@ -1,3 +1,90 @@
+## Chantier courant prioritaire — Phase 4 Core Progression — raccord runtime points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Base exacte :
+  `14d88f69b404650088cd19436819caae4138c564`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit officiellement GREEN
+
+SHA :
+`14d88f69b404650088cd19436819caae4138c564`.
+
+Validation finale :
+- Architecture + navigateur complet : `35740934705` — SUCCESS ;
+- Firefox : `35740934945` — SUCCESS ;
+- Tactical Dock : `35740934451` — SUCCESS.
+
+### Mission unique
+
+Raccorder uniquement :
+`dungeonCore044HeroProgression -> dungeonRpgEarnedSkillPoints`
+
+vers :
+`GensProgressionV1.earnedSkillPointsFromLevel`.
+
+Forme autorisée par le pré-audit :
+
+`window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules(),level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,null,r.startingSkillPoints,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,p)}`
+
+Le raccord doit conserver :
+- `activeProg()` ;
+- `loadDungeonRpgRules()` seulement sans profil ;
+- `dungeonRpgLevelFromXp(xp)` comme autorité unique du niveau ;
+- ordre et nombre des lectures propriétaires ;
+- le comportement utilisateur existant.
+
+### TDD
+
+Sentinelle RED :
+`tests/gens_phase4_progression_earned_skill_points_raccord_v1.test.cjs`.
+
+Le RED attendu doit être exclusivement :
+absence de délégation runtime vers
+`GensProgressionV1.earnedSkillPointsFromLevel`.
+
+### Hors périmètre
+
+- aucun changement de `dungeonSyncProgressionForState` ;
+- aucun point dépensé / bonus / stat points ;
+- aucun XP manuel/combat/objectifs ;
+- aucun level-up/UI/persistance ;
+- aucune optimisation annexe ;
+- aucun Event Bus ;
+- aucun wrapper, observer ou timer/retry ;
+- aucun changement du Core Progression ;
+- aucun merge sur `main`.
+
+### Source exacte
+
+`index.html` de départ :
+- 8 174 346 octets ;
+- blob `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+Core Progression :
+- blob `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+### Prochaine action
+
+1. observer le RED ciblé ;
+2. modifier uniquement le seam runtime autorisé ;
+3. vérifier nouveau blob/taille de `index.html` ;
+4. réaligner uniquement les fingerprints réellement dépendants ;
+5. triple CI ;
+6. clôture documentaire ;
+7. triple CI finale ;
+8. checkpoint GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — pré-audit raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -34,7 +34,7 @@ function xpIntoLevel(xp,progressionConfig,fallbackXpPerLevel){
   const value=Math.max(0,Number(xp)||0);
 
   if(!p||(p.xpCurveMode||"linear")!=="custom"){
-    const per=Math.max(1,Number(p&&p.xpPerLevel)||Number(fallbackXpPerLevel)||10);
+    const per=Math.max(1,Number(p?.xpPerLevel)||fallbackXpPerLevel||10);
     return value%per;
   }
 

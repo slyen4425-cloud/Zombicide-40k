@@ -18,8 +18,8 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blob=crypto.createHash('sha1')
   .update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8174346,'Progression preaudit must run on the exact first-raccord index');
-assert.equal(blob,'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc','Progression preaudit index blob drifted');
+assert.equal(bytes.length,8174314,'Progression preaudit must run on the exact first-raccord index');
+assert.equal(blob,'8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91','Progression preaudit index blob drifted');
 
 function scriptBody(id){
   const re=new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

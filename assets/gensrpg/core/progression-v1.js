@@ -44,10 +44,22 @@ function xpIntoLevel(xp,progressionConfig,fallbackXpPerLevel){
   return Math.max(0,value-start);
 }
 
+function earnedSkillPointsFromLevel(level,progressionConfig,fallbackStartingSkillPoints,fallbackSkillPointsPerLevel){
+  const p=progressionConfig&&typeof progressionConfig==="object"?progressionConfig:null;
+  const gained=Math.max(0,(Number(level)||0)-1);
+
+  if(!p){
+    return Math.max(0,fallbackStartingSkillPoints)+gained*Math.max(0,fallbackSkillPointsPerLevel);
+  }
+
+  return Math.max(0,Number(p.startingSkillPoints)||0)+gained*Math.max(0,Number(p.talentPointsPerLevel)||0);
+}
+
 ROOT.GensProgressionV1=Object.freeze({
   VERSION,
   levelFromXp,
-  xpIntoLevel
+  xpIntoLevel,
+  earnedSkillPointsFromLevel
 });
 
 })(typeof window!=="undefined"?window:globalThis);

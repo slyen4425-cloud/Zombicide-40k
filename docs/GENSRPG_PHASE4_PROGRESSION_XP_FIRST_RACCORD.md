@@ -153,3 +153,36 @@ GREEN uniquement si :
 8. Firefox — SUCCESS ;
 9. Tactical Dock — SUCCESS ;
 10. documentation finale validée sur le même SHA avant checkpoint GREEN.
+
+## RED TDD observé
+
+SHA RED :
+
+`8a5a674b6574e104300c6f4346d6a3f6833ea88c`.
+
+Runs :
+- Architecture : `35710641838` — **FAILURE attendu** ;
+- Firefox : `35710641580` — SUCCESS ;
+- Tactical Dock : `35710641684` — SUCCESS.
+
+Dans Architecture, les sentinelles antérieures passent, notamment :
+- pré-audit Core Progression XP ;
+- contrat pur Core Progression XP ;
+- pré-audit du premier raccord Core Progression XP.
+
+L'unique nouvelle étape en échec est :
+
+`Raccorder le premier calcul XP niveau au Core Progression`.
+
+Cause attendue du RED :
+- `progression-v1.js` n'est pas encore chargé par la composition source ;
+- `dungeonRpgLevelFromXp` ne délègue pas encore sa branche profil configuré au Core.
+
+Aucun runtime n'a été modifié pour obtenir ce RED.
+
+## Prochaine action après RED
+
+Appliquer le micro-raccord au vrai propriétaire, à partir du `index.html` exact
+du lot, puis réaligner uniquement les sentinelles/cartographies rendues
+obsolètes par ce raccord.
+

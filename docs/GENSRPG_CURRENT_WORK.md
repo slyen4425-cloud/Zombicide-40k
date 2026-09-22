@@ -126,10 +126,27 @@ Interdit :
 - Survie / Dungeon / Capture / PvP ;
 - Save & Quit / reprise.
 
+### TDD RED obtenu
+
+RED observé avant création du service :
+
+- SHA sentinelle + CI :
+  `b4109f7e6b7a4c1f2dab53fdb3b6582deea82fb3` ;
+- Architecture :
+  `35701986461` — FAILURE attendue ;
+- étape :
+  `Verrouiller le contrat pur Core Progression XP Phase 4` ;
+- erreur exacte :
+  `Phase 4 pure Core Progression XP service must exist` ;
+- le pré-audit Progression précédent reste SUCCESS juste avant cette étape.
+
+Aucun service Core Progression n'existait sur ce RED.
+
 ### Prochaine action
 
-Créer la sentinelle contractuelle sur cette base clean, la brancher à Architecture
-et obtenir le RED attendu avant création du service.
+Créer maintenant uniquement le service pur
+`assets/gensrpg/core/progression-xp-v1.js`, sans raccord runtime, puis laisser
+la cartographie détecter explicitement le nouveau fichier Phase 4 inert.
 
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 

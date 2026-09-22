@@ -6,7 +6,7 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const owners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
-const layered=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_LAYERED_RESPONSIBILITIES.json'),'utf8');
+const layered=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_LAYERED_RESPONSIBILITIES.json'),'utf8'));
 
 const chainIds=[
   'captureFix131',

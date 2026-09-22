@@ -90,7 +90,7 @@ Il s'agit d'une correction soustractive, pas d'une nouvelle autorité.
 
 Forme candidate :
 
-`window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),fallback=(!p||(p.xpCurveMode||"linear")!=="custom")?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}`
+`window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}`
 
 Points importants :
 - `activeProg()` reste à la frontière historique ;
@@ -124,13 +124,15 @@ Pour `NaN`, la parité est contrôlée explicitement.
 
 ## Lecture des règles Dungeon
 
-La sentinelle verrouille :
-- no-profile / linéaire :
-  - legacy = 1 lecture des règles ;
-  - candidat = 1 lecture des règles ;
-- custom :
-  - legacy = 0 lecture des règles ;
-  - candidat = 0 lecture des règles.
+La sentinelle verrouille le court-circuit exact :
+- no-profile : 1 lecture des règles ;
+- linéaire avec `Number(p.xpPerLevel)` truthy : 0 lecture ;
+- linéaire avec `Number(p.xpPerLevel)` falsy : 1 lecture ;
+- custom : 0 lecture.
+
+Le premier essai de pré-audit a volontairement échoué car le candidat lisait
+les règles Dungeon pour tout profil linéaire. Cette hypothèse a été rejetée :
+le raccord doit préserver le court-circuit du legacy.
 
 Ainsi, le futur raccord ne devra pas écrire naïvement :
 

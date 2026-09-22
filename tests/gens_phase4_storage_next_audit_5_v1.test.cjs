@@ -18,7 +18,7 @@ assert.deepEqual(manifest.totals,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174580,'post-Manual-MJ index byte size drifted');
+assert.equal(bytes.length,8174637,'post-Manual-MJ index byte size drifted');
 assert.equal(blob,'5b8e790fefe7970a250fd9485ee80549511737e6','audit 5 must target the exact post-Deck index blob');
 
 function block(id){

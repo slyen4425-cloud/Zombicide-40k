@@ -1,3 +1,71 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Text Utils — pré-audit raccord Room Creator — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-room-creator-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `f3c2d6235bb9db655ec55a4b785c1edb70ea450a`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-text-utils-u1-contract-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit terminé sans modification runtime/composition.
+
+Consommateur :
+`assets/dungeon/dungeon-room-creator-100.js`.
+
+Sources protégées :
+- Room Creator blob `19c0fff57bfe27648819a12ed657cebe4f41f6df` ;
+- U1 blob `d8dd5091963e180a18dfa5274aa4030cbaadaa90`.
+
+Caractérisation :
+- un seul helper local `function esc(v)` ;
+- 11 occurrences `esc(` définition comprise ;
+- parité U1 validée sur 16 cas ;
+- Pages et preview chargent Room Creator mais pas encore U1 ;
+- `index.html` source n'est pas un point de raccord pour ce consommateur.
+
+### Raccord futur autorisé
+
+Le futur lot séparé pourra :
+1. charger U1 avant Room Creator dans Pages ;
+2. charger U1 avant Room Creator dans `preview.html` ;
+3. remplacer uniquement la copie locale `esc()` par `GensTextUtilsV1.escapeHtml` ;
+4. supprimer tout fallback local ;
+5. reclasser U1 inert -> connected dans la cartographie ;
+6. repasser le vrai Dungeon Builder navigateur.
+
+Forme candidate :
+
+`const TextUtils=ROOT.GensTextUtilsV1;if(!TextUtils)throw new Error("GensTextUtilsV1 must load before DungeonRoomCreator100");const esc=TextUtils.escapeHtml;`
+
+### Validation technique avant documentation finale
+
+SHA :
+`3137617799dc1ffbc98c75793e315354ca482acb`.
+
+- Architecture + navigateur complet : `35761570252` — SUCCESS ;
+- Firefox : `35761569826` — SUCCESS ;
+- Tactical Dock : `35761569876` — SUCCESS.
+
+### Validation finale obligatoire
+
+Cette clôture documentaire change le SHA. Avant le checkpoint GREEN cible,
+ce SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun raccord runtime n'est autorisé avant ce GREEN.
+
 ## Chantier courant prioritaire — Phase 4 / U1 Text Utils — pré-audit raccord Room Creator — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

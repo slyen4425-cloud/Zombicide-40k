@@ -62,3 +62,24 @@ Pas de fallback local autorisé : sinon deux autorités subsisteraient.
 ## Interdictions
 
 Ce pré-audit ne modifie aucun runtime, consommateur, composition, storage ou gameplay.
+
+
+## Résultat technique
+
+SHA du pré-audit :
+`3137617799dc1ffbc98c75793e315354ca482acb`.
+
+Validation :
+- Architecture + navigateur complet `35761570252` — SUCCESS ;
+- Firefox `35761569826` — SUCCESS ;
+- Tactical Dock `35761569876` — SUCCESS.
+
+La sentinelle confirme :
+- parité locale/U1 sur 16 cas ;
+- un seul propriétaire local avant raccord ;
+- U1 toujours inert dans Pages et preview ;
+- aucun changement runtime.
+
+La clôture documentaire doit repasser la triple CI sur son propre SHA exact.
+Après succès, créer :
+`checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-green-2026-09-22`.

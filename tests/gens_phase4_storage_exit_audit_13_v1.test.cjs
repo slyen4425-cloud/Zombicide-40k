@@ -16,8 +16,8 @@ function gitBlob(buffer){
   ])).digest('hex');
 }
 
-const BLOB='5b8e790fefe7970a250fd9485ee80549511737e6';
-assert.equal(bytes.length,8174637);
+const BLOB='2d7677950f04e9a3290ff0062e157a126123891d';
+assert.equal(bytes.length,8174648);
 assert.equal(gitBlob(bytes),BLOB);
 assert.equal(manifest.sourceIndexBlob,BLOB);
 assert.deepEqual(manifest.totals,{

@@ -10,6 +10,7 @@ const room=fs.readFileSync(path.join(root,roomPath),'utf8');
 const u1=fs.readFileSync(path.join(root,u1Path),'utf8');
 const main=fs.readFileSync(path.join(root,'.github/workflows/main.yml'),'utf8');
 const preview=fs.readFileSync(path.join(root,'preview.html'),'utf8');
+const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 
 assert.ok(u1.includes('ROOT.GensTextUtilsV1=Object.freeze'),
   'Core Text Utils v1 API missing');
@@ -34,6 +35,9 @@ assert.ok(previewRoom>=0,
 assert.ok(previewU1<previewRoom,
   'RED: preview must load Text Utils v1 before Room Creator');
 
+assert.ok(sw.includes('./assets/gensrpg/core/text-utils-v1.js'),
+  'RED: connected Text Utils v1 must be precached for the PWA');
+
 assert.equal((room.match(/function esc\(v\)/g)||[]).length,0,
   'RED: Room Creator local esc implementation must be retired');
 assert.match(room,/GensTextUtilsV1/,
@@ -48,5 +52,6 @@ console.log(JSON.stringify({
   pagesOrder:{textUtils:pagesU1,roomCreator:pagesRoom},
   previewOrder:{textUtils:previewU1,roomCreator:previewRoom},
   localEscRetired:true,
-  explicitCoreDependency:true
+  explicitCoreDependency:true,
+  pwaPrecached:true
 },null,2));

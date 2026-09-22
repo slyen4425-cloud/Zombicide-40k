@@ -1,3 +1,105 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit premier raccord — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-first-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-first-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `4a1c63dd2558343dde27966320238d1655fb4406`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer le **premier raccord Core Progression** sans modifier le runtime.
+
+Candidat unique à caractériser :
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`.
+
+Comparer exactement :
+- branche avec profil progression actif ;
+- branche historique sans profil progression ;
+- normalisation XP ;
+- courbe linéaire ;
+- courbe custom ;
+- `maxLevel` ;
+- fallback seuil custom absent/invalide ;
+- ordre de chargement requis du futur Core.
+
+### État de départ
+
+Service pur GREEN :
+`assets/gensrpg/core/progression-v1.js`
+blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+API :
+`GensProgressionV1.levelFromXp(xp, progressionConfig)`.
+
+Le service est actuellement Phase 4 inert :
+- non chargé par `index.html` ;
+- non injecté par preview/Pages ;
+- hors graphe production ;
+- 77 fichiers production-reachable.
+
+`index.html` reste inchangé :
+- taille `8 174 648` octets ;
+- blob `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+La reconstruction locale déjà vérifiée de ce blob reste valide pour l'inspection :
+aucun lot depuis le raccord Dice n'a modifié `index.html`.
+
+### Périmètre strict
+
+Autorisé :
+- audit documentaire ;
+- sentinelle de parité premier raccord ;
+- comparaison du vrai helper inline avec le service pur ;
+- identification de la frontière de compatibilité minimale ;
+- sélection explicite d'un seul futur raccord.
+
+Interdit :
+- modifier `index.html` ;
+- charger `progression-v1.js` en production ;
+- modifier `progression-v1.js` ;
+- modifier `dungeonRpgXpIntoLevel` ;
+- modifier `dungeonRpgEarnedSkillPoints` ;
+- modifier synchronisation héros / XP manuel / récompenses / level-up ;
+- modifier service worker / preview / Pages ;
+- ajouter wrapper, observer, timer, retry ou fallback ;
+- modifier `main`.
+
+### Questions à résoudre
+
+1. La branche **profil actif** est-elle en parité exacte avec
+   `GensProgressionV1.levelFromXp` ?
+2. La branche **sans profil** peut-elle être déléguée sans changer son contrat
+   historique `loadDungeonRpgRules().xpPerLevel` et son absence de cap explicite ?
+3. Quelle normalisation doit rester à la frontière historique ?
+4. Quel ordre de chargement exact sera requis pour un futur raccord ?
+5. Le futur lot peut-il rester limité à un seul helper sans toucher aux autres
+   responsabilités Progression ?
+
+### Tests / preuves attendues
+
+- propriétaire inline exact et callsites ;
+- matrice parité profil actif / Core ;
+- caractérisation explicite de la branche sans profil ;
+- preuve qu'une délégation naïve `Core(xp,{})` serait ou non compatible ;
+- Core service byte-identique ;
+- aucun changement runtime ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Prochaine action
+
+Créer la sentinelle de pré-audit et sélectionner le raccord minimal uniquement
+après preuve de parité.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — contrat pur XP -> niveau — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

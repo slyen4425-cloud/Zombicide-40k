@@ -1,3 +1,85 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — retrait captureFix131 — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-capture131-retirement-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-capture131-retirement-2026-09-22`.
+- Base exacte :
+  `fbab85b75a1eb304eb4b081f36549b66f45eec58`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-authority-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-capture131-retirement-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Micro-lot TDD terminé.
+
+Modification runtime volontaire unique :
+- retrait de l'affectation `window.startConfiguredGame` du bloc
+  `captureFix131`, caractérisée comme wrapper transitif pur.
+
+Chaîne avant :
+`captureFix131 -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Chaîne après :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Résultat :
+- 6 -> 5 affectations ;
+- dernier propriétaire inchangé :
+  `dungeonCore200Rebuild` ;
+- `captureFix131` reste présent pour ses autres responsabilités ;
+- aucun nouveau Shell runtime ;
+- aucun gameplay déplacé ;
+- aucun wrapper/observer/timer ajouté.
+
+Document :
+`docs/GENSRPG_PHASE5_STARTCONFIGUREDGAME_CAPTURE131_RETIREMENT.md`.
+
+Sentinelle :
+`tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs`.
+
+### Empreinte index
+
+Le retrait soustractif réduit `index.html` de 166 octets.
+
+Nouvelle empreinte :
+- taille : `8174148` ;
+- blob : `f13835a2827dbfa9e2698cb026d3e732ad62aba4`.
+
+Les sentinelles historiques qui verrouillaient l'ancienne empreinte ont été
+réalignées uniquement sur la taille/blob, sans changement de comportement.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`c71234cbf7e69ab9202a26796f2d220449b10bd0`.
+
+- Architecture + navigateur complet : `35778341539` — SUCCESS ;
+- Firefox : `35778341492` — SUCCESS ;
+- Tactical Dock : `35778341723` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-startconfiguredgame-capture131-retirement-green-2026-09-22` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir ensuite un nouveau pré-audit Phase 5 sur la chaîne
+   `startConfiguredGame` restante à 5 propriétaires ;
+5. ne retirer aucun second wrapper sans nouveau RED dédié et preuve d'absence
+   d'effet de bord.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / startConfiguredGame — retrait wrapper captureFix131 — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

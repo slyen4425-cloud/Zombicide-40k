@@ -1,3 +1,78 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — contrat pur — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-contract-2026-09-22`.
+- Base exacte :
+  `b4af567cc93d8dac30e87131e7a1eb32e10c6486`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+Le pré-audit Core Dice est officiellement GREEN sur
+`b4af567cc93d8dac30e87131e7a1eb32e10c6486`.
+
+Runs exacts :
+- Architecture + navigateur complet `35674850926` — SUCCESS ;
+- Firefox `35674850986` — SUCCESS ;
+- Tactical Dock `35674850962` — SUCCESS.
+
+Le zip utilisateur `index_work_9.zip` a été vérifié : son blob
+`5b9b9ae780f735eadef049afeb10acf0b57441fe` correspond exactement à
+`index.html` de la base.
+
+### Mission unique
+
+Créer uniquement le **contrat pur** du futur Core Dice, sans aucun raccord runtime.
+
+API cible minimale :
+- `roll(sides, rng?)` : résultat entier 1..N ;
+- `thresholdFromChance(chance, bounds?)` : seuil haut D100 avec bornes explicites ;
+- `rollChanceHigh(chance, bounds?, rng?)` : résultat explicable
+  `{roll, chance, threshold, success}` ;
+- `rollCheck({sides, modifier, difficulty, rng?})` : résultat explicable
+  `{roll, modifier, total, difficulty, success}`.
+
+Le Core doit accepter un RNG injecté pour les tests / futurs consommateurs seedés,
+mais utiliser `Math.random` par défaut.
+
+### Frontières protégées
+
+Ce lot ne doit pas :
+- modifier `index.html` ;
+- raccorder `d100ThresholdFromChance`, `dungeonUniversalTest` ou Tactical ;
+- modifier `Math.random()` global ;
+- toucher animations D6/D100 ;
+- modifier seuils/clamps historiques des consommateurs ;
+- modifier Stats, Inventory, Tactical, Dungeon, Survie, Capture ou PvP ;
+- ajouter wrapper, observer, timer, retry ou fallback ;
+- modifier `main`.
+
+Le futur service ne connaît aucun module gameplay et ne décide ni touche, ni
+critique, ni dégâts, ni armure, ni mutation PV.
+
+### TDD obligatoire
+
+1. RED : sentinelle exigeant le fichier Core Dice et son API pure ;
+2. tester bornes D6/D20/D100 avec RNG injecté déterministe ;
+3. tester bornes de chance 1..100 et bornes explicites 1..99 / 5..95 ;
+4. tester résultat explicable de `rollChanceHigh` ;
+5. tester `rollCheck` sans règle gameplay cachée ;
+6. vérifier l'absence de DOM, stockage, timers et noms de modules ;
+7. correctif minimal : nouveau service Core uniquement ;
+8. aucun raccord runtime dans ce lot ;
+9. Architecture + navigateur complet, Firefox et Tactical avant checkpoint GREEN.
+
+### Prochaine action
+
+Créer la sentinelle RED du contrat pur puis ajouter le service Core minimal.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

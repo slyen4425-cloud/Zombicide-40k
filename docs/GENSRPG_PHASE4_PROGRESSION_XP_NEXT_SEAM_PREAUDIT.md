@@ -190,3 +190,36 @@ Si ce pré-audit devient GREEN :
 4. seulement après GREEN du contrat, ouvrir un lot de raccord dédié.
 
 Aucun merge sur `main`.
+
+
+## Validation technique avant clôture documentaire
+
+SHA :
+`7a8b691072828c0a84d8468ca274e28b772478de`.
+
+Runs sur ce SHA exact :
+- Architecture + navigateur complet :
+  `35718095681` — SUCCESS ;
+- Firefox :
+  `35718095818` — SUCCESS ;
+- Tactical Dock :
+  `35718095640` — SUCCESS.
+
+La nouvelle sentinelle
+`gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs`
+est passée SUCCESS dans Architecture.
+
+Aucune modification runtime n'est incluse dans ce lot.
+
+## Clôture conditionnelle
+
+Checkpoint GREEN cible :
+
+`checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
+
+La clôture documentaire change le SHA. Le même SHA documentaire final exact doit
+donc repasser Architecture + navigateur complet, Firefox et Tactical Dock avant
+création du checkpoint GREEN.
+
+Après GREEN, la seule suite autorisée côté Progression est un nouveau lot
+homogène de **contrat Core pur XP-into-level**, sans raccord runtime.

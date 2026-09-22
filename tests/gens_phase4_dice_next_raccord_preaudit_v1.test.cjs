@@ -37,11 +37,11 @@ assert.equal((index.match(/\bshowSpecialD6Roll\s*\(/g)||[]).length,3,'shared spe
 assert.match(index,/function showSpecialD6Roll\([\s\S]*?const roll=Math\.floor\(Math\.random\(\)\*6\)\+1;[\s\S]*?const success=roll>=threshold;/,
   'special D6 remains coupled to presentation and threshold UI');
 
-assert.equal((index.match(/\brollDungeonRpDice073\s*\(/g)||[]).length,2,'RP dice UI inventory drifted');
+assert.equal((index.match(/\brollDungeonRpDice073\b/g)||[]).length,2,'RP dice UI identifier inventory drifted');
 assert.match(index,/if\(type==="dodge"\)\{[\s\S]*?threshold=Math\.max\(1,101-chance\),roll=1\+Math\.floor\(Math\.random\(\)\*100\),ok=roll>=threshold/,
   'RP dice dodge remains an inline UI-owned D100 seam');
 
-assert.equal((index.match(/\bdc051RollStatChallenge\s*\(/g)||[]).length,2,'challenge D100 inventory drifted');
+assert.equal((index.match(/\bdc051RollStatChallenge\b/g)||[]).length,2,'challenge D100 identifier inventory drifted');
 assert.match(index,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*?chance=Math\.max\(5,Math\.min\(95,Number\(chance\)\|\|50\)\);[\s\S]*?threshold=101-chance,roll=1\+Math\.floor\(Math\.random\(\)\*100\),ok=roll>=threshold/,
   'challenge D100 remains inline with distinct non-rounded 5..95 normalization');
 

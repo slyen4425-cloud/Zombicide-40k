@@ -25696,12 +25696,6 @@ window.cleanupPregame130=function(){};
 
 /* Quand la préparation devient visible, on répare une seule fois sans observer
    tout le DOM en boucle. */
-const oldStartCfg=window.startConfiguredGame;
-if(oldStartCfg){
- window.startConfiguredGame=async function(){
-   return await oldStartCfg.apply(this,arguments);
- };
-}
 document.addEventListener("DOMContentLoaded",()=>setTimeout(fixPregame131,50));
 setTimeout(fixPregame131,150);
 })();

@@ -1,3 +1,95 @@
+## ÉTAT TECHNIQUE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire avant validation globale.
+
+- Branche :
+  `work/gensrpg-phase4-dice-d10048-raccord-2026-09-22`.
+- Base GREEN :
+  `ddce78deb72169e2aac7280da86049d40e774fab`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-d10048-raccord-2026-09-22`.
+- Production `main` reste gelée sur
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### TDD observé
+
+RED valide avant modification runtime :
+
+- SHA sentinelle :
+  `93f0a79713e526c6e4e165ab35a78ff275f36e85` ;
+- run Architecture :
+  `35692554405` — FAILURE attendue ;
+- étape :
+  `Verrouiller le raccord d10048 Core Dice Phase 4` ;
+- échec sur l'ancien corps legacy de `d10048`, avant toute délégation Core ;
+- pré-audits Dice et premier raccord `d100ThresholdFromChance` toujours SUCCESS.
+
+### Raccord runtime réalisé
+
+Commit runtime :
+`b8307bc09ff737d3c878cf447be15063c354ff3a`
+— `refactor: route d10048 through Core Dice`.
+
+Seul le corps de `d10048(chance)` a changé :
+
+- conservation de
+  `Math.round(Number(chance)||50)` puis clamp `5..95` ;
+- suppression du seuil local `101 - chance` ;
+- suppression du D100 local `Math.random()*100` ;
+- délégation à
+  `GensDiceV1.rollChanceHigh(c,{min:5,max:95})` ;
+- projection vers la forme legacy
+  `{chance,threshold,roll,ok}`.
+
+Les quatre consommateurs restent inchangés :
+`dc047StealthPrompt`,
+`dc048TrapDetectRoll`,
+`dc048TrapActionRoll`,
+`dc048TrapTrigger`.
+
+Nouvel `index.html` :
+- taille : `8 174 648` octets ;
+- blob Git :
+  `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+Le patch a été appliqué par workflow one-shot avec assertions strictes du blob
+avant/après, puis ce workflow s'est supprimé.
+
+### Réalignement des gardes historiques
+
+Les sentinelles historiques qui verrouillaient l'ancien blob/taille ont été
+réalignées uniquement sur la nouvelle empreinte, sans changement de leurs
+sémantiques.
+
+Commit d'alignement :
+`3ed644a0371d51878739be62c087f65f7a37c9c2`
+— `test: realign historical guards after d10048 raccord`.
+
+Les workflows temporaires de probe/alignement sont supprimés.
+
+### Invariants toujours protégés
+
+- `assets/gensrpg/core/dice-v1.js` byte-identique ;
+- premier raccord `d100ThresholdFromChance` inchangé ;
+- 15 consommateurs du premier seam inchangés ;
+- Tactical / RNG seedé Tactical inchangés ;
+- Mobile Combat Performance inchangé ;
+- `dungeonUniversalTest`, D6 UI, RP Dice composite,
+  `dc051RollStatChallenge`, low-roll puzzle/piège et initiative restent différés ;
+- aucun wrapper, observer, timer, retry ou fallback ajouté ;
+- aucun changement de règle, clamp ou probabilité ;
+- aucun merge sur `main`.
+
+### Validation globale maintenant requise
+
+Exécuter sur le même SHA déclenché après ce bloc :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Ne créer le checkpoint GREEN final qu'après trois SUCCESS sur le SHA documentaire
+final exact.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — raccord d10048 — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

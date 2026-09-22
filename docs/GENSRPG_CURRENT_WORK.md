@@ -1,3 +1,74 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Text Utils — raccord Room Creator — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-room-creator-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-room-creator-raccord-2026-09-22`.
+- Base exacte :
+  `6be892c9ef7bd93702bab9b21a93eb31366adfd9`.
+- Dernier checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Raccord Room Creator -> Core Text Utils U1 terminé.
+
+Le propriétaire historique `DungeonRoomCreator100` ne contient plus son
+implémentation locale `esc(v)` et consomme explicitement
+`GensTextUtilsV1.escapeHtml`.
+
+Composition :
+- Pages charge U1 avant Room Creator ;
+- preview charge U1 avant Room Creator ;
+- PWA précache U1 ;
+- `index.html` source reste inchangé.
+
+Cartographie :
+- Pages : 30 modules injectés ;
+- graphe production-reachable : 79 fichiers ;
+- composition directe production : 35 fichiers uniques ;
+- U1 est classé Phase 4 connected ;
+- propriétaire : `GenSrpG Core Text Utils`.
+
+Aucun Event Bus générique n'a été créé.
+Aucun gameplay, wrapper global, MutationObserver ou timer/retry permanent n'a été ajouté.
+
+Document de clôture :
+`docs/GENSRPG_PHASE4_TEXT_UTILS_U1_ROOM_CREATOR_RACCORD.md`.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`b9679a42d6481407648e6b9144c2e789ae9fe218`.
+
+- Architecture + navigateur complet : `35766655446` — SUCCESS ;
+- Firefox : `35766655432` — SUCCESS ;
+- Tactical Dock : `35766655458` — SUCCESS.
+
+Le vrai Dungeon Builder, Dungeon après Survie, Save & Quit/Reprise, Capture,
+non-interférence, Preview Chromium et les autres sentinelles navigateur sont GREEN.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. attendre/contrôler les trois CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-green-2026-09-22`
+   sur ce SHA exact ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir ensuite un lot séparé pour la sortie de Phase 4 / transition Phase 5,
+   uniquement après relecture du critère de sortie de la roadmap.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / U1 Text Utils — raccord Room Creator — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

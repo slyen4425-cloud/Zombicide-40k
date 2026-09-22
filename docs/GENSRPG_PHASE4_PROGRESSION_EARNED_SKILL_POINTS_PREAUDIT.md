@@ -62,3 +62,62 @@ correspondant au SHA de base. GitHub reste l'autorité pour SHA, branches, diff 
 - Tactical Dock.
 
 Le futur contrat Core éventuel sera un lot distinct après GREEN.
+
+
+## Résultat de caractérisation
+
+Source utilisateur vérifiée contre le checkpoint GREEN :
+- taille : `8 174 346` octets ;
+- blob Git : `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+Propriétaire actif confirmé :
+`dungeonCore044HeroProgression -> dungeonRpgEarnedSkillPoints`.
+
+Consommateur direct :
+`dungeonSyncProgressionForState`.
+
+Dépendance calculatoire :
+`dungeonRpgLevelFromXp`, déjà raccordé au Core Progression pour les profils configurés.
+
+La fonction de points gagnés ne possède pas la courbe XP :
+- aucun `xpPerLevel`, `xpThresholds` ou `maxLevel` local ;
+- aucun stockage, DOM, timer, save ou render ;
+- le niveau canonique est demandé exactement une fois par appel.
+
+Deux politiques historiques existent :
+- profil Progression configuré : `startingSkillPoints + talentPointsPerLevel` ;
+- absence de profil Dungeon : `startingSkillPoints + skillPointsPerLevel` provenant des Dungeon rules.
+
+Un objet progression vide `{}` est un profil configuré valide et ne doit pas être
+confondu avec l'absence de profil.
+
+Les lectures actuelles sont volontairement caractérisées, pas optimisées dans ce lot :
+- profil configuré : deux lectures du profil actif (seam points + seam niveau), zéro lecture Dungeon rules ;
+- profil absent/non-Dungeon : deux lectures du profil actif et deux lectures Dungeon rules,
+  dont une de chaque paire arrive via le seam niveau.
+
+La matrice de caractérisation couvre 100 cas et verrouille également les coercions
+historiques de fallback, y compris la propagation `NaN` sur certaines anciennes
+valeurs invalides. Toute normalisation différente devra être un lot fonctionnel séparé.
+
+### Primitive Core candidate
+
+Forme recommandée pour le lot suivant :
+
+`earnedSkillPointsFromLevel(level, explicitProgressionConfig, fallbackStartingSkillPoints, fallbackSkillPointsPerLevel)`
+
+Cette primitive doit recevoir le **niveau canonique** au lieu de l'XP afin de ne jamais
+réimplémenter la courbe, les seuils custom ou `maxLevel`.
+
+Restent hors périmètre :
+- `dungeonSpentSkillPointsFor` ;
+- mutation `dungeonSyncProgressionForState` ;
+- `bonusSkillPoints` et soustraction des points dépensés ;
+- stat points ;
+- XP manuel/combat/objectifs ;
+- level-up UI/persistance.
+
+Sentinelle :
+`tests/gens_phase4_progression_earned_skill_points_preaudit_v1.test.cjs`.
+
+Aucun runtime ni Core n'est modifié par ce pré-audit.

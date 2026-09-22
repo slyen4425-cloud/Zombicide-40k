@@ -90,7 +90,7 @@ const scenarios=[
   {name:'no profile zero fallback',profile:null,rules:{xpPerLevel:0},xs:[0,9,10,23,99]},
   {name:'no profile bad fallback',profile:null,rules:{xpPerLevel:'bad'},xs:[0,1,23,99]},
   {name:'no profile negative fallback',profile:null,rules:{xpPerLevel:-5},xs:[0,1,23,99]},
-  {name:'linear 7',profile:{xpCurveMode:'linear',xpPerLevel:7,maxLevel:100},rules:{xpPerLevel:25},xs:[0,6,7,20,21,28,29,63,999]},
+  {name:'linear 7',profile:{xpCurveMode:'linear',xpPerLevel:7,maxLevel:100},rules:{xpPerLevel:25},xs:[0,6,7,20,21,28,29,63,100,101,123,999,1000]},
   {name:'linear zero',profile:{xpCurveMode:'linear',xpPerLevel:0,maxLevel:100},rules:{xpPerLevel:25},xs:[0,24,25,63,999]},
   {name:'linear bad',profile:{xpCurveMode:'linear',xpPerLevel:'bad',maxLevel:100},rules:{xpPerLevel:25},xs:[0,24,25,63,999]},
   {name:'linear negative',profile:{xpCurveMode:'linear',xpPerLevel:-5,maxLevel:100},rules:{xpPerLevel:25},xs:[0,1,63,999]},

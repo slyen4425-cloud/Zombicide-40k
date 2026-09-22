@@ -1,3 +1,120 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit raccord XP dans le niveau — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-into-level-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-into-level-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `beca0fd4ddc15d00ee7d99090ac211ec0cbfa5c5`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Contrat xpIntoLevel officiellement GREEN
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-progression-xp-into-level-contract-green-2026-09-22`.
+
+SHA :
+`beca0fd4ddc15d00ee7d99090ac211ec0cbfa5c5`.
+
+Validation finale sur ce SHA :
+- Architecture + navigateur complet :
+  `35721325706` — SUCCESS, attempt 2 ;
+- Firefox :
+  `35721325665` — SUCCESS ;
+- Tactical Dock :
+  `35721325764` — SUCCESS.
+
+L'attempt 1 navigateur a rencontré le flake déjà connu
+`Dungeon après Survie` : overlay Tactical interceptant un clic Survie.
+Rerun du même SHA, sans modification : SUCCESS complet.
+
+Core Progression :
+- blob `f633de55f1e6bda339e66c65debc35d7b8da2510` ;
+- `levelFromXp` + `xpIntoLevel` ;
+- aucun raccord runtime encore.
+
+### Mission unique du lot courant
+
+Pré-auditer uniquement le raccord de :
+
+`dungeonCore044HeroProgression -> dungeonRpgXpIntoLevel`
+
+vers :
+
+`GensProgressionV1.xpIntoLevel`.
+
+Aucun runtime ne doit être modifié dans ce pré-audit.
+
+### Raccord candidat
+
+Le candidat conserve :
+- `activeProg()` à la frontière ;
+- normalisation XP historique à la frontière ;
+- fallback Dungeon lazy uniquement no-profile/linéaire ;
+- zéro lecture des règles Dungeon en custom.
+
+Forme candidate :
+
+`window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),fallback=(!p||(p.xpCurveMode||"linear")!=="custom")?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}`
+
+### Point de vigilance custom
+
+Le chemin legacy custom relit actuellement le profil via
+`dungeonRpgLevelFromXp(v)`.
+
+Le candidat supprime ce second read redondant et utilise directement le
+`levelFromXp` interne du même Core.
+
+Cette soustraction n'est acceptable que si la sentinelle prouve :
+- propriétaire niveau unique ;
+- délégation niveau avec profil déjà vers Core ;
+- parité exacte ;
+- zéro lecture des règles Dungeon en custom ;
+- aucune mutation.
+
+### Livrables
+
+- `docs/GENSRPG_PHASE4_PROGRESSION_XP_INTO_LEVEL_RACCORD_PREAUDIT.md` ;
+- `tests/gens_phase4_progression_xp_into_level_raccord_preaudit_v1.test.cjs`.
+
+### Hors périmètre
+
+Toujours différés :
+- `dungeonRpgEarnedSkillPoints` ;
+- synchronisation progression ;
+- XP manuel/combat/objectifs ;
+- points dépensés ;
+- level-up ;
+- UI/persistance.
+
+### Prochaine action immédiate
+
+Ajouter la nouvelle sentinelle au workflow Architecture puis exécuter :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Si GREEN sur le même SHA :
+- clôture documentaire ;
+- rerun final après documentation ;
+- checkpoint GREEN du pré-audit ;
+- ensuite seulement ouvrir un lot distinct de raccord runtime.
+
+### Coordination Agent 1
+
+Le pré-audit Event Bus/utilitaires reste GREEN et gelé sur :
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`,
+SHA `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Ne pas fusionner ce chantier pendant Progression.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — contrat pur XP dans le niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

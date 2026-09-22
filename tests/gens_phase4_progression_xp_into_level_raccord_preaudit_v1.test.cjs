@@ -56,7 +56,7 @@ assert.doesNotMatch(currentXpInto,/GensProgressionV1\.xpIntoLevel/,
 assert.match(earned,/dungeonRpgLevelFromXp\(xp\)/,
   'earned skill points must remain outside this raccord');
 
-const candidate='window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),fallback=(!p||(p.xpCurveMode||"linear")!=="custom")?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}';
+const candidate='window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}';
 assert.notEqual(candidate,currentXpInto,'candidate must differ from current owner');
 
 function makeRuntime({profile=null,rules={xpPerLevel:10},candidateMode=false}={}){
@@ -114,8 +114,10 @@ for(const s of scenarios){
       assert.equal(lc.profilesCalls,2,s.name+' legacy custom path currently re-reads active profile through level seam');
       assert.equal(nc.profilesCalls,1,s.name+' candidate removes only the redundant second active-profile read');
     }else{
-      assert.equal(lc.rulesCalls,1,s.name+' legacy linear/no-profile reads Dungeon rules once');
-      assert.equal(nc.rulesCalls,1,s.name+' candidate linear/no-profile must read Dungeon rules once');
+      const profilePer=s.profile?Number(s.profile.xpPerLevel):0;
+      const expectedRulesCalls=profilePer?0:1;
+      assert.equal(lc.rulesCalls,expectedRulesCalls,s.name+' legacy Dungeon-rules short-circuit drifted');
+      assert.equal(nc.rulesCalls,expectedRulesCalls,s.name+' candidate must preserve exact Dungeon-rules short-circuit');
       assert.equal(lc.profilesCalls,1,s.name+' legacy profile lookup count drifted');
       assert.equal(nc.profilesCalls,1,s.name+' candidate profile lookup count drifted');
     }
@@ -132,6 +134,7 @@ console.log(JSON.stringify({
   selectedOwner:'dungeonCore044HeroProgression -> dungeonRpgXpIntoLevel',
   candidate,
   parityCases,
+  dungeonRulesShortCircuit:'read only when non-custom and Number(profile.xpPerLevel) is falsy',
   customDungeonRulesCalls:0,
   acceptedSubtraction:'custom branch removes one redundant activeProg()/level global round-trip; level math remains the same Core levelFromXp',
   deferred:[

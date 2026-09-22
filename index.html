@@ -32581,6 +32581,8 @@ try{
 })();
 </script>
 
+<script src="assets/gensrpg/core/progression-v1.js?v=1"></script>
+
 <style id="dungeonCore044HeroProgressionCss">
 .rpgXpCurveRow{display:grid;grid-template-columns:90px 1fr 92px;gap:8px;align-items:center;padding:7px 2px;border-bottom:1px solid #ffffff12}
 .rpgXpCurveRow b{font-size:13px}.rpgXpCurveRow input{width:100%}.rpgXpCurveGain{font-size:11px;opacity:.7;text-align:right}
@@ -32621,7 +32623,7 @@ window.renderRpgHeroProgressionPreview=function(){
 };
 function activeProg(){try{const p=loadGameProfiles().find(x=>String(x.id)===String(activeGameProfileId()));return p?.gameStyle==="dungeon"?p.rpgUniverse?.progression:null}catch(e){return null}}
 window.dungeonActiveProgressionConfig=function(){return activeProg()||{}};
-window.dungeonRpgLevelFromXp=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p){const r=loadDungeonRpgRules();return 1+Math.floor(v/Math.max(1,r.xpPerLevel))}const max=Math.max(1,Number(p.maxLevel)||100);if((p.xpCurveMode||"linear")==="custom"){let level=1;for(let lv=2;lv<=max;lv++){const req=Math.max(0,Number(p.xpThresholds?.[lv])||((lv-1)*Math.max(1,Number(p.xpPerLevel)||10)));if(v>=req)level=lv;else break}return level}return Math.min(max,1+Math.floor(v/Math.max(1,Number(p.xpPerLevel)||10)))};
+window.dungeonRpgLevelFromXp=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p){const r=loadDungeonRpgRules();return 1+Math.floor(v/Math.max(1,r.xpPerLevel))}return GensProgressionV1.levelFromXp(v,p)};
 window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p||(p.xpCurveMode||"linear")!=="custom"){const per=Math.max(1,Number(p?.xpPerLevel)||loadDungeonRpgRules().xpPerLevel||10);return v%per}const level=dungeonRpgLevelFromXp(v),start=level<=1?0:Math.max(0,Number(p.xpThresholds?.[level])||0);return Math.max(0,v-start)};
 window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules();return Math.max(0,r.startingSkillPoints)+Math.max(0,dungeonRpgLevelFromXp(xp)-1)*Math.max(0,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return Math.max(0,Number(p.startingSkillPoints)||0)+Math.max(0,level-1)*Math.max(0,Number(p.talentPointsPerLevel)||0)};
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 1.05";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 1.05 · aide énigmes · objectifs secondaires · dalles visuelles."}catch(e){}

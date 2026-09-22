@@ -1,3 +1,80 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — pré-audit raccord points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `f892e6edad42acce4a43351e6f69c7837c76e637`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-contract-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit du raccord `dungeonRpgEarnedSkillPoints` terminé sans modification runtime/Core.
+
+Propriétaire :
+`dungeonCore044HeroProgression`.
+
+Candidat minimal validé :
+- conserve `activeProg()` ;
+- conserve `loadDungeonRpgRules()` uniquement sans profil ;
+- conserve `dungeonRpgLevelFromXp(xp)` comme niveau canonique ;
+- conserve l'ordre des lectures ;
+- ajoute uniquement un appel à
+  `GensProgressionV1.earnedSkillPointsFromLevel(...)`.
+
+Matrice : 65 cas sur le vrai chemin.
+
+Le faux risque `NaN` initial a été éliminé en testant le propriétaire réel :
+`loadDungeonRpgRules() -> normalizeDungeonRpgRules()`.
+
+Sources inchangées :
+- `index.html` : 8 174 346 octets, blob `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc` ;
+- Core Progression : blob `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+### Validation technique avant documentation finale
+
+SHA :
+`495011a8a0c7b42e2f7748f20ac3fcf20902f963`.
+
+- Architecture + navigateur complet : `35740076726` — SUCCESS ;
+- Firefox : `35740076816` — SUCCESS ;
+- Tactical Dock : `35740076884` — SUCCESS.
+
+La nouvelle étape
+`Pré-auditer le raccord des points de compétence gagnés Core Progression`
+est GREEN.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant le checkpoint GREEN cible,
+le même SHA final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite autorisée après GREEN
+
+Ouvrir un lot distinct de **raccord runtime** de
+`dungeonRpgEarnedSkillPoints`.
+
+Le raccord futur doit rester exactement dans le seam caractérisé.
+Interdictions :
+- ne pas modifier `dungeonSyncProgressionForState` ;
+- ne pas modifier points dépensés / bonus / stat points ;
+- ne pas toucher XP manuel/combat/objectifs ;
+- ne pas toucher level-up/UI/persistance ;
+- ne pas introduire wrapper, observer, timer/retry ou Event Bus.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression — pré-audit raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

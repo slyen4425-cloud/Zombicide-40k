@@ -76,3 +76,24 @@ Sources protégées :
 Aucun runtime ni Core n'est modifié dans ce pré-audit.
 Aucun changement de `dungeonSyncProgressionForState`, points dépensés, bonus,
 stat points, distribution XP, level-up, UI, persistance ou Event Bus.
+
+
+## Validation technique du pré-audit
+
+SHA :
+`495011a8a0c7b42e2f7748f20ac3fcf20902f963`.
+
+Résultats :
+- Architecture + navigateur complet : `35740076726` — SUCCESS ;
+- Firefox : `35740076816` — SUCCESS ;
+- Tactical Dock : `35740076884` — SUCCESS.
+
+La sentinelle de 65 cas traverse la normalisation réelle des règles Dungeon et
+valide le candidat sans modifier ni runtime ni Core.
+
+Le lot suivant autorisé est un raccord runtime séparé et minimal de
+`dungeonRpgEarnedSkillPoints` vers
+`GensProgressionV1.earnedSkillPointsFromLevel`.
+
+La clôture documentaire doit elle-même repasser la triple CI avant création de :
+`checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-green-2026-09-22`.

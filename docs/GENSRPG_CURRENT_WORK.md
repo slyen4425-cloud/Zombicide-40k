@@ -1,3 +1,88 @@
+## Chantier courant prioritaire — Phase 4 / U1 Core Text Utility — contrat pur escapeHtml — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Décision issue du pré-audit Agent 1
+
+Pré-audit Event Bus / utilitaires :
+- checkpoint GREEN : `checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`;
+- SHA : `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Verdict conservé :
+- ne pas créer d'Event Bus Core générique ;
+- les mécanismes Dungeon, Tactical, Supabase, DOM/PWA et callbacks restent des responsabilités différentes ;
+- premier micro-lot sûr : **U1 — échappement HTML pur**.
+
+### Mission unique
+
+Créer uniquement un contrat Core pur et inert :
+
+`assets/gensrpg/core/text-utils-v1.js`
+
+API publique :
+
+`GensTextUtilsV1.escapeHtml(value)`
+
+Contrat :
+- `null` / `undefined` -> chaîne vide ;
+- conversion par `String(...)` ;
+- `&` -> `&amp;` ;
+- `<` -> `&lt;` ;
+- `>` -> `&gt;` ;
+- `"` -> `&quot;` ;
+- `'` -> `&#39;` ;
+- autres caractères inchangés ;
+- chaîne déjà échappée : double échappement historique conservé.
+
+### Interdictions
+
+Dans ce lot :
+- aucun raccord consommateur ;
+- aucun changement `index.html` ;
+- aucun changement `preview.html` ;
+- aucune injection GitHub Pages ;
+- aucun Service Worker ;
+- aucun Event Bus ;
+- aucun DOM/storage/listener/event/timer/retry/RNG/navigation/gameplay ;
+- aucun changement Progression/Dice/Stats/Inventory/Storage ;
+- aucun merge sur `main`.
+
+### TDD
+
+Sentinelle :
+`tests/gens_phase4_text_utils_u1_contract_v1.test.cjs`.
+
+RED attendu :
+- service absent.
+
+GREEN attendu :
+- service pur présent ;
+- API unique `escapeHtml` ;
+- matrice de sémantique GREEN ;
+- graphe production inchangé.
+
+### Prochaine action
+
+1. observer le RED ciblé ;
+2. ajouter uniquement le service pur ;
+3. triple CI ;
+4. clôture documentaire ;
+5. triple CI finale sur SHA exact ;
+6. checkpoint GREEN.
+
+Aucun raccord UI dans ce lot.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

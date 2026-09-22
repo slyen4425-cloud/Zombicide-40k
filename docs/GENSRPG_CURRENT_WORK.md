@@ -1,3 +1,72 @@
+## Chantier courant prioritaire — Phase 5 / startConfiguredGame — pré-audit d'autorité — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-authority-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-authority-preaudit-2026-09-22`.
+- Base exacte :
+  `f3cf5acdaa2014e02adf353a3fdbdcd940048315`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-shell-navigation-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer la chaîne d'autorité `startConfiguredGame` **sans modification runtime**.
+
+État de départ prouvé :
+- responsabilité classée Shell ;
+- 6 affectations actives ;
+- chaîne :
+  `captureFix131 -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- dernier propriétaire :
+  `dungeonCore200Rebuild`.
+
+### Objectifs
+
+Pour chacune des six affectations :
+1. caractériser la condition d'interception ;
+2. caractériser la délégation vers le propriétaire précédent ;
+3. relever les effets de bord autorisés ;
+4. distinguer logique Shell de logique Capture/Dungeon ;
+5. identifier les couches purement wrapper pouvant être retirées plus tard ;
+6. proposer une future autorité Shell unique sans changer les routes actuelles.
+
+### Interdictions
+
+- aucun changement runtime ;
+- ne pas connecter `assets/gensrpg/shell/entry-v1.js` ;
+- ne supprimer aucun wrapper dans ce pré-audit ;
+- ne déplacer aucun gameplay Capture/Dungeon ;
+- aucun nouveau global ;
+- aucun observer/timer/retry ;
+- aucun changement Tactical ;
+- aucun merge sur `main`.
+
+### Invariants à préserver
+
+- Survie démarre en Survie ;
+- Dungeon démarre en Dungeon ;
+- Capture conserve sa route dédiée ;
+- PvP reste le placeholder actuel ;
+- le changement de famille `forceReload155` reste inchangé ;
+- Save & Quit / reprise reste inchangé ;
+- aucune fuite Dungeon/Capture entre modules.
+
+### Prochaine action
+
+1. caractériser les six affectations et leurs délégations ;
+2. construire une sentinelle de pré-audit dédiée ;
+3. sélectionner le micro-lot TDD minimal ;
+4. documenter le contrat futur avant toute modification runtime ;
+5. triple CI ;
+6. checkpoint GREEN du pré-audit dédié.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / pré-audit Shell & navigation — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

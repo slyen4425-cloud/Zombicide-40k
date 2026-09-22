@@ -1,0 +1,23 @@
+name: GenSrpG progression contract cartography scan
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-progression-xp-contract-2026-09-22'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan Phase 4 physical/inert inventory guards
+        run: |
+          echo '=== progression service refs ==='
+          grep -RIn --exclude-dir=.git 'progression-xp-v1.js' tests docs .github assets 2>/dev/null || true
+          echo '=== phase4 inert list guards ==='
+          grep -RIn --exclude-dir=.git 'phase4InertServices\|fourteen Phase 4 services\|allJs.length,94\|currentPhysicalLocalJs\|phase4InertServices.length' tests docs 2>/dev/null || true
+          echo '=== existing inert Core service refs ==='
+          grep -RIn --exclude-dir=.git 'stats-armor-contract-v1.js\|stats-resistance-normalization-v1.js' tests docs 2>/dev/null || true

@@ -43,3 +43,36 @@ Le RED attendu est exclusivement l'absence de
 - aucun point dépensé, bonus, stat point, XP award ou level-up.
 
 Après GREEN technique, clôture documentaire et triple CI finale sur le SHA exact.
+
+
+## Résultat technique
+
+TDD RED :
+- SHA : `04518beefee472526c48e20c5716930b2fdc0d3d` ;
+- Architecture : `35734920486` — FAILURE attendue ;
+- échec ciblé : absence de `earnedSkillPointsFromLevel`.
+
+Implémentation minimale :
+- commit : `755aee157a841da4e695816f87386d123b23f1b4` ;
+- fichier modifié : `assets/gensrpg/core/progression-v1.js` uniquement pour la primitive ;
+- blob Core résultant : `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+Réalignement des sentinelles de fingerprint Progression :
+- commit : `6367f37fc6a9805f0661b2677bb09009662850eb` ;
+- aucun runtime modifié ;
+- aucun comportement historique changé.
+
+Validation technique sur `6367f37fc6a9805f0661b2677bb09009662850eb` :
+- Architecture + navigateur complet : `35735255233` — SUCCESS ;
+- Firefox : `35735255297` — SUCCESS ;
+- Tactical Dock : `35735255205` — SUCCESS.
+
+`index.html` reste exactement sur le blob
+`8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+La clôture documentaire doit encore passer la triple CI sur son propre SHA exact.
+Après succès, créer :
+`checkpoint/gensrpg-phase4-progression-earned-skill-points-contract-green-2026-09-22`.
+
+Le chantier suivant devra être un **pré-audit de raccord** séparé, jamais un raccord
+direct sans caractérisation.

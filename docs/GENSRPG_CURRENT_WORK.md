@@ -1,3 +1,91 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — contrat pur points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-contract-2026-09-22`.
+- Base exacte :
+  `57810c4087b29f17b83bfea14ee49b5afcc99845`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat du contrat pur
+
+`GensProgressionV1` expose désormais :
+
+`earnedSkillPointsFromLevel(level, explicitProgressionConfig, fallbackStartingSkillPoints, fallbackSkillPointsPerLevel)`.
+
+Le contrat :
+- reçoit un niveau déjà canonique ;
+- ne recalcule aucune courbe XP ;
+- ne lit aucun profil global ni Dungeon rules ;
+- ne possède aucun stockage, DOM, timer, retry, UI ou event bus ;
+- ne modifie aucun runtime dans ce lot.
+
+Core Progression après contrat :
+- commit d'implémentation : `755aee157a841da4e695816f87386d123b23f1b4` ;
+- blob Core : `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+Runtime protégé inchangé :
+- `index.html` : 8 174 346 octets ;
+- blob : `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+### TDD
+
+RED ciblé sur :
+`04518beefee472526c48e20c5716930b2fdc0d3d`.
+
+Run Architecture :
+`35734920486` — FAILURE attendue.
+
+Cause unique :
+`RED until earnedSkillPointsFromLevel exists`.
+
+Les anciennes sentinelles Progression ont ensuite été réalignées uniquement sur le
+nouveau fingerprint légitime du Core, sans changement runtime :
+`6367f37fc6a9805f0661b2677bb09009662850eb`.
+
+### Validation technique avant documentation finale
+
+SHA :
+`6367f37fc6a9805f0661b2677bb09009662850eb`.
+
+- Architecture + navigateur complet : `35735255233` — SUCCESS ;
+- Firefox : `35735255297` — SUCCESS ;
+- Tactical Dock : `35735255205` — SUCCESS.
+
+La nouvelle étape
+`Verrouiller le contrat pur des points de compétence gagnés Core Progression`
+est GREEN.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant création du checkpoint GREEN,
+ce SHA documentaire final doit lui-même repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite autorisée après GREEN
+
+Ouvrir un lot distinct de **pré-audit de raccord runtime** de
+`dungeonRpgEarnedSkillPoints` vers la primitive Core.
+
+Ce futur lot devra seulement caractériser le raccord minimal. Il ne devra pas encore :
+- modifier `dungeonSyncProgressionForState` ;
+- mélanger les points dépensés / bonus / stat points ;
+- toucher XP manuel/combat/objectifs ;
+- toucher level-up/UI/persistance ;
+- introduire Event Bus, wrapper, observer, timer ou nouvelle autorité globale.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression — contrat pur points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

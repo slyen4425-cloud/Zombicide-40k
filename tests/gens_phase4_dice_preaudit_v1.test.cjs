@@ -9,8 +9,13 @@ const tacticalDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-t
 const tacticalWallDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-wall-dice-stats-16781145.js"),"utf8");
 
 const coreDice=path.join(root,"assets","gensrpg","core","dice-v1.js");
-assert.equal(fs.existsSync(coreDice),false,
-  "pre-audit invariant: no Core Dice service exists yet");
+assert.equal(fs.existsSync(coreDice),true,
+  "post-preaudit invariant: pure Core Dice contract must now exist");
+const coreDiceSrc=fs.readFileSync(coreDice,"utf8");
+assert.match(coreDiceSrc,/GensDiceV1/,
+  "pure Core Dice contract API must remain present");
+assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),false,
+  "Core Dice contract must remain inert until a dedicated raccord lot");
 
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?101-c/,
   "index must still own the shared D100 threshold helper");
@@ -65,7 +70,8 @@ assert.ok(gameplayRandoms>50,
 
 console.log(JSON.stringify({
   scenario:"Phase 4 Dice preaudit",
-  coreDiceExists:false,
+  coreDiceExists:true,
+  runtimeRaccord:false,
   gameplayRandoms,
   owners:{
     sharedThreshold:"index:d100ThresholdFromChance",

@@ -22,7 +22,6 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/core/progression-v1.js',
-  'assets/gensrpg/core/text-utils-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
@@ -95,6 +94,7 @@ const phase4ConnectedServices=[
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/progression-v1.js',
+  'assets/gensrpg/core/text-utils-v1.js',
   'assets/gensrpg/core/stats-normalization-v1.js',
   'assets/gensrpg/core/stats-value-engine-v1.js',
   'assets/gensrpg/core/stats-hero-values-v1.js',

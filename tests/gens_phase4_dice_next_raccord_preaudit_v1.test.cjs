@@ -19,9 +19,10 @@ assert.match(index,/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\
 
 assert.equal((index.match(/\bd10048\s*\(/g)||[]).length,5,'d10048 must remain one definition + four consumers');
 const d10048=index.match(/function d10048\(chance\)\{[\s\S]*?\n\}/)?.[0]||'';
-assert.match(d10048,/chance=Math\.max\(5,Math\.min\(95,Math\.round\(Number\(chance\)\|\|50\)\)\)/,'d10048 5..95 rounded tolerant boundary drifted');
-assert.match(d10048,/threshold=101-chance,roll=1\+Math\.floor\(Math\.random\(\)\*100\)/,'d10048 D100 generation drifted');
-assert.match(d10048,/return \{chance,threshold,roll,ok:roll>=threshold\}/,'d10048 result shape drifted');
+assert.match(d10048,/const c=Math\.max\(5,Math\.min\(95,Math\.round\(Number\(chance\)\|\|50\)\)\);/,'d10048 5..95 rounded tolerant boundary drifted');
+assert.match(d10048,/const r=GensDiceV1\.rollChanceHigh\(c,\{min:5,max:95\}\);/,'d10048 Core Dice delegation drifted');
+assert.doesNotMatch(d10048,/threshold=101-chance|Math\.random\(\)\*100/,'d10048 must not regain local threshold or D100 generation');
+assert.match(d10048,/return \{chance:r\.chance,threshold:r\.threshold,roll:r\.roll,ok:r\.success\}/,'d10048 legacy result projection drifted');
 
 for(const marker of ['dc047StealthPrompt','dc048TrapDetectRoll','dc048TrapActionRoll','dc048TrapTrigger']){
   assert.ok(index.includes(marker),'expected d10048 consumer owner missing: '+marker);

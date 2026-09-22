@@ -1,3 +1,144 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-d10048-raccord-2026-09-22`.
+- Base exacte :
+  `ddce78deb72169e2aac7280da86049d40e774fab`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-next-raccord-preaudit-green-2026-09-22`.
+- Checkpoint de départ du lot :
+  `checkpoint/gensrpg-start-phase4-dice-d10048-raccord-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### TDD / RED prouvé
+
+Le raccord a été précédé d'un RED réel :
+
+- SHA sentinelle :
+  `93f0a79713e526c6e4e165ab35a78ff275f36e85` ;
+- Architecture :
+  `35692554405` — FAILURE attendue ;
+- étape :
+  `Verrouiller le raccord d10048 Core Dice Phase 4` ;
+- échec obtenu sur le corps legacy avant toute délégation Core.
+
+### Raccord réalisé
+
+Commit runtime :
+
+`b8307bc09ff737d3c878cf447be15063c354ff3a`
+— `refactor: route d10048 through Core Dice`.
+
+Le seul changement runtime est le corps de `d10048(chance)` :
+
+- normalisation historique conservée :
+  `Math.round(Number(chance)||50)`, clamp `5..95` ;
+- formule locale `101 - chance` retirée ;
+- D100 local `Math.random()*100` retiré du helper ;
+- délégation à
+  `GensDiceV1.rollChanceHigh(c,{min:5,max:95})` ;
+- surface legacy conservée :
+  `{chance,threshold,roll,ok}` ;
+- un seul tirage RNG, même mapping vers `1..100`.
+
+Les quatre consommateurs sont inchangés :
+
+- `dc047StealthPrompt` ;
+- `dc048TrapDetectRoll` ;
+- `dc048TrapActionRoll` ;
+- `dc048TrapTrigger`.
+
+Nouvel `index.html` :
+
+- taille : `8 174 648` octets ;
+- blob Git :
+  `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+### Gardes historiques réalignées
+
+Les sentinelles et manifestes qui verrouillaient uniquement l'ancienne empreinte
+de l'index ont été réalignés sur la nouvelle taille/blob sans changement de leur
+sémantique.
+
+Le premier raccord `d100ThresholdFromChance` reste protégé :
+- 15 consommateurs inchangés ;
+- sa frontière legacy et sa délégation Core restent inchangées ;
+- son ancien inventaire RNG a été ajusté uniquement pour refléter le retrait
+  approuvé d'un D100 direct dans `d10048`.
+
+Le pré-audit du prochain raccord a été réaligné pour caractériser `d10048`
+comme désormais connecté au Core, tout en gardant les autres seams différés.
+
+Les workflows temporaires one-shot/probe/scan ont été retirés.
+
+### Systèmes protégés
+
+Toujours byte-identiques :
+
+- Core Dice :
+  `assets/gensrpg/core/dice-v1.js`
+  blob `1813b6edb1ac69317d158e8cac6eb5c8ac353855` ;
+- Tactical V114.11 :
+  `assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js`
+  blob `3e7e92eea89fd8e949361162636b4b524ff93eef` ;
+- Mobile Combat Performance :
+  `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
+  blob `e8fd9f1049a6597118eb026976bca7548f11b284`.
+
+Toujours différés et non modifiés :
+
+- `dungeonUniversalTest` ;
+- `showSpecialD6Roll` ;
+- `rollDungeonRpDice073` ;
+- `dc051RollStatChallenge` ;
+- conventions low-roll puzzle/piège ;
+- initiative configurable ;
+- Tactical et son RNG seedé.
+
+Aucun wrapper, observer, timer, retry ou fallback n'a été ajouté.
+Aucune règle, chance, clamp ou probabilité n'a été modifiée.
+
+### Validation technique GREEN
+
+SHA technique validé :
+
+`062989ae85252cec37924f4e5ad1aba7930631e6`.
+
+Runs sur ce même SHA :
+
+- Architecture + navigateur complet :
+  `35693297405` — SUCCESS ;
+- Firefox :
+  `35693297413` — SUCCESS ;
+- Tactical Dock :
+  `35693297412` — SUCCESS.
+
+Le navigateur complet valide notamment :
+Survie, Dungeon après Survie, Builder, Config objet, fiche RPG, authored
+cache/pièges, Save & Quit/reprise, PvP, Capture, non-interférence quatre modules,
+murs, preview, assets et Equipment.
+
+### Validation finale obligatoire avant checkpoint
+
+La suppression du workflow de diagnostic et cette clôture documentaire changent
+le SHA.
+
+Le checkpoint GREEN cible ne doit être créé qu'après trois SUCCESS sur le
+**même SHA documentaire final exact** :
+
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après GREEN, ne pas enchaîner automatiquement sur un autre seam Dice.
+Le prochain raccord éventuel doit repartir d'un nouveau pré-audit / micro-lot
+séparé conformément à la charte.
+
 ## ÉTAT TECHNIQUE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire avant validation globale.

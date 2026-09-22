@@ -1,3 +1,89 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP dans le niveau — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-into-level-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-into-level-contract-2026-09-22`.
+- Base exacte :
+  `b6d91ffeaa9317c9dbc329f73ce83220544eb5e2`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit précédent officiellement GREEN
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
+
+SHA :
+`b6d91ffeaa9317c9dbc329f73ce83220544eb5e2`.
+
+Validation finale sur ce SHA :
+- Architecture + navigateur complet :
+  `35719032604` — SUCCESS ;
+- Firefox :
+  `35719032663` — SUCCESS ;
+- Tactical Dock :
+  `35719032603` — SUCCESS.
+
+Seam sélectionné :
+`dungeonRpgXpIntoLevel`.
+
+### Mission unique
+
+Ajouter au Core Progression un contrat pur :
+
+`xpIntoLevel(xp, progressionConfig, fallbackXpPerLevel)`.
+
+Aucun raccord runtime dans ce lot.
+
+Le propriétaire historique `dungeonRpgXpIntoLevel` reste inchangé.
+
+### TDD obligatoire — prochaine action
+
+1. sentinelle contractuelle ajoutée ;
+2. raccord CI ajouté ;
+3. observer le RED attendu car `GensProgressionV1.xpIntoLevel` n'existe pas encore ;
+4. vérifier que toutes les étapes antérieures sont GREEN ;
+5. seulement ensuite modifier le Core Progression.
+
+Contrats à préserver :
+- normalisation XP historique ;
+- fallback explicite Dungeon ;
+- linéaire zéro/invalide -> fallback ;
+- négatif truthy -> clamp 1 ;
+- custom via `levelFromXp` ;
+- seuil custom explicite courant uniquement ;
+- comportement clairsemé/invalide inchangé.
+
+Document :
+`docs/GENSRPG_PHASE4_PROGRESSION_XP_INTO_LEVEL_CONTRACT.md`.
+
+Sentinelle :
+`tests/gens_phase4_progression_xp_into_level_contract_v1.test.cjs`.
+
+### Sources protégées
+
+`index.html` :
+- taille `8 174 416` octets ;
+- blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Core Progression avant contrat :
+- blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+### Chantier Agent 1
+
+Le pré-audit Event Bus/utilitaires reste validé et gelé sur :
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
+SHA `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Il ne doit pas être fusionné pendant ce lot Progression.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit du seam suivant — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

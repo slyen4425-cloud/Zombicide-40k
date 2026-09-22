@@ -75,8 +75,14 @@ assert.match(earnedFn,/dungeonRpgLevelFromXp\(xp\)/,
   'earned points must consume the canonical XP-to-level seam rather than duplicate curve logic');
 assert.match(earnedFn,/r\.startingSkillPoints/,'no-profile branch must preserve startingSkillPoints rule');
 assert.match(earnedFn,/r\.skillPointsPerLevel/,'no-profile branch must preserve skillPointsPerLevel rule');
-assert.match(earnedFn,/p\.startingSkillPoints/,'profile branch must preserve startingSkillPoints profile field');
-assert.match(earnedFn,/p\.talentPointsPerLevel/,'profile branch must preserve talentPointsPerLevel profile field');
+assert.match(earnedFn,/GensProgressionV1\.earnedSkillPointsFromLevel\(level,p\)/,
+  'configured profile branch must delegate its points policy to Core');
+assert.doesNotMatch(earnedFn,/p\.startingSkillPoints|p\.talentPointsPerLevel/,
+  'runtime seam must not retain configured-profile points arithmetic after raccord');
+assert.match(coreSource,/p\.startingSkillPoints/,
+  'Core earned-points policy must preserve startingSkillPoints profile field');
+assert.match(coreSource,/p\.talentPointsPerLevel/,
+  'Core earned-points policy must preserve talentPointsPerLevel profile field');
 assert.doesNotMatch(earnedFn,/xpPerLevel|xpThresholds|maxLevel|localStorage|document\.|setTimeout|setInterval|save\(|render\(/,
   'earned-points owner must not own curve math, persistence, UI or timers');
 assert.match(levelFn,/GensProgressionV1\.levelFromXp/,'XP-to-level dependency must remain Core-backed');

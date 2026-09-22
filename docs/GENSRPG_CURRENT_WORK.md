@@ -1,3 +1,82 @@
+## PRÉ-AUDIT TECHNIQUE — premier consommateur sélectionné : Room Creator 100 — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-common-text-utils-first-consumer-preaudit-2026-09-22`.
+- Base :
+  `1d5df325384d9748adfbce241445db294dd2466c`.
+- Service Core protégé :
+  `assets/gensrpg/core/text-utils-v1.js`,
+  blob `c84cd370c5c2874a51d5314abbf695fc4a63a7ee`.
+- Consommateur sélectionné :
+  `assets/dungeon/dungeon-room-creator-100.js`,
+  blob `19c0fff57bfe27648819a12ed657cebe4f41f6df`.
+
+### Comparaison des candidats
+
+Nombre de callsites locaux `esc(...)` :
+- World Builder : 22 ;
+- Room Creator 100 : 10 ;
+- Stats UI : 15 ;
+- Tactical Stats : 3.
+
+Tactical a moins de callsites mais appartient au runtime combat critique.
+Stats UI touche un domaine Core sensible.
+World Builder possède davantage de surface.
+
+Room Creator 100 est donc le premier candidat le moins risqué :
+- Builder/UI ;
+- 10 callsites ;
+- aucun appel `esc` dans stockage/normalisation/gameplay ;
+- usages limités aux chaînes de rendu bibliothèque/grille/statut ;
+- couverture navigateur Builder déjà existante.
+
+### Parité
+
+Le helper local exact :
+`function esc(v){return String(v??"").replace(/[&<>"']/g,...)}`
+
+est comparé au vrai
+`GensTextUtilsV1.escapeHtml`
+sur une matrice nullish, nombres, booléens, texte normal, cinq caractères HTML,
+chaînes mixtes et double échappement.
+
+Parité exigée : exacte.
+
+### Chargement futur
+
+État présent :
+- Room Creator est chargé par GitHub Pages ;
+- Room Creator est reproduit par `preview.html` ;
+- `text-utils-v1.js` reste inert et non chargé.
+
+Futur raccord minimal recommandé :
+1. charger `text-utils-v1.js` immédiatement avant Room Creator dans Pages ;
+2. reproduire le même ordre dans preview ;
+3. remplacer uniquement le helper local `esc` par une référence explicite au Core ;
+4. ne raccorder aucun autre consommateur dans ce lot ;
+5. valider le navigateur Dungeon Builder.
+
+Aucune modification de chargement n'est faite dans ce pré-audit.
+
+### Hors périmètre maintenu
+
+- World Builder ;
+- Stats UI ;
+- Tactical Stats ;
+- tout autre consommateur ;
+- Event Bus ;
+- index.html ;
+- gameplay/storage.
+
+### Prochaine action
+
+Valider cette sentinelle par Architecture + navigateur, Firefox et Tactical.
+Après GREEN, ouvrir un lot séparé de raccord Room Creator 100 uniquement.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / utilitaires communs U1 — pré-audit premier consommateur UI — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -43,3 +43,31 @@ de chargement minimal du futur lot de raccord, sans l'appliquer ici.
 
 Pas d'injection, pas de raccord, pas de suppression de helper, pas d'Event Bus,
 pas de modification de `index.html`, preview, Pages ou Service Worker.
+
+
+## Résultat du pré-audit
+
+Consommateur futur sélectionné :
+`assets/dungeon/dungeon-room-creator-100.js`.
+
+Raisons :
+- helper local strictement équivalent ;
+- 10 callsites UI seulement ;
+- aucun usage dans stockage/normalisation/gameplay ;
+- navigateur Builder existant ;
+- moins de surface que World Builder ;
+- moins sensible que Stats ou Tactical.
+
+Comparaison :
+- World Builder : 22 callsites ;
+- Room Creator : 10 ;
+- Stats UI : 15 ;
+- Tactical Stats : 3, mais runtime combat critique.
+
+Le futur raccord devra charger le service Core avant Room Creator dans **Pages et preview**,
+sans modifier `index.html`, puis supprimer uniquement le helper local Room Creator.
+
+Sentinelle :
+`tests/gens_phase4_common_text_utils_first_consumer_preaudit_v1.test.cjs`.
+
+Aucun runtime n'est modifié dans ce pré-audit.

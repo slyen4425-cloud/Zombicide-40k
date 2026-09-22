@@ -1,3 +1,92 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — premier raccord XP -> niveau — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-first-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-first-raccord-2026-09-22`.
+- Base exacte :
+  `e85b9cb4e93c38595f29b27738a823a8ac4954bd`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit définitivement GREEN
+
+SHA final :
+`e85b9cb4e93c38595f29b27738a823a8ac4954bd`.
+
+Runs sur ce SHA exact :
+- Architecture + navigateur complet :
+  `35709648036` — SUCCESS ;
+- Firefox :
+  `35709647990` — SUCCESS ;
+- Tactical Dock :
+  `35709647955` — SUCCESS.
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-progression-xp-first-raccord-preaudit-green-2026-09-22`.
+
+### Mission unique
+
+Raccorder uniquement la branche avec profil Progression actif de
+`dungeonRpgLevelFromXp(xp)` à :
+
+`GensProgressionV1.levelFromXp(v,p)`.
+
+Le propriétaire historique doit conserver :
+- `activeProg()` ;
+- `Math.max(0, Number(xp) || 0)` ;
+- la branche sans profil ;
+- `loadDungeonRpgRules().xpPerLevel`.
+
+Le Core pur reste byte-identique.
+
+### TDD obligatoire — prochaine action
+
+Avant toute modification runtime :
+1. ajouter la sentinelle de raccord ;
+2. la brancher à Architecture ;
+3. observer le RED attendu sur l'absence du raccord réel ;
+4. vérifier que les étapes antérieures sont GREEN ;
+5. seulement ensuite modifier le vrai propriétaire.
+
+La sentinelle doit prouver :
+- appel Core sur la branche profil ;
+- zéro appel Core sur la branche no-profile ;
+- 140 cas configurés en parité ;
+- legacy `xpPerLevel=25`, 50 XP -> niveau 3 ;
+- legacy `xpPerLevel=25`, 2500 XP -> niveau 101 ;
+- chargement Core avant Core 0.44 ;
+- aucun autre seam Progression raccordé.
+
+Document :
+`docs/GENSRPG_PHASE4_PROGRESSION_XP_FIRST_RACCORD.md`.
+
+### Source exacte
+
+`index.html` :
+- 8 174 648 octets ;
+- blob `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+Core Progression :
+- blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+Si le gros HTML doit être modifié et qu'aucune copie exacte n'est disponible,
+appliquer immédiatement la règle 26 de la charte.
+
+### Interdictions
+
+- aucun `dungeonRpgXpIntoLevel` ;
+- aucun `dungeonRpgEarnedSkillPoints` ;
+- aucune synchronisation héros / XP manuel / récompense / level-up / popup ;
+- aucun changement Core Progression ;
+- aucun wrapper / observer / timer / retry / fallback concurrent ;
+- aucun changement Stats / Inventory / Storage / Dice / Tactical ;
+- aucun changement sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit premier raccord — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

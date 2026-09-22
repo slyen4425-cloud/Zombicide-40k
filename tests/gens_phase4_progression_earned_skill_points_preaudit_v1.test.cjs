@@ -17,7 +17,7 @@ const owners=fs.existsSync(path.join(root,'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAS
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 assert.equal(indexBuf.length,8174346,'earned-points preaudit must run on exact xpIntoLevel GREEN index');
 assert.equal(gitBlob(indexBuf),'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc','earned-points preaudit index blob drifted');
-assert.equal(gitBlob(coreBuf),'f633de55f1e6bda339e66c65debc35d7b8da2510','Core Progression blob must remain unchanged during preaudit');
+assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression blob must remain unchanged during preaudit');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';

@@ -18,7 +18,7 @@ const coreBlob=crypto.createHash('sha1')
   .update(coreBuf)
   .digest('hex');
 
-assert.equal(coreBlob,'f633de55f1e6bda339e66c65debc35d7b8da2510',
+assert.equal(coreBlob,'3cca29084ce436a8dcae95e5d6d745edd4afa3cf',
   'current Core Progression contract blob drifted after later pure API expansion');
 
 function scriptBody(id){

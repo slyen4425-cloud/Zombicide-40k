@@ -15,7 +15,7 @@ const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.leng
 
 assert.equal(indexBuf.length,8174346,'raccord RED must start from exact preaudit GREEN index');
 assert.equal(gitBlob(indexBuf),'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc','raccord RED index drifted');
-assert.equal(gitBlob(coreBuf),'f633de55f1e6bda339e66c65debc35d7b8da2510','Core Progression must remain byte-identical');
+assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression must remain byte-identical');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';

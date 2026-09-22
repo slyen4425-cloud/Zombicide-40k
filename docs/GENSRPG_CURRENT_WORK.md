@@ -1,3 +1,71 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit premier raccord — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-first-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-first-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `0ac5882199f845eec0b811e680b8ef624b95720a`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent GREEN
+
+Le contrat pur Core Dice est officiellement GREEN sur
+`0ac5882199f845eec0b811e680b8ef624b95720a`.
+
+Runs exacts :
+- Architecture + navigateur complet `35676612019` — SUCCESS ;
+- Firefox `35676612018` — SUCCESS ;
+- Tactical Dock `35676612007` — SUCCESS.
+
+Le service `assets/gensrpg/core/dice-v1.js` reste inert et non chargé en production.
+
+### Mission unique
+
+Pré-auditer uniquement le **premier raccord** Core Dice.
+
+Comparer :
+1. `d100ThresholdFromChance(chance)` ;
+2. `dungeonUniversalTest(statValue,opt)`.
+
+Objectifs :
+- cartographier leurs callsites réels ;
+- comparer exactement leurs contrats au Core Dice pur ;
+- mesurer les différences de clamps, arrondis, erreurs et structures de résultat ;
+- choisir le raccord le plus petit et le plus sûr ;
+- définir le RED du lot correctif suivant.
+
+### Périmètre strict
+
+Audit / caractérisation uniquement.
+
+Interdit :
+- modifier `index.html` ;
+- charger `dice-v1.js` en production ;
+- modifier seuils, chances, dés, réussite/échec ;
+- modifier Tactical ou son RNG seedé ;
+- modifier animations ;
+- ajouter wrapper, observer, timer, retry ou fallback ;
+- modifier `main`.
+
+Le zip utilisateur `index_work_9.zip` reste valide pour cette inspection :
+aucun lot depuis `669a8b2e…` n'a modifié `index.html`.
+
+### Preuves attendues
+
+1. corps exact des deux candidats ;
+2. callsites et consommateurs ;
+3. parité sur bornes et valeurs représentatives ;
+4. risques inter-module ;
+5. sélection explicite d'un seul premier raccord ;
+6. sentinelle de pré-audit ;
+7. Architecture + navigateur complet, Firefox et Tactical avant GREEN.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — contrat pur — 2026-09-22
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

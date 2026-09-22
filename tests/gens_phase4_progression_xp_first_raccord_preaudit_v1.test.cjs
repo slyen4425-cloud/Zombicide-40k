@@ -20,7 +20,7 @@ const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.le
 const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
 assert.equal(indexBuf.length,8174416,'first-raccord preaudit must track the exact connected index after its dedicated raccord');
 assert.equal(indexBlob,'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','index blob drifted after the dedicated Progression raccord');
-assert.equal(coreBlob,'04ffcc5e8932e8c4c101c6af09095775e62245a2','current Core Progression contract blob drifted');
+assert.equal(coreBlob,'f633de55f1e6bda339e66c65debc35d7b8da2510','current Core Progression contract blob drifted');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';

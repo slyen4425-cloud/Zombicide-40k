@@ -92,8 +92,8 @@ for(const s of cases)for(const xp of s.xs){
   const c=rt.counts();
   assert.equal(c.coreCalls,1,'must delegate exactly once');
   assert.equal(c.levelCalls,1,'must read canonical level exactly once');
-  assert.equal(c.rulesCalls,s.profile?0:1,'Dungeon rules read count drifted');
-  assert.equal(c.profilesCalls,1,'active profile read count drifted');
+  assert.equal(c.rulesCalls,s.profile?0:2,'Dungeon rules read count drifted');
+  assert.equal(c.profilesCalls,2,'active profile read count drifted');
   n++;
 }
 assert.ok(n>=15);

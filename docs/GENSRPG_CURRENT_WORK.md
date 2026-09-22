@@ -1,3 +1,94 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit prochain raccord — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-next-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-next-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `e19d479c5559da9215d4456b4ea62c05a9f8bbf6`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-first-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer les seams Dice historiques restant après le raccord GREEN de
+`d100ThresholdFromChance`, afin de sélectionner **un seul** prochain candidat
+pour un futur micro-lot TDD.
+
+Ce lot est documentaire/diagnostic uniquement :
+- aucun raccord runtime ;
+- aucune modification de `index.html` ;
+- aucun changement de RNG ;
+- aucun changement de seuil/chance ;
+- aucun changement Tactical / Stats / Inventory / Storage / Progression.
+
+`dungeonUniversalTest` reste un candidat connu mais **n'est pas présélectionné** :
+la clôture précédente interdit de l'enchaîner automatiquement sans nouveau
+pré-audit ciblé.
+
+### Candidats à caractériser
+
+À partir du runtime exact courant, inventorier et comparer au contrat
+`GensDiceV1` :
+- `dungeonUniversalTest` ;
+- D6 partagé / `showSpecialD6Roll` et consommateurs réels ;
+- `rollDungeonRpDice073` en séparant UI et primitives de jet ;
+- D100 historiques Dungeon avec clamps 5..95 ;
+- tests puzzle/piège en convention `roll <= chance` ;
+- `dungeonInitiativeScore` et son dé configurable ;
+- tout autre seam de jet de règle réellement partagé identifié par preuve.
+
+Les RNG de contenu (spawn, loot, IA, génération, sélection pondérée, IDs) restent
+hors Core Dice.
+
+### Invariants / systèmes protégés
+
+- `assets/gensrpg/core/dice-v1.js` reste inchangé dans ce pré-audit ;
+- le raccord `d100ThresholdFromChance` GREEN reste inchangé ;
+- les 15 consommateurs du premier seam restent inchangés ;
+- Tactical V114.11 et son RNG seedé restent hors raccord ;
+- Mobile Combat Performance et animations de dés restent décorateurs UI ;
+- aucun wrapper, observer, timer, retry ou fallback ;
+- aucune règle gameplay codée en dur ou uniformisation de clamps ;
+- aucun merge sur `main`.
+
+### Source exacte requise
+
+Le `index.html` du checkpoint GREEN a changé depuis le fichier utilisateur
+`index_work_9.zip`.
+
+État exact attendu :
+- SHA commit :
+  `e19d479c5559da9215d4456b4ea62c05a9f8bbf6` ;
+- blob `index.html` :
+  `5b8e790fefe7970a250fd9485ee80549511737e6` ;
+- taille :
+  `8 174 637` octets.
+
+Conformément à la règle 26 de la charte, toute inspection détaillée du gros
+`index.html` doit utiliser une copie utilisateur téléchargée depuis ce SHA et
+vérifiée contre ce blob avant analyse.
+
+### Tests / sortie attendue
+
+Le pré-audit devra produire une sentinelle dédiée qui :
+1. inventorie les candidats réellement présents et leurs callsites ;
+2. caractérise faces, clamps, convention de succès, coercions et RNG ;
+3. compare chaque primitive au contrat Core Dice sans modifier le gameplay ;
+4. distingue RNG de règle et RNG de contenu ;
+5. prouve l'absence de modification Tactical / premier raccord ;
+6. sélectionne un seul prochain seam ou conclut qu'aucun raccord n'est assez sûr ;
+7. passe Architecture + navigateur complet, Firefox et Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Obtenir et vérifier le `index.html` exact du checkpoint GREEN
+`e19d479c...`, puis construire le pré-audit sans modification runtime.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — premier raccord d100ThresholdFromChance — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

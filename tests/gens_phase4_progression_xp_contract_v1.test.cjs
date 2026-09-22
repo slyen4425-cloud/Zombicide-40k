@@ -108,8 +108,10 @@ for(const row of configs){
 
 assert.equal(api.levelFromXp(999,{xpCurveMode:'linear',xpPerLevel:10,maxLevel:2.5}),2.5,
   'legacy fractional maxLevel behavior must not be silently normalized');
-assert.equal(api.levelFromXp(29,{xpCurveMode:'custom',xpPerLevel:8,maxLevel:5,xpThresholds:{2:3,4:28}}),3,
-  'missing custom threshold must fall back to the historical linear threshold for that level');
+assert.equal(api.levelFromXp(15,{xpCurveMode:'custom',xpPerLevel:8,maxLevel:5,xpThresholds:{2:3,4:28}}),2,
+  'missing level-3 custom threshold must fall back to the historical linear threshold of 16 XP');
+assert.equal(api.levelFromXp(29,{xpCurveMode:'custom',xpPerLevel:8,maxLevel:5,xpThresholds:{2:3,4:28}}),4,
+  'after satisfying the fallback level-3 threshold, a later explicit custom threshold must still apply');
 assert.equal(api.levelFromXp(0,{xpCurveMode:'custom',xpPerLevel:8,maxLevel:4,xpThresholds:{2:-4}}),2,
   'negative explicit custom threshold must preserve legacy clamp-to-zero behavior');
 assert.equal(api.levelFromXp(0,{xpCurveMode:'custom',xpPerLevel:8,maxLevel:4,xpThresholds:{2:0}}),1,

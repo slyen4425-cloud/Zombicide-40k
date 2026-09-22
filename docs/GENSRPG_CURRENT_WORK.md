@@ -55,12 +55,13 @@ Aucun runtime ne doit être modifié dans ce pré-audit.
 Le candidat conserve :
 - `activeProg()` à la frontière ;
 - normalisation XP historique à la frontière ;
-- fallback Dungeon lazy uniquement no-profile/linéaire ;
+- fallback Dungeon lazy uniquement lorsqu'il est réellement requis ;
+- zéro lecture des règles Dungeon avec un profil linéaire numérique truthy ;
 - zéro lecture des règles Dungeon en custom.
 
 Forme candidate :
 
-`window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),fallback=(!p||(p.xpCurveMode||"linear")!=="custom")?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}`
+`window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}`
 
 ### Point de vigilance custom
 

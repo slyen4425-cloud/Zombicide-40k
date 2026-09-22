@@ -1,3 +1,136 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP -> niveau — reprise clean-base — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-contract-cleanbase-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-contract-cleanbase-2026-09-22`.
+- Base exacte :
+  `79ca6dca0df93abd40c8443fad8fcfc9c6cc4c28`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-final-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Preuve du GREEN de départ
+
+Sur le SHA exact `79ca6dca0df93abd40c8443fad8fcfc9c6cc4c28` :
+
+- Architecture + navigateur complet :
+  `35701194882` — SUCCESS ;
+- Firefox :
+  `35701195075` — SUCCESS ;
+- Tactical Dock :
+  `35701194905` — SUCCESS.
+
+### Correction de gouvernance
+
+Un premier essai de lot contrat avait été ouvert trop tôt sur :
+- checkpoint `checkpoint/gensrpg-start-phase4-progression-xp-contract-2026-09-22` ;
+- base réelle `4bf7a325da0a44cb4e73e0d92f17793b7a2aa003` ;
+- branche `work/gensrpg-phase4-progression-xp-contract-2026-09-22`.
+
+Cette base précède de trois commits la clôture GREEN finale du pré-audit.
+Ces références restent conservées comme historique et ne sont ni déplacées ni
+réécrites.
+
+Le présent lot **clean-base** repart donc du vrai checkpoint GREEN final.
+Le travail technique de l'ancien essai peut servir de référence documentaire,
+mais chaque étape TDD requise est rejouée proprement sur cette base.
+
+### Mission unique
+
+Créer le **contrat pur** du futur Core Progression pour le seul calcul
+XP -> niveau.
+
+Service cible :
+`assets/gensrpg/core/progression-xp-v1.js`.
+
+API minimale :
+`levelFromXp(xp, progressionConfig)`.
+
+Ce lot ne raccorde aucun consommateur runtime.
+
+### Contrat legacy à reproduire exactement
+
+Le propriétaire actif reste :
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`.
+
+Le service pur doit reproduire, avec configuration explicite :
+
+- normalisation XP :
+  `Math.max(0, Number(xp) || 0)` ;
+- `maxLevel = Math.max(1, Number(maxLevel) || 100)` ;
+- mode par défaut `linear` ;
+- linéaire :
+  `Math.min(maxLevel, 1 + floor(xp / max(1, Number(xpPerLevel)||10)))` ;
+- custom :
+  parcours des niveaux 2..max ;
+- seuil custom :
+  `Math.max(0, Number(xpThresholds[level]) || ((level-1)*max(1,Number(xpPerLevel)||10)))` ;
+- arrêt au premier seuil non atteint.
+
+Le fallback « aucun profil progression » reste une responsabilité de frontière du
+futur raccord Core 0.44 : le service pur reçoit toujours une configuration
+explicite.
+
+### TDD obligatoire
+
+Avant création du service :
+
+1. créer la sentinelle contractuelle dédiée ;
+2. la brancher à Architecture ;
+3. observer un RED exact parce que le service n'existe pas encore ;
+4. seulement ensuite créer le service.
+
+Après création, la sentinelle doit verrouiller :
+- courbe linéaire ;
+- courbe custom ;
+- seuil custom absent -> fallback linéaire historique ;
+- `maxLevel` y compris comportement fractionnaire/non fini legacy ;
+- XP négative, chaîne numérique, vide, null, false, undefined, NaN, ±Infinity ;
+- coercions `xpPerLevel` et seuils historiques ;
+- résultat nombre uniquement ;
+- pureté : aucun DOM, storage, timer, observer, listener, RNG, profil actif ;
+- CommonJS testable + global Core explicite si chargé ;
+- service **hors graphe production** dans ce lot.
+
+### Périmètre strict
+
+Autorisé :
+- nouveau fichier pur `assets/gensrpg/core/progression-xp-v1.js` ;
+- test contractuel ;
+- classement Phase 4 inert / non-production ;
+- documentation et CI.
+
+Interdit :
+- modifier `index.html` ;
+- modifier `dungeonCore044HeroProgression` ;
+- charger le service en production ;
+- modifier `progression-runtime-v1.js` ;
+- modifier `dungeonRpgXpIntoLevel`, points gagnés, sync, XP manuel, récompenses,
+  victoire ou popup ;
+- modifier Stats / Inventory / Dice / Storage / Tactical ;
+- ajouter wrapper, observer, timer, retry, fallback global ou auto-install ;
+- modifier `main`.
+
+### Systèmes protégés
+
+- comportement utilisateur du checkpoint GREEN Progression pré-audit ;
+- retours manuels différés :
+  - détection ennemis à portée ;
+  - confusion visuelle Stats Aldren ;
+- Core Dice / Stats / Inventory / Storage ;
+- Tactical V114.11 ;
+- Survie / Dungeon / Capture / PvP ;
+- Save & Quit / reprise.
+
+### Prochaine action
+
+Créer la sentinelle contractuelle sur cette base clean, la brancher à Architecture
+et obtenir le RED attendu avant création du service.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

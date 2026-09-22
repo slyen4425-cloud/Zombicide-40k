@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
 
-assert.equal(bytes.length,8174416,'S7 must audit the exact verified index');
-assert.equal(blob,'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','S7 index blob must remain the Rule 26 verified source');
+assert.equal(bytes.length,8174346,'S7 must audit the exact verified index');
+assert.equal(blob,'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc','S7 index blob must remain the Rule 26 verified source');
 
 for(const text of [
   'function dungeonCombatHeroSnapshot(heroId){',

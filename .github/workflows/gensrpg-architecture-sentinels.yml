@@ -464,6 +464,9 @@ jobs:
       - name: Pré-auditer le raccord U1 vers Room Creator
         run: node tests/gens_phase4_text_utils_u1_room_creator_raccord_preaudit_v1.test.cjs
 
+      - name: Raccorder U1 vers Room Creator
+        run: node tests/gens_phase4_text_utils_u1_room_creator_raccord_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit du seam suivant — 2026-09-22
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit du seam suivant — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
 
@@ -8,58 +8,39 @@ Ce bloc devient le point de reprise actif. Les sections suivantes sont historiqu
   `checkpoint/gensrpg-start-phase4-progression-xp-next-seam-preaudit-2026-09-22`.
 - Base exacte :
   `6458f2d41245cfbd48e0d61367962a79d9d002f2`.
-- Dernier checkpoint GREEN :
+- Checkpoint GREEN de départ :
   `checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Premier raccord Progression officiellement GREEN
+### Résultat du pré-audit
 
-Checkpoint :
-`checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+Aucun runtime n'a été modifié.
 
-SHA :
-`6458f2d41245cfbd48e0d61367962a79d9d002f2`.
-
-Validations sur ce SHA exact :
-- Architecture + navigateur complet :
-  `35714743207` — SUCCESS ;
-- Firefox :
-  `35714743174` — SUCCESS ;
-- Tactical Dock :
-  `35714743339` — SUCCESS.
-
-### Mission unique du lot courant
-
-Pré-auditer le prochain seam Progression sans modification runtime.
-
-Candidats comparés :
-- `dungeonRpgXpIntoLevel` ;
-- `dungeonRpgEarnedSkillPoints` ;
-- synchronisation/mutation aval explicitement exclue.
-
-Sélection actuelle du pré-audit :
+Seam sélectionné :
 `dungeonRpgXpIntoLevel`.
 
-Raison :
-- calcul déterministe ;
-- aucune persistance / DOM / timer / mutation ;
-- le mode custom consomme le niveau canonique déjà raccordé ;
-- les politiques de points restent hors périmètre.
+Propriétaire :
+`dungeonCore044HeroProgression`.
 
-### Frontières découvertes à préserver
+Le pré-audit verrouille :
+- branche sans profil avec fallback `loadDungeonRpgRules().xpPerLevel` ;
+- profil linéaire avec priorité `p.xpPerLevel` puis fallback Dungeon ;
+- coercion historique des valeurs négatives ;
+- profil custom via le niveau canonique déjà raccordé ;
+- soustraction du seul seuil explicite du niveau courant ;
+- comportement custom clairsemé/invalide inchangé.
 
-`dungeonRpgXpIntoLevel` possède trois sémantiques réelles :
-1. sans profil : fallback `loadDungeonRpgRules().xpPerLevel` ;
-2. profil linéaire : `p.xpPerLevel`, avec fallback Dungeon si absent/invalide/zéro ;
-3. profil custom : niveau canonique puis soustraction du seuil explicite du niveau courant.
+Toujours différés :
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- XP manuel / combat / objectifs ;
+- points dépensés ;
+- level-up / restauration / popup / son / persistance.
 
-Une valeur négative `xpPerLevel` est truthy puis clampée à 1.
-En custom clairsemé, un seuil de fallback peut faire progresser le niveau alors que
-`xpIntoLevel` soustrait 0 si le seuil explicite courant manque : ce comportement
-historique doit rester inchangé pendant la restructuration.
-
-### Source exacte protégée
+### Sources protégées
 
 `index.html` :
 - taille `8 174 416` octets ;
@@ -68,25 +49,55 @@ historique doit rester inchangé pendant la restructuration.
 Core Progression :
 - blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
 
-Aucun runtime ne doit être modifié dans ce pré-audit.
+### Validation technique avant documentation finale
 
-### Livrables du pré-audit
+SHA :
+`7a8b691072828c0a84d8468ca274e28b772478de`.
 
-- `docs/GENSRPG_PHASE4_PROGRESSION_XP_NEXT_SEAM_PREAUDIT.md` ;
-- `tests/gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs`.
+- Architecture + navigateur complet :
+  `35718095681` — SUCCESS ;
+- Firefox :
+  `35718095818` — SUCCESS ;
+- Tactical Dock :
+  `35718095640` — SUCCESS.
 
-### Prochaine action immédiate
+### Validation finale obligatoire
 
-Brancher la sentinelle de pré-audit à Architecture puis exécuter :
+La clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN cible, le même SHA documentaire final exact
+doit repasser :
 1. Architecture + navigateur complet ;
 2. Firefox ;
 3. Tactical Dock.
 
-Si GREEN sur le même SHA :
-- documenter la clôture ;
-- rerun après documentation ;
-- créer le checkpoint GREEN du pré-audit ;
-- ouvrir ensuite un lot distinct de contrat Core pur `xpIntoLevel`.
+### Suite autorisée après GREEN
+
+Ouvrir un nouveau lot homogène :
+**contrat Core pur XP-into-level**.
+
+Forme candidate à verrouiller par TDD :
+`xpIntoLevel(xp, explicitProgressionConfig, fallbackXpPerLevel)`.
+
+Aucun raccord runtime dans ce futur contrat pur.
+
+### Coordination Agent 1 — chantier futur Event Bus / utilitaires
+
+Audit Agent 1 vérifié :
+- checkpoint :
+  `checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22` ;
+- SHA :
+  `5d713123585917d55a057373cba7d5003de02e7c` ;
+- aucun runtime modifié ;
+- conclusion : ne pas créer de Event Bus générique à ce stade ;
+- premier micro-lot futur recommandé :
+  utilitaire texte Core pur `escapeHtml()`, inert avant tout raccord.
+
+Cet audit part de l'ancienne base
+`e85b9cb4e93c38595f29b27738a823a8ac4954bd`.
+Ne pas fusionner directement sa branche dans la ligne Progression actuelle.
+Le réappliquer/revalider sur la future base GREEN seulement lorsque la roadmap
+atteindra le point 7 « bus d'événements / utilitaires communs ».
 
 Aucun merge sur `main`.
 

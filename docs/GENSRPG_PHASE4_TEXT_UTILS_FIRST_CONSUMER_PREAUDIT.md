@@ -47,3 +47,45 @@ sans modifier les données, le rendu fonctionnel ni le cycle du Room Creator.
 ## Hors périmètre
 
 Aucune modification runtime dans ce pré-audit.
+
+
+## Résultat de caractérisation
+
+Consommateur sélectionné :
+`assets/dungeon/dungeon-room-creator-100.js`.
+
+Fingerprint protégé :
+`19c0fff57bfe27648819a12ed657cebe4f41f6df`.
+
+Text Utils U1 :
+- fichier : `assets/gensrpg/core/text-utils-v1.js` ;
+- blob : `f0befe5feaf3bb2536b9b15267399988c949aab8`.
+
+Inventaire Room Creator :
+- 1 définition locale `esc(v)` ;
+- 10 callsites ;
+- `renderLibrary` : 7 ;
+- `renderGrid` : 1 ;
+- `renderStatus` : 2 ;
+- aucun callsite hors de ces trois fonctions de rendu.
+
+La matrice de parité compare le helper local réel à
+`GensTextUtilsV1.escapeHtml` sur null, undefined, chaînes, nombres, booléens,
+les cinq caractères HTML, double échappement, Unicode et objet avec `toString`.
+Parité attendue : exacte.
+
+### Composition
+
+État actuel :
+- GitHub Pages charge Room Creator mais pas Text Utils ;
+- `preview.html` charge Room Creator mais pas Text Utils ;
+- U1 reste donc inert.
+
+Un futur raccord minimal devra, dans un lot séparé :
+1. charger `text-utils-v1.js` avant `dungeon-room-creator-100.js` dans Pages ;
+2. reproduire le même ordre dans `preview.html` ;
+3. remplacer uniquement le corps du helper local par
+   `return GensTextUtilsV1.escapeHtml(v)` ;
+4. ne modifier aucune donnée, sauvegarde, grille ou règle Builder.
+
+Ce pré-audit ne modifie aucun runtime.

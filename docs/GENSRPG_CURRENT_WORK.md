@@ -1,3 +1,112 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-preaudit-2026-09-22`.
+- Base exacte :
+  `0ce2451da078cceb90c0431a3735932dbd41f945`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Justification roadmap
+
+La Phase 4 impose l'ordre des services communs :
+assets -> stockage -> stats -> inventory/equipment/sets -> dés -> **progression/XP** -> bus/utilitaires.
+
+Le sous-chantier Core Dice est donc gelé après son checkpoint GREEN. Aucun troisième
+raccord Dice n'est autorisé dans ce lot.
+
+### Mission unique
+
+Pré-auditer la progression/XP réellement active avant toute extraction Core.
+
+Ce lot doit :
+- inventorier les propriétaires actuels du calcul niveau/XP/points ;
+- distinguer règles de progression, mutations d'état, UI et récompenses de combat ;
+- identifier les conventions propres à Dungeon, Survie et Capture ;
+- déterminer quelles primitives peuvent réellement devenir Core sans imposer
+  une règle de gameplay commune ;
+- caractériser les callsites et les frontières de persistance ;
+- vérifier l'état réel de l'ancien
+  `assets/gensrpg/dungeon/progression-runtime-v1.js` et prouver s'il est chargé
+  ou inerte ;
+- sélectionner un seul futur micro-lot TDD ou conclure qu'aucune extraction
+  n'est encore sûre.
+
+Aucun raccord runtime n'est autorisé dans ce pré-audit.
+
+### Autorités déjà connues à revalider
+
+Sentinelles existantes à réutiliser :
+- `gens_progression_authority_characterization_v11411.test.cjs` ;
+- `gens_progression_victory_authority_extract_v11411.test.cjs` ;
+- `gens_progression_victory_characterization_v11411.test.cjs` ;
+- `gens_manual_level_authority_characterization_v11411.test.cjs` ;
+- `gens_manual_xp_statpoints_characterization_v11411.test.cjs` ;
+- `gens_manual_xp_progression_runtime_v1.test.cjs`.
+
+Propriétaires historiques à caractériser précisément :
+- `dungeonRpgLevelFromXp` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- `changeXP` ;
+- `awardDungeonDefeatXp` ;
+- `dungeonRecordCombatReward` ;
+- `dungeonHandleLevelUp071` ;
+- rendu `statPoints / skillPoints / rpgLevel` ;
+- récompenses Tactical -> Dungeon.
+
+### Risques / interdictions
+
+- ne pas coder `10 XP = 1 niveau` ou toute autre courbe en dur dans un futur Core ;
+- ne pas confondre calcul pur, mutation, persistance, popup niveau et récompenses ;
+- ne pas rendre Dungeon propriétaire d'une progression commune ;
+- ne pas détourner les progressions Survie/Capture ;
+- ne pas activer un ancien wrapper ou module inerte pour gagner du temps ;
+- aucun wrapper, observer, timer/retry, fallback global ou monkey-patch ;
+- aucun changement Stats / Inventory / Dice / Storage / Tactical ;
+- aucun merge sur `main`.
+
+### Source exacte
+
+L'index GREEN courant est :
+- commit :
+  `0ce2451da078cceb90c0431a3735932dbd41f945` ;
+- blob :
+  `2d7677950f04e9a3290ff0062e157a126123891d` ;
+- taille :
+  `8 174 648` octets.
+
+La copie utilisateur précédente `work_10.zip` correspond au blob antérieur
+`5b8e790f...` et ne doit pas être utilisée pour l'analyse exacte de ce nouveau lot.
+
+Conformément à la règle 26, toute inspection détaillée de l'index actuel doit se
+faire à partir d'une copie utilisateur téléchargée depuis le SHA ci-dessus et
+revérifiée avant usage.
+
+### Sortie attendue
+
+Le pré-audit devra produire :
+1. inventaire des autorités et callsites réellement actifs ;
+2. matrice calcul pur / mutation / stockage / UI / récompense ;
+3. preuve d'activité ou d'inertie de `progression-runtime-v1.js` ;
+4. comparaison des règles entre modules sans les uniformiser ;
+5. proposition d'un contrat Core configurable si et seulement si la parité peut
+   être garantie ;
+6. un seul futur seam TDD sélectionné, ou un refus motivé d'extraire ;
+7. Architecture + navigateur complet, Firefox et Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Réutiliser les sentinelles existantes et la cartographie de charge pour établir
+le périmètre sans toucher au runtime, puis obtenir l'index exact courant avant
+toute analyse détaillée des propriétaires inline.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

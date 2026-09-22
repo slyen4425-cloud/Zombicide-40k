@@ -68,8 +68,8 @@ const xpIntoStart=nextStart;
 const skillStart=core044.indexOf('window.dungeonRpgEarnedSkillPoints=',xpIntoStart);
 assert.ok(skillStart>xpIntoStart,'cannot isolate deferred XP-into-level seam');
 const xpIntoSource=core044.slice(xpIntoStart,skillStart);
-assert.equal(xpIntoSource.includes('GensProgressionV1'),false,
-  'dungeonRpgXpIntoLevel is deferred and must not be raccorded in this lot');
+assert.match(xpIntoSource,/GensProgressionV1\.xpIntoLevel\(v,p,fallback\)/,
+  'later dedicated raccord must now connect dungeonRpgXpIntoLevel without altering the first level raccord');
 
 function runtime({profile=null,rules={xpPerLevel:10}}={}){
   const ctx={
@@ -135,5 +135,6 @@ console.log(JSON.stringify({
   configuredProfileCoreDelegation:true,
   noProfileCoreDelegation:false,
   pureCoreChanged:false,
-  deferred:['dungeonRpgXpIntoLevel','dungeonRpgEarnedSkillPoints','sync/manual XP/rewards/level-up']
+  laterConnected:['dungeonRpgXpIntoLevel'],
+  deferred:['dungeonRpgEarnedSkillPoints','sync/manual XP/rewards/level-up']
 },null,2));

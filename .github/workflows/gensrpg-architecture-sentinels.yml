@@ -419,6 +419,9 @@ jobs:
       - name: Pré-auditer le prochain raccord Core Dice Phase 4
         run: node tests/gens_phase4_dice_next_raccord_preaudit_v1.test.cjs
 
+      - name: Verrouiller le raccord d10048 Core Dice Phase 4
+        run: node tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

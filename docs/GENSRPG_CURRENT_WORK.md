@@ -1,3 +1,111 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit premier raccord — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-first-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-first-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `4a1c63dd2558343dde27966320238d1655fb4406`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-contract-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+Sentinelle :
+`tests/gens_phase4_progression_xp_first_raccord_preaudit_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_PROGRESSION_XP_FIRST_RACCORD_PREAUDIT.md`.
+
+Le propriétaire actif reste :
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`.
+
+La branche avec profil Progression actif est en parité exacte avec
+`GensProgressionV1.levelFromXp(xp,profile)` :
+- 5 profils ;
+- 28 valeurs XP ;
+- 140 comparaisons exactes ;
+- linéaire/custom/coercions/maxLevel/seuils manquants ou invalides couverts.
+
+La branche historique sans profil est volontairement différente :
+- elle lit `loadDungeonRpgRules().xpPerLevel` ;
+- elle ne possède pas le même cap `maxLevel=100` du Core pur.
+
+Preuves verrouillées :
+- `xpPerLevel=25`, 50 XP : legacy = niveau 3, Core naïf = niveau 6 ;
+- `xpPerLevel=25`, 2500 XP : legacy = niveau 101, Core avec ses défauts = niveau 100.
+
+### Futur raccord minimal sélectionné
+
+Le futur lot TDD doit conserver dans `dungeonRpgLevelFromXp` :
+1. `activeProg()` ;
+2. `Math.max(0, Number(xp) || 0)` ;
+3. la branche no-profile utilisant `loadDungeonRpgRules().xpPerLevel`.
+
+Uniquement lorsque le profil Progression existe, déléguer à :
+
+`GensProgressionV1.levelFromXp(v,p)`.
+
+Restent explicitement différés :
+- `dungeonRpgXpIntoLevel` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- XP manuel ;
+- XP combat / récompenses ;
+- points dépensés ;
+- level-up / restauration / popup / son / persistance.
+
+### Sources protégées
+
+- `index.html` : 8 174 648 octets, blob
+  `2d7677950f04e9a3290ff0062e157a126123891d` ;
+- Core Progression : blob
+  `b02487346f1a0df12effbc4559b5063bf8e12726` ;
+- service encore inert ;
+- graphe production-reachable inchangé à 77 ;
+- aucun changement Stats / Inventory / Storage / Dice / Tactical.
+
+### Validation technique avant fermeture documentaire
+
+SHA :
+`8f6d2645e7201b66c05a082a262cf9e9d0e8441c`.
+
+- Architecture + navigateur complet :
+  `35705074875` — SUCCESS ;
+- Firefox :
+  `35705074718` — SUCCESS ;
+- Tactical Dock :
+  `35705074886` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN cible, le **même SHA documentaire final
+exact** doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun runtime ne doit être modifié pendant cette validation.
+
+### Prochaine action après GREEN
+
+Ouvrir un nouveau lot homogène de raccord TDD de
+`dungeonRpgLevelFromXp` depuis ce checkpoint.
+
+Le RED doit être observé avant modification runtime et verrouiller la frontière
+legacy ci-dessus. Ne raccorder aucun autre seam Progression dans ce lot.
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit premier raccord — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

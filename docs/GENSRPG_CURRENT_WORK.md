@@ -1,3 +1,60 @@
+## Chantier courant prioritaire — Phase 4 Core Inventory / Equipment — audit de clôture — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-inventory-equipment-closure-audit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-inventory-equipment-closure-audit-2026-09-22`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Source de travail vérifiée
+
+Le ZIP utilisateur `index_work_9.zip` contient `index_work9.txt`, qui est bien
+le HTML source complet.
+
+- taille : `8 174 580` octets ;
+- blob Git : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Correspondance exacte avec le `index.html` du checkpoint de départ.
+
+### Mission unique
+
+Auditer la sortie réelle du sous-chantier Inventory / Equipment avant de passer
+au point suivant de la roadmap Phase 4.
+
+Aucun runtime n'est modifié dans cet audit.
+
+### Premier résultat
+
+Inventory/Equipment n'est pas encore clôturable.
+
+Deux autorités communes restent actives hors Core :
+
+1. la réindexation des refs de slots après suppression :
+   - contrat Core `reindexRefsAfterRemoval()` déjà créé ;
+   - runtime Core 0.62 et `removeItem61` recalculent encore manuellement ;
+2. le calcul set-state :
+   - `GensEquipmentBonusSetsV1.setState()` existe ;
+   - `dungeon-core-316.js` possède encore `setState316` et publie
+     `dungeonSetStateFromItems316`.
+
+### Ordre obligatoire
+
+1. fermer cet audit avec les trois batteries ;
+2. ouvrir un lot séparé de raccord Slot Refs après suppression ;
+3. puis un lot séparé de raccord Set State ;
+4. refaire l'audit de sortie ;
+5. seulement après GREEN de sortie passer aux Dés.
+
+Document :
+`docs/GENSRPG_PHASE4_INVENTORY_EQUIPMENT_CLOSURE_AUDIT.md`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

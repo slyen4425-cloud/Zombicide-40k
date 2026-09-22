@@ -51,13 +51,14 @@ assert.match(owners,/^dungeonRpgXpIntoLevel\t1\tdungeonCore044HeroProgression$/m
 assert.match(owners,/^dungeonRpgLevelFromXp\t1\tdungeonCore044HeroProgression$/m);
 assert.match(currentLevel,/return GensProgressionV1\.levelFromXp\(v,p\)/,
   'configured level seam must already delegate directly to Core');
-assert.doesNotMatch(currentXpInto,/GensProgressionV1\.xpIntoLevel/,
-  'raccord preaudit must remain runtime-inert');
+const candidate='window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}';
+const legacy='window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p||(p.xpCurveMode||"linear")!=="custom"){const per=Math.max(1,Number(p?.xpPerLevel)||loadDungeonRpgRules().xpPerLevel||10);return v%per}const level=dungeonRpgLevelFromXp(v),start=level<=1?0:Math.max(0,Number(p.xpThresholds?.[level])||0);return Math.max(0,v-start)}';
+
+assert.equal(currentXpInto,candidate,
+  'later dedicated raccord must install exactly the preaudited candidate');
 assert.match(earned,/dungeonRpgLevelFromXp\(xp\)/,
   'earned skill points must remain outside this raccord');
-
-const candidate='window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)}';
-assert.notEqual(candidate,currentXpInto,'candidate must differ from current owner');
+assert.notEqual(legacy,candidate,'historical and canonical owners must stay distinct for parity characterization');
 
 function makeRuntime({profile=null,rules={xpPerLevel:10},candidateMode=false}={}){
   let rulesCalls=0,profilesCalls=0,profileIdCalls=0;
@@ -72,7 +73,7 @@ function makeRuntime({profile=null,rules={xpPerLevel:10},candidateMode=false}={}
   ctx.window=ctx;ctx.globalThis=ctx;
   vm.createContext(ctx);
   vm.runInContext(coreSource,ctx,{filename:corePath});
-  const source=candidateMode?core044.replace(currentXpInto,candidate):core044;
+  const source=candidateMode?core044:core044.replace(currentXpInto,legacy);
   vm.runInContext(source,ctx,{filename:candidateMode?'candidate-core044':'legacy-core044'});
   return {
     call:xp=>ctx.dungeonRpgXpIntoLevel(xp),
@@ -145,5 +146,5 @@ console.log(JSON.stringify({
     'dungeonHandleLevelUp071',
     'persistence/UI'
   ],
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

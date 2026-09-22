@@ -25,7 +25,28 @@ assert.equal(indexBuf.length,8174314,'runtime index size drifted during inert-co
 assert.equal(gitBlob(indexBuf),'8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91','runtime index blob drifted during inert-consumer preaudit');
 
 assert.match(consumer,/UI-only layer over the existing zone\/template content APIs/);
-assert.match(consumer,/function esc\(v\)\{return String\(v\?\?""\)\.replace\(\/\[&<>\\"'\]\/g,/,
+function extractNamedFunction(src,name){
+  const marker='function '+name+'(';
+  const pos=src.indexOf(marker);
+  assert.ok(pos>=0,'missing function '+name);
+  const brace=src.indexOf('{',pos);
+  let depth=0,quote=null,escape=false;
+  for(let i=brace;i<src.length;i++){
+    const ch=src[i];
+    if(quote){
+      if(escape){escape=false;continue}
+      if(ch==='\\\\'){escape=true;continue}
+      if(ch===quote)quote=null;
+      continue;
+    }
+    if(ch==='"'||ch==="'"||ch===String.fromCharCode(96)){quote=ch;continue}
+    if(ch==='{')depth++;
+    else if(ch==='}'&&--depth===0)return src.slice(pos,i+1);
+  }
+  assert.fail('unterminated function '+name);
+}
+const localEscSource=extractNamedFunction(consumer,'esc');
+assert.ok(localEscSource.includes('String(v??"").replace(/[&<>"\']/g'),
   'selected consumer local escape helper drifted');
 
 const escCalls=(consumer.match(/\besc\(/g)||[]).length;
@@ -38,10 +59,7 @@ assert.match(consumer,/function renderItems\(surface\).*esc\(names\.get\(String\
 assert.doesNotMatch(consumer,/localStorage|indexedDB|fetch\(|XMLHttpRequest|WebSocket|Supabase|setInterval/,
   'selected helper surface must stay outside storage/network/permanent timers');
 
-const m=consumer.match(/function esc\(v\)\{([^}]+\}\[c\]\)\)\}\n)/);
-assert.ok(m,'unable to extract local esc helper');
-const fnSource='function esc(v){'+m[1];
-const localCtx={};vm.createContext(localCtx);vm.runInContext(fnSource+';globalThis.__esc=esc;',localCtx);
+const localCtx={};vm.createContext(localCtx);vm.runInContext(localEscSource+';globalThis.__esc=esc;',localCtx);
 const coreCtx={};coreCtx.window=coreCtx;coreCtx.globalThis=coreCtx;vm.createContext(coreCtx);vm.runInContext(core,coreCtx,{filename:corePath});
 
 const cases=[

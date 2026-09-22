@@ -80,12 +80,37 @@ Le RED doit être observé et documenté avant le raccord runtime.
 - casser le cache PWA si un nouveau fichier devient production-reachable sans
   alignement du cache.
 
+### État technique avant validation finale
+
+Le TDD du premier raccord est maintenant réalisé :
+
+- RED observé sur la nouvelle sentinelle du raccord avant toute modification runtime ;
+- raccord runtime limité à `d100ThresholdFromChance` ;
+- `assets/gensrpg/core/dice-v1.js` chargé explicitement avant consommation ;
+- normalisation historique `Number(chance) || 1` + clamp `1..100` conservée à la frontière ;
+- formule locale `101 - chance` retirée du helper ;
+- délégation unique à `GensDiceV1.thresholdFromChance(c)` ;
+- 15 consommateurs inchangés ;
+- RNG / génération D100-D6 inchangés ;
+- Tactical inchangé ;
+- `dungeonUniversalTest` toujours différé ;
+- Core Dice ajouté au graphe runtime et au cache PWA ;
+- cartographies/sentinelles historiques réalignées au nouvel index
+  `8 174 637` octets / blob
+  `5b8e790fefe7970a250fd9485ee80549511737e6`.
+
+Le HEAD technique avant validation globale est :
+`e56cef28` — `test: realign historical guards after Core Dice source load`.
+
+Les workflows temporaires de diagnostic/alignement ont été supprimés.
+
 ### Prochaine action
 
-1. poser la sentinelle du raccord et la brancher à Architecture ;
-2. obtenir le RED attendu sans changement runtime ;
-3. seulement ensuite appliquer le micro-diff exact de chargement + délégation ;
-4. valider les trois batteries avant tout checkpoint GREEN.
+1. valider Architecture + navigateur complet sur le SHA documentaire courant ;
+2. valider Firefox ;
+3. valider Tactical Dock ;
+4. inspecter le diff final contre `87a28139...` ;
+5. seulement si tout est GREEN, documenter la clôture puis revalider le SHA documentaire final exact avant checkpoint.
 
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — pré-audit premier raccord — 2026-09-22
 

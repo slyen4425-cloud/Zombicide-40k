@@ -94,18 +94,8 @@ jobs:
               "Phase 3 diagnostic count")
 
           p="docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json"
-          old='''    "assets/gensrpg/core/asset-resolver-v1.js": {
-              "owner": "GenSrpG Core Assets",
-              "domain": "core",
-              "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
-            },
-            "assets/gensrpg/core/runtime-bootstrap-v1.js": {'''
-          new='''    "assets/gensrpg/core/asset-resolver-v1.js": {
-              "owner": "GenSrpG Core Assets",
-              "domain": "core",
-              "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
-            },
-            "assets/gensrpg/core/dice-v1.js": {
+          old='    "assets/gensrpg/core/runtime-bootstrap-v1.js": {'
+          new='''    "assets/gensrpg/core/dice-v1.js": {
               "owner": "GenSrpG Core Dice",
               "domain": "core",
               "role": "canonical pure D100 threshold primitive; first production raccord through the historical d100ThresholdFromChance boundary adapter"

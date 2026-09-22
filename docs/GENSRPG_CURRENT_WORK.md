@@ -65,6 +65,28 @@ La sentinelle doit prouver :
 Document :
 `docs/GENSRPG_PHASE4_PROGRESSION_XP_FIRST_RACCORD.md`.
 
+### TDD RED observé
+
+SHA :
+`8a5a674b6574e104300c6f4346d6a3f6833ea88c`.
+
+- Architecture `35710641838` — **FAILURE attendu** uniquement à la nouvelle étape
+  `Raccorder le premier calcul XP niveau au Core Progression` ;
+- Firefox `35710641580` — SUCCESS ;
+- Tactical Dock `35710641684` — SUCCESS.
+
+Les sentinelles Progression antérieures passent avant ce RED.
+Aucun runtime n'a été modifié.
+
+Cause attendue :
+- Core Progression encore inert dans la composition source ;
+- branche profil de `dungeonRpgLevelFromXp` encore calculée localement.
+
+### Prochaine action immédiate
+
+Appliquer le micro-raccord au vrai propriétaire, sans toucher aux seams différés.
+La règle 26 s'applique avant toute modification du gros `index.html`.
+
 ### Source exacte
 
 `index.html` :

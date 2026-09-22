@@ -1,3 +1,86 @@
+## Chantier courant prioritaire — Phase 4 / audit de sortie vers Phase 5 — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-exit-audit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-exit-audit-2026-09-22`.
+- Base exacte :
+  `605d90b48b0dedf3ba29e22a7527df7f345c347b`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État Phase 4 validé avant audit de sortie
+
+Le dernier micro-lot du point 7 est GREEN :
+- Text Utils U1 raccordé au vrai Room Creator ;
+- SHA final GREEN : `605d90b48b0dedf3ba29e22a7527df7f345c347b` ;
+- Architecture + navigateur : `35767328553` — SUCCESS ;
+- Firefox : `35767328547` — SUCCESS ;
+- Tactical Dock : `35767328648` — SUCCESS.
+
+Le pré-audit Event Bus/utilitaires a conclu qu'aucun Event Bus générique ne devait
+être introduit ; U1 `escapeHtml()` était le micro-lot commun sûr retenu.
+
+### Mission unique
+
+Auditer la sortie de Phase 4 **sans modification runtime**.
+
+Vérifier, pour les sept domaines de la roadmap :
+1. resolver d'assets ;
+2. stockage/migrations ;
+3. stats ;
+4. inventory/equipment/sets ;
+5. dés ;
+6. progression/XP ;
+7. event bus/utilitaires communs ;
+
+que :
+- le propriétaire Core/externe réellement actif est identifié ;
+- le vrai raccord est couvert par sentinelle quand un raccord a été retenu ;
+- il n'existe pas de second moteur commun concurrent actif ;
+- les éventuels fallbacks/bridges restants sont documentés comme frontières
+  explicites et non comme second système ;
+- la composition Pages/Preview et le graphe runtime reflètent les propriétaires
+  actifs ;
+- le critère de sortie Phase 4 de la roadmap peut être déclaré satisfait ou,
+  sinon, les blockers exacts sont listés.
+
+### Interdictions
+
+Audit uniquement :
+- aucun gameplay ;
+- aucune extraction supplémentaire ;
+- aucun déplacement de code ;
+- aucun nouveau service ;
+- aucun Event Bus ;
+- aucun wrapper/monkey-patch ;
+- aucun MutationObserver ;
+- aucun timer/retry ;
+- aucun changement de `index.html` ;
+- aucun merge sur `main`.
+
+Si l'audit révèle un vrai reliquat de moteur commun dans `index.html`, le
+documenter et ouvrir ensuite un lot correctif dédié ; ne pas le corriger dans
+cet audit.
+
+### Prochaine action
+
+1. construire une sentinelle de sortie Phase 4 basée sur les vrais propriétaires ;
+2. vérifier les sept domaines et la composition active ;
+3. exploiter les cartographies/tests existants plutôt que réimplémenter le runtime ;
+4. si l'inspection du gros `index.html` exige son contenu intégral et que GitHub
+   le tronque, appliquer la règle 26 de la charte au lieu de répéter l'API ;
+5. produire le verdict documentaire de sortie ;
+6. triple CI ;
+7. checkpoint GREEN de l'audit ;
+8. seulement si le critère de sortie est satisfait, ouvrir le premier pré-audit Phase 5.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Text Utils — raccord Room Creator — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

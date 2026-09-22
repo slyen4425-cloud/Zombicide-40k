@@ -89,14 +89,14 @@ assert.equal(
   'one or more of the fifteen d100ThresholdFromChance consumers changed'
 );
 
-assert.equal((index.match(/Math\.random\(\)/g)||[]).length,229,
-  'global RNG call inventory changed during threshold-only raccord');
+assert.equal((index.match(/Math\.random\(\)/g)||[]).length,228,
+  'global direct RNG inventory drifted after the later d10048 Core raccord');
 assert.equal((index.match(/Math\.floor\(Math\.random\(\)\*100\)\+1/g)||[]).length,16,
   'D100 generation pattern Math.floor(Math.random()*100)+1 changed');
-assert.equal((index.match(/1\+Math\.floor\(Math\.random\(\)\*100\)/g)||[]).length,6,
-  'D100 generation pattern 1+Math.floor(Math.random()*100) changed');
-assert.equal((index.match(/Math\.random\(\)\*100/g)||[]).length,60,
-  'D100 RNG multiplication inventory changed');
+assert.equal((index.match(/1\+Math\.floor\(Math\.random\(\)\*100\)/g)||[]).length,5,
+  'direct D100 1+Math.floor(Math.random()*100) inventory drifted after d10048 raccord');
+assert.equal((index.match(/Math\.random\(\)\*100/g)||[]).length,59,
+  'direct D100 RNG multiplication inventory drifted after d10048 raccord');
 assert.equal((index.match(/Math\.random\(\)\*6/g)||[]).length,15,
   'D6 RNG inventory changed');
 

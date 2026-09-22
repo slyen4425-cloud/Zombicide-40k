@@ -5,6 +5,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
+const textUtilsSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','text-utils-v1.js'),'utf8');
 const roomSrc=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-100.js'),'utf8');
 
 function makeStorage(initial={}){
@@ -21,6 +22,7 @@ function load(storage){
   ctx.window=ctx;ctx.globalThis=ctx;
   vm.createContext(ctx);
   vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
+  vm.runInContext(textUtilsSrc,ctx,{filename:'text-utils-v1.js'});
   vm.runInContext(roomSrc,ctx,{filename:'dungeon-room-creator-100.js'});
   return ctx.DungeonRoomCreator100;
 }

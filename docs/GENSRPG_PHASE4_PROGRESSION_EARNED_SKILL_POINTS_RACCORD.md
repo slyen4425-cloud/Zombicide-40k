@@ -66,3 +66,29 @@ Le diff runtime est strictement limité au seam pré-audité.
 Le Core Progression reste inchangé.
 
 Prochaine étape : CI complète et réalignement éventuel des seuls fingerprints dépendants.
+
+
+## Clôture technique du raccord
+
+Le raccord runtime est terminé techniquement sur
+`222e1242c55ccb5ab61d78ef71a69ae48939607b`.
+
+Validation :
+- Architecture + navigateur complet `35746418913` — SUCCESS ;
+- Firefox `35746418989` — SUCCESS ;
+- Tactical Dock `35746418951` — SUCCESS.
+
+Les sentinelles ont été réalignées sur le blob runtime
+`8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91`.
+
+Les deux ajustements de caractérisation importants ont été :
+- la politique de profil configuré appartient désormais au Core, pas au seam runtime ;
+- les fallbacks Dungeon sont testés via le vrai propriétaire
+  `normalizeDungeonRpgRules`, pas via des règles brutes artificielles.
+
+Aucune optimisation des doubles lectures profil/règles n'a été introduite :
+le lot conserve volontairement les lectures caractérisées du propriétaire historique.
+
+La clôture documentaire doit encore repasser la triple CI sur son propre SHA exact.
+Après succès, créer :
+`checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.

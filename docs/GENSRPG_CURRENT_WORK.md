@@ -1,3 +1,92 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — raccord points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Base exacte :
+  `14d88f69b404650088cd19436819caae4138c564`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Le seam runtime `dungeonRpgEarnedSkillPoints` délègue désormais uniquement son calcul
+final à `GensProgressionV1.earnedSkillPointsFromLevel`.
+
+Le raccord conserve :
+- `activeProg()` comme frontière profil ;
+- `loadDungeonRpgRules()` uniquement sur le chemin sans profil ;
+- `dungeonRpgLevelFromXp(xp)` comme autorité unique du niveau ;
+- les lectures propriétaires caractérisées ;
+- `dungeonSyncProgressionForState` inchangé ;
+- points dépensés, bonus, stat points, distribution XP et level-up hors périmètre.
+
+### TDD RED
+
+SHA :
+`a368c7bfd4b8e50f505bcb20c99c63b5e7a54fea`.
+
+Architecture :
+`35742520031` — FAILURE attendue uniquement à l'étape raccord.
+
+Firefox :
+`35742519956` — SUCCESS.
+
+Tactical Dock :
+`35742520126` — SUCCESS.
+
+Cause RED :
+absence de délégation vers
+`GensProgressionV1.earnedSkillPointsFromLevel`.
+
+### Patch runtime exact
+
+Workflow one-shot :
+`99ba3ac9223ba344854b7f3fd4e3fff2659c3f70`.
+
+Commit runtime :
+`ca7311a96496c85ba58e243ed24ddccb8a07a9b8`.
+
+Le workflow one-shot s'est supprimé dans le même commit.
+
+`index.html` :
+- avant : 8 174 346 octets, blob `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc` ;
+- après : 8 174 314 octets, blob `8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91`.
+
+Core Progression inchangé :
+`3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+Après le commit runtime, les réalignements ont été limités aux tests, fingerprints,
+manifests Phase 2 et documentation. Aucun autre runtime/Core n'a changé.
+
+### Validation technique avant documentation finale
+
+SHA :
+`222e1242c55ccb5ab61d78ef71a69ae48939607b`.
+
+- Architecture + navigateur complet : `35746418913` — SUCCESS ;
+- Firefox : `35746418989` — SUCCESS ;
+- Tactical Dock : `35746418951` — SUCCESS.
+
+Les étapes Progression 143 à 147 sont toutes GREEN.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant création du checkpoint GREEN,
+ce SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun merge sur `main`.
+
 ## RACCORDEMENT TECHNIQUE EN COURS — Phase 4 Core Progression — points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

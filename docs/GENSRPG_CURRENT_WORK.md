@@ -1,3 +1,112 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Core Text Utility — escapeHtml — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-text-utils-u1-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Décision d'architecture
+
+Le pré-audit Event Bus / utilitaires d'Agent 1 est conservé :
+- aucun Event Bus Core générique n'est créé ;
+- U1 est le premier micro-lot sûr ;
+- U1 reste un contrat pur et inert.
+
+### Résultat
+
+Nouveau service :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+API publique :
+`GensTextUtilsV1.escapeHtml(value)`.
+
+Blob du service :
+`d8dd5091963e180a18dfa5274aa4030cbaadaa90`.
+
+Le contrat préserve :
+- null / undefined -> chaîne vide ;
+- conversion `String(...)` ;
+- échappement `& < > " '` ;
+- autres caractères inchangés ;
+- double échappement historique.
+
+Le service est :
+- sans DOM ;
+- sans stockage ;
+- sans listener / event dispatch ;
+- sans timer/retry ;
+- sans RNG ;
+- sans navigation ;
+- sans gameplay ;
+- hors graphe de production.
+
+Aucun consommateur n'est raccordé dans ce lot.
+
+### TDD RED
+
+SHA :
+`228a01f214107ffb3768da1ab3e1417d0b12bc75`.
+
+- Architecture : `35759386423` — FAILURE attendue uniquement sur U1 ;
+- Firefox : `35759386339` — SUCCESS ;
+- Tactical Dock : `35759386354` — SUCCESS.
+
+Cause RED :
+`RED until Core Text Utility v1 exists`.
+
+### Implémentation minimale
+
+Commit :
+`76790f0cdb850817e502e9152590ccb8889c1805`.
+
+Une seule création fonctionnelle :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+La cartographie Phase 2 a ensuite été réalignée uniquement pour classer U1 comme
+16e service Phase 4 physique, **inert et non production-reachable**.
+
+Commit de réalignement :
+`c6d3bb8d8ea4ed38c0209cdf6eed9d6a5251f72c`.
+
+### Validation technique avant documentation finale
+
+SHA :
+`c6d3bb8d8ea4ed38c0209cdf6eed9d6a5251f72c`.
+
+- Architecture + navigateur complet : `35759686674` — SUCCESS ;
+- Firefox : `35759686682` — SUCCESS ;
+- Tactical Dock : `35759686698` — SUCCESS.
+
+Le graphe production reste inchangé ; U1 reste hors chargement runtime.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant création du checkpoint GREEN,
+ce SHA documentaire final doit lui-même repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite autorisée après GREEN
+
+Ouvrir un lot séparé de pré-audit/raccord pour **un seul consommateur UI à faible risque**.
+
+Interdictions maintenues :
+- ne pas raccorder plusieurs consommateurs dans un même lot ;
+- ne pas créer d'Event Bus ;
+- ne pas toucher aux règles gameplay ;
+- ne pas fusionner dans `main`.
+
 ## Chantier courant prioritaire — Phase 4 / U1 Core Text Utility — contrat pur escapeHtml — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

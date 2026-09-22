@@ -1,3 +1,57 @@
+## Chantier courant prioritaire — Phase 5 / startConfiguredGame — retrait wrapper captureFix131 — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-capture131-retirement-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-capture131-retirement-2026-09-22`.
+- Base exacte :
+  `fbab85b75a1eb304eb4b081f36549b66f45eec58`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-authority-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Retirer uniquement l'affectation `window.startConfiguredGame` purement transitive
+du bloc `captureFix131`.
+
+Le reste du bloc `captureFix131` doit rester inchangé.
+
+### Base de preuve
+
+Le pré-audit dédié a confirmé :
+- 6 affectations actuelles ;
+- `captureFix131` est un wrapper strictement transitif sans effet de bord ;
+- `captureFix135`, `captureFix138`, `captureFix139`,
+  `gensDungeonCore01Js` et `dungeonCore200Rebuild` portent de vraies règles ;
+- le dernier propriétaire doit rester `dungeonCore200Rebuild`.
+
+### TDD obligatoire
+
+RED attendu avant modification runtime :
+- `captureFix131` ne doit plus affecter `startConfiguredGame` ;
+- chaîne cible : 5 affectations ;
+- dernier propriétaire inchangé ;
+- les 5 autres propriétaires restent présents ;
+- routes Survie/Dungeon/Capture/PvP couvertes par les sentinelles navigateur existantes.
+
+Puis seulement :
+retirer cette affectation no-op dans `index.html`.
+
+### Interdictions
+
+- ne toucher à aucun autre wrapper ;
+- ne modifier aucune logique Capture ;
+- ne modifier aucune logique Dungeon ;
+- ne connecter aucun nouveau Shell runtime ;
+- aucun nouveau global ;
+- aucun observer/timer/retry ;
+- aucun changement Tactical ;
+- aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — pré-audit d'autorité — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

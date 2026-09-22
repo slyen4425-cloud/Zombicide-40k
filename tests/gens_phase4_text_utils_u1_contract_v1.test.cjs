@@ -19,7 +19,7 @@ for(const forbidden of [
   /location\.|history\.|openGensFamily|startConfiguredGame/,
   /damage|armor|initiative|skillPoints|xpPerLevel|combat/i
 ]){
-  assert.doesNotMatch(source,forbidden,'Text Utility must stay pure/inert: '+forbidden);
+  assert.doesNotMatch(source,forbidden,'Text Utility must stay pure: '+forbidden);
 }
 
 assert.match(source,/ROOT\.GensTextUtilsV1\s*=\s*Object\.freeze\(/,
@@ -60,19 +60,10 @@ for(const [input,expected] of cases){
   assert.equal(api.escapeHtml(input),expected,'escapeHtml parity failed for '+String(input));
 }
 
-// U1 must remain inert: no production composition raccord in this lot.
-for(const relFile of ['index.html','preview.html','.github/workflows/main.yml','service-worker.js']){
-  const p=path.join(root,relFile);
-  if(!fs.existsSync(p))continue;
-  const text=fs.readFileSync(p,'utf8');
-  assert.ok(!text.includes('assets/gensrpg/core/text-utils-v1.js'),
-    relFile+' must not load the inert U1 contract');
-}
-
 console.log(JSON.stringify({
   scenario:'Phase 4 U1 pure Core Text Utility contract',
   api:'GensTextUtilsV1.escapeHtml',
   cases:cases.length,
-  inert:true,
-  runtimeRaccord:false
+  pure:true,
+  compositionContract:'covered by dedicated raccord sentinels'
 },null,2));

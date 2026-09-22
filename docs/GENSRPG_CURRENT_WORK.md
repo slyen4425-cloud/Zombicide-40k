@@ -1,3 +1,100 @@
+## JALON GREEN INTERMÉDIAIRE — Phase 4 Core Progression / XP — pré-audit structurel — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-preaudit-2026-09-22`.
+- Base du chantier :
+  `0ce2451da078cceb90c0431a3735932dbd41f945`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-preaudit-2026-09-22`.
+- Checkpoint intermédiaire GREEN :
+  `checkpoint/gensrpg-phase4-progression-preaudit-structural-green-2026-09-22`.
+- SHA GREEN intermédiaire :
+  `d03f5a69f89599cce07fb4bf741e6bf0f4a5ddd4`.
+- Dernier checkpoint runtime GREEN :
+  `checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat structurel prouvé
+
+Aucun runtime n'a été modifié.
+
+La sentinelle
+`tests/gens_phase4_progression_preaudit_v1.test.cjs`
+prouve :
+
+1. `assets/gensrpg/dungeon/progression-runtime-v1.js` reste hors graphe de production ;
+2. ce fichier est un ancien wrapper de `changeXP` et ne doit pas être réactivé ;
+3. Dungeon possède déjà des autorités natives distinctes pour calcul/sync,
+   mutation manuelle, level-up et récompenses ;
+4. les règles Capture restent métier Capture et configurables par profil ;
+5. aucun `assets/gensrpg/core/progression-v1.js` n'a été introduit prématurément ;
+6. aucune règle Dungeon n'est promue en règle commune sans comparaison contractuelle.
+
+Document :
+`docs/GENSRPG_PHASE4_PROGRESSION_PREAUDIT.md`.
+
+### Validation du jalon structurel
+
+Même SHA exact :
+`d03f5a69f89599cce07fb4bf741e6bf0f4a5ddd4`.
+
+- Architecture + navigateur complet :
+  `35696513638` — SUCCESS ;
+- Firefox :
+  `35696513649` — SUCCESS ;
+- Tactical Dock :
+  `35696513499` — SUCCESS.
+
+### Frontière Tactical confirmée
+
+L'intégration Tactical actuelle ne calcule pas la progression Dungeon.
+Elle délègue les récompenses vers les autorités Dungeon existantes :
+
+- `awardDungeonDefeatXp` ;
+- `dungeonRecordCombatReward` ;
+- `rollEnemyLoot`.
+
+La victoire/popup reste un hotspot Dungeon/Tactical et ne doit pas être déplacée
+dans Core Progression pendant la Phase 4.
+
+### Ce qui reste à caractériser avant tout contrat Core
+
+- définition et callsites exacts de `dungeonRpgLevelFromXp` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- `changeXP` ;
+- `awardDungeonDefeatXp` et partage d'XP ;
+- `dungeonHandleLevelUp071` et effets/UI ;
+- progression Survival ;
+- application runtime des règles Capture.
+
+Aucun futur seam n'est sélectionné avant cette matrice.
+
+### Source exacte requise — règle 26
+
+Le fichier utilisateur `work_10.zip` est désormais obsolète pour cette analyse.
+
+Le `index.html` exact requis est celui du dernier runtime GREEN :
+
+- SHA :
+  `0ce2451da078cceb90c0431a3735932dbd41f945` ;
+- blob Git :
+  `2d7677950f04e9a3290ff0062e157a126123891d` ;
+- taille :
+  `8 174 648` octets.
+
+Avant l'inspection détaillée inline, demander ce fichier à l'utilisateur depuis
+le permalink SHA, le vérifier, puis continuer le pré-audit sans modifier le runtime.
+
+### Prochaine action
+
+Obtenir et vérifier l'index exact ci-dessus, puis produire la matrice finale
+calcul pur / mutation / persistance / UI / récompenses et sélectionner au plus
+un futur micro-lot TDD.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

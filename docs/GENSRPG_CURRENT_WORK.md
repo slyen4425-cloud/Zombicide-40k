@@ -1,3 +1,65 @@
+## Chantier courant prioritaire — Phase 4 / U1 — raccord Room Content UI -> Text Utils — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-room-content-ui-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-room-content-ui-raccord-2026-09-22`.
+- Base exacte :
+  `e2334324130f4b6fe2a1f795c236f12681ff96b1`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-room-content-ui-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Raccorder uniquement Room Content UI à
+`GensTextUtilsV1.escapeHtml`.
+
+Fichiers runtime autorisés :
+1. `assets/dungeon/dungeon-room-content-ui-167831.js` ;
+2. `assets/dungeon/dungeon-room-creator-feedback-167821.js` pour l'ordre de chargement ;
+3. `service-worker.js` uniquement pour précacher la nouvelle dépendance runtime.
+
+Aucun `index.html`.
+
+### Contrat de raccord
+
+- charger `assets/gensrpg/core/text-utils-v1.js` avant Room Content UI ;
+- ne pas ajouter de retry ou fallback permanent ;
+- retirer l'implémentation locale `function esc(...)` ;
+- utiliser le Core pour les quatre callsites existants ;
+- conserver le rendu HTML à l'identique ;
+- précacher Text Utils sous l'URL exacte utilisée par le loader ;
+- ne raccorder aucun autre consommateur.
+
+### TDD RED
+
+Sentinelle :
+`tests/gens_phase4_text_utils_room_content_ui_raccord_v1.test.cjs`.
+
+RED attendu :
+Room Content UI utilise encore son helper local et son loader ne charge pas Text Utils.
+
+### Hors périmètre
+
+World Builder, Stats UI, Tactical, Core Text Utils, index, gameplay, Storage,
+Event Bus et autres utilitaires restent inchangés.
+
+### Prochaine action
+
+1. observer RED ciblé ;
+2. appliquer le raccord minimal ;
+3. adapter uniquement les tests de harness qui doivent fournir la nouvelle dépendance ;
+4. triple CI ;
+5. clôture documentaire ;
+6. triple CI finale ;
+7. checkpoint GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 — pré-audit premier consommateur Text Utils — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

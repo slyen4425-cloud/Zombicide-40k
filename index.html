@@ -1647,6 +1647,7 @@ body:not(.gensDungeonTheme) #dungeonAdvancedEditorBtn{display:none!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="assets/gensrpg/core/storage-v1.js"></script>
+<script src="assets/gensrpg/core/dice-v1.js"></script>
 
 <link id="gensManifestLink" rel="manifest" href="manifest.webmanifest?v=1738">
 <meta name="z40k-app-version" content="16.168-DUNGEON-HERO-ITEM-ASSETS">
@@ -16446,7 +16447,7 @@ function setDieFace(el,value){
 
 function d100ThresholdFromChance(chance){
   const c=Math.max(1,Math.min(100,Number(chance)||1));
-  return Math.max(1,Math.min(100,101-c));
+  return GensDiceV1.thresholdFromChance(c);
 }
 function animateRpgDice(containerId,count,finalRolls,threshold,sides,onDone){
   const box=document.getElementById(containerId);if(!box)return;

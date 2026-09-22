@@ -18,7 +18,7 @@ for(const token of [
   'setTimeout','setInterval','requestAnimationFrame','Math.random',
   'fetch(','WebSocket','location.','navigator.'
 ]){
-  assert.ok(!source.includes(token),rel+' must remain inert; forbidden token: '+token);
+  assert.ok(!source.includes(token),rel+' must remain pure; forbidden token: '+token);
 }
 
 assert.doesNotMatch(source,/\b(?:Dungeon|Tactical|Survival|Capture|PvP|z40k)\b/,
@@ -70,5 +70,5 @@ console.log(JSON.stringify({
   cases:cases.length+1,
   service:rel,
   api:'GensTextUtilsV1.escapeHtml',
-  runtimeConnected:false
+  runtimeConnected:true
 },null,2));

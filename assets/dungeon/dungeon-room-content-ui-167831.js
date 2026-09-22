@@ -10,7 +10,8 @@ const VERSION="1.1.0",APP_VERSION="16.78.32";
 const RANDOM_ENEMY_ID="__random_enemy__",RANDOM_ITEM_ID="__random_item__";
 const drafts={zone:[],template:[]};
 let installed=false;
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+const escapeHtml=ROOT.GensTextUtilsV1?.escapeHtml;
+if(typeof escapeHtml!=="function")throw new Error("GenSrpG Text Utils v1 required");
 function visual(){return ROOT.DungeonRoomVisualConfig167826||ROOT.DungeonRoomVisualConfig167825||null}
 function template(){return ROOT.DungeonRoomTemplateContent167828||null}
 function trapTypes(){
@@ -35,7 +36,7 @@ function itemsText(items){return (Array.isArray(items)?items:[]).map(x=>String(x
 function prefix(surface){return surface==="zone"?"drv167826":"drt"}
 function grid(surface){return DOC?.querySelector?.(surface==="zone"?"#drv167826Modal .drv167826Grid":"#drt167828Modal .drtGrid")||null}
 function currentValues(surface,obj){const p=prefix(surface),get=id=>DOC?.getElementById(p+id);if(obj==="enemy"||obj==="boss")return {enemyId:String(get("Enemy")?.value||"dng_skeleton")};if(obj==="chest")return {rarity:String(get("Rarity")?.value||"common"),gold:Number(get("Gold")?.value||0),items:String(get("Items")?.value||"")};if(obj==="trap")return {refId:String(get("TrapRef")?.value||""),label:String(get("TrapLabel")?.value||"")};return {}}
-function optionHtml(items,value){return items.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(value)?'selected':'')+'>'+esc(x.label)+(x.rarity?' · '+esc(x.rarity):'')+'</option>').join('')}
+function optionHtml(items,value){return items.map(x=>'<option value="'+escapeHtml(x.id)+'" '+(String(x.id)===String(value)?'selected':'')+'>'+escapeHtml(x.label)+(x.rarity?' · '+escapeHtml(x.rarity):'')+'</option>').join('')}
 function enemyOptions(value){const list=[{id:RANDOM_ENEMY_ID,label:"🎲 Aléatoire — bibliothèque des monstres"},...enemyItems()];if(value&&!list.some(x=>x.id===value))list.push({id:value,label:value});return optionHtml(list,value)}
 function itemOptions(){return optionHtml([{id:"",label:"— choisir un objet —"},{id:RANDOM_ITEM_ID,label:"🎲 Aléatoire — bibliothèque des objets"},...lootItems()],"")}
 function simplify(surface,obj){
@@ -52,7 +53,7 @@ function simplify(surface,obj){
   }
   return false;
 }
-function renderItems(surface){const box=DOC?.getElementById("dui167831List"+surface),hidden=DOC?.getElementById(prefix(surface)+"Items");if(hidden)hidden.value=itemsText(drafts[surface]);if(!box)return;const names=new Map([[RANDOM_ITEM_ID,"🎲 Aléatoire — bibliothèque des objets"],...lootItems().map(x=>[x.id,x.label])]);box.innerHTML=drafts[surface].length?'<div style="font-size:12px;font-weight:800;margin:6px 0">Contenu du coffre</div>'+drafts[surface].map((it,i)=>'<div style="display:flex;gap:8px;align-items:center;margin:5px 0;padding:7px;border:1px solid #444;border-radius:8px"><span style="flex:1">'+esc(names.get(String(it.itemId))||it.itemId)+' × '+Math.max(1,Number(it.qty)||1)+'</span><button type="button" style="padding:5px 8px;font-size:12px" onclick="DungeonRoomContentUI167831.removeItem(\''+surface+'\','+i+')">✕</button></div>').join(''):'<div style="font-size:12px;color:#aaa">Aucun objet ajouté. Tu peux choisir un objet précis ou « Aléatoire ».</div>'}
+function renderItems(surface){const box=DOC?.getElementById("dui167831List"+surface),hidden=DOC?.getElementById(prefix(surface)+"Items");if(hidden)hidden.value=itemsText(drafts[surface]);if(!box)return;const names=new Map([[RANDOM_ITEM_ID,"🎲 Aléatoire — bibliothèque des objets"],...lootItems().map(x=>[x.id,x.label])]);box.innerHTML=drafts[surface].length?'<div style="font-size:12px;font-weight:800;margin:6px 0">Contenu du coffre</div>'+drafts[surface].map((it,i)=>'<div style="display:flex;gap:8px;align-items:center;margin:5px 0;padding:7px;border:1px solid #444;border-radius:8px"><span style="flex:1">'+escapeHtml(names.get(String(it.itemId))||it.itemId)+' × '+Math.max(1,Number(it.qty)||1)+'</span><button type="button" style="padding:5px 8px;font-size:12px" onclick="DungeonRoomContentUI167831.removeItem(\''+surface+'\','+i+')">✕</button></div>').join(''):'<div style="font-size:12px;color:#aaa">Aucun objet ajouté. Tu peux choisir un objet précis ou « Aléatoire ».</div>'}
 function addItem(surface){const sel=DOC?.getElementById("dui167831Item"+surface),qty=DOC?.getElementById("dui167831Qty"+surface),id=String(sel?.value||"");if(!id)return false;const n=Math.max(1,Math.min(99,Math.trunc(Number(qty?.value)||1))),old=drafts[surface].find(x=>String(x.itemId)===id);if(old)old.qty=Math.max(1,Number(old.qty)||1)+n;else drafts[surface].push({itemId:id,qty:n});if(sel)sel.value="";if(qty)qty.value="1";renderItems(surface);return true}
 function removeItem(surface,index){const i=Math.trunc(Number(index));if(i<0||i>=drafts[surface].length)return false;drafts[surface].splice(i,1);renderItems(surface);return true}
 function selectedItems(surface){const out=(drafts[surface]||[]).map(it=>({itemId:String(it?.itemId||""),qty:Math.max(1,Math.trunc(Number(it?.qty)||1))})).filter(it=>it.itemId),sel=DOC?.getElementById("dui167831Item"+surface),qty=DOC?.getElementById("dui167831Qty"+surface),id=String(sel?.value||"");if(id){const n=Math.max(1,Math.min(99,Math.trunc(Number(qty?.value)||1))),old=out.find(x=>x.itemId===id);if(old)old.qty+=n;else out.push({itemId:id,qty:n})}return out}

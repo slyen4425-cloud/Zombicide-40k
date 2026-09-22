@@ -20,44 +20,32 @@ const index=indexBuf.toString('utf8');
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
 assert.equal(gitBlob(coreBuf),'f0befe5feaf3bb2536b9b15267399988c949aab8','U1 Core Text Utils drifted');
-assert.equal(gitBlob(consumerBuf),'983a12bf6edad2eaec502bb08981e04b6c800be3','Room Content UI must remain unchanged during preaudit');
+assert.equal(gitBlob(consumerBuf),'5f0082699d71232a378a8163f4907bf5af3e72e8','Room Content UI raccord blob drifted');
 assert.equal(indexBuf.length,8174314,'runtime index size drifted during inert-consumer preaudit');
 assert.equal(gitBlob(indexBuf),'8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91','runtime index blob drifted during inert-consumer preaudit');
 
 assert.match(consumer,/UI-only layer over the existing zone\/template content APIs/);
-const localEscSource=consumer.split('\n').find(line=>line.startsWith('function esc(v){'));
-assert.ok(localEscSource,'selected consumer local escape helper missing');
-assert.ok(localEscSource.includes('String(v??')&&localEscSource.includes('.replace(/[&<>"\']/g'),
-  'selected consumer local escape helper drifted');
+assert.doesNotMatch(consumer,/function esc\(v\)/,
+  'local duplicate must stay removed after dedicated raccord');
+assert.match(consumer,/const escapeHtml=ROOT\.GensTextUtilsV1\?\.escapeHtml/,
+  'Room Content UI must keep the Core Text Utils dependency');
+const escCalls=(consumer.match(/\bescapeHtml\(/g)||[]).length;
+assert.equal(escCalls,4,'Room Content UI Core escape callsite inventory drifted');
 
-const escCalls=(consumer.match(/\besc\(/g)||[]).length;
-assert.equal(escCalls,5,'Room Content UI local esc inventory drifted: definition + four callsites expected');
-
-assert.match(consumer,/function optionHtml\(items,value\).*esc\(x\.id\).*esc\(x\.label\).*esc\(x\.rarity\)/s,
+assert.match(consumer,/function optionHtml\(items,value\).*escapeHtml\(x\.id\).*escapeHtml\(x\.label\).*escapeHtml\(x\.rarity\)/s,
   'option HTML must remain the main escaping consumer');
-assert.match(consumer,/function renderItems\(surface\).*esc\(names\.get\(String\(it\.itemId\)\)\|\|it\.itemId\)/s,
+assert.match(consumer,/function renderItems\(surface\).*escapeHtml\(names\.get\(String\(it\.itemId\)\)\|\|it\.itemId\)/s,
   'rendered item names must remain escaped');
 assert.doesNotMatch(consumer,/localStorage|indexedDB|fetch\(|XMLHttpRequest|WebSocket|Supabase|setInterval/,
   'selected helper surface must stay outside storage/network/permanent timers');
 
-const localCtx={};vm.createContext(localCtx);vm.runInContext(localEscSource+';globalThis.__esc=esc;',localCtx);
 const coreCtx={};coreCtx.window=coreCtx;coreCtx.globalThis=coreCtx;vm.createContext(coreCtx);vm.runInContext(core,coreCtx,{filename:corePath});
-
-const cases=[
-  null,undefined,'',0,42,true,false,'texte simple',
-  '&','<','>','"',"'",'&<>"\'',
-  '&amp;','A & B < C > D "Q" \'X\'','éèà 😀'
-];
-for(const value of cases){
-  assert.equal(localCtx.__esc(value),coreCtx.GensTextUtilsV1.escapeHtml(value),
-    'escape parity drift for '+String(value));
-}
 assert.equal(coreCtx.GensTextUtilsV1.escapeHtml('&amp;'),'&amp;amp;','historical double escaping must remain');
 
 assert.match(loader,/function loadIntuitiveUI\(\).*dungeon-room-content-ui-167831\.js\?v=167833/s,
   'Room Content UI dynamic loader path drifted');
-assert.doesNotMatch(loader,/text-utils-v1\.js|GensTextUtilsV1/,
-  'Text Utils must still be inert before a dedicated raccord lot');
+assert.match(loader,/assets\/gensrpg\/core\/text-utils-v1\.js/,
+  'dedicated raccord must load Text Utils before Room Content UI');
 assert.doesNotMatch(index,/text-utils-v1\.js|GensTextUtilsV1/,
   'Text Utils U1 must not be loaded by index during this preaudit');
 
@@ -67,13 +55,13 @@ const selection={
   localHelper:'esc',
   parityCases:cases.length,
   localEscOccurrences:escCalls,
-  runtimeLoadedTextUtils:false,
-  raccordRisk:'Text Utils is inert and loader does not yet guarantee dependency order',
+  runtimeLoadedTextUtils:true,
+  raccordRisk:'resolved by explicit loader dependency gate',
   futureRaccord:[
-    'load text-utils-v1.js explicitly before Room Content UI',
-    'replace only the Room Content UI local esc helper',
-    'remove the local duplicate after parity',
-    'leave World Builder, Stats UI and Tactical untouched'
+    'installed: Text Utils loads before Room Content UI',
+    'installed: Room Content UI uses only Core escapeHtml',
+    'installed: local duplicate removed',
+    'World Builder, Stats UI and Tactical remain untouched'
   ]
 };
 
@@ -83,5 +71,5 @@ console.log(JSON.stringify({
   coreBlob:gitBlob(coreBuf),
   consumerBlob:gitBlob(consumerBuf),
   selection,
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

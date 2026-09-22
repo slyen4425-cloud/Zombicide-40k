@@ -1,3 +1,108 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP -> niveau — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-contract-2026-09-22`.
+- Base exacte :
+  `4bf7a325da0a44cb4e73e0d92f17793b7a2aa003`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Créer le **contrat pur** du futur Core Progression pour le seul calcul
+XP -> niveau.
+
+Service cible :
+`assets/gensrpg/core/progression-xp-v1.js`.
+
+API minimale :
+`levelFromXp(xp, progressionConfig)`.
+
+Ce lot ne raccorde aucun consommateur runtime.
+
+### Contrat legacy à reproduire exactement
+
+Le propriétaire actif reste
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`.
+
+Le service pur doit reproduire, avec configuration explicite :
+
+- normalisation XP :
+  `Math.max(0, Number(xp) || 0)` ;
+- `maxLevel = Math.max(1, Number(maxLevel) || 100)` ;
+- mode par défaut `linear` ;
+- linéaire :
+  `Math.min(maxLevel, 1 + floor(xp / max(1, Number(xpPerLevel)||10)))` ;
+- custom :
+  parcours des niveaux 2..max ;
+- seuil custom :
+  `Math.max(0, Number(xpThresholds[level]) || ((level-1)*max(1,Number(xpPerLevel)||10)))` ;
+- arrêt au premier seuil non atteint.
+
+Le fallback « aucun profil progression » reste une responsabilité de frontière du
+futur raccord Core 0.44 et n'entre pas dans le service pur : le futur appelant
+devra construire la configuration explicite adéquate depuis les règles legacy.
+
+### TDD obligatoire
+
+Avant création du service :
+
+1. ajouter une sentinelle dédiée ;
+2. obtenir un RED exact « service Core Progression absent » ;
+3. ne créer le service qu'après ce RED.
+
+La sentinelle doit ensuite verrouiller :
+- courbe linéaire ;
+- courbe custom ;
+- seuil custom absent -> fallback linéaire historique ;
+- `maxLevel` ;
+- XP négative, chaîne numérique, vide, null, false, undefined, NaN, ±Infinity ;
+- valeurs `xpPerLevel` atypiques selon coercion historique ;
+- objet résultat : un entier niveau uniquement, sans état caché ;
+- pureté : aucun DOM, storage, timer, observer, listener, RNG, profil actif ;
+- module CommonJS testable + global Core explicite si chargé ;
+- service **hors graphe production** dans ce lot.
+
+### Périmètre strict
+
+Autorisé :
+- nouveau fichier pur `assets/gensrpg/core/progression-xp-v1.js` ;
+- test contractuel ;
+- cartographie du nouveau fichier comme Phase 4 inert / non-production ;
+- documentation et CI.
+
+Interdit :
+- modifier `index.html` ;
+- modifier `dungeonCore044HeroProgression` ;
+- charger le service en production ;
+- modifier `progression-runtime-v1.js` ;
+- modifier `dungeonRpgXpIntoLevel`, points gagnés, sync, XP manuel, récompenses,
+  victoire ou popup ;
+- modifier Stats / Inventory / Dice / Storage / Tactical ;
+- ajouter wrapper, observer, timer, retry, fallback global ou auto-install ;
+- modifier `main`.
+
+### Systèmes protégés
+
+- comportement utilisateur du checkpoint GREEN Progression pré-audit ;
+- deux retours manuels différés : détection ennemis à portée, confusion visuelle
+  Stats Aldren ;
+- Core Dice / Stats / Inventory / Storage ;
+- Tactical V114.11 ;
+- Survie / Dungeon / Capture / PvP ;
+- Save & Quit / reprise.
+
+### Prochaine action
+
+Créer la sentinelle contractuelle, la brancher à Architecture et observer le RED
+avant toute création du service.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

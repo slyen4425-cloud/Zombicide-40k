@@ -255,6 +255,27 @@ Interdit :
 Construire la sentinelle de pré-audit à partir de l'index GREEN exact reconstruit
 et des tests historiques existants, sans modification runtime.
 
+### Retour utilisateur du test manuel du checkpoint Dice GREEN
+
+Test manuel utilisateur du lien de preview du checkpoint
+`checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22` :
+
+- comportement global : **correct à ce stade** ;
+- anomalie 1 : un ennemi ne repère pas toujours immédiatement un héros pourtant
+  à portée ;
+- anomalie 2 : sur Aldren, une petite confusion visuelle reste visible autour des
+  statistiques.
+
+Décision de coordination :
+- ne pas mélanger ces deux points avec le pré-audit Progression/XP ;
+- la détection ennemie / ligne de vue après déplacement est une dette déjà
+  documentée dans les lots antérieurs et reste un futur lot gameplay dédié ;
+- la confusion visuelle de stats d'Aldren est enregistrée comme dette UI à
+  caractériser séparément, sans modifier Stats tant que le writer/renderer fautif
+  n'est pas prouvé ;
+- aucune rustine, aucun changement runtime ou Tactical n'est autorisé dans le lot
+  Progression courant pour ces deux symptômes.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

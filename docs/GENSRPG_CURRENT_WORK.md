@@ -1,3 +1,78 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — pré-audit d'autorité — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-authority-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-authority-preaudit-2026-09-22`.
+- Base exacte :
+  `f3cf5acdaa2014e02adf353a3fdbdcd940048315`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-shell-navigation-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-authority-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit d'autorité `startConfiguredGame` terminé sans modification runtime.
+
+Document :
+`docs/GENSRPG_PHASE5_STARTCONFIGUREDGAME_AUTHORITY_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_startconfiguredgame_authority_preaudit_v1.test.cjs`.
+
+Chaîne confirmée :
+`captureFix131 -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Premier micro-lot TDD sélectionné :
+**retirer uniquement l'affectation `startConfiguredGame` de `captureFix131`**.
+
+Motif :
+- wrapper strictement transitif ;
+- délégation inconditionnelle ;
+- aucun effet de bord ;
+- aucun test de contexte ;
+- aucune règle Capture/Dungeon ;
+- conserve déjà `this` et `arguments`.
+
+Protégés :
+- `captureFix135` ;
+- `captureFix138` ;
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- `dungeonCore200Rebuild` ;
+- `forceReload155` ;
+- Shell Phase 3 inert ;
+- Tactical ;
+- routes Survie/Dungeon/Capture/PvP.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`1d2c5d144735b5517a1e1e699fbf2676477ec0b3`.
+
+- Architecture + navigateur complet : `35773498900` — SUCCESS ;
+- Firefox : `35773498967` — SUCCESS ;
+- Tactical Dock : `35773498893` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-startconfiguredgame-authority-preaudit-green-2026-09-22` ;
+3. ouvrir un lot runtime séparé avec TDD RED ;
+4. le RED doit exiger 5 affectations et l'absence du wrapper `captureFix131` ;
+5. ne retirer que cette affectation si et seulement si le RED est exact.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / startConfiguredGame — pré-audit d'autorité — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

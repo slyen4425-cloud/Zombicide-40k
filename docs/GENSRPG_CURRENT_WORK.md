@@ -1,3 +1,73 @@
+## Chantier courant prioritaire — Phase 4 / U1 Text Utils — pré-audit raccord Room Creator — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-room-creator-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `f3c2d6235bb9db655ec55a4b785c1edb70ea450a`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-u1-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer **un seul consommateur UI faible risque** :
+`assets/dungeon/dungeon-room-creator-100.js`.
+
+Objectif :
+déterminer si son helper local `esc(v)` peut être remplacé par
+`GensTextUtilsV1.escapeHtml` sans changer le comportement ni les responsabilités.
+
+### État observé
+
+- Room Creator blob :
+  `19c0fff57bfe27648819a12ed657cebe4f41f6df`.
+- U1 blob :
+  `d8dd5091963e180a18dfa5274aa4030cbaadaa90`.
+- un seul `function esc(v)` local ;
+- 11 occurrences `esc(` au total, définition comprise ;
+- implémentation locale identique au contrat U1 ;
+- Room Creator est injecté par GitHub Pages et `preview.html` ;
+- U1 n'est encore chargé ni par Pages ni par preview ;
+- `index.html` source ne référence pas Room Creator directement.
+
+### Candidat de raccord futur
+
+Le futur lot de raccord, séparé, devra :
+1. charger `assets/gensrpg/core/text-utils-v1.js` avant Room Creator dans la composition Pages ;
+2. charger U1 avant Room Creator dans `preview.html` ;
+3. remplacer uniquement le helper local par une dépendance explicite vers `GensTextUtilsV1.escapeHtml` ;
+4. supprimer l'implémentation locale ;
+5. reclasser U1 de Phase 4 inert -> connected dans la cartographie runtime ;
+6. valider le vrai Dungeon Builder dans le navigateur.
+
+Forme candidate :
+
+`const TextUtils=ROOT.GensTextUtilsV1;if(!TextUtils)throw new Error("GensTextUtilsV1 must load before DungeonRoomCreator100");const esc=TextUtils.escapeHtml;`
+
+### Hors périmètre
+
+- aucun raccord dans ce pré-audit ;
+- aucun changement Room Creator ;
+- aucun changement Pages/preview ;
+- aucun changement `index.html` ;
+- aucun changement Storage ;
+- aucun World Builder ;
+- aucun Stats UI ;
+- aucun Tactical ;
+- aucun Event Bus ;
+- aucun comportement Builder/gameplay ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Créer la sentinelle de parité du vrai helper local contre U1, puis triple CI.
+Si GREEN, fermer ce pré-audit et ouvrir seulement ensuite le lot de raccord.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Core Text Utility — escapeHtml — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

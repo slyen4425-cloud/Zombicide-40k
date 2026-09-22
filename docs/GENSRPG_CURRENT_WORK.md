@@ -1,3 +1,89 @@
+## Chantier courant prioritaire — Phase 4 / U1 Text Utils — raccord Room Creator — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-u1-room-creator-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-u1-room-creator-raccord-2026-09-22`.
+- Base exacte :
+  `6be892c9ef7bd93702bab9b21a93eb31366adfd9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit validé
+
+Pré-audit Room Creator -> U1 validé sur le SHA exact :
+`6be892c9ef7bd93702bab9b21a93eb31366adfd9`.
+
+CI finale :
+- Architecture + navigateur complet : `35762222565` — SUCCESS ;
+- Firefox : `35762222430` — SUCCESS ;
+- Tactical Dock : `35762222429` — SUCCESS.
+
+### Mission unique
+
+Raccorder uniquement :
+`assets/dungeon/dungeon-room-creator-100.js`
+vers :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+Le raccord doit :
+1. charger U1 avant Room Creator dans GitHub Pages ;
+2. charger U1 avant Room Creator dans `preview.html` ;
+3. remplacer uniquement le helper local `esc(v)` par `GensTextUtilsV1.escapeHtml` ;
+4. supprimer l'implémentation locale ;
+5. ne créer aucun fallback local ;
+6. reclasser U1 de inert -> connected dans la cartographie runtime ;
+7. valider le vrai Dungeon Builder navigateur.
+
+### Propriétaires / fichiers autorisés
+
+- `assets/dungeon/dungeon-room-creator-100.js` ;
+- `.github/workflows/main.yml` uniquement pour l'ordre Pages si nécessaire ;
+- `preview.html` ;
+- fichiers de tests/cartographie/documentation strictement nécessaires au raccord ;
+- `service-worker.js` seulement si la composition réellement chargée l'exige et après preuve.
+
+`index.html` reste hors périmètre de ce lot.
+
+### Fonctions protégées / hors périmètre
+
+- aucun gameplay Dungeon ;
+- aucun Storage ;
+- aucun Stats / Dice / Progression / Inventory ;
+- aucun Tactical ;
+- aucun World Builder ;
+- aucun Event Bus ;
+- aucun MutationObserver ;
+- aucun timer/retry permanent ;
+- aucun wrapper ou monkey-patch ;
+- aucun second helper d'échappement ;
+- aucun merge sur `main`.
+
+### TDD
+
+Créer une sentinelle RED dédiée au vrai raccord :
+- U1 doit être chargé avant Room Creator dans Pages et preview ;
+- Room Creator ne doit plus définir son propre `function esc(v)` ;
+- Room Creator doit dépendre explicitement de `GensTextUtilsV1.escapeHtml` ;
+- le vrai Builder doit rester fonctionnel.
+
+### Prochaine action
+
+1. écrire la sentinelle RED ciblée ;
+2. observer le RED attendu ;
+3. appliquer le raccord minimal ;
+4. réaligner uniquement la cartographie/composition dépendante ;
+5. triple CI ;
+6. clôture documentaire ;
+7. triple CI finale ;
+8. checkpoint GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 Text Utils — pré-audit raccord Room Creator — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

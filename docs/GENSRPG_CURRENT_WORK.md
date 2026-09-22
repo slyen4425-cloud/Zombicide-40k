@@ -11,7 +11,7 @@ Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont his
 - Checkpoint de départ du lot :
   `checkpoint/gensrpg-start-phase4-progression-xp-preaudit-2026-09-22`.
 - Checkpoint GREEN cible :
-  `checkpoint/gensrpg-phase4-progression-xp-preaudit-green-2026-09-22`.
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-final-green-2026-09-22`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
 
@@ -125,6 +125,20 @@ Deux signaux distincts sont conservés, sans correction dans ce pré-audit :
 
 Ces deux points ne sont pas attribués au lot Progression actuel : aucun runtime
 n'y a été modifié.
+
+### Correction de gouvernance checkpoint
+
+Un checkpoint nommé
+`checkpoint/gensrpg-phase4-progression-xp-preaudit-green-2026-09-22`
+a été créé prématurément un commit avant le SHA documentaire final validé.
+
+Conformément à la règle de non-réutilisation des noms de checkpoint, il n'est pas
+déplacé ni réécrit. Le checkpoint définitif du lot sera donc :
+
+`checkpoint/gensrpg-phase4-progression-xp-preaudit-final-green-2026-09-22`.
+
+Il devra pointer exactement sur le SHA documentaire final qui passe les trois
+batteries.
 
 ### Validation finale obligatoire avant checkpoint
 

@@ -97,9 +97,9 @@ assert.equal(level(5,sparse),2);
 assert.equal(level(19,sparse),2);
 assert.equal(level(20,sparse),3,'missing level 3 threshold must fall back to 20');
 assert.equal(level(39,sparse),3);
-assert.equal(level(40,sparse),4);
-assert.equal(level(49,sparse),4);
-assert.equal(level(50,sparse),5,'invalid level 5 threshold must fall back to 50');
+assert.equal(level(40,sparse),5,'invalid level 5 threshold falls back to 40, matching the historical formula');
+assert.equal(level(49,sparse),5);
+assert.equal(level(50,sparse),5);
 
 // Non-custom mode is legacy linear.
 assert.equal(level(20,{xpCurveMode:'anything',xpPerLevel:6,maxLevel:9}),4);

@@ -223,3 +223,102 @@ création du checkpoint GREEN.
 
 Après GREEN, la seule suite autorisée côté Progression est un nouveau lot
 homogène de **contrat Core pur XP-into-level**, sans raccord runtime.
+
+
+## Validation technique avant clôture documentaire
+
+SHA technique :
+
+`7a8b691072828c0a84d8468ca274e28b772478de`.
+
+Résultats :
+- Architecture + navigateur complet :
+  run `35718095681` — SUCCESS, run attempt 2 ;
+- Firefox :
+  run `35718095818` — SUCCESS ;
+- Tactical Dock :
+  run `35718095640` — SUCCESS.
+
+La première tentative du job navigateur a échoué sur
+`Dungeon après Survie` par timeout Playwright : un overlay Tactical interceptait
+le clic vers Survie.
+
+Ce pré-audit n'ayant modifié aucun runtime, le diff exact depuis le checkpoint
+GREEN ne contenait que :
+- le présent document ;
+- la nouvelle sentinelle ;
+- `GENSRPG_CURRENT_WORK.md` ;
+- le raccord CI de cette sentinelle.
+
+Le job navigateur a donc été relancé sans aucun changement de code sur le même
+SHA. La seconde exécution a passé :
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- cache/retour/pièges authored ;
+- Save & Quit/reprise ;
+- PvP ;
+- Capture ;
+- non-interférence ;
+- murs ;
+- preview ;
+- assets ;
+- Equipment.
+
+Le premier timeout est donc classé comme flake navigateur non reproductible,
+pas comme une régression Progression.
+
+## Décision de sortie du pré-audit
+
+Le prochain seam Progression sélectionné est confirmé :
+
+`dungeonRpgXpIntoLevel`.
+
+Le lot suivant doit être un **contrat Core pur**, encore sans raccord runtime.
+
+API candidate à figer par TDD :
+
+`xpIntoLevel(xp, explicitProgressionConfig, fallbackXpPerLevel)`.
+
+Le Core ne devra jamais appeler `loadDungeonRpgRules()` directement.
+
+Restent différés :
+- `dungeonRpgEarnedSkillPoints` ;
+- synchronisation de state ;
+- XP manuel/combat/objectifs ;
+- level-up ;
+- points dépensés ;
+- persistance/UI.
+
+## Chantier parallèle Agent 1 vérifié
+
+Le pré-audit Event Bus / utilitaires communs réalisé par Agent 1 a été vérifié
+par le coordinateur et reste gelé sur :
+
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
+
+SHA :
+
+`5d713123585917d55a057373cba7d5003de02e7c`.
+
+Il ne doit pas être fusionné dans ce lot Progression.
+
+Sa conclusion de planification est conservée pour la suite de Phase 4 :
+- ne pas créer de Event Bus Core générique maintenant ;
+- futur premier micro-lot utilitaire recommandé :
+  contrat pur inert `escapeHtml()` ;
+- ce travail ne commence qu'après la clôture du domaine Progression selon la
+  roadmap.
+
+## Validation finale obligatoire
+
+La présente clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN de ce pré-audit, le même SHA documentaire
+final exact doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun runtime ne doit être modifié pendant cette dernière validation.

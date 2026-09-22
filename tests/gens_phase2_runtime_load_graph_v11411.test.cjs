@@ -21,6 +21,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
+  'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
@@ -92,6 +93,7 @@ const phase4ConnectedServices=[
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
+  'assets/gensrpg/core/progression-v1.js',
   'assets/gensrpg/core/stats-normalization-v1.js',
   'assets/gensrpg/core/stats-value-engine-v1.js',
   'assets/gensrpg/core/stats-hero-values-v1.js',
@@ -104,8 +106,7 @@ const phase4ConnectedServices=[
 ];
 const phase4InertServices=[
   'assets/gensrpg/core/stats-resistance-normalization-v1.js',
-  'assets/gensrpg/core/stats-armor-contract-v1.js',
-  'assets/gensrpg/core/progression-v1.js'
+  'assets/gensrpg/core/stats-armor-contract-v1.js'
 ];
 const phase4Set=new Set([...phase4ConnectedServices,...phase4InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
@@ -113,7 +114,7 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,95,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and fifteen Phase 4 services');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,77,'production-reachable JS graph must currently contain 77 files');
+assert.equal(reachable.size,78,'production-reachable JS graph must currently contain 78 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);

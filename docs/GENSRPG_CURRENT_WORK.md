@@ -64,7 +64,7 @@ La sentinelle doit ensuite verrouiller :
 - `maxLevel` ;
 - XP négative, chaîne numérique, vide, null, false, undefined, NaN, ±Infinity ;
 - valeurs `xpPerLevel` atypiques selon coercion historique ;
-- objet résultat : un entier niveau uniquement, sans état caché ;
+- résultat : un nombre de niveau uniquement, sans état caché ; ne pas arrondir `maxLevel` au-delà du comportement legacy ;
 - pureté : aucun DOM, storage, timer, observer, listener, RNG, profil actif ;
 - module CommonJS testable + global Core explicite si chargé ;
 - service **hors graphe production** dans ce lot.

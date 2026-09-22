@@ -9,8 +9,8 @@ const index=indexBuf.toString('utf8');
 const corePath='assets/gensrpg/core/progression-v1.js';
 const coreSource=fs.readFileSync(path.join(root,corePath),'utf8');
 function gitBlob(b){return crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex')}
-assert.equal(indexBuf.length,8174346);
-assert.equal(gitBlob(indexBuf),'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc');
+assert.equal(indexBuf.length,8174314);
+assert.equal(gitBlob(indexBuf),'8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91');
 assert.equal(gitBlob(Buffer.from(coreSource)),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf');
 function scriptBody(id){const marker='<script id="'+id+'">';const s=index.indexOf(marker),f=s+marker.length,e=index.indexOf('</script>',f);assert.ok(s>=0&&e>f);return index.slice(f,e)}
 function extractFunction(src,name){const needle='function '+name+'(';const p=src.indexOf(needle);assert.ok(p>=0,'missing '+name);const b=src.indexOf('{',p);let d=0,q=null,esc=false,line=false,block=false;for(let i=b;i<src.length;i++){const c=src[i],n=src[i+1]||'';if(line){if(c==='\n')line=false;continue}if(block){if(c==='*'&&n==='/'){block=false;i++}continue}if(q){if(esc){esc=false;continue}if(c==='\\'){esc=true;continue}if(c===q)q=null;continue}if(c==='/'&&n==='/'){line=true;i++;continue}if(c==='/'&&n==='*'){block=true;i++;continue}if(c==="'"||c==='"'||c==='`'){q=c;continue}if(c==='{')d++;else if(c==='}'&&--d===0)return src.slice(p,i+1)}throw Error('unterminated '+name)}
@@ -20,10 +20,11 @@ const normalizeFn=extractFunction(index,'normalizeDungeonRpgRules');
 const core044=scriptBody('dungeonCore044HeroProgression');
 const current=extractWindowFunction(core044,'dungeonRpgEarnedSkillPoints');
 const candidate='window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules(),level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,null,r.startingSkillPoints,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,p)}';
+const legacy='window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules();return Math.max(0,r.startingSkillPoints)+Math.max(0,dungeonRpgLevelFromXp(xp)-1)*Math.max(0,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return Math.max(0,Number(p.startingSkillPoints)||0)+Math.max(0,level-1)*Math.max(0,Number(p.talentPointsPerLevel)||0)}';
 assert.match(current,/activeProg\(\)/);
 assert.match(current,/loadDungeonRpgRules\(\)/);
 assert.match(current,/dungeonRpgLevelFromXp\(xp\)/);
-assert.doesNotMatch(current,/earnedSkillPointsFromLevel/);
+assert.equal(current,candidate,'dedicated raccord must install exactly the preaudited candidate');
 assert.match(candidate,/GensProgressionV1\.earnedSkillPointsFromLevel/);
 const ABS=Symbol('abs'),MISS=Symbol('miss');
 function run({profile=ABS,gameStyle='dungeon',rawRules={},xp=0,candidateMode=false}){
@@ -40,7 +41,7 @@ function run({profile=ABS,gameStyle='dungeon',rawRules={},xp=0,candidateMode=fal
   vm.runInContext(coreSource,ctx);
   const originalEarned=ctx.GensProgressionV1.earnedSkillPointsFromLevel;
   ctx.GensProgressionV1=Object.freeze({...ctx.GensProgressionV1,earnedSkillPointsFromLevel:(...args)=>{events.push('coreEarned');return originalEarned(...args)}});
-  vm.runInContext(candidateMode?core044.replace(current,candidate):core044,ctx);
+  vm.runInContext(candidateMode?core044:core044.replace(current,legacy),ctx);
   return {value:ctx.dungeonRpgEarnedSkillPoints(xp),events};
 }
 function sameValue(a,b,label){if(Number.isNaN(a)&&Number.isNaN(b))return;assert.equal(a,b,label)}
@@ -72,4 +73,4 @@ for(const bad of ['bad',undefined,NaN]){
   assert.equal(a.value,8); assert.equal(b.value,8); assert.ok(!Number.isNaN(a.value)); assert.ok(!Number.isNaN(b.value));
 }
 assert.ok(parity>=60);
-console.log(JSON.stringify({scenario:'Phase 4 earned skill points raccord preaudit real path',parityCases:parity,indexBlob:gitBlob(indexBuf),coreBlob:gitBlob(Buffer.from(coreSource)),owner:'dungeonCore044HeroProgression',selected:'dungeonRpgEarnedSkillPoints',candidateDelegates:'GensProgressionV1.earnedSkillPointsFromLevel',normalizationOwner:'normalizeDungeonRpgRules via loadDungeonRpgRules',runtimeChanged:false},null,2));
+console.log(JSON.stringify({scenario:'Phase 4 earned skill points raccord preaudit real path',parityCases:parity,indexBlob:gitBlob(indexBuf),coreBlob:gitBlob(Buffer.from(coreSource)),owner:'dungeonCore044HeroProgression',selected:'dungeonRpgEarnedSkillPoints',candidateDelegates:'GensProgressionV1.earnedSkillPointsFromLevel',normalizationOwner:'normalizeDungeonRpgRules via loadDungeonRpgRules',runtimeChanged:true},null,2));

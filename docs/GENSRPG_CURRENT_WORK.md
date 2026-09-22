@@ -1,3 +1,45 @@
+## RACCORDEMENT TECHNIQUE EN COURS — Phase 4 Core Progression — points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche : `work/gensrpg-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Base GREEN : `14d88f69b404650088cd19436819caae4138c564`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-raccord-2026-09-22`.
+- Production `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### TDD RED prouvé
+
+SHA RED : `a368c7bfd4b8e50f505bcb20c99c63b5e7a54fea`.
+
+- Architecture `35742520031` — FAILURE attendue à l'étape 147 ;
+- cause unique : absence de délégation vers `GensProgressionV1.earnedSkillPointsFromLevel` ;
+- Firefox `35742519956` — SUCCESS ;
+- Tactical Dock `35742520126` — SUCCESS.
+
+### Patch runtime exact
+
+Workflow one-shot : `99ba3ac9223ba344854b7f3fd4e3fff2659c3f70`.
+Commit runtime : `ca7311a96496c85ba58e243ed24ddccb8a07a9b8`.
+
+Diff :
+- `index.html` : exactement 1 ligne remplacée ;
+- workflow one-shot supprimé dans le même commit ;
+- aucun autre runtime touché.
+
+Fingerprint :
+- avant : 8 174 346 octets, `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc` ;
+- après : 8 174 314 octets, `8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91`.
+
+Le seam installé est exactement celui du pré-audit. Le Core Progression reste inchangé
+sur `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+### Action actuelle
+
+Réaligner uniquement les fingerprints réellement dépendants puis obtenir
+Architecture + navigateur, Firefox et Tactical GREEN.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression — raccord runtime points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

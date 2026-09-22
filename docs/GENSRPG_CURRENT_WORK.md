@@ -1,3 +1,164 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — contrat pur XP -> niveau — clean-base — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-contract-cleanbase-2026-09-22`.
+- Base exacte :
+  `79ca6dca0df93abd40c8443fad8fcfc9c6cc4c28`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-final-green-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-contract-cleanbase-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-contract-cleanbase-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pourquoi clean-base
+
+Le premier essai du contrat avait été ouvert sur
+`4bf7a325da0a44cb4e73e0d92f17793b7a2aa003`, avant la clôture GREEN finale du
+pré-audit Progression.
+
+Cette branche historique n'est pas réécrite. Le présent lot a rejoué le TDD depuis
+le vrai GREEN `79ca6dca...`.
+
+### TDD RED
+
+SHA sentinelle + CI :
+
+`b4109f7e6b7a4c1f2dab53fdb3b6582deea82fb3`.
+
+Architecture :
+
+`35701986461` — FAILURE attendue.
+
+Étape :
+
+`Verrouiller le contrat pur Core Progression XP Phase 4`.
+
+Erreur exacte :
+
+`Phase 4 pure Core Progression XP service must exist`.
+
+### Service pur créé
+
+Fichier :
+
+`assets/gensrpg/core/progression-xp-v1.js`.
+
+Commit :
+
+`dccc64d0adaa7ec9ab9dc9c3f2f72de7f898b055`.
+
+Blob :
+
+`f00811e31653032de7718eaecbf1774284253004`.
+
+API :
+
+`GensProgressionXpV1.levelFromXp(xp, progressionConfig)`.
+
+Le service est :
+- pur ;
+- configuration explicite uniquement ;
+- CommonJS-testable ;
+- API immuable ;
+- sans DOM, stockage, timer, observer, listener ou RNG ;
+- sans profil actif ;
+- sans récompense, mutation héros, popup ou UI ;
+- sans auto-install.
+
+### Parité protégée
+
+La sentinelle compare le vrai propriétaire
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`
+avec le service pur sur **352 cas**.
+
+Sont couverts :
+- courbe linéaire ;
+- courbe custom ;
+- fallback seuil custom manquant ;
+- seuils zéro / négatifs ;
+- `xpPerLevel` atypique ;
+- `maxLevel` normal, fractionnaire et non fini ;
+- XP négative, chaînes, vide, null, false, undefined, NaN et ±Infinity.
+
+Les coercions legacy sont conservées, sans « amélioration » silencieuse.
+
+### Cartographie
+
+Après création du fichier, Architecture a échoué correctement sur l'inventaire
+physique JS : `95 !== 94`.
+
+Le service a été classé **Phase 4 inert** au commit :
+
+`3908272af49001e5731b3f7ce52866864f9133c6`.
+
+Résultat :
+- inventaire physique : 95 JS ;
+- graphe production-reachable : toujours 77 ;
+- service absent de `index.html`, preview, Pages et service worker.
+
+### Frontières inchangées
+
+Inchangés :
+- `index.html`, blob
+  `2d7677950f04e9a3290ff0062e157a126123891d` ;
+- Core 0.44 et ses propriétaires inline ;
+- `dungeonRpgXpIntoLevel` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- `changeXP` ;
+- XP combat / récompenses ;
+- level-up / popup ;
+- `progression-runtime-v1.js` ;
+- Stats / Inventory / Dice / Storage / Tactical ;
+- Survie / Dungeon / Capture / PvP ;
+- `main`.
+
+### Validation technique GREEN
+
+SHA technique :
+
+`3908272af49001e5731b3f7ce52866864f9133c6`.
+
+Sur ce même SHA :
+- Architecture + navigateur complet :
+  `35702209391` — SUCCESS ;
+- Firefox :
+  `35702209398` — SUCCESS ;
+- Tactical Dock :
+  `35702209417` — SUCCESS.
+
+Document dédié :
+`docs/GENSRPG_PHASE4_PROGRESSION_XP_CONTRACT.md`.
+
+### Suite après GREEN
+
+Ne pas raccorder automatiquement le service.
+
+Le prochain lot doit être un **pré-audit de raccord** séparé :
+- frontière Core 0.44 -> service ;
+- construction de la configuration explicite ;
+- fallback règles legacy ;
+- aucun autre calcul Progression dans le même lot ;
+- RED avant chargement production.
+
+Les deux retours manuels restent hors périmètre :
+- détection ennemie à portée ;
+- confusion visuelle Stats Aldren.
+
+### Validation finale obligatoire
+
+Cette clôture documentaire change le SHA.
+
+Avant checkpoint GREEN, le **même SHA documentaire final exact** doit obtenir :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP -> niveau — reprise clean-base — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

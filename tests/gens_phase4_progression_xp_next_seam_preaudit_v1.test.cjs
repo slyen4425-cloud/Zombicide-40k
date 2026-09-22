@@ -18,7 +18,7 @@ const gitBlob=buf=>crypto.createHash('sha1')
 
 assert.equal(indexBuf.length,8174416,'next-seam preaudit must run on exact first-raccord GREEN index');
 assert.equal(gitBlob(indexBuf),'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','next-seam preaudit index blob drifted');
-assert.equal(gitBlob(coreBuf),'04ffcc5e8932e8c4c101c6af09095775e62245a2','current Core Progression contract blob drifted');
+assert.equal(gitBlob(coreBuf),'f633de55f1e6bda339e66c65debc35d7b8da2510','current Core Progression contract blob drifted');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';

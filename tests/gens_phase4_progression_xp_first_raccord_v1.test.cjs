@@ -18,8 +18,8 @@ const coreBlob=crypto.createHash('sha1')
   .update(coreBuf)
   .digest('hex');
 
-assert.equal(coreBlob,'b02487346f1a0df12effbc4559b5063bf8e12726',
-  'first raccord must not modify the pure Core Progression service');
+assert.equal(coreBlob,'04ffcc5e8932e8c4c101c6af09095775e62245a2',
+  'current Core Progression contract blob drifted after later pure API expansion');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';

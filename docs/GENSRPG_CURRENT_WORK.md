@@ -1,3 +1,98 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — raccord d10048 — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-d10048-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-d10048-raccord-2026-09-22`.
+- Base exacte :
+  `ddce78deb72169e2aac7280da86049d40e774fab`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-next-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Raccorder uniquement le helper historique `d10048(chance)` au service pur
+`GensDiceV1.rollChanceHigh`.
+
+Les quatre consommateurs historiques restent inchangés :
+- `dc047StealthPrompt` ;
+- `dc048TrapDetectRoll` ;
+- `dc048TrapActionRoll` ;
+- `dc048TrapTrigger`.
+
+Aucun autre seam Dice n'est modifié dans ce lot.
+
+### Source index autorisée
+
+Le fichier utilisateur `work_10.zip` a été revérifié et correspond à l'index
+du dernier état runtime GREEN :
+- HTML : `index_work10.txt` ;
+- taille : `8 174 637` octets ;
+- blob Git : `5b8e790fefe7970a250fd9485ee80549511737e6`.
+
+Le pré-audit `ddce78de...` n'a pas modifié `index.html`; cette copie reste donc
+l'autorité locale pour ce raccord.
+
+### TDD / RED obligatoire
+
+Avant toute modification runtime, la nouvelle sentinelle doit exiger :
+
+1. conservation exacte de la normalisation historique
+   `Math.round(Number(chance)||50)`, clamp `5..95` ;
+2. disparition du calcul local `101 - chance` dans `d10048` ;
+3. disparition du générateur D100 local dans `d10048` ;
+4. délégation à `GensDiceV1.rollChanceHigh(c,{min:5,max:95})` ;
+5. conservation exacte de la forme legacy
+   `{chance,threshold,roll,ok}` ;
+6. un seul tirage RNG, même ordre et même mapping vers 1..100 ;
+7. quatre consommateurs inchangés ;
+8. premier raccord `d100ThresholdFromChance` inchangé ;
+9. Tactical et son RNG seedé inchangés ;
+10. aucun autre seam Dice, wrapper, observer, timer, retry ou fallback.
+
+Le RED doit être observé et documenté avant toute modification de `index.html`.
+
+### Systèmes protégés
+
+- `assets/gensrpg/core/dice-v1.js` reste byte-identique ;
+- `d100ThresholdFromChance` et ses 15 consommateurs restent inchangés ;
+- `dungeonUniversalTest`, `showSpecialD6Roll`, `rollDungeonRpDice073`,
+  `dc051RollStatChallenge`, puzzles/pièges low-roll et initiative restent différés ;
+- aucun changement Tactical / Stats / Inventory / Storage / Progression ;
+- aucun changement Survie / Capture / PvP ;
+- aucun changement de règle, chance, clamp ou probabilité ;
+- aucun merge sur `main`.
+
+### Risques
+
+- perdre le `Math.round` historique avant clamp ;
+- modifier les coercions `undefined / NaN / ±Infinity` ;
+- changer la forme `ok` en `success` chez les consommateurs ;
+- consommer le RNG plus d'une fois ou dans un autre ordre ;
+- raccorder par erreur `dc051RollStatChallenge` ou un autre D100 5..95.
+
+### Tests requis avant GREEN
+
+- nouvelle sentinelle dédiée au raccord `d10048` ;
+- pré-audit du prochain raccord toujours GREEN ;
+- test de parité déterministe legacy/Core avec RNG injecté ;
+- hash des quatre consommateurs inchangé ;
+- premier raccord Dice inchangé ;
+- Core Dice / Tactical / Mobile Combat Performance byte-identiques ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock ;
+- inspection du diff contre `ddce78de...`.
+
+### Prochaine action
+
+Créer et exécuter la sentinelle TDD du raccord. Obtenir un RED exact avant toute
+modification runtime.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — pré-audit prochain raccord — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

@@ -33280,9 +33280,9 @@ function manual48(){
   }catch(e){return true}
 }
 function d10048(chance){
-  chance=Math.max(5,Math.min(95,Math.round(Number(chance)||50)));
-  const threshold=101-chance,roll=1+Math.floor(Math.random()*100);
-  return {chance,threshold,roll,ok:roll>=threshold};
+  const c=Math.max(5,Math.min(95,Math.round(Number(chance)||50)));
+  const r=GensDiceV1.rollChanceHigh(c,{min:5,max:95});
+  return {chance:r.chance,threshold:r.threshold,roll:r.roll,ok:r.success};
 }
 function applyDamage48(heroId,damage){
   damage=Math.max(1,Number(damage)||1);

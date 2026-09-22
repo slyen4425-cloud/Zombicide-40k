@@ -1,0 +1,21 @@
+name: GenSrpG d10048 fingerprint scan
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-dice-d10048-raccord-2026-09-22'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find stale pre-d10048 index fingerprints
+        run: |
+          echo '=== OLD BLOB REFERENCES ==='
+          grep -RIn --exclude-dir=.git '5b8e790fefe7970a250fd9485ee80549511737e6' . || true
+          echo '=== OLD SIZE REFERENCES ==='
+          grep -RIn --exclude-dir=.git '8174637' . || true

@@ -1,3 +1,60 @@
+## Chantier courant prioritaire — Phase 4 / Text Utils — pré-audit premier consommateur — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-first-consumer-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-first-consumer-preaudit-2026-09-22`.
+- Base exacte :
+  `fb5ad67f13adb97d04533d1cd692a5e6cc75b794`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer **un seul consommateur UI** de `GensTextUtilsV1.escapeHtml` avant tout raccord.
+
+Consommateur sélectionné :
+`assets/dungeon/dungeon-room-creator-100.js`.
+
+Helper local actuel :
+`function esc(v){...}`.
+
+### Pourquoi Room Creator
+
+Comparaison réelle sur le checkpoint GREEN :
+- World Builder : helper `esc` + de nombreux callsites de rendu ;
+- Room Creator : un seul helper `esc`, usages limités à bibliothèque/grille/statut ;
+- Stats UI : helper pur mais surface Stats protégée plus sensible.
+
+Room Creator est donc le premier seam le plus étroit et le plus facile à rollback.
+
+### Pré-audit uniquement
+
+Autorisé :
+- caractériser la parité sémantique du helper local avec `GensTextUtilsV1.escapeHtml` ;
+- inventorier ses callsites ;
+- vérifier qu'il est seulement utilisé en rendu/attributs HTML ;
+- définir le raccord minimal futur ;
+- ajouter une sentinelle de caractérisation.
+
+Interdit dans ce lot :
+- modifier `dungeon-room-creator-100.js` ;
+- charger Text Utils autrement ;
+- raccorder World Builder, Stats UI ou Tactical ;
+- modifier données, sauvegarde, Builder gameplay ou schémas ;
+- ajouter wrapper, observer, timer/retry ou Event Bus ;
+- modifier `index.html` ;
+- merge sur `main`.
+
+### Prochaine action
+
+Créer la sentinelle de pré-audit Room Creator, valider la parité et les callsites,
+puis triple CI avant tout futur lot de raccord.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 — contrat pur Text Utils — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

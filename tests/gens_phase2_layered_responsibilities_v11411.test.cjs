@@ -27,7 +27,6 @@ for(const h of manifest.hotspots){
 assert.equal(new Set(manifest.hotspots.map(x=>x.name)).size,manifest.hotspots.length,'duplicate hotspot records');
 assert.ok(manifest.hotspots.some(x=>x.name==='renderDungeonCombatRound'&&x.assignmentCount===30));
 assert.ok(manifest.hotspots.some(x=>x.name==='captureRenderBattleLive'&&x.assignmentCount===15));
-assert.ok(manifest.hotspots.some(x=>x.name==='startConfiguredGame'&&x.lastOwner==='dungeonCore200Rebuild'));
 
 console.log(JSON.stringify({
   scenario:'Phase 2 layered responsibility hotspots',

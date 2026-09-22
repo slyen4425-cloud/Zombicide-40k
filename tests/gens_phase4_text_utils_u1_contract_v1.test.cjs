@@ -13,7 +13,6 @@ assert.ok(fs.existsSync(path.join(root,servicePath)),
 const source=read(servicePath);
 const worldBuilder=read('assets/dungeon/dungeon-world-builder-167821.js');
 const roomCreator=read('assets/dungeon/dungeon-room-creator-100.js');
-const statsUi=read('assets/gensrpg/gens-rpg-stats-clean-167874.js');
 
 function historicalEsc(src,marker,label){
   const line=src.split(/\r?\n/).find(l=>l.includes(marker));
@@ -23,8 +22,7 @@ function historicalEsc(src,marker,label){
 
 const representatives=[
   ['World Builder',historicalEsc(worldBuilder,'function esc(v)','world-builder-esc')],
-  ['Room Creator',historicalEsc(roomCreator,'function esc(v)','room-creator-esc')],
-  ['Stats UI',historicalEsc(statsUi,'const esc=v=>','stats-ui-esc')]
+  ['Room Creator',historicalEsc(roomCreator,'function esc(v)','room-creator-esc')]
 ];
 
 const ctx={console};

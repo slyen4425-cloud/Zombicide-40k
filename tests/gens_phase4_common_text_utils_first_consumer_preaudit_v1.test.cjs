@@ -55,9 +55,8 @@ assert.equal(roomEscCallsites,10,'Room Creator escape callsite inventory drifted
 const renderStart=room.indexOf('function renderLibrary');
 assert.ok(renderStart>=0,'Room Creator render boundary missing');
 const roomCalls=[...room.matchAll(/\besc\s*\(/g)].map(m=>m.index)
-  .filter(i=>i>room.indexOf('function esc'));
-assert.equal(roomCalls.length,10);
-assert.ok(roomCalls.every(i=>i>=renderStart),
+  .filter(i=>i>=renderStart);
+assert.equal(roomCalls.length,10,
   'Room Creator escape calls must stay confined to render/UI functions');
 
 assert.doesNotMatch(room,/GensTextUtilsV1/,

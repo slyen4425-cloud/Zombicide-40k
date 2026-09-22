@@ -1,3 +1,67 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / pré-audit Shell & navigation — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-shell-navigation-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-shell-navigation-preaudit-2026-09-22`.
+- Base exacte :
+  `4e8e87dec5043cc8687022e720aba998265b986e`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-complete-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-shell-navigation-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit Phase 5 terminé sans modification runtime.
+
+Document :
+`docs/GENSRPG_PHASE5_SHELL_NAVIGATION_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_shell_navigation_preaudit_v1.test.cjs`.
+
+Constats :
+- le contrat Shell Phase 3 reste inert ;
+- `forceReload155` est déjà propriétaire Shell du changement de famille ;
+- la fiche héros a ses anciennes couches de réparation visuelle neutralisées ;
+- `startConfiguredGame` est le hotspot prioritaire :
+  6 affectations, classification Shell, dernier propriétaire Dungeon
+  `dungeonCore200Rebuild` ;
+- la chaîne traverse Capture puis Dungeon et doit préserver la non-interférence
+  Survie/Dungeon/Capture/PvP.
+
+Premier micro-lot recommandé :
+**pré-audit de consolidation de l'autorité `startConfiguredGame`**.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`a914647121ed7717c39abf27c3c2b7bbb35dac3d`.
+
+- Architecture + navigateur complet : `35770564360` — SUCCESS ;
+- Firefox : `35770564233` — SUCCESS ;
+- Tactical Dock : `35770564315` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-shell-navigation-preaudit-green-2026-09-22` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir un lot séparé
+   `Phase 5 / startConfiguredGame authority consolidation preaudit` ;
+5. aucun changement runtime dans ce lot de pré-audit dédié.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / pré-audit Shell & navigation — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

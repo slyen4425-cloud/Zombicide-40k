@@ -75,10 +75,10 @@ for(const eventName of ['install','activate','message','fetch']){
 
 // A first safe common-utility candidate exists: identical pure HTML escaping is
 // duplicated across active owners. This test only characterizes that duplication.
-const escNeedle='.replace(/[&<>"\\\']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"';
-assert.ok(worldBuilder.includes(escNeedle),'World Builder HTML escape helper drifted');
-assert.ok(roomCreator.includes(escNeedle),'Room Creator HTML escape helper drifted');
-assert.ok(statsUi.includes(escNeedle),'Stats UI HTML escape helper drifted');
+const escPattern=/\\.replace\\(\\/\\[&<>"'\\]\\/g,c=>\\(\\{"&":"&amp;","<":"&lt;",">":"&gt;"/;
+assert.match(worldBuilder,escPattern,'World Builder HTML escape helper drifted');
+assert.match(roomCreator,escPattern,'Room Creator HTML escape helper drifted');
+assert.match(statsUi,escPattern,'Stats UI HTML escape helper drifted');
 
 // The preaudit must not itself create a bus implementation in the current runtime.
 for(const rel of [

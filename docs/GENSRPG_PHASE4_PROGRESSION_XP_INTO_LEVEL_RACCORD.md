@@ -120,3 +120,43 @@ Après RED prouvé :
 7. checkpoint GREEN.
 
 Aucun merge sur `main`.
+
+
+## Clôture conditionnelle du lot
+
+Le raccord runtime a été appliqué au vrai propriétaire par le commit
+`ee5255c4635a89c7fe92045090c8c8affef18c33`.
+
+État runtime obtenu :
+- `dungeonRpgXpIntoLevel` délègue à `GensProgressionV1.xpIntoLevel` ;
+- `activeProg()` et la normalisation XP historique restent à la frontière ;
+- le fallback Dungeon reste lazy ;
+- le Core Progression reste byte-identique
+  `f633de55f1e6bda339e66c65debc35d7b8da2510` ;
+- `index.html` final runtime : 8 174 346 octets, blob
+  `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+TDD RED :
+- SHA `abc4172b07f71e377276388d3c09b6a78891eb37` ;
+- Architecture `35724108671` — FAILURE attendu ;
+- Firefox `35724108621` — SUCCESS ;
+- Tactical Dock `35724108638` — SUCCESS.
+
+Validation technique avant documentation finale :
+- SHA `edda07afe4acff4a40225dcaf40c54d5c686cabc` ;
+- Architecture + navigateur complet `35730872204` — SUCCESS ;
+- Firefox `35730872338` — SUCCESS ;
+- Tactical Dock `35730872226` — SUCCESS.
+
+Les sentinelles historiques dont le seul écart était le fingerprint de
+`index.html` ont été réalignées sur le nouveau blob. Aucun autre changement
+runtime n'a été ajouté.
+
+La documentation finale doit maintenant repasser la triple CI sur son propre
+SHA exact. Après succès, créer
+`checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+
+Le lot suivant doit être distinct : pré-audit du prochain seam Progression,
+avec `dungeonRpgEarnedSkillPoints` comme candidat à caractériser seulement.
+
+Aucun merge sur `main`.

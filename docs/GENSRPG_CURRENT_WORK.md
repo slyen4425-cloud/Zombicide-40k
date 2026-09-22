@@ -1,3 +1,108 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — raccord XP dans le niveau — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-into-level-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-into-level-raccord-2026-09-22`.
+- Base exacte :
+  `29a2ab49779a5a0a43d6a063ffa69ca898905d00`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat du raccord
+
+Le vrai propriétaire `dungeonCore044HeroProgression -> dungeonRpgXpIntoLevel`
+délègue désormais à `GensProgressionV1.xpIntoLevel`.
+
+Raccord runtime :
+- commit propriétaire : `ee5255c4635a89c7fe92045090c8c8affef18c33` ;
+- `activeProg()` conservé à la frontière ;
+- normalisation XP historique conservée ;
+- fallback Dungeon conservé et évalué uniquement lorsqu'il est requis ;
+- plus de calcul modulo/custom local dans ce seam ;
+- aucun raccord de `dungeonRpgEarnedSkillPoints`, synchronisation, level-up, UI ou persistance.
+
+Core Progression inchangé :
+`f633de55f1e6bda339e66c65debc35d7b8da2510`.
+
+Source runtime après raccord :
+- `index.html` : 8 174 346 octets ;
+- blob : `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+### TDD
+
+RED ciblé observé après branchement de la sentinelle :
+- SHA `abc4172b07f71e377276388d3c09b6a78891eb37` ;
+- Architecture `35724108671` — FAILURE attendu ;
+- Firefox `35724108621` — SUCCESS ;
+- Tactical Dock `35724108638` — SUCCESS.
+
+Le RED portait uniquement sur l'absence de délégation réelle à
+`GensProgressionV1.xpIntoLevel`.
+
+### Réalignements après raccord
+
+Le changement légitime du blob `index.html` a invalidé plusieurs sentinelles
+historiques qui verrouillaient encore l'ancien fingerprint. Elles ont été
+réalignées sans modification supplémentaire du runtime :
+- Storage ;
+- Stats ;
+- Inventory / Equipment ;
+- Dice ;
+- Progression historique ;
+- Asset Resolver.
+
+Aucune sémantique métier ni autorité supplémentaire n'a été modifiée pendant
+ces réalignements.
+
+### Validation technique avant documentation finale
+
+SHA :
+`edda07afe4acff4a40225dcaf40c54d5c686cabc`.
+
+- Architecture + navigateur complet :
+  `35730872204` — SUCCESS ;
+- Firefox :
+  `35730872338` — SUCCESS ;
+- Tactical Dock :
+  `35730872226` — SUCCESS.
+
+Le navigateur complet valide notamment les chemins réels Survie, Dungeon après
+Survie, Builder, Config objet, caches/pièges authored, Save & Quit/Reprise,
+PvP, Capture, non-interférence quatre modules, murs, preview, Asset Resolver
+et Equipment.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN cible, le **même SHA documentaire final**
+doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite après GREEN
+
+Créer le checkpoint :
+`checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+
+Puis ouvrir un **nouveau lot homogène de pré-audit du prochain seam Progression**.
+Candidat naturel à caractériser : `dungeonRpgEarnedSkillPoints`, sans le
+raccorder automatiquement et sans mélanger synchronisation, level-up, UI ou
+persistance.
+
+Le chantier Event Bus / utilitaires Agent 1 reste gelé et séparé jusqu'au point 7
+de la Phase 4.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — raccord XP dans le niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

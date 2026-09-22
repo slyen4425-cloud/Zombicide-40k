@@ -45,7 +45,7 @@ const productionDirect=[
   ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,33,'production composition must expose 33 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,34,'production composition must expose 34 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');

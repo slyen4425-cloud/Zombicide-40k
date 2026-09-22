@@ -75,7 +75,7 @@ for(const eventName of ['install','activate','message','fetch']){
 
 // A first safe common-utility candidate exists: identical pure HTML escaping is
 // duplicated across active owners. This test only characterizes that duplication.
-const escNeedle=".replace(/[&<>\\\"']/g,c=>({\\\"&\\\":\\\"&amp;\\\",\\\"<\\\":\\\"&lt;\\\",\\\">\\\":\\\"&gt;\\\"";
+const escNeedle='.replace(/[&<>"' + "'" + ']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"';
 assert.ok(worldBuilder.includes(escNeedle),'World Builder HTML escape helper drifted');
 assert.ok(roomCreator.includes(escNeedle),'Room Creator HTML escape helper drifted');
 assert.ok(statsUi.includes(escNeedle),'Stats UI HTML escape helper drifted');

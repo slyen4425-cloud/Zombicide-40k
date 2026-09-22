@@ -152,3 +152,44 @@ Ne pas mélanger ce raccord avec :
 - level-up ;
 - distribution XP ;
 - UI/persistance.
+
+
+## RED TDD observé
+
+SHA :
+
+`69b6791a90cc85accaefd2595174ea8153550b4f`.
+
+Runs :
+- Architecture :
+  `35719759926` — FAILURE attendu ;
+- Firefox :
+  `35719759695` — SUCCESS ;
+- Tactical Dock :
+  `35719759730` — SUCCESS.
+
+Toutes les étapes Progression antérieures passent avant le nouveau RED :
+- pré-audit Progression ;
+- contrat pur `levelFromXp` ;
+- pré-audit premier raccord ;
+- premier raccord réel ;
+- pré-audit `xpIntoLevel`.
+
+L'unique nouvelle étape en échec est :
+
+`Verrouiller le contrat pur XP dans le niveau Core Progression`.
+
+Cause exacte :
+
+`GensProgressionV1.xpIntoLevel` est `undefined` alors que la sentinelle exige
+une fonction.
+
+Aucun runtime/Core n'a été modifié pour obtenir ce RED.
+
+## Prochaine action après RED
+
+Ajouter uniquement la primitive pure `xpIntoLevel` au service Core Progression
+existant, sans modifier `index.html`, Core 0.44, service worker, UI, Storage ou
+gameplay.
+
+Le propriétaire historique restera non raccordé dans ce lot.

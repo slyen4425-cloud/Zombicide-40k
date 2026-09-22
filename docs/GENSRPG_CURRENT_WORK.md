@@ -1,3 +1,57 @@
+## Chantier courant prioritaire — Phase 4 / U1 — pré-audit premier consommateur Text Utils — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-room-content-ui-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-room-content-ui-preaudit-2026-09-22`.
+- Base exacte :
+  `fb5ad67f13adb97d04533d1cd692a5e6cc75b794`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer un seul premier consommateur de `GensTextUtilsV1.escapeHtml`.
+
+Consommateur sélectionné :
+`assets/dungeon/dungeon-room-content-ui-167831.js`.
+
+Ce lot ne raccorde rien.
+
+### Risque à caractériser
+
+Le service Text Utils U1 est inert.
+Room Content UI est chargé dynamiquement par
+`assets/dungeon/dungeon-room-creator-feedback-167821.js`,
+qui ne charge actuellement pas Text Utils.
+
+Le futur raccord doit donc posséder un ordre de chargement explicite et ne peut pas
+se limiter à remplacer le helper local.
+
+### Sentinelle
+
+`tests/gens_phase4_text_utils_room_content_ui_preaudit_v1.test.cjs`.
+
+### Interdictions
+
+Aucun runtime, loader, Core, index, service worker, gameplay ou autre consommateur modifié.
+
+### Prochaine action
+
+1. verrouiller la parité du helper local ;
+2. verrouiller son inventaire de callsites ;
+3. confirmer la frontière de chargement ;
+4. triple CI ;
+5. clôture documentaire ;
+6. triple CI finale ;
+7. checkpoint GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / U1 — contrat pur Text Utils — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

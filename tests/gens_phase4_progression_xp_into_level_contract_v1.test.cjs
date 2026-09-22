@@ -46,8 +46,8 @@ function extractWindowFunction(src,name){
 }
 
 const ownerFn=extractWindowFunction(core044,'dungeonRpgXpIntoLevel');
-assert.doesNotMatch(ownerFn,/GensProgressionV1\.xpIntoLevel/,
-  'pure contract lot must not raccord runtime owner');
+assert.match(ownerFn,/GensProgressionV1\.xpIntoLevel\(v,p,fallback\)/,
+  'later dedicated runtime lot must consume the pure contract through the canonical owner');
 
 const ctx={console};
 ctx.window=ctx;ctx.globalThis=ctx;
@@ -122,6 +122,6 @@ assert.ok(Object.isFrozen(ctx.GensProgressionV1),'Core Progression public API mu
 console.log(JSON.stringify({
   scenario:'Phase 4 Core Progression XP-into-level pure contract',
   cases:cases.length,
-  runtimeRaccord:false,
+  runtimeRaccord:true,
   indexBlob:gitBlob(indexBuf)
 },null,2));

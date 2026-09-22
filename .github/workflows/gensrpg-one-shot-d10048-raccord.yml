@@ -1,0 +1,68 @@
+name: One-shot Core Dice d10048 raccord
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-dice-d10048-raccord-2026-09-22'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-dice-d10048-raccord-2026-09-22
+          fetch-depth: 0
+
+      - name: Patch exact d10048 owner
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          p=Path("index.html")
+          data=p.read_bytes()
+
+          def blob(b):
+              return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
+
+          before="5b8e790fefe7970a250fd9485ee80549511737e6"
+          after="2d7677950f04e9a3290ff0062e157a126123891d"
+          if len(data) != 8174637 or blob(data) != before:
+              raise SystemExit(f"unexpected base index: size={len(data)} blob={blob(data)}")
+
+          text=data.decode("utf-8")
+          old="""function d10048(chance){
+            chance=Math.max(5,Math.min(95,Math.round(Number(chance)||50)));
+            const threshold=101-chance,roll=1+Math.floor(Math.random()*100);
+            return {chance,threshold,roll,ok:roll>=threshold};
+          }"""
+          new="""function d10048(chance){
+            const c=Math.max(5,Math.min(95,Math.round(Number(chance)||50)));
+            const r=GensDiceV1.rollChanceHigh(c,{min:5,max:95});
+            return {chance:r.chance,threshold:r.threshold,roll:r.roll,ok:r.success};
+          }"""
+          if text.count(old) != 1:
+              raise SystemExit(f"expected exactly one legacy d10048 body, found {text.count(old)}")
+          if text.count(new) != 0:
+              raise SystemExit("new d10048 body already present")
+
+          out=text.replace(old,new).encode("utf-8")
+          if len(out) != 8174648 or blob(out) != after:
+              raise SystemExit(f"unexpected patched index: size={len(out)} blob={blob(out)}")
+
+          p.write_bytes(out)
+          PY
+
+      - name: Commit patch and retire one-shot workflow
+        run: |
+          git config user.name "gensrpg-one-shot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-one-shot-d10048-raccord.yml
+          git commit -m "refactor: route d10048 through Core Dice"
+          git push origin HEAD:work/gensrpg-phase4-dice-d10048-raccord-2026-09-22

@@ -1,3 +1,95 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit du seam suivant — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-next-seam-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-next-seam-preaudit-2026-09-22`.
+- Base exacte :
+  `6458f2d41245cfbd48e0d61367962a79d9d002f2`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Premier raccord Progression officiellement GREEN
+
+Checkpoint :
+`checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+
+SHA :
+`6458f2d41245cfbd48e0d61367962a79d9d002f2`.
+
+Validations sur ce SHA exact :
+- Architecture + navigateur complet :
+  `35714743207` — SUCCESS ;
+- Firefox :
+  `35714743174` — SUCCESS ;
+- Tactical Dock :
+  `35714743339` — SUCCESS.
+
+### Mission unique du lot courant
+
+Pré-auditer le prochain seam Progression sans modification runtime.
+
+Candidats comparés :
+- `dungeonRpgXpIntoLevel` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- synchronisation/mutation aval explicitement exclue.
+
+Sélection actuelle du pré-audit :
+`dungeonRpgXpIntoLevel`.
+
+Raison :
+- calcul déterministe ;
+- aucune persistance / DOM / timer / mutation ;
+- le mode custom consomme le niveau canonique déjà raccordé ;
+- les politiques de points restent hors périmètre.
+
+### Frontières découvertes à préserver
+
+`dungeonRpgXpIntoLevel` possède trois sémantiques réelles :
+1. sans profil : fallback `loadDungeonRpgRules().xpPerLevel` ;
+2. profil linéaire : `p.xpPerLevel`, avec fallback Dungeon si absent/invalide/zéro ;
+3. profil custom : niveau canonique puis soustraction du seuil explicite du niveau courant.
+
+Une valeur négative `xpPerLevel` est truthy puis clampée à 1.
+En custom clairsemé, un seuil de fallback peut faire progresser le niveau alors que
+`xpIntoLevel` soustrait 0 si le seuil explicite courant manque : ce comportement
+historique doit rester inchangé pendant la restructuration.
+
+### Source exacte protégée
+
+`index.html` :
+- taille `8 174 416` octets ;
+- blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Core Progression :
+- blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+Aucun runtime ne doit être modifié dans ce pré-audit.
+
+### Livrables du pré-audit
+
+- `docs/GENSRPG_PHASE4_PROGRESSION_XP_NEXT_SEAM_PREAUDIT.md` ;
+- `tests/gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs`.
+
+### Prochaine action immédiate
+
+Brancher la sentinelle de pré-audit à Architecture puis exécuter :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Si GREEN sur le même SHA :
+- documenter la clôture ;
+- rerun après documentation ;
+- créer le checkpoint GREEN du pré-audit ;
+- ouvrir ensuite un lot distinct de contrat Core pur `xpIntoLevel`.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — premier raccord XP -> niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

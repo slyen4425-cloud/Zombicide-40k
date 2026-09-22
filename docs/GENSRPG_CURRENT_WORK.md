@@ -1,3 +1,90 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-preaudit-2026-09-22`.
+- Base exacte :
+  `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-inventory-equipment-wrapper-retry-scope-fix-green-2026-09-21`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Validation de la base fournie
+
+Le zip utilisateur `index_work_9.zip` contient `index_work9.txt`, qui est bien
+le HTML complet.
+
+Blob Git calculé :
+`5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Il est identique au blob `index.html` du checkpoint GREEN de départ.
+Le pré-audit travaille donc sur la bonne base exacte.
+
+### Lot précédent GREEN
+
+Le correctif de garde de chaîne retry Hero Editor / Equipment est officiellement
+GREEN sur `669a8b2ef1caeba2d75a97000b4716877e9e5fc9`.
+
+Runs exacts :
+- Architecture + navigateur complet `35657635038` — SUCCESS ;
+- Firefox `35657635013` — SUCCESS ;
+- Tactical Dock `35657635025` — SUCCESS.
+
+### Mission unique
+
+Pré-auditer le futur service **Core Dice**, cinquième sous-chantier recommandé de
+la Phase 4.
+
+Objectifs :
+1. cartographier les jets de règles D6 / dé configurable / D100 ;
+2. distinguer les jets de règles du RNG de contenu (loot, spawns, cartes, IA, IDs) ;
+3. identifier les helpers partagés et duplications réelles ;
+4. séparer règles de dés et animations ;
+5. déterminer le contrat pur minimal du futur Core Dice ;
+6. ne raccorder aucun runtime avant un lot correctif/extraction séparé.
+
+### Premiers constats
+
+- aucun `assets/gensrpg/core/dice-v1.js` n'existe ;
+- `d100ThresholdFromChance` reste inline dans `index.html` ;
+- `dungeonUniversalTest` possède le jet RPG configurable ;
+- `showSpecialD6Roll` possède un jet D6 Survie/spécial ;
+- `rollDungeonRpDice073` combine plusieurs consommateurs ;
+- `d10048`, `dc051RollStatChallenge`, `dc201PuzzleRoll` et
+  `dc211TrapTest` conservent des conventions D100 locales ;
+- le module Mobile Combat Performance remplace seulement les animations
+  `animateDice` / `animateRpgDice`, sans posséder les règles.
+
+Document :
+`docs/GENSRPG_PHASE4_DICE_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase4_dice_preaudit_v1.test.cjs`.
+
+### Périmètre strict
+
+Pré-audit / caractérisation uniquement.
+
+Interdit :
+- créer Core Dice runtime dans ce lot ;
+- modifier `Math.random()` ;
+- modifier seuils, clamps, réussite/échec ou dégâts ;
+- modifier Stats, Tactical, Dungeon, Survie ou Capture ;
+- modifier animations ;
+- ajouter wrapper, observer, timer, retry ou fallback ;
+- modifier `index.html` ;
+- modifier `main`.
+
+### Prochaine action
+
+Faire passer la nouvelle sentinelle dans Architecture + navigateur complet,
+Firefox et Tactical Dock. Si GREEN, clôturer ce pré-audit sur son SHA exact puis
+ouvrir un lot séparé de **contrat pur Core Dice**.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

@@ -78,6 +78,36 @@ assert.deepEqual(assignments.map(x=>x.id),chainIds);
 assert.deepEqual(assignments.slice(0,4).map(x=>x.primaryDomain),['capture','capture','capture','capture']);
 assert.deepEqual(assignments.slice(4).map(x=>x.primaryDomain),['dungeon','dungeon']);
 
+const byId=Object.fromEntries(assignments.map(x=>[x.id,x.source]));
+
+assert.match(byId.captureFix131,
+  /window\.startConfiguredGame=async function\(\)\{\s*return await oldStartCfg\.apply\(this,arguments\);\s*\}/,
+  'captureFix131 startConfiguredGame assignment must remain a pure pass-through wrapper during pre-audit');
+assert.doesNotMatch(byId.captureFix131,
+  /isCaptureContext|gensCapturePregameMode|markSessionActive|setTimeout|document\.|saveCapture|renderCapture|isDungeonMode|eligible\(/,
+  'captureFix131 selected wrapper must have no launch policy or side effect');
+
+assert.match(byId.captureFix135,/gensCapturePregameMode/);
+assert.match(byId.captureFix135,/saveCaptureWorldState/);
+assert.match(byId.captureFix138,/isCaptureContext138/);
+assert.match(byId.captureFix138,/setTimeout/);
+assert.match(byId.captureFix138,/renderCaptureWorldHub/);
+assert.match(byId.captureFix139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
+assert.match(byId.captureFix139,/markSessionActive/);
+assert.match(byId.gensDungeonCore01Js,/if\(eligible\(\)\)return start\(\)/);
+assert.match(byId.dungeonCore200Rebuild,/isDungeonMode/);
+assert.match(byId.dungeonCore200Rebuild,/isCaptureContext138/);
+assert.match(byId.dungeonCore200Rebuild,/startOutside200.*apply/);
+
+const selectedFirstMicroLot={
+  owner:'captureFix131',
+  seam:'startConfiguredGame',
+  action:'retire pure pass-through assignment only',
+  reason:'exact wrapper preserves this/arguments and delegates unconditionally with no policy or side effect',
+  protectedOwners:['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
+  runtimeChanged:false
+};
+
 const report=assignments.map(x=>({
   id:x.id,
   primaryDomain:x.primaryDomain,
@@ -91,5 +121,6 @@ console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame authority preaudit characterization',
   hotspot,
   assignments:report,
+  selectedFirstMicroLot,
   runtimeChanged:false
 },null,2));

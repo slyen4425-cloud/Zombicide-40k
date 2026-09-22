@@ -470,6 +470,9 @@ jobs:
       - name: Pré-auditer Shell et navigation Phase 5
         run: node tests/gens_phase5_shell_navigation_preaudit_v1.test.cjs
 
+      - name: Caractériser l'autorité startConfiguredGame Phase 5
+        run: node tests/gens_phase5_startconfiguredgame_authority_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

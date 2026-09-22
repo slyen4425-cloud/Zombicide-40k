@@ -5,6 +5,8 @@ const path=require("node:path");
 const root=path.resolve(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"index.html"),"utf8");
 const perf=fs.readFileSync(path.join(root,"assets","gensrpg","gens-mobile-combat-performance-16781022.js"),"utf8");
+const tacticalDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-visual-dice-16781142.js"),"utf8");
+const tacticalWallDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-wall-dice-stats-16781145.js"),"utf8");
 
 const coreDice=path.join(root,"assets","gensrpg","core","dice-v1.js");
 assert.equal(fs.existsSync(coreDice),false,
@@ -38,6 +40,25 @@ assert.match(perf,/R\.animateDice=animateDiceDispatch;R\.animateRpgDice=animateR
 assert.doesNotMatch(perf,/d100ThresholdFromChance|dungeonUniversalTest|rollDungeonRpDice073/,
   "mobile performance module must not own dice rules");
 
+assert.match(tacticalDice,/function thresholdForChance\(hitChance,high=true\)[\s\S]*?clamp\(Math\.round\(num\(hitChance,50\)\),1,99\)/,
+  "Tactical V114.11 must remain a distinct D100 rules owner with its 1..99 display clamp");
+assert.match(tacticalDice,/function nextRandom\(state\)\{if\(!state\?\.rngSeed\)return Math\.random\(\)/,
+  "Tactical V114.11 must retain its seeded-RNG-aware random source");
+assert.match(tacticalDice,/function patchHitResolver\([\s\S]*?E\.resolveAttack=resolve/,
+  "Tactical visual dice module must remain characterized as a resolveAttack owner, not only UI");
+assert.match(tacticalDice,/const ok=displayHit\(shown,calculation\.finalChance,high\)/,
+  "Tactical attack resolution must still use its local D100 hit convention");
+assert.match(tacticalDice,/critRoll=Math\.floor\(nextRandom\(state\)\*100\)\+1;if\(critRoll<=critChance\)/,
+  "Tactical critical roll must remain a local D100 consumer during pre-audit");
+
+assert.match(tacticalWallDice,/function diceFinalValue\(card\)/);
+assert.match(tacticalWallDice,/die\.textContent=String\(1\+Math\.floor\(Math\.random\(\)\*100\)\)/,
+  "wall/dice patch may randomize animation frames only");
+assert.match(tacticalWallDice,/const finish=\(\)=>\{[\s\S]*?die\.textContent=String\(finalValue\)/,
+  "wall/dice patch must settle on an externally supplied final result");
+assert.doesNotMatch(tacticalWallDice,/E\.resolveAttack=|function thresholdForChance\(/,
+  "wall/dice patch must not own Tactical hit rules");
+
 const gameplayRandoms=(index.match(/Math\.random\(\)/g)||[]).length;
 assert.ok(gameplayRandoms>50,
   "Math.random is broadly used for non-dice RNG too; Core Dice must not absorb all randomness");
@@ -53,7 +74,9 @@ console.log(JSON.stringify({
     freeRpgDice:"index:rollDungeonRpDice073",
     legacyDungeonD100:"index:d10048/dc051RollStatChallenge",
     puzzleTrapD100:"index:dc201PuzzleRoll/dc211TrapTest",
-    animationDecorator:"gens-mobile-combat-performance-16781022.js"
+    legacyAnimationDecorator:"gens-mobile-combat-performance-16781022.js",
+    tacticalRuleOwner:"gens-rpg-tactical-visual-dice-16781142.js",
+    tacticalAnimationDecorator:"gens-rpg-tactical-wall-dice-stats-16781145.js"
   },
-  finding:"dice rules are fragmented; animation performance is a separate concern; generic RNG must remain out of scope"
+  finding:"dice rules are fragmented across inline gameplay and Tactical; animation decorators are separate; generic RNG must remain out of scope"
 },null,2));

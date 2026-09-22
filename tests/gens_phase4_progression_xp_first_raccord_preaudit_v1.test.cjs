@@ -38,8 +38,8 @@ assert.equal((index.match(/function dungeonRpgLevelFromXp\s*\(/g)||[]).length,1,
   'historical base level helper definition count drifted');
 assert.equal((index.match(/window\.dungeonRpgLevelFromXp\s*=\s*function/g)||[]).length,1,
   'Core 0.44 override count drifted');
-assert.equal((index.match(/\bdungeonRpgLevelFromXp\b/g)||[]).length,14,
-  'global level helper identifier inventory drifted');
+assert.equal((index.match(/\bdungeonRpgLevelFromXp\b/g)||[]).length,13,
+  'global level helper identifier inventory drifted after the dedicated xpIntoLevel raccord retired its local level-seam call');
 
 assert.match(core044,/window\.dungeonRpgLevelFromXp=function\(xp\)\{const p=activeProg\(\),v=Math\.max\(0,Number\(xp\)\|\|0\);if\(!p\)\{const r=loadDungeonRpgRules\(\);return 1\+Math\.floor\(v\/Math\.max\(1,r\.xpPerLevel\)\)\}/,
   'historical no-profile boundary drifted');
@@ -118,8 +118,10 @@ const selection={
     'Math.max(0, Number(xp) || 0) normalization for legacy fallback',
     'no-profile loadDungeonRpgRules().xpPerLevel branch'
   ],
+  laterConnected:[
+    'dungeonRpgXpIntoLevel'
+  ],
   deferred:[
-    'dungeonRpgXpIntoLevel',
     'dungeonRpgEarnedSkillPoints',
     'dungeonSyncProgressionForState',
     'changeXP',

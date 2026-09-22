@@ -1,3 +1,74 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 complète / transition Phase 5 — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-exit-audit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-exit-audit-2026-09-22`.
+- Base exacte :
+  `605d90b48b0dedf3ba29e22a7527df7f345c347b`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-text-utils-u1-room-creator-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-complete-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Verdict de sortie
+
+L'audit formel de sortie Phase 4 est terminé sans modification runtime.
+
+Sentinelle :
+`tests/gens_phase4_exit_audit_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_EXIT_AUDIT.md`.
+
+Verdict :
+**le critère de sortie de la Phase 4 est satisfait**.
+
+Résumé :
+- Asset Resolver : aucune dette commune restante identifiée ;
+- Storage commun : aucun candidat autonome commun restant ;
+- Stats : moteurs communs Core raccordés ; contrats inertes non concurrents ;
+- Inventory / Equipment / Sets : calculs communs Core raccordés ;
+- Dice : scope commun retenu raccordé ; autres seams explicitement de domaine/différés ;
+- Progression : calculs communs retenus raccordés ; mutations/UI restent de domaine ;
+- Event Bus / utilitaires : aucun Event Bus générique créé ; U1 Text Utils raccordé.
+
+Cartographie :
+- 14 services Core Phase 4 connectés ;
+- 2 contrats Stats inertes non runtime ;
+- 79 JS production-reachable ;
+- 35 entrées directes production uniques ;
+- 30 modules Pages.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`5c87913cfa2543f77da5201dade009e71d762297`.
+
+- Architecture + navigateur complet : `35768434291` — SUCCESS ;
+- Firefox : `35768434363` — SUCCESS ;
+- Tactical Dock : `35768434304` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase4-complete-green-2026-09-22` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir ensuite un lot **Phase 5 pré-audit Shell/navigation** séparé, depuis ce
+   checkpoint GREEN ;
+5. ne déplacer aucun code Shell tant que ce pré-audit n'a pas cartographié les
+   propriétaires actuels accueil/navigation/fiche/session.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / audit de sortie vers Phase 5 — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

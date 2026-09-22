@@ -1,3 +1,103 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — premier raccord XP -> niveau — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-first-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-first-raccord-2026-09-22`.
+- Base exacte :
+  `e85b9cb4e93c38595f29b27738a823a8ac4954bd`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### TDD et raccord
+
+RED obligatoire observé avant runtime :
+- SHA `8a5a674b6574e104300c6f4346d6a3f6833ea88c` ;
+- Architecture `35710641838` — FAILURE attendu ;
+- Firefox `35710641580` — SUCCESS ;
+- Tactical Dock `35710641684` — SUCCESS.
+
+Raccord runtime :
+- commit `7396e115347d7ae2473afab184a8ab51de7c13e5` ;
+- Core chargé une fois avant `dungeonCore044HeroProgression` ;
+- branche profil -> `GensProgressionV1.levelFromXp(v,p)` ;
+- branche sans profil legacy inchangée ;
+- service worker cache le Core Progression.
+
+### État runtime final du lot
+
+`index.html` :
+- taille `8 174 416` octets ;
+- blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Core Progression :
+- blob inchangé
+  `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+Service worker :
+- blob `9076efa07bf3db411b48d143f05a007cbe41ccfe`.
+
+Graphe production-reachable :
+- 77 -> 78 fichiers JS.
+
+Le raccord conserve :
+- `activeProg()` ;
+- normalisation XP historique ;
+- branche no-profile ;
+- `loadDungeonRpgRules().xpPerLevel` ;
+- absence de cap 100 implicite sur cette branche legacy.
+
+Toujours différés :
+- `dungeonRpgXpIntoLevel` ;
+- `dungeonRpgEarnedSkillPoints` ;
+- `dungeonSyncProgressionForState` ;
+- XP manuel ;
+- XP combat/récompenses ;
+- level-up/restauration/popup/son/persistance.
+
+### Validation technique avant documentation finale
+
+SHA :
+`4904cde93ac677445bf0947fd4e41aee309c5d82`.
+
+- Architecture + navigateur complet
+  `35714002177` — SUCCESS ;
+- Firefox
+  `35714002278` — SUCCESS ;
+- Tactical Dock
+  `35714002221` — SUCCESS.
+
+Aucun RED fonctionnel n'est resté. Les écarts intermédiaires étaient des gardes
+de cartographie/fingerprint devenues obsolètes par le raccord et ont été
+réalignées sans changer leurs contrats métier.
+
+### Validation finale obligatoire
+
+La clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN cible, le **même SHA documentaire final
+exact** doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Prochaine action après GREEN
+
+Ouvrir une nouvelle branche homogène de pré-audit du prochain seam Progression.
+Ne pas raccorder automatiquement plusieurs responsabilités.
+
+Le prochain seam doit être sélectionné par caractérisation parmi les primitives
+restantes, avec priorité naturelle à `dungeonRpgXpIntoLevel` si le pré-audit
+confirme qu'il est pur et isolable.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — premier raccord XP -> niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

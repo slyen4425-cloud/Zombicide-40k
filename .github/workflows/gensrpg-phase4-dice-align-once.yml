@@ -105,46 +105,59 @@ jobs:
 
           p="tests/gens_phase4_dice_preaudit_v1.test.cjs"
           rep(p,
-              '''assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),false,
-                "Core Dice contract must remain inert until a dedicated raccord lot");''',
-              '''assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),true,
-                "post-raccord invariant: Core Dice must now be explicitly production-loaded");''',
+              'assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),false,',
+              'assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),true,',
               "Dice preaudit load state")
           rep(p,
-              '''assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?101-c/,
-                "index must still own the shared D100 threshold helper");''',
-              '''assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?Number\(chance\)\|\|1[\s\S]*?GensDiceV1\.thresholdFromChance\(c\)/,
-                "index must keep the shared D100 boundary while delegating the threshold formula to Core Dice");''',
+              '  "Core Dice contract must remain inert until a dedicated raccord lot");',
+              '  "post-raccord invariant: Core Dice must now be explicitly production-loaded");',
+              "Dice preaudit load message")
+          rep(p,
+              r'assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?101-c/,',
+              r'assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?Number\(chance\)\|\|1[\s\S]*?GensDiceV1\.thresholdFromChance\(c\)/,',
               "Dice preaudit seam")
+          rep(p,
+              '  "index must still own the shared D100 threshold helper");',
+              '  "index must keep the shared D100 boundary while delegating the threshold formula to Core Dice");',
+              "Dice preaudit seam message")
           rep(p,
               "  runtimeRaccord:false,",
               "  runtimeRaccord:'d100ThresholdFromChance',",
               "Dice preaudit diagnostic")
 
           p="tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs"
-          old=r'''const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return Math\.max\(1,Math\.min\(100,101-c\)\);\s*\}/);
-          assert.ok(thresholdMatch,'historical D100 threshold helper contract drifted');
-
-          const legacyCtx={Math,Number};
-          vm.createContext(legacyCtx);
-          vm.runInContext(thresholdMatch[0]+';this.legacyThreshold=d100ThresholdFromChance;',legacyCtx);
-          const legacy=legacyCtx.legacyThreshold;
-          '''
-          new=r'''const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/);
-          assert.ok(thresholdMatch,'selected D100 boundary must preserve legacy normalization and delegate to Core Dice');
-
-          const legacy=chance=>{
-            const c=Math.max(1,Math.min(100,Number(chance)||1));
-            return Math.max(1,Math.min(100,101-c));
-          };
-          '''
-          rep(p,old,new,"first raccord preaudit helper")
           rep(p,
-              '''assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),false,
-                'Core Dice must remain inert during first-raccord preaudit');''',
-              '''assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),true,
-                'selected first raccord must explicitly load Core Dice');''',
+              r'const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return Math\.max\(1,Math\.min\(100,101-c\)\);\s*\}/);',
+              r'const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/);',
+              "first raccord preaudit helper")
+          rep(p,
+              "assert.ok(thresholdMatch,'historical D100 threshold helper contract drifted');",
+              "assert.ok(thresholdMatch,'selected D100 boundary must preserve legacy normalization and delegate to Core Dice');",
+              "first raccord preaudit helper message")
+          rep(p,
+              "const legacyCtx={Math,Number};",
+              "const legacy=chance=>{",
+              "legacy adapter start")
+          rep(p,
+              "vm.createContext(legacyCtx);",
+              "  const c=Math.max(1,Math.min(100,Number(chance)||1));",
+              "legacy adapter normalize")
+          rep(p,
+              "vm.runInContext(thresholdMatch[0]+';this.legacyThreshold=d100ThresholdFromChance;',legacyCtx);",
+              "  return Math.max(1,Math.min(100,101-c));",
+              "legacy adapter formula")
+          rep(p,
+              "const legacy=legacyCtx.legacyThreshold;",
+              "};",
+              "legacy adapter end")
+          rep(p,
+              "assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),false,",
+              "assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),true,",
               "first raccord preaudit load")
+          rep(p,
+              "  'Core Dice must remain inert during first-raccord preaudit');",
+              "  'selected first raccord must explicitly load Core Dice');",
+              "first raccord preaudit load message")
           rep(p,
               "  runtimeChanged:false",
               "  runtimeChanged:true",

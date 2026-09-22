@@ -403,6 +403,11 @@
       "owner": "GenSrpG Core Stats Snapshot",
       "domain": "core",
       "role": "canonical immutable values and derived snapshot consumed through the active Stats runtime adapter"
+    },
+    "assets/gensrpg/core/text-utils-v1.js": {
+      "owner": "GenSrpG Core Text Utils",
+      "domain": "core",
+      "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
     }
   }
 }

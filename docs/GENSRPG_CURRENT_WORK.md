@@ -1,3 +1,70 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-preaudit-2026-09-22`.
+- Base exacte :
+  `4f0cdbcc436a71616191d2733883d5934950f60a`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit de `dungeonRpgEarnedSkillPoints` terminé sans modification runtime.
+
+- propriétaire actif : `dungeonCore044HeroProgression` ;
+- consommateur : `dungeonSyncProgressionForState` ;
+- dépendance : `dungeonRpgLevelFromXp`, déjà Core-backed ;
+- matrice : 100 cas ;
+- `index.html` inchangé : 8 174 346 octets, blob `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc` ;
+- Core Progression inchangé : blob `f633de55f1e6bda339e66c65debc35d7b8da2510`.
+
+Primitive Core candidate pour le lot suivant :
+`earnedSkillPointsFromLevel(level, explicitProgressionConfig, fallbackStartingSkillPoints, fallbackSkillPointsPerLevel)`.
+
+Le niveau canonique doit être fourni à cette primitive : le futur Core ne doit pas
+réimplémenter la courbe XP, les seuils custom ni `maxLevel`.
+
+### Validation technique avant documentation finale
+
+SHA :
+`2ba5ebeb94b5575ba24e804acf5359b7d2405781`.
+
+- Architecture + navigateur complet : `35733752295` — SUCCESS ;
+- Firefox : `35733752442` — SUCCESS ;
+- Tactical Dock : `35733752339` — SUCCESS.
+
+La nouvelle étape
+`Pré-auditer les points de compétence gagnés Core Progression`
+est GREEN dans Architecture.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant le checkpoint GREEN cible,
+le même SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite après GREEN
+
+Ouvrir un lot distinct de **contrat pur Core Progression** pour
+`earnedSkillPointsFromLevel(...)`.
+
+Interdictions maintenues :
+- aucun raccord runtime dans le lot de contrat ;
+- aucune mutation de `dungeonSyncProgressionForState` ;
+- aucun mélange avec points dépensés, bonus points, stat points, XP distribution ou level-up ;
+- aucun Event Bus ;
+- aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

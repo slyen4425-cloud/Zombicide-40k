@@ -121,3 +121,30 @@ Sentinelle :
 `tests/gens_phase4_progression_earned_skill_points_preaudit_v1.test.cjs`.
 
 Aucun runtime ni Core n'est modifié par ce pré-audit.
+
+
+## Validation technique du pré-audit
+
+SHA caractérisation :
+`2ba5ebeb94b5575ba24e804acf5359b7d2405781`.
+
+Résultats :
+- Architecture + navigateur complet : `35733752295` — SUCCESS ;
+- Firefox : `35733752442` — SUCCESS ;
+- Tactical Dock : `35733752339` — SUCCESS.
+
+La sentinelle de 100 cas est GREEN dans le pipeline Architecture.
+
+Le lot reste strictement documentaire/test :
+- aucun changement de `index.html` ;
+- aucun changement de `assets/gensrpg/core/progression-v1.js` ;
+- aucun nouveau propriétaire runtime.
+
+La clôture documentaire doit maintenant être validée par la triple CI sur son
+propre SHA exact. Après succès, créer :
+`checkpoint/gensrpg-phase4-progression-earned-skill-points-preaudit-green-2026-09-22`.
+
+Le lot suivant autorisé est un contrat Core pur et séparé pour :
+`earnedSkillPointsFromLevel(level, explicitProgressionConfig, fallbackStartingSkillPoints, fallbackSkillPointsPerLevel)`.
+
+Aucun raccord runtime dans le lot suivant tant que ce contrat n'est pas lui-même GREEN.

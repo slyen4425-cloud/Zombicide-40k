@@ -76,7 +76,7 @@ const cases=[
 
   // default fallback if explicit Dungeon fallback is invalid
   {xp:23,p:null,f:0,expected:3,label:'no-profile invalid fallback uses 10'},
-  {xp:23,p:null,f:'bad',expected:3,label:'no-profile NaN fallback uses 10'},
+  {xp:23,p:null,f:'bad',expected:NaN,label:'no-profile truthy invalid fallback preserves NaN'},
   {xp:23,p:null,f:-5,expected:0,label:'negative fallback clamps to one'},
 
   // linear profile

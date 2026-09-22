@@ -1,3 +1,61 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — pré-audit premier raccord — 2026-09-22
+
+Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-first-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `0ac5882199f845eec0b811e680b8ef624b95720a`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-contract-green-2026-09-22`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+Sentinelle :
+`tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs`.
+
+Résultats :
+- `d100ThresholdFromChance` : 1 définition + 15 callsites ;
+- `dungeonUniversalTest` : 1 définition + 1 callsite ;
+- le helper D100 est en parité avec Core Dice sur toutes les valeurs
+  finies/coercibles représentatives ;
+- divergence volontaire uniquement pour les entrées non finies
+  `undefined / NaN / ±Infinity` ;
+- `dungeonUniversalTest` mélange encore règles, activation, coercions,
+  sélection de dé, RNG et forme de résultat.
+
+Sélection :
+**premier raccord = `d100ThresholdFromChance`**.
+
+Document :
+`docs/GENSRPG_PHASE4_DICE_FIRST_RACCORD_PREAUDIT.md`.
+
+### Prochain lot correctif — séparé
+
+Après GREEN :
+- charger explicitement Core Dice ;
+- conserver la normalisation historique à la frontière ;
+- déléguer uniquement la formule du helper à
+  `GensDiceV1.thresholdFromChance` ;
+- ne modifier aucun RNG ni consommateur ;
+- ne pas toucher Tactical ;
+- RED avant modification runtime.
+
+### Validation finale
+
+Le checkpoint GREEN ne doit être créé qu'après SUCCESS de :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock ;
+sur le SHA documentaire final exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-dice-first-raccord-preaudit-green-2026-09-22`.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit premier raccord — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

@@ -129,7 +129,31 @@ entière, mais les clamps et conventions d'affichage ne sont pas identiques.
 Le pré-audit ne normalise rien tant que ces différences ne sont pas couvertes par
 des contrats explicites.
 
-## Animation : propriétaire distinct
+## Tactical V114.11 : propriétaire de règles D100 séparé
+
+`assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js` est un acteur
+distinct et important.
+
+Il possède notamment :
+- `thresholdForChance(hitChance, high)` avec clamp 1..99 ;
+- `displayHit(roll, hitChance, high)` ;
+- `nextRandom(state)`, qui utilise `state.rngSeed` lorsqu'il existe et
+  `Math.random()` sinon ;
+- le patch du vrai `resolveAttack` Tactical ;
+- les jets D100 de touche ;
+- les jets D100 de critique ;
+- une partie de la résolution de dégâts/armure autour de ces jets.
+
+Conclusion : ce fichier n'est pas un simple décorateur visuel. Il est actuellement
+un propriétaire de résolution Tactical. Core Dice ne devra pas absorber sa logique
+de hit/dégâts ; il pourra seulement, dans un lot futur et après preuve de parité,
+fournir des primitives de jet pures consommées par Tactical.
+
+Le RNG seedé est une contrainte de contrat importante : le futur Core Dice doit
+permettre une source RNG injectée ou explicitement fournie, sinon un raccord
+Tactical pourrait casser la reproductibilité d'une session seedée.
+
+## Animation : propriétaires distincts
 
 `assets/gensrpg/gens-mobile-combat-performance-16781022.js` capture :
 - `animateDice` ;
@@ -147,6 +171,15 @@ Ce module :
 Conclusion : il est un décorateur UI/performance et ne doit pas devenir le
 propriétaire Core Dice.
 
+`assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js` est un second
+décorateur d'animation D100 Tactical :
+- il lit la valeur finale déjà calculée depuis la carte ;
+- il affiche des faces D100 temporaires avec `Math.random()` ;
+- il termine sur la valeur finale reçue ;
+- il ne possède pas `resolveAttack` ni le calcul du seuil de touche.
+
+Il doit rester séparé du moteur de règles.
+
 ## Risques architecturaux
 
 1. Centraliser tout `Math.random()` mélangerait dés de règle et RNG de contenu.
@@ -155,8 +188,13 @@ propriétaire Core Dice.
 3. Déplacer les résolutions d'attaque dans Core Dice violerait les frontières Stats /
    Tactical / Dungeon : le moteur de dés doit produire des jets, pas décider dégâts,
    armure, critique ou mutation PV.
-4. Uniformiser immédiatement les clamps 1..100 et 5..95 pourrait modifier le gameplay.
-5. Les animations doivent rester séparées des règles et du RNG de résolution.
+4. Un Core Dice non injectable casserait potentiellement le RNG seedé de Tactical
+   V114.11.
+5. Les patches d'animation Mobile Combat Performance et Tactical Wall/Dice ne
+   doivent pas devenir des autorités de règle.
+6. Uniformiser immédiatement les clamps 1..100, 1..99 et 5..95 pourrait modifier
+   le gameplay.
+7. Les animations doivent rester séparées des règles et du RNG de résolution.
 
 ## Sentinelle de pré-audit
 
@@ -167,7 +205,8 @@ Il vérifie :
 - absence de Core Dice actuel ;
 - présence des principaux propriétaires/consommateurs ;
 - conventions D6 / dé configurable / D100 ;
-- séparation animation/règles du module performance ;
+- séparation animation/règles des modules performance ;
+- présence du propriétaire de résolution D100 Tactical V114.11 et de son RNG seedé ;
 - présence d'un grand volume de RNG non-dice, donc hors périmètre.
 
 ## Suite recommandée après GREEN

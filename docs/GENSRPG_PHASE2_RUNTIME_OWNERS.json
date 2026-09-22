@@ -209,7 +209,12 @@
       "domain": "core",
       "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
     },
-    "assets/gensrpg/core/runtime-bootstrap-v1.js": {
+    "assets/gensrpg/core/dice-v1.js": {
+    "owner": "GenSrpG Core Dice",
+    "domain": "core",
+    "role": "canonical pure D100 threshold primitive; first production raccord through the historical d100ThresholdFromChance boundary adapter"
+  },
+  "assets/gensrpg/core/runtime-bootstrap-v1.js": {
       "owner": "Core Bootstrap",
       "domain": "core",
       "role": "runtime dependency loader"

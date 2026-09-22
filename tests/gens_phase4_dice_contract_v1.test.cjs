@@ -91,5 +91,5 @@ console.log(JSON.stringify({
   chanceBounds:['1..100','1..99','5..95'],
   injectedRng:true,
   explainableResults:true,
-  runtimeRaccord:false
+  runtimeRaccord:'d100ThresholdFromChance'
 },null,2));

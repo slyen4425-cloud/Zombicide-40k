@@ -14,11 +14,11 @@ assert.equal(fs.existsSync(coreDice),true,
 const coreDiceSrc=fs.readFileSync(coreDice,"utf8");
 assert.match(coreDiceSrc,/GensDiceV1/,
   "pure Core Dice contract API must remain present");
-assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),false,
-  "Core Dice contract must remain inert until a dedicated raccord lot");
+assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),true,
+  "post-raccord invariant: Core Dice must now be explicitly production-loaded");
 
-assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?101-c/,
-  "index must still own the shared D100 threshold helper");
+assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?Number\(chance\)\|\|1[\s\S]*?GensDiceV1\.thresholdFromChance\(c\)/,
+  "index must keep the shared D100 boundary while delegating the threshold formula to Core Dice");
 assert.match(index,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?Math\.random\(\)\*sides[\s\S]*?success:total>=difficulty/,
   "RPG universal test must remain a configurable-sided roll + stat/modifier vs difficulty");
 assert.match(index,/function dungeonInitiativeScore\(statValue\)[\s\S]*?Math\.random\(\)\*d/,
@@ -71,7 +71,7 @@ assert.ok(gameplayRandoms>50,
 console.log(JSON.stringify({
   scenario:"Phase 4 Dice preaudit",
   coreDiceExists:true,
-  runtimeRaccord:false,
+  runtimeRaccord:'d100ThresholdFromChance',
   gameplayRandoms,
   owners:{
     sharedThreshold:"index:d100ThresholdFromChance",

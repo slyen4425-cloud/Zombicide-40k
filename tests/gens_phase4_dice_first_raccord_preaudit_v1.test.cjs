@@ -12,13 +12,13 @@ const universalOccurrences=(index.match(/\bdungeonUniversalTest\s*\(/g)||[]).len
 assert.equal(thresholdOccurrences,16,'D100 threshold seam must remain one definition + fifteen callsites');
 assert.equal(universalOccurrences,2,'universal test must remain one definition + one callsite');
 
-const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return Math\.max\(1,Math\.min\(100,101-c\)\);\s*\}/);
-assert.ok(thresholdMatch,'historical D100 threshold helper contract drifted');
+const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/);
+assert.ok(thresholdMatch,'selected D100 boundary must preserve legacy normalization and delegate to Core Dice');
 
-const legacyCtx={Math,Number};
-vm.createContext(legacyCtx);
-vm.runInContext(thresholdMatch[0]+';this.legacyThreshold=d100ThresholdFromChance;',legacyCtx);
-const legacy=legacyCtx.legacyThreshold;
+const legacy=chance=>{
+  const c=Math.max(1,Math.min(100,Number(chance)||1));
+  return Math.max(1,Math.min(100,101-c));
+};
 
 const coreCtx={console,Math,Number,Object,RangeError,TypeError};
 coreCtx.window=coreCtx;coreCtx.globalThis=coreCtx;
@@ -61,8 +61,8 @@ assert.match(index,/difficulty=Math\.max\(1,Number\(opt\.difficulty\)\|\|r\.test
 assert.match(index,/return \{enabled:true,success:total>=difficulty,total,roll,sides,modifier:mod,difficulty\}/,
   'universal test result shape drifted');
 
-assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),false,
-  'Core Dice must remain inert during first-raccord preaudit');
+assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),true,
+  'selected first raccord must explicitly load Core Dice');
 
 const selection={
   first:'d100ThresholdFromChance',
@@ -82,5 +82,5 @@ console.log(JSON.stringify({
   threshold:{callsites:thresholdOccurrences-1,finiteParity:true,nonFiniteBoundaryAdapterRequired:true},
   universalTest:{callsites:universalOccurrences-1,directCoreParity:false},
   selection,
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

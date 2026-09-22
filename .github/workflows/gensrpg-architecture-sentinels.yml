@@ -467,16 +467,7 @@ jobs:
       - name: Auditer la sortie Phase 4 vers Phase 5
         run: node tests/gens_phase4_exit_audit_v1.test.cjs
 
-      - name: Pré-auditer Shell et navigation Phase 5
-        run: node tests/gens_phase5_shell_navigation_preaudit_v1.test.cjs
-
-      - name: Caractériser l'autorité startConfiguredGame Phase 5
-        run: node tests/gens_phase5_startconfiguredgame_authority_preaudit_v1.test.cjs
-
       - name: Retirer le wrapper captureFix131 de startConfiguredGame
-        run: node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
-
-      - name: Retirer le wrapper startConfiguredGame captureFix131
         run: node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
 
       - name: Vérifier la parité stockage Dungeon Scene

@@ -1,3 +1,109 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / utilitaires communs U1 — contrat pur escapeHtml — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-common-text-utils-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-common-text-utils-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-common-text-utils-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+U1 crée uniquement :
+`assets/gensrpg/core/text-utils-v1.js`
+
+API :
+`GensTextUtilsV1.escapeHtml(value)`.
+
+Blob du service :
+`c84cd370c5c2874a51d5314abbf695fc4a63a7ee`.
+
+Sémantique :
+- nullish -> chaîne vide ;
+- conversion String ;
+- échappement de `& < > " '` ;
+- double échappement historique conservé.
+
+Le service est inert :
+- non chargé par `index.html` ;
+- non injecté par preview/Pages ;
+- absent du Service Worker ;
+- hors graphe production ;
+- aucun DOM/storage/event/listener/timer/RNG/navigation/gameplay.
+
+Cartographie :
+- JS physiques : 96 ;
+- Phase 2 baseline : 72 ;
+- Phase 3 inert : 8 ;
+- Phase 4 services : 16 ;
+- production-reachable : 78, inchangé.
+
+Aucun Event Bus générique n'a été créé.
+
+### TDD RED
+
+SHA :
+`e39fb7d8e342e8ad966714cf79b733cccc52b5b4`.
+
+Architecture :
+`35752132656` — FAILURE attendue sur U1 uniquement.
+
+Cause :
+`RED until Core Text Utility v1 exists`.
+
+Firefox :
+`35752132452` — SUCCESS.
+
+Tactical Dock :
+`35752132630` — SUCCESS.
+
+### Implémentation
+
+Commit service :
+`5493854aad6282fdf4d21aa5031ac7e31056fc3d`.
+
+Réalignement cartographie inert :
+`a38d73e8c623a14284f1355755d66ed520718d19`.
+
+Aucun runtime utilisateur n'a été modifié.
+
+### Validation technique avant documentation finale
+
+SHA :
+`a38d73e8c623a14284f1355755d66ed520718d19`.
+
+- Architecture + navigateur complet : `35752419473` — SUCCESS ;
+- Firefox : `35752419299` — SUCCESS ;
+- Tactical Dock : `35752419364` — SUCCESS.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant création du checkpoint GREEN,
+ce SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite autorisée après GREEN
+
+Ouvrir un lot séparé de **pré-audit d'un unique consommateur UI à faible risque**.
+
+Contraintes :
+- un seul consommateur ;
+- parité avant raccord ;
+- retirer son helper local seulement après preuve ;
+- aucun raccord multiple World Builder + Room Creator + Stats + Tactical ;
+- aucun Event Bus générique ;
+- aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / utilitaires communs U1 — contrat pur escapeHtml — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

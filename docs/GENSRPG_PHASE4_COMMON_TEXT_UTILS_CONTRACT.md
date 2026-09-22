@@ -69,3 +69,34 @@ GREEN : créer uniquement le fichier pur.
 
 Lot suivant séparé seulement après GREEN :
 pré-auditer puis raccorder un unique consommateur UI à faible risque.
+
+
+## Résultat technique
+
+RED :
+- SHA `e39fb7d8e342e8ad966714cf79b733cccc52b5b4` ;
+- Architecture `35752132656` — FAILURE attendue uniquement car le service n'existait pas ;
+- Firefox `35752132452` — SUCCESS ;
+- Tactical Dock `35752132630` — SUCCESS.
+
+GREEN technique :
+- service créé par `5493854aad6282fdf4d21aa5031ac7e31056fc3d` ;
+- cartographie inert réalignée par `a38d73e8c623a14284f1355755d66ed520718d19` ;
+- blob service `c84cd370c5c2874a51d5314abbf695fc4a63a7ee`.
+
+Validation sur `a38d73e8c623a14284f1355755d66ed520718d19` :
+- Architecture + navigateur complet `35752419473` — SUCCESS ;
+- Firefox `35752419299` — SUCCESS ;
+- Tactical Dock `35752419364` — SUCCESS.
+
+Le service reste hors graphe production. Le nombre de fichiers production-reachable
+reste 78 malgré le passage de 95 à 96 fichiers JS physiques.
+
+Aucun `index.html`, preview, Pages, Service Worker ou consommateur historique
+n'a été raccordé.
+
+La clôture documentaire doit encore passer la triple CI sur son propre SHA exact.
+Après succès, créer :
+`checkpoint/gensrpg-phase4-common-text-utils-contract-green-2026-09-22`.
+
+Le lot suivant doit être un pré-audit séparé d'un unique consommateur UI à faible risque.

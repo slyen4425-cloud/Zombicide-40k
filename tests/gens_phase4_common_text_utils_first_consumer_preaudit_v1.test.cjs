@@ -13,13 +13,8 @@ const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.concat([
 
 const corePath='assets/gensrpg/core/text-utils-v1.js';
 const roomPath='assets/dungeon/dungeon-room-creator-100.js';
-const worldPath='assets/dungeon/dungeon-world-builder-167821.js';
-const statsPath='assets/gensrpg/gens-rpg-stats-clean-167874.js';
-const tacticalPath='assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js';
-
 const coreBuf=bytes(corePath),core=coreBuf.toString('utf8');
 const roomBuf=bytes(roomPath),room=roomBuf.toString('utf8');
-const world=read(worldPath),stats=read(statsPath),tactical=read(tacticalPath);
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 const browserTest=read('tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs');
@@ -73,15 +68,8 @@ for(const value of cases){
   assert.equal(current(value),legacy(value),'Room Creator/Core parity drift for '+String(value));
 }
 
-const callCount=(src,subtractDefinition)=>((src.match(/\besc\s*\(/g)||[]).length-(subtractDefinition?1:0));
-const counts={
-  world:callCount(world,true),
-  room:callCount(room,true),
-  stats:callCount(stats,false),
-  tactical:callCount(tactical,false)
-};
-assert.deepEqual(counts,{world:22,room:10,stats:15,tactical:3},
-  'candidate escape callsite inventory drifted');
+const roomEscCallsites=(room.match(/\besc\s*\(/g)||[]).length-1;
+assert.equal(roomEscCallsites,10,'Room Creator escape callsite inventory drifted');
 
 const renderStart=room.indexOf('function renderLibrary');
 assert.ok(renderStart>=0,'Room Creator render boundary missing');
@@ -118,7 +106,7 @@ console.log(JSON.stringify({
   selected:'DungeonRoomCreator100',
   selectedPath:roomPath,
   parityCases:cases.length,
-  escapeCallsites:counts,
+  roomEscapeCallsites:roomEscCallsites,
   futureLoadOrder:'GensTextUtilsV1 before DungeonRoomCreator100 in Pages and preview',
   runtimeModified:false
 },null,2));

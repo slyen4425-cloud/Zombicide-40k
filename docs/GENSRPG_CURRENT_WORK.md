@@ -17,6 +17,120 @@ Ce bloc devient le point de reprise actif. Les sections suivantes sont historiqu
 
 ### Résultat du pré-audit
 
+Aucun runtime modifié.
+
+Seam suivant sélectionné :
+`dungeonRpgXpIntoLevel`.
+
+Propriétaire actif :
+`dungeonCore044HeroProgression`.
+
+Contrats historiques caractérisés :
+- sans profil : fallback `loadDungeonRpgRules().xpPerLevel` ;
+- profil linéaire : `p.xpPerLevel`, fallback Dungeon si absent/invalide/zéro ;
+- profil linéaire négatif : valeur truthy puis clamp à 1 ;
+- profil custom : consomme `dungeonRpgLevelFromXp(v)` puis soustrait uniquement
+  le seuil explicite du niveau courant ;
+- seuil custom manquant/invalide : départ de niveau 0 même si le calcul de niveau
+  a pu progresser via son propre fallback.
+
+Sentinelle :
+`tests/gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE4_PROGRESSION_XP_NEXT_SEAM_PREAUDIT.md`.
+
+### Validation technique
+
+SHA :
+`7a8b691072828c0a84d8468ca274e28b772478de`.
+
+- Architecture + navigateur complet :
+  `35718095681` — SUCCESS au run attempt 2 ;
+- Firefox :
+  `35718095818` — SUCCESS ;
+- Tactical Dock :
+  `35718095640` — SUCCESS.
+
+La première tentative navigateur de `35718095681` a timeout sur un clic
+`Dungeon après Survie`, avec overlay Tactical interceptant les pointer events.
+Le runtime était byte-identique au checkpoint GREEN ; relance du même SHA sans
+modification : SUCCESS complet. Flake navigateur non reproductible.
+
+### Source protégée
+
+`index.html` :
+- taille `8 174 416` octets ;
+- blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Core Progression :
+- blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+### Prochain lot après GREEN
+
+Ouvrir un lot distinct de **contrat Core pur XP-into-level**.
+
+API candidate :
+`xpIntoLevel(xp, explicitProgressionConfig, fallbackXpPerLevel)`.
+
+Le contrat pur doit :
+- conserver les sémantiques caractérisées ;
+- ne modifier aucun runtime ;
+- ne lire aucune règle Dungeon directement ;
+- rester inert jusqu'à son propre raccord ultérieur.
+
+### Chantier Agent 1 vérifié et gelé
+
+Pré-audit Event Bus / utilitaires communs :
+
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
+
+SHA :
+`5d713123585917d55a057373cba7d5003de02e7c`.
+
+Vérifications coordinateur :
+- branche = SHA annoncé ;
+- checkpoint = SHA annoncé ;
+- diff uniquement doc + sentinelle + CI ;
+- Architecture+navigateur `35717742314` — SUCCESS ;
+- Firefox `35717742455` — SUCCESS ;
+- Tactical Dock `35717742362` — SUCCESS.
+
+Décision :
+- ne pas créer de Event Bus générique ;
+- U1 futur = contrat pur inert `escapeHtml()` ;
+- ne pas mélanger ce chantier au domaine Progression en cours.
+
+### Validation finale obligatoire
+
+La clôture documentaire change le SHA.
+
+Avant checkpoint GREEN cible, le **même SHA documentaire final** doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Aucun merge sur `main`.
+
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit du seam suivant — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-next-seam-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-next-seam-preaudit-2026-09-22`.
+- Base exacte :
+  `6458f2d41245cfbd48e0d61367962a79d9d002f2`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat du pré-audit
+
 Aucun runtime n'a été modifié.
 
 Seam sélectionné :

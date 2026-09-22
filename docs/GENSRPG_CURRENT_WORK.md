@@ -1,3 +1,122 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-xp-preaudit-2026-09-22`.
+- Base exacte :
+  `0ce2451da078cceb90c0431a3735932dbd41f945`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Position roadmap
+
+Phase 4 suit l'ordre :
+Assets -> Storage -> Stats -> Inventory/Equipment -> Dice -> **Progression/XP** ->
+bus d'événements/utilitaires communs.
+
+Le sous-chantier Dice est arrêté sur son checkpoint GREEN actuel. Aucun troisième
+seam Dice n'est raccordé automatiquement.
+
+### Mission unique
+
+Pré-auditer les autorités Progression / XP réellement actives afin de définir le
+premier micro-lot Core Progression sans changement de gameplay.
+
+Le lot doit notamment caractériser :
+
+- `dungeonRpgLevelFromXp` ;
+- `dungeonSyncProgressionForState` ;
+- `changeXP` et le chemin XP manuel ;
+- `awardDungeonDefeatXp` ;
+- `dungeonRecordCombatReward` et les récompenses de victoire ;
+- `dungeonHandleLevelUp071` et la file de popups de niveau ;
+- les écritures de `rpgLevel`, `statPoints`, `skillPoints` ;
+- le rôle réel de
+  `assets/gensrpg/dungeon/progression-runtime-v1.js` ;
+- les frontières entre calcul pur, mutation d'état, persistance, UI et récompenses.
+
+### État déjà connu à vérifier, pas à supposer
+
+Des sentinelles historiques existent déjà pour :
+- progression native / récompenses ;
+- autorités exactes victoire/progression ;
+- XP manuel et points de caractéristiques ;
+- contrat `progression-runtime-v1.js`.
+
+Le fichier `progression-runtime-v1.js` existe, mais son commentaire indique qu'il
+ne possède qu'un seam d'action XP manuel et que les formules restent dans le
+monolithe. Le pré-audit doit prouver son statut réel dans le graphe de production
+avant toute décision.
+
+### Source index exacte
+
+Le dernier fichier utilisateur `work_10.zip` correspondait au GREEN précédent :
+- taille `8 174 637` octets ;
+- blob `5b8e790fefe7970a250fd9485ee80549511737e6`.
+
+Le seul micro-diff runtime ultérieur, le raccord GREEN `d10048`, a été rejoué
+localement à partir de cette copie avec le diff exact validé.
+
+La reconstruction obtenue correspond **exactement** au checkpoint GREEN courant :
+- taille `8 174 648` octets ;
+- blob Git `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+Cette reconstruction vérifiée est l'autorité locale d'inspection de l'index pour
+ce pré-audit. Aucun nouveau téléchargement n'est nécessaire tant que
+`index.html` ne change pas.
+
+### Périmètre strict
+
+Autorisé :
+- audit documentaire ;
+- nouvelle sentinelle de caractérisation ;
+- inventaire définitions/callsites/writers ;
+- analyse des frontières de responsabilité ;
+- comparaison avec les tests et modules existants ;
+- sélection d'un seul premier candidat ou conclusion qu'aucun raccord n'est sûr.
+
+Interdit :
+- modifier `index.html` ;
+- modifier `progression-runtime-v1.js` ;
+- modifier formules XP/niveau/points ;
+- modifier récompenses, loot ou victoire ;
+- modifier persistance ;
+- modifier UI/popups de niveau ;
+- modifier Stats / Inventory / Dice / Tactical / Storage ;
+- ajouter wrapper, observer, timer, retry ou fallback ;
+- modifier `main`.
+
+### Systèmes protégés
+
+- checkpoint GREEN Dice `0ce2451d...` ;
+- Core Dice et raccords existants ;
+- Core Stats / Inventory / Storage ;
+- Tactical V114.11 ;
+- Survie / Capture / PvP ;
+- Save & Quit / reprise ;
+- récompenses et progression Dungeon actuelles.
+
+### Tests / preuves attendues
+
+1. inventaire exact des autorités Progression et de leurs callsites ;
+2. séparation calcul pur / mutation / persistance / UI / récompenses ;
+3. statut production-reachable ou inert du module externe Progression V1 ;
+4. identification des doubles propriétaires éventuels ;
+5. test des valeurs configurables `xpPerLevel`, `statPointsPerLevel`, etc. ;
+6. aucun changement de formule ni de résultat ;
+7. sélection explicite du premier micro-lot Progression ;
+8. Architecture + navigateur complet, Firefox et Tactical Dock avant GREEN.
+
+### Prochaine action
+
+Construire la sentinelle de pré-audit à partir de l'index GREEN exact reconstruit
+et des tests historiques existants, sans modification runtime.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — raccord d10048 — 2026-09-22
 
 Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.

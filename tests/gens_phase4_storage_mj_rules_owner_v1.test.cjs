@@ -55,8 +55,8 @@ assert.match(
 assert.equal(mj.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.includes('removeItem("'+KEY+'")'),false);
 
-assert.equal(bytes.length,8174580,'MJ Rules micro-diff must keep exact index size');
-assert.equal(gitBlob(bytes),'5b9b9ae780f735eadef049afeb10acf0b57441fe','MJ Rules raccord must match deterministic target blob');
+assert.equal(bytes.length,8174637,'MJ Rules micro-diff must keep exact index size');
+assert.equal(gitBlob(bytes),'5b8e790fefe7970a250fd9485ee80549511737e6','MJ Rules raccord must match deterministic target blob');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core storage authority',

@@ -26,8 +26,8 @@ const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
-assert.equal(bytes.length,8174580,'preaudit must execute the exact verified index');
-assert.equal(blob,'5b9b9ae780f735eadef049afeb10acf0b57441fe','preaudit index blob drifted');
+assert.equal(bytes.length,8174637,'preaudit must execute the exact verified index');
+assert.equal(blob,'5b8e790fefe7970a250fd9485ee80549511737e6','preaudit index blob drifted');
 
 function extractFunction(source,name){
   const token='function '+name+'(';

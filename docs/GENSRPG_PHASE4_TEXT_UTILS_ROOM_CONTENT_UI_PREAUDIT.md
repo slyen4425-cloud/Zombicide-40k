@@ -102,3 +102,30 @@ Aucune stratégie de fallback silencieuse ou de double implémentation permanent
 ## Critère GREEN
 
 Pré-audit documentaire/test uniquement, triple CI GREEN, puis checkpoint dédié.
+
+
+## Résultat du pré-audit
+
+Consommateur retenu :
+`assets/dungeon/dungeon-room-content-ui-167831.js`.
+
+Le helper local `esc()` :
+- possède 4 callsites réels ;
+- ne porte aucune politique métier ;
+- est strictement équivalent à `GensTextUtilsV1.escapeHtml` sur 17 cas caractérisés.
+
+Risque principal :
+Text Utils U1 est inert et le loader de Room Content UI ne le charge pas actuellement.
+
+Conclusion :
+le futur raccord doit inclure un ordre de chargement explicite avant suppression du helper local.
+Aucun fallback permanent ou double implémentation ne doit être conservé.
+
+Validation technique sur `1d700b30d42fbdb653766b619070cbe69df37fa4` :
+- Architecture + navigateur complet `35759849292` — SUCCESS ;
+- Firefox `35759849442` — SUCCESS ;
+- Tactical Dock `35759849358` — SUCCESS.
+
+Aucun runtime, loader, Core ou consumer n'a été modifié dans ce pré-audit.
+
+La clôture documentaire doit maintenant passer la triple CI sur son propre SHA exact.

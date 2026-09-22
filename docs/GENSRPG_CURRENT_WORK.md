@@ -1,3 +1,90 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / U1 — pré-audit premier consommateur Text Utils — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-room-content-ui-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-room-content-ui-preaudit-2026-09-22`.
+- Base exacte :
+  `fb5ad67f13adb97d04533d1cd692a5e6cc75b794`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-text-utils-contract-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-text-utils-room-content-ui-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Premier consommateur sélectionné :
+`assets/dungeon/dungeon-room-content-ui-167831.js`.
+
+Pourquoi :
+- couche UI-only ;
+- helper local `esc()` purement textuel ;
+- seulement quatre callsites réels (+ définition) ;
+- aucun Storage, gameplay, Stats, Dice, Tactical ou réseau dans cette responsabilité ;
+- tests dédiés déjà présents.
+
+### Parité
+
+`esc()` local et `GensTextUtilsV1.escapeHtml` sont identiques sur 17 cas,
+incluant null/undefined, types scalaires, les cinq caractères HTML, mélange,
+Unicode et double échappement historique.
+
+Consumer inchangé :
+- blob `983a12bf6edad2eaec502bb08981e04b6c800be3`.
+
+Core Text Utils inchangé :
+- blob `f0befe5feaf3bb2536b9b15267399988c949aab8`.
+
+Runtime `index.html` inchangé :
+- 8 174 314 octets ;
+- blob `8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91`.
+
+### Frontière de chargement prouvée
+
+U1 reste inert.
+
+Le loader actuel
+`assets/dungeon/dungeon-room-creator-feedback-167821.js`
+charge Room Content UI mais ne charge pas Text Utils.
+
+Un futur raccord direct sans modifier l'ordre de chargement serait donc invalide.
+
+Le futur lot séparé devra :
+1. garantir explicitement `text-utils-v1.js` avant Room Content UI ;
+2. raccorder uniquement Room Content UI ;
+3. retirer son helper local `esc()` ;
+4. ne pas ajouter de fallback local permanent ;
+5. conserver World Builder, Stats UI et Tactical inchangés ;
+6. valider le vrai Room Creator dans le navigateur.
+
+### Validation technique avant documentation finale
+
+SHA :
+`1d700b30d42fbdb653766b619070cbe69df37fa4`.
+
+- Architecture + navigateur complet : `35759849292` — SUCCESS ;
+- Firefox : `35759849442` — SUCCESS ;
+- Tactical Dock : `35759849358` — SUCCESS.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA.
+Avant création du checkpoint GREEN cible, le même SHA final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite après GREEN
+
+Ouvrir un lot séparé de **raccord Room Content UI -> Text Utils**.
+Ce lot commencera par un TDD RED et ne touchera aucun autre consommateur.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / U1 — pré-audit premier consommateur Text Utils — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

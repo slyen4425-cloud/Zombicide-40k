@@ -1,3 +1,86 @@
+## Chantier courant prioritaire — Phase 4 Core Progression — pré-audit raccord points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-raccord-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `f892e6edad42acce4a43351e6f69c7837c76e637`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Contrat précédent officiellement GREEN
+
+SHA :
+`f892e6edad42acce4a43351e6f69c7837c76e637`.
+
+Validation finale :
+- Architecture + navigateur complet : `35737394851` — SUCCESS au rerun du job navigateur sur le même SHA ;
+- Firefox : `35737394805` — SUCCESS ;
+- Tactical Dock : `35737394865` — SUCCESS.
+
+Le premier passage navigateur a eu un timeout non déterministe dans Dungeon après Survie ;
+le rerun du même job, sans aucun changement de fichier, est entièrement SUCCESS.
+
+### Mission unique
+
+Pré-auditer le raccord runtime de `dungeonRpgEarnedSkillPoints` vers
+`GensProgressionV1.earnedSkillPointsFromLevel`.
+
+Pré-audit uniquement :
+- aucun changement de `index.html` ;
+- aucun changement du Core ;
+- caractériser propriétaire, lectures, ordre, coercions et parité ;
+- déterminer la forme minimale du futur raccord.
+
+### Source exacte protégée
+
+- `index.html` : 8 174 346 octets ;
+- blob : `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`;
+- Core Progression : blob `3cca29084ce436a8dcae95e5d6d745edd4afa3cf`.
+
+### Résultat de caractérisation local
+
+Propriétaire actif confirmé :
+`dungeonCore044HeroProgression -> dungeonRpgEarnedSkillPoints`.
+
+Le candidat minimal doit conserver :
+- `activeProg()` ;
+- `loadDungeonRpgRules()` uniquement sans profil ;
+- `dungeonRpgLevelFromXp(xp)` comme autorité du niveau canonique ;
+- l'ordre actuel des lectures.
+
+Il remplace uniquement la formule finale par :
+`GensProgressionV1.earnedSkillPointsFromLevel(...)`.
+
+Matrice réelle : 65 cas de parité.
+
+Le soupçon `NaN` sur `xpPerLevel` invalide n'est pas atteignable par le vrai chemin :
+`loadDungeonRpgRules()` passe d'abord par `normalizeDungeonRpgRules()`, qui normalise
+`xpPerLevel`, `startingSkillPoints` et `skillPointsPerLevel`.
+
+Le test doit donc traverser ce propriétaire réel et ne pas injecter directement des
+règles brutes après normalisation.
+
+### Hors périmètre
+
+- aucun raccord runtime dans ce lot ;
+- aucun `dungeonSyncProgressionForState` ;
+- aucun point dépensé, bonus ou stat point ;
+- aucun XP manuel/combat/objectifs ;
+- aucun level-up/UI/persistance ;
+- aucun Event Bus/common utilities ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Brancher la sentinelle de pré-audit à Architecture, passer Architecture + navigateur,
+Firefox et Tactical, documenter le résultat puis créer le checkpoint GREEN du pré-audit.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — contrat pur points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

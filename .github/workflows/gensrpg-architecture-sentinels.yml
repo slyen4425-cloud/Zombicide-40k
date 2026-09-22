@@ -452,6 +452,9 @@ jobs:
       - name: Verrouiller le contrat pur des points de compétence gagnés Core Progression
         run: node tests/gens_phase4_progression_earned_skill_points_contract_v1.test.cjs
 
+      - name: Pré-auditer le raccord des points de compétence gagnés Core Progression
+        run: node tests/gens_phase4_progression_earned_skill_points_raccord_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

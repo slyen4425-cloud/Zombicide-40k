@@ -18,8 +18,8 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blob=crypto.createHash('sha1')
   .update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8174648,'Progression preaudit must run on the exact d10048 GREEN index');
-assert.equal(blob,'2d7677950f04e9a3290ff0062e157a126123891d','Progression preaudit index blob drifted');
+assert.equal(bytes.length,8174416,'Progression preaudit must run on the exact first-raccord index');
+assert.equal(blob,'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','Progression preaudit index blob drifted');
 
 function scriptBody(id){
   const re=new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
@@ -78,14 +78,12 @@ assert.equal((index.match(/function dungeonRecordCombatReward\s*\(/g)||[]).lengt
 const levelFn=extractWindowFunction(core044,'dungeonRpgLevelFromXp');
 assert.match(levelFn,/const p=activeProg\(\),v=Math\.max\(0,Number\(xp\)\|\|0\)/,
   'XP->level boundary normalization drifted');
-assert.match(levelFn,/const max=Math\.max\(1,Number\(p\.maxLevel\)\|\|100\)/,
-  'profile maxLevel contract drifted');
-assert.match(levelFn,/\(p\.xpCurveMode\|\|"linear"\)==="custom"/,
-  'custom XP curve branch missing');
-assert.match(levelFn,/p\.xpThresholds\?\.\[lv\]/,
-  'custom XP thresholds must remain data-driven');
-assert.match(levelFn,/Math\.min\(max,1\+Math\.floor\(v\/Math\.max\(1,Number\(p\.xpPerLevel\)\|\|10\)\)\)/,
-  'linear XP curve contract drifted');
+assert.match(levelFn,/if\(!p\)\{const r=loadDungeonRpgRules\(\);return 1\+Math\.floor\(v\/Math\.max\(1,r\.xpPerLevel\)\)\}/,
+  'legacy no-profile XP curve boundary drifted');
+assert.match(levelFn,/return GensProgressionV1\.levelFromXp\(v,p\)/,
+  'configured profile XP curve must delegate to Core Progression');
+assert.doesNotMatch(levelFn,/p\.xpThresholds|const max=Math\.max/,
+  'configured profile curve implementation must no longer be duplicated in Core 0.44');
 
 const sync=extractFunction(index,'dungeonSyncProgressionForState');
 assert.match(sync,/const level=dungeonRpgLevelFromXp\(st\.xp\)/,'state sync must consume the canonical level seam');
@@ -149,6 +147,7 @@ function runLevel(profile,xp){
   };
   ctx.window=ctx;ctx.globalThis=ctx;
   vm.createContext(ctx);
+  vm.runInContext(read('assets/gensrpg/core/progression-v1.js'),ctx,{filename:'progression-v1.js'});
   vm.runInContext(core044,ctx,{filename:'dungeonCore044HeroProgression'});
   return ctx.dungeonRpgLevelFromXp(xp);
 }

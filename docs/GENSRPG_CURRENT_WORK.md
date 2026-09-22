@@ -1,3 +1,92 @@
+## Chantier courant prioritaire — Phase 4 Core Dice — premier raccord d100ThresholdFromChance — 2026-09-22
+
+Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-first-raccord-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-dice-first-raccord-2026-09-22`.
+- Base exacte :
+  `87a281394b2e5c31cb44277d8806ecf10101c0d1`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-dice-first-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Raccorder uniquement le helper historique
+`d100ThresholdFromChance(chance)` au service pur
+`GensDiceV1.thresholdFromChance`.
+
+Le helper historique reste la frontière de compatibilité pour ses 15 consommateurs.
+Aucun callsite n'est migré individuellement dans ce lot.
+
+### Source index autorisée
+
+Le fichier utilisateur `index_work_9.zip` a été retrouvé et revérifié avant ouverture
+du lot :
+- HTML : `index_work9.txt` ;
+- taille : `8 174 580` octets ;
+- blob Git : `5b9b9ae780f735eadef049afeb10acf0b57441fe` ;
+- identique au `index.html` de la base.
+
+### TDD / RED obligatoire
+
+La sentinelle du lot doit exiger avant toute modification runtime :
+1. Core Dice chargé explicitement avant consommation ;
+2. conservation de `Number(chance) || 1` puis clamp historique `1..100` à la frontière ;
+3. disparition de la formule locale `101 - chance` du helper ;
+4. délégation à `GensDiceV1.thresholdFromChance` ;
+5. parité exacte sur valeurs finies/coercibles et `undefined / NaN / ±Infinity` ;
+6. RNG D100 et génération des jets inchangés ;
+7. les 15 consommateurs inchangés ;
+8. Tactical inchangé ;
+9. aucun autre raccord Dice ;
+10. aucun wrapper, observer, timer, retry ou fallback.
+
+Le RED doit être observé et documenté avant le raccord runtime.
+
+### Invariants / systèmes protégés
+
+- `assets/gensrpg/core/dice-v1.js` reste strict et inchangé sauf preuve contraire ;
+- `dungeonUniversalTest` reste différé ;
+- aucune génération D6/D20/D100 n'est déplacée ;
+- aucun `Math.random()` de résolution ou de contenu n'est modifié ;
+- Tactical V114.11, son RNG seedé et ses conventions 1..99 sont hors périmètre ;
+- animations Mobile Combat Performance et Tactical Wall/Dice inchangées ;
+- aucun changement Stats / Inventory / Storage / Progression ;
+- aucun changement Survie / Dungeon / Capture / PvP autre que le seam central du helper ;
+- aucun merge sur `main`.
+
+### Tests requis avant GREEN
+
+- nouvelle sentinelle propriétaire/parité du premier raccord ;
+- pré-audit Dice et contrat pur Core Dice toujours GREEN ;
+- cartographie / graphe de production réalignés uniquement si le chargement du Core
+  rend leurs attentes obsolètes ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock ;
+- inspection du diff contre `87a28139...` pour prouver l'absence de dérive des
+  15 callsites, du RNG et de Tactical.
+
+### Risques
+
+- perdre la tolérance legacy sur les entrées non finies ;
+- charger le Core trop tard par rapport au helper inline ;
+- créer un double chargement entre source, preview et Pages ;
+- faire entrer par erreur un autre primitive Dice dans le raccord ;
+- casser le cache PWA si un nouveau fichier devient production-reachable sans
+  alignement du cache.
+
+### Prochaine action
+
+1. poser la sentinelle du raccord et la brancher à Architecture ;
+2. obtenir le RED attendu sans changement runtime ;
+3. seulement ensuite appliquer le micro-diff exact de chargement + délégation ;
+4. valider les trois batteries avant tout checkpoint GREEN.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — pré-audit premier raccord — 2026-09-22
 
 Ce bloc est le point de reprise prioritaire. Les sections suivantes sont historiques.

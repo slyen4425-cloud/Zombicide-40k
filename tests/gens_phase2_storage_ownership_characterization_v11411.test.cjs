@@ -39,7 +39,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,77);
+assert.equal(reachable.size,78);
 
 const disabled=new Set(Object.entries(inlineOwners.blocks||{}).filter(([,v])=>v.status==='disabled').map(([k])=>k));
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]

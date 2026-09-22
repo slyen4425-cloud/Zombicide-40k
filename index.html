@@ -32625,7 +32625,7 @@ function activeProg(){try{const p=loadGameProfiles().find(x=>String(x.id)===Stri
 window.dungeonActiveProgressionConfig=function(){return activeProg()||{}};
 window.dungeonRpgLevelFromXp=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p){const r=loadDungeonRpgRules();return 1+Math.floor(v/Math.max(1,r.xpPerLevel))}return GensProgressionV1.levelFromXp(v,p)};
 window.dungeonRpgXpIntoLevel=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0),needsFallback=(!p||(p.xpCurveMode||"linear")!=="custom")&&!Number(p?.xpPerLevel),fallback=needsFallback?loadDungeonRpgRules().xpPerLevel:undefined;return GensProgressionV1.xpIntoLevel(v,p,fallback)};
-window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules();return Math.max(0,r.startingSkillPoints)+Math.max(0,dungeonRpgLevelFromXp(xp)-1)*Math.max(0,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return Math.max(0,Number(p.startingSkillPoints)||0)+Math.max(0,level-1)*Math.max(0,Number(p.talentPointsPerLevel)||0)};
+window.dungeonRpgEarnedSkillPoints=function(xp){const p=activeProg();if(!p){const r=loadDungeonRpgRules(),level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,null,r.startingSkillPoints,r.skillPointsPerLevel)}const level=dungeonRpgLevelFromXp(xp);return GensProgressionV1.earnedSkillPointsFromLevel(level,p)};
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 1.05";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 1.05 · aide énigmes · objectifs secondaires · dalles visuelles."}catch(e){}
 })();
 </script>

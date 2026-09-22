@@ -1,10 +1,10 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "2d7677950f04e9a3290ff0062e157a126123891d",
+  "sourceIndexBlob": "a68bcbaf5d16bdbe2e70cbe0959a421371554fcc",
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
-    "externalReachableFiles": 77,
+    "externalReachableFiles": 78,
     "externalTimerSources": 53,
     "externalSetTimeoutSyntax": 148,
     "externalSetIntervalSyntax": 1,

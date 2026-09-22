@@ -1,3 +1,100 @@
+## Chantier courant prioritaire — Phase 4 / utilitaires communs U1 — pré-audit premier consommateur UI — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-common-text-utils-first-consumer-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-common-text-utils-first-consumer-preaudit-2026-09-22`.
+- Base exacte :
+  `1d5df325384d9748adfbce241445db294dd2466c`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-common-text-utils-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État de départ
+
+Service pur GREEN :
+`assets/gensrpg/core/text-utils-v1.js`
+
+API :
+`GensTextUtilsV1.escapeHtml(value)`
+
+Blob :
+`c84cd370c5c2874a51d5314abbf695fc4a63a7ee`.
+
+Le service est encore inert :
+- hors `index.html` ;
+- hors preview/Pages ;
+- hors Service Worker ;
+- hors graphe production.
+
+Pré-audit Agent 1 source :
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
+SHA `5d713123585917d55a057373cba7d5003de02e7c`.
+
+### Mission unique
+
+Pré-auditer un **seul futur consommateur UI** pour `escapeHtml`, sans raccord runtime.
+
+Candidats à comparer :
+- World Builder ;
+- Room Creator ;
+- Stats UI ;
+- Tactical Stats / autre UI active réellement porteuse du même helper.
+
+Le pré-audit doit sélectionner **un seul** consommateur futur en fonction de :
+1. helper réellement dupliqué ;
+2. parité exacte avec `GensTextUtilsV1.escapeHtml` ;
+3. faible risque gameplay ;
+4. faible risque inter-module ;
+5. ordre de chargement maîtrisable ;
+6. suppression locale possible sans wrapper ni fallback ;
+7. test navigateur ciblable.
+
+### Périmètre strict
+
+Autorisé :
+- lecture des propriétaires physiques ;
+- caractérisation des helpers locaux ;
+- inventaire callsites ;
+- vérification production-reachable ;
+- analyse de l'ordre de chargement futur ;
+- sentinelle documentaire/de parité ;
+- sélection d'un unique futur raccord.
+
+Interdit :
+- aucun raccord ;
+- aucune modification de consommateur ;
+- aucune injection de `text-utils-v1.js` ;
+- aucun `index.html` ;
+- aucun Event Bus ;
+- aucun gameplay ;
+- aucun storage ;
+- aucun Stats/Inventory/Dice/Progression comportemental ;
+- aucun wrapper/observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Tests attendus
+
+- preuve de duplication exacte ;
+- matrice de parité avec le Core Text Utility ;
+- inventaire des callsites du candidat sélectionné ;
+- preuve qu'aucun autre consommateur n'est raccordé ;
+- source Core byte-identique ;
+- graphe production inchangé ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Prochaine action
+
+Caractériser les candidats physiques existants et sélectionner le premier consommateur
+uniquement après preuve de parité et de faible risque.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 / utilitaires communs U1 — contrat pur escapeHtml — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

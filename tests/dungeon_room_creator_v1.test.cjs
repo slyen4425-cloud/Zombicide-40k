@@ -5,6 +5,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
+const textUtilsSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','text-utils-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-creator-100.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -21,6 +22,7 @@ const ctx={
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);
 vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
+vm.runInContext(textUtilsSrc,ctx,{filename:'text-utils-v1.js'});
 vm.runInContext(src,ctx,{filename:'dungeon-room-creator-100.js'});
 
 const d=ctx.DungeonRoomCreator100;

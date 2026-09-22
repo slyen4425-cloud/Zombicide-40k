@@ -1,3 +1,105 @@
+## Chantier courant prioritaire — Phase 4 Event Bus / utilitaires communs — U1 contrat Text Utility — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-event-bus-utilities-u1-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-event-bus-utilities-u1-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Phase 4 — ordre roadmap
+
+Étapes 1 à 6 traitées jusqu'au raccord Progression courant.
+Étape active : **7. bus d'événements / utilitaires communs**.
+
+Le pré-audit Agent 1 est GREEN sur :
+- branche : `work/gensrpg-phase4-event-bus-utilities-preaudit-agent1-2026-09-22` ;
+- SHA : `5d713123585917d55a057373cba7d5003de02e7c` ;
+- document : `docs/GENSRPG_PHASE4_EVENT_BUS_UTILITIES_PREAUDIT.md`.
+
+Ce pré-audit n'est pas fusionné : ses conclusions sont reprises sur la base GREEN actuelle.
+
+### Verdict pré-audit
+
+Ne pas créer d'Event Bus générique maintenant.
+
+Les mécanismes existants appartiennent à des propriétaires distincts :
+- notification métier locale Dungeon ;
+- lifecycle public Tactical ;
+- transport réseau Supabase ;
+- événements DOM/PWA/callbacks locaux.
+
+Un bus global créerait une seconde autorité transverse.
+
+### Mission unique U1
+
+Créer uniquement un contrat pur et inerte :
+
+`assets/gensrpg/core/text-utils-v1.js`
+
+API initiale unique :
+
+`escapeHtml(value)`.
+
+Contrat :
+- `null` / `undefined` -> chaîne vide ;
+- conversion par `String(...)` ;
+- `&` -> `&amp;` ;
+- `<` -> `&lt;` ;
+- `>` -> `&gt;` ;
+- `"` -> `&quot;` ;
+- `'` -> `&#39;` ;
+- autres caractères inchangés ;
+- une chaîne déjà échappée est ré-échappée comme dans les implémentations historiques.
+
+### Inertie obligatoire
+
+Dans ce lot :
+- aucun raccord consommateur ;
+- aucune modification de `index.html` ;
+- aucune modification de `preview.html` ;
+- aucune injection GitHub Pages ;
+- aucun Service Worker ;
+- aucun DOM ;
+- aucun storage ;
+- aucun listener / CustomEvent ;
+- aucun timer/retry ;
+- aucun RNG ;
+- aucun gameplay ;
+- aucune navigation ;
+- aucun Event Bus.
+
+### Tests prévus
+
+1. TDD RED : absence du service ;
+2. matrice pure `escapeHtml` ;
+3. parité avec des implémentations actives représentatives ;
+4. garde d'inertie du fichier ;
+5. garde d'absence du graphe production ;
+6. Architecture + navigateur complet ;
+7. Firefox ;
+8. Tactical Dock ;
+9. clôture documentaire puis triple CI finale sur le même SHA.
+
+### Risque
+
+Faible si le service reste inerte.
+Le principal risque serait de raccorder plusieurs consommateurs dans ce même lot ou
+d'introduire une infrastructure événementielle spéculative : explicitement interdit.
+
+### Prochaine action
+
+Créer la sentinelle RED U1 et la brancher à Architecture.
+Ne créer le service qu'après preuve RED ciblée.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

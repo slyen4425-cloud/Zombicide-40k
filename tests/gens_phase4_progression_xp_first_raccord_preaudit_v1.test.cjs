@@ -18,8 +18,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.length+'\0')).update(indexBuf).digest('hex');
 const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
-assert.equal(indexBuf.length,8174648,'first-raccord preaudit must remain on exact d10048 GREEN index');
-assert.equal(indexBlob,'2d7677950f04e9a3290ff0062e157a126123891d','index blob drifted during Progression preaudit');
+assert.equal(indexBuf.length,8174416,'first-raccord preaudit must track the exact connected index after its dedicated raccord');
+assert.equal(indexBlob,'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','index blob drifted after the dedicated Progression raccord');
 assert.equal(coreBlob,'b02487346f1a0df12effbc4559b5063bf8e12726','pure Core Progression service drifted');
 
 function scriptBody(id){
@@ -43,16 +43,18 @@ assert.equal((index.match(/\bdungeonRpgLevelFromXp\b/g)||[]).length,14,
 
 assert.match(core044,/window\.dungeonRpgLevelFromXp=function\(xp\)\{const p=activeProg\(\),v=Math\.max\(0,Number\(xp\)\|\|0\);if\(!p\)\{const r=loadDungeonRpgRules\(\);return 1\+Math\.floor\(v\/Math\.max\(1,r\.xpPerLevel\)\)\}/,
   'historical no-profile boundary drifted');
-assert.match(core044,/const max=Math\.max\(1,Number\(p\.maxLevel\)\|\|100\)/,
-  'configured profile max-level branch drifted');
-assert.match(core044,/p\.xpThresholds\?\.\[lv\]/,
-  'configured custom threshold branch drifted');
-assert.match(core044,/return Math\.min\(max,1\+Math\.floor\(v\/Math\.max\(1,Number\(p\.xpPerLevel\)\|\|10\)\)\)/,
-  'configured linear branch drifted');
+assert.match(core044,/return GensProgressionV1\.levelFromXp\(v,p\)/,
+  'configured profile branch must stay delegated to Core Progression');
+assert.doesNotMatch(core044,/p\.xpThresholds\?\.\[lv\]|const max=Math\.max\(1,Number\(p\.maxLevel\)/,
+  'configured profile curve implementation must not reappear locally');
 
-for(const source of [index,preview,pages,sw]){
+assert.equal(index.includes(corePath),true,
+  'Core Progression must be loaded by the source index after the dedicated raccord');
+assert.equal(sw.includes('./'+corePath),true,
+  'Core Progression must be included in the PWA cache after the dedicated raccord');
+for(const source of [preview,pages]){
   assert.equal(source.includes(corePath),false,
-    'Core Progression must remain inert during first-raccord preaudit');
+    'preview/Pages must inherit the source-index Core Progression load instead of injecting a second copy');
 }
 
 function runtime({profile=null,rules={xpPerLevel:10}}={}){
@@ -124,8 +126,8 @@ const selection={
     'combat XP/rewards/persistence',
     'dungeonHandleLevelUp071'
   ],
-  futureLoadOrder:'load progression-v1.js before dungeonCore044HeroProgression',
-  graphEffect:'Phase 4 inert -> connected; production reachable 77 -> 78'
+  futureLoadOrder:'resolved: progression-v1.js loads before dungeonCore044HeroProgression',
+  graphEffect:'resolved: Phase 4 connected; production reachable 78'
 };
 
 console.log(JSON.stringify({
@@ -133,5 +135,5 @@ console.log(JSON.stringify({
   profileParityCases:profileCases,
   noProfileDirectDelegationSafe:false,
   selection,
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

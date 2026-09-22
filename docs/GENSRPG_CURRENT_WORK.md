@@ -1,3 +1,133 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — pré-audit prochain raccord — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-next-raccord-preaudit-2026-09-22`.
+- Base exacte :
+  `e19d479c5559da9215d4456b4ea62c05a9f8bbf6`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-first-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-dice-next-raccord-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Source exacte vérifiée
+
+Le fichier utilisateur `work_10.zip` a été vérifié contre la base GREEN :
+
+- `index_work10.txt` ;
+- taille `8 174 637` octets ;
+- blob Git `5b8e790fefe7970a250fd9485ee80549511737e6`.
+
+Il correspond exactement au `index.html` de
+`e19d479c5559da9215d4456b4ea62c05a9f8bbf6`.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+Le prochain seam Core Dice recommandé est :
+
+`d10048(chance)`.
+
+État caractérisé :
+- 1 définition ;
+- 4 consommateurs :
+  `dc047StealthPrompt`,
+  `dc048TrapDetectRoll`,
+  `dc048TrapActionRoll`,
+  `dc048TrapTrigger` ;
+- normalisation historique :
+  `Math.round(Number(chance)||50)`, clamp `5..95` ;
+- seuil `101 - chance` ;
+- un seul D100 `1 + floor(Math.random()*100)` ;
+- succès haut `roll >= threshold` ;
+- forme résultat legacy `{chance,threshold,roll,ok}`.
+
+Après conservation de la normalisation de frontière, la primitive
+`GensDiceV1.rollChanceHigh(c,{min:5,max:95},rng)`
+est en parité exacte sur la chance, le seuil, le tirage RNG et la réussite.
+
+La matrice déterministe du pré-audit couvre 95 combinaisons incluant :
+- valeurs finies et décimales ;
+- coercions historiques ;
+- 0 / vide / null / false ;
+- undefined / NaN / ±Infinity ;
+- cinq valeurs RNG représentatives.
+
+Le service Core Dice ne nécessite aucune modification pour ce futur raccord.
+
+### Seams explicitement différés
+
+- `dungeonUniversalTest` :
+  règles RPG + branche disabled + dé configurable + coercions + résultat legacy ;
+- `showSpecialD6Roll` :
+  propriétaire UI/animation/callback, pas un seam moteur pur ;
+- `rollDungeonRpDice073` :
+  UI composite arme/esquive/test de caractéristique ;
+- `dc051RollStatChallenge` :
+  normalisation 5..95 distincte sans arrondi explicite ;
+- puzzle / détection pièges :
+  convention `roll <= chance` non représentée par le contrat Core actuel ;
+- `dungeonInitiativeScore` :
+  définition sans consommateur actuel identifié.
+
+Aucune uniformisation de ces conventions n'est autorisée dans le prochain lot.
+
+### Sentinelle
+
+Nouvelle sentinelle :
+`tests/gens_phase4_dice_next_raccord_preaudit_v1.test.cjs`.
+
+Elle verrouille :
+- l'index GREEN exact ;
+- le premier raccord `d100ThresholdFromChance` ;
+- l'inventaire des candidats restants ;
+- les conventions propres à chaque seam ;
+- la parité déterministe de `d10048` avec Core Dice ;
+- la sélection unique de `d10048`.
+
+La première exécution a révélé uniquement une erreur de comptage de test sur deux
+fonctions définies via `window.x=function`; aucune erreur runtime. La sentinelle a
+été corrigée pour compter les identifiants réels.
+
+SHA de la sentinelle corrigée :
+`81852cbfde6e3a03be7dfdab60eb137e5293fdff`.
+
+Architecture statique sur ce SHA : SUCCESS.
+La fermeture finale doit néanmoins être revalidée après ce bloc documentaire.
+
+### Futur micro-lot TDD après GREEN
+
+Ne pas modifier le runtime dans ce pré-audit.
+
+Après création du checkpoint GREEN uniquement, ouvrir un nouveau lot dédié
+**uniquement** au raccord de `d10048`.
+
+Le futur RED devra exiger :
+1. conservation exacte de `Math.round(Number(chance)||50)` + clamp `5..95` ;
+2. retrait du calcul local `101 - chance` et du D100 local dans `d10048` ;
+3. délégation à `GensDiceV1.rollChanceHigh(c,{min:5,max:95})` ;
+4. conservation de `{chance,threshold,roll,ok}` ;
+5. un seul appel RNG, même ordre et mêmes bornes ;
+6. quatre consommateurs inchangés ;
+7. premier raccord `d100ThresholdFromChance` inchangé ;
+8. Tactical / RNG seedé Tactical inchangés ;
+9. aucun autre seam Dice ;
+10. aucun wrapper, observer, timer, retry ou fallback.
+
+### Validation finale obligatoire avant checkpoint
+
+Ce bloc documentaire change le SHA.
+
+Le checkpoint cible ne doit être créé qu'après SUCCESS sur le **même SHA final
+exact** de :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — pré-audit prochain raccord — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

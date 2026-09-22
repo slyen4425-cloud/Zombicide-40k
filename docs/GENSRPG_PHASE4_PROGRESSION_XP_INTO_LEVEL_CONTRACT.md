@@ -199,3 +199,61 @@ existant, sans modifier `index.html`, Core 0.44, service worker, UI, Storage ou
 gameplay.
 
 Le propriétaire historique restera non raccordé dans ce lot.
+
+
+## Implémentation pure obtenue
+
+Core Progression :
+`assets/gensrpg/core/progression-v1.js`.
+
+Blob final du Core pour ce lot :
+`f633de55f1e6bda339e66c65debc35d7b8da2510`.
+
+API publique :
+- `levelFromXp(xp, progressionConfig)` ;
+- `xpIntoLevel(xp, progressionConfig, fallbackXpPerLevel)`.
+
+Le propriétaire runtime historique
+`dungeonCore044HeroProgression -> dungeonRpgXpIntoLevel`
+reste non raccordé à `GensProgressionV1.xpIntoLevel`.
+
+`index.html` reste byte-identique :
+- taille `8 174 416` octets ;
+- blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Aucun changement service worker / composition / graphe de production dans ce lot.
+
+## Validation technique avant clôture documentaire
+
+SHA :
+`dfb325fe7cdf66450350bd1f5ab1a5b7ab096d4a`.
+
+Runs sur ce SHA exact :
+- Architecture + navigateur complet :
+  `35720388888` — SUCCESS ;
+- Firefox :
+  `35720388992` — SUCCESS ;
+- Tactical Dock :
+  `35720388950` — SUCCESS.
+
+Toutes les sentinelles Progression historiques passent avec le nouveau contrat pur.
+
+## Clôture conditionnelle
+
+Checkpoint GREEN cible :
+
+`checkpoint/gensrpg-phase4-progression-xp-into-level-contract-green-2026-09-22`.
+
+La clôture documentaire change le SHA. Le SHA documentaire final exact doit donc
+repasser Architecture + navigateur complet, Firefox et Tactical Dock avant
+création du checkpoint GREEN.
+
+Après GREEN, ouvrir un lot séparé de pré-audit du raccord runtime de
+`dungeonRpgXpIntoLevel` vers `GensProgressionV1.xpIntoLevel`.
+
+Ne pas inclure dans ce futur raccord :
+- `dungeonRpgEarnedSkillPoints` ;
+- synchronisation des points ;
+- XP manuel/combat/objectifs ;
+- level-up ;
+- UI/persistance.

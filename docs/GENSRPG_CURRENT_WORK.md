@@ -84,11 +84,29 @@ Interdit :
 - modifier `index.html` ;
 - modifier `main`.
 
-### Prochaine action
+### Validation technique complète
 
-Faire passer la nouvelle sentinelle dans Architecture + navigateur complet,
-Firefox et Tactical Dock. Si GREEN, clôturer ce pré-audit sur son SHA exact puis
-ouvrir un lot séparé de **contrat pur Core Dice**.
+SHA technique validé :
+`48b3ad9b8b45c3603c7ee4f92c583f6c6149429c`.
+
+- Architecture + navigateur complet `35674408786` — SUCCESS ;
+- Firefox `35674408857` — SUCCESS ;
+- Tactical Dock `35674408856` — SUCCESS.
+
+Le contrôle Phase 2 des fichiers hors graphe a été réaligné pour les nouvelles
+références documentaires au patch Tactical Wall/Dice et est SUCCESS.
+
+### Clôture documentaire finale
+
+La mise à jour de clôture change le SHA. Avant checkpoint GREEN :
+1. revalider Architecture + navigateur complet ;
+2. revalider Firefox ;
+3. revalider Tactical Dock ;
+4. créer seulement après trois SUCCESS :
+   `checkpoint/gensrpg-phase4-dice-preaudit-green-2026-09-22`.
+
+Après GREEN, ouvrir un lot séparé **contrat pur Core Dice**. Aucun raccord runtime
+ne doit être inclus dans ce pré-audit.
 
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Inventory / Equipment — garde de chaîne retry Hero Editor — 2026-09-21
 

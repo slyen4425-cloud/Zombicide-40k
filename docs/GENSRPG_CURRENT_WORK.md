@@ -1,3 +1,141 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-xp-preaudit-2026-09-22`.
+- Base exacte :
+  `0ce2451da078cceb90c0431a3735932dbd41f945`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-d10048-raccord-green-2026-09-22`.
+- Checkpoint de départ du lot :
+  `checkpoint/gensrpg-start-phase4-progression-xp-preaudit-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### Résultat du pré-audit
+
+Aucun runtime n'a été modifié.
+
+Le propriétaire actif du calcul XP -> niveau est :
+
+`dungeonCore044HeroProgression -> dungeonRpgLevelFromXp`.
+
+Le calcul actif est déjà piloté par les données :
+- XP normalisée à partir de l'entrée ;
+- `xpCurveMode` ;
+- `xpPerLevel` ;
+- `xpThresholds` ;
+- `maxLevel` ;
+- fallback vers les règles Dungeon historiques en absence de profil progression.
+
+La sentinelle exécute le vrai propriétaire Core 0.44 et confirme la priorité des
+valeurs personnalisées sur les défauts, en courbe linéaire et personnalisée.
+
+### Frontières caractérisées
+
+Restent hors du premier service pur :
+
+- `dungeonRpgXpIntoLevel` : calcul adjacent, séparé ;
+- `dungeonRpgEarnedSkillPoints` : points gagnés, calcul métier distinct ;
+- `dungeonSyncProgressionForState` : mutation de
+  `rpgLevel / skillPoints / statPoints` ;
+- `changeXP` : mutation XP + persistance + son + rendu ;
+- `awardDungeonDefeatXp` : partage groupe + synchronisation + persistance ;
+- `dungeonRecordCombatReward` : agrégation kills / XP / drops ;
+- `dungeonHandleLevelUp071` : dernier propriétaire
+  `dungeonCore312TurnAndPopupFixes`, avec restauration, persistance,
+  file de popups et scheduling ;
+- `gens-stat-upgrade-policy-167898.js` : dépense de points, UI et retry.
+
+### Module progression-runtime-v1.js
+
+`assets/gensrpg/dungeon/progression-runtime-v1.js` est confirmé hors graphe
+production :
+- statut Phase 2 `tests-docs-only` ;
+- absent de l'index, preview, Pages et service worker ;
+- il wrappe `changeXP` et redélègue les formules au monolithe.
+
+Il ne doit pas devenir le Core Progression par simple reconnexion.
+
+### Premier micro-lot recommandé après GREEN
+
+Créer **un contrat pur Core Progression XP -> niveau**, sans raccord runtime.
+
+Forme conceptuelle :
+
+`levelFromXp(xp, progressionConfig)`.
+
+Le futur contrat doit reproduire exactement :
+- courbe linéaire ;
+- courbe personnalisée ;
+- `maxLevel` ;
+- fallback historique d'un seuil custom absent ;
+- normalisation d'entrée ;
+- priorité des valeurs configurées.
+
+Il ne doit posséder ni héros courant, récompense, mutation, stockage, UI, popup,
+son, timer ou module de jeu.
+
+Le raccord de Core 0.44 au futur service devra rester un lot ultérieur distinct
+avec TDD RED.
+
+### Source index vérifiée
+
+Le fichier utilisateur `work_10.zip` a été réutilisé uniquement après
+reconstruction du micro-diff GREEN `d10048`.
+
+La copie reconstruite correspond exactement au checkpoint de départ courant :
+- taille : `8 174 648` octets ;
+- blob Git : `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+### Validation technique GREEN
+
+SHA technique :
+
+`024c17a6a67bf6fcd8756b0eeb3cc1c5800b94a0`.
+
+Sur ce même SHA :
+- Architecture + navigateur complet :
+  `35696729085` — SUCCESS ;
+- Firefox :
+  `35696729032` — SUCCESS ;
+- Tactical Dock :
+  `35696729130` — SUCCESS.
+
+Le diff depuis le checkpoint GREEN Dice ne contient aucun fichier runtime.
+
+### Retour de test manuel utilisateur — différé hors lot
+
+Le test manuel du checkpoint Dice `d10048` est globalement correct.
+
+Deux signaux distincts sont conservés, sans correction dans ce pré-audit :
+
+1. **Détection ennemis** :
+   un ennemi ne repère plus immédiatement un héros lorsqu'il entre à portée.
+   À traiter dans un lot Dungeon mouvement -> détection / LOS avec reproduction
+   ciblée et propriétaire exact, sans mélange avec Progression.
+
+2. **Aldren / affichage Stats** :
+   confusion visuelle observée sur certaines statistiques d'Aldren.
+   À traiter dans un lot fiche RPG / rendu Stats en distinguant calcul canonique
+   et présentation.
+
+Ces deux points ne sont pas attribués au lot Progression actuel : aucun runtime
+n'y a été modifié.
+
+### Validation finale obligatoire avant checkpoint
+
+Cette clôture documentaire change le SHA.
+
+Le checkpoint GREEN cible ne doit être créé qu'après trois SUCCESS sur le même
+SHA documentaire final exact :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

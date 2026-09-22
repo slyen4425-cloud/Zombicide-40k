@@ -10,7 +10,7 @@ let activeRoom=null,activeTool="floor",zoom=38,painting=false,dirty=false;
 function now(){return new Date().toISOString()}
 function clampInt(v,min,max,fallback){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):fallback}
 function uid(){return "droom_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+const TextUtils=ROOT.GensTextUtilsV1;if(!TextUtils)throw new Error("GensTextUtilsV1 must load before DungeonRoomCreator100");const esc=TextUtils.escapeHtml;
 function cell(){return {terrain:"floor",object:null}}
 function normalizeCell(raw){const terrain=raw?.terrain==="wall"?"wall":"floor";const object=Object.prototype.hasOwnProperty.call(TOOLS,String(raw?.object||""))&&TOOLS[String(raw.object)].kind==="object"?String(raw.object):null;return {terrain,object:terrain==="wall"?null:object}}
 function makeRoom(opts){opts=opts||{};const width=clampInt(opts.width,MIN_SIZE,MAX_SIZE,8),height=clampInt(opts.height,MIN_SIZE,MAX_SIZE,8),cells=Array.from({length:width*height},cell),entryIndex=(height-1)*width+Math.floor(width/2),exitIndex=Math.floor(width/2);if(cells[entryIndex])cells[entryIndex].object="entry";if(cells[exitIndex]&&exitIndex!==entryIndex)cells[exitIndex].object="exit";const stamp=now();return {schema:SCHEMA_VERSION,id:opts.id||uid(),name:String(opts.name||"Nouvelle pièce"),roomType:String(opts.roomType||"room"),theme:String(opts.theme||"stone"),tags:Array.isArray(opts.tags)?opts.tags.map(String):[],notes:String(opts.notes||""),width,height,cells,createdAt:opts.createdAt||stamp,updatedAt:stamp}}

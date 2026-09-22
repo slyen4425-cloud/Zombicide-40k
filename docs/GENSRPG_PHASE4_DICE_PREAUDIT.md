@@ -237,3 +237,22 @@ propriétaire, probablement le helper D100 partagé ou `dungeonUniversalTest`.
 - aucun wrapper/observer/timer/retry supplémentaire ;
 - aucun changement de `index.html` ;
 - aucun changement de `main`.
+
+## Validation technique complète
+
+SHA technique validé :
+`48b3ad9b8b45c3603c7ee4f92c583f6c6149429c`.
+
+- Architecture + navigateur complet : `35674408786` — SUCCESS ;
+- Firefox : `35674408857` — SUCCESS ;
+- Tactical Dock : `35674408856` — SUCCESS.
+
+La sentinelle Dice et le manifeste Phase 2 hors-graphe sont SUCCESS sur ce SHA.
+
+## Clôture documentaire
+
+La présente clôture documentaire change le SHA. Le checkpoint GREEN ne doit être
+créé qu'après revalidation des trois batteries sur le SHA documentaire final exact.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase4-dice-preaudit-green-2026-09-22`.

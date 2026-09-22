@@ -434,6 +434,9 @@ jobs:
       - name: Raccorder le premier calcul XP niveau au Core Progression
         run: node tests/gens_phase4_progression_xp_first_raccord_v1.test.cjs
 
+      - name: Pré-auditer le seam XP dans le niveau Core Progression
+        run: node tests/gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

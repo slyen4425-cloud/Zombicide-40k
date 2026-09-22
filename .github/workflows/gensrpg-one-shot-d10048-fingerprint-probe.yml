@@ -1,0 +1,26 @@
+name: One-shot d10048 fingerprint probe
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-dice-d10048-raccord-2026-09-22'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find stale active index fingerprints
+        run: |
+          echo "=== OLD BLOB ==="
+          grep -RIn --exclude='GENSRPG_CURRENT_WORK.md' --exclude='GENSRPG_PHASE4_DICE_NEXT_RACCORD_PREAUDIT.md' \
+            '5b8e790fefe7970a250fd9485ee80549511737e6' tests docs .github || true
+          echo "=== OLD SIZE ==="
+          grep -RIn --exclude='GENSRPG_CURRENT_WORK.md' --exclude='GENSRPG_PHASE4_DICE_NEXT_RACCORD_PREAUDIT.md' \
+            '8174637' tests docs .github || true
+          echo "=== OLD D10048 BODY ==="
+          grep -RIn 'threshold=101-chance,roll=1+Math.floor(Math.random()*100)' tests docs .github || true

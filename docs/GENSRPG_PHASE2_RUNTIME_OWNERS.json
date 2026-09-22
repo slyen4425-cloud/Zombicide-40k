@@ -214,6 +214,11 @@
       "domain": "core",
       "role": "canonical pure D100 threshold primitive; first production raccord through the historical d100ThresholdFromChance boundary adapter"
     },
+    "assets/gensrpg/core/progression-v1.js": {
+      "owner": "GenSrpG Core Progression",
+      "domain": "core",
+      "role": "canonical pure XP-to-level primitive used by the active Core 0.44 owner for configured progression profiles while the legacy no-profile fallback remains at the historical boundary"
+    },
     "assets/gensrpg/core/runtime-bootstrap-v1.js": {
       "owner": "Core Bootstrap",
       "domain": "core",

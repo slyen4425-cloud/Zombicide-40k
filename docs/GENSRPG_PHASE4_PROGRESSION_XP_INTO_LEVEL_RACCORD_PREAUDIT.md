@@ -179,3 +179,47 @@ TDD du futur raccord :
 - aucun autre seam Progression raccordé.
 
 Aucun merge sur `main`.
+
+
+## Validation technique avant clôture documentaire
+
+SHA :
+`2c1451d24762c3268d988d6f38deb2995c4cbe74`.
+
+Runs sur ce SHA exact :
+- Architecture + navigateur complet :
+  `35722837686` — SUCCESS ;
+- Firefox :
+  `35722837644` — SUCCESS ;
+- Tactical Dock :
+  `35722837719` — SUCCESS.
+
+La sentinelle de pré-audit verrouille désormais une matrice de **70 cas de parité exacte**.
+
+Elle prouve également le comportement lazy du fallback Dungeon :
+- no-profile : lecture requise ;
+- linéaire avec `Number(p.xpPerLevel)` truthy : aucune lecture ;
+- linéaire avec valeur falsy/invalide : lecture requise ;
+- custom : aucune lecture.
+
+Aucun runtime n'est modifié dans ce lot.
+
+## Clôture conditionnelle
+
+Checkpoint GREEN cible :
+
+`checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-preaudit-green-2026-09-22`.
+
+La documentation finale change le SHA. Le même SHA documentaire final doit donc
+repasser Architecture + navigateur complet, Firefox et Tactical Dock avant
+création du checkpoint GREEN.
+
+Après GREEN, ouvrir un lot séparé de raccord runtime TDD de
+`dungeonRpgXpIntoLevel` vers `GensProgressionV1.xpIntoLevel`.
+
+Le futur raccord doit :
+- conserver `activeProg()` à la frontière ;
+- conserver la normalisation XP historique ;
+- conserver le fallback Dungeon lazy ;
+- ne modifier aucun autre seam Progression ;
+- laisser le Core byte-identique.

@@ -30,6 +30,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
+  'assets/gensrpg/core/progression-v1.js?v=1',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js'

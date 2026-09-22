@@ -186,3 +186,130 @@ Appliquer le micro-raccord au vrai propriétaire, à partir du `index.html` exac
 du lot, puis réaligner uniquement les sentinelles/cartographies rendues
 obsolètes par ce raccord.
 
+
+
+## Raccord appliqué et validation technique GREEN
+
+Le fichier utilisateur `index_w_11.zip` a été vérifié avant modification contre
+la source Git attendue :
+
+- taille `index.html` : `8 174 648` octets ;
+- blob Git : `2d7677950f04e9a3290ff0062e157a126123891d`.
+
+Le micro-raccord a été appliqué par workflow one-shot avec vérifications strictes
+avant/après puis auto-suppression du workflow.
+
+Commit runtime du raccord :
+
+`7396e115347d7ae2473afab184a8ab51de7c13e5`.
+
+### Diff runtime exact
+
+`index.html` :
+- charge une seule fois
+  `assets/gensrpg/core/progression-v1.js?v=1`
+  immédiatement avant `dungeonCore044HeroProgression` ;
+- conserve `activeProg()` ;
+- conserve la normalisation
+  `Math.max(0, Number(xp) || 0)` ;
+- conserve intégralement la branche `!p` et
+  `loadDungeonRpgRules().xpPerLevel` ;
+- remplace uniquement la formule locale de la branche profil par
+  `GensProgressionV1.levelFromXp(v,p)`.
+
+`service-worker.js` :
+- ajoute uniquement
+  `./assets/gensrpg/core/progression-v1.js`
+  à `CORE_FILES`.
+
+Core Progression :
+- fichier byte-identique ;
+- blob toujours
+  `b02487346f1a0df12effbc4559b5063bf8e12726`.
+
+État final de l'index après raccord :
+- taille : `8 174 416` octets ;
+- blob Git :
+  `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
+
+Service worker final :
+- blob Git :
+  `9076efa07bf3db411b48d143f05a007cbe41ccfe`.
+
+### Contrat réellement obtenu
+
+La sentinelle de raccord protège :
+- 140 cas de parité sur les profils configurés ;
+- exactement un appel Core par calcul profil configuré ;
+- zéro appel Core dans la branche no-profile ;
+- `xpPerLevel=25`, 50 XP -> niveau 3 en legacy ;
+- `xpPerLevel=25`, 2500 XP -> niveau 101 en legacy ;
+- aucun raccord de `dungeonRpgXpIntoLevel` ;
+- aucun raccord de points de talent, sync héros, XP manuel, récompenses,
+  level-up, popup ou persistance.
+
+Le graphe production-reachable passe volontairement de 77 à 78 fichiers JS.
+
+### Réalignements de cartographie/sentinelles
+
+Après le RED et le raccord, seules les gardes devenues obsolètes par :
+- le nouveau blob `index.html` ;
+- le passage 77 -> 78 ;
+- le passage de Core Progression de `inert` à `connected` ;
+- le dernier propriétaire de `dungeonRpgLevelFromXp` ;
+
+ont été réalignées.
+
+Les contrats métier historiques restent inchangés. Les batteries Storage, Stats,
+Inventory/Equipment, Dice, Asset Resolver, Phase 2 et Phase 3 ont ensuite toutes
+repassé SUCCESS.
+
+### Validation technique avant clôture documentaire
+
+SHA technique :
+
+`4904cde93ac677445bf0947fd4e41aee309c5d82`.
+
+Sur ce SHA exact :
+
+- Architecture + navigateur complet :
+  `35714002177` — SUCCESS ;
+- Firefox :
+  `35714002278` — SUCCESS ;
+- Tactical Dock :
+  `35714002221` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie et Fouiller/arts ;
+- Dungeon après Survie ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG ;
+- caches/retours/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- murs ;
+- preview ;
+- assets ;
+- Equipment.
+
+## Clôture conditionnelle finale
+
+Checkpoint cible :
+
+`checkpoint/gensrpg-phase4-progression-xp-first-raccord-green-2026-09-22`.
+
+La présente documentation modifie le SHA. Le checkpoint ne doit être créé
+qu'après trois SUCCESS sur le **SHA documentaire final exact** :
+
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après ce GREEN uniquement, le prochain lot Progression doit être un nouveau
+pré-audit homogène. Aucun autre seam Progression ne doit être raccordé dans le
+présent lot.
+
+Aucun merge sur `main`.

@@ -38,7 +38,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,77);
+assert.equal(reachable.size,78);
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 
 const disabled=new Set([

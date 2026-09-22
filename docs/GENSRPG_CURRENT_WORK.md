@@ -1,3 +1,90 @@
+## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-preaudit-2026-09-22`.
+- Base exacte :
+  `4f0cdbcc436a71616191d2733883d5934950f60a`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Lot précédent officiellement GREEN
+
+Raccord `dungeonRpgXpIntoLevel -> GensProgressionV1.xpIntoLevel` validé sur le SHA exact
+`4f0cdbcc436a71616191d2733883d5934950f60a` :
+
+- Architecture + navigateur complet : `35731403941` — SUCCESS ;
+- Firefox : `35731404025` — SUCCESS ;
+- Tactical Dock : `35731403944` — SUCCESS.
+
+Checkpoint final :
+`checkpoint/gensrpg-phase4-progression-xp-into-level-raccord-green-2026-09-22`.
+
+### Mission unique du nouveau lot
+
+Pré-auditer uniquement le seam candidat :
+`dungeonRpgEarnedSkillPoints`.
+
+Objectif :
+- identifier son propriétaire runtime exact ;
+- caractériser ses entrées, sorties, coercions et fallbacks ;
+- vérifier sa relation avec le profil Progression actif ;
+- déterminer si une primitive Core pure peut être isolée sans modifier le runtime ;
+- produire une sentinelle de caractérisation avant tout futur contrat/raccord.
+
+### Périmètre autorisé
+
+- documentation ;
+- sentinelle de caractérisation ;
+- lecture du propriétaire exact ;
+- matrice de parité/edge cases ;
+- identification d'une API Core candidate pure et inerte.
+
+### Hors périmètre
+
+- aucun raccord runtime dans ce lot ;
+- aucune modification de `dungeonRpgEarnedSkillPoints` ;
+- aucune modification de `dungeonSyncProgressionForState` ;
+- aucun XP manuel/combat/objectifs ;
+- aucun changement points dépensés ;
+- aucun level-up/restauration/popup/son ;
+- aucune UI/persistance ;
+- aucun changement Stats/Inventory/Storage/Dice/Tactical ;
+- aucun Event Bus/utilitaire commun ;
+- aucun changement sur `main`.
+
+### Propriétaire candidat à confirmer
+
+`dungeonCore044HeroProgression`.
+
+Le propriétaire ne doit être déclaré définitif qu'après lecture de la source exacte.
+
+### Source protégée
+
+Le lot part du runtime GREEN :
+- `index.html` : 8 174 346 octets ;
+- blob : `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+Règle 26 obligatoire : si le contenu exact de `index.html` est nécessaire,
+utiliser une copie correspondant exactement au SHA/base ci-dessus ; ne pas
+reconstruire ni lire en boucle le gros HTML via l'API.
+
+### Prochaine action immédiate
+
+1. obtenir/vérifier la copie exacte de `index.html` du SHA de base si nécessaire ;
+2. localiser et caractériser `dungeonRpgEarnedSkillPoints` sans modifier le runtime ;
+3. écrire la sentinelle de pré-audit ;
+4. brancher la sentinelle à Architecture ;
+5. valider Architecture + navigateur, Firefox et Tactical ;
+6. documenter le futur micro-lot autorisé uniquement après GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — raccord XP dans le niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

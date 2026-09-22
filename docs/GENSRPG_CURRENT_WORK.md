@@ -140,15 +140,22 @@ déplacé ni réécrit. Le checkpoint définitif du lot sera donc :
 Il devra pointer exactement sur le SHA documentaire final qui passe les trois
 batteries.
 
-### Validation finale obligatoire avant checkpoint
+### Validation finale sur le SHA documentaire candidat
 
-Cette clôture documentaire change le SHA.
+SHA documentaire candidat :
+`5303d13372b73fcb827b6ef8df5b8a2350a4d6c8`.
 
-Le checkpoint GREEN cible ne doit être créé qu'après trois SUCCESS sur le même
-SHA documentaire final exact :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+Sur ce même SHA :
+- Architecture + navigateur complet :
+  `35700145785` — SUCCESS ;
+- Firefox :
+  `35700145805` — SUCCESS ;
+- Tactical Dock :
+  `35700145915` — SUCCESS.
+
+Cette inscription des preuves modifie à nouveau le SHA documentaire.
+Le checkpoint GREEN définitif ne doit donc être créé qu'après une dernière
+revalidation des trois batteries sur le **nouveau SHA exact de cette clôture**.
 
 ## Chantier courant prioritaire — Phase 4 Core Progression / XP — pré-audit — 2026-09-22
 

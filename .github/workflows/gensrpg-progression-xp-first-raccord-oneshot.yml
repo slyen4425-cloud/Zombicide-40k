@@ -1,0 +1,87 @@
+name: GenSrpG Progression XP first raccord one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase4-progression-xp-first-raccord-2026-09-22
+    paths:
+      - .github/workflows/gensrpg-progression-xp-first-raccord-oneshot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase4-progression-xp-first-raccord-2026-09-22
+          fetch-depth: 0
+
+      - name: Verify exact source and patch owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(wc -c < index.html)" = "8174648"
+          test "$(git hash-object index.html)" = "2d7677950f04e9a3290ff0062e157a126123891d"
+          test "$(git hash-object assets/gensrpg/core/progression-v1.js)" = "b02487346f1a0df12effbc4559b5063bf8e12726"
+
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          owner='<style id="dungeonCore044HeroProgressionCss">'
+          assert s.count(owner)==1
+          assert 'assets/gensrpg/core/progression-v1.js' not in s
+
+          start=s.index('window.dungeonRpgLevelFromXp=function(xp)')
+          end=s.index('window.dungeonRpgXpIntoLevel=',start)
+          old=s[start:end]
+          assert 'p.xpThresholds' in old
+          assert 'GensProgressionV1' not in old
+          assert 'loadDungeonRpgRules()' in old
+
+          new='window.dungeonRpgLevelFromXp=function(xp){const p=activeProg(),v=Math.max(0,Number(xp)||0);if(!p){const r=loadDungeonRpgRules();return 1+Math.floor(v/Math.max(1,r.xpPerLevel))}return GensProgressionV1.levelFromXp(v,p)};\n'
+
+          s=s[:start]+new+s[end:]
+          s=s.replace(owner,'<script src="assets/gensrpg/core/progression-v1.js?v=1"></script>\n\n'+owner,1)
+          p.write_text(s,encoding="utf-8")
+
+          assert p.stat().st_size==8174416
+          blob=subprocess.check_output(["git","hash-object","index.html"],text=True).strip()
+          assert blob=="a68bcbaf5d16bdbe2e70cbe0959a421371554fcc",blob
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("service-worker.js")
+          s=p.read_text(encoding="utf-8")
+          needle='"./assets/gensrpg/core/dice-v1.js",'
+          assert s.count(needle)==1
+          assert './assets/gensrpg/core/progression-v1.js' not in s
+          s=s.replace(needle,needle+'"./assets/gensrpg/core/progression-v1.js",',1)
+          p.write_text(s,encoding="utf-8")
+          assert s.count('./assets/gensrpg/core/progression-v1.js')==1
+          PY
+
+          echo "=== Progression references after patch ==="
+          grep -R -n --exclude=index.html "progression-v1.js" docs tests .github preview.html service-worker.js || true
+          echo "=== Runtime diff ==="
+          git diff -- index.html service-worker.js
+
+      - name: Commit exact micro-raccord and remove one-shot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/gensrpg-progression-xp-first-raccord-oneshot.yml
+          git add index.html service-worker.js
+          git diff --cached --check
+          git commit -m "refactor: raccord Core Progression XP level owner"
+          git push origin HEAD:work/gensrpg-phase4-progression-xp-first-raccord-2026-09-22

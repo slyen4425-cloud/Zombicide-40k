@@ -24,28 +24,9 @@ assert.equal(gitBlob(coreBuf),'c84cd370c5c2874a51d5314abbf695fc4a63a7ee',
 assert.equal(gitBlob(roomBuf),'19c0fff57bfe27648819a12ed657cebe4f41f6df',
   'Room Creator must remain byte-identical during preaudit');
 
-function extractFunction(src,name){
-  const marker='function '+name+'(';
-  const p=src.indexOf(marker);
-  assert.ok(p>=0,'missing '+name);
-  const b=src.indexOf('{',p);
-  let depth=0,quote=null,escape=false;
-  for(let i=b;i<src.length;i++){
-    const c=src[i];
-    if(quote){
-      if(escape){escape=false;continue}
-      if(c==='\\'){escape=true;continue}
-      if(c===quote)quote=null;
-      continue;
-    }
-    if(c==='"'||c==="'"||c===String.fromCharCode(96)){quote=c;continue}
-    if(c==='{')depth++;
-    else if(c==='}'&&--depth===0)return src.slice(p,i+1);
-  }
-  assert.fail('unterminated '+name);
-}
+const legacySource=room.split("\n").find(line=>line.startsWith('function esc(v){'));
+assert.ok(legacySource,'Room Creator esc source line missing');
 
-const legacySource=extractFunction(room,'esc');
 const legacyCtx={};
 vm.createContext(legacyCtx);
 vm.runInContext(legacySource+';globalThis.__legacy=esc;',legacyCtx);

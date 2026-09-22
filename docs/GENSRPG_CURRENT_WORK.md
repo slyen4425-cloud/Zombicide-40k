@@ -1,3 +1,82 @@
+## Chantier courant prioritaire — Phase 4 Core Progression — contrat pur points de compétence gagnés — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-progression-earned-skill-points-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-progression-earned-skill-points-contract-2026-09-22`.
+- Base exacte :
+  `57810c4087b29f17b83bfea14ee49b5afcc99845`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-preaudit-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Pré-audit officiellement GREEN
+
+SHA : `57810c4087b29f17b83bfea14ee49b5afcc99845`.
+
+Validation finale :
+- Architecture + navigateur complet : `35734002142` — SUCCESS ;
+- Firefox : `35734002135` — SUCCESS ;
+- Tactical Dock : `35734002136` — SUCCESS.
+
+### Mission unique
+
+Ajouter uniquement au Core Progression une primitive pure :
+
+`earnedSkillPointsFromLevel(level, explicitProgressionConfig, fallbackStartingSkillPoints, fallbackSkillPointsPerLevel)`.
+
+Cette primitive :
+- reçoit un niveau déjà canonique ;
+- ne recalcule jamais XP, seuils custom ou `maxLevel` ;
+- ne lit aucun profil global ni Dungeon rules ;
+- ne touche ni stockage, DOM, timers, UI, save ou render ;
+- ne modifie pas le runtime dans ce lot.
+
+### TDD
+
+Sentinelle :
+`tests/gens_phase4_progression_earned_skill_points_contract_v1.test.cjs`.
+
+RED attendu :
+- `GensProgressionV1.earnedSkillPointsFromLevel` absent ;
+- toutes les sentinelles historiques restent GREEN.
+
+### Hors périmètre
+
+- aucun changement de `index.html` ;
+- aucun raccord de `dungeonRpgEarnedSkillPoints` ;
+- aucune optimisation des doubles lectures profil/règles ;
+- aucun `dungeonSyncProgressionForState` ;
+- aucun point dépensé / bonusSkillPoints / stat points ;
+- aucun XP manuel/combat/objectifs ;
+- aucun level-up/UI/persistance ;
+- aucun Event Bus ;
+- aucun merge sur `main`.
+
+### Source protégée
+
+`index.html` doit rester exactement :
+- 8 174 346 octets ;
+- blob `8da7afa3c986f29e740eee1748dcc0ec0f8f75bc`.
+
+Core Progression de départ :
+- blob `f633de55f1e6bda339e66c65debc35d7b8da2510`.
+
+### Prochaine action immédiate
+
+1. observer le RED ciblé du nouveau contrat ;
+2. vérifier Firefox/Tactical et les étapes antérieures ;
+3. ajouter seulement la primitive pure à `assets/gensrpg/core/progression-v1.js` ;
+4. triple CI ;
+5. clôture documentaire ;
+6. triple CI finale sur le même SHA ;
+7. checkpoint GREEN.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — pré-audit points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

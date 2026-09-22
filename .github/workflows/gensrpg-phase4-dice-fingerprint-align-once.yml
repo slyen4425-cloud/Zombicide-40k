@@ -31,22 +31,22 @@ jobs:
           old_blob="5b9b9ae780f735eadef049afeb10acf0b57441fe"
           new_blob="5b8e790fefe7970a250fd9485ee80549511737e6"
           targets=[
-    "tests/gens_phase4_storage_next_audit_9_v1.test.cjs",
-    "tests/gens_phase4_storage_dungeon_deck_owner_v1.test.cjs",
-    "tests/gens_phase4_storage_economy_rules_owner_v1.test.cjs",
-    "tests/gens_phase4_storage_manual_mj_effects_owner_v1.test.cjs",
-    "tests/gens_phase4_inventory_equipment_sets_preaudit_v1.test.cjs",
-    "tests/gens_phase4_inventory_equipped_view_slot_refs_contract_v1.test.cjs",
-    "tests/gens_phase4_storage_exit_audit_13_v1.test.cjs",
-    "tests/gens_phase4_storage_challenge_history_owner_v1.test.cjs",
-    "tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs",
-    "tests/gens_phase4_storage_dungeon_scene_owner_v1.test.cjs",
-    "tests/gens_phase4_storage_next_audit_10_v1.test.cjs",
-    "tests/gens_phase4_storage_next_audit_12_v1.test.cjs",
-    "tests/gens_phase4_storage_challenge_library_owner_v1.test.cjs",
-    "tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs",
-    "tests/gens_asset_resolver_final_audit_v1.test.cjs",
-    "docs/GENSRPG_PHASE2_STORAGE_OWNERS.json",
+          "tests/gens_phase4_storage_next_audit_9_v1.test.cjs",
+          "tests/gens_phase4_storage_dungeon_deck_owner_v1.test.cjs",
+          "tests/gens_phase4_storage_economy_rules_owner_v1.test.cjs",
+          "tests/gens_phase4_storage_manual_mj_effects_owner_v1.test.cjs",
+          "tests/gens_phase4_inventory_equipment_sets_preaudit_v1.test.cjs",
+          "tests/gens_phase4_inventory_equipped_view_slot_refs_contract_v1.test.cjs",
+          "tests/gens_phase4_storage_exit_audit_13_v1.test.cjs",
+          "tests/gens_phase4_storage_challenge_history_owner_v1.test.cjs",
+          "tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs",
+          "tests/gens_phase4_storage_dungeon_scene_owner_v1.test.cjs",
+          "tests/gens_phase4_storage_next_audit_10_v1.test.cjs",
+          "tests/gens_phase4_storage_next_audit_12_v1.test.cjs",
+          "tests/gens_phase4_storage_challenge_library_owner_v1.test.cjs",
+          "tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs",
+          "tests/gens_asset_resolver_final_audit_v1.test.cjs",
+          "docs/GENSRPG_PHASE2_STORAGE_OWNERS.json",
           ]
           for name in targets:
               p=Path(name)

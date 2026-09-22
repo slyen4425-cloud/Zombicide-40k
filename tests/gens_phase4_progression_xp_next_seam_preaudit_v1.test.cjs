@@ -58,18 +58,16 @@ assert.equal((index.match(/\bdungeonRpgXpIntoLevel\b/g)||[]).length,5,
 
 assert.match(xpIntoFn,/const p=activeProg\(\),v=Math\.max\(0,Number\(xp\)\|\|0\)/,
   'XP normalization boundary drifted');
-assert.match(xpIntoFn,/if\(!p\|\|\(p\.xpCurveMode\|\|"linear"\)!=="custom"\)/,
-  'linear/no-profile branch drifted');
-assert.match(xpIntoFn,/Number\(p\?\.xpPerLevel\)\|\|loadDungeonRpgRules\(\)\.xpPerLevel\|\|10/,
-  'linear/no-profile Dungeon fallback drifted');
-assert.match(xpIntoFn,/const level=dungeonRpgLevelFromXp\(v\)/,
-  'custom branch must consume the canonical level seam');
-assert.match(xpIntoFn,/p\.xpThresholds\?\.\[level\]/,
-  'custom branch must keep current-level threshold semantics');
+assert.match(xpIntoFn,/needsFallback=\(!p\|\|\(p\.xpCurveMode\|\|"linear"\)!=="custom"\)&&!Number\(p\?\.xpPerLevel\)/,
+  'later raccord must preserve the preaudited lazy Dungeon fallback condition');
+assert.match(xpIntoFn,/fallback=needsFallback\?loadDungeonRpgRules\(\)\.xpPerLevel:undefined/,
+  'later raccord must preserve lazy Dungeon-rules evaluation');
+assert.match(xpIntoFn,/GensProgressionV1\.xpIntoLevel\(v,p,fallback\)/,
+  'later dedicated raccord must delegate XP-into-level to Core');
+assert.doesNotMatch(xpIntoFn,/dungeonRpgLevelFromXp|p\.xpThresholds|%/,
+  'later raccord must retire the local level/custom/modulo implementation');
 assert.doesNotMatch(xpIntoFn,/localStorage|document\.|setTimeout|setInterval|save\(|render\(/,
-  'XP-into-level candidate must remain calculation-only');
-assert.doesNotMatch(xpIntoFn,/GensProgressionV1\.xpIntoLevel/,
-  'next Core primitive must not already be connected');
+  'XP-into-level owner must remain calculation-only');
 
 assert.match(earnedFn,/dungeonRpgLevelFromXp\(xp\)/,
   'earned points depends on the level seam');
@@ -135,7 +133,7 @@ function runtime({profile=null,rules={xpPerLevel:10}}={}){
   const cases=[[0,0],[3,3],[4,0],[10,6],[11,0],[29,18],[30,0],[69,39],[70,0],[99,29],[999,929]];
   for(const [xp,expected] of cases){
     r.reset();assert.equal(r.ctx.dungeonRpgXpIntoLevel(xp),expected,'custom xp='+String(xp));
-    assert.equal(r.levelCalls(),1,'custom branch must call canonical level seam exactly once');
+    assert.equal(r.levelCalls(),0,'later Core raccord must remove the redundant global level-seam round trip');
   }
 }
 
@@ -147,7 +145,7 @@ function runtime({profile=null,rules={xpPerLevel:10}}={}){
   const r=runtime({profile,rules:{xpPerLevel:25}});
   for(const [xp,expected] of [[20,20],[39,39],[40,40],[99,99]]){
     r.reset();assert.equal(r.ctx.dungeonRpgXpIntoLevel(xp),expected,'sparse custom xp='+String(xp));
-    assert.equal(r.levelCalls(),1);
+    assert.equal(r.levelCalls(),0);
   }
 }
 
@@ -180,5 +178,5 @@ const selection={
 console.log(JSON.stringify({
   scenario:'Phase 4 Progression XP next-seam preaudit',
   selection,
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

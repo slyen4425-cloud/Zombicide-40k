@@ -18,7 +18,7 @@ const gitBlob=buf=>crypto.createHash('sha1')
 
 assert.equal(indexBuf.length,8174416,'next-seam preaudit must run on exact first-raccord GREEN index');
 assert.equal(gitBlob(indexBuf),'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','next-seam preaudit index blob drifted');
-assert.equal(gitBlob(coreBuf),'b02487346f1a0df12effbc4559b5063bf8e12726','Core Progression changed before next-seam preaudit');
+assert.equal(gitBlob(coreBuf),'04ffcc5e8932e8c4c101c6af09095775e62245a2','current Core Progression contract blob drifted');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';
@@ -89,8 +89,8 @@ function runtime({profile=null,rules={xpPerLevel:10}}={}){
   vm.createContext(ctx);
   vm.runInContext(coreSource,ctx,{filename:corePath});
   vm.runInContext(core044,ctx,{filename:'dungeonCore044HeroProgression'});
-  assert.equal(typeof ctx.GensProgressionV1.xpIntoLevel,'undefined',
-    'Core must not gain the next primitive during preaudit');
+  assert.equal(typeof ctx.GensProgressionV1.xpIntoLevel,'function',
+    'dedicated pure contract lot must expose xpIntoLevel while runtime owner stays unraccorded');
   const originalLevel=ctx.dungeonRpgLevelFromXp;
   let levelCalls=0;
   ctx.dungeonRpgLevelFromXp=function(xp){levelCalls++;return originalLevel(xp)};

@@ -5,6 +5,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const diceCore=fs.readFileSync(path.join(root,'assets','gensrpg','core','dice-v1.js'),'utf8');
 const baseEngine=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2.js'));
 globalThis.GensRpgTacticalCombatV2=baseEngine;
 require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-rules.js'));
@@ -31,9 +32,11 @@ function extractFunction(name){
 }
 
 function dungeonContext(rules){
-  const ctx={Math,Number,loadDungeonRpgRules:()=>rules};
+  const ctx={console,Math,Number,Object,RangeError,TypeError,loadDungeonRpgRules:()=>rules};
+  ctx.window=ctx;
   ctx.globalThis=ctx;
   vm.createContext(ctx);
+  vm.runInContext(diceCore,ctx,{filename:'dice-v1.js'});
   for(const name of ['dungeonHitBonusForMode','dungeonClampHitChance','d100ThresholdFromChance','dungeonAttackerCharacteristic','dungeonDefenseReduction']){
     vm.runInContext(extractFunction(name),ctx,{filename:'index#'+name});
   }

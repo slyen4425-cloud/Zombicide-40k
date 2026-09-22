@@ -407,6 +407,9 @@ jobs:
       - name: Pré-auditer les propriétaires du moteur de dés Phase 4
         run: node tests/gens_phase4_dice_preaudit_v1.test.cjs
 
+      - name: Verrouiller le contrat pur Core Dice Phase 4
+        run: node tests/gens_phase4_dice_contract_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

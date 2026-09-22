@@ -1,3 +1,77 @@
+## Chantier courant prioritaire — Phase 5 / startConfiguredGame — pré-audit chaîne restante — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-remaining-chain-preaudit-2026-09-22`.
+- Base exacte :
+  `b93576ac281309354f99ddad4e0898e760e88f2c`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-capture131-retirement-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État de départ prouvé
+
+La chaîne `startConfiguredGame` contient désormais 5 propriétaires actifs :
+
+1. `captureFix135`
+2. `captureFix138`
+3. `captureFix139`
+4. `gensDungeonCore01Js`
+5. `dungeonCore200Rebuild`
+
+Le wrapper transitif `captureFix131` est retiré et le lot précédent est GREEN.
+
+### Mission unique
+
+Pré-auditer la chaîne restante **sans modification runtime** pour déterminer la
+prochaine étape Phase 5 compatible avec l'objectif de la roadmap :
+**un seul propriétaire Shell de navigation**.
+
+Pour chacun des 5 propriétaires :
+- caractériser la condition d'interception ;
+- caractériser les effets de bord ;
+- caractériser la délégation ;
+- distinguer règle de module et règle de Shell ;
+- identifier ce qui peut devenir un contrat d'entrée module ;
+- vérifier si une nouvelle suppression soustractive est possible ou si le
+  prochain lot doit être un raccord explicite vers une autorité Shell.
+
+### Interdictions
+
+- aucun retrait de wrapper dans ce pré-audit ;
+- aucun nouveau Shell runtime connecté ;
+- aucun déplacement de gameplay Capture/Dungeon ;
+- aucun nouveau global ;
+- aucun observer/timer/retry ;
+- aucune modification Tactical ;
+- aucun changement de `index.html` ;
+- aucun merge sur `main`.
+
+### Invariants
+
+- Survie démarre en Survie ;
+- Dungeon démarre en Dungeon ;
+- Capture conserve sa route dédiée ;
+- PvP reste le placeholder ;
+- Save & Quit / reprise inchangé ;
+- non-interférence quatre modules ;
+- `dungeonCore200Rebuild` reste dernier propriétaire tant qu'aucun nouveau lot
+  n'a prouvé un remplacement sûr.
+
+### Prochaine action
+
+1. construire une sentinelle de pré-audit sur les 5 propriétaires ;
+2. classer leurs responsabilités Shell vs module ;
+3. proposer un seul prochain micro-lot homogène ;
+4. triple CI ;
+5. checkpoint GREEN du pré-audit avant toute nouvelle modification runtime.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — retrait captureFix131 — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

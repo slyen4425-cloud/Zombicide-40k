@@ -42,6 +42,29 @@ Aucun raccord runtime dans ce lot.
 
 Le propriétaire historique `dungeonRpgXpIntoLevel` reste inchangé.
 
+### RED TDD observé
+
+SHA :
+`69b6791a90cc85accaefd2595174ea8153550b4f`.
+
+- Architecture `35719759926` — FAILURE attendu uniquement sur
+  `Verrouiller le contrat pur XP dans le niveau Core Progression` ;
+- Firefox `35719759695` — SUCCESS ;
+- Tactical Dock `35719759730` — SUCCESS.
+
+Cause exacte :
+`GensProgressionV1.xpIntoLevel` est encore absent (`undefined`).
+
+Toutes les étapes Progression antérieures sont GREEN avant ce RED.
+Aucun runtime/Core n'a été modifié pour obtenir le RED.
+
+### Prochaine action immédiate
+
+Ajouter uniquement la primitive pure `xpIntoLevel` à
+`assets/gensrpg/core/progression-v1.js`.
+
+Ne raccorder aucun consommateur runtime dans ce lot.
+
 ### TDD obligatoire — prochaine action
 
 1. sentinelle contractuelle ajoutée ;

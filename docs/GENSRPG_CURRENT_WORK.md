@@ -1,3 +1,86 @@
+## Chantier courant prioritaire — Phase 4 / utilitaires communs U1 — contrat pur escapeHtml — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-common-text-utils-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-common-text-utils-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Origine du lot
+
+Pré-audit Agent 1 officiellement GREEN :
+- branche : `work/gensrpg-phase4-event-bus-utilities-preaudit-agent1-2026-09-22` ;
+- checkpoint : `checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22` ;
+- SHA : `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Verdict repris par le coordinateur :
+- ne pas créer d'Event Bus générique ;
+- conserver séparés événements Dungeon, lifecycle Tactical, transport Supabase et DOM/PWA ;
+- premier micro-lot sûr : utilitaire texte pur d'échappement HTML.
+
+### Mission unique
+
+Créer un service Core totalement pur et inert :
+
+`assets/gensrpg/core/text-utils-v1.js`
+
+API publique unique :
+
+`GensTextUtilsV1.escapeHtml(value)`
+
+Contrat :
+- `null` / `undefined` -> chaîne vide ;
+- conversion via `String(...)` ;
+- `&` -> `&amp;` ;
+- `<` -> `&lt;` ;
+- `>` -> `&gt;` ;
+- `"` -> `&quot;` ;
+- `'` -> `&#39;` ;
+- autres caractères inchangés ;
+- double échappement historique conservé.
+
+### Périmètre strict
+
+Autorisé :
+- nouveau service pur ;
+- sentinelle contractuelle ;
+- documentation ;
+- workflow CI.
+
+Interdit :
+- aucun raccord de consommateur ;
+- aucune modification de `index.html` ;
+- aucune injection preview/Pages ;
+- aucun Service Worker ;
+- aucun Event Bus ;
+- aucun listener / CustomEvent / MutationObserver ;
+- aucun storage ;
+- aucun timer/retry ;
+- aucun RNG ;
+- aucun gameplay ;
+- aucun changement Progression/Dice/Stats/Inventory/Storage/Tactical ;
+- aucun merge sur `main`.
+
+### TDD
+
+Sentinelle :
+`tests/gens_phase4_common_text_utils_contract_v1.test.cjs`.
+
+RED attendu :
+le fichier `assets/gensrpg/core/text-utils-v1.js` n'existe pas encore.
+
+Après preuve du RED :
+ajouter uniquement le service pur, puis triple CI.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

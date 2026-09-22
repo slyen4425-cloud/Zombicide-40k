@@ -458,6 +458,9 @@ jobs:
       - name: Raccorder les points de compétence gagnés au Core Progression
         run: node tests/gens_phase4_progression_earned_skill_points_raccord_v1.test.cjs
 
+      - name: Verrouiller le contrat pur Text Utils U1
+        run: node tests/gens_phase4_text_utils_contract_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

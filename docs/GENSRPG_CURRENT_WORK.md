@@ -1,3 +1,79 @@
+## Chantier courant prioritaire — Phase 4 / U1 — contrat pur Text Utils — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Source de décision
+
+Pré-audit Agent 1 officiellement GREEN :
+- checkpoint : `checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22` ;
+- SHA : `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Verdict réutilisé :
+- **ne pas créer de Event Bus Core générique** ;
+- les mécanismes actuels appartiennent à Dungeon, Tactical, réseau Supabase, DOM/PWA ou callbacks locaux ;
+- premier micro-lot sûr : utilitaire texte pur d'échappement HTML.
+
+### Mission unique U1
+
+Créer uniquement un service pur et inert :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+API initiale :
+`GensTextUtilsV1.escapeHtml(value)`.
+
+Contrat :
+- `null` / `undefined` -> chaîne vide ;
+- conversion avec `String(...)` ;
+- `&` -> `&amp;` ;
+- `<` -> `&lt;` ;
+- `>` -> `&gt;` ;
+- `"` -> `&quot;` ;
+- `'` -> `&#39;` ;
+- autres caractères inchangés ;
+- chaîne déjà échappée : double échappement historique conservé.
+
+### TDD
+
+Sentinelle :
+`tests/gens_phase4_text_utils_contract_v1.test.cjs`.
+
+RED attendu :
+service absent.
+
+GREEN attendu :
+service pur présent et testable isolément.
+
+### Interdictions
+
+- aucun raccord consommateur dans ce lot ;
+- aucun changement `index.html` ;
+- aucune injection Pages/preview/bootstrap/service-worker ;
+- aucun Event Bus ;
+- aucun DOM, Storage, listener, CustomEvent, timer/retry, RNG, réseau ou navigation ;
+- aucun changement Progression/Dice/Stats/Inventory/Storage ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+1. observer RED ciblé ;
+2. créer uniquement le service pur ;
+3. triple CI ;
+4. clôture documentaire ;
+5. triple CI finale sur SHA exact ;
+6. checkpoint GREEN ;
+7. seulement ensuite ouvrir un lot séparé pour un unique consommateur UI faible risque.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression — raccord points de compétence gagnés — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

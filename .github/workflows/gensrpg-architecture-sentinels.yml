@@ -461,9 +461,6 @@ jobs:
       - name: Verrouiller U1 utilitaire texte pur Core
         run: node tests/gens_phase4_text_utils_u1_contract_v1.test.cjs
 
-      - name: Pré-auditer le raccord U1 vers Room Creator
-        run: node tests/gens_phase4_text_utils_u1_room_creator_raccord_preaudit_v1.test.cjs
-
       - name: Raccorder U1 vers Room Creator
         run: node tests/gens_phase4_text_utils_u1_room_creator_raccord_v1.test.cjs
 

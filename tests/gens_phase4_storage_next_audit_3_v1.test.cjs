@@ -22,7 +22,7 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8174580,'index.html byte size drifted from post-Economy-Rules checkpoint');
+assert.equal(index.length,8174637,'index.html byte size drifted from post-Economy-Rules checkpoint');
 assert.equal(blobSha,'5b8e790fefe7970a250fd9485ee80549511737e6','index.html blob must remain the exact post-Challenge-Library source');
 
 

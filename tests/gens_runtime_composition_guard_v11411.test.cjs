@@ -28,6 +28,7 @@ assert.deepEqual(directSrcs,[
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
   'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
   'assets/gensrpg/core/storage-v1.js',
+  'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',

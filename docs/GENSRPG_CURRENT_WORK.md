@@ -1,3 +1,118 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Dice — premier raccord d100ThresholdFromChance — 2026-09-22
+
+Ce bloc devient le point de reprise prioritaire. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-dice-first-raccord-2026-09-22`.
+- Base exacte :
+  `87a281394b2e5c31cb44277d8806ecf10101c0d1`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-dice-first-raccord-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-dice-first-raccord-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11, inchangée.
+
+### TDD observé
+
+RED réel observé avant modification runtime :
+
+- run Architecture `35678566211` ;
+- échec exactement sur la nouvelle étape
+  `Verrouiller le premier raccord réel Core Dice Phase 4` ;
+- pré-audit Dice et contrat pur Core Dice précédents : SUCCESS ;
+- aucun runtime n'avait encore été modifié.
+
+### Raccord réalisé
+
+Le seul raccord runtime du lot est
+`d100ThresholdFromChance(chance)`.
+
+Résultat exact :
+
+- `assets/gensrpg/core/dice-v1.js` est chargé explicitement avant le helper ;
+- le service Core Dice reste byte-identique à sa version pure
+  (blob `1813b6edb1ac69317d158e8cac6eb5c8ac353855`) ;
+- la frontière historique conserve :
+  `Number(chance) || 1`, puis clamp `1..100` ;
+- la formule locale `101 - chance` a disparu du helper ;
+- le calcul est délégué à
+  `GensDiceV1.thresholdFromChance(c)` ;
+- les 15 consommateurs historiques restent inchangés ;
+- les entrées `undefined / NaN / ±Infinity` gardent leur compatibilité
+  historique grâce à la normalisation de frontière ;
+- aucun RNG, aucun générateur D100/D6 et aucun consommateur n'a été déplacé ;
+- `dungeonUniversalTest` reste explicitement différé ;
+- aucun autre primitive/raccord Core Dice n'a été connecté ;
+- aucun wrapper, observer, timer, retry ou fallback n'a été ajouté.
+
+Le nouvel `index.html` de travail est :
+
+- taille : `8 174 637` octets ;
+- blob Git :
+  `5b8e790fefe7970a250fd9485ee80549511737e6`.
+
+Core Dice est désormais production-reachable et présent dans le cache PWA.
+La cartographie Phase 2 passe donc de 76 à 77 fichiers runtime atteignables.
+
+### Systèmes protégés vérifiés
+
+- Tactical V114.11 byte-identique :
+  `assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js`
+  blob `3e7e92eea89fd8e949361162636b4b524ff93eef` ;
+- Mobile Combat Performance byte-identique :
+  `assets/gensrpg/gens-mobile-combat-performance-16781022.js`
+  blob `e8fd9f1049a6597118eb026976bca7548f11b284` ;
+- `main` reste exactement sur le SHA gelé ;
+- aucun changement fonctionnel Stats / Inventory / Storage / Progression ;
+- les modifications de leurs tests historiques sont uniquement des
+  réalignements d'empreinte/index ou de fixture de chargement après l'entrée
+  officielle de Core Dice dans le graphe de production.
+
+### Validation technique GREEN
+
+SHA technique validé :
+
+`39d85f94aa0ae0ef043e5ec922b1e0822ebf2e3f`.
+
+Runs :
+
+- Architecture + navigateur complet :
+  `35680242538` — SUCCESS ;
+- Firefox :
+  `35680242494` — SUCCESS ;
+- Tactical Dock :
+  `35680242896` — SUCCESS.
+
+La nouvelle sentinelle
+`tests/gens_phase4_dice_first_raccord_v1.test.cjs`
+verrouille notamment :
+
+- ordre de chargement Core Dice ;
+- frontière legacy exacte ;
+- suppression de la formule locale ;
+- délégation Core unique ;
+- parité finie et non finie ;
+- hash des 15 callsites ;
+- inventaires RNG D100/D6 ;
+- `dungeonUniversalTest` inchangé ;
+- blobs Tactical / performance / Core Dice inchangés ;
+- absence de second consommateur Core Dice.
+
+### Validation finale obligatoire avant checkpoint
+
+Cette clôture documentaire modifie le SHA.
+Le checkpoint cible ne doit être créé qu'après SUCCESS sur le SHA documentaire
+final exact de :
+
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après GREEN, ne pas enchaîner automatiquement sur `dungeonUniversalTest` :
+il reste différé par le pré-audit. Le prochain raccord Dice éventuel doit faire
+l'objet d'un micro-lot séparé et d'un nouveau pré-audit ciblé.
+
 ## Chantier courant prioritaire — Phase 4 Core Dice — premier raccord d100ThresholdFromChance — 2026-09-22
 
 Ce bloc est le point de reprise actif ; les sections suivantes sont historiques.

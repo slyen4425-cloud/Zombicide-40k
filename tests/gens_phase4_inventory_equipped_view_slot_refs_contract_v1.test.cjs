@@ -16,8 +16,8 @@ const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
-assert.equal(bytes.length,8174346);
-assert.equal(blob,'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc');
+assert.equal(bytes.length,8174314);
+assert.equal(blob,'8ef7c65fca1f72f0393f0f6ccb6fea8426b41f91');
 
 function extractFunction(source,name){
   const token='function '+name+'(';

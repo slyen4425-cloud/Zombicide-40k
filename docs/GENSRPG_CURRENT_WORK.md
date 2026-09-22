@@ -1,3 +1,77 @@
+## Chantier courant prioritaire — Phase 5 / pré-audit Shell & navigation — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-shell-navigation-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-shell-navigation-preaudit-2026-09-22`.
+- Base exacte :
+  `4e8e87dec5043cc8687022e720aba998265b986e`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase4-complete-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État de transition
+
+La Phase 4 est officiellement GREEN et clôturée.
+
+Validation finale Phase 4 :
+- Architecture + navigateur complet : `35769207486` — SUCCESS ;
+- Firefox : `35769207571` — SUCCESS ;
+- Tactical Dock : `35769207511` — SUCCESS.
+
+### Mission unique
+
+Pré-auditer la Phase 5 sans modification runtime.
+
+Cartographier les propriétaires actifs de :
+1. accueil ;
+2. changement de module ;
+3. navigation générale ;
+4. fiche personnage hors combat ;
+5. ouverture/fermeture des écrans ;
+6. état de session / module actif.
+
+Objectif :
+identifier les vraies frontières Shell actuelles, les réassignations globales,
+les doublons de responsabilité et le **premier micro-lot soustractif sûr**.
+
+### Règles
+
+- audit uniquement ;
+- ne rien déplacer ;
+- ne modifier aucun gameplay ;
+- ne créer aucun nouveau Shell runtime ;
+- ne créer aucun wrapper/observer/timer/retry ;
+- ne pas ajouter de compatibilité globale ;
+- réutiliser la cartographie Phase 2 et les sentinelles Phase 1 ;
+- si un défaut fonctionnel est découvert, le caractériser et l'isoler dans un
+  chantier séparé ;
+- aucun merge sur `main`.
+
+### Critère du pré-audit
+
+Le pré-audit doit produire :
+- la liste des propriétaires actuels pour les six responsabilités Phase 5 ;
+- les points de réassignation / last-owner importants ;
+- les risques de non-interférence Survie/Dungeon/Capture/PvP ;
+- la frontière avec Tactical ;
+- un premier micro-lot proposé avec propriétaire unique et périmètre homogène ;
+- aucune modification runtime.
+
+### Prochaine action
+
+1. lire les manifestes Phase 2 ownership / last-owner / responsabilités stratifiées ;
+2. croiser avec les sentinelles Shell réelles ;
+3. créer une sentinelle de pré-audit Phase 5 ;
+4. documenter le premier micro-lot recommandé ;
+5. triple CI ;
+6. checkpoint GREEN du pré-audit avant toute extraction.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 4 complète / transition Phase 5 — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

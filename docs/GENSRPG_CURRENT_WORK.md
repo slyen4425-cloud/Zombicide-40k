@@ -1,3 +1,112 @@
+## CLÔTURE CONDITIONNELLE — Phase 4 / U1 — contrat pur Text Utils — 2026-09-22
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase4-text-utils-contract-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase4-text-utils-contract-2026-09-22`.
+- Base exacte :
+  `dab3813f5b9af2ea358fe18f707d02e9cf66bbef`.
+- Checkpoint GREEN de départ :
+  `checkpoint/gensrpg-phase4-progression-earned-skill-points-raccord-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-text-utils-contract-green-2026-09-22`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Décision Event Bus / utilitaires
+
+Le pré-audit Agent 1 GREEN reste la décision de référence :
+`checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
+SHA `5d713123585917d55a057373cba7d5003de02e7c`.
+
+Verdict appliqué :
+- aucun Event Bus Core générique n'est créé ;
+- U1 extrait seulement un utilitaire texte pur.
+
+### Résultat U1
+
+Service ajouté :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+Export :
+`GensTextUtilsV1.escapeHtml(value)`.
+
+Blob du service :
+`f0befe5feaf3bb2536b9b15267399988c949aab8`.
+
+Le service :
+- est déterministe et sans état ;
+- ne dépend d'aucun module ;
+- ne contient aucun DOM, Storage, listener, événement, timer/retry, RNG, réseau ou navigation ;
+- n'est raccordé à aucun consommateur ;
+- n'est pas chargé par le runtime dans ce lot.
+
+### TDD RED
+
+SHA :
+`cccbaa37e62b26a0c211e36fdb3d5e24f359e5c5`.
+
+- Architecture : `35756339143` — FAILURE attendue sur l'étape U1, service absent ;
+- Firefox : `35756339120` — SUCCESS ;
+- Tactical Dock : `35756339114` — SUCCESS.
+
+### Implémentation et cartographie
+
+Commit service :
+`b2c4f4b1f8c07e7fc6f5d45766005567638fb465`.
+
+L'ajout physique du service a fait évoluer l'inventaire JS de 95 à 96.
+Le test Phase 2 a été réaligné sans changer le graphe production :
+- Phase 2 baseline : inchangée ;
+- services Phase 4 : 16 physiques ;
+- `text-utils-v1.js` classé **inert** ;
+- graphe production atteignable : inchangé à 78.
+
+Commit de cartographie :
+`9dbe995cfdc5c94062a0d8a218631ddb0f397e49`.
+
+### Validation technique avant documentation finale
+
+SHA :
+`9dbe995cfdc5c94062a0d8a218631ddb0f397e49`.
+
+- Architecture + navigateur complet : `35756574291` — SUCCESS ;
+- Firefox : `35756574260` — SUCCESS ;
+- Tactical Dock : `35756574406` — SUCCESS.
+
+### Diff du lot
+
+Depuis le checkpoint de départ :
+- ajout du service pur U1 ;
+- ajout de sa sentinelle ;
+- ajout de sa documentation ;
+- ajout d'une étape CI ;
+- réalignement de l'inventaire physique Phase 2 ;
+- mise à jour de `CURRENT_WORK`.
+
+Aucun `index.html`, preview, Pages, Service Worker, gameplay, Storage, Stats, Inventory,
+Dice, Progression ou Shell n'a été modifié.
+
+### Validation finale obligatoire
+
+La présente clôture documentaire change le SHA. Avant le checkpoint GREEN cible,
+le même SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite après GREEN
+
+Ouvrir un lot séparé de **pré-audit d'un seul consommateur UI à faible risque** de
+l'échappement HTML commun. Aucun raccord multiple dans le même lot.
+
+Le choix du consommateur devra être prouvé par caractérisation ; World Builder,
+Room Creator, Stats UI et Tactical ne doivent pas être raccordés ensemble.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 4 / U1 — contrat pur Text Utils — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

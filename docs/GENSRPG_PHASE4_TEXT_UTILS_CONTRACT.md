@@ -59,3 +59,40 @@ Aucun `index.html`, preview, Pages, bootstrap ou service worker ne doit être mo
 ## Critère GREEN
 
 La sentinelle de contrat passe, les trois CI sont GREEN et le diff n'ajoute aucune autorité runtime.
+
+
+## Résultat technique U1
+
+### RED
+
+SHA `cccbaa37e62b26a0c211e36fdb3d5e24f359e5c5` :
+- Architecture `35756339143` — FAILURE attendue, service absent ;
+- Firefox `35756339120` — SUCCESS ;
+- Tactical Dock `35756339114` — SUCCESS.
+
+### GREEN technique
+
+Service :
+`assets/gensrpg/core/text-utils-v1.js`.
+
+Commit :
+`b2c4f4b1f8c07e7fc6f5d45766005567638fb465`.
+
+Blob :
+`f0befe5feaf3bb2536b9b15267399988c949aab8`.
+
+Le service exporte uniquement :
+- `VERSION` ;
+- `escapeHtml`.
+
+La cartographie Phase 2 a été mise à jour sur
+`9dbe995cfdc5c94062a0d8a218631ddb0f397e49` :
+le nouveau fichier est explicitement inert et le graphe production reste à 78 fichiers atteignables.
+
+Validation :
+- Architecture + navigateur complet `35756574291` — SUCCESS ;
+- Firefox `35756574260` — SUCCESS ;
+- Tactical Dock `35756574406` — SUCCESS.
+
+Aucun runtime consommateur n'est raccordé dans U1.
+La clôture documentaire doit encore passer la triple CI sur son propre SHA exact.

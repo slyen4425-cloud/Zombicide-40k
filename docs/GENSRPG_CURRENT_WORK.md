@@ -1,4 +1,4 @@
-## Chantier courant prioritaire — Phase 4 Core Progression / XP — contrat pur XP dans le niveau — 2026-09-22
+## CLÔTURE CONDITIONNELLE — Phase 4 Core Progression / XP — contrat pur XP dans le niveau — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
 
@@ -8,102 +8,74 @@ Ce bloc devient le point de reprise actif. Les sections suivantes sont historiqu
   `checkpoint/gensrpg-start-phase4-progression-xp-into-level-contract-2026-09-22`.
 - Base exacte :
   `b6d91ffeaa9317c9dbc329f73ce83220544eb5e2`.
-- Dernier checkpoint GREEN :
+- Checkpoint GREEN de départ :
   `checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase4-progression-xp-into-level-contract-green-2026-09-22`.
 - Production gelée :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
 
-### Pré-audit précédent officiellement GREEN
+### Résultat du lot
 
-Checkpoint :
-`checkpoint/gensrpg-phase4-progression-xp-next-seam-preaudit-green-2026-09-22`.
-
-SHA :
-`b6d91ffeaa9317c9dbc329f73ce83220544eb5e2`.
-
-Validation finale sur ce SHA :
-- Architecture + navigateur complet :
-  `35719032604` — SUCCESS ;
-- Firefox :
-  `35719032663` — SUCCESS ;
-- Tactical Dock :
-  `35719032603` — SUCCESS.
-
-Seam sélectionné :
-`dungeonRpgXpIntoLevel`.
-
-### Mission unique
-
-Ajouter au Core Progression un contrat pur :
-
-`xpIntoLevel(xp, progressionConfig, fallbackXpPerLevel)`.
-
-Aucun raccord runtime dans ce lot.
-
-Le propriétaire historique `dungeonRpgXpIntoLevel` reste inchangé.
-
-### RED TDD observé
-
-SHA :
-`69b6791a90cc85accaefd2595174ea8153550b4f`.
-
-- Architecture `35719759926` — FAILURE attendu uniquement sur
-  `Verrouiller le contrat pur XP dans le niveau Core Progression` ;
+RED TDD observé :
+- SHA `69b6791a90cc85accaefd2595174ea8153550b4f` ;
+- Architecture `35719759926` — FAILURE attendu uniquement sur l'API absente ;
 - Firefox `35719759695` — SUCCESS ;
 - Tactical Dock `35719759730` — SUCCESS.
 
-Cause exacte :
-`GensProgressionV1.xpIntoLevel` est encore absent (`undefined`).
+Implémentation pure :
+- API `GensProgressionV1.xpIntoLevel(xp, progressionConfig, fallbackXpPerLevel)` ;
+- Core blob `f633de55f1e6bda339e66c65debc35d7b8da2510` ;
+- `levelFromXp` conservé ;
+- aucun raccord runtime ;
+- aucune mutation de config/state ;
+- aucune dépendance DOM/Storage/timer/RNG.
 
-Toutes les étapes Progression antérieures sont GREEN avant ce RED.
-Aucun runtime/Core n'a été modifié pour obtenir le RED.
-
-### Prochaine action immédiate
-
-Ajouter uniquement la primitive pure `xpIntoLevel` à
-`assets/gensrpg/core/progression-v1.js`.
-
-Ne raccorder aucun consommateur runtime dans ce lot.
-
-### TDD obligatoire — prochaine action
-
-1. sentinelle contractuelle ajoutée ;
-2. raccord CI ajouté ;
-3. observer le RED attendu car `GensProgressionV1.xpIntoLevel` n'existe pas encore ;
-4. vérifier que toutes les étapes antérieures sont GREEN ;
-5. seulement ensuite modifier le Core Progression.
-
-Contrats à préserver :
-- normalisation XP historique ;
-- fallback explicite Dungeon ;
-- linéaire zéro/invalide -> fallback ;
-- négatif truthy -> clamp 1 ;
-- custom via `levelFromXp` ;
-- seuil custom explicite courant uniquement ;
-- comportement clairsemé/invalide inchangé.
-
-Document :
-`docs/GENSRPG_PHASE4_PROGRESSION_XP_INTO_LEVEL_CONTRACT.md`.
-
-Sentinelle :
-`tests/gens_phase4_progression_xp_into_level_contract_v1.test.cjs`.
-
-### Sources protégées
-
-`index.html` :
-- taille `8 174 416` octets ;
+`index.html` inchangé :
+- taille `8 174 416` ;
 - blob `a68bcbaf5d16bdbe2e70cbe0959a421371554fcc`.
 
-Core Progression avant contrat :
-- blob `b02487346f1a0df12effbc4559b5063bf8e12726`.
+### Validation technique avant documentation finale
 
-### Chantier Agent 1
+SHA :
+`dfb325fe7cdf66450350bd1f5ab1a5b7ab096d4a`.
 
-Le pré-audit Event Bus/utilitaires reste validé et gelé sur :
+- Architecture + navigateur complet :
+  `35720388888` — SUCCESS ;
+- Firefox :
+  `35720388992` — SUCCESS ;
+- Tactical Dock :
+  `35720388950` — SUCCESS.
+
+### Validation finale obligatoire
+
+La documentation finale change le SHA.
+
+Avant création du checkpoint GREEN cible, le même SHA documentaire final exact
+doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+### Suite autorisée après GREEN
+
+Ouvrir un lot distinct de pré-audit du raccord runtime de
+`dungeonRpgXpIntoLevel`.
+
+Ne pas inclure :
+- `dungeonRpgEarnedSkillPoints` ;
+- synchronisation progression ;
+- XP manuel/combat/objectifs ;
+- level-up ;
+- UI/persistance.
+
+### Coordination Agent 1
+
+Le pré-audit Event Bus/utilitaires reste GREEN et gelé sur :
 `checkpoint/gensrpg-phase4-event-bus-utilities-preaudit-agent1-green-2026-09-22`
 SHA `5d713123585917d55a057373cba7d5003de02e7c`.
 
-Il ne doit pas être fusionné pendant ce lot Progression.
+Il ne doit pas être fusionné pendant le sous-chantier Progression.
 
 Aucun merge sur `main`.
 

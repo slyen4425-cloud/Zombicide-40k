@@ -1,0 +1,27 @@
+name: GenSrpG Phase 4 Dice fingerprint probe
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase4-dice-first-raccord-2026-09-22'
+    paths:
+      - '.github/workflows/gensrpg-phase4-dice-fingerprint-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inventory stale index fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== OLD SIZE 8174580 ==='
+          grep -RIn --include='*.cjs' --include='*.json' --include='*.tsv' '8174580' tests docs || true
+          echo '=== OLD BLOB 5b9b9ae... ==='
+          grep -RIn --include='*.cjs' --include='*.json' --include='*.tsv' '5b9b9ae780f735eadef049afeb10acf0b57441fe' tests docs || true
+          echo '=== OLD REACHABLE COUNT 76 ==='
+          grep -RIn --include='*.cjs' --include='*.json' -E 'reachable\.size[^0-9]*76|externalReachableFiles[^0-9]*76|productionReachable[^0-9]*76|ownerMapped[^0-9]*76' tests docs || true

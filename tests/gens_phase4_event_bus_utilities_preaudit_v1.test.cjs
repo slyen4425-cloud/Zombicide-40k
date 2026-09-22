@@ -74,11 +74,16 @@ for(const eventName of ['install','activate','message','fetch']){
 }
 
 // A first safe common-utility candidate exists: identical pure HTML escaping is
-// duplicated across active owners. This test only characterizes that duplication.
-const escNeedle='.replace(/[&<>"' + "'" + ']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"';
-assert.ok(worldBuilder.includes(escNeedle),'World Builder HTML escape helper drifted');
-assert.ok(roomCreator.includes(escNeedle),'Room Creator HTML escape helper drifted');
-assert.ok(statsUi.includes(escNeedle),'Stats UI HTML escape helper drifted');
+// duplicated across active owners. Characterize semantics, not quote/source style.
+const assertEscapeHelper=(src,label)=>{
+  assert.match(src,/replace\(\/\[&<>"'\]\/g/,(label+' HTML escape character set drifted'));
+  for(const entity of ['&amp;','&lt;','&gt;','&quot;','&#39;']){
+    assert.ok(src.includes(entity),label+' HTML escape mapping drifted for '+entity);
+  }
+};
+assertEscapeHelper(worldBuilder,'World Builder');
+assertEscapeHelper(roomCreator,'Room Creator');
+assertEscapeHelper(statsUi,'Stats UI');
 
 // The preaudit must not itself create a bus implementation in the current runtime.
 for(const rel of [

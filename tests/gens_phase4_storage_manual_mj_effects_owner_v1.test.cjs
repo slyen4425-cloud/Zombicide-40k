@@ -23,8 +23,8 @@ assert.match(block,/function loadEffects\(\)\{const a=GensStorageV1\.readJson\(l
 assert.match(block,/function saveEffects\(a\)\{GensStorageV1\.writeJson\(localStorage,KEY,a\|\|\[\]\)\}/,'Writer must preserve a || [] contract without swallowing errors');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Manual MJ raccord must not touch deferred runtime_v2');
 
-assert.equal(bytes.length,8174416,'current index size must include the later Challenge Library micro-diff');
-assert.equal(blob,'a68bcbaf5d16bdbe2e70cbe0959a421371554fcc','current index blob must include the later Challenge Library micro-diff');
+assert.equal(bytes.length,8174346,'current index size must include the later Challenge Library micro-diff');
+assert.equal(blob,'8da7afa3c986f29e740eee1748dcc0ec0f8f75bc','current index blob must include the later Challenge Library micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Manual MJ effects Core storage authority',

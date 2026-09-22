@@ -44,8 +44,9 @@ Objectifs :
 2. distinguer les jets de règles du RNG de contenu (loot, spawns, cartes, IA, IDs) ;
 3. identifier les helpers partagés et duplications réelles ;
 4. séparer règles de dés et animations ;
-5. déterminer le contrat pur minimal du futur Core Dice ;
-6. ne raccorder aucun runtime avant un lot correctif/extraction séparé.
+5. préserver explicitement le RNG seedé du resolver Tactical ;
+6. déterminer le contrat pur minimal du futur Core Dice ;
+7. ne raccorder aucun runtime avant un lot correctif/extraction séparé.
 
 ### Premiers constats
 
@@ -56,8 +57,12 @@ Objectifs :
 - `rollDungeonRpDice073` combine plusieurs consommateurs ;
 - `d10048`, `dc051RollStatChallenge`, `dc201PuzzleRoll` et
   `dc211TrapTest` conservent des conventions D100 locales ;
-- le module Mobile Combat Performance remplace seulement les animations
-  `animateDice` / `animateRpgDice`, sans posséder les règles.
+- `gens-rpg-tactical-visual-dice-16781142.js` possède le vrai resolver
+  D100 Tactical V114.11, un RNG seedé optionnel et les jets touche/critique ;
+- Mobile Combat Performance remplace seulement les animations
+  `animateDice` / `animateRpgDice`, sans posséder les règles ;
+- `gens-rpg-tactical-wall-dice-stats-16781145.js` accélère l'animation D100
+  Tactical mais termine sur la valeur finale déjà résolue.
 
 Document :
 `docs/GENSRPG_PHASE4_DICE_PREAUDIT.md`.

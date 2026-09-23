@@ -1,3 +1,103 @@
+## CHANTIER COURANT — Phase 5 / module-launch — pré-audit du raccord runtime — 2026-09-24
+
+Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-raccord-runtime-preaudit-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-raccord-runtime-preaudit-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-contract-preaudit-green-2026-09-24`.
+- SHA exact de base :
+  `8dee418cc1d8ed777166624d6bb04e6c14540443`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Règle 26 satisfaite
+
+Fichier utilisateur :
+`work14 (1).zip -> indexwork14.txt`.
+
+Vérifié localement :
+- taille `8170726` ;
+- blob Git `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+Le fichier correspond exactement au runtime du checkpoint GREEN.
+
+### Mission unique
+
+Pré-auditer le futur raccord runtime du contrat
+`module-launch / startModuleSession`
+sans modifier `index.html`.
+
+Constats exacts :
+- resolver Shell unique :
+  `gensShellActiveModuleV1()` ;
+- déjà exposé par :
+  `GensShellScreenReturnV1.activeModule()` ;
+- propriétaire natif :
+  `async function startConfiguredGame()` ;
+- cinq propriétaires historiques :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+### Décision architecturale
+
+Le futur launch router ne doit **pas** créer un second resolver de module.
+
+Séquence :
+1. S1 : registre `GensShellModuleLaunchV1` seulement, à côté du ScreenReturn ;
+2. S2 : provider Survival ;
+3. S3 : provider Capture ;
+4. S4 : provider Dungeon ;
+5. PvP : aucun provider tant que `PVP — À VENIR` reste le comportement réel ;
+6. Shell final seulement après parité E2E de tous les providers concernés ;
+7. retraits historiques un par un, jamais par shadowing statique.
+
+### S1 sélectionné
+
+Premier runtime micro-lot futur :
+**Phase 5 / module-launch S1 — Shell registry raccord**.
+
+S1 devra :
+- réutiliser `gensShellActiveModuleV1` ;
+- exposer `register / activeModule / startModuleSession` ;
+- ne pas être appelé par `startConfiguredGame` ;
+- ne raccorder aucun provider module ;
+- ne modifier aucune des cinq affectations historiques ;
+- ne créer aucun observer/timer/retry/polling.
+
+### Protection utilisateur
+
+La garde rollback de `captureFix135` reste permanente.
+
+Aucun retrait d'autorité avant preuve :
+- Dungeon map -> Tactical ;
+- embuscade/proximité ;
+- Builder jeu + édition ;
+- Capture victoire -> Hub ;
+- Capture reprise ;
+- Survival ;
+- Save & Quit ;
+- PvP placeholder ;
+- non-interférence quatre modules.
+
+### QA différée — hors périmètre
+
+- rafraîchissements ;
+- inventaire objet Survie à 0 ;
+- Stats au retour ;
+- détection ennemie/téléportation ;
+- terminologie Survie.
+
+### Sentinelle
+
+`tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs`.
+
+Aucun changement runtime dans ce pré-audit.
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / contrat public de lancement module — pré-audit — 2026-09-24
 
 Ce bloc devient le point de reprise final de ce micro-lot dès que le SHA documentaire

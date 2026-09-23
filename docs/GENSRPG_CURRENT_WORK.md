@@ -1,3 +1,77 @@
+## GREEN TECHNIQUE — Phase 5 / autorité unique Resume — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-resume-routing-fix-2026-09-23`.
+- Candidat runtime validé :
+  `c85d59f77c2e0596d19636ba3462353466645fc8`.
+- `index.html` :
+  taille `8171795`,
+  blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Correction validée
+
+La chaîne Dungeon `resumeGame` est consolidée à un seul propriétaire :
+`dungeonCore310PersistenceAndTokens`.
+
+Retirés :
+- `dungeonCore100ResumeAndInteractionFix -> window.resumeGame` ;
+- `dungeonCore307CriticalResumeFix -> window.resumeGame`.
+
+Conservé :
+- Core 3.10 comme seul propriétaire Dungeon ;
+- délégation vers l'autorité Shell antérieure hors Dungeon/Capture ;
+- aucune suppression de sauvegarde ;
+- aucun nouveau wrapper, routeur, observer, timer/retry ou stockage.
+
+### Validation CI complète sur c85d59f7
+
+- Architecture : `35840719332` — SUCCESS ;
+- navigateur complet : job `107115011798` — SUCCESS ;
+- Firefox : `35840719361` — SUCCESS ;
+- Tactical Dock : `35840719169` — SUCCESS.
+
+Le navigateur complet confirme :
+- Survie ;
+- Fouiller + arts Survie ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire -> Hub ;
+- Capture reload -> Reprendre -> Capture malgré une vieille sauvegarde Dungeon ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- Save & Quit -> reprise Dungeon ;
+- PvP ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- Preview / assets / Equipment.
+
+### Statut fonctionnel
+
+Ce lot est **GREEN technique complet**.
+
+Restent explicitement hors périmètre :
+- détection ennemie immédiate hors embuscade : dette connue, à traiter dans un lot dédié ultérieur ;
+- embuscade proche des héros : sentinelle automatique GREEN mais validation manuelle utilisateur non encore acquise.
+
+### Prochaine étape Phase 5
+
+Ne pas rouvrir `startConfiguredGame` immédiatement.
+
+Ouvrir un pré-audit séparé de la frontière Shell
+`goMenu / transitions écrans globaux`, car :
+- la Phase 5 exige une autorité unique de navigation générale ;
+- `goMenu` possède encore plusieurs propriétaires ;
+- le lot Resume vient de réduire proprement l'autorité session/module ;
+- aucun retrait runtime ne doit être tenté sans cartographie et E2E dédiés.
+
+Aucun merge sur `main`.
+
 ## CANDIDAT TDD GREEN À VALIDER — Phase 5 / autorité unique Resume — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -656,6 +656,9 @@ jobs:
       - name: Caractériser goMenu Dungeon et Capture
         run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
 
+      - name: Caractériser la responsabilité résiduelle goMenu Core 0.23
+        run: node tests/gens_phase5_gomenu_core023_e2e_characterization_v1.test.cjs
+
       - name: Caractériser goMenu Survie
         run: node tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs
 

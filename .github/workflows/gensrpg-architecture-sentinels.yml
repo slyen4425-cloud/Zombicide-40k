@@ -662,6 +662,9 @@ jobs:
       - name: Exiger le retrait de l'autorité goMenu Core 0.23
         run: node tests/gens_phase5_gomenu_core023_retirement_v1.test.cjs
 
+      - name: Caractériser l'autorité goMenu Core 0.01 restante
+        run: node tests/gens_phase5_gomenu_core01_preaudit_e2e_v1.test.cjs
+
       - name: Caractériser goMenu Survie
         run: node tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs
 

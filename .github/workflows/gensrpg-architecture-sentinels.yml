@@ -503,6 +503,9 @@ jobs:
       - name: Raccorder Capture S1 au retour écran Shell Phase 5
         run: node tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs
 
+      - name: Raccorder Dungeon S2 au retour écran Shell Phase 5
+        run: node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

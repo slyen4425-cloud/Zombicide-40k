@@ -33,7 +33,7 @@ jobs:
               raise SystemExit(f"unexpected source blob: {before} != {expected_before}")
 
           text = path.read_text(encoding="utf-8")
-          old = "const oldGo=window.goMenu;window.goMenu=function(){if(coreActive&&eligible()){try{save?.()}catch(e){}const sh=document.getElementById('sheet');if(sh)sh.style.display='none';show();return}return oldGo?.apply(this,arguments)};\\n"
+          old = "const oldGo=window.goMenu;window.goMenu=function(){if(coreActive&&eligible()){try{save?.()}catch(e){}const sh=document.getElementById('sheet');if(sh)sh.style.display='none';show();return}return oldGo?.apply(this,arguments)};\n"
           if text.count(old) != 1:
               raise SystemExit(f"expected exactly one Core 0.01 goMenu line, found {text.count(old)}")
 

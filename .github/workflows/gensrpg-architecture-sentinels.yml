@@ -494,6 +494,9 @@ jobs:
       - name: Pré-auditer la frontière finale goMenu Phase 5
         run: node tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs
 
+      - name: Verrouiller le contrat pur de retour écran module Phase 5
+        run: node tests/gens_phase5_module_screen_return_contract_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

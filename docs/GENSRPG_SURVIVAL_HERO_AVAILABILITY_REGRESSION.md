@@ -101,17 +101,38 @@ Nouvelle empreinte runtime finale :
 - taille `8171571` ;
 - blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
 
-## Validation requise
+## Validation finale GREEN
 
-Le présent commit documentaire déclenche :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+SHA candidat fonctionnel :
+`2901311d349450a82d7ae6cd808631f17df43f69`.
 
-La nouvelle sentinelle doit passer GREEN sur :
-Dungeon -> lancement -> sortie -> Survie -> sélection de héros.
+Triple CI :
+- Architecture + navigateur complet `35855369653` — SUCCESS ;
+- Firefox `35855369536` — SUCCESS ;
+- Tactical Dock `35855369651` — SUCCESS.
 
-Le lot ne sera GREEN que si la nouvelle sentinelle Dungeon -> Survie passe et
-si toutes les sentinelles existantes restent GREEN.
+La nouvelle sentinelle
+`tests/gens_survival_heroes_after_dungeon_e2e_browser_v1.test.cjs`
+passe désormais GREEN sur le vrai parcours :
+Dungeon -> lancement -> sortie -> Survie -> nouvelle partie -> sélection héros.
+
+Les sentinelles existantes restent également GREEN, notamment :
+- lancement Survie ;
+- Fouiller + arts Survie ;
+- goMenu Dungeon/Capture/Survie ;
+- Dungeon map -> Tactical ;
+- Capture victoire/reprise ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- Save & Quit / reprise ;
+- PvP ;
+- non-interférence quatre modules ;
+- preview/assets/Equipment.
+
+Le lot est donc fonctionnellement GREEN.
+
+Checkpoint final à créer après validation du commit documentaire :
+`checkpoint/gensrpg-survival-hero-availability-green-2026-09-23`.
 
 Aucun merge sur `main`.

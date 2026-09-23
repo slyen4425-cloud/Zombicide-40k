@@ -1,3 +1,78 @@
+## CHANTIER COURANT — Phase 5 / pré-audit retrait goMenu Core 0.30 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core030-retirement-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core030-retirement-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-e2e-characterization-green-2026-09-23`.
+- SHA exact de base :
+  `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946`.
+- Runtime inchangé :
+  index blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Prouver ou réfuter que
+`dungeonCore030HeroReturnFix -> window.goMenu`
+est devenu une interception inatteignable sous le propriétaire final
+`dungeonCore200Rebuild`.
+
+Aucun retrait runtime dans ce pré-audit.
+
+### Preuve à établir
+
+Core 2.00 :
+- possède le dernier `goMenu` ;
+- intercepte si `active200 && isDungeonMode()` ;
+- retourne sans déléguer dans ce cas ;
+- délègue sinon vers Core 0.30.
+
+Core 0.30 :
+- intercepte seulement si
+  `DungeonCore01.active && DungeonCore01.eligible()`.
+
+Or le `DungeonCore01` final est celui de Core 2.00 :
+- `.active -> active200` ;
+- `.eligible() -> isDungeonMode()`.
+
+Donc, si Core 2.00 délègue, la condition de Core 0.30 doit être fausse.
+
+### Barrières
+
+Conserver les sentinelles E2E GREEN :
+- Dungeon fiche -> goMenu -> map ;
+- Capture + vieille sauvegarde Dungeon -> goMenu -> Hub ;
+- Survie fiche -> goMenu -> menu ;
+- Dungeon map -> Tactical ;
+- Capture victoire/reprise ;
+- Save & Quit/reprise Dungeon ;
+- Builder ;
+- non-interférence quatre modules.
+
+### Interdictions
+
+- aucune modification de `index.html` ;
+- aucune suppression dans ce pré-audit ;
+- aucun nouveau wrapper/routeur/global ;
+- aucun observer/timer/retry ;
+- aucun changement Capture/Dungeon/Tactical/Builder ;
+- aucun traitement de la détection ennemie ;
+- aucun merge sur `main`.
+
+### Sortie attendue
+
+Si la preuve est GREEN :
+ouvrir un lot TDD séparé retirant uniquement l'affectation
+`window.goMenu` de Core 0.30, sans toucher au reste du bloc.
+
+Si la preuve échoue :
+aucun retrait ; documenter le chemin qui rend Core 0.30 encore actif.
+
 ## CANDIDAT GREEN — Phase 5 / caractérisation E2E goMenu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

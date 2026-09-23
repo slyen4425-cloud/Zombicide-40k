@@ -1,3 +1,75 @@
+## PRÉ-AUDIT TERMINÉ — Phase 5 / autorité resumeGame — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-resumegame-authority-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-resumegame-authority-preaudit-2026-09-23`.
+- Base :
+  `65999b34c36ed2909921e957a17e810ca9d0a04a`.
+- Dernier checkpoint fonctionnel GREEN :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit terminé sans modification runtime.
+
+Document :
+`docs/GENSRPG_PHASE5_RESUMEGAME_AUTHORITY_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_resumegame_authority_preaudit_v1.test.cjs`.
+
+Le runtime actif possède exactement trois autorités de reprise :
+1. Shell historique `function resumeGame()` ;
+2. `dungeonCore307CriticalResumeFix` ;
+3. `dungeonCore310PersistenceAndTokens`.
+
+`dungeonCore100ResumeAndInteractionFix` est désactivé et ne fait pas partie de
+la chaîne active.
+
+Core 3.07 et Core 3.10 interceptent sur la seule présence d'un runtime Dungeon
+avec participants, sans vérifier que le module actif est Dungeon.
+
+Le RED Capture/reprise est donc architecturalement expliqué :
+une ancienne sauvegarde Dungeon peut voler la reprise d'une session Capture.
+
+### Contrat cible
+
+Phase 5 impose une seule autorité Shell pour session/module actif.
+
+Le futur correctif doit :
+- modifier le propriétaire Shell existant, pas ajouter de wrapper ;
+- router par le module/profil actif en réutilisant `gensMode151()` et les
+  contrats existants ;
+- retirer les affectations globales `resumeGame` de Core 3.07 et Core 3.10 ;
+- conserver leurs autres responsabilités intactes ;
+- ne jamais supprimer la sauvegarde Dungeon pour faire passer Capture.
+
+### Preuves
+
+- pré-audit statique `resumeGame` : SUCCESS dans Architecture run
+  `35835303622` ;
+- Dungeon map -> Tactical V2 : SUCCESS ;
+- Capture victoire -> Hub : SUCCESS ;
+- Capture reprise avec ancien runtime Dungeon : RED, TDD conservé.
+
+### Prochaine action exacte
+
+Ouvrir un micro-lot séparé :
+
+**Phase 5 / consolidation resumeGame au Shell**.
+
+Le lot sera TDD et soustractif.
+Aucune garde spéciale Capture dans Dungeon.
+Aucun nouveau wrapper global.
+Aucun retrait `captureFix135/138/139`.
+Aucune correction de détection ennemie.
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / pré-audit d'autorité resumeGame — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

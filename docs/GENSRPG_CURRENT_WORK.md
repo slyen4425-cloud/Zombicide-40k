@@ -1,3 +1,80 @@
+## CHANTIER COURANT — Stats / cohérence éditeur -> runtime -> fiche — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-stats-editor-ingame-regression-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-stats-editor-ingame-regression-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-survival-hero-availability-green-2026-09-23`.
+- SHA exact de base :
+  `80a17a4ea9c9fdb685c0a27ff7c926e854d55e94`.
+- Runtime de base :
+  taille `8171571`,
+  blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Signalement utilisateur
+
+Conflit persistant entre les statistiques définies dans l'éditeur et les
+statistiques affichées en jeu. La même zone peut montrer plusieurs valeurs
+différentes sans que leur rôle soit clair.
+
+### Mission unique
+
+Caractériser le trajet réel :
+éditeur héros -> sauvegarde -> définition héros -> état runtime ->
+valeur canonique -> rendu de fiche.
+
+Aucun changement runtime avant reproduction RED.
+
+### Deux risques structurels à distinguer
+
+1. **Présentation** :
+   le rendu natif `renderDungeonAttributes()` affiche encore une ligne
+   `Base <state.rpgAttributes>`, alors que la sémantique moderne attend
+   `Base héros <dungeonStats> · Total <valeur canonique>`.
+   Le test statique actuel ne prouve pas le DOM réel.
+
+2. **Cache canonique** :
+   la couche performance met en cache `GensCleanRpgStats167874.value`.
+   Les invalidations couvrent notamment `saveGameProfiles`,
+   `changeDungeonAttribute`, équipement et sauvegardes runtime, mais
+   `saveCustomHero` / la sauvegarde de définition héros n'est pas dans
+   la liste actuelle.
+
+Ces deux risques doivent être testés séparément avant toute correction.
+
+### TDD obligatoire
+
+1. Browser réel :
+   ouvrir l'éditeur d'un héros Dungeon, lire sa valeur de base, ouvrir ensuite
+   la vraie fiche en jeu et comparer :
+   - valeur éditeur ;
+   - valeur canonique ;
+   - gros nombre affiché ;
+   - libellé Base/Total visible.
+2. Cache :
+   prouver qu'une sauvegarde de définition héros invalide ou non
+   `GensCleanRpgStats.value`.
+3. Si RED, corriger uniquement le propriétaire fautif.
+4. Ne pas changer les règles de progression : Base et Total peuvent être
+   différents si la différence est explicable.
+5. Rejouer Stats, Tactical, Survie, Capture, Builder et triple CI.
+
+### Interdictions
+
+- aucune modification de formule de stats ;
+- aucun reset arbitraire de `rpgAttributes` ;
+- aucun fallback UI ;
+- aucun nouveau wrapper/observer/timer/retry ;
+- aucune correction détection/embuscade ;
+- aucun merge sur `main`.
+
+---
+
 ## GREEN — Survie / disponibilité héros après Dungeon — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

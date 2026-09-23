@@ -65,17 +65,27 @@ persisté : la vraie UI de sélection ne peut donc plus proposer de héros.
 
 ## Correction propriétaire
 
-Commit runtime :
-`3f463bc90a3f09af29ff8bc51f4ec0269d5e0afc`.
+La première candidate runtime
+`3f463bc90a3f09af29ff8bc51f4ec0269d5e0afc`
+a correctement réparé le comportement mais a introduit deux helpers globaux.
+La sentinelle de cartographie Phase 2 l'a refusée. Cette candidate est donc
+abandonnée et n'est pas le résultat final.
 
-Correction sans wrapper UI :
-- ajout d'un calcul `survivalHeroIdsForBaseProfile()` indépendant du mode actif ;
-- `ensureBaseGameProfile()` utilise cette source au lieu de
-  `currentAllHeroIds()` pour le profil 40K ;
-- ajout d'une réparation idempotente du profil 40K déjà persisté avec un
-  `heroPool` vide ;
-- cette réparation est exécutée à l'ouverture du profil 40K, avant la
-  normalisation des participants.
+Correction v2 :
+`75be90dedf62e85eec0f0e34ecab8b6c52f75cfd`.
+
+Réalignement strict des dérivés :
+`4881330969882ce687315eecc79993ec53efe7b8`.
+
+Correction finale, sans nouveau global ni wrapper UI :
+- `ensureBaseGameProfile()` calcule directement le pool 40K à partir des héros
+  Survie, indépendamment de `isDungeonMode()` ;
+- il n'utilise plus `currentAllHeroIds()` pour construire le pool 40K ;
+- à l'ouverture du profil 40K, si un ancien état persistant a déjà un
+  `heroPool` vide, `openGensBuiltInGame()` redélègue au propriétaire existant
+  `ensureBaseGameProfile()` pour le reconstruire ;
+- aucun helper global supplémentaire n'est conservé ;
+- la cartographie Phase 2 garde les mêmes nombres de globals et propriétaires.
 
 Aucun changement de :
 - Dungeon gameplay ;
@@ -87,16 +97,19 @@ Aucun changement de :
 - embuscade ;
 - goMenu.
 
-Nouvelle empreinte runtime :
-- taille `8171970` ;
-- blob `842d248315a89e848bdbea565bf33a420eda3806`.
+Nouvelle empreinte runtime finale :
+- taille `8171571` ;
+- blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
 
 ## Validation requise
 
-Le commit documentaire de ce rapport doit déclencher :
+Le présent commit documentaire déclenche :
 1. Architecture + navigateur complet ;
 2. Firefox ;
 3. Tactical Dock.
+
+La nouvelle sentinelle doit passer GREEN sur :
+Dungeon -> lancement -> sortie -> Survie -> sélection de héros.
 
 Le lot ne sera GREEN que si la nouvelle sentinelle Dungeon -> Survie passe et
 si toutes les sentinelles existantes restent GREEN.

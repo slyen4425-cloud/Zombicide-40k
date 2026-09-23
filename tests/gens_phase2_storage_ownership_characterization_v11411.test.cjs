@@ -45,7 +45,7 @@ const disabled=new Set(Object.entries(inlineOwners.blocks||{}).filter(([,v])=>v.
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],source:m[2]}))
   .filter(x=>!disabled.has(x.id));
-assert.equal(inline.length,120);
+assert.equal(inline.length,119);
 
 function constants(source){
   const out=new Map();

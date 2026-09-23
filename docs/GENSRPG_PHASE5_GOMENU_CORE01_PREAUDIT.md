@@ -118,3 +118,45 @@ affectation `window.goMenu` de `gensDungeonCore01Js`.
 Les autres responsabilités de ce bloc, notamment son ancienne implémentation
 Dungeon et `closeGameCustomization`, restent hors périmètre jusqu'à audit
 spécifique.
+
+
+## Conclusion GREEN
+
+SHA technique validé :
+`2ec907067b0723fd4447f43ba8dcba11e390095a`.
+
+Validation :
+- Architecture + navigateur complet `35872003882` — SUCCESS ;
+- Firefox `35872003797` — SUCCESS ;
+- Tactical Dock `35872003759` — SUCCESS.
+
+Une première exécution a produit un faux RED avant lancement navigateur à cause
+d'une regex sur-échappée dans la nouvelle sentinelle. La syntaxe du test a été
+corrigée sans aucun changement runtime.
+
+La caractérisation E2E finale prouve :
+- vrai lancement Dungeon moderne ;
+- vrai Save & Quit ;
+- vrai switch vers Survie ;
+- retour Shell au profil Dungeon sans Resume/Nouvelle partie ;
+- profil réellement Dungeon et runtime resumable toujours présent ;
+- Core 2.00 reste inactif ;
+- l'appel `goMenu` ne réaffiche pas la map Dungeon.
+
+Conclusion architecturale :
+l'état privé `coreActive` de `gensDungeonCore01Js` reste inert sur le chemin
+moderne protégé. Son interception globale `window.goMenu` est donc un candidat
+de retrait soustractif.
+
+Prochain micro-lot autorisé après checkpoint GREEN :
+TDD de retrait **uniquement** de :
+- `const oldGo=window.goMenu` ;
+- `window.goMenu=function(){...}`
+dans `gensDungeonCore01Js`.
+
+Toutes les autres responsabilités de `gensDungeonCore01Js` restent hors
+périmètre, notamment `startConfiguredGame`, `closeGameCustomization` et son
+ancienne implémentation Dungeon.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase5-gomenu-core01-preaudit-green-2026-09-23`.

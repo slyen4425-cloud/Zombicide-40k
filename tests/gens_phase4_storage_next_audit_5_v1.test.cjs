@@ -9,8 +9,8 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:182,
-  resolvedAccesses:117,
+  totalAccesses:181,
+  resolvedAccesses:116,
   unresolvedAccesses:65,
   distinctResolvedKeys:19
 },'post-Economy-Rules storage totals drifted');

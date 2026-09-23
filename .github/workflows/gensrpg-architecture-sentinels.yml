@@ -497,6 +497,9 @@ jobs:
       - name: Verrouiller le contrat pur de retour écran module Phase 5
         run: node tests/gens_phase5_module_screen_return_contract_v1.test.cjs
 
+      - name: Pré-auditer le raccord runtime retour écran module Phase 5
+        run: node tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

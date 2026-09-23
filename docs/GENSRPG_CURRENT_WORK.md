@@ -1,3 +1,50 @@
+## CHANTIER COURANT — Pré-audit cohérence Stats éditeur -> jeu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-stats-editor-game-coherence-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-stats-editor-game-coherence-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-survival-hero-availability-green-2026-09-23`.
+- SHA exact de base :
+  `80a17a4ea9c9fdb685c0a27ff7c926e854d55e94`.
+- Runtime :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Caractériser le signalement utilisateur :
+éditeur Stats -> sauvegarde héros -> état runtime -> valeur canonique -> fiche en jeu.
+
+Aucun correctif runtime avant reproduction RED ou preuve d'une divergence réelle.
+
+### Piste déjà identifiée
+
+La fiche affiche actuellement :
+- une base issue de `hero.dungeonStats` ;
+- un total issu de `GensCleanRpgStats167874.value()`.
+
+Cette API privilégie `state.rpgAttributes` lorsqu'une valeur runtime existe.
+Il faut déterminer si cet écart représente une progression valide ou un ancien
+état de base devenu obsolète après édition du héros.
+
+### Hors périmètre
+
+- Survie : lot précédent fermé GREEN ;
+- détection ennemie ;
+- embuscade ;
+- goMenu ;
+- progression/XP ;
+- formules Tactical.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN — Survie / disponibilité héros après Dungeon — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

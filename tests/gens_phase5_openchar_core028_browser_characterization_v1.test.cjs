@@ -48,7 +48,6 @@ const server=http.createServer((req,res)=>{
 });
 
 async function ready(page){
-  await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
   await page.waitForFunction(()=>
     typeof window.openGensFamily==='function' &&
     typeof window.startConfiguredGame==='function' &&

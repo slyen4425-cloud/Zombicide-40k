@@ -10,7 +10,7 @@ const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const deployWorkflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
 const marker=/<script\b[^>]*\bid=["']dungeonCore028HeroExploreGuard["'][^>]*>[\s\S]*?<\/script>/i;
-assert.match(indexSource,marker,'exact S2 index must contain Dungeon Core 0.28 before characterization');
+assert.doesNotMatch(indexSource,marker,'retired Core 0.28 must be absent from current index');
 
 const modulesStart=deployWorkflow.indexOf('          modules = [');
 const modulesEnd=deployWorkflow.indexOf('          html = index.read_text',modulesStart);
@@ -25,8 +25,8 @@ composed=composed.replace(perfTag+'\\n','').replace(perfTag,'');
 for(const tag of moduleTags){
   if(!composed.includes(tag))composed=composed.replace('</body>',tag+'\\n</body>');
 }
-const withoutCore028=composed.replace(marker,'');
-assert.doesNotMatch(withoutCore028,/dungeonCore028HeroExploreGuard/,'characterization page must remove Core 0.28 entirely');
+const withoutCore028=composed;
+assert.doesNotMatch(withoutCore028,/dungeonCore028HeroExploreGuard/,'production-composed page must keep Core 0.28 absent');
 assert.ok(withoutCore028.includes('dungeon-world-builder-167821.js?v=167821'),'characterization must use the full Pages-style composition');
 
 const DUNGEON_ID='game_profile_dungeon_demo';
@@ -168,13 +168,13 @@ async function startDungeon(page){
     assert.deepEqual(errors,[],'characterization must not raise browser/runtime errors');
 
     console.log(JSON.stringify({
-      scenario:'Phase 5 openChar Core 0.28 redundancy characterization',
+      scenario:'Phase 5 openChar after Core 0.28 retirement',
       removedOwner:'dungeonCore028HeroExploreGuard',
       hero,
       hiddenLegacyExplorerButtons:explorers,
       visibleExplorerButtons:visibleExplorers,
       remainingOpenCharOwner:'Capture 139 over native Shell openChar',
-      result:'Core 0.28 openChar wrapper not required for visible Dungeon sheet behavior'
+      result:'retired Core 0.28 remains unnecessary in the production-composed Dungeon sheet'
     }));
   }finally{
     clearTimeout(watchdog);

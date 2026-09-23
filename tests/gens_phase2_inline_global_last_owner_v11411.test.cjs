@@ -56,7 +56,16 @@ const expected=[
   })
 ].join('\n')+'\n';
 
-assert.equal(table,expected,'inline global last-owner table drifted from the committed runtime');
+if(table!==expected){
+  const actualLines=table.split('\n');
+  const expectedLines=expected.split('\n');
+  const max=Math.max(actualLines.length,expectedLines.length);
+  let first=-1;
+  for(let i=0;i<max;i++){if(actualLines[i]!==expectedLines[i]){first=i;break}}
+  assert.fail('inline global last-owner table drifted at line '+(first+1)+
+    '\nactual:   '+JSON.stringify(actualLines[first])+
+    '\nexpected: '+JSON.stringify(expectedLines[first]));
+}
 
 for(const [name,count,lastOwner] of [
   ['renderDungeonCombatRound',30,'dungeonCore303TimelineRootFix'],

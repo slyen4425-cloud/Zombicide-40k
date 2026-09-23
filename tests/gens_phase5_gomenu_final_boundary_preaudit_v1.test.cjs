@@ -47,11 +47,11 @@ assert.equal(owners.blocks.dungeonCore200Rebuild.primaryDomain,'dungeon');
 
 const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
 const dungeon=blocks.find(b=>b.id==='dungeonCore200Rebuild')?.body||'';
-assert.doesNotMatch(capture,/window\\.goMenu\\s*=/,
+assert.doesNotMatch(capture,/window\.goMenu\s*=/,
   'Capture S1 must no longer assign the global goMenu boundary');
 assert.match(capture,/GensShellScreenReturnV1/,
   'Capture S1 must register through the Shell public contract');
-assert.match(capture,/captureEnterWorld139\\(\\)/,
+assert.match(capture,/captureEnterWorld139\(\)/,
   'Capture S1 must keep the Capture-owned world/hub implementation');
 assert.match(dungeon,/const goOutside200=window\.goMenu;/,
   'Dungeon Core 2.00 must still capture the previous goMenu boundary');

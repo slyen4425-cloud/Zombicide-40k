@@ -29,10 +29,10 @@ function blockInfo(id){
 
 assert.equal(manifest.sourceIndexBlob,CURRENT_BLOB,'Storage cartography fingerprint must follow MJ Rules GREEN candidate index');
 assert.deepEqual(manifest.totals,{
-  totalAccesses:182,resolvedAccesses:117,unresolvedAccesses:65,distinctResolvedKeys:19
+  totalAccesses:181,resolvedAccesses:116,unresolvedAccesses:65,distinctResolvedKeys:19
 },'Audit 12 guard must follow the migrated MJ Rules storage totals');
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:152,resolved:102,unresolved:50,distinctKeys:11
+  accesses:151,resolved:101,unresolved:50,distinctKeys:11
 },'Audit 12 guard must follow the migrated MJ Rules Dungeon totals');
 assert.deepEqual(manifest.byDomain.core,{
   accesses:2,resolved:1,unresolved:1,distinctKeys:1

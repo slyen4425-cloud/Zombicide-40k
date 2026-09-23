@@ -1,3 +1,61 @@
+## RED PROUVÉ — Phase 5 / captureFix135 retirement — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capturefix135-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capturefix135-retirement-2026-09-23`.
+- Base exacte :
+  `22cc0e61f22e350dc61da390cb99925d74122eed`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### RED
+
+Sentinelle :
+`tests/gens_phase5_capturefix135_retirement_v1.test.cjs`.
+
+Workflow :
+`GenSrpG architecture sentinels` run `35818765293`.
+
+Échec exact :
+`Phase 5 target must reduce startConfiguredGame assignments from 5 to 4`.
+
+Constat :
+- actual : `5` ;
+- expected : `4` ;
+- étape en échec uniquement :
+  `Retirer l’affectation shadowée captureFix135 de startConfiguredGame`.
+
+Les preuves antérieures Phase 4/Phase 5 exécutées avant cette étape sont GREEN.
+
+CI parallèles :
+- Firefox run `35818765321` — SUCCESS ;
+- Tactical Dock run `35818765277` — SUCCESS.
+
+### Prochaine action autorisée
+
+Appliquer la règle 26 de la charte avant toute modification du gros
+`index.html`.
+
+Il faut utiliser le fichier exact correspondant au SHA courant de la branche,
+le vérifier, puis retirer uniquement l'affectation
+`window.startConfiguredGame` du bloc `captureFix135`.
+
+Aucune autre modification runtime n'est autorisée.
+
+Après modification :
+1. RED -> GREEN de la sentinelle dédiée ;
+2. réalignement strict des cartographies/empreintes devenues obsolètes ;
+3. triple CI complète ;
+4. checkpoint GREEN ;
+5. ré-audit séparé de `captureFix138`.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / captureFix135 retirement — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

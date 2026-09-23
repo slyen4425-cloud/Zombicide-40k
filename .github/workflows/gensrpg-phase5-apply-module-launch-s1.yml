@@ -5,6 +5,7 @@ on:
     branches:
       - work/gensrpg-phase5-module-launch-s1-shell-registry-2026-09-24
     paths:
+      - .github/workflows/gensrpg-phase5-apply-module-launch-s1.yml
       - .github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch
 
 permissions:
@@ -52,12 +53,29 @@ jobs:
           s=b.decode("utf-8")
           blob=hashlib.sha1(f"blob {len(b)}\0".encode()+b).hexdigest()
           assert len(b)==8171576, len(b)
-          assert blob=="1836981cf3d880d0e87ab2efb2efafda428ccf4b", blob
+          assert blob=="12be0fdbaa5c05f7852933b48a3dd5df09da6145", blob
           assert s.count("window.GensShellModuleLaunchV1")==1
           assert len(re.findall(r"function\s+gensShellActiveModuleV1\s*\(",s))==1
           assert len(re.findall(r"window\.startConfiguredGame\s*=\s*async\s+function",s))==5
           assert "GensShellModuleLaunchV1?.register" not in s
           PY
+
+      - name: Retarget S1 exact fingerprint and prove GREEN
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs")
+          s=p.read_text()
+          assert s.count("8170726")==1
+          assert s.count("d9ee34d47fa888795db68cdc244d0c73d30ee523")==1
+          s=s.replace("8170726","8171576",1)
+          s=s.replace("d9ee34d47fa888795db68cdc244d0c73d30ee523","12be0fdbaa5c05f7852933b48a3dd5df09da6145",1)
+          s=s.replace("S1 RED must start from the exact GREEN runtime","S1 runtime must match the exact inert-registry candidate")
+          s=s.replace("S1 RED must start from the exact GREEN blob","S1 runtime blob must match the exact inert-registry candidate")
+          p.write_text(s)
+          PY
+          node tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs
 
       - name: Remove one-shot mechanism
         shell: bash
@@ -70,6 +88,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html .github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch .github/workflows/gensrpg-phase5-apply-module-launch-s1.yml
+          git add index.html tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs .github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch .github/workflows/gensrpg-phase5-apply-module-launch-s1.yml
+          git diff --cached --check
           git commit -m "feat: add Phase 5 module-launch S1 Shell registry"
           git push origin HEAD:work/gensrpg-phase5-module-launch-s1-shell-registry-2026-09-24

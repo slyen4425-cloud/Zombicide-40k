@@ -28,5 +28,13 @@
     "not referenced by the current production load graph during Phase 3",
     "no gameplay is moved into this contract",
     "no compatibility wrapper is introduced by this contract"
-  ]
+  ],
+  "publicEntries": {
+    "moduleScreenReturn": {
+      "contract": "assets/gensrpg/shell/module-screen-return-contract-v1.json",
+      "operation": "returnToPrimaryView",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-primary-view"
+    }
+  }
 }

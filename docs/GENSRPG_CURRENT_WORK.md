@@ -1,3 +1,106 @@
+## GREEN FINAL CANDIDATE — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
+
+Ce bloc devient le point de reprise final de S1 dès que le SHA documentaire de clôture
+a lui-même passé la triple CI et que le checkpoint final existe.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-raccord-runtime-preaudit-green-2026-09-24`.
+- SHA de base :
+  `05360ddd5a48aed2ec80e6fb1d373e5d3d1bfdac`.
+- Checkpoint final cible :
+  `checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### TDD
+
+RED :
+- SHA `08d15900e001bd5b69b5d81717d38a120c8937fc` ;
+- Architecture run `35931646797` ;
+- échec attendu uniquement sur `Raccorder le registre Shell module-launch S1`.
+
+### Runtime S1
+
+Commit runtime :
+`438f3a3feaae2d2e3c7c1891c25be58a375631cb`.
+
+`index.html` :
+- taille `8171576` ;
+- blob `12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+
+Modification runtime unique :
+- +19 lignes dans le propriétaire Shell natif ;
+- ajout de `GensShellModuleLaunchV1` entre `GensShellScreenReturnV1` et `goMenu()`.
+
+API :
+- `register(moduleId, handler)` ;
+- `activeModule: gensShellActiveModuleV1` ;
+- `startModuleSession(moduleId=gensShellActiveModuleV1())`.
+
+### Inertie préservée
+
+- aucun provider enregistré ;
+- aucun appel production au nouveau registre ;
+- un seul resolver `gensShellActiveModuleV1()` ;
+- propriétaire natif `startConfiguredGame` inchangé ;
+- cinq wrappers historiques inchangés :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- aucun DOM/stockage/observer/listener/timer/retry/polling ajouté.
+
+### Réalignements de sentinelles
+
+Les cartographies Phase 2 et les sentinelles anciennes qui suivent l'empreinte du
+runtime courant ont été réalignées sur le nouveau size/blob.
+
+Aucune assertion métier n'a été supprimée ou affaiblie.
+
+### Validation technique complète
+
+SHA technique :
+`3056eb3a16e9c85f4976d47592e033890414d2ad`.
+
+- Architecture + navigateur complet : `35934434891` — SUCCESS ;
+- Tactical Dock : `35934434987` — SUCCESS ;
+- Firefox : `35934435046` — SUCCESS.
+
+Le navigateur complet valide notamment :
+Survie/Dungeon, Dungeon->Tactical, Capture victoire/reprise, Builder, Config objet,
+fiche RPG/openChar, Save & Quit, PvP, Monster Capture, Capture complet,
+non-interférence, murs, preview/assets et Equipment.
+
+### Hygiène
+
+Mécanismes one-shot absents :
+- `.github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch` ;
+- `.github/workflows/gensrpg-phase5-apply-module-launch-s1.yml`.
+
+`main` reste gelée.
+
+### QA différée — inchangée
+
+- petits bugs de rafraîchissement ;
+- inventaire objet Survie à `0` par défaut ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- terminologie Survie.
+
+### Prochaine action après checkpoint GREEN
+
+1. générer une preview téléphone complète alignée avec GitHub Pages ;
+2. validation utilisateur ;
+3. seulement après validation utilisateur, ouvrir
+   **Phase 5 / module-launch S2 — provider Survival**.
+
+S2 ne devra encore retirer aucun propriétaire historique.
+
+Aucun merge sur `main`.
+
+---
+
 ## CANDIDAT RUNTIME — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
 
 Ce bloc devient le point de reprise actif pendant la validation du candidat S1.

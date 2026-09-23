@@ -143,3 +143,67 @@ Ne créer aucun checkpoint GREEN avant :
 - Tactical Dock SUCCESS.
 
 Aucun merge sur `main`.
+
+
+## Validation technique GREEN avant clôture documentaire
+
+SHA technique final :
+`3056eb3a16e9c85f4976d47592e033890414d2ad`.
+
+CI :
+- Architecture + navigateur complet : run `35934434891` — SUCCESS ;
+- Tactical Dock : run `35934434987` — SUCCESS ;
+- Firefox wall : run `35934435046` — SUCCESS.
+
+La batterie navigateur complète a notamment validé :
+- Survie après Dungeon ;
+- Fouiller et arts Survie ;
+- retours `goMenu` ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire + reprise inter-module ;
+- Dungeon après Survie ;
+- Dungeon Builder réel ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- `openChar` sans Core 0.28 ;
+- cache / retour / pièges authored ;
+- Save & Quit + reprise ;
+- PvP placeholder ;
+- Monster Capture ;
+- Capture en composition complète ;
+- non-interférence des quatre modules ;
+- murs ;
+- preview ;
+- résolution d'assets ;
+- Equipment.
+
+Runtime final S1 inchangé depuis le commit runtime :
+- taille `8171576` ;
+- blob `12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+
+Les réalignements ultérieurs concernent uniquement les cartographies et sentinelles
+d'empreinte qui suivent le runtime courant ; aucune assertion métier n'a été supprimée
+ni affaiblie.
+
+Les mécanismes temporaires sont absents :
+- `.github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch` ;
+- `.github/workflows/gensrpg-phase5-apply-module-launch-s1.yml`.
+
+## Clôture finale obligatoire
+
+La présente clôture documentaire change le SHA.
+
+Avant le checkpoint GREEN final, ce nouveau SHA doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+
+Après checkpoint GREEN :
+- créer une preview téléphone complète avec la même composition que GitHub Pages ;
+- obtenir la validation utilisateur ;
+- seulement ensuite ouvrir S2 — provider Survival.
+
+Aucun merge sur `main`.

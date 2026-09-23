@@ -98,6 +98,28 @@ assert.match(functions.captureFix138,/renderCaptureWorldHub/);
 assert.match(functions.captureFix139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
 assert.match(functions.captureFix139,/markSessionActive/);
 
+// Effective-chain shadowing proof.
+assert.match(captureContextSource,/gensCapturePregameMode/);
+assert.match(captureContextSource,/gensCapturePregameMode\(\)\)return true/);
+assert.match(captureContextSource,/fam===["']creature["']/);
+assert.match(functions.captureFix135,/if\(typeof gensCapturePregameMode===["']function["']&&gensCapturePregameMode\(\)\)/);
+assert.match(functions.captureFix138,/const cap=isCaptureContext138\(\)/);
+assert.match(functions.captureFix138,/if\(cap\)\{/);
+
+const shadowingProof={
+  outerOwner:'captureFix139',
+  delegatesOnlyWhen:'isCaptureContext138() === false',
+  capture135EffectCondition:'gensCapturePregameMode() === true',
+  capture135ConditionCoveredByOuterPredicate:true,
+  capture138EffectCondition:'isCaptureContext138() === true',
+  capture138ConditionCoveredByOuterPredicate:true,
+  consequence:[
+    'Capture contexts are intercepted by captureFix139 before captureFix138/captureFix135',
+    'delegated non-Capture contexts do not activate captureFix138 post-launch branch',
+    'delegated normal contexts do not activate captureFix135 pregame reset branch'
+  ]
+};
+
 const sourceReport=ids.map(id=>({
   id,
   responsibility:owners.blocks[id].responsibility,

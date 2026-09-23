@@ -1,3 +1,77 @@
+## CANDIDAT GREEN — Phase 5 / pré-audit retrait goMenu Core 0.30 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core030-retirement-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core030-retirement-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-e2e-characterization-green-2026-09-23`,
+  SHA `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946`.
+- Runtime inchangé :
+  index blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Preuve
+
+Document :
+`docs/GENSRPG_PHASE5_GOMENU_CORE030_RETIREMENT_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_gomenu_core030_retirement_preaudit_v1.test.cjs`.
+
+Run Architecture de preuve :
+`35846251476`.
+
+Étape :
+`Prouver le shadowing goMenu de Core 0.30` — SUCCESS.
+
+Conclusion :
+la condition Core 0.30 est équivalente à la condition d'interception de Core
+2.00. Core 0.30 ne peut donc jamais voir sa condition vraie après une
+délégation Core 2.00.
+
+### Candidat de retrait
+
+Retirer uniquement :
+`dungeonCore030HeroReturnFix -> window.goMenu`.
+
+Conserver tout le reste du bloc Core 0.30.
+
+Chaîne cible :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore023StabilityFix ->
+dungeonCore200Rebuild`.
+
+### Validation finale du présent pré-audit
+
+Le SHA documentaire final doit repasser :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Après checkpoint GREEN seulement :
+- ouvrir un lot TDD séparé ;
+- ajouter le RED 5 -> 4 propriétaires ;
+- appliquer le retrait exact ;
+- ne retirer aucun autre propriétaire.
+
+### Règle index.html pour le futur retrait
+
+Le futur lot modifiera `index.html`.
+Il devra repartir du SHA/checkpoint GREEN exact de ce pré-audit et appliquer la
+procédure de la charte pour obtenir/vérifier la copie exacte avant toute
+modification.
+
+### Dettes séparées
+
+- détection ennemie immédiate hors embuscade : différée ;
+- embuscade proche des héros : automatique GREEN, pas encore validée
+  manuellement.
+
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / pré-audit retrait goMenu Core 0.30 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

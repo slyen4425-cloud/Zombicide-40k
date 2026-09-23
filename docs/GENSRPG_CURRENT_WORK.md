@@ -1,3 +1,65 @@
+## CLÔTURE CANDIDATE — Phase 5 / retrait goMenu Core 0.01 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core01-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core01-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core01-preaudit-green-2026-09-23`.
+- SHA de base :
+  `d17ac5c486f0abfd9520c69356457e403370dfb5`.
+- Runtime final :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Commit runtime :
+  `76df9e9a6ff83db118e054f1e0afa36ac0c8c90e`.
+- SHA technique GREEN :
+  `61730ed2fa0f006ab843fc72573d46fd869dbe69`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+L'autorité `window.goMenu` de `gensDungeonCore01Js` est retirée.
+
+Chaîne goMenu candidate :
+`captureFix139 -> dungeonCore200Rebuild`.
+
+Core 0.01 reste chargé pour ses autres responsabilités :
+- `startConfiguredGame` ;
+- `closeGameCustomization` ;
+- ancienne API `DungeonCore01` ;
+- état privé `coreActive`.
+
+Diff runtime :
+1 ligne supprimée, 0 ajout, 225 octets retirés.
+Aucun wrapper, observer, timer/retry ou fallback ajouté.
+
+### Validation technique
+
+- Architecture + navigateur complet `35883403875` — SUCCESS ;
+- Firefox `35883404119` — SUCCESS ;
+- Tactical Dock `35883404181` — SUCCESS ;
+- Architecture : 203 / 203 ;
+- navigateur complet : 36 / 36.
+
+### Checkpoint final prévu
+
+`checkpoint/gensrpg-phase5-gomenu-core01-retirement-green-2026-09-23`.
+
+Créer ce checkpoint seulement après triple CI GREEN du SHA documentaire final exact.
+
+### Dettes séparées, inchangées
+
+- détection ennemie intermittente ;
+- petits défauts de rafraîchissement Stats/UI ;
+- validation manuelle embuscade.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN CANDIDATE — Phase 5 / pré-audit goMenu Core 0.01 restant — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

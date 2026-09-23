@@ -1,3 +1,72 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / captureFix138 ré-audit — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capturefix138-reaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capturefix138-reaudit-2026-09-23`.
+- Base exacte :
+  `2feec88919aa41d9fbf8f151ca9402ac0ae3bdea`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-capturefix135-retirement-green-2026-09-23`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-capturefix138-reaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Ré-audit terminé sans modification runtime ni `index.html`.
+
+Document :
+`docs/GENSRPG_PHASE5_CAPTUREFIX138_REAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_capturefix138_reaudit_v1.test.cjs`.
+
+Verdict :
+- chaîne actuelle à 4 propriétaires ;
+- `captureFix138 -> startConfiguredGame` est shadowé dans la chaîne effective ;
+- sa branche post-lancement Capture n'est atteignable ni quand le contexte est
+  Capture, ni quand il ne l'est pas ;
+- `captureFix138` reste propriétaire de plusieurs autres responsabilités
+  Capture et son bloc ne doit pas être supprimé.
+
+### Prochain micro-lot recommandé
+
+Retrait TDD séparé de la seule affectation
+`captureFix138 -> startConfiguredGame`.
+
+Cible :
+- `4 -> 3` affectations ;
+- propriétaires conservés :
+  `captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- aucun retrait de `captureFix139`.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`6d9339bb53f70311e90dc4d990897ac691444ca6`.
+
+- Architecture + navigateur complet : `35827850005` — SUCCESS ;
+- Firefox : `35827849946` — SUCCESS ;
+- Tactical Dock : `35827850010` — SUCCESS.
+
+### Prochaine action exacte
+
+La clôture documentaire a changé le SHA.
+
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-capturefix138-reaudit-green-2026-09-23` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir un lot séparé
+   `Phase 5 / captureFix138 startConfiguredGame retirement` ;
+5. RED dédié avant toute modification runtime.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / captureFix138 ré-audit — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

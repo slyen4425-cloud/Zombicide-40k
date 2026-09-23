@@ -37,7 +37,7 @@ const executable=shellEntry.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,
 assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert before raccord');
 
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
-assert.match(phase3Test,/entry+' must not be loaded by '+name/,
+assert.ok(phase3Test.includes("assert.equal(text.includes(entry),false,entry+' must not be loaded by '+name);"),
   'Phase 3 guard must still forbid loading target entries in production');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');

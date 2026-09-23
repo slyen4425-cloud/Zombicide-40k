@@ -23,13 +23,12 @@ function chainFor(name){
 const chain=chainFor('goMenu');
 const total=chain.reduce((n,x)=>n+x.count,0);
 
-assert.equal(total,3,
-  'Phase 5 cumulative retirement must keep Core 0.30 absent from the current three-owner goMenu chain');
+assert.equal(total,2,
+  'Phase 5 cumulative retirement must keep Core 0.30 absent from the current two-owner goMenu chain');
 assert.deepEqual(chain.map(x=>x.id),[
   'captureFix139',
-  'gensDungeonCore01Js',
   'dungeonCore200Rebuild'
-],'Core 0.30 must remain retired after the later Core 0.23 retirement');
+],'Core 0.30 must remain retired after the later Core 0.23 and Core 0.01 retirements');
 
 const core030=blocks.find(x=>x.id==='dungeonCore030HeroReturnFix');
 assert.ok(core030,'Core 0.30 script must remain present for its non-goMenu responsibilities');
@@ -45,12 +44,14 @@ assert.match(core200,/return goOutside200\?\.apply\(this,arguments\)/);
 
 console.log(JSON.stringify({
   scenario:'Phase 5 retire Core 0.30 goMenu owner',
-  expectedAssignments:3,
+  expectedAssignments:2,
   expectedChain:[
     'captureFix139',
-    'gensDungeonCore01Js',
     'dungeonCore200Rebuild'
   ],
   retired:'dungeonCore030HeroReturnFix -> window.goMenu',
-  laterRetirement:'dungeonCore023StabilityFix -> window.goMenu'
+  laterRetirements:[
+    'dungeonCore023StabilityFix -> window.goMenu',
+    'gensDungeonCore01Js -> window.goMenu'
+  ]
 },null,2));

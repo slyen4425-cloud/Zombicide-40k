@@ -1,3 +1,75 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — pré-audit chaîne restante — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-2026-09-22`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-remaining-chain-preaudit-2026-09-22`.
+- Base exacte :
+  `b93576ac281309354f99ddad4e0898e760e88f2c`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-capture131-retirement-green-2026-09-22`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit terminé sans modification runtime ni `index.html`.
+
+Chaîne active confirmée :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Verdict :
+- 5 propriétaires actifs ;
+- aucun wrapper transitif pur restant ;
+- aucun second retrait soustractif sûr immédiat ;
+- Shell Phase 3 toujours inert ;
+- les règles Capture/Dungeon doivent rester dans leurs modules.
+
+Document :
+`docs/GENSRPG_PHASE5_STARTCONFIGUREDGAME_REMAINING_CHAIN_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs`.
+
+### Prochain micro-lot recommandé
+
+**Pré-audit du contrat public de lancement Capture.**
+
+Objectif :
+caractériser `captureFix135/138/139` comme un seul cycle de lancement Capture
+(pré-lancement / route dédiée / post-lancement) afin de préparer une entrée
+publique module consommable plus tard par le Shell.
+
+Aucune suppression ni connexion Shell dans ce prochain pré-audit.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`711c896cd06f2f84e40b2a2f4ccd224d14c0f9ea`.
+
+- Architecture + navigateur complet : `35816713522` — SUCCESS ;
+- Firefox : `35816713549` — SUCCESS ;
+- Tactical Dock : `35816713524` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire a changé le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-green-2026-09-23` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir un chantier séparé
+   `Phase 5 / Capture public launch-entry contract preaudit` ;
+5. ne modifier aucun runtime dans ce nouveau pré-audit.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / startConfiguredGame — pré-audit chaîne restante — 2026-09-22
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

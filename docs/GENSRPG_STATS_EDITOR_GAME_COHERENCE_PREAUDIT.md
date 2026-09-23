@@ -75,3 +75,38 @@ l'éditeur laisse un ancien état runtime qui n'est plus aligné avec la défini
 - aucun changement Survie/Capture/Tactical/Builder ;
 - aucun traitement détection/embuscade ;
 - aucun merge sur `main`.
+
+
+## Conclusion du pré-audit
+
+SHA technique :
+`f5ad07f5c0623bfab3ab6a2b17f8011fc603e9b6`.
+
+Triple CI sur ce SHA :
+- Architecture + navigateur complet `35858550651` — SUCCESS ;
+- Firefox `35858550682` — SUCCESS ;
+- Tactical Dock `35858550671` — SUCCESS.
+
+La sentinelle confirme la coexistence de deux niveaux de données :
+- définition héros : `dungeonStats` ;
+- état de partie persistant : `rpgAttributes`.
+
+Le Core et le Snapshot privilégient l'état runtime lorsqu'il existe.
+Ce comportement peut produire une différence visible entre « Base héros » et
+« Total », mais aucun défaut moteur n'est démontré par les tests actuels.
+
+Retour manuel utilisateur :
+- fonctionnement global revenu dans l'ordre ;
+- quelques petits défauts de rafraîchissement peuvent momentanément faire croire
+  à une incohérence de Stats ;
+- ces défauts visuels sont différés ;
+- aucune correction runtime n'est justifiée dans ce lot.
+
+Décision :
+- clôture GREEN du pré-audit ;
+- aucune modification Stats ;
+- conserver une dette UI/rafraîchissement séparée ;
+- reprendre la roadmap Phase 5.
+
+Checkpoint cible :
+`checkpoint/gensrpg-stats-editor-game-coherence-preaudit-green-2026-09-23`.

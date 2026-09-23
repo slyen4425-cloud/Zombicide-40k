@@ -1,3 +1,99 @@
+## CHANTIER COURANT — Phase 5 / pré-audit autorité fiche héros openChar — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-openchar-authority-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-openchar-authority-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-dungeon-s2-green-2026-09-23`.
+- SHA exact de base :
+  `eba5ba001744dfb00f9bec1fa391e6fa54d2f527`.
+- Runtime :
+  taille `8172500`, blob `7b586e9fb14b7a93a0edb069e115fd6d48cbda97`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation manuelle S2 / QA différée
+
+La preview S2 complète a été testée sur téléphone.
+
+Le comportement ciblé S2 semble fonctionner. Trois anomalies ont été observées,
+mais le diff S1 -> S2 ne modifie que 7 lignes dans la frontière `goMenu`
+(5 ajouts / 2 suppressions) et aucun fichier Stats, déplacement, détection,
+Survie, Builder ou asset.
+
+Elles sont donc enregistrées comme QA séparée et ne doivent pas recevoir de
+rustine dans le chantier `openChar` :
+
+1. Stats au retour :
+   valeurs/affichage pouvant ne pas correspondre immédiatement à l'état attendu.
+   Dette de rafraîchissement/affichage déjà connue.
+2. Détection ennemie :
+   bug déjà référencé ; nouveau symptôme observé :
+   un ennemi non détectant a ensuite été téléporté à l'autre bout de la map.
+3. Survie :
+   certains libellés semblent reprendre du vocabulaire Dungeon
+   (ex. « explorer salle ») alors que l'action invoque correctement la vague zombie.
+
+### Règle 26
+
+La copie exacte S2 déjà vérifiée reste valide pour ce pré-audit :
+- taille `8172500` ;
+- blob `7b586e9fb14b7a93a0edb069e115fd6d48cbda97`.
+
+Aucun nouveau fichier utilisateur n'est nécessaire tant que le runtime de base
+ne change pas.
+
+### Objectif du pré-audit
+
+Phase 5 doit encore consolider la fiche héros hors combat.
+
+Propriétaire natif :
+`function openChar(id)` dans le Shell historique.
+
+Interceptions réelles trouvées dans le runtime exact :
+- `captureFix139` :
+  bloque uniquement une ouverture automatique pendant la fenêtre critique de
+  lancement Capture, puis délègue ;
+- `dungeonCore028HeroExploreGuard` :
+  post-traite `#sheet` pour supprimer des boutons « Explorer », installe un
+  `MutationObserver` ciblé sur la fiche et deux retries `setTimeout(0/100)`,
+  puis wrappe globalement `window.openChar`.
+
+### Correction de cartographie à retenir
+
+L'ancien inventaire Phase 2 peut annoncer 3 affectations `openChar`, car son
+regex historique `window.<name>\s*=` compte aussi le premier `=` de
+`window.openChar==="function"`.
+
+Le pré-audit doit utiliser une détection stricte d'affectation
+(`=(?!=)`) et ne pas prendre ce compteur historique comme preuve de chaîne.
+
+### Hypothèse à prouver
+
+Le premier candidat soustractif est `dungeonCore028HeroExploreGuard`.
+
+Avant tout retrait, prouver par navigateur que la fiche Dungeon actuelle ne
+réinjecte plus de bouton Explorer même lorsque ce bloc de compatibilité est
+absent.
+
+Le wrapper Capture 139 n'est pas candidat à un retrait opportuniste : il porte
+encore une garde de lancement Capture réelle.
+
+### Hors périmètre
+
+- aucun changement Stats ;
+- aucune correction détection/mouvement ;
+- aucune correction terminologie Survie ;
+- aucun changement Capture launch ;
+- aucun changement Tactical ;
+- aucun changement gameplay ;
+- aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / retour écran Shell — Dungeon S2 — 2026-09-23
 
 Ce bloc devient le point de reprise final de S2 dès que la triple CI du SHA

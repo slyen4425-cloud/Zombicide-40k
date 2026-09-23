@@ -1,3 +1,78 @@
+## CANDIDAT RUNTIME — Phase 5 / consolidation resumeGame au Shell — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-resumegame-shell-consolidation-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-resumegame-shell-consolidation-2026-09-23`.
+- Base :
+  `823d10f228a7c518a06fed852504cbfc48b27a81`.
+- SHA runtime candidat :
+  `da0c8c7ace21d9505a4bb9ecf3e9463d880e1c85`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### TDD
+
+Avant patch :
+- `tests/gens_phase5_resumegame_shell_consolidation_v1.test.cjs` :
+  **RED attendu**, car Core 3.07 et Core 3.10 remplaçaient encore globalement
+  `resumeGame`.
+
+Patch one-shot :
+- source `index.html` vérifiée :
+  blob `f13835a2827dbfa9e2698cb026d3e732ad62aba4`,
+  8 174 148 octets ;
+- cible :
+  blob `bd31ab46a36869b59204bbcc0ee279abcda126c2`,
+  8 173 853 octets ;
+- workflow one-shot supprimé dans le même commit ;
+- test d'autorité unique exécuté dans le one-shot : **SUCCESS**.
+
+### Modification runtime exacte
+
+Un seul propriétaire actif `resumeGame` :
+le Shell historique.
+
+Le Shell :
+- utilise le discriminant existant `gensMode151()` ;
+- si `dungeon` : délègue à `DungeonCore01.show()` ;
+- si `capture` : délègue au chemin Capture existant
+  `captureEnterWorld139()` avec fallback `renderCaptureWorldHub()` ;
+- sinon : conserve le chemin historique Survie/autre.
+
+Retraits soustractifs :
+- affectation globale `resumeGame` retirée de
+  `dungeonCore307CriticalResumeFix` ;
+- affectation globale `resumeGame` retirée de
+  `dungeonCore310PersistenceAndTokens`.
+
+Toutes les autres responsabilités de Core 3.07 et Core 3.10 restent intactes.
+
+Aucun nouveau wrapper, observer, timer, retry ou stockage.
+Aucun retrait `captureFix135/138/139`.
+Aucune modification détection/embuscade/Builder/Tactical/gameplay.
+
+### Validation à effectuer
+
+Le commit documentaire suivant sert uniquement à déclencher la CI, car le
+commit one-shot produit avec le token Actions ne déclenche pas les workflows.
+
+Requis avant checkpoint :
+- autorité unique Shell ;
+- Capture victoire + reprise avec vieille sauvegarde Dungeon ;
+- Dungeon Save & Quit + reprise ;
+- Dungeon map -> Tactical ;
+- Survie ;
+- Capture courant ;
+- non-interférence 4 modules ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / consolidation resumeGame au Shell — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

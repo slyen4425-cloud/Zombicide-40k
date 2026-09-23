@@ -111,3 +111,42 @@ résultat d'un vrai `goMenu` Survie avec la sauvegarde Dungeon toujours présent
 
 SHA de sentinelle poursuivant ce scénario :
 `bfac3dc4333828004758c15ebd0f84f172aaec49`.
+
+
+## Conclusion GREEN
+
+SHA validé :
+`98b7c21cb4353537d679c721f9c304828ff0ee83`.
+
+Validation :
+- Architecture + navigateur complet `35864217815` — SUCCESS ;
+- Firefox `35864217859` — SUCCESS ;
+- Tactical Dock `35864217834` — SUCCESS.
+
+La sentinelle ciblée Core 0.23 est GREEN sur le vrai parcours :
+Dungeon actif -> fiche -> goMenu -> map ->
+Save & Quit -> Shell racine ->
+Survie -> goMenu.
+
+Constats :
+- le retour nominal Dungeon reste correct via Core 2.00 ;
+- Save & Quit conserve l'état Dungeon resumable ;
+- le getter `DungeonCore01.active` peut rester vrai juste après Save & Quit,
+  mais le vrai switch Shell vers Survie restaure ensuite l'isolation ;
+- avec une sauvegarde Dungeon persistante, `goMenu` Survie ne réaffiche pas Dungeon ;
+- Capture avec sauvegarde Dungeon persistante reste également protégée par le E2E existant ;
+- le vieux `dc01Modal` n'est plus le modal public de Core 2.00 ;
+- la fermeture `specialDiceModal` à l'entrée de fiche reste une responsabilité
+  séparée de Core 0.23 et ne doit pas être retirée avec `goMenu`.
+
+Décision :
+le prochain lot peut TDD le retrait **uniquement** de :
+- `const oldGo023=window.goMenu` ;
+- l'affectation `window.goMenu=function(){...}` correspondante.
+
+Toutes les autres responsabilités de `dungeonCore023StabilityFix` restent intactes.
+
+Aucun runtime n'a été modifié dans ce lot.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase5-gomenu-core023-e2e-characterization-green-2026-09-23`.

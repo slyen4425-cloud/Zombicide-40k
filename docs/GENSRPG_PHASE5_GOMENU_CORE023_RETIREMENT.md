@@ -127,11 +127,47 @@ Aucune modification de :
 
 Aucun merge sur `main`.
 
-## Validation finale requise
+## Validation technique GREEN
 
-Le commit documentaire qui accompagne ce candidat doit passer, sur le même SHA :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+SHA technique validé :
+`ed0ea1cab7128d8e1c9196e472db55d639ecae06`.
 
-Le checkpoint GREEN final ne sera créé qu'après ces trois SUCCESS.
+Runs :
+- Architecture + navigateur complet :
+  `35868625048` — SUCCESS ;
+- Firefox :
+  `35868624975` — SUCCESS ;
+- Tactical Dock :
+  `35868624981` — SUCCESS.
+
+Architecture statique :
+203 / 203 étapes GREEN.
+
+Navigateur complet :
+34 / 34 étapes GREEN, notamment :
+- héros Survie après Dungeon ;
+- Fouiller + arts Survie ;
+- goMenu Dungeon/Capture ;
+- caractérisation résiduelle Core 0.23 ;
+- TDD de retrait Core 0.23 ;
+- goMenu Survie ;
+- Dungeon -> Tactical ;
+- Capture victoire/reprise ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- preview/assets ;
+- Equipment.
+
+## Clôture documentaire
+
+Le présent commit documentaire final doit lui-même repasser les trois batteries
+sur son SHA exact avant création du checkpoint :
+
+`checkpoint/gensrpg-phase5-gomenu-core023-retirement-green-2026-09-23`.
+
+Aucun merge sur `main`.

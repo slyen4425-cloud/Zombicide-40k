@@ -479,6 +479,9 @@ jobs:
       - name: Caractériser la régression utilisateur Phase 5
         run: node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
 
+      - name: Verrouiller le routage Resume Capture hors du propriétaire Dungeon
+        run: node tests/gens_phase5_capture_resume_routing_owner_v1.test.cjs
+
       - name: Verrouiller la proximité des embuscades Dungeon
         run: node tests/dungeon_event_ambush_position_v167878.test.cjs
 

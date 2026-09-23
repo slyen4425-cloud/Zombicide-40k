@@ -10,6 +10,61 @@ Ce bloc devient le point de reprise actif. Les sections suivantes sont historiqu
   `checkpoint/gensrpg-phase5-gomenu-screen-transitions-preaudit-green-2026-09-23`.
 - SHA exact de base :
   `1a7cbeac8bf8765c8cda9afd0fe6b60a50bda57c`.
+- Runtime inchangé :
+  index blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Caractériser en navigateur réel la frontière publique `goMenu` avant tout
+retrait de l'un de ses cinq propriétaires.
+
+### Scénarios obligatoires
+
+1. Dungeon actif -> ouvrir une vraie fiche héros -> `goMenu` -> retour map Dungeon ;
+2. après retour Dungeon :
+   - fiche masquée ;
+   - map/Core visible ;
+   - aucune fuite Capture ;
+   - interactions/overflow non bloqués ;
+3. conserver une vraie sauvegarde Dungeon persistante ;
+4. lancer Capture ;
+5. Capture active + vieille sauvegarde Dungeon -> `goMenu` -> Hub Capture ;
+6. Dungeon ne doit jamais voler ce retour ;
+7. Survie active -> fiche héros -> `goMenu` -> menu Survie ;
+8. non-interférence quatre modules, Builder et Tactical restent couverts par la CI existante.
+
+### Interdictions
+
+- aucune modification de `index.html` ;
+- aucun retrait `goMenu` ;
+- aucun nouveau wrapper/routeur/global ;
+- aucun observer/timer/retry ;
+- aucun changement gameplay ;
+- aucun traitement de la détection ennemie ;
+- aucun merge sur `main`.
+
+### Critère de sortie
+
+Le lot est GREEN seulement si la caractérisation E2E passe sur la composition
+réelle et si la triple CI complète reste GREEN.
+
+Si un scénario est RED, documenter le propriétaire/état exact puis ouvrir un
+lot correctif séparé. Ne pas corriger dans ce lot de caractérisation.
+
+## CHANTIER COURANT — Phase 5 / caractérisation E2E goMenu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-screen-transitions-preaudit-green-2026-09-23`.
+- SHA exact de base :
+  `1a7cbeac8bf8765c8cda9afd0fe6b60a50bda57c`.
 - Production :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
 

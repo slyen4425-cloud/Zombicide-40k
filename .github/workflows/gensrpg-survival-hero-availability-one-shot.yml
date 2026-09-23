@@ -1,0 +1,123 @@
+name: GenSrpG Survival hero availability repair one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-survival-hero-availability-regression-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and repair Survival hero pool owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          before="$(git hash-object index.html)"
+          bytes_before="$(wc -c < index.html | tr -d ' ')"
+          test "$before" = "6a9392e667881f2087e4df931645cada4201cb3c"
+          test "$bytes_before" = "8171079"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          marker='''function ensureBaseGameProfile(){
+          '''
+          helper='''function survivalHeroIdsForBaseProfile(){
+            applyCustomHeroesMulti();
+            const dungeonCustomHeroIds=new Set(customHeroesForMode(true).map(h=>String(h.id)));
+            const ids=new Set(
+              Object.keys(CHARS).filter(id=>
+                !(typeof DUNGEON_HERO_IDS!=="undefined"&&DUNGEON_HERO_IDS.includes(String(id))) &&
+                !dungeonCustomHeroIds.has(String(id))
+              )
+            );
+            customHeroesForMode(false).forEach(h=>{if(h?.id)ids.add(String(h.id));});
+            return [...ids];
+          }
+
+          '''
+          if s.count(marker)!=1:
+              raise SystemExit(f"ensureBaseGameProfile marker count={s.count(marker)}")
+          s=s.replace(marker,helper+marker,1)
+
+          old='''    // Isolation stricte : aucun héros Dungeon (base ou personnalisé) dans Zombicide.
+              const dungeonCustomHeroIds=new Set(customHeroesForMode(true).map(h=>String(h.id)));
+              bp.heroPool=currentAllHeroIds().filter(id=>
+                !(typeof DUNGEON_HERO_IDS!=="undefined"&&DUNGEON_HERO_IDS.includes(String(id))) &&
+                !dungeonCustomHeroIds.has(String(id))
+              );
+          '''
+          new='''    // Isolation stricte : le pool 40K est indépendant du mode actif.
+              // Un lancement Dungeon ne doit jamais vider le profil Survie de référence.
+              bp.heroPool=survivalHeroIdsForBaseProfile();
+          '''
+          if s.count(old)!=1:
+              raise SystemExit(f"base Survival heroPool owner match count={s.count(old)}")
+          s=s.replace(old,new,1)
+
+          load_marker='''function loadGameProfiles(){
+            // Ne reconstruire les profils que s'ils manquent réellement.
+          '''
+          repair='''function repairEmptyBaseSurvivalHeroPool(){
+            try{
+              const profiles=loadGameProfilesRaw();
+              const bp=profiles.find(p=>String(p?.id||"")===String(GAME_PROFILE_BASE_ID));
+              if(!bp||bp.builtIn!==true||!Array.isArray(bp.heroPool)||bp.heroPool.length)return false;
+              const restored=survivalHeroIdsForBaseProfile();
+              if(!restored.length)return false;
+              bp.heroPool=restored;
+              saveGameProfiles(profiles);
+              return true;
+            }catch(e){console.warn("Réparation pool héros Survie",e);return false}
+          }
+
+          '''
+          if s.count(load_marker)!=1:
+              raise SystemExit(f"loadGameProfiles marker count={s.count(load_marker)}")
+          s=s.replace(load_marker,repair+load_marker,1)
+
+          call_old='''  setActiveGameProfileId(profileId);
+            gensCleanIncompatibleHeroSelection();
+          '''
+          call_new='''  setActiveGameProfileId(profileId);
+            if(String(profileId)===String(GAME_PROFILE_BASE_ID))repairEmptyBaseSurvivalHeroPool();
+            gensCleanIncompatibleHeroSelection();
+          '''
+          if s.count(call_old)!=1:
+              raise SystemExit(f"openGensBuiltInGame owner match count={s.count(call_old)}")
+          s=s.replace(call_old,call_new,1)
+
+          if 'bp.heroPool=currentAllHeroIds().filter' in s:
+              raise SystemExit("mode-dependent 40K heroPool rebuild still present")
+          p.write_text(s,encoding="utf-8")
+          PY
+
+          after="$(git hash-object index.html)"
+          bytes_after="$(wc -c < index.html | tr -d ' ')"
+          echo "after_blob=$after"
+          echo "after_bytes=$bytes_after"
+          test "$after" = "842d248315a89e848bdbea565bf33a420eda3806"
+          test "$bytes_after" = "8171970"
+
+      - name: Commit owner repair and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-survival-hero-availability-one-shot.yml
+          git commit -m "fix: preserve Survival heroes across Dungeon launch"
+          git push origin HEAD:work/gensrpg-survival-hero-availability-regression-2026-09-23

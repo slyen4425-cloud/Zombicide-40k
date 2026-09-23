@@ -1,3 +1,42 @@
+## CHANTIER COURANT — Phase 5 / revalidation goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-revalidation-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-revalidation-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-stats-editor-game-coherence-preaudit-green-2026-09-23`.
+- SHA de base :
+  `146778230a2d95f5730b46ba744f9f0956605c66`.
+- Runtime inchangé :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Revalider le pré-audit historique Core 0.23 sur le runtime GREEN actuel,
+sans retrait et sans modification gameplay.
+
+Conclusion structurelle attendue à vérifier par CI :
+- Core 2.00 court-circuite Core 0.23 sur le Dungeon nominal ;
+- Core 0.23 conserve un nettoyage historique post-délégation ;
+- son ancien wrapper `openHero` est remplacé plus tard par Core 2.00 ;
+- aucune suppression autorisée tant qu'un E2E dédié n'a pas caractérisé
+  l'atteignabilité réelle des états legacy.
+
+### Dettes séparées
+
+- rafraîchissements Stats/UI : différés ;
+- détection ennemie intermittente : différée ;
+- embuscade manuelle : différée.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN — Pré-audit cohérence Stats éditeur -> jeu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

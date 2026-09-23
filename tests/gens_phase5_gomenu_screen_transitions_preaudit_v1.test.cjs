@@ -40,24 +40,28 @@ function excerpt(body,index,span=900){
 }
 
 const phase2=lastOwnerRow('goMenu');
-assert.deepEqual(phase2,{count:2,last:'dungeonCore200Rebuild'},
+assert.deepEqual(phase2,{count:1,last:'dungeonCore200Rebuild'},
   'goMenu baseline must match the current cumulative Phase 5 cartography');
 
 const chain=chainFor('goMenu');
 const total=chain.reduce((n,x)=>n+x.count,0);
-assert.equal(total,2,'goMenu current runtime assignment count drifted');
+assert.equal(total,1,'goMenu current runtime assignment count drifted');
 assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild','goMenu current last owner drifted');
 assert.deepEqual(chain.map(x=>x.id),[
-  'captureFix139',
   'dungeonCore200Rebuild'
-],'goMenu owner chain drifted from the current cumulative Phase 5 baseline');
+],'Capture S1 must leave Dungeon Core 2.00 as the sole global goMenu override');
 
 const bodies=Object.fromEntries(chain.map(x=>[x.id,x.body]));
 const retiredCore01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
+const capture139=blocks.find(x=>x.id==='captureFix139')?.body||'';
 assert.doesNotMatch(retiredCore01,/window\.goMenu\s*=/,
   'retired Core01 must not regain global goMenu authority');
-assert.match(bodies.captureFix139,/const oldMenu139=window\.goMenu;[\s\S]*if\(hasActiveSession\(\)&&isCaptureContext138\(\)\)\{[\s\S]*captureEnterWorld139\(\);return;/,
-  'Capture 139 must remain the dedicated active-Capture goMenu interceptor');
+assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
+  'Capture S1 must not regain global goMenu authority');
+assert.match(capture139,/GensShellScreenReturnV1/,
+  'Capture S1 must expose its return through the Shell public registry');
+assert.match(capture139,/captureEnterWorld139\(\)/,
+  'Capture S1 must keep Capture-owned world/hub rendering');
 assert.match(bodies.dungeonCore200Rebuild,/const goOutside200=window\.goMenu;[\s\S]*if\(active200&&isDungeonMode\?\.\(\)\)\{[\s\S]*return show\(\)\}/,
   'Core 2.00 remains the final active-Dungeon goMenu interceptor');
 assert.match(bodies.dungeonCore200Rebuild,/return goOutside200\?\.apply\(this,arguments\)/,
@@ -90,6 +94,7 @@ console.log(JSON.stringify({
   phase2Row:phase2,
   assignments:total,
   chain:report,
-  runtimeChanged:false,
-  nextDecision:'classify each owner as Shell transition, module-private transition, or transit wrapper before any runtime retirement'
+  runtimeChanged:true,
+  captureMigratedToPublicContract:true,
+  nextDecision:'migrate the remaining Dungeon owner through the same Shell contract in a separate micro-lot'
 },null,2));

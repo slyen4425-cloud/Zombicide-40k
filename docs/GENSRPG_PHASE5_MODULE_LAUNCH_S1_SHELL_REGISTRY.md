@@ -93,3 +93,53 @@ Après patch :
 - preview téléphone si le lot modifie le runtime de production.
 
 Aucun retrait historique dans S1.
+
+
+## Candidat runtime S1
+
+TDD RED acquis au SHA :
+`08d15900e001bd5b69b5d81717d38a120c8937fc`.
+
+Run Architecture RED :
+`35931646797`.
+
+Échec unique attendu :
+`Raccorder le registre Shell module-launch S1`.
+
+Firefox et Tactical restaient GREEN.
+
+Runtime raccordé par mécanisme one-shot temporaire, supprimé dans le même commit.
+
+Commit runtime :
+`438f3a3feaae2d2e3c7c1891c25be58a375631cb`.
+
+Empreinte après S1 :
+- taille `8171576` octets ;
+- blob `12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+
+Diff runtime :
+- insertion de 19 lignes uniquement ;
+- registre `GensShellModuleLaunchV1` placé entre ScreenReturn et `goMenu()` ;
+- aucun provider enregistré ;
+- aucun appel production au nouveau registre ;
+- aucun second resolver ;
+- les cinq wrappers `startConfiguredGame` sont inchangés.
+
+Mécanismes temporaires vérifiés absents après le commit :
+- `.github/runtime-patches/gens_phase5_module_launch_s1_shell_registry.patch` ;
+- `.github/workflows/gensrpg-phase5-apply-module-launch-s1.yml`.
+
+Le hash cible erroné d'un premier essai one-shot a provoqué un échec avant commit runtime.
+Il a été corrigé avant toute modification persistante du runtime.
+
+### Validation obligatoire du candidat
+
+Déclencher maintenant la triple CI complète sur un SHA documentaire descendant de
+`438f3a3f...`.
+
+Ne créer aucun checkpoint GREEN avant :
+- Architecture + navigateur complet SUCCESS ;
+- Firefox SUCCESS ;
+- Tactical Dock SUCCESS.
+
+Aucun merge sur `main`.

@@ -1,3 +1,92 @@
+## CANDIDAT RUNTIME — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
+
+Ce bloc devient le point de reprise actif pendant la validation du candidat S1.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-raccord-runtime-preaudit-green-2026-09-24`.
+- SHA de base :
+  `05360ddd5a48aed2ec80e6fb1d373e5d3d1bfdac`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### TDD RED
+
+SHA RED :
+`08d15900e001bd5b69b5d81717d38a120c8937fc`.
+
+Architecture :
+`35931646797` — FAILURE uniquement sur
+`Raccorder le registre Shell module-launch S1`.
+
+Firefox et Tactical : GREEN.
+
+### Runtime S1
+
+Commit runtime :
+`438f3a3feaae2d2e3c7c1891c25be58a375631cb`.
+
+`index.html` :
+- taille `8171576` ;
+- blob `12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+
+Modification runtime unique :
+- +19 lignes ;
+- ajout du registre `GensShellModuleLaunchV1` à côté de `GensShellScreenReturnV1`.
+
+API :
+- `register(moduleId, handler)` ;
+- `activeModule: gensShellActiveModuleV1` ;
+- `startModuleSession(moduleId=gensShellActiveModuleV1())`.
+
+### Inertie S1 conservée
+
+- aucun provider enregistré ;
+- aucun appel de production au nouveau service ;
+- cinq wrappers `startConfiguredGame` inchangés ;
+- propriétaire Shell natif inchangé ;
+- aucun second resolver ;
+- aucun DOM/stockage/observer/listener/timer/retry/polling.
+
+Mécanismes one-shot supprimés du commit runtime :
+- patch temporaire absent ;
+- workflow temporaire absent.
+
+### Incident temporaire sans impact runtime
+
+Un premier one-shot avait un hash cible erroné et a échoué avant commit.
+Le patch a été recalculé sur le fichier exact règle 26 :
+blob correct après insertion =
+`12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+
+Aucune version au hash erroné n'a été commitée comme runtime.
+
+### Validation en cours
+
+La triple CI complète doit être déclenchée sur le présent SHA documentaire descendant
+du commit runtime.
+
+Checkpoint GREEN interdit avant :
+- Architecture + navigateur complet SUCCESS ;
+- Firefox SUCCESS ;
+- Tactical Dock SUCCESS.
+
+### QA différée
+
+Ne pas toucher :
+- rafraîchissements ;
+- inventaire Survie à 0 ;
+- Stats au retour ;
+- détection/téléportation ;
+- terminologie Survie.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

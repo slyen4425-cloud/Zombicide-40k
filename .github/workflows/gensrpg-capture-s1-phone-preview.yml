@@ -1,0 +1,84 @@
+name: Build GenSrpG Capture S1 phone preview
+
+on:
+  push:
+    branches:
+      - test/gensrpg-phase5-capture-s1-phone-2026-09-23
+    paths:
+      - .github/workflows/gensrpg-capture-s1-phone-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact test branch
+        uses: actions/checkout@v4
+        with:
+          ref: test/gensrpg-phase5-capture-s1-phone-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify exact GREEN S1 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:index.html)" = "c17460335b2deb5e5916dbf91448b0706c38d0df"
+          test "$(wc -c < index.html)" = "8172505"
+
+      - name: Compose phone preview like GitHub Pages build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          source = Path("index.html")
+          workflow = Path(".github/workflows/main.yml").read_text(encoding="utf-8")
+          html = source.read_text(encoding="utf-8")
+
+          start = workflow.index("          modules = [")
+          end = workflow.index("          html = index.read_text", start)
+          block = workflow[start:end]
+          tags = re.findall(r"'(<script src=\"[^\"]+\"></script>)'", block)
+
+          if not tags:
+              raise SystemExit("No GitHub Pages module tags discovered")
+
+          perf_tag = '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
+          html = html.replace(perf_tag + "\n", "").replace(perf_tag, "")
+
+          for tag in tags:
+              if tag not in html:
+                  if "</body>" not in html:
+                      raise SystemExit("Cannot compose preview: </body> missing")
+                  html = html.replace("</body>", tag + "\n</body>")
+
+          out = Path("capture-s1-phone-test.html")
+          out.write_text(html, encoding="utf-8")
+
+          required = [
+              'assets/dungeon/dungeon-world-builder-167821.js?v=167821',
+              'assets/gensrpg/gens-world-summary-167820.js?v=167820',
+              'assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819',
+              'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
+          ]
+          for item in required:
+              if item not in html:
+                  raise SystemExit("Missing composed module: " + item)
+
+          print("preview-bytes", out.stat().st_size)
+          print("module-tags", len(tags))
+          PY
+
+      - name: Commit composed preview only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "GenSrpG Test Preview Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add capture-s1-phone-test.html
+          git commit -m "test: compose Capture S1 phone preview"
+          git push origin HEAD:test/gensrpg-phase5-capture-s1-phone-2026-09-23

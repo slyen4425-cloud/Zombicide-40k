@@ -108,6 +108,9 @@ jobs:
           PY
 
           after="$(git hash-object index.html)"
+          bytes="$(wc -c < index.html | tr -d ' ')"
+          echo "after_blob=$after"
+          echo "after_bytes=$bytes"
           test "$after" = "4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
 
       - name: Commit owner retirement and remove one-shot workflow

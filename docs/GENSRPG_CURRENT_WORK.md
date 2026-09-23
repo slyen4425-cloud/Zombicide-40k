@@ -1,4 +1,4 @@
-## CLÔTURE CANDIDATE — Phase 5 / retrait goMenu Core 0.01 — 2026-09-23
+## GREEN FINAL — Phase 5 / retrait goMenu Core 0.01 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
 
@@ -44,11 +44,18 @@ Aucun wrapper, observer, timer/retry ou fallback ajouté.
 - Architecture : 203 / 203 ;
 - navigateur complet : 36 / 36.
 
-### Checkpoint final prévu
+### Validation documentaire
 
+Le SHA documentaire candidat `fcf9f0a2d060f35f345b2d360b41e936703f40a5` a repassé :
+- Architecture + navigateur complet `35884503531` — SUCCESS ;
+- Firefox `35884503540` — SUCCESS ;
+- Tactical Dock `35884503405` — SUCCESS ;
+- navigateur complet 36 / 36.
+
+Checkpoint final :
 `checkpoint/gensrpg-phase5-gomenu-core01-retirement-green-2026-09-23`.
 
-Créer ce checkpoint seulement après triple CI GREEN du SHA documentaire final exact.
+Le présent SHA documentaire final doit repasser la triple CI avant création effective du checkpoint.
 
 ### Dettes séparées, inchangées
 

@@ -1,4 +1,4 @@
-## VALIDATION EN COURS — Phase 5 / retrait goMenu Core 0.23 — 2026-09-23
+## CLÔTURE CANDIDATE — Phase 5 / retrait goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
 
@@ -8,49 +8,47 @@ Ce bloc devient le point de reprise actif. Les sections suivantes sont historiqu
   `checkpoint/gensrpg-start-phase5-gomenu-core023-retirement-2026-09-23`.
 - Base GREEN :
   `checkpoint/gensrpg-phase5-gomenu-core023-e2e-characterization-green-2026-09-23`.
-- Base SHA :
-  `d5e15691f4784ee1aef24c72aadbc8424054f73c`.
-- Runtime avant :
-  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
-- Runtime candidat :
+- Runtime final :
   taille `8171186`, blob `c2424bada56517e579ffe65fa147facbb6bf2caf`.
 - Commit runtime :
   `f6d9ecf912d3a0b618019d50b4e006af5062eaed`.
-- Commit réalignement :
+- Réalignement dérivé :
   `c73b6699ae6b4cd5ffe75cd31b2d095162036270`.
+- SHA technique GREEN :
+  `ed0ea1cab7128d8e1c9196e472db55d639ecae06`.
 - Production :
   `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
 
-### TDD
+### Résultat
 
-Run RED :
-`35866725675`.
+L'autorité `window.goMenu` de `dungeonCore023StabilityFix` est retirée.
 
-Échec ciblé :
-Core 0.23 figurait encore comme quatrième propriétaire de `goMenu`.
+Chaîne finale candidate :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
 
-### Retrait
-
-Suppression strictement soustractive dans `dungeonCore023StabilityFix` :
-- capture `oldGo023` ;
-- affectation globale `window.goMenu`.
+Core 0.23 reste actif pour ses autres responsabilités, notamment :
+- `DungeonCore01.openHero` ;
+- nettoyage fiche / `specialDiceModal` ;
+- gardes combat ;
+- logique IA / loot restante.
 
 Diff runtime :
 6 lignes supprimées, 0 ajout, 385 octets retirés.
+Aucun wrapper, observer, retry, timer ou fallback ajouté.
 
-Toutes les autres responsabilités Core 0.23 restent présentes.
+### Validation technique
 
-### Chaîne candidate
+- Architecture + navigateur complet `35868625048` — SUCCESS ;
+- Firefox `35868624975` — SUCCESS ;
+- Tactical Dock `35868624981` — SUCCESS.
 
-`captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+Le navigateur complet passe 34 / 34 étapes.
 
-Cartographie Phase 2 :
-- affectations inline `767 -> 766` ;
-- `goMenu 4 -> 3`.
+### Checkpoint final prévu
 
-### Validation requise
+`checkpoint/gensrpg-phase5-gomenu-core023-retirement-green-2026-09-23`.
 
-Triple CI complète sur le SHA documentaire candidat avant checkpoint GREEN.
+Le checkpoint ne sera créé qu'après triple CI GREEN du SHA documentaire final exact.
 
 ### Dettes séparées, inchangées
 
@@ -61,7 +59,6 @@ Triple CI complète sur le SHA documentaire candidat avant checkpoint GREEN.
 Aucun merge sur `main`.
 
 ---
-
 ## GREEN — Phase 5 / caractérisation E2E goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -709,6 +709,9 @@ jobs:
       - name: Caractériser le flash Survie dans la fiche RPG
         run: node tests/gens_rpg_sheet_survival_flash_browser_v11411.test.cjs
 
+      - name: Caractériser openChar sans Dungeon Core 0.28
+        run: node tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs
+
       - name: Vérifier cache, retour et pièges authored dans Chromium
         run: node tests/gens_authored_cache_trap_browser_v11411.test.cjs
 

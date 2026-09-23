@@ -1,3 +1,90 @@
+## GREEN FINAL CANDIDATE — Phase 5 / contrat public de lancement module — pré-audit — 2026-09-24
+
+Ce bloc devient le point de reprise final de ce micro-lot dès que le SHA documentaire
+de clôture a lui-même passé la triple CI et que le checkpoint final existe.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-contract-preaudit-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-contract-preaudit-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-openchar-core028-retirement-green-2026-09-23`.
+- SHA de base :
+  `4ce38c01e00f75703f5103c83b268e1a75724364`.
+- Checkpoint final cible :
+  `checkpoint/gensrpg-phase5-module-launch-contract-preaudit-green-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Contrat public metadata-only créé :
+`assets/gensrpg/shell/module-launch-contract-v1.json`.
+
+Opération :
+`startModuleSession`.
+
+Providers :
+- Survival ;
+- Dungeon ;
+- Capture ;
+- PvP.
+
+Les quatre contrats module déclarent `moduleLaunch` avec statut
+`declared-not-loaded`.
+
+Aucun `entry-v1.js` n'est raccordé au runtime.
+
+Invariant majeur :
+**le shadowing statique ou l'ordre d'une chaîne de wrappers n'est jamais une preuve suffisante pour retirer une autorité de lancement.**
+
+La garde de rollback utilisateur reste obligatoire :
+`tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs`.
+
+Chaîne `startConfiguredGame` volontairement inchangée :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+### Runtime
+
+`index.html` n'a pas changé :
+- taille `8170726` ;
+- blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+Aucun gameplay, Builder, Tactical, Storage, Stats, détection, inventaire Survie ou cache PWA modifié.
+
+### Validation technique du candidat
+
+SHA technique :
+`b4bc46560c1f47c383799e5f31b43bee507f9640`.
+
+- Architecture + navigateur complet : `35927000630` — SUCCESS ;
+- Firefox : `35927000589` — SUCCESS ;
+- Tactical Dock : `35927000620` — SUCCESS.
+
+### QA utilisateur différée
+
+Conserver séparément :
+- petits défauts de rafraîchissement ;
+- inventaire objet Survie observé à `0` par défaut ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- libellés Survie mélangeant du vocabulaire Dungeon.
+
+### Prochaine action après checkpoint GREEN
+
+Ouvrir un chantier séparé :
+**Phase 5 / raccord module-launch — pré-audit runtime**.
+
+Avant toute inspection détaillée ou modification du gros `index.html`, appliquer la règle 26 :
+demander le fichier exact correspondant au checkpoint GREEN final, puis vérifier son blob/taille.
+
+Le futur raccord devra prouver la parité sur les vrais chemins utilisateur avant tout retrait
+de `captureFix135/138/139` ou d'une autorité Dungeon.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / contrat public de lancement module — pré-audit — 2026-09-24
 
 Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.

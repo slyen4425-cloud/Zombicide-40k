@@ -157,3 +157,46 @@ Ouvrir un lot séparé :
 Conformément à la règle 26, ce lot suivant devra utiliser le fichier `index.html` exact du checkpoint GREEN fourni par l'utilisateur avant toute inspection ou modification détaillée du gros HTML.
 
 Aucun merge sur `main`.
+
+
+## Validation technique GREEN avant clôture documentaire
+
+SHA technique :
+`b4bc46560c1f47c383799e5f31b43bee507f9640`.
+
+- Architecture + navigateur complet : run `35927000630` — SUCCESS ;
+- Firefox : run `35927000589` — SUCCESS ;
+- Tactical Dock : run `35927000620` — SUCCESS.
+
+La batterie navigateur confirme notamment :
+- Dungeon map -> Tactical ;
+- Capture victoire et reprise inter-module ;
+- Dungeon après Survie ;
+- Builder réel ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- openChar sans Core 0.28 ;
+- Save & Quit / reprise ;
+- PvP ;
+- Monster Capture ;
+- Capture en composition complète ;
+- non-interférence quatre modules ;
+- preview et assets.
+
+Le runtime reste byte-identique :
+- taille `8170726` ;
+- blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+## Clôture finale obligatoire
+
+La clôture documentaire change le SHA.
+
+Avant création du checkpoint GREEN final, le SHA documentaire final doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase5-module-launch-contract-preaudit-green-2026-09-24`.
+
+Aucun merge sur `main`.

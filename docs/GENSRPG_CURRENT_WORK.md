@@ -1,3 +1,74 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / Capture public launch-entry — pré-audit — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-public-launch-entry-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-public-launch-entry-preaudit-2026-09-23`.
+- Base exacte :
+  `d519ae79f925b8be8c873f6c1f8c05d001427cb7`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-green-2026-09-23`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Pré-audit Capture terminé sans modification runtime ni `index.html`.
+
+Document :
+`docs/GENSRPG_PHASE5_CAPTURE_PUBLIC_LAUNCH_ENTRY_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs`.
+
+Constats :
+- `captureFix139` est le meilleur noyau actuel d'entrée publique Capture ;
+- le Shell cible ne doit fournir qu'une décision de routage ;
+- état privé, participants, monde, session et UI restent propriété Capture ;
+- `captureFix135` est shadowé dans la chaîne effective par
+  `captureFix139` sur les contextes où son effet Capture pourrait s'activer ;
+- aucun retrait de `captureFix138` n'est autorisé sans ré-audit séparé.
+
+### Premier micro-lot runtime recommandé
+
+Retirer uniquement l'affectation `startConfiguredGame` de `captureFix135`
+avec TDD RED dédié.
+
+Cible :
+- chaîne 5 -> 4 affectations ;
+- `captureFix135` ne possède plus ce seam ;
+- `captureFix138`, `captureFix139`, `gensDungeonCore01Js`,
+  `dungeonCore200Rebuild` restent propriétaires actifs ;
+- aucun changement de comportement utilisateur.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`36283aa784dcd124f2b1af5dacebe5c5fe48e3b0`.
+
+- Architecture + navigateur complet : `35817855015` — SUCCESS ;
+- Firefox : `35817855090` — SUCCESS ;
+- Tactical Dock : `35817855009` — SUCCESS.
+
+### Validation finale obligatoire
+
+La clôture documentaire change le SHA.
+
+Prochaine action exacte :
+1. triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir le lot TDD séparé
+   `Phase 5 / captureFix135 startConfiguredGame retirement` ;
+5. ré-auditer `captureFix138` après ce retrait avant toute autre suppression.
+
+Aucun merge sur `main`.
+
 ## Chantier courant prioritaire — Phase 5 / Capture public launch-entry — pré-audit — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

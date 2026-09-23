@@ -1,3 +1,57 @@
+## GREEN — Phase 5 / caractérisation E2E goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-e2e-characterization-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-e2e-characterization-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-stats-editor-game-coherence-preaudit-green-2026-09-23`.
+- SHA technique validé :
+  `98b7c21cb4353537d679c721f9c304828ff0ee83`.
+- Runtime inchangé :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation
+
+- Architecture + navigateur complet `35864217815` — SUCCESS ;
+- Firefox `35864217859` — SUCCESS ;
+- Tactical `35864217834` — SUCCESS.
+
+Le vrai parcours Dungeon -> Save & Quit -> Survie -> goMenu est GREEN avec la
+sauvegarde Dungeon conservée.
+
+### Décision
+
+Le prochain micro-lot Phase 5 peut TDD le retrait uniquement de l'interception
+`window.goMenu` de `dungeonCore023StabilityFix`.
+
+Interdiction de retirer ses autres responsabilités :
+- garde `openHero` ;
+- nettoyage `specialDiceModal` à l'entrée fiche ;
+- logique IA/loot encore portée par ce script.
+
+Le retrait devra être soustractif, sans wrapper de remplacement.
+
+### Règle 26 prête
+
+Copie exacte disponible :
+- taille `8171571` ;
+- blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+
+### Dettes différées
+
+- détection ennemie intermittente ;
+- petits défauts de rafraîchissement UI/Stats ;
+- validation manuelle embuscade.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / caractérisation E2E goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -1,3 +1,95 @@
+## GREEN FINAL CANDIDATE — Phase 5 / pré-audit autorité openChar — 2026-09-23
+
+Ce bloc devient le point de reprise final du pré-audit dès que la triple CI du
+SHA documentaire final est GREEN et que le checkpoint ci-dessous existe.
+
+- Branche :
+  `work/gensrpg-phase5-openchar-authority-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-openchar-authority-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-dungeon-s2-green-2026-09-23`.
+- SHA de base :
+  `eba5ba001744dfb00f9bec1fa391e6fa54d2f527`.
+- Checkpoint final à créer après triple CI :
+  `checkpoint/gensrpg-phase5-openchar-authority-preaudit-green-2026-09-23`.
+- Runtime inchangé :
+  taille `8172500`, blob `7b586e9fb14b7a93a0edb069e115fd6d48cbda97`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Propriétaire natif :
+`function openChar(id)` dans le Shell historique.
+
+Deux vraies affectations globales seulement :
+1. `captureFix139` ;
+2. `dungeonCore028HeroExploreGuard`.
+
+L'ancien compteur Phase 2 « 3 » contient un faux positif dû à
+`window.openChar==="function"`.
+
+Capture 139 porte encore une garde réelle de lancement Capture et reste hors
+périmètre d'un retrait opportuniste.
+
+Core 0.28 :
+- wrappe `openChar` ;
+- scanne `#sheet` ;
+- installe un `MutationObserver` ;
+- utilise des retries 0/100 ms pour supprimer les boutons « Explorer ».
+
+### Preuve navigateur sans Core 0.28
+
+Sentinelle :
+`tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs`.
+
+Run ciblé :
+`35920553852` — SUCCESS.
+
+Fixture :
+- runtime S2 exact ;
+- composition GitHub Pages ;
+- Core 0.28 retiré uniquement dans le test.
+
+Résultat :
+- fiche Dungeon fonctionnelle ;
+- onglets Dungeon présents ;
+- aucun bouton Explorer visible/clicable ;
+- les deux seuls nœuds « Explorer » restants sont des contrôles Survie cachés
+  `display:none`, tous deux liés à `generateZombieWaveQuick()`.
+
+Décision :
+le premier micro-lot runtime suivant peut être **strictement soustractif** :
+retirer `dungeonCore028HeroExploreGuard` sans remplacer son observer/retry.
+
+### QA utilisateur conservée séparément
+
+Ne pas mélanger avec ce lot :
+- Stats au retour / rafraîchissement ;
+- détection ennemie intermittente + cas de téléportation ennemie ;
+- terminologie Survie « explorer salle » pour une action de vague zombie.
+
+Le dernier point est désormais localisé : les contrôles Survie concernés
+appellent bien `generateZombieWaveQuick()`.
+
+### Prochaine action après checkpoint GREEN
+
+Ouvrir un nouveau checkpoint/branche :
+**Phase 5 / retrait openChar Dungeon Core 0.28**.
+
+TDD avant runtime :
+- exiger absence du bloc/wrapper Core 0.28 ;
+- chaîne stricte openChar = Capture 139 uniquement ;
+- fiche Dungeon sans action Explorer visible ;
+- flash Survie absent ;
+- non-interférence quatre modules ;
+- Capture inchangé.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / pré-audit autorité fiche héros openChar — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

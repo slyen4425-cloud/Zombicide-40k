@@ -1,0 +1,80 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
+const source=read('index.html');
+const owners=JSON.parse(read('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'));
+const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
+
+const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
+  .map(m=>({id:m[1],body:m[2],offset:m.index}));
+
+function lastOwnerRow(name){
+  const safe=name.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');
+  const m=lastOwners.match(new RegExp('^'+safe+'\\t(\\d+)\\t([^\\n]+)$','m'));
+  assert.ok(m,'missing Phase 2 last-owner row for '+name);
+  return {count:Number(m[1]),last:m[2].trim()};
+}
+
+function chainFor(name){
+  const re=new RegExp('window\\.'+name+'\\s*=','g');
+  const out=[];
+  for(const block of blocks){
+    const hits=[...block.body.matchAll(re)];
+    if(!hits.length)continue;
+    out.push({id:block.id,count:hits.length,body:block.body,offset:block.offset});
+  }
+  return out;
+}
+
+function excerpt(body,index,span=900){
+  const from=Math.max(0,index-span);
+  const to=Math.min(body.length,index+span);
+  return body.slice(from,to)
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+const phase2=lastOwnerRow('goMenu');
+assert.deepEqual(phase2,{count:5,last:'dungeonCore200Rebuild'},
+  'goMenu baseline must match the current Phase 2 cartography before characterization');
+
+const chain=chainFor('goMenu');
+const total=chain.reduce((n,x)=>n+x.count,0);
+assert.equal(total,5,'goMenu current runtime assignment count drifted');
+assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild','goMenu current last owner drifted');
+
+const report=chain.map(rec=>{
+  const meta=owners.blocks?.[rec.id];
+  assert.ok(meta,'missing inline owner metadata for goMenu owner '+rec.id);
+  const indices=[...rec.body.matchAll(/window\.goMenu\s*=/g)].map(m=>m.index);
+  return {
+    id:rec.id,
+    assignments:rec.count,
+    primaryDomain:meta.primaryDomain,
+    crossDomains:meta.crossDomains||[],
+    responsibility:meta.responsibility,
+    capturesPrevious:/(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*window\.goMenu\b/.test(rec.body),
+    directCallsPrevious:/\.apply\(this,arguments\)|\.call\(this/.test(rec.body),
+    touchesSelectedFamily:/gensSelectedFamily/.test(rec.body),
+    touchesSession:/markSessionActive|z40k_session_active_v1/.test(rec.body),
+    touchesDungeon:/DungeonCore01|gensDungeon|dungeon/i.test(rec.body),
+    touchesCapture:/capture/i.test(rec.body),
+    touchesRootScreens:/gensRootHome|gensFamilyHome|gensGameHome|showAppHome|showHome|menu/.test(rec.body),
+    excerpts:indices.map(i=>excerpt(rec.body,i))
+  };
+});
+
+console.log(JSON.stringify({
+  scenario:'Phase 5 goMenu / global screen transitions preaudit',
+  sourceIndexBlob:owners.sourceIndexBlob,
+  phase2Row:phase2,
+  assignments:total,
+  chain:report,
+  runtimeChanged:false,
+  nextDecision:'classify each owner as Shell transition, module-private transition, or transit wrapper before any runtime retirement'
+},null,2));

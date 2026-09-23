@@ -55,8 +55,8 @@ assert.match(
 assert.equal(mj.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.includes('removeItem("'+KEY+'")'),false);
 
-assert.equal(bytes.length,8174148,'current Phase 5 Shell index size must remain deterministic');
-assert.equal(gitBlob(bytes),'f13835a2827dbfa9e2698cb026d3e732ad62aba4','MJ Rules raccord must target the current Phase 5 Shell baseline');
+assert.equal(bytes.length,8174315,'current Phase 5 Shell index size must remain deterministic');
+assert.equal(gitBlob(bytes),'0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a','MJ Rules raccord must target the current Phase 5 Shell baseline');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core storage authority',

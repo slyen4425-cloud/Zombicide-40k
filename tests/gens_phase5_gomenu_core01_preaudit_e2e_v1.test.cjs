@@ -16,7 +16,7 @@ function scriptBody(id){
   assert.ok(m,'missing inline block '+id);
   return m[1];
 }
-const blocks=[...source.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
+const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
 const goOwners=blocks.filter(b=>/window\.goMenu\s*=/.test(b.body)).map(b=>b.id);
 assert.deepEqual(goOwners,['captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],

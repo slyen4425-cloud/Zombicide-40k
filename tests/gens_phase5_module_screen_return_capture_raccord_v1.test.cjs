@@ -47,15 +47,17 @@ assert.doesNotMatch(capture,/const oldMenu139=window\.goMenu/,
 assert.doesNotMatch(capture,/window\.goMenu\s*=/,
   'Capture must no longer assign global goMenu');
 
-assert.deepEqual(chainFor('goMenu'),['dungeonCore200Rebuild'],
-  'Capture S1 must reduce the inline goMenu override chain to Dungeon only');
-assert.match(dungeon,/const goOutside200=window\.goMenu/,
-  'Dungeon wrapper must remain untouched in Capture S1');
+assert.deepEqual(chainFor('goMenu'),[],
+  'Capture must remain off the global goMenu chain after cumulative Dungeon S2');
+assert.doesNotMatch(dungeon,/window\.goMenu\s*=/,
+  'later Dungeon S2 must not reintroduce a global goMenu override');
+assert.match(dungeon,/GensShellScreenReturnV1/,
+  'later Dungeon S2 must use the same public Shell screen-return contract');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module screen-return Capture S1 raccord',
   goMenuOverrideChain:chainFor('goMenu'),
   shellOwner:'native goMenu + GensShellScreenReturnV1',
-  migratedProvider:'capture',
-  deferredProvider:'dungeon'
+  migratedProviders:['capture','dungeon'],
+  captureInvariant:'Capture never regains global goMenu authority'
 },null,2));

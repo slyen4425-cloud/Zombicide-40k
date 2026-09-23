@@ -120,8 +120,14 @@ Preuves :
 - aucune modification des rafraîchissements UI/Stats ;
 - aucun merge sur `main`.
 
-## Checkpoint final prévu
+## Clôture GREEN
 
+Le SHA documentaire candidat `fcf9f0a2d060f35f345b2d360b41e936703f40a5`
+a repassé la triple CI :
+- Architecture + navigateur complet `35884503531` — SUCCESS ;
+- Firefox `35884503540` — SUCCESS ;
+- Tactical Dock `35884503405` — SUCCESS ;
+- navigateur complet : 36 / 36.
+
+Checkpoint final :
 `checkpoint/gensrpg-phase5-gomenu-core01-retirement-green-2026-09-23`.
-
-Ce checkpoint n'est créé qu'après triple CI GREEN du SHA documentaire final exact.

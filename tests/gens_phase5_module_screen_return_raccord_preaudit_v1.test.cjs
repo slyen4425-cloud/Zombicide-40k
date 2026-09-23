@@ -16,9 +16,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8170961,'raccord preaudit must keep validated runtime size');
-assert.equal(gitBlob(indexBuf),'0c15b1dba66ce83f2b27ed99e371885fb1d0ed75',
-  'raccord preaudit must keep validated runtime blob');
+assert.equal(indexBuf.length,8172505,'raccord guard must target current Capture S1 runtime size');
+assert.equal(gitBlob(indexBuf),'c17460335b2deb5e5916dbf91448b0706c38d0df',
+  'raccord guard current runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');
 assert.equal(shared.operation,'returnToPrimaryView');
@@ -55,8 +55,8 @@ const chain=[];
 for(const block of blocks){
   if(/window\.goMenu\s*=/.test(block.body))chain.push(block.id);
 }
-assert.deepEqual(chain,['captureFix139','dungeonCore200Rebuild'],
-  'goMenu final runtime interception chain drifted');
+assert.deepEqual(chain,['dungeonCore200Rebuild'],
+  'Capture S1 must leave Dungeon as the sole inline goMenu override');
 
 assert.ok(exists('tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs'));
 assert.ok(exists('tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs'));
@@ -77,6 +77,6 @@ console.log(JSON.stringify({
     runtimeBootstrapV1:true,
     reason:'historical loader uses retry timers and does not load the target Shell/module entries'
   },
-  runtimeChanged:false,
-  nextRequirement:'Rule 26 exact index.html required before choosing the native Shell owner and exact runtime load/raccord point'
+  runtimeChanged:true,
+  nextRequirement:'migrate Dungeon through the proven Shell registry in a separate micro-lot'
 },null,2));

@@ -476,8 +476,11 @@ jobs:
       - name: Pré-auditer le contrat public de lancement Capture Phase 5
         run: node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
 
-      - name: Retirer l’affectation shadowée captureFix135 de startConfiguredGame
-        run: node tests/gens_phase5_capturefix135_retirement_v1.test.cjs
+      - name: Caractériser la régression utilisateur Phase 5
+        run: node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
+
+      - name: Verrouiller la proximité des embuscades Dungeon
+        run: node tests/dungeon_event_ambush_position_v167878.test.cjs
 
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs

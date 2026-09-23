@@ -122,7 +122,7 @@ jobs:
 
       - name: Verify exact target blob and TDD
         run: |
-          test "$(git hash-object index.html)" = "bc12d60a3c137d6b5908321922237d1b0ae59e38"
+          test "$(git hash-object index.html)" = "bd31ab46a36869b59204bbcc0ee279abcda126c2"
           node tests/gens_phase5_resumegame_shell_consolidation_v1.test.cjs
 
       - name: Commit exact patch and remove one-shot

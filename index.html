@@ -37240,8 +37240,10 @@ window.resumeGame=function(){
 
   const core=readCore100();
   const looksDungeon=Array.isArray(core.participants)&&core.participants.length>0;
+  const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
+  const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
 
-  if(looksDungeon && window.DungeonCore01){
+  if(dungeon&&looksDungeon && window.DungeonCore01){
     const p=resolveSessionProfile100();
     if(p){
       try{setActiveGameProfileId?.(String(p.id))}catch(e){}
@@ -42831,7 +42833,9 @@ window.resumeGame=function(){
   let runtime=null;
   try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
   const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
-  if((typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
+  const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
+  const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
+  if(dungeon&&(typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
     try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
     ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
       const el=document.getElementById(id);if(el)el.style.display="none";

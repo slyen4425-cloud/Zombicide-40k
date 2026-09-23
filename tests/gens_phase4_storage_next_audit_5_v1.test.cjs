@@ -18,8 +18,8 @@ assert.deepEqual(manifest.totals,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174315,'current Phase 5 Shell index byte size drifted');
-assert.equal(blob,'0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a','audit 5 must target the exact post-Deck index blob');
+assert.equal(bytes.length,8174649,'current Phase 5 Shell index byte size drifted');
+assert.equal(blob,'ef8a0ac77019ed08f166a97389dd5bdf4a692841','audit 5 must target the exact post-Deck index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

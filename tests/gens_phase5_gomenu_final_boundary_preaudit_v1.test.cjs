@@ -34,25 +34,25 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8170961,'preaudit must use the exact manually validated Core01-retirement runtime');
-assert.equal(gitBlob(indexBuf),'0c15b1dba66ce83f2b27ed99e371885fb1d0ed75','preaudit runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'0c15b1dba66ce83f2b27ed99e371885fb1d0ed75','owner manifest must target current runtime');
+assert.equal(indexBuf.length,8172505,'goMenu boundary guard must use the current Capture S1 runtime');
+assert.equal(gitBlob(indexBuf),'c17460335b2deb5e5916dbf91448b0706c38d0df','goMenu boundary runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'c17460335b2deb5e5916dbf91448b0706c38d0df','owner manifest must target current runtime');
 
-assert.deepEqual(row('goMenu'),{count:2,last:'dungeonCore200Rebuild'});
-assert.deepEqual(chainFor('goMenu'),['captureFix139','dungeonCore200Rebuild'],
-  'final goMenu boundary must contain exactly Capture 139 then Dungeon Core 2.00');
+assert.deepEqual(row('goMenu'),{count:1,last:'dungeonCore200Rebuild'});
+assert.deepEqual(chainFor('goMenu'),['dungeonCore200Rebuild'],
+  'Capture S1 must leave Dungeon Core 2.00 as the only inline goMenu override');
 
 assert.equal(owners.blocks.captureFix139.primaryDomain,'capture');
 assert.equal(owners.blocks.dungeonCore200Rebuild.primaryDomain,'dungeon');
 
 const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
 const dungeon=blocks.find(b=>b.id==='dungeonCore200Rebuild')?.body||'';
-assert.match(capture,/const oldMenu139=window\.goMenu;/,
-  'Capture 139 must still capture the prior Shell/module boundary');
-assert.match(capture,/hasActiveSession\(\)&&isCaptureContext138\(\)/,
-  'Capture 139 must still own active Capture return routing');
-assert.match(capture,/captureEnterWorld139\(\);return;/,
-  'Capture 139 return must still enter the Capture-owned world/hub path');
+assert.doesNotMatch(capture,/window\\.goMenu\\s*=/,
+  'Capture S1 must no longer assign the global goMenu boundary');
+assert.match(capture,/GensShellScreenReturnV1/,
+  'Capture S1 must register through the Shell public contract');
+assert.match(capture,/captureEnterWorld139\\(\\)/,
+  'Capture S1 must keep the Capture-owned world/hub implementation');
 assert.match(dungeon,/const goOutside200=window\.goMenu;/,
   'Dungeon Core 2.00 must still capture the previous goMenu boundary');
 assert.match(dungeon,/active200&&isDungeonMode\?\.\(\)/,
@@ -75,15 +75,13 @@ for(const [name,entry] of [['shell',shellEntry],['capture',captureEntry],['dunge
     name+' Phase 3 entry must not gain compatibility side effects');
 }
 
-assert.equal('publicScreenReturn' in captureContract,false,
-  'Capture has no declared public screen-return contract yet');
-assert.equal('publicScreenReturn' in dungeonContract,false,
-  'Dungeon has no declared public screen-return contract yet');
+assert.equal(captureContract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView');
+assert.equal(dungeonContract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 final goMenu boundary preaudit',
   runtime:{size:indexBuf.length,blob:gitBlob(indexBuf)},
-  chain:['captureFix139','dungeonCore200Rebuild'],
+  chain:['dungeonCore200Rebuild'],
   owners:{
     capture:owners.blocks.captureFix139.responsibility,
     dungeon:owners.blocks.dungeonCore200Rebuild.responsibility
@@ -93,10 +91,10 @@ console.log(JSON.stringify({
     consumesModulePublicEntryContracts:true
   },
   decision:{
-    retireCapture139:false,
+    captureMigratedToPublicContract:true,
     retireDungeon200:false,
-    reason:'both remaining global interceptors carry real module-owned transitions',
-    missingContract:'public module screen-return entry consumed by the Shell before global goMenu authority can be consolidated'
+    reason:'Capture no longer owns global goMenu; Dungeon still carries a real module-owned transition',
+    nextBoundary:'migrate Dungeon through the same Shell public contract before removing the final override'
   },
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

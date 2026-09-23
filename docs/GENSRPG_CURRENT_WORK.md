@@ -1,3 +1,93 @@
+## RED PROUVÉ — Phase 5 / pré-audit E2E Shell routing — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-shell-routing-e2e-preaudit-2026-09-23`.
+- Base :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`,
+  SHA `74aa0aba0b2b292edd0869223724ac1935392737`.
+- Dernier SHA de pré-audit :
+  `9d8dc8e76d93404db2eae5443a640f695bce89f6`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, inchangée.
+
+### Résultats du pré-audit
+
+Aucun runtime n'a été modifié dans ce lot.
+
+Nouvelle sentinelle :
+`tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs`.
+
+Résultat :
+**SUCCESS** — le vrai chemin Dungeon -> action carte -> Tactical V2 ouvre bien
+la carte de combat avec héros et ennemi réels.
+
+Nouvelle sentinelle :
+`tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs`.
+
+Résultat partiel :
+- victoire Capture -> bouton TERMINER -> retour Hub Capture : SUCCESS ;
+- session Capture reste active après victoire : SUCCESS ;
+- vieille sauvegarde Dungeon conservée en parallèle : SUCCESS ;
+- recréation page -> profil Capture -> Reprendre : **RED** ;
+- symptôme exact : `#gensDungeonCore01` devient `display:block` alors que
+  Capture doit garder l'autorité.
+
+### Cause exacte prouvée
+
+Propriétaire :
+`dungeonCore310PersistenceAndTokens` dans `index.html`.
+
+Son wrapper `window.resumeGame` vérifie seulement :
+- qu'un runtime Dungeon persistant contient des participants ;
+- que `DungeonCore01` existe.
+
+Puis il force :
+- `gensSelectedFamily="adventure"` ;
+- `gensDungeonTheme` ;
+- `DungeonCore01.show()`.
+
+Il ne vérifie pas que le profil/module actif est réellement Dungeon et ne
+réutilise pas l'exclusion Capture déjà employée par
+`dungeonCore200Rebuild -> startConfiguredGame`.
+
+Conséquence :
+une ancienne sauvegarde Dungeon peut voler la reprise d'une session Capture.
+
+### Correction autorisée — lot séparé obligatoire
+
+Ne pas corriger dans ce pré-audit.
+
+Ouvrir un lot dédié propriétaire `Dungeon Core 3.10 / resumeGame routing` :
+- réutiliser la frontière Dungeon/Capture existante ;
+- aucun nouveau routeur ;
+- aucun nouveau global ;
+- aucun wrapper supplémentaire ;
+- aucune suppression de sauvegarde Dungeon ;
+- aucune modification du runtime Capture ;
+- préserver la reprise Dungeon existante.
+
+TDD :
+1. garder RED Capture avec vieille sauvegarde Dungeon ;
+2. garder GREEN Save & Quit -> reprise Dungeon ;
+3. garder GREEN victoire Capture -> Hub Capture ;
+4. triple CI complète.
+
+### Note sentinelle historique
+
+`gens_dungeon_after_survival_start_state_browser_v11411.test.cjs` avait un
+nondéterminisme de fixture : une salle aléatoire pouvait ouvrir Tactical V2
+avant le changement de module. Le test a été rendu déterministe uniquement par
+fermeture via l'API publique `GensRpgTacticalCombatV2Ui.close()` avant le
+Save & Quit de préparation. Aucun runtime n'a été modifié.
+
+La détection ennemie hors embuscade reste une dette fonctionnelle séparée.
+L'embuscade proche des héros reste automatique GREEN mais non confirmée
+manuellement par Sylvain.
+
+Aucun merge sur `main`.
+
 ## RED CARACTÉRISÉ — Phase 5 / pré-audit end-to-end Shell routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

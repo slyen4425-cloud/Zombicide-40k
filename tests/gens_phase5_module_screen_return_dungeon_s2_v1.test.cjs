@@ -28,9 +28,9 @@ assert.match(dungeon,/GensShellScreenReturnV1/,
   'Dungeon must register an owner-local screen-return provider');
 assert.match(dungeon,/register\?\.\("dungeon"/,
   'Dungeon must register under the dungeon provider id');
-assert.match(dungeon,/active200&&isDungeonMode\?\.\(\)/,
-  'Dungeon provider must preserve the historical active Dungeon guard');
-assert.match(dungeon,/return show\(\)/,
+assert.match(dungeon,/if\(!active200\|\|!isDungeonMode\?\.\(\)\)return false;/,
+  'Dungeon provider must preserve the historical active Dungeon guard as an early false return');
+assert.match(dungeon,/return show\(\)===true/,
   'Dungeon provider must keep show() as the owner-local primary-view transition');
 
 assert.doesNotMatch(dungeon,/const goOutside200=window\.goMenu/,

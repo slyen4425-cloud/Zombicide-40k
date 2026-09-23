@@ -1,3 +1,60 @@
+## RED UTILISATEUR — Phase 5 / régressions fonctionnelles après retrait captureFix135 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-user-regression-repair-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-user-regression-repair-2026-09-23`.
+- Base exacte RED :
+  `2feec88919aa41d9fbf8f151ca9402ac0ae3bdea`.
+- Dernier checkpoint techniquement GREEN mais invalidé fonctionnellement par test utilisateur :
+  `checkpoint/gensrpg-phase5-capturefix135-retirement-green-2026-09-23`.
+- Dernier checkpoint GREEN antérieur retenu pour comparaison :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`
+  (`22cc0e61f22e350dc61da390cb99925d74122eed`).
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Régressions utilisateur confirmées
+
+1. Dungeon : le combat tactique sur la map ne se lance plus comme avant.
+2. Dungeon : les embuscades ne placent plus les ennemis près des héros ; retour d'un spawn au fond de salle.
+3. Builder : disparu du jeu et du mode Édition.
+4. Capture : l'interface Capture prévue est revenue et doit être conservée.
+5. Capture : victoire de combat renvoie au menu général.
+6. Capture : `Reprendre` relance une partie Dungeon au lieu de reprendre Capture.
+
+### Application de la charte
+
+Règle 17 appliquée :
+- aucune rustine ;
+- aucun correctif dans Dungeon/Builder/Capture avant identification du premier changement responsable ;
+- retour au dernier état sûr ;
+- correction soustractive / rollback du changement fautif ;
+- ajout de sentinelles sur les vrais chemins utilisateurs.
+
+Comparaison Git :
+depuis la clôture Phase 4, les seules modifications runtime sont des suppressions dans `index.html` :
+- retrait `captureFix131 -> startConfiguredGame` ;
+- retrait `captureFix135 -> startConfiguredGame`.
+
+Le dernier changement runtime avant le test RED utilisateur est le retrait `captureFix135`.
+
+### Première action autorisée
+
+1. caractériser l'état RED actuel ;
+2. restaurer exactement l'autorité `captureFix135 -> startConfiguredGame` depuis le blob vérifié antérieur
+   `f13835a2827dbfa9e2698cb026d3e732ad62aba4` (8 174 148 octets) ;
+3. ne modifier aucun propriétaire Dungeon, Builder, Capture, Tactical ou Storage ;
+4. lancer la triple CI ;
+5. fournir un lien de test manuel ;
+6. ne déclarer GREEN qu'après validation utilisateur des régressions listées.
+
+Si le rollback de `captureFix135` ne suffit pas, le lot reste RED et la prochaine comparaison portera séparément sur le retrait `captureFix131`.
+
+Aucun merge sur `main`. Aucune poursuite du pré-audit `captureFix138` tant que ce lot n'est pas résolu.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / captureFix135 retirement — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

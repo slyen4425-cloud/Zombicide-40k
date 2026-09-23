@@ -518,6 +518,9 @@ jobs:
       - name: Pré-auditer le raccord runtime module-launch Phase 5
         run: node tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs
 
+      - name: Raccorder le registre Shell module-launch S1
+        run: node tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

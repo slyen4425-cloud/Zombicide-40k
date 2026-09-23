@@ -1,3 +1,63 @@
+## CHANTIER COURANT — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s1-shell-registry-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-raccord-runtime-preaudit-green-2026-09-24`.
+- SHA exact de base :
+  `05360ddd5a48aed2ec80e6fb1d373e5d3d1bfdac`.
+- Runtime exact :
+  taille `8170726`, blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Ajouter uniquement le registre Shell public `GensShellModuleLaunchV1`
+à côté de `GensShellScreenReturnV1`.
+
+API :
+- `register(moduleId, handler)` ;
+- `activeModule: gensShellActiveModuleV1` ;
+- `startModuleSession(moduleId=gensShellActiveModuleV1())`.
+
+### Inertie obligatoire
+
+Dans S1 :
+- aucun provider enregistré ;
+- aucun appel depuis `startConfiguredGame` ;
+- aucune modification des cinq propriétaires historiques ;
+- aucun second resolver ;
+- aucun DOM/stockage/observer/listener/timer/retry/polling.
+
+Chaîne à conserver :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+### TDD RED
+
+Sentinelle :
+`tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs`.
+
+Le RED doit provenir uniquement de l'absence du registre S1 sur le runtime de base.
+
+### QA différée
+
+Ne pas toucher :
+- rafraîchissements ;
+- inventaire Survie à 0 ;
+- Stats au retour ;
+- détection/téléportation ;
+- terminologie Survie.
+
+Aucun retrait historique.
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / module-launch — pré-audit raccord runtime — 2026-09-24
 
 Ce bloc devient le point de reprise final dès que le SHA documentaire de clôture

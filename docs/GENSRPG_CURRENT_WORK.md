@@ -1,3 +1,78 @@
+## Chantier courant prioritaire — Phase 5 / Capture public launch-entry — pré-audit — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-public-launch-entry-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-public-launch-entry-preaudit-2026-09-23`.
+- Base exacte :
+  `d519ae79f925b8be8c873f6c1f8c05d001427cb7`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-remaining-chain-preaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État de départ prouvé
+
+La chaîne `startConfiguredGame` reste à 5 propriétaires :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Le pré-audit précédent a démontré :
+- aucun wrapper transitif pur restant ;
+- `captureFix135/138/139` forment trois couches Capture de pré-lancement,
+  transition post-lancement et entrée Capture dédiée ;
+- le Shell Phase 3 est toujours inert ;
+- le contrat Shell cible consomme des `module public entry contracts`.
+
+### Mission unique
+
+Pré-auditer le **contrat public de lancement Capture** sans modification runtime.
+
+Objectifs :
+1. caractériser précisément les responsabilités de `captureFix135/138/139` ;
+2. séparer préconditions, mutations Capture, entrée de monde et transition UI ;
+3. définir le contrat public minimal que le futur Shell pourra appeler sans lire
+   l'état privé Capture ;
+4. identifier l'ordre TDD permettant ensuite de retirer une affectation globale
+   à la fois ;
+5. vérifier que le contrat ne déplace aucune règle Capture dans le Shell.
+
+### Interdictions
+
+- aucun changement de `index.html` ;
+- aucun retrait de `captureFix135/138/139` ;
+- ne pas connecter `assets/gensrpg/shell/entry-v1.js` ;
+- ne pas connecter `assets/gensrpg/capture/entry-v1.js` ;
+- aucun déplacement de gameplay Capture ;
+- aucune modification Dungeon ;
+- aucun nouveau global ;
+- aucun wrapper/observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Invariants
+
+- Survie démarre en Survie ;
+- Dungeon démarre en Dungeon ;
+- Capture conserve sa route dédiée ;
+- PvP reste le placeholder ;
+- Save & Quit / reprise inchangé ;
+- non-interférence des quatre modules ;
+- la chaîne actuelle à 5 propriétaires reste inchangée pendant ce pré-audit.
+
+### Critère de sortie
+
+Le pré-audit doit produire :
+- une sentinelle de caractérisation des trois couches Capture ;
+- un contrat public Capture proposé, purement descriptif dans ce lot ;
+- une distinction claire entre état privé Capture et signaux publics nécessaires
+  au Shell ;
+- un premier micro-lot TDD runtime homogène ;
+- triple CI GREEN ;
+- checkpoint GREEN avant toute modification runtime.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / startConfiguredGame — pré-audit chaîne restante — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

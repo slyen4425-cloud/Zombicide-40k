@@ -1,3 +1,71 @@
+## CHANTIER COURANT — Phase 5 / pré-audit goMenu & transitions écrans — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-screen-transitions-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-screen-transitions-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-resume-single-owner-green-2026-09-23`.
+- SHA exact de base :
+  `333919cacf809772df727419f3cc7f5aedd2c1a6`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Pré-auditer la frontière globale `goMenu` et les transitions d'écrans
+associées avant toute consolidation Shell supplémentaire.
+
+État cartographié actuel :
+- `goMenu` : 5 affectations inline ;
+- dernier propriétaire : `dungeonCore200Rebuild`.
+
+### Objectifs
+
+1. retrouver la chaîne exacte des 5 propriétaires depuis le `index.html` courant ;
+2. caractériser pour chaque propriétaire :
+   - domaine ;
+   - précondition ;
+   - délégation vers le propriétaire précédent ;
+   - écrans/états manipulés ;
+3. distinguer logique Shell générale et effets privés de module ;
+4. identifier d'éventuelles couches purement transitives ;
+5. définir le prochain micro-lot, sans retrait runtime dans ce pré-audit.
+
+### Interdictions
+
+- aucune modification de `index.html` ;
+- aucune suppression `goMenu` dans ce lot ;
+- aucun nouveau routeur/wrapper/global ;
+- aucun observer/timer/retry ;
+- ne pas rouvrir `startConfiguredGame` ;
+- ne pas toucher à `resumeGame` ;
+- ne pas corriger ici la détection ennemie ;
+- aucun merge sur `main`.
+
+### Barrières de non-régression
+
+Conserver GREEN :
+- Dungeon map -> Tactical V2 ;
+- Capture victoire/reprise avec vieille sauvegarde Dungeon ;
+- Save & Quit -> reprise Dungeon ;
+- Builder ;
+- Survie ;
+- Capture ;
+- PvP ;
+- non-interférence quatre modules ;
+- Firefox ;
+- Tactical Dock.
+
+### Dette séparée
+
+- détection ennemie immédiate hors embuscade : différée ;
+- embuscade proche des héros : automatique GREEN, validation manuelle non acquise.
+
+Aucun changement runtime autorisé dans ce pré-audit.
+
 ## GREEN TECHNIQUE — Phase 5 / autorité unique Resume — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

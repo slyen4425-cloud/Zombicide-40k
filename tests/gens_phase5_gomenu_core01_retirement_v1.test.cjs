@@ -30,12 +30,11 @@ function lastOwnerRow(name){
 
 const chain=chainFor('goMenu');
 assert.deepEqual(chain.map(x=>x.id),[
-  'captureFix139',
   'dungeonCore200Rebuild'
-],'Core 0.01 goMenu retirement target requires the two-owner chain');
+],'Core 0.01 must remain retired after Capture S1 migration');
 
-assert.deepEqual(lastOwnerRow('goMenu'),{count:2,last:'dungeonCore200Rebuild'},
-  'Phase 2 last-owner mapping must be realigned to the two-owner goMenu chain');
+assert.deepEqual(lastOwnerRow('goMenu'),{count:1,last:'dungeonCore200Rebuild'},
+  'Phase 2 last-owner mapping must track the current Dungeon-only goMenu override chain');
 
 const core01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
 assert.ok(core01,'Core 0.01 script must remain present for its non-goMenu responsibilities');
@@ -54,8 +53,10 @@ assert.match(core01,/let coreActive=false/,
   'Core 0.01 private state must not be removed incidentally');
 
 const capture139=blocks.find(x=>x.id==='captureFix139')?.body||'';
-assert.match(capture139,/window\.goMenu\s*=/,
-  'Capture 139 must remain the Capture goMenu owner');
+assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
+  'Capture S1 must remain migrated off global goMenu');
+assert.match(capture139,/GensShellScreenReturnV1/,
+  'Capture must remain registered through the Shell screen-return contract');
 
 const core200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 assert.match(core200,/const goOutside200=window\.goMenu;/,

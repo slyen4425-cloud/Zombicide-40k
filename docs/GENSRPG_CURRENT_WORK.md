@@ -1,3 +1,67 @@
+## VALIDATION EN COURS — Phase 5 / retrait goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core023-e2e-characterization-green-2026-09-23`.
+- Base SHA :
+  `d5e15691f4784ee1aef24c72aadbc8424054f73c`.
+- Runtime avant :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Runtime candidat :
+  taille `8171186`, blob `c2424bada56517e579ffe65fa147facbb6bf2caf`.
+- Commit runtime :
+  `f6d9ecf912d3a0b618019d50b4e006af5062eaed`.
+- Commit réalignement :
+  `c73b6699ae6b4cd5ffe75cd31b2d095162036270`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### TDD
+
+Run RED :
+`35866725675`.
+
+Échec ciblé :
+Core 0.23 figurait encore comme quatrième propriétaire de `goMenu`.
+
+### Retrait
+
+Suppression strictement soustractive dans `dungeonCore023StabilityFix` :
+- capture `oldGo023` ;
+- affectation globale `window.goMenu`.
+
+Diff runtime :
+6 lignes supprimées, 0 ajout, 385 octets retirés.
+
+Toutes les autres responsabilités Core 0.23 restent présentes.
+
+### Chaîne candidate
+
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Cartographie Phase 2 :
+- affectations inline `767 -> 766` ;
+- `goMenu 4 -> 3`.
+
+### Validation requise
+
+Triple CI complète sur le SHA documentaire candidat avant checkpoint GREEN.
+
+### Dettes séparées, inchangées
+
+- détection ennemie intermittente ;
+- petits défauts de rafraîchissement Stats/UI ;
+- validation manuelle embuscade.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN — Phase 5 / caractérisation E2E goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -30656,7 +30656,6 @@ function gmChest(rarity){if(role()!=='gm')return;const room=Number(loadDungeonSt
 function legacyGm(){closeModal();try{openDungeonMasterPanel?.()}catch(e){modal('⚠️ Outils MJ',z40kEscHtml(e.message||String(e)))}}
 function quit(){if(!confirm('Quitter la partie Dungeon ?'))return;coreActive=false;try{markSessionActive(false)}catch(e){}const core=document.getElementById('gensDungeonCore01');if(core)core.style.display='none';try{showGensRootHome?.()}catch(e){const setup=document.getElementById('setup');if(setup)setup.style.display='block'}}
 const oldStart=window.startConfiguredGame;window.startConfiguredGame=async function(){if(eligible())return start();return oldStart?.apply(this,arguments)};
-const oldGo=window.goMenu;window.goMenu=function(){if(coreActive&&eligible()){try{save?.()}catch(e){}const sh=document.getElementById('sheet');if(sh)sh.style.display='none';show();return}return oldGo?.apply(this,arguments)};
 const oldCloseCfg=window.closeGameCustomization;window.closeGameCustomization=function(){if(coreActive&&eligible()){const e=document.getElementById('gameCustomization');if(e)e.style.display='none';show();return}return oldCloseCfg?.apply(this,arguments)};
 window.__dc097NativeEndTurn=endTurn;
 window.__dc097NativeAmbush=window.dc076StartAmbushCombat;

@@ -19,8 +19,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170726,'preaudit must run on the exact user-validated GREEN runtime');
-assert.equal(gitBlob,'d9ee34d47fa888795db68cdc244d0c73d30ee523','preaudit runtime blob must match the user-supplied checkpoint file');
+assert.equal(bytes.length,8171576,'module-launch preaudit guard must track the current S1 runtime');
+assert.equal(gitBlob,'12be0fdbaa5c05f7852933b48a3dd5df09da6145','preaudit runtime blob must match the user-supplied checkpoint file');
 
 assert.match(index,/function\s+gensShellActiveModuleV1\(\)\s*\{/,'Shell must already own one active-module resolver');
 assert.match(index,/window\.GensShellScreenReturnV1\s*=\s*Object\.freeze\(\{[\s\S]*activeModule:gensShellActiveModuleV1/,'screen-return must expose the existing active-module resolver');
@@ -31,7 +31,8 @@ assert.equal(launchContract.operation,'startModuleSession');
 assert.deepEqual(launchContract.providers,['survival','dungeon','capture','pvp']);
 assert.ok(shellContract.consumes.includes('module launch contract'));
 
-assert.doesNotMatch(index,/GensShellModuleLaunchV1/,'runtime launch registry must not exist before S1');
+assert.match(index,/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze\(\{/,
+  'S1 Shell module-launch registry must now be present while the preaudit invariants remain protected');
 assert.doesNotMatch(preview,/assets\/gensrpg\/shell\/entry-v1\.js/,'Shell Phase 3 entry must remain outside preview load graph during preaudit');
 assert.doesNotMatch(deploy,/assets\/gensrpg\/shell\/entry-v1\.js/,'Shell Phase 3 entry must remain outside Pages load graph during preaudit');
 

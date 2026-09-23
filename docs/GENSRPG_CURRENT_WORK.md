@@ -1,3 +1,108 @@
+## CHANTIER COURANT — Phase 5 / retour écran Shell — Dungeon S2 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-dungeon-s2-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-dungeon-s2-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-capture-s1-green-2026-09-23`.
+- SHA exact de base :
+  `35200c468fd935dd0c6b93775ecdc4003ea4c7f3`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation utilisateur de Capture S1
+
+Capture S1 a été validé manuellement sur téléphone le 2026-09-23 via une preview
+composée comme GitHub Pages. Le premier lien brut avait omis les modules externes
+de build ; il n'est pas utilisé comme preuve fonctionnelle.
+
+Validation utilisateur :
+- accueil Monster Capture : correct ;
+- compteurs / résumé : correct avec composition Pages ;
+- Builder : présent avec composition Pages ;
+- verdict utilisateur : « ça a l'air correct ».
+
+### Règle 26 / fichier exact
+
+Copie locale vérifiée du runtime S1 :
+- taille : `8172505` ;
+- blob Git : `c17460335b2deb5e5916dbf91448b0706c38d0df`;
+- contenu HTML complet.
+
+Cette copie correspond exactement au checkpoint GREEN S1 et peut servir à
+l'analyse/modification locale de S2.
+
+### Frontière prouvée
+
+Dans `dungeonCore200Rebuild`, la dernière autorité globale restante est :
+
+`const goOutside200=window.goMenu;`
+`window.goMenu=function(){if(active200&&isDungeonMode?.()){...;return show()}return goOutside200?.apply(this,arguments)};`
+
+Le propriétaire module réel reste `show()`, déjà fermé dans la closure Dungeon.
+
+Le Shell natif possède déjà le registre public
+`window.GensShellScreenReturnV1` et l'opération
+`returnToPrimaryView`.
+
+### Objectif S2
+
+Migrer uniquement le retour écran Dungeon vers le contrat public Shell :
+
+- enregistrer un provider `dungeon` owner-local dans `dungeonCore200Rebuild` ;
+- conserver la garde fonctionnelle existante
+  `active200 && isDungeonMode?.()` ;
+- conserver `show()` comme propriétaire de la vue Dungeon ;
+- retirer `const goOutside200=window.goMenu` ;
+- retirer l'affectation `window.goMenu = ...`.
+
+Résultat architectural attendu :
+- plus aucune affectation inline `window.goMenu =` ;
+- `goMenu()` natif Shell devient l'unique autorité globale ;
+- Capture et Dungeon passent tous deux par `returnToPrimaryView`.
+
+### Interdictions / hors périmètre
+
+Ne pas toucher :
+- `show()` autrement que comme provider existant ;
+- `startConfiguredGame` ;
+- `resumeGame` ;
+- `openChar` ;
+- Tactical ;
+- Builder ;
+- Storage ;
+- Stats ;
+- détection ennemie / embuscade ;
+- timers historiques hors frontière `goMenu`.
+
+Aucun wrapper, observer, retry, polling ou fallback inter-module ne doit être ajouté.
+
+### TDD prévu
+
+Avant modification runtime :
+1. exiger provider Dungeon via `GensShellScreenReturnV1` ;
+2. exiger absence de `goOutside200` ;
+3. exiger absence de `window.goMenu =` dans `dungeonCore200Rebuild` ;
+4. exiger chaîne inline `goMenu` vide ;
+5. conserver les E2E :
+   - Dungeon fiche -> map ;
+   - Dungeon map -> Tactical ;
+   - Capture -> Hub ;
+   - Survival -> menu ;
+   - Save & Quit / reprise ;
+   - Builder ;
+   - PvP ;
+   - non-interférence quatre modules.
+
+Checkpoint GREEN seulement après triple CI et validation manuelle si runtime utilisateur modifié.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / retour écran Shell — Capture S1 — 2026-09-23
 
 Ce bloc devient le point de reprise de ce micro-lot dès que le checkpoint final

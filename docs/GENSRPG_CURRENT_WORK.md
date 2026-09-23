@@ -1,3 +1,91 @@
+## GREEN FINAL CANDIDATE — Phase 5 / retour écran Shell — Dungeon S2 — 2026-09-23
+
+Ce bloc devient le point de reprise final de S2 dès que la triple CI du SHA
+documentaire final est GREEN et que le checkpoint ci-dessous existe.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-dungeon-s2-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-dungeon-s2-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-capture-s1-green-2026-09-23`.
+- SHA de base :
+  `35200c468fd935dd0c6b93775ecdc4003ea4c7f3`.
+- Checkpoint final à créer après triple CI :
+  `checkpoint/gensrpg-phase5-module-screen-return-dungeon-s2-green-2026-09-23`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation manuelle préalable
+
+Capture S1 a été validé manuellement sur téléphone par Sylvain avant S2.
+Le lien de test correct était une preview composée comme GitHub Pages ; un
+`index.html` brut ne doit plus être fourni comme preview utilisateur.
+
+### Runtime S2
+
+- commit runtime :
+  `af32ebbd8df692efe8353bfda0b72329db88895b`;
+- taille :
+  `8172500`;
+- blob :
+  `7b586e9fb14b7a93a0edb069e115fd6d48cbda97`.
+
+### Résultat architectural
+
+Chaîne inline `window.goMenu =` :
+
+avant Capture S1 :
+`captureFix139 -> dungeonCore200Rebuild`
+
+après Capture S1 :
+`dungeonCore200Rebuild`
+
+après Dungeon S2 :
+**aucune affectation inline**.
+
+Le `function goMenu()` natif Shell est l'unique propriétaire de la frontière
+globale de retour.
+
+Capture enregistre son provider `capture` et garde
+`captureEnterWorld139()`.
+
+Dungeon enregistre son provider `dungeon` et garde `show()`.
+
+Aucun wrapper, observer, timer, retry, polling ou fallback inter-module ajouté.
+
+### TDD / cartographie
+
+Sentinelle S2 :
+`tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs`.
+
+RED confirmé avant modification.
+
+Cartographie Phase 2 S2 :
+- source blob `7b586e9fb14b7a93a0edb069e115fd6d48cbda97` ;
+- `437` globals explicites distincts ;
+- `763` affectations inline ;
+- `120` globals multi-owner ;
+- aucune ligne explicite `goMenu`.
+
+Les gardes cumulatives Core 0.30 / 0.23 / 0.01 et Capture S1 restent actives.
+
+### Document
+
+`docs/GENSRPG_PHASE5_MODULE_SCREEN_RETURN_DUNGEON_S2.md`.
+
+### Prochaine action
+
+1. triple CI sur le SHA documentaire final ;
+2. checkpoint GREEN S2 ;
+3. preview téléphone composée comme GitHub Pages ;
+4. validation manuelle utilisateur ;
+5. seulement ensuite ouvrir le prochain micro-lot Phase 5.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / retour écran Shell — Dungeon S2 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

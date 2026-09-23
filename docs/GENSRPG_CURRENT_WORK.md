@@ -1,3 +1,65 @@
+## CANDIDAT CORRECTIF — Phase 5 / Capture Resume routing — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-resume-routing-fix-2026-09-23`.
+- Base RED :
+  `fc737b0fbb316a7461790abb80e5ebdae929687a`.
+- Patch propriétaire :
+  `cd6606265c8a1e053fffc7eef9edb171dbc57c50`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Correction appliquée
+
+Propriétaire modifié uniquement :
+`dungeonCore310PersistenceAndTokens -> window.resumeGame`.
+
+Core 3.10 réutilise désormais la frontière existante :
+- `isDungeonMode()` doit être vrai ;
+- `isCaptureContext138()` doit être faux ;
+- alors seulement une sauvegarde Dungeon persistante peut appeler
+  `DungeonCore01.show()`.
+
+Pour tout autre contexte, le wrapper délègue à `previousResume310`.
+
+Aucune donnée n'est supprimée :
+la vieille sauvegarde Dungeon peut rester présente pendant que Capture reprend
+sa propre session.
+
+### Empreinte index
+
+Avant :
+- taille `8174148` ;
+- blob `f13835a2827dbfa9e2698cb026d3e732ad62aba4`.
+
+Après :
+- taille `8174315` ;
+- blob `0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a`.
+
+Le workflow one-shot a vérifié strictement ces deux blobs puis s'est supprimé.
+
+### Validation requise avant GREEN
+
+- sentinelle propriétaire Core 3.10 ;
+- Capture victoire -> Hub ;
+- Capture recréation page -> Reprendre -> Capture avec vieille sauvegarde Dungeon ;
+- Save & Quit -> reprise Dungeon ;
+- Dungeon map -> Tactical V2 ;
+- Builder ;
+- non-interférence quatre modules ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+La détection ennemie hors embuscade reste hors périmètre.
+L'embuscade reste non confirmée manuellement.
+
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / correction propriétaire Capture Resume routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

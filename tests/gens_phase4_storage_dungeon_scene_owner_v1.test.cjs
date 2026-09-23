@@ -24,8 +24,8 @@ assert.match(block,/GensStorageV1\.writeJson\(localStorage,GENS_DUNGEON_SCENE_KE
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8172505);
-assert.equal(blob,'c17460335b2deb5e5916dbf91448b0706c38d0df','Dungeon Scene final index blob must match deterministic micro-diff');
+assert.equal(bytes.length,8172500);
+assert.equal(blob,'7b586e9fb14b7a93a0edb069e115fd6d48cbda97','Dungeon Scene final index blob must match deterministic micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Scene Core storage authority',

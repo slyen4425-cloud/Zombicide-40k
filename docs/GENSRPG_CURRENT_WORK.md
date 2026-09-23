@@ -1,3 +1,82 @@
+## RED CARACTÉRISÉ — Phase 5 / pré-audit end-to-end Shell routing — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-shell-routing-e2e-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-shell-routing-e2e-preaudit-2026-09-23`.
+- Base exacte :
+  `74aa0aba0b2b292edd0869223724ac1935392737`.
+- Dernier checkpoint fonctionnel :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Aucun runtime ni `index.html` modifié.
+
+Document :
+`docs/GENSRPG_PHASE5_SHELL_ROUTING_E2E_PREAUDIT.md`.
+
+Nouvelles sentinelles :
+- `tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs` ;
+- `tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs`.
+
+Résultats :
+- Dungeon map -> Tactical V2 : **SUCCESS** ;
+- Capture victoire -> retour Hub : **SUCCESS** ;
+- Capture recréation page -> Reprendre avec ancien runtime Dungeon persistant :
+  **RED** ;
+- échec exact : Dungeon devient visible pendant la reprise Capture.
+
+Cause de frontière caractérisée :
+plusieurs wrappers Dungeon remplacent globalement `resumeGame` et se basent
+sur la seule présence d'un runtime Dungeon persistant avec participants.
+Core 3.10 et Core 3.07 peuvent ainsi voler la reprise d'un autre module.
+
+Il est interdit de corriger uniquement Core 3.10 par une garde Capture :
+la délégation exposerait encore Core 3.07 et conserverait plusieurs autorités.
+
+### Statuts utilisateur à conserver
+
+- détection ennemie hors embuscade : dette connue, toujours différée ;
+- embuscade proche des héros : automatique GREEN, **non validée manuellement** ;
+- aucun traitement de ces deux points dans ce chantier.
+
+### CI
+
+SHA de preuve avant documentation :
+`112bbf1995c3d11695c3eae2cf8432f1aa811fc7`.
+
+- Architecture statique : SUCCESS ;
+- Firefox `35834373360` : SUCCESS ;
+- Tactical Dock `35834373409` : SUCCESS ;
+- navigateur : RED sur la nouvelle sentinelle Capture reprise.
+
+L'ancienne sentinelle Dungeon après Survie possède aussi une fixture
+non déterministe pouvant laisser Tactical actif après une rencontre aléatoire ;
+ce point est documenté séparément et ne justifie aucune modification runtime.
+
+### Prochaine action exacte
+
+Ouvrir un chantier séparé :
+
+**Phase 5 / pré-audit d'autorité `resumeGame`**.
+
+Le prochain lot doit :
+1. inventorier toute la chaîne active `resumeGame` ;
+2. caractériser conditions, effets et délégations ;
+3. identifier les wrappers Dungeon redondants/supplantés ;
+4. définir le routage module/session attendu côté Shell ;
+5. proposer un seul micro-lot soustractif ;
+6. conserver le RED Capture reprise comme TDD.
+
+Aucune correction runtime avant ce pré-audit.
+Aucun retrait de `captureFix135/138/139`.
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / pré-audit end-to-end Shell routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

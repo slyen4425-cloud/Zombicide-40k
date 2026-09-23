@@ -16,7 +16,6 @@ const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const dungeonEntry=read('assets/gensrpg/dungeon/entry-v1.js');
 
 const ids=[
-  'captureFix135',
   'captureFix138',
   'captureFix139',
   'gensDungeonCore01Js',
@@ -72,19 +71,14 @@ for(const id of ids){
   functions[id]=assignedFunction(blockBody(id),'startConfiguredGame');
 }
 
-assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m,
-  'cartography must expose the current 5-owner chain');
+assert.match(lastOwners,/^startConfiguredGame\t4\tdungeonCore200Rebuild$/m,
+  'cartography must expose the current 4-owner chain');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
-  ['capture','capture','capture','dungeon','dungeon'],
+  ['capture','capture','dungeon','dungeon'],
   'remaining owners must stay module-owned before Shell raccord'
 );
-
-// Capture 135: pre-launch Capture state work + delegation.
-assert.match(functions.captureFix135,/gensCapturePregameMode/);
-assert.match(functions.captureFix135,/saveCaptureWorldState/);
-assert.match(functions.captureFix135,/\.apply\(this,arguments\)/);
 
 // Capture 138: Capture-context post-launch UI work + historical delayed render.
 assert.match(functions.captureFix138,/isCaptureContext138/);
@@ -104,7 +98,7 @@ assert.match(functions.dungeonCore200Rebuild,/isDungeonMode/);
 assert.match(functions.dungeonCore200Rebuild,/isCaptureContext138/);
 assert.match(functions.dungeonCore200Rebuild,/startOutside200/);
 
-// None of the five is equivalent to the retired captureFix131 pass-through.
+// None of the four remaining owners is equivalent to the retired transit wrappers.
 for(const id of ids){
   assert.doesNotMatch(
     functions[id],
@@ -135,12 +129,6 @@ for(const [name,src] of [['shell',shellEntry],['capture',captureEntry],['dungeon
 }
 
 const classification=[
-  {
-    id:'captureFix135',
-    role:'capture-prelaunch-state',
-    shellAuthority:false,
-    removableNow:false
-  },
   {
     id:'captureFix138',
     role:'capture-postlaunch-ui-transition',
@@ -182,10 +170,11 @@ const nextMicroLot={
 
 console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame remaining-chain preaudit',
-  assignments:5,
+  assignments:4,
   chain:ids,
   lastOwner:'dungeonCore200Rebuild',
   noPureTransitWrapperRemains:true,
+  captureFix135StartAssignmentRetired:true,
   classification,
   nextMicroLot,
   runtimeChanged:false

@@ -30787,12 +30787,6 @@ if(window.DungeonCore01){
     return oldOpenHero.call(this,id);
   };
 }
-const oldGo023=window.goMenu;
-window.goMenu=function(){
-  const r=oldGo023?.apply(this,arguments);
-  try{if(window.DungeonCore01?.active){document.body.style.overflow="";document.getElementById("specialDiceModal")?.classList.remove("open");document.getElementById("dc01Modal")?.classList.remove("open");DungeonCore01.show()}}catch(e){console.warn("Core return 0.23",e)}
-  return r;
-};
 try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 0.23";const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 0.23 · navigation Core isolée + IA directe sans popup historique."}catch(e){}
 })();
 </script>

@@ -1,3 +1,80 @@
+## CHANTIER COURANT — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-openchar-core028-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-openchar-core028-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-openchar-authority-preaudit-green-2026-09-23`.
+- SHA exact de base :
+  `ed5f306fb4fe0182863dac78866edfe81a23dbe3`.
+- Runtime de base inchangé depuis S2 :
+  taille `8172500`, blob `7b586e9fb14b7a93a0edb069e115fd6d48cbda97`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Preuve préalable GREEN
+
+Le pré-audit a prouvé :
+- propriétaire natif : `function openChar(id)` ;
+- vraie chaîne de wrappers :
+  `captureFix139 -> dungeonCore028HeroExploreGuard` ;
+- Capture 139 porte encore une garde réelle de lancement et reste hors périmètre ;
+- Core 0.28 n'est plus nécessaire pour le comportement visible de la fiche.
+
+Sentinelle navigateur sans Core 0.28 :
+`tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs`.
+
+Résultat :
+- aucun bouton Explorer visible/clicable en Dungeon ;
+- onglets Dungeon présents ;
+- seuls deux contrôles Survie cachés `display:none` restent dans le DOM,
+  tous deux liés à `generateZombieWaveQuick()`.
+
+### Mission unique
+
+Retirer **uniquement** le bloc
+`dungeonCore028HeroExploreGuard` de `index.html`.
+
+Aucun remplacement :
+- ne pas déplacer son `MutationObserver` ;
+- ne pas recréer ses retries 0/100 ms ;
+- ne pas ajouter de hook `openChar` ailleurs.
+
+Résultat attendu :
+- chaîne stricte `window.openChar =` :
+  `captureFix139` uniquement ;
+- propriétaire natif Shell inchangé ;
+- fiche Dungeon inchangée visuellement ;
+- Capture inchangé.
+
+### Hors périmètre
+
+Ne pas toucher :
+- Stats / rafraîchissement ;
+- détection ennemie / téléportation ;
+- terminologie Survie ;
+- Capture 139 ;
+- `goMenu` ;
+- `startConfiguredGame` ;
+- `resumeGame` ;
+- Tactical / Builder / gameplay.
+
+### TDD obligatoire avant runtime
+
+1. exiger absence du bloc Core 0.28 ;
+2. exiger chaîne stricte openChar = Capture 139 uniquement ;
+3. exiger absence de `dc028RemoveHeroExplore` / observer / retries ;
+4. conserver la fiche Dungeon sans Explorer visible ;
+5. conserver flash Survie absent ;
+6. conserver non-interférence quatre modules.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / pré-audit autorité openChar — 2026-09-23
 
 Ce bloc devient le point de reprise final du pré-audit dès que la triple CI du

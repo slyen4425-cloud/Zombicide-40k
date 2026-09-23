@@ -1,3 +1,79 @@
+## TDD RED — Phase 5 / autorité unique Resume — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23`.
+- État runtime actuel :
+  `index.html` blob `0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a`.
+- Sentinelle RED :
+  `tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs`.
+- Run Architecture :
+  `35838821434`.
+- Étape RED :
+  `Exiger un propriétaire Dungeon unique pour Resume`.
+
+### Cause complète prouvée
+
+La chaîne `resumeGame` possède trois interceptions Dungeon actives :
+
+1. `dungeonCore100ResumeAndInteractionFix`;
+2. `dungeonCore307CriticalResumeFix`;
+3. `dungeonCore310PersistenceAndTokens`.
+
+Le premier correctif Core 3.10 a correctement exclu Capture, mais son fallback
+`previousResume310` pointe vers Core 3.07. Core 3.07 reprend alors la vieille
+sauvegarde Dungeon. Son propre fallback pointe à son tour vers Core 1.00, qui
+possède le même ancien routage Dungeon.
+
+Le RED navigateur Capture est donc expliqué par la chaîne de propriétaires,
+pas par un défaut du moteur Capture.
+
+### Correction soustractive sélectionnée
+
+Conserver Core 3.10 comme seul propriétaire Dungeon de `resumeGame`.
+
+Retirer uniquement :
+- l'affectation `window.resumeGame` de Core 1.00 ;
+- l'affectation `window.resumeGame` de Core 3.07.
+
+Ne pas supprimer leurs autres responsabilités.
+
+Après retrait :
+- `previousResume310` capturera directement le `resumeGame` Shell historique ;
+- Dungeon restera pris en charge par Core 3.10 ;
+- Capture/Survie retomberont directement sur l'autorité Shell ;
+- aucun nouveau routeur, wrapper, global, observer ou timer n'est créé.
+
+### Candidat exact préparé
+
+Source :
+- taille `8174315`;
+- blob `0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a`.
+
+Cible soustractive :
+- taille `8171795`;
+- blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+
+### Validation obligatoire après patch
+
+- sentinelle propriétaire unique GREEN ;
+- Capture victoire -> Hub GREEN ;
+- Capture reload -> Reprendre -> Capture GREEN avec vieille sauvegarde Dungeon ;
+- Save & Quit -> reprise Dungeon GREEN ;
+- Dungeon map -> Tactical GREEN ;
+- Builder GREEN ;
+- non-interférence quatre modules GREEN ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Si la reprise Dungeon révèle une capacité réellement portée seulement par un
+ancien wrapper, cette capacité devra être migrée dans Core 3.10, sans restaurer
+la chaîne de wrappers.
+
+Aucun merge sur `main`.
+
 ## CANDIDAT CORRECTIF — Phase 5 / Capture Resume routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

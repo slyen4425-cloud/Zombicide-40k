@@ -643,6 +643,12 @@ jobs:
       - name: Vérifier le Dungeon Builder dans le vrai éditeur
         run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
 
+      - name: Verrouiller Dungeon map vers Tactical V2
+        run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
+
+      - name: Verrouiller Capture victoire et reprise inter-module
+        run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
+
       - name: Caractériser la stabilité de Config objet moderne
         run: node tests/gens_object_config_editor_browser_v11411.test.cjs
 

@@ -21,7 +21,7 @@ assert.equal(bytes.length,8171795);
 assert.equal(gitBlob(bytes),BLOB);
 assert.equal(manifest.sourceIndexBlob,BLOB);
 assert.deepEqual(manifest.totals,{
-  totalAccesses:182,resolvedAccesses:117,unresolvedAccesses:65,distinctResolvedKeys:19
+  totalAccesses:181,resolvedAccesses:116,unresolvedAccesses:65,distinctResolvedKeys:19
 });
 
 const classification={

@@ -1,0 +1,54 @@
+name: GenSrpG Phase 5 Capture resume routing one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and patch Core 3.10 resume owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          before="$(git hash-object index.html)"
+          test "$before" = "f13835a2827dbfa9e2698cb026d3e732ad62aba4"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old='''window.resumeGame=function(){
+            const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
+            if(ok&&window.DungeonCore01){'''
+          new='''window.resumeGame=function(){
+            const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
+            const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
+            const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
+            if(dungeon&&ok&&window.DungeonCore01){'''
+          if s.count(old)!=1:
+              raise SystemExit(f"unexpected Core 3.10 resume owner match count: {s.count(old)}")
+          p.write_text(s.replace(old,new,1),encoding="utf-8")
+          PY
+          after="$(git hash-object index.html)"
+          test "$after" = "0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a"
+
+      - name: Commit owner correction and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-phase5-capture-resume-routing-fix-one-shot.yml
+          git commit -m "fix: keep Capture resume out of Dungeon owner"
+          git push origin HEAD:work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23

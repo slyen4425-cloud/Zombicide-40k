@@ -61,6 +61,7 @@ function normalized(src){
 
 const blocks={};
 const functions={};
+let captureContextSource='';
 for(const id of ids){
   const meta=owners.blocks?.[id];
   assert.ok(meta,'missing owner metadata '+id);
@@ -69,6 +70,7 @@ for(const id of ids){
   blocks[id]=blockBody(id);
   functions[id]=extractAssignedFunction(blocks[id],'startConfiguredGame');
 }
+captureContextSource=extractAssignedFunction(blocks.captureFix138,'isCaptureContext138');
 
 assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m,
   'preaudit must run against the current five-owner chain');
@@ -108,10 +110,10 @@ const sourceReport=ids.map(id=>({
 const proposedPublicBoundary={
   owner:'capture',
   consumer:'shell',
+  currentBestEntryOwner:'captureFix139',
   shellProvides:['module selection / routing decision only'],
   captureKeeps:[
     'pregame/private state',
-    'Capture save/reset semantics',
     'participant/starter validation',
     'Capture world initialization',
     'Capture hub/UI transition'
@@ -121,10 +123,23 @@ const proposedPublicBoundary={
   status:'descriptive only; no runtime entry connected in this lot'
 };
 
+const selectedFirstRuntimeMicroLot={
+  owner:'captureFix135',
+  seam:'startConfiguredGame',
+  action:'retire only the shadowed startConfiguredGame assignment',
+  targetAssignments:4,
+  preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
+  rationale:'captureFix139 intercepts every normal context in which captureFix135 pregame reset could activate; delegated contexts do not activate that branch',
+  requiresDedicatedRed:true,
+  reAuditBeforeAnyCaptureFix138Retirement:true
+};
+
 console.log(JSON.stringify({
   scenario:'Phase 5 Capture public launch-entry preaudit',
   chainOwners:ids,
   sourceReport,
+  shadowingProof,
   proposedPublicBoundary,
+  selectedFirstRuntimeMicroLot,
   runtimeChanged:false
 },null,2));

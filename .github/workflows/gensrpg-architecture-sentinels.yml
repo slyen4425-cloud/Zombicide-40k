@@ -473,6 +473,9 @@ jobs:
       - name: Pré-auditer la chaîne startConfiguredGame restante Phase 5
         run: node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
 
+      - name: Pré-auditer le contrat public de lancement Capture Phase 5
+        run: node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

@@ -1,3 +1,72 @@
+## CANDIDAT GREEN — Phase 5 / pré-audit goMenu & transitions écrans — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-screen-transitions-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-screen-transitions-preaudit-2026-09-23`.
+- Base :
+  `checkpoint/gensrpg-phase5-resume-single-owner-green-2026-09-23`,
+  SHA `333919cacf809772df727419f3cc7f5aedd2c1a6`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Aucun runtime ni `index.html` modifié.
+
+Document :
+`docs/GENSRPG_PHASE5_GOMENU_SCREEN_TRANSITIONS_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs`.
+
+Chaîne exacte `goMenu` :
+1. `captureFix139`;
+2. `gensDungeonCore01Js`;
+3. `dungeonCore023StabilityFix`;
+4. `dungeonCore030HeroReturnFix`;
+5. `dungeonCore200Rebuild`.
+
+### Conclusion
+
+- Capture 139 porte une vraie transition Capture ;
+- Core01 porte un ancien retour Dungeon ;
+- Core 0.23 porte un nettoyage post-délégation ;
+- Core 0.30 porte un ancien retour fiche héros Dungeon ;
+- Core 2.00 est l'intercepteur Dungeon final actuel.
+
+Sur le chemin nominal Dungeon actif, Core 2.00 masque les trois anciennes
+interceptions Dungeon en retournant avant délégation.
+
+Mais, conformément au retour d'expérience `captureFix135`, **ce shadowing
+statique n'autorise aucun retrait**.
+
+### Prochaine action après GREEN
+
+Ouvrir un lot séparé :
+**Phase 5 / goMenu E2E boundary characterization**.
+
+Avant tout retrait, verrouiller :
+- Dungeon fiche -> goMenu -> map ;
+- nettoyage overlays/UI Dungeon ;
+- Capture -> goMenu -> Hub ;
+- Capture avec vieille sauvegarde Dungeon -> Capture ;
+- Survie ;
+- non-interférence quatre modules ;
+- Builder/Tactical inchangés.
+
+Un éventuel retrait ultérieur devra être TDD, un propriétaire à la fois,
+soustractif et sans wrapper de compatibilité.
+
+### Dettes séparées
+
+- détection ennemie immédiate hors embuscade : différée ;
+- embuscade proche des héros : automatique GREEN, pas encore validée manuellement.
+
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / pré-audit goMenu & transitions écrans — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

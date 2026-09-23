@@ -37,8 +37,8 @@ assert.match(c51,/function saveChallengeLibrary069\(lib\)\{\s*try\{GensStorageV1
 assert.match(c200,/typeof loadChallengeLibrary069==='function'\?loadChallengeLibrary069\(\):GensStorageV1\.readJson/,'Core 2.00 loader preference must remain');
 assert.match(c202,/typeof loadChallengeLibrary069==="function"\?loadChallengeLibrary069\(\):GensStorageV1\.readJson/,'Core 2.02 loader preference must remain');
 
-assert.equal(bytes.length,8171186);
-assert.equal(blob,'c2424bada56517e579ffe65fa147facbb6bf2caf','Challenge Library raccord must match deterministic target blob');
+assert.equal(bytes.length,8170961);
+assert.equal(blob,'0c15b1dba66ce83f2b27ed99e371885fb1d0ed75','Challenge Library raccord must match deterministic target blob');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Challenge Library Core storage authority',

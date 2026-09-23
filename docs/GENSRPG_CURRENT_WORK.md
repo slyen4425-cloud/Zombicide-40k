@@ -1,3 +1,92 @@
+## Chantier courant prioritaire — Phase 5 / captureFix135 retirement — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capturefix135-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capturefix135-retirement-2026-09-23`.
+- Base exacte :
+  `22cc0e61f22e350dc61da390cb99925d74122eed`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Retirer uniquement l'affectation `window.startConfiguredGame` du bloc
+`captureFix135`, démontrée shadowée dans la chaîne effective par
+`captureFix139`.
+
+Le reste du bloc `captureFix135` doit rester intact.
+
+### Base de preuve
+
+Le pré-audit Capture a établi :
+- chaîne actuelle :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- `captureFix139` intercepte les contextes Capture avant que les effets
+  spécifiques du wrapper `captureFix135` puissent être atteints ;
+- les contextes délégués hors Capture n'activent pas sa branche Capture ;
+- aucun retrait de `captureFix138` n'est autorisé dans ce lot.
+
+### TDD obligatoire
+
+Avant toute modification runtime, créer un RED dédié exigeant :
+- 4 affectations `startConfiguredGame` ;
+- absence d'affectation dans `captureFix135` ;
+- propriétaires conservés :
+  - `captureFix138`
+  - `captureFix139`
+  - `gensDungeonCore01Js`
+  - `dungeonCore200Rebuild`
+- dernier propriétaire inchangé :
+  `dungeonCore200Rebuild` ;
+- bloc `captureFix135` toujours présent pour ses autres responsabilités.
+
+Puis seulement :
+retirer l'affectation démontrée shadowée.
+
+### Fonctions / domaines protégés
+
+- `captureFix138` ;
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- `dungeonCore200Rebuild` ;
+- Shell Phase 3 inert ;
+- Survie ;
+- Dungeon ;
+- PvP ;
+- Save & Quit / reprise ;
+- Tactical.
+
+### Interdictions
+
+- ne retirer aucun autre wrapper ;
+- aucune modification des règles Capture ;
+- aucune modification Dungeon ;
+- ne pas connecter Shell/Capture Phase 3 ;
+- aucun nouveau global ;
+- aucun observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Règle index.html
+
+Le lot modifie potentiellement `index.html`.
+Appliquer strictement la règle 26 de la charte :
+- RED d'abord sans modifier le gros HTML ;
+- utiliser ensuite le fichier exact correspondant à la base du chantier,
+  récupéré par lien SHA et vérifié avant modification.
+
+### Après GREEN
+
+- triple CI complète ;
+- checkpoint GREEN ;
+- ré-audit obligatoire de `captureFix138` avant tout autre retrait Capture.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / Capture public launch-entry — pré-audit — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

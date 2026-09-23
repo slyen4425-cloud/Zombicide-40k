@@ -396,9 +396,15 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     }
 
     // This scenario characterizes NEW GAME reset after a previously persisted Dungeon.
-    // Save & Quit UI itself has a dedicated browser sentinel; use the canonical Dungeon owner
-    // here so a legitimate event/Tactical overlay cannot make fixture setup nondeterministic.
-    await page.evaluate(()=>window.DungeonCore01?.quit?.());
+    // It is not a combat-exit test. If the randomly generated room legitimately opened
+    // Tactical V2, close it through its public owner before invoking the canonical Dungeon
+    // Save & Quit owner, so the fixture does not depend on random encounter generation.
+    await page.evaluate(()=>{
+      if(document.querySelector('.gtv2Overlay[data-gens-tactical-v2="1"]')){
+        window.GensRpgTacticalCombatV2Ui?.close?.();
+      }
+      window.DungeonCore01?.quit?.();
+    });
     await page.waitForFunction(()=>{
       const root=document.getElementById('gensRootHome');
       const core=document.getElementById('gensDungeonCore01');

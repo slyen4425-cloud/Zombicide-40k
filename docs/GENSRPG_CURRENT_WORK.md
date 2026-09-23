@@ -1,3 +1,83 @@
+## TDD RED PROUVÉ — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core030-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core030-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-e2e-characterization-green-2026-09-23`,
+  SHA `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946`.
+- Runtime exact :
+  `index.html` taille `8171795`,
+  blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### TDD
+
+Sentinelle :
+`tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs`.
+
+Run Architecture :
+`35847094439`.
+
+RED exact :
+`Exiger le retrait du propriétaire goMenu Core 0.30`.
+
+Toutes les étapes Architecture précédentes, y compris :
+- autorité unique Resume ;
+- pré-audit goMenu ;
+- sortie Phase 4 ;
+- protections stockage/assets ;
+
+sont GREEN avant ce RED.
+
+Le navigateur est volontairement SKIPPED après le RED Architecture.
+
+### Cible unique
+
+Retirer uniquement :
+`dungeonCore030HeroReturnFix -> window.goMenu`.
+
+Conserver :
+- le script Core 0.30 lui-même ;
+- toutes ses autres responsabilités ;
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- `dungeonCore023StabilityFix` ;
+- `dungeonCore200Rebuild`.
+
+Chaîne cible :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore023StabilityFix -> dungeonCore200Rebuild`.
+
+### Règle 26 — prochaine action obligatoire
+
+La modification runtime ne doit pas être faite depuis une ancienne copie.
+
+Copie exacte requise :
+- SHA de référence :
+  `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946` ;
+- blob :
+  `4f8c3b9be4189a9ac163fcb17531c95cbd783b05` ;
+- taille :
+  `8171795`.
+
+Le précédent `work_13.zip` est obsolète pour ce lot.
+
+Avant modification :
+1. obtenir cette copie exacte ;
+2. vérifier taille + blob ;
+3. retirer uniquement l'affectation Core 0.30 ;
+4. réaligner les empreintes dérivées ;
+5. exécuter triple CI ;
+6. seulement si GREEN, fournir un lien mobile de test si validation manuelle utile.
+
+Aucune rustine.
+Aucun autre runtime modifié.
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

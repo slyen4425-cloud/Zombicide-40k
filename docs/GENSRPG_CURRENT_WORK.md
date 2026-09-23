@@ -1,3 +1,56 @@
+## CHANTIER COURANT — Phase 5 / caractérisation E2E goMenu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-screen-transitions-preaudit-green-2026-09-23`.
+- SHA exact de base :
+  `1a7cbeac8bf8765c8cda9afd0fe6b60a50bda57c`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Caractériser les vrais chemins utilisateur de `goMenu` avant tout retrait
+d'un propriétaire historique.
+
+Aucun runtime ne sera modifié dans ce lot.
+
+### Chaîne actuelle à préserver pendant la caractérisation
+
+1. `captureFix139`;
+2. `gensDungeonCore01Js`;
+3. `dungeonCore023StabilityFix`;
+4. `dungeonCore030HeroReturnFix`;
+5. `dungeonCore200Rebuild`.
+
+### E2E à verrouiller
+
+- Dungeon actif + fiche héros ouverte -> `goMenu` -> retour map Dungeon ;
+- retour Dungeon sans overlay/pointer-events bloquants ;
+- Capture active -> `goMenu` -> Hub Capture ;
+- Capture avec vieille sauvegarde Dungeon persistante -> Capture garde l'autorité ;
+- sauvegarde Dungeon indépendante conservée ;
+- Survie / PvP / Builder / Tactical / non-interférence restent couverts par la CI existante.
+
+### Interdictions
+
+- aucune modification de `index.html` ;
+- aucun retrait `goMenu` ;
+- aucun nouveau wrapper/routeur/global ;
+- aucun observer/timer/retry ;
+- aucun traitement de la détection ennemie dans ce lot ;
+- aucun merge sur `main`.
+
+### Sortie attendue
+
+Si les scénarios E2E sont GREEN, sélectionner au maximum un ancien propriétaire
+Dungeon pour un futur TDD de retrait soustractif. Aucun retrait dans le présent lot.
+
 ## CANDIDAT GREEN — Phase 5 / pré-audit goMenu & transitions écrans — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

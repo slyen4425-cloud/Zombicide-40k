@@ -9,14 +9,14 @@ const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
 assert.deepEqual(manifest.totals,{
-  totalAccesses:182,
-  resolvedAccesses:117,
+  totalAccesses:181,
+  resolvedAccesses:116,
   unresolvedAccesses:65,
   distinctResolvedKeys:19
 },'Audit 10 guard must follow the migrated Dungeon Scene storage totals');
 
 assert.deepEqual(manifest.byDomain.dungeon,{
-  accesses:152,resolved:102,unresolved:50,distinctKeys:11
+  accesses:151,resolved:101,unresolved:50,distinctKeys:11
 },'Audit 10 guard must follow the migrated Dungeon Scene Dungeon totals');
 
 const blob=crypto.createHash('sha1').update(Buffer.concat([

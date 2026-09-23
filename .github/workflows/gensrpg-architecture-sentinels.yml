@@ -404,6 +404,9 @@ jobs:
       - name: Exiger la garde de chaîne Hero Editor
         run: node tests/gens_phase4_inventory_equipment_wrapper_chain_guard_owner_v1.test.cjs
 
+      - name: Pré-auditer l'autorité resumeGame Phase 5
+        run: node tests/gens_phase5_resumegame_authority_preaudit_v1.test.cjs
+
       - name: Pré-auditer les propriétaires du moteur de dés Phase 4
         run: node tests/gens_phase4_dice_preaudit_v1.test.cjs
 

@@ -13,7 +13,7 @@ const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHA
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
 const HISTORICAL_SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
-const CURRENT_BLOB='6e76a99af5fb839db5ffb20a2e67fd1572bf13ea';
+const CURRENT_BLOB='c2424bada56517e579ffe65fa147facbb6bf2caf';
 
 function gitBlob(buffer){
   return crypto.createHash('sha1').update(Buffer.concat([
@@ -37,7 +37,7 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 assert.deepEqual(manifest.byDomain.core,{
   accesses:2,resolved:1,unresolved:1,distinctKeys:1
 },'Audit 12 guard must follow the migrated MJ Rules Core totals');
-assert.equal(bytes.length,8171571);
+assert.equal(bytes.length,8171186);
 assert.equal(gitBlob(bytes),CURRENT_BLOB,'Audit 12 must follow the exact migrated MJ Rules index');
 
 const mj=blockInfo('dungeonMj72_2Script');

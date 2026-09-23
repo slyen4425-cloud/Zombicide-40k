@@ -15,8 +15,8 @@ const owners=fs.existsSync(path.join(root,'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAS
   :'dungeonRpgEarnedSkillPoints\t1\tdungeonCore044HeroProgression\n';
 
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
-assert.equal(indexBuf.length,8171571,'earned-points preaudit must run on exact xpIntoLevel GREEN index');
-assert.equal(gitBlob(indexBuf),'6e76a99af5fb839db5ffb20a2e67fd1572bf13ea','earned-points preaudit index blob drifted');
+assert.equal(indexBuf.length,8171186,'earned-points preaudit must run on exact xpIntoLevel GREEN index');
+assert.equal(gitBlob(indexBuf),'c2424bada56517e579ffe65fa147facbb6bf2caf','earned-points preaudit index blob drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression blob must remain unchanged during preaudit');
 
 function scriptBody(id){

@@ -9,8 +9,8 @@ const index=indexBuf.toString('utf8');
 const corePath='assets/gensrpg/core/progression-v1.js';
 const coreSource=fs.readFileSync(path.join(root,corePath),'utf8');
 function gitBlob(b){return crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex')}
-assert.equal(indexBuf.length,8171571);
-assert.equal(gitBlob(indexBuf),'6e76a99af5fb839db5ffb20a2e67fd1572bf13ea');
+assert.equal(indexBuf.length,8171186);
+assert.equal(gitBlob(indexBuf),'c2424bada56517e579ffe65fa147facbb6bf2caf');
 assert.equal(gitBlob(Buffer.from(coreSource)),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf');
 function scriptBody(id){const marker='<script id="'+id+'">';const s=index.indexOf(marker),f=s+marker.length,e=index.indexOf('</script>',f);assert.ok(s>=0&&e>f);return index.slice(f,e)}
 function extractFunction(src,name){const needle='function '+name+'(';const p=src.indexOf(needle);assert.ok(p>=0,'missing '+name);const b=src.indexOf('{',p);let d=0,q=null,esc=false,line=false,block=false;for(let i=b;i<src.length;i++){const c=src[i],n=src[i+1]||'';if(line){if(c==='\n')line=false;continue}if(block){if(c==='*'&&n==='/'){block=false;i++}continue}if(q){if(esc){esc=false;continue}if(c==='\\'){esc=true;continue}if(c===q)q=null;continue}if(c==='/'&&n==='/'){line=true;i++;continue}if(c==='/'&&n==='*'){block=true;i++;continue}if(c==="'"||c==='"'||c==='`'){q=c;continue}if(c==='{')d++;else if(c==='}'&&--d===0)return src.slice(p,i+1)}throw Error('unterminated '+name)}

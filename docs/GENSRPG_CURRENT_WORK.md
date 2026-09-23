@@ -1,3 +1,66 @@
+## CHANTIER COURANT — Phase 5 / pré-audit goMenu Core 0.01 restant — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core01-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core01-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core023-retirement-green-2026-09-23`.
+- SHA exact de base :
+  `17ff591bb5509496a7b417d5ee16a3c099a539f4`.
+- Runtime exact :
+  taille `8171186`, blob `c2424bada56517e579ffe65fa147facbb6bf2caf`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Caractériser l'autorité `window.goMenu` encore portée par
+`gensDungeonCore01Js`, sans modifier le runtime.
+
+Chaîne actuelle :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Hypothèse à prouver :
+- l'ancien état privé `coreActive` de Core 0.01 reste faux sur les chemins
+  Dungeon modernes car Core 2.00 intercepte le lancement et remplace l'API
+  publique Dungeon ;
+- l'ancien `goMenu` Core 0.01 serait donc inert/shadowé.
+
+### Sentinelle
+
+`tests/gens_phase5_gomenu_core01_preaudit_e2e_v1.test.cjs`.
+
+Scénario :
+Dungeon réel -> Save & Quit -> Survie -> retour au profil Dungeon sans Resume ->
+`goMenu`.
+
+Le test doit maintenir :
+- profil réellement Dungeon ;
+- Core 2.00 inactif ;
+- runtime Dungeon resumable présent ;
+- map Dungeon masquée après `goMenu`.
+
+### Interdictions
+
+- aucun runtime modifié dans ce pré-audit ;
+- aucune suppression avant preuve GREEN ;
+- aucun changement Capture/Core 2.00 ;
+- aucune détection ennemie ;
+- aucun rafraîchissement UI/Stats ;
+- aucun wrapper/observer/timer/retry ;
+- aucun merge sur `main`.
+
+### Dettes différées inchangées
+
+- détection ennemie intermittente ;
+- petits défauts de rafraîchissement Stats/UI ;
+- validation manuelle embuscade.
+
+---
+
 ## CLÔTURE CANDIDATE — Phase 5 / retrait goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

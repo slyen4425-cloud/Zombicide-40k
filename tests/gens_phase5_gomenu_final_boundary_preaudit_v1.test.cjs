@@ -34,13 +34,13 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8172505,'goMenu boundary guard must use the current Capture S1 runtime');
-assert.equal(gitBlob(indexBuf),'c17460335b2deb5e5916dbf91448b0706c38d0df','goMenu boundary runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'c17460335b2deb5e5916dbf91448b0706c38d0df','owner manifest must target current runtime');
+assert.equal(indexBuf.length,8172500,'goMenu boundary guard must use the current Dungeon S2 runtime');
+assert.equal(gitBlob(indexBuf),'7b586e9fb14b7a93a0edb069e115fd6d48cbda97','goMenu boundary runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'7b586e9fb14b7a93a0edb069e115fd6d48cbda97','owner manifest must target current runtime');
 
-assert.deepEqual(row('goMenu'),{count:1,last:'dungeonCore200Rebuild'});
-assert.deepEqual(chainFor('goMenu'),['dungeonCore200Rebuild'],
-  'Capture S1 must leave Dungeon Core 2.00 as the only inline goMenu override');
+assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
+assert.deepEqual(chainFor('goMenu'),[],
+  'Dungeon S2 must remove the final inline goMenu override');
 
 assert.equal(owners.blocks.captureFix139.primaryDomain,'capture');
 assert.equal(owners.blocks.dungeonCore200Rebuild.primaryDomain,'dungeon');
@@ -53,12 +53,18 @@ assert.match(capture,/GensShellScreenReturnV1/,
   'Capture S1 must register through the Shell public contract');
 assert.ok(capture.includes('captureEnterWorld139()'),
   'Capture S1 must keep the Capture-owned world/hub implementation');
-assert.match(dungeon,/const goOutside200=window\.goMenu;/,
-  'Dungeon Core 2.00 must still capture the previous goMenu boundary');
-assert.match(dungeon,/active200&&isDungeonMode\?\.\(\)/,
-  'Dungeon Core 2.00 must still own active Dungeon return routing');
-assert.match(dungeon,/return goOutside200\?\.apply\(this,arguments\)/,
-  'Dungeon Core 2.00 must delegate outside Dungeon');
+assert.doesNotMatch(dungeon,/window\.goMenu\s*=/,
+  'Dungeon S2 must no longer assign the global goMenu boundary');
+assert.doesNotMatch(dungeon,/const goOutside200=window\.goMenu/,
+  'Dungeon S2 must no longer capture the previous goMenu boundary');
+assert.match(dungeon,/GensShellScreenReturnV1/,
+  'Dungeon S2 must register through the Shell public contract');
+assert.match(dungeon,/register\?\.\("dungeon"/,
+  'Dungeon S2 must register under the dungeon provider id');
+assert.match(dungeon,/if\(!active200\|\|!isDungeonMode\?\.\(\)\)return false;/,
+  'Dungeon S2 must preserve the historical active Dungeon guard');
+assert.match(dungeon,/return show\(\)===true/,
+  'Dungeon S2 must keep show() as the owner-local transition');
 
 assert.ok(shellContract.owns.includes('global screen transitions'),
   'Shell contract must own global screen transitions');
@@ -81,7 +87,7 @@ assert.equal(dungeonContract.publicEntries?.moduleScreenReturn?.operation,'retur
 console.log(JSON.stringify({
   scenario:'Phase 5 final goMenu boundary preaudit',
   runtime:{size:indexBuf.length,blob:gitBlob(indexBuf)},
-  chain:['dungeonCore200Rebuild'],
+  chain:[],
   owners:{
     capture:owners.blocks.captureFix139.responsibility,
     dungeon:owners.blocks.dungeonCore200Rebuild.responsibility
@@ -92,9 +98,10 @@ console.log(JSON.stringify({
   },
   decision:{
     captureMigratedToPublicContract:true,
-    retireDungeon200:false,
-    reason:'Capture no longer owns global goMenu; Dungeon still carries a real module-owned transition',
-    nextBoundary:'migrate Dungeon through the same Shell public contract before removing the final override'
+    dungeonMigratedToPublicContract:true,
+    shellNativeGoMenuSoleAuthority:true,
+    reason:'Capture and Dungeon own their module transitions while Shell owns the single global return boundary',
+    nextBoundary:'preserve the consolidated boundary while continuing Phase 5'
   },
   runtimeChanged:true
 },null,2));

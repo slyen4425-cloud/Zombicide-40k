@@ -1,3 +1,68 @@
+## GREEN FINAL — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core030-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core030-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-e2e-characterization-green-2026-09-23`,
+  SHA `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946`.
+- Checkpoint GREEN final :
+  `checkpoint/gensrpg-phase5-gomenu-core030-retirement-green-2026-09-23`.
+- SHA exact validé :
+  `32d2c00200bf148e2c764166a3c07e4ae05bc919`.
+- Runtime validé :
+  `index.html` taille `8171079`,
+  blob `6a9392e667881f2087e4df931645cada4201cb3c`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+L'autorité `window.goMenu` de `dungeonCore030HeroReturnFix` a été retirée
+de manière strictement soustractive.
+
+Chaîne `goMenu` finale :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore023StabilityFix -> dungeonCore200Rebuild`.
+
+Aucune autre responsabilité Core 0.30 n'a été retirée.
+Aucun wrapper, observer, timer/retry, mécanisme de compatibilité ou second
+système n'a été ajouté.
+
+### Validation
+
+- Architecture + navigateur complet `35848721773` — SUCCESS ;
+- Firefox `35848721942` — SUCCESS ;
+- Tactical Dock `35848721777` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Dungeon fiche héros -> `goMenu` -> map Dungeon ;
+- Capture active + vieille sauvegarde Dungeon -> `goMenu` -> Hub Capture ;
+- Survie fiche héros -> `goMenu` -> menu Survie ;
+- Save & Quit / reprise Dungeon ;
+- Dungeon map -> Tactical ;
+- Builder ;
+- non-interférence quatre modules.
+
+### Hors périmètre conservé
+
+Toujours séparés et non corrigés dans ce lot :
+- détection immédiate des ennemis hors embuscade ;
+- validation manuelle utilisateur de l'embuscade proche des héros.
+
+### Prochaine action
+
+Le chantier Core 0.30 est clos automatiquement GREEN.
+Avant d'ouvrir le prochain lot Phase 5, choisir un nouveau périmètre homogène,
+créer son checkpoint de départ depuis ce checkpoint GREEN et respecter la
+procédure complète de reprise.
+
+Aucun merge sur `main`.
+
+---
+
 ## TDD RED PROUVÉ — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

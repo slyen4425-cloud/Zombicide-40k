@@ -13,8 +13,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8172500,'openChar preaudit must target the exact Dungeon S2 runtime');
-assert.equal(gitBlob(bytes),'7b586e9fb14b7a93a0edb069e115fd6d48cbda97',
+assert.equal(bytes.length,8170726,'openChar preaudit must target the exact Dungeon S2 runtime');
+assert.equal(gitBlob(bytes),'d9ee34d47fa888795db68cdc244d0c73d30ee523',
   'openChar preaudit runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';

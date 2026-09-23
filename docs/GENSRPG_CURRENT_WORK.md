@@ -1,3 +1,61 @@
+## CHANTIER COURANT — Phase 5 / pré-audit raccord runtime retour écran module — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-raccord-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-raccord-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-contract-green-2026-09-23`.
+- SHA exact de base :
+  `05daf6383005c1b4ae75409ac53444602179e500`.
+- Runtime inchangé :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation du lot précédent
+
+Checkpoint GREEN :
+`checkpoint/gensrpg-phase5-module-screen-return-contract-green-2026-09-23`.
+
+Triple CI finale :
+- Architecture + navigateur complet `35900753740` — SUCCESS ;
+- Firefox `35900753712` — SUCCESS ;
+- Tactical Dock `35900753640` — SUCCESS.
+
+### Mission unique
+
+Pré-auditer le futur raccord runtime du contrat
+`module-screen-return / returnToPrimaryView` sans modifier le runtime.
+
+Objectifs :
+- identifier l'autorité Shell existante la plus proche pour dispatcher le retour ;
+- identifier l'implémentation owner-local minimale côté Survival, Dungeon, Capture, PvP ;
+- définir comment remplacer à terme la chaîne globale `goMenu` sans ajouter une nouvelle chaîne de wrappers ;
+- déterminer si un nouveau fichier runtime Shell est nécessaire ou si une autorité existante peut être raccordée ;
+- identifier les tests E2E obligatoires avant toute modification ;
+- décider précisément à quel moment la règle 26 impose de demander l'`index.html` exact.
+
+### Interdictions
+
+- aucun changement de `index.html` ;
+- aucun changement runtime dans ce pré-audit ;
+- aucun retrait `captureFix139` / `dungeonCore200Rebuild` ;
+- aucun nouveau wrapper global ;
+- aucun observer, timer, retry, polling ou fallback ;
+- aucun accès Shell à l'état privé d'un module ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Relire les pré-audits Shell/navigation existants, les tests E2E `goMenu`, les
+contrats Phase 3 et les patterns de raccord Core déjà validés, puis produire
+une décision de raccord minimale et testable.
+
+---
+
 ## GREEN FINAL — Phase 5 / contrat public retour écran module — 2026-09-23
 
 Ce bloc devient le point de reprise de ce lot dès que le checkpoint final

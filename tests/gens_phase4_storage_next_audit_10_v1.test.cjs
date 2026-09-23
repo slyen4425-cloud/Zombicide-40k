@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8174148);
-assert.equal(blob,'f13835a2827dbfa9e2698cb026d3e732ad62aba4');
+assert.equal(bytes.length,8173578);
+assert.equal(blob,'9313afd3437fe827b9c17245a675f75645570878');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

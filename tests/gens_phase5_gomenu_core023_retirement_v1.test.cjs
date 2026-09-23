@@ -32,12 +32,11 @@ function lastOwnerRow(name){
 const chain=chainFor('goMenu');
 assert.deepEqual(chain.map(x=>x.id),[
   'captureFix139',
-  'gensDungeonCore01Js',
   'dungeonCore200Rebuild'
-],'Core 0.23 goMenu retirement target requires the three-owner chain');
+],'Core 0.23 must remain retired in the current two-owner goMenu chain');
 
-assert.deepEqual(lastOwnerRow('goMenu'),{count:3,last:'dungeonCore200Rebuild'},
-  'Phase 2 last-owner mapping must be realigned to the three-owner goMenu chain');
+assert.deepEqual(lastOwnerRow('goMenu'),{count:2,last:'dungeonCore200Rebuild'},
+  'Phase 2 last-owner mapping must track the current two-owner goMenu chain');
 
 const core023=blocks.find(x=>x.id==='dungeonCore023StabilityFix')?.body||'';
 assert.ok(core023,'Core 0.23 script must remain present for its non-goMenu responsibilities');
@@ -69,5 +68,6 @@ console.log(JSON.stringify({
   core023StillPresent:true,
   core023GoMenuOwner:false,
   preserved:['openHero guard','specialDiceModal hero-entry cleanup','AI/loot responsibilities'],
-  runtimeChange:'subtractive only'
+  runtimeChange:'subtractive only',
+  laterRetirement:'gensDungeonCore01Js -> window.goMenu'
 },null,2));

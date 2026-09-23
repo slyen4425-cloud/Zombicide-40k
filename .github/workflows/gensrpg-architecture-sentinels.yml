@@ -650,6 +650,9 @@ jobs:
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 
+      - name: Caractériser goMenu Dungeon et Capture en E2E
+        run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
+
       - name: Caractériser Dungeon après Survie dans Chromium
         env:
           GENSRPG_BROWSER: chromium

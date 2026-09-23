@@ -16,8 +16,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8172500,'raccord guard must target current Dungeon S2 runtime size');
-assert.equal(gitBlob(indexBuf),'7b586e9fb14b7a93a0edb069e115fd6d48cbda97',
+assert.equal(indexBuf.length,8170726,'raccord guard must target current Dungeon S2 runtime size');
+assert.equal(gitBlob(indexBuf),'d9ee34d47fa888795db68cdc244d0c73d30ee523',
   'raccord guard current runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');

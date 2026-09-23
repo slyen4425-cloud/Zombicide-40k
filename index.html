@@ -37234,53 +37234,6 @@ function hideForeignGameUi100(){
   });
 }
 
-const legacyResume100=window.resumeGame;
-window.resumeGame=function(){
-  if(!hasActiveSession?.())return;
-
-  const core=readCore100();
-  const looksDungeon=Array.isArray(core.participants)&&core.participants.length>0;
-  const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
-  const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
-
-  if(dungeon&&looksDungeon && window.DungeonCore01){
-    const p=resolveSessionProfile100();
-    if(p){
-      try{setActiveGameProfileId?.(String(p.id))}catch(e){}
-      try{applyGameProfile?.(p,false)}catch(e){console.warn("Core 1.00 profil reprise",e)}
-    }
-    try{window.gensSelectedFamily="adventure"}catch(e){}
-    try{document.body.classList.add("gensDungeonTheme")}catch(e){}
-    hideForeignGameUi100();
-
-    // Empêche explicitement le hub Capture de se réafficher.
-    const cap=document.getElementById("captureGameHub");
-    if(cap)cap.style.display="none";
-    const capSheet=document.getElementById("captureHeroSheet");
-    if(capSheet)capSheet.style.display="none";
-
-    if(p){
-      saveSessionProfile100();
-    }
-
-    try{
-      if(DungeonCore01.show()){
-        setTimeout(()=>{
-          hideForeignGameUi100();
-          const d=document.getElementById("gensDungeonCore01");
-          if(d)d.style.display="block";
-          try{dc099Paint?.();dc099SyncMainAction?.()}catch(e){}
-        },0);
-        return;
-      }
-    }catch(e){console.error("Core 1.00 reprise Dungeon",e)}
-  }
-
-  // Partie non-Dungeon : comportement historique.
-  return typeof legacyResume100==="function"
-    ? legacyResume100.apply(this,arguments)
-    : undefined;
-};
 
 /* ---------------------------------------------------------
    COFFRES / CACHES : proximité exacte.
@@ -42828,28 +42781,6 @@ try{
 <script id="dungeonCore307CriticalResumeFix">
 (function(){
 "use strict";
-const previousResume307=window.resumeGame;
-window.resumeGame=function(){
-  let runtime=null;
-  try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
-  const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
-  const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
-  const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
-  if(dungeon&&(typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
-    try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
-    ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.style.display="none";
-    });
-    try{
-      if(DungeonCore01.show()){
-        const shell=document.getElementById("gensDungeonCore01");if(shell)shell.style.display="block";
-        window.scrollTo(0,0);
-        return true;
-      }
-    }catch(e){console.error("Core 3.07 reprise Dungeon",e)}
-  }
-  return typeof previousResume307==="function"?previousResume307.apply(this,arguments):undefined;
-};
 try{
   const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.07";
   const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.07 · reprise, coffres et timeline IA stabilisés.";

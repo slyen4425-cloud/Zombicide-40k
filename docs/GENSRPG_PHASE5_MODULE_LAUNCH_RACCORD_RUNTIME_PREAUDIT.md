@@ -223,3 +223,46 @@ Ce lot S1 devra commencer par un RED dédié exigeant le nouveau registre tout e
 - aucun appel de production vers le nouveau service.
 
 Aucun merge sur `main`.
+
+
+## Validation technique GREEN avant clôture
+
+SHA technique :
+`0f422397f94183eab176d170cb1127eeec90c01d`.
+
+- Architecture + navigateur complet : `35929842956` — SUCCESS ;
+- Firefox : `35929842979` — SUCCESS ;
+- Tactical Dock : `35929843001` — SUCCESS.
+
+Le navigateur complet conserve notamment :
+- Survival et Survival après Dungeon ;
+- Fouiller/arts ;
+- goMenu ;
+- Dungeon map -> Tactical ;
+- Capture victoire/reprise ;
+- Dungeon après Survival ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- openChar sans Core 0.28 ;
+- cache/pièges ;
+- Save & Quit ;
+- PvP placeholder ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- preview/assets/Equipment.
+
+Runtime toujours byte-identique :
+- taille `8170726` ;
+- blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+## Clôture finale
+
+Le SHA documentaire final doit repasser la triple CI avant création de :
+
+`checkpoint/gensrpg-phase5-module-launch-raccord-runtime-preaudit-green-2026-09-24`.
+
+Après GREEN seulement :
+ouvrir S1 Shell registry avec RED dédié.
+
+Aucun merge sur `main`.

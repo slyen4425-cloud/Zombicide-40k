@@ -1,3 +1,94 @@
+## GREEN FINAL CANDIDATE — Phase 5 / module-launch — pré-audit raccord runtime — 2026-09-24
+
+Ce bloc devient le point de reprise final dès que le SHA documentaire de clôture
+a lui-même passé la triple CI et que le checkpoint final existe.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-raccord-runtime-preaudit-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-raccord-runtime-preaudit-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-contract-preaudit-green-2026-09-24`.
+- SHA de base :
+  `8dee418cc1d8ed777166624d6bb04e6c14540443`.
+- Checkpoint final cible :
+  `checkpoint/gensrpg-phase5-module-launch-raccord-runtime-preaudit-green-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Règle 26
+
+Fichier exact utilisateur :
+`work14 (1).zip -> indexwork14.txt`.
+
+Vérifié :
+- `8170726` octets ;
+- blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+### Résultat du pré-audit
+
+Autorité de module actif unique existante :
+`gensShellActiveModuleV1()`,
+déjà exposée via
+`GensShellScreenReturnV1.activeModule()`.
+
+Le futur module-launch doit réutiliser cette autorité et ne créer aucun second resolver.
+
+Chaîne `startConfiguredGame` conservée :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+S1 sélectionné :
+**Shell registry raccord**.
+
+S1 ajoutera seulement `GensShellModuleLaunchV1` à côté du ScreenReturn :
+- `register` ;
+- `activeModule` ;
+- `startModuleSession`.
+
+S1 ne devra :
+- être appelé par aucun lancement de production ;
+- connecter aucun provider module ;
+- modifier aucune des cinq affectations `startConfiguredGame` ;
+- ajouter aucun second resolver ;
+- ajouter aucun observer/timer/retry/polling.
+
+Ordre futur :
+S2 Survival -> S3 Capture -> S4 Dungeon.
+PvP reste sans provider pendant le placeholder.
+
+Aucun retrait d'autorité historique avant preuve E2E des providers.
+
+### Validation technique
+
+SHA technique :
+`0f422397f94183eab176d170cb1127eeec90c01d`.
+
+- Architecture + navigateur complet : `35929842956` — SUCCESS ;
+- Firefox : `35929842979` — SUCCESS ;
+- Tactical Dock : `35929843001` — SUCCESS.
+
+Runtime inchangé :
+- taille `8170726` ;
+- blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+### QA différée
+
+- rafraîchissements ;
+- inventaire Survie à 0 ;
+- Stats au retour ;
+- détection/téléportation ;
+- terminologie Survie.
+
+### Étape suivante après checkpoint GREEN
+
+Ouvrir :
+**Phase 5 / module-launch S1 — Shell registry raccord**.
+
+TDD RED obligatoire avant runtime.
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch — pré-audit du raccord runtime — 2026-09-24
 
 Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.

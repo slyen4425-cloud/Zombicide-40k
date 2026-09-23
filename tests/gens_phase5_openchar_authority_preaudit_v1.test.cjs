@@ -13,9 +13,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8170726,'openChar preaudit must target the exact Dungeon S2 runtime');
+assert.equal(bytes.length,8170726,'openChar guard must target the exact Core 0.28-retired runtime');
 assert.equal(gitBlob(bytes),'d9ee34d47fa888795db68cdc244d0c73d30ee523',
-  'openChar preaudit runtime blob drifted');
+  'openChar guard runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';
 assert.match(native,/closeTurnPopup\(\)/,'native Shell openChar must close stale turn popup');
@@ -37,10 +37,10 @@ function strictAssignments(name){
 }
 
 const chain=strictAssignments('openChar');
-assert.deepEqual(chain.map(x=>x.id),['captureFix139','dungeonCore028HeroExploreGuard'],
-  'openChar strict wrapper chain must contain Capture 139 then Dungeon Core 0.28 only');
-assert.equal(chain.reduce((n,x)=>n+x.count,0),2,
-  'openChar must have exactly two true window assignments after excluding comparison operators');
+assert.deepEqual(chain.map(x=>x.id),['captureFix139'],
+  'after Core 0.28 retirement, Capture 139 must be the only strict openChar wrapper');
+assert.equal(chain.reduce((n,x)=>n+x.count,0),1,
+  'openChar must have exactly one true window assignment after Core 0.28 retirement');
 
 const capture=chain.find(x=>x.id==='captureFix139')?.body||'';
 assert.match(capture,/window\._captureStarting139=false/);
@@ -49,15 +49,10 @@ assert.match(capture,/if\(window\._captureStarting139 && isCaptureContext138\(\)
 assert.match(capture,/return openChar139\.apply\(this,arguments\)/,
   'Capture wrapper must delegate every non-startup openChar call');
 
-const dungeon=chain.find(x=>x.id==='dungeonCore028HeroExploreGuard')?.body||'';
-assert.match(dungeon,/function dc028RemoveHeroExplore\(\)/,
-  'Dungeon Core 0.28 must expose its real remaining responsibility');
-assert.match(dungeon,/new MutationObserver\(\(\)=>dc028RemoveHeroExplore\(\)\)/,
-  'Dungeon Core 0.28 currently owns a targeted sheet observer');
-assert.match(dungeon,/setTimeout\(dc028RemoveHeroExplore,0\)/);
-assert.match(dungeon,/setTimeout\(dc028RemoveHeroExplore,100\)/);
-assert.match(dungeon,/window\.openChar=function\(\)/,
-  'Dungeon Core 0.28 currently owns the final global openChar wrapper');
+assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
+  'Dungeon Core 0.28 block must remain retired');
+assert.doesNotMatch(source,/dc028RemoveHeroExplore/,
+  'retired Core 0.28 remover must not remain in runtime');
 
 assert.ok(source.includes('function render(){\n  try{applyDungeonSheetIdentity();renderDungeonHeroStats();renderDungeonSkillTree();updateDungeonSearchUi()}catch(e){}'),
   'current canonical render must apply Dungeon sheet identity synchronously before shared sheet render');
@@ -71,11 +66,11 @@ for(const file of [
 }
 
 console.log(JSON.stringify({
-  scenario:'Phase 5 openChar authority preaudit',
+  scenario:'Phase 5 openChar authority after Core 0.28 retirement',
   runtime:{size:bytes.length,blob:gitBlob(bytes)},
   nativeOwner:'function openChar(id)',
   strictWrapperChain:chain.map(x=>x.id),
   historicalCartographyWarning:'window.openChar===function comparisons must not count as assignments',
-  firstSubtractiveCandidate:'dungeonCore028HeroExploreGuard',
+  retiredOwner:'dungeonCore028HeroExploreGuard',
   capture139RetirementCandidate:false
 },null,2));

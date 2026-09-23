@@ -1,3 +1,85 @@
+## CHANTIER COURANT — Phase 5 / contrat public retour écran module — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-contract-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-contract-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-final-boundary-preaudit-green-2026-09-23`.
+- SHA exact de base :
+  `79af020a1e589dc4cc8cc9325db5b91da21ae123`.
+- Runtime inchangé :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Fermeture du pré-audit précédent
+
+Le pré-audit frontière finale `goMenu` est GREEN et figé sur :
+`checkpoint/gensrpg-phase5-gomenu-final-boundary-preaudit-green-2026-09-23`.
+
+Triple CI du SHA `79af020a1e589dc4cc8cc9325db5b91da21ae123` :
+- Architecture + navigateur complet `35896964229` — SUCCESS ;
+- Firefox `35896964127` — SUCCESS ;
+- Tactical Dock `35896964272` — SUCCESS.
+
+Conclusion :
+`captureFix139` et `dungeonCore200Rebuild` portent encore de vraies transitions module-owned.
+Aucun retrait direct n'est autorisé.
+
+### Mission unique
+
+Définir et verrouiller un contrat public **pur et non chargé** permettant au Shell
+de demander au module de jeu actif de revenir vers sa vue principale, sans lire
+l'état privé du module et sans modifier le runtime actuel.
+
+Modules de jeu concernés :
+- Survival ;
+- Dungeon ;
+- Capture ;
+- PvP.
+
+Tactical reste hors de cette frontière : il s'agit d'un sous-système de combat,
+pas d'une destination de navigation générale.
+
+### Règles du contrat
+
+- le Shell choisit uniquement le module actif à partir de l'état de routage public ;
+- le module choisi reste seul propriétaire de la décision de vue interne ;
+- aucun identifiant DOM privé n'est exposé au Shell ;
+- aucun état runtime privé du module n'est exposé au Shell ;
+- aucun gameplay n'est déplacé ;
+- aucune implémentation runtime n'est raccordée dans ce lot ;
+- les `entry-v1.js` Phase 3 restent inertes ;
+- aucun `window.goMenu` n'est ajouté, retiré ou modifié.
+
+### TDD
+
+1. ajouter une sentinelle RED exigeant le contrat commun et sa déclaration dans
+   Survival / Dungeon / Capture / PvP ;
+2. implémenter uniquement les métadonnées de contrat ;
+3. repasser Architecture + navigateur, Firefox et Tactical Dock ;
+4. checkpoint GREEN uniquement si le runtime reste byte-identique.
+
+### Hors périmètre
+
+- raccord runtime du Shell ;
+- retrait de `captureFix139` ;
+- retrait de `dungeonCore200Rebuild` ;
+- `startConfiguredGame` ;
+- `resumeGame` ;
+- `openChar` ;
+- dettes détection ennemie / Stats UI / embuscade ;
+- Builder et Tactical.
+
+### Prochaine action
+
+Créer la sentinelle TDD du contrat public de retour vers la vue principale du module.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / pré-audit frontière finale goMenu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

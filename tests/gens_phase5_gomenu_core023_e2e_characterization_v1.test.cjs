@@ -158,9 +158,36 @@ async function startDungeon(page){
     assert.equal(nominal.specialDiceOpen,false,'nominal Dungeon goMenu must not leave special dice open');
     assert.equal(nominal.dc01ModalOpen,false,'nominal Dungeon goMenu must not leave the Dungeon modal open');
 
-    // B. Real module change while Dungeon session is active, without Dungeon quit().
-    // The Shell owns the switch. After reload, stale Dungeon runtime may remain,
-    // but Dungeon active state must not survive or retake the screen.
+    // B. Real user path out of an active Dungeon session:
+    // Save & Quit returns authority to the Shell while keeping the Dungeon save.
+    const beforeQuit=await page.evaluate(()=>({
+      runtime:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),
+      session:localStorage.getItem('z40k_session_active_v1')
+    }));
+    assert.ok(Array.isArray(beforeQuit.runtime?.participants)&&beforeQuit.runtime.participants.length>0,
+      'Dungeon runtime must exist before the real Save & Quit transition');
+
+    await page.locator('#gensDungeonCore01 .dc01Top button[onclick="DungeonCore01.quit()"]').click();
+    await page.waitForFunction(()=>
+      getComputedStyle(document.getElementById('gensRootHome')).display!=='none' &&
+      getComputedStyle(document.getElementById('gensDungeonCore01')).display==='none'
+    ,null,{timeout:10000});
+
+    const afterQuit=await page.evaluate(()=>({
+      session:localStorage.getItem('z40k_session_active_v1'),
+      dungeonActive:!!window.DungeonCore01?.active,
+      root:getComputedStyle(document.getElementById('gensRootHome')).display,
+      dungeonDisplay:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
+      runtime:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')
+    }));
+    assert.equal(afterQuit.session,'1','Save & Quit must keep the Dungeon session resumable');
+    assert.equal(afterQuit.dungeonActive,false,'Save & Quit must release Dungeon active screen authority');
+    assert.notEqual(afterQuit.root,'none','Save & Quit must return to the Shell root');
+    assert.equal(afterQuit.dungeonDisplay,'none');
+    assert.ok(Array.isArray(afterQuit.runtime?.participants)&&afterQuit.runtime.participants.length>0,
+      'Save & Quit must keep the independent Dungeon runtime');
+
+    // The Shell now owns the real switch to Survival.
     await selectProfile(page,'survival',SURVIVAL_ID);
 
     const switched=await page.evaluate(()=>({
@@ -214,7 +241,7 @@ async function startDungeon(page){
       nominalDungeon:nominal,
       realDungeonToSurvivalSwitch:switched,
       survivalGoMenuWithStaleDungeonRuntime:survivalGo,
-      conclusion:'Nominal Dungeon return is owned by Core 2.00. After a real Shell module switch, Dungeon active authority is false, so Core 0.23 post-delegation cleanup cannot retake the screen.'
+      conclusion:'Nominal Dungeon return stays correct. After real Save & Quit and a real Shell switch to Survival, Dungeon active authority is false, so Core 0.23 post-delegation cleanup cannot retake the screen.'
     },null,2));
   }finally{
     clearTimeout(watchdog);

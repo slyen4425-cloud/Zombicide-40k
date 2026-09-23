@@ -48,7 +48,7 @@ const productionDirect=[
 assert.equal(new Set(productionDirect).size,35,'production composition must expose 35 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
-assert.equal(inlineIds.length,130,'Phase 2 cartography expects the current 130 identified inline script blocks');
+assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
 
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
   .map(m=>stripQuery(m[0]))

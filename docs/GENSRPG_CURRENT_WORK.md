@@ -1,3 +1,61 @@
+## GREEN — Survie / disponibilité héros après Dungeon — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-survival-hero-availability-regression-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-survival-hero-availability-regression-2026-09-23`.
+- Base :
+  SHA `44db719503ca3ab697f65d4ba3da93c929733935`.
+- Candidat fonctionnel GREEN :
+  `2901311d349450a82d7ae6cd808631f17df43f69`.
+- Runtime :
+  taille `8171571`,
+  blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Checkpoint final prévu :
+  `checkpoint/gensrpg-survival-hero-availability-green-2026-09-23`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Régression corrigée
+
+Le lancement Dungeon pouvait vider le `heroPool` persistant du profil 40K.
+Le correctif reste dans les propriétaires existants :
+- `ensureBaseGameProfile()` reconstruit le pool 40K indépendamment du mode Dungeon actif ;
+- `openGensBuiltInGame()` redélègue au propriétaire existant si un ancien pool 40K a déjà été persisté vide.
+
+Aucun fallback UI, nouveau global, wrapper, observer, timer ou second système.
+
+### Validation
+
+- Architecture + navigateur complet `35855369653` — SUCCESS ;
+- Firefox `35855369536` — SUCCESS ;
+- Tactical Dock `35855369651` — SUCCESS.
+
+Nouveau vrai E2E GREEN :
+Dungeon -> lancement -> sortie -> Survie -> nouvelle partie -> sélection héros.
+
+### Prochain chantier prioritaire
+
+Régression Stats signalée par l'utilisateur :
+- valeurs définies dans l'éditeur ;
+- valeurs affichées en jeu incohérentes ;
+- plusieurs valeurs différentes visibles dans le même onglet.
+
+Ouvrir un chantier séparé de caractérisation :
+éditeur -> sauvegarde -> runtime canonique -> fiche en jeu.
+Ne modifier aucun runtime avant reproduction RED.
+
+### Dettes séparées conservées
+
+- détection ennemie immédiate hors embuscade ;
+- validation manuelle de l'embuscade proche des héros.
+
+Aucun merge sur `main`.
+
+---
+
 ## RÉGRESSION UTILISATEUR — Survie / disponibilité héros après Dungeon — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

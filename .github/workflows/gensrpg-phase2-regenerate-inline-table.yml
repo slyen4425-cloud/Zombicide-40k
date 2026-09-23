@@ -1,0 +1,92 @@
+name: GenSrpG Phase2 regenerate inline owner table
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-module-screen-return-raccord-2026-09-23
+    paths:
+      - .github/workflows/gensrpg-phase2-regenerate-inline-table.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase5-module-screen-return-raccord-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify Capture S1 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:index.html)" = "c17460335b2deb5e5916dbf91448b0706c38d0df"
+          test "$(wc -c < index.html)" = "8172505"
+
+      - name: Regenerate exact Phase 2 inline last-owner table
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const source=fs.readFileSync('index.html','utf8');
+          const blob='c17460335b2deb5e5916dbf91448b0706c38d0df';
+          const disabled=new Set([
+            'dungeonCore081TacticalMovementDisabled',
+            'dungeonCore084MovementRuntimeFixDisabled',
+            'dungeonCore086MovementStabilityDisabled',
+            'dungeonCore087InteractionRulesDisabled',
+            'dungeonCore087ChestGuardDisabled',
+            'dungeonCore089TacticalInteractionsDisabled',
+            'dungeonCore090MovementV2Disabled',
+            'dungeonCore094EndTurnFinalDisabled',
+            'dungeonCore095SoloTurnFinalDisabled',
+            'dungeonCore097StabilityRollbackDisabled'
+          ]);
+          const blockRe=/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi;
+          const assignmentRe=/\bwindow\.([A-Za-z_$][\w$]*)\s*=/g;
+          const chains=new Map();
+          for(const match of source.matchAll(blockRe)){
+            const id=match[1];
+            if(disabled.has(id))continue;
+            for(const hit of match[2].matchAll(assignmentRe)){
+              const name=hit[1];
+              if(!chains.has(name))chains.set(name,[]);
+              chains.get(name).push(id);
+            }
+          }
+          const distinctGlobals=chains.size;
+          const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
+          const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
+          const table=[
+            '# GenSrpG Phase 2 — inline global last owners',
+            '# sourceIndexBlob='+blob,
+            '# scope=explicit window.<name> assignments in 120 active inline blocks',
+            '# distinctGlobals='+distinctGlobals+' assignments='+assignments+' multiOwnerGlobals='+multiOwnerGlobals,
+            '# name\tassignmentCount\tlastOwner',
+            ...[...chains.keys()].sort().map(name=>{
+              const chain=chains.get(name);
+              return name+'\t'+chain.length+'\t'+chain.at(-1);
+            })
+          ].join('\n')+'\n';
+          fs.writeFileSync('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv',table);
+          console.log({distinctGlobals,assignments,multiOwnerGlobals,goMenu:chains.get('goMenu')});
+          NODE
+
+      - name: Commit regenerated cartography
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "GenSrpG Architecture Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+          if git diff --cached --quiet; then
+            echo "No cartography change required"
+            exit 0
+          fi
+          git commit -m "docs: regenerate inline global owner table for Capture S1"
+          git push origin HEAD:work/gensrpg-phase5-module-screen-return-raccord-2026-09-23

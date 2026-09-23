@@ -31057,27 +31057,6 @@ function dc030RefreshCombatButton(){
 
 /* Retour Core propre : aucun reset de variable métier.
    On nettoie seulement les couches visuelles de la fiche. */
-const prevGo=window.goMenu;
-window.goMenu=function(){
-  try{
-    if(window.DungeonCore01?.active && DungeonCore01.eligible?.()){
-      try{save?.()}catch(e){}
-      const sh=document.getElementById("sheet");
-      if(sh)sh.style.display="none";
-      document.body.style.overflow="";
-      document.body.style.pointerEvents="";
-      document.documentElement.style.overflow="";
-      ["specialDiceModal"].forEach(id=>{
-        const e=document.getElementById(id);
-        if(e){e.classList.remove("open");e.style.display="";}
-      });
-      DungeonCore01.show();
-      dc030RefreshCombatButton();
-      return;
-    }
-  }catch(e){console.error("Core 0.30 retour fiche",e)}
-  return prevGo?.apply(this,arguments);
-};
 
 /* Chaque rendu restaure explicitement les interactions du Core. */
 if(window.DungeonCore01 && typeof DungeonCore01.render==="function"){

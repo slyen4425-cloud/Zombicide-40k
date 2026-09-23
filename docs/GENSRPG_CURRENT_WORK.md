@@ -1,3 +1,101 @@
+## CHANTIER COURANT — Phase 5 / raccord runtime retour écran module — Capture S1 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-raccord-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-raccord-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-raccord-preaudit-green-2026-09-23`.
+- SHA exact de base :
+  `cdae0a0c9259456ef210cf4f6b15ec943a8ae31b`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Fichier runtime vérifié — règle 26
+
+Fichier utilisateur reçu dans `work14.zip` :
+`indexwork_14.txt`, contenu HTML complet.
+
+Vérification locale avant toute modification :
+- taille : `8170961` octets ;
+- blob Git : `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75` ;
+- préfixe : `<!doctype html>`.
+
+Le fichier correspond exactement au runtime du checkpoint GREEN.
+
+### Preuve runtime obtenue
+
+Le propriétaire Shell natif est la fonction déclarée :
+
+`function goMenu(){...}`
+
+Elle :
+- ferme le popup de tour ;
+- sauvegarde l'état courant ;
+- masque `sheet` ;
+- affiche `menu` ;
+- remet `current/state` à `null` ;
+- rafraîchit les statuts et le deck ;
+- appelle le rendu Capture de façon tolérante.
+
+Les deux seules réaffectations globales restantes sont toujours :
+`captureFix139 -> dungeonCore200Rebuild`.
+
+### Stratégie de migration progressive
+
+Ne pas remplacer `goMenu` par un nouveau wrapper.
+
+Le Shell natif recevra un registre public minimal conforme au contrat
+`returnToPrimaryView`.
+
+Le Shell choisira le module à partir des données publiques de routage :
+- `gensSelectedFamily` pour `pvp` ;
+- profil actif public + `gensContentFamilyForProfile(profile)` pour distinguer
+  Capture de Dungeon ;
+- sinon Survival.
+
+Le module enregistré décide ensuite de sa vue propriétaire.
+
+### Micro-lot S1 — Capture uniquement
+
+1. TDD RED :
+   - exiger le registre Shell public ;
+   - exiger le dispatch dans le `goMenu` natif ;
+   - exiger l'enregistrement Capture owner-local ;
+   - exiger le retrait de l'affectation globale `window.goMenu` de
+     `captureFix139` ;
+   - chaîne attendue après S1 :
+     `dungeonCore200Rebuild` uniquement.
+2. Modification runtime minimale :
+   - aucun changement Dungeon ;
+   - aucun changement Survival/PvP ;
+   - aucun nouveau loader ;
+   - aucun observer/timer/retry/polling ;
+   - aucune copie de la logique Capture dans Shell.
+3. E2E :
+   - Capture + vieille sauvegarde Dungeon -> Hub Capture ;
+   - Capture victoire/reload/reprise ;
+   - Dungeon fiche -> map inchangé ;
+   - Survival fiche -> menu inchangé ;
+   - non-interférence quatre modules ;
+   - Builder/Tactical inchangés.
+4. Checkpoint GREEN uniquement après triple CI et validation technique.
+
+### Hors périmètre
+
+- retrait `dungeonCore200Rebuild -> goMenu` ;
+- `startConfiguredGame` ;
+- `resumeGame` ;
+- `openChar` ;
+- dettes détection ennemie / Stats UI / embuscade ;
+- nettoyage des timers Capture historiques hors frontière `goMenu`.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / pré-audit raccord runtime retour écran module — 2026-09-23
 
 Ce bloc devient le point de reprise de ce lot dès que le checkpoint final

@@ -35,9 +35,9 @@ const expected={
     exact:['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']
   },
   resumeGame:{
-    assignments:3,
+    assignments:1,
     last:'dungeonCore310PersistenceAndTokens',
-    exact:['dungeonCore100ResumeAndInteractionFix','dungeonCore307CriticalResumeFix','dungeonCore310PersistenceAndTokens']
+    exact:['dungeonCore310PersistenceAndTokens']
   },
   DungeonCore01:{
     assignments:2,

@@ -39,10 +39,10 @@ const distinctGlobals=chains.size;
 const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
-assert.equal(blob,'ef8a0ac77019ed08f166a97389dd5bdf4a692841','Phase 2 inline global table must target the current committed index blob');
+assert.equal(blob,'4f8c3b9be4189a9ac163fcb17531c95cbd783b05','Phase 2 inline global table must target the current committed index blob');
 assert.equal(distinctGlobals,438,'distinct explicit inline globals drifted');
-assert.equal(assignments,772,'explicit inline global assignments drifted');
-assert.equal(multiOwnerGlobals,123,'multi-owner inline globals drifted');
+assert.equal(assignments,768,'explicit inline global assignments drifted');
+assert.equal(multiOwnerGlobals,121,'multi-owner inline globals drifted');
 
 const expected=[
   '# GenSrpG Phase 2 — inline global last owners',
@@ -62,7 +62,7 @@ for(const [name,count,lastOwner] of [
   ['renderDungeonCombatRound',30,'dungeonCore303TimelineRootFix'],
   ['captureRenderBattleLive',15,'coreCombatPoolFix156'],
   ['startConfiguredGame',5,'dungeonCore200Rebuild'],
-  ['resumeGame',3,'dungeonCore310PersistenceAndTokens']
+  ['resumeGame',1,'dungeonCore310PersistenceAndTokens']
 ]){
   const chain=chains.get(name)||[];
   assert.equal(chain.length,count,name+' assignment count drifted');

@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=ef8a0ac77019ed08f166a97389dd5bdf4a692841
+# sourceIndexBlob=4f8c3b9be4189a9ac163fcb17531c95cbd783b05
 # scope=explicit window.<name> assignments in 120 active inline blocks
-# distinctGlobals=438 assignments=772 multiOwnerGlobals=123
+# distinctGlobals=438 assignments=768 multiOwnerGlobals=121
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -379,7 +379,7 @@ gensNormalizeParticipants156	1	coreCombatPoolFix156
 gensProfileContentFamily155	1	forceReload155
 gensReconcile151	1	gensStability151
 gensRenderCaptureStarterPicker	1	captureFix129
-gensSelectedFamily	3	dungeonCore310PersistenceAndTokens
+gensSelectedFamily	1	dungeonCore310PersistenceAndTokens
 gensShowOutOfGameHeroes	1	gensrpgDungeonFlowFix171
 gensSwitchUniverse155	1	forceReload155
 gensToggleCaptureStarter	2	captureFix130
@@ -424,7 +424,7 @@ renderTacticalMovement081	1	dungeonCore098IsolatedMovement
 renderTacticalMovement090	1	dungeonCore098IsolatedMovement
 renderTacticalMovement098	2	dungeonCore105MovementRenderFix
 resolveAiAttack023	1	dungeonCore023StabilityFix
-resumeGame	3	dungeonCore310PersistenceAndTokens
+resumeGame	1	dungeonCore310PersistenceAndTokens
 rollDungeonEnemyAttackSkill	4	dungeonCore043MjCombatFlow
 rollDungeonRpDice073	1	dungeonCore073RpDice
 saveDungeonEconomyRules160	1	dungeonEconomy160

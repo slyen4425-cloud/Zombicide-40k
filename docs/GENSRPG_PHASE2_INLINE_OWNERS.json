@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "ef8a0ac77019ed08f166a97389dd5bdf4a692841",
+  "sourceIndexBlob": "4f8c3b9be4189a9ac163fcb17531c95cbd783b05",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",
@@ -743,7 +743,7 @@
       "order": 99,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon 100 Resume And Interaction Fix",
+      "responsibility": "Dungeon session-profile persistence and interaction proximity rules; legacy Resume routing retired in Phase 5",
       "crossDomains": []
     },
     "dungeonCore101CacheGuard": {
@@ -932,7 +932,7 @@
       "order": 126,
       "status": "active",
       "primaryDomain": "dungeon",
-      "responsibility": "Dungeon critical resume wrapper and family restoration",
+      "responsibility": "Dungeon Core 3.07 historical badge/footer compatibility; legacy Resume routing retired in Phase 5",
       "crossDomains": []
     },
     "dungeonCore308NewRunReset": {

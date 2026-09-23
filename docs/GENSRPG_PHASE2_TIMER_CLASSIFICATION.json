@@ -1,16 +1,16 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "7b586e9fb14b7a93a0edb069e115fd6d48cbda97",
+  "sourceIndexBlob": "d9ee34d47fa888795db68cdc244d0c73d30ee523",
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
     "externalReachableFiles": 79,
     "externalTimerSources": 53,
     "externalSetTimeoutSyntax": 148,
     "externalSetIntervalSyntax": 1,
-    "activeInlineBlocks": 120,
-    "inlineTimerSources": 66,
-    "inlineSetTimeoutSyntax": 145,
+    "activeInlineBlocks": 119,
+    "inlineTimerSources": 65,
+    "inlineSetTimeoutSyntax": 143,
     "inlineSetIntervalSyntax": 1
   },
   "defaultClassification": "deferred-ui-runtime",

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "7b586e9fb14b7a93a0edb069e115fd6d48cbda97",
+  "sourceIndexBlob": "d9ee34d47fa888795db68cdc244d0c73d30ee523",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",
@@ -10,8 +10,8 @@
     "capture"
   ],
   "expected": {
-    "total": 130,
-    "active": 120,
+    "total": 129,
+    "active": 119,
     "disabled": 10
   },
   "blocks": {
@@ -312,652 +312,645 @@
       "responsibility": "Dungeon 023 Stability Fix",
       "crossDomains": []
     },
-    "dungeonCore028HeroExploreGuard": {
-      "order": 38,
-      "status": "active",
-      "primaryDomain": "dungeon",
-      "responsibility": "Dungeon 028 Hero Explore Guard",
-      "crossDomains": []
-    },
     "dungeonCore029AiTurnFix": {
-      "order": 39,
+      "order": 38,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 029 Ai Turn Fix",
       "crossDomains": []
     },
     "dungeonCore030HeroReturnFix": {
-      "order": 40,
+      "order": 39,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 030 Hero Return Fix",
       "crossDomains": []
     },
     "dungeonCore031CombatUiAndAiPopup": {
-      "order": 41,
+      "order": 40,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 031 Combat Ui And Ai Popup",
       "crossDomains": []
     },
     "dungeonCore032RpgLifeAndReadableAi": {
-      "order": 42,
+      "order": 41,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 032 Rpg Life And Readable Ai",
       "crossDomains": []
     },
     "dungeonCore033RecoveryAndGameOverFix": {
-      "order": 43,
+      "order": 42,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 033 Recovery And Game Over Fix",
       "crossDomains": []
     },
     "dungeonCore034NavigationAndCombatHostFix": {
-      "order": 44,
+      "order": 43,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 034 Navigation And Combat Host Fix",
       "crossDomains": []
     },
     "dc097CaptureNativeCombat": {
-      "order": 45,
+      "order": 44,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Preserved native Dungeon combat entry alias for compatibility",
       "crossDomains": []
     },
     "dungeonCore035PopupVisibilityFixJs": {
-      "order": 46,
+      "order": 45,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 035 Popup Visibility Fix Js",
       "crossDomains": []
     },
     "dungeonCore036CombatPacing": {
-      "order": 47,
+      "order": 46,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 036 Combat Pacing",
       "crossDomains": []
     },
     "dungeonCore037PlayerTurnGate": {
-      "order": 48,
+      "order": 47,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 037 Player Turn Gate",
       "crossDomains": []
     },
     "dungeonCore039SafeExit": {
-      "order": 49,
+      "order": 48,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 039 Safe Exit",
       "crossDomains": []
     },
     "dungeonCore040ManualImportantPopups": {
-      "order": 50,
+      "order": 49,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 040 Manual Important Popups",
       "crossDomains": []
     },
     "dungeonCore041DamageFloorInfo": {
-      "order": 51,
+      "order": 50,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 041 Damage Floor Info",
       "crossDomains": []
     },
     "dungeonCore042AiDamagePersistence": {
-      "order": 52,
+      "order": 51,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 042 Ai Damage Persistence",
       "crossDomains": []
     },
     "dungeonCore043MjCombatFlow": {
-      "order": 53,
+      "order": 52,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 043 Mj Combat Flow",
       "crossDomains": []
     },
     "dungeonCore044HeroProgression": {
-      "order": 54,
+      "order": 53,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 044 Hero Progression",
       "crossDomains": []
     },
     "dungeonCore045HeroCombatModule": {
-      "order": 55,
+      "order": 54,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 045 Hero Combat Module",
       "crossDomains": []
     },
     "dungeonCore046ManualMjAssist": {
-      "order": 56,
+      "order": 55,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 046 Manual Mj Assist",
       "crossDomains": []
     },
     "dungeonCore047LivingExploration": {
-      "order": 57,
+      "order": 56,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 047 Living Exploration",
       "crossDomains": []
     },
     "dungeonCore048ExplorationTests": {
-      "order": 58,
+      "order": 57,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 048 Exploration Tests",
       "crossDomains": []
     },
     "dungeonCore049TrapPowerConfig": {
-      "order": 59,
+      "order": 58,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 049 Trap Power Config",
       "crossDomains": []
     },
     "dungeonCore050CombatAndEntrance": {
-      "order": 60,
+      "order": 59,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 050 Combat And Entrance",
       "crossDomains": []
     },
     "dungeonCore051ExplorationPolish": {
-      "order": 61,
+      "order": 60,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 051 Exploration Polish",
       "crossDomains": []
     },
     "dungeonCore052SpecialExploration": {
-      "order": 62,
+      "order": 61,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 052 Special Exploration",
       "crossDomains": []
     },
     "dungeonCore053Stability": {
-      "order": 63,
+      "order": 62,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 053 Stability",
       "crossDomains": []
     },
     "dungeonCore054MapAndStart": {
-      "order": 64,
+      "order": 63,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 054 Map And Start",
       "crossDomains": []
     },
     "dungeonCore055ExactAssets": {
-      "order": 65,
+      "order": 64,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 055 Exact Assets",
       "crossDomains": []
     },
     "dungeonCore060": {
-      "order": 66,
+      "order": 65,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon runtime layer",
       "crossDomains": []
     },
     "dungeonCore061CombatItems": {
-      "order": 67,
+      "order": 66,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 061 Combat Items",
       "crossDomains": []
     },
     "dungeonCore062GearPortrait": {
-      "order": 68,
+      "order": 67,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 062 Gear Portrait",
       "crossDomains": []
     },
     "dungeonCore070StartupGuard": {
-      "order": 69,
+      "order": 68,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 070 Startup Guard",
       "crossDomains": []
     },
     "dungeonCore070RoomStability": {
-      "order": 70,
+      "order": 69,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 070 Room Stability",
       "crossDomains": []
     },
     "dungeonCore071LevelUp": {
-      "order": 71,
+      "order": 70,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 071 Level Up",
       "crossDomains": []
     },
     "dungeonCore071Merchant": {
-      "order": 72,
+      "order": 71,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 071 Merchant",
       "crossDomains": []
     },
     "dungeonCore071CombatErgo": {
-      "order": 73,
+      "order": 72,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 071 Combat Ergo",
       "crossDomains": []
     },
     "dungeonCore071ColdStart": {
-      "order": 74,
+      "order": 73,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 071 Cold Start",
       "crossDomains": []
     },
     "dungeonCore073RpDice": {
-      "order": 75,
+      "order": 74,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 073 Rp Dice",
       "crossDomains": []
     },
     "dungeonCore074EventsAndWeights": {
-      "order": 76,
+      "order": 75,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 074 Events And Weights",
       "crossDomains": []
     },
     "dungeonCore077Objectives": {
-      "order": 77,
+      "order": 76,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 077 Objectives",
       "crossDomains": []
     },
     "dungeonCore078FloorSets": {
-      "order": 78,
+      "order": 77,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 078 Floor Sets",
       "crossDomains": []
     },
     "dungeonCore079MapPolish": {
-      "order": 79,
+      "order": 78,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 079 Map Polish",
       "crossDomains": []
     },
     "dungeonCore080FinalMapRenderer": {
-      "order": 80,
+      "order": 79,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 080 Final Map Renderer",
       "crossDomains": []
     },
     "dungeonCore200StableCapture": {
-      "order": 81,
+      "order": 80,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Snapshot aliases for stable Core 2.00 combat renderer/close/victory functions",
       "crossDomains": []
     },
     "dungeonCore081TacticalMovementDisabled": {
-      "order": 82,
+      "order": 81,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 081 Tactical Movement Disabled",
       "crossDomains": []
     },
     "dungeonCore083MovementBalance": {
-      "order": 83,
+      "order": 82,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 083 Movement Balance",
       "crossDomains": []
     },
     "dungeonCore083MovementHelpers": {
-      "order": 84,
+      "order": 83,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 083 Movement Helpers",
       "crossDomains": []
     },
     "dungeonCore084MovementRuntimeFixDisabled": {
-      "order": 85,
+      "order": 84,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 084 Movement Runtime Fix Disabled",
       "crossDomains": []
     },
     "dungeonCore086MovementStabilityDisabled": {
-      "order": 86,
+      "order": 85,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 086 Movement Stability Disabled",
       "crossDomains": []
     },
     "dungeonCore087InteractionRulesDisabled": {
-      "order": 87,
+      "order": 86,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 087 Interaction Rules Disabled",
       "crossDomains": []
     },
     "dungeonCore087ChestGuardDisabled": {
-      "order": 88,
+      "order": 87,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 087 Chest Guard Disabled",
       "crossDomains": []
     },
     "dungeonCore089TacticalInteractionsDisabled": {
-      "order": 89,
+      "order": 88,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 089 Tactical Interactions Disabled",
       "crossDomains": []
     },
     "dungeonCore090MovementV2Disabled": {
-      "order": 90,
+      "order": 89,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 090 Movement V2 Disabled",
       "crossDomains": []
     },
     "dungeonCore091PostCombatUnlock": {
-      "order": 91,
+      "order": 90,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 091 Post Combat Unlock",
       "crossDomains": []
     },
     "dungeonCore093StabilityDiagnostic": {
-      "order": 92,
+      "order": 91,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 093 Stability Diagnostic",
       "crossDomains": []
     },
     "dungeonCore093StateGuard": {
-      "order": 93,
+      "order": 92,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 093 State Guard",
       "crossDomains": []
     },
     "dungeonCore094EndTurnFinalDisabled": {
-      "order": 94,
+      "order": 93,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 094 End Turn Final Disabled",
       "crossDomains": []
     },
     "dungeonCore095SoloTurnFinalDisabled": {
-      "order": 95,
+      "order": 94,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 095 Solo Turn Final Disabled",
       "crossDomains": []
     },
     "dungeonCore096SoloPartyGuard": {
-      "order": 96,
+      "order": 95,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 096 Solo Party Guard",
       "crossDomains": []
     },
     "dungeonCore097StabilityRollbackDisabled": {
-      "order": 97,
+      "order": 96,
       "status": "disabled",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 097 Stability Rollback Disabled",
       "crossDomains": []
     },
     "dungeonCore098IsolatedMovement": {
-      "order": 98,
+      "order": 97,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 098 Isolated Movement",
       "crossDomains": []
     },
     "dungeonCore100ResumeAndInteractionFix": {
-      "order": 99,
+      "order": 98,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon session-profile persistence and interaction proximity rules; legacy Resume routing retired in Phase 5",
       "crossDomains": []
     },
     "dungeonCore101CacheGuard": {
-      "order": 100,
+      "order": 99,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 101 Cache Guard",
       "crossDomains": []
     },
     "dungeonCore102RoomCycleFix": {
-      "order": 101,
+      "order": 100,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 102 Room Cycle Fix",
       "crossDomains": []
     },
     "dungeonCore103StabilityPass": {
-      "order": 102,
+      "order": 101,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 103 Stability Pass",
       "crossDomains": []
     },
     "dungeonCore104Coherence": {
-      "order": 103,
+      "order": 102,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 104 Coherence",
       "crossDomains": []
     },
     "dungeonCore105MovementRenderFix": {
-      "order": 104,
+      "order": 103,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 105 Movement Render Fix",
       "crossDomains": []
     },
     "dungeonCore305MovementAuthority": {
-      "order": 105,
+      "order": 104,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon positional-gameplay enablement authority",
       "crossDomains": []
     },
     "dungeonCore313SpatialModel": {
-      "order": 106,
+      "order": 105,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon canonical spatial model and persistence helpers",
       "crossDomains": []
     },
     "dungeonCore200Rebuild": {
-      "order": 107,
+      "order": 106,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon Core 2.00 rebuilt runtime/API and final Dungeon start interception",
       "crossDomains": []
     },
     "dungeonCore201Stability": {
-      "order": 108,
+      "order": 107,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 201 Stability",
       "crossDomains": []
     },
     "dungeonCore202ContentDensity": {
-      "order": 109,
+      "order": 108,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 202 Content Density",
       "crossDomains": []
     },
     "dungeonCore203Diagnostics": {
-      "order": 110,
+      "order": 109,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 203 Diagnostics",
       "crossDomains": []
     },
     "dungeonCore204Diagnostics": {
-      "order": 111,
+      "order": 110,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 204 Diagnostics",
       "crossDomains": []
     },
     "dungeonCore205FinalCoherence": {
-      "order": 112,
+      "order": 111,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 205 Final Coherence",
       "crossDomains": []
     },
     "dungeonCore206ChestInteraction": {
-      "order": 113,
+      "order": 112,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 206 Chest Interaction",
       "crossDomains": []
     },
     "dungeonCore207ChestAlignment": {
-      "order": 114,
+      "order": 113,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 207 Chest Alignment",
       "crossDomains": []
     },
     "dungeonCore208SingleChestAuthority": {
-      "order": 115,
+      "order": 114,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 208 Single Chest Authority",
       "crossDomains": []
     },
     "dungeonCore209TacticalSense": {
-      "order": 116,
+      "order": 115,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 209 Tactical Sense",
       "crossDomains": []
     },
     "dungeonCore210DefeatAuthority": {
-      "order": 117,
+      "order": 116,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 210 Defeat Authority",
       "crossDomains": []
     },
     "dungeonCore211Consolidation": {
-      "order": 118,
+      "order": 117,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 211 Consolidation",
       "crossDomains": []
     },
     "dungeonCore212RenderVictory": {
-      "order": 119,
+      "order": 118,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 212 Render Victory",
       "crossDomains": []
     },
     "dungeonCore213Stability": {
-      "order": 120,
+      "order": 119,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 213 Stability",
       "crossDomains": []
     },
     "dungeonCore214SingleAuthority": {
-      "order": 121,
+      "order": 120,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 214 Single Authority",
       "crossDomains": []
     },
     "dungeonCore303TimelineRootFix": {
-      "order": 122,
+      "order": 121,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon final timeline/turn wrapper over preserved Core 2.14 renderer",
       "crossDomains": []
     },
     "dungeonCore304DefeatExit": {
-      "order": 123,
+      "order": 122,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon defeat exit authority and hard-home recovery",
       "crossDomains": []
     },
     "dungeonCore305Debug": {
-      "order": 124,
+      "order": 123,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 305 Debug",
       "crossDomains": []
     },
     "dungeonCore306NarrativeDebug": {
-      "order": 125,
+      "order": 124,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon 306 Narrative Debug",
       "crossDomains": []
     },
     "dungeonCore307CriticalResumeFix": {
-      "order": 126,
+      "order": 125,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon Core 3.07 historical badge/footer compatibility; legacy Resume routing retired in Phase 5",
       "crossDomains": []
     },
     "dungeonCore308NewRunReset": {
-      "order": 127,
+      "order": 126,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon new-run reset after defeat without altering resume",
       "crossDomains": []
     },
     "dungeonCore309VisualFixes": {
-      "order": 128,
+      "order": 127,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon final visual decoration for enemies/chests",
       "crossDomains": []
     },
     "dungeonCore310PersistenceAndTokens": {
-      "order": 129,
+      "order": 128,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon final Save & Quit/resume persistence and token repaint authority",
       "crossDomains": []
     },
     "dungeonCore312TurnAndPopupFixes": {
-      "order": 130,
+      "order": 129,
       "status": "active",
       "primaryDomain": "dungeon",
       "responsibility": "Dungeon queued level-up popup and combat-busy turn fixes",

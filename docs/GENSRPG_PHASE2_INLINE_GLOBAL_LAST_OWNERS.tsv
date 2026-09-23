@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=7b586e9fb14b7a93a0edb069e115fd6d48cbda97
-# scope=explicit window.<name> assignments in 120 active inline blocks
-# distinctGlobals=437 assignments=763 multiOwnerGlobals=120
+# sourceIndexBlob=d9ee34d47fa888795db68cdc244d0c73d30ee523
+# scope=explicit window.<name> assignments in 119 active inline blocks
+# distinctGlobals=436 assignments=760 multiOwnerGlobals=119
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -134,7 +134,6 @@ closeGameCustomization	1	gensDungeonCore01Js
 closeSpecialRoll	4	dungeonCore303TimelineRootFix
 combatItems61	1	dungeonCore061CombatItems
 current	7	dungeonCore200Rebuild
-dc028RemoveHeroExplore	1	dungeonCore028HeroExploreGuard
 dc029AiWatchdog	1	dungeonCore029AiTurnFix
 dc030EngageCombat	5	dungeonCore098IsolatedMovement
 dc032HardHome	1	dungeonCore032RpgLifeAndReadableAi
@@ -390,7 +389,7 @@ markSessionActive	1	dungeonCore100ResumeAndInteractionFix
 merchantBuy071	1	dungeonCore071Merchant
 merchantSelectHero071	1	dungeonCore071Merchant
 merchantSell071	1	dungeonCore071Merchant
-openChar	3	dungeonCore028HeroExploreGuard
+openChar	1	captureFix139
 openDungeonChest	1	dungeonEconomy160
 openDungeonCombatStats	1	dungeonDirectImageBinding166
 openDungeonCombatVictoryPopup	8	dungeonCore212RenderVictory

@@ -1,3 +1,55 @@
+## GREEN — Pré-audit cohérence Stats éditeur -> jeu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-stats-editor-game-coherence-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-stats-editor-game-coherence-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-survival-hero-availability-green-2026-09-23`.
+- SHA technique :
+  `f5ad07f5c0623bfab3ab6a2b17f8011fc603e9b6`.
+- Runtime inchangé :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Le pré-audit confirme deux niveaux de données :
+- `hero.dungeonStats` = définition/base éditeur ;
+- `state.rpgAttributes` = valeur runtime persistante.
+
+La fiche peut donc afficher Base et Total différents sans que cela prouve à lui
+seul un défaut moteur.
+
+Retour manuel utilisateur :
+- fonctionnement global revenu dans l'ordre ;
+- petits défauts de rafraîchissement visuel différés ;
+- aucune correction Stats demandée maintenant.
+
+Triple CI :
+- Architecture + navigateur `35858550651` — SUCCESS ;
+- Firefox `35858550682` — SUCCESS ;
+- Tactical `35858550671` — SUCCESS.
+
+Aucun runtime modifié dans ce lot.
+
+### Dettes séparées
+
+- rafraîchissement visuel Stats / UI ;
+- détection ennemie intermittente ;
+- validation manuelle embuscade.
+
+### Prochaine action
+
+Reprendre la roadmap Phase 5 avec un pré-audit dédié de
+`dungeonCore023StabilityFix -> window.goMenu`.
+Ne rien retirer avant caractérisation de ses effets post-délégation.
+
+---
+
 ## CHANTIER COURANT — Pré-audit cohérence Stats éditeur -> jeu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

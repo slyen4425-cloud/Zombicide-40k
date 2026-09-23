@@ -12279,9 +12279,43 @@ function resumeAfterLiveEdit(){
 
 function resumeGame(){
   if(!hasActiveSession())return;
+  const mode=typeof gensMode151==="function"?gensMode151():"other";
+
+  if(mode==="dungeon"&&window.DungeonCore01){
+    ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
+      const e=document.getElementById(id);if(e)e.style.display="none";
+    });
+    try{
+      window.gensSelectedFamily="adventure";
+      document.body.classList.remove("gens-pure-capture");
+      document.body.classList.add("gensDungeonTheme");
+      if(DungeonCore01.show()){window.scrollTo(0,0);return true}
+    }catch(e){console.error("Shell reprise Dungeon",e)}
+    return;
+  }
+
+  if(mode==="capture"){
+    ["setup","sheet","pregameSetup","editorHub","gensDungeonCore01"].forEach(id=>{
+      const e=document.getElementById(id);if(e)e.style.display="none";
+    });
+    try{
+      document.body.classList.remove("gensDungeonTheme");
+      document.body.classList.add("gens-pure-capture");
+      if(typeof captureEnterWorld139==="function"){captureEnterWorld139();return true}
+      if(typeof renderCaptureWorldHub==="function"){
+        const menu=document.getElementById("menu");if(menu)menu.style.display="block";
+        renderCaptureWorldHub();
+        const hub=document.getElementById("captureGameHub");if(hub)hub.style.display="block";
+        window.scrollTo(0,0);return true;
+      }
+    }catch(e){console.error("Shell reprise Capture",e)}
+    return;
+  }
+
   {const e=document.getElementById("setup");if(e)e.style.display="none";}
   {const e=document.getElementById("menu");if(e)e.style.display="block";}
   renderMenuStatuses();renderDeckBadge();applyGameCustomizationUi();window.scrollTo(0,0);
+  return true;
 }
 function newGame(){
   if(hasActiveSession() && !confirm("Commencer une nouvelle partie ? Toute la progression actuelle sera effacée."))return;
@@ -42826,26 +42860,6 @@ try{
 <script id="dungeonCore307CriticalResumeFix">
 (function(){
 "use strict";
-const previousResume307=window.resumeGame;
-window.resumeGame=function(){
-  let runtime=null;
-  try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
-  const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
-  if((typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
-    try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
-    ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.style.display="none";
-    });
-    try{
-      if(DungeonCore01.show()){
-        const shell=document.getElementById("gensDungeonCore01");if(shell)shell.style.display="block";
-        window.scrollTo(0,0);
-        return true;
-      }
-    }catch(e){console.error("Core 3.07 reprise Dungeon",e)}
-  }
-  return typeof previousResume307==="function"?previousResume307.apply(this,arguments):undefined;
-};
 try{
   const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOTEUR · CORE 3.07";
   const f=document.querySelector(".dc01Footer");if(f)f.textContent="Dungeon Core 3.07 · reprise, coffres et timeline IA stabilisés.";
@@ -43076,15 +43090,6 @@ if(window.DungeonCore01){
   }
 }
 
-const previousResume310=window.resumeGame;
-window.resumeGame=function(){
-  const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
-  if(ok&&window.DungeonCore01){
-    try{markSessionActive?.(true)}catch(e){localStorage.setItem("z40k_session_active_v1","1")}
-    try{if(Array.isArray(x.participants))saveGameParticipants?.(x.participants);window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme");if(DungeonCore01.show()){queuePaint();return true}}catch(e){console.error("Core 3.10 reprise Dungeon",e)}
-  }
-  return typeof previousResume310==="function"?previousResume310.apply(this,arguments):undefined
-};
 document.addEventListener("DOMContentLoaded",()=>{observe();queuePaint()});
 if(document.readyState!=="loading"){observe();queuePaint()}
 window.dungeonDebug310=function(){const x=runtime();return {saved:!!x,sessionActive:localStorage.getItem("z40k_session_active_v1")==="1",room:x?.room,heroRooms:x?.heroRooms||{},heroTokens:document.querySelectorAll(".dc310Hero").length,enemyTokens:document.querySelectorAll(".dc310Enemy").length,enemyArts:document.querySelectorAll(".dc310Enemy img").length}};

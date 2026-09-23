@@ -151,3 +151,61 @@ retrait soustractif de Core 0.28 uniquement.
 - aucune nouvelle autorité Shell ;
 - aucun nouveau wrapper, observer, retry ou polling ;
 - aucun merge sur `main`.
+
+
+## Résultat navigateur ciblé
+
+Workflow ciblé temporaire :
+
+- run `35920553852` ;
+- résultat : **SUCCESS** ;
+- workflow temporaire retiré de l'arbre final après la preuve.
+
+Fixture :
+- runtime S2 exact ;
+- composition des modules reconstruite depuis
+  `.github/workflows/main.yml`, comme GitHub Pages ;
+- retrait uniquement de
+  `dungeonCore028HeroExploreGuard`.
+
+Résultat réel :
+- la fiche Dungeon s'ouvre ;
+- les onglets Dungeon restent présents ;
+- aucun bouton Explorer visible/clicable n'est recréé ;
+- aucun besoin fonctionnel visible du wrapper Core 0.28 n'est observé.
+
+Deux nœuds hérités restent dans le DOM de la fiche mais sont
+`display:none` :
+
+- `🧟 EXPLORER UNE SALLE` -> `generateZombieWaveQuick()` ;
+- `⚡ EXPLORER UNE SALLE` -> `generateZombieWaveQuick()`.
+
+Ce sont des contrôles Survie cachés, pas des actions Dungeon.
+
+Cette preuve explique également le retour utilisateur sur la terminologie
+Survie : le texte « explorer salle » appartient bien à des contrôles qui
+déclenchent une vague zombie. La logique fonctionne ; le libellé est une dette
+UI/terminologie séparée.
+
+## Décision du pré-audit
+
+Premier micro-lot runtime recommandé :
+
+**retirer uniquement `dungeonCore028HeroExploreGuard`.**
+
+Le lot devra être strictement soustractif :
+- supprimer le bloc Core 0.28 ;
+- ne pas déplacer son observer/retry ailleurs ;
+- ne pas modifier le renderer de fiche ;
+- ne pas modifier Capture 139 ;
+- conserver les sentinelles fiche Dungeon / flash Survie ;
+- ajouter une sentinelle permanente garantissant qu'aucune action Explorer
+  visible n'apparaît dans la fiche Dungeon.
+
+Après ce retrait, la chaîne globale réelle `openChar` devra devenir :
+
+`captureFix139`
+
+au-dessus du propriétaire natif Shell `function openChar(id)`.
+
+Le retrait de Capture 139 n'est pas autorisé par ce pré-audit.

@@ -7,12 +7,27 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
-const previewPath=path.join(root,'preview.html');
-const previewSource=fs.readFileSync(previewPath,'utf8');
-const marker=/<script\b[^>]*\bid=["']dungeonCore028HeroExploreGuard["'][^>]*>[\s\S]*?<\/script>/i;
-assert.match(previewSource,marker,'preview must contain Dungeon Core 0.28 before characterization');
-const withoutCore028=previewSource.replace(marker,'');
-assert.doesNotMatch(withoutCore028,/dungeonCore028HeroExploreGuard/,'characterization preview must remove Core 0.28 entirely');
+const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const deployWorkflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
+const marker=/<script\\b[^>]*\\bid=["']dungeonCore028HeroExploreGuard["'][^>]*>[\\s\\S]*?<\\/script>/i;
+assert.match(indexSource,marker,'exact S2 index must contain Dungeon Core 0.28 before characterization');
+
+const modulesStart=deployWorkflow.indexOf('          modules = [');
+const modulesEnd=deployWorkflow.indexOf('          html = index.read_text',modulesStart);
+assert.ok(modulesStart>=0&&modulesEnd>modulesStart,'deploy workflow module block must exist');
+const moduleBlock=deployWorkflow.slice(modulesStart,modulesEnd);
+const moduleTags=[...moduleBlock.matchAll(/'(<script src="[^"]+"><\\/script>)'/g)].map(m=>m[1]);
+assert.ok(moduleTags.length>0,'GitHub Pages deploy workflow must expose module tags');
+
+let composed=indexSource;
+const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
+composed=composed.replace(perfTag+'\\n','').replace(perfTag,'');
+for(const tag of moduleTags){
+  if(!composed.includes(tag))composed=composed.replace('</body>',tag+'\\n</body>');
+}
+const withoutCore028=composed.replace(marker,'');
+assert.doesNotMatch(withoutCore028,/dungeonCore028HeroExploreGuard/,'characterization page must remove Core 0.28 entirely');
+assert.ok(withoutCore028.includes('dungeon-world-builder-167821.js?v=167821'),'characterization must use the full Pages-style composition');
 
 const DUNGEON_ID='game_profile_dungeon_demo';
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.mp3':'audio/mpeg'};

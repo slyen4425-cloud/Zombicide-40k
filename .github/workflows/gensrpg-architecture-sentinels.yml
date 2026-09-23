@@ -491,6 +491,9 @@ jobs:
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 
+      - name: Pré-auditer le propriétaire goMenu Core 0.23
+        run: node tests/gens_phase5_gomenu_core023_preaudit_v1.test.cjs
+
       - name: Verrouiller la proximité des embuscades Dungeon
         run: node tests/dungeon_event_ambush_position_v167878.test.cjs
 

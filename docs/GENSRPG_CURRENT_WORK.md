@@ -1,3 +1,71 @@
+## CHANTIER COURANT — Phase 5 / pré-audit goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-preaudit-2026-09-23`.
+- Base exacte :
+  `44db719503ca3ab697f65d4ba3da93c929733935`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core030-retirement-green-2026-09-23`,
+  SHA `32d2c00200bf148e2c764166a3c07e4ae05bc919`.
+- Runtime inchangé :
+  taille `8171079`, blob `6a9392e667881f2087e4df931645cada4201cb3c`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Pré-auditer uniquement
+`dungeonCore023StabilityFix -> window.goMenu`.
+
+La chaîne actuelle reste :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore023StabilityFix -> dungeonCore200Rebuild`.
+
+Core 0.23 délègue d'abord, puis peut nettoyer les anciennes modales et rappeler
+`DungeonCore01.show()` si l'API Dungeon publique reste active.
+Il n'est donc pas classé comme wrapper transitif pur.
+
+### Périmètre
+
+- sentinelle :
+  `tests/gens_phase5_gomenu_core023_preaudit_v1.test.cjs` ;
+- document :
+  `docs/GENSRPG_PHASE5_GOMENU_CORE023_PREAUDIT.md` ;
+- aucun runtime modifié ;
+- E2E goMenu existants conservés.
+
+### Risque à prouver
+
+Core 2.00 court-circuite Core 0.23 en Dungeon nominal, mais délègue hors Dungeon.
+Il faut donc caractériser la frontière où `active200` pourrait rester vrai
+pendant une transition vers un autre module avant d'autoriser un retrait.
+
+### Fonctions protégées
+
+Ne pas modifier :
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- `dungeonCore023StabilityFix` runtime ;
+- `dungeonCore200Rebuild` ;
+- `resumeGame` ;
+- `startConfiguredGame` ;
+- gameplay Dungeon/Capture/Survie ;
+- Tactical, Builder, Storage ;
+- détection ennemie et embuscade.
+
+### Prochaine étape
+
+Faire passer le pré-audit statique et la triple CI.
+Si GREEN, créer son checkpoint GREEN documentaire puis ouvrir un lot séparé de
+caractérisation navigateur Core 0.23.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

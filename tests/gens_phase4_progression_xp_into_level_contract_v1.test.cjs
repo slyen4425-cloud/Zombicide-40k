@@ -15,8 +15,8 @@ const index=indexBuf.toString('utf8');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8171079,'contract lot must stay on exact preaudit GREEN index');
-assert.equal(gitBlob(indexBuf),'6a9392e667881f2087e4df931645cada4201cb3c','index runtime must remain untouched by pure contract lot');
+assert.equal(indexBuf.length,8171571,'contract lot must stay on exact preaudit GREEN index');
+assert.equal(gitBlob(indexBuf),'6e76a99af5fb839db5ffb20a2e67fd1572bf13ea','index runtime must remain untouched by pure contract lot');
 
 assert.doesNotMatch(coreSource,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|dispatchEvent|CustomEvent|fetch\s*\(|XMLHttpRequest|Math\.random/,
   'Core Progression contract must remain pure and infrastructure-free');

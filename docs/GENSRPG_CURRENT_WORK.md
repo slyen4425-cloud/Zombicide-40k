@@ -1,3 +1,71 @@
+## CHANTIER COURANT — Phase 5 / correction propriétaire Capture Resume routing — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-resume-routing-fix-2026-09-23`.
+- Base exacte :
+  `fc737b0fbb316a7461790abb80e5ebdae929687a`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Corriger uniquement le routage de `resumeGame` possédé par
+`dungeonCore310PersistenceAndTokens`.
+
+Bug prouvé :
+une sauvegarde Dungeon persistante avec participants peut voler `Reprendre`
+à une session/profil Capture actif.
+
+### Correction cible
+
+Réutiliser la frontière Dungeon/Capture déjà appliquée par
+`dungeonCore200Rebuild -> startConfiguredGame` :
+Dungeon Core 3.10 ne doit prendre la reprise que si le contexte courant est
+Dungeon **et non Capture**.
+
+Le fallback `previousResume310` reste l'autorité pour les autres modules.
+
+### Périmètre autorisé
+
+- une garde propriétaire dans le wrapper `resumeGame` de Core 3.10 ;
+- réalignement strict des empreintes/index tests si nécessaire ;
+- aucune autre logique.
+
+### Interdictions
+
+- aucun nouveau routeur ;
+- aucun wrapper supplémentaire ;
+- aucune suppression de sauvegarde Dungeon ;
+- aucune modification Capture ;
+- aucune modification Tactical/Builder/détection/mouvement ;
+- aucun observer/timer/retry ;
+- aucun merge sur `main`.
+
+### TDD obligatoire
+
+- `gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs` doit passer GREEN ;
+- `gens_savequit_resume_shell_browser_v11411.test.cjs` doit rester GREEN ;
+- `gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs` doit rester GREEN ;
+- non-interférence quatre modules ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Règle index.html
+
+Le contenu exact requis est le blob
+`f13835a2827dbfa9e2698cb026d3e732ad62aba4`, taille `8174148`.
+
+Le fichier fourni précédemment `work_13.zip` a été revérifié localement avec
+`git hash-object` et correspond exactement à ce blob. Il peut donc servir de
+source conformément à la règle 26 sans redemander une copie identique.
+
+Aucun autre changement runtime n'est autorisé.
+
 ## RED PROUVÉ — Phase 5 / pré-audit E2E Shell routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

@@ -57,8 +57,8 @@ const disabled=new Set([
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],source:m[2]}));
 const activeInline=inline.filter(x=>!disabled.has(x.id));
-assert.equal(inline.length,130);
-assert.equal(activeInline.length,120);
+assert.equal(inline.length,129);
+assert.equal(activeInline.length,119);
 
 function count(source,re){return (source.match(re)||[]).length}
 function metrics(source){

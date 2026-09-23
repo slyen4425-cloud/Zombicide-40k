@@ -485,6 +485,9 @@ jobs:
       - name: Exiger un propriétaire Dungeon unique pour Resume
         run: node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
 
+      - name: Pré-auditer goMenu et les transitions écrans Phase 5
+        run: node tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs
+
       - name: Verrouiller la proximité des embuscades Dungeon
         run: node tests/dungeon_event_ambush_position_v167878.test.cjs
 

@@ -213,14 +213,9 @@ async function startCapture(page){
     const stale=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'));
     assert.ok(Array.isArray(stale?.participants)&&stale.participants.length>0,'old Dungeon save must coexist with Capture');
 
-    // Push away from the hub, then call the real shared goMenu boundary.
-    await page.evaluate(()=>{
-      const hub=document.getElementById('captureGameHub');
-      if(hub)hub.style.display='none';
-      const sheet=document.getElementById('sheet');
-      if(sheet)sheet.style.display='block';
-      window.goMenu();
-    });
+    // Call the real shared public boundary from the active Capture session.
+    // Do not mutate views or storage to manufacture the expected result.
+    await page.evaluate(()=>window.goMenu());
     await page.waitForFunction(()=>
       getComputedStyle(document.getElementById('captureGameHub')).display!=='none'
     ,null,{timeout:10000});

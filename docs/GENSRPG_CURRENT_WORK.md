@@ -1,3 +1,64 @@
+## Chantier courant prioritaire — Phase 5 / captureFix138 ré-audit — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capturefix138-reaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capturefix138-reaudit-2026-09-23`.
+- Base exacte :
+  `2feec88919aa41d9fbf8f151ca9402ac0ae3bdea`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-capturefix135-retirement-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### État de départ prouvé
+
+Chaîne `startConfiguredGame` actuelle :
+
+`captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Affectations : `4`.
+
+Le retrait de `captureFix135` est GREEN et ne doit pas être rejoué.
+
+### Mission unique
+
+Ré-auditer `captureFix138 -> startConfiguredGame` après le retrait de
+`captureFix135`.
+
+Objectifs :
+1. prouver l'ordre effectif `captureFix138 -> captureFix139` ;
+2. caractériser le prédicat `isCaptureContext138()` ;
+3. caractériser exactement quand `captureFix139` délègue vers
+   `captureFix138` ;
+4. déterminer si la branche post-lancement Capture de `captureFix138` est
+   encore atteignable dans la chaîne effective ;
+5. si et seulement si elle est shadowée, sélectionner un futur micro-lot TDD
+   séparé pour retirer cette seule affectation ;
+6. ne pas modifier `captureFix139`, Dungeon ou le Shell.
+
+### Interdictions
+
+- aucun changement de `index.html` dans ce ré-audit ;
+- aucun retrait de wrapper ;
+- aucun nouveau global ;
+- aucun raccord Shell/Capture Phase 3 ;
+- aucune modification Dungeon ;
+- aucun observer/timer/retry ajouté ;
+- aucun merge sur `main`.
+
+### Critère de sortie
+
+- sentinelle de ré-audit dédiée ;
+- preuve explicite atteignable/shadowée ;
+- décision unique pour le prochain micro-lot ;
+- triple CI GREEN ;
+- checkpoint GREEN avant toute modification runtime.
+
+Aucun merge sur `main`.
+
 ## CLÔTURE CONDITIONNELLE — Phase 5 / captureFix135 retirement — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

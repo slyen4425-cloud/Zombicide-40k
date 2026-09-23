@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "phase": 5,
+  "contract": "module-launch",
+  "owner": "shell",
+  "operation": "startModuleSession",
+  "providers": [
+    "survival",
+    "dungeon",
+    "capture",
+    "pvp"
+  ],
+  "arguments": [],
+  "returns": "handled:boolean|Promise<boolean>",
+  "invariants": [
+    "Shell selects the provider only from public active module routing state",
+    "the selected module owns its launch preconditions and session initialization",
+    "participants, world initialization and module-owned UI transitions remain inside the selected module",
+    "no private module runtime state is read or transported through the Shell",
+    "no gameplay rule or gameplay state ownership moves into the Shell",
+    "the legacy startConfiguredGame chain remains frozen until a provider proves parity on the real end-to-end user paths",
+    "static wrapper order or shadowing alone is never sufficient evidence for retiring a launch authority",
+    "the contract remains metadata-only until an explicit Phase 5 runtime raccord is separately approved"
+  ],
+  "forbidden": [
+    "private module storage inspection by Shell",
+    "module gameplay logic in Shell",
+    "cross-module runtime mutation",
+    "global compatibility wrapper",
+    "observer timer retry or polling authority",
+    "retiring captureFix135 from static shadowing evidence alone",
+    "Tactical combat resolution"
+  ]
+}

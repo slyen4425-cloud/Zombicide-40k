@@ -37,6 +37,12 @@
       "operation": "returnToPrimaryView",
       "status": "declared-not-loaded",
       "ownership": "module-owned-primary-view"
+    },
+    "moduleLaunch": {
+      "contract": "assets/gensrpg/shell/module-launch-contract-v1.json",
+      "operation": "startModuleSession",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-session-start"
     }
   }
 }

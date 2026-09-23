@@ -512,6 +512,9 @@ jobs:
       - name: Retirer le wrapper openChar Dungeon Core 0.28
         run: node tests/gens_phase5_openchar_core028_retirement_v1.test.cjs
 
+      - name: Pré-auditer le contrat public de lancement module Phase 5
+        run: node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

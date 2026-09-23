@@ -12,7 +12,8 @@
   "consumes": [
     "core public contracts",
     "module public entry contracts",
-    "module screen-return contract"
+    "module screen-return contract",
+    "module launch contract"
   ],
   "forbidden": [
     "module gameplay rules",

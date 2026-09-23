@@ -1,3 +1,124 @@
+## CHANTIER COURANT — Phase 5 / contrat public de lancement module — pré-audit — 2026-09-24
+
+Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-contract-preaudit-2026-09-24`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-contract-preaudit-2026-09-24`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-openchar-core028-retirement-green-2026-09-23`.
+- SHA exact de base :
+  `4ce38c01e00f75703f5103c83b268e1a75724364`.
+- Runtime de base :
+  taille `8170726`, blob `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation utilisateur de la base
+
+Preview téléphone complète post-Core 0.28 : validation utilisateur globalement OK.
+
+QA différée et explicitement hors périmètre :
+- petits défauts de rafraîchissement ;
+- inventaire objet Survie observé à `0` par défaut, anormal mais à traiter plus tard ;
+- Stats au retour / rafraîchissement ;
+- détection ennemie intermittente et cas de téléportation ;
+- vocabulaire Survie mélangeant certains libellés Dungeon.
+
+### Décision de reprise
+
+Ne pas retenter le retrait de `captureFix135 -> startConfiguredGame`.
+
+Ce retrait avait été techniquement GREEN mais invalidé par test utilisateur réel.
+Le rollback est un invariant permanent :
+`tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs`.
+
+État structurel courant :
+- `goMenu` : 0 affectation inline ;
+- `openChar` : `captureFix139` uniquement ;
+- `resumeGame` : 1 propriétaire Dungeon ;
+- `startConfiguredGame` : 5 propriétaires :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+### Mission unique
+
+Formaliser **sans raccord runtime** un contrat public de lancement module afin que la
+prochaine consolidation ne repose plus sur un shadowing statique.
+
+Contrat :
+`assets/gensrpg/shell/module-launch-contract-v1.json`.
+
+Opération :
+`startModuleSession`.
+
+Providers déclarés :
+- Survival ;
+- Dungeon ;
+- Capture ;
+- PvP.
+
+Le Shell choisit seulement le provider à partir du routage public.
+Le module garde :
+- préconditions de lancement ;
+- participants ;
+- initialisation session/monde ;
+- transition UI propriétaire.
+
+### Modifications autorisées
+
+- contrat metadata-only ;
+- déclarations dans les contrats module Phase 3 ;
+- sentinelle dédiée ;
+- CI ;
+- documentation.
+
+### Interdictions
+
+- aucun changement `index.html` ;
+- aucun raccord `entry-v1.js` ;
+- aucun retrait de `captureFix135/138/139` ;
+- aucun changement Dungeon launch ;
+- aucun wrapper global ;
+- aucun observer/timer/retry/polling ;
+- aucune correction des QA différées ;
+- aucun merge sur `main`.
+
+### Sentinelle
+
+`tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs`.
+
+Elle doit verrouiller :
+- contrat pur ;
+- séparation Shell/module ;
+- quatre providers déclarés-not-loaded ;
+- points d'entrée Phase 3 inertes ;
+- chaîne `startConfiguredGame` restaurée à 5 propriétaires ;
+- garde de rollback utilisateur conservée ;
+- aucune connexion au graphe production.
+
+### Critère de sortie
+
+- sentinelle contrat GREEN ;
+- Architecture + navigateur complet GREEN ;
+- Firefox GREEN ;
+- Tactical Dock GREEN ;
+- `index.html` byte-identique à `d9ee34d47fa888795db68cdc244d0c73d30ee523` ;
+- checkpoint final :
+  `checkpoint/gensrpg-phase5-module-launch-contract-preaudit-green-2026-09-24`.
+
+### Étape suivante seulement après GREEN
+
+Ouvrir :
+**Phase 5 / raccord module-launch — pré-audit runtime**.
+
+La règle 26 s'appliquera : demander le `index.html` exact du checkpoint GREEN avant
+toute inspection/modification détaillée du gros runtime.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
 
 Ce bloc devient le point de reprise final de ce micro-lot dès que le SHA documentaire

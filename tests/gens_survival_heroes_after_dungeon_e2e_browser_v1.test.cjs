@@ -37,20 +37,43 @@ async function waitPreview(page){
   ,null,{timeout:60000});
 }
 
-async function openAdventure(page){
-  const b=page.locator('button.gensRootModeCard.adventure');
+async function openFamily(page,rootClass){
+  const b=page.locator('button.gensRootModeCard.'+rootClass);
   await b.waitFor({state:'visible'});await b.click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 }
 
-async function selectDungeon(page){
-  await openAdventure(page);
-  const card=page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn');
-  await card.waitFor({state:'visible'});await card.click();
-  await page.waitForFunction(id=>
-    typeof activeGameProfileId==='function'&&activeGameProfileId()===id&&
+async function selectProfile(page,rootClass,id){
+  await openFamily(page,rootClass);
+  let card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+  await card.waitFor({state:'visible'});
+
+  const sw=await page.evaluate(pid=>({
+    active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+    from:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(activeGameProfileId()):'',
+    to:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(pid):''
+  }),id);
+
+  if(sw.active&&sw.active!==id&&sw.from!==sw.to){
+    await Promise.all([
+      page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),
+      card.click()
+    ]);
+    await waitPreview(page);
+    await openFamily(page,rootClass);
+    card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+    await card.waitFor({state:'visible'});
+  }
+
+  await card.click();
+  await page.waitForFunction(pid=>
+    typeof activeGameProfileId==='function'&&activeGameProfileId()===pid&&
     getComputedStyle(document.getElementById('gensGameHome')).display!=='none'
-  ,DUNGEON_ID,{timeout:30000});
+  ,id,{timeout:30000});
+}
+
+async function selectDungeon(page){
+  await selectProfile(page,'adventure',DUNGEON_ID);
 }
 
 async function startDungeon(page){
@@ -75,17 +98,7 @@ async function startDungeon(page){
 }
 
 async function openSurvivalHeroSetup(page){
-  const survival=page.locator('button.gensRootModeCard.survival');
-  await survival.waitFor({state:'visible'});await survival.click();
-  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
-
-  const cards=page.locator('#gensFamilyGames button.gensFamilyGameCard:not(.disabled)');
-  await cards.first().waitFor({state:'visible'});
-  await cards.first().click();
-  await page.waitForFunction(id=>
-    typeof activeGameProfileId==='function'&&activeGameProfileId()===id&&
-    getComputedStyle(document.getElementById('gensGameHome')).display!=='none'
-  ,SURVIVAL_ID,{timeout:30000});
+  await selectProfile(page,'survival',SURVIVAL_ID);
 
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');

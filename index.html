@@ -43079,7 +43079,9 @@ if(window.DungeonCore01){
 const previousResume310=window.resumeGame;
 window.resumeGame=function(){
   const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
-  if(ok&&window.DungeonCore01){
+  const capture=typeof isCaptureContext138==="function"&&isCaptureContext138();
+  const dungeon=typeof isDungeonMode==="function"&&isDungeonMode()&&!capture;
+  if(dungeon&&ok&&window.DungeonCore01){
     try{markSessionActive?.(true)}catch(e){localStorage.setItem("z40k_session_active_v1","1")}
     try{if(Array.isArray(x.participants))saveGameParticipants?.(x.participants);window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme");if(DungeonCore01.show()){queuePaint();return true}}catch(e){console.error("Core 3.10 reprise Dungeon",e)}
   }

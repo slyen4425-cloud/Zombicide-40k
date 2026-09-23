@@ -1,0 +1,83 @@
+name: GenSrpG Phase 5 Core 0.30 goMenu retirement one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase5-gomenu-core030-retirement-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and retire Core 0.30 goMenu owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          before="$(git hash-object index.html)"
+          bytes_before="$(wc -c < index.html | tr -d ' ')"
+          test "$before" = "4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
+          test "$bytes_before" = "8171795"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old='''const prevGo=window.goMenu;
+          window.goMenu=function(){
+            try{
+              if(window.DungeonCore01?.active && DungeonCore01.eligible?.()){
+                try{save?.()}catch(e){}
+                const sh=document.getElementById("sheet");
+                if(sh)sh.style.display="none";
+                document.body.style.overflow="";
+                document.body.style.pointerEvents="";
+                document.documentElement.style.overflow="";
+                ["specialDiceModal"].forEach(id=>{
+                  const e=document.getElementById(id);
+                  if(e){e.classList.remove("open");e.style.display="";}
+                });
+                DungeonCore01.show();
+                dc030RefreshCombatButton();
+                return;
+              }
+            }catch(e){console.error("Core 0.30 retour fiche",e)}
+            return prevGo?.apply(this,arguments);
+          };
+          '''
+          if s.count(old)!=1:
+              raise SystemExit(f"Core 0.30 goMenu owner match count={s.count(old)}")
+          s=s.replace(old,"",1)
+          a=s.index('<script id="dungeonCore030HeroReturnFix">')
+          z=s.index('</script>',a)
+          body=s[a:z]
+          if 'window.goMenu=' in body or 'const prevGo=window.goMenu;' in body:
+              raise SystemExit("Core 0.30 still owns/captures goMenu")
+          p.write_text(s,encoding="utf-8")
+          PY
+
+          after="$(git hash-object index.html)"
+          bytes_after="$(wc -c < index.html | tr -d ' ')"
+          echo "after_blob=$after"
+          echo "after_bytes=$bytes_after"
+          test "$after" = "6a9392e667881f2087e4df931645cada4201cb3c"
+          test "$bytes_after" = "8171079"
+
+      - name: Commit owner retirement and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-phase5-gomenu-core030-retirement-one-shot.yml
+          git commit -m "refactor: retire Core 0.30 goMenu authority"
+          git push origin HEAD:work/gensrpg-phase5-gomenu-core030-retirement-2026-09-23

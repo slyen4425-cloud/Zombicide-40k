@@ -1,3 +1,50 @@
+## GREEN FINAL — Phase 5 / pré-audit goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-preaudit-2026-09-23`.
+- Checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core023-preaudit-green-2026-09-23`.
+- SHA exact validé :
+  `b1f3f790f41c4204a925cbd37aba744ac172bfb0`.
+- Dernier runtime GREEN inchangé :
+  `index.html` taille `8171079`,
+  blob `6a9392e667881f2087e4df931645cada4201cb3c`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat du pré-audit
+
+Core 0.23 n'est pas un wrapper transitif pur :
+- il délègue d'abord au propriétaire précédent ;
+- puis, si `DungeonCore01.active` reste vrai, il ferme des couches historiques
+  et rappelle `DungeonCore01.show()`.
+
+Core 2.00 court-circuite Core 0.23 sur le chemin Dungeon nominal, mais délègue
+hors Dungeon. Le risque restant est donc la frontière inter-module avec
+`active200=true`.
+
+Aucun runtime n'a été modifié.
+
+### Validation
+
+- Architecture + navigateur complet `35851158253` — SUCCESS ;
+- Firefox `35851158424` — SUCCESS ;
+- Tactical Dock `35851158340` — SUCCESS.
+
+### Prochaine action
+
+Ouvrir un lot séparé :
+**Phase 5 / caractérisation E2E de la responsabilité goMenu Core 0.23**.
+
+Aucun retrait Core 0.23 avant cette caractérisation.
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / pré-audit goMenu Core 0.23 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

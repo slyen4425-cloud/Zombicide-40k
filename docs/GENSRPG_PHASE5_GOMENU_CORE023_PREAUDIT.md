@@ -126,3 +126,22 @@ nécessaire :
 - aucune correction détection ennemie ou embuscade ;
 - aucun wrapper, observer, timer/retry ou monkey patch supplémentaire ;
 - aucun merge sur `main`.
+
+
+## Validation finale
+
+SHA validé :
+`b1f3f790f41c4204a925cbd37aba744ac172bfb0`.
+
+Triple CI :
+- Architecture + navigateur complet `35851158253` — SUCCESS ;
+- Firefox `35851158424` — SUCCESS ;
+- Tactical Dock `35851158340` — SUCCESS.
+
+Checkpoint GREEN :
+`checkpoint/gensrpg-phase5-gomenu-core023-preaudit-green-2026-09-23`.
+
+Conclusion :
+le pré-audit est GREEN et ne modifie aucun runtime.
+Le prochain lot est uniquement la caractérisation E2E de la responsabilité
+post-délégation Core 0.23.

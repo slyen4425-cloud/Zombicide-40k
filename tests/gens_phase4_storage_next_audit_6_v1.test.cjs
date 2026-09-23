@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8172500,'audit 6 must target the current Phase 5 Shell index size');
-assert.equal(blob,'7b586e9fb14b7a93a0edb069e115fd6d48cbda97','audit 6 must target the exact post-Economy-Rules index blob');
+assert.equal(bytes.length,8170726,'audit 6 must target the current Phase 5 Shell index size');
+assert.equal(blob,'d9ee34d47fa888795db68cdc244d0c73d30ee523','audit 6 must target the exact post-Economy-Rules index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

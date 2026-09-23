@@ -19,8 +19,8 @@ function scriptBody(id){
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
 const goOwners=blocks.filter(b=>/window\.goMenu\s*=/.test(b.body)).map(b=>b.id);
-assert.deepEqual(goOwners,['captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'preaudit requires the current three-owner goMenu chain');
+assert.deepEqual(goOwners,['captureFix139','dungeonCore200Rebuild'],
+  'cumulative guard requires the current two-owner goMenu chain after Core01 retirement');
 
 const core01=scriptBody('gensDungeonCore01Js');
 const core200=scriptBody('dungeonCore200Rebuild');
@@ -30,7 +30,8 @@ assert.equal((core01.match(/coreActive=true/g)||[]).length,1,
 assert.match(core01,/function show\(\)\{if\(!eligible\(\)\)return false;coreActive=true/);
 assert.match(core01,/function start\(\)[\s\S]*return show\(\);/);
 assert.match(core01,/window\.startConfiguredGame=async function\(\)\{if\(eligible\(\)\)return start\(\)/);
-assert.match(core01,/window\.goMenu=function\(\)\{if\(coreActive&&eligible\(\)\)/);
+assert.doesNotMatch(core01,/window\.goMenu\s*=/,
+  'retired Core01 must not regain global goMenu authority');
 
 assert.match(core200,/window\.DungeonCore01=\{eligible:/,
   'Core 2.00 must replace the old public Dungeon API');

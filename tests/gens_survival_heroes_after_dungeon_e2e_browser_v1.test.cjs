@@ -43,9 +43,9 @@ async function openFamily(page,rootClass){
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 }
 
-async function selectProfile(page,rootClass,id){
+async function selectProfile(page,rootClass,selector,id){
   await openFamily(page,rootClass);
-  let card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+  let card=page.locator(selector);
   await card.waitFor({state:'visible'});
 
   const sw=await page.evaluate(pid=>({
@@ -61,7 +61,7 @@ async function selectProfile(page,rootClass,id){
     ]);
     await waitPreview(page);
     await openFamily(page,rootClass);
-    card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
+    card=page.locator(selector);
     await card.waitFor({state:'visible'});
   }
 
@@ -73,7 +73,12 @@ async function selectProfile(page,rootClass,id){
 }
 
 async function selectDungeon(page){
-  await selectProfile(page,'adventure',DUNGEON_ID);
+  await selectProfile(
+    page,
+    'adventure',
+    '#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',
+    DUNGEON_ID
+  );
 }
 
 async function startDungeon(page){
@@ -98,7 +103,12 @@ async function startDungeon(page){
 }
 
 async function openSurvivalHeroSetup(page){
-  await selectProfile(page,'survival',SURVIVAL_ID);
+  await selectProfile(
+    page,
+    'survival',
+    '#gensFamilyGames button.gensFamilyGameCard[onclick*="'+SURVIVAL_ID+'"]',
+    SURVIVAL_ID
+  );
 
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');

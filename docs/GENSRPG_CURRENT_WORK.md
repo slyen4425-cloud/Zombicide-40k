@@ -1,3 +1,56 @@
+## CHANTIER COURANT — Phase 5 / caractérisation E2E goMenu Core 0.23 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core023-e2e-characterization-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core023-e2e-characterization-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-stats-editor-game-coherence-preaudit-green-2026-09-23`.
+- SHA de base :
+  `146778230a2d95f5730b46ba744f9f0956605c66`.
+- Runtime inchangé :
+  taille `8171571`, blob `6e76a99af5fb839db5ffb20a2e67fd1572bf13ea`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### État
+
+Deux RED de sentinelle ont été invalidés comme défauts de test :
+1. instrumentation de `DungeonCore01.show` incapable d'observer le `show()`
+   local de Core 2.00 ;
+2. tentative de cliquer la carte racine Survie alors qu'elle est cachée pendant
+   une vraie session Dungeon active.
+
+Aucun de ces RED ne justifie une modification runtime.
+
+### Scénario réel retenu
+
+Dungeon actif -> fiche -> `goMenu` -> map Dungeon ->
+vrai Sauvegarder & quitter -> Shell racine ->
+Survie -> `goMenu`.
+
+La sauvegarde Dungeon doit rester présente pendant la preuve.
+
+Objectif :
+prouver qu'après le vrai Save & Quit puis le vrai switch Shell,
+`DungeonCore01.active` est faux et le post-traitement Core 0.23 ne peut plus
+reprendre l'écran.
+
+Dernier SHA de test :
+`4ac6333d5af5e5ad4b1805865fdba12a3a29d0f5`.
+
+### Hors périmètre
+
+- aucun runtime modifié ;
+- détection ennemie intermittente différée ;
+- petits défauts de rafraîchissement UI différés ;
+- aucune embuscade ;
+- aucun merge sur `main`.
+
+---
+
 ## GREEN — Pré-audit cohérence Stats éditeur -> jeu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

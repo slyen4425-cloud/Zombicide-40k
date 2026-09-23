@@ -15983,11 +15983,46 @@ function openChar(id){
     alert("Erreur fiche "+requestedId+" : "+err.message);
   }
 }
+const gensShellScreenReturnProvidersV1=Object.create(null);
+function gensShellActiveModuleV1(){
+  if(String(gensSelectedFamily||"")==="pvp")return "pvp";
+  let profile=null;
+  try{profile=typeof activeGameProfileRaw==="function"?activeGameProfileRaw():null}catch(e){}
+  if(!profile)try{profile=typeof getActiveGameProfile==="function"?getActiveGameProfile():null}catch(e){}
+  if(profile?.gameStyle==="dungeon"){
+    let family="";
+    try{family=typeof gensContentFamilyForProfile==="function"?gensContentFamilyForProfile(profile):""}catch(e){}
+    return family==="creature"?"capture":"dungeon";
+  }
+  return "survival";
+}
+function gensRegisterModuleScreenReturnV1(moduleId,handler){
+  const id=String(moduleId||"").toLowerCase();
+  if(!["survival","dungeon","capture","pvp"].includes(id)||typeof handler!=="function")return false;
+  gensShellScreenReturnProvidersV1[id]=handler;
+  return true;
+}
+function gensReturnToPrimaryViewV1(moduleId=gensShellActiveModuleV1()){
+  const id=String(moduleId||"").toLowerCase();
+  const handler=gensShellScreenReturnProvidersV1[id];
+  if(typeof handler!=="function")return false;
+  try{return handler()===true}
+  catch(e){console.error("GenSrpG Shell returnToPrimaryView",id,e);return false}
+}
+window.GensShellScreenReturnV1=Object.freeze({
+  register:gensRegisterModuleScreenReturnV1,
+  activeModule:gensShellActiveModuleV1,
+  returnToPrimaryView:gensReturnToPrimaryViewV1
+});
 function goMenu(){
+  const moduleId=gensShellActiveModuleV1();
+  const handled=window.GensShellScreenReturnV1.returnToPrimaryView(moduleId);
+  if(handled)return true;
   closeTurnPopup();
   save(); document.getElementById("sheet").style.display="none";
   document.getElementById("menu").style.display="block"; current=null; state=null; renderMenuStatuses(); renderDeckBadge(); window.scrollTo(0,0);
   try{renderCaptureWorldHub()}catch(e){}
+  return true;
 }
 function level(xp){
   if(xp>=43)return["Rouge","#9f241f"]; if(xp>=19)return["Orange","#cd6b20"];
@@ -27212,15 +27247,13 @@ window.startConfiguredGame=async function(){
   }
 };
 
-/* Même si un ancien callback tente de revenir sur la sélection/fiches après le start,
-   le hub Capture actif reste la destination principale. */
-const oldMenu139=window.goMenu;
-window.goMenu=function(){
-  if(hasActiveSession()&&isCaptureContext138()){
-    captureEnterWorld139();return;
-  }
-  return oldMenu139.apply(this,arguments);
-};
+/* Le Shell garde l’unique frontière globale goMenu.
+   Capture expose uniquement son retour owner-local via le contrat public. */
+window.GensShellScreenReturnV1?.register?.("capture",function(){
+  if(!hasActiveSession()||!isCaptureContext138())return false;
+  captureEnterWorld139();
+  return true;
+});
 })();
 </script>
 <style id="captureFix139Css">

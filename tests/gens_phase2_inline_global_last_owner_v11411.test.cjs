@@ -47,7 +47,7 @@ assert.equal(multiOwnerGlobals,119,'multi-owner inline globals drifted');
 const expected=[
   '# GenSrpG Phase 2 — inline global last owners',
   '# sourceIndexBlob='+blob,
-  '# scope=explicit window.<name> assignments in 120 active inline blocks',
+  '# scope=explicit window.<name> assignments in 119 active inline blocks',
   '# distinctGlobals='+distinctGlobals+' assignments='+assignments+' multiOwnerGlobals='+multiOwnerGlobals,
   '# name\tassignmentCount\tlastOwner',
   ...[...chains.keys()].sort().map(name=>{

@@ -1,3 +1,82 @@
+## CHANTIER COURANT — Phase 5 / pré-audit frontière finale goMenu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-final-boundary-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-final-boundary-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core01-retirement-green-2026-09-23`.
+- SHA exact de base :
+  `764a13d57ed81bfe5d0fb7428ecd6c285b815719`.
+- Runtime exact :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation utilisateur de la base
+
+Test téléphone utilisateur confirmé OK après le retrait goMenu Core 0.01.
+Le checkpoint `764a13d57ed81bfe5d0fb7428ecd6c285b815719` est donc la base manuellement validée de ce chantier.
+
+### Mission unique
+
+Pré-auditer la frontière `window.goMenu` restante sans modifier le runtime.
+
+Cartographie courante :
+`captureFix139 -> dungeonCore200Rebuild`.
+
+Objectifs :
+- confirmer exactement les deux propriétaires restants et leur ordre ;
+- caractériser leur domaine et leur contrat de délégation ;
+- vérifier si `goMenu` peut déjà être considéré comme une frontière module-owned correctement routée ou si un contrat Shell public manque encore ;
+- identifier le plus petit prochain micro-lot autorisable sans déplacer de gameplay Capture/Dungeon dans le Shell ;
+- ne supprimer aucune autorité sur preuve statique seule.
+
+### Périmètre
+
+Propriétaires étudiés :
+- `captureFix139` — Capture ;
+- `dungeonCore200Rebuild` — Dungeon / dernier propriétaire global.
+
+Systèmes protégés :
+- `startConfiguredGame` et sa chaîne restaurée ;
+- `resumeGame` ;
+- `openChar` / fiche héros ;
+- Survie ;
+- Dungeon exploration/combat ;
+- Capture ;
+- PvP ;
+- Builder ;
+- Stats/UI ;
+- détection ennemie ;
+- embuscade.
+
+### Tests / preuves
+
+- sentinelle statique de chaîne `goMenu` finale ;
+- E2E existants Dungeon -> fiche -> goMenu -> map ;
+- Capture + vieille sauvegarde Dungeon -> goMenu -> Hub Capture ;
+- Survie -> fiche -> goMenu -> menu Survie ;
+- non-interférence quatre modules ;
+- triple CI avant checkpoint GREEN.
+
+### Interdictions
+
+- aucun changement runtime dans ce pré-audit ;
+- aucun retrait `captureFix139` ou `dungeonCore200Rebuild` ;
+- aucun nouveau wrapper, observer, timer, retry, fallback ou routeur global ;
+- ne pas rouvrir `startConfiguredGame` ;
+- ne pas traiter détection ennemie, Stats/UI ou embuscade ;
+- aucun merge sur `main`.
+
+### Prochaine action
+
+Créer la sentinelle de caractérisation et un document de pré-audit, puis exécuter la validation. Si le contenu exact de `index.html` devient nécessaire, appliquer immédiatement la règle 26.
+
+---
+
 ## GREEN FINAL — Phase 5 / retrait goMenu Core 0.01 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

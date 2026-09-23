@@ -9,14 +9,14 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const deployWorkflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
-const marker=/<script\\b[^>]*\\bid=["']dungeonCore028HeroExploreGuard["'][^>]*>[\\s\\S]*?<\\/script>/i;
+const marker=/<script\b[^>]*\bid=["']dungeonCore028HeroExploreGuard["'][^>]*>[\s\S]*?<\/script>/i;
 assert.match(indexSource,marker,'exact S2 index must contain Dungeon Core 0.28 before characterization');
 
 const modulesStart=deployWorkflow.indexOf('          modules = [');
 const modulesEnd=deployWorkflow.indexOf('          html = index.read_text',modulesStart);
 assert.ok(modulesStart>=0&&modulesEnd>modulesStart,'deploy workflow module block must exist');
 const moduleBlock=deployWorkflow.slice(modulesStart,modulesEnd);
-const moduleTags=[...moduleBlock.matchAll(/'(<script src="[^"]+"><\\/script>)'/g)].map(m=>m[1]);
+const moduleTags=[...moduleBlock.matchAll(/'(<script src="[^"]+"><\/script>)'/g)].map(m=>m[1]);
 assert.ok(moduleTags.length>0,'GitHub Pages deploy workflow must expose module tags');
 
 let composed=indexSource;

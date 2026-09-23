@@ -1,3 +1,79 @@
+## GREEN UTILISATEUR — Phase 5 / rollback régressions utilisateur — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-user-regression-repair-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-user-regression-repair-2026-09-23`.
+- Base RED :
+  `2feec88919aa41d9fbf8f151ca9402ac0ae3bdea`.
+- Base restaurée :
+  état antérieur au retrait de `captureFix135 -> startConfiguredGame`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Validation utilisateur réelle
+
+Sylvain a confirmé sur le lien de test que tout est revenu dans l'ordre :
+- combat Dungeon sur la map : revenu ;
+- embuscades proches des héros : revenues ;
+- Builder visible dans le jeu : revenu ;
+- Builder visible dans le mode Édition : revenu ;
+- interface Capture prévue : conservée ;
+- flux Capture victoire / reprise : revenu dans l'ordre.
+
+Verdict :
+**GREEN utilisateur.**
+
+### Cause / correction retenue
+
+Le retrait `captureFix135 -> startConfiguredGame` est considéré non sûr dans l'état architectural actuel.
+
+La réparation ne contient aucune rustine :
+- aucun nouveau wrapper ;
+- aucun observer ;
+- aucun timer/retry ;
+- aucun correctif séparé Dungeon/Builder/Capture/Tactical ;
+- aucune nouvelle autorité globale.
+
+La seule action runtime retenue est le rollback exact du retrait fautif.
+
+Empreinte restaurée de `index.html` :
+- taille : `8174148` octets ;
+- blob : `f13835a2827dbfa9e2698cb026d3e732ad62aba4`.
+
+### Validation automatique
+
+Candidat documenté :
+`879bcce81743e69e0a33b8b0e79db675f62a6360`.
+
+Runs :
+- Architecture + navigateur complet : `35829390804` — SUCCESS ;
+- Firefox : `35829390772` — SUCCESS ;
+- Tactical Dock : `35829390817` — SUCCESS.
+
+### Invariant Phase 5 ajouté
+
+Ne plus retirer `captureFix135 -> startConfiguredGame` sur la seule base d'un shadowing statique.
+
+Avant toute future consolidation de cette autorité, il faudra prouver sur les vrais chemins :
+- Dungeon -> détection/embuscade -> combat map ;
+- Builder jeu + édition ;
+- Capture -> victoire -> retour de module ;
+- Capture -> reprise de session ;
+- non-interférence quatre modules.
+
+### Prochaine action après checkpoint GREEN
+
+Reprendre Phase 5 depuis ce checkpoint fonctionnel.
+Le prochain travail doit être un pré-audit séparé, sans nouveau retrait runtime opportuniste.
+`captureFix138` ne doit pas être retiré tant que la chaîne Capture/Shell n'a pas une entrée publique explicitement prouvée par des tests end-to-end couvrant les invariants ci-dessus.
+
+Aucun merge sur `main`.
+
 ## CANDIDAT DE RÉPARATION — Phase 5 / rollback régressions utilisateur — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

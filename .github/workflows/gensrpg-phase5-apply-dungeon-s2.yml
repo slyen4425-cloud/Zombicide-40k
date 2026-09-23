@@ -1,0 +1,48 @@
+name: GenSrpG Phase5 apply Dungeon S2 runtime
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-module-screen-return-dungeon-s2-2026-09-23
+    paths:
+      - .github/runtime-patches/gens_phase5_dungeon_s2.patch
+      - .github/workflows/gensrpg-phase5-apply-dungeon-s2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase5-module-screen-return-dungeon-s2-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify exact GREEN S1 base
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:index.html)" = "c17460335b2deb5e5916dbf91448b0706c38d0df"
+          test "$(wc -c < index.html)" = "8172505"
+
+      - name: Apply deterministic Dungeon S2 change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check .github/runtime-patches/gens_phase5_dungeon_s2.patch
+          git apply .github/runtime-patches/gens_phase5_dungeon_s2.patch
+          test "$(git hash-object index.html)" = "7b586e9fb14b7a93a0edb069e115fd6d48cbda97"
+          test "$(wc -c < index.html)" = "8172500"
+
+      - name: Commit runtime only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "GenSrpG Architecture Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "refactor: route Dungeon screen return through Shell"
+          git push origin HEAD:work/gensrpg-phase5-module-screen-return-dungeon-s2-2026-09-23

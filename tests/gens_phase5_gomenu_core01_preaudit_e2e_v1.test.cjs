@@ -19,8 +19,8 @@ function scriptBody(id){
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
 const goOwners=blocks.filter(b=>/window\.goMenu\s*=/.test(b.body)).map(b=>b.id);
-assert.deepEqual(goOwners,['dungeonCore200Rebuild'],
-  'cumulative guard requires Dungeon Core 2.00 as the sole global goMenu override after Capture S1');
+assert.deepEqual(goOwners,[],
+  'cumulative guard requires no inline global goMenu override after Dungeon S2');
 
 const core01=scriptBody('gensDungeonCore01Js');
 const core200=scriptBody('dungeonCore200Rebuild');
@@ -37,7 +37,11 @@ assert.match(core200,/window\.DungeonCore01=\{eligible:/,
   'Core 2.00 must replace the old public Dungeon API');
 assert.match(core200,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138/,
   'Core 2.00 must intercept current Dungeon starts before delegating');
-assert.match(core200,/window\.goMenu=function\(\)\{if\(active200&&isDungeonMode\?\.\(\)\)/);
+assert.doesNotMatch(core200,/window\.goMenu\s*=/);
+assert.match(core200,/GensShellScreenReturnV1/);
+assert.match(core200,/register\?\.\("dungeon"/);
+assert.match(core200,/if\(!active200\|\|!isDungeonMode\?\.\(\)\)return false;/);
+assert.match(core200,/return show\(\)===true/);
 const oldCapture='const old=window.DungeonCore01||{};';
 assert.ok(core200.includes(oldCapture),'Core 2.00 replacement boundary must be explicit');
 assert.equal((core200.slice(core200.indexOf(oldCapture)+oldCapture.length).match(/\bold\s*[.[]/g)||[]).length,0,
@@ -189,10 +193,9 @@ async function startDungeon(page){
     assert.ok(Array.isArray(dungeonHome.runtime?.participants),
       'the stale/resumable Dungeon runtime must still exist for this proof');
 
-    // Decisive boundary: Core 2.00 delegates because active200=false.
-    // The Shell contract has no Dungeon provider yet, so Core 2.00 delegates to native Shell when inactive.
-    // If legacy Core01 coreActive had survived the real launch, its old goMenu
-    // would now match eligible()==true and steal the screen.
+    // Decisive boundary: native Shell selects Dungeon, but the Dungeon provider
+    // returns false because active200=false. Native Shell then falls back to the
+    // shared profile/menu path. Legacy Core01 must remain unable to steal the screen.
     await page.evaluate(()=>window.goMenu());
     await page.waitForTimeout(350);
 

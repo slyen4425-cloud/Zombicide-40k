@@ -1,3 +1,82 @@
+## CHANTIER COURANT — Phase 5 / pré-audit d'autorité resumeGame — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-resumegame-authority-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-resumegame-authority-preaudit-2026-09-23`.
+- Base exacte :
+  `65999b34c36ed2909921e957a17e810ca9d0a04a`.
+- Dernier checkpoint fonctionnel GREEN :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`.
+- Pré-audit précédent :
+  Phase 5 Shell routing E2E — RED caractérisé.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Pré-auditer toute la chaîne active `resumeGame` sans modification runtime.
+
+Objectifs :
+1. inventorier toutes les affectations actives `resumeGame` dans l'ordre réel ;
+2. caractériser leurs préconditions, effets et délégations ;
+3. identifier le propriétaire Shell historique ;
+4. identifier les interceptions Dungeon ;
+5. déterminer quelles couches sont redondantes/supplantées ;
+6. définir le contrat de routage module/session attendu ;
+7. sélectionner un seul futur micro-lot soustractif.
+
+### Preuve RED à conserver
+
+`tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs`
+
+Le vrai scénario prouve :
+- victoire Capture -> Hub Capture : SUCCESS ;
+- recréation de page ;
+- profil Capture sélectionné ;
+- clic réel `Reprendre` ;
+- ancien runtime Dungeon persistant ;
+- Dungeon devient visible : RED.
+
+Le futur correctif devra faire passer ce test sans supprimer artificiellement la
+sauvegarde Dungeon et sans créer une seconde autorité de reprise.
+
+### Fonctions / domaines protégés
+
+- `resumeGame` runtime : lecture/caractérisation uniquement dans ce lot ;
+- `captureFix135/138/139` ;
+- `startConfiguredGame` ;
+- Dungeon movement/detection ;
+- Tactical ;
+- Builders ;
+- Core Storage ;
+- Survie ;
+- Capture gameplay ;
+- PvP.
+
+### Interdictions
+
+- aucune modification de `index.html` ;
+- aucun runtime modifié ;
+- aucune garde spéciale Capture ajoutée aux wrappers Dungeon ;
+- aucun nouveau wrapper global ;
+- aucun observer/timer/retry ;
+- aucune correction de détection ennemie ;
+- aucun retrait Capture ;
+- aucun merge sur `main`.
+
+### Critère de sortie
+
+Le pré-audit doit produire :
+- ordre exact des propriétaires `resumeGame` ;
+- classification propriétaire / wrapper / redondance ;
+- preuve des conditions trop larges ;
+- contrat cible de routage par module/session ;
+- premier micro-lot TDD soustractif ;
+- aucune modification fonctionnelle.
+
 ## RED CARACTÉRISÉ — Phase 5 / pré-audit end-to-end Shell routing — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

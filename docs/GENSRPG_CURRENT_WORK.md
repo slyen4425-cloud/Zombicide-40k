@@ -1,3 +1,97 @@
+## CHANTIER COURANT — Phase 5 / pré-audit end-to-end Shell routing — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-shell-routing-e2e-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-shell-routing-e2e-preaudit-2026-09-23`.
+- Base exacte :
+  `74aa0aba0b2b292edd0869223724ac1935392737`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Correction du statut utilisateur précédent
+
+Le checkpoint nommé
+`checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`
+est techniquement GREEN, mais la validation manuelle de l'embuscade avait été
+surinterprétée.
+
+État réel confirmé par Sylvain :
+- combat Dungeon sur la map : revenu ;
+- Builder : revenu ;
+- interface Capture prévue : revenue/conservée ;
+- flux Capture global revenu dans l'ordre ;
+- embuscade proche des héros : **non confirmée manuellement** ;
+- détection ennemie hors embuscade : **toujours défaillante**, dette déjà
+  documentée et volontairement séparée de ce chantier.
+
+La sentinelle automatique
+`dungeon_event_ambush_position_v167878.test.cjs` reste GREEN, mais ne remplace
+pas le test utilisateur manuel.
+
+### Mission unique
+
+Renforcer la couverture end-to-end des frontières Shell/module avant toute
+nouvelle suppression d'autorité `startConfiguredGame`.
+
+Ce pré-audit ne modifie aucun runtime.
+
+Chemins à verrouiller :
+1. Dungeon : lancement réel -> map -> déclenchement combat Tactical ;
+2. Dungeon : Builder visible depuis les surfaces prévues ;
+3. Capture : lancement -> combat -> victoire -> retour dans Capture, pas menu global ;
+4. Capture : persistance/reprise -> Capture, jamais Dungeon ;
+5. non-interférence des quatre modules.
+
+### Fonctions / domaines protégés
+
+- `captureFix135` ;
+- `captureFix138` ;
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- `dungeonCore200Rebuild` ;
+- `resumeGame` ;
+- Dungeon movement/detection ;
+- Tactical ;
+- Builders ;
+- Core Storage ;
+- Survie ;
+- PvP.
+
+### Interdictions
+
+- aucun retrait de wrapper dans ce pré-audit ;
+- aucune modification de `index.html` ;
+- aucune rustine ;
+- aucun nouveau global ;
+- aucun observer/timer/retry ;
+- ne pas corriger ici la détection ennemie hors embuscade ;
+- ne pas modifier le gameplay Capture/Dungeon ;
+- aucun merge sur `main`.
+
+### Tests prévus
+
+- réutiliser les sentinelles navigateur réelles existantes ;
+- identifier précisément les trous de couverture ayant laissé passer la régression ;
+- ajouter uniquement des sentinelles sur les vrais chemins manquants ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Critère de sortie
+
+Le pré-audit est GREEN uniquement si :
+- aucun runtime n'a changé ;
+- les trous de couverture sont documentés ;
+- les nouvelles sentinelles reproduisent les frontières réellement sensibles ;
+- la triple CI est GREEN ;
+- un prochain micro-lot Phase 5 est défini sans supposer qu'un wrapper est
+  supprimable sur preuve statique seule.
+
+Aucun merge sur `main`.
+
 ## GREEN UTILISATEUR — Phase 5 / rollback régressions utilisateur — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

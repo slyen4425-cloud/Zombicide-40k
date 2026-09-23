@@ -1,0 +1,158 @@
+name: GenSrpG Phase 5 Resume cartography realign one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  realign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Realign cartography to single Resume owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = "4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
+          test "$(wc -c < index.html | tr -d ' ')" = "8171795"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          OLD_BLOB="ef8a0ac77019ed08f166a97389dd5bdf4a692841"
+          NEW_BLOB="4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
+          OLD_SIZE="8174649"
+          NEW_SIZE="8171795"
+
+          # Exact-baseline tests: only the verified index fingerprint changes here.
+          for p in Path("tests").glob("*.cjs"):
+              s=p.read_text(encoding="utf-8")
+              if OLD_BLOB in s or OLD_SIZE in s:
+                  p.write_text(s.replace(OLD_BLOB,NEW_BLOB).replace(OLD_SIZE,NEW_SIZE),encoding="utf-8")
+
+          # Current Phase 2 cartography source fingerprints.
+          doc_names=[
+              "GENSRPG_PHASE2_INLINE_OWNERS.json",
+              "GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv",
+              "GENSRPG_PHASE2_LAYERED_RESPONSIBILITIES.json",
+              "GENSRPG_PHASE2_STORAGE_OWNERS.json",
+              "GENSRPG_PHASE2_TIMER_CLASSIFICATION.json",
+          ]
+          for name in doc_names:
+              p=Path("docs")/name
+              s=p.read_text(encoding="utf-8")
+              if OLD_BLOB not in s:
+                  raise SystemExit(f"expected old source fingerprint missing in {p}")
+              p.write_text(s.replace(OLD_BLOB,NEW_BLOB),encoding="utf-8")
+
+          # Global-owner topology changed by the deliberate retirement:
+          # resumeGame 3->1 and gensSelectedFamily 3->1.
+          p=Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv")
+          s=p.read_text(encoding="utf-8")
+          replacements={
+              "# distinctGlobals=438 assignments=772 multiOwnerGlobals=123":
+                  "# distinctGlobals=438 assignments=768 multiOwnerGlobals=121",
+              "gensSelectedFamily\t3\tdungeonCore310PersistenceAndTokens":
+                  "gensSelectedFamily\t1\tdungeonCore310PersistenceAndTokens",
+              "resumeGame\t3\tdungeonCore310PersistenceAndTokens":
+                  "resumeGame\t1\tdungeonCore310PersistenceAndTokens",
+          }
+          for old,new in replacements.items():
+              if s.count(old)!=1:
+                  raise SystemExit(f"unexpected global-owner cartography match for {old!r}: {s.count(old)}")
+              s=s.replace(old,new,1)
+          p.write_text(s,encoding="utf-8")
+
+          # Inline owner responsibilities: old blocks remain active for their other duties,
+          # but no longer own Resume routing.
+          p=Path("docs/GENSRPG_PHASE2_INLINE_OWNERS.json")
+          data=json.loads(p.read_text(encoding="utf-8"))
+          data["blocks"]["dungeonCore100ResumeAndInteractionFix"]["responsibility"] = (
+              "Dungeon session-profile persistence and interaction proximity rules; legacy Resume routing retired in Phase 5"
+          )
+          data["blocks"]["dungeonCore307CriticalResumeFix"]["responsibility"] = (
+              "Dungeon Core 3.07 historical badge/footer compatibility; legacy Resume routing retired in Phase 5"
+          )
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+
+          # One setTimeout disappeared with Core 1.00's retired Resume wrapper.
+          p=Path("docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json")
+          data=json.loads(p.read_text(encoding="utf-8"))
+          if data["expected"]["inlineSetTimeoutSyntax"] != 146:
+              raise SystemExit("unexpected old inlineSetTimeoutSyntax")
+          data["expected"]["inlineSetTimeoutSyntax"]=145
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+
+          # One resolved direct localStorage read disappeared with Core 3.07's Resume wrapper.
+          p=Path("docs/GENSRPG_PHASE2_STORAGE_OWNERS.json")
+          data=json.loads(p.read_text(encoding="utf-8"))
+          expected=(data["totals"]["totalAccesses"],data["totals"]["resolvedAccesses"],
+                    data["byDomain"]["dungeon"]["accesses"],data["byDomain"]["dungeon"]["resolved"])
+          if expected != (182,117,152,102):
+              raise SystemExit(f"unexpected old storage totals: {expected}")
+          data["totals"]["totalAccesses"]=181
+          data["totals"]["resolvedAccesses"]=116
+          data["byDomain"]["dungeon"]["accesses"]=151
+          data["byDomain"]["dungeon"]["resolved"]=101
+          runtime=next((x for x in data["resolvedKeys"] if x.get("key")=="gensrpg_dungeon_runtime_v2"),None)
+          if not runtime:
+              raise SystemExit("runtime_v2 storage record missing")
+          source="inline:dungeonCore307CriticalResumeFix"
+          if runtime["sources"].count(source)!=1:
+              raise SystemExit(f"unexpected Core 3.07 runtime source count: {runtime['sources'].count(source)}")
+          runtime["sources"].remove(source)
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+
+          # Characterization tests with deliberate topology expectations.
+          p=Path("tests/gens_phase2_inline_global_last_owner_v11411.test.cjs")
+          s=p.read_text(encoding="utf-8")
+          for old,new in [
+              ("assert.equal(assignments,772,","assert.equal(assignments,768,"),
+              ("assert.equal(multiOwnerGlobals,123,","assert.equal(multiOwnerGlobals,121,"),
+              ("['resumeGame',3,'dungeonCore310PersistenceAndTokens']",
+               "['resumeGame',1,'dungeonCore310PersistenceAndTokens']"),
+          ]:
+              if s.count(old)!=1:
+                  raise SystemExit(f"unexpected inline-owner test match {old!r}: {s.count(old)}")
+              s=s.replace(old,new,1)
+          p.write_text(s,encoding="utf-8")
+
+          p=Path("tests/gens_phase2_global_owner_inventory_v11411.test.cjs")
+          s=p.read_text(encoding="utf-8")
+          old="""  resumeGame:{
+              assignments:3,
+              last:'dungeonCore310PersistenceAndTokens',
+              exact:['dungeonCore100ResumeAndInteractionFix','dungeonCore307CriticalResumeFix','dungeonCore310PersistenceAndTokens']
+            },"""
+          new="""  resumeGame:{
+              assignments:1,
+              last:'dungeonCore310PersistenceAndTokens',
+              exact:['dungeonCore310PersistenceAndTokens']
+            },"""
+          if s.count(old)!=1:
+              raise SystemExit(f"unexpected global inventory Resume block count: {s.count(old)}")
+          p.write_text(s.replace(old,new,1),encoding="utf-8")
+          PY
+
+          # Prove runtime bytes were not touched by cartography realignment.
+          test "$(git hash-object index.html)" = "4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
+
+      - name: Commit cartography and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests docs
+          git rm .github/workflows/gensrpg-phase5-resume-cartography-realign-one-shot.yml
+          git commit -m "test: realign cartography for single Resume owner"
+          git push origin HEAD:work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23

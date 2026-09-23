@@ -10,8 +10,8 @@ const index=indexBuf.toString('utf8');
 const coreSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','dice-v1.js'),'utf8');
 
 const gitBlob=crypto.createHash('sha1').update(Buffer.from(`blob ${indexBuf.length}\0`)).update(indexBuf).digest('hex');
-assert.equal(indexBuf.length,8170961,'preaudit must stay aligned to the exact d10048 raccord index');
-assert.equal(gitBlob,'0c15b1dba66ce83f2b27ed99e371885fb1d0ed75','preaudit index blob drifted');
+assert.equal(indexBuf.length,8172505,'preaudit must stay aligned to the exact d10048 raccord index');
+assert.equal(gitBlob,'c17460335b2deb5e5916dbf91448b0706c38d0df','preaudit index blob drifted');
 
 assert.equal((index.match(/\bd100ThresholdFromChance\s*\(/g)||[]).length,16,'first GREEN seam must remain one definition + fifteen callsites');
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/,

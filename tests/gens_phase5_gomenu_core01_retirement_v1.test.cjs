@@ -29,12 +29,10 @@ function lastOwnerRow(name){
 }
 
 const chain=chainFor('goMenu');
-assert.deepEqual(chain.map(x=>x.id),[
-  'dungeonCore200Rebuild'
-],'Core 0.01 must remain retired after Capture S1 migration');
-
-assert.deepEqual(lastOwnerRow('goMenu'),{count:1,last:'dungeonCore200Rebuild'},
-  'Phase 2 last-owner mapping must track the current Dungeon-only goMenu override chain');
+assert.deepEqual(chain.map(x=>x.id),[],
+  'Core 0.01 must remain retired after cumulative Dungeon S2');
+assert.equal(/^goMenu\t/m.test(lastOwners),false,
+  'Phase 2 last-owner mapping must no longer contain an explicit goMenu override owner');
 
 const core01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
 assert.ok(core01,'Core 0.01 script must remain present for its non-goMenu responsibilities');
@@ -59,12 +57,12 @@ assert.match(capture139,/GensShellScreenReturnV1/,
   'Capture must remain registered through the Shell screen-return contract');
 
 const core200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
-assert.match(core200,/const goOutside200=window\.goMenu;/,
-  'Core 2.00 must remain the final Dungeon goMenu owner');
-assert.match(core200,/window\.goMenu=function\(\)\{if\(active200&&isDungeonMode\?\.\(\)\)/,
-  'Core 2.00 must retain nominal active-Dungeon routing');
-assert.match(core200,/return goOutside200\?\.apply\(this,arguments\)/,
-  'Core 2.00 must retain delegation outside Dungeon');
+assert.doesNotMatch(core200,/window\.goMenu\s*=/,
+  'Dungeon S2 must not reintroduce global goMenu ownership');
+assert.match(core200,/GensShellScreenReturnV1/,
+  'Dungeon S2 must use the Shell screen-return contract');
+assert.match(core200,/register\?\.\("dungeon"/);
+assert.match(core200,/return show\(\)===true/);
 
 console.log(JSON.stringify({
   scenario:'Phase 5 retire Core 0.01 goMenu authority only',

@@ -47,6 +47,27 @@ const chain=chainFor('goMenu');
 const total=chain.reduce((n,x)=>n+x.count,0);
 assert.equal(total,5,'goMenu current runtime assignment count drifted');
 assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild','goMenu current last owner drifted');
+assert.deepEqual(chain.map(x=>x.id),[
+  'captureFix139',
+  'gensDungeonCore01Js',
+  'dungeonCore023StabilityFix',
+  'dungeonCore030HeroReturnFix',
+  'dungeonCore200Rebuild'
+],'goMenu owner chain drifted from the characterized Phase 5 baseline');
+
+const bodies=Object.fromEntries(chain.map(x=>[x.id,x.body]));
+assert.match(bodies.captureFix139,/const oldMenu139=window\.goMenu;[\s\S]*if\(hasActiveSession\(\)&&isCaptureContext138\(\)\)\{[\s\S]*captureEnterWorld139\(\);return;/,
+  'Capture 139 must remain the dedicated active-Capture goMenu interceptor');
+assert.match(bodies.gensDungeonCore01Js,/const oldGo=window\.goMenu;[\s\S]*if\(coreActive&&eligible\(\)\)\{[\s\S]*show\(\);return/,
+  'native Dungeon Core01 keeps its historical active-Dungeon return path');
+assert.match(bodies.dungeonCore023StabilityFix,/const oldGo023=window\.goMenu;[\s\S]*const r=oldGo023\?\.apply\(this,arguments\);[\s\S]*if\(window\.DungeonCore01\?\.active\)/,
+  'Core 0.23 is a post-delegation Dungeon UI cleanup layer, not a pure transit wrapper');
+assert.match(bodies.dungeonCore030HeroReturnFix,/const prevGo=window\.goMenu;[\s\S]*if\(window\.DungeonCore01\?\.active && DungeonCore01\.eligible\?\.\(\)\)/,
+  'Core 0.30 keeps a Dungeon hero-return/UI cleanup branch');
+assert.match(bodies.dungeonCore200Rebuild,/const goOutside200=window\.goMenu;[\s\S]*if\(active200&&isDungeonMode\?\.\(\)\)\{[\s\S]*return show\(\)\}/,
+  'Core 2.00 remains the final active-Dungeon goMenu interceptor');
+assert.match(bodies.dungeonCore200Rebuild,/return goOutside200\?\.apply\(this,arguments\)/,
+  'Core 2.00 must delegate non-Dungeon goMenu calls to the previous module/Shell chain');
 
 const report=chain.map(rec=>{
   const meta=owners.blocks?.[rec.id];

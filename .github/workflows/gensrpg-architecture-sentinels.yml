@@ -479,6 +479,9 @@ jobs:
       - name: Retirer l’affectation shadowée captureFix135 de startConfiguredGame
         run: node tests/gens_phase5_capturefix135_retirement_v1.test.cjs
 
+      - name: Ré-auditer captureFix138 après retrait captureFix135
+        run: node tests/gens_phase5_capturefix138_reaudit_v1.test.cjs
+
       - name: Vérifier la parité stockage Dungeon Scene
         run: node tests/gens_phase4_storage_dungeon_scene_parity_v1.test.cjs
 

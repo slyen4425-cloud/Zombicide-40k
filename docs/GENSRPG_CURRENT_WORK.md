@@ -1,3 +1,88 @@
+## CANDIDAT TDD GREEN À VALIDER — Phase 5 / autorité unique Resume — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture-resume-routing-fix-2026-09-23`.
+- Dernier commit runtime :
+  `acd548645fa94ab534454f6fc060acc3bd0faed3`.
+- Dernier commit cartographie :
+  `4a600302a167037fa7fa3271baabf84ed89b2d00`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, toujours gelée.
+
+### Runtime exact
+
+`index.html` :
+- taille : `8171795` octets ;
+- blob : `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+
+### Cause complète et correction
+
+La régression Capture Resume provenait de trois propriétaires Dungeon superposés :
+1. `dungeonCore100ResumeAndInteractionFix`;
+2. `dungeonCore307CriticalResumeFix`;
+3. `dungeonCore310PersistenceAndTokens`.
+
+Un correctif intermédiaire `0895874501218277a495196cd16ec0efbe2df3be`
+avait ajouté des gardes Capture aux deux anciens propriétaires. Il a été
+explicitement identifié dans l'historique ; ses ajouts étaient entièrement
+contenus dans les wrappers désormais retirés.
+
+Correction finale, soustractive :
+- retrait de l'affectation `window.resumeGame` de Core 1.00 ;
+- retrait de l'affectation `window.resumeGame` de Core 3.07 ;
+- Core 3.10 reste le seul propriétaire Dungeon de `resumeGame` ;
+- son fallback capture directement l'autorité Shell antérieure ;
+- aucun nouveau wrapper, routeur, global, observer, timer/retry ou stockage ;
+- aucune sauvegarde Dungeon n'est supprimée.
+
+### Cartographie réelle après retrait
+
+- `resumeGame` : 3 propriétaires -> 1 ;
+- `gensSelectedFamily` : 3 affectations -> 1 ;
+- affectations globales inline : 772 -> 768 ;
+- globals multi-propriétaires : 123 -> 121 ;
+- syntaxe `setTimeout` inline : 146 -> 145 ;
+- accès stockage directs : 182 -> 181 ;
+- accès stockage résolus : 117 -> 116 ;
+- accès Dungeon directs : 152 -> 151 ;
+- accès Dungeon résolus : 102 -> 101 ;
+- source `inline:dungeonCore307CriticalResumeFix` retirée des accès directs
+  à `gensrpg_dungeon_runtime_v2`.
+
+### TDD
+
+RED acquis avant correction :
+- run Architecture `35838821434` ;
+- étape `Exiger un propriétaire Dungeon unique pour Resume`.
+
+Candidat actuel :
+- sentinelle propriétaire unique ajoutée ;
+- cartographie/fingerprints réalignés sur le runtime réel ;
+- aucun autre runtime modifié.
+
+### Validation obligatoire avant checkpoint GREEN
+
+1. Architecture complète ;
+2. Firefox ;
+3. Tactical Dock ;
+4. Dungeon map -> Tactical V2 ;
+5. Capture victoire -> Hub ;
+6. Capture reload -> Reprendre -> Capture avec vieille sauvegarde Dungeon ;
+7. Save & Quit -> reprise Dungeon ;
+8. Builder ;
+9. non-interférence quatre modules.
+
+La détection ennemie hors embuscade reste une dette séparée.
+L'embuscade proche des héros reste automatique GREEN mais non confirmée
+manuellement par Sylvain.
+
+Aucun merge sur `main`.
+Aucun nouveau retrait Phase 5 avant validation complète de ce candidat.
+
 ## TDD RED — Phase 5 / autorité unique Resume — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

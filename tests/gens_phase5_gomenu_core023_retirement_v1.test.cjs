@@ -31,12 +31,11 @@ function lastOwnerRow(name){
 
 const chain=chainFor('goMenu');
 assert.deepEqual(chain.map(x=>x.id),[
-  'captureFix139',
   'dungeonCore200Rebuild'
-],'Core 0.23 must remain retired in the current two-owner goMenu chain');
+],'Core 0.23 must remain retired after Capture S1 migration');
 
-assert.deepEqual(lastOwnerRow('goMenu'),{count:2,last:'dungeonCore200Rebuild'},
-  'Phase 2 last-owner mapping must track the current two-owner goMenu chain');
+assert.deepEqual(lastOwnerRow('goMenu'),{count:1,last:'dungeonCore200Rebuild'},
+  'Phase 2 last-owner mapping must track the current Dungeon-only goMenu override chain');
 
 const core023=blocks.find(x=>x.id==='dungeonCore023StabilityFix')?.body||'';
 assert.ok(core023,'Core 0.23 script must remain present for its non-goMenu responsibilities');

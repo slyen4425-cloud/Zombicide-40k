@@ -1,0 +1,132 @@
+name: GenSrpG Phase5 Core028 retarget active sentinels
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-openchar-core028-retirement-2026-09-23
+    paths:
+      - .github/workflows/gensrpg-phase5-core028-retarget-sentinels.yml
+
+permissions:
+  contents: write
+
+jobs:
+  retarget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase5-openchar-core028-retirement-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify exact Core028-retired runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:index.html)" = "d9ee34d47fa888795db68cdc244d0c73d30ee523"
+          test "$(wc -c < index.html)" = "8170726"
+
+      - name: Retarget fingerprints and active structural guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          old_blob="7b586e9fb14b7a93a0edb069e115fd6d48cbda97"
+          new_blob="d9ee34d47fa888795db68cdc244d0c73d30ee523"
+          old_size="8172500"
+          new_size="8170726"
+
+          # Runtime fingerprints: tests remain semantic-identical, only target current index.
+          for p in Path("tests").rglob("*.cjs"):
+              s=p.read_text(encoding="utf-8")
+              n=s.replace(old_blob,new_blob).replace(old_size,new_size)
+              if n!=s:
+                  p.write_text(n,encoding="utf-8")
+
+          # Phase 2 exact current counts after removing one whole inline block.
+          p=Path("tests/gens_phase2_inline_global_last_owner_v11411.test.cjs")
+          s=p.read_text(encoding="utf-8")
+          s=s.replace("assert.equal(distinctGlobals,437,'distinct explicit inline globals drifted');",
+                      "assert.equal(distinctGlobals,436,'distinct explicit inline globals drifted');")
+          s=s.replace("assert.equal(assignments,763,'explicit inline global assignments drifted');",
+                      "assert.equal(assignments,760,'explicit inline global assignments drifted');")
+          s=s.replace("assert.equal(multiOwnerGlobals,120,'multi-owner inline globals drifted');",
+                      "assert.equal(multiOwnerGlobals,119,'multi-owner inline globals drifted');")
+          p.write_text(s,encoding="utf-8")
+
+          p=Path("tests/gens_phase2_layered_responsibilities_v11411.test.cjs")
+          s=p.read_text(encoding="utf-8").replace(
+              "assert.equal(rows.size,437,'last-owner table size drifted');",
+              "assert.equal(rows.size,436,'last-owner table size drifted');")
+          p.write_text(s,encoding="utf-8")
+
+          # Advance the openChar authority guard from preaudit state to retired state.
+          p=Path("tests/gens_phase5_openchar_authority_preaudit_v1.test.cjs")
+          s=p.read_text(encoding="utf-8")
+          s=s.replace(
+"""const chain=strictAssignments('openChar');
+assert.deepEqual(chain.map(x=>x.id),['captureFix139','dungeonCore028HeroExploreGuard'],
+  'openChar strict wrapper chain must contain Capture 139 then Dungeon Core 0.28 only');
+assert.equal(chain.reduce((n,x)=>n+x.count,0),2,
+  'openChar must have exactly two true window assignments after excluding comparison operators');
+
+const capture=chain.find(x=>x.id==='captureFix139')?.body||'';
+assert.match(capture,/window\._captureStarting139=false/);
+assert.match(capture,/if\(window\._captureStarting139 && isCaptureContext138\(\)\)/,
+  'Capture wrapper must only suppress sheet opening during active Capture startup');
+assert.match(capture,/return openChar139\.apply\(this,arguments\)/,
+  'Capture wrapper must delegate every non-startup openChar call');
+
+const dungeon=chain.find(x=>x.id==='dungeonCore028HeroExploreGuard')?.body||'';
+assert.match(dungeon,/function dc028RemoveHeroExplore\(\)/,
+  'Dungeon Core 0.28 must expose its real remaining responsibility');
+assert.match(dungeon,/new MutationObserver\(\(\)=>dc028RemoveHeroExplore\(\)\)/,
+  'Dungeon Core 0.28 currently owns a targeted sheet observer');
+assert.match(dungeon,/setTimeout\(dc028RemoveHeroExplore,0\)/);
+assert.match(dungeon,/setTimeout\(dc028RemoveHeroExplore,100\)/);
+assert.match(dungeon,/window\.openChar=function\(\)/,
+  'Dungeon Core 0.28 currently owns the final global openChar wrapper');""",
+"""const chain=strictAssignments('openChar');
+assert.deepEqual(chain.map(x=>x.id),['captureFix139'],
+  'after Core 0.28 retirement, Capture 139 must be the only strict openChar wrapper');
+assert.equal(chain.reduce((n,x)=>n+x.count,0),1,
+  'openChar must have exactly one true window assignment after Core 0.28 retirement');
+
+const capture=chain.find(x=>x.id==='captureFix139')?.body||'';
+assert.match(capture,/window\._captureStarting139=false/);
+assert.match(capture,/if\(window\._captureStarting139 && isCaptureContext138\(\)\)/,
+  'Capture wrapper must only suppress sheet opening during active Capture startup');
+assert.match(capture,/return openChar139\.apply\(this,arguments\)/,
+  'Capture wrapper must delegate every non-startup openChar call');
+
+assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
+  'Dungeon Core 0.28 block must remain retired');
+assert.doesNotMatch(source,/dc028RemoveHeroExplore/,
+  'retired Core 0.28 remover must not remain in runtime');""")
+          s=s.replace("firstSubtractiveCandidate:'dungeonCore028HeroExploreGuard',",
+                      "retiredOwner:'dungeonCore028HeroExploreGuard',")
+          p.write_text(s,encoding="utf-8")
+
+          # The browser characterization now runs against production state directly:
+          # Core 0.28 is already absent, no fixture mutation is allowed.
+          p=Path("tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs")
+          s=p.read_text(encoding="utf-8")
+          s=s.replace(
+              "assert.match(indexSource,marker,'exact S2 index must contain Dungeon Core 0.28 before characterization');",
+              "assert.doesNotMatch(indexSource,marker,'retired Core 0.28 must be absent from the current runtime');")
+          s=s.replace("const withoutCore028=composed.replace(marker,'');",
+                      "const withoutCore028=composed;")
+          p.write_text(s,encoding="utf-8")
+          PY
+
+      - name: Commit active sentinel retarget
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "GenSrpG Architecture Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add tests
+          git commit -m "test: retarget sentinels after Core 0.28 retirement"
+          git push origin HEAD:work/gensrpg-phase5-openchar-core028-retirement-2026-09-23

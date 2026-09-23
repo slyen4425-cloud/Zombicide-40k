@@ -135,15 +135,6 @@ async function startDungeon(page){
 
     // A. Nominal active Dungeon: Core 2.00 must short-circuit before Core 0.23.
     const hero=await startDungeon(page);
-    await page.evaluate(()=>{
-      const original=window.DungeonCore01.show;
-      window.__core023ShowCount=0;
-      window.DungeonCore01.show=function(){
-        window.__core023ShowCount++;
-        return original.apply(this,arguments);
-      };
-    });
-
     await page.evaluate(id=>window.DungeonCore01.openHero(id),hero);
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('sheet')).display!=='none');
     await page.evaluate(()=>window.goMenu());
@@ -153,15 +144,19 @@ async function startDungeon(page){
     );
 
     const nominal=await page.evaluate(()=>({
-      showCount:window.__core023ShowCount,
       active:!!window.DungeonCore01?.active,
       dungeonMode:!!window.isDungeonMode?.(),
-      core:getComputedStyle(document.getElementById('gensDungeonCore01')).display
+      sheet:getComputedStyle(document.getElementById('sheet')).display,
+      core:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
+      specialDiceOpen:document.getElementById('specialDiceModal')?.classList.contains('open')||false,
+      dc01ModalOpen:document.getElementById('dc01Modal')?.classList.contains('open')||false
     }));
-    assert.equal(nominal.showCount,1,
-      'nominal Dungeon goMenu must invoke only Core 2.00 show(); Core 0.23 must remain shadowed');
     assert.equal(nominal.active,true);
     assert.equal(nominal.dungeonMode,true);
+    assert.equal(nominal.sheet,'none','nominal Dungeon goMenu must close the hero sheet');
+    assert.notEqual(nominal.core,'none','nominal Dungeon goMenu must return to the Dungeon map');
+    assert.equal(nominal.specialDiceOpen,false,'nominal Dungeon goMenu must not leave special dice open');
+    assert.equal(nominal.dc01ModalOpen,false,'nominal Dungeon goMenu must not leave the Dungeon modal open');
 
     // B. Real module change while Dungeon session is active, without Dungeon quit().
     // The Shell owns the switch. After reload, stale Dungeon runtime may remain,
@@ -187,13 +182,39 @@ async function startDungeon(page){
     assert.ok(Array.isArray(switched.staleDungeon?.participants),
       'the routing proof must not depend on deleting the independent Dungeon runtime');
 
+    // C. Exercise the shared goMenu boundary after the real switch.
+    // Core 0.23 delegates outside Dungeon, but its post-delegation cleanup must
+    // remain inert because DungeonCore01.active is now false.
+    await page.evaluate(()=>window.goMenu());
+    await page.waitForFunction(()=>
+      getComputedStyle(document.getElementById('menu')).display!=='none' &&
+      getComputedStyle(document.getElementById('gensDungeonCore01')).display==='none'
+    ,null,{timeout:10000});
+
+    const survivalGo=await page.evaluate(()=>({
+      profile:activeGameProfileId?.()||'',
+      dungeonActive:!!window.DungeonCore01?.active,
+      dungeonMode:!!window.isDungeonMode?.(),
+      menu:getComputedStyle(document.getElementById('menu')).display,
+      dungeonDisplay:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
+      staleDungeon:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null')
+    }));
+    assert.equal(survivalGo.profile,SURVIVAL_ID,'Survival goMenu must keep Survival profile authority');
+    assert.equal(survivalGo.dungeonActive,false,'Core 0.23 post-delegation condition must be false after the real switch');
+    assert.equal(survivalGo.dungeonMode,false,'Survival goMenu must remain outside Dungeon mode');
+    assert.notEqual(survivalGo.menu,'none','Survival goMenu must return to the Survival menu');
+    assert.equal(survivalGo.dungeonDisplay,'none','Core 0.23 must not re-show Dungeon after delegation');
+    assert.ok(Array.isArray(survivalGo.staleDungeon?.participants),
+      'the proof must keep the stale Dungeon runtime present');
+
     assert.deepEqual(errors,[],'Core 0.23 characterization must not raise browser/runtime errors');
 
     console.log(JSON.stringify({
       scenario:'Phase 5 Core 0.23 goMenu E2E characterization',
       nominalDungeon:nominal,
       realDungeonToSurvivalSwitch:switched,
-      conclusion:'Core 0.23 is shadowed on nominal Dungeon goMenu; real Shell module switch clears Dungeon active authority before later navigation.'
+      survivalGoMenuWithStaleDungeonRuntime:survivalGo,
+      conclusion:'Nominal Dungeon return is owned by Core 2.00. After a real Shell module switch, Dungeon active authority is false, so Core 0.23 post-delegation cleanup cannot retake the screen.'
     },null,2));
   }finally{
     clearTimeout(watchdog);

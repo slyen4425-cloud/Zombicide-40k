@@ -644,6 +644,12 @@ jobs:
       - name: Caractériser Fouiller et les arts Survie
         run: node tests/gens_survival_search_art_browser_v11411.test.cjs
 
+      - name: Caractériser goMenu Dungeon et Capture
+        run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
+
+      - name: Caractériser goMenu Survie
+        run: node tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs
+
       - name: Verrouiller Dungeon map vers Tactical V2
         run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
 

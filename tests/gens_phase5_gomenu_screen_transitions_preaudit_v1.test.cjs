@@ -39,62 +39,64 @@ function excerpt(body,index,span=900){
     .trim();
 }
 
-const phase2=lastOwnerRow('goMenu');
-assert.deepEqual(phase2,{count:1,last:'dungeonCore200Rebuild'},
-  'goMenu baseline must match the current cumulative Phase 5 cartography');
+assert.equal(/^goMenu\t/m.test(lastOwners),false,
+  'Phase 2 last-owner table must no longer contain an explicit goMenu owner');
 
 const chain=chainFor('goMenu');
 const total=chain.reduce((n,x)=>n+x.count,0);
-assert.equal(total,1,'goMenu current runtime assignment count drifted');
-assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild','goMenu current last owner drifted');
-assert.deepEqual(chain.map(x=>x.id),[
-  'dungeonCore200Rebuild'
-],'Capture S1 must leave Dungeon Core 2.00 as the sole global goMenu override');
+assert.equal(total,0,'Dungeon S2 must remove every inline global goMenu assignment');
+assert.deepEqual(chain,[],'goMenu override chain must be empty after Dungeon S2');
 
-const bodies=Object.fromEntries(chain.map(x=>[x.id,x.body]));
 const retiredCore01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
 const capture139=blocks.find(x=>x.id==='captureFix139')?.body||'';
+const dungeon200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
+
 assert.doesNotMatch(retiredCore01,/window\.goMenu\s*=/,
   'retired Core01 must not regain global goMenu authority');
 assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
   'Capture S1 must not regain global goMenu authority');
+assert.doesNotMatch(dungeon200,/window\.goMenu\s*=/,
+  'Dungeon S2 must not regain global goMenu authority');
+
 assert.match(capture139,/GensShellScreenReturnV1/,
   'Capture S1 must expose its return through the Shell public registry');
 assert.match(capture139,/captureEnterWorld139\(\)/,
   'Capture S1 must keep Capture-owned world/hub rendering');
-assert.match(bodies.dungeonCore200Rebuild,/const goOutside200=window\.goMenu;[\s\S]*if\(active200&&isDungeonMode\?\.\(\)\)\{[\s\S]*return show\(\)\}/,
-  'Core 2.00 remains the final active-Dungeon goMenu interceptor');
-assert.match(bodies.dungeonCore200Rebuild,/return goOutside200\?\.apply\(this,arguments\)/,
-  'Core 2.00 must delegate non-Dungeon goMenu calls to the previous module/Shell chain');
 
-const report=chain.map(rec=>{
-  const meta=owners.blocks?.[rec.id];
-  assert.ok(meta,'missing inline owner metadata for goMenu owner '+rec.id);
-  const indices=[...rec.body.matchAll(/window\.goMenu\s*=/g)].map(m=>m.index);
-  return {
-    id:rec.id,
-    assignments:rec.count,
-    primaryDomain:meta.primaryDomain,
-    crossDomains:meta.crossDomains||[],
-    responsibility:meta.responsibility,
-    capturesPrevious:/(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*window\.goMenu\b/.test(rec.body),
-    directCallsPrevious:/\.apply\(this,arguments\)|\.call\(this/.test(rec.body),
-    touchesSelectedFamily:/gensSelectedFamily/.test(rec.body),
-    touchesSession:/markSessionActive|z40k_session_active_v1/.test(rec.body),
-    touchesDungeon:/DungeonCore01|gensDungeon|dungeon/i.test(rec.body),
-    touchesCapture:/capture/i.test(rec.body),
-    touchesRootScreens:/gensRootHome|gensFamilyHome|gensGameHome|showAppHome|showHome|menu/.test(rec.body),
-    excerpts:indices.map(i=>excerpt(rec.body,i))
-  };
-});
+assert.match(dungeon200,/GensShellScreenReturnV1/,
+  'Dungeon S2 must expose its return through the Shell public registry');
+assert.match(dungeon200,/register\?\.\("dungeon"/,
+  'Dungeon S2 must register under the dungeon provider id');
+assert.match(dungeon200,/if\(!active200\|\|!isDungeonMode\?\.\(\)\)return false;/,
+  'Dungeon S2 must preserve the historical active Dungeon guard');
+assert.match(dungeon200,/return show\(\)===true/,
+  'Dungeon S2 must keep show() as the owner-local transition');
+
+const report=[
+  {
+    id:'captureFix139',
+    primaryDomain:owners.blocks?.captureFix139?.primaryDomain,
+    responsibility:owners.blocks?.captureFix139?.responsibility,
+    provider:'capture'
+  },
+  {
+    id:'dungeonCore200Rebuild',
+    primaryDomain:owners.blocks?.dungeonCore200Rebuild?.primaryDomain,
+    responsibility:owners.blocks?.dungeonCore200Rebuild?.responsibility,
+    provider:'dungeon'
+  }
+];
 
 console.log(JSON.stringify({
   scenario:'Phase 5 goMenu / global screen transitions preaudit',
   sourceIndexBlob:owners.sourceIndexBlob,
-  phase2Row:phase2,
+  phase2Row:null,
   assignments:total,
-  chain:report,
+  chain:[],
+  providers:report,
   runtimeChanged:true,
   captureMigratedToPublicContract:true,
-  nextDecision:'migrate the remaining Dungeon owner through the same Shell contract in a separate micro-lot'
+  dungeonMigratedToPublicContract:true,
+  shellNativeGoMenuSoleAuthority:true,
+  nextDecision:'preserve this consolidated Shell boundary while continuing Phase 5'
 },null,2));

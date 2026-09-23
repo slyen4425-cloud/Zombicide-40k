@@ -1,0 +1,135 @@
+name: GenSrpG Phase 5 resumeGame Shell one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-resumegame-shell-consolidation-2026-09-23
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[resume-shell-patched]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase5-resumegame-shell-consolidation-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify exact source blob
+        run: |
+          test "$(git hash-object index.html)" = "f13835a2827dbfa9e2698cb026d3e732ad62aba4"
+
+      - name: Consolidate resumeGame at Shell owner
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          old_shell='''function resumeGame(){
+            if(!hasActiveSession())return;
+            {const e=document.getElementById("setup");if(e)e.style.display="none";}
+            {const e=document.getElementById("menu");if(e)e.style.display="block";}
+            renderMenuStatuses();renderDeckBadge();applyGameCustomizationUi();window.scrollTo(0,0);
+          }'''
+          new_shell='''function resumeGame(){
+            if(!hasActiveSession())return;
+            const mode=typeof gensMode151==="function"?gensMode151():"other";
+
+            if(mode==="dungeon"&&window.DungeonCore01){
+              ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
+                const e=document.getElementById(id);if(e)e.style.display="none";
+              });
+              try{
+                window.gensSelectedFamily="adventure";
+                document.body.classList.remove("gens-pure-capture");
+                document.body.classList.add("gensDungeonTheme");
+                if(DungeonCore01.show()){window.scrollTo(0,0);return true}
+              }catch(e){console.error("Shell reprise Dungeon",e)}
+              return;
+            }
+
+            if(mode==="capture"){
+              ["setup","sheet","pregameSetup","editorHub","gensDungeonCore01"].forEach(id=>{
+                const e=document.getElementById(id);if(e)e.style.display="none";
+              });
+              try{
+                document.body.classList.remove("gensDungeonTheme");
+                document.body.classList.add("gens-pure-capture");
+                if(typeof captureEnterWorld139==="function"){captureEnterWorld139();return true}
+                if(typeof renderCaptureWorldHub==="function"){
+                  const menu=document.getElementById("menu");if(menu)menu.style.display="block";
+                  renderCaptureWorldHub();
+                  const hub=document.getElementById("captureGameHub");if(hub)hub.style.display="block";
+                  window.scrollTo(0,0);return true;
+                }
+              }catch(e){console.error("Shell reprise Capture",e)}
+              return;
+            }
+
+            {const e=document.getElementById("setup");if(e)e.style.display="none";}
+            {const e=document.getElementById("menu");if(e)e.style.display="block";}
+            renderMenuStatuses();renderDeckBadge();applyGameCustomizationUi();window.scrollTo(0,0);
+            return true;
+          }'''
+
+          old307='''const previousResume307=window.resumeGame;
+          window.resumeGame=function(){
+            let runtime=null;
+            try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
+            const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
+            if((typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
+              try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
+              ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
+                const el=document.getElementById(id);if(el)el.style.display="none";
+              });
+              try{
+                if(DungeonCore01.show()){
+                  const shell=document.getElementById("gensDungeonCore01");if(shell)shell.style.display="block";
+                  window.scrollTo(0,0);
+                  return true;
+                }
+              }catch(e){console.error("Core 3.07 reprise Dungeon",e)}
+            }
+            return typeof previousResume307==="function"?previousResume307.apply(this,arguments):undefined;
+          };
+          '''
+
+          old310='''const previousResume310=window.resumeGame;
+          window.resumeGame=function(){
+            const x=runtime(),ok=Array.isArray(x?.participants)&&x.participants.length>0;
+            if(ok&&window.DungeonCore01){
+              try{markSessionActive?.(true)}catch(e){localStorage.setItem("z40k_session_active_v1","1")}
+              try{if(Array.isArray(x.participants))saveGameParticipants?.(x.participants);window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme");if(DungeonCore01.show()){queuePaint();return true}}catch(e){console.error("Core 3.10 reprise Dungeon",e)}
+            }
+            return typeof previousResume310==="function"?previousResume310.apply(this,arguments):undefined
+          };
+          '''
+
+          for label,old in [("Shell",old_shell),("Core307",old307),("Core310",old310)]:
+              if s.count(old)!=1:
+                  raise SystemExit(f"{label} exact block count={s.count(old)}")
+
+          s=s.replace(old_shell,new_shell,1)
+          s=s.replace(old307,"",1)
+          s=s.replace(old310,"",1)
+          p.write_text(s,encoding="utf-8")
+          PY
+
+      - name: Verify exact target blob and TDD
+        run: |
+          test "$(git hash-object index.html)" = "bc12d60a3c137d6b5908321922237d1b0ae59e38"
+          node tests/gens_phase5_resumegame_shell_consolidation_v1.test.cjs
+
+      - name: Commit exact patch and remove one-shot
+        run: |
+          git config user.name "gensrpg-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/gensrpg-phase5-resumegame-shell-patch.yml
+          git add index.html
+          git commit -m "fix: consolidate resumeGame at Shell [resume-shell-patched]"
+          git push origin HEAD:work/gensrpg-phase5-resumegame-shell-consolidation-2026-09-23

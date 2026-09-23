@@ -1,3 +1,86 @@
+## GREEN FINAL — Phase 5 / contrat public retour écran module — 2026-09-23
+
+Ce bloc devient le point de reprise de ce lot dès que le checkpoint final
+ci-dessous existe. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-contract-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-contract-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-final-boundary-preaudit-green-2026-09-23`.
+- SHA de base :
+  `79af020a1e589dc4cc8cc9325db5b91da21ae123`.
+- Checkpoint final à créer uniquement après triple CI finale :
+  `checkpoint/gensrpg-phase5-module-screen-return-contract-green-2026-09-23`.
+- Runtime inchangé :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Contrat pur créé :
+`assets/gensrpg/shell/module-screen-return-contract-v1.json`.
+
+Opération publique sémantique :
+`returnToPrimaryView`.
+
+Providers déclarés :
+`survival`, `dungeon`, `capture`, `pvp`.
+
+Les quatre contrats module déclarent
+`publicEntries.moduleScreenReturn`.
+Le Shell déclare consommer `module screen-return contract`.
+
+Tactical est hors de cette frontière.
+
+Tous les `entry-v1.js` restent inertes et hors graphe de production.
+Aucun raccord runtime n'est réalisé.
+
+### TDD
+
+RED confirmé :
+- Architecture `35899395632` ;
+- échec attendu sur la nouvelle sentinelle avant création du contrat.
+
+GREEN technique :
+- Architecture + navigateur complet `35899613671` — SUCCESS ;
+- Firefox `35899613568` — SUCCESS ;
+- Tactical Dock `35899613739` — SUCCESS.
+
+Sentinelle :
+`tests/gens_phase5_module_screen_return_contract_v1.test.cjs`.
+
+Document :
+`docs/GENSRPG_PHASE5_MODULE_SCREEN_RETURN_CONTRACT.md`.
+
+### Invariants confirmés
+
+- `index.html` byte-identique ;
+- aucune modification `window.goMenu` ;
+- aucun wrapper global ;
+- aucun observer, timer, retry ou polling ;
+- aucun déplacement de gameplay ;
+- aucun état privé module exposé au Shell ;
+- aucun merge sur `main`.
+
+### Prochaine frontière
+
+Ouvrir un pré-audit séparé du raccord runtime
+`Shell -> moduleScreenReturn -> vue propriétaire`.
+
+Le raccord futur doit :
+- conserver le Shell comme seul décideur de routage général ;
+- laisser Capture / Dungeon / Survival / PvP propriétaires de leur vue interne ;
+- ne jamais faire lire au Shell l'état privé d'un module ;
+- ne pas recréer une chaîne globale de wrappers.
+
+Si ce pré-audit nécessite le contenu exact de `index.html`, appliquer la
+règle 26 et demander le fichier exact à l'utilisateur avant toute modification.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / contrat public retour écran module — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

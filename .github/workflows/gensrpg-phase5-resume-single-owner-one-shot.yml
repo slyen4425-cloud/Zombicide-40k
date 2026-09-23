@@ -1,0 +1,122 @@
+name: GenSrpG Phase 5 Resume single owner one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and retire old Dungeon Resume owners
+        shell: bash
+        run: |
+          set -euo pipefail
+          before="$(git hash-object index.html)"
+          test "$before" = "0aaafb2eaf42b7bce6520efa633b6b6a6ffbe92a"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          old1='''const legacyResume100=window.resumeGame;
+          window.resumeGame=function(){
+            if(!hasActiveSession?.())return;
+
+            const core=readCore100();
+            const looksDungeon=Array.isArray(core.participants)&&core.participants.length>0;
+
+            if(looksDungeon && window.DungeonCore01){
+              const p=resolveSessionProfile100();
+              if(p){
+                try{setActiveGameProfileId?.(String(p.id))}catch(e){}
+                try{applyGameProfile?.(p,false)}catch(e){console.warn("Core 1.00 profil reprise",e)}
+              }
+              try{window.gensSelectedFamily="adventure"}catch(e){}
+              try{document.body.classList.add("gensDungeonTheme")}catch(e){}
+              hideForeignGameUi100();
+
+              // Empêche explicitement le hub Capture de se réafficher.
+              const cap=document.getElementById("captureGameHub");
+              if(cap)cap.style.display="none";
+              const capSheet=document.getElementById("captureHeroSheet");
+              if(capSheet)capSheet.style.display="none";
+
+              if(p){
+                saveSessionProfile100();
+              }
+
+              try{
+                if(DungeonCore01.show()){
+                  setTimeout(()=>{
+                    hideForeignGameUi100();
+                    const d=document.getElementById("gensDungeonCore01");
+                    if(d)d.style.display="block";
+                    try{dc099Paint?.();dc099SyncMainAction?.()}catch(e){}
+                  },0);
+                  return;
+                }
+              }catch(e){console.error("Core 1.00 reprise Dungeon",e)}
+            }
+
+            // Partie non-Dungeon : comportement historique.
+            return typeof legacyResume100==="function"
+              ? legacyResume100.apply(this,arguments)
+              : undefined;
+          };
+          '''
+
+          old2='''const previousResume307=window.resumeGame;
+          window.resumeGame=function(){
+            let runtime=null;
+            try{runtime=JSON.parse(localStorage.getItem("gensrpg_dungeon_runtime_v2")||"null")}catch(e){}
+            const dungeonSession=Array.isArray(runtime?.participants)&&runtime.participants.length>0;
+            if((typeof hasActiveSession!=="function"||hasActiveSession())&&dungeonSession&&window.DungeonCore01){
+              try{window.gensSelectedFamily="adventure";document.body.classList.add("gensDungeonTheme")}catch(e){}
+              ["setup","menu","sheet","pregameSetup","editorHub","captureGameHub","captureHeroSheet"].forEach(id=>{
+                const el=document.getElementById(id);if(el)el.style.display="none";
+              });
+              try{
+                if(DungeonCore01.show()){
+                  const shell=document.getElementById("gensDungeonCore01");if(shell)shell.style.display="block";
+                  window.scrollTo(0,0);
+                  return true;
+                }
+              }catch(e){console.error("Core 3.07 reprise Dungeon",e)}
+            }
+            return typeof previousResume307==="function"?previousResume307.apply(this,arguments):undefined;
+          };
+          '''
+
+          if s.count(old1)!=1:
+              raise SystemExit(f"Core 1.00 Resume owner match count={s.count(old1)}")
+          if s.count(old2)!=1:
+              raise SystemExit(f"Core 3.07 Resume owner match count={s.count(old2)}")
+
+          s=s.replace(old1,"",1).replace(old2,"",1)
+          p.write_text(s,encoding="utf-8")
+          PY
+
+          after="$(git hash-object index.html)"
+          test "$after" = "4f8c3b9be4189a9ac163fcb17531c95cbd783b05"
+
+      - name: Commit owner retirement and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-phase5-resume-single-owner-one-shot.yml
+          git commit -m "refactor: retire redundant Dungeon Resume owners"
+          git push origin HEAD:work/gensrpg-phase5-capture-resume-routing-fix-2026-09-23

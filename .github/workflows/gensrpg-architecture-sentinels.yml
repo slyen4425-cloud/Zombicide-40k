@@ -470,6 +470,9 @@ jobs:
       - name: Caractériser la cohérence Stats éditeur vers runtime et fiche
         run: node tests/gens_stats_editor_game_coherence_preaudit_v1.test.cjs
 
+      - name: Revalider goMenu Core 0.23 sur le GREEN courant
+        run: node tests/gens_phase5_gomenu_core023_revalidation_v1.test.cjs
+
       - name: Retirer le wrapper captureFix131 de startConfiguredGame
         run: node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
 

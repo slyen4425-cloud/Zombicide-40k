@@ -1,3 +1,83 @@
+## GREEN FINAL — Phase 5 / pré-audit raccord runtime retour écran module — 2026-09-23
+
+Ce bloc devient le point de reprise de ce lot dès que le checkpoint final
+ci-dessous existe. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-raccord-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-raccord-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-contract-green-2026-09-23`.
+- SHA de base :
+  `05daf6383005c1b4ae75409ac53444602179e500`.
+- Checkpoint final à créer uniquement après triple CI finale :
+  `checkpoint/gensrpg-phase5-module-screen-return-raccord-preaudit-green-2026-09-23`.
+- Runtime inchangé :
+  taille `8170961`, blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Le contrat `returnToPrimaryView` est prêt mais reste non chargé.
+
+Chaîne globale actuelle :
+`captureFix139 -> dungeonCore200Rebuild`.
+
+Le `RuntimeBootstrapV1` historique est explicitement rejeté comme modèle
+de raccord Shell :
+- il ne charge pas les points d'entrée Phase 3 ;
+- il utilise des retries 250 / 1200 / 3000 ms ;
+- la charte interdit de recréer cette forme d'autorité pour la navigation.
+
+Les points d'entrée Phase 3 restent inertes.
+
+### Décision architecturale
+
+Aucun raccord runtime n'est autorisé avant inspection de l'`index.html` exact.
+
+Il reste à prouver depuis ce fichier :
+- la déclaration Shell native exacte située sous les interceptions `goMenu` ;
+- tous les callsites réels de cette frontière ;
+- la source publique exacte du module actif ;
+- le point de chargement/raccord minimal ;
+- l'accessibilité réelle des fonctions owner-local Capture/Dungeon enfermées
+  dans leurs closures.
+
+Document :
+`docs/GENSRPG_PHASE5_MODULE_SCREEN_RETURN_RACCORD_PREAUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs`.
+
+### Incident de sentinelle
+
+Le premier run du pré-audit a échoué uniquement à cause d'une regex incorrecte
+dans la nouvelle sentinelle.
+Aucun défaut GenSrpG n'était impliqué.
+La sentinelle a été corrigée sans changement runtime.
+
+### Prochaine action obligatoire — règle 26
+
+Demander à l'utilisateur le fichier `index.html` exact correspondant au
+checkpoint GREEN de ce pré-audit.
+
+Avant travail, vérifier :
+- taille `8170961` ;
+- blob Git `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+
+Après vérification seulement :
+- ouvrir un nouveau checkpoint/branche de raccord ;
+- localiser le propriétaire Shell natif ;
+- écrire le TDD du raccord ;
+- choisir la stratégie minimale ;
+- ne retirer aucun des deux propriétaires `goMenu` avant preuve E2E.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / pré-audit raccord runtime retour écran module — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

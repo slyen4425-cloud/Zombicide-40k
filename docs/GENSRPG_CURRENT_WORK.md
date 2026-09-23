@@ -1,3 +1,53 @@
+## GREEN CANDIDATE — Phase 5 / pré-audit goMenu Core 0.01 restant — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core01-preaudit-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core01-preaudit-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-core023-retirement-green-2026-09-23`.
+- SHA technique GREEN :
+  `2ec907067b0723fd4447f43ba8dcba11e390095a`.
+- Runtime inchangé :
+  taille `8171186`, blob `c2424bada56517e579ffe65fa147facbb6bf2caf`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat
+
+Chaîne `goMenu` actuelle :
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Le vrai scénario :
+Dungeon -> Save & Quit -> Survie -> retour profil Dungeon sans Resume -> goMenu
+confirme que le vieux `coreActive` de Core 0.01 reste inert et ne reprend pas
+l'écran.
+
+Triple CI technique :
+- Architecture + navigateur `35872003882` — SUCCESS ;
+- Firefox `35872003797` — SUCCESS ;
+- Tactical `35872003759` — SUCCESS.
+
+### Prochaine action après checkpoint final
+
+Ouvrir un micro-lot TDD séparé visant uniquement
+`gensDungeonCore01Js -> window.goMenu`.
+
+Aucun autre propriétaire ni aucune autre responsabilité du bloc Core 0.01 ne
+doit être retiré.
+
+### Dettes différées inchangées
+
+- détection ennemie intermittente ;
+- petits défauts de rafraîchissement Stats/UI ;
+- validation manuelle embuscade.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / pré-audit goMenu Core 0.01 restant — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

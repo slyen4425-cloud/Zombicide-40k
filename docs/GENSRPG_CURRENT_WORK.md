@@ -1,3 +1,63 @@
+## RÉGRESSION UTILISATEUR — Survie / disponibilité héros après Dungeon — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-survival-hero-availability-regression-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-survival-hero-availability-regression-2026-09-23`.
+- SHA exact de base :
+  `44db719503ca3ab697f65d4ba3da93c929733935`.
+- Dernier checkpoint GREEN fonctionnel :
+  `checkpoint/gensrpg-phase5-gomenu-core030-retirement-green-2026-09-23`.
+- Runtime de base inchangé :
+  taille `8171079`, blob `6a9392e667881f2087e4df931645cada4201cb3c`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Signalement utilisateur
+
+Après les validations Phase 5 :
+- Mode Survie : plus de héros disponibles dans la sélection de participants.
+- Dette séparée confirmée par l'utilisateur : incohérence entre stats éditeur et stats affichées en jeu.
+- Dettes déjà connues : détection ennemie hors embuscade et validation manuelle embuscade.
+
+Le présent lot traite UNIQUEMENT la disponibilité des héros Survie.
+
+### Cause structurelle candidate à prouver par E2E
+
+`startConfiguredGame()` appelle `ensureBaseGameProfile()` aussi en Dungeon.
+Dans `ensureBaseGameProfile()`, le profil 40K reconstruit actuellement
+`bp.heroPool` depuis `currentAllHeroIds()`.
+Or `currentAllHeroIds()` dépend de `isDungeonMode()`.
+Pendant un lancement Dungeon, il retourne le pool Dungeon, puis le code retire
+les héros Dungeon pour construire le pool 40K : le résultat peut donc devenir vide.
+
+Core 156 respecte ensuite strictement le `heroPool` enregistré du profil 40K,
+ce qui peut rendre la sélection Survie vide.
+
+### Procédure obligatoire
+
+1. Ajouter un E2E réel :
+   Dungeon propre -> lancement -> sortie -> Survie -> nouvelle partie -> sélection héros.
+2. Le test doit échouer sur le runtime actuel si la régression est réelle.
+3. Aucun runtime modifié avant ce RED.
+4. Identifier le premier propriétaire fautif.
+5. Corriger au propriétaire, sans fallback UI, wrapper, observer ou timer.
+6. Rejouer triple CI + non-interférence.
+7. Fournir un lien mobile après GREEN.
+
+### Hors périmètre
+
+- aucune correction Stats dans ce lot ;
+- aucune détection ennemie ;
+- aucune embuscade ;
+- aucun changement goMenu ;
+- aucun changement Capture/Tactical/Builder ;
+- aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

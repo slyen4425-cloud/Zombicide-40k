@@ -23,11 +23,10 @@ function chainFor(name){
 const chain=chainFor('goMenu');
 const total=chain.reduce((n,x)=>n+x.count,0);
 
-assert.equal(total,1,
-  'Phase 5 cumulative retirement must keep Core 0.30 absent after Capture S1 migration');
-assert.deepEqual(chain.map(x=>x.id),[
-  'dungeonCore200Rebuild'
-],'Core 0.30 must remain retired after Capture S1 and the later Core 0.23/Core 0.01 retirements');
+assert.equal(total,0,
+  'Phase 5 cumulative retirement must keep Core 0.30 absent after Dungeon S2');
+assert.deepEqual(chain.map(x=>x.id),[],
+  'Core 0.30 must remain retired after Capture S1, Core 0.23/Core 0.01 retirements and Dungeon S2');
 
 const core030=blocks.find(x=>x.id==='dungeonCore030HeroReturnFix');
 assert.ok(core030,'Core 0.30 script must remain present for its non-goMenu responsibilities');
@@ -37,16 +36,17 @@ assert.doesNotMatch(core030.body,/const\s+prevGo\s*=\s*window\.goMenu/,
   'Core 0.30 must no longer capture the previous goMenu owner');
 
 const core200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
-assert.match(core200,/const goOutside200=window\.goMenu;/);
-assert.match(core200,/if\(active200&&isDungeonMode\?\.\(\)\)\{[\s\S]*return show\(\)\}/);
-assert.match(core200,/return goOutside200\?\.apply\(this,arguments\)/);
+assert.doesNotMatch(core200,/window\.goMenu\s*=/);
+assert.doesNotMatch(core200,/const goOutside200=window\.goMenu/);
+assert.match(core200,/GensShellScreenReturnV1/);
+assert.match(core200,/register\?\.\("dungeon"/);
+assert.match(core200,/if\(!active200\|\|!isDungeonMode\?\.\(\)\)return false;/);
+assert.match(core200,/return show\(\)===true/);
 
 console.log(JSON.stringify({
   scenario:'Phase 5 retire Core 0.30 goMenu owner',
-  expectedAssignments:1,
-  expectedChain:[
-    'dungeonCore200Rebuild'
-  ],
+  expectedAssignments:0,
+  expectedChain:[],
   retired:'dungeonCore030HeroReturnFix -> window.goMenu',
   laterRetirements:[
     'dungeonCore023StabilityFix -> window.goMenu',

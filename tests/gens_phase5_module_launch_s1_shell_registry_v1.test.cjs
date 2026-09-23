@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170726,'S1 RED must start from the exact GREEN runtime');
-assert.equal(gitBlob,'d9ee34d47fa888795db68cdc244d0c73d30ee523','S1 RED must start from the exact GREEN blob');
+assert.equal(bytes.length,8171576,'S1 runtime must match the exact inert-registry candidate');
+assert.equal(gitBlob,'12be0fdbaa5c05f7852933b48a3dd5df09da6145','S1 runtime blob must match the exact inert-registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);

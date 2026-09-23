@@ -1,3 +1,74 @@
+## CHANTIER COURANT — Phase 5 / retrait goMenu Core 0.30 — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-core030-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-core030-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-e2e-characterization-green-2026-09-23`.
+- SHA exact de base :
+  `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946`.
+- Runtime exact de base :
+  `index.html` taille `8171795`, blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Retirer uniquement l'affectation globale
+`dungeonCore030HeroReturnFix -> window.goMenu`
+si et seulement si le TDD prouve qu'elle est devenue redondante derrière
+`dungeonCore200Rebuild`.
+
+### Preuve préalable acquise
+
+Le lot E2E précédent est GREEN et protège :
+- Dungeon fiche héros -> `goMenu` -> map Dungeon ;
+- Capture + vieille sauvegarde Dungeon -> `goMenu` -> Hub Capture ;
+- Survie fiche héros -> `goMenu` -> menu Survie ;
+- Builder ;
+- Tactical ;
+- Save/Quit/Resume ;
+- non-interférence quatre modules.
+
+### Périmètre autorisé
+
+- retrait de l'affectation `window.goMenu` dans
+  `dungeonCore030HeroReturnFix` uniquement ;
+- conservation intégrale des autres responsabilités Core 0.30 ;
+- réalignement strict des cartographies/empreintes dérivées si nécessaire.
+
+### Interdictions
+
+- aucun autre retrait `goMenu` ;
+- aucune modification Capture ;
+- aucune modification Core 2.00 ;
+- aucun nouveau wrapper/routeur/global ;
+- aucun observer/timer/retry ;
+- aucune correction détection/embuscade dans ce lot ;
+- aucun merge sur `main`.
+
+### TDD obligatoire
+
+Avant toute modification runtime :
+1. créer une sentinelle RED exigeant la chaîne goMenu sans Core 0.30 ;
+2. conserver les E2E goMenu Dungeon/Capture/Survie ;
+3. après retrait, triple CI complète ;
+4. validation manuelle téléphone uniquement si le runtime candidat est GREEN.
+
+### Règle 26
+
+Toute modification d'`index.html` exige la copie exacte du runtime courant :
+- SHA : `3bfa092908f233e2e518ef6a5dcdc6bb4cb5b946` ;
+- blob : `4f8c3b9be4189a9ac163fcb17531c95cbd783b05` ;
+- taille : `8171795`.
+
+Ne pas réutiliser `work_13.zip` : son blob historique n'est plus le runtime courant.
+
+Aucun changement runtime avant TDD RED + copie exacte.
+
 ## CANDIDAT GREEN — Phase 5 / caractérisation E2E goMenu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

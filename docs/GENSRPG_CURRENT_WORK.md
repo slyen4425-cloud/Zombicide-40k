@@ -1,3 +1,83 @@
+## CANDIDAT DE RÉPARATION — Phase 5 / rollback régressions utilisateur — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-user-regression-repair-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-user-regression-repair-2026-09-23`.
+- Base RED :
+  `2feec88919aa41d9fbf8f151ca9402ac0ae3bdea`.
+- Dernier checkpoint sûr antérieur utilisé pour le rollback :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`,
+  SHA `22cc0e61f22e350dc61da390cb99925d74122eed`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Cause isolée / action appliquée
+
+Le dernier changement runtime avant les régressions utilisateur était le retrait
+`captureFix135 -> startConfiguredGame`.
+
+Conformément à la règle 17 de la charte, aucun système cassé n'a été réécrit :
+- aucun patch Dungeon ;
+- aucun patch Builder ;
+- aucun patch Tactical ;
+- aucun patch Capture post-combat ;
+- aucun patch Resume.
+
+Le lot a effectué un rollback structurel exact vers l'état précédent au retrait
+`captureFix135`.
+
+`index.html` restauré :
+- taille : `8174148` octets ;
+- blob : `f13835a2827dbfa9e2698cb026d3e732ad62aba4`.
+
+Le fichier `work_13.zip` fourni par l'utilisateur a été retrouvé et son contenu
+a été revérifié localement avec exactement ce blob Git avant le rollback.
+
+### TDD / sentinelles
+
+RED prouvé avant rollback :
+- `tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs` échouait sur
+  l'état à 4 propriétaires.
+
+Après rollback :
+- garde chaîne Capture `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` : SUCCESS ;
+- `dungeon_event_ambush_position_v167878.test.cjs` désormais exécuté dans la CI principale : SUCCESS ;
+- vrai Dungeon après Survie : SUCCESS ;
+- vrai Builder via l'éditeur : SUCCESS ;
+- Config objet : SUCCESS ;
+- caches / pièges authored : SUCCESS ;
+- Save & Quit / reprise : SUCCESS ;
+- Monster Capture par le vrai Shell : SUCCESS ;
+- Capture composition complète : SUCCESS ;
+- non-interférence quatre modules : SUCCESS ;
+- Preview Chromium : SUCCESS.
+
+Validation technique du rollback, SHA runtime :
+`a1d0e55aff838c9bda8f1fe7ab34bf00f9c99f98`.
+
+Runs :
+- Architecture + navigateur complet : `35828866016` — SUCCESS ;
+- Firefox : `35828865978` — SUCCESS ;
+- Tactical Dock : `35828865994` — SUCCESS.
+
+### Statut
+
+**Candidat automatique GREEN, mais PAS encore checkpoint GREEN final.**
+
+Le test utilisateur réel reste obligatoire pour les régressions qui ont motivé le rollback :
+1. Dungeon : lancement du combat sur la map ;
+2. Dungeon : embuscade avec ennemis près des héros ;
+3. Builder visible depuis le jeu et le mode Édition ;
+4. Capture : interface prévue conservée ;
+5. Capture : victoire de combat ne renvoie pas au menu général ;
+6. Capture : Reprendre reprend bien Capture et non Dungeon.
+
+Aucune poursuite Phase 5 / `captureFix138` avant validation utilisateur de ce candidat.
+Aucun merge sur `main`.
+
 ## RED UTILISATEUR — Phase 5 / régressions fonctionnelles après retrait captureFix135 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

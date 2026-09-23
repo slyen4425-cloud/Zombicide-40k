@@ -1,0 +1,71 @@
+name: GenSrpG Core01 retirement one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase5-gomenu-core01-retirement-2026-09-23'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-core01-retirement:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase5-gomenu-core01-retirement-2026-09-23
+          fetch-depth: 0
+
+      - name: Verify exact source blob and retire only Core 0.01 goMenu
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+
+          path = Path("index.html")
+          before = subprocess.check_output(["git","hash-object",str(path)], text=True).strip()
+          expected_before = "c2424bada56517e579ffe65fa147facbb6bf2caf"
+          expected_after = "0c15b1dba66ce83f2b27ed99e371885fb1d0ed75"
+          if before != expected_before:
+              raise SystemExit(f"unexpected source blob: {before} != {expected_before}")
+
+          text = path.read_text(encoding="utf-8")
+          old = """const oldGo=window.goMenu;window.goMenu=function(){if(coreActive&&eligible()){try{save?.()}catch(e){}const sh=document.getElementById('sheet');if(sh)sh.style.display='none';show();return}return oldGo?.apply(this,arguments)};
+"""
+          if text.count(old) != 1:
+              raise SystemExit(f"expected exactly one Core 0.01 goMenu line, found {text.count(old)}")
+
+          text = text.replace(old, "")
+          path.write_text(text, encoding="utf-8")
+
+          after = subprocess.check_output(["git","hash-object",str(path)], text=True).strip()
+          if after != expected_after:
+              raise SystemExit(f"unexpected candidate blob: {after} != {expected_after}")
+
+          core_start = text.index('<script id="gensDungeonCore01Js"')
+          core_end = text.index("</script>", core_start)
+          core = text[core_start:core_end]
+          if "const oldGo=window.goMenu" in core or "window.goMenu=function" in core:
+              raise SystemExit("Core 0.01 goMenu authority still present")
+          for required in (
+              "const oldStart=window.startConfiguredGame",
+              "window.startConfiguredGame=async function",
+              "const oldCloseCfg=window.closeGameCustomization",
+              "window.closeGameCustomization=function",
+              "window.DungeonCore01={",
+          ):
+              if required not in core:
+                  raise SystemExit(f"preserved Core 0.01 responsibility missing: {required}")
+
+      - name: Commit exact subtractive runtime change
+        run: |
+          test "$(git diff --name-only)" = "index.html"
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "refactor: retire Core 0.01 goMenu authority"
+          git push origin HEAD:work/gensrpg-phase5-gomenu-core01-retirement-2026-09-23

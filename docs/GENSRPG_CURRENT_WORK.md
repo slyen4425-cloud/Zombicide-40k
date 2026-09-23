@@ -1,3 +1,120 @@
+## GREEN FINAL CANDIDATE — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
+
+Ce bloc devient le point de reprise final de ce micro-lot dès que le SHA documentaire
+créé par cette clôture a lui-même passé la triple CI et que le checkpoint ci-dessous existe.
+
+- Branche :
+  `work/gensrpg-phase5-openchar-core028-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-openchar-core028-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-openchar-authority-preaudit-green-2026-09-23`.
+- SHA de base :
+  `ed5f306fb4fe0182863dac78866edfe81a23dbe3`.
+- Checkpoint final à créer après triple CI du SHA documentaire final :
+  `checkpoint/gensrpg-phase5-openchar-core028-retirement-green-2026-09-23`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, vérifiée inchangée et gelée.
+
+### Retrait runtime validé
+
+Le bloc entier `dungeonCore028HeroExploreGuard` a été retiré sans remplacement.
+
+Commit runtime :
+`26714f32cf0b857bc09c0e3999f2b65579a7c5b7`.
+
+Le changement runtime est strictement soustractif :
+- 49 lignes supprimées ;
+- aucune ligne runtime ajoutée ;
+- aucun nouveau wrapper ;
+- aucun observer ;
+- aucun retry/polling/fallback ajouté.
+
+Runtime courant vérifié au HEAD candidat :
+- taille verrouillée par sentinelle : `8170726` octets ;
+- blob Git vérifié : `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+Depuis le commit runtime, `index.html` n'a plus été modifié.
+
+### Autorité openChar après retrait
+
+Propriétaire natif conservé :
+`function openChar(id)` dans le Shell historique.
+
+Chaîne stricte `window.openChar =` :
+`captureFix139` uniquement.
+
+Capture 139 reste volontairement en place :
+elle conserve sa garde réelle pendant le lancement Capture puis délègue au propriétaire natif.
+
+Absents du runtime :
+- `dungeonCore028HeroExploreGuard` ;
+- `dc028RemoveHeroExplore` ;
+- son `MutationObserver` de fiche ;
+- ses retries 0/100 ms.
+
+### TDD / cartographie
+
+Sentinelle de retrait :
+`tests/gens_phase5_openchar_core028_retirement_v1.test.cjs`.
+
+Sentinelle navigateur :
+`tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs`.
+
+La sentinelle navigateur utilise désormais directement le runtime courant où Core 0.28 est
+réellement absent et compose la page avec la liste GitHub Pages.
+
+Cartographie Phase 2 post-retrait :
+- blocs inline : `129` total / `119` actifs / `10` disabled ;
+- globals explicites : `436` distincts / `760` affectations / `119` multi-owner ;
+- chaîne `openChar` : `captureFix139` uniquement ;
+- sources inline avec timers : `65` ;
+- `setTimeout` syntaxiques : `143` ;
+- `setInterval` : `1`.
+
+### Triple CI du candidat technique
+
+HEAD technique vérifié :
+`cb2c5b9a578525680e586aeaf0248de945e01ed6`.
+
+- Architecture + navigateur complet : run `35923707576` — SUCCESS ;
+- Firefox : run `35923707606` — SUCCESS ;
+- Tactical Dock : run `35923707596` — SUCCESS.
+
+Dans le navigateur complet, la caractérisation
+`openChar sans Dungeon Core 0.28` est SUCCESS.
+
+### Nettoyage
+
+Les mécanismes temporaires d'application du gros runtime ont été retirés.
+Vérifiés absents au HEAD :
+- `.github/runtime-patches/gens_phase5_openchar_core028_retirement.patch` ;
+- `.github/workflows/gensrpg-phase5-apply-openchar-core028-retirement.yml`.
+
+Aucun mécanisme temporaire ne doit être recréé comme infrastructure permanente.
+
+### QA séparée — ne pas corriger dans ce lot
+
+Restent hors périmètre :
+1. rafraîchissement/affichage Stats au retour ;
+2. détection ennemie intermittente, y compris le cas observé de téléportation lointaine ;
+3. libellé Survie mélangeant du vocabulaire Dungeon alors que l'action appelle bien
+   `generateZombieWaveQuick()`.
+
+### Preview téléphone après checkpoint GREEN
+
+Après triple CI du présent SHA documentaire et création du checkpoint GREEN :
+- créer une branche de preview depuis ce checkpoint ;
+- conserver `index.html` inchangé ;
+- aligner la composition de `preview.html` exactement sur `.github/workflows/main.yml` ;
+- le seul écart constaté avant cette clôture est l'absence de
+  `assets/gensrpg/core/storage-v1.js` dans la liste de modules de `preview.html` ;
+- fournir ensuite un lien raw.githack vers cette preview complète pour validation téléphone.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

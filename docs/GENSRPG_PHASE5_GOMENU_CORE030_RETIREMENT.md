@@ -107,17 +107,32 @@ Aucune modification de :
 
 Aucun wrapper, observer, timer/retry ou mécanisme de compatibilité n'a été ajouté.
 
-## Validation en cours
+## Validation finale GREEN
 
-Le présent commit documentaire sert de déclencheur humain pour la triple CI sur
-le runtime et les dérivés finalisés.
+SHA runtime/documentation validé :
+`32d2c00200bf148e2c764166a3c07e4ae05bc919`.
 
-Validation requise :
-1. Architecture + navigateur complet ;
-2. Firefox ;
-3. Tactical Dock.
+Triple CI complète :
+- Architecture + navigateur complet `35848721773` — SUCCESS ;
+- Firefox `35848721942` — SUCCESS ;
+- Tactical Dock `35848721777` — SUCCESS.
 
-Le checkpoint GREEN ne sera créé qu'après SUCCESS des trois workflows et
-vérification des scénarios E2E ciblés.
+Scénarios explicitement couverts par le navigateur complet :
+- Dungeon fiche héros -> `goMenu` -> map Dungeon — GREEN ;
+- Capture active + vieille sauvegarde Dungeon -> `goMenu` -> Hub Capture — GREEN ;
+- Survie fiche héros -> `goMenu` -> menu Survie — GREEN ;
+- Save & Quit / reprise Dungeon — GREEN ;
+- Dungeon map -> Tactical — GREEN ;
+- Builder — GREEN ;
+- non-interférence quatre modules — GREEN.
+
+Checkpoint GREEN final :
+`checkpoint/gensrpg-phase5-gomenu-core030-retirement-green-2026-09-23`
+sur le SHA exact
+`32d2c00200bf148e2c764166a3c07e4ae05bc919`.
+
+Le runtime reste :
+- taille `8171079` octets ;
+- blob Git `6a9392e667881f2087e4df931645cada4201cb3c`.
 
 Aucun merge sur `main`.

@@ -1,3 +1,74 @@
+## CANDIDAT GREEN — Phase 5 / caractérisation E2E goMenu — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-gomenu-e2e-characterization-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-gomenu-screen-transitions-preaudit-green-2026-09-23`,
+  SHA `1a7cbeac8bf8765c8cda9afd0fe6b60a50bda57c`.
+- Runtime inchangé :
+  index blob `4f8c3b9be4189a9ac163fcb17531c95cbd783b05`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Résultat E2E
+
+Document :
+`docs/GENSRPG_PHASE5_GOMENU_E2E_CHARACTERIZATION.md`.
+
+Sentinelles :
+- `tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs` ;
+- `tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs`.
+
+Première exécution navigateur :
+- Dungeon fiche héros -> `goMenu` -> map : GREEN ;
+- Capture active + vieille sauvegarde Dungeon -> `goMenu` -> Hub Capture :
+  GREEN ;
+- Survie fiche héros -> `goMenu` -> menu Survie : GREEN.
+
+Aucune mutation artificielle de storage ou de vue n'est utilisée pour produire
+le résultat Capture. Le test appelle la frontière publique réelle `goMenu()`.
+
+### Chaîne protégée
+
+`captureFix139 -> gensDungeonCore01Js -> dungeonCore023StabilityFix ->
+dungeonCore030HeroReturnFix -> dungeonCore200Rebuild`.
+
+### Prochain candidat soustractif
+
+`dungeonCore030HeroReturnFix -> window.goMenu`.
+
+Preuve structurelle :
+- Core 2.00 intercepte et retourne si `active200 && isDungeonMode()` ;
+- s'il délègue, la condition Core 0.30
+  `DungeonCore01.active && DungeonCore01.eligible()`
+  ne peut plus être vraie avec le propriétaire final courant.
+
+Aucun retrait dans ce lot.
+
+### Validation finale avant checkpoint GREEN
+
+Le SHA documentaire final doit repasser :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Puis seulement :
+- créer le checkpoint GREEN E2E ;
+- ouvrir un lot TDD dédié Core 0.30 ;
+- ne modifier aucun autre propriétaire `goMenu`.
+
+### Dettes séparées
+
+- détection ennemie immédiate hors embuscade : différée ;
+- embuscade proche des héros : automatique GREEN, pas encore validée
+  manuellement.
+
+Aucun merge sur `main`.
+
 ## CHANTIER COURANT — Phase 5 / caractérisation E2E goMenu — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

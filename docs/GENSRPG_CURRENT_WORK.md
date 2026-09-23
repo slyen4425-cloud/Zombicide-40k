@@ -1,3 +1,69 @@
+## CLÔTURE CONDITIONNELLE — Phase 5 / captureFix135 retirement — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-capturefix135-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capturefix135-retirement-2026-09-23`.
+- Base exacte :
+  `22cc0e61f22e350dc61da390cb99925d74122eed`.
+- Dernier checkpoint GREEN :
+  `checkpoint/gensrpg-phase5-capture-public-launch-entry-preaudit-green-2026-09-23`.
+- Checkpoint GREEN cible :
+  `checkpoint/gensrpg-phase5-capturefix135-retirement-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Résultat
+
+Retrait soustractif de l'affectation
+`captureFix135 -> startConfiguredGame` terminé.
+
+Document :
+`docs/GENSRPG_PHASE5_CAPTUREFIX135_RETIREMENT.md`.
+
+Sentinelle :
+`tests/gens_phase5_capturefix135_retirement_v1.test.cjs`.
+
+Chaîne actuelle :
+
+`captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Affectations :
+
+`5 -> 4`.
+
+Blob `index.html` actuel :
+
+`9313afd3437fe827b9c17245a675f75645570878`.
+
+Taille :
+
+`8173578` octets.
+
+### Validation technique avant clôture documentaire
+
+SHA :
+`1026c89d3dc602baddeb72e721fb658b92a0e8ee`.
+
+- Architecture + navigateur complet : `35826657289` — SUCCESS ;
+- Firefox : `35826657238` — SUCCESS ;
+- Tactical Dock : `35826657231` — SUCCESS.
+
+### Prochaine action exacte
+
+La clôture documentaire a changé le SHA.
+
+1. repasser la triple CI sur le SHA documentaire final ;
+2. si toutes SUCCESS, créer
+   `checkpoint/gensrpg-phase5-capturefix135-retirement-green-2026-09-23` ;
+3. vérifier `main` toujours gelée ;
+4. ouvrir un **pré-audit séparé de `captureFix138`** ;
+5. aucun nouveau retrait Capture avant ce pré-audit GREEN.
+
+Aucun merge sur `main`.
+
 ## RED PROUVÉ — Phase 5 / captureFix135 retirement — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

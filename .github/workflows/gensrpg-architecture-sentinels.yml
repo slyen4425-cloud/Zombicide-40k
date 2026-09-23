@@ -47,6 +47,9 @@ jobs:
       - name: Vérifier le profil performance mobile inchangé
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
 
+      - name: Exiger l'invalidation du cache Stats après sauvegarde héros
+        run: node tests/gens_stats_hero_save_cache_invalidation_v1.test.cjs
+
       - name: Vérifier l'autorité UI Dungeon native V114.11
         run: node tests/gens_v11411_native_ui_authority.test.cjs
 
@@ -675,6 +678,9 @@ jobs:
 
       - name: Caractériser le flash Survie dans la fiche RPG
         run: node tests/gens_rpg_sheet_survival_flash_browser_v11411.test.cjs
+
+      - name: Caractériser éditeur Stats vers fiche en jeu
+        run: node tests/gens_stats_editor_ingame_display_e2e_browser_v1.test.cjs
 
       - name: Vérifier cache, retour et pièges authored dans Chromium
         run: node tests/gens_authored_cache_trap_browser_v11411.test.cjs

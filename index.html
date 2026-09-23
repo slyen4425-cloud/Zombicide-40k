@@ -8473,6 +8473,19 @@ function ensureCustomContentGameModes(profiles){
   if(heroChanged)saveCustomHeroesMulti(heroes);
 }
 
+function survivalHeroIdsForBaseProfile(){
+  applyCustomHeroesMulti();
+  const dungeonCustomHeroIds=new Set(customHeroesForMode(true).map(h=>String(h.id)));
+  const ids=new Set(
+    Object.keys(CHARS).filter(id=>
+      !(typeof DUNGEON_HERO_IDS!=="undefined"&&DUNGEON_HERO_IDS.includes(String(id))) &&
+      !dungeonCustomHeroIds.has(String(id))
+    )
+  );
+  customHeroesForMode(false).forEach(h=>{if(h?.id)ids.add(String(h.id));});
+  return [...ids];
+}
+
 function ensureBaseGameProfile(){
   let profiles=loadGameProfilesRaw();
   let changed=false;
@@ -8520,12 +8533,9 @@ function ensureBaseGameProfile(){
     const oldDeck={...(bp.deck||{})};
     bp.deck={...defaultDeckConfig()};
     Object.keys(bp.deck).forEach(id=>bp.deck[id]=zItems.includes(String(id))?Math.max(0,Number(oldDeck[id]??bp.deck[id])||0):0);
-    // Isolation stricte : aucun héros Dungeon (base ou personnalisé) dans Zombicide.
-    const dungeonCustomHeroIds=new Set(customHeroesForMode(true).map(h=>String(h.id)));
-    bp.heroPool=currentAllHeroIds().filter(id=>
-      !(typeof DUNGEON_HERO_IDS!=="undefined"&&DUNGEON_HERO_IDS.includes(String(id))) &&
-      !dungeonCustomHeroIds.has(String(id))
-    );
+    // Isolation stricte : le pool 40K est indépendant du mode actif.
+    // Un lancement Dungeon ne doit jamais vider le profil Survie de référence.
+    bp.heroPool=survivalHeroIdsForBaseProfile();
     // Réserve/configuration 40K : uniquement les ennemis Survie.
     const oldEnemyCfg={...(bp.enemyConfig||{})},oldEnemyRes={...(bp.enemyReserve||{})};
     bp.enemyConfig={};bp.enemyReserve={};
@@ -8561,6 +8571,19 @@ function ensureBaseGameProfile(){
   if(changed)saveGameProfiles(profiles);
   return profiles;
 }
+function repairEmptyBaseSurvivalHeroPool(){
+  try{
+    const profiles=loadGameProfilesRaw();
+    const bp=profiles.find(p=>String(p?.id||"")===String(GAME_PROFILE_BASE_ID));
+    if(!bp||bp.builtIn!==true||!Array.isArray(bp.heroPool)||bp.heroPool.length)return false;
+    const restored=survivalHeroIdsForBaseProfile();
+    if(!restored.length)return false;
+    bp.heroPool=restored;
+    saveGameProfiles(profiles);
+    return true;
+  }catch(e){console.warn("Réparation pool héros Survie",e);return false}
+}
+
 function loadGameProfiles(){
   // Ne reconstruire les profils que s'ils manquent réellement.
   // Avant, chaque simple lecture réécrivait les pools et localStorage, ce qui
@@ -12178,6 +12201,7 @@ function openGensBuiltInGame(profileId,family){
   // Source de vérité IMMÉDIATE. Tous les rendus peuvent désormais filtrer correctement
   // héros / objets / éditeurs / ennemis avant même l'application complète du profil.
   setActiveGameProfileId(profileId);
+  if(String(profileId)===String(GAME_PROFILE_BASE_ID))repairEmptyBaseSurvivalHeroPool();
   gensCleanIncompatibleHeroSelection();
   gensStartingParticipants=null;
   if(!hasActiveSession())try{saveGameParticipants([])}catch(e){}

@@ -1,5 +1,115 @@
 ## GREEN FINAL CANDIDATE — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
 
+Ce bloc devient le point de reprise final du lot dès que la triple CI du SHA
+documentaire final est GREEN et que le checkpoint ci-dessous existe.
+
+- Branche :
+  `work/gensrpg-phase5-openchar-core028-retirement-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-openchar-core028-retirement-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-openchar-authority-preaudit-green-2026-09-23`.
+- SHA de base :
+  `ed5f306fb4fe0182863dac78866edfe81a23dbe3`.
+- Checkpoint final à créer après triple CI :
+  `checkpoint/gensrpg-phase5-openchar-core028-retirement-green-2026-09-23`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Runtime
+
+Commit runtime :
+`26714f32cf0b857bc09c0e3999f2b65579a7c5b7`.
+
+Runtime final du lot :
+- taille : `8170726` ;
+- blob : `d9ee34d47fa888795db68cdc244d0c73d30ee523`.
+
+Diff runtime :
+- retrait complet de `dungeonCore028HeroExploreGuard` ;
+- 49 lignes supprimées ;
+- 0 ajout runtime ;
+- aucun autre bloc runtime modifié.
+
+### Résultat architectural
+
+Chaîne stricte `openChar` :
+`captureFix139` uniquement.
+
+Le Shell natif `function openChar(id)` reste propriétaire de la fiche hors
+combat.
+
+Supprimés sans remplacement :
+- wrapper global Core 0.28 ;
+- `dc028RemoveHeroExplore` ;
+- `MutationObserver` ciblé fiche ;
+- retries 0/100 ms.
+
+Capture 139 reste volontairement en place : sa garde de lancement Capture est
+réelle et couverte par les E2E.
+
+### Cartographie après retrait
+
+- 129 blocs inline / 119 actifs / 10 désactivés ;
+- 436 globals explicites ;
+- 760 affectations ;
+- 119 multi-owner ;
+- 65 sources inline avec timers ;
+- 143 `setTimeout` inline ;
+- 1 `setInterval` inline.
+
+### TDD
+
+RED avant runtime :
+- SHA `92c63e20ceebe76375eeaf2d18479a0cc30af07e` ;
+- Architecture run `35921773644` ;
+- seul échec : `Retirer le wrapper openChar Dungeon Core 0.28`.
+
+Candidat technique GREEN :
+- SHA `cb2c5b9a578525680e586aeaf0248de945e01ed6` ;
+- Architecture + navigateur `35923707576` — SUCCESS ;
+- Firefox `35923707606` — SUCCESS ;
+- Tactical Dock `35923707596` — SUCCESS.
+
+### Preuves fonctionnelles
+
+Sur le runtime réellement retiré :
+- fiche Dungeon fonctionnelle ;
+- aucun bouton Explorer visible/clicable ;
+- flash Survie fiche RPG absent ;
+- Builder OK ;
+- Capture victoire/reprise OK ;
+- Monster Capture OK ;
+- Save & Quit/reprise OK ;
+- non-interférence quatre modules OK ;
+- Dungeon -> Tactical OK.
+
+### Document
+
+`docs/GENSRPG_PHASE5_OPENCHAR_CORE028_RETIREMENT.md`.
+
+### QA séparée à conserver
+
+Hors périmètre et non corrigé par rustine :
+- Stats au retour / rafraîchissement ;
+- détection ennemie intermittente + téléportation observée ;
+- libellé Survie « explorer salle » alors que l'action appelle
+  `generateZombieWaveQuick()`.
+
+### Prochaine action
+
+1. triple CI sur le SHA documentaire final ;
+2. checkpoint GREEN ;
+3. preview téléphone complète, composée comme GitHub Pages ;
+4. validation manuelle utilisateur ;
+5. seulement ensuite prochain micro-lot Phase 5.
+
+Aucun merge sur `main`.
+
+---
+
+## GREEN FINAL CANDIDATE — Phase 5 / retrait openChar Dungeon Core 0.28 — 2026-09-23
+
 Ce bloc devient le point de reprise final de ce micro-lot dès que le SHA documentaire
 créé par cette clôture a lui-même passé la triple CI et que le checkpoint ci-dessous existe.
 

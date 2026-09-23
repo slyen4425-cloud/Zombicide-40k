@@ -1,3 +1,57 @@
+## CHANTIER COURANT — Phase 5 / consolidation resumeGame au Shell — 2026-09-23
+
+Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-resumegame-shell-consolidation-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-resumegame-shell-consolidation-2026-09-23`.
+- Base exacte :
+  `823d10f228a7c518a06fed852504cbfc48b27a81`.
+- Dernier checkpoint fonctionnel GREEN :
+  `checkpoint/gensrpg-phase5-user-regression-repair-green-2026-09-23`.
+- Production gelée :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, V16.78.114.11.
+
+### Mission unique
+
+Consolider `resumeGame` au propriétaire Shell existant.
+
+Le lot doit :
+1. conserver une seule autorité active `resumeGame` ;
+2. router la reprise selon le module/profil actif ;
+3. conserver Survie ;
+4. conserver Dungeon Save & Quit -> Reprendre ;
+5. permettre Capture -> Reprendre même si une ancienne sauvegarde Dungeon persiste ;
+6. retirer seulement les affectations globales `resumeGame` de Core 3.07 et Core 3.10 ;
+7. conserver toutes leurs autres responsabilités.
+
+### Interdictions
+
+- aucun nouveau wrapper global ;
+- aucune garde spéciale Capture ajoutée dans Dungeon ;
+- aucun observer/timer/retry ;
+- aucun retrait `captureFix135/138/139` ;
+- aucune correction de détection ennemie ;
+- aucun changement Builder/Tactical/gameplay ;
+- aucun merge sur `main`.
+
+### TDD attendu
+
+Avant patch runtime :
+- la sentinelle d'autorité unique doit être RED sur la chaîne à 3 propriétaires ;
+- la sentinelle Capture reprise reste RED ;
+- Dungeon map -> Tactical reste GREEN.
+
+Après patch :
+- une seule autorité `resumeGame` active ;
+- Capture victoire/reprise GREEN ;
+- Dungeon Save & Quit/reprise GREEN ;
+- Survie GREEN ;
+- non-interférence 4 modules GREEN ;
+- Dungeon map -> Tactical GREEN ;
+- Architecture, Firefox et Tactical Dock GREEN.
+
 ## PRÉ-AUDIT TERMINÉ — Phase 5 / autorité resumeGame — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

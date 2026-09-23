@@ -12,7 +12,7 @@ const shellContract=JSON.parse(read('assets/gensrpg/shell/module-contract-v1.jso
 const captureContract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 
-const ids=['captureFix138','captureFix139'];
+const ids=['captureFix135','captureFix138','captureFix139'];
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -72,8 +72,8 @@ for(const id of ids){
 }
 captureContextSource=extractAssignedFunction(blocks.captureFix138,'isCaptureContext138');
 
-assert.match(lastOwners,/^startConfiguredGame\t4\tdungeonCore200Rebuild$/m,
-  'Capture public-boundary guard must track the current four-owner chain');
+assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m,
+  'preaudit must run against the current five-owner chain');
 
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.consumes.includes('module public entry contracts'));
@@ -87,9 +87,9 @@ assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 assert.doesNotMatch(captureEntry,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
   'Capture Phase 3 entry must remain inert during preaudit');
 
-const capture135Block=blockBody('captureFix135');
-assert.doesNotMatch(capture135Block,/window\.startConfiguredGame\s*=/,
-  'captureFix135 startConfiguredGame seam must remain retired');
+assert.match(functions.captureFix135,/gensCapturePregameMode/);
+assert.match(functions.captureFix135,/saveCaptureWorldState/);
+assert.match(functions.captureFix135,/\.apply\(this,arguments\)/);
 
 assert.match(functions.captureFix138,/isCaptureContext138/);
 assert.match(functions.captureFix138,/setTimeout/);
@@ -98,17 +98,26 @@ assert.match(functions.captureFix138,/renderCaptureWorldHub/);
 assert.match(functions.captureFix139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
 assert.match(functions.captureFix139,/markSessionActive/);
 
+// Effective-chain shadowing proof.
 assert.match(captureContextSource,/gensCapturePregameMode/);
+assert.match(captureContextSource,/gensCapturePregameMode\(\)\)return true/);
 assert.match(captureContextSource,/fam===["']creature["']/);
+assert.match(functions.captureFix135,/if\(typeof gensCapturePregameMode===["']function["']&&gensCapturePregameMode\(\)\)/);
 assert.match(functions.captureFix138,/const cap=isCaptureContext138\(\)/);
 assert.match(functions.captureFix138,/if\(cap\)\{/);
 
-const retirementProof={
-  retiredOwner:'captureFix135',
-  seam:'startConfiguredGame',
-  currentCaptureOwners:['captureFix138','captureFix139'],
-  currentGlobalAssignments:4,
-  requiresReAuditBeforeCaptureFix138Retirement:true
+const shadowingProof={
+  outerOwner:'captureFix139',
+  delegatesOnlyWhen:'isCaptureContext138() === false',
+  capture135EffectCondition:'gensCapturePregameMode() === true',
+  capture135ConditionCoveredByOuterPredicate:true,
+  capture138EffectCondition:'isCaptureContext138() === true',
+  capture138ConditionCoveredByOuterPredicate:true,
+  consequence:[
+    'Capture contexts are intercepted by captureFix139 before captureFix138/captureFix135',
+    'delegated non-Capture contexts do not activate captureFix138 post-launch branch',
+    'delegated normal contexts do not activate captureFix135 pregame reset branch'
+  ]
 };
 
 const sourceReport=ids.map(id=>({
@@ -136,12 +145,14 @@ const proposedPublicBoundary={
   status:'descriptive only; no runtime entry connected in this lot'
 };
 
-const completedFirstRuntimeMicroLot={
+const selectedFirstRuntimeMicroLot={
   owner:'captureFix135',
   seam:'startConfiguredGame',
-  action:'retired',
-  assignments:4,
+  action:'retire only the shadowed startConfiguredGame assignment',
+  targetAssignments:4,
   preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
+  rationale:'captureFix139 intercepts every normal context in which captureFix135 pregame reset could activate; delegated contexts do not activate that branch',
+  requiresDedicatedRed:true,
   reAuditBeforeAnyCaptureFix138Retirement:true
 };
 
@@ -149,8 +160,8 @@ console.log(JSON.stringify({
   scenario:'Phase 5 Capture public launch-entry preaudit',
   chainOwners:ids,
   sourceReport,
-  retirementProof,
+  shadowingProof,
   proposedPublicBoundary,
-  completedFirstRuntimeMicroLot,
+  selectedFirstRuntimeMicroLot,
   runtimeChanged:false
 },null,2));

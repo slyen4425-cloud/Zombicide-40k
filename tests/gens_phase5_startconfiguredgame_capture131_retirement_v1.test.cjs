@@ -23,30 +23,34 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,4,'captureFix131 must remain retired after later approved reductions');
+assert.equal(total,5,'Phase 5 target must reduce startConfiguredGame assignments from 6 to 5');
 assert.deepEqual(ids,[
+  'captureFix135',
   'captureFix138',
   'captureFix139',
   'gensDungeonCore01Js',
   'dungeonCore200Rebuild'
-],'current startConfiguredGame chain drifted after captureFix135 retirement');
+],'Phase 5 target chain drifted');
 
 const capture131=blocks.find(x=>x.id==='captureFix131');
 assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-for(const id of ['captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){
+for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){
   assert.ok(chain.some(x=>x.id===id),id+' must remain an active startConfiguredGame owner');
 }
 assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild',
   'Dungeon Core 2.00 must remain the last startConfiguredGame owner');
 
+const c135=blocks.find(x=>x.id==='captureFix135')?.body||'';
 const c138=blocks.find(x=>x.id==='captureFix138')?.body||'';
 const c139=blocks.find(x=>x.id==='captureFix139')?.body||'';
 const dc01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
 const dc200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 
+assert.match(c135,/gensCapturePregameMode/);
+assert.match(c135,/saveCaptureWorldState/);
 assert.match(c138,/isCaptureContext138/);
 assert.match(c138,/renderCaptureWorldHub/);
 assert.match(c139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);

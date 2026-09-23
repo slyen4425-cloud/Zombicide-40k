@@ -1,0 +1,16 @@
+--- a/index.html
++++ b/index.html
+@@ -39555,8 +39555,11 @@
+ // Final game start interception: other modes go through their existing chain untouched.
+ const startOutside200=window.startConfiguredGame;
+ window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};
+-const goOutside200=window.goMenu;
+-window.goMenu=function(){if(active200&&isDungeonMode?.()){const sh=document.getElementById('sheet');if(sh)sh.style.display='none';return show()}return goOutside200?.apply(this,arguments)};
++window.GensShellScreenReturnV1?.register?.("dungeon",function(){
++  if(!active200||!isDungeonMode?.())return false;
++  const sh=document.getElementById('sheet');if(sh)sh.style.display='none';
++  return show()===true;
++});
+ 
+ window.dungeonDebug200=function(){const x=rt(),h=activeHero(x);return {runtime:x,activeHero:h,position:position(h,x),remaining:x?.remaining?.[h],living:liveEnemies().map(e=>({id:e.id,name:enemyName(e),cell:x?.enemyCells?.[e.id],hp:e.hp})),target:enemyAt(activePos(x),x)?.id||null,locked:exitLocked(x),tactical:tactical(),combatActive:typeof dungeonCombatActive!=='undefined'?!!dungeonCombatActive:null,combatHostLen:(document.getElementById('dungeonCombatSetupView')?.innerHTML||'').length}};
+ try{const b=document.querySelector('.dc01Badge');if(b)b.textContent='MOTEUR DUNGEON · CORE 2.00';const f=document.querySelector('.dc01Footer');if(f)f.textContent='Dungeon Core 3.06 · runtime reconstruit et isolé.'}catch(e){}

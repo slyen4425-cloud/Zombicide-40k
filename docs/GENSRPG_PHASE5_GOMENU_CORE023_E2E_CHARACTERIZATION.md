@@ -86,3 +86,28 @@ Le test doit prouver :
 - aucune correction détection ennemie ;
 - aucun traitement des petits rafraîchissements UI ;
 - aucun merge sur `main`.
+
+
+## Observation intermédiaire — état actif résiduel après Save & Quit
+
+Le scénario réel a atteint le vrai bouton `DungeonCore01.quit()`.
+
+Résultat observé :
+- le Shell racine redevient visible ;
+- la map Dungeon est masquée ;
+- la sauvegarde Dungeon reste présente ;
+- le marqueur de session reste resumable ;
+- **`DungeonCore01.active` reste néanmoins `true` juste après Save & Quit**.
+
+Cette observation ne déclenche aucun correctif dans ce lot.
+
+Elle confirme précisément le risque décrit par le pré-audit Core 0.23 :
+un état actif Dungeon peut survivre brièvement alors que l'écran a déjà été
+rendu au Shell.
+
+La caractérisation doit donc continuer par le vrai switch Shell vers Survie.
+Le point décisif est l'état de `DungeonCore01.active` après ce switch et le
+résultat d'un vrai `goMenu` Survie avec la sauvegarde Dungeon toujours présente.
+
+SHA de sentinelle poursuivant ce scénario :
+`bfac3dc4333828004758c15ebd0f84f172aaec49`.

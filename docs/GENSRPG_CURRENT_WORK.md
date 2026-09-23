@@ -1,3 +1,97 @@
+## GREEN FINAL — Phase 5 / retour écran Shell — Capture S1 — 2026-09-23
+
+Ce bloc devient le point de reprise de ce micro-lot dès que le checkpoint final
+ci-dessous existe. Les sections suivantes sont historiques.
+
+- Branche :
+  `work/gensrpg-phase5-module-screen-return-raccord-2026-09-23`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-screen-return-raccord-2026-09-23`.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-screen-return-raccord-preaudit-green-2026-09-23`.
+- SHA de base :
+  `cdae0a0c9259456ef210cf4f6b15ec943a8ae31b`.
+- Checkpoint final à créer après triple CI du SHA documentaire final :
+  `checkpoint/gensrpg-phase5-module-screen-return-capture-s1-green-2026-09-23`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Règle 26 / runtime
+
+Fichier utilisateur exact vérifié depuis `work14.zip` :
+- base taille `8170961` ;
+- base blob `0c15b1dba66ce83f2b27ed99e371885fb1d0ed75`.
+
+Runtime S1 :
+- commit runtime :
+  `7c0863b2c1faf4c4b51564030b935ee20d053d1e` ;
+- taille :
+  `8172505` ;
+- blob :
+  `c17460335b2deb5e5916dbf91448b0706c38d0df`.
+
+### Résultat S1
+
+Capture ne remplace plus `window.goMenu`.
+
+Le `goMenu` natif Shell possède un registre public minimal conforme au contrat
+`returnToPrimaryView`, et Capture y enregistre son retour owner-local via
+`captureEnterWorld139()`.
+
+Chaîne inline `goMenu` :
+
+avant :
+`captureFix139 -> dungeonCore200Rebuild`
+
+après :
+`dungeonCore200Rebuild`.
+
+Aucun nouveau wrapper global, observer, polling, timer ou retry n'a été ajouté.
+Dungeon n'a pas été modifié dans ce micro-lot.
+
+### TDD / cartographie
+
+Sentinelle S1 :
+`tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs`.
+
+RED confirmé avant modification.
+
+Cartographie Phase 2 recalée :
+- source blob `c17460335b2deb5e5916dbf91448b0706c38d0df` ;
+- `438` globals distincts ;
+- `764` affectations inline ;
+- `120` globals multi-owner ;
+- `goMenu = 1 / dungeonCore200Rebuild`.
+
+Les gardes cumulatives Core 0.30 / 0.23 / 0.01 restent actives.
+
+### Validation du candidat technique
+
+SHA :
+`b56703389a17782fc3ce6a040bbdc399b18cdada`.
+
+- Architecture + navigateur complet `35908275054` — SUCCESS ;
+- Firefox `35908274988` — SUCCESS ;
+- Tactical Dock `35908275152` — SUCCESS.
+
+Le vrai E2E Capture avec ancienne sauvegarde Dungeon est GREEN.
+Capture victoire/reprise, Survival, Dungeon/Tactical, Builder, PvP et
+non-interférence quatre modules sont GREEN.
+
+Document :
+`docs/GENSRPG_PHASE5_MODULE_SCREEN_RETURN_CAPTURE_S1.md`.
+
+### Prochaine action
+
+1. repasser la triple CI sur le SHA documentaire final ;
+2. créer le checkpoint GREEN S1 ;
+3. fournir à Sylvain un fichier ZIP de test basé exactement sur le blob S1 ;
+4. attendre son retour manuel avant le micro-lot Dungeon S2.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / raccord runtime retour écran module — Capture S1 — 2026-09-23
 
 Ce bloc devient le point de reprise actif. Les sections suivantes sont historiques.

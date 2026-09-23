@@ -147,7 +147,8 @@ async function startDungeon(page){
         text:(btn.textContent||'').replace(/\s+/g,' ').trim(),
         onclick:btn.getAttribute('onclick')||'',
         display:getComputedStyle(btn).display,
-        visibility:getComputedStyle(btn).visibility
+        visibility:getComputedStyle(btn).visibility,
+        opacity:getComputedStyle(btn).opacity
       })),
       tabs:document.getElementById('dungeonSheetTabs')?getComputedStyle(document.getElementById('dungeonSheetTabs')).display:'absent'
     }));
@@ -156,8 +157,13 @@ async function startDungeon(page){
       /explorer/i.test(b.text) ||
       /exploreDungeonRoom|DungeonCore01\.explore/i.test(b.onclick)
     );
-    assert.deepEqual(explorers,[],
-      'current Dungeon sheet must not recreate Explorer without Core 0.28; offenders='+JSON.stringify(explorers));
+    const visibleExplorers=explorers.filter(b=>
+      b.display!=='none' && b.visibility!=='hidden' && b.opacity!=='0'
+    );
+    assert.deepEqual(visibleExplorers,[],
+      'current Dungeon sheet must not expose a visible Explorer action without Core 0.28; offenders='+JSON.stringify(visibleExplorers));
+    assert.ok(explorers.every(b=>b.display==='none'&&/generateZombieWaveQuick/.test(b.onclick)),
+      'remaining Explorer-labelled nodes must be hidden Survival wave controls only; nodes='+JSON.stringify(explorers));
     assert.notEqual(sheet.tabs,'none','Dungeon sheet tabs must still render without Core 0.28');
     assert.deepEqual(errors,[],'characterization must not raise browser/runtime errors');
 
@@ -165,9 +171,10 @@ async function startDungeon(page){
       scenario:'Phase 5 openChar Core 0.28 redundancy characterization',
       removedOwner:'dungeonCore028HeroExploreGuard',
       hero,
-      explorerButtons:explorers,
+      hiddenLegacyExplorerButtons:explorers,
+      visibleExplorerButtons:visibleExplorers,
       remainingOpenCharOwner:'Capture 139 over native Shell openChar',
-      result:'Core 0.28 openChar wrapper not required by current Dungeon sheet render'
+      result:'Core 0.28 openChar wrapper not required for visible Dungeon sheet behavior'
     }));
   }finally{
     clearTimeout(watchdog);

@@ -15,10 +15,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172742,
-  'Core200 global-retirement preaudit must use the exact user-verified GREEN index');
-assert.equal(gitBlob,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8',
-  'Core200 global-retirement preaudit must use the exact GREEN index blob');
+assert.equal(bytes.length,8172687,
+  'Core200 global-retirement characterization must follow the exact retired runtime');
+assert.equal(gitBlob,'e56f7b63963d991717e1738c3e5188011276a2b7',
+  'Core200 global-retirement characterization must use the exact retired runtime blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -33,8 +33,8 @@ const d01=block('gensDungeonCore01Js');
 const d200=block('dungeonCore200Rebuild');
 
 const core200Dispatcher=
-  'window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};';
-const stableRef='const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;';
+  'const gensDungeonStartConfiguredGame200V1=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};';
+const stableRef=core200Dispatcher;
 const providerOpen='const gensDungeonStartModuleSessionV1=async()=>{';
 const providerRegistration='window.GensShellModuleLaunchV1.register("dungeon",gensDungeonStartModuleSessionV1);';
 
@@ -45,14 +45,14 @@ const providerPos=d200.body.indexOf(providerOpen);
 const registrationPos=d200.body.indexOf(providerRegistration);
 
 assert.ok(capturePreviousPos>=0&&dispatcherPos>capturePreviousPos,
-  'Core200 must still capture the previous historical chain immediately before its current global dispatcher');
-assert.ok(stableRefPos>dispatcherPos,
-  'the Dungeon S4 stable reference must be captured immediately after the Core200 dispatcher');
+  'Core200 must still capture the previous historical chain before its local dispatcher');
+assert.equal(stableRefPos,dispatcherPos,
+  'the Dungeon S4 stable reference is now the local Core200 dispatcher itself');
 assert.ok(providerPos>stableRefPos&&registrationPos>providerPos,
   'the Dungeon public provider must remain downstream of the stable Core200 reference');
 
-assert.equal((d200.body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length,1,
-  'Core200 currently owns exactly one historical global startConfiguredGame assignment');
+assert.equal((d200.body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length,0,
+  'Core200 historical global startConfiguredGame assignment must remain retired');
 assert.equal((index.match(/gensDungeonStartConfiguredGame200V1/g)||[]).length,2,
   'the stable Core200 reference must have exactly one declaration and one provider invocation');
 assert.doesNotMatch(index,/window\.gensDungeonStartConfiguredGame200V1/,
@@ -74,8 +74,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'preaudit must characterize, not alter, the current five-owner historical chain');
+  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+  'characterization must preserve exactly the four remaining historical owners');
 
 const afterCore200=index.slice(d200.end);
 assert.doesNotMatch(afterCore200,/startConfiguredGame/,
@@ -132,8 +132,8 @@ assert.match(providerBrowser,/GensShellModuleLaunchV1\?\.startModuleSession\?\.\
   'the S4 browser proof must launch Dungeon through the public provider independently of the visible global');
 
 const saveQuitBrowser=read('tests/gens_savequit_resume_shell_browser_v11411.test.cjs');
-assert.match(saveQuitBrowser,/Core 2\.00 must own true Dungeon launches while preserving Capture routing/,
-  'preaudit must record that the old Save & Quit fixture still contains a static Core200-global assumption to realign in the future retirement lot');
+assert.match(saveQuitBrowser,/Core 2\.00 must retain the true Dungeon launch dispatcher as a stable local provider target/,
+  'Save & Quit fixture must now protect the local Core200 dispatcher behind the final Shell/provider path');
 assert.match(saveQuitBrowser,/onclick="startConfiguredGame\(\)"/,
   'the old Save & Quit fixture still exercises the visible callsite and must be kept realistic when the Core200 assignment is retired');
 
@@ -152,17 +152,17 @@ for(const step of [
 }
 
 console.log(JSON.stringify({
-  scenario:'Phase 5 Core200 startConfiguredGame global-retirement preaudit',
+  scenario:'Phase 5 Core200 startConfiguredGame global-retirement characterization after retirement',
   exactIndex:{bytes:bytes.length,gitBlob},
   currentHistoricalOwners:chain,
   proved:{
-    exactCore200GlobalDispatcher:true,
+    exactCore200LocalDispatcher:true,
     stableLocalCore200Reference:true,
     stableReferenceConsumers:['gensDungeonStartModuleSessionV1'],
     lateInlineReaders:0,
     lateExternalReaders:0,
     finalShellReadsPreviousGlobal:false,
-    assignmentInstallationSideEffect:'none observed; assignment only publishes the dispatcher before the stable local capture'
+    assignmentInstallationSideEffect:'retired; local dispatcher preserved without a global publication'
   },
   futureRedContract:{
     shellFinalOwnsGlobal:true,
@@ -183,5 +183,5 @@ console.log(JSON.stringify({
       'four-module non-interference'
     ]
   },
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

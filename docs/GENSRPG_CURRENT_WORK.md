@@ -1,3 +1,79 @@
+# BLOCAGE TRANSPORT UNIQUEMENT — Phase 5 / retrait global Core200 — 2026-09-24
+
+Le chantier runtime est prêt mais l'écriture du gros \`index.html\` est bloquée par la limite de transport du connecteur, pas par un problème de code.
+
+## TDD RED confirmé
+
+SHA RED :
+\`565c9fd4770f7c2a9a40c91551d82d41e509225a\`.
+
+CI :
+- Architecture : run \`36013639894\` — FAILURE attendue uniquement sur
+  \`Retirer le global startConfiguredGame Core200\` ;
+- Firefox : run \`36013639813\` — SUCCESS ;
+- Tactical Dock : run \`36013640021\` — SUCCESS complet ;
+- Browser : skipped car dépendant d'Architecture RED.
+
+Le RED exige exactement le futur état :
+- aucun \`window.startConfiguredGame=\` dans \`dungeonCore200Rebuild\` ;
+- fonction Core200 conservée comme référence locale stable
+  \`gensDungeonStartConfiguredGame200V1\` ;
+- provider Dungeon S4 conservé ;
+- quatre autres propriétaires historiques conservés.
+
+## Patch runtime exact préparé
+
+Source vérifiée :
+- taille \`8172742\` ;
+- blob \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Cible exacte calculée depuis le fichier utilisateur règle 26 :
+- taille \`8172687\` ;
+- blob attendu \`e56f7b63963d991717e1738c3e5188011276a2b7\`.
+
+Modification unique :
+
+\`\`\`js
+const startOutside200=window.startConfiguredGame;
+const gensDungeonStartConfiguredGame200V1=async function(){
+  if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))
+    return start();
+  return startOutside200?.apply(this,arguments)
+};
+\`\`\`
+
+Au lieu de publier ce dispatcher sur \`window.startConfiguredGame\`.
+
+## Échecs de transport prouvés
+
+Trois voies ont été testées sans modification du HEAD :
+1. création one-shot GitHub : bloquée par la couche de sécurité avant création ;
+2. Git Data \`create_blob\` : rupture HTTP/2 avant création du blob cible ;
+3. Contents API \`update_file\` : rupture HTTP/2 avant commit.
+
+Après chaque tentative, vérification :
+- HEAD toujours \`565c9fd4770f7c2a9a40c91551d82d41e509225a\` ;
+- \`index.html\` toujours blob \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Aucune écriture runtime partielle n'existe.
+
+## Reprise après substitution manuelle du fichier cible
+
+Dès que le fichier cible exact remplace \`index.html\` sur la branche
+\`work/gensrpg-phase5-startconfiguredgame-core200-global-retirement-2026-09-24\` :
+
+1. vérifier que GitHub retourne exactement le blob
+   \`e56f7b63963d991717e1738c3e5188011276a2b7\` ;
+2. réaligner uniquement les sentinelles historiques devenues obsolètes ;
+3. exécuter Architecture + Browser complet ;
+4. Firefox ;
+5. Tactical Dock ;
+6. créer checkpoint GREEN ;
+7. preview téléphone si nécessaire ;
+8. aucun merge \`main\`.
+
+---
+
 # CHANTIER COURANT — Phase 5 / retrait du global startConfiguredGame Core200 — 2026-09-24
 
 Le pré-audit précédent est GREEN et figé.

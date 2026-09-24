@@ -179,3 +179,33 @@ Le SHA documentaire descendant de ce candidat doit encore passer :
 - Tactical Dock.
 
 Aucun checkpoint GREEN avant cette triple validation.
+
+
+## RED structurel — ordre d'installation du provider
+
+La première validation navigateur S2 a détecté une régression réelle avant même le
+nouveau scénario provider.
+
+Run :
+`35959902449`.
+
+Le scénario historique
+`gens_survival_shell_launch_browser_v11411.test.cjs`
+échoue pendant le chargement du Shell.
+
+Cause :
+`window.GensShellModuleLaunchV1.register("survival", ...)`
+était exécuté juste après le propriétaire natif, alors que
+`GensShellModuleLaunchV1` n'est exposé que plus loin dans le même script.
+
+Erreur observée :
+`TypeError: Cannot read properties of undefined (reading 'register')`.
+
+Décision :
+- conserver la capture native et la fonction provider près du propriétaire Survival ;
+- déplacer uniquement l'enregistrement après
+  `window.GensShellModuleLaunchV1=Object.freeze(...)` ;
+- l'enregistrement doit rester avant `goMenu()` ;
+- aucune temporisation/retry/wrapper de compatibilité n'est autorisé.
+
+La sentinelle S2 est renforcée pour rendre cette mauvaise position RED.

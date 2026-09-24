@@ -38,8 +38,14 @@ assert.match(provider,/await\s+gensSurvivalNativeStartV1\(\)/,
   'Survival provider must call the captured native Shell launch path');
 assert.match(provider,/return true/,
   'Survival provider must report handled=true after delegating');
-assert.match(provider,/window\.GensShellModuleLaunchV1\.register\(["']survival["'],gensSurvivalStartModuleSessionV1\)/,
-  'S2 must register exactly the Survival provider');
+assert.doesNotMatch(provider,/GensShellModuleLaunchV1\.register/,
+  'S2 must not register Survival before the S1 registry exists');
+
+const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
+const goMenu=index.indexOf('function goMenu(){',registryExpose);
+const registration=index.indexOf('window.GensShellModuleLaunchV1.register("survival",gensSurvivalStartModuleSessionV1);');
+assert.ok(registryExpose>nextOwner&&registration>registryExpose&&registration<goMenu,
+  'S2 must register Survival only after the S1 registry is exposed and before goMenu');
 
 assert.doesNotMatch(provider,/document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/,
   'S2 provider must contain routing only; native launch remains the existing owner');

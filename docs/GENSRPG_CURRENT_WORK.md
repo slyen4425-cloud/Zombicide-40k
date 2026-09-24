@@ -1,3 +1,31 @@
+## S2 — RED STRUCTUREL ORDRE D'INSTALLATION — 2026-09-24
+
+La première CI navigateur du candidat S2 a détecté une régression réelle.
+
+- SHA candidat concerné :
+  `374ea8c2447a4caff1568b68c0b404829f0d7d66`.
+- Run Architecture + navigateur :
+  `35959902449`.
+- Architecture statique : SUCCESS.
+- Firefox : SUCCESS.
+- Tactical : SUCCESS.
+- Navigateur complet : FAILURE sur le lancement Survival historique.
+
+Cause prouvée :
+l'appel
+`GensShellModuleLaunchV1.register("survival", ...)`
+s'exécutait avant l'exposition du registre S1.
+
+Correction sélectionnée :
+- provider défini près du propriétaire natif ;
+- enregistrement déplacé après l'exposition du registre S1 ;
+- avant `goMenu()` ;
+- aucun retry/timer/wrapper ajouté.
+
+La sentinelle S2 exige désormais cet ordre avant toute correction runtime.
+
+---
+
 ## CANDIDAT RUNTIME — Phase 5 / module-launch S2 — provider Survival — 2026-09-24
 
 Ce bloc devient le point de reprise actif pendant la validation S2.

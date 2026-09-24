@@ -1,3 +1,39 @@
+## S3 — RED PROVIDER CAPTURE — prêt après checkpoint pré-audit GREEN — 2026-09-24
+
+Base obligatoire :
+`checkpoint/gensrpg-phase5-module-launch-s3-capture-provider-preaudit-green-2026-09-24`.
+
+Mission :
+raccorder Capture uniquement au registre `GensShellModuleLaunchV1`.
+
+### Contrat RED
+
+La sentinelle
+`tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs`
+doit échouer sur la base pré-audit car le provider Capture n'existe pas encore.
+
+Elle exige ensuite :
+- capture de `window.startConfiguredGame` après installation du wrapper `captureFix139` ;
+- provider public routing-only ;
+- garde `gensShellActiveModuleV1() === "capture"` ;
+- appel de la référence Capture139 capturée ;
+- `handled=true` après délégation ;
+- registration Capture exactement une fois ;
+- provider Survival S2 conservé ;
+- aucun provider Dungeon/PvP ;
+- bouton production toujours sur `startConfiguredGame()` ;
+- chaîne historique exacte de cinq propriétaires inchangée.
+
+### Interdiction absolue
+
+S3 ne retire ni `captureFix135`, ni `captureFix138`, ni `captureFix139`,
+ni les deux wrappers Dungeon.
+Aucune preuve de shadowing ne peut autoriser un retrait.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / module-launch S3 — pré-audit provider Capture — 2026-09-24
 
 Pré-audit terminé et triple-GREEN.

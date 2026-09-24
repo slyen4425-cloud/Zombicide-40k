@@ -26500,21 +26500,6 @@ window.captureBattleApplyAbility=function(battle,actor,ability,target){
   return applyBuff135(battle,actor,ability,target);
 };
 
-/* 6) Nouveau jeu = reset du jour / tour monde Capture */
-const start135=window.startConfiguredGame;
-if(typeof start135==="function"){
-  window.startConfiguredGame=async function(){
-    try{
-      if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode()){
-        const ws=captureWorldState();
-        ws.day=1;ws.turnIndex=0;ws.round=1;ws.last=null;
-        if(Array.isArray(ws.history))ws.history=[];
-        saveCaptureWorldState(ws);
-      }
-    }catch(e){console.warn("Reset jour Capture",e)}
-    return await start135.apply(this,arguments);
-  };
-}
 })();
 </script>
 <style id="captureFix135Css">

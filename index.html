@@ -4295,6 +4295,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 </div>
 
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
+<script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
 
 <script>
 
@@ -13811,7 +13812,7 @@ function bindWaveEditorAutosave(){
 const ZOMBICIDE_BASE_PRESET_ID="wave_zombicide_base";
 
 function zombicideBaseWaveProfile(){
-  const base=defaultWaveProfile();
+  const base=GensSurvivalV1.waveRules.defaultProfile();
   base.enabled=true;
   base.mode="xp";
 
@@ -13931,13 +13932,6 @@ function renderWavePresetReserve(reserve){
     box.appendChild(row);
   });
 }
-function collectEnemyIdsFromProfile(p){
-  const ids=new Set();
-  (p.levels||[]).forEach(l=>(l.cards||[]).forEach(c=>{
-    if((c.kind==="enemy"||c.kind==="activation") && c.enemy)ids.add(String(c.enemy));
-  }));
-  return [...ids];
-}
 function normalizeWaveReserveForProfile(profile,reserve){
   refreshCustomEnemiesIntoZombieTypes();
   const out={...defaultZombieConfig(),...(reserve||{})};
@@ -13964,7 +13958,7 @@ function normalizeWaveReserveForProfile(profile,reserve){
 function autoReserveFromProfile(p){
   const reserve={};
   ZOMBIE_TYPES.forEach(z=>reserve[z.id]=0);
-  collectEnemyIdsFromProfile(p).forEach(id=>{
+  GensSurvivalV1.waveRules.collectEnemyIds(p).forEach(id=>{
     // valeur boîte actuelle si dispo, sinon au moins 1
     reserve[id]=Math.max(1,Number(defaultZombieConfig()[id])||1);
   });
@@ -14029,7 +14023,7 @@ function selectWavePreset(id){
 
   setActiveWavePresetId(id);
 
-  const profile={...(preset.profile||defaultWaveProfile()),enabled:true};
+  const profile={...(preset.profile||GensSurvivalV1.waveRules.defaultProfile()),enabled:true};
   saveWaveProfile(profile);
   applyActiveWavePresetReserve();
 
@@ -14044,7 +14038,7 @@ function selectWavePreset(id){
 function saveAndActivateWaveSet(){
   const profile=readWaveProfileFromUi();
   let reserve=collectWaveReserveFromUi();
-  const used=collectEnemyIdsFromProfile(profile);
+  const used=GensSurvivalV1.waveRules.collectEnemyIds(profile);
   const hasAny=Object.values(reserve).some(v=>Number(v)>0);
   if(!hasAny && used.length)reserve=autoReserveFromProfile(profile);
   reserve=normalizeWaveReserveForProfile(profile,reserve);
@@ -14099,7 +14093,7 @@ function createNewWaveSet(){
   wavePresetDirty=false;
   setActiveWavePresetId("");
 
-  const p=defaultWaveProfile();
+  const p=GensSurvivalV1.waveRules.defaultProfile();
   p.enabled=true;
   saveWaveProfile(p);
 
@@ -14167,7 +14161,7 @@ function applyActiveWavePresetReserve(){
   if(!id)return false;
   const p=loadWavePresets().find(x=>x.id===id);
   if(!p)return false;
-  const profile=p.profile||defaultWaveProfile();
+  const profile=p.profile||GensSurvivalV1.waveRules.defaultProfile();
   const reserve=normalizeWaveReserveForProfile(
     profile,
     p.reserve||autoReserveFromProfile(profile)
@@ -14189,47 +14183,14 @@ function applyActiveWavePresetReserve(){
 }
 
 
-function defaultWaveProfile(){
-  return {
-    enabled:false,
-    mode:"xp",
-    manualLevel:0,
-    levels:[
-      {name:"Bleu",color:"#2779b9",threshold:0,cards:[
-        {kind:"enemy",enemy:"walker",qty:1},
-        {kind:"enemy",enemy:"walker",qty:2},
-        {kind:"enemy",enemy:"fatty",qty:1},
-        {kind:"none",enemy:"walker",qty:0}
-      ]},
-      {name:"Jaune",color:"#c79a20",threshold:7,cards:[
-        {kind:"enemy",enemy:"walker",qty:3},
-        {kind:"enemy",enemy:"runner",qty:1},
-        {kind:"enemy",enemy:"fatty",qty:1},
-        {kind:"activation",enemy:"walker",qty:0}
-      ]},
-      {name:"Orange",color:"#cd6b20",threshold:19,cards:[
-        {kind:"enemy",enemy:"walker",qty:5},
-        {kind:"enemy",enemy:"runner",qty:2},
-        {kind:"enemy",enemy:"fatty",qty:2},
-        {kind:"double",enemy:"walker",qty:0}
-      ]},
-      {name:"Rouge",color:"#9f241f",threshold:43,cards:[
-        {kind:"enemy",enemy:"walker",qty:7},
-        {kind:"enemy",enemy:"runner",qty:3},
-        {kind:"enemy",enemy:"abomination",qty:1},
-        {kind:"double",enemy:"walker",qty:0}
-      ]}
-    ]
-  };
-}
 function loadWaveProfile(){
   try{
     const raw=JSON.parse(localStorage.getItem(WAVE_PROFILE_KEY)||"null");
     if(raw && Array.isArray(raw.levels)){
-      return {...defaultWaveProfile(),...raw,levels:raw.levels.slice(0,20)};
+      return {...GensSurvivalV1.waveRules.defaultProfile(),...raw,levels:raw.levels.slice(0,20)};
     }
   }catch(e){}
-  return defaultWaveProfile();
+  return GensSurvivalV1.waveRules.defaultProfile();
 }
 function saveWaveProfile(p){
   const clean={...p,levels:(p.levels||[]).slice(0,20)};

@@ -63,8 +63,8 @@ assert.match(
 );
 assert.match(
   d200.body,
-  /const startOutside200=window\.startConfiguredGame;\s*window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\);return startOutside200\?\.apply\(this,arguments\)\}/,
-  'Core200 must remain the final Dungeon launch interceptor while delegating non-Dungeon/Capture traffic'
+  /const startOutside200=window\.startConfiguredGame;\s*const gensDungeonStartConfiguredGame200V1=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\);return startOutside200\?\.apply\(this,arguments\)\}/,
+  'Core200 must remain the local Dungeon launch dispatcher while delegating non-Dungeon/Capture traffic'
 );
 assert.match(
   d200.body,
@@ -87,8 +87,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
 }
 assert.deepEqual(
   chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'S4 preaudit must preserve the exact five-owner chain'
+  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S4 preaudit must preserve the exact four-owner global chain after Core200 retirement'
 );
 
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
@@ -104,8 +104,8 @@ for(const p of [
 }
 
 const saveQuit=fs.readFileSync(path.join(root,'tests','gens_savequit_resume_shell_browser_v11411.test.cjs'),'utf8');
-assert.match(saveQuit,/Core 2\.00 must own true Dungeon launches while preserving Capture routing/,
-  'permanent Save & Quit E2E must continue to characterize Core200 as the true Dungeon launch owner');
+assert.match(saveQuit,/Core 2\.00 must retain the true Dungeon launch dispatcher as a stable local provider target/,
+  'permanent Save & Quit E2E must continue to characterize Core200 as the local Dungeon launch dispatcher');
 assert.match(saveQuit,/const core200Script=exactScript\('dungeonCore200Rebuild'\)/,
   'Save & Quit E2E must continue to execute the exact Core200 production block');
 
@@ -114,8 +114,8 @@ assert.match(mapCombat,/GensRpgTacticalCombatV2Bridge/,
   'Dungeon map combat E2E must continue to protect the Tactical public bridge');
 
 const rollback=fs.readFileSync(path.join(root,'tests','gens_phase5_user_regression_rollback_guard_v1.test.cjs'),'utf8');
-assert.match(rollback,/Dungeon Core 2\.00 must remain the final Dungeon launch interceptor/,
-  'user-regression rollback guard must continue to protect Core200');
+assert.match(rollback,/Dungeon Core 2\.00 must retain its stable local Dungeon launch dispatcher/,
+  'user-regression rollback guard must continue to protect the local Core200 dispatcher');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S4 Dungeon provider preaudit',
@@ -124,7 +124,7 @@ console.log(JSON.stringify({
   chain,
   selectedSeam:{
     owner:'dungeonCore200Rebuild',
-    captureReference:'window.startConfiguredGame immediately after Core200 installs its final Dungeon interceptor',
+    captureReference:'gensDungeonStartConfiguredGame200V1 local dispatcher retained inside Core200',
     provider:'future routing-only Dungeon provider',
     productionRouting:'unchanged during S4',
     retirement:'none'

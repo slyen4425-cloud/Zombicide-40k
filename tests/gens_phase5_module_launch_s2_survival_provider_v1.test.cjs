@@ -55,8 +55,8 @@ assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).len
 assert.doesNotMatch(index,/GensShellModuleLaunchV1\.register\(["']pvp["']/,
   'PvP must remain unrouted during the module-launch provider sequence');
 
-assert.equal((index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length,5,
-  'S2 must preserve all five historical startConfiguredGame wrappers');
+assert.equal((index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length,4,
+  'S2 must preserve the four remaining historical startConfiguredGame globals');
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'S2 must preserve the native Shell startConfiguredGame owner');
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
@@ -64,11 +64,15 @@ assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
 assert.equal((index.match(/GensShellModuleLaunchV1\.startModuleSession\(/g)||[]).length,0,
   'S2 must not switch production routing to the registry');
 
-for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){
+for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js']){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing historical launch owner '+id);
   assert.match(m[1],/window\.startConfiguredGame\s*=\s*async\s+function/,'historical owner changed: '+id);
 }
+const core200=index.match(/<script\\b[^>]*\\bid=["\\']dungeonCore200Rebuild["\\'][^>]*>([\\s\\S]*?)<\\/script>/i)?.[1]||'';
+assert.match(core200,/const gensDungeonStartConfiguredGame200V1=async function/,'Core200 local Dungeon launch dispatcher must remain');
+assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global launch assignment must remain retired');
+assert.match(core200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core200 Dungeon provider registration must remain');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S2 Survival provider',

@@ -56,8 +56,10 @@ assert.match(c138.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
   'Capture138 historical boundary must remain');
 assert.match(d01.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
   'Dungeon Core01 historical boundary must remain');
-assert.match(d200.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
-  'Dungeon Core200 historical boundary must remain');
+assert.match(d200.body,/const gensDungeonStartConfiguredGame200V1=async function/,
+  'Dungeon Core200 local launch dispatcher must remain');
+assert.doesNotMatch(d200.body,/window\.startConfiguredGame\s*=(?!=)/,
+  'Dungeon Core200 global launch boundary must remain retired');
 
 const chain=[];
 for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){
@@ -65,8 +67,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'S3 preaudit must preserve the exact five-owner chain');
+assert.deepEqual(chain,['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S3 preaudit must preserve the exact four-owner global chain after Core200 retirement');
 
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_user_regression_rollback_guard_v1.test.cjs')),
   'the permanent user-regression rollback guard must remain');

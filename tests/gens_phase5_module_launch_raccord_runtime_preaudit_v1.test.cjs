@@ -39,7 +39,7 @@ assert.doesNotMatch(deploy,/assets\/gensrpg\/shell\/entry-v1\.js/,'Shell Phase 3
 const native=(index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length;
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
 assert.equal(native,1,'Shell native startConfiguredGame owner must remain present');
-assert.equal(wrappers,5,'preaudit must preserve the five historical module wrappers');
+assert.equal(wrappers,4,'preaudit must preserve the four remaining historical global module wrappers');
 
 function scriptBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -47,16 +47,20 @@ function scriptBody(id){
   return m[1];
 }
 
-const chain=['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'];
+const chain=['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'];
 for(const id of chain){
   assert.match(scriptBody(id),/window\.startConfiguredGame\s*=\s*async\s+function/,'missing startConfiguredGame owner '+id);
 }
+const core200=scriptBody('dungeonCore200Rebuild');
+assert.match(core200,/const gensDungeonStartConfiguredGame200V1=async function/,'Core200 local Dungeon launch dispatcher must remain');
+assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global launch assignment must remain retired');
+assert.match(core200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core200 Dungeon provider registration must remain');
 
 assert.match(scriptBody('captureFix135'),/gensCapturePregameMode[\s\S]*saveCaptureWorldState/,'Capture135 reset semantics must remain');
 assert.match(scriptBody('captureFix138'),/isCaptureContext138[\s\S]*renderCaptureWorldHub[\s\S]*setTimeout/,'Capture138 post-launch UI semantics must remain');
 assert.match(scriptBody('captureFix139'),/if\(!isCaptureContext138\(\)\)return await start139\.apply[\s\S]*normalizeGameParticipants[\s\S]*captureEnterWorld139/,'Capture139 remains the dedicated Capture launch path');
 assert.match(scriptBody('gensDungeonCore01Js'),/if\(eligible\(\)\)return start\(\)/,'Dungeon Core01 remains a real Dungeon launch owner');
-assert.match(scriptBody('dungeonCore200Rebuild'),/isDungeonMode[\s\S]*isCaptureContext138[\s\S]*return start\(\)/,'Dungeon Core200 remains the final Dungeon launch owner');
+assert.match(core200,/isDungeonMode[\s\S]*isCaptureContext138[\s\S]*return start\(\)/,'Dungeon Core200 remains the local Dungeon launch dispatcher');
 
 assert.match(index,/Le moteur PvP n’est pas encore construit\./,'PvP must remain a placeholder');
 assert.match(index,/PVP — À VENIR/,'PvP must not receive a runtime launch provider yet');

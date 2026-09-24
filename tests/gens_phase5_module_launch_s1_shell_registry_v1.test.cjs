@@ -49,11 +49,11 @@ assert.doesNotMatch(service,/GensShellModuleLaunchV1\.register/,
   'module provider registrations must remain outside the S1 registry infrastructure block');
 
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
-assert.equal(wrappers,5,'S1 must preserve all five historical startConfiguredGame wrappers');
+assert.equal(wrappers,4,'S1 must preserve the four remaining historical startConfiguredGame globals');
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'S1 must preserve the native Shell startConfiguredGame owner');
 
-const expected=['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'];
+const expected=['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'];
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing '+id);
@@ -62,10 +62,14 @@ function block(id){
 for(const id of expected){
   const body=block(id);
   assert.match(body,/window\.startConfiguredGame\s*=\s*async\s+function/,'historical start owner changed: '+id);
-  if(!['captureFix139','dungeonCore200Rebuild'].includes(id)){
+  if(id!=='captureFix139'){
     assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
   }
 }
+const core200=block('dungeonCore200Rebuild');
+assert.match(core200,/const gensDungeonStartConfiguredGame200V1=async function/,'Core200 local Dungeon launch dispatcher must remain');
+assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global launch assignment must remain retired');
+assert.match(core200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core200 Dungeon provider registration must remain');
 
 assert.match(service,/if\(typeof handler!==["']function["']\)return false/,
   'S1 must return false when a provider is not registered');

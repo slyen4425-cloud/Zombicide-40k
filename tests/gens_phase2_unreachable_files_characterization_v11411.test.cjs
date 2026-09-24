@@ -35,7 +35,10 @@ assert.equal(injected[0],CORE_STORAGE,'Pages fallback must keep Core storage fir
 assert.equal(previewInjected.includes(CORE_STORAGE),false,'Preview must inherit Core storage from source index instead of injecting a duplicate');
 assert.deepEqual(previewInjected,injected.filter(x=>x!==CORE_STORAGE),'Preview and Pages must otherwise share the same external module order');
 const productionDirect=[
-  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...rawDirect.filter(x=>![
+    'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+  ].includes(x)),
   ...injected
 ];
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\s)]+\.js(?:\?[^"'\s)]*)?/g)]
@@ -47,7 +50,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,79);
+assert.equal(reachable.size,80);
 for(const rel of targets)assert.equal(reachable.has(rel),false,rel+' unexpectedly entered production graph');
 
 const textExt=new Set(['.js','.cjs','.mjs','.html','.md','.json','.yml','.yaml','.txt','.webmanifest']);

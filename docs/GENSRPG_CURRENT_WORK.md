@@ -1,3 +1,169 @@
+# PRÉ-AUDIT PROUVÉ — Phase 5 / retrait du global startConfiguredGame Core200 — 2026-09-24
+
+Le seam de retrait de l'affectation globale Core200 est désormais caractérisé **sans modification runtime**.
+
+## État GitHub vérifié avant audit
+
+- Production \`main\` :
+  \`e8681f9823573ced8aec59c8ddc47a72b02bc663\`, toujours gelée.
+- Dernier checkpoint GREEN validé utilisateur :
+  \`checkpoint/gensrpg-phase5-survival-to-dungeon-grid-repair-green-2026-09-24\`.
+- SHA GREEN :
+  \`ed6064e7113034242dd3467f8b306b63d47101a0\`.
+- Checkpoint de départ du pré-audit :
+  \`checkpoint/gensrpg-start-phase5-startconfiguredgame-core200-global-retirement-preaudit-2026-09-24\`.
+- Branche :
+  \`work/gensrpg-phase5-startconfiguredgame-core200-global-retirement-preaudit-2026-09-24\`.
+- La branche repart bien de \`ed6064e...\` et ne contenait avant ce pré-audit qu'un commit documentaire.
+
+## Règle 26 — fichier utilisateur vérifié
+
+Fichier reçu :
+\`work18.zip\`.
+
+Contenu :
+\`index18.txt\`, HTML complet.
+
+Empreinte vérifiée :
+- taille : \`8172742\` octets ;
+- blob Git : \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Le blob GitHub de \`index.html\` au SHA
+\`ed6064e7113034242dd3467f8b306b63d47101a0\`
+est exactement le même :
+\`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Le fichier utilisateur est donc l'autorité locale exacte pour ce pré-audit.
+
+## Fonction Core200 exacte caractérisée
+
+Dans \`dungeonCore200Rebuild\` :
+
+\`\`\`js
+const startOutside200=window.startConfiguredGame;
+window.startConfiguredGame=async function(){
+  if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))
+    return start();
+  return startOutside200?.apply(this,arguments)
+};
+const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;
+\`\`\`
+
+Le provider S4 appelle ensuite uniquement la référence stable :
+
+\`\`\`js
+const gensDungeonStartModuleSessionV1=async()=>{
+  if(gensShellActiveModuleV1()!=="dungeon")return false;
+  await gensDungeonStartConfiguredGame200V1();
+  return true;
+};
+window.GensShellModuleLaunchV1.register("dungeon",gensDungeonStartModuleSessionV1);
+\`\`\`
+
+## Réponses prouvées aux questions du pré-audit
+
+1. **Fonction affectée au global** :
+   le dispatcher async Core200 exact ci-dessus.
+
+2. **Appels directs ailleurs** :
+   \`gensDungeonStartConfiguredGame200V1\` apparaît exactement deux fois dans le runtime :
+   sa déclaration et son appel par \`gensDungeonStartModuleSessionV1\`.
+   Aucun autre consommateur direct n'a été trouvé.
+
+3. **Référence stable provider S4** :
+   oui. Le provider Dungeon possède déjà une référence locale stable Core200,
+   indépendante des réaffectations globales ultérieures.
+
+4. **Lecteurs tardifs du vieux global Core200** :
+   aucun dans les scripts inline postérieurs à Core200.
+   Les fichiers tardifs \`dungeon-core-316.js\`, \`dungeon-core-317.js\` et
+   \`gens-mobile-combat-performance-16781022.js\` ne lisent pas
+   \`startConfiguredGame\`.
+   Le Shell final ne lit pas l'ancienne valeur : il réaffecte le global avec son propre routeur public.
+
+5. **Chemins à protéger au futur retrait** :
+   la logique Dungeon réelle doit rester intacte via le provider S4.
+   Les preuves E2E existantes couvrent déjà Dungeon direct/provider,
+   Survival -> Dungeon, map -> Tactical, Save & Quit/reprise, Builder,
+   Capture, PvP et non-interférence.
+   Embuscade/détection restent protégées par leurs sentinelles dédiées.
+
+6. **Effet secondaire de l'affectation elle-même** :
+   aucun effet d'installation observé.
+   L'affectation publie uniquement le dispatcher sur \`window\`, puis ce dispatcher est immédiatement
+   capturé comme référence locale S4.
+   Aucun listener, stockage, timer, observer ou installation gameplay n'est attaché à l'affectation elle-même.
+
+7. **RED futur exact** :
+   le futur lot runtime devra exiger simultanément :
+   - Shell final toujours seul propriétaire visible de \`window.startConfiguredGame\` ;
+   - provider Dungeon public toujours présent ;
+   - référence Core200 stable toujours présente et appelée par le provider ;
+   - **zéro** affectation \`window.startConfiguredGame\` dans \`dungeonCore200Rebuild\` ;
+   - les quatre autres propriétaires historiques encore présents :
+     \`captureFix135\`, \`captureFix138\`, \`captureFix139\`, \`gensDungeonCore01Js\` ;
+   - aucune autre suppression dans le même lot ;
+   - tous les E2E imposés par le contrat utilisateur.
+
+## Point important sur les sentinelles historiques
+
+Trois sentinelles actuelles protègent encore volontairement l'ancien contrat à cinq propriétaires :
+- \`gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs\` ;
+- \`gens_phase5_module_launch_final_shell_authority_v1.test.cjs\` ;
+- \`gens_phase5_user_regression_rollback_guard_v1.test.cjs\`.
+
+Le test Save & Quit historique contient lui aussi une hypothèse statique Core200-global
+dans son fixture réduit.
+
+Lors du **futur lot runtime seulement**, ces contrats devront être réalignés explicitement
+de cinq propriétaires vers quatre, sans neutraliser leurs preuves fonctionnelles.
+Le vrai chemin Save & Quit devra continuer à traverser le propriétaire Shell final + provider Dungeon,
+pas être simplifié artificiellement pour faire passer le test.
+
+## Sentinelle de pré-audit ajoutée
+
+\`tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs\`
+
+Elle verrouille :
+- index exact \`8172742 / 95f8c96...\` ;
+- dispatcher Core200 actuel ;
+- référence stable S4 ;
+- provider public Dungeon ;
+- absence de lecteurs tardifs ;
+- Shell final sans fallback ;
+- chaîne historique actuelle intacte ;
+- présence des preuves E2E obligatoires ;
+- contrat RED futur documenté.
+
+Commits du pré-audit avant clôture documentaire :
+- test : \`b91a8698f99f4123b0aa5bf01cbe5eb738fdae46\` ;
+- raccord CI : \`f4d32f49bd362d40674ce77e8ced4d92225a0509\`.
+
+## État runtime
+
+**Aucun runtime modifié.**
+\`index.html\` reste exactement :
+- taille \`8172742\` ;
+- blob \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Aucun retrait n'est effectué pendant ce pré-audit.
+
+## Validation requise avant checkpoint GREEN pré-audit
+
+Le HEAD documentaire final doit passer :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après triple SUCCESS :
+- créer
+  \`checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-preaudit-green-2026-09-24\` ;
+- ouvrir ensuite un **nouveau chantier runtime** depuis ce checkpoint ;
+- créer le RED futur avant toute modification de Core200 ;
+- aucun merge sur \`main\`.
+
+---
+
 # CHANTIER COURANT — Phase 5 / startConfiguredGame — pré-audit retrait autorité globale Core200 — 2026-09-24
 
 Validation utilisateur du checkpoint précédent :

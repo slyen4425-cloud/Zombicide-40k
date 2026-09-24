@@ -74,7 +74,7 @@ assert.match(finalShell,/launchService\.startModuleSession\(moduleId\)/,'Shell f
 for(const p of [
   'tests/gens_capture_current_shell_browser_v11411.test.cjs',
   'tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs',
-  'tests/gens_phase5_survival_to_dungeon_same_open_browser_v1.test.cjs',
+  'tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs',
   'tests/gens_savequit_resume_shell_browser_v11411.test.cjs',
   'tests/gens_phase1_four_modules_non_interference_browser_v11411.test.cjs'
 ]){

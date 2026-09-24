@@ -72,8 +72,8 @@ for(const id of ids){
 }
 captureContextSource=extractAssignedFunction(blocks.captureFix138,'isCaptureContext138');
 
-assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m,
-  'preaudit must run against the current five-owner chain');
+assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m,
+  'preaudit must run against the current four-owner global chain after Core200 retirement');
 
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.consumes.includes('module public entry contracts'));
@@ -149,9 +149,9 @@ const selectedFirstRuntimeMicroLot={
   owner:'captureFix135',
   seam:'startConfiguredGame',
   action:'retire only the shadowed startConfiguredGame assignment',
-  targetAssignments:4,
-  preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  rationale:'captureFix139 intercepts every normal context in which captureFix135 pregame reset could activate; delegated contexts do not activate that branch',
+  targetAssignments:3,
+  preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
+  rationale:'historical candidate only; captureFix135 remains protected by the user-regression guard until a fresh dedicated proof replaces it',
   requiresDedicatedRed:true,
   reAuditBeforeAnyCaptureFix138Retirement:true
 };

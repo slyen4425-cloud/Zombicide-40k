@@ -49,7 +49,7 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,80,'Phase 3 scaffolding must remain inert while the current production owner graph contains 80 files');
+assert.equal(Object.keys(ownerManifest.files||{}).length,79,'Phase 3 scaffolding must remain inert while the current production owner graph contains 79 files after the Phase 6 legacy guard retirement');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');
@@ -60,6 +60,6 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:80,
+  productionOwnerGraph:79,
   loadedByProduction:0
 },null,2));

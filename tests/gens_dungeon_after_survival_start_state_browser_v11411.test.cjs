@@ -358,6 +358,47 @@ async function runScenario(port,survivalFirst){
   }
 }
 
+async function runDirectDungeonRoomGridScenario(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+    await selectProfile(page,'adventure','#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',DUNGEON_ID);
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+    const entrance=await dungeonSnapshot(page,'direct-dungeon-grid-control-entrance');
+    const explore=page.locator('#dc01Explore');
+    await explore.waitFor({state:'visible'});
+    await explore.click();
+    await page.waitForTimeout(1800);
+    const continueBtn=page.locator('#dc200ModalOk');
+    if(await continueBtn.count()){
+      await continueBtn.waitFor({state:'visible',timeout:5000});
+      await continueBtn.click();
+      await page.waitForTimeout(1800);
+    }
+    if(!(await page.evaluate(()=>{
+      try{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return Number(x?.room)>=1&&!!x?.last}catch(e){return false}
+    }))){
+      await page.evaluate(()=>window.DungeonCore01?.explore?.());
+      await page.waitForTimeout(1200);
+    }
+    const room=await dungeonSnapshot(page,'direct-dungeon-grid-control-room');
+    return {entrance,room,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
 async function runSameOpenSurvivalToDungeonScenario(port){
   const errors=[];
   const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
@@ -526,6 +567,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const control=await runScenario(port,false);
     const afterSurvival=await runScenario(port,true);
     const persistedThenSurvival=await runPersistedDungeonThenSurvivalScenario(port);
+    const directRoomGrid=await runDirectDungeonRoomGridScenario(port);
     const sameOpen=await runSameOpenSurvivalToDungeonScenario(port);
 
     console.log(JSON.stringify({
@@ -534,6 +576,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
       control:control.snap,
       afterSurvival:afterSurvival.snap,
       persistedThenSurvival,
+      directRoomGrid,
       sameOpen,
       controlErrors:control.errors,
       afterSurvivalErrors:afterSurvival.errors
@@ -570,17 +613,21 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.equal(sameOpen.beforeReturn.family,'survival','same-open characterization must retain Survival family before returning home');
     assert.equal(sameOpen.entrance.activeProfile,DUNGEON_ID,'same-open transition must activate the Dungeon profile');
     assert.equal(sameOpen.entrance.family,'adventure','same-open transition must activate Adventure family');
+    assert.ok(Number(directRoomGrid.room.runtime.room)>=1,'direct Dungeon control must reach a generated Dungeon room');
+    assert.ok(directRoomGrid.room.runtime.lastKind,'direct Dungeon control must retain the generated room');
+    assert.equal(directRoomGrid.room.gridLike.length>0,true,'direct Dungeon control must expose the real visible Dungeon grid surface');
     assert.ok(Number(sameOpen.room.runtime.room)>=1,'same-open Survival -> Dungeon must reach a generated Dungeon room');
     assert.ok(sameOpen.room.runtime.lastKind,'same-open Survival -> Dungeon must retain the generated room');
     assert.equal(
       sameOpen.room.gridLike.length>0,
-      true,
-      'Survival -> Dungeon without manually closing/reopening the link must expose the real visible Dungeon grid surface'
+      directRoomGrid.room.gridLike.length>0,
+      'Survival -> Dungeon without manually closing/reopening the link must expose the same real grid surface as direct Dungeon'
     );
 
     assert.deepEqual(control.errors,[],'fresh direct Dungeon must not raise browser errors');
     assert.deepEqual(afterSurvival.errors,[],'Dungeon after Survival must not raise browser errors');
     assert.deepEqual(persistedThenSurvival.errors,[],'persisted Dungeon -> Survival -> new Dungeon must not raise browser errors');
+    assert.deepEqual(directRoomGrid.errors,[],'direct Dungeon room-grid control must not raise browser errors');
     assert.deepEqual(sameOpen.errors,[],'same-open Survival -> Dungeon must not raise browser errors');
   }finally{
     server.closeAllConnections?.();server.closeIdleConnections?.();server.close();

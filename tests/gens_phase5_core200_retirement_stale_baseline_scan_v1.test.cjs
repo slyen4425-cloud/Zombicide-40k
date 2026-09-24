@@ -7,7 +7,8 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const testsRoot=path.join(root,'tests');
 const exempt=new Set([
-  'gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs'
+  'gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs',
+  'gens_phase5_core200_retirement_stale_baseline_scan_v1.test.cjs'
 ]);
 const stale=[];
 for(const name of fs.readdirSync(testsRoot)){

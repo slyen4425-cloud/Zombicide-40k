@@ -1,3 +1,91 @@
+# CANDIDAT GREEN FINAL — Phase 5 / retrait startConfiguredGame captureFix135 — 2026-09-24
+
+Le micro-lot de retrait de l'ancien propriétaire global `captureFix135` est techniquement GREEN sur le SHA fonctionnel
+`e40e51a1ee18375b5435762b515510f1b8eefb76`.
+
+## Base et périmètre
+
+- Checkpoint GREEN de base :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-green-2026-09-24`.
+- SHA exact de base :
+  `f25f9eb043b426c0b137397949ba7ec4f96bfc54`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-capture135-retirement-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, toujours gelée.
+
+Le patch runtime de ce lot est limité au retrait de l'affectation
+`window.startConfiguredGame` du bloc `captureFix135`.
+Aucun autre propriétaire `startConfiguredGame` n'a été retiré.
+
+## Runtime exact
+
+Commit runtime :
+`8f8092d0f9c79d3876429f57a26ec4b1bb244fba`
+— `runtime: retire captureFix135 startConfiguredGame global assignment`.
+
+Empreinte actuelle :
+- `index.html` blob Git :
+  `198207e3f52730498831f196caa35c4a0283e934`.
+
+Le contenu exact du gros fichier n'a pas été relu pour cette clôture ; la règle 26 reste respectée.
+
+## Chaîne startConfiguredGame après retrait
+
+La chaîne historique globale restante est exactement :
+
+`captureFix138 -> captureFix139 -> gensDungeonCore01Js`.
+
+Invariants :
+- `captureFix135` n'est plus propriétaire global ;
+- `captureFix138`, `captureFix139` et `gensDungeonCore01Js` restent intacts comme propriétaires historiques ;
+- Core200 reste dispatcher Dungeon LOCAL stable via
+  `gensDungeonStartConfiguredGame200V1` ;
+- le Shell final reste l'autorité publique/visible finale ;
+- aucune rustine, aucun nouveau wrapper global, observer, polling, reload ou heartbeat n'a été ajouté.
+
+## Validation complète du SHA fonctionnel
+
+SHA :
+`e40e51a1ee18375b5435762b515510f1b8eefb76`.
+
+- Architecture + Browser :
+  run `36033928386` — SUCCESS.
+  - Architecture job `107749213558` — SUCCESS ;
+  - Browser job `107749590380` — SUCCESS.
+- Firefox :
+  run `36033928516` — SUCCESS.
+- Tactical Dock :
+  run `36033928487` — SUCCESS.
+
+Les sentinelles historiques ont été réalignées uniquement lorsqu'elles portaient
+une baseline obsolète de blob/taille/chaîne, sans suppression de leurs contrats comportementaux.
+
+## Clôture documentaire obligatoire
+
+Le présent commit documentaire change le HEAD.
+
+Avant toute création de checkpoint GREEN final :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock
+
+doivent tous être SUCCESS sur le même SHA documentaire final.
+
+Après triple SUCCESS uniquement :
+- créer
+  `checkpoint/gensrpg-phase5-startconfiguredgame-capture135-retirement-green-2026-09-24` ;
+- créer
+  `preview/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24`
+  sur exactement le même SHA ;
+- fournir le lien de test téléphone à Sylvain ;
+- attendre sa validation utilisateur avant d'ouvrir le ré-audit / retrait de
+  `captureFix138` ;
+- réévaluer explicitement le critère de sortie Phase 5 avant tout nouveau micro-lot ;
+- ne jamais merger sur `main` sans validation explicite.
+
 # CHANTIER COURANT — Phase 5 / retrait startConfiguredGame captureFix135 — 2026-09-24
 
 Validation utilisateur du checkpoint précédent :

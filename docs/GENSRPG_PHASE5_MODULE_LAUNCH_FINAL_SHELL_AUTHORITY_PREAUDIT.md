@@ -205,3 +205,63 @@ Elle verrouille :
 - la présence des preuves E2E obligatoires.
 
 Aucun runtime n'est modifié par ce pré-audit.
+
+
+## Validation technique du pré-audit
+
+SHA technique :
+`3f6b5b23653de7d1fd41e12f40a51d9f77ac478f`.
+
+CI :
+- Architecture + navigateur complet : `35981166457` — SUCCESS ;
+- Tactical Dock : `35981166458` — SUCCESS ;
+- Firefox : `35981166471` — SUCCESS.
+
+Le navigateur complet a notamment validé :
+- Survival historique + provider S2 ;
+- Survival après Dungeon ;
+- goMenu Dungeon/Capture ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire/reprise ;
+- Dungeon après Survival ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG ;
+- openChar ;
+- caches/pièges authored ;
+- Save & Quit/reprise ;
+- provider Dungeon S4 ;
+- PvP placeholder ;
+- Monster Capture historique ;
+- provider Capture S3 ;
+- composition Capture complète ;
+- non-interférence quatre modules ;
+- preview/assets/Equipment.
+
+Le runtime reste strictement inchangé :
+- taille `8172529` ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+### Décision d'architecture finale du pré-audit
+
+La future bascule doit ajouter un propriétaire Shell **sans fallback legacy** :
+`assets/gensrpg/shell/module-launch-final-authority-v1.js`.
+
+Ce fichier sera chargé en dernier et remplacera uniquement
+`window.startConfiguredGame` par le dispatcher du contrat public.
+
+Les cinq propriétaires historiques restent chargés pendant ce futur lot runtime.
+Ils ne pourront être retirés qu'après validation utilisateur de la bascule,
+puis un par un avec TDD dédié.
+
+### Clôture documentaire
+
+Le présent SHA documentaire doit repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Checkpoint cible après triple GREEN :
+`checkpoint/gensrpg-phase5-module-launch-final-shell-authority-preaudit-green-2026-09-24`.
+
+Aucun merge sur `main`.

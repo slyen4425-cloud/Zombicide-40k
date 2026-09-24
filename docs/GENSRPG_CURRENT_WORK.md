@@ -1,3 +1,44 @@
+## GREEN FINAL CANDIDATE — Phase 5 / pré-audit Autorité Shell finale — 2026-09-24
+
+Le pré-audit de l'autorité Shell finale est techniquement GREEN sur :
+`3f6b5b23653de7d1fd41e12f40a51d9f77ac478f`.
+
+Validation :
+- Architecture + navigateur complet : `35981166457` — SUCCESS ;
+- Tactical Dock : `35981166458` — SUCCESS ;
+- Firefox : `35981166471` — SUCCESS.
+
+Runtime :
+- inchangé ;
+- taille `8172529` ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Seam retenu :
+- futur fichier `assets/gensrpg/shell/module-launch-final-authority-v1.js` ;
+- chargé comme dernier script production avant `</body>` ;
+- propriétaire final de `window.startConfiguredGame` ;
+- délégation uniquement à `GensShellModuleLaunchV1.activeModule()` +
+  `startModuleSession(...)` ;
+- aucun fallback vers l'ancienne chaîne ;
+- callsite utilisateur `startConfiguredGame()` inchangé ;
+- aucun retrait historique dans le même lot que la bascule.
+
+Les trois providers construits ont déjà leur parité E2E :
+Survival, Capture et Dungeon.
+PvP reste volontairement sans provider tant que le placeholder reste l'autorité produit.
+
+La présente clôture documentaire doit elle-même repasser la triple CI.
+Après seulement :
+1. checkpoint pré-audit GREEN ;
+2. nouveau chantier runtime avec son propre checkpoint de départ ;
+3. RED dédié exigeant l'autorité Shell finale ;
+4. patch minimal ;
+5. aucun retrait historique avant validation utilisateur de cette bascule.
+
+Aucun merge sur `main`.
+
+---
+
 ## PRÉ-AUDIT EN COURS — Autorité Shell finale caractérisée — 2026-09-24
 
 Le fichier S4 exact fourni par l'utilisateur a été vérifié :

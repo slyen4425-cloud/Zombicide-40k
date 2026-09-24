@@ -1,3 +1,70 @@
+# GREEN FINAL CANDIDATE — Phase 5 / réparation transition Survie -> Dungeon / grille — 2026-09-24
+
+Le lot de réparation est techniquement GREEN sur le SHA `0989aa25f08da6f62fe8681dc88c383c5f40104e`.
+
+- Base GREEN : `checkpoint/gensrpg-phase5-module-launch-final-shell-authority-green-2026-09-24`.
+- SHA de base : `f9ac03a9ad8dfd76b2c8725f885be4fe396942c5`.
+- Branche : `work/gensrpg-phase5-survival-to-dungeon-grid-repair-2026-09-24`.
+- Production `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Fichier exact règle 26 fourni par l'utilisateur : `work17.zip`, index vérifié contre le blob `eddba424d3ebb086a1bdd0bcc1b1822d16a83771`.
+
+## Cause prouvée
+
+L'ancien état d'entrée `dc054AtEntrance`, piloté historiquement par Core 0.54 depuis `loadDungeonState().room`, pouvait rester actif alors que le runtime Dungeon moderne `gensrpg_dungeon_runtime_v2` avait déjà `room >= 1`.
+
+Conséquence : la vraie grille `#dc047RoomBoard .dc047Grid` était générée mais masquée par le CSS `display:none!important`.
+
+## Correction propriétaire
+
+Le runtime Dungeon moderne est désormais l'autorité de visibilité de l'état d'entrée :
+- synchronisation depuis `gensrpg_dungeon_runtime_v2` ;
+- aucune seconde grille ;
+- aucun reload ;
+- aucun polling ;
+- aucun observer supplémentaire ;
+- aucune modification des règles de mouvement, positions, Tactical, Capture, PvP, Stats, Inventory ou Storage.
+
+Le scénario TDD exact Survie -> retour Shell -> Dungeon dans la même page exige désormais la vraie grille canonique et verrouille l'absence de l'état d'entrée obsolète après génération de salle.
+
+## Validation technique
+
+Sur `0989aa25f08da6f62fe8681dc88c383c5f40104e` :
+- Architecture + Browser complet : run `36004816606` — SUCCESS ;
+- Firefox : run `36004816581` — SUCCESS ;
+- Tactical Dock : run `36004816605` — SUCCESS.
+
+Le Browser complet valide notamment :
+- Dungeon après Survie dans la même page ;
+- vraie grille Dungeon canonique ;
+- Dungeon map -> Tactical V2 ;
+- Save & Quit / reprise ;
+- Builder ;
+- Survival ;
+- Capture ;
+- PvP placeholder ;
+- non-interférence quatre modules ;
+- cache/pièges authored ;
+- preview Chromium ;
+- Equipment.
+
+Les anciennes sentinelles figées sur des tailles/hash historiques de `index.html` ont été réalignées sur l'index exact du chantier sans modifier leur contrat fonctionnel.
+
+## Clôture
+
+Le présent commit documentaire doit lui-même repasser :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après triple SUCCESS :
+- créer `checkpoint/gensrpg-phase5-survival-to-dungeon-grid-repair-green-2026-09-24` ;
+- préparer la preview téléphone sur ce checkpoint ;
+- demander validation utilisateur avant de reprendre le retrait des propriétaires historiques.
+
+Aucun merge sur `main`.
+
+---
+
 # CHANTIER COURANT — Phase 5 / réparation transition Survie -> Dungeon / grille — 2026-09-24
 
 Validation utilisateur du lot Autorité Shell finale :

@@ -1,3 +1,83 @@
+## CHANTIER COURANT — Phase 5 / module-launch — raccord Autorité Shell finale — 2026-09-24
+
+Base pré-audit GREEN :
+`checkpoint/gensrpg-phase5-module-launch-final-shell-authority-preaudit-green-2026-09-24`.
+
+SHA base :
+`6f0d062aa40cc4dce61e7db0d09dc491cca14d42`.
+
+Triple CI finale du pré-audit :
+- Architecture + navigateur complet : `35982305366` — SUCCESS ;
+- Firefox : `35982305316` — SUCCESS ;
+- Tactical Dock : `35982305246` — SUCCESS.
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase5-module-launch-final-shell-authority-raccord-2026-09-24`.
+
+Branche :
+`work/gensrpg-phase5-module-launch-final-shell-authority-raccord-2026-09-24`.
+
+Runtime de base :
+- taille `8172529` ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Production :
+`main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Faire de Shell le propriétaire final de `window.startConfiguredGame` sans déplacer
+aucune logique gameplay et sans retirer aucune autorité historique dans ce lot.
+
+Cible :
+- créer `assets/gensrpg/shell/module-launch-final-authority-v1.js` ;
+- charger ce fichier comme **dernier script** avant `</body>` ;
+- le fichier remplace uniquement `window.startConfiguredGame` ;
+- il délègue uniquement à `GensShellModuleLaunchV1.activeModule()` puis
+  `GensShellModuleLaunchV1.startModuleSession(...)` ;
+- aucun fallback vers l'ancien global ;
+- le bouton production reste `startConfiguredGame()`.
+
+### Invariants
+
+- provider Survival S2 inchangé ;
+- provider Capture S3 inchangé ;
+- provider Dungeon S4 inchangé ;
+- PvP reste sans provider ;
+- `captureFix135` conservé ;
+- `captureFix138` conservé ;
+- `captureFix139` conservé ;
+- `gensDungeonCore01Js` conservé ;
+- `dungeonCore200Rebuild` conservé ;
+- aucun observer/timer/retry/polling ;
+- aucun changement Tactical/Builder/Storage/Stats/gameplay ;
+- aucun correctif QA différé ;
+- aucun merge sur `main`.
+
+### Règle 26
+
+Le fichier utilisateur `work16.zip -> indexwork16.txt` a déjà été vérifié contre
+ce runtime exact :
+- `8172529` octets ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Le SHA de base documentaire a conservé ce même blob ; cette copie exacte reste donc
+valide pour le lot.
+
+### TDD
+
+Prochaine action :
+1. sentinelle RED exigeant le fichier Shell final et son chargement en dernier ;
+2. RED Architecture attendu uniquement sur cette sentinelle ;
+3. patch runtime minimal ;
+4. parité E2E complète ;
+5. preview téléphone + validation utilisateur ;
+6. seulement ensuite ouvrir les retraits historiques un par un.
+
+Aucun retrait historique dans ce chantier.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / pré-audit Autorité Shell finale — 2026-09-24
 
 Le pré-audit de l'autorité Shell finale est techniquement GREEN sur :

@@ -29,9 +29,10 @@ assert.match(
 );
 assert.match(fix138,/window\.isCaptureContext138\s*=\s*function/,'captureFix138 must remain present');
 assert.match(fix139,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix139 must remain the dedicated Capture launch interceptor');
-assert.match(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 must remain the final Dungeon launch interceptor');
+assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+function/,'Dungeon Core 2.00 must retain its stable local Dungeon launch dispatcher');
+assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 global launch owner must remain retired');
 
 const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
-assert.equal(assignments,5,'rollback target must restore the characterized five-owner chain before any new Phase 5 consolidation');
+assert.equal(assignments,4,'rollback guard must preserve the four remaining historical global owners after Core200 retirement');
 
-console.log('Phase 5 user regression rollback guard: captureFix135 boundary restored, 5-owner chain preserved');
+console.log('Phase 5 user regression rollback guard: captureFix135 boundary preserved, 4-owner chain preserved, Core200 local dispatcher retained');

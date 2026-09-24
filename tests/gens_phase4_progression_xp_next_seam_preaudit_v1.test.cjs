@@ -16,8 +16,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8172204,'next-seam preaudit must run on exact first-raccord GREEN index');
-assert.equal(gitBlob(indexBuf),'6c95e3f6ca4bf8e34003776e7e43e44192aafb16','next-seam preaudit index blob drifted');
+assert.equal(indexBuf.length,8172529,'next-seam preaudit must run on exact first-raccord GREEN index');
+assert.equal(gitBlob(indexBuf),'696014056409dda9b6ef25ace58dfd9d5f9e2718','next-seam preaudit index blob drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

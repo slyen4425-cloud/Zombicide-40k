@@ -15,8 +15,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(runtime.length,8172204,'contract-only lot must keep the manually validated runtime size');
-assert.equal(gitBlob(runtime),'6c95e3f6ca4bf8e34003776e7e43e44192aafb16',
+assert.equal(runtime.length,8172529,'contract-only lot must keep the manually validated runtime size');
+assert.equal(gitBlob(runtime),'696014056409dda9b6ef25ace58dfd9d5f9e2718',
   'contract-only lot must keep index.html byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';

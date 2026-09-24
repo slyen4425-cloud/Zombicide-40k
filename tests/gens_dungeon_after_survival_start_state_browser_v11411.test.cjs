@@ -623,6 +623,11 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.ok(directRoomGrid.room.runtime.lastKind,'direct Dungeon control must retain the generated room');
     assert.equal(directRoomGrid.room.gridLike.length>0,true,'direct Dungeon control must expose the real visible Dungeon grid surface');
     assert.ok(Number(sameOpen.room.runtime.room)>=1,'same-open Survival -> Dungeon must reach a generated Dungeon room');
+    assert.equal(
+      sameOpen.room.bodyClass.split(/\\s+/).includes('dc054AtEntrance'),
+      false,
+      'same-open Survival -> Dungeon must clear the obsolete entrance-only body state'
+    );
     assert.ok(sameOpen.room.runtime.lastKind,'same-open Survival -> Dungeon must retain the generated room');
     assert.equal(
       sameOpen.room.gridLike.length>0,

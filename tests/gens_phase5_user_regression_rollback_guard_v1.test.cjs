@@ -22,11 +22,11 @@ assert.doesNotMatch(
   /window\.startConfiguredGame\s*=/,
   'user-regression guard: captureFix135 global startConfiguredGame owner must remain retired'
 );
-assert.match(
-  fix135,
-  /gensCapturePregameMode\(\)[\s\S]*ws\.day=1;ws\.turnIndex=0;ws\.round=1;ws\.last=null;[\s\S]*saveCaptureWorldState\(ws\)/,
-  'captureFix135 must preserve Capture new-session reset semantics'
-);
+assert.match(fix135,/target135\(/,'captureFix135 ally-targeting responsibility must remain');
+assert.match(fix135,/render135\(/,'captureFix135 battle rendering/log responsibility must remain');
+assert.match(fix135,/captureBattleLiveBody/,'captureFix135 detailed combat-log UI must remain');
+assert.match(fix135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
+assert.match(fix135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
 assert.match(fix138,/window\.isCaptureContext138\s*=\s*function/,'captureFix138 must remain present');
 assert.match(fix139,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix139 must remain the dedicated Capture launch interceptor');
 assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+function/,'Dungeon Core 2.00 must retain its stable local Dungeon launch dispatcher');
@@ -35,4 +35,4 @@ assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/
 const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
 assert.equal(assignments,3,'rollback guard must preserve the three remaining historical global owners after captureFix135 retirement');
 
-console.log('Phase 5 user regression rollback guard: captureFix135 reset semantics preserved, global owner retired, 3-owner chain preserved, Core200 local dispatcher retained');
+console.log('Phase 5 user regression rollback guard: captureFix135 non-wrapper responsibilities preserved, global owner retired, 3-owner chain preserved, Core200 local dispatcher retained');

@@ -129,3 +129,31 @@ routing-only.
 Cette sélection n'autorise aucun retrait historique.
 
 Aucun provider Dungeon n'est encore raccordé dans ce pré-audit.
+
+
+## Validation technique du pré-audit
+
+SHA technique :
+`5e67751c75fc411bfae61d0a61ec008832379ddf`.
+
+CI :
+- Architecture + navigateur complet `35971054303` — SUCCESS ;
+- Firefox `35971054307` — SUCCESS ;
+- Tactical Dock `35971054270` — SUCCESS.
+
+Le navigateur complet a maintenu GREEN notamment :
+- lancement Survie et provider S2 ;
+- Dungeon map -> Tactical ;
+- Capture victoire/reprise et provider S3 ;
+- Dungeon après Survival ;
+- Builder / Config objet / openChar ;
+- caches/pièges authored ;
+- Save & Quit/reprise ;
+- PvP ;
+- Capture composition complète ;
+- non-interférence quatre modules.
+
+Le runtime n'a pas changé.
+
+Le prochain commit documentaire doit lui-même repasser la triple CI avant le
+checkpoint pré-audit GREEN et le RED provider Dungeon.

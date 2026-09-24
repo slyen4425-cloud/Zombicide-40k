@@ -1,3 +1,71 @@
+## GREEN CANDIDATE — Phase 5 / module-launch S4 — pré-audit provider Dungeon — 2026-09-24
+
+Validation utilisateur S3 : **OK**.
+
+- Base GREEN S3 :
+  `checkpoint/gensrpg-phase5-module-launch-s3-capture-provider-green-2026-09-24`.
+- SHA base :
+  `e8fd85ab68df818a138ed7949c411005ad622457`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s4-dungeon-provider-2026-09-24`.
+- Runtime inchangé :
+  taille `8172204`, blob `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+- Sentinelle pré-audit :
+  `tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs`.
+- SHA technique pré-audit :
+  `5e67751c75fc411bfae61d0a61ec008832379ddf`.
+
+### Validation technique
+
+- Architecture + navigateur complet :
+  `35971054303` — SUCCESS ;
+- Firefox :
+  `35971054307` — SUCCESS ;
+- Tactical Dock :
+  `35971054270` — SUCCESS.
+
+### Seam prouvé
+
+Le propriétaire retenu est `dungeonCore200Rebuild` parce que :
+- il remplace publiquement `DungeonCore01` ;
+- son `start()` initialise et persiste le runtime Dungeon courant ;
+- il installe le dernier intercept Dungeon de `startConfiguredGame` ;
+- Save & Quit/reprise exécute explicitement son bloc production ;
+- les scénarios Dungeon après Survival, Dungeon->Tactical, Builder et non-interférence
+  restent GREEN.
+
+Seam futur :
+capturer `window.startConfiguredGame` immédiatement après l'intercept Core200,
+puis enregistrer un provider Dungeon routing-only.
+
+### Invariants
+
+Providers publics actuels :
+- Survival : raccordé ;
+- Capture : raccordé ;
+- Dungeon : absent ;
+- PvP : absent.
+
+La chaîne historique reste :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Aucun propriétaire retiré.
+Bouton production inchangé.
+Aucun observer/timer/retry/polling ajouté.
+`main` gelée.
+
+### Prochaine étape
+
+Le présent SHA documentaire doit repasser la triple CI.
+Après seulement :
+1. checkpoint pré-audit S4 GREEN ;
+2. RED dédié provider Dungeon ;
+3. aucun runtime avant ce RED.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch S4 — provider Dungeon — pré-audit — 2026-09-24
 
 Validation utilisateur S3 : **OK — « Ok je valide. Ça semble ok. »**.

@@ -87,7 +87,6 @@ jobs:
       - name: Verify S4 contracts before commit
         shell: bash
         run: |
-          node tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs
           node tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs
           node tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs
           node tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs

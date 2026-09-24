@@ -12,7 +12,8 @@ const shellContract=JSON.parse(read('assets/gensrpg/shell/module-contract-v1.jso
 const captureContract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 
-const ids=['captureFix135','captureFix138','captureFix139'];
+const ids=['captureFix138','captureFix139'];
+const retiredCapture135Id='captureFix135';
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -70,10 +71,17 @@ for(const id of ids){
   blocks[id]=blockBody(id);
   functions[id]=extractAssignedFunction(blocks[id],'startConfiguredGame');
 }
+const capture135Meta=owners.blocks?.[retiredCapture135Id];
+assert.ok(capture135Meta,'missing owner metadata '+retiredCapture135Id);
+assert.equal(capture135Meta.status,'active',retiredCapture135Id+' block must remain active');
+assert.equal(capture135Meta.primaryDomain,'capture',retiredCapture135Id+' must remain Capture-owned');
+blocks[retiredCapture135Id]=blockBody(retiredCapture135Id);
+assert.doesNotMatch(blocks[retiredCapture135Id],/window\.startConfiguredGame\s*=/,
+  'captureFix135 global startConfiguredGame owner must remain retired');
 captureContextSource=extractAssignedFunction(blocks.captureFix138,'isCaptureContext138');
 
-assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m,
-  'preaudit must run against the current four-owner global chain after Core200 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m,
+  'preaudit must run against the current three-owner global chain after captureFix135 retirement');
 
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.consumes.includes('module public entry contracts'));
@@ -87,9 +95,9 @@ assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 assert.doesNotMatch(captureEntry,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
   'Capture Phase 3 entry must remain inert during preaudit');
 
-assert.match(functions.captureFix135,/gensCapturePregameMode/);
-assert.match(functions.captureFix135,/saveCaptureWorldState/);
-assert.match(functions.captureFix135,/\.apply\(this,arguments\)/);
+assert.match(blocks.captureFix135,/gensCapturePregameMode/);
+assert.match(blocks.captureFix135,/saveCaptureWorldState/);
+assert.doesNotMatch(blocks.captureFix135,/start135|\.apply\(this,arguments\)/);
 
 assert.match(functions.captureFix138,/isCaptureContext138/);
 assert.match(functions.captureFix138,/setTimeout/);
@@ -102,32 +110,41 @@ assert.match(functions.captureFix139,/markSessionActive/);
 assert.match(captureContextSource,/gensCapturePregameMode/);
 assert.match(captureContextSource,/gensCapturePregameMode\(\)\)return true/);
 assert.match(captureContextSource,/fam===["']creature["']/);
-assert.match(functions.captureFix135,/if\(typeof gensCapturePregameMode===["']function["']&&gensCapturePregameMode\(\)\)/);
+assert.doesNotMatch(blocks.captureFix135,/window\.startConfiguredGame\s*=/);
 assert.match(functions.captureFix138,/const cap=isCaptureContext138\(\)/);
 assert.match(functions.captureFix138,/if\(cap\)\{/);
 
 const shadowingProof={
   outerOwner:'captureFix139',
   delegatesOnlyWhen:'isCaptureContext138() === false',
-  capture135EffectCondition:'gensCapturePregameMode() === true',
-  capture135ConditionCoveredByOuterPredicate:true,
+  capture135GlobalOwnerRetired:true,
   capture138EffectCondition:'isCaptureContext138() === true',
   capture138ConditionCoveredByOuterPredicate:true,
   consequence:[
-    'Capture contexts are intercepted by captureFix139 before captureFix138/captureFix135',
+    'Capture contexts are intercepted by captureFix139 before captureFix138',
     'delegated non-Capture contexts do not activate captureFix138 post-launch branch',
-    'delegated normal contexts do not activate captureFix135 pregame reset branch'
+    'captureFix135 no longer participates in the global launch chain'
   ]
 };
 
-const sourceReport=ids.map(id=>({
+const sourceReport=[
+  {
+    id:'captureFix135',
+    responsibility:owners.blocks.captureFix135.responsibility,
+    functionSource:'global startConfiguredGame retired',
+    relevantBlockLines:blocks.captureFix135.split(/\n/).map(x=>x.trim()).filter(x=>
+      /gensCapturePregameMode|saveCaptureWorldState|world|trainer|starter|participant|turn|round|day/i.test(x)
+    ).slice(0,80)
+  },
+  ...ids.map(id=>({
   id,
   responsibility:owners.blocks[id].responsibility,
   functionSource:normalized(functions[id]),
   relevantBlockLines:blocks[id].split(/\n/).map(x=>x.trim()).filter(x=>
     /startConfiguredGame|gensCapturePregameMode|saveCaptureWorldState|isCaptureContext138|renderCaptureWorldHub|markSessionActive|setTimeout|world|trainer|starter|participant|turn|round|day/i.test(x)
   ).slice(0,80)
-}));
+  }))
+];
 
 const proposedPublicBoundary={
   owner:'capture',
@@ -148,17 +165,17 @@ const proposedPublicBoundary={
 const selectedFirstRuntimeMicroLot={
   owner:'captureFix135',
   seam:'startConfiguredGame',
-  action:'retire only the shadowed startConfiguredGame assignment',
+  action:'retirement completed',
   targetAssignments:3,
   preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
-  rationale:'historical candidate only; captureFix135 remains protected by the user-regression guard until a fresh dedicated proof replaces it',
-  requiresDedicatedRed:true,
+  rationale:'captureFix135 global authority is retired while its non-wrapper Capture responsibilities remain',
+  requiresDedicatedRed:false,
   reAuditBeforeAnyCaptureFix138Retirement:true
 };
 
 console.log(JSON.stringify({
   scenario:'Phase 5 Capture public launch-entry preaudit',
-  chainOwners:ids,
+  chainOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
   sourceReport,
   shadowingProof,
   proposedPublicBoundary,

@@ -1,3 +1,82 @@
+# PHASE 6 OUVERTE — Isolation Survie — 2026-09-24
+
+## Clôture formelle Phase 5
+
+Validation manuelle utilisateur reçue sur la preview :
+> "Tout a l'air parfait"
+
+SHA exact validé manuellement et automatiquement :
+`e9837460bb42bb5661b7b0d66f510b99523344e4`.
+
+Checkpoint de sortie Phase 5 :
+`checkpoint/gensrpg-phase5-exit-green-2026-09-24`.
+
+Critère de sortie Phase 5 satisfait :
+- autorité publique navigation : Shell unique ;
+- wrappers globaux inline `goMenu` : 0 ;
+- autorité fiche héros : `function openChar(id)` native unique ;
+- wrappers globaux inline `openChar` : 0 ;
+- audit actif : `phase5ExitReady: true`.
+
+CI du SHA de sortie :
+- Architecture + Browser : run `36046500323` — SUCCESS ;
+- Firefox : run `36046500362` — SUCCESS ;
+- Tactical Dock : run `36046500396` — SUCCESS.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Phase 6 — base et branches
+
+Base exacte :
+`e9837460bb42bb5661b7b0d66f510b99523344e4`.
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-isolation-2026-09-24`.
+
+Branche de travail :
+`work/gensrpg-phase6-survival-isolation-2026-09-24`.
+
+## Objectif Phase 6
+
+Conformément à la roadmap :
+
+- déplacer progressivement le runtime Survie vers `assets/gensrpg/survival/` ;
+- aucun appel Survie vers fonctions privées Dungeon ;
+- dés / stats / inventaire communs uniquement via Core ;
+- assets Survie uniquement via contexte Survie.
+
+Critère de sortie :
+**Survie démarre et joue avec Dungeon/Tactical non chargés ou inactifs.**
+
+## Règles de chantier
+
+- aucun merge sur `main` ;
+- aucun changement gameplay opportuniste ;
+- aucun changement UI opportuniste ;
+- 1 micro-lot homogène à la fois ;
+- TDD / pré-audit avant runtime ;
+- aucune rustine globale ;
+- aucun nouveau wrapper / polling / reload / MutationObserver global ;
+- ne déplacer dans Core que ce qui est réellement partagé ;
+- ne déplacer dans Shell aucun gameplay Survie.
+
+## Première mission
+
+Faire un pré-audit structurel de l'état réel Survie :
+1. cartographier les fichiers déjà présents dans `assets/gensrpg/survival/` ;
+2. identifier les propriétaires runtime Survie encore inline ou hors dossier ;
+3. identifier les dépendances Survie -> Dungeon/Tactical ;
+4. identifier les dépendances Survie -> Core déjà publiques ;
+5. classer les responsabilités en :
+   - déjà isolées ;
+   - partage Core légitime ;
+   - dette inter-module prouvée ;
+   - legacy / inactif ;
+6. proposer **un seul premier micro-lot Phase 6**, le plus petit et le plus sûr.
+
+Aucune modification runtime avant ce pré-audit.
+
 # CANDIDAT GREEN FINAL — Phase 5 / retrait dernier wrapper global openChar Capture139 — 2026-09-24
 
 ## Résultat fonctionnel

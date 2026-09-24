@@ -35,8 +35,10 @@ assert.doesNotMatch(core01,/window\.goMenu\s*=/,
 
 assert.match(core200,/window\.DungeonCore01=\{eligible:/,
   'Core 2.00 must replace the old public Dungeon API');
-assert.match(core200,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138/,
-  'Core 2.00 must intercept current Dungeon starts before delegating');
+assert.match(core200,/const gensDungeonStartConfiguredGame200V1=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138/,
+  'Core 2.00 must retain the local Dungeon launch dispatcher before delegating');
+assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=(?!=)/,
+  'Core 2.00 global startConfiguredGame assignment must remain retired');
 assert.doesNotMatch(core200,/window\.goMenu\s*=/);
 assert.match(core200,/GensShellScreenReturnV1/);
 assert.match(core200,/register\?\.\("dungeon"/);

@@ -1,3 +1,77 @@
+# CHANTIER COURANT — Phase 5 / retrait du dernier wrapper fiche héros Capture139 — 2026-09-24
+
+## Base GREEN
+
+- Audit de sortie Phase 5 GREEN :
+  `checkpoint/gensrpg-phase5-exit-audit-green-2026-09-24`.
+- SHA exact :
+  `94263af2c0f0852d3106f0d98ba86a4ceca23865`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-capture139-openchar-retirement-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-capture139-openchar-retirement-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+CI de l'audit de sortie sur son SHA documentaire final :
+- Architecture + Browser : run `36039648981` — SUCCESS ;
+- Firefox : run `36039649101` — SUCCESS ;
+- Tactical Dock : run `36039648855` — SUCCESS.
+
+## Bloqueur unique prouvé
+
+Le critère Phase 5 exige un seul propriétaire de navigation et fiche héros.
+
+Navigation :
+- autorité publique Shell unique ;
+- zéro override global `goMenu`.
+
+Fiche héros :
+- propriétaire natif Shell : `function openChar(id)` ;
+- dernier wrapper global strict :
+  `captureFix139 -> window.openChar`.
+
+Aucun autre nettoyage n'est autorisé dans ce lot.
+
+## Mission unique
+
+Prouver puis retirer uniquement le wrapper `window.openChar` de `captureFix139`.
+
+Le wrapper actuel :
+- intercepte uniquement la fenêtre `_captureStarting139` en contexte Capture ;
+- délègue sinon vers le propriétaire natif.
+
+La preuve navigateur doit démontrer que le lancement Capture public complet reste stable
+lorsqu'on retire cette interception globale.
+
+## TDD obligatoire avant runtime
+
+Avant toute modification `index.html` :
+1. ajouter une sentinelle statique dédiée ;
+2. ajouter une caractérisation navigateur qui compose le runtime actuel
+   en supprimant uniquement le wrapper `openChar` de Capture139 ;
+3. vérifier le vrai parcours Capture et le provider public ;
+4. vérifier que `startConfiguredGame` de Capture139 reste intact ;
+5. ne modifier le runtime qu'après preuve GREEN.
+
+## Interdictions
+
+- aucun retrait `startConfiguredGame` Capture138/Capture139/Dungeon Core01 ;
+- aucun changement gameplay Capture ;
+- aucun changement navigation Shell ;
+- aucun changement Survival / Dungeon / Tactical / Builder / Stats ;
+- aucun nouveau wrapper, observer, retry, polling ou reload ;
+- ne pas déplacer la suppression `openChar` ailleurs ;
+- aucun merge sur `main`.
+
+## Sortie du lot
+
+Après retrait runtime GREEN + CI complète + validation téléphone :
+- ré-audit immédiat du critère de sortie Phase 5 ;
+- si zéro autre propriétaire global navigation/fiche héros : **clôturer Phase 5** ;
+- ouvrir ensuite **Phase 6 — isolation Survie** ;
+- aucun micro-nettoyage intermédiaire sans nouveau bloqueur prouvé.
+
 # RÉSULTAT AUDIT DE SORTIE PHASE 5 — 2026-09-24
 
 Audit structurel et CI réalisés sans modification runtime.

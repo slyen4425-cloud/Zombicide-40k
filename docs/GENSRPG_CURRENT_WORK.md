@@ -1,3 +1,64 @@
+## GREEN FINAL — Phase 5 / module-launch S3 — pré-audit provider Capture — 2026-09-24
+
+Pré-audit terminé et triple-GREEN.
+
+- Branche :
+  `work/gensrpg-phase5-module-launch-s3-capture-provider-2026-09-24`.
+- SHA technique :
+  `0650d3325688869ace4e4c89e176eb3b011e72c8`.
+- Base :
+  `checkpoint/gensrpg-phase5-module-launch-s2-survival-provider-green-2026-09-24`.
+- Runtime inchangé :
+  taille `8171879`,
+  blob `7601760f7a635094d4f687b725a639b5728e93b4`.
+
+### Seam prouvé
+
+Ordre réel :
+`Shell registry -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Positions statiques observées :
+- registre : `6137753` ;
+- Capture135 : `7178830` ;
+- Capture138 : `7208188` ;
+- Capture139 : `7216814` ;
+- Dungeon01 : `7552280` ;
+- Dungeon200 : `7942629`.
+
+Seam sélectionné :
+capturer `window.startConfiguredGame` **immédiatement après** que `captureFix139`
+installe son wrapper, puis utiliser cette référence pour le futur provider public Capture.
+
+Aucun retrait historique.
+
+### CI
+
+- Architecture + navigateur complet : `35963606091` — SUCCESS ;
+- Firefox : `35963606145` — SUCCESS ;
+- Tactical Dock : `35963606147` — SUCCESS.
+
+Le navigateur complet a notamment validé :
+- Capture victoire/reprise ;
+- Capture composition complète ;
+- non-interférence des quatre modules ;
+- Survival historique + provider S2 ;
+- Dungeon -> Tactical ;
+- Builder / Config objet / openChar / Save & Quit.
+
+### Prochaine action
+
+Créer le RED dédié S3 exigeant :
+- référence Capture139 capturée ;
+- provider routing-only Capture ;
+- registration `capture` unique ;
+- aucun provider Dungeon/PvP ;
+- bouton production inchangé ;
+- cinq propriétaires historiques inchangés.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch S3 — provider Capture — pré-audit — 2026-09-24
 
 Validation utilisateur S2 : **OK — « Ça a l'air correct »**.

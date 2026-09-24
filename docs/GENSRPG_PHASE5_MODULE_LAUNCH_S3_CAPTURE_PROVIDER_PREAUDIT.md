@@ -73,3 +73,29 @@ Après GREEN :
 ouvrir un RED dédié pour exiger le provider Capture, puis seulement modifier le runtime.
 
 Aucun merge sur `main`.
+
+
+## Résultat du pré-audit
+
+SHA technique :
+`0650d3325688869ace4e4c89e176eb3b011e72c8`.
+
+Validation :
+- Architecture + navigateur complet `35963606091` — SUCCESS ;
+- Firefox `35963606145` — SUCCESS ;
+- Tactical Dock `35963606147` — SUCCESS.
+
+Ordre réel prouvé :
+`GensShellModuleLaunchV1 -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Le registre existe donc déjà avant le chargement de Capture139.
+
+Seam autorisé pour le RED suivant :
+- après installation du wrapper Capture139 ;
+- capturer cette fonction comme référence Capture publique ;
+- provider routing-only ;
+- aucune suppression ou modification des cinq propriétaires historiques ;
+- aucun changement du bouton de production.
+
+Checkpoint cible :
+`checkpoint/gensrpg-phase5-module-launch-s3-capture-provider-preaudit-green-2026-09-24`.

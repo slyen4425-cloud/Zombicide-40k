@@ -521,6 +521,9 @@ jobs:
       - name: Retirer le wrapper openChar Dungeon Core 0.28
         run: node tests/gens_phase5_openchar_core028_retirement_v1.test.cjs
 
+      - name: Auditer le critère de sortie Phase 5
+        run: node tests/gens_phase5_exit_audit_v1.test.cjs
+
       - name: Pré-auditer le contrat public de lancement module Phase 5
         run: node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
 

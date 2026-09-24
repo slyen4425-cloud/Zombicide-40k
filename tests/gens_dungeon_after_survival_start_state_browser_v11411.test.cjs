@@ -145,9 +145,10 @@ async function settleDungeonLaunch(page){
 }
 
 async function returnActiveGameToRootWithoutClosing(page){
-  const home=page.locator('button.back[onclick="backHomeFromGame()"]:visible').first();
-  await home.waitFor({state:'visible',timeout:10000});
-  await home.click();
+  await page.evaluate(()=>{
+    if(typeof window.backHomeFromGame!=='function')throw new Error('backHomeFromGame owner absent');
+    window.backHomeFromGame();
+  });
   await page.waitForFunction(()=>{
     const root=document.getElementById('gensRootHome');
     return !!root&&getComputedStyle(root).display!=='none';

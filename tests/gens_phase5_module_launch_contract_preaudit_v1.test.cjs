@@ -75,7 +75,7 @@ assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollba
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
 assert.match(rollbackGuard,/captureFix135 must retain its historical startConfiguredGame boundary until a replacement contract is proven on real user paths/);
-assert.match(rollbackGuard,/assert\.equal\(assignments,5/);
+assert.match(rollbackGuard,/assert\.equal\(assignments,4/);
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
@@ -88,10 +88,9 @@ assert.deepEqual(chain,[
   'captureFix135',
   'captureFix138',
   'captureFix139',
-  'gensDungeonCore01Js',
-  'dungeonCore200Rebuild'
-],'module-launch preaudit must freeze the restored five-owner startConfiguredGame chain');
-assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m);
+  'gensDungeonCore01Js'
+],'module-launch preaudit must freeze the four remaining historical startConfiguredGame global owners after Core200 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m);
 
 // Metadata-only means no new launch contract or Phase 3 entry is connected to production composition.
 assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/);

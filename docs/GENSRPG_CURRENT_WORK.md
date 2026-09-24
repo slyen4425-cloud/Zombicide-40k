@@ -1,3 +1,45 @@
+# PHASE 6 — MICRO-LOT 2 — activation entrée Survie / règles de vagues pures — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-green-2026-09-24`
+
+SHA de base :
+`c82d1605acbc791977f88b1e3ae89297a50ab929`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-wave-rules-entry-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-wave-rules-entry-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_WAVE_RULES_ENTRY_PREAUDIT.md`
+
+Fichier exact utilisateur :
+- `work20.zip` ;
+- 8 171 854 octets ;
+- blob Git du contenu : `97f0e060d8bffcde2baaf5aa42c1e16b8544263f` ;
+- correspond exactement au `index.html` du SHA de base.
+
+Décision :
+- ne pas extraire le propriétaire historique `startConfiguredGame()` dans ce lot car il mélange encore Shell, Dungeon, Capture et responsabilités partagées ;
+- activer en premier `assets/gensrpg/survival/entry-v1.js` avec deux règles pures du système de vagues Survie :
+  - profil par défaut ;
+  - collecte des IDs ennemis du profil ;
+- supprimer les deux propriétaires inline historiques et raccorder directement leurs consommateurs à l’API Survie ;
+- aucun wrapper de compatibilité.
+
+TDD RED :
+`tests/gens_phase6_survival_wave_rules_entry_v1.test.cjs`
+
+La sentinelle est raccordée à Architecture.
+Le lot doit rester RED tant que l’entrée Survie est inerte et que les deux propriétaires inline existent encore.
+
+Aucun runtime modifié à ce stade.
+`main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 6 OUVERTE — Isolation Survie — 2026-09-24
 
 ## PREMIER MICRO-LOT PHASE 6 — retrait du garde legacy Survie/Dungeon — CI technique GREEN

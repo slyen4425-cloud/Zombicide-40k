@@ -50,10 +50,10 @@ assert.ok(registryExpose>nextOwner&&registration>registryExpose&&registration<go
 assert.doesNotMatch(provider,/document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/,
   'S2 provider must contain routing only; native launch remains the existing owner');
 
-for(const id of ['dungeon','pvp']){
-  assert.doesNotMatch(index,new RegExp('GensShellModuleLaunchV1\\.register\\(["\\\']'+id+'["\\\']'),
-    'S2 must not register '+id+' yet');
-}
+assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length<=1,
+  'later S4 may register Dungeon once; S2 must not permit duplicate Dungeon providers');
+assert.doesNotMatch(index,/GensShellModuleLaunchV1\.register\(["']pvp["']/,
+  'PvP must remain unrouted during the module-launch provider sequence');
 
 assert.equal((index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length,5,
   'S2 must preserve all five historical startConfiguredGame wrappers');

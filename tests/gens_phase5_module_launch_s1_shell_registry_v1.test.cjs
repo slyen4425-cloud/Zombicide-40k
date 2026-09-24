@@ -62,13 +62,18 @@ function block(id){
 for(const id of expected){
   const body=block(id);
   assert.match(body,/window\.startConfiguredGame\s*=\s*async\s+function/,'historical start owner changed: '+id);
-  if(id!=='captureFix139')assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
+  if(!['captureFix139','dungeonCore200Rebuild'].includes(id)){
+    assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
+  }
 }
 
 assert.match(service,/if\(typeof handler!==["']function["']\)return false/,
   'S1 must return false when a provider is not registered');
 assert.match(service,/return\s+\(await handler\(\)\)===true/,
   'S1 public operation must normalize provider success to handled=true');
+assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length<=1,
+  'later S4 may register Dungeon once; S1 must not permit duplicate Dungeon providers');
+
 assert.match(service,/catch\(e\)\{console\.error\(["']GenSrpG Shell startModuleSession["'],id,e\);return false\}/,
   'S1 registry must contain errors at the Shell contract boundary');
 

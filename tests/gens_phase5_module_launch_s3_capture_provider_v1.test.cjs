@@ -50,8 +50,8 @@ assert.match(index,/GensShellModuleLaunchV1\.register\("survival",gensSurvivalSt
   'S2 Survival provider must remain');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,1,
   'S3 must register Capture exactly once');
-assert.equal((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length,0,
-  'S3 must not register Dungeon');
+assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length<=1,
+  'later S4 may register Dungeon once; S3 must not permit duplicate Dungeon providers');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("pvp"/g)||[]).length,0,
   'S3 must not register PvP');
 

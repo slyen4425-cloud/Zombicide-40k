@@ -11,9 +11,10 @@ const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
 const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"></script>');
-assert.equal(pageTags.length,30,'Pages-equivalent characterization expects 30 injected modules including connected Core Stats, Core Inventory Equipment and Core Text Utils');
+assert.equal(pageTags.length,31,'Pages-equivalent characterization expects 31 injected modules including connected Core services and final Shell authority');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
-let productionHtml=indexSource.split(perfTag).join('');
+const finalShellTag='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>';
+let productionHtml=indexSource.split(perfTag).join('').split(finalShellTag).join('');
 let inlineSeq=0;
 productionHtml=productionHtml.replace(
   /<script\b([^>]*)>([\s\S]*?)<\/script>/gi,
@@ -342,10 +343,10 @@ const server=http.createServer((req,res)=>{
       runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
       tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
       familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||'',
-      pagesInjectedModules:30
+      pagesInjectedModules:31
     }));
     console.log('[phase2-full-capture] composition',JSON.stringify(composition));
-    assert.equal(composition.pagesInjectedModules,30,'full production characterization must use the Pages module set');
+    assert.equal(composition.pagesInjectedModules,31,'full production characterization must use the Pages module set including final Shell authority');
 
     mark('open-adventure');
     await openAdventure();

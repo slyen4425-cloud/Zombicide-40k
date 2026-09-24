@@ -43,7 +43,8 @@ small{display:block;margin-top:10px;opacity:.7}
     '<script src="assets/gensrpg/core/stats-snapshot-v1.js?v=1"><\/script>',
     '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"><\/script>',
     '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"><\/script>',
-    '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>'
+    '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>',
+    '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>'
   ];
   const previewGuard='<script>(()=>{window.__GENSRPG_PREVIEW__=true;const fake={scope:location.href,active:null,waiting:null,installing:null,update:async()=>{},unregister:async()=>true,addEventListener:()=>{},removeEventListener:()=>{}};try{if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations?.().then(rs=>Promise.all(rs.filter(r=>String(r.scope||"").includes("/slyen4425-cloud/Zombicide-40k/")).map(r=>r.unregister?.()))).catch(()=>{});try{Object.defineProperty(navigator.serviceWorker,"register",{configurable:true,value:async()=>fake})}catch(_){try{navigator.serviceWorker.register=async()=>fake}catch(__){}}try{Object.defineProperty(navigator.serviceWorker,"ready",{configurable:true,get:()=>Promise.resolve(fake)})}catch(_){}}}catch(_){}try{if("caches" in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>String(k).startsWith("gensrpg-cache-")).map(k=>caches.delete(k)))).catch(()=>{})}catch(_){}})();<\/script>';
   const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\/script>';
@@ -54,7 +55,9 @@ small{display:block;margin-top:10px;opacity:.7}
     }
     let html=await fetch('index.html',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
     const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>';
+    const finalShell='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>';
     html=html.split(perf).join('');
+    html=html.split(finalShell).join('');
     const base=new URL('./',location.href).href;
     html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
     if(!/<\/body>/i.test(html))throw new Error('</body> absent');

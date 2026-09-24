@@ -21,8 +21,14 @@ for(const src of previewSrcs){
   const file=src.split('?')[0];
   assert.equal(fs.existsSync(path.join(root,file)),true,`preview runtime asset missing: ${file}`);
 }
-assert.equal(previewSrcs.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap handoff must remain the final injected runtime layer');
-assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,'preview must remove the source performance tag before reinjecting the Pages order');
+assert.equal(previewSrcs.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'performance/bootstrap handoff must remain immediately before the final Shell authority');
+assert.equal(previewSrcs.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js',
+  'final Shell authority must be the final injected preview runtime layer');
+assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,
+  'preview must remove the source performance tag before reinjecting the Pages order');
+assert.match(preview,/html=html\.split\(finalShell\)\.join\(''\)/,
+  'preview must remove the source final Shell tag before reinjecting the Pages order');
 assert.ok(preview.includes('const base=new URL(\'./\',location.href).href;'),'preview must derive its immutable commit-root base URL');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
 assert.ok(preview.includes('document.open();')&&preview.includes('document.write(html);')&&preview.includes('document.close();'),'preview must render into the top-level document so reload/restart returns to preview.html');

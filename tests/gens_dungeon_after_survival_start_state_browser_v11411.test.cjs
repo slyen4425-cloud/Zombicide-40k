@@ -150,6 +150,20 @@ async function returnActiveGameToRootWithoutClosing(page){
     window.backHomeFromGame();
   });
   await page.waitForFunction(()=>{
+    const menu=document.getElementById('menu');
+    const game=document.getElementById('gensGameHome');
+    const root=document.getElementById('gensRootHome');
+    return (menu&&getComputedStyle(menu).display!=='none')||
+      (game&&getComputedStyle(game).display!=='none')||
+      (root&&getComputedStyle(root).display!=='none');
+  },null,{timeout:10000});
+  await page.evaluate(()=>{
+    const root=document.getElementById('gensRootHome');
+    if(root&&getComputedStyle(root).display!=='none')return;
+    if(typeof window.showGensRootHome!=='function')throw new Error('showGensRootHome owner absent');
+    window.showGensRootHome();
+  });
+  await page.waitForFunction(()=>{
     const root=document.getElementById('gensRootHome');
     return !!root&&getComputedStyle(root).display!=='none';
   },null,{timeout:10000});

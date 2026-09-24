@@ -748,6 +748,9 @@ jobs:
       - name: Vérifier Monster Capture actuel par le vrai Shell
         run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
 
+      - name: Vérifier le provider Capture module-launch S3
+        run: node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
+
       - name: Caractériser Capture dans la composition complète Phase 2
         run: node tests/gens_phase2_full_composition_capture_browser_v11411.test.cjs
 

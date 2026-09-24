@@ -113,7 +113,7 @@ async function startSurvival(page){
       return {
         activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'',
         activeStyle:typeof getActiveGameProfile==='function'?getActiveGameProfile()?.gameStyle||'':'',
-        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
         dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
         menu:{display:menu?getComputedStyle(menu).display:'absent',className:menu?.className||'',text:String(menu?.innerText||'').replace(/\s+/g,' ').slice(0,6000)},
         searchNodes,searchAncestors,globalFns,searchOwnerRefs,

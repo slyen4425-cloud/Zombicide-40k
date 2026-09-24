@@ -1,3 +1,72 @@
+# CANDIDAT GREEN — Phase 5 / audit de sortie vers Phase 6 — 2026-09-24
+
+Le diagnostic de sortie Phase 5 est établi sans modification runtime.
+
+## Résultat
+
+Navigation / Shell :
+**consolidée**.
+
+- `window.startConfiguredGame` public final appartient au Shell ;
+- `GensShellModuleLaunchV1` est le registre public unique de lancement ;
+- resolver de module actif unique ;
+- `goMenu` natif délègue à `GensShellScreenReturnV1` ;
+- zéro override inline global `window.goMenu`.
+
+Fiche héros :
+**critère de propriétaire unique pas encore atteint**.
+
+Il reste exactement un wrapper global :
+`captureFix139 -> window.openChar`.
+
+Ce wrapper bloque la fiche uniquement pendant le démarrage Capture puis délègue
+au `openChar(id)` natif pour tous les autres appels.
+
+Conclusion :
+**ne pas ouvrir Phase 6 immédiatement**.
+Le seul micro-lot Phase 5 encore justifié par le critère roadmap est le retrait
+du wrapper global `openChar` de `captureFix139`, avec conservation du garde
+Capture par une frontière Capture-owned non globale.
+
+Les wrappers historiques `startConfiguredGame`
+`captureFix138 -> captureFix139 -> gensDungeonCore01Js`
+restent figés dans cet audit et ne sont pas, à eux seuls, un motif de nettoyage
+supplémentaire avant Phase 6.
+
+## Preuve
+
+Document :
+`docs/GENSRPG_PHASE5_EXIT_AUDIT.md`.
+
+Sentinelle :
+`tests/gens_phase5_exit_audit_v1.test.cjs`.
+
+SHA technique :
+`bed5c32e284a8e39286ac93f419bc636ceb97951`.
+
+CI technique :
+- Architecture + Browser `36038322477` — SUCCESS ;
+- Firefox `36038322232` — SUCCESS ;
+- Tactical Dock `36038322288` — SUCCESS.
+
+Runtime inchangé :
+- `index.html` blob :
+  `198207e3f52730498831f196caa35c4a0283e934`.
+
+## Clôture
+
+Le présent commit documentaire doit repasser la triple CI.
+
+Après triple SUCCESS :
+- créer
+  `checkpoint/gensrpg-phase5-exit-audit-green-2026-09-24` ;
+- ouvrir un nouveau checkpoint/branche dédié au seul retrait
+  `captureFix139 openChar` ;
+- construire d'abord le RED et les preuves navigateur ;
+- ne demander le gros `index.html` à Sylvain que lorsque le contenu exact sera
+  réellement nécessaire pour le patch runtime, conformément à la règle 26 ;
+- ne pas toucher à `main`.
+
 # RÉSULTAT AUDIT DE SORTIE PHASE 5 — 2026-09-24
 
 Audit structurel et CI réalisés sans modification runtime.

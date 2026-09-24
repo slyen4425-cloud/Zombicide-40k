@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172687,'S2 runtime must match the exact Survival-provider candidate');
-assert.equal(gitBlob,'e56f7b63963d991717e1738c3e5188011276a2b7','S2 runtime blob must match the exact Survival-provider candidate');
+assert.equal(bytes.length,8172118,'S2 runtime must match the exact Survival-provider candidate');
+assert.equal(gitBlob,'198207e3f52730498831f196caa35c4a0283e934','S2 runtime blob must match the exact Survival-provider candidate');
 
 assert.match(index,/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze\(\{/,
   'S2 requires the S1 Shell registry');

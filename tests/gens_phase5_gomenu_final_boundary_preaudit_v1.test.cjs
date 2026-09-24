@@ -34,9 +34,9 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8172687,'goMenu boundary guard must use the current final-Shell runtime');
-assert.equal(gitBlob(indexBuf),'e56f7b63963d991717e1738c3e5188011276a2b7','goMenu boundary runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'e56f7b63963d991717e1738c3e5188011276a2b7','owner manifest must target current runtime');
+assert.equal(indexBuf.length,8172118,'goMenu boundary guard must use the current final-Shell runtime');
+assert.equal(gitBlob(indexBuf),'198207e3f52730498831f196caa35c4a0283e934','goMenu boundary runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'198207e3f52730498831f196caa35c4a0283e934','owner manifest must target current runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],

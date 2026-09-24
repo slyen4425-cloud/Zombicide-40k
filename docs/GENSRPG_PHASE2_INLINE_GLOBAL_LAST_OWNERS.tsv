@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=e56f7b63963d991717e1738c3e5188011276a2b7
+# sourceIndexBlob=198207e3f52730498831f196caa35c4a0283e934
 # scope=explicit window.<name> assignments in 119 active inline blocks
-# distinctGlobals=436 assignments=759 multiOwnerGlobals=119
+# distinctGlobals=436 assignments=758 multiOwnerGlobals=119
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -432,7 +432,7 @@ saveRpgGameplayModules	2	dungeonCore045HeroCombatModule
 setDeviceGameRole	2	gensrpgDungeonFlowFix171
 showAbilityInfo	2	captureAbilityTruth144
 showTurnPopup	1	rpgTurnTargetFlow157
-startConfiguredGame	4	gensDungeonCore01Js
+startConfiguredGame	3	gensDungeonCore01Js
 startDungeonClassicCombat	3	dungeonCore045HeroCombatModule
 startTurnManagerForGame	2	rpgTurnTargetFlow157
 state	8	dungeonCore200Rebuild

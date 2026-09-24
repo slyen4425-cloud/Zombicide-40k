@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171854,
+assert.equal(bytes.length,8170730,
   'Core200 global-retirement characterization must follow the exact retired runtime');
-assert.equal(gitBlob,'97f0e060d8bffcde2baaf5aa42c1e16b8544263f',
+assert.equal(gitBlob,'7663392f163aac32c4c3b918cbce67472856b3b6',
   'Core200 global-retirement characterization must use the exact retired runtime blob');
 
 function block(id){

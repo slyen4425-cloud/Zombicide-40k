@@ -30,9 +30,9 @@ const expected={
     mustInclude:['capturePlaytestFix128','captureAbilityTruth144','coreCombatPoolFix156']
   },
   startConfiguredGame:{
-    assignments:5,
-    last:'dungeonCore200Rebuild',
-    exact:['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']
+    assignments:4,
+    last:'gensDungeonCore01Js',
+    exact:['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js']
   },
   resumeGame:{
     assignments:1,
@@ -65,6 +65,8 @@ assert.match(capture156,/const oldCaptureRender156=window\.captureRenderBattleLi
 
 const start200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 assert.match(start200,/const startOutside200=window\.startConfiguredGame/,'Dungeon Core 2.00 must preserve the previous shared launch chain');
+assert.match(start200,/const gensDungeonStartConfiguredGame200V1=async function/,'Dungeon Core 2.00 must retain its local launch dispatcher for the Dungeon provider');
+assert.doesNotMatch(start200,/window\.startConfiguredGame\s*=(?!=)/,'Dungeon Core 2.00 global launch assignment must remain retired');
 assert.match(
   start200,
   /if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,

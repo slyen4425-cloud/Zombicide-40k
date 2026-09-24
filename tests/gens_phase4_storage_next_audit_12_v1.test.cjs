@@ -13,7 +13,7 @@ const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHA
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
 const HISTORICAL_SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
-const CURRENT_BLOB='95f8c96e7e221eb743f7c8013ffa8af499eca1c8';
+const CURRENT_BLOB='95f8c96e7e221eb743f7c8013ffa8af499eca1c8'; // Phase 5 grid repair changes Dungeon visibility only; storage ownership totals stay unchanged.
 
 function gitBlob(buffer){
   return crypto.createHash('sha1').update(Buffer.concat([

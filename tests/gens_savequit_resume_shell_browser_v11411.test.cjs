@@ -8,12 +8,15 @@ const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 const mobilePerformance=fs.readFileSync(path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js'),'utf8');
+const finalShellAuthority=fs.readFileSync(path.join(root,'assets','gensrpg','shell','module-launch-final-authority-v1.js'),'utf8');
 
 assert.match(indexSource,/id="dungeonCore310PersistenceAndTokens"/,'real index.html must contain the final Core 3.10 persistence layer');
 assert.match(indexSource,/DungeonCore01\.quit=function\(\)\{[\s\S]*Sauvegarder et quitter le Dungeon/,'Core 3.10 must own Save & Quit');
 assert.match(indexSource,/const previousResume310=window\.resumeGame;[\s\S]*window\.resumeGame=function\(\)/,'Core 3.10 must own the final inline Dungeon resume wrapper');
 assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production RuntimeBootstrap must keep the family/session guard');
 assert.match(mobilePerformance,/runtime-bootstrap-v1\.js/,'production mobile bootstrap must still load RuntimeBootstrap');
+assert.match(finalShellAuthority,/window\.startConfiguredGame\s*=\s*async\s+function/,'final Shell authority must own the visible launch global');
+assert.match(finalShellAuthority,/launchService\.startModuleSession\(moduleId\)/,'final Shell authority must delegate to the public module-launch registry');
 assert.match(indexSource,/let z40kRoomId = localStorage\.getItem\('z40k_online_room_id'\) \|\| null;/,'production online block must define optional room id from localStorage');
 assert.match(indexSource,/let z40kRoomCode = localStorage\.getItem\('z40k_online_room_code'\) \|\| '';/,'production online block must define optional room code from localStorage');
 assert.match(indexSource,/let z40kApplyingRemote = false;/,'production online block must default remote-application guard to false');
@@ -66,8 +69,9 @@ const core307Script=exactScript('dungeonCore307CriticalResumeFix');
 const core308Script=exactScript('dungeonCore308NewRunReset');
 const core310Script=exactScript('dungeonCore310PersistenceAndTokens');
 assert.match(core200Script,/localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\)/,'Core 2.00 must remain the creator/persister of the Dungeon runtime');
-assert.match(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,'Core 2.00 must own true Dungeon launches while preserving Capture routing');
-assert.doesNotMatch(core200Script,/window\.startConfiguredGame=async function\(\)\{if\(isDungeonMode\?\.\(\)\)return start\(\)/,'Core 2.00 must not steal Capture launches from the dedicated Capture owner');
+assert.match(core200Script,/const gensDungeonStartConfiguredGame200V1=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,'Core 2.00 must retain the true Dungeon launch dispatcher as a stable local provider target');
+assert.doesNotMatch(core200Script,/window\.startConfiguredGame\s*=(?!=)/,'Core 2.00 must not republish the retired launch global');
+assert.match(core200Script,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core 2.00 must register the public Dungeon provider');
 
 // Browser harness built only from exact production source blocks:
 // Shell + offline session support + custom-content + native Dungeon markup,
@@ -84,6 +88,7 @@ const roundTripHtml=
   '\n'+core307Script+
   '\n'+core308Script+
   '\n'+core310Script+
+  '\n<script src="/assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'+ 
   '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={
@@ -174,6 +179,7 @@ const server=http.createServer((req,res)=>{
       typeof window.openGensFamily==='function' &&
       typeof window.openGensBuiltInGame==='function' &&
       typeof window.startConfiguredGame==='function' &&
+      typeof window.GensShellModuleLaunchV1?.startModuleSession==='function' &&
       typeof window.resumeGame==='function' &&
       typeof window.DungeonCore01?.quit==='function' &&
       window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0'

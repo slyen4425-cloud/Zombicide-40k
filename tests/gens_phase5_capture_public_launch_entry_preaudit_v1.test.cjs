@@ -95,8 +95,11 @@ assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 assert.doesNotMatch(captureEntry,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
   'Capture Phase 3 entry must remain inert during preaudit');
 
-assert.match(blocks.captureFix135,/gensCapturePregameMode/);
-assert.match(blocks.captureFix135,/saveCaptureWorldState/);
+assert.match(blocks.captureFix135,/target135\(/);
+assert.match(blocks.captureFix135,/render135\(/);
+assert.match(blocks.captureFix135,/captureBattleLiveBody/);
+assert.match(blocks.captureFix135,/captureCreatureDetailBody/);
+assert.match(blocks.captureFix135,/oldPlayerText135/);
 assert.doesNotMatch(blocks.captureFix135,/start135|\.apply\(this,arguments\)/);
 
 assert.match(functions.captureFix138,/isCaptureContext138/);
@@ -133,7 +136,7 @@ const sourceReport=[
     responsibility:owners.blocks.captureFix135.responsibility,
     functionSource:'global startConfiguredGame retired',
     relevantBlockLines:blocks.captureFix135.split(/\n/).map(x=>x.trim()).filter(x=>
-      /gensCapturePregameMode|saveCaptureWorldState|world|trainer|starter|participant|turn|round|day/i.test(x)
+      /target135|render135|captureBattleLiveBody|captureCreatureDetailBody|oldPlayerText135|world|trainer|starter|participant|turn|round|day/i.test(x)
     ).slice(0,80)
   },
   ...ids.map(id=>({

@@ -20,10 +20,10 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8172742,
-  'final Shell authority switch must only add the final production script tag to the exact S4 index');
-assert.equal(gitBlob,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8',
-  'final Shell authority switch must keep the exact reviewed index composition');
+assert.equal(bytes.length,8172687,
+  'final Shell authority contract must run on the exact Core200-global-retired index');
+assert.equal(gitBlob,'e56f7b63963d991717e1738c3e5188011276a2b7',
+  'final Shell authority contract must keep the exact reviewed Core200 retirement composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),
   'final Shell authority file must exist');
@@ -83,8 +83,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'final authority switch must not retire any historical owner in the same lot');
+  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+  'Core200 retirement must preserve exactly the four remaining historical owners');
 
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'native Shell implementation must remain available behind the Survival provider');

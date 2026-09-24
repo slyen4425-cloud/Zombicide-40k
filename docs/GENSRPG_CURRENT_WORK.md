@@ -1,3 +1,70 @@
+## CHANTIER COURANT — Phase 5 / module-launch S2 — provider Survival — 2026-09-24
+
+Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.
+
+- Validation utilisateur S1 : **OK — « cela semble correct »**.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+- SHA :
+  `e12b71937521b24748a820b3e6698eed0b191d42`.
+- Runtime :
+  taille `8171576`, blob `12be0fdbaa5c05f7852933b48a3dd5df09da6145`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Raccorder uniquement le provider public Survival au registre S1.
+
+Le chemin production `startConfiguredGame()` reste inchangé pendant S2.
+
+### Pré-audit
+
+Survival finit sur le propriétaire natif Shell :
+les wrappers Capture et Dungeon délèguent hors de leur contexte.
+
+Raccord sélectionné :
+- capturer la référence native avant les wrappers ;
+- enregistrer `survival` dans `GensShellModuleLaunchV1` ;
+- provider routing-only ;
+- aucun DOM/stockage/timer/observer ;
+- aucun provider Capture/Dungeon/PvP.
+
+### TDD
+
+RED statique :
+`tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs`.
+
+Preuve navigateur future :
+`tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs`.
+
+L'ancien scénario navigateur Survival reste obligatoire en parallèle.
+
+### Invariants
+
+Chaîne à conserver :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Aucun retrait historique.
+Aucune bascule du bouton production vers le registre dans S2.
+
+### QA différée
+
+Ne pas toucher :
+- rafraîchissements ;
+- inventaire objet Survie à 0 ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- terminologie Survie.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / module-launch S1 — Shell registry raccord — 2026-09-24
 
 Ce bloc devient le point de reprise final de S1 dès que le SHA documentaire de clôture

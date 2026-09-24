@@ -521,6 +521,9 @@ jobs:
       - name: Raccorder le registre Shell module-launch S1
         run: node tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs
 
+      - name: Raccorder le provider Survival module-launch S2
+        run: node tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 
@@ -676,6 +679,9 @@ jobs:
 
       - name: Vérifier le lancement Survie par le vrai Shell
         run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
+
+      - name: Vérifier le provider public Survival module-launch S2
+        run: node tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs
 
       - name: Reproduire la perte des héros Survie après Dungeon
         run: node tests/gens_survival_heroes_after_dungeon_e2e_browser_v1.test.cjs

@@ -485,6 +485,9 @@ jobs:
       - name: Retirer le global startConfiguredGame captureFix135
         run: node tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs
 
+      - name: Scanner les anciennes empreintes captureFix135
+        run: node tests/gens_phase5_capture135_retirement_stale_baseline_scan_v1.test.cjs
+
       - name: Caractériser la régression utilisateur Phase 5
         run: node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
 

@@ -66,7 +66,7 @@ assert.equal(ctx.current,'hero','snapshot builder must restore active hero conte
 assert.equal(ctx.state,state,'snapshot builder must restore active hero state');
 
 const baseStart=source.indexOf('function baseValue');
-const baseEnd=source.indexOf('function compare',baseStart);
+const baseEnd=source.indexOf('const compare=StatsNorm.compare',baseStart);
 assert.ok(baseStart>0&&baseEnd>baseStart);
 assert.doesNotMatch(source.slice(baseStart,baseEnd),/nativeAttr\.call/,'canonical current-hero values must not fall back to the obsolete native reader');
 console.log('V16.78.114.7 rebuilt canonical hero stats -> Tactical V110 snapshot OK');

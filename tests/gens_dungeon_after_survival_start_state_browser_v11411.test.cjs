@@ -144,6 +144,148 @@ async function settleDungeonLaunch(page){
   await page.waitForTimeout(1200);
 }
 
+async function returnActiveGameToRootWithoutClosing(page){
+  const home=page.locator('button.back[onclick="backHomeFromGame()"]:visible').first();
+  await home.waitFor({state:'visible',timeout:10000});
+  await home.click();
+  await page.waitForFunction(()=>{
+    const root=document.getElementById('gensRootHome');
+    return !!root&&getComputedStyle(root).display!=='none';
+  },null,{timeout:10000});
+}
+
+async function forceDiagnosticDungeonRoomAndGrid(page,label){
+  await page.evaluate(label=>{
+    const RT='gensrpg_dungeon_runtime_v2';
+    const x=JSON.parse(localStorage.getItem(RT)||'null');
+    if(!x||!Array.isArray(x.participants)||!x.participants.length)throw new Error(label+': Dungeon runtime absent');
+    const hero=String(x.participants[0]);
+    x.room=1;
+    x.index=0;
+    x.branch=null;
+    x.last={kind:'empty',room:1,at:Date.now(),title:'Salle diagnostic grille',
+      map:{size:5,cells:Array(25).fill('floor')},narrative:'',exitLocked:false,keyEnemyId:''};
+    x.positions=x.positions&&typeof x.positions==='object'?x.positions:{};
+    x.heroRooms=x.heroRooms&&typeof x.heroRooms==='object'?x.heroRooms:{};
+    x.remaining=x.remaining&&typeof x.remaining==='object'?x.remaining:{};
+    x.positions[hero]=12;
+    x.heroRooms[hero]=1;
+    x.remaining[hero]=Math.max(1,Number(x.remaining[hero])||3);
+    localStorage.setItem(RT,JSON.stringify(x));
+    window.DungeonCore01?.render?.();
+  },label);
+  await page.waitForTimeout(500);
+  return page.evaluate(label=>{
+    const grid=document.querySelector('#dc047RoomBoard .dc047Grid');
+    const cells=[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')];
+    const visible=el=>{
+      if(!el)return false;
+      const st=getComputedStyle(el),r=el.getBoundingClientRect();
+      return st.display!=='none'&&st.visibility!=='hidden'&&Number(st.opacity||1)!==0&&r.width>0&&r.height>0;
+    };
+    const render=window.DungeonCore01?.render;
+    return {
+      label,
+      gridPresent:!!grid,
+      gridVisible:visible(grid),
+      cellCount:cells.length,
+      visibleCellCount:cells.filter(visible).length,
+      boardDisplay:document.getElementById('dc047RoomBoard')?getComputedStyle(document.getElementById('dc047RoomBoard')).display:'absent',
+      coreDisplay:document.getElementById('gensDungeonCore01')?getComputedStyle(document.getElementById('gensDungeonCore01')).display:'absent',
+      renderFlags:{
+        cacheUx:!!render?.__cacheUx167853,
+        cacheUxOriginal:typeof render?.__cacheUxOriginal==='function',
+        sourceStable:!!render?.__dsr167877,
+        largeRoom:!!render?.__dlr167835,
+        worldRuntime:!!render?.__dwr167838
+      },
+      renderSource:String(render||'').slice(0,1800),
+      recovery:{
+        present:!!window.DungeonGridDisplayRecovery167856,
+        version:window.DungeonGridDisplayRecovery167856?.VERSION||''
+      }
+    };
+  },label);
+}
+
+async function runSameOpenSurvivalToDungeonGridScenario(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+
+    await selectProfile(
+      page,'survival',
+      '#gensFamilyGames button.gensFamilyGameCard[onclick*="'+SURVIVAL_ID+'"]',
+      SURVIVAL_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await waitSurvivalStarted(page);
+
+    const beforeReturn=await page.evaluate(()=>({
+      href:location.href,
+      active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      renderFlags:{
+        cacheUx:!!window.DungeonCore01?.render?.__cacheUx167853,
+        sourceStable:!!window.DungeonCore01?.render?.__dsr167877
+      }
+    }));
+
+    await returnActiveGameToRootWithoutClosing(page);
+
+    await selectProfile(
+      page,'adventure',
+      '#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',
+      DUNGEON_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+
+    const grid=await forceDiagnosticDungeonRoomAndGrid(page,'same-open-after-survival');
+    return {beforeReturn,grid,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
+async function runDirectDungeonGridControl(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+    await selectProfile(
+      page,'adventure',
+      '#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',
+      DUNGEON_ID
+    );
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+    const grid=await forceDiagnosticDungeonRoomAndGrid(page,'direct-dungeon-control');
+    return {grid,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
 async function dungeonSnapshot(page,label){
   return page.evaluate(label=>{
     const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return {parseError:String(e)}}};
@@ -445,6 +587,8 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const control=await runScenario(port,false);
     const afterSurvival=await runScenario(port,true);
     const persistedThenSurvival=await runPersistedDungeonThenSurvivalScenario(port);
+    const directGrid=await runDirectDungeonGridControl(port);
+    const sameOpenGrid=await runSameOpenSurvivalToDungeonGridScenario(port);
 
     console.log(JSON.stringify({
       scenario:'Dungeon new game after Survival characterization',
@@ -452,6 +596,8 @@ async function runPersistedDungeonThenSurvivalScenario(port){
       control:control.snap,
       afterSurvival:afterSurvival.snap,
       persistedThenSurvival,
+      directGrid,
+      sameOpenGrid,
       controlErrors:control.errors,
       afterSurvivalErrors:afterSurvival.errors
     },null,2));
@@ -483,9 +629,24 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.deepEqual(restarted.returnControls,control.snap.returnControls,'NEW GAME must not keep stale room-return controls');
     assert.equal(restarted.gridLike.length>0,control.snap.gridLike.length>0,'NEW GAME must restore the same initial grid surface as a clean launch');
 
+    assert.equal(directGrid.grid.gridPresent,true,'direct Dungeon control must create the canonical dc047 grid');
+    assert.equal(directGrid.grid.gridVisible,true,'direct Dungeon control grid must be visible');
+    assert.ok(directGrid.grid.visibleCellCount>0,'direct Dungeon control must expose visible movement cells');
+    assert.equal(
+      sameOpenGrid.grid.gridVisible,true,
+      'Survival -> Dungeon without manually closing/reopening the link must show the canonical movement grid'
+    );
+    assert.equal(
+      sameOpenGrid.grid.visibleCellCount,
+      directGrid.grid.visibleCellCount,
+      'Survival -> Dungeon in the same open link must expose the same movement-cell surface as direct Dungeon'
+    );
+
     assert.deepEqual(control.errors,[],'fresh direct Dungeon must not raise browser errors');
     assert.deepEqual(afterSurvival.errors,[],'Dungeon after Survival must not raise browser errors');
     assert.deepEqual(persistedThenSurvival.errors,[],'persisted Dungeon -> Survival -> new Dungeon must not raise browser errors');
+    assert.deepEqual(directGrid.errors,[],'direct Dungeon grid control must not raise browser errors');
+    assert.deepEqual(sameOpenGrid.errors,[],'same-open Survival -> Dungeon grid scenario must not raise browser errors');
   }finally{
     server.closeAllConnections?.();server.closeIdleConnections?.();server.close();
   }

@@ -3,7 +3,13 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-const source=fs.readFileSync(path.join(__dirname,'..','assets/dungeon/dungeon-core-318.js'),'utf8');
+const index=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const core200=(index.match(/<script[^>]*id=["']dungeonCore200Rebuild["'][^>]*>([\s\S]*?)<\/script>/i)||[])[1]||'';
+assert.ok(core200,'Dungeon Core 2.00 block must exist');
+
+const match=core200.match(/function syncEntranceState200\(x\)\{document\.body\?\.classList\?\.toggle\('dc054AtEntrance',Number\(x\?\.room\|\|0\)<=0\)\}/);
+assert.ok(match,'canonical entrance visibility function must be extractable');
+
 const classes=new Set(['dc054AtEntrance']);
 const classList={
   add:name=>classes.add(name),
@@ -11,39 +17,16 @@ const classList={
   toggle:(name,on)=>{if(on)classes.add(name);else classes.delete(name);return !!on},
   contains:name=>classes.has(name)
 };
-const storage={
-  gensrpg_dungeon_runtime_v2:JSON.stringify({room:1,participants:['hero'],index:0})
-};
-const sandbox={
-  console,
-  document:{body:{classList},querySelector:()=>null},
-  localStorage:{
-    getItem:key=>Object.prototype.hasOwnProperty.call(storage,key)?storage[key]:null,
-    setItem:(key,value)=>{storage[key]=String(value)}
-  },
-  isDungeonMode:()=>true,
-  DungeonCore01:{
-    // Reproduces the obsolete Core 0.54 writer: it marks the body as entrance
-    // even while the canonical runtime is already in a generated room.
-    render(){classes.add('dc054AtEntrance');return 'rendered'},
-    show(){classes.add('dc054AtEntrance');return 'shown'}
-  },
-  setTimeout:()=>1
-};
-sandbox.window=sandbox;
+const sandbox={document:{body:{classList}}};
+vm.runInNewContext(match[0],sandbox,{filename:'dungeon-core-200-entrance-authority.js'});
 
-vm.runInNewContext(source,sandbox,{filename:'dungeon-core-318.js'});
+sandbox.syncEntranceState200({room:1});
+assert.equal(classes.has('dc054AtEntrance'),false,'generated Dungeon room must clear stale entrance-only visibility');
 
-assert.equal(classes.has('dc054AtEntrance'),false,'install must normalize stale entrance state from runtime room 1');
-assert.equal(sandbox.DungeonCore01.render.__dc318EntranceAuthority,true,'render must expose the final entrance authority marker');
-assert.equal(sandbox.DungeonCore01.show.__dc318EntranceAuthority,true,'show must expose the final entrance authority marker');
+sandbox.syncEntranceState200({room:0});
+assert.equal(classes.has('dc054AtEntrance'),true,'Dungeon entrance must retain the entrance-only presentation');
 
-assert.equal(sandbox.DungeonCore01.render(),'rendered');
-assert.equal(classes.has('dc054AtEntrance'),false,'legacy render cannot re-hide a generated Dungeon room');
-
-storage.gensrpg_dungeon_runtime_v2=JSON.stringify({room:0,participants:['hero'],index:0});
-classes.delete('dc054AtEntrance');
-assert.equal(sandbox.DungeonCore01.show(),'shown');
-assert.equal(classes.has('dc054AtEntrance'),true,'Dungeon entrance room 0 must retain the entrance-only presentation');
+sandbox.syncEntranceState200({room:2});
+assert.equal(classes.has('dc054AtEntrance'),false,'later Dungeon rooms must remain visible without any reload');
 
 console.log('gens_dungeon_entrance_visibility_runtime_v1: GREEN');

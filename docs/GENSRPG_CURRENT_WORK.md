@@ -1,3 +1,82 @@
+## CANDIDAT RUNTIME — Phase 5 / module-launch S2 — provider Survival — 2026-09-24
+
+Ce bloc devient le point de reprise actif pendant la validation S2.
+
+- Validation utilisateur S1 : **OK — « cela semble correct »**.
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+- SHA base :
+  `e12b71937521b24748a820b3e6698eed0b191d42`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### TDD RED
+
+SHA :
+`a07bbbe65bbb9e3f1bd84e70a9c82d9ac4147007`.
+
+Architecture :
+`35959014200` — FAILURE uniquement sur
+`Raccorder le provider Survival module-launch S2`.
+
+### Runtime S2
+
+Commit :
+`3df4297e55b0d18518623ff248401b78f5dac8b5`.
+
+`index.html` :
+- taille `8171879` ;
+- blob `cacee0bb95d8c046264668c1ccc721fc88bbed2d`.
+
+Diff runtime :
+- +8 lignes ;
+- capture du propriétaire natif Survival ;
+- provider routing-only ;
+- enregistrement `survival` uniquement.
+
+### Production inchangée
+
+Le bouton continue d'appeler `startConfiguredGame()`.
+
+La chaîne reste :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Aucun provider Capture/Dungeon/PvP.
+Aucun retrait d'autorité.
+Aucun DOM/stockage/observer/listener/timer/retry/polling dans le provider.
+
+### Validation en cours
+
+Les anciennes empreintes qui suivent le runtime courant sont réalignées sur S2.
+
+Checkpoint GREEN interdit avant :
+- Architecture + navigateur complet SUCCESS ;
+- Firefox SUCCESS ;
+- Tactical Dock SUCCESS.
+
+Après triple GREEN :
+- clôture documentaire ;
+- checkpoint S2 GREEN ;
+- preview téléphone ;
+- validation utilisateur avant S3 Capture.
+
+### QA différée
+
+Ne pas toucher :
+- rafraîchissements ;
+- inventaire objet Survie à 0 ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- terminologie Survie.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch S2 — provider Survival — 2026-09-24
 
 Ce bloc devient le point de reprise opérationnel. Les sections suivantes sont historiques.

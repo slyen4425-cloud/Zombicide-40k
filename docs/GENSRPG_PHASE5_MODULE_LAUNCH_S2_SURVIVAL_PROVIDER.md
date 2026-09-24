@@ -134,3 +134,48 @@ Avant GREEN :
 10. validation utilisateur avant S3.
 
 Aucun merge sur `main`.
+
+
+## Candidat runtime S2
+
+RED acquis :
+- SHA `a07bbbe65bbb9e3f1bd84e70a9c82d9ac4147007` ;
+- Architecture run `35959014200` ;
+- échec unique attendu :
+  `Raccorder le provider Survival module-launch S2` ;
+- assertion RED :
+  absence de la référence native capturée.
+
+Commit runtime :
+`3df4297e55b0d18518623ff248401b78f5dac8b5`.
+
+Runtime :
+- taille `8171879` ;
+- blob `cacee0bb95d8c046264668c1ccc721fc88bbed2d` ;
+- diff `index.html` : +8 lignes uniquement.
+
+Ajout :
+- `gensSurvivalNativeStartV1` capture le propriétaire natif avant les wrappers ;
+- `gensSurvivalStartModuleSessionV1` refuse tout module autre que Survival ;
+- le provider appelle uniquement la référence native ;
+- enregistrement uniquement de `survival`.
+
+Inchangés :
+- bouton production `startConfiguredGame()` ;
+- propriétaire natif ;
+- cinq wrappers historiques ;
+- aucun provider Capture/Dungeon/PvP.
+
+Le mécanisme one-shot a été supprimé dans le même commit runtime.
+
+### Validation en cours
+
+Les cartographies et sentinelles qui suivent l'empreinte du runtime courant sont
+réalignées sur `8171879 / cacee0bb...` sans changement d'assertion métier.
+
+Le SHA documentaire descendant de ce candidat doit encore passer :
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+Aucun checkpoint GREEN avant cette triple validation.

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171576,'S1 runtime must match the exact inert-registry candidate');
-assert.equal(gitBlob,'12be0fdbaa5c05f7852933b48a3dd5df09da6145','S1 runtime blob must match the exact inert-registry candidate');
+assert.equal(bytes.length,8171879,'current runtime must preserve the S1 registry candidate');
+assert.equal(gitBlob,'cacee0bb95d8c046264668c1ccc721fc88bbed2d','current runtime blob must preserve the S1 registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);
@@ -40,8 +40,10 @@ const service=index.slice(serviceStart,goMenu);
 assert.doesNotMatch(service,/MutationObserver|setTimeout|setInterval|localStorage|sessionStorage|document\.|querySelector|addEventListener/,
   'S1 registry must be pure routing infrastructure with no DOM/storage/observer/timer authority');
 
-assert.equal((index.match(/window\.GensShellModuleLaunchV1/g)||[]).length,1,
-  'S1 must expose the registry only; no module provider registration or production call yet');
+assert.equal((index.match(/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze/g)||[]).length,1,
+  'S1 must keep exactly one public Shell module-launch registry exposure');
+assert.doesNotMatch(service,/GensShellModuleLaunchV1\.register/,
+  'later module providers must remain outside the S1 registry infrastructure block');
 
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
 assert.equal(wrappers,5,'S1 must preserve all five historical startConfiguredGame wrappers');
@@ -71,5 +73,5 @@ console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S1 Shell registry',
   expected:'RED before runtime raccord, GREEN after inert registry insertion',
   preservedStartConfiguredGameWrappers:wrappers,
-  providerRegistrations:0
+  registryAssignments:1
 },null,2));

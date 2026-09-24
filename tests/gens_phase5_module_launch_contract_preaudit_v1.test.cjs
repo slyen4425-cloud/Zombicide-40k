@@ -65,8 +65,16 @@ for(const module of ['survival','dungeon','capture','pvp']){
   assert.equal(entry.ownership,'module-owned-session-start');
 
   const src=read('assets/gensrpg/'+module+'/entry-v1.js');
-  assert.doesNotMatch(src,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
-    module+' Phase 3 entry must remain inert during launch-contract preaudit');
+  if(module==='survival'){
+    assert.match(src,/GensSurvivalV1/,'Phase 6 may activate the Survival wave-rules namespace');
+    assert.doesNotMatch(src,/startModuleSession|GensShellModuleLaunchV1|moduleLaunch/,
+      'active Survival wave rules must not take module-launch authority');
+    assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|Dungeon|Tactical|Capture|PvP/,
+      'active Survival wave rules must remain pure and isolated');
+  }else{
+    assert.doesNotMatch(src,/window\.|globalThis|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
+      module+' Phase 3 entry must remain inert during launch-contract preaudit');
+  }
 }
 
 // The previous user-regression rollback is now an architectural invariant.
@@ -93,10 +101,16 @@ assert.deepEqual(chain,[
 ],'module-launch preaudit must track the three remaining historical startConfiguredGame global owners after captureFix135 retirement');
 assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m);
 
-// Metadata-only means no new launch contract or Phase 3 entry is connected to production composition.
-assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/);
-assert.doesNotMatch(preview,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/);
-assert.doesNotMatch(deploy,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/);
+// Phase 6 may connect only the pure Survival wave-rules entry in the source index.
+// The module-launch contract itself remains metadata-only and no other Phase 3 module entry is activated here.
+assert.equal((index.match(/assets\/gensrpg\/survival\/entry-v1\.js/g)||[]).length,1,
+  'Phase 6 must load the Survival entry exactly once');
+assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|dungeon|capture|pvp)\/entry-v1\.js/,
+  'Phase 6 wave-rules extraction must not activate another module entry or the launch contract');
+assert.doesNotMatch(preview,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
+  'preview must inherit the source index and not inject module entries independently');
+assert.doesNotMatch(deploy,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
+  'Pages composition must inherit the source index and not inject module entries independently');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module launch contract preaudit',

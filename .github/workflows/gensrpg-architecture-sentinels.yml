@@ -524,6 +524,9 @@ jobs:
       - name: Auditer le critère de sortie Phase 5
         run: node tests/gens_phase5_exit_audit_v1.test.cjs
 
+      - name: Pré-auditer le retrait openChar Capture139
+        run: node tests/gens_phase5_capture139_openchar_retirement_preaudit_v1.test.cjs
+
       - name: Pré-auditer le contrat public de lancement module Phase 5
         run: node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
 
@@ -765,6 +768,9 @@ jobs:
 
       - name: Caractériser openChar sans Dungeon Core 0.28
         run: node tests/gens_phase5_openchar_core028_browser_characterization_v1.test.cjs
+
+      - name: Caractériser Capture sans wrapper openChar Capture139
+        run: node tests/gens_phase5_capture139_openchar_retirement_browser_characterization_v1.test.cjs
 
       - name: Vérifier cache, retour et pièges authored dans Chromium
         run: node tests/gens_authored_cache_trap_browser_v11411.test.cjs

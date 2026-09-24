@@ -1,5 +1,96 @@
 # PHASE 6 OUVERTE — Isolation Survie — 2026-09-24
 
+## PREMIER MICRO-LOT PHASE 6 — retrait du garde legacy Survie/Dungeon — CI technique GREEN
+
+Périmètre :
+- retrait de `assets/gensrpg/gens-survival-mode-isolation-1678104.js` ;
+- retrait de son chargement/réaffirmation dans `assets/gensrpg/core/runtime-bootstrap-v1.js` ;
+- retrait de son précache dans `service-worker.js` ;
+- réalignement strict des sentinelles/cartographies historiques sur l'autorité Shell existante `gensSelectedFamily` ;
+- `index.html` inchangé ;
+- aucun nouveau wrapper, observer, timer, retry, fallback ou autorité globale.
+
+SHA technique validé avant clôture documentaire :
+`e843eead578d6d50245c7e56001682861744d5c3`.
+
+Dernier commit technique :
+`test: align PvP family with Shell authority`.
+
+Preuve CI exacte sur ce SHA :
+- Architecture + Browser : run `36057803301` — **SUCCESS** ;
+  - job Architecture statique — SUCCESS ;
+  - job Browser complet — SUCCESS ;
+  - étape Browser `Vérifier le provider Dungeon module-launch S4` — **SUCCESS** ;
+- Firefox : run `36057803191` — **SUCCESS** ;
+- Tactical Dock : run `36057803158` — **SUCCESS**.
+
+Le Browser complet confirme notamment sur le runtime sans le garde legacy :
+- lancement Survie par le vrai Shell ;
+- provider public Survival ;
+- héros Survie après Dungeon ;
+- Fouiller / arts Survie ;
+- navigation/goMenu ;
+- Capture victoire + reprise inter-module ;
+- Dungeon après Survie ;
+- fiche RPG sans flash Survie ;
+- cache / retour / pièges authored ;
+- Save & Quit / reprise par le vrai Shell ;
+- provider Dungeon module-launch S4 ;
+- PvP ;
+- Monster Capture ;
+- non-interférence quatre modules ;
+- preview / assets / Equipment.
+
+Conclusion technique :
+- aucune régression runtime prouvée sur ce micro-lot ;
+- l'ancien garde inter-module Survie/Dungeon est retiré sans remplacement ;
+- les frontières reposent sur les autorités Shell publiques déjà construites en Phase 5 ;
+- Phase 5 reste fermée ;
+- `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+### Fermeture documentaire et checkpoint technique
+
+La présente mise à jour de `CURRENT_WORK` change le SHA.
+
+Avant tout checkpoint :
+1. Architecture + Browser doivent être SUCCESS sur le SHA documentaire exact ;
+2. Firefox doit être SUCCESS sur le même SHA ;
+3. Tactical Dock doit être SUCCESS sur le même SHA ;
+4. l'étape Browser `Vérifier le provider Dungeon module-launch S4` doit rester SUCCESS.
+
+Checkpoint technique cible après ces preuves :
+`checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-ci-green-2026-09-24`.
+
+Preview stable cible :
+`preview/gensrpg-phase6-survival-legacy-guard-retirement-2026-09-24`.
+
+### BLOCAGE MANUEL OBLIGATOIRE
+
+**Ne pas commencer le deuxième micro-lot Phase 6 avant validation manuelle de Sylvain.**
+
+La preview doit permettre au minimum :
+1. lancer une partie Survie ;
+2. ouvrir un héros ;
+3. utiliser Fouiller ;
+4. vérifier les arts des héros ;
+5. revenir au menu ;
+6. passer Survie → Dungeon ;
+7. vérifier que la grille Dungeon apparaît ;
+8. passer Dungeon → Survie ;
+9. vérifier qu'aucun écran/thème Dungeon ne fuit en Survie ;
+10. Save & Quit Dungeon ;
+11. reprendre Dungeon ;
+12. tester Capture rapidement ;
+13. vérifier les menus/navigation.
+
+Après validation utilisateur seulement :
+- enregistrer la validation ;
+- créer le checkpoint final :
+  `checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-green-2026-09-24` ;
+- sélectionner ensuite le deuxième micro-lot Phase 6 via pré-audit ;
+- aucun déplacement opportuniste de fichier vers `assets/gensrpg/survival/`.
+
+
 ## Clôture formelle Phase 5
 
 Validation manuelle utilisateur reçue sur la preview :

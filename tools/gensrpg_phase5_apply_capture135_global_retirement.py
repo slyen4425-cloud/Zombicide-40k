@@ -37,6 +37,7 @@ assert text.count(old)==1, text.count(old)
 after=text.replace(old,"",1).encode("utf-8")
 
 assert len(after)==8172118, (len(after),git_blob(after))
+assert git_blob(after)=="198207e3f52730498831f196caa35c4a0283e934", git_blob(after)
 assert b'<script id="captureFix135">' in after
 assert b'window.captureSelectAllyTarget135=function' in after
 assert b'const target135=window.captureBattleSelectDefaultTarget;' in after

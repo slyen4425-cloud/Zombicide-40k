@@ -27273,6 +27273,13 @@ window.startConfiguredGame=async function(){
     },1200);
   }
 };
+const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;
+const gensCaptureStartModuleSessionV1=async()=>{
+  if(gensShellActiveModuleV1()!=="capture")return false;
+  await gensCaptureStartConfiguredGame139V1();
+  return true;
+};
+window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);
 
 /* Le Shell garde l’unique frontière globale goMenu.
    Capture expose uniquement son retour owner-local via le contrat public. */

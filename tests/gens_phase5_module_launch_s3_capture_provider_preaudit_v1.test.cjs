@@ -13,15 +13,15 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171879,'S3 preaudit must start from the exact user-validated S2 runtime');
-assert.equal(gitBlob,'7601760f7a635094d4f687b725a639b5728e93b4','S3 preaudit must start from the exact S2 blob');
+assert.equal(bytes.length,8172204,'S3 preaudit must start from the exact user-validated S2 runtime');
+assert.equal(gitBlob,'6c95e3f6ca4bf8e34003776e7e43e44192aafb16','S3 preaudit must start from the exact S2 blob');
 
 const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
 assert.ok(registryExpose>0,'S1 registry must remain exposed');
 assert.match(index,/window\.GensShellModuleLaunchV1\.register\("survival",gensSurvivalStartModuleSessionV1\);/,
   'S2 Survival provider must remain registered');
-assert.doesNotMatch(index,/GensShellModuleLaunchV1\.register\(["']capture["']/,
-  'Capture provider must still be absent before S3 runtime raccord');
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']capture["']/g)||[]).length,1,
+  'Capture provider must be registered exactly once after S3 runtime raccord');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

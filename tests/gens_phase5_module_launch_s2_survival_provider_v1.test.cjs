@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171879,'S2 runtime must match the exact Survival-provider candidate');
-assert.equal(gitBlob,'7601760f7a635094d4f687b725a639b5728e93b4','S2 runtime blob must match the exact Survival-provider candidate');
+assert.equal(bytes.length,8172204,'S2 runtime must match the exact Survival-provider candidate');
+assert.equal(gitBlob,'6c95e3f6ca4bf8e34003776e7e43e44192aafb16','S2 runtime blob must match the exact Survival-provider candidate');
 
 assert.match(index,/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze\(\{/,
   'S2 requires the S1 Shell registry');
@@ -50,7 +50,7 @@ assert.ok(registryExpose>nextOwner&&registration>registryExpose&&registration<go
 assert.doesNotMatch(provider,/document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/,
   'S2 provider must contain routing only; native launch remains the existing owner');
 
-for(const id of ['capture','dungeon','pvp']){
+for(const id of ['dungeon','pvp']){
   assert.doesNotMatch(index,new RegExp('GensShellModuleLaunchV1\\.register\\(["\\\']'+id+'["\\\']'),
     'S2 must not register '+id+' yet');
 }

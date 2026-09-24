@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171879,'current runtime must preserve the S1 registry candidate');
-assert.equal(gitBlob,'7601760f7a635094d4f687b725a639b5728e93b4','current runtime blob must preserve the S1 registry candidate');
+assert.equal(bytes.length,8172204,'current runtime must preserve the S1 registry candidate');
+assert.equal(gitBlob,'6c95e3f6ca4bf8e34003776e7e43e44192aafb16','current runtime blob must preserve the S1 registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);
@@ -62,7 +62,7 @@ function block(id){
 for(const id of expected){
   const body=block(id);
   assert.match(body,/window\.startConfiguredGame\s*=\s*async\s+function/,'historical start owner changed: '+id);
-  assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'S1 must not route a module through the new registry yet: '+id);
+  if(id!=='captureFix139')assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
 }
 
 assert.match(service,/if\(typeof handler!==["']function["']\)return false/,

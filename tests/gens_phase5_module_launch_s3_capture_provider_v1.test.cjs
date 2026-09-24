@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8171879,'S3 RED must start from the exact S2 GREEN runtime');
-assert.equal(gitBlob,'7601760f7a635094d4f687b725a639b5728e93b4','S3 RED must start from the exact S2 GREEN blob');
+assert.equal(bytes.length,8172204,'S3 RED must start from the exact S2 GREEN runtime');
+assert.equal(gitBlob,'6c95e3f6ca4bf8e34003776e7e43e44192aafb16','S3 RED must start from the exact S2 GREEN blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -1,0 +1,33 @@
+name: GenSrpG one-shot Capture135 baseline realign
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24
+
+permissions:
+  contents: write
+
+jobs:
+  realign-capture135-baselines:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Realign exact test and Phase 2 baselines
+        run: python tools/gensrpg_phase5_realign_capture135_baselines.py
+
+      - name: Verify stale baseline scan
+        run: node tests/gens_phase5_capture135_retirement_stale_baseline_scan_v1.test.cjs
+
+      - name: Commit baseline realignment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests docs/GENSRPG_PHASE2_INLINE_OWNERS.json docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json docs/GENSRPG_PHASE2_STORAGE_OWNERS.json docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv
+          git commit -m "test: realign baselines after captureFix135 retirement"
+          git push origin HEAD:work/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24

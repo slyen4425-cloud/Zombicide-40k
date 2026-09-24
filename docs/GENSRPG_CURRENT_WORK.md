@@ -1,3 +1,97 @@
+# CANDIDAT GREEN FINAL — Phase 5 / retrait dernier wrapper global openChar Capture139 — 2026-09-24
+
+## Résultat fonctionnel
+
+SHA fonctionnel validé par CI :
+`74cce56beea71ee3bdcd0b132b28a99e6a20b017`.
+
+Runtime :
+- `index.html` : 8 171 854 octets ;
+- blob : `97f0e060d8bffcde2baaf5aa42c1e16b8544263f`.
+
+Modification runtime unique :
+- retrait du wrapper global `window.openChar` de `captureFix139` ;
+- 0 ajout / 8 lignes supprimées ;
+- aucun autre changement runtime.
+
+Préservé :
+- `captureFix139` et son lancement Capture ;
+- `window._captureStarting139` ;
+- chaîne historique `startConfiguredGame` :
+  `captureFix138 -> captureFix139 -> gensDungeonCore01Js` ;
+- provider public Capture ;
+- Shell final public `startConfiguredGame` ;
+- Dungeon / Survival / Tactical / Builder / Stats.
+
+Autorité fiche héros après retrait :
+- propriétaire natif : `function openChar(id)` ;
+- wrappers globaux inline : **0**.
+
+Cartographie Phase 2 :
+- globals explicites : 435 ;
+- affectations explicites : 757 ;
+- multi-owner globals : 119 ;
+- ligne `openChar -> captureFix139` supprimée de la table des derniers propriétaires.
+
+## CI exacte du SHA fonctionnel
+
+Architecture + Browser :
+- run `36045182459` — **SUCCESS** ;
+- Architecture statique — SUCCESS ;
+- Browser complet — SUCCESS.
+
+Firefox :
+- run `36045182471` — **SUCCESS**.
+
+Tactical Dock :
+- run `36045182458` — **SUCCESS**.
+
+Le Browser complet a notamment validé :
+- lancement Survie par le vrai Shell ;
+- provider public Survival ;
+- héros Survie après Dungeon ;
+- Fouiller / arts Survie ;
+- goMenu Dungeon / Capture / Survival ;
+- retraits historiques goMenu Core 0.23 et Core 0.01 ;
+- Dungeon -> Tactical V2 ;
+- Capture victoire et reprise inter-module ;
+- Dungeon après Survie ;
+- Builder ;
+- fiche héros sans Core 0.28 ;
+- Save & Quit / reprise ;
+- provider Dungeon ;
+- PvP ;
+- Monster Capture ;
+- provider Capture ;
+- composition Capture complète ;
+- non-interférence quatre modules ;
+- preview Chromium ;
+- assets / Equipment.
+
+## Critère de sortie Phase 5
+
+L'audit actif `tests/gens_phase5_exit_audit_v1.test.cjs` est GREEN et conclut :
+- autorité navigation publique unique : Shell ;
+- zéro override global `goMenu` ;
+- autorité fiche héros native unique : `function openChar(id)` ;
+- zéro wrapper global inline `openChar` ;
+- `phase5ExitReady: true`.
+
+**Aucun nouveau micro-nettoyage Phase 5 n'est autorisé sans nouveau bloqueur prouvé.**
+
+## Étape restante
+
+Validation utilisateur téléphone de la preview de ce candidat GREEN.
+
+Après validation utilisateur :
+1. enregistrer la validation ;
+2. clôturer formellement Phase 5 ;
+3. créer le checkpoint GREEN de sortie Phase 5 ;
+4. ouvrir **Phase 6 — isolation Survie** conformément à la roadmap.
+
+Production `main` reste gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
 # RUNTIME APPLIQUÉ — Phase 5 / retrait dernier wrapper global openChar Capture139 — 2026-09-24
 
 Validation de la source utilisateur :

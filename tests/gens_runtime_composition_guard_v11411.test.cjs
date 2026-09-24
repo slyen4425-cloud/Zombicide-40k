@@ -33,7 +33,8 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/progression-v1.js?v=1',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
-  'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
+  'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
 
 // 2. Pages build keeps the same deterministic static order.
@@ -58,16 +59,27 @@ const pagesModules=[
   'stats-normalization-v1.js',
   'gens-rpg-stats-clean-167874.js',
   'gens-dungeon-hero-art-repair-167874.js',
-  'gens-mobile-combat-performance-16781022.js'
+  'gens-mobile-combat-performance-16781022.js',
+  'module-launch-final-authority-v1.js'
 ];
 assertOrdered(workflow,pagesModules,'Pages build modules');
 const perfTag='assets/gensrpg/gens-mobile-combat-performance-16781022.js';
-const removePos=workflow.indexOf('html = html.replace(perf_tag');
+const finalShellTag='assets/gensrpg/shell/module-launch-final-authority-v1.js';
+const removePerfPos=workflow.indexOf('html = html.replace(perf_tag');
+const removeFinalPos=workflow.indexOf('html = html.replace(final_shell_tag');
 const injectPos=workflow.indexOf('for module, tag, error in modules');
-assert.ok(removePos>=0 && injectPos>removePos,'Pages build must remove the source performance tag before reinjecting the ordered module list');
-assert.ok(workflow.includes("perf_tag = '<script src=\"assets/gensrpg/gens-mobile-combat-performance-16781022.js\"></script>'"),'Pages build must explicitly identify the final performance entry tag');
-assert.equal(pagesModules.at(-1),'gens-mobile-combat-performance-16781022.js','performance entry must remain the final statically injected module during this transition');
-assert.ok(workflow.lastIndexOf(perfTag)>workflow.indexOf('gens-dungeon-hero-art-repair-167874.js'),'performance entry must remain after canonical stats and hero-art layers');
+assert.ok(removePerfPos>=0 && removeFinalPos>removePerfPos && injectPos>removeFinalPos,
+  'Pages build must remove both source tail tags before reinjecting the canonical ordered module list');
+assert.ok(workflow.includes("perf_tag = '<script src=\"assets/gensrpg/gens-mobile-combat-performance-16781022.js\"></script>'"),
+  'Pages build must explicitly identify the performance entry tag');
+assert.ok(workflow.includes("final_shell_tag = '<script src=\"assets/gensrpg/shell/module-launch-final-authority-v1.js\"></script>'"),
+  'Pages build must explicitly identify the final Shell authority tag');
+assert.equal(pagesModules.at(-2),'gens-mobile-combat-performance-16781022.js',
+  'performance entry must remain immediately before the final Shell authority');
+assert.equal(pagesModules.at(-1),'module-launch-final-authority-v1.js',
+  'final Shell authority must be the last statically injected production module');
+assert.ok(workflow.lastIndexOf(finalShellTag)>workflow.lastIndexOf(perfTag),
+  'final Shell authority must remain ordered after mobile performance in the Pages build');
 
 // 3. Performance may start ONE explicit bootstrap, but it no longer owns Tactical composition.
 const baseTactical=[

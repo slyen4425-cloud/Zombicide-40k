@@ -1,4 +1,5 @@
-const assert=require('node:assert/strict');\n// S4: same real Dungeon Save & Quit/resume path, launched through the public module-launch provider.
+const assert=require('node:assert/strict');
+// S4: same real Dungeon Save & Quit/resume path, launched through the public module-launch provider.
 const fs=require('node:fs');
 const http=require('node:http');
 const path=require('node:path');

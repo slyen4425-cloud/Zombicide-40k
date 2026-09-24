@@ -74,8 +74,10 @@ for(const module of ['survival','dungeon','capture','pvp']){
 assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs')),
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
-assert.match(rollbackGuard,/captureFix135 global launch boundary must remain retired after dedicated RED and real user-path proof/);
+assert.match(rollbackGuard,/captureFix135 global startConfiguredGame owner must remain retired/);
 assert.match(rollbackGuard,/assert\.equal\(assignments,3/);
+assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs')),
+  'the dedicated captureFix135 retirement RED/contract must remain present');
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));

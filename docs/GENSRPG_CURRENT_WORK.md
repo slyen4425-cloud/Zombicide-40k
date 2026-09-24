@@ -1,3 +1,27 @@
+## GREEN FINAL — Phase 5 / module-launch S3 — provider Capture — 2026-09-24
+
+S3 est validé techniquement sur le SHA `acc620ea134d21f16c548777d90bdd71f110615f`.
+
+- Architecture + navigateur complet : `35965380501` — SUCCESS ;
+- Firefox : `35965380429` — SUCCESS ;
+- Tactical Dock : `35965380519` — SUCCESS.
+- Runtime : `8172204` octets ;
+- blob : `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+- Providers publics raccordés : Survival + Capture uniquement.
+- Dungeon/PvP restent non raccordés.
+- Chaîne historique `startConfiguredGame` inchangée.
+- Aucun propriétaire historique retiré.
+- `main` reste gelée.
+
+Le présent commit documentaire doit lui-même repasser la triple CI avant que le
+checkpoint/preview S3 soient considérés définitifs.
+
+Après checkpoint + preview, validation utilisateur obligatoire avant S4 Dungeon.
+
+Aucun merge sur `main`.
+
+---
+
 ## CANDIDAT RUNTIME — Phase 5 / module-launch S3 — provider Capture — 2026-09-24
 
 Point de reprise actif pendant la validation complète.

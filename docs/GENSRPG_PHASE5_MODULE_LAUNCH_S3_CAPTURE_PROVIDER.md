@@ -91,3 +91,29 @@ puis s'est supprimé dans le même commit runtime.
 
 La validation triple CI complète doit maintenant être exécutée sur un SHA utilisateur
 descendant de ce runtime.
+
+
+## Validation technique complète
+
+SHA candidat validé :
+`acc620ea134d21f16c548777d90bdd71f110615f`.
+
+- Architecture + navigateur complet : `35965380501` — SUCCESS ;
+- Firefox : `35965380429` — SUCCESS ;
+- Tactical Dock : `35965380519` — SUCCESS.
+
+Le navigateur complet a validé notamment :
+- Capture historique par le Shell ;
+- provider public Capture S3 ;
+- Capture victoire/reprise ;
+- Capture composition complète ;
+- non-interférence des quatre modules ;
+- Survival historique et provider S2 ;
+- Dungeon -> Tactical ;
+- Builder, Config objet, openChar, Save & Quit, PvP, preview/assets/equipment.
+
+Le runtime reste inchangé :
+- taille `8172204` ;
+- blob `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+
+Clôture documentaire soumise à une nouvelle triple CI avant checkpoint final.

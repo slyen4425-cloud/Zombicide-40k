@@ -82,3 +82,39 @@ Après RED :
 - preview téléphone + validation utilisateur avant toute bascule d'autorité globale.
 
 Aucun merge sur `main`.
+
+
+## Validation technique complète S4
+
+SHA technique validé :
+`54d9aba4acb3456e3c01f00c1aa5c6f629c92095`.
+
+CI :
+- Architecture + navigateur complet : `35975357431` — SUCCESS ;
+- Firefox : `35975357435` — SUCCESS ;
+- Tactical Dock : `35975357498` — SUCCESS.
+
+Runtime final candidat :
+- taille `8172529` ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Providers publics :
+- Survival : raccordé ;
+- Capture : raccordé ;
+- Dungeon : raccordé ;
+- PvP : absent.
+
+Le bouton production et les cinq propriétaires historiques restent inchangés.
+Aucun mécanisme one-shot ne reste chargé.
+
+### Note de validation
+
+Le legacy `Dungeon après Survival` a présenté une occurrence aléatoire
+`battle-already-open` lors d'une première exécution. Une relance du même job,
+sur le même SHA, a passé ce scénario avant de poursuivre. Aucun correctif gameplay
+n'a été appliqué pour cette occurrence.
+
+Le test navigateur S4 a ensuite été corrigé d'une erreur syntaxique de génération
+(`\\n` littéral après le premier `require`), sans changement runtime.
+
+Le SHA documentaire de clôture doit repasser la triple CI avant checkpoint GREEN final.

@@ -1,3 +1,97 @@
+## GREEN FINAL CANDIDATE — Phase 5 / module-launch S4 — provider Dungeon — 2026-09-24
+
+S4 est techniquement GREEN sur le SHA `54d9aba4acb3456e3c01f00c1aa5c6f629c92095`.
+
+- Base pré-audit GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s4-dungeon-provider-preaudit-green-2026-09-24`.
+- Runtime S4 :
+  `853f1cb68d65f224c3619eca4b73a491fecdb5ae`.
+- SHA technique validé :
+  `54d9aba4acb3456e3c01f00c1aa5c6f629c92095`.
+- `index.html` :
+  taille `8172529`,
+  blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Runtime S4
+
+Ajout routing-only dans `dungeonCore200Rebuild` :
+- référence stable `gensDungeonStartConfiguredGame200V1` ;
+- provider `gensDungeonStartModuleSessionV1` ;
+- garde `gensShellActiveModuleV1() === "dungeon"` ;
+- délégation au dernier intercept Core200 ;
+- registration publique `dungeon`.
+
+Diff runtime :
+- +7 lignes ;
+- aucun retrait.
+
+Providers publics raccordés :
+- Survival ;
+- Capture ;
+- Dungeon.
+
+Toujours non raccordé :
+- PvP.
+
+### Invariants conservés
+
+- bouton production toujours `startConfiguredGame()` ;
+- cinq propriétaires historiques toujours présents ;
+- aucun propriétaire retiré ;
+- aucun observer/timer/retry/polling ajouté ;
+- aucun changement gameplay Dungeon/Tactical ;
+- rollback utilisateur permanent conservé.
+
+### Validation technique complète
+
+- Architecture + navigateur complet :
+  `35975357431` — SUCCESS ;
+- Firefox :
+  `35975357435` — SUCCESS ;
+- Tactical Dock :
+  `35975357498` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- lancement Dungeon historique ;
+- provider public Dungeon S4 ;
+- Save & Quit / reprise par le provider ;
+- Dungeon map -> Tactical V2 ;
+- Dungeon après Survival ;
+- Survival historique + provider S2 ;
+- Capture victoire/reprise + provider S3 ;
+- Builder / Config objet / openChar ;
+- authored cache/pièges ;
+- non-interférence des quatre modules ;
+- preview/assets/equipment.
+
+### Incident de validation caractérisé
+
+Une première exécution du navigateur a échoué sur le scénario aléatoire
+`Dungeon après Survival` avec le message `battle-already-open`.
+La relance du même job sur le même SHA a passé ce scénario, prouvant que cet échec
+était lié à l'embuscade aléatoire du test et non au provider S4.
+
+Le premier fichier navigateur S4 avait également un `\\n` littéral après son
+premier `require`; cette erreur de test a été corrigée sans modifier le runtime.
+
+### Clôture
+
+Le présent commit documentaire doit lui-même repasser :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après triple GREEN :
+- checkpoint final S4 ;
+- preview téléphone alignée ;
+- validation utilisateur obligatoire avant toute bascule d'autorité globale ou retrait historique.
+
+Aucun merge sur `main`.
+
+---
+
 ## S4 — RED PROVIDER DUNGEON — 2026-09-24
 
 Base obligatoire :

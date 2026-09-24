@@ -42,7 +42,7 @@ const pagesPerfTuple='assets/gensrpg/gens-mobile-combat-performance-16781022.js'
 const pagesFinalTuple='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 assert.ok(pagesWorkflow.lastIndexOf(pagesFinalTuple)>pagesWorkflow.lastIndexOf(pagesPerfTuple),
   'Pages build must inject final Shell authority after mobile performance');
-assert.ok(pagesWorkflow.includes("final_shell_tag = '<script src=\\"assets/gensrpg/shell/module-launch-final-authority-v1.js\\"></script>'"),
+assert.ok(pagesWorkflow.includes(`final_shell_tag = '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'`),
   'Pages build must explicitly remove/reinject the final Shell authority tag');
 assert.ok(pagesWorkflow.includes('html = html.replace(final_shell_tag + "\\n", "").replace(final_shell_tag, "")'),
   'Pages build must normalize the source final Shell tag before canonical reinjection');

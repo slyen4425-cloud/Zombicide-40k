@@ -121,6 +121,7 @@ const server=http.createServer((req,res)=>{
     ));
 
     mark('verify-legacy-survival-guard-neutralized');
+    await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
     await page.waitForFunction(()=>window.__phase6LegacySurvivalIsolationBlocked===true);
     assert.equal(await page.evaluate(()=>typeof window.GensSurvivalModeIsolation1678104),'undefined',
       'Phase 6 characterization must execute without the legacy Survival/Dungeon isolation guard');

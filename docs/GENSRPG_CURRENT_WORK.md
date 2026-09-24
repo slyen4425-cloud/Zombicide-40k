@@ -1,3 +1,81 @@
+# CHANTIER COURANT — Phase 5 / audit de sortie vers Phase 6 — 2026-09-24
+
+Validation utilisateur du checkpoint précédent :
+**OK — preview captureFix135 testée par Sylvain : « Semble parfait 👍 »**.
+
+## Base et gouvernance
+
+- Dernier checkpoint GREEN validé utilisateur :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-capture135-retirement-green-2026-09-24`.
+- SHA exact de base :
+  `6dcfa06d5785710a0fd09b76ee1d0143bd2fe67f`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-exit-audit-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-exit-audit-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, toujours gelée.
+
+## Objet unique
+
+Réévaluer explicitement le critère de sortie de la Phase 5 avant tout nouveau retrait historique.
+
+Critère roadmap :
+**un seul propriétaire de navigation et fiche héros**.
+
+L'audit doit déterminer factuellement si les responsabilités suivantes ont déjà une autorité unique suffisante :
+- accueil ;
+- changement de module ;
+- navigation générale ;
+- fiche personnage hors combat ;
+- ouverture / fermeture / retour des écrans ;
+- état de session / module actif ;
+- lancement public des modules.
+
+La présence résiduelle de wrappers historiques `startConfiguredGame`
+(`captureFix138 -> captureFix139 -> gensDungeonCore01Js`)
+ne justifie pas à elle seule un nouveau micro-nettoyage :
+il faut d'abord prouver qu'un de ces propriétaires conserve encore une autorité globale
+qui bloque le critère de sortie Phase 5.
+
+## Périmètre
+
+Audit / documentation / sentinelle de sortie uniquement.
+
+Interdit dans ce lot :
+- aucun changement runtime ;
+- aucun changement `index.html` ;
+- aucun retrait de `captureFix138`, `captureFix139` ou `gensDungeonCore01Js` ;
+- aucun changement gameplay ;
+- aucune rustine / wrapper / observer / polling / reload ;
+- aucun merge sur `main`.
+
+## Sources de preuve à contrôler
+
+- contrats Shell Phase 5 ;
+- registre public de lancement module ;
+- providers Survival / Capture / Dungeon ;
+- autorité finale `startConfiguredGame` du Shell ;
+- `goMenu` et contrat de retour écran ;
+- `openChar` / fiche héros ;
+- tests navigateur de navigation et non-interférence ;
+- chaîne historique restante uniquement pour distinguer
+  « autorité publique » de « compatibilité interne encore chargée ».
+
+## Décision attendue
+
+Deux issues seulement :
+
+1. **critère Phase 5 atteint** :
+   clôturer Phase 5, créer checkpoint GREEN de sortie,
+   puis ouvrir réellement Phase 6 — isolation Survie ;
+
+2. **critère non atteint** :
+   identifier précisément UNE responsabilité encore multi-propriétaire,
+   avec preuve, puis ouvrir seulement le micro-lot correspondant.
+
+Ne pas inventer de nettoyage additionnel sans blocage prouvé.
+
 # CANDIDAT GREEN FINAL — Phase 5 / retrait startConfiguredGame captureFix135 — 2026-09-24
 
 Le micro-lot de retrait de l'ancien propriétaire global `captureFix135` est techniquement GREEN sur le SHA fonctionnel

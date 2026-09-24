@@ -64,31 +64,48 @@ Checkpoint technique cible après ces preuves :
 Preview stable cible :
 `preview/gensrpg-phase6-survival-legacy-guard-retirement-2026-09-24`.
 
-### BLOCAGE MANUEL OBLIGATOIRE
+### VALIDATION MANUELLE — REÇUE
 
-**Ne pas commencer le deuxième micro-lot Phase 6 avant validation manuelle de Sylvain.**
+Preview stable créée :
+`preview/gensrpg-phase6-survival-legacy-guard-retirement-2026-09-24`.
 
-La preview doit permettre au minimum :
-1. lancer une partie Survie ;
-2. ouvrir un héros ;
-3. utiliser Fouiller ;
-4. vérifier les arts des héros ;
-5. revenir au menu ;
-6. passer Survie → Dungeon ;
-7. vérifier que la grille Dungeon apparaît ;
-8. passer Dungeon → Survie ;
-9. vérifier qu'aucun écran/thème Dungeon ne fuit en Survie ;
-10. Save & Quit Dungeon ;
-11. reprendre Dungeon ;
-12. tester Capture rapidement ;
-13. vérifier les menus/navigation.
+Checkpoint technique CI GREEN créé :
+`checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-ci-green-2026-09-24`.
 
-Après validation utilisateur seulement :
-- enregistrer la validation ;
-- créer le checkpoint final :
-  `checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-green-2026-09-24` ;
-- sélectionner ensuite le deuxième micro-lot Phase 6 via pré-audit ;
-- aucun déplacement opportuniste de fichier vers `assets/gensrpg/survival/`.
+Ces deux refs pointent sur le SHA documentaire/technique validé avant retour utilisateur :
+`d7bbb5965680aa01e80bed16938cdae64eba862d`.
+
+Validation utilisateur reçue sur la preview :
+> "Ok tout semble parfait"
+
+Aucune régression manuelle n'a été signalée sur le périmètre de contrôle demandé :
+Survie, fiche héros, Fouiller, arts, navigation, transitions Survie ↔ Dungeon,
+grille Dungeon, Save & Quit / reprise, Capture et menus.
+
+### FERMETURE DU PREMIER MICRO-LOT PHASE 6
+
+La présente mise à jour de `CURRENT_WORK` crée un nouveau SHA documentaire.
+Conformément à la charte, le checkpoint GREEN final ne peut être créé qu'après
+validation des CI sur ce SHA exact :
+
+1. Architecture + Browser — SUCCESS ;
+2. Firefox — SUCCESS ;
+3. Tactical Dock — SUCCESS ;
+4. étape Browser `Vérifier le provider Dungeon module-launch S4` — SUCCESS.
+
+Checkpoint GREEN final cible :
+`checkpoint/gensrpg-phase6-survival-legacy-guard-retirement-green-2026-09-24`.
+
+Interdictions maintenues jusqu'à ce checkpoint :
+- ne pas ouvrir le deuxième micro-lot Phase 6 ;
+- ne pas modifier le runtime ;
+- ne pas toucher à `main` ;
+- aucun déplacement opportuniste vers `assets/gensrpg/survival/`.
+
+Après création du checkpoint GREEN final seulement :
+- reprendre le pré-audit Phase 6 ;
+- sélectionner un deuxième micro-lot homogène ;
+- appliquer TDD / preuves avant toute modification runtime.
 
 
 ## Clôture formelle Phase 5

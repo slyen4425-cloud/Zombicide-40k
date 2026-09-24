@@ -1,3 +1,82 @@
+# GREEN FINAL CANDIDATE — Phase 5 / pré-audit retrait global startConfiguredGame Core200 — 2026-09-24
+
+Le pré-audit Core200 est techniquement GREEN sur le SHA
+\`9ce6145ed0674978c7a6a7840d21cc36f79184ed\`.
+
+## Validation complète du candidat
+
+- Architecture + navigateur complet :
+  run \`36010651278\` — **SUCCESS**.
+- Firefox :
+  run \`36010651466\` — **SUCCESS**.
+- Tactical Dock :
+  run \`36010651321\` — **SUCCESS**.
+
+Le navigateur complet a notamment validé :
+- lancement Survie par le vrai Shell ;
+- provider public Survival S2 ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire / reprise ;
+- Dungeon après Survie dans la même ouverture ;
+- Dungeon Builder ;
+- Config objet ;
+- openChar ;
+- cache / retour / pièges authored ;
+- Save & Quit / reprise ;
+- provider public Dungeon S4 ;
+- PvP placeholder ;
+- Monster Capture ;
+- provider public Capture S3 ;
+- composition Capture complète ;
+- non-interférence des quatre modules ;
+- murs Chromium ;
+- preview Chromium ;
+- assets ;
+- Equipment.
+
+## Résultat architectural
+
+Le retrait futur peut cibler **uniquement l'affectation globale Core200**.
+
+À conserver impérativement :
+- la vraie fonction de lancement Dungeon Core200 ;
+- la référence stable \`gensDungeonStartConfiguredGame200V1\` ;
+- le provider \`gensDungeonStartModuleSessionV1\` ;
+- la registration publique Dungeon ;
+- les quatre autres couches historiques
+  \`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js\` ;
+- le Shell final comme propriétaire visible de \`window.startConfiguredGame\`.
+
+Aucun consommateur production tardif n'a été trouvé pour l'ancien global Core200.
+L'affectation elle-même n'installe ni listener, ni stockage, ni timer, ni observer.
+
+## Runtime
+
+Toujours **inchangé** :
+- \`index.html\` : \`8172742\` octets ;
+- blob : \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+\`main\` reste gelée sur
+\`e8681f9823573ced8aec59c8ddc47a72b02bc663\`.
+
+## Clôture obligatoire
+
+Le présent commit documentaire doit lui-même repasser :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Après triple SUCCESS :
+- créer
+  \`checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-preaudit-green-2026-09-24\`
+  sur le SHA documentaire final ;
+- ouvrir un nouveau chantier runtime depuis ce checkpoint ;
+- construire d'abord le RED de retrait ;
+- ne retirer aucun autre propriétaire dans ce lot ;
+- aucun merge sur \`main\`.
+
+---
+
 # PRÉ-AUDIT PROUVÉ — Phase 5 / retrait du global startConfiguredGame Core200 — 2026-09-24
 
 Le seam de retrait de l'affectation globale Core200 est désormais caractérisé **sans modification runtime**.

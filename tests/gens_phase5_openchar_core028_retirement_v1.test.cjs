@@ -19,14 +19,14 @@ function strictChain(name){
   const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
   return blocks.filter(b=>[...b.body.matchAll(re)].length).map(b=>b.id);
 }
-assert.deepEqual(strictChain('openChar'),['captureFix139'],
-  'after Core 0.28 retirement, Capture 139 must be the only global openChar wrapper');
+assert.deepEqual(strictChain('openChar'),[],
+  'after Core 0.28 and Capture139 retirements, no global openChar wrapper may remain');
 
 const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
-assert.match(capture,/const openChar139=window\.openChar/);
-assert.match(capture,/window\._captureStarting139 && isCaptureContext138\(\)/);
-assert.match(capture,/return openChar139\.apply\(this,arguments\)/,
-  'Capture 139 must keep delegating non-startup openChar calls');
+assert.ok(capture,'Capture139 launch block must remain present');
+assert.doesNotMatch(capture,/const openChar139=window\.openChar/);
+assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
+assert.doesNotMatch(capture,/return openChar139\.apply\(this,arguments\)/);
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';
 assert.match(native,/document\.getElementById\("sheet"\)/,
@@ -37,6 +37,6 @@ console.log(JSON.stringify({
   scenario:'Phase 5 retire Dungeon Core 0.28 openChar wrapper',
   strictOpenCharChain:strictChain('openChar'),
   nativeOwner:'function openChar(id)',
-  remainingWrapper:'captureFix139',
-  retired:'dungeonCore028HeroExploreGuard'
+  remainingWrapper:null,
+  retired:['dungeonCore028HeroExploreGuard','captureFix139 global openChar']
 },null,2));

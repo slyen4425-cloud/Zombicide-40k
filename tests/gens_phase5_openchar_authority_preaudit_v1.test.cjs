@@ -13,8 +13,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8172118,'openChar guard must target the current Core 0.28-retired runtime');
-assert.equal(gitBlob(bytes),'198207e3f52730498831f196caa35c4a0283e934',
+assert.equal(bytes.length,8171854,'openChar guard must target the current Core 0.28-retired runtime');
+assert.equal(gitBlob(bytes),'97f0e060d8bffcde2baaf5aa42c1e16b8544263f',
   'openChar guard runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';
@@ -37,17 +37,17 @@ function strictAssignments(name){
 }
 
 const chain=strictAssignments('openChar');
-assert.deepEqual(chain.map(x=>x.id),['captureFix139'],
-  'after Core 0.28 retirement, Capture 139 must be the only strict openChar wrapper');
-assert.equal(chain.reduce((n,x)=>n+x.count,0),1,
-  'openChar must have exactly one true window assignment after Core 0.28 retirement');
+assert.deepEqual(chain.map(x=>x.id),[],
+  'Phase 5 final authority must leave zero strict global openChar wrapper');
+assert.equal(chain.reduce((n,x)=>n+x.count,0),0,
+  'openChar must have zero true window assignment after Capture139 retirement');
 
-const capture=chain.find(x=>x.id==='captureFix139')?.body||'';
+const capture=blocks.find(x=>x.id==='captureFix139')?.body||'';
+assert.ok(capture,'Capture139 launch block must remain present');
 assert.match(capture,/window\._captureStarting139=false/);
-assert.match(capture,/if\(window\._captureStarting139 && isCaptureContext138\(\)\)/,
-  'Capture wrapper must only suppress sheet opening during active Capture startup');
-assert.match(capture,/return openChar139\.apply\(this,arguments\)/,
-  'Capture wrapper must delegate every non-startup openChar call');
+assert.doesNotMatch(capture,/const openChar139=window\.openChar/);
+assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
+assert.doesNotMatch(capture,/return openChar139\.apply\(this,arguments\)/);
 
 assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
   'Dungeon Core 0.28 block must remain retired');
@@ -66,11 +66,11 @@ for(const file of [
 }
 
 console.log(JSON.stringify({
-  scenario:'Phase 5 openChar authority after Core 0.28 retirement',
+  scenario:'Phase 5 final openChar authority after Capture139 retirement',
   runtime:{size:bytes.length,blob:gitBlob(bytes)},
   nativeOwner:'function openChar(id)',
   strictWrapperChain:chain.map(x=>x.id),
   historicalCartographyWarning:'window.openChar===function comparisons must not count as assignments',
-  retiredOwner:'dungeonCore028HeroExploreGuard',
-  capture139RetirementCandidate:false
+  retiredOwners:['dungeonCore028HeroExploreGuard','captureFix139 global openChar'],
+  capture139Retired:true
 },null,2));

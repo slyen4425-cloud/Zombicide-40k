@@ -16,7 +16,7 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
 
 const allowed=new Map([
   [8172742,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8'],
-  [8172118,'198207e3f52730498831f196caa35c4a0283e934']
+  [8171854,'97f0e060d8bffcde2baaf5aa42c1e16b8544263f']
 ]);
 assert.equal(allowed.get(bytes.length),gitBlob,
   'Core200 retirement RED/runtime must stay on the exact reviewed base or exact one-line retirement target');

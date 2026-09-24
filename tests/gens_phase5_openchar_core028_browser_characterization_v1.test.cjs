@@ -173,7 +173,7 @@ async function startDungeon(page){
       hero,
       hiddenLegacyExplorerButtons:explorers,
       visibleExplorerButtons:visibleExplorers,
-      remainingOpenCharOwner:'Capture 139 over native Shell openChar',
+      remainingOpenCharOwner:'native Shell openChar',
       result:'retired Core 0.28 remains unnecessary in the production-composed Dungeon sheet'
     }));
   }finally{

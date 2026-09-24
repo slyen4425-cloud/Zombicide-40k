@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172118,'Phase 5 exit audit must target the validated captureFix135 GREEN runtime');
-assert.equal(gitBlob,'198207e3f52730498831f196caa35c4a0283e934',
+assert.equal(bytes.length,8171854,'Phase 5 exit audit must target the validated captureFix135 GREEN runtime');
+assert.equal(gitBlob,'97f0e060d8bffcde2baaf5aa42c1e16b8544263f',
   'Phase 5 exit audit runtime blob drifted');
 
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
@@ -63,15 +63,14 @@ assert.match(nativeOpen,/render\(\)/,
   'native Shell openChar must own canonical sheet rendering');
 
 const openCharChain=strictChain('openChar');
-assert.deepEqual(openCharChain,['captureFix139'],
-  'Phase 5 exit blocker must remain exactly the Capture139 global openChar wrapper');
+assert.deepEqual(openCharChain,[],
+  'Phase 5 exit requires zero inline global openChar wrapper');
 
 const capture139=blocks.find(x=>x.id==='captureFix139')?.body||'';
-assert.match(capture139,/const openChar139=window\.openChar/);
-assert.match(capture139,/window\._captureStarting139 && isCaptureContext138\(\)/,
-  'Capture139 wrapper must be limited to Capture startup suppression');
-assert.match(capture139,/return openChar139\.apply\(this,arguments\)/,
-  'Capture139 wrapper must delegate normal hero-sheet calls');
+assert.ok(capture139,'Capture139 launch block must remain present');
+assert.doesNotMatch(capture139,/const openChar139=window\.openChar/);
+assert.doesNotMatch(capture139,/window\.openChar\s*=(?!=)/);
+assert.doesNotMatch(capture139,/return openChar139\.apply\(this,arguments\)/);
 assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
   'retired Dungeon Core 0.28 hero-sheet wrapper must stay absent');
 
@@ -94,10 +93,10 @@ const result={
   heroSheet:{
     nativeOwner:'function openChar(id)',
     remainingGlobalWrappers:openCharChain,
-    blocker:'captureFix139'
+    blocker:null
   },
-  phase5ExitReady:false,
-  nextRequiredMicroLot:'retire only Capture139 global openChar wrapper after dedicated TDD/browser proof'
+  phase5ExitReady:true,
+  nextRequiredMicroLot:null
 };
 
 console.log(JSON.stringify(result,null,2));

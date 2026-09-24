@@ -23,7 +23,7 @@ assert.deepEqual(stale,[],
   'active sentinels must not retain the pre-Core200-retirement index baseline: '+JSON.stringify(stale));
 console.log(JSON.stringify({
   scenario:'Phase 5 Core200 retirement stale-baseline scan',
-  current:{bytes:8172118,gitBlob:'198207e3f52730498831f196caa35c4a0283e934'},
+  current:{bytes:8171854,gitBlob:'97f0e060d8bffcde2baaf5aa42c1e16b8544263f'},
   exemptions:[...exempt],
   stale
 },null,2));

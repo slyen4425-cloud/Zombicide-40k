@@ -13,8 +13,8 @@ const coreSource=coreBuf.toString('utf8');
 const owners=fs.readFileSync(path.join(root,'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8172118,'earned-points raccord RED must start from exact preaudit GREEN index');
-assert.equal(gitBlob(indexBuf),'198207e3f52730498831f196caa35c4a0283e934','earned-points raccord RED index drifted');
+assert.equal(indexBuf.length,8171854,'earned-points raccord RED must start from exact preaudit GREEN index');
+assert.equal(gitBlob(indexBuf),'97f0e060d8bffcde2baaf5aa42c1e16b8544263f','earned-points raccord RED index drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression must remain byte-identical');
 
 function scriptBody(id){

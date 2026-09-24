@@ -1,3 +1,34 @@
+# RUNTIME APPLIQUÉ — Phase 5 / retrait dernier wrapper global openChar Capture139 — 2026-09-24
+
+Validation de la source utilisateur :
+- fichier fourni via ZIP vérifié contre le blob Git attendu ;
+- source : 8 172 118 octets ;
+- blob source : `198207e3f52730498831f196caa35c4a0283e934`.
+
+Patch runtime :
+- commit : `68d807b9b8b63a9ceab88f6c3331b43c106607b8` ;
+- seul `index.html` est modifié ;
+- 0 ajout / 8 lignes supprimées ;
+- retrait uniquement de `const openChar139=window.openChar` et du wrapper `window.openChar=function(id){...}` ;
+- taille : 8 171 854 octets ;
+- blob : `97f0e060d8bffcde2baaf5aa42c1e16b8544263f`.
+
+Préservé sans modification :
+- `captureFix139` et son lancement Capture ;
+- `window._captureStarting139` ;
+- chaîne `startConfiguredGame` :
+  `captureFix138 -> captureFix139 -> gensDungeonCore01Js` ;
+- provider public Capture ;
+- Shell final `startConfiguredGame` ;
+- navigation / goMenu / Dungeon / Survival / Tactical / Builder / Stats.
+
+Autorité fiche héros attendue après ce retrait :
+- propriétaire natif : `function openChar(id)` ;
+- wrappers globaux inline : **0**.
+
+Sentinelles actives et cartographie Phase 2 réalignées sur cette nouvelle empreinte.
+Les pré-audits historiques Capture139 restent conservés comme preuve du chantier.
+
 # PREUVE TDD GREEN — Capture139 sans wrapper global openChar — 2026-09-24
 
 ## Preuve ciblée

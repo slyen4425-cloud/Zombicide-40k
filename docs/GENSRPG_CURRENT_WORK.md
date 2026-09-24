@@ -1,3 +1,118 @@
+# CHANTIER COURANT — Phase 5 / retrait du global startConfiguredGame Core200 — 2026-09-24
+
+Le pré-audit précédent est GREEN et figé.
+
+## Base et gouvernance
+
+- Checkpoint GREEN de base :
+  \`checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-preaudit-green-2026-09-24\`.
+- SHA exact de base :
+  \`608d31b3eb874d698e6b97da4995e2d0aff5c7f6\`.
+- Checkpoint de départ runtime :
+  \`checkpoint/gensrpg-start-phase5-startconfiguredgame-core200-global-retirement-2026-09-24\`.
+- Branche :
+  \`work/gensrpg-phase5-startconfiguredgame-core200-global-retirement-2026-09-24\`.
+- Production \`main\` :
+  \`e8681f9823573ced8aec59c8ddc47a72b02bc663\`, gelée.
+
+Les deux branches de départ ont été créées directement depuis
+\`608d31b3eb874d698e6b97da4995e2d0aff5c7f6\`.
+
+## Règle 26
+
+Le runtime de base n'a pas changé depuis le fichier utilisateur déjà vérifié :
+- \`work18.zip\` ;
+- \`index18.txt\` ;
+- taille \`8172742\` ;
+- blob Git \`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Le blob \`index.html\` du checkpoint de départ est toujours exactement
+\`95f8c96e7e221eb743f7c8013ffa8af499eca1c8\`.
+
+Aucun nouveau fichier utilisateur n'est nécessaire tant que le HEAD runtime reste ce blob.
+
+## Mission unique
+
+Retirer **uniquement** l'affectation historique de
+\`window.startConfiguredGame\` portée par \`dungeonCore200Rebuild\`.
+
+La logique Core200 doit rester intégralement disponible au provider Dungeon S4.
+
+## Invariants obligatoires
+
+À conserver :
+- fonction \`start()\` Core200 ;
+- \`const startOutside200=window.startConfiguredGame;\` si nécessaire uniquement pour former la référence stable sans publier de nouveau global ;
+- référence stable \`gensDungeonStartConfiguredGame200V1\` ;
+- provider \`gensDungeonStartModuleSessionV1\` ;
+- registration publique \`dungeon\` ;
+- Shell final comme propriétaire visible de \`window.startConfiguredGame\` ;
+- \`captureFix135\` ;
+- \`captureFix138\` ;
+- \`captureFix139\` ;
+- \`gensDungeonCore01Js\`.
+
+Interdit :
+- retirer un autre propriétaire historique ;
+- modifier gameplay Dungeon ;
+- modifier movement/positions/détection/embuscade/événements ;
+- modifier Tactical ;
+- modifier Survival/Capture/PvP/Builder ;
+- wrapper/fallback supplémentaire ;
+- observer/timer/retry/polling ;
+- reload ;
+- merge \`main\`.
+
+## TDD RED obligatoire
+
+Avant runtime, créer une sentinelle qui exige :
+1. Shell final toujours propriétaire de \`window.startConfiguredGame\` ;
+2. provider Dungeon public présent ;
+3. référence stable Core200 présente ;
+4. référence stable appelée par le provider ;
+5. aucune affectation \`window.startConfiguredGame\` dans \`dungeonCore200Rebuild\` ;
+6. les quatre autres couches historiques intactes ;
+7. aucune suppression d'un autre propriétaire dans ce lot ;
+8. Dungeon direct/provider ;
+9. Survival -> Dungeon même page ;
+10. map -> Tactical ;
+11. Save & Quit/reprise ;
+12. embuscade/détection ;
+13. Builder ;
+14. Survival ;
+15. Capture ;
+16. PvP placeholder ;
+17. non-interférence quatre modules.
+
+Le RED doit échouer sur la base uniquement parce que Core200 publie encore son ancien global.
+
+## Sentinelles historiques à réaligner dans ce même lot
+
+Sans affaiblir leurs contrats fonctionnels :
+- \`gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs\` ;
+- \`gens_phase5_module_launch_final_shell_authority_v1.test.cjs\` ;
+- \`gens_phase5_user_regression_rollback_guard_v1.test.cjs\` ;
+- fixture réduit Save & Quit qui suppose encore l'affectation globale Core200.
+
+Ces sentinelles doivent passer de la chaîne historique attendue
+\`5 propriétaires\` à \`4 propriétaires\` après le retrait,
+tout en conservant la preuve du provider Dungeon et du Shell final.
+
+## Prochaine action
+
+1. créer le RED dédié ;
+2. raccorder ce RED à Architecture ;
+3. vérifier RED ciblé ;
+4. seulement ensuite patch runtime minimal du gros \`index.html\` ;
+5. réaligner les sentinelles obsolètes sans toucher à leur comportement ;
+6. triple CI ;
+7. checkpoint GREEN ;
+8. preview téléphone si le comportement utilisateur est potentiellement touché.
+
+Aucun merge sur \`main\`.
+
+---
+
 # GREEN FINAL CANDIDATE — Phase 5 / pré-audit retrait global startConfiguredGame Core200 — 2026-09-24
 
 Le pré-audit Core200 est techniquement GREEN sur le SHA

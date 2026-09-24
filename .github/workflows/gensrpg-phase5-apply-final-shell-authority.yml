@@ -1,0 +1,78 @@
+name: GenSrpG one-shot final Shell authority
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24
+
+permissions:
+  contents: write
+
+jobs:
+  apply-final-shell-authority:
+    if: github.event.head_commit.message == 'chore: stage final Shell authority one-shot'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Appliquer la bascule Shell finale avec empreintes strictes
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+
+          index_path=Path("index.html")
+          before=index_path.read_bytes()
+
+          def git_blob(data):
+              return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+
+          assert len(before)==8172529, (len(before), git_blob(before))
+          assert git_blob(before)=="696014056409dda9b6ef25ace58dfd9d5f9e2718"
+
+          text=before.decode("utf-8")
+          needle='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>\n'
+          tag='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>\n'
+          assert text.count(needle)==1
+          assert tag not in text
+          text=text.replace(needle,needle+tag,1)
+          after=text.encode("utf-8")
+
+          assert len(after)==8172610, (len(after), git_blob(after))
+          assert git_blob(after)=="eddba424d3ebb086a1bdd0bcc1b1822d16a83771"
+          index_path.write_bytes(after)
+
+          shell_path=Path("assets/gensrpg/shell/module-launch-final-authority-v1.js")
+          shell_path.parent.mkdir(parents=True,exist_ok=True)
+          shell=b"""'use strict';
+
+(function installGensShellModuleLaunchFinalAuthorityV1(){
+  const launchService=window.GensShellModuleLaunchV1;
+
+  window.startConfiguredGame=async function(){
+    if(!launchService || typeof launchService.activeModule!==\"function\" || typeof launchService.startModuleSession!==\"function\")return false;
+    const moduleId=launchService.activeModule();
+    return launchService.startModuleSession(moduleId);
+  };
+})();
+"""
+          assert len(shell)==432
+          assert git_blob(shell)=="abeec800b2d668ab1134bfddcc781be63ed0774d"
+          shell_path.write_bytes(shell)
+
+      - name: Vérifier la sentinelle finale avant commit
+        run: |
+          node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
+
+      - name: Commit runtime minimal et retrait du one-shot
+        run: |
+          git config user.name "slyen4425-cloud"
+          git config user.email "slyen4425@gmail.com"
+          rm .github/workflows/gensrpg-phase5-apply-final-shell-authority.yml
+          git add index.html assets/gensrpg/shell/module-launch-final-authority-v1.js .github/workflows/gensrpg-phase5-apply-final-shell-authority.yml
+          git commit -m "runtime: switch final Shell launch authority"
+          git push origin HEAD:work/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24

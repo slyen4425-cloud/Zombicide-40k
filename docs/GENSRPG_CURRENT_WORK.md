@@ -1,3 +1,105 @@
+## CHANTIER COURANT — Phase 5 / module-launch — pré-audit Autorité Shell finale — 2026-09-24
+
+Validation utilisateur S4 : **OK — « Je valide. »**.
+
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s4-dungeon-provider-green-2026-09-24`.
+- SHA exact :
+  `3542e0661dc1006d19115f936147651d727c2301`.
+- Runtime :
+  taille `8172529`, blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-final-shell-authority-preaudit-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-final-shell-authority-preaudit-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Pré-auditer la future **autorité Shell finale** de `startConfiguredGame`.
+
+Ce lot est **diagnostic/documentaire uniquement** tant que le seam exact et la parité E2E
+ne sont pas prouvés.
+
+Aucun propriétaire historique n'est retiré dans ce pré-audit.
+
+### État public validé avant ce lot
+
+Providers module-launch raccordés et validés utilisateur :
+- Survival ;
+- Capture ;
+- Dungeon.
+
+PvP reste volontairement sans provider runtime tant que le placeholder
+`PVP — À VENIR` reste le comportement officiel.
+
+Chaîne historique protégée :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Le bouton production continue d'appeler `startConfiguredGame()`.
+
+### Objectif architectural
+
+Déterminer, sans modifier le runtime :
+1. comment le Shell peut devenir le propriétaire final unique de `startConfiguredGame` ;
+2. comment router Survival/Capture/Dungeon via `GensShellModuleLaunchV1` ;
+3. comment préserver exactement le placeholder PvP ;
+4. quelles responsabilités historiques restent encore nécessaires derrière les providers ;
+5. dans quel ordre les anciennes affectations pourront ensuite être retirées **une par une**.
+
+### Interdictions
+
+- aucune suppression de `captureFix135/138/139` ;
+- aucune suppression de `gensDungeonCore01Js` ou `dungeonCore200Rebuild` ;
+- aucune bascule production dans ce pré-audit ;
+- aucun provider PvP artificiel ;
+- aucun changement gameplay ;
+- aucun wrapper de compatibilité permanent ;
+- aucun observer/timer/retry/polling ;
+- aucune correction opportuniste des QA différées ;
+- aucun merge sur `main`.
+
+### Preuves obligatoires avant toute future bascule
+
+- Survival par vrai Shell ;
+- provider Survival direct ;
+- Dungeon -> map -> Tactical ;
+- embuscade / proximité / détection couverte par les sentinelles existantes pertinentes ;
+- Builder jeu + édition ;
+- Save & Quit / reprise ;
+- Capture -> lancement -> combat -> victoire -> Hub ;
+- Capture -> reprise ;
+- provider Capture direct ;
+- provider Dungeon direct ;
+- PvP placeholder ;
+- non-interférence quatre modules ;
+- Config objet / openChar / assets / Equipment ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Règle 26
+
+Le contenu exact du gros `index.html` S4 est requis avant toute inspection détaillée
+ou proposition de modification du propriétaire final.
+
+Fichier attendu :
+- SHA base `3542e0661dc1006d19115f936147651d727c2301` ;
+- taille `8172529` ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Aucune modification runtime avant réception et vérification du fichier exact.
+
+### Prochaine étape
+
+Recevoir et vérifier le `index.html` exact du checkpoint S4 GREEN, puis construire
+la sentinelle de pré-audit de l'autorité Shell finale.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / module-launch S4 — provider Dungeon — 2026-09-24
 
 S4 est techniquement GREEN sur le SHA `54d9aba4acb3456e3c01f00c1aa5c6f629c92095`.

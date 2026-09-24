@@ -1,3 +1,24 @@
+## S4 — RED PROVIDER DUNGEON — 2026-09-24
+
+Base obligatoire :
+`checkpoint/gensrpg-phase5-module-launch-s4-dungeon-provider-preaudit-green-2026-09-24`
+(`3f3e9a0f5492839df6c32ac7f05544450a587425`).
+
+Le RED exige :
+- référence stable du dernier intercept Core200 ;
+- provider public Dungeon routing-only ;
+- providers Survival/Capture conservés ;
+- aucun provider PvP ;
+- cinq propriétaires historiques inchangés ;
+- production toujours sur `startConfiguredGame()`.
+
+Le navigateur futur traversera le vrai Save & Quit/reprise via
+`startModuleSession("dungeon")`.
+
+Aucun runtime n'est modifié dans ce commit RED.
+
+---
+
 ## GREEN CANDIDATE — Phase 5 / module-launch S4 — pré-audit provider Dungeon — 2026-09-24
 
 Validation utilisateur S3 : **OK**.

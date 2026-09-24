@@ -533,6 +533,9 @@ jobs:
       - name: Pré-auditer le provider Dungeon module-launch S4
         run: node tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs
 
+      - name: Raccorder le provider Dungeon module-launch S4
+        run: node tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 
@@ -744,6 +747,9 @@ jobs:
 
       - name: Vérifier Save & Quit puis reprise par le vrai Shell
         run: node tests/gens_savequit_resume_shell_browser_v11411.test.cjs
+
+      - name: Vérifier le provider Dungeon module-launch S4
+        run: node tests/gens_phase5_module_launch_s4_dungeon_provider_browser_v1.test.cjs
 
       - name: Vérifier le placeholder PvP par le vrai Shell
         run: node tests/gens_pvp_placeholder_shell_browser_v11411.test.cjs

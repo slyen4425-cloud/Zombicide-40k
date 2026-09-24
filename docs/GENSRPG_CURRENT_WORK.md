@@ -1,3 +1,95 @@
+# CANDIDAT GREEN — Phase 5 / retrait global startConfiguredGame Core200 — 2026-09-24
+
+Le lot runtime a atteint l'état candidat GREEN après TDD RED et patch minimal.
+
+## Runtime exact
+
+Commit runtime :
+\`3bcc1d5f1be3b51014b1701627cd5a78a3ccbf14\`.
+
+Modification unique dans \`index.html\` :
+
+\`\`\`diff
+ const startOutside200=window.startConfiguredGame;
+-window.startConfiguredGame=async function(){...};
+-const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;
++const gensDungeonStartConfiguredGame200V1=async function(){...};
+\`\`\`
+
+La logique du dispatcher est inchangée :
+- vrai lancement Dungeon => \`start()\` Core200 ;
+- fallback historique conservé via \`startOutside200?.apply(this,arguments)\` ;
+- aucune nouvelle écriture globale ;
+- aucun timer, observer, polling, reload ou wrapper supplémentaire.
+
+Empreinte runtime après patch :
+- taille : \`8172687\` octets ;
+- blob Git : \`e56f7b63963d991717e1738c3e5188011276a2b7\`.
+
+Cette empreinte correspond exactement à la cible calculée depuis
+\`work18.zip\` validé règle 26.
+
+## Transport one-shot
+
+Le transport temporaire a uniquement appliqué le patch exact puis a été retiré.
+
+Commits de nettoyage :
+- suppression workflow one-shot :
+  \`286856104781b5a05aaff798e01a05f758de7111\` ;
+- suppression patcher temporaire :
+  \`9a885b96ba4545219a360e016f762005bf249a85\`.
+
+Aucun fichier de transport ne reste dans le diff final.
+
+## Sentinelles réalignées
+
+Les contrats historiques ont été mis à jour sans supprimer leurs preuves fonctionnelles :
+
+- Dungeon provider S4 :
+  \`996af9084d74268edaa9f4657ccc785f09037825\` ;
+- Shell final :
+  \`85aa8d52b4daef0e33c6d6d9db77f620fdb0a2e1\` ;
+- rollback guard :
+  \`6a2474eefc71e455411eeb36aa73df1fa73ac1ff\` ;
+- Save & Quit/reprise :
+  \`7b547e22c9f3a375977f43728cd894eb39b97bb5\` ;
+- caractérisation Core200 portée au nouvel état :
+  \`8600835c1d639e8ae5608b1bfb684b4b5154853e\`.
+
+Le test Save & Quit conserve désormais le chemin réel :
+\`Shell final -> GensShellModuleLaunchV1 -> provider Dungeon -> gensDungeonStartConfiguredGame200V1\`.
+
+## Invariants après retrait
+
+Doivent rester vrais :
+- Shell final = propriétaire visible de \`window.startConfiguredGame\` ;
+- Core200 = zéro affectation globale ;
+- Core200 local stable = \`gensDungeonStartConfiguredGame200V1\` ;
+- provider Dungeon enregistré une fois ;
+- quatre propriétaires historiques restants :
+  \`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js\` ;
+- Survival, Capture, Dungeon, PvP placeholder, Tactical, Builder,
+  Save & Quit/reprise, embuscade/détection et non-interférence protégés.
+
+## Validation obligatoire avant checkpoint
+
+Exécuter sur le SHA documentaire final :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Si les trois sont SUCCESS :
+- créer
+  \`checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-green-2026-09-24\` ;
+- créer une preview téléphone sur ce GREEN car le chemin de lancement utilisateur a été touché ;
+- attendre validation utilisateur avant de retirer un autre propriétaire historique ;
+- ne pas toucher à \`main\`.
+
+\`main\` reste gelée sur
+\`e8681f9823573ced8aec59c8ddc47a72b02bc663\`.
+
+---
+
 # BLOCAGE TRANSPORT UNIQUEMENT — Phase 5 / retrait global Core200 — 2026-09-24
 
 Le chantier runtime est prêt mais l'écriture du gros \`index.html\` est bloquée par la limite de transport du connecteur, pas par un problème de code.

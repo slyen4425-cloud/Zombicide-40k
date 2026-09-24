@@ -1,0 +1,57 @@
+name: GenSrpG temporary Capture139 openChar apply
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-capture139-openchar-retirement-2026-09-24
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'ci: apply Capture139 openChar source patch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Verify source blob and apply exact subtraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_blob="$(git hash-object index.html)"
+          test "$source_blob" = "198207e3f52730498831f196caa35c4a0283e934"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old='''const openChar139=window.openChar;
+          window.openChar=function(id){
+            if(window._captureStarting139 && isCaptureContext138()){
+              console.warn("Ouverture fiche ignorée pendant lancement Capture :",id);
+              return;
+            }
+            return openChar139.apply(this,arguments);
+          };
+          '''
+          if s.count(old) != 1:
+              raise SystemExit(f"Capture139 openChar boundary count={s.count(old)}")
+          p.write_text(s.replace(old,"",1),encoding="utf-8",newline="")
+          PY
+          target_blob="$(git hash-object index.html)"
+          test "$target_blob" = "97f0e060d8bffcde2baaf5aa42c1e16b8544263f"
+
+      - name: Commit exact runtime subtraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --check
+          git commit -m "runtime: retire Capture139 global openChar wrapper"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

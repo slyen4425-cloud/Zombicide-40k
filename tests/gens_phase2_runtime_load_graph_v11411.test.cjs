@@ -21,6 +21,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
+  'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -50,7 +51,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,36,'production composition must expose 36 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,37,'production composition must expose 37 unique direct local JS entries after the first active Survival entry');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -124,10 +125,14 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,96,'physical JS inventory must reflect the retired legacy Survival/Dungeon guard');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,79,'production-reachable JS graph must drop the retired legacy Survival/Dungeon guard');
+assert.equal(reachable.size,80,'production-reachable JS graph must include the first active Survival entry');
 for(const rel of phase3Entrypoints){
-  assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
-  assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
+  assert.equal(allJs.includes(rel),true,'Phase 3 target entry missing: '+rel);
+  if(rel==='assets/gensrpg/survival/entry-v1.js'){
+    assert.equal(reachable.has(rel),true,'Phase 6 must connect the Survival entry');
+  }else{
+    assert.equal(reachable.has(rel),false,'unconnected Phase 3 entry must stay outside production graph: '+rel);
+  }
 }
 for(const rel of phase4ConnectedServices){
   assert.equal(allJs.includes(rel),true,'Phase 4 connected service missing: '+rel);

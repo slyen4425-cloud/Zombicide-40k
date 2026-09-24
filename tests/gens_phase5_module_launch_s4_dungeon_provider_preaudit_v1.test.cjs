@@ -87,8 +87,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
 }
 assert.deepEqual(
   chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S4 preaudit must preserve the exact four-owner global chain after Core200 retirement'
+  ['captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S4 preaudit must preserve the exact three-owner global chain after captureFix135 retirement'
 );
 
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,

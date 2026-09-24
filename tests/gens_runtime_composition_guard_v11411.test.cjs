@@ -88,19 +88,18 @@ const baseTactical=[
   'gens-rpg-tactical-combat-v2-rules.js',
   'gens-rpg-tactical-combat-v2-integration.js',
   'gens-rpg-tactical-combat-v2-ui.js',
-  'gens-rpg-tactical-combat-v2-bridge.js',
-  'gens-survival-mode-isolation-1678104.js'
+  'gens-rpg-tactical-combat-v2-bridge.js'
 ];
 assert.ok(perf.includes('assets/gensrpg/core/runtime-bootstrap-v1.js?v=1'),'performance layer must delegate runtime composition to RuntimeBootstrap V1');
 assert.ok(perf.includes('R.__gensRuntimeBootstrapEntryV1=true'),'performance-to-bootstrap handoff must be idempotent');
 for(const file of baseTactical)assert.equal(perf.includes(file),false,`performance layer must not own ${file}`);
 assert.equal(perf.includes('setTimeout(apply,3000)'),false,'performance layer must not own Tactical/Survival install retries');
 
-// 4. RuntimeBootstrap is the one documented owner of base Tactical + Survival composition.
+// 4. RuntimeBootstrap is the one documented owner of base Tactical composition.
 assertOrdered(bootstrap,baseTactical,'RuntimeBootstrap V1 base Tactical composition');
 assert.ok(bootstrap.includes('R.__gensTacticalV2Loader105=true'),'RuntimeBootstrap must preserve the historical idempotency guard');
 assert.ok(bootstrap.includes('setTimeout(apply,250)') && bootstrap.includes('setTimeout(apply,1200)') && bootstrap.includes('setTimeout(apply,3000)'),
-  'RuntimeBootstrap must preserve the known bridge/isolation retry timings during extraction');
+  'RuntimeBootstrap must preserve the known Tactical bridge retry timings during extraction');
 assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve ordered sequential script loading');
 
 // 5. Integration preserves the real runtime call chain V108 -> V114.11, now with direct cleaned installs.
@@ -132,4 +131,4 @@ assert.ok(integration.includes('loadPolish108();'),'clean Tactical chain must st
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 
-console.log('GenSrpG runtime composition guard OK: deterministic direct Tactical chain without global observer shim');
+console.log('GenSrpG runtime composition guard OK: deterministic Tactical bootstrap without legacy Survival/Dungeon guard');

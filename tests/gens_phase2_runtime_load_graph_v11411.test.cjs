@@ -24,7 +24,8 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
-  'assets/gensrpg/gens-mobile-combat-performance-16781022.js'
+  'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'raw index local JS entries must remain explicit and ordered');
 
 const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
@@ -37,15 +38,19 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,30,'GitHub Pages must inject the current 30-module production list');
+assert.equal(injected.length,31,'GitHub Pages must inject the current 31-module production list');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
-assert.equal(injected.at(-1),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay final');
+assert.equal(injected.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay immediately before final Shell authority');
+assert.equal(injected.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js','final Shell authority must stay final');
 
 const productionDirect=[
-  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...rawDirect.filter(x=>![
+    'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+  ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,35,'production composition must expose 35 unique direct local JS entries');
+assert.equal(new Set(productionDirect).size,36,'production composition must expose 36 unique direct local JS entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -110,12 +115,16 @@ const phase4InertServices=[
   'assets/gensrpg/core/stats-armor-contract-v1.js'
 ];
 const phase4Set=new Set([...phase4ConnectedServices,...phase4InertServices]);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel));
+const phase5ConnectedServices=[
+  'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+];
+const phase5Set=new Set(phase5ConnectedServices);
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,96,'physical JS inventory must be Phase 2 baseline plus eight Phase 3 entries and sixteen Phase 4 services');
+assert.equal(allJs.length,97,'physical JS inventory must be Phase 2 baseline plus Phase 3 entries, Phase 4 services and the connected Phase 5 Shell authority');
 assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,79,'production-reachable JS graph must currently contain 79 files');
+assert.equal(reachable.size,80,'production-reachable JS graph must currently contain 80 files');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);
@@ -127,6 +136,10 @@ for(const rel of phase4ConnectedServices){
 for(const rel of phase4InertServices){
   assert.equal(allJs.includes(rel),true,'Phase 4 inert service missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 4 inert service must stay outside production graph until its dedicated raccord: '+rel);
+}
+for(const rel of phase5ConnectedServices){
+  assert.equal(allJs.includes(rel),true,'Phase 5 connected Shell service missing: '+rel);
+  assert.equal(reachable.has(rel),true,'Phase 5 connected Shell service must stay production-reachable: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
@@ -153,6 +166,7 @@ console.log(JSON.stringify({
   phase3InertEntrypoints:phase3Entrypoints.length,
   phase4ConnectedServices:phase4ConnectedServices.length,
   phase4InertServices:phase4InertServices.length,
+  phase5ConnectedServices:phase5ConnectedServices.length,
   productionReachableLocalJs:reachable.size,
   phase2NonReachableLocalJs:notReachablePhase2.length,
   knownDebt:{

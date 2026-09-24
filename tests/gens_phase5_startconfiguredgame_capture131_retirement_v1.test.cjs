@@ -23,25 +23,24 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,5,'Phase 5 target must reduce startConfiguredGame assignments from 6 to 5');
+assert.equal(total,4,'Phase 5 historical global chain must now contain four owners after Core200 global retirement');
 assert.deepEqual(ids,[
   'captureFix135',
   'captureFix138',
   'captureFix139',
-  'gensDungeonCore01Js',
-  'dungeonCore200Rebuild'
-],'Phase 5 target chain drifted');
+  'gensDungeonCore01Js'
+],'Phase 5 target chain drifted after Core200 global retirement');
 
 const capture131=blocks.find(x=>x.id==='captureFix131');
 assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){
-  assert.ok(chain.some(x=>x.id===id),id+' must remain an active startConfiguredGame owner');
+for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js']){
+  assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
 }
-assert.equal(chain.at(-1)?.id,'dungeonCore200Rebuild',
-  'Dungeon Core 2.00 must remain the last startConfiguredGame owner');
+assert.equal(chain.at(-1)?.id,'gensDungeonCore01Js',
+  'Dungeon Core01 must remain the last historical global startConfiguredGame owner after Core200 retirement');
 
 const c135=blocks.find(x=>x.id==='captureFix135')?.body||'';
 const c138=blocks.find(x=>x.id==='captureFix138')?.body||'';
@@ -59,6 +58,10 @@ assert.match(dc01,/if\(eligible\?*\(\)?|if\(eligible\(\)\)/);
 assert.match(dc200,/isDungeonMode/);
 assert.match(dc200,/isCaptureContext138/);
 assert.match(dc200,/startOutside200/);
+assert.match(dc200,/const gensDungeonStartConfiguredGame200V1=async function/,
+  'Core200 must retain its stable local Dungeon launch dispatcher');
+assert.doesNotMatch(dc200,/window\.startConfiguredGame\s*=(?!=)/,
+  'Core200 global startConfiguredGame assignment must remain retired');
 
 console.log(JSON.stringify({
   scenario:'Phase 5 retire captureFix131 startConfiguredGame wrapper',

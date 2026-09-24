@@ -50,7 +50,9 @@ for(const module of modules){
   const contract=json(contractPath);
   const entry=read(entryPath);
 
-  assert.equal(contract.status,'contract-only-not-loaded',module+' must remain contract-only');
+  const expectedStatus=module==='survival'?'partial-runtime-loaded':'contract-only-not-loaded';
+  assert.equal(contract.status,expectedStatus,
+    module+(module==='survival'?' may activate only its Phase 6 wave-rules slice':' must remain contract-only'));
   assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
     module+' must declare moduleScreenReturn');
   assert.deepEqual(contract.publicEntries.moduleScreenReturn,{
@@ -64,9 +66,19 @@ for(const module of modules){
     .replace(/\/\*[\s\S]*?\*\//g,'')
     .replace(/\/\/.*$/gm,'')
     .trim();
-  assert.equal(executable,'"use strict";',module+' Phase 3 entry must remain inert');
-  assert.doesNotMatch(entry,/window\.|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/,
-    module+' entry must not gain runtime side effects in the contract-only lot');
+  if(module==='survival'){
+    assert.equal(contract.publicRuntimeApi,'GensSurvivalV1',
+      'Phase 6 Survival entry must expose only its declared public runtime namespace');
+    assert.match(entry,/GensSurvivalV1/,'Phase 6 Survival wave-rules entry must remain active');
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating Survival wave rules must not implement or take ownership of screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Dungeon|Tactical|Capture|PvP/,
+      'active Survival wave-rules slice must stay pure and isolated');
+  }else{
+    assert.equal(executable,'"use strict";',module+' Phase 3 entry must remain inert');
+    assert.doesNotMatch(entry,/window\.|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/,
+      module+' entry must not gain runtime side effects in the contract-only lot');
+  }
 }
 
 const tactical=json('assets/gensrpg/tactical/module-contract-v1.json');

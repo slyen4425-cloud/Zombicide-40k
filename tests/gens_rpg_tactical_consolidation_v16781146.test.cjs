@@ -54,25 +54,31 @@ assert.doesNotMatch(baseFn,/nativeAttr\.call/,'current hero core stats must not 
 
 const Stats=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-stats-1678110.js'));
 const state={rpgAttributes:{force:19,agilite:14,defense:11,movement:4},wounds:1};
-let reads=0;
+let snapshots=0;
 const rt={
   current:'other',state:{marker:'old'},
   loadState:id=>id==='hero'?state:{},
   CHARS:{hero:{id:'hero',dungeonStats:{force:19,agilite:14,defense:11,movement:4}}},
   GensCleanRpgStats167874:{
-    runtimeDefs:()=>[
-      {id:'force',name:'Force',icon:'💪',defaultValue:10},
-      {id:'agilite',name:'Agilité',icon:'🏃',defaultValue:10},
-      {id:'defense',name:'Défense',icon:'🛡️',defaultValue:10},
-      {id:'movement',name:'Mouvement',icon:'👣',defaultValue:3}
-    ],
-    value(id,sid){reads++;assert.equal(id,'hero');assert.equal(rt.current,'hero');assert.equal(rt.state,state);return state.rpgAttributes[sid]}
+    coreSnapshot(id){
+      snapshots++;assert.equal(id,'hero');assert.equal(rt.current,'hero');assert.equal(rt.state,state);
+      return {
+        canonical:[
+          {id:'force',name:'Force',icon:'💪',value:19},
+          {id:'agilite',name:'Agilité',icon:'🏃',value:14},
+          {id:'defense',name:'Défense',icon:'🛡️',value:11},
+          {id:'movement',name:'Mouvement',icon:'👣',value:4}
+        ],
+        values:{force:19,agilite:14,defense:11,movement:4},
+        derived:{dodge:8,crit:6,magicResistance:3,maxMana:0,physicalDamageBonus:0,magicDamageBonus:0}
+      };
+    }
   },
   effectiveMaxWounds:()=>20,dungeonHeroMoveValue083:()=>4,dungeonDerivedInitiative:()=>12,dungeonDerivedDefense:()=>11,dungeonArmorScore:()=>2,dungeonDodgeChance:()=>8,dungeonCriticalChance:()=>6,dungeonMagicResistance:()=>3,dungeonMaxMana:()=>0,dungeonPhysicalDamageBonus:()=>0,dungeonMagicDamageBonus:()=>0,loadDungeonRpgRules:()=>({critMultiplier:2})
 };
 const actor={id:'hero',side:'hero',hp:19,maxHp:20,movement:3,initiative:0,defense:0,armor:0,dodge:0,meta:{heroId:'hero'}};
 const snap=Stats.buildHeroSnapshot(rt,'hero',actor);
-assert.equal(snap.values.force,19);assert.equal(snap.values.agilite,14);assert.equal(snap.values.defense,11);assert.equal(snap.values.movement,4);assert.equal(reads,4);
+assert.equal(snap.values.force,19);assert.equal(snap.values.agilite,14);assert.equal(snap.values.defense,11);assert.equal(snap.values.movement,4);assert.equal(snapshots,1);
 assert.equal(rt.current,'other');assert.deepEqual(rt.state,{marker:'old'});
 assert.match(v113,/GensRpgTacticalStats1678110\?\.decorateBattle\?\.\(realRt,battle,\{force:true\}\)/,'final V113 scope wrapper must reassert the canonical V110 snapshot once');
 

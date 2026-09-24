@@ -88,7 +88,7 @@ const roundTripHtml=
   '\n'+core307Script+
   '\n'+core308Script+
   '\n'+core310Script+
-  '\n<script src="/assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'+ 
+  '\n<script src="/assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>\n</body></html>';
 
 const mime={
   '.html':'text/html; charset=utf-8',

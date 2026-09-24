@@ -344,11 +344,6 @@
       "domain": "core",
       "role": "per-stat upgrade lock and characteristic-point cost policy"
     },
-    "assets/gensrpg/gens-survival-mode-isolation-1678104.js": {
-      "owner": "Shell Module Boundary",
-      "domain": "shell",
-      "role": "Survival vs Adventure/Dungeon isolation guard"
-    },
     "assets/gensrpg/gens-ui-recovery-167843.js": {
       "owner": "Shell UI Recovery",
       "domain": "shell",

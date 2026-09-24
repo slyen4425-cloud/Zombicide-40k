@@ -32,11 +32,80 @@ Décision :
 TDD RED :
 `tests/gens_phase6_survival_wave_rules_entry_v1.test.cjs`
 
-La sentinelle est raccordée à Architecture.
-Le lot doit rester RED tant que l’entrée Survie est inerte et que les deux propriétaires inline existent encore.
+La sentinelle a été raccordée à Architecture et le RED obligatoire a été prouvé sur le SHA :
+`ec68c6cdaaafecc2abd68d5f3dfa9c921748a068`.
 
-Aucun runtime modifié à ce stade.
-`main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+Échec exact attendu :
+`Phase 6 micro-lot 2 requires an active Survival entry API`.
+
+Sur ce SHA RED :
+- Firefox — SUCCESS ;
+- Tactical Dock — SUCCESS ;
+- Architecture — FAILURE uniquement sur la nouvelle sentinelle Phase 6.
+
+## Raccord runtime effectué
+
+Le runtime a ensuite été raccordé sans changer le gameplay :
+- `assets/gensrpg/survival/entry-v1.js` devient un vrai point d’entrée runtime Survie ;
+- API publique : `window.GensSurvivalV1.waveRules` ;
+- `defaultProfile()` reprend exactement le profil de vagues historique ;
+- `collectEnemyIds(profile)` reprend exactement la collecte historique, dédupliquée et ordonnée ;
+- les deux propriétaires inline historiques ont été retirés ;
+- les 8 consommateurs utilisent directement l’API Survie ;
+- aucun wrapper de compatibilité ajouté ;
+- aucun DOM, stockage, timer, retry, observer ou dépendance privée Dungeon/Tactical/Capture/PvP dans cette entrée.
+
+Empreinte runtime du lot :
+- `index.html` : 8 170 730 octets ;
+- blob Git :
+  `7663392f163aac32c4c3b918cbce67472856b3b6`.
+
+Les sentinelles/cartographies Phase 2/4/5 encore figées sur l’ancienne empreinte
+`8 171 854 / 97f0e060d8bffcde2baaf5aa42c1e16b8544263f`
+ont été réalignées uniquement sur le nouveau blob/taille ou la nouvelle cardinalité du graphe.
+Leurs assertions métier ont été conservées.
+
+## CANDIDAT TECHNIQUE GREEN — micro-lot 2
+
+SHA fonctionnel exact :
+`dee818b8c695d72105370f7f135409640c6c0708`.
+
+Dernier commit :
+`test: align Storage owner with Survival extraction`.
+
+Preuves automatiques exactes sur ce SHA :
+- Architecture + Browser : run `36069595543` — **SUCCESS** ;
+  - Architecture job `107867196551` — SUCCESS ;
+  - Browser job `107867544987` — SUCCESS ;
+  - étape `Raccorder les premières règles de vagues au module Survie Phase 6` — SUCCESS ;
+- Firefox : run `36069595383` — **SUCCESS** ;
+- Tactical Dock : run `36069595396` — **SUCCESS**.
+
+Conclusion technique :
+- extraction pure Survie validée ;
+- aucune régression prouvée par les sentinelles globales ;
+- aucun changement opportuniste de gameplay ;
+- `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Fermeture documentaire obligatoire
+
+La présente mise à jour de `CURRENT_WORK` crée un nouveau SHA documentaire.
+
+Avant tout checkpoint technique GREEN :
+1. Architecture + Browser complet doivent être SUCCESS sur ce nouveau SHA exact ;
+2. Firefox doit être SUCCESS sur le même SHA ;
+3. Tactical Dock doit être SUCCESS sur le même SHA ;
+4. la sentinelle Phase 6 des règles de vagues doit rester SUCCESS.
+
+Après ces preuves uniquement :
+- créer
+  `checkpoint/gensrpg-phase6-survival-wave-rules-entry-ci-green-2026-09-25` ;
+- créer
+  `preview/gensrpg-phase6-survival-wave-rules-entry-2026-09-25`
+  sur exactement le même SHA ;
+- fournir le lien de preview téléphone à Sylvain ;
+- attendre validation manuelle avant tout micro-lot 3 ;
+- ne jamais merger sur `main` sans validation explicite.
 
 ---
 

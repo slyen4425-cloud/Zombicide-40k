@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172529,'S4 preaudit must start from the exact user-validated S3 runtime');
-assert.equal(gitBlob,'696014056409dda9b6ef25ace58dfd9d5f9e2718','S4 preaudit must start from the exact S3 blob');
+assert.equal(bytes.length,8172529,'S4 preaudit/postaudit must track the current validated runtime');
+assert.equal(gitBlob,'696014056409dda9b6ef25ace58dfd9d5f9e2718','S4 preaudit/postaudit blob must track the current validated runtime');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -34,8 +34,9 @@ assert.equal((index.match(/GensShellModuleLaunchV1\.register\("survival"/g)||[])
   'S2 Survival provider must remain registered exactly once');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,1,
   'S3 Capture provider must remain registered exactly once');
-assert.equal((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length,0,
-  'Dungeon provider must still be absent during S4 preaudit');
+const dungeonProviderCount=(index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length;
+assert.ok(dungeonProviderCount<=1,
+  'S4 preaudit/postaudit must never permit duplicate Dungeon providers');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("pvp"/g)||[]).length,0,
   'PvP must remain unrouted during S4');
 
@@ -70,6 +71,13 @@ assert.match(
   /window\.GensShellScreenReturnV1\?\.register\?\.\("dungeon",function\(\)/,
   'Dungeon ScreenReturn provider must stay owned by the same final runtime'
 );
+if(dungeonProviderCount===1){
+  assert.match(
+    d200.body,
+    /window\.GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,
+    'once S4 is raccorded, the unique Dungeon provider must live in Core200'
+  );
+}
 
 const chain=[];
 for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild']){

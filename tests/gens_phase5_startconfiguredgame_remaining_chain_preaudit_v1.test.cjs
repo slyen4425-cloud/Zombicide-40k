@@ -16,11 +16,11 @@ const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const dungeonEntry=read('assets/gensrpg/dungeon/entry-v1.js');
 
 const ids=[
-  'captureFix135',
   'captureFix138',
   'captureFix139',
   'gensDungeonCore01Js'
 ];
+const retiredCapture135Id='captureFix135';
 const core200Id='dungeonCore200Rebuild';
 
 function blockBody(id){
@@ -71,25 +71,32 @@ for(const id of ids){
   assert.equal(meta.status,'active',id+' must remain active');
   functions[id]=assignedFunction(blockBody(id),'startConfiguredGame');
 }
+const retiredCapture135Meta=owners.blocks?.[retiredCapture135Id];
+assert.ok(retiredCapture135Meta,'missing owner metadata '+retiredCapture135Id);
+assert.equal(retiredCapture135Meta.status,'active',retiredCapture135Id+' block must remain active');
+const retiredCapture135Body=blockBody(retiredCapture135Id);
+assert.doesNotMatch(retiredCapture135Body,/window\.startConfiguredGame\s*=/,
+  'captureFix135 must remain retired as a global startConfiguredGame owner');
+assert.match(retiredCapture135Body,/gensCapturePregameMode/);
+assert.match(retiredCapture135Body,/saveCaptureWorldState/);
 const core200Meta=owners.blocks?.[core200Id];
 assert.ok(core200Meta,'missing owner metadata '+core200Id);
 assert.equal(core200Meta.status,'active',core200Id+' must remain active');
 const core200Body=blockBody(core200Id);
 
-assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m,
-  'cartography must expose the current four historical global owners after Core200 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m,
+  'cartography must expose the current three historical global owners after captureFix135 retirement');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
-  ['capture','capture','capture','dungeon'],
+  ['capture','capture','dungeon'],
   'remaining historical global owners must stay module-owned'
 );
 assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must remain Dungeon-owned');
 
-// Capture 135: pre-launch Capture state work + delegation.
-assert.match(functions.captureFix135,/gensCapturePregameMode/);
-assert.match(functions.captureFix135,/saveCaptureWorldState/);
-assert.match(functions.captureFix135,/\.apply\(this,arguments\)/);
+// Capture 135 remains active for non-wrapper Capture responsibilities only.
+assert.equal(retiredCapture135Meta.primaryDomain,'capture');
+assert.doesNotMatch(retiredCapture135Body,/start135|\.apply\(this,arguments\)/);
 
 // Capture 138: Capture-context post-launch UI work + historical delayed render.
 assert.match(functions.captureFix138,/isCaptureContext138/);
@@ -112,7 +119,7 @@ assert.match(core200Body,/startOutside200/);
 assert.doesNotMatch(core200Body,/window\.startConfiguredGame\s*=(?!=)/,
   'Core200 must remain retired as a global startConfiguredGame owner');
 
-// None of the four remaining historical global owners is equivalent to the retired captureFix131 pass-through.
+// None of the three remaining historical global owners is equivalent to the retired captureFix131 pass-through.
 for(const id of ids){
   assert.doesNotMatch(
     functions[id],
@@ -145,8 +152,9 @@ for(const [name,src] of [['shell',shellEntry],['capture',captureEntry],['dungeon
 const classification=[
   {
     id:'captureFix135',
-    role:'capture-prelaunch-state',
+    role:'capture-prelaunch-state-block',
     shellAuthority:false,
+    globalOwner:false,
     removableNow:false
   },
   {
@@ -177,21 +185,21 @@ const classification=[
 ];
 
 const nextMicroLot={
-  name:'Capture public launch-entry contract preaudit',
+  name:'Re-audit captureFix138 before any further startConfiguredGame retirement',
   kind:'contract/preaudit-only',
-  reason:'three adjacent Capture wrappers implement one module launch lifecycle; Shell contract already requires module public entry contracts',
+  reason:'captureFix135 is now retired globally; captureFix138 must be re-characterized against the new three-owner chain before any runtime change',
   runtimeChanged:false,
   indexChanged:false,
   forbidden:[
+    'retire captureFix138 without a fresh preaudit and dedicated RED',
     'connect Shell entry now',
-    'delete another wrapper without a dedicated RED',
     'move Capture gameplay into Shell'
   ]
 };
 
 console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame remaining-chain preaudit',
-  assignments:4,
+  assignments:3,
   chain:ids,
   lastOwner:'gensDungeonCore01Js',
   core200LocalDispatcher:true,

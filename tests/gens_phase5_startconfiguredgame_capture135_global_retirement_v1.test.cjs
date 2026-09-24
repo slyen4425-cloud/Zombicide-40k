@@ -15,8 +15,9 @@ function blockBody(id){
 }
 
 function globalOwners(name){
-  const blocks=[...index.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)];
-  const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
+  const scriptRe=new RegExp('<script\\\\b[^>]*\\\\bid=["\\\']([^"\\\']+)["\\\'][^>]*>([\\\\s\\\\S]*?)<\\\\/script>','gi');
+  const blocks=[...index.matchAll(scriptRe)];
+  const re=new RegExp('window\\\\.'+name+'\\\\s*=(?!=)','g');
   const ids=[];
   for(const m of blocks){
     const hits=m[2].match(re)||[];
@@ -44,8 +45,11 @@ assert.deepEqual(
   'after captureFix135 retirement exactly three historical global owners must remain'
 );
 
-assert.match(c135,/gensCapturePregameMode/,'captureFix135 Capture pregame responsibility must remain');
-assert.match(c135,/saveCaptureWorldState/,'captureFix135 Capture world-state responsibility must remain');
+assert.match(c135,/target135\(/,'captureFix135 ally-targeting responsibility must remain');
+assert.match(c135,/render135\(/,'captureFix135 battle rendering/log responsibility must remain');
+assert.match(c135,/captureBattleLiveBody/,'captureFix135 detailed combat-log UI must remain');
+assert.match(c135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
+assert.match(c135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
 
 assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix138 global owner must remain');
 assert.match(c138,/isCaptureContext138/,'captureFix138 Capture-context routing must remain');

@@ -36,7 +36,7 @@ assert.deepEqual(strictChain('openChar'),['captureFix139'],
 
 const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
 assert.match(capture,/const\s+openChar139\s*=\s*window\.openChar/);
-assert.match(capture,/window\.openChar\s*=\s*function\s*\(\)\s*\{/);
+assert.match(capture,/window\.openChar\s*=\s*function\s*\(id\)\s*\{/);
 assert.match(capture,/window\._captureStarting139\s*&&\s*isCaptureContext138\(\)/);
 assert.match(capture,/return\s+openChar139\.apply\(this,arguments\)/);
 

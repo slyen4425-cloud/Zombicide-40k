@@ -325,7 +325,7 @@ const server=http.createServer((req,res)=>{
     assert.match(pvpText,/PVP — À VENIR/);
     assert.equal(pvp.session,beforePvp.session,'PvP placeholder must not create/replace a session');
     assert.equal(pvp.active,beforePvp.active,'PvP placeholder must not activate another game profile');
-    assert.equal(pvp.family,beforePvp.family,'PvP placeholder must not invent a PvP family guard');
+    assert.equal(pvp.family,'pvp','Shell family authority must identify the PvP placeholder without creating gameplay state');
     assert.equal(pvp.dungeonRuntime,beforePvp.dungeonRuntime,'PvP placeholder must not create/replace Dungeon runtime');
     assert.equal(pvp.dungeonState,beforePvp.dungeonState,'PvP placeholder must not create/replace Dungeon state');
     assert.equal(pvp.dungeonTheme,false,'Adventure/Dungeon theme must not leak into PvP');

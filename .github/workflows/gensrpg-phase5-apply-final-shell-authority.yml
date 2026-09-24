@@ -46,18 +46,17 @@ jobs:
 
           shell_path=Path("assets/gensrpg/shell/module-launch-final-authority-v1.js")
           shell_path.parent.mkdir(parents=True,exist_ok=True)
-          shell=b"""'use strict';
-
-(function installGensShellModuleLaunchFinalAuthorityV1(){
-  const launchService=window.GensShellModuleLaunchV1;
-
-  window.startConfiguredGame=async function(){
-    if(!launchService || typeof launchService.activeModule!==\"function\" || typeof launchService.startModuleSession!==\"function\")return false;
-    const moduleId=launchService.activeModule();
-    return launchService.startModuleSession(moduleId);
-  };
-})();
-"""
+          shell=(
+              b"'use strict';\n\n"
+              b"(function installGensShellModuleLaunchFinalAuthorityV1(){\n"
+              b"  const launchService=window.GensShellModuleLaunchV1;\n\n"
+              b"  window.startConfiguredGame=async function(){\n"
+              b"    if(!launchService || typeof launchService.activeModule!==\"function\" || typeof launchService.startModuleSession!==\"function\")return false;\n"
+              b"    const moduleId=launchService.activeModule();\n"
+              b"    return launchService.startModuleSession(moduleId);\n"
+              b"  };\n"
+              b"})();\n"
+          )
           assert len(shell)==432
           assert git_blob(shell)=="abeec800b2d668ab1134bfddcc781be63ed0774d"
           shell_path.write_bytes(shell)

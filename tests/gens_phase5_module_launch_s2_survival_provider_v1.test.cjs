@@ -69,7 +69,9 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   assert.ok(m,'missing historical launch owner '+id);
   assert.match(m[1],/window\.startConfiguredGame\s*=\s*async\s+function/,'historical owner changed: '+id);
 }
-const core200=index.match(/<script\\b[^>]*\\bid=["\\']dungeonCore200Rebuild["\\'][^>]*>([\\s\\S]*?)<\\/script>/i)?.[1]||'';
+const core200Match=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']dungeonCore200Rebuild["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
+assert.ok(core200Match,'missing dungeonCore200Rebuild');
+const core200=core200Match[1];
 assert.match(core200,/const gensDungeonStartConfiguredGame200V1=async function/,'Core200 local Dungeon launch dispatcher must remain');
 assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global launch assignment must remain retired');
 assert.match(core200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core200 Dungeon provider registration must remain');
@@ -78,6 +80,6 @@ console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S2 Survival provider',
   expected:'RED before provider insertion, GREEN after provider registration',
   legacyProductionRouting:true,
-  historicalWrappers:5,
+  historicalWrappers:4,
   provider:'survival'
 },null,2));

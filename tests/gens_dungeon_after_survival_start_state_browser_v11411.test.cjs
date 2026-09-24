@@ -199,7 +199,7 @@ async function dungeonSnapshot(page,label){
     return {
       label,
       activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
       session:localStorage.getItem('z40k_session_active_v1'),
       bodyClass:document.body.className,
@@ -421,7 +421,7 @@ async function runSameOpenSurvivalToDungeonScenario(port){
     const beforeReturn=await page.evaluate(()=>({
       href:location.href,
       active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||''
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||'')
     }));
 
     await returnActiveGameToRootWithoutClosing(page);

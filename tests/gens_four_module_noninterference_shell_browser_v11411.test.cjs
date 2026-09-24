@@ -19,7 +19,7 @@ assert.match(indexSource,/function backToGensFamily\(\)/,'real Shell game-to-fam
 assert.match(indexSource,/window\.gensSwitchUniverse155=function\(profileId,family\)/,'V16.155 content-family switch owner must exist');
 assert.match(indexSource,/window\.gensMode151=function\(\)/,'V16.151 mode authority must exist');
 assert.match(indexSource,/id="builtinMonsterCapture162"/,'built-in Capture seed must exist');
-assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production family/session guard must remain in RuntimeBootstrap');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production bootstrap must not load the retired Survival/Dungeon guard');
 
 const shellOwner=indexSource.indexOf('async function startConfiguredGame(){');
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
@@ -127,8 +127,6 @@ const server=http.createServer((req,res)=>{
       mark('install-'+owner.id);
       await page.addScriptTag({content:owner.source});
     }
-    mark('install-family-guard');
-    await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
     await page.evaluate(()=>{try{window.gensReconcile151?.('four-module-install')}catch(e){}});
   };
 
@@ -141,13 +139,12 @@ const server=http.createServer((req,res)=>{
       typeof window.gensMode151==='function' &&
       typeof window.gensProfileContentFamily155==='function' &&
       typeof window.ensureBuiltinMonsterCapture162==='function' &&
-      window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0' &&
       profiles.some(p=>String(p.id)===captureId);
   },CAPTURE_ID);
 
   const snapshot=()=>page.evaluate(()=>({
     active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
-    familyGuard:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+    family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
     contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
     mode151:typeof gensMode151==='function'?gensMode151():'missing',
     dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
@@ -228,7 +225,7 @@ const server=http.createServer((req,res)=>{
     );
     let s=await snapshot();
     assert.equal(s.active,SURVIVAL_ID);
-    assert.equal(s.familyGuard,'survival');
+    assert.equal(s.family,'survival');
     assert.equal(s.contentFamily,'survival');
     assert.equal(s.mode151,'other');
     assert.equal(s.dungeonMode,false);
@@ -249,7 +246,7 @@ const server=http.createServer((req,res)=>{
     );
     s=await snapshot();
     assert.equal(s.active,DUNGEON_ID);
-    assert.equal(s.familyGuard,'adventure');
+    assert.equal(s.family,'adventure');
     assert.equal(s.contentFamily,'rpg');
     assert.equal(s.mode151,'dungeon');
     assert.equal(s.dungeonMode,true);
@@ -271,7 +268,7 @@ const server=http.createServer((req,res)=>{
     );
     s=await snapshot();
     assert.equal(s.active,SURVIVAL_ID);
-    assert.equal(s.familyGuard,'survival');
+    assert.equal(s.family,'survival');
     assert.equal(s.contentFamily,'survival');
     assert.equal(s.mode151,'other');
     assert.equal(s.dungeonMode,false);
@@ -291,7 +288,7 @@ const server=http.createServer((req,res)=>{
     );
     s=await snapshot();
     assert.equal(s.active,CAPTURE_ID);
-    assert.equal(s.familyGuard,'adventure');
+    assert.equal(s.family,'adventure');
     assert.equal(s.contentFamily,'creature');
     assert.equal(s.mode151,'capture');
     assert.equal(s.dungeonMode,true,'current Capture keeps historical dungeon-style substrate');
@@ -328,7 +325,7 @@ const server=http.createServer((req,res)=>{
     assert.match(pvpText,/PVP — À VENIR/);
     assert.equal(pvp.session,beforePvp.session,'PvP placeholder must not create/replace a session');
     assert.equal(pvp.active,beforePvp.active,'PvP placeholder must not activate another game profile');
-    assert.equal(pvp.familyGuard,beforePvp.familyGuard,'PvP placeholder must not invent a PvP family guard');
+    assert.equal(pvp.family,beforePvp.family,'PvP placeholder must not invent a PvP family guard');
     assert.equal(pvp.dungeonRuntime,beforePvp.dungeonRuntime,'PvP placeholder must not create/replace Dungeon runtime');
     assert.equal(pvp.dungeonState,beforePvp.dungeonState,'PvP placeholder must not create/replace Dungeon state');
     assert.equal(pvp.dungeonTheme,false,'Adventure/Dungeon theme must not leak into PvP');
@@ -344,7 +341,7 @@ const server=http.createServer((req,res)=>{
       viewport:'412x915 @2.625 touch',
       transitions:['survival','dungeon','survival','capture','pvp-placeholder'],
       finalProfile:pvp.active,
-      familyGuard:pvp.familyGuard,
+      familyGuard:pvp.family,
       session:pvp.session
     }));
   }finally{

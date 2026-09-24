@@ -13,7 +13,7 @@ const finalShellAuthority=fs.readFileSync(path.join(root,'assets','gensrpg','she
 assert.match(indexSource,/id="dungeonCore310PersistenceAndTokens"/,'real index.html must contain the final Core 3.10 persistence layer');
 assert.match(indexSource,/DungeonCore01\.quit=function\(\)\{[\s\S]*Sauvegarder et quitter le Dungeon/,'Core 3.10 must own Save & Quit');
 assert.match(indexSource,/const previousResume310=window\.resumeGame;[\s\S]*window\.resumeGame=function\(\)/,'Core 3.10 must own the final inline Dungeon resume wrapper');
-assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production RuntimeBootstrap must keep the family/session guard');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 RuntimeBootstrap must not load the retired Survival/Dungeon guard');
 assert.match(mobilePerformance,/runtime-bootstrap-v1\.js/,'production mobile bootstrap must still load RuntimeBootstrap');
 assert.match(finalShellAuthority,/window\.startConfiguredGame\s*=\s*async\s+function/,'final Shell authority must own the visible launch global');
 assert.match(finalShellAuthority,/launchService\.startModuleSession\(moduleId\)/,'final Shell authority must delegate to the public module-launch registry');
@@ -89,7 +89,6 @@ const roundTripHtml=
   '\n'+core308Script+
   '\n'+core310Script+
   '\n<script src="/assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'+ 
-  '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
 
 const mime={
   '.html':'text/html; charset=utf-8',
@@ -181,8 +180,7 @@ const server=http.createServer((req,res)=>{
       typeof window.startConfiguredGame==='function' &&
       typeof window.GensShellModuleLaunchV1?.startModuleSession==='function' &&
       typeof window.resumeGame==='function' &&
-      typeof window.DungeonCore01?.quit==='function' &&
-      window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0'
+      typeof window.DungeonCore01?.quit==='function'
     );
 
     mark('open-adventure-family');
@@ -200,7 +198,7 @@ const server=http.createServer((req,res)=>{
     );
     let shell=await page.evaluate(()=>({
       activeId:window.activeGameProfileId?.()||'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:!!window.isDungeonMode?.(),
       session:localStorage.getItem('z40k_session_active_v1')
     }));
@@ -237,7 +235,7 @@ const server=http.createServer((req,res)=>{
     }catch(error){
       const startDiag=await page.evaluate(()=>({
         activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'',
-        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
         dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
         contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
         eligible:typeof window.DungeonCore01?.eligible==='function'?window.DungeonCore01.eligible():null,
@@ -267,7 +265,7 @@ const server=http.createServer((req,res)=>{
         lastRoom:Number(rt?.last?.room)||0,
         session:localStorage.getItem('z40k_session_active_v1'),
         profile:localStorage.getItem('gensrpg_game_profile_active_v1'),
-        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||''
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||'')
       };
     });
     assert.equal(savedBeforeQuit.room,0,'fresh real Dungeon runtime must remain at the entrance before Save & Quit');
@@ -306,8 +304,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>
       typeof window.openGensFamily==='function' &&
       typeof window.resumeGame==='function' &&
-      typeof window.DungeonCore01?.show==='function' &&
-      window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0'
+      typeof window.DungeonCore01?.show==='function'
     );
 
     const persistedAfterRecreation=await page.evaluate(()=>({
@@ -338,7 +335,7 @@ const server=http.createServer((req,res)=>{
       runtime:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null'),
       session:localStorage.getItem('z40k_session_active_v1'),
       profile:localStorage.getItem('gensrpg_game_profile_active_v1'),
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:!!window.isDungeonMode?.(),
       dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
       core:getComputedStyle(document.getElementById('gensDungeonCore01')).display,

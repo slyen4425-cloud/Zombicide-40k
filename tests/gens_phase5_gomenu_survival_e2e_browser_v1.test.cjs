@@ -55,8 +55,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>
       typeof window.openChar==='function' &&
       typeof window.goMenu==='function' &&
-      typeof window.startConfiguredGame==='function' &&
-      typeof window.GensSurvivalModeIsolation1678104?.storedFamily==='function'
+      typeof window.startConfiguredGame==='function'
     ,null,{timeout:60000});
     await page.evaluate(()=>{localStorage.clear();sessionStorage.clear()});
     await page.reload({waitUntil:'domcontentloaded',timeout:60000});
@@ -94,7 +93,7 @@ const server=http.createServer((req,res)=>{
 
     const before=await page.evaluate(()=>({
       active:activeGameProfileId(),
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       participants:typeof loadGameParticipants==='function'?loadGameParticipants().map(String):[],
       menu:getComputedStyle(document.getElementById('menu')).display,
       dungeon:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
@@ -118,7 +117,7 @@ const server=http.createServer((req,res)=>{
 
     const after=await page.evaluate(()=>({
       active:activeGameProfileId(),
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       session:localStorage.getItem('z40k_session_active_v1'),
       menu:getComputedStyle(document.getElementById('menu')).display,
       sheet:getComputedStyle(document.getElementById('sheet')).display,

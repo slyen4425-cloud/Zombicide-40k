@@ -101,7 +101,7 @@ async function startDungeon(page){
     await page.waitForFunction(()=>{const s=document.getElementById('sheet');return s&&getComputedStyle(s).display!=='none'},null,{timeout:10000});
     await page.waitForTimeout(250);
 
-    const trace=await page.evaluate(()=>{window.__rpgSheetSnap('final');window.__rpgSheetObserver?.disconnect?.();return {trace:window.__rpgSheetTrace||[],calls:window.__rpgSheetCalls||[],family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',active:window.activeGameProfileId?.()||'',dungeonMode:!!window.isDungeonMode?.()}}).catch(e=>({evalError:String(e)}));
+    const trace=await page.evaluate(()=>{window.__rpgSheetSnap('final');window.__rpgSheetObserver?.disconnect?.();return {trace:window.__rpgSheetTrace||[],calls:window.__rpgSheetCalls||[],family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),active:window.activeGameProfileId?.()||'',dungeonMode:!!window.isDungeonMode?.()}}).catch(e=>({evalError:String(e)}));
     trace.clicked=clicked;
     console.log('[rpg-sheet-flash] trace',JSON.stringify(trace,null,2));
     assert.ok(trace,'trace must be readable');

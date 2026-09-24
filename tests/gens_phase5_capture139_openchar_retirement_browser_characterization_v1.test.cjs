@@ -329,22 +329,7 @@ const server=http.createServer((req,res)=>{
         document.body.classList.contains('gens-pure-capture') &&
         getComputedStyle(document.getElementById('captureGameHub')).display!=='none'
       ),null,{timeout:7000});
-    }
-
-    const sheetAfterLaunch=await page.evaluate(()=>{
-      const sheet=document.getElementById('sheet');
-      return sheet?getComputedStyle(sheet).display:'absent';
-    });
-    assert.ok(sheetAfterLaunch==='none'||sheetAfterLaunch==='absent',
-      'Capture launch without Capture139 openChar wrapper must not expose the shared hero sheet');
-
-    try{
-      assert.equal(typeof window.openChar,'function','native Shell openChar must remain callable after Capture launch');
     }catch(error){
-      throw error;
-    }
-
-    try{
       const diag=await page.evaluate(()=>({
         active:activeGameProfileId(),
         familyGuard:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
@@ -360,6 +345,15 @@ const server=http.createServer((req,res)=>{
       console.error('[capture139-openchar] launch-diagnostic',JSON.stringify({diag,dialogs,browserErrors}));
       throw error;
     }
+
+    const sheetAfterLaunch=await page.evaluate(()=>{
+      const sheet=document.getElementById('sheet');
+      return sheet?getComputedStyle(sheet).display:'absent';
+    });
+    assert.ok(sheetAfterLaunch==='none'||sheetAfterLaunch==='absent',
+      'Capture launch without Capture139 openChar wrapper must not expose the shared hero sheet');
+    assert.equal(await page.evaluate(()=>typeof window.openChar),'function',
+      'native Shell openChar must remain callable after Capture launch');
 
     state=await page.evaluate(()=>({
       active:activeGameProfileId(),

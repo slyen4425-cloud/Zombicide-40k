@@ -18,8 +18,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.length+'\0')).update(indexBuf).digest('hex');
 const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
-assert.equal(indexBuf.length,8172610,'first-raccord preaudit must track the exact connected index after its dedicated raccord');
-assert.equal(indexBlob,'eddba424d3ebb086a1bdd0bcc1b1822d16a83771','index blob drifted after the dedicated Progression raccord');
+assert.equal(indexBuf.length,8172742,'first-raccord preaudit must track the exact connected index after its dedicated raccord');
+assert.equal(indexBlob,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8','index blob drifted after the dedicated Progression raccord');
 assert.equal(coreBlob,'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

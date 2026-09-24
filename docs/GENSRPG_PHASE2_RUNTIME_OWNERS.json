@@ -408,6 +408,11 @@
       "owner": "GenSrpG Shell Module Launch Final Authority",
       "domain": "shell",
       "role": "final startConfiguredGame routing authority delegating only to the public GensShellModuleLaunchV1 registry"
+    },
+    "assets/gensrpg/survival/entry-v1.js": {
+      "owner": "GenSrpG Survival Wave Rules",
+      "domain": "survival",
+      "role": "active Survival module entry exposing pure wave-profile defaults and enemy-id collection"
     }
   }
 }

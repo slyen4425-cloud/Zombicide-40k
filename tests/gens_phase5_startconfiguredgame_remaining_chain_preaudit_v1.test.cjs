@@ -19,9 +19,9 @@ const ids=[
   'captureFix135',
   'captureFix138',
   'captureFix139',
-  'gensDungeonCore01Js',
-  'dungeonCore200Rebuild'
+  'gensDungeonCore01Js'
 ];
+const core200Id='dungeonCore200Rebuild';
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -71,15 +71,20 @@ for(const id of ids){
   assert.equal(meta.status,'active',id+' must remain active');
   functions[id]=assignedFunction(blockBody(id),'startConfiguredGame');
 }
+const core200Meta=owners.blocks?.[core200Id];
+assert.ok(core200Meta,'missing owner metadata '+core200Id);
+assert.equal(core200Meta.status,'active',core200Id+' must remain active');
+const core200Body=blockBody(core200Id);
 
-assert.match(lastOwners,/^startConfiguredGame\t5\tdungeonCore200Rebuild$/m,
-  'cartography must expose the current 5-owner chain');
+assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m,
+  'cartography must expose the current four historical global owners after Core200 retirement');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
-  ['capture','capture','capture','dungeon','dungeon'],
-  'remaining owners must stay module-owned before Shell raccord'
+  ['capture','capture','capture','dungeon'],
+  'remaining historical global owners must stay module-owned'
 );
+assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must remain Dungeon-owned');
 
 // Capture 135: pre-launch Capture state work + delegation.
 assert.match(functions.captureFix135,/gensCapturePregameMode/);
@@ -99,12 +104,15 @@ assert.match(functions.captureFix139,/markSessionActive/);
 assert.match(functions.gensDungeonCore01Js,/eligible\(\)/);
 assert.match(functions.gensDungeonCore01Js,/return start\(\)/);
 
-// Dungeon Core 2.00: final Dungeon interception, explicitly excludes Capture.
-assert.match(functions.dungeonCore200Rebuild,/isDungeonMode/);
-assert.match(functions.dungeonCore200Rebuild,/isCaptureContext138/);
-assert.match(functions.dungeonCore200Rebuild,/startOutside200/);
+// Dungeon Core 2.00: local Dungeon dispatcher, explicitly excludes Capture.
+assert.match(core200Body,/const gensDungeonStartConfiguredGame200V1=async function/);
+assert.match(core200Body,/isDungeonMode/);
+assert.match(core200Body,/isCaptureContext138/);
+assert.match(core200Body,/startOutside200/);
+assert.doesNotMatch(core200Body,/window\.startConfiguredGame\s*=(?!=)/,
+  'Core200 must remain retired as a global startConfiguredGame owner');
 
-// None of the five is equivalent to the retired captureFix131 pass-through.
+// None of the four remaining historical global owners is equivalent to the retired captureFix131 pass-through.
 for(const id of ids){
   assert.doesNotMatch(
     functions[id],
@@ -161,8 +169,9 @@ const classification=[
   },
   {
     id:'dungeonCore200Rebuild',
-    role:'dungeon-final-launch-interceptor',
+    role:'dungeon-local-launch-dispatcher',
     shellAuthority:false,
+    globalOwner:false,
     removableNow:false
   }
 ];
@@ -182,9 +191,10 @@ const nextMicroLot={
 
 console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame remaining-chain preaudit',
-  assignments:5,
+  assignments:4,
   chain:ids,
-  lastOwner:'dungeonCore200Rebuild',
+  lastOwner:'gensDungeonCore01Js',
+  core200LocalDispatcher:true,
   noPureTransitWrapperRemains:true,
   classification,
   nextMicroLot,

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172742,'S4 RED must start from the exact S3 GREEN runtime');
-assert.equal(gitBlob,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8','S4 RED must start from the exact S3 blob');
+assert.equal(bytes.length,8172687,'S4 provider contract must run on the exact Core200-global-retired runtime');
+assert.equal(gitBlob,'e56f7b63963d991717e1738c3e5188011276a2b7','S4 provider contract must keep the exact reviewed Core200 retirement blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -23,12 +23,13 @@ function block(id){
 }
 
 const d200=block('dungeonCore200Rebuild');
-const wrapper='window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};';
+const wrapper='const gensDungeonStartConfiguredGame200V1=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};';
 const wrapperPos=d200.indexOf(wrapper);
-assert.ok(wrapperPos>=0,'Core200 final Dungeon launch interceptor must remain');
+assert.ok(wrapperPos>=0,'Core200 Dungeon launch dispatcher must remain as the stable local S4 reference');
 
-const refPos=d200.indexOf('const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;',wrapperPos);
-assert.ok(refPos>wrapperPos,'S4 requires capturing the final Core200 Dungeon launch interceptor');
+const refPos=wrapperPos;
+assert.doesNotMatch(d200,/window\.startConfiguredGame\s*=(?!=)/,
+  'Core200 must no longer publish startConfiguredGame globally');
 
 const providerPos=d200.indexOf('const gensDungeonStartModuleSessionV1=async()=>{',refPos);
 const registrationPos=d200.indexOf('window.GensShellModuleLaunchV1.register("dungeon",gensDungeonStartModuleSessionV1);',providerPos);
@@ -62,8 +63,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
 }
 assert.deepEqual(
   chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js','dungeonCore200Rebuild'],
-  'S4 must preserve all five historical launch owners'
+  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S4 must preserve the four remaining historical launch owners after Core200 global retirement'
 );
 
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
@@ -73,8 +74,8 @@ assert.equal((index.match(/GensShellModuleLaunchV1\.startModuleSession\(/g)||[])
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S4 Dungeon provider',
-  expected:'RED before Dungeon provider insertion, GREEN after Core200-owned registration',
+  expected:'GREEN with Dungeon provider bound to the local Core200 dispatcher after global retirement',
   historicalChain:chain,
-  productionRouting:'legacy startConfiguredGame unchanged',
+  productionRouting:'final Shell global routing with local Core200 provider target',
   provider:'dungeon'
 },null,2));

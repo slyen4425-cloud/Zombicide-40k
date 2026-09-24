@@ -180,9 +180,10 @@ async function dungeonSnapshot(page,label){
       return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)!==0&&r.width>0&&r.height>0;
     };
     const gridLike=[...document.querySelectorAll(
-      '[id*="grid" i],[class*="grid" i],[id*="map" i],[class*="map" i],[id*="board" i],[class*="board" i]'
-    )].filter(visible).slice(0,30).map(el=>({
+      '#dc047RoomBoard .dc047Grid'
+    )].filter(visible).map(el=>({
       tag:el.tagName,id:el.id||'',class:String(el.className||'').slice(0,180),
+      cells:el.querySelectorAll(':scope > .dc047Cell').length,
       text:(el.innerText||'').trim().replace(/\s+/g,' ').slice(0,180)
     }));
     const returnControls=[...document.querySelectorAll('button,a')]

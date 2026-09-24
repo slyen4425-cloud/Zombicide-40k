@@ -46,7 +46,7 @@ assert.doesNotMatch(integration,/loadFinal1145|gens-rpg-tactical-wall-dice-stats
 // Stats: rebuilt rpgAttributes/dungeonStats are the canonical source even for the current hero.
 assert.match(clean,/const VERSION="3\.5\.0",APP_VERSION="16\.78\.114\.7"/);
 const baseStart=clean.indexOf('function baseValue');
-const baseEnd=clean.indexOf('function compare',baseStart);
+const baseEnd=clean.indexOf('const compare=StatsNorm.compare;',baseStart);
 assert.ok(baseStart>0&&baseEnd>baseStart);
 const baseFn=clean.slice(baseStart,baseEnd);
 assert.match(baseFn,/let n=customBase\(hero,id\)/);

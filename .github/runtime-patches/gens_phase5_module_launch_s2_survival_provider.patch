@@ -1,0 +1,17 @@
+--- a/index.html
++++ b/index.html
+@@ -12600,6 +12600,14 @@
+   setTimeout(()=>{gensStartingParticipants=null;try{renderMenuStatuses()}catch(e){}},1000);
+   window.scrollTo(0,0);
+ }
++const gensSurvivalNativeStartV1=startConfiguredGame;
++const gensSurvivalStartModuleSessionV1=async()=>{
++  if(gensShellActiveModuleV1()!=="survival")return false;
++  await gensSurvivalNativeStartV1();
++  return true;
++};
++window.GensShellModuleLaunchV1.register("survival",gensSurvivalStartModuleSessionV1);
++
+ 
+ 
+ function gensCleanDungeonBaseHeroesFromOtherRpgProfiles(){

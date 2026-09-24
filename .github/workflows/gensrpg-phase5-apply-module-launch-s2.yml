@@ -1,0 +1,92 @@
+name: GenSrpG apply module-launch S2 Survival provider
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24
+    paths:
+      - .github/runtime-patches/gens_phase5_module_launch_s2_survival_provider.patch
+
+permissions:
+  contents: write
+
+jobs:
+  apply-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout S2 branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact S1 GREEN base
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          b=Path("index.html").read_bytes()
+          blob=hashlib.sha1(f"blob {len(b)}\0".encode()+b).hexdigest()
+          assert len(b)==8171576, len(b)
+          assert blob=="12be0fdbaa5c05f7852933b48a3dd5df09da6145", blob
+          s=b.decode("utf-8")
+          assert "gensSurvivalNativeStartV1" not in s
+          assert len(re.findall(r"window\.startConfiguredGame\s*=\s*async\s+function",s))==5
+          PY
+
+      - name: Apply S2 patch
+        shell: bash
+        run: |
+          git apply --check .github/runtime-patches/gens_phase5_module_launch_s2_survival_provider.patch
+          git apply .github/runtime-patches/gens_phase5_module_launch_s2_survival_provider.patch
+
+      - name: Verify exact S2 runtime
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          b=Path("index.html").read_bytes()
+          s=b.decode("utf-8")
+          blob=hashlib.sha1(f"blob {len(b)}\0".encode()+b).hexdigest()
+          assert len(b)==8171879, len(b)
+          assert blob=="cacee0bb95d8c046264668c1ccc721fc88bbed2d", blob
+          assert s.count('window.GensShellModuleLaunchV1.register("survival",gensSurvivalStartModuleSessionV1)')==1
+          assert 'GensShellModuleLaunchV1.register("capture"' not in s
+          assert 'GensShellModuleLaunchV1.register("dungeon"' not in s
+          assert 'GensShellModuleLaunchV1.register("pvp"' not in s
+          assert len(re.findall(r"window\.startConfiguredGame\s*=\s*async\s+function",s))==5
+          PY
+
+      - name: Retarget S2 fingerprint and prove GREEN
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs")
+          s=p.read_text()
+          assert s.count("8171576")==1
+          assert s.count("12be0fdbaa5c05f7852933b48a3dd5df09da6145")==1
+          s=s.replace("8171576","8171879",1)
+          s=s.replace("12be0fdbaa5c05f7852933b48a3dd5df09da6145","cacee0bb95d8c046264668c1ccc721fc88bbed2d",1)
+          s=s.replace("S2 RED must start from the exact S1 GREEN runtime","S2 runtime must match the exact Survival-provider candidate")
+          s=s.replace("S2 RED must start from the exact S1 GREEN blob","S2 runtime blob must match the exact Survival-provider candidate")
+          p.write_text(s)
+          PY
+          node tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs
+
+      - name: Remove one-shot mechanism
+        shell: bash
+        run: |
+          rm .github/runtime-patches/gens_phase5_module_launch_s2_survival_provider.patch
+          rm .github/workflows/gensrpg-phase5-apply-module-launch-s2.yml
+
+      - name: Commit exact S2 runtime
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs .github/runtime-patches/gens_phase5_module_launch_s2_survival_provider.patch .github/workflows/gensrpg-phase5-apply-module-launch-s2.yml
+          git diff --cached --check
+          git commit -m "feat: register Phase 5 module-launch S2 Survival provider"
+          git push origin HEAD:work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24

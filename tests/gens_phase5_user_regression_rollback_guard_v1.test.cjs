@@ -17,10 +17,10 @@ const fix138=scriptBody('captureFix138');
 const fix139=scriptBody('captureFix139');
 const core200=scriptBody('dungeonCore200Rebuild');
 
-assert.match(
+assert.doesNotMatch(
   fix135,
-  /const\s+start135\s*=\s*window\.startConfiguredGame;[\s\S]*window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)/,
-  'user-regression guard: captureFix135 must retain its historical startConfiguredGame boundary until a replacement contract is proven on real user paths'
+  /window\.startConfiguredGame\s*=/,
+  'user-regression guard: captureFix135 global startConfiguredGame owner must remain retired'
 );
 assert.match(
   fix135,
@@ -33,6 +33,6 @@ assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+
 assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 global launch owner must remain retired');
 
 const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
-assert.equal(assignments,4,'rollback guard must preserve the four remaining historical global owners after Core200 retirement');
+assert.equal(assignments,3,'rollback guard must preserve the three remaining historical global owners after captureFix135 retirement');
 
-console.log('Phase 5 user regression rollback guard: captureFix135 boundary preserved, 4-owner chain preserved, Core200 local dispatcher retained');
+console.log('Phase 5 user regression rollback guard: captureFix135 reset semantics preserved, global owner retired, 3-owner chain preserved, Core200 local dispatcher retained');

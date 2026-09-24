@@ -1,0 +1,109 @@
+name: GenSrpG Phase5 S4 Dungeon provider one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-module-launch-s4-dungeon-provider-2026-09-24
+    paths:
+      - .github/workflows/gensrpg-phase5-apply-s4-dungeon-provider.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-s4:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact S4 RED branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply exact Dungeon provider patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          p=Path("index.html")
+          b=p.read_bytes()
+          def blob(data):
+              return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+
+          assert len(b)==8172204, len(b)
+          assert blob(b)=="6c95e3f6ca4bf8e34003776e7e43e44192aafb16", blob(b)
+          s=b.decode("utf-8")
+
+          old='''const startOutside200=window.startConfiguredGame;
+          window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};
+          '''
+          new='''const startOutside200=window.startConfiguredGame;
+          window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};
+          const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;
+          const gensDungeonStartModuleSessionV1=async()=>{
+            if(gensShellActiveModuleV1()!=="dungeon")return false;
+            await gensDungeonStartConfiguredGame200V1();
+            return true;
+          };
+          window.GensShellModuleLaunchV1.register("dungeon",gensDungeonStartModuleSessionV1);
+          '''
+          assert s.count(old)==1, s.count(old)
+          s=s.replace(old,new,1)
+          out=s.encode("utf-8")
+          assert len(out)==8172529, len(out)
+          assert blob(out)=="696014056409dda9b6ef25ace58dfd9d5f9e2718", blob(out)
+          p.write_bytes(out)
+
+          old_blob="6c95e3f6ca4bf8e34003776e7e43e44192aafb16"
+          new_blob="696014056409dda9b6ef25ace58dfd9d5f9e2718"
+          old_size="8172204"
+          new_size="8172529"
+          changed=[]
+          for path in Path(".").rglob("*"):
+              if not path.is_file():
+                  continue
+              rel=path.as_posix()
+              if rel.startswith(".git/") or rel=="index.html":
+                  continue
+              if not (rel.startswith("tests/") or rel.startswith("docs/GENSRPG_PHASE2_")):
+                  continue
+              try:
+                  text=path.read_text()
+              except Exception:
+                  continue
+              if old_blob not in text:
+                  continue
+              text=text.replace(old_blob,new_blob).replace(old_size,new_size)
+              path.write_text(text)
+              changed.append(rel)
+
+          assert changed, "no current-runtime fingerprint followers realigned"
+          print("fingerprint followers realigned:")
+          for rel in changed:
+              print(rel)
+          PY
+
+      - name: Verify S4 contracts before commit
+        shell: bash
+        run: |
+          node tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs
+          node tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs
+          node tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs
+          node tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs
+          node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
+
+      - name: Remove one-shot workflow
+        shell: bash
+        run: rm .github/workflows/gensrpg-phase5-apply-s4-dungeon-provider.yml
+
+      - name: Commit S4 runtime
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html tests docs/GENSRPG_PHASE2_* .github/workflows/gensrpg-phase5-apply-s4-dungeon-provider.yml
+          git diff --cached --check
+          git commit -m "feat: register Phase 5 module-launch S4 Dungeon provider"
+          git push origin HEAD:work/gensrpg-phase5-module-launch-s4-dungeon-provider-2026-09-24

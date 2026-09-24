@@ -1,3 +1,82 @@
+# RÉSULTAT AUDIT DE SORTIE PHASE 5 — 2026-09-24
+
+Audit structurel et CI réalisés sans modification runtime.
+
+## SHA d'audit validé
+
+SHA technique :
+`bed5c32e284a8e39286ac93f419bc636ceb97951`.
+
+Commits d'audit :
+- `7f9af81c563d2786920fa618fe4c0413516fff02` — test d'autorité de sortie Phase 5 ;
+- `bed5c32e284a8e39286ac93f419bc636ceb97951` — raccord du test à Architecture.
+
+Runtime inchangé :
+- `index.html` taille `8172118` octets ;
+- blob `198207e3f52730498831f196caa35c4a0283e934`.
+
+## Résultat d'autorité
+
+Navigation / lancement :
+- Shell final = propriétaire public de `window.startConfiguredGame` ;
+- `gensShellActiveModuleV1` = un seul resolver actif ;
+- `GensShellModuleLaunchV1` = un seul registre public ;
+- providers Survival / Capture / Dungeon présents ;
+- chaîne historique interne
+  `captureFix138 -> captureFix139 -> gensDungeonCore01Js`
+  reste gelée mais ne constitue pas, à elle seule, le blocage de sortie Phase 5.
+
+Retour écran :
+- `GensShellScreenReturnV1` = registre public unique ;
+- `goMenu` natif délègue via `returnToPrimaryView` ;
+- zéro override global inline `window.goMenu`.
+
+Fiche héros :
+- propriétaire natif :
+  `function openChar(id)` ;
+- Dungeon Core 0.28 reste retiré ;
+- il subsiste exactement UN wrapper global strict :
+  `captureFix139`.
+
+Rôle résiduel de Capture139 :
+- pendant `window._captureStarting139 === true` ;
+- uniquement en contexte Capture ;
+- empêcher l'ouverture automatique de la fiche pendant la fenêtre critique de démarrage ;
+- déléguer tous les autres appels au propriétaire natif.
+
+## Verdict Phase 5
+
+**Critère de sortie PAS ENCORE atteint.**
+
+Le bloqueur unique prouvé est :
+`captureFix139 -> window.openChar`.
+
+Aucun autre nettoyage Phase 5 n'est justifié avant ce micro-lot.
+
+Le prochain micro-lot doit donc être strictement :
+**retirer uniquement le wrapper global openChar de Capture139**, après TDD et preuve navigateur que le lancement Capture reste identique sans cette interception globale.
+
+Interdit dans ce futur lot :
+- ne pas retirer `startConfiguredGame` de Capture138/139 ou Dungeon Core01 ;
+- ne pas modifier gameplay Capture ;
+- ne pas modifier Shell navigation ;
+- ne pas modifier Stats / Tactical / Survival / Builder ;
+- ne pas recréer la suppression openChar sous forme d'un autre wrapper, observer ou retry.
+
+Après retrait GREEN et validation utilisateur :
+**ré-auditer immédiatement le critère de sortie Phase 5 ; si aucun autre propriétaire de navigation/fiche héros n'existe, clôturer Phase 5 et ouvrir Phase 6 — isolation Survie.**
+
+## CI du SHA technique
+
+- Architecture + Browser :
+  run `36038322477` — SUCCESS ;
+- Firefox :
+  run `36038322232` — SUCCESS ;
+- Tactical Dock :
+  run `36038322288` — SUCCESS.
+
+La clôture documentaire ci-dessus change le HEAD et doit elle-même repasser les trois validations avant checkpoint GREEN de l'audit.
+
 # CHANTIER COURANT — Phase 5 / audit de sortie vers Phase 6 — 2026-09-24
 
 Validation utilisateur du checkpoint précédent :

@@ -56,3 +56,38 @@ il délègue à l'autorité Capture139 existante.
 Preview téléphone et validation utilisateur obligatoires avant S4 Dungeon.
 
 Aucun merge sur `main`.
+
+
+## Candidat runtime
+
+RED acquis au SHA :
+`afd995c1b7bb20eecd071581a5ef46c636a32d17`.
+
+Échec attendu :
+`S3 requires capturing Capture139 after its wrapper is installed`.
+
+Runtime raccordé :
+`b398261c3eef0bb4e230db5afb6cf6dc1b0a2223`.
+
+Empreinte :
+- `8172204` octets ;
+- blob `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+
+Modification :
+- +7 lignes dans `captureFix139` ;
+- provider Capture routing-only ;
+- registration Capture unique ;
+- aucun provider Dungeon/PvP ;
+- provider Survival conservé ;
+- aucun retrait historique.
+
+Le premier one-shot d'application s'est arrêté avant commit car deux sentinelles Phase 2
+lisent volontairement `HEAD:index.html`.
+Ces vérifications ont été déplacées à leur emplacement correct : la CI post-commit.
+Aucun runtime incomplet n'a été poussé par cet essai.
+
+Le second one-shot a validé les contrats S1/S2/S3 et le rollback avant commit,
+puis s'est supprimé dans le même commit runtime.
+
+La validation triple CI complète doit maintenant être exécutée sur un SHA utilisateur
+descendant de ce runtime.

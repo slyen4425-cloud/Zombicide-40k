@@ -1,3 +1,96 @@
+## CANDIDAT RUNTIME — Phase 5 / module-launch S3 — provider Capture — 2026-09-24
+
+Point de reprise actif pendant la validation complète.
+
+- Validation utilisateur S2 : **OK**.
+- Base pré-audit GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s3-capture-provider-preaudit-green-2026-09-24`.
+- SHA pré-audit final :
+  `f901e7bd3db046749d20ec4ce1d049a366f604f5`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s3-capture-provider-2026-09-24`.
+- Runtime S3 :
+  `b398261c3eef0bb4e230db5afb6cf6dc1b0a2223`.
+- `index.html` :
+  taille `8172204`,
+  blob `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Pré-audit
+
+Triple-GREEN :
+- Architecture + navigateur complet : `35963606091` — SUCCESS ;
+- Firefox : `35963606145` — SUCCESS ;
+- Tactical Dock : `35963606147` — SUCCESS.
+
+Seam prouvé :
+`captureFix139` est chargé après le registre Shell et avant les wrappers Dungeon.
+
+### TDD RED
+
+SHA RED :
+`afd995c1b7bb20eecd071581a5ef46c636a32d17`.
+
+- Architecture `35964823217` : FAILURE uniquement sur
+  `Raccorder le provider Capture module-launch S3` ;
+- assertion attendue :
+  absence de la référence Capture139 capturée ;
+- Firefox `35964823163` : SUCCESS ;
+- Tactical Dock `35964823182` : SUCCESS.
+
+### Runtime S3
+
+Ajout dans `captureFix139`, après son wrapper historique :
+- `gensCaptureStartConfiguredGame139V1` capture l'autorité Capture139 ;
+- `gensCaptureStartModuleSessionV1` garde le module `capture` ;
+- le provider délègue uniquement à la référence Capture139 ;
+- registration publique :
+  `GensShellModuleLaunchV1.register("capture", ...)`.
+
+Diff runtime :
+- +7 lignes ;
+- +325 octets ;
+- aucune suppression.
+
+Providers publics connectés :
+- Survival : oui ;
+- Capture : oui ;
+- Dungeon : non ;
+- PvP : non.
+
+### Invariants conservés
+
+- bouton production : toujours `startConfiguredGame()` ;
+- chaîne historique toujours exactement :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- aucun propriétaire retiré ;
+- aucun observer/timer/retry/polling ajouté par le provider ;
+- rollback utilisateur `captureFix135` conservé ;
+- nouveau test navigateur direct du provider Capture ajouté ;
+- workflow one-shot supprimé du commit runtime.
+
+### Validation obligatoire maintenant
+
+Le présent SHA documentaire descendant de `b398261c...` doit passer :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Le navigateur complet doit valider en parallèle :
+- Capture historique par le Shell ;
+- provider public Capture S3 ;
+- Capture victoire/reprise ;
+- Capture composition complète ;
+- non-interférence des quatre modules ;
+- Survival historique + provider S2 ;
+- Dungeon -> Tactical.
+
+Aucun checkpoint GREEN S3 avant cette triple validation.
+Aucun merge sur `main`.
+
+---
+
 ## S3 — RED PROVIDER CAPTURE — prêt après checkpoint pré-audit GREEN — 2026-09-24
 
 Base obligatoire :

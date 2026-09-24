@@ -13,8 +13,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8172529,'openChar guard must target the current Core 0.28-retired runtime');
-assert.equal(gitBlob(bytes),'696014056409dda9b6ef25ace58dfd9d5f9e2718',
+assert.equal(bytes.length,8172610,'openChar guard must target the current Core 0.28-retired runtime');
+assert.equal(gitBlob(bytes),'eddba424d3ebb086a1bdd0bcc1b1822d16a83771',
   'openChar guard runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';

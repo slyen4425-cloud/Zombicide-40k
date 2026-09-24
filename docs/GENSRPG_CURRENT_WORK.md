@@ -1,3 +1,81 @@
+## GREEN FINAL CANDIDATE — Phase 5 / module-launch S2 Survival — 2026-09-24
+
+Ce bloc devient le point de reprise final de S2 dès que ce SHA documentaire
+a lui-même repassé la triple CI et que le checkpoint final existe.
+
+- Base GREEN S1 :
+  `checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- Runtime corrigé :
+  `ed37caac80206d2cf90cdf11be7ad191025e498c`.
+- Nettoyage one-shot :
+  `16eee755746ab614271de53e7b379d55d9f11337`.
+- Sentinelle S1 réalignée :
+  `20fd04512a7602f008904564fd4b3dffcbd126cc`.
+- SHA documentaire validé techniquement :
+  `03e5f7764826ff9e70b197b5b4681003bc73ff8c`.
+- Checkpoint final cible :
+  `checkpoint/gensrpg-phase5-module-launch-s2-survival-provider-green-2026-09-24`.
+- `index.html` :
+  taille `8171879`,
+  blob `7601760f7a635094d4f687b725a639b5728e93b4`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Validation technique complète du SHA 03e5f776
+
+- Architecture + navigateur complet :
+  `35960835317` — SUCCESS ;
+- Firefox :
+  `35960835344` — SUCCESS ;
+- Tactical Dock :
+  `35960835334` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- lancement Survival historique par `startConfiguredGame()` ;
+- lancement public S2 par
+  `GensShellModuleLaunchV1.startModuleSession("survival")` ;
+- Dungeon -> Tactical ;
+- Capture victoire/reprise ;
+- Dungeon après Survival ;
+- Builder ;
+- Config objet ;
+- openChar ;
+- Save & Quit ;
+- PvP ;
+- Capture complet ;
+- non-interférence des quatre modules ;
+- preview/assets/equipment.
+
+### État S2
+
+Provider connecté :
+- Survival uniquement.
+
+Toujours non connectés :
+- Capture ;
+- Dungeon ;
+- PvP.
+
+Toujours inchangés :
+- bouton de production ;
+- propriétaire natif `startConfiguredGame` ;
+- cinq wrappers historiques
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Aucun mécanisme temporaire S2 ne doit exister dans le checkpoint final.
+
+### Prochaine étape après checkpoint + preview + validation utilisateur
+
+**S3 — provider Capture**.
+
+S3 restera interdit tant que la preview S2 n'a pas été validée par l'utilisateur.
+
+Aucun merge sur `main`.
+
+---
+
 ## CANDIDAT CORRIGÉ — Phase 5 / module-launch S2 Survival — 2026-09-24
 
 Point de reprise actif.

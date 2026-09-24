@@ -235,3 +235,34 @@ Les empreintes historiques qui suivent le runtime courant ont été réalignées
 `7601760f...`.
 
 Les mécanismes temporaires sont absents avant CI finale.
+
+
+## Clôture technique S2
+
+SHA documentaire testé :
+`03e5f7764826ff9e70b197b5b4681003bc73ff8c`.
+
+CI :
+- Architecture + navigateur complet : `35960835317` — SUCCESS ;
+- Firefox : `35960835344` — SUCCESS ;
+- Tactical Dock : `35960835334` — SUCCESS.
+
+Runtime final S2 :
+- taille `8171879` ;
+- blob `7601760f7a635094d4f687b725a639b5728e93b4`.
+
+Le provider public Survival et le lancement historique ont tous deux été validés
+dans le navigateur complet.
+
+Checkpoint final cible :
+`checkpoint/gensrpg-phase5-module-launch-s2-survival-provider-green-2026-09-24`.
+
+La présente clôture documentaire doit elle-même repasser la triple CI avant création
+du checkpoint.
+
+Après checkpoint GREEN :
+1. créer une preview téléphone identique au checkpoint ;
+2. obtenir la validation utilisateur ;
+3. seulement ensuite ouvrir S3 — provider Capture.
+
+Aucun merge sur `main`.

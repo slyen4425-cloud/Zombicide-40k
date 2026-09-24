@@ -1,3 +1,115 @@
+## CANDIDAT RUNTIME — Phase 5 / module-launch — Autorité Shell finale — 2026-09-24
+
+La bascule runtime minimale de l'autorité Shell finale est appliquée.
+
+- Base GREEN pré-audit :
+  `checkpoint/gensrpg-phase5-module-launch-final-shell-authority-preaudit-green-2026-09-24`.
+- SHA de base :
+  `6f0d062aa40cc4dce61e7db0d09dc491cca14d42`.
+- Checkpoint de départ runtime :
+  `checkpoint/gensrpg-start-phase5-module-launch-final-shell-authority-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24`.
+- RED dédié :
+  SHA `28ebe0daa646389e1e81905145f152b51a8d45d5`.
+- RED Architecture :
+  `35983366052` — FAILURE uniquement sur
+  `Raccorder l'autorité Shell finale module-launch Phase 5`.
+- RED Firefox :
+  `35983366046` — SUCCESS.
+- RED Tactical Dock :
+  `35983366063` — SUCCESS.
+- Commit runtime :
+  `89db6863462bdc6667f550f1b37e53014d7e64b1`.
+
+### Runtime exact
+
+`index.html` :
+- taille `8172610` ;
+- blob Git `eddba424d3ebb086a1bdd0bcc1b1822d16a83771` ;
+- modification : une seule balise script ajoutée après
+  `assets/gensrpg/gens-mobile-combat-performance-16781022.js`.
+
+Nouveau propriétaire :
+`assets/gensrpg/shell/module-launch-final-authority-v1.js`.
+
+Blob :
+`abeec800b2d668ab1134bfddcc781be63ed0774d`.
+
+Responsabilité :
+- remplace uniquement `window.startConfiguredGame` ;
+- lit `GensShellModuleLaunchV1.activeModule()` ;
+- appelle `GensShellModuleLaunchV1.startModuleSession(moduleId)` ;
+- retourne le résultat public ;
+- aucun fallback legacy ;
+- aucun accès DOM/storage ;
+- aucun timer/retry/polling/observer ;
+- aucun gameplay module.
+
+### Invariants conservés
+
+- callsite HTML : `startConfiguredGame()` inchangé ;
+- provider Survival : conservé ;
+- provider Capture : conservé ;
+- provider Dungeon : conservé ;
+- PvP : aucun provider, `PVP — À VENIR` conservé ;
+- chaîne historique entièrement conservée :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild` ;
+- aucun retrait historique dans ce lot ;
+- garde rollback utilisateur conservée ;
+- workflow one-shot absent du HEAD runtime ;
+- `main` non touchée.
+
+### Application règle 26
+
+Le patch a été appliqué par one-shot strict depuis le fichier exact S4 déjà vérifié.
+Le one-shot a exigé avant commit :
+- source `8172529 / 696014056409dda9b6ef25ace58dfd9d5f9e2718` ;
+- cible `8172610 / eddba424d3ebb086a1bdd0bcc1b1822d16a83771` ;
+- fichier Shell `432 octets / abeec800b2d668ab1134bfddcc781be63ed0774d` ;
+- sentinelle pré-audit GREEN ;
+- sentinelle finale GREEN.
+
+Le workflow temporaire s'est supprimé dans le commit runtime.
+
+### Validation obligatoire maintenant
+
+Le présent commit documentaire doit déclencher et passer :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Le navigateur complet doit conserver les preuves :
+- Survival historique + provider ;
+- Survival après Dungeon ;
+- Dungeon historique + provider ;
+- Dungeon map -> Tactical V2 ;
+- Save & Quit -> reprise ;
+- Dungeon après Survival ;
+- embuscade/proximité/détection protégées ;
+- Dungeon Builder ;
+- Capture historique + provider ;
+- Capture victoire/reprise ;
+- Capture composition complète ;
+- PvP placeholder ;
+- non-interférence quatre modules ;
+- Config objet ;
+- openChar ;
+- authored cache/pièges ;
+- preview/assets/Equipment ;
+- garde rollback utilisateur.
+
+Checkpoint GREEN final interdit avant triple SUCCESS.
+
+Après checkpoint GREEN :
+- produire/aligner la preview téléphone ;
+- validation utilisateur obligatoire ;
+- aucun pré-audit de retrait historique avant cette validation.
+
+Aucun merge sur `main`.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch — Autorité Shell finale — 2026-09-24
 
 Le pré-audit Autorité Shell finale est clôturé GREEN.

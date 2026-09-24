@@ -1,3 +1,90 @@
+# CHANTIER COURANT — Phase 5 / startConfiguredGame — pré-audit retrait autorité globale Core200 — 2026-09-24
+
+Validation utilisateur du checkpoint précédent :
+**OK — « Parfait.👍 »**.
+
+## Base et gouvernance
+
+- Dernier checkpoint GREEN validé :
+  `checkpoint/gensrpg-phase5-survival-to-dungeon-grid-repair-green-2026-09-24`.
+- SHA exact de base :
+  `ed6064e7113034242dd3467f8b306b63d47101a0`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-core200-global-retirement-preaudit-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-core200-global-retirement-preaudit-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+## Mission unique
+
+Pré-auditer le retrait de **l'affectation globale** de `startConfiguredGame`
+portée historiquement par `dungeonCore200Rebuild`, sans retirer sa logique Dungeon
+ni le provider public Dungeon S4.
+
+Le Shell final reste l'unique propriétaire runtime de `window.startConfiguredGame`.
+
+## Pourquoi Core200 en premier
+
+Le provider Dungeon S4 possède déjà une référence stable vers l'intercept Core200
+et le Shell final délègue au registre public `GensShellModuleLaunchV1`.
+
+Le pré-audit doit prouver que l'affectation historique globale de Core200 est devenue
+inutile comme **autorité globale**, tout en conservant le comportement Dungeon appelé
+par son provider public.
+
+Aucune conclusion ne peut être tirée du simple shadowing statique.
+
+## Périmètre
+
+Autorisé :
+- caractériser la référence stable Core200 ;
+- caractériser le provider Dungeon S4 ;
+- caractériser l'ordre de chargement et le Shell final ;
+- construire un test RED/contrat de retrait futur ;
+- documenter les E2E bloquants.
+
+Interdit dans ce pré-audit :
+- aucune modification runtime ;
+- aucun retrait effectif de `dungeonCore200Rebuild` ;
+- aucun retrait de `captureFix135/138/139` ou `gensDungeonCore01Js` ;
+- aucune modification Survival/Capture/PvP/Tactical/Stats/Storage/Inventory ;
+- aucun wrapper de compatibilité ;
+- aucun observer/timer/retry/polling ;
+- aucun merge sur `main`.
+
+## Preuves obligatoires
+
+Avant tout futur retrait runtime :
+1. provider Dungeon S4 direct ;
+2. vrai Shell -> Dungeon ;
+3. Dungeon map -> Tactical V2 ;
+4. Save & Quit -> reprise ;
+5. Dungeon après Survival dans la même page ;
+6. Builder ;
+7. Capture historique/provider inchangés ;
+8. PvP placeholder ;
+9. non-interférence quatre modules ;
+10. Architecture + Browser complet ;
+11. Firefox ;
+12. Tactical Dock.
+
+## Règle 26
+
+Le pré-audit doit utiliser le `index.html` exact du SHA de base
+`ed6064e7113034242dd3467f8b306b63d47101a0`.
+
+Si son contenu exact est requis, demander le fichier à l'utilisateur via le permalink
+SHA puis vérifier taille/blob avant inspection. Ne pas réutiliser `work17.zip` :
+il correspond à un état antérieur.
+
+## Prochaine action
+
+Résoudre l'empreinte exacte du `index.html` du checkpoint GREEN, demander le fichier
+exact conformément à la règle 26, puis construire la sentinelle de pré-audit.
+
+---
+
 # GREEN FINAL CANDIDATE — Phase 5 / réparation transition Survie -> Dungeon / grille — 2026-09-24
 
 Le lot de réparation est techniquement GREEN sur le SHA `0989aa25f08da6f62fe8681dc88c383c5f40104e`.

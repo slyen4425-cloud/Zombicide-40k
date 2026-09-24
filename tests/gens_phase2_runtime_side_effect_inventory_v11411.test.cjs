@@ -26,7 +26,10 @@ assert.equal(previewInjected.includes(CORE_STORAGE),false,'preview must inherit 
 assert.deepEqual(previewInjected,injected.filter(x=>x!==CORE_STORAGE),'preview and Pages must otherwise share the same external module order');
 
 const productionDirect=[
-  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...rawDirect.filter(x=>![
+    'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+  ].includes(x)),
   ...injected
 ];
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
@@ -38,7 +41,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,79);
+assert.equal(reachable.size,80);
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 
 const disabled=new Set([

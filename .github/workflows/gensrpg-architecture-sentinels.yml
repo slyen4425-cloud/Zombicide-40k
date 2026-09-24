@@ -722,6 +722,9 @@ jobs:
       - name: Vérifier le provider public Survival module-launch S2
         run: node tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs
 
+      - name: Caractériser Survie sans garde legacy inter-module
+        run: node tests/gens_phase6_survival_without_legacy_isolation_guard_browser_v1.test.cjs
+
       - name: Reproduire la perte des héros Survie après Dungeon
         run: node tests/gens_survival_heroes_after_dungeon_e2e_browser_v1.test.cjs
 

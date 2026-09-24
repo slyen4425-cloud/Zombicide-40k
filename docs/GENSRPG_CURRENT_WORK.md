@@ -1,3 +1,79 @@
+# CHANTIER COURANT — Phase 5 / réparation transition Survie -> Dungeon / grille — 2026-09-24
+
+Validation utilisateur du lot Autorité Shell finale :
+**globalement OK** sur la preview GREEN.
+Le défaut ci-dessous est signalé comme ancien et distinct du lot Shell final.
+
+## Signalement utilisateur exact
+
+Après une session Survie, lorsqu'on passe ensuite en Dungeon sans fermer puis relancer le lien,
+la grille de déplacements Dungeon n'apparaît pas.
+Fermer/reouvrir le lien fait réapparaître la grille.
+
+## Base et gouvernance
+
+- Dernier checkpoint GREEN validé :
+  `checkpoint/gensrpg-phase5-module-launch-final-shell-authority-green-2026-09-24`.
+- SHA exact de base :
+  `f9ac03a9ad8dfd76b2c8725f885be4fe396942c5`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-survival-to-dungeon-grid-repair-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-survival-to-dungeon-grid-repair-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+## Périmètre
+
+Module concerné :
+Dungeon, uniquement lors de la transition depuis une session Survie dans la même ouverture.
+
+Propriétaires à caractériser avant toute correction :
+- navigation Shell de sortie Survie / entrée Dungeon ;
+- initialisation de la surface/grille de déplacement Dungeon ;
+- hooks de rendu Dungeon réellement responsables de cette surface.
+
+Systèmes à réutiliser :
+- Shell existant ;
+- provider Dungeon module-launch S4 ;
+- propriétaire de grille/mouvement Dungeon existant.
+
+Fonctions/systèmes protégés :
+- aucun changement de règles de mouvement ;
+- aucun changement de positions héros/ennemis ;
+- aucun changement Tactical/combat ;
+- aucun changement Capture/PvP ;
+- aucun changement Stats/Inventory/Storage ;
+- aucun nouveau wrapper global ;
+- aucun observer/timer/retry/polling ;
+- aucun `location.reload()` comme correction ;
+- aucun retrait de propriétaire historique `startConfiguredGame` dans ce lot.
+
+## TDD obligatoire
+
+Avant runtime :
+1. reproduire Survie -> retour Shell -> Dungeon dans la même page ;
+2. ne pas fermer/recréer la page dans le test ;
+3. lancer une vraie nouvelle partie Dungeon ;
+4. exiger la présence et visibilité de la vraie grille de déplacement ;
+5. comparer à un lancement Dungeon direct de contrôle ;
+6. conserver les sentinelles Dungeon map->Tactical, Save & Quit, Builder, Capture et non-interférence.
+
+Le lot reste RED tant que le scénario exact utilisateur n'est pas reproduit.
+
+## Risque principal
+
+Une initialisation de grille peut être installée seulement au chargement initial du document
+ou dépendre d'un état/class/flag laissé par Survie.
+La correction doit rejouer l'initialisation via le propriétaire Dungeon existant,
+pas créer une seconde grille ni forcer un reload.
+
+## Prochaine action
+
+Construire la sentinelle navigateur RED exacte puis diagnostiquer le propriétaire fautif.
+
+---
+
 ## CANDIDAT RUNTIME — Phase 5 / module-launch — Autorité Shell finale — 2026-09-24
 
 La bascule runtime minimale de l'autorité Shell finale est appliquée.

@@ -227,6 +227,9 @@ jobs:
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
 
+      - name: Scanner les anciennes empreintes Core200
+        run: node tests/gens_phase5_core200_retirement_stale_baseline_scan_v1.test.cjs
+
       - name: Vérifier la cartographie du graphe runtime Phase 2
         run: node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
 

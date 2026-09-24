@@ -1,4 +1,4 @@
-name: GenSrpG temporary Capture139 guard realignment
+name: GenSrpG temporary Capture139 non-workflow realignment
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 1
 
-      - name: Realign active guards and Phase 2 maps
+      - name: Realign active tests and Phase 2 maps
         shell: bash
         run: |
           set -euo pipefail
@@ -31,35 +31,7 @@ jobs:
           NEW_BLOB="97f0e060d8bffcde2baaf5aa42c1e16b8544263f"
           OLD_SIZE="8172118"
           NEW_SIZE="8171854"
-
           root=Path(".")
-          arch_path=root/".github/workflows/gensrpg-architecture-sentinels.yml"
-          arch=arch_path.read_text(encoding="utf-8")
-
-          preaudit='''      - name: Pré-auditer le retrait openChar Capture139
-                  run: node tests/gens_phase5_capture139_openchar_retirement_preaudit_v1.test.cjs
-
-          '''
-          browser_char='''      - name: Caractériser Capture sans wrapper openChar Capture139
-                  run: node tests/gens_phase5_capture139_openchar_retirement_browser_characterization_v1.test.cjs
-
-          '''
-          final_anchor='''      - name: Auditer le critère de sortie Phase 5
-                  run: node tests/gens_phase5_exit_audit_v1.test.cjs
-          '''
-          final_step=final_anchor+'''\n      - name: Retirer le dernier wrapper global openChar Capture139
-                  run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
-          '''
-          if preaudit not in arch:
-              raise SystemExit("missing Capture139 preaudit workflow step")
-          if browser_char not in arch:
-              raise SystemExit("missing Capture139 browser characterization workflow step")
-          if final_anchor not in arch:
-              raise SystemExit("missing Phase 5 exit audit workflow anchor")
-          arch=arch.replace(preaudit,"",1).replace(browser_char,"",1)
-          if "gens_phase5_capture139_openchar_retirement_v1.test.cjs" not in arch:
-              arch=arch.replace(final_anchor,final_step,1)
-          arch_path.write_text(arch,encoding="utf-8",newline="")
 
           active=set()
           for wf in (root/".github/workflows").glob("*.yml"):
@@ -68,6 +40,9 @@ jobs:
           for wf in (root/".github/workflows").glob("*.yaml"):
               txt=wf.read_text(encoding="utf-8")
               active.update(re.findall(r'tests/[A-Za-z0-9_./-]+\.test\.cjs',txt))
+          active.discard("tests/gens_phase5_capture139_openchar_retirement_preaudit_v1.test.cjs")
+          active.discard("tests/gens_phase5_capture139_openchar_retirement_browser_characterization_v1.test.cjs")
+          active.add("tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs")
 
           baseline_changed=[]
           for rel in sorted(active):
@@ -263,29 +238,28 @@ jobs:
           - propriétaire natif : `function openChar(id)` ;
           - wrappers globaux inline : **0**.
 
-          Le présent lot réaligne ensuite uniquement les sentinelles actives et la cartographie Phase 2 sur cette nouvelle empreinte.
-          Les pré-audits historiques Capture139 restent conservés hors workflow comme preuve du chantier.
+          Sentinelles actives et cartographie Phase 2 réalignées sur cette nouvelle empreinte.
+          Les pré-audits historiques Capture139 restent conservés comme preuve du chantier.
 
           '''
           current.write_text(prefix+old,encoding="utf-8",newline="")
-
-          temp=root/".github/workflows/gensrpg-temp-capture139-openchar-apply.yml"
-          if not temp.exists():
-              raise SystemExit("temporary workflow missing")
-          temp.unlink()
 
           print("active baseline files realigned:",len(baseline_changed))
           for rel in baseline_changed:
               print(" -",rel)
           PY
 
-      - name: Commit guard realignment
+      - name: Commit non-workflow realignment
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add tests docs
           git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "No non-workflow changes to commit"
+            exit 0
+          fi
           git commit -m "test: realign guards after Capture139 openChar retirement"
           git push origin "HEAD:${GITHUB_REF_NAME}"

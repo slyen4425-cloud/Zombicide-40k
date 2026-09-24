@@ -342,7 +342,7 @@ const server=http.createServer((req,res)=>{
       gensVersion:window.GENSRPG_VERSION||'',
       runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
       tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
-      familyGuard:window.GensSurvivalModeIsolation1678104?.VERSION||'',
+      shellFamily:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       pagesInjectedModules:31
     }));
     console.log('[phase2-full-capture] composition',JSON.stringify(composition));

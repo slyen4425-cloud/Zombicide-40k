@@ -21,7 +21,7 @@ assert.match(indexSource,/if\(mods\.capture && mods\.controllableCreatures\)retu
 assert.match(indexSource,/if\(p\?\.gameStyle==="dungeon" && fam==="creature"\)return "capture"/,'V16.151 must keep Capture distinct from classic Dungeon');
 assert.match(indexSource,/if\(gensMode151\(\)!=="capture"\)[\s\S]*captureGameHub/,'V16.151 must guard the Capture hub');
 assert.match(indexSource,/window\.openGensBuiltInGame=function\(profileId,family\)[\s\S]*gensSwitchUniverse155/,'V16.155 must remain the real universe-switch owner');
-assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production composition must keep the family/session guard');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production composition must not load the retired Survival/Dungeon guard');
 
 const shellOwner=indexSource.indexOf('async function startConfiguredGame(){');
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
@@ -154,8 +154,6 @@ const server=http.createServer((req,res)=>{
       mark('install-'+owner.id);
       await page.addScriptTag({content:owner.source});
     }
-    mark('install-family-guard');
-    await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
     await page.evaluate(()=>{try{window.gensReconcile151?.('sentinel-install')}catch(e){}});
   };
 
@@ -166,7 +164,6 @@ const server=http.createServer((req,res)=>{
       typeof window.startConfiguredGame==='function' &&
       typeof window.gensMode151==='function' &&
       typeof window.ensureBuiltinMonsterCapture162==='function' &&
-      window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0' &&
       !!p;
   },CAPTURE_ID);
 
@@ -248,7 +245,7 @@ const server=http.createServer((req,res)=>{
 
     let state=await page.evaluate(()=>({
       active:activeGameProfileId(),
-      familyGuard:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       contentFamily:gensCurrentContentFamily(),
       mode151:gensMode151(),
       dungeonMode:!!isDungeonMode(),
@@ -256,7 +253,7 @@ const server=http.createServer((req,res)=>{
       session:localStorage.getItem('z40k_session_active_v1')
     }));
     assert.equal(state.active,CAPTURE_ID);
-    assert.equal(state.familyGuard,'adventure','current Shell family guard classifies Capture under Adventure');
+    assert.equal(state.family,'adventure','current Shell family guard classifies Capture under Adventure');
     assert.equal(state.contentFamily,'creature');
     assert.equal(state.mode151,'capture','V16.151 must separate Capture from classic Dungeon');
     assert.equal(state.dungeonMode,true,'current Capture still uses the historical dungeon-style RPG substrate');
@@ -322,7 +319,7 @@ const server=http.createServer((req,res)=>{
     }catch(error){
       const diag=await page.evaluate(()=>({
         active:activeGameProfileId(),
-        familyGuard:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
         contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
         mode151:typeof gensMode151==='function'?gensMode151():'missing',
         session:localStorage.getItem('z40k_session_active_v1'),
@@ -338,7 +335,7 @@ const server=http.createServer((req,res)=>{
 
     state=await page.evaluate(()=>({
       active:activeGameProfileId(),
-      familyGuard:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       contentFamily:gensCurrentContentFamily(),
       mode151:gensMode151(),
       session:localStorage.getItem('z40k_session_active_v1'),
@@ -351,7 +348,7 @@ const server=http.createServer((req,res)=>{
       location:document.getElementById('captureWorldLocationLabel')?.textContent||''
     }));
     assert.equal(state.active,CAPTURE_ID);
-    assert.equal(state.familyGuard,'adventure');
+    assert.equal(state.family,'adventure');
     assert.equal(state.contentFamily,'creature');
     assert.equal(state.mode151,'capture');
     assert.equal(state.session,'1');
@@ -392,7 +389,7 @@ const server=http.createServer((req,res)=>{
       scenario:'Phase 5 S3 Monster Capture public provider through real Shell',
       viewport:'412x915 @2.625 touch',
       profile:CAPTURE_ID,
-      familyGuard:state.familyGuard,
+      family:state.family,
       contentFamily:state.contentFamily,
       mode151:state.mode151,
       day:played.day

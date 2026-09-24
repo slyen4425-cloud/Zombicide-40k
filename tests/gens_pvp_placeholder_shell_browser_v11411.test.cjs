@@ -11,7 +11,7 @@ const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core',
 assert.match(indexSource,/class="gensRootModeCard pvp" onclick="openGensFamily\('pvp'\)"/,'real Shell must expose the PvP root card');
 assert.match(indexSource,/if\(family==="survival"\)[\s\S]*else if\(family==="adventure"\)[\s\S]*PVP — À VENIR/,'real Shell must keep PvP as the current placeholder branch');
 assert.match(indexSource,/Le moteur PvP n’est pas encore construit\./,'real Shell must keep the current PvP not-built message');
-assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'production composition must keep the family/session guard');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production composition must not load the retired Survival/Dungeon guard');
 
 const shellOwnerMarker='async function startConfiguredGame(){';
 const shellOwner=indexSource.indexOf(shellOwnerMarker);
@@ -27,7 +27,7 @@ assert.ok(customHeroesOwner>shellScriptEnd&&customHeroesScriptStart>shellScriptE
 const realPvpShellHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
-  '\n<script src="/assets/gensrpg/gens-survival-mode-isolation-1678104.js"></script>\n</body></html>';
+  '\n</body></html>';
 
 const mime={
   '.html':'text/html; charset=utf-8',
@@ -91,7 +91,7 @@ const server=http.createServer((req,res)=>{
     await page.goto(`http://127.0.0.1:${port}/__gens_pvp_placeholder_real.html`,{waitUntil:'domcontentloaded',timeout:45000});
 
     mark('wait-shell-owner');
-    await page.waitForFunction(()=>typeof window.openGensFamily==='function'&&window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
+    await page.waitForFunction(()=>typeof window.openGensFamily==='function');
 
     const before=await page.evaluate(()=>({
       session:localStorage.getItem('z40k_session_active_v1'),
@@ -121,7 +121,7 @@ const server=http.createServer((req,res)=>{
       session:localStorage.getItem('z40k_session_active_v1'),
       profile:localStorage.getItem('gensrpg_game_profile_active_v1'),
       familyGuard:localStorage.getItem('gensrpg_session_family_guard_v1'),
-      guardStored:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      shellFamily:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:!!window.isDungeonMode?.(),
       dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
       dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2'),
@@ -141,7 +141,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(state.session,before.session,'PvP placeholder must not create an active session');
     assert.equal(state.profile,before.profile,'PvP placeholder must not activate a game profile');
     assert.equal(state.familyGuard,before.familyGuard,'PvP placeholder must not overwrite the Survival/Adventure family guard');
-    assert.equal(state.guardStored,'','family guard must remain unset for the not-built PvP module');
+    assert.equal(state.shellFamily,'pvp','Shell family authority must identify the not-built PvP module without creating a gameplay session');
     assert.equal(state.dungeonTheme,false,'PvP placeholder must not activate Dungeon theme');
     assert.equal(state.dungeonRuntime,before.dungeonRuntime,'PvP placeholder must not create Dungeon runtime');
     assert.equal(state.dungeonState,before.dungeonState,'PvP placeholder must not create Dungeon exploration state');

@@ -12,10 +12,9 @@ const files=[
   "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
   "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
-  "assets/gensrpg/gens-survival-mode-isolation-1678104.js"
 ];
 function finalize(){
-  const apply=()=>{try{R.GensSurvivalModeIsolation1678104?.install?.();R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG RuntimeBootstrap V1 install",e)}};
+  const apply=()=>{try{R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG RuntimeBootstrap V1 install",e)}};
   apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
 }
 function load(i){

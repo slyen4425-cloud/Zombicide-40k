@@ -35,7 +35,7 @@ const realSurvivalShellHtml=
   '\n'+realCustomHeroShellSupport+
   '\n</body></html>';
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
-assert.match(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'runtime bootstrap must keep the real Survival isolation guard in production composition');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 runtime bootstrap must not load the retired Survival/Dungeon isolation guard');
 const mime={
   '.html':'text/html; charset=utf-8',
   '.js':'text/javascript; charset=utf-8',
@@ -113,12 +113,9 @@ const server=http.createServer((req,res)=>{
       typeof window.isDungeonMode==='function'
     ));
 
-    mark('ensure-survival-guard');
-    const guardReady=await page.evaluate(()=>window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
-    if(!guardReady){
-      await page.addScriptTag({url:`http://127.0.0.1:${port}/assets/gensrpg/gens-survival-mode-isolation-1678104.js`});
-    }
-    await page.waitForFunction(()=>window.GensSurvivalModeIsolation1678104?.VERSION==='1.0.0');
+    mark('verify-phase6-no-legacy-survival-guard');
+    assert.equal(await page.evaluate(()=>typeof window.GensSurvivalModeIsolation1678104),'undefined',
+      'Phase 6 Survival flow must run without the retired Survival/Dungeon isolation guard');
 
     mark('open-survival-family');
     const rootSurvival=page.locator('button.gensRootModeCard.survival');
@@ -128,7 +125,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
     let shell=await page.evaluate(()=>({
       title:document.getElementById('gensFamilyTitle')?.textContent||'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonTheme:document.body.classList.contains('gensDungeonTheme')
     }));
     assert.match(shell.title,/Mode Survie/,'root -> family must open the real Survival family');
@@ -155,7 +152,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
     shell=await page.evaluate(()=>({
       activeId:window.activeGameProfileId?.()||'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:!!window.isDungeonMode?.(),
       dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
       style:window.getActiveGameProfile?.()?.gameStyle||''
@@ -212,7 +209,7 @@ const server=http.createServer((req,res)=>{
         normalized:typeof normalizeGameParticipants==='function'?normalizeGameParticipants():[],
         activeProfileId:typeof activeGameProfileId==='function'?activeGameProfileId():'',
         activeProfile:typeof getActiveGameProfile==='function'?(()=>{const p=getActiveGameProfile();return p?{id:p.id,name:p.name,style:p.gameStyle,heroPool:p.heroPool}:null})():null,
-        family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
         dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
         pregame:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
         menu:document.getElementById('menu')?getComputedStyle(document.getElementById('menu')).display:'absent'
@@ -225,7 +222,7 @@ const server=http.createServer((req,res)=>{
     const launched=await page.evaluate(()=>({
       active:localStorage.getItem('z40k_session_active_v1'),
       activeId:window.activeGameProfileId?.()||'',
-      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||'',
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
       dungeonMode:!!window.isDungeonMode?.(),
       dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
       menu:getComputedStyle(document.getElementById('menu')).display,

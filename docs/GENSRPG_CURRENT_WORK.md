@@ -1,3 +1,92 @@
+## CHANTIER COURANT — Phase 5 / module-launch — Autorité Shell finale — 2026-09-24
+
+Le pré-audit Autorité Shell finale est clôturé GREEN.
+
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-final-shell-authority-preaudit-green-2026-09-24`.
+- SHA exact de base :
+  `6f0d062aa40cc4dce61e7db0d09dc491cca14d42`.
+- Pré-audit CI :
+  - Architecture + navigateur complet `35982305366` — SUCCESS ;
+  - Firefox `35982305316` — SUCCESS ;
+  - Tactical Dock `35982305246` — SUCCESS.
+- Checkpoint de départ runtime :
+  `checkpoint/gensrpg-start-phase5-module-launch-final-shell-authority-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24`.
+- Runtime de base inchangé :
+  taille `8172529`, blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+- Fichier règle 26 vérifié :
+  `work16.zip -> indexwork16.txt`, correspondance exacte.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission unique
+
+Faire de `window.startConfiguredGame` une autorité Shell finale routing-only,
+sans retirer aucun propriétaire historique dans le même lot.
+
+Seam imposé :
+`assets/gensrpg/shell/module-launch-final-authority-v1.js`,
+chargé comme dernier script production avant `</body>`.
+
+Le callsite HTML reste :
+`startConfiguredGame()`.
+
+### Contrat de la bascule
+
+Le propriétaire final :
+- lit uniquement `GensShellModuleLaunchV1.activeModule()` ;
+- délègue uniquement à `GensShellModuleLaunchV1.startModuleSession(...)` ;
+- retourne le booléen du contrat public ;
+- ne capture pas l'ancien `window.startConfiguredGame` ;
+- n'utilise aucun fallback legacy ;
+- ne lit aucun stockage privé module ;
+- ne possède aucun gameplay, DOM, timer, retry, polling ou observer.
+
+Providers à conserver :
+- Survival ;
+- Capture ;
+- Dungeon.
+
+PvP :
+- aucun provider ;
+- placeholder `PVP — À VENIR` conservé ;
+- refus public autorisé (`false`).
+
+Chaîne historique à conserver intégralement pendant ce lot :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+### TDD obligatoire
+
+Avant tout runtime, créer un RED dédié qui exige :
+1. le fichier Shell final ;
+2. son chargement après `gens-mobile-combat-performance-16781022.js` et juste avant `</body>` ;
+3. la propriété finale de `window.startConfiguredGame` ;
+4. une délégation exclusive au registre public ;
+5. zéro fallback legacy ;
+6. zéro retrait historique ;
+7. callsite production HTML inchangé ;
+8. parité E2E Survival/Capture/Dungeon/PvP + non-interférence.
+
+Aucun patch runtime avant preuve RED.
+
+### Hors périmètre
+
+Ne pas corriger ici :
+- rafraîchissements ;
+- inventaire Survie à 0 ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- terminologie Survie.
+
+Après GREEN technique + preview téléphone, validation utilisateur obligatoire
+avant tout pré-audit de retrait historique.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / pré-audit Autorité Shell finale — 2026-09-24
 
 Le pré-audit de l'autorité Shell finale est techniquement GREEN sur :

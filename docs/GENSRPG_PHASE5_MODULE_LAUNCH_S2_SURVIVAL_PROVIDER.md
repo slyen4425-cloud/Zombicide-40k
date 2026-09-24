@@ -209,3 +209,29 @@ Décision :
 - aucune temporisation/retry/wrapper de compatibilité n'est autorisé.
 
 La sentinelle S2 est renforcée pour rendre cette mauvaise position RED.
+
+
+## Candidat S2 corrigé — ordre d'enregistrement
+
+Le RED structurel a été acquis au SHA :
+`30f3c682a1ab9d6377f1696940dbda226b09b1f7`.
+
+Correction runtime appliquée :
+- commit runtime bot : `ed37caac80206d2cf90cdf11be7ad191025e498c` ;
+- nettoyage des mécanismes temporaires : `16eee755746ab614271de53e7b379d55d9f11337` ;
+- taille : `8171879` ;
+- blob : `7601760f7a635094d4f687b725a639b5728e93b4`.
+
+Changement par rapport au premier candidat :
+- aucune nouvelle logique ;
+- la ligne d'enregistrement Survival est déplacée après
+  `window.GensShellModuleLaunchV1=Object.freeze(...)` ;
+- elle reste avant `goMenu()`.
+
+La définition du provider reste près du propriétaire natif et ne contient toujours
+aucun DOM/stockage/timer/observer/retry.
+
+Les empreintes historiques qui suivent le runtime courant ont été réalignées sur
+`7601760f...`.
+
+Les mécanismes temporaires sont absents avant CI finale.

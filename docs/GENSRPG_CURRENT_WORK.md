@@ -1,3 +1,60 @@
+## CANDIDAT CORRIGÉ — Phase 5 / module-launch S2 Survival — 2026-09-24
+
+Point de reprise actif.
+
+- Base GREEN S1 :
+  `checkpoint/gensrpg-phase5-module-launch-s1-shell-registry-green-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s2-survival-provider-2026-09-24`.
+- RED initial provider :
+  `a07bbbe65bbb9e3f1bd84e70a9c82d9ac4147007`.
+- Premier candidat runtime :
+  `3df4297e55b0d18518623ff248401b78f5dac8b5`.
+- RED structurel ordre d'installation :
+  `30f3c682a1ab9d6377f1696940dbda226b09b1f7`.
+- Runtime corrigé :
+  `ed37caac80206d2cf90cdf11be7ad191025e498c`.
+- HEAD propre après suppression des mécanismes temporaires :
+  `16eee755746ab614271de53e7b379d55d9f11337`.
+- `index.html` :
+  taille `8171879`,
+  blob `7601760f7a635094d4f687b725a639b5728e93b4`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Cause de la régression intermédiaire
+
+L'enregistrement Survival était exécuté avant la création du registre S1.
+
+Correction :
+- provider défini près du propriétaire natif ;
+- enregistrement seulement après l'exposition de `GensShellModuleLaunchV1` ;
+- avant `goMenu()`.
+
+### Invariants toujours conservés
+
+- bouton production : `startConfiguredGame()` ;
+- propriétaire natif inchangé ;
+- cinq wrappers historiques inchangés ;
+- aucun provider Capture/Dungeon/PvP ;
+- aucun retrait d'autorité ;
+- aucun retry/timer/observer ajouté.
+
+### Prochaine validation
+
+Le prochain SHA documentaire doit passer :
+1. Architecture + navigateur complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Le navigateur complet doit valider à la fois :
+- le lancement Survival historique ;
+- le provider public Survival S2.
+
+Aucun checkpoint GREEN avant cette validation.
+
+---
+
 ## S2 — RED STRUCTUREL ORDRE D'INSTALLATION — 2026-09-24
 
 La première CI navigateur du candidat S2 a détecté une régression réelle.

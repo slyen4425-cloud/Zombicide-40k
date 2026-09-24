@@ -27,7 +27,10 @@ const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'));
 
 const productionDirect=[
-  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...rawDirect.filter(x=>![
+    'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+  ].includes(x)),
   ...injected
 ];
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'`\s)]+\.js(?:\?[^"'`\s)]*)?/g)]

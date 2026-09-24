@@ -27190,14 +27190,6 @@ window.captureEnterWorld139=function(){
 
 /* Neutralise l'ouverture automatique d'une fiche durant la fenêtre critique de lancement. */
 window._captureStarting139=false;
-const openChar139=window.openChar;
-window.openChar=function(id){
-  if(window._captureStarting139 && isCaptureContext138()){
-    console.warn("Ouverture fiche ignorée pendant lancement Capture :",id);
-    return;
-  }
-  return openChar139.apply(this,arguments);
-};
 
 /* Remplace le lancement Capture par un chemin dédié, sans passer par les initialisations Dungeon. */
 const start139=window.startConfiguredGame;

@@ -144,6 +144,31 @@ async function settleDungeonLaunch(page){
   await page.waitForTimeout(1200);
 }
 
+async function returnActiveGameToRootWithoutClosing(page){
+  await page.evaluate(()=>{
+    if(typeof window.backHomeFromGame!=='function')throw new Error('backHomeFromGame owner absent');
+    window.backHomeFromGame();
+  });
+  await page.waitForFunction(()=>{
+    const menu=document.getElementById('menu');
+    const game=document.getElementById('gensGameHome');
+    const root=document.getElementById('gensRootHome');
+    return (menu&&getComputedStyle(menu).display!=='none')||
+      (game&&getComputedStyle(game).display!=='none')||
+      (root&&getComputedStyle(root).display!=='none');
+  },null,{timeout:10000});
+  await page.evaluate(()=>{
+    const root=document.getElementById('gensRootHome');
+    if(root&&getComputedStyle(root).display!=='none')return;
+    if(typeof window.showGensRootHome!=='function')throw new Error('showGensRootHome owner absent');
+    window.showGensRootHome();
+  });
+  await page.waitForFunction(()=>{
+    const root=document.getElementById('gensRootHome');
+    return !!root&&getComputedStyle(root).display!=='none';
+  },null,{timeout:10000});
+}
+
 async function dungeonSnapshot(page,label){
   return page.evaluate(label=>{
     const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return {parseError:String(e)}}};
@@ -155,9 +180,10 @@ async function dungeonSnapshot(page,label){
       return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)!==0&&r.width>0&&r.height>0;
     };
     const gridLike=[...document.querySelectorAll(
-      '[id*="grid" i],[class*="grid" i],[id*="map" i],[class*="map" i],[id*="board" i],[class*="board" i]'
-    )].filter(visible).slice(0,30).map(el=>({
+      '#dc047RoomBoard .dc047Grid'
+    )].filter(visible).map(el=>({
       tag:el.tagName,id:el.id||'',class:String(el.className||'').slice(0,180),
+      cells:el.querySelectorAll(':scope > .dc047Cell').length,
       text:(el.innerText||'').trim().replace(/\s+/g,' ').slice(0,180)
     }));
     const returnControls=[...document.querySelectorAll('button,a')]
@@ -333,6 +359,103 @@ async function runScenario(port,survivalFirst){
   }
 }
 
+async function runDirectDungeonRoomGridScenario(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+    await selectProfile(page,'adventure','#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',DUNGEON_ID);
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+    const entrance=await dungeonSnapshot(page,'direct-dungeon-grid-control-entrance');
+    const explore=page.locator('#dc01Explore');
+    await explore.waitFor({state:'visible'});
+    await explore.click();
+    await page.waitForTimeout(1800);
+    const continueBtn=page.locator('#dc200ModalOk');
+    if(await continueBtn.count()){
+      await continueBtn.waitFor({state:'visible',timeout:5000});
+      await continueBtn.click();
+      await page.waitForTimeout(1800);
+    }
+    if(!(await page.evaluate(()=>{
+      try{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return Number(x?.room)>=1&&!!x?.last}catch(e){return false}
+    }))){
+      await page.evaluate(()=>window.DungeonCore01?.explore?.());
+      await page.waitForTimeout(1200);
+    }
+    const room=await dungeonSnapshot(page,'direct-dungeon-grid-control-room');
+    return {entrance,room,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
+async function runSameOpenSurvivalToDungeonScenario(port){
+  const errors=[];
+  const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
+  const browser=await browserType.launch(launchArgs);
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  let page;
+  try{
+    page=await preparePage(context,port,errors);
+    await clearStorageAndReload(page);
+
+    await selectProfile(page,'survival','#gensFamilyGames button.gensFamilyGameCard[onclick*="'+SURVIVAL_ID+'"]',SURVIVAL_ID);
+    await chooseFirstParticipantAndStart(page);
+    await waitSurvivalStarted(page);
+
+    const beforeReturn=await page.evaluate(()=>({
+      href:location.href,
+      active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+      family:window.GensSurvivalModeIsolation1678104?.storedFamily?.()||''
+    }));
+
+    await returnActiveGameToRootWithoutClosing(page);
+
+    await selectProfile(page,'adventure','#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn',DUNGEON_ID);
+    await chooseFirstParticipantAndStart(page);
+    await settleDungeonLaunch(page);
+
+    const entrance=await dungeonSnapshot(page,'same-open-dungeon-entrance');
+    const explore=page.locator('#dc01Explore');
+    await explore.waitFor({state:'visible'});
+    await explore.click();
+    await page.waitForTimeout(1800);
+
+    const continueBtn=page.locator('#dc200ModalOk');
+    if(await continueBtn.count()){
+      await continueBtn.waitFor({state:'visible',timeout:5000});
+      await continueBtn.click();
+      await page.waitForTimeout(1800);
+    }
+    if(!(await page.evaluate(()=>{
+      try{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return Number(x?.room)>=1&&!!x?.last}catch(e){return false}
+    }))){
+      await page.evaluate(()=>window.DungeonCore01?.explore?.());
+      await page.waitForTimeout(1200);
+    }
+    const room=await dungeonSnapshot(page,'same-open-dungeon-room');
+    return {beforeReturn,entrance,room,errors};
+  }finally{
+    await context.close();
+    await browser.close();
+  }
+}
+
 async function runPersistedDungeonThenSurvivalScenario(port){
   const errors=[];
   const launchArgs=browserName==='chromium'?{headless:true,args:['--disable-dev-shm-usage']}:{headless:true};
@@ -445,6 +568,8 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     const control=await runScenario(port,false);
     const afterSurvival=await runScenario(port,true);
     const persistedThenSurvival=await runPersistedDungeonThenSurvivalScenario(port);
+    const directRoomGrid=await runDirectDungeonRoomGridScenario(port);
+    const sameOpen=await runSameOpenSurvivalToDungeonScenario(port);
 
     console.log(JSON.stringify({
       scenario:'Dungeon new game after Survival characterization',
@@ -452,6 +577,8 @@ async function runPersistedDungeonThenSurvivalScenario(port){
       control:control.snap,
       afterSurvival:afterSurvival.snap,
       persistedThenSurvival,
+      directRoomGrid,
+      sameOpen,
       controlErrors:control.errors,
       afterSurvivalErrors:afterSurvival.errors
     },null,2));
@@ -483,9 +610,36 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.deepEqual(restarted.returnControls,control.snap.returnControls,'NEW GAME must not keep stale room-return controls');
     assert.equal(restarted.gridLike.length>0,control.snap.gridLike.length>0,'NEW GAME must restore the same initial grid surface as a clean launch');
 
+    assert.equal(sameOpen.beforeReturn.active,SURVIVAL_ID,'same-open characterization must really start from Survival');
+    assert.equal(sameOpen.beforeReturn.family,'survival','same-open characterization must retain Survival family before returning home');
+    assert.equal(sameOpen.entrance.activeProfile,DUNGEON_ID,'same-open transition must activate the Dungeon profile');
+    assert.equal(sameOpen.entrance.family,'adventure','same-open transition must activate Adventure family');
+    assert.ok(Number(directRoomGrid.room.runtime.room)>=1,'direct Dungeon control must reach a generated Dungeon room');
+    assert.equal(
+      directRoomGrid.room.bodyClass.split(/\\s+/).includes('dc054AtEntrance'),
+      false,
+      'generated Dungeon room must clear the obsolete entrance-only body state'
+    );
+    assert.ok(directRoomGrid.room.runtime.lastKind,'direct Dungeon control must retain the generated room');
+    assert.equal(directRoomGrid.room.gridLike.length>0,true,'direct Dungeon control must expose the real visible Dungeon grid surface');
+    assert.ok(Number(sameOpen.room.runtime.room)>=1,'same-open Survival -> Dungeon must reach a generated Dungeon room');
+    assert.equal(
+      sameOpen.room.bodyClass.split(/\\s+/).includes('dc054AtEntrance'),
+      false,
+      'same-open Survival -> Dungeon must clear the obsolete entrance-only body state'
+    );
+    assert.ok(sameOpen.room.runtime.lastKind,'same-open Survival -> Dungeon must retain the generated room');
+    assert.equal(
+      sameOpen.room.gridLike.length>0,
+      directRoomGrid.room.gridLike.length>0,
+      'Survival -> Dungeon without manually closing/reopening the link must expose the same real grid surface as direct Dungeon'
+    );
+
     assert.deepEqual(control.errors,[],'fresh direct Dungeon must not raise browser errors');
     assert.deepEqual(afterSurvival.errors,[],'Dungeon after Survival must not raise browser errors');
     assert.deepEqual(persistedThenSurvival.errors,[],'persisted Dungeon -> Survival -> new Dungeon must not raise browser errors');
+    assert.deepEqual(directRoomGrid.errors,[],'direct Dungeon room-grid control must not raise browser errors');
+    assert.deepEqual(sameOpen.errors,[],'same-open Survival -> Dungeon must not raise browser errors');
   }finally{
     server.closeAllConnections?.();server.closeIdleConnections?.();server.close();
   }

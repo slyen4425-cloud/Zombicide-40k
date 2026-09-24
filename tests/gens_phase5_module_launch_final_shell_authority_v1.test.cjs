@@ -20,9 +20,9 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8172610,
+assert.equal(bytes.length,8172742,
   'final Shell authority switch must only add the final production script tag to the exact S4 index');
-assert.equal(gitBlob,'eddba424d3ebb086a1bdd0bcc1b1822d16a83771',
+assert.equal(gitBlob,'95f8c96e7e221eb743f7c8013ffa8af499eca1c8',
   'final Shell authority switch must keep the exact reviewed index composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),

@@ -51,7 +51,7 @@ window.saveGameProfiles=()=>{};window.loadGameProfiles=()=>[];window.dispatchEve
 <script src="/assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"></script>
 <script src="/assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js"></script>
 <script>
-window.startProfiledEncounter=function(){const out=window.GensRpgTacticalCombatV2Bridge.openCurrent(window,{enemyIds:["e"],reason:"browser-v11410"});if(!out.ok)throw new Error(out.reason);return out.battle};
+window.startProfiledEncounter=function(){const out=window.GensRpgTacticalCombatV2Bridge.openCurrent(window,{enemyIds:["e"],reason:"browser-v11410"});if(!out.ok)throw new Error(out.reason+(out.error?.message?": "+out.error.message:""));return out.battle};
 window.closeProfiledEncounter=()=>window.GensRpgTacticalCombatV2Ui.close(false);
 window.enterLyra=function(){window.__runtime.heroRooms.dungeon_lyra=1;window.__runtime.positions.dungeon_lyra=7;window.__runtime.index=1;localStorage.setItem("gensrpg_dungeon_runtime_v2",JSON.stringify(window.__runtime));return true};
 window.addEventListener("DOMContentLoaded",()=>{window.GensRpgTacticalStats1678110.install(window);window.GensRpgTacticalCombatV2Bridge.install(window);window.GensRpgTacticalVisualDice16781142.install(window);window.__browserProfileReady=true});

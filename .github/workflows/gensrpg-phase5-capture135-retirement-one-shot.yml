@@ -1,0 +1,22 @@
+name: GenSrpG one-shot Capture135 retirement
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24
+
+permissions:
+  contents: write
+
+jobs:
+  plan-capture135-retirement:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Plan exact Capture135 patch
+        run: python tools/gensrpg_phase5_apply_capture135_global_retirement.py

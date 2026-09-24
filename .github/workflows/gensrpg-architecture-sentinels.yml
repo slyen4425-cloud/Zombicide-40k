@@ -527,6 +527,9 @@ jobs:
       - name: Exiger le retrait du garde legacy Survie/Dungeon Phase 6
         run: node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
 
+      - name: Raccorder les premières règles de vagues au module Survie Phase 6
+        run: node tests/gens_phase6_survival_wave_rules_entry_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

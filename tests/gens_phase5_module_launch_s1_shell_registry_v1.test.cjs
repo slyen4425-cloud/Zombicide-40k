@@ -36,14 +36,17 @@ assert.equal((index.match(/function\s+gensShellActiveModuleV1\s*\(/g)||[]).lengt
   'S1 must not create a second active-module resolver');
 
 const serviceStart=index.lastIndexOf('const gensShellModuleLaunchProvidersV1',launchPos);
-const service=index.slice(serviceStart,goMenu);
+const registryEnd=index.indexOf('});',launchPos)+3;
+assert.ok(registryEnd>launchPos&&registryEnd<goMenu,
+  'S1 registry infrastructure must end before later provider registrations and goMenu');
+const service=index.slice(serviceStart,registryEnd);
 assert.doesNotMatch(service,/MutationObserver|setTimeout|setInterval|localStorage|sessionStorage|document\.|querySelector|addEventListener/,
   'S1 registry must be pure routing infrastructure with no DOM/storage/observer/timer authority');
 
 assert.equal((index.match(/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze/g)||[]).length,1,
   'S1 must keep exactly one public Shell module-launch registry exposure');
 assert.doesNotMatch(service,/GensShellModuleLaunchV1\.register/,
-  'later module providers must remain outside the S1 registry infrastructure block');
+  'module provider registrations must remain outside the S1 registry infrastructure block');
 
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
 assert.equal(wrappers,5,'S1 must preserve all five historical startConfiguredGame wrappers');

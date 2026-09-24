@@ -2,15 +2,14 @@
   "version": 1,
   "phase": 3,
   "module": "survival",
-  "status": "contract-only-not-loaded",
+  "status": "partial-runtime-loaded",
   "plannedEntry": "assets/gensrpg/survival/entry-v1.js",
   "owns": [
+    "Survival wave rule primitives",
     "Survival runtime",
     "Survival rules and UI"
   ],
-  "consumes": [
-    "core public contracts"
-  ],
+  "consumes": [],
   "forbidden": [
     "Dungeon private runtime",
     "Tactical private runtime",
@@ -22,9 +21,10 @@
     "dispose": "future temporary modules must release listeners, observers and timers"
   },
   "invariants": [
-    "not referenced by the current production load graph during Phase 3",
-    "no gameplay is moved into this contract",
-    "no compatibility wrapper is introduced by this contract"
+    "the active entry exposes only the public GensSurvivalV1 namespace",
+    "the first connected slice is pure Survival wave rules with no DOM storage timer listener or observer",
+    "no private Dungeon Tactical Capture or PvP runtime is consumed",
+    "legacy inline owners are retired when a responsibility is connected here"
   ],
   "publicEntries": {
     "moduleScreenReturn": {
@@ -39,5 +39,7 @@
       "status": "declared-not-loaded",
       "ownership": "module-owned-session-start"
     }
-  }
+  },
+  "activatedPhase": 6,
+  "publicRuntimeApi": "GensSurvivalV1"
 }

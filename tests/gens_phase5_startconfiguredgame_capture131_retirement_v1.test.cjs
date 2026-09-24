@@ -35,8 +35,6 @@ assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
-  'captureFix135 must remain retired as a global startConfiguredGame owner');
 for(const id of ['captureFix138','captureFix139','gensDungeonCore01Js']){
   assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
 }
@@ -44,6 +42,8 @@ assert.equal(chain.at(-1)?.id,'gensDungeonCore01Js',
   'Dungeon Core01 must remain the last historical global startConfiguredGame owner after captureFix135 retirement');
 
 const c135=blocks.find(x=>x.id==='captureFix135')?.body||'';
+assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
+  'captureFix135 must remain retired as a global startConfiguredGame owner');
 const c138=blocks.find(x=>x.id==='captureFix138')?.body||'';
 const c139=blocks.find(x=>x.id==='captureFix139')?.body||'';
 const dc01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';

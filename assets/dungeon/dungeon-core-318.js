@@ -45,6 +45,24 @@ function runtimeRoom(){
 function legacyRoom(){
   try{return normRoom(ROOT.loadDungeonState?.()?.room)}catch(e){return 0}
 }
+function syncEntranceVisibility(){
+  const x=readRuntime();
+  if(!x||!dungeonMode()||!ROOT.document?.body)return false;
+  ROOT.document.body.classList.toggle("dc054AtEntrance",normRoom(x.room)<=0);
+  return true;
+}
+function installEntranceVisibilityAuthority(){
+  const core=ROOT.DungeonCore01;if(!core)return false;
+  let installed=false;
+  for(const name of ["render","show"]){
+    const old=core[name];if(typeof old!=="function")continue;
+    if(old.__dc318EntranceAuthority){installed=true;continue}
+    const wrapped=function(){const out=old.apply(this,arguments);syncEntranceVisibility();return out};
+    wrapped.__dc318=true;wrapped.__dc318EntranceAuthority=true;wrapped.__dc318Original=old;
+    core[name]=wrapped;installed=true;
+  }
+  return installed;
+}
 function selectedEnemyRoom(){
   try{
     if(!ROOT.dungeonCombatActive)return 0;
@@ -236,6 +254,8 @@ function install(){
   wrapRoomProducer("dungeonMjSpawnEnemy",function(){return activeRoom()});
   wrapRoomProducer("applyEnemyConfiguredAbilityEffect",function(inst){return normRoom(inst?.dungeonRoom)||activeRoom()});
   installBranchGuard();
+  installEntranceVisibilityAuthority();
+  syncEntranceVisibility();
 
   ROOT.GENSRPG_VERSION=APP_VERSION;
   ROOT.DUNGEON_CORE_VERSION=VERSION;
@@ -257,7 +277,7 @@ function debug(){
   };
 }
 
-ROOT.DungeonCore318={VERSION,APP_VERSION,activeRoom,withRoom,stamp,install,debug,branchStateForSource};
+ROOT.DungeonCore318={VERSION,APP_VERSION,activeRoom,withRoom,stamp,install,debug,branchStateForSource,syncEntranceVisibility,installEntranceVisibilityAuthority};
 install();
 /* Garde-fou si une couche tardive remplace encore une fonction pendant le boot. */
 if(typeof setTimeout==="function")setTimeout(install,0);

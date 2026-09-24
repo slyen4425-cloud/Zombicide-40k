@@ -49,7 +49,7 @@ function exactScript(id){
   let source=indexSource.slice(openEnd+1,end);
   if(id==='captureFix139'){
     const decl=source.indexOf('const openChar139=window.openChar');
-    const assign=source.indexOf('window.openChar=function()',decl);
+    const assign=source.indexOf('window.openChar=function(id)',decl);
     const apply=source.indexOf('return openChar139.apply(this,arguments)',assign);
     const wrapperEnd=source.indexOf('};',apply);
     assert.ok(decl>=0&&assign>decl&&apply>assign&&wrapperEnd>apply,

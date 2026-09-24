@@ -39540,8 +39540,7 @@ Object.defineProperty(window.DungeonCore01,'active',{get:()=>active200});
 
 // Final game start interception: other modes go through their existing chain untouched.
 const startOutside200=window.startConfiguredGame;
-window.startConfiguredGame=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};
-const gensDungeonStartConfiguredGame200V1=window.startConfiguredGame;
+const gensDungeonStartConfiguredGame200V1=async function(){if(isDungeonMode?.()&&!(typeof isCaptureContext138==="function"&&isCaptureContext138()))return start();return startOutside200?.apply(this,arguments)};
 const gensDungeonStartModuleSessionV1=async()=>{
   if(gensShellActiveModuleV1()!=="dungeon")return false;
   await gensDungeonStartConfiguredGame200V1();

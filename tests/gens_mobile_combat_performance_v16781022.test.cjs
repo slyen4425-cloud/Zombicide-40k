@@ -19,11 +19,11 @@ for(const legacyOwned of [
   'gens-rpg-tactical-combat-v2.js','gens-rpg-tactical-combat-v2-adapter.js','gens-rpg-tactical-combat-v2-rules.js',
   'gens-rpg-tactical-combat-v2-integration.js','gens-rpg-tactical-combat-v2-ui.js','gens-rpg-tactical-combat-v2-bridge.js','gens-survival-mode-isolation-1678104.js'
 ]) assert.equal(source.includes(legacyOwned),false,`performance layer must no longer own ${legacyOwned}`);
-assert.match(bootstrap,/gens-survival-mode-isolation-1678104\.js/,'RuntimeBootstrap must own Survival isolation composition');
+assert.doesNotMatch(bootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 RuntimeBootstrap must not load the retired Survival/Dungeon isolation guard');
 assert.match(source,/translate3d/,"Dungeon dice motion must stay compositor-friendly");
 assert.match(sw,/gensrpg-cache-16\.78\.106-real-tactical-runtime/);
 assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
-assert.match(sw,/gens-survival-mode-isolation-1678104\.js/);
+assert.doesNotMatch(sw,/gens-survival-mode-isolation-1678104\.js/,'service worker must not precache the retired Survival/Dungeon isolation guard');
 assert.match(sw,/gens-rpg-runtime-repair-1678106\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance entry must load after the final Dungeon core");
 if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance entry must remain the final static runtime script during bootstrap extraction")}

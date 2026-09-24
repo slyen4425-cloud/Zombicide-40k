@@ -23,24 +23,25 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,4,'Phase 5 historical global chain must now contain four owners after Core200 global retirement');
+assert.equal(total,3,'Phase 5 historical global chain must now contain three owners after captureFix135 global retirement');
 assert.deepEqual(ids,[
-  'captureFix135',
   'captureFix138',
   'captureFix139',
   'gensDungeonCore01Js'
-],'Phase 5 target chain drifted after Core200 global retirement');
+],'Phase 5 target chain drifted after captureFix135 global retirement');
 
 const capture131=blocks.find(x=>x.id==='captureFix131');
 assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js']){
+assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
+  'captureFix135 must remain retired as a global startConfiguredGame owner');
+for(const id of ['captureFix138','captureFix139','gensDungeonCore01Js']){
   assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
 }
 assert.equal(chain.at(-1)?.id,'gensDungeonCore01Js',
-  'Dungeon Core01 must remain the last historical global startConfiguredGame owner after Core200 retirement');
+  'Dungeon Core01 must remain the last historical global startConfiguredGame owner after captureFix135 retirement');
 
 const c135=blocks.find(x=>x.id==='captureFix135')?.body||'';
 const c138=blocks.find(x=>x.id==='captureFix138')?.body||'';

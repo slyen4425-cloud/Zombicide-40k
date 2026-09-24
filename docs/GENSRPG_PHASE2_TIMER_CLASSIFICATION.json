@@ -4,9 +4,9 @@
   "sourceIndexBlob": "97f0e060d8bffcde2baaf5aa42c1e16b8544263f",
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
-    "externalReachableFiles": 80,
-    "externalTimerSources": 53,
-    "externalSetTimeoutSyntax": 148,
+    "externalReachableFiles": 79,
+    "externalTimerSources": 52,
+    "externalSetTimeoutSyntax": 145,
     "externalSetIntervalSyntax": 1,
     "activeInlineBlocks": 119,
     "inlineTimerSources": 65,
@@ -31,7 +31,6 @@
   "bootstrapRetryExternal": [
     "assets/gensrpg/core/runtime-bootstrap-v1.js",
     "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
-    "assets/gensrpg/gens-survival-mode-isolation-1678104.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js",
     "assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js",

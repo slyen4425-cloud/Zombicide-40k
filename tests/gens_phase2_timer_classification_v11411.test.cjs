@@ -89,7 +89,6 @@ const core317=read('assets/dungeon/dungeon-core-317.js');
 assert.match(core317,/attempts\s*>=\s*12/,'merchant retry must remain bounded');
 assert.match(core317,/setInterval\([\s\S]*?,\s*250\)/,'merchant retry cadence drifted');
 assert.match(read('assets/gensrpg/core/runtime-bootstrap-v1.js'),/setTimeout\(apply,250\);setTimeout\(apply,1200\);setTimeout\(apply,3000\)/);
-assert.match(read('assets/gensrpg/gens-survival-mode-isolation-1678104.js'),/setTimeout\(install,0\);R\.setTimeout\(install,300\);R\.setTimeout\(install,1300\)/);
 assert.match(read('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js'),/installWithRetries[\s\S]*\[80,220,600,1200,2500,5000\]/);
 assert.match(read('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js'),/installWithRetries[\s\S]*\[80,220,600,1200,2500,5000,7500,10000\]/);
 assert.match(read('assets/gensrpg/gens-hero-editor-dynamic-167897.js'),/tries\+\+<30[\s\S]*setTimeout\(retry,100\)/);

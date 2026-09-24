@@ -1,3 +1,26 @@
+## PRÉ-AUDIT EN COURS — Autorité Shell finale caractérisée — 2026-09-24
+
+Le fichier S4 exact fourni par l'utilisateur a été vérifié :
+- `8172529` octets ;
+- blob `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Seam retenu pour le futur lot runtime :
+- fichier Shell dédié `assets/gensrpg/shell/module-launch-final-authority-v1.js` ;
+- chargé en dernier avant `</body>` ;
+- remplace uniquement `window.startConfiguredGame` ;
+- délègue uniquement à l'API publique `GensShellModuleLaunchV1` ;
+- aucun fallback legacy ;
+- aucun retrait historique dans le même lot ;
+- callsite `startConfiguredGame()` inchangé.
+
+Sentinelle :
+`tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs`.
+
+Le pré-audit doit maintenant passer Architecture + navigateur complet, Firefox et Tactical
+avant checkpoint GREEN.
+
+---
+
 ## CHANTIER COURANT — Phase 5 / module-launch — pré-audit Autorité Shell finale — 2026-09-24
 
 Validation utilisateur S4 : **OK — « Je valide. »**.

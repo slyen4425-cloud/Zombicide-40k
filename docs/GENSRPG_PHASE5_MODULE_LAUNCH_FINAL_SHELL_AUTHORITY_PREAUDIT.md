@@ -110,3 +110,98 @@ Le micro-lot runtime suivant devra commencer par un RED dédié et ne pourra ret
 aucun propriétaire historique dans le même lot que la bascule Shell.
 
 Aucun merge sur `main`.
+
+
+## Fichier exact S4 vérifié
+
+Fichier utilisateur :
+`work16.zip -> indexwork16.txt`.
+
+Vérification :
+- taille : `8172529` octets ;
+- blob Git : `696014056409dda9b6ef25ace58dfd9d5f9e2718`.
+
+Correspondance avec le checkpoint S4 GREEN : **exacte**.
+
+## Cartographie de l'autorité finale
+
+Le runtime exact contient toujours :
+- un propriétaire natif `async function startConfiguredGame()` ;
+- cinq affectations historiques :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Providers publics déjà raccordés :
+- Survival : 1 ;
+- Capture : 1 ;
+- Dungeon : 1 ;
+- PvP : 0.
+
+Le vrai callsite utilisateur reste :
+`onclick="startConfiguredGame()"`.
+
+Les scripts chargés après `dungeonCore200Rebuild` ont été vérifiés :
+- `assets/dungeon/dungeon-core-316.js` ;
+- `assets/dungeon/dungeon-core-317.js` ;
+- `assets/gensrpg/gens-mobile-combat-performance-16781022.js`.
+
+Aucun ne lit ou ne réaffecte `startConfiguredGame`, et aucun n'utilise
+`GensShellModuleLaunchV1`.
+
+Le dernier script actuel est :
+`assets/gensrpg/gens-mobile-combat-performance-16781022.js`.
+
+## Seam sélectionné
+
+Le futur propriétaire final doit être un fichier Shell dédié :
+
+`assets/gensrpg/shell/module-launch-final-authority-v1.js`.
+
+Il sera chargé **après tous les scripts actuels**, comme dernier script avant
+`</body>`.
+
+Il remplacera `window.startConfiguredGame` par un dispatcher Shell routing-only qui :
+1. lit le module actif via l'API publique `GensShellModuleLaunchV1.activeModule()` ;
+2. délègue à `GensShellModuleLaunchV1.startModuleSession(...)` ;
+3. retourne le booléen public du contrat.
+
+### Décision importante : aucun fallback legacy
+
+Le futur propriétaire final :
+- ne capture pas l'ancien `window.startConfiguredGame` ;
+- ne délègue pas à l'ancienne chaîne en cas de refus ;
+- ne contient aucun fallback Capture/Dungeon/Survival ;
+- ne crée aucune double autorité.
+
+Justification :
+- Survival S2 possède déjà sa référence native validée ;
+- Capture S3 possède déjà sa référence Capture139 validée ;
+- Dungeon S4 possède déjà sa référence Core200 validée ;
+- PvP reste volontairement sans provider et le registre retourne `false`.
+
+Le callsite HTML pourra donc rester byte-identique :
+`startConfiguredGame()`.
+
+### Retraits historiques
+
+**Aucun retrait dans le même lot que la bascule Shell.**
+
+Après validation utilisateur de la future bascule :
+les cinq anciennes affectations seront caractérisées et retirées une par une,
+chacune avec RED/GREEN et E2E propres.
+
+## Sentinelle de pré-audit
+
+`tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs`.
+
+Elle verrouille :
+- l'empreinte S4 exacte ;
+- les trois providers publics ;
+- PvP sans provider ;
+- la chaîne historique à cinq propriétaires ;
+- le callsite production inchangé ;
+- l'absence d'un propriétaire tardif caché ;
+- le futur emplacement Shell final ;
+- l'interdiction d'un fallback legacy ;
+- la présence des preuves E2E obligatoires.
+
+Aucun runtime n'est modifié par ce pré-audit.

@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,79,'production graph must reflect retirement of the legacy Survival/Dungeon guard');
-assert.equal(mapped.size,79,'owner manifest must map all 79 production-reachable files after Phase 6 guard retirement');
+assert.equal(reachable.size,80,'production graph must include the first active Survival entry after legacy guard retirement');
+assert.equal(mapped.size,80,'owner manifest must map all 80 production-reachable files after the first Phase 6 Survival extraction');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

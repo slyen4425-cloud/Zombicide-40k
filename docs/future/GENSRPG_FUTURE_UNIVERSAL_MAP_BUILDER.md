@@ -42,6 +42,14 @@ Map
        -> Zones
        -> Entities / Interactions
        -> Connections
+  -> Tile Templates / Smart Templates
+       -> Connectors
+       -> Rotation rules
+       -> Neighbor constraints
+  -> Biome
+       -> Generation rules
+       -> Allowed families
+       -> Weights / constraints
   -> Asset Pack references
 ```
 
@@ -677,13 +685,19 @@ Permettre de construire RDC, étage, cave, etc. via lieux raccordés.
 ### Étape H — Catalogue et packs d'assets
 Importer et classer les textures dans un format sûr.
 
-### Étape I — UX Builder
-Palette, filtres, sélection, édition des propriétés, visualisation des connexions.
+### Étape I — Gabarits intelligents et connecteurs
+Créer les familles de tuiles préconfigurées, les connecteurs cardinaux, les rotations et les contraintes de voisinage.
 
-### Étape J — Runtime
+### Étape J — Biomes et génération cohérente
+Créer le contrat Biome + GenerationRules et un premier générateur procédural déterministe/cohérent fondé sur les gabarits.
+
+### Étape K — UX Builder
+Palette, filtres, sélection, édition des propriétés, visualisation des connexions, import guidé Simple / Avancé.
+
+### Étape L — Runtime
 Brancher progressivement les modules consommateurs sur les données validées.
 
-### Étape K — Migration / compatibilité
+### Étape M — Migration / compatibilité
 Tester les anciennes cartes et proposer une migration versionnée si nécessaire.
 
 ## 21. Tests futurs obligatoires
@@ -735,7 +749,7 @@ Le chantier sera considéré comme réussi lorsque :
 - pathfinding vertical automatique global ;
 - découpe dynamique sophistiquée du toit autour de chaque héros ;
 - scripts arbitraires dans les assets utilisateurs ;
-- génération procédurale automatique complète ;
+- génération procédurale avancée de type monde infini / simulation complexe dès la première version ;
 - éditeur de règles gameplay universel en même temps que l'éditeur visuel.
 
 La première ambition est un **éditeur 2D/2.5D très flexible, structuré et sûr**.
@@ -751,6 +765,8 @@ Les étages seront privilégiés sous forme de **lieux séparés raccordés par 
 Les toits seront des **couches d'occlusion locales au lieu ou à la zone**, capables de devenir transparentes ou invisibles selon une condition configurée, sans affecter les autres lieux.
 
 Les assets devront être classés proprement dès le départ et l'import de textures / packs personnalisés fait partie de la cible.
+
+La génération automatique devra s'appuyer sur des **gabarits intelligents, connecteurs, rotations, contraintes de voisinage et biomes**, afin de produire des cartes cohérentes plutôt qu'un mélange aléatoire de textures.
 
 ## 25. Condition d'ouverture du chantier
 
@@ -768,3 +784,502 @@ Avant ouverture :
 8. aucun développement direct sur `main`.
 
 Le présent document sert uniquement de **spécification de futur chantier** et de mémoire de la décision produit.
+
+
+## 26. Évolution du concept "Dungeon" vers une génération universelle
+
+Le terme "Dungeon" devient trop restrictif pour la cible long terme.
+
+Le moteur générique devra pouvoir servir à :
+
+- générer des cartes ;
+- générer des biomes ;
+- générer des zones ;
+- générer des lieux / mondes composés ;
+- assister la création manuelle dans le Builder.
+
+Exemples :
+
+- donjon ;
+- forêt ;
+- village ;
+- ville ;
+- zone enneigée ;
+- environnement contemporain ;
+- science-fiction ;
+- maps Capture ;
+- thèmes créés par les joueurs.
+
+**Dungeon reste un module distinct.**
+
+Il peut consommer des briques communes de grille, placement, raccordement et génération, mais ses règles de gameplay restent dans Dungeon.
+
+Même principe pour Capture, Survie et les futurs modules.
+
+## 27. Génération cohérente : principe général
+
+Le générateur ne doit jamais fonctionner comme une simple sélection aléatoire d'images.
+
+Une tuile doit être choisie parce que :
+
+- son type correspond à la famille recherchée ;
+- ses connecteurs sont compatibles avec ses voisines ;
+- sa rotation est valide ;
+- les contraintes du biome l'autorisent ;
+- les règles locales de génération sont respectées ;
+- son poids éventuel autorise sa sélection.
+
+Principe :
+
+**Le visuel est libre. La topologie et les règles de raccordement sont structurées.**
+
+## 28. Connecteurs logiques
+
+Les tuiles raccordables possèdent des connecteurs.
+
+Première convention privilégiée :
+
+- Nord ;
+- Est ;
+- Sud ;
+- Ouest.
+
+Exemple :
+
+```json
+{
+  "template": "road_straight",
+  "connectors": {
+    "N": "road",
+    "S": "road"
+  }
+}
+```
+
+Une route droite Nord-Sud ne peut être placée dans une continuité Est-Ouest sans rotation valide.
+
+Exemple d'angle :
+
+```json
+{
+  "template": "road_corner",
+  "connectors": {
+    "N": "road",
+    "E": "road"
+  }
+}
+```
+
+Le même principe doit pouvoir s'étendre plus tard à des connecteurs plus spécialisés :
+
+- road ;
+- river ;
+- wall ;
+- doorway ;
+- corridor ;
+- cliff ;
+- bridge ;
+- interior ;
+- exterior ;
+- biome-edge ;
+- autres familles futures.
+
+Les contrats réels devront rester simples et versionnés.
+
+## 29. Familles de tuiles intelligentes
+
+Familles initiales envisagées :
+
+### Routes
+- droite ;
+- virage ;
+- intersection T ;
+- croisement ;
+- fin de route ;
+- pont.
+
+### Murs
+- droit ;
+- angle intérieur ;
+- angle extérieur ;
+- extrémité ;
+- jonction ;
+- mur avec ouverture ;
+- mur avec porte.
+
+### Eau / rivières
+- segment droit ;
+- courbe ;
+- embranchement ;
+- rive ;
+- source / terminaison ;
+- pont.
+
+### Relief / danger
+- falaise ;
+- lave ;
+- crevasse ;
+- obstacle ;
+- bordure.
+
+### Bâtiments
+- sol intérieur ;
+- mur ;
+- porte ;
+- toit ;
+- entrée ;
+- raccord intérieur / extérieur.
+
+Le système doit rester extensible sans transformer chaque nouvelle famille en code spécial dispersé.
+
+## 30. Gabarits intelligents prédéfinis
+
+Le mode privilégié est que GenSrpG fournisse des **gabarits déjà configurés**.
+
+Exemple : gabarit "Mur angle".
+
+```
+Type : wall
+Forme : corner
+Taille : 1 x 1
+Connecteurs : Nord + Est
+Rotation : autorisée
+Contexte : intérieur / extérieur configurable
+Point d'ancrage : prédéfini
+Règles de placement : prédéfinies
+```
+
+L'utilisateur n'a principalement qu'à fournir le visuel.
+
+Le gabarit transporte la logique structurante.
+
+Cela évite de demander au joueur de comprendre :
+
+- graphe de connecteurs ;
+- coordonnées ;
+- ancres ;
+- règles de voisinage ;
+- rotations ;
+- contraintes de génération.
+
+## 31. Mode Simple d'import de textures
+
+Le mode Simple est la priorité UX.
+
+Parcours :
+
+1. choisir un gabarit ;
+2. importer ou remplacer une texture ;
+3. prévisualiser ;
+4. enregistrer.
+
+Exemple d'écran :
+
+```
+Dépose ta texture ici :
+
+[ Sol ]
+[ Mur droit ]
+[ Angle de mur ]
+[ Porte ]
+[ Route droite ]
+[ Virage ]
+[ Croisement ]
+[ Rivière ]
+[ Pont ]
+...
+```
+
+Chaque entrée peut afficher une petite prévisualisation du rôle attendu.
+
+GenSrpG gère automatiquement :
+
+- connecteurs ;
+- rotations ;
+- taille ;
+- ancrages ;
+- règles de voisinage ;
+- catégorie ;
+- règles de génération de base.
+
+Principe UX :
+
+**Le joueur crée surtout les visuels. GenSrpG sait comment les assembler.**
+
+## 32. Rotations automatiques
+
+Lorsqu'une tuile peut être tournée sans modifier sa signification artistique, une seule texture source doit pouvoir générer plusieurs orientations.
+
+Exemple :
+
+```
+road_corner_N_E
+-> N-E
+-> E-S
+-> S-O
+-> O-N
+```
+
+Même principe pour :
+
+- routes ;
+- murs ;
+- portes ;
+- ponts ;
+- chemins ;
+- objets orientables ;
+- autres familles compatibles.
+
+Chaque gabarit doit déclarer :
+
+- rotations autorisées ;
+- rotations interdites ;
+- éventuelle symétrie ;
+- éventuelles variantes artistiques imposées.
+
+Le système ne doit pas supposer qu'une texture est toujours rotatable.
+
+## 33. Packs / ZIP de textures
+
+Un pack doit pouvoir regrouper les visuels et les métadonnées nécessaires à leur utilisation immédiate.
+
+Contenu cible :
+
+- images ;
+- familles de tuiles ;
+- références de gabarits ;
+- connecteurs ;
+- rotations ;
+- catégories ;
+- biome(s) associé(s) ;
+- règles de voisinage ;
+- poids de génération optionnels ;
+- version du format.
+
+Les packs de textures déjà préparés pour GenSrpG pourront servir de premières bases officielles au moment de l'ouverture du chantier, après vérification de leur structure et adaptation au format retenu.
+
+Un pack utilisateur ne doit jamais contenir de code runtime arbitraire.
+
+## 34. Biomes
+
+Un biome décrit un ensemble cohérent de familles et de règles de génération.
+
+### Exemple : Forêt
+
+- sol herbe ;
+- chemins de terre ;
+- arbres ;
+- rivière ;
+- ponts ;
+- rochers ;
+- clairières.
+
+### Exemple : Village médiéval
+
+- routes pavées ;
+- maisons ;
+- murs ;
+- portes ;
+- places ;
+- ruelles ;
+- végétation compatible.
+
+### Exemple : Donjon
+
+- sols intérieurs ;
+- murs ;
+- portes ;
+- couloirs ;
+- eau / lave ;
+- salles ;
+- transitions.
+
+Le biome peut définir :
+
+- familles autorisées ;
+- familles interdites ;
+- poids relatifs ;
+- densités ;
+- contraintes de proximité ;
+- contraintes de bord ;
+- règles de transition ;
+- taille minimale / maximale de certaines structures ;
+- variantes de décoration.
+
+Le but est que le résultat paraisse **construit volontairement**, pas assemblé au hasard.
+
+## 35. Mode Avancé
+
+Le mode Avancé est destiné aux créateurs expérimentés.
+
+Il peut permettre :
+
+- nouveaux types de tuiles ;
+- connecteurs personnalisés ;
+- contraintes de voisinage ;
+- tailles non standard ;
+- ancres spécifiques ;
+- rotations particulières ;
+- probabilités / poids de génération ;
+- tags ;
+- règles de transition ;
+- variantes de biome.
+
+Le mode Avancé ne doit jamais être nécessaire pour utiliser normalement le Builder.
+
+Les gabarits officiels restent la voie recommandée.
+
+## 36. Contrat conceptuel d'un TileTemplate
+
+Exemple indicatif :
+
+```json
+{
+  "id": "road_corner",
+  "category": "road",
+  "shape": "corner",
+  "size": { "w": 1, "h": 1 },
+  "connectors": {
+    "N": "road",
+    "E": "road"
+  },
+  "rotations": [0, 90, 180, 270],
+  "anchor": "center",
+  "tags": ["outdoor"],
+  "generation": {
+    "weight": 1,
+    "allowedBiomes": ["forest", "medieval_village"]
+  }
+}
+```
+
+Ce schéma est uniquement conceptuel.
+
+Le contrat réel devra être défini après pré-audit et utiliser les propriétaires Core / Storage / Asset Resolver issus de la restructuration.
+
+## 37. Contraintes de voisinage
+
+Les connecteurs répondent à la question :
+
+**"Est-ce que ces deux bords peuvent se raccorder ?"**
+
+Les contraintes de voisinage répondent à des règles plus larges :
+
+- un pont doit traverser une rivière ;
+- une porte doit appartenir à une structure compatible ;
+- une route ne doit pas se terminer dans l'eau sans terminaison prévue ;
+- un mur intérieur ne doit pas être utilisé comme falaise extérieure ;
+- une maison nécessite une zone constructible suffisante ;
+- une clairière ne doit pas être remplie d'arbres selon sa règle ;
+- une rivière doit conserver une continuité.
+
+Ces règles devront être déclaratives autant que possible.
+
+## 38. Génération déterministe et reproductible
+
+Le générateur devra idéalement accepter une graine (seed).
+
+À données identiques :
+
+```
+biome + dimensions + paramètres + seed
+-> même carte
+```
+
+Avantages :
+
+- tests reproductibles ;
+- partage d'une génération ;
+- diagnostic des bugs ;
+- sauvegarde plus légère dans certains cas ;
+- comparaison avant/après évolution du moteur.
+
+Toute évolution du générateur devra être versionnée pour éviter qu'une ancienne seed ne change silencieusement de monde.
+
+## 39. Séparation moteur générique / règles de module
+
+Briques potentiellement communes :
+
+- grille ;
+- géométrie ;
+- connecteurs ;
+- rotation ;
+- voisinage ;
+- catalogue de gabarits ;
+- génération procédurale ;
+- seed ;
+- biome ;
+- placement.
+
+Briques spécifiques :
+
+### Dungeon
+- pièges Dungeon ;
+- logique de salles Dungeon ;
+- rencontres ;
+- clés ;
+- objectifs Dungeon.
+
+### Capture
+- biomes Capture ;
+- règles d'apparition des créatures ;
+- zones de capture ;
+- progression propre au mode.
+
+### Survie
+- règles de vagues ;
+- spawn Survie ;
+- objectifs Survie.
+
+Partager un moteur de génération ne doit jamais signifier partager les états gameplay.
+
+## 40. Tests supplémentaires pour la génération
+
+À ajouter aux tests futurs du chantier :
+
+- route droite raccordée correctement ;
+- virage raccordé correctement ;
+- T et croisement valides ;
+- absence de connecteurs incompatibles ;
+- rotation automatique correcte ;
+- rotation interdite respectée ;
+- mur angle intérieur / extérieur non confondus ;
+- rivière continue ;
+- pont placé uniquement dans un contexte valide ;
+- biome Forêt n'utilise pas de famille interdite ;
+- biome Village respecte ses familles ;
+- même seed = même résultat ;
+- seed différente = variation valide ;
+- pack importé = gabarits reconstruits correctement ;
+- texture remplacée = logique du gabarit inchangée ;
+- mode Simple ne demande aucune logique technique ;
+- mode Avancé ne modifie pas les gabarits officiels sans action explicite ;
+- échec de génération détecté proprement si les contraintes sont impossibles ;
+- aucun fallback aléatoire incohérent pour "forcer" une carte.
+
+## 41. Critères de réussite supplémentaires
+
+Le générateur sera considéré comme suffisamment mature lorsque :
+
+1. un utilisateur peut remplacer les textures d'un pack sans reprogrammer les raccords ;
+2. les routes restent continues ;
+3. les murs restent topologiquement cohérents ;
+4. les rivières et ponts respectent leurs relations ;
+5. les rotations réduisent réellement le nombre d'assets requis ;
+6. un biome produit une identité visuelle et structurelle cohérente ;
+7. le mode Simple suffit à la majorité des utilisateurs ;
+8. le mode Avancé permet l'extension sans casser le format standard ;
+9. une génération est reproductible par seed/version ;
+10. les modules consommateurs restent strictement cloisonnés.
+
+## 42. Décision complémentaire enregistrée — 2026-09-24
+
+Orientation ajoutée au futur chantier :
+
+**GenSrpG devra utiliser des gabarits intelligents et des connecteurs préconfigurés afin que les joueurs puissent principalement créer/remplacer les visuels, tandis que le moteur conserve automatiquement les règles nécessaires pour assembler des cartes et biomes cohérents.**
+
+Le mode Simple est prioritaire.
+
+Le mode Avancé reste disponible pour les créateurs qui souhaitent définir de nouvelles familles, connecteurs ou contraintes.
+
+La génération procédurale ne doit jamais être une juxtaposition aléatoire de textures. Elle doit être pilotée par les contrats de tuiles, les règles de raccordement, les contraintes de voisinage et le biome.

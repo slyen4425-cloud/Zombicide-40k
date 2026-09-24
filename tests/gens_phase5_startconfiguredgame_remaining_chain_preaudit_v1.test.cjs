@@ -77,8 +77,11 @@ assert.equal(retiredCapture135Meta.status,'active',retiredCapture135Id+' block m
 const retiredCapture135Body=blockBody(retiredCapture135Id);
 assert.doesNotMatch(retiredCapture135Body,/window\.startConfiguredGame\s*=/,
   'captureFix135 must remain retired as a global startConfiguredGame owner');
-assert.match(retiredCapture135Body,/gensCapturePregameMode/);
-assert.match(retiredCapture135Body,/saveCaptureWorldState/);
+assert.match(retiredCapture135Body,/target135\(/);
+assert.match(retiredCapture135Body,/render135\(/);
+assert.match(retiredCapture135Body,/captureBattleLiveBody/);
+assert.match(retiredCapture135Body,/captureCreatureDetailBody/);
+assert.match(retiredCapture135Body,/oldPlayerText135/);
 const core200Meta=owners.blocks?.[core200Id];
 assert.ok(core200Meta,'missing owner metadata '+core200Id);
 assert.equal(core200Meta.status,'active',core200Id+' must remain active');

@@ -47,7 +47,6 @@ const legacyFiles=new Set([
   'assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js',
   'assets/gensrpg/gens-stat-manual-cost-167898.js',
   'assets/gensrpg/gens-stat-upgrade-policy-167898.js',
-  'assets/gensrpg/gens-survival-mode-isolation-1678104.js',
   'assets/gensrpg/gens-ui-recovery-167843.js',
   'assets/gensrpg/gens-world-summary-167820.js'
 ]);

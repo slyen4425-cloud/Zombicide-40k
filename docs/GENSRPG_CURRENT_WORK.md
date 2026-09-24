@@ -1,3 +1,39 @@
+# CHECKPOINT FINAL CRÉÉ — Capture139 openChar retirement — 2026-09-24
+
+Conformément à la règle 25, le checkpoint final est créé sur le **SHA fonctionnel exact validé par les tests requis** :
+
+- checkpoint :
+  `checkpoint/gensrpg-phase5-capture139-openchar-retirement-green-2026-09-24`
+- SHA :
+  `74cce56beea71ee3bdcd0b132b28a99e6a20b017`
+- preview :
+  `preview/gensrpg-phase5-capture139-openchar-retirement-2026-09-24`
+- même SHA exact :
+  `74cce56beea71ee3bdcd0b132b28a99e6a20b017`
+
+Validation automatique de ce SHA :
+- Architecture + Browser : run `36045182459` — SUCCESS ;
+- Firefox : run `36045182471` — SUCCESS ;
+- Tactical Dock : run `36045182458` — SUCCESS.
+
+Le commit documentaire suivant `e9837460bb42bb5661b7b0d66f510b99523344e4`
+ne modifie pas le runtime et ne remplace pas le SHA fonctionnel validé du checkpoint.
+
+État de sortie Phase 5 sur le checkpoint :
+- navigation publique : Shell unique ;
+- `goMenu` global inline : 0 ;
+- fiche héros : `function openChar(id)` native unique ;
+- wrappers globaux inline `openChar` : 0 ;
+- audit `phase5ExitReady: true`.
+
+Dernière étape avant clôture formelle Phase 5 :
+**validation manuelle utilisateur de la preview**.
+
+Après validation utilisateur :
+- enregistrer la validation ;
+- clôturer formellement Phase 5 ;
+- ouvrir Phase 6 — isolation Survie.
+
 # CANDIDAT GREEN FINAL — Phase 5 / retrait dernier wrapper global openChar Capture139 — 2026-09-24
 
 ## Résultat fonctionnel

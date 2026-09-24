@@ -542,6 +542,9 @@ jobs:
       - name: Raccorder l'autorité Shell finale module-launch Phase 5
         run: node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
 
+      - name: Pré-auditer le retrait du global startConfiguredGame Core200
+        run: node tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

@@ -27,13 +27,26 @@ for(const domain of domains){
   assert.equal(contract.version,1,domain+' contract version');
   assert.equal(contract.phase,3,domain+' contract phase');
   assert.equal(contract.module,domain,domain+' contract module');
-  assert.equal(contract.status,'contract-only-not-loaded',domain+' contract status');
   assert.equal(contract.plannedEntry,entry,domain+' planned entry');
   assert.ok(Array.isArray(contract.owns)&&contract.owns.length,domain+' must declare ownership');
   assert.ok(Array.isArray(contract.consumes),domain+' consumes must be explicit');
   assert.ok(Array.isArray(contract.forbidden)&&contract.forbidden.length,domain+' forbidden boundary must be explicit');
   assert.ok(Array.isArray(contract.invariants)&&contract.invariants.length>=3,domain+' invariants missing');
 
+  if(domain==='survival'){
+    assert.equal(contract.status,'partial-runtime-loaded','Survival contract status');
+    assert.equal(contract.activatedPhase,6,'Survival activation phase');
+    assert.equal(contract.publicRuntimeApi,'GensSurvivalV1','Survival public runtime API');
+    assert.match(source,/GensSurvivalV1/,'Survival entry must expose its Phase 6 namespace');
+    assert.doesNotMatch(source,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|\bDungeon\b|\bTactical\b|\bCapture\b|\bPvP\b/,
+      'first active Survival slice must stay pure and isolated');
+    assert.equal(composition.index.includes(entry),true,'Survival entry must be directly loaded by source index in Phase 6');
+    for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,'Survival source entry must not be redundantly injected by '+name);
+    assert.equal(composition.index.includes(contractPath),false,'Survival contract metadata must not be runtime-loaded');
+    continue;
+  }
+
+  assert.equal(contract.status,'contract-only-not-loaded',domain+' contract status');
   const forbidden=/\b(?:window|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|fetch|XMLHttpRequest|navigator|location)\b|\bnew\s+Worker\b|\.install\s*\(|\bimport\s*\(/;
   assert.doesNotMatch(source,forbidden,entry+' must remain inert');
   const executable=source
@@ -49,7 +62,7 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,79,'Phase 3 scaffolding must remain inert while the current production owner graph contains 79 files after the Phase 6 legacy guard retirement');
+assert.equal(Object.keys(ownerManifest.files||{}).length,80,'Phase 3 scaffolding remains inert except the explicitly activated Survival entry; production owner graph now contains 80 files');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');
@@ -60,6 +73,6 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:79,
+  productionOwnerGraph:80,
   loadedByProduction:0
 },null,2));

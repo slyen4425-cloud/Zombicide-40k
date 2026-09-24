@@ -49,8 +49,11 @@ const c139=blocks.find(x=>x.id==='captureFix139')?.body||'';
 const dc01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
 const dc200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 
-assert.match(c135,/gensCapturePregameMode/);
-assert.match(c135,/saveCaptureWorldState/);
+assert.match(c135,/target135\(/);
+assert.match(c135,/render135\(/);
+assert.match(c135,/captureBattleLiveBody/);
+assert.match(c135,/captureCreatureDetailBody/);
+assert.match(c135,/oldPlayerText135/);
 assert.match(c138,/isCaptureContext138/);
 assert.match(c138,/renderCaptureWorldHub/);
 assert.match(c139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);

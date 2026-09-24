@@ -539,6 +539,9 @@ jobs:
       - name: Pré-auditer l'autorité Shell finale module-launch Phase 5
         run: node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
 
+      - name: Raccorder l'autorité Shell finale module-launch Phase 5
+        run: node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
+
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
 

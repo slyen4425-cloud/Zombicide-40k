@@ -76,7 +76,7 @@ for(const p of [
   'tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs',
   'tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs',
   'tests/gens_savequit_resume_shell_browser_v11411.test.cjs',
-  'tests/gens_phase1_four_modules_non_interference_browser_v11411.test.cjs'
+  'tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs'
 ]){
   assert.ok(fs.existsSync(path.join(root,p)),'required regression proof missing: '+p);
 }

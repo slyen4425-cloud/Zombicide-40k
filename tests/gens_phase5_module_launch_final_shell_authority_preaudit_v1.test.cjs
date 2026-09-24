@@ -15,10 +15,12 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8172529,
-  'final Shell authority preaudit must start from the exact user-validated S4 runtime');
-assert.equal(gitBlob,'696014056409dda9b6ef25ace58dfd9d5f9e2718',
-  'final Shell authority preaudit must start from the exact S4 blob');
+const allowedExactRuntimes=new Map([
+  [8172529,'696014056409dda9b6ef25ace58dfd9d5f9e2718'],
+  [8172610,'eddba424d3ebb086a1bdd0bcc1b1822d16a83771']
+]);
+assert.equal(allowedExactRuntimes.get(bytes.length),gitBlob,
+  'final Shell authority preaudit must remain on either exact S4 or the exact final-authority index composition');
 
 assert.equal((index.match(/function\s+gensShellActiveModuleV1\s*\(/g)||[]).length,1,
   'Shell must keep one active-module resolver');

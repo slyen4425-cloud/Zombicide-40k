@@ -1,4 +1,5 @@
 name: GenSrpG Phase5 S4 Dungeon provider one-shot
+# retrigger after durable S1-S3 contract alignment
 
 on:
   push:

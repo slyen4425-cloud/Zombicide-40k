@@ -74,8 +74,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
-  'characterization must preserve exactly the four remaining historical owners');
+  ['captureFix138','captureFix139','gensDungeonCore01Js'],
+  'characterization must preserve exactly the three remaining historical owners after captureFix135 retirement');
 
 const afterCore200=index.slice(d200.end);
 assert.doesNotMatch(afterCore200,/startConfiguredGame/,
@@ -169,7 +169,7 @@ console.log(JSON.stringify({
     dungeonProviderRetained:true,
     stableCore200ReferenceRetained:true,
     core200GlobalAssignmentCount:0,
-    untouchedHistoricalOwners:['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
+    untouchedHistoricalOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
     protectedPaths:[
       'Dungeon direct',
       'Survival -> Dungeon same page',

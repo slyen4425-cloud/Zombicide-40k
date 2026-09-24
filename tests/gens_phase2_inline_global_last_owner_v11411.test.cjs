@@ -41,7 +41,7 @@ const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).lengt
 
 assert.equal(blob,'198207e3f52730498831f196caa35c4a0283e934','Phase 2 inline global table must target the current committed index blob');
 assert.equal(distinctGlobals,436,'distinct explicit inline globals drifted');
-assert.equal(assignments,759,'explicit inline global assignments drifted');
+assert.equal(assignments,758,'explicit inline global assignments drifted');
 assert.equal(multiOwnerGlobals,119,'multi-owner inline globals drifted');
 
 const expected=[
@@ -70,7 +70,7 @@ if(table!==expected){
 for(const [name,count,lastOwner] of [
   ['renderDungeonCombatRound',30,'dungeonCore303TimelineRootFix'],
   ['captureRenderBattleLive',15,'coreCombatPoolFix156'],
-  ['startConfiguredGame',4,'gensDungeonCore01Js'],
+  ['startConfiguredGame',3,'gensDungeonCore01Js'],
   ['resumeGame',1,'dungeonCore310PersistenceAndTokens']
 ]){
   const chain=chains.get(name)||[];

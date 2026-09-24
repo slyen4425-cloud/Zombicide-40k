@@ -122,9 +122,9 @@ const phase5Set=new Set(phase5ConnectedServices);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,97,'physical JS inventory must be Phase 2 baseline plus Phase 3 entries, Phase 4 services and the connected Phase 5 Shell authority');
-assert.equal(phase2Js.length,72,'Phase 2 baseline JS inventory size drifted');
-assert.equal(reachable.size,80,'production-reachable JS graph must currently contain 80 files');
+assert.equal(allJs.length,96,'physical JS inventory must reflect the retired legacy Survival/Dungeon guard');
+assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
+assert.equal(reachable.size,79,'production-reachable JS graph must drop the retired legacy Survival/Dungeon guard');
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 inert entry missing: '+rel);
   assert.equal(reachable.has(rel),false,'Phase 3 inert entry must stay outside production graph: '+rel);

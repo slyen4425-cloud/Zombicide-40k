@@ -20,7 +20,7 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
 ])).digest('hex');
 
 assert.equal(bytes.length,8171879,'module-launch preaudit guard must track the current S1 runtime');
-assert.equal(gitBlob,'cacee0bb95d8c046264668c1ccc721fc88bbed2d','preaudit runtime blob must match the user-supplied checkpoint file');
+assert.equal(gitBlob,'7601760f7a635094d4f687b725a639b5728e93b4','preaudit runtime blob must match the user-supplied checkpoint file');
 
 assert.match(index,/function\s+gensShellActiveModuleV1\(\)\s*\{/,'Shell must already own one active-module resolver');
 assert.match(index,/window\.GensShellScreenReturnV1\s*=\s*Object\.freeze\(\{[\s\S]*activeModule:gensShellActiveModuleV1/,'screen-return must expose the existing active-module resolver');

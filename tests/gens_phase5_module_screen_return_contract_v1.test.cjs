@@ -16,7 +16,7 @@ function gitBlob(buf){
 }
 
 assert.equal(runtime.length,8171879,'contract-only lot must keep the manually validated runtime size');
-assert.equal(gitBlob(runtime),'cacee0bb95d8c046264668c1ccc721fc88bbed2d',
+assert.equal(gitBlob(runtime),'7601760f7a635094d4f687b725a639b5728e93b4',
   'contract-only lot must keep index.html byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';

@@ -13,7 +13,7 @@ const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHA
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
 const HISTORICAL_SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
-const CURRENT_BLOB='cacee0bb95d8c046264668c1ccc721fc88bbed2d';
+const CURRENT_BLOB='7601760f7a635094d4f687b725a639b5728e93b4';
 
 function gitBlob(buffer){
   return crypto.createHash('sha1').update(Buffer.concat([

@@ -11,7 +11,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(blob,'cacee0bb95d8c046264668c1ccc721fc88bbed2d','asset resolver final audit must target the current post-Challenge-Library runtime index blob');
+assert.equal(blob,'7601760f7a635094d4f687b725a639b5728e93b4','asset resolver final audit must target the current post-Challenge-Library runtime index blob');
 
 function block(id){
   const m=index.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

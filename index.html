@@ -12606,7 +12606,6 @@ const gensSurvivalStartModuleSessionV1=async()=>{
   await gensSurvivalNativeStartV1();
   return true;
 };
-window.GensShellModuleLaunchV1.register("survival",gensSurvivalStartModuleSessionV1);
 
 
 
@@ -16041,6 +16040,7 @@ window.GensShellModuleLaunchV1=Object.freeze({
   activeModule:gensShellActiveModuleV1,
   startModuleSession:gensStartModuleSessionV1
 });
+window.GensShellModuleLaunchV1.register("survival",gensSurvivalStartModuleSessionV1);
 function goMenu(){
   const moduleId=gensShellActiveModuleV1();
   const handled=window.GensShellScreenReturnV1.returnToPrimaryView(moduleId);

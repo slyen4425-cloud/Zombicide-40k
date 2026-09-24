@@ -14,7 +14,7 @@ function gitBlob(buf){
 }
 
 assert.equal(bytes.length,8171879,'openChar guard must target the current Core 0.28-retired runtime');
-assert.equal(gitBlob(bytes),'cacee0bb95d8c046264668c1ccc721fc88bbed2d',
+assert.equal(gitBlob(bytes),'7601760f7a635094d4f687b725a639b5728e93b4',
   'openChar guard runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';

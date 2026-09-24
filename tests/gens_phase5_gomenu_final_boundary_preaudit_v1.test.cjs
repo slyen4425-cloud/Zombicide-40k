@@ -35,8 +35,8 @@ function chainFor(name){
 }
 
 assert.equal(indexBuf.length,8171879,'goMenu boundary guard must use the current Dungeon S2 runtime');
-assert.equal(gitBlob(indexBuf),'cacee0bb95d8c046264668c1ccc721fc88bbed2d','goMenu boundary runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'cacee0bb95d8c046264668c1ccc721fc88bbed2d','owner manifest must target current runtime');
+assert.equal(gitBlob(indexBuf),'7601760f7a635094d4f687b725a639b5728e93b4','goMenu boundary runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'7601760f7a635094d4f687b725a639b5728e93b4','owner manifest must target current runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],

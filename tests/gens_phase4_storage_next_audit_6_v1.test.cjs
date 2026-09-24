@@ -23,7 +23,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 assert.equal(bytes.length,8171879,'audit 6 must target the current Phase 5 Shell index size');
-assert.equal(blob,'cacee0bb95d8c046264668c1ccc721fc88bbed2d','audit 6 must target the exact post-Economy-Rules index blob');
+assert.equal(blob,'7601760f7a635094d4f687b725a639b5728e93b4','audit 6 must target the exact post-Economy-Rules index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

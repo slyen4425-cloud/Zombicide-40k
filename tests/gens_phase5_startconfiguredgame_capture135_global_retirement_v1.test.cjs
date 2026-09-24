@@ -15,9 +15,9 @@ function blockBody(id){
 }
 
 function globalOwners(name){
-  const scriptRe=new RegExp('<script\\\\b[^>]*\\\\bid=["\\\']([^"\\\']+)["\\\'][^>]*>([\\\\s\\\\S]*?)<\\\\/script>','gi');
+  const scriptRe=new RegExp('<script\\b[^>]*\\bid=["\\\']([^"\\\']+)["\\\'][^>]*>([\\s\\S]*?)<\\/script>','gi');
   const blocks=[...index.matchAll(scriptRe)];
-  const re=new RegExp('window\\\\.'+name+'\\\\s*=(?!=)','g');
+  const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
   const ids=[];
   for(const m of blocks){
     const hits=m[2].match(re)||[];

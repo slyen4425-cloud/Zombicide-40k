@@ -1,3 +1,60 @@
+## CHANTIER COURANT — Phase 5 / module-launch S3 — provider Capture — pré-audit — 2026-09-24
+
+Validation utilisateur S2 : **OK — « Ça a l'air correct »**.
+
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s2-survival-provider-green-2026-09-24`.
+- SHA exact :
+  `7701c9a21ec49ef12d7188d71e075a90055e7ede`.
+- Runtime :
+  taille `8171879`, blob `7601760f7a635094d4f687b725a639b5728e93b4`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s3-capture-provider-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s3-capture-provider-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Pré-auditer puis raccorder **Capture uniquement** au registre public module-launch.
+
+Aucun runtime ne sera modifié avant :
+1. caractérisation du seam Capture139 ;
+2. preuve de l'ordre registre -> Capture139 -> wrappers Dungeon ;
+3. RED dédié.
+
+### Invariants obligatoires
+
+- conserver `captureFix135` ;
+- conserver `captureFix138` ;
+- conserver `captureFix139` ;
+- conserver `gensDungeonCore01Js` ;
+- conserver `dungeonCore200Rebuild` ;
+- ne retirer aucune autorité sur preuve de shadowing ;
+- garder le bouton production sur `startConfiguredGame()` ;
+- ne raccorder ni Dungeon ni PvP dans S3 ;
+- conserver le provider Survival S2 ;
+- aucun observer/timer/retry/polling.
+
+### Preuve utilisateur permanente
+
+Le rollback historique impose que `captureFix135` reste jusqu'à preuve E2E d'un remplacement complet.
+Cette règle n'est pas réouverte par S3.
+
+### QA différée
+
+Ne pas toucher :
+- rafraîchissements ;
+- inventaire objet Survie à 0 ;
+- Stats au retour ;
+- détection ennemie / téléportation ;
+- terminologie Survie.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL CANDIDATE — Phase 5 / module-launch S2 Survival — 2026-09-24
 
 Ce bloc devient le point de reprise final de S2 dès que ce SHA documentaire

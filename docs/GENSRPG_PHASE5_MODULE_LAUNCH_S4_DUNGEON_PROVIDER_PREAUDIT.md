@@ -80,3 +80,52 @@ Ensuite seulement : RED provider Dungeon, patch minimal, triple CI, preview tél
 validation utilisateur.
 
 Aucun merge sur `main`.
+
+
+## Fichier exact vérifié
+
+Fichier utilisateur reçu :
+`works15.zip -> index_15work.txt`.
+
+Vérification locale :
+- taille : `8172204` octets ;
+- blob Git : `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+
+Correspondance exacte avec le checkpoint S3 : **OK**.
+
+## Caractérisation du seam Dungeon
+
+Le fichier exact prouve l'ordre :
+`Shell registry -> captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+Positions observées :
+- registre Shell : `6137753` ;
+- Capture135 : `7178830` ;
+- Capture138 : `7208188` ;
+- Capture139 : `7216814` ;
+- Dungeon Core01 : `7552605` ;
+- Dungeon Core200 : `7942954`.
+
+Core01 garde son ancienne interception Dungeon, mais Core200 :
+- remplace publiquement `window.DungeonCore01` ;
+- fournit le `start()` qui active la session, construit `gensrpg_dungeon_runtime_v2`,
+  sauvegarde le runtime puis affiche le Dungeon ;
+- installe le dernier intercept Dungeon de `startConfiguredGame` ;
+- conserve le provider ScreenReturn Dungeon.
+
+Les sentinelles permanentes confirment ce propriétaire par comportement réel :
+- Save & Quit/reprise exécute le bloc exact `dungeonCore200Rebuild` et affirme que
+  Core 2.00 possède les vrais lancements Dungeon ;
+- Dungeon map -> Tactical protège le bridge public Tactical ;
+- Dungeon après Survival protège le nouvel état initial ;
+- le rollback utilisateur protège Core200 comme dernier intercept Dungeon.
+
+### Seam sélectionné pour le futur RED
+
+Capturer `window.startConfiguredGame` **immédiatement après** l'installation de
+l'intercept final Core200, puis exposer cette référence via un provider Dungeon
+routing-only.
+
+Cette sélection n'autorise aucun retrait historique.
+
+Aucun provider Dungeon n'est encore raccordé dans ce pré-audit.

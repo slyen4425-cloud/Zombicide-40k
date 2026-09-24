@@ -74,8 +74,8 @@ for(const module of ['survival','dungeon','capture','pvp']){
 assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs')),
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
-assert.match(rollbackGuard,/captureFix135 must retain its historical startConfiguredGame boundary until a replacement contract is proven on real user paths/);
-assert.match(rollbackGuard,/assert\.equal\(assignments,4/);
+assert.match(rollbackGuard,/captureFix135 global launch boundary must remain retired after dedicated RED and real user-path proof/);
+assert.match(rollbackGuard,/assert\.equal\(assignments,3/);
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
@@ -85,12 +85,11 @@ for(const block of blocks){
   for(let i=0;i<count;i++)chain.push(block.id);
 }
 assert.deepEqual(chain,[
-  'captureFix135',
   'captureFix138',
   'captureFix139',
   'gensDungeonCore01Js'
-],'module-launch preaudit must freeze the four remaining historical startConfiguredGame global owners after Core200 retirement');
-assert.match(lastOwners,/^startConfiguredGame\t4\tgensDungeonCore01Js$/m);
+],'module-launch preaudit must track the three remaining historical startConfiguredGame global owners after captureFix135 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m);
 
 // Metadata-only means no new launch contract or Phase 3 entry is connected to production composition.
 assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/);
@@ -102,7 +101,7 @@ console.log(JSON.stringify({
   contract:'module-launch/startModuleSession',
   providers:launch.providers,
   startConfiguredGameChain:chain,
-  regressionInvariant:'captureFix135 remains until replacement contract is proven by real E2E paths',
+  regressionInvariant:'captureFix135 global retirement is accepted only after dedicated RED and real E2E parity; captureFix138 requires a fresh re-audit',
   runtimeChanged:false,
   productionLoadGraphChanged:false
 },null,2));

@@ -61,8 +61,10 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S3 must preserve the four remaining historical global launch owners after Core200 retirement');
+assert.deepEqual(chain,['captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S3 must track the three remaining historical global launch owners after Capture135 retirement');
+assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
+  'Capture135 global launch owner must remain retired');
 
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
   'S3 must keep the production button on the historical global route');

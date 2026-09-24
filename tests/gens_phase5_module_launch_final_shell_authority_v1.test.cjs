@@ -83,8 +83,10 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
-  'Core200 retirement must preserve exactly the four remaining historical owners');
+  ['captureFix138','captureFix139','gensDungeonCore01Js'],
+  'captureFix135 retirement must leave exactly three historical global owners');
+assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
+  'captureFix135 global launch owner must remain retired');
 
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'native Shell implementation must remain available behind the Survival provider');

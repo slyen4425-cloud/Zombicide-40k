@@ -50,8 +50,10 @@ assert.match(c139.body,/normalizeGameParticipants/,
 assert.match(c139.body,/captureEnterWorld139/,
   'Capture139 must still own Capture world entry');
 
-assert.match(c135.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
-  'Capture135 historical boundary must remain');
+assert.doesNotMatch(c135.body,/window\.startConfiguredGame\s*=(?!=)/,
+  'Capture135 global launch boundary must remain retired');
+assert.match(c135.body,/target135\([\s\S]*render135\([\s\S]*captureBattleLiveBody/,
+  'Capture135 non-launch combat/UX responsibilities must remain');
 assert.match(c138.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
   'Capture138 historical boundary must remain');
 assert.match(d01.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
@@ -67,8 +69,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix135','captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S3 preaudit must preserve the exact four-owner global chain after Core200 retirement');
+assert.deepEqual(chain,['captureFix138','captureFix139','gensDungeonCore01Js'],
+  'S3 preaudit must track the exact three-owner global chain after Capture135 retirement');
 
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_user_regression_rollback_guard_v1.test.cjs')),
   'the permanent user-regression rollback guard must remain');
@@ -82,7 +84,7 @@ const selectedSeam={
   captureReference:'capture window.startConfiguredGame immediately after Capture139 installs its wrapper',
   registrationTiming:'registry already exists before Capture139 loads',
   productionRouting:'unchanged during S3',
-  retirement:'none; captureFix135/138/139 and Dungeon owners remain',
+  retirement:'captureFix135 global retired by dedicated proof; captureFix138/139 and Dungeon global owners remain',
   proof:'legacy Capture shell + Capture victory/resume + full composition + four-module non-interference'
 };
 

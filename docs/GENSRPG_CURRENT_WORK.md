@@ -1,3 +1,57 @@
+# PREUVE TDD GREEN — Capture139 sans wrapper global openChar — 2026-09-24
+
+## Preuve ciblée
+
+Workflow temporaire ciblé :
+- run `36042376156` ;
+- résultat : **SUCCESS** ;
+- workflow temporaire ensuite supprimé de l'arbre de travail.
+
+La fixture a composé le runtime actuel en retirant uniquement, dans `captureFix139` :
+- `const openChar139=window.openChar` ;
+- l'affectation `window.openChar=function(id){...}` ;
+- la délégation `openChar139.apply(this,arguments)`.
+
+Tout le reste de Capture139 est resté intact, notamment :
+- `window._captureStarting139` ;
+- `window.startConfiguredGame=async function(){...}` ;
+- le provider public Capture ;
+- `captureEnterWorld139` ;
+- le retour écran Capture.
+
+Résultat navigateur :
+- vrai parcours Capture atteint ;
+- provider public `GensShellModuleLaunchV1.startModuleSession('capture')` retourne handled ;
+- session Capture active ;
+- hub Capture visible ;
+- fiche héros partagée non affichée pendant le lancement ;
+- `window.openChar` natif reste callable ;
+- progression Capture conservée ;
+- aucune erreur navigateur relevée par la caractérisation.
+
+## TDD de retrait
+
+Contrat écrit avant modification runtime :
+`tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs`.
+
+Le contrat final exige :
+- zéro override inline global `window.openChar` ;
+- propriétaire natif `function openChar(id)` conservé ;
+- Capture139 conservé ;
+- chaîne `startConfiguredGame` inchangée :
+  `captureFix138 -> captureFix139 -> gensDungeonCore01Js` ;
+- provider Capture public conservé.
+
+## Autorisation runtime
+
+Le retrait minimal du wrapper `openChar` de Capture139 est maintenant autorisé.
+
+Aucun autre code Capture139 ne doit être modifié.
+
+La modification exacte de `index.html` doit suivre la règle 26 :
+utiliser le fichier exact correspondant au SHA courant / blob vérifié, fourni par Sylvain,
+et ne pas relire ou reconstruire les ~8 Mo par GitHub.
+
 # CHANTIER COURANT — Phase 5 / retrait du dernier wrapper fiche héros Capture139 — 2026-09-24
 
 ## Base GREEN

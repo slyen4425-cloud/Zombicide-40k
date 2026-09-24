@@ -1,3 +1,85 @@
+# CANDIDAT GREEN FINAL — Phase 5 / retrait global startConfiguredGame Core200 — 2026-09-24
+
+Le lot runtime et ses sentinelles ont passé la validation complète sur le SHA
+`c644cbf190efd5e8af8b7a23359db176c5a82af3`.
+
+## Validation complète du candidat runtime
+
+- Architecture + Browser complet :
+  run `36024897874` — **SUCCESS**.
+  - job Architecture `107718808951` — **SUCCESS** ;
+  - job Browser `107719317340` — **SUCCESS**.
+- Firefox :
+  run `36024897855` — **SUCCESS**.
+- Tactical Dock :
+  run `36024897878` — **SUCCESS**.
+
+Le Browser complet a notamment validé :
+- isolation navigateur ;
+- lancement Survival par le vrai Shell ;
+- provider public Survival S2 ;
+- Survival après Dungeon ;
+- Fouiller et arts Survival ;
+- goMenu Dungeon / Capture / Survival ;
+- retraits Core 0.23 et Core 0.01 ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire / reprise inter-module ;
+- Dungeon après Survival dans Chromium ;
+- Dungeon Builder ;
+- Config objet ;
+- openChar ;
+- cache / retour / pièges authored ;
+- Save & Quit / reprise ;
+- provider public Dungeon S4 ;
+- PvP placeholder ;
+- Monster Capture ;
+- provider public Capture S3 ;
+- composition Capture complète ;
+- non-interférence des quatre modules ;
+- murs / preview / assets ;
+- Equipment.
+
+## État runtime final
+
+La modification runtime du lot reste strictement le retrait de l'affectation globale Core200.
+
+Runtime :
+- commit d'application : `3bcc1d5f1be3b51014b1701627cd5a78a3ccbf14` ;
+- `index.html` : `8172687` octets ;
+- blob Git : `e56f7b63963d991717e1738c3e5188011276a2b7`.
+
+Invariants validés :
+- Shell final = propriétaire visible de `window.startConfiguredGame` ;
+- Core200 = zéro affectation globale `window.startConfiguredGame` ;
+- Core200 conserve `gensDungeonStartConfiguredGame200V1` comme dispatcher local stable ;
+- provider public Dungeon S4 enregistré une fois et branché sur ce dispatcher ;
+- quatre propriétaires historiques restants :
+  `captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js` ;
+- aucun autre propriétaire retiré dans ce lot ;
+- aucune rustine, aucun observer, timer, polling, reload ou second routeur ajouté.
+
+## Clôture documentaire obligatoire
+
+Le présent commit documentaire doit lui-même repasser :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock.
+
+Si les trois sont **SUCCESS** sur le même SHA documentaire :
+- créer
+  `checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-green-2026-09-24` ;
+- créer
+  `preview/gensrpg-phase5-startconfiguredgame-core200-global-retirement-2026-09-24`
+  depuis ce GREEN ;
+- fournir le lien de test utilisateur téléphone ;
+- attendre validation utilisateur avant tout nouveau retrait d'un propriétaire historique ;
+- ne pas toucher à `main`.
+
+Production `main` reste gelée sur
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # CANDIDAT GREEN — Phase 5 / retrait global startConfiguredGame Core200 — 2026-09-24
 
 Le lot runtime a atteint l'état candidat GREEN après TDD RED et patch minimal.

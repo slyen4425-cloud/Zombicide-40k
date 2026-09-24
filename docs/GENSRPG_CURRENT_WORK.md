@@ -1,3 +1,107 @@
+# CHANTIER COURANT — Phase 5 / retrait startConfiguredGame captureFix135 — 2026-09-24
+
+Validation utilisateur du checkpoint précédent :
+**OK — navigation / menus validés comme particulièrement stables après le retrait Core200**.
+
+## Base et gouvernance
+
+- Checkpoint GREEN de base :
+  `checkpoint/gensrpg-phase5-startconfiguredgame-core200-global-retirement-green-2026-09-24`.
+- SHA exact de base :
+  `f25f9eb043b426c0b137397949ba7ec4f96bfc54`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-startconfiguredgame-capture135-retirement-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-startconfiguredgame-capture135-retirement-2026-09-24`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+Les branches de départ ont été créées directement depuis le checkpoint GREEN Core200 validé utilisateur.
+
+## État de la chaîne startConfiguredGame au départ
+
+Quatre propriétaires historiques globaux restent actifs :
+
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js`.
+
+Core200 reste uniquement dispatcher local stable :
+`gensDungeonStartConfiguredGame200V1`.
+
+Le Shell final reste l'autorité visible finale de `window.startConfiguredGame`.
+
+## Micro-lot imposé par le pré-audit
+
+Le pré-audit `gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs`
+désigne `captureFix135` comme premier candidat runtime.
+
+Mission unique :
+**retirer uniquement l'affectation `window.startConfiguredGame` portée par `captureFix135`**.
+
+Tout le reste du bloc `captureFix135` doit rester intact.
+
+## Invariants obligatoires
+
+À conserver :
+- logique Capture pré-lancement portée par le bloc `captureFix135` hors wrapper retiré ;
+- `captureFix138` ;
+- `captureFix139` ;
+- `gensDungeonCore01Js` ;
+- dispatcher Core200 local ;
+- provider public Capture S3 ;
+- provider public Dungeon S4 ;
+- Shell final comme seule autorité visible finale ;
+- Survival, Dungeon, Capture, PvP placeholder, Tactical, Builder, Save & Quit/reprise et non-interférence.
+
+Interdit dans ce lot :
+- retirer `captureFix138`, `captureFix139` ou `gensDungeonCore01Js` ;
+- déplacer du gameplay Capture dans le Shell ;
+- modifier la détection Capture/Dungeon ;
+- modifier gameplay, mouvement, stats, combat, stockage ou assets ;
+- ajouter wrapper, fallback global, observer, timer/retry, polling ou reload ;
+- merger sur `main`.
+
+## TDD RED obligatoire avant runtime
+
+Créer une sentinelle dédiée qui exige simultanément :
+1. chaîne globale réduite de 4 à 3 propriétaires ;
+2. absence d'affectation `window.startConfiguredGame` dans `captureFix135` ;
+3. bloc `captureFix135` toujours présent ;
+4. responsabilités Capture non liées au wrapper toujours présentes ;
+5. `captureFix138`, `captureFix139`, `gensDungeonCore01Js` inchangés comme propriétaires ;
+6. Core200 toujours local uniquement ;
+7. Shell final inchangé ;
+8. providers Capture/Dungeon inchangés ;
+9. vrai lancement Capture ;
+10. reprise Capture inter-module ;
+11. Dungeon après Survival ;
+12. Save & Quit/reprise ;
+13. non-interférence quatre modules.
+
+Le RED doit échouer sur la base uniquement parce que `captureFix135`
+publie encore `window.startConfiguredGame`.
+
+## Règle 26
+
+Le runtime courant vérifié est :
+- `index.html` : `8172687` octets ;
+- blob : `e56f7b63963d991717e1738c3e5188011276a2b7`.
+
+Ne pas télécharger ni réécrire l'intégralité du gros fichier via le connecteur.
+Si le patch runtime exige le contenu exact, utiliser uniquement une transformation ciblée
+avec vérification stricte du blob source/cible, ou demander le fichier exact à Sylvain.
+
+## Prochaine action
+
+1. construire le RED dédié captureFix135 ;
+2. raccorder ce RED à Architecture ;
+3. vérifier que l'échec est ciblé uniquement sur l'ancien global captureFix135 ;
+4. seulement ensuite préparer le patch soustractif minimal ;
+5. triple CI ;
+6. checkpoint GREEN + preview si le chemin utilisateur est touché ;
+7. aucun autre propriétaire retiré dans ce lot.
+
+---
+
 # CANDIDAT GREEN FINAL — Phase 5 / retrait global startConfiguredGame Core200 — 2026-09-24
 
 Le lot runtime et ses sentinelles ont passé la validation complète sur le SHA

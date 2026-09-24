@@ -1,3 +1,79 @@
+## CHANTIER COURANT — Phase 5 / module-launch S4 — provider Dungeon — pré-audit — 2026-09-24
+
+Validation utilisateur S3 : **OK — « Ok je valide. Ça semble ok. »**.
+
+- Base GREEN :
+  `checkpoint/gensrpg-phase5-module-launch-s3-capture-provider-green-2026-09-24`.
+- SHA exact :
+  `e8fd85ab68df818a138ed7949c411005ad622457`.
+- Runtime :
+  taille `8172204`, blob `6c95e3f6ca4bf8e34003776e7e43e44192aafb16`.
+- Checkpoint de départ :
+  `checkpoint/gensrpg-start-phase5-module-launch-s4-dungeon-provider-2026-09-24`.
+- Branche :
+  `work/gensrpg-phase5-module-launch-s4-dungeon-provider-2026-09-24`.
+- Production :
+  `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+### Mission
+
+Pré-auditer puis raccorder **Dungeon uniquement** au registre public module-launch.
+
+Aucun runtime ne sera modifié avant :
+1. récupération du fichier `index.html` exact du SHA de base selon la règle 26 ;
+2. vérification taille/blob ;
+3. caractérisation du propriétaire Dungeon réellement requis ;
+4. preuve E2E du seam ;
+5. RED dédié.
+
+### Invariants obligatoires
+
+- conserver le provider Survival S2 ;
+- conserver le provider Capture S3 ;
+- ne pas raccorder PvP dans S4 ;
+- conserver `captureFix135` ;
+- conserver `captureFix138` ;
+- conserver `captureFix139` ;
+- conserver `gensDungeonCore01Js` ;
+- conserver `dungeonCore200Rebuild` tant qu'aucune preuve E2E n'autorise un retrait ;
+- garder le bouton production sur `startConfiguredGame()` ;
+- aucun observer/timer/retry/polling ;
+- aucun changement gameplay Dungeon/Tactical.
+
+### Risque principal
+
+Le chemin Dungeon comporte deux propriétaires historiques tardifs.  
+S4 ne doit **pas** déduire l'autorité correcte par simple shadowing ou ordre statique.
+Le propriétaire public devra être démontré par le vrai chemin Dungeon -> Tactical,
+Save & Quit/reprise, Builder et non-interférence.
+
+### Tests prévus
+
+- sentinelle statique de seam Dungeon ;
+- lancement Dungeon historique par le vrai Shell ;
+- futur provider public Dungeon ;
+- Dungeon map -> Tactical ;
+- Save & Quit / reprise ;
+- Dungeon après Survival ;
+- Capture victoire/reprise ;
+- provider Survival S2 ;
+- provider Capture S3 ;
+- quatre modules non-interférence ;
+- Builder / Config objet / openChar ;
+- Architecture + navigateur complet ;
+- Firefox ;
+- Tactical Dock.
+
+### Règle 26
+
+Le contenu exact du gros `index.html` est requis pour S4.  
+Ne pas multiplier les lectures GitHub du fichier. Utiliser le fichier exact fourni
+par l'utilisateur et vérifier sa correspondance au SHA/base avant pré-audit détaillé.
+
+Aucun merge sur `main`.
+
+---
+
 ## GREEN FINAL — Phase 5 / module-launch S3 — provider Capture — 2026-09-24
 
 S3 est validé techniquement sur le SHA `acc620ea134d21f16c548777d90bdd71f110615f`.

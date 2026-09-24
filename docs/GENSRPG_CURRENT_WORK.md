@@ -1,3 +1,95 @@
+# POINT DE REPRISE ACTIF — Phase 5 / module-launch — Autorité Shell finale — GREEN technique / validation téléphone — 2026-09-24
+
+Le lot **Autorité Shell finale** est techniquement GREEN et figé.
+
+- Branche de travail :
+  `work/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24`.
+- SHA GREEN technique exact :
+  `f9ac03a9ad8dfd76b2c8725f885be4fe396942c5`.
+- Checkpoint GREEN final :
+  `checkpoint/gensrpg-phase5-module-launch-final-shell-authority-green-2026-09-24`.
+- Checkpoint == SHA GREEN :
+  **identique, 0 commit d'écart**.
+- Branche de preview téléphone :
+  `preview/gensrpg-phase5-module-launch-final-shell-authority-2026-09-24`.
+- Preview == checkpoint GREEN :
+  **identique, 0 commit d'écart**.
+- Lien de validation téléphone exact par SHA :
+  `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/f9ac03a9ad8dfd76b2c8725f885be4fe396942c5/preview.html`.
+- Production `main` :
+  `e8681f9823573ced8aec59c8ddc47a72b02bc663`, toujours gelée et inchangée.
+
+## Triple CI GREEN du SHA final
+
+- Architecture + navigateur complet :
+  `35989716956` — **SUCCESS**.
+  - statique : **220/220 SUCCESS** ;
+  - navigateur : **40/40 SUCCESS**.
+- Firefox :
+  `35989716916` — **SUCCESS**.
+- Tactical Dock :
+  `35989716908` — **SUCCESS**.
+
+Le navigateur final protège notamment :
+- Survival historique + provider ;
+- Survival après Dungeon ;
+- Dungeon map -> Tactical V2 ;
+- Save & Quit -> reprise ;
+- Dungeon après Survival ;
+- embuscade/proximité ;
+- Dungeon Builder ;
+- Capture historique + provider ;
+- Capture victoire/reprise ;
+- Capture composition Pages complète à 31 modules ;
+- PvP placeholder ;
+- non-interférence des quatre modules ;
+- Config objet ;
+- isolation fiche RPG/Survie ;
+- openChar ;
+- authored cache/pièges ;
+- preview manuelle Chromium ;
+- assets et tokens tardifs ;
+- Equipment wrappers/chain guard.
+
+## Runtime figé
+
+`index.html` :
+- taille : `8172610` ;
+- blob Git : `eddba424d3ebb086a1bdd0bcc1b1822d16a83771`.
+
+Autorité finale :
+`assets/gensrpg/shell/module-launch-final-authority-v1.js`
+(blob `abeec800b2d668ab1134bfddcc781be63ed0774d`).
+
+Elle :
+- remplace uniquement `window.startConfiguredGame` ;
+- délègue uniquement à `GensShellModuleLaunchV1.activeModule()` puis
+  `GensShellModuleLaunchV1.startModuleSession(...)` ;
+- ne contient aucun fallback legacy ;
+- ne possède aucun gameplay, DOM, stockage, timer, retry, polling ou observer.
+
+La chaîne historique reste entièrement présente :
+`captureFix135 -> captureFix138 -> captureFix139 -> gensDungeonCore01Js -> dungeonCore200Rebuild`.
+
+## Verrou de reprise
+
+**Prochaine action obligatoire : validation utilisateur sur téléphone de la preview.**
+
+Avant cette validation :
+- ne retirer aucun propriétaire historique ;
+- ne lancer aucun pré-audit de retraite de la chaîne `startConfiguredGame` ;
+- ne corriger aucun sujet QA différé ;
+- ne merger aucun changement sur `main`.
+
+Après validation utilisateur explicite seulement :
+- ouvrir un **pré-audit séparé** du premier propriétaire historique éventuellement retirable ;
+- un propriétaire à la fois ;
+- repartir du checkpoint GREEN ci-dessus ;
+- TDD / cartographie / E2E / checkpoint selon la charte ;
+- ne pas supposer que `captureFix135` est retirable : son retrait précédent a causé une régression utilisateur et la garde rollback permanente reste obligatoire.
+
+---
+
 ## CANDIDAT RUNTIME — Phase 5 / module-launch — Autorité Shell finale — 2026-09-24
 
 La bascule runtime minimale de l'autorité Shell finale est appliquée.

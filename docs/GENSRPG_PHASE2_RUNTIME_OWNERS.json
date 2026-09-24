@@ -408,6 +408,11 @@
       "owner": "GenSrpG Core Text Utils",
       "domain": "core",
       "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/shell/module-launch-final-authority-v1.js": {
+      "owner": "GenSrpG Shell Module Launch Final Authority",
+      "domain": "shell",
+      "role": "final startConfiguredGame routing authority delegating only to the public GensShellModuleLaunchV1 registry"
     }
   }
 }

@@ -29,7 +29,10 @@ const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'owner manifest must follow Pages additions while preview inherits Core storage from source index');
 
 const productionDirect=[
-  ...rawDirect.filter(x=>x!=='assets/gensrpg/gens-mobile-combat-performance-16781022.js'),
+  ...rawDirect.filter(x=>![
+    'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+  ].includes(x)),
   ...injected
 ];
 
@@ -48,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,79,'production graph size drifted before owner validation');
-assert.equal(mapped.size,79,'owner manifest must currently map all 79 production-reachable files');
+assert.equal(reachable.size,80,'production graph size drifted before owner validation');
+assert.equal(mapped.size,80,'owner manifest must currently map all 80 production-reachable files');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

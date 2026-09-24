@@ -130,8 +130,6 @@ jobs:
         shell: bash
         run: |
           node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
-          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
-          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
           node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
           node tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs
           node tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs

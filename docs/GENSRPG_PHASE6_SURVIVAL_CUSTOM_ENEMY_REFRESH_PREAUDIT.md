@@ -123,3 +123,95 @@ Procédure obligatoire :
 6. seulement ensuite inspecter l'implémentation et figer le contrat TDD.
 
 Ne pas réutiliser une ancienne copie du gros HTML, même si elle est proche du runtime courant.
+
+## Caractérisation Rule 26 — source exacte reçue
+
+Sylvain a fourni `work29.zip`.
+
+Contenu vérifié :
+- fichier : `index29.txt` ;
+- taille : 8 170 881 octets ;
+- blob Git : `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
+- correspond exactement au `index.html` du HEAD requis.
+
+### Propriétaire natif réel
+
+Le runtime contient exactement une définition native :
+
+`function refreshCustomEnemiesIntoZombieTypes()`.
+
+Sa sémantique actuelle est mixte :
+1. appeler `applyBuiltinEnemyOverrides()` ;
+2. retirer de `ZOMBIE_TYPES` les entrées `customEnemy` non `dungeonBuiltin` ;
+3. recharger `loadCustomEnemies()` et convertir chaque entrée via `customEnemyToZombieType(e)` ;
+4. appeler `ensureDungeonEnemies()` si disponible.
+
+Ce propriétaire natif n'est donc PAS encore une responsabilité Survie pure :
+- `loadCustomEnemies()` contient les créations Survie et Dungeon ;
+- `customEnemyToZombieType()` conserve `gameMode` et les stats RPG ;
+- `applyBuiltinEnemyOverrides()` construit sa base depuis `BASE_ZOMBIE_TYPES` ET `dungeonEnemies()` ;
+- `ensureDungeonEnemies()` est explicitement Dungeon.
+
+Une extraction directe de toute cette fonction vers `assets/gensrpg/survival/` est interdite : elle importerait des responsabilités Dungeon dans Survie.
+
+### Wrapper Dungeon tardif prouvé
+
+Le bloc `dungeonArtRenderFix165` réattribue globalement :
+
+`window.refreshCustomEnemiesIntoZombieTypes=function(){ const r=old.apply(this,arguments); apply(); return r; };`
+
+Raison historique indiquée par le code : réappliquer les arts Dungeon après chaque reconstruction du catalogue.
+
+Cette réattribution fait de `dungeonArtRenderFix165` le dernier propriétaire global cartographié, y compris lorsque le refresh est déclenché par un parcours Survie.
+
+### État des couches d'art plus récentes
+
+Le runtime contient aussi :
+- `dungeonGithubArts164`, qui enveloppe déjà `applyBuiltinEnemyOverrides()` et `dungeonEnemies()` pour fournir l'art Dungeon ;
+- `dungeonArtRenderFix165`, qui protège encore `activeEnemyDefinition`, `enemyCardHtml`, `openZombieRule` et `renderActiveEnemies` ;
+- `dungeonDirectImageBinding166`, dont le commentaire explicite qu'il ne dépend plus de `def.art` pour afficher les PNG GitHub et qui injecte les arts directement dans les renderers actifs.
+
+Hypothèse minimale à tester : le wrapper GLOBAL de `refreshCustomEnemiesIntoZombieTypes` dans V165 est devenu redondant, tandis que les autres protections d'art restent en place.
+
+### Consommateurs
+
+La source exacte contient de nombreux consommateurs partagés et spécifiques de mode. Le pré-audit a confirmé notamment :
+- démarrage/boot commun ;
+- lancement de profil ;
+- éditeur et bibliothèque d'ennemis ;
+- configuration/réserve/vagues Survie ;
+- résolution des apparitions ;
+- récompenses/loot ;
+- événements, rencontres, boss, codex et MJ Dungeon ;
+- rendu de règle Dungeon V166.
+
+Le micro-lot ne doit donc surtout PAS remplacer globalement tous ces appels par une API Survie.
+
+## Micro-lot retenu après caractérisation
+
+Le plus petit lot homogène est :
+**prouver puis retirer uniquement le wrapper global de `refreshCustomEnemiesIntoZombieTypes` dans `dungeonArtRenderFix165`.**
+
+Ce micro-lot ne déplace pas encore le propriétaire natif et ne traite pas encore ses dépendances mixtes `applyBuiltinEnemyOverrides/dungeonEnemies/ensureDungeonEnemies`.
+Celles-ci devront faire l'objet d'un micro-lot séparé après restauration de l'autorité native.
+
+### TDD attendu
+
+Avant toute modification runtime :
+1. caractérisation navigateur avec une fixture qui retire uniquement le wrapper V165 ;
+2. vérifier que le propriétaire natif reste callable ;
+3. vérifier qu'un ennemi personnalisé Survie est encore publié dans `ZOMBIE_TYPES` ;
+4. vérifier que les built-ins Dungeon existent toujours après refresh ;
+5. vérifier qu'un override d'art Dungeon reste visible via `activeEnemyDefinition` et `enemyCardHtml` grâce aux couches restantes ;
+6. ajouter ensuite une sentinelle statique RED exigeant l'absence du wrapper V165 ;
+7. ne modifier `index.html` qu'après preuve de caractérisation + RED isolé.
+
+### Hors périmètre du micro-lot retenu
+
+- ne pas retirer `applyBuiltinEnemyOverrides()` ;
+- ne pas retirer `ensureDungeonEnemies()` ;
+- ne pas déplacer `refreshCustomEnemiesIntoZombieTypes()` dans Survie ou Core ;
+- ne pas modifier `dungeonGithubArts164` ;
+- ne pas modifier les wrappers V165 de `activeEnemyDefinition`, `enemyCardHtml`, `openZombieRule`, `renderActiveEnemies` ;
+- ne pas modifier `dungeonDirectImageBinding166` ;
+- ne pas modifier les données ennemis, le stockage ou le gameplay.

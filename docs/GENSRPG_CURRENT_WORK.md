@@ -265,17 +265,25 @@ SHA preview :
 Lien mobile :
 `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/cdd05bc6cbc920359904ad6f814943285b9d766a/preview.html`.
 
-## Prochaine action obligatoire
+## Validation utilisateur mobile
 
-1. obtenir la validation utilisateur mobile ciblée :
-   - Survie : ennemis personnalisés + vagues ;
-   - Dungeon : built-ins, ennemis custom et arts ;
-   - transition Survie ↔ Dungeon ;
-2. ne pas rouvrir `applyBuiltinEnemyOverrides()` ni `dungeonEnemies()` dans ce lot ;
-3. après validation, enregistrer le retour utilisateur ;
-4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire de fermeture ;
-5. créer seulement ensuite le checkpoint GREEN final :
-   `checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`.
+Validation reçue le 2026-09-25 :
+`Ça a l air ok 👍`.
+
+Périmètre validé :
+- Survie : ennemis personnalisés + vagues ;
+- Dungeon : built-ins, ennemis custom et arts ;
+- transition Survie ↔ Dungeon.
+
+Aucune régression utilisateur signalée.
+
+## Fermeture GREEN — prochaine action
+
+1. ne pas rouvrir `applyBuiltinEnemyOverrides()` ni `dungeonEnemies()` dans ce lot ;
+2. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire de fermeture ;
+3. si les trois workflows sont SUCCESS, créer le checkpoint final :
+   `checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25` ;
+4. ne pas ouvrir le micro-lot suivant avant cette fermeture.
 
 ---
 

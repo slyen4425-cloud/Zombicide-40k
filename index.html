@@ -12903,7 +12903,6 @@ function refreshCustomEnemiesIntoZombieTypes(){
     if(ZOMBIE_TYPES[i]?.customEnemy && !ZOMBIE_TYPES[i]?.dungeonBuiltin)ZOMBIE_TYPES.splice(i,1);
   }
   loadCustomEnemies().forEach(e=>ZOMBIE_TYPES.push(customEnemyToZombieType(e)));
-  if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();
 }
 function isDungeonEnemyRecord(e){
   if(!e)return false;

@@ -31,7 +31,7 @@ jobs:
           data=path.read_bytes()
 
           def git_blob(buf):
-              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\\0"+buf).hexdigest()
+              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\x00"+buf).hexdigest()
 
           assert len(data)==8170815, f"unexpected source size: {len(data)}"
           assert git_blob(data)=="9c762dcb8ad3549cf7175ba9413f925b11f5396c", git_blob(data)

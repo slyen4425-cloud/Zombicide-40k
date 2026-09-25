@@ -734,6 +734,9 @@ jobs:
       - name: Vérifier le lancement Survie par le vrai Shell
         run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
 
+      - name: Vérifier la bibliothèque de compétences Survie depuis le vrai hub
+        run: node tests/gens_phase6_survival_skill_library_browser_v1.test.cjs
+
       - name: Vérifier le provider public Survival module-launch S2
         run: node tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs
 

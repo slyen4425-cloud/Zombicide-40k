@@ -234,17 +234,27 @@ SHA preview :
 Lien mobile :
 `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/a3ab2c9995912af579c6164332480d56fb451cc9/preview.html`.
 
-## Prochaine action obligatoire
+## Validation utilisateur mobile
 
-1. obtenir la validation utilisateur mobile, en particulier :
-   - ouverture du gestionnaire d'ennemis / réserve Survie ;
-   - présence correcte des ennemis/arts Survie ;
-   - vagues toujours fonctionnelles ;
-   - vérifier rapidement un parcours Dungeon avec créatures/arts ;
-2. ne pas rouvrir le propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ni `ensureDungeonEnemies()` dans ce lot ;
-3. après validation, enregistrer le retour utilisateur ;
-4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire de fermeture ;
-5. créer seulement ensuite le checkpoint GREEN final du lot.
+Validation reçue le 2026-09-25 :
+`Ok tout fonctionne bien`.
+
+Périmètre validé par l'utilisateur :
+- gestionnaire / réserve ennemis Survie fonctionnels ;
+- ennemis et arts Survie corrects ;
+- vagues fonctionnelles ;
+- parcours Dungeon et créatures/arts corrects ;
+- navigation Survie ↔ Dungeon correcte.
+
+Aucune régression utilisateur signalée.
+
+## Fermeture GREEN — prochaine action
+
+1. ne pas rouvrir le propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ni `ensureDungeonEnemies()` dans ce lot ;
+2. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire de fermeture ;
+3. si les trois workflows sont SUCCESS, créer le checkpoint final :
+   `checkpoint/gensrpg-phase6-survival-custom-enemy-refresh-green-2026-09-25` ;
+4. ne pas ouvrir le micro-lot suivant avant cette fermeture.
 
 Hors périmètre maintenu :
 - propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;

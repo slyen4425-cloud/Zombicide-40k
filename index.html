@@ -5755,6 +5755,7 @@ function closeAbilityLibrary(){const m=document.getElementById("abilityLibraryMo
 
 function renderAbilityLibraryCategories(){
   const box=document.getElementById("abilityLibraryCategories"),m=document.getElementById("abilityLibraryModal");if(!box||!m)return;
+  if(gensAbilityLibraryTab==="survival"){m.dataset.category="";box.innerHTML="";return;}
   const cur=m.dataset.category||"";
   const all=[["","📚 Toutes"],...GENSRPG_ABILITY_CATEGORIES];
   box.innerHTML=all.map(x=>'<button type="button" class="'+(cur===x[0]?'startGameBtn':'v2Btn')+'" style="margin:0;min-height:48px" onclick="setAbilityLibraryCategory(\''+x[0]+'\')">'+x[1]+'</button>').join("");
@@ -5766,6 +5767,13 @@ function setAbilityLibraryCategory(cat){
 function renderAbilityLibrary(){
   const box=document.getElementById("abilityLibraryList");if(!box)return;renderAbilityLibraryTabs();
   const cat=document.getElementById("abilityLibraryModal")?.dataset.category||"",q=String(document.getElementById("abilityLibrarySearch")?.value||"").trim().toLowerCase(),lib=gensAbilityLibraryTab||"rpg";
+  if(lib==="survival"){
+    const arr=allSelectableSkills().filter(a=>!q||String(a.name||"").toLowerCase().includes(q)||String(a.desc||"").toLowerCase().includes(q));
+    const head='<div class="hint" style="text-align:left;margin-bottom:8px"><strong>'+z40kEscHtml(gensAbilityLibraryLabel(lib))+'</strong> · compétences natives et personnalisées du mode Survie. La création/édition détaillée reste gérée par l’éditeur de héros Survie.</div>';
+    if(!arr.length){box.innerHTML=head+'<div class="empty">Aucune compétence Survie pour ce filtre.</div>';return}
+    box.innerHTML=head+arr.map(a=>'<div class="v2LibCard"><div class="v2LibHead"><strong>'+z40kEscHtml(a.name||"Compétence")+'</strong><span class="badge">'+z40kEscHtml(skillTypeLabel(a.type))+'</span></div><div class="small">'+z40kEscHtml(a.desc||"")+'</div>'+(a.native?'<div class="small" style="margin-top:4px">Compétence native Survie</div>':'<div class="small" style="margin-top:4px">Compétence personnalisée Survie</div>')+'</div>').join("");
+    return;
+  }
   const arr=loadAbilityLibrary().filter(a=>gensAbilityLibraryId(a)===lib&&gensAbilityAllowedForTarget(a,abilityLibraryTarget)&&(!cat||a.category===cat)&&(!q||String(a.name||"").toLowerCase().includes(q)||String(a.desc||"").toLowerCase().includes(q)));
   const st=loadAbilityLibrarySettings()[lib]||{};
   const head='<div class="hint" style="text-align:left;margin-bottom:8px"><strong>'+z40kEscHtml(gensAbilityLibraryLabel(lib))+'</strong> · règle par défaut : '+z40kEscHtml(st.mode==="charges"?(st.value+" charges"):st.mode==="mana"?(st.value+" Mana"):st.mode==="cooldown"?("recharge "+st.value+" tour(s)"):"Libre")+'</div>';
@@ -23700,7 +23708,7 @@ function attemptCreatureCapture(entityId){
 
 const GENSRPG_ABILITY_LIBRARY_KEY="gensrpg_ability_library_v1";
 const GENSRPG_ABILITY_LIBRARY_SETTINGS_KEY="gensrpg_ability_library_settings_v1";
-const GENSRPG_ABILITY_LIBRARIES=[["rpg","🧙 RPG"],["creature","🐲 Créatures"],["trainer","🥊 Dresseur"],["companion","🐺 Compagnons"]];
+const GENSRPG_ABILITY_LIBRARIES=[["survival","☠️ Survie"],["rpg","🧙 RPG"],["creature","🐲 Créatures"],["trainer","🥊 Dresseur"],["companion","🐺 Compagnons"]];
 function gensAbilityLibraryId(a){if(a?.libraryId)return String(a.libraryId);const u=gensAbilityUsages(a);if(a?.builtinCreature||u.includes("captureCreature"))return "creature";if(u.includes("trainer")&&!u.includes("rpgHero"))return "trainer";if(u.includes("companion")&&!u.includes("rpgHero"))return "companion";return "rpg"}
 function gensAbilityLibraryLabel(id){return (GENSRPG_ABILITY_LIBRARIES.find(x=>x[0]===id)||["","Autre"])[1]}
 function gensDefaultAbilityLibrarySettings(){return {rpg:{mode:"mana",value:0,recovery:"rest"},creature:{mode:"charges",value:10,recovery:"combat"},trainer:{mode:"cooldown",value:1,recovery:"combat"},companion:{mode:"cooldown",value:1,recovery:"combat"}}}
@@ -23709,9 +23717,25 @@ function saveAbilityLibrarySettings(x){localStorage.setItem(GENSRPG_ABILITY_LIBR
 function gensAbilityUseRule(a){const lib=gensAbilityLibraryId(a),base=loadAbilityLibrarySettings()[lib]||{mode:"free",value:0,recovery:"combat"},o=a?.useRuleOverride;return o?.enabled?{mode:o.mode||base.mode,value:Math.max(0,Number(o.value)||0),recovery:o.recovery||base.recovery,source:"custom"}:{...base,source:"library"}}
 function gensAbilityUseRuleText(a){if(a?.type!=="active")return "Passif";const r=gensAbilityUseRule(a);if(r.mode==="charges")return "🔢 "+r.value+" charge"+(r.value>1?"s":"");if(r.mode==="mana")return "🔵 "+r.value+" Mana";if(r.mode==="cooldown")return "⏱️ recharge "+r.value+" tour"+(r.value>1?"s":"");return "♾️ Libre"}
 let gensAbilityLibraryTab="rpg";
-function gensAbilityLibraryForTarget(t){if(t?.kind==="sharedEntity")return sharedEntityEditingCategory==="companion"?"companion":"creature";if(t?.kind==="trainer")return "trainer";return "rpg"}
+function gensAbilityLibraryForTarget(t){
+  if(!t){
+    try{
+      const hub=document.getElementById("editorHub");
+      if(hub&&hub.style.display!=="none"&&typeof editorHubIsRpgContext==="function"&&!editorHubIsRpgContext())return "survival";
+    }catch(e){}
+  }
+  if(t?.kind==="sharedEntity")return sharedEntityEditingCategory==="companion"?"companion":"creature";
+  if(t?.kind==="trainer")return "trainer";
+  return "rpg";
+}
 function gensSetAbilityLibraryTab(id){gensAbilityLibraryTab=id||"rpg";renderAbilityLibraryTabs();renderAbilityLibrary()}
-function renderAbilityLibraryTabs(){const h=document.getElementById("abilityLibraryTabs");if(!h)return;h.innerHTML=GENSRPG_ABILITY_LIBRARIES.map(([id,label])=>'<button type="button" class="v2Btn '+(gensAbilityLibraryTab===id?"primary":"")+'" onclick="gensSetAbilityLibraryTab(\''+id+'\')">'+label+'</button>').join("")}
+function renderAbilityLibraryTabs(){
+  const h=document.getElementById("abilityLibraryTabs");if(!h)return;
+  h.innerHTML=GENSRPG_ABILITY_LIBRARIES.map(([id,label])=>'<button type="button" class="v2Btn '+(gensAbilityLibraryTab===id?"primary":"")+'" onclick="gensSetAbilityLibraryTab(\''+id+'\')">'+label+'</button>').join("");
+  const survival=gensAbilityLibraryTab==="survival",modal=document.getElementById("abilityLibraryModal");
+  const rules=modal?.querySelector('button[onclick="gensOpenAbilityLibrarySettings()"]');if(rules)rules.style.display=survival?"none":"";
+  const add=modal?.querySelector('button[onclick="newAbilityLibraryEntry()"]');if(add)add.style.display=survival?"none":"";
+}
 function gensOpenAbilityLibrarySettings(){const id=gensAbilityLibraryTab||"rpg",all=loadAbilityLibrarySettings(),r=all[id]||{mode:"free",value:0,recovery:"combat"};const q=prompt("Mode par défaut : free / charges / mana / cooldown",r.mode);if(q===null)return;const mode=["free","charges","mana","cooldown"].includes(String(q).toLowerCase())?String(q).toLowerCase():r.mode;let value=0;if(mode!=="free"){const n=prompt(mode==="charges"?"Charges par défaut :":mode==="mana"?"Coût Mana par défaut :":"Recharge par défaut (tours) :",String(r.value||0));if(n===null)return;value=Math.max(0,Number(n)||0)}let recovery=r.recovery||"combat";if(mode==="charges"){const z=prompt("Récupération : combat / rest / manual",recovery);if(z!==null&&["combat","rest","manual"].includes(String(z).toLowerCase()))recovery=String(z).toLowerCase()}all[id]={mode,value,recovery};saveAbilityLibrarySettings(all);renderAbilityLibrary()}
 
 const GENSRPG_ABILITY_CATEGORIES=[

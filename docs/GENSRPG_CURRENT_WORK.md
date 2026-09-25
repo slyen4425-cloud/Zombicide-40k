@@ -1,3 +1,90 @@
+# PHASE 6 — MICRO-LOT — dépendance dungeonEnemies du builtin enemy refresh — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`
+
+SHA de base :
+`3853ac9a8e0704910698962ce265a75a03a46a37`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-builtin-enemy-dungeon-dependency-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-builtin-enemy-dungeon-dependency-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_BUILTIN_ENEMY_DUNGEON_DEPENDENCY_PREAUDIT.md`
+
+## Fermeture confirmée du lot précédent
+
+Le lot de retrait de la dépendance
+`refreshCustomEnemiesIntoZombieTypes() -> ensureDungeonEnemies()`
+est fermé GREEN sur :
+
+`checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`
+
+SHA final :
+`3853ac9a8e0704910698962ce265a75a03a46a37`.
+
+CI finale :
+- Architecture + Browser complet : `36191917580` — SUCCESS ;
+- Firefox : `36191917546` — SUCCESS ;
+- Tactical Dock : `36191917636` — SUCCESS.
+
+Validation utilisateur :
+`Ça a l air ok 👍`.
+
+Production `main` reste exactement gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Runtime de base du présent lot :
+- `index.html` : 8 170 402 octets ;
+- blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
+
+## Dette sélectionnée
+
+La prochaine frontière Phase 6 résiduelle est :
+`applyBuiltinEnemyOverrides() -> dungeonEnemies()`.
+
+La caractérisation du lot précédent avait montré une composition de base de forme :
+`[...BASE_ZOMBIE_TYPES, ...dungeonEnemies()]`.
+
+Cette dépendance doit être revalidée sur le runtime exact actuel avant toute décision architecturale.
+
+Le lot n'autorise PAS encore :
+- retrait de `dungeonEnemies()` ;
+- déplacement de `applyBuiltinEnemyOverrides()` ;
+- création d'un adapter ;
+- modification runtime.
+
+## Protections
+
+Ne pas toucher :
+- `refreshCustomEnemiesIntoZombieTypes()` sauf futur raccord strict prouvé ;
+- `ensureDungeonEnemies()` / `ensureDungeonContent()` ;
+- `loadBuiltinEnemyOverrides()` ;
+- `customEnemyToZombieType()` ;
+- V164/V165/V166 ;
+- stockage / éditeur ;
+- vagues/réserves ;
+- Tactical/Capture/PvP.
+
+## Prochaine action obligatoire — Rule 26
+
+1. résoudre le HEAD exact de cette branche après le présent enregistrement ;
+2. confirmer que `index.html` reste à 8 170 402 octets / blob
+   `2a7dae75115d83b4edc368c42453a7cb58d0bd73` ;
+3. fournir le permalink SHA exact à Sylvain ;
+4. demander le ZIP exact du fichier ;
+5. vérifier taille + blob ;
+6. caractériser précisément `applyBuiltinEnemyOverrides()` et son recours à `dungeonEnemies()` ;
+7. seulement ensuite choisir une cible architecturale et écrire la preuve navigateur ;
+8. aucun runtime avant caractérisation GREEN + TDD RED.
+
+Ne pas réutiliser `work30.zip` : il correspond à l'état runtime précédent.
+
+---
+
 # PHASE 6 — MICRO-LOT — retirer la dépendance ensureDungeonEnemies du refresh partagé — 2026-09-25
 
 Base GREEN :

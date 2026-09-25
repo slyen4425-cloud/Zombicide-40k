@@ -1,0 +1,72 @@
+name: One-shot Phase 6 Survival Zombicide base reserve
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-survival-zombicide-base-reserve.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25
+          fetch-depth: 0
+
+      - name: Guard and patch index.html exactly
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          data=path.read_bytes()
+
+          def git_blob(buf):
+              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\\0"+buf).hexdigest()
+
+          assert len(data)==8170815, f"unexpected source size: {len(data)}"
+          assert git_blob(data)=="9c762dcb8ad3549cf7175ba9413f925b11f5396c", git_blob(data)
+
+          old_def=b"function zombicideBaseReserve(){\\n  return {...defaultZombieConfig()};\\n}\\n"
+          old_call=b"zombicideBaseReserve()"
+          direct=b"GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig())"
+
+          assert data.count(old_def)==1, data.count(old_def)
+          assert data.count(old_call)==4, data.count(old_call)
+
+          out=data.replace(old_def,b"",1)
+          assert out.count(old_call)==3, out.count(old_call)
+          out=out.replace(old_call,direct)
+
+          assert out.count(b"function zombicideBaseReserve(")==0
+          assert out.count(old_call)==0
+          assert out.count(direct)==3
+          assert len(out)==8170881, len(out)
+          assert git_blob(out)=="f6a11fa5c0807debc0c9950cc2caf5356c97cfc8", git_blob(out)
+
+          path.write_bytes(out)
+          print("source_blob=9c762dcb8ad3549cf7175ba9413f925b11f5396c")
+          print("result_blob="+git_blob(out))
+          print("result_size="+str(len(out)))
+          print("direct_consumers="+str(out.count(direct)))
+          PY
+
+      - name: Self-delete one-shot workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-survival-zombicide-base-reserve.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/oneshot-phase6-survival-zombicide-base-reserve.yml
+          git diff --cached --check
+          git commit -m "refactor: connect Survival Zombicide base reserve"
+          git push origin HEAD:work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25

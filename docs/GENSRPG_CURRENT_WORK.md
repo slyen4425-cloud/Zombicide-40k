@@ -37,30 +37,48 @@ Ajouter une vue `Survie` au répertoire générique comme façade de lecture de 
 Aucune duplication dans `loadAbilityLibrary()`.
 Aucune modification de gameplay ou de mécanique de compétence.
 
-## TDD requis
+## TDD RED — prouvé
 
 Test navigateur réel :
 `tests/gens_phase6_survival_skill_library_browser_v1.test.cjs`.
 
-RED attendu :
-- depuis le vrai hub Survie, l'onglet actif est RPG ;
-- `Tourelle`, `Extermination`, `Soins intensifs` absents.
+SHA RED :
+`e782295b1947739a0a63859fcfc32a0ffbcfab8e`.
 
-GREEN attendu :
-- onglet Survie actif par défaut ;
-- compétences natives Survie visibles ;
-- compétence personnalisée Survie visible ;
-- onglet RPG toujours fonctionnel ;
-- aucune erreur navigateur.
+Résultat :
+- Architecture statique : SUCCESS, 232 étapes ;
+- Browser : FAILURE uniquement sur la nouvelle étape #7 ;
+- message exact : `the shared skill library must expose a Survival tab` ;
+- Firefox : SUCCESS — run `36131927031` ;
+- Tactical Dock : SUCCESS — run `36131927113` ;
+- Architecture + Browser : run `36131927063` — FAILURE attendue sur #7.
+
+La première version du test a été corrigée avant cette preuve : elle supposait à tort que `gensSelectedFamily` restait renseigné après sélection du profil. Le test final utilise le vrai propriétaire `editorHubIsRpgContext()` et le `gameStyle` du profil actif.
+
+## Rule 26
+
+Au SHA RED, `index.html` est toujours exactement :
+- 8 169 047 octets ;
+- blob `afc271f9e038f77c5c78caa9f4445d0e49eaea5d`.
+
+Le raccord sera appliqué par workflow one-shot avec garde stricte taille/blob, sans reconstruction depuis des fragments GitHub.
+
+## Correctif cible
+
+- ajouter l'onglet `☠️ Survie` au répertoire partagé ;
+- depuis le hub Survie, le sélectionner par défaut ;
+- rendre son contenu directement depuis `allSelectableSkills()` ;
+- ne rien copier dans `loadAbilityLibrary()` ;
+- masquer dans cet onglet les commandes génériques `Nouvelle compétence` / `Règles du répertoire` afin qu'elles ne créent pas une seconde source de vérité ;
+- conserver les autres onglets et leurs comportements inchangés.
 
 ## Prochaine action
 
-1. créer et brancher le test RED ;
-2. prouver le RED ;
-3. revalider le blob exact `index.html` ;
-4. appliquer la règle 26 ;
-5. corriger uniquement routage/rendu de la bibliothèque ;
-6. CI complète + preview mobile avant checkpoint GREEN.
+1. appliquer le raccord exact sur `index.html` ;
+2. rejouer le Browser RED -> GREEN ;
+3. Architecture + Browser complet, Firefox, Tactical Dock ;
+4. preview mobile ;
+5. validation utilisateur avant checkpoint GREEN.
 
 ---
 

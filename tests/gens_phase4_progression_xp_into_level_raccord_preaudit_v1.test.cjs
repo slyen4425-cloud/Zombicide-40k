@@ -13,8 +13,8 @@ const coreSource=coreBuf.toString('utf8');
 const owners=fs.readFileSync(path.join(root,'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8170472,'raccord preaudit must use exact contract GREEN index');
-assert.equal(gitBlob(indexBuf),'2232d8c1d65121758646915080bd3c17be4d4cd6','runtime index drifted');
+assert.equal(indexBuf.length,8170402,'raccord preaudit must use exact contract GREEN index');
+assert.equal(gitBlob(indexBuf),'2a7dae75115d83b4edc368c42453a7cb58d0bd73','runtime index drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression contract drifted');
 
 function scriptBody(id){

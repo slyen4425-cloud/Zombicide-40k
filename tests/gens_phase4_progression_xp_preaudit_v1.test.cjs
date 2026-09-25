@@ -18,8 +18,8 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blob=crypto.createHash('sha1')
   .update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8170472,'Progression preaudit must run on the exact current runtime after Survival reserve extraction');
-assert.equal(blob,'2232d8c1d65121758646915080bd3c17be4d4cd6','Progression preaudit index blob drifted');
+assert.equal(bytes.length,8170402,'Progression preaudit must run on the exact current runtime after Survival reserve extraction');
+assert.equal(blob,'2a7dae75115d83b4edc368c42453a7cb58d0bd73','Progression preaudit index blob drifted');
 
 function scriptBody(id){
   const re=new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

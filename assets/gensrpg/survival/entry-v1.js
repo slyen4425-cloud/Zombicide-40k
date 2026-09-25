@@ -55,6 +55,26 @@
     return reserve;
   }
 
+  function normalizeReserve(profile,reserve,defaultReserve){
+    const defaults=(defaultReserve&&typeof defaultReserve==="object")?defaultReserve:{};
+    const current=(reserve&&typeof reserve==="object")?reserve:{};
+    const out={...defaults,...current};
+    const minimums={};
+
+    (profile?.levels||[]).forEach(level=>(level?.cards||[]).forEach(card=>{
+      if(card?.kind!=="enemy"||!card?.enemy)return;
+      const id=String(card.enemy);
+      const qty=Math.max(1,Number(card.qty)||1);
+      minimums[id]=Math.max(minimums[id]||0,qty);
+    }));
+
+    Object.entries(minimums).forEach(([id,min])=>{
+      const value=Math.max(0,Number(out[id])||0);
+      if(value<=0)out[id]=Math.max(1,min);
+    });
+    return out;
+  }
+
   function zombicideBaseProfile(spawnCards,enemyTypes){
     const base=defaultProfile();
     base.enabled=true;
@@ -91,6 +111,7 @@
       defaultProfile,
       collectEnemyIds,
       autoReserve,
+      normalizeReserve,
       zombicideBaseProfile
     })
   });

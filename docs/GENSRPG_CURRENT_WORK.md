@@ -20,11 +20,11 @@ Pré-audit :
 Propriétaire inline historique :
 `normalizeWaveReserveForProfile(profile, reserve)`.
 
-État vérifié :
+État initial vérifié :
 - 1 définition inline ;
 - 4 consommateurs ;
-- runtime actuel : 8 169 503 octets ;
-- blob `index.html` : `fb8c77504ed067fb094374260b459f8d1fb7e824`.
+- runtime de départ : 8 169 503 octets ;
+- blob `index.html` de départ : `fb8c77504ed067fb094374260b459f8d1fb7e824`.
 
 Cible :
 `GensSurvivalV1.waveRules.normalizeReserve(profile, reserve, defaultReserve)`.
@@ -65,18 +65,59 @@ Commit API :
 Contrat Survie mis à jour :
 `65929d8e03cec77dda3c8afff1372ba6206baac0`.
 
-Aucun `index.html`, UI, stockage ou gameplay n'a encore été modifié dans cette étape.
+## Rule 26 — fichier exact reçu et vérifié
 
-## Rule 26 — prochaine action bloquante
+Sylvain a fourni `work23.zip`.
 
-Avant le raccord de `index.html` :
-1. résoudre le HEAD exact du micro-lot ;
-2. confirmer que `index.html` est toujours le blob `fb8c77504ed067fb094374260b459f8d1fb7e824` ;
-3. demander à Sylvain le fichier exact via permalink SHA et ZIP ;
-4. vérifier taille/blob du fichier reçu ;
-5. retirer uniquement `normalizeWaveReserveForProfile()` et raccorder ses 4 consommateurs.
+Contenu vérifié :
+- fichier : `index23.txt` ;
+- taille : 8 169 503 octets ;
+- blob Git : `fb8c77504ed067fb094374260b459f8d1fb7e824` ;
+- correspond exactement au `index.html` du HEAD requis avant raccord.
 
-Ne pas modifier le gros HTML à partir de fragments GitHub.
+## Raccord runtime
+
+Commit runtime :
+`4a76ceefc8c099d64647ea1fc0ea22e603bac926`
+(`refactor: connect Survival wave reserve normalization`).
+
+Le raccord a :
+- supprimé l'unique propriétaire inline `normalizeWaveReserveForProfile()` ;
+- raccordé exactement 4 consommateurs directs ;
+- conservé `refreshCustomEnemiesIntoZombieTypes()` au runtime historique avant chacun des 4 appels ;
+- passé `defaultZombieConfig()` explicitement à l'API pure ;
+- ajouté aucun wrapper global, fallback, timer, observer, polling ou changement UI/stockage/gameplay.
+
+Runtime après raccord :
+- `index.html` : 8 169 047 octets ;
+- blob Git : `afc271f9e038f77c5c78caa9f4445d0e49eaea5d`.
+
+Le workflow one-shot de raccord s'est auto-supprimé dans le même commit.
+
+## Réalignement des sentinelles d'empreinte
+
+La sentinelle micro-lot 5 verrouille maintenant le nouveau runtime exact :
+`53a68beb1c1ed59e7e62629e94a3f7afb648fa05`.
+
+Le manifeste inline Phase 2 a été réaligné sur le nouveau blob sans changement de cartographie métier :
+`266c782ffe5f2ec270bc7f63fd6a6d329fa1aef2`.
+
+Les sentinelles historiques déjà identifiées lors du micro-lot 4 ont été réalignées uniquement sur les constantes taille/blob du nouveau runtime :
+`d6e7cbc80f95f1d34d72f3f62787a16395f55321`.
+
+Aucune assertion fonctionnelle de ces sentinelles n'a été modifiée.
+
+## État avant CI technique finale
+
+Le présent enregistrement crée un nouveau SHA documentaire.
+Prochaine étape :
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock ;
+4. corriger uniquement d'éventuels verrous d'empreinte résiduels sans affaiblir les assertions métier ;
+5. si triple GREEN, créer/mettre à jour la preview ;
+6. obtenir validation utilisateur mobile ;
+7. seulement ensuite créer le checkpoint GREEN final du micro-lot 5.
 
 ---
 

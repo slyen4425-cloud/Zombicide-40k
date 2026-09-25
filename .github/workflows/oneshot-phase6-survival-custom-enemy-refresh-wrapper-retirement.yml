@@ -25,27 +25,21 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import base64
           import hashlib
 
           path=Path("index.html")
           data=path.read_bytes()
 
           def git_blob(buf):
-              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\x00"+buf).hexdigest()
+              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\\x00"+buf).hexdigest()
 
           assert len(data)==8170881, f"unexpected source size: {len(data)}"
           assert git_blob(data)=="f6a11fa5c0807debc0c9950cc2caf5356c97cfc8", git_blob(data)
 
-          old=b'''/* Critical fix: refreshCustomEnemiesIntoZombieTypes was rebuilding the definitions
-   after V164 had assigned their images. Apply the art AFTER every rebuild. */
-if(typeof window.refreshCustomEnemiesIntoZombieTypes==="function"){
-  const old=window.refreshCustomEnemiesIntoZombieTypes;
-  window.refreshCustomEnemiesIntoZombieTypes=function(){
-    const r=old.apply(this,arguments); apply(); return r;
-  };
-}
-'''
+          old=base64.b64decode("LyogQ3JpdGljYWwgZml4OiByZWZyZXNoQ3VzdG9tRW5lbWllc0ludG9ab21iaWVUeXBlcyB3YXMgcmVidWlsZGluZyB0aGUgZGVmaW5pdGlvbnMKICAgYWZ0ZXIgVjE2NCBoYWQgYXNzaWduZWQgdGhlaXIgaW1hZ2VzLiBBcHBseSB0aGUgYXJ0IEFGVEVSIGV2ZXJ5IHJlYnVpbGQuICovCmlmKHR5cGVvZiB3aW5kb3cucmVmcmVzaEN1c3RvbUVuZW1pZXNJbnRvWm9tYmllVHlwZXM9PT0iZnVuY3Rpb24iKXsKICBjb25zdCBvbGQ9d2luZG93LnJlZnJlc2hDdXN0b21FbmVtaWVzSW50b1pvbWJpZVR5cGVzOwogIHdpbmRvdy5yZWZyZXNoQ3VzdG9tRW5lbWllc0ludG9ab21iaWVUeXBlcz1mdW5jdGlvbigpewogICAgY29uc3Qgcj1vbGQuYXBwbHkodGhpcyxhcmd1bWVudHMpOyBhcHBseSgpOyByZXR1cm4gcjsKICB9Owp9Cg==")
 
+          assert len(old)==409
           assert data.count(old)==1, data.count(old)
           assert data.count(b"function refreshCustomEnemiesIntoZombieTypes(){")==1
           assert data.count(b"window.refreshCustomEnemiesIntoZombieTypes=function(){")==1
@@ -55,8 +49,6 @@ if(typeof window.refreshCustomEnemiesIntoZombieTypes==="function"){
           assert out.count(old)==0
           assert out.count(b"function refreshCustomEnemiesIntoZombieTypes(){")==1
           assert out.count(b"window.refreshCustomEnemiesIntoZombieTypes=function(){")==0
-
-          # Preserve the other reviewed V165 protections.
           assert b"window.gensDungeonCreatureArt165=function" in out
           assert b"window.activeEnemyDefinition=function" in out
           assert b"window.enemyCardHtml=function" in out

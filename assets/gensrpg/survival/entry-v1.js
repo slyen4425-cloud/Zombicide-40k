@@ -75,6 +75,11 @@
     return out;
   }
 
+  function zombicideBaseReserve(defaultReserve){
+    const defaults=(defaultReserve&&typeof defaultReserve==="object")?defaultReserve:{};
+    return {...defaults};
+  }
+
   function zombicideBaseProfile(spawnCards,enemyTypes){
     const base=defaultProfile();
     base.enabled=true;
@@ -112,6 +117,7 @@
       collectEnemyIds,
       autoReserve,
       normalizeReserve,
+      zombicideBaseReserve,
       zombicideBaseProfile
     })
   });

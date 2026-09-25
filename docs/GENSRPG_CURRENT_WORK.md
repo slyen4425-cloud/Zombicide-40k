@@ -1,3 +1,69 @@
+# PHASE 6 — LOT COMPÉTENCES SURVIE — bibliothèque contextuelle — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-wave-reserve-normalization-green-2026-09-25`
+
+SHA de base :
+`e5eca6948fbe2b38cc026fb4cc803a44a88e7e29`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-skill-library-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-skill-library-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_SKILL_LIBRARY_PREAUDIT.md`
+
+## Signalement
+
+En contexte Survie, `📚 COMPÉTENCES` ouvre le répertoire générique sur RPG et ne montre pas les compétences spécifiques Survie.
+
+## Diagnostic
+
+- hub : `#abilityLibraryHubCard -> openAbilityLibrary(null)` ;
+- `gensAbilityLibraryForTarget(null)` retourne `rpg` ;
+- onglets génériques : RPG / Créatures / Dresseur / Compagnons ;
+- compétences Survie toujours présentes dans `Z40K_NATIVE_SKILLS` ;
+- compétences personnalisées Survie dans `loadSkillLibrary()` ;
+- source canonique Survie : `allSelectableSkills()`.
+
+Cause : routage/présentation du hub. Les données Survie ne sont pas perdues.
+
+## Cible
+
+Ajouter une vue `Survie` au répertoire générique comme façade de lecture de `allSelectableSkills()`, sélectionnée par défaut depuis le hub Survie.
+
+Aucune duplication dans `loadAbilityLibrary()`.
+Aucune modification de gameplay ou de mécanique de compétence.
+
+## TDD requis
+
+Test navigateur réel :
+`tests/gens_phase6_survival_skill_library_browser_v1.test.cjs`.
+
+RED attendu :
+- depuis le vrai hub Survie, l'onglet actif est RPG ;
+- `Tourelle`, `Extermination`, `Soins intensifs` absents.
+
+GREEN attendu :
+- onglet Survie actif par défaut ;
+- compétences natives Survie visibles ;
+- compétence personnalisée Survie visible ;
+- onglet RPG toujours fonctionnel ;
+- aucune erreur navigateur.
+
+## Prochaine action
+
+1. créer et brancher le test RED ;
+2. prouver le RED ;
+3. revalider le blob exact `index.html` ;
+4. appliquer la règle 26 ;
+5. corriger uniquement routage/rendu de la bibliothèque ;
+6. CI complète + preview mobile avant checkpoint GREEN.
+
+---
+
 # PHASE 6 — MICRO-LOT 5 — normalisation de réserve de vagues Survie — 2026-09-25
 
 Base GREEN :

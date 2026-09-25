@@ -127,16 +127,35 @@ Browser :
 - la nouvelle étape `Vérifier la bibliothèque de compétences Survie depuis le vrai hub` est SUCCESS ;
 - Dungeon après Survie, Dungeon Builder, Capture, goMenu, Save & Quit, non-interférence des modules et autres scénarios historiques restent GREEN.
 
-## État avant preview
+## Validation utilisateur mobile
 
-Le présent enregistrement crée un nouveau SHA documentaire.
-Avant preview :
-1. refaire Architecture + Browser, Firefox et Tactical Dock sur ce SHA exact ;
-2. si triple SUCCESS, créer la preview du lot compétences Survie ;
-3. obtenir validation utilisateur mobile ;
-4. seulement ensuite créer le checkpoint GREEN final.
+Preview :
+`preview/gensrpg-phase6-survival-skill-library-2026-09-25`.
 
-Ne pas ouvrir le lot suivant avant validation utilisateur et fermeture GREEN finale.
+SHA preview validé :
+`81911d4c7cca12a0067d0bb46d79545b916b8503`.
+
+Validation utilisateur reçue le 2026-09-25 :
+`Ok c est fixée .`
+
+Résultat validé :
+- le hub Compétences en contexte Survie expose désormais l'onglet `☠️ Survie` ;
+- les compétences spécifiques Survie sont visibles ;
+- les compétences natives et personnalisées restent lues depuis la source canonique Survie ;
+- aucune seconde bibliothèque métier n'a été créée ;
+- aucun changement gameplay n'a été introduit.
+
+## Fermeture GREEN
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase6-survival-skill-library-green-2026-09-25`.
+
+Avant création du checkpoint :
+1. enregistrer cette validation ;
+2. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire final ;
+3. créer le checkpoint GREEN final uniquement si les trois workflows sont SUCCESS.
+
+Le lot suivant ne doit partir que de ce checkpoint GREEN final.
 
 ---
 

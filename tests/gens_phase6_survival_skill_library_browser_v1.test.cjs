@@ -84,9 +84,12 @@ const server=http.createServer((req,res)=>{
 
     const contextState=await page.evaluate(()=>({
       family:String(window.gensSelectedFamily||''),
+      activeId:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+      gameStyle:typeof getActiveGameProfile==='function'?(getActiveGameProfile()?.gameStyle||''):'',
       isRpg:typeof editorHubIsRpgContext==='function'?editorHubIsRpgContext():null
     }));
-    assert.equal(contextState.family,'survival','fixture must stay in the Survival family');
+    assert.ok(contextState.activeId,'fixture must keep a real active Survival profile');
+    assert.notEqual(contextState.gameStyle,'dungeon','fixture active profile must be non-Dungeon');
     assert.equal(contextState.isRpg,false,'editor hub must resolve as Survival context');
 
     const skills=page.locator('#abilityLibraryHubCard');

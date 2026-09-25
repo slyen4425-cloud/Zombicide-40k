@@ -157,14 +157,62 @@ Nouvelle cartographie explicite `window.<name>=` :
 
 Aucune assertion métier n'a été affaiblie.
 
-## Prochaine action obligatoire — GREEN technique
+## Réalignement de cartographie complémentaire
 
-1. lancer Architecture + Browser complet, Firefox et Tactical Dock sur le présent SHA documentaire ;
-2. vérifier spécialement Phase 6 #170 à #176 ;
-3. si une sentinelle métier casse, arrêter et diagnostiquer avant toute correction ;
-4. si les trois workflows sont SUCCESS, créer une branche preview dédiée depuis le SHA technique/documentaire exact ;
-5. fournir le lien mobile à Sylvain ;
-6. attendre validation utilisateur avant fermeture/checkpoint GREEN final.
+La première CI post-raccord a détecté une seule garde historique restante :
+`tests/gens_phase2_layered_responsibilities_v11411.test.cjs`
+attendait encore 435 lignes dans la table des derniers propriétaires.
+
+Cause :
+- la suppression du wrapper V165 retire complètement `refreshCustomEnemiesIntoZombieTypes` de la table des affectations explicites `window.<name>=` ;
+- le nouveau total correct est donc 434.
+
+Correction strictement documentaire/test :
+`663266a88ca8db9351725ecb9923a9fd9d05a461`
+(`test: align Phase 2 layered owner table size`).
+
+Aucun runtime n'a été modifié par cette correction.
+
+## CI technique GREEN
+
+SHA technique testé :
+`663266a88ca8db9351725ecb9923a9fd9d05a461`.
+
+Runs :
+- Architecture + Browser complet : `36176196852` — SUCCESS ;
+- Firefox : `36176196849` — SUCCESS ;
+- Tactical Dock : `36176196874` — SUCCESS.
+
+Architecture statique :
+- Phase 6 #170 à #176 : SUCCESS ;
+- #176 `Retirer le wrapper Dungeon du refresh des ennemis personnalisés Phase 6` : SUCCESS ;
+- toutes les sentinelles Architecture : SUCCESS.
+
+Browser complet :
+- scénario dédié `Vérifier le refresh ennemi sans wrapper Dungeon V165` : SUCCESS ;
+- lancement Survie et provider Survie : SUCCESS ;
+- Fouiller / arts Survie : SUCCESS ;
+- goMenu : SUCCESS ;
+- Dungeon après Survie : SUCCESS ;
+- Dungeon map -> Tactical V2 : SUCCESS ;
+- Capture victoire + reprise inter-module : SUCCESS ;
+- Builder / Config objet : SUCCESS ;
+- fiche RPG / openChar : SUCCESS ;
+- Save & Quit / reprise : SUCCESS ;
+- Dungeon provider, PvP, Monster Capture, Capture provider : SUCCESS ;
+- résolution d'assets / Equipment : SUCCESS.
+
+Firefox : SUCCESS.
+Tactical Dock contrat + Chromium + Firefox : SUCCESS.
+
+## Prochaine action obligatoire — fermeture technique avant preview
+
+1. le présent enregistrement documentaire crée un nouveau SHA ;
+2. refaire Architecture + Browser, Firefox et Tactical Dock sur ce SHA documentaire exact ;
+3. si triple SUCCESS, créer la branche preview dédiée :
+   `preview/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25` ;
+4. fournir le lien mobile exact à Sylvain ;
+5. attendre validation utilisateur avant tout checkpoint GREEN final.
 
 Hors périmètre maintenu :
 - propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;

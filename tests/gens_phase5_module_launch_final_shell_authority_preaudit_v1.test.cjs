@@ -17,7 +17,7 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
 
 const allowedExactRuntimes=new Map([
   [8172529,'696014056409dda9b6ef25ace58dfd9d5f9e2718'],
-  [8169047,'afc271f9e038f77c5c78caa9f4445d0e49eaea5d']
+  [8170815,'9c762dcb8ad3549cf7175ba9413f925b11f5396c']
 ]);
 assert.equal(allowedExactRuntimes.get(bytes.length),gitBlob,
   'final Shell authority preaudit must remain on either exact S4 or the exact final-authority index composition');

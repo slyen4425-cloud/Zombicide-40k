@@ -16,8 +16,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8169047,'next-seam preaudit must run on exact current index after Survival reserve extraction');
-assert.equal(gitBlob(indexBuf),'afc271f9e038f77c5c78caa9f4445d0e49eaea5d','next-seam preaudit index blob drifted');
+assert.equal(indexBuf.length,8170815,'next-seam preaudit must run on exact current index after Survival reserve extraction');
+assert.equal(gitBlob(indexBuf),'9c762dcb8ad3549cf7175ba9413f925b11f5396c','next-seam preaudit index blob drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

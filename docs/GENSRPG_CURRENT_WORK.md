@@ -165,15 +165,59 @@ Contrôle du diff :
 - hors workflow one-shot auto-supprimé, toutes les lignes ajoutées/supprimées du commit de réalignement ne changent que taille/blob ;
 - aucune autre modification détectée.
 
+## CI technique GREEN
+
+SHA technique/documentaire testé :
+`f7aec2e5a1be3a6c47bb023ae4d07d12cc40c191`.
+
+Runs sur ce SHA exact :
+- Architecture + Browser complet : `36153683450` — SUCCESS ;
+- Firefox : `36153683317` — SUCCESS ;
+- Tactical Dock : `36153683553` — SUCCESS.
+
+Architecture statique :
+- Phase 6 #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS ;
+- #174 : SUCCESS ;
+- #175 `Extraire la réserve Zombicide de base vers le module Survie Phase 6` : SUCCESS ;
+- toutes les étapes Architecture jusqu'à #231 sont SUCCESS.
+
+Browser complet :
+- lancement Survie : SUCCESS ;
+- bibliothèque Compétences Survie : SUCCESS ;
+- héros Survie après Dungeon : SUCCESS ;
+- Fouiller / arts Survie : SUCCESS ;
+- goMenu : SUCCESS ;
+- Dungeon map -> Tactical V2 : SUCCESS ;
+- Capture victoire + reprise inter-module : SUCCESS ;
+- Dungeon après Survie : SUCCESS ;
+- Dungeon Builder / Config objet : SUCCESS ;
+- Save & Quit / reprise : SUCCESS ;
+- Capture / PvP / non-interférence quatre modules : SUCCESS ;
+- preview Chromium / assets / Equipment : SUCCESS.
+
+## Preview utilisateur
+
+Branche dédiée :
+`preview/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25`.
+
+SHA preview :
+`f7aec2e5a1be3a6c47bb023ae4d07d12cc40c191`.
+
+Lien mobile exact :
+`https://raw.githack.com/slyen4425-cloud/Zombicide-40k/f7aec2e5a1be3a6c47bb023ae4d07d12cc40c191/preview.html`.
+
 ## Prochaine action obligatoire
 
-1. utiliser le présent commit documentaire pour déclencher la CI complète sur l'état runtime + empreintes réalignées ;
-2. exiger Architecture + Browser complet GREEN ;
-3. exiger Firefox GREEN ;
-4. exiger Tactical Dock GREEN ;
-5. si une sentinelle métier casse, arrêter et diagnostiquer sans l'affaiblir ;
-6. après triple GREEN, créer une branche preview dédiée depuis le SHA technique/documentaire exact et fournir le lien de test mobile à Sylvain ;
-7. attendre la validation utilisateur avant fermeture et checkpoint GREEN final.
+1. obtenir la validation utilisateur mobile du comportement Survie/vagues ;
+2. ne pas rouvrir les compétences Survie ni les autres modules sans régression objective ;
+3. après validation, enregistrer le retour utilisateur dans CURRENT_WORK ;
+4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire final ;
+5. créer seulement ensuite le checkpoint final
+   `checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`
+   sur le SHA final exact ;
+6. ne pas ouvrir le micro-lot suivant avant cette fermeture.
 
 ---
 

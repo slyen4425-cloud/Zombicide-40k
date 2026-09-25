@@ -106,19 +106,32 @@ Le Browser complet valide notamment :
 - Save & Quit / reprise ;
 - non-interférence des quatre modules.
 
-## État avant preview
+## Validation finale
 
-Le présent enregistrement crée un nouveau SHA documentaire.
-Avant preview :
-1. refaire Architecture + Browser, Firefox et Tactical Dock sur ce nouveau SHA ;
-2. si triple SUCCESS, créer/mettre à jour la preview du micro-lot 4 ;
-3. obtenir validation utilisateur mobile ;
-4. seulement ensuite documenter la validation et créer le checkpoint GREEN FINAL.
+SHA documentaire / preview validé :
+`05a420d3aa2da5e87ec5dd540f5997061e0e3278`.
 
-Nom recommandé :
+CI sur ce SHA exact :
+- Architecture + Browser complet : `36116909768` — SUCCESS ;
+- Firefox : `36116909744` — SUCCESS ;
+- Tactical Dock : `36116909694` — SUCCESS.
+
+Preview :
+`preview/gensrpg-phase6-survival-wave-auto-reserve-2026-09-25`.
+
+Validation utilisateur mobile reçue le 2026-09-25 :
+`Je valide. Tout semble ok`.
+
+État :
+- runtime validé ;
+- CI triple GREEN ;
+- validation mobile GREEN ;
+- micro-lot 4 prêt pour checkpoint GREEN FINAL.
+
+Checkpoint final :
 `checkpoint/gensrpg-phase6-survival-wave-auto-reserve-green-2026-09-25`.
 
-Ne pas ouvrir le micro-lot suivant avant validation utilisateur et fermeture GREEN finale.
+Le micro-lot suivant ne doit partir que de ce checkpoint GREEN final.
 
 ---
 

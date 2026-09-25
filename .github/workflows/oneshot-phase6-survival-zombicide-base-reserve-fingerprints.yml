@@ -1,0 +1,93 @@
+name: One-shot Phase 6 Survival base reserve fingerprints
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-survival-zombicide-base-reserve-fingerprints.yml
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25
+          fetch-depth: 0
+
+      - name: Align exact runtime fingerprints only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          index=Path("index.html").read_bytes()
+          blob=hashlib.sha1(b"blob "+str(len(index)).encode()+bytes([0])+index).hexdigest()
+          assert len(index)==8170881, len(index)
+          assert blob=="f6a11fa5c0807debc0c9950cc2caf5356c97cfc8", blob
+
+          old_blob="9c762dcb8ad3549cf7175ba9413f925b11f5396c"
+          new_blob="f6a11fa5c0807debc0c9950cc2caf5356c97cfc8"
+          old_size="8170815"
+          new_size="8170881"
+
+          changed=[]
+
+          for p in sorted(Path("tests").glob("*.cjs")):
+              text=p.read_text(encoding="utf-8")
+              if old_blob not in text:
+                  continue
+              updated=text.replace(old_blob,new_blob)
+              if old_size in updated:
+                  updated=updated.replace(old_size,new_size)
+              if updated==text:
+                  raise SystemExit(f"{p}: expected fingerprint-only change")
+              p.write_text(updated,encoding="utf-8")
+              changed.append(str(p))
+
+          docs=[
+            Path("docs/GENSRPG_PHASE2_INLINE_OWNERS.json"),
+            Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv"),
+            Path("docs/GENSRPG_PHASE2_STORAGE_OWNERS.json"),
+            Path("docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json"),
+          ]
+          for p in docs:
+              text=p.read_text(encoding="utf-8")
+              if old_blob not in text:
+                  continue
+              updated=text.replace(old_blob,new_blob)
+              if old_size in updated:
+                  updated=updated.replace(old_size,new_size)
+              p.write_text(updated,encoding="utf-8")
+              changed.append(str(p))
+
+          target="tests/gens_phase6_survival_zombicide_base_reserve_v1.test.cjs"
+          assert target in changed, changed
+          assert changed, "No previous runtime fingerprints found to align"
+
+          forbidden=[p for p in changed if not (p.startswith("tests/") or p.startswith("docs/"))]
+          if forbidden:
+              raise SystemExit(f"Unexpected non-test/doc changes: {forbidden}")
+
+          print("Aligned fingerprint-only files:",len(changed))
+          for p in changed:
+              print(p)
+          PY
+
+      - name: Commit fingerprint alignment and remove one-shot
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-survival-zombicide-base-reserve-fingerprints.yml
+          git config user.name "gensrpg-architecture-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A tests docs .github/workflows/oneshot-phase6-survival-zombicide-base-reserve-fingerprints.yml
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "test: align fingerprints after Survival base reserve raccord"
+          git push origin HEAD:work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25

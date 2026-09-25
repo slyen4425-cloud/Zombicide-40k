@@ -248,13 +248,41 @@ Périmètre validé par l'utilisateur :
 
 Aucune régression utilisateur signalée.
 
-## Fermeture GREEN — prochaine action
+## CI finale après validation utilisateur — GREEN
 
-1. ne pas rouvrir le propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ni `ensureDungeonEnemies()` dans ce lot ;
-2. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire de fermeture ;
-3. si les trois workflows sont SUCCESS, créer le checkpoint final :
-   `checkpoint/gensrpg-phase6-survival-custom-enemy-refresh-green-2026-09-25` ;
-4. ne pas ouvrir le micro-lot suivant avant cette fermeture.
+SHA documentaire validé :
+`10cff9dcd25859eb27f5a9354d1c886647dfac4e`.
+
+Runs :
+- Architecture + Browser complet : `36180446525` — SUCCESS ;
+- Firefox : `36180446637` — SUCCESS ;
+- Tactical Dock : `36180446681` — SUCCESS.
+
+Architecture statique :
+- toutes les sentinelles : SUCCESS ;
+- Phase 6 #170 à #176 : SUCCESS ;
+- #176 `Retirer le wrapper Dungeon du refresh des ennemis personnalisés Phase 6` : SUCCESS.
+
+Browser complet :
+- scénario dédié `Vérifier le refresh ennemi sans wrapper Dungeon V165` : SUCCESS ;
+- Survie, compétences, Fouiller/arts, goMenu, Dungeon après Survie, Tactical, Capture, PvP, Builder, Config objet, openChar, Save & Quit, assets/Equipment et non-interférence : SUCCESS.
+
+Firefox : SUCCESS.
+Tactical Dock contrat + Chromium + Firefox : SUCCESS.
+
+## Fermeture GREEN
+
+Runtime final du lot :
+- `index.html` : 8 170 472 octets ;
+- blob Git : `2232d8c1d65121758646915080bd3c17be4d4cd6`.
+
+Validation utilisateur :
+`Ok tout fonctionne bien`.
+
+Checkpoint final à créer après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-refresh-green-2026-09-25`.
+
+Le micro-lot suivant ne doit partir que de ce checkpoint GREEN final.
 
 Hors périmètre maintenu :
 - propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;

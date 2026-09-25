@@ -1,3 +1,44 @@
+# PHASE 6 — MICRO-LOT 3 — profil Zombicide de base vers règles Survie — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-wave-rules-entry-green-2026-09-25`
+
+SHA de base :
+`48d9af75913e9208d74d73a655a6b5fded2da7dc`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-zombicide-base-wave-profile-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-zombicide-base-wave-profile-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_ZOMBICIDE_BASE_WAVE_PROFILE_PREAUDIT.md`
+
+Candidat homogène :
+- propriétaire inline historique `zombicideBaseWaveProfile()` ;
+- responsabilité : convertir `BP_SPAWN_CARDS` vers le profil de vagues éditable Survie ;
+- exactement 3 consommateurs historiques ;
+- cible : `GensSurvivalV1.waveRules.zombicideBaseProfile(spawnCards, enemyTypes)`.
+
+Contraintes :
+- parité exacte des cartes / seuils / couleurs / fallback Walker ;
+- aucune UI, aucun stockage, aucun changement gameplay ;
+- aucun appel Dungeon/Tactical/Capture/PvP ;
+- aucun wrapper global ;
+- TDD RED avant runtime ;
+- Rule 26 : demander l’index exact du HEAD avant tout raccord du fichier lourd.
+
+TDD :
+`tests/gens_phase6_survival_zombicide_base_wave_profile_v1.test.cjs`
+
+État :
+- pré-audit écrit ;
+- sentinelle RED ajoutée et raccordée à Architecture ;
+- aucun runtime modifié dans ce micro-lot à ce stade.
+
+---
+
 # PHASE 6 — MICRO-LOT 2 — activation entrée Survie / règles de vagues pures — 2026-09-25
 
 Base GREEN :

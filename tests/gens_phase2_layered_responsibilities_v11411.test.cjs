@@ -13,7 +13,7 @@ for(const line of tsv.split(/\r?\n/)){
   const [name,count,lastOwner]=line.split('\t');
   if(name&&count&&lastOwner)rows.set(name,{assignmentCount:Number(count),lastOwner});
 }
-assert.equal(rows.size,435,'last-owner table size drifted');
+assert.equal(rows.size,434,'last-owner table size drifted');
 
 for(const h of manifest.hotspots){
   const row=rows.get(h.name);

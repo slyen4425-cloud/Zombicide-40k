@@ -1,3 +1,82 @@
+# PHASE 6 — MICRO-LOT — propriété du refresh ennemis personnalisés Survie — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`
+
+SHA de base :
+`d7c2e2faf54505438b95892a6d1e41a2fef30455`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-custom-enemy-refresh-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_REFRESH_PREAUDIT.md`
+
+## Fermeture confirmée du lot précédent
+
+Le lot `zombicideBaseReserve()` est fermé GREEN sur :
+`checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`.
+
+Checkpoint et SHA final sont identiques :
+`d7c2e2faf54505438b95892a6d1e41a2fef30455`.
+
+CI finale sur ce SHA :
+- Architecture + Browser complet : `36158105234` — SUCCESS ;
+- Firefox : `36158105133` — SUCCESS ;
+- Tactical Dock : `36158105069` — SUCCESS.
+
+Runtime de base du présent lot :
+- `index.html` : 8 170 881 octets ;
+- blob Git : `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8`.
+
+Production `main` reste exactement gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Dette sélectionnée
+
+La cartographie Phase 2 courante attribue encore :
+`refreshCustomEnemiesIntoZombieTypes    2    dungeonArtRenderFix165`.
+
+Le test GREEN de normalisation des réserves prouve par ailleurs quatre callsites historiques qui exécutent ce refresh avant l'API pure Survie `waveRules.normalizeReserve`.
+
+Cette responsabilité est donc un candidat direct Phase 6 car elle reste possédée par une couche Dungeon alors qu'elle alimente le catalogue ennemi Survie/Zombicide.
+
+Le lot ne traite PAS `openZombieRule`, même si la cartographie l'attribue encore à `dungeonDirectImageBinding166`.
+
+## État du lot
+
+- checkpoint de départ : créé depuis le checkpoint GREEN précédent ;
+- branche dédiée : créée depuis exactement ce checkpoint ;
+- pré-audit : écrit ;
+- aucune modification runtime ;
+- aucune API cible inventée avant inspection de la source exacte ;
+- aucun TDD RED encore ajouté : il sera défini après caractérisation exacte du propriétaire.
+
+## Prochaine action obligatoire — Rule 26
+
+Le contenu exact de `index.html` est nécessaire pour caractériser :
+- définition(s) exacte(s) ;
+- consommateurs ;
+- mutations du catalogue ;
+- source des ennemis personnalisés ;
+- stockage/UI éventuels ;
+- dépendances Dungeon réelles.
+
+Avant cette inspection :
+1. résoudre le HEAD exact de cette branche ;
+2. confirmer que le gros HTML reste à 8 170 881 octets / blob `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
+3. fournir le permalink SHA exact à Sylvain ;
+4. demander le ZIP exact ;
+5. vérifier le fichier reçu ;
+6. seulement ensuite figer le contrat cible et écrire le TDD RED.
+
+Aucun runtime ne doit être modifié avant cette caractérisation.
+
+---
+
 # PHASE 6 — MICRO-LOT — réserve Zombicide de base Survie — 2026-09-25
 
 Base GREEN :

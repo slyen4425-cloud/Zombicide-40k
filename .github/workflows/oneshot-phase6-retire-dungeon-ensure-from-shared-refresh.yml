@@ -1,0 +1,73 @@
+name: One-shot Phase 6 retire Dungeon ensure from shared refresh
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-retire-dungeon-ensure-from-shared-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+          fetch-depth: 0
+
+      - name: Guard and patch exact runtime
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          OLD_SIZE=8170472
+          OLD_BLOB="2232d8c1d65121758646915080bd3c17be4d4cd6"
+          NEW_SIZE=8170402
+          NEW_BLOB="2a7dae75115d83b4edc368c42453a7cb58d0bd73"
+          target=Path("index.html")
+          data=target.read_bytes()
+          blob=hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+          assert len(data)==OLD_SIZE,(len(data),OLD_SIZE)
+          assert blob==OLD_BLOB,(blob,OLD_BLOB)
+
+          old=b'  if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();\n'
+          assert data.count(old)==1,data.count(old)
+
+          new=data.replace(old,b'',1)
+          new_blob=hashlib.sha1(b"blob "+str(len(new)).encode()+b"\0"+new).hexdigest()
+          assert len(new)==NEW_SIZE,(len(new),NEW_SIZE)
+          assert new_blob==NEW_BLOB,(new_blob,NEW_BLOB)
+          text=new.decode("utf-8")
+          start=text.index("function refreshCustomEnemiesIntoZombieTypes(){")
+          end=text.index("function isDungeonEnemyRecord(",start)
+          body=text[start:end]
+          assert "ensureDungeonEnemies" not in body
+          assert "applyBuiltinEnemyOverrides();" in body
+          assert "loadCustomEnemies().forEach" in body
+          assert text.count("function ensureDungeonEnemies(){")==1
+          assert "function ensureDungeonContent(){ensureDungeonHeroes();ensureDungeonItems();ensureDungeonEnemies()}" in text
+
+          target.write_bytes(new)
+          print("old_size",OLD_SIZE)
+          print("old_blob",OLD_BLOB)
+          print("new_size",NEW_SIZE)
+          print("new_blob",NEW_BLOB)
+          PY
+
+      - name: Commit runtime patch and self-delete
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-retire-dungeon-ensure-from-shared-refresh.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/oneshot-phase6-retire-dungeon-ensure-from-shared-refresh.yml
+          git diff --cached --check
+          git commit -m "refactor: retire Dungeon ensure from shared custom enemy refresh"
+          git push origin HEAD:work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25

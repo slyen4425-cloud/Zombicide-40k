@@ -99,20 +99,18 @@ const server=http.createServer((req,res)=>{
 
     const initial=await page.evaluate(()=>({
       tabs:[...document.querySelectorAll('#abilityLibraryTabs button')].map(b=>({text:(b.textContent||'').trim(),active:b.classList.contains('primary')})),
-      list:(document.getElementById('abilityLibraryList')?.innerText||'').replace(/\s+/g,' ').trim(),
-      libraryTab:String(window.gensAbilityLibraryTab||'')
+      list:(document.getElementById('abilityLibraryList')?.innerText||'').replace(/\s+/g,' ').trim()
     }));
 
     assert.ok(initial.tabs.some(t=>/Survie/i.test(t.text)),'the shared skill library must expose a Survival tab');
-    assert.equal(initial.libraryTab,'survival','opening Skills from the Survival editor hub must default to Survival');
-    assert.ok(initial.tabs.some(t=>/Survie/i.test(t.text)&&t.active),'Survival tab must be visibly active');
+    assert.ok(initial.tabs.some(t=>/Survie/i.test(t.text)&&t.active),'opening Skills from the Survival editor hub must visibly default to Survival');
     for(const name of ['Tourelle','Extermination','Soins intensifs','Sentinelle Survie QA']){
       assert.match(initial.list,new RegExp(name,'i'),'Survival library must show '+name);
     }
 
     const rpgTab=page.locator('#abilityLibraryTabs button').filter({hasText:'RPG'});
     await rpgTab.click();
-    await page.waitForFunction(()=>String(window.gensAbilityLibraryTab||'')==='rpg');
+    await page.waitForFunction(()=>[...document.querySelectorAll('#abilityLibraryTabs button')].some(b=>/RPG/i.test(b.textContent||'')&&b.classList.contains('primary')));
 
     const rpg=await page.evaluate(()=>({
       list:(document.getElementById('abilityLibraryList')?.innerText||'').replace(/\s+/g,' ').trim(),

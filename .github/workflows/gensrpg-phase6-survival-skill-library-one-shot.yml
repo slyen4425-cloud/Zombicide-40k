@@ -1,0 +1,131 @@
+name: GenSrpG one-shot Phase 6 Survival skill library
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-skill-library-2026-09-25
+    paths:
+      - .github/workflows/gensrpg-phase6-survival-skill-library-one-shot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-skill-library-2026-09-25
+          fetch-depth: 0
+
+      - name: Patch exact verified index
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          p=Path("index.html")
+          data=p.read_bytes()
+          blob=hashlib.sha1(f"blob {len(data)}\0".encode()+data).hexdigest()
+          expected_size=8169047
+          expected_blob="afc271f9e038f77c5c78caa9f4445d0e49eaea5d"
+          if len(data)!=expected_size or blob!=expected_blob:
+              raise SystemExit(f"Refusing patch: index mismatch size={len(data)} blob={blob}")
+
+          text=data.decode("utf-8")
+
+          old='const GENSRPG_ABILITY_LIBRARIES=[["rpg","🧙 RPG"],["creature","🐲 Créatures"],["trainer","🥊 Dresseur"],["companion","🐺 Compagnons"]];'
+          new='const GENSRPG_ABILITY_LIBRARIES=[["survival","☠️ Survie"],["rpg","🧙 RPG"],["creature","🐲 Créatures"],["trainer","🥊 Dresseur"],["companion","🐺 Compagnons"]];'
+          if text.count(old)!=1:
+              raise SystemExit(f"Ability library list guard failed: {text.count(old)}")
+          text=text.replace(old,new,1)
+
+          old='function gensAbilityLibraryForTarget(t){if(t?.kind==="sharedEntity")return sharedEntityEditingCategory==="companion"?"companion":"creature";if(t?.kind==="trainer")return "trainer";return "rpg"}'
+          new='''function gensAbilityLibraryForTarget(t){
+            if(!t){
+              try{
+                const hub=document.getElementById("editorHub");
+                if(hub&&hub.style.display!=="none"&&typeof editorHubIsRpgContext==="function"&&!editorHubIsRpgContext())return "survival";
+              }catch(e){}
+            }
+            if(t?.kind==="sharedEntity")return sharedEntityEditingCategory==="companion"?"companion":"creature";
+            if(t?.kind==="trainer")return "trainer";
+            return "rpg";
+          }'''
+          if text.count(old)!=1:
+              raise SystemExit(f"Ability target routing guard failed: {text.count(old)}")
+          text=text.replace(old,new,1)
+
+          old='function renderAbilityLibraryTabs(){const h=document.getElementById("abilityLibraryTabs");if(!h)return;h.innerHTML=GENSRPG_ABILITY_LIBRARIES.map(([id,label])=>\'<button type="button" class="v2Btn \'+(gensAbilityLibraryTab===id?"primary":"")+\'" onclick="gensSetAbilityLibraryTab(\\\'\'+id+\'\\\')">\'+label+\'</button>\').join("")}'
+          new='''function renderAbilityLibraryTabs(){
+            const h=document.getElementById("abilityLibraryTabs");if(!h)return;
+            h.innerHTML=GENSRPG_ABILITY_LIBRARIES.map(([id,label])=>'<button type="button" class="v2Btn '+(gensAbilityLibraryTab===id?"primary":"")+'" onclick="gensSetAbilityLibraryTab(\\''+id+'\\')">'+label+'</button>').join("");
+            const survival=gensAbilityLibraryTab==="survival",modal=document.getElementById("abilityLibraryModal");
+            const rules=modal?.querySelector('button[onclick="gensOpenAbilityLibrarySettings()"]');if(rules)rules.style.display=survival?"none":"";
+            const add=modal?.querySelector('button[onclick="newAbilityLibraryEntry()"]');if(add)add.style.display=survival?"none":"";
+          }'''
+          if text.count(old)!=1:
+              raise SystemExit(f"Ability tabs guard failed: {text.count(old)}")
+          text=text.replace(old,new,1)
+
+          old='''function renderAbilityLibraryCategories(){
+            const box=document.getElementById("abilityLibraryCategories"),m=document.getElementById("abilityLibraryModal");if(!box||!m)return;
+            const cur=m.dataset.category||"";
+            const all=[["","📚 Toutes"],...GENSRPG_ABILITY_CATEGORIES];
+            box.innerHTML=all.map(x=>'<button type="button" class="'+(cur===x[0]?'startGameBtn':'v2Btn')+'" style="margin:0;min-height:48px" onclick="setAbilityLibraryCategory(\\''+x[0]+'\\')">'+x[1]+'</button>').join("");
+          }'''
+          new='''function renderAbilityLibraryCategories(){
+            const box=document.getElementById("abilityLibraryCategories"),m=document.getElementById("abilityLibraryModal");if(!box||!m)return;
+            if(gensAbilityLibraryTab==="survival"){m.dataset.category="";box.innerHTML="";return;}
+            const cur=m.dataset.category||"";
+            const all=[["","📚 Toutes"],...GENSRPG_ABILITY_CATEGORIES];
+            box.innerHTML=all.map(x=>'<button type="button" class="'+(cur===x[0]?'startGameBtn':'v2Btn')+'" style="margin:0;min-height:48px" onclick="setAbilityLibraryCategory(\\''+x[0]+'\\')">'+x[1]+'</button>').join("");
+          }'''
+          if text.count(old)!=1:
+              raise SystemExit(f"Ability categories guard failed: {text.count(old)}")
+          text=text.replace(old,new,1)
+
+          old='''  const cat=document.getElementById("abilityLibraryModal")?.dataset.category||"",q=String(document.getElementById("abilityLibrarySearch")?.value||"").trim().toLowerCase(),lib=gensAbilityLibraryTab||"rpg";
+            const arr=loadAbilityLibrary().filter(a=>gensAbilityLibraryId(a)===lib&&gensAbilityAllowedForTarget(a,abilityLibraryTarget)&&(!cat||a.category===cat)&&(!q||String(a.name||"").toLowerCase().includes(q)||String(a.desc||"").toLowerCase().includes(q)));'''
+          new='''  const cat=document.getElementById("abilityLibraryModal")?.dataset.category||"",q=String(document.getElementById("abilityLibrarySearch")?.value||"").trim().toLowerCase(),lib=gensAbilityLibraryTab||"rpg";
+            if(lib==="survival"){
+              const arr=allSelectableSkills().filter(a=>!q||String(a.name||"").toLowerCase().includes(q)||String(a.desc||"").toLowerCase().includes(q));
+              const head='<div class="hint" style="text-align:left;margin-bottom:8px"><strong>'+z40kEscHtml(gensAbilityLibraryLabel(lib))+'</strong> · compétences natives et personnalisées du mode Survie. La création/édition détaillée reste gérée par l’éditeur de héros Survie.</div>';
+              if(!arr.length){box.innerHTML=head+'<div class="empty">Aucune compétence Survie pour ce filtre.</div>';return}
+              box.innerHTML=head+arr.map(a=>'<div class="v2LibCard"><div class="v2LibHead"><strong>'+z40kEscHtml(a.name||"Compétence")+'</strong><span class="badge">'+z40kEscHtml(skillTypeLabel(a.type))+'</span></div><div class="small">'+z40kEscHtml(a.desc||"")+'</div>'+(a.native?'<div class="small" style="margin-top:4px">Compétence native Survie</div>':'<div class="small" style="margin-top:4px">Compétence personnalisée Survie</div>')+'</div>').join("");
+              return;
+            }
+            const arr=loadAbilityLibrary().filter(a=>gensAbilityLibraryId(a)===lib&&gensAbilityAllowedForTarget(a,abilityLibraryTarget)&&(!cat||a.category===cat)&&(!q||String(a.name||"").toLowerCase().includes(q)||String(a.desc||"").toLowerCase().includes(q)));'''
+          if text.count(old)!=1:
+              raise SystemExit(f"Ability render guard failed: {text.count(old)}")
+          text=text.replace(old,new,1)
+
+          if text.count('["survival","☠️ Survie"]')!=1:
+              raise SystemExit("Survival ability tab must exist exactly once")
+          if text.count('return "survival"')<1:
+              raise SystemExit("Survival ability routing missing")
+          if text.count("const Z40K_NATIVE_SKILLS=")!=1:
+              raise SystemExit("Survival native skill owner must remain unique")
+          if "localStorage.setItem(GENSRPG_ABILITY_LIBRARY_KEY" not in text:
+              raise SystemExit("Generic ability library owner unexpectedly changed")
+
+          out=text.encode("utf-8")
+          out_blob=hashlib.sha1(f"blob {len(out)}\0".encode()+out).hexdigest()
+          if len(out)!=8170815 or out_blob!="9c762dcb8ad3549cf7175ba9413f925b11f5396c":
+              raise SystemExit(f"Unexpected patched index size={len(out)} blob={out_blob}")
+          p.write_bytes(out)
+          print("Patched Survival skill library:",len(out),out_blob)
+          PY
+
+      - name: Commit runtime and remove one-shot
+        shell: bash
+        run: |
+          rm .github/workflows/gensrpg-phase6-survival-skill-library-one-shot.yml
+          git config user.name "gensrpg-architecture-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A index.html .github/workflows/gensrpg-phase6-survival-skill-library-one-shot.yml
+          git commit -m "fix: route Survival skill library in editor hub"
+          git push origin HEAD:work/gensrpg-phase6-survival-skill-library-2026-09-25

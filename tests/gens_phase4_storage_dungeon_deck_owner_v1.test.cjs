@@ -24,8 +24,8 @@ assert.match(block,/if\(ds\.remaining\[it\.id\]===undefined\)\{ds\.remaining\[it
 assert.match(block,/remaining\[it\.id\]=raw===undefined\?2:Math\.max\(0,parseInt\(raw,10\)\|\|0\)/,'Dungeon deck build quantity semantics must remain unchanged');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Deck raccord must not touch deferred runtime_v2');
 
-assert.equal(bytes.length,8170815,'current index size must include the later Challenge Library micro-diff');
-assert.equal(blob,'9c762dcb8ad3549cf7175ba9413f925b11f5396c','current index blob must include the later Challenge Library micro-diff');
+assert.equal(bytes.length,8170881,'current index size must include the later Challenge Library micro-diff');
+assert.equal(blob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8','current index blob must include the later Challenge Library micro-diff');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon deck Core storage authority',

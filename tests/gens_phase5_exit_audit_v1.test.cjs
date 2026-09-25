@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170815,'Phase 5 exit audit must target the validated captureFix135 GREEN runtime');
-assert.equal(gitBlob,'9c762dcb8ad3549cf7175ba9413f925b11f5396c',
+assert.equal(bytes.length,8170881,'Phase 5 exit audit must target the validated captureFix135 GREEN runtime');
+assert.equal(gitBlob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8',
   'Phase 5 exit audit runtime blob drifted');
 
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');

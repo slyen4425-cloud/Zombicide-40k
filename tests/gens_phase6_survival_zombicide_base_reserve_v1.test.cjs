@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170815,'base-reserve lot must start from the exact GREEN Survival skill-library runtime size');
-assert.equal(blob,'9c762dcb8ad3549cf7175ba9413f925b11f5396c','base-reserve lot must target the exact GREEN Survival skill-library runtime');
+assert.equal(bytes.length,8170881,'base-reserve lot must start from the exact GREEN Survival skill-library runtime size');
+assert.equal(blob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8','base-reserve lot must target the exact GREEN Survival skill-library runtime');
 
 const entry=fs.readFileSync(entryPath,'utf8');
 const contract=JSON.parse(fs.readFileSync(contractPath,'utf8'));

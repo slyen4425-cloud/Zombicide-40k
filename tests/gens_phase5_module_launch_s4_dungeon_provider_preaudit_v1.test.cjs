@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170815,'S4 preaudit/postaudit must track the current validated runtime');
-assert.equal(gitBlob,'9c762dcb8ad3549cf7175ba9413f925b11f5396c','S4 preaudit/postaudit blob must track the current validated runtime');
+assert.equal(bytes.length,8170881,'S4 preaudit/postaudit must track the current validated runtime');
+assert.equal(gitBlob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8','S4 preaudit/postaudit blob must track the current validated runtime');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -171,9 +171,9 @@ const server=http.createServer((req,res)=>{
       'Dungeon built-ins must still exist after native refresh');
     assert.equal(result.dungeonArt,result.override,
       'remaining Dungeon art layers must preserve an explicit Dungeon art override after refresh');
-    assert.match(result.html,/data:image/png;base64,iVBORw0KGgo=/,
+    assert.ok(result.html.includes(result.override),
       'Dungeon enemyCardHtml must still receive the direct art binding');
-    assert.match(result.popupHtml,/data:image/png;base64,iVBORw0KGgo=/,
+    assert.ok(result.popupHtml.includes(result.override),
       'Dungeon rule popup must still render the explicit art override');
 
     console.log(JSON.stringify({

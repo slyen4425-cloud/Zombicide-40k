@@ -124,3 +124,70 @@ Procédure :
 6. seulement ensuite inspecter et écrire le TDD.
 
 Ne pas réutiliser `work29.zip` : il correspond à l'état antérieur au retrait du wrapper V165.
+
+## Rule 26 — source exacte reçue et vérifiée
+
+Sylvain a fourni `work30.zip`.
+
+Contenu vérifié :
+- fichier : `index.30.txt` ;
+- taille : 8 170 472 octets ;
+- blob Git : `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
+- correspond exactement au `index.html` du HEAD requis.
+
+## Caractérisation exacte de la dépendance
+
+Source native vérifiée :
+
+`refreshCustomEnemiesIntoZombieTypes()` exécute actuellement :
+1. `applyBuiltinEnemyOverrides()` ;
+2. suppression des entrées custom non `dungeonBuiltin` ;
+3. rechargement de `loadCustomEnemies()` via `customEnemyToZombieType()` ;
+4. `if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();`.
+
+La source exacte de `applyBuiltinEnemyOverrides()` construit déjà :
+`[...BASE_ZOMBIE_TYPES, ...dungeonEnemies()]`
+et ajoute tout builtin Dungeon absent à `ZOMBIE_TYPES` lorsque `base.dungeonBuiltin` est vrai.
+
+Donc, avant même l'appel final à `ensureDungeonEnemies()`, les built-ins Dungeon manquants sont déjà republiés par l'autorité précédente.
+
+`ensureDungeonEnemies()` reste une vraie fonction Dungeon utilisée ailleurs, notamment via
+`ensureDungeonContent()`. Le présent lot ne doit donc surtout PAS supprimer sa définition globale ; il cible seulement l'appel depuis le refresh partagé.
+
+## Preuve navigateur de l'état cible — GREEN
+
+Test :
+`tests/gens_phase6_survival_custom_enemy_without_dungeon_ensure_browser_characterization_v1.test.cjs`.
+
+La fixture retire uniquement :
+`if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();`
+
+du propriétaire natif partagé et laisse tout le reste byte-identique.
+
+Le scénario vérifie après deux refresh successifs :
+- un ennemi custom Survie est présent exactement une fois ;
+- un ennemi custom Dungeon est présent exactement une fois ;
+- le filtre Survie n'expose aucun ennemi Dungeon ;
+- le filtre Dungeon expose le custom Dungeon et les built-ins ;
+- tous les IDs retournés par `dungeonEnemies()` sont déjà présents dans `ZOMBIE_TYPES` ;
+- un override d'art Dungeon reste appliqué ;
+- `enemyCardHtml` conserve cet art.
+
+Workflow ciblé :
+- run `36184402550` — SUCCESS.
+
+Conclusion :
+**l'appel `ensureDungeonEnemies()` dans `refreshCustomEnemiesIntoZombieTypes()` est redondant sur le runtime courant et peut être retiré sans retirer la fonction Dungeon elle-même.**
+
+## Cible TDD
+
+Le RED suivant doit exiger simultanément :
+- propriétaire natif partagé toujours unique ;
+- `applyBuiltinEnemyOverrides()` conservé ;
+- `loadCustomEnemies()` conservé ;
+- aucun appel `ensureDungeonEnemies` dans le corps de `refreshCustomEnemiesIntoZombieTypes()` ;
+- définition `function ensureDungeonEnemies()` conservée ;
+- `ensureDungeonContent()` conserve son appel à `ensureDungeonEnemies()` ;
+- aucun changement de V164/V165/V166.
+
+Le raccord runtime autorisé après RED est uniquement la suppression de la ligne conditionnelle déjà caractérisée.

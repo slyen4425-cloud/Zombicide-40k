@@ -46,34 +46,96 @@ Cette responsabilité est donc un candidat direct Phase 6 car elle reste posséd
 
 Le lot ne traite PAS `openZombieRule`, même si la cartographie l'attribue encore à `dungeonDirectImageBinding166`.
 
-## État du lot
+## Rule 26 — source exacte reçue
 
-- checkpoint de départ : créé depuis le checkpoint GREEN précédent ;
-- branche dédiée : créée depuis exactement ce checkpoint ;
-- pré-audit : écrit ;
-- aucune modification runtime ;
-- aucune API cible inventée avant inspection de la source exacte ;
-- aucun TDD RED encore ajouté : il sera défini après caractérisation exacte du propriétaire.
+Sylvain a fourni `work29.zip`.
 
-## Prochaine action obligatoire — Rule 26
+Vérification :
+- fichier : `index29.txt` ;
+- taille : 8 170 881 octets ;
+- blob Git : `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
+- correspond exactement au runtime du checkpoint GREEN de base.
 
-Le contenu exact de `index.html` est nécessaire pour caractériser :
-- définition(s) exacte(s) ;
-- consommateurs ;
-- mutations du catalogue ;
-- source des ennemis personnalisés ;
-- stockage/UI éventuels ;
-- dépendances Dungeon réelles.
+## Caractérisation du propriétaire
 
-Avant cette inspection :
-1. résoudre le HEAD exact de cette branche ;
-2. confirmer que le gros HTML reste à 8 170 881 octets / blob `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
-3. fournir le permalink SHA exact à Sylvain ;
-4. demander le ZIP exact ;
-5. vérifier le fichier reçu ;
-6. seulement ensuite figer le contrat cible et écrire le TDD RED.
+La source exacte prouve :
+- 1 propriétaire natif `function refreshCustomEnemiesIntoZombieTypes()` ;
+- ce propriétaire est encore mixte : `applyBuiltinEnemyOverrides()`, publication des créations via `loadCustomEnemies()/customEnemyToZombieType()`, puis `ensureDungeonEnemies()` ;
+- il ne peut donc pas être déplacé tel quel dans `assets/gensrpg/survival/` ;
+- `dungeonArtRenderFix165` ajoute ensuite un wrapper global tardif de ce propriétaire uniquement pour réappliquer les arts Dungeon ;
+- `dungeonGithubArts164` et `dungeonDirectImageBinding166` possèdent déjà des protections d'art complémentaires, V166 déclarant explicitement ne plus dépendre de `def.art` pour les PNG GitHub.
 
-Aucun runtime ne doit être modifié avant cette caractérisation.
+Micro-lot retenu :
+**retirer uniquement le wrapper global `refreshCustomEnemiesIntoZombieTypes` de `dungeonArtRenderFix165`**, sans déplacer le propriétaire natif et sans toucher encore à `ensureDungeonEnemies/applyBuiltinEnemyOverrides`.
+
+## Preuve navigateur de l'état cible — GREEN
+
+Test :
+`tests/gens_phase6_survival_custom_enemy_refresh_wrapper_browser_characterization_v1.test.cjs`.
+
+Le test compose le runtime réel en retirant uniquement le wrapper V165 puis vérifie :
+- propriétaire natif toujours actif ;
+- ennemi personnalisé Survie publié une seule fois dans `ZOMBIE_TYPES` ;
+- filtrage Survie conservé ;
+- built-ins Dungeon toujours présents ;
+- override d'art Dungeon conservé après refresh ;
+- `enemyCardHtml` et popup de règle Dungeon continuent à recevoir l'art direct.
+
+Workflow ciblé :
+- run `36168977899` — SUCCESS.
+
+Le workflow temporaire s'est auto-supprimé après la preuve.
+
+## TDD RED — prouvé
+
+Sentinelle :
+`tests/gens_phase6_survival_custom_enemy_refresh_wrapper_retirement_v1.test.cjs`.
+
+Commit sentinelle :
+`c4fe0a68acb7800699302dba17bdb2b71e70c08f`.
+
+Raccord CI :
+`6a4f07f8dae328c43d6b916a326d77a8c04a9c70`.
+
+CI sur ce SHA :
+- Architecture : run `36169198234` — FAILURE attendue ;
+- Firefox : run `36169198186` — SUCCESS ;
+- Tactical Dock : run `36169198147` — SUCCESS.
+
+Architecture :
+- Phase 6 #170 : SUCCESS ;
+- #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS ;
+- #174 : SUCCESS ;
+- #175 : SUCCESS ;
+- nouvelle étape #176 `Retirer le wrapper Dungeon du refresh des ennemis personnalisés Phase 6` : FAILURE attendue.
+
+Message RED exact :
+`Phase 6 requires retiring the Dungeon V165 global refreshCustomEnemiesIntoZombieTypes wrapper`.
+
+Le RED est isolé au wrapper V165. Ce rouge n'est pas une régression fonctionnelle.
+
+## Prochaine action obligatoire — raccord minimal
+
+1. résoudre le HEAD exact courant ;
+2. confirmer que `index.html` est toujours à 8 170 881 octets / blob `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
+3. le fichier Rule 26 `work29.zip/index29.txt` reste autorisé uniquement si cette empreinte est inchangée ;
+4. retirer exactement le bloc wrapper V165 déjà caractérisé, et rien d'autre ;
+5. résultat attendu calculé sur la source exacte :
+   - taille : 8 170 472 octets ;
+   - blob : `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
+6. réaligner uniquement les empreintes/cartographies déclarant explicitement le blob/taille ;
+7. obtenir Architecture + Browser, Firefox et Tactical Dock GREEN ;
+8. créer une preview et demander validation utilisateur avant fermeture.
+
+Hors périmètre maintenu :
+- propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;
+- `applyBuiltinEnemyOverrides()` ;
+- `ensureDungeonEnemies()` ;
+- autres wrappers art V165 ;
+- V164 / V166 ;
+- stockage, UI, gameplay, Dungeon/Tactical/Capture/PvP.
 
 ---
 

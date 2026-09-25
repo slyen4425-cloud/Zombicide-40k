@@ -13811,35 +13811,6 @@ function bindWaveEditorAutosave(){
 
 const ZOMBICIDE_BASE_PRESET_ID="wave_zombicide_base";
 
-function zombicideBaseWaveProfile(){
-  const base=GensSurvivalV1.waveRules.defaultProfile();
-  base.enabled=true;
-  base.mode="xp";
-
-  // Reprend le deck Zombicide actuellement intégré quand il est disponible.
-  if(typeof BP_SPAWN_CARDS!=="undefined" && Array.isArray(BP_SPAWN_CARDS)){
-    const cols=[
-      {name:"Bleu",color:"#2779b9",threshold:0,key:"b"},
-      {name:"Jaune",color:"#c79a20",threshold:7,key:"y"},
-      {name:"Orange",color:"#cd6b20",threshold:19,key:"o"},
-      {name:"Rouge",color:"#9f241f",threshold:43,key:"r"}
-    ];
-    base.levels=cols.map(col=>({
-      name:col.name,color:col.color,threshold:col.threshold,
-      cards:BP_SPAWN_CARDS.map(card=>{
-        const e=card[col.key]||["none"];
-        if(e[0]==="none")return {kind:"none",enemy:"walker",qty:1};
-        if(e[0]==="double")return {kind:"double",enemy:"walker",qty:1};
-        if(e[0]==="activation")return {kind:"activation",enemy:e[1]||"walker",qty:1};
-        // Le Nécromancien n'existe pas encore comme type autonome dans GenSrpG :
-        // il est représenté par Walker dans le set éditable de base.
-        const enemy=ZOMBIE_TYPES.some(z=>z.id===e[0])?e[0]:"walker";
-        return {kind:"enemy",enemy,qty:Math.max(1,Number(e[1])||1)};
-      })
-    }));
-  }
-  return base;
-}
 function zombicideBaseReserve(){
   return {...defaultZombieConfig()};
 }
@@ -13849,7 +13820,7 @@ function ensureZombicideBasePreset(){
     presets.unshift({
       id:ZOMBICIDE_BASE_PRESET_ID,
       name:"Zombicide — Base",
-      profile:zombicideBaseWaveProfile(),
+      profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
       reserve:zombicideBaseReserve(),
       builtIn:true
     });
@@ -13863,7 +13834,7 @@ function resetZombicideBasePreset(){
   const fresh={
     id:ZOMBICIDE_BASE_PRESET_ID,
     name:"Zombicide — Base",
-    profile:zombicideBaseWaveProfile(),
+    profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
     reserve:zombicideBaseReserve(),
     builtIn:true
   };
@@ -13890,7 +13861,7 @@ function loadWavePresets(){
   const fresh={
     id:ZOMBICIDE_BASE_PRESET_ID,
     name:"Zombicide — Base",
-    profile:zombicideBaseWaveProfile(),
+    profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
     reserve:zombicideBaseReserve(),
     builtIn:true
   };

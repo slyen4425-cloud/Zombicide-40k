@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170730,'current runtime must preserve the S1 registry candidate');
-assert.equal(gitBlob,'7663392f163aac32c4c3b918cbce67472856b3b6','current runtime blob must preserve the S1 registry candidate');
+assert.equal(bytes.length,8169596,'current runtime must preserve the S1 registry candidate');
+assert.equal(gitBlob,'d451372389f29d0145d3f9689ca739128a0650e9','current runtime blob must preserve the S1 registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);

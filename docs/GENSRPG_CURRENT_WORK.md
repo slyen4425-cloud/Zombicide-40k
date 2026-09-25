@@ -77,14 +77,58 @@ Le RED est isolé au nouveau contrat. Ce rouge n'est pas une régression du runt
 - 8 170 815 octets ;
 - blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
 
-## Prochaine action obligatoire
+## API pure préparée
 
-1. préparer uniquement l'API pure `GensSurvivalV1.waveRules.zombicideBaseReserve(defaultReserve)` dans l'entrée Survie et enregistrer sa propriété dans le contrat ;
-2. vérifier que la sentinelle évolue alors de « API absente » vers « ancien propriétaire inline / anciens consommateurs encore présents » ;
-3. appliquer la règle 26 avant tout raccord `index.html` : résoudre le nouveau HEAD, confirmer taille/blob, fournir le permalink SHA exact à Sylvain et demander le nouveau ZIP ;
-4. ne raccorder le gros HTML qu'après vérification du fichier exact reçu.
+Entrée Survie :
+`assets/gensrpg/survival/entry-v1.js`.
 
-Aucun changement `index.html` n'est autorisé avant cette étape Rule 26.
+Commit :
+`f5101b0556f3690aee9406cee563f9dbcf637fc3`
+(`refactor: add pure Survival base reserve API`).
+
+API ajoutée :
+`GensSurvivalV1.waveRules.zombicideBaseReserve(defaultReserve)`.
+
+Sémantique :
+- reçoit explicitement la réserve par défaut ;
+- retourne une copie fraîche par spread ;
+- ne lit aucun global gameplay ;
+- aucun effet de bord ;
+- aucun DOM/stockage/timer/listener/observer.
+
+Contrat Survie mis à jour :
+`ea2477251a38f99e7826b05adbab5f1a87f9ff77`
+(`docs: declare Survival base reserve ownership`).
+
+## Sentinelle après préparation API
+
+CI sur le SHA `ea2477251a38f99e7826b05adbab5f1a87f9ff77` :
+- Architecture : run `36150638329` — FAILURE attendue ;
+- Firefox : run `36150638234` — SUCCESS ;
+- Tactical Dock : run `36150637966` — SUCCESS.
+
+Architecture :
+- Phase 6 #171 à #174 : SUCCESS ;
+- #175 : FAILURE attendue ;
+- le message a bien évolué vers :
+  `legacy inline zombicideBaseReserve owner must be retired`.
+
+Cela prouve que l'API pure et le contrat sont désormais reconnus et que le seul blocage métier restant est le raccord du propriétaire inline / des 3 consommateurs dans `index.html`.
+
+Le runtime lourd reste inchangé :
+- `index.html` : 8 170 815 octets ;
+- blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
+
+## Prochaine action obligatoire — Rule 26
+
+1. résoudre le HEAD exact après le présent enregistrement documentaire ;
+2. confirmer que `index.html` reste exactement au blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c` et à 8 170 815 octets ;
+3. fournir à Sylvain le permalink GitHub SHA exact vers `index.html` ;
+4. demander le ZIP du fichier exact correspondant ;
+5. vérifier taille/blob du fichier reçu avant tout raccord ;
+6. seulement ensuite retirer l'unique `zombicideBaseReserve()` inline et raccorder exactement ses 3 consommateurs.
+
+Ne pas utiliser `work23.zip` pour ce raccord. Aucun changement `index.html` n'est autorisé avant vérification du nouveau fichier exact.
 
 ---
 

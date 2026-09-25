@@ -72,10 +72,31 @@ Le raccord sera appliqué par workflow one-shot avec garde stricte taille/blob, 
 - masquer dans cet onglet les commandes génériques `Nouvelle compétence` / `Règles du répertoire` afin qu'elles ne créent pas une seconde source de vérité ;
 - conserver les autres onglets et leurs comportements inchangés.
 
+## Raccord runtime
+
+Commit :
+`806866b96a72e5ac72a3f8ac2a09af3b5fbf5e1f`
+(`fix: route Survival skill library in editor hub`).
+
+Le raccord :
+- ajoute l'onglet `☠️ Survie` au répertoire partagé ;
+- sélectionne cet onglet par défaut quand le répertoire est ouvert depuis le vrai hub Survie ;
+- lit directement `allSelectableSkills()` ;
+- affiche compétences natives et personnalisées Survie ;
+- masque dans cet onglet les commandes génériques de création/règles afin de ne pas créer une seconde source de vérité ;
+- conserve les autres onglets et leurs propriétaires génériques ;
+- ne modifie aucune mécanique de compétence.
+
+Runtime après raccord :
+- `index.html` : 8 170 815 octets ;
+- blob : `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
+
+Le workflow one-shot s'est auto-supprimé dans le même commit.
+
 ## Prochaine action
 
-1. appliquer le raccord exact sur `index.html` ;
-2. rejouer le Browser RED -> GREEN ;
+1. rejouer le Browser RED -> GREEN ;
+2. réaligner uniquement les empreintes exactes rendues obsolètes par le nouveau blob ;
 3. Architecture + Browser complet, Firefox, Tactical Dock ;
 4. preview mobile ;
 5. validation utilisateur avant checkpoint GREEN.

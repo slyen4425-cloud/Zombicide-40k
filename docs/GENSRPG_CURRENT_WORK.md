@@ -208,16 +208,23 @@ SHA preview :
 Lien mobile exact :
 `https://raw.githack.com/slyen4425-cloud/Zombicide-40k/f7aec2e5a1be3a6c47bb023ae4d07d12cc40c191/preview.html`.
 
-## Prochaine action obligatoire
+## Validation utilisateur mobile
 
-1. obtenir la validation utilisateur mobile du comportement Survie/vagues ;
-2. ne pas rouvrir les compétences Survie ni les autres modules sans régression objective ;
-3. après validation, enregistrer le retour utilisateur dans CURRENT_WORK ;
-4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire final ;
-5. créer seulement ensuite le checkpoint final
+Validation utilisateur reçue le 2026-09-25 :
+`Oui les vague fonctionnent.`
+
+Résultat :
+- comportement Survie/vagues validé sur mobile ;
+- aucune régression utilisateur signalée sur le périmètre du micro-lot ;
+- bibliothèque Compétences Survie et autres modules restent hors périmètre et ne sont pas rouverts.
+
+## Fermeture GREEN — prochaine action
+
+1. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire final ;
+2. si les trois workflows sont SUCCESS, créer le checkpoint final
    `checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`
-   sur le SHA final exact ;
-6. ne pas ouvrir le micro-lot suivant avant cette fermeture.
+   sur ce SHA exact ;
+3. ne pas ouvrir le micro-lot suivant avant cette fermeture.
 
 ---
 

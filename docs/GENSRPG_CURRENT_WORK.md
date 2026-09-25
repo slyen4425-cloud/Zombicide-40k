@@ -102,10 +102,15 @@ La sentinelle micro-lot 5 verrouille maintenant le nouveau runtime exact :
 Le manifeste inline Phase 2 a été réaligné sur le nouveau blob sans changement de cartographie métier :
 `266c782ffe5f2ec270bc7f63fd6a6d329fa1aef2`.
 
-Les sentinelles historiques déjà identifiées lors du micro-lot 4 ont été réalignées uniquement sur les constantes taille/blob du nouveau runtime :
-`d6e7cbc80f95f1d34d72f3f62787a16395f55321`.
+La table Phase 2 des derniers propriétaires globaux inline a été réalignée uniquement sur son blob source :
+- test : `80efd3f9d95c3ebe22514c80177c56569e210f9a` ;
+- table TSV : `350e19dd6bc65c54cda011158f57eaee66b86899`.
 
-Aucune assertion fonctionnelle de ces sentinelles n'a été modifiée.
+Les sentinelles historiques déjà identifiées lors du micro-lot 4 ont été réalignées uniquement sur les constantes taille/blob du nouveau runtime :
+- premier lot d'empreintes : `d6e7cbc80f95f1d34d72f3f62787a16395f55321` ;
+- cartes Phase 2 timers/storage + audits Storage/Stats/Inventory restants : `a2730d60ec3c494c8b3e9547fddcc4aa63d905a7`.
+
+Aucune assertion fonctionnelle, aucun propriétaire métier et aucun comportement runtime de ces sentinelles/cartographies n'a été modifié.
 
 ## État avant CI technique finale
 

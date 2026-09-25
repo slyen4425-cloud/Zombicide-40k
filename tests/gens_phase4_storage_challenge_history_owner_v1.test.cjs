@@ -25,8 +25,8 @@ assert.match(block,/hist\.push\(String\(chosen\.id\)\)/,'chosen challenge must s
 assert.match(block,/try\{GensStorageV1\.writeJson\(localStorage,hk,hist\.slice\(-24\)\)\}catch\(e\)\{\}/,'write must remain swallowed by historical try/catch');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Challenge History raccord must not touch deferred runtime_v2');
 
-assert.equal(bytes.length,8169596,'current Phase 5 grid-repair index size must remain deterministic');
-assert.equal(blob,'d451372389f29d0145d3f9689ca739128a0650e9','current Phase 5 grid-repair index blob must remain deterministic');
+assert.equal(bytes.length,8169503,'current Phase 5 grid-repair index size must remain deterministic');
+assert.equal(blob,'fb8c77504ed067fb094374260b459f8d1fb7e824','current Phase 5 grid-repair index blob must remain deterministic');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Challenge History 0.67 Core storage authority',

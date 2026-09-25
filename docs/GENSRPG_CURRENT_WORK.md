@@ -218,13 +218,39 @@ Résultat :
 - aucune régression utilisateur signalée sur le périmètre du micro-lot ;
 - bibliothèque Compétences Survie et autres modules restent hors périmètre et ne sont pas rouverts.
 
-## Fermeture GREEN — prochaine action
+## CI finale après validation utilisateur
 
-1. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire final ;
-2. si les trois workflows sont SUCCESS, créer le checkpoint final
-   `checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`
-   sur ce SHA exact ;
-3. ne pas ouvrir le micro-lot suivant avant cette fermeture.
+SHA documentaire validé :
+`384a7a94712e47f3f1e278d47bde69f3dfdcbea6`.
+
+Runs :
+- Architecture + Browser complet : `36157079380` — SUCCESS ;
+- Firefox : `36157079526` — SUCCESS ;
+- Tactical Dock : `36157079493` — SUCCESS.
+
+Architecture statique :
+- toutes les étapes jusqu'à #231 : SUCCESS ;
+- Phase 6 #171 à #175 : SUCCESS.
+
+Browser complet :
+- tous les scénarios : SUCCESS ;
+- lancement Survie, vagues, compétences Survie, Fouiller/arts, goMenu, Dungeon après Survie, Tactical, Builder, Config objet, Capture, PvP, Save & Quit et non-interférence restent GREEN.
+
+## Fermeture GREEN
+
+Runtime final du lot :
+- `index.html` : 8 170 881 octets ;
+- blob Git : `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8`.
+
+Preview validée :
+- branche : `preview/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25` ;
+- SHA preview : `f7aec2e5a1be3a6c47bb023ae4d07d12cc40c191` ;
+- validation utilisateur : `Oui les vague fonctionnent.`.
+
+Checkpoint final à créer après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase6-survival-zombicide-base-reserve-green-2026-09-25`.
+
+Le micro-lot suivant ne doit partir que de ce checkpoint GREEN final.
 
 ---
 

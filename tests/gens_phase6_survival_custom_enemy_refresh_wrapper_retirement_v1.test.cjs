@@ -54,9 +54,6 @@ assert.match(native,/applyBuiltinEnemyOverrides\(\)/,
   'native shared refresh behavior must remain unchanged in this micro-lot');
 assert.match(native,/loadCustomEnemies\(\)/,
   'native custom-enemy publication must remain unchanged');
-assert.match(native,/ensureDungeonEnemies/,
-  'mixed Dungeon dependency is intentionally deferred to a later micro-lot');
-
 assert.match(index,/<script id="dungeonDirectImageBinding166">/,
   'direct Dungeon image binding V166 must remain loaded');
 

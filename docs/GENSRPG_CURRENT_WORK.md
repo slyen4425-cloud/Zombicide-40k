@@ -148,6 +148,32 @@ Après ces preuves uniquement :
 - fournir la preview à Sylvain ;
 - attendre validation manuelle avant toute fermeture finale ou micro-lot 4.
 
+## VALIDATION MANUELLE UTILISATEUR — micro-lot 3
+
+Validation reçue de Sylvain après test mobile de la preview technique :
+> « Je valide les derniers travaux en test mobile. »
+
+Cette validation concerne le micro-lot 3 « profil Zombicide de base vers règles Survie » sur l’état technique validé :
+- branche : `work/gensrpg-phase6-survival-zombicide-base-wave-profile-2026-09-25` ;
+- checkpoint CI technique : `checkpoint/gensrpg-phase6-survival-zombicide-base-wave-profile-ci-green-2026-09-25` ;
+- preview : `preview/gensrpg-phase6-survival-zombicide-base-wave-profile-2026-09-25` ;
+- SHA technique validé manuellement : `c97cba6be03b97f6f771e6d659686c4b39ff1989`.
+
+La validation utilisateur étant désormais acquise, le micro-lot 3 peut être fermé **uniquement après** les preuves CI du nouveau SHA documentaire créé par la présente mise à jour.
+
+Avant checkpoint GREEN final :
+1. Architecture + Browser — SUCCESS sur le nouveau SHA ;
+2. Firefox — SUCCESS sur le même SHA ;
+3. Tactical Dock — SUCCESS sur le même SHA ;
+4. sentinelles Phase 6 #171 et #172 toujours SUCCESS.
+
+Checkpoint GREEN final prévu après ces preuves :
+`checkpoint/gensrpg-phase6-survival-zombicide-base-wave-profile-green-2026-09-25`.
+
+Ne pas ouvrir le micro-lot 4 avant cette fermeture finale.
+
+---
+
 ---
 
 ---

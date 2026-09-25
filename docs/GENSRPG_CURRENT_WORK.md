@@ -112,17 +112,57 @@ Les sentinelles historiques déjà identifiées lors du micro-lot 4 ont été r�
 
 Aucune assertion fonctionnelle, aucun propriétaire métier et aucun comportement runtime de ces sentinelles/cartographies n'a été modifié.
 
-## État avant CI technique finale
+## CI technique GREEN
+
+SHA technique final testé :
+`2518f542fa9f38750ebf577a1d0b6eb758f7dbf1`.
+
+Runs sur ce SHA exact :
+- Architecture + Browser complet : `36125051473` — SUCCESS ;
+- Firefox : `36125051513` — SUCCESS ;
+- Tactical Dock : `36125051516` — SUCCESS.
+
+Architecture statique :
+- 232 étapes terminées ;
+- aucune failure ;
+- Phase 6 #170 : SUCCESS ;
+- #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS ;
+- nouvelle #174 `normalizeReserve` : SUCCESS.
+
+Browser complet :
+- 40 étapes terminées ;
+- aucune failure ;
+- lancement Survie : SUCCESS ;
+- héros Survie après Dungeon : SUCCESS ;
+- Fouiller / arts Survie : SUCCESS ;
+- goMenu Survie : SUCCESS ;
+- Dungeon map -> Tactical V2 : SUCCESS ;
+- Capture victoire + reprise inter-module : SUCCESS ;
+- Dungeon après Survie dans Chromium : SUCCESS ;
+- Dungeon Builder / Config objet : SUCCESS ;
+- Save & Quit / reprise : SUCCESS ;
+- Capture / PvP / non-interférence quatre modules : SUCCESS ;
+- preview Chromium / assets / Equipment : SUCCESS.
+
+Les dernières empreintes Phase 6 historiques ont été réalignées sans modification métier :
+- Zombicide base-profile : `6cad1c7a41a89182b27207f083eb61b45a321f6a` ;
+- auto-reserve : `2518f542fa9f38750ebf577a1d0b6eb758f7dbf1`.
+
+## État avant preview
 
 Le présent enregistrement crée un nouveau SHA documentaire.
-Prochaine étape :
-1. Architecture + Browser complet ;
-2. Firefox ;
-3. Tactical Dock ;
-4. corriger uniquement d'éventuels verrous d'empreinte résiduels sans affaiblir les assertions métier ;
-5. si triple GREEN, créer/mettre à jour la preview ;
-6. obtenir validation utilisateur mobile ;
-7. seulement ensuite créer le checkpoint GREEN final du micro-lot 5.
+Avant preview :
+1. refaire Architecture + Browser, Firefox et Tactical Dock sur ce nouveau SHA ;
+2. si triple SUCCESS, créer/mettre à jour la preview du micro-lot 5 ;
+3. obtenir validation utilisateur mobile ;
+4. seulement ensuite documenter la validation et créer le checkpoint GREEN FINAL.
+
+Nom recommandé :
+`checkpoint/gensrpg-phase6-survival-wave-reserve-normalization-green-2026-09-25`.
+
+Ne pas ouvrir le micro-lot suivant avant validation utilisateur et fermeture GREEN finale.
 
 ---
 

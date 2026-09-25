@@ -84,6 +84,70 @@ Les tests/cartographies qui verrouillaient uniquement l’empreinte exacte du ru
 - one-shot retiré ;
 - prochain verrou : Architecture + Browser, Firefox et Tactical Dock doivent être SUCCESS sur le présent SHA documentaire avant checkpoint technique.
 
+## CANDIDAT TECHNIQUE GREEN — micro-lot 3
+
+SHA exact :
+`af2c9365cae88945f649bf249f1096b80de999c8`.
+
+Dernier commit :
+`test: align wave-rules sentinel with Zombicide extraction`.
+
+Preuves automatiques exactes sur ce SHA :
+- Architecture + Browser : run `36103726482` — **SUCCESS** ;
+  - Architecture job `107971573791` — SUCCESS ;
+  - Browser job `107971808900` — SUCCESS ;
+  - étape Phase 6 #171 `Raccorder les premières règles de vagues au module Survie Phase 6` — SUCCESS ;
+  - étape Phase 6 #172 `Extraire le profil Zombicide de base vers le module Survie Phase 6` — SUCCESS ;
+- Firefox : run `36103726611`, job `107971574419` — **SUCCESS** ;
+- Tactical Dock : run `36103726453` — **SUCCESS** ;
+  - contrat `107971573398` — SUCCESS ;
+  - Chromium `107971612732` — SUCCESS ;
+  - Firefox `107971612790` — SUCCESS.
+
+Le Browser complet confirme notamment :
+- lancement Survie par le vrai Shell ;
+- provider public Survie ;
+- héros Survie après Dungeon ;
+- Fouiller / arts Survie ;
+- navigation/goMenu ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire + reprise inter-module ;
+- Dungeon après Survie dans Chromium — SUCCESS ;
+- Dungeon Builder ;
+- Config objet moderne ;
+- fiche RPG sans flash Survie ;
+- cache / retour / pièges authored ;
+- Save & Quit / reprise par le vrai Shell ;
+- provider Dungeon S4 ;
+- PvP ;
+- Monster Capture ;
+- non-interférence des quatre modules ;
+- murs / preview / assets / Equipment.
+
+Conclusion technique :
+- propriétaire inline `zombicideBaseWaveProfile()` retiré ;
+- 3 consommateurs raccordés directement au module Survie ;
+- conversion pure désormais propriétaire de `GensSurvivalV1.waveRules.zombicideBaseProfile` ;
+- aucune dépendance privée inter-module ajoutée ;
+- aucun changement de gameplay attendu ;
+- `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Fermeture documentaire avant checkpoint technique
+
+La présente mise à jour de `CURRENT_WORK` crée un nouveau SHA documentaire.
+
+Avant de créer le checkpoint technique :
+1. Architecture + Browser doivent être SUCCESS sur ce nouveau SHA exact ;
+2. Firefox doit être SUCCESS sur le même SHA ;
+3. Tactical Dock doit être SUCCESS sur le même SHA ;
+4. les deux sentinelles Phase 6 #171 et #172 doivent rester SUCCESS.
+
+Après ces preuves uniquement :
+- créer `checkpoint/gensrpg-phase6-survival-zombicide-base-wave-profile-ci-green-2026-09-25` ;
+- créer `preview/gensrpg-phase6-survival-zombicide-base-wave-profile-2026-09-25` sur le même SHA ;
+- fournir la preview à Sylvain ;
+- attendre validation manuelle avant toute fermeture finale ou micro-lot 4.
+
 ---
 
 ---

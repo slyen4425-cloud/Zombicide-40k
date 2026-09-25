@@ -8,6 +8,7 @@
     "Zombicide base wave profile conversion",
     "Survival wave rule primitives",
     "Automatic wave reserve derivation",
+    "Wave reserve normalization",
     "Survival runtime",
     "Survival rules and UI"
   ],
@@ -28,7 +29,8 @@
     "no private Dungeon Tactical Capture or PvP runtime is consumed",
     "legacy inline owners are retired when a responsibility is connected here",
     "the Zombicide base deck converter is pure and receives deck/type dependencies explicitly",
-    "automatic wave reserve derivation is pure and receives default reserve data explicitly"
+    "automatic wave reserve derivation is pure and receives default reserve data explicitly",
+    "wave reserve normalization is pure and receives default reserve data explicitly while custom-enemy refresh stays outside the module"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

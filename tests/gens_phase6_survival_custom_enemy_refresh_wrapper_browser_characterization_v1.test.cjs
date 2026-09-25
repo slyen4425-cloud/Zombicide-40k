@@ -89,12 +89,12 @@ const server=http.createServer((req,res)=>{
     );
 
     await page.waitForFunction(()=>(
-      typeof window.refreshCustomEnemiesIntoZombieTypes==='function' &&
-      typeof window.activeEnemyDefinition==='function' &&
-      typeof window.enemyCardHtml==='function' &&
-      typeof window.loadCustomEnemies==='function' &&
-      typeof window.enemiesForMode==='function' &&
-      Array.isArray(window.ZOMBIE_TYPES)
+      typeof refreshCustomEnemiesIntoZombieTypes==='function' &&
+      typeof activeEnemyDefinition==='function' &&
+      typeof enemyCardHtml==='function' &&
+      typeof loadCustomEnemies==='function' &&
+      typeof enemiesForMode==='function' &&
+      Array.isArray(ZOMBIE_TYPES)
     ),null,{timeout:30000});
 
     const result=await page.evaluate(()=>{

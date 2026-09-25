@@ -83,8 +83,10 @@ assert.ok(index.indexOf(tag)<index.indexOf('const Z40K_GENERIC_SHEET_BG'),
 
 assert.doesNotMatch(index,/function\s+defaultWaveProfile\s*\(/,'legacy defaultWaveProfile owner must be retired');
 assert.doesNotMatch(index,/function\s+collectEnemyIdsFromProfile\s*\(/,'legacy enemy-id collector owner must be retired');
-assert.equal((index.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[]).length,6,
-  'all six default profile consumers must use Survival API directly');
+assert.equal((index.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[]).length,5,
+  'five legacy index consumers must still use Survival API directly after Zombicide base conversion moves into the module');
+assert.match(entry,/function\s+zombicideBaseProfile\s*\([^)]*\)\s*\{[\s\S]*?const\s+base=defaultProfile\(\)/,
+  'the sixth default-profile consumption now belongs inside the Survival Zombicide base converter');
 assert.equal((index.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,2,
   'both enemy-id consumers must use Survival API directly');
 

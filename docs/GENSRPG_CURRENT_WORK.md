@@ -107,6 +107,33 @@ Après ces preuves uniquement :
 - attendre validation manuelle avant tout micro-lot 3 ;
 - ne jamais merger sur `main` sans validation explicite.
 
+## VALIDATION MANUELLE UTILISATEUR — micro-lot 2
+
+Preview testée par Sylvain :
+`https://raw.githack.com/slyen4425-cloud/Zombicide-40k/fbbb9504e0d769558a3afe1705d50458798554f6/preview.html`
+
+Retour utilisateur du 2026-09-25 :
+`Tout semble ok`.
+
+Parcours demandé avant validation :
+- lancement Survie ;
+- fonctionnement normal des vagues et ennemis ;
+- contrôle Fouiller / héros / déroulement d’un tour ;
+- transition Survie -> Dungeon ;
+- présence immédiate de la grille Dungeon sans fermeture/réouverture ;
+- retour possible vers Survie.
+
+Conclusion :
+- validation manuelle obtenue ;
+- aucun défaut bloquant signalé sur le périmètre du micro-lot ;
+- le micro-lot 2 peut être fermé après preuve CI du présent SHA documentaire ;
+- le micro-lot 3 reste interdit tant que le checkpoint GREEN final n’est pas créé.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase6-survival-wave-rules-entry-green-2026-09-25`.
+
+---
+
 ---
 
 # PHASE 6 OUVERTE — Isolation Survie — 2026-09-24

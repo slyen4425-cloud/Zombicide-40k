@@ -36,7 +36,7 @@ function chainFor(name){
 
 assert.equal(indexBuf.length,8169503,'goMenu boundary guard must use the current runtime after Survival reserve extraction');
 assert.equal(gitBlob(indexBuf),'fb8c77504ed067fb094374260b459f8d1fb7e824','goMenu boundary runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'d451372389f29d0145d3f9689ca739128a0650e9','owner manifest must target current runtime');
+assert.equal(owners.sourceIndexBlob,'fb8c77504ed067fb094374260b459f8d1fb7e824','owner manifest must target current runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],

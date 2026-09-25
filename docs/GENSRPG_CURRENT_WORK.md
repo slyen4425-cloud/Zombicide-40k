@@ -45,6 +45,47 @@ TDD :
 - prochain verrou : retirer le propriétaire inline `zombicideBaseWaveProfile()` et raccorder ses 3 consommateurs directs ;
 - Rule 26 obligatoire avant ce raccord : obtenir l’index exact du HEAD courant et vérifier son blob.
 
+## Raccord runtime effectué — micro-lot 3
+
+Fichier exact fourni par Sylvain :
+- `work21.zip` ;
+- contenu `index21.txt` ;
+- 8 170 730 octets ;
+- blob Git `7663392f163aac32c4c3b918cbce67472856b3b6` ;
+- correspond exactement au `index.html` du HEAD avant raccord.
+
+Transformation Rule 26 :
+- one-shot temporaire ;
+- garde stricte taille/blob avant écriture ;
+- suppression de l’unique propriétaire inline `zombicideBaseWaveProfile()` ;
+- remplacement des exactement 3 consommateurs historiques par :
+  `GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES)` ;
+- aucun autre gameplay déplacé ;
+- workflow one-shot supprimé dans son propre commit.
+
+Nouvelle empreinte exacte :
+- `index.html` : 8 169 596 octets ;
+- blob Git :
+  `d451372389f29d0145d3f9689ca739128a0650e9`.
+
+Commit runtime :
+`68375f94f50feabc8171c212695485a1ada20cf8`
+(`refactor: connect Zombicide base waves to Survival`).
+
+La sentinelle micro-lot a été exécutée localement dans le one-shot avant commit : SUCCESS.
+
+Les tests/cartographies qui verrouillaient uniquement l’empreinte exacte du runtime ont été réalignés vers la nouvelle taille/blob ; leurs assertions métier restent inchangées.
+
+État :
+- raccord runtime minimal effectué ;
+- aucun wrapper global ;
+- aucune dépendance Dungeon/Tactical/Capture/PvP ajoutée ;
+- aucun DOM/stockage/timer/observer ajouté dans l’entrée Survie ;
+- one-shot retiré ;
+- prochain verrou : Architecture + Browser, Firefox et Tactical Dock doivent être SUCCESS sur le présent SHA documentaire avant checkpoint technique.
+
+---
+
 ---
 
 # PHASE 6 — MICRO-LOT 2 — activation entrée Survie / règles de vagues pures — 2026-09-25

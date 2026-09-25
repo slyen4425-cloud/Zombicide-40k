@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170881,'S4 provider contract must run on the exact Core200-global-retired runtime');
-assert.equal(gitBlob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8','S4 provider contract must keep the exact reviewed Core200 retirement blob');
+assert.equal(bytes.length,8170472,'S4 provider contract must run on the exact Core200-global-retired runtime');
+assert.equal(gitBlob,'2232d8c1d65121758646915080bd3c17be4d4cd6','S4 provider contract must keep the exact reviewed Core200 retirement blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

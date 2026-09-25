@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170881,'micro-lot 3 must start from the final GREEN micro-lot 2 index');
-assert.equal(blob,'f6a11fa5c0807debc0c9950cc2caf5356c97cfc8','micro-lot 3 must target the exact micro-lot 2 runtime');
+assert.equal(bytes.length,8170472,'micro-lot 3 must start from the final GREEN micro-lot 2 index');
+assert.equal(blob,'2232d8c1d65121758646915080bd3c17be4d4cd6','micro-lot 3 must target the exact micro-lot 2 runtime');
 
 const entry=fs.readFileSync(entryPath,'utf8');
 const contract=JSON.parse(fs.readFileSync(contractPath,'utf8'));

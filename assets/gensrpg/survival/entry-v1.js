@@ -45,11 +45,42 @@
     return [...ids];
   }
 
+  function zombicideBaseProfile(spawnCards,enemyTypes){
+    const base=defaultProfile();
+    base.enabled=true;
+    base.mode="xp";
+
+    if(Array.isArray(spawnCards)){
+      const types=Array.isArray(enemyTypes)?enemyTypes:[];
+      const cols=[
+        {name:"Bleu",color:"#2779b9",threshold:0,key:"b"},
+        {name:"Jaune",color:"#c79a20",threshold:7,key:"y"},
+        {name:"Orange",color:"#cd6b20",threshold:19,key:"o"},
+        {name:"Rouge",color:"#9f241f",threshold:43,key:"r"}
+      ];
+      base.levels=cols.map(col=>({
+        name:col.name,
+        color:col.color,
+        threshold:col.threshold,
+        cards:spawnCards.map(card=>{
+          const e=card?.[col.key]||["none"];
+          if(e[0]==="none")return {kind:"none",enemy:"walker",qty:1};
+          if(e[0]==="double")return {kind:"double",enemy:"walker",qty:1};
+          if(e[0]==="activation")return {kind:"activation",enemy:e[1]||"walker",qty:1};
+          const enemy=types.some(z=>z?.id===e[0])?e[0]:"walker";
+          return {kind:"enemy",enemy,qty:Math.max(1,Number(e[1])||1)};
+        })
+      }));
+    }
+    return base;
+  }
+
   root.GensSurvivalV1=Object.freeze({
     VERSION,
     waveRules:Object.freeze({
       defaultProfile,
-      collectEnemyIds
+      collectEnemyIds,
+      zombicideBaseProfile
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

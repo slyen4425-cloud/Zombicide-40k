@@ -7,6 +7,7 @@
   "owns": [
     "Zombicide base wave profile conversion",
     "Survival wave rule primitives",
+    "Automatic wave reserve derivation",
     "Survival runtime",
     "Survival rules and UI"
   ],
@@ -26,7 +27,8 @@
     "the first connected slice is pure Survival wave rules with no DOM storage timer listener or observer",
     "no private Dungeon Tactical Capture or PvP runtime is consumed",
     "legacy inline owners are retired when a responsibility is connected here",
-    "the Zombicide base deck converter is pure and receives deck/type dependencies explicitly"
+    "the Zombicide base deck converter is pure and receives deck/type dependencies explicitly",
+    "automatic wave reserve derivation is pure and receives default reserve data explicitly"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

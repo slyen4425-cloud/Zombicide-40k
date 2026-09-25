@@ -44,16 +44,18 @@ assert.notEqual(a,b,'base reserve must return a fresh object on every call');
 a.walker=999;
 assert.equal(defaults.walker,35,'mutating the returned reserve must not mutate the provided defaults');
 
-assert.doesNotMatch(entry,/document|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener|Dungeon|Tactical|Capture|PvP/,
-  'Survival wave-rules entry must remain pure and module-isolated');
-assert.doesNotMatch(entry,/defaultZombieConfigs*(/,
+for(const token of ['document','localStorage','sessionStorage','MutationObserver','setTimeout','setInterval','addEventListener','Dungeon','Tactical','Capture','PvP']){
+  assert.equal(entry.includes(token),false,'Survival wave-rules entry must remain pure/module-isolated; forbidden token: '+token);
+}
+assert.equal(entry.includes('defaultZombieConfig('),false,
   'zombicideBaseReserve must receive default reserve data explicitly instead of reading gameplay globals');
 
-assert.doesNotMatch(index,/functions+zombicideBaseReserves*(/,
+assert.equal(index.includes('function zombicideBaseReserve('),false,
   'legacy inline zombicideBaseReserve owner must be retired');
 
+const direct='GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig())';
 assert.equal(
-  (index.match(/GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig())/g)||[]).length,
+  index.split(direct).length-1,
   3,
   'all three historical Zombicide base-reserve consumers must call the Survival API directly'
 );

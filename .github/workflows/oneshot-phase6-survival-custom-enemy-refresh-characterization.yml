@@ -1,4 +1,5 @@
 name: One-shot Phase 6 custom enemy refresh characterization
+# rerun after assertion syntax fix
 
 on:
   push:

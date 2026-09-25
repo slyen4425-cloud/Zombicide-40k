@@ -36,14 +36,25 @@ jobs:
           assert len(data)==8170815, f"unexpected source size: {len(data)}"
           assert git_blob(data)=="9c762dcb8ad3549cf7175ba9413f925b11f5396c", git_blob(data)
 
-          old_def=b"function zombicideBaseReserve(){\\n  return {...defaultZombieConfig()};\\n}\\n"
+          owner=b"function zombicideBaseReserve(){"
+          next_owner=b"function ensureZombicideBasePreset(){"
           old_call=b"zombicideBaseReserve()"
           direct=b"GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig())"
 
-          assert data.count(old_def)==1, data.count(old_def)
+          assert data.count(owner)==1, data.count(owner)
+          assert data.count(next_owner)==1, data.count(next_owner)
           assert data.count(old_call)==4, data.count(old_call)
 
-          out=data.replace(old_def,b"",1)
+          start=data.index(owner)
+          end=data.index(next_owner,start)
+          block=data[start:end]
+          assert block.strip().splitlines()==[
+              b"function zombicideBaseReserve(){",
+              b"  return {...defaultZombieConfig()};",
+              b"}"
+          ], block
+
+          out=data[:start]+data[end:]
           assert out.count(old_call)==3, out.count(old_call)
           out=out.replace(old_call,direct)
 

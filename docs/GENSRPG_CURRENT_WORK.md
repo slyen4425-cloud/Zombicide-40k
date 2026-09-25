@@ -185,13 +185,54 @@ Réalisé :
 
 Aucune assertion métier n'a été affaiblie.
 
-## Prochaine action obligatoire — GREEN technique
+## Réalignements de tests après retrait
 
-1. lancer Architecture + Browser complet, Firefox et Tactical Dock sur le présent SHA documentaire ;
-2. vérifier spécialement Phase 6 #170 à #177 ;
-3. vérifier le scénario navigateur de caractérisation sans `ensureDungeonEnemies()` ;
-4. si les trois workflows sont SUCCESS, créer une preview dédiée ;
-5. demander validation utilisateur avant tout checkpoint GREEN final.
+Deux assertions historiques ont été réalignées après que le micro-lot a effectivement retiré la dépendance différée :
+
+1. commit `88d1f997536c1124814bcf138127f6eaf28ea7c3`
+   (`test: release deferred Dungeon ensure assertion from V165 sentinel`) :
+   - retire uniquement de la sentinelle du lot V165 l'ancienne assertion qui exigeait encore la présence de `ensureDungeonEnemies` ;
+   - toutes les protections du lot V165 restent actives.
+
+2. commit `e5fcdb9b5a82ccc9dcd18a2b5ea2157eb42cef6e`
+   (`test: align V165 browser characterization after Dungeon ensure retirement`) :
+   - remplace l'ancienne attente `ensureDungeonEnemies présent` par l'attente inverse `ensureDungeonEnemies absent` dans le propriétaire partagé ;
+   - le scénario fonctionnel conserve toutes ses vérifications Survie/Dungeon/arts.
+
+Aucun runtime n'a été modifié par ces deux commits.
+
+## CI technique GREEN
+
+SHA technique testé :
+`e5fcdb9b5a82ccc9dcd18a2b5ea2157eb42cef6e`.
+
+Runtime inchangé depuis le raccord :
+- `index.html` : 8 170 402 octets ;
+- blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
+
+Runs :
+- Architecture + Browser complet : `36187986013` — SUCCESS ;
+- Firefox : `36187985853` — SUCCESS ;
+- Tactical Dock : `36187985916` — SUCCESS.
+
+Architecture :
+- toutes les sentinelles : SUCCESS ;
+- Phase 6 #170 à #177 : SUCCESS ;
+- #177 `Retirer ensureDungeonEnemies du refresh partagé Phase 6` : SUCCESS.
+
+Browser complet :
+- caractérisation du refresh ennemi sans wrapper Dungeon V165 : SUCCESS ;
+- caractérisation du refresh partagé sans `ensureDungeonEnemies()` : SUCCESS ;
+- Survie / Dungeon / Tactical / Capture / PvP / Builder / Save & Quit / assets / Equipment : SUCCESS.
+
+## Prochaine action obligatoire — CI documentaire avant preview
+
+1. le présent enregistrement documentaire crée un nouveau SHA ;
+2. refaire Architecture + Browser complet, Firefox et Tactical Dock sur ce SHA documentaire exact ;
+3. si triple SUCCESS, créer la branche preview dédiée :
+   `preview/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25` ;
+4. fournir le lien mobile exact à Sylvain ;
+5. demander validation ciblée Survie + Dungeon avant tout checkpoint GREEN final.
 
 ---
 

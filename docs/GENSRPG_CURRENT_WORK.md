@@ -205,14 +205,46 @@ Browser complet :
 Firefox : SUCCESS.
 Tactical Dock contrat + Chromium + Firefox : SUCCESS.
 
-## Prochaine action obligatoire — fermeture technique avant preview
+## CI documentaire finale avant preview — GREEN
 
-1. le présent enregistrement documentaire crée un nouveau SHA ;
-2. refaire Architecture + Browser, Firefox et Tactical Dock sur ce SHA documentaire exact ;
-3. si triple SUCCESS, créer la branche preview dédiée :
-   `preview/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25` ;
-4. fournir le lien mobile exact à Sylvain ;
-5. attendre validation utilisateur avant tout checkpoint GREEN final.
+SHA documentaire testé :
+`a3ab2c9995912af579c6164332480d56fb451cc9`.
+
+Runs :
+- Architecture + Browser complet : `36177374557` — SUCCESS ;
+- Firefox : `36177374480` — SUCCESS ;
+- Tactical Dock : `36177374422` — SUCCESS.
+
+Architecture statique :
+- toutes les sentinelles : SUCCESS ;
+- Phase 6 #170 à #176 : SUCCESS.
+
+Browser complet :
+- scénario dédié `Vérifier le refresh ennemi sans wrapper Dungeon V165` : SUCCESS ;
+- matrice complète Survie / Dungeon / Tactical / Capture / PvP / Builder / Save & Quit / assets : SUCCESS.
+
+## Preview utilisateur
+
+Branche dédiée :
+`preview/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25`.
+
+SHA preview :
+`a3ab2c9995912af579c6164332480d56fb451cc9`.
+
+Lien mobile :
+`https://raw.githack.com/slyen4425-cloud/Zombicide-40k/a3ab2c9995912af579c6164332480d56fb451cc9/preview.html`.
+
+## Prochaine action obligatoire
+
+1. obtenir la validation utilisateur mobile, en particulier :
+   - ouverture du gestionnaire d'ennemis / réserve Survie ;
+   - présence correcte des ennemis/arts Survie ;
+   - vagues toujours fonctionnelles ;
+   - vérifier rapidement un parcours Dungeon avec créatures/arts ;
+2. ne pas rouvrir le propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ni `ensureDungeonEnemies()` dans ce lot ;
+3. après validation, enregistrer le retour utilisateur ;
+4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire de fermeture ;
+5. créer seulement ensuite le checkpoint GREEN final du lot.
 
 Hors périmètre maintenu :
 - propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;

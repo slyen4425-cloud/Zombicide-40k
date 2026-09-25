@@ -1,0 +1,90 @@
+name: GenSrpG one-shot Phase 6 reserve fingerprint alignment
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-wave-reserve-normalization-2026-09-25
+    paths:
+      - .github/workflows/gensrpg-phase6-wave-reserve-fingerprint-one-shot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  align-fingerprints:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-wave-reserve-normalization-2026-09-25
+          fetch-depth: 0
+
+      - name: Align exact runtime fingerprints only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          old_blob="fb8c77504ed067fb094374260b459f8d1fb7e824"
+          new_blob="afc271f9e038f77c5c78caa9f4445d0e49eaea5d"
+          old_size="8169503"
+          new_size="8169047"
+
+          expected={
+            "tests/gens_phase4_dice_next_raccord_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_first_raccord_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_earned_skill_points_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_earned_skill_points_raccord_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_earned_skill_points_raccord_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_into_level_contract_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_into_level_raccord_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase4_progression_xp_into_level_raccord_v1.test.cjs":(1,1),
+            "tests/gens_asset_resolver_final_audit_v1.test.cjs":(1,0),
+            "tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs":(2,1),
+            "tests/gens_phase5_exit_audit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s1_shell_registry_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s3_capture_provider_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_screen_return_contract_v1.test.cjs":(1,1),
+            "tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_openchar_authority_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs":(1,1),
+            "tests/gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs":(1,1),
+          }
+
+          changed=[]
+          for name,(want_blob,want_size) in expected.items():
+              p=Path(name)
+              text=p.read_text(encoding="utf-8")
+              got_blob=text.count(old_blob)
+              got_size=text.count(old_size)
+              if (got_blob,got_size)!=(want_blob,want_size):
+                  raise SystemExit(f"{name}: fingerprint guard mismatch blob={got_blob}/{want_blob} size={got_size}/{want_size}")
+              updated=text.replace(old_blob,new_blob).replace(old_size,new_size)
+              if updated==text:
+                  raise SystemExit(f"{name}: expected fingerprint-only change")
+              p.write_text(updated,encoding="utf-8")
+              changed.append(name)
+
+          print("Aligned exact runtime fingerprints in",len(changed),"files")
+          PY
+
+      - name: Commit fingerprint alignment and remove one-shot
+        shell: bash
+        run: |
+          rm .github/workflows/gensrpg-phase6-wave-reserve-fingerprint-one-shot.yml
+          git config user.name "gensrpg-architecture-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A tests .github/workflows/gensrpg-phase6-wave-reserve-fingerprint-one-shot.yml
+          git diff --cached --stat
+          git commit -m "test: align runtime fingerprints after Survival reserve normalization"
+          git push origin HEAD:work/gensrpg-phase6-survival-wave-reserve-normalization-2026-09-25

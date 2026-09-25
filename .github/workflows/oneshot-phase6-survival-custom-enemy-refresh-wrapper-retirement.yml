@@ -1,0 +1,87 @@
+name: One-shot Phase 6 retire Dungeon V165 custom enemy refresh wrapper
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-survival-custom-enemy-refresh-wrapper-retirement.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25
+          fetch-depth: 0
+
+      - name: Guard and remove only V165 refresh wrapper
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          path=Path("index.html")
+          data=path.read_bytes()
+
+          def git_blob(buf):
+              return hashlib.sha1(b"blob "+str(len(buf)).encode()+b"\x00"+buf).hexdigest()
+
+          assert len(data)==8170881, f"unexpected source size: {len(data)}"
+          assert git_blob(data)=="f6a11fa5c0807debc0c9950cc2caf5356c97cfc8", git_blob(data)
+
+          old=b'''/* Critical fix: refreshCustomEnemiesIntoZombieTypes was rebuilding the definitions
+   after V164 had assigned their images. Apply the art AFTER every rebuild. */
+if(typeof window.refreshCustomEnemiesIntoZombieTypes==="function"){
+  const old=window.refreshCustomEnemiesIntoZombieTypes;
+  window.refreshCustomEnemiesIntoZombieTypes=function(){
+    const r=old.apply(this,arguments); apply(); return r;
+  };
+}
+'''
+
+          assert data.count(old)==1, data.count(old)
+          assert data.count(b"function refreshCustomEnemiesIntoZombieTypes(){")==1
+          assert data.count(b"window.refreshCustomEnemiesIntoZombieTypes=function(){")==1
+
+          out=data.replace(old,b"",1)
+
+          assert out.count(old)==0
+          assert out.count(b"function refreshCustomEnemiesIntoZombieTypes(){")==1
+          assert out.count(b"window.refreshCustomEnemiesIntoZombieTypes=function(){")==0
+
+          # Preserve the other reviewed V165 protections.
+          assert b"window.gensDungeonCreatureArt165=function" in out
+          assert b"window.activeEnemyDefinition=function" in out
+          assert b"window.enemyCardHtml=function" in out
+          assert b"window.openZombieRule=function" in out
+          assert b"window.renderActiveEnemies=function" in out
+          assert b'<script id="dungeonDirectImageBinding166">' in out
+
+          assert len(out)==8170472, len(out)
+          assert git_blob(out)=="2232d8c1d65121758646915080bd3c17be4d4cd6", git_blob(out)
+
+          path.write_bytes(out)
+          print("source_size=8170881")
+          print("source_blob=f6a11fa5c0807debc0c9950cc2caf5356c97cfc8")
+          print("result_size="+str(len(out)))
+          print("result_blob="+git_blob(out))
+          print("removed_wrapper_count=1")
+          PY
+
+      - name: Self-delete one-shot workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-survival-custom-enemy-refresh-wrapper-retirement.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/oneshot-phase6-survival-custom-enemy-refresh-wrapper-retirement.yml
+          git diff --cached --check
+          git commit -m "refactor: retire Dungeon V165 custom enemy refresh wrapper"
+          git push origin HEAD:work/gensrpg-phase6-survival-custom-enemy-refresh-2026-09-25

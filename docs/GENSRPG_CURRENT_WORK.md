@@ -35,7 +35,15 @@ TDD :
 État :
 - pré-audit écrit ;
 - sentinelle RED ajoutée et raccordée à Architecture ;
-- aucun runtime modifié dans ce micro-lot à ce stade.
+- RED obligatoire prouvé sur le SHA `8bdd0b316d54e65d8a29d892e9fee62dcbd15df6` ;
+- échec exact : `Phase 6 micro-lot 3 requires the Zombicide base-profile converter in Survival` ;
+- sur ce SHA RED : Firefox SUCCESS, Tactical Dock SUCCESS, Architecture FAILURE uniquement sur la nouvelle sentinelle ;
+- `assets/gensrpg/survival/entry-v1.js` contient maintenant la conversion pure `waveRules.zombicideBaseProfile(spawnCards, enemyTypes)` ;
+- contrat Survie étendu à cette responsabilité ;
+- commits runtime/contrat : `f63524d08d57d23c8d8e2b700e17f027dac2e38e` puis `fe6585282f34c6ad23f61b4c22bc2dd28674389e` ;
+- `index.html` n’a pas encore été modifié dans ce micro-lot ;
+- prochain verrou : retirer le propriétaire inline `zombicideBaseWaveProfile()` et raccorder ses 3 consommateurs directs ;
+- Rule 26 obligatoire avant ce raccord : obtenir l’index exact du HEAD courant et vérifier son blob.
 
 ---
 

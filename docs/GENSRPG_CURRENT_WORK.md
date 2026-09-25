@@ -107,13 +107,36 @@ Le réalignement a :
 
 Le workflow temporaire de réalignement s'est auto-supprimé.
 
-## Prochaine action
+## CI technique GREEN
 
-1. Architecture + Browser complet ;
-2. Firefox ;
-3. Tactical Dock ;
-4. si triple GREEN, créer la preview mobile ;
-5. validation utilisateur avant checkpoint GREEN.
+SHA technique testé :
+`7608b3e43bceedef76e4b6898c2198b1c4898691`.
+
+Runs :
+- Architecture + Browser complet : `36132948390` — SUCCESS ;
+- Firefox : `36132948259` — SUCCESS ;
+- Tactical Dock : `36132948252` — SUCCESS.
+
+Architecture statique :
+- 232 étapes terminées ;
+- 0 failure.
+
+Browser :
+- 41 étapes terminées ;
+- 0 failure ;
+- la nouvelle étape `Vérifier la bibliothèque de compétences Survie depuis le vrai hub` est SUCCESS ;
+- Dungeon après Survie, Dungeon Builder, Capture, goMenu, Save & Quit, non-interférence des modules et autres scénarios historiques restent GREEN.
+
+## État avant preview
+
+Le présent enregistrement crée un nouveau SHA documentaire.
+Avant preview :
+1. refaire Architecture + Browser, Firefox et Tactical Dock sur ce SHA exact ;
+2. si triple SUCCESS, créer la preview du lot compétences Survie ;
+3. obtenir validation utilisateur mobile ;
+4. seulement ensuite créer le checkpoint GREEN final.
+
+Ne pas ouvrir le lot suivant avant validation utilisateur et fermeture GREEN finale.
 
 ---
 

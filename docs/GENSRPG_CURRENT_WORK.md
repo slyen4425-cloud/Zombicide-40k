@@ -142,27 +142,56 @@ Message RED exact :
 
 Le RED est isolé à l'appel direct depuis le refresh partagé. Ce rouge n'est pas une régression fonctionnelle.
 
-## Prochaine action obligatoire — raccord minimal
+## Raccord runtime minimal appliqué
 
-Rule 26 autorise le raccord uniquement sur la source exacte `work30.zip/index.30.txt`.
+Commit runtime :
+`8cc341250d935fb78fd5ec5c2a9751bac70727ba`
+(`refactor: retire Dungeon ensure from shared custom enemy refresh`).
 
-Modification autorisée :
-- retirer exactement la ligne
+Modification runtime unique :
+- suppression exacte d'une seule ligne :
   `if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();`
-  du corps de `refreshCustomEnemiesIntoZombieTypes()` ;
-- ne rien modifier d'autre.
+  dans `refreshCustomEnemiesIntoZombieTypes()`.
 
-Résultat attendu calculé sur la source exacte :
-- taille : 8 170 402 octets ;
+Conservé byte-identique hors cette ligne :
+- `applyBuiltinEnemyOverrides()` ;
+- publication des custom via `loadCustomEnemies()/customEnemyToZombieType()` ;
+- définition Dungeon `ensureDungeonEnemies()` ;
+- appel Dungeon dans `ensureDungeonContent()` ;
+- V164/V165/V166 ;
+- stockage/UI/gameplay.
+
+Runtime obtenu exactement comme calculé avant raccord :
+- `index.html` : 8 170 402 octets ;
 - blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
 
-Après raccord :
-1. vérifier taille/blob exacts ;
-2. réaligner uniquement les empreintes/cartographies mécaniques ;
-3. conserver la définition Dungeon `ensureDungeonEnemies()` et `ensureDungeonContent()` ;
-4. obtenir #170 à #177 GREEN ;
-5. triple CI ;
-6. preview utilisateur avant checkpoint final.
+## Réalignement strict des empreintes
+
+Inventaire post-raccord :
+- aucune métrique de propriété globale ne change ;
+- aucun compteur Phase 2 ne change ;
+- seules les empreintes taille/blob des sentinelles et les quatre `sourceIndexBlob` de cartographie doivent suivre le nouveau runtime.
+
+Commit :
+`8d04eb203a86ecf43ca14c186cc2879cd3397475`
+(`test: align fingerprints after Dungeon ensure retirement`).
+
+Réalisé :
+- ancienne taille `8170472` -> `8170402` dans les sentinelles de runtime courant ;
+- ancien blob `2232d8c1d65121758646915080bd3c17be4d4cd6` ->
+  `2a7dae75115d83b4edc368c42453a7cb58d0bd73` ;
+- quatre cartographies Phase 2 : uniquement `sourceIndexBlob` ;
+- références historiques du pré-audit et de CURRENT_WORK conservées.
+
+Aucune assertion métier n'a été affaiblie.
+
+## Prochaine action obligatoire — GREEN technique
+
+1. lancer Architecture + Browser complet, Firefox et Tactical Dock sur le présent SHA documentaire ;
+2. vérifier spécialement Phase 6 #170 à #177 ;
+3. vérifier le scénario navigateur de caractérisation sans `ensureDungeonEnemies()` ;
+4. si les trois workflows sont SUCCESS, créer une preview dédiée ;
+5. demander validation utilisateur avant tout checkpoint GREEN final.
 
 ---
 

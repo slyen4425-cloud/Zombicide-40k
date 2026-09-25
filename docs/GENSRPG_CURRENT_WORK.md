@@ -1,3 +1,93 @@
+# PHASE 6 — MICRO-LOT — retirer la dépendance ensureDungeonEnemies du refresh partagé — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-refresh-green-2026-09-25`
+
+SHA de base :
+`10cff9dcd25859eb27f5a9354d1c886647dfac4e`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_DUNGEON_ENSURE_PREAUDIT.md`
+
+## Fermeture confirmée du lot précédent
+
+Le lot de retrait du wrapper Dungeon V165 de
+`refreshCustomEnemiesIntoZombieTypes()`
+est fermé GREEN sur :
+
+`checkpoint/gensrpg-phase6-survival-custom-enemy-refresh-green-2026-09-25`
+
+SHA final :
+`10cff9dcd25859eb27f5a9354d1c886647dfac4e`.
+
+CI finale :
+- Architecture + Browser complet : `36180446525` — SUCCESS ;
+- Firefox : `36180446637` — SUCCESS ;
+- Tactical Dock : `36180446681` — SUCCESS.
+
+Validation utilisateur :
+`Ok tout fonctionne bien`.
+
+Production `main` reste exactement gelée sur :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Runtime de base du présent lot :
+- `index.html` : 8 170 472 octets ;
+- blob Git : `2232d8c1d65121758646915080bd3c17be4d4cd6`.
+
+## Dette sélectionnée
+
+La caractérisation GREEN précédente a prouvé que le propriétaire natif unique
+`refreshCustomEnemiesIntoZombieTypes()`
+reste encore mixte.
+
+Le présent lot cible uniquement son appel privé Dungeon :
+`ensureDungeonEnemies()`.
+
+`applyBuiltinEnemyOverrides()` et sa dépendance `dungeonEnemies()` restent explicitement hors périmètre pour le moment.
+
+But :
+- déterminer si `ensureDungeonEnemies()` est désormais redondant ;
+- si oui, retirer uniquement cet appel ;
+- si non, stopper le lot et préparer un adapter/hook Dungeon explicite dans un lot séparé.
+
+## Protections
+
+Ne pas toucher :
+- `applyBuiltinEnemyOverrides()` ;
+- `dungeonEnemies()` ;
+- `customEnemyToZombieType()` ;
+- `loadCustomEnemies()` ;
+- wrappers arts V164/V165/V166 ;
+- `openZombieRule` ;
+- stockage/éditeur ;
+- règles de vagues ;
+- Tactical/Capture/PvP.
+
+Aucun runtime n'a encore été modifié.
+
+## Prochaine action obligatoire — Rule 26
+
+1. résoudre le HEAD exact après le présent enregistrement documentaire ;
+2. confirmer que `index.html` reste à 8 170 472 octets / blob
+   `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
+3. fournir le permalink SHA exact à Sylvain ;
+4. demander le ZIP exact du fichier ;
+5. vérifier taille + blob ;
+6. seulement ensuite caractériser la suppression de l'appel `ensureDungeonEnemies()` ;
+7. si la caractérisation navigateur est GREEN, écrire le TDD RED ;
+8. ne pas modifier le runtime avant cette preuve.
+
+Ne pas réutiliser `work29.zip` : il appartient à l'état précédent du runtime.
+
+---
+
 # PHASE 6 — MICRO-LOT — propriété du refresh ennemis personnalisés Survie — 2026-09-25
 
 Base GREEN :

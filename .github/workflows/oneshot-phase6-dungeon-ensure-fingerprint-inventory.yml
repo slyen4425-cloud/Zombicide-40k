@@ -1,0 +1,39 @@
+name: One-shot Phase 6 Dungeon ensure fingerprint inventory
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-inventory.yml
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+          fetch-depth: 0
+
+      - name: Inventory exact old runtime fingerprints
+        shell: bash
+        run: |
+          echo "=== OLD BLOB ==="
+          git grep -n -F "2232d8c1d65121758646915080bd3c17be4d4cd6" -- ':!docs/GENSRPG_CURRENT_WORK.md' ':!docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_DUNGEON_ENSURE_PREAUDIT.md' || true
+          echo "=== OLD SIZE ==="
+          git grep -n -E '8170472|8 170 472' -- ':!docs/GENSRPG_CURRENT_WORK.md' ':!docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_DUNGEON_ENSURE_PREAUDIT.md' || true
+
+      - name: Self-delete inventory workflow
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-inventory.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-inventory.yml
+          git commit -m "ci: remove Dungeon ensure fingerprint inventory workflow"
+          git push origin HEAD:work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25

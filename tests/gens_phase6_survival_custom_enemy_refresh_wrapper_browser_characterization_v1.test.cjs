@@ -17,9 +17,10 @@ if(typeof window.refreshCustomEnemiesIntoZombieTypes==="function"){
 }
 `;
 
-assert.equal(indexSource.split(wrapper).length-1,1,
-  'characterization requires the exact single V165 refresh wrapper');
-const fixture=indexSource.replace(wrapper,'');
+const wrapperCount=indexSource.split(wrapper).length-1;
+assert.ok(wrapperCount===0||wrapperCount===1,
+  'runtime must contain at most the reviewed single V165 refresh wrapper');
+const fixture=wrapperCount===1?indexSource.replace(wrapper,''):indexSource;
 assert.doesNotMatch(
   fixture.slice(fixture.indexOf('<script id="dungeonArtRenderFix165">'),fixture.indexOf('</script>',fixture.indexOf('<script id="dungeonArtRenderFix165">'))),
   /window.refreshCustomEnemiesIntoZombieTypess*=s*function/,

@@ -1,3 +1,47 @@
+# PHASE 6 — MICRO-LOT 4 — réserve automatique des vagues Survie — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-zombicide-base-wave-profile-green-2026-09-25`
+
+SHA de base :
+`819380e2598b18d349029d8522068101ea153110`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-wave-auto-reserve-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-wave-auto-reserve-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_WAVE_AUTO_RESERVE_PREAUDIT.md`
+
+Rule 26 :
+- `work22.zip` / `index22.txt` ;
+- 8 169 596 octets ;
+- blob Git `d451372389f29d0145d3f9689ca739128a0650e9` ;
+- correspond exactement au runtime du checkpoint GREEN précédent.
+
+Candidat homogène :
+- propriétaire inline `autoReserveFromProfile(profile)` ;
+- 1 définition + exactement 6 consommateurs ;
+- cible : `GensSurvivalV1.waveRules.autoReserve(profile, defaultReserve)` ;
+- `defaultZombieConfig()` reste propriétaire de la donnée et est passé explicitement par les callsites.
+
+Contraintes :
+- fonction pure ;
+- parité exacte ;
+- aucun DOM / stockage / timer / listener / observer ;
+- aucune dépendance privée Dungeon/Tactical/Capture/PvP ;
+- aucun wrapper global ;
+- `normalizeWaveReserveForProfile()`, `zombicideBaseReserve()` et `startConfiguredGame()` hors périmètre ;
+- TDD RED obligatoire avant tout raccord runtime.
+
+Prochaine action :
+- ajouter la sentinelle TDD du micro-lot 4 et la raccorder à Architecture ;
+- prouver le RED attendu avant toute modification runtime.
+
+---
+
 # PHASE 6 — MICRO-LOT 3 — profil Zombicide de base vers règles Survie — 2026-09-25
 
 Base GREEN :

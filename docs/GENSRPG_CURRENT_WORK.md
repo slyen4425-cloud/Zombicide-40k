@@ -111,18 +111,58 @@ Important :
 - `ensureDungeonContent()` continue de l'utiliser ;
 - seul l'appel depuis le refresh partagé est candidat au retrait.
 
-## Prochaine action obligatoire — TDD RED
+## TDD RED — prouvé
 
-1. ajouter une sentinelle statique exigeant l'absence de `ensureDungeonEnemies` dans le corps du refresh partagé ;
-2. verrouiller simultanément la conservation de :
-   - `applyBuiltinEnemyOverrides()` ;
-   - `loadCustomEnemies()` ;
-   - la définition `ensureDungeonEnemies()` ;
-   - son appel depuis `ensureDungeonContent()` ;
-   - V164/V165/V166 ;
-3. brancher cette sentinelle en nouvelle étape Phase 6 #177 ;
-4. prouver RED isolé avec #170 à #176 GREEN, Firefox GREEN et Tactical Dock GREEN ;
-5. ne modifier le runtime qu'après cette preuve.
+Sentinelle :
+`tests/gens_phase6_survival_custom_enemy_dungeon_ensure_retirement_v1.test.cjs`.
+
+Commit sentinelle :
+`57da835834086ebf06430e3010aac7189097eae4`.
+
+Raccord CI :
+`4cb03405315a9b5992ffcb4efccac76a9927e4dc`.
+
+CI sur ce SHA :
+- Architecture : run `36184661605` — FAILURE attendue ;
+- Firefox : run `36184661496` — SUCCESS ;
+- Tactical Dock : run `36184661643` — SUCCESS.
+
+Architecture Phase 6 :
+- #170 : SUCCESS ;
+- #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS ;
+- #174 : SUCCESS ;
+- #175 : SUCCESS ;
+- #176 : SUCCESS ;
+- nouvelle étape #177 `Retirer ensureDungeonEnemies du refresh partagé Phase 6` : FAILURE attendue.
+
+Message RED exact :
+`Phase 6 requires removing the private Dungeon ensureDungeonEnemies dependency from the shared custom-enemy refresh owner`.
+
+Le RED est isolé à l'appel direct depuis le refresh partagé. Ce rouge n'est pas une régression fonctionnelle.
+
+## Prochaine action obligatoire — raccord minimal
+
+Rule 26 autorise le raccord uniquement sur la source exacte `work30.zip/index.30.txt`.
+
+Modification autorisée :
+- retirer exactement la ligne
+  `if(typeof ensureDungeonEnemies==="function")ensureDungeonEnemies();`
+  du corps de `refreshCustomEnemiesIntoZombieTypes()` ;
+- ne rien modifier d'autre.
+
+Résultat attendu calculé sur la source exacte :
+- taille : 8 170 402 octets ;
+- blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
+
+Après raccord :
+1. vérifier taille/blob exacts ;
+2. réaligner uniquement les empreintes/cartographies mécaniques ;
+3. conserver la définition Dungeon `ensureDungeonEnemies()` et `ensureDungeonContent()` ;
+4. obtenir #170 à #177 GREEN ;
+5. triple CI ;
+6. preview utilisateur avant checkpoint final.
 
 ---
 

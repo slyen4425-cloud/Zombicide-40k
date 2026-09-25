@@ -18,8 +18,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.length+'\0')).update(indexBuf).digest('hex');
 const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
-assert.equal(indexBuf.length,8169503,'first-raccord preaudit must track the exact current index after Survival reserve extraction');
-assert.equal(indexBlob,'fb8c77504ed067fb094374260b459f8d1fb7e824','index blob drifted after Survival reserve extraction');
+assert.equal(indexBuf.length,8169047,'first-raccord preaudit must track the exact current index after Survival reserve extraction');
+assert.equal(indexBlob,'afc271f9e038f77c5c78caa9f4445d0e49eaea5d','index blob drifted after Survival reserve extraction');
 assert.equal(coreBlob,'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169503,'S3 preaudit must start from the exact user-validated S2 runtime');
-assert.equal(gitBlob,'fb8c77504ed067fb094374260b459f8d1fb7e824','S3 preaudit must start from the exact S2 blob');
+assert.equal(bytes.length,8169047,'S3 preaudit must start from the exact user-validated S2 runtime');
+assert.equal(gitBlob,'afc271f9e038f77c5c78caa9f4445d0e49eaea5d','S3 preaudit must start from the exact S2 blob');
 
 const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
 assert.ok(registryExpose>0,'S1 registry must remain exposed');

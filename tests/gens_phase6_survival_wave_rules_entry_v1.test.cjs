@@ -87,8 +87,10 @@ assert.equal((index.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[])
   'five legacy index consumers must still use Survival API directly after Zombicide base conversion moves into the module');
 assert.match(entry,/function\s+zombicideBaseProfile\s*\([^)]*\)\s*\{[\s\S]*?const\s+base=defaultProfile\(\)/,
   'the sixth default-profile consumption now belongs inside the Survival Zombicide base converter');
-assert.equal((index.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,2,
-  'both enemy-id consumers must use Survival API directly');
+assert.equal((index.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,1,
+  'one legacy index consumer must still use Survival API directly after auto-reserve ownership moves into the module');
+assert.match(entry,/function\s+autoReserve\s*\([^)]*\)\s*\{[\s\S]*?collectEnemyIds\(profile\)/,
+  'automatic reserve derivation must reuse the module-owned enemy-id collector');
 
 assert.equal(contract.status,'partial-runtime-loaded','Survival contract must record the first active runtime slice');
 assert.equal(contract.publicRuntimeApi,'GensSurvivalV1','Survival contract must name its public runtime namespace');

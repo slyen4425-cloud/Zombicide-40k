@@ -13926,18 +13926,9 @@ function normalizeWaveReserveForProfile(profile,reserve){
   return out;
 }
 
-function autoReserveFromProfile(p){
-  const reserve={};
-  ZOMBIE_TYPES.forEach(z=>reserve[z.id]=0);
-  GensSurvivalV1.waveRules.collectEnemyIds(p).forEach(id=>{
-    // valeur boîte actuelle si dispo, sinon au moins 1
-    reserve[id]=Math.max(1,Number(defaultZombieConfig()[id])||1);
-  });
-  return reserve;
-}
 function autoConfigureWaveReserve(){
   const p=readWaveProfileFromUi();
-  const reserve=normalizeWaveReserveForProfile(p,autoReserveFromProfile(p));
+  const reserve=normalizeWaveReserveForProfile(p,GensSurvivalV1.waveRules.autoReserve(p,defaultZombieConfig()));
   renderWavePresetReserve(reserve);
   markWavePresetDirty();
 }
@@ -14011,7 +14002,7 @@ function saveAndActivateWaveSet(){
   let reserve=collectWaveReserveFromUi();
   const used=GensSurvivalV1.waveRules.collectEnemyIds(profile);
   const hasAny=Object.values(reserve).some(v=>Number(v)>0);
-  if(!hasAny && used.length)reserve=autoReserveFromProfile(profile);
+  if(!hasAny && used.length)reserve=GensSurvivalV1.waveRules.autoReserve(profile,defaultZombieConfig());
   reserve=normalizeWaveReserveForProfile(profile,reserve);
 
   const name=(document.getElementById("wavePresetName")?.value||"").trim()||"Set de vagues";
@@ -14084,7 +14075,7 @@ function saveCurrentWavePreset(){saveAndActivateWaveSet();}
 function duplicateCurrentWavePreset(){
   const profile=readWaveProfileFromUi();
   let reserve=collectWaveReserveFromUi();
-  if(!Object.values(reserve).some(v=>Number(v)>0))reserve=autoReserveFromProfile(profile);
+  if(!Object.values(reserve).some(v=>Number(v)>0))reserve=GensSurvivalV1.waveRules.autoReserve(profile,defaultZombieConfig());
 
   const base=(document.getElementById("wavePresetName")?.value||"Set de vagues").trim();
   const p={
@@ -14135,7 +14126,7 @@ function applyActiveWavePresetReserve(){
   const profile=p.profile||GensSurvivalV1.waveRules.defaultProfile();
   const reserve=normalizeWaveReserveForProfile(
     profile,
-    p.reserve||autoReserveFromProfile(profile)
+    p.reserve||GensSurvivalV1.waveRules.autoReserve(profile,defaultZombieConfig())
   );
 
   // Répare aussi les anciens sets qui avaient un ennemi utilisé mais une réserve à 0.
@@ -14236,7 +14227,7 @@ function renderWaveProfileEditor(){
 
   const activeId=activeWavePresetId();
   const preset=loadWavePresets().find(x=>x.id===activeId);
-  renderWavePresetReserve(preset?.reserve||autoReserveFromProfile(p));
+  renderWavePresetReserve(preset?.reserve||GensSurvivalV1.waveRules.autoReserve(p,defaultZombieConfig()));
 }
 function waveCardKindChanged(sel){
   const row=sel.closest(".waveCardRow");if(!row)return;
@@ -14291,7 +14282,7 @@ function waveProfileUiChanged(){
         saveZombieConfig({...defaultZombieConfig(),...reserve});
         saveZombieReserve({...defaultZombieConfig(),...reserve});
       }else{
-        const auto=autoReserveFromProfile(p);
+        const auto=GensSurvivalV1.waveRules.autoReserve(p,defaultZombieConfig());
         saveZombieConfig({...defaultZombieConfig(),...auto});
         saveZombieReserve({...defaultZombieConfig(),...auto});
       }

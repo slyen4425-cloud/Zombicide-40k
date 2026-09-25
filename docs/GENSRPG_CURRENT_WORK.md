@@ -93,12 +93,26 @@ Runtime après raccord :
 
 Le workflow one-shot s'est auto-supprimé dans le même commit.
 
+## Réalignement des empreintes exactes
+
+Commit :
+`05364f97ba5fe298c7a3c7763fc630e15beadc93`
+(`test: align fingerprints after Survival skill library fix`).
+
+Le réalignement a :
+- remplacé uniquement l'ancien blob `afc271f9e038f77c5c78caa9f4445d0e49eaea5d` par `9c762dcb8ad3549cf7175ba9413f925b11f5396c` dans les tests qui le verrouillaient ;
+- remplacé la taille associée `8169047` par `8170815` uniquement dans ces mêmes tests ;
+- réaligné les quatre cartographies Phase 2 décrivant explicitement la source courante ;
+- modifié aucun runtime, aucune règle métier et aucune assertion fonctionnelle.
+
+Le workflow temporaire de réalignement s'est auto-supprimé.
+
 ## Prochaine action
 
-1. rejouer le Browser RED -> GREEN ;
-2. réaligner uniquement les empreintes exactes rendues obsolètes par le nouveau blob ;
-3. Architecture + Browser complet, Firefox, Tactical Dock ;
-4. preview mobile ;
+1. Architecture + Browser complet ;
+2. Firefox ;
+3. Tactical Dock ;
+4. si triple GREEN, créer la preview mobile ;
 5. validation utilisateur avant checkpoint GREEN.
 
 ---

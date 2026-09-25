@@ -1,3 +1,58 @@
+# PHASE 6 — MICRO-LOT — réserve Zombicide de base Survie — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-skill-library-green-2026-09-25`
+
+SHA de base :
+`7627d10dd42bd3d72578eceda489d7f54f770b49`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-zombicide-base-reserve-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-zombicide-base-reserve-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_ZOMBICIDE_BASE_RESERVE_PREAUDIT.md`
+
+## Périmètre
+
+Propriétaire inline historique :
+`zombicideBaseReserve()`.
+
+État historique vérifié et à reprouver par TDD sur le runtime courant :
+- 1 définition inline ;
+- 3 consommateurs ;
+- sémantique : copie fraîche de `defaultZombieConfig()`.
+
+Runtime exact de départ :
+- `index.html` : 8 170 815 octets ;
+- blob : `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
+
+Cible :
+`GensSurvivalV1.waveRules.zombicideBaseReserve(defaultReserve)`.
+
+Hors périmètre :
+- `defaultZombieConfig()` ;
+- stockage/presets ;
+- UI vagues ;
+- danger/résolution des cartes ;
+- `startConfiguredGame()` ;
+- Compétences Survie ;
+- Dungeon/Tactical/Capture/PvP.
+
+## Prochaine action obligatoire
+
+1. ajouter la sentinelle TDD RED ;
+2. la raccorder à Architecture ;
+3. prouver le RED isolé sur le runtime courant ;
+4. préparer uniquement l'API pure Survie ;
+5. appliquer la règle 26 avant tout raccord `index.html`.
+
+Aucun runtime du gros HTML ne doit être modifié avant RED.
+
+---
+
 # PHASE 6 — LOT COMPÉTENCES SURVIE — bibliothèque contextuelle — 2026-09-25
 
 Base GREEN :

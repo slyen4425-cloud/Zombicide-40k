@@ -15,30 +15,110 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE6_SURVIVAL_WAVE_AUTO_RESERVE_PREAUDIT.md`
 
-Rule 26 :
+## Rule 26
+
+Fichier exact fourni et vérifié :
 - `work22.zip` / `index22.txt` ;
 - 8 169 596 octets ;
 - blob Git `d451372389f29d0145d3f9689ca739128a0650e9` ;
 - correspond exactement au runtime du checkpoint GREEN précédent.
 
-Candidat homogène :
-- propriétaire inline `autoReserveFromProfile(profile)` ;
-- 1 définition + exactement 6 consommateurs ;
-- cible : `GensSurvivalV1.waveRules.autoReserve(profile, defaultReserve)` ;
-- `defaultZombieConfig()` reste propriétaire de la donnée et est passé explicitement par les callsites.
+## Périmètre
 
-Contraintes :
-- fonction pure ;
-- parité exacte ;
-- aucun DOM / stockage / timer / listener / observer ;
-- aucune dépendance privée Dungeon/Tactical/Capture/PvP ;
-- aucun wrapper global ;
-- `normalizeWaveReserveForProfile()`, `zombicideBaseReserve()` et `startConfiguredGame()` hors périmètre ;
-- TDD RED obligatoire avant tout raccord runtime.
+Propriétaire inline historique :
+`autoReserveFromProfile(profile)`.
 
-Prochaine action :
-- ajouter la sentinelle TDD du micro-lot 4 et la raccorder à Architecture ;
-- prouver le RED attendu avant toute modification runtime.
+État initial :
+- 1 définition ;
+- exactement 6 consommateurs.
+
+Cible :
+`GensSurvivalV1.waveRules.autoReserve(profile, defaultReserve)`.
+
+La fonction est pure et reçoit explicitement `defaultZombieConfig()` aux callsites.
+`normalizeWaveReserveForProfile()`, `zombicideBaseReserve()`, stockage/UI et `startConfiguredGame()` restent hors périmètre.
+
+## TDD RED
+
+Sentinelle :
+`tests/gens_phase6_survival_wave_auto_reserve_v1.test.cjs`.
+
+RED prouvé au SHA :
+`02ff7c81cceb2540b7ea72d57ee0f5245c3ac877`.
+
+Échec unique attendu Architecture :
+`Phase 6 micro-lot 4 requires automatic wave-reserve derivation in Survival`.
+
+Sur le SHA RED :
+- Firefox : SUCCESS ;
+- Tactical Dock : SUCCESS ;
+- Architecture : FAILURE sur la nouvelle sentinelle #173.
+
+## Raccord runtime
+
+L'entrée Survie possède maintenant :
+`GensSurvivalV1.waveRules.autoReserve(profile, defaultReserve)`.
+
+Le raccord Rule 26 a :
+- supprimé l'unique propriétaire inline `autoReserveFromProfile()` ;
+- raccordé exactement 6 consommateurs directs ;
+- conservé `defaultZombieConfig()` comme propriétaire de la donnée ;
+- ajouté aucun wrapper, fallback, timer, observer, polling ou changement UI/gameplay.
+
+Commit runtime :
+`22035b9cf345902cfb6f8a619374f22e3654e401`
+(`refactor: connect Survival wave auto reserve`).
+
+Runtime actuel :
+- `index.html` : 8 169 503 octets ;
+- blob Git : `fb8c77504ed067fb094374260b459f8d1fb7e824`.
+
+Les cartographies/tests historiques verrouillant uniquement l'empreinte exacte du runtime ont été réalignés sans modification de leurs assertions métier.
+
+La sentinelle Phase 6 #171 a également été réalignée sur la propriété réelle après extraction :
+- 1 consommateur direct `collectEnemyIds()` reste dans `index.html` ;
+- `autoReserve()` consomme désormais le second chemin à l'intérieur du module Survie.
+
+## CI technique GREEN
+
+SHA technique final testé :
+`f330dbb135a094593ac5431aca4538828c509451`.
+
+Runs sur ce SHA exact :
+- Architecture + Browser complet : `36115743732` — SUCCESS ;
+- Firefox : `36115743723` — SUCCESS ;
+- Tactical Dock : `36115743737` — SUCCESS.
+
+Sentinelles Phase 6 sur ce SHA :
+- #170 : SUCCESS ;
+- #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS.
+
+Le Browser complet valide notamment :
+- lancement Survie ;
+- héros Survie après Dungeon ;
+- Fouiller / arts Survie ;
+- goMenu Survie ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire + reprise inter-module ;
+- Dungeon après Survie dans Chromium ;
+- Save & Quit / reprise ;
+- non-interférence des quatre modules.
+
+## État avant preview
+
+Le présent enregistrement crée un nouveau SHA documentaire.
+Avant preview :
+1. refaire Architecture + Browser, Firefox et Tactical Dock sur ce nouveau SHA ;
+2. si triple SUCCESS, créer/mettre à jour la preview du micro-lot 4 ;
+3. obtenir validation utilisateur mobile ;
+4. seulement ensuite documenter la validation et créer le checkpoint GREEN FINAL.
+
+Nom recommandé :
+`checkpoint/gensrpg-phase6-survival-wave-auto-reserve-green-2026-09-25`.
+
+Ne pas ouvrir le micro-lot suivant avant validation utilisateur et fermeture GREEN finale.
 
 ---
 

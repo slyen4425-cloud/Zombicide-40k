@@ -1,3 +1,66 @@
+# PHASE 6 — MICRO-LOT 5 — normalisation de réserve de vagues Survie — 2026-09-25
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-wave-auto-reserve-green-2026-09-25`
+
+SHA de base :
+`9ff069eea2b68668e1fe7423a3988b56235ad790`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-wave-reserve-normalization-2026-09-25`
+
+Branche :
+`work/gensrpg-phase6-survival-wave-reserve-normalization-2026-09-25`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_WAVE_RESERVE_NORMALIZATION_PREAUDIT.md`
+
+## Périmètre
+
+Propriétaire inline historique :
+`normalizeWaveReserveForProfile(profile, reserve)`.
+
+État vérifié :
+- 1 définition inline ;
+- 4 consommateurs ;
+- runtime actuel : 8 169 503 octets ;
+- blob `index.html` : `fb8c77504ed067fb094374260b459f8d1fb7e824`.
+
+Cible :
+`GensSurvivalV1.waveRules.normalizeReserve(profile, reserve, defaultReserve)`.
+
+La règle cible reste pure. `refreshCustomEnemiesIntoZombieTypes()` reste au runtime historique/callsite et `defaultZombieConfig()` est passé explicitement.
+
+Hors périmètre :
+- `zombicideBaseReserve()` ;
+- stockage/presets/autosave ;
+- UI vagues ;
+- danger / résolution des cartes ;
+- `startConfiguredGame()` ;
+- Dungeon/Tactical/Capture/PvP.
+
+## TDD requis
+
+Nouvelle sentinelle RED à ajouter avant tout raccord runtime :
+`tests/gens_phase6_survival_wave_reserve_normalization_v1.test.cjs`.
+
+Le RED doit prouver l'absence de `waveRules.normalizeReserve` et la présence du propriétaire inline historique.
+
+## Rule 26
+
+Avant tout raccord de `index.html`, revalider le SHA et le blob exact du runtime.
+Aucune reconstruction du gros HTML depuis des fragments GitHub.
+
+## Prochaine action
+
+1. ajouter la sentinelle RED ;
+2. la raccorder à Architecture ;
+3. prouver le RED isolé ;
+4. seulement ensuite préparer l'API pure Survie ;
+5. appliquer la règle 26 avant le raccord `index.html`.
+
+---
+
 # PHASE 6 — MICRO-LOT 4 — réserve automatique des vagues Survie — 2026-09-25
 
 Base GREEN :

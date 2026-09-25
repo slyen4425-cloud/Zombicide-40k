@@ -72,19 +72,57 @@ Ne pas toucher :
 
 Aucun runtime n'a encore été modifié.
 
-## Prochaine action obligatoire — Rule 26
+## Rule 26 — source exacte reçue
 
-1. résoudre le HEAD exact après le présent enregistrement documentaire ;
-2. confirmer que `index.html` reste à 8 170 472 octets / blob
-   `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
-3. fournir le permalink SHA exact à Sylvain ;
-4. demander le ZIP exact du fichier ;
-5. vérifier taille + blob ;
-6. seulement ensuite caractériser la suppression de l'appel `ensureDungeonEnemies()` ;
-7. si la caractérisation navigateur est GREEN, écrire le TDD RED ;
-8. ne pas modifier le runtime avant cette preuve.
+Sylvain a fourni `work30.zip`.
 
-Ne pas réutiliser `work29.zip` : il appartient à l'état précédent du runtime.
+Vérification :
+- fichier : `index.30.txt` ;
+- taille : 8 170 472 octets ;
+- blob Git : `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
+- correspond exactement au runtime requis.
+
+## Caractérisation navigateur — GREEN
+
+Test :
+`tests/gens_phase6_survival_custom_enemy_without_dungeon_ensure_browser_characterization_v1.test.cjs`.
+
+Le test retire uniquement l'appel conditionnel à `ensureDungeonEnemies()` dans une fixture mémoire.
+
+Résultat :
+- custom Survie publié exactement une fois ;
+- custom Dungeon publié exactement une fois ;
+- filtre Survie sans fuite Dungeon ;
+- filtre Dungeon conserve custom + built-ins ;
+- tous les IDs de `dungeonEnemies()` sont déjà présents après `applyBuiltinEnemyOverrides()` ;
+- override d'art Dungeon conservé ;
+- rendu de carte ennemi Dungeon conservé.
+
+Workflow ciblé :
+- run `36184402550` — SUCCESS.
+
+Conclusion :
+`ensureDungeonEnemies()` est redondant dans le corps de
+`refreshCustomEnemiesIntoZombieTypes()`
+sur le runtime courant.
+
+Important :
+- la fonction `ensureDungeonEnemies()` elle-même reste nécessaire au domaine Dungeon ;
+- `ensureDungeonContent()` continue de l'utiliser ;
+- seul l'appel depuis le refresh partagé est candidat au retrait.
+
+## Prochaine action obligatoire — TDD RED
+
+1. ajouter une sentinelle statique exigeant l'absence de `ensureDungeonEnemies` dans le corps du refresh partagé ;
+2. verrouiller simultanément la conservation de :
+   - `applyBuiltinEnemyOverrides()` ;
+   - `loadCustomEnemies()` ;
+   - la définition `ensureDungeonEnemies()` ;
+   - son appel depuis `ensureDungeonContent()` ;
+   - V164/V165/V166 ;
+3. brancher cette sentinelle en nouvelle étape Phase 6 #177 ;
+4. prouver RED isolé avec #170 à #176 GREEN, Firefox GREEN et Tactical Dock GREEN ;
+5. ne modifier le runtime qu'après cette preuve.
 
 ---
 

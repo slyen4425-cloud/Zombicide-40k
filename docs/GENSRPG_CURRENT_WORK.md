@@ -41,15 +41,50 @@ Hors périmètre :
 - Compétences Survie ;
 - Dungeon/Tactical/Capture/PvP.
 
+## TDD RED — prouvé
+
+Pré-audit :
+`a10594962de473b716b08a42e7d062662521cb27`.
+
+Ouverture du lot dans CURRENT_WORK :
+`851007c9c143b3cf93d0fee60e54d321950144b3`.
+
+Sentinelle RED :
+`d0477bc987a0b701c23ee26cd3543b3303e44813`.
+
+Raccord CI :
+`7fc39b48f658076e06503055bbcd97a96a1e85bf`.
+
+Correction syntaxique de la sentinelle :
+`83598eb52a1b1df9adbb940773ec1991e3c5c96c`.
+
+CI sur le SHA `83598eb52a1b1df9adbb940773ec1991e3c5c96c` :
+- Architecture : run `36141567119` — FAILURE attendue ;
+- Firefox : run `36141567008` — SUCCESS ;
+- Tactical Dock : run `36141567088` — SUCCESS.
+
+Architecture :
+- Phase 6 #171 : SUCCESS ;
+- #172 : SUCCESS ;
+- #173 : SUCCESS ;
+- #174 : SUCCESS ;
+- nouvelle étape #175 `Extraire la réserve Zombicide de base vers le module Survie Phase 6` : FAILURE attendue ;
+- message RED exact : `Phase 6 requires Zombicide base-reserve derivation in Survival`.
+
+Le RED est isolé au nouveau contrat. Ce rouge n'est pas une régression du runtime.
+
+`index.html` n'a pas été modifié par ce lot et reste au runtime de départ :
+- 8 170 815 octets ;
+- blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
+
 ## Prochaine action obligatoire
 
-1. ajouter la sentinelle TDD RED ;
-2. la raccorder à Architecture ;
-3. prouver le RED isolé sur le runtime courant ;
-4. préparer uniquement l'API pure Survie ;
-5. appliquer la règle 26 avant tout raccord `index.html`.
+1. préparer uniquement l'API pure `GensSurvivalV1.waveRules.zombicideBaseReserve(defaultReserve)` dans l'entrée Survie et enregistrer sa propriété dans le contrat ;
+2. vérifier que la sentinelle évolue alors de « API absente » vers « ancien propriétaire inline / anciens consommateurs encore présents » ;
+3. appliquer la règle 26 avant tout raccord `index.html` : résoudre le nouveau HEAD, confirmer taille/blob, fournir le permalink SHA exact à Sylvain et demander le nouveau ZIP ;
+4. ne raccorder le gros HTML qu'après vérification du fichier exact reçu.
 
-Aucun runtime du gros HTML ne doit être modifié avant RED.
+Aucun changement `index.html` n'est autorisé avant cette étape Rule 26.
 
 ---
 

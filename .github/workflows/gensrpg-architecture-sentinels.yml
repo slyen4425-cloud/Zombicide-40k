@@ -542,6 +542,9 @@ jobs:
       - name: Extraire la réserve Zombicide de base vers le module Survie Phase 6
         run: node tests/gens_phase6_survival_zombicide_base_reserve_v1.test.cjs
 
+      - name: Retirer le wrapper Dungeon du refresh des ennemis personnalisés Phase 6
+        run: node tests/gens_phase6_survival_custom_enemy_refresh_wrapper_retirement_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 
@@ -748,6 +751,9 @@ jobs:
 
       - name: Caractériser Fouiller et les arts Survie
         run: node tests/gens_survival_search_art_browser_v11411.test.cjs
+
+      - name: Vérifier le refresh ennemi sans wrapper Dungeon V165
+        run: node tests/gens_phase6_survival_custom_enemy_refresh_wrapper_browser_characterization_v1.test.cjs
 
       - name: Caractériser goMenu Dungeon et Capture
         run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs

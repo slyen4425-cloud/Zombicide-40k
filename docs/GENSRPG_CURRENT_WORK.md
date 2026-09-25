@@ -225,14 +225,57 @@ Browser complet :
 - caractérisation du refresh partagé sans `ensureDungeonEnemies()` : SUCCESS ;
 - Survie / Dungeon / Tactical / Capture / PvP / Builder / Save & Quit / assets / Equipment : SUCCESS.
 
-## Prochaine action obligatoire — CI documentaire avant preview
+## CI documentaire finale avant preview — GREEN
 
-1. le présent enregistrement documentaire crée un nouveau SHA ;
-2. refaire Architecture + Browser complet, Firefox et Tactical Dock sur ce SHA documentaire exact ;
-3. si triple SUCCESS, créer la branche preview dédiée :
-   `preview/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25` ;
-4. fournir le lien mobile exact à Sylvain ;
-5. demander validation ciblée Survie + Dungeon avant tout checkpoint GREEN final.
+SHA documentaire testé :
+`cdd05bc6cbc920359904ad6f814943285b9d766a`.
+
+Runs :
+- Architecture + Browser complet : `36189158325` — SUCCESS ;
+- Firefox : `36189158424` — SUCCESS ;
+- Tactical Dock : `36189158375` — SUCCESS.
+
+Architecture :
+- toutes les sentinelles : SUCCESS ;
+- Phase 6 #170 à #177 : SUCCESS.
+
+Browser complet :
+- lancement/compétences/provider Survie : SUCCESS ;
+- refresh ennemi sans wrapper Dungeon V165 : SUCCESS ;
+- Dungeon après Survie : SUCCESS ;
+- Dungeon -> Tactical V2 : SUCCESS ;
+- Capture victoire/reprise inter-module : SUCCESS ;
+- Builder / Config objet / fiche RPG : SUCCESS ;
+- Save & Quit / providers Dungeon et Capture / PvP : SUCCESS ;
+- non-interférence quatre modules : SUCCESS ;
+- assets / Equipment : SUCCESS.
+
+Runtime testé :
+- `index.html` : 8 170 402 octets ;
+- blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
+
+## Preview utilisateur
+
+Branche :
+`preview/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25`.
+
+SHA preview :
+`cdd05bc6cbc920359904ad6f814943285b9d766a`.
+
+Lien mobile :
+`https://raw.githack.com/slyen4425-cloud/Zombicide-40k/cdd05bc6cbc920359904ad6f814943285b9d766a/preview.html`.
+
+## Prochaine action obligatoire
+
+1. obtenir la validation utilisateur mobile ciblée :
+   - Survie : ennemis personnalisés + vagues ;
+   - Dungeon : built-ins, ennemis custom et arts ;
+   - transition Survie ↔ Dungeon ;
+2. ne pas rouvrir `applyBuiltinEnemyOverrides()` ni `dungeonEnemies()` dans ce lot ;
+3. après validation, enregistrer le retour utilisateur ;
+4. refaire Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire de fermeture ;
+5. créer seulement ensuite le checkpoint GREEN final :
+   `checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`.
 
 ---
 

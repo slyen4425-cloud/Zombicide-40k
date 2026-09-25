@@ -45,6 +45,16 @@
     return [...ids];
   }
 
+  function autoReserve(profile,defaultReserve){
+    const defaults=(defaultReserve&&typeof defaultReserve==="object")?defaultReserve:{};
+    const reserve={};
+    Object.keys(defaults).forEach(id=>{reserve[id]=0});
+    collectEnemyIds(profile).forEach(id=>{
+      reserve[id]=Math.max(1,Number(defaults[id])||1);
+    });
+    return reserve;
+  }
+
   function zombicideBaseProfile(spawnCards,enemyTypes){
     const base=defaultProfile();
     base.enabled=true;
@@ -80,6 +90,7 @@
     waveRules:Object.freeze({
       defaultProfile,
       collectEnemyIds,
+      autoReserve,
       zombicideBaseProfile
     })
   });

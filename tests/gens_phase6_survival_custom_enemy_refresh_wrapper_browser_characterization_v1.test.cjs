@@ -156,8 +156,8 @@ const server=http.createServer((req,res)=>{
       'without the V165 wrapper, the native shared refresh owner must remain active');
     assert.match(result.nativeSource,/loadCustomEnemies()/,
       'native refresh must still publish custom enemies');
-    assert.match(result.nativeSource,/ensureDungeonEnemies/,
-      'this characterization intentionally leaves the mixed Dungeon dependency for a later micro-lot');
+    assert.doesNotMatch(result.nativeSource,/ensureDungeonEnemies/,
+      'shared custom-enemy refresh must remain free of the retired private Dungeon ensure dependency');
     assert.doesNotMatch(result.nativeSource,/old.apply(this,arguments)/,
       'V165 global refresh wrapper must be absent from the characterization fixture');
 

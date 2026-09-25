@@ -13820,9 +13820,6 @@ function bindWaveEditorAutosave(){
 
 const ZOMBICIDE_BASE_PRESET_ID="wave_zombicide_base";
 
-function zombicideBaseReserve(){
-  return {...defaultZombieConfig()};
-}
 function ensureZombicideBasePreset(){
   let presets=loadWavePresetsRaw();
   if(!presets.some(p=>p.id===ZOMBICIDE_BASE_PRESET_ID)){
@@ -13830,7 +13827,7 @@ function ensureZombicideBasePreset(){
       id:ZOMBICIDE_BASE_PRESET_ID,
       name:"Zombicide — Base",
       profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
-      reserve:zombicideBaseReserve(),
+      reserve:GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig()),
       builtIn:true
     });
     saveWavePresets(presets);
@@ -13844,7 +13841,7 @@ function resetZombicideBasePreset(){
     id:ZOMBICIDE_BASE_PRESET_ID,
     name:"Zombicide — Base",
     profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
-    reserve:zombicideBaseReserve(),
+    reserve:GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig()),
     builtIn:true
   };
   const idx=presets.findIndex(p=>p.id===ZOMBICIDE_BASE_PRESET_ID);
@@ -13871,7 +13868,7 @@ function loadWavePresets(){
     id:ZOMBICIDE_BASE_PRESET_ID,
     name:"Zombicide — Base",
     profile:GensSurvivalV1.waveRules.zombicideBaseProfile(BP_SPAWN_CARDS,ZOMBIE_TYPES),
-    reserve:zombicideBaseReserve(),
+    reserve:GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig()),
     builtIn:true
   };
   const merged=[fresh,...raw];

@@ -39,25 +39,44 @@ Hors périmètre :
 - `startConfiguredGame()` ;
 - Dungeon/Tactical/Capture/PvP.
 
-## TDD requis
+## TDD RED — prouvé
 
-Nouvelle sentinelle RED à ajouter avant tout raccord runtime :
+Sentinelle :
 `tests/gens_phase6_survival_wave_reserve_normalization_v1.test.cjs`.
 
-Le RED doit prouver l'absence de `waveRules.normalizeReserve` et la présence du propriétaire inline historique.
+SHA RED :
+`61c4e04a4836ef63ac684a5b6851cb610676cbe7`.
 
-## Rule 26
+Résultat :
+- Architecture : FAILURE uniquement sur la nouvelle étape #174 ;
+- message exact : `Phase 6 micro-lot 5 requires wave-reserve normalization in Survival` ;
+- #170 à #173 : SUCCESS ;
+- Firefox : SUCCESS ;
+- Tactical Dock : SUCCESS.
 
-Avant tout raccord de `index.html`, revalider le SHA et le blob exact du runtime.
-Aucune reconstruction du gros HTML depuis des fragments GitHub.
+## API pure préparée
 
-## Prochaine action
+`assets/gensrpg/survival/entry-v1.js` expose maintenant :
+`GensSurvivalV1.waveRules.normalizeReserve(profile, reserve, defaultReserve)`.
 
-1. ajouter la sentinelle RED ;
-2. la raccorder à Architecture ;
-3. prouver le RED isolé ;
-4. seulement ensuite préparer l'API pure Survie ;
-5. appliquer la règle 26 avant le raccord `index.html`.
+Commit API :
+`7b3c70053a769d2ea7cd8208221fe65f4971ec68`.
+
+Contrat Survie mis à jour :
+`65929d8e03cec77dda3c8afff1372ba6206baac0`.
+
+Aucun `index.html`, UI, stockage ou gameplay n'a encore été modifié dans cette étape.
+
+## Rule 26 — prochaine action bloquante
+
+Avant le raccord de `index.html` :
+1. résoudre le HEAD exact du micro-lot ;
+2. confirmer que `index.html` est toujours le blob `fb8c77504ed067fb094374260b459f8d1fb7e824` ;
+3. demander à Sylvain le fichier exact via permalink SHA et ZIP ;
+4. vérifier taille/blob du fichier reçu ;
+5. retirer uniquement `normalizeWaveReserveForProfile()` et raccorder ses 4 consommateurs.
+
+Ne pas modifier le gros HTML à partir de fragments GitHub.
 
 ---
 

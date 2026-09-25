@@ -112,6 +112,32 @@ Les sentinelles historiques déjà identifiées lors du micro-lot 4 ont été r�
 
 Aucune assertion fonctionnelle, aucun propriétaire métier et aucun comportement runtime de ces sentinelles/cartographies n'a été modifié.
 
+## Validation utilisateur mobile
+
+Preview validée :
+`preview/gensrpg-phase6-survival-wave-reserve-normalization-2026-09-25`.
+
+SHA preview :
+`df47fa0094c5ade51dff7879705ab339d0886b3e`.
+
+Validation utilisateur reçue le 2026-09-25 :
+`Ok, pour les vagues, tout ça, ça a l'air de très bien fonctionner.`
+
+Cette validation couvre le périmètre du micro-lot 5 : normalisation/réserve des vagues Survie.
+
+Un défaut séparé a été signalé pendant ce test :
+- dans l'éditeur global `📚 COMPÉTENCES` en contexte Survie, la bibliothèque affiche les compétences RPG mais pas les compétences spécifiques Survie ;
+- diagnostic initial : `openAbilityLibrary(null)` route par défaut vers la bibliothèque `rpg`, tandis que les compétences Survie historiques restent dans `Z40K_NATIVE_SKILLS` / la bibliothèque Z40K séparée ;
+- ce défaut est antérieur au micro-lot 5 et le commit runtime de normalisation des réserves ne touche aucun code de compétences ;
+- ce point doit être traité dans un lot Survie séparé après fermeture GREEN du micro-lot 5.
+
+## Fermeture prévue
+
+Checkpoint GREEN final :
+`checkpoint/gensrpg-phase6-survival-wave-reserve-normalization-green-2026-09-25`.
+
+Le prochain lot ne doit pas mélanger ce défaut de bibliothèque de compétences avec la normalisation des vagues.
+
 ## CI technique GREEN
 
 SHA technique final testé :

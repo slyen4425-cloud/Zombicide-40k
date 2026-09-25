@@ -119,16 +119,61 @@ Le runtime lourd reste inchangé :
 - `index.html` : 8 170 815 octets ;
 - blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c`.
 
-## Prochaine action obligatoire — Rule 26
+## Rule 26 — fichier exact reçu et vérifié
 
-1. résoudre le HEAD exact après le présent enregistrement documentaire ;
-2. confirmer que `index.html` reste exactement au blob `9c762dcb8ad3549cf7175ba9413f925b11f5396c` et à 8 170 815 octets ;
-3. fournir à Sylvain le permalink GitHub SHA exact vers `index.html` ;
-4. demander le ZIP du fichier exact correspondant ;
-5. vérifier taille/blob du fichier reçu avant tout raccord ;
-6. seulement ensuite retirer l'unique `zombicideBaseReserve()` inline et raccorder exactement ses 3 consommateurs.
+Sylvain a fourni `work24.zip`.
 
-Ne pas utiliser `work23.zip` pour ce raccord. Aucun changement `index.html` n'est autorisé avant vérification du nouveau fichier exact.
+Contenu vérifié :
+- fichier : `index24.txt` ;
+- taille : 8 170 815 octets ;
+- blob Git : `9c762dcb8ad3549cf7175ba9413f925b11f5396c` ;
+- correspond exactement au `index.html` du HEAD requis avant raccord.
+
+## Raccord runtime
+
+Commit :
+`2f9dbc1b9a1ebc3682ecc6d8f0ad9856f8ab4092`
+(`refactor: connect Survival Zombicide base reserve`).
+
+Le raccord a :
+- supprimé l'unique propriétaire inline `zombicideBaseReserve()` ;
+- remplacé exactement ses 3 consommateurs par
+  `GensSurvivalV1.waveRules.zombicideBaseReserve(defaultZombieConfig())` ;
+- ajouté aucun wrapper global ;
+- modifié aucune UI, aucun stockage, aucune règle gameplay ;
+- conservé `defaultZombieConfig()` au runtime historique comme propriétaire de la donnée.
+
+Le workflow one-shot de raccord s'est auto-supprimé dans le commit runtime.
+
+Runtime après raccord :
+- `index.html` : 8 170 881 octets ;
+- blob Git : `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8`.
+
+## Réalignement des empreintes exactes
+
+Commit :
+`37902ee7b764f682bd273f09d40c0562f28cf9dc`
+(`test: align fingerprints after Survival base reserve raccord`).
+
+Le réalignement a :
+- remplacé uniquement le blob exact `9c762dcb8ad3549cf7175ba9413f925b11f5396c` par `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` dans les tests qui verrouillaient le runtime courant ;
+- remplacé uniquement la taille associée `8170815` par `8170881` dans ces mêmes tests ;
+- réaligné les quatre cartographies Phase 2 qui déclarent explicitement `sourceIndexBlob` ;
+- modifié aucune assertion métier et aucun runtime.
+
+Contrôle du diff :
+- hors workflow one-shot auto-supprimé, toutes les lignes ajoutées/supprimées du commit de réalignement ne changent que taille/blob ;
+- aucune autre modification détectée.
+
+## Prochaine action obligatoire
+
+1. utiliser le présent commit documentaire pour déclencher la CI complète sur l'état runtime + empreintes réalignées ;
+2. exiger Architecture + Browser complet GREEN ;
+3. exiger Firefox GREEN ;
+4. exiger Tactical Dock GREEN ;
+5. si une sentinelle métier casse, arrêter et diagnostiquer sans l'affaiblir ;
+6. après triple GREEN, créer une branche preview dédiée depuis le SHA technique/documentaire exact et fournir le lien de test mobile à Sylvain ;
+7. attendre la validation utilisateur avant fermeture et checkpoint GREEN final.
 
 ---
 

@@ -116,18 +116,55 @@ Message RED exact :
 
 Le RED est isolé au wrapper V165. Ce rouge n'est pas une régression fonctionnelle.
 
-## Prochaine action obligatoire — raccord minimal
+## Raccord runtime minimal appliqué
 
-1. résoudre le HEAD exact courant ;
-2. confirmer que `index.html` est toujours à 8 170 881 octets / blob `f6a11fa5c0807debc0c9950cc2caf5356c97cfc8` ;
-3. le fichier Rule 26 `work29.zip/index29.txt` reste autorisé uniquement si cette empreinte est inchangée ;
-4. retirer exactement le bloc wrapper V165 déjà caractérisé, et rien d'autre ;
-5. résultat attendu calculé sur la source exacte :
-   - taille : 8 170 472 octets ;
-   - blob : `2232d8c1d65121758646915080bd3c17be4d4cd6` ;
-6. réaligner uniquement les empreintes/cartographies déclarant explicitement le blob/taille ;
-7. obtenir Architecture + Browser, Firefox et Tactical Dock GREEN ;
-8. créer une preview et demander validation utilisateur avant fermeture.
+Commit runtime :
+`bb2fc5e02b99606c0a42aa4ac6c8a02ffd050dda`
+(`refactor: retire Dungeon V165 custom enemy refresh wrapper`).
+
+Modification runtime unique :
+- retrait exact des 8 lignes du wrapper global `refreshCustomEnemiesIntoZombieTypes` dans `dungeonArtRenderFix165` ;
+- propriétaire natif `function refreshCustomEnemiesIntoZombieTypes()` conservé ;
+- `applyBuiltinEnemyOverrides()` conservé ;
+- `ensureDungeonEnemies()` conservé ;
+- autres wrappers art V165 conservés ;
+- V164 / V166 conservés ;
+- aucun changement stockage/UI/gameplay.
+
+Runtime après raccord :
+- `index.html` : 8 170 472 octets ;
+- blob Git : `2232d8c1d65121758646915080bd3c17be4d4cd6`.
+
+L'empreinte obtenue correspond exactement à l'empreinte calculée sur la source Rule 26 avant raccord.
+
+## Réalignement strict des sentinelles/cartographies
+
+Commit :
+`cb5bccaf801bae6d37a8b3773705517baa90d1a6`
+(`test: align fingerprints after V165 refresh wrapper retirement`).
+
+Le réalignement a :
+- remplacé uniquement l'ancienne taille/blob du runtime courant dans les sentinelles qui les verrouillaient ;
+- réaligné `sourceIndexBlob` dans les quatre cartographies Phase 2 ;
+- conservé les références historiques du pré-audit et de CURRENT_WORK ;
+- réaligné la cartographie des globals inline avec la suppression réelle du wrapper V165.
+
+Nouvelle cartographie explicite `window.<name>=` :
+- distinctGlobals : 435 -> 434 ;
+- assignments : 757 -> 755 ;
+- multiOwnerGlobals : 119 -> 118 ;
+- la ligne `refreshCustomEnemiesIntoZombieTypes\t2\tdungeonArtRenderFix165` disparaît de la table des derniers propriétaires, car aucun override inline global de cette fonction ne subsiste.
+
+Aucune assertion métier n'a été affaiblie.
+
+## Prochaine action obligatoire — GREEN technique
+
+1. lancer Architecture + Browser complet, Firefox et Tactical Dock sur le présent SHA documentaire ;
+2. vérifier spécialement Phase 6 #170 à #176 ;
+3. si une sentinelle métier casse, arrêter et diagnostiquer avant toute correction ;
+4. si les trois workflows sont SUCCESS, créer une branche preview dédiée depuis le SHA technique/documentaire exact ;
+5. fournir le lien mobile à Sylvain ;
+6. attendre validation utilisateur avant fermeture/checkpoint GREEN final.
 
 Hors périmètre maintenu :
 - propriétaire natif `refreshCustomEnemiesIntoZombieTypes()` ;

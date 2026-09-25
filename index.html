@@ -29997,14 +29997,6 @@ function apply(){
   }catch(e){}
 }
 
-/* Critical fix: refreshCustomEnemiesIntoZombieTypes was rebuilding the definitions
-   after V164 had assigned their images. Apply the art AFTER every rebuild. */
-if(typeof window.refreshCustomEnemiesIntoZombieTypes==="function"){
-  const old=window.refreshCustomEnemiesIntoZombieTypes;
-  window.refreshCustomEnemiesIntoZombieTypes=function(){
-    const r=old.apply(this,arguments); apply(); return r;
-  };
-}
 if(typeof window.activeEnemyDefinition==="function"){
   const old=window.activeEnemyDefinition;
   window.activeEnemyDefinition=function(id){

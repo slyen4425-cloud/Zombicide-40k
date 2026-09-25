@@ -1,0 +1,88 @@
+name: One-shot Phase 6 Dungeon ensure fingerprint alignment
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+    paths:
+      - .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-alignment.yml
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25
+          fetch-depth: 0
+
+      - name: Guard and align exact fingerprints
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          OLD_BLOB="2232d8c1d65121758646915080bd3c17be4d4cd6"
+          NEW_BLOB="2a7dae75115d83b4edc368c42453a7cb58d0bd73"
+          OLD_SIZE="8170472"
+          NEW_SIZE="8170402"
+
+          index=Path("index.html").read_bytes()
+          git_blob=hashlib.sha1(b"blob "+str(len(index)).encode()+b"\0"+index).hexdigest()
+          assert len(index)==8170402, len(index)
+          assert git_blob==NEW_BLOB, git_blob
+
+          text=index.decode("utf-8")
+          start=text.index("function refreshCustomEnemiesIntoZombieTypes(){")
+          end=text.index("function isDungeonEnemyRecord(",start)
+          body=text[start:end]
+          assert "ensureDungeonEnemies" not in body
+          assert "applyBuiltinEnemyOverrides();" in body
+          assert "loadCustomEnemies().forEach" in body
+          assert text.count("function ensureDungeonEnemies(){")==1
+          assert "function ensureDungeonContent(){ensureDungeonHeroes();ensureDungeonItems();ensureDungeonEnemies()}" in text
+
+          touched=[]
+          for p in sorted(Path("tests").glob("*.test.cjs")):
+              s=p.read_text()
+              n=s.replace(OLD_BLOB,NEW_BLOB).replace(OLD_SIZE,NEW_SIZE)
+              if n!=s:
+                  p.write_text(n)
+                  touched.append(str(p))
+
+          maps=[
+              Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv"),
+              Path("docs/GENSRPG_PHASE2_INLINE_OWNERS.json"),
+              Path("docs/GENSRPG_PHASE2_STORAGE_OWNERS.json"),
+              Path("docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json"),
+          ]
+          for p in maps:
+              s=p.read_text()
+              assert OLD_BLOB in s, f"old blob missing from {p}"
+              p.write_text(s.replace(OLD_BLOB,NEW_BLOB))
+              touched.append(str(p))
+
+          pre=Path("docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_DUNGEON_ENSURE_PREAUDIT.md").read_text()
+          assert OLD_BLOB in pre and "8 170 472" in pre
+
+          print("aligned_files="+str(len(set(touched))))
+          for p in sorted(set(touched)): print("aligned="+p)
+          print("new_runtime_size="+str(len(index)))
+          print("new_runtime_blob="+git_blob)
+          PY
+
+      - name: Commit alignment and self-delete
+        shell: bash
+        run: |
+          rm .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-alignment.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv docs/GENSRPG_PHASE2_INLINE_OWNERS.json docs/GENSRPG_PHASE2_STORAGE_OWNERS.json docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json .github/workflows/oneshot-phase6-dungeon-ensure-fingerprint-alignment.yml
+          git diff --cached --check
+          git commit -m "test: align fingerprints after Dungeon ensure retirement"
+          git push origin HEAD:work/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-2026-09-25

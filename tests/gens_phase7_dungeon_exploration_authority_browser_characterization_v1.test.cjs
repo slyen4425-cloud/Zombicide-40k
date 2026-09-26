@@ -79,12 +79,6 @@ async function startDungeon(page){
   await page.waitForFunction(()=>!!localStorage.getItem('gensrpg_dungeon_runtime_v2'),null,{timeout:15000});
 }
 
-function visible(el){
-  if(!el)return false;
-  const s=getComputedStyle(el),r=el.getBoundingClientRect();
-  return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)!==0&&r.width>0&&r.height>0;
-}
-
 (async()=>{
   let stage='boot';
   const watchdog=setTimeout(()=>{console.error('[phase7-exploration-browser] WATCHDOG '+stage);process.exit(1)},180000);
@@ -130,7 +124,7 @@ function visible(el){
         world:!!window.DungeonCore01?.explore?.__dwr167823
       },
       legacyWorld:window.DungeonWorldRuntime167823?.getConfig?.()||null,
-      tacticalOverlay:visible(document.querySelector('.gtv2Overlay')),
+      tacticalOverlay:(()=>{const el=document.querySelector('.gtv2Overlay');if(!el)return false;const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0&&r.width>0&&r.height>0})(),
       tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
     }));
     assert.equal(generatedBefore.authoredActive,false,'generated adventure must not activate authored travel');
@@ -196,7 +190,7 @@ function visible(el){
         room:!!window.DungeonCore01?.explore?.__drr167822,
         world:!!window.DungeonCore01?.explore?.__dwr167823
       },
-      tacticalOverlay:visible(document.querySelector('.gtv2Overlay')),
+      tacticalOverlay:(()=>{const el=document.querySelector('.gtv2Overlay');if(!el)return false;const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0&&r.width>0&&r.height>0})(),
       tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
     }));
     assert.equal(authoredBefore.authoredActive,true,'selected world must activate Authored travel');
@@ -220,7 +214,7 @@ function visible(el){
         roomId:String(x?.last?.customRoomId||''),
         authored:!!x?.last?.authoredRuntime167839,
         position:x?.positions?.[hero],
-        tacticalOverlay:visible(document.querySelector('.gtv2Overlay')),
+        tacticalOverlay:(()=>{const el=document.querySelector('.gtv2Overlay');if(!el)return false;const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0&&r.width>0&&r.height>0})(),
         tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
       };
     });

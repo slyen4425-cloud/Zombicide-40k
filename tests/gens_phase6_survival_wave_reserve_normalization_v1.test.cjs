@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170402,'micro-lot 5 must target the exact connected runtime size');
-assert.equal(blob,'2a7dae75115d83b4edc368c42453a7cb58d0bd73','micro-lot 5 must target the exact connected runtime');
+assert.equal(bytes.length,8170150,'micro-lot 5 must target the exact connected runtime size');
+assert.equal(blob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9','micro-lot 5 must target the exact connected runtime');
 
 const entry=fs.readFileSync(entryPath,'utf8');
 const contract=JSON.parse(fs.readFileSync(contractPath,'utf8'));

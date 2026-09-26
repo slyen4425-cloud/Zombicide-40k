@@ -15,9 +15,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(runtime.length,8170150,'contract-only lot must keep the manually validated runtime size');
-assert.equal(gitBlob(runtime),'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'contract-only lot must keep index.html byte-identical');
+assert.equal(runtime.length,8170350,'contract lot must keep the current Phase 7 Dungeon generated-advance runtime size');
+assert.equal(gitBlob(runtime),'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'contract lot must keep the current Phase 7 index byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';
 assert.equal(exists(sharedPath),true,'shared module screen-return contract is missing');
@@ -50,9 +50,14 @@ for(const module of modules){
   const contract=json(contractPath);
   const entry=read(entryPath);
 
-  const expectedStatus=module==='survival'?'partial-runtime-loaded':'contract-only-not-loaded';
+  const partialRuntime=module==='survival'||module==='dungeon';
+  const expectedStatus=partialRuntime?'partial-runtime-loaded':'contract-only-not-loaded';
   assert.equal(contract.status,expectedStatus,
-    module+(module==='survival'?' may activate only its Phase 6 wave-rules slice':' must remain contract-only'));
+    module+(module==='survival'
+      ?' may activate only its Phase 6 wave-rules slice'
+      :module==='dungeon'
+        ?' may activate only its first pure Phase 7 exploration slice'
+        :' must remain contract-only'));
   assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
     module+' must declare moduleScreenReturn');
   assert.deepEqual(contract.publicEntries.moduleScreenReturn,{
@@ -74,6 +79,15 @@ for(const module of modules){
       'activating Survival wave rules must not implement or take ownership of screen return');
     assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Dungeon|Tactical|Capture|PvP/,
       'active Survival wave-rules slice must stay pure and isolated');
+  }else if(module==='dungeon'){
+    assert.equal(contract.publicRuntimeApi,'GensDungeonV1',
+      'Phase 7 Dungeon entry must expose only its declared public runtime namespace');
+    assert.match(entry,/function planGeneratedAdvance\(/,
+      'Phase 7 Dungeon generated-advance planner must remain active');
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating the Dungeon planner must not implement or take ownership of screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Tactical|Capture|Survival|PvP/,
+      'active Dungeon generated-advance slice must stay pure and isolated');
   }else{
     assert.equal(executable,'"use strict";',module+' Phase 3 entry must remain inert');
     assert.doesNotMatch(entry,/window\.|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/,

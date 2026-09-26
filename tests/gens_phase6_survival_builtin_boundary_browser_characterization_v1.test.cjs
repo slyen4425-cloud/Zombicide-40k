@@ -31,6 +31,19 @@ const resetCall='  applyBuiltinEnemyOverrides();\n  renderEnemyLibrary();';
 assert.equal(indexSource.split(resetCall).length-1,1,
   'characterization requires the reviewed builtin reset apply call');
 
+const v164ApplyWrapper=[
+  'if(typeof window.applyBuiltinEnemyOverrides==="function"){',
+  '  const oldApplyOverrides164=window.applyBuiltinEnemyOverrides;',
+  '  window.applyBuiltinEnemyOverrides=function(){',
+  '    const r=oldApplyOverrides164.apply(this,arguments);',
+  '    dungeonApplyGithubArts164();',
+  '    return r;',
+  '  };',
+  '}'
+].join('\n');
+assert.equal(indexSource.split(v164ApplyWrapper).length-1,1,
+  'characterization requires the exact reviewed V164 applyBuiltinEnemyOverrides wrapper');
+
 let fixture=indexSource
   .replace(applyHeader,[
     'function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){',
@@ -44,7 +57,8 @@ let fixture=indexSource
     '}'
   ].join('\n'))
   .replace(saveCall,'    applyBuiltinEnemyOverrides([builtinEnemyBase(baseId)].filter(Boolean));\n\n    const cfg=loadZombieConfig();')
-  .replace(resetCall,'  applyBuiltinEnemyOverrides([base]);\n  renderEnemyLibrary();');
+  .replace(resetCall,'  applyBuiltinEnemyOverrides([base]);\n  renderEnemyLibrary();')
+  .replace(v164ApplyWrapper,'');
 
 const applyStart=fixture.indexOf('function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){');
 const applyEnd=fixture.indexOf('function resetBuiltinEnemyCustomization(',applyStart);
@@ -130,6 +144,7 @@ const server=http.createServer((req,res)=>{
       typeof applyBuiltinEnemyOverrides==='function' &&
       typeof ensureDungeonEnemies==='function' &&
       typeof dungeonEnemies==='function' &&
+      typeof dungeonApplyGithubArts164==='function' &&
       typeof activeEnemyDefinition==='function' &&
       typeof enemyCardHtml==='function' &&
       typeof enemiesForMode==='function' &&
@@ -143,10 +158,16 @@ const server=http.createServer((req,res)=>{
       const survivalBuiltinId='walker';
       const dungeonOverrideArt='data:image/png;base64,iVBORw0KGgo=';
       const originalDungeonEnemies=window.dungeonEnemies;
+      const originalDungeonArtApply=window.dungeonApplyGithubArts164;
       let dungeonCalls=0;
+      let dungeonArtApplyCalls=0;
       window.dungeonEnemies=function(){
         dungeonCalls++;
         return originalDungeonEnemies.apply(this,arguments);
+      };
+      window.dungeonApplyGithubArts164=function(){
+        dungeonArtApplyCalls++;
+        return originalDungeonArtApply.apply(this,arguments);
       };
 
       localStorage.setItem('gensrpg_custom_enemies_v1',JSON.stringify([
@@ -192,9 +213,11 @@ const server=http.createServer((req,res)=>{
       }
 
       const beforeRefreshCalls=dungeonCalls;
+      const beforeRefreshArtCalls=dungeonArtApplyCalls;
       refreshCustomEnemiesIntoZombieTypes();
       refreshCustomEnemiesIntoZombieTypes();
       const afterRefreshCalls=dungeonCalls;
+      const afterRefreshArtCalls=dungeonArtApplyCalls;
 
       const survivalBuiltin=ZOMBIE_TYPES.find(z=>String(z.id)===survivalBuiltinId);
       const survivalCustom=ZOMBIE_TYPES.filter(z=>String(z.id)===survivalId);
@@ -220,12 +243,15 @@ const server=http.createServer((req,res)=>{
       });
 
       window.dungeonEnemies=originalDungeonEnemies;
+      window.dungeonApplyGithubArts164=originalDungeonArtApply;
 
       return {
         applySource:String(window.applyBuiltinEnemyOverrides),
         ensureSource:String(window.ensureDungeonEnemies),
         beforeRefreshCalls,
         afterRefreshCalls,
+        beforeRefreshArtCalls,
+        afterRefreshArtCalls,
         afterEnsureCalls,
         survivalBuiltinName:survivalBuiltin?.name,
         survivalBuiltinDamage:survivalBuiltin?.rule?.damage,
@@ -248,6 +274,10 @@ const server=http.createServer((req,res)=>{
 
     assert.doesNotMatch(result.applySource,/dungeonEnemies/,
       'shared builtin override transform must execute without a private Dungeon factory dependency');
+    assert.doesNotMatch(result.applySource,/dungeonApplyGithubArts164/,
+      'shared builtin override transform must no longer be wrapped by the Dungeon V164 art authority');
+    assert.match(result.applySource,/function applyBuiltinEnemyOverrides\(bases=BASE_ZOMBIE_TYPES\)/,
+      'native shared builtin override owner must be restored as the callable owner');
     assert.match(result.ensureSource,/dungeonEnemies\(\)/,
       'Dungeon ensure owner must retain the private Dungeon factory call');
     assert.match(result.ensureSource,/applyBuiltinEnemyOverrides\(bases\)/,
@@ -255,6 +285,8 @@ const server=http.createServer((req,res)=>{
 
     assert.equal(result.afterRefreshCalls,result.beforeRefreshCalls,
       'two shared custom-enemy refreshes must not call dungeonEnemies');
+    assert.equal(result.afterRefreshArtCalls,result.beforeRefreshArtCalls,
+      'two shared custom-enemy refreshes must not call the Dungeon V164 art apply owner');
     assert.ok(result.afterEnsureCalls>=result.afterRefreshCalls+2,
       'Dungeon ensure must be the path that calls the Dungeon builtin factory');
 
@@ -288,6 +320,7 @@ const server=http.createServer((req,res)=>{
     console.log(JSON.stringify({
       scenario:'Phase 6 builtin override boundary without Survival -> dungeonEnemies dependency',
       survivalRefreshCallsDungeonFactory:false,
+      survivalRefreshCallsDungeonArtOwner:false,
       survivalBuiltinOverridePreserved:true,
       dungeonEnsureOwnsDungeonFactory:true,
       dungeonBuiltinOverridePreserved:true,

@@ -1,3 +1,90 @@
+# PHASE 6 — MICRO-LOT — frontière built-ins du refresh partagé — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`
+
+SHA de base :
+`3853ac9a8e0704910698962ce265a75a03a46a37`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-survival-custom-enemy-builtin-boundary-2026-09-26`
+
+Branche :
+`work/gensrpg-phase6-survival-custom-enemy-builtin-boundary-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_BUILTIN_BOUNDARY_PREAUDIT.md`
+
+## Fermeture précédente vérifiée avant ouverture
+
+Le lot `ensureDungeonEnemies()` est fermé GREEN sur :
+`3853ac9a8e0704910698962ce265a75a03a46a37`.
+
+Vérifications GitHub :
+- `main` identique à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
+- checkpoint GREEN précédent identique à sa branche de travail ;
+- Architecture + Browser `36191917580` — SUCCESS ;
+- Firefox `36191917546` — SUCCESS ;
+- Tactical Dock `36191917636` — SUCCESS.
+
+Le décalage documentaire du bloc précédent a été corrigé ci-dessous :
+la triple CI finale et le checkpoint GREEN sont désormais enregistrés comme déjà réalisés.
+
+## Dette sélectionnée
+
+Le propriétaire partagé
+`refreshCustomEnemiesIntoZombieTypes()`
+ne dépend plus de `ensureDungeonEnemies()`, mais son chemin appelle toujours :
+`applyBuiltinEnemyOverrides()`.
+
+La caractérisation exacte précédente a établi que cette fonction compose sa base avec :
+`[...BASE_ZOMBIE_TYPES, ...dungeonEnemies()]`.
+
+La cartographie Phase 2 courante (sourceIndexBlob
+`2a7dae75115d83b4edc368c42453a7cb58d0bd73`) donne encore :
+- `applyBuiltinEnemyOverrides` : 2 assignations, dernier propriétaire `dungeonGithubArts164` ;
+- `dungeonEnemies` : 2 assignations, dernier propriétaire `dungeonGithubArts164`.
+
+Le lot courant caractérise uniquement cette frontière.
+Il ne présume pas si la bonne sortie sera :
+- retrait soustractif d'une couche devenue redondante ;
+- séparation d'une transformation pure ;
+- adapter Dungeon explicite ;
+- ou arrêt sans runtime.
+
+`openZombieRule -> dungeonDirectImageBinding166` reste une dette séparée hors périmètre.
+
+## Protections
+
+Ne pas toucher avant preuve :
+- données ennemis ;
+- IDs/stats/quantités ;
+- stockage/éditeur ;
+- règles de vagues ;
+- `loadCustomEnemies()` ;
+- `customEnemyToZombieType()` ;
+- V165/V166 ;
+- `openZombieRule` ;
+- Tactical/Capture/PvP ;
+- gameplay.
+
+Aucun raccord runtime n'est autorisé avant caractérisation exacte + TDD RED.
+
+## Prochaine action obligatoire
+
+Appliquer Rule 26 sur le HEAD documentaire du présent lot :
+
+1. résoudre le SHA exact après le pré-audit et cette mise à jour ;
+2. vérifier blob + taille de `index.html` par métadonnées Git ;
+3. fournir le permalink SHA exact ;
+4. demander à Sylvain le ZIP de CE fichier ;
+5. vérifier le fichier reçu ;
+6. caractériser les définitions/réassignations exactes de
+   `applyBuiltinEnemyOverrides()` et `dungeonEnemies()` ;
+7. seulement ensuite écrire la caractérisation navigateur puis le TDD RED.
+
+---
+
 # PHASE 6 — MICRO-LOT — retirer la dépendance ensureDungeonEnemies du refresh partagé — 2026-09-25
 
 Base GREEN :
@@ -277,13 +364,26 @@ Périmètre validé :
 
 Aucune régression utilisateur signalée.
 
-## Fermeture GREEN — prochaine action
+## Fermeture GREEN — CONFIRMÉE
 
-1. ne pas rouvrir `applyBuiltinEnemyOverrides()` ni `dungeonEnemies()` dans ce lot ;
-2. refaire Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire de fermeture ;
-3. si les trois workflows sont SUCCESS, créer le checkpoint final :
-   `checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25` ;
-4. ne pas ouvrir le micro-lot suivant avant cette fermeture.
+SHA final validé :
+`3853ac9a8e0704910698962ce265a75a03a46a37`.
+
+Triple CI finale sur ce SHA :
+- Architecture + Browser complet : `36191917580` — SUCCESS ;
+- Firefox : `36191917546` — SUCCESS ;
+- Tactical Dock : `36191917636` — SUCCESS.
+
+Checkpoint GREEN final :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-dungeon-ensure-green-2026-09-25`.
+
+Le checkpoint et la branche de travail du lot sont identiques :
+- ahead : 0 ;
+- behind : 0 ;
+- SHA commun : `3853ac9a8e0704910698962ce265a75a03a46a37`.
+
+Le micro-lot `ensureDungeonEnemies()` est FERMÉ GREEN.
+Ne pas recréer ce checkpoint et ne pas rejouer ce lot.
 
 ---
 

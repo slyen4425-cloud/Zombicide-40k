@@ -146,6 +146,14 @@ async function startSurvival(page){
     }));
 
     assert.ok(residual.enemyThumbs>0,'Survival enemy manager must render its reserve during exit characterization');
+    assert.deepEqual(residual.calls,{
+      openZombieRule:0,
+      enemyCardHtml:0,
+      renderActiveEnemies:0,
+      activeEnemyDefinition:0
+    },'Survival enemy UI must not execute functions whose active owner is private Dungeon');
+    assert.equal(residual.triggerCount,0,'Survival enemy manager must not expose a Dungeon-owned openZombieRule trigger');
+    assert.equal(residual.visibleRuleTriggers,0,'Survival must not expose visible Dungeon-owned enemy-rule triggers');
     assert.deepEqual(errors,[],'Phase 6 exit characterization must not raise browser/runtime errors');
 
     console.log(JSON.stringify({

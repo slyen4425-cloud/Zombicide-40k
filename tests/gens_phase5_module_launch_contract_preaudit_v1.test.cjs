@@ -71,6 +71,17 @@ for(const module of ['survival','dungeon','capture','pvp']){
       'active Survival wave rules must not take module-launch authority');
     assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|Dungeon|Tactical|Capture|PvP/,
       'active Survival wave rules must remain pure and isolated');
+  }else if(module==='dungeon'){
+    assert.equal(contract.status,'partial-runtime-loaded',
+      'Phase 7 may activate only the reviewed partial Dungeon runtime slice');
+    assert.equal(contract.activatedPhase,7);
+    assert.equal(contract.publicRuntimeApi,'GensDungeonV1');
+    assert.match(src,/GensDungeonV1/,'Phase 7 must expose the public Dungeon namespace');
+    assert.match(src,/planGeneratedAdvance/,'Phase 7 must expose only the reviewed generated-advance planner slice');
+    assert.doesNotMatch(src,/startModuleSession|GensShellModuleLaunchV1|moduleLaunch/,
+      'active Dungeon exploration slice must not take module-launch authority');
+    assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|Tactical|Capture|Survival|PvP/,
+      'active Dungeon exploration slice must remain pure and isolated');
   }else{
     assert.doesNotMatch(src,/window\.|globalThis|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
       module+' Phase 3 entry must remain inert during launch-contract preaudit');
@@ -101,12 +112,14 @@ assert.deepEqual(chain,[
 ],'module-launch preaudit must track the three remaining historical startConfiguredGame global owners after captureFix135 retirement');
 assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m);
 
-// Phase 6 may connect only the pure Survival wave-rules entry in the source index.
-// The module-launch contract itself remains metadata-only and no other Phase 3 module entry is activated here.
+// Phase 6 keeps the pure Survival wave-rules entry connected and Phase 7 additionally connects
+// the reviewed pure Dungeon exploration planner. The module-launch contract itself remains metadata-only.
 assert.equal((index.match(/assets\/gensrpg\/survival\/entry-v1\.js/g)||[]).length,1,
-  'Phase 6 must load the Survival entry exactly once');
-assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|dungeon|capture|pvp)\/entry-v1\.js/,
-  'Phase 6 wave-rules extraction must not activate another module entry or the launch contract');
+  'Phase 6 must keep the Survival entry loaded exactly once');
+assert.equal((index.match(/assets\/gensrpg\/dungeon\/entry-v1\.js/g)||[]).length,1,
+  'Phase 7 must load the reviewed Dungeon entry exactly once');
+assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|capture|pvp)\/entry-v1\.js/,
+  'Phase 7 exploration must not activate Shell/Capture/PvP module entries or the launch contract');
 assert.doesNotMatch(preview,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
   'preview must inherit the source index and not inject module entries independently');
 assert.doesNotMatch(deploy,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
@@ -119,5 +132,5 @@ console.log(JSON.stringify({
   startConfiguredGameChain:chain,
   regressionInvariant:'captureFix135 global retirement is accepted only after dedicated RED and real E2E parity; captureFix138 requires a fresh re-audit',
   runtimeChanged:false,
-  productionLoadGraphChanged:false
+  productionLoadGraphChanged:'Phase 7 Dungeon exploration entry active; module-launch graph unchanged'
 },null,2));

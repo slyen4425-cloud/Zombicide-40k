@@ -22,6 +22,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/dice-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js',
+  'assets/gensrpg/dungeon/entry-v1.js',
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -51,7 +52,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,37,'production composition must expose 37 unique direct local JS entries after the first active Survival entry');
+assert.equal(new Set(productionDirect).size,38,'production composition must expose 38 unique direct local JS entries after the active Survival and Dungeon entries');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -125,11 +126,15 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,96,'physical JS inventory must reflect the retired legacy Survival/Dungeon guard');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,80,'production-reachable JS graph must include the first active Survival entry');
+assert.equal(reachable.size,81,'production-reachable JS graph must include the active Survival and Dungeon entries');
+const connectedPhaseEntrypoints=new Set([
+  'assets/gensrpg/survival/entry-v1.js',
+  'assets/gensrpg/dungeon/entry-v1.js'
+]);
 for(const rel of phase3Entrypoints){
   assert.equal(allJs.includes(rel),true,'Phase 3 target entry missing: '+rel);
-  if(rel==='assets/gensrpg/survival/entry-v1.js'){
-    assert.equal(reachable.has(rel),true,'Phase 6 must connect the Survival entry');
+  if(connectedPhaseEntrypoints.has(rel)){
+    assert.equal(reachable.has(rel),true,'connected module entry must stay production-reachable: '+rel);
   }else{
     assert.equal(reachable.has(rel),false,'unconnected Phase 3 entry must stay outside production graph: '+rel);
   }
@@ -168,7 +173,8 @@ console.log(JSON.stringify({
   inlineIdScripts:inlineIds.length,
   currentPhysicalLocalJs:allJs.length,
   phase2BaselineLocalJs:phase2Js.length,
-  phase3InertEntrypoints:phase3Entrypoints.length,
+  phase3TargetEntrypoints:phase3Entrypoints.length,
+  phase3ConnectedEntrypoints:connectedPhaseEntrypoints.size,
   phase4ConnectedServices:phase4ConnectedServices.length,
   phase4InertServices:phase4InertServices.length,
   phase5ConnectedServices:phase5ConnectedServices.length,

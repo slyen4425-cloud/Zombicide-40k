@@ -108,6 +108,34 @@ tous SUCCESS.
 
 Il n'existe pas encore d'audit de sortie Phase 6 dédié dans la CI.
 
+## Validation preview — composition corrigée
+
+Premier lien de preview :
+`6143b321ffb75539571bf552bea73ccc4b695561`.
+
+Ce commit de preview avait remplacé à tort le `preview.html` standard par une copie brute de `index.html`.
+Conséquence : les modules externes ajoutés par la composition preview, notamment :
+- `assets/dungeon/dungeon-room-creator-100.js` ;
+- `assets/dungeon/dungeon-world-builder-167821.js` ;
+n'étaient plus chargés sur ce lien.
+
+Aucun défaut du runtime Phase 6 n'a été prouvé.
+
+Correction preview uniquement :
+`cf5ff23d3a549a4b02094d3b9a9918b6d2a79a25`
+(`preview: restore standard GenSrpG module composition`).
+
+Vérification :
+- `preview.html` restauré sur le blob standard `2a308d19efde5c5960e6493f4047c8085fbcb385` ;
+- Room Creator chargé ;
+- World Builder chargé ;
+- `index.html` inchangé sur `ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9`.
+
+Validation utilisateur reçue le 2026-09-26 :
+`Ok builder est de retour`.
+
+Le diagnostic isolé `work/gensrpg-builder-survival-dungeon-switch-2026-09-26` est donc **abandonné sans modification runtime** : son hypothèse Shell n'a pas à être corrigée dans ce lot.
+
 ## Prochaine action obligatoire
 
 1. valider ce document sur la triple CI du SHA documentaire exact ;

@@ -152,3 +152,30 @@ Le raccord minimal a été appliqué après RED isolé.
 
 La nouvelle sentinelle et la caractérisation Phase 7 réalignée ont passé le contrôle local du workflow d’application.
 La triple CI complète doit maintenant valider ce candidat avant toute déclaration GREEN.
+
+
+## Fermeture GREEN — confirmée
+
+Le candidat runtime a été validé sans modification fonctionnelle supplémentaire après le commit runtime `9b1baf1839d11699208ff24992a92ab84385566d`.
+
+SHA exact triple-GREEN :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+CI finale :
+- Architecture + Browser : `36268473777` — SUCCESS ;
+- Firefox : `36268473788` — SUCCESS ;
+- Tactical Dock : `36268473779` — SUCCESS.
+
+Empreinte runtime finale du micro-lot :
+- taille `index.html` : `8170350` octets ;
+- blob Git : `e513d23c7a8c7aef9a187202bbcc34ab540e856f`.
+
+Checkpoint GREEN final :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA du checkpoint :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+Le micro-lot est fermé. Ne pas le rejouer et ne pas fusionner artificiellement les chemins generated/authored.
+
+Le prochain micro-lot Phase 7 doit repartir de ce checkpoint GREEN via un nouveau checkpoint de départ et un nouveau pré-audit, avant toute modification runtime.

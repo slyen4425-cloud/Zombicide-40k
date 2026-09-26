@@ -259,3 +259,22 @@ Avant checkpoint final :
 6. triple CI finale ;
 7. créer le checkpoint GREEN final du lot ;
 8. seulement ensuite ouvrir un audit de sortie Phase 6 dédié.
+
+
+## Validation utilisateur
+
+Preview corrigée :
+`cf5ff23d3a549a4b02094d3b9a9918b6d2a79a25`.
+
+Validation reçue le 2026-09-26 :
+`Oui c est ok`.
+
+Confirmé :
+- Survie ennemis de base/custom + vagues ;
+- Dungeon built-ins/custom + arts ;
+- transitions Survie <-> Dungeon ;
+- Builder présent après restauration de la composition preview standard.
+
+Le premier défaut Builder venait uniquement d'une mauvaise composition de preview ; aucun correctif runtime Builder/Shell n'a été nécessaire.
+
+Le lot peut passer à sa CI documentaire finale avant checkpoint GREEN.

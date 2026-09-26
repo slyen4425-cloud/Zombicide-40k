@@ -136,6 +136,26 @@ Validation utilisateur reçue le 2026-09-26 :
 
 Le diagnostic isolé `work/gensrpg-builder-survival-dungeon-switch-2026-09-26` est donc **abandonné sans modification runtime** : son hypothèse Shell n'a pas à être corrigée dans ce lot.
 
+## Validation utilisateur finale du micro-lot
+
+Validation reçue le 2026-09-26 :
+`Oui c est ok`.
+
+Périmètre confirmé sur la preview corrigée `cf5ff23d3a549a4b02094d3b9a9918b6d2a79a25` :
+- Survie : ennemis de base + custom + vagues ;
+- Dungeon : built-ins + custom + arts ;
+- transitions Survie -> Dungeon et Dungeon -> Survie ;
+- Builder revenu et accessible dans l'éditeur Dungeon.
+
+Aucune régression utilisateur signalée.
+
+La triple CI du SHA documentaire précédent `44ebcbb351b76846167ee28b0e5e2313b8a60223` est GREEN :
+- Architecture + Browser : `36231044701` — SUCCESS ;
+- Firefox : `36231044708` — SUCCESS ;
+- Tactical Dock : `36231044706` — SUCCESS.
+
+État : **validation utilisateur acquise ; prêt pour CI documentaire finale + checkpoint GREEN**.
+
 ## Prochaine action obligatoire
 
 1. valider ce document sur la triple CI du SHA documentaire exact ;

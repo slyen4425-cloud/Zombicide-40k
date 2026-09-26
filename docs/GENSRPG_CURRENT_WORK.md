@@ -1,3 +1,81 @@
+# PHASE 7 — MICRO-LOT 2 — pondération du type de salle generated — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA de base :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-kind-weighting-2026-09-26`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-kind-weighting-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_KIND_WEIGHTING_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Dernier checkpoint GREEN
+
+Micro-lot 1 fermé GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+CI GREEN :
+- Architecture + Browser : `36268473777` ;
+- Firefox : `36268473788` ;
+- Tactical Dock : `36268473779`.
+
+## Source Rule 26
+
+Le fichier exact fourni par l'utilisateur dans `work33.zip` / `index33.txt` a été vérifié :
+- taille : `8170350` octets ;
+- blob Git : `e513d23c7a8c7aef9a187202bbcc34ab540e856f`.
+
+## Périmètre du micro-lot 2
+
+Cible :
+`GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(roomWeights, roll)`
+
+Le lot extrait uniquement la pondération non-Boss aujourd'hui inline dans `dungeonCore200Rebuild.chooseKind(room)`.
+
+Restent hors périmètre :
+- politique Boss ;
+- création/restauration de salle ;
+- mouvement ;
+- événements / spawn ;
+- coffres / pièges / énigmes ;
+- branches ;
+- persistance ;
+- Tactical / combat ;
+- authored World Builder ;
+- ancien `gensDungeonCore01Js`.
+
+## Invariants
+
+- aucun nouvel appel aléatoire dans l'API Dungeon ;
+- `Math.random()` reste au callsite Core 2.00 sur le chemin non-Boss ;
+- aucun DOM / stockage / timer / observer / listener dans l'API pure ;
+- authored inchangé ;
+- aucune modification Survie / Capture / PvP.
+
+## Prochaine action obligatoire
+
+1. ajouter une caractérisation statique de la pondération actuelle ;
+2. raccorder la caractérisation à Architecture et obtenir GREEN ;
+3. ajouter ensuite la sentinelle RED exigeant l'API et le raccord ;
+4. aucun runtime avant RED isolé ;
+5. micro-diff minimal avec Rule 26 ;
+6. triple CI ;
+7. checkpoint GREEN final si tout reste SUCCESS.
+
+---
+
 # PHASE 7 — ENTRÉE — isoler Dungeon exploration — 2026-09-26
 
 Base GREEN :

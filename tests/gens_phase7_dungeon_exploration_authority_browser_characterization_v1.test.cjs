@@ -124,6 +124,7 @@ async function startDungeon(page){
         world:!!window.DungeonCore01?.explore?.__dwr167823
       },
       legacyWorld:window.DungeonWorldRuntime167823?.getConfig?.()||null,
+      actionIsAuthoredTravel:document.getElementById('dc01Explore')?.onclick===window.DungeonAuthoredRuntime167839?.travel,
       tacticalOverlay:(()=>{const el=document.querySelector('.gtv2Overlay');if(!el)return false;const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0&&r.width>0&&r.height>0})(),
       tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
     }));
@@ -131,6 +132,7 @@ async function startDungeon(page){
     assert.deepEqual(generatedBefore.exploreMarkers,{authored:false,room:false,world:false},
       'generated adventure must use the native Dungeon explore chain without authored/world wrapper markers');
     assert.equal(!!generatedBefore.legacyWorld?.enabled,false,'generated adventure must not activate legacy built-world runtime by default');
+    assert.equal(generatedBefore.actionIsAuthoredTravel,false,'generated adventure action must not be owned by Authored travel');
     assert.equal(generatedBefore.tacticalOverlay,false,'generated exploration start must not create Tactical UI');
     assert.equal(generatedBefore.tacticalBattle,false,'generated exploration start must not create a Tactical battle');
 
@@ -190,12 +192,16 @@ async function startDungeon(page){
         room:!!window.DungeonCore01?.explore?.__drr167822,
         world:!!window.DungeonCore01?.explore?.__dwr167823
       },
+      actionIsAuthoredTravel:document.getElementById('dc01Explore')?.onclick===window.DungeonAuthoredRuntime167839?.travel,
       tacticalOverlay:(()=>{const el=document.querySelector('.gtv2Overlay');if(!el)return false;const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0&&r.width>0&&r.height>0})(),
       tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
     }));
     assert.equal(authoredBefore.authoredActive,true,'selected world must activate Authored travel');
     assert.equal(!!authoredBefore.legacyWorld?.enabled,false,'Authored world must keep legacy World Runtime disabled');
-    assert.deepEqual(authoredBefore.exploreMarkers,{authored:true,room:true,world:true});
+    assert.deepEqual(authoredBefore.exploreMarkers,{authored:false,room:false,world:false},
+      'Authored world must not rely on a final DungeonCore01.explore wrapper chain');
+    assert.equal(authoredBefore.actionIsAuthoredTravel,true,
+      'Authored world action button must delegate directly to DungeonAuthoredRuntime167839.travel');
     assert.equal(authoredBefore.tacticalOverlay,false,'Authored exploration start must not create Tactical UI');
     assert.equal(authoredBefore.tacticalBattle,false,'Authored exploration start must not create a Tactical battle');
 

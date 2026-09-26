@@ -13,9 +13,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8170150,'openChar guard must target the current Core 0.28-retired runtime');
-assert.equal(gitBlob(bytes),'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'openChar guard runtime blob drifted');
+assert.equal(bytes.length,8170350,'openChar guard must target the current Phase 7 Dungeon generated-advance runtime');
+assert.equal(gitBlob(bytes),'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'openChar guard Phase 7 runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';
 assert.match(native,/closeTurnPopup\(\)/,'native Shell openChar must close stale turn popup');

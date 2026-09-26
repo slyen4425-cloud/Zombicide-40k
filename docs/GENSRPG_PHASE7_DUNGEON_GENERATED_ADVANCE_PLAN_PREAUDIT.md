@@ -135,3 +135,20 @@ Tous les tests historiques hors de cette nouvelle exigence doivent rester inchan
 - aucune dépendance Tactical dans l’entrée Dungeon ;
 - Architecture + Browser, Firefox, Tactical Dock GREEN ;
 - preview réel + validation utilisateur si un comportement visible change.
+
+
+## Candidat runtime appliqué
+
+Le raccord minimal a été appliqué après RED isolé.
+
+- SHA runtime : `9b1baf1839d11699208ff24992a92ab84385566d`
+- nouveau blob `index.html` : `e513d23c7a8c7aef9a187202bbcc34ab540e856f`
+- `assets/gensrpg/dungeon/entry-v1.js` : première API Dungeon active, pure ;
+- `module-contract-v1.json` : `partial-runtime-loaded`, activation Phase 7 ;
+- Core 2.00 délègue uniquement `complete / existing / create` ;
+- `service-worker.js` référence l’entrée Dungeon ;
+- `DungeonAuthoredRuntime167839` est inchangé ;
+- le workflow one-shot s’est supprimé dans le commit runtime.
+
+La nouvelle sentinelle et la caractérisation Phase 7 réalignée ont passé le contrôle local du workflow d’application.
+La triple CI complète doit maintenant valider ce candidat avant toute déclaration GREEN.

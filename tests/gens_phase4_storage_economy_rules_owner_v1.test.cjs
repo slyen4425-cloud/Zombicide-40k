@@ -30,8 +30,8 @@ assert.equal((block.match(/GensStorageV1\.writeJson\(localStorage,key,rest\)/g)|
 assert.match(block,/const key="gensrpg_dungeon_session_eco_160_"\+id/,'dynamic Economy session key must remain profile-scoped');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Economy rules raccord must not touch deferred runtime_v2');
 
-assert.equal(bytes.length,8170150,'post-raccord index size must match the exact Economy rules micro-diff');
-assert.equal(blob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9','post-raccord index blob must match the exact Economy rules micro-diff');
+assert.equal(bytes.length,8170350,'post-raccord index size must match the current Phase 7 Economy rules composition');
+assert.equal(blob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f','post-raccord index blob must match the current Phase 7 Economy rules composition');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Economy rules Core storage authority',

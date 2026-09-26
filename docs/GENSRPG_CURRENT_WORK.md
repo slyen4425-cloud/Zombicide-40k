@@ -15,71 +15,118 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE6_EXIT_AUDIT_PREAUDIT.md`
 
-## Fermeture du micro-lot précédent
-
-Le micro-lot frontière built-ins est fermé GREEN sur :
-`52ce1be73ff882840aaa6afbb6b45e6dd0c62023`.
-
-Validation utilisateur finale :
-`Oui c est ok`.
-
-CI finale exacte :
-- Architecture + Browser : `36232137682` — SUCCESS ;
-- Firefox : `36232137749` — SUCCESS ;
-- Tactical Dock : `36232137683` — SUCCESS.
-
 Production `main` reste gelée :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-## Critère roadmap à auditer
+## Critère roadmap
 
 Phase 6 peut être clôturée uniquement si :
 **Survie démarre et joue avec Dungeon/Tactical non chargés ou inactifs.**
 
-Sous-critères :
-1. aucun appel Survie vers une fonction privée Dungeon ;
-2. aucun appel Survie vers une fonction privée Tactical ;
-3. dés/stats/inventaire partagés uniquement via Core ;
-4. assets Survie résolus sans fallback inter-module ;
-5. démarrage et jeu Survie sans activation d'état, overlay ou session Dungeon/Tactical.
+## Méthode
 
-## État initial
+Audit uniquement :
+- aucune modification runtime ;
+- ajout d'une caractérisation statique ;
+- ajout d'une caractérisation navigateur réelle Survie ;
+- ajout d'un audit final de sortie ;
+- raccord des trois preuves à la CI.
 
-`assets/gensrpg/survival/` contient actuellement :
-- `entry-v1.js` ;
-- `module-contract-v1.json`.
+## Preuves statiques
 
-`entry-v1.js` expose uniquement `GensSurvivalV1.waveRules` et ne contient aucune dépendance Dungeon/Tactical.
+`assets/gensrpg/survival/entry-v1.js` :
+- aucune référence privée Dungeon ;
+- aucune référence privée Tactical ;
+- aucun import `assets/gensrpg/dungeon/` ou `assets/gensrpg/tactical/` ;
+- API publique unique `GensSurvivalV1`.
 
-Les sentinelles navigateur existantes prouvent déjà :
-- démarrage Survie par le vrai Shell ;
-- provider public Survival ;
+`module-contract-v1.json` interdit explicitement :
+- Dungeon private runtime ;
+- Tactical private runtime ;
+- Capture private runtime ;
+- PvP private runtime.
+
+Les services partagés requis existent sous Core :
+- Dice ;
+- Stats Snapshot ;
+- Inventory Equipped View ;
+- Asset Resolver.
+
+## Propriétaires Dungeon résiduels
+
+La cartographie conserve volontairement :
+- `openZombieRule -> dungeonDirectImageBinding166` ;
+- `enemyCardHtml -> dungeonDirectImageBinding166` ;
+- `renderActiveEnemies -> dungeonDirectImageBinding166` ;
+- `activeEnemyDefinition -> dungeonArtRenderFix165`.
+
+Ils sont **chargés mais inactifs dans le chemin Survie**.
+
+La caractérisation navigateur instrumente ces quatre fonctions pendant une vraie session Survie et impose :
+- `openZombieRule: 0` appel ;
+- `enemyCardHtml: 0` appel ;
+- `renderActiveEnemies: 0` appel ;
+- `activeEnemyDefinition: 0` appel ;
+- 0 trigger visible `openZombieRule` dans le gestionnaire ennemis Survie.
+
+## Dungeon/Tactical inactifs en Survie
+
+Le vrai démarrage Survie prouve :
+- `gensSelectedFamily === "survival"` ;
 - `isDungeonMode() === false` ;
-- thème Dungeon inactif ;
-- états Dungeon runtime/exploration non créés ni remplacés ;
-- overlays Dungeon inactifs ;
-- arts Survie sans fallback inter-module.
+- overlay Dungeon invisible ;
+- hôte combat Dungeon invisible ;
+- overlay Tactical invisible ;
+- dock Tactical invisible ;
+- aucune bataille Tactical UI ;
+- aucune bataille Tactical Bridge.
 
-## Dette résiduelle à caractériser
+Le gestionnaire ennemis Survie rend bien sa réserve sans consommer les propriétaires Dungeon résiduels.
 
-La cartographie Phase 2 indique encore :
-- `openZombieRule` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
-- `enemyCardHtml` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
-- `renderActiveEnemies` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
-- `activeEnemyDefinition` : 2 assignations, dernier propriétaire `dungeonArtRenderFix165`.
+## Audit final
 
-Ces fonctions sont potentiellement partagées avec l'UI ennemis Survie.
-Leur simple chargement ne suffit pas à bloquer la sortie ; l'audit doit prouver si elles sont réellement exécutées/nécessaires dans le chemin Survie.
+Tests ajoutés :
+- `tests/gens_phase6_exit_static_characterization_v1.test.cjs` ;
+- `tests/gens_phase6_exit_survival_runtime_browser_characterization_v1.test.cjs` ;
+- `tests/gens_phase6_exit_audit_v1.test.cjs`.
+
+CI sur le SHA technique `03871831acd44e88558cd4388285cde1b84525b4` :
+- Architecture + Browser : `36233731004` — SUCCESS ;
+- Firefox : `36233731003` — SUCCESS ;
+- Tactical Dock : `36233731001` — SUCCESS.
+
+Étapes nouvelles :
+- #179 `Caractériser la sortie Phase 6 Survie` — SUCCESS ;
+- #180 `Auditer le critère de sortie Phase 6` — SUCCESS ;
+- Browser `Caractériser le runtime de sortie Phase 6 Survie` — SUCCESS.
+
+Le browser complet valide également :
+- Dungeon après Survie — SUCCESS ;
+- Dungeon Builder — SUCCESS ;
+- Save & Quit — SUCCESS ;
+- Capture/PvP — SUCCESS ;
+- non-interférence — SUCCESS.
+
+## Décision
+
+**PHASE 6 — CRITÈRE DE SORTIE SATISFAIT.**
+
+Aucune dépendance privée Dungeon/Tactical n'est requise pour démarrer et jouer Survie.
+Les couches Dungeon/Tactical qui restent physiquement chargées dans la composition sont inactives dans le chemin Survie.
+
+Aucune modification runtime n'a été nécessaire dans cet audit.
 
 ## Prochaine action obligatoire
 
-1. ajouter un audit statique de sortie Phase 6 sans modifier le runtime ;
-2. ajouter une caractérisation navigateur du vrai démarrage Survie ;
-3. vérifier explicitement Tactical inactif ;
-4. instrumenter le chemin ennemis Survie pour déterminer si les propriétaires Dungeon V165/V166 sont consommés ;
-5. si aucun propriétaire privé Dungeon/Tactical n'est requis : préparer l'audit de sortie GREEN ;
-6. si une dépendance privée est prouvée : STOP sortie Phase 6 et ouvrir un dernier micro-lot homogène ;
-7. aucune ouverture Phase 7 avant preuve GREEN du critère de sortie.
+1. repasser la triple CI sur ce SHA documentaire exact ;
+2. créer `checkpoint/gensrpg-phase6-complete-green-2026-09-26` sur ce SHA final ;
+3. ouvrir Phase 7 depuis ce checkpoint ;
+4. créer un checkpoint de départ Phase 7 ;
+5. ouvrir une branche Phase 7 dédiée ;
+6. mettre à jour `GENSRPG_CURRENT_WORK.md` avec le chantier Dungeon exploration ;
+7. pré-audit Phase 7 avant toute modification runtime ;
+8. ne rien merger sur `main`.
+
 
 ---
 

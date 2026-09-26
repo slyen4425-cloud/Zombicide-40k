@@ -103,3 +103,63 @@ Sans modifier le runtime :
 - aucune suppression de couche Dungeon sur hypothèse ;
 - aucune ouverture Phase 7 avant décision de sortie ;
 - si le contenu exact d'`index.html` devient nécessaire pour corriger une dette, appliquer Rule 26 et demander le fichier exact à Sylvain.
+
+
+---
+
+# Résultat de l'audit de sortie
+
+## Audit statique — GREEN
+
+`tests/gens_phase6_exit_static_characterization_v1.test.cjs` prouve :
+- seul `entry-v1.js` constitue l'entrée JS physique Survie dans `assets/gensrpg/survival/` ;
+- aucune consommation de runtime privé Dungeon/Tactical ;
+- API publique `GensSurvivalV1` ;
+- contrat de module interdisant les runtimes privés des autres modes.
+
+Les propriétaires Dungeon résiduels sont cartographiés explicitement, pas ignorés.
+
+## Audit navigateur — GREEN
+
+`tests/gens_phase6_exit_survival_runtime_browser_characterization_v1.test.cjs` démarre une vraie session Survie mobile et prouve :
+- Dungeon mode faux ;
+- overlay/hôte Dungeon inactifs ;
+- overlay/dock Tactical inactifs ;
+- aucune bataille Tactical UI ou Bridge ;
+- réserve ennemis Survie rendue ;
+- propriétaires Dungeon résiduels `openZombieRule`, `enemyCardHtml`, `renderActiveEnemies`, `activeEnemyDefinition` instrumentés à 0 appel ;
+- aucun trigger `openZombieRule` exposé en Survie ;
+- aucune erreur navigateur/runtime.
+
+## Audit final — GREEN
+
+`tests/gens_phase6_exit_audit_v1.test.cjs` verrouille :
+- runtime exact 8 170 150 octets ;
+- blob `ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9` ;
+- services Core partagés présents ;
+- caractérisation navigateur raccordée à la CI ;
+- critère Phase 6 prêt pour sortie.
+
+## CI technique
+
+SHA :
+`03871831acd44e88558cd4388285cde1b84525b4`.
+
+Runs :
+- Architecture + Browser `36233731004` — SUCCESS ;
+- Firefox `36233731003` — SUCCESS ;
+- Tactical Dock `36233731001` — SUCCESS.
+
+## Décision
+
+**GREEN — Phase 6 satisfait son critère de sortie.**
+
+Survie démarre et joue sans dépendre d'une autorité privée Dungeon/Tactical active.
+
+Les scripts historiques Dungeon/Tactical éventuellement présents dans la composition n'exercent aucune autorité sur le chemin Survie testé.
+
+Aucun runtime n'a été modifié dans l'audit.
+
+La prochaine étape après CI documentaire finale est la création du checkpoint :
+`checkpoint/gensrpg-phase6-complete-green-2026-09-26`,
+puis l'ouverture de la Phase 7 Dungeon exploration.

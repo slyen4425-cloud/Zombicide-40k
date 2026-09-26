@@ -785,6 +785,9 @@ jobs:
       - name: Caractériser l'autorité exploration Dungeon Phase 7 dans Chromium
         run: node tests/gens_phase7_dungeon_exploration_authority_browser_characterization_v1.test.cjs
 
+      - name: Caractériser le rejoin generated Dungeon Phase 7 dans Chromium
+        run: node tests/gens_phase7_dungeon_generated_transition_browser_characterization_v1.test.cjs
+
       - name: Caractériser goMenu Dungeon et Capture
         run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
 

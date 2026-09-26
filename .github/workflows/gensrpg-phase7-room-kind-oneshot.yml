@@ -35,19 +35,8 @@ jobs:
           # entry-v1.js: add one pure deterministic selector and export it.
           p=Path("assets/gensrpg/dungeon/entry-v1.js")
           s=p.read_text()
-          marker='''\n  root.GensDungeonV1=Object.freeze({'''
-          add='''\n  function pickWeightedGeneratedRoomKind(roomWeights,roll){
-    const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
-    const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
-    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;
-    let remaining=Number(roll)*total;
-    for(const [kind,value] of entries){
-      remaining-=value;
-      if(remaining<=0)return kind;
-    }
-    return "enemy";
-  }
-'''
+          marker="\\n  root.GensDungeonV1=Object.freeze({"
+          add="\\n  function pickWeightedGeneratedRoomKind(roomWeights,roll){\\n    const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};\\n    const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);\\n    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;\\n    let remaining=Number(roll)*total;\\n    for(const [kind,value] of entries){\\n      remaining-=value;\\n      if(remaining<=0)return kind;\\n    }\\n    return \"enemy\";\\n  }\\n"
           if s.count(marker)!=1:
               raise SystemExit("entry install marker drift")
           s=s.replace(marker,add+marker)

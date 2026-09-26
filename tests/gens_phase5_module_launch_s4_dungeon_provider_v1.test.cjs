@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170350,'S4 provider contract must run on the current Phase 7 Core200-global-retired runtime');
-assert.equal(gitBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f','S4 provider contract must keep the current Phase 7 reviewed Core200 retirement blob');
+assert.equal(bytes.length,8170143,'S4 provider contract must run on the current Phase 7 room-kind S2 GREEN runtime');
+assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','S4 provider contract must keep the current Phase 7 room-kind S2 GREEN blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -1,132 +1,118 @@
-# PHASE 6 — AUDIT DE SORTIE — indépendance Survie — 2026-09-26
+# PHASE 7 — ENTRÉE — isoler Dungeon exploration — 2026-09-26
 
 Base GREEN :
-`checkpoint/gensrpg-phase6-survival-custom-enemy-builtin-boundary-green-2026-09-26`
+`checkpoint/gensrpg-phase6-complete-green-2026-09-26`
 
 SHA de base :
-`52ce1be73ff882840aaa6afbb6b45e6dd0c62023`
+`4a39617cd1b25f5a52d587e9fa19dd25976a3d3e`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase6-exit-audit-2026-09-26`
+`checkpoint/gensrpg-start-phase7-dungeon-exploration-2026-09-26`
 
 Branche :
-`work/gensrpg-phase6-exit-audit-2026-09-26`
+`work/gensrpg-phase7-dungeon-exploration-2026-09-26`
 
 Pré-audit :
-`docs/GENSRPG_PHASE6_EXIT_AUDIT_PREAUDIT.md`
+`docs/GENSRPG_PHASE7_DUNGEON_EXPLORATION_PREAUDIT.md`
 
 Production `main` reste gelée :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-## Critère roadmap
+## Fermeture Phase 6
 
-Phase 6 peut être clôturée uniquement si :
+Phase 6 est officiellement GREEN.
+
+Checkpoint :
+`checkpoint/gensrpg-phase6-complete-green-2026-09-26`
+
+SHA :
+`4a39617cd1b25f5a52d587e9fa19dd25976a3d3e`
+
+CI finale :
+- Architecture + Browser : `36239664419` — SUCCESS ;
+- Firefox : `36239664454` — SUCCESS ;
+- Tactical Dock : `36239664435` — SUCCESS.
+
+Critère satisfait :
 **Survie démarre et joue avec Dungeon/Tactical non chargés ou inactifs.**
 
-## Méthode
+## Objectif roadmap Phase 7
 
-Audit uniquement :
-- aucune modification runtime ;
-- ajout d'une caractérisation statique ;
-- ajout d'une caractérisation navigateur réelle Survie ;
-- ajout d'un audit final de sortie ;
-- raccord des trois preuves à la CI.
+Isoler dans le domaine Dungeon :
+- exploration ;
+- salles / branches ;
+- déplacement ;
+- événements / spawn ;
+- portes / coffres / pièges / énigmes ;
+- déclenchement de combat ;
+- sauvegarde d'état Dungeon.
 
-## Preuves statiques
+Dungeon reste propriétaire du monde et décide quand Tactical démarre.
 
-`assets/gensrpg/survival/entry-v1.js` :
-- aucune référence privée Dungeon ;
-- aucune référence privée Tactical ;
-- aucun import `assets/gensrpg/dungeon/` ou `assets/gensrpg/tactical/` ;
-- API publique unique `GensSurvivalV1`.
+Critère de sortie :
+**exploration complète sans dépendance UI Tactical globale.**
 
-`module-contract-v1.json` interdit explicitement :
-- Dungeon private runtime ;
-- Tactical private runtime ;
-- Capture private runtime ;
-- PvP private runtime.
+## État physique au départ
 
-Les services partagés requis existent sous Core :
-- Dice ;
-- Stats Snapshot ;
-- Inventory Equipped View ;
-- Asset Resolver.
+`assets/gensrpg/dungeon/` contient :
+- `entry-v1.js` — façade Phase 3 encore inerte ;
+- `module-contract-v1.json` — contrat Phase 3 `contract-only-not-loaded` ;
+- `progression-runtime-v1.js` — seam de progression, hors présent lot.
 
-## Propriétaires Dungeon résiduels
+L'exploration réelle reste répartie entre :
+- `index.html` / `DungeonCore01` ;
+- les couches historiques sous `assets/dungeon/` ;
+- les runtimes Room / World / Authored.
 
-La cartographie conserve volontairement :
-- `openZombieRule -> dungeonDirectImageBinding166` ;
-- `enemyCardHtml -> dungeonDirectImageBinding166` ;
-- `renderActiveEnemies -> dungeonDirectImageBinding166` ;
-- `activeEnemyDefinition -> dungeonArtRenderFix165`.
+## Premier micro-lot Phase 7
 
-Ils sont **chargés mais inactifs dans le chemin Survie**.
+**Audit de la chaîne d'autorité exploration/travel uniquement.**
 
-La caractérisation navigateur instrumente ces quatre fonctions pendant une vraie session Survie et impose :
-- `openZombieRule: 0` appel ;
-- `enemyCardHtml: 0` appel ;
-- `renderActiveEnemies: 0` appel ;
-- `activeEnemyDefinition: 0` appel ;
-- 0 trigger visible `openZombieRule` dans le gestionnaire ennemis Survie.
+Chaîne externe déjà caractérisée :
+- `DungeonRoomRuntime167822` enveloppe `DungeonCore01.explore` ;
+- `DungeonWorldRuntime167823` enveloppe `DungeonCore01.explore` et `render` ;
+- `DungeonAuthoredRuntime167839` enveloppe `explore`, `render`, `show`, `start` ;
+- pour un monde construit, `DungeonAuthoredRuntime167839` appelle `disableLegacyWorldRuntime()` et devient l'autorité de `travel()/enterNode()` ;
+- `DungeonWorldSessionBridge167832` route le lancement d'un monde construit vers `DungeonAuthoredRuntime167839.startConfigured()`.
 
-## Dungeon/Tactical inactifs en Survie
+Le premier lot ne choisit encore aucun propriétaire définitif.
+Il doit d'abord verrouiller cette chaîne et vérifier le vrai comportement generated adventure + authored world.
 
-Le vrai démarrage Survie prouve :
-- `gensSelectedFamily === "survival"` ;
-- `isDungeonMode() === false` ;
-- overlay Dungeon invisible ;
-- hôte combat Dungeon invisible ;
-- overlay Tactical invisible ;
-- dock Tactical invisible ;
-- aucune bataille Tactical UI ;
-- aucune bataille Tactical Bridge.
+## Hors périmètre du premier micro-lot
 
-Le gestionnaire ennemis Survie rend bien sa réserve sans consommer les propriétaires Dungeon résiduels.
+Ne pas modifier :
+- mouvement case par case ;
+- `DungeonSpatial313` ;
+- événements / spawn ;
+- coffres / pièges / énigmes ;
+- branches secondaires ;
+- Room Creator / World Builder ;
+- progression ;
+- inventaire / stats / dés ;
+- Tactical engine / UI / bridge ;
+- combat ;
+- stockage ;
+- assets ;
+- Capture / Survie / PvP.
 
-## Audit final
+## Risques identifiés
 
-Tests ajoutés :
-- `tests/gens_phase6_exit_static_characterization_v1.test.cjs` ;
-- `tests/gens_phase6_exit_survival_runtime_browser_characterization_v1.test.cjs` ;
-- `tests/gens_phase6_exit_audit_v1.test.cjs`.
-
-CI sur le SHA technique `03871831acd44e88558cd4388285cde1b84525b4` :
-- Architecture + Browser : `36233731004` — SUCCESS ;
-- Firefox : `36233731003` — SUCCESS ;
-- Tactical Dock : `36233731001` — SUCCESS.
-
-Étapes nouvelles :
-- #179 `Caractériser la sortie Phase 6 Survie` — SUCCESS ;
-- #180 `Auditer le critère de sortie Phase 6` — SUCCESS ;
-- Browser `Caractériser le runtime de sortie Phase 6 Survie` — SUCCESS.
-
-Le browser complet valide également :
-- Dungeon après Survie — SUCCESS ;
-- Dungeon Builder — SUCCESS ;
-- Save & Quit — SUCCESS ;
-- Capture/PvP — SUCCESS ;
-- non-interférence — SUCCESS.
-
-## Décision
-
-**PHASE 6 — CRITÈRE DE SORTIE SATISFAIT.**
-
-Aucune dépendance privée Dungeon/Tactical n'est requise pour démarrer et jouer Survie.
-Les couches Dungeon/Tactical qui restent physiquement chargées dans la composition sont inactives dans le chemin Survie.
-
-Aucune modification runtime n'a été nécessaire dans cet audit.
+- plusieurs wrappers `DungeonCore01.explore` coexistent historiquement ;
+- certaines couches utilisent des retries différés ;
+- `DungeonAuthoredReturnPersist167862` ré-enveloppe `enterNode()` ;
+- `DungeonAuthoredActionFix167857` enveloppe `DungeonSpatial313.persist` ;
+- des couches d'événements enveloppent encore `render/show` ;
+- une suppression prématurée peut casser generated adventure ou authored world ;
+- aucune dépendance Tactical ne doit être importée dans l'exploration.
 
 ## Prochaine action obligatoire
 
-1. repasser la triple CI sur ce SHA documentaire exact ;
-2. créer `checkpoint/gensrpg-phase6-complete-green-2026-09-26` sur ce SHA final ;
-3. ouvrir Phase 7 depuis ce checkpoint ;
-4. créer un checkpoint de départ Phase 7 ;
-5. ouvrir une branche Phase 7 dédiée ;
-6. mettre à jour `GENSRPG_CURRENT_WORK.md` avec le chantier Dungeon exploration ;
-7. pré-audit Phase 7 avant toute modification runtime ;
-8. ne rien merger sur `main`.
-
+1. écrire une caractérisation statique de la chaîne externe `explore/travel` ;
+2. raccorder cette caractérisation à la CI ;
+3. vérifier qu'elle reste GREEN sur la base Phase 7 ;
+4. préparer une caractérisation navigateur generated adventure + authored world ;
+5. seulement si la chaîne réelle exige de lire/modifier le `DungeonCore01.explore` natif dans `index.html`, appliquer Rule 26 sur le SHA Phase 7 courant ;
+6. aucun runtime modifié avant caractérisation + TDD RED d'un micro-lot homogène.
 
 ---
 

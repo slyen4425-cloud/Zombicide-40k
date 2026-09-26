@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=2a7dae75115d83b4edc368c42453a7cb58d0bd73
+# sourceIndexBlob=ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9
 # scope=explicit window.<name> assignments in 119 active inline blocks
-# distinctGlobals=434 assignments=755 multiOwnerGlobals=118
+# distinctGlobals=433 assignments=753 multiOwnerGlobals=117
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -23,7 +23,6 @@ _captureStarting139	3	captureFix139
 _openGensBuiltInGame155	1	forceReload155
 activeEnemyDefinition	2	dungeonArtRenderFix165
 allowedHeroIdsForActiveProfile	1	coreCombatPoolFix156
-applyBuiltinEnemyOverrides	2	dungeonGithubArts164
 applyDungeonFloorTheme078	1	dungeonCore078FloorSets
 applyDungeonMapPolish079	1	dungeonCore079MapPolish
 applyGameProfile	1	gensStability151

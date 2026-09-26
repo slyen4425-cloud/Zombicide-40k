@@ -14,9 +14,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170350,'Phase 5 exit audit must target the current Phase 7 Dungeon generated-advance runtime');
-assert.equal(gitBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
-  'Phase 5 exit audit runtime blob drifted from the Phase 7 baseline');
+assert.equal(bytes.length,8170143,'Phase 5 exit audit must target the current Phase 7 Dungeon room-kind runtime');
+assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d',
+  'Phase 5 exit audit runtime blob drifted from the Phase 7 room-kind baseline');
 
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
 assert.match(finalShell,/window\.startConfiguredGame\s*=\s*async\s+function/,

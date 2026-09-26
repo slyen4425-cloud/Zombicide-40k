@@ -128,8 +128,8 @@ async function startDungeon(page){
       tacticalBattle:!!window.GensRpgTacticalCombatV2Bridge?.currentBattle?.(window)
     }));
     assert.equal(generatedBefore.authoredActive,false,'generated adventure must not activate authored travel');
-    assert.deepEqual(generatedBefore.exploreMarkers,{authored:true,room:true,world:true},
-      'final explore chain must expose the authored wrapper while preserving historical markers');
+    assert.deepEqual(generatedBefore.exploreMarkers,{authored:false,room:false,world:false},
+      'generated adventure must use the native Dungeon explore chain without authored/world wrapper markers');
     assert.equal(!!generatedBefore.legacyWorld?.enabled,false,'generated adventure must not activate legacy built-world runtime by default');
     assert.equal(generatedBefore.tacticalOverlay,false,'generated exploration start must not create Tactical UI');
     assert.equal(generatedBefore.tacticalBattle,false,'generated exploration start must not create a Tactical battle');

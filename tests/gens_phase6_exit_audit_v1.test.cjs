@@ -14,9 +14,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170150,'Phase 6 exit audit must target the validated builtin-boundary runtime');
-assert.equal(gitBlob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'Phase 6 exit audit runtime blob drifted');
+assert.equal(bytes.length,8170350,'Phase 6 exit audit must target the current Phase 7 Dungeon generated-advance runtime');
+assert.equal(gitBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'Phase 6 exit audit runtime blob drifted from the Phase 7 baseline');
 
 const entry=read('assets/gensrpg/survival/entry-v1.js');
 const contract=JSON.parse(read('assets/gensrpg/survival/module-contract-v1.json'));

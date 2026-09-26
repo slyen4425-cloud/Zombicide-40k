@@ -34,9 +34,9 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8170150,'goMenu boundary guard must use the current runtime after Survival reserve extraction');
-assert.equal(gitBlob(indexBuf),'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9','goMenu boundary runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9','owner manifest must target current runtime');
+assert.equal(indexBuf.length,8170350,'goMenu boundary guard must use the current Phase 7 Dungeon generated-advance runtime');
+assert.equal(gitBlob(indexBuf),'e513d23c7a8c7aef9a187202bbcc34ab540e856f','goMenu boundary Phase 7 runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f','owner manifest must target current Phase 7 runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],
@@ -72,14 +72,25 @@ assert.ok(shellContract.consumes.includes('module public entry contracts'),
   'Shell contract must consume module public entry contracts');
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.equal(captureContract.status,'contract-only-not-loaded');
-assert.equal(dungeonContract.status,'contract-only-not-loaded');
+assert.equal(dungeonContract.status,'partial-runtime-loaded');
+assert.equal(dungeonContract.activatedPhase,7);
+assert.equal(dungeonContract.publicRuntimeApi,'GensDungeonV1');
 
-for(const [name,entry] of [['shell',shellEntry],['capture',captureEntry],['dungeon',dungeonEntry]]){
+for(const [name,entry] of [['shell',shellEntry],['capture',captureEntry]]){
   assert.doesNotMatch(entry,/window\.[A-Za-z_$][\w$]*\s*=/,
     name+' Phase 3 entry must remain inert during this preaudit');
   assert.doesNotMatch(entry,/addEventListener|MutationObserver|setTimeout|setInterval/,
     name+' Phase 3 entry must not gain compatibility side effects');
 }
+assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
+  'Dungeon Phase 7 entry must remain limited to the characterized generated-advance planner');
+assert.match(dungeonEntry,/root\.GensDungeonV1=Object\.freeze\(/,
+  'Dungeon Phase 7 entry must publish only its public GensDungeonV1 namespace');
+assert.doesNotMatch(
+  dungeonEntry,
+  /goMenu|GensShellScreenReturnV1|startConfiguredGame|document\.|localStorage|sessionStorage|addEventListener|MutationObserver|setTimeout|setInterval/,
+  'Dungeon Phase 7 entry must not acquire Shell transition, launch, DOM, storage, listener or timer authority'
+);
 
 assert.equal(captureContract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView');
 assert.equal(dungeonContract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView');

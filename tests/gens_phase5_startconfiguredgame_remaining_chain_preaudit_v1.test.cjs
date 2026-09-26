@@ -149,14 +149,16 @@ assert.equal(dungeonContract.publicRuntimeApi,'GensDungeonV1');
 assert.ok(dungeonContract.owns.includes('Dungeon world state'));
 assert.ok(dungeonContract.owns.includes('exploration'));
 assert.ok(dungeonContract.forbidden.includes('Capture runtime'));
-assert.ok(dungeonContract.invariants.includes('the first connected Phase 7 slice is the pure generated exploration advance planner'));
+assert.ok(dungeonContract.invariants.includes('the connected Phase 7 exploration slices are the pure generated advance planner and weighted room-kind selector'));
 
 for(const [name,src] of [['shell',shellEntry],['capture',captureEntry]]){
   assert.doesNotMatch(src,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
     name+' Phase 3 entry must remain inert during this preaudit');
 }
 assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
-  'Dungeon Phase 7 entry must expose only the characterized pure advance planner slice');
+  'Dungeon Phase 7 entry must retain the pure generated advance planner');
+assert.match(dungeonEntry,/function pickWeightedGeneratedRoomKind\(/,
+  'Dungeon Phase 7 entry must expose the second pure generated room-kind selector slice');
 assert.match(dungeonEntry,/root\.GensDungeonV1=Object\.freeze\(/,
   'Dungeon Phase 7 entry must publish the GensDungeonV1 public namespace');
 assert.doesNotMatch(

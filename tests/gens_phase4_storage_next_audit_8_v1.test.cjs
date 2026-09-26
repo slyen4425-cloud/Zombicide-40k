@@ -18,8 +18,8 @@ assert.deepEqual(manifest.totals,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8170150);
-assert.equal(blob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9');
+assert.equal(bytes.length,8170350);
+assert.equal(blob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -77,5 +77,5 @@ console.log(JSON.stringify({
   selected:'gensrpg_challenge_library_v1',
   selectedOwners:['dungeonCore051ExplorationPolish','dungeonCore200Rebuild','dungeonCore202ContentDensity'],
   selectedCoreAccesses:{reads:3,writes:2},
-  targetBlob:'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9'
+  targetBlob:'e513d23c7a8c7aef9a187202bbcc34ab540e856f'
 },null,2));

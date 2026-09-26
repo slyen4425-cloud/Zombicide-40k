@@ -150,3 +150,62 @@ Le lot est GREEN uniquement si :
 - l'API Dungeon reste pure ;
 - authored est inchangé ;
 - les trois CI requises sont SUCCESS.
+
+
+## RED prouvé
+
+SHA RED :
+`44bda5f3d5f1c46ce3ed4ddaa7c7e168f506cd60`
+
+Triple contrôle du SHA RED :
+- Architecture : run `36272062948` — FAILURE attendue ;
+- Firefox : run `36272062952` — SUCCESS ;
+- Tactical Dock : run `36272062985` — SUCCESS.
+
+La caractérisation Phase 7 reste GREEN :
+- #181 autorité exploration : SUCCESS ;
+- #182 plan d'avance generated : SUCCESS ;
+- #183 pondération generated caractérisée : SUCCESS.
+
+La seule nouvelle garde rouge est :
+- #184 `Exiger la pondération Dungeon des salles generated Phase 7`.
+
+Erreur exacte attendue :
+`Phase 7 micro-lot 2 requires Dungeon-owned weighted generated room-kind selection`
+
+État observé :
+- attendu : `function` ;
+- réel : `undefined`.
+
+Le RED prouve donc uniquement l'absence de la nouvelle API publique Dungeon avant raccord.
+
+## Candidat runtime appliqué
+
+Le raccord minimal a été appliqué après RED isolé.
+
+SHA runtime :
+`8f2661ed1d7c34c6f3f21664401feb9ca64a8fed`
+
+Le gros `index.html` a été modifié via un workflow one-shot auto-supprimé, afin de respecter Rule 26 sans réutiliser une ancienne copie.
+
+One-shot final :
+- run `36272623866` — SUCCESS ;
+- source vérifiée avant patch : taille `8170350`, blob `e513d23c7a8c7aef9a187202bbcc34ab540e856f` ;
+- cible vérifiée après patch : taille `8170143`, blob `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+Micro-diff runtime :
+- `assets/gensrpg/dungeon/entry-v1.js` expose `pickWeightedGeneratedRoomKind(roomWeights, roll)` ;
+- l'API ne possède aucun `Math.random()` ;
+- Core 2.00 conserve toute la politique Boss ;
+- Core 2.00 passe explicitement `Math.random()` au sélecteur uniquement sur le chemin non-Boss ;
+- l'ancien calcul pondéré inline est retiré ;
+- authored reste inchangé ;
+- le contrat Dungeon documente la seconde slice pure.
+
+Tests ciblés exécutés dans le one-shot avant commit :
+- plan d'avance generated : SUCCESS ;
+- caractérisation pondération generated : SUCCESS ;
+- nouvelle garde propriétaire pondération : SUCCESS ;
+- `git diff --check` : SUCCESS.
+
+La triple CI complète doit maintenant valider le runtime exact avant toute déclaration GREEN.

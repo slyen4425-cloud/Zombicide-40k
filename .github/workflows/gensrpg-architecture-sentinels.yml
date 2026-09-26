@@ -548,6 +548,9 @@ jobs:
       - name: Retirer ensureDungeonEnemies du refresh partagé Phase 6
         run: node tests/gens_phase6_survival_custom_enemy_dungeon_ensure_retirement_v1.test.cjs
 
+      - name: Isoler la frontière built-ins Survie Dungeon Phase 6
+        run: node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

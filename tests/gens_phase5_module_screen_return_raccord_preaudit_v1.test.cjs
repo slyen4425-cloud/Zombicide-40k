@@ -16,9 +16,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8170150,'raccord guard must target current Dungeon S2 runtime size');
-assert.equal(gitBlob(indexBuf),'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'raccord guard current runtime blob drifted');
+assert.equal(indexBuf.length,8170350,'raccord guard must target current Phase 7 Dungeon generated-advance runtime size');
+assert.equal(gitBlob(indexBuf),'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'raccord guard current Phase 7 runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');
 assert.equal(shared.operation,'returnToPrimaryView');
@@ -37,8 +37,10 @@ const executable=shellEntry.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,
 assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert before raccord');
 
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
-assert.ok(phase3Test.includes("assert.equal(text.includes(entry),false,entry+' must not be loaded by '+name);"),
-  'Phase 3 guard must still forbid loading target entries in production');
+assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'"),
+  'Phase 3 guard must explicitly recognize the Survival Phase 6 and Dungeon Phase 7 partial-runtime entries');
+assert.ok(phase3Test.includes('productionOwnerGraph:81'),
+  'Phase 3 guard must track the current 81-file production owner graph');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 assert.doesNotMatch(bootstrap,/assets\/gensrpg\/shell\/entry-v1\.js/,

@@ -33,16 +33,27 @@ for(const domain of domains){
   assert.ok(Array.isArray(contract.forbidden)&&contract.forbidden.length,domain+' forbidden boundary must be explicit');
   assert.ok(Array.isArray(contract.invariants)&&contract.invariants.length>=3,domain+' invariants missing');
 
-  if(domain==='survival'){
-    assert.equal(contract.status,'partial-runtime-loaded','Survival contract status');
-    assert.equal(contract.activatedPhase,6,'Survival activation phase');
-    assert.equal(contract.publicRuntimeApi,'GensSurvivalV1','Survival public runtime API');
-    assert.match(source,/GensSurvivalV1/,'Survival entry must expose its Phase 6 namespace');
-    assert.doesNotMatch(source,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|\bDungeon\b|\bTactical\b|\bCapture\b|\bPvP\b/,
-      'first active Survival slice must stay pure and isolated');
-    assert.equal(composition.index.includes(entry),true,'Survival entry must be directly loaded by source index in Phase 6');
-    for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,'Survival source entry must not be redundantly injected by '+name);
-    assert.equal(composition.index.includes(contractPath),false,'Survival contract metadata must not be runtime-loaded');
+  if(domain==='survival'||domain==='dungeon'){
+    const phase=domain==='survival'?6:7;
+    const api=domain==='survival'?'GensSurvivalV1':'GensDungeonV1';
+    assert.equal(contract.status,'partial-runtime-loaded',domain+' contract status');
+    assert.equal(contract.activatedPhase,phase,domain+' activation phase');
+    assert.equal(contract.publicRuntimeApi,api,domain+' public runtime API');
+
+    if(domain==='survival'){
+      assert.match(source,/GensSurvivalV1/,'Survival entry must expose its Phase 6 namespace');
+      assert.doesNotMatch(source,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|\bDungeon\b|\bTactical\b|\bCapture\b|\bPvP\b/,
+        'first active Survival slice must stay pure and isolated');
+    }else{
+      assert.match(source,/function planGeneratedAdvance\(/,'Dungeon entry must expose its first pure Phase 7 exploration slice');
+      assert.match(source,/root\.GensDungeonV1=Object\.freeze\(/,'Dungeon entry must publish only GensDungeonV1');
+      assert.doesNotMatch(source,/returnToPrimaryView|GensShellScreenReturnV1|startConfiguredGame|\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|\bTactical\b|\bCapture\b|\bSurvival\b|\bPvP\b/,
+        'first active Dungeon slice must stay pure and isolated from Shell routing and other modules');
+    }
+
+    assert.equal(composition.index.includes(entry),true,domain+' entry must be directly loaded by source index in Phase '+phase);
+    for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,domain+' source entry must not be redundantly injected by '+name);
+    assert.equal(composition.index.includes(contractPath),false,domain+' contract metadata must not be runtime-loaded');
     continue;
   }
 
@@ -62,7 +73,7 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,80,'Phase 3 scaffolding remains inert except the explicitly activated Survival entry; production owner graph now contains 80 files');
+assert.equal(Object.keys(ownerManifest.files||{}).length,81,'Phase 3 scaffolding remains inert except the explicitly activated Survival and Dungeon slices; production owner graph now contains 81 files');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');
@@ -73,6 +84,6 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:80,
-  loadedByProduction:0
+  productionOwnerGraph:81,
+  loadedByProduction:2
 },null,2));

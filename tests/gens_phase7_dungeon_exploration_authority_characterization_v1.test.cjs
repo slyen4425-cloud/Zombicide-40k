@@ -16,8 +16,12 @@ const bridge=read('assets/dungeon/dungeon-world-session-bridge-167832.js');
 const retPersist=read('assets/dungeon/dungeon-authored-return-persist-167862.js');
 const actionFix=read('assets/dungeon/dungeon-authored-action-fix-167857.js');
 
-assert.match(entry,/Intentionally contains no runtime code/,
-  'Phase 7 must start from the still-inert Dungeon public entry');
+assert.match(entry,/GensDungeonV1/,
+  'Phase 7 Dungeon public entry must expose the connected public namespace');
+assert.match(entry,/planGeneratedAdvance/,
+  'Phase 7 first connected Dungeon slice must remain the generated advance planner');
+assert.doesNotMatch(entry,/document|localStorage|sessionStorage|setTimeout|setInterval|MutationObserver|addEventListener/,
+  'Phase 7 first connected Dungeon slice must remain pure and side-effect free');
 assert.equal(contract.module,'dungeon');
 assert.ok(contract.owns.includes('exploration'),'Dungeon contract must own exploration');
 assert.ok(contract.owns.includes('movement'),'Dungeon contract must own movement');
@@ -74,7 +78,7 @@ assert.match(actionFix,/DungeonSpatial313/,
 
 console.log(JSON.stringify({
   scenario:'Phase 7 Dungeon exploration entry authority characterization',
-  publicEntry:'inert',
+  publicEntry:'partial-runtime-generated-advance-plan',
   generatedAdventure:'delegated to pre-authored explore chain',
   authoredWorld:'DungeonAuthoredRuntime167839.travel',
   adjacentDecorators:[

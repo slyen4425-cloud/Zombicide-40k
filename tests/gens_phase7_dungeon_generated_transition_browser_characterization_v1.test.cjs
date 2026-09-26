@@ -187,12 +187,12 @@ async function startDungeonWithTwoHeroes(page){
     },{key:RT_KEY,secondHero},{timeout:15000});
 
     stage='prepare-existing-join';
-    const beforeJoin=await page.evaluate(({key,deviceKey,firstHero,secondHero})=>{
+    const beforeJoin=await page.evaluate(({key,firstHero,secondHero})=>{
       const x=JSON.parse(localStorage.getItem(key)||'null');
-      localStorage.setItem(deviceKey,String(secondHero));
       x.remaining=x.remaining||{};
       x.remaining[secondHero]=2;
       localStorage.setItem(key,JSON.stringify(x));
+      window.DungeonCore01.assignHero(secondHero);
       return {
         room:Number(x.room)||0,
         firstRoom:Number(x.heroRooms?.[firstHero])||0,
@@ -204,7 +204,7 @@ async function startDungeonWithTwoHeroes(page){
         roomState:JSON.stringify(x.roomStates?.['1']||null),
         roomLastAt:Number(x.roomStates?.['1']?.last?.at)||0
       };
-    },{key:RT_KEY,deviceKey:DEVICE_HERO_KEY,firstHero,secondHero});
+    },{key:RT_KEY,firstHero,secondHero});
 
     assert.equal(beforeJoin.room,0,'second hero view must be restored to entrance before join');
     assert.equal(beforeJoin.firstRoom,1,'first hero must remain in room 1');

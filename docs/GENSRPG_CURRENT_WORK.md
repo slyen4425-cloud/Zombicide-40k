@@ -1,3 +1,96 @@
+# PHASE 7 — MICRO-LOT 1 — plan d’avance générée Dungeon — FERMÉ GREEN — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-complete-green-2026-09-26`
+
+Checkpoint de départ Phase 7 :
+`checkpoint/gensrpg-start-phase7-dungeon-exploration-2026-09-26`
+
+Branche de travail :
+`work/gensrpg-phase7-dungeon-exploration-2026-09-26`
+
+Pré-audits :
+- `docs/GENSRPG_PHASE7_DUNGEON_EXPLORATION_PREAUDIT.md`
+- `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ADVANCE_PLAN_PREAUDIT.md`
+
+## Résultat du micro-lot
+
+Le premier micro-lot Phase 7 est **FERMÉ GREEN**.
+
+Responsabilité extraite :
+`GensDungeonV1.exploration.planGeneratedAdvance(currentRoom, roomLimit, roomStates)`.
+
+La fonction reste pure et décide uniquement :
+- `complete` ;
+- `existing` ;
+- `create` ;
+- la salle cible.
+
+Le runtime generated de Core 2.00 délègue uniquement cette décision.
+Restent hors de cette API :
+- création/restauration réelle de salle ;
+- mouvement ;
+- événements / spawn ;
+- coffres / pièges / énigmes ;
+- combat ;
+- Tactical ;
+- authored world.
+
+Le chemin authored reste séparé et `DungeonAuthoredRuntime167839` est inchangé.
+
+Commit runtime du micro-lot :
+`9b1baf1839d11699208ff24992a92ab84385566d`
+
+Empreinte runtime Phase 7 :
+- taille `index.html` : `8170350` octets ;
+- blob Git : `e513d23c7a8c7aef9a187202bbcc34ab540e856f`.
+
+Après ce commit runtime, les corrections supplémentaires ont porté uniquement sur les tests/sentinelles historiques de cartographie et leurs fingerprints ; aucun autre changement runtime n’a été nécessaire.
+
+## Validation finale
+
+SHA exact triple-GREEN :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+CI finale :
+- Architecture + Browser : `36268473777` — SUCCESS ;
+- Firefox : `36268473788` — SUCCESS ;
+- Tactical Dock : `36268473779` — SUCCESS.
+
+Les scénarios navigateur protégés restent GREEN, notamment :
+- exploration Dungeon Phase 7 ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- Save & Quit / reprise ;
+- Dungeon map -> Tactical V2 ;
+- Capture ;
+- PvP placeholder ;
+- non-interférence multi-modules.
+
+Le micro-lot ne modifie pas visiblement le comportement utilisateur : il extrait une décision interne pure à comportement équivalent. Aucune validation preview supplémentaire n’est requise pour cette fermeture.
+
+Checkpoint GREEN final créé sur le SHA exact validé :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA du checkpoint :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Prochaine action obligatoire
+
+1. Ne pas rouvrir ce micro-lot sans régression réelle prouvée.
+2. Ne pas commencer le prochain micro-lot directement sur la branche courante sans checkpoint de départ dédié.
+3. Partir du checkpoint GREEN ci-dessus.
+4. Réauditer la prochaine plus petite frontière d’autorité Dungeon exploration.
+5. Créer ensuite `checkpoint/gensrpg-start-<prochain-micro-lot>-2026-09-26` et sa branche dédiée avant toute modification.
+6. Conserver generated et authored séparés tant qu’un audit ne prouve pas qu’une convergence est correcte.
+7. Continuer avec caractérisation -> RED -> micro-diff -> triple CI -> checkpoint GREEN.
+
+---
+
 # PHASE 7 — ENTRÉE — isoler Dungeon exploration — 2026-09-26
 
 Base GREEN :

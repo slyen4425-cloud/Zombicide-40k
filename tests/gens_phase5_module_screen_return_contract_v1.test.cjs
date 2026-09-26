@@ -15,9 +15,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(runtime.length,8170350,'contract lot must keep the current Phase 7 Dungeon generated-advance runtime size');
-assert.equal(gitBlob(runtime),'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
-  'contract lot must keep the current Phase 7 index byte-identical');
+assert.equal(runtime.length,8170143,'contract lot must keep the current Phase 7 Dungeon room-kind runtime size');
+assert.equal(gitBlob(runtime),'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d',
+  'contract lot must keep the current Phase 7 room-kind index byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';
 assert.equal(exists(sharedPath),true,'shared module screen-return contract is missing');
@@ -56,7 +56,7 @@ for(const module of modules){
     module+(module==='survival'
       ?' may activate only its Phase 6 wave-rules slice'
       :module==='dungeon'
-        ?' may activate only its first pure Phase 7 exploration slice'
+        ?' may activate only its pure Phase 7 exploration slices'
         :' must remain contract-only'));
   assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
     module+' must declare moduleScreenReturn');
@@ -84,6 +84,8 @@ for(const module of modules){
       'Phase 7 Dungeon entry must expose only its declared public runtime namespace');
     assert.match(entry,/function planGeneratedAdvance\(/,
       'Phase 7 Dungeon generated-advance planner must remain active');
+    assert.match(entry,/function pickWeightedGeneratedRoomKind\(/,
+      'Phase 7 Dungeon weighted room-kind selector must remain active');
     assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
       'activating the Dungeon planner must not implement or take ownership of screen return');
     assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Tactical|Capture|Survival|PvP/,

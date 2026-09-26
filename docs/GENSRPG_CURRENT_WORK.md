@@ -1,3 +1,83 @@
+# PHASE 7 — MICRO-LOT 3 — création/restauration de salle generated — pré-audit — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`
+
+SHA de base :
+`2fc83900b001a7643cdd21eecd94d048b91192d1`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-creation-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-creation-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_CREATION_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Fermeture du micro-lot 2
+
+Checkpoint GREEN créé :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`.
+
+SHA exact :
+`2fc83900b001a7643cdd21eecd94d048b91192d1`.
+
+CI finale du même SHA :
+- Architecture + Browser : `36278791790` — SUCCESS ;
+- Firefox : `36278791812` — SUCCESS ;
+- Tactical Dock : `36278791780` — SUCCESS.
+
+## Périmètre du micro-lot 3
+
+Audit uniquement, avant tout RED/runtime :
+- création d'une salle generated nouvelle ;
+- restauration/réutilisation d'une salle generated existante ;
+- frontière entre le plan déjà extrait `planGeneratedAdvance(...)`, le type déjà extrait `pickWeightedGeneratedRoomKind(...)` et le propriétaire runtime qui matérialise la salle.
+
+Hors périmètre :
+- politique Boss ;
+- mouvement case par case ;
+- événements/spawn ;
+- coffres/pièges/énigmes ;
+- branches secondaires ;
+- Tactical/combat ;
+- authored World Builder ;
+- Survie / Capture / PvP ;
+- stockage global non spécifique à cette frontière.
+
+## Invariants
+
+- aucune modification runtime avant caractérisation + RED isolé ;
+- generated et authored restent séparés ;
+- aucune responsabilité Tactical dans l'exploration ;
+- aucun wrapper/timer/observer/retry nouveau ;
+- une seule responsabilité extraite à la fois ;
+- Rule 26 obligatoire dès qu'il faut inspecter le propriétaire exact dans `index.html`.
+
+## Rule 26 — source requise pour poursuivre le pré-audit
+
+Base exacte :
+`2fc83900b001a7643cdd21eecd94d048b91192d1`.
+
+Permalink exact :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/2fc83900b001a7643cdd21eecd94d048b91192d1/index.html`.
+
+Le fichier `index.html` exact de ce SHA doit être téléchargé, compressé et fourni avant inspection de la fonction native de création/restauration de salle. L'ancien `work33.zip/index33.txt` est désormais une source historique et ne doit pas être réutilisé pour ce nouveau lot.
+
+## Prochaine action obligatoire
+
+1. obtenir et vérifier le `index.html` exact du SHA de base via Rule 26 ;
+2. caractériser uniquement le propriétaire de création/restauration generated ;
+3. identifier UNE frontière pure candidate sans déplacer mouvement/événements/combat ;
+4. écrire la caractérisation avant toute modification runtime ;
+5. préparer ensuite un RED isolé si et seulement si l'extraction est prouvée sûre.
+
+---
+
 # PHASE 7 — MICRO-LOT 2 — pondération du type de salle generated — 2026-09-26
 
 Base GREEN :

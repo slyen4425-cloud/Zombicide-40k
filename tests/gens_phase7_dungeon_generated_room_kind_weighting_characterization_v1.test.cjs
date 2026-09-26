@@ -32,8 +32,10 @@ assert.match(core200,/if\(c\.boss===['"]specific['"]&&explicit\.includes\(room\)
   'specific Boss policy must remain in Core 2.00');
 assert.match(core200,/if\(c\.boss===['"]random['"]&&room>2&&Math\.random\(\)\*100<Math\.max\(0,Number\(c\.bossChance\)\|\|13\)\)return['"]boss['"]/,
   'random Boss policy and its first random call must remain in Core 2.00');
-assert.match(core200,/const w=\{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,\.\.\.\(c\.roomWeights\|\|\{\}\)\}/,
-  'current generated weighting defaults must remain characterized before extraction');
+assert.doesNotMatch(core200,/const w=\{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,\.\.\.\(c\.roomWeights\|\|\{\}\)\}/,
+  'Core 2.00 must retire the inline weighted room-kind calculation');
+assert.match(core200,/GensDungeonV1\.exploration\.pickWeightedGeneratedRoomKind\(c\.roomWeights,Math\.random\(\)\)/,
+  'Core 2.00 must delegate the weighted non-Boss selection with one explicit random roll');
 assert.equal((core200.match(/Math\.random\(\)/g)||[]).length>=2,true,
   'Core 2.00 chooseKind path must currently contain Boss and weighted random sources');
 
@@ -105,7 +107,7 @@ assert.match(entry,/planGeneratedAdvance/,
 
 console.log(JSON.stringify({
   scenario:'Phase 7 generated room-kind weighting characterization',
-  finalOwner:'dungeonCore200Rebuild.chooseKind',
+  finalOwner:'dungeonCore200Rebuild.chooseKind -> GensDungeonV1.exploration.pickWeightedGeneratedRoomKind',
   consumer:'generated explore',
   weightedDefaults:['enemy','ambush','trap','chest','merchant','rest','mystery'],
   bossPolicy:'remains Core 2.00',

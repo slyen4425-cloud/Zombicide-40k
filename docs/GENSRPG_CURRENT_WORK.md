@@ -1,3 +1,88 @@
+# PHASE 6 — AUDIT DE SORTIE — indépendance Survie — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase6-survival-custom-enemy-builtin-boundary-green-2026-09-26`
+
+SHA de base :
+`52ce1be73ff882840aaa6afbb6b45e6dd0c62023`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase6-exit-audit-2026-09-26`
+
+Branche :
+`work/gensrpg-phase6-exit-audit-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_PHASE6_EXIT_AUDIT_PREAUDIT.md`
+
+## Fermeture du micro-lot précédent
+
+Le micro-lot frontière built-ins est fermé GREEN sur :
+`52ce1be73ff882840aaa6afbb6b45e6dd0c62023`.
+
+Validation utilisateur finale :
+`Oui c est ok`.
+
+CI finale exacte :
+- Architecture + Browser : `36232137682` — SUCCESS ;
+- Firefox : `36232137749` — SUCCESS ;
+- Tactical Dock : `36232137683` — SUCCESS.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Critère roadmap à auditer
+
+Phase 6 peut être clôturée uniquement si :
+**Survie démarre et joue avec Dungeon/Tactical non chargés ou inactifs.**
+
+Sous-critères :
+1. aucun appel Survie vers une fonction privée Dungeon ;
+2. aucun appel Survie vers une fonction privée Tactical ;
+3. dés/stats/inventaire partagés uniquement via Core ;
+4. assets Survie résolus sans fallback inter-module ;
+5. démarrage et jeu Survie sans activation d'état, overlay ou session Dungeon/Tactical.
+
+## État initial
+
+`assets/gensrpg/survival/` contient actuellement :
+- `entry-v1.js` ;
+- `module-contract-v1.json`.
+
+`entry-v1.js` expose uniquement `GensSurvivalV1.waveRules` et ne contient aucune dépendance Dungeon/Tactical.
+
+Les sentinelles navigateur existantes prouvent déjà :
+- démarrage Survie par le vrai Shell ;
+- provider public Survival ;
+- `isDungeonMode() === false` ;
+- thème Dungeon inactif ;
+- états Dungeon runtime/exploration non créés ni remplacés ;
+- overlays Dungeon inactifs ;
+- arts Survie sans fallback inter-module.
+
+## Dette résiduelle à caractériser
+
+La cartographie Phase 2 indique encore :
+- `openZombieRule` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
+- `enemyCardHtml` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
+- `renderActiveEnemies` : 3 assignations, dernier propriétaire `dungeonDirectImageBinding166` ;
+- `activeEnemyDefinition` : 2 assignations, dernier propriétaire `dungeonArtRenderFix165`.
+
+Ces fonctions sont potentiellement partagées avec l'UI ennemis Survie.
+Leur simple chargement ne suffit pas à bloquer la sortie ; l'audit doit prouver si elles sont réellement exécutées/nécessaires dans le chemin Survie.
+
+## Prochaine action obligatoire
+
+1. ajouter un audit statique de sortie Phase 6 sans modifier le runtime ;
+2. ajouter une caractérisation navigateur du vrai démarrage Survie ;
+3. vérifier explicitement Tactical inactif ;
+4. instrumenter le chemin ennemis Survie pour déterminer si les propriétaires Dungeon V165/V166 sont consommés ;
+5. si aucun propriétaire privé Dungeon/Tactical n'est requis : préparer l'audit de sortie GREEN ;
+6. si une dépendance privée est prouvée : STOP sortie Phase 6 et ouvrir un dernier micro-lot homogène ;
+7. aucune ouverture Phase 7 avant preuve GREEN du critère de sortie.
+
+---
+
 # PHASE 6 — MICRO-LOT — frontière built-ins du refresh partagé — 2026-09-26
 
 Base GREEN :

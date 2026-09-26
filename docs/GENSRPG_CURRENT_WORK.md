@@ -1,3 +1,45 @@
+# PHASE 7 — MICRO-LOT 2 — picker pondéré de salle generated — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA de base :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-weighted-pick-2026-09-26`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-weighted-pick-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_WEIGHTED_PICK_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Cible
+
+Extraire uniquement la sélection pondérée non-Boss de `chooseKind(room)` vers :
+
+`GensDungeonV1.exploration.pickGeneratedRoomKind(weights, roll)`
+
+Les règles Boss, `cfg()`, les poids par défaut, le merge `roomWeights`, `Math.random()` et `createRoom()` restent propriétaires Core 2.00.
+
+## Hors périmètre
+
+Aucun mouvement, spawn, événement, coffre, piège, énigme, branche, Tactical, combat, authored, Builder, stockage, progression, Survie, Capture, PvP ou asset.
+
+## Prochaine action obligatoire
+
+1. caractériser le comportement actuel de `chooseKind()` ;
+2. raccorder la caractérisation à la CI ;
+3. obtenir GREEN sur la base ;
+4. seulement ensuite créer le RED du nouveau picker ;
+5. avant toute modification de `index.html`, demander à l'utilisateur le fichier HTML actuel exact.
+
+---
+
 # PHASE 7 — ENTRÉE — isoler Dungeon exploration — 2026-09-26
 
 Base GREEN :

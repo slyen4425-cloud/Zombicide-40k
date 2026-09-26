@@ -64,15 +64,38 @@ Restent hors périmètre :
 - authored inchangé ;
 - aucune modification Survie / Capture / PvP.
 
+## Fermeture candidate GREEN
+
+Runtime final du micro-lot :
+- `index.html` : `8170143` octets ;
+- blob Git : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+SHA technique GREEN :
+`8d9da74a7a1e149a97e18e8a3bacced7bebefff5`.
+
+CI complète sur ce SHA :
+- Architecture + Browser : `36277936841` — SUCCESS ;
+- Firefox : `36277936842` — SUCCESS ;
+- Tactical Dock : `36277936849` — SUCCESS.
+
+Résultat :
+- politique Boss inchangée dans Core 2.00 ;
+- pondération generated non-Boss extraite vers `GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(roomWeights, roll)` ;
+- `Math.random()` reste au callsite historique ;
+- API pure, sans DOM/stockage/timer/observer/listener ;
+- authored, Survie, Capture, PvP et Tactical inchangés ;
+- aucun changement utilisateur visible, donc aucune preview manuelle supplémentaire requise.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`.
+
 ## Prochaine action obligatoire
 
-1. ajouter une caractérisation statique de la pondération actuelle ;
-2. raccorder la caractérisation à Architecture et obtenir GREEN ;
-3. ajouter ensuite la sentinelle RED exigeant l'API et le raccord ;
-4. aucun runtime avant RED isolé ;
-5. micro-diff minimal avec Rule 26 ;
-6. triple CI ;
-7. checkpoint GREEN final si tout reste SUCCESS.
+1. valider la présente clôture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le micro-lot Phase 7 suivant depuis ce checkpoint GREEN ;
+4. le prochain lot doit rester dans `Dungeon exploration / salles` et être pré-audité avant tout runtime ;
+5. si l'inspection du propriétaire natif de création/restauration de salle dans `index.html` devient nécessaire, appliquer Rule 26 et demander le fichier exact à Sylvain.
 
 ---
 

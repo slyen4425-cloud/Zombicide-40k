@@ -15,10 +15,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170150,
-  'Core200 global-retirement characterization must follow the exact retired runtime');
-assert.equal(gitBlob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'Core200 global-retirement characterization must use the exact retired runtime blob');
+assert.equal(bytes.length,8170350,
+  'Core200 global-retirement characterization must follow the current Phase 7 retired runtime');
+assert.equal(gitBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'Core200 global-retirement characterization must use the current Phase 7 retired runtime blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

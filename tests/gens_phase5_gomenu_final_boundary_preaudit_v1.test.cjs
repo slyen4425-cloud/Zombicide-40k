@@ -34,9 +34,9 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8170350,'goMenu boundary guard must use the current Phase 7 Dungeon generated-advance runtime');
-assert.equal(gitBlob(indexBuf),'e513d23c7a8c7aef9a187202bbcc34ab540e856f','goMenu boundary Phase 7 runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f','owner manifest must target current Phase 7 runtime');
+assert.equal(indexBuf.length,8170143,'goMenu boundary guard must use the current Phase 7 Dungeon room-kind runtime');
+assert.equal(gitBlob(indexBuf),'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','goMenu boundary Phase 7 room-kind runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','owner manifest must target current Phase 7 room-kind runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],
@@ -83,7 +83,9 @@ for(const [name,entry] of [['shell',shellEntry],['capture',captureEntry]]){
     name+' Phase 3 entry must not gain compatibility side effects');
 }
 assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
-  'Dungeon Phase 7 entry must remain limited to the characterized generated-advance planner');
+  'Dungeon Phase 7 entry must retain the pure generated-advance planner');
+assert.match(dungeonEntry,/function pickWeightedGeneratedRoomKind\(/,
+  'Dungeon Phase 7 entry must expose the second pure generated room-kind selector');
 assert.match(dungeonEntry,/root\.GensDungeonV1=Object\.freeze\(/,
   'Dungeon Phase 7 entry must publish only its public GensDungeonV1 namespace');
 assert.doesNotMatch(

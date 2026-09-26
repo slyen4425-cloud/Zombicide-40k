@@ -55,16 +55,11 @@ jobs:
           if s.count(marker)!=1:
               raise SystemExit("entry install marker drift")
           s=s.replace(marker,add+marker)
-          old='''    exploration:Object.freeze({
-              planGeneratedAdvance
-            })'''
-          new='''    exploration:Object.freeze({
-              planGeneratedAdvance,
-              pickWeightedGeneratedRoomKind
-            })'''
+          old='      planGeneratedAdvance'+nl+'    })'
+          new='      planGeneratedAdvance,'+nl+'      pickWeightedGeneratedRoomKind'+nl+'    })'
           if s.count(old)!=1:
               raise SystemExit("entry export anchor drift")
-          p.write_text(s.replace(old,new))
+          p.write_text(s.replace(old,new,1))
 
           # module contract: document the second pure slice and keep Boss outside.
           p=Path("assets/gensrpg/dungeon/module-contract-v1.json")

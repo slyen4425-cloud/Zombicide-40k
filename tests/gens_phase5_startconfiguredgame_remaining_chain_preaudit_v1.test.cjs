@@ -131,7 +131,7 @@ for(const id of ids){
   );
 }
 
-// Phase 3 target remains contract-only: Shell owns routing, modules own gameplay.
+// Shell/Capture remain contract-only. Dungeon now carries only the first pure Phase 7 exploration slice.
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.owns.includes('active module/session routing'));
 assert.ok(shellContract.owns.includes('global screen transitions'));
@@ -143,14 +143,27 @@ assert.equal(captureContract.status,'contract-only-not-loaded');
 assert.ok(captureContract.owns.includes('Monster Capture runtime'));
 assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 
-assert.equal(dungeonContract.status,'contract-only-not-loaded');
+assert.equal(dungeonContract.status,'partial-runtime-loaded');
+assert.equal(dungeonContract.activatedPhase,7);
+assert.equal(dungeonContract.publicRuntimeApi,'GensDungeonV1');
 assert.ok(dungeonContract.owns.includes('Dungeon world state'));
+assert.ok(dungeonContract.owns.includes('exploration'));
 assert.ok(dungeonContract.forbidden.includes('Capture runtime'));
+assert.ok(dungeonContract.invariants.includes('the first connected Phase 7 slice is the pure generated exploration advance planner'));
 
-for(const [name,src] of [['shell',shellEntry],['capture',captureEntry],['dungeon',dungeonEntry]]){
+for(const [name,src] of [['shell',shellEntry],['capture',captureEntry]]){
   assert.doesNotMatch(src,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
     name+' Phase 3 entry must remain inert during this preaudit');
 }
+assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
+  'Dungeon Phase 7 entry must expose only the characterized pure advance planner slice');
+assert.match(dungeonEntry,/root\.GensDungeonV1=Object\.freeze\(/,
+  'Dungeon Phase 7 entry must publish the GensDungeonV1 public namespace');
+assert.doesNotMatch(
+  dungeonEntry,
+  /startConfiguredGame|document\.|localStorage|sessionStorage|MutationObserver|setInterval|setTimeout|addEventListener|dispatchEvent|fetch\s*\(/,
+  'Dungeon Phase 7 entry must not acquire launch routing, DOM, storage, listener, timer or network authority'
+);
 
 const classification=[
   {

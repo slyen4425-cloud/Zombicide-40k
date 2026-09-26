@@ -178,3 +178,17 @@ Règle : migrer un petit groupe homogène à la fois, diminuer le compteur atten
 ## Statut
 
 La consolidation des autorités de composition, UI Dungeon, détection, observers globaux et rendu mural a franchi des checkpoints verts. La production `main` reste volontairement sur V16.78.114.11 et n'a pas été publiée avec ces changements de restructuration.
+
+## Mise à jour Phase 7 — 2026-09-26
+
+Premier slice Dungeon activé sur la branche `work/gensrpg-phase7-dungeon-exploration-2026-09-26` :
+
+- entrée source directe : `assets/gensrpg/dungeon/entry-v1.js?v=1` ;
+- namespace public : `GensDungeonV1` ;
+- responsabilité connectée : plan pur de destination generated `exploration.planGeneratedAdvance()` ;
+- chargement source : immédiatement après `assets/gensrpg/survival/entry-v1.js?v=1`, avant `dungeonCore200Rebuild` ;
+- Core 2.00 conserve les gardes, la persistance, le mouvement, la création de salle, spawn, événements, coffres, pièges et combat ;
+- le chemin authored reste directement propriétaire via `DungeonAuthoredRuntime167839.travel -> enterNode()` ;
+- aucune dépendance Tactical n’est introduite dans l’entrée Dungeon.
+
+Cette mise à jour ne modifie pas la production `main`, toujours gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

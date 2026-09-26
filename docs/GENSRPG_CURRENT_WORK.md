@@ -1,3 +1,70 @@
+# PHASE 7 — MICRO-LOT 2 — transition generated Dungeon — PRÉ-AUDIT — 2026-09-26
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA de base :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-transition-2026-09-26`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-transition-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_TRANSITION_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Micro-lot précédent — FERMÉ GREEN
+
+Checkpoint :
+`checkpoint/gensrpg-phase7-dungeon-generated-advance-plan-green-2026-09-26`
+
+SHA :
+`497b34cc2b0b5e82f665a0b85b6251f34b34fca4`
+
+CI :
+- Architecture + Browser : `36268473777` — SUCCESS ;
+- Firefox : `36268473788` — SUCCESS ;
+- Tactical Dock : `36268473779` — SUCCESS.
+
+API extraite :
+`GensDungeonV1.exploration.planGeneratedAdvance()`.
+
+## Périmètre actuel
+
+Caractériser uniquement ce qui se passe **après** `planGeneratedAdvance` dans le generated Core 2.00 :
+- rejoin d’une salle existante ;
+- création d’une salle nouvelle ;
+- conservation du mouvement restant ;
+- placement sur l’entrée ;
+- préservation des autres héros ;
+- marqueur `dc313LastTransition`.
+
+Ne pas extraire encore le runtime et ne pas toucher :
+- mouvement case par case ;
+- événements / spawn ;
+- coffres / pièges / énigmes ;
+- branches ;
+- combat / Tactical ;
+- authored world ;
+- Builder ;
+- Survie / Capture / PvP.
+
+## Prochaine action obligatoire
+
+1. ajouter une caractérisation statique de la transition generated ;
+2. la raccorder à la CI ;
+3. obtenir GREEN ;
+4. ajouter une caractérisation navigateur du rejoin d’une salle existante ;
+5. seulement après ces preuves, sélectionner UNE frontière de runtime ;
+6. si `index.html` doit être modifié, appliquer Rule 26 sur le SHA exact du lot avant le micro-diff.
+
+---
+
 # PHASE 7 — ENTRÉE — isoler Dungeon exploration — 2026-09-26
 
 Base GREEN :

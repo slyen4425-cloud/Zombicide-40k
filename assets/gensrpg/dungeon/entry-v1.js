@@ -1,10 +1,22 @@
 "use strict";
 
-/**
- * GenSrpG Phase 3 inert entry point — dungeon.
- * Contract: ./module-contract-v1.json
- *
- * Intentionally contains no runtime code, global assignment, auto-install,
- * DOM access, storage access, observer, listener, timer or retry.
- * It is not part of the production load graph in Phase 3.
- */
+(function installGensDungeonV1(root){
+  const VERSION="1.0.0";
+
+  function planGeneratedAdvance(currentRoom,roomLimit,roomStates){
+    const current=Number(currentRoom||0);
+    const limit=Number(roomLimit||10);
+    if(current>=limit)return {status:"complete",targetRoom:null};
+    const targetRoom=Math.max(1,current+1);
+    const states=roomStates&&typeof roomStates==="object"?roomStates:{};
+    const existing=states[String(targetRoom)];
+    return {status:existing?.last?"existing":"create",targetRoom};
+  }
+
+  root.GensDungeonV1=Object.freeze({
+    VERSION,
+    exploration:Object.freeze({
+      planGeneratedAdvance
+    })
+  });
+})(typeof window!=="undefined"?window:globalThis);

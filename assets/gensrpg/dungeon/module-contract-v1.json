@@ -2,7 +2,7 @@
   "version": 1,
   "phase": 3,
   "module": "dungeon",
-  "status": "contract-only-not-loaded",
+  "status": "partial-runtime-loaded",
   "plannedEntry": "assets/gensrpg/dungeon/entry-v1.js",
   "owns": [
     "Dungeon world state",
@@ -23,12 +23,15 @@
     "PvP runtime"
   ],
   "lifecycle": {
-    "install": "future explicit install only when the module is intentionally connected",
-    "dispose": "future temporary modules must release listeners, observers and timers"
+    "install": "loaded once by the source index; the connected Phase 7 slice exposes only a pure Dungeon API",
+    "dispose": "no temporary state, listener, observer or timer is created by the connected slice"
   },
   "invariants": [
-    "not referenced by the current production load graph during Phase 3",
-    "no gameplay is moved into this contract",
+    "the active entry exposes only the public GensDungeonV1 namespace",
+    "the first connected Phase 7 slice is the pure generated exploration advance planner",
+    "the planner has no DOM storage timer listener observer or Tactical dependency",
+    "generated room creation movement events spawn chest trap puzzle and combat remain outside this first slice",
+    "authored World Builder travel remains owned by DungeonAuthoredRuntime167839 during this micro-lot",
     "no compatibility wrapper is introduced by this contract"
   ],
   "publicEntries": {
@@ -44,5 +47,7 @@
       "status": "declared-not-loaded",
       "ownership": "module-owned-session-start"
     }
-  }
+  },
+  "activatedPhase": 7,
+  "publicRuntimeApi": "GensDungeonV1"
 }

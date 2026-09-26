@@ -4296,6 +4296,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 <script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
+<script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
 
 <script>
 
@@ -39291,8 +39292,9 @@ function explore(){
     if(exitLocked(x))return modal('🔑 Sortie verrouillée','Trouve et bats le porteur de la clé.');
     if(tactical()&&activePos(x)!==exitIndex(x.last?.map))return modal('🚪 Sortie','Place le héros actif sur la case SORTIE.');
   }
-  if(x.room>=Number(cfg().rooms||10))return modal('🏆 Donjon terminé','Le groupe a terminé le donjon.');
-  const targetRoom=Math.max(1,Number(x.room||0)+1);
+  const advancePlan=GensDungeonV1.exploration.planGeneratedAdvance(x.room,Number(cfg().rooms||10),x.roomStates);
+  if(advancePlan.status==='complete')return modal('🏆 Donjon terminé','Le groupe a terminé le donjon.');
+  const targetRoom=advancePlan.targetRoom;
   const movementLeft=Number.isFinite(Number(x.remaining?.[heroId]))
     ?Math.max(0,Number(x.remaining[heroId])):moveMax(heroId);
   spatialPersist(x);
@@ -39300,7 +39302,7 @@ function explore(){
   /* Une salle n'est créée qu'une fois. Les héros suivants la rejoignent
      à leur propre tour, sans déplacer ceux qui sont restés derrière. */
   const existing=x.roomStates?.[String(targetRoom)];
-  if(existing?.last){
+  if(advancePlan.status==='existing'&&existing?.last){
     spatialSetRoom(x,heroId,targetRoom);
     spatialActivate(x,heroId);
     const entry=spawnIndex(x.last?.map);

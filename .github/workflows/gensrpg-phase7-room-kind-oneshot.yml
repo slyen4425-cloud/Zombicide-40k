@@ -35,32 +35,22 @@ jobs:
           # entry-v1.js: add one pure deterministic selector and export it.
           p=Path("assets/gensrpg/dungeon/entry-v1.js")
           s=p.read_text()
-          anchor='''  function planGeneratedAdvance(currentRoom,roomLimit,roomStates){
-            const current=Number(currentRoom||0);
-            const limit=Number(roomLimit||10);
-            if(current>=limit)return {status:"complete",targetRoom:null};
-            const targetRoom=Math.max(1,current+1);
-            const states=roomStates&&typeof roomStates==="object"?roomStates:{};
-            const existing=states[String(targetRoom)];
-            return {status:existing?.last?"existing":"create",targetRoom};
-          }
-          '''
-          add='''
-          function pickWeightedGeneratedRoomKind(roomWeights,roll){
-            const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
-            const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
-            const total=entries.reduce((sum,[,value])=>sum+value,0)||1;
-            let remaining=Number(roll)*total;
-            for(const [kind,value] of entries){
-              remaining-=value;
-              if(remaining<=0)return kind;
-            }
-            return "enemy";
-          }
-          '''
-          if s.count(anchor)!=1:
-              raise SystemExit("entry planner anchor drift")
-          s=s.replace(anchor,anchor+add)
+          marker='''\n  root.GensDungeonV1=Object.freeze({'''
+          add='''\n  function pickWeightedGeneratedRoomKind(roomWeights,roll){
+    const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
+    const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
+    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;
+    let remaining=Number(roll)*total;
+    for(const [kind,value] of entries){
+      remaining-=value;
+      if(remaining<=0)return kind;
+    }
+    return "enemy";
+  }
+'''
+          if s.count(marker)!=1:
+              raise SystemExit("entry install marker drift")
+          s=s.replace(marker,add+marker)
           old='''    exploration:Object.freeze({
               planGeneratedAdvance
             })'''

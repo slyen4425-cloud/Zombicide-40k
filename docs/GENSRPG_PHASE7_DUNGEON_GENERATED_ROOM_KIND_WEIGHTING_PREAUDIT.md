@@ -209,3 +209,34 @@ Tests ciblés exécutés dans le one-shot avant commit :
 - `git diff --check` : SUCCESS.
 
 La triple CI complète doit maintenant valider le runtime exact avant toute déclaration GREEN.
+
+## Fermeture GREEN technique — 2026-09-27
+
+Le micro-lot est fonctionnellement et architecturalement GREEN sur le SHA exact :
+`8d9da74a7a1e149a97e18e8a3bacced7bebefff5`.
+
+Runtime final inchangé depuis le raccord :
+- `index.html` : `8170143` octets ;
+- blob Git : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+Validation CI complète du même SHA :
+- Architecture + Browser : run `36277936841` — SUCCESS ;
+- Firefox : run `36277936842` — SUCCESS ;
+- Tactical Dock : run `36277936849` — SUCCESS.
+
+Le Browser sentinel est également SUCCESS dans le run Architecture, y compris les scénarios historiques de non-interférence, Dungeon après Survie, Dungeon vers Tactical, Capture, Builder, Save & Quit et assets.
+
+Aucune régression fonctionnelle n'a été détectée pendant la cartographie des fingerprints historiques. Les réalignements post-raccord ont uniquement suivi le runtime exact `8170143 / 23b4f590...` et n'ont pas modifié les assertions métier.
+
+Le comportement utilisateur n'a pas changé : ce micro-lot extrait un calcul pur interne de pondération. Conformément au plan TDD, aucune preview ni validation manuelle utilisateur supplémentaire n'est requise.
+
+Critère GREEN confirmé :
+- politique Boss toujours dans Core 2.00 ;
+- pondération non-Boss déléguée à `GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(roomWeights, roll)` ;
+- `Math.random()` reste au callsite Core 2.00 ;
+- API Dungeon pure ;
+- authored inchangé ;
+- Survie / Capture / PvP / Tactical inchangés.
+
+Checkpoint final prévu après CI documentaire du présent état :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`.

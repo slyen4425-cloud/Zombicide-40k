@@ -413,6 +413,11 @@
       "owner": "GenSrpG Survival Wave Rules",
       "domain": "survival",
       "role": "active Survival module entry exposing pure wave-profile defaults and enemy-id collection"
+    },
+    "assets/gensrpg/dungeon/entry-v1.js": {
+      "owner": "GenSrpG Dungeon Exploration",
+      "domain": "dungeon",
+      "role": "public Phase 7 Dungeon module entry exposing pure generated advance planning only; authored travel remains owned by DungeonAuthoredRuntime167839"
     }
   }
 }

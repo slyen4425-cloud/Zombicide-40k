@@ -7,75 +7,43 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
-const applyHeader=[
-  'function applyBuiltinEnemyOverrides(){',
-  ' const overrides=loadBuiltinEnemyOverrides();',
-  ' const bases=[...BASE_ZOMBIE_TYPES,...((typeof dungeonEnemies==="function")?dungeonEnemies():[])];'
-].join('\n');
+const applyHeader='function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){';
 assert.equal(indexSource.split(applyHeader).length-1,1,
-  'characterization requires the exact reviewed mixed builtin override owner');
+  'runtime must expose the reviewed shared builtin override owner with Survival defaults');
+
+const applyStart=indexSource.indexOf(applyHeader);
+const applyEnd=indexSource.indexOf('function resetBuiltinEnemyCustomization(',applyStart);
+assert.ok(applyStart>=0&&applyEnd>applyStart,'runtime must expose the shared builtin override boundary');
+const applyRuntime=indexSource.slice(applyStart,applyEnd);
+assert.doesNotMatch(applyRuntime,/dungeonEnemies/,
+  'shared builtin override transform must not read the private Dungeon enemy factory');
+assert.doesNotMatch(applyRuntime,/dungeonApplyGithubArts164/,
+  'shared builtin override transform must not call the Dungeon V164 art authority');
+assert.match(applyRuntime,/bases\.forEach/,
+  'shared builtin override transform must operate only on explicit/default bases');
 
 const ensureBody=[
   'function ensureDungeonEnemies(){',
-  '  dungeonEnemies().forEach(e=>{if(!ZOMBIE_TYPES.some(x=>x.id===e.id))ZOMBIE_TYPES.push(e)});',
+  '  const bases=dungeonEnemies();',
+  '  bases.forEach(e=>{if(!ZOMBIE_TYPES.some(x=>x.id===e.id))ZOMBIE_TYPES.push(e)});',
+  '  applyBuiltinEnemyOverrides(bases);',
   '}'
 ].join('\n');
 assert.equal(indexSource.split(ensureBody).length-1,1,
-  'characterization requires the exact reviewed Dungeon ensure owner');
+  'Dungeon ensure owner must obtain Dungeon bases and apply shared overrides explicitly');
 
-const saveCall='    applyBuiltinEnemyOverrides();\n\n    const cfg=loadZombieConfig();';
+const saveCall='    applyBuiltinEnemyOverrides([builtinEnemyBase(baseId)].filter(Boolean));\n\n    const cfg=loadZombieConfig();';
 assert.equal(indexSource.split(saveCall).length-1,1,
-  'characterization requires the reviewed builtin editor apply call');
+  'builtin editor save must apply overrides only to the resolved builtin base');
 
-const resetCall='  applyBuiltinEnemyOverrides();\n  renderEnemyLibrary();';
+const resetCall='  applyBuiltinEnemyOverrides([base]);\n  renderEnemyLibrary();';
 assert.equal(indexSource.split(resetCall).length-1,1,
-  'characterization requires the reviewed builtin reset apply call');
+  'builtin reset must apply overrides only to the resolved builtin base');
 
-const v164ApplyWrapper=[
-  'if(typeof window.applyBuiltinEnemyOverrides==="function"){',
-  '  const oldApplyOverrides164=window.applyBuiltinEnemyOverrides;',
-  '  window.applyBuiltinEnemyOverrides=function(){',
-  '    const r=oldApplyOverrides164.apply(this,arguments);',
-  '    dungeonApplyGithubArts164();',
-  '    return r;',
-  '  };',
-  '}'
-].join('\n');
-assert.equal(indexSource.split(v164ApplyWrapper).length-1,1,
-  'characterization requires the exact reviewed V164 applyBuiltinEnemyOverrides wrapper');
+assert.equal(indexSource.includes('oldApplyOverrides164'),false,
+  'Dungeon V164 must not wrap the shared builtin override owner');
 
-let fixture=indexSource
-  .replace(applyHeader,[
-    'function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){',
-    ' const overrides=loadBuiltinEnemyOverrides();'
-  ].join('\n'))
-  .replace(ensureBody,[
-    'function ensureDungeonEnemies(){',
-    '  const bases=dungeonEnemies();',
-    '  bases.forEach(e=>{if(!ZOMBIE_TYPES.some(x=>x.id===e.id))ZOMBIE_TYPES.push(e)});',
-    '  applyBuiltinEnemyOverrides(bases);',
-    '}'
-  ].join('\n'))
-  .replace(saveCall,'    applyBuiltinEnemyOverrides([builtinEnemyBase(baseId)].filter(Boolean));\n\n    const cfg=loadZombieConfig();')
-  .replace(resetCall,'  applyBuiltinEnemyOverrides([base]);\n  renderEnemyLibrary();')
-  .replace(v164ApplyWrapper,'');
-
-const applyStart=fixture.indexOf('function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){');
-const applyEnd=fixture.indexOf('function resetBuiltinEnemyCustomization(',applyStart);
-assert.ok(applyStart>=0&&applyEnd>applyStart,'fixture must expose the proposed builtin override boundary');
-const applyFixture=fixture.slice(applyStart,applyEnd);
-assert.doesNotMatch(applyFixture,/dungeonEnemies/,
-  'proposed shared builtin override transform must not read the private Dungeon enemy factory');
-assert.match(applyFixture,/bases\.forEach/,
-  'proposed shared builtin override transform must operate only on explicit/default bases');
-
-const ensureStart=fixture.indexOf('function ensureDungeonEnemies(){');
-const ensureEnd=fixture.indexOf('function dungeonContentIds(',ensureStart);
-const ensureFixture=fixture.slice(ensureStart,ensureEnd);
-assert.match(ensureFixture,/const bases=dungeonEnemies\(\)/,
-  'Dungeon owner must remain responsible for obtaining Dungeon builtin bases');
-assert.match(ensureFixture,/applyBuiltinEnemyOverrides\(bases\)/,
-  'Dungeon owner must explicitly reuse the shared override transform with Dungeon bases');
+const fixture=indexSource;
 
 const mime={
   '.html':'text/html; charset=utf-8',

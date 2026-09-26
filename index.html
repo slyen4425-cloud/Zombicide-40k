@@ -6496,7 +6496,9 @@ function dungeonEnemies(){
  ];
 }
 function ensureDungeonEnemies(){
-  dungeonEnemies().forEach(e=>{if(!ZOMBIE_TYPES.some(x=>x.id===e.id))ZOMBIE_TYPES.push(e)});
+  const bases=dungeonEnemies();
+  bases.forEach(e=>{if(!ZOMBIE_TYPES.some(x=>x.id===e.id))ZOMBIE_TYPES.push(e)});
+  applyBuiltinEnemyOverrides(bases);
 }
 function dungeonContentIds(){return {heroes:[...DUNGEON_HERO_IDS],objects:[...DUNGEON_ITEM_IDS],enemies:[...DUNGEON_ENEMY_IDS]}}
 function ensureDungeonContent(){ensureDungeonHeroes();ensureDungeonItems();ensureDungeonEnemies()}
@@ -13465,7 +13467,7 @@ function saveEnemyEditor(){
     const o=loadBuiltinEnemyOverrides();
     o[baseId]=e;
     saveBuiltinEnemyOverrides(o);
-    applyBuiltinEnemyOverrides();
+    applyBuiltinEnemyOverrides([builtinEnemyBase(baseId)].filter(Boolean));
 
     const cfg=loadZombieConfig();
     cfg[baseId]=Math.max(0,Number(e.defaultCount)||0);
@@ -13654,9 +13656,8 @@ function builtinEnemyToEditorData(id){
     }
   };
 }
-function applyBuiltinEnemyOverrides(){
+function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){
  const overrides=loadBuiltinEnemyOverrides();
- const bases=[...BASE_ZOMBIE_TYPES,...((typeof dungeonEnemies==="function")?dungeonEnemies():[])];
  bases.forEach(base=>{
    let target=ZOMBIE_TYPES.find(z=>String(z.id)===String(base.id));
    if(!target){if(base.dungeonBuiltin){ZOMBIE_TYPES.push(JSON.parse(JSON.stringify(base)));target=ZOMBIE_TYPES[ZOMBIE_TYPES.length-1]}else return}
@@ -13673,7 +13674,7 @@ function resetBuiltinEnemyCustomization(id){
   const o=loadBuiltinEnemyOverrides();
   delete o[id];
   saveBuiltinEnemyOverrides(o);
-  applyBuiltinEnemyOverrides();
+  applyBuiltinEnemyOverrides([base]);
   renderEnemyLibrary();
   try{renderZombieReserve();renderWaveProfileEditor()}catch(e){}
 }
@@ -29921,15 +29922,6 @@ if(typeof window.dungeonEnemies==="function"){
 
 /* Lorsqu'un visuel est modifié/réinitialisé dans l'éditeur, on réapplique
    immédiatement la priorité personnalisée > GitHub. */
-if(typeof window.applyBuiltinEnemyOverrides==="function"){
-  const oldApplyOverrides164=window.applyBuiltinEnemyOverrides;
-  window.applyBuiltinEnemyOverrides=function(){
-    const r=oldApplyOverrides164.apply(this,arguments);
-    dungeonApplyGithubArts164();
-    return r;
-  };
-}
-
 /* Les contenus Dungeon ont parfois déjà été construits avant ce patch :
    on met à jour leurs objets runtime immédiatement. */
 try{dungeonApplyGithubArts164()}catch(e){console.warn("Arts Dungeon GitHub",e)}

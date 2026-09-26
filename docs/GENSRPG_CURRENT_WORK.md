@@ -1,3 +1,85 @@
+# CORRECTIF ISOLÉ — Builder disparu après switch Survie -> Dungeon — 2026-09-26
+
+Base exacte :
+`1af678b7d4453cafdab629a58c334ee15e4393fb`
+
+Base fonctionnelle :
+micro-lot Phase 6 frontière built-ins candidat GREEN technique, validation utilisateur interrompue par :
+`Hmmm builder a disparu`.
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-builder-survival-dungeon-switch-2026-09-26`
+
+Branche :
+`work/gensrpg-builder-survival-dungeon-switch-2026-09-26`
+
+Pré-audit :
+`docs/GENSRPG_BUILDER_SURVIVAL_DUNGEON_SWITCH_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Statut du lot Phase 6 parent
+
+La clôture du lot Phase 6 est **suspendue**.
+Aucun checkpoint GREEN final ne doit être créé tant que le Builder n'est pas revenu chez l'utilisateur.
+
+Le runtime Phase 6 candidat reste :
+- 8 170 150 octets ;
+- blob `ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9`.
+
+## Signalement utilisateur
+
+Sur la preview :
+`6143b321ffb75539571bf552bea73ccc4b695561`
+
+le Builder n'est plus visible.
+
+Le test existant :
+`tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs`
+est GREEN mais efface `localStorage` et `sessionStorage` avant le scénario.
+Il ne couvre donc pas le cas réel de transition avec état persistant.
+
+## Hypothèse propriétaire à prouver
+
+Le chemin legacy :
+`switchGameModeFromHome(profileId)`
+applique le profil Dungeon mais ne met pas à jour la variable lexicale :
+`gensSelectedFamily`.
+
+Le hub éditeur décide ensuite :
+- `gensSelectedFamily==="survival"` => contexte Survie ;
+- la carte `#dungeonAdvancedEditorBtn` est masquée ;
+- le Builder devient inaccessible bien que le profil actif soit Dungeon.
+
+Cette hypothèse doit être prouvée par TDD RED avant tout runtime.
+
+## Périmètre strict
+
+Autorisé :
+- reproduire Survie -> sélecteur accueil -> Dungeon -> Éditeurs ;
+- corriger uniquement la synchronisation famille/profil à cette frontière ;
+- renforcer le test Builder pour ce chemin réel persistant.
+
+Interdit :
+- modifier Builder / Room Creator / World Builder ;
+- toucher Tactical, Capture, PvP ;
+- modifier gameplay ;
+- ajouter wrapper, observer, polling, retry ou reload ;
+- mélanger d'autres dettes Phase 6.
+
+## Prochaine action obligatoire
+
+1. écrire la reproduction navigateur RED ;
+2. prouver que la carte Dungeon/Builder disparaît sur le runtime actuel ;
+3. corriger uniquement la frontière Shell responsable ;
+4. triple CI ;
+5. preview et validation utilisateur ;
+6. checkpoint GREEN du correctif ;
+7. revenir ensuite au lot Phase 6 parent pour sa clôture.
+
+---
+
 # PHASE 6 — MICRO-LOT — frontière built-ins du refresh partagé — 2026-09-26
 
 Base GREEN :

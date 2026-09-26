@@ -758,6 +758,9 @@ jobs:
       - name: Vérifier le refresh ennemi sans wrapper Dungeon V165
         run: node tests/gens_phase6_survival_custom_enemy_refresh_wrapper_browser_characterization_v1.test.cjs
 
+      - name: Caractériser la frontière built-ins Survie/Dungeon Phase 6
+        run: node tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs
+
       - name: Caractériser goMenu Dungeon et Capture
         run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
 

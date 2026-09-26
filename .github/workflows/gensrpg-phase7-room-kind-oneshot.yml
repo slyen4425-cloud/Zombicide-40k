@@ -1,0 +1,142 @@
+name: GenSrpG Phase 7 room-kind one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase7-dungeon-generated-room-kind-weighting-2026-09-26
+    paths:
+      - .github/workflows/gensrpg-phase7-room-kind-oneshot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 source
+        shell: bash
+        run: |
+          test "$(wc -c < index.html)" = "8170350"
+          test "$(git hash-object index.html)" = "e513d23c7a8c7aef9a187202bbcc34ab540e856f"
+
+      - name: Apply exact Phase 7 micro-diff
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          # entry-v1.js: add one pure deterministic selector and export it.
+          p=Path("assets/gensrpg/dungeon/entry-v1.js")
+          s=p.read_text()
+          anchor='''  function planGeneratedAdvance(currentRoom,roomLimit,roomStates){
+            const current=Number(currentRoom||0);
+            const limit=Number(roomLimit||10);
+            if(current>=limit)return {status:"complete",targetRoom:null};
+            const targetRoom=Math.max(1,current+1);
+            const states=roomStates&&typeof roomStates==="object"?roomStates:{};
+            const existing=states[String(targetRoom)];
+            return {status:existing?.last?"existing":"create",targetRoom};
+          }
+          '''
+          add='''
+          function pickWeightedGeneratedRoomKind(roomWeights,roll){
+            const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
+            const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
+            const total=entries.reduce((sum,[,value])=>sum+value,0)||1;
+            let remaining=Number(roll)*total;
+            for(const [kind,value] of entries){
+              remaining-=value;
+              if(remaining<=0)return kind;
+            }
+            return "enemy";
+          }
+          '''
+          if s.count(anchor)!=1:
+              raise SystemExit("entry planner anchor drift")
+          s=s.replace(anchor,anchor+add)
+          old='''    exploration:Object.freeze({
+              planGeneratedAdvance
+            })'''
+          new='''    exploration:Object.freeze({
+              planGeneratedAdvance,
+              pickWeightedGeneratedRoomKind
+            })'''
+          if s.count(old)!=1:
+              raise SystemExit("entry export anchor drift")
+          p.write_text(s.replace(old,new))
+
+          # module contract: document the second pure slice and keep Boss outside.
+          p=Path("assets/gensrpg/dungeon/module-contract-v1.json")
+          data=json.loads(p.read_text())
+          inv=data["invariants"]
+          inv=[("the connected Phase 7 exploration slices are the pure generated advance planner and weighted room-kind selector"
+                if x=="the first connected Phase 7 slice is the pure generated exploration advance planner"
+                else "the connected exploration planners have no DOM storage timer listener observer or Tactical dependency"
+                if x=="the planner has no DOM storage timer listener observer or Tactical dependency"
+                else x) for x in inv]
+          old_out="generated room creation movement events spawn chest trap puzzle and combat remain outside this first slice"
+          if old_out not in inv:
+              raise SystemExit("contract invariant anchor drift")
+          i=inv.index(old_out)
+          inv[i]="generated room creation movement events spawn chest trap puzzle and combat remain outside these pure slices"
+          inv[i+1:i+1]=[
+              "the weighted room-kind selector receives its random roll explicitly and never owns random generation",
+              "generated Boss policy remains owned by Core 2.00 during this micro-lot"
+          ]
+          data["invariants"]=inv
+          p.write_text(json.dumps(data,indent=2,ensure_ascii=False)+"\n")
+
+          # characterization: preserve behavior checks but expect delegated ownership.
+          p=Path("tests/gens_phase7_dungeon_generated_room_kind_weighting_characterization_v1.test.cjs")
+          s=p.read_text()
+          old="""assert.match(core200,/const w=\\{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,\\.\\.\\.\\(c\\.roomWeights\\|\\|\\{\\}\\)\\}/,
+            'current generated weighting defaults must remain characterized before extraction');"""
+          new="""assert.doesNotMatch(core200,/const w=\\{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,\\.\\.\\.\\(c\\.roomWeights\\|\\|\\{\\}\\)\\}/,
+            'Core 2.00 must retire the inline weighted room-kind calculation');
+          assert.match(core200,/GensDungeonV1\\.exploration\\.pickWeightedGeneratedRoomKind\\(c\\.roomWeights,Math\\.random\\(\\)\\)/,
+            'Core 2.00 must delegate the weighted non-Boss selection with one explicit random roll');"""
+          if s.count(old)!=1:
+              raise SystemExit("characterization inline anchor drift")
+          s=s.replace(old,new)
+          old_owner="  finalOwner:'dungeonCore200Rebuild.chooseKind',"
+          new_owner="  finalOwner:'dungeonCore200Rebuild.chooseKind -> GensDungeonV1.exploration.pickWeightedGeneratedRoomKind',"
+          if s.count(old_owner)!=1:
+              raise SystemExit("characterization owner anchor drift")
+          p.write_text(s.replace(old_owner,new_owner))
+
+          # Rule 26 exact index: Boss clauses untouched; only weighted selection delegates.
+          p=Path("index.html")
+          s=p.read_text()
+          old=""" const w={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(c.roomWeights||{})},entries=Object.entries(w).map(([k,v])=>[k,Math.max(0,Number(v)||0)]),total=entries.reduce((n,x)=>n+x[1],0)||1;let r=Math.random()*total;for(const [k,v] of entries){r-=v;if(r<=0)return k}return'enemy'}"""
+          new=""" return GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(c.roomWeights,Math.random())}"""
+          if s.count(old)!=1:
+              raise SystemExit("index weighted block anchor drift")
+          p.write_text(s.replace(old,new))
+          PY
+
+      - name: Verify exact target and focused tests
+        shell: bash
+        run: |
+          test "$(wc -c < index.html)" = "8170143"
+          test "$(git hash-object index.html)" = "23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d"
+          node tests/gens_phase7_dungeon_generated_advance_plan_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_kind_weighting_characterization_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_kind_weighting_v1.test.cjs
+          git diff --check
+
+      - name: Commit runtime and remove one-shot
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/gensrpg-phase7-room-kind-oneshot.yml
+          git add index.html assets/gensrpg/dungeon/entry-v1.js assets/gensrpg/dungeon/module-contract-v1.json tests/gens_phase7_dungeon_generated_room_kind_weighting_characterization_v1.test.cjs
+          git commit -m "refactor: extract Dungeon generated room kind weighting"
+          git push origin HEAD:work/gensrpg-phase7-dungeon-generated-room-kind-weighting-2026-09-26

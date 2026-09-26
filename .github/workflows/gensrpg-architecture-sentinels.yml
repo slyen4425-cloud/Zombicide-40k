@@ -551,6 +551,9 @@ jobs:
       - name: Isoler la frontière built-ins Survie Dungeon Phase 6
         run: node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs
 
+      - name: Caractériser la sortie Phase 6 Survie
+        run: node tests/gens_phase6_exit_static_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 
@@ -763,6 +766,9 @@ jobs:
 
       - name: Caractériser la frontière built-ins Survie/Dungeon Phase 6
         run: node tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs
+
+      - name: Caractériser le runtime de sortie Phase 6 Survie
+        run: node tests/gens_phase6_exit_survival_runtime_browser_characterization_v1.test.cjs
 
       - name: Caractériser goMenu Dungeon et Capture
         run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs

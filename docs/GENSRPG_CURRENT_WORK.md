@@ -15,73 +15,113 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE6_SURVIVAL_CUSTOM_ENEMY_BUILTIN_BOUNDARY_PREAUDIT.md`
 
-## Fermeture précédente vérifiée avant ouverture
+## Résultat architectural
 
-Le lot `ensureDungeonEnemies()` est fermé GREEN sur :
-`3853ac9a8e0704910698962ce265a75a03a46a37`.
+La frontière mixte :
+`refreshCustomEnemiesIntoZombieTypes() -> applyBuiltinEnemyOverrides() -> dungeonEnemies()`
+a été séparée sans changement gameplay.
 
-Vérifications GitHub :
-- `main` identique à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ;
-- checkpoint GREEN précédent identique à sa branche de travail ;
-- Architecture + Browser `36191917580` — SUCCESS ;
-- Firefox `36191917546` — SUCCESS ;
-- Tactical Dock `36191917636` — SUCCESS.
+État final :
+- `applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES)` ne lit plus `dungeonEnemies()` ;
+- Survie utilise uniquement les built-ins Survie par défaut ;
+- `ensureDungeonEnemies()` reste propriétaire Dungeon et appelle explicitement `applyBuiltinEnemyOverrides(bases)` ;
+- les deux callsites éditeur passent uniquement leur base résolue ;
+- wrapper V164 de `applyBuiltinEnemyOverrides()` retiré ;
+- wrapper V164 de `dungeonEnemies()` conservé ;
+- V165/V166 conservés ;
+- `openZombieRule` non touché.
 
-Le décalage documentaire du bloc précédent a été corrigé ci-dessous :
-la triple CI finale et le checkpoint GREEN sont désormais enregistrés comme déjà réalisés.
+## Rule 26
 
-## Dette sélectionnée
+Source exacte reçue et vérifiée :
+- `work31.zip` / `index31.txt` ;
+- 8 170 402 octets ;
+- blob `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
 
-Le propriétaire partagé
-`refreshCustomEnemiesIntoZombieTypes()`
-ne dépend plus de `ensureDungeonEnemies()`, mais son chemin appelle toujours :
-`applyBuiltinEnemyOverrides()`.
+## TDD
 
-La caractérisation exacte précédente a établi que cette fonction compose sa base avec :
-`[...BASE_ZOMBIE_TYPES, ...dungeonEnemies()]`.
+Caractérisation navigateur :
+`tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs`.
 
-La cartographie Phase 2 courante (sourceIndexBlob
-`2a7dae75115d83b4edc368c42453a7cb58d0bd73`) donne encore :
-- `applyBuiltinEnemyOverrides` : 2 assignations, dernier propriétaire `dungeonGithubArts164` ;
-- `dungeonEnemies` : 2 assignations, dernier propriétaire `dungeonGithubArts164`.
+RED isolé :
+`833bf91bc2a0e047c2d1b19f20b4c35fc3c98c36`.
 
-Le lot courant caractérise uniquement cette frontière.
-Il ne présume pas si la bonne sortie sera :
-- retrait soustractif d'une couche devenue redondante ;
-- séparation d'une transformation pure ;
-- adapter Dungeon explicite ;
-- ou arrêt sans runtime.
+La sentinelle #178 exigeait exactement la nouvelle frontière et était la seule dette Phase 6 rouge.
 
-`openZombieRule -> dungeonDirectImageBinding166` reste une dette séparée hors périmètre.
+## Raccord runtime
 
-## Protections
+Commit principal :
+`2e3d3c37f135e4c16d8f9ac426e2510aa840b47c`
+(`runtime: isolate Survival builtin enemy boundary`).
 
-Ne pas toucher avant preuve :
-- données ennemis ;
-- IDs/stats/quantités ;
-- stockage/éditeur ;
-- règles de vagues ;
-- `loadCustomEnemies()` ;
-- `customEnemyToZombieType()` ;
-- V165/V166 ;
-- `openZombieRule` ;
+Runtime courant :
+- `index.html` : 8 170 150 octets ;
+- blob : `ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9`.
+
+Aucun changement de :
+- données/IDs/stats/quantités ;
+- vagues ;
+- custom enemies ;
+- arts Dungeon V164/V165/V166 ;
 - Tactical/Capture/PvP ;
 - gameplay.
 
-Aucun raccord runtime n'est autorisé avant caractérisation exacte + TDD RED.
+## Réalignements mécaniques
+
+Les seules adaptations post-raccord ont été :
+- empreintes taille/blob du runtime courant ;
+- sourceIndexBlob/cartographies concernées ;
+- table LAST_OWNERS : 434 -> 433, conséquence attendue du retrait d'un propriétaire de `applyBuiltinEnemyOverrides` ;
+- caractérisation navigateur convertie en régression post-état.
+
+Les 15 hotspots stratifiés restent conformes ; `dungeonEnemies` reste 2 assignations, dernier propriétaire `dungeonGithubArts164`.
+
+## CI technique GREEN
+
+SHA technique exact :
+`ece2605aaacc7970f68e1bf5c53d7c1ff016cdba`.
+
+Runs :
+- Architecture + Browser complet : `36223093181` — SUCCESS ;
+- Firefox : `36223093159` — SUCCESS ;
+- Tactical Dock : `36223093158` — SUCCESS.
+
+Architecture :
+- toutes les sentinelles #1 à #234 : SUCCESS ;
+- Phase 6 #170 à #178 : SUCCESS ;
+- #178 frontière built-ins : SUCCESS.
+
+Browser complet :
+- Survie ;
+- Dungeon après Survie ;
+- Dungeon -> Tactical ;
+- Capture/PvP ;
+- Save & Quit ;
+- non-interférence ;
+- assets/Equipment ;
+- caractérisation post-état de la frontière built-ins ;
+tous SUCCESS.
+
+## État actuel
+
+**Candidat GREEN technique, pas encore checkpoint final.**
+
+Il n'existe pas encore d'audit de sortie Phase 6 dédié dans la CI.
 
 ## Prochaine action obligatoire
 
-Appliquer Rule 26 sur le HEAD documentaire du présent lot :
-
-1. résoudre le SHA exact après le pré-audit et cette mise à jour ;
-2. vérifier blob + taille de `index.html` par métadonnées Git ;
-3. fournir le permalink SHA exact ;
-4. demander à Sylvain le ZIP de CE fichier ;
-5. vérifier le fichier reçu ;
-6. caractériser les définitions/réassignations exactes de
-   `applyBuiltinEnemyOverrides()` et `dungeonEnemies()` ;
-7. seulement ensuite écrire la caractérisation navigateur puis le TDD RED.
+1. valider ce document sur la triple CI du SHA documentaire exact ;
+2. créer une preview exacte du runtime `ca5cb0b9...` ;
+3. validation utilisateur ciblée :
+   - Survie : ennemis de base + custom + vagues ;
+   - Dungeon : built-ins + custom + arts ;
+   - transition Survie -> Dungeon et Dungeon -> Survie ;
+4. enregistrer la validation ;
+5. triple CI finale ;
+6. créer `checkpoint/gensrpg-phase6-survival-custom-enemy-builtin-boundary-green-2026-09-26` ;
+7. ouvrir ensuite un **audit de sortie Phase 6** séparé pour vérifier le critère roadmap :
+   **Survie démarre et joue avec Dungeon/Tactical non chargés ou inactifs** ;
+8. si cet audit est GREEN, clôturer Phase 6 puis ouvrir Phase 7 Dungeon exploration.
 
 ---
 

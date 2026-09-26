@@ -163,3 +163,99 @@ Procédure obligatoire :
 7. seulement ensuite inspecter les définitions/réassignations et écrire le TDD.
 
 Ne jamais réutiliser `work30.zip` : ce fichier correspond au HEAD du lot précédent, pas au HEAD documentaire du présent lot.
+
+
+---
+
+# Résultat du micro-lot — GREEN technique
+
+## Rule 26 — source exacte
+
+Source utilisateur vérifiée :
+- archive : `work31.zip` ;
+- fichier : `index31.txt` ;
+- taille : 8 170 402 octets ;
+- blob Git : `2a7dae75115d83b4edc368c42453a7cb58d0bd73`.
+
+La source correspondait exactement au runtime du lot avant raccord.
+
+## Caractérisation retenue
+
+La frontière exacte était :
+`refreshCustomEnemiesIntoZombieTypes() -> applyBuiltinEnemyOverrides() -> dungeonEnemies()`.
+
+Architecture minimale validée :
+- `applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES)` devient une transformation partagée alimentée explicitement ;
+- le chemin Survie par défaut ne lit plus `dungeonEnemies()` ;
+- `ensureDungeonEnemies()` reste propriétaire Dungeon, obtient `const bases=dungeonEnemies()`, publie les bases puis appelle `applyBuiltinEnemyOverrides(bases)` ;
+- les deux callsites éditeur passent leur base déjà résolue ;
+- le wrapper V164 autour de `applyBuiltinEnemyOverrides()` est retiré ;
+- le wrapper V164 de `dungeonEnemies()` et V165/V166 restent intacts.
+
+La caractérisation navigateur a d'abord été validée en fixture puis convertie en régression post-état :
+`tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs`.
+
+## TDD RED
+
+Sentinelle :
+`tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs`.
+
+HEAD RED :
+`833bf91bc2a0e047c2d1b19f20b4c35fc3c98c36`.
+
+Résultat :
+- Architecture : FAILURE attendue, isolée à la frontière built-ins ;
+- Firefox : SUCCESS ;
+- Tactical Dock : SUCCESS.
+
+## Raccord runtime
+
+Commit runtime principal :
+`2e3d3c37f135e4c16d8f9ac426e2510aa840b47c`
+(`runtime: isolate Survival builtin enemy boundary`).
+
+Runtime final du raccord :
+- taille : 8 170 150 octets ;
+- blob : `ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9`.
+
+Le raccord ne change ni données, ni IDs, ni stats, ni quantités, ni règles de vagues, ni gameplay. Il retire uniquement la lecture Dungeon depuis la transformation partagée et restaure une frontière explicite.
+
+## Réalignements mécaniques
+
+Les empreintes taille/blob et les cartographies directement dépendantes du runtime courant ont été réalignées sans affaiblir les assertions métier.
+
+Conséquence Phase 2 attendue et vérifiée :
+- la table des derniers propriétaires passe de 434 à 433 entrées car `applyBuiltinEnemyOverrides` n'est plus multi-propriétaire ;
+- `dungeonEnemies` reste à 2 assignations, dernier propriétaire `dungeonGithubArts164` ;
+- les 15 hotspots stratifiés restent conformes à leur manifeste.
+
+Le test navigateur a été converti en preuve post-état au commit :
+`ece2605aaacc7970f68e1bf5c53d7c1ff016cdba`
+(`test: convert builtin boundary browser proof to post-state regression`).
+
+## CI technique GREEN
+
+SHA technique :
+`ece2605aaacc7970f68e1bf5c53d7c1ff016cdba`.
+
+Runs :
+- Architecture + Browser complet : `36223093181` — SUCCESS ;
+- Firefox : `36223093159` — SUCCESS ;
+- Tactical Dock : `36223093158` — SUCCESS.
+
+Les étapes Phase 6 #170 à #178 sont toutes SUCCESS, dont :
+`#178 — Isoler la frontière built-ins Survie Dungeon Phase 6`.
+
+## État du lot
+
+**Candidat GREEN technique.**
+
+Avant checkpoint final :
+1. mettre à jour `GENSRPG_CURRENT_WORK.md` ;
+2. repasser la triple CI sur le SHA documentaire exact ;
+3. préparer une preview exacte ;
+4. obtenir la validation utilisateur Survie + Dungeon + arts + transition ;
+5. enregistrer la validation ;
+6. triple CI finale ;
+7. créer le checkpoint GREEN final du lot ;
+8. seulement ensuite ouvrir un audit de sortie Phase 6 dédié.

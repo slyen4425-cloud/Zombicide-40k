@@ -20,10 +20,10 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8170150,
-  'final Shell authority contract must run on the exact Core200-global-retired index');
-assert.equal(gitBlob,'ca5cb0b92f4e6ff8779ebe2339bb2be32a89f8f9',
-  'final Shell authority contract must keep the exact reviewed Core200 retirement composition');
+assert.equal(bytes.length,8170350,
+  'final Shell authority contract must run on the current Phase 7 Core200-global-retired index');
+assert.equal(gitBlob,'e513d23c7a8c7aef9a187202bbcc34ab540e856f',
+  'final Shell authority contract must keep the current Phase 7 reviewed Core200 retirement composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),
   'final Shell authority file must exist');

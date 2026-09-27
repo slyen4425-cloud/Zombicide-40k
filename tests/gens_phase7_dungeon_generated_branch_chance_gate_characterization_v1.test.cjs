@@ -15,10 +15,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170062,
-  'Phase 7 branch chance-gate characterization must track the branch-plan GREEN runtime');
-assert.equal(gitBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e',
-  'Phase 7 branch chance-gate characterization must track the exact branch-plan GREEN blob');
+assert.equal(bytes.length,8170090,
+  'Phase 7 branch chance-gate characterization must track the chance-gate runtime');
+assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9',
+  'Phase 7 branch chance-gate characterization must track the exact chance-gate runtime blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

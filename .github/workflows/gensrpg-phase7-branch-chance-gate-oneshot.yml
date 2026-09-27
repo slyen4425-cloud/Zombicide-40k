@@ -1,0 +1,100 @@
+name: GenSrpG Phase 7 branch chance gate one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase7-dungeon-generated-branch-chance-gate-2026-09-27
+    paths:
+      - .github/workflows/gensrpg-phase7-branch-chance-gate-oneshot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase7-dungeon-generated-branch-chance-gate-2026-09-27
+          fetch-depth: 0
+
+      - name: Vérifier et appliquer le micro-diff
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          def git_blob(data: bytes) -> str:
+              return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+
+          p=Path("index.html")
+          data=p.read_bytes()
+          assert len(data)==8170062, (len(data),"unexpected source size")
+          assert git_blob(data)=="74e223b2c9877e6a88b6ad6726290d230f1f616e", git_blob(data)
+          text=data.decode("utf-8")
+          old="function maybeSpecialBranch(x){const c=cfg(),m=x?.last?.map;if(!m||!Array.isArray(m.cells)||Math.random()*100>=Math.max(0,Number(c.specialBranchChance)||0))return null;const i=nearestFree(x);if(i<0)return null;const type=GensDungeonV1.exploration.pickWeightedGeneratedBranchType(c.specialBranchWeights,Math.random());"
+          new="function maybeSpecialBranch(x){const c=cfg(),m=x?.last?.map;if(!m||!Array.isArray(m.cells)||!GensDungeonV1.exploration.shouldCreateGeneratedBranch(c.specialBranchChance,Math.random()))return null;const i=nearestFree(x);if(i<0)return null;const type=GensDungeonV1.exploration.pickWeightedGeneratedBranchType(c.specialBranchWeights,Math.random());"
+          assert text.count(old)==1, text.count(old)
+          text=text.replace(old,new)
+          out=text.encode("utf-8")
+          assert len(out)==8170090, len(out)
+          assert git_blob(out)=="85bf8dcb0ad22d596e648f4992210d870520d6f9", git_blob(out)
+          p.write_bytes(out)
+
+          ep=Path("assets/gensrpg/dungeon/entry-v1.js")
+          e=ep.read_text()
+          anchor='''  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
+    return {heroId,from:fromRoom,to:toRoom,created,at};
+  }
+'''
+          insert='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
+    return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
+  }
+
+'''+anchor
+          assert e.count(anchor)==1
+          e=e.replace(anchor,insert)
+          export_anchor='''      buildGeneratedRoomTransition,
+      pickWeightedGeneratedBranchType
+'''
+          export_new='''      buildGeneratedRoomTransition,
+      pickWeightedGeneratedBranchType,
+      shouldCreateGeneratedBranch
+'''
+          assert e.count(export_anchor)==1
+          e=e.replace(export_anchor,export_new)
+          ep.write_text(e)
+
+          cp=Path("assets/gensrpg/dungeon/module-contract-v1.json")
+          c=cp.read_text()
+          old_inv='"the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor and weighted generated branch-type selector",'
+          new_inv='"the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector and generated branch chance gate",'
+          assert c.count(old_inv)==1
+          c=c.replace(old_inv,new_inv)
+          anchor_inv='"the weighted generated branch-type selector receives its random roll explicitly after the Core 2.00 nearest-free gate and never owns random generation or branch materialization",'
+          new_anchor=anchor_inv+'\n    "the generated branch chance gate receives its random roll explicitly and only decides chance acceptance before the Core 2.00 nearest-free lookup",'
+          assert c.count(anchor_inv)==1
+          c=c.replace(anchor_inv,new_anchor)
+          cp.write_text(c)
+          PY
+
+          node tests/gens_phase7_dungeon_generated_branch_chance_gate_characterization_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_branch_chance_gate_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_branch_type_weighting_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs
+          node tests/dungeon_room_runtime_v167822.test.cjs
+          git diff --check
+
+      - name: Commit runtime et retirer le one-shot
+        shell: bash
+        run: |
+          rm -f .github/workflows/gensrpg-phase7-branch-chance-gate-oneshot.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/gensrpg/dungeon/entry-v1.js assets/gensrpg/dungeon/module-contract-v1.json .github/workflows/gensrpg-phase7-branch-chance-gate-oneshot.yml
+          git commit -m "runtime: isolate generated branch chance gate"
+          git push origin HEAD:work/gensrpg-phase7-dungeon-generated-branch-chance-gate-2026-09-27

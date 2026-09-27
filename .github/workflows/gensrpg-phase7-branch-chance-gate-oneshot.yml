@@ -28,7 +28,7 @@ jobs:
           from pathlib import Path
           import hashlib
 
-          def git_blob(data: bytes) -> str:
+          def git_blob(data):
               return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
 
           p=Path("index.html")
@@ -47,25 +47,13 @@ jobs:
 
           ep=Path("assets/gensrpg/dungeon/entry-v1.js")
           e=ep.read_text()
-          anchor='''  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
-    return {heroId,from:fromRoom,to:toRoom,created,at};
-  }
-'''
-          insert='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
-    return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
-  }
-
-'''+anchor
-          assert e.count(anchor)==1
+          anchor="  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){\n    return {heroId,from:fromRoom,to:toRoom,created,at};\n  }\n"
+          insert="  function shouldCreateGeneratedBranch(specialBranchChance,roll){\n    return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);\n  }\n\n"+anchor
+          assert e.count(anchor)==1, e.count(anchor)
           e=e.replace(anchor,insert)
-          export_anchor='''      buildGeneratedRoomTransition,
-      pickWeightedGeneratedBranchType
-'''
-          export_new='''      buildGeneratedRoomTransition,
-      pickWeightedGeneratedBranchType,
-      shouldCreateGeneratedBranch
-'''
-          assert e.count(export_anchor)==1
+          export_anchor="      buildGeneratedRoomTransition,\n      pickWeightedGeneratedBranchType\n"
+          export_new="      buildGeneratedRoomTransition,\n      pickWeightedGeneratedBranchType,\n      shouldCreateGeneratedBranch\n"
+          assert e.count(export_anchor)==1, e.count(export_anchor)
           e=e.replace(export_anchor,export_new)
           ep.write_text(e)
 
@@ -73,11 +61,11 @@ jobs:
           c=cp.read_text()
           old_inv='"the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor and weighted generated branch-type selector",'
           new_inv='"the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector and generated branch chance gate",'
-          assert c.count(old_inv)==1
+          assert c.count(old_inv)==1, c.count(old_inv)
           c=c.replace(old_inv,new_inv)
           anchor_inv='"the weighted generated branch-type selector receives its random roll explicitly after the Core 2.00 nearest-free gate and never owns random generation or branch materialization",'
           new_anchor=anchor_inv+'\n    "the generated branch chance gate receives its random roll explicitly and only decides chance acceptance before the Core 2.00 nearest-free lookup",'
-          assert c.count(anchor_inv)==1
+          assert c.count(anchor_inv)==1, c.count(anchor_inv)
           c=c.replace(anchor_inv,new_anchor)
           cp.write_text(c)
           PY

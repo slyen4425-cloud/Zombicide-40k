@@ -97,9 +97,28 @@ Slice pure sélectionnée :
 
 Le test de chance, `nearestFree`, les deux appels `Math.random()` et la matérialisation restent au callsite historique.
 
+## RED isolé + runtime candidat
+
+RED :
+- SHA `aaf2edbf7d7c8db6991ee951a3d4a6c397284c88` ;
+- Architecture `36308105216` — FAILURE attendue sur #188 uniquement ;
+- Firefox `36308105234` — SUCCESS ;
+- Tactical Dock `36308105230` — SUCCESS.
+
+Runtime candidat :
+- SHA `eae6760f1f86270042d3bd2ffa542f994995d946` ;
+- one-shot `36308661330` — SUCCESS ;
+- `index.html` : `8170062` octets ;
+- blob : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Raccord :
+- `pickWeightedGeneratedBranchType(branchWeights, roll)` devient propriétaire uniquement du calcul pondéré ;
+- chance, `nearestFree`, les deux RNG et matérialisation restent au callsite historique ;
+- authored / Spatial / RoomRuntime / spawn / Tactical / Survie / Capture / PvP inchangés.
+
 ## Prochaine action obligatoire
 
-Écrire et raccorder UNE sentinelle RED pour `pickWeightedGeneratedBranchType(branchWeights, roll)`, prouver que cette nouvelle dette est la seule garde Phase 7 rouge, puis seulement appliquer le micro-diff runtime minimal.
+Lancer la triple CI sur le runtime candidat, réaligner uniquement les fingerprints historiques qui échouent un par un, sans assouplir d'assertion fonctionnelle, puis déclarer GREEN uniquement lorsque Architecture + Browser, Firefox et Tactical Dock sont SUCCESS.
 
 ---
 

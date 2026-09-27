@@ -25,11 +25,16 @@
     return "enemy";
   }
 
+  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
+    return {heroId,from:fromRoom,to:toRoom,created,at};
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
       planGeneratedAdvance,
-      pickWeightedGeneratedRoomKind
+      pickWeightedGeneratedRoomKind,
+      buildGeneratedRoomTransition
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

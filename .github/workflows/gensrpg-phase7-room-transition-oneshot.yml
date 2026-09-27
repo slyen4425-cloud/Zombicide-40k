@@ -54,6 +54,37 @@ jobs:
             s=s.replace(old,new,1)
 
           p.write_text(s)
+
+          # Characterization follows the exact post-raccord runtime and delegated transition form.
+          p=Path("tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs")
+          t=p.read_text()
+          test_changes=[
+            (
+              "assert.equal(bytes.length,8170143,'Phase 7 room create/restore characterization must start from the room-kind GREEN runtime');",
+              "assert.equal(bytes.length,8170213,'Phase 7 room create/restore characterization must track the generated transition GREEN candidate runtime');",
+              "characterization size"
+            ),
+            (
+              "assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','Phase 7 room create/restore characterization must use the exact room-kind GREEN blob');",
+              "assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','Phase 7 room create/restore characterization must track the exact generated transition GREEN candidate blob');",
+              "characterization blob"
+            ),
+            (
+              "'created:false',",
+              "'GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,false,Date.now())',",
+              "existing transition characterization"
+            ),
+            (
+              "'created:true',",
+              "'GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,true,Date.now())',",
+              "create transition characterization"
+            )
+          ]
+          for old,new,label in test_changes:
+            if t.count(old)!=1:
+              raise SystemExit(label+" anchor drift: "+str(t.count(old)))
+            t=t.replace(old,new,1)
+          p.write_text(t)
           PY
 
       - name: Verify exact target and focused tests
@@ -75,6 +106,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/gensrpg-phase7-room-transition-oneshot.yml
-          git add index.html
+          git add index.html tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs
           git commit -m "refactor: delegate generated room transition descriptors"
           git push origin HEAD:work/gensrpg-phase7-dungeon-generated-room-create-restore-2026-09-27

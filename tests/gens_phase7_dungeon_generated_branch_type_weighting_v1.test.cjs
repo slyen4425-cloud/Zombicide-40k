@@ -47,8 +47,8 @@ assert.ok(line,'Core 2.00 maybeSpecialBranch must remain directly characterizabl
 
 assert.equal((line.match(/GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(/g)||[]).length,1,
   'Core 2.00 must delegate generated branch-type weighting exactly once');
-assert.match(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchChance\)\|\|0\)[\s\S]*const i=nearestFree\(x\);if\(i<0\)return null;[\s\S]*GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(c\.specialBranchWeights,Math\.random\(\)\)/,
-  'chance roll, nearest-free check and explicit type roll must preserve historical order at the callsite');
+assert.match(line,/GensDungeonV1\.exploration\.shouldCreateGeneratedBranch\(c\.specialBranchChance,Math\.random\(\)\)[\s\S]*const i=nearestFree\(x\);if\(i<0\)return null;[\s\S]*GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(c\.specialBranchWeights,Math\.random\(\)\)/,
+  'explicit chance roll, Dungeon chance gate, nearest-free check and explicit type roll must preserve historical order at the callsite');
 assert.doesNotMatch(line,/const w=\{treasure:45,boss:25,secret:30/,
   'Core 2.00 must retire the inline branch-type weighting calculation');
 assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,

@@ -25,6 +25,18 @@
     return "enemy";
   }
 
+  function pickWeightedGeneratedBranchType(branchWeights,roll){
+    const weights={treasure:45,boss:25,secret:30,...(branchWeights||{})};
+    const entries=Object.entries(weights).map(([type,value])=>[type,Math.max(0,Number(value)||0)]);
+    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;
+    let remaining=Number(roll)*total;
+    for(const [type,value] of entries){
+      remaining-=value;
+      if(remaining<=0)return type;
+    }
+    return "treasure";
+  }
+
   function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
     return {heroId,from:fromRoom,to:toRoom,created,at};
   }
@@ -34,7 +46,8 @@
     exploration:Object.freeze({
       planGeneratedAdvance,
       pickWeightedGeneratedRoomKind,
-      buildGeneratedRoomTransition
+      buildGeneratedRoomTransition,
+      pickWeightedGeneratedBranchType
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

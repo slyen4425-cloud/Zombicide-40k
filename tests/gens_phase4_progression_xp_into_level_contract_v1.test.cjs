@@ -15,8 +15,8 @@ const index=indexBuf.toString('utf8');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8170143,'contract lot must stay on exact Phase 7 room-kind index');
-assert.equal(gitBlob(indexBuf),'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','index runtime must remain on the current Phase 7 room-kind baseline during the pure contract lot');
+assert.equal(indexBuf.length,8170213,'contract lot must stay on exact Phase 7 generated-room transition index');
+assert.equal(gitBlob(indexBuf),'efcc459c9bade0e35bf123d100e499b3ce7d4eca','index runtime must remain on the current Phase 7 generated-room transition baseline during the pure contract lot');
 
 assert.doesNotMatch(coreSource,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|dispatchEvent|CustomEvent|fetch\s*\(|XMLHttpRequest|Math\.random/,
   'Core Progression contract must remain pure and infrastructure-free');

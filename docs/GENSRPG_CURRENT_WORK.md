@@ -1,3 +1,35 @@
+# PHASE 7 — MICRO-LOT 6 — descripteur de branche generated — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-chance-gate-green-2026-09-27`
+
+SHA de base :
+`0e2d97f1230ab75c76945faf4798d8cfcb344de6`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-branch-descriptor-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-branch-descriptor-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BRANCH_DESCRIPTOR_PREAUDIT.md`
+
+Cible :
+extraire uniquement le descripteur pur de la trappe de branche generated, sans déplacer `nearestFree`, les RNG, `addDungeonSceneElement` ni la mutation de map.
+
+Runtime de base :
+- `index.html` : `8170090` octets ;
+- blob : `85bf8dcb0ad22d596e648f4992210d870520d6f9`.
+
+Hors périmètre :
+authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
+
+Prochaine action :
+caractérisation GREEN dédiée du descripteur historique, puis RED isolé.
+
+---
+
 # PHASE 7 — MICRO-LOT 5 — gate de présence des branches generated — 2026-09-27
 
 Base GREEN :

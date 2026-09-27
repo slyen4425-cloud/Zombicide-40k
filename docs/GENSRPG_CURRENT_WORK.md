@@ -129,14 +129,38 @@ Le raccord ne change que les deux constructions de `dc313LastTransition` dans Co
 
 Spatial, RoomRuntime, spawn, authored et Tactical restent inchangés.
 
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`48d6395bdb54fed9bd1b8d8daff443849dce711d`.
+
+CI complète :
+- Architecture + Browser : `36303290018` — SUCCESS ;
+- Firefox : `36303290058` — SUCCESS ;
+- Tactical Dock : `36303290014` — SUCCESS.
+
+Runtime final :
+- `index.html` : `8170213` octets ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+Résultat :
+- `buildGeneratedRoomTransition(...)` possède uniquement le descripteur pur de transition ;
+- existing/create restent distincts ;
+- Spatial, RoomRuntime, création de salle, spawn, authored et Tactical restent inchangés ;
+- tous les gardes historiques invalidés par le nouveau fingerprint ont été réalignés un par un ;
+- aucune assertion fonctionnelle n’a été assouplie ;
+- aucun changement utilisateur visible, donc aucune preview manuelle supplémentaire requise.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-create-restore-green-2026-09-27`.
+
 ## Prochaine action obligatoire
 
-1. exécuter Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire ;
-2. si un ancien garde échoue uniquement sur l’ancienne empreinte `8170143 / 23b4...`, réaligner un garde à la fois ;
-3. ne modifier aucune assertion métier tant qu’elle n’est pas prouvée obsolète ;
-4. si une assertion fonctionnelle échoue, arrêter la cartographie et investiguer ;
-5. une fois la CI complète GREEN, documenter la fermeture et créer le checkpoint final du micro-lot 3 ;
-6. aucune preview manuelle supplémentaire n’est requise si aucun comportement visible n’a changé.
+1. valider la présente clôture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le micro-lot Phase 7 suivant depuis ce checkpoint GREEN ;
+4. rester dans `Dungeon exploration / salles` et pré-auditer avant tout runtime ;
+5. appliquer Rule 26 si le prochain lot exige une nouvelle inspection exacte de `index.html`.
 
 ---
 

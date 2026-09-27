@@ -55,8 +55,8 @@ assert.match(
 assert.equal(mj.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.includes('removeItem("'+KEY+'")'),false);
 
-assert.equal(bytes.length,8170143,'current Phase 7 Dungeon room-kind index size must remain deterministic');
-assert.equal(gitBlob(bytes),'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','MJ Rules raccord must target the current Phase 7 Dungeon room-kind baseline');
+assert.equal(bytes.length,8170213,'current Phase 7 Dungeon generated-room transition index size must remain deterministic');
+assert.equal(gitBlob(bytes),'efcc459c9bade0e35bf123d100e499b3ce7d4eca','MJ Rules raccord must target the current Phase 7 Dungeon generated-room transition baseline');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core storage authority',

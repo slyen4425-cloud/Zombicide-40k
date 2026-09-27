@@ -34,9 +34,9 @@ function chainFor(name){
   return blocks.filter(b=>re.test(b.body)).map(b=>b.id);
 }
 
-assert.equal(indexBuf.length,8170213,'goMenu boundary guard must use the current Phase 7 Dungeon generated-room transition runtime');
-assert.equal(gitBlob(indexBuf),'efcc459c9bade0e35bf123d100e499b3ce7d4eca','goMenu boundary Phase 7 generated-room transition runtime blob drifted');
-assert.equal(owners.sourceIndexBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','owner manifest must target current Phase 7 generated-room transition runtime');
+assert.equal(indexBuf.length,8170062,'goMenu boundary guard must use the current Phase 7 Dungeon generated-branch weighting runtime');
+assert.equal(gitBlob(indexBuf),'74e223b2c9877e6a88b6ad6726290d230f1f616e','goMenu boundary Phase 7 generated-branch weighting runtime blob drifted');
+assert.equal(owners.sourceIndexBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','owner manifest must target current Phase 7 generated-branch weighting runtime');
 
 assert.equal(/^goMenu\t/m.test(lastOwners),false,'Phase 2 inline table must no longer contain an explicit goMenu owner');
 assert.deepEqual(chainFor('goMenu'),[],

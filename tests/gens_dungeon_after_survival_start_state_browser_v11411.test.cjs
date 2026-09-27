@@ -144,6 +144,24 @@ async function settleDungeonLaunch(page){
   await page.waitForTimeout(1200);
 }
 
+async function pinDeterministicNonCombatDungeonRoom(page){
+  await page.evaluate(()=>{
+    if(!window.__gensDungeonAfterSurvivalOriginalRandom){
+      window.__gensDungeonAfterSurvivalOriginalRandom=Math.random;
+    }
+    Math.random=()=>0.65;
+  });
+}
+
+async function restoreDungeonRoomRandom(page){
+  await page.evaluate(()=>{
+    if(window.__gensDungeonAfterSurvivalOriginalRandom){
+      Math.random=window.__gensDungeonAfterSurvivalOriginalRandom;
+      delete window.__gensDungeonAfterSurvivalOriginalRandom;
+    }
+  });
+}
+
 async function returnActiveGameToRootWithoutClosing(page){
   await page.evaluate(()=>{
     if(typeof window.backHomeFromGame!=='function')throw new Error('backHomeFromGame owner absent');
@@ -376,6 +394,7 @@ async function runDirectDungeonRoomGridScenario(port){
     await chooseFirstParticipantAndStart(page);
     await settleDungeonLaunch(page);
     const entrance=await dungeonSnapshot(page,'direct-dungeon-grid-control-entrance');
+    await pinDeterministicNonCombatDungeonRoom(page);
     const explore=page.locator('#dc01Explore');
     await explore.waitFor({state:'visible'});
     await explore.click();
@@ -393,6 +412,7 @@ async function runDirectDungeonRoomGridScenario(port){
       await page.waitForTimeout(1200);
     }
     const room=await dungeonSnapshot(page,'direct-dungeon-grid-control-room');
+    await restoreDungeonRoomRandom(page);
     return {entrance,room,errors};
   }finally{
     await context.close();
@@ -431,6 +451,7 @@ async function runSameOpenSurvivalToDungeonScenario(port){
     await settleDungeonLaunch(page);
 
     const entrance=await dungeonSnapshot(page,'same-open-dungeon-entrance');
+    await pinDeterministicNonCombatDungeonRoom(page);
     const explore=page.locator('#dc01Explore');
     await explore.waitFor({state:'visible'});
     await explore.click();
@@ -449,6 +470,7 @@ async function runSameOpenSurvivalToDungeonScenario(port){
       await page.waitForTimeout(1200);
     }
     const room=await dungeonSnapshot(page,'same-open-dungeon-room');
+    await restoreDungeonRoomRandom(page);
     return {beforeReturn,entrance,room,errors};
   }finally{
     await context.close();
@@ -483,6 +505,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     assert.equal(Number(entrance.dungeonState?.room),0,'real prior Dungeon must begin at room 0 before exploring');
     assert.equal(entrance.dungeonState?.last??null,null,'real prior Dungeon entrance must have no generated room yet');
 
+    await pinDeterministicNonCombatDungeonRoom(page);
     const explore=page.locator('#dc01Explore');
     await explore.waitFor({state:'visible'});
     await explore.click();
@@ -511,6 +534,7 @@ async function runPersistedDungeonThenSurvivalScenario(port){
     }
 
     const persisted=await dungeonSnapshot(page,'persisted-room-before-survival');
+    await restoreDungeonRoomRandom(page);
 
     const effectClose=page.locator('#effectModal.open .effectClose');
     if(await effectClose.count()){

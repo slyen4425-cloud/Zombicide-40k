@@ -587,6 +587,9 @@ jobs:
       - name: Exiger le gate Dungeon de présence des branches generated Phase 7
         run: node tests/gens_phase7_dungeon_generated_branch_chance_gate_v1.test.cjs
 
+      - name: Caractériser le descripteur des branches generated Phase 7
+        run: node tests/gens_phase7_dungeon_generated_branch_descriptor_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

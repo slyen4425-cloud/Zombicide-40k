@@ -18,8 +18,8 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blob=crypto.createHash('sha1')
   .update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8170213,'Progression preaudit must run on the exact current Phase 7 Dungeon generated-room transition runtime');
-assert.equal(blob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','Progression preaudit Phase 7 generated-room transition index blob drifted');
+assert.equal(bytes.length,8170062,'Progression preaudit must run on the exact current Phase 7 Dungeon generated-branch weighting runtime');
+assert.equal(blob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','Progression preaudit Phase 7 generated-branch weighting index blob drifted');
 
 function scriptBody(id){
   const re=new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

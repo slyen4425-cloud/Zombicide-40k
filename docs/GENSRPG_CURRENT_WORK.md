@@ -1,3 +1,31 @@
+# PHASE 7 — MICRO-LOT 5 — gate de présence des branches generated — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-plan-green-2026-09-27`
+
+SHA de base :
+`49289784ee92a47fd51089815ca25954cdba4493`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-branch-chance-gate-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-branch-chance-gate-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BRANCH_CHANCE_GATE_PREAUDIT.md`
+
+Cible :
+isoler uniquement le gate pur `specialBranchChance + roll explicite`, sans déplacer `nearestFree`, le RNG de type ni la matérialisation.
+
+Hors périmètre :
+authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
+
+Prochaine action :
+caractérisation GREEN dédiée, puis RED isolé. Rule 26 obligatoire avant tout micro-diff de `index.html`.
+
+---
+
 # PHASE 7 — MICRO-LOT 4 — planification des branches generated — 2026-09-27
 
 Base GREEN :

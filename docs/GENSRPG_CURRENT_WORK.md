@@ -21568,3 +21568,65 @@ Les trois autres dettes signalées restent séparées et non modifiées :
 - déclenchement tardif coffre / ligne de vue ennemie ;
 - ralentissement entre déplacements ;
 - fiche Zombicide apparaissant brièvement en RPG.
+
+# PHASE 7 — MICRO-LOT 5 — présence des branches generated — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-plan-green-2026-09-27`
+
+SHA de base :
+`49289784ee92a47fd51089815ca25954cdba4493`
+
+CI base :
+- Architecture + Browser : `36324103034` — SUCCESS ;
+- Firefox : `36324103113` — SUCCESS ;
+- Tactical Dock : `36324103013` — SUCCESS.
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-branch-presence-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-branch-presence-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BRANCH_PRESENCE_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Périmètre
+
+Cible unique :
+**présence / éligibilité probabiliste d'une branche secondaire generated autour de `specialBranchChance`.**
+
+Question à caractériser :
+le calcul chance + roll explicite peut-il devenir une responsabilité pure Dungeon sans déplacer le RNG ni aucune mutation ?
+
+Restent protégés et inchangés :
+- `nearestFree(x)` ;
+- deuxième RNG de type ;
+- `pickWeightedGeneratedBranchType` ;
+- matérialisation trapdoor ;
+- authored branches ;
+- Spatial / RoomRuntime ;
+- événements / spawn / ennemis ;
+- mouvement ;
+- Tactical ;
+- Survie / Capture / PvP.
+
+## Invariants critiques
+
+- même nombre et même ordre de RNG ;
+- roll exactement au seuil toujours rejeté ;
+- rejet de présence avant `nearestFree` ;
+- aucun RNG dans l'éventuelle API pure ;
+- aucune matérialisation ou mutation déplacée ;
+- aucune nouvelle globale / wrapper / observer / retry / polling / timer.
+
+## Prochaine action obligatoire
+
+Créer une caractérisation GREEN dédiée de la règle de présence generated, sans modifier le runtime.
+
+Rule 26 :
+la source exacte `index.html` devra être redemandée dès qu'une inspection/modification exacte du callsite courant devient nécessaire.
+

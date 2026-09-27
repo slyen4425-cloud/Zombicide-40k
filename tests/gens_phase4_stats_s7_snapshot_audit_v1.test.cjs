@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
 
-assert.equal(bytes.length,8170143,'S7 must audit the exact verified Phase 7 room-kind index');
-assert.equal(blob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','S7 index blob must remain the current Phase 7 room-kind source');
+assert.equal(bytes.length,8170213,'S7 must audit the exact verified Phase 7 generated-room transition index');
+assert.equal(blob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','S7 index blob must remain the current Phase 7 generated-room transition source');
 
 for(const text of [
   'function dungeonCombatHeroSnapshot(heroId){',

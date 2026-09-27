@@ -115,3 +115,67 @@ Dès le passage du RED au micro-diff runtime, utiliser exactement le fichier :
 - blob attendu : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
 
 Aucune ancienne copie Rule 26 ne doit être utilisée sans vérification.
+
+
+## Caractérisation GREEN
+
+SHA :
+`37e1799ff8202331ec556ada295420d76eb20970`.
+
+CI :
+- Architecture + Browser : `36330176254` — SUCCESS ;
+- Firefox : `36330176237` — SUCCESS ;
+- Tactical Dock : `36330176229` — SUCCESS.
+
+La caractérisation confirme :
+- le gate historique est `roll*100 < Math.max(0, Number(specialBranchChance)||0)` ;
+- une map absente consomme zéro RNG ;
+- le premier RNG reste avant `nearestFree` ;
+- le second RNG reste après `nearestFree` ;
+- la matérialisation reste dans Core 2.00.
+
+## RED isolé — prouvé
+
+SHA RED :
+`b6455906c6583eaeb01f093633d6d5bf6bac28d7`.
+
+CI :
+- Architecture : `36330996836` — FAILURE attendue ;
+- Firefox : `36330996759` — SUCCESS ;
+- Tactical Dock : `36330996997` — SUCCESS.
+
+Les gardes Phase 7 #181 à #189 restent SUCCESS.
+La seule nouvelle dette est #190 :
+`Exiger le gate Dungeon de présence des branches generated Phase 7`.
+
+Erreur attendue :
+`Phase 7 micro-lot 5 requires Dungeon-owned generated branch chance gate`.
+
+## Candidat runtime appliqué
+
+Rule 26 vérifiée sur `work37.zip / index37.txt` :
+- taille source : `8170062` octets ;
+- blob source : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+One-shot final :
+- run `36331320227` — SUCCESS ;
+- workflow temporaire auto-retiré dans le commit runtime.
+
+SHA runtime :
+`951d659f83c373f4628ad73e128dadfd15b38829`.
+
+Runtime cible vérifié par le one-shot :
+- `index.html` : `8170090` octets ;
+- blob Git : `85bf8dcb0ad22d596e648f4992210d870520d6f9`.
+
+Micro-diff :
+- ajout de `GensDungeonV1.exploration.shouldCreateGeneratedBranch(specialBranchChance, roll)` ;
+- aucun `Math.random()` dans l'API ;
+- premier RNG toujours au callsite Core 2.00 ;
+- `nearestFree(x)` reste après acceptation du gate ;
+- second RNG de type reste après `nearestFree(x)` ;
+- pondération du type reste dans `pickWeightedGeneratedBranchType(...)` ;
+- `addDungeonSceneElement(...)` et `m.cells[i]='trapdoor'` restent dans Core 2.00 ;
+- authored, Spatial, RoomRuntime, spawn, ennemis et Tactical restent inchangés.
+
+Les tests fingerprintés historiques doivent maintenant être réalignés un garde à la fois vers le nouveau blob, sans assouplir leurs assertions métier.

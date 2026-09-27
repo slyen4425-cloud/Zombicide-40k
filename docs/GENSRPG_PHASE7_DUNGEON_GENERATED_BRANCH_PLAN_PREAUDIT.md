@@ -323,3 +323,40 @@ Tests ciblés exécutés par le one-shot :
 - `git diff --check` : SUCCESS.
 
 La CI complète doit maintenant cartographier les éventuels fingerprints historiques invalidés avant toute déclaration GREEN.
+
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`c27075fc63e074bcb491c2d46b98bf9565d4cde4`.
+
+CI complète :
+- Architecture + Browser : run `36323368454` — SUCCESS ;
+- Firefox : run `36323368557` — SUCCESS ;
+- Tactical Dock : run `36323368550` — SUCCESS.
+
+Runtime final :
+- `index.html` : `8170062` octets ;
+- blob Git : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Résultat :
+- `GensDungeonV1.exploration.pickWeightedGeneratedBranchType(branchWeights, roll)` possède uniquement la sélection pondérée du type de branche generated ;
+- le premier `Math.random()` de présence reste au callsite historique ;
+- `nearestFree(x)` reste entre le tirage de présence et le tirage de type ;
+- le second `Math.random()` reste au callsite et n'est consommé que lorsqu'une case libre existe ;
+- `addDungeonSceneElement(...)`, les libellés et `m.cells[i]='trapdoor'` restent dans Core 2.00 ;
+- authored, Spatial, RoomRuntime, événements/spawn, ennemis, Tactical, Survie, Capture et PvP restent inchangés ;
+- tous les fingerprints historiques invalidés par le nouveau blob ont été réalignés un garde à la fois ;
+- aucune assertion fonctionnelle n'a été assouplie ;
+- Architecture, Browser Chromium, Firefox et Tactical Dock sont GREEN sur le même SHA ;
+- aucun changement utilisateur visible n'a été introduit, donc aucune preview manuelle supplémentaire n'est requise pour ce micro-lot.
+
+Checkpoint final prévu après CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-plan-green-2026-09-27`.
+
+## Prochaine action obligatoire
+
+1. valider la présente clôture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le micro-lot Phase 7 suivant depuis ce checkpoint GREEN ;
+4. rester dans `Dungeon exploration / salles / branches` et pré-auditer avant tout nouveau runtime ;
+5. appliquer Rule 26 dès qu'une nouvelle inspection/modification exacte de `index.html` devient nécessaire.

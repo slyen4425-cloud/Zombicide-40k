@@ -28,11 +28,14 @@
   },
   "invariants": [
     "the active entry exposes only the public GensDungeonV1 namespace",
-    "the connected Phase 7 exploration slices are the pure generated advance planner and weighted room-kind selector",
-    "the connected exploration planners have no DOM storage timer listener observer or Tactical dependency",
+    "the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector and generated room transition descriptor",
+    "the connected exploration slices have no DOM storage timer listener observer or Tactical dependency",
     "generated room creation movement events spawn chest trap puzzle and combat remain outside these pure slices",
     "the weighted room-kind selector receives its random roll explicitly and never owns random generation",
     "generated Boss policy remains owned by Core 2.00 during this micro-lot",
+    "the generated room transition descriptor receives hero rooms created state and timestamp explicitly",
+    "DungeonSpatial313 remains the owner of room snapshot persistence and activation during this micro-lot",
+    "DungeonRoomRuntime167822 remains the consumer of created transition state during this micro-lot",
     "authored World Builder travel remains owned by DungeonAuthoredRuntime167839 during this micro-lot",
     "no compatibility wrapper is introduced by this contract"
   ],

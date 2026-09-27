@@ -21630,3 +21630,23 @@ Créer une caractérisation GREEN dédiée de la règle de présence generated, 
 Rule 26 :
 la source exacte `index.html` devra être redemandée dès qu'une inspection/modification exacte du callsite courant devient nécessaire.
 
+## Micro-lot 5 — caractérisation GREEN puis RED isolé
+
+Caractérisation GREEN :
+- SHA `b97347b6a52fe16a7a5e3a10835f3ef91720308b` ;
+- Architecture + Browser `36325079612` — SUCCESS ;
+- Firefox `36325079673` — SUCCESS ;
+- Tactical `36325079788` — SUCCESS.
+
+API sélectionnée :
+`GensDungeonV1.exploration.shouldCreateGeneratedBranch(specialBranchChance, roll)`.
+
+RED isolé :
+- SHA `78e50ddfe36a33895e3c403d6db551df624bf9ef` ;
+- Architecture `36325840661` — FAILURE attendue uniquement sur #190 ;
+- Firefox `36325840643` — SUCCESS ;
+- Tactical `36325840624` — SUCCESS.
+
+Prochaine action :
+**Rule 26 obligatoire avant runtime** : récupérer et vérifier le `index.html` exact du HEAD courant, puis appliquer un micro-diff minimal conservant les deux RNG au callsite, `nearestFree` entre les deux, et toute matérialisation dans Core 2.00.
+

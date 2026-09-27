@@ -266,3 +266,60 @@ Ce découpage est retenu précisément pour ne pas avancer le second tirage alé
 5. exiger que la matérialisation reste dans Core 2.00 ;
 6. prouver que seule cette nouvelle garde devient RED ;
 7. seulement ensuite appliquer le micro-diff minimal.
+
+
+## RED isolé — prouvé
+
+SHA RED :
+`aaf2edbf7d7c8db6991ee951a3d4a6c397284c88`.
+
+CI :
+- Architecture : run `36308105216` — FAILURE attendue ;
+- Firefox : run `36308105234` — SUCCESS ;
+- Tactical Dock : run `36308105230` — SUCCESS.
+
+La nouvelle garde Phase 7 :
+- #188 `Exiger la pondération Dungeon des types de branches generated Phase 7`
+
+est la seule garde Phase 7 rouge.
+
+Erreur attendue :
+`Phase 7 micro-lot 4 requires Dungeon-owned weighted generated branch-type selection`.
+
+La dette est donc isolée à l'absence de :
+`GensDungeonV1.exploration.pickWeightedGeneratedBranchType(branchWeights, roll)`.
+
+## Candidat runtime appliqué
+
+One-shot final :
+- run `36308661330` — SUCCESS ;
+- workflow temporaire auto-supprimé dans le commit runtime.
+
+SHA runtime candidat :
+`eae6760f1f86270042d3bd2ffa542f994995d946`.
+
+Source Rule 26 vérifiée avant patch :
+- taille : `8170213` ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+Cible vérifiée après patch :
+- taille : `8170062` ;
+- blob : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Micro-diff runtime :
+- ajout de l'API pure `pickWeightedGeneratedBranchType(branchWeights, roll)` dans `GensDungeonV1.exploration` ;
+- retrait du calcul pondéré inline de `maybeSpecialBranch(x)` ;
+- premier `Math.random()` de présence inchangé ;
+- `nearestFree(x)` inchangé et toujours avant le second tirage ;
+- second `Math.random()` inchangé au callsite, passé explicitement à l'API ;
+- `addDungeonSceneElement(...)`, libellés et `m.cells[i]='trapdoor'` restent dans Core 2.00 ;
+- authored, Spatial, RoomRuntime, spawn, Tactical, Survie, Capture et PvP inchangés.
+
+Tests ciblés exécutés par le one-shot :
+- avance generated : SUCCESS ;
+- transition generated : SUCCESS ;
+- nouvelle garde propriétaire type de branche : SUCCESS ;
+- RoomRuntime V167822 : SUCCESS ;
+- `git diff --check` : SUCCESS.
+
+La CI complète doit maintenant cartographier les éventuels fingerprints historiques invalidés avant toute déclaration GREEN.

@@ -30,8 +30,8 @@ const core200=block('dungeonCore200Rebuild');
 const line=core200.split(/\r?\n/).find(v=>v.startsWith('function maybeSpecialBranch(x){'));
 assert.ok(line,'Core 2.00 maybeSpecialBranch must remain directly characterizable');
 
-assert.match(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchChance\)\|\|0\)/,
-  'generated branch presence must still compare the first explicit RNG to normalized specialBranchChance');
+assert.match(line,/GensDungeonV1\.exploration\.shouldCreateGeneratedBranch\(c\.specialBranchChance,Math\.random\(\)\)/,
+  'generated branch presence must delegate normalized specialBranchChance and the first explicit RNG to the Dungeon gate');
 assert.match(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchChance\)\|\|0\)[\s\S]*const i=nearestFree\(x\);if\(i<0\)return null;[\s\S]*pickWeightedGeneratedBranchType\(c\.specialBranchWeights,Math\.random\(\)\)/,
   'chance gate, nearest-free search and type RNG must preserve their historical order');
 assert.equal((line.match(/Math\.random\(\)/g)||[]).length,2,

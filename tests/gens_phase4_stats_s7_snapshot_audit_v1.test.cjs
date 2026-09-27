@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
 
-assert.equal(bytes.length,8170062,'S7 must audit the exact verified Phase 7 generated-branch weighting index');
-assert.equal(blob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','S7 index blob must remain the current Phase 7 generated-branch weighting source');
+assert.equal(bytes.length,8170090,'S7 must audit the exact verified Phase 7 generated-branch weighting index');
+assert.equal(blob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','S7 index blob must remain the current Phase 7 generated-branch weighting source');
 
 for(const text of [
   'function dungeonCombatHeroSnapshot(heroId){',

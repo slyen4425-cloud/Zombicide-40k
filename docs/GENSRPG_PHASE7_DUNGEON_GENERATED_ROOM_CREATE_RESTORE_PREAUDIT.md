@@ -302,3 +302,49 @@ Erreur exacte :
 
 Le RED est donc isolé à l’absence de la nouvelle API pure.
 Aucune régression du runtime n’est impliquée.
+
+
+## Candidat runtime appliqué
+
+One-shot :
+- workflow temporaire `.github/workflows/gensrpg-phase7-room-transition-oneshot.yml` ;
+- run final : `36293613079` — SUCCESS ;
+- workflow auto-supprimé dans le commit runtime.
+
+SHA runtime :
+`8ed22bc9afd393b775fb478e192b210e1875d03a`.
+
+Source Rule 26 vérifiée avant patch :
+- taille : `8170143` ;
+- blob : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+Cible vérifiée après patch :
+- taille : `8170213` ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+Micro-diff runtime exact :
+- existing :
+  `x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,false,Date.now())` ;
+- create :
+  `x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,true,Date.now())`.
+
+Inchangés :
+- `DungeonSpatial313` ;
+- `DungeonRoomRuntime167822` ;
+- `chooseKind()` / politique Boss ;
+- `createRoom()` ;
+- spawn / scene / lock / challenge ;
+- mouvement ;
+- authored World Builder ;
+- Tactical / Survie / Capture / PvP.
+
+Tests ciblés exécutés avant commit :
+- plan d’avance generated : SUCCESS ;
+- pondération generated caractérisation : SUCCESS ;
+- propriétaire pondération : SUCCESS ;
+- création/restauration caractérisation : SUCCESS ;
+- propriétaire transition : SUCCESS ;
+- RoomRuntime V167822 : SUCCESS ;
+- `git diff --check` : SUCCESS.
+
+La CI complète post-raccord doit maintenant cartographier les éventuelles empreintes historiques invalidées avant toute déclaration GREEN.

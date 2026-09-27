@@ -20,10 +20,10 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8170062,
-  'final Shell authority contract must run on the current Phase 7 generated-branch weighting index');
-assert.equal(gitBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e',
-  'final Shell authority contract must keep the current Phase 7 generated-branch weighting composition');
+assert.equal(bytes.length,8170090,
+  'final Shell authority contract must run on the current Phase 7 generated-branch chance-gate index');
+assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9',
+  'final Shell authority contract must keep the current Phase 7 generated-branch chance-gate composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),
   'final Shell authority file must exist');

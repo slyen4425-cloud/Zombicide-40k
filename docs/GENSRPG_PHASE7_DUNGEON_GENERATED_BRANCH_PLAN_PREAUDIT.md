@@ -177,3 +177,92 @@ La source Rule 26 précédente `work35.zip / index35.txt` est désormais obsolè
 elle correspond au blob `23b4f590...` antérieur au micro-lot 3.
 
 Aucun runtime du micro-lot 4 ne sera modifié avant réception et vérification de la source exacte ci-dessus.
+
+
+## Rule 26 — source exacte reçue et vérifiée
+
+Sylvain a fourni `work36.zip`.
+
+Contenu vérifié :
+- fichier : `index36.txt` ;
+- taille : `8170213` octets ;
+- blob Git : `efcc459c9bade0e35bf123d100e499b3ce7d4eca` ;
+- correspond exactement au runtime du checkpoint GREEN `9ec3a39af709405f5d9ee54a61aa2c041c7339e6`.
+
+Cette source devient la source Rule 26 autorisée pour le présent micro-lot tant que `index.html` ne change pas.
+
+## Caractérisation GREEN de `maybeSpecialBranch(x)`
+
+Test :
+`tests/gens_phase7_dungeon_generated_branch_plan_characterization_v1.test.cjs`.
+
+SHA caractérisé :
+`c3654bdfbd0674968b321b9a7b440f8772d1db94`.
+
+CI :
+- Architecture + Browser : run `36307407149` — SUCCESS ;
+- Firefox : run `36307407138` — SUCCESS ;
+- Tactical Dock : run `36307407144` — SUCCESS.
+
+La source exacte prouve :
+
+1. une salle existing ne rappelle jamais `maybeSpecialBranch(x)` ;
+2. une salle newly created l'appelle exactement une fois ;
+3. sans map valide, aucun tirage aléatoire n'est consommé ;
+4. le test de présence consomme un premier `Math.random()` et compare `roll*100` à `specialBranchChance` ;
+5. si ce test échoue, `nearestFree(x)` et le tirage de type ne sont pas exécutés ;
+6. si aucune case libre n'existe, aucun second tirage n'est consommé ;
+7. seulement après succès du test de présence ET existence d'une case libre, un second `Math.random()` choisit le type ;
+8. pondération historique :
+   - treasure : 45 ;
+   - boss : 25 ;
+   - secret : 30 ;
+   - surchargée par `specialBranchWeights` ;
+9. les poids sont normalisés par `Math.max(0, Number(value)||0)` ;
+10. la matérialisation reste ensuite impérative :
+   - `addDungeonSceneElement(...)` ;
+   - `m.cells[i]='trapdoor'`.
+
+Les runtimes authored :
+- `DungeonAuthoredRuntime167839` ;
+- `DungeonSecondaryBranchContentFix167860` ;
+- `DungeonAuthoredBranchNavCleanup167863`
+restent hors de cette chaîne generated.
+
+## Slice pure sélectionnée
+
+API cible :
+
+`GensDungeonV1.exploration.pickWeightedGeneratedBranchType(branchWeights, roll)`
+
+Responsabilité UNIQUE :
+sélectionner le type de branche generated à partir des poids et d'un roll explicite.
+
+La fonction doit conserver exactement :
+- défauts `{treasure:45,boss:25,secret:30}` ;
+- surcharge par `branchWeights` ;
+- clamp des poids négatifs/invalides à 0 ;
+- somme `|| 1` ;
+- ordre `Object.entries` historique ;
+- fallback `"treasure"`.
+
+Restent impérativement dans Core 2.00 :
+- le premier `Math.random()` de présence ;
+- `specialBranchChance` ;
+- `nearestFree(x)` ;
+- le second `Math.random()`, passé explicitement à l'API seulement après case libre ;
+- `addDungeonSceneElement` ;
+- le libellé du passage ;
+- `m.cells[i]='trapdoor'`.
+
+Ce découpage est retenu précisément pour ne pas avancer le second tirage aléatoire avant `nearestFree(x)` et ne pas changer la séquence RNG historique.
+
+## Prochaine étape TDD
+
+1. ajouter une sentinelle RED exigeant `pickWeightedGeneratedBranchType(branchWeights, roll)` ;
+2. exiger un seul consommateur dans `maybeSpecialBranch(x)` ;
+3. exiger que les deux `Math.random()` restent au callsite et dans le même ordre conditionnel ;
+4. interdire l'ancien calcul pondéré inline ;
+5. exiger que la matérialisation reste dans Core 2.00 ;
+6. prouver que seule cette nouvelle garde devient RED ;
+7. seulement ensuite appliquer le micro-diff minimal.

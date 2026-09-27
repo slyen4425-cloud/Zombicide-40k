@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170213,'S4 preaudit/postaudit must track the current Phase 7 generated-room transition S2 GREEN runtime');
-assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','S4 preaudit/postaudit blob must track the current Phase 7 generated-room transition S2 GREEN runtime');
+assert.equal(bytes.length,8170062,'S4 preaudit/postaudit must track the current Phase 7 generated-branch weighting runtime');
+assert.equal(gitBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','S4 preaudit/postaudit blob must track the current Phase 7 generated-branch weighting runtime');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

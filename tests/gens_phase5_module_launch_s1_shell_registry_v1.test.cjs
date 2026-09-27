@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170143,'current runtime must preserve the Phase 7 room-kind S1 registry candidate');
-assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','current runtime blob must preserve the Phase 7 room-kind S1 registry candidate');
+assert.equal(bytes.length,8170213,'current runtime must preserve the Phase 7 generated-room transition S1 registry candidate');
+assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','current runtime blob must preserve the Phase 7 generated-room transition S1 registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);

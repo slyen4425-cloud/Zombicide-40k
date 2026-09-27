@@ -3,23 +3,24 @@ name: GenSrpG Phase 7 generated branch type one-shot
 on:
   push:
     branches:
-      - 'work/gensrpg-phase7-dungeon-generated-branch-plan-2026-09-27'
+      - work/gensrpg-phase7-dungeon-generated-branch-plan-2026-09-27
+    paths:
+      - .github/workflows/gensrpg-phase7-branch-type-oneshot.yml
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: github.event.head_commit.message == 'ci: add Phase 7 branch type one-shot'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact work branch
         uses: actions/checkout@v4
         with:
-          ref: work/gensrpg-phase7-dungeon-generated-branch-plan-2026-09-27
           fetch-depth: 0
 
       - name: Patch exact Phase 7 branch weighting seam
+        shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -90,6 +91,7 @@ jobs:
           PY
 
       - name: Run targeted Phase 7 guards
+        shell: bash
         run: |
           node tests/gens_phase7_dungeon_generated_advance_plan_v1.test.cjs
           node tests/gens_phase7_dungeon_generated_room_transition_v1.test.cjs
@@ -98,6 +100,7 @@ jobs:
           git diff --check
 
       - name: Commit runtime and remove one-shot
+        shell: bash
         run: |
           git config user.name "slyen4425-cloud"
           git config user.email "slyen4425@gmail.com"

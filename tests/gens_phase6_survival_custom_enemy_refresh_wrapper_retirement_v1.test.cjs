@@ -12,10 +12,10 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170143,
-  'custom-enemy-refresh wrapper lot must run on the current Phase 7 Dungeon room-kind runtime size');
-assert.equal(blob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d',
-  'custom-enemy-refresh wrapper lot must target the current Phase 7 room-kind runtime baseline');
+assert.equal(bytes.length,8170213,
+  'custom-enemy-refresh wrapper lot must run on the current Phase 7 Dungeon generated-room transition runtime size');
+assert.equal(blob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca',
+  'custom-enemy-refresh wrapper lot must target the current Phase 7 generated-room transition runtime baseline');
 
 assert.equal(
   (index.match(/function\s+refreshCustomEnemiesIntoZombieTypes\s*\(/g)||[]).length,

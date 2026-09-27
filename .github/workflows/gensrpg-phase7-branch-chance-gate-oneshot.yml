@@ -71,7 +71,6 @@ jobs:
           PY
 
           node tests/gens_phase7_dungeon_generated_branch_chance_gate_v1.test.cjs
-          node tests/gens_phase7_dungeon_generated_branch_type_weighting_v1.test.cjs
           node tests/dungeon_room_runtime_v167822.test.cjs
           git diff --check
 

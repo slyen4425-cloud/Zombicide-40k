@@ -152,3 +152,66 @@ Aucune ancienne copie Rule 26 ne doit être réutilisée sans vérification.
 ## Prochaine action
 
 Créer une caractérisation GREEN dédiée de la présence des branches generated en réutilisant les preuves versionnées du micro-lot 4, sans modifier le runtime.
+
+## Caractérisation GREEN
+
+SHA :
+`b97347b6a52fe16a7a5e3a10835f3ef91720308b`
+
+Test :
+`tests/gens_phase7_dungeon_generated_branch_presence_characterization_v1.test.cjs`
+
+CI :
+- Architecture + Browser : `36325079612` — SUCCESS ;
+- Firefox : `36325079673` — SUCCESS ;
+- Tactical Dock : `36325079788` — SUCCESS.
+
+Preuves verrouillées :
+- map absente : aucun RNG ;
+- chance 0 : rejet ;
+- chance 20 : roll inférieur au seuil accepté, roll exactement au seuil rejeté ;
+- chance 100 : les rolls normaux de `Math.random()` passent ;
+- chance négative ou invalide : normalisée à 0 ;
+- chaîne numérique : coercition `Number` conservée ;
+- aucune borne haute historique : une chance > 100 reste possible ;
+- ordre accepté inchangé : premier RNG de présence -> `nearestFree` -> second RNG de type -> matérialisation ;
+- un rejet de présence stoppe avant `nearestFree` ;
+- authored reste séparé.
+
+API pure sélectionnée après preuve :
+`GensDungeonV1.exploration.shouldCreateGeneratedBranch(specialBranchChance, roll)`.
+
+Responsabilité unique :
+retourner si le roll explicite passe la règle historique
+`roll * 100 < Math.max(0, Number(chance)||0)`.
+
+Le RNG lui-même reste au callsite Core 2.00.
+
+## RED isolé — prouvé
+
+SHA RED :
+`78e50ddfe36a33895e3c403d6db551df624bf9ef`.
+
+CI :
+- Architecture : `36325840661` — FAILURE attendue ;
+- Firefox : `36325840643` — SUCCESS ;
+- Tactical Dock : `36325840624` — SUCCESS ;
+- Browser : skipped après échec Architecture, conformément au workflow.
+
+Une seule nouvelle garde est RED :
+`#190 — Exiger la décision Dungeon de présence des branches generated Phase 7`.
+
+Erreur attendue :
+`Phase 7 micro-lot 5 requires Dungeon-owned generated branch presence decision`.
+
+La garde précédente de pondération du type de branche passe juste avant, ce qui prouve que le micro-lot 4 reste GREEN.
+
+## Rule 26 — prochaine étape obligatoire
+
+Le diff entre la base GREEN `49289784...` et le RED `78e50dd...` ne touche pas `index.html`.
+Le runtime reste donc :
+- taille : `8170062` octets ;
+- blob : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Avant tout micro-diff runtime, demander le `index.html` exact du HEAD courant, vérifier taille/blob, puis seulement patcher le callsite.
+

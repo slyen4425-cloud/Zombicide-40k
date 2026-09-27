@@ -37,6 +37,10 @@
     return "treasure";
   }
 
+  function shouldCreateGeneratedBranch(specialBranchChance,roll){
+    return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
+  }
+
   function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
     return {heroId,from:fromRoom,to:toRoom,created,at};
   }
@@ -47,7 +51,8 @@
       planGeneratedAdvance,
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
-      pickWeightedGeneratedBranchType
+      pickWeightedGeneratedBranchType,
+      shouldCreateGeneratedBranch
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

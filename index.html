@@ -39308,7 +39308,7 @@ function explore(){
     const entry=spawnIndex(x.last?.map);
     if(Number.isInteger(entry)&&entry>=0)x.positions[heroId]=entry;
     x.remaining[heroId]=movementLeft;
-    x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:false,at:Date.now()};
+    x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,false,Date.now());
     saveRt(x);render();
     return modal('🚪 '+heroName(heroId)+' avance','Le héros rejoint la salle '+targetRoom+'. Les autres héros conservent leur salle et leur position.');
   }
@@ -39320,7 +39320,7 @@ function explore(){
   const entry=spawnIndex(x.last?.map);
   if(Number.isInteger(entry)&&entry>=0)x.positions[heroId]=entry;
   x.remaining[heroId]=movementLeft;
-  x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:true,at:Date.now()};
+  x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,true,Date.now());
   saveRt(x);placeSceneForRoom(x,kind,made.result);
   if(kind==='rest')applyRest200(x);
   maybeSpecialBranch(x);assignEnemyCells(x);initLock(x);maybeDoorChallenge(x);saveRt(x);render();roomIntro(x,made.result)

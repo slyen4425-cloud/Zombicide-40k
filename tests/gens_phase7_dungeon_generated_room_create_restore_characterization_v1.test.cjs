@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170143,'Phase 7 room create/restore characterization must start from the room-kind GREEN runtime');
-assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d','Phase 7 room create/restore characterization must use the exact room-kind GREEN blob');
+assert.equal(bytes.length,8170213,'Phase 7 room create/restore characterization must track the generated transition GREEN candidate runtime');
+assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','Phase 7 room create/restore characterization must track the exact generated transition GREEN candidate blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -67,7 +67,7 @@ ordered(existingBranch,[
   'spatialActivate(x,heroId)',
   'const entry=spawnIndex(x.last?.map)',
   'x.remaining[heroId]=movementLeft',
-  'created:false',
+  'GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,false,Date.now())',
   'saveRt(x);render()',
   "return modal('🚪 '+heroName(heroId)+' avance'"
 ],'existing-room restore path');
@@ -82,7 +82,7 @@ ordered(createBranch,[
   'x.last={kind,room:x.room',
   'const entry=spawnIndex(x.last?.map)',
   'x.remaining[heroId]=movementLeft',
-  'created:true',
+  'GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,true,Date.now())',
   'saveRt(x);placeSceneForRoom(x,kind,made.result)',
   "if(kind==='rest')applyRest200(x)",
   'maybeSpecialBranch(x);assignEnemyCells(x);initLock(x);maybeDoorChallenge(x);saveRt(x);render();roomIntro(x,made.result)'

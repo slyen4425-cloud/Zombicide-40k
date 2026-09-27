@@ -169,3 +169,107 @@ Empreinte attendue :
 - blob : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
 
 Aucun runtime ne sera modifié avant réception et vérification de cette source exacte.
+
+
+## Rule 26 — source exacte reçue et vérifiée
+
+Sylvain a fourni `work35.zip`.
+
+Contenu vérifié :
+- fichier : `index35.txt` ;
+- taille : `8170143` octets ;
+- blob Git : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d` ;
+- correspond exactement au `index.html` du checkpoint GREEN de base `2fc83900b001a7643cdd21eecd94d048b91192d1`.
+
+Cette source est désormais l’unique source Rule 26 autorisée pour le raccord de ce micro-lot tant que le runtime `index.html` n’a pas changé.
+
+## Caractérisation exacte create / existing
+
+Test :
+`tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs`.
+
+SHA caractérisé :
+`d9e9f4658ed8012c43492248587fcd495237af58`.
+
+CI :
+- Architecture + Browser : `36292666711` — SUCCESS ;
+- Firefox : `36292666748` — SUCCESS ;
+- Tactical Dock : `36292666751` — SUCCESS.
+
+Architecture :
+- #181 autorité exploration : SUCCESS ;
+- #182 plan d’avance generated : SUCCESS ;
+- #183 pondération generated caractérisée : SUCCESS ;
+- #184 propriétaire pondération : SUCCESS ;
+- #185 création/restauration generated : SUCCESS.
+
+La source exacte prouve :
+
+### existing
+Après `planGeneratedAdvance(...)`, si `status==='existing'` et que le snapshot possède `last` :
+- `spatialSetRoom(x, heroId, targetRoom)` ;
+- `spatialActivate(x, heroId)` ;
+- `DungeonSpatial313.activate()` restaure `last` et `enemyCells` depuis `roomStates[targetRoom]` par clone ;
+- le héros actif est replacé sur l’entrée ;
+- son mouvement restant est conservé ;
+- `dc313LastTransition.created=false` ;
+- aucun `chooseKind`, `createRoom`, `placeSceneForRoom`, spawn, lock ou challenge n’est rejoué.
+
+### create
+Si la salle n’existe pas :
+- `x.room=targetRoom`, `enemyCells={}`, `branch=null` ;
+- `spatialSetRoom(...)` ;
+- `chooseKind()` puis `createRoom()` exactement une fois ;
+- construction de `x.last` ;
+- position d’entrée + mouvement restant ;
+- `dc313LastTransition.created=true` ;
+- sauvegarde initiale ;
+- seulement ensuite scène / repos / branche spéciale / assignation ennemis / lock / challenge ;
+- nouvelle sauvegarde puis render/intro.
+
+### Spatial
+`DungeonSpatial313.persist()` snapshotte exactement :
+- `last` ;
+- `enemyCells`.
+
+`DungeonSpatial313.activate()` restaure exactement ces deux données et les clone.
+Cette autorité Spatial ne doit pas être déplacée dans le présent lot.
+
+### Room Runtime
+`DungeonRoomRuntime167822` consomme `dc313LastTransition.created===true`.
+Son test permanent protège que rejoindre une salle existante ne régénère pas de layout custom.
+
+## Slice pure sélectionnée après caractérisation
+
+API cible :
+`GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId, fromRoom, toRoom, created, at)`.
+
+Responsabilité unique :
+construire le descripteur de transition generated actuellement dupliqué inline dans les deux branches Core 2.00 :
+
+`{heroId, from, to, created, at}`.
+
+Sémantique :
+- existing -> `created:false` ;
+- create -> `created:true` ;
+- `Date.now()` reste au callsite Core 2.00 et est passé explicitement ;
+- aucun accès Spatial ;
+- aucune mutation de runtime ;
+- aucun DOM / stockage / timer / observer / listener ;
+- aucun aléatoire ;
+- aucune dépendance Tactical / Capture / Survie / PvP.
+
+Pourquoi cette slice :
+- elle est commune aux deux branches create/existing ;
+- elle formalise exactement la frontière caractérisée ;
+- elle est consommée par `DungeonRoomRuntime167822` sans déplacer son autorité ;
+- elle ne déplace ni restauration Spatial, ni création de contenu, ni spawn ;
+- elle constitue un micro-lot homogène et réversible.
+
+## Prochaine étape TDD
+
+1. ajouter une sentinelle RED exigeant `buildGeneratedRoomTransition` ;
+2. exiger exactement deux consommateurs Core 2.00 : `created:false` et `created:true` ;
+3. interdire les deux constructions inline historiques ;
+4. vérifier que la nouvelle garde est la seule dette Phase 7 rouge ;
+5. seulement après RED isolé, ajouter l’API pure, mettre à jour le contrat et raccorder les deux callsites via la source Rule 26 vérifiée.

@@ -1,0 +1,80 @@
+name: GenSrpG Phase 7 room-transition one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase7-dungeon-generated-room-create-restore-2026-09-27
+    paths:
+      - .github/workflows/gensrpg-phase7-room-transition-oneshot.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 source
+        shell: bash
+        run: |
+          test "$(wc -c < index.html)" = "8170143"
+          test "$(git hash-object index.html)" = "23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d"
+          grep -q "function buildGeneratedRoomTransition" assets/gensrpg/dungeon/entry-v1.js
+
+      - name: Apply exact Phase 7 transition micro-diff
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p=Path("index.html")
+          s=p.read_text()
+
+          changes=[
+            (
+              "x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:false,at:Date.now()};",
+              "x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,false,Date.now());",
+              "existing generated room transition"
+            ),
+            (
+              "x.dc313LastTransition={heroId,from:targetRoom-1,to:targetRoom,created:true,at:Date.now()};",
+              "x.dc313LastTransition=GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId,targetRoom-1,targetRoom,true,Date.now());",
+              "new generated room transition"
+            )
+          ]
+
+          for old,new,label in changes:
+            if s.count(old)!=1:
+              raise SystemExit(label+" anchor drift: "+str(s.count(old)))
+            s=s.replace(old,new,1)
+
+          p.write_text(s)
+          PY
+
+      - name: Verify exact target and focused tests
+        shell: bash
+        run: |
+          test "$(wc -c < index.html)" = "8170213"
+          test "$(git hash-object index.html)" = "efcc459c9bade0e35bf123d100e499b3ce7d4eca"
+          node tests/gens_phase7_dungeon_generated_advance_plan_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_kind_weighting_characterization_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_kind_weighting_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs
+          node tests/gens_phase7_dungeon_generated_room_transition_v1.test.cjs
+          node tests/dungeon_room_runtime_v167822.test.cjs
+          git diff --check
+
+      - name: Commit runtime and remove one-shot
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/gensrpg-phase7-room-transition-oneshot.yml
+          git add index.html
+          git commit -m "refactor: delegate generated room transition descriptors"
+          git push origin HEAD:work/gensrpg-phase7-dungeon-generated-room-create-restore-2026-09-27

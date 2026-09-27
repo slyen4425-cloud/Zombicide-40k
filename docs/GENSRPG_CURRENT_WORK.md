@@ -42,13 +42,13 @@ Runtime final :
 
 ## Fermeture candidate GREEN
 
-SHA technique GREEN :
-`0e08f1f6ae3c668c4aeb93f5ecc412342cd60931`.
+SHA technique GREEN final :
+`9dbded033d9103e7af3bfd9e10f8a79d14e3eb5c`.
 
 CI complète :
-- Architecture + Browser : `36341817763` — SUCCESS ;
-- Firefox : `36341817750` — SUCCESS ;
-- Tactical Dock : `36341817713` — SUCCESS.
+- Architecture + Browser : `36345202167` — SUCCESS ;
+- Firefox : `36345202158` — SUCCESS ;
+- Tactical Dock : `36345202183` — SUCCESS.
 
 Résultat :
 - gate de présence extrait en API pure Dungeon ;
@@ -56,6 +56,7 @@ Résultat :
 - `nearestFree`, sélection de type et matérialisation restent à leur propriétaire historique ;
 - authored reste séparé ;
 - aucune assertion métier assouplie pendant le réalignement des fingerprints ;
+- la fixture Browser `Dungeon après Survie` a été rendue déterministe pour supprimer une flakiness RNG prouvée, sans modifier ni masquer le comportement production ;
 - aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
 
 Checkpoint final prévu après CI du présent SHA documentaire :

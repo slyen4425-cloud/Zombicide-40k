@@ -11,7 +11,7 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(blob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','asset resolver final audit must target the current Phase 7 Dungeon generated-branch weighting runtime index blob');
+assert.equal(blob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','asset resolver final audit must target the current Phase 7 Dungeon generated-branch chance-gate runtime index blob');
 
 function block(id){
   const m=index.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -42,8 +42,10 @@ const authoredBranchNav=read('assets/dungeon/dungeon-authored-branch-nav-cleanup
 const line=core200.split(/\r?\n/).find(v=>v.startsWith('function maybeSpecialBranch(x){'));
 assert.ok(line,'Core 2.00 maybeSpecialBranch must remain directly characterizable');
 
-assert.match(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchChance\)\|\|0\)/,
-  'generated branch presence must use the configured specialBranchChance');
+assert.match(line,/GensDungeonV1\.exploration\.shouldCreateGeneratedBranch\(c\.specialBranchChance,Math\.random\(\)\)/,
+  'generated branch presence must delegate configured specialBranchChance and the explicit first random roll to the Dungeon gate');
+assert.doesNotMatch(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchChance\)\|\|0\)/,
+  'Core 2.00 must no longer duplicate the generated branch chance calculation');
 assert.match(line,/const i=nearestFree\(x\);if\(i<0\)return null/,
   'generated branch planning must stop before type selection when there is no free cell');
 assert.equal((line.match(/GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(/g)||[]).length,1,

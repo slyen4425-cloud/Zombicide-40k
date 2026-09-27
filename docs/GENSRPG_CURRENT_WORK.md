@@ -116,9 +116,38 @@ Raccord :
 - chance, `nearestFree`, les deux RNG et matérialisation restent au callsite historique ;
 - authored / Spatial / RoomRuntime / spawn / Tactical / Survie / Capture / PvP inchangés.
 
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`c27075fc63e074bcb491c2d46b98bf9565d4cde4`.
+
+CI complète :
+- Architecture + Browser : `36323368454` — SUCCESS ;
+- Firefox : `36323368557` — SUCCESS ;
+- Tactical Dock : `36323368550` — SUCCESS.
+
+Runtime final :
+- `index.html` : `8170062` octets ;
+- blob : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Résultat :
+- `pickWeightedGeneratedBranchType(branchWeights, roll)` devient propriétaire uniquement du calcul pondéré ;
+- chance, `nearestFree`, les deux RNG et la matérialisation restent au callsite historique ;
+- authored / Spatial / RoomRuntime / événements-spawn / ennemis / Tactical / Survie / Capture / PvP restent inchangés ;
+- les fingerprints historiques ont été réalignés un par un sans assouplir les assertions fonctionnelles ;
+- Architecture, Browser Chromium, Firefox et Tactical Dock sont GREEN sur le même SHA ;
+- aucun changement utilisateur visible, donc pas de test utilisateur supplémentaire requis pour ce micro-lot.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-plan-green-2026-09-27`.
+
 ## Prochaine action obligatoire
 
-Lancer la triple CI sur le runtime candidat, réaligner uniquement les fingerprints historiques qui échouent un par un, sans assouplir d'assertion fonctionnelle, puis déclarer GREEN uniquement lorsque Architecture + Browser, Firefox et Tactical Dock sont SUCCESS.
+1. valider la clôture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint GREEN ;
+4. pré-auditer avant toute nouvelle modification runtime ;
+5. appliquer Rule 26 dès qu'une nouvelle inspection exacte de `index.html` est nécessaire.
 
 ---
 

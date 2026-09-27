@@ -24,8 +24,8 @@ assert.match(block,/GensStorageV1\.writeJson\(localStorage,GENS_DUNGEON_SCENE_KE
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8170213);
-assert.equal(blob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','Dungeon Scene final index blob must match the current Phase 7 generated-room transition deterministic composition');
+assert.equal(bytes.length,8170062);
+assert.equal(blob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','Dungeon Scene final index blob must match the current Phase 7 generated-branch weighting deterministic composition');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon Scene Core storage authority',

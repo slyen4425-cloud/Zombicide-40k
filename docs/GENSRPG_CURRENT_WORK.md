@@ -1,3 +1,100 @@
+# PHASE 7 — MICRO-LOT 3 — création/restauration de salle generated — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`
+
+SHA de base :
+`2fc83900b001a7643cdd21eecd94d048b91192d1`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-create-restore-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-create-restore-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_CREATE_RESTORE_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Dernier checkpoint GREEN
+
+Micro-lot 2 fermé GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-kind-weighting-green-2026-09-27`
+
+SHA :
+`2fc83900b001a7643cdd21eecd94d048b91192d1`
+
+CI GREEN :
+- Architecture + Browser : `36279456713` — SUCCESS ;
+- Firefox : `36279456727` — SUCCESS ;
+- Tactical Dock : `36279456712` — SUCCESS.
+
+Runtime de base :
+- `index.html` : `8170143` octets ;
+- blob Git : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+## Périmètre du micro-lot 3
+
+Cible :
+**frontière generated entre création d’une nouvelle salle et restauration/rejointure d’une salle déjà présente dans `roomStates`.**
+
+Déjà propriétaires Dungeon et protégés :
+- `GensDungeonV1.exploration.planGeneratedAdvance(...)` ;
+- `GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(...)`.
+
+Le présent lot ne doit pas encore déplacer :
+- mouvement ;
+- événements/spawn ;
+- contenu coffre/piège/énigme ;
+- branches ;
+- politique Boss ;
+- persistance générale ;
+- Room Creator / World Builder ;
+- `DungeonRoomRuntime167822` ;
+- `DungeonSpatial313` ;
+- Tactical/combat ;
+- Survie / Capture / PvP.
+
+## Invariants
+
+- create et existing restent distincts ;
+- une salle existante ne doit jamais être régénérée au retour ;
+- `dc313LastTransition.created` doit conserver sa sémantique ;
+- `DungeonRoomRuntime167822` ne s’applique qu’aux nouvelles salles ;
+- authored reste séparé ;
+- aucune nouvelle globale / wrapper / timer / observer / retry.
+
+## Tests prévus
+
+1. caractérisation statique du chemin Core 2.00 create/existing ;
+2. caractérisation déterministe/VM création-restauration ;
+3. raccord Architecture et GREEN ;
+4. RED isolé d’une seule responsabilité pure ;
+5. micro-diff minimal ;
+6. CI complète ;
+7. checkpoint GREEN final.
+
+## Risque principal
+
+Le chemin exact Core 2.00 mélange potentiellement matérialisation de salle, snapshot spatial, spawn/contenu et marqueur de transition. Aucun déplacement ne doit regrouper ces responsabilités sans preuve.
+
+## Prochaine action obligatoire
+
+Appliquer Rule 26 au SHA exact de base afin d’inspecter le propriétaire natif Core 2.00 de création/restauration.
+
+Permalink requis :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/2fc83900b001a7643cdd21eecd94d048b91192d1/index.html`
+
+Fichier attendu :
+- taille : `8170143` octets ;
+- blob : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+Aucun runtime ne doit être modifié avant réception et vérification du fichier exact.
+
+---
+
 # PHASE 7 — MICRO-LOT 2 — pondération du type de salle generated — 2026-09-26
 
 Base GREEN :

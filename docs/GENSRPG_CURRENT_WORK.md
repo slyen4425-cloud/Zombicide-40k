@@ -15,14 +15,60 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BRANCH_CHANCE_GATE_PREAUDIT.md`
 
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Périmètre fermé
+
 Cible :
 isoler uniquement le gate pur `specialBranchChance + roll explicite`, sans déplacer `nearestFree`, le RNG de type ni la matérialisation.
 
-Hors périmètre :
+Hors périmètre confirmé inchangé :
 authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
 
-Prochaine action :
-caractérisation GREEN dédiée, puis RED isolé. Rule 26 obligatoire avant tout micro-diff de `index.html`.
+API propriétaire :
+`GensDungeonV1.exploration.shouldCreateGeneratedBranch(specialBranchChance, roll)`.
+
+## Rule 26
+
+Source exacte vérifiée :
+- `work37.zip / index37.txt` ;
+- source : `8170062` octets ;
+- blob : `74e223b2c9877e6a88b6ad6726290d230f1f616e`.
+
+Runtime final :
+- `index.html` : `8170090` octets ;
+- blob : `85bf8dcb0ad22d596e648f4992210d870520d6f9`.
+
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`0e08f1f6ae3c668c4aeb93f5ecc412342cd60931`.
+
+CI complète :
+- Architecture + Browser : `36341817763` — SUCCESS ;
+- Firefox : `36341817750` — SUCCESS ;
+- Tactical Dock : `36341817713` — SUCCESS.
+
+Résultat :
+- gate de présence extrait en API pure Dungeon ;
+- ordre et nombre de RNG conservés ;
+- `nearestFree`, sélection de type et matérialisation restent à leur propriétaire historique ;
+- authored reste séparé ;
+- aucune assertion métier assouplie pendant le réalignement des fingerprints ;
+- aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-chance-gate-green-2026-09-27`.
+
+## Prochaine action obligatoire
+
+1. valider la clôture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le prochain micro-lot Phase 7 depuis ce checkpoint GREEN ;
+4. rester dans `Dungeon exploration / salles / branches` ;
+5. pré-auditer avant toute nouvelle modification runtime ;
+6. appliquer Rule 26 si le prochain lot exige une inspection exacte de `index.html`.
 
 ---
 

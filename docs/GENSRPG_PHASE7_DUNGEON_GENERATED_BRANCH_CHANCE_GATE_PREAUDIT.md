@@ -182,13 +182,13 @@ Les tests fingerprintés historiques doivent maintenant être réalignés un gar
 
 ## Fermeture candidate GREEN
 
-SHA technique GREEN :
-`0e08f1f6ae3c668c4aeb93f5ecc412342cd60931`.
+SHA technique GREEN final :
+`9dbded033d9103e7af3bfd9e10f8a79d14e3eb5c`.
 
 CI complète :
-- Architecture + Browser : `36341817763` — SUCCESS ;
-- Firefox : `36341817750` — SUCCESS ;
-- Tactical Dock : `36341817713` — SUCCESS.
+- Architecture + Browser : `36345202167` — SUCCESS ;
+- Firefox : `36345202158` — SUCCESS ;
+- Tactical Dock : `36345202183` — SUCCESS.
 
 Runtime final :
 - `index.html` : `8170090` octets ;
@@ -205,6 +205,8 @@ Résultat :
 - les fingerprints historiques invalidés par le nouveau blob ont été réalignés un garde à la fois ;
 - aucune assertion fonctionnelle ou métier n'a été assouplie ;
 - Architecture, Browser Chromium, Firefox et Tactical Dock sont GREEN sur le même SHA technique ;
+- le Browser E2E `Dungeon après Survie` a été rendu déterministe côté fixture de test après preuve d'une flakiness RNG : une salle `ambush` pouvait ouvrir Tactical automatiquement et produire `battle-already-open`, tandis que le même runtime passait avec une salle `chest` ;
+- la stabilisation fixe temporairement le RNG uniquement dans la fixture lors de la génération de la première salle ; aucun RNG production, gameplay ou runtime n'est modifié et aucune erreur n'est masquée ;
 - aucun changement utilisateur visible : aucun test utilisateur supplémentaire requis.
 
 Checkpoint final prévu après CI du présent SHA documentaire :

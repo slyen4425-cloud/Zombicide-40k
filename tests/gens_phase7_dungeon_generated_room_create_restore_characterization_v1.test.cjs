@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170213,'Phase 7 room create/restore characterization must track the generated transition GREEN candidate runtime');
-assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca','Phase 7 room create/restore characterization must track the exact generated transition GREEN candidate blob');
+assert.equal(bytes.length,8170062,'Phase 7 room create/restore characterization must track the generated branch-weighting GREEN candidate runtime');
+assert.equal(gitBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','Phase 7 room create/restore characterization must track the exact generated branch-weighting GREEN candidate blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -108,14 +108,35 @@ La caractérisation prouve :
 Slice pure sélectionnée :
 `GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId, fromRoom, toRoom, created, at)`.
 
+## Raccord runtime candidat
+
+API pure :
+`GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId, fromRoom, toRoom, created, at)`.
+
+SHA runtime :
+`8ed22bc9afd393b775fb478e192b210e1875d03a`.
+
+One-shot :
+`36293613079` — SUCCESS.
+
+Runtime :
+- `index.html` : `8170213` octets ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+Le raccord ne change que les deux constructions de `dc313LastTransition` dans Core 2.00 :
+- existing -> descripteur Dungeon avec `created:false` ;
+- create -> descripteur Dungeon avec `created:true`.
+
+Spatial, RoomRuntime, spawn, authored et Tactical restent inchangés.
+
 ## Prochaine action obligatoire
 
-1. ajouter une sentinelle RED exigeant cette API pure ;
-2. exiger exactement deux callsites Core 2.00 : `created:false` et `created:true` ;
-3. interdire les deux objets transition inline historiques ;
-4. vérifier RED isolé : Architecture rouge uniquement sur la nouvelle garde, Firefox/Tactical verts ;
-5. seulement ensuite ajouter l’API/contrat et raccorder `index.html` avec la source Rule 26 `work35.zip` ;
-6. ne pas toucher à `DungeonSpatial313`, `DungeonRoomRuntime167822`, spawn, events, Tactical ou authored.
+1. exécuter Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire ;
+2. si un ancien garde échoue uniquement sur l’ancienne empreinte `8170143 / 23b4...`, réaligner un garde à la fois ;
+3. ne modifier aucune assertion métier tant qu’elle n’est pas prouvée obsolète ;
+4. si une assertion fonctionnelle échoue, arrêter la cartographie et investiguer ;
+5. une fois la CI complète GREEN, documenter la fermeture et créer le checkpoint final du micro-lot 3 ;
+6. aucune preview manuelle supplémentaire n’est requise si aucun comportement visible n’a changé.
 
 ---
 

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170062,'S3 must track the current Phase 7 generated-branch weighting runtime');
-assert.equal(gitBlob,'74e223b2c9877e6a88b6ad6726290d230f1f616e','S3 must track the current Phase 7 generated-branch weighting blob');
+assert.equal(bytes.length,8170090,'S3 must track the current Phase 7 generated-branch chance-gate runtime');
+assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','S3 must track the current Phase 7 generated-branch chance-gate blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

@@ -64,20 +64,42 @@ Aucune API cible n'est encore figée avant inspection exacte.
 - aucune dépendance Tactical ;
 - aucun wrapper / retry / observer / polling ajouté.
 
-## Prochaine action obligatoire
+## Rule 26 + caractérisation GREEN
 
-Appliquer Rule 26 au SHA exact de base pour inspecter `maybeSpecialBranch(x)`.
-
-Permalink :
-`https://github.com/slyen4425-cloud/Zombicide-40k/blob/9ec3a39af709405f5d9ee54a61aa2c041c7339e6/index.html`
-
-Fichier attendu :
+Source exacte reçue et vérifiée :
+- `work36.zip / index36.txt` ;
 - taille : `8170213` octets ;
 - blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
 
-`work35.zip / index35.txt` ne doit plus être utilisé pour une inspection exacte, car il correspond à l'ancien blob `23b4f590...`.
+Caractérisation :
+`tests/gens_phase7_dungeon_generated_branch_plan_characterization_v1.test.cjs`.
 
-Aucun runtime ne doit être modifié avant réception et vérification du fichier exact.
+SHA GREEN :
+`c3654bdfbd0674968b321b9a7b440f8772d1db94`.
+
+CI :
+- Architecture + Browser : `36307407149` — SUCCESS ;
+- Firefox : `36307407138` — SUCCESS ;
+- Tactical Dock : `36307407144` — SUCCESS.
+
+Preuves :
+- existing ne relance pas la planification de branche ;
+- create appelle `maybeSpecialBranch(x)` une seule fois ;
+- présence : premier RNG ;
+- recherche case libre ensuite ;
+- type pondéré : second RNG seulement si une case libre existe ;
+- poids par défaut `45/25/30` ;
+- matérialisation scène + `trapdoor` reste dans Core 2.00 ;
+- authored reste séparé.
+
+Slice pure sélectionnée :
+`GensDungeonV1.exploration.pickWeightedGeneratedBranchType(branchWeights, roll)`.
+
+Le test de chance, `nearestFree`, les deux appels `Math.random()` et la matérialisation restent au callsite historique.
+
+## Prochaine action obligatoire
+
+Écrire et raccorder UNE sentinelle RED pour `pickWeightedGeneratedBranchType(branchWeights, roll)`, prouver que cette nouvelle dette est la seule garde Phase 7 rouge, puis seulement appliquer le micro-diff runtime minimal.
 
 ---
 

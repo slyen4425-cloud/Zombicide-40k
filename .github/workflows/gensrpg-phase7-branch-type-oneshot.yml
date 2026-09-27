@@ -42,24 +42,24 @@ jobs:
 
           entry_path=Path("assets/gensrpg/dungeon/entry-v1.js")
           entry=entry_path.read_text(encoding="utf-8")
-          marker="  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){\\n    return {heroId,from:fromRoom,to:toRoom,created,at};\\n  }\\n"
+          marker="  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){\n    return {heroId,from:fromRoom,to:toRoom,created,at};\n  }\n"
           addition=(
-              "  function pickWeightedGeneratedBranchType(branchWeights,roll){\\n"
-              "    const weights={treasure:45,boss:25,secret:30,...(branchWeights||{})};\\n"
-              "    const entries=Object.entries(weights).map(([type,value])=>[type,Math.max(0,Number(value)||0)]);\\n"
-              "    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;\\n"
-              "    let remaining=Number(roll)*total;\\n"
-              "    for(const [type,value] of entries){\\n"
-              "      remaining-=value;\\n"
-              "      if(remaining<=0)return type;\\n"
-              "    }\\n"
-              "    return \"treasure\";\\n"
-              "  }\\n\\n"
+              "  function pickWeightedGeneratedBranchType(branchWeights,roll){\n"
+              "    const weights={treasure:45,boss:25,secret:30,...(branchWeights||{})};\n"
+              "    const entries=Object.entries(weights).map(([type,value])=>[type,Math.max(0,Number(value)||0)]);\n"
+              "    const total=entries.reduce((sum,[,value])=>sum+value,0)||1;\n"
+              "    let remaining=Number(roll)*total;\n"
+              "    for(const [type,value] of entries){\n"
+              "      remaining-=value;\n"
+              "      if(remaining<=0)return type;\n"
+              "    }\n"
+              "    return \"treasure\";\n"
+              "  }\n\n"
           )
           assert entry.count(marker)==1, entry.count(marker)
           entry=entry.replace(marker,addition+marker)
-          export_old="      planGeneratedAdvance,\\n      pickWeightedGeneratedRoomKind,\\n      buildGeneratedRoomTransition\\n"
-          export_new="      planGeneratedAdvance,\\n      pickWeightedGeneratedRoomKind,\\n      buildGeneratedRoomTransition,\\n      pickWeightedGeneratedBranchType\\n"
+          export_old="      planGeneratedAdvance,\n      pickWeightedGeneratedRoomKind,\n      buildGeneratedRoomTransition\n"
+          export_new="      planGeneratedAdvance,\n      pickWeightedGeneratedRoomKind,\n      buildGeneratedRoomTransition,\n      pickWeightedGeneratedBranchType\n"
           assert entry.count(export_old)==1, entry.count(export_old)
           entry=entry.replace(export_old,export_new)
           entry_path.write_text(entry,encoding="utf-8")

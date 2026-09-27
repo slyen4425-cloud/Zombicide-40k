@@ -1,3 +1,86 @@
+# PHASE 7 — MICRO-LOT 4 — planification des branches generated — 2026-09-27
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-create-restore-green-2026-09-27`
+
+SHA de base :
+`9ec3a39af709405f5d9ee54a61aa2c041c7339e6`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-branch-plan-2026-09-27`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-branch-plan-2026-09-27`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BRANCH_PLAN_PREAUDIT.md`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Micro-lot précédent fermé GREEN
+
+Micro-lot 3 :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-create-restore-green-2026-09-27`
+
+SHA :
+`9ec3a39af709405f5d9ee54a61aa2c041c7339e6`
+
+CI finale :
+- Architecture + Browser : `36304220091` — SUCCESS ;
+- Firefox : `36304220130` — SUCCESS ;
+- Tactical Dock : `36304220131` — SUCCESS.
+
+Runtime courant :
+- `index.html` : `8170213` octets ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+## Périmètre du micro-lot 4
+
+Cible :
+**décision / planification de branche secondaire dans l'adventure generated autour de `maybeSpecialBranch(x)`.**
+
+Rester avant :
+- événements/spawn ;
+- assignation ennemis ;
+- mouvement ;
+- portes/coffres/pièges/énigmes ;
+- déclenchement Tactical.
+
+Les branches authored restent séparées :
+- `DungeonSecondaryBranchContentFix167860` conserve le contenu exact authored ;
+- `DungeonAuthoredBranchNavCleanup167863` conserve la navigation authored.
+
+Aucune API cible n'est encore figée avant inspection exacte.
+
+## Invariants
+
+- aucune branche generated ajoutée/supprimée par erreur ;
+- conditions/probabilités identiques ;
+- même ordre/nombre de tirages aléatoires ;
+- mutations runtime au même point ;
+- aucun spawn ou contenu authored déplacé ;
+- Spatial / RoomRuntime inchangés ;
+- aucune dépendance Tactical ;
+- aucun wrapper / retry / observer / polling ajouté.
+
+## Prochaine action obligatoire
+
+Appliquer Rule 26 au SHA exact de base pour inspecter `maybeSpecialBranch(x)`.
+
+Permalink :
+`https://github.com/slyen4425-cloud/Zombicide-40k/blob/9ec3a39af709405f5d9ee54a61aa2c041c7339e6/index.html`
+
+Fichier attendu :
+- taille : `8170213` octets ;
+- blob : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+`work35.zip / index35.txt` ne doit plus être utilisé pour une inspection exacte, car il correspond à l'ancien blob `23b4f590...`.
+
+Aucun runtime ne doit être modifié avant réception et vérification du fichier exact.
+
+---
+
 # PHASE 7 — MICRO-LOT 3 — création/restauration de salle generated — 2026-09-27
 
 Base GREEN :

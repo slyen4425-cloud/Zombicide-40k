@@ -48,8 +48,8 @@ vm.createContext(sandbox);
 vm.runInContext(entry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(typeof sandbox.GensDungeonV1?.exploration?.pickWeightedGeneratedBranchType,'function',
   'prior branch-type weighting owner must remain present before chance-gate extraction');
-assert.equal(typeof sandbox.GensDungeonV1?.exploration?.shouldCreateGeneratedBranch,'undefined',
-  'chance-gate owner must not exist during characterization GREEN');
+assert.equal(typeof sandbox.GensDungeonV1?.exploration?.shouldCreateGeneratedBranch,'function',
+  'chance-gate owner must exist in Dungeon after the dedicated Phase 7 raccord');
 
 function currentGate(chance,roll){
   return !(Number(roll)*100>=Math.max(0,Number(chance)||0));

@@ -80,18 +80,42 @@ Le présent lot ne doit pas encore déplacer :
 
 Le chemin exact Core 2.00 mélange potentiellement matérialisation de salle, snapshot spatial, spawn/contenu et marqueur de transition. Aucun déplacement ne doit regrouper ces responsabilités sans preuve.
 
+## Rule 26 et caractérisation GREEN
+
+Source exacte reçue :
+- `work35.zip / index35.txt` ;
+- taille `8170143` octets ;
+- blob `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
+
+Caractérisation :
+`tests/gens_phase7_dungeon_generated_room_create_restore_characterization_v1.test.cjs`.
+
+SHA GREEN :
+`d9e9f4658ed8012c43492248587fcd495237af58`.
+
+CI :
+- Architecture + Browser : `36292666711` — SUCCESS ;
+- Firefox : `36292666748` — SUCCESS ;
+- Tactical Dock : `36292666751` — SUCCESS.
+
+La caractérisation prouve :
+- existing restaure `last + enemyCells` via `DungeonSpatial313.activate()` sans régénération ;
+- create appelle `createRoom()` exactement une fois ;
+- `dc313LastTransition.created` distingue false/true ;
+- `DungeonRoomRuntime167822` consomme ce marqueur uniquement pour les nouvelles salles ;
+- authored reste séparé.
+
+Slice pure sélectionnée :
+`GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId, fromRoom, toRoom, created, at)`.
+
 ## Prochaine action obligatoire
 
-Appliquer Rule 26 au SHA exact de base afin d’inspecter le propriétaire natif Core 2.00 de création/restauration.
-
-Permalink requis :
-`https://github.com/slyen4425-cloud/Zombicide-40k/blob/2fc83900b001a7643cdd21eecd94d048b91192d1/index.html`
-
-Fichier attendu :
-- taille : `8170143` octets ;
-- blob : `23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d`.
-
-Aucun runtime ne doit être modifié avant réception et vérification du fichier exact.
+1. ajouter une sentinelle RED exigeant cette API pure ;
+2. exiger exactement deux callsites Core 2.00 : `created:false` et `created:true` ;
+3. interdire les deux objets transition inline historiques ;
+4. vérifier RED isolé : Architecture rouge uniquement sur la nouvelle garde, Firefox/Tactical verts ;
+5. seulement ensuite ajouter l’API/contrat et raccorder `index.html` avec la source Rule 26 `work35.zip` ;
+6. ne pas toucher à `DungeonSpatial313`, `DungeonRoomRuntime167822`, spawn, events, Tactical ou authored.
 
 ---
 

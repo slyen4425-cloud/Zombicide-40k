@@ -20,10 +20,10 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8170143,
-  'final Shell authority contract must run on the current Phase 7 room-kind S2 GREEN index');
-assert.equal(gitBlob,'23b4f59009c5e51fdb91e9bfe3fd87d2a79bba3d',
-  'final Shell authority contract must keep the current Phase 7 room-kind S2 GREEN composition');
+assert.equal(bytes.length,8170213,
+  'final Shell authority contract must run on the current Phase 7 generated-room transition S2 GREEN index');
+assert.equal(gitBlob,'efcc459c9bade0e35bf123d100e499b3ce7d4eca',
+  'final Shell authority contract must keep the current Phase 7 generated-room transition S2 GREEN composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),
   'final Shell authority file must exist');

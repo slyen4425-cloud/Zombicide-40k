@@ -273,3 +273,32 @@ Pourquoi cette slice :
 3. interdire les deux constructions inline historiques ;
 4. vérifier que la nouvelle garde est la seule dette Phase 7 rouge ;
 5. seulement après RED isolé, ajouter l’API pure, mettre à jour le contrat et raccorder les deux callsites via la source Rule 26 vérifiée.
+
+
+## RED isolé — prouvé
+
+SHA RED :
+`8e8474e059344ecf43af2e376950401c235a553d`.
+
+CI :
+- Architecture : `36293318726` — FAILURE attendue ;
+- Firefox : `36293318749` — SUCCESS ;
+- Tactical Dock : `36293318721` — SUCCESS.
+
+Architecture Phase 7 :
+- #181 autorité exploration : SUCCESS ;
+- #182 plan d’avance generated : SUCCESS ;
+- #183 pondération generated caractérisée : SUCCESS ;
+- #184 propriétaire pondération : SUCCESS ;
+- #185 création/restauration generated : SUCCESS ;
+- #186 `Exiger le descripteur de transition des salles generated Phase 7` : FAILURE attendue.
+
+Erreur exacte :
+`Phase 7 micro-lot 3 requires Dungeon-owned generated room transition descriptors`.
+
+État observé :
+- attendu : `function` ;
+- réel : `undefined`.
+
+Le RED est donc isolé à l’absence de la nouvelle API pure.
+Aucune régression du runtime n’est impliquée.

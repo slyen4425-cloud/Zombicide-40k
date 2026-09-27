@@ -348,3 +348,38 @@ Tests ciblés exécutés avant commit :
 - `git diff --check` : SUCCESS.
 
 La CI complète post-raccord doit maintenant cartographier les éventuelles empreintes historiques invalidées avant toute déclaration GREEN.
+
+
+## Fermeture candidate GREEN — micro-lot 3
+
+SHA technique GREEN avant clôture documentaire :
+`48d6395bdb54fed9bd1b8d8daff443849dce711d`.
+
+CI complète sur ce même SHA :
+- Architecture : `36303290018` — SUCCESS ;
+- Browser : job du run `36303290018` — SUCCESS ;
+- Firefox : `36303290058` — SUCCESS ;
+- Tactical Dock : `36303290014` — SUCCESS.
+
+Runtime final du micro-lot :
+- `index.html` : `8170213` octets ;
+- blob Git : `efcc459c9bade0e35bf123d100e499b3ce7d4eca`.
+
+Résultat architectural :
+- `GensDungeonV1.exploration.buildGeneratedRoomTransition(heroId, fromRoom, toRoom, created, at)` est le propriétaire pur du descripteur generated ;
+- Core 2.00 conserve les mutations de runtime, Spatial, création de salle, spawn, scene, lock et challenge ;
+- existing et create restent strictement distincts ;
+- `Date.now()` reste au callsite et est passé explicitement ;
+- `DungeonSpatial313` et `DungeonRoomRuntime167822` restent inchangés ;
+- authored World Builder reste séparé ;
+- aucune autorité Tactical / Survie / Capture / PvP n'a été déplacée ;
+- aucune nouvelle globale, wrapper, timer, observer, polling ou retry n'a été ajouté ;
+- aucun changement utilisateur visible n'est attendu, donc aucune preview manuelle supplémentaire n'est requise.
+
+Cartographie post-raccord :
+- tous les anciens gardes invalidés uniquement par le fingerprint `8170143 / 23b4...` ont été réalignés un par un ;
+- aucune assertion fonctionnelle n'a dû être assouplie ;
+- aucun nouveau changement runtime n'a été nécessaire après `8ed22bc9afd393b775fb478e192b210e1875d03a`.
+
+Checkpoint final prévu après validation CI du commit documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-create-restore-green-2026-09-27`.

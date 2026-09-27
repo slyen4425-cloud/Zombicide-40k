@@ -9,6 +9,7 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
+const dungeonEntry=read('assets/gensrpg/dungeon/entry-v1.js');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
@@ -45,10 +46,12 @@ assert.match(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.specialBranchC
   'generated branch presence must use the configured specialBranchChance');
 assert.match(line,/const i=nearestFree\(x\);if\(i<0\)return null/,
   'generated branch planning must stop before type selection when there is no free cell');
-assert.match(line,/\{treasure:45,boss:25,secret:30,\.\.\.\(c\.specialBranchWeights\|\|\{\}\)\}/,
-  'generated branch type selection must preserve default weights plus configured overrides');
-assert.match(line,/Math\.random\(\)\*tot/,
-  'generated branch type selection must consume a second random roll only after eligibility');
+assert.equal((line.match(/GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(/g)||[]).length,1,
+  'generated branch type selection must delegate exactly once to the Dungeon owner');
+assert.match(line,/GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(c\.specialBranchWeights,Math\.random\(\)\)/,
+  'generated branch type selection must pass configured weights and the explicit second random roll');
+assert.doesNotMatch(line,/const w=\{treasure:45,boss:25,secret:30/,
+  'Core 2.00 must no longer duplicate the branch-type weighting calculation');
 assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,
   'branch materialization must still create the scene element at the Core 2.00 callsite');
 assert.match(line,/m\.cells\[i\]='trapdoor'/,
@@ -102,6 +105,7 @@ function runScenario({config,map=true,free=4,rolls=[]}){
   sandbox.window=sandbox;
   sandbox.globalThis=sandbox;
   vm.createContext(sandbox);
+  vm.runInContext(dungeonEntry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
   vm.runInContext(line+'\nthis.__maybeSpecialBranch=maybeSpecialBranch;',sandbox,{filename:'maybeSpecialBranch.js'});
   const result=sandbox.__maybeSpecialBranch(x);
   return {result:JSON.parse(JSON.stringify(result)),x,events,draws:ri};

@@ -41,8 +41,27 @@ RED isolé :
 - Tactical Dock `36431701044` — SUCCESS ;
 - Browser SKIPPED uniquement à cause du RED Architecture.
 
+Micro-diff GREEN :
+- planner pur `GensDungeonV1.movement.planAuthoredEntryMovement(remainingValue)` raccordé ;
+- `DungeonAuthoredRuntime167839.movementForEntry` consomme ce planner une seule fois ;
+- fallback `heroMoveAllowance(hero)` conservé paresseux dans Authored Runtime ;
+- `DungeonSpatial313`, positions, pathfinding, déplacement réel, événements et Tactical inchangés ;
+- `index.html` inchangé : `8169990` octets / `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Fermeture candidate GREEN :
+- SHA technique : `4750b8b73bbe28684abc2fa997292173522d7b82` ;
+- Architecture + Browser Chromium : `36434074641` — SUCCESS ;
+- Firefox : `36434074564` — SUCCESS ;
+- Tactical Dock : `36434074498` — SUCCESS ;
+- aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-entry-movement-green-2026-09-28`.
+
 Prochaine action :
-micro-diff minimal dans les modules autonomes : planner pur Dungeon + raccord Authored Runtime + contrat. `index.html` reste inchangé, donc Rule 26 n’est pas requise pour ce raccord.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le prochain micro-lot mouvement Phase 7 depuis ce checkpoint GREEN.
 
 ---
 

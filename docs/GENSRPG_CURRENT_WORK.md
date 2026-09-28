@@ -25,8 +25,21 @@ Runtime de base :
 Hors périmètre :
 authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
 
+Caractérisation GREEN :
+- SHA `cb95de0ee473c4729f924d0e3aefaa29118a5177` ;
+- Architecture + Browser `36347575887` — SUCCESS ;
+- Firefox `36347575879` — SUCCESS ;
+- Tactical Dock `36347575878` — SUCCESS.
+
+RED isolé :
+- SHA `008701730efaf438a995e4c0026626947cda607c` ;
+- Architecture `36360543411` — FAILURE attendue sur #192 uniquement ;
+- Firefox `36360543499` — SUCCESS ;
+- Tactical Dock `36360543487` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
 Prochaine action :
-caractérisation GREEN dédiée du descripteur historique, puis RED isolé.
+Rule 26 sur l'index exact du SHA RED, puis micro-diff minimal du descripteur pur. Aucun runtime ne doit être modifié avant vérification locale taille/blob du fichier fourni.
 
 ---
 

@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function realExitIndex\(x\)\{const map=x\?\.last\?\.map\|\|\{\},cells=Array\.isArray\(map\.cells\)\?map\.cells:\[\];const direct=Number\(map\.exitIdx\);if\(Number\.isInteger\(direct\)&&direct>=0&&String\(cells\[direct\]\|\|""\)\.toLowerCase\(\)==="exit"\)return direct;return cells\.findIndex\(v=>String\(v\|\|""\)\.toLowerCase\(\)==="exit"\)\}/,
-  'historical realExitIndex must remain local to Authored Runtime before extraction'
+  /function realExitIndex\(x\)\{const map=x\?\.last\?\.map\|\|\{\},cells=Array\.isArray\(map\.cells\)\?map\.cells:\[\];return ROOT\.GensDungeonV1\.movement\.resolveAuthoredRealExitIndex\(cells,map\.exitIdx\)\}/,
+  'post-raccord realExitIndex must preserve map reads and delegate only pure exit resolution'
 );
 assert.match(
   authored,
@@ -72,8 +72,8 @@ vm.createContext(pureSandbox);
 vm.runInContext(entry,pureSandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof pureSandbox.GensDungeonV1?.movement?.resolveAuthoredRealExitIndex,
-  'undefined',
-  'pre-extraction characterization must prove the pure real-exit resolver is not connected yet'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored real-exit resolver'
 );
 
 assert.doesNotMatch(
@@ -83,9 +83,9 @@ assert.doesNotMatch(
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored real exit index characterization after outgoing-edge GREEN',
+  scenario:'Phase 7 authored real exit index post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredRuntime167839.realExitIndex',
+  currentOwner:'DungeonAuthoredRuntime167839.realExitIndex consumer',
   semantics:{
     validDirectPriority:true,
     numericDirectCoercion:true,

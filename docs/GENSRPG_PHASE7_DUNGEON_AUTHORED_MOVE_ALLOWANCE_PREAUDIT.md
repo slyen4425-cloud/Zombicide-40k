@@ -117,3 +117,36 @@ Si une modification exacte de `index.html` devenait nécessaire, le lot doit s'a
 8. triple CI ;
 9. aucun test utilisateur si le comportement reste strictement identique ;
 10. fermeture documentaire + checkpoint GREEN.
+
+## RED isolé — prouvé
+
+SHA RED :
+`0e34b070fae984e83cfb294d65b2ca03e9488a24`.
+
+CI :
+- Architecture : `36445516538` — FAILURE attendue ;
+- nouvelle garde rouge unique : `#196 — Exiger la normalisation Dungeon du mouvement authored Phase 7` ;
+- erreur : `Phase 7 micro-lot 8 requires Dungeon-owned authored hero move-allowance normalization` ;
+- Browser : SKIPPED uniquement parce qu'Architecture est rouge ;
+- Firefox : `36445516297` — SUCCESS ;
+- Tactical Dock : `36445516491` — contract / Firefox / Chromium SUCCESS.
+
+La caractérisation #195 reste GREEN.
+Aucun runtime `index.html` n'a été modifié.
+
+## Micro-diff autorisé après RED
+
+Fichiers uniquement :
+- `assets/gensrpg/dungeon/entry-v1.js` ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` ;
+- `assets/gensrpg/dungeon/module-contract-v1.json`.
+
+Changement autorisé :
+1. ajouter le helper pur `resolveAuthoredHeroMoveAllowance(runtimeMovementValue, statMovementValue)` ;
+2. exposer ce helper sous `GensDungeonV1.movement` ;
+3. faire déléguer `heroMoveAllowance(id)` à ce helper avec les deux lectures explicites ;
+4. conserver le `try/catch` et son fallback `3` dans Authored Runtime ;
+5. documenter la propriété pure dans le contrat Dungeon.
+
+Tout le reste reste hors périmètre.
+

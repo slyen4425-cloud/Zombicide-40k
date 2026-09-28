@@ -137,3 +137,85 @@ alors appliquer Rule 26 sur le HEAD courant :
 - seulement ensuite inspecter/modifier le runtime exact.
 
 La source `work39.zip` est obsolète pour un futur micro-diff : elle correspond au blob précédent `85bf8dcb...`.
+
+## Caractérisation GREEN
+
+SHA :
+`adb9a128b5e4c19ed7d325163687c3679b22f0e8`.
+
+CI :
+- Architecture + Browser Chromium : `36421618974` — SUCCESS ;
+- Firefox : `36421618917` — SUCCESS ;
+- Tactical Dock : `36421619005` — SUCCESS.
+
+Test :
+`tests/gens_phase7_dungeon_generated_boss_policy_characterization_v1.test.cjs`.
+
+La caractérisation prouve :
+
+1. priorité historique :
+   - final-room si `boss !== 'none'` ;
+   - `everyN` ;
+   - `specific` ;
+   - `random` ;
+   - pondération non-Boss ;
+2. final/everyN/specific réussis : zéro RNG ;
+3. miss déterministe : un RNG de pondération ;
+4. random avec `room <= 2` : aucun RNG Boss, un RNG de pondération ;
+5. random réussi : un seul RNG total ;
+6. random refusé : RNG Boss puis RNG de pondération ;
+7. le final-room garde priorité même quand le mode vaut `random` ;
+8. `boss:'none'` désactive le Boss final ;
+9. `bossEvery:0` conserve le fallback historique à 5 ;
+10. `bossEvery<0` conserve le clamp historique via `Math.max(1,...)` ;
+11. `bossChance:0` conserve le fallback historique à 13 ;
+12. `bossChance<0` est clampée à 0 ;
+13. `pickWeightedGeneratedRoomKind(...)` reste l'unique propriétaire de la pondération non-Boss ;
+14. authored reste séparé.
+
+## Slice pure sélectionnée
+
+API cible TDD :
+`GensDungeonV1.exploration.planGeneratedBossPolicy(room, roomLimit, bossMode, bossEvery, bossRooms, bossChance)`.
+
+Responsabilité UNIQUE :
+produire un plan pur de politique Boss sans consommer de RNG.
+
+Sortie cible :
+- `{status:'boss', chance:null}` : une règle déterministe impose Boss ;
+- `{status:'random', chance:<chance normalisée>}` : le callsite doit effectuer le tirage Boss ;
+- `{status:'none', chance:null}` : passer directement à la pondération non-Boss.
+
+Sémantique cible exacte :
+- final-room prioritaire si `bossMode !== 'none'` ;
+- `everyN` avec `Math.max(1, Number(bossEvery)||5)` ;
+- `specific` avec parsing historique de `bossRooms` ;
+- `random` seulement pour `room > 2` ;
+- chance random `Math.max(0, Number(bossChance)||13)`.
+
+Le callsite Core 2.00 doit conserver :
+- l'appel `cfg()` ;
+- le `Math.random()` Boss, exécuté uniquement si `status==='random'` ;
+- la comparaison `roll*100 < plan.chance` ;
+- le `Math.random()` de pondération non-Boss ;
+- l'appel à `pickWeightedGeneratedRoomKind(...)`.
+
+Ainsi :
+- aucun RNG n'entre dans l'API pure ;
+- le final-room en mode random ne consomme toujours aucun RNG ;
+- un random refusé consomme toujours exactement deux tirages au total ;
+- aucun autre contenu de salle n'entre dans ce lot.
+
+## RED attendu
+
+La future sentinelle doit être rouge uniquement parce que :
+- `planGeneratedBossPolicy(...)` n'existe pas encore ;
+- Core 2.00 possède encore directement la politique final/everyN/specific/random.
+
+Tous les autres gardes doivent rester GREEN.
+
+Aucun runtime ne sera modifié avant :
+1. RED isolé ;
+2. Rule 26 sur le HEAD RED exact ;
+3. vérification locale du fichier fourni.
+

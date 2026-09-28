@@ -47,6 +47,7 @@ const context={
 context.window=context;
 context.globalThis=context;
 vm.createContext(context);
+vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 vm.runInContext(authored,context,{filename:'dungeon-authored-runtime-167839.js'});
 const api=context.DungeonAuthoredRuntime167839;
 assert.ok(api,'authored runtime API must load');

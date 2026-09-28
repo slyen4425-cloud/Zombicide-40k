@@ -44,30 +44,18 @@ jobs:
           
           entry_path=Path("assets/gensrpg/dungeon/entry-v1.js")
           entry=entry_path.read_text(encoding="utf-8")
-          old_entry='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
-            return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
-          }
-
-          function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'''
-          new_entry='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
-            return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
-          }
-
-          function buildGeneratedBranchSceneElement(room,cellIndex,branchType){
+          anchor='  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'
+          helper='''  function buildGeneratedBranchSceneElement(room,cellIndex,branchType){
             const name=branchType==="boss"?"Trappe inquiétante":branchType==="secret"?"Passage secret":"Cache souterraine";
             return {kind:"trapdoor",name,room,cellIndex,environment:"dungeon",branchType};
           }
 
-          function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'''
-          assert entry.count(old_entry)==1, entry.count(old_entry)
-          entry=entry.replace(old_entry,new_entry)
-          old_export='''      pickWeightedGeneratedBranchType,
-                shouldCreateGeneratedBranch
-              })'''
-          new_export='''      pickWeightedGeneratedBranchType,
-                shouldCreateGeneratedBranch,
-                buildGeneratedBranchSceneElement
-              })'''
+'''
+          assert entry.count(anchor)==1, entry.count(anchor)
+          assert entry.count('function buildGeneratedBranchSceneElement(')==0, entry.count('function buildGeneratedBranchSceneElement(')
+          entry=entry.replace(anchor,helper+anchor)
+          old_export='      shouldCreateGeneratedBranch\n'
+          new_export='      shouldCreateGeneratedBranch,\n      buildGeneratedBranchSceneElement\n'
           assert entry.count(old_export)==1, entry.count(old_export)
           entry=entry.replace(old_export,new_export)
           entry_path.write_text(entry,encoding="utf-8",newline="")

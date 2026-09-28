@@ -89,10 +89,10 @@ entrySandbox.window=entrySandbox;
 entrySandbox.globalThis=entrySandbox;
 vm.createContext(entrySandbox);
 vm.runInContext(entry,entrySandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
-assert.equal(typeof entrySandbox.GensDungeonV1?.movement?.resolveEntryAllowance,'undefined',
-  'characterization must remain GREEN before movement allowance extraction');
+assert.equal(typeof entrySandbox.GensDungeonV1?.movement?.normalizeEntryRemaining,'undefined',
+  'characterization must remain GREEN before movement remaining normalization extraction');
 
-assert.doesNotMatch(authored,/GensDungeonV1\.movement\.resolveEntryAllowance/,
+assert.doesNotMatch(authored,/GensDungeonV1\.movement\.normalizeEntryRemaining/,
   'Authored runtime must not consume the future movement helper before RED extraction');
 
 console.log(JSON.stringify({

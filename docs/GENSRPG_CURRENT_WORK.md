@@ -37,8 +37,15 @@ Slice pure retenue :
 Le plan pur retourne `boss / random / none` et ne consomme aucun RNG.
 Core 2.00 doit conserver les tirages aléatoires et le fallback pondéré.
 
+RED isolé :
+- SHA `d545a47a7660e664a7934017b6640d52d5e3628c` ;
+- Architecture `36422843181` — FAILURE attendue sur #186 uniquement ;
+- Firefox `36422843157` — SUCCESS ;
+- Tactical Dock `36422843214` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
 Prochaine action :
-sentinelle RED isolée exigeant ce plan pur et son raccord minimal ; Rule 26 seulement après preuve du RED.
+Rule 26 sur le `index.html` exact du HEAD courant, puis micro-diff minimal du plan Boss pur. Aucun runtime ne doit être modifié avant vérification locale taille/blob du fichier fourni.
 
 ---
 

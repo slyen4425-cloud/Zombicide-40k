@@ -623,6 +623,9 @@ jobs:
       - name: Exiger la vraie case sortie Dungeon Phase 7
         run: node tests/gens_phase7_dungeon_authored_real_exit_index_v1.test.cjs
 
+      - name: Caractériser la politique de sortie terminale authored Phase 7
+        run: node tests/gens_phase7_dungeon_authored_terminal_exit_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

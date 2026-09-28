@@ -34,6 +34,7 @@
     "the authored entry movement planner receives the remaining movement value explicitly and only decides remaining-versus-fallback without reading hero stats or spatial state",
     "DungeonAuthoredRuntime167839 remains the owner of heroMoveAllowance and consumes the pure movement plan lazily before DungeonSpatial313 ensure/persist",
     "the authored move allowance normalizer receives runtime and stat movement values explicitly while DungeonAuthoredRuntime167839 retains both global reads the try/catch and its fallback ownership",
+    "the authored outgoing edge selector receives outgoing edges hero position and positional mode explicitly while DungeonAuthoredRuntime167839 retains graph position and positional configuration reads",
     "the authored arrival cell planner receives map cell count edge entry index and map entry index explicitly and only selects the arrival cell while Authored Runtime keeps position writes and DungeonSpatial313 keeps spatial persistence",
     "the weighted room-kind selector receives its random roll explicitly and never owns random generation",
     "the weighted generated branch-type selector receives its random roll explicitly after the Core 2.00 nearest-free gate and never owns random generation or branch materialization",

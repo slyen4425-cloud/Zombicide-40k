@@ -90,8 +90,8 @@ vm.createContext(sandbox);
 vm.runInContext(entry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof sandbox.GensDungeonV1?.movement?.resolveAuthoredHeroMoveAllowance,
-  'undefined',
-  'characterization must remain GREEN before authored move-allowance extraction'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored move-allowance helper'
 );
 
 assert.doesNotMatch(

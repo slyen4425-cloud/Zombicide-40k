@@ -138,3 +138,88 @@ Le fingerprint de base reste :
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
 Si le périmètre change et exige `index.html`, arrêter le lot et appliquer Rule 26 avant toute modification.
+
+
+## TDD observé
+
+### Caractérisation GREEN
+
+SHA de caractérisation câblée à Architecture :
+`4d8a5f051532efc106ead678b1d47c0a5ee2c85f`.
+
+Validation :
+- Architecture + Browser : `36457736957` — SUCCESS ;
+- Firefox : `36457736468` — SUCCESS ;
+- Tactical Dock : `36457736453` — SUCCESS.
+
+La caractérisation historique verrouille :
+- priorité de la valeur runtime truthy après conversion `Number(...)` ;
+- fallback vers la stat pour runtime nul/0/invalide ;
+- clamp final `Math.max(0,...)` ;
+- fallback historique `3` ;
+- `Infinity` conservé comme historiquement ;
+- exceptions des lectures globales capturées par Authored Runtime avec retour `3` ;
+- `movementForEntry(...)` reste lazy ;
+- planner d’arrivée du micro-lot précédent inchangé.
+
+### RED isolé
+
+SHA RED :
+`6ac100075b1501e1ccf5943f414e945bc827889d`.
+
+CI :
+- Architecture : `36458986877` — FAILURE attendue ;
+- seule étape rouge : `#198 — Exiger la normalisation Dungeon du mouvement authored Phase 7` ;
+- Browser : SKIPPED uniquement parce qu’Architecture est rouge ;
+- Firefox : `36458986994` — SUCCESS ;
+- Tactical Dock : `36458987029` — SUCCESS.
+
+Le RED exige uniquement :
+`GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(runtimeMovementValue, statMovementValue)`
+et son raccord unique dans `DungeonAuthoredRuntime167839.heroMoveAllowance(id)`.
+
+### Micro-diff
+
+Runtime modifié uniquement dans :
+- `assets/gensrpg/dungeon/entry-v1.js` : ajout du helper pur ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` : délégation de `heroMoveAllowance(id)` ;
+- `assets/gensrpg/dungeon/module-contract-v1.json` : déclaration de frontière.
+
+Le helper pur reproduit exactement :
+`Math.max(0, Number(runtimeMovementValue) || Number(statMovementValue) || 3)`.
+
+Restent Authored Runtime :
+- lectures `dungeonHeroMoveValue083` et `CHARS` ;
+- `try/catch` historique ;
+- fallback d’exception `3` ;
+- `movementForEntry(...)`, `arrival(...)`, positions et authored travel.
+
+`DungeonSpatial313` reste inchangé.
+
+Après le raccord runtime, la caractérisation pré-extraction #197 a logiquement échoué seule sur le SHA
+`e0ef0e6c4a1b65b2edc19cd18feff65de8af46a8`
+(run Architecture `36459342633`), tandis que Firefox `36459342746` et Tactical `36459342504` restaient SUCCESS.
+La caractérisation a ensuite été réalignée vers le raccord post-extraction sans modifier ni assouplir la parité métier.
+
+## Fermeture candidate GREEN
+
+SHA technique final :
+`7d9c38516914ba038c7a4b71ce5db0426559a293`.
+
+CI complète :
+- Architecture + Browser Chromium : `36459918622` — SUCCESS ;
+- Firefox : `36459918388` — SUCCESS ;
+- Tactical Dock : `36459918590` — SUCCESS.
+
+Résultat :
+- `GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(...)` est pur ;
+- aucun DOM, storage, timer, listener, observer, Spatial ou Tactical dans le helper ;
+- Authored Runtime conserve les lectures globales et le `try/catch` ;
+- consommation unique du helper ;
+- `movementForEntry(...)` et `planAuthoredArrivalCell(...)` restent inchangés ;
+- `DungeonSpatial313`, déplacement réel, pathfinding, événements/spawn, interactions et Tactical inchangés ;
+- `index.html` inchangé : `8169990` octets / `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082` ;
+- aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-move-allowance-green-2026-09-28`.

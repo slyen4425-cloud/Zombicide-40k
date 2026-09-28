@@ -50,6 +50,13 @@
     return {heroId,from:fromRoom,to:toRoom,created,at};
   }
 
+  function planAuthoredEntryMovement(remainingValue){
+    const value=Number(remainingValue);
+    return Number.isFinite(value)
+      ?{status:"remaining",movement:Math.max(0,value)}
+      :{status:"fallback",movement:null};
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -59,6 +66,9 @@
       pickWeightedGeneratedBranchType,
       shouldCreateGeneratedBranch,
       buildGeneratedBranchSceneElement
+    }),
+    movement:Object.freeze({
+      planAuthoredEntryMovement
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

@@ -1,3 +1,38 @@
+# PHASE 7 — MICRO-LOT 7 — mouvement d’entrée authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`
+
+SHA de base :
+`cdc939b810edf918f6eeee537da9b5d5488a5ac8`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-entry-movement-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-entry-movement-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ENTRY_MOVEMENT_PREAUDIT.md`
+
+Cible :
+isoler uniquement la décision pure de `movementForEntry(x, hero)` : conserver un mouvement restant exploitable ou demander le fallback historique `heroMoveAllowance(hero)`.
+
+API cible après caractérisation GREEN :
+`GensDungeonV1.movement.planAuthoredEntryMovement(remainingValue)`.
+
+Hors périmètre :
+déplacement réel, positions, pathfinding, consommation par case, `DungeonSpatial313`, événements/spawn, interactions, Tactical, authored travel.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+caractérisation GREEN du seam historique et de la paresse du fallback. Aucun runtime ne doit être modifié avant cette preuve.
+
+---
+
 # PHASE 7 — MICRO-LOT 6 — descripteur de branche generated — 2026-09-27
 
 Base GREEN :

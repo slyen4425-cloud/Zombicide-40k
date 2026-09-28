@@ -16,22 +16,49 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_EXIT_EDGE_SELECTION_PREAUDIT.md`
 
 Cible :
-caractériser puis isoler uniquement la sélection pure d’une arête de sortie dans `DungeonAuthoredRuntime167839.plan(x,g)`, sans déplacer `positional()`, les lectures de position, le graphe, travel, Spatial ou le déplacement réel.
+isoler uniquement la sélection pure d’une arête de sortie dans `DungeonAuthoredRuntime167839.plan(x,g)`, sans déplacer `positional()`, les lectures de position, le graphe, travel, Spatial ou le déplacement réel.
 
-API candidate après caractérisation GREEN :
+API propriétaire :
 `GensDungeonV1.movement.selectAuthoredOutgoingEdge(outgoingEdges, heroPosition, positionalEnabled)`.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36462259908` — SUCCESS ;
-- Firefox `36462259954` — SUCCESS ;
-- Tactical Dock `36462259736` — SUCCESS.
+Caractérisation GREEN :
+- SHA `f4adfbdd82a27da98ada1dee7e4c9492b367db6f` ;
+- Architecture + Browser `36464073660` — SUCCESS ;
+- Firefox `36464073682` — SUCCESS ;
+- Tactical Dock `36464073655` — SUCCESS.
+
+RED isolé :
+- SHA `76e74e1990bde178c0f25f6c382d547f0951f008` ;
+- Architecture `36465534331` — FAILURE attendue uniquement sur #200 ;
+- Firefox `36465534355` — SUCCESS ;
+- Tactical Dock `36465534577` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
+Micro-diff GREEN :
+- sélecteur pur ajouté dans `assets/gensrpg/dungeon/entry-v1.js` ;
+- `DungeonAuthoredRuntime167839.plan(x,g)` délègue une seule fois la sélection ;
+- graphe, position, `positional()`, `targetNodeId` et `needsExit` restent Authored Runtime ;
+- contrat Dungeon mis à jour ;
+- Spatial, déplacement réel, pathfinding, événements, Tactical et `index.html` inchangés.
+
+Fermeture candidate GREEN :
+- SHA technique `947896275ad17e03dd3eedbe0490ee892003bbd2` ;
+- Architecture + Browser `36465967097` — SUCCESS ;
+- Firefox `36465967111` — SUCCESS ;
+- Tactical Dock `36465967077` — SUCCESS ;
+- aucun changement utilisateur visible.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-exit-edge-selection-green-2026-09-28`.
 
 Prochaine action :
-ajouter une caractérisation GREEN de la sélection historique, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical ;
+2. si tout est SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint.
 
 ---
 

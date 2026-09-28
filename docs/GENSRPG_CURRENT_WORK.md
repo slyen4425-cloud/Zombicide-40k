@@ -1,3 +1,38 @@
+# PHASE 7 — MICRO-LOT 8 — case d'arrivée authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-entry-movement-green-2026-09-28`
+
+SHA de base :
+`c6553ce1a381c356515c4791eab327c0bc16db35`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-arrival-cell-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-arrival-cell-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ARRIVAL_CELL_PREAUDIT.md`
+
+Cible :
+isoler uniquement la décision pure de la case d'arrivée authored, sans déplacer les écritures de position ni `DungeonSpatial313`.
+
+API cible après caractérisation GREEN :
+`GensDungeonV1.movement.planAuthoredArrivalCell(mapCellCount, edgeEntryIndex, mapEntryIndex)`.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Hors périmètre :
+déplacement réel, positions, pathfinding, consommation de mouvement, Spatial, événements/spawn, interactions, Tactical.
+
+Prochaine action :
+caractérisation GREEN dédiée de `DungeonAuthoredRuntime167839.arrival(map, edge)`, puis RED isolé.
+
+---
+
 # PHASE 7 — MICRO-LOT 7 — mouvement d’entrée authored — 2026-09-28
 
 Base GREEN :

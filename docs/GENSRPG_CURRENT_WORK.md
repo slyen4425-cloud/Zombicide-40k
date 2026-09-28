@@ -1,3 +1,35 @@
+# PHASE 7 — MICRO-LOT 7 — politique Boss generated — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`
+
+SHA de base :
+`cdc939b810edf918f6eeee537da9b5d5488a5ac8`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-boss-policy-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-boss-policy-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BOSS_POLICY_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la politique Boss generated de `chooseKind(room)`, en préservant exactement la consommation RNG et le fallback vers la pondération non-Boss.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Hors périmètre :
+matérialisation salle, branches, authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
+
+Prochaine action :
+caractérisation GREEN dédiée de la politique Boss et de la consommation RNG ; aucune modification runtime avant cette preuve.
+
+---
+
 # PHASE 7 — MICRO-LOT 6 — descripteur de branche generated — 2026-09-27
 
 Base GREEN :

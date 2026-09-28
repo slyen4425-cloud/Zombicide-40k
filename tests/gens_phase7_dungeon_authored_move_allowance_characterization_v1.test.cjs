@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function heroMoveAllowance\(id\)\{try\{return Math\.max\(0,Number\(ROOT\.dungeonHeroMoveValue083\?\.\(id\)\)\|\|Number\(ROOT\.CHARS\?\.\[id\]\?\.dungeonStats\?\.movement\)\|\|3\)\}catch\(e\)\{return 3\}\}/,
-  'historical authored heroMoveAllowance formula drifted before extraction'
+  /function heroMoveAllowance\(id\)\{try\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredHeroMoveAllowance\(ROOT\.dungeonHeroMoveValue083\?\.\(id\),ROOT\.CHARS\?\.\[id\]\?\.dungeonStats\?\.movement\)\}catch\(e\)\{return 3\}\}/,
+  'post-raccord authored heroMoveAllowance must preserve global reads and catch fallback around the pure Dungeon helper'
 );
 assert.match(
   authored,

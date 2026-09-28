@@ -41,7 +41,11 @@ vm.runInContext(authored,context,{filename:'assets/dungeon/dungeon-authored-runt
 const api=context.DungeonAuthoredRuntime167839;
 assert.ok(api,'authored runtime API must load');
 
-function state({hero=true,cells=['floor','exit'],exitIdx=1,position=1}={}){
+function state(options={}){
+  const hero=Object.prototype.hasOwnProperty.call(options,'hero')?options.hero:true;
+  const cells=Object.prototype.hasOwnProperty.call(options,'cells')?options.cells:['floor','exit'];
+  const exitIdx=Object.prototype.hasOwnProperty.call(options,'exitIdx')?options.exitIdx:1;
+  const position=Object.prototype.hasOwnProperty.call(options,'position')?options.position:1;
   return {
     participants:hero?['hero']:[],
     index:0,

@@ -1,0 +1,135 @@
+# GenSrpG — Phase 7 / Dungeon movement — mouvement d’entrée authored — pré-audit — 2026-09-28
+
+## Base sûre
+
+Micro-lot précédent fermé GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`
+
+SHA exact de base :
+`cdc939b810edf918f6eeee537da9b5d5488a5ac8`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-entry-movement-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-entry-movement-2026-09-28`
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+## Position dans la Phase 7
+
+Les micro-lots précédents ont isolé les slices generated de planification / salle / branche.
+
+La roadmap Phase 7 demande ensuite d’isoler explicitement le déplacement Dungeon.
+
+Le premier seam mouvement retenu est volontairement étroit :
+`DungeonAuthoredRuntime167839.movementForEntry(x, hero)`.
+
+Comportement historique actuel :
+`const raw=x?.remaining?.[hero]; return Number.isFinite(Number(raw)) ? Math.max(0,Number(raw)) : heroMoveAllowance(hero)`.
+
+Ce seam est exécuté avant la persistance / activation spatiale de `enterNode(...)`.
+
+## Cible stricte du micro-lot 7
+
+Isoler uniquement la décision pure :
+- réutiliser une valeur de mouvement restante exploitable ;
+- ou demander au propriétaire historique `heroMoveAllowance(hero)` de fournir le fallback.
+
+API cible proposée après caractérisation GREEN :
+`GensDungeonV1.movement.planAuthoredEntryMovement(remainingValue)`.
+
+Contrat cible :
+- valeur convertible en nombre fini -> `{status:"remaining", movement: Math.max(0, Number(value))}` ;
+- valeur non finie / absente -> `{status:"fallback", movement:null}`.
+
+Le fallback `heroMoveAllowance(hero)` reste évalué uniquement dans le chemin `fallback`.
+Il ne doit pas être calculé de manière anticipée.
+
+## Pourquoi ce seam
+
+Il permet de commencer l’isolation de `movement` sans déplacer :
+- la position du héros ;
+- le déplacement de case en case ;
+- le pathfinding ;
+- la consommation de mouvement pendant un tour ;
+- la persistance `DungeonSpatial313` ;
+- les événements post-déplacement ;
+- les interactions de case ;
+- le combat.
+
+## Propriétaires à préserver
+
+### DungeonAuthoredRuntime167839
+Reste propriétaire pendant ce micro-lot de :
+- `heroMoveAllowance(hero)` ;
+- `movementForEntry(x, hero)` comme consommateur/raccord ;
+- `enterNode(...)` ;
+- placement sur `arrival(...)` ;
+- écriture `x.remaining[hero]=movement` ;
+- authored travel / sortie finale.
+
+### DungeonSpatial313
+Reste propriétaire de :
+- `ensure` ;
+- `persist` ;
+- `setRoom` ;
+- `activate` ;
+- snapshots spatiaux.
+
+### Autres systèmes hors périmètre
+Ne pas toucher :
+- mouvement generated ;
+- grille / clic de déplacement ;
+- portée / movement allowance ;
+- fin de tour ;
+- événements / spawn ;
+- coffres / pièges / énigmes ;
+- ennemis / LOS ;
+- Tactical / combat trigger / combat resolution ;
+- authored action fix ;
+- authored return persist ;
+- Survival / Capture / PvP ;
+- assets.
+
+## Invariants de parité
+
+Le comportement historique de `movementForEntry` doit rester exact :
+
+- `remaining=2` -> 2, sans appel fallback ;
+- `remaining=0` -> 0, sans appel fallback ;
+- `remaining=-2` -> 0, sans appel fallback ;
+- `remaining="2"` -> 2, sans appel fallback ;
+- `remaining=null` -> 0, sans appel fallback ;
+- `remaining=""` -> 0, sans appel fallback ;
+- `remaining=true` -> 1, sans appel fallback ;
+- `remaining=undefined` -> fallback ;
+- `remaining="abc"` -> fallback ;
+- `remaining=Infinity` -> fallback.
+
+Le fallback doit rester paresseux : aucune lecture de `dungeonHeroMoveValue083` / `CHARS` quand une valeur restante exploitable existe.
+
+## TDD obligatoire
+
+1. caractérisation GREEN du seam historique, y compris paresse du fallback ;
+2. raccord de la caractérisation à Architecture ;
+3. Architecture + Browser, Firefox et Tactical Dock GREEN ;
+4. UNE garde RED exigeant l’API pure Dungeon et son raccord unique ;
+5. preuve que le RED est isolé ;
+6. Rule 26 si `index.html` doit changer ;
+7. micro-diff minimal ;
+8. réalignement des fingerprints un garde à la fois si nécessaire ;
+9. triple CI ;
+10. aucun test utilisateur si le comportement reste strictement neutre ;
+11. fermeture documentaire + checkpoint GREEN final.
+
+## Rule 26
+
+Aucune modification de `index.html` n’est autorisée dans les étapes de pré-audit / caractérisation / RED.
+
+Si le raccord final exige une modification de l’inline authored ou d’un bloc exact dans `index.html`, demander le fichier exact avant modification et vérifier taille + blob localement.

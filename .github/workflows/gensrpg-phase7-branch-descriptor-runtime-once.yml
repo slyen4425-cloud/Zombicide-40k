@@ -1,0 +1,106 @@
+name: GenSrpG Phase 7 branch descriptor runtime once
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase7-dungeon-generated-branch-descriptor-2026-09-27
+    paths:
+      - .github/workflows/gensrpg-phase7-branch-descriptor-runtime-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase7-dungeon-generated-branch-descriptor-2026-09-27
+          fetch-depth: 0
+
+      - name: Verify Rule 26 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(wc -c < index.html)" = "8170090"
+          test "$(git hash-object index.html)" = "85bf8dcb0ad22d596e648f4992210d870520d6f9"
+
+      - name: Apply exact micro-diff
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          
+          index_path=Path("index.html")
+          index=index_path.read_text(encoding="utf-8")
+          old_index="const el=addDungeonSceneElement?.({kind:'trapdoor',name:type==='boss'?'Trappe inquiétante':type==='secret'?'Passage secret':'Cache souterraine',room:x.room,cellIndex:i,environment:'dungeon',branchType:type});"
+          new_index="const el=addDungeonSceneElement?.(GensDungeonV1.exploration.buildGeneratedBranchSceneElement(x.room,i,type));"
+          assert index.count(old_index)==1, index.count(old_index)
+          assert index.count(new_index)==0, index.count(new_index)
+          index=index.replace(old_index,new_index)
+          index_path.write_text(index,encoding="utf-8",newline="")
+          
+          entry_path=Path("assets/gensrpg/dungeon/entry-v1.js")
+          entry=entry_path.read_text(encoding="utf-8")
+          old_entry='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
+            return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
+          }
+
+          function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'''
+          new_entry='''  function shouldCreateGeneratedBranch(specialBranchChance,roll){
+            return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
+          }
+
+          function buildGeneratedBranchSceneElement(room,cellIndex,branchType){
+            const name=branchType==="boss"?"Trappe inquiétante":branchType==="secret"?"Passage secret":"Cache souterraine";
+            return {kind:"trapdoor",name,room,cellIndex,environment:"dungeon",branchType};
+          }
+
+          function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'''
+          assert entry.count(old_entry)==1, entry.count(old_entry)
+          entry=entry.replace(old_entry,new_entry)
+          old_export='''      pickWeightedGeneratedBranchType,
+                shouldCreateGeneratedBranch
+              })'''
+          new_export='''      pickWeightedGeneratedBranchType,
+                shouldCreateGeneratedBranch,
+                buildGeneratedBranchSceneElement
+              })'''
+          assert entry.count(old_export)==1, entry.count(old_export)
+          entry=entry.replace(old_export,new_export)
+          entry_path.write_text(entry,encoding="utf-8",newline="")
+          
+          contract_path=Path("assets/gensrpg/dungeon/module-contract-v1.json")
+          contract=json.loads(contract_path.read_text(encoding="utf-8"))
+          inv=contract["invariants"]
+          old="the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector and generated branch chance gate"
+          new="the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector generated branch chance gate and generated branch scene descriptor builder"
+          assert inv.count(old)==1, inv.count(old)
+          inv[inv.index(old)]=new
+          extra="the generated branch scene descriptor builder owns only the plain trapdoor descriptor while nearest-free lookup random generation scene creation and map mutation remain owned by Core 2.00"
+          assert extra not in inv
+          insert_at=inv.index("the generated branch chance gate receives its random roll explicitly and only decides chance acceptance before the Core 2.00 nearest-free lookup")+1
+          inv.insert(insert_at,extra)
+          contract_path.write_text(json.dumps(contract,ensure_ascii=False,indent=2)+"\n",encoding="utf-8",newline="")
+
+      - name: Verify exact target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(wc -c < index.html)" = "8169990"
+          test "$(git hash-object index.html)" = "1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082"
+          node tests/gens_phase7_dungeon_generated_branch_descriptor_characterization_v1.test.cjs || true
+          node tests/gens_phase7_dungeon_generated_branch_descriptor_v1.test.cjs
+
+      - name: Retire one-shot and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/gensrpg-phase7-branch-descriptor-runtime-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/gensrpg/dungeon/entry-v1.js assets/gensrpg/dungeon/module-contract-v1.json .github/workflows/gensrpg-phase7-branch-descriptor-runtime-once.yml
+          git commit -m "refactor: extract generated branch scene descriptor"
+          git push origin HEAD:work/gensrpg-phase7-dungeon-generated-branch-descriptor-2026-09-27

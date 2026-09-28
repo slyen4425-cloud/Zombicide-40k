@@ -159,3 +159,37 @@ Fichiers autorisés :
 
 Tout le reste reste hors périmètre.
 
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`cf6eaef71a68942993ca2faa38c1ae05fc4b356b`.
+
+CI complète :
+- Architecture + Browser Chromium : `36449474219` — SUCCESS ;
+- Firefox : `36449474192` — SUCCESS ;
+- Tactical Dock : `36449474129` — SUCCESS.
+
+Runtime :
+- `index.html` inchangé : `8169990` octets ;
+- blob Git inchangé : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Résultat :
+- `GensDungeonV1.movement.planAuthoredArrivalCell(mapCellCount, edgeEntryIndex, mapEntryIndex)` possède uniquement la décision pure de case d'arrivée ;
+- une entrée d'arête entière et dans les bornes gagne ;
+- sinon le fallback historique `map.entryIdx`, clampé à zéro, est conservé ;
+- `DungeonAuthoredRuntime167839.arrival(map, edge)` reste le consommateur unique et ne contient plus la décision dupliquée ;
+- les deux écritures `x.positions[hero]=arrival(map,edge)` restent Authored Runtime ;
+- `DungeonSpatial313.ensure/persist/setRoom/activate` restent hors du planner et inchangés ;
+- déplacement réel, pathfinding, consommation de mouvement, événements/spawn, interactions et Tactical restent hors périmètre ;
+- aucun changement utilisateur visible : aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-arrival-cell-green-2026-09-28`.
+
+## Prochaine action obligatoire
+
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. seulement ensuite ouvrir le prochain micro-lot mouvement Phase 7 depuis ce checkpoint GREEN ;
+4. continuer par pré-audit d'un seam étroit, sans migrer le déplacement complet d'un seul coup.
+

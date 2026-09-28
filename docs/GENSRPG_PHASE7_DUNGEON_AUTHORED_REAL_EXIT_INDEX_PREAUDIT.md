@@ -114,3 +114,85 @@ Ne pas toucher :
 
 Aucune modification de `index.html` n’est prévue.
 Si le périmètre change et exige son contenu exact, arrêter le lot et appliquer Rule 26 avant toute modification.
+
+
+## TDD observé
+
+### Caractérisation GREEN
+
+SHA :
+`e74acac774e77e709ecc4be8dbc8b5fb1c716790`.
+
+Validation :
+- Architecture + Browser : `36473130186` — SUCCESS ;
+- Firefox : `36473130614` — SUCCESS ;
+- Tactical Dock : `36473130177` — SUCCESS.
+
+La caractérisation verrouille :
+- priorité de l’index direct uniquement s’il pointe réellement vers une cellule `exit` ;
+- coercition numérique historique de `exitIdx` ;
+- fallback vers la première vraie cellule `exit` si l’index direct est invalide ;
+- comparaison insensible à la casse via `String(value||"").toLowerCase()` ;
+- absence de sortie => `-1` ;
+- politique `atTerminalExit(x)` inchangée.
+
+### RED isolé
+
+SHA RED :
+`15dd8983b3d54d79117b8d9a7cb8575061c8508c`.
+
+CI :
+- Architecture : `36474354853` — FAILURE attendue ;
+- seule étape rouge : `#202 — Exiger la vraie case sortie Dungeon Phase 7` ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36474354955` — SUCCESS ;
+- Tactical Dock : `36474354836` — SUCCESS.
+
+Le RED exige uniquement :
+`GensDungeonV1.movement.resolveAuthoredRealExitIndex(cells, directExitIndex)`
+et son raccord unique dans `DungeonAuthoredRuntime167839.realExitIndex(x)`.
+
+### Micro-diff
+
+Runtime modifié uniquement dans :
+- `assets/gensrpg/dungeon/entry-v1.js` : ajout du resolver pur ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` : délégation de `realExitIndex(x)` ;
+- `assets/gensrpg/dungeon/module-contract-v1.json` : déclaration de frontière.
+
+Authored Runtime conserve :
+- lecture `x?.last?.map` ;
+- normalisation de `map.cells` en tableau ;
+- `realExitIndex(x)` comme consommateur ;
+- `atTerminalExit(x)` ;
+- `positional()` ;
+- lecture `x.positions[hero]` ;
+- travel et politique de fin authored.
+
+`DungeonSpatial313` reste inchangé.
+
+Après le raccord, la caractérisation pré-extraction a logiquement échoué seule sur le SHA
+`c502b8c3234fa786d2473e3f4ecd628b89eecb62`
+(run Architecture `36474878468`, étape #201), tandis que Firefox `36474878465` et Tactical `36474878491` restaient SUCCESS.
+La caractérisation a ensuite été réalignée vers le raccord post-extraction sans modifier les cas de parité ni assouplir la garde métier.
+
+## Fermeture candidate GREEN
+
+SHA technique final :
+`416de48972c4a2305ab452e80457a684686764fa`.
+
+CI complète :
+- Architecture + Browser Chromium : `36474978235` — SUCCESS ;
+- Firefox : `36474978288` — SUCCESS ;
+- Tactical Dock : `36474978210` — SUCCESS.
+
+Résultat :
+- `GensDungeonV1.movement.resolveAuthoredRealExitIndex(...)` est pur ;
+- aucun DOM, storage, timer, listener, observer ou Spatial dans le resolver ;
+- Authored Runtime conserve lecture map, terminal-exit policy, positional et position héros ;
+- consommation unique du resolver ;
+- `atTerminalExit`, déplacement réel, pathfinding, événements/spawn, interactions et Tactical inchangés ;
+- `index.html` inchangé : `8169990` octets / `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082` ;
+- aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-real-exit-index-green-2026-09-28`.

@@ -81,8 +81,25 @@ jobs:
           set -euo pipefail
           test "$(wc -c < index.html)" = "8169990"
           test "$(git hash-object index.html)" = "1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082"
-          node tests/gens_phase7_dungeon_generated_branch_descriptor_characterization_v1.test.cjs || true
-          node tests/gens_phase7_dungeon_generated_branch_descriptor_v1.test.cjs
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const vm=require('node:vm');
+          const assert=require('node:assert/strict');
+          const entry=fs.readFileSync('assets/gensrpg/dungeon/entry-v1.js','utf8');
+          const index=fs.readFileSync('index.html','utf8');
+          const ctx={};ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);
+          vm.runInContext(entry,ctx,{filename:'entry-v1.js'});
+          const build=ctx.GensDungeonV1?.exploration?.buildGeneratedBranchSceneElement;
+          assert.equal(typeof build,'function');
+          const norm=v=>JSON.parse(JSON.stringify(v));
+          assert.deepEqual(norm(build(6,7,'treasure')),{kind:'trapdoor',name:'Cache souterraine',room:6,cellIndex:7,environment:'dungeon',branchType:'treasure'});
+          assert.deepEqual(norm(build(6,7,'boss')),{kind:'trapdoor',name:'Trappe inquiétante',room:6,cellIndex:7,environment:'dungeon',branchType:'boss'});
+          assert.deepEqual(norm(build(6,7,'secret')),{kind:'trapdoor',name:'Passage secret',room:6,cellIndex:7,environment:'dungeon',branchType:'secret'});
+          assert.equal((index.match(/buildGeneratedBranchSceneElement\(x\.room,i,type\)/g)||[]).length,1);
+          assert.equal(index.includes("name:type==='boss'?'Trappe inquiétante':type==='secret'?'Passage secret':'Cache souterraine'"),false);
+          assert.equal(index.includes("const i=nearestFree(x);if(i<0)return null"),true);
+          assert.equal(index.includes("m.cells[i]='trapdoor';return el"),true);
+          NODE
 
       - name: Retire one-shot and commit
         shell: bash

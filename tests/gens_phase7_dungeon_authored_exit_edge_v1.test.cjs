@@ -75,8 +75,8 @@ assert.match(
 );
 assert.match(
   authored,
-  /function atTerminalExit\(x\)\{[^\n]*if\(!positional\(\)\)return true;/,
-  'terminal-exit positional policy must remain outside this micro-lot'
+  /function atTerminalExit\(x\)\{const hero=activeHero\(x\),exitIdx=realExitIndex\(x\);return ROOT\.GensDungeonV1\.movement\.isAuthoredTerminalExit\(hero,exitIdx,positional\(\),x\?\.positions\?\.\[hero\]\)\}/,
+  'terminal-exit policy must remain outside outgoing-edge selection after its later dedicated extraction'
 );
 
 assert.ok(

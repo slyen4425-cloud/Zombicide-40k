@@ -25,8 +25,20 @@ Runtime de base :
 Hors périmètre :
 matérialisation salle, branches, authored, mouvement, Spatial, RoomRuntime, événements/spawn, ennemis, coffres/pièges/énigmes, combat/Tactical, Survie/Capture/PvP.
 
+Caractérisation GREEN :
+- SHA `adb9a128b5e4c19ed7d325163687c3679b22f0e8` ;
+- Architecture + Browser `36421618974` — SUCCESS ;
+- Firefox `36421618917` — SUCCESS ;
+- Tactical Dock `36421619005` — SUCCESS.
+
+Slice pure retenue :
+`GensDungeonV1.exploration.planGeneratedBossPolicy(room, roomLimit, bossMode, bossEvery, bossRooms, bossChance)`.
+
+Le plan pur retourne `boss / random / none` et ne consomme aucun RNG.
+Core 2.00 doit conserver les tirages aléatoires et le fallback pondéré.
+
 Prochaine action :
-caractérisation GREEN dédiée de la politique Boss et de la consommation RNG ; aucune modification runtime avant cette preuve.
+sentinelle RED isolée exigeant ce plan pur et son raccord minimal ; Rule 26 seulement après preuve du RED.
 
 ---
 

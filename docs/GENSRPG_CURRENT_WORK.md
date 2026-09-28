@@ -16,10 +16,10 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_ENTRY_MOVEMENT_ALLOWANCE_PREAUDIT.md`
 
 Cible :
-extraire uniquement la règle pure de conservation/clamp du mouvement restant à l'entrée authored, avec fallback déjà calculé par le runtime authored.
+extraire uniquement la normalisation pure du mouvement restant à l'entrée authored ; le runtime authored conserve le fallback paresseux via `heroMoveAllowance(hero)`.
 
 API cible :
-`GensDungeonV1.movement.resolveEntryAllowance(remainingValue, fallbackAllowance)`.
+`GensDungeonV1.movement.normalizeEntryRemaining(remainingValue)`.
 
 Hors périmètre :
 mouvement case-à-case, pathfinding, DungeonSpatial313, positions, snapshots, heroMoveAllowance, stats, fin de tour, événements/spawn, interactions, Tactical et autres modules.

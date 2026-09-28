@@ -51,8 +51,10 @@ assert.match(line,/GensDungeonV1\.exploration\.shouldCreateGeneratedBranch\(c\.s
   'explicit chance roll, Dungeon chance gate, nearest-free check and explicit type roll must preserve historical order at the callsite');
 assert.doesNotMatch(line,/const w=\{treasure:45,boss:25,secret:30/,
   'Core 2.00 must retire the inline branch-type weighting calculation');
-assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,
-  'branch scene materialization must remain in Core 2.00');
+assert.match(line,/addDungeonSceneElement\?\.\(GensDungeonV1\.exploration\.buildGeneratedBranchSceneElement\(x\.room,i,type\)\)/,
+  'branch scene materialization must remain in Core 2.00 using the pure Dungeon descriptor');
+assert.doesNotMatch(line,/name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine'/,
+  'Core 2.00 must not duplicate generated branch descriptor labels');
 assert.match(line,/m\.cells\[i\]='trapdoor'/,
   'branch map mutation must remain in Core 2.00');
 assert.doesNotMatch(authored,/pickWeightedGeneratedBranchType/,

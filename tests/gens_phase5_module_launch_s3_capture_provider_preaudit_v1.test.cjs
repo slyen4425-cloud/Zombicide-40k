@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170090,'S3 preaudit must start from the current Phase 7 generated-branch chance-gate S2 runtime');
-assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','S3 preaudit must start from the current Phase 7 generated-branch chance-gate S2 blob');
+assert.equal(bytes.length,8169990,'S3 preaudit must start from the current Phase 7 generated-branch descriptor S2 runtime');
+assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','S3 preaudit must start from the current Phase 7 generated-branch descriptor S2 blob');
 
 const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
 assert.ok(registryExpose>0,'S1 registry must remain exposed');

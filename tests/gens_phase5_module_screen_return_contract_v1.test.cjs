@@ -15,9 +15,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(runtime.length,8170090,'contract lot must keep the current Phase 7 Dungeon generated-branch chance-gate runtime size');
-assert.equal(gitBlob(runtime),'85bf8dcb0ad22d596e648f4992210d870520d6f9',
-  'contract lot must keep the current Phase 7 generated-branch chance-gate index byte-identical');
+assert.equal(runtime.length,8169990,'contract lot must keep the current Phase 7 Dungeon generated-branch descriptor runtime size');
+assert.equal(gitBlob(runtime),'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
+  'contract lot must keep the current Phase 7 generated-branch descriptor index byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';
 assert.equal(exists(sharedPath),true,'shared module screen-return contract is missing');

@@ -121,3 +121,41 @@ Ne pas toucher :
 
 Aucune modification de `index.html` prévue pour ce micro-lot.
 Si le périmètre change et exige l'inline exact, Rule 26 devra être appliquée avant toute modification.
+
+## Caractérisation GREEN — prouvée
+
+SHA :
+`8bbc795778397ede509cf50b3256862a70eae43e`.
+
+CI :
+- Architecture + Browser Chromium : `36447808052` — SUCCESS ;
+- Firefox : `36447808043` — SUCCESS ;
+- Tactical Dock : `36447808072` — SUCCESS.
+
+La caractérisation verrouille la parité historique de `arrival(map, edge)`, les deux écritures de position dans Authored Runtime et le maintien de `DungeonSpatial313` hors du seam pur.
+
+## RED isolé — prouvé
+
+SHA RED :
+`edb14ca41f5678068cdfe398ceaa38a3d840eef9`.
+
+CI :
+- Architecture : `36448866150` — FAILURE attendue sur #196 uniquement ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36448866639` — SUCCESS ;
+- Tactical Dock : `36448866111` — SUCCESS.
+
+Garde rouge unique :
+`#196 — Exiger le planificateur Dungeon de la case d’arrivée authored Phase 7`.
+
+## Micro-diff autorisé après RED
+
+Aucune modification de `index.html` n'est nécessaire.
+
+Fichiers autorisés :
+- `assets/gensrpg/dungeon/entry-v1.js` : ajouter le planner pur sous `GensDungeonV1.movement` ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` : faire déléguer `arrival(map, edge)` au planner avec trois entrées primitives explicites ;
+- `assets/gensrpg/dungeon/module-contract-v1.json` : déclarer la frontière de propriété.
+
+Tout le reste reste hors périmètre.
+

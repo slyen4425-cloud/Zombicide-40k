@@ -47,8 +47,25 @@ Runtime candidat :
 - matérialisation et RNG restent Core 2.00 ;
 - one-shot retiré.
 
+Fermeture candidate GREEN :
+- SHA technique : `fbc920816e8ab4ec35aa707430e499379715cf11` ;
+- Architecture + Browser Chromium : `36405137080` — SUCCESS ;
+- Firefox : `36405136990` — SUCCESS ;
+- Tactical Dock : `36405137041` — SUCCESS ;
+- runtime final : `8169990` octets / `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082` ;
+- builder pur `buildGeneratedBranchSceneElement(...)` propriétaire du descripteur ;
+- `nearestFree`, les deux RNG, `addDungeonSceneElement` et la mutation map restent Core 2.00 ;
+- authored / Spatial / RoomRuntime / Tactical et autres modules inchangés ;
+- fingerprints réalignés un garde à la fois, sans assouplissement métier ;
+- aucun changement utilisateur visible, donc aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`.
+
 Prochaine action :
-CI normale sur ce candidat, puis réalignement des fingerprints historiques un garde à la fois sans assouplir les assertions métier.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. ouvrir ensuite seulement le prochain micro-lot Phase 7 depuis ce checkpoint GREEN.
 
 ---
 

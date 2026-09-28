@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8170090,'audit 6 must target the current Phase 7 Dungeon generated-branch weighting index size');
-assert.equal(blob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','audit 6 must target the exact current Phase 7 Dungeon generated-branch weighting index blob');
+assert.equal(bytes.length,8169990,'audit 6 must target the current Phase 7 Dungeon generated-branch descriptor index size');
+assert.equal(blob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','audit 6 must target the exact current Phase 7 Dungeon generated-branch descriptor index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

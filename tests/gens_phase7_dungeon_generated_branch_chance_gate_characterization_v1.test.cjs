@@ -36,8 +36,10 @@ assert.match(line,/GensDungeonV1\.exploration\.shouldCreateGeneratedBranch\(c\.s
   'chance gate, nearest-free search and type RNG must preserve their historical order');
 assert.equal((line.match(/Math\.random\(\)/g)||[]).length,2,
   'accepted generated branch path must still contain exactly two RNG callsites');
-assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,
-  'branch materialization must remain at the Core 2.00 callsite');
+assert.match(line,/addDungeonSceneElement\?\.\(GensDungeonV1\.exploration\.buildGeneratedBranchSceneElement\(x\.room,i,type\)\)/,
+  'branch materialization must remain at the Core 2.00 callsite using the pure Dungeon descriptor');
+assert.doesNotMatch(line,/name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine'/,
+  'Core 2.00 must no longer duplicate generated branch descriptor labels');
 assert.match(line,/m\.cells\[i\]='trapdoor'/,
   'map mutation must remain at the Core 2.00 callsite');
 

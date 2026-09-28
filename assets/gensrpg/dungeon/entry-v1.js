@@ -57,6 +57,10 @@
       :{status:"fallback",movement:null};
   }
 
+  function resolveAuthoredHeroMoveAllowance(runtimeMovementValue,statMovementValue){
+    return Math.max(0,Number(runtimeMovementValue)||Number(statMovementValue)||3);
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -68,7 +72,8 @@
       buildGeneratedBranchSceneElement
     }),
     movement:Object.freeze({
-      planAuthoredEntryMovement
+      planAuthoredEntryMovement,
+      resolveAuthoredHeroMoveAllowance
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

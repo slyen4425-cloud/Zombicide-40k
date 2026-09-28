@@ -10,8 +10,8 @@ const index=indexBuf.toString('utf8');
 const coreSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','dice-v1.js'),'utf8');
 
 const gitBlob=crypto.createHash('sha1').update(Buffer.from(`blob ${indexBuf.length}\0`)).update(indexBuf).digest('hex');
-assert.equal(indexBuf.length,8170090,'preaudit must stay aligned to the exact current Phase 7 Dungeon generated-branch chance-gate runtime');
-assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','preaudit Phase 7 generated-branch chance-gate index blob drifted');
+assert.equal(indexBuf.length,8169990,'preaudit must stay aligned to the exact current Phase 7 Dungeon generated-branch descriptor runtime');
+assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','preaudit Phase 7 generated-branch descriptor index blob drifted');
 
 assert.equal((index.match(/\bd100ThresholdFromChance\s*\(/g)||[]).length,16,'first GREEN seam must remain one definition + fifteen callsites');
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/,

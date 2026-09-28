@@ -57,6 +57,14 @@
       :{status:"fallback",movement:null};
   }
 
+  function planAuthoredArrivalCell(mapCellCount,edgeEntryIndex,mapEntryIndex){
+    const count=Math.max(0,Number(mapCellCount)||0);
+    const edge=Number(edgeEntryIndex);
+    return Number.isInteger(edge)&&edge>=0&&edge<count
+      ?edge
+      :Math.max(0,Number(mapEntryIndex)||0);
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -68,7 +76,8 @@
       buildGeneratedBranchSceneElement
     }),
     movement:Object.freeze({
-      planAuthoredEntryMovement
+      planAuthoredEntryMovement,
+      planAuthoredArrivalCell
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

@@ -122,3 +122,39 @@ Si une nouvelle source exacte devient nécessaire après changement de runtime, 
 8. triple CI ;
 9. aucun test utilisateur si le comportement reste strictement neutre ;
 10. fermeture documentaire + checkpoint GREEN final.
+
+## RED isolé — prouvé
+
+SHA RED :
+`008701730efaf438a995e4c0026626947cda607c`.
+
+CI :
+- Architecture : `36360543411` — FAILURE attendue ;
+- Browser : SKIPPED uniquement car Architecture est rouge ;
+- Firefox : `36360543499` — SUCCESS ;
+- Tactical Dock : `36360543487` — SUCCESS.
+
+La caractérisation du descripteur historique reste GREEN.
+La seule nouvelle garde rouge est :
+`#192 — Exiger le descripteur Dungeon des branches generated Phase 7`.
+
+Erreur attendue :
+`Phase 7 micro-lot 6 requires Dungeon-owned generated branch scene descriptor builder`.
+
+Aucun runtime n'a encore été modifié.
+
+## Étape suivante — Rule 26
+
+Le passage RED -> micro-diff nécessite maintenant la source exacte courante de `index.html` correspondant au SHA :
+`008701730efaf438a995e4c0026626947cda607c`.
+
+Le runtime attendu est toujours :
+- taille : `8170090` octets ;
+- blob : `85bf8dcb0ad22d596e648f4992210d870520d6f9`.
+
+Avant toute modification de `index.html` :
+1. récupérer le fichier exact via le permalink du SHA RED ;
+2. recevoir le ZIP/TXT ;
+3. vérifier localement taille + blob ;
+4. seulement ensuite appliquer le micro-diff du descripteur.
+

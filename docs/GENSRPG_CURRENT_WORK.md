@@ -28,8 +28,21 @@ Runtime de base :
 - `index.html` : `8169990` octets ;
 - blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
+Caractérisation GREEN :
+- SHA `8461beb071b52d1397ec3f322cbdbb8bab609cbf` ;
+- Architecture + Browser `36430074810` — SUCCESS ;
+- Firefox `36430074767` — SUCCESS ;
+- Tactical Dock `36430074878` — SUCCESS.
+
+RED isolé :
+- SHA `cd3b3b5bc646e8fd4df1cd93177cee734761798a` ;
+- Architecture `36431701247` — FAILURE attendue sur #194 uniquement ;
+- Firefox `36431701142` — SUCCESS ;
+- Tactical Dock `36431701044` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
 Prochaine action :
-caractérisation GREEN du seam historique et de la paresse du fallback. Aucun runtime ne doit être modifié avant cette preuve.
+micro-diff minimal dans les modules autonomes : planner pur Dungeon + raccord Authored Runtime + contrat. `index.html` reste inchangé, donc Rule 26 n’est pas requise pour ce raccord.
 
 ---
 

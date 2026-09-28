@@ -55,8 +55,8 @@ vm.createContext(sandbox);
 vm.runInContext(entry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(typeof sandbox.GensDungeonV1?.exploration?.shouldCreateGeneratedBranch,'function');
 assert.equal(typeof sandbox.GensDungeonV1?.exploration?.pickWeightedGeneratedBranchType,'function');
-assert.equal(typeof sandbox.GensDungeonV1?.exploration?.buildGeneratedBranchSceneElement,'undefined',
-  'characterization must stay GREEN before descriptor extraction');
+assert.equal(typeof sandbox.GensDungeonV1?.exploration?.buildGeneratedBranchSceneElement,'function',
+  'post-raccord characterization requires the Dungeon-owned generated branch descriptor builder');
 
 function run(typeRoll){
   const events=[];

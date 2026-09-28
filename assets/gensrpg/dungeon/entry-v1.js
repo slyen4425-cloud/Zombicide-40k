@@ -69,6 +69,13 @@
     return Math.max(0,Number(runtimeMovementValue)||Number(statMovementValue)||3);
   }
 
+  function selectAuthoredOutgoingEdge(outgoingEdges,heroPosition,positionalEnabled){
+    const pos=Number(heroPosition);
+    let edge=outgoingEdges.find(e=>Number(e.fromExitIndex)===pos)||null;
+    if(!edge&&!positionalEnabled&&outgoingEdges.length===1)edge=outgoingEdges[0];
+    return edge;
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -82,7 +89,8 @@
     movement:Object.freeze({
       planAuthoredEntryMovement,
       planAuthoredArrivalCell,
-      resolveAuthoredHeroMoveAllowance
+      resolveAuthoredHeroMoveAllowance,
+      selectAuthoredOutgoingEdge
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

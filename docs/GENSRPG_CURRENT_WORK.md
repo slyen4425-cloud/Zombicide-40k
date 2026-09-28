@@ -1,3 +1,40 @@
+# PHASE 7 — MICRO-LOT 10 — sélection de sortie authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-move-allowance-green-2026-09-28`
+
+SHA de base :
+`646efe7bd37b76081bf1709e89f1a4f777f66ec9`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-exit-edge-selection-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-exit-edge-selection-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_EXIT_EDGE_SELECTION_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la sélection pure d’une arête de sortie dans `DungeonAuthoredRuntime167839.plan(x,g)`, sans déplacer `positional()`, les lectures de position, le graphe, travel, Spatial ou le déplacement réel.
+
+API candidate après caractérisation GREEN :
+`GensDungeonV1.movement.selectAuthoredOutgoingEdge(outgoingEdges, heroPosition, positionalEnabled)`.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36462259908` — SUCCESS ;
+- Firefox `36462259954` — SUCCESS ;
+- Tactical Dock `36462259736` — SUCCESS.
+
+Prochaine action :
+ajouter une caractérisation GREEN de la sélection historique, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 9 — normalisation du mouvement héros authored après case d’arrivée — 2026-09-28
 
 Base GREEN :

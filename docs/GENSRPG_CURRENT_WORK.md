@@ -41,8 +41,27 @@ RED isolé :
 - Tactical Dock `36448866111` — SUCCESS ;
 - Browser SKIPPED uniquement à cause du RED Architecture.
 
+Micro-diff GREEN :
+- planner pur `GensDungeonV1.movement.planAuthoredArrivalCell(mapCellCount, edgeEntryIndex, mapEntryIndex)` raccordé ;
+- `DungeonAuthoredRuntime167839.arrival(map, edge)` consomme ce planner une seule fois ;
+- les deux écritures de position restent Authored Runtime ;
+- `DungeonSpatial313` reste propriétaire de la persistance spatiale ;
+- `index.html` inchangé : `8169990` octets / `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Fermeture candidate GREEN :
+- SHA technique `cf6eaef71a68942993ca2faa38c1ae05fc4b356b` ;
+- Architecture + Browser `36449474219` — SUCCESS ;
+- Firefox `36449474192` — SUCCESS ;
+- Tactical Dock `36449474129` — SUCCESS ;
+- aucun changement utilisateur visible.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-arrival-cell-green-2026-09-28`.
+
 Prochaine action :
-micro-diff minimal du planner pur de case d'arrivée, sans modification de `index.html`, puis triple CI.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical ;
+2. si tout est SUCCESS, créer le checkpoint final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot mouvement depuis ce checkpoint GREEN.
 
 ---
 

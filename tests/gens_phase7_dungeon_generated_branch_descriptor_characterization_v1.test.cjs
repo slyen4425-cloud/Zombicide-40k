@@ -39,8 +39,13 @@ assert.match(line,/pickWeightedGeneratedBranchType\(c\.specialBranchWeights,Math
   'branch type selection must remain delegated before descriptor construction');
 assert.match(
   line,
-  /const el=addDungeonSceneElement\?\.\(\{kind:'trapdoor',name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine',room:x\.room,cellIndex:i,environment:'dungeon',branchType:type\}\);m\.cells\[i\]='trapdoor';return el/,
-  'historical generated branch descriptor/materialization sequence drifted'
+  /const el=addDungeonSceneElement\?\.\(GensDungeonV1\.exploration\.buildGeneratedBranchSceneElement\(x\.room,i,type\)\);m\.cells\[i\]='trapdoor';return el/,
+  'generated branch descriptor/materialization sequence must preserve Core 2.00 materialization around the pure Dungeon descriptor'
+);
+assert.doesNotMatch(
+  line,
+  /name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine'/,
+  'Core 2.00 must no longer duplicate the generated branch descriptor labels'
 );
 
 const sandbox={};

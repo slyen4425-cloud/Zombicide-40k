@@ -26,8 +26,8 @@ const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
-assert.equal(bytes.length,8170090,'preaudit must execute the exact verified Phase 7 generated-branch weighting index');
-assert.equal(blob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','preaudit Phase 7 generated-branch weighting index blob drifted');
+assert.equal(bytes.length,8169990,'preaudit must execute the exact verified Phase 7 generated-branch descriptor index');
+assert.equal(blob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','preaudit Phase 7 generated-branch descriptor index blob drifted');
 
 function extractFunction(source,name){
   const token='function '+name+'(';

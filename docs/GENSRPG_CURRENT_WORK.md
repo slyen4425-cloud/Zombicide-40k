@@ -1,3 +1,38 @@
+# PHASE 7 — MICRO-LOT 8 — normalisation du mouvement authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-entry-movement-green-2026-09-28`
+
+SHA de base :
+`c6553ce1a381c356515c4791eab327c0bc16db35`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-move-allowance-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-move-allowance-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_MOVE_ALLOWANCE_PREAUDIT.md`
+
+Cible :
+isoler uniquement la formule pure de normalisation du mouvement authored ; les lectures `dungeonHeroMoveValue083` et `CHARS`, le try/catch et tous les effets restent dans `DungeonAuthoredRuntime167839`.
+
+API cible après caractérisation GREEN :
+`GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(runtimeMovementValue, statMovementValue)`.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Hors périmètre :
+movementForEntry, déplacement réel, positions, remaining writes, DungeonSpatial313, pathfinding, authored travel, événements/spawn, interactions, Tactical.
+
+Prochaine action :
+caractérisation GREEN dédiée de `heroMoveAllowance(id)`, puis RED isolé.
+
+---
+
 # PHASE 7 — MICRO-LOT 7 — mouvement d’entrée authored — 2026-09-28
 
 Base GREEN :

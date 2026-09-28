@@ -219,3 +219,39 @@ Aucun runtime ne sera modifié avant :
 2. Rule 26 sur le HEAD RED exact ;
 3. vérification locale du fichier fourni.
 
+## RED isolé — prouvé
+
+SHA RED :
+`d545a47a7660e664a7934017b6640d52d5e3628c`.
+
+CI :
+- Architecture : `36422843181` — FAILURE attendue ;
+- Browser : SKIPPED uniquement car Architecture est rouge ;
+- Firefox : `36422843157` — SUCCESS ;
+- Tactical Dock : `36422843214` — SUCCESS.
+
+La caractérisation Boss #185 reste GREEN.
+
+La seule nouvelle garde rouge est :
+`#186 — Exiger la politique Boss Dungeon generated Phase 7`.
+
+Erreur attendue :
+`Phase 7 micro-lot 7 requires Dungeon-owned pure generated Boss policy planning`.
+
+Aucun runtime n'a encore été modifié dans ce micro-lot.
+
+## Étape suivante — Rule 26
+
+Le passage RED -> micro-diff exige maintenant le `index.html` exact du HEAD courant de la branche.
+
+Empreinte runtime attendue avant micro-diff :
+- taille : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Après réception du ZIP/TXT exact :
+1. vérifier localement taille + blob ;
+2. inspecter uniquement la définition `chooseKind(room)` nécessaire au raccord ;
+3. appliquer le micro-diff minimal du plan Boss ;
+4. conserver les deux `Math.random()` au callsite Core 2.00 ;
+5. réaligner ensuite les fingerprints un garde à la fois.
+

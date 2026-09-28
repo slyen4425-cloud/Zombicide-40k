@@ -1,3 +1,43 @@
+# PHASE 7 — MICRO-LOT 9 — normalisation du mouvement héros authored après case d’arrivée — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-arrival-cell-green-2026-09-28`
+
+SHA de base :
+`0740afef16264744e02fff74246bbb8494f05bdd`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-move-allowance-after-arrival-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-move-allowance-after-arrival-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_MOVE_ALLOWANCE_AFTER_ARRIVAL_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la normalisation pure de `heroMoveAllowance(id)`, sans déplacer les lectures `dungeonHeroMoveValue083` / `CHARS`, le `try/catch`, `DungeonSpatial313` ni le déplacement réel.
+
+API candidate après caractérisation GREEN :
+`GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(runtimeMovementValue, statMovementValue)`.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36450655832` — SUCCESS ;
+- Firefox `36450655752` — SUCCESS ;
+- Tactical Dock `36450655574` — SUCCESS.
+
+Coordination :
+les anciennes branches parallèles `hero/move allowance` parties de `c6553ce1...` sont consultables comme preuves historiques mais ne sont pas des bases valides pour ce lot.
+
+Prochaine action :
+ajouter une caractérisation GREEN de `heroMoveAllowance(id)` sur cette base exacte, la raccorder à Architecture, puis repasser Architecture + Browser / Firefox / Tactical avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 8 — case d'arrivée authored — 2026-09-28
 
 Base GREEN :

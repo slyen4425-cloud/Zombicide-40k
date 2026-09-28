@@ -68,8 +68,16 @@ assert.doesNotMatch(index,/const targetRoom=Math\.max\(1,Number\(x\.room\|\|0\)\
 assert.match(sw,/\.\/assets\/gensrpg\/dungeon\/entry-v1\.js/,
   'PWA cache must include the connected Dungeon entry');
 
-assert.doesNotMatch(authored,/GensDungeonV1/,
-  'Authored travel must remain untouched in this generated-only micro-lot');
+assert.equal(
+  (authored.match(/GensDungeonV1\.movement\.planAuthoredEntryMovement\(/g)||[]).length,
+  1,
+  'Authored Runtime may consume only the Phase 7 movement planner exactly once'
+);
+assert.doesNotMatch(
+  authored,
+  /GensDungeonV1\.exploration\./,
+  'Authored travel must remain outside generated exploration ownership'
+);
 assert.match(authored,/btn\.onclick=travel/,
   'Authored World Builder must keep direct travel button authority');
 

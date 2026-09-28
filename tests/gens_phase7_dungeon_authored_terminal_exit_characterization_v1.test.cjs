@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function atTerminalExit\(x\)\{const hero=activeHero\(x\),exitIdx=realExitIndex\(x\);if\(!hero\|\|exitIdx<0\)return false;if\(!positional\(\)\)return true;return Number\(x\?\.positions\?\.\[hero\]\)===exitIdx\}/,
-  'historical atTerminalExit must remain local to Authored Runtime before extraction'
+  /function atTerminalExit\(x\)\{const hero=activeHero\(x\),exitIdx=realExitIndex\(x\);return ROOT\.GensDungeonV1\.movement\.isAuthoredTerminalExit\(hero,exitIdx,positional\(\),x\?\.positions\?\.\[hero\]\)\}/,
+  'post-raccord atTerminalExit must preserve all runtime reads around the pure terminal decision'
 );
 
 let positionalEnabled=true;
@@ -97,8 +97,8 @@ vm.createContext(pureSandbox);
 vm.runInContext(entry,pureSandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof pureSandbox.GensDungeonV1?.movement?.isAuthoredTerminalExit,
-  'undefined',
-  'pre-extraction characterization must prove the pure terminal-exit helper is not connected yet'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored terminal-exit helper'
 );
 
 assert.doesNotMatch(
@@ -108,9 +108,9 @@ assert.doesNotMatch(
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored terminal exit characterization after real-exit GREEN',
+  scenario:'Phase 7 authored terminal exit post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredRuntime167839.atTerminalExit',
+  currentOwner:'DungeonAuthoredRuntime167839.atTerminalExit consumer',
   semantics:{
     heroRequired:true,
     realExitRequired:true,

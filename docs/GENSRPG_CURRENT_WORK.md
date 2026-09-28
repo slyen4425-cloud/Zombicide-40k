@@ -16,25 +16,49 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_MOVE_ALLOWANCE_AFTER_ARRIVAL_PREAUDIT.md`
 
 Cible :
-caractériser puis isoler uniquement la normalisation pure de `heroMoveAllowance(id)`, sans déplacer les lectures `dungeonHeroMoveValue083` / `CHARS`, le `try/catch`, `DungeonSpatial313` ni le déplacement réel.
+isoler uniquement la normalisation pure de `heroMoveAllowance(id)`, sans déplacer les lectures `dungeonHeroMoveValue083` / `CHARS`, le `try/catch`, `DungeonSpatial313` ni le déplacement réel.
 
-API candidate après caractérisation GREEN :
+API propriétaire :
 `GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(runtimeMovementValue, statMovementValue)`.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36450655832` — SUCCESS ;
-- Firefox `36450655752` — SUCCESS ;
-- Tactical Dock `36450655574` — SUCCESS.
+Caractérisation GREEN :
+- SHA `4d8a5f051532efc106ead678b1d47c0a5ee2c85f` ;
+- Architecture + Browser `36457736957` — SUCCESS ;
+- Firefox `36457736468` — SUCCESS ;
+- Tactical Dock `36457736453` — SUCCESS.
 
-Coordination :
-les anciennes branches parallèles `hero/move allowance` parties de `c6553ce1...` sont consultables comme preuves historiques mais ne sont pas des bases valides pour ce lot.
+RED isolé :
+- SHA `6ac100075b1501e1ccf5943f414e945bc827889d` ;
+- Architecture `36458986877` — FAILURE attendue uniquement sur #198 ;
+- Firefox `36458986994` — SUCCESS ;
+- Tactical Dock `36458987029` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
+Micro-diff GREEN :
+- helper pur ajouté dans `assets/gensrpg/dungeon/entry-v1.js` ;
+- `DungeonAuthoredRuntime167839.heroMoveAllowance(id)` délègue une seule fois au helper ;
+- lectures runtime/stat, `try/catch` et fallback exception `3` restent Authored Runtime ;
+- contrat Dungeon mis à jour ;
+- `DungeonSpatial313`, déplacement réel, positions, pathfinding, événements, Tactical et `index.html` inchangés.
+
+Fermeture candidate GREEN :
+- SHA technique `7d9c38516914ba038c7a4b71ce5db0426559a293` ;
+- Architecture + Browser `36459918622` — SUCCESS ;
+- Firefox `36459918388` — SUCCESS ;
+- Tactical Dock `36459918590` — SUCCESS ;
+- aucun changement utilisateur visible.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-move-allowance-green-2026-09-28`.
 
 Prochaine action :
-ajouter une caractérisation GREEN de `heroMoveAllowance(id)` sur cette base exacte, la raccorder à Architecture, puis repasser Architecture + Browser / Firefox / Tactical avant toute garde RED.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical ;
+2. si tout est SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot movement Phase 7 depuis ce checkpoint.
 
 ---
 

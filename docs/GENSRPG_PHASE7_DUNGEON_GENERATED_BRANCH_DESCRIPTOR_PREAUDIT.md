@@ -183,3 +183,39 @@ Micro-diff :
 Étape suivante :
 relancer la CI normale et réaligner uniquement les fingerprints historiques réellement invalidés, un garde à la fois.
 
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`fbc920816e8ab4ec35aa707430e499379715cf11`.
+
+CI complète :
+- Architecture + Browser Chromium : `36405137080` — SUCCESS ;
+- Firefox : `36405136990` — SUCCESS ;
+- Tactical Dock : `36405137041` — SUCCESS.
+
+Runtime final :
+- `index.html` : `8169990` octets ;
+- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Résultat :
+- `GensDungeonV1.exploration.buildGeneratedBranchSceneElement(room, cellIndex, branchType)` possède uniquement la construction pure du descripteur generated ;
+- les formes historiques treasure / boss / secret et le fallback de libellé sont conservés ;
+- `nearestFree(x)`, le premier RNG de chance, le second RNG de type, `addDungeonSceneElement(...)`, `m.cells[i]='trapdoor'` et le retour de matérialisation restent dans Core 2.00 ;
+- `shouldCreateGeneratedBranch(...)` et `pickWeightedGeneratedBranchType(...)` restent leurs propriétaires Dungeon déjà établis ;
+- authored / Spatial / RoomRuntime / événements-spawn / ennemis / Tactical / Survie / Capture / PvP restent hors périmètre ;
+- la caractérisation #191 est devenue une caractérisation post-raccord et la garde #192 valide le builder pur, son fresh object et l'absence de side effects ;
+- les fingerprints historiques invalidés par le nouveau blob ont été réalignés un garde à la fois, sans assouplir les assertions métier ;
+- Architecture, Browser Chromium, Firefox et Tactical Dock sont GREEN sur le même SHA technique ;
+- aucun changement utilisateur visible : aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`.
+
+## Prochaine action obligatoire
+
+1. valider cette fermeture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint GREEN ;
+4. rester dans `Dungeon exploration / salles / branches` et pré-auditer avant toute modification runtime ;
+5. appliquer Rule 26 dès qu'une nouvelle inspection exacte de `index.html` est nécessaire.
+

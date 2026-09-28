@@ -149,7 +149,7 @@ assert.equal(dungeonContract.publicRuntimeApi,'GensDungeonV1');
 assert.ok(dungeonContract.owns.includes('Dungeon world state'));
 assert.ok(dungeonContract.owns.includes('exploration'));
 assert.ok(dungeonContract.forbidden.includes('Capture runtime'));
-assert.ok(dungeonContract.invariants.includes('the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector and generated branch chance gate'));
+assert.ok(dungeonContract.invariants.includes('the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector generated branch chance gate and generated branch scene descriptor builder'));
 
 for(const [name,src] of [['shell',shellEntry],['capture',captureEntry]]){
   assert.doesNotMatch(src,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,

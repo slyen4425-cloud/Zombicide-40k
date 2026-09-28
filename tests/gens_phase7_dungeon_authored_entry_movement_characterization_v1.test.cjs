@@ -90,8 +90,8 @@ vm.createContext(dungeonSandbox);
 vm.runInContext(entry,dungeonSandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof dungeonSandbox.GensDungeonV1?.movement?.planAuthoredEntryMovement,
-  'undefined',
-  'characterization must remain GREEN before the movement planner extraction'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored entry movement planner'
 );
 
 console.log(JSON.stringify({

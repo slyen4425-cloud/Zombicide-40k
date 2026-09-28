@@ -73,12 +73,21 @@ Restent hors lot :
 Isoler uniquement la règle pure de résolution de l'allowance d'entrée.
 
 API cible proposée après caractérisation GREEN :
-`GensDungeonV1.movement.resolveEntryAllowance(remainingValue, fallbackAllowance)`
+`GensDungeonV1.movement.normalizeEntryRemaining(remainingValue)`
 
 Sémantique historique à préserver :
 - valeur restante finie -> `Math.max(0, Number(remainingValue))` ;
-- valeur restante absente / non finie -> fallback déjà calculé par le runtime authored ;
+- valeur restante absente / non finie -> `null`, signalant au runtime authored de calculer son fallback ;
 - le helper pur ne lit ni héros, ni stats, ni config, ni stockage.
+
+### Raffinement issu de la caractérisation GREEN
+
+Le pré-audit initial envisageait `resolveEntryAllowance(remainingValue, fallbackAllowance)`.
+Cette forme aurait forcé le runtime authored à calculer `heroMoveAllowance(hero)` avant l'appel, y compris lorsque le mouvement restant est déjà valide.
+
+Le comportement historique est paresseux : `heroMoveAllowance(hero)` n'est évalué que lorsque `remaining` est absent/non fini.
+
+La cible est donc resserrée avant RED vers `normalizeEntryRemaining(remainingValue)`, avec `null` comme sentinel de fallback.
 
 Le runtime authored restera propriétaire de :
 - `heroMoveAllowance(hero)` ;
@@ -114,9 +123,10 @@ Ne pas déplacer/modifier :
 - remaining `undefined` -> fallback ;
 - remaining `null` conserve la sémantique historique de `Number(null)` fini, donc `0` ;
 - remaining `"bad"` -> fallback ;
-- le fallback n'est pas recalculé dans le helper ;
+- le fallback n'est jamais calculé dans le helper ;
 - aucun accès DOM/storage/global/Tactical ;
-- le helper retourne un nombre et ne mute aucun input ;
+- le helper retourne un nombre ou `null` et ne mute aucun input ;
+- `movementForEntry` reste propriétaire de l'appel paresseux à `heroMoveAllowance(hero)` ;
 - `enterNode` garde exactement ses deux affectations authored existantes ;
 - `DungeonSpatial313.persist/activate` restent inchangés.
 
@@ -125,7 +135,7 @@ Ne pas déplacer/modifier :
 1. ajouter une caractérisation GREEN de `movementForEntry` historique ;
 2. raccorder cette caractérisation à Architecture ;
 3. valider Architecture + Browser, Firefox et Tactical Dock GREEN ;
-4. ajouter UNE garde RED exigeant `GensDungeonV1.movement.resolveEntryAllowance(...)` et son consommateur authored ;
+4. ajouter UNE garde RED exigeant `GensDungeonV1.movement.normalizeEntryRemaining(...)` et son consommateur authored ;
 5. prouver le RED isolé ;
 6. appliquer le micro-diff minimal dans `assets/gensrpg/dungeon/entry-v1.js` et `assets/dungeon/dungeon-authored-runtime-167839.js` ;
 7. mettre à jour le contrat Dungeon ;

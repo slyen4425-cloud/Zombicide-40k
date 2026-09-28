@@ -133,3 +133,50 @@ Le fallback doit rester paresseux : aucune lecture de `dungeonHeroMoveValue083` 
 Aucune modification de `index.html` n’est autorisée dans les étapes de pré-audit / caractérisation / RED.
 
 Si le raccord final exige une modification de l’inline authored ou d’un bloc exact dans `index.html`, demander le fichier exact avant modification et vérifier taille + blob localement.
+
+## Caractérisation GREEN — prouvée
+
+SHA de caractérisation :
+`8461beb071b52d1397ec3f322cbdbb8bab609cbf`.
+
+CI :
+- Architecture + Browser Chromium : `36430074810` — SUCCESS ;
+- Firefox : `36430074767` — SUCCESS ;
+- Tactical Dock : `36430074878` — SUCCESS.
+
+La caractérisation verrouille :
+- parité exacte de `movementForEntry` pour valeurs numériques/coercibles ;
+- clamp des valeurs négatives à zéro ;
+- fallback pour valeur absente/non finie ;
+- appel paresseux de `heroMoveAllowance(hero)` uniquement sur fallback ;
+- décision avant `DungeonSpatial313.ensure/persist` ;
+- écriture finale de `x.remaining[hero]=movement` toujours Authored Runtime.
+
+## RED isolé — prouvé
+
+SHA RED :
+`cd3b3b5bc646e8fd4df1cd93177cee734761798a`.
+
+CI :
+- Architecture : `36431701247` — FAILURE attendue ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36431701142` — SUCCESS ;
+- Tactical Dock : `36431701044` — SUCCESS.
+
+Seule garde rouge :
+`#194 — Exiger le planificateur Dungeon du mouvement d’entrée authored Phase 7`.
+
+Erreur attendue :
+`Phase 7 micro-lot 7 requires Dungeon-owned authored entry movement planner`.
+
+## Micro-diff autorisé après RED
+
+Le raccord ne nécessite aucune modification de `index.html`.
+
+Fichiers autorisés :
+- `assets/gensrpg/dungeon/entry-v1.js` : ajouter le planner pur sous `GensDungeonV1.movement` ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` : faire consommer ce planner par `movementForEntry` en conservant le fallback paresseux ;
+- `assets/gensrpg/dungeon/module-contract-v1.json` : déclarer la frontière de propriété.
+
+Tout le reste reste hors périmètre.
+

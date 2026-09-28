@@ -65,6 +65,10 @@
       :Math.max(0,Number(mapEntryIndex)||0);
   }
 
+  function resolveAuthoredHeroMoveAllowance(runtimeMovementValue,statMovementValue){
+    return Math.max(0,Number(runtimeMovementValue)||Number(statMovementValue)||3);
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -77,7 +81,8 @@
     }),
     movement:Object.freeze({
       planAuthoredEntryMovement,
-      planAuthoredArrivalCell
+      planAuthoredArrivalCell,
+      resolveAuthoredHeroMoveAllowance
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

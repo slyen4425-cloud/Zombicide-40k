@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function movementForEntry\(x,hero\)\{const raw=x\?\.remaining\?\.\[hero\];return Number\.isFinite\(Number\(raw\)\)\?Math\.max\(0,Number\(raw\)\):heroMoveAllowance\(hero\)\}/,
-  'historical authored entry-movement decision drifted before extraction'
+  /function movementForEntry\(x,hero\)\{const plan=ROOT\.GensDungeonV1\.movement\.planAuthoredEntryMovement\(x\?\.remaining\?\.\[hero\]\);return plan\.status==="remaining"\?plan\.movement:heroMoveAllowance\(hero\)\}/,
+  'post-raccord authored entry-movement decision must preserve lazy fallback around the pure Dungeon planner'
 );
 assert.match(
   authored,

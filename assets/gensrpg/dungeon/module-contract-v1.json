@@ -36,6 +36,7 @@
     "the authored move allowance normalizer receives runtime and stat movement values explicitly while DungeonAuthoredRuntime167839 retains both global reads the try/catch and its fallback ownership",
     "the authored outgoing edge selector receives outgoing edges hero position and positional mode explicitly while DungeonAuthoredRuntime167839 retains graph position and positional configuration reads",
     "the authored real exit index resolver receives cells and direct exit index explicitly while DungeonAuthoredRuntime167839 retains map reads terminal-exit policy positional configuration and hero position reads",
+    "the authored terminal exit decision receives hero id real exit index positional mode and hero position explicitly while DungeonAuthoredRuntime167839 retains all runtime reads travel finish notifications and navigation policy",
     "the authored arrival cell planner receives map cell count edge entry index and map entry index explicitly and only selects the arrival cell while Authored Runtime keeps position writes and DungeonSpatial313 keeps spatial persistence",
     "the weighted room-kind selector receives its random roll explicitly and never owns random generation",
     "the weighted generated branch-type selector receives its random roll explicitly after the Core 2.00 nearest-free gate and never owns random generation or branch materialization",

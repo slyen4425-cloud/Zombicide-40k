@@ -180,3 +180,40 @@ Fichiers autorisés :
 
 Tout le reste reste hors périmètre.
 
+## Fermeture candidate GREEN
+
+SHA technique GREEN :
+`4750b8b73bbe28684abc2fa997292173522d7b82`.
+
+CI complète :
+- Architecture + Browser Chromium : `36434074641` — SUCCESS ;
+- Firefox : `36434074564` — SUCCESS ;
+- Tactical Dock : `36434074498` — SUCCESS.
+
+Runtime :
+- `index.html` inchangé : `8169990` octets ;
+- blob Git inchangé : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Résultat :
+- `GensDungeonV1.movement.planAuthoredEntryMovement(remainingValue)` possède uniquement la décision pure remaining-versus-fallback ;
+- valeurs numériques/coercibles finies : statut `remaining`, clamp à zéro ;
+- valeur absente/non finie : statut `fallback`, sans lecture de stats dans le planner ;
+- `DungeonAuthoredRuntime167839.movementForEntry(x, hero)` reste le consommateur unique ;
+- `heroMoveAllowance(hero)` reste propriétaire du fallback et n'est appelé que paresseusement ;
+- planification du mouvement reste avant `DungeonSpatial313.ensure/persist` ;
+- placement `x.positions[hero]=arrival(...)` et écriture `x.remaining[hero]=movement` restent Authored Runtime ;
+- `DungeonSpatial313`, déplacement de grille, pathfinding, consommation par case, événements/spawn, interactions et Tactical restent inchangés ;
+- les anciens gardes generated ont été resserrés pour autoriser uniquement le nouveau consommateur mouvement, sans transférer les APIs `GensDungeonV1.exploration.*` vers Authored Runtime ;
+- caractérisation post-raccord et garde propriétaire #194 sont GREEN ;
+- aucun changement utilisateur visible : aucun test utilisateur supplémentaire requis.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-entry-movement-green-2026-09-28`.
+
+## Prochaine action obligatoire
+
+1. valider cette fermeture documentaire par Architecture + Browser, Firefox et Tactical Dock ;
+2. si tout est SUCCESS, créer le checkpoint final exact ci-dessus ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint GREEN ;
+4. continuer le domaine `movement` par pré-audit d'un seam étroit, sans migrer le déplacement complet d'un seul coup.
+

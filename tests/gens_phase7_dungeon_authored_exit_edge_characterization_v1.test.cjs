@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function plan\(x,g\)\{const hero=activeHero\(x\),s=ensureState\(x,g\),current=currentNode\(x,s,hero\);if\(!current\)return \{hero,s,currentNodeId:"",targetNodeId:String\(g\.startNodeId\|\|""\),edge:null,first:true,needsExit:false\};const list=outgoing\(g,current\),pos=Number\(x\?\.positions\?\.\[hero\]\);let edge=list\.find\(e=>Number\(e\.fromExitIndex\)===pos\)\|\|null;if\(!edge&&!positional\(\)&&list\.length===1\)edge=list\[0\];return \{hero,s,currentNodeId:current,targetNodeId:String\(edge\?\.toNodeId\|\|""\),edge,first:false,needsExit:!!list\.length&&!edge,outgoing:list\}\}/,
-  'historical authored plan exit-edge selection drifted before extraction'
+  /function plan\(x,g\)\{const hero=activeHero\(x\),s=ensureState\(x,g\),current=currentNode\(x,s,hero\);if\(!current\)return \{hero,s,currentNodeId:"",targetNodeId:String\(g\.startNodeId\|\|""\),edge:null,first:true,needsExit:false\};const list=outgoing\(g,current\),pos=Number\(x\?\.positions\?\.\[hero\]\),edge=ROOT\.GensDungeonV1\.movement\.selectAuthoredOutgoingEdge\(list,pos,positional\(\)\);return \{hero,s,currentNodeId:current,targetNodeId:String\(edge\?\.toNodeId\|\|""\),edge,first:false,needsExit:!!list\.length&&!edge,outgoing:list\}\}/,
+  'post-raccord authored plan must preserve graph/position/config ownership around the pure selector'
 );
 
 let positionalEnabled=true;
@@ -136,14 +136,14 @@ vm.createContext(pureSandbox);
 vm.runInContext(entry,pureSandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof pureSandbox.GensDungeonV1?.movement?.selectAuthoredOutgoingEdge,
-  'undefined',
-  'characterization must remain GREEN before authored exit-edge extraction'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored outgoing-edge selector'
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored exit-edge selection characterization',
+  scenario:'Phase 7 authored exit-edge selection post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredRuntime167839.plan',
+  currentOwner:'DungeonAuthoredRuntime167839.plan consumer',
   semantics:{
     positionMatch:true,
     numericCoercion:true,

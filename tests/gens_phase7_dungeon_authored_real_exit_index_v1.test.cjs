@@ -65,8 +65,8 @@ assert.match(
 );
 assert.match(
   authored,
-  /function atTerminalExit\(x\)\{const hero=activeHero\(x\),exitIdx=realExitIndex\(x\);if\(!hero\|\|exitIdx<0\)return false;if\(!positional\(\)\)return true;return Number\(x\?\.positions\?\.\[hero\]\)===exitIdx\}/,
-  'terminal-exit policy must remain unchanged outside this extraction'
+  /function atTerminalExit\(x\)\{const hero=activeHero\(x\),exitIdx=realExitIndex\(x\);return ROOT\.GensDungeonV1\.movement\.isAuthoredTerminalExit\(hero,exitIdx,positional\(\),x\?\.positions\?\.\[hero\]\)\}/,
+  'terminal-exit policy must remain outside real-exit resolution after its later dedicated extraction'
 );
 
 assert.ok(

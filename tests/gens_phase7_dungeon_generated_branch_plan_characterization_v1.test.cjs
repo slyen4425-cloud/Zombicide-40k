@@ -54,8 +54,10 @@ assert.match(line,/GensDungeonV1\.exploration\.pickWeightedGeneratedBranchType\(
   'generated branch type selection must pass configured weights and the explicit second random roll');
 assert.doesNotMatch(line,/const w=\{treasure:45,boss:25,secret:30/,
   'Core 2.00 must no longer duplicate the branch-type weighting calculation');
-assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,
-  'branch materialization must still create the scene element at the Core 2.00 callsite');
+assert.match(line,/addDungeonSceneElement\?\.\(GensDungeonV1\.exploration\.buildGeneratedBranchSceneElement\(x\.room,i,type\)\)/,
+  'branch materialization must still occur at the Core 2.00 callsite using the pure Dungeon descriptor');
+assert.doesNotMatch(line,/name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine'/,
+  'Core 2.00 must no longer duplicate the generated branch descriptor labels');
 assert.match(line,/m\.cells\[i\]='trapdoor'/,
   'branch materialization must still mutate the generated map at the Core 2.00 callsite');
 

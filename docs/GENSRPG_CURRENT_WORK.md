@@ -28,8 +28,21 @@ Runtime de base :
 Hors périmètre :
 déplacement réel, positions, pathfinding, consommation de mouvement, Spatial, événements/spawn, interactions, Tactical.
 
+Caractérisation GREEN :
+- SHA `8bbc795778397ede509cf50b3256862a70eae43e` ;
+- Architecture + Browser `36447808052` — SUCCESS ;
+- Firefox `36447808043` — SUCCESS ;
+- Tactical Dock `36447808072` — SUCCESS.
+
+RED isolé :
+- SHA `edb14ca41f5678068cdfe398ceaa38a3d840eef9` ;
+- Architecture `36448866150` — FAILURE attendue sur #196 uniquement ;
+- Firefox `36448866639` — SUCCESS ;
+- Tactical Dock `36448866111` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
 Prochaine action :
-caractérisation GREEN dédiée de `DungeonAuthoredRuntime167839.arrival(map, edge)`, puis RED isolé.
+micro-diff minimal du planner pur de case d'arrivée, sans modification de `index.html`, puis triple CI.
 
 ---
 

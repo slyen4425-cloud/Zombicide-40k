@@ -1,3 +1,38 @@
+# PHASE 7 — MICRO-LOT 7 — allowance mouvement à l'entrée authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-branch-descriptor-green-2026-09-28`
+
+SHA de base :
+`cdc939b810edf918f6eeee537da9b5d5488a5ac8`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-entry-movement-allowance-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-entry-movement-allowance-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_ENTRY_MOVEMENT_ALLOWANCE_PREAUDIT.md`
+
+Cible :
+extraire uniquement la règle pure de conservation/clamp du mouvement restant à l'entrée authored, avec fallback déjà calculé par le runtime authored.
+
+API cible :
+`GensDungeonV1.movement.resolveEntryAllowance(remainingValue, fallbackAllowance)`.
+
+Hors périmètre :
+mouvement case-à-case, pathfinding, DungeonSpatial313, positions, snapshots, heroMoveAllowance, stats, fin de tour, événements/spawn, interactions, Tactical et autres modules.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+caractérisation GREEN dédiée de `DungeonAuthoredRuntime167839.movementForEntry`, puis RED isolé.
+
+---
+
 # PHASE 7 — MICRO-LOT 6 — descripteur de branche generated — 2026-09-27
 
 Base GREEN :

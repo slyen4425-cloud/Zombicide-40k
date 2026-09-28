@@ -1,3 +1,40 @@
+# PHASE 7 — MICRO-LOT 12 — politique de sortie terminale authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-real-exit-index-green-2026-09-28`
+
+SHA de base :
+`f470567fe25c2ed2b9f8dc9ff73eb59bf0d04b79`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-terminal-exit-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-terminal-exit-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_TERMINAL_EXIT_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la décision booléenne de `DungeonAuthoredRuntime167839.atTerminalExit(x)`, sans déplacer les lectures du héros, de la vraie sortie, de `positional()`, de la position ou la politique de travel.
+
+API candidate après caractérisation GREEN :
+`GensDungeonV1.movement.isAuthoredTerminalExit(heroId, realExitIndex, positionalEnabled, heroPosition)`.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36476396122` — SUCCESS ;
+- Firefox `36476396302` — SUCCESS ;
+- Tactical Dock `36476396223` — SUCCESS.
+
+Prochaine action :
+ajouter une caractérisation GREEN de `atTerminalExit(x)`, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 11 — vraie case sortie authored — 2026-09-28
 
 Base GREEN :

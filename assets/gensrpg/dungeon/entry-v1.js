@@ -41,6 +41,11 @@
     return Number(roll)*100<Math.max(0,Number(specialBranchChance)||0);
   }
 
+  function buildGeneratedBranchSceneElement(room,cellIndex,branchType){
+    const name=branchType==="boss"?"Trappe inquiétante":branchType==="secret"?"Passage secret":"Cache souterraine";
+    return {kind:"trapdoor",name,room,cellIndex,environment:"dungeon",branchType};
+  }
+
   function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){
     return {heroId,from:fromRoom,to:toRoom,created,at};
   }
@@ -52,7 +57,8 @@
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
       pickWeightedGeneratedBranchType,
-      shouldCreateGeneratedBranch
+      shouldCreateGeneratedBranch,
+      buildGeneratedBranchSceneElement
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

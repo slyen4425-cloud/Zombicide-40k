@@ -82,6 +82,12 @@
     return cells.findIndex(v=>String(v||"").toLowerCase()==="exit");
   }
 
+  function isAuthoredTerminalExit(heroId,realExitIndex,positionalEnabled,heroPosition){
+    if(!heroId||realExitIndex<0)return false;
+    if(!positionalEnabled)return true;
+    return Number(heroPosition)===realExitIndex;
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -97,7 +103,8 @@
       planAuthoredArrivalCell,
       resolveAuthoredHeroMoveAllowance,
       selectAuthoredOutgoingEdge,
-      resolveAuthoredRealExitIndex
+      resolveAuthoredRealExitIndex,
+      isAuthoredTerminalExit
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

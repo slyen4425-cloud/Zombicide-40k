@@ -1,3 +1,32 @@
+# PHASE 7 — MICRO-LOT 8 — autorité du mouvement héros authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-entry-movement-green-2026-09-28`
+
+SHA de base :
+`c6553ce1a381c356515c4791eab327c0bc16db35`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-hero-move-allowance-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-hero-move-allowance-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_HERO_MOVE_ALLOWANCE_PREAUDIT.md`
+
+Cible :
+isoler uniquement la décision pure du premier candidat de `heroMoveAllowance(id)`, sans déplacer la lecture CHARS, le fallback 3, le try/catch, DungeonSpatial313 ni le déplacement réel.
+
+Runtime de base :
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+caractérisation GREEN dédiée du comportement historique de `heroMoveAllowance`, y compris la paresse de la lecture CHARS.
+
+---
+
 # PHASE 7 — MICRO-LOT 7 — mouvement d’entrée authored — 2026-09-28
 
 Base GREEN :

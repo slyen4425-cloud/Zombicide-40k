@@ -38,8 +38,17 @@ RED isolé :
 - Tactical Dock `36360543487` — SUCCESS ;
 - Browser SKIPPED uniquement à cause du RED Architecture.
 
+Runtime candidat :
+- Rule 26 : `work39.zip / indexwok39.txt` vérifié ;
+- SHA runtime `d86115d35e06d94d0881f08d8a915d7784237628` ;
+- `index.html` : `8169990` octets ;
+- blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082` ;
+- builder pur `buildGeneratedBranchSceneElement(...)` raccordé ;
+- matérialisation et RNG restent Core 2.00 ;
+- one-shot retiré.
+
 Prochaine action :
-Rule 26 sur l'index exact du SHA RED, puis micro-diff minimal du descripteur pur. Aucun runtime ne doit être modifié avant vérification locale taille/blob du fichier fourni.
+CI normale sur ce candidat, puis réalignement des fingerprints historiques un garde à la fois sans assouplir les assertions métier.
 
 ---
 

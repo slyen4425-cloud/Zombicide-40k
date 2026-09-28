@@ -27,7 +27,7 @@ function validGraph(g){if(!g?.startNodeId||!Array.isArray(g.nodes)||!g.nodes.len
 function active(){return validGraph(graph())}
 function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
 function positional(){try{if(typeof ROOT.dc305PositionalGameplay==="function")return !!ROOT.dc305PositionalGameplay()}catch(e){}try{return ROOT.gensGameplayModules?.()?.movement===true}catch(e){return false}}
-function heroMoveAllowance(id){try{return Math.max(0,Number(ROOT.dungeonHeroMoveValue083?.(id))||Number(ROOT.CHARS?.[id]?.dungeonStats?.movement)||3)}catch(e){return 3}}
+function heroMoveAllowance(id){try{return ROOT.GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(ROOT.dungeonHeroMoveValue083?.(id),ROOT.CHARS?.[id]?.dungeonStats?.movement)}catch(e){return 3}}
 function movementForEntry(x,hero){const plan=ROOT.GensDungeonV1.movement.planAuthoredEntryMovement(x?.remaining?.[hero]);return plan.status==="remaining"?plan.movement:heroMoveAllowance(hero)}
 function roomPack(g,nodeId){const node=(g?.nodes||[]).find(n=>String(n.id)===String(nodeId||""));if(!node)return null;const room=roomApi()?.findRoom?.(node.roomId);return room?{node,room}:null}
 function nodeLabel(g,nodeId){const p=roomPack(g,nodeId);return String(p?.node?.label||p?.room?.name||"Zone")}

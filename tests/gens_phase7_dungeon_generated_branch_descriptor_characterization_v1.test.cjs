@@ -18,10 +18,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170090,
-  'Phase 7 generated branch descriptor characterization must track the micro-lot 5 runtime');
-assert.equal(gitBlob,'85bf8dcb0ad22d596e648f4992210d870520d6f9',
-  'Phase 7 generated branch descriptor characterization must track the exact micro-lot 5 blob');
+assert.equal(bytes.length,8169990,
+  'Phase 7 generated branch descriptor characterization must track the micro-lot 6 runtime');
+assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
+  'Phase 7 generated branch descriptor characterization must track the exact micro-lot 6 blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

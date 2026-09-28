@@ -16,22 +16,49 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_REAL_EXIT_INDEX_PREAUDIT.md`
 
 Cible :
-caractériser puis isoler uniquement la résolution pure de la vraie cellule `exit` dans `DungeonAuthoredRuntime167839.realExitIndex(x)`, sans déplacer `atTerminalExit`, `positional()`, les positions, travel ou Spatial.
+isoler uniquement la résolution pure de la vraie cellule `exit` dans `DungeonAuthoredRuntime167839.realExitIndex(x)`, sans déplacer `atTerminalExit`, `positional()`, les positions, travel ou Spatial.
 
-API candidate après caractérisation GREEN :
+API propriétaire :
 `GensDungeonV1.movement.resolveAuthoredRealExitIndex(cells, directExitIndex)`.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36471642373` — SUCCESS ;
-- Firefox `36471642303` — SUCCESS ;
-- Tactical Dock `36471642315` — SUCCESS.
+Caractérisation GREEN :
+- SHA `e74acac774e77e709ecc4be8dbc8b5fb1c716790` ;
+- Architecture + Browser `36473130186` — SUCCESS ;
+- Firefox `36473130614` — SUCCESS ;
+- Tactical Dock `36473130177` — SUCCESS.
+
+RED isolé :
+- SHA `15dd8983b3d54d79117b8d9a7cb8575061c8508c` ;
+- Architecture `36474354853` — FAILURE attendue uniquement sur #202 ;
+- Firefox `36474354955` — SUCCESS ;
+- Tactical Dock `36474354836` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
+Micro-diff GREEN :
+- resolver pur ajouté dans `assets/gensrpg/dungeon/entry-v1.js` ;
+- `DungeonAuthoredRuntime167839.realExitIndex(x)` délègue une seule fois au resolver ;
+- lecture map, normalisation cells, `atTerminalExit`, positional et position héros restent Authored Runtime ;
+- contrat Dungeon mis à jour ;
+- Spatial, déplacement réel, pathfinding, événements, Tactical et `index.html` inchangés.
+
+Fermeture candidate GREEN :
+- SHA technique `416de48972c4a2305ab452e80457a684686764fa` ;
+- Architecture + Browser `36474978235` — SUCCESS ;
+- Firefox `36474978288` — SUCCESS ;
+- Tactical Dock `36474978210` — SUCCESS ;
+- aucun changement utilisateur visible.
+
+Checkpoint final prévu après CI du présent SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-real-exit-index-green-2026-09-28`.
 
 Prochaine action :
-ajouter une caractérisation GREEN de `realExitIndex(x)`, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+1. valider la fermeture documentaire par Architecture + Browser, Firefox et Tactical ;
+2. si tout est SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint.
 
 ---
 

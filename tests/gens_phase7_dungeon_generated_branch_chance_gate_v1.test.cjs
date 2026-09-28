@@ -50,8 +50,10 @@ assert.doesNotMatch(line,/Math\.random\(\)\*100>=Math\.max\(0,Number\(c\.special
   'Core 2.00 must retire the inline generated branch chance calculation');
 assert.equal((line.match(/Math\.random\(\)/g)||[]).length,2,
   'Core 2.00 must preserve exactly two RNG callsites on the accepted branch path');
-assert.match(line,/addDungeonSceneElement\?\.\(\{kind:'trapdoor'/,
-  'branch scene materialization must remain in Core 2.00');
+assert.match(line,/addDungeonSceneElement\?\.\(GensDungeonV1\.exploration\.buildGeneratedBranchSceneElement\(x\.room,i,type\)\)/,
+  'branch scene materialization must remain in Core 2.00 using the pure Dungeon descriptor');
+assert.doesNotMatch(line,/name:type==='boss'\?'Trappe inquiétante':type==='secret'\?'Passage secret':'Cache souterraine'/,
+  'Core 2.00 must no longer duplicate generated branch descriptor labels');
 assert.match(line,/m\.cells\[i\]='trapdoor'/,
   'branch map mutation must remain in Core 2.00');
 assert.doesNotMatch(authored,/shouldCreateGeneratedBranch/,

@@ -158,3 +158,28 @@ Avant toute modification de `index.html` :
 3. vérifier localement taille + blob ;
 4. seulement ensuite appliquer le micro-diff du descripteur.
 
+## Candidat runtime appliqué
+
+Source Rule 26 vérifiée :
+- `work39.zip / indexwok39.txt` ;
+- taille source : `8170090` octets ;
+- blob source : `85bf8dcb0ad22d596e648f4992210d870520d6f9`.
+
+SHA runtime :
+`d86115d35e06d94d0881f08d8a915d7784237628`.
+
+Runtime cible :
+- `index.html` : `8169990` octets ;
+- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Micro-diff :
+- ajout de `GensDungeonV1.exploration.buildGeneratedBranchSceneElement(room, cellIndex, branchType)` ;
+- le builder retourne uniquement le plain object historique de trappe generated ;
+- `nearestFree(x)`, les deux RNG, `addDungeonSceneElement(...)`, `m.cells[i]='trapdoor'` et le retour de matérialisation restent dans Core 2.00 ;
+- authored, Spatial, RoomRuntime, événements/spawn, ennemis et Tactical restent inchangés ;
+- contrat Dungeon mis à jour pour refléter cette propriété pure ;
+- workflow one-shot retiré dans le commit runtime.
+
+Étape suivante :
+relancer la CI normale et réaligner uniquement les fingerprints historiques réellement invalidés, un garde à la fois.
+

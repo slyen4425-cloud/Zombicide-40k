@@ -14,7 +14,18 @@ const arrivalMatch=authored.match(/function arrival\(map,edge\)\{[^\n]+\}/);
 assert.ok(arrivalMatch,'authored arrival(map, edge) seam must remain directly characterizable');
 const arrivalSource=arrivalMatch[0];
 
-const sandbox={};
+const entrySandbox={};
+entrySandbox.window=entrySandbox;
+entrySandbox.globalThis=entrySandbox;
+vm.createContext(entrySandbox);
+vm.runInContext(entry,entrySandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
+assert.equal(
+  typeof entrySandbox.GensDungeonV1?.movement?.planAuthoredArrivalCell,
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored arrival planner'
+);
+
+const sandbox={ROOT:{GensDungeonV1:entrySandbox.GensDungeonV1}};
 vm.createContext(sandbox);
 vm.runInContext(arrivalSource+'\nthis.__arrival=arrival;',sandbox,{filename:'arrival-characterization.js'});
 const arrival=sandbox.__arrival;
@@ -41,17 +52,6 @@ assert.match(authored,/DungeonSpatial313\?\.persist\?\.\(x\)/,
   'DungeonSpatial313 persist must remain in Authored Runtime');
 assert.doesNotMatch(arrivalSource,/DungeonSpatial313|localStorage|document|Math\.random|Tactical|positions|remaining/,
   'arrival seam must stay pure and side-effect free');
-
-const entrySandbox={};
-entrySandbox.window=entrySandbox;
-entrySandbox.globalThis=entrySandbox;
-vm.createContext(entrySandbox);
-vm.runInContext(entry,entrySandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
-assert.equal(
-  typeof entrySandbox.GensDungeonV1?.movement?.planAuthoredArrivalCell,
-  'undefined',
-  'characterization must remain GREEN before authored arrival planner extraction'
-);
 
 console.log(JSON.stringify({
   scenario:'Phase 7 authored arrival cell characterization',

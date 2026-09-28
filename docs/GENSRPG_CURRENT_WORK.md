@@ -28,8 +28,21 @@ Runtime `index.html` inchangé :
 Hors périmètre :
 movementForEntry, déplacement réel, positions, remaining writes, DungeonSpatial313, pathfinding, authored travel, événements/spawn, interactions, Tactical.
 
+Caractérisation GREEN :
+- SHA `b4a2fd349b26afc2f9953d45048ecd2e58b49a30` ;
+- Architecture + Browser `36443831895` — SUCCESS ;
+- Firefox `36443831925` — SUCCESS ;
+- Tactical Dock `36443831919` — SUCCESS.
+
+RED isolé :
+- SHA `0e34b070fae984e83cfb294d65b2ca03e9488a24` ;
+- Architecture `36445516538` — FAILURE attendue sur #196 uniquement ;
+- Firefox `36445516297` — SUCCESS ;
+- Tactical Dock `36445516491` — SUCCESS ;
+- Browser SKIPPED uniquement à cause du RED Architecture.
+
 Prochaine action :
-caractérisation GREEN dédiée de `heroMoveAllowance(id)`, puis RED isolé.
+micro-diff minimal du helper pur dans `entry-v1.js`, raccord unique dans `heroMoveAllowance(id)`, mise à jour minimale du contrat Dungeon ; `index.html` reste strictement inchangé.
 
 ---
 

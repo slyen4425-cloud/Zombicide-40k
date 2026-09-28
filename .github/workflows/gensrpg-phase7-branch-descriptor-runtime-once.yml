@@ -45,12 +45,14 @@ jobs:
           entry_path=Path("assets/gensrpg/dungeon/entry-v1.js")
           entry=entry_path.read_text(encoding="utf-8")
           anchor='  function buildGeneratedRoomTransition(heroId,fromRoom,toRoom,created,at){'
-          helper='''  function buildGeneratedBranchSceneElement(room,cellIndex,branchType){
-            const name=branchType==="boss"?"Trappe inquiétante":branchType==="secret"?"Passage secret":"Cache souterraine";
-            return {kind:"trapdoor",name,room,cellIndex,environment:"dungeon",branchType};
-          }
-
-'''
+          helper="\n".join([
+            '  function buildGeneratedBranchSceneElement(room,cellIndex,branchType){',
+            '    const name=branchType==="boss"?"Trappe inquiétante":branchType==="secret"?"Passage secret":"Cache souterraine";',
+            '    return {kind:"trapdoor",name,room,cellIndex,environment:"dungeon",branchType};',
+            '  }',
+            '',
+            ''
+          ])
           assert entry.count(anchor)==1, entry.count(anchor)
           assert entry.count('function buildGeneratedBranchSceneElement(')==0, entry.count('function buildGeneratedBranchSceneElement(')
           entry=entry.replace(anchor,helper+anchor)

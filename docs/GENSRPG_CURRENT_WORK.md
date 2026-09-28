@@ -1,3 +1,40 @@
+# PHASE 7 — MICRO-LOT 11 — vraie case sortie authored — 2026-09-28
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-exit-edge-selection-green-2026-09-28`
+
+SHA de base :
+`27fcd34dd606f4e751a37f07819428536fb7f629`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-real-exit-index-2026-09-28`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-real-exit-index-2026-09-28`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_REAL_EXIT_INDEX_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la résolution pure de la vraie cellule `exit` dans `DungeonAuthoredRuntime167839.realExitIndex(x)`, sans déplacer `atTerminalExit`, `positional()`, les positions, travel ou Spatial.
+
+API candidate après caractérisation GREEN :
+`GensDungeonV1.movement.resolveAuthoredRealExitIndex(cells, directExitIndex)`.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36471642373` — SUCCESS ;
+- Firefox `36471642303` — SUCCESS ;
+- Tactical Dock `36471642315` — SUCCESS.
+
+Prochaine action :
+ajouter une caractérisation GREEN de `realExitIndex(x)`, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 10 — sélection de sortie authored — 2026-09-28
 
 Base GREEN :

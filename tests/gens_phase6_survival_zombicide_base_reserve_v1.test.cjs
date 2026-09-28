@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8170090,'base-reserve lot must run on the current Phase 7 Dungeon generated-branch chance-gate runtime size');
-assert.equal(blob,'85bf8dcb0ad22d596e648f4992210d870520d6f9','base-reserve lot must target the current Phase 7 generated-branch chance-gate runtime baseline');
+assert.equal(bytes.length,8169990,'base-reserve lot must run on the current Phase 7 Dungeon generated-branch descriptor runtime size');
+assert.equal(blob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','base-reserve lot must target the current Phase 7 generated-branch descriptor runtime baseline');
 
 const entry=fs.readFileSync(entryPath,'utf8');
 const contract=JSON.parse(fs.readFileSync(contractPath,'utf8'));

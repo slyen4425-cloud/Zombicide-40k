@@ -15,37 +15,58 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTION_FIX_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
-conserver l'API publique `DungeonAuthoredActionFix167857.activeHero(x)` et déléguer uniquement sa décision pure au propriétaire canonique existant :
+Cible fermée :
+conserver l'API publique `DungeonAuthoredActionFix167857.activeHero(x)` et déléguer uniquement sa décision pure au propriétaire canonique :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit élargi :
-- Action Fix reste une copie authored exacte ;
-- Exact Trap et Zone Links possèdent aussi une copie et restent différés ;
-- World Runtime, Room Runtime, Large Room Support, Core 317/318 possèdent leurs propres sélecteurs ;
-- Source Render possède une sélection inline différente à caractériser séparément ;
-- le lot 21 ne revendique donc aucune harmonisation globale au-delà d'Action Fix.
+Caractérisation GREEN :
+- SHA `d23f66037732502da01786d49a1dad399b3fb8ab` ;
+- Architecture + Browser `36635090559` — SUCCESS ;
+- Firefox `36635090431` — SUCCESS ;
+- Tactical Dock `36635090451` — SUCCESS.
 
-Frontière :
+RED isolé :
+- SHA `a5faa8b9286d5489afe4ac2957992528d1900955` ;
+- Architecture `36638185092` — FAILURE attendue uniquement sur #221 `Exiger la délégation héros actif Action Fix authored Phase 7` ;
+- caractérisation #220 — SUCCESS ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36638184927` — SUCCESS ;
+- Tactical Dock `36638184920` — SUCCESS.
+
+Micro-diff GREEN :
+- `88af59063ecc36ee802d9f94a9915968356714b5` — Action Fix conserve son API publique et délègue la sélection pure ;
+- `f3a9cdb4c6ec93b1efbe4884b04b7dc686d3a881` — contrat Dungeon clarifié ;
+- `bee15e9aa39ee7f0bac9ba32a0b825e99ea6b464` — caractérisation post-raccord ;
+- `7f35476850ca19da25bfe2cdf2fbb76d1668054d` — fixture historique chargée avec le propriétaire Dungeon réel.
+
+Triple CI technique GREEN sur `7f35476850ca19da25bfe2cdf2fbb76d1668054d` :
+- Architecture + Browser `36638438995` — SUCCESS ;
+- Browser 45/45 sans échec ;
+- Firefox `36638439073` — SUCCESS ;
+- Tactical Dock `36638438940` — SUCCESS.
+
+Frontière préservée :
 - `positionKey` et `exactChestAtActivePosition` restent Action Fix ;
-- règles de coffre, état opened, DOM, wrappers Spatial/Core, clics et timers restent inchangés ;
-- aucun autre consommateur activeHero n'est modifié ;
+- règles de coffre, état opened, lecture runtime, contexte authored, DOM, wrappers Spatial/Core, clics et timers restent inchangés ;
+- Exact Trap, Zone Links, World Runtime, Room Runtime, Large Room Support, Core 317/318 et Source Render restent différés ;
+- Branch Nav, Return Persist, Final Exit, Authored Runtime et `DungeonSpatial313` restent inchangés ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36633251800` — SUCCESS ;
-- Firefox `36633251726` — SUCCESS ;
-- Tactical Dock `36633251601` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. caractériser Action Fix activeHero + positionKey + exactChestAtActivePosition ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Action Fix.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-action-fix-active-hero-delegation-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 20 — délégation héros actif Branch Nav Cleanup authored — 2026-09-29

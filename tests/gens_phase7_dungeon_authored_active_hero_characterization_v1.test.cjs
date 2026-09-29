@@ -68,7 +68,10 @@ const makeStore=()=>{
   assert.equal(hero(['a','b'],'1'),'b');
   assert.equal(hero(['a','b'],-4),'a');
   assert.equal(hero(['a','b'],99),'b');
-  assert.equal(hero(['a','b'],1.5),'');
+  assert.equal(hero(['a','b'],1.5),'b',
+    'fractional index above the last index must clamp to the last hero historically');
+  assert.equal(hero(['a','b','c'],1.5),'',
+    'fractional index inside the valid numeric range must remain fractional and miss the array slot historically');
   assert.equal(hero([],0),'');
   assert.equal(hero('not-an-array',0),'');
   assert.equal(hero([0,'b'],0),'');
@@ -136,7 +139,8 @@ console.log(JSON.stringify({
     clampsNegativeToFirst:true,
     clampsOverflowToLast:true,
     numericStringCoercion:true,
-    fractionalIndexNotNormalized:true,
+    fractionalIndexClampedOnlyAtBounds:true,
+    inRangeFractionalIndexNotNormalized:true,
     falsyParticipantBecomesEmpty:true
   }
 },null,2));

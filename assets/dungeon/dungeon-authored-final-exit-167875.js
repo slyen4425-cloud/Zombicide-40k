@@ -11,7 +11,7 @@ function api(){return R.DungeonAuthoredRuntime167839||null}
 function runtime(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function save(x){try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));return true}catch(e){return false}}
 function blocked(x){try{if(R.dungeonRoomExitLocked102?.())return true}catch(e){}return R.GensDungeonV1.movement.isAuthoredExitBlocked(x?.last?.exitLocked,x?.last?.map?.objective?.status,x?.last?.objective?.status)}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function activeHero(x){return R.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function inSecondaryBranch(x,hero){
   if(x?.branch?.active)return true;
   const stacks=x?.authored167847ReturnStacks;

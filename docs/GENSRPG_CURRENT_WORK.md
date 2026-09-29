@@ -16,30 +16,60 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_EXIT_LOCK_DECISION_PREAUDIT.md`
 
 Cible :
-caractériser puis isoler uniquement la décision authored locale de verrouillage de sortie dans `DungeonAuthoredRuntime167839.blocked(x)`.
+isoler uniquement la décision authored locale de verrouillage de sortie dans `DungeonAuthoredRuntime167839.blocked(x)`.
 
-API candidate après caractérisation GREEN :
+API propriétaire :
 `GensDungeonV1.movement.isAuthoredExitBlocked(lastExitLocked, mapObjectiveStatus, objectiveStatus)`.
 
-Frontière obligatoire :
-- le garde dynamique `dungeonRoomExitLocked102?.()`, son ordre et son `try/catch` restent dans Authored Runtime ;
-- Authored Runtime conserve toutes les lectures de `x`, `travel()`, `syncActionButton()`, notices et politique de navigation ;
+Frontière préservée :
+- le garde dynamique `dungeonRoomExitLocked102?.()`, son ordre, son court-circuit et son `try/catch` restent dans Authored Runtime ;
+- Authored Runtime conserve les lectures de `x`, `blocked(x)` comme raccord, `travel()`, `syncActionButton()`, notices et politique de navigation ;
 - le helper Dungeon ne reçoit que trois valeurs explicites déjà lues ;
-- Spatial reste inchangé.
+- `DungeonSpatial313` reste inchangé.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36516451500` — SUCCESS ;
-- Firefox `36516451759` — SUCCESS ;
-- Tactical Dock `36516451884` — SUCCESS.
+Caractérisation GREEN :
+- SHA `db442959670d36dd21476a975fb432b4fbf2825d` ;
+- Architecture + Browser `36517633316` — SUCCESS ;
+- Firefox `36517633486` — SUCCESS ;
+- Tactical Dock `36517633305` — SUCCESS.
+
+RED isolé :
+- SHA `6c8e3f54a5579c560466ba964a6cf02341a64f76` ;
+- Architecture `36536656012` — FAILURE attendue uniquement sur #206 `Exiger la décision Dungeon de verrouillage de sortie authored Phase 7` ;
+- Browser SKIPPED uniquement à cause du RED Architecture ;
+- Firefox `36536656013` — SUCCESS ;
+- Tactical Dock `36536655999` — SUCCESS.
+
+Micro-diff GREEN :
+- helper pur ajouté dans `assets/gensrpg/dungeon/entry-v1.js` ;
+- `DungeonAuthoredRuntime167839.blocked(x)` conserve le garde dynamique historique puis délègue une seule fois au helper ;
+- contrat Dungeon mis à jour ;
+- caractérisation post-raccord conserve les mêmes scénarios métier ;
+- Spatial, terminal exit, vraie sortie, mouvement réel, pathfinding, travel, `syncActionButton()`, événements, Tactical et `index.html` inchangés.
+
+SHA technique GREEN :
+`ab93c86e24896959fa9e4e05eea5d380ee988901`.
+
+CI technique GREEN :
+- Architecture + Browser `36536917769` — SUCCESS ;
+- Firefox `36536917768` — SUCCESS ;
+- Tactical Dock `36536917890` — SUCCESS.
+
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après CI du SHA documentaire final :
+`checkpoint/gensrpg-phase7-dungeon-authored-exit-lock-decision-green-2026-09-29`.
 
 Prochaine action :
-1. ajouter une caractérisation GREEN de la politique actuelle de `blocked(x)` ;
-2. la raccorder à Architecture ;
-3. repasser les trois validations avant toute garde RED.
+1. valider Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint.
 
 ---
 

@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function blocked\(x\)\{try\{if\(ROOT\.dungeonRoomExitLocked102\?\.\(\)\)return true\}catch\(e\)\{\}if\(x\?\.last\?\.exitLocked\)return true;return String\(x\?\.last\?\.map\?\.objective\?\.status\|\|x\?\.last\?\.objective\?\.status\|\|""\)===\"locked\"\}/,
-  'historical blocked policy must remain local to Authored Runtime before extraction'
+  /function blocked\(x\)\{try\{if\(ROOT\.dungeonRoomExitLocked102\?\.\(\)\)return true\}catch\(e\)\{\}return ROOT\.GensDungeonV1\.movement\.isAuthoredExitBlocked\(x\?\.last\?\.exitLocked,x\?\.last\?\.map\?\.objective\?\.status,x\?\.last\?\.objective\?\.status\)\}/,
+  'post-raccord blocked policy must keep the dynamic guard local and delegate only the authored fallback decision'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -161,20 +161,28 @@ vm.createContext(pureSandbox);
 vm.runInContext(entry,pureSandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof pureSandbox.GensDungeonV1?.movement?.isAuthoredExitBlocked,
-  'undefined',
-  'pre-extraction characterization must prove the pure exit-lock helper is not connected yet'
+  'function',
+  'post-raccord characterization requires the Dungeon-owned authored exit-lock helper'
 );
+
+const pureBlocked=pureSandbox.GensDungeonV1.movement.isAuthoredExitBlocked;
+assert.equal(pureBlocked(true,'open','open'),true);
+assert.equal(pureBlocked(false,'locked','open'),true);
+assert.equal(pureBlocked(false,'','locked'),true);
+assert.equal(pureBlocked(false,'open','locked'),false);
+assert.equal(pureBlocked(false,'LOCKED',''),false);
+assert.equal(pureBlocked(false,'open','open'),false);
 
 assert.doesNotMatch(
   entry,
   /dungeonRoomExitLocked102|DungeonSpatial313|localStorage|sessionStorage|document|setTimeout|setInterval|MutationObserver|addEventListener/,
-  'Dungeon public entry must remain pure before exit-lock extraction'
+  'Dungeon public entry must remain pure after exit-lock extraction'
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored exit lock characterization after terminal-exit GREEN',
+  scenario:'Phase 7 authored exit lock post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredRuntime167839.blocked',
+  currentOwner:'DungeonAuthoredRuntime167839.blocked consumer',
   semantics:{
     dynamicGuardFirst:true,
     dynamicGuardExceptionFallsThrough:true,

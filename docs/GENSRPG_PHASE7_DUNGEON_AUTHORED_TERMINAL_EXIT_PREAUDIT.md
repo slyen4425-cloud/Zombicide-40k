@@ -117,3 +117,57 @@ Ne pas toucher :
 
 Aucune modification de `index.html` n’est prévue.
 Si le périmètre change et exige son contenu exact, arrêter le lot et appliquer Rule 26 avant toute modification.
+
+
+## Résultat TDD du micro-lot
+
+### Caractérisation GREEN
+
+La première exécution raccordée au workflow sur `cc04a0ee2011aa5643a52960daf30bbe7ea3c442` a révélé un défaut du helper de test, pas du runtime : la déstructuration `position=1` remplaçait artificiellement le cas explicite `position: undefined`.
+
+Le helper de test a été corrigé seul sur :
+`52b020c2a7ce326b0cf74835647123ccff1cc7e5`.
+
+Preuve GREEN de caractérisation :
+- Architecture + Browser : `36481586102` — SUCCESS ;
+- Firefox : `36481586272` — SUCCESS ;
+- Tactical Dock : `36481586105` — SUCCESS.
+
+La parité historique est donc verrouillée avant extraction, y compris le cas réel de position absente.
+
+### RED isolé
+
+Garde ajoutée :
+`gens_phase7_dungeon_authored_terminal_exit_v1.test.cjs`.
+
+SHA RED :
+`34bc03c68b4a139794fe46c156ddc36be692f7b4`.
+
+Preuve :
+- Architecture : `36483086139` — FAILURE attendue uniquement sur #204 `Exiger la politique Dungeon de sortie terminale authored Phase 7` ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36483086247` — SUCCESS ;
+- Tactical Dock : `36483086122` — SUCCESS.
+
+### Micro-diff GREEN
+
+Extraction minimale :
+- `GensDungeonV1.movement.isAuthoredTerminalExit(heroId, realExitIndex, positionalEnabled, heroPosition)` ajouté comme décision pure ;
+- `DungeonAuthoredRuntime167839.atTerminalExit(x)` conserve les lectures de héros, vraie sortie, mode positionnel et position puis délègue une seule fois à la décision pure ;
+- `travel()`, `finishTerminal()`, notifications et politique de navigation authored restent dans Authored Runtime ;
+- invariant Dungeon ajouté au contrat ;
+- Spatial, déplacement réel, pathfinding, événements, Tactical et `index.html` inchangés.
+
+SHA technique GREEN :
+`ba8ed7005b889261b28dba27452db19d7108db15`.
+
+Preuve GREEN :
+- Architecture + Browser : `36483916317` — SUCCESS ;
+- Firefox : `36483916217` — SUCCESS ;
+- Tactical Dock : `36483916249` — SUCCESS.
+
+Runtime `index.html` toujours inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Aucun test utilisateur n'est requis : aucun comportement visible n'a été modifié.

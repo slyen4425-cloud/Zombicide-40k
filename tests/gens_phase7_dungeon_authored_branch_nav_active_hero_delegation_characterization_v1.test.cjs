@@ -11,12 +11,17 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const branchNav=read('assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
-assert.match(branchNav,historical,
-  'Branch Nav Cleanup must still own the historical local activeHero selector before delegation');
+assert.doesNotMatch(branchNav,historical,
+  'Branch Nav Cleanup must no longer own the duplicated activeHero decision after delegation');
 assert.equal(
   (branchNav.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Branch Nav Cleanup must not consume the canonical helper before this micro-lot'
+  1,
+  'Branch Nav Cleanup must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  branchNav,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Branch Nav Cleanup must preserve its public activeHero raccord while delegating only pure selection'
 );
 
 const store=new Map();
@@ -116,7 +121,7 @@ console.log(JSON.stringify({
   publicApi:'DungeonAuthoredBranchNavCleanup167863.activeHero',
   consumer:'DungeonAuthoredBranchNavCleanup167863.branchReturnActive',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation',
+  expected:'GREEN after delegation',
   preserved:[
     'currentNode',
     'authoredActive',

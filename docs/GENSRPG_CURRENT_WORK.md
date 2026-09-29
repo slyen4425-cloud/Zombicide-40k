@@ -1,3 +1,53 @@
+# PHASE 7 — MICRO-LOT 21 — délégation héros actif Action Fix authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-branch-nav-active-hero-delegation-green-2026-09-29`
+
+SHA de base :
+`48b1ac81c16fcd8ba4ae0f3e228b2cfd9dc3524c`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-action-fix-active-hero-delegation-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-action-fix-active-hero-delegation-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTION_FIX_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+conserver l'API publique `DungeonAuthoredActionFix167857.activeHero(x)` et déléguer uniquement sa décision pure au propriétaire canonique existant :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit élargi :
+- Action Fix reste une copie authored exacte ;
+- Exact Trap et Zone Links possèdent aussi une copie et restent différés ;
+- World Runtime, Room Runtime, Large Room Support, Core 317/318 possèdent leurs propres sélecteurs ;
+- Source Render possède une sélection inline différente à caractériser séparément ;
+- le lot 21 ne revendique donc aucune harmonisation globale au-delà d'Action Fix.
+
+Frontière :
+- `positionKey` et `exactChestAtActivePosition` restent Action Fix ;
+- règles de coffre, état opened, DOM, wrappers Spatial/Core, clics et timers restent inchangés ;
+- aucun autre consommateur activeHero n'est modifié ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36633251800` — SUCCESS ;
+- Firefox `36633251726` — SUCCESS ;
+- Tactical Dock `36633251601` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. caractériser Action Fix activeHero + positionKey + exactChestAtActivePosition ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Action Fix.
+
+---
+
 # PHASE 7 — MICRO-LOT 20 — délégation héros actif Branch Nav Cleanup authored — 2026-09-29
 
 Base GREEN :

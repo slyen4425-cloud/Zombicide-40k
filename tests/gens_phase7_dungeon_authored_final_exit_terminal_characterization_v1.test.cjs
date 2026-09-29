@@ -71,7 +71,10 @@ vm.runInContext(finalExit,ctx,{filename:'assets/dungeon/dungeon-authored-final-e
 const api=ctx.DungeonAuthoredFinalExit167875;
 assert.ok(api,'Final Exit API must load');
 
-function save({position=2,cells=['floor','cache','exit'],exitIdx=2}={}){
+function save(options={}){
+  const position=Object.prototype.hasOwnProperty.call(options,'position')?options.position:2;
+  const cells=Object.prototype.hasOwnProperty.call(options,'cells')?options.cells:['floor','cache','exit'];
+  const exitIdx=Object.prototype.hasOwnProperty.call(options,'exitIdx')?options.exitIdx:2;
   localStorage.setItem(RT,JSON.stringify({
     participants:['aldren'],
     index:0,

@@ -1,3 +1,49 @@
+# PHASE 7 — MICRO-LOT 15 — délégation terminale Final Exit authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-lock-delegation-green-2026-09-29`
+
+SHA de base :
+`4cc0d8a985a42ff934127508398df245f1be503b`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-final-exit-terminal-delegation-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-final-exit-terminal-delegation-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_FINAL_EXIT_TERMINAL_DELEGATION_PREAUDIT.md`
+
+Cible :
+retirer uniquement la duplication de la sous-décision positionnelle `atExit` dans `DungeonAuthoredFinalExit167875.finalState()`.
+
+API réutilisée :
+`GensDungeonV1.movement.isAuthoredTerminalExit(heroId, realExitIndex, positionalEnabled, heroPosition)`.
+
+Frontière obligatoire :
+- `hasExit` reste une garde locale Final Exit ;
+- résolution locale `exitIdx` inchangée ;
+- aucune nouvelle API ;
+- `finish()`, verrouillage, stockage, complétion, session, popup, retour accueil et UI restent Final Exit ;
+- Authored Runtime 167839 et Spatial inchangés.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36567160296` — SUCCESS ;
+- Firefox `36567160281` — SUCCESS ;
+- Tactical Dock `36567160491` — SUCCESS.
+
+Prochaine action :
+1. caractériser GREEN les cas `hasExit / atExit` ;
+2. raccorder la caractérisation à Architecture ;
+3. repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 14 — délégation verrouillage Final Exit authored — 2026-09-29
 
 Base GREEN :

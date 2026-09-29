@@ -19,10 +19,13 @@ assert.match(
 );
 assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,1,
   'Return Persist must consume the canonical helper exactly once after raccord');
-assert.match(branchNav,historical,
-  'Branch Nav Cleanup must retain its historical local selector throughout this lot');
-assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,0,
-  'Branch Nav Cleanup must stay outside this lot');
+assert.doesNotMatch(branchNav,historical,
+  'Branch Nav Cleanup no longer owns the duplicated selector after its later dedicated delegation lot');
+assert.match(branchNav,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Branch Nav Cleanup preserves its public raccord while delegating pure selection');
+assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,1,
+  'Branch Nav Cleanup must consume the canonical helper exactly once after its later lot');
 
 const store=new Map();
 let persistCalls=0;
@@ -101,5 +104,5 @@ console.log(JSON.stringify({
   publicApi:'DungeonAuthoredReturnPersist167862.activeHero',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   persistPath:'DungeonAuthoredReturnPersist167862.persistFinalPosition',
-  branchNavUntouched:true
+  branchNavLaterDelegated:true
 },null,2));

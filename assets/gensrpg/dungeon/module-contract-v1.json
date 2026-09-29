@@ -47,7 +47,8 @@
     "DungeonSpatial313 remains the owner of room snapshot persistence and activation during this micro-lot",
     "DungeonRoomRuntime167822 remains the consumer of created transition state during this micro-lot",
     "authored World Builder travel remains owned by DungeonAuthoredRuntime167839 during this micro-lot",
-    "no compatibility wrapper is introduced by this contract"
+    "no compatibility wrapper is introduced by this contract",
+    "the authored exit lock decision receives last exit lock map objective status and fallback objective status explicitly while DungeonAuthoredRuntime167839 retains the dynamic dungeonRoomExitLocked102 guard its try catch runtime reads travel sync action button notices and navigation policy"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

@@ -66,7 +66,6 @@ assert.match(
 );
 
 for(const [name,source] of [
-  ['Final Exit',finalExit],
   ['Return Persist',returnPersist],
   ['Branch Nav Cleanup',branchNav]
 ]){
@@ -93,8 +92,8 @@ console.log(JSON.stringify({
   expected:'RED before pure active-hero extraction, GREEN after Authored Runtime-only raccord',
   pureOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
-  untouched:[
-    'DungeonAuthoredFinalExit167875',
+  subsequentConsumer:'DungeonAuthoredFinalExit167875',
+  stillUntouched:[
     'DungeonAuthoredReturnPersist167862',
     'DungeonAuthoredBranchNavCleanup167863',
     'DungeonSpatial313'

@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 16 — résolution héros actif authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-terminal-delegation-green-2026-09-29`
+
+SHA de base :
+`930d4a33b31f465646f3941aa21cf3a4f7793d61`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-active-hero-resolution-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-active-hero-resolution-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTIVE_HERO_RESOLUTION_PREAUDIT.md`
+
+Cible :
+supprimer la duplication bit-à-bit de la sélection du héros actif entre Authored Runtime et Final Exit.
+
+API candidate :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Frontière obligatoire :
+- les deux runtimes conservent les lectures de leur état ;
+- aucune nouvelle règle de validation ;
+- Final Exit conserve branche, graphe, resolver `exitIdx`, `hasExit`, finish, lock, stockage, session et UI ;
+- Authored Runtime conserve plan, mouvement, travel et Spatial.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36580054199` — SUCCESS ;
+- Firefox `36580053906` — SUCCESS ;
+- Tactical Dock `36580053914` — SUCCESS.
+
+Prochaine action :
+1. caractériser GREEN les deux implémentations historiques ;
+2. raccorder à Architecture ;
+3. repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 15 — délégation terminale Final Exit authored — 2026-09-29
 
 Base GREEN :

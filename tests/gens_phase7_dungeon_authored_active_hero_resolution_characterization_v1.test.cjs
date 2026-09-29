@@ -29,8 +29,11 @@ assert.match(
   /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
   'Authored Runtime must preserve local state reads while delegating only pure active-hero selection'
 );
-assert.match(finalExit,historical,
-  'Final Exit must retain its historical local activeHero selector in micro-lot 17');
+assert.match(
+  finalExit,
+  /function activeHero\(x\)\{return R\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Final Exit may subsequently delegate the same proven pure selection while preserving finalState semantics'
+);
 assert.equal((authored.match(/function activeHero\(/g)||[]).length,1);
 assert.equal((finalExit.match(/function activeHero\(/g)||[]).length,1);
 assert.ok(
@@ -137,7 +140,7 @@ console.log(JSON.stringify({
   runtime:{bytes:bytes.length,gitBlob},
   pureOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
-  historicalUntouchedConsumer:'DungeonAuthoredFinalExit167875.activeHero',
+  subsequentDelegatedConsumer:'DungeonAuthoredFinalExit167875.activeHero',
   semantics:{
     clampsNegativeToFirst:true,
     clampsOverflowToLast:true,

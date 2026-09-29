@@ -182,3 +182,76 @@ La métadonnée connue reste :
 - blob : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 17
+
+### Caractérisation GREEN préalable
+
+SHA :
+`d79b0c71d84137ca2142871c2c069e4f466a8cca`.
+
+CI :
+- Architecture + Browser `36594959916` — SUCCESS ;
+- Firefox `36594959945` — SUCCESS ;
+- Tactical Dock `36594959844` — SUCCESS.
+
+La caractérisation confirme la sémantique historique exacte, notamment :
+- clamp négatif vers le premier héros ;
+- clamp au-delà de la borne vers le dernier héros ;
+- coercition des chaînes numériques ;
+- index fractionnaire au-dessus de la borne : clamp vers le dernier index ;
+- index fractionnaire encore dans les bornes : aucun arrondi, lookup fractionnaire historique et résultat potentiellement vide ;
+- participant falsy : chaîne vide ;
+- participant truthy non-chaîne : conversion par `String(...)`.
+
+### RED isolé
+
+SHA :
+`d980ab7ab577ffe05b5cd315a3c29d621d47d594`.
+
+Résultat :
+- Architecture `36596591932` — FAILURE attendue uniquement sur l'étape #213 `Exiger la sélection Dungeon du héros actif authored Phase 7` ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36596591939` — SUCCESS ;
+- Tactical Dock `36596591993` — SUCCESS.
+
+Aucune autre sentinelle n'a échoué.
+
+### Micro-diff GREEN appliqué
+
+Commits fonctionnels :
+- `302128f9fab4cd0c96c8c05b91d22a52fa43be47` — ajout du propriétaire pur `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)` ;
+- `77c83a26d8daf42266ac5859a4a6c8012b9202c6` — raccord unique de `DungeonAuthoredRuntime167839.activeHero(x)` ;
+- `8ede41cc7d6225fae09562add8ca7a8d201b9f0b` — frontière contractuelle documentée ;
+- `c5d6078b7b3a0059dfea39329f4cc9b2985d002d` — caractérisation post-raccord alignée sans affaiblir la sémantique.
+
+Frontière finale du lot :
+- `GensDungeonV1.movement` possède uniquement la décision pure ;
+- Authored Runtime conserve toutes les lectures runtime, plan, entrée de salle, travel, persistance, UI et Spatial ;
+- Final Exit, Return Persist et Branch Nav Cleanup conservent leurs copies locales historiques et n'appellent pas le nouveau helper ;
+- aucun changement de `DungeonSpatial313` ;
+- aucun changement de `index.html`.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`c5d6078b7b3a0059dfea39329f4cc9b2985d002d`.
+
+CI :
+- Architecture + Browser `36596894909` — SUCCESS ;
+- Firefox `36596894665` — SUCCESS ;
+- Tactical Dock `36596894512` — SUCCESS.
+
+### Conformité
+
+- aucune rustine globale ;
+- aucun wrapper de compatibilité ;
+- aucun observer, timer, retry ou heartbeat ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée : `index.html` n'a été ni consulté arbitrairement ni modifié.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-active-hero-resolution-post-divergence-green-2026-09-29`.

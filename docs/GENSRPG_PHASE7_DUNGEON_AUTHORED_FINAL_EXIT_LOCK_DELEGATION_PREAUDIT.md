@@ -142,3 +142,64 @@ Aucune lecture/modification détaillée de `index.html` n'est nécessaire.
 Le lot s'appuie sur la taille/blob déjà verrouillés et sur les sentinelles de composition existantes.
 
 Si le périmètre exige finalement une modification du gros runtime, arrêter le lot et appliquer Rule 26 avant toute modification.
+
+
+## Résultat TDD du micro-lot
+
+### Caractérisation GREEN
+
+La politique historique du verrouillage Final Exit a été caractérisée sans modifier le runtime :
+- garde dynamique `dungeonRoomExitLocked102?.()` évalué en premier ;
+- exception du garde ignorée puis fallback authored ;
+- `last.exitLocked` prioritaire ;
+- statut `map.objective.status` prioritaire sur le fallback `last.objective.status` ;
+- comparaison strictement sensible à la casse ;
+- helper canonique Dungeon déjà présent mais non consommé par Final Exit sur la base.
+
+SHA de caractérisation :
+`84ddeeaf9ec103bca0fd294346230bc7c5457806`.
+
+Preuve GREEN :
+- Architecture + Browser : `36561541239` — SUCCESS ;
+- Firefox : `36561541226` — SUCCESS ;
+- Tactical Dock : `36561541328` — SUCCESS.
+
+### RED isolé
+
+Garde ajoutée :
+`gens_phase7_dungeon_authored_final_exit_lock_delegation_v1.test.cjs`.
+
+SHA RED :
+`dddd08f1823bf57101b941868208e9c8959972db`.
+
+Preuve :
+- Architecture : `36562859541` — FAILURE attendue uniquement sur #208 `Exiger la délégation canonique verrouillage Final Exit authored Phase 7` ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36562859470` — SUCCESS ;
+- Tactical Dock : `36562859263` — SUCCESS.
+
+### Micro-diff GREEN
+
+Raccord minimal :
+- `DungeonAuthoredFinalExit167875.blocked(x)` conserve le garde dynamique, son ordre et son `try/catch` ;
+- la copie locale de `last.exitLocked / objective.status` est supprimée ;
+- le module consomme désormais `GensDungeonV1.movement.isAuthoredExitBlocked(...)` ;
+- aucune nouvelle API n'est créée ;
+- `finish()`, `finalState()`, `syncButton()`, stockage, marqueurs de complétion, session, popup, retour accueil et wrappers render/show restent inchangés ;
+- `DungeonAuthoredRuntime167839`, Spatial, travel, mouvement et `index.html` restent inchangés ;
+- contrat Dungeon clarifié pour identifier Final Exit comme consommateur canonique.
+
+SHA GREEN courant :
+`918221dc65d3c779b361a07e9c44d20bfd840c2f`.
+
+Preuve GREEN :
+- Architecture + Browser : `36563386509` — SUCCESS ;
+- Firefox : `36563386507` — SUCCESS ;
+- Tactical Dock : `36563386524` — SUCCESS.
+
+Runtime `index.html` toujours inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Aucun comportement utilisateur visible n'est modifié.
+Aucun test utilisateur n'est requis.

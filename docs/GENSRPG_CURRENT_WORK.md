@@ -50,10 +50,14 @@ Base validée :
 - Firefox `36591058200` — SUCCESS ;
 - Tactical Dock `36591057899` — SUCCESS.
 
+Caractérisation ajoutée :
+`tests/gens_phase7_dungeon_authored_active_hero_resolution_characterization_v1.test.cjs`.
+
+La caractérisation couvre le vrai chemin Authored Runtime et verrouille aussi Final Exit comme témoin historique inchangé ; Return Persist et Branch Nav Cleanup ont été audités et restent hors périmètre de raccord.
+
 Prochaine action :
-1. ajouter la caractérisation GREEN depuis cette base exacte ;
-2. raccorder la caractérisation à Architecture ;
-3. triple CI GREEN avant toute garde RED.
+1. valider la triple CI GREEN de la caractérisation sur le SHA courant ;
+2. seulement ensuite poser UNE garde RED exigeant le helper pur et le raccord Authored Runtime unique.
 
 ---
 

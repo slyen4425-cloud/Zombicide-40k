@@ -124,3 +124,77 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 18
+
+### Caractérisation GREEN préalable
+
+SHA :
+`fcd0b3a1e1e4cf22e79836e0ee83d6c69b80fba4`.
+
+CI :
+- Architecture + Browser `36613164224` — SUCCESS ;
+- Firefox `36613163967` — SUCCESS ;
+- Tactical Dock `36613163949` — SUCCESS.
+
+La caractérisation passe par le vrai chemin `DungeonAuthoredFinalExit167875.finalState()` et verrouille la parité exacte avec le helper canonique, y compris :
+- index absent / NaN / négatif / dépassement ;
+- chaîne numérique ;
+- index fractionnaire au-delà de la borne ;
+- index fractionnaire dans les bornes sans arrondi ;
+- participant falsy ;
+- participant truthy non-chaîne.
+
+### RED isolé
+
+SHA :
+`422781643c192148f3906b5273316342797a2a5f`.
+
+Résultat :
+- Architecture `36614121047` — FAILURE attendue uniquement sur l'étape #215 `Exiger la délégation héros actif Final Exit authored Phase 7` ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36614120953` — SUCCESS ;
+- Tactical Dock `36614120959` — SUCCESS.
+
+Aucune autre sentinelle n'a échoué.
+
+### Micro-diff GREEN appliqué
+
+Commits fonctionnels :
+- `65c87d21f4a8f8fc0c0a34f458e9d012f4a1eb0e` — `DungeonAuthoredFinalExit167875.activeHero(x)` délègue au propriétaire canonique existant ;
+- `17cb8d140d69076f690b2fa95c8a854765c1078e` — frontière contractuelle Final Exit documentée ;
+- `4e4dc4f49f107f9fe2a8bd2cccd49b7e74c8c42c` — caractérisation post-raccord ;
+- `57e963be42946548aec03fe4f86983fb119c01fe` et `ffbbb005aec6345b97359ba5590911701b507689` — tests du lot 17 réalignés uniquement sur la nouvelle frontière, sans élargissement de comportement.
+
+Frontière finale :
+- Final Exit ne possède plus la décision pure de sélection du héros actif ;
+- `GensDungeonV1.movement.resolveAuthoredActiveHero(...)` reste le propriétaire unique de cette décision ;
+- Final Exit conserve lecture runtime, branche secondaire, graphe, plan, resolver local `exitIdx`, `hasExit`, terminal, lock, finish, stockage, session, popup, retour accueil et UI ;
+- Return Persist et Branch Nav Cleanup conservent leurs copies locales historiques et restent hors périmètre ;
+- Authored Runtime et `DungeonSpatial313` restent inchangés ;
+- aucun changement de `index.html`.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`ffbbb005aec6345b97359ba5590911701b507689`.
+
+CI :
+- Architecture + Browser `36614760364` — SUCCESS ;
+- Firefox `36614760862` — SUCCESS ;
+- Tactical Dock `36614760415` — SUCCESS.
+
+### Conformité
+
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun wrapper de compatibilité ;
+- aucun observer, timer, retry ou heartbeat ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-active-hero-delegation-green-2026-09-29`.

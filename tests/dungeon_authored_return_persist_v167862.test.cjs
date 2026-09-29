@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
+const entrySrc=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-authored-return-persist-167862.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 const store={};
@@ -10,7 +11,9 @@ const rt={room:2,index:0,participants:['lyra'],positions:{lyra:3},last:{authored
 store[RT]=JSON.stringify(rt);
 const context={console,JSON,Math,Date,localStorage:{getItem(k){return store[k]||null},setItem(k,v){store[k]=String(v)}},setTimeout(fn){fn();return 1},DungeonSpatial313:{ensure(){},persist(x){persistCalls++;renderedPosition=Number(x.positions.lyra)}},DungeonAuthoredRuntime167839:{enterNode(graph,nodeId,edge){const x=JSON.parse(store[RT]);x.room=1;x.last={authoredRuntime167839:true,worldNodeId:nodeId};x.positions.lyra=Number(edge.toEntryIndex);store[RT]=JSON.stringify(x);return true}}};
 context.window=context;context.globalThis=context;
-vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-return-persist-167862.js'});
+vm.createContext(context);
+vm.runInContext(entrySrc,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
+vm.runInContext(src,context,{filename:'dungeon-authored-return-persist-167862.js'});
 const api=context.DungeonAuthoredReturnPersist167862;
 assert.ok(api);assert.equal(api.APP_VERSION,'16.78.62');assert.equal(context.DungeonAuthoredRuntime167839.enterNode.__returnPersist167862,true);
 const ok=context.DungeonAuthoredRuntime167839.enterNode({},'A',{toEntryIndex:7});

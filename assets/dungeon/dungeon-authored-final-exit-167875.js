@@ -28,9 +28,9 @@ function finalState(){
   if(x.last.worldNodeId&&String(x.last.worldNodeId)!==String(p.currentNodeId))return null;
   const map=x?.last?.map||{},cells=Array.isArray(map.cells)?map.cells:[];
   const direct=Number(map.exitIdx),exitIdx=Number.isInteger(direct)&&direct>=0?direct:cells.findIndex(v=>String(v||"").toLowerCase()==="exit");
-  const pos=Number(x?.positions?.[hero]),positional=!!a.positional?.();
+  const positional=!!a.positional?.();
   const hasExit=exitIdx>=0&&exitIdx<cells.length&&String(cells[exitIdx]||"").toLowerCase()==="exit";
-  const atExit=hasExit&&(!positional||pos===exitIdx);
+  const atExit=hasExit&&R.GensDungeonV1.movement.isAuthoredTerminalExit(hero,exitIdx,positional,x?.positions?.[hero]);
   return {a,x,g,p,hero,map,exitIdx,positional,hasExit,atExit};
 }
 function notice(title,text,onDone){try{return R.DungeonCore01?.modal?.(title,text,onDone)}catch(e){}try{R.showToast?.(title+" · "+text)}catch(e){}if(typeof onDone==="function")setTimeout(onDone,0)}

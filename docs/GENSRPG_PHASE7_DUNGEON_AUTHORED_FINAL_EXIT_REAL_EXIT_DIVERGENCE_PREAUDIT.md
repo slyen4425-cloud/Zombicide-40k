@@ -128,3 +128,56 @@ Ne pas modifier :
 
 Aucune modification de `index.html` n'est prévue.
 Si le périmètre dérive vers le gros runtime, arrêter et appliquer Rule 26.
+
+
+## Résultat de caractérisation
+
+Caractérisation comparative :
+`tests/gens_phase7_dungeon_authored_final_exit_real_exit_divergence_characterization_v1.test.cjs`.
+
+SHA :
+`0a0a45eccbf9bfd60470182d4c32e52f3522e6dd`.
+
+Preuve GREEN :
+- Architecture + Browser : `36589726877` — SUCCESS ;
+- Firefox : `36589726784` — SUCCESS ;
+- Tactical Dock : `36589726795` — SUCCESS.
+
+### Parité confirmée
+
+Final Exit et le resolver canonique donnent le même index pour :
+- index direct valide ;
+- chaîne numérique valide ;
+- cellule `EXIT` en casse différente ;
+- index direct négatif avec fallback ;
+- index direct non entier avec fallback ;
+- index direct absent avec fallback.
+
+### Divergence confirmée
+
+Final Exit historique conserve tout entier direct >= 0, puis laisse `hasExit` invalider la fin.
+
+Le resolver canonique valide d'abord que l'index direct désigne réellement une cellule `exit`, puis recherche sinon une vraie sortie ailleurs.
+
+Cas verrouillés :
+- direct `0` vers `floor` avec une sortie réelle en `1` :
+  - Final Exit : `exitIdx=0`, `hasExit=false`, `atExit=false` ;
+  - canonique : `1`.
+- direct `99` hors tableau avec une sortie réelle en `1` :
+  - Final Exit : `exitIdx=99`, `hasExit=false` ;
+  - canonique : `1`.
+- direct vers une non-sortie sans aucune vraie sortie :
+  - Final Exit conserve l'index direct mais `hasExit=false` ;
+  - canonique retourne `-1`.
+
+### Décision de gouvernance
+
+Aucun RED de migration n'est posé.
+
+Remplacer le resolver local Final Exit par `resolveAuthoredRealExitIndex(...)` ne serait pas une restructuration à parité : cela autoriserait la fin du donjon dans certains états incohérents actuellement bloqués par `hasExit`.
+
+Cette éventuelle harmonisation doit donc rester une décision fonctionnelle dédiée, séparée de la Phase 7 de restructuration.
+
+Aucun fichier runtime n'a été modifié dans ce micro-lot.
+`index.html` reste à `8169990` octets / blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+Aucun test utilisateur n'est requis.

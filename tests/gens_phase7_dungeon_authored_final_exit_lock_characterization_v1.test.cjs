@@ -23,13 +23,13 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   finalExit,
-  /function blocked\(x\)\{try\{if\(R\.dungeonRoomExitLocked102\?\.\(\)\)return true\}catch\(e\)\{\}if\(x\?\.last\?\.exitLocked\)return true;return String\(x\?\.last\?\.map\?\.objective\?\.status\|\|x\?\.last\?\.objective\?\.status\|\|""\)==="locked"\}/,
-  'Final Exit must still expose the historical duplicated authored lock decision before delegation'
+  /function blocked\(x\)\{try\{if\(R\.dungeonRoomExitLocked102\?\.\(\)\)return true\}catch\(e\)\{\}return R\.GensDungeonV1\.movement\.isAuthoredExitBlocked\(x\?\.last\?\.exitLocked,x\?\.last\?\.map\?\.objective\?\.status,x\?\.last\?\.objective\?\.status\)\}/,
+  'post-raccord Final Exit must retain the dynamic guard locally and delegate only the authored fallback decision'
 );
-assert.doesNotMatch(
-  finalExit,
-  /GensDungeonV1\.movement\.isAuthoredExitBlocked\(/,
-  'pre-delegation characterization must prove Final Exit does not consume the canonical helper yet'
+assert.equal(
+  (finalExit.match(/GensDungeonV1\.movement\.isAuthoredExitBlocked\(/g)||[]).length,
+  1,
+  'post-raccord Final Exit must consume the canonical authored lock helper exactly once'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -164,10 +164,10 @@ assert.doesNotMatch(
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored Final Exit lock characterization',
+  scenario:'Phase 7 authored Final Exit lock post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
   canonicalOwner:'GensDungeonV1.movement.isAuthoredExitBlocked',
-  currentFinalExitState:'duplicate local authored fallback still present',
+  currentFinalExitState:'canonical helper consumed after local dynamic guard',
   semantics:{
     dynamicGuardFirst:true,
     dynamicGuardExceptionFallsThrough:true,

@@ -11,15 +11,20 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const exactTrap=read('assets/dungeon/dungeon-exact-trap-runtime-167845.js');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
-assert.match(
+assert.doesNotMatch(
   exactTrap,
   historical,
-  'Exact Trap must still expose the historical private selector before the delegation RED'
+  'Exact Trap must no longer own the historical private selector after delegation'
 );
 assert.equal(
   (exactTrap.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Exact Trap must not consume the canonical helper before the delegation lot'
+  1,
+  'Exact Trap must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  exactTrap,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Exact Trap must retain a private raccord while delegating only the pure selection'
 );
 
 const store=new Map();
@@ -131,7 +136,7 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Exact Trap active hero characterization',
   consumer:'DungeonExactTrapRuntime167845.triggerAtHero',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical private selector preserved',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonZoneLinks167846.activeHero',
     'DungeonWorldRuntime167823.activeHeroId',

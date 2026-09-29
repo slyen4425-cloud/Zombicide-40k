@@ -16,14 +16,21 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTIVE_HERO_RESOLUTION_POST_DIVERGENCE_PREAUDIT.md`
 
 Cible :
-extraire uniquement la sélection pure du héros actif authored, encore dupliquée bit-à-bit dans Authored Runtime et Final Exit, sans modifier aucune politique de mouvement ou de fin.
+extraire uniquement la sélection pure du héros actif authored puis raccorder **un seul consommateur** : `DungeonAuthoredRuntime167839.activeHero(x)`.
+
+Copies historiques confirmées :
+- Authored Runtime ;
+- Final Exit ;
+- Return Persist ;
+- Branch Nav Cleanup.
 
 API candidate :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
 Frontière :
-- les deux runtimes conservent les lectures de `x` et leur raccord local `activeHero(x)` ;
+- Authored Runtime conserve les lectures de `x` et son raccord local `activeHero(x)` ;
 - la sémantique historique fractionnaire doit rester exacte ;
+- Final Exit, Return Persist et Branch Nav Cleanup restent totalement inchangés dans ce lot, y compris leurs copies locales `activeHero(x)` ;
 - Final Exit conserve le resolver local `exitIdx`, `hasExit`, finish, lock, stockage, session et UI ;
 - Authored Runtime conserve plan, mouvement, travel et Spatial ;
 - `DungeonSpatial313` reste inchangé ;

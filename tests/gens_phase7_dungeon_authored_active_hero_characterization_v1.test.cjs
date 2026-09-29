@@ -23,8 +23,8 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   authored,
-  /function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/,
-  'historical Authored Runtime activeHero selection must remain local before extraction'
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.exploration\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'post-raccord Authored Runtime must preserve state reads while delegating active-hero selection'
 );
 
 const pure={};
@@ -34,8 +34,8 @@ vm.createContext(pure);
 vm.runInContext(entry,pure,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
   typeof pure.GensDungeonV1?.exploration?.resolveAuthoredActiveHero,
-  'undefined',
-  'pre-extraction characterization must prove the canonical active-hero helper is not connected yet'
+  'function',
+  'post-raccord characterization requires the canonical authored active-hero helper'
 );
 
 const localStorage={getItem(){return null},setItem(){}};
@@ -78,9 +78,9 @@ assert.equal(hero([123],0),'123',
   'truthy non-string participant values must preserve String conversion');
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 authored active hero characterization',
+  scenario:'Phase 7 authored active hero post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredRuntime167839.activeHero',
+  currentOwner:'DungeonAuthoredRuntime167839.activeHero consumer',
   pureTarget:'GensDungeonV1.exploration.resolveAuthoredActiveHero',
   semantics:{
     clampNegativeToFirst:true,

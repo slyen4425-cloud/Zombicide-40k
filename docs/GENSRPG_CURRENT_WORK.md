@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 16 — sélection héros actif authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-terminal-delegation-green-2026-09-29`
+
+SHA de base :
+`930d4a33b31f465646f3941aa21cf3a4f7793d61`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-active-hero-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-active-hero-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTIVE_HERO_PREAUDIT.md`
+
+Cible :
+extraire uniquement la sélection pure du héros actif et raccorder `DungeonAuthoredRuntime167839.activeHero(x)`.
+
+API candidate :
+`GensDungeonV1.exploration.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Frontière :
+- Authored Runtime conserve les lectures de `x` et tous les appels métier ;
+- Final Exit, Return Persist et Branch Nav Cleanup restent inchangés ;
+- aucune normalisation métier supplémentaire ;
+- Spatial et Tactical inchangés.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36580054199` — SUCCESS ;
+- Firefox `36580053906` — SUCCESS ;
+- Tactical Dock `36580053914` — SUCCESS.
+
+Prochaine action :
+1. caractérisation GREEN de la sélection historique via `plan(x,g).hero` ;
+2. triple CI ;
+3. seulement ensuite garde RED isolée.
+
+---
+
 # PHASE 7 — MICRO-LOT 15 — délégation terminale Final Exit authored — 2026-09-29
 
 Base GREEN :

@@ -139,3 +139,64 @@ Ne pas toucher :
 
 Aucune modification de `index.html` n'est prévue.
 Toute dérive vers le gros runtime arrête le lot et déclenche Rule 26.
+
+
+## Résultat TDD du micro-lot
+
+### Caractérisation GREEN
+
+La première caractérisation raccordée au workflow sur `650eeaf16f972a2bedcb6d5e3b9ec8a878255ce4` a échoué uniquement sur #209 parce que le helper du test remplaçait artificiellement une position explicitement absente.
+
+Ce défaut était limité au test :
+- Architecture `36568808778` — FAILURE uniquement sur #209 `Caractériser la décision terminale Final Exit authored Phase 7` ;
+- Firefox `36568808842` — SUCCESS ;
+- Tactical Dock `36568808926` — SUCCESS.
+
+Le helper de caractérisation a été corrigé seul sur :
+`79b11e23dd666e2f2ba90823d9ad9499c63e3ad5`.
+
+Preuve GREEN de caractérisation :
+- Architecture + Browser : `36568924448` — SUCCESS ;
+- Firefox : `36568924544` — SUCCESS ;
+- Tactical Dock : `36568924470` — SUCCESS.
+
+### RED isolé
+
+Garde ajoutée :
+`gens_phase7_dungeon_authored_final_exit_terminal_delegation_v1.test.cjs`.
+
+SHA RED :
+`f7be261cd87435ba484cf508bff666a6c2f4b3ff`.
+
+Preuve :
+- Architecture : `36577837012` — FAILURE attendue uniquement sur #210 `Exiger la délégation canonique terminale Final Exit authored Phase 7` ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36577836904` — SUCCESS ;
+- Tactical Dock : `36577836966` — SUCCESS.
+
+### Micro-diff GREEN
+
+Raccord minimal :
+- `DungeonAuthoredFinalExit167875.finalState()` conserve la résolution locale historique de `exitIdx` ;
+- `hasExit` reste une garde locale obligatoire et inchangée ;
+- seule la sous-décision positionnelle `atExit` consomme désormais `GensDungeonV1.movement.isAuthoredTerminalExit(hero, exitIdx, positional, heroPosition)` ;
+- aucune nouvelle API ;
+- `finish()`, verrouillage, stockage, complétion, session, popup, retour accueil, UI et wrappers restent inchangés ;
+- `DungeonAuthoredRuntime167839`, Spatial, movement, travel et `index.html` restent inchangés ;
+- les deux tests historiques Final Exit chargent désormais l'entrée Dungeon avant Final Exit, conformément à la dépendance réelle du graphe production ;
+- contrat Dungeon mis à jour pour déclarer Final Exit consommateur canonique de la décision terminale.
+
+SHA technique GREEN :
+`08ed6e557187ffac1aa396dc20b78c6bf36e7317`.
+
+Preuve GREEN :
+- Architecture + Browser : `36578263315` — SUCCESS ;
+- Firefox : `36578263259` — SUCCESS ;
+- Tactical Dock : `36578263304` — SUCCESS.
+
+Runtime `index.html` toujours inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Aucun comportement utilisateur visible n'est modifié.
+Aucun test utilisateur n'est requis.

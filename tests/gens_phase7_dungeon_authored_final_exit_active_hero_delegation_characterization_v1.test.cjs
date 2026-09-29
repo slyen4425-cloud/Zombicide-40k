@@ -39,9 +39,12 @@ assert.match(returnPersist,
   /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
   'Return Persist preserves its public raccord and delegates only pure selection');
 assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,1);
-assert.match(branchNav,historical,
-  'Branch Nav Cleanup remains the historical local owner outside both delegation lots');
-assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,0);
+assert.doesNotMatch(branchNav,historical,
+  'Branch Nav Cleanup no longer owns the duplicated decision after its later dedicated delegation lot');
+assert.match(branchNav,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Branch Nav Cleanup preserves its public raccord and delegates only pure selection');
+assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,1);
 
 const store=new Map();
 const localStorage={
@@ -115,9 +118,11 @@ console.log(JSON.stringify({
   runtime:{bytes:bytes.length,gitBlob},
   localOwner:'DungeonAuthoredFinalExit167875.activeHero',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  laterDelegated:'DungeonAuthoredReturnPersist167862.activeHero',
+  laterDelegated:[
+    'DungeonAuthoredReturnPersist167862.activeHero',
+    'DungeonAuthoredBranchNavCleanup167863.activeHero'
+  ],
   untouched:[
-    'DungeonAuthoredBranchNavCleanup167863.activeHero',
     'DungeonAuthoredRuntime167839',
     'DungeonSpatial313'
   ],

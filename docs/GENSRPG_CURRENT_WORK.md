@@ -1,3 +1,55 @@
+# PHASE 7 — MICRO-LOT 17 — résolution héros actif authored post-divergence — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-real-exit-divergence-green-2026-09-29`
+
+SHA de base :
+`ce72d8c115e55b80134a1d933d61b4dd6992af19`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-active-hero-resolution-post-divergence-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-active-hero-resolution-post-divergence-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTIVE_HERO_RESOLUTION_POST_DIVERGENCE_PREAUDIT.md`
+
+Cible :
+extraire uniquement la sélection pure du héros actif authored, encore dupliquée bit-à-bit dans Authored Runtime et Final Exit, sans modifier aucune politique de mouvement ou de fin.
+
+API candidate :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Frontière :
+- les deux runtimes conservent les lectures de `x` et leur raccord local `activeHero(x)` ;
+- la sémantique historique fractionnaire doit rester exacte ;
+- Final Exit conserve le resolver local `exitIdx`, `hasExit`, finish, lock, stockage, session et UI ;
+- Authored Runtime conserve plan, mouvement, travel et Spatial ;
+- `DungeonSpatial313` reste inchangé ;
+- aucun changement `index.html`.
+
+Tentatives historiques non canoniques examinées :
+- `work/gensrpg-phase7-dungeon-authored-active-hero-2026-09-29` ;
+- `work/gensrpg-phase7-dungeon-authored-active-hero-resolution-2026-09-29`.
+Elles restent hors reprise car basées sur `930d4a33...`, divergentes du checkpoint GREEN courant et sans checkpoint final canonique.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36591058090` — SUCCESS ;
+- Firefox `36591058200` — SUCCESS ;
+- Tactical Dock `36591057899` — SUCCESS.
+
+Prochaine action :
+1. ajouter la caractérisation GREEN depuis cette base exacte ;
+2. raccorder la caractérisation à Architecture ;
+3. triple CI GREEN avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 16 — divergence vraie sortie Final Exit authored — 2026-09-29
 
 Base GREEN :

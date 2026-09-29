@@ -23,13 +23,13 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 assert.match(
   finalExit,
-  /const atExit=hasExit&&\(!positional\|\|pos===exitIdx\);/,
-  'pre-extraction Final Exit must still own the local positional atExit expression'
+  /const atExit=hasExit&&R\.GensDungeonV1\.movement\.isAuthoredTerminalExit\(hero,exitIdx,positional,x\?\.positions\?\.\[hero\]\);/,
+  'post-raccord Final Exit must keep hasExit local and delegate only the positional terminal decision'
 );
 assert.equal(
   (finalExit.match(/GensDungeonV1\.movement\.isAuthoredTerminalExit\(/g)||[]).length,
-  0,
-  'pre-extraction Final Exit must not consume the canonical terminal helper yet'
+  1,
+  'post-raccord Final Exit must consume the canonical terminal helper exactly once'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -147,9 +147,9 @@ assert.equal(
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 Final Exit terminal decision characterization',
+  scenario:'Phase 7 Final Exit terminal decision post-raccord characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'DungeonAuthoredFinalExit167875 local atExit expression',
+  currentOwner:'DungeonAuthoredFinalExit167875 finalState consumer',
   canonicalOwner:'GensDungeonV1.movement.isAuthoredTerminalExit',
   semantics:{
     hasExitGuardLocal:true,

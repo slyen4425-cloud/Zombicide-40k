@@ -49,7 +49,7 @@
     "authored World Builder travel remains owned by DungeonAuthoredRuntime167839 during this micro-lot",
     "no compatibility wrapper is introduced by this contract",
     "the authored exit lock decision receives last exit lock map objective status and fallback objective status explicitly while DungeonAuthoredRuntime167839 retains the dynamic dungeonRoomExitLocked102 guard its try catch runtime reads travel sync action button notices and navigation policy",
-    "DungeonAuthoredFinalExit167875 consumes the canonical authored exit lock decision from GensDungeonV1.movement while retaining its dynamic dungeonRoomExitLocked102 guard runtime reads completion flow storage session popup and home navigation"
+    "DungeonAuthoredFinalExit167875 Final Exit consumes the canonical authored exit lock decision from GensDungeonV1.movement while retaining its dynamic dungeonRoomExitLocked102 guard runtime reads completion flow storage session popup and home navigation"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

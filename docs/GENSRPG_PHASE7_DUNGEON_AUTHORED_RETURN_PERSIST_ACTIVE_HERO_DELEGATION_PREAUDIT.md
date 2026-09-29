@@ -118,3 +118,81 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 19
+
+### Caractérisation GREEN préalable
+
+SHA :
+`c30550f3d2c4847ba09e01565f9131059a74abf7`.
+
+CI :
+- Architecture + Browser `36623200886` — SUCCESS ;
+- Firefox `36623200973` — SUCCESS ;
+- Tactical Dock `36623200967` — SUCCESS.
+
+La caractérisation couvre :
+- l'API publique `DungeonAuthoredReturnPersist167862.activeHero(x)` ;
+- la sémantique historique complète, y compris les deux cas fractionnaires ;
+- le vrai chemin `persistFinalPosition()` ;
+- le maintien du test historique de persistance spatiale V167862 ;
+- Branch Nav Cleanup comme dernier sélecteur local hors périmètre.
+
+### RED isolé
+
+SHA :
+`5d285db68de731ec9c23668906a342f1e6742945`.
+
+Résultat :
+- Architecture `36624556957` — FAILURE attendue uniquement sur #217 `Exiger la délégation héros actif Return Persist authored Phase 7` ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36624556874` — SUCCESS ;
+- Tactical Dock `36624556888` — SUCCESS.
+
+La caractérisation #216 reste GREEN ; aucune autre sentinelle Architecture n'échoue.
+
+### Micro-diff GREEN appliqué
+
+Commits principaux :
+- `ffe0297930cf199a7f2f0c4f7a09d94a5b9b603a` — `DungeonAuthoredReturnPersist167862.activeHero(x)` conserve son API publique et délègue uniquement la décision pure au propriétaire Dungeon ;
+- `80289d1545369c7ef2ee10e76666ae05c08898ea` — frontière contractuelle documentée ;
+- `47bb653432104668d407c4410840c44971b52ac7` — caractérisation post-raccord ;
+- `72351c0a836b9b9a922ed2d6a93a7366e650421d` — fixture historique V167862 charge le propriétaire Dungeon avant Return Persist, sans affaiblir ses assertions ;
+- `963cd8d4d5d59760bf2afe93037ec8828c40d058`, `2bb206489091afd1c42bfe92910f43f4b395240e`, `084102e409694bf8da3ed8d1e739e243f16a45d1` — sentinelles cumulatives lots 17/18 réalignées sur la nouvelle frontière.
+
+Frontière finale du lot :
+- `GensDungeonV1.movement.resolveAuthoredActiveHero` reste propriétaire unique de la décision pure ;
+- Return Persist conserve son API publique `activeHero(x)` ;
+- Return Persist conserve lecture/écriture runtime, garde authored, validation de position, `DungeonSpatial313.ensure/persist`, wrapper `enterNode` et retry d'installation ;
+- Branch Nav Cleanup conserve la dernière copie locale historique du sélecteur ;
+- Final Exit et Authored Runtime restent sur leur délégation canonique acquise ;
+- `DungeonSpatial313` reste inchangé ;
+- aucun changement de `index.html`.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`084102e409694bf8da3ed8d1e739e243f16a45d1`.
+
+CI :
+- Architecture + Browser `36624958335` — SUCCESS ;
+- Firefox `36624958261` — SUCCESS ;
+- Tactical Dock `36624958204` — SUCCESS.
+
+Le Browser termine 45/45 sans échec.
+
+### Conformité
+
+- API publique Return Persist conservée ;
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun nouvel observer, wrapper, timer, retry ou heartbeat ;
+- cadence retry historique inchangée ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-return-persist-active-hero-delegation-green-2026-09-29`.

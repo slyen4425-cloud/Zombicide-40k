@@ -76,9 +76,14 @@ assert.match(
   'Return Persist must preserve its public raccord while delegating the pure decision'
 );
 assert.equal(
-  (branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Branch Nav Cleanup remains the only historical local selector after the later Return Persist lot'
+  (branchNav.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
+  1,
+  'Branch Nav Cleanup must reflect its later dedicated delegation lot'
+);
+assert.match(
+  branchNav,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Branch Nav Cleanup must preserve its public raccord while delegating the pure decision'
 );
 
 assert.doesNotMatch(
@@ -98,8 +103,8 @@ console.log(JSON.stringify({
   pureOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
   subsequentConsumer:'DungeonAuthoredFinalExit167875',
+  laterDelegatedBranchNav:'DungeonAuthoredBranchNavCleanup167863.activeHero',
   stillUntouched:[
-    'DungeonAuthoredBranchNavCleanup167863',
     'DungeonSpatial313'
   ]
 },null,2));

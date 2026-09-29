@@ -12,10 +12,13 @@ const returnPersist=read('assets/dungeon/dungeon-authored-return-persist-167862.
 const branchNav=read('assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
-assert.match(returnPersist,historical,
-  'Return Persist must still own the historical local activeHero selector before delegation');
-assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,0,
-  'Return Persist must not consume the canonical helper before the RED/GREEN delegation');
+assert.match(
+  returnPersist,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Return Persist public activeHero must delegate only pure selection after raccord'
+);
+assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,1,
+  'Return Persist must consume the canonical helper exactly once after raccord');
 assert.match(branchNav,historical,
   'Branch Nav Cleanup must retain its historical local selector throughout this lot');
 assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,0,
@@ -90,11 +93,11 @@ assert.equal(persistCalls,1,'rejected fractional selector must not add a persist
 assert.equal(
   ctx.GensDungeonV1.movement.resolveAuthoredActiveHero(['a','b','c'],1.5),
   api.activeHero({participants:['a','b','c'],index:1.5}),
-  'historical Return Persist selector must already be semantically identical to canonical owner'
+  'Return Persist public selector must remain semantically identical to canonical owner after raccord'
 );
 
 console.log(JSON.stringify({
-  scenario:'Phase 7 Return Persist active hero delegation characterization',
+  scenario:'Phase 7 Return Persist active hero delegation characterization after raccord',
   publicApi:'DungeonAuthoredReturnPersist167862.activeHero',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   persistPath:'DungeonAuthoredReturnPersist167862.persistFinalPosition',

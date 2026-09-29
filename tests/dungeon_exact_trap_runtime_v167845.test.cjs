@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-exact-trap-runtime-167845.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 function storage(initial={}){const m=new Map(Object.entries(initial));return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
@@ -19,7 +20,7 @@ const context={console,JSON,Math,Date,localStorage:store,setTimeout(){return 1},
  loadDungeonSceneElements(){return JSON.parse(JSON.stringify(scene))},saveDungeonSceneElements(v){scene=JSON.parse(JSON.stringify(v))},
  dungeonTrapTypes(){return {dart:{id:'dart',name:'Salve'},snare:{id:'snare',name:'Entrave'},rune:{id:'rune',name:'Rune instable'},collapse:{id:'collapse',name:'Éboulement'}}},
  dungeonResolveTrapAgainstHero(id,hero,show){resolved.push({id,hero,show});return {ok:false}}};
-context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-exact-trap-runtime-167845.js'});
+context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,context,{filename:'dungeon-exact-trap-runtime-167845.js'});
 const api=context.DungeonExactTrapRuntime167845;assert.ok(api);assert.equal(api.normalizeTrapId('dtrap_rune'),'rune');
 let x=JSON.parse(store.getItem(RT));assert.equal(x.last.map.cells[6],'floor','le marqueur trap brut doit être neutralisé pour bloquer le tirage aléatoire');assert.equal(x.last.map.cells[4],'floor','le marqueur du piège aléatoire legacy doit être retiré dans une salle construite');
 assert.equal(x.last.map.cells[2],'floor','un marqueur de piège étranger/stale doit aussi être retiré de la salle authored courante');

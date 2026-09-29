@@ -1,3 +1,53 @@
+# PHASE 7 — MICRO-LOT 22 — délégation héros actif Exact Trap Runtime — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-action-fix-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`0b8da1aed803f52e5e5aabf12d080e3f6483f0b1`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-exact-trap-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-exact-trap-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_EXACT_TRAP_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée du héros actif dans `DungeonExactTrapRuntime167845.triggerAtHero(x)` au propriétaire canonique existant :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Exact Trap possède encore la copie locale historique `activeHero(x)` ;
+- elle est privée et consommée uniquement par `triggerAtHero(x)` ;
+- la résolution du piège, l'état `triggeredTraps`, les scènes et la persistance restent Exact Trap ;
+- Zone Links, World Runtime, Room Runtime, Large Room Support, Core 317/318 et Source Render restent différés.
+
+Frontière :
+- aucune nouvelle API ;
+- aucun changement du type de piège, détection, scènes ou état ;
+- aucun changement des wrappers Core ou du retry d'installation ;
+- aucun changement Spatial ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36639910939` — SUCCESS ;
+- Firefox `36639910839` — SUCCESS ;
+- Tactical Dock `36639910844` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. ajouter une caractérisation ciblée du vrai chemin `triggerAtHero` ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Exact Trap.
+
+---
+
 # PHASE 7 — MICRO-LOT 21 — délégation héros actif Action Fix authored — 2026-09-29
 
 Base GREEN :

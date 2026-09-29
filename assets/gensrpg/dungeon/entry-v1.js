@@ -50,6 +50,12 @@
     return {heroId,from:fromRoom,to:toRoom,created,at};
   }
 
+  function resolveAuthoredActiveHero(participants,activeIndex){
+    const heroes=Array.isArray(participants)?participants:[];
+    const index=Math.max(0,Math.min(Math.max(0,heroes.length-1),Number(activeIndex)||0));
+    return String(heroes[index]||"");
+  }
+
   function planAuthoredEntryMovement(remainingValue){
     const value=Number(remainingValue);
     return Number.isFinite(value)
@@ -104,6 +110,7 @@
       buildGeneratedBranchSceneElement
     }),
     movement:Object.freeze({
+      resolveAuthoredActiveHero,
       planAuthoredEntryMovement,
       planAuthoredArrivalCell,
       resolveAuthoredHeroMoveAllowance,

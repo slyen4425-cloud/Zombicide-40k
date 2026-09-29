@@ -63,11 +63,12 @@ Créer une seule décision pure propriétaire Dungeon :
 
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Puis faire déléguer uniquement les deux raccords locaux existants :
-- `DungeonAuthoredRuntime167839.activeHero(x)` ;
-- `DungeonAuthoredFinalExit167875.activeHero(x)`.
+Puis faire déléguer **uniquement** :
+- `DungeonAuthoredRuntime167839.activeHero(x)`.
 
-Les deux runtimes continuent de lire leur propre état `x`.
+Ce micro-lot ne migre pas les trois autres consommateurs. Ils restent volontairement locaux et feront l'objet de micro-lots séparés après fermeture GREEN du présent lot.
+
+Authored Runtime continue de lire son propre état `x`.
 
 ## Parité historique obligatoire
 
@@ -104,9 +105,9 @@ Reste propriétaire de :
 
 ### DungeonAuthoredFinalExit167875
 
-Reste propriétaire de :
+Reste totalement inchangé dans ce micro-lot, y compris :
 - lecture de son état runtime ;
-- `activeHero(x)` comme raccord local ;
+- sa copie locale historique `activeHero(x)` ;
 - branche secondaire ;
 - validation graphe / nœud terminal ;
 - resolver local `exitIdx` volontairement divergent ;
@@ -115,6 +116,14 @@ Reste propriétaire de :
 - verrouillage ;
 - `finish()` ;
 - stockage / session / popup / retour accueil / UI.
+
+### DungeonAuthoredReturnPersist167862
+
+Reste totalement inchangé, y compris sa copie locale historique `activeHero(x)`.
+
+### DungeonAuthoredBranchNavCleanup167863
+
+Reste totalement inchangé, y compris sa copie locale historique `activeHero(x)`.
 
 ### DungeonSpatial313
 
@@ -148,9 +157,9 @@ Ne pas toucher :
 3. prouver que le helper canonique n'existe pas encore ;
 4. raccorder cette caractérisation à Architecture ;
 5. triple CI GREEN ;
-6. poser UNE garde RED exigeant le helper pur et les deux consommateurs directs ;
+6. poser UNE garde RED exigeant le helper pur et le raccord direct d'Authored Runtime uniquement ;
 7. vérifier que le RED est isolé à cette garde ;
-8. micro-diff minimal dans `entry-v1.js`, les deux raccords locaux et le contrat/documentation strictement nécessaire ;
+8. micro-diff minimal dans `entry-v1.js`, `DungeonAuthoredRuntime167839.activeHero(x)` et le contrat/documentation strictement nécessaire ;
 9. aucun wrapper, fallback global ou changement comportemental ;
 10. triple CI GREEN ;
 11. fermeture documentaire ;

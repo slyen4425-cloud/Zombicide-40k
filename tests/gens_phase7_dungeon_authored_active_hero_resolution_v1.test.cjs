@@ -65,16 +65,21 @@ assert.match(
   'Authored Runtime activeHero must retain runtime reads and delegate only pure selection'
 );
 
-for(const [name,source] of [
-  ['Return Persist',returnPersist],
-  ['Branch Nav Cleanup',branchNav]
-]){
-  assert.equal(
-    (source.match(/resolveAuthoredActiveHero\(/g)||[]).length,
-    0,
-    name+' must stay outside micro-lot 17'
-  );
-}
+assert.equal(
+  (returnPersist.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
+  1,
+  'Return Persist must consume the canonical selector exactly once after its later dedicated delegation lot'
+);
+assert.match(
+  returnPersist,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Return Persist must preserve its public raccord while delegating the pure decision'
+);
+assert.equal(
+  (branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,
+  0,
+  'Branch Nav Cleanup remains the only historical local selector after the later Return Persist lot'
+);
 
 assert.doesNotMatch(
   entry,
@@ -94,7 +99,6 @@ console.log(JSON.stringify({
   runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
   subsequentConsumer:'DungeonAuthoredFinalExit167875',
   stillUntouched:[
-    'DungeonAuthoredReturnPersist167862',
     'DungeonAuthoredBranchNavCleanup167863',
     'DungeonSpatial313'
   ]

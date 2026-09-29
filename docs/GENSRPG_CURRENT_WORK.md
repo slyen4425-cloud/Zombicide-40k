@@ -1,3 +1,52 @@
+# PHASE 7 — MICRO-LOT 19 — délégation héros actif Return Persist authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-active-hero-delegation-green-2026-09-29`
+
+SHA de base :
+`eabfb9ca136369e6a0166560d14d151df88650f7`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-return-persist-active-hero-delegation-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-return-persist-active-hero-delegation-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_RETURN_PERSIST_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+conserver l'API publique `DungeonAuthoredReturnPersist167862.activeHero(x)` et faire déléguer uniquement sa décision pure au propriétaire canonique :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Return Persist possède encore une copie locale bit-à-bit du sélecteur ;
+- `persistFinalPosition()` consomme ce sélecteur avant `DungeonSpatial313.ensure/persist` ;
+- le test historique `tests/dungeon_authored_return_persist_v167862.test.cjs` protège la persistance exacte après `enterNode` ;
+- Branch Nav Cleanup conserve la dernière copie locale et reste hors périmètre.
+
+Frontière :
+- API publique `activeHero` conservée ;
+- lecture/écriture runtime, validation authored, position, Spatial, wrapper `enterNode` et retry restent Return Persist ;
+- Branch Nav Cleanup, Final Exit, Authored Runtime et Spatial restent inchangés ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36616443873` — SUCCESS ;
+- Firefox `36616444021` — SUCCESS ;
+- Tactical Dock `36616443949` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. ajouter une caractérisation Return Persist ciblée ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Return Persist.
+
+---
+
 # PHASE 7 — MICRO-LOT 18 — délégation héros actif Final Exit authored — 2026-09-29
 
 Base GREEN :

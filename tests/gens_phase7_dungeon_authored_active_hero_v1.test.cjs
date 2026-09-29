@@ -32,12 +32,12 @@ vm.createContext(pure);
 vm.runInContext(entry,pure,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 
 assert.equal(
-  typeof pure.GensDungeonV1?.exploration?.resolveAuthoredActiveHero,
+  typeof pure.GensDungeonV1?.movement?.resolveAuthoredActiveHero,
   'function',
   'Phase 7 micro-lot 16 requires Dungeon-owned authored active-hero selection'
 );
 
-const resolve=pure.GensDungeonV1.exploration.resolveAuthoredActiveHero;
+const resolve=pure.GensDungeonV1.movement.resolveAuthoredActiveHero;
 assert.equal(resolve(['a','b','c'],0),'a');
 assert.equal(resolve(['a','b','c'],2),'c');
 assert.equal(resolve(['a','b','c'],99),'c');
@@ -52,13 +52,13 @@ assert.equal(resolve([0,'b'],0),'');
 assert.equal(resolve([123],0),'123');
 
 assert.equal(
-  (authored.match(/GensDungeonV1\.exploration\.resolveAuthoredActiveHero\(/g)||[]).length,
+  (authored.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
   1,
   'Authored Runtime must consume the pure active-hero selector exactly once through activeHero'
 );
 assert.match(
   authored,
-  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.exploration\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
   'Authored Runtime activeHero must retain runtime reads and delegate only the pure selection'
 );
 
@@ -88,7 +88,7 @@ assert.ok(
 console.log(JSON.stringify({
   scenario:'Phase 7 authored active hero owner',
   expected:'RED before pure active-hero extraction, GREEN after Authored Runtime-only raccord',
-  pureOwner:'GensDungeonV1.exploration.resolveAuthoredActiveHero',
+  pureOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
   untouched:['DungeonAuthoredFinalExit167875','DungeonAuthoredReturnPersist167862','DungeonAuthoredBranchNavCleanup167863','DungeonSpatial313']
 },null,2));

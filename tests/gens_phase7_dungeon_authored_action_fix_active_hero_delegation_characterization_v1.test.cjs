@@ -11,12 +11,17 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const actionFix=read('assets/dungeon/dungeon-authored-action-fix-167857.js');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
-assert.match(actionFix,historical,
-  'Action Fix must still own the historical local activeHero selector before delegation');
+assert.doesNotMatch(actionFix,historical,
+  'Action Fix must no longer own the historical activeHero selection after delegation');
 assert.equal(
   (actionFix.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Action Fix must not consume the canonical helper before this micro-lot'
+  1,
+  'Action Fix must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  actionFix,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Action Fix activeHero must retain its public surface while delegating only the pure selection'
 );
 
 const store=new Map();
@@ -148,7 +153,7 @@ console.log(JSON.stringify({
     'DungeonAuthoredActionFix167857.exactChestAtActivePosition'
   ],
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonExactTrapRuntime167845.activeHero',
     'DungeonZoneLinks167846.activeHero',

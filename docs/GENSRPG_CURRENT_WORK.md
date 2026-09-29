@@ -15,36 +15,60 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_BRANCH_NAV_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
-faire déléguer uniquement l'API publique `DungeonAuthoredBranchNavCleanup167863.activeHero(x)` au propriétaire canonique existant :
+Cible fermée :
+conserver l'API publique `DungeonAuthoredBranchNavCleanup167863.activeHero(x)` et déléguer uniquement sa décision pure à :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Branch Nav Cleanup est la dernière copie locale historique connue du sélecteur activeHero ;
-- `activeHero` reste obligatoirement exporté dans l'API publique ;
-- `branchReturnActive()` demeure propriétaire de la lecture runtime, pile de retour, nœud courant et décision de branche ;
-- DOM, wrappers, listener click et timers restent totalement hors périmètre.
+Caractérisation GREEN :
+- SHA `21b5d2d621f9b9dcdf3f2b5ce6d4b3b1632a6079` ;
+- Architecture + Browser `36629944427` — SUCCESS ;
+- Firefox `36629944354` — SUCCESS ;
+- Tactical Dock `36629944355` — SUCCESS.
 
-Frontière :
-- aucune nouvelle API ;
-- aucun changement de `currentNode`, `authoredActive`, `branchReturnActive` hors sélection du héros ;
-- aucun changement DOM/navigation ;
-- Authored Runtime, Final Exit, Return Persist et Spatial restent inchangés ;
+RED isolé :
+- SHA `b942b4e9a38b2ff2b732778a07e6b96dbdf0de2b` ;
+- Architecture `36631314119` — FAILURE attendue uniquement sur #219 `Exiger la délégation héros actif Branch Nav Cleanup authored Phase 7` ;
+- caractérisation #218 — SUCCESS ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36631314160` — SUCCESS ;
+- Tactical Dock `36631314117` — SUCCESS.
+
+Micro-diff GREEN :
+- `75b5c3fa42fb00ad608932c0857d3fcb54cac5b9` — Branch Nav conserve son API publique et délègue la décision pure ;
+- `49ed3573fa64d261e0f96c1bd1c4f3bc21b4e630` — contrat Dungeon clarifié ;
+- `abba751a5591252258a260e9a0d5193b7be43b75` — caractérisation post-raccord ;
+- `c5e04355ec266f9b780a74fc913a694a2e86f7a9` — fixture historique Branch Nav charge le propriétaire canonique ;
+- `15449fbf94751a1455bcfaca42a3e3bd5efb22aa`, `509a97c4c69883162138ca64fb0ac841670a2d23`, `37abb64ab4b722068a2915a1b5f5313a7eeb1dae`, `cd24dd09ac43480a113a99b7ac63f19164f00561`, `c124cf954e16af34827e587fc59ee4380a250880` — sentinelles lots 17–19 alignées sur l'état cumulatif.
+
+Triple CI technique GREEN sur `c124cf954e16af34827e587fc59ee4380a250880` :
+- Architecture + Browser `36631824981` — SUCCESS ;
+- Firefox `36631824957` — SUCCESS ;
+- Tactical Dock `36631824949` — SUCCESS ;
+- Browser 45/45 sans échec.
+
+Frontière préservée :
+- `GensDungeonV1.movement.resolveAuthoredActiveHero` possède désormais la décision pure pour les quatre consommateurs authored audités ;
+- API publique Branch Nav `activeHero` conservée ;
+- `currentNode`, `authoredActive`, `branchReturnActive`, pile de retour et décision de branche restent Branch Nav Cleanup ;
+- DOM, hide/restore, sync/block, wrappers render/show, listener click et timers restent inchangés ;
+- Authored Runtime, Final Exit, Return Persist et `DungeonSpatial313` inchangés dans ce lot ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36626538149` — SUCCESS ;
-- Firefox `36626538206` — SUCCESS ;
-- Tactical Dock `36626537960` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-branch-nav-active-hero-delegation-green-2026-09-29`.
+
 Prochaine action :
-1. ajouter une caractérisation ciblée de l'API publique activeHero et du vrai chemin branchReturnActive ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Branch Nav Cleanup.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 
 ---
 

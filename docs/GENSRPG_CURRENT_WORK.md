@@ -18,23 +18,39 @@ Pré-audit :
 Cible :
 caractériser uniquement la divergence sémantique entre le resolver local `exitIdx` de Final Exit et `GensDungeonV1.movement.resolveAuthoredRealExitIndex(...)`.
 
-Règle :
-aucune harmonisation runtime tant que la parité n'est pas prouvée. Une divergence comportementale doit rester explicitement séparée de la restructuration.
+Résultat :
+- parité confirmée sur les index directs valides et les fallbacks négatif / non-entier / absent ;
+- divergence confirmée lorsqu'un entier direct >= 0 ne désigne pas une vraie sortie ;
+- le resolver canonique cherche alors une vraie cellule `exit`, alors que Final Exit conserve l'index direct puis bloque via `hasExit`.
+
+Caractérisation GREEN :
+- SHA `0a0a45eccbf9bfd60470182d4c32e52f3522e6dd` ;
+- Architecture + Browser `36589726877` — SUCCESS ;
+- Firefox `36589726784` — SUCCESS ;
+- Tactical Dock `36589726795` — SUCCESS.
+
+Décision conforme à la charte :
+- aucun RED de migration ;
+- aucun changement runtime ;
+- aucune harmonisation masquée en refactor ;
+- une éventuelle adoption du resolver canonique par Final Exit doit être traitée comme décision fonctionnelle dédiée.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36581813705` — SUCCESS ;
-- Firefox `36581813465` — SUCCESS ;
-- Tactical Dock `36581813531` — SUCCESS.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après CI du SHA documentaire final :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-real-exit-divergence-green-2026-09-29`.
 
 Prochaine action :
-1. ajouter une caractérisation comparative GREEN ;
-2. raccorder à Architecture ;
-3. repasser les trois validations ;
-4. si divergence confirmée, ne poser aucun RED de migration et fermer comme audit/caractérisation GREEN.
+1. valider la triple CI du SHA documentaire final ;
+2. créer le checkpoint GREEN exact ;
+3. reprendre seulement ensuite un seam Phase 7 à parité prouvable.
+
 
 ---
 

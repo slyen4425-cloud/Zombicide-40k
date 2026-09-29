@@ -64,7 +64,7 @@ Les deux runtimes restent responsables de leurs lectures `x?.participants` et `x
 - index négatif : clamp 0 ;
 - index au-delà du tableau : clamp dernier index ;
 - chaîne numérique : coercition numérique historique ;
-- index fractionnaire non entier : ne pas normaliser, lookup fractionnaire historique donc héros vide sauf propriété correspondante ;
+- index fractionnaire : appliquer d’abord le clamp numérique historique ; s’il reste fractionnaire à l’intérieur des bornes, ne pas l’arrondir et conserver le lookup fractionnaire historique ;
 - valeur participant falsy : chaîne vide ;
 - valeur participant truthy : `String(...)`.
 

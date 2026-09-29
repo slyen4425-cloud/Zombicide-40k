@@ -88,6 +88,11 @@
     return Number(heroPosition)===realExitIndex;
   }
 
+  function isAuthoredExitBlocked(lastExitLocked,mapObjectiveStatus,objectiveStatus){
+    if(lastExitLocked)return true;
+    return String(mapObjectiveStatus||objectiveStatus||"")==="locked";
+  }
+
   root.GensDungeonV1=Object.freeze({
     VERSION,
     exploration:Object.freeze({
@@ -104,7 +109,8 @@
       resolveAuthoredHeroMoveAllowance,
       selectAuthoredOutgoingEdge,
       resolveAuthoredRealExitIndex,
-      isAuthoredTerminalExit
+      isAuthoredTerminalExit,
+      isAuthoredExitBlocked
     })
   });
 })(typeof window!=="undefined"?window:globalThis);

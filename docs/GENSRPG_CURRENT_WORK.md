@@ -15,50 +15,74 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_ACTIVE_HERO_RESOLUTION_POST_DIVERGENCE_PREAUDIT.md`
 
-Cible :
-extraire uniquement la sélection pure du héros actif authored puis raccorder **un seul consommateur** : `DungeonAuthoredRuntime167839.activeHero(x)`.
+Cible fermée :
+extraire uniquement la sélection pure du héros actif authored puis raccorder **un seul consommateur**, `DungeonAuthoredRuntime167839.activeHero(x)`.
 
-Copies historiques confirmées :
-- Authored Runtime ;
-- Final Exit ;
-- Return Persist ;
-- Branch Nav Cleanup.
-
-API candidate :
+Propriétaire créé :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Frontière :
-- Authored Runtime conserve les lectures de `x` et son raccord local `activeHero(x)` ;
-- la sémantique historique fractionnaire doit rester exacte ;
-- Final Exit, Return Persist et Branch Nav Cleanup restent totalement inchangés dans ce lot, y compris leurs copies locales `activeHero(x)` ;
-- Final Exit conserve le resolver local `exitIdx`, `hasExit`, finish, lock, stockage, session et UI ;
-- Authored Runtime conserve plan, mouvement, travel et Spatial ;
+Copies historiques confirmées :
+- Authored Runtime — raccordé dans ce lot ;
+- Final Exit — copie locale conservée ;
+- Return Persist — copie locale conservée ;
+- Branch Nav Cleanup — copie locale conservée.
+
+Parité historique conservée :
+- non-tableau / tableau vide -> `""` ;
+- index absent, NaN ou falsy -> 0 ;
+- négatif -> premier héros ;
+- au-delà de la borne -> dernier héros ;
+- chaîne numérique -> coercition Number ;
+- fractionnaire au-delà de la borne -> clamp au dernier ;
+- fractionnaire encore dans les bornes -> aucun arrondi, lookup fractionnaire historique ;
+- participant falsy -> `""` ;
+- participant truthy -> `String(...)`.
+
+Caractérisation GREEN avant RED :
+- SHA `d79b0c71d84137ca2142871c2c069e4f466a8cca` ;
+- Architecture + Browser `36594959916` — SUCCESS ;
+- Firefox `36594959945` — SUCCESS ;
+- Tactical Dock `36594959844` — SUCCESS.
+
+RED isolé :
+- SHA `d980ab7ab577ffe05b5cd315a3c29d621d47d594` ;
+- Architecture `36596591932` — FAILURE attendue uniquement sur #213 `Exiger la sélection Dungeon du héros actif authored Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36596591939` — SUCCESS ;
+- Tactical Dock `36596591993` — SUCCESS.
+
+Micro-diff GREEN :
+- `302128f9fab4cd0c96c8c05b91d22a52fa43be47` — helper pur ajouté dans `entry-v1.js` ;
+- `77c83a26d8daf42266ac5859a4a6c8012b9202c6` — raccord unique Authored Runtime ;
+- `8ede41cc7d6225fae09562add8ca7a8d201b9f0b` — contrat Dungeon clarifié ;
+- `c5d6078b7b3a0059dfea39329f4cc9b2985d002d` — caractérisation post-raccord.
+
+Triple CI technique GREEN sur `c5d6078b7b3a0059dfea39329f4cc9b2985d002d` :
+- Architecture + Browser `36596894909` — SUCCESS ;
+- Firefox `36596894665` — SUCCESS ;
+- Tactical Dock `36596894512` — SUCCESS.
+
+Frontière préservée :
+- Authored Runtime conserve les lectures de `x`, plan, mouvement, room entry, travel, persistance, UI et Spatial ;
+- Final Exit, Return Persist et Branch Nav Cleanup restent inchangés dans ce lot ;
 - `DungeonSpatial313` reste inchangé ;
 - aucun changement `index.html`.
-
-Tentatives historiques non canoniques examinées :
-- `work/gensrpg-phase7-dungeon-authored-active-hero-2026-09-29` ;
-- `work/gensrpg-phase7-dungeon-authored-active-hero-resolution-2026-09-29`.
-Elles restent hors reprise car basées sur `930d4a33...`, divergentes du checkpoint GREEN courant et sans checkpoint final canonique.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36591058090` — SUCCESS ;
-- Firefox `36591058200` — SUCCESS ;
-- Tactical Dock `36591057899` — SUCCESS.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
-Caractérisation ajoutée :
-`tests/gens_phase7_dungeon_authored_active_hero_resolution_characterization_v1.test.cjs`.
-
-La caractérisation couvre le vrai chemin Authored Runtime et verrouille aussi Final Exit comme témoin historique inchangé ; Return Persist et Branch Nav Cleanup ont été audités et restent hors périmètre de raccord.
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-active-hero-resolution-post-divergence-green-2026-09-29`.
 
 Prochaine action :
-1. valider la triple CI GREEN de la caractérisation sur le SHA courant ;
-2. seulement ensuite poser UNE garde RED exigeant le helper pur et le raccord Authored Runtime unique.
-
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 16 — divergence vraie sortie Final Exit authored — 2026-09-29

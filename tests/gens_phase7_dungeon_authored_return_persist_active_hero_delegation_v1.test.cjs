@@ -23,9 +23,14 @@ assert.match(
   'Return Persist public activeHero must delegate only the pure selection decision'
 );
 assert.equal(
-  (branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Branch Nav Cleanup must remain outside micro-lot 19'
+  (branchNav.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
+  1,
+  'Branch Nav Cleanup must reflect its later dedicated delegation lot'
+);
+assert.match(
+  branchNav,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Branch Nav Cleanup must preserve its public activeHero raccord after later delegation'
 );
 
 assert.match(
@@ -80,5 +85,5 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Return Persist active hero delegation guard',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   publicConsumer:'DungeonAuthoredReturnPersist167862.activeHero',
-  branchNavUntouched:true
+  branchNavLaterDelegated:true
 },null,2));

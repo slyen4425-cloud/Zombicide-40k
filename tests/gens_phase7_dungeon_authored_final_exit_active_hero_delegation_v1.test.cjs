@@ -52,12 +52,12 @@ assert.equal(
   1,
   'Return Persist must delegate active-hero selection exactly once after its later lot'
 );
-assert.match(branchNav,historical,
-  'Branch Nav Cleanup remains the historical local selector');
+assert.doesNotMatch(branchNav,historical,
+  'Branch Nav Cleanup must reflect its later dedicated delegation lot');
 assert.equal(
-  (branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Branch Nav Cleanup remains outside the current delegation lot'
+  (branchNav.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
+  1,
+  'Branch Nav Cleanup must delegate active-hero selection exactly once after its later lot'
 );
 
 assert.ok(
@@ -69,9 +69,11 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Final Exit active hero delegation guard',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   consumer:'DungeonAuthoredFinalExit167875.activeHero',
-  laterDelegated:'DungeonAuthoredReturnPersist167862.activeHero',
+  laterDelegated:[
+    'DungeonAuthoredReturnPersist167862.activeHero',
+    'DungeonAuthoredBranchNavCleanup167863.activeHero'
+  ],
   untouched:[
-    'DungeonAuthoredBranchNavCleanup167863.activeHero',
     'DungeonAuthoredRuntime167839',
     'DungeonSpatial313'
   ]

@@ -43,7 +43,7 @@ function record(x,s,g,pack,hero,roomNo){s.nodeRooms[String(pack.node.id)]=Number
 function currentNode(x,s,hero){const roomKey=String(Number(x?.room)||0);return String(s?.roomNodes?.[roomKey]||s?.heroNodes?.[hero]||"")}
 function outgoing(g,nodeId){return (g?.edges||[]).filter(e=>String(e.fromNodeId)===String(nodeId||""))}
 function plan(x,g){const hero=activeHero(x),s=ensureState(x,g),current=currentNode(x,s,hero);if(!current)return {hero,s,currentNodeId:"",targetNodeId:String(g.startNodeId||""),edge:null,first:true,needsExit:false};const list=outgoing(g,current),pos=Number(x?.positions?.[hero]),edge=ROOT.GensDungeonV1.movement.selectAuthoredOutgoingEdge(list,pos,positional());return {hero,s,currentNodeId:current,targetNodeId:String(edge?.toNodeId||""),edge,first:false,needsExit:!!list.length&&!edge,outgoing:list}}
-function blocked(x){try{if(ROOT.dungeonRoomExitLocked102?.())return true}catch(e){}if(x?.last?.exitLocked)return true;return String(x?.last?.map?.objective?.status||x?.last?.objective?.status||"")==="locked"}
+function blocked(x){try{if(ROOT.dungeonRoomExitLocked102?.())return true}catch(e){}return ROOT.GensDungeonV1.movement.isAuthoredExitBlocked(x?.last?.exitLocked,x?.last?.map?.objective?.status,x?.last?.objective?.status)}
 function arrival(map,edge){return ROOT.GensDungeonV1.movement.planAuthoredArrivalCell(map?.cells?.length,edge?.toEntryIndex,map?.entryIdx)}
 function realExitIndex(x){const map=x?.last?.map||{},cells=Array.isArray(map.cells)?map.cells:[];return ROOT.GensDungeonV1.movement.resolveAuthoredRealExitIndex(cells,map.exitIdx)}
 function atTerminalExit(x){const hero=activeHero(x),exitIdx=realExitIndex(x);return ROOT.GensDungeonV1.movement.isAuthoredTerminalExit(hero,exitIdx,positional(),x?.positions?.[hero])}

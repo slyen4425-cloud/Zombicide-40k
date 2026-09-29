@@ -33,7 +33,7 @@ pure.globalThis=pure;
 vm.createContext(pure);
 vm.runInContext(entry,pure,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(
-  typeof pure.GensDungeonV1?.exploration?.resolveAuthoredActiveHero,
+  typeof pure.GensDungeonV1?.movement?.resolveAuthoredActiveHero,
   'undefined',
   'pre-extraction characterization must prove the canonical active-hero helper is not connected yet'
 );
@@ -81,7 +81,7 @@ console.log(JSON.stringify({
   scenario:'Phase 7 authored active hero characterization',
   runtime:{bytes:bytes.length,gitBlob},
   currentOwner:'DungeonAuthoredRuntime167839.activeHero',
-  pureTarget:'GensDungeonV1.exploration.resolveAuthoredActiveHero',
+  pureTarget:'GensDungeonV1.movement.resolveAuthoredActiveHero',
   semantics:{
     clampNegativeToFirst:true,
     clampOversizedToLast:true,

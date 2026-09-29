@@ -44,7 +44,7 @@ Ce micro-lot ne doit pas modifier ces quatre consommateurs à la fois.
 
 Extraire uniquement la décision pure dans Dungeon :
 
-`GensDungeonV1.exploration.resolveAuthoredActiveHero(participants, activeIndex)`.
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
 Puis raccorder uniquement :
 `DungeonAuthoredRuntime167839.activeHero(x)`.
@@ -67,7 +67,7 @@ Aucun arrondi, aucune validation supplémentaire et aucun fallback vers un autre
 
 ## Propriétaires
 
-### GensDungeonV1.exploration
+### GensDungeonV1.movement
 Devient propriétaire uniquement de la sélection pure à partir de :
 - `participants` ;
 - `activeIndex`.
@@ -110,3 +110,15 @@ Ne pas toucher :
 
 Aucun changement `index.html` n'est prévu.
 Toute dérive vers le gros runtime déclenche Rule 26.
+
+
+## Correction de frontière avant implémentation
+
+La première tentative de raccord a fait échouer l'ancienne sentinelle generated #182, qui interdit à Authored Runtime de consommer le namespace `GensDungeonV1.exploration`.
+
+Cette garde n'est pas affaiblie : elle exprime une frontière valide, le namespace `exploration` restant propriétaire du chemin generated.
+
+Le candidat canonique est donc corrigé vers :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Le runtime et le contrat ont été restaurés à l'état pré-extraction avant de refaire le RED sur cette frontière corrigée.

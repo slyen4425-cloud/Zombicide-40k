@@ -33,11 +33,14 @@ assert.equal((finalExit.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHer
 assert.match(finalExit,
   /function activeHero\(x\)\{return R\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
   'Final Exit must keep activeHero(x) as the local runtime raccord');
-assert.match(returnPersist,historical,
-  'Return Persist remains a historical local owner outside this lot');
+assert.doesNotMatch(returnPersist,historical,
+  'Return Persist no longer owns the duplicated decision after its later dedicated delegation lot');
+assert.match(returnPersist,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Return Persist preserves its public raccord and delegates only pure selection');
+assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,1);
 assert.match(branchNav,historical,
-  'Branch Nav Cleanup remains a historical local owner outside this lot');
-assert.equal((returnPersist.match(/resolveAuthoredActiveHero\(/g)||[]).length,0);
+  'Branch Nav Cleanup remains the historical local owner outside both delegation lots');
 assert.equal((branchNav.match(/resolveAuthoredActiveHero\(/g)||[]).length,0);
 
 const store=new Map();
@@ -100,7 +103,7 @@ for(const [participants,index] of [
   if(expectedHero){
     assert.ok(state,'Final Exit must accept a valid canonical active hero in the terminal scenario');
     assert.equal(state.hero,expectedHero,
-      'Final Exit local selector must match the canonical helper exactly before delegation');
+      'Final Exit local raccord must match the canonical helper exactly after delegation');
   }else{
     assert.equal(state,null,
       'Final Exit must reject terminal state when the historical/canonical active hero is empty');
@@ -112,8 +115,8 @@ console.log(JSON.stringify({
   runtime:{bytes:bytes.length,gitBlob},
   localOwner:'DungeonAuthoredFinalExit167875.activeHero',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
+  laterDelegated:'DungeonAuthoredReturnPersist167862.activeHero',
   untouched:[
-    'DungeonAuthoredReturnPersist167862.activeHero',
     'DungeonAuthoredBranchNavCleanup167863.activeHero',
     'DungeonAuthoredRuntime167839',
     'DungeonSpatial313'

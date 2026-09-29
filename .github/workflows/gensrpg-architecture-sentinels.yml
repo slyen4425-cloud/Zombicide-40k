@@ -647,6 +647,9 @@ jobs:
       - name: Exiger la délégation canonique terminale Final Exit authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_final_exit_terminal_delegation_v1.test.cjs
 
+      - name: Caractériser la sélection du héros actif authored Phase 7
+        run: node tests/gens_phase7_dungeon_authored_active_hero_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

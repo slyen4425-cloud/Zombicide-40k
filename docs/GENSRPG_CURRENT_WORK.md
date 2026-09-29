@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 13 — décision de verrouillage de sortie authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-terminal-exit-green-2026-09-28`
+
+SHA de base :
+`0621441a3b39f07e82ce97238e70037d7a9f9db9`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-exit-lock-decision-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-exit-lock-decision-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_EXIT_LOCK_DECISION_PREAUDIT.md`
+
+Cible :
+caractériser puis isoler uniquement la décision authored locale de verrouillage de sortie dans `DungeonAuthoredRuntime167839.blocked(x)`.
+
+API candidate après caractérisation GREEN :
+`GensDungeonV1.movement.isAuthoredExitBlocked(lastExitLocked, mapObjectiveStatus, objectiveStatus)`.
+
+Frontière obligatoire :
+- le garde dynamique `dungeonRoomExitLocked102?.()`, son ordre et son `try/catch` restent dans Authored Runtime ;
+- Authored Runtime conserve toutes les lectures de `x`, `travel()`, `syncActionButton()`, notices et politique de navigation ;
+- le helper Dungeon ne reçoit que trois valeurs explicites déjà lues ;
+- Spatial reste inchangé.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36516451500` — SUCCESS ;
+- Firefox `36516451759` — SUCCESS ;
+- Tactical Dock `36516451884` — SUCCESS.
+
+Prochaine action :
+1. ajouter une caractérisation GREEN de la politique actuelle de `blocked(x)` ;
+2. la raccorder à Architecture ;
+3. repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 12 — politique de sortie terminale authored — 2026-09-28
 
 Base GREEN :

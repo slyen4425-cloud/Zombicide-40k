@@ -24,16 +24,18 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
 
-assert.match(authored,historical,
-  'Authored Runtime must still own the historical local activeHero selector before extraction');
+assert.match(
+  authored,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Authored Runtime must preserve local state reads while delegating only pure active-hero selection'
+);
 assert.match(finalExit,historical,
-  'Final Exit must still own the same historical local activeHero selector before extraction');
+  'Final Exit must retain its historical local activeHero selector in micro-lot 17');
 assert.equal((authored.match(/function activeHero\(/g)||[]).length,1);
 assert.equal((finalExit.match(/function activeHero\(/g)||[]).length,1);
-assert.equal(
-  (entry.match(/resolveAuthoredActiveHero/g)||[]).length,
-  0,
-  'canonical active-hero helper must not exist before extraction'
+assert.ok(
+  (entry.match(/resolveAuthoredActiveHero/g)||[]).length>=2,
+  'canonical active-hero helper must be defined and exported by Dungeon movement'
 );
 
 const makeStore=()=>{
@@ -133,11 +135,9 @@ const makeStore=()=>{
 console.log(JSON.stringify({
   scenario:'Phase 7 authored active hero resolution characterization after Final Exit divergence lot',
   runtime:{bytes:bytes.length,gitBlob},
-  duplicatedOwners:[
-    'DungeonAuthoredRuntime167839.activeHero',
-    'DungeonAuthoredFinalExit167875.activeHero'
-  ],
-  pureTarget:'GensDungeonV1.movement.resolveAuthoredActiveHero',
+  pureOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
+  runtimeConsumer:'DungeonAuthoredRuntime167839.activeHero',
+  historicalUntouchedConsumer:'DungeonAuthoredFinalExit167875.activeHero',
   semantics:{
     clampsNegativeToFirst:true,
     clampsOverflowToLast:true,

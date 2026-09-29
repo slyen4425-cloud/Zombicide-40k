@@ -25,7 +25,7 @@ function primary(){try{const p=bridge()?.primary?.();if(p)return p}catch(e){}con
 function graph(){const p=primary();if(String(p?.kind)!=="world"||!p?.id)return null;try{return builder()?.findDungeon?.(String(p.id))||null}catch(e){return null}}
 function validGraph(g){if(!g?.startNodeId||!Array.isArray(g.nodes)||!g.nodes.length)return false;try{return builder()?.validation?.(g)?.valid!==false}catch(e){return true}}
 function active(){return validGraph(graph())}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function positional(){try{if(typeof ROOT.dc305PositionalGameplay==="function")return !!ROOT.dc305PositionalGameplay()}catch(e){}try{return ROOT.gensGameplayModules?.()?.movement===true}catch(e){return false}}
 function heroMoveAllowance(id){try{return ROOT.GensDungeonV1.movement.resolveAuthoredHeroMoveAllowance(ROOT.dungeonHeroMoveValue083?.(id),ROOT.CHARS?.[id]?.dungeonStats?.movement)}catch(e){return 3}}
 function movementForEntry(x,hero){const plan=ROOT.GensDungeonV1.movement.planAuthoredEntryMovement(x?.remaining?.[hero]);return plan.status==="remaining"?plan.movement:heroMoveAllowance(hero)}

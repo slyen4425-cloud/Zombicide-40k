@@ -134,3 +134,79 @@ Ne pas toucher :
 
 Aucune modification de `index.html` n'est prévue.
 Si le périmètre change et exige son contenu exact, arrêter le lot et appliquer Rule 26 avant toute modification.
+
+
+## Résultat TDD du micro-lot
+
+### Caractérisation GREEN
+
+SHA de caractérisation raccordée :
+`db442959670d36dd21476a975fb432b4fbf2825d`.
+
+Preuve GREEN :
+- Architecture + Browser : `36517633316` — SUCCESS ;
+- Firefox : `36517633486` — SUCCESS ;
+- Tactical Dock : `36517633305` — SUCCESS.
+
+La caractérisation verrouille :
+- le garde dynamique évalué en premier ;
+- le court-circuit si ce garde est truthy ;
+- l'exception du garde dynamique ignorée avant fallback authored ;
+- `last.exitLocked` truthy ;
+- la priorité de `map.objective.status` sur le fallback ;
+- le fallback vers `last.objective.status` seulement si le statut map est falsy ;
+- la comparaison historique strictement sensible à la casse sur `"locked"`.
+
+### RED isolé
+
+Garde ajoutée :
+`tests/gens_phase7_dungeon_authored_exit_lock_v1.test.cjs`.
+
+SHA RED :
+`6c8e3f54a5579c560466ba964a6cf02341a64f76`.
+
+Preuve :
+- Architecture : `36536656012` — FAILURE attendue uniquement sur #206 `Exiger la décision Dungeon de verrouillage de sortie authored Phase 7` ;
+- Browser : SKIPPED uniquement à cause du RED Architecture ;
+- Firefox : `36536656013` — SUCCESS ;
+- Tactical Dock : `36536655999` — SUCCESS.
+
+### Micro-diff GREEN
+
+Extraction minimale :
+- `GensDungeonV1.movement.isAuthoredExitBlocked(lastExitLocked, mapObjectiveStatus, objectiveStatus)` ajouté comme décision pure ;
+- `DungeonAuthoredRuntime167839.blocked(x)` conserve le garde dynamique `dungeonRoomExitLocked102?.()`, son ordre et son `try/catch`, puis délègue une seule fois au helper pur ;
+- les trois lectures authored restent effectuées par Authored Runtime et sont transmises explicitement ;
+- invariant Dungeon ajouté au contrat ;
+- caractérisation réalignée après raccord sans retirer ni affaiblir aucun scénario métier ;
+- Spatial, terminal exit, vraie sortie, mouvement réel, pathfinding, travel, `syncActionButton()`, événements, Tactical et `index.html` inchangés.
+
+Commits de raccord :
+- helper pur : `71e8838ec28d9559b3693332ff86d161253a3a09` ;
+- raccord runtime : `44ee8f776e0529564aecdc8f230f71e3d86a4830` ;
+- frontière de contrat : `cd7ec62a5568daf0d19384029a40a35faaf61d01` ;
+- caractérisation post-raccord : `ab93c86e24896959fa9e4e05eea5d380ee988901`.
+
+SHA technique GREEN :
+`ab93c86e24896959fa9e4e05eea5d380ee988901`.
+
+Preuve GREEN :
+- Architecture + Browser : `36536917769` — SUCCESS ;
+- Firefox : `36536917768` — SUCCESS ;
+- Tactical Dock : `36536917890` — SUCCESS.
+
+Contrôle de périmètre base -> GREEN technique :
+- workflow CI ;
+- `assets/dungeon/dungeon-authored-runtime-167839.js` : raccord minimal ;
+- `assets/gensrpg/dungeon/entry-v1.js` : helper pur ;
+- contrat Dungeon ;
+- docs du lot ;
+- deux tests du lot ;
+- aucun autre runtime/gameplay/asset.
+
+Runtime `index.html` toujours inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Aucun comportement utilisateur visible n'a été modifié ; aucun test utilisateur n'est requis.
+Rule 26 non déclenchée.

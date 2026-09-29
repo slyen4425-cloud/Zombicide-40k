@@ -21,25 +21,56 @@ supprimer uniquement la duplication locale de la décision authored de verrouill
 API réutilisée :
 `GensDungeonV1.movement.isAuthoredExitBlocked(lastExitLocked, mapObjectiveStatus, objectiveStatus)`.
 
-Frontière obligatoire :
-- garde dynamique `dungeonRoomExitLocked102?.()`, ordre et `try/catch` restent Final Exit ;
+Frontière préservée :
+- garde dynamique `dungeonRoomExitLocked102?.()`, ordre, court-circuit et `try/catch` restent Final Exit ;
 - aucune nouvelle API ;
 - `finish()`, `finalState()`, `syncButton()`, stockage, complétion, session, popup et retour accueil restent Final Exit ;
-- Authored Runtime 167839 et Spatial inchangés.
+- Authored Runtime 167839 et Spatial restent inchangés.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36538216504` — SUCCESS ;
-- Firefox `36538216686` — SUCCESS ;
-- Tactical Dock `36538216745` — SUCCESS.
+Caractérisation GREEN :
+- SHA `84ddeeaf9ec103bca0fd294346230bc7c5457806` ;
+- Architecture + Browser `36561541239` — SUCCESS ;
+- Firefox `36561541226` — SUCCESS ;
+- Tactical Dock `36561541328` — SUCCESS.
+
+RED isolé :
+- SHA `dddd08f1823bf57101b941868208e9c8959972db` ;
+- Architecture `36562859541` — FAILURE attendue uniquement sur #208 `Exiger la délégation canonique verrouillage Final Exit authored Phase 7` ;
+- Browser SKIPPED uniquement à cause du RED Architecture ;
+- Firefox `36562859470` — SUCCESS ;
+- Tactical Dock `36562859263` — SUCCESS.
+
+Micro-diff GREEN :
+- la copie locale de la décision authored de verrouillage est retirée de Final Exit ;
+- `DungeonAuthoredFinalExit167875.blocked(x)` conserve le garde dynamique puis délègue au helper canonique Dungeon ;
+- aucune nouvelle API ni fallback global ;
+- contrat Dungeon clarifié ;
+- caractérisation post-raccord conserve les mêmes scénarios métier ;
+- `finish()`, `finalState()`, `syncButton()`, stockage, retour accueil, Authored Runtime 167839, Spatial, movement, travel et `index.html` inchangés.
+
+SHA GREEN courant :
+`918221dc65d3c779b361a07e9c44d20bfd840c2f`.
+
+CI GREEN :
+- Architecture + Browser `36563386509` — SUCCESS ;
+- Firefox `36563386507` — SUCCESS ;
+- Tactical Dock `36563386524` — SUCCESS.
+
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après CI du SHA documentaire final :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-lock-delegation-green-2026-09-29`.
 
 Prochaine action :
-1. ajouter une caractérisation GREEN de la politique `blocked()` de Final Exit ;
-2. prouver que le helper canonique existe mais n'est pas encore consommé ;
-3. raccorder à Architecture et repasser les trois validations avant toute garde RED.
+1. valider Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire final ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint.
 
 ---
 

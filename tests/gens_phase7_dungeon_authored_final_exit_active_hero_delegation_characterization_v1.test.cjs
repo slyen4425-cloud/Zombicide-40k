@@ -26,10 +26,13 @@ assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
 
-assert.match(finalExit,historical,
-  'Final Exit must still own the historical local activeHero selector before delegation');
-assert.equal((finalExit.match(/resolveAuthoredActiveHero\(/g)||[]).length,0,
-  'Final Exit must not consume the canonical helper before RED');
+assert.doesNotMatch(finalExit,historical,
+  'Final Exit must no longer own the duplicated activeHero decision after delegation');
+assert.equal((finalExit.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,1,
+  'Final Exit must consume the canonical helper exactly once after delegation');
+assert.match(finalExit,
+  /function activeHero\(x\)\{return R\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Final Exit must keep activeHero(x) as the local runtime raccord');
 assert.match(returnPersist,historical,
   'Return Persist remains a historical local owner outside this lot');
 assert.match(branchNav,historical,
@@ -115,5 +118,5 @@ console.log(JSON.stringify({
     'DungeonAuthoredRuntime167839',
     'DungeonSpatial313'
   ],
-  result:'parity proven before delegation'
+  result:'parity preserved after delegation'
 },null,2));

@@ -19,7 +19,7 @@ Cible :
 extraire uniquement la sélection pure du héros actif et raccorder `DungeonAuthoredRuntime167839.activeHero(x)`.
 
 API candidate :
-`GensDungeonV1.exploration.resolveAuthoredActiveHero(participants, activeIndex)`.
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
 Frontière :
 - Authored Runtime conserve les lectures de `x` et tous les appels métier ;

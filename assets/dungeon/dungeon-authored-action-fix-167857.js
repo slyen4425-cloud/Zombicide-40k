@@ -17,7 +17,7 @@ function primary(){try{const p=ROOT.DungeonWorldSessionBridge167832?.primary?.()
 function builtSelected(){const p=primary();return String(p?.kind||"")==="world"&&!!p?.id}
 function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
 function contextActive(){return builtSelected()||authored(readRt())}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function positionKey(x){if(!x)return"";const h=activeHero(x);if(!h)return"";return [h,Number(x.room)||0,Number(x?.positions?.[h])].join("|")}
 function normText(v){return String(v||"").replace(/\s+/g," ").trim().toUpperCase()}
 function clickableCandidates(){if(!DOC)return[];const sel="button,[role='button'],input[type='button'],input[type='submit'],.btn,.dc01Btn,.dc047Btn";return Array.from(DOC.querySelectorAll?.(sel)||[])}

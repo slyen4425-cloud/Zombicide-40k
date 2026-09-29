@@ -1,3 +1,43 @@
+# PHASE 7 — MICRO-LOT 16 — divergence vraie sortie Final Exit authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-terminal-delegation-green-2026-09-29`
+
+SHA de base :
+`930d4a33b31f465646f3941aa21cf3a4f7793d61`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-final-exit-real-exit-divergence-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-final-exit-real-exit-divergence-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_FINAL_EXIT_REAL_EXIT_DIVERGENCE_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la divergence sémantique entre le resolver local `exitIdx` de Final Exit et `GensDungeonV1.movement.resolveAuthoredRealExitIndex(...)`.
+
+Règle :
+aucune harmonisation runtime tant que la parité n'est pas prouvée. Une divergence comportementale doit rester explicitement séparée de la restructuration.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36581813705` — SUCCESS ;
+- Firefox `36581813465` — SUCCESS ;
+- Tactical Dock `36581813531` — SUCCESS.
+
+Prochaine action :
+1. ajouter une caractérisation comparative GREEN ;
+2. raccorder à Architecture ;
+3. repasser les trois validations ;
+4. si divergence confirmée, ne poser aucun RED de migration et fermer comme audit/caractérisation GREEN.
+
+---
+
 # PHASE 7 — MICRO-LOT 15 — délégation terminale Final Exit authored — 2026-09-29
 
 Base GREEN :

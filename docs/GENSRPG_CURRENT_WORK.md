@@ -15,37 +15,56 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_FINAL_EXIT_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
+Cible fermée :
 faire déléguer uniquement le sélecteur privé `DungeonAuthoredFinalExit167875.activeHero(x)` au propriétaire canonique existant :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Final Exit possède encore une copie locale bit-à-bit ;
-- cette copie est privée et consommée uniquement par `finalState()` ;
-- Return Persist et Branch Nav Cleanup possèdent encore leurs copies locales mais les exposent dans leur API publique ;
-- ils restent hors périmètre absolu de ce lot.
+Caractérisation GREEN :
+- SHA `fcd0b3a1e1e4cf22e79836e0ee83d6c69b80fba4` ;
+- Architecture + Browser `36613164224` — SUCCESS ;
+- Firefox `36613163967` — SUCCESS ;
+- Tactical Dock `36613163949` — SUCCESS.
 
-Frontière :
+RED isolé :
+- SHA `422781643c192148f3906b5273316342797a2a5f` ;
+- Architecture `36614121047` — FAILURE attendue uniquement sur #215 `Exiger la délégation héros actif Final Exit authored Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36614120953` — SUCCESS ;
+- Tactical Dock `36614120959` — SUCCESS.
+
+Micro-diff GREEN :
+- `65c87d21f4a8f8fc0c0a34f458e9d012f4a1eb0e` — Final Exit délègue la sélection pure au helper canonique ;
+- `17cb8d140d69076f690b2fa95c8a854765c1078e` — contrat Dungeon clarifié ;
+- `4e4dc4f49f107f9fe2a8bd2cccd49b7e74c8c42c` — caractérisation post-raccord ;
+- `57e963be42946548aec03fe4f86983fb119c01fe` et `ffbbb005aec6345b97359ba5590911701b507689` — tests lot 17 réalignés sur la nouvelle frontière uniquement.
+
+Triple CI technique GREEN sur `ffbbb005aec6345b97359ba5590911701b507689` :
+- Architecture + Browser `36614760364` — SUCCESS ;
+- Firefox `36614760862` — SUCCESS ;
+- Tactical Dock `36614760415` — SUCCESS.
+
+Frontière préservée :
 - aucune nouvelle API ;
-- Final Exit conserve runtime, branche secondaire, graphe, plan, resolver local `exitIdx`, `hasExit`, terminal, lock, finish, storage, session, popup, home et UI ;
-- Return Persist et Branch Nav Cleanup restent inchangés ;
-- Authored Runtime et Spatial restent inchangés ;
+- Final Exit conserve runtime, branche secondaire, graphe, plan, resolver local `exitIdx`, `hasExit`, terminal, lock, finish, stockage, session, popup, home et UI ;
+- Return Persist et Branch Nav Cleanup conservent leurs copies locales historiques ;
+- Authored Runtime et `DungeonSpatial313` restent inchangés ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36611757409` — SUCCESS ;
-- Firefox `36611757248` — SUCCESS ;
-- Tactical Dock `36611757326` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. ajouter une caractérisation Final Exit ciblée ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Final Exit.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-final-exit-active-hero-delegation-green-2026-09-29`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 17 — résolution héros actif authored post-divergence — 2026-09-29

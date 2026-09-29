@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 14 — délégation verrouillage Final Exit authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-exit-lock-decision-green-2026-09-29`
+
+SHA de base :
+`bf11948595ccbaa700e56cd4f50f569b766f8fdf`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-final-exit-lock-delegation-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-final-exit-lock-delegation-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_FINAL_EXIT_LOCK_DELEGATION_PREAUDIT.md`
+
+Cible :
+supprimer uniquement la duplication locale de la décision authored de verrouillage dans `DungeonAuthoredFinalExit167875` et faire consommer le propriétaire canonique existant.
+
+API réutilisée :
+`GensDungeonV1.movement.isAuthoredExitBlocked(lastExitLocked, mapObjectiveStatus, objectiveStatus)`.
+
+Frontière obligatoire :
+- garde dynamique `dungeonRoomExitLocked102?.()`, ordre et `try/catch` restent Final Exit ;
+- aucune nouvelle API ;
+- `finish()`, `finalState()`, `syncButton()`, stockage, complétion, session, popup et retour accueil restent Final Exit ;
+- Authored Runtime 167839 et Spatial inchangés.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Base validée :
+- Architecture + Browser `36538216504` — SUCCESS ;
+- Firefox `36538216686` — SUCCESS ;
+- Tactical Dock `36538216745` — SUCCESS.
+
+Prochaine action :
+1. ajouter une caractérisation GREEN de la politique `blocked()` de Final Exit ;
+2. prouver que le helper canonique existe mais n'est pas encore consommé ;
+3. raccorder à Architecture et repasser les trois validations avant toute garde RED.
+
+---
+
 # PHASE 7 — MICRO-LOT 13 — décision de verrouillage de sortie authored — 2026-09-29
 
 Base GREEN :

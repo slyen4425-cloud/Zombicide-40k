@@ -15,35 +15,60 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_RETURN_PERSIST_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
-conserver l'API publique `DungeonAuthoredReturnPersist167862.activeHero(x)` et faire déléguer uniquement sa décision pure au propriétaire canonique :
+Cible fermée :
+conserver l'API publique `DungeonAuthoredReturnPersist167862.activeHero(x)` et déléguer uniquement sa décision pure à :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Return Persist possède encore une copie locale bit-à-bit du sélecteur ;
-- `persistFinalPosition()` consomme ce sélecteur avant `DungeonSpatial313.ensure/persist` ;
-- le test historique `tests/dungeon_authored_return_persist_v167862.test.cjs` protège la persistance exacte après `enterNode` ;
-- Branch Nav Cleanup conserve la dernière copie locale et reste hors périmètre.
+Caractérisation GREEN :
+- SHA `c30550f3d2c4847ba09e01565f9131059a74abf7` ;
+- Architecture + Browser `36623200886` — SUCCESS ;
+- Firefox `36623200973` — SUCCESS ;
+- Tactical Dock `36623200967` — SUCCESS.
 
-Frontière :
-- API publique `activeHero` conservée ;
-- lecture/écriture runtime, validation authored, position, Spatial, wrapper `enterNode` et retry restent Return Persist ;
-- Branch Nav Cleanup, Final Exit, Authored Runtime et Spatial restent inchangés ;
+RED isolé :
+- SHA `5d285db68de731ec9c23668906a342f1e6742945` ;
+- Architecture `36624556957` — FAILURE attendue uniquement sur #217 `Exiger la délégation héros actif Return Persist authored Phase 7` ;
+- caractérisation #216 — SUCCESS ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36624556874` — SUCCESS ;
+- Tactical Dock `36624556888` — SUCCESS.
+
+Micro-diff GREEN :
+- `ffe0297930cf199a7f2f0c4f7a09d94a5b9b603a` — Return Persist conserve son API publique et délègue la décision pure ;
+- `80289d1545369c7ef2ee10e76666ae05c08898ea` — contrat Dungeon clarifié ;
+- `47bb653432104668d407c4410840c44971b52ac7` — caractérisation post-raccord ;
+- `72351c0a836b9b9a922ed2d6a93a7366e650421d` — fixture historique V167862 alignée sur le chargement du propriétaire ;
+- `963cd8d4d5d59760bf2afe93037ec8828c40d058`, `2bb206489091afd1c42bfe92910f43f4b395240e`, `084102e409694bf8da3ed8d1e739e243f16a45d1` — sentinelles lots 17/18 alignées sur l'état cumulatif.
+
+Triple CI technique GREEN sur `084102e409694bf8da3ed8d1e739e243f16a45d1` :
+- Architecture + Browser `36624958335` — SUCCESS ;
+- Firefox `36624958261` — SUCCESS ;
+- Tactical Dock `36624958204` — SUCCESS ;
+- Browser 45/45 sans échec.
+
+Frontière préservée :
+- API publique Return Persist `activeHero` conservée ;
+- runtime read/write, garde authored, position, Spatial, wrapper `enterNode` et retry restent Return Persist ;
+- Branch Nav Cleanup reste le dernier sélecteur local historique ;
+- Final Exit, Authored Runtime et `DungeonSpatial313` inchangés dans ce lot ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36616443873` — SUCCESS ;
-- Firefox `36616444021` — SUCCESS ;
-- Tactical Dock `36616443949` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-authored-return-persist-active-hero-delegation-green-2026-09-29`.
+
 Prochaine action :
-1. ajouter une caractérisation Return Persist ciblée ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Return Persist.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer Branch Nav Cleanup depuis ce checkpoint.
+
 
 ---
 

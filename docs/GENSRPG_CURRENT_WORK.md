@@ -16,22 +16,60 @@ Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_TERMINAL_EXIT_PREAUDIT.md`
 
 Cible :
-caractériser puis isoler uniquement la décision booléenne de `DungeonAuthoredRuntime167839.atTerminalExit(x)`, sans déplacer les lectures du héros, de la vraie sortie, de `positional()`, de la position ou la politique de travel.
+isoler uniquement la décision booléenne de `DungeonAuthoredRuntime167839.atTerminalExit(x)` à partir de valeurs déjà résolues, sans déplacer les lectures runtime ni la politique de travel.
 
-API candidate après caractérisation GREEN :
+API propriétaire :
 `GensDungeonV1.movement.isAuthoredTerminalExit(heroId, realExitIndex, positionalEnabled, heroPosition)`.
+
+Responsabilités préservées :
+- la décision pure appartient à `GensDungeonV1.movement` ;
+- `DungeonAuthoredRuntime167839` reste propriétaire de `activeHero(x)`, `realExitIndex(x)`, `positional()`, lecture de position, `atTerminalExit(x)` comme raccord, `travel()`, `finishTerminal()`, notifications et navigation ;
+- `DungeonSpatial313` reste inchangé et seul propriétaire spatial.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Base validée :
-- Architecture + Browser `36476396122` — SUCCESS ;
-- Firefox `36476396302` — SUCCESS ;
-- Tactical Dock `36476396223` — SUCCESS.
+Caractérisation :
+- un premier échec sur `cc04a0ee2011aa5643a52960daf30bbe7ea3c442` provenait uniquement du helper de test qui remplaçait `position: undefined` par `1` ;
+- helper corrigé seul sur SHA `52b020c2a7ce326b0cf74835647123ccff1cc7e5` ;
+- Architecture + Browser `36481586102` — SUCCESS ;
+- Firefox `36481586272` — SUCCESS ;
+- Tactical Dock `36481586105` — SUCCESS.
+
+RED isolé :
+- SHA `34bc03c68b4a139794fe46c156ddc36be692f7b4` ;
+- Architecture `36483086139` — FAILURE attendue uniquement sur #204 `Exiger la politique Dungeon de sortie terminale authored Phase 7` ;
+- Browser SKIPPED uniquement à cause du RED Architecture ;
+- Firefox `36483086247` — SUCCESS ;
+- Tactical Dock `36483086122` — SUCCESS.
+
+Micro-diff GREEN :
+- helper pur ajouté dans `assets/gensrpg/dungeon/entry-v1.js` ;
+- `DungeonAuthoredRuntime167839.atTerminalExit(x)` délègue une seule fois au helper ;
+- contrat Dungeon mis à jour ;
+- tests de lots précédents réalignés uniquement sur la nouvelle frontière, sans modification de leurs règles métier ;
+- Spatial, mouvement réel, pathfinding, événements, Tactical et `index.html` inchangés.
+
+SHA technique GREEN :
+`ba8ed7005b889261b28dba27452db19d7108db15`.
+
+CI technique GREEN :
+- Architecture + Browser `36483916317` — SUCCESS ;
+- Firefox `36483916217` — SUCCESS ;
+- Tactical Dock `36483916249` — SUCCESS.
+
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après CI du SHA documentaire final :
+`checkpoint/gensrpg-phase7-dungeon-authored-terminal-exit-green-2026-09-28`.
 
 Prochaine action :
-ajouter une caractérisation GREEN de `atTerminalExit(x)`, la raccorder à Architecture et repasser les trois validations avant toute garde RED.
+1. valider Architecture + Browser, Firefox et Tactical Dock sur le présent SHA documentaire ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. ouvrir seulement ensuite le prochain micro-lot Phase 7 depuis ce checkpoint.
 
 ---
 

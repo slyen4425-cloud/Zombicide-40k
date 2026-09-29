@@ -1,3 +1,53 @@
+# PHASE 7 — MICRO-LOT 20 — délégation héros actif Branch Nav Cleanup authored — 2026-09-29
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-authored-return-persist-active-hero-delegation-green-2026-09-29`
+
+SHA de base :
+`acf72786a1ffe82dd814d6a97f0196e08b1245d6`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-authored-branch-nav-active-hero-delegation-2026-09-29`
+
+Branche :
+`work/gensrpg-phase7-dungeon-authored-branch-nav-active-hero-delegation-2026-09-29`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_AUTHORED_BRANCH_NAV_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement l'API publique `DungeonAuthoredBranchNavCleanup167863.activeHero(x)` au propriétaire canonique existant :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Branch Nav Cleanup est la dernière copie locale historique connue du sélecteur activeHero ;
+- `activeHero` reste obligatoirement exporté dans l'API publique ;
+- `branchReturnActive()` demeure propriétaire de la lecture runtime, pile de retour, nœud courant et décision de branche ;
+- DOM, wrappers, listener click et timers restent totalement hors périmètre.
+
+Frontière :
+- aucune nouvelle API ;
+- aucun changement de `currentNode`, `authoredActive`, `branchReturnActive` hors sélection du héros ;
+- aucun changement DOM/navigation ;
+- Authored Runtime, Final Exit, Return Persist et Spatial restent inchangés ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36626538149` — SUCCESS ;
+- Firefox `36626538206` — SUCCESS ;
+- Tactical Dock `36626537960` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. ajouter une caractérisation ciblée de l'API publique activeHero et du vrai chemin branchReturnActive ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Branch Nav Cleanup.
+
+---
+
 # PHASE 7 — MICRO-LOT 19 — délégation héros actif Return Persist authored — 2026-09-29
 
 Base GREEN :

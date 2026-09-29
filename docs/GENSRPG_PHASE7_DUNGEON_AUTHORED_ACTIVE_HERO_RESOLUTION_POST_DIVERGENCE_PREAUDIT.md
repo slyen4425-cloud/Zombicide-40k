@@ -45,17 +45,24 @@ Ces branches sont donc utilisées uniquement comme sources de diagnostic histori
 
 ## Constat sur la base canonique actuelle
 
-Dans `assets/dungeon/dungeon-authored-runtime-167839.js` et
-`assets/dungeon/dungeon-authored-final-exit-167875.js`, la sélection du héros actif est encore dupliquée bit-à-bit :
+La même sélection historique du héros actif est encore dupliquée bit-à-bit dans **quatre** consommateurs authored :
+- `assets/dungeon/dungeon-authored-runtime-167839.js` ;
+- `assets/dungeon/dungeon-authored-final-exit-167875.js` ;
+- `assets/dungeon/dungeon-authored-return-persist-167862.js` ;
+- `assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js`.
+
+Expression commune :
 
 `const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")`.
 
 Dans `assets/gensrpg/dungeon/entry-v1.js`, aucun
 `resolveAuthoredActiveHero` n'existe sur la base `ce72d8c...`.
 
-La duplication concerne uniquement une décision pure à partir de :
+La duplication concerne une décision pure à partir de :
 - `participants` ;
 - `activeIndex`.
+
+Conformément à la règle micro-lot / autorité unique, il serait trop large de migrer les quatre consommateurs simultanément. Le présent lot crée le propriétaire pur puis ne raccorde qu'Authored Runtime.
 
 ## Cible stricte du micro-lot 17
 

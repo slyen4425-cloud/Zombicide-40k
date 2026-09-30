@@ -15,38 +15,60 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_WORLD_RUNTIME_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
-faire déléguer uniquement la sélection privée `DungeonWorldRuntime167823.activeHeroId(x)` au propriétaire canonique existant :
+Cible fermée :
+faire déléguer uniquement la sélection privée `DungeonWorldRuntime167823.activeHeroId(x)` au propriétaire canonique :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- World Runtime possède encore une copie locale bit-à-bit du sélecteur historique ;
-- elle est privée ;
-- elle est consommée par le vrai wrapper `DungeonCore01.explore` et par `currentPlan()` ;
-- graphes, edges, Room Creator, Zone Content, Spatial, DOM, wrappers et timers restent hors périmètre ;
-- Source Render présente une divergence sémantique et reste explicitement différé.
+Caractérisation GREEN :
+- SHA `a34730d271cfa2d2c4fbe038328aa66b01b0493e` ;
+- Architecture + Browser `36679933562` — SUCCESS ;
+- Firefox `36679933625` — SUCCESS ;
+- Tactical Dock `36679933558` — SUCCESS ;
+- caractérisation World Runtime #228 — SUCCESS ;
+- Browser 45/45 sans échec.
 
-Frontière :
-- aucune nouvelle API ;
-- aucun changement du routage World Builder ;
-- aucun changement de chargement/snapshot de salle ;
-- aucun changement Spatial ;
+RED isolé :
+- SHA `bd79ae8b647552b2a0fd85be700a42ae190dc2b5` ;
+- Architecture `36681168409` — FAILURE attendue uniquement sur #229 `Exiger la délégation héros actif World Runtime Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36681168395` — SUCCESS ;
+- Tactical Dock `36681168393` — SUCCESS.
+
+Micro-diff GREEN :
+- `a5d87b7cb1bc2ef0497c5ac45a912cf4514000e6` — World Runtime délègue la sélection pure ;
+- `e87c414ccf396450072d6ae01624da36a3b8335b` — contrat Dungeon clarifié ;
+- `b4f61e5e89d993cf92c5eb67484a3ea27f451a5d` — caractérisation post-raccord ;
+- `ceea7c6f1be9b36517e0b28c35d7b8f64575c74f` — fixture historique chargée avec le propriétaire Dungeon réel.
+
+Triple CI technique GREEN sur `ceea7c6f1be9b36517e0b28c35d7b8f64575c74f` :
+- Architecture + Browser `36681436344` — SUCCESS ;
+- Firefox `36681436341` — SUCCESS ;
+- Tactical Dock `36681436354` — SUCCESS ;
+- Browser 45/45 sans échec.
+
+Frontière préservée :
+- configuration authoritative world, graphes, edges, snapshots, contenu de zone et chargement direct restent World Runtime ;
+- `directFixedNode`, Spatial, wrappers explore/render, bouton de sortie, panneau legacy et timers restent inchangés ;
+- Room Runtime, Zone Links, Exact Trap et les lots authored précédents restent inchangés ;
+- Large Room Support, Core 317/318 et Source Render restent différés ;
+- Source Render présente une divergence de sélection inline et reste hors migration simple ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36678532628` — SUCCESS ;
-- Firefox `36678532695` — SUCCESS ;
-- Tactical Dock `36678532649` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. ajouter une caractérisation ciblée de `currentPlan()` et du vrai wrapper `explore()` ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation World Runtime.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-world-runtime-active-hero-delegation-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 24 — délégation héros actif Room Runtime — 2026-09-30

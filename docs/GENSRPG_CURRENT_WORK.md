@@ -1,3 +1,53 @@
+# PHASE 7 — MICRO-LOT 29 — divergence héros actif Source Render Stability — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-core317-active-hero-divergence-green-2026-09-30`
+
+SHA de base :
+`6fedae19e66c7eb87aa7e626692926801cdfa445`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-source-render-active-hero-divergence-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-source-render-active-hero-divergence-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_SOURCE_RENDER_ACTIVE_HERO_DIVERGENCE_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la divergence entre la sélection inline du héros actif dans `DungeonSourceRenderStability167877.paintTokensNow()` et :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Source Render sélectionne inline via `String(x.participants?.[Number(x.index)||0]||"")` ;
+- cette sélection ne clamp ni les index négatifs ni les dépassements ;
+- elle peut indexer une valeur `participants` non-tableau mais indexable ;
+- elle sert uniquement à appliquer la classe visuelle `active` au token héros.
+
+Frontière :
+- aucun changement runtime autorisé dans ce lot ;
+- aucun RED de migration si divergence confirmée ;
+- rendu des tokens, styles, assets, wrappers render/show, Spatial et retry restent inchangés ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36699004061` — SUCCESS ;
+- Firefox `36699004069` — SUCCESS ;
+- Tactical Dock `36699004115` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. caractériser le vrai chemin `paintTokensNow()` ;
+2. comparer les cas limites au helper canonique ;
+3. triple CI GREEN ;
+4. documenter la décision sans migration si divergence confirmée.
+
+---
+
 # PHASE 7 — MICRO-LOT 28 — divergence héros actif Core 317 — 2026-09-30
 
 Base GREEN :

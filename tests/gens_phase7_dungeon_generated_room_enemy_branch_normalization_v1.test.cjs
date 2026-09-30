@@ -57,8 +57,11 @@ for(const marker of [false,true,null,0,'']){
   );
 }
 
-assert.throws(()=>shouldDefault(null,4),TypeError,
-  'pure predicate must preserve direct-property-access failure semantics for invalid enemy values');
+assert.throws(
+  ()=>shouldDefault(null,4),
+  error=>error&&error.name==='TypeError',
+  'pure predicate must preserve direct-property-access failure semantics for invalid enemy values'
+);
 
 const fnMatch=entry.match(/function shouldDefaultGeneratedRoomEnemyBranch\(enemy,room\)\{[\s\S]*?\n  \}/);
 assert.ok(fnMatch,'pure dc200Branch predicate source must remain extractable');

@@ -18,8 +18,8 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blob=crypto.createHash('sha1')
   .update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8169990,'Progression preaudit must run on the exact current Phase 7 Dungeon generated-branch descriptor runtime');
-assert.equal(blob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','Progression preaudit Phase 7 generated-branch descriptor index blob drifted');
+assert.equal(bytes.length,8169856,'Progression preaudit must run on the exact current Phase 7 Dungeon generated Boss policy runtime');
+assert.equal(blob,'454b2e12cde591c2db19023d1b76055ebac8e1b1','Progression preaudit Phase 7 generated Boss policy index blob drifted');
 
 function scriptBody(id){
   const re=new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

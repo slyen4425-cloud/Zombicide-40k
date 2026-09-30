@@ -11,12 +11,17 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const worldRuntime=read('assets/dungeon/dungeon-world-runtime-167823.js');
 
 const historical=/function activeHeroId\(x\)\{const list=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,list\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(list\[i\]\|\|""\)\}/;
-assert.match(worldRuntime,historical,
-  'World Runtime must still own the historical private selector before delegation');
+assert.doesNotMatch(worldRuntime,historical,
+  'World Runtime must no longer own the historical private selector after delegation');
 assert.equal(
   (worldRuntime.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'World Runtime must not consume the canonical helper before this delegation lot'
+  1,
+  'World Runtime must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  worldRuntime,
+  /function activeHeroId\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'World Runtime activeHeroId must retain its private surface while delegating only the pure selection'
 );
 
 const store=new Map();
@@ -159,5 +164,5 @@ console.log(JSON.stringify({
     'DungeonWorldRuntime167823 installed DungeonCore01.explore wrapper'
   ],
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical private selector preserved'
+  expected:'GREEN after delegation with historical behavior preserved'
 },null,2));

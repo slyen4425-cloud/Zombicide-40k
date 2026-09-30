@@ -710,6 +710,9 @@ jobs:
       - name: Exiger la délégation héros actif Large Room Phase 7
         run: node tests/gens_phase7_dungeon_large_room_active_hero_delegation_v1.test.cjs
 
+      - name: Caractériser la délégation héros actif Core 318 Phase 7
+        run: node tests/gens_phase7_dungeon_core318_active_hero_delegation_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

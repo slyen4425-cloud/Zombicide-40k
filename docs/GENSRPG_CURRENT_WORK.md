@@ -20,24 +20,50 @@ extraire uniquement la planification pure de la politique Boss generated vers :
 `GensDungeonV1.exploration.planGeneratedBossPolicy(...)`
 tout en laissant les tirages RNG et la matérialisation dans Core 2.00.
 
-Audit initial :
-- politique Boss encore inline dans Core 2.00 ;
-- blob `index.html` strictement inchangé : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`, `8169990` octets ;
-- ancienne branche Boss du 28/09 non réutilisée ;
-- comportement historique à reverrouiller depuis la base actuelle avant RED.
+Caractérisation GREEN post authority sweep :
+- SHA `98f6ace947ed75242770d4124a55605dea10ec54` ;
+- Architecture + Browser `36706175521` — SUCCESS ;
+- Firefox `36706175574` — SUCCESS ;
+- Tactical Dock `36706175544` — SUCCESS ;
+- Browser 45/45 sans échec.
 
-Frontière :
-- planner pur uniquement ;
-- aucun RNG dans `GensDungeonV1` ;
-- Core 2.00 garde `Math.random()` Boss + pondération ;
-- aucune autre logique generated/authored touchée ;
-- Rule 26 obligatoire avant toute modification du runtime inline.
+Comportement reverrouillé :
+- Boss final prioritaire si `boss !== 'none'` et salle finale ;
+- `everyN`, `specific` et `random` conservent exactement leurs règles historiques ;
+- random Boss reste inactif pour les salles <=2 ;
+- normalisation historique `bossChance` conservée ;
+- fallback non-Boss reste `pickWeightedGeneratedRoomKind(..., Math.random())` ;
+- consommation RNG historique confirmée 0 / 1 / 2 tirages selon le chemin.
 
-Prochaine action :
-1. caractérisation GREEN du vrai `chooseKind(room)` sur le blob exact courant ;
-2. triple CI GREEN ;
-3. UNE garde RED isolée ;
-4. seulement ensuite demander/fixer l'`index.html` exact pour le micro-diff.
+RED isolé :
+- SHA `31baecbf4ab75f9ecb9a6179a17cea60c7ed3235` ;
+- Architecture `36707500873` — FAILURE attendue uniquement sur #194 `Exiger la politique Boss generated post authority sweep Phase 7` ;
+- caractérisation #193 — SUCCESS ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36707500953` — SUCCESS ;
+- Tactical Dock `36707500802` — SUCCESS.
+
+État actuel :
+**RULE 26 HOLD avant micro-diff runtime inline.**
+
+Le fichier exact requis doit correspondre à :
+- `index.html` : `8169990` octets ;
+- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Interdiction de lire/modifier le contenu exact via les outils GitHub.
+Le micro-diff ne reprend qu'après fourniture par Sylvain d'un ZIP/TXT exact et vérification locale de cette empreinte.
+
+Après validation Rule 26 :
+1. ajouter le planner pur dans `assets/gensrpg/dungeon/entry-v1.js` ;
+2. remplacer uniquement la politique Boss inline dans `Core 2.00 chooseKind(room)` ;
+3. conserver les RNG Boss + pondération dans Core 2.00 ;
+4. triple CI GREEN technique ;
+5. fermeture documentaire ;
+6. triple CI documentaire ;
+7. checkpoint GREEN final.
+
+Aucun changement runtime effectué depuis le RED.
+`main` reste gelée.
 
 ---
 

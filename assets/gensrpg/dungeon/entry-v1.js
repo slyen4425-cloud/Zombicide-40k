@@ -22,6 +22,14 @@
     return {status:"none",chance:null};
   }
 
+  function buildGeneratedNonCombatRoomResult(kind,trapType){
+    if(kind==="trap")return {title:"🪤 "+trapType.name,text:"Un piège est présent dans la salle.",enemyQty:0,trapId:trapType.id};
+    if(kind==="chest")return {title:"🎁 Coffre",text:"Un coffre est présent dans la salle.",enemyQty:0};
+    if(kind==="merchant")return {title:"🧙‍♂️ Marchand",text:"Un marchand attend le groupe.",enemyQty:0};
+    if(kind==="rest")return {title:"⛩️ Sanctuaire",text:"Un lieu de repos.",enemyQty:0};
+    return {title:"✨ Salle calme",text:"La salle semble calme.",enemyQty:0};
+  }
+
   function pickWeightedGeneratedRoomKind(roomWeights,roll){
     const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
     const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
@@ -113,6 +121,7 @@
     exploration:Object.freeze({
       planGeneratedAdvance,
       planGeneratedBossPolicy,
+      buildGeneratedNonCombatRoomResult,
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
       pickWeightedGeneratedBranchType,

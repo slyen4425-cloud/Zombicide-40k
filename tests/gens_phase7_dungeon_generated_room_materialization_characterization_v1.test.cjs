@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169856,
+assert.equal(bytes.length,8169442,
   'Phase 7 materialization characterization must track the current Boss-policy runtime size');
-assert.equal(gitBlob,'454b2e12cde591c2db19023d1b76055ebac8e1b1',
+assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db',
   'Phase 7 materialization characterization must track the exact current Boss-policy runtime blob');
 
 function block(id){
@@ -35,8 +35,8 @@ const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*
 
 assert.equal((core200.match(/function createRoom\(room,kind\)/g)||[]).length,1,
   'Core 2.00 must keep one generated room materialization owner during this audit');
-assert.doesNotMatch(createSource,/GensDungeonV1\.exploration\./,
-  'materialization remains unextracted during the characterization lot');
+assert.equal((createSource.match(/GensDungeonV1\.exploration\.buildGeneratedNonCombatRoomResult\(/g)||[]).length,1,
+  'createRoom must delegate only non-combat result construction after the isolated raccord');
 
 const sandbox={events:[],config:{map:true},activeEnemies:[]};
 sandbox.window=sandbox;
@@ -71,6 +71,7 @@ sandbox.generateDungeonMap=(kind,qty)=>{
 };
 
 vm.createContext(sandbox);
+vm.runInContext(entry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 vm.runInContext(createSource+';this.createRoom=createRoom;',sandbox,{filename:'dungeonCore200Rebuild.createRoom.js'});
 
 function plain(v){return JSON.parse(JSON.stringify(v));}
@@ -176,6 +177,6 @@ console.log(JSON.stringify({
     'generateDungeonMap call',
     '{result,map} composition'
   ],
-  decision:'characterize before selecting one pure extraction seam',
+  decision:'non-combat result descriptors delegated; active materialization remains Core 2.00',
   authored:'separate and unchanged'
 },null,2));

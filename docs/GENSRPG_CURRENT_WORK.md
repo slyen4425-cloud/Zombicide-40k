@@ -1,3 +1,57 @@
+# PHASE 7 — MICRO-LOT 31 — audit matérialisation des salles generated — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-boss-policy-post-authority-sweep-green-2026-09-30`
+
+SHA de base :
+`cae1b61120fabd331a437290bb63639f57d79896`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-materialization-audit-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-materialization-audit-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_MATERIALIZATION_AUDIT_PREAUDIT.md`
+
+Cible :
+caractériser uniquement `dungeonCore200Rebuild.createRoom(room, kind)` afin de séparer précisément :
+- résultat de salle ;
+- encounter/Boss actifs ;
+- descripteurs statiques ;
+- normalisation `dc200Branch` ;
+- sauvegarde ennemis ;
+- génération de carte ;
+- forme `{result,map}`.
+
+Décision d'architecture :
+- interdiction d'extraire `createRoom(...)` en bloc ;
+- aucune API de migration figée avant caractérisation ;
+- aucune modification runtime pendant l'audit initial.
+
+Runtime de base :
+- `index.html` : `8169856` octets ;
+- blob : `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
+
+Base CI :
+- Architecture + Browser `36741124146` — SUCCESS ;
+- Firefox `36741124306` — SUCCESS ;
+- Tactical Dock `36741124296` — SUCCESS.
+
+Rule 26 :
+- `work40.zip / index40.txt` a permis d'inspecter le seam `createRoom` resté inchangé par le lot 30 ;
+- toute future modification du `index.html` exige une source exacte correspondant au blob courant `454b2e12...`.
+
+Prochaine action :
+1. ajouter la caractérisation permanente de `createRoom(...)` ;
+2. raccorder la sentinelle à Architecture ;
+3. triple CI GREEN ;
+4. sélectionner UNE responsabilité pure homogène seulement après preuve ;
+5. aucun RED ni micro-diff runtime avant cette sélection.
+
+---
+
 # PHASE 7 — MICRO-LOT 30 — politique Boss generated post authority sweep — 2026-09-30
 
 Base GREEN :

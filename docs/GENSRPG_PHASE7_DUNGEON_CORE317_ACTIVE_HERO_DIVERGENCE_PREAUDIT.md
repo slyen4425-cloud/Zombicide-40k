@@ -125,3 +125,58 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture du micro-lot 28
+
+### Caractérisation GREEN
+
+SHA :
+`c28454bcba818ebb73b6e191f4652d6de7b9a7ce`.
+
+CI :
+- Architecture + Browser `36697844017` — SUCCESS ;
+- Firefox `36697844151` — SUCCESS ;
+- Tactical Dock `36697843950` — SUCCESS ;
+- Browser 45/45 sans échec.
+
+### Résultat exact
+
+Parité confirmée entre Core 317 et le helper canonique pour :
+- identifiants héros string ;
+- index absent / NaN / négatif / dépassement ;
+- chaîne numérique ;
+- index fractionnaire ;
+- tableau vide / non-tableau ;
+- participant falsy.
+
+Divergence confirmée pour un participant truthy non-chaîne :
+- `participants:[42]` : Core 317 renvoie `42` (number), le helper canonique renvoie `"42"` ;
+- `participants:[{id:"hero"}]` : Core 317 renvoie l'objet brut, le helper canonique renvoie `"[object Object]"` ;
+- `participants:[true]` : Core 317 renvoie `true`, le helper canonique renvoie `"true"`.
+
+### Décision conforme à la charte
+
+Aucun RED de migration.
+Aucun changement runtime.
+
+La délégation directe de `Core 317 activeHeroId(x)` vers `resolveAuthoredActiveHero(...)` n'est pas un refactor à comportement constant.
+
+Toute harmonisation future exige une décision fonctionnelle dédiée et une caractérisation de ses impacts consommateurs.
+
+### Frontière préservée
+
+- `dungeon-core-317.js` inchangé ;
+- helper canonique inchangé ;
+- retour salle, marchand, armor, DOM, observer/timers et Spatial inchangés ;
+- Source Render Stability reste le prochain seam de divergence à caractériser ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-core317-active-hero-divergence-green-2026-09-30`.

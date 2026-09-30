@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169442,
+assert.equal(bytes.length,8169446,
   'enemy branch normalization characterization must track the exact lot 31 runtime size');
-assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db',
+assert.equal(gitBlob,'8a70856f20102270dc7f3553dcef74fe1dc45ad8',
   'enemy branch normalization characterization must track the exact lot 31 runtime blob');
 
 function block(id){
@@ -33,9 +33,14 @@ const createMatch=core200.match(/function createRoom\(room,kind\)\{[\s\S]*?\}\nf
 assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
 const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
-assert.match(createSource,
+assert.equal(
+  (createSource.match(/GensDungeonV1\.exploration\.shouldInitializeGeneratedEnemyBranch\(e,room\)/g)||[]).length,
+  1,
+  'createRoom must delegate the normalization decision exactly once after the isolated raccord'
+);
+assert.doesNotMatch(createSource,
   /Number\(e\.dungeonRoom\|\|0\)===Number\(room\)&&e\.dc200Branch===undefined/,
-  'current normalization predicate must remain directly characterizable');
+  'createRoom must retire the duplicated inline normalization predicate');
 assert.match(createSource,/loadActiveEnemies\?\.\(\)\|\|\[\]/,
   'enemy loading must remain Core 2.00');
 assert.match(createSource,/saveActiveEnemies\?\.\(all\)/,
@@ -111,16 +116,19 @@ for(const e of saved){
     'NaN comparisons must remain false under strict equality');
 }
 
-assert.doesNotMatch(entry,/shouldInitializeGeneratedEnemyBranch/,
-  'audit characterization must precede any extracted helper');
+assert.equal(
+  typeof sandbox.GensDungeonV1?.exploration?.shouldInitializeGeneratedEnemyBranch,
+  'function',
+  'post-raccord characterization must load the pure Dungeon predicate'
+);
 assert.doesNotMatch(authored,/dc200Branch/,
   'authored runtime must remain outside generated dc200Branch normalization');
 
 console.log(JSON.stringify({
   scenario:'Phase 7 generated enemy branch normalization characterization',
   runtime:{bytes:bytes.length,gitBlob},
-  currentOwner:'dungeonCore200Rebuild.createRoom',
-  predicate:'Number(enemy.dungeonRoom||0)===Number(room) && enemy.dc200Branch===undefined',
+  decisionOwner:'GensDungeonV1.exploration.shouldInitializeGeneratedEnemyBranch',
+  predicate:'delegated pure decision; mutation remains Core 2.00',
   coercion:'historical Number(...) with dungeonRoom || 0 fallback',
   mutation:'Core 2.00 only',
   persistence:'Core 2.00 only',

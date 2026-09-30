@@ -1,3 +1,45 @@
+# PHASE 7 — MICRO-LOT 27 — délégation héros actif Core 318 — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-large-room-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`2a7b6b5a95bd5103dc4e6e667d62c870b74ba92c`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-core318-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-core318-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_CORE318_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée `Dungeon Core 3.18 activeHeroId(x)` au propriétaire canonique :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Core 318 est à parité exacte avec le helper canonique ;
+- ses consommateurs sont `runtimeRoom()` et la garde de sous-salle `installBranchGuard()` ;
+- `activeHeroId` reste privé ;
+- Core 317 diverge sur la conversion String d'un participant truthy non-string ;
+- Source Render diverge sur le clamp des index ;
+- Core 317 et Source Render restent donc hors périmètre.
+
+Frontière :
+- aucune nouvelle API ;
+- aucun changement spawn/stamping/sous-salle/Spatial ;
+- aucun changement DOM/UI ;
+- aucun changement `index.html`.
+
+Prochaine action :
+1. caractérisation du vrai chemin Core 318 ;
+2. triple CI GREEN ;
+3. seulement ensuite UNE garde RED de délégation Core 318.
+
+---
+
 # PHASE 7 — MICRO-LOT 26 — délégation héros actif Large Room Support — 2026-09-30
 
 Base GREEN :

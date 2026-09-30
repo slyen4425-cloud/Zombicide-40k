@@ -126,3 +126,75 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact déclenche la règle 26.
+
+
+## Fermeture technique du micro-lot 27
+
+### Caractérisation GREEN préalable
+
+SHA :
+`e0e141a1c2c5b25e85922dfa7b08891bd882fdae`.
+
+CI :
+- Architecture + Browser `36692334483` — SUCCESS ;
+- Firefox `36692334510` — SUCCESS ;
+- Tactical Dock `36692334421` — SUCCESS.
+
+La caractérisation traverse :
+- `DungeonCore318.activeRoom()` et `DungeonSpatial313.roomOf` ;
+- le wrapper réel `dc200EnterBranch` ;
+- chaîne numérique, négatif, dépassement, fractionnaires et participant truthy non-string ;
+- fallback runtime lorsqu'aucun héros n'est sélectionné ;
+- reprise d'une sous-salle existante sans nouveau spawn.
+
+### RED isolé
+
+SHA :
+`60d4fac349fd2d6f166ebcb255da93cdafece8fc`.
+
+Résultat :
+- Architecture `36693253297` — FAILURE attendue uniquement sur #233 `Exiger la délégation héros actif Core 318 Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36693253223` — SUCCESS ;
+- Tactical Dock `36693253299` — SUCCESS.
+
+### Micro-diff GREEN appliqué
+
+Commits :
+- `476812430167202ef99aca4ac60306872d1afbeb` — Core 318 délègue uniquement la sélection pure du héros actif ;
+- `e4050854fdf916a06512291996236b19127802f0` — frontière contractuelle documentée ;
+- `5c13b8fd6d263f1acf66970c9b57d648ed7204f1` — caractérisation post-raccord ;
+- `88331972000896d422555e2fc7f861d3b1c5f187` — fixture historique Core 318 charge le propriétaire Dungeon réel.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`88331972000896d422555e2fc7f861d3b1c5f187`.
+
+CI :
+- Architecture + Browser `36693492531` — SUCCESS ;
+- Firefox `36693492382` — SUCCESS ;
+- Tactical Dock `36693492514` — SUCCESS.
+
+### Frontière préservée
+
+- Core 318 ne possède plus l'algorithme de sélection du héros actif ;
+- `GensDungeonV1.movement.resolveAuthoredActiveHero(...)` reste le propriétaire canonique ;
+- `activeRoom`, room stack, enemy room stamping, wrappers de spawn, tracker et garde de sous-salle restent Core 318 ;
+- `DungeonSpatial313` reste inchangé ;
+- Core 317 reste inchangé avec sa divergence de conversion `String` ;
+- Source Render Stability reste inchangé avec sa divergence de clamp ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun wrapper/observer/timer/retry ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-core318-active-hero-delegation-green-2026-09-30`.

@@ -29,8 +29,8 @@ char=CHAR.read_text(encoding="utf-8")
 guard=GUARD.read_text(encoding="utf-8")
 
 old_choose="""function chooseKind(room){const c=cfg(),explicit=String(c.bossRooms||'').split(/[,; ]+/).map(Number).filter(n=>n>0);
-  // Core 2.05 : si les Boss automatiques ne sont pas désactivés,
-  // la dernière salle est toujours une épreuve de Boss.
+ // Core 2.05 : si les Boss automatiques ne sont pas désactivés,
+ // la dernière salle est toujours une épreuve de Boss.
  if(c.boss!=='none'&&room===Number(c.rooms))return'boss';
  if(c.boss==='everyN'&&room%Math.max(1,Number(c.bossEvery)||5)===0)return'boss';
  if(c.boss==='specific'&&explicit.includes(room))return'boss';

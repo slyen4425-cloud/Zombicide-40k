@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-world-runtime-167823.js'),'utf8');
 const htmlArg=process.argv[2];
 const RT='gensrpg_dungeon_runtime_v2';
@@ -44,7 +45,7 @@ const ctx={console,Math,Date,localStorage,setTimeout(fn){fn();return 1},clearTim
   activeDungeonAdventureId(){return 'adv_1'},showToast(){},modal(){return false},dungeonRoomExitLocked102(){return false}
 };
 ctx.globalThis=ctx;ctx.window=ctx;
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-world-runtime-167823.js'});
+vm.createContext(ctx);vm.runInContext(entry,ctx,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,ctx,{filename:'dungeon-world-runtime-167823.js'});
 const api=ctx.DungeonWorldRuntime167823;
 assert.ok(api);
 assert.equal(api.APP_VERSION,'16.78.38');assert.equal(api.VERSION,'1.3.0');

@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 26 — délégation héros actif Large Room Support — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-world-runtime-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`2088b622eea687c880c3a4558038edce187c54c7`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-large-room-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-large-room-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_LARGE_ROOM_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée `DungeonLargeRoom167834.activeHero(x)` au propriétaire canonique :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- copie historique bit-à-bit équivalente au helper canonique ;
+- deux consommateurs privés : `repairGenerated()` et `ensureWorldState()` via `repairWorld()` ;
+- aucune nouvelle API ;
+- géométrie, génération, World Builder, Spatial, wrappers et timers restent hors périmètre ;
+- Core 317/318 et Source Render restent différés ;
+- Source Render conserve une divergence de sélection inline et ne sera pas migré comme simple refactor sans caractérisation dédiée.
+
+Base validée :
+- Architecture + Browser `36682686771` — SUCCESS ;
+- Firefox `36682686722` — SUCCESS ;
+- Tactical Dock `36682686715` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. caractériser `repairGenerated()` et `repairWorld()` avec la sélection historique ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Large Room.
+
+---
+
 # PHASE 7 — MICRO-LOT 25 — délégation héros actif World Runtime — 2026-09-30
 
 Base GREEN :

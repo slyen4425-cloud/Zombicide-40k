@@ -593,6 +593,9 @@ jobs:
       - name: Exiger le descripteur Dungeon des branches generated Phase 7
         run: node tests/gens_phase7_dungeon_generated_branch_descriptor_v1.test.cjs
 
+      - name: Caractériser la politique Boss generated post authority sweep Phase 7
+        run: node tests/gens_phase7_dungeon_generated_boss_policy_post_authority_sweep_characterization_v1.test.cjs
+
       - name: Caractériser le mouvement d’entrée authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_entry_movement_characterization_v1.test.cjs
 

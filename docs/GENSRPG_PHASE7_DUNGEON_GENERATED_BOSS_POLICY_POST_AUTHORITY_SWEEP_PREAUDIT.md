@@ -123,3 +123,66 @@ Le HEAD courant exige :
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
 Après RED isolé, le micro-diff runtime ne pourra être réalisé qu'avec un ZIP/TXT fourni par Sylvain et vérifié localement contre cette empreinte.
+
+
+## Caractérisation GREEN post authority sweep
+
+SHA :
+`98f6ace947ed75242770d4124a55605dea10ec54`.
+
+CI :
+- Architecture + Browser `36706175521` — SUCCESS ;
+- Firefox `36706175574` — SUCCESS ;
+- Tactical Dock `36706175544` — SUCCESS ;
+- Browser 45/45 sans échec.
+
+La caractérisation reverrouille sur le blob exact courant :
+- final-room Boss prioritaire si `boss !== 'none'` ;
+- `everyN` avec fallback historique `||5` puis `Math.max(1,...)` ;
+- `specific` avec parsing historique des salles ;
+- `random` seulement pour `room > 2` ;
+- chance `Math.max(0, Number(bossChance)||13)` ;
+- fallback pondéré via `GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(..., Math.random())`.
+
+Consommation RNG confirmée :
+- Boss déterministe : 0 tirage ;
+- miss déterministe : 1 tirage pondéré ;
+- random salle <=2 : 1 tirage pondéré ;
+- random Boss réussi : 1 tirage ;
+- random Boss refusé : 2 tirages ;
+- final-room prioritaire en mode random : 0 tirage.
+
+Le planner `GensDungeonV1.exploration.planGeneratedBossPolicy` est confirmé absent avant RED.
+
+## RED isolé
+
+SHA :
+`31baecbf4ab75f9ecb9a6179a17cea60c7ed3235`.
+
+CI :
+- Architecture `36707500873` — FAILURE attendue uniquement sur #194 `Exiger la politique Boss generated post authority sweep Phase 7` ;
+- caractérisation #193 — SUCCESS ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36707500953` — SUCCESS ;
+- Tactical Dock `36707500802` — SUCCESS, jobs contrat / Chromium / Firefox tous GREEN.
+
+Aucune autre sentinelle n'a échoué.
+
+## Rule 26 hold
+
+Le lot est volontairement arrêté avant tout micro-diff runtime inline.
+
+Le fichier requis doit correspondre exactement à :
+- taille : `8169990` octets ;
+- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Après fourniture par Sylvain d'un ZIP/TXT contenant cet `index.html`, l'empreinte doit être vérifiée localement avant toute modification.
+
+Aucune lecture/modification du contenu exact de `index.html` via les outils GitHub n'est autorisée.
+
+Prochaine action après vérification Rule 26 :
+1. ajouter le planner pur `planGeneratedBossPolicy(...)` dans `entry-v1.js` ;
+2. modifier uniquement `chooseKind(room)` dans le bloc Core 2.00 du fichier exact fourni ;
+3. conserver les deux callsites RNG au Core 2.00 ;
+4. pousser le micro-diff sur la branche courante ;
+5. triple CI GREEN technique.

@@ -1,3 +1,46 @@
+# PHASE 7 — MICRO-LOT 30 — politique Boss generated post authority sweep — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-source-render-active-hero-divergence-green-2026-09-30`
+
+SHA de base :
+`874ec11d8db5a06e5eca8b05efe4ee7b609367b3`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-boss-policy-post-authority-sweep-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-boss-policy-post-authority-sweep-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BOSS_POLICY_POST_AUTHORITY_SWEEP_PREAUDIT.md`
+
+Cible :
+extraire uniquement la planification pure de la politique Boss generated vers :
+`GensDungeonV1.exploration.planGeneratedBossPolicy(...)`
+tout en laissant les tirages RNG et la matérialisation dans Core 2.00.
+
+Audit initial :
+- politique Boss encore inline dans Core 2.00 ;
+- blob `index.html` strictement inchangé : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`, `8169990` octets ;
+- ancienne branche Boss du 28/09 non réutilisée ;
+- comportement historique à reverrouiller depuis la base actuelle avant RED.
+
+Frontière :
+- planner pur uniquement ;
+- aucun RNG dans `GensDungeonV1` ;
+- Core 2.00 garde `Math.random()` Boss + pondération ;
+- aucune autre logique generated/authored touchée ;
+- Rule 26 obligatoire avant toute modification du runtime inline.
+
+Prochaine action :
+1. caractérisation GREEN du vrai `chooseKind(room)` sur le blob exact courant ;
+2. triple CI GREEN ;
+3. UNE garde RED isolée ;
+4. seulement ensuite demander/fixer l'`index.html` exact pour le micro-diff.
+
+---
+
 # PHASE 7 — MICRO-LOT 29 — divergence héros actif Source Render Stability — 2026-09-30
 
 Base GREEN :

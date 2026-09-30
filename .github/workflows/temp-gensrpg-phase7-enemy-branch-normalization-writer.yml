@@ -1,0 +1,33 @@
+name: TEMP GenSrpG Phase7 enemy branch normalization writer
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase7-dungeon-generated-enemy-branch-normalization-audit-2026-09-30'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply bounded lot 32 patch
+        run: python3 tools/temp_phase7_enemy_branch_normalization_writer.py
+
+      - name: Commit exact lot 32 runtime files
+        run: |
+          if git diff --quiet; then
+            echo "No runtime diff to commit."
+            exit 0
+          fi
+          test "$(git diff --name-only | sort)" = $'assets/gensrpg/dungeon/entry-v1.js\nindex.html\ntests/gens_phase7_dungeon_generated_enemy_branch_normalization_characterization_v1.test.cjs\ntests/gens_phase7_dungeon_generated_enemy_branch_normalization_v1.test.cjs'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/gensrpg/dungeon/entry-v1.js index.html tests/gens_phase7_dungeon_generated_enemy_branch_normalization_characterization_v1.test.cjs tests/gens_phase7_dungeon_generated_enemy_branch_normalization_v1.test.cjs
+          git commit -m 'feat: delegate generated enemy branch predicate to Dungeon'
+          git push

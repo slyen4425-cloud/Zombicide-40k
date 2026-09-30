@@ -25,7 +25,7 @@ function getConfig(adventureId){const id=String(adventureId||currentAdventureId(
 function saveConfig(cfg,adventureId){const id=String(adventureId||currentAdventureId()),all=allConfigs();all[id]={enabled:!!cfg?.enabled,chance:Math.max(0,Math.min(100,Number(cfg?.chance??100))),roomIds:Array.isArray(cfg?.roomIds)?cfg.roomIds.map(String):[]};writeJson(CFG_KEY,all);return all[id]}
 function readRuntime(){const x=readJson(RT_KEY,null);return x&&typeof x==="object"?x:null}
 function writeRuntime(x){return writeJson(RT_KEY,x||{})}
-function activeHeroId(x){const list=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,list.length-1),Number(x?.index)||0));return String(list[i]||"")}
+function activeHeroId(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function generatedKind(x){return String(x?.last?.kind||"").toLowerCase()}
 function selectedTemplates(cfg,kind){const ids=new Set((cfg?.roomIds||[]).map(String));let rooms=library().filter(r=>!ids.size||ids.has(String(r.id)));if(!rooms.length)return [];
   const k=String(kind||"").toLowerCase();

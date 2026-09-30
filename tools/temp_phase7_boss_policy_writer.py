@@ -37,8 +37,8 @@ old_choose="""function chooseKind(room){const c=cfg(),explicit=String(c.bossRoom
  if(c.boss==='random'&&room>2&&Math.random()*100<Math.max(0,Number(c.bossChance)||13))return'boss';
  return GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(c.roomWeights,Math.random())}"""
 new_choose="""function chooseKind(room){const c=cfg();
-  // Core 2.05 : si les Boss automatiques ne sont pas désactivés,
-  // la dernière salle est toujours une épreuve de Boss.
+ // Core 2.05 : si les Boss automatiques ne sont pas désactivés,
+ // la dernière salle est toujours une épreuve de Boss.
  const bossPlan=GensDungeonV1.exploration.planGeneratedBossPolicy(room,c.rooms,c.boss,c.bossEvery,c.bossRooms,c.bossChance);if(bossPlan.status==='boss')return'boss';if(bossPlan.status==='random'&&Math.random()*100<bossPlan.chance)return'boss';
  return GensDungeonV1.exploration.pickWeightedGeneratedRoomKind(c.roomWeights,Math.random())}"""
 if index.count(old_choose)!=1:

@@ -15,30 +15,45 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_ENEMY_BRANCH_NORMALIZATION_AUDIT_PREAUDIT.md`
 
-Cible :
-caractériser uniquement la règle historique de normalisation `dc200Branch` dans `createRoom(room,kind)`.
+Cible auditée :
+règle historique de normalisation `dc200Branch` dans `createRoom(room,kind)`.
 
-Frontière :
-- décision de normalisation à caractériser ;
-- `loadActiveEnemies()`, mutation réelle et `saveActiveEnemies(...)` restent Core 2.00 pendant l'audit ;
-- aucun déplacement spawn/stockage/carte/combat ;
-- aucune API cible figée avant preuve.
+Caractérisation GREEN :
+- SHA `8a8e605c69a64b5ab0018cfa75d4a10f0d7adcc1` ;
+- Architecture + Browser `36754785657` — SUCCESS ;
+- Firefox `36754785664` — SUCCESS ;
+- Tactical Dock `36754785665` — SUCCESS ;
+- étape #197 — SUCCESS.
 
-Runtime de base :
+Résultat :
+- comparaison historique `Number(enemy.dungeonRoom||0)===Number(room)` confirmée ;
+- seul `dc200Branch===undefined` reçoit `false` ;
+- marqueurs déjà définis inchangés ;
+- mutation in-place et identité tableau/objets conservées ;
+- ordre `load -> normalisation -> save -> cfg/map` conservé ;
+- stockage, boucle et mutation restent Core 2.00.
+
+Slice pure sélectionnée :
+`GensDungeonV1.exploration.shouldDefaultGeneratedRoomEnemyBranch(enemy, room)`.
+
+Le futur raccord doit déplacer uniquement le booléen de décision.
+Restent Core 2.00 :
+- `loadActiveEnemies()` ;
+- `try/catch` ;
+- `all.forEach(...)` ;
+- mutation `dc200Branch=false` ;
+- `saveActiveEnemies(all)` ;
+- suite de `createRoom(...)`.
+
+Runtime inchangé :
 - `index.html` : `8169442` octets ;
 - blob : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
 
-Base CI :
-- Architecture + Browser `36752651640` — SUCCESS ;
-- Firefox `36752651555` — SUCCESS ;
-- Tactical Dock `36752651655` — SUCCESS.
-
 Prochaine action :
-1. ajouter une caractérisation dédiée `dc200Branch` ;
-2. brancher la sentinelle Architecture ;
-3. triple CI GREEN ;
-4. sélectionner UNE slice pure minimale après preuve ;
-5. aucun RED ni runtime avant cette sélection.
+1. poser UNE garde RED exigeant le prédicat pur + raccord exact ;
+2. confirmer #197 GREEN ;
+3. vérifier RED Architecture isolé, Firefox/Tactical GREEN ;
+4. seulement ensuite décider du micro-diff runtime sous Rule 26.
 
 ---
 

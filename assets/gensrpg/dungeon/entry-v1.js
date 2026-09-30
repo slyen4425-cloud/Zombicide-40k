@@ -13,6 +13,15 @@
     return {status:existing?.last?"existing":"create",targetRoom};
   }
 
+  function planGeneratedBossPolicy(room,roomLimit,bossMode,bossEvery,bossRooms,bossChance){
+    if(bossMode!=="none"&&room===Number(roomLimit))return {status:"boss",chance:null};
+    if(bossMode==="everyN"&&room%Math.max(1,Number(bossEvery)||5)===0)return {status:"boss",chance:null};
+    const explicit=String(bossRooms||"").split(/[,; ]+/).map(Number).filter(n=>n>0);
+    if(bossMode==="specific"&&explicit.includes(room))return {status:"boss",chance:null};
+    if(bossMode==="random"&&room>2)return {status:"random",chance:Math.max(0,Number(bossChance)||13)};
+    return {status:"none",chance:null};
+  }
+
   function pickWeightedGeneratedRoomKind(roomWeights,roll){
     const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
     const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
@@ -103,6 +112,7 @@
     VERSION,
     exploration:Object.freeze({
       planGeneratedAdvance,
+      planGeneratedBossPolicy,
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
       pickWeightedGeneratedBranchType,

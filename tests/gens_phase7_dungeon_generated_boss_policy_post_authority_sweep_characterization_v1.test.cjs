@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169990,
+assert.equal(bytes.length,8169856,
   'post-authority Boss characterization must track the current exact runtime size');
-assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
+assert.equal(gitBlob,'454b2e12cde591c2db19023d1b76055ebac8e1b1',
   'post-authority Boss characterization must track the current exact runtime blob');
 
 function block(id){
@@ -33,14 +33,13 @@ const chooseMatch=core200.match(/function chooseKind\(room\)\{[\s\S]*?\}\nfuncti
 assert.ok(chooseMatch,'Core 2.00 chooseKind source must remain extractable');
 const chooseSource=chooseMatch[0].replace(/\nfunction selectedChallenges\([\s\S]*$/,'');
 
-assert.match(chooseSource,/if\(c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)\)return['"]boss['"]/,
-  'final-room Boss rule must remain first');
-assert.match(chooseSource,/if\(c\.boss===['"]everyN['"]&&room%Math\.max\(1,Number\(c\.bossEvery\)\|\|5\)===0\)return['"]boss['"]/,
-  'everyN Boss rule must remain intact');
-assert.match(chooseSource,/if\(c\.boss===['"]specific['"]&&explicit\.includes\(room\)\)return['"]boss['"]/,
-  'specific Boss rule must remain intact');
-assert.match(chooseSource,/if\(c\.boss===['"]random['"]&&room>2&&Math\.random\(\)\*100<Math\.max\(0,Number\(c\.bossChance\)\|\|13\)\)return['"]boss['"]/,
-  'random Boss rule must remain lazy and inline');
+assert.equal((chooseSource.match(/GensDungeonV1\.exploration\.planGeneratedBossPolicy\(/g)||[]).length,1,
+  'Core 2.00 must delegate generated Boss policy exactly once');
+assert.match(chooseSource,
+  /const bossPlan=GensDungeonV1\.exploration\.planGeneratedBossPolicy\(room,c\.rooms,c\.boss,c\.bossEvery,c\.bossRooms,c\.bossChance\);if\(bossPlan\.status==='boss'\)return'boss';if\(bossPlan\.status==='random'&&Math\.random\(\)\*100<bossPlan\.chance\)return'boss'/,
+  'Core 2.00 must preserve lazy Boss RNG around the pure planner');
+assert.doesNotMatch(chooseSource,/c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)|c\.boss===['"]everyN['"]|c\.boss===['"]specific['"]|Math\.max\(0,Number\(c\.bossChance\)\|\|13\)/,
+  'Boss policy decisions must no longer be duplicated inline');
 assert.match(chooseSource,/GensDungeonV1\.exploration\.pickWeightedGeneratedRoomKind\(c\.roomWeights,Math\.random\(\)\)/,
   'non-Boss fallback must remain delegated with its own explicit RNG');
 
@@ -59,8 +58,8 @@ vm.runInContext(chooseSource+';this.chooseKind=chooseKind;',sandbox,{filename:'d
 
 assert.equal(typeof sandbox.GensDungeonV1?.exploration?.pickWeightedGeneratedRoomKind,'function',
   'weighted generated room-kind owner must remain present');
-assert.equal(typeof sandbox.GensDungeonV1?.exploration?.planGeneratedBossPolicy,'undefined',
-  'Boss planner must not exist before the dedicated RED');
+assert.equal(typeof sandbox.GensDungeonV1?.exploration?.planGeneratedBossPolicy,'function',
+  'Boss planner must own pure generated Boss policy after the isolated raccord');
 
 const defaults={
   rooms:10,

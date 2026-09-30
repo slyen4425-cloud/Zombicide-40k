@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169990,
+assert.equal(bytes.length,8169856,
   'Boss-policy RED must start from the exact post-authority-sweep runtime size');
-assert.equal(gitBlob,'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
+assert.equal(gitBlob,'454b2e12cde591c2db19023d1b76055ebac8e1b1',
   'Boss-policy RED must start from the exact post-authority-sweep runtime blob');
 
 function block(id){
@@ -59,6 +59,8 @@ assert.deepEqual(norm(plan(3,10,'random',5,'',13)),{status:'random',chance:13});
 assert.deepEqual(norm(plan(3,10,'random',5,'',0)),{status:'random',chance:13});
 assert.deepEqual(norm(plan(3,10,'random',5,'',-5)),{status:'random',chance:0});
 assert.deepEqual(norm(plan(3,10,'random',5,'','bad')),{status:'random',chance:13});
+assert.deepEqual(norm(plan('10',10,'final',5,'',13)),{status:'none',chance:null});
+assert.deepEqual(norm(plan('4',10,'specific',5,'2,4,7',13)),{status:'none',chance:null});
 
 const a=plan(3,10,'random',5,'',13);
 const b=plan(3,10,'random',5,'',13);

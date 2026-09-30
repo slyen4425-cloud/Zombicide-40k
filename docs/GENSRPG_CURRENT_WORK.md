@@ -33,12 +33,26 @@ Base CI :
 - Firefox `36752651555` — SUCCESS ;
 - Tactical Dock `36752651655` — SUCCESS.
 
+Caractérisation GREEN :
+- SHA `090a2d697bec4b617b6a2150f86e0859788a07a0` ;
+- Architecture + Browser `36767206870` — SUCCESS ;
+- Firefox `36767206854` — SUCCESS ;
+- Tactical Dock `36767206806` — SUCCESS ;
+- étape #197 — SUCCESS.
+
+Slice pure retenue :
+`GensDungeonV1.exploration.shouldInitializeGeneratedEnemyBranch(enemy, room)`.
+
+Frontière du futur raccord :
+- le helper retourne seulement le booléen historique ;
+- Core 2.00 conserve `loadActiveEnemies()`, la boucle, `e.dc200Branch=false`, `saveActiveEnemies(all)` et l'ordre de matérialisation ;
+- aucune mutation, aucun stockage, aucune config et aucun RNG dans le helper.
+
 Prochaine action :
-1. caractérisation pure de la condition historique ;
-2. raccord Architecture ;
-3. triple CI GREEN ;
-4. seulement ensuite décider si `shouldInitializeGeneratedEnemyBranch(enemy,room)` devient l'API cible ;
-5. aucun RED avant cette preuve.
+1. poser UNE garde RED exigeant le helper pur et son raccord exact ;
+2. vérifier RED isolé sur Architecture ;
+3. Firefox et Tactical Dock doivent rester GREEN ;
+4. seulement ensuite appliquer un micro-diff minimal sous Rule 26.
 
 ---
 

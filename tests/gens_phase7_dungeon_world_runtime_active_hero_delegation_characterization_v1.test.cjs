@@ -111,6 +111,7 @@ const canonical=ctx.GensDungeonV1?.movement?.resolveAuthoredActiveHero;
 assert.ok(api);
 assert.equal(typeof api.currentPlan,'function');
 assert.equal(typeof canonical,'function');
+assert.equal(api.install(),true,'fixture must explicitly install the real World Runtime wrappers');
 
 for(const t of [
   {participants:['a','b'],index:undefined},

@@ -185,3 +185,101 @@ L'API cible :
 3. vérifier RED isolé sur la nouvelle étape Architecture ;
 4. Firefox et Tactical Dock doivent rester GREEN ;
 5. aucun micro-diff runtime avant ce RED isolé.
+
+
+## Fermeture du micro-lot 32
+
+### RED isolé
+
+SHA :
+`b9355fa33cf7e4dee6214254954bdc6345bfe8e2`.
+
+CI :
+- Architecture `36755952074` — FAILURE attendue uniquement sur #198 `Exiger la règle pure dc200Branch generated Phase 7` ;
+- caractérisation #197 — SUCCESS ;
+- Firefox `36755951793` — SUCCESS ;
+- Tactical Dock `36755951729` — SUCCESS.
+
+### Raccord GREEN technique
+
+SHA technique GREEN :
+`37d50b4dcd7322f02831f01de777ed685ccd8e9a`.
+
+CI :
+- Architecture + Browser `36761222657` — SUCCESS ;
+- Firefox `36761222535` — SUCCESS ;
+- Tactical Dock `36761222557` — SUCCESS ;
+- étape #197 `Caractériser la normalisation dc200Branch generated Phase 7` — SUCCESS ;
+- étape #198 `Exiger la règle pure dc200Branch generated Phase 7` — SUCCESS.
+
+### Runtime final
+
+`index.html` :
+- taille : `8169447` octets ;
+- blob Git : `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39`.
+
+Rule 26 a vérifié :
+- runtime source exact : `8169442 / a37acaabcb3202a8527c2d545f9e2ff4466ea1db` ;
+- seam inline unique ;
+- sortie exacte : `8169447 / 106d2ec6e82f3b777e1d724cd3f74f30a22fdf39` ;
+- tests #197/#198 GREEN localement avant commit.
+
+### Résultat exact
+
+Le propriétaire pur est désormais :
+`GensDungeonV1.exploration.shouldDefaultGeneratedRoomEnemyBranch(enemy, room)`.
+
+Il possède uniquement la décision historique :
+`Number(enemy.dungeonRoom||0)===Number(room) && enemy.dc200Branch===undefined`.
+
+Core 2.00 conserve :
+- `loadActiveEnemies()` ;
+- le `try/catch` historique ;
+- `all.forEach(...)` ;
+- la mutation réelle `enemy.dc200Branch=false` ;
+- `saveActiveEnemies(all)` ;
+- tout le reste de `createRoom(...)`.
+
+Sémantique conservée :
+- comparaison Number historique ;
+- fallback `dungeonRoom||0` ;
+- seuls les marqueurs `undefined` sont initialisés ;
+- `false`, `true`, `null`, `0` et chaîne vide restent inchangés ;
+- ennemis des autres salles inchangés ;
+- mutation in-place et identité tableau/objets conservées ;
+- ordre `load -> normalisation -> save -> cfg/map` conservé.
+
+### Sentinelles et tooling
+
+Les gardes qui désignaient le précédent fingerprint comme runtime courant ont été réalignées sur :
+`8169447 / 106d2ec6e82f3b777e1d724cd3f74f30a22fdf39`.
+
+Les deux listes explicitement historiques ont conservé l'ancien couple et ajouté le nouveau.
+
+Les métadonnées Phase 2 qui identifient le blob source courant ont été réalignées.
+
+Tous les workflows/scripts temporaires de writer, scan et réalignement ont été supprimés avant le SHA technique final.
+
+### Frontière préservée
+
+Aucun déplacement de :
+- chargement/sauvegarde ennemis ;
+- mutation ennemis ;
+- encounter/Boss ;
+- choix du piège ;
+- résultat non-combat du lot 31 ;
+- génération de carte / RNG ;
+- Spatial ;
+- Room Runtime ;
+- branches generated ;
+- politique Boss ;
+- authored ;
+- mouvement ;
+- Tactical/combat ;
+- Survival / Capture / PvP ;
+- assets.
+
+Aucun changement utilisateur visible attendu.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-enemy-branch-normalization-audit-green-2026-09-30`.

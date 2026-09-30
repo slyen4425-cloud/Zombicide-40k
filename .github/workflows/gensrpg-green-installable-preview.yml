@@ -30,6 +30,7 @@ jobs:
         with:
           ref: preview/gensrpg-green-pwa-2026-09-30
           path: candidate
+          fetch-depth: 2
 
       - name: Verify immutable refs
         run: |

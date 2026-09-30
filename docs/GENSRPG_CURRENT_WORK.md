@@ -1,3 +1,54 @@
+# PHASE 7 — MICRO-LOT 25 — délégation héros actif World Runtime — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-room-runtime-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`32a970429c240110a8e207fee1fe18441e10e40d`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-world-runtime-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-world-runtime-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_WORLD_RUNTIME_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée `DungeonWorldRuntime167823.activeHeroId(x)` au propriétaire canonique existant :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- World Runtime possède encore une copie locale bit-à-bit du sélecteur historique ;
+- elle est privée ;
+- elle est consommée par le vrai wrapper `DungeonCore01.explore` et par `currentPlan()` ;
+- graphes, edges, Room Creator, Zone Content, Spatial, DOM, wrappers et timers restent hors périmètre ;
+- Source Render présente une divergence sémantique et reste explicitement différé.
+
+Frontière :
+- aucune nouvelle API ;
+- aucun changement du routage World Builder ;
+- aucun changement de chargement/snapshot de salle ;
+- aucun changement Spatial ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36678532628` — SUCCESS ;
+- Firefox `36678532695` — SUCCESS ;
+- Tactical Dock `36678532649` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. ajouter une caractérisation ciblée de `currentPlan()` et du vrai wrapper `explore()` ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation World Runtime.
+
+---
+
 # PHASE 7 — MICRO-LOT 24 — délégation héros actif Room Runtime — 2026-09-30
 
 Base GREEN :

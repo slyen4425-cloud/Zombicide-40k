@@ -35,10 +35,16 @@ jobs:
         run: |
           test "$(git -C production rev-parse HEAD)" = "e8681f9823573ced8aec59c8ddc47a72b02bc663"
           test "$(git -C candidate rev-parse HEAD^)" = "874ec11d8db5a06e5eca8b05efe4ee7b609367b3"
-          grep -q 'V16.167' candidate/index.html
-          grep -q "navigator.serviceWorker.register('./service-worker.js'" candidate/index.html
-          grep -q '"start_url": "./"' candidate/manifest.webmanifest
-          grep -q '"scope": "./"' candidate/manifest.webmanifest
+          test "$(git -C candidate hash-object index.html)" = "1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path("candidate/manifest.webmanifest").read_text())
+          assert m["start_url"]=="./"
+          assert m["scope"]=="./"
+          assert m["display"]=="standalone"
+          print("immutable GREEN candidate verified")
+          PY
 
       - name: Build production root and GREEN preview
         run: |

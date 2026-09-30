@@ -152,8 +152,11 @@ assert.equal(s.events.some(v=>v.startsWith('generateDungeonMap:')),false,
 
 assert.match(createSource,/loadActiveEnemies\?\.\(\)\|\|\[\]/,
   'createRoom must keep active-enemy normalization at the current owner');
-assert.match(createSource,/Number\(e\.dungeonRoom\|\|0\)===Number\(room\)&&e\.dc200Branch===undefined/,
-  'dc200Branch normalization must remain scoped to matching room and undefined marker');
+assert.equal(
+  (createSource.match(/GensDungeonV1\.exploration\.shouldDefaultGeneratedRoomEnemyBranch\(e,room\)/g)||[]).length,
+  1,
+  'dc200Branch normalization must delegate the matching-room/undefined-marker rule exactly once'
+);
 assert.match(createSource,/saveActiveEnemies\?\.\(all\)/,
   'createRoom must keep enemy persistence after normalization');
 assert.match(createSource,/cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\)/,

@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169442,
+assert.equal(bytes.length,8169447,
   'dc200Branch characterization must track the exact lot 31 GREEN runtime size');
-assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db',
+assert.equal(gitBlob,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39',
   'dc200Branch characterization must track the exact lot 31 GREEN runtime blob');
 
 function block(id){
@@ -32,8 +32,8 @@ assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
 const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
 assert.match(createSource,
-  /try\{const all=loadActiveEnemies\?\.\(\)\|\|\[\];all\.forEach\(e=>\{if\(Number\(e\.dungeonRoom\|\|0\)===Number\(room\)&&e\.dc200Branch===undefined\)e\.dc200Branch=false\}\);saveActiveEnemies\?\.\(all\)\}catch\(e\)\{\}/,
-  'historical dc200Branch normalization must remain directly characterizable, including forEach and swallowed storage errors');
+  /try\{const all=loadActiveEnemies\?\.\(\)\|\|\[\];all\.forEach\(e=>\{if\(GensDungeonV1\.exploration\.shouldDefaultGeneratedRoomEnemyBranch\(e,room\)\)e\.dc200Branch=false\}\);saveActiveEnemies\?\.\(all\)\}catch\(e\)\{\}/,
+  'dc200Branch normalization must delegate only the boolean rule while preserving forEach and swallowed storage errors');
 
 const sandbox={events:[],loaded:null,saved:null,config:{map:false}};
 sandbox.window=sandbox;
@@ -126,8 +126,10 @@ assert.ok(Array.isArray(sandbox.saved)&&sandbox.saved.length===0,
 assert.deepEqual(sandbox.events,['load','save','cfg'],
   'empty fallback list must preserve the same save/config order');
 
-assert.doesNotMatch(entry,/loadActiveEnemies|saveActiveEnemies|dc200Branch/,
-  'Dungeon entry must not silently take storage/mutation authority during the audit');
+assert.match(entry,/function shouldDefaultGeneratedRoomEnemyBranch\(enemy,room\)/,
+  'Dungeon entry must own only the pure dc200Branch default predicate after raccord');
+assert.doesNotMatch(entry,/loadActiveEnemies|saveActiveEnemies|\.dc200Branch=false/,
+  'Dungeon entry must not take storage or mutation authority');
 
 console.log(JSON.stringify({
   scenario:'Phase 7 generated room dc200Branch normalization characterization',

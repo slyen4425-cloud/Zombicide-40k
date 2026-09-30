@@ -1,3 +1,52 @@
+# PHASE 7 — MICRO-LOT 24 — délégation héros actif Room Runtime — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-zone-links-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`ba43236d9a90d38afd4db17c902062dad5edf0c2`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-room-runtime-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-room-runtime-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_ROOM_RUNTIME_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée `DungeonRoomRuntime167822.activeHeroId(x)` au propriétaire canonique :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- `activeHeroId` est privé ;
+- il n'est consommé que par `applyTemplateToCurrentRoom(forceRoom)` ;
+- il choisit le héros dont la position est placée sur l'entrée et dont le mouvement restant est conservé ;
+- World Runtime, Large Room Support, Core 317/318 et Source Render restent différés.
+
+Frontière :
+- aucune nouvelle API ;
+- aucune modification de sélection de template, chance, conversion de carte, remap ennemi ou Spatial ;
+- wrapper Explore, panneau DOM, listeners et timers inchangés ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36666260165` — SUCCESS ;
+- Firefox `36666260075` — SUCCESS ;
+- Tactical Dock `36666260082` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. ajouter une caractérisation ciblée via `applyTemplateToCurrentRoom(forceRoom)` ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Room Runtime.
+
+---
+
 # PHASE 7 — MICRO-LOT 23 — délégation héros actif Zone Links — 2026-09-30
 
 Base GREEN :

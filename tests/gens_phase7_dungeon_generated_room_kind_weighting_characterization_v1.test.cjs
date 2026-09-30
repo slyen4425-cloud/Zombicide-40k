@@ -24,14 +24,12 @@ assert.equal((core200.match(/function\s+chooseKind\s*\(/g)||[]).length,1,
   'Core 2.00 must keep one final generated room-kind owner');
 assert.equal((core200.match(/chooseKind\(x\.room\)/g)||[]).length,1,
   'generated explore must consume chooseKind exactly once');
-assert.match(core200,/if\(c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)\)return['"]boss['"]/,
-  'final-room Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]everyN['"]&&room%Math\.max\(1,Number\(c\.bossEvery\)\|\|5\)===0\)return['"]boss['"]/,
-  'everyN Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]specific['"]&&explicit\.includes\(room\)\)return['"]boss['"]/,
-  'specific Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]random['"]&&room>2&&Math\.random\(\)\*100<Math\.max\(0,Number\(c\.bossChance\)\|\|13\)\)return['"]boss['"]/,
-  'random Boss policy and its first random call must remain in Core 2.00');
+assert.match(core200,
+  /const bossPlan=GensDungeonV1\.exploration\.planGeneratedBossPolicy\(room,c\.rooms,c\.boss,c\.bossEvery,c\.bossRooms,c\.bossChance\);if\(bossPlan\.status==='boss'\)return'boss';if\(bossPlan\.status==='random'&&Math\.random\(\)\*100<bossPlan\.chance\)return'boss'/,
+  'Core 2.00 must consume the pure Dungeon Boss plan while retaining the lazy Boss RNG');
+assert.doesNotMatch(core200,
+  /if\(c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)\)|if\(c\.boss===['"]everyN['"]|if\(c\.boss===['"]specific['"]|Math\.max\(0,Number\(c\.bossChance\)\|\|13\)/,
+  'generated Boss policy decisions must remain retired from Core 2.00');
 assert.doesNotMatch(core200,/const w=\{enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,\.\.\.\(c\.roomWeights\|\|\{\}\)\}/,
   'Core 2.00 must retire the inline weighted room-kind calculation');
 assert.match(core200,/GensDungeonV1\.exploration\.pickWeightedGeneratedRoomKind\(c\.roomWeights,Math\.random\(\)\)/,
@@ -110,7 +108,7 @@ console.log(JSON.stringify({
   finalOwner:'dungeonCore200Rebuild.chooseKind -> GensDungeonV1.exploration.pickWeightedGeneratedRoomKind',
   consumer:'generated explore',
   weightedDefaults:['enemy','ambush','trap','chest','merchant','rest','mystery'],
-  bossPolicy:'remains Core 2.00',
+  bossPolicy:'pure plan in GensDungeonV1.exploration.planGeneratedBossPolicy; RNG remains Core 2.00',
   authored:'unchanged',
   randomConsumption:{
     finalBoss:0,

@@ -21,6 +21,9 @@ vm.runInContext(entry,sandbox,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
 assert.equal(typeof sandbox.GensDungeonV1?.exploration?.pickWeightedGeneratedRoomKind,'function',
   'Phase 7 micro-lot 2 requires Dungeon-owned weighted generated room-kind selection');
 
+assert.equal(typeof sandbox.GensDungeonV1?.exploration?.planGeneratedBossPolicy,'function',
+  'Phase 7 post-authority sweep requires Dungeon-owned pure generated Boss planning');
+
 const pick=sandbox.GensDungeonV1.exploration.pickWeightedGeneratedRoomKind;
 const defaults={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11};
 
@@ -46,14 +49,18 @@ function block(id){
 }
 const core200=block('dungeonCore200Rebuild');
 
-assert.match(core200,/if\(c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)\)return['"]boss['"]/,
-  'final-room Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]everyN['"]&&room%Math\.max\(1,Number\(c\.bossEvery\)\|\|5\)===0\)return['"]boss['"]/,
-  'everyN Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]specific['"]&&explicit\.includes\(room\)\)return['"]boss['"]/,
-  'specific Boss policy must remain in Core 2.00');
-assert.match(core200,/if\(c\.boss===['"]random['"]&&room>2&&Math\.random\(\)\*100<Math\.max\(0,Number\(c\.bossChance\)\|\|13\)\)return['"]boss['"]/,
-  'random Boss policy must remain in Core 2.00');
+assert.match(core200,
+  /const bossPlan=GensDungeonV1\.exploration\.planGeneratedBossPolicy\(room,c\.rooms,c\.boss,c\.bossEvery,c\.bossRooms,c\.bossChance\);if\(bossPlan\.status==='boss'\)return'boss';if\(bossPlan\.status==='random'&&Math\.random\(\)\*100<bossPlan\.chance\)return'boss'/,
+  'Core 2.00 must consume the pure Dungeon Boss plan while retaining lazy Boss RNG');
+assert.doesNotMatch(core200,
+  /if\(c\.boss!==['"]none['"]&&room===Number\(c\.rooms\)\)|if\(c\.boss===['"]everyN['"]|if\(c\.boss===['"]specific['"]|Math\.max\(0,Number\(c\.bossChance\)\|\|13\)/,
+  'Core 2.00 must not re-own generated Boss policy decisions');
+
+const chooseMatch=core200.match(/function chooseKind\(room\)\{[\s\S]*?\}\nfunction selectedChallenges\(/);
+assert.ok(chooseMatch,'Core 2.00 chooseKind source must remain extractable');
+const choose=chooseMatch[0].replace(/\nfunction selectedChallenges\([\s\S]*$/,'');
+assert.equal((choose.match(/Math\.random\(\)/g)||[]).length,2,
+  'Core 2.00 must retain exactly Boss RNG plus weighted-room RNG');
 
 assert.match(core200,/GensDungeonV1\.exploration\.pickWeightedGeneratedRoomKind\(c\.roomWeights,Math\.random\(\)\)/,
   'Core 2.00 must delegate only the non-Boss weighted selection with one explicit random roll');
@@ -66,7 +73,7 @@ assert.doesNotMatch(authored,/pickWeightedGeneratedRoomKind/,
 console.log(JSON.stringify({
   scenario:'Phase 7 Dungeon generated room-kind weighting owner',
   owner:'GensDungeonV1.exploration.pickWeightedGeneratedRoomKind',
-  bossPolicy:'Core 2.00 unchanged',
+  bossPolicy:'pure Dungeon planner; RNG remains Core 2.00',
   randomness:'explicit callsite roll',
   authored:'unchanged'
 },null,2));

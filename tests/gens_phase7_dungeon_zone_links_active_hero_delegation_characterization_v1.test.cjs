@@ -11,12 +11,17 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const zoneLinks=read('assets/dungeon/dungeon-zone-links-167846.js');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;
-assert.match(zoneLinks,historical,
-  'Zone Links must still own the historical private activeHero selector before the RED');
+assert.doesNotMatch(zoneLinks,historical,
+  'Zone Links must no longer own the historical private activeHero selector after delegation');
 assert.equal(
   (zoneLinks.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Zone Links must not consume the canonical helper before delegation'
+  1,
+  'Zone Links must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  zoneLinks,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Zone Links activeHero must delegate only the pure selection'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -133,7 +138,7 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Zone Links active hero characterization',
   publicConsumer:'DungeonZoneLinks167846.authoredContext',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical private selector preserved',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonWorldRuntime167823.activeHeroId',
     'DungeonRoomRuntime167822.activeHeroId',

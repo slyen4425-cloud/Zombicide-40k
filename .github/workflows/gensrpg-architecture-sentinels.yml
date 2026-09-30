@@ -608,6 +608,9 @@ jobs:
       - name: Caractériser la normalisation dc200Branch generated Phase 7
         run: node tests/gens_phase7_dungeon_generated_room_enemy_branch_normalization_characterization_v1.test.cjs
 
+      - name: Exiger la règle pure dc200Branch generated Phase 7
+        run: node tests/gens_phase7_dungeon_generated_room_enemy_branch_normalization_v1.test.cjs
+
       - name: Caractériser le mouvement d’entrée authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_entry_movement_characterization_v1.test.cjs
 

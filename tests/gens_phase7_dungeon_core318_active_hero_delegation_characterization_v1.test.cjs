@@ -11,12 +11,12 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const core318=read('assets/dungeon/dungeon-core-318.js');
 
 const historical=/function activeHeroId\(x\)\{\s*const list=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\];\s*const i=Math\.max\(0,Math\.min\(Math\.max\(0,list\.length-1\),Number\(x\?\.index\)\|\|0\)\);\s*return String\(list\[i\]\|\|""\);\s*\}/;
-assert.match(core318,historical,
-  'Core 318 must still own the historical private activeHeroId before delegation RED');
+assert.doesNotMatch(core318,historical,
+  'Core 318 must no longer own the historical private activeHeroId after delegation');
 assert.equal(
   (core318.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Core 318 must not consume the canonical helper before the delegation lot'
+  1,
+  'Core 318 must consume the canonical helper exactly once after delegation'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -161,7 +161,7 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Core 318 active hero characterization',
   consumers:['DungeonCore318.activeRoom','dc200EnterBranch branch guard'],
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical Core 318 selector preserved',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonCore317 activeHeroId divergence',
     'DungeonSourceRenderStability167877 inline active selector divergence'

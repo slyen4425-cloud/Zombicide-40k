@@ -32,8 +32,8 @@ assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
 const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
 assert.match(createSource,
-  /const all=loadActiveEnemies\?\.\(\)\|\|\[\];for\(const e of all\)if\(Number\(e\.dungeonRoom\|\|0\)===Number\(room\)&&e\.dc200Branch===undefined\)e\.dc200Branch=false;saveActiveEnemies\?\.\(all\)/,
-  'historical dc200Branch normalization must remain directly characterizable');
+  /try\{const all=loadActiveEnemies\?\.\(\)\|\|\[\];all\.forEach\(e=>\{if\(Number\(e\.dungeonRoom\|\|0\)===Number\(room\)&&e\.dc200Branch===undefined\)e\.dc200Branch=false\}\);saveActiveEnemies\?\.\(all\)\}catch\(e\)\{\}/,
+  'historical dc200Branch normalization must remain directly characterizable, including forEach and swallowed storage errors');
 
 const sandbox={events:[],loaded:null,saved:null,config:{map:false}};
 sandbox.window=sandbox;

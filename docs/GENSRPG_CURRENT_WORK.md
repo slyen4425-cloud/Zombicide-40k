@@ -1,3 +1,53 @@
+# PHASE 7 — MICRO-LOT 23 — délégation héros actif Zone Links — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-exact-trap-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`3347cbd8c426a3fdb0b95903e42f6b1ca2669846`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-zone-links-active-hero-delegation-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-zone-links-active-hero-delegation-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_ZONE_LINKS_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
+
+Cible :
+faire déléguer uniquement la sélection privée du héros actif utilisée par `DungeonZoneLinks167846.authoredContext()` au propriétaire canonique :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Audit initial :
+- Zone Links possède encore la copie locale historique `activeHero(x)` ;
+- elle est privée et consommée uniquement par `authoredContext()` ;
+- `authoredContext()` reste public ;
+- transitions cache/retour, piles par héros, Builder, DOM et boutons restent totalement hors périmètre.
+
+Frontière :
+- aucune nouvelle API ;
+- aucune modification des transitions ou des piles ;
+- aucun changement Builder / DOM / wrapper Core / retry ;
+- aucun changement Spatial ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36663174741` — SUCCESS ;
+- Firefox `36663174686` — SUCCESS ;
+- Tactical Dock `36663174706` — SUCCESS.
+
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Prochaine action :
+1. caractériser l'API publique `authoredContext()` sur les sémantiques historiques du héros actif ;
+2. triple CI GREEN ;
+3. seulement ensuite poser UNE garde RED de délégation Zone Links.
+
+---
+
 # PHASE 7 — MICRO-LOT 22 — délégation héros actif Exact Trap Runtime — 2026-09-30
 
 Base GREEN :

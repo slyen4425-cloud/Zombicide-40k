@@ -240,3 +240,20 @@ Un futur micro-diff du seam sélectionné pourra donc utiliser cette source exac
 2. vérifier RED isolé sur Architecture ;
 3. Firefox et Tactical Dock doivent rester GREEN ;
 4. seulement ensuite appliquer le micro-diff minimal.
+
+
+## RED isolé non-combat
+
+SHA :
+`45060d384bb0ae2736208dde54981350529a9cb2`.
+
+CI :
+- Architecture `36744953544` — FAILURE attendue uniquement sur #196 `Exiger le propriétaire pur des résultats non-combat generated Phase 7` ;
+- caractérisation #195 — SUCCESS ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36744953488` — SUCCESS ;
+- Tactical Dock `36744953451` — SUCCESS.
+
+Le RED est donc isolé à l'absence du nouveau propriétaire pur et de son raccord.
+
+Aucune autre régression n'est détectée avant micro-diff.

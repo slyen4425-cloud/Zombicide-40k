@@ -140,3 +140,77 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 25
+
+### Caractérisation GREEN préalable
+
+SHA :
+`a34730d271cfa2d2c4fbe038328aa66b01b0493e`.
+
+CI :
+- Architecture + Browser `36679933562` — SUCCESS ;
+- Firefox `36679933625` — SUCCESS ;
+- Tactical Dock `36679933558` — SUCCESS ;
+- caractérisation World Runtime #228 — SUCCESS ;
+- Browser 45/45 sans échec.
+
+La caractérisation verrouille les deux vrais consommateurs :
+- `DungeonWorldRuntime167823.currentPlan()` ;
+- le wrapper réel `DungeonCore01.explore()` installé par World Runtime.
+
+### RED isolé
+
+SHA :
+`bd79ae8b647552b2a0fd85be700a42ae190dc2b5`.
+
+Résultat :
+- Architecture `36681168409` — FAILURE attendue uniquement sur #229 `Exiger la délégation héros actif World Runtime Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36681168395` — SUCCESS ;
+- Tactical Dock `36681168393` — SUCCESS.
+
+### Micro-diff GREEN appliqué
+
+Commits :
+- `a5d87b7cb1bc2ef0497c5ac45a912cf4514000e6` — World Runtime délègue uniquement la sélection pure du héros ;
+- `e87c414ccf396450072d6ae01624da36a3b8335b` — frontière contractuelle documentée ;
+- `b4f61e5e89d993cf92c5eb67484a3ea27f451a5d` — caractérisation post-raccord ;
+- `ceea7c6f1be9b36517e0b28c35d7b8f64575c74f` — fixture historique World Runtime chargée avec le propriétaire Dungeon réel.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`ceea7c6f1be9b36517e0b28c35d7b8f64575c74f`.
+
+CI :
+- Architecture + Browser `36681436344` — SUCCESS ;
+- Firefox `36681436341` — SUCCESS ;
+- Tactical Dock `36681436354` — SUCCESS ;
+- Browser 45/45 sans échec ;
+- caractérisation #228 — SUCCESS ;
+- garde #229 — SUCCESS.
+
+### Frontière préservée
+
+- World Runtime ne possède plus l'algorithme de sélection du héros actif ;
+- `GensDungeonV1.movement.resolveAuthoredActiveHero(...)` reste le propriétaire canonique ;
+- configuration authoritative world, graphes, edge routing, snapshots, chargement direct, contenu, `directFixedNode`, Spatial, wrappers explore/render, bouton de sortie, panneau legacy et timers restent World Runtime ;
+- Room Runtime, Zone Links, Exact Trap et les lots authored précédents restent inchangés ;
+- Large Room Support, Core 317/318 et Source Render restent différés ;
+- Source Render reste explicitement hors migration simple à cause de sa divergence de sélection inline ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun wrapper/observer/timer/retry ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-world-runtime-active-hero-delegation-green-2026-09-30`.

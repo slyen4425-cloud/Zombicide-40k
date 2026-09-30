@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8169856,'index.html byte size drifted from Phase 7 Dungeon generated Boss policy baseline');
-assert.equal(blobSha,'454b2e12cde591c2db19023d1b76055ebac8e1b1','index.html blob must remain the Phase 7 Dungeon generated Boss policy source');
+assert.equal(index.length,8169442,'index.html byte size drifted from Phase 7 Dungeon generated Boss policy baseline');
+assert.equal(blobSha,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db','index.html blob must remain the Phase 7 Dungeon generated Boss policy source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');

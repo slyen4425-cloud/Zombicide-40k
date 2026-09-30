@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169856,
+assert.equal(bytes.length,8169442,
   'Phase 7 branch chance-gate characterization must track the branch-descriptor runtime');
-assert.equal(gitBlob,'454b2e12cde591c2db19023d1b76055ebac8e1b1',
+assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db',
   'Phase 7 branch chance-gate characterization must track the exact branch-descriptor runtime blob');
 
 function block(id){

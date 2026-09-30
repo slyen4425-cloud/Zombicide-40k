@@ -15,8 +15,8 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_ENEMY_BRANCH_NORMALIZATION_AUDIT_PREAUDIT.md`
 
-Cible auditée :
-règle historique de normalisation `dc200Branch` dans `createRoom(room,kind)`.
+Cible fermée :
+extraire uniquement la décision pure historique qui détermine si un ennemi generated de la salle doit recevoir le marqueur par défaut `dc200Branch=false`.
 
 Caractérisation GREEN :
 - SHA `8a8e605c69a64b5ab0018cfa75d4a10f0d7adcc1` ;
@@ -25,35 +25,57 @@ Caractérisation GREEN :
 - Tactical Dock `36754785665` — SUCCESS ;
 - étape #197 — SUCCESS.
 
+RED isolé :
+- SHA `b9355fa33cf7e4dee6214254954bdc6345bfe8e2` ;
+- Architecture `36755952074` — FAILURE attendue uniquement sur #198 ;
+- #197 — SUCCESS ;
+- Firefox `36755951793` — SUCCESS ;
+- Tactical Dock `36755951729` — SUCCESS.
+
+Raccord GREEN technique :
+- SHA `37d50b4dcd7322f02831f01de777ed685ccd8e9a` ;
+- Architecture + Browser `36761222657` — SUCCESS ;
+- Firefox `36761222535` — SUCCESS ;
+- Tactical Dock `36761222557` — SUCCESS ;
+- #197 — SUCCESS ;
+- #198 — SUCCESS.
+
 Résultat :
-- comparaison historique `Number(enemy.dungeonRoom||0)===Number(room)` confirmée ;
-- seul `dc200Branch===undefined` reçoit `false` ;
+- nouveau propriétaire pur :
+  `GensDungeonV1.exploration.shouldDefaultGeneratedRoomEnemyBranch(enemy, room)` ;
+- la règle exacte reste :
+  `Number(enemy.dungeonRoom||0)===Number(room) && enemy.dc200Branch===undefined` ;
+- Core 2.00 conserve chargement, `try/catch`, boucle, mutation `dc200Branch=false`, sauvegarde et suite de `createRoom(...)`.
+
+Sémantique conservée :
+- coercition Number historique ;
+- fallback `dungeonRoom||0` ;
+- seuls les marqueurs `undefined` sont initialisés ;
 - marqueurs déjà définis inchangés ;
-- mutation in-place et identité tableau/objets conservées ;
-- ordre `load -> normalisation -> save -> cfg/map` conservé ;
-- stockage, boucle et mutation restent Core 2.00.
+- mutation in-place et identité des objets conservées ;
+- ordre `load -> normalisation -> save -> cfg/map` inchangé.
 
-Slice pure sélectionnée :
-`GensDungeonV1.exploration.shouldDefaultGeneratedRoomEnemyBranch(enemy, room)`.
+Runtime final :
+- `index.html` : `8169447` octets ;
+- blob : `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39`.
 
-Le futur raccord doit déplacer uniquement le booléen de décision.
-Restent Core 2.00 :
-- `loadActiveEnemies()` ;
-- `try/catch` ;
-- `all.forEach(...)` ;
-- mutation `dc200Branch=false` ;
-- `saveActiveEnemies(all)` ;
-- suite de `createRoom(...)`.
+Sentinelles / Rule 26 :
+- seam unique et fingerprints exacts vérifiés ;
+- gardes runtime courant réalignées sans retirer d'assertion métier ;
+- anciennes empreintes conservées dans les listes explicitement historiques ;
+- tooling temporaire intégralement retiré avant GREEN final.
 
-Runtime inchangé :
-- `index.html` : `8169442` octets ;
-- blob : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+Frontière préservée :
+- stockage/mutation ennemis, encounter/Boss, pièges, résultat non-combat, génération carte/RNG, Spatial, Room Runtime, branches, Boss policy, authored, mouvement, Tactical, Survival, Capture, PvP et assets inchangés hors délégation booléenne ciblée ;
+- aucun changement utilisateur visible attendu.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-enemy-branch-normalization-audit-green-2026-09-30`.
 
 Prochaine action :
-1. poser UNE garde RED exigeant le prédicat pur + raccord exact ;
-2. confirmer #197 GREEN ;
-3. vérifier RED Architecture isolé, Firefox/Tactical GREEN ;
-4. seulement ensuite décider du micro-diff runtime sous Rule 26.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 
 ---
 

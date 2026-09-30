@@ -123,3 +123,65 @@ Toute future modification de `index.html` exige une source Rule 26 correspondant
 - blob `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
 
 Aucun nouveau mécanisme global, wrapper, timer, observer ou retry n'est autorisé.
+
+
+## Caractérisation GREEN dc200Branch
+
+Test :
+`tests/gens_phase7_dungeon_generated_room_enemy_branch_normalization_characterization_v1.test.cjs`.
+
+SHA GREEN :
+`8a8e605c69a64b5ab0018cfa75d4a10f0d7adcc1`.
+
+CI :
+- Architecture + Browser `36754785657` — SUCCESS ;
+- Firefox `36754785664` — SUCCESS ;
+- Tactical Dock `36754785665` — SUCCESS ;
+- étape #197 `Caractériser la normalisation dc200Branch generated Phase 7` — SUCCESS.
+
+La caractérisation confirme :
+- comparaison historique `Number(enemy.dungeonRoom || 0) === Number(room)` ;
+- un numéro de salle numérique et sa chaîne numérique sont équivalents ;
+- les valeurs absentes/falsy de `dungeonRoom` passent par le fallback `0` ;
+- seul `dc200Branch === undefined` reçoit la valeur `false` ;
+- les marqueurs déjà définis `false`, `true`, `null`, `0` et chaîne vide restent inchangés ;
+- les ennemis d'une autre salle restent inchangés ;
+- le tableau et les objets ennemis gardent leur identité : le chemin historique mute in-place ;
+- `saveActiveEnemies(all)` reçoit le tableau exact chargé ;
+- l'ordre reste `load -> normalisation -> save -> cfg/map` ;
+- un résultat de chargement absent utilise `[]` puis sauvegarde cette liste vide ;
+- le bloc reste dans le `try/catch` historique de Core 2.00.
+
+## Slice pure sélectionnée
+
+API cible :
+`GensDungeonV1.exploration.shouldDefaultGeneratedRoomEnemyBranch(enemy, room)`.
+
+Responsabilité unique :
+retourner le booléen historique :
+
+`Number(enemy.dungeonRoom || 0) === Number(room) && enemy.dc200Branch === undefined`.
+
+Le raccord futur doit laisser dans Core 2.00 :
+- `loadActiveEnemies()` ;
+- le `try/catch` historique ;
+- `all.forEach(...)` ;
+- la mutation `enemy.dc200Branch=false` ;
+- `saveActiveEnemies(all)` ;
+- tout ce qui suit dans `createRoom(...)`.
+
+L'API cible :
+- ne mute rien ;
+- ne lit aucun stockage ;
+- ne lit aucune config ;
+- ne consomme aucun RNG ;
+- ne dépend ni du DOM ni d'un autre module ;
+- conserve les accès directs aux propriétés de l'ennemi afin de ne pas introduire silencieusement une nouvelle tolérance aux entrées invalides.
+
+## Prochaine étape TDD
+
+1. poser UNE sentinelle RED exigeant uniquement `shouldDefaultGeneratedRoomEnemyBranch(...)` et son raccord dans la boucle existante ;
+2. vérifier que #197 reste GREEN ;
+3. vérifier RED isolé sur la nouvelle étape Architecture ;
+4. Firefox et Tactical Dock doivent rester GREEN ;
+5. aucun micro-diff runtime avant ce RED isolé.

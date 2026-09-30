@@ -11,15 +11,20 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const roomRuntime=read('assets/dungeon/dungeon-room-runtime-167822.js');
 
 const historical=/function activeHeroId\(x\)\{const list=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,list\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(list\[i\]\|\|""\)\}/;
-assert.match(
+assert.doesNotMatch(
   roomRuntime,
   historical,
-  'Room Runtime must still own the historical private activeHeroId selector before delegation'
+  'Room Runtime must no longer own the historical private activeHeroId selector after delegation'
 );
 assert.equal(
   (roomRuntime.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Room Runtime must not consume the canonical helper before the delegation RED'
+  1,
+  'Room Runtime must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  roomRuntime,
+  /function activeHeroId\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Room Runtime activeHeroId must retain its private surface while delegating only the pure selection'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -177,7 +182,7 @@ console.log(JSON.stringify({
   scenario:'Phase 7 Room Runtime active hero delegation characterization',
   consumer:'DungeonRoomRuntime167822.applyTemplateToCurrentRoom',
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical private selector preserved',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonWorldRuntime167823.activeHeroId',
     'DungeonLargeRoomSupport167834.activeHero',

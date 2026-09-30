@@ -143,3 +143,100 @@ La caractérisation doit prouver au minimum :
 - authored et autres modules restent hors de ce seam.
 
 Aucun changement utilisateur visible n'est attendu pour la phase de caractérisation.
+
+
+## Caractérisation GREEN du seam createRoom
+
+Test :
+`tests/gens_phase7_dungeon_generated_room_materialization_characterization_v1.test.cjs`.
+
+SHA :
+`62d3bd9d48201be4ec9af5ab541057206cbcae6f`.
+
+CI :
+- Architecture + Browser `36743699875` — SUCCESS ;
+- Firefox `36743699968` — SUCCESS ;
+- Tactical Dock `36743699886` — SUCCESS ;
+- étape dédiée #195 `Caractériser la matérialisation des salles generated Phase 7` — SUCCESS.
+
+La caractérisation verrouille exactement :
+
+### Chemins actifs
+
+- `enemy` et `ambush` délèguent à `dungeonEncounter(room)` ;
+- `boss` délègue à `dungeonBossRoom(room)` ;
+- ces chemins restent hors extraction pure.
+
+### Descripteurs non-combat
+
+- `trap` construit le résultat à partir du type de piège déjà choisi ;
+- `chest`, `merchant`, `rest` et le fallback calme sont des objets descriptifs sans besoin de runtime externe une fois les entrées connues.
+
+### Normalisation ennemis
+
+Après le choix du résultat :
+- `loadActiveEnemies()` est lu ;
+- seuls les ennemis dont `Number(dungeonRoom)===Number(room)` et `dc200Branch===undefined` reçoivent `false` ;
+- un marqueur existant n'est pas écrasé ;
+- les autres salles restent intactes ;
+- `saveActiveEnemies(all)` reste au propriétaire Core 2.00.
+
+### Carte
+
+- `cfg().map===false` produit `map:null` sans appel à `generateDungeonMap` ;
+- sinon `generateDungeonMap(kind,result.enemyQty||0)` est appelé une fois ;
+- RNG et géométrie restent hors extraction pure.
+
+### Retour
+
+La forme reste :
+`{result,map}`.
+
+## Slice pure sélectionnée
+
+API cible :
+`GensDungeonV1.exploration.buildGeneratedNonCombatRoomResult(kind, trapType)`.
+
+Responsabilité unique :
+construire uniquement les objets descriptifs des salles generated non-combat.
+
+Sémantique cible :
+- `trap` -> `{title:'🪤 '+trapType.name,text:'Un piège est présent dans la salle.',enemyQty:0,trapId:trapType.id}` ;
+- `chest` -> descripteur Coffre historique ;
+- `merchant` -> descripteur Marchand historique ;
+- `rest` -> descripteur Sanctuaire historique ;
+- autre kind non-combat -> descripteur Salle calme historique.
+
+Le callsite Core 2.00 conserve :
+- les branches `enemy/ambush` et `boss` ;
+- le choix du piège `dungeonPickTrapType(cfg())` et son fallback historique ;
+- la normalisation / sauvegarde `dc200Branch` ;
+- `cfg().map` ;
+- `generateDungeonMap(...)` ;
+- la composition finale `{result,map}`.
+
+L'API cible :
+- ne consomme aucun RNG ;
+- ne lit aucune config ;
+- ne touche aucun stockage ;
+- ne dépend ni du DOM, ni de Spatial, ni de Room Runtime ;
+- ne consomme aucun autre module.
+
+## Rule 26 courant reconstitué et vérifié
+
+À partir du fichier utilisateur exact `work40.zip / index40.txt` et du micro-diff Boss du lot 30 déjà documenté, l'`index.html` courant a été reconstruit localement.
+
+Empreinte vérifiée :
+- `8169856` octets ;
+- blob Git `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
+
+Cette reconstruction correspond exactement au runtime courant.
+
+Un futur micro-diff du seam sélectionné pourra donc utiliser cette source exacte, sous garde stricte d'empreinte et remplacement à occurrence unique.
+
+## Prochaine étape TDD
+
+1. poser UNE sentinelle RED exigeant `buildGeneratedNonCombatRoomResult(...)` et son raccord exact dans `createRoom(...)` ;
+2. vérifier RED isolé sur Architecture ;
+3. Firefox et Tactical Dock doivent rester GREEN ;
+4. seulement ensuite appliquer le micro-diff minimal.

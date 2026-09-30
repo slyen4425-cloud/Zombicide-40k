@@ -16,9 +16,9 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8169990,'raccord guard must target current Phase 7 Dungeon generated-branch descriptor runtime size');
-assert.equal(gitBlob(indexBuf),'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082',
-  'raccord guard current Phase 7 generated-branch descriptor runtime blob drifted');
+assert.equal(indexBuf.length,8169856,'raccord guard must target current Phase 7 Dungeon generated Boss policy runtime size');
+assert.equal(gitBlob(indexBuf),'454b2e12cde591c2db19023d1b76055ebac8e1b1',
+  'raccord guard current Phase 7 generated Boss policy runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');
 assert.equal(shared.operation,'returnToPrimaryView');

@@ -138,3 +138,79 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 23
+
+### Caractérisation GREEN préalable
+
+SHA :
+`5732bb03d60a572c6c317ababeef02ce67cd92aa`.
+
+CI :
+- Architecture + Browser `36664129967` — SUCCESS ;
+- Firefox `36664129907` — SUCCESS ;
+- Tactical Dock `36664129980` — SUCCESS.
+
+La caractérisation verrouille via le vrai `authoredContext()` :
+- la sélection historique du héros ;
+- `currentNodeId` ;
+- la position ;
+- le rejet du runtime non-authored ;
+- le rejet d'un graphe absent ou d'un `worldDungeonId` divergent ;
+- le cas fractionnaire dans les bornes, qui conserve un contexte nul.
+
+### RED isolé
+
+SHA :
+`87a60dfe5069a7f13dd295823b6a6ea8f265eae7`.
+
+Résultat :
+- Architecture `36665107361` — FAILURE attendue uniquement sur l'étape #225 `Exiger la délégation héros actif Zone Links authored Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36665107335` — SUCCESS ;
+- Tactical Dock `36665107324` — SUCCESS.
+
+### Micro-diff GREEN appliqué
+
+Commits :
+- `3823c0b42922abe001b168e33f5c9f37418fad0e` — Zone Links délègue uniquement la sélection pure du héros au propriétaire canonique ;
+- `a96d2f027b4d82a81325812e54c0fdeff76b8af0` — frontière contractuelle documentée ;
+- `0f603cfb014d558001ddc3c80aa3b255812fc748` — caractérisation post-raccord ;
+- `5cd67d6c1401f7affc518b1551f0e9d620625eaf` et `6ba8b4d694df1cd356a7951c8214f79f5959913c` — fixtures historiques Zone Links chargées avec le propriétaire Dungeon réel.
+
+Le premier run post-raccord a échoué uniquement parce qu'une fixture historique chargeait encore Zone Links sans initialiser `GensDungeonV1`. Le log a confirmé :
+`TypeError: Cannot read properties of undefined (reading 'movement')`.
+La correction est restée limitée aux fixtures de test ; aucun correctif runtime supplémentaire n'a été ajouté.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`6ba8b4d694df1cd356a7951c8214f79f5959913c`.
+
+CI :
+- Architecture + Browser `36665363990` — SUCCESS ;
+- Firefox `36665363960` — SUCCESS ;
+- Tactical Dock `36665363881` — SUCCESS.
+
+### Frontière préservée
+
+- Zone Links ne possède plus l'algorithme de sélection du héros actif ;
+- `GensDungeonV1.movement.resolveAuthoredActiveHero(...)` reste le propriétaire canonique ;
+- `authoredContext` conserve lectures runtime/graphe, validation authored, `currentNodeId` et position ;
+- transitions reverse/cache/return, piles par héros, cache bindings, Builder, boutons, DOM, wrapper Core, listener editor et retry restent Zone Links ;
+- World Runtime, Room Runtime, Large Room Support, Core 317/318 et Source Render restent différés ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun wrapper, observer, timer, retry ou heartbeat ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-zone-links-active-hero-delegation-green-2026-09-30`.

@@ -124,3 +124,65 @@ Toute future modification du gros fichier exige une source exacte correspondant 
 - blob `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
 
 Aucune ancienne copie ne doit être utilisée directement comme fichier de sortie courant.
+
+
+## Caractérisation GREEN de la décision dc200Branch
+
+Test :
+`tests/gens_phase7_dungeon_generated_enemy_branch_normalization_characterization_v1.test.cjs`.
+
+SHA :
+`090a2d697bec4b617b6a2150f86e0859788a07a0`.
+
+CI :
+- Architecture + Browser `36767206870` — SUCCESS ;
+- Firefox `36767206854` — SUCCESS ;
+- Tactical Dock `36767206806` — SUCCESS ;
+- étape dédiée #197 `Caractériser la normalisation dc200Branch des ennemis generated Phase 7` — SUCCESS.
+
+La caractérisation confirme exactement :
+
+- même salle numérique + marqueur absent -> initialisation ;
+- salle stockée comme chaîne numérique -> même comportement via `Number(...)` ;
+- autre salle -> aucune initialisation ;
+- marqueur déjà `false`, `true` ou `null` -> préservé ;
+- `dungeonRoom` falsy -> fallback historique `||0` ;
+- room chaîne numérique -> comparaison numérique historique ;
+- valeurs non numériques -> `NaN===NaN` reste false.
+
+La mutation et la persistance restent observées dans le vrai `createRoom(...)`.
+
+## Slice pure retenue
+
+API cible :
+`GensDungeonV1.exploration.shouldInitializeGeneratedEnemyBranch(enemy, room)`.
+
+Responsabilité unique :
+retourner uniquement le booléen historique :
+
+`Number(enemy.dungeonRoom||0)===Number(room) && enemy.dc200Branch===undefined`.
+
+Le helper doit :
+- rester pur ;
+- ne muter ni `enemy` ni aucune collection ;
+- ne lire aucun stockage ;
+- ne sauvegarder aucune donnée ;
+- ne lire aucune config ;
+- ne consommer aucun RNG ;
+- ne dépendre d'aucun autre module.
+
+Core 2.00 doit conserver :
+- `loadActiveEnemies()` ;
+- la boucle sur les ennemis ;
+- l'assignation `e.dc200Branch=false` ;
+- `saveActiveEnemies(all)` ;
+- l'ordre de matérialisation de salle ;
+- encounter/Boss ;
+- génération de carte.
+
+## Prochaine étape TDD
+
+1. poser UNE garde RED exigeant le helper pur et son raccord exact dans la condition existante ;
+2. vérifier RED isolé sur Architecture ;
+3. Firefox et Tactical Dock doivent rester GREEN ;
+4. aucun micro-diff runtime avant confirmation du RED isolé.

@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
+const entry=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-zone-links-167846.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 const graph={id:'world-1',nodes:[{id:'A',roomId:'ra',label:'Salle A'}],edges:[],cacheBindings:[{id:'cb',sourceNodeId:'A',sourceIndex:2,targetRoomId:'attic',kind:'secondary',returnMode:'source'}]};
@@ -47,7 +48,7 @@ const context={console,JSON,Math,Date,document,
   showToast(){}
 };
 context.window=context;context.globalThis=context;
-vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-zone-links-167846.js'});
+vm.createContext(context);vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,context,{filename:'dungeon-zone-links-167846.js'});
 const api=context.DungeonZoneLinks167846;
 
 assert.equal(api.travelCache(),true,'cache transition must succeed');

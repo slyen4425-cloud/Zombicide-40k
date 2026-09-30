@@ -52,11 +52,18 @@ Rule 26 courant :
 - empreinte vérifiée : `8169856` / `454b2e12cde591c2db19023d1b76055ebac8e1b1` ;
 - aucun nouveau fichier utilisateur n'est requis pour ce seam tant que cette empreinte reste la base.
 
+RED isolé :
+- SHA `45060d384bb0ae2736208dde54981350529a9cb2` ;
+- Architecture `36744953544` — FAILURE attendue uniquement sur #196 ;
+- caractérisation #195 — SUCCESS ;
+- Firefox `36744953488` — SUCCESS ;
+- Tactical Dock `36744953451` — SUCCESS.
+
 Prochaine action :
-1. poser UNE sentinelle RED exigeant uniquement `buildGeneratedNonCombatRoomResult(...)` + son raccord exact dans `createRoom(...)` ;
-2. vérifier RED isolé Architecture ;
-3. Firefox et Tactical Dock doivent rester GREEN ;
-4. appliquer ensuite seulement le micro-diff minimal.
+1. appliquer le micro-diff minimal : nouveau builder pur + raccord non-combat unique dans `createRoom(...)` ;
+2. conserver encounter/Boss, piège RNG, stockage ennemis et génération de carte au callsite ;
+3. triple CI GREEN technique ;
+4. réaligner uniquement les fingerprints réellement invalidés.
 
 ---
 

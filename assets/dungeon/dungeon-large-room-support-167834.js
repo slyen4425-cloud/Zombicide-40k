@@ -53,7 +53,7 @@ function generate(kind,enemyQty,sizeOverride,oldObjective){
   const objective=clone(oldObjective)||{type:"reach_exit",status:"open",title:"Atteindre la sortie",text:"La voie vers la porte suivante est libre."};
   return {version:4,size:n,width:n,height:n,cells:a,entry,exit,entryIdx:ei,exitIdx:xo,heroIdx:hi,chestIdx,trapIdx,enemies,objective,shape:s.type,environment:"dungeon",generatedAt:Date.now(),largeRoom167835:true};
 }
-function activeHero(x){const ids=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,ids.length-1),Number(x?.index)||0));return String(ids[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function roomEnemies(room){try{return (ROOT.loadActiveEnemies?.()||[]).filter(e=>!e?.removed&&!e?.defeated&&Number(e?.hp)>0&&Number(e?.dungeonRoom)===Number(room))}catch(e){return []}}
 function remapEnemies(x,map){
   const ids=roomEnemies(x.room).map(e=>String(e.id)),anchors=[...(map.enemies||[])];

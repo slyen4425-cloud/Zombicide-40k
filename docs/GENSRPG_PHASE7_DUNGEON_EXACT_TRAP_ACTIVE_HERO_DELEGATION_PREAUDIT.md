@@ -138,3 +138,74 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture technique du micro-lot 22
+
+### Caractérisation GREEN préalable
+
+SHA :
+`2871c430a09ac52ea7f41a843e6b3f8c687c8238`.
+
+CI :
+- Architecture + Browser `36641403703` — SUCCESS ;
+- Firefox `36641403629` — SUCCESS ;
+- Tactical Dock `36641403618` — SUCCESS.
+
+La caractérisation verrouille :
+- la sélection historique du héros par le vrai chemin `triggerAtHero(x)` ;
+- la transmission du héros sélectionné à `dungeonResolveTrapAgainstHero` ;
+- le cas fractionnaire dans les bornes sans arrondi ;
+- le rejet du contexte non-authored ;
+- l'absence de redéclenchement d'un piège déjà consommé.
+
+### RED isolé
+
+SHA :
+`b3fe368b4638d148f4f0ac263ce60ddb7ff9dd65`.
+
+Résultat :
+- Architecture `36642633732` — FAILURE attendue uniquement sur l'étape #223 `Exiger la délégation héros actif Exact Trap authored Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36642633771` — SUCCESS ;
+- Tactical Dock `36642633799` — SUCCESS.
+
+### Micro-diff GREEN appliqué
+
+Commits :
+- `1866745a59ca3416ebcb8373279d8d3b5ce7763d` — Exact Trap délègue uniquement la sélection pure du héros au propriétaire canonique ;
+- `04c1a652b7d3ede47baca6892c0663afd1eea3cf` — frontière contractuelle documentée ;
+- `6e802f4fb9538b9308ffaecfdba3ced923ecd5af` — caractérisation post-raccord ;
+- `528216ee0d867db5d52225603a807854befe2e17` — fixture historique Exact Trap chargée avec le propriétaire Dungeon réel.
+
+### Triple CI technique GREEN
+
+SHA technique :
+`528216ee0d867db5d52225603a807854befe2e17`.
+
+CI :
+- Architecture + Browser `36642919868` — SUCCESS ;
+- Firefox `36642919856` — SUCCESS ;
+- Tactical Dock `36642920026` — SUCCESS.
+
+### Frontière préservée
+
+- Exact Trap ne possède plus l'algorithme de sélection du héros actif ;
+- `GensDungeonV1.movement.resolveAuthoredActiveHero(...)` reste le propriétaire canonique ;
+- `triggerAtHero` conserve validation authored, position, état du piège, sélection de piège, résolution, consommation, scène et persistance ;
+- `DungeonSpatial313` reste inchangé ;
+- Zone Links, World Runtime, Room Runtime, Large Room Support, Core 317/318 et Source Render restent différés ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucune nouvelle API ;
+- aucune rustine globale ;
+- aucun wrapper, observer, timer, retry ou heartbeat ajouté ;
+- aucune modification de `main` ;
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-exact-trap-active-hero-delegation-green-2026-09-30`.

@@ -15,40 +15,48 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_MATERIALIZATION_AUDIT_PREAUDIT.md`
 
-Cible :
-caractériser uniquement `dungeonCore200Rebuild.createRoom(room, kind)` afin de séparer précisément :
-- résultat de salle ;
-- encounter/Boss actifs ;
-- descripteurs statiques ;
-- normalisation `dc200Branch` ;
-- sauvegarde ennemis ;
-- génération de carte ;
-- forme `{result,map}`.
+Cible auditée :
+`dungeonCore200Rebuild.createRoom(room, kind)`.
 
-Décision d'architecture :
-- interdiction d'extraire `createRoom(...)` en bloc ;
-- aucune API de migration figée avant caractérisation ;
-- aucune modification runtime pendant l'audit initial.
+Caractérisation GREEN :
+- SHA `62d3bd9d48201be4ec9af5ab541057206cbcae6f` ;
+- Architecture + Browser `36743699875` — SUCCESS ;
+- Firefox `36743699968` — SUCCESS ;
+- Tactical Dock `36743699886` — SUCCESS ;
+- étape #195 `Caractériser la matérialisation des salles generated Phase 7` — SUCCESS.
+
+Résultat de l'audit :
+- `enemy/ambush` restent délégués à `dungeonEncounter(room)` ;
+- `boss` reste délégué à `dungeonBossRoom(room)` ;
+- `createRoom(...)` normalise encore `dc200Branch`, sauvegarde les ennemis, décide map on/off et appelle `generateDungeonMap(...)` ;
+- ces responsabilités actives restent hors extraction ;
+- les descripteurs `trap/chest/merchant/rest/default` forment la seule slice pure homogène identifiée.
+
+Slice pure sélectionnée :
+`GensDungeonV1.exploration.buildGeneratedNonCombatRoomResult(kind, trapType)`.
+
+Le futur raccord doit laisser Core 2.00 propriétaire de :
+- choix du piège `dungeonPickTrapType(cfg())` + fallback historique ;
+- encounter/Boss ;
+- normalisation/sauvegarde ennemis ;
+- config map ;
+- génération de carte et RNG ;
+- composition finale `{result,map}`.
 
 Runtime de base :
 - `index.html` : `8169856` octets ;
 - blob : `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
 
-Base CI :
-- Architecture + Browser `36741124146` — SUCCESS ;
-- Firefox `36741124306` — SUCCESS ;
-- Tactical Dock `36741124296` — SUCCESS.
-
-Rule 26 :
-- `work40.zip / index40.txt` a permis d'inspecter le seam `createRoom` resté inchangé par le lot 30 ;
-- toute future modification du `index.html` exige une source exacte correspondant au blob courant `454b2e12...`.
+Rule 26 courant :
+- l'exact runtime courant a été reconstruit localement depuis `work40.zip` + le micro-diff Boss du lot 30 ;
+- empreinte vérifiée : `8169856` / `454b2e12cde591c2db19023d1b76055ebac8e1b1` ;
+- aucun nouveau fichier utilisateur n'est requis pour ce seam tant que cette empreinte reste la base.
 
 Prochaine action :
-1. ajouter la caractérisation permanente de `createRoom(...)` ;
-2. raccorder la sentinelle à Architecture ;
-3. triple CI GREEN ;
-4. sélectionner UNE responsabilité pure homogène seulement après preuve ;
-5. aucun RED ni micro-diff runtime avant cette sélection.
+1. poser UNE sentinelle RED exigeant uniquement `buildGeneratedNonCombatRoomResult(...)` + son raccord exact dans `createRoom(...)` ;
+2. vérifier RED isolé Architecture ;
+3. Firefox et Tactical Dock doivent rester GREEN ;
+4. appliquer ensuite seulement le micro-diff minimal.
 
 ---
 

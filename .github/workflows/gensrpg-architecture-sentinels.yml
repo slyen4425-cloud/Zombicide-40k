@@ -719,6 +719,9 @@ jobs:
       - name: Caractériser la divergence héros actif Core 317 Phase 7
         run: node tests/gens_phase7_dungeon_core317_active_hero_divergence_characterization_v1.test.cjs
 
+      - name: Caractériser la divergence héros actif Source Render Phase 7
+        run: node tests/gens_phase7_dungeon_source_render_active_hero_divergence_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

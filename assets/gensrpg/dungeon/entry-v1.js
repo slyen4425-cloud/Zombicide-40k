@@ -30,6 +30,10 @@
     return {title:"✨ Salle calme",text:"La salle semble calme.",enemyQty:0};
   }
 
+  function shouldDefaultGeneratedRoomEnemyBranch(enemy,room){
+    return Number(enemy.dungeonRoom||0)===Number(room)&&enemy.dc200Branch===undefined;
+  }
+
   function pickWeightedGeneratedRoomKind(roomWeights,roll){
     const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
     const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
@@ -122,6 +126,7 @@
       planGeneratedAdvance,
       planGeneratedBossPolicy,
       buildGeneratedNonCombatRoomResult,
+      shouldDefaultGeneratedRoomEnemyBranch,
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
       pickWeightedGeneratedBranchType,

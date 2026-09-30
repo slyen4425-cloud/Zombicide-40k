@@ -15,7 +15,7 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_BOSS_POLICY_POST_AUTHORITY_SWEEP_PREAUDIT.md`
 
-Cible :
+Cible fermée :
 extraire uniquement la planification pure de la politique Boss generated vers :
 `GensDungeonV1.exploration.planGeneratedBossPolicy(...)`
 tout en laissant les tirages RNG et la matérialisation dans Core 2.00.
@@ -24,46 +24,50 @@ Caractérisation GREEN post authority sweep :
 - SHA `98f6ace947ed75242770d4124a55605dea10ec54` ;
 - Architecture + Browser `36706175521` — SUCCESS ;
 - Firefox `36706175574` — SUCCESS ;
-- Tactical Dock `36706175544` — SUCCESS ;
-- Browser 45/45 sans échec.
-
-Comportement reverrouillé :
-- Boss final prioritaire si `boss !== 'none'` et salle finale ;
-- `everyN`, `specific` et `random` conservent exactement leurs règles historiques ;
-- random Boss reste inactif pour les salles <=2 ;
-- normalisation historique `bossChance` conservée ;
-- fallback non-Boss reste `pickWeightedGeneratedRoomKind(..., Math.random())` ;
-- consommation RNG historique confirmée 0 / 1 / 2 tirages selon le chemin.
+- Tactical Dock `36706175544` — SUCCESS.
 
 RED isolé :
 - SHA `31baecbf4ab75f9ecb9a6179a17cea60c7ed3235` ;
-- Architecture `36707500873` — FAILURE attendue uniquement sur #194 `Exiger la politique Boss generated post authority sweep Phase 7` ;
+- Architecture `36707500873` — FAILURE attendue uniquement sur #194 ;
 - caractérisation #193 — SUCCESS ;
-- Browser SKIPPED uniquement par dépendance au RED Architecture ;
 - Firefox `36707500953` — SUCCESS ;
 - Tactical Dock `36707500802` — SUCCESS.
 
-État actuel :
-**RULE 26 HOLD avant micro-diff runtime inline.**
+Rule 26 satisfaite :
+- fichier source fourni et vérifié : `8169990` octets / blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082` ;
+- runtime final : `8169856` octets / blob `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
 
-Le fichier exact requis doit correspondre à :
-- `index.html` : `8169990` octets ;
-- blob Git : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+Raccord GREEN technique :
+- SHA `be44ae8f56abc9880c0f354c2df6db58478d91ad` ;
+- Architecture + Browser `36735197069` — SUCCESS ;
+- Firefox `36735196980` — SUCCESS ;
+- Tactical Dock `36735197073` — SUCCESS ;
+- étape #193 — SUCCESS ;
+- étape #194 — SUCCESS.
 
-Interdiction de lire/modifier le contenu exact via les outils GitHub.
-Le micro-diff ne reprend qu'après fourniture par Sylvain d'un ZIP/TXT exact et vérification locale de cette empreinte.
+Résultat :
+- `planGeneratedBossPolicy(...)` est désormais le propriétaire pur de la décision Boss generated ;
+- le planner ne consomme aucun RNG ;
+- Core 2.00 conserve le tirage Boss aléatoire, le tirage de pondération, `pickWeightedGeneratedRoomKind(...)` et la matérialisation ;
+- priorité Boss final, `everyN`, parsing `specific`, seuil salle > 2 du mode `random` et fallback de chance historique sont conservés ;
+- consommation RNG historique 0 / 1 / 2 tirages conservée selon le chemin.
 
-Après validation Rule 26 :
-1. ajouter le planner pur dans `assets/gensrpg/dungeon/entry-v1.js` ;
-2. remplacer uniquement la politique Boss inline dans `Core 2.00 chooseKind(room)` ;
-3. conserver les RNG Boss + pondération dans Core 2.00 ;
-4. triple CI GREEN technique ;
-5. fermeture documentaire ;
-6. triple CI documentaire ;
-7. checkpoint GREEN final.
+Sentinelles :
+- les gardes qui désignaient l'ancien blob comme runtime courant ont été réalignées sur le nouveau blob ;
+- aucune assertion métier n'a été retirée ;
+- les empreintes historiques ont été conservées dans les listes explicitement historiques.
 
-Aucun changement runtime effectué depuis le RED.
-`main` reste gelée.
+Frontière préservée :
+- branches generated, authored World Builder, mouvement, Spatial, événements/spawn, ennemis, coffres, pièges, énigmes, Tactical, Survival, Capture, PvP et assets inchangés hors raccord ciblé ;
+- aucun changement utilisateur visible attendu.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-boss-policy-post-authority-sweep-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite reprendre l'audit du prochain seam Phase 7 depuis ce checkpoint.
 
 ---
 

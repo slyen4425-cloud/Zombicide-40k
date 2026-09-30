@@ -15,55 +15,58 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_MATERIALIZATION_AUDIT_PREAUDIT.md`
 
-Cible auditée :
-`dungeonCore200Rebuild.createRoom(room, kind)`.
+Cible fermée :
+caractériser `dungeonCore200Rebuild.createRoom(room, kind)`, puis extraire uniquement la slice pure homogène identifiée sans déplacer encounter/Boss, stockage ennemis ni génération de carte.
 
 Caractérisation GREEN :
 - SHA `62d3bd9d48201be4ec9af5ab541057206cbcae6f` ;
 - Architecture + Browser `36743699875` — SUCCESS ;
 - Firefox `36743699968` — SUCCESS ;
 - Tactical Dock `36743699886` — SUCCESS ;
-- étape #195 `Caractériser la matérialisation des salles generated Phase 7` — SUCCESS.
+- étape #195 — SUCCESS.
 
 Résultat de l'audit :
-- `enemy/ambush` restent délégués à `dungeonEncounter(room)` ;
-- `boss` reste délégué à `dungeonBossRoom(room)` ;
-- `createRoom(...)` normalise encore `dc200Branch`, sauvegarde les ennemis, décide map on/off et appelle `generateDungeonMap(...)` ;
-- ces responsabilités actives restent hors extraction ;
-- les descripteurs `trap/chest/merchant/rest/default` forment la seule slice pure homogène identifiée.
-
-Slice pure sélectionnée :
-`GensDungeonV1.exploration.buildGeneratedNonCombatRoomResult(kind, trapType)`.
-
-Le futur raccord doit laisser Core 2.00 propriétaire de :
-- choix du piège `dungeonPickTrapType(cfg())` + fallback historique ;
-- encounter/Boss ;
-- normalisation/sauvegarde ennemis ;
-- config map ;
-- génération de carte et RNG ;
-- composition finale `{result,map}`.
-
-Runtime de base :
-- `index.html` : `8169856` octets ;
-- blob : `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
-
-Rule 26 courant :
-- l'exact runtime courant a été reconstruit localement depuis `work40.zip` + le micro-diff Boss du lot 30 ;
-- empreinte vérifiée : `8169856` / `454b2e12cde591c2db19023d1b76055ebac8e1b1` ;
-- aucun nouveau fichier utilisateur n'est requis pour ce seam tant que cette empreinte reste la base.
+- `createRoom(...)` mélange encounter/Boss, piège, normalisation ennemis, stockage et carte ;
+- extraction en bloc interdite ;
+- seule slice pure retenue : descripteurs generated non-combat.
 
 RED isolé :
 - SHA `45060d384bb0ae2736208dde54981350529a9cb2` ;
 - Architecture `36744953544` — FAILURE attendue uniquement sur #196 ;
-- caractérisation #195 — SUCCESS ;
+- #195 — SUCCESS ;
 - Firefox `36744953488` — SUCCESS ;
 - Tactical Dock `36744953451` — SUCCESS.
 
+Raccord GREEN technique :
+- SHA `2ada8cbd17dd872cd02bfb395a16304da8371554` ;
+- Architecture + Browser `36746980361` — SUCCESS ;
+- Firefox `36746979868` — SUCCESS ;
+- Tactical Dock `36746978838` — SUCCESS ;
+- #195 — SUCCESS ;
+- #196 — SUCCESS.
+
+Résultat :
+- nouveau propriétaire pur :
+  `GensDungeonV1.exploration.buildGeneratedNonCombatRoomResult(kind, trapType)` ;
+- Core 2.00 conserve `dungeonEncounter(room)`, `dungeonBossRoom(room)`, choix du piège, normalisation/sauvegarde ennemis, `cfg().map`, `generateDungeonMap(...)` et `{result,map}` ;
+- aucun RNG/config/stockage/DOM/Spatial/Room Runtime dans le builder pur.
+
+Runtime final :
+- `index.html` : `8169442` octets ;
+- blob : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+
+Sentinelles / Rule 26 :
+- fingerprints du runtime courant réalignés sans retirer les assertions métier ;
+- outils temporaires de fingerprint retirés avant le GREEN final ;
+- aucune modification utilisateur visible attendue.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-materialization-audit-green-2026-09-30`.
+
 Prochaine action :
-1. appliquer le micro-diff minimal : nouveau builder pur + raccord non-combat unique dans `createRoom(...)` ;
-2. conserver encounter/Boss, piège RNG, stockage ennemis et génération de carte au callsite ;
-3. triple CI GREEN technique ;
-4. réaligner uniquement les fingerprints réellement invalidés.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite ouvrir le prochain seam Phase 7 depuis ce checkpoint.
 
 ---
 

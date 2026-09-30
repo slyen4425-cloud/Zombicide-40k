@@ -112,3 +112,61 @@ Ne pas toucher :
 
 Aucune lecture ni modification du contenu exact de `index.html` n'est requise.
 Toute dérive vers son contenu exact arrête le lot et déclenche Rule 26.
+
+
+## Fermeture du micro-lot 29
+
+### Caractérisation GREEN
+
+SHA :
+`9b610776fda094f4f75450e4657bde17f19adf33`.
+
+CI :
+- Architecture + Browser `36701730421` — SUCCESS ;
+- Firefox `36701730296` — SUCCESS ;
+- Tactical Dock `36701730395` — SUCCESS ;
+- Browser 45/45 sans échec ;
+- étape dédiée #235 `Caractériser la divergence héros actif Source Render Phase 7` — SUCCESS.
+
+### Résultat exact
+
+Parité confirmée entre Source Render et le helper canonique pour :
+- index entier valide ;
+- chaîne numérique d'index ;
+- index fractionnaire encore dans les bornes, qui ne correspond à aucune propriété de tableau ;
+- participant truthy non-chaîne dans un tableau, car Source Render applique lui aussi `String(...)` ;
+- participant falsy.
+
+Divergence confirmée pour :
+- index négatif : Source Render ne marque aucun token actif, le helper canonique sélectionne le premier héros ;
+- index au-delà de la borne : Source Render ne marque aucun token actif, le helper canonique sélectionne le dernier héros ;
+- index fractionnaire au-delà de la borne : Source Render ne marque aucun token actif, le helper canonique clamp vers le dernier héros ;
+- `participants` non-tableau : le vrai chemin Source Render reste historiquement dépendant de `.forEach` et lève une erreur, tandis que le helper canonique retourne `""`.
+
+### Décision conforme à la charte
+
+Aucun RED de migration.
+Aucun changement runtime.
+
+La délégation directe de la sélection inline Source Render vers `resolveAuthoredActiveHero(...)` changerait le comportement visuel dans plusieurs cas limites et n'est donc pas autorisée comme simple refactor.
+
+Toute harmonisation future exige une décision fonctionnelle dédiée sur :
+- politique de clamp des index ;
+- contrat de type de `participants` ;
+- comportement attendu du token visuellement actif.
+
+### Frontière préservée
+
+- `dungeon-source-render-stability-167877.js` inchangé ;
+- helper canonique inchangé ;
+- textures, murs, tokens héros/ennemis, styles, Spatial, wrappers render/show et retry inchangés ;
+- aucun changement `index.html`.
+
+### Conformité
+
+- aucun changement utilisateur visible ;
+- aucun test utilisateur nécessaire ;
+- Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-source-render-active-hero-divergence-green-2026-09-30`.

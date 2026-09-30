@@ -1,0 +1,21 @@
+name: TEMP GenSrpG lot31 fingerprint scan
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase7-dungeon-generated-room-materialization-audit-2026-09-30'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List exact previous runtime fingerprint references
+        run: |
+          echo "=== TEST REFERENCES ==="
+          grep -R -n -E '8169856|454b2e12cde591c2db19023d1b76055ebac8e1b1' tests || true
+          echo "=== DOC/WORKFLOW REFERENCES ==="
+          grep -R -n -E '8169856|454b2e12cde591c2db19023d1b76055ebac8e1b1' docs .github/workflows || true

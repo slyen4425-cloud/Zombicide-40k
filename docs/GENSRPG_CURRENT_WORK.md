@@ -15,32 +15,57 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_LARGE_ROOM_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
+Cible fermée :
 faire déléguer uniquement la sélection privée `DungeonLargeRoom167834.activeHero(x)` au propriétaire canonique :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- copie historique bit-à-bit équivalente au helper canonique ;
-- deux consommateurs privés : `repairGenerated()` et `ensureWorldState()` via `repairWorld()` ;
-- aucune nouvelle API ;
-- géométrie, génération, World Builder, Spatial, wrappers et timers restent hors périmètre ;
-- Core 317/318 et Source Render restent différés ;
-- Source Render conserve une divergence de sélection inline et ne sera pas migré comme simple refactor sans caractérisation dédiée.
+Caractérisation GREEN :
+- SHA `2aed29ecb8c663c1fae89f09e98305898b055f02` ;
+- Architecture + Browser `36687134583` — SUCCESS ;
+- Firefox `36687134541` — SUCCESS ;
+- Tactical Dock `36687134540` — SUCCESS.
 
-Base validée :
-- Architecture + Browser `36682686771` — SUCCESS ;
-- Firefox `36682686722` — SUCCESS ;
-- Tactical Dock `36682686715` — SUCCESS.
+RED isolé :
+- SHA `561c7a9cdaf5a29ded883a58f9504d44dcad095b` ;
+- Architecture `36688367873` — FAILURE attendue uniquement sur #231 `Exiger la délégation héros actif Large Room Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36688367959` — SUCCESS ;
+- Tactical Dock `36688367872` — SUCCESS.
+
+Micro-diff GREEN :
+- `f00c396568d5ad9120c4f383f2a77adae6e21b2a` — Large Room délègue uniquement la sélection pure ;
+- `a1c133300f4a75ce821329f65f1b94c4e5c314f0` — contrat Dungeon clarifié ;
+- `a61b39f1e8a91f36f5758d5734edcfe434a6b04b` — caractérisation réalignée post-délégation ;
+- `73dbb027d8ceebdefa73a3fdd5a3f57434de1f0d` — fixture historique Large Room charge le propriétaire Dungeon réel.
+
+Triple CI technique GREEN sur `73dbb027d8ceebdefa73a3fdd5a3f57434de1f0d` :
+- Architecture + Browser `36689169056` — SUCCESS ;
+- Firefox `36689169091` — SUCCESS ;
+- Tactical Dock `36689169092` — SUCCESS.
+
+Frontière préservée :
+- `repairGenerated` et `ensureWorldState` gardent leurs responsabilités hors sélection pure du héros ;
+- géométrie, tailles, génération, randomisation, World Builder/Runtime, contenu de zone et Spatial restent inchangés ;
+- wrappers render/show/explore, UI, styles, labels et timers restent inchangés ;
+- Core 317 / Core 318 et Source Render Stability restent différés ;
+- Source Render conserve sa divergence inline et ne sera pas migré comme simple refactor sans caractérisation dédiée ;
+- aucun changement `index.html`.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. caractériser `repairGenerated()` et `repairWorld()` avec la sélection historique ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Large Room.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-large-room-active-hero-delegation-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 25 — délégation héros actif World Runtime — 2026-09-30

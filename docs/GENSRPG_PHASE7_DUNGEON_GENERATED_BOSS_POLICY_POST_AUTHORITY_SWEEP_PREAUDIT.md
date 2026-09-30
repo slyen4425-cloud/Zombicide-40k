@@ -186,3 +186,91 @@ Prochaine action après vérification Rule 26 :
 3. conserver les deux callsites RNG au Core 2.00 ;
 4. pousser le micro-diff sur la branche courante ;
 5. triple CI GREEN technique.
+
+
+## Fermeture du micro-lot 30
+
+### Rule 26 satisfaite
+
+Le fichier exact fourni par Sylvain a été vérifié avant modification :
+- taille source : `8169990` octets ;
+- blob Git source : `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Le micro-diff produit :
+- taille finale `index.html` : `8169856` octets ;
+- blob Git final : `454b2e12cde591c2db19023d1b76055ebac8e1b1`.
+
+Aucune lecture arbitraire de l'ancien gros `index.html` n'a été utilisée pour contourner Rule 26.
+
+### Raccord GREEN
+
+SHA technique GREEN :
+`be44ae8f56abc9880c0f354c2df6db58478d91ad`.
+
+CI :
+- Architecture + Browser `36735197069` — SUCCESS ;
+- Firefox `36735196980` — SUCCESS ;
+- Tactical Dock `36735197073` — SUCCESS ;
+- étape #193 `Caractériser la politique Boss generated post authority sweep Phase 7` — SUCCESS ;
+- étape #194 `Exiger la politique Boss generated post authority sweep Phase 7` — SUCCESS.
+
+### Résultat exact
+
+Le propriétaire pur est désormais :
+`GensDungeonV1.exploration.planGeneratedBossPolicy(room, roomLimit, bossMode, bossEvery, bossRooms, bossChance)`.
+
+Le planner :
+- ne consomme aucun RNG ;
+- retourne `{status:'boss', chance:null}` pour une décision Boss déterministe ;
+- retourne `{status:'random', chance:<chance normalisée>}` pour le mode aléatoire éligible ;
+- retourne `{status:'none', chance:null}` sinon.
+
+Core 2.00 conserve :
+- `cfg()` ;
+- le tirage `Math.random()` du Boss aléatoire ;
+- le tirage `Math.random()` de pondération ;
+- `pickWeightedGeneratedRoomKind(...)` ;
+- la matérialisation réelle de la salle.
+
+Sémantique historique conservée :
+- Boss final prioritaire si `boss !== 'none'` et salle finale ;
+- `everyN` avec `Math.max(1, Number(bossEvery)||5)` ;
+- parsing historique du mode `specific` ;
+- mode `random` inactif pour les salles <= 2 ;
+- chance `Math.max(0, Number(bossChance)||13)` ;
+- fallback non-Boss pondéré inchangé.
+
+Consommation RNG conservée :
+- Boss déterministe réussi : 0 ;
+- miss déterministe : 1 tirage pondéré ;
+- random salle <= 2 : 1 tirage pondéré ;
+- random Boss réussi : 1 ;
+- random Boss refusé : 2 ;
+- final-room prioritaire en mode random : 0.
+
+### Sentinelles historiques
+
+Le changement légitime d'empreinte de `index.html` a nécessité le réalignement des gardes qui déclaraient explicitement l'ancien blob comme runtime courant.
+
+Ces réalignements :
+- ne modifient aucune règle gameplay ;
+- ne retirent aucune assertion métier ;
+- conservent les anciennes empreintes lorsque les tests les utilisent comme historique autorisé ;
+- font désormais passer l'ensemble Architecture, Browser, Firefox et Tactical Dock.
+
+### Frontière préservée
+
+Aucun changement fonctionnel hors politique Boss generated :
+- branches generated inchangées ;
+- authored World Builder inchangé ;
+- mouvement et Spatial inchangés ;
+- événements/spawn inchangés ;
+- ennemis, coffres, pièges et énigmes inchangés ;
+- Tactical/combat inchangé ;
+- Survival, Capture et PvP inchangés ;
+- assets inchangés.
+
+Aucun changement utilisateur visible attendu.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-boss-policy-post-authority-sweep-green-2026-09-30`.

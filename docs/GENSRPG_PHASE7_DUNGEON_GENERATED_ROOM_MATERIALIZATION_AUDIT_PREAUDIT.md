@@ -257,3 +257,86 @@ CI :
 Le RED est donc isolé à l'absence du nouveau propriétaire pur et de son raccord.
 
 Aucune autre régression n'est détectée avant micro-diff.
+
+
+## Fermeture du micro-lot 31
+
+### Raccord GREEN technique
+
+SHA technique GREEN :
+`2ada8cbd17dd872cd02bfb395a16304da8371554`.
+
+CI :
+- Architecture + Browser `36746980361` — SUCCESS ;
+- Firefox `36746979868` — SUCCESS ;
+- Tactical Dock `36746978838` — SUCCESS ;
+- étape #195 `Caractériser la matérialisation des salles generated Phase 7` — SUCCESS ;
+- étape #196 `Exiger le propriétaire pur des résultats non-combat generated Phase 7` — SUCCESS.
+
+### Runtime final
+
+`index.html` :
+- taille : `8169442` octets ;
+- blob Git : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+
+Le changement de fingerprint provient uniquement du micro-diff ciblé du seam non-combat et des réalignements de sentinelles nécessaires.
+
+### Résultat exact
+
+Le propriétaire pur est désormais :
+`GensDungeonV1.exploration.buildGeneratedNonCombatRoomResult(kind, trapType)`.
+
+Il possède uniquement :
+- le descripteur piège une fois le piège déjà choisi ;
+- le descripteur coffre ;
+- le descripteur marchand ;
+- le descripteur repos ;
+- le descripteur calme/fallback.
+
+Core 2.00 conserve :
+- `enemy/ambush -> dungeonEncounter(room)` ;
+- `boss -> dungeonBossRoom(room)` ;
+- le choix du piège `dungeonPickTrapType(cfg())` et son fallback historique ;
+- la normalisation `dc200Branch` ;
+- `loadActiveEnemies()` / `saveActiveEnemies(...)` ;
+- `cfg().map` ;
+- `generateDungeonMap(kind,result.enemyQty||0)` ;
+- la composition finale `{result,map}`.
+
+Le builder pur :
+- ne consomme aucun RNG ;
+- ne lit aucune configuration ;
+- ne touche aucun stockage ;
+- ne dépend ni du DOM, ni de Spatial, ni de Room Runtime ;
+- ne consomme aucun autre module.
+
+### Sentinelles / Rule 26
+
+La source exacte courante a été obtenue sous Rule 26 à partir de la source utilisateur vérifiée et du micro-diff Boss déjà documenté, puis protégée par empreinte avant le micro-diff du lot 31.
+
+Les gardes qui verrouillaient explicitement l'ancien runtime courant ont été réalignées sur le nouveau fingerprint sans suppression d'assertions métier.
+
+Les outils temporaires de fingerprint ont été retirés avant le SHA technique GREEN final.
+
+### Frontière préservée
+
+Restent inchangés :
+- encounter et Boss actifs ;
+- réserve/spawn ennemis ;
+- stockage ennemis hors normalisation historique conservée au callsite ;
+- génération de carte et RNG ;
+- Spatial ;
+- Room Runtime ;
+- branches generated ;
+- politique Boss ;
+- authored World Builder ;
+- mouvement ;
+- événements ;
+- Tactical/combat ;
+- Survival / Capture / PvP ;
+- assets.
+
+Aucun changement utilisateur visible attendu.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-materialization-audit-green-2026-09-30`.

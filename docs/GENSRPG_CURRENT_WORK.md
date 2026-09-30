@@ -1,3 +1,47 @@
+# PHASE 7 — MICRO-LOT 32 — audit normalisation dc200Branch generated — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-materialization-audit-green-2026-09-30`
+
+SHA de base :
+`b546f96a928ade114553790a37b1f07ba8e56b87`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-enemy-branch-normalization-audit-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-enemy-branch-normalization-audit-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_ENEMY_BRANCH_NORMALIZATION_AUDIT_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la règle historique de normalisation `dc200Branch` dans `createRoom(room,kind)`.
+
+Frontière :
+- décision de normalisation à caractériser ;
+- `loadActiveEnemies()`, mutation réelle et `saveActiveEnemies(...)` restent Core 2.00 pendant l'audit ;
+- aucun déplacement spawn/stockage/carte/combat ;
+- aucune API cible figée avant preuve.
+
+Runtime de base :
+- `index.html` : `8169442` octets ;
+- blob : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+
+Base CI :
+- Architecture + Browser `36752651640` — SUCCESS ;
+- Firefox `36752651555` — SUCCESS ;
+- Tactical Dock `36752651655` — SUCCESS.
+
+Prochaine action :
+1. ajouter une caractérisation dédiée `dc200Branch` ;
+2. brancher la sentinelle Architecture ;
+3. triple CI GREEN ;
+4. sélectionner UNE slice pure minimale après preuve ;
+5. aucun RED ni runtime avant cette sélection.
+
+---
+
 # PHASE 7 — MICRO-LOT 31 — audit matérialisation des salles generated — 2026-09-30
 
 Base GREEN :

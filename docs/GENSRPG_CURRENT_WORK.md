@@ -15,37 +15,53 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_SOURCE_RENDER_ACTIVE_HERO_DIVERGENCE_PREAUDIT.md`
 
-Cible :
+Cible fermée :
 caractériser uniquement la divergence entre la sélection inline du héros actif dans `DungeonSourceRenderStability167877.paintTokensNow()` et :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Source Render sélectionne inline via `String(x.participants?.[Number(x.index)||0]||"")` ;
-- cette sélection ne clamp ni les index négatifs ni les dépassements ;
-- elle peut indexer une valeur `participants` non-tableau mais indexable ;
-- elle sert uniquement à appliquer la classe visuelle `active` au token héros.
+Caractérisation GREEN :
+- SHA `9b610776fda094f4f75450e4657bde17f19adf33` ;
+- Architecture + Browser `36701730421` — SUCCESS ;
+- Firefox `36701730296` — SUCCESS ;
+- Tactical Dock `36701730395` — SUCCESS ;
+- Browser 45/45 sans échec ;
+- étape dédiée #235 — SUCCESS.
 
-Frontière :
-- aucun changement runtime autorisé dans ce lot ;
-- aucun RED de migration si divergence confirmée ;
-- rendu des tokens, styles, assets, wrappers render/show, Spatial et retry restent inchangés ;
+Résultat :
+- parité sur index valide, chaîne numérique, fractionnaire encore dans les bornes, participants truthy non-chaîne en tableau et participants falsy ;
+- divergence confirmée sur :
+  - index négatif : Source Render aucun actif, canonique premier héros ;
+  - dépassement : Source Render aucun actif, canonique dernier héros ;
+  - fractionnaire au-delà de la borne : Source Render aucun actif, canonique dernier héros par clamp ;
+  - participants non-tableau : vrai chemin Source Render dépend de `.forEach` et lève une erreur, canonique retourne `""`.
+
+Décision :
+- aucun RED de migration ;
+- aucun changement runtime ;
+- une délégation directe vers le helper canonique changerait le comportement visuel et n'est donc pas autorisée comme simple refactor ;
+- toute harmonisation future exige une décision fonctionnelle dédiée.
+
+Frontière préservée :
+- Source Render runtime inchangé ;
+- helper canonique inchangé ;
+- textures, murs, tokens, styles, Spatial, wrappers render/show et retry inchangés ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36699004061` — SUCCESS ;
-- Firefox `36699004069` — SUCCESS ;
-- Tactical Dock `36699004115` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. caractériser le vrai chemin `paintTokensNow()` ;
-2. comparer les cas limites au helper canonique ;
-3. triple CI GREEN ;
-4. documenter la décision sans migration si divergence confirmée.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-source-render-active-hero-divergence-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 28 — divergence héros actif Core 317 — 2026-09-30

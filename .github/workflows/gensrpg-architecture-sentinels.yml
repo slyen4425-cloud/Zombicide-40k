@@ -599,6 +599,9 @@ jobs:
       - name: Exiger la politique Boss generated post authority sweep Phase 7
         run: node tests/gens_phase7_dungeon_generated_boss_policy_post_authority_sweep_v1.test.cjs
 
+      - name: Caractériser la matérialisation des salles generated Phase 7
+        run: node tests/gens_phase7_dungeon_generated_room_materialization_characterization_v1.test.cjs
+
       - name: Caractériser le mouvement d’entrée authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_entry_movement_characterization_v1.test.cjs
 

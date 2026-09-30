@@ -55,8 +55,8 @@ assert.match(
 assert.equal(mj.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.includes('removeItem("'+KEY+'")'),false);
 
-assert.equal(bytes.length,8169990,'current Phase 7 Dungeon generated-branch descriptor index size must remain deterministic');
-assert.equal(gitBlob(bytes),'1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082','MJ Rules raccord must target the current Phase 7 Dungeon generated-branch descriptor baseline');
+assert.equal(bytes.length,8169856,'current Phase 7 Dungeon generated Boss policy index size must remain deterministic');
+assert.equal(gitBlob(bytes),'454b2e12cde591c2db19023d1b76055ebac8e1b1','MJ Rules raccord must target the current Phase 7 Dungeon generated Boss policy baseline');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core storage authority',

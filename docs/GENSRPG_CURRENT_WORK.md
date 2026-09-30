@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 28 — divergence héros actif Core 317 — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-core318-active-hero-delegation-green-2026-09-30`
+
+SHA de base :
+`21893747841404a17187fdaa77ad5fa3cf3d2ac1`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-core317-active-hero-divergence-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-core317-active-hero-divergence-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_CORE317_ACTIVE_HERO_DIVERGENCE_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la divergence entre le sélecteur privé `Dungeon Core 3.17 activeHeroId(x)` et :
+`GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
+
+Constat initial :
+- parité attendue sur les identifiants string et la sélection d'index historique ;
+- divergence suspectée pour les participants truthy non-chaîne : Core 317 retourne la valeur brute, le helper canonique applique `String(...)` ;
+- aucune migration runtime autorisée tant que la parité complète n'est pas prouvée.
+
+Frontière :
+- aucun changement `dungeon-core-317.js` dans ce lot ;
+- aucun changement du helper canonique ;
+- navigation retour salle, marchand, armor, DOM, observer/timers et Spatial hors périmètre ;
+- Source Render Stability reste différé ;
+- aucun changement `index.html`.
+
+Base validée :
+- Architecture + Browser `36694853712` — SUCCESS ;
+- Firefox `36694853706` — SUCCESS ;
+- Tactical Dock `36694853731` — SUCCESS.
+
+Prochaine action :
+1. ajouter une caractérisation ciblée du vrai `activeHeroId` Core 317 ;
+2. triple CI GREEN ;
+3. si divergence confirmée, fermer le lot sans RED de migration.
+
+---
+
 # PHASE 7 — MICRO-LOT 27 — délégation héros actif Core 318 — 2026-09-30
 
 Base GREEN :

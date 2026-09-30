@@ -1,3 +1,48 @@
+# PHASE 7 — MICRO-LOT 33 — audit frontière carte de salle generated — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-enemy-branch-normalization-audit-green-2026-09-30`
+
+SHA de base :
+`f7e0979fcdf2bbfe9d0c59a269de2b943005f5cf`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-room-map-boundary-audit-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-room-map-boundary-audit-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ROOM_MAP_BOUNDARY_AUDIT_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la frontière carte encore inline dans `createRoom(room,kind)` :
+- strict `cfg().map===false` ;
+- appel `generateDungeonMap(kind,result.enemyQty||0)` ;
+- ordre après sauvegarde ennemis ;
+- retour final `{result,map}`.
+
+Aucune API de migration n'est figée avant caractérisation.
+`generateDungeonMap(...)`, sa géométrie et son RNG restent hors extraction.
+
+Runtime de base :
+- `index.html` : `8169447` octets ;
+- blob : `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39`.
+
+Base CI :
+- Architecture + Browser `36762830930` — SUCCESS ;
+- Firefox `36762830943` — SUCCESS ;
+- Tactical Dock `36762830683` — SUCCESS.
+
+Prochaine action :
+1. ajouter la caractérisation permanente de la frontière carte ;
+2. raccorder la sentinelle à Architecture ;
+3. triple CI GREEN ;
+4. sélectionner UNE responsabilité pure homogène seulement après preuve ;
+5. aucun RED ni micro-diff runtime avant cette sélection.
+
+---
+
 # PHASE 7 — MICRO-LOT 32 — audit normalisation dc200Branch generated — 2026-09-30
 
 Base GREEN :

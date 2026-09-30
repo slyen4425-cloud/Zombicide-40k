@@ -1,3 +1,47 @@
+# PHASE 7 — MICRO-LOT 32 — audit normalisation dc200Branch ennemis generated — 2026-09-30
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-materialization-audit-green-2026-09-30`
+
+SHA de base :
+`b546f96a928ade114553790a37b1f07ba8e56b87`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-dungeon-generated-enemy-branch-normalization-audit-2026-09-30`
+
+Branche :
+`work/gensrpg-phase7-dungeon-generated-enemy-branch-normalization-audit-2026-09-30`
+
+Pré-audit :
+`docs/GENSRPG_PHASE7_DUNGEON_GENERATED_ENEMY_BRANCH_NORMALIZATION_AUDIT_PREAUDIT.md`
+
+Cible :
+caractériser uniquement la décision inline qui initialise `dc200Branch=false` pour les ennemis de la salle generated courante.
+
+Frontière :
+- aucune mutation ennemi dans l'API candidate ;
+- aucun `loadActiveEnemies()` / `saveActiveEnemies()` déplacé ;
+- encounter/Boss, spawn, carte, Spatial, Room Runtime et autres modules inchangés ;
+- aucun changement `index.html` pendant l'audit initial.
+
+Runtime de base :
+- `index.html` : `8169442` octets ;
+- blob : `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+
+Base CI :
+- Architecture + Browser `36752651640` — SUCCESS ;
+- Firefox `36752651555` — SUCCESS ;
+- Tactical Dock `36752651655` — SUCCESS.
+
+Prochaine action :
+1. caractérisation pure de la condition historique ;
+2. raccord Architecture ;
+3. triple CI GREEN ;
+4. seulement ensuite décider si `shouldInitializeGeneratedEnemyBranch(enemy,room)` devient l'API cible ;
+5. aucun RED avant cette preuve.
+
+---
+
 # PHASE 7 — MICRO-LOT 31 — audit matérialisation des salles generated — 2026-09-30
 
 Base GREEN :

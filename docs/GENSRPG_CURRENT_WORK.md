@@ -48,11 +48,23 @@ Frontière du futur raccord :
 - Core 2.00 conserve `loadActiveEnemies()`, la boucle, `e.dc200Branch=false`, `saveActiveEnemies(all)` et l'ordre de matérialisation ;
 - aucune mutation, aucun stockage, aucune config et aucun RNG dans le helper.
 
+RED isolé :
+- SHA `8d15377dcf49b01a73af105f9d4d1ddd49d9b343` ;
+- Architecture `36768712087` — FAILURE attendue uniquement sur #198 ;
+- caractérisation #197 — SUCCESS ;
+- Firefox `36768712077` — SUCCESS ;
+- Tactical Dock `36768712056` — SUCCESS.
+
+Rule 26 :
+- source lot 31 reconstruite et vérifiée : `8169442 / a37acaabcb3202a8527c2d545f9e2ff4466ea1db` ;
+- micro-diff borné attendu : `8169446 / 8a70856f20102270dc7f3553dcef74fe1dc45ad8`.
+
 Prochaine action :
-1. poser UNE garde RED exigeant le helper pur et son raccord exact ;
-2. vérifier RED isolé sur Architecture ;
-3. Firefox et Tactical Dock doivent rester GREEN ;
-4. seulement ensuite appliquer un micro-diff minimal sous Rule 26.
+1. ajouter le helper pur dans `entry-v1.js` ;
+2. remplacer uniquement la condition inline dans `createRoom(...)` ;
+3. conserver mutation et stockage dans Core 2.00 ;
+4. triple CI GREEN technique ;
+5. réaligner seulement les fingerprints réellement invalidés.
 
 ---
 

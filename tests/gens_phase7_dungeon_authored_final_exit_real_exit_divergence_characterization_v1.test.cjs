@@ -16,9 +16,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169442,
+assert.equal(bytes.length,8169446,
   'Phase 7 Final Exit real-exit divergence characterization must start from terminal-delegation GREEN runtime');
-assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db',
+assert.equal(gitBlob,'8a70856f20102270dc7f3553dcef74fe1dc45ad8',
   'Phase 7 Final Exit real-exit divergence characterization must keep the exact canonical index blob');
 
 assert.match(

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169442,'S3 must track the current Phase 7 generated Boss policy runtime');
-assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db','S3 must track the current Phase 7 generated Boss policy blob');
+assert.equal(bytes.length,8169446,'S3 must track the current Phase 7 generated Boss policy runtime');
+assert.equal(gitBlob,'8a70856f20102270dc7f3553dcef74fe1dc45ad8','S3 must track the current Phase 7 generated Boss policy blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

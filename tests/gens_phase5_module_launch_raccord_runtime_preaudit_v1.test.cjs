@@ -19,8 +19,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169442,'module-launch preaudit guard must track the current Phase 7 Dungeon generated Boss policy runtime');
-assert.equal(gitBlob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db','preaudit runtime blob must match the current Phase 7 generated Boss policy baseline');
+assert.equal(bytes.length,8169446,'module-launch preaudit guard must track the current Phase 7 Dungeon generated Boss policy runtime');
+assert.equal(gitBlob,'8a70856f20102270dc7f3553dcef74fe1dc45ad8','preaudit runtime blob must match the current Phase 7 generated Boss policy baseline');
 
 assert.match(index,/function\s+gensShellActiveModuleV1\(\)\s*\{/,'Shell must already own one active-module resolver');
 assert.match(index,/window\.GensShellScreenReturnV1\s*=\s*Object\.freeze\(\{[\s\S]*activeModule:gensShellActiveModuleV1/,'screen-return must expose the existing active-module resolver');

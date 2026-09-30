@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
 
-assert.equal(bytes.length,8169442,'S7 must audit the exact verified Phase 7 generated Boss policy index');
-assert.equal(blob,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db','S7 index blob must remain the current Phase 7 generated Boss policy source');
+assert.equal(bytes.length,8169446,'S7 must audit the exact verified Phase 7 generated Boss policy index');
+assert.equal(blob,'8a70856f20102270dc7f3553dcef74fe1dc45ad8','S7 index blob must remain the current Phase 7 generated Boss policy source');
 
 for(const text of [
   'function dungeonCombatHeroSnapshot(heroId){',

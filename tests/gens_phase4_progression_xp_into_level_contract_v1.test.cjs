@@ -15,8 +15,8 @@ const index=indexBuf.toString('utf8');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8169442,'contract lot must stay on exact Phase 7 generated Boss policy index');
-assert.equal(gitBlob(indexBuf),'a37acaabcb3202a8527c2d545f9e2ff4466ea1db','index runtime must remain on the current Phase 7 generated Boss policy baseline during the pure contract lot');
+assert.equal(indexBuf.length,8169446,'contract lot must stay on exact Phase 7 generated Boss policy index');
+assert.equal(gitBlob(indexBuf),'8a70856f20102270dc7f3553dcef74fe1dc45ad8','index runtime must remain on the current Phase 7 generated Boss policy baseline during the pure contract lot');
 
 assert.doesNotMatch(coreSource,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|dispatchEvent|CustomEvent|fetch\s*\(|XMLHttpRequest|Math\.random/,
   'Core Progression contract must remain pure and infrastructure-free');

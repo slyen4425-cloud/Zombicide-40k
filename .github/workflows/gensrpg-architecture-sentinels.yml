@@ -605,6 +605,9 @@ jobs:
       - name: Exiger le propriétaire pur des résultats non-combat generated Phase 7
         run: node tests/gens_phase7_dungeon_generated_noncombat_room_result_v1.test.cjs
 
+      - name: Caractériser la normalisation dc200Branch des ennemis generated Phase 7
+        run: node tests/gens_phase7_dungeon_generated_enemy_branch_normalization_characterization_v1.test.cjs
+
       - name: Caractériser le mouvement d’entrée authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_entry_movement_characterization_v1.test.cjs
 

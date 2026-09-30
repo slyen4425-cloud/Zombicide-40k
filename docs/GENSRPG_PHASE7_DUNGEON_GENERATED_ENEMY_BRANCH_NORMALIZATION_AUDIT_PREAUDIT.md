@@ -186,3 +186,47 @@ Core 2.00 doit conserver :
 2. vérifier RED isolé sur Architecture ;
 3. Firefox et Tactical Dock doivent rester GREEN ;
 4. aucun micro-diff runtime avant confirmation du RED isolé.
+
+
+## RED isolé dc200Branch
+
+SHA :
+`8d15377dcf49b01a73af105f9d4d1ddd49d9b343`.
+
+CI :
+- Architecture `36768712087` — FAILURE attendue uniquement sur #198 `Exiger le propriétaire pur de la normalisation dc200Branch generated Phase 7` ;
+- caractérisation #197 — SUCCESS ;
+- Browser — SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36768712077` — SUCCESS ;
+- Tactical Dock `36768712056` — SUCCESS.
+
+Le RED est isolé à l'absence de :
+- `GensDungeonV1.exploration.shouldInitializeGeneratedEnemyBranch(enemy,room)` ;
+- son raccord exact dans la condition Core 2.00.
+
+## Rule 26 — micro-diff préparé localement
+
+La source exacte du lot 31 a été reconstruite localement et vérifiée :
+- taille `8169442` ;
+- blob `a37acaabcb3202a8527c2d545f9e2ff4466ea1db`.
+
+Remplacement borné prévu, occurrence unique :
+
+ancien :
+`if(Number(e.dungeonRoom||0)===Number(room)&&e.dc200Branch===undefined)e.dc200Branch=false`
+
+nouveau :
+`if(GensDungeonV1.exploration.shouldInitializeGeneratedEnemyBranch(e,room))e.dc200Branch=false`
+
+Le fichier résultant attendu est vérifié localement :
+- taille `8169446` ;
+- blob `8a70856f20102270dc7f3553dcef74fe1dc45ad8`.
+
+La mutation `e.dc200Branch=false` reste au callsite Core 2.00.
+
+Prochaine action :
+1. ajouter le helper pur à `entry-v1.js` ;
+2. appliquer uniquement le remplacement borné ci-dessus dans `index.html` ;
+3. mettre à jour uniquement les deux tests du lot pour le nouveau fingerprint ;
+4. lancer les tests locaux du lot ;
+5. laisser la CI révéler les fingerprints historiques réellement invalidés.

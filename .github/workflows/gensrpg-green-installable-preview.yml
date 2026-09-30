@@ -1,0 +1,199 @@
+name: GenSrpG GREEN installable preview
+
+on:
+  push:
+    branches:
+      - 'preview/gensrpg-green-pwa-2026-09-30'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout production main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+
+      - name: Checkout GREEN preview
+        uses: actions/checkout@v4
+        with:
+          ref: preview/gensrpg-green-pwa-2026-09-30
+          path: candidate
+
+      - name: Verify immutable refs
+        run: |
+          test "$(git -C production rev-parse HEAD)" = "e8681f9823573ced8aec59c8ddc47a72b02bc663"
+          test "$(git -C candidate rev-parse HEAD^)" = "874ec11d8db5a06e5eca8b05efe4ee7b609367b3"
+          grep -q 'V16.167' candidate/index.html
+          grep -q "navigator.serviceWorker.register('./service-worker.js'" candidate/index.html
+          grep -q '"start_url": "./"' candidate/manifest.webmanifest
+          grep -q '"scope": "./"' candidate/manifest.webmanifest
+
+      - name: Build production root and GREEN preview
+        run: |
+          rm -rf _site
+          mkdir -p _site _site/preview-green
+
+          # Preserve the current production at the site root.
+          if [ -f production/Z40K_GITHUB_PAGES_READY.zip ]; then
+            unzip -oq production/Z40K_GITHUB_PAGES_READY.zip -d _site
+          fi
+          cp -f production/index.html _site/index.html
+          cp -f production/manifest.webmanifest _site/manifest.webmanifest
+          [ ! -f production/manifest.json ] || cp -f production/manifest.json _site/manifest.json
+          cp -f production/service-worker.js _site/service-worker.js
+          mkdir -p _site/icons
+          cp -f production/icon-192.png _site/icons/icon-192.png
+          cp -f production/icon-512.png _site/icons/icon-512.png
+          for file in production/sound_*.mp3; do [ ! -f "$file" ] || cp -f "$file" _site/; done
+          mkdir -p _site/assets
+          cp -R production/assets/. _site/assets/
+
+          # Installable GREEN candidate under a distinct nested PWA scope.
+          if [ -f candidate/Z40K_GITHUB_PAGES_READY.zip ]; then
+            unzip -oq candidate/Z40K_GITHUB_PAGES_READY.zip -d _site/preview-green
+          fi
+          cp -f candidate/index.html _site/preview-green/index.html
+          cp -f candidate/manifest.webmanifest _site/preview-green/manifest.webmanifest
+          [ ! -f candidate/manifest.json ] || cp -f candidate/manifest.json _site/preview-green/manifest.json
+          cp -f candidate/service-worker.js _site/preview-green/service-worker.js
+          mkdir -p _site/preview-green/icons
+          cp -f candidate/icon-192.png _site/preview-green/icons/icon-192.png
+          cp -f candidate/icon-512.png _site/preview-green/icons/icon-512.png
+          for file in candidate/sound_*.mp3; do [ ! -f "$file" ] || cp -f "$file" _site/preview-green/; done
+          mkdir -p _site/preview-green/assets
+          cp -R candidate/assets/. _site/preview-green/assets/
+
+      - name: Compose production root exactly like main deployment
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path("_site/index.html")
+          modules=[
+            ('assets/dungeon/dungeon-core-318.js','<script src="assets/dungeon/dungeon-core-318.js"></script>'),
+            ('assets/dungeon/dungeon-large-room-support-167834.js','<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>'),
+            ('assets/dungeon/dungeon-room-creator-100.js','<script src="assets/dungeon/dungeon-room-creator-100.js"></script>'),
+            ('assets/dungeon/dungeon-room-creator-v2-167819.js','<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>'),
+            ('assets/dungeon/dungeon-room-creator-feedback-167821.js','<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>'),
+            ('assets/dungeon/dungeon-world-builder-167821.js','<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>'),
+            ('assets/dungeon/dungeon-room-runtime-167822.js','<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>'),
+            ('assets/dungeon/dungeon-world-runtime-167823.js','<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>'),
+            ('assets/dungeon/dungeon-zone-content-167824.js','<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>'),
+            ('assets/dungeon/dungeon-authored-runtime-167839.js','<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>'),
+            ('assets/dungeon/dungeon-authored-cache-visual-167852.js','<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>'),
+            ('assets/dungeon/dungeon-source-render-stability-167877.js','<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>'),
+            ('assets/dungeon/dungeon-equipment-ui.js','<script src="assets/dungeon/dungeon-equipment-ui.js"></script>'),
+            ('assets/dungeon/dungeon-equipment-hotfix-167817.js','<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>'),
+            ('assets/dungeon/dungeon-set-editor-167818.js','<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>'),
+            ('assets/gensrpg/gens-world-summary-167820.js','<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>'),
+            ('assets/gensrpg/gens-rpg-stats-clean-167874.js','<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>'),
+            ('assets/gensrpg/gens-dungeon-hero-art-repair-167874.js','<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>'),
+            ('assets/gensrpg/gens-mobile-combat-performance-16781022.js','<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>')
+          ]
+          html=index.read_text(encoding="utf-8")
+          perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
+          html=html.replace(perf+"\n","").replace(perf,"")
+          for rel,tag in modules:
+            if not Path("_site",rel).exists(): raise SystemExit("missing production module "+rel)
+            if tag not in html: html=html.replace("</body>",tag+"\n</body>")
+          index.write_text(html,encoding="utf-8")
+          PY
+
+      - name: Compose GREEN preview runtime
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path("_site/preview-green")
+          index=base/"index.html"
+          tags=[
+            '<script src="assets/dungeon/dungeon-core-318.js"></script>',
+            '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>',
+            '<script src="assets/gensrpg/core/text-utils-v1.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>',
+            '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"></script>',
+            '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"></script>',
+            '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"></script>',
+            '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"></script>',
+            '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>',
+            '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>',
+            '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>',
+            '<script src="assets/gensrpg/core/inventory-equipped-view-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/equipment-evolution-v1.js?v=1"></script>',
+            '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>',
+            '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>',
+            '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>',
+            '<script src="assets/gensrpg/core/stats-normalization-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/stats-value-engine-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/stats-hero-values-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/stats-modifier-provider-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/stats-derived-values-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/core/stats-snapshot-v1.js?v=1"></script>',
+            '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>',
+            '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>',
+            '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>',
+            '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'
+          ]
+          html=index.read_text(encoding="utf-8")
+          for tag in (tags[-2],tags[-1]):
+            html=html.replace(tag+"\n","").replace(tag,"")
+          if "</body>" not in html: raise SystemExit("preview index missing </body>")
+          for tag in tags:
+            rel=tag.split('src="',1)[1].split('"',1)[0].split('?',1)[0]
+            if not (base/rel).exists(): raise SystemExit("missing preview module "+rel)
+            if tag not in html: html=html.replace("</body>",tag+"\n</body>")
+          index.write_text(html,encoding="utf-8")
+          PY
+
+      - name: Validate isolated installable preview
+        run: |
+          test -f _site/preview-green/index.html
+          test -f _site/preview-green/manifest.webmanifest
+          test -f _site/preview-green/service-worker.js
+          grep -q 'V16.167' _site/preview-green/index.html
+          grep -q "navigator.serviceWorker.register('./service-worker.js'" _site/preview-green/index.html
+          grep -q 'module-launch-final-authority-v1.js' _site/preview-green/index.html
+          grep -q 'gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1' _site/preview-green/service-worker.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path("_site/preview-green/manifest.webmanifest").read_text())
+          assert m["start_url"]=="./"
+          assert m["scope"]=="./"
+          assert m["display"]=="standalone"
+          assert len(m.get("icons",[]))>=2
+          print("GREEN preview manifest OK")
+          PY
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload combined Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy combined production + GREEN preview
+        id: deployment
+        uses: actions/deploy-pages@v4

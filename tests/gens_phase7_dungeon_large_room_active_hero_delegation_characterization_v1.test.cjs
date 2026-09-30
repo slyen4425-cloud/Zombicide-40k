@@ -11,15 +11,20 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const largeRoom=read('assets/dungeon/dungeon-large-room-support-167834.js');
 
 const historical=/function activeHero\(x\)\{const ids=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,ids\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(ids\[i\]\|\|""\)\}/;
-assert.match(
+assert.doesNotMatch(
   largeRoom,
   historical,
-  'Large Room must still own the historical private activeHero selector before the delegation RED'
+  'Large Room must no longer own the historical private activeHero selector after delegation'
 );
 assert.equal(
   (largeRoom.match(/GensDungeonV1\.movement\.resolveAuthoredActiveHero\(/g)||[]).length,
-  0,
-  'Large Room must not consume the canonical helper before the delegation lot'
+  1,
+  'Large Room must consume the canonical helper exactly once after delegation'
+);
+assert.match(
+  largeRoom,
+  /function activeHero\(x\)\{return ROOT\.GensDungeonV1\.movement\.resolveAuthoredActiveHero\(x\?\.participants,x\?\.index\)\}/,
+  'Large Room private activeHero must delegate directly to the canonical Dungeon movement owner'
 );
 
 const RT='gensrpg_dungeon_runtime_v2';
@@ -157,7 +162,7 @@ console.log(JSON.stringify({
     'DungeonLargeRoom167834.repairWorld -> ensureWorldState'
   ],
   canonicalOwner:'GensDungeonV1.movement.resolveAuthoredActiveHero',
-  expected:'GREEN before delegation with historical private selector preserved',
+  expected:'GREEN after delegation with historical behavior preserved',
   deferred:[
     'DungeonCore317.activeHeroId',
     'DungeonCore318.activeHeroId',

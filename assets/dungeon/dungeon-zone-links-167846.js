@@ -19,7 +19,7 @@ function writeRt(x){try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));retur
 function authored(){return ROOT.DungeonAuthoredRuntime167839||null}
 function builder(){return ROOT.DungeonWorldBuilder167821||null}
 function roomApi(){return ROOT.DungeonRoomCreator100||null}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function authoredContext(){const A=authored(),x=readRt();if(!A?.active?.()||!x?.last?.authoredRuntime167839)return null;const graph=A.graph?.();if(!graph||String(x.last.worldDungeonId||"")!==String(graph.id))return null;const hero=activeHero(x);if(!hero)return null;const s=x.authored167839||{},currentNodeId=String(s?.roomNodes?.[String(Number(x.room)||0)]||s?.heroNodes?.[hero]||x.last.worldNodeId||"");return {A,x,graph,hero,currentNodeId,pos:Number(x?.positions?.[hero])}}
 function nodeInfo(graph,nodeId){const node=(graph?.nodes||[]).find(v=>String(v.id)===String(nodeId||""));return node?{node,room:roomApi()?.findRoom?.(node.roomId)||null}:null}
 function nodeLabel(graph,nodeId){const p=nodeInfo(graph,nodeId);return String(p?.node?.label||p?.room?.name||"Zone")}

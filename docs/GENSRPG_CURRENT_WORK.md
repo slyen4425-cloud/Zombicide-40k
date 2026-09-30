@@ -15,37 +15,55 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_ZONE_LINKS_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
-faire déléguer uniquement la sélection privée du héros actif utilisée par `DungeonZoneLinks167846.authoredContext()` au propriétaire canonique :
+Cible fermée :
+faire déléguer uniquement la sélection privée `DungeonZoneLinks167846.activeHero(x)` au propriétaire canonique :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Zone Links possède encore la copie locale historique `activeHero(x)` ;
-- elle est privée et consommée uniquement par `authoredContext()` ;
-- `authoredContext()` reste public ;
-- transitions cache/retour, piles par héros, Builder, DOM et boutons restent totalement hors périmètre.
+Caractérisation GREEN :
+- SHA `5732bb03d60a572c6c317ababeef02ce67cd92aa` ;
+- Architecture + Browser `36664129967` — SUCCESS ;
+- Firefox `36664129907` — SUCCESS ;
+- Tactical Dock `36664129980` — SUCCESS.
 
-Frontière :
-- aucune nouvelle API ;
-- aucune modification des transitions ou des piles ;
-- aucun changement Builder / DOM / wrapper Core / retry ;
-- aucun changement Spatial ;
+RED isolé :
+- SHA `87a60dfe5069a7f13dd295823b6a6ea8f265eae7` ;
+- Architecture `36665107361` — FAILURE attendue uniquement sur #225 `Exiger la délégation héros actif Zone Links authored Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36665107335` — SUCCESS ;
+- Tactical Dock `36665107324` — SUCCESS.
+
+Micro-diff GREEN :
+- `3823c0b42922abe001b168e33f5c9f37418fad0e` — Zone Links délègue la sélection pure ;
+- `a96d2f027b4d82a81325812e54c0fdeff76b8af0` — contrat Dungeon clarifié ;
+- `0f603cfb014d558001ddc3c80aa3b255812fc748` — caractérisation post-raccord ;
+- `5cd67d6c1401f7affc518b1551f0e9d620625eaf` et `6ba8b4d694df1cd356a7951c8214f79f5959913c` — fixtures historiques Zone Links chargées avec le propriétaire Dungeon réel.
+
+Triple CI technique GREEN sur `6ba8b4d694df1cd356a7951c8214f79f5959913c` :
+- Architecture + Browser `36665363990` — SUCCESS ;
+- Firefox `36665363960` — SUCCESS ;
+- Tactical Dock `36665363881` — SUCCESS.
+
+Frontière préservée :
+- `authoredContext` conserve runtime/graphe, validation authored, `currentNodeId` et position ;
+- reverse/cache/return, piles de retour, cache bindings, Builder, boutons, DOM, wrapper Core, listener editor et retry restent Zone Links ;
+- World Runtime, Room Runtime, Large Room Support, Core 317/318 et Source Render restent différés ;
 - aucun changement `index.html`.
-
-Base validée :
-- Architecture + Browser `36663174741` — SUCCESS ;
-- Firefox `36663174686` — SUCCESS ;
-- Tactical Dock `36663174706` — SUCCESS.
 
 Runtime `index.html` inchangé :
 - `8169990` octets ;
 - blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
-Prochaine action :
-1. caractériser l'API publique `authoredContext()` sur les sémantiques historiques du héros actif ;
-2. triple CI GREEN ;
-3. seulement ensuite poser UNE garde RED de délégation Zone Links.
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
 
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-zone-links-active-hero-delegation-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 ---
 
 # PHASE 7 — MICRO-LOT 22 — délégation héros actif Exact Trap Runtime — 2026-09-30

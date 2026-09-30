@@ -686,6 +686,9 @@ jobs:
       - name: Exiger la délégation héros actif Exact Trap authored Phase 7
         run: node tests/gens_phase7_dungeon_exact_trap_active_hero_delegation_v1.test.cjs
 
+      - name: Caractériser la délégation héros actif Zone Links authored Phase 7
+        run: node tests/gens_phase7_dungeon_zone_links_active_hero_delegation_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

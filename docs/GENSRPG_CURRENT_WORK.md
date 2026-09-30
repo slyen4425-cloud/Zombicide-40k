@@ -15,29 +15,56 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_CORE318_ACTIVE_HERO_DELEGATION_PREAUDIT.md`
 
-Cible :
+Cible fermée :
 faire déléguer uniquement la sélection privée `Dungeon Core 3.18 activeHeroId(x)` au propriétaire canonique :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Audit initial :
-- Core 318 est à parité exacte avec le helper canonique ;
-- ses consommateurs sont `runtimeRoom()` et la garde de sous-salle `installBranchGuard()` ;
-- `activeHeroId` reste privé ;
-- Core 317 diverge sur la conversion String d'un participant truthy non-string ;
-- Source Render diverge sur le clamp des index ;
-- Core 317 et Source Render restent donc hors périmètre.
+Caractérisation GREEN :
+- SHA `e0e141a1c2c5b25e85922dfa7b08891bd882fdae` ;
+- Architecture + Browser `36692334483` — SUCCESS ;
+- Firefox `36692334510` — SUCCESS ;
+- Tactical Dock `36692334421` — SUCCESS.
 
-Frontière :
-- aucune nouvelle API ;
-- aucun changement spawn/stamping/sous-salle/Spatial ;
-- aucun changement DOM/UI ;
+RED isolé :
+- SHA `60d4fac349fd2d6f166ebcb255da93cdafece8fc` ;
+- Architecture `36693253297` — FAILURE attendue uniquement sur #233 `Exiger la délégation héros actif Core 318 Phase 7` ;
+- Browser SKIPPED uniquement par dépendance au RED Architecture ;
+- Firefox `36693253223` — SUCCESS ;
+- Tactical Dock `36693253299` — SUCCESS.
+
+Micro-diff GREEN :
+- `476812430167202ef99aca4ac60306872d1afbeb` — Core 318 délègue la sélection pure ;
+- `e4050854fdf916a06512291996236b19127802f0` — contrat Dungeon clarifié ;
+- `5c13b8fd6d263f1acf66970c9b57d648ed7204f1` — caractérisation post-raccord ;
+- `88331972000896d422555e2fc7f861d3b1c5f187` — fixture historique Core 318 charge le propriétaire Dungeon réel.
+
+Triple CI technique GREEN sur `88331972000896d422555e2fc7f861d3b1c5f187` :
+- Architecture + Browser `36693492531` — SUCCESS ;
+- Firefox `36693492382` — SUCCESS ;
+- Tactical Dock `36693492514` — SUCCESS.
+
+Frontière préservée :
+- `activeRoom`, room stack, enemy stamping, spawn wrappers, tracker et garde de sous-salle restent Core 318 ;
+- `DungeonSpatial313` reste inchangé ;
+- Core 317 reste hors migration simple : divergence historique sur la conversion `String` ;
+- Source Render Stability reste hors migration simple : divergence historique sur le clamp des index ;
 - aucun changement `index.html`.
 
-Prochaine action :
-1. caractérisation du vrai chemin Core 318 ;
-2. triple CI GREEN ;
-3. seulement ensuite UNE garde RED de délégation Core 318.
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
 
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-core318-active-hero-delegation-green-2026-09-30`.
+
+Prochaine action :
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite caractériser les divergences restantes Core 317 et Source Render avant toute décision de migration.
 ---
 
 # PHASE 7 — MICRO-LOT 26 — délégation héros actif Large Room Support — 2026-09-30

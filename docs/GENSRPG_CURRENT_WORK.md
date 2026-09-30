@@ -15,31 +15,53 @@ Branche :
 Pré-audit :
 `docs/GENSRPG_PHASE7_DUNGEON_CORE317_ACTIVE_HERO_DIVERGENCE_PREAUDIT.md`
 
-Cible :
-caractériser uniquement la divergence entre le sélecteur privé `Dungeon Core 3.17 activeHeroId(x)` et :
+Cible fermée :
+caractériser uniquement la divergence entre le sélecteur privé `Core 317 activeHeroId(x)` et :
 `GensDungeonV1.movement.resolveAuthoredActiveHero(participants, activeIndex)`.
 
-Constat initial :
-- parité attendue sur les identifiants string et la sélection d'index historique ;
-- divergence suspectée pour les participants truthy non-chaîne : Core 317 retourne la valeur brute, le helper canonique applique `String(...)` ;
-- aucune migration runtime autorisée tant que la parité complète n'est pas prouvée.
+Caractérisation GREEN :
+- SHA `c28454bcba818ebb73b6e191f4652d6de7b9a7ce` ;
+- Architecture + Browser `36697844017` — SUCCESS ;
+- Firefox `36697844151` — SUCCESS ;
+- Tactical Dock `36697843950` — SUCCESS ;
+- Browser 45/45 sans échec.
 
-Frontière :
-- aucun changement `dungeon-core-317.js` dans ce lot ;
-- aucun changement du helper canonique ;
-- navigation retour salle, marchand, armor, DOM, observer/timers et Spatial hors périmètre ;
-- Source Render Stability reste différé ;
+Résultat :
+- parité sur les identifiants string, les cas falsy et la sélection d'index historique ;
+- divergence confirmée sur les participants truthy non-chaîne :
+  - `42` reste un number dans Core 317, mais devient `"42"` via le helper canonique ;
+  - objet brut conservé dans Core 317, mais converti en `"[object Object]"` par le helper ;
+  - `true` reste boolean dans Core 317, mais devient `"true"` via le helper.
+
+Décision :
+- aucun RED de migration ;
+- aucun changement runtime ;
+- une délégation directe Core 317 -> helper canonique changerait la sémantique et n'est donc pas autorisée comme simple refactor ;
+- toute harmonisation future exige une décision fonctionnelle dédiée.
+
+Frontière préservée :
+- `dungeon-core-317.js` inchangé ;
+- helper canonique inchangé ;
+- navigation retour salle, merchant, armor, DOM, observer/timers et Spatial inchangés ;
+- Source Render Stability reste le prochain seam de divergence à caractériser ;
 - aucun changement `index.html`.
 
-Base validée :
-- Architecture + Browser `36694853712` — SUCCESS ;
-- Firefox `36694853706` — SUCCESS ;
-- Tactical Dock `36694853731` — SUCCESS.
+Runtime `index.html` inchangé :
+- `8169990` octets ;
+- blob `1dde9f80fcc1cd5e3c9560491ab28a2ecd2d2082`.
+
+Aucun changement utilisateur visible.
+Aucun test utilisateur nécessaire.
+Rule 26 non déclenchée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-core317-active-hero-divergence-green-2026-09-30`.
 
 Prochaine action :
-1. ajouter une caractérisation ciblée du vrai `activeHeroId` Core 317 ;
-2. triple CI GREEN ;
-3. si divergence confirmée, fermer le lot sans RED de migration.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite caractériser la divergence Source Render Stability.
+
 
 ---
 

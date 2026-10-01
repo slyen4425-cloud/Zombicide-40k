@@ -614,6 +614,9 @@ jobs:
       - name: Caractériser la frontière carte des salles generated Phase 7
         run: node tests/gens_phase7_dungeon_generated_room_map_boundary_characterization_v1.test.cjs
 
+      - name: Exiger le planificateur pur de frontière carte generated Phase 7
+        run: node tests/gens_phase7_dungeon_generated_room_map_boundary_v1.test.cjs
+
       - name: Caractériser le mouvement d’entrée authored Phase 7
         run: node tests/gens_phase7_dungeon_authored_entry_movement_characterization_v1.test.cjs
 

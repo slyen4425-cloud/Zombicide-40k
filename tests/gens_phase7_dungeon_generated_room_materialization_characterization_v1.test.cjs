@@ -159,8 +159,8 @@ assert.equal(
 );
 assert.match(createSource,/saveActiveEnemies\?\.\(all\)/,
   'createRoom must keep enemy persistence after normalization');
-assert.match(createSource,/cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\)/,
-  'map enablement and generateDungeonMap call must remain at the current owner');
+assert.match(createSource,/const mapPlan=GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\);const mapObj=mapPlan\.status==="disabled"\?null:generateDungeonMap\(mapPlan\.kind,mapPlan\.enemyQty\)/,
+  'map policy planning must delegate to Dungeon while generateDungeonMap remains at the current Core owner');
 
 assert.doesNotMatch(entry,/function\s+createRoom\s*\(/,
   'Dungeon entry must not silently duplicate the Core 2.00 materialization owner');

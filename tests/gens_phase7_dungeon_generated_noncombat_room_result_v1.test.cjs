@@ -106,8 +106,8 @@ assert.match(createSource,/loadActiveEnemies\?\.\(\)\|\|\[\]/,
   'active-enemy normalization must remain Core 2.00');
 assert.match(createSource,/saveActiveEnemies\?\.\(all\)/,
   'enemy persistence must remain Core 2.00');
-assert.match(createSource,/cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\)/,
-  'map enablement and generation must remain Core 2.00');
+assert.match(createSource,/const mapPlan=GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\);const mapObj=mapPlan\.status==="disabled"\?null:generateDungeonMap\(mapPlan\.kind,mapPlan\.enemyQty\)/,
+  'map policy planning must delegate to Dungeon while map generation remains Core 2.00');
 
 assert.doesNotMatch(authored,/buildGeneratedNonCombatRoomResult/,
   'authored World Builder must remain outside generated non-combat result construction');

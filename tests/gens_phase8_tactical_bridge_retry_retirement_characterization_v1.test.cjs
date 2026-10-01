@@ -31,9 +31,8 @@ assert.equal(expectedFiles.at(-1),'assets/gensrpg/gens-rpg-tactical-combat-v2-br
 
 assert.match(entry,/const apply=\(\)=>\{try\{R\.GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,
   'current finalize must own immediate Bridge install');
-for(const ms of [250,1200,3000]){
-  assert.ok(entry.includes('setTimeout(apply,'+ms+')'),'current Bridge retry '+ms+' must remain characterized before retirement');
-}
+assert.equal((entry.match(/setTimeout\(apply,/g)||[]).length,0,
+  'retired public-entry Bridge retries must not reappear');
 
 assert.match(bridge,/if\(!rt\?\.GensRpgTacticalCombatV2\|\|!rt\?\.GensRpgTacticalCombatV2Adapter\|\|!rt\?\.GensRpgTacticalCombatV2Ui\)return false/,
   'Bridge install dependency guard drifted');
@@ -57,16 +56,17 @@ vm.runInContext(entry,sandbox,{filename:'tactical/entry-v1.js'});
 
 assert.deepEqual(loaded,expectedFiles.map(f=>f+'?v=16.78.105'),
   'runtime characterization must keep exact base load order');
-assert.equal(bridgeInstalls,4,'current runtime must characterize immediate + 3 delayed Bridge installs');
-assert.deepEqual(timers,[250,1200,3000],'current runtime Bridge retry timings drifted');
+assert.equal(bridgeInstalls,1,'current runtime must keep one immediate Bridge install');
+assert.deepEqual(timers,[],'retired public-entry Bridge retry timers must stay absent');
 assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical idempotency guard must remain set');
 
 console.log(JSON.stringify({
   scenario:'Phase 8 Tactical Bridge retry retirement characterization',
   bridgeLast:true,
   immediateInstalls:1,
-  delayedReinstalls:[250,1200,3000],
-  totalBridgeInstalls:4,
+  preMigrationDelayedReinstalls:[250,1200,3000],
+  delayedReinstalls:[],
+  totalBridgeInstalls:1,
   v113RespectsBridgeAuthority:true,
-  nextTarget:'immediate-only'
+  nextTarget:'retired'
 },null,2));

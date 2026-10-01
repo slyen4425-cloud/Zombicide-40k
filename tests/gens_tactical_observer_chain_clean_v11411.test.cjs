@@ -14,7 +14,8 @@ const layers=[
 
 for(const [label,file] of layers){
   const source=read(file);
-  assert.match(source,/function observe\(rt=R\)/,`${label}: historical observer seam should remain inspectable during progressive cleanup`);
+  assert.doesNotMatch(source,/function observe\(rt=R\)/,`${label}: inactive observer seam must stay retired`);
+  assert.doesNotMatch(source,/MutationObserver/,`${label}: MutationObserver authority must stay absent`);
   const install=(source.match(/function install\(rt=R\)\{[^\n]*/)||[''])[0];
   assert.ok(install,`${label}: install function missing`);
   assert.doesNotMatch(install,/observe\(rt\)/,`${label}: install must not activate its historical global observer`);

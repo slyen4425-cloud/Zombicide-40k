@@ -51,10 +51,8 @@ assert.equal(baseFiles.at(-1),'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge
 const finalize=block(entry,'function finalize(){','function load(i){','Tactical entry finalize');
 assert.match(finalize,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,
   'entry finalize must currently install Bridge immediately');
-for(const ms of [250,1200,3000]){
-  assert.ok(finalize.includes('setTimeout(apply,'+ms+')'),
-    'current entry must still characterize delayed Bridge reinstall '+ms);
-}
+assert.equal((finalize.match(/setTimeout\(apply,/g)||[]).length,0,
+  'public Tactical entry must keep delayed Bridge reinstalls retired');
 
 const bridgeInstall=block(bridge,'function install(rt=R){','function status(rt=R){','Bridge install');
 assert.match(bridgeInstall,/!rt\?\.GensRpgTacticalCombatV2\|\|!rt\?\.GensRpgTacticalCombatV2Adapter\|\|!rt\?\.GensRpgTacticalCombatV2Ui/,
@@ -96,13 +94,13 @@ console.log(JSON.stringify({
     publicEntryLoadedEagerly:true,
     baseStackLoadedEagerly:true,
     bridgeImmediateInstalls:1,
-    bridgeDelayedReinstalls:[250,1200,3000],
+    bridgeDelayedReinstalls:[],
     compatibilityLayersAutoInstall:true,
     historicalGlobalObserversActive:false,
     closeRemovesBattleOverlay:true,
     closeDisposesGlobalHooks:false
   },
-  selectedNextSeam:'retire public-entry delayed Bridge reinstalls; keep one immediate Bridge install',
+  selectedNextSeam:'public-entry delayed Bridge reinstalls retired; re-audit next lifecycle seam',
   evidence:{
     bridgeLoadedLast:true,
     dependenciesAvailableBeforeFinalize:true,

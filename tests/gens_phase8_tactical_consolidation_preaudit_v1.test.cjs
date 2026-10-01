@@ -18,8 +18,8 @@ assert.equal(contract.module,'tactical');
 assert.equal(contract.status,'partial-runtime-loaded');
 assert.equal(contract.activatedPhase,8);
 assert.equal(contract.publicRuntimeApi,'GensTacticalV1');
-assert.match(preauditDoc,/entrée Tactical publique encore inert/,'preaudit document must preserve the observed baseline');
-assert.match(preauditDoc,/propriétaire actuel de composition : Core RuntimeBootstrap V1/,'preaudit document must preserve the former composition owner');
+assert.match(preauditDoc,/entry-v1\.js` existe mais reste inert/,'preaudit document must preserve the observed inert-entry baseline');
+assert.match(preauditDoc,/Le propriétaire actuel de la composition de base Tactical est encore :[\s\S]*runtime-bootstrap-v1\.js/,'preaudit document must preserve the former Core composition owner');
 
 const baseTactical=[
   'gens-rpg-tactical-combat-v2.js',

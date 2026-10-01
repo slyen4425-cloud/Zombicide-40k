@@ -1,3 +1,57 @@
+# PHASE 8 — MICRO-LOT 4 — RETRAIT SEAMS OBSERVERS LEGACY TACTICAL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-bridge-retry-retirement-green-2026-10-01`
+
+SHA de base :
+`483c86cea6571b128552d5b653c486c10c1a4921`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-legacy-observer-seam-retirement-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-legacy-observer-seam-retirement-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-bridge-retry-retirement-green-2026-10-01`
+
+Périmètre :
+retirer uniquement les seams historiques `observe(rt=R)` / `MutationObserver` encore présents mais inactifs dans V108, V109, V111, V112 et V113.
+
+État réel audité sur la base :
+- chaque fichier contient encore une fonction `observe(rt=R)` qui instancie un `MutationObserver` ;
+- aucun `install(rt=R)` de V108/V109/V111/V112/V113 n'appelle `observe(rt)` ;
+- aucune API publique de ces cinq couches n'expose `observe` ;
+- les responsabilités actives de chaque `install` restent distinctes et doivent être conservées ;
+- V110 et V114.11 sont hors périmètre de ce retrait ;
+- les retries `installWithRetries` restent hors périmètre.
+
+Hors périmètre :
+- suppression complète d'une couche V108-V113 ;
+- retries internes V108-V114.11 ;
+- lazy loading / teardown complet ;
+- hit, dégâts, armure, IA, rendu actif, détection active V113 ;
+- Dungeon/Survival/Capture/PvP ;
+- `index.html`.
+
+Tests prévus :
+1. caractériser la présence des cinq seams observers historiques et leur inactivité réelle ;
+2. verrouiller les responsabilités actives des cinq `install(rt)` ;
+3. poser RED exigeant l'absence des seams observers ;
+4. micro-diff soustractif limité aux cinq fonctions `observe` et à leurs variables `observer` devenues mortes ;
+5. réaligner uniquement les sentinelles qui exigeaient leur présence historique ;
+6. triple CI avant checkpoint final.
+
+Risques :
+- supprimer par erreur un hook actif voisin ;
+- toucher aux retries ou à la détection active V113 ;
+- confondre `queueMaintain` encore utilisée ailleurs avec le seam observer lui-même.
+
+Prochaine étape :
+caractérisation GREEN de l'état courant, puis RED isolé exigeant le retrait des cinq seams observers sans changement des responsabilités actives.
+
+---
+
 # PHASE 8 — MICRO-LOT 3 — RETRAIT RETRIES BRIDGE TACTICAL — 2026-10-01
 
 Base GREEN :

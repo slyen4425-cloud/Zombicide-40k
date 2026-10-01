@@ -47,8 +47,15 @@ Risques :
 - toucher aux retries ou à la détection active V113 ;
 - confondre `queueMaintain` encore utilisée ailleurs avec le seam observer lui-même.
 
+Caractérisation :
+- test : `tests/gens_phase8_tactical_legacy_observer_seam_retirement_characterization_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_LEGACY_OBSERVER_SEAM_RETIREMENT_CHARACTERIZATION.md` ;
+- cinq seams `observe(rt=R)` présents et inactifs depuis leurs `install(rt)` ;
+- aucune API publique n'expose `observe` ;
+- responsabilités actives des cinq installs verrouillées.
+
 Prochaine étape :
-caractérisation GREEN de l'état courant, puis RED isolé exigeant le retrait des cinq seams observers sans changement des responsabilités actives.
+valider cette caractérisation GREEN, puis poser RED isolé exigeant le retrait physique des cinq seams observers sans toucher aux responsabilités actives ni aux retries.
 
 ---
 

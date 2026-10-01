@@ -39,9 +39,8 @@ assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,'Core RuntimeBo
 for(const file of baseTactical)assert.equal(bootstrap.includes(file),false,'Core must not know Tactical private file '+file);
 assert.match(entry,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,
   'Tactical entry must own final bridge install');
-for(const ms of [250,1200,3000]){
-  assert.ok(entry.includes('setTimeout(apply,'+ms+')'),'Tactical entry bridge retry missing '+ms);
-}
+assert.equal((entry.match(/setTimeout\(apply,/g)||[]).length,0,
+  'Tactical public entry must not regain delayed Bridge reinstalls');
 
 for(const layer of [
   'gens-rpg-tactical-combat-v2-polish-1678108.js',

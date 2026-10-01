@@ -52,27 +52,28 @@ jobs:
 
           entry_path=Path("assets/gensrpg/dungeon/entry-v1.js")
           entry=entry_path.read_text("utf-8")
-          old_owner='''  function shouldDefaultGeneratedRoomEnemyBranch(enemy,room){
-            return Number(enemy.dungeonRoom||0)===Number(room)&&enemy.dc200Branch===undefined;
-          }
-          '''
-          planner='''  function planGeneratedRoomMapBoundary(mapSetting,kind,result){
-            if(mapSetting===false)return {status:"disabled",kind:null,enemyQty:null};
-            return {status:"generate",kind,enemyQty:result.enemyQty||0};
-          }
-          '''
-          assert entry.count(old_owner)==1, entry.count(old_owner)
-          entry=entry.replace(old_owner,old_owner+"\n"+planner,1)
+          nl=chr(10)
+          owner_anchor='  function shouldDefaultGeneratedRoomEnemyBranch(enemy,room){'
+          next_anchor='  function pickWeightedGeneratedRoomKind(roomWeights,roll){'
+          assert entry.count(owner_anchor)==1, entry.count(owner_anchor)
+          assert entry.count(next_anchor)==1, entry.count(next_anchor)
+          assert 'function planGeneratedRoomMapBoundary(mapSetting,kind,result)' not in entry
+          insert_at=entry.index(next_anchor)
+          planner=nl.join([
+            '  function planGeneratedRoomMapBoundary(mapSetting,kind,result){',
+            '    if(mapSetting===false)return {status:"disabled",kind:null,enemyQty:null};',
+            '    return {status:"generate",kind,enemyQty:result.enemyQty||0};',
+            '  }',
+            '',
+            ''
+          ])
+          entry=entry[:insert_at]+planner+entry[insert_at:]
 
-          old_export='''      buildGeneratedNonCombatRoomResult,
-                shouldDefaultGeneratedRoomEnemyBranch,
-                pickWeightedGeneratedRoomKind,'''
-          new_export='''      buildGeneratedNonCombatRoomResult,
-                shouldDefaultGeneratedRoomEnemyBranch,
-                planGeneratedRoomMapBoundary,
-                pickWeightedGeneratedRoomKind,'''
-          assert entry.count(old_export)==1, entry.count(old_export)
-          entry=entry.replace(old_export,new_export,1)
+          export_anchor='      shouldDefaultGeneratedRoomEnemyBranch,'
+          assert entry.count(export_anchor)==1, entry.count(export_anchor)
+          export_pos=entry.index(export_anchor)
+          export_end=entry.index(nl,export_pos)+1
+          entry=entry[:export_end]+'      planGeneratedRoomMapBoundary,'+nl+entry[export_end:]
           entry_path.write_text(entry,"utf-8")
 
           tests=[

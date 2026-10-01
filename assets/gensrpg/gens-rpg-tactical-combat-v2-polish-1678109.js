@@ -20,7 +20,7 @@
   const QUICK_CLASS="gtv2109QuickAttack";
   const UNARMED_VALUE="-1";
   const BOW_RANGE=6,STAFF_RANGE=4;
-  let observer=null,installed=false,bound=false;
+  let installed=false,bound=false;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -166,11 +166,6 @@
       const equip=ev?.target?.closest?.("button[data-v108-equip]");if(!equip)return;const panel=equip.closest?.("[data-v108-panel]"),sel=panel?.querySelector?.("[data-v108-weapon]");if(str(sel?.value)!==UNARMED_VALUE)return;ev.preventDefault?.();ev.stopPropagation?.();ev.stopImmediatePropagation?.();equipUnarmed(rt,panel?.getAttribute?.("data-v108-panel")||"");
     },true);
     return true;
-  }
-  function observe(rt=R){
-    const D=doc(rt);if(!D||observer||typeof rt?.MutationObserver!=="function")return false;let queued=false;
-    const run=()=>{queued=false;try{enhance(rt)}catch(e){}};
-    observer=new rt.MutationObserver(()=>{if(queued)return;queued=true;if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
   }
   function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);bind(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms);return true}

@@ -43,14 +43,30 @@ Risques :
 - prolonger artificiellement Phase 7 en auditant des seams hors critère de sortie ;
 - affaiblir une sentinelle historique au lieu de constater l'état réel.
 
-Sentinelle candidate :
-- `tests/gens_phase7_exit_audit_v1.test.cjs` ;
-- audit : `docs/GENSRPG_PHASE7_EXIT_AUDIT.md` ;
-- aucun changement runtime ni `index.html` ;
-- décision candidate : PHASE 7 EXIT READY, sous réserve de triple CI GREEN.
+Audit de sortie GREEN :
+- test : `tests/gens_phase7_exit_audit_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE7_EXIT_AUDIT.md` ;
+- SHA technique : `0a548cc1d678cf462f4d2c2b798ea0a4484fc94d` ;
+- étape Architecture #244 `Auditer le critère de sortie Phase 7` — SUCCESS ;
+- Architecture + Browser `36866229632` — SUCCESS ;
+- Firefox `36866229526` — SUCCESS ;
+- Tactical Dock `36866229475` — SUCCESS ;
+- preuve Chromium exploration Dungeon generated/authored sans UI Tactical globale — SUCCESS ;
+- aucun changement runtime ni `index.html`.
+
+Décision :
+**PHASE 7 FERMÉE / EXIT GREEN**.
+Le critère officiel `exploration complète sans dépendance UI Tactical globale` est satisfait.
+Aucun lot Dungeon supplémentaire n'est requis avant Phase 8.
+
+Checkpoint final prévu après CI documentaire :
+`checkpoint/gensrpg-phase7-exit-green-2026-10-01`.
 
 Prochaine étape :
-exécuter la triple CI complète. Si GREEN, fermer Phase 7, créer son checkpoint final, puis ouvrir Phase 8 avec son propre checkpoint de départ.
+1. triple CI documentaire ;
+2. créer le checkpoint final Phase 7 sur le SHA documentaire GREEN ;
+3. créer le checkpoint de départ Phase 8 ;
+4. ouvrir Phase 8 — Consolider Tactical sur une branche dédiée.
 
 ---
 

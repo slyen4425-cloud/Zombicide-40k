@@ -60,15 +60,21 @@ La CI protège déjà :
 - sémantique armure canonique ;
 - calcul final dégâts mêlée et formule visible.
 
-## Décision candidate
+## Décision GREEN
 
-**PHASE 7 EXIT READY**, sous réserve de triple CI GREEN du présent audit.
+**PHASE 7 FERMÉE / EXIT GREEN**.
 
-Aucun changement runtime n'est requis pour cette décision.
-Aucun nouveau seam Dungeon ne doit être ouvert si cet audit reste GREEN.
+Preuves sur le SHA technique `0a548cc1d678cf462f4d2c2b798ea0a4484fc94d` :
+- Architecture + Browser `36866229632` — SUCCESS ;
+- Firefox `36866229526` — SUCCESS ;
+- Tactical Dock `36866229475` — SUCCESS ;
+- étape Architecture #244 — SUCCESS ;
+- preuve Chromium d'exploration generated/authored sans UI Tactical globale — SUCCESS.
 
-Après triple CI GREEN :
-1. fermer documentairement Phase 7 ;
-2. créer le checkpoint final Phase 7 ;
-3. créer le checkpoint de départ Phase 8 ;
-4. commencer Phase 8 — Consolider Tactical.
+Aucun changement runtime n'a été nécessaire pour sortir de Phase 7.
+
+Suite autorisée :
+1. CI documentaire ;
+2. checkpoint final Phase 7 ;
+3. checkpoint de départ Phase 8 ;
+4. Phase 8 — Consolider Tactical.

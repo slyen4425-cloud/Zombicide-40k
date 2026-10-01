@@ -42,8 +42,15 @@ Risques :
 - déplacement involontaire des retries du bridge ;
 - démarrage Tactical avant disponibilité des dépendances.
 
+Caractérisation :
+- test : `tests/gens_phase8_tactical_composition_handoff_characterization_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_COMPOSITION_HANDOFF_CHARACTERIZATION.md` ;
+- propriétaire actuel attendu : Core RuntimeBootstrap V1 ;
+- entrée Tactical attendue inert avant migration ;
+- ordre, guard, suffixe de chargement et retries bridge figés.
+
 Prochaine étape :
-caractériser le handoff et poser un RED isolé avant tout changement runtime.
+valider cette caractérisation GREEN, puis poser un RED isolé exigeant l'entrée Tactical comme propriétaire unique avant tout micro-diff runtime.
 
 ---
 

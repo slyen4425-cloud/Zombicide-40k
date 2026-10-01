@@ -1,3 +1,58 @@
+# PHASE 8 — MICRO-LOT 2 — AUDIT LIFECYCLE SESSION TACTICAL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-composition-handoff-green-2026-10-01`
+
+SHA de base :
+`ba46d8dd3d969af0244e25c512d5144b8a903f45`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-session-lifecycle-audit-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-session-lifecycle-audit-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-composition-handoff-green-2026-10-01`
+
+Objectif :
+caractériser la frontière de cycle de vie Tactical afin de préparer le critère de sortie Phase 8 :
+`Tactical n'existe que pendant une session de combat et se démonte proprement`.
+
+Périmètre :
+- chargement eager de l'entrée Tactical ;
+- installation automatique des couches Tactical ;
+- création/fermeture de session ;
+- listeners, timers/retries et hooks qui survivent à la session ;
+- responsabilités de `open/close/install/dispose`.
+
+Hors périmètre :
+- règles hit/dégâts/armure ;
+- IA ;
+- rendu métier ;
+- V108-V113 suppression ;
+- Dungeon gameplay ;
+- Survival/Capture/PvP ;
+- `index.html`.
+
+Tests prévus :
+1. caractériser le chargement eager actuel depuis RuntimeBootstrap ;
+2. caractériser les auto-installs et retries hors session ;
+3. caractériser la fermeture actuelle de la UI/battle ;
+4. inventorier ce qui reste installé après `close` ;
+5. sélectionner un premier seam lifecycle homogène avant tout changement runtime.
+
+Risques :
+- casser le démarrage combat en rendant Tactical lazy trop tôt ;
+- confondre code chargé et session active ;
+- retirer des listeners encore nécessaires hors combat ;
+- modifier plusieurs couches à la fois.
+
+Prochaine étape :
+pré-audit réel du lifecycle actuel ; aucun changement runtime avant sélection du seam.
+
+---
+
 # PHASE 8 — MICRO-LOT 1 — HANDOFF COMPOSITION TACTICAL — 2026-10-01
 
 Base GREEN :

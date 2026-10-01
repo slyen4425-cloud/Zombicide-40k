@@ -37,19 +37,20 @@ const executable=shellEntry.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,
 assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert before raccord');
 
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
-assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'"),
-  'Phase 3 guard must explicitly recognize the Survival Phase 6 and Dungeon Phase 7 partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:81'),
-  'Phase 3 guard must track the current 81-file production owner graph');
+assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'"),
+  'Phase 3 guard must explicitly recognize the Survival Phase 6, Dungeon Phase 7 and Tactical Phase 8 partial-runtime entries');
+assert.ok(phase3Test.includes('productionOwnerGraph:82'),
+  'Phase 3 guard must track the current 82-file production owner graph');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 assert.doesNotMatch(bootstrap,/assets\/gensrpg\/shell\/entry-v1\.js/,
   'historical RuntimeBootstrap must not already load Shell entry');
 assert.doesNotMatch(bootstrap,/assets\/gensrpg\/(?:capture|dungeon|pvp)\/entry-v1\.js/,
   'historical RuntimeBootstrap must not already load module target entries');
-assert.match(bootstrap,/setTimeout\(apply,250\)/);
-assert.match(bootstrap,/setTimeout\(apply,1200\)/);
-assert.match(bootstrap,/setTimeout\(apply,3000\)/);
+assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,
+  'Core RuntimeBootstrap may delegate to the Tactical public entry only');
+assert.doesNotMatch(bootstrap,/GensRpgTacticalCombatV2Bridge|__gensTacticalV2Loader105/,
+  'Core RuntimeBootstrap must not regain Tactical private composition while Phase 5 Shell return stays isolated');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
@@ -77,7 +78,7 @@ console.log(JSON.stringify({
   },
   rejectedRaccordPattern:{
     runtimeBootstrapV1:true,
-    reason:'historical loader uses retry timers and does not load the target Shell/module entries'
+    reason:'Core bootstrap is a public-entry handoff and must not become a Shell/module screen-return owner'
   },
   runtimeChanged:true,
   nextRequirement:'preserve native Shell goMenu as the sole global return authority'

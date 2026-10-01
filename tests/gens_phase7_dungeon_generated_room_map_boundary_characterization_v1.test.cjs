@@ -31,7 +31,7 @@ const createMatch=core200.match(/function createRoom\(room,kind\)\{[\s\S]*?\}\nf
 assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
 const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
-assert.match(createSource,/const map=cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\);return \{result,map\}/,
+assert.match(createSource,/const mapObj=cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\);return \{result,map:mapObj\}/,
   'map boundary must remain a strict false gate followed by one map-generation call and {result,map} return');
 
 const sandbox={

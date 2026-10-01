@@ -1,3 +1,53 @@
+# PHASE 8 — TACTICAL — PRÉ-AUDIT CHAÎNE LEGACY SUIVANTE — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-composition-handoff-green-2026-10-01`
+
+SHA de base :
+`ba46d8dd3d969af0244e25c512d5144b8a903f45`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-legacy-chain-next-preaudit-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-legacy-chain-next-preaudit-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-composition-handoff-green-2026-10-01`
+
+Périmètre :
+pré-audit uniquement pour sélectionner le prochain micro-lot Phase 8 dans la chaîne de compatibilité Tactical V108 -> V109 -> V110 -> V111 -> V112 -> V113 -> V114.11.
+
+Objectif :
+identifier la première couche réellement redondante ou absorbable sans modifier gameplay, hit, dégâts, armure, UI, IA ni bridge Dungeon.
+
+Invariants :
+- aucun changement runtime pendant le pré-audit ;
+- aucun changement `index.html` ;
+- ne pas supprimer une couche parce qu'elle est ancienne : distinguer fonctions historiques inactives et responsabilités encore actives ;
+- ne pas supprimer V110 stats, V113 scope/detection ou V114.11 dégâts sans preuve explicite ;
+- aucun observer, heartbeat, retry ou wrapper supplémentaire ;
+- Survival / Capture / PvP hors périmètre.
+
+Tests prévus :
+1. inventorier les responsabilités actives de V108, V109, V111, V112 et V113 ;
+2. comparer ces responsabilités aux propriétaires déjà consolidés dans engine/adapter/UI/bridge ;
+3. repérer les fonctions encore appelées par install/render/hooks ;
+4. repérer les portions purement historiques déjà neutralisées par les sentinelles ;
+5. sélectionner un seul candidat de retrait/absorption ;
+6. documenter les tests de caractérisation nécessaires avant tout RED.
+
+Risques :
+- retirer une couche dont une fonction non visuelle reste encore active ;
+- confondre code mort inspectable avec code appelé indirectement ;
+- casser la compatibilité mobile/navigation/détails combat ;
+- créer une nouvelle autorité concurrente au lieu d'en retirer une.
+
+Prochaine étape :
+pré-auditer les couches actives et sélectionner le candidat le plus sûr. Aucun micro-diff avant cette sélection.
+
+---
+
 # PHASE 8 — MICRO-LOT 1 — HANDOFF COMPOSITION TACTICAL — 2026-10-01
 
 Base GREEN :

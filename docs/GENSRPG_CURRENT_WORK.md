@@ -63,12 +63,39 @@ Caractérisation vérifiée GREEN sur le HEAD réel :
 
 RED isolé :
 - test : `tests/gens_phase8_tactical_bridge_retry_retirement_v1.test.cjs` ;
-- cible : exactement 1 installation Bridge immédiate ;
-- cible : aucun retry Bridge dans l'entrée publique ;
+- HEAD RED : `124b40b0d5e64605df5813d00c46832675fb4cf6` ;
+- Architecture `36917709606` — FAILURE attendue ;
+- caractérisation Bridge — SUCCESS ;
+- garde retrait retries — FAILURE attendue : `3 !== 0` ;
 - aucun runtime modifié dans le commit RED.
 
+Micro-diff appliqué :
+- `assets/gensrpg/tactical/entry-v1.js` conserve l'installation Bridge immédiate ;
+- retraits uniques : retries 250 / 1200 / 3000 ms ;
+- ordre des six fichiers, Bridge-last et guard `__gensTacticalV2Loader105` conservés ;
+- Bridge métier et V108-V114.11 inchangés ;
+- manifeste timers Phase 2 réaligné : 52 -> 51 sources timers externes, 145 -> 142 syntaxes `setTimeout` externes ;
+- uniquement les gardes décrivant explicitement les anciens retries ont été réalignées ;
+- aucun changement `index.html`, gameplay, hit, dégâts, armure, UI, AI, Dungeon, Survival, Capture ou PvP.
+
+Validation technique GREEN :
+- SHA : `2acb1922ad1195764e9f19b6f0ed1d9710bd42e9` ;
+- Architecture + Browser `36918174048` — SUCCESS ;
+- Firefox `36918174021` — SUCCESS ;
+- Tactical Dock `36918173998` — SUCCESS ;
+- garde Phase 8 retrait retries Bridge — SUCCESS.
+
+Décision :
+**MICRO-LOT 3 TECHNIQUEMENT GREEN**.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-bridge-retry-retirement-green-2026-10-01`.
+
 Prochaine étape :
-valider l'échec RED uniquement sur les retries 250 / 1200 / 3000, puis appliquer le micro-diff dans `assets/gensrpg/tactical/entry-v1.js`.
+1. triple CI documentaire ;
+2. créer le checkpoint GREEN final sur le SHA documentaire exact ;
+3. repartir de ce checkpoint pour auditer le prochain plus petit seam lifecycle ;
+4. ne pas présélectionner une migration V108-V114.11 sans audit.
 
 ---
 

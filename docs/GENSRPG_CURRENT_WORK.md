@@ -43,8 +43,14 @@ Risques :
 - prolonger artificiellement Phase 7 en auditant des seams hors critère de sortie ;
 - affaiblir une sentinelle historique au lieu de constater l'état réel.
 
+Sentinelle candidate :
+- `tests/gens_phase7_exit_audit_v1.test.cjs` ;
+- audit : `docs/GENSRPG_PHASE7_EXIT_AUDIT.md` ;
+- aucun changement runtime ni `index.html` ;
+- décision candidate : PHASE 7 EXIT READY, sous réserve de triple CI GREEN.
+
 Prochaine étape :
-poser la preuve d'audit de sortie Phase 7. Si GREEN, fermer Phase 7 et créer son checkpoint final avant toute Phase 8.
+exécuter la triple CI complète. Si GREEN, fermer Phase 7, créer son checkpoint final, puis ouvrir Phase 8 avec son propre checkpoint de départ.
 
 ---
 

@@ -67,7 +67,7 @@ sandbox.generateDungeonMap=(kind,qty)=>{
 
 vm.runInContext(createSource+';this.createRoom=createRoom;',sandbox,{filename:'dungeonCore200Rebuild.createRoom.js'});
 
-function run({mapSetting,enemyQty=2,kind='enemy'}){
+function run({mapSetting,enemyQty,kind='enemy'}){
   sandbox.events=[];
   sandbox.saved=null;
   sandbox.config={map:mapSetting};

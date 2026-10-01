@@ -770,6 +770,9 @@ jobs:
       - name: Exiger le retrait des retries Bridge Tactical Phase 8
         run: node tests/gens_phase8_tactical_bridge_retry_retirement_v1.test.cjs
 
+      - name: Caractériser les seams observers legacy Tactical Phase 8
+        run: node tests/gens_phase8_tactical_legacy_observer_seam_retirement_characterization_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

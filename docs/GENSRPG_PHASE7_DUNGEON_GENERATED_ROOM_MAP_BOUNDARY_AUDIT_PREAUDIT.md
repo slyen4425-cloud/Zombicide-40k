@@ -112,3 +112,89 @@ Toute future modification du runtime exige la source exacte correspondant à :
 - blob `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39`.
 
 Aucun nouveau wrapper, observer, timer, retry ou autorité globale n'est autorisé.
+
+
+## Caractérisation GREEN de la frontière carte
+
+Test :
+`tests/gens_phase7_dungeon_generated_room_map_boundary_characterization_v1.test.cjs`.
+
+SHA de caractérisation validé :
+`bfd20658a04905c19dfaef22b8e363a188784fb1`.
+
+Le commit `bfd20658...` est un retry CI à tree strictement identique à `3b4401d8830b86d9f2c73fd13161d8fb140ec31b`, après blocage infrastructure du premier runner Chromium.
+
+CI GREEN :
+- Architecture + Browser `36814038088` — SUCCESS ;
+- Firefox `36814038058` — SUCCESS ;
+- Tactical Dock `36814038050` — SUCCESS ;
+- étape dédiée #199 `Caractériser la frontière carte des salles generated Phase 7` — SUCCESS.
+
+La caractérisation confirme exactement :
+
+### Gate carte
+
+- seule la valeur booléenne stricte `false` désactive la carte ;
+- `true`, `undefined`, `null`, `0` et `""` conservent le chemin de génération ;
+- `cfg().map` reste lu au callsite Core 2.00.
+
+### Quantité transmise
+
+Le chemin actif conserve exactement :
+`result.enemyQty || 0`.
+
+Aucune conversion `Number(...)`, aucun clamp et aucune normalisation supplémentaire ne sont autorisés.
+
+### Ordre
+
+L'ordre actuel reste :
+1. chargement ennemis ;
+2. normalisation dc200Branch ;
+3. sauvegarde ennemis ;
+4. lecture `cfg().map` ;
+5. éventuel `generateDungeonMap(kind,result.enemyQty||0)` ;
+6. retour `{result,map:mapObj}`.
+
+### Matérialisation
+
+- un seul callsite `generateDungeonMap(...)` existe dans `createRoom(...)` ;
+- `generateDungeonMap(...)` et son RNG restent hors extraction ;
+- le retour public reste `{result,map}`.
+
+## Slice pure sélectionnée
+
+API cible :
+`GensDungeonV1.exploration.planGeneratedRoomMapBoundary(mapSetting, kind, result)`.
+
+Responsabilité unique :
+planifier uniquement la décision de matérialiser une carte generated et les arguments du callsite.
+
+Contrat cible :
+- si `mapSetting === false` :
+  `{status:"disabled",kind:null,enemyQty:null}` ;
+- sinon :
+  `{status:"generate",kind,enemyQty:result.enemyQty||0}`.
+
+Cette forme préserve la paresse historique :
+- si la carte est désactivée, `result.enemyQty` n'est pas lu ;
+- si la carte est active et `result` est invalide, le comportement d'accès historique n'est pas masqué.
+
+Core 2.00 doit conserver :
+- l'appel `cfg().map` ;
+- l'appel réel `generateDungeonMap(...)` ;
+- tout RNG/géométrie ;
+- la composition finale `{result,map:mapObj}`.
+
+Le planner pur :
+- ne consomme aucun RNG ;
+- ne lit aucune config lui-même ;
+- n'appelle pas `generateDungeonMap` ;
+- ne touche aucun stockage, DOM, Spatial ou autre module.
+
+## Prochaine étape TDD
+
+1. poser UNE garde RED exigeant `planGeneratedRoomMapBoundary(...)` ;
+2. exiger un raccord Core 2.00 unique et explicite ;
+3. vérifier RED isolé : Architecture échoue uniquement sur cette garde ;
+4. Firefox et Tactical Dock doivent rester GREEN ;
+5. aucun micro-diff runtime avant ce RED isolé.

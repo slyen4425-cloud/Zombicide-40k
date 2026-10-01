@@ -15,10 +15,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169447,
-  'generated room map-boundary characterization must track the exact lot 32 GREEN runtime size');
-assert.equal(gitBlob,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39',
-  'generated room map-boundary characterization must track the exact lot 32 GREEN runtime blob');
+assert.equal(bytes.length,8169555,
+  'generated room map-boundary characterization must track the exact lot 33 runtime size');
+assert.equal(gitBlob,'02a052bc231728eb383e17c83e61a958be0ac58c',
+  'generated room map-boundary characterization must track the exact lot 33 runtime blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -31,8 +31,8 @@ const createMatch=core200.match(/function createRoom\(room,kind\)\{[\s\S]*?\}\nf
 assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
 const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
-assert.match(createSource,/const mapObj=cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\);return \{result,map:mapObj\}/,
-  'map boundary must remain a strict false gate followed by one map-generation call and {result,map} return');
+assert.match(createSource,/const mapPlan=GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\);const mapObj=mapPlan\.status==="disabled"\?null:generateDungeonMap\(mapPlan\.kind,mapPlan\.enemyQty\);return \{result,map:mapObj\}/,
+  'map boundary must delegate only planning while Core keeps cfg, generation and {result,map} composition');
 
 const sandbox={
   config:{map:true},
@@ -113,8 +113,8 @@ assert.deepEqual(s.value.map,{kind:'chest',qty:0},
 
 assert.equal((createSource.match(/generateDungeonMap\(/g)||[]).length,1,
   'createRoom must keep exactly one generateDungeonMap callsite');
-assert.equal((createSource.match(/cfg\(\)\.map===false/g)||[]).length,1,
-  'createRoom must keep exactly one strict map=false gate');
+assert.equal((createSource.match(/GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\)/g)||[]).length,1,
+  'createRoom must keep exactly one planner call with cfg().map at the Core callsite');
 assert.doesNotMatch(entry,/generateDungeonMap|cfg\(\)\.map/,
   'Dungeon entry must not take map-generation or config authority during this audit');
 
@@ -126,5 +126,5 @@ console.log(JSON.stringify({
   order:['load','normalize','save','cfg','generateDungeonMap?'],
   generateCalls:1,
   returnShape:['result','map'],
-  decision:'characterize before selecting any pure map-planning seam'
+  decision:'pure map-planning seam selected and delegated'
 },null,2));

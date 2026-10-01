@@ -34,6 +34,11 @@
     return Number(enemy.dungeonRoom||0)===Number(room)&&enemy.dc200Branch===undefined;
   }
 
+  function planGeneratedRoomMapBoundary(mapSetting,kind,result){
+    if(mapSetting===false)return {status:"disabled",kind:null,enemyQty:null};
+    return {status:"generate",kind,enemyQty:result.enemyQty||0};
+  }
+
   function pickWeightedGeneratedRoomKind(roomWeights,roll){
     const weights={enemy:44,ambush:12,trap:14,chest:14,merchant:8,rest:11,mystery:11,...(roomWeights||{})};
     const entries=Object.entries(weights).map(([kind,value])=>[kind,Math.max(0,Number(value)||0)]);
@@ -127,6 +132,7 @@
       planGeneratedBossPolicy,
       buildGeneratedNonCombatRoomResult,
       shouldDefaultGeneratedRoomEnemyBranch,
+      planGeneratedRoomMapBoundary,
       pickWeightedGeneratedRoomKind,
       buildGeneratedRoomTransition,
       pickWeightedGeneratedBranchType,

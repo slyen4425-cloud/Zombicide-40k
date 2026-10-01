@@ -15,10 +15,10 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169447,
-  'map-boundary RED must start from the exact lot 32 GREEN runtime size');
-assert.equal(gitBlob,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39',
-  'map-boundary RED must start from the exact lot 32 GREEN runtime blob');
+assert.equal(bytes.length,8169555,
+  'map-boundary guard must track the exact lot 33 runtime size');
+assert.equal(gitBlob,'02a052bc231728eb383e17c83e61a958be0ac58c',
+  'map-boundary guard must track the exact lot 33 runtime blob');
 
 const sandbox={};
 sandbox.window=sandbox;

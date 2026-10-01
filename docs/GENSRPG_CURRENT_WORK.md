@@ -1,3 +1,57 @@
+# PHASE 8 — MICRO-LOT 3 — RETRAIT RETRIES BRIDGE TACTICAL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-lifecycle-audit-green-2026-10-01`
+
+SHA de base :
+`bbeea10737a759ddb70b729f9d6458b90efc8d90`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-bridge-retry-retirement-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-bridge-retry-retirement-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-lifecycle-audit-green-2026-10-01`
+
+Périmètre :
+retirer uniquement les trois réinstallations différées du Bridge dans `assets/gensrpg/tactical/entry-v1.js`.
+
+État cible :
+- une seule installation Bridge immédiate après le chargement séquentiel des six fichiers de base ;
+- aucun timer 250 / 1200 / 3000 ms dans l'entrée publique Tactical ;
+- ordre des six fichiers inchangé ;
+- guard `__gensTacticalV2Loader105` inchangé ;
+- Bridge métier, V108-V114.11, règles combat et UI inchangés.
+
+Hors périmètre :
+- retries internes V108-V114.11 ;
+- lazy loading complet de Tactical ;
+- teardown listeners/hooks ;
+- détection V113 ;
+- hit/dégâts/armure/AI ;
+- Dungeon/Survival/Capture/PvP ;
+- `index.html`.
+
+Tests prévus :
+1. caractériser immediate + 3 retries actuels ;
+2. prouver l'ordre Bridge-last et le contrat V113-equivalent ;
+3. poser RED exigeant immediate-only ;
+4. micro-diff uniquement dans l'entrée Tactical ;
+5. réaligner seulement les gardes qui décrivent explicitement ces retries ;
+6. triple CI complète avant checkpoint final.
+
+Risques :
+- perte du routeur si une couche tardive réécrit le start wrapper ;
+- changement involontaire de l'idempotence ;
+- suppression accidentelle de retries internes hors périmètre.
+
+Prochaine étape :
+caractérisation GREEN de l'état current immediate + 3 retries, puis RED isolated immediate-only.
+
+---
+
 # PHASE 8 — MICRO-LOT 2 — AUDIT LIFECYCLE SESSION TACTICAL — 2026-10-01
 
 Base GREEN :

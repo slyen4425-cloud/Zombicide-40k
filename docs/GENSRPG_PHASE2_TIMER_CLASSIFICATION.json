@@ -4,7 +4,7 @@
   "sourceIndexBlob": "02a052bc231728eb383e17c83e61a958be0ac58c",
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
-    "externalReachableFiles": 81,
+    "externalReachableFiles": 82,
     "externalTimerSources": 52,
     "externalSetTimeoutSyntax": 145,
     "externalSetIntervalSyntax": 1,
@@ -29,7 +29,7 @@
     }
   ],
   "bootstrapRetryExternal": [
-    "assets/gensrpg/core/runtime-bootstrap-v1.js",
+    "assets/gensrpg/tactical/entry-v1.js",
     "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js",

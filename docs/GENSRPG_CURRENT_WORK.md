@@ -43,8 +43,18 @@ Risques :
 - casser la compatibilité mobile/navigation/détails combat ;
 - créer une nouvelle autorité concurrente au lieu d'en retirer une.
 
+Pré-audit :
+- test : `tests/gens_phase8_tactical_legacy_observer_preaudit_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_LEGACY_OBSERVER_PREAUDIT.md` ;
+- V108/V109/V111/V112/V113 conservent chacune des responsabilités actives : aucun fichier entier n'est supprimable proprement ;
+- leurs `observe(rt=R)` / `MutationObserver` historiques existent encore mais ne sont plus appelés par les `install(rt)` ;
+- V110 et V114.11 sont déjà sans observer global.
+
+Candidat sélectionné :
+retrait homogène des seams observers historiques inactifs V108/V109/V111/V112/V113, sans toucher aux comportements actifs ni aux retries.
+
 Prochaine étape :
-pré-auditer les couches actives et sélectionner le candidat le plus sûr. Aucun micro-diff avant cette sélection.
+valider ce pré-audit par triple CI ; si GREEN, checkpoint final puis chantier dédié au retrait des seams observers.
 
 ---
 

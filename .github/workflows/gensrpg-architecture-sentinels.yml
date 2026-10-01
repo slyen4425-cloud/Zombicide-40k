@@ -761,6 +761,9 @@ jobs:
       - name: Vérifier le runtime de l'entrée publique Tactical Phase 8
         run: node tests/gens_phase8_tactical_entry_runtime_v1.test.cjs
 
+      - name: Pré-auditer le retrait des observers legacy Tactical Phase 8
+        run: node tests/gens_phase8_tactical_legacy_observer_preaudit_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

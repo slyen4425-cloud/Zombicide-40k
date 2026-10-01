@@ -54,8 +54,20 @@ Caractérisation :
 - aucune API publique n'expose `observe` ;
 - responsabilités actives des cinq installs verrouillées.
 
+Caractérisation ciblée GREEN :
+- Architecture étape #252 — SUCCESS sur `c5da4d6e7649af5256eb6645830a0b833bb09450` ;
+- les cinq seams observers sont bien inactifs depuis leurs installs ;
+- responsabilités actives verrouillées.
+
+RED isolé :
+- test : `tests/gens_phase8_tactical_legacy_observer_seam_retirement_v1.test.cjs` ;
+- exige 0 `observe(rt=R)`, 0 `MutationObserver` et 0 état `observer=null` dans V108/V109/V111/V112/V113 ;
+- réaffirme les appels actifs de chaque install ;
+- réaffirme les cadences `installWithRetries` existantes ;
+- aucun runtime modifié dans le commit RED.
+
 Prochaine étape :
-valider cette caractérisation GREEN, puis poser RED isolé exigeant le retrait physique des cinq seams observers sans toucher aux responsabilités actives ni aux retries.
+valider que le RED échoue uniquement parce que les cinq seams historiques sont encore physiquement présents, puis appliquer le micro-diff soustractif.
 
 ---
 

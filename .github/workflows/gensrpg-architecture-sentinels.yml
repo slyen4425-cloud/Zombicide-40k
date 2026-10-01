@@ -755,6 +755,9 @@ jobs:
       - name: Caractériser le handoff composition Tactical Phase 8
         run: node tests/gens_phase8_tactical_composition_handoff_characterization_v1.test.cjs
 
+      - name: Exiger l'autorité de composition Tactical Phase 8
+        run: node tests/gens_phase8_tactical_composition_handoff_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

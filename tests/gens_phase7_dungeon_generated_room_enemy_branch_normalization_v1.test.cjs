@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169447,
+assert.equal(bytes.length,8169555,
   'dc200Branch RED must start from the exact lot 31 GREEN runtime size');
-assert.equal(gitBlob,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39',
+assert.equal(gitBlob,'02a052bc231728eb383e17c83e61a958be0ac58c',
   'dc200Branch RED must start from the exact lot 31 GREEN runtime blob');
 
 const sandbox={};

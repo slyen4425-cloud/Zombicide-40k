@@ -13,8 +13,8 @@ const coreSource=coreBuf.toString('utf8');
 const owners=fs.readFileSync(path.join(root,'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
 const gitBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8169447,'raccord must start from the exact Phase 7 generated Boss policy index');
-assert.equal(gitBlob(indexBuf),'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39','raccord Phase 7 generated Boss policy index drifted');
+assert.equal(indexBuf.length,8169555,'raccord must start from the exact Phase 7 generated Boss policy index');
+assert.equal(gitBlob(indexBuf),'02a052bc231728eb383e17c83e61a958be0ac58c','raccord Phase 7 generated Boss policy index drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','Core Progression must remain byte-identical');
 
 function scriptBody(id){

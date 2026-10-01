@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169447,'S3 preaudit must start from the current Phase 7 generated Boss policy S2 runtime');
-assert.equal(gitBlob,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39','S3 preaudit must start from the current Phase 7 generated Boss policy S2 blob');
+assert.equal(bytes.length,8169555,'S3 preaudit must start from the current Phase 7 generated Boss policy S2 runtime');
+assert.equal(gitBlob,'02a052bc231728eb383e17c83e61a958be0ac58c','S3 preaudit must start from the current Phase 7 generated Boss policy S2 blob');
 
 const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
 assert.ok(registryExpose>0,'S1 registry must remain exposed');

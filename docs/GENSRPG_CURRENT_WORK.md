@@ -1,3 +1,53 @@
+# PHASE 7 — AUDIT DE SORTIE OFFICIEL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-map-boundary-audit-green-2026-10-01`
+
+SHA de base :
+`9dccc9db3f76c928491aed47836a7edf4d02f8ba`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase7-exit-audit-2026-10-01`
+
+Branche :
+`work/gensrpg-phase7-exit-audit-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-map-boundary-audit-green-2026-10-01`
+
+Périmètre :
+audit documentaire + sentinelle de sortie uniquement. Aucun nouveau seam Dungeon et aucune migration runtime avant décision de sortie.
+
+Critère officiel Roadmap :
+`exploration complète sans dépendance UI Tactical globale`.
+
+Fonctions / domaines protégés :
+- runtime Dungeon existant ;
+- déclenchement de combat ;
+- Tactical ;
+- Survival ;
+- Capture ;
+- PvP ;
+- assets ;
+- `index.html`.
+
+Tests prévus :
+1. inventorier les dépendances Tactical réellement utilisées par l'exploration Dungeon ;
+2. prouver que l'exploration peut exister sans autorité UI Tactical globale ;
+3. réutiliser les sentinelles Browser déjà GREEN pour parcours Dungeon, Builder, authored et inter-modules ;
+4. vérifier le prérequis Phase 8 stats -> snapshot -> attaque -> dégâts/explication déjà verrouillé ;
+5. triple CI complète avant décision.
+
+Risques :
+- confondre un bridge de déclenchement de combat autorisé avec une dépendance UI Tactical globale interdite ;
+- prolonger artificiellement Phase 7 en auditant des seams hors critère de sortie ;
+- affaiblir une sentinelle historique au lieu de constater l'état réel.
+
+Prochaine étape :
+poser la preuve d'audit de sortie Phase 7. Si GREEN, fermer Phase 7 et créer son checkpoint final avant toute Phase 8.
+
+---
+
 # PHASE 7 — MICRO-LOT 33 — audit frontière carte de salle generated — 2026-09-30
 
 Base GREEN :

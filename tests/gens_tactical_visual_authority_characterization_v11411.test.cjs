@@ -32,7 +32,7 @@ for(const sig of ['function paintWalls(rt=R)','function patchDungeonMapHtml(rt=R
 const i108=block(v108,'function install(rt=R){','function installWithRetries','V108 install');
 for(const retired of ['patchDungeonMapHtml(rt)','hookDungeonRender(rt)','paintWalls(rt)'])assert.ok(!i108.includes(retired),`V108 install still owns walls: ${retired}`);
 for(const required of ['ensureStyle(rt)','bindControls(rt)','hookUiRender(rt)','enhanceActions(rt)'])assert.ok(i108.includes(required),`V108 non-wall behavior lost ${required}`);
-const hookUi108=block(v108,'function hookUiRender(rt=R){','function observe(rt=R){','V108 hookUiRender');
+const hookUi108=block(v108,'function hookUiRender(rt=R){','function install(rt=R){','V108 hookUiRender');
 assert.match(hookUi108,/enhanceActions\(rt\)/,'V108 render hook must preserve action enhancement');
 assert.doesNotMatch(hookUi108,/paintWalls\(rt\)/,'V108 render hook must no longer repaint walls');
 

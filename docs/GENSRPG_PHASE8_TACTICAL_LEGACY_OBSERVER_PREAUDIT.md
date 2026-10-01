@@ -54,3 +54,14 @@ Il est homogène et ne change pas le gameplay : on retire du code dont l'inactiv
 4. RED exigeant l'absence de ces seams tout en gardant les responsabilités actives ;
 5. micro-diff ;
 6. triple CI.
+
+
+## Validation GREEN
+
+- SHA technique : `6281abc3b11fc9e0321fc764859ece56a26d3a46`
+- Architecture + Browser `36894540705` — SUCCESS
+- Firefox `36894540703` — SUCCESS
+- Tactical Dock `36894540767` — SUCCESS
+- étape Architecture #249 — SUCCESS
+
+Décision : le retrait des seams observers historiques inactifs est autorisé comme prochain micro-lot homogène, sous checkpoint de départ dédié.

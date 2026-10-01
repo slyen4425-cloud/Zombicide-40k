@@ -53,8 +53,26 @@ Pré-audit :
 Candidat sélectionné :
 retrait homogène des seams observers historiques inactifs V108/V109/V111/V112/V113, sans toucher aux comportements actifs ni aux retries.
 
+Validation GREEN :
+- SHA technique : `6281abc3b11fc9e0321fc764859ece56a26d3a46` ;
+- Architecture + Browser `36894540705` — SUCCESS ;
+- Firefox `36894540703` — SUCCESS ;
+- Tactical Dock `36894540767` — SUCCESS ;
+- étape Architecture #249 `Pré-auditer le retrait des observers legacy Tactical Phase 8` — SUCCESS ;
+- aucun changement runtime, gameplay ou `index.html`.
+
+Décision :
+**PRÉ-AUDIT GREEN**.
+Le prochain micro-lot Phase 8 retire uniquement les seams observers historiques inactifs V108/V109/V111/V112/V113 et protège toutes leurs responsabilités actives.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-legacy-observer-preaudit-green-2026-10-01`.
+
 Prochaine étape :
-valider ce pré-audit par triple CI ; si GREEN, checkpoint final puis chantier dédié au retrait des seams observers.
+1. triple CI documentaire ;
+2. checkpoint GREEN du pré-audit ;
+3. checkpoint de départ + branche dédiés au retrait des observers ;
+4. caractérisation/RED avant micro-diff.
 
 ---
 

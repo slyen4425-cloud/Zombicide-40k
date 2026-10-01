@@ -108,8 +108,8 @@ assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve or
 // 4b. Tactical public entry is the sole owner of base Tactical composition.
 assertOrdered(tacticalEntry,baseTactical,'Tactical public entry base composition');
 assert.ok(tacticalEntry.includes('R.__gensTacticalV2Loader105=true'),'Tactical entry must preserve the historical idempotency guard');
-assert.ok(tacticalEntry.includes('setTimeout(apply,250)') && tacticalEntry.includes('setTimeout(apply,1200)') && tacticalEntry.includes('setTimeout(apply,3000)'),
-  'Tactical entry must preserve the known bridge retry timings during ownership handoff');
+assert.equal((tacticalEntry.match(/setTimeout\(apply,/g)||[]).length,0,
+  'Tactical public entry must not regain delayed Bridge reinstalls');
 assert.ok(tacticalEntry.includes('s.async=false'),'Tactical entry must preserve ordered sequential private-module loading');
 assert.ok(tacticalEntry.includes('R.GensTacticalV1=Object.freeze'),'Tactical entry must expose the public module API');
 

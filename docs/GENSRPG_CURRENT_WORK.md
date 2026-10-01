@@ -48,8 +48,19 @@ Risques :
 - retirer des listeners encore nécessaires hors combat ;
 - modifier plusieurs couches à la fois.
 
+Audit lifecycle :
+- document : `docs/GENSRPG_PHASE8_TACTICAL_SESSION_LIFECYCLE_AUDIT.md` ;
+- garde : `tests/gens_phase8_tactical_session_lifecycle_audit_v1.test.cjs` ;
+- Tactical reste chargé eager au démarrage ;
+- UI `close()` ferme bien la session locale mais ne démonte pas encore les hooks/listeners globaux ;
+- observers historiques V108/V109/V111/V112/V113 déjà inactifs ;
+- entrée publique Tactical conserve 1 installation Bridge immédiate + 3 réinstallations différées 250 / 1200 / 3000 ms.
+
+Premier seam lifecycle sélectionné :
+retirer uniquement les 3 réinstallations différées du Bridge dans l'entrée publique Tactical, en conservant l'installation immédiate.
+
 Prochaine étape :
-pré-audit réel du lifecycle actuel ; aucun changement runtime avant sélection du seam.
+valider cet audit par triple CI ; si GREEN, checkpoint final puis nouveau micro-lot dédié au retrait des retries Bridge.
 
 ---
 

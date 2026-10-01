@@ -54,8 +54,21 @@ Caractérisation :
 - Bridge chargé en dernier ;
 - V113 doit continuer à respecter l'autorité Bridge.
 
+Caractérisation vérifiée GREEN sur le HEAD réel :
+- HEAD : `756100b499e8f935fd552cf1e76c19f5713f8b22` ;
+- ordre des six modules intact ;
+- Bridge dernier ;
+- 1 installation immédiate + retries 250 / 1200 / 3000 confirmés ;
+- guards Bridge/V113 confirmés.
+
+RED isolé :
+- test : `tests/gens_phase8_tactical_bridge_retry_retirement_v1.test.cjs` ;
+- cible : exactement 1 installation Bridge immédiate ;
+- cible : aucun retry Bridge dans l'entrée publique ;
+- aucun runtime modifié dans le commit RED.
+
 Prochaine étape :
-valider cette caractérisation GREEN, puis poser RED isolated exigeant une installation immédiate unique et aucun retry Bridge dans l'entrée publique.
+valider l'échec RED uniquement sur les retries 250 / 1200 / 3000, puis appliquer le micro-diff dans `assets/gensrpg/tactical/entry-v1.js`.
 
 ---
 

@@ -12,7 +12,7 @@ const files=[
 ];
 function finalize(){
   const apply=()=>{try{R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG Tactical V1 install",e)}};
-  apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
+  apply();
 }
 function load(i){
   if(i>=files.length){finalize();return}

@@ -44,9 +44,8 @@ const layers=[
 const result=[];
 for(const layer of layers){
   const src=read(layer.path);
-  assert.match(src,/function observe\(rt=R\)/,layer.id+' historical observe seam must exist before retirement');
-  assert.match(src,/new (?:rt\?\.)?MutationObserver|new rt\.MutationObserver|new MutationObserver/,
-    layer.id+' historical observe seam must still instantiate MutationObserver before retirement');
+  assert.doesNotMatch(src,/function observe\(rt=R\)/,layer.id+' retired observe seam must stay absent');
+  assert.doesNotMatch(src,/MutationObserver/,layer.id+' retired MutationObserver authority must stay absent');
 
   const install=block(src,'function install(rt=R){','function installWithRetries',layer.id+' install');
   assert.doesNotMatch(install,/\bobserve\s*\(/,layer.id+' install must not activate historical observer seam');
@@ -59,7 +58,8 @@ for(const layer of layers){
 
   result.push({
     id:layer.id,
-    observerSeamPresent:true,
+    preMigrationObserverSeam:true,
+    observerSeamPresent:false,
     observerActiveFromInstall:false,
     observerPublic:false,
     activeInstallResponsibilities:layer.active
@@ -69,7 +69,7 @@ for(const layer of layers){
 console.log(JSON.stringify({
   scenario:'Phase 8 Tactical legacy observer seam retirement characterization',
   layers:result,
-  selectedSeam:'remove inactive observe/MutationObserver seams only',
+  selectedSeam:'inactive observe/MutationObserver seams retired',
   retriesChangeExpected:false,
   gameplayChangeExpected:false,
   indexChangeRequired:false

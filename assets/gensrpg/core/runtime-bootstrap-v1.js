@@ -1,26 +1,18 @@
 /* GenSrpG architecture bootstrap V1 — extracted runtime loader.
    The native index.html changeXP() function owns manual hero-sheet XP again.
-   This bootstrap must not replace that owner with progression-runtime-v1. */
+   Tactical internal composition is owned by assets/gensrpg/tactical/entry-v1.js. */
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.2.0",APP_VERSION="16.78.114.11-architecture-bootstrap-3";
+const VERSION="1.3.0",APP_VERSION="16.78.114.11-phase8-tactical-entry";
 const files=[
-  "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
-  "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js",
-  "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js",
-  "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js",
-  "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
-  "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js",
+  "assets/gensrpg/tactical/entry-v1.js",
 ];
-function finalize(){
-  const apply=()=>{try{R.GensRpgTacticalCombatV2Bridge?.install?.(R)}catch(e){console.error("GenSrpG RuntimeBootstrap V1 install",e)}};
-  apply();setTimeout(apply,250);setTimeout(apply,1200);setTimeout(apply,3000);
-}
+let installed=false;
 function load(i){
-  if(i>=files.length){finalize();return}
+  if(i>=files.length)return;
   const s=D.createElement("script");
-  s.src=files[i]+"?v=16.78.105";
+  s.src=files[i]+"?v=1";
   s.async=false;
   s.onload=()=>load(i+1);
   s.onerror=()=>{console.error("GenSrpG RuntimeBootstrap V1 load failed",files[i]);load(i+1)};
@@ -28,11 +20,11 @@ function load(i){
 }
 function install(){
   if(!D||!(D.head||D.documentElement))return false;
-  if(R.__gensTacticalV2Loader105)return true;
-  R.__gensTacticalV2Loader105=true;
+  if(installed)return true;
+  installed=true;
   load(0);
   return true;
 }
-R.GensRuntimeBootstrapV1={VERSION,APP_VERSION,files:[...files],install,finalize};
+R.GensRuntimeBootstrapV1={VERSION,APP_VERSION,files:[...files],install};
 install();
 })();

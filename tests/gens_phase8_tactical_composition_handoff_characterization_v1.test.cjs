@@ -11,6 +11,7 @@ const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 const entry=read('assets/gensrpg/tactical/entry-v1.js');
 const contract=JSON.parse(read('assets/gensrpg/tactical/module-contract-v1.json'));
 const runtimeGuard=read('tests/gens_runtime_composition_guard_v11411.test.cjs');
+const characterizationDoc=read('docs/GENSRPG_PHASE8_TACTICAL_COMPOSITION_HANDOFF_CHARACTERIZATION.md');
 
 const files=[
   'assets/gensrpg/gens-rpg-tactical-combat-v2.js',
@@ -21,41 +22,40 @@ const files=[
   'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js'
 ];
 
-assert.equal(contract.status,'contract-only-not-loaded');
-assert.match(entry,/Intentionally contains no runtime code/);
-assert.doesNotMatch(entry,/createElement\(["']script|GensRpgTacticalCombatV2|__gensTacticalV2Loader105|setTimeout\(/);
+assert.equal(contract.status,'partial-runtime-loaded');
+assert.equal(contract.activatedPhase,8);
+assert.equal(contract.publicRuntimeApi,'GensTacticalV1');
+assert.match(characterizationDoc,/Propriétaire actuel[\s\S]*runtime-bootstrap-v1\.js/,'characterization document must preserve the original Core owner');
+assert.match(characterizationDoc,/entry-v1\.js[\s\S]*encore inert/,'characterization document must preserve the original inert-entry observation');
 
 let cursor=-1;
 for(const file of files){
-  const pos=bootstrap.indexOf('"'+file+'"',cursor+1);
-  assert.ok(pos>cursor,'current Core owner must preserve Tactical base order: '+file);
+  const pos=entry.indexOf('"'+file+'"',cursor+1);
+  assert.ok(pos>cursor,'migrated Tactical entry must preserve characterized order: '+file);
   cursor=pos;
 }
-
-assert.match(bootstrap,/const files=\[/,'Core RuntimeBootstrap must currently own the Tactical file list');
-assert.match(bootstrap,/if\(R\.__gensTacticalV2Loader105\)return true;/,'current loader idempotency guard missing');
-assert.match(bootstrap,/R\.__gensTacticalV2Loader105=true;/,'current loader must set idempotency guard before loading');
-assert.match(bootstrap,/s\.src=files\[i\]\+"\?v=16\.78\.105";/,'current cache/version suffix must be preserved');
-assert.match(bootstrap,/s\.async=false;/,'current sequential loading must remain explicit');
-assert.match(bootstrap,/s\.onload=\(\)=>load\(i\+1\)/,'current sequential success path missing');
-assert.match(bootstrap,/s\.onerror=\(\)=>\{console\.error\("GenSrpG RuntimeBootstrap V1 load failed",files\[i\]\);load\(i\+1\)\}/,
-  'current sequential error continuation missing');
-
-const finalizeStart=bootstrap.indexOf('function finalize(){');
-const loadStart=bootstrap.indexOf('function load(i){');
-assert.ok(finalizeStart>=0&&loadStart>finalizeStart,'finalize/load boundaries missing');
-const finalize=bootstrap.slice(finalizeStart,loadStart);
-assert.match(finalize,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,'bridge final install missing');
-for(const ms of [250,1200,3000]) assert.ok(finalize.includes('setTimeout(apply,'+ms+')'),'bridge retry '+ms+' missing');
-
-assert.match(runtimeGuard,/RuntimeBootstrap is the one documented owner of base Tactical composition/,
-  'historical runtime composition guard must still describe the current owner before migration');
+assert.match(entry,/if\(R\.__gensTacticalV2Loader105\)return true;/,'migrated entry must preserve characterized idempotency guard');
+assert.match(entry,/R\.__gensTacticalV2Loader105=true;/,'migrated entry must set characterized idempotency guard');
+assert.match(entry,/s\.src=files\[i\]\+"\?v=16\.78\.105";/,'migrated entry must preserve characterized cache suffix');
+assert.match(entry,/s\.async=false;/,'migrated entry must preserve characterized sequential loading');
+assert.match(entry,/s\.onload=\(\)=>load\(i\+1\)/,'migrated entry must preserve characterized success continuation');
+const finalizeStart=entry.indexOf('function finalize(){');
+const loadStart=entry.indexOf('function load(i){');
+assert.ok(finalizeStart>=0&&loadStart>finalizeStart,'migrated entry finalize/load boundaries missing');
+const finalize=entry.slice(finalizeStart,loadStart);
+assert.match(finalize,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,'migrated entry must preserve bridge final install');
+for(const ms of [250,1200,3000]) assert.ok(finalize.includes('setTimeout(apply,'+ms+')'),'migrated entry bridge retry '+ms+' missing');
+assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,'Core must delegate to public Tactical entry after handoff');
+for(const file of files)assert.equal(bootstrap.includes(file),false,'Core must not retain characterized private file '+file);
+assert.match(runtimeGuard,/Tactical public entry is the sole owner of base Tactical composition/,
+  'runtime composition guard must name the new sole owner');
 
 console.log(JSON.stringify({
   scenario:'Phase 8 Tactical composition handoff characterization',
-  currentOwner:'assets/gensrpg/core/runtime-bootstrap-v1.js',
+  baselineOwner:'assets/gensrpg/core/runtime-bootstrap-v1.js',
   targetOwner:'assets/gensrpg/tactical/entry-v1.js',
-  entryCurrentlyInert:true,
+  entryBaselineInert:true,
+  currentOwner:'assets/gensrpg/tactical/entry-v1.js',
   files,
   sequentialLoading:true,
   idempotencyGuard:'__gensTacticalV2Loader105',

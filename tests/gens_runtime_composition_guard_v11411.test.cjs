@@ -20,6 +20,7 @@ const source=read('index.html');
 const workflow=read('.github/workflows/main.yml');
 const perf=read('assets/gensrpg/gens-mobile-combat-performance-16781022.js');
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
+const tacticalEntry=read('assets/gensrpg/tactical/entry-v1.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 
 // 1. Source index remains the known legacy shell entry point, now with Core storage bootstrapped before inline storage.
@@ -97,12 +98,20 @@ assert.ok(perf.includes('R.__gensRuntimeBootstrapEntryV1=true'),'performance-to-
 for(const file of baseTactical)assert.equal(perf.includes(file),false,`performance layer must not own ${file}`);
 assert.equal(perf.includes('setTimeout(apply,3000)'),false,'performance layer must not own Tactical/Survival install retries');
 
-// 4. RuntimeBootstrap is the one documented owner of base Tactical composition.
-assertOrdered(bootstrap,baseTactical,'RuntimeBootstrap V1 base Tactical composition');
-assert.ok(bootstrap.includes('R.__gensTacticalV2Loader105=true'),'RuntimeBootstrap must preserve the historical idempotency guard');
-assert.ok(bootstrap.includes('setTimeout(apply,250)') && bootstrap.includes('setTimeout(apply,1200)') && bootstrap.includes('setTimeout(apply,3000)'),
-  'RuntimeBootstrap must preserve the known Tactical bridge retry timings during extraction');
-assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve ordered sequential script loading');
+// 4. Core RuntimeBootstrap now delegates only to the Tactical public entry.
+assertOrdered(bootstrap,['assets/gensrpg/tactical/entry-v1.js'],'RuntimeBootstrap V1 Tactical public-entry handoff');
+for(const file of baseTactical)assert.equal(bootstrap.includes(file),false,`RuntimeBootstrap must not own Tactical private file ${file}`);
+assert.equal(bootstrap.includes('GensRpgTacticalCombatV2Bridge'),false,'RuntimeBootstrap must not install the Tactical bridge');
+assert.equal(bootstrap.includes('__gensTacticalV2Loader105'),false,'RuntimeBootstrap must not own Tactical idempotency');
+assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve ordered sequential public-entry loading');
+
+// 4b. Tactical public entry is the sole owner of base Tactical composition.
+assertOrdered(tacticalEntry,baseTactical,'Tactical public entry base composition');
+assert.ok(tacticalEntry.includes('R.__gensTacticalV2Loader105=true'),'Tactical entry must preserve the historical idempotency guard');
+assert.ok(tacticalEntry.includes('setTimeout(apply,250)') && tacticalEntry.includes('setTimeout(apply,1200)') && tacticalEntry.includes('setTimeout(apply,3000)'),
+  'Tactical entry must preserve the known bridge retry timings during ownership handoff');
+assert.ok(tacticalEntry.includes('s.async=false'),'Tactical entry must preserve ordered sequential private-module loading');
+assert.ok(tacticalEntry.includes('R.GensTacticalV1=Object.freeze'),'Tactical entry must expose the public module API');
 
 // 5. Integration preserves the real runtime call chain V108 -> V114.11, now with direct cleaned installs.
 for(const file of [
@@ -133,4 +142,4 @@ assert.ok(integration.includes('loadPolish108();'),'clean Tactical chain must st
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 
-console.log('GenSrpG runtime composition guard OK: deterministic Tactical bootstrap without legacy Survival/Dungeon guard');
+console.log('GenSrpG runtime composition guard OK: Core delegates to public Tactical entry; Tactical owns deterministic base composition');

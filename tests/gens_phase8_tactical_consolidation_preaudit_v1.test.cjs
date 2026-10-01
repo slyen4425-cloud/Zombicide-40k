@@ -12,12 +12,14 @@ const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 const observerGuard=read('tests/gens_tactical_observer_chain_clean_v11411.test.cjs');
 const runtimeGuard=read('tests/gens_runtime_composition_guard_v11411.test.cjs');
+const preauditDoc=read('docs/GENSRPG_PHASE8_TACTICAL_CONSOLIDATION_PREAUDIT.md');
 
 assert.equal(contract.module,'tactical');
-assert.equal(contract.status,'contract-only-not-loaded');
-assert.match(entry,/Intentionally contains no runtime code/,'Tactical public entry must still be inert at preaudit');
-assert.doesNotMatch(entry,/GensRpgTacticalCombatV2|createElement\(["']script|setTimeout|MutationObserver/,
-  'Phase 8 preaudit must not silently activate Tactical entry');
+assert.equal(contract.status,'partial-runtime-loaded');
+assert.equal(contract.activatedPhase,8);
+assert.equal(contract.publicRuntimeApi,'GensTacticalV1');
+assert.match(preauditDoc,/entrée Tactical publique encore inert/,'preaudit document must preserve the observed baseline');
+assert.match(preauditDoc,/propriétaire actuel de composition : Core RuntimeBootstrap V1/,'preaudit document must preserve the former composition owner');
 
 const baseTactical=[
   'gens-rpg-tactical-combat-v2.js',
@@ -29,14 +31,16 @@ const baseTactical=[
 ];
 let cursor=-1;
 for(const file of baseTactical){
-  const pos=bootstrap.indexOf(file,cursor+1);
-  assert.ok(pos>cursor,'RuntimeBootstrap must currently own ordered Tactical base composition: '+file);
+  const pos=entry.indexOf(file,cursor+1);
+  assert.ok(pos>cursor,'Tactical public entry must own ordered base composition: '+file);
   cursor=pos;
 }
-assert.match(bootstrap,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,
-  'RuntimeBootstrap must currently own final bridge install');
+assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,'Core RuntimeBootstrap must delegate to the Tactical public entry');
+for(const file of baseTactical)assert.equal(bootstrap.includes(file),false,'Core must not know Tactical private file '+file);
+assert.match(entry,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,
+  'Tactical entry must own final bridge install');
 for(const ms of [250,1200,3000]){
-  assert.ok(bootstrap.includes('setTimeout(apply,'+ms+')'),'RuntimeBootstrap bridge retry missing '+ms);
+  assert.ok(entry.includes('setTimeout(apply,'+ms+')'),'Tactical entry bridge retry missing '+ms);
 }
 
 for(const layer of [
@@ -57,14 +61,14 @@ assert.doesNotMatch(integration,/gens-rpg-tactical-session-guard-16781144\.js/,
 
 assert.match(observerGuard,/install must not activate its historical global observer/,
   'V108-V113 historical observer retirement guard must remain');
-assert.match(runtimeGuard,/RuntimeBootstrap is the one documented owner of base Tactical composition/,
-  'current composition owner must remain explicitly characterized before migration');
+assert.match(runtimeGuard,/Tactical public entry is the sole owner of base Tactical composition/,
+  'runtime guard must preserve the selected Phase 8 ownership target');
 
 const result={
   scenario:'Phase 8 Tactical consolidation preaudit',
   targetArchitecture:['engine','adapter','ui','ai','dungeon-bridge'],
-  currentPublicEntry:'inert',
-  currentCompositionOwner:'Core RuntimeBootstrap V1',
+  currentPublicEntry:'GensTacticalV1',
+  currentCompositionOwner:'Tactical public entry',
   baseComposition:baseTactical,
   activeCompatibilityChain:['V108','V109','V110','V111','V112','V113','V114.11'],
   alreadyRetired:['active V108/V109/V111/V112/V113 global observers','V114.1 global observer hotfix','V114.4 session guard'],

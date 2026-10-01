@@ -214,6 +214,21 @@
       "domain": "core",
       "role": "canonical pure D100 threshold primitive; first production raccord through the historical d100ThresholdFromChance boundary adapter"
     },
+    "assets/gensrpg/core/equipment-bonus-sets-v1.js": {
+      "owner": "GenSrpG Core Equipment Bonus Sets",
+      "domain": "core",
+      "role": "canonical pure direct equipment and set bonus authority used by the existing Equipment runtime owner before evolution and performance caching"
+    },
+    "assets/gensrpg/core/equipment-evolution-v1.js": {
+      "owner": "GenSrpG Core Equipment Evolution",
+      "domain": "core",
+      "role": "canonical pure Equipment evolution bonus authority used by the existing cached evolution runtime boundary"
+    },
+    "assets/gensrpg/core/inventory-equipped-view-v1.js": {
+      "owner": "GenSrpG Core Inventory Equipped View",
+      "domain": "core",
+      "role": "canonical pure equipped-item view from explicit inventory and slot references, connected through the existing Dungeon Equipment runtime adapter"
+    },
     "assets/gensrpg/core/progression-v1.js": {
       "owner": "GenSrpG Core Progression",
       "domain": "core",
@@ -224,10 +239,50 @@
       "domain": "core",
       "role": "runtime dependency loader"
     },
+    "assets/gensrpg/core/stats-derived-values-v1.js": {
+      "owner": "GenSrpG Core Stats Derived Values",
+      "domain": "core",
+      "role": "canonical deterministic derived stat formulas feeding the Tactical snapshot boundary"
+    },
+    "assets/gensrpg/core/stats-hero-values-v1.js": {
+      "owner": "GenSrpG Core Stats Hero Values",
+      "domain": "core",
+      "role": "canonical explicit hero base-value provider used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-modifier-provider-v1.js": {
+      "owner": "GenSrpG Core Stats Modifier Provider",
+      "domain": "core",
+      "role": "canonical explicit Equipment, Skill and Challenge modifier composition used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-normalization-v1.js": {
+      "owner": "GenSrpG Core Stats Normalization",
+      "domain": "core",
+      "role": "canonical pure stat/effect normalization authority loaded before the legacy Stats runtime owner"
+    },
+    "assets/gensrpg/core/stats-snapshot-v1.js": {
+      "owner": "GenSrpG Core Stats Snapshot",
+      "domain": "core",
+      "role": "canonical immutable values and derived snapshot consumed through the active Stats runtime adapter"
+    },
+    "assets/gensrpg/core/stats-value-engine-v1.js": {
+      "owner": "GenSrpG Core Stats Value Engine",
+      "domain": "core",
+      "role": "canonical deterministic stat values and effect composition used by the active Stats owner"
+    },
     "assets/gensrpg/core/storage-v1.js": {
       "owner": "GenSrpG Core Storage",
       "domain": "core",
       "role": "canonical shared JSON storage service; production-connected first through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/core/text-utils-v1.js": {
+      "owner": "GenSrpG Core Text Utils",
+      "domain": "core",
+      "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/dungeon/entry-v1.js": {
+      "owner": "GenSrpG Dungeon Exploration",
+      "domain": "dungeon",
+      "role": "public Phase 7 Dungeon module entry exposing pure generated advance planning only; authored travel remains owned by DungeonAuthoredRuntime167839"
     },
     "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js": {
       "owner": "Dungeon Visual Bridge",
@@ -354,56 +409,6 @@
       "domain": "shell",
       "role": "live world-card summaries from content sources"
     },
-    "assets/gensrpg/core/inventory-equipped-view-v1.js": {
-      "owner": "GenSrpG Core Inventory Equipped View",
-      "domain": "core",
-      "role": "canonical pure equipped-item view from explicit inventory and slot references, connected through the existing Dungeon Equipment runtime adapter"
-    },
-    "assets/gensrpg/core/equipment-bonus-sets-v1.js": {
-      "owner": "GenSrpG Core Equipment Bonus Sets",
-      "domain": "core",
-      "role": "canonical pure direct equipment and set bonus authority used by the existing Equipment runtime owner before evolution and performance caching"
-    },
-    "assets/gensrpg/core/equipment-evolution-v1.js": {
-      "owner": "GenSrpG Core Equipment Evolution",
-      "domain": "core",
-      "role": "canonical pure Equipment evolution bonus authority used by the existing cached evolution runtime boundary"
-    },
-    "assets/gensrpg/core/stats-normalization-v1.js": {
-      "owner": "GenSrpG Core Stats Normalization",
-      "domain": "core",
-      "role": "canonical pure stat/effect normalization authority loaded before the legacy Stats runtime owner"
-    },
-    "assets/gensrpg/core/stats-value-engine-v1.js": {
-      "owner": "GenSrpG Core Stats Value Engine",
-      "domain": "core",
-      "role": "canonical deterministic stat values and effect composition used by the active Stats owner"
-    },
-    "assets/gensrpg/core/stats-hero-values-v1.js": {
-      "owner": "GenSrpG Core Stats Hero Values",
-      "domain": "core",
-      "role": "canonical explicit hero base-value provider used by the active Stats owner"
-    },
-    "assets/gensrpg/core/stats-modifier-provider-v1.js": {
-      "owner": "GenSrpG Core Stats Modifier Provider",
-      "domain": "core",
-      "role": "canonical explicit Equipment, Skill and Challenge modifier composition used by the active Stats owner"
-    },
-    "assets/gensrpg/core/stats-derived-values-v1.js": {
-      "owner": "GenSrpG Core Stats Derived Values",
-      "domain": "core",
-      "role": "canonical deterministic derived stat formulas feeding the Tactical snapshot boundary"
-    },
-    "assets/gensrpg/core/stats-snapshot-v1.js": {
-      "owner": "GenSrpG Core Stats Snapshot",
-      "domain": "core",
-      "role": "canonical immutable values and derived snapshot consumed through the active Stats runtime adapter"
-    },
-    "assets/gensrpg/core/text-utils-v1.js": {
-      "owner": "GenSrpG Core Text Utils",
-      "domain": "core",
-      "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
-    },
     "assets/gensrpg/shell/module-launch-final-authority-v1.js": {
       "owner": "GenSrpG Shell Module Launch Final Authority",
       "domain": "shell",
@@ -414,10 +419,10 @@
       "domain": "survival",
       "role": "active Survival module entry exposing pure wave-profile defaults and enemy-id collection"
     },
-    "assets/gensrpg/dungeon/entry-v1.js": {
-      "owner": "GenSrpG Dungeon Exploration",
-      "domain": "dungeon",
-      "role": "public Phase 7 Dungeon module entry exposing pure generated advance planning only; authored travel remains owned by DungeonAuthoredRuntime167839"
+    "assets/gensrpg/tactical/entry-v1.js": {
+      "owner": "Tactical Module Entry",
+      "domain": "tactical",
+      "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
     }
   }
 }

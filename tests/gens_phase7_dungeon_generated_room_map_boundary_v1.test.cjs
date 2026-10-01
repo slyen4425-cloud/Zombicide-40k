@@ -12,7 +12,7 @@ const index=read('index.html');
 const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
-  Buffer.from('blob '+bytes.length+'\\0'),bytes
+  Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
 assert.equal(bytes.length,8169447,
@@ -85,54 +85,54 @@ assert.throws(
   'active plan must preserve the historical direct-property-access failure semantics'
 );
 
-const fnMatch=entry.match(/function planGeneratedRoomMapBoundary\\(mapSetting,kind,result\\)\\{[\\s\\S]*?\\n  \\}/);
+const fnMatch=entry.match(/function planGeneratedRoomMapBoundary\(mapSetting,kind,result\)\{[\s\S]*?\n  \}/);
 assert.ok(fnMatch,'pure generated-room map-boundary planner source must remain extractable');
 assert.doesNotMatch(fnMatch[0],
-  /Math\\.random|\\bcfg\\(|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|generateDungeonMap|loadActiveEnemies|saveActiveEnemies|GensSpatial|RoomRuntime/i,
+  /Math\.random|\bcfg\(|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|generateDungeonMap|loadActiveEnemies|saveActiveEnemies|GensSpatial|RoomRuntime/i,
   'map-boundary planner must stay pure and free of config, RNG, DOM, storage, geometry and runtime authority');
 
 function block(id){
-  const m=index.match(new RegExp('<script\\\\b[^>]*\\\\bid=["\\\\\']'+id+'["\\\\\'][^>]*>([\\\\s\\\\S]*?)<\\\\/script>','i'));
+  const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing inline block '+id);
   return m[1];
 }
 
 const core200=block('dungeonCore200Rebuild');
-const createMatch=core200.match(/function createRoom\\(room,kind\\)\\{[\\s\\S]*?\\}\\nfunction placeSceneForRoom\\(/);
+const createMatch=core200.match(/function createRoom\(room,kind\)\{[\s\S]*?\}\nfunction placeSceneForRoom\(/);
 assert.ok(createMatch,'Core 2.00 createRoom source must remain extractable');
-const createSource=createMatch[0].replace(/\\nfunction placeSceneForRoom\\([\\s\\S]*$/,'');
+const createSource=createMatch[0].replace(/\nfunction placeSceneForRoom\([\s\S]*$/,'');
 
 assert.equal(
-  (createSource.match(/GensDungeonV1\\.exploration\\.planGeneratedRoomMapBoundary\\(/g)||[]).length,
+  (createSource.match(/GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(/g)||[]).length,
   1,
   'Core 2.00 createRoom must consume the map-boundary planner exactly once'
 );
 
 const planCall=createSource.match(
-  /const ([A-Za-z_$][\\w$]*)=GensDungeonV1\\.exploration\\.planGeneratedRoomMapBoundary\\(cfg\\(\\)\\.map,kind,result\\);/
+  /const ([A-Za-z_$][\w$]*)=GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\);/
 );
 assert.ok(planCall,
   'Core 2.00 must keep cfg().map at the callsite and pass mapSetting, kind and result to the planner');
-const planVar=planCall[1].replace(/\\$/g,'\\\\$');
+const planVar=planCall[1].replace(/\$/g,'\\$');
 
-assert.equal((createSource.match(/cfg\\(\\)\\.map/g)||[]).length,1,
+assert.equal((createSource.match(/cfg\(\)\.map/g)||[]).length,1,
   'cfg().map must remain a single Core 2.00 read');
-assert.equal((createSource.match(/generateDungeonMap\\(/g)||[]).length,1,
+assert.equal((createSource.match(/generateDungeonMap\(/g)||[]).length,1,
   'generateDungeonMap must remain a single Core 2.00 callsite');
 
 assert.match(
   createSource,
-  new RegExp(planVar+'\\\\.status==="disabled"\\\\?null:generateDungeonMap\\\\('+planVar+'\\\\.kind,'+planVar+'\\\\.enemyQty\\\\)'),
+  new RegExp(planVar+'\\.status==="disabled"\\?null:generateDungeonMap\\('+planVar+'\\.kind,'+planVar+'\\.enemyQty\\)'),
   'Core 2.00 must keep materialization and generateDungeonMap while consuming only the pure plan'
 );
-assert.match(createSource,/return \\{result,map:mapObj\\}/,
+assert.match(createSource,/return \{result,map:mapObj\}/,
   'Core 2.00 must keep the final {result,map} composition');
 
-assert.doesNotMatch(createSource,/cfg\\(\\)\\.map===false/,
+assert.doesNotMatch(createSource,/cfg\(\)\.map===false/,
   'Core 2.00 must retire the duplicated strict-false decision after delegation');
-assert.doesNotMatch(createSource,/result\\.enemyQty\\|\\|0/,
+assert.doesNotMatch(createSource,/result\.enemyQty\|\|0/,
   'Core 2.00 must retire the duplicated enemyQty fallback after delegation');
-assert.doesNotMatch(createSource,/generateDungeonMap\\(kind,result\\.enemyQty\\|\\|0\\)/,
+assert.doesNotMatch(createSource,/generateDungeonMap\(kind,result\.enemyQty\|\|0\)/,
   'the historical inline map-boundary expression must no longer remain duplicated');
 
 console.log(JSON.stringify({

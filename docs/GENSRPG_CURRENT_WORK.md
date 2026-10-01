@@ -1,3 +1,47 @@
+# PHASE 8 — TACTICAL CONSOLIDATION — AUDIT INITIAL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-exit-green-2026-10-01`
+
+SHA de base :
+`c8a4b845caf2ccc78c678516c62ab9d5d358cfe4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-consolidation-audit-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-consolidation-audit-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase7-exit-green-2026-10-01`
+
+Phase 7 :
+**FERMÉE / EXIT GREEN**. Aucun nouveau lot Dungeon ne doit être ouvert sans régression explicitement prouvée.
+
+Périmètre Phase 8 — audit initial uniquement :
+- cartographier l'architecture Tactical réelle ;
+- identifier engine / adapter / UI / AI / bridge Dungeon ;
+- inventorier les chaînes V108/V109/V111/V112/V113 encore actives ou déjà retirées ;
+- inventorier observers, heartbeats, retries différés, autorités de détection/rendu et calculateurs dégâts/toucher ;
+- vérifier que le chemin stats -> snapshot -> attaque -> dégâts/explication reste GREEN ;
+- sélectionner un premier micro-lot homogène avant toute migration.
+
+Interdictions :
+- aucune modification `index.html` pendant cet audit ;
+- aucune migration big-bang ;
+- aucune nouvelle autorité globale ;
+- aucun observer/heartbeat/retry ajouté ;
+- aucun changement Dungeon, Survival, Capture, PvP ou assets hors audit ;
+- `main` reste gelée.
+
+Critère de sortie Phase 8 :
+`Tactical n'existe que pendant une session de combat et se démonte proprement`.
+
+Prochaine étape :
+pré-audit réel de l'architecture Tactical actuelle, puis sélection d'un premier micro-lot strictement borné.
+
+---
+
 # PHASE 7 — AUDIT DE SORTIE OFFICIEL — 2026-10-01
 
 Base GREEN :

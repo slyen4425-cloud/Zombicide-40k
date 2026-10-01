@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,81,'production graph must include the active Survival and Dungeon entries');
-assert.equal(mapped.size,81,'owner manifest must map all 81 production-reachable files after the first Phase 7 Dungeon extraction');
+assert.equal(reachable.size,82,'production graph must include the active Survival, Dungeon and Tactical public entries');
+assert.equal(mapped.size,82,'owner manifest must map all 82 production-reachable files after the Phase 8 Tactical public-entry handoff');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

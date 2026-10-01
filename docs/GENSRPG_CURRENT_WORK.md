@@ -67,8 +67,25 @@ Pré-audit :
 Premier seam sélectionné :
 handoff de la composition Tactical de base depuis Core RuntimeBootstrap vers l'entrée publique Tactical, sans changement de gameplay ni d'index.html.
 
+Pré-audit GREEN :
+- SHA technique : `ff7023ad6b774d546c11cb84f8eb17bdb6ae1829` ;
+- étape Architecture #245 `Pré-auditer la consolidation Tactical Phase 8` — SUCCESS ;
+- Architecture + Browser `36870924357` — SUCCESS ;
+- Firefox `36870924477` — SUCCESS ;
+- Tactical Dock `36870924370` — SUCCESS ;
+- aucun changement runtime, gameplay ou `index.html`.
+
+Décision :
+premier micro-lot Phase 8 retenu = handoff de la composition Tactical de base depuis Core RuntimeBootstrap vers l'entrée publique Tactical, avec ordre/modules/retries conservés à l'identique.
+
+Checkpoint final prévu après CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-consolidation-preaudit-green-2026-10-01`.
+
 Prochaine étape :
-valider le pré-audit par triple CI ; si GREEN, checkpoint final du pré-audit puis nouveau lot/branche pour caractériser ce handoff avant toute migration.
+1. triple CI documentaire ;
+2. créer le checkpoint GREEN du pré-audit ;
+3. créer checkpoint de départ + branche du micro-lot handoff composition ;
+4. caractériser ce handoff avant tout changement runtime.
 
 ---
 

@@ -22,7 +22,7 @@
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let installed=false,observer=null,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false,uiRenderHooked=false;
+  let installed=false,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false,uiRenderHooked=false;
   let lastDetectionStamp="",lastDetectionAt=0;
 
   function doc(rt=R){return rt?.document||null}
@@ -140,7 +140,6 @@
   function bindClicks(rt=R){if(clickBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.hasAttribute?.("data-v111-attack")){const s=sourceButton(rt,"attack");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-end")){const s=sourceButton(rt,"end");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-ability")){const s=sourceButton(rt,"ability");if(s&&!s.disabled)s.click?.()}},true);clickBound=true;return true}
   function maintain(rt=R){maintenanceQueued=false;hideRuntimeTabs(rt);ensureDock(rt);paintDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintenanceQueued)return;maintenanceQueued=true;if(typeof requestAnimationFrame==="function")requestAnimationFrame(()=>maintain(rt));else setTimeout(()=>maintain(rt),0)}
-  function observe(rt=R){const D=doc(rt);if(!D?.body||typeof MutationObserver==="undefined")return false;if(observer)return true;observer=new MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
   function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}
 
   function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookMultiDice(rt);bindClicks(rt);hookUiRender(rt);const b=currentBattle(rt);if(b)refreshBattleAttacks(rt,b);maintain(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_FIXES_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}

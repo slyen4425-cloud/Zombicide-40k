@@ -5,8 +5,8 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-runtime-authority-1678113.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 
-assert.match(source,/function observe\(rt=R\)/,'historical V113 observer seam should remain inspectable during progressive cleanup');
-assert.match(source,/observer\.observe\(D\.body,\{childList:true,subtree:true\}\)/,'characterization must identify the historical V113 body observer');
+assert.doesNotMatch(source,/function observe\(rt=R\)/,'inactive V113 observer seam must stay retired');
+assert.doesNotMatch(source,/MutationObserver/,'V113 must stay free of MutationObserver authority');
 const install=(source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
 assert.ok(install,'V113 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V113 must no longer activate a document.body MutationObserver');

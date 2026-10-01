@@ -87,13 +87,44 @@ Validation ciblée one-shot :
 - diff strict — SUCCESS ;
 - commit/push atomique — SUCCESS.
 
+Raccord GREEN technique :
+- SHA `a6afd3d7b2128bf17976267fe79d4648d90c1f46` ;
+- Architecture + Browser `36860649156` — SUCCESS ;
+- Firefox `36860649244` — SUCCESS ;
+- Tactical Dock `36860649143` — SUCCESS ;
+- étapes Architecture #195 à #200 — SUCCESS, dont #199 caractérisation frontière carte et #200 garde propriétaire ;
+- Browser — SUCCESS intégral.
+
+Résultat :
+- nouveau propriétaire pur :
+  `GensDungeonV1.exploration.planGeneratedRoomMapBoundary(mapSetting, kind, result)` ;
+- seul `mapSetting===false` désactive la carte ;
+- le chemin actif conserve exactement `result.enemyQty||0`, sans normalisation supplémentaire ;
+- le chemin désactivé reste lazy et ne lit pas `result.enemyQty` ;
+- Core 2.00 conserve `cfg().map`, l'appel réel `generateDungeonMap(...)`, le RNG/la géométrie et la composition finale `{result,map}` ;
+- ordre historique `load enemies -> dc200Branch normalize -> save enemies -> cfg().map -> generateDungeonMap? -> return` conservé.
+
+Runtime final :
+- `index.html` : `8169555` octets ;
+- blob : `02a052bc231728eb383e17c83e61a958be0ac58c`.
+
+Sentinelles / Rule 26 :
+- source exacte fournie par l'utilisateur et blob de départ vérifié avant modification ;
+- remplacement `index.html` strictement borné à une occurrence ;
+- gardes du runtime courant réalignées sans retirer ni affaiblir leurs assertions métier ;
+- les allowlists explicitement historiques conservent l'ancienne empreinte et acceptent aussi le runtime courant ;
+- les gardes des lots 31/32 qui exigeaient encore l'ancienne expression inline ont été réalignées pour exiger le planner Dungeon tout en maintenant `generateDungeonMap(...)` dans Core 2.00 ;
+- aucun changement de gameplay hors frontière carte ciblée ;
+- aucun changement Tactical, Survival, Capture, PvP ou assets ;
+- `main` non modifiée.
+
+Checkpoint final prévu après triple CI du SHA documentaire :
+`checkpoint/gensrpg-phase7-dungeon-generated-room-map-boundary-audit-green-2026-10-01`.
+
 Prochaine action :
-1. lancer/observer la triple CI complète sur l'arbre candidat ;
-2. corriger uniquement une éventuelle sentinelle d'empreinte réellement invalidée ;
-3. obtenir Architecture + Browser / Firefox / Tactical GREEN ;
-4. fermer documentairement le lot ;
-5. triple CI documentaire ;
-6. créer le checkpoint GREEN final avant tout nouveau seam Phase 7.
+1. attendre Architecture + Browser, Firefox et Tactical Dock sur le SHA documentaire courant ;
+2. si les trois sont SUCCESS, créer le checkpoint GREEN final exact ;
+3. seulement ensuite auditer le prochain seam Phase 7 depuis ce checkpoint.
 
 ---
 

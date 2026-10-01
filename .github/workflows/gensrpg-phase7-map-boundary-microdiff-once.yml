@@ -100,6 +100,30 @@ jobs:
                 "map-boundary guard must track the exact lot 33 runtime blob")
               test_path.write_text(t,"utf-8")
 
+          char_path=tests[0]
+          char=char_path.read_text("utf-8")
+          old_inline=r'/const mapObj=cfg\(\)\.map===false\?null:generateDungeonMap\(kind,result\.enemyQty\|\|0\);return \{result,map:mapObj\}/'
+          new_inline=r'/const mapPlan=GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\);const mapObj=mapPlan\.status==="disabled"\?null:generateDungeonMap\(mapPlan\.kind,mapPlan\.enemyQty\);return \{result,map:mapObj\}/'
+          assert char.count(old_inline)==1, char.count(old_inline)
+          char=char.replace(old_inline,new_inline,1)
+          char=char.replace(
+            'map boundary must remain a strict false gate followed by one map-generation call and {result,map} return',
+            'map boundary must delegate only planning while Core keeps cfg, generation and {result,map} composition',
+            1)
+          old_gate=r'/cfg\(\)\.map===false/g'
+          new_gate=r'/GensDungeonV1\.exploration\.planGeneratedRoomMapBoundary\(cfg\(\)\.map,kind,result\)/g'
+          assert char.count(old_gate)==1, char.count(old_gate)
+          char=char.replace(old_gate,new_gate,1)
+          char=char.replace(
+            'createRoom must keep exactly one strict map=false gate',
+            'createRoom must keep exactly one planner call with cfg().map at the Core callsite',
+            1)
+          char=char.replace(
+            "decision:'characterize before selecting any pure map-planning seam'",
+            "decision:'pure map-planning seam selected and delegated'",
+            1)
+          char_path.write_text(char,"utf-8")
+
           assert index.count("GensDungeonV1.exploration.planGeneratedRoomMapBoundary(cfg().map,kind,result)")==1
           assert index.count(old_map)==0
           assert entry.count("function planGeneratedRoomMapBoundary(mapSetting,kind,result)")==1

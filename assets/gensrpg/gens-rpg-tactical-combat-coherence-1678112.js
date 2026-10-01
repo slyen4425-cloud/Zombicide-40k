@@ -22,7 +22,7 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const esc=v=>str(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,observer=null,queued=false,lastScanSignature="",detailActorId="";
+  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,queued=false,lastScanSignature="",detailActorId="";
 
   function doc(rt=R){return rt?.document||null}
   function engine(rt=R){return rt?.GensRpgTacticalCombatV2||null}
@@ -192,7 +192,6 @@
   function maintain(rt=R){queued=false;ensureStyle(rt);patchDetail(rt);patchDice(rt);return true}
   function queueMaintain(rt=R){if(queued)return;queued=true;const run=()=>maintain(rt);if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)}
   function bindDetail(rt=R){if(detailBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.dataset?.detail){detailActorId=str(b.dataset.detail);setTimeout(()=>patchDetail(rt),0)}else if(b.hasAttribute?.("data-detail-close"))detailActorId=""},true);detailBound=true;return true}
-  function observe(rt=R){const D=doc(rt);if(observer||!D?.body||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(muts=>{for(const m of muts){for(const node of m.addedNodes||[]){if(node?.nodeType!==1)continue;if(node.matches?.(".gtv2DiceBackdrop,.gtv271DetailBackdrop,.dc047Grid")||node.querySelector?.(".gtv2DiceBackdrop,.gtv271DetailBackdrop,.dc047Grid")){queueMaintain(rt);return}}}});observer.observe(D.body,{childList:true,subtree:true});return true}
 
   function wrapDetectionFunction(rt,name,reason,force=false){const old=rt?.[name];if(typeof old!=="function"||old.__gensRpg112Detection)return false;const w=function(){const out=old.apply(this,arguments);scheduleDetection(rt,reason,force);return out};w.__gensRpg112Detection=true;w.__original=old;rt[name]=w;return true}
   function hookDetection(rt=R){wrapDetectionFunction(rt,"dungeonMoveHero098","movement-vision-v112",false);wrapDetectionFunction(rt,"applyDungeonTurnEvent","event-vision-v112",true);wrapDetectionFunction(rt,"dungeonEventSpawn","spawn-vision-v112",true);wrapDetectionFunction(rt,"trackSpawnedEnemyInstances","spawn-vision-v112",true);const core=rt?.DungeonCore01;if(core)for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__gensRpg112Detection)continue;const w=function(){const out=old.apply(this,arguments);markWallCells(rt);scheduleDetection(rt,"room-vision-v112",false);return out};w.__gensRpg112Detection=true;w.__original=old;core[name]=w}detectionHooked=true;return true}

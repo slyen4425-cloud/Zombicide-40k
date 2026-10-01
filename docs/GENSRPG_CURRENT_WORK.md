@@ -34,12 +34,40 @@ Base CI :
 - Firefox `36762830943` — SUCCESS ;
 - Tactical Dock `36762830683` — SUCCESS.
 
+Caractérisation GREEN :
+- test `tests/gens_phase7_dungeon_generated_room_map_boundary_characterization_v1.test.cjs` ;
+- SHA validé `bfd20658a04905c19dfaef22b8e363a188784fb1` ;
+- Architecture + Browser `36814038088` — SUCCESS ;
+- Firefox `36814038058` — SUCCESS ;
+- Tactical Dock `36814038050` — SUCCESS ;
+- étape Architecture #199 — SUCCESS.
+
+Slice pure sélectionnée :
+`GensDungeonV1.exploration.planGeneratedRoomMapBoundary(mapSetting, kind, result)`.
+
+Contrat :
+- `mapSetting===false` -> `{status:"disabled",kind:null,enemyQty:null}` sans lecture de `result.enemyQty` ;
+- sinon -> `{status:"generate",kind,enemyQty:result.enemyQty||0}`.
+
+RED isolé prouvé :
+- garde `tests/gens_phase7_dungeon_generated_room_map_boundary_v1.test.cjs` ;
+- SHA RED final `b80833a85fc43208d2e1ebcdb247c168cb6f7fb4` ;
+- Architecture + Browser `36830725377` — FAILURE attendue ;
+- étape #199 caractérisation — SUCCESS ;
+- étape #200 `Exiger le planificateur pur de frontière carte generated Phase 7` — FAILURE ;
+- cause exacte : `planGeneratedRoomMapBoundary` est encore `undefined` alors qu'une fonction est exigée ;
+- Browser — SKIPPED uniquement parce que le job Architecture est RED ;
+- Firefox `36830725423` — SUCCESS ;
+- Tactical Dock `36830725444` — SUCCESS.
+
+Aucun runtime, gameplay, asset ni `index.html` n'a été modifié pour poser le RED.
+
 Prochaine action :
-1. ajouter la caractérisation permanente de la frontière carte ;
-2. raccorder la sentinelle à Architecture ;
-3. triple CI GREEN ;
-4. sélectionner UNE responsabilité pure homogène seulement après preuve ;
-5. aucun RED ni micro-diff runtime avant cette sélection.
+1. appliquer Rule 26 avant tout micro-diff runtime ;
+2. obtenir la source exacte de `index.html` correspondant à `8169447` octets / blob `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39` ;
+3. vérifier localement taille + blob Git ;
+4. ajouter uniquement le planner pur dans `assets/gensrpg/dungeon/entry-v1.js` et le raccord map borné dans Core 2.00 ;
+5. lancer la triple CI technique GREEN avant toute fermeture.
 
 ---
 

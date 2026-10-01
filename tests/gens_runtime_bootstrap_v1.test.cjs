@@ -21,26 +21,19 @@ sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(src,sandbox,{filename:'runtime-bootstrap-v1.js'});
 
-const expected=[
-  'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105'
-];
-assert.deepEqual(loaded,expected,'RuntimeBootstrap must preserve Tactical order without loading retired Survival isolation or a second changeXP owner');
-assert.equal(sandbox.__gensTacticalV2Loader105,true,'historical loader guard must remain active');
+const expected=['assets/gensrpg/tactical/entry-v1.js?v=1'];
+assert.deepEqual(loaded,expected,'RuntimeBootstrap must delegate only to the Tactical public entry');
+assert.equal('__gensTacticalV2Loader105' in sandbox,false,'Core RuntimeBootstrap must not own Tactical private idempotency');
 assert.equal(progressionInstalls,0,'progression-runtime-v1 must stay inactive; native changeXP owns manual XP');
-assert.equal(bridgeInstalls,4,'Tactical bridge must keep immediate + 3 retry installs');
-assert.deepEqual(timers,[250,1200,3000],'RuntimeBootstrap Tactical bridge retry timings must remain unchanged');
+assert.equal(bridgeInstalls,0,'Core RuntimeBootstrap must not install the Tactical bridge');
+assert.deepEqual(timers,[],'Core RuntimeBootstrap must not own Tactical bridge retry timings');
 assert.ok(sandbox.GensRuntimeBootstrapV1,'RuntimeBootstrap API missing');
 const ownedFiles=Array.from(sandbox.GensRuntimeBootstrapV1.files);
-assert.deepEqual(ownedFiles,expected.map(x=>x.replace('?v=16.78.105','')),'RuntimeBootstrap API must expose the owned composition');
-assert.equal(ownedFiles.some(file=>/progression-runtime-v1/.test(file)),false,'bootstrap composition must not reclaim native manual XP ownership');
+assert.deepEqual(ownedFiles,['assets/gensrpg/tactical/entry-v1.js'],'RuntimeBootstrap API must expose only the public Tactical entry handoff');
+assert.equal(ownedFiles.some(file=>/gens-rpg-tactical-combat-v2/.test(file)),false,'bootstrap must not expose Tactical private base files');
 
 const before=loaded.length;
 sandbox.GensRuntimeBootstrapV1.install();
-assert.equal(loaded.length,before,'RuntimeBootstrap install must be idempotent after the guard is set');
+assert.equal(loaded.length,before,'RuntimeBootstrap install must stay idempotent after the public entry is loaded');
 
-console.log('GenSrpG RuntimeBootstrap V1 OK: native manual XP owner + deterministic Tactical load order');
+console.log('GenSrpG RuntimeBootstrap V1 OK: generic bootstrap delegates to the Tactical public entry');

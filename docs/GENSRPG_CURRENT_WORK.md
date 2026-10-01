@@ -1,3 +1,65 @@
+# PHASE 8 — TACTICAL CONSOLIDATION — PRÉ-AUDIT — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase7-exit-green-2026-10-01`
+
+SHA de base :
+`c8a4b845caf2ccc78c678516c62ab9d5d358cfe4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-consolidation-preaudit-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-consolidation-preaudit-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase7-exit-green-2026-10-01`
+
+Objectif Phase 8 :
+consolider Tactical vers l'architecture cible :
+- engine pur ;
+- adapter ;
+- UI ;
+- AI ;
+- bridge Dungeon.
+
+Périmètre de ce chantier :
+pré-audit uniquement. Inventorier les propriétaires Tactical actifs et les chaînes legacy V108/V109/V111/V112/V113, puis sélectionner un premier micro-lot homogène et réversible.
+
+Interdictions :
+- aucun changement de gameplay pendant le pré-audit ;
+- aucune migration `index.html` sans Rule 26 ;
+- aucune nouvelle autorité globale ;
+- aucun observer body, heartbeat, retry long, wrapper concurrent ou monkey-patch ajouté ;
+- ne pas toucher Survival, Capture, PvP ou au runtime Dungeon hors contrat de bridge explicitement audité.
+
+Prérequis déjà GREEN :
+- Force -> snapshot Tactical ;
+- Agilité -> toucher expliqué ;
+- cohérence statistiques éditeur / jeu ;
+- armure canonique ;
+- dégâts finaux + explication ;
+- Phase 7 exit GREEN.
+
+Tests prévus :
+1. cartographier fichiers/versions Tactical chargés et ordre de composition ;
+2. identifier engine / adapter / UI / AI / bridge Dungeon actuels ;
+3. inventorier observers, timers, retries et wrappers d'autorité ;
+4. identifier les autorités redondantes de rendu, détection, hit et dégâts ;
+5. réutiliser les sentinelles Tactical existantes comme base de caractérisation ;
+6. sélectionner un seul premier seam Phase 8 avant tout RED/micro-diff.
+
+Risques :
+- confondre une couche historique inactive avec une autorité runtime active ;
+- supprimer une chaîne V108-V113 encore utilisée par compatibilité ;
+- déplacer trop de responsabilités dans un même lot ;
+- modifier le combat au lieu de consolider son architecture.
+
+Prochaine étape :
+produire le pré-audit réel depuis les fichiers chargés, les contrats Tactical et les sentinelles existantes ; aucun changement runtime avant sélection documentée du premier seam.
+
+---
+
 # PHASE 7 — AUDIT DE SORTIE OFFICIEL — 2026-10-01
 
 Base GREEN :

@@ -23,7 +23,7 @@ for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRende
 
 const activeBlocks=[];
 activeBlocks.push(['V108 install',block(historical[0][1],'function install(rt=R){','function installWithRetries','V108 install')]);
-activeBlocks.push(['V108 hookUiRender',block(historical[0][1],'function hookUiRender(rt=R){','function observe(rt=R){','V108 hookUiRender')]);
+activeBlocks.push(['V108 hookUiRender',block(historical[0][1],'function hookUiRender(rt=R){','function install(rt=R){','V108 hookUiRender')]);
 activeBlocks.push(['V109 install',block(historical[1][1],'function install(rt=R){','function installWithRetries','V109 install')]);
 activeBlocks.push(['V109 enhance',block(historical[1][1],'function enhance(rt=R){','function hookUi','V109 enhance')]);
 activeBlocks.push(['V111 maintain',block(historical[2][1],'function maintain(rt=R){','function queueMaintain','V111 maintain')]);

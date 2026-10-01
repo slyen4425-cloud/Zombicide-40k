@@ -62,12 +62,38 @@ RED isolé prouvé :
 
 Aucun runtime, gameplay, asset ni `index.html` n'a été modifié pour poser le RED.
 
+Rule 26 satisfaite :
+- source utilisateur reçue dans `work41.zip` sous `index41.txt` ;
+- taille vérifiée : `8169447` octets ;
+- blob Git vérifié : `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39` ;
+- remplacement borné simulé localement : exactement 1 occurrence.
+
+Micro-diff candidat appliqué :
+- SHA runtime : `5601d95457e1a802dbd02b93327a22cf4617f8fe` ;
+- nouveau `index.html` : `8169555` octets ;
+- nouveau blob Git attendu/vérifié par le workflow : `02a052bc231728eb383e17c83e61a958be0ac58c` ;
+- ajout pur : `GensDungeonV1.exploration.planGeneratedRoomMapBoundary(mapSetting,kind,result)` ;
+- Core 2.00 conserve `cfg().map`, `generateDungeonMap(...)`, RNG/géométrie et composition finale ;
+- un seul raccord depuis `createRoom(...)` ;
+- caractérisation réalignée sans suppression des assertions métier ;
+- garde propriétaire réalignée au nouveau fingerprint ;
+- workflow one-shot supprimé dans le commit runtime.
+
+Validation ciblée one-shot :
+- run `36831891186` — SUCCESS ;
+- préparation bornée — SUCCESS ;
+- caractérisation lot 33 — SUCCESS ;
+- garde propriétaire lot 33 — SUCCESS ;
+- diff strict — SUCCESS ;
+- commit/push atomique — SUCCESS.
+
 Prochaine action :
-1. appliquer Rule 26 avant tout micro-diff runtime ;
-2. obtenir la source exacte de `index.html` correspondant à `8169447` octets / blob `106d2ec6e82f3b777e1d724cd3f74f30a22fdf39` ;
-3. vérifier localement taille + blob Git ;
-4. ajouter uniquement le planner pur dans `assets/gensrpg/dungeon/entry-v1.js` et le raccord map borné dans Core 2.00 ;
-5. lancer la triple CI technique GREEN avant toute fermeture.
+1. lancer/observer la triple CI complète sur l'arbre candidat ;
+2. corriger uniquement une éventuelle sentinelle d'empreinte réellement invalidée ;
+3. obtenir Architecture + Browser / Firefox / Tactical GREEN ;
+4. fermer documentairement le lot ;
+5. triple CI documentaire ;
+6. créer le checkpoint GREEN final avant tout nouveau seam Phase 7.
 
 ---
 

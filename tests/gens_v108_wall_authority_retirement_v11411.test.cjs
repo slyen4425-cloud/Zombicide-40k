@@ -16,7 +16,7 @@ const install=block('function install(rt=R){','function installWithRetries','V10
 for(const retired of ['paintWalls(rt)','patchDungeonMapHtml(rt)','hookDungeonRender(rt)'])assert.ok(!install.includes(retired),`V108 install must not reactivate wall authority: ${retired}`);
 for(const required of ['ensureStyle(rt)','bindControls(rt)','hookUiRender(rt)','enhanceActions(rt)'])assert.ok(install.includes(required),`V108 install lost non-wall behavior: ${required}`);
 
-const hookUi=block('function hookUiRender(rt=R){','function observe(rt=R){','V108 hookUiRender');
+const hookUi=block('function hookUiRender(rt=R){','function install(rt=R){','V108 hookUiRender');
 assert.match(hookUi,/enhanceActions\(rt\)/,'V108 render hook must preserve tactical action panel enhancement');
 assert.doesNotMatch(hookUi,/paintWalls\(rt\)/,'V108 render hook must not repaint walls');
 

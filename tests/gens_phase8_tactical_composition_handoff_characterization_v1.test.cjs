@@ -44,7 +44,8 @@ const loadStart=entry.indexOf('function load(i){');
 assert.ok(finalizeStart>=0&&loadStart>finalizeStart,'migrated entry finalize/load boundaries missing');
 const finalize=entry.slice(finalizeStart,loadStart);
 assert.match(finalize,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,'migrated entry must preserve bridge final install');
-for(const ms of [250,1200,3000]) assert.ok(finalize.includes('setTimeout(apply,'+ms+')'),'migrated entry bridge retry '+ms+' missing');
+assert.equal((finalize.match(/setTimeout\(apply,/g)||[]).length,0,
+  'migrated entry must not retain delayed Bridge reinstalls after lifecycle cleanup');
 assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,'Core must delegate to public Tactical entry after handoff');
 for(const file of files)assert.equal(bootstrap.includes(file),false,'Core must not retain characterized private file '+file);
 assert.match(runtimeGuard,/Tactical public entry is the sole owner of base Tactical composition/,
@@ -59,7 +60,7 @@ console.log(JSON.stringify({
   files,
   sequentialLoading:true,
   idempotencyGuard:'__gensTacticalV2Loader105',
-  bridgeRetries:[0,250,1200,3000],
+  bridgeRetries:[0],
   gameplayChangeExpected:false,
   indexChangeRequired:false
 },null,2));

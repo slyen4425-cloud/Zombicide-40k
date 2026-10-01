@@ -73,12 +73,26 @@ Il ne démonte pas encore les listeners/hooks globaux installés par les couches
 - supprimer V108-V113 ;
 - modifier UI, hit, dégâts, armure, AI ou bridge Dungeon.
 
+## Validation GREEN
+
+SHA technique :
+`52d9f35e8eb7469808506249315789c7781bcaf8`
+
+- Architecture + Browser `36901547380` — SUCCESS ;
+- Firefox `36901547340` — SUCCESS ;
+- Tactical Dock `36901547356` — SUCCESS ;
+- étape Architecture #249 — SUCCESS.
+
+Décision : **AUDIT LIFECYCLE GREEN**.
+
+Le prochain lot est limité au retrait des trois réinstallations différées du Bridge dans l'entrée publique Tactical. Une installation immédiate reste conservée.
+
 ## Suite
 
-Après triple CI GREEN de cet audit :
-1. checkpoint GREEN ;
-2. nouveau checkpoint de départ ;
-3. branche dédiée `Bridge retry retirement` ;
-4. caractérisation actuelle immediate + 3 retries ;
-5. RED exigeant immediate only ;
-6. micro-diff de l'entrée publique Tactical uniquement.
+1. CI documentaire ;
+2. checkpoint GREEN ;
+3. nouveau checkpoint de départ ;
+4. branche dédiée `Bridge retry retirement` ;
+5. caractérisation actuelle immediate + 3 retries ;
+6. RED exigeant immediate only ;
+7. micro-diff de l'entrée publique Tactical uniquement.

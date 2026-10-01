@@ -59,8 +59,26 @@ Audit lifecycle :
 Premier seam lifecycle sélectionné :
 retirer uniquement les 3 réinstallations différées du Bridge dans l'entrée publique Tactical, en conservant l'installation immédiate.
 
+Audit lifecycle GREEN :
+- SHA technique : `52d9f35e8eb7469808506249315789c7781bcaf8` ;
+- Architecture + Browser `36901547380` — SUCCESS ;
+- Firefox `36901547340` — SUCCESS ;
+- Tactical Dock `36901547356` — SUCCESS ;
+- étape Architecture #249 `Auditer le lifecycle session Tactical Phase 8` — SUCCESS ;
+- aucun changement runtime ni `index.html`.
+
+Décision :
+**MICRO-LOT 2 AUDIT GREEN**.
+Le premier retrait lifecycle borné est confirmé : supprimer uniquement les réinstallations différées 250 / 1200 / 3000 ms du Bridge dans l'entrée publique Tactical, en conservant l'installation immédiate.
+
+Checkpoint final prévu après CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-session-lifecycle-audit-green-2026-10-01`.
+
 Prochaine étape :
-valider cet audit par triple CI ; si GREEN, checkpoint final puis nouveau micro-lot dédié au retrait des retries Bridge.
+1. triple CI documentaire ;
+2. créer le checkpoint GREEN de l'audit ;
+3. créer checkpoint de départ + branche du micro-lot Bridge retry retirement ;
+4. caractériser puis poser RED avant toute modification runtime.
 
 ---
 

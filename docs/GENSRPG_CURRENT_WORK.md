@@ -55,8 +55,20 @@ Risques :
 - déplacer trop de responsabilités dans un même lot ;
 - modifier le combat au lieu de consolider son architecture.
 
+Pré-audit :
+- document : `docs/GENSRPG_PHASE8_TACTICAL_CONSOLIDATION_PREAUDIT.md` ;
+- garde : `tests/gens_phase8_tactical_consolidation_preaudit_v1.test.cjs` ;
+- propriétaire actuel de composition : Core RuntimeBootstrap V1 ;
+- entrée Tactical publique encore inert ;
+- chaîne active : base engine/adapter/rules/integration/UI/bridge puis V108 -> V109 -> V110 -> V111 -> V112 -> V113 -> V114.11 ;
+- observers historiques actifs déjà retirés par les gardes V114.11 ;
+- V114.1 et V114.4 hors chaîne active.
+
+Premier seam sélectionné :
+handoff de la composition Tactical de base depuis Core RuntimeBootstrap vers l'entrée publique Tactical, sans changement de gameplay ni d'index.html.
+
 Prochaine étape :
-produire le pré-audit réel depuis les fichiers chargés, les contrats Tactical et les sentinelles existantes ; aucun changement runtime avant sélection documentée du premier seam.
+valider le pré-audit par triple CI ; si GREEN, checkpoint final du pré-audit puis nouveau lot/branche pour caractériser ce handoff avant toute migration.
 
 ---
 

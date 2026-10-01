@@ -47,8 +47,15 @@ Risques :
 - changement involontaire de l'idempotence ;
 - suppression accidentelle de retries internes hors périmètre.
 
+Caractérisation :
+- test : `tests/gens_phase8_tactical_bridge_retry_retirement_characterization_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_BRIDGE_RETRY_RETIREMENT_CHARACTERIZATION.md` ;
+- état courant attendu : 1 installation immédiate + retries 250 / 1200 / 3000 ;
+- Bridge chargé en dernier ;
+- V113 doit continuer à respecter l'autorité Bridge.
+
 Prochaine étape :
-caractérisation GREEN de l'état current immediate + 3 retries, puis RED isolated immediate-only.
+valider cette caractérisation GREEN, puis poser RED isolated exigeant une installation immédiate unique et aucun retry Bridge dans l'entrée publique.
 
 ---
 

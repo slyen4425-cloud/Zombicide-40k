@@ -32,8 +32,8 @@ const expected=[
 ];
 assert.deepEqual(loaded,expected,'Tactical public entry must preserve the exact historical private-module order');
 assert.equal(sandbox.__gensTacticalV2Loader105,true,'Tactical public entry must own the historical idempotency guard');
-assert.equal(bridgeInstalls,4,'Tactical entry must preserve immediate + 3 bridge installs');
-assert.deepEqual(timers,[250,1200,3000],'Tactical entry must preserve historical bridge retry timings');
+assert.equal(bridgeInstalls,1,'Tactical entry must install the Bridge exactly once after base composition');
+assert.deepEqual(timers,[],'Tactical entry must not schedule delayed Bridge reinstalls');
 assert.ok(sandbox.GensTacticalV1,'Tactical public API missing');
 assert.deepEqual(Array.from(sandbox.GensTacticalV1.files),expected.map(x=>x.replace('?v=16.78.105','')),
   'Tactical public API must expose its ordered private composition');
@@ -41,7 +41,7 @@ assert.deepEqual(Array.from(sandbox.GensTacticalV1.files),expected.map(x=>x.repl
 const before={loads:loaded.length,timers:timers.length,bridges:bridgeInstalls};
 sandbox.GensTacticalV1.install();
 assert.equal(loaded.length,before.loads,'Tactical install must be idempotent after the historical guard is set');
-assert.equal(timers.length,before.timers,'idempotent Tactical install must not schedule duplicate bridge retries');
+assert.equal(timers.length,before.timers,'idempotent Tactical install must not schedule timers');
 assert.equal(bridgeInstalls,before.bridges,'idempotent Tactical install must not duplicate bridge installation');
 
 console.log('Phase 8 Tactical public entry runtime handoff OK');

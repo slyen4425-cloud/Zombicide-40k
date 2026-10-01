@@ -6,7 +6,7 @@
   "expected": {
     "externalReachableFiles": 82,
     "externalTimerSources": 51,
-    "externalSetTimeoutSyntax": 142,
+    "externalSetTimeoutSyntax": 141,
     "externalSetIntervalSyntax": 1,
     "activeInlineBlocks": 119,
     "inlineTimerSources": 65,

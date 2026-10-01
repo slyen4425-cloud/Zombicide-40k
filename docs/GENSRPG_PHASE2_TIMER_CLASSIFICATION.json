@@ -5,8 +5,8 @@
   "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
   "expected": {
     "externalReachableFiles": 82,
-    "externalTimerSources": 52,
-    "externalSetTimeoutSyntax": 145,
+    "externalTimerSources": 51,
+    "externalSetTimeoutSyntax": 142,
     "externalSetIntervalSyntax": 1,
     "activeInlineBlocks": 119,
     "inlineTimerSources": 65,
@@ -29,7 +29,6 @@
     }
   ],
   "bootstrapRetryExternal": [
-    "assets/gensrpg/tactical/entry-v1.js",
     "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js",
     "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js",

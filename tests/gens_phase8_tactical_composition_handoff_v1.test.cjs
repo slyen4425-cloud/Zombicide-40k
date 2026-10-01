@@ -38,7 +38,8 @@ assert.match(entry,/s\.src=files\[i\]\+"\?v=16\.78\.105";/,'Tactical entry must 
 assert.match(entry,/s\.async=false;/,'Tactical entry must preserve sequential script loading');
 assert.match(entry,/s\.onload=\(\)=>load\(i\+1\)/,'Tactical entry must preserve sequential success continuation');
 assert.match(entry,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,'Tactical entry must own final bridge install');
-for(const ms of [250,1200,3000]) assert.ok(entry.includes('setTimeout(apply,'+ms+')'),'Tactical entry bridge retry '+ms+' missing');
+assert.equal((entry.match(/setTimeout\(apply,/g)||[]).length,0,
+  'Tactical public entry must not regain delayed Bridge reinstalls');
 
 assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,
   'Core RuntimeBootstrap must delegate only to the Tactical public entry');

@@ -5,8 +5,8 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-coherence-1678112.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 
-assert.match(source,/function observe\(rt=R\)/,'historical V112 observer seam should remain inspectable during progressive cleanup');
-assert.match(source,/observer\.observe\(D\.body,\{childList:true,subtree:true\}\)/,'characterization must identify the historical V112 body observer');
+assert.doesNotMatch(source,/function observe\(rt=R\)/,'inactive V112 observer seam must stay retired');
+assert.doesNotMatch(source,/MutationObserver/,'V112 must stay free of MutationObserver authority');
 const install=(source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
 assert.ok(install,'V112 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V112 must no longer activate a document.body MutationObserver');

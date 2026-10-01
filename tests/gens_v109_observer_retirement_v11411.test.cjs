@@ -5,8 +5,8 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-polish-1678109.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 
-assert.match(source,/function observe\(rt=R\)/,'historical V109 observer seam should remain inspectable during progressive cleanup');
-assert.match(source,/observer\.observe\(D\.body\|\|D\.documentElement,\{childList:true,subtree:true\}\)/,'characterization must keep identifying the old V109 body/html observer');
+assert.doesNotMatch(source,/function observe\(rt=R\)/,'inactive V109 observer seam must stay retired');
+assert.doesNotMatch(source,/MutationObserver/,'V109 must stay free of MutationObserver authority');
 const install=(source.match(/function install\(rt=R\)\{[^\n]+/)||[''])[0];
 assert.ok(install,'V109 install function missing');
 assert.doesNotMatch(install,/observe\(rt\)/,'V109 must no longer activate a body/html MutationObserver');

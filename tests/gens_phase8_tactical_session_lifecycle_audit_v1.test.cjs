@@ -83,9 +83,10 @@ for(const [label,src] of autoLayers){
 
 const observerLayers=[['V108',v108],['V109',v109],['V111',v111],['V112',v112],['V113',v113]];
 for(const [label,src] of observerLayers){
-  assert.match(src,/function observe\(rt=R\)/,label+' historical observer seam must remain inspectable');
+  assert.doesNotMatch(src,/function observe\(rt=R\)/,label+' inactive observer seam must stay retired');
+  assert.doesNotMatch(src,/MutationObserver/,label+' MutationObserver authority must stay absent');
   const install=block(src,'function install(rt=R){','function installWithRetries',label+' install');
-  assert.doesNotMatch(install,/observe\(rt\)/,label+' install must keep historical observer inactive');
+  assert.doesNotMatch(install,/observe\(rt\)/,label+' install must remain observer-free');
 }
 
 console.log(JSON.stringify({
@@ -100,7 +101,7 @@ console.log(JSON.stringify({
     closeRemovesBattleOverlay:true,
     closeDisposesGlobalHooks:false
   },
-  selectedNextSeam:'public-entry delayed Bridge reinstalls retired; re-audit next lifecycle seam',
+  selectedNextSeam:'legacy observer seams retired; re-audit next lifecycle seam',
   evidence:{
     bridgeLoadedLast:true,
     dependenciesAvailableBeforeFinalize:true,

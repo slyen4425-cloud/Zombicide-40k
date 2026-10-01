@@ -45,12 +45,41 @@ Risques :
 Caractérisation :
 - test : `tests/gens_phase8_tactical_composition_handoff_characterization_v1.test.cjs` ;
 - document : `docs/GENSRPG_PHASE8_TACTICAL_COMPOSITION_HANDOFF_CHARACTERIZATION.md` ;
-- propriétaire actuel attendu : Core RuntimeBootstrap V1 ;
-- entrée Tactical attendue inert avant migration ;
-- ordre, guard, suffixe de chargement et retries bridge figés.
+- état de base figé : Core RuntimeBootstrap propriétaire, entrée Tactical inert ;
+- ordre, guard, suffixe de chargement et retries bridge caractérisés avant migration.
+
+Micro-diff appliqué :
+- `assets/gensrpg/core/runtime-bootstrap-v1.js` charge désormais uniquement l'entrée publique Tactical ;
+- `assets/gensrpg/tactical/entry-v1.js` possède seule la composition ordonnée des six fichiers Tactical de base ;
+- `assets/gensrpg/tactical/module-contract-v1.json` est passé à `partial-runtime-loaded` avec API publique `GensTacticalV1` ;
+- guard historique `__gensTacticalV2Loader105` conservé ;
+- installation bridge + retries 250 / 1200 / 3000 ms conservés ;
+- aucun changement `index.html` ;
+- aucun changement de règles hit/dégâts/armure/IA/rendu ;
+- manifests/sentinelles de graphe runtime réalignés uniquement sur la nouvelle propriété de composition.
+
+Validation technique GREEN :
+- SHA : `4914cfb0961dcd1feff35c03c9fb7eddb1e94d1c` ;
+- Architecture + Browser `36886193074` — SUCCESS ;
+- Firefox `36886193112` — SUCCESS ;
+- Tactical Dock `36886193138` — SUCCESS ;
+- Architecture #245 pré-audit Phase 8 — SUCCESS ;
+- #246 caractérisation handoff — SUCCESS ;
+- #247 autorité de composition Tactical — SUCCESS ;
+- #248 runtime entrée publique Tactical — SUCCESS ;
+- `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Décision :
+**MICRO-LOT 1 TECHNIQUEMENT GREEN**.
+La composition Tactical n'est plus une responsabilité privée de Core RuntimeBootstrap.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-composition-handoff-green-2026-10-01`.
 
 Prochaine étape :
-valider cette caractérisation GREEN, puis poser un RED isolé exigeant l'entrée Tactical comme propriétaire unique avant tout micro-diff runtime.
+1. triple CI documentaire ;
+2. créer le checkpoint GREEN final du micro-lot 1 ;
+3. seulement ensuite ouvrir le micro-lot Phase 8 suivant depuis ce checkpoint.
 
 ---
 

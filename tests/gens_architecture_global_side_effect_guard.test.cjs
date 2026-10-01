@@ -52,11 +52,16 @@ const legacyFiles=new Set([
 ]);
 
 const RUNTIME_BOOTSTRAP='assets/gensrpg/core/runtime-bootstrap-v1.js';
-const explicitRuleExceptions=new Map([[RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])]]);
+const TACTICAL_ENTRY='assets/gensrpg/tactical/entry-v1.js';
+const explicitRuleExceptions=new Map([
+  [RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])],
+  [TACTICAL_ENTRY,new Set(['hidden script injection'])]
+]);
 
 const allFiles=walk(root).map(rel).sort();
 for(const old of legacyFiles) assert.ok(allFiles.includes(old),`legacy architecture baseline changed: missing ${old}`);
 assert.ok(allFiles.includes(RUNTIME_BOOTSTRAP),'explicit RuntimeBootstrap V1 must exist');
+assert.ok(allFiles.includes(TACTICAL_ENTRY),'explicit Tactical public composition entry must exist');
 
 const newFiles=allFiles.filter(f=>!legacyFiles.has(f));
 const violations=[];
@@ -82,7 +87,7 @@ for(const file of newFiles){
 }
 
 assert.deepEqual(violations,[],
-  'new GenSrpG modules must not introduce hidden/global runtime authority; only the explicit RuntimeBootstrap may compose scripts:\n'+violations.join('\n'));
+  'new GenSrpG modules must not introduce hidden/global runtime authority; only Core RuntimeBootstrap may load a public entry and Tactical entry may compose Tactical private scripts:\n'+violations.join('\n'));
 
 const targetPrefixes=[
   'assets/gensrpg/core/',
@@ -103,5 +108,6 @@ for(const file of allFiles.filter(f=>targetPrefixes.some(p=>f.startsWith(p)))){
   }
 }
 
-assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP],'RuntimeBootstrap must remain the only new architecture exception');
-console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; script composition owned only by RuntimeBootstrap V1)`);
+assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY],
+  'only Core RuntimeBootstrap and the Tactical public entry may compose their explicit script levels');
+console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; Core loads public entry, Tactical entry owns private composition)`);

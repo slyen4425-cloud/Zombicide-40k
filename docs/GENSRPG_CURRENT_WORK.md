@@ -1,3 +1,52 @@
+# PHASE 8 — MICRO-LOT 1 — HANDOFF COMPOSITION TACTICAL — 2026-10-01
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-consolidation-preaudit-green-2026-10-01`
+
+SHA de base :
+`9fd5a789180e26204833e9d6b330079352272ec6`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-composition-handoff-2026-10-01`
+
+Branche :
+`work/gensrpg-phase8-tactical-composition-handoff-2026-10-01`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-consolidation-preaudit-green-2026-10-01`
+
+Périmètre :
+transférer uniquement la propriété de la composition Tactical de base depuis `assets/gensrpg/core/runtime-bootstrap-v1.js` vers `assets/gensrpg/tactical/entry-v1.js`.
+
+Invariants obligatoires :
+- conserver exactement l'ordre des six modules de base Tactical ;
+- conserver l'installation du bridge et ses retries historiques 250 / 1200 / 3000 ms dans ce lot ;
+- conserver les guards d'idempotence existants ;
+- ne modifier aucune règle de combat, hit, dégâts, armure, IA ou rendu ;
+- ne toucher ni V108-V114.11 ni Dungeon/Survival/Capture/PvP ;
+- aucun changement `index.html` prévu ;
+- aucun nouvel observer, heartbeat, retry ou autorité globale.
+
+Tests prévus :
+1. caractériser l'état actuel Core propriétaire / Tactical entry inert ;
+2. verrouiller l'ordre exact des six modules ;
+3. verrouiller le comportement bridge install/retries ;
+4. poser RED sur la future propriété Tactical entry ;
+5. micro-diff limité aux fichiers de composition ;
+6. triple CI avant checkpoint final.
+
+Risques :
+- double chargement si Core et Tactical entry deviennent propriétaires simultanément ;
+- inversion d'ordre entre engine/adapter/rules/integration/UI/bridge ;
+- perte d'idempotence ;
+- déplacement involontaire des retries du bridge ;
+- démarrage Tactical avant disponibilité des dépendances.
+
+Prochaine étape :
+caractériser le handoff et poser un RED isolé avant tout changement runtime.
+
+---
+
 # PHASE 8 — TACTICAL CONSOLIDATION — PRÉ-AUDIT — 2026-10-01
 
 Base GREEN :

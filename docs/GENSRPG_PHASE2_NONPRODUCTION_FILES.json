@@ -62,6 +62,7 @@
         "service-worker.js",
         "tests/gens_architecture_global_side_effect_guard.test.cjs",
         "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_phase8_exit_preaudit_v1.test.cjs",
         "tests/gens_rpg_tactical_hotfix_v1678114.test.cjs",
         "tests/gens_runtime_composition_guard_v11411.test.cjs"
       ]
@@ -78,6 +79,7 @@
         "service-worker.js",
         "tests/gens_architecture_global_side_effect_guard.test.cjs",
         "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
+        "tests/gens_phase8_exit_preaudit_v1.test.cjs",
         "tests/gens_rpg_tactical_session_guard_v16781144.test.cjs",
         "tests/gens_runtime_composition_guard_v11411.test.cjs"
       ]
@@ -97,6 +99,7 @@
         "tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
         "tests/gens_phase4_dice_preaudit_v1.test.cjs",
         "tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs",
+        "tests/gens_phase8_exit_preaudit_v1.test.cjs",
         "tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs"
       ]
     },

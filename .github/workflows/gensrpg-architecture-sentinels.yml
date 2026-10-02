@@ -776,6 +776,9 @@ jobs:
       - name: Exiger le retrait des seams observers legacy Tactical Phase 8
         run: node tests/gens_phase8_tactical_legacy_observer_seam_retirement_v1.test.cjs
 
+      - name: Pré-auditer le critère de sortie Phase 8
+        run: node tests/gens_phase8_exit_preaudit_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

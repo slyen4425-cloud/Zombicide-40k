@@ -1,47 +1,39 @@
 'use strict';
-
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets/gensrpg/tactical/entry-v1.js'),'utf8');
-const loaded=[];
-const timers=[];
-let bridgeInstalls=0;
-
-const head={appendChild(s){loaded.push(s.src);if(typeof s.onload==='function')s.onload();return s}};
-const document={head,documentElement:head,createElement(tag){assert.equal(tag,'script');return {src:'',async:true,onload:null,onerror:null}}};
-const sandbox={
-  console,document,
-  setTimeout(fn,ms){timers.push(ms);if(typeof fn==='function')fn();return timers.length},
-  GensRpgTacticalCombatV2Bridge:{install(){bridgeInstalls++}}
-};
+const loaded=[],timers=[];let bridgeInstalls=0,ready=0;
+const sandbox={console,setTimeout(fn,ms){timers.push(ms);return timers.length}};
+const head={appendChild(s){
+ loaded.push(s.src);
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js'))sandbox.GensRpgTacticalCombatV2Bridge={install(){bridgeInstalls++;return true}};
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2.js'))sandbox.GensRpgTacticalCombatV2={};
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js'))sandbox.GensRpgTacticalCombatV2Adapter={};
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js'))sandbox.GensRpgTacticalCombatV2Rules={};
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js'))sandbox.GensRpgTacticalCombatV2Ui={};
+ if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js')){
+   s.onload?.();sandbox.GensTacticalV1.compatibilityReady(true);return s;
+ }
+ s.onload?.();return s;
+}};
+sandbox.document={head,documentElement:head,createElement(){return {src:'',async:true,onload:null,onerror:null}}};
 sandbox.window=sandbox;sandbox.globalThis=sandbox;
-vm.createContext(sandbox);
-vm.runInContext(src,sandbox,{filename:'tactical/entry-v1.js'});
-
-const expected=[
-  'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js?v=16.78.105',
-  'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105'
-];
-assert.deepEqual(loaded,expected,'Tactical public entry must preserve the exact historical private-module order');
-assert.equal(sandbox.__gensTacticalV2Loader105,true,'Tactical public entry must own the historical idempotency guard');
-assert.equal(bridgeInstalls,1,'Tactical entry must install the Bridge exactly once after base composition');
-assert.deepEqual(timers,[],'Tactical entry must not schedule delayed Bridge reinstalls');
-assert.ok(sandbox.GensTacticalV1,'Tactical public API missing');
-assert.deepEqual(Array.from(sandbox.GensTacticalV1.files),expected.map(x=>x.replace('?v=16.78.105','')),
-  'Tactical public API must expose its ordered private composition');
-
-const before={loads:loaded.length,timers:timers.length,bridges:bridgeInstalls};
-sandbox.GensTacticalV1.install();
-assert.equal(loaded.length,before.loads,'Tactical install must be idempotent after the historical guard is set');
-assert.equal(timers.length,before.timers,'idempotent Tactical install must not schedule timers');
-assert.equal(bridgeInstalls,before.bridges,'idempotent Tactical install must not duplicate bridge installation');
-
-console.log('Phase 8 Tactical public entry runtime handoff OK');
+vm.createContext(sandbox);vm.runInContext(src,sandbox,{filename:'tactical/entry-v1.js'});
+assert.deepEqual(loaded,['assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105'],'bootstrap must load facade only');
+assert.equal(bridgeInstalls,0);assert.notEqual(sandbox.__gensTacticalV2Loader105,true);
+sandbox.GensTacticalV1.activate(ok=>{assert.equal(ok,true);ready++});
+assert.deepEqual(loaded.slice(1),[
+ 'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
+ 'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
+ 'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',
+ 'assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js?v=16.78.105',
+ 'assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js?v=16.78.105'
+]);
+assert.equal(sandbox.__gensTacticalV2Loader105,true);
+assert.equal(bridgeInstalls,1);assert.equal(ready,1);assert.deepEqual(timers,[]);
+const before=loaded.length;sandbox.GensTacticalV1.activate(ok=>{assert.equal(ok,true);ready++});
+assert.equal(loaded.length,before);assert.equal(bridgeInstalls,1);assert.equal(ready,2);
+console.log('Phase 8 Tactical public entry runtime: facade eager, private stack first-request only');

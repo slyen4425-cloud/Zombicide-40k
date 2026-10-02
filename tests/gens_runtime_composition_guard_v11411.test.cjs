@@ -105,13 +105,21 @@ assert.equal(bootstrap.includes('GensRpgTacticalCombatV2Bridge'),false,'RuntimeB
 assert.equal(bootstrap.includes('__gensTacticalV2Loader105'),false,'RuntimeBootstrap must not own Tactical idempotency');
 assert.ok(bootstrap.includes('s.async=false'),'RuntimeBootstrap must preserve ordered sequential public-entry loading');
 
-// 4b. Tactical public entry is the sole owner of base Tactical composition.
-assertOrdered(tacticalEntry,baseTactical,'Tactical public entry base composition');
-assert.ok(tacticalEntry.includes('R.__gensTacticalV2Loader105=true'),'Tactical entry must preserve the historical idempotency guard');
+// 4b. Tactical public entry remains the sole owner, but only the Bridge facade is eager.
+const privateTactical=baseTactical.slice(0,-1),bridgeFacade=baseTactical.at(-1);
+const privateStart=tacticalEntry.indexOf('const privateFiles=['),privateEnd=tacticalEntry.indexOf('];',privateStart);
+assert.ok(privateStart>=0&&privateEnd>privateStart,'Tactical privateFiles declaration missing');
+const privateBlock=tacticalEntry.slice(privateStart,privateEnd);
+assertOrdered(privateBlock,privateTactical,'Tactical public entry private composition');
+assert.ok(tacticalEntry.includes('const facadeFile="assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js"'),
+  'Tactical public entry must own the inert Bridge facade path');
+assert.ok(tacticalEntry.includes('function activate(onReady)'),'Tactical entry must expose first-request activation');
+assert.ok(tacticalEntry.includes('R.__gensTacticalV2Loader105=true'),'private activation must preserve the historical idempotency guard');
 assert.equal((tacticalEntry.match(/setTimeout\(apply,/g)||[]).length,0,
   'Tactical public entry must not regain delayed Bridge reinstalls');
 assert.ok(tacticalEntry.includes('s.async=false'),'Tactical entry must preserve ordered sequential private-module loading');
 assert.ok(tacticalEntry.includes('R.GensTacticalV1=Object.freeze'),'Tactical entry must expose the public module API');
+assert.ok(tacticalEntry.includes(bridgeFacade),'Tactical entry must retain Bridge facade ownership');
 
 // 5. Integration preserves the real runtime call chain V108 -> V114.11, now with direct cleaned installs.
 for(const file of [
@@ -138,7 +146,9 @@ assert.equal(integration.includes('beginChainObserverGuard'),false,'whole-chain 
 assert.equal(integration.includes('endChainObserverGuard'),false,'whole-chain observer guard teardown must remain retired');
 assert.equal(/R\.MutationObserver\s*=/.test(integration),false,'integration must never replace the native MutationObserver constructor');
 assert.ok(integration.trim().endsWith('})(typeof globalThis!=="undefined"?globalThis:this);'),'integration wrapper must remain intact');
-assert.ok(integration.includes('loadPolish108();'),'clean Tactical chain must still start at V108');
+assert.ok(integration.includes('function activateCompatibilityChain()'),'compatibility chain must retain one explicit activation seam');
+assert.ok(integration.includes('GensRpgTacticalCompatibilityChainPhase8'),'integration must expose the chain activator to the Tactical lifecycle owner');
+assert.ok(integration.includes('if(!lifecycle?.activating)activateCompatibilityChain()'),'standalone integration loading must still activate the compatibility chain when no session activation owns it');
 assert.ok(!integration.includes('gens-rpg-tactical-hotfix-1678114.js'),'V114.1 hotfix file must not return to the active Tactical chain');
 assert.ok(!integration.includes('gens-rpg-tactical-session-guard-16781144.js'),'global V114.4 session guard must not return to the active Tactical chain');
 

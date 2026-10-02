@@ -54,8 +54,28 @@ Méthode :
 - sélectionner un seul seam de session avant tout RED futur ;
 - triple CI avant checkpoint GREEN.
 
+Pré-audit :
+- test : `tests/gens_phase8_tactical_session_ownership_preaudit_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_SESSION_OWNERSHIP_PREAUDIT.md` ;
+- RuntimeBootstrap possède uniquement l'entrée publique Tactical ;
+- le Bridge peut être chargé comme façade inerte : il publie son API mais ne s'auto-installe pas ;
+- les callsites Dungeon actifs sont déjà Bridge-backed ;
+- le dernier `dc200StartCombat` brut est une graine de compatibilité, pas un callsite Dungeon actif.
+
+Seam sélectionné :
+**façade Bridge chargée / pile Tactical privée activée à la première requête de combat**.
+
+Pourquoi ce seam est nécessaire au critère de sortie Phase 8 :
+il retire l'activation de la pile Tactical hors combat sans modifier les callsites Dungeon ni `index.html`, et établit la première vraie frontière de propriété de session.
+
+Hors futur lot :
+- teardown/dispose après fermeture ;
+- V113/V114.11 fichier par fichier ;
+- gameplay, IA, hit/dégâts/armure ;
+- toute migration `index.html`.
+
 Prochaine étape :
-cartographier le vrai chemin `bootstrap -> entrée publique -> bridge -> session UI -> close` et les side effects qui survivent hors session, puis sélectionner un seul seam bloquant.
+valider ce pré-audit par triple CI. Après checkpoint GREEN, le futur lot runtime posera d'abord un RED prouvant qu'après bootstrap seule la façade est disponible et que la première requête Bridge active la pile privée une seule fois.
 
 ---
 

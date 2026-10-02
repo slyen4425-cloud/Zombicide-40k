@@ -1,3 +1,79 @@
+# PHASE 9 — PRÉ-AUDIT DE REPRISE MONSTER CAPTURE — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-exit-green-2026-10-02`
+
+SHA de base :
+`03da28af683607719a635f89db5f47c41c9fbbe6`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-recovery-preaudit-2026-10-02`
+
+Branche :
+`work/gensrpg-phase9-capture-recovery-preaudit-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-exit-green-2026-10-02`
+
+## Pourquoi ce pré-audit est obligatoire
+
+La Phase 9 de la roadmap vise l'autonomie de Monster Capture, mais une refonte importante du mode a été développée récemment hors du fil principal de restructuration, notamment dans :
+- les autres fils de travail Monster Capture ;
+- le dépôt laboratoire `slyen4425-cloud/GenSrpg_labo_combat_dynamique`;
+- ses branches/checkpoints de combat dynamique, éditeurs, catalogues, assets, sons, arènes, export/import et règles.
+
+Il serait contraire à la charte de restructurer uniquement l'ancien runtime Capture du dépôt principal ou de recréer des systèmes déjà développés ailleurs.
+
+## Périmètre
+
+Pré-audit **lecture/comparaison uniquement** :
+1. inventorier le Capture actuellement actif dans `Zombicide-40k` ;
+2. inventorier les contrats et checkpoints réellement validés du laboratoire ;
+3. récupérer les décisions/régressions importantes des travaux récents ;
+4. distinguer GREEN technique, prévalidation mobile et validation utilisateur ;
+5. identifier les systèmes déjà autoritaires : combat, roster/format, créatures, compétences, stats/progression, effets/status, visuels/FX, audio, arènes, export/import ;
+6. produire une matrice `dépôt principal actuel / labo refondu / décision Phase 9` ;
+7. sélectionner seulement ensuite le premier seam Phase 9.
+
+## Interdictions
+
+- aucun changement runtime pendant ce pré-audit ;
+- aucun merge/cherry-pick aveugle depuis le labo ;
+- aucun développement sur `main` ;
+- aucun changement dans le dépôt laboratoire ;
+- aucune seconde autorité Combat/Stats/Skill/Creature ;
+- aucune reconstruction d'un éditeur déjà présent ;
+- ne pas considérer un checkpoint « prevalidation » comme validation utilisateur ;
+- ne pas reprendre comme GREEN une intégration ayant vidé la bibliothèque de créatures sauf le loup de test ;
+- pas de lecture/modification `index.html` sauf nécessité démontrée et Rule 26.
+
+## Points récents à vérifier dans GitHub, sans les considérer vrais par mémoire seule
+
+- formats combat 1v1 / 2v2 et roster natif ;
+- éditeur créatures + CRUD/catalogue + scale/sockets ;
+- éditeur compétences + bibliothèque active + niveaux/limites d'utilisation ;
+- stats/progression extensibles et PV/Santé comme stat ;
+- compétences complexes : soins, AoE, lifesteal, buff/debuff, DoT/HoT, immobilisation/status ;
+- export/import et database bundle ;
+- assets face/dos/icône, arènes, sons et taxonomie audio ;
+- géométrie visible autoritaire pour projectiles et attaques avec déplacement ;
+- collision/contact possédés par le Combat Runtime, sans moteur secondaire ;
+- correctifs projectile/contact du 2 octobre et généralisation aux capacités de contact.
+
+## Critère de sortie du pré-audit
+
+Le pré-audit est terminé uniquement si :
+- le vrai état GitHub des deux dépôts est identifié ;
+- les checkpoints de référence sont sélectionnés avec leur statut exact ;
+- les régressions/non-validations sont explicitement exclues ;
+- les autorités cibles Phase 9 sont documentées sans doublon ;
+- le premier micro-lot peut être justifié directement par le critère Phase 9 :
+  **Capture peut démarrer sans runtime Dungeon/Survie actif.**
+
+Aucun micro-lot runtime ne sera ouvert avant cette décision.
+
+---
+
 # PHASE 8 — AUDIT EXIT OFFICIEL — 2026-10-02
 
 Base GREEN :

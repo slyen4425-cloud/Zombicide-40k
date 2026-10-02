@@ -13,7 +13,7 @@ const captureContract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1
 const shellFinal=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
 const launchContract=JSON.parse(read('assets/gensrpg/shell/module-launch-contract-v1.json'));
 const currentCaptureTest=read('tests/gens_capture_current_shell_browser_v11411.test.cjs');
-const providerTest=read('tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs');
+const providerTest=read('tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs');
 const recovery=read('docs/GENSRPG_PHASE9_CAPTURE_RECOVERY_PREAUDIT.md');
 
 assert.match(roadmap,/## Phase 9 — Séparer Monster Capture[\s\S]*Critère de sortie : Capture peut démarrer sans runtime Dungeon\/Survie actif\./,

@@ -121,3 +121,18 @@ Après triple CI GREEN :
 - ouvrir un seul micro-lot runtime `session teardown ownership` ;
 - RED isolé avant modification ;
 - après ce lot, ré-audit immédiat du critère de sortie Phase 8 au lieu de poursuivre du nettoyage opportuniste.
+
+
+## Validation GREEN
+
+HEAD de pré-audit :
+`b8c3c26eff788e22fae0e40445724346bb746ad8`
+
+- Architecture + Browser `37010529357` — SUCCESS ;
+- Firefox `37010529128` — SUCCESS ;
+- Tactical Dock `37010529074` — SUCCESS ;
+- aucun runtime modifié.
+
+Décision : **PRÉ-AUDIT TEARDOWN DE SESSION TACTICAL GREEN**.
+
+Le seul prochain lot Phase 8 autorisé est le micro-lot homogène `session teardown ownership`, car il répond directement au critère de sortie. Après ce lot, ré-audit immédiat de sortie Phase 8 ; aucun nettoyage legacy supplémentaire par défaut.

@@ -16,6 +16,13 @@ Roadmap :
 
 > Capture peut démarrer sans runtime Dungeon/Survie actif.
 
+Interprétation renforcée :
+- **Capture est un module autonome de premier niveau**, frère de Survie, Dungeon et Versus/PvP ;
+- Capture ne doit plus être un sous-mode Dungeon ni utiliser Dungeon comme identité fonctionnelle ;
+- son lifecycle, son monde/exploration, son combat, ses créatures, son équipe/réserve, sa UI et sa sauvegarde doivent appartenir à Capture ;
+- Dungeon peut au plus partager des services génériques via Core, jamais servir d'autorité ou de runtime hôte ;
+- à la sortie de Phase 9, lancer Capture ne doit nécessiter aucun runtime privé Dungeon/Survie actif.
+
 La Phase 9 ne demande pas de jeter le mode Capture existant ni de fusionner le laboratoire en bloc. Elle demande de rendre Capture autonome avec des propriétaires explicites.
 
 ## État réel du dépôt principal

@@ -160,14 +160,19 @@ Critère de sortie : Tactical n’existe que pendant une session de combat et se
 
 ## Phase 9 — Séparer Monster Capture
 
-Créer `capture/` comme module autonome.
+Créer `capture/` comme module autonome de premier niveau, au même rang que Survie, Dungeon et Duel/PvP.
 
 - créatures, biomes, capture, équipe/réserve ;
+- monde/exploration Capture propres ;
 - combat Capture propre ;
+- lifecycle et UI Capture propres ;
+- sauvegarde/session Capture propres ;
 - Core commun uniquement pour services génériques réellement partagés ;
-- aucun détournement Dungeon/Survie.
+- aucun détournement Dungeon/Survie ;
+- aucun besoin de `gameStyle="dungeon"` ou de `isDungeonMode()` comme identité fonctionnelle de Capture ;
+- les compatibilités historiques Dungeon/Capture sont retirées progressivement après parité et sentinelles.
 
-Critère de sortie : Capture peut démarrer sans runtime Dungeon/Survie actif.
+Critère de sortie : Capture peut démarrer, fonctionner et se fermer comme module autonome sans runtime Dungeon/Survie actif.
 
 ## Phase 10 — Séparer Duel/PvP
 

@@ -17,7 +17,16 @@ Dernier checkpoint GREEN :
 
 ## Pourquoi ce pré-audit est obligatoire
 
-La Phase 9 de la roadmap vise l'autonomie de Monster Capture, mais une refonte importante du mode a été développée récemment hors du fil principal de restructuration, notamment dans :
+La Phase 9 de la roadmap vise l'autonomie de Monster Capture.
+
+Invariant architectural ajouté :
+- **Monster Capture est un module de premier niveau**, au même rang que Survie, Dungeon et Versus/PvP ;
+- il ne doit plus être représenté comme un sous-mode Dungeon, un `gameStyle="dungeon"` fonctionnel, ni dépendre de `isDungeonMode()` pour exister ;
+- le Shell peut router vers Capture, mais Dungeon ne doit ni posséder son lifecycle, ni son monde, ni son combat, ni son UI ;
+- les services réellement communs passent uniquement par Core ;
+- toute compatibilité historique Dungeon -> Capture doit être temporaire, inventoriée puis retirée au fil des seams Phase 9.
+
+Une refonte importante du mode a été développée récemment hors du fil principal de restructuration, notamment dans :
 - les autres fils de travail Monster Capture ;
 - le dépôt laboratoire `slyen4425-cloud/GenSrpg_labo_combat_dynamique`;
 - ses branches/checkpoints de combat dynamique, éditeurs, catalogues, assets, sons, arènes, export/import et règles.

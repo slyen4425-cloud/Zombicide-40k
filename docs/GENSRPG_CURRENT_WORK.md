@@ -106,8 +106,40 @@ Micro-diff appliqué :
 - aucun nouveau timer, observer, polling ou heartbeat ;
 - aucun changement `index.html`, callsite Dungeon ou gameplay.
 
+Réalignement final des sentinelles :
+- seules les gardes décrivant explicitement l'ancien eager-loading ont été modifiées ;
+- la sentinelle Browser Dungeon Builder n'attend plus V111 hors combat ;
+- elle exige désormais que la pile Tactical privée reste non chargée pendant l'édition structurelle Dungeon ;
+- aucune modification runtime supplémentaire.
+
+Validation technique GREEN :
+- HEAD technique : `b496aab046788318e913f593ba7725df9a3dd536` ;
+- Architecture + Browser `37002153836` — SUCCESS ;
+- Firefox `37002153833` — SUCCESS ;
+- Tactical Dock `37002153835` — SUCCESS ;
+- étapes Phase 8 #254 à #257 — SUCCESS ;
+- Dungeon map -> Tactical V2 — SUCCESS ;
+- Dungeon Builder réel — SUCCESS ;
+- premier combat cold-start — SUCCESS ;
+- non-interférence inter-modules — SUCCESS.
+
+Décision :
+**MICRO-LOT 5 TECHNIQUEMENT GREEN**.
+
+Impact critère Phase 8 :
+- blocage A1 retiré : la pile Tactical privée n'existe plus au bootstrap application ;
+- le Bridge reste la façade publique chargée ;
+- la pile privée s'active seulement à la première requête de combat ;
+- teardown / `dispose()` reste volontairement hors de ce lot et demeure le prochain blocage lifecycle à auditer.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-session-activation-green-2026-10-02`.
+
 Prochaine étape :
-réaligner uniquement les sentinelles qui décrivent explicitement l'ancien eager loading, puis valider le micro-diff par triple CI technique.
+1. triple CI documentaire sur le SHA exact ;
+2. créer le checkpoint GREEN final ;
+3. repartir de ce checkpoint pour pré-auditer uniquement le teardown de session réellement nécessaire au critère de sortie ;
+4. ne pas ouvrir de nettoyage legacy non bloquant.
 
 ---
 

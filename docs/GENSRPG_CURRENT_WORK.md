@@ -83,11 +83,29 @@ Classification factuelle actuelle :
 - A5 : base UI / V114.11 conservent des side effects globaux hors session ;
 - B : fichiers non atteignables, code historique inactif, nettoyage cosmétique/documentaire -> backlog seulement.
 
-Décision préliminaire :
-**Phase 8 n'est pas encore EXIT-ready**, mais aucun nettoyage legacy supplémentaire n'est autorisé hors blocage A.
+Décision :
+**PRÉ-AUDIT DE SORTIE PHASE 8 GREEN.**
+
+Preuve :
+- HEAD documentaire : `d631f8f914b150b50b3b2d228f2e3e2aa8325953` ;
+- Architecture + Browser `36949611830` — SUCCESS ;
+- Firefox `36949611826` — SUCCESS ;
+- Tactical Dock `36949611965` — SUCCESS ;
+- aucun changement runtime pendant ce pré-audit.
+
+Conclusion :
+- Phase 8 n'est pas encore EXIT-ready ;
+- les seuls sujets autorisés pour la suite sont les blocages A du lifecycle ;
+- les dettes B restent dans `docs/GENSRPG_PHASE8_BACKLOG.md` sans correction opportuniste.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase8-exit-preaudit-green-2026-10-02`.
 
 Prochaine étape :
-valider ce pré-audit par triple CI. Ensuite sélectionner uniquement le plus petit raccord de propriété de session nécessaire ; ne pas descendre V108 -> V114 fichier par fichier.
+1. triple CI documentaire de fermeture ;
+2. checkpoint GREEN final ;
+3. ouvrir un pré-audit dédié à la propriété de session Tactical ;
+4. écrire explicitement pourquoi ce lot est nécessaire au critère de sortie avant toute migration runtime.
 
 ---
 

@@ -106,9 +106,8 @@ async function openDungeonGameHome(page){
     await dungeonEditorButton.click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('dungeonAdvancedEditor')).display!=='none');
 
-    // Give the existing click-lifecycle installers one event-loop turn.
+    // Phase 8 cold-start: structural Dungeon editors must not require the private Tactical stack.
     await page.waitForTimeout(150);
-    await page.waitForFunction(()=>typeof window.GensRpgTacticalRuntimeFixes1678111?.hideRuntimeTabs==='function',null,{timeout:30000});
 
     const state=await page.evaluate(()=>({
       active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
@@ -122,6 +121,7 @@ async function openDungeonGameHome(page){
       builderModal:!!document.getElementById('drc300Modal'),
       roomLauncherHtml:document.getElementById('drc100Launcher')?.outerHTML?.slice(0,1200)||'',
       builderParent:document.getElementById('drc300Launch')?.parentElement?.id||'',
+      tacticalRuntimeFixesLoaded:typeof window.GensRpgTacticalRuntimeFixes1678111!=='undefined',
       scripts:[...document.querySelectorAll('script[src]')].map(s=>s.getAttribute('src')||'').filter(s=>/dungeon-room-creator|dungeon-world-builder/.test(s))
     }));
     console.log('[dungeon-builder-visibility] editor-state',JSON.stringify(state,null,2));
@@ -135,26 +135,17 @@ async function openDungeonGameHome(page){
     assert.equal(state.roomModal,true,'Room Creator modal must be mounted');
     assert.equal(state.builderModal,true,'Dungeon Builder modal must be mounted');
     assert.equal(state.builderParent,'drc100Launcher','Dungeon Builder launcher must remain owned by the Room Creator launcher');
+    assert.equal(state.tacticalRuntimeFixesLoaded,false,'private Tactical V111 must stay unloaded while browsing the structural Dungeon editor outside combat');
 
     const ownership=await page.evaluate(()=>{
       const launcher=document.getElementById('drc100Launcher');
-      const existing=document.getElementById('dc047RoomBoard');
-      const previous=existing?{display:existing.style.display,html:existing.innerHTML}:null;
-      const board=existing||document.createElement('div');
-      if(!existing){board.id='dc047RoomBoard';document.body.appendChild(board)}
-      board.style.display='block';board.style.width='120px';board.style.height='120px';
-      board.innerHTML='<div class="dc047Grid" style="width:100px;height:100px"></div>';
-      window.GensRpgTacticalRuntimeFixes1678111.hideRuntimeTabs(window);
-      const during={
+      return {
         hidden:launcher?.hasAttribute('data-v111-hidden-tab')||false,
         display:launcher?.style.getPropertyValue('display')||'',
         priority:launcher?.style.getPropertyPriority('display')||''
       };
-      if(existing){board.style.display=previous.display;board.innerHTML=previous.html}else board.remove();
-      window.GensRpgTacticalRuntimeFixes1678111.hideRuntimeTabs(window);
-      return during;
     });
-    assert.deepEqual(ownership,{hidden:false,display:'',priority:''},'Tactical V111 must never take display ownership of the structural Dungeon editor launcher');
+    assert.deepEqual(ownership,{hidden:false,display:'',priority:''},'structural Dungeon editor launcher must remain visible without Tactical ownership');
 
     const build=page.locator('#drc300Launch');
     assert.equal(await visible(build),true,'CONSTRUIRE UN DONJON must be visible in the Dungeon editor');

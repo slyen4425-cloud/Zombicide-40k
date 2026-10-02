@@ -66,8 +66,38 @@ RED isolé :
 - réaffirme les cadences `installWithRetries` existantes ;
 - aucun runtime modifié dans le commit RED.
 
+RED confirmé :
+- HEAD RED : `8a774ea9c21b13c5f1f8d42b2418bf33ba207f59` ;
+- Architecture `36922171754` — FAILURE attendue ;
+- échec isolé étape #253 `Exiger le retrait des seams observers legacy Tactical Phase 8` ;
+- erreur : `V108 inactive observe seam must be physically retired` ;
+- Firefox `36922171730` — SUCCESS ;
+- Tactical Dock `36922171620` — SUCCESS ;
+- aucun runtime modifié au point RED.
+
+Micro-diff appliqué :
+- retrait physique des cinq fonctions `observe(rt=R)` V108/V109/V111/V112/V113 ;
+- retrait des constructions `MutationObserver` correspondantes ;
+- retrait des états `observer=null` devenus morts ;
+- responsabilités actives de chaque `install(rt)` conservées ;
+- retries `installWithRetries` conservés ;
+- détection V113, hit, dégâts, armure, IA et UI métier inchangés ;
+- manifeste timers réaligné : `externalSetTimeoutSyntax` 142 -> 141 ;
+- guards historiques observers/murs/autorité visuelle réalignés uniquement sur la nouvelle frontière physique.
+
+Validation technique partielle :
+- HEAD runtime+guards : `f357b3f09ea5651e842377cd1a08cdf4126a0f82` ;
+- Architecture + Browser `36923077568` — SUCCESS ;
+- Tactical Dock `36923077393` — SUCCESS ;
+- Firefox Wall `36923077369` bloqué côté runner sur l'étape `Installer Firefox Playwright`, avant le test projet ;
+- les cinq étapes précédentes du job Firefox sont SUCCESS ;
+- ce blocage n'est pas une régression GenSrpG.
+
+Relance CI :
+un commit documentaire de traçabilité est utilisé pour déclencher un nouveau cycle complet sans modifier le runtime.
+
 Prochaine étape :
-valider que le RED échoue uniquement parce que les cinq seams historiques sont encore physiquement présents, puis appliquer le micro-diff soustractif.
+obtenir une triple CI complète GREEN sur le runtime inchangé, puis fermer documentairement le micro-lot et créer le checkpoint GREEN final.
 
 ---
 

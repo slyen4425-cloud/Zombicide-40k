@@ -111,3 +111,29 @@ Le futur lot runtime devra d'abord poser un RED prouvant :
 - aucun gameplay n'est modifié.
 
 Ce pré-audit ne modifie aucun runtime.
+
+
+## Validation technique GREEN
+
+HEAD :
+`87eb363de4b7723f741f77f2514131b3c23878fe`
+
+Triple CI :
+- Architecture + Browser `36979070245` — SUCCESS ;
+- Firefox `36979070269` — SUCCESS ;
+- Tactical Dock `36979070220` — SUCCESS ;
+- sentinelle Architecture #255 — SUCCESS.
+
+Aucun runtime n'a été modifié.
+
+## Décision
+
+**PRÉ-AUDIT PROPRIÉTÉ DE SESSION TACTICAL GREEN.**
+
+Le seam sélectionné reste strictement :
+**façade Bridge chargée / pile Tactical privée activée à la première requête de combat**.
+
+Le teardown/dispose après fermeture reste un blocage A distinct et hors de ce futur premier lot runtime.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase8-tactical-session-ownership-preaudit-green-2026-10-02`.

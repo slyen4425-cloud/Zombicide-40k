@@ -22,7 +22,8 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const esc=v=>str(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,queued=false,lastScanSignature="",detailActorId="";
+  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,queued=false,lastScanSignature="",detailActorId="",detailHandler=null,startWrapped=null;
+  const retryTimers=new Set();
 
   function doc(rt=R){return rt?.document||null}
   function engine(rt=R){return rt?.GensRpgTacticalCombatV2||null}
@@ -153,7 +154,7 @@
       let requested=arr(ids).map(str);if(isDetectionReason(reason)){const visible=new Set(detectionEnemyIds(rt,state));requested=requested.filter(id=>visible.has(id));if(!requested.length)return {ok:false,reason:"not-detected-v112"};const pairs=detectionPairs(rt,state).filter(p=>requested.includes(p.enemyId));setContext(rt,{room:num(state.room,0),sourceHeroIds:[...new Set(pairs.map(p=>p.heroId))],enemyIds:requested,reason:"vision-v112"})}
       const sel=selectCombatants(rt,{enemyIds:requested});if(!sel.heroIds.length||!sel.enemyIds.length)return {ok:false,reason:"no-spatial-combatants-v112"};setContext(rt,{room:sel.room,sourceHeroIds:sel.sourceHeroIds,enemyIds:sel.enemyIds,reason});return old.call(this,sel.enemyIds,reason);
     };
-    wrapped.__gensRpg112Start=true;wrapped.__original=old;rt.dc200StartCombat=wrapped;startHooked=true;return true;
+    wrapped.__gensRpg112Start=true;wrapped.__original=old;rt.dc200StartCombat=wrapped;startWrapped=wrapped;startHooked=true;return true;
   }
 
   function hookResultDetails(rt=R){
@@ -191,14 +192,22 @@
   function patchDice(rt=R){const D=doc(rt),card=D?.querySelector?.(".gtv2DiceCard");if(!card)return false;const row=latestAttackRow(rt);if(!row)return false;let note=card.querySelector?.(".gtv2112Explain");if(!note){note=D.createElement("div");note.className="gtv2112Explain";const button=card.querySelector?.("[data-dice-continue]");if(button)card.insertBefore(note,button);else card.appendChild(note)}note.textContent=explainAttack(row);return true}
   function maintain(rt=R){queued=false;ensureStyle(rt);patchDetail(rt);patchDice(rt);return true}
   function queueMaintain(rt=R){if(queued)return;queued=true;const run=()=>maintain(rt);if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)}
-  function bindDetail(rt=R){if(detailBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.dataset?.detail){detailActorId=str(b.dataset.detail);setTimeout(()=>patchDetail(rt),0)}else if(b.hasAttribute?.("data-detail-close"))detailActorId=""},true);detailBound=true;return true}
+  function bindDetail(rt=R){if(detailBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;detailHandler=ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.dataset?.detail){detailActorId=str(b.dataset.detail);setTimeout(()=>patchDetail(rt),0)}else if(b.hasAttribute?.("data-detail-close"))detailActorId=""};D.addEventListener("click",detailHandler,true);detailBound=true;return true}
 
   function wrapDetectionFunction(rt,name,reason,force=false){const old=rt?.[name];if(typeof old!=="function"||old.__gensRpg112Detection)return false;const w=function(){const out=old.apply(this,arguments);scheduleDetection(rt,reason,force);return out};w.__gensRpg112Detection=true;w.__original=old;rt[name]=w;return true}
   function hookDetection(rt=R){wrapDetectionFunction(rt,"dungeonMoveHero098","movement-vision-v112",false);wrapDetectionFunction(rt,"applyDungeonTurnEvent","event-vision-v112",true);wrapDetectionFunction(rt,"dungeonEventSpawn","spawn-vision-v112",true);wrapDetectionFunction(rt,"trackSpawnedEnemyInstances","spawn-vision-v112",true);const core=rt?.DungeonCore01;if(core)for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__gensRpg112Detection)continue;const w=function(){const out=old.apply(this,arguments);markWallCells(rt);scheduleDetection(rt,"room-vision-v112",false);return out};w.__gensRpg112Detection=true;w.__original=old;core[name]=w}detectionHooked=true;return true}
 
   function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookResultDetails(rt);bindDetail(rt);maintain(rt);try{rt.GENSRPG_VERSION=APP_VERSION;rt.GENS_RPG_TACTICAL_COHERENCE_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&resultHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,mapInfo,cellXY,lineOfSightCells,pathDistance,roomOfHero,heroesInRoom,enemyVision,heroPerception,detectionPairs,detectionEnemyIds,scanDetection,selectCombatants,applyRuntimePositions,explainAttack,markWallCells,patchDice,patchDetail,hookAdapter,hookStart,hookResultDetails,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,resultHooked,detectionHooked})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),A=adapter(rt),E=engine(rt);if(D&&detailHandler)D.removeEventListener?.("click",detailHandler,true);
+    const create=A?.createBattle;if(create?.__gensRpg112Spatial&&!create?.__gensRpg113Scope&&typeof create.__original==="function")A.createBattle=create.__original;
+    const resolve=E?.resolveAttack;if(resolve?.__gensRpg112Explain&&typeof resolve.__original==="function")E.resolveAttack=resolve.__original;
+    if(startWrapped&&rt?.dc200StartCombat===startWrapped&&typeof startWrapped.__original==="function")rt.dc200StartCombat=startWrapped.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();detailHandler=null;startWrapped=null;installed=false;adapterHooked=false;startHooked=false;resultHooked=false;detectionHooked=false;detailBound=false;queued=false;detailActorId="";return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,mapInfo,cellXY,lineOfSightCells,pathDistance,roomOfHero,heroesInRoom,enemyVision,heroPerception,detectionPairs,detectionEnemyIds,scanDetection,selectCombatants,applyRuntimePositions,explainAttack,markWallCells,patchDice,patchDetail,hookAdapter,hookStart,hookResultDetails,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,startHooked,resultHooked,detectionHooked})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

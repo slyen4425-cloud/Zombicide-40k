@@ -20,7 +20,8 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   let installed=false,adapterHooked=false,startHooked=false,clickBound=false,maintainQueued=false;
-  let moveWrapped=null,eventWrapped=new Map(),lastDetectionSignature="";
+  let moveWrapped=null,eventWrapped=new Map(),lastDetectionSignature="",onBoard=null,adapterWrapped=null,startWrapped=null;
+  const retryTimers=new Set(),detectionTimers=new Set();
 
   function doc(rt=R){return rt?.document||null}
   function adapter(rt=R){return rt?.GensRpgTacticalCombatV2Adapter||null}
@@ -132,7 +133,7 @@
   function hookAdapter(rt=R){
     const A=adapter(rt);if(!A?.createBattle)return false;if(A.createBattle.__gensRpg113Scope){adapterHooked=true;return true}const base=unwrap112Create(A.createBattle);if(typeof base!=="function")return false;
     const wrapped=function(runtime,options={}){const realRt=runtime||rt,sel=selectCombatants(realRt,options||{}),next={...(options||{}),heroIds:sel.heroIds,enemyIds:sel.enemyIds},battle=base.call(this,realRt,next);applyRuntimePositions(realRt,battle,sel);try{realRt?.GensRpgTacticalStats1678110?.decorateBattle?.(realRt,battle,{force:true})}catch(e){}return battle};
-    wrapped.__gensRpg113Scope=true;wrapped.__gensRpg112Spatial=true;wrapped.__original=base;A.createBattle=wrapped;adapterHooked=true;return true;
+    wrapped.__gensRpg113Scope=true;wrapped.__gensRpg112Spatial=true;wrapped.__original=base;A.createBattle=wrapped;adapterWrapped=wrapped;adapterHooked=true;return true;
   }
 
   function isDetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
@@ -144,20 +145,20 @@
       if(isDetectionReason(reason)){const pairs=detectionPairs(rt,state),visible=new Set(pairs.map(p=>p.enemyId));requested=(requested.length?requested:[...visible]).filter(id=>visible.has(id));if(!requested.length)return {ok:false,reason:"not-detected-v113"};const source=[...new Set(pairs.filter(p=>requested.includes(p.enemyId)).map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:requested,reason})}
       const sel=selectCombatants(rt,{enemyIds:requested});if(!sel.heroIds.length||!sel.enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113"};setContext(rt,{scope:sel.scope,sourceHeroIds:sel.sourceHeroIds,enemyIds:sel.enemyIds,reason});return base.call(this,sel.enemyIds,reason);
     };
-    wrapped.__gensRpg113Start=true;wrapped.__gensRpg112Start=true;wrapped.__original=base;rt.dc200StartCombat=wrapped;startHooked=true;return true;
+    wrapped.__gensRpg113Start=true;wrapped.__gensRpg112Start=true;wrapped.__original=base;rt.dc200StartCombat=wrapped;startWrapped=wrapped;startHooked=true;return true;
   }
 
   function detectionSignature(rt,state){const scope=activeScope(state,rt),h=heroesInScope(state,scope,rt).map(id=>`${id}@${heroCell(state,id)}`).sort().join(","),e=enemiesInScope(rt,state,scope).map(x=>`${str(x.id)}@${enemyCell(state,x)}#${num(x.hp,0)}`).sort().join(",");return `${scopeKey(scope)}|${h}|${e}`}
   function scanDetection(rt=R,reason="vision-v113",force=false){
     hookStart(rt);hookAdapter(rt);if(currentBattle(rt))return [];const state=runtimeState(rt);if(!state?.last?.map)return [];const sig=detectionSignature(rt,state);if(!force&&sig===lastDetectionSignature)return [];lastDetectionSignature=sig;const pairs=detectionPairs(rt,state);if(!pairs.length)return [];const ids=[...new Set(pairs.map(p=>p.enemyId))],source=[...new Set(pairs.map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:ids,reason});try{rt?.dc200StartCombat?.(ids,reason)}catch(e){try{rt?.console?.warn?.("V16.78.113 detection",e)}catch(_){}}return ids;
   }
-  function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function")setTimeout(run,Math.max(0,delay));else run()}
+  function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function"){const id=setTimeout(()=>{detectionTimers.delete(id);run()},Math.max(0,delay));detectionTimers.add(id)}else run()}
   function hookMovement(rt=R){
     const fn=rt?.dungeonMoveHero098;if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){moveWrapped=fn;return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,"movement-detection-v113",true,0);scheduleDetection(rt,"movement-detection-v113",true,90);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt.dungeonMoveHero098=wrapped;moveWrapped=wrapped;return true;
   }
   function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){eventWrapped.set(name,fn);return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
   function ensureDetectionHooks(rt=R){hookMovement(rt);for(const name of ["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"])hookEventFunction(rt,name);hookStart(rt);hookAdapter(rt);return true}
-  function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;const onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
+  function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
     .gtv2113DiceRow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
@@ -177,8 +178,17 @@
   function maintain(rt=R){maintainQueued=false;ensureStyle(rt);ensureDetectionHooks(rt);animateDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintainQueued)return;maintainQueued=true;const run=()=>maintain(rt);if(typeof requestAnimationFrame==="function")requestAnimationFrame(run);else if(typeof setTimeout==="function")setTimeout(run,0);else run()}
   function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoardClicks(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const bag of [retryTimers,detectionTimers]){for(const id of bag)try{clearTimeout(id)}catch(e){}bag.clear()}
+    const D=doc(rt),A=adapter(rt);if(D&&onBoard){D.removeEventListener("click",onBoard,false);D.removeEventListener("pointerup",onBoard,false)}
+    if(moveWrapped&&rt?.dungeonMoveHero098===moveWrapped&&typeof moveWrapped.__original==="function")rt.dungeonMoveHero098=moveWrapped.__original;
+    for(const [name,wrapped] of eventWrapped){if(rt?.[name]===wrapped&&typeof wrapped.__original==="function")rt[name]=wrapped.__original}eventWrapped.clear();
+    if(startWrapped&&rt?.dc200StartCombat===startWrapped&&typeof startWrapped.__original==="function")rt.dc200StartCombat=startWrapped.__original;
+    if(adapterWrapped&&A?.createBattle===adapterWrapped&&typeof adapterWrapped.__original==="function")A.createBattle=adapterWrapped.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();onBoard=null;moveWrapped=null;adapterWrapped=null;startWrapped=null;lastDetectionSignature="";installed=false;adapterHooked=false;startHooked=false;clickBound=false;maintainQueued=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

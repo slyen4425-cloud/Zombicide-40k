@@ -1,7 +1,7 @@
 (function(root){
 "use strict";
 const R=root||globalThis,D=typeof document!=="undefined"?document:null;
-const VERSION="1.1.0",APP_VERSION="16.78.114.11-phase8-session-activation";
+const VERSION="1.2.0",APP_VERSION="16.78.114.11-phase8-session-teardown";
 const facadeFile="assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js";
 const privateFiles=[
   "assets/gensrpg/gens-rpg-tactical-combat-v2.js",
@@ -37,6 +37,7 @@ function startCompatibility(){
 }
 function baseLoaded(){
   baseReady=true;
+  try{R.GensRpgTacticalCombatV2Ui?.installGlobalPolish?.()}catch(e){console.error("GenSrpG Tactical V1 UI install",e)}
   try{bridgeInstalled=!!R.GensRpgTacticalCombatV2Bridge?.install?.(R)}
   catch(e){bridgeInstalled=false;console.error("GenSrpG Tactical V1 Bridge install",e)}
   if(!bridgeInstalled){compatibilityDone=true;compatibilityOk=false;return finishIfReady()}
@@ -71,7 +72,17 @@ function activate(onReady){
   }
   R.__gensTacticalV2Loader105=true;
   activating=true;active=false;baseReady=false;compatibilityDone=false;compatibilityOk=false;bridgeInstalled=false;
+  const warm=!!(R.GensRpgTacticalCombatV2&&R.GensRpgTacticalCombatV2Adapter&&R.GensRpgTacticalCombatV2Ui&&R.GensRpgTacticalCombatV2Bridge&&R.GensRpgTacticalCompatibilityChainPhase8);
+  if(warm){baseLoaded();return true}
   loadPrivate(0);
+  return true;
+}
+function deactivate(){
+  try{R.GensRpgTacticalCompatibilityChainPhase8?.deactivate?.(R)}catch(e){console.error("GenSrpG Tactical V1 compatibility teardown",e)}
+  try{R.GensRpgTacticalCombatV2Bridge?.dispose?.(R)}catch(e){console.error("GenSrpG Tactical V1 Bridge teardown",e)}
+  try{R.GensRpgTacticalCombatV2Ui?.dispose?.(R)}catch(e){console.error("GenSrpG Tactical V1 UI teardown",e)}
+  activating=false;active=false;baseReady=false;compatibilityDone=false;compatibilityOk=false;bridgeInstalled=false;readyQueue=[];
+  R.__gensTacticalV2Loader105=false;
   return true;
 }
 function loadFacade(){
@@ -93,6 +104,6 @@ function install(){
   return loadFacade();
 }
 function status(){return {installed,facadeReady:facadeReady||!!R.GensRpgTacticalCombatV2Bridge,activating,active,baseReady,compatibilityDone,bridgeInstalled}}
-R.GensTacticalV1=Object.freeze({VERSION,APP_VERSION,files:[...files],privateFiles:[...privateFiles],facadeFile,install,activate,compatibilityReady,finalize:finishIfReady,status});
+R.GensTacticalV1=Object.freeze({VERSION,APP_VERSION,files:[...files],privateFiles:[...privateFiles],facadeFile,install,activate,deactivate,dispose:deactivate,compatibilityReady,finalize:finishIfReady,status});
 install();
 })(typeof globalThis!=="undefined"?globalThis:this);

@@ -22,7 +22,8 @@
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let installed=false,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false,uiRenderHooked=false;
+  let installed=false,clickBound=false,adapterHooked=false,rulesHooked=false,detectionHooked=false,maintenanceQueued=false,uiRenderHooked=false,clickHandler=null,afterRenderOff=null;
+  const retryTimers=new Set();
   let lastDetectionStamp="",lastDetectionAt=0;
 
   function doc(rt=R){return rt?.document||null}
@@ -137,14 +138,21 @@
   function ensureDock(rt=R){const D=doc(rt),b=currentBattle(rt),E=engine(rt),cur=b&&E?.currentActor?.(b);if(!D||!b||!D.body){D?.querySelector?.("["+DOCK_ATTR+"]")?.remove?.();return false}let dock=D.querySelector?.("["+DOCK_ATTR+"]");if(!dock){dock=D.createElement("div");dock.className="gtv2111Dock";dock.setAttribute(DOCK_ATTR,"1");dock.innerHTML='<button type="button" class="attack" data-v111-attack>⚔️ Attaquer</button><button type="button" data-v111-end>⏭️ Fin du tour</button><button type="button" class="ability" data-v111-ability>✨ Capacité</button>';D.body.appendChild(dock)}
     const heroTurn=b.status==="active"&&cur?.side==="hero",atk=sourceButton(rt,"attack"),end=sourceButton(rt,"end"),ability=sourceButton(rt,"ability"),a=dock.querySelector?.("[data-v111-attack]"),e=dock.querySelector?.("[data-v111-end]"),ab=dock.querySelector?.("[data-v111-ability]");dock.style.display=heroTurn?"grid":"none";if(a)a.disabled=!heroTurn||!atk||!!atk.disabled;if(e)e.disabled=!heroTurn||!end||!!end.disabled;if(ab){ab.style.display=ability?"":"none";ab.disabled=!ability||!!ability.disabled}dock.classList?.toggle?.("hasAbility",!!ability);return true}
   function paintDiceOverlay(rt=R){return false}
-  function bindClicks(rt=R){if(clickBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.hasAttribute?.("data-v111-attack")){const s=sourceButton(rt,"attack");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-end")){const s=sourceButton(rt,"end");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-ability")){const s=sourceButton(rt,"ability");if(s&&!s.disabled)s.click?.()}},true);clickBound=true;return true}
+  function bindClicks(rt=R){if(clickBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;clickHandler=ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.hasAttribute?.("data-v111-attack")){const s=sourceButton(rt,"attack");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-end")){const s=sourceButton(rt,"end");if(s&&!s.disabled)s.click?.()}else if(b.hasAttribute?.("data-v111-ability")){const s=sourceButton(rt,"ability");if(s&&!s.disabled)s.click?.()}};D.addEventListener("click",clickHandler,true);clickBound=true;return true}
   function maintain(rt=R){maintenanceQueued=false;hideRuntimeTabs(rt);ensureDock(rt);paintDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintenanceQueued)return;maintenanceQueued=true;if(typeof requestAnimationFrame==="function")requestAnimationFrame(()=>maintain(rt));else setTimeout(()=>maintain(rt),0)}
-  function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}
+  function hookUiRender(rt=R){const U=ui(rt);if(uiRenderHooked)return true;if(typeof U?.onAfterRender!=="function")return false;afterRenderOff=U.onAfterRender(()=>maintain(rt));uiRenderHooked=true;return true}
 
   function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookMultiDice(rt);bindClicks(rt);hookUiRender(rt);const b=currentBattle(rt);if(b)refreshBattleAttacks(rt,b);maintain(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_FIXES_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WALL_SIZE,MAX_ATTACK_DICE,attackDice,preserveDiceTag,refreshBattleAttacks,hookAdapter,hookMultiDice,runtimeState,heroCells,enemyRange,detectionEnemyIds,scanDetection,hookDetection,paintWalls,hideRuntimeTabs,ensureDock,paintDiceOverlay,hookUiRender,install,installWithRetries,status:()=>({installed,adapterHooked,rulesHooked,detectionHooked,uiRenderHooked})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),A=adapter(rt),E=engine(rt);if(D&&clickHandler)D.removeEventListener?.("click",clickHandler,true);try{afterRenderOff?.()}catch(e){}
+    for(const name of ["createBattle","heroAttacks"]){const cur=A?.[name];if((cur?.__gensRpg111Refresh||cur?.__gensRpg111Dice)&&typeof cur.__original==="function")A[name]=cur.__original}
+    const resolve=E?.resolveAttack;if(resolve?.__gensRpg111MultiDice&&typeof resolve.__original==="function")E.resolveAttack=resolve.__original;
+    D?.querySelector?.("["+DOCK_ATTR+"]")?.remove?.();D?.getElementById?.(STYLE_ID)?.remove?.();clickHandler=null;afterRenderOff=null;installed=false;clickBound=false;adapterHooked=false;rulesHooked=false;detectionHooked=false;maintenanceQueued=false;uiRenderHooked=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,WALL_SIZE,MAX_ATTACK_DICE,attackDice,preserveDiceTag,refreshBattleAttacks,hookAdapter,hookMultiDice,runtimeState,heroCells,enemyRange,detectionEnemyIds,scanDetection,hookDetection,paintWalls,hideRuntimeTabs,ensureDock,paintDiceOverlay,hookUiRender,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,rulesHooked,detectionHooked,uiRenderHooked})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

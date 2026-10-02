@@ -39,8 +39,8 @@ assert.equal((serviceWorker.match(/\.\/assets\/gensrpg\/core\/dice-v1\.js/g)||[]
 
 assert.equal(gitBlobSha(coreSrc),'1813b6edb1ac69317d158e8cac6eb5c8ac353855',
   'pure Core Dice implementation must remain byte-for-byte unchanged in this raccord');
-assert.equal(gitBlobSha(tactical),'3e7e92eea89fd8e949361162636b4b524ff93eef',
-  'Tactical V114.11 dice authority must remain byte-for-byte unchanged');
+assert.equal(gitBlobSha(tactical),'4f05007de537793fed07739ca718f5131faef9eb',
+  'Tactical V114.11 dice/gameplay authority plus session-teardown lifecycle baseline must remain byte-for-byte unchanged');
 assert.equal(gitBlobSha(performance),'e8fd9f1049a6597118eb026976bca7548f11b284',
   'mobile dice animation/performance layer must remain byte-for-byte unchanged');
 

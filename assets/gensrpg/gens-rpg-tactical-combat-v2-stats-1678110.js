@@ -11,7 +11,8 @@
   const STYLE_ID="gensRpgTacticalStats1678110Style";
   const dirtyHeroes=new Set();
   const metrics={snapshotsBuilt:0,canonicalReads:0,derivedReads:0,previewSnapshotReads:0,renderSnapshotReads:0};
-  let installed=false,uiHooked=false,adapterHooked=false,rulesHooked=false,saveHooked=false,clickHooked=false,lastDetailActorId="";
+  let installed=false,uiHooked=false,adapterHooked=false,rulesHooked=false,saveHooked=false,clickHooked=false,lastDetailActorId="",clickHandler=null,rulesOriginals=null,rulesInstalled=null;
+  const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -158,6 +159,7 @@
       const cells=E.reachableCells(state,actor.id).filter(c=>c.cost>0);let best=null;for(const cell of cells){const d=target?E.distance(cell,target):999,cover=num(E.coverAt?.(state,cell),0),score=d*100-cover*2+cell.cost;if(!best||score<best.score)best={cell,score}}if(best)E.moveActor(state,actor.id,best.cell);
       target=nearestEnemy(state,actor);choice=target?bestAttack(state,actor,target):null;let attack=null;if(choice&&actor.actionsLeft>0)attack=resolve(state,actor.id,target.id,choice.a.id);if(state.status==="active")E.endTurn(state);return {ok:true,type:attack?"move-attack":"move",attack,position:{x:actor.x,y:actor.y}};
     };
+    rulesOriginals={attackPreview:E.attackPreview,resolveAttack:E.resolveAttack,aiStep:E.aiStep};rulesInstalled={attackPreview:preview,resolveAttack:resolve,aiStep};
     E.attackPreview=preview;E.resolveAttack=resolve;E.aiStep=aiStep;E.__gensRpg110StatsRules=true;rulesHooked=true;return true;
   }
   function hookAdapter(rt=R){
@@ -200,19 +202,28 @@
     if(uiHooked)return true;const U=ui(rt);if(!U?.render)return false;if(U.render.__gensRpg110Stats){uiHooked=true;return true}const old=U.render,wrapped=function(){try{const b=currentBattle(rt);if(b)decorateBattle(rt,b)}catch(e){}const out=old.apply(this,arguments);try{enhanceUi(rt)}catch(e){}return out};wrapped.__gensRpg110Stats=true;wrapped.__original=old;U.render=wrapped;uiHooked=true;return true;
   }
   function bindClicks(rt=R){
-    if(clickHooked)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{
+    if(clickHooked)return true;const D=doc(rt);if(!D?.addEventListener)return false;clickHandler=ev=>{
       const btn=ev.target?.closest?.("button");if(!btn)return;
       if(btn.dataset?.detail){lastDetailActorId=str(btn.dataset.detail);setTimeout(()=>decorateDetail(rt),0);return}
       if(btn.hasAttribute?.("data-detail-close")){lastDetailActorId="";return}
       if(btn.hasAttribute?.("data-v110-attack")){const src=sourceButton(rt,"attack");if(src&&!src.disabled)src.click?.();return}
       if(btn.hasAttribute?.("data-v110-end")){const src=sourceButton(rt,"end");if(src&&!src.disabled)src.click?.();return}
       if(btn.hasAttribute?.("data-v110-ability")){const src=sourceButton(rt,"ability");if(src&&!src.disabled)src.click?.();return}
-    });clickHooked=true;return true;
+    };D.addEventListener("click",clickHandler);clickHooked=true;return true;
   }
   function install(rt=R){ensureStyle(rt);hookSaveInvalidation(rt);hookAdapter(rt);hookRules(rt);hookUi(rt);bindClicks(rt);const b=currentBattle(rt);if(b)decorateBattle(rt,b);enhanceUi(rt);try{rt.GENS_RPG_TACTICAL_STATS_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&rulesHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms);return true}
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),A=adapter(rt),U=ui(rt),E=engine(rt);if(D&&clickHandler)D.removeEventListener?.("click",clickHandler);
+    const render=U?.render;if(render?.__gensRpg110Stats&&typeof render.__original==="function")U.render=render.__original;
+    const create=A?.createBattle;if(create?.__gensRpg110Stats&&typeof create.__original==="function")A.createBattle=create.__original;
+    const save=rt?.saveState;if(save?.__gensRpg110Dirty&&typeof save.__original==="function")rt.saveState=save.__original;
+    if(E&&rulesInstalled&&rulesOriginals){if(E.attackPreview===rulesInstalled.attackPreview)E.attackPreview=rulesOriginals.attackPreview;if(E.resolveAttack===rulesInstalled.resolveAttack)E.resolveAttack=rulesOriginals.resolveAttack;if(E.aiStep===rulesInstalled.aiStep)E.aiStep=rulesOriginals.aiStep;try{delete E.__gensRpg110StatsRules}catch(e){E.__gensRpg110StatsRules=false}}
+    D?.getElementById?.(STYLE_ID)?.remove?.();clickHandler=null;rulesOriginals=null;rulesInstalled=null;installed=false;uiHooked=false;adapterHooked=false;rulesHooked=false;saveHooked=false;clickHooked=false;lastDetailActorId="";return true;
+  }
   function resetMetrics(){for(const k of Object.keys(metrics))metrics[k]=0;return metrics}
-  const api={VERSION,APP_VERSION,SNAPSHOT_VERSION,metrics,resetMetrics,buildHeroSnapshot,applyHeroSnapshot,enemySnapshot,decorateBattle,refreshHeroSnapshot,markHeroDirty,normalizeDamageType,resistanceFor,adjustedDamage,statRows,detailRows,detailStatsHtml,ensureDock,decorateDetail,hookAdapter,hookRules,hookSaveInvalidation,install,installWithRetries,status:()=>({installed,adapterHooked,rulesHooked,uiHooked,snapshotsBuilt:metrics.snapshotsBuilt,dirty:[...dirtyHeroes]})};
+  const api={VERSION,APP_VERSION,SNAPSHOT_VERSION,metrics,resetMetrics,buildHeroSnapshot,applyHeroSnapshot,enemySnapshot,decorateBattle,refreshHeroSnapshot,markHeroDirty,normalizeDamageType,resistanceFor,adjustedDamage,statRows,detailRows,detailStatsHtml,ensureDock,decorateDetail,hookAdapter,hookRules,hookSaveInvalidation,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,rulesHooked,uiHooked,snapshotsBuilt:metrics.snapshotsBuilt,dirty:[...dirtyHeroes]})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

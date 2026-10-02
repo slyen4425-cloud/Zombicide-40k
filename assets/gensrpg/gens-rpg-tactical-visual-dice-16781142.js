@@ -20,7 +20,8 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const norm=v=>str(v).trim().toLowerCase().normalize?.("NFD").replace(/[\u0300-\u036f]/g,"")||str(v).trim().toLowerCase();
-  let installed=false,hitPatched=false,menuBound=false,uiOpenPatched=false,transitionCount=0;
+  let installed=false,hitPatched=false,menuBound=false,uiOpenPatched=false,transitionCount=0,menuHandler=null;
+  const retryTimers=new Set();
 
   function doc(rt=R){return rt?.document||null}
   function ui(rt=R){return rt?.GensRpgTacticalCombatV2Ui||null}
@@ -172,7 +173,7 @@
   function clickMenuCandidate(rt=R){const D=doc(rt);if(!D)return false;const exact=new Set(["accueil","menu","menu principal","retour menu","retour au menu","retour a l accueil","retour à l accueil"]);for(const el of D.querySelectorAll?.("button,a,[role=button]")||[]){if(el.closest?.(".gtv2Overlay")||!visible(el,rt))continue;if(exact.has(norm(el.textContent))){try{el.click?.();return true}catch(e){}}}return false}
   function invokeMenuFunction(rt=R){for(const name of ["showHome","showMainMenu","openMainMenu","goHome","returnToMenu","backToMenu"]){const fn=rt?.[name];if(typeof fn!=="function")continue;try{fn.call(rt);return true}catch(e){}}return false}
   function returnToMenu(rt=R){setEmergencyEscape(rt);try{ui(rt)?.close?.(false)}catch(e){}const go=()=>{if(clickMenuCandidate(rt)||invokeMenuFunction(rt))return true;try{rt?.location?.reload?.();return true}catch(e){return false}};if(typeof setTimeout==="function")setTimeout(go,30);else go();return true}
-  function bindMenu(rt=R){const D=doc(rt);if(!D?.addEventListener||menuBound)return !!D;D.addEventListener("click",ev=>{const b=ev?.target?.closest?.("[data-v1143-menu]");if(!b)return;try{ev.preventDefault?.();ev.stopPropagation?.();ev.stopImmediatePropagation?.()}catch(e){}returnToMenu(rt)},true);menuBound=true;return true}
+  function bindMenu(rt=R){const D=doc(rt);if(!D?.addEventListener||menuBound)return !!D;D.addEventListener("click",menuHandler=ev=>{const b=ev?.target?.closest?.("[data-v1143-menu]");if(!b)return;try{ev.preventDefault?.();ev.stopPropagation?.();ev.stopImmediatePropagation?.()}catch(e){}returnToMenu(rt)},true);menuBound=true;return true}
   function patchUiOpen(rt=R){
     const U=ui(rt);if(!U)return false;let patched=false;
     for(const name of ["openCurrentEncounter","open"]){const fn=U[name];if(typeof fn!=="function"||fn.__gensRpg1149Transition)continue;const old=fn;const wrapped=function(){const opts=name==="open"?(arguments[1]||arguments[0]||{}):(arguments[0]||{});showCombatTransition(rt,opts);const out=old.apply(this,arguments);decorateCombatUi(rt);return out};wrapped.__gensRpg1149Transition=true;wrapped.__gensRpg1148Transition=true;wrapped.__original=old;U[name]=wrapped;patched=true}
@@ -183,8 +184,16 @@
     ensureStyle(rt);preloadWallBitmap(rt);patchDungeonMapHtml(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);
     try{rt.GENS_RPG_TACTICAL_VISUAL_DICE_VERSION=APP_VERSION}catch(e){}installed=true;return true;
   }
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,armorRules,resolvePhysicalDamage,resolveDamagePerHit,damageCalculationFormula,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,status:()=>({installed,observer:false,uiRenderPatched:false,mapPatched:false,corePatched:false,hitPatched,menuBound,uiOpenPatched,transitionCount})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),E=engine(rt),U=ui(rt);if(D&&menuHandler)D.removeEventListener("click",menuHandler,true);
+    for(const name of ["open","openCurrentEncounter"]){const cur=U?.[name];if(cur?.__gensRpg1149Transition&&typeof cur.__original==="function")U[name]=cur.__original}
+    const start=rt?.dc200StartCombat;if(start?.__gensRpg1143MenuGuard&&typeof start.__original==="function")rt.dc200StartCombat=start.__original;
+    const resolve=E?.resolveAttack;if(resolve?.__gensRpg11411Damage&&typeof resolve.__original==="function")E.resolveAttack=resolve.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();menuHandler=null;installed=false;hitPatched=false;menuBound=false;uiOpenPatched=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,WRONG_WALL_ASSET,ESCAPE_MS,TRANSITION_MS,DICE_WATCHDOG_MS,runtimeState,preloadWallBitmap,wallTargets,styleWallTile,attachWallTile,stabilizeWalls,patchDungeonMapHtml,patchRenderHooks,observeWalls,thresholdForChance,displayHit,forcedToDisplay,attackDice,hitCalculation,physicalType,attackMode,canonicalDamageBonus,armorRules,resolvePhysicalDamage,resolveDamagePerHit,damageCalculationFormula,patchHitResolver,diceInfo,showCombatTransition,decorateCombatUi,emergencyActive,setEmergencyEscape,guardCombatStart,returnToMenu,patchUiOpen,install,installWithRetries,dispose,status:()=>({installed,observer:false,uiRenderPatched:false,mapPatched:false,corePatched:false,hitPatched,menuBound,uiOpenPatched,transitionCount})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

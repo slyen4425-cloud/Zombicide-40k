@@ -15,7 +15,8 @@
   const RUNTIME_KEY="gensrpg_dungeon_runtime_v2";
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
-  let installed=false,lastDetectionStamp="",lastDetectionAt=0;
+  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -226,22 +227,18 @@
   }
   function bindControls(rt=R){
     const D=doc(rt);if(!D||D.__gensRpg108Controls)return true;D.__gensRpg108Controls=true;
-    D.addEventListener?.("change",ev=>{const t=ev?.target;if(t?.matches?.("[data-v108-item]"))updateQtySelect(rt,t)});
-    D.addEventListener?.("click",async ev=>{
+    changeHandler=ev=>{const t=ev?.target;if(t?.matches?.("[data-v108-item]"))updateQtySelect(rt,t)};
+    clickHandler=async ev=>{
       const btn=ev?.target?.closest?.("button[data-v108-attack-go],button[data-v108-equip],button[data-v108-reload],button[data-v108-use]");if(!btn)return;
       const panel=btn.closest?.("[data-v108-panel]"),heroId=panel?.getAttribute?.("data-v108-panel")||"";if(!panel||!heroId)return;
       ev.preventDefault?.();ev.stopPropagation?.();
-      if(btn.hasAttribute("data-v108-attack-go")){
-        const id=panel.querySelector?.("[data-v108-attack]")?.value,legacy=[...(D.querySelectorAll?.(".gtv2Actions button[data-attack]")||[])].find(b=>str(b.dataset?.attack)===str(id));legacy?.click?.();return;
-      }
+      if(btn.hasAttribute("data-v108-attack-go")){const id=panel.querySelector?.("[data-v108-attack]")?.value,legacy=[...(D.querySelectorAll?.(".gtv2Actions button[data-attack]")||[])].find(b=>str(b.dataset?.attack)===str(id));legacy?.click?.();return}
       const weaponIndex=num(panel.querySelector?.("[data-v108-weapon]")?.value,-1);
       if(btn.hasAttribute("data-v108-equip")){equipWeapon(rt,heroId,weaponIndex);return}
       if(btn.hasAttribute("data-v108-reload")){reloadWeapon(rt,heroId,weaponIndex);return}
-      if(btn.hasAttribute("data-v108-use")){
-        const itemId=panel.querySelector?.("[data-v108-item]")?.value,qty=num(panel.querySelector?.("[data-v108-qty]")?.value,1);btn.disabled=true;
-        try{await useConsumable(rt,heroId,itemId,qty)}finally{btn.disabled=false;try{ui(rt)?.render?.()}catch(e){}}
-      }
-    },true);return true;
+      if(btn.hasAttribute("data-v108-use")){const itemId=panel.querySelector?.("[data-v108-item]")?.value,qty=num(panel.querySelector?.("[data-v108-qty]")?.value,1);btn.disabled=true;try{await useConsumable(rt,heroId,itemId,qty)}finally{btn.disabled=false;try{ui(rt)?.render?.()}catch(e){}}}
+    };
+    D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
     const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
@@ -252,8 +249,14 @@
     try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}
     installed=true;return true;
   }
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms)}return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,status:()=>({installed,wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
+    const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,dispose,status:()=>({installed,wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

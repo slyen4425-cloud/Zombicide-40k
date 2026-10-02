@@ -9,7 +9,8 @@
   "use strict";
   const VERSION="0.6.0",APP_VERSION="16.78.114.10";
   let opening=false,installed=false,repairLoading=false;
-  let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
+  const repairTimers=new Set();
+  let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null,legacyOpenTactical=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -206,7 +207,7 @@
       const s=D.createElement("script");
       s.src="assets/gensrpg/gens-rpg-runtime-repair-1678106.js?v=16.78.106";
       s.async=false;
-      s.onload=()=>{repairLoading=false;installRepair(rt);setTimeout(()=>installRepair(rt),250);setTimeout(()=>installRepair(rt),1200)};
+      s.onload=()=>{repairLoading=false;installRepair(rt);const t250=setTimeout(()=>{repairTimers.delete(t250);installRepair(rt)},250);repairTimers.add(t250);const t1200=setTimeout(()=>{repairTimers.delete(t1200);installRepair(rt)},1200);repairTimers.add(t1200)};
       s.onerror=()=>{repairLoading=false;try{rt.console?.error?.("GenSrpG V106 runtime repair load failed")}catch(e){}};
       (D.head||D.documentElement)?.appendChild?.(s);
       return true;
@@ -234,7 +235,9 @@
       direct.__gensTacticalV2Default=true;direct.__legacy=legacyStartCombatFn;rt.startCombat=direct;
     }
 
+    if(typeof rt.openTacticalCombatV2==="function"&&!rt.openTacticalCombatV2.__gensTacticalV2Default&&!legacyOpenTactical)legacyOpenTactical=rt.openTacticalCombatV2;
     rt.openTacticalCombatV2=(opts={})=>requestCombat(rt,{...opts,entry:opts.entry||"openTacticalCombatV2"});
+    rt.openTacticalCombatV2.__gensTacticalV2Default=true;rt.openTacticalCombatV2.__legacy=legacyOpenTactical;
     rt.GENS_TACTICAL_V2_DEFAULT=true;
     rt.GENS_TACTICAL_V2_ROUTER_VERSION=APP_VERSION;
     installed=true;
@@ -242,6 +245,23 @@
     try{rt.dispatchEvent?.(new CustomEvent("gensrpg:tactical-combat-ready",{detail:{version:APP_VERSION}}))}catch(e){}
     return true;
   }
+  function restoreOwned(rt,name,legacy){
+    const cur=rt?.[name];if(typeof cur!=="function"||!cur.__gensTacticalV2Default)return false;
+    if(typeof legacy==="function")rt[name]=legacy;else try{delete rt[name]}catch(e){rt[name]=undefined}
+    return true;
+  }
+  function dispose(rt=R){
+    for(const id of repairTimers)try{clearTimeout(id)}catch(e){}repairTimers.clear();
+    restoreOwned(rt,"startCombat",legacyStartCombatFn);
+    restoreOwned(rt,"launchCombat200",legacyLaunch);
+    restoreOwned(rt,"openDungeonCombatSetup",legacySetup);
+    restoreOwned(rt,"dc200StartCombat",legacyStart);
+    restoreOwned(rt,"openTacticalCombatV2",legacyOpenTactical);
+    try{delete rt.GENS_TACTICAL_V2_DEFAULT;delete rt.GENS_TACTICAL_V2_ROUTER_VERSION}catch(e){}
+    opening=false;installed=false;repairLoading=false;
+    legacyStart=null;legacySetup=null;legacyLaunch=null;legacyStartCombatFn=null;legacyOpenTactical=null;
+    return true;
+  }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,rewardSummaryHtml,showOutcomeModal,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,rewardSummaryHtml,showOutcomeModal,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,dispose,status};
 });

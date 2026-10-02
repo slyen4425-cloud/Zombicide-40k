@@ -20,7 +20,8 @@
   const QUICK_CLASS="gtv2109QuickAttack";
   const UNARMED_VALUE="-1";
   const BOW_RANGE=6,STAFF_RANGE=4;
-  let installed=false,bound=false;
+  let installed=false,bound=false,clickHandler=null;
+  const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -161,16 +162,23 @@
 
   function bind(rt=R){
     const D=doc(rt);if(!D||bound)return !!D;bound=true;
-    D.addEventListener?.("click",ev=>{
+    clickHandler=ev=>{
       const quick=ev?.target?.closest?.("[data-v109-quick-attack]");if(quick){ev.preventDefault?.();ev.stopPropagation?.();const st=quickAttackState(rt);if(!st.disabled)st.button?.click?.();return}
       const equip=ev?.target?.closest?.("button[data-v108-equip]");if(!equip)return;const panel=equip.closest?.("[data-v108-panel]"),sel=panel?.querySelector?.("[data-v108-weapon]");if(str(sel?.value)!==UNARMED_VALUE)return;ev.preventDefault?.();ev.stopPropagation?.();ev.stopImmediatePropagation?.();equipUnarmed(rt,panel?.getAttribute?.("data-v108-panel")||"");
-    },true);
-    return true;
+    };
+    D.addEventListener?.("click",clickHandler,true);return true;
   }
   function install(rt=R){ensureStyle(rt);hookAdapterRanges(rt);hookUi(rt);bind(rt);enhance(rt);try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}installed=true;return true}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms);return true}
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),A=adapter(rt),U=ui(rt);if(D&&clickHandler)D.removeEventListener?.("click",clickHandler,true);
+    for(const name of ["createBattle","heroAttacks"]){const cur=A?.[name];if(cur?.__gensRpg109Range&&typeof cur.__original==="function")A[name]=cur.__original}
+    const render=U?.render;if(render?.__gensRpg109Ui&&typeof render.__original==="function")U.render=render.__original;
+    D?.querySelector?.("."+QUICK_CLASS)?.remove?.();D?.getElementById?.(STYLE_ID)?.remove?.();clickHandler=null;bound=false;installed=false;return true;
+  }
 
-  const api={VERSION,APP_VERSION,WALL_ASSET,BOW_RANGE,STAFF_RANGE,UNARMED_VALUE,rangedKind,normalizeRangedAttack,normalizeActorRanges,normalizeBattleRanges,turnSequence,timelineHtml,paintBuilderWalls,isUnarmedState,equipUnarmed,quickAttackState,ensureUnarmedOption,ensureQuickAttack,enhance,install,installWithRetries,status:()=>({installed,wall:WALL_ASSET})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,BOW_RANGE,STAFF_RANGE,UNARMED_VALUE,rangedKind,normalizeRangedAttack,normalizeActorRanges,normalizeBattleRanges,turnSequence,timelineHtml,paintBuilderWalls,isUnarmedState,equipUnarmed,quickAttackState,ensureUnarmedOption,ensureQuickAttack,enhance,install,installWithRetries,dispose,status:()=>({installed,wall:WALL_ASSET})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

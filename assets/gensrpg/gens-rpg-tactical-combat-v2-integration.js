@@ -131,7 +131,21 @@
     compatibilityStarted=true;
     return loadPolish108();
   }
-  R.GensRpgTacticalCompatibilityChainPhase8=Object.freeze({activate:activateCompatibilityChain});
+  function deactivateCompatibilityChain(rt=R){
+    const layers=[
+      rt.GensRpgTacticalVisualDice16781142,
+      rt.GensRpgTacticalRuntimeAuthority1678113,
+      rt.GensRpgTacticalCombatCoherence1678112,
+      rt.GensRpgTacticalRuntimeFixes1678111,
+      rt.GensRpgTacticalStats1678110,
+      rt.GensRpgTacticalPolish1678109,
+      rt.GensRpgTacticalPolish1678108
+    ];
+    for(const api of layers)try{api?.dispose?.(rt)}catch(e){try{rt.console?.error?.("GenSrpG Tactical layer teardown",e)}catch(_){}}
+    compatibilityStarted=false;
+    return true;
+  }
+  R.GensRpgTacticalCompatibilityChainPhase8=Object.freeze({activate:activateCompatibilityChain,deactivate:deactivateCompatibilityChain});
   const lifecycle=R.GensTacticalV1?.status?.();
   if(!lifecycle?.activating)activateCompatibilityChain();
 })(typeof globalThis!=="undefined"?globalThis:this);

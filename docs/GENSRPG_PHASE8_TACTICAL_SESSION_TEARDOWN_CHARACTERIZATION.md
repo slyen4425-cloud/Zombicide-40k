@@ -48,3 +48,44 @@ Exiger :
 8. réactivation suivante fonctionnelle sans duplication.
 
 Après GREEN de ce lot, ré-audit immédiat du critère de sortie Phase 8.
+
+
+## RED confirmé et migration
+
+HEAD RED :
+`355065a3f958dda6b39905d46dd017576dcd2643`
+
+- Architecture `37032650051` — FAILURE attendue ;
+- étape #260 — échec attendu : `GensTacticalV1 must own session deactivate` ;
+- Firefox `37032649902` — SUCCESS ;
+- Tactical Dock `37032650125` — SUCCESS.
+
+Le micro-diff lifecycle a ensuite :
+- ajouté `GensTacticalV1.deactivate()/dispose()` ;
+- raccordé `UI.close()` à ce propriétaire ;
+- ajouté des `dispose()` ciblés au Bridge, à la base UI et aux sept couches privées ;
+- rendu les retries pendants annulables ;
+- retiré les listeners document V113/V114.11 au teardown ;
+- restauré uniquement les wrappers encore possédés par la couche ;
+- réinitialisé la chaîne de compatibilité pour une réactivation propre.
+
+Aucun changement gameplay, IA, hit, dégâts, armure, callsite Dungeon, Capture, PvP, Survival ou `index.html`.
+
+## Validation technique GREEN
+
+HEAD :
+`d82981bcd2fe1e08f4b041d81111b81dc29ac342`
+
+- Architecture + Browser `37039255432` — SUCCESS ;
+- Firefox `37039255361` — SUCCESS ;
+- Tactical Dock `37039255396` — SUCCESS ;
+- garde Phase 8 #260 — SUCCESS ;
+- scénarios Browser inter-modules — SUCCESS.
+
+Le dernier réalignement `docs/GENSRPG_PHASE2_NONPRODUCTION_FILES.json` est purement descriptif : le nouvel audit de sortie ne référence plus trois fichiers historiques non-production. Aucun runtime n'a été modifié par ce réalignement.
+
+## Décision
+
+**MICRO-LOT 6 TECHNIQUEMENT GREEN.**
+
+Le prochain travail autorisé est l'audit EXIT Phase 8. Aucun nettoyage legacy supplémentaire n'est justifié avant cet audit.

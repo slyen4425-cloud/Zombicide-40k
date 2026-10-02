@@ -67,16 +67,33 @@ La CI doit conserver au minimum :
 - Tactical Dock ;
 - non-interférence inter-modules déjà couverte par la suite globale.
 
-## Décision technique avant CI
+## Validation finale
 
-**PHASE 8 CANDIDATE EXIT GREEN**.
+HEAD audit :
+`c7aed1124dda138ebf9c8415c48e9516470ec64d`
 
-Aucun changement runtime n'est nécessaire dans cet audit.
+- sentinelle EXIT dédiée, étape Architecture #261 — SUCCESS ;
+- Architecture + Browser `37043579764` — SUCCESS ;
+- Firefox `37043579675` — SUCCESS ;
+- Tactical Dock `37043579704` — SUCCESS ;
+- aucun changement runtime dans l'audit.
 
-Validation requise :
-1. sentinelle EXIT dédiée GREEN ;
-2. Architecture + Browser GREEN ;
-3. Firefox GREEN ;
-4. Tactical Dock GREEN.
+## Décision GREEN
 
-Si ces preuves sont GREEN, la Phase 8 peut être fermée et la Phase 9 ouverte depuis le checkpoint final Phase 8.
+**PHASE 8 FERMÉE / EXIT GREEN**.
+
+Le critère officiel est satisfait :
+- Tactical privé reste froid hors combat ;
+- l'activation appartient à la requête de session ;
+- la fermeture déclenche le teardown au propriétaire unique ;
+- listeners, wrappers et retries privés sont démontables ;
+- l'état revient à froid ;
+- une deuxième session se réactive proprement ;
+- Dungeon reste propriétaire du déclenchement via la frontière Bridge.
+
+La dette historique non active reste backlog et ne justifie aucun lot Phase 8 supplémentaire.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase8-exit-green-2026-10-02`.
+
+La Phase 9 ne doit pas modifier Capture avant un audit de reprise des travaux récents réalisés hors de ce chantier principal, notamment la refonte et le laboratoire combat dynamique.

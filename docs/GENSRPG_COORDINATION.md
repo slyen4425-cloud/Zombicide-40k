@@ -8,9 +8,36 @@ Un seul fil est coordinateur. Règle : **1 lot = 1 branche = 1 périmètre homog
 
 Aucun lot de restructuration ne fusionne directement dans `main`.
 
-## État actif — 2026-09-20
+## État actif — 2026-10-02
 
 Ce bloc prime sur les jalons historiques ci-dessous.
+
+- Coordinateur : audit EXIT Phase 8, branche `work/gensrpg-phase8-exit-audit-2026-10-02`.
+- Base : `checkpoint/gensrpg-phase8-tactical-session-teardown-ownership-green-2026-10-02`, SHA `9a2035be05a68877d73b08bf947abba53d8d5659`.
+- HEAD audit validé : `c7aed1124dda138ebf9c8415c48e9516470ec64d`.
+- Architecture + Browser `37043579764` — SUCCESS.
+- Firefox `37043579675` — SUCCESS.
+- Tactical Dock `37043579704` — SUCCESS.
+- Étape Architecture #261 audit EXIT Phase 8 — SUCCESS.
+- Décision : **PHASE 8 FERMÉE / EXIT GREEN**.
+- Prochain checkpoint : `checkpoint/gensrpg-phase8-exit-green-2026-10-02` après CI documentaire de fermeture.
+- Production `main` reste gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Aucun nettoyage Tactical supplémentaire n'est autorisé avant Phase 9.
+
+### Garde-fou de transition Phase 9 — Monster Capture
+
+La Phase 9 ne démarre pas par une modification runtime.
+
+Avant le premier micro-lot :
+- récupérer les travaux Monster Capture récents réalisés sur les autres fils ;
+- auditer le dépôt `slyen4425-cloud/GenSrpg_labo_combat_dynamique` et les éléments de refonte Capture ;
+- comparer ces travaux avec le runtime Capture du dépôt principal ;
+- identifier les autorités déjà validées et éviter toute duplication ou régression ;
+- établir un pré-audit Phase 9 et seulement ensuite sélectionner le premier seam.
+
+Cette reprise est obligatoire car une refonte importante de Monster Capture a été développée hors du fil de restructuration principal.
+
+## Historique — État du 2026-09-20
 
 - Coordinateur : Audit Storage 11, branche `work/gensrpg-phase4-storage-next-audit-11-2026-09-20`.
 - Base : Dungeon Scene GREEN, `c7e4dea6d9a9e51ddf381b2ab3c4e3d7145137a5`.
@@ -30,6 +57,7 @@ Ce bloc prime sur les jalons historiques ci-dessous.
 - Phase 4 Storage en cours ; estimation globale fournie par Sylvain : environ 35 %,
   sans métrique de complétude automatique.
 - Point de reprise détaillé : premier bloc de `GENSRPG_CURRENT_WORK.md`.
+
 
 ## Historique — État du 2026-09-18
 

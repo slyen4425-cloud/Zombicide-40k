@@ -67,16 +67,36 @@ Une sentinelle dédiée `tests/gens_phase8_exit_audit_v1.test.cjs` verrouille :
 6. frontière Dungeon/Bridge ;
 7. présence des gardes Phase 8 existantes dans la CI.
 
-## Décision avant CI
+## Validation EXIT GREEN
 
-**CANDIDAT EXIT GREEN**.
+HEAD audit :
+`c7aed1124dda138ebf9c8415c48e9516470ec64d`
 
-Aucun nouveau micro-lot runtime n'est justifié par cet audit. Si la triple CI de ce SHA est GREEN :
-1. documenter les runs ;
-2. checkpoint final Phase 8 ;
-3. ouvrir Phase 9 — Monster Capture depuis ce checkpoint.
+Triple validation :
+- Architecture + Browser `37043579764` — SUCCESS ;
+- Firefox `37043579675` — SUCCESS ;
+- Tactical Dock `37043579704` — SUCCESS ;
+- étape Architecture #261 `Auditer la sortie officielle Phase 8` — SUCCESS.
 
-Aucun nettoyage legacy supplémentaire n'est autorisé avant cette décision.
+Décision :
+**PHASE 8 FERMÉE / EXIT GREEN**.
+
+Aucun nouveau micro-lot Tactical n'est autorisé dans cette phase.
+
+Checkpoint final prévu après la CI documentaire de fermeture :
+`checkpoint/gensrpg-phase8-exit-green-2026-10-02`.
+
+## Porte d'entrée Phase 9 — Monster Capture
+
+Avant toute modification runtime Phase 9 :
+1. repartir du checkpoint final Phase 8 ;
+2. récupérer et relire les travaux Monster Capture récents réalisés sur les autres fils ;
+3. auditer le dépôt laboratoire `slyen4425-cloud/GenSrpg_labo_combat_dynamique` et les éléments Capture déjà préparés ;
+4. comparer ces travaux avec le runtime Capture actuellement présent dans GenSrpG ;
+5. identifier ce qui est déjà validé, ce qui doit être intégré, et l'autorité cible ;
+6. seulement ensuite ouvrir le premier micro-lot Phase 9.
+
+Interdiction : restructurer l'ancienne version Capture sans cette reprise préalable, ou recréer dans GenSrpG un système déjà développé/validé dans la refonte Capture.
 
 ---
 

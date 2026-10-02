@@ -70,8 +70,18 @@ Caractérisation :
 - V113/V114.11 gardent des listeners document après close ;
 - retries bornés mais non possédés/cancelables.
 
+Caractérisation ciblée GREEN :
+- HEAD initial : `cbfa42d8afa4967c423c6d000b525ee0c7d486ce` ;
+- Architecture étape #259 `Caractériser l'ownership du teardown Tactical Phase 8` — SUCCESS ;
+- Firefox `37026987910` — SUCCESS ;
+- Tactical Dock `37026988363` — SUCCESS ;
+- le premier run Architecture `37026988592` s'est figé après #259 sur l'ancien test Phase 4 `World Builder`, sans échec Phase 8 et sans modification runtime.
+
+Relance CI :
+un commit documentaire de traçabilité déclenche un nouveau cycle complet sur le même runtime. Aucun RED n'est posé tant que cette triple CI n'est pas complète.
+
 Prochaine étape :
-valider cette caractérisation par triple CI avant de poser le RED teardown.
+obtenir la triple CI de caractérisation complète GREEN, puis poser le RED teardown isolé.
 
 ---
 

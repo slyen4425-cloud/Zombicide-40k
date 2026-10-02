@@ -70,8 +70,24 @@ Risques :
 - transformer l'audit de sortie en nouvelle descente V108 -> V114 ;
 - corriger pendant l'audit au lieu de caractériser.
 
+Pré-audit :
+- test : `tests/gens_phase8_exit_preaudit_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_EXIT_PREAUDIT.md` ;
+- backlog B : `docs/GENSRPG_PHASE8_BACKLOG.md`.
+
+Classification factuelle actuelle :
+- A1 : pile Tactical activée eager depuis le bootstrap application ;
+- A2 : V108/V109/V110/V111/V112/V113/V114.11 auto-installent encore avec retries et sans `dispose()` ;
+- A3 : `UI.close()` ferme l'overlay/battle local mais ne démonte pas listeners/hooks/timers globaux ;
+- A4 : V113 garde une autorité de détection Dungeon hors combat alors que le contrat Dungeon possède `combat trigger` ;
+- A5 : base UI / V114.11 conservent des side effects globaux hors session ;
+- B : fichiers non atteignables, code historique inactif, nettoyage cosmétique/documentaire -> backlog seulement.
+
+Décision préliminaire :
+**Phase 8 n'est pas encore EXIT-ready**, mais aucun nettoyage legacy supplémentaire n'est autorisé hors blocage A.
+
 Prochaine étape :
-pré-audit statique/runtime des seules frontières lifecycle, puis décision factuelle : EXIT AUDIT directement ou micro-lot A strictement nécessaire.
+valider ce pré-audit par triple CI. Ensuite sélectionner uniquement le plus petit raccord de propriété de session nécessaire ; ne pas descendre V108 -> V114 fichier par fichier.
 
 ---
 

@@ -52,8 +52,10 @@ assert.equal(Bridge.isV113DetectionReason('manual'),false,
   'manual must not enter the V113 detection-only branch');
 assert.equal(Bridge.isV113DetectionReason('ambush'),true,
   'ambush remains behaviorally distinct from manual even after its lot 4L migration');
-assert.match(bridgeSource,/function requestCombat\(rt=R,options=\{\}\)[\s\S]*?scopedRequest\(rt,\{\.\.\.options,enemyIds,entry\}\)[\s\S]*?openCurrent\(rt,\{\.\.\.scoped\.options,entry\}\)/,
-  'canonical requestCombat must preserve options while applying V113 scope before opening Tactical');
+assert.match(bridgeSource,/function requestCombat\(rt=R,options=\{\}\)[\s\S]*?const cleanOptions=\{\.\.\.options\};delete cleanOptions\.__gensActivationReplay;[\s\S]*?scopedRequest\(rt,\{\.\.\.cleanOptions,enemyIds,entry\}\)[\s\S]*?openCurrent\(rt,\{\.\.\.scoped\.options,entry\}\)/,
+  'canonical requestCombat must preserve caller options except its internal replay marker while applying V113 scope before opening Tactical');
+assert.match(bridgeSource,/delete cleanOptions\.__gensActivationReplay;/,
+  'Bridge must remove only its private lifecycle replay marker before V113 scoping');
 assert.match(bridgeSource,/function startDefault\(rt=R,enemyIds=\[\],reason="manual"\)[\s\S]*?requestCombat\(rt,\{enemyIds:arr\(enemyIds\)\.map\(str\),reason,entry:"dc200StartCombat"\}\)/,
   'Bridge must retain the characterized compatibility entry contract');
 

@@ -1,3 +1,80 @@
+# PHASE 8 — PRÉ-AUDIT DE SORTIE — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-legacy-observer-seam-retirement-green-2026-10-02`
+
+SHA de base :
+`87ceb515a90c5dbf093c3d9bd78a28cf52ecb75d`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-exit-preaudit-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-exit-preaudit-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-legacy-observer-seam-retirement-green-2026-10-02`
+
+## Pourquoi ce lot est-il nécessaire au critère de sortie Phase 8 ?
+
+Parce que le prochain choix doit être factuel : soit le lifecycle Tactical satisfait déjà le critère de sortie, soit il existe encore une autorité active hors session qui empêche réellement `start -> session -> close -> teardown`.
+
+Ce lot est un **pré-audit de sortie uniquement**. Il interdit d'ouvrir un nouveau nettoyage legacy sur la seule base qu'un fichier est ancien, dupliqué, imparfait ou encore améliorable.
+
+Question de sortie officielle :
+`Tactical n'existe que pendant une session de combat et se démonte proprement à la fin de cette session.`
+
+Périmètre :
+- propriété du démarrage d'une session Tactical ;
+- activation réelle de la pile Tactical avant / pendant combat ;
+- listeners, hooks, wrappers, timers et retries actifs hors session ;
+- comportement réel de `UI.close()` ;
+- existence d'un teardown/dispose ;
+- frontière Dungeon -> Bridge -> Tactical ;
+- classification stricte A/B de chaque dette observée.
+
+Catégories obligatoires :
+- **A — bloque le critère Phase 8** : seul type autorisé à justifier un futur micro-lot Phase 8 ;
+- **B — ne bloque pas le critère Phase 8** : backlog obligatoire, aucune correction opportuniste.
+
+Hors périmètre :
+- équilibrage/gameplay ;
+- nouvelles capacités ;
+- refonte IA ;
+- amélioration graphique ;
+- suppression de fichiers simplement anciens ;
+- Capture / PvP / Survival ;
+- gameplay Dungeon déjà validé Phase 7 ;
+- `index.html` ;
+- toute migration runtime pendant ce pré-audit.
+
+État GREEN du lot précédent :
+- checkpoint final : `checkpoint/gensrpg-phase8-tactical-legacy-observer-seam-retirement-green-2026-10-02` ;
+- SHA : `87ceb515a90c5dbf093c3d9bd78a28cf52ecb75d` ;
+- Architecture + Browser `36947818009` — SUCCESS ;
+- Firefox `36947818008` — SUCCESS ;
+- Tactical Dock `36947818105` — SUCCESS.
+
+Tests prévus :
+1. caractériser l'activation eager réelle de Tactical ;
+2. inventorier uniquement les side effects actifs hors session ;
+3. caractériser `close()` et l'absence/presence de `dispose` ;
+4. vérifier le contrat Dungeon propriétaire du combat trigger et le Bridge explicite ;
+5. classer les éléments A/B ;
+6. ajouter le backlog Phase 8 pour les éléments B ;
+7. triple CI sans changement runtime.
+
+Risques :
+- confondre fichier chargé et autorité active ;
+- classer comme bloquant un code non atteignable ;
+- transformer l'audit de sortie en nouvelle descente V108 -> V114 ;
+- corriger pendant l'audit au lieu de caractériser.
+
+Prochaine étape :
+pré-audit statique/runtime des seules frontières lifecycle, puis décision factuelle : EXIT AUDIT directement ou micro-lot A strictement nécessaire.
+
+---
+
 # PHASE 8 — MICRO-LOT 4 — RETRAIT SEAMS OBSERVERS LEGACY TACTICAL — 2026-10-01
 
 Base GREEN :

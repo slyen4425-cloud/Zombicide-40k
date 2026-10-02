@@ -14,6 +14,10 @@ Aucun élément de cette liste ne justifie à lui seul un nouveau micro-lot Phas
 | documentation Phase 2 historique | certains paragraphes décrivent la composition avant le handoff Phase 8 | document de cartographie historique ; CURRENT_WORK + docs Phase 8 portent l'état actuel | mise à jour documentaire future si nécessaire |
 | constantes/styles/version labels historiques Tactical | noms V108-V114 et styles hérités encore présents | cosmétique/maintenabilité, pas lifecycle | phase de dette/maintenance |
 
+| scripts/API Tactical déjà chargés après une session | les balises script et objets API restent en mémoire | leur présence seule n'est pas une autorité active si tous listeners/wrappers/timers sont démontés ; le navigateur ne décharge pas du JS exécuté | accepté après Phase 8 si runtime inerte |
+| listener `click` du root overlay | listener attaché au conteneur `.gtv2Overlay` | le propriétaire DOM est retiré par `UI.close()`, donc le listener disparaît avec lui | aucun travail |
+| timers visuels auto-nettoyants V114.11 | transitions UI avec suppression bornée de leur propre élément | ils ne réinstallent aucune autorité globale et se terminent seuls | dette nulle / surveillance sentinelle |
+
 ## Exclusions de ce backlog
 
 Les éléments suivants sont **A — bloquants** et ne doivent pas être rangés ici :

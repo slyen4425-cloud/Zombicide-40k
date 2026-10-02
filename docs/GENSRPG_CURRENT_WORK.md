@@ -1,3 +1,71 @@
+# PHASE 8 — PRÉ-AUDIT TEARDOWN DE SESSION TACTICAL — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-activation-green-2026-10-02`
+
+SHA de base :
+`6fd4b1e601db48b93c9f6a6f1466b487e7ab1f64`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-session-teardown-preaudit-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-tactical-session-teardown-preaudit-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-activation-green-2026-10-02`
+
+## Pourquoi ce lot est-il nécessaire au critère de sortie Phase 8 ?
+
+Parce que le micro-lot 5 a retiré le blocage A1 : la pile privée Tactical ne s'active plus au bootstrap mais seulement à la première requête de combat.
+
+Le blocage lifecycle restant est désormais explicite : après activation et fermeture d'un combat, `UI.close()` ferme l'état local mais il faut prouver quelles autorités globales restent actives et quel plus petit ownership de teardown est nécessaire pour satisfaire :
+
+`Tactical n'existe que pendant une session de combat et se démonte proprement.`
+
+Ce lot est **audit + caractérisation uniquement**. Aucun runtime ne doit être modifié avant sélection d'un seam unique.
+
+Périmètre :
+- entrée publique Tactical et état d'activation de session ;
+- Bridge `requestCombat` / frontière de fin de combat ;
+- UI Tactical `open/close` ;
+- intégration V108-V114.11 uniquement sous l'angle ressources installées ;
+- listeners, wrappers, timers/retries et styles réellement actifs après `close()` ;
+- identification d'un propriétaire unique de `dispose()`.
+
+Catégories obligatoires :
+- **A — bloque la sortie Phase 8** : ressource active après session qui doit réellement être démontée ;
+- **B — non bloquant** : code historique, dette cosmétique ou ressource sans autorité active -> backlog.
+
+Hors périmètre :
+- refonte gameplay ;
+- hit/dégâts/armure ;
+- IA ;
+- suppression de fichiers legacy pour le principe ;
+- Dungeon gameplay ;
+- Capture/PvP/Survival ;
+- `index.html` ;
+- toute modification runtime pendant ce pré-audit.
+
+Tests prévus :
+1. caractériser une session froide `requestCombat -> activation -> open -> close` ;
+2. inventorier les side effects réellement installés et survivants après `close` ;
+3. distinguer ressources session-scoped et dettes B ;
+4. identifier le plus petit propriétaire de teardown sans second système ;
+5. vérifier que Dungeon conserve uniquement le Bridge comme contrat de combat ;
+6. triple CI sans changement runtime.
+
+Risques :
+- transformer le teardown en suppression V108-V114 fichier par fichier ;
+- restaurer des wrappers de façon dangereuse sans ownership clair ;
+- confondre retries déjà terminés avec timers persistants ;
+- casser les combats suivants en démontant une ressource qui doit être réinstallable.
+
+Prochaine étape :
+caractériser le runtime exact post-activation et post-`UI.close()`, puis sélectionner un seul seam A. Aucun RED ni changement runtime avant cette décision.
+
+---
+
 # PHASE 8 — MICRO-LOT 5 — ACTIVATION TACTICAL À LA PREMIÈRE REQUÊTE BRIDGE — 2026-10-02
 
 Base GREEN :

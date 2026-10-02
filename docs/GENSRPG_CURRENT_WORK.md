@@ -80,8 +80,20 @@ Caractérisation ciblée GREEN :
 Relance CI :
 un commit documentaire de traçabilité déclenche un nouveau cycle complet sur le même runtime. Aucun RED n'est posé tant que cette triple CI n'est pas complète.
 
+Caractérisation complète GREEN :
+- HEAD caractérisation : `d25f66d152c8df4f86811c550b769f1f4a834e5b` ;
+- Architecture + Browser `37027556626` — SUCCESS ;
+- Firefox `37027556413` — SUCCESS ;
+- Tactical Dock `37027556347` — SUCCESS ;
+- aucun changement runtime depuis la caractérisation initiale.
+
+RED isolé posé :
+- test : `tests/gens_phase8_tactical_session_teardown_ownership_v1.test.cjs` ;
+- exige `GensTacticalV1.deactivate()/dispose()`, signal depuis `UI.close()`, dispose Bridge + couches privées, annulation retries, retrait listeners document et reset permettant une réactivation propre ;
+- aucun runtime modifié dans le commit RED.
+
 Prochaine étape :
-obtenir la triple CI de caractérisation complète GREEN, puis poser le RED teardown isolé.
+valider l'échec isolé de la garde teardown, puis appliquer uniquement le micro-diff lifecycle nécessaire.
 
 ---
 

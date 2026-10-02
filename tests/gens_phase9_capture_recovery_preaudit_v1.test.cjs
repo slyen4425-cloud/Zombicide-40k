@@ -80,8 +80,10 @@ assert.match(recovery,/Ancien checkpoint 1v1 \/ 2v2[\s\S]*divergente/i,
   'old diverged 2v2 prevalidation must not become an integration base');
 assert.match(recovery,/laboratoire_dynamique_exploration-/,
   'Phase 9 recovery must include the Exploration laboratory');
+assert.ok(recovery.includes('f9209d4b55506b1fc3cab438ed8b7429551f8cad'),
+  'recovery audit must preserve the reviewed Exploration work cutoff');
 assert.ok(recovery.includes('3f6cc88b39d99e62589182cdee28f89538e7f3e8'),
-  'recovery audit must preserve the reviewed Exploration Map Actor head');
+  'recovery audit must preserve the reviewed Exploration technical runtime head');
 assert.ok(recovery.includes('80e6468eda0261e0f7db12c81f98beb13df339ab'),
   'recovery audit must preserve the Exploration GREEN base');
 assert.match(recovery,/Map Actor reste \*\*non GREEN utilisateur\*\*/i,

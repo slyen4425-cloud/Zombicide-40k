@@ -100,8 +100,13 @@ Il ne doit donc jamais devenir un runtime Dungeon ni une seconde autorité Comba
 Branche :
 `work/exploration-map-actor-editor-v1-2026-10-02`
 
-HEAD observé :
-`3f6cc88b39d99e62589182cdee28f89538e7f3e8`
+Cutoff de reprise relu :
+- HEAD documentaire de la branche : `f9209d4b55506b1fc3cab438ed8b7429551f8cad` ;
+- HEAD runtime technique correspondant : `3f6cc88b39d99e62589182cdee28f89538e7f3e8` ;
+- CI runtime `37059461116` — SUCCESS ;
+- Pages `37059948321` — SUCCESS.
+
+Tout commit Exploration postérieur à `f9209d4...` devra être traité comme un delta à ré-auditer avant intégration.
 
 Base GREEN du chantier :
 `checkpoint/exploration-world-builder-dynamique-ui-v1-green-2026-10-02`
@@ -139,7 +144,9 @@ sans transporter de position Builder, collision, stat ou IA.
 
 Le correctif de source `data:` / cache revision est techniquement GREEN :
 - correction : `a5a2a05bac42267c365ebf16696dce5e8a390d7d`;
-- CI `37059209076` — SUCCESS.
+- CI `37059209076` — SUCCESS ;
+- cache-bust runtime final : `3f6cc88b39d99e62589182cdee28f89538e7f3e8`;
+- CI finale `37059461116` — SUCCESS.
 
 Mais le chantier Map Actor reste **non GREEN utilisateur** tant que le test smartphone complet Builder -> Tester en jeu -> retour Builder n'est pas validé.
 

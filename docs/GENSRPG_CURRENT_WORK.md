@@ -70,7 +70,8 @@ Pré-audit **lecture/comparaison uniquement** :
 - collision/contact possédés par le Combat Runtime, sans moteur secondaire ;
 - correctifs projectile/contact du 2 octobre et généralisation aux capacités de contact ;
 - moteur Exploration libre, WorldDocument/World Builder et chaîne Map Actor du laboratoire Exploration ;
-- état exact du handoff Builder -> runtime -> Builder pour les réglages acteur, sans le considérer GREEN utilisateur tant que la gate smartphone n'est pas validée.
+- état exact du handoff Builder -> runtime -> Builder pour les réglages acteur, sans le considérer GREEN utilisateur tant que la gate smartphone n'est pas validée ;
+- cutoff Exploration relu : work HEAD `f9209d4b55506b1fc3cab438ed8b7429551f8cad`, runtime technique `3f6cc88b39d99e62589182cdee28f89538e7f3e8`; tout delta postérieur devra être ré-audité avant intégration.
 
 ## Critère de sortie du pré-audit
 

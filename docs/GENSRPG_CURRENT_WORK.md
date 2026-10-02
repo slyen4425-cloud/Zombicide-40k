@@ -85,19 +85,27 @@ Micro-diff appliqué :
 - manifeste timers réaligné : `externalSetTimeoutSyntax` 142 -> 141 ;
 - guards historiques observers/murs/autorité visuelle réalignés uniquement sur la nouvelle frontière physique.
 
-Validation technique partielle :
+Validation technique GREEN :
 - HEAD runtime+guards : `f357b3f09ea5651e842377cd1a08cdf4126a0f82` ;
-- Architecture + Browser `36923077568` — SUCCESS ;
-- Tactical Dock `36923077393` — SUCCESS ;
-- Firefox Wall `36923077369` bloqué côté runner sur l'étape `Installer Firefox Playwright`, avant le test projet ;
-- les cinq étapes précédentes du job Firefox sont SUCCESS ;
-- ce blocage n'est pas une régression GenSrpG.
+- premier cycle : Architecture + Browser `36923077568` — SUCCESS ; Tactical Dock `36923077393` — SUCCESS ;
+- Firefox Wall `36923077369` a été bloqué côté runner sur `Installer Firefox Playwright` avant le test projet ;
+- commit documentaire de relance : `5436f3c9588eff07e8c140cee6be948734a97c95`, runtime inchangé ;
+- Architecture + Browser `36946775572` — SUCCESS ;
+- Firefox Wall `36946775568` — SUCCESS ;
+- Tactical Dock `36946775576` — SUCCESS ;
+- diff `f357b3f0...` -> `5436f3c9...` : `docs/GENSRPG_CURRENT_WORK.md` uniquement.
 
-Relance CI :
-un commit documentaire de traçabilité est utilisé pour déclencher un nouveau cycle complet sans modifier le runtime.
+Décision :
+**MICRO-LOT 4 TECHNIQUEMENT GREEN**.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-legacy-observer-seam-retirement-green-2026-10-02`.
 
 Prochaine étape :
-obtenir une triple CI complète GREEN sur le runtime inchangé, puis fermer documentairement le micro-lot et créer le checkpoint GREEN final.
+1. fermer documentairement le lot ;
+2. triple CI documentaire sur le SHA exact ;
+3. créer le checkpoint GREEN final ;
+4. repartir de ce checkpoint pour auditer le prochain plus petit seam lifecycle, sans présélectionner de couche.
 
 ---
 

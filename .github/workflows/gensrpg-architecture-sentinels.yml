@@ -797,6 +797,9 @@ jobs:
       - name: Exiger l'ownership du teardown Tactical Phase 8
         run: node tests/gens_phase8_tactical_session_teardown_ownership_v1.test.cjs
 
+      - name: Auditer la sortie officielle Phase 8
+        run: node tests/gens_phase8_exit_audit_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

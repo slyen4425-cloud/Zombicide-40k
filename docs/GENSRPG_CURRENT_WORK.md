@@ -1,3 +1,85 @@
+# PHASE 8 — AUDIT EXIT OFFICIEL — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-ownership-green-2026-10-02`
+
+SHA de base :
+`9a2035be05a68877d73b08bf947abba53d8d5659`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-exit-audit-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-exit-audit-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-ownership-green-2026-10-02`
+
+## Critère officiel
+
+Roadmap Phase 8 :
+
+> Tactical n'existe que pendant une session de combat et se démonte proprement.
+
+Interprétation architecturale retenue :
+- la façade publique `GensTacticalV1` / Bridge peut rester chargée et inerte ;
+- la pile privée Tactical et ses autorités globales ne doivent s'activer qu'à la demande d'un combat ;
+- la fermeture doit rendre listeners, wrappers, retries et état d'activation privés inertes/démontés ;
+- une nouvelle demande doit pouvoir réactiver exactement une pile propre.
+
+## Périmètre de l'audit
+
+- bootstrap Core -> entrée publique Tactical ;
+- façade Bridge et requête froide ;
+- activation privée ;
+- UI.close() -> propriétaire lifecycle ;
+- démontage Bridge/UI/compatibilité V108-V114.11 ;
+- annulation des retries pendants ;
+- retrait des listeners document Tactical ;
+- restauration conditionnelle des wrappers possédés ;
+- retour à l'état froid ;
+- réactivation propre ;
+- frontière Dungeon -> Bridge ;
+- non-régression des sentinelles existantes.
+
+Hors périmètre :
+- nettoyage de code legacy inactif ;
+- renommage V108-V114 ;
+- gameplay, IA, hit, dégâts, armure ou rendu ;
+- Capture/PvP/Survival ;
+- `index.html`.
+
+## Preuves déjà présentes
+
+- activation à la première requête : `gens_phase8_tactical_first_request_activation_v1.test.cjs` ;
+- ownership du teardown : `gens_phase8_tactical_session_teardown_ownership_v1.test.cjs` ;
+- pré-audit de sortie réaligné : `gens_phase8_exit_preaudit_v1.test.cjs` ;
+- triple CI documentaire du micro-lot 6 sur `9a2035be...` : Architecture `37040461088`, Firefox `37040461058`, Tactical Dock `37040460924` — SUCCESS.
+
+## Nouvelle preuve de sortie
+
+Une sentinelle dédiée `tests/gens_phase8_exit_audit_v1.test.cjs` verrouille :
+1. runtime exact ;
+2. bootstrap façade-only ;
+3. cycle actif -> teardown -> état froid ;
+4. deuxième activation propre sans rechargement de scripts privés ;
+5. dispose des couches et retrait listeners ;
+6. frontière Dungeon/Bridge ;
+7. présence des gardes Phase 8 existantes dans la CI.
+
+## Décision avant CI
+
+**CANDIDAT EXIT GREEN**.
+
+Aucun nouveau micro-lot runtime n'est justifié par cet audit. Si la triple CI de ce SHA est GREEN :
+1. documenter les runs ;
+2. checkpoint final Phase 8 ;
+3. ouvrir Phase 9 — Monster Capture depuis ce checkpoint.
+
+Aucun nettoyage legacy supplémentaire n'est autorisé avant cette décision.
+
+---
+
 # PHASE 8 — MICRO-LOT 6 — OWNERSHIP DU TEARDOWN DE SESSION TACTICAL — 2026-10-02
 
 Base GREEN :

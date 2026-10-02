@@ -35,7 +35,7 @@ async function waitPreview(page){
     typeof window.gensProfileContentFamily155==='function' &&
     typeof window.DungeonCore01?.render==='function' &&
     typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat==='function' &&
-    typeof window.GensRpgTacticalCombatV2Ui?.getBattle==='function'
+    typeof window.GensTacticalV1?.activate==='function'
   ,null,{timeout:60000});
 }
 

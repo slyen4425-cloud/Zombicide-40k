@@ -1,3 +1,64 @@
+# PHASE 8 — PRÉ-AUDIT PROPRIÉTÉ DE SESSION TACTICAL — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-exit-preaudit-green-2026-10-02`
+
+SHA de base :
+`4f57f22d4ada1ee1eb6dba3c88b1739cd1e7a931`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-session-ownership-preaudit-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-tactical-session-ownership-preaudit-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-exit-preaudit-green-2026-10-02`
+
+## Pourquoi ce lot est-il nécessaire au critère de sortie Phase 8 ?
+
+Parce que le pré-audit de sortie a prouvé que Tactical existe encore avant toute session de combat, que ses autorités globales ne sont pas possédées par une session, et que `UI.close()` ne démonte pas ces autorités.
+
+Ce pré-audit doit sélectionner le **plus petit raccord architectural** permettant de faire posséder l'activation et le teardown Tactical par une session explicite, sans descendre la chaîne V108 -> V114 fichier par fichier.
+
+Questions obligatoires :
+1. quel est le point d'entrée minimal pouvant rester chargé sans activer Tactical ?
+2. quel appel réel démarre aujourd'hui le combat depuis Dungeon ?
+3. où peut vivre l'ownership de session sans créer une seconde autorité ?
+4. quelles ressources doivent absolument être installées/disposées avec la session ?
+5. quelles dettes observées peuvent rester en backlog car non bloquantes ?
+
+Périmètre :
+- `assets/gensrpg/core/runtime-bootstrap-v1.js` ;
+- `assets/gensrpg/tactical/entry-v1.js` ;
+- bridge Tactical ;
+- UI Tactical `open/close` ;
+- intégration de la chaîne V108-V114.11 uniquement sous l'angle lifecycle ;
+- hooks/listeners/timers actifs réellement nécessaires au démarrage/fermeture ;
+- contrat Dungeon -> Tactical existant.
+
+Hors périmètre :
+- refonte gameplay ;
+- hit/dégâts/armure ;
+- IA ;
+- rendu cosmétique ;
+- suppression de couches legacy seulement parce qu'elles sont anciennes ;
+- Capture/PvP/Survival ;
+- gameplay Dungeon ;
+- `index.html`.
+
+Méthode :
+- audit + caractérisation uniquement ;
+- aucune migration runtime dans ce pré-audit ;
+- classification A/B obligatoire ;
+- sélectionner un seul seam de session avant tout RED futur ;
+- triple CI avant checkpoint GREEN.
+
+Prochaine étape :
+cartographier le vrai chemin `bootstrap -> entrée publique -> bridge -> session UI -> close` et les side effects qui survivent hors session, puis sélectionner un seul seam bloquant.
+
+---
+
 # PHASE 8 — PRÉ-AUDIT DE SORTIE — 2026-10-02
 
 Base GREEN :

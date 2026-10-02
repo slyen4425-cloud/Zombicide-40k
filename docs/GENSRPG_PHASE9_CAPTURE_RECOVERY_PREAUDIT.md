@@ -78,6 +78,78 @@ Cela prouve un **héritage de substrat et de routage**, mais pas que le provider
 
 Le premier travail Phase 9 doit donc isoler l'autorité Capture existante derrière sa propre entrée avant de remplacer son moteur interne.
 
+## État réel du laboratoire Exploration
+
+Dépôt :
+`slyen4425-cloud/laboratoire_dynamique_exploration-`.
+
+Ce laboratoire est explicitement isolé de GenSrpG principal et du laboratoire Combat Dynamique. Sa cible architecturale est déjà compatible avec la Phase 9 :
+
+```text
+GenSrpG Shell
+   -> Capture runtime
+      -> Capture Exploration
+         -> Encounter Bridge
+            -> Capture Combat
+```
+
+Il ne doit donc jamais devenir un runtime Dungeon ni une seconde autorité Combat.
+
+### Référence de travail actuelle
+
+Branche :
+`work/exploration-map-actor-editor-v1-2026-10-02`
+
+HEAD observé :
+`3f6cc88b39d99e62589182cdee28f89538e7f3e8`
+
+Base GREEN du chantier :
+`checkpoint/exploration-world-builder-dynamique-ui-v1-green-2026-10-02`
+= SHA `80e6468eda0261e0f7db12c81f98beb13df339ab`.
+
+La branche Map Actor est 25 commits devant cette base, sans divergence.
+
+### Autorités déjà structurées à préserver
+
+- Exploration Engine : position/mouvement ;
+- Collision World : collisions ;
+- WorldDocument / World Surface Model : monde et surfaces ;
+- World Builder Dynamique : édition de données, jamais runtime ;
+- WorldObject / WorldArea / Portal : objets et passages ;
+- MapActorVisual v1 : représentation visuelle seulement ;
+- Map Actor Renderer : rendu, sans position/collision/stats ;
+- Encounter Bridge : future frontière Exploration -> Capture Combat.
+
+Le laboratoire n'a aucune autorité sur le Shell GenSrpG, les services Core partagés ou le moteur Capture Combat.
+
+### Map Actor Editor — statut exact
+
+Le chantier édite visuellement héros / PNJ / créatures en réutilisant le Map Actor Visual System v1.
+
+Une régression réelle a été documentée :
+- les réglages Map Actor étaient visibles dans le Builder ;
+- `Tester en jeu` lançait le runtime avec le visuel par défaut ;
+- le retour Builder perdait les réglages.
+
+La correction architecturale transporte désormais, pour la session de test :
+- WorldDocument canonique ;
+- MapActorVisual v1 optionnel ;
+- source image de session optionnelle ;
+sans transporter de position Builder, collision, stat ou IA.
+
+Le correctif de source `data:` / cache revision est techniquement GREEN :
+- correction : `a5a2a05bac42267c365ebf16696dce5e8a390d7d`;
+- CI `37059209076` — SUCCESS.
+
+Mais le chantier Map Actor reste **non GREEN utilisateur** tant que le test smartphone complet Builder -> Tester en jeu -> retour Builder n'est pas validé.
+
+Décision Phase 9 :
+- préserver cette architecture comme source de référence ;
+- ne pas importer le labo Exploration en bloc ;
+- ne pas déclarer Map Actor final GREEN avant validation utilisateur ;
+- lors de l'intégration, raccorder Exploration sous le runtime Capture autonome, jamais sous Dungeon ;
+- remplacer ses adapters locaux par les contrats Core/Shell/Capture appropriés sans créer de seconde autorité.
+
 ## État réel du laboratoire Combat Dynamique
 
 Dépôt :
@@ -193,7 +265,9 @@ Décision Phase 9 :
 | --- | --- | --- | --- |
 | Lancement module | Shell public -> provider Capture139 | autonome | conserver Shell ; déplacer l'autorité derrière l'entrée Capture |
 | Entrée `assets/gensrpg/capture/` | inerte | n/a | premier seam d'ownership |
-| Monde Capture / hub / capture | inline historique | labo combat ne possède pas ce monde | conserver puis isoler progressivement |
+| Monde Capture / hub / capture | inline historique | labo Combat ne possède pas ce monde | conserver puis isoler progressivement |
+| Exploration libre / carte | substrat Capture historique incomplet | labo Exploration : WorldDocument + Engine + Builder structurés | future intégration sous Capture runtime, jamais sous Dungeon |
+| Visuel héros/PNJ/créature sur map | historique dispersé | MapActorVisual v1 + Renderer + Editor | préserver l'autorité visuelle unique ; validation smartphone encore requise |
 | Combat Capture | inline historique | moteur autonome largement refondu | futur adaptateur, pas copie brute |
 | Créatures | historique GenSrpG | configuredCreatures + catalogue canonique | réconcilier par ID stable |
 | Capacités | historique GenSrpG | configuredSkills + effets complexes | réconcilier par ID stable |
@@ -216,7 +290,7 @@ Règle :
 
 ## Décision du pré-audit
 
-La Phase 9 ne doit **pas** commencer par importer le moteur du labo.
+La Phase 9 ne doit **pas** commencer par importer en bloc le moteur d'un des deux laboratoires.
 
 Le premier seam à traiter est :
 
@@ -228,7 +302,7 @@ Cible :
 3. l'entrée Capture délègue d'abord au propriétaire Capture historique validé, sans déplacer de gameplay dans le Shell ;
 4. aucune règle du labo n'est intégrée dans ce premier seam ;
 5. après parité E2E, l'autorité inline Capture pourra être extraite progressivement derrière cette entrée ;
-6. seulement ensuite, le moteur du labo sera raccordé par un adaptateur Capture documenté.
+6. seulement ensuite, les sous-systèmes validés des laboratoires Combat et Exploration seront raccordés par des adapters Capture documentés, chacun sous son propriétaire cible.
 
 Pourquoi ce seam est nécessaire au critère Phase 9 :
 tant que l'entrée cible Capture est inerte et que l'autorité de session reste inline/historique, brancher directement le labo créerait une seconde architecture au lieu de séparer proprement le module.

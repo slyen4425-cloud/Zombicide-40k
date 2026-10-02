@@ -18,6 +18,10 @@ const recovery=read('docs/GENSRPG_PHASE9_CAPTURE_RECOVERY_PREAUDIT.md');
 
 assert.match(roadmap,/## Phase 9 — Séparer Monster Capture[\s\S]*Critère de sortie : Capture peut démarrer sans runtime Dungeon\/Survie actif\./,
   'Phase 9 official autonomy criterion must remain explicit');
+assert.match(roadmap,/module autonome de premier niveau/i,
+  'Capture must remain a first-class top-level module');
+assert.match(roadmap,/aucun besoin de `gameStyle="dungeon"` ou de `isDungeonMode\(\)` comme identité fonctionnelle de Capture/,
+  'Capture must not keep Dungeon identity as its target architecture');
 
 assert.equal(captureContract.status,'contract-only-not-loaded',
   'Capture target entry must still be inert before the first Phase 9 runtime seam');
@@ -74,6 +78,16 @@ assert.match(recovery,/Database Export\/Import R2[\s\S]*diverge/i,
   'divergent database files/UI branch must remain explicitly quarantined');
 assert.match(recovery,/Ancien checkpoint 1v1 \/ 2v2[\s\S]*divergente/i,
   'old diverged 2v2 prevalidation must not become an integration base');
+assert.match(recovery,/laboratoire_dynamique_exploration-/,
+  'Phase 9 recovery must include the Exploration laboratory');
+assert.ok(recovery.includes('3f6cc88b39d99e62589182cdee28f89538e7f3e8'),
+  'recovery audit must preserve the reviewed Exploration Map Actor head');
+assert.ok(recovery.includes('80e6468eda0261e0f7db12c81f98beb13df339ab'),
+  'recovery audit must preserve the Exploration GREEN base');
+assert.match(recovery,/Map Actor reste \*\*non GREEN utilisateur\*\*/i,
+  'Map Actor must not be promoted to final GREEN before smartphone validation');
+assert.match(recovery,/Capture Exploration[\s\S]*Encounter Bridge[\s\S]*Capture Combat/,
+  'Exploration must remain below Capture runtime and bridge to Capture Combat');
 assert.match(recovery,/premier seam à traiter est :[\s\S]*ownership de l'entrée publique Capture/i,
   'Phase 9 must begin at the public Capture ownership boundary, not with a lab merge');
 assert.match(recovery,/Rule 26/,

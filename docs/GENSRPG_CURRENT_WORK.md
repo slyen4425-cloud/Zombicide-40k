@@ -29,7 +29,8 @@ Invariant architectural ajouté :
 Une refonte importante du mode a été développée récemment hors du fil principal de restructuration, notamment dans :
 - les autres fils de travail Monster Capture ;
 - le dépôt laboratoire `slyen4425-cloud/GenSrpg_labo_combat_dynamique`;
-- ses branches/checkpoints de combat dynamique, éditeurs, catalogues, assets, sons, arènes, export/import et règles.
+- le dépôt laboratoire Exploration `slyen4425-cloud/laboratoire_dynamique_exploration-`;
+- leurs branches/checkpoints de combat dynamique, exploration, World Builder, Map Actor, éditeurs, catalogues, assets, sons, arènes, export/import et règles.
 
 Il serait contraire à la charte de restructurer uniquement l'ancien runtime Capture du dépôt principal ou de recréer des systèmes déjà développés ailleurs.
 
@@ -37,7 +38,7 @@ Il serait contraire à la charte de restructurer uniquement l'ancien runtime Cap
 
 Pré-audit **lecture/comparaison uniquement** :
 1. inventorier le Capture actuellement actif dans `Zombicide-40k` ;
-2. inventorier les contrats et checkpoints réellement validés du laboratoire ;
+2. inventorier les contrats et checkpoints réellement validés des laboratoires Combat Dynamique et Exploration ;
 3. récupérer les décisions/régressions importantes des travaux récents ;
 4. distinguer GREEN technique, prévalidation mobile et validation utilisateur ;
 5. identifier les systèmes déjà autoritaires : combat, roster/format, créatures, compétences, stats/progression, effets/status, visuels/FX, audio, arènes, export/import ;
@@ -67,12 +68,14 @@ Pré-audit **lecture/comparaison uniquement** :
 - assets face/dos/icône, arènes, sons et taxonomie audio ;
 - géométrie visible autoritaire pour projectiles et attaques avec déplacement ;
 - collision/contact possédés par le Combat Runtime, sans moteur secondaire ;
-- correctifs projectile/contact du 2 octobre et généralisation aux capacités de contact.
+- correctifs projectile/contact du 2 octobre et généralisation aux capacités de contact ;
+- moteur Exploration libre, WorldDocument/World Builder et chaîne Map Actor du laboratoire Exploration ;
+- état exact du handoff Builder -> runtime -> Builder pour les réglages acteur, sans le considérer GREEN utilisateur tant que la gate smartphone n'est pas validée.
 
 ## Critère de sortie du pré-audit
 
 Le pré-audit est terminé uniquement si :
-- le vrai état GitHub des deux dépôts est identifié ;
+- le vrai état GitHub du dépôt principal et des deux laboratoires Capture est identifié ;
 - les checkpoints de référence sont sélectionnés avec leur statut exact ;
 - les régressions/non-validations sont explicitement exclues ;
 - les autorités cibles Phase 9 sont documentées sans doublon ;

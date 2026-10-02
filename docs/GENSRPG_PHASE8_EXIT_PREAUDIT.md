@@ -116,11 +116,21 @@ Aucune lecture/modification exacte de `index.html` n'est nécessaire pour ce pr�
 
 Si un futur lot exige une modification de ses callsites inline, appliquer Rule 26 avant toute modification.
 
-## Validation attendue
+## Validation finale
 
-Audit documentaire + sentinelle statique uniquement :
-- aucune modification runtime ;
-- Architecture + Browser ;
-- Firefox ;
-- Tactical Dock ;
-- checkpoint GREEN du pré-audit avant tout lot runtime suivant.
+Audit documentaire + sentinelle statique uniquement ; aucun runtime modifié.
+
+HEAD validé :
+`d631f8f914b150b50b3b2d228f2e3e2aa8325953`
+
+Triple CI :
+- Architecture + Browser `36949611830` — SUCCESS ;
+- Firefox `36949611826` — SUCCESS ;
+- Tactical Dock `36949611965` — SUCCESS.
+
+Décision : **PRÉ-AUDIT DE SORTIE PHASE 8 GREEN**.
+
+La Phase 8 n'est pas encore EXIT-ready pour une raison lifecycle démontrée, non pour dette legacy générique. Toute suite doit partir d'un blocage A explicite.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase8-exit-preaudit-green-2026-10-02`.

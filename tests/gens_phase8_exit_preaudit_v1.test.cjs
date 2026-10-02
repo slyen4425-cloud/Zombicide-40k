@@ -28,7 +28,7 @@ const v11411=read('assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js');
 const dungeonContract=JSON.parse(read('assets/gensrpg/dungeon/module-contract-v1.json'));
 const cartography=read('docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md');
 
-assert.match(roadmap,/## Phase 8 — Consolider Tactical[\s\S]*Critère de sortie : Tactical n'existe que pendant une session de combat et se démonte proprement\./,
+assert.match(roadmap,/## Phase 8 — Consolider Tactical[\s\S]*Critère de sortie : Tactical n’existe que pendant une session de combat et se démonte proprement\./,
   'Phase 8 official lifecycle exit criterion must remain explicit');
 
 assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,

@@ -70,8 +70,25 @@ Caractérisation :
 - requête froide actuelle : `modules-missing` ;
 - requête chaude actuelle : synchrone et fonctionnelle.
 
+Caractérisation GREEN :
+- HEAD : `0e13c46c7169ec2846dfa4e50564c55ba8bfdd5c` ;
+- Architecture + Browser `36989371225` — SUCCESS ;
+- Firefox `36989371252` — SUCCESS ;
+- Tactical Dock `36989371238` — SUCCESS ;
+- étape Architecture #256 — SUCCESS ;
+- aucun runtime modifié.
+
+RED isolé :
+- test : `tests/gens_phase8_tactical_first_request_activation_v1.test.cjs` ;
+- exige façade Bridge seule au bootstrap ;
+- exige activation privée unique au premier `Bridge.requestCombat` ;
+- exige replay unique après readiness ;
+- protège le contrat synchrone des requêtes chaudes ;
+- exige un signal déterministe de fin de chaîne de compatibilité ;
+- aucun runtime modifié dans le commit RED.
+
 Prochaine étape :
-valider cette caractérisation par triple CI, puis poser le RED isolé exigeant façade seule au bootstrap et activation unique à la première requête Bridge.
+valider que le RED échoue uniquement sur l'ancien eager loading / absence d'activation froide, puis appliquer le micro-diff lifecycle minimal.
 
 ---
 

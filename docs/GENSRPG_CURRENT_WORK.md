@@ -61,8 +61,17 @@ Méthode :
 6. ré-audit immédiat du critère de sortie Phase 8 ;
 7. si satisfait, audit EXIT au lieu d'un nouveau nettoyage.
 
+Caractérisation :
+- test : `tests/gens_phase8_tactical_session_teardown_characterization_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_SESSION_TEARDOWN_CHARACTERIZATION.md` ;
+- `GensTacticalV1` possède l'activation mais aucun teardown ;
+- `UI.close()` est local uniquement ;
+- Bridge/layers privées n'exposent aucun dispose ;
+- V113/V114.11 gardent des listeners document après close ;
+- retries bornés mais non possédés/cancelables.
+
 Prochaine étape :
-caractérisation GREEN des ressources installées/survivantes, sans modification runtime.
+valider cette caractérisation par triple CI avant de poser le RED teardown.
 
 ---
 

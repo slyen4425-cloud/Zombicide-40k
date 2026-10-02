@@ -38,9 +38,9 @@ for(const globalName of ['dc200StartCombat','openDungeonCombatSetup','openTactic
 
 assert.match(ui,/if\(D\(\)\)\{if\(D\(\)\.readyState==="loading"\)D\(\)\.addEventListener\("DOMContentLoaded",installGlobalPolish/,
   'base UI must characterize auto-install of global polish during private activation');
-assert.match(ui,/wrapped\.__original=old;R\.dungeonMapHtml=wrapped/,
+assert.match(ui,/(?:w|wrapped)\.__original=old;R\.dungeonMapHtml=(?:w|wrapped)/,
   'base UI must characterize restorable dungeonMapHtml wrapper');
-assert.match(ui,/wrapped\.__original=old;core\[name\]=wrapped/,
+assert.match(ui,/(?:w|wrapped)\.__original=old;core\[name\]=(?:w|wrapped)/,
   'base UI must characterize restorable Dungeon render wrappers');
 
 const layers=[

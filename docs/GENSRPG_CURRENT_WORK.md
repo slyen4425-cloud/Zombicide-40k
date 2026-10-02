@@ -87,8 +87,27 @@ RED isolé :
 - exige un signal déterministe de fin de chaîne de compatibilité ;
 - aucun runtime modifié dans le commit RED.
 
+RED confirmé :
+- HEAD RED : `df4dc6e26cd333be365b1dc867444fd71256a643` ;
+- Architecture `36990370116` — FAILURE attendue ;
+- caractérisation #256 — SUCCESS ;
+- garde cible #257 — FAILURE attendue ;
+- erreur : `bootstrap must load only the inert Bridge facade` ;
+- Firefox `36990370135` — SUCCESS ;
+- Tactical Dock `36990370092` — SUCCESS ;
+- aucun runtime modifié au point RED.
+
+Micro-diff appliqué :
+- entrée Tactical : bootstrap = façade Bridge uniquement ;
+- pile privée cinq fichiers activée une seule fois à la première requête ;
+- Bridge : requête froide acceptée `pending`, puis rejouée après readiness ;
+- intégration : chaîne V108-V114.11 différée jusqu'à disponibilité de la base UI et signal déterministe de fin ;
+- Bridge installé avant activation de la chaîne de compatibilité afin de conserver l'autorité de start canonique ;
+- aucun nouveau timer, observer, polling ou heartbeat ;
+- aucun changement `index.html`, callsite Dungeon ou gameplay.
+
 Prochaine étape :
-valider que le RED échoue uniquement sur l'ancien eager loading / absence d'activation froide, puis appliquer le micro-diff lifecycle minimal.
+réaligner uniquement les sentinelles qui décrivent explicitement l'ancien eager loading, puis valider le micro-diff par triple CI technique.
 
 ---
 

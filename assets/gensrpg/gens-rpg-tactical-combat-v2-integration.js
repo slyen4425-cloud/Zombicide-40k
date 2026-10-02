@@ -41,12 +41,32 @@
      their own install seams. The integration therefore keeps only deterministic,
      sequential layer installation and never replaces the browser MutationObserver. */
 
+  function notifyCompatibilityReady(ok=true){
+    try{R.GensTacticalV1?.compatibilityReady?.(ok!==false)}catch(e){console.error("GenSrpG Tactical compatibility ready signal",e)}
+    return ok!==false;
+  }
   function loadVisualDice11411(){
-    const D=R.document;if(!D)return false;if(R.__gensTacticalVisualDiceLoader11411)return false;
-    R.__gensTacticalVisualDiceLoader11411=true;
-    const install=()=>{try{R.GensRpgTacticalVisualDice16781142?.installWithRetries?.(R)}catch(e){console.error("GenSrpG V114.11 tactical UX install",e)}};
+    const D=R.document;if(!D){notifyCompatibilityReady(false);return false}
+    const install=()=>{
+      let ok=false;
+      try{
+        const api=R.GensRpgTacticalVisualDice16781142;
+        if(!api?.installWithRetries)return false;
+        ok=api.installWithRetries(R)!==false;
+        return ok;
+      }catch(e){console.error("GenSrpG V114.11 tactical UX install",e);return false}
+      finally{notifyCompatibilityReady(ok)}
+    };
     if(R.GensRpgTacticalVisualDice16781142){install();return true}
-    const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.11";s.async=false;s.onload=install;s.onerror=()=>{console.error("GenSrpG V114.11 tactical UX load failed")};(D.head||D.documentElement).appendChild(s);return true;
+    if(R.__gensTacticalVisualDiceLoader11411){notifyCompatibilityReady(!!R.GensRpgTacticalVisualDice16781142);return false}
+    R.__gensTacticalVisualDiceLoader11411=true;
+    const s=D.createElement("script");
+    s.src="assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js?v=16.78.114.11";
+    s.async=false;
+    s.onload=install;
+    s.onerror=()=>{console.error("GenSrpG V114.11 tactical UX load failed");notifyCompatibilityReady(false)};
+    (D.head||D.documentElement).appendChild(s);
+    return true;
   }
 
   /* V114.1 used a body observer + 450 ms heartbeat. V114.10 now owns entered-hero safety,
@@ -105,5 +125,13 @@
     R.__gensTacticalPolishLoader108=true;
     const s=D.createElement("script");s.src="assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js?v=16.78.108";s.async=false;s.onload=after108;s.onerror=()=>{console.error("GenSrpG V108 polish load failed");loadPolish109()};(D.head||D.documentElement).appendChild(s);return true;
   }
-  loadPolish108();
+  let compatibilityStarted=false;
+  function activateCompatibilityChain(){
+    if(compatibilityStarted)return true;
+    compatibilityStarted=true;
+    return loadPolish108();
+  }
+  R.GensRpgTacticalCompatibilityChainPhase8=Object.freeze({activate:activateCompatibilityChain});
+  const lifecycle=R.GensTacticalV1?.status?.();
+  if(!lifecycle?.activating)activateCompatibilityChain();
 })(typeof globalThis!=="undefined"?globalThis:this);

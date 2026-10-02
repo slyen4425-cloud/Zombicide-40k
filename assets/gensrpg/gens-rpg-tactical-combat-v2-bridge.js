@@ -142,9 +142,29 @@
       return {ok:false,reason:"open-failed",error:err};
     }finally{opening=false}
   }
+  function privateRuntimeReady(rt=R){return !!(rt?.GensRpgTacticalCombatV2&&rt?.GensRpgTacticalCombatV2Adapter&&rt?.GensRpgTacticalCombatV2Ui)}
   function requestCombat(rt=R,options={}){
     const entry=str(options.entry||"requestCombat")||"requestCombat";
-    const enemyIds=arr(options.enemyIds).map(str).filter(Boolean),scoped=scopedRequest(rt,{...options,enemyIds,entry});
+    if(!privateRuntimeReady(rt)){
+      if(options.__gensActivationReplay===true)return reportBlocked(rt,{ok:false,reason:"modules-missing"},entry);
+      const activate=rt?.GensTacticalV1?.activate;
+      if(typeof activate!=="function")return reportBlocked(rt,{ok:false,reason:"modules-missing"},entry);
+      const replayOptions={...options,entry,__gensActivationReplay:true};
+      let started=false;
+      try{
+        started=activate(ok=>{
+          if(ok===false){reportBlocked(rt,{ok:false,reason:"activation-failed"},entry);return}
+          requestCombat(rt,replayOptions);
+        })!==false;
+      }catch(error){
+        try{rt?.console?.error?.("Combat tactique V2 activation",error)}catch(e){}
+        return reportBlocked(rt,{ok:false,reason:"activation-failed",error},entry);
+      }
+      if(!started)return reportBlocked(rt,{ok:false,reason:"activation-failed"},entry);
+      return {ok:true,pending:true,reason:"tactical-activating"};
+    }
+    const cleanOptions={...options};delete cleanOptions.__gensActivationReplay;
+    const enemyIds=arr(cleanOptions.enemyIds).map(str).filter(Boolean),scoped=scopedRequest(rt,{...cleanOptions,enemyIds,entry});
     if(!scoped.ok)return reportBlocked(rt,scoped,entry);
     const result=openCurrent(rt,{...scoped.options,entry});
     return result.ok?result:reportBlocked(rt,result,entry);

@@ -61,8 +61,30 @@ Risques :
 - confondre retries déjà terminés avec timers persistants ;
 - casser les combats suivants en démontant une ressource qui doit être réinstallable.
 
+Pré-audit :
+- test : `tests/gens_phase8_tactical_session_teardown_preaudit_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_SESSION_TEARDOWN_PREAUDIT.md` ;
+- `UI.close()` démonte correctement l'overlay/battle local mais pas les autorités globales privées ;
+- Bridge, base UI et V108-V114.11 conservent après activation des wrappers/listeners/hooks sans `dispose()` ;
+- les retries internes sont bornés mais non possédés/cancelables par une session ;
+- V113 peut rester actif dans l'exploration Dungeon après fermeture ;
+- scripts/APIs chargés, listener du root overlay et timers visuels auto-nettoyants sont classés B et ne justifient aucun lot.
+
+Seam A sélectionné :
+**`GensTacticalV1` propriétaire unique d'un `deactivate()/dispose()` de session, avec démontage inverse des ressources privées et réinstallation propre à la requête suivante.**
+
+Pourquoi ce futur lot est-il nécessaire au critère de sortie Phase 8 ?
+Parce qu'après le premier combat les autorités privées Tactical survivent encore à `close()`. Tant qu'elles ne sont pas démontées par le même propriétaire qui les active, le critère `start -> session -> close -> teardown` n'est pas satisfait.
+
+Interdictions confirmées :
+- pas de nettoyage V108-V114 fichier par fichier pour le principe ;
+- pas de gameplay/IA/hit/dégâts/armure ;
+- pas de Capture/PvP/Survival ;
+- pas de changement `index.html` ;
+- aucun observer/heartbeat/polling/retry ajouté.
+
 Prochaine étape :
-caractériser le runtime exact post-activation et post-`UI.close()`, puis sélectionner un seul seam A. Aucun RED ni changement runtime avant cette décision.
+valider ce pré-audit par triple CI. Si GREEN, créer son checkpoint final puis ouvrir un seul lot runtime de teardown de session avec RED isolé avant modification.
 
 ---
 

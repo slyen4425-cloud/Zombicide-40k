@@ -63,8 +63,15 @@ Méthode :
 8. triple CI documentaire ;
 9. checkpoint GREEN.
 
+Caractérisation :
+- test : `tests/gens_phase8_tactical_first_request_activation_characterization_v1.test.cjs` ;
+- document : `docs/GENSRPG_PHASE8_TACTICAL_FIRST_REQUEST_ACTIVATION_CHARACTERIZATION.md` ;
+- état actuel verrouillé : six fichiers privés chargés eager + Bridge installé au bootstrap ;
+- requête froide actuelle : `modules-missing` ;
+- requête chaude actuelle : synchrone et fonctionnelle.
+
 Prochaine étape :
-poser la caractérisation GREEN avant toute modification runtime.
+valider cette caractérisation par triple CI, puis poser le RED isolé exigeant façade seule au bootstrap et activation unique à la première requête Bridge.
 
 ---
 

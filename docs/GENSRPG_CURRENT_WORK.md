@@ -1,3 +1,73 @@
+# PHASE 8 — MICRO-LOT 5 — ACTIVATION TACTICAL À LA PREMIÈRE REQUÊTE BRIDGE — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-ownership-preaudit-green-2026-10-02`
+
+SHA de base :
+`4385a6ce1de8165b3ea0ad2623f4900a4136f7bd`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-session-activation-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-tactical-session-activation-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-ownership-preaudit-green-2026-10-02`
+
+## Pourquoi ce lot est-il nécessaire au critère de sortie Phase 8 ?
+
+Parce que le pré-audit a prouvé le blocage A1 : la pile privée Tactical s'active au bootstrap application, avant toute session de combat.
+
+Ce lot retire uniquement cette activation eager. Il ne nettoie aucune couche legacy pour le principe.
+
+Cible exacte :
+- RuntimeBootstrap continue de charger uniquement l'entrée publique Tactical ;
+- l'entrée publique charge au bootstrap uniquement la façade Bridge, qui reste inerte ;
+- engine / adapter / rules / integration / UI et chaîne de compatibilité ne s'activent qu'à la première `Bridge.requestCombat` ;
+- la première requête froide est acceptée comme activation en cours puis rejouée une fois la pile prête ;
+- une requête lorsque la pile est déjà active conserve le contrat synchrone existant ;
+- une seule activation privée est autorisée.
+
+Périmètre runtime autorisé :
+- `assets/gensrpg/tactical/entry-v1.js` ;
+- `assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js` ;
+- `assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js` uniquement pour signaler la fin déterministe de la chaîne de compatibilité ;
+- contrats/tests directement liés à ce lifecycle.
+
+Hors périmètre :
+- teardown / `dispose()` après fermeture ;
+- suppression V108-V114 fichier par fichier ;
+- modification des retries internes V108-V114.11 ;
+- gameplay, IA, hit, dégâts, armure ;
+- Dungeon gameplay / callsites ;
+- Capture / PvP / Survival ;
+- `index.html`.
+
+Invariants :
+- Bridge reste l'unique contrat Dungeon -> Tactical ;
+- callsites Dungeon existants inchangés ;
+- premier combat ne doit pas perdre la disponibilité V113/V114.11 avant replay ;
+- aucune nouvelle boucle de polling, heartbeat, MutationObserver ou retry ;
+- le signal de fin de chaîne doit être déterministe et possédé par l'entrée Tactical ;
+- les requêtes suivantes restent synchrones.
+
+Méthode :
+1. caractérisation GREEN de l'eager actuel et du contrat synchrone existant ;
+2. triple CI ;
+3. RED isolé exigeant façade seule au bootstrap + activation unique à la première requête ;
+4. micro-diff minimal ;
+5. réalignement uniquement des guards explicitement liés à l'eager loading ;
+6. triple CI technique ;
+7. fermeture documentaire ;
+8. triple CI documentaire ;
+9. checkpoint GREEN.
+
+Prochaine étape :
+poser la caractérisation GREEN avant toute modification runtime.
+
+---
+
 # PHASE 8 — PRÉ-AUDIT PROPRIÉTÉ DE SESSION TACTICAL — 2026-10-02
 
 Base GREEN :

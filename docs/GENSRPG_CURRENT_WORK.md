@@ -83,8 +83,25 @@ Interdictions confirmées :
 - pas de changement `index.html` ;
 - aucun observer/heartbeat/polling/retry ajouté.
 
+Validation GREEN du pré-audit :
+- HEAD : `b8c3c26eff788e22fae0e40445724346bb746ad8` ;
+- Architecture + Browser `37010529357` — SUCCESS ;
+- Firefox `37010529128` — SUCCESS ;
+- Tactical Dock `37010529074` — SUCCESS ;
+- aucun runtime modifié.
+
+Décision :
+**PRÉ-AUDIT TEARDOWN DE SESSION TACTICAL GREEN**.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-preaudit-green-2026-10-02`.
+
 Prochaine étape :
-valider ce pré-audit par triple CI. Si GREEN, créer son checkpoint final puis ouvrir un seul lot runtime de teardown de session avec RED isolé avant modification.
+1. triple CI documentaire sur le SHA de fermeture ;
+2. créer le checkpoint GREEN final ;
+3. ouvrir un seul lot runtime `session teardown ownership` depuis ce checkpoint ;
+4. RED isolé avant toute modification runtime ;
+5. après ce lot, ré-audit immédiat du critère de sortie Phase 8.
 
 ---
 

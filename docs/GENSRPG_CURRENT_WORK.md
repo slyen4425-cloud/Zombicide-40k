@@ -74,8 +74,26 @@ Hors futur lot :
 - gameplay, IA, hit/dégâts/armure ;
 - toute migration `index.html`.
 
+Validation technique GREEN :
+- HEAD : `87eb363de4b7723f741f77f2514131b3c23878fe` ;
+- Architecture + Browser `36979070245` — SUCCESS ;
+- Firefox `36979070269` — SUCCESS ;
+- Tactical Dock `36979070220` — SUCCESS ;
+- étape Architecture #255 `Pré-auditer la propriété de session Tactical Phase 8` — SUCCESS ;
+- aucun runtime modifié.
+
+Décision :
+**PRÉ-AUDIT PROPRIÉTÉ DE SESSION TACTICAL GREEN**.
+
+Checkpoint final prévu :
+`checkpoint/gensrpg-phase8-tactical-session-ownership-preaudit-green-2026-10-02`.
+
 Prochaine étape :
-valider ce pré-audit par triple CI. Après checkpoint GREEN, le futur lot runtime posera d'abord un RED prouvant qu'après bootstrap seule la façade est disponible et que la première requête Bridge active la pile privée une seule fois.
+1. triple CI documentaire ;
+2. créer le checkpoint GREEN final ;
+3. ouvrir le lot runtime dédié à l'activation à la première requête Bridge ;
+4. poser un RED isolé avant toute modification runtime ;
+5. ne pas inclure teardown/dispose dans ce premier lot.
 
 ---
 

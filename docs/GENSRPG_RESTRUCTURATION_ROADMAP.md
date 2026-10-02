@@ -172,7 +172,9 @@ Créer `capture/` comme module autonome de premier niveau, au même rang que Sur
 - aucun besoin de `gameStyle="dungeon"` ou de `isDungeonMode()` comme identité fonctionnelle de Capture ;
 - les compatibilités historiques Dungeon/Capture sont retirées progressivement après parité et sentinelles.
 
-Critère de sortie : Capture peut démarrer, fonctionner et se fermer comme module autonome sans runtime Dungeon/Survie actif.
+Critère de sortie : Capture peut démarrer sans runtime Dungeon/Survie actif.
+
+Exigence renforcée de Phase 9 : Capture doit également fonctionner et se fermer comme module autonome de premier niveau, sans utiliser Dungeon comme runtime hôte ou identité fonctionnelle.
 
 ## Phase 10 — Séparer Duel/PvP
 

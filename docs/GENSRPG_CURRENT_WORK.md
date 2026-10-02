@@ -1,3 +1,71 @@
+# PHASE 8 — MICRO-LOT 6 — OWNERSHIP DU TEARDOWN DE SESSION TACTICAL — 2026-10-02
+
+Base GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-preaudit-green-2026-10-02`
+
+SHA de base :
+`1a345a79a387b921e8f78cf5a33e1a2aea7a7f01`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase8-tactical-session-teardown-ownership-2026-10-02`
+
+Branche :
+`work/gensrpg-phase8-tactical-session-teardown-ownership-2026-10-02`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-preaudit-green-2026-10-02`
+
+## Pourquoi ce lot est-il nécessaire au critère de sortie Phase 8 ?
+
+Parce que le pré-audit GREEN a prouvé que, après le premier combat, les autorités privées Tactical restent actives après `UI.close()`. Tant que le même propriétaire qui active la pile ne peut pas la désactiver et la réinstaller proprement au combat suivant, le critère `start -> session -> close -> teardown` n'est pas satisfait.
+
+Cible exacte :
+- `GensTacticalV1` reste l'unique propriétaire d'activation privée ;
+- ajout d'un `deactivate()/dispose()` idempotent au même propriétaire ;
+- `UI.close()` signale la fin de session vers cette frontière unique ;
+- démontage inverse des ressources privées réellement installées ;
+- annulation des retries encore pendants ;
+- retrait des listeners document appartenant à Tactical ;
+- restauration des wrappers appartenant à la session uniquement quand le wrapper courant est bien celui installé par la couche ;
+- façade Bridge conservée et inerte entre deux combats ;
+- deuxième combat capable de réactiver proprement la même pile.
+
+Périmètre :
+- entrée publique Tactical ;
+- Bridge et UI Tactical uniquement pour la frontière de fin de session ;
+- intégration/layers V108-V114.11 uniquement pour lifecycle install/dispose ;
+- tests/contrats/manifests explicitement liés à ces ressources.
+
+Hors périmètre :
+- suppression de fichiers V108-V114 ;
+- gameplay, IA, hit, dégâts, armure, équilibre ou rendu cosmétique ;
+- modification des callsites Dungeon déjà Bridge-backed ;
+- Capture/PvP/Survival ;
+- `index.html` ;
+- nouveau observer, heartbeat, polling ou retry.
+
+Invariants :
+- activation froide à la première requête Bridge conservée ;
+- Bridge reste le contrat Dungeon -> Tactical ;
+- `dispose()` est idempotent ;
+- aucune restauration ne doit écraser un propriétaire plus récent : restauration seulement si le wrapper courant est celui de la couche ;
+- timers visuels auto-nettoyants et API/scripts chargés restent hors teardown si sans autorité active ;
+- réactivation après teardown doit produire une seule pile fonctionnelle, sans duplication listeners/wrappers.
+
+Méthode :
+1. caractérisation GREEN du cycle actuel `cold request -> active -> close -> autorités survivantes` ;
+2. triple CI ;
+3. RED isolé exigeant `deactivate()/dispose()` + deuxième activation propre ;
+4. micro-diff lifecycle uniquement ;
+5. triple CI technique ;
+6. ré-audit immédiat du critère de sortie Phase 8 ;
+7. si satisfait, audit EXIT au lieu d'un nouveau nettoyage.
+
+Prochaine étape :
+caractérisation GREEN des ressources installées/survivantes, sans modification runtime.
+
+---
+
 # PHASE 8 — PRÉ-AUDIT TEARDOWN DE SESSION TACTICAL — 2026-10-02
 
 Base GREEN :

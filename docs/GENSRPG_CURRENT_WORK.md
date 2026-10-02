@@ -87,13 +87,60 @@ Caractérisation complète GREEN :
 - Tactical Dock `37027556347` — SUCCESS ;
 - aucun changement runtime depuis la caractérisation initiale.
 
-RED isolé posé :
-- test : `tests/gens_phase8_tactical_session_teardown_ownership_v1.test.cjs` ;
-- exige `GensTacticalV1.deactivate()/dispose()`, signal depuis `UI.close()`, dispose Bridge + couches privées, annulation retries, retrait listeners document et reset permettant une réactivation propre ;
-- aucun runtime modifié dans le commit RED.
+RED isolé confirmé :
+- HEAD RED : `355065a3f958dda6b39905d46dd017576dcd2643` ;
+- Architecture `37032650051` — FAILURE attendue ;
+- étape #260 `Exiger l'ownership du teardown Tactical Phase 8` — FAILURE attendue ;
+- erreur : `GensTacticalV1 must own session deactivate` ;
+- Firefox `37032649902` — SUCCESS ;
+- Tactical Dock `37032650125` — SUCCESS ;
+- aucun runtime modifié au point RED.
+
+Micro-diff lifecycle appliqué :
+- `GensTacticalV1` possède désormais `deactivate()` + alias `dispose` et remet l'activation privée à froid ;
+- `UI.close()` signale la fin de session au propriétaire unique ;
+- Bridge + base UI + V108/V109/V110/V111/V112/V113/V114.11 exposent un `dispose()` ciblé sur les ressources qu'ils installent ;
+- retries pendants possédés et annulables ;
+- listeners document Tactical retirés au teardown ;
+- wrappers restaurés uniquement s'ils sont encore les wrappers courants possédés par la couche ;
+- chaîne de compatibilité démontée en ordre inverse puis réinitialisée ;
+- façade Bridge reste chargée/inert entre deux combats ;
+- aucune suppression de couche legacy, aucun changement gameplay/IA/hit/dégâts/armure ;
+- aucun changement `index.html`, Capture, PvP, Survival ou callsite Dungeon ;
+- aucun observer, heartbeat, polling ou retry supplémentaire.
+
+Réalignements de sentinelles :
+- gardes Phase 8 lifecycle réalignées sur le teardown désormais implémenté ;
+- deux guards historiques Dice réalignés sur les blobs changés uniquement par ajout de lifecycle ;
+- manifeste Phase 2 non-production réaligné car `gens_phase8_exit_preaudit_v1.test.cjs` ne référence plus trois anciens fichiers non-production ;
+- aucune assertion métier affaiblie.
+
+Validation technique GREEN :
+- HEAD technique : `d82981bcd2fe1e08f4b041d81111b81dc29ac342` ;
+- Architecture + Browser `37039255432` — SUCCESS ;
+- Firefox `37039255361` — SUCCESS ;
+- Tactical Dock `37039255396` — SUCCESS ;
+- étape Phase 8 #260 — SUCCESS ;
+- Dungeon -> Tactical, Dungeon après Survival, Builder, Save & Quit, Capture/PvP et non-interférence — SUCCESS.
+
+Décision :
+**MICRO-LOT 6 TECHNIQUEMENT GREEN**.
+
+Impact sur le critère Phase 8 :
+- activation privée : session-scoped ;
+- fermeture : signale désormais un teardown au même propriétaire ;
+- listeners/wrappers/retries privés : démontables et réinstallables ;
+- les blocages lifecycle A1-A5 du pré-audit sont candidats résolus ;
+- la prochaine action obligatoire est un audit EXIT Phase 8, pas un nettoyage legacy.
+
+Checkpoint final prévu après triple CI documentaire :
+`checkpoint/gensrpg-phase8-tactical-session-teardown-ownership-green-2026-10-02`.
 
 Prochaine étape :
-valider l'échec isolé de la garde teardown, puis appliquer uniquement le micro-diff lifecycle nécessaire.
+1. triple CI documentaire sur le SHA exact ;
+2. créer le checkpoint GREEN final ;
+3. ouvrir immédiatement l'audit EXIT Phase 8 depuis ce checkpoint ;
+4. si le critère de sortie est satisfait, fermer Phase 8 et passer à Phase 9.
 
 ---
 

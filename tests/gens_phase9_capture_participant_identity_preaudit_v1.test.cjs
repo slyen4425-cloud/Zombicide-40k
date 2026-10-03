@@ -15,8 +15,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168382,'participant preaudit must inspect the Rule 26 verified runtime');
-assert.equal(blob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1','participant preaudit must inspect the exact verified index blob');
+assert.equal(bytes.length,8168810,'participant preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'a5d337ae25435d801a72333ee27e6dbc390a5175','participant preaudit must inspect the exact verified post-raccord index blob');
 
 function fn(name){
   const marker='function '+name+'(';
@@ -53,16 +53,20 @@ assert.match(captureEntry,/function isProfile\(profile\)/);
 assert.doesNotMatch(captureEntry,/gameStyle|isDungeonMode|document\.|localStorage/,
   'canonical Capture identity must remain pure and Dungeon-independent');
 
+assert.match(normalize,/GensCaptureV1\.isProfile\(getActiveGameProfile\(\)\)/,
+  'Capture strict participant normalization must now use canonical Capture identity');
 assert.match(normalize,/isDungeonMode\(\)/,
-  'current Capture still reaches strict participant normalization through historical Dungeon identity');
+  'real Dungeon must retain its strict participant branch');
 assert.match(normalize,/availableParticipantHeroIds\(\)/);
 assert.match(normalize,/loadTurnState\(\)\?\.heroes/,
   'non-Dungeon active sessions still merge historical turn heroes');
 assert.ok(normalize.indexOf('isDungeonMode()')<normalize.indexOf('loadTurnState()?.heroes'),
   'strict Dungeon branch must precede the historical turn-state merge');
 
-assert.match(available,/if\(isDungeonMode\(\) && typeof ensureDungeonContent==="function"\)ensureDungeonContent\(\)/,
-  'current participant availability still pulls Dungeon content for Capture through isDungeonMode');
+assert.match(available,/GensCaptureV1\.isProfile\(getActiveGameProfile\(\)\)/,
+  'participant availability must resolve canonical Capture identity');
+assert.match(available,/if\(!capture && isDungeonMode\(\) && typeof ensureDungeonContent==="function"\)ensureDungeonContent\(\)/,
+  'Dungeon content hydration must be excluded for Capture while remaining for true Dungeon');
 assert.match(available,/allowedHeroIdsForActiveProfile\(\)/);
 
 assert.match(allowed,/if\(id===GAME_PROFILE_DUNGEON_ID\)/);
@@ -96,10 +100,10 @@ console.log(JSON.stringify({
   scenario:'Phase 9 Capture participant identity preaudit',
   rule26:{bytes:bytes.length,blob},
   currentCoupling:{
-    normalizeViaDungeonIdentity:true,
-    dungeonContentLoadedForCapture:true
+    normalizeViaDungeonIdentity:false,
+    dungeonContentLoadedForCapture:false
   },
   canonicalParticipantSource:'active profile heroPool through allowedHeroIdsForActiveProfile',
   selectedSeam:'explicit Capture strict normalization + Dungeon-only ensureDungeonContent',
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

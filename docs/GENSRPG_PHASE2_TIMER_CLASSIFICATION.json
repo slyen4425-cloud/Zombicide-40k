@@ -9,7 +9,7 @@
     "externalSetTimeoutSyntax": 141,
     "externalSetIntervalSyntax": 1,
     "activeInlineBlocks": 119,
-    "inlineTimerSources": 64,
+    "inlineTimerSources": 65,
     "inlineSetTimeoutSyntax": 140,
     "inlineSetIntervalSyntax": 1
   },
@@ -76,6 +76,7 @@
     "assets/dungeon/dungeon-zone-content-167824.js"
   ],
   "mixedInline": [
+    "captureFix137",
     "captureFix138",
     "captureFix139",
     "dungeonCore213Stability"

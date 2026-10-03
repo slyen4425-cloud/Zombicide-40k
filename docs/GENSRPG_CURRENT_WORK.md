@@ -1,3 +1,73 @@
+# PHASE 9 — PRÉ-AUDIT CAPTURE PARTICIPANT IDENTITY — 2026-10-03
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-identity-authority-raccord-green-2026-10-03`
+
+SHA de base :
+`fefd1ad48ee42e0cbb50b80a41171fa57a05194d`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-participant-identity-preaudit-2026-10-03`
+
+Branche :
+`work/gensrpg-phase9-capture-participant-identity-preaudit-2026-10-03`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture-identity-authority-raccord-green-2026-10-03`
+
+## Mission
+
+Caractériser les usages participants/RPG où Capture dépend encore de `isDungeonMode()`, après mise en place de l'autorité canonique `GensCaptureV1.isProfile(profile)`.
+
+Le but n'est pas de modifier `isDungeonMode()`, mais d'identifier le plus petit seam permettant aux participants Capture d'utiliser l'identité Capture explicite sans emprunter une branche Dungeon.
+
+## Cibles principales
+
+- `normalizeGameParticipants()` ;
+- `availableParticipantHeroIds()` ;
+- appel `ensureDungeonContent()` sous garde `isDungeonMode()` ;
+- différences réelles entre participants Dungeon et Capture ;
+- sélection trainer/créatures/starter Capture ;
+- protections reprise/lancement qui doivent rester intactes.
+
+## Invariants
+
+- `GensCaptureV1.isProfile(profile)` reste l'unique autorité identité Capture ;
+- `isDungeonMode()` reste inchangé pendant ce pré-audit ;
+- vrai Dungeon inchangé ;
+- Capture139 session initializer inchangé ;
+- aucune duplication d'autorité participants ;
+- Shell routing-only ;
+- aucun Combat Dynamique / Exploration ;
+- aucun timer/observer/retry/fallback global.
+
+## Hors périmètre
+
+- migration du champ `gameStyle` ;
+- `ensureBaseGameProfile()` global ;
+- `saveActiveEnemies()` / `updateDungeonExploreButtons()` ;
+- UI Capture/Dungeon non liée aux participants ;
+- Combat, Exploration, progression, créatures/compétences ;
+- Survival, PvP, Tactical ;
+- `main` gelée.
+
+## Rule 26
+
+Le runtime exact a changé pendant le raccord d'identité.
+
+Fichier requis :
+- commit : `fefd1ad48ee42e0cbb50b80a41171fa57a05194d` ;
+- blob `index.html` : `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1` ;
+- taille : `8168382` octets.
+
+La copie `work50.zip` correspond au blob précédent `f523410e...` et ne doit pas servir à l'inspection exacte de ce chantier.
+
+## Prochaine étape
+
+Recevoir et vérifier le nouvel `index.html` Rule 26, puis caractériser les branches participants exactes. Aucun TDD RED ni runtime avant cette gate.
+
+---
+
 # PHASE 9 — RACCORD AUTORITÉ IDENTITÉ CAPTURE — 2026-10-03
 
 Base GREEN :

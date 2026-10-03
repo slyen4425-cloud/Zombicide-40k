@@ -15,8 +15,8 @@ assert.match(indexSource,/id="builtinMonsterCapture162"/,'production HTML must k
 assert.match(indexSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
 assert.match(indexSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
 assert.match(indexSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');
-assert.match(indexSource,/if\(mods\.capture && mods\.controllableCreatures\)return "creature"/,'content-family owner must classify Capture as creature');
-assert.match(indexSource,/if\(p\?\.gameStyle==="dungeon" && fam==="creature"\)return "capture"/,'V16.151 must keep Capture distinct from classic Dungeon');
+assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(profile\)\)return "creature"/,'content-family owner must classify Capture through GensCaptureV1');
+assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(p\)\)return "capture"/,'V16.151 must keep Capture distinct from classic Dungeon through canonical identity');
 assert.match(indexSource,/if\(gensMode151\(\)!=="capture"\)[\s\S]*captureGameHub/,'V16.151 must guard the Capture hub');
 assert.match(indexSource,/window\.openGensBuiltInGame=function\(profileId,family\)[\s\S]*gensSwitchUniverse155/,'V16.155 must remain the real universe-switch owner');
 assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production composition must not load the retired Survival/Dungeon guard');

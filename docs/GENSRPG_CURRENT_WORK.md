@@ -1,4 +1,4 @@
-# PHASE 9 — RACCORD PARTICIPANT IDENTITY CAPTURE — TDD RED — 2026-10-03
+# PHASE 9 — RACCORD PARTICIPANT IDENTITY CAPTURE — GREEN — 2026-10-03
 
 Base GREEN :
 `checkpoint/gensrpg-phase9-capture-participant-identity-preaudit-green-2026-10-03`
@@ -6,88 +6,77 @@ Base GREEN :
 SHA de base :
 `186fe08d02e12e39043cc3835a43e72358a35068`
 
-Pré-audit participants GREEN validé :
-- Architecture `37137913653` — SUCCESS (architecture-sentinels + browser-sentinel) ;
-- Firefox `37137913702` — SUCCESS ;
-- Tactical Dock `37137913663` — SUCCESS.
-
 Checkpoint de départ :
 `checkpoint/gensrpg-start-phase9-capture-participant-identity-raccord-2026-10-03`
 
 Branche :
 `work/gensrpg-phase9-capture-participant-identity-raccord-2026-10-03`
 
-Dernier checkpoint GREEN :
-`checkpoint/gensrpg-phase9-capture-participant-identity-preaudit-green-2026-10-03`
+Checkpoint GREEN de fermeture :
+`checkpoint/gensrpg-phase9-capture-participant-identity-raccord-green-2026-10-03`
 
-## Résultat du pré-audit
+SHA fonctionnel validé avant fermeture documentaire :
+`ed943f139bddb028c8417bc3924d57d02be235b2`
 
-Le pré-audit a confirmé sans mutation runtime que :
-- `normalizeGameParticipants()` applique encore sa branche stricte via `isDungeonMode()`, donc Capture hérite historiquement de l'identité Dungeon ;
-- `availableParticipantHeroIds()` appelle encore `ensureDungeonContent()` sous la seule garde `isDungeonMode()`, ce qui charge inutilement le contenu Dungeon en Capture ;
-- `allowedHeroIdsForActiveProfile()` est déjà la source canonique correcte : vrai Dungeon -> `DUNGEON_HERO_IDS`, Capture/autres profils RPG -> `profile.heroPool` ;
-- `gensCaptureParticipantsReady()` dépend de `normalizeGameParticipants()` puis des starters Capture, sans besoin de règle Dungeon ;
-- aucune nouvelle autorité participants ne doit être créée.
+## Résultat
 
-La sentinelle de pré-audit a été corrigée uniquement dans son propre code de test :
-- en-tête Git blob avec vrai `\0` ;
-- parseur de fonction avec vrai `\n` et échappement backslash correct.
-Aucun fichier runtime n'a été modifié.
+Le raccord participant Capture est désormais explicite et ne dépend plus de l'identité Dungeon pour cette frontière :
 
-## TDD RED constaté
+- `normalizeGameParticipants()` résout Capture via `GensCaptureV1.isProfile(getActiveGameProfile())` ;
+- Capture conserve la sémantique stricte attendue : la sélection courante est filtrée et les anciens héros du turn manager ne sont pas réinjectés ;
+- le vrai Dungeon conserve sa branche `isDungeonMode()` ;
+- `availableParticipantHeroIds()` n'appelle plus `ensureDungeonContent()` lorsque le profil actif est Capture ;
+- `allowedHeroIdsForActiveProfile()` reste la source canonique des IDs autorisés, avec `profile.heroPool` pour Capture ;
+- aucune seconde autorité participants, aucun service/provider parallèle et aucun fallback global n'ont été ajoutés ;
+- `isDungeonMode()`, Capture139, Combat Dynamique, Exploration, progression, créatures et compétences restent hors de ce lot.
 
-HEAD RED :
-`ee389b85f9c8f543da148e22ca43466ea41cdf9f`
-
-CI Architecture :
-`37138840530` — FAILURE attendue sur l'étape `Exiger le raccord participants Capture Phase 9`.
-
-Erreur exacte :
-`AssertionError [ERR_ASSERTION]: RED: normalizeGameParticipants must select Capture strict semantics from canonical Capture identity`
-
-Le pré-audit précédent reste GREEN ; ce RED démontre uniquement l'absence du seam runtime Capture explicite. Aucun runtime n'a encore été modifié.
-
-## Mission unique du raccord
-
-TDD strict :
-1. écrire une sentinelle RED qui exige le seam minimal ;
-2. constater le RED sur le runtime actuel ;
-3. seulement ensuite modifier le propriétaire runtime existant ;
-4. diff minimal ;
-5. triple CI GREEN ;
-6. checkpoint GREEN.
-
-## Seam minimal obligatoire
-
-1. calculer l'identité Capture via `GensCaptureV1.isProfile(getActiveGameProfile())` ;
-2. préserver pour Capture la sémantique stricte actuelle de `normalizeGameParticipants()` sans passer par l'identité Dungeon ;
-3. laisser le vrai Dungeon conserver sa branche `isDungeonMode()` ;
-4. empêcher `availableParticipantHeroIds()` d'appeler `ensureDungeonContent()` lorsque le profil actif est Capture ;
-5. conserver `allowedHeroIdsForActiveProfile()` comme source canonique des IDs autorisés via `heroPool`.
-
-## Invariants
-
-- ne pas modifier `isDungeonMode()` ;
-- ne pas créer de service/provider participants concurrent ;
-- ne pas modifier Capture139 session initializer ;
-- ne pas migrer `gameStyle` dans ce lot ;
-- ne pas toucher Combat Dynamique / Exploration / progression / créatures / compétences ;
-- vrai Dungeon inchangé ;
-- Survival/PvP/Tactical inchangés ;
-- `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+Diff runtime ciblé :
+- `index.html` uniquement pour le seam fonctionnel ;
+- +6 / -3 lignes au commit runtime ;
+- aucun nouveau moteur, wrapper, observer, timer ou polling.
 
 ## Rule 26
 
-Le runtime de base reste exactement :
-- commit `fefd1ad48ee42e0cbb50b80a41171fa57a05194d` pour le dernier changement de `index.html` ;
+Runtime de base vérifié :
+- commit de référence `fefd1ad48ee42e0cbb50b80a41171fa57a05194d` ;
 - blob `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1` ;
-- taille `8168382` octets.
+- taille `8168382`.
 
-Les commits de pré-audit jusqu'à `186fe08d02e12e39043cc3835a43e72358a35068` n'ont pas modifié `index.html`.
+Runtime après raccord :
+- blob `a5d337ae25435d801a72333ee27e6dbc390a5175` ;
+- taille `8168810`.
 
-## Prochaine étape
+Les sentinelles historiques qui pinnaient explicitement le blob courant ont été avancées vers ce nouveau fingerprint. Leurs assertions métier n'ont pas été assouplies.
 
-Ajouter et constater la sentinelle TDD RED du raccord participants. Aucun runtime avant ce RED.
+## Triple CI GREEN fonctionnelle
+
+- Architecture + Browser : `37145666323` — SUCCESS ;
+- Firefox : `37145666255` — SUCCESS ;
+- Tactical Dock : `37145666259` — SUCCESS.
+
+Les scénarios protégés ont notamment rejoué :
+- lancement Survie ;
+- Dungeon après Survie ;
+- Dungeon map -> Tactical V2 ;
+- Capture victoire + reprise inter-module ;
+- Save & Quit / reprise Shell ;
+- Builder ;
+- non-interférences et sentinelles historiques.
+
+Production :
+- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Prochaine étape Phase 9
+
+Ouvrir un pré-audit dédié des couplages Capture restant derrière l'identité Dungeon historique.
+
+Règles :
+1. aucune mutation runtime au démarrage ;
+2. inventorier les consommateurs Capture encore atteints via `isDungeonMode()` / `gameStyle="dungeon"` ;
+3. classer vrai Dungeon vs héritage Capture ;
+4. choisir un seul seam minimal sous TDD ;
+5. ne pas modifier globalement `isDungeonMode()` ;
+6. conserver le critère officiel de sortie : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 
 ---
 

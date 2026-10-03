@@ -97,10 +97,29 @@ Interdiction :
 - confondre substrat historique `gameStyle="dungeon"` avec contrat cible ;
 - réintroduire une seconde autorité de lancement.
 
+## Rule 26 validée
+
+`work43.zip/index43.txt` vérifié :
+- taille `8169555` octets ;
+- blob `02a052bc231728eb383e17c83e61a958be0ac58c` ;
+- correspondance exacte avec le `index.html` de base.
+
+Inspection exacte Capture139 terminée :
+- propriétaire legacy Capture confirmé ;
+- aucun runtime privé Dungeon/Tactical appelé directement dans son cœur de lancement ;
+- dépendances Dungeon indirectes inventoriées : identité `gameStyle="dungeon"`, `isDungeonMode()` via participants, entretien Dungeon dans `ensureBaseGameProfile()`, effet UI Dungeon via `saveActiveEnemies()`.
+
+## Décision de seam
+
+Premier raccord cible :
+`Shell -> GensCaptureV1 -> référence stable Capture139`.
+
+Le premier runtime lot ne retirera aucune dépendance Dungeon historique.
+Il déplacera uniquement **l'ownership du provider public Capture** vers `assets/gensrpg/capture/entry-v1.js`.
+
 ## Prochaine étape
 
-Recevoir et vérifier le `index.html` Rule 26 exact, puis terminer le pré-audit `Capture public-entry ownership`.
-Aucun runtime n'est autorisé avant cette vérification.
+Valider la sentinelle de pré-audit et la triple CI, fermer ce pré-audit par checkpoint GREEN, puis ouvrir le TDD RED dédié au raccord public-entry.
 
 ---
 

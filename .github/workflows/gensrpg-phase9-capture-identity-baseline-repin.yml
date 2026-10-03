@@ -55,3 +55,4 @@ jobs:
           gh workflow run gensrpg-architecture-sentinels.yml --ref "$GITHUB_REF_NAME"
           gh workflow run gensrpg-firefox-wall-sentinel.yml --ref "$GITHUB_REF_NAME"
           gh workflow run gensrpg-tactical-dock-sentinel.yml --ref "$GITHUB_REF_NAME"
+# rerun after canonical identity guard alignment

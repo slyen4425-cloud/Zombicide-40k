@@ -41,14 +41,106 @@ Le but de ce pré-audit n'est pas de supprimer ces conditions immédiatement mai
 
 ## Rule 26 gate
 
-Le contenu exact de `index.html` est requis.
+Gate franchie avec `work50.zip/index50.txt`.
 
-Attendu :
-- commit `c2d80eea97d1b9111f2a1ec506dafde9c2eb772e`
-- blob `f523410e175ee4946059da8e8ee8519295fb63c5`
-- taille `8169430`
+Vérification :
+- commit de référence `c2d80eea97d1b9111f2a1ec506dafde9c2eb772e` ;
+- taille `8169430` octets ;
+- blob Git recalculé `f523410e175ee4946059da8e8ee8519295fb63c5` ;
+- HTML valide.
 
-L'ancienne copie `work43.zip/index43.txt` correspond au blob précédent et n'est plus suffisante pour ce chantier.
+## Cartographie exacte
+
+### 1. Identité Dungeon trop large
+
+`isDungeonMode()` lit le profil actif puis renvoie `p?.gameStyle==="dungeon"`. Le built-in Monster Capture ayant encore ce style, Capture est donc automatiquement considérée Dungeon par tous les consommateurs historiques de ce helper.
+
+Le fichier exact contient 126 appels `isDungeonMode()`. Ils ne peuvent pas être inversés globalement dans un seul lot : plusieurs contrôlent encore équipement RPG, économie, UI, événements, combat et autres services historiques partagés.
+
+### 2. Frontières Capture encore dépendantes du style Dungeon
+
+Les fonctions suivantes exigent actuellement `gameStyle="dungeon"` pour reconnaître Capture :
+- `gensCapturePregameMode()` ;
+- `gensPureCaptureSheetMode()` ;
+- `gensShellActiveModuleV1()` ;
+- `gensMode151()` ;
+- `gensIsCaptureGameplay()` ;
+- `gensContentFamilyForProfile()` ;
+- `gensGameplayModules()`.
+
+### 3. Helper Capture existant non canonique
+
+`gensIsCaptureGameplay(profile)` est le meilleur noyau historique mais ne peut pas devenir l'autorité tel quel :
+- il rejette tout profil qui n'est pas `gameStyle="dungeon"` ;
+- il appelle `ensureRpgProfileData(profile)` et peut donc normaliser/muter des données ;
+- une identité de module doit rester pure et déterministe.
+
+Il devra déléguer vers l'autorité publique, pas coexister comme second détecteur.
+
+### 4. Identité Capture explicite déjà présente dans les données
+
+Le seed Monster Capture porte déjà :
+- `rpgUniverse.gameplay.profile="creature"` ;
+- `rpgUniverse.gameplay.modules.capture=true` ;
+- `rpgUniverse.gameplay.modules.controllableCreatures=true`.
+
+Ces marqueurs permettent d'identifier Capture sans utiliser Dungeon.
+
+Pour préserver la parité des profils existants, la future autorité pure peut reprendre la sémantique historique explicite de `gensIsCaptureGameplay()` sans son test Dungeon ni sa mutation : profil gameplay `creature` **ou** couple `capture + controllableCreatures`.
+
+### 5. Participants encore couplés à Dungeon
+
+`normalizeGameParticipants()` utilise encore `isDungeonMode()` pour choisir sa branche de filtrage.
+
+`availableParticipantHeroIds()` appelle encore `ensureDungeonContent()` lorsque `isDungeonMode()` est vrai. Ce chemin est donc réellement emprunté par Capture aujourd'hui.
+
+Ces deux responsabilités sont volontairement différées : modifier `isDungeonMode()` dès le premier seam changerait trop de services simultanément.
+
+### 6. Resume Dungeon déjà capable d'exclure Capture
+
+Le propriétaire de reprise Dungeon contient déjà :
+`const capture=...isCaptureContext138();` puis `const dungeon=...isDungeonMode()&&!capture;`.
+
+C'est une preuve importante : la sécurité Dungeon peut rester stricte tout en distinguant une identité Capture indépendante.
+
+## Autorité canonique sélectionnée
+
+Cible du prochain raccord :
+`GensCaptureV1.isProfile(profile)`.
+
+Contraintes :
+- fonction pure ;
+- aucune lecture DOM/storage ;
+- aucune mutation de profil ;
+- aucune dépendance `gameStyle="dungeon"` ou `isDungeonMode()` ;
+- pas de fallback global ;
+- un seul propriétaire de la décision Capture/non-Capture.
+
+Les helpers historiques Capture devront déléguer à cette fonction, puis être retirés progressivement lorsqu'ils ne servent plus.
+
+## Premier seam runtime proposé
+
+Le premier seam ne touche pas les comportements RPG profonds. Il raccorde uniquement les frontières d'identité :
+1. ajouter `GensCaptureV1.isProfile(profile)` ;
+2. faire déléguer `gensIsCaptureGameplay()` ;
+3. faire déléguer `gensCapturePregameMode()` et `gensPureCaptureSheetMode()` ;
+4. faire classer Capture par le Shell via cette autorité avant la branche Dungeon ;
+5. faire déléguer `gensMode151()` et `isCaptureContext138()` ;
+6. permettre à `gensContentFamilyForProfile()` et à la lecture des modules de reconnaître Capture avant leur garde Dungeon.
+
+`isDungeonMode()` reste inchangé dans ce seam. Son découplage sera un chantier ultérieur, sous TDD séparé.
+
+## TDD RED à préparer
+
+Le prochain TDD RED devra exiger :
+- API publique `GensCaptureV1.isProfile(profile)` ;
+- parité vraie pour le built-in Monster Capture ;
+- faux pour Dungeon built-in et Survival ;
+- aucune dépendance `gameStyle`/`isDungeonMode` dans cette API ;
+- délégation des frontières d'identité listées ;
+- `isDungeonMode()` inchangé ;
+- lancement Capture/provider/victoire-reprise/non-interférence toujours GREEN.
+
 
 ## Sortie attendue
 

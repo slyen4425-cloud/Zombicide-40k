@@ -65,9 +65,43 @@ Fichier requis pour cette inspection :
 
 Aucune inspection exacte de l'identité inline ni aucun TDD RED runtime ne doit utiliser l'ancienne copie `02a052bc...`.
 
+## Rule 26 validée
+
+`work50.zip/index50.txt` vérifié :
+- taille `8169430` octets ;
+- blob Git `f523410e175ee4946059da8e8ee8519295fb63c5` ;
+- correspondance exacte avec le `index.html` du checkpoint GREEN `c2d80eea97d1b9111f2a1ec506dafde9c2eb772e`.
+
+## Faits d'ownership
+
+- `isDungeonMode()` considère encore tout profil `gameStyle="dungeon"` comme Dungeon, donc Capture reste incluse dans ses usages historiques ;
+- `gensCapturePregameMode()`, `gensPureCaptureSheetMode()`, `gensShellActiveModuleV1()` et `gensMode151()` exigent encore directement `gameStyle="dungeon"` pour reconnaître Capture ;
+- `gensContentFamilyForProfile()` refuse tout profil non-Dungeon avant même de lire les modules Capture ;
+- `gensGameplayModules()` refuse également les profils non-Dungeon ;
+- `normalizeGameParticipants()` prend encore la branche `isDungeonMode()` ;
+- `availableParticipantHeroIds()` appelle encore `ensureDungeonContent()` lorsque `isDungeonMode()` est vrai ;
+- `gensIsCaptureGameplay()` existe déjà mais mélange identité et mutation : il exige `gameStyle="dungeon"` et appelle `ensureRpgProfileData(profile)` ;
+- le seed Monster Capture possède déjà une identité explicite indépendante du style : `gameplay.profile="creature"`, `modules.capture=true`, `modules.controllableCreatures=true` ;
+- la reprise Dungeon protège déjà Capture avec `isDungeonMode() && !capture`, preuve que les deux concepts peuvent être séparés sans fusion d'autorité.
+
+## Seam minimal retenu
+
+Créer une seule autorité publique pure `GensCaptureV1.isProfile(profile)` basée sur les marqueurs Capture explicites du gameplay, sans DOM, storage, mutation ni dépendance Dungeon.
+
+Le premier raccord d'identité devra seulement faire déléguer les frontières de classification existantes vers cette autorité :
+- `gensIsCaptureGameplay()` ;
+- `gensCapturePregameMode()` ;
+- `gensPureCaptureSheetMode()` ;
+- `gensShellActiveModuleV1()` ;
+- `gensMode151()` ;
+- `isCaptureContext138()` ;
+- `gensContentFamilyForProfile()` / lecture des modules afin que Capture puisse être reconnue avant le test Dungeon.
+
+`isDungeonMode()` **ne sera pas modifié dans ce premier seam**. Ses usages profonds seront retirés de Capture par lots séparés après caractérisation, notamment participants et services RPG partagés.
+
 ## Prochaine étape
 
-Recevoir et vérifier le `index.html` exact du SHA de base, puis terminer le pré-audit d'identité Capture. Aucun runtime avant cette gate.
+Ajouter la sentinelle de caractérisation à la CI. Après triple CI GREEN, fermer ce pré-audit par checkpoint puis ouvrir un TDD RED dédié à l'autorité `GensCaptureV1.isProfile(profile)`.
 
 ---
 

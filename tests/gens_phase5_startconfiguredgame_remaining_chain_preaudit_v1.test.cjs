@@ -131,7 +131,7 @@ for(const id of ids){
   );
 }
 
-// Shell/Capture remain contract-only. Dungeon now carries only the first pure Phase 7 exploration slice.
+// Shell remains contract-only. Capture now carries only the Phase 9 public provider boundary; Dungeon keeps its reviewed Phase 7 slice.
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.owns.includes('active module/session routing'));
 assert.ok(shellContract.owns.includes('global screen transitions'));
@@ -139,8 +139,11 @@ assert.ok(shellContract.consumes.includes('module public entry contracts'));
 assert.ok(shellContract.forbidden.includes('module gameplay rules'));
 assert.ok(shellContract.forbidden.includes('private module runtime state'));
 
-assert.equal(captureContract.status,'contract-only-not-loaded');
-assert.ok(captureContract.owns.includes('Monster Capture runtime'));
+assert.equal(captureContract.status,'partial-runtime-loaded');
+assert.equal(captureContract.activatedPhase,9);
+assert.equal(captureContract.publicRuntimeApi,'GensCaptureV1');
+assert.ok(captureContract.owns.includes('Monster Capture public runtime entry'));
+assert.ok(captureContract.owns.includes('Capture module-launch provider'));
 assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 
 assert.equal(dungeonContract.status,'partial-runtime-loaded');
@@ -151,10 +154,12 @@ assert.ok(dungeonContract.owns.includes('exploration'));
 assert.ok(dungeonContract.forbidden.includes('Capture runtime'));
 assert.ok(dungeonContract.invariants.includes('the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector generated branch chance gate and generated branch scene descriptor builder'));
 
-for(const [name,src] of [['shell',shellEntry],['capture',captureEntry]]){
-  assert.doesNotMatch(src,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
-    name+' Phase 3 entry must remain inert during this preaudit');
-}
+assert.doesNotMatch(shellEntry,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
+  'Shell Phase 3 entry must remain inert during this preaudit');
+assert.match(captureEntry,/GensCaptureV1/);
+assert.match(captureEntry,/function startModuleSession\(\)/);
+assert.doesNotMatch(captureEntry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+  'Capture Phase 9 public entry must remain routing-only');
 assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
   'Dungeon Phase 7 entry must retain the pure generated advance planner');
 assert.match(dungeonEntry,/function pickWeightedGeneratedRoomKind\(/,

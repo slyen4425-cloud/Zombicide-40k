@@ -88,12 +88,18 @@ assert.ok(shellContract.consumes.includes('module public entry contracts'));
 assert.ok(shellContract.forbidden.includes('module gameplay rules'));
 assert.ok(shellContract.forbidden.includes('private module runtime state'));
 
-assert.equal(captureContract.status,'contract-only-not-loaded');
-assert.ok(captureContract.owns.includes('Monster Capture runtime'));
+assert.equal(captureContract.status,'partial-runtime-loaded');
+assert.equal(captureContract.activatedPhase,9);
+assert.equal(captureContract.publicRuntimeApi,'GensCaptureV1');
+assert.ok(captureContract.owns.includes('Monster Capture public runtime entry'));
+assert.ok(captureContract.owns.includes('Capture module-launch provider'));
 assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 
-assert.doesNotMatch(captureEntry,/window\.|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
-  'Capture Phase 3 entry must remain inert during preaudit');
+assert.match(captureEntry,/GensCaptureV1/);
+assert.match(captureEntry,/function install\(legacyStart\)/);
+assert.match(captureEntry,/function startModuleSession\(\)/);
+assert.doesNotMatch(captureEntry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+  'Capture Phase 9 public entry must remain routing-only');
 
 assert.match(blocks.captureFix135,/target135\(/);
 assert.match(blocks.captureFix135,/render135\(/);

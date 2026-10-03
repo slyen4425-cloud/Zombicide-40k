@@ -71,17 +71,20 @@ assert.ok(shellContract.owns.includes('global screen transitions'),
 assert.ok(shellContract.consumes.includes('module public entry contracts'),
   'Shell contract must consume module public entry contracts');
 assert.equal(shellContract.status,'contract-only-not-loaded');
-assert.equal(captureContract.status,'contract-only-not-loaded');
+assert.equal(captureContract.status,'partial-runtime-loaded');
+assert.equal(captureContract.activatedPhase,9);
+assert.equal(captureContract.publicRuntimeApi,'GensCaptureV1');
 assert.equal(dungeonContract.status,'partial-runtime-loaded');
 assert.equal(dungeonContract.activatedPhase,7);
 assert.equal(dungeonContract.publicRuntimeApi,'GensDungeonV1');
 
-for(const [name,entry] of [['shell',shellEntry],['capture',captureEntry]]){
-  assert.doesNotMatch(entry,/window\.[A-Za-z_$][\w$]*\s*=/,
-    name+' Phase 3 entry must remain inert during this preaudit');
-  assert.doesNotMatch(entry,/addEventListener|MutationObserver|setTimeout|setInterval/,
-    name+' Phase 3 entry must not gain compatibility side effects');
-}
+assert.doesNotMatch(shellEntry,/window\.[A-Za-z_$][\w$]*\s*=/,
+  'Shell Phase 3 entry must remain inert during this preaudit');
+assert.doesNotMatch(shellEntry,/addEventListener|MutationObserver|setTimeout|setInterval/,
+  'Shell Phase 3 entry must not gain compatibility side effects');
+assert.match(captureEntry,/GensCaptureV1/);
+assert.doesNotMatch(captureEntry,/returnToPrimaryView|GensShellScreenReturnV1|document\.|localStorage|sessionStorage|addEventListener|MutationObserver|setTimeout|setInterval/,
+  'Capture module-launch activation must not take screen-return or side-effect authority');
 assert.match(dungeonEntry,/function planGeneratedAdvance\(/,
   'Dungeon Phase 7 entry must retain the pure generated-advance planner');
 assert.match(dungeonEntry,/function pickWeightedGeneratedRoomKind\(/,

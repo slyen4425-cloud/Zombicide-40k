@@ -50,14 +50,16 @@ for(const module of modules){
   const contract=json(contractPath);
   const entry=read(entryPath);
 
-  const partialRuntime=module==='survival'||module==='dungeon';
+  const partialRuntime=module==='survival'||module==='dungeon'||module==='capture';
   const expectedStatus=partialRuntime?'partial-runtime-loaded':'contract-only-not-loaded';
   assert.equal(contract.status,expectedStatus,
     module+(module==='survival'
       ?' may activate only its Phase 6 wave-rules slice'
       :module==='dungeon'
         ?' may activate only its pure Phase 7 exploration slices'
-        :' must remain contract-only'));
+        :module==='capture'
+          ?' may activate only its Phase 9 public module-launch boundary'
+          :' must remain contract-only'));
   assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
     module+' must declare moduleScreenReturn');
   assert.deepEqual(contract.publicEntries.moduleScreenReturn,{
@@ -90,6 +92,15 @@ for(const module of modules){
       'activating the Dungeon planner must not implement or take ownership of screen return');
     assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Tactical|Capture|Survival|PvP/,
       'active Dungeon generated-advance slice must stay pure and isolated');
+  }else if(module==='capture'){
+    assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
+    assert.equal(contract.activatedPhase,9);
+    assert.match(entry,/GensCaptureV1/);
+    assert.match(entry,/function startModuleSession\(\)/);
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating the Capture launch provider must not implement screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+      'Capture public launch entry must remain routing-only');
   }else{
     assert.equal(executable,'"use strict";',module+' Phase 3 entry must remain inert');
     assert.doesNotMatch(entry,/window\.|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/,

@@ -7,6 +7,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
+const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -67,7 +68,9 @@ assert.match(dc200,/const gensDungeonStartConfiguredGame200V1=async function/,'C
 assert.doesNotMatch(dc200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global owner must remain retired');
 assert.match(dc200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Dungeon provider S4 must remain');
 
-assert.match(index,/GensShellModuleLaunchV1\.register\("capture"/,'Capture provider S3 must remain registered');
+assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,'Capture139 must no longer register the public provider directly');
+assert.match(c139,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,'Capture139 must bind its stable session initializer into the public entry');
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/,'Capture public entry must keep the provider registered exactly once');
 assert.match(finalShell,/window\.startConfiguredGame=async function/,'Shell final authority must remain visible');
 assert.match(finalShell,/launchService\.startModuleSession\(moduleId\)/,'Shell final authority must continue delegating through the module registry');
 

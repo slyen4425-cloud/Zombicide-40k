@@ -37,10 +37,10 @@ const executable=shellEntry.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,
 assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert before raccord');
 
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
-assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'"),
-  'Phase 3 guard must explicitly recognize the Survival Phase 6, Dungeon Phase 7 and Tactical Phase 8 partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:82'),
-  'Phase 3 guard must track the current 82-file production owner graph');
+assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'"),
+  'Phase 3 guard must explicitly recognize Survival, Dungeon, Tactical and Capture partial-runtime entries');
+assert.ok(phase3Test.includes('productionOwnerGraph:83'),
+  'Phase 3 guard must track the current 83-file production owner graph');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 assert.doesNotMatch(bootstrap,/assets\/gensrpg\/shell\/entry-v1\.js/,

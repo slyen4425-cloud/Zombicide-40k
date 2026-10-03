@@ -51,7 +51,14 @@ jobs:
           if(residualCalls!==1)throw new Error('expected one remaining Capture138 cleanup call in startConfiguredGame, got '+residualCalls);
           src=src.replace(/[ \\t]*captureCleanDungeonUi138\\(\\);[ \\t]*/,'');
 
-          if(/cleanDungeonPregame137|captureCleanDungeonUi138/.test(src))throw new Error('retired pregame cleanup authority still present');
+          const residualOwnership=[...src.matchAll(/cleanDungeonPregame137|captureCleanDungeonUi138/g)].map(m=>({
+            name:m[0],
+            context:src.slice(Math.max(0,m.index-220),Math.min(src.length,m.index+360)).replace(/\s+/g,' ').trim()
+          }));
+          if(residualOwnership.length){
+            console.log(JSON.stringify({residualOwnership},null,2));
+            throw new Error('retired pregame cleanup authority still present');
+          }
           if(!src.includes('openSessionDungeonSetup'))throw new Error('protected Capture137 Dungeon setup guard was lost');
           if(!src.includes('gensEnsureDungeonAdventureButton139'))throw new Error('protected Capture139 pregame owner was lost');
 

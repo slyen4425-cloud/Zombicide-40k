@@ -71,9 +71,37 @@ Cible :
 - déplacement accidentel de gameplay dans l'entrée ;
 - régression Capture/Dungeon par retrait prématuré d'une compatibilité.
 
+## Résultat GREEN
+
+SHA runtime validé :
+`c2d80eea97d1b9111f2a1ec506dafde9c2eb772e`
+
+Checkpoint final :
+`checkpoint/gensrpg-phase9-capture-public-entry-raccord-green-2026-10-03`
+
+Triple CI :
+- Architecture + Browser `37107319589` — SUCCESS ;
+- Firefox `37107319397` — SUCCESS ;
+- Tactical Dock `37107319444` — SUCCESS.
+
+Preuves navigateur incluses dans Architecture :
+- Monster Capture actuel par le vrai Shell — SUCCESS ;
+- provider public Capture — SUCCESS ;
+- victoire/reprise inter-module — SUCCESS ;
+- composition complète Capture — SUCCESS ;
+- non-interférence des quatre modules — SUCCESS.
+
+Runtime :
+- `GensCaptureV1` possède désormais le provider public Capture ;
+- Capture139 conserve uniquement le legacy session initializer ;
+- Shell reste routing-only ;
+- un seul provider Capture ;
+- aucun gameplay/Combat/Exploration ni dette Dungeon déplacé dans ce lot ;
+- `index.html` blob `f523410e175ee4946059da8e8ee8519295fb63c5`, taille `8169430`.
+
 ## Prochaine étape
 
-Créer la sentinelle TDD RED dédiée. Aucun runtime ne sera modifié avant constat du RED attendu.
+Ouvrir un **pré-audit Capture identity ownership** pour caractériser et retirer progressivement l'identité fonctionnelle héritée `gameStyle="dungeon"` / `isDungeonMode()`, sans modifier le runtime avant TDD RED dédié.
 
 ---
 # PHASE 9 — PRÉ-AUDIT CAPTURE PUBLIC-ENTRY OWNERSHIP — 2026-10-03

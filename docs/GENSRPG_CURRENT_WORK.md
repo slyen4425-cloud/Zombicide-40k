@@ -1,3 +1,76 @@
+# PHASE 9 — PRÉ-AUDIT CAPTURE IDENTITY OWNERSHIP — 2026-10-03
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-public-entry-raccord-green-2026-10-03`
+
+SHA de base :
+`c2d80eea97d1b9111f2a1ec506dafde9c2eb772e`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-identity-ownership-preaudit-2026-10-03`
+
+Branche :
+`work/gensrpg-phase9-capture-identity-ownership-preaudit-2026-10-03`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture-public-entry-raccord-green-2026-10-03`
+
+## Mission
+
+Caractériser exactement l'identité fonctionnelle Capture encore héritée de Dungeon avant tout retrait de `gameStyle="dungeon"` ou de `isDungeonMode()`.
+
+Objectif Phase 9 :
+Capture doit être reconnue comme module autonome de premier niveau par une autorité Capture explicite, sans utiliser Dungeon comme identité fonctionnelle.
+
+## Périmètre du pré-audit
+
+Lecture/caractérisation uniquement :
+1. inventorier tous les chemins où Capture dépend encore de `gameStyle="dungeon"` ;
+2. inventorier les appels `isDungeonMode()` qui affectent réellement Capture ;
+3. distinguer classification Shell, sélection de profil, pré-game, participants, UI et gameplay ;
+4. protéger strictement le vrai Dungeon ;
+5. déterminer la plus petite autorité Capture canonique à introduire ou raccorder ;
+6. préparer un TDD RED dédié avant tout changement runtime.
+
+## Cibles connues à vérifier
+
+- `gensCapturePregameMode()` ;
+- `gensPureCaptureSheetMode()` ;
+- `gensShellActiveModuleV1()` ;
+- `normalizeGameParticipants()` ;
+- built-in Monster Capture / profil actif ;
+- protections Resume et lancement Dungeon ;
+- UI Capture/Dungeon V137/V138/V151.
+
+## Hors périmètre
+
+- public-entry Capture déjà GREEN ;
+- Capture139 session initializer ;
+- `ensureBaseGameProfile()` ;
+- `saveActiveEnemies()` / `updateDungeonExploreButtons()` ;
+- Combat Dynamique ;
+- Exploration / World Builder / Map Actor ;
+- migration créatures/compétences/stats/progression ;
+- Survival, PvP, Tactical ;
+- `main` gelée.
+
+## Rule 26
+
+Le runtime exact a changé pendant le raccord public-entry.
+
+Fichier requis pour cette inspection :
+- commit : `c2d80eea97d1b9111f2a1ec506dafde9c2eb772e` ;
+- blob `index.html` : `f523410e175ee4946059da8e8ee8519295fb63c5` ;
+- taille : `8169430` octets.
+
+Aucune inspection exacte de l'identité inline ni aucun TDD RED runtime ne doit utiliser l'ancienne copie `02a052bc...`.
+
+## Prochaine étape
+
+Recevoir et vérifier le `index.html` exact du SHA de base, puis terminer le pré-audit d'identité Capture. Aucun runtime avant cette gate.
+
+---
+
 # PHASE 9 — RACCORD PUBLIC-ENTRY CAPTURE — 2026-10-03
 
 Base GREEN :

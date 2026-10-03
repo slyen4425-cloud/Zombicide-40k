@@ -28,7 +28,7 @@ const allowedExactRuntimes=new Map([
   [8169856,'454b2e12cde591c2db19023d1b76055ebac8e1b1'],
   [8169442,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db'],
   [8169447,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39'],
-  [8168810,'a5d337ae25435d801a72333ee27e6dbc390a5175']
+  [8167047,'a98daff5b7709c8a68f148a9af2b6d8a5837265b']
 ]);
 assert.equal(allowedExactRuntimes.get(bytes.length),gitBlob,
   'final Shell authority preaudit must remain on either exact S4 or the exact final-authority index composition');

@@ -1,3 +1,109 @@
+# PHASE 9 — PRÉ-AUDIT CAPTURE PUBLIC-ENTRY OWNERSHIP — 2026-10-03
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-recovery-preaudit-green-2026-10-03`
+
+SHA de base :
+`08f727f7fa5dab01515c03ae57937aa5ca8b7810`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-public-entry-ownership-preaudit-2026-10-03`
+
+Branche :
+`work/gensrpg-phase9-capture-public-entry-ownership-preaudit-2026-10-03`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture-recovery-preaudit-green-2026-10-03`
+
+## Mission
+
+Caractériser exactement la frontière publique de lancement Capture avant le premier micro-lot runtime Phase 9.
+
+Cible architecturale :
+- Capture est un module autonome de premier niveau, frère de Survie, Dungeon et PvP ;
+- le Shell route seulement vers Capture ;
+- `assets/gensrpg/capture/entry-v1.js` doit devenir la frontière publique Capture réellement chargée ;
+- l'entrée publique pourra d'abord déléguer à l'autorité historique Capture139 afin de préserver le comportement ;
+- aucune règle Combat Dynamique ou Exploration n'est intégrée dans ce lot ;
+- aucune dépendance Dungeon n'est retirée avant caractérisation exacte et parité.
+
+## Périmètre du pré-audit
+
+Lecture et caractérisation uniquement :
+1. vérifier le provider public Capture déjà enregistré par la Phase 5 ;
+2. inspecter le propriétaire inline `captureFix139` et sa référence stable ;
+3. cartographier les responsabilités réellement nécessaires au démarrage Capture ;
+4. distinguer dépendances Capture propres, compatibilités historiques Dungeon et services Core/Shell ;
+5. vérifier les protections Resume / Dungeon routing qui excluent déjà Capture ;
+6. définir le plus petit raccord `Shell -> capture/entry-v1.js -> Capture139` sans deuxième autorité ;
+7. préparer seulement ensuite un TDD RED dédié.
+
+## Rule 26 — gate obligatoire
+
+Le contenu exact de `index.html` est nécessaire pour inspecter `captureFix139`.
+
+Fichier attendu pour ce chantier :
+- commit : `08f727f7fa5dab01515c03ae57937aa5ca8b7810` ;
+- blob Git attendu : `02a052bc231728eb383e17c83e61a958be0ac58c` ;
+- taille attendue : `8169555` octets.
+
+Le blob est identique au checkpoint final Phase 8 `03da28af683607719a635f89db5f47c41c9fbbe6`.
+
+Interdiction :
+- pas de lecture répétée du gros fichier via GitHub ;
+- pas d'inspection exacte de Capture139 à partir d'une vieille copie ;
+- pas de runtime avant réception et vérification du fichier exact fourni par l'utilisateur.
+
+## Autorités protégées
+
+- navigation/lancement global : Shell ;
+- runtime Capture cible : Capture ;
+- runtime Dungeon : Dungeon uniquement ;
+- Core partagé : services génériques uniquement ;
+- Combat Capture refondu : laboratoire Combat Dynamique, non raccordé ici ;
+- Exploration Capture refondue : laboratoire Exploration, non raccordée ici ;
+- production `main` : gelée.
+
+## Fonctions/systèmes hors périmètre
+
+- gameplay Capture ;
+- combat Capture ;
+- créatures/compétences/stats/progression ;
+- WorldDocument/World Builder/Map Actor ;
+- Dungeon gameplay ;
+- Survival ;
+- PvP ;
+- Tactical ;
+- assets/audio ;
+- persistance/migrations ;
+- tout merge/cherry-pick de laboratoire.
+
+## Tests prévus après inspection exacte
+
+- caractérisation de l'ordre et de l'ownership réel Capture139 ;
+- preuve que le provider Shell reste routing-only ;
+- preuve que l'entrée Capture cible ne crée aucune seconde autorité ;
+- parité Capture historique/public provider ;
+- non-interférence Dungeon/Survival/PvP ;
+- sentinelle interdisant `gameStyle="dungeon"` / `isDungeonMode()` comme identité cible de Capture ;
+- TDD RED séparé avant le premier changement runtime.
+
+## Risques
+
+- connecter le labo trop tôt et créer deux architectures Capture ;
+- déplacer du gameplay dans le Shell ;
+- faire de l'entrée Capture un wrapper permanent sans ownership ;
+- retirer une compatibilité Dungeon encore réellement requise ;
+- confondre substrat historique `gameStyle="dungeon"` avec contrat cible ;
+- réintroduire une seconde autorité de lancement.
+
+## Prochaine étape
+
+Recevoir et vérifier le `index.html` Rule 26 exact, puis terminer le pré-audit `Capture public-entry ownership`.
+Aucun runtime n'est autorisé avant cette vérification.
+
+---
+
 # PHASE 9 — PRÉ-AUDIT DE REPRISE MONSTER CAPTURE — 2026-10-02
 
 ## Validation GREEN du pré-audit de reprise

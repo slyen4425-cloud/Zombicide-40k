@@ -9425,7 +9425,8 @@ async function gensrpgPullParticipants(){
 }
 function availableParticipantHeroIds(){
   applyCustomHeroesMulti();
-  if(isDungeonMode() && typeof ensureDungeonContent==="function")ensureDungeonContent();
+  const capture=!!(typeof GensCaptureV1!=="undefined" && typeof GensCaptureV1.isProfile==="function" && GensCaptureV1.isProfile(getActiveGameProfile()));
+  if(!capture && isDungeonMode() && typeof ensureDungeonContent==="function")ensureDungeonContent();
   const ids=new Set(Object.keys(CHARS));
   loadCustomHeroesMulti().forEach(h=>{if(h?.id)ids.add(String(h.id));});
   const allowed=allowedHeroIdsForActiveProfile();
@@ -9440,11 +9441,13 @@ function normalizeGameParticipants(){
   const raw=[...new Set(loadGameParticipants().map(String).filter(Boolean))];
 
   // Core 0.96 — IMPORTANT :
-  // en Dungeon, la sélection faite dans la préparation est la seule source de vérité.
+  // en Dungeon et Capture, la sélection faite dans la préparation est la seule source de vérité.
+  // Capture utilise son identité canonique, sans emprunter l'identité Dungeon.
   // Le vieux gestionnaire de tours ne doit JAMAIS réinjecter des héros d'une session
   // précédente dans la partie courante.
   try{
-    if(typeof isDungeonMode==="function" && isDungeonMode()){
+    const capture=!!(typeof GensCaptureV1!=="undefined" && typeof GensCaptureV1.isProfile==="function" && GensCaptureV1.isProfile(getActiveGameProfile()));
+    if(capture || (typeof isDungeonMode==="function" && isDungeonMode())){
       const available=new Set(availableParticipantHeroIds().map(String));
       const filtered=raw.filter(id=>available.has(id));
       if(JSON.stringify(raw)!==JSON.stringify(filtered))saveGameParticipants(filtered);

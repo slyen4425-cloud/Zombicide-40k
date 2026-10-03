@@ -16,8 +16,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168382,'identity preaudit must use the Rule 26 verified public-entry runtime');
-assert.equal(blob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1','identity preaudit must use the exact verified index blob');
+assert.equal(bytes.length,8168810,'identity preaudit must use the current verified Phase 9 runtime');
+assert.equal(blob,'a5d337ae25435d801a72333ee27e6dbc390a5175','identity preaudit must use the exact verified post-participant-raccord index blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -91,8 +91,10 @@ assert.match(c151,/p\?\.gameStyle==="dungeon"/);
 assert.match(captureGameplay,/GensCaptureV1\.isProfile\(profile\)/);
 assert.doesNotMatch(captureGameplay,/gameStyle|ensureRpgProfileData/);
 
+assert.match(normalize,/GensCaptureV1\.isProfile\(getActiveGameProfile\(\)\)/);
 assert.match(normalize,/isDungeonMode\(\)/);
-assert.match(available,/isDungeonMode\(\) && typeof ensureDungeonContent==="function"\)ensureDungeonContent\(\)/);
+assert.match(available,/GensCaptureV1\.isProfile\(getActiveGameProfile\(\)\)/);
+assert.match(available,/!capture && isDungeonMode\(\) && typeof ensureDungeonContent==="function"\)ensureDungeonContent\(\)/);
 
 assert.match(c138,/window\.isCaptureContext138=function/);
 assert.match(c138,/GensCaptureV1/);
@@ -122,7 +124,7 @@ console.log(JSON.stringify({
     captureSeedStillDungeonStyle:true,
     isDungeonModeCalls:(index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length,
     boundaryIdentityCanonical:true,
-    participantDungeonDependency:true
+    participantDungeonDependency:false
   },
   selectedAuthority:'GensCaptureV1.isProfile(profile)',
   firstRuntimeSeam:'identity boundaries only; isDungeonMode unchanged',

@@ -1,86 +1,65 @@
-# PHASE 9 — PRÉ-AUDIT COUPLAGES CAPTURE / IDENTITÉ DUNGEON — 2026-10-03
+# PHASE 9 — RACCORD OWNERSHIP UI PRÉ-GAME CAPTURE/DUNGEON — 2026-10-03
 
 Base GREEN :
-`checkpoint/gensrpg-phase9-capture-participant-identity-raccord-green-2026-10-03`
+`checkpoint/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-green-2026-10-03`
 
 SHA de base :
-`0912042b13c9c0f3b2a3b151e43137463b644b28`
+`8fdf9474560375f47bffe824bbf5531ce60f07c9`
 
 Checkpoint de départ :
-`checkpoint/gensrpg-start-phase9-capture-dungeon-identity-coupling-preaudit-2026-10-03`
+`checkpoint/gensrpg-start-phase9-capture-pregame-ui-ownership-raccord-2026-10-03`
 
 Branche :
-`work/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-2026-10-03`
+`work/gensrpg-phase9-capture-pregame-ui-ownership-raccord-2026-10-03`
 
 Dernier checkpoint GREEN :
-`checkpoint/gensrpg-phase9-capture-participant-identity-raccord-green-2026-10-03`
+`checkpoint/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-green-2026-10-03`
 
-## État
+## Mission unique
 
-Pré-audit diagnostic terminé fonctionnellement, runtime inchangé.
+Consolider uniquement l'ownership du bouton/page Aventure Dungeon dans le pré-game afin de supprimer la multi-autorité UI historique entre Capture137, Capture138 et Capture139.
 
-Rule 26 :
-- `index.html` = `8168810` octets ;
-- blob = `a5d337ae25435d801a72333ee27e6dbc390a5175`.
+Cible :
+- Capture139 reste temporairement l'unique propriétaire de cette frontière UI via `gensEnsureDungeonAdventureButton139()` ;
+- les cleanups redondants 137/138 liés au bouton/page Dungeon sont retirés ;
+- aucune autre responsabilité 137/138 n'est déplacée dans ce lot.
 
-Autorité Capture canonique conservée :
-`GensCaptureV1.isProfile(profile)`.
+## RED attendu
 
-Participants déjà découplés :
-- `normalizeGameParticipants()` utilise l'identité Capture explicite ;
-- `availableParticipantHeroIds()` n'hydrate plus Dungeon pour Capture.
+Avant toute mutation runtime, la sentinelle doit échouer parce que :
+- `cleanDungeonPregame137` existe encore ;
+- Capture137 possède encore un wrapper `updateGameStyleUi` + timer de nettoyage ;
+- `captureCleanDungeonUi138` existe encore ;
+- Capture138 possède encore les wrappers/listeners/timers qui maintiennent cette visibilité ;
+- Capture139 possède déjà `gensEnsureDungeonAdventureButton139()`.
 
-## Inventaire
+## Invariants
 
-- 126 appels `isDungeonMode()` restent dans le runtime historique.
-- Le seed Monster Capture garde encore `gameStyle:"dungeon"`.
-- Aucun retrait global de `gameStyle` / `isDungeonMode()` n'est autorisé dans le prochain lot.
+- conserver le garde `openSessionDungeonSetup` de Capture137 ;
+- conserver toutes les autres responsabilités Capture137/138 ;
+- ne pas modifier `isDungeonMode()` ;
+- ne pas modifier le seed `gameStyle:"dungeon"` ;
+- ne pas modifier Capture139 session init ;
+- aucun nouveau wrapper/timer/listener ;
+- aucun changement économie/MJ, Combat Dynamique, Exploration/World Builder/Map Actor ;
+- vrai Dungeon inchangé ;
+- Capture provider/identité/participants restent GREEN ;
+- `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-Blocs identité repérés :
-- `dungeonMj72_2Script` ;
-- `captureFix139` ;
-- `gensStability151` ;
-- `builtinMonsterCapture162` ;
-- `dungeonCore100ResumeAndInteractionFix` ;
-- `dungeonCore310PersistenceAndTokens`.
+## Rule 26
 
-Les gardes de `gensStability151`, Core100 resume et Core310 persistence excluent déjà Capture correctement ou ciblent le vrai Dungeon.
+Runtime exact inchangé depuis le checkpoint précédent :
+- taille `8168810` ;
+- blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
 
-## Dette prioritaire sélectionnée
+Aucun changement runtime avant constat du RED.
 
-Le pré-game Dungeon/Capture possède encore **trois autorités UI concurrentes** :
+## Étape immédiate
 
-- Capture137 : `cleanDungeonPregame137` + wrapper `updateGameStyleUi` + timer ;
-- Capture138 : `captureCleanDungeonUi138` + wrappers `renderParticipantSelector` / `updateGameStyleUi` + listener/timers ;
-- Capture139 : `gensEnsureDungeonAdventureButton139` crée déjà le bouton Aventure uniquement pour le vrai Dungeon et le retire sinon.
-
-### Prochain seam
-
-Conserver temporairement Capture139 comme **propriétaire unique** du bouton/page Aventure Dungeon et retirer uniquement les nettoyages UI redondants 137/138.
-
-Conserver dans ce premier seam :
-- le garde `openSessionDungeonSetup` de Capture137 ;
-- toutes les autres responsabilités Capture137/138 ;
-- `isDungeonMode()` ;
-- le seed `gameStyle:"dungeon"` ;
-- Capture139 session init ;
-- économie/MJ ;
-- Combat Dynamique ;
-- Exploration/World Builder/Map Actor.
-
-Interdits :
-- seconde autorité ;
-- nouveau wrapper ;
-- nouveau timer/listener de réparation ;
-- migration globale Capture ;
-- changement `main`.
-
-## Prochaine étape
-
-1. terminer triple CI du pré-audit documentaire ;
-2. créer `checkpoint/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-green-2026-10-03` ;
-3. ouvrir un nouveau lot TDD dédié à la consolidation pré-game Dungeon/Capture ;
-4. écrire le RED avant toute mutation runtime.
+1. créer la sentinelle TDD ;
+2. la brancher à Architecture ;
+3. constater le RED exact ;
+4. seulement ensuite appliquer le diff runtime minimal.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

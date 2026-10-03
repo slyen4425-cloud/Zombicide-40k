@@ -11,7 +11,7 @@ const index=read('index.html');
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([
-  Buffer.from('blob '+bytes.length+'\\0'),
+  Buffer.from('blob '+bytes.length+'\0'),
   bytes
 ])).digest('hex');
 

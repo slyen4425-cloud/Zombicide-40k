@@ -6,7 +6,8 @@
   "plannedEntry": "assets/gensrpg/capture/entry-v1.js",
   "owns": [
     "Monster Capture public runtime entry",
-    "Capture module-launch provider"
+    "Capture module-launch provider",
+    "Capture profile identity classification"
   ],
   "consumes": [
     "core public contracts",
@@ -30,7 +31,8 @@
     "Capture139 remains the sole temporary legacy session initializer during this seam",
     "the entry has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
     "only one Shell register capture provider is active",
-    "historical Dungeon compatibility remains unchanged until separately audited"
+    "historical Dungeon compatibility remains unchanged until separately audited",
+    "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

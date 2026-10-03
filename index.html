@@ -9508,9 +9508,7 @@ function applyPregameGoldToParticipants(ids){
 function gensCapturePregameMode(){
   try{
     const p=getActiveGameProfile();
-    if(!p||p.gameStyle!=="dungeon")return false;
-    if(String(p.id)===String(GAME_PROFILE_DUNGEON_ID))return false;
-    return typeof gensCurrentContentFamily==="function" && gensCurrentContentFamily()==="creature";
+    return !!GensCaptureV1.isProfile(p);
   }catch(e){return false}
 }
 function gensCaptureStarterPool(){
@@ -11042,12 +11040,8 @@ const GENS_CAPTURE_BATTLE_TARGETS=[
 ];
 
 function gensIsCaptureGameplay(profile=getActiveGameProfile()){
-  try{
-    if(!profile||profile.gameStyle!=="dungeon")return false;
-    ensureRpgProfileData(profile);
-    const g=profile.rpgUniverse?.gameplay||{};
-    return g.profile==="creature" || (!!g.modules?.capture && !!g.modules?.controllableCreatures);
-  }catch(e){return false}
+  try{return !!GensCaptureV1.isProfile(profile)}
+  catch(e){return false}
 }
 function gensCaptureRequireMode(){
   if(gensIsCaptureGameplay())return true;
@@ -11579,7 +11573,8 @@ function gensGameplayModules(){
     const id=editorOpen?rpgEditingId:activeGameProfileId();
     if(!id)return empty;
     const p=loadGameProfiles().find(x=>String(x.id)===String(id));
-    if(!p||p.gameStyle!=="dungeon")return empty;
+    if(!p)return empty;
+    if(!window.GensCaptureV1?.isProfile?.(p) && p.gameStyle!=="dungeon")return empty;
     const g=getStoredRpgGameplay(id);
     return {...empty,...(g.modules||{})};
   }catch(e){return empty}
@@ -15908,11 +15903,8 @@ function gensShellActiveModuleV1(){
   let profile=null;
   try{profile=typeof activeGameProfileRaw==="function"?activeGameProfileRaw():null}catch(e){}
   if(!profile)try{profile=typeof getActiveGameProfile==="function"?getActiveGameProfile():null}catch(e){}
-  if(profile?.gameStyle==="dungeon"){
-    let family="";
-    try{family=typeof gensContentFamilyForProfile==="function"?gensContentFamilyForProfile(profile):""}catch(e){}
-    return family==="creature"?"capture":"dungeon";
-  }
+  if(window.GensCaptureV1?.isProfile?.(profile))return "capture";
+  if(profile?.gameStyle==="dungeon")return "dungeon";
   return "survival";
 }
 function gensRegisterModuleScreenReturnV1(moduleId,handler){
@@ -22159,12 +22151,9 @@ const GENS_CONTENT_FAMILIES={
 };
 function gensContentFamilyForProfile(profile){
   if(!profile)return "survival";
+  if(window.GensCaptureV1?.isProfile?.(profile))return "creature";
   if(profile.gameStyle!=="dungeon")return "survival";
   const g=profile.rpgUniverse?.gameplay||{};
-  const mods=g.modules||{};
-  // Les modules réellement actifs ont priorité sur le nom du preset.
-  if(mods.capture && mods.controllableCreatures)return "creature";
-  if(g.profile==="creature")return "creature";
   if(g.profile==="manga")return "manga";
   // RPG classique, narratif et personnalisé sans capture partagent le socle RPG.
   return "rpg";
@@ -23461,9 +23450,7 @@ function saveHeroCreatureState(heroId,st){
 function gensPureCaptureSheetMode(){
   try{
     const p=getActiveGameProfile();
-    if(!p || p.gameStyle!=="dungeon")return false;
-    if(String(p.id)===String(GAME_PROFILE_DUNGEON_ID))return false;
-    return gensCurrentContentFamily()==="creature";
+    return !!GensCaptureV1.isProfile(p);
   }catch(e){return false}
 }
 let captureSheetTab="team";
@@ -26878,11 +26865,8 @@ window.captureRenderBattleLive=function(b=window.gensCurrentCaptureBattle){
 /* ---------- contexte Capture fiable ---------- */
 window.isCaptureContext138=function(){
   try{
-    if(typeof gensPureCaptureSheetMode==="function"&&gensPureCaptureSheetMode())return true;
-    if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return true;
     const p=getActiveGameProfile?.();
-    const fam=typeof gensCurrentContentFamily==="function"?gensCurrentContentFamily():"";
-    return fam==="creature";
+    return !!window.GensCaptureV1?.isProfile?.(p);
   }catch(e){return false}
 };
 
@@ -27947,8 +27931,7 @@ if(typeof info144==="function")window.showAbilityInfo=function(id){
 window.gensMode151=function(){
   try{
     const p=getActiveGameProfile?.();
-    const fam=typeof gensCurrentContentFamily==="function"?gensCurrentContentFamily():"";
-    if(p?.gameStyle==="dungeon" && fam==="creature")return "capture";
+    if(window.GensCaptureV1?.isProfile?.(p))return "capture";
     if(p?.gameStyle==="dungeon")return "dungeon";
     return "other";
   }catch(e){return "other"}

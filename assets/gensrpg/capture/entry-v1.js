@@ -1,9 +1,17 @@
 "use strict";
 
 (function installGensCaptureV1(root){
-  const VERSION="1.0.0";
+  const VERSION="1.1.0";
   let legacyStartConfiguredGame=null;
   let installed=false;
+
+  function isProfile(profile){
+    const gameplay=profile?.rpgUniverse?.gameplay;
+    if(!gameplay||typeof gameplay!=="object")return false;
+    if(gameplay.profile==="creature")return true;
+    const modules=gameplay.modules;
+    return !!(modules&&modules.capture===true&&modules.controllableCreatures===true);
+  }
 
   async function startModuleSession(){
     const shell=root.GensShellModuleLaunchV1;
@@ -32,5 +40,5 @@
     return Object.freeze({installed,legacyBound:typeof legacyStartConfiguredGame==="function"});
   }
 
-  root.GensCaptureV1=Object.freeze({VERSION,install,startModuleSession,status});
+  root.GensCaptureV1=Object.freeze({VERSION,isProfile,install,startModuleSession,status});
 })(typeof window!=="undefined"?window:globalThis);

@@ -7,6 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),
@@ -32,8 +33,10 @@ const registry=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze({');
 assert.ok(registry>0&&registry<c135.start,'Shell module-launch registry must exist before historical module owners');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("survival"/g)||[]).length,1,
   'S2 Survival provider must remain registered exactly once');
-assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,1,
-  'S3 Capture provider must remain registered exactly once');
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,0,
+  'Phase 9 must keep the historical inline Capture registration retired');
+assert.equal((captureEntry.match(/shell\.register\("capture",startModuleSession\)/g)||[]).length,1,
+  'Capture public entry must register the provider exactly once');
 const dungeonProviderCount=(index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length;
 assert.ok(dungeonProviderCount<=1,
   'S4 preaudit/postaudit must never permit duplicate Dungeon providers');

@@ -8,6 +8,7 @@ const crypto=require('node:crypto');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
+const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const workflow=read('.github/workflows/gensrpg-architecture-sentinels.yml');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
@@ -37,13 +38,17 @@ assert.equal((index.match(/function\s+gensShellActiveModuleV1\s*\(/g)||[]).lengt
 assert.match(index,/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze\(\{/,
   'public module-launch registry must remain loaded');
 
-for(const id of ['survival','capture','dungeon']){
+for(const id of ['survival','dungeon']){
   assert.equal(
     (index.match(new RegExp('GensShellModuleLaunchV1\\.register\\(["\\\']'+id+'["\\\']','g'))||[]).length,
     1,
-    id+' provider must remain registered exactly once before Shell authority switch'
+    id+' inline provider must remain registered exactly once before Shell authority switch'
   );
 }
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']capture["']/g)||[]).length,0,
+  'Phase 9 must retire the historical inline Capture provider registration');
+assert.equal((captureEntry.match(/shell\.register\("capture",startModuleSession\)/g)||[]).length,1,
+  'Capture public entry must own exactly one provider registration');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']pvp["']/g)||[]).length,0,
   'PvP must remain without runtime provider while it is a placeholder');
 

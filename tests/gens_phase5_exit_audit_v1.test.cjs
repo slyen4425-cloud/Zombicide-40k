@@ -19,6 +19,7 @@ assert.equal(gitBlob,'f523410e175ee4946059da8e8ee8519295fb63c5',
   'Phase 5 exit audit runtime blob drifted from the Phase 7 generated Boss policy baseline');
 
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
+const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 assert.match(finalShell,/window\.startConfiguredGame\s*=\s*async\s+function/,
   'Shell final authority must own the public startConfiguredGame global');
 assert.match(finalShell,/GensShellModuleLaunchV1/);
@@ -77,8 +78,12 @@ assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
 const startChain=strictChain('startConfiguredGame');
 assert.deepEqual(startChain,['captureFix138','captureFix139','gensDungeonCore01Js'],
   'historical startConfiguredGame chain must stay frozen during the exit audit');
-assert.match(index,/GensShellModuleLaunchV1\.register\(["']capture["']/,
-  'Capture public launch provider must remain registered');
+assert.doesNotMatch(capture139,/GensShellModuleLaunchV1\.register\(["']capture["']/,
+  'Capture139 must no longer register the public launch provider');
+assert.match(capture139,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,
+  'Capture139 must bind only its stable legacy session initializer');
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/,
+  'Capture public entry must own the registered launch provider');
 assert.match(index,/GensShellModuleLaunchV1\.register\(["']dungeon["']/,
   'Dungeon public launch provider must remain registered');
 

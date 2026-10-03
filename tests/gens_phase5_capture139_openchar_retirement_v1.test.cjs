@@ -6,6 +6,7 @@ const path=require('node:path');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],body:m[2]}));
@@ -36,7 +37,9 @@ assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','captureFix
   'openChar-only retirement must not alter historical startConfiguredGame ownership');
 assert.match(capture,/window\.startConfiguredGame\s*=\s*async function\(\)/);
 assert.match(capture,/gensCaptureStartConfiguredGame139V1/);
-assert.match(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);
+assert.doesNotMatch(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);
+assert.match(capture,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/);
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/);
 
 console.log(JSON.stringify({
   scenario:'Phase 5 Capture139 openChar retirement',

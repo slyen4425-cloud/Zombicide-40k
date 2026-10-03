@@ -9,6 +9,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 const workflow=read('.github/workflows/gensrpg-architecture-sentinels.yml');
+const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const pagesWorkflow=read('.github/workflows/main.yml');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
@@ -63,10 +64,14 @@ assert.doesNotMatch(src,/isDungeonMode|isCaptureContext|gensCapture|DungeonCore|
 
 assert.equal((index.match(/function\s+gensShellActiveModuleV1\s*\(/g)||[]).length,1,
   'active module resolver must remain unique');
-for(const id of ['survival','capture','dungeon']){
+for(const id of ['survival','dungeon']){
   assert.equal((index.match(new RegExp('GensShellModuleLaunchV1\\.register\\(["\\\']'+id+'["\\\']','g'))||[]).length,1,
-    id+' provider must remain registered exactly once');
+    id+' inline provider must remain registered exactly once');
 }
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']capture["']/g)||[]).length,0,
+  'Phase 9 must retire the historical inline Capture provider registration');
+assert.equal((captureEntry.match(/shell\.register\("capture",startModuleSession\)/g)||[]).length,1,
+  'Capture public entry must own exactly one provider registration');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']pvp["']/g)||[]).length,0,
   'PvP must remain without a runtime provider');
 assert.match(index,/PVP — À VENIR/,

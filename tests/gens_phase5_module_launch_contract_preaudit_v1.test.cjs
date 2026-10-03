@@ -61,7 +61,7 @@ for(const module of ['survival','dungeon','capture','pvp']){
   assert.ok(entry,module+' must declare the module launch public entry');
   assert.equal(entry.contract,'assets/gensrpg/shell/module-launch-contract-v1.json');
   assert.equal(entry.operation,'startModuleSession');
-  assert.equal(entry.status,'declared-not-loaded');
+  assert.equal(entry.status,module==='capture'?'loaded-public-provider':'declared-not-loaded');
   assert.equal(entry.ownership,'module-owned-session-start');
 
   const src=read('assets/gensrpg/'+module+'/entry-v1.js');
@@ -82,6 +82,15 @@ for(const module of ['survival','dungeon','capture','pvp']){
       'active Dungeon exploration slice must not take module-launch authority');
     assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|Tactical|Capture|Survival|PvP/,
       'active Dungeon exploration slice must remain pure and isolated');
+  }else if(module==='capture'){
+    assert.equal(contract.status,'partial-runtime-loaded');
+    assert.equal(contract.activatedPhase,9);
+    assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
+    assert.match(src,/function startModuleSession\(\)/);
+    assert.match(src,/function install\(legacyStart\)/);
+    assert.match(src,/shell\.register\("capture",startModuleSession\)/);
+    assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+      'Capture Phase 9 public provider entry must remain routing-only');
   }else{
     assert.doesNotMatch(src,/window\.|globalThis|document\.|localStorage|MutationObserver|setInterval|setTimeout/,
       module+' Phase 3 entry must remain inert during launch-contract preaudit');
@@ -118,8 +127,10 @@ assert.equal((index.match(/assets\/gensrpg\/survival\/entry-v1\.js/g)||[]).lengt
   'Phase 6 must keep the Survival entry loaded exactly once');
 assert.equal((index.match(/assets\/gensrpg\/dungeon\/entry-v1\.js/g)||[]).length,1,
   'Phase 7 must load the reviewed Dungeon entry exactly once');
-assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|capture|pvp)\/entry-v1\.js/,
-  'Phase 7 exploration must not activate Shell/Capture/PvP module entries or the launch contract');
+assert.equal((index.match(/assets\/gensrpg\/capture\/entry-v1\.js/g)||[]).length,1,
+  'Phase 9 must load the Capture public entry exactly once');
+assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|pvp)\/entry-v1\.js/,
+  'Phase 9 must not activate Shell/PvP target entries or runtime-load the launch contract metadata');
 assert.doesNotMatch(preview,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
   'preview must inherit the source index and not inject module entries independently');
 assert.doesNotMatch(deploy,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,
@@ -131,6 +142,6 @@ console.log(JSON.stringify({
   providers:launch.providers,
   startConfiguredGameChain:chain,
   regressionInvariant:'captureFix135 global retirement is accepted only after dedicated RED and real E2E parity; captureFix138 requires a fresh re-audit',
-  runtimeChanged:false,
-  productionLoadGraphChanged:'Phase 7 Dungeon exploration entry active; module-launch graph unchanged'
+  runtimeChanged:true,
+  productionLoadGraphChanged:'Phase 9 Capture public entry active; Shell registry contract remains public routing metadata'
 },null,2));

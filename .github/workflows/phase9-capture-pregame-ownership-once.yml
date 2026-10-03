@@ -49,7 +49,7 @@ jobs:
 
           const residualCalls=(src.match(/captureCleanDungeonUi138\(\);/g)||[]).length;
           if(residualCalls!==1)throw new Error('expected one remaining Capture138 cleanup call in startConfiguredGame, got '+residualCalls);
-          src=src.replace(/^[ \\t]*captureCleanDungeonUi138\\(\\);[ \\t]*(?:\\r?\\n)?/m,'');
+          src=src.replace(/[ \\t]*captureCleanDungeonUi138\\(\\);[ \\t]*/,'');
 
           if(/cleanDungeonPregame137|captureCleanDungeonUi138/.test(src))throw new Error('retired pregame cleanup authority still present');
           if(!src.includes('openSessionDungeonSetup'))throw new Error('protected Capture137 Dungeon setup guard was lost');

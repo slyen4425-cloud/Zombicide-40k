@@ -102,6 +102,24 @@ const captureDungeonServiceBlocks=inlineBlocks
   .filter(x=>/ensureDungeonContent|updateDungeonExploreButtons|saveActiveEnemies|ensureBaseGameProfile|Dungeon[A-Z]/.test(x.body))
   .map(x=>x.id);
 
+function contexts(body){
+  const out=[];
+  const re=/isDungeonMode\s*\(\s*\)|gameStyle\s*={2,3}\s*["']dungeon["']|gameStyle["']?\s*:\s*["']dungeon["']/g;
+  let m;
+  while((m=re.exec(body))&&out.length<4){
+    out.push(body.slice(Math.max(0,m.index-150),Math.min(body.length,m.index+m[0].length+180))
+      .replace(/\s+/g,' ').trim());
+  }
+  return out;
+}
+
+const residualIdentityContexts=Object.fromEntries(
+  captureDungeonIdentityBlocks.map(id=>{
+    const found=inlineBlocks.find(x=>x.id===id);
+    return [id,contexts(found?.body||'')];
+  })
+);
+
 assert.ok(captureDungeonIdentityBlocks.length>0,
   'preaudit must expose at least one remaining Capture block carrying Dungeon identity debt');
 assert.ok(captureDungeonServiceBlocks.length>0,
@@ -137,7 +155,8 @@ console.log(JSON.stringify({
     capture139:{
       ensureBaseGameProfile:true,
       saveActiveEnemiesReset:true
-    }
+    },
+    residualIdentityContexts
   },
   decision:'diagnostic only; select exactly one next seam after reviewing this inventory',
   runtimeChanged:false

@@ -16,8 +16,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 const gitBlob=buf=>crypto.createHash('sha1')
   .update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 
-assert.equal(indexBuf.length,8168382,'next-seam preaudit must run on exact current Phase 7 Dungeon generated Boss policy index');
-assert.equal(gitBlob(indexBuf),'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1','next-seam preaudit Phase 7 generated Boss policy index blob drifted');
+assert.equal(indexBuf.length,8168810,'next-seam preaudit must run on exact current Phase 7 Dungeon generated Boss policy index');
+assert.equal(gitBlob(indexBuf),'a5d337ae25435d801a72333ee27e6dbc390a5175','next-seam preaudit Phase 7 generated Boss policy index blob drifted');
 assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

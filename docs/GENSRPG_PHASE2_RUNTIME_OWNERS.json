@@ -423,6 +423,11 @@
       "owner": "Tactical Module Entry",
       "domain": "tactical",
       "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
+    },
+    "assets/gensrpg/capture/entry-v1.js": {
+      "owner": "GenSrpG Capture Public Entry",
+      "domain": "capture",
+      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider while legacy Capture139 remains the temporary session initializer"
     }
   }
 }

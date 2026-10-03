@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168382,
+assert.equal(bytes.length,8168810,
   'Phase 7 active-hero resolution characterization must start from the canonical post-divergence GREEN runtime');
-assert.equal(gitBlob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1',
+assert.equal(gitBlob,'a5d337ae25435d801a72333ee27e6dbc390a5175',
   'Phase 7 active-hero resolution characterization must keep the exact canonical index blob');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;

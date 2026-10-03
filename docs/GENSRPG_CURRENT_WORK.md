@@ -1,3 +1,84 @@
+# PHASE 9 — RACCORD AUTORITÉ IDENTITÉ CAPTURE — 2026-10-03
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-identity-ownership-preaudit-green-2026-10-03`
+
+SHA de base :
+`c7a693505191621b60a6987871568a1af58df8db`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-identity-authority-raccord-2026-10-03`
+
+Branche :
+`work/gensrpg-phase9-capture-identity-authority-raccord-2026-10-03`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture-identity-ownership-preaudit-green-2026-10-03`
+
+## Mission unique
+
+Introduire une seule autorité publique pure `GensCaptureV1.isProfile(profile)` puis raccorder uniquement les frontières d'identité Capture, sans modifier `isDungeonMode()` ni les comportements RPG profonds.
+
+## Sémantique cible
+
+`isProfile(profile)` doit reconnaître Capture uniquement depuis les marqueurs gameplay explicites déjà présents :
+- `gameplay.profile === "creature"` ; ou
+- `gameplay.modules.capture === true` ET `gameplay.modules.controllableCreatures === true`.
+
+Interdictions :
+- aucune dépendance à `gameStyle="dungeon"` ;
+- aucun appel `isDungeonMode()` ;
+- aucune mutation/normalisation du profil ;
+- aucune lecture DOM/storage ;
+- aucune seconde autorité/fallback.
+
+## Frontières raccordées dans ce lot
+
+- `gensIsCaptureGameplay()` ;
+- `gensCapturePregameMode()` ;
+- `gensPureCaptureSheetMode()` ;
+- `gensShellActiveModuleV1()` ;
+- `gensMode151()` ;
+- `isCaptureContext138()` ;
+- `gensContentFamilyForProfile()` ;
+- garde de lecture `gensGameplayModules()`.
+
+## Hors périmètre
+
+- `isDungeonMode()` reste strictement inchangé ;
+- `normalizeGameParticipants()` ;
+- `availableParticipantHeroIds()` / `ensureDungeonContent()` ;
+- `ensureBaseGameProfile()` ;
+- `saveActiveEnemies()` / `updateDungeonExploreButtons()` ;
+- Capture139 session initializer ;
+- Combat Dynamique ;
+- Exploration ;
+- migration du champ `gameStyle` du profil ;
+- Survival, Dungeon, PvP, Tactical ;
+- `main` gelée.
+
+## Rule 26
+
+La base runtime est exactement le checkpoint GREEN déjà vérifié avec `work50.zip/index50.txt` :
+- blob `f523410e175ee4946059da8e8ee8519295fb63c5` ;
+- taille `8169430`.
+
+Aucun nouveau `index.html` n'est nécessaire avant le premier changement runtime, puisque ce lot part exactement de ce SHA.
+
+## TDD
+
+1. RED : exiger l'API canonique et les délégations ;
+2. vérifier que l'échec vient de l'absence actuelle de `isProfile` ;
+3. seulement ensuite appliquer le diff runtime minimal ;
+4. conserver `isDungeonMode()` inchangé ;
+5. rejouer les E2E Capture/Dungeon/non-interférence ;
+6. triple CI avant checkpoint.
+
+## Prochaine étape
+
+Constater le RED dédié. Aucun runtime avant ce RED.
+
+---
 # PHASE 9 — PRÉ-AUDIT CAPTURE IDENTITY OWNERSHIP — 2026-10-03
 
 Base GREEN :

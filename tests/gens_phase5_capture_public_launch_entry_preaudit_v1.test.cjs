@@ -116,9 +116,9 @@ assert.match(functions.captureFix139,/if\(!isCaptureContext138\(\)\)return await
 assert.match(functions.captureFix139,/markSessionActive/);
 
 // Effective-chain shadowing proof.
-assert.match(captureContextSource,/gensCapturePregameMode/);
-assert.match(captureContextSource,/gensCapturePregameMode\(\)\)return true/);
-assert.match(captureContextSource,/fam===["']creature["']/);
+assert.match(captureContextSource,/GensCaptureV1/);
+assert.match(captureContextSource,/isProfile/);
+assert.doesNotMatch(captureContextSource,/gensCapturePregameMode|gensPureCaptureSheetMode|fam===["']creature["']/);
 assert.doesNotMatch(blocks.captureFix135,/window\.startConfiguredGame\s*=/);
 assert.match(functions.captureFix138,/const cap=isCaptureContext138\(\)/);
 assert.match(functions.captureFix138,/if\(cap\)\{/);
@@ -127,6 +127,7 @@ const shadowingProof={
   outerOwner:'captureFix139',
   delegatesOnlyWhen:'isCaptureContext138() === false',
   capture135GlobalOwnerRetired:true,
+  capture138IdentityOwner:'GensCaptureV1.isProfile(profile)',
   capture138EffectCondition:'isCaptureContext138() === true',
   capture138ConditionCoveredByOuterPredicate:true,
   consequence:[

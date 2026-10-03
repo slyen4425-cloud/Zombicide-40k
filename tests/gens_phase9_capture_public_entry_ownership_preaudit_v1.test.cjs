@@ -9,6 +9,7 @@ const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 const contract=JSON.parse(fs.readFileSync(path.join(root,'assets/gensrpg/capture/module-contract-v1.json'),'utf8'));
+const audit=fs.readFileSync(path.join(root,'docs/GENSRPG_PHASE9_CAPTURE_PUBLIC_ENTRY_OWNERSHIP_PREAUDIT.md'),'utf8');
 const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),
@@ -68,8 +69,9 @@ assert.ok(start139.includes('captureEnterWorld139()'));
 assert.doesNotMatch(start139,/DungeonCore01|DungeonSpatial|startTacticalCombat|GensTacticalV1/);
 
 assert.ok(c139.includes('const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;'));
-assert.ok(c139.includes('const gensCaptureStartModuleSessionV1=async()=>{'));
-assert.ok(c139.includes('window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);'));
+assert.ok(c139.includes('window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);'));
+assert.ok(!c139.includes('const gensCaptureStartModuleSessionV1=async()=>{'));
+assert.ok(!c139.includes('window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);'));
 assert.ok(c139.includes('gensEnsureDungeonAdventureButton139'));
 
 const pregame=functionFrom(index,'function gensCapturePregameMode()');
@@ -87,11 +89,17 @@ assert.ok(participants.includes('isDungeonMode()'));
 assert.ok(ensureProfile.includes('ensureDungeonContent()'));
 assert.ok(saveEnemies.includes('updateDungeonExploreButtons'));
 
-assert.equal(contract.status,'contract-only-not-loaded');
-assert.ok(!index.includes('src="assets/gensrpg/capture/entry-v1.js'));
-assert.doesNotMatch(entry,/window\.|document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/);
+assert.equal(contract.status,'partial-runtime-loaded');
+assert.equal(contract.activatedPhase,9);
+assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
+assert.equal((index.match(/assets\/gensrpg\/capture\/entry-v1\.js/g)||[]).length,1);
+assert.match(entry,/GensCaptureV1/);
+assert.match(entry,/shell\.register\("capture",startModuleSession\)/);
+assert.doesNotMatch(entry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/);
 assert.ok(index.includes('src="assets/gensrpg/survival/entry-v1.js?v=1"'));
 assert.ok(index.includes('src="assets/gensrpg/dungeon/entry-v1.js?v=1"'));
+assert.ok(audit.includes('02a052bc231728eb383e17c83e61a958be0ac58c'),'completed preaudit must preserve the verified Rule 26 source blob');
+assert.match(audit,/Shell -> GensCaptureV1 -> legacy Capture139|Shell -> GensCaptureV1 -> référence stable Capture139/);
 
 console.log(JSON.stringify({
   scenario:'Phase 9 Capture public-entry ownership preaudit',
@@ -99,7 +107,7 @@ console.log(JSON.stringify({
   capture139:{
     stableLegacyReference:true,
     directPrivateDungeonRuntime:false,
-    providerStillInline:true
+    providerStillInline:false
   },
   historicalDebts:[
     'Capture identity uses dungeon gameStyle',
@@ -108,5 +116,5 @@ console.log(JSON.stringify({
     'saveActiveEnemies updates Dungeon explore UI'
   ],
   selectedRuntimeSeam:'Shell -> GensCaptureV1 -> legacy Capture139',
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

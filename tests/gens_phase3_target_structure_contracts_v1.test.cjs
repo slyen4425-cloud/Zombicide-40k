@@ -33,9 +33,9 @@ for(const domain of domains){
   assert.ok(Array.isArray(contract.forbidden)&&contract.forbidden.length,domain+' forbidden boundary must be explicit');
   assert.ok(Array.isArray(contract.invariants)&&contract.invariants.length>=3,domain+' invariants missing');
 
-  if(domain==='survival'||domain==='dungeon'||domain==='tactical'){
-    const phase=domain==='survival'?6:domain==='dungeon'?7:8;
-    const api=domain==='survival'?'GensSurvivalV1':domain==='dungeon'?'GensDungeonV1':'GensTacticalV1';
+  if(domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'){
+    const phase=domain==='survival'?6:domain==='dungeon'?7:domain==='tactical'?8:9;
+    const api=domain==='survival'?'GensSurvivalV1':domain==='dungeon'?'GensDungeonV1':domain==='tactical'?'GensTacticalV1':'GensCaptureV1';
     assert.equal(contract.status,'partial-runtime-loaded',domain+' contract status');
     assert.equal(contract.activatedPhase,phase,domain+' activation phase');
     assert.equal(contract.publicRuntimeApi,api,domain+' public runtime API');
@@ -53,10 +53,18 @@ for(const domain of domains){
         'first active Dungeon slice must stay pure and isolated from Shell routing and other modules');
       assert.equal(composition.index.includes(entry),true,'dungeon entry must be directly loaded by source index in Phase 7');
       for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,'dungeon source entry must not be redundantly injected by '+name);
-    }else{
+    }else if(domain==='tactical'){
       assert.match(source,/R\.GensTacticalV1=Object\.freeze\(/,'Tactical entry must expose GensTacticalV1 in Phase 8');
       assert.equal(composition.bootstrap.includes(entry),true,'Tactical public entry must be loaded only through Core RuntimeBootstrap in Phase 8');
       for(const name of ['index','preview','pages'])assert.equal(composition[name].includes(entry),false,'Tactical entry must not be redundantly loaded by '+name);
+    }else{
+      assert.match(source,/root\.GensCaptureV1=Object\.freeze\(/,'Capture entry must expose GensCaptureV1 in Phase 9');
+      assert.match(source,/function install\(legacyStart\)/,'Capture entry must expose the explicit legacy binding boundary');
+      assert.match(source,/function startModuleSession\(\)/,'Capture entry must own the public module-launch provider');
+      assert.doesNotMatch(source,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+        'Capture public entry must stay isolated from DOM storage and private module runtimes');
+      assert.equal(composition.index.includes(entry),true,'capture entry must be directly loaded by source index in Phase 9');
+      for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,'capture source entry must not be redundantly injected by '+name);
     }
     assert.equal(composition.index.includes(contractPath),false,domain+' contract metadata must not be runtime-loaded');
     continue;
@@ -78,7 +86,7 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,82,'Phase 3 scaffolding remains inert except explicitly activated Survival, Dungeon and Tactical entry slices; production owner graph now contains 82 files');
+assert.equal(Object.keys(ownerManifest.files||{}).length,83,'Phase 3 scaffolding remains inert except explicitly activated Survival, Dungeon, Tactical and Capture entry slices; production owner graph now contains 83 files');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');
@@ -89,6 +97,6 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:82,
-  loadedByProduction:3
+  productionOwnerGraph:83,
+  loadedByProduction:4
 },null,2));

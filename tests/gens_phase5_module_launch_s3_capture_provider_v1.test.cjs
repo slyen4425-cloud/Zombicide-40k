@@ -7,6 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),
@@ -28,28 +29,30 @@ assert.match(c139,/window\.startConfiguredGame\s*=\s*async\s+function/);
 
 const wrapperPos=c139.indexOf('window.startConfiguredGame=async function(){');
 const captureRefPos=c139.indexOf('const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;');
-const providerPos=c139.indexOf('const gensCaptureStartModuleSessionV1=async()=>{');
-const registrationPos=c139.indexOf('window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);');
+const installPos=c139.indexOf('window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);');
 
 assert.ok(wrapperPos>=0,'Capture139 wrapper must remain');
-assert.ok(captureRefPos>wrapperPos,'S3 requires capturing Capture139 after its wrapper is installed');
-assert.ok(providerPos>captureRefPos,'S3 requires a Capture-owned provider after the captured reference');
-assert.ok(registrationPos>providerPos,'S3 requires registration after provider declaration');
+assert.ok(captureRefPos>wrapperPos,'S3 stable Capture139 reference must remain after its wrapper is installed');
+assert.ok(installPos>captureRefPos,'Phase 9 must bind the stable Capture139 reference into the public Capture entry');
+assert.doesNotMatch(c139,/const gensCaptureStartModuleSessionV1=async\(\)=>/,
+  'Capture139 must no longer own the public provider implementation');
+assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,
+  'Capture139 must no longer register Capture directly');
 
-const provider=c139.slice(providerPos,registrationPos);
-assert.match(provider,/if\(gensShellActiveModuleV1\(\)!==["']capture["']\)return false/,
-  'Capture provider must refuse non-Capture routing state');
-assert.match(provider,/await\s+gensCaptureStartConfiguredGame139V1\(\)/,
-  'Capture provider must invoke the captured Capture139 owner');
-assert.match(provider,/return true/,
-  'Capture provider must normalize handled=true');
-assert.doesNotMatch(provider,/document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/,
-  'S3 provider must be routing-only; Capture139 remains the gameplay/session owner');
+assert.match(entry,/function startModuleSession\(\)/);
+assert.match(entry,/if\(shell\.activeModule\(\)!=="capture"\)return false/);
+assert.match(entry,/await legacyStartConfiguredGame\(\)/);
+assert.match(entry,/return true/);
+assert.match(entry,/shell\.register\("capture",startModuleSession\)/);
+assert.doesNotMatch(entry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener/,
+  'Phase 9 Capture provider must remain routing-only; Capture139 remains the gameplay/session owner');
 
 assert.match(index,/GensShellModuleLaunchV1\.register\("survival",gensSurvivalStartModuleSessionV1\)/,
   'S2 Survival provider must remain');
-assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,1,
-  'S3 must register Capture exactly once');
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\("capture"/g)||[]).length,0,
+  'Phase 9 must retire the direct inline Capture registration');
+assert.equal((entry.match(/shell\.register\("capture",startModuleSession\)/g)||[]).length,1,
+  'Phase 9 Capture entry must register Capture exactly once');
 assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).length<=1,
   'later S4 may register Dungeon once; S3 must not permit duplicate Dungeon providers');
 assert.equal((index.match(/GensShellModuleLaunchV1\.register\("pvp"/g)||[]).length,0,
@@ -73,8 +76,8 @@ assert.equal((index.match(/GensShellModuleLaunchV1\.startModuleSession\(/g)||[])
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S3 Capture provider',
-  expected:'RED before Capture provider insertion, GREEN after Capture139-owned registration',
+  expected:'historical S3 reference preserved; Phase 9 provider ownership moved to GensCaptureV1',
   historicalChain:chain,
   productionRouting:'legacy startConfiguredGame unchanged',
-  provider:'capture'
+  provider:'GensCaptureV1'
 },null,2));

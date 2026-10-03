@@ -7,6 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),
@@ -20,8 +21,10 @@ const registryExpose=index.indexOf('window.GensShellModuleLaunchV1=Object.freeze
 assert.ok(registryExpose>0,'S1 registry must remain exposed');
 assert.match(index,/window\.GensShellModuleLaunchV1\.register\("survival",gensSurvivalStartModuleSessionV1\);/,
   'S2 Survival provider must remain registered');
-assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']capture["']/g)||[]).length,1,
-  'Capture provider must be registered exactly once after S3 runtime raccord');
+assert.equal((index.match(/GensShellModuleLaunchV1\.register\(["']capture["']/g)||[]).length,0,
+  'Phase 9 must retire the historical inline Capture registration');
+assert.equal((entry.match(/shell\.register\("capture",startModuleSession\)/g)||[]).length,1,
+  'Capture provider must now be registered exactly once by the public entry');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -79,12 +82,20 @@ assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_capture_victory_resu
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase2_full_composition_capture_browser_v11411.test.cjs')),
   'full Capture composition E2E proof must remain available');
 
+assert.match(c139.body,/const gensCaptureStartConfiguredGame139V1=window\.startConfiguredGame;/,
+  'historical S3 stable reference must remain available');
+assert.match(c139.body,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,
+  'Phase 9 must hand the stable Capture139 reference to the public entry');
+assert.doesNotMatch(c139.body,/GensShellModuleLaunchV1\.register\("capture"/,
+  'Capture139 must no longer register the provider directly');
+
 const selectedSeam={
-  owner:'captureFix139',
-  captureReference:'capture window.startConfiguredGame immediately after Capture139 installs its wrapper',
-  registrationTiming:'registry already exists before Capture139 loads',
-  productionRouting:'unchanged during S3',
-  retirement:'captureFix135 global retired by dedicated proof; captureFix138/139 and Dungeon global owners remain',
+  owner:'GensCaptureV1',
+  legacySessionOwner:'captureFix139',
+  captureReference:'stable Capture139 window.startConfiguredGame reference preserved',
+  registrationTiming:'public Capture entry loads before Capture139 binding',
+  productionRouting:'Shell public registry path preserved',
+  retirement:'captureFix135 global retired; Capture139 keeps legacy session initialization only',
   proof:'legacy Capture shell + Capture victory/resume + full composition + four-module non-interference'
 };
 

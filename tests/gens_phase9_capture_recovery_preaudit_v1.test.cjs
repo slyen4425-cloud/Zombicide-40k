@@ -23,14 +23,19 @@ assert.match(roadmap,/module autonome de premier niveau/i,
 assert.match(roadmap,/aucun besoin de `gameStyle="dungeon"` ou de `isDungeonMode\(\)` comme identité fonctionnelle de Capture/,
   'Capture must not keep Dungeon identity as its target architecture');
 
-assert.equal(captureContract.status,'contract-only-not-loaded',
-  'Capture target entry must still be inert before the first Phase 9 runtime seam');
-assert.ok(captureContract.owns.includes('Monster Capture runtime'));
-assert.ok(captureContract.owns.includes('Capture combat'));
+assert.equal(captureContract.status,'partial-runtime-loaded',
+  'after the first Phase 9 seam the Capture target entry must be loaded only as the public provider boundary');
+assert.equal(captureContract.activatedPhase,9);
+assert.equal(captureContract.publicRuntimeApi,'GensCaptureV1');
+assert.ok(captureContract.owns.includes('Monster Capture public runtime entry'));
+assert.ok(captureContract.owns.includes('Capture module-launch provider'));
 assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 assert.ok(captureContract.forbidden.includes('Survival private runtime'));
-assert.doesNotMatch(captureEntry,/window\.|document\.|localStorage|sessionStorage|MutationObserver|setTimeout|setInterval|addEventListener/,
-  'Phase 9 recovery audit must not silently turn the inert Capture entry into runtime');
+assert.match(captureEntry,/GensCaptureV1/);
+assert.match(captureEntry,/function install\(legacyStart\)/);
+assert.match(captureEntry,/function startModuleSession\(\)/);
+assert.doesNotMatch(captureEntry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+  'the activated Capture public entry must remain a routing boundary only');
 
 assert.match(shellFinal,/GensShellModuleLaunchV1/);
 assert.match(shellFinal,/activeModule\s*\(/);
@@ -99,7 +104,7 @@ console.log(JSON.stringify({
   scenario:'Phase 9 Monster Capture recovery preaudit',
   genSrpg:{
     finalShellPublicRouting:true,
-    captureTargetEntryLoaded:false,
+    captureTargetEntryLoaded:true,
     currentCaptureHistoricalSubstrate:true
   },
   laboratory:{
@@ -108,5 +113,5 @@ console.log(JSON.stringify({
     divergentBranchesQuarantined:true
   },
   selectedNext:'Capture public-entry ownership preaudit',
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

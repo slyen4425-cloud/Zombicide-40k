@@ -81,10 +81,12 @@ const participants=functionFrom(index,'function normalizeGameParticipants()');
 const ensureProfile=functionFrom(index,'function ensureBaseGameProfile()');
 const saveEnemies=functionFrom(index,'function saveActiveEnemies(a)');
 
-assert.ok(pregame.includes('p.gameStyle!=="dungeon"'));
-assert.ok(pureSheet.includes('p.gameStyle!=="dungeon"'));
+assert.ok(pregame.includes('GensCaptureV1.isProfile(p)'));
+assert.ok(!pregame.includes('p.gameStyle'));
+assert.ok(pureSheet.includes('GensCaptureV1.isProfile(p)'));
+assert.ok(!pureSheet.includes('p.gameStyle'));
+assert.ok(shellModule.includes('GensCaptureV1?.isProfile?.(profile)')||shellModule.includes('GensCaptureV1.isProfile(profile)'));
 assert.ok(shellModule.includes('profile?.gameStyle==="dungeon"'));
-assert.ok(shellModule.includes('family==="creature"?"capture":"dungeon"'));
 assert.ok(participants.includes('isDungeonMode()'));
 assert.ok(ensureProfile.includes('ensureDungeonContent()'));
 assert.ok(saveEnemies.includes('updateDungeonExploreButtons'));
@@ -110,11 +112,11 @@ console.log(JSON.stringify({
     providerStillInline:false
   },
   historicalDebts:[
-    'Capture identity uses dungeon gameStyle',
     'normalizeGameParticipants uses isDungeonMode',
     'ensureBaseGameProfile maintains Dungeon content',
     'saveActiveEnemies updates Dungeon explore UI'
   ],
+  identityBoundary:'GensCaptureV1.isProfile(profile)',
   selectedRuntimeSeam:'Shell -> GensCaptureV1 -> legacy Capture139',
   runtimeChanged:true
 },null,2));

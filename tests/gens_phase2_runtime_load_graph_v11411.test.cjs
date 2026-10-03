@@ -23,6 +23,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
+  'assets/gensrpg/capture/entry-v1.js',
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -52,7 +53,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,38,'production composition must expose 38 unique direct local JS entries before dynamic module-entry traversal');
+assert.equal(new Set(productionDirect).size,39,'production composition must expose 39 unique direct local JS entries before dynamic module-entry traversal');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -126,10 +127,11 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,96,'physical JS inventory must reflect the retired legacy Survival/Dungeon guard');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,82,'production-reachable JS graph must include the active Survival, Dungeon and Tactical public entries');
+assert.equal(reachable.size,83,'production-reachable JS graph must include the active Survival, Dungeon, Capture and Tactical public entries');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
+  'assets/gensrpg/capture/entry-v1.js',
   'assets/gensrpg/tactical/entry-v1.js'
 ]);
 for(const rel of phase3Entrypoints){

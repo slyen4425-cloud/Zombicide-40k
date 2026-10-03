@@ -1,0 +1,57 @@
+name: GenSrpG Phase 9 Capture identity baseline repin
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-identity-authority-raccord-2026-10-03'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-identity-baseline-repin.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  repin-and-sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify identity runtime baseline
+        run: |
+          test "$(git hash-object index.html)" = "1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1"
+          test "$(wc -c < index.html)" = "8168382"
+
+      - name: Repin exact baseline constants
+        run: python tools/gensrpg_phase9_identity_repin_baseline.py
+
+      - name: Verify mechanical repin scope
+        run: |
+          git diff --check
+          echo "Changed files:"
+          git diff --name-only
+          ! grep -RIl --exclude-dir=.git 'f523410e175ee4946059da8e8ee8519295fb63c5\|8169430' tests
+          ! grep -RIn --exclude-dir=.git 'sourceIndexBlob.*f523410e175ee4946059da8e8ee8519295fb63c5' docs
+
+      - name: Sweep all static architecture tests
+        run: python tools/gensrpg_phase9_static_failure_sweep.py
+
+      - name: Commit mechanical baseline repin
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests docs
+          test -z "$(git diff --cached --name-only | grep -v -E '^(tests|docs)/')" || (echo "Non test/doc file modified" && exit 1)
+          git commit -m "test: repin baseline after Capture identity authority"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Dispatch required validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run gensrpg-architecture-sentinels.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-firefox-wall-sentinel.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-tactical-dock-sentinel.yml --ref "$GITHUB_REF_NAME"

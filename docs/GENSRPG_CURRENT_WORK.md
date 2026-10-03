@@ -1,5 +1,29 @@
 # PHASE 9 — PRÉ-AUDIT DE REPRISE MONSTER CAPTURE — 2026-10-02
 
+## Validation GREEN du pré-audit de reprise
+
+HEAD technique/documentaire relu :
+`9635d9c3409dc804b2a860fad04ccd38b7dd16dc`.
+
+Triple CI :
+- Architecture + Browser `37060581725` — SUCCESS ;
+- Firefox `37060581712` — SUCCESS ;
+- Tactical Dock `37060581734` — SUCCESS.
+
+Décision :
+**PRÉ-AUDIT DE REPRISE MONSTER CAPTURE GREEN**.
+
+Le dépôt principal et les deux laboratoires Capture ont été cartographiés sans modification runtime.
+Le premier seam autorisé reste `Capture public-entry ownership`.
+
+Checkpoint final prévu après la CI de cette clôture documentaire :
+`checkpoint/gensrpg-phase9-capture-recovery-preaudit-green-2026-10-03`.
+
+Prochain chantier :
+`Capture public-entry ownership preaudit`, avec Rule 26 avant toute inspection exacte de `index.html`.
+
+---
+
 Base GREEN :
 `checkpoint/gensrpg-phase8-exit-green-2026-10-02`
 

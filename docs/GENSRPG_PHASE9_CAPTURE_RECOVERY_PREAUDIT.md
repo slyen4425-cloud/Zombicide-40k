@@ -314,6 +314,21 @@ Cible :
 Pourquoi ce seam est nécessaire au critère Phase 9 :
 tant que l'entrée cible Capture est inerte et que l'autorité de session reste inline/historique, brancher directement le labo créerait une seconde architecture au lieu de séparer proprement le module.
 
+## Validation GREEN
+
+HEAD relu :
+`9635d9c3409dc804b2a860fad04ccd38b7dd16dc`.
+
+Triple CI :
+- Architecture + Browser `37060581725` — SUCCESS ;
+- Firefox `37060581712` — SUCCESS ;
+- Tactical Dock `37060581734` — SUCCESS.
+
+Décision :
+**PRÉ-AUDIT DE REPRISE MONSTER CAPTURE GREEN**.
+
+Aucun runtime GenSrpG, Combat Dynamique ou Exploration n'a été modifié par ce pré-audit.
+
 ## Prochaine étape autorisée
 
 **Pré-audit dédié `Capture public-entry ownership`**, puis TDD RED avant toute modification runtime.

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   patch-index:
-    if: github.event.head_commit.message == 'ci(phase9): apply participant runtime raccord once'
+    if: ${{ github.event.head_commit.message == 'phase9 apply participant runtime raccord once' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout target branch

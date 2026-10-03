@@ -86,7 +86,7 @@
     },
     {
       "name": "renderParticipantSelector",
-      "assignmentCount": 8,
+      "assignmentCount": 7,
       "lastOwner": "coreCombatPoolFix156",
       "classification": "cross-domain-shared-ui",
       "domain": "core",

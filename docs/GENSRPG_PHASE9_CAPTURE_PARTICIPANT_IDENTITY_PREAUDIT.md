@@ -33,12 +33,60 @@ Le seam suivant doit retirer uniquement l'utilisation de l'identité Dungeon dan
 
 ## Rule 26
 
-Attendu :
-- commit `fefd1ad48ee42e0cbb50b80a41171fa57a05194d`
-- blob `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1`
-- taille `8168382`
+Gate franchie avec `worka.zip/indexA.txt` :
+- commit de base `fefd1ad48ee42e0cbb50b80a41171fa57a05194d` ;
+- blob `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1` ;
+- taille `8168382` octets.
 
-Aucune inspection inline exacte à partir de `work50.zip`.
+Cette copie est la source locale exacte utilisée pour l'inspection participants.
+
+## Résultats de caractérisation
+
+### `normalizeGameParticipants()`
+
+Le chemin actuel possède deux sémantiques :
+- Dungeon : sélection stricte, filtrée par les IDs autorisés, sans réinjecter les héros d'un ancien état de tours ;
+- hors Dungeon : en session active, fusion historique avec `loadTurnState().heroes`.
+
+Capture entre encore dans la première branche uniquement parce que `isDungeonMode()` reste vrai pour son ancien `gameStyle="dungeon"`. Cette sémantique stricte doit être conservée, mais l'identité qui la sélectionne doit devenir Capture explicite.
+
+### `availableParticipantHeroIds()`
+
+La fonction :
+1. applique les héros personnalisés ;
+2. appelle actuellement `ensureDungeonContent()` si `isDungeonMode()` ;
+3. construit les IDs depuis `CHARS` + héros personnalisés ;
+4. filtre ensuite avec `allowedHeroIdsForActiveProfile()`.
+
+Pour Capture, l'étape 2 est un couplage Dungeon résiduel : le filtre canonique de profil est déjà fourni par `allowedHeroIdsForActiveProfile()`.
+
+### Source de vérité Capture
+
+`allowedHeroIdsForActiveProfile()` distingue déjà correctement :
+- vrai Dungeon (`GAME_PROFILE_DUNGEON_ID`) -> `DUNGEON_HERO_IDS` + héros Dungeon personnalisés ;
+- profil de base -> héros non-Dungeon ;
+- autre univers RPG / Monster Capture -> `profile.heroPool`, avec exclusion défensive des héros Dungeon built-in.
+
+Le seed Monster Capture possède déjà `heroPool=["custom_mt7lk6jv_ioga"]`. Il n'est donc pas nécessaire de créer une liste participants Capture concurrente.
+
+### Starter readiness
+
+`gensCaptureParticipantsReady()` appelle `normalizeGameParticipants()` et vérifie ensuite `gensCaptureStarterIdsForHero(id)`. Les starters sont issus de l'état héros Capture (`creatureTeam`) et ne dépendent pas du runtime Dungeon.
+
+## Seam runtime sélectionné
+
+Le futur micro-lot devra uniquement séparer l'identité, pas la donnée :
+- Capture explicite + vrai Dungeon partagent temporairement la même sémantique stricte de normalisation ;
+- seul le vrai Dungeon déclenche `ensureDungeonContent()` ;
+- Capture continue d'utiliser `heroPool` via `allowedHeroIdsForActiveProfile()` ;
+- aucun nouveau service participants, aucun fallback, aucune copie de liste.
+
+Le TDD RED devra prouver :
+- présence d'un test Capture explicite via `GensCaptureV1.isProfile(getActiveGameProfile())` dans les frontières participants ;
+- préservation de la branche Dungeon ;
+- absence d'`ensureDungeonContent()` pour Capture ;
+- parité trainer/starter/lancement/reprise ;
+- non-régression Dungeon.
 
 ## Sortie attendue
 

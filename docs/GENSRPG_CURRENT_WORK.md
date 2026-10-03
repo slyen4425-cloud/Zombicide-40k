@@ -62,9 +62,36 @@ Fichier requis :
 
 La copie `work50.zip` correspond au blob précédent `f523410e...` et ne doit pas servir à l'inspection exacte de ce chantier.
 
+## Rule 26 validée
+
+`worka.zip/indexA.txt` vérifié :
+- taille `8168382` octets ;
+- blob Git `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1` ;
+- correspondance exacte avec le `index.html` du checkpoint GREEN `fefd1ad48ee42e0cbb50b80a41171fa57a05194d`.
+
+## Faits d'ownership participants
+
+- `normalizeGameParticipants()` applique actuellement une normalisation stricte dès que `isDungeonMode()` est vrai : filtrage contre `availableParticipantHeroIds()` et aucune réinjection des héros du vieux gestionnaire de tours ; Capture hérite donc aujourd'hui de cette sémantique via son ancien `gameStyle="dungeon"` ;
+- `availableParticipantHeroIds()` appelle encore `ensureDungeonContent()` sous la seule garde `isDungeonMode()`, ce qui charge inutilement le contenu Dungeon en Capture ;
+- `allowedHeroIdsForActiveProfile()` possède déjà la séparation correcte : le vrai profil Dungeon utilise `DUNGEON_HERO_IDS`, alors que tout autre profil RPG/Capture utilise directement son `heroPool` ;
+- le seed Monster Capture fournit déjà `heroPool=["custom_mt7lk6jv_ioga"]` et les marqueurs Capture explicites ;
+- `gensCaptureParticipantsReady()` consomme `normalizeGameParticipants()` puis les starters de chaque trainer ; aucune règle Dungeon n'est nécessaire à cette validation ;
+- les starters/équipes restent possédés par l'état héros Capture et ne doivent pas migrer dans un nouveau service participants.
+
+## Seam minimal retenu
+
+Ne créer aucune nouvelle autorité participants.
+
+Le premier raccord devra seulement :
+1. calculer l'identité Capture via `GensCaptureV1.isProfile(getActiveGameProfile())` ;
+2. préserver pour Capture la sémantique stricte actuelle de `normalizeGameParticipants()` sans passer par l'identité Dungeon ;
+3. laisser le vrai Dungeon conserver sa branche `isDungeonMode()` inchangée ;
+4. empêcher `availableParticipantHeroIds()` d'appeler `ensureDungeonContent()` lorsque le profil actif est Capture ;
+5. conserver `allowedHeroIdsForActiveProfile()` comme source canonique des IDs autorisés via `heroPool` pour Capture.
+
 ## Prochaine étape
 
-Recevoir et vérifier le nouvel `index.html` Rule 26, puis caractériser les branches participants exactes. Aucun TDD RED ni runtime avant cette gate.
+Ajouter la sentinelle de caractérisation à la CI. Après triple CI GREEN, fermer ce pré-audit par checkpoint puis ouvrir un TDD RED dédié au raccord participants.
 
 ---
 

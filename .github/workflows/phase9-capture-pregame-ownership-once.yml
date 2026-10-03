@@ -1,0 +1,99 @@
+name: Phase 9 Capture pregame ownership one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-03
+
+permissions:
+  contents: write
+
+jobs:
+  patch-runtime:
+    if: ${{ github.event.head_commit.message == 'phase9 apply Capture pregame ownership seam once' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-03
+          fetch-depth: 0
+
+      - name: Apply exact ownership consolidation
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const crypto=require('node:crypto');
+          const cp=require('node:child_process');
+          const indexPath='index.html';
+          let src=fs.readFileSync(indexPath,'utf8');
+          const oldBytes=Buffer.from(src,'utf8');
+          const oldBlob=crypto.createHash('sha1').update(Buffer.concat([
+            Buffer.from('blob '+oldBytes.length+'\0'),oldBytes
+          ])).digest('hex');
+          if(oldBytes.length!==8168810)throw new Error('unexpected baseline size '+oldBytes.length);
+          if(oldBlob!=='a5d337ae25435d801a72333ee27e6dbc390a5175')throw new Error('unexpected baseline blob '+oldBlob);
+
+          if(!src.includes('openSessionDungeonSetup'))throw new Error('missing protected Capture137 Dungeon setup guard');
+          if(!src.includes('gensEnsureDungeonAdventureButton139'))throw new Error('missing protected Capture139 pregame owner');
+
+          const r137=/function cleanDungeonPregame137\(\)\{[\s\S]*?\}\s*setTimeout\(cleanDungeonPregame137,80\);\s*const update137=window\.updateGameStyleUi;\s*if\(typeof update137==="function"\)window\.updateGameStyleUi=function\(\)\{const r=update137\.apply\(this,arguments\);cleanDungeonPregame137\(\);return r\};/;
+          const m137=src.match(r137);
+          if(!m137)throw new Error('Capture137 pregame cleanup block not found exactly');
+          src=src.replace(r137,'');
+
+          const r138=/window\.captureCleanDungeonUi138=function\(\)\{[\s\S]*?\};\s*const rps138=window\.renderParticipantSelector;\s*window\.renderParticipantSelector=function\(\)\{const r=rps138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*const ugs138=window\.updateGameStyleUi;\s*if\(typeof ugs138==="function"\)window\.updateGameStyleUi=function\(\)\{const r=ugs138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*document\.addEventListener\("DOMContentLoaded",\(\)=>setTimeout\(captureCleanDungeonUi138,80\)\);\s*setTimeout\(captureCleanDungeonUi138,200\);/;
+          const m138=src.match(r138);
+          if(!m138)throw new Error('Capture138 pregame cleanup ownership block not found exactly');
+          src=src.replace(r138,'');
+
+          const residualCalls=(src.match(/captureCleanDungeonUi138\(\);/g)||[]).length;
+          if(residualCalls!==1)throw new Error('expected one remaining Capture138 cleanup call in startConfiguredGame, got '+residualCalls);
+          src=src.replace('captureCleanDungeonUi138();','');
+
+          if(/cleanDungeonPregame137|captureCleanDungeonUi138/.test(src))throw new Error('retired pregame cleanup authority still present');
+          if(!src.includes('openSessionDungeonSetup'))throw new Error('protected Capture137 Dungeon setup guard was lost');
+          if(!src.includes('gensEnsureDungeonAdventureButton139'))throw new Error('protected Capture139 pregame owner was lost');
+
+          fs.writeFileSync(indexPath,src,'utf8');
+          const bytes=fs.readFileSync(indexPath);
+          const blob=crypto.createHash('sha1').update(Buffer.concat([
+            Buffer.from('blob '+bytes.length+'\0'),bytes
+          ])).digest('hex');
+          console.log(JSON.stringify({old:{bytes:oldBytes.length,blob:oldBlob},next:{bytes:bytes.length,blob}},null,2));
+
+          const oldSize='8168810';
+          const oldFingerprint='a5d337ae25435d801a72333ee27e6dbc390a5175';
+          const nextSize=String(bytes.length);
+          const files=cp.execSync("git ls-files 'tests/**/*.cjs' 'tests/*.cjs'",{encoding:'utf8'}).trim().split(/\n+/).filter(Boolean);
+          let touched=0;
+          for(const p of files){
+            let c=fs.readFileSync(p,'utf8');
+            const before=c;
+            c=c.split(oldSize).join(nextSize).split(oldFingerprint).join(blob);
+            if(c!==before){fs.writeFileSync(p,c,'utf8');touched++;}
+          }
+          for(const p of [
+            'docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv',
+            'docs/GENSRPG_PHASE2_INLINE_OWNERS.json',
+            'docs/GENSRPG_PHASE2_STORAGE_OWNERS.json',
+            'docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json'
+          ]){
+            if(!fs.existsSync(p))continue;
+            let c=fs.readFileSync(p,'utf8');
+            const before=c;
+            c=c.split(oldFingerprint).join(blob);
+            if(c!==before){fs.writeFileSync(p,c,'utf8');touched++;}
+          }
+          console.log('fingerprint files advanced:',touched);
+          NODE
+
+      - name: Commit exact runtime and fingerprint transition
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html tests docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv docs/GENSRPG_PHASE2_INLINE_OWNERS.json docs/GENSRPG_PHASE2_STORAGE_OWNERS.json docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json
+          git diff --cached --quiet && { echo "No changes to commit"; exit 1; }
+          git commit -m "runtime(phase9): consolidate Capture pregame ownership"
+          git push origin HEAD:work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-03

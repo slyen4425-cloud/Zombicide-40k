@@ -70,27 +70,34 @@ const c162=block('builtinMonsterCapture162');
 assert.match(dungeonMode,/return p\?\.gameStyle==="dungeon"/);
 assert.ok((index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length>=120);
 
-assert.match(contentFamily,/if\(profile\.gameStyle!=="dungeon"\)return "survival"/);
-assert.match(contentFamily,/mods\.capture && mods\.controllableCreatures/);
-assert.match(gameplayModules,/if\(!p\|\|p\.gameStyle!=="dungeon"\)return empty/);
+assert.match(contentFamily,/GensCaptureV1/);
+assert.match(contentFamily,/isProfile/);
+assert.ok(contentFamily.indexOf('isProfile')<contentFamily.indexOf('profile.gameStyle!=="dungeon"'));
+assert.match(gameplayModules,/GensCaptureV1/);
+assert.match(gameplayModules,/isProfile/);
+assert.match(gameplayModules,/p\.gameStyle!=="dungeon"/);
 
+assert.match(shellActive,/GensCaptureV1/);
+assert.match(shellActive,/isProfile/);
 assert.match(shellActive,/profile\?\.gameStyle==="dungeon"/);
-assert.match(shellActive,/family==="creature"\?"capture":"dungeon"/);
-assert.match(pregame,/p\.gameStyle!=="dungeon"/);
-assert.match(sheet,/p\.gameStyle!=="dungeon"/);
-assert.match(c151,/p\?\.gameStyle==="dungeon" && fam==="creature"/);
+assert.match(pregame,/GensCaptureV1\.isProfile\(p\)/);
+assert.doesNotMatch(pregame,/p\.gameStyle/);
+assert.match(sheet,/GensCaptureV1\.isProfile\(p\)/);
+assert.doesNotMatch(sheet,/p\.gameStyle/);
+assert.match(c151,/GensCaptureV1/);
+assert.match(c151,/isProfile/);
+assert.match(c151,/p\?\.gameStyle==="dungeon"/);
 
-assert.match(captureGameplay,/profile\.gameStyle!=="dungeon"/);
-assert.match(captureGameplay,/ensureRpgProfileData\(profile\)/);
-assert.match(captureGameplay,/g\.profile==="creature" \|\| \(!!g\.modules\?\.capture && !!g\.modules\?\.controllableCreatures\)/);
+assert.match(captureGameplay,/GensCaptureV1\.isProfile\(profile\)/);
+assert.doesNotMatch(captureGameplay,/gameStyle|ensureRpgProfileData/);
 
 assert.match(normalize,/isDungeonMode\(\)/);
 assert.match(available,/isDungeonMode\(\) && typeof ensureDungeonContent==="function"\)ensureDungeonContent\(\)/);
 
 assert.match(c138,/window\.isCaptureContext138=function/);
-assert.match(c138,/gensPureCaptureSheetMode/);
-assert.match(c138,/gensCapturePregameMode/);
-assert.match(c138,/fam==="creature"/);
+assert.match(c138,/GensCaptureV1/);
+assert.match(c138,/isProfile/);
+assert.doesNotMatch(c138,/gensPureCaptureSheetMode|gensCapturePregameMode|fam==="creature"/);
 
 assert.match(c162,/"gameStyle":"dungeon"/);
 assert.match(c162,/"profile":"creature"/);
@@ -100,7 +107,9 @@ assert.match(c162,/"capture":true/);
 assert.match(index,/const capture=typeof isCaptureContext138==="function"&&isCaptureContext138\(\);[\s\S]{0,180}const dungeon=typeof isDungeonMode==="function"&&isDungeonMode\(\)&&!capture;/);
 
 assert.match(entry,/GensCaptureV1/);
-assert.doesNotMatch(entry,/function\s+isProfile\s*\(/);
+assert.match(entry,/function\s+isProfile\s*\(profile\)/);
+const identityFn=functionFrom(entry,'function isProfile');
+assert.doesNotMatch(identityFn,/gameStyle|isDungeonMode|document\.|localStorage|sessionStorage|ensureRpgProfileData|setTimeout|MutationObserver/);
 
 assert.match(preauditDoc,/GensCaptureV1\.isProfile\(profile\)/);
 assert.match(preauditDoc,/isDungeonMode\(\).*reste inchangé dans ce seam/);
@@ -110,12 +119,12 @@ console.log(JSON.stringify({
   scenario:'Phase 9 Capture identity ownership preaudit',
   rule26:{bytes:bytes.length,blob},
   current:{
-    captureStillDungeonStyle:true,
+    captureSeedStillDungeonStyle:true,
     isDungeonModeCalls:(index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length,
-    helperMutatesProfile:true,
+    boundaryIdentityCanonical:true,
     participantDungeonDependency:true
   },
   selectedAuthority:'GensCaptureV1.isProfile(profile)',
   firstRuntimeSeam:'identity boundaries only; isDungeonMode unchanged',
-  runtimeChanged:false
+  runtimeChanged:true
 },null,2));

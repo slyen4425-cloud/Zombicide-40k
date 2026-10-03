@@ -13,7 +13,7 @@ Branche :
 `work/gensrpg-phase9-capture-identity-authority-raccord-2026-10-03`
 
 Dernier checkpoint GREEN :
-`checkpoint/gensrpg-phase9-capture-identity-ownership-preaudit-green-2026-10-03`
+`checkpoint/gensrpg-phase9-capture-identity-authority-raccord-green-2026-10-03`
 
 ## Mission unique
 
@@ -74,9 +74,30 @@ Aucun nouveau `index.html` n'est nécessaire avant le premier changement runtime
 5. rejouer les E2E Capture/Dungeon/non-interférence ;
 6. triple CI avant checkpoint.
 
+## Résultat GREEN
+
+SHA validé :
+`fefd1ad48ee42e0cbb50b80a41171fa57a05194d`
+
+Checkpoint final :
+`checkpoint/gensrpg-phase9-capture-identity-authority-raccord-green-2026-10-03`
+
+Triple CI :
+- Architecture + Browser `37128924603` — SUCCESS ;
+- Firefox `37128924604` — SUCCESS ;
+- Tactical Dock `37128924608` — SUCCESS.
+
+Résultat :
+- `GensCaptureV1.isProfile(profile)` est l'unique autorité publique pure d'identité Capture ;
+- les frontières prévues délèguent vers cette autorité ;
+- `isDungeonMode()` reste inchangé ;
+- vrai Dungeon, participants, Capture139, Combat et Exploration restent hors de ce seam ;
+- navigateur complet Capture/Dungeon/non-interférence GREEN ;
+- `index.html` courant : blob `1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1`, taille `8168382`.
+
 ## Prochaine étape
 
-Constater le RED dédié. Aucun runtime avant ce RED.
+Ouvrir le pré-audit `Capture participant identity` pour caractériser les usages de `isDungeonMode()` dans `normalizeGameParticipants()` et `availableParticipantHeroIds()` / `ensureDungeonContent()`, sans runtime avant Rule 26 et TDD RED.
 
 ---
 # PHASE 9 — PRÉ-AUDIT CAPTURE IDENTITY OWNERSHIP — 2026-10-03

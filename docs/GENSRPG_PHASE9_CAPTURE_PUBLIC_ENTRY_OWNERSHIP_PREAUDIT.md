@@ -142,6 +142,31 @@ Le prochain lot runtime commencera par une sentinelle RED exigeant :
 - parité Capture historique/public provider ;
 - Dungeon/Survival/PvP non régressés ;
 - aucune intégration Combat/Exploration dans ce seam.
+## Validation technique GREEN
+
+HEAD validé :
+`8c8134329f122cb441f39ee70532f7c0ac48d258`.
+
+Triple CI :
+- Architecture + Browser `37099872746` — SUCCESS ;
+- Firefox `37099872733` — SUCCESS ;
+- Tactical Dock `37099872732` — SUCCESS.
+
+Preuves notables de la batterie navigateur :
+- Monster Capture actuel par le vrai Shell — SUCCESS ;
+- provider public Capture S3 — SUCCESS ;
+- composition Capture complète — SUCCESS ;
+- victoire/reprise Capture — SUCCESS ;
+- non-interférence des quatre modules — SUCCESS.
+
+Décision :
+**PRÉ-AUDIT CAPTURE PUBLIC-ENTRY OWNERSHIP TECHNIQUEMENT GREEN**.
+
+Aucun runtime n'a été modifié. Le seam retenu reste :
+`Shell -> GensCaptureV1 -> référence stable Capture139`.
+
+Checkpoint final prévu après la CI de cette clôture documentaire :
+`checkpoint/gensrpg-phase9-capture-public-entry-ownership-preaudit-green-2026-10-03`.
 ## Critère de sortie
 
 Le pré-audit sera GREEN uniquement si le fichier exact permet de documenter :

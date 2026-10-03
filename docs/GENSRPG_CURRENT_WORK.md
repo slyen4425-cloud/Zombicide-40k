@@ -117,9 +117,27 @@ Premier raccord cible :
 Le premier runtime lot ne retirera aucune dépendance Dungeon historique.
 Il déplacera uniquement **l'ownership du provider public Capture** vers `assets/gensrpg/capture/entry-v1.js`.
 
+## Validation technique GREEN
+
+HEAD validé :
+`8c8134329f122cb441f39ee70532f7c0ac48d258`.
+
+Triple CI :
+- Architecture + Browser `37099872746` — SUCCESS ;
+- Firefox `37099872733` — SUCCESS ;
+- Tactical Dock `37099872732` — SUCCESS.
+
+La nouvelle sentinelle `gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs` est exécutée par la CI Architecture et passe.
+
+Décision :
+**PRÉ-AUDIT CAPTURE PUBLIC-ENTRY OWNERSHIP TECHNIQUEMENT GREEN**.
+
+Checkpoint final prévu après la CI de cette clôture documentaire :
+`checkpoint/gensrpg-phase9-capture-public-entry-ownership-preaudit-green-2026-10-03`.
+
 ## Prochaine étape
 
-Valider la sentinelle de pré-audit et la triple CI, fermer ce pré-audit par checkpoint GREEN, puis ouvrir le TDD RED dédié au raccord public-entry.
+Créer le checkpoint GREEN final après validation de cette clôture documentaire, puis ouvrir un chantier séparé TDD RED pour le raccord `Shell -> GensCaptureV1 -> legacy Capture139`.
 
 ---
 

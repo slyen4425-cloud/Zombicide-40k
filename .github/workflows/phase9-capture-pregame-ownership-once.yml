@@ -37,12 +37,12 @@ jobs:
           if(!src.includes('openSessionDungeonSetup'))throw new Error('missing protected Capture137 Dungeon setup guard');
           if(!src.includes('gensEnsureDungeonAdventureButton139'))throw new Error('missing protected Capture139 pregame owner');
 
-          const r137=/function cleanDungeonPregame137\(\)\{[\s\S]*?\}\s*setTimeout\(cleanDungeonPregame137,80\);\s*const update137=window\.updateGameStyleUi;\s*if\(typeof update137==="function"\)window\.updateGameStyleUi=function\(\)\{const r=update137\.apply\(this,arguments\);cleanDungeonPregame137\(\);return r\};/;
+          const r137=/[ \t]*function cleanDungeonPregame137\(\)\{[\s\S]*?\}\s*setTimeout\(cleanDungeonPregame137,80\);\s*const update137=window\.updateGameStyleUi;\s*if\(typeof update137==="function"\)window\.updateGameStyleUi=function\(\)\{const r=update137\.apply\(this,arguments\);cleanDungeonPregame137\(\);return r\};[ \t]*/;
           const m137=src.match(r137);
           if(!m137)throw new Error('Capture137 pregame cleanup block not found exactly');
           src=src.replace(r137,'');
 
-          const r138=/window\.captureCleanDungeonUi138=function\(\)\{[\s\S]*?\};\s*const rps138=window\.renderParticipantSelector;\s*window\.renderParticipantSelector=function\(\)\{const r=rps138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*const ugs138=window\.updateGameStyleUi;\s*if\(typeof ugs138==="function"\)window\.updateGameStyleUi=function\(\)\{const r=ugs138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*document\.addEventListener\("DOMContentLoaded",\(\)=>setTimeout\(captureCleanDungeonUi138,80\)\);\s*setTimeout\(captureCleanDungeonUi138,200\);/;
+          const r138=/[ \t]*window\.captureCleanDungeonUi138=function\(\)\{[\s\S]*?\};\s*const rps138=window\.renderParticipantSelector;\s*window\.renderParticipantSelector=function\(\)\{const r=rps138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*const ugs138=window\.updateGameStyleUi;\s*if\(typeof ugs138==="function"\)window\.updateGameStyleUi=function\(\)\{const r=ugs138\.apply\(this,arguments\);captureCleanDungeonUi138\(\);return r\};\s*document\.addEventListener\("DOMContentLoaded",\(\)=>setTimeout\(captureCleanDungeonUi138,80\)\);\s*setTimeout\(captureCleanDungeonUi138,200\);[ \t]*/;
           const m138=src.match(r138);
           if(!m138)throw new Error('Capture138 pregame cleanup ownership block not found exactly');
           src=src.replace(r138,'');

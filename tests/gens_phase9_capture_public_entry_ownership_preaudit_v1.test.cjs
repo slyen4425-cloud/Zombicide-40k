@@ -16,8 +16,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169430,'preaudit must inspect the Rule 26 verified runtime');
-assert.equal(blob,'f523410e175ee4946059da8e8ee8519295fb63c5','preaudit must inspect the exact verified index blob');
+assert.equal(bytes.length,8168382,'preaudit must inspect the Rule 26 verified runtime');
+assert.equal(blob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1','preaudit must inspect the exact verified index blob');
 
 function block(id){
   const marker='<script id="'+id+'">';

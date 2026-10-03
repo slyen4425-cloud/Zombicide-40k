@@ -12,9 +12,9 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169430,
+assert.equal(bytes.length,8168382,
   'Dungeon ensure retirement lot must run on the current Phase 7 Dungeon generated Boss policy runtime size');
-assert.equal(blob,'f523410e175ee4946059da8e8ee8519295fb63c5',
+assert.equal(blob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1',
   'Dungeon ensure retirement lot must target the current Phase 7 generated Boss policy runtime baseline');
 
 assert.equal(

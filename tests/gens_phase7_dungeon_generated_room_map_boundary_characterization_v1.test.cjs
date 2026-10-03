@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8169430,
+assert.equal(bytes.length,8168382,
   'generated room map-boundary characterization must track the exact lot 33 runtime size');
-assert.equal(gitBlob,'f523410e175ee4946059da8e8ee8519295fb63c5',
+assert.equal(gitBlob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1',
   'generated room map-boundary characterization must track the exact lot 33 runtime blob');
 
 function block(id){

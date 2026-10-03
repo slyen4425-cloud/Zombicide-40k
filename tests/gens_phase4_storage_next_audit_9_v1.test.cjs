@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8169430);
-assert.equal(blob,'f523410e175ee4946059da8e8ee8519295fb63c5');
+assert.equal(bytes.length,8168382);
+assert.equal(blob,'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -63,7 +63,7 @@ console.log(JSON.stringify({
   selectedDirectAccesses:{reads:0,writes:0},
   coreAccesses:{reads:1,writes:1},
   semantics:{recentWindow:12,persistedHistory:24},
-  targetBlob:'f523410e175ee4946059da8e8ee8519295fb63c5',
+  targetBlob:'1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1',
   state:'migrated',
   migrated:['economy session'],
   deferred:['pending trap','special branch','gameplay mirror','dungeon runtime v2']

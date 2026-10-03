@@ -49,7 +49,7 @@ jobs:
 
           const residualCalls=(src.match(/captureCleanDungeonUi138\(\);/g)||[]).length;
           if(residualCalls!==1)throw new Error('expected one remaining Capture138 cleanup call in startConfiguredGame, got '+residualCalls);
-          src=src.replace(/[ \\t]*captureCleanDungeonUi138\\(\\);[ \\t]*/,'');
+          src=src.replace(/[ \t]*captureCleanDungeonUi138\(\);[ \t]*/,'');
 
           const residualOwnership=[...src.matchAll(/cleanDungeonPregame137|captureCleanDungeonUi138/g)].map(m=>({
             name:m[0],

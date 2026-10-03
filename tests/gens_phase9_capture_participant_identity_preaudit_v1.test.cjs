@@ -26,11 +26,11 @@ function fn(name){
   let depth=0,quote=null,escaped=false,line=false,comment=false;
   for(let i=open;i<index.length;i++){
     const c=index[i],n=index[i+1]||'';
-    if(line){if(c==='\\n')line=false;continue}
+    if(line){if(c==='\n')line=false;continue}
     if(comment){if(c==='*'&&n==='/'){comment=false;i++}continue}
     if(quote){
       if(escaped){escaped=false;continue}
-      if(c==='\\\\'){escaped=true;continue}
+      if(c==='\\'){escaped=true;continue}
       if(c===quote)quote=null;
       continue;
     }

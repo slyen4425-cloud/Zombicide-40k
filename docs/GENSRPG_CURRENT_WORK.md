@@ -54,12 +54,23 @@ Runtime exact inchangé depuis le checkpoint précédent :
 
 Aucun changement runtime avant constat du RED.
 
+## TDD RED constaté
+
+- HEAD RED : `e49cd66d459e7ac8d14b2012a793fcada734a690` ;
+- Architecture : `37152221992` — FAILURE attendue ;
+- étape : `Exiger l'ownership UI pré-game Capture / Dungeon Phase 9` ;
+- cause exacte : `Capture137 must retire its duplicate Dungeon pregame cleanup` ;
+- runtime encore inchangé à ce stade.
+
+Le log confirme également les cleanups/hook UI 138 et l'autorité `gensEnsureDungeonAdventureButton139()` déjà présente.
+
 ## Étape immédiate
 
-1. créer la sentinelle TDD ;
-2. la brancher à Architecture ;
-3. constater le RED exact ;
-4. seulement ensuite appliquer le diff runtime minimal.
+Appliquer uniquement le diff runtime minimal validé par ce RED :
+- retirer cleanup/timer/wrapper UI 137 ;
+- retirer cleanup/wrappers/listeners/timers UI 138 ;
+- retirer l'appel résiduel au cleanup 138 dans son wrapper de lancement ;
+- conserver le garde `openSessionDungeonSetup` 137 et Capture139 inchangés.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

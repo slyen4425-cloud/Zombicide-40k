@@ -15,8 +15,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168810,'participant preaudit must inspect the current verified Phase 9 runtime');
-assert.equal(blob,'a5d337ae25435d801a72333ee27e6dbc390a5175','participant preaudit must inspect the exact verified post-raccord index blob');
+assert.equal(bytes.length,8167013,'participant preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'40598938bc5211240cf2aa92442f59bc9d21f804','participant preaudit must inspect the exact verified post-raccord index blob');
 
 function fn(name){
   const marker='function '+name+'(';

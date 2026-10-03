@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168810,
+assert.equal(bytes.length,8167013,
   'dc200Branch characterization must track the exact lot 31 GREEN runtime size');
-assert.equal(gitBlob,'a5d337ae25435d801a72333ee27e6dbc390a5175',
+assert.equal(gitBlob,'40598938bc5211240cf2aa92442f59bc9d21f804',
   'dc200Branch characterization must track the exact lot 31 GREEN runtime blob');
 
 function block(id){

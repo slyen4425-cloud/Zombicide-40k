@@ -1,3 +1,81 @@
+# PHASE 9 — RACCORD PUBLIC-ENTRY CAPTURE — 2026-10-03
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-public-entry-ownership-preaudit-green-2026-10-03`
+
+SHA de base :
+`ef0af616851f143a1a3ef34469a972b06666706a`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-public-entry-raccord-2026-10-03`
+
+Branche :
+`work/gensrpg-phase9-capture-public-entry-raccord-2026-10-03`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture-public-entry-ownership-preaudit-green-2026-10-03`
+
+## Mission unique
+
+Déplacer uniquement l'ownership du provider public Capture de `captureFix139` vers `assets/gensrpg/capture/entry-v1.js`, sans déplacer le gameplay/session historique.
+
+Cible :
+`Shell -> GensCaptureV1.startModuleSession() -> référence stable Capture139`.
+
+## Périmètre
+
+- charger l'entrée publique Capture dans le vrai `index.html` ;
+- exposer une API `GensCaptureV1` ;
+- fournir un binding explicite de la référence stable Capture139 ;
+- faire posséder l'enregistrement du provider Capture par l'entrée ;
+- retirer uniquement l'enregistrement/provider inline de Capture139 devenu doublon ;
+- conserver le wrapper legacy Capture139 comme unique propriétaire de l'initialisation de session.
+
+## Hors périmètre / protégés
+
+- `gameStyle="dungeon"` ;
+- `isDungeonMode()` et `normalizeGameParticipants()` ;
+- Capture138 ;
+- `ensureBaseGameProfile()` ;
+- `saveActiveEnemies()` / `updateDungeonExploreButtons()` ;
+- UI Dungeon/Capture historique ;
+- gameplay Capture ;
+- Combat Dynamique ;
+- Exploration / World Builder / Map Actor ;
+- Survival, Dungeon, PvP, Tactical ;
+- `main` gelée.
+
+## Règles d'ownership
+
+- Shell reste routing-only ;
+- l'entrée Capture possède le provider public, pas le gameplay ;
+- Capture139 reste temporairement l'unique legacy session initializer ;
+- un seul `register("capture", ...)` actif ;
+- aucun fallback provider concurrent ;
+- aucun timer/observer/retry ajouté par l'entrée.
+
+## TDD
+
+1. RED : exiger l'entrée chargée, `GensCaptureV1`, binding legacy et provider possédé par l'entrée ;
+2. vérifier que le RED échoue uniquement parce que l'entrée est encore inerte/non chargée et le provider inline ;
+3. appliquer le plus petit diff runtime ;
+4. faire passer la sentinelle dédiée ;
+5. rejouer parité Capture Shell/provider, victoire/reprise et non-interférence ;
+6. triple CI avant checkpoint.
+
+## Risques
+
+- double provider Capture ;
+- ordre de chargement incorrect ;
+- perte de la référence stable Capture139 ;
+- déplacement accidentel de gameplay dans l'entrée ;
+- régression Capture/Dungeon par retrait prématuré d'une compatibilité.
+
+## Prochaine étape
+
+Créer la sentinelle TDD RED dédiée. Aucun runtime ne sera modifié avant constat du RED attendu.
+
+---
 # PHASE 9 — PRÉ-AUDIT CAPTURE PUBLIC-ENTRY OWNERSHIP — 2026-10-03
 
 Base GREEN :

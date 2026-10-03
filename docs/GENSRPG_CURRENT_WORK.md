@@ -34,6 +34,19 @@ La sentinelle de pré-audit a été corrigée uniquement dans son propre code de
 - parseur de fonction avec vrai `\n` et échappement backslash correct.
 Aucun fichier runtime n'a été modifié.
 
+## TDD RED constaté
+
+HEAD RED :
+`ee389b85f9c8f543da148e22ca43466ea41cdf9f`
+
+CI Architecture :
+`37138840530` — FAILURE attendue sur l'étape `Exiger le raccord participants Capture Phase 9`.
+
+Erreur exacte :
+`AssertionError [ERR_ASSERTION]: RED: normalizeGameParticipants must select Capture strict semantics from canonical Capture identity`
+
+Le pré-audit précédent reste GREEN ; ce RED démontre uniquement l'absence du seam runtime Capture explicite. Aucun runtime n'a encore été modifié.
+
 ## Mission unique du raccord
 
 TDD strict :

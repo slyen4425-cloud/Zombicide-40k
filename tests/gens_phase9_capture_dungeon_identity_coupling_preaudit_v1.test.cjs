@@ -120,6 +120,36 @@ const residualIdentityContexts=Object.fromEntries(
   })
 );
 
+function serviceContexts(body){
+  const out=[];
+  const re=/ensureBaseGameProfile\s*\(|saveActiveEnemies\s*\(|updateDungeonExploreButtons\s*\(|ensureDungeonContent\s*\(|Dungeon[A-Z][A-Za-z0-9_]*/g;
+  let m;
+  while((m=re.exec(body))&&out.length<8){
+    out.push({
+      token:m[0].replace(/\s+/g,' '),
+      context:body.slice(Math.max(0,m.index-150),Math.min(body.length,m.index+m[0].length+190))
+        .replace(/\s+/g,' ').trim()
+    });
+  }
+  return out;
+}
+
+const serviceDetailBlockIds=[
+  'captureFix137',
+  'captureFix138',
+  'captureFix139',
+  'coreCombatPoolFix156',
+  'dungeonCore200StableCapture',
+  'dungeonCore212RenderVictory'
+];
+
+const residualServiceContexts=Object.fromEntries(
+  serviceDetailBlockIds.map(id=>{
+    const found=inlineBlocks.find(x=>x.id===id);
+    return [id,serviceContexts(found?.body||'')];
+  })
+);
+
 assert.ok(captureDungeonIdentityBlocks.length>0,
   'preaudit must expose at least one remaining Capture block carrying Dungeon identity debt');
 assert.ok(captureDungeonServiceBlocks.length>0,
@@ -156,7 +186,8 @@ console.log(JSON.stringify({
       ensureBaseGameProfile:true,
       saveActiveEnemiesReset:true
     },
-    residualIdentityContexts
+    residualIdentityContexts,
+    residualServiceContexts
   },
   decision:'diagnostic only; select exactly one next seam after reviewing this inventory',
   runtimeChanged:false

@@ -4297,6 +4297,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 <script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
+<script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>
 
 <script>
 
@@ -27178,12 +27179,7 @@ window.startConfiguredGame=async function(){
   }
 };
 const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;
-const gensCaptureStartModuleSessionV1=async()=>{
-  if(gensShellActiveModuleV1()!=="capture")return false;
-  await gensCaptureStartConfiguredGame139V1();
-  return true;
-};
-window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);
+window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);
 
 /* Le Shell garde l’unique frontière globale goMenu.
    Capture expose uniquement son retour owner-local via le contrat public. */

@@ -2,32 +2,35 @@
   "version": 1,
   "phase": 3,
   "module": "capture",
-  "status": "contract-only-not-loaded",
+  "status": "partial-runtime-loaded",
   "plannedEntry": "assets/gensrpg/capture/entry-v1.js",
   "owns": [
-    "Monster Capture runtime",
-    "creatures",
-    "biomes",
-    "capture",
-    "team/reserve",
-    "Capture combat"
+    "Monster Capture public runtime entry",
+    "Capture module-launch provider"
   ],
   "consumes": [
-    "core public contracts"
+    "core public contracts",
+    "Shell module-launch public contract",
+    "temporary legacy Capture139 session start binding"
   ],
   "forbidden": [
     "Dungeon private runtime",
     "Survival private runtime",
-    "PvP private runtime"
+    "PvP private runtime",
+    "Tactical private runtime",
+    "Capture gameplay ownership inside the public entry"
   ],
   "lifecycle": {
-    "install": "future explicit install only when the module is intentionally connected",
-    "dispose": "future temporary modules must release listeners, observers and timers"
+    "install": "explicit Capture139 legacy binding; registers the Capture public provider exactly once",
+    "dispose": "not temporary in this seam; no listener observer timer or storage state is created"
   },
   "invariants": [
-    "not referenced by the current production load graph during Phase 3",
-    "no gameplay is moved into this contract",
-    "no compatibility wrapper is introduced by this contract"
+    "the active entry exposes only the public GensCaptureV1 namespace",
+    "the entry owns the public Capture module-launch provider but not Capture gameplay/session initialization",
+    "Capture139 remains the sole temporary legacy session initializer during this seam",
+    "the entry has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
+    "only one Shell register capture provider is active",
+    "historical Dungeon compatibility remains unchanged until separately audited"
   ],
   "publicEntries": {
     "moduleScreenReturn": {
@@ -39,8 +42,10 @@
     "moduleLaunch": {
       "contract": "assets/gensrpg/shell/module-launch-contract-v1.json",
       "operation": "startModuleSession",
-      "status": "declared-not-loaded",
+      "status": "loaded-public-provider",
       "ownership": "module-owned-session-start"
     }
-  }
+  },
+  "activatedPhase": 9,
+  "publicRuntimeApi": "GensCaptureV1"
 }

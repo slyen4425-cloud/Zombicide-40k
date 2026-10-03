@@ -34,6 +34,25 @@ Le corps legacy Capture139 reste inchangé comme propriétaire de session.
 - aucun fallback vers un second provider ;
 - aucune dette Dungeon inventoriée au pré-audit n'est retirée ici.
 
+## Validation GREEN
+
+SHA validé :
+`c2d80eea97d1b9111f2a1ec506dafde9c2eb772e`
+
+Checkpoint :
+`checkpoint/gensrpg-phase9-capture-public-entry-raccord-green-2026-10-03`
+
+CI :
+- Architecture + Browser `37107319589` — SUCCESS ;
+- Firefox `37107319397` — SUCCESS ;
+- Tactical Dock `37107319444` — SUCCESS.
+
+Le raccord public-entry est clos GREEN.
+
+Le provider public Capture appartient maintenant à `GensCaptureV1`.
+Capture139 reste temporairement l'unique initialiseur legacy de session.
+Aucune autre dette Dungeon/Capture n'a été retirée dans ce micro-lot.
+
 ## RED attendu
 
 La sentinelle doit échouer sur la base GREEN parce que :

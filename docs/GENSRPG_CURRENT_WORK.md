@@ -64,12 +64,38 @@ Aucune mutation runtime avant RED dédié + vérification d'une copie locale exa
 
 Cette copie **ne correspond pas** au runtime de base et ne doit pas être utilisée pour le raccord.
 
+## RED constaté
+
+HEAD RED :
+`20a7d01a102e875923bececf991c1205b3fda450`
+
+CI :
+- Architecture `37181008636` — **FAILURE attendue** à l'étape 270 `Exiger l'ownership UI pré-game Dungeon / Capture Phase 9` ;
+- Firefox `37181008620` — SUCCESS ;
+- Tactical Dock `37181008623` — SUCCESS.
+
+Échec exact :
+- `cleanDungeonPregame137` est encore présent ;
+- son `setTimeout(cleanDungeonPregame137,80)` est encore présent ;
+- son wrapper `window.updateGameStyleUi` appelle encore le cleanup ;
+- `captureCleanDungeonUi138` est encore présent ;
+- ses wrappers `renderParticipantSelector` / `updateGameStyleUi`, listener `DOMContentLoaded` et timers associés sont encore présents.
+
+Le RED prouve donc exactement la multi-autorité UI visée.
+
+## Gate Rule 26 avant runtime
+
+La copie utilisateur `workc.zip/indexc.txt` reçue le 2026-10-04 est **refusée comme base** :
+- taille `8167091` ;
+- blob `8a42d15ed218895690a3b8490bbe636d9d2d27c6`.
+
+Runtime exact requis :
+- taille `8168810` ;
+- blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
+
 ## Prochaine étape
 
-1. ajouter le RED dédié ;
-2. brancher la sentinelle Architecture ;
-3. constater un RED légitime sur l'ownership UI 137/138 ;
-4. seulement ensuite appliquer le diff runtime minimal à partir du blob Rule 26 exact.
+Recevoir et vérifier la copie exacte Rule 26, puis appliquer uniquement le retrait des nettoyages UI redondants 137/138. Aucun autre runtime avant cette vérification.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

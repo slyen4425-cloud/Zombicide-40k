@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,'Capture139 base-profile retirement must start from the exact preaudit GREEN runtime');
-assert.equal(blob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed','Capture139 base-profile retirement must start from the exact preaudit GREEN blob');
+assert.equal(bytes.length,8167007,'Capture139 base-profile retirement must start from the exact preaudit GREEN runtime');
+assert.equal(blob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4','Capture139 base-profile retirement must start from the exact preaudit GREEN blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
@@ -74,10 +74,10 @@ assert.match(
   'true Dungeon preparation must remain inside ensureBaseGameProfile'
 );
 
-assert.match(
+assert.doesNotMatch(
   c139,
-  /saveActiveEnemies\(\[\]\)/,
-  'active-enemy reset is deliberately outside this seam and must remain unchanged'
+  /saveActiveEnemies|loadActiveEnemies|ACTIVE_ENEMIES_KEY/,
+  'Capture139 active-enemy dependency must remain retired after the dedicated follow-up seam'
 );
 assert.match(c139,/captureEnsureStarterKitsForParticipants\(\)/,
   'Capture starter-kit initialization must remain unchanged');
@@ -111,7 +111,7 @@ console.log(JSON.stringify({
   target:{
     capture139EnsureBaseGameProfileCall:false,
     ensureBaseGameProfileDefinitionPreserved:true,
-    saveActiveEnemiesResetPreserved:true,
+    saveActiveEnemiesResetRetired:true,
     publicCaptureEntryRoutingOnly:true
   }
 },null,2));

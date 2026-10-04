@@ -27,8 +27,8 @@ jobs:
 
           OLD_SIZE=8168810
           OLD_BLOB='a5d337ae25435d801a72333ee27e6dbc390a5175'
-          NEW_SIZE=8166976
-          NEW_BLOB='28f68c7ce751f78f2503dd6bf6c695311dbb1bd9'
+          NEW_SIZE=8166967
+          NEW_BLOB='1d09d3d810485b206afb677ccd0be275212f912f'
 
           def git_blob(data: bytes) -> str:
               return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
@@ -79,9 +79,10 @@ jobs:
                   raise SystemExit('Capture138 segment missing '+required)
           src=src[:start]+src[end:]
 
-          if src.count('captureCleanDungeonUi138();')!=1:
-              raise SystemExit('unexpected residual Capture138 cleanup call count')
-          src=src.replace('captureCleanDungeonUi138();','',1)
+          cleanup_line='        captureCleanDungeonUi138();\\n'
+          if src.count(cleanup_line)!=1:
+              raise SystemExit('unexpected residual Capture138 cleanup line count')
+          src=src.replace(cleanup_line,'',1)
 
           required_invariants=[
               'window.openSessionDungeonSetup=(function(old)',

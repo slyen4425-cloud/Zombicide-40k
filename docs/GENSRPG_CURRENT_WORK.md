@@ -1,4 +1,4 @@
-# PHASE 9 — RETRAIT ensureBaseGameProfile() DU LANCEMENT CAPTURE139 — TDD — 2026-10-04
+# PHASE 9 — RETRAIT ensureBaseGameProfile() DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
 
 Base GREEN :
 `checkpoint/gensrpg-phase9-capture139-session-dependency-preaudit-green-2026-10-04`
@@ -12,75 +12,91 @@ Checkpoint de départ :
 Branche :
 `work/gensrpg-phase9-capture139-base-profile-retirement-2026-10-04`
 
-Dernier checkpoint GREEN :
-`checkpoint/gensrpg-phase9-capture139-session-dependency-preaudit-green-2026-10-04`
+Checkpoint GREEN de fermeture :
+`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`
 
-## Mission unique
+SHA fonctionnel GREEN avant fermeture documentaire :
+`0a65dee67d9e19193b5fd536a1644bc3cb834fda`
 
-Retirer uniquement l'appel `ensureBaseGameProfile()` du lancement Capture139.
+## Résultat
 
-Le pré-audit a prouvé que `ensureBaseGameProfile()` est une responsabilité Base/Dungeon :
-- création/réparation des profils Base + Dungeon ;
-- `ensureDungeonContent()` ;
-- reconstruction de pools Dungeon/Base ;
-- sauvegarde de profils ;
-- aucune identité Capture canonique.
+Capture139 ne déclenche plus la préparation Base/Dungeon pendant le lancement Capture.
 
-Capture139 ne doit donc plus provoquer cette préparation Base/Dungeon lors du démarrage Capture.
+Retrait runtime unique :
+- suppression de `try{ensureBaseGameProfile()}catch(e){}` dans `captureFix139`.
 
-## Invariants
+Conservé strictement :
+- définition `ensureBaseGameProfile()` ;
+- consommateurs Base/Dungeon ;
+- `ensureDungeonContent()` à l'intérieur de cette autorité Base/Dungeon ;
+- `saveActiveEnemies([])` dans Capture139 ;
+- starter kits Capture ;
+- monde Capture ;
+- or pré-game ;
+- participants Capture ;
+- provider public `GensCaptureV1` ;
+- `isDungeonMode()` ;
+- seed Capture `gameStyle:"dungeon"` ;
+- vrai Dungeon.
 
-- la définition `ensureBaseGameProfile()` reste intacte ;
-- ses consommateurs Base/Dungeon restent intacts ;
-- `saveActiveEnemies([])` reste dans Capture139 pour ce lot ;
-- participants Capture inchangés ;
-- monde Capture / starter kits / or pré-game inchangés ;
-- provider public `GensCaptureV1` inchangé ;
-- `isDungeonMode()` inchangé ;
-- seed Capture `gameStyle:"dungeon"` inchangé ;
-- vrai Dungeon inchangé ;
-- aucun nouveau service/API/wrapper/fallback/timer/listener ;
-- Combat Dynamique / Exploration / World Builder / Map Actor hors périmètre ;
-- `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+Aucun nouveau service, wrapper, timer, listener, observer, polling ou fallback n'a été ajouté.
 
 ## Rule 26
 
-Runtime de base GREEN :
+Runtime de base validé avec `indexE.zip/indexD(1).txt` :
 - taille `8167091` octets ;
 - blob `8a42d15ed218895690a3b8490bbe636d9d2d27c6`.
 
-Vérification GitHub Rule 26 reconfirmée sur `20b102f1671c54419daeedbc30f85360768337ce` : même taille et même blob.
+Runtime après raccord :
+- taille `8167048` octets ;
+- blob `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.
 
-Aucune mutation runtime avant :
-1. TDD RED dédié constaté ;
-2. vérification Rule 26 du fichier exact à modifier.
+Diff fonctionnel :
+- `index.html` uniquement pour le seam runtime ;
+- -43 octets ;
+- aucune autre logique Capture139 modifiée.
 
-## État TDD RED
+Les fingerprints exacts des sentinelles courantes ont été avancés mécaniquement sans assouplissement de contrat métier.
 
-RED constaté sur le HEAD :
-`30cf01e56d13b9ea722117f6641252af70bd5eff`.
+## Triple CI GREEN fonctionnelle
 
-Architecture run :
-`37180445589`.
+- Architecture + Browser : `37210604220` — SUCCESS ;
+- Firefox : `37210604160` — SUCCESS ;
+- Tactical Dock : `37210604163` — SUCCESS.
 
-Étape en échec attendue :
-`Exiger le retrait de ensureBaseGameProfile du lancement Capture139 Phase 9`.
+Parités protégées rejouées :
+- Capture Shell/provider ;
+- Capture victoire + reprise inter-module ;
+- vrai Dungeon ;
+- Dungeon après Survie ;
+- Dungeon map -> Tactical V2 ;
+- Save & Quit / reprise ;
+- Builder ;
+- non-interférence inter-modules.
 
-Aucune mutation runtime n'a encore été faite.
+Production :
+- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-## TDD
+## Prochaine étape Phase 9
 
-RED attendu :
-- Capture139 ne doit plus appeler `ensureBaseGameProfile()` ;
-- `ensureBaseGameProfile()` doit rester présente pour Base/Dungeon ;
-- Capture139 doit conserver `saveActiveEnemies([])` ;
-- lancement Capture/provider/victoire-reprise/non-interférence doivent rester protégés.
+Ouvrir un **pré-audit dédié de la dépendance `saveActiveEnemies([])` dans Capture139**.
 
-Après RED uniquement :
-- diff runtime minimal dans `captureFix139` ;
-- mise à jour du fingerprint Rule 26 des sentinelles concernées ;
-- triple CI ;
-- checkpoint GREEN.
+But :
+1. déterminer si `saveActiveEnemies` est encore une autorité Dungeon/global trop large pour Capture ;
+2. caractériser précisément stockage, UI Dungeon, sync et consommateurs ;
+3. distinguer ce qui est réellement partagé de ce qui appartient à Dungeon ;
+4. protéger vrai Dungeon et la reprise inter-module ;
+5. sélectionner un seul seam minimal sous TDD ;
+6. aucune mutation runtime au démarrage.
+
+Hors périmètre initial :
+- retrait global de `saveActiveEnemies` ;
+- `isDungeonMode()` ;
+- seed `gameStyle:"dungeon"` ;
+- Combat Dynamique ;
+- Exploration / World Builder / Map Actor ;
+- progression / créatures / compétences ;
+- `main`.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

@@ -1111,7 +1111,7 @@ jobs:
       - name: Vérifier Monster Capture actuel par le vrai Shell
         run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
 
-      - name: Caractériser Capture sans identité Dungeon historique
+      - name: Exiger le routage Shell Capture sans identité Dungeon historique
         run: node tests/gens_phase9_capture_seed_without_dungeon_style_browser_characterization_v1.test.cjs
 
       - name: Vérifier le provider Capture module-launch S3

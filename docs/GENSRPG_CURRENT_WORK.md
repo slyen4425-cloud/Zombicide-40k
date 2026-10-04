@@ -1,3 +1,88 @@
+# PHASE 9 — PRÉ-AUDIT DERNIERS COUPLAGES IDENTITÉ/RUNTIME DUNGEON DE CAPTURE — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`
+
+SHA de base :
+`ed29f9c1772eaf7aff998917fc523ce0944f5ca4`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-dungeon-runtime-identity-preaudit-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture-dungeon-runtime-identity-preaudit-2026-10-04`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`
+
+## Mission unique
+
+Pré-audit lecture/caractérisation uniquement des derniers marqueurs qui peuvent encore faire utiliser Dungeon comme identité ou runtime hôte de Monster Capture après retrait des dépendances de session Capture139.
+
+Priorité :
+1. built-in Monster Capture `gameStyle:"dungeon"` ;
+2. appels résiduels `isDungeonMode()` qui peuvent affecter Capture ;
+3. sélection profil / Resume / Shell / exploration / UI / runtime ;
+4. déterminer si un marqueur active réellement une autorité Dungeon ou s'il ne reste qu'une dette de compatibilité de données ;
+5. protéger vrai Dungeon, Capture victoire/reprise et quatre modules ;
+6. sélectionner un seul prochain seam minimal ;
+7. écrire un RED seulement après checkpoint GREEN du pré-audit.
+
+Aucune mutation runtime pendant ce lot.
+
+## Déjà retiré — ne pas refaire
+
+- entrée publique Capture : `GensCaptureV1` ;
+- identité canonique : `GensCaptureV1.isProfile(profile)` ;
+- participant identity Capture ;
+- pré-game ownership Capture/Dungeon ;
+- `ensureBaseGameProfile()` dans Capture139 ;
+- `saveActiveEnemies([])` dans Capture139.
+
+## Hors périmètre
+
+- retrait immédiat de `gameStyle:"dungeon"` ;
+- modification globale de `isDungeonMode()` ;
+- Combat Dynamique ;
+- Exploration / World Builder / Map Actor ;
+- progression / créatures / compétences ;
+- Survival ;
+- PvP ;
+- Tactical ;
+- `main`.
+
+Interdits :
+- deuxième architecture Capture ;
+- wrapper/fallback/timer/observer/polling ;
+- nouveau marqueur d'identité concurrent ;
+- détour par Dungeon pour conserver Capture.
+
+## Rule 26
+
+Runtime exact de base :
+- taille `8167007` octets ;
+- blob Git `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+La copie locale dérivée du fichier utilisateur Rule 26 a déjà été vérifiée exactement sur ce blob et cette taille.
+
+## Tests prévus
+
+Pré-audit structural :
+- inventaire des occurrences `gameStyle:"dungeon"` liées à Capture ;
+- inventaire des `isDungeonMode()` dans les blocs Capture et leurs consommateurs ;
+- protection `GensCaptureV1.isProfile` ;
+- vrai Dungeon ;
+- Capture Shell/provider ;
+- Capture victoire/reprise ;
+- non-interférence quatre modules ;
+- triple CI.
+
+## Prochaine étape
+
+Caractériser le runtime exact sans mutation, documenter l'ownership résiduel et sélectionner un seul seam.
+
+---
+
 # PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
 
 Base GREEN :

@@ -1,0 +1,150 @@
+name: Phase 9 fingerprint update one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04
+
+permissions:
+  contents: write
+
+jobs:
+  update-fingerprints:
+    if: ${{ github.event.head_commit.message == 'phase9 update current runtime fingerprints once' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04
+          fetch-depth: 0
+
+      - name: Update current-runtime fingerprints and affected Phase 2 cartography
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,re,hashlib
+
+          old_blob='a5d337ae25435d801a72333ee27e6dbc390a5175'
+          new_blob='8a42d15ed218895690a3b8490bbe636d9d2d27c6'
+          old_size='8168810'
+          new_size='8167091'
+
+          raw=Path('index.html').read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          if len(raw)!=int(new_size) or blob!=new_blob:
+              raise SystemExit(f'unexpected runtime {len(raw)} {blob}')
+
+          changed_tests=[]
+          for p in Path('tests').rglob('*.test.cjs'):
+              s=p.read_text(encoding='utf-8')
+              if old_blob not in s:
+                  continue
+              s2=s.replace(old_blob,new_blob).replace(old_size,new_size)
+              if s2==s:
+                  raise SystemExit(f'fingerprint replacement made no change in {p}')
+              p.write_text(s2,encoding='utf-8')
+              changed_tests.append(str(p))
+
+          if len(changed_tests)!=96:
+              raise SystemExit(f'expected 96 current-runtime test fingerprints, got {len(changed_tests)}')
+
+          # Phase 2 inline owner manifest: block ownership/order unchanged, source runtime changed.
+          p=Path('docs/GENSRPG_PHASE2_INLINE_OWNERS.json')
+          obj=json.loads(p.read_text(encoding='utf-8'))
+          if obj.get('sourceIndexBlob')!=old_blob:
+              raise SystemExit('unexpected inline owner manifest source blob')
+          obj['sourceIndexBlob']=new_blob
+          p.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Phase 2 storage cartography: no storage access changed, only source runtime fingerprint.
+          p=Path('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json')
+          obj=json.loads(p.read_text(encoding='utf-8'))
+          if obj.get('sourceIndexBlob')!=old_blob:
+              raise SystemExit('unexpected storage owner manifest source blob')
+          obj['sourceIndexBlob']=new_blob
+          p.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Timer cartography: exactly three duplicate UI cleanup setTimeout syntaxes were retired.
+          p=Path('docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json')
+          obj=json.loads(p.read_text(encoding='utf-8'))
+          if obj.get('sourceIndexBlob')!=old_blob:
+              raise SystemExit('unexpected timer manifest source blob')
+          if obj.get('expected',{}).get('inlineSetTimeoutSyntax')!=143:
+              raise SystemExit('unexpected previous inline timeout count')
+          obj['sourceIndexBlob']=new_blob
+          obj['expected']['inlineSetTimeoutSyntax']=140
+          p.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Global cartography: regenerate exactly with the same algorithm as the permanent sentinel.
+          source=raw.decode('utf-8')
+          disabled={
+            'dungeonCore081TacticalMovementDisabled',
+            'dungeonCore084MovementRuntimeFixDisabled',
+            'dungeonCore086MovementStabilityDisabled',
+            'dungeonCore087InteractionRulesDisabled',
+            'dungeonCore087ChestGuardDisabled',
+            'dungeonCore089TacticalInteractionsDisabled',
+            'dungeonCore090MovementV2Disabled',
+            'dungeonCore094EndTurnFinalDisabled',
+            'dungeonCore095SoloTurnFinalDisabled',
+            'dungeonCore097StabilityRollbackDisabled'
+          }
+          block_re=re.compile(r'<script\b[^>]*\bid=["\']([^"\']+)["\'][^>]*>([\s\S]*?)</script>',re.I)
+          assignment_re=re.compile(r'\bwindow\.([A-Za-z_$][\w$]*)\s*=')
+          chains={}
+          active=0
+          for m in block_re.finditer(source):
+              ident,body=m.group(1),m.group(2)
+              if ident in disabled:
+                  continue
+              active+=1
+              for hit in assignment_re.finditer(body):
+                  chains.setdefault(hit.group(1),[]).append(ident)
+
+          distinct=len(chains)
+          assignments=sum(len(v) for v in chains.values())
+          multi=sum(1 for v in chains.values() if len(v)>1)
+          if (active,distinct,assignments,multi)!=(119,432,749,117):
+              raise SystemExit(f'unexpected global cartography {(active,distinct,assignments,multi)}')
+
+          lines=[
+            '# GenSrpG Phase 2 — inline global last owners',
+            '# sourceIndexBlob='+new_blob,
+            '# scope=explicit window.<name> assignments in 119 active inline blocks',
+            f'# distinctGlobals={distinct} assignments={assignments} multiOwnerGlobals={multi}',
+            '# name\tassignmentCount\tlastOwner'
+          ]
+          for name in sorted(chains):
+              chain=chains[name]
+              lines.append(f'{name}\t{len(chain)}\t{chain[-1]}')
+          Path('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+
+          # The permanent global-table sentinel also pins the expected aggregate counts.
+          p=Path('tests/gens_phase2_inline_global_last_owner_v11411.test.cjs')
+          s=p.read_text(encoding='utf-8')
+          for before,after,label in [
+            ("assert.equal(distinctGlobals,433,'distinct explicit inline globals drifted');",
+             "assert.equal(distinctGlobals,432,'distinct explicit inline globals drifted');",'distinct globals'),
+            ("assert.equal(assignments,753,'explicit inline global assignments drifted');",
+             "assert.equal(assignments,749,'explicit inline global assignments drifted');",'assignments')
+          ]:
+              if s.count(before)!=1:
+                  raise SystemExit(f'{label}: expected one old assertion, got {s.count(before)}')
+              s=s.replace(before,after)
+          p.write_text(s,encoding='utf-8')
+
+          print('updated tests',len(changed_tests))
+          for name in changed_tests:
+              print(name)
+          print({'indexBlob':new_blob,'indexBytes':len(raw),'distinctGlobals':distinct,'assignments':assignments,'multiOwnerGlobals':multi,'inlineSetTimeoutSyntax':140})
+          PY
+
+      - name: Commit controlled fingerprint/cartography update
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests docs/GENSRPG_PHASE2_INLINE_OWNERS.json docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv docs/GENSRPG_PHASE2_STORAGE_OWNERS.json docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json
+          git diff --cached --quiet && { echo "No controlled update to commit"; exit 1; }
+          git commit -m "test(phase9): advance pregame runtime fingerprints"
+          git push origin HEAD:work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04

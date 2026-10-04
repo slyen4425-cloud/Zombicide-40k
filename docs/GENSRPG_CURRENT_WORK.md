@@ -1,4 +1,4 @@
-# PHASE 9 — RACCORD OWNERSHIP UI PRÉ-GAME DUNGEON / CAPTURE — 2026-10-04
+# PHASE 9 — RACCORD OWNERSHIP UI PRÉ-GAME DUNGEON / CAPTURE — GREEN — 2026-10-04
 
 Base GREEN :
 `checkpoint/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-green-2026-10-04`
@@ -12,98 +12,91 @@ Checkpoint de départ :
 Branche :
 `work/gensrpg-phase9-capture-pregame-ui-ownership-raccord-2026-10-04`
 
-Dernier checkpoint GREEN :
-`checkpoint/gensrpg-phase9-capture-dungeon-identity-coupling-preaudit-green-2026-10-04`
+Checkpoint GREEN de fermeture :
+`checkpoint/gensrpg-phase9-capture-pregame-ui-ownership-raccord-green-2026-10-04`
 
-## Mission unique
+SHA fonctionnel GREEN avant fermeture documentaire :
+`c2129b284e3b8e460c15823754382e3357a578aa`
 
-Consolider l'ownership du bouton/page Aventure Dungeon dans le pré-game, sans modifier l'identité globale Dungeon/Capture.
+## Résultat
 
-Cible temporaire unique :
+La frontière UI pré-game Dungeon/Capture n'a plus trois autorités concurrentes.
+
+Propriétaire temporaire unique conservé :
 `captureFix139.gensEnsureDungeonAdventureButton139()`.
 
-## TDD cible
+Retraits runtime exacts :
+- `cleanDungeonPregame137` supprimé ;
+- son `setTimeout(cleanDungeonPregame137,80)` supprimé ;
+- son wrapper `updateGameStyleUi` supprimé ;
+- `captureCleanDungeonUi138` supprimé ;
+- wrappers `renderParticipantSelector` / `updateGameStyleUi` de Capture138 liés à ce cleanup supprimés ;
+- listener `DOMContentLoaded` et timers de réparation Capture138 liés à ce cleanup supprimés ;
+- appel résiduel `captureCleanDungeonUi138()` dans le post-start Capture138 supprimé.
 
-Le RED doit exiger :
-
-- retrait de `cleanDungeonPregame137` et de tous ses appels de maintien UI ;
-- retrait de `captureCleanDungeonUi138` et de tous ses appels de maintien UI ;
-- conservation du garde `openSessionDungeonSetup` de Capture137 ;
-- conservation de `gensEnsureDungeonAdventureButton139()` comme propriétaire temporaire unique ;
-- aucun nouveau wrapper/timer/listener de réparation ;
-- vrai Dungeon : bouton Aventure toujours disponible ;
-- Capture : aucune page/bouton Aventure Dungeon parasite ;
-- Capture/Dungeon/Save-Resume/quatre modules restent protégés.
-
-## Hors périmètre
-
+Conservé volontairement :
+- garde `openSessionDungeonSetup` de Capture137 ;
+- autres responsabilités Capture137/138 ;
+- Capture139 session initializer ;
 - `isDungeonMode()` global ;
 - seed Monster Capture `gameStyle:"dungeon"` ;
-- Capture139 session initializer ;
-- économie/MJ ;
-- participants ;
-- progression/XP/loot ;
-- Combat Dynamique ;
-- Exploration / World Builder / Map Actor ;
-- Survival / PvP / Tactical ;
-- `main`.
+- économie/MJ, participants, progression, Combat Dynamique, Exploration et Builders.
+
+Aucun nouveau wrapper, timer, listener, observer, polling ou fallback n'a été ajouté.
 
 ## Rule 26
 
-Runtime exact de base :
-- taille `8168810` octets ;
-- blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
-
-Aucune mutation runtime avant RED dédié + vérification d'une copie locale exactement identique.
-
-## État du fichier fourni
-
-`workD.zip/indexd.txt` vérifié le 2026-10-04 :
+Base validée avec `workD.zip/indexd.txt` :
 - taille `8168810` ;
 - blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
 
-Cette copie correspond exactement au `index.html` du HEAD RED et franchit la Rule 26.
-
-Diff runtime préparé localement :
-- retrait du cleanup UI Capture137 uniquement ;
-- retrait du cleanup UI Capture138, de ses wrappers/listener/timers liés uniquement ;
-- retrait de l'appel résiduel `captureCleanDungeonUi138()` dans le post-start Capture138 ;
-- garde `openSessionDungeonSetup` Capture137 conservée ;
-- Capture139 inchangé.
-
-Fingerprint cible calculé :
+Runtime GREEN après raccord :
 - taille `8167044` ;
 - blob `d38eae0b46208f71bc4c290b25b625cc9c12e052`.
 
-## RED constaté
+## Sentinelles / cartographie
 
-HEAD RED :
-`20a7d01a102e875923bececf991c1205b3fda450`
+La sentinelle dédiée est GREEN :
+`tests/gens_phase9_capture_pregame_ui_ownership_raccord_v1.test.cjs`.
 
-CI :
-- Architecture `37181008636` — **FAILURE attendue** à l'étape 270 `Exiger l'ownership UI pré-game Dungeon / Capture Phase 9` ;
-- Firefox `37181008620` — SUCCESS ;
-- Tactical Dock `37181008623` — SUCCESS.
+Les fingerprints courants ont été avancés mécaniquement sans modification de contrat métier.
 
-Échec exact :
-- `cleanDungeonPregame137` est encore présent ;
-- son `setTimeout(cleanDungeonPregame137,80)` est encore présent ;
-- son wrapper `window.updateGameStyleUi` appelle encore le cleanup ;
-- `captureCleanDungeonUi138` est encore présent ;
-- ses wrappers `renderParticipantSelector` / `updateGameStyleUi`, listener `DOMContentLoaded` et timers associés sont encore présents.
+Cartographie Phase 2 recalculée après retrait des wrappers :
+- globals explicites : `432` ;
+- assignments globaux : `749` ;
+- multi-owner globals : `117` ;
+- `renderParticipantSelector` : `7` assignments ;
+- `updateGameStyleUi` : `2` assignments ;
+- `captureCleanDungeonUi138` : retiré ;
+- inline `setTimeout` syntax : `140` au lieu de `143`.
 
-Le RED prouve donc exactement la multi-autorité UI visée.
+## Triple CI GREEN fonctionnelle
 
-## Gate Rule 26 avant runtime
+- Architecture + Browser : `37197790486` — SUCCESS ;
+- Firefox : `37197790459` — SUCCESS ;
+- Tactical Dock : `37197790518` — SUCCESS.
 
-**GREEN** avec `workD.zip/indexd.txt` :
-- taille `8168810` ;
-- blob `a5d337ae25435d801a72333ee27e6dbc390a5175` ;
-- correspondance exacte avec le runtime du HEAD RED `5e93e48a9d8976f7a0ea8d37d61b2ca6fe99833d`.
+Parités protégées rejouées :
+- Dungeon map -> Tactical V2 ;
+- Capture victoire + reprise inter-module ;
+- provider Capture S3 ;
+- Dungeon après Survie ;
+- Builder ;
+- Save & Quit / reprise ;
+- non-interférence quatre modules ;
+- sentinelles historiques Phase 2 à 9.
 
-## Prochaine étape
+Production :
+- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-Appliquer uniquement le retrait des nettoyages UI redondants 137/138 sur la copie Rule 26 validée, avancer les fingerprints courants sans modifier les contrats métier, puis rejouer la triple CI.
+## Prochaine étape Phase 9
+
+Fermer ce lot par checkpoint GREEN après CI documentaire, puis ouvrir un **pré-audit dédié** du garde Capture137 `openSessionDungeonSetup`.
+
+But :
+- déterminer si ce garde reste nécessaire maintenant que Capture139 possède seul l'existence/visibilité du bouton Aventure ;
+- ne rien retirer avant preuve ;
+- conserver `isDungeonMode()`, `gameStyle:"dungeon"`, Capture139 session init et les autres services hors périmètre.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

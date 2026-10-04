@@ -76,7 +76,22 @@ Cette copie correspond exactement au runtime GREEN de base.
 
 ## État immédiat
 
-TDD RED à écrire. Aucun runtime encore modifié.
+TDD RED confirmé.
+
+- commit sentinelle + workflow : `ba72138a752d42753a7d6fc5064adf375e34ece0` ;
+- Architecture : `37193071703` — FAILURE attendue ;
+- étape : `Exiger l'ownership unique pré-game Aventure Dungeon / Capture Phase 9` ;
+- assertion : `RED: Capture137 must no longer own Dungeon adventure pregame cleanup`.
+
+Aucun runtime GitHub n'est encore modifié à ce stade.
+
+Patch local Rule 26 préparé depuis `workD.zip/indexd.txt` :
+- taille cible : `8166976` ;
+- blob cible : `28f68c7ce751f78f2503dd6bf6c695311dbb1bd9` ;
+- retrait net : `1834` octets ;
+- `cleanDungeonPregame137` : 3 occurrences -> 0 ;
+- `captureCleanDungeonUi138` : 6 occurrences -> 0 ;
+- owner 139 et responsabilités protégées 137/138 conservés.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

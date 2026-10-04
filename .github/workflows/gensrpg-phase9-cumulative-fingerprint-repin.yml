@@ -1,0 +1,98 @@
+name: GenSrpG Phase 9 cumulative fingerprint repin
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04'
+    paths:
+      - '.github/workflows/gensrpg-phase9-cumulative-fingerprint-repin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify current runtime
+        run: |
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+
+      - name: Repin cumulative runtime fingerprints only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          old_blob="3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed"
+          new_blob="9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          old_size="8167048"
+          new_size="8167007"
+
+          changed=[]
+
+          for p in sorted(Path("tests").rglob("*.test.cjs")):
+              s=p.read_text(encoding="utf-8")
+              n=s.replace(old_blob,new_blob).replace(old_size,new_size)
+              if n!=s:
+                  p.write_text(n,encoding="utf-8")
+                  changed.append(str(p))
+
+          manifest_paths=[
+              Path("docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json"),
+              Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv"),
+              Path("docs/GENSRPG_PHASE2_INLINE_OWNERS.json"),
+              Path("docs/GENSRPG_PHASE2_STORAGE_OWNERS.json"),
+          ]
+          for p in manifest_paths:
+              s=p.read_text(encoding="utf-8")
+              n=s.replace(old_blob,new_blob).replace(old_size,new_size)
+              if n!=s:
+                  p.write_text(n,encoding="utf-8")
+                  changed.append(str(p))
+
+          assert changed, "no stale cumulative fingerprints found"
+          print("REPinned",len(changed),"files")
+          for p in changed:
+              print(p)
+          PY
+
+      - name: Remove temporary diagnostic transports
+        run: |
+          rm .github/workflows/gensrpg-phase9-stale-fingerprint-scan.yml
+          rm .github/workflows/gensrpg-phase9-cumulative-fingerprint-repin.yml
+
+      - name: Verify scope and stale executable fingerprints
+        run: |
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+          ! grep -RIl '3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed' tests
+          ! grep -RIl '8167048' tests
+          for f in             docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json             docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv             docs/GENSRPG_PHASE2_INLINE_OWNERS.json             docs/GENSRPG_PHASE2_STORAGE_OWNERS.json
+          do
+            ! grep -q '3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed' "$f"
+            ! grep -q '8167048' "$f"
+          done
+          git diff --check
+          git status --short
+
+      - name: Re-run first affected architecture proofs
+        run: |
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_phase2_timer_classification_v11411.test.cjs
+          node tests/gens_phase2_storage_ownership_characterization_v11411.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+
+      - name: Commit fingerprint repin
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "test(phase9): repin cumulative runtime fingerprints"
+          git push origin "HEAD:$GITHUB_REF_NAME"

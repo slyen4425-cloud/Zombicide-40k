@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=a5d337ae25435d801a72333ee27e6dbc390a5175
+# sourceIndexBlob=8a42d15ed218895690a3b8490bbe636d9d2d27c6
 # scope=explicit window.<name> assignments in 119 active inline blocks
-# distinctGlobals=433 assignments=753 multiOwnerGlobals=117
+# distinctGlobals=432 assignments=749 multiOwnerGlobals=117
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -59,7 +59,6 @@ captureBattleSelectedTargetId	2	captureFix129
 captureBattleUseAbility	3	captureBuffFx143
 captureChooseFriendlyTarget136	1	captureFix136
 captureChooseReplaceSlot133	1	captureFix133
-captureCleanDungeonUi138	1	captureFix138
 captureCreatureCardHtml	1	captureFix133
 captureElementLabel138	1	captureFix138
 captureEnterWorld139	1	captureFix139
@@ -412,7 +411,7 @@ renderInventory	1	dungeonCore062GearPortrait
 renderMenuStatuses	1	dungeonEconomy160
 renderMerchant	1	dungeonCore071Merchant
 renderMerchant071	1	dungeonCore071Merchant
-renderParticipantSelector	8	coreCombatPoolFix156
+renderParticipantSelector	7	coreCombatPoolFix156
 renderRpgHeroProgressionCurve	1	dungeonCore044HeroProgression
 renderRpgHeroProgressionPreview	1	dungeonCore044HeroProgression
 renderTacticalMovement081	1	dungeonCore098IsolatedMovement
@@ -435,4 +434,4 @@ startTurnManagerForGame	2	rpgTurnTargetFlow157
 state	8	dungeonCore200Rebuild
 toggleOutOfGameHeroes	2	gensrpgDungeonFlowFix171
 updateDungeonSearchUi	1	dungeonEconomy160
-updateGameStyleUi	4	gensStability151
+updateGameStyleUi	2	gensStability151

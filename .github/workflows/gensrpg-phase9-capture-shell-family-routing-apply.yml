@@ -1,0 +1,85 @@
+name: GenSrpG Phase 9 Capture Shell family routing apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-seed-dungeon-identity-preaudit-2026-10-04'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-shell-family-routing-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 baseline
+        run: |
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+
+      - name: Apply Shell family routing seam
+        run: python tools/gensrpg_phase9_capture_shell_family_routing_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "99d7784676669b629cae6070df8c02606d67002f"
+          test "$(wc -c < index.html)" = "8167187"
+          python - <<'PY'
+          from pathlib import Path
+          s=Path("index.html").read_text(encoding="utf-8")
+          assert 'const all=loadGameProfiles(),rpg=all.filter(p=>{const f=gensContentFamilyForProfile(p);return f==="rpg"||f==="manga"||f==="creature"}).map(ensureRpgProfileData);' in s
+          assert 'const raw=loadGameProfiles().filter(p=>{const f=gensContentFamilyForProfile(p);return f==="rpg"||f==="manga"||f==="creature"});' in s
+          assert 'const f=gensContentFamilyForProfile(p);return (f==="rpg"||f==="manga"||f==="creature")?"adventure":"survival";' in s
+          assert 'const MC162_PROFILE=' in s and '"gameStyle":"dungeon"' in s[s.index('const MC162_PROFILE='):s.index('const MC162_TRAINER=')]
+          PY
+
+      - name: Verify Phase 9 structural invariants
+        run: |
+          node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+
+      - name: Remove one-shot transport files
+        run: |
+          rm tools/gensrpg_phase9_capture_shell_family_routing_apply.py
+          rm .github/workflows/gensrpg-phase9-capture-shell-family-routing-apply.yml
+
+      - name: Verify diff scope
+        run: |
+          git diff --check
+          python - <<'PY'
+          import subprocess
+          allowed_docs={
+            "docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json",
+            "docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv",
+            "docs/GENSRPG_PHASE2_INLINE_OWNERS.json",
+            "docs/GENSRPG_PHASE2_STORAGE_OWNERS.json",
+          }
+          changed=set(subprocess.check_output(["git","diff","--name-only"],text=True).splitlines())
+          assert "index.html" in changed,sorted(changed)
+          for p in changed:
+              assert (
+                  p=="index.html" or
+                  p.startswith("tests/") and p.endswith(".test.cjs") or
+                  p in allowed_docs or
+                  p=="tools/gensrpg_phase9_capture_shell_family_routing_apply.py" or
+                  p==".github/workflows/gensrpg-phase9-capture-shell-family-routing-apply.yml"
+              ),p
+          PY
+          git diff --stat
+          git diff -- index.html | sed -n '1,140p'
+
+      - name: Commit GREEN candidate
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor(phase9): route Capture through Shell content family"
+          git push origin "HEAD:$GITHUB_REF_NAME"

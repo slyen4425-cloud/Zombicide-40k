@@ -1,0 +1,146 @@
+name: Phase 9 Capture pregame ownership one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04
+
+permissions:
+  contents: write
+
+jobs:
+  patch-index:
+    if: ${{ github.event.head_commit.message == 'phase9 apply pregame ownership runtime once' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04
+          fetch-depth: 0
+
+      - name: Apply exact pregame ownership seam
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          path=Path('index.html')
+          raw=path.read_bytes()
+          before_blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          if len(raw)!=8168810 or before_blob!='a5d337ae25435d801a72333ee27e6dbc390a5175':
+              raise SystemExit(f'unexpected base runtime {len(raw)} {before_blob}')
+          src=raw.decode('utf-8')
+
+          old137='''/* ---------- supprime réellement le morceau Aventure Dungeon en Capture ---------- */
+          window.openSessionDungeonSetup=(function(old){
+            return function(){
+              if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return;
+              return old.apply(this,arguments);
+            };
+          })(window.openSessionDungeonSetup);
+          function cleanDungeonPregame137(){
+            const capture=typeof gensCapturePregameMode==="function"&&gensCapturePregameMode();
+            const btn=document.getElementById("sessionDungeonSetupBtn");
+            const page=document.getElementById("sessionDungeonSetup");
+            if(btn)btn.style.display=capture?"none":"";
+            if(page&&capture)page.style.setProperty("display","none","important");
+          }
+          setTimeout(cleanDungeonPregame137,80);
+          const update137=window.updateGameStyleUi;
+          if(typeof update137==="function")window.updateGameStyleUi=function(){const r=update137.apply(this,arguments);cleanDungeonPregame137();return r};
+          '''
+          new137='''/* ---------- bloque l’accès Aventure Dungeon en Capture ---------- */
+          window.openSessionDungeonSetup=(function(old){
+            return function(){
+              if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return;
+              return old.apply(this,arguments);
+            };
+          })(window.openSessionDungeonSetup);
+          '''
+
+          old138='''/* ---------- supprime vraiment Aventure Dungeon du flux Capture ---------- */
+          window.captureCleanDungeonUi138=function(){
+            const cap=isCaptureContext138();
+            const btn=document.getElementById("sessionDungeonSetupBtn");
+            const page=document.getElementById("sessionDungeonSetup");
+            if(btn)btn.style.setProperty("display",cap?"none":"","important");
+            if(page&&cap)page.style.setProperty("display","none","important");
+
+            /* sécurité : aucun accès au bouton Aventure depuis la grille de session */
+            const grid=document.querySelector(".sessionSetupGrid");
+            if(grid&&cap){
+              [...grid.querySelectorAll("button")].forEach(b=>{
+                if(b.id==="sessionDungeonSetupBtn")b.style.setProperty("display","none","important");
+              });
+            }
+          };
+          const rps138=window.renderParticipantSelector;
+          window.renderParticipantSelector=function(){const r=rps138.apply(this,arguments);captureCleanDungeonUi138();return r};
+          const ugs138=window.updateGameStyleUi;
+          if(typeof ugs138==="function")window.updateGameStyleUi=function(){const r=ugs138.apply(this,arguments);captureCleanDungeonUi138();return r};
+          document.addEventListener("DOMContentLoaded",()=>setTimeout(captureCleanDungeonUi138,80));
+          setTimeout(captureCleanDungeonUi138,200);
+
+          '''
+
+          oldcall='''        if(hub){hub.style.display="block";hub.scrollIntoView({block:"start"})}
+                  captureCleanDungeonUi138();
+          '''
+          newcall='''        if(hub){hub.style.display="block";hub.scrollIntoView({block:"start"})}
+          '''
+
+          old139='''window.gensEnsureDungeonAdventureButton139=function(){
+            const grid=document.querySelector("#pregameSetup .sessionSetupGrid");if(!grid)return;
+            let b=document.getElementById("sessionDungeonSetupBtn");
+            let realDungeon=false;
+          '''
+          new139='''window.gensEnsureDungeonAdventureButton139=function(){
+            const grid=document.querySelector("#pregameSetup .sessionSetupGrid");if(!grid)return;
+            let b=document.getElementById("sessionDungeonSetupBtn");
+            const page=document.getElementById("sessionDungeonSetup");
+            let realDungeon=false;
+          '''
+
+          old139b='''  }catch(e){}
+            if(!realDungeon){b?.remove();return}
+            if(!b){
+          '''
+          new139b='''  }catch(e){}
+            if(!realDungeon){
+              b?.remove();
+              if(page)page.style.setProperty("display","none","important");
+              return;
+            }
+            if(!b){
+          '''
+
+          for before,after,label in [
+              (old137,new137,'Capture137 cleanup'),
+              (old138,'','Capture138 cleanup authority'),
+              (oldcall,newcall,'Capture138 start cleanup call'),
+              (old139,new139,'Capture139 page binding'),
+              (old139b,new139b,'Capture139 non-Dungeon page ownership'),
+          ]:
+              count=src.count(before)
+              if count!=1:
+                  raise SystemExit(f'{label}: expected one exact source, got {count}')
+              src=src.replace(before,after)
+
+          path.write_text(src,encoding='utf-8')
+          raw=path.read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          if len(raw)!=8167091 or blob!='8a42d15ed218895690a3b8490bbe636d9d2d27c6':
+              raise SystemExit(f'unexpected target runtime {len(raw)} {blob}')
+          print({'bytes':len(raw),'blob':blob})
+          PY
+
+      - name: Commit exact runtime diff
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && { echo "No runtime change to commit"; exit 1; }
+          git commit -m "runtime(phase9): consolidate Capture pregame ownership"
+          git push origin HEAD:work/gensrpg-phase9-capture-pregame-ownership-raccord-2026-10-04

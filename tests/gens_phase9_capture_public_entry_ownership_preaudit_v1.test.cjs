@@ -16,8 +16,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,'preaudit must inspect the current verified Phase 9 runtime');
-assert.equal(blob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed','preaudit must inspect the exact verified post-participant-raccord index blob');
+assert.equal(bytes.length,8167007,'preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4','preaudit must inspect the exact verified post-participant-raccord index blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -64,7 +64,7 @@ assert.ok(!start139.includes('ensureBaseGameProfile()'),'Capture139 must remain 
 assert.ok(start139.includes('captureWorldState()'));
 assert.ok(start139.includes('saveCaptureWorldState(ws)'));
 assert.ok(start139.includes('captureEnsureStarterKitsForParticipants()'));
-assert.ok(start139.includes('saveActiveEnemies([])'));
+assert.ok(!start139.includes('saveActiveEnemies([])'),'Capture139 active-enemy reset must remain retired after the dedicated Phase 9 seam');
 assert.ok(start139.includes('captureEnterWorld139()'));
 assert.doesNotMatch(start139,/DungeonCore01|DungeonSpatial|startTacticalCombat|GensTacticalV1/);
 
@@ -112,7 +112,7 @@ console.log(JSON.stringify({
     providerStillInline:false
   },
   historicalDebts:[
-    'saveActiveEnemies updates Dungeon explore UI'
+    'legacy saveActiveEnemies still updates Dungeon explore UI outside Capture139'
   ],
   retiredDebts:[
     'normalizeGameParticipants no longer uses Dungeon identity for Capture',

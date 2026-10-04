@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,'current runtime must preserve the Phase 7 generated Boss policy S1 registry candidate');
-assert.equal(gitBlob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed','current runtime blob must preserve the Phase 7 generated Boss policy S1 registry candidate');
+assert.equal(bytes.length,8167007,'current runtime must preserve the Phase 7 generated Boss policy S1 registry candidate');
+assert.equal(gitBlob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4','current runtime blob must preserve the Phase 7 generated Boss policy S1 registry candidate');
 
 const screenReturn=index.indexOf('window.GensShellScreenReturnV1=Object.freeze({');
 const goMenu=index.indexOf('function goMenu(){',screenReturn);

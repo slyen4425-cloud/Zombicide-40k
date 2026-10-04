@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,'Capture/Dungeon coupling preaudit must inspect the current verified Phase 9 runtime');
-assert.equal(blob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed','Capture/Dungeon coupling preaudit must inspect the exact verified Phase 9 runtime blob');
+assert.equal(bytes.length,8167007,'Capture/Dungeon coupling preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4','Capture/Dungeon coupling preaudit must inspect the exact verified Phase 9 runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -84,8 +84,8 @@ assert.match(c138,/GensCaptureV1/);
 assert.match(c151,/GensCaptureV1/);
 assert.doesNotMatch(c139,/ensureBaseGameProfile\(\)/,
   'Capture139 must remain decoupled from Base/Dungeon profile preparation after the dedicated retirement seam');
-assert.match(c139,/saveActiveEnemies\(\[\]\)/,
-  'legacy Capture139 still resets active enemies through the historical shared/global seam');
+assert.doesNotMatch(c139,/saveActiveEnemies|loadActiveEnemies|ACTIVE_ENEMIES_KEY/,
+  'Capture139 active-enemy dependency must remain retired after the dedicated Phase 9 seam');
 
 const inlineBlocks=[];
 const re=/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi;
@@ -184,7 +184,7 @@ console.log(JSON.stringify({
     captureDungeonServiceBlocks,
     capture139:{
       ensureBaseGameProfile:false,
-      saveActiveEnemiesReset:true
+      saveActiveEnemiesReset:false
     },
     residualIdentityContexts,
     residualServiceContexts

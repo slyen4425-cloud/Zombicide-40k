@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,
+assert.equal(bytes.length,8167007,
   'Boss-policy RED must start from the exact post-authority-sweep runtime size');
-assert.equal(gitBlob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed',
+assert.equal(gitBlob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4',
   'Boss-policy RED must start from the exact post-authority-sweep runtime blob');
 
 function block(id){

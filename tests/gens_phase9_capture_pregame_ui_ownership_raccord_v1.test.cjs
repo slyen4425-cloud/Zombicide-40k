@@ -40,12 +40,21 @@ assert.doesNotMatch(c137,/cleanDungeonPregame137/,
 assert.doesNotMatch(c138,/captureCleanDungeonUi138/,
   'RED: Capture138 must no longer own redundant Dungeon pregame UI cleanup');
 
-assert.match(c139,/function\s+gensEnsureDungeonAdventureButton139\s*\(/,
+assert.doesNotMatch(c137,/const\s+update137=window\.updateGameStyleUi/,
+  'Capture137 must no longer wrap updateGameStyleUi for Dungeon pregame cleanup');
+assert.doesNotMatch(c138,/const\s+rps138=window\.renderParticipantSelector/,
+  'Capture138 must no longer wrap renderParticipantSelector for Dungeon pregame cleanup');
+assert.doesNotMatch(c138,/const\s+ugs138=window\.updateGameStyleUi/,
+  'Capture138 must no longer wrap updateGameStyleUi for Dungeon pregame cleanup');
+assert.doesNotMatch(c138,/DOMContentLoaded[^\n]*captureCleanDungeonUi138|setTimeout\(captureCleanDungeonUi138/,
+  'Capture138 must no longer maintain Dungeon pregame visibility with cleanup listeners/timers');
+
+assert.match(c139,/window\.gensEnsureDungeonAdventureButton139=function\s*\(/,
   'Capture139 must remain the temporary unique owner of the Dungeon Adventure button/page boundary');
 assert.match(c139,/GAME_PROFILE_DUNGEON_ID/,
   'Capture139 Adventure-button ownership must continue targeting the canonical real Dungeon profile');
 assert.equal(
-  (index.match(/function\s+gensEnsureDungeonAdventureButton139\s*\(/g)||[]).length,
+  (index.match(/window\.gensEnsureDungeonAdventureButton139=function\s*\(/g)||[]).length,
   1,
   'the temporary Adventure-button owner must have one declaration only'
 );

@@ -1,0 +1,77 @@
+name: GenSrpG Phase 9 Capture139 active-enemies retirement one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture139-active-enemies-retirement-2026-10-04'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture139-active-enemies-retirement-apply.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  apply-capture139-active-enemies-retirement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 baseline
+        run: |
+          test "$(git hash-object index.html)" = "3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed"
+          test "$(wc -c < index.html)" = "8167048"
+
+      - name: Apply exact Capture139 active-enemies seam
+        run: python tools/gensrpg_phase9_capture139_active_enemies_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path("index.html").read_text()
+          m=re.search(r'<script\b[^>]*\bid=["\x27]captureFix139["\x27][^>]*>([\s\S]*?)</script>',s,re.I)
+          assert m
+          b=m.group(1)
+          assert "saveActiveEnemies" not in b
+          assert "loadActiveEnemies" not in b
+          assert "ACTIVE_ENEMIES_KEY" not in b
+          assert "captureEnsureStarterKitsForParticipants()" in b
+          PY
+
+      - name: Run dedicated TDD targets
+        run: |
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+          node tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs
+          node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
+
+      - name: Review exact scope
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- index.html             tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs             tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs             tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs | sed -n '1,320p'
+          test -z "$(git diff --name-only | grep -Ev '^(index\.html|tests/gens_phase9_capture139_session_dependency_preaudit_v1\.test\.cjs|tests/gens_phase9_capture139_base_profile_retirement_v1\.test\.cjs|tests/gens_phase9_capture139_active_enemies_retirement_v1\.test\.cjs)$')"
+          test "$(git diff --name-only | wc -l)" = "4"
+
+      - name: Commit exact runtime seam
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html             tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs             tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs             tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+          test "$(git diff --cached --name-only | wc -l)" = "4"
+          git commit -m "refactor(phase9): retire Capture139 active-enemy dependency"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Dispatch required validation on runtime SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run gensrpg-architecture-sentinels.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-firefox-wall-sentinel.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-tactical-dock-sentinel.yml --ref "$GITHUB_REF_NAME"

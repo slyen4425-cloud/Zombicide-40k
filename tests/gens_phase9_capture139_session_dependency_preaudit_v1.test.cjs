@@ -47,6 +47,31 @@ function ownerCandidates(symbol){
   return out;
 }
 
+function functionSource(name){
+  const marker='function '+name+'(';
+  const start=index.indexOf(marker);
+  assert.ok(start>=0,'missing function '+name);
+  const open=index.indexOf('{',start);
+  let depth=0,quote=null,escaped=false,line=false,comment=false;
+  for(let i=open;i<index.length;i++){
+    const ch=index[i],next=index[i+1]||'';
+    if(line){if(ch==='\n')line=false;continue}
+    if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}
+    if(quote){
+      if(escaped){escaped=false;continue}
+      if(ch==='\\'){escaped=true;continue}
+      if(ch===quote)quote=null;
+      continue;
+    }
+    if(ch==='/'&&next==='/'){line=true;i++;continue}
+    if(ch==='/'&&next==='*'){comment=true;i++;continue}
+    if(ch==="'"||ch==='"'||ch===String.fromCharCode(96)){quote=ch;continue}
+    if(ch==='{')depth++;
+    if(ch==='}'&&--depth===0)return index.slice(start,i+1);
+  }
+  assert.fail('unterminated function '+name);
+}
+
 const c139=block('captureFix139');
 assert.match(c139,/ensureBaseGameProfile\(\)/,'Capture139 must still expose the historical profile-preparation dependency during preaudit');
 assert.match(c139,/saveActiveEnemies\(\[\]\)/,'Capture139 must still expose the historical active-enemy reset dependency during preaudit');
@@ -58,8 +83,28 @@ assert.doesNotMatch(captureEntry,/ensureBaseGameProfile|saveActiveEnemies|Dungeo
 
 const ensureContexts=contextsFor('ensureBaseGameProfile');
 const enemyContexts=contextsFor('saveActiveEnemies');
+const ensureFn=functionSource('ensureBaseGameProfile');
+const saveEnemiesFn=functionSource('saveActiveEnemies');
+
 assert.ok(ensureContexts.length>=2,'preaudit must locate definition/use contexts for ensureBaseGameProfile');
 assert.ok(enemyContexts.length>=2,'preaudit must locate definition/use contexts for saveActiveEnemies');
+
+const exactFunctionMarkers={
+  ensureBaseGameProfile:{
+    baseProfile:/GAME_PROFILE_BASE_ID/.test(ensureFn),
+    dungeonProfile:/GAME_PROFILE_DUNGEON_ID/.test(ensureFn),
+    captureIdentity:/GensCaptureV1|MC162_ID|captureWorldState|creatureTeam/.test(ensureFn),
+    profileSave:/saveGameProfiles|saveGameProfilesRaw|localStorage/.test(ensureFn),
+    dom:/document\.|getElementById|querySelector/.test(ensureFn)
+  },
+  saveActiveEnemies:{
+    localStorage:/localStorage/.test(saveEnemiesFn),
+    renderActiveEnemyButtons:/renderActiveEnemyButtons/.test(saveEnemiesFn),
+    updateDungeonExploreButtons:/updateDungeonExploreButtons/.test(saveEnemiesFn),
+    pushSync:/z40kSchedulePush/.test(saveEnemiesFn),
+    captureIdentity:/GensCaptureV1|captureWorldState|creatureTeam/.test(saveEnemiesFn)
+  }
+};
 
 const markers={
   ensureBaseGameProfile:{
@@ -90,6 +135,11 @@ console.log(JSON.stringify({
     saveActiveEnemies:ownerCandidates('saveActiveEnemies')
   },
   markers,
+  exactFunctionMarkers,
+  exactFunctions:{
+    ensureBaseGameProfile:ensureFn,
+    saveActiveEnemies:saveEnemiesFn
+  },
   contexts:{
     ensureBaseGameProfile:ensureContexts,
     saveActiveEnemies:enemyContexts

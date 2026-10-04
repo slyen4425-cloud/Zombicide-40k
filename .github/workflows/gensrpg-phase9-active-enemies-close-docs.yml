@@ -28,141 +28,18 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           current=Path("docs/GENSRPG_CURRENT_WORK.md")
           preaudit=Path("docs/GENSRPG_PHASE9_CAPTURE139_ACTIVE_ENEMIES_PREAUDIT.md")
-
           marker="# PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04"
-          assert marker not in current.read_text(encoding="utf-8"), "CURRENT_WORK already closed"
-
-          block="""# PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
-
-Base GREEN :
-`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`
-
-SHA de base :
-`77d68ab0764c7715969a24d102a725d1a3d03a74`
-
-Checkpoint de départ :
-`checkpoint/gensrpg-start-phase9-capture139-active-enemies-preaudit-2026-10-04`
-
-Branche :
-`work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04`
-
-Checkpoint GREEN de fermeture :
-`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`
-
-SHA fonctionnel GREEN :
-`fc4cc5bb2f4117794a7b5e36369be131a692ff19`
-
-## Résultat
-
-Capture139 ne touche plus l'autorité legacy des ennemis actifs Survie/Dungeon.
-
-Retrait runtime unique :
-- suppression de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139`.
-
-Conservé strictement :
-- `saveActiveEnemies()` ;
-- `loadActiveEnemies()` ;
-- `ACTIVE_ENEMIES_KEY` ;
-- `renderActiveEnemyButtons()` ;
-- `updateDungeonExploreButtons()` ;
-- `z40kSchedulePush()` ;
-- consommateurs Survie/Dungeon ;
-- resets généraux `newGame()`, `switchGameModeFromHome()`, `openGensBuiltInGame()` ;
-- vrais démarrages Dungeon ;
-- lancement Survival ;
-- starter kits, monde, participants, or pré-game et turn manager Capture ;
-- `GensCaptureV1` routing-only ;
-- `isDungeonMode()` et seed Capture `gameStyle:"dungeon"` inchangés.
-
-Aucun nouveau service, stockage, wrapper, fallback, timer, observer, polling ou seconde autorité.
-
-## Rule 26
-
-Runtime de base vérifié depuis le fichier utilisateur exact :
-- taille `8167048` octets ;
-- blob `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.
-
-Runtime après seam :
-- taille `8167007` octets ;
-- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
-
-Diff runtime :
-- `index.html` : une seule ligne retirée ;
-- -41 octets ;
-- aucune autre logique gameplay modifiée.
-
-Les fingerprints des sentinelles cumulatives et quatre manifestes Phase 2 ont été repinés mécaniquement sur le nouveau blob, sans modifier le runtime ni assouplir les contrats. Les workflows temporaires de transport/diagnostic ont été supprimés.
-
-## TDD
-
-RED dédié constaté :
-- Architecture `37216705469` — FAILURE attendu sur « retrait de saveActiveEnemies du lancement Capture139 ».
-
-GREEN fonctionnel final :
-- Architecture + Browser : `37225278513` — SUCCESS ;
-- Firefox : `37225278411` — SUCCESS ;
-- Tactical Dock : `37225278415` — SUCCESS.
-
-Le cœur Architecture a validé 659 étapes, puis son job navigateur a terminé SUCCESS.
-
-## Résultat architectural
-
-- Capture : aucun ownership de l'état legacy `ACTIVE_ENEMIES_KEY` ;
-- Survie/Dungeon : autorité legacy existante conservée ;
-- Shell/pré-game général : nettoyages transitoires existants conservés ;
-- aucune multi-autorité créée.
-
-Production :
-- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
-
-## Prochaine étape Phase 9
-
-Après checkpoint GREEN, ouvrir un nouveau pré-audit du prochain couplage résiduel Capture/Dungeon.
-
-Ne pas modifier `isDungeonMode()` ni le seed `gameStyle:"dungeon"` sans caractérisation dédiée et RED TDD.
-
-Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
-
----
-
-"""
-          current.write_text(block+current.read_text(encoding="utf-8"),encoding="utf-8")
-
-          ptxt=preaudit.read_text(encoding="utf-8")
           close_marker="## Clôture GREEN — retrait Capture139"
-          assert close_marker not in ptxt, "preaudit already closed"
-          closure="""
-
-## Clôture GREEN — retrait Capture139
-
-Le seam sélectionné a été appliqué sous TDD :
-- retrait unique de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139` ;
-- aucune modification de la définition `saveActiveEnemies()`, de sa clé, de ses consommateurs Survie/Dungeon ou des resets généraux ;
-- aucune nouvelle autorité.
-
-Runtime final :
-- taille : `8167007` octets ;
-- blob Git : `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
-
-RED dédié :
-- Architecture `37216705469` — FAILURE attendu.
-
-Triple CI fonctionnelle GREEN :
-- Architecture + Browser `37225278513` — SUCCESS ;
-- Firefox `37225278411` — SUCCESS ;
-- Tactical Dock `37225278415` — SUCCESS.
-
-Les fingerprints cumulés ont été repinés mécaniquement sur le nouveau runtime. Aucun code gameplay supplémentaire n'a été modifié.
-
-Checkpoint de fermeture prévu :
-`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`.
-
-État : **GREEN fonctionnel, fermeture documentaire en cours**.
-"""
-          preaudit.write_text(ptxt.rstrip()+closure+"\n",encoding="utf-8")
+          block="# PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04\n\nBase GREEN :\n`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`\n\nSHA de base :\n`77d68ab0764c7715969a24d102a725d1a3d03a74`\n\nCheckpoint de départ :\n`checkpoint/gensrpg-start-phase9-capture139-active-enemies-preaudit-2026-10-04`\n\nBranche :\n`work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04`\n\nCheckpoint GREEN de fermeture :\n`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`\n\nSHA fonctionnel GREEN :\n`fc4cc5bb2f4117794a7b5e36369be131a692ff19`\n\n## Résultat\n\nCapture139 ne touche plus l'autorité legacy des ennemis actifs Survie/Dungeon.\n\nRetrait runtime unique :\n- suppression de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139`.\n\nConservé strictement :\n- `saveActiveEnemies()` ;\n- `loadActiveEnemies()` ;\n- `ACTIVE_ENEMIES_KEY` ;\n- `renderActiveEnemyButtons()` ;\n- `updateDungeonExploreButtons()` ;\n- `z40kSchedulePush()` ;\n- consommateurs Survie/Dungeon ;\n- resets généraux `newGame()`, `switchGameModeFromHome()`, `openGensBuiltInGame()` ;\n- vrais démarrages Dungeon ;\n- lancement Survival ;\n- starter kits, monde, participants, or pré-game et turn manager Capture ;\n- `GensCaptureV1` routing-only ;\n- `isDungeonMode()` et seed Capture `gameStyle:\"dungeon\"` inchangés.\n\nAucun nouveau service, stockage, wrapper, fallback, timer, observer, polling ou seconde autorité.\n\n## Rule 26\n\nRuntime de base vérifié depuis le fichier utilisateur exact :\n- taille `8167048` octets ;\n- blob `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.\n\nRuntime après seam :\n- taille `8167007` octets ;\n- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.\n\nDiff runtime :\n- `index.html` : une seule ligne retirée ;\n- -41 octets ;\n- aucune autre logique gameplay modifiée.\n\nLes fingerprints des sentinelles cumulatives et quatre manifestes Phase 2 ont été repinés mécaniquement sur le nouveau blob, sans modifier le runtime ni assouplir les contrats. Les workflows temporaires de transport/diagnostic ont été supprimés.\n\n## TDD\n\nRED dédié constaté :\n- Architecture `37216705469` — FAILURE attendu sur « retrait de saveActiveEnemies du lancement Capture139 ».\n\nGREEN fonctionnel final :\n- Architecture + Browser : `37225278513` — SUCCESS ;\n- Firefox : `37225278411` — SUCCESS ;\n- Tactical Dock : `37225278415` — SUCCESS.\n\nLe cœur Architecture a validé 659 étapes, puis son job navigateur a terminé SUCCESS.\n\n## Résultat architectural\n\n- Capture : aucun ownership de l'état legacy `ACTIVE_ENEMIES_KEY` ;\n- Survie/Dungeon : autorité legacy existante conservée ;\n- Shell/pré-game général : nettoyages transitoires existants conservés ;\n- aucune multi-autorité créée.\n\nProduction :\n- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.\n\n## Prochaine étape Phase 9\n\nAprès checkpoint GREEN, ouvrir un nouveau pré-audit du prochain couplage résiduel Capture/Dungeon.\n\nNe pas modifier `isDungeonMode()` ni le seed `gameStyle:\"dungeon\"` sans caractérisation dédiée et RED TDD.\n\nCritère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**\n\n---\n\n"
+          closure="\n\n## Clôture GREEN — retrait Capture139\n\nLe seam sélectionné a été appliqué sous TDD :\n- retrait unique de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139` ;\n- aucune modification de la définition `saveActiveEnemies()`, de sa clé, de ses consommateurs Survie/Dungeon ou des resets généraux ;\n- aucune nouvelle autorité.\n\nRuntime final :\n- taille : `8167007` octets ;\n- blob Git : `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.\n\nRED dédié :\n- Architecture `37216705469` — FAILURE attendu.\n\nTriple CI fonctionnelle GREEN :\n- Architecture + Browser `37225278513` — SUCCESS ;\n- Firefox `37225278411` — SUCCESS ;\n- Tactical Dock `37225278415` — SUCCESS.\n\nLes fingerprints cumulés ont été repinés mécaniquement sur le nouveau runtime. Aucun code gameplay supplémentaire n'a été modifié.\n\nCheckpoint de fermeture prévu :\n`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`.\n\nÉtat : **GREEN fonctionnel, fermeture documentaire en cours**.\n"
+          c=current.read_text(encoding="utf-8")
+          p=preaudit.read_text(encoding="utf-8")
+          assert marker not in c, "CURRENT_WORK already closed"
+          assert close_marker not in p, "preaudit already closed"
+          current.write_text(block+c,encoding="utf-8")
+          preaudit.write_text(p.rstrip()+closure+"\n",encoding="utf-8")
           PY
 
       - name: Remove one-shot workflow
@@ -173,9 +50,16 @@ Checkpoint de fermeture prévu :
           test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
           test "$(wc -c < index.html)" = "8167007"
           git diff --check
-          changed="$(git diff --name-only | sort)"
-          expected="$(printf '%s\n'             '.github/workflows/gensrpg-phase9-active-enemies-close-docs.yml'             'docs/GENSRPG_CURRENT_WORK.md'             'docs/GENSRPG_PHASE9_CAPTURE139_ACTIVE_ENEMIES_PREAUDIT.md' | sort)"
-          test "$changed" = "$expected"
+          python - <<'PY'
+          import subprocess
+          changed=set(subprocess.check_output(["git","diff","--name-only"],text=True).splitlines())
+          expected={
+            ".github/workflows/gensrpg-phase9-active-enemies-close-docs.yml",
+            "docs/GENSRPG_CURRENT_WORK.md",
+            "docs/GENSRPG_PHASE9_CAPTURE139_ACTIVE_ENEMIES_PREAUDIT.md",
+          }
+          assert changed==expected,(sorted(changed),sorted(expected))
+          PY
 
       - name: Commit closure docs
         run: |

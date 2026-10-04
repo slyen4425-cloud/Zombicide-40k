@@ -48,7 +48,8 @@ assert.match(c139,/gensEnsureDungeonAdventureButton139/,
 assert.match(c139,/GAME_PROFILE_DUNGEON_ID/,
   'Capture139 must continue distinguishing the real built-in Dungeon profile');
 assert.match(c139,/sessionDungeonSetupBtn/);
-assert.match(c139,/sessionDungeonSetup/);
+assert.match(c139,/window\.gensEnsureDungeonAdventureButton139=function\(\)\{[\s\S]*const page=document\.getElementById\("sessionDungeonSetup"\);[\s\S]*if\(!realDungeon\)\{[\s\S]*if\(page\)page\.style\.setProperty\("display","none","important"\)/,
+  'RED: Capture139 must own hiding the Dungeon Adventure page when the active profile is not the real Dungeon');
 
 assert.doesNotMatch(c139,/window\.GensCaptureV1\s*=/,
   'this seam must not create a second Capture public authority');

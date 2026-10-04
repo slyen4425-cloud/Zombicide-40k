@@ -73,7 +73,7 @@ function functionSource(name){
 }
 
 const c139=block('captureFix139');
-assert.match(c139,/ensureBaseGameProfile\(\)/,'Capture139 must still expose the historical profile-preparation dependency during preaudit');
+assert.doesNotMatch(c139,/ensureBaseGameProfile\(\)/,'Capture139 must remain decoupled from Base/Dungeon profile preparation after the dedicated retirement seam');
 assert.match(c139,/saveActiveEnemies\(\[\]\)/,'Capture139 must still expose the historical active-enemy reset dependency during preaudit');
 
 assert.match(captureEntry,/GensCaptureV1/);
@@ -127,7 +127,7 @@ console.log(JSON.stringify({
   scenario:'Phase 9 Capture139 session dependency preaudit',
   rule26:{bytes:bytes.length,blob},
   capture139:{
-    ensureBaseGameProfileCall:true,
+    ensureBaseGameProfileCall:false,
     saveActiveEnemiesResetCall:true
   },
   owners:{
@@ -144,6 +144,6 @@ console.log(JSON.stringify({
     ensureBaseGameProfile:ensureContexts,
     saveActiveEnemies:enemyContexts
   },
-  decision:'diagnostic only; no runtime mutation and no seam selected yet',
-  runtimeChanged:false
+  decision:'Base/Dungeon profile preparation dependency retired; saveActiveEnemies reset remains the next session dependency to preaudit',
+  runtimeChanged:true
 },null,2));

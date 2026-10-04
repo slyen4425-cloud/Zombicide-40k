@@ -86,9 +86,9 @@ TDD RED confirmé.
 Aucun runtime GitHub n'est encore modifié à ce stade.
 
 Patch local Rule 26 préparé depuis `workD.zip/indexd.txt` :
-- taille cible : `8166976` ;
-- blob cible : `28f68c7ce751f78f2503dd6bf6c695311dbb1bd9` ;
-- retrait net : `1834` octets ;
+- taille cible : `8166967` ;
+- blob cible : `1d09d3d810485b206afb677ccd0be275212f912f` ;
+- retrait net : `1843` octets ;
 - `cleanDungeonPregame137` : 3 occurrences -> 0 ;
 - `captureCleanDungeonUi138` : 6 occurrences -> 0 ;
 - owner 139 et responsabilités protégées 137/138 conservés.

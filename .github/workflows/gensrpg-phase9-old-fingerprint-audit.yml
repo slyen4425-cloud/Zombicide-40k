@@ -1,4 +1,4 @@
-name: GenSrpG Phase 9 old runtime fingerprint audit
+name: GenSrpG Phase 9 cumulative runtime fingerprint repin
 
 on:
   push:
@@ -8,17 +8,104 @@ on:
       - '.github/workflows/gensrpg-phase9-old-fingerprint-audit.yml'
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 jobs:
-  audit-old-runtime-fingerprint:
+  repin-cumulative-runtime-fingerprints:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact branch
         uses: actions/checkout@v4
-      - name: List remaining old runtime fingerprint references
+        with:
+          fetch-depth: 0
+
+      - name: Verify runtime GREEN candidate
         run: |
-          echo "OLD_BLOB_FILES"
-          grep -RIl --exclude-dir=.git '3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed' tests docs .github tools 2>/dev/null | sort || true
-          echo "OLD_BLOB_COUNT"
-          grep -RIl --exclude-dir=.git '3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed' tests docs .github tools 2>/dev/null | wc -l
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+
+      - name: Repin only tests still bound to the previous runtime
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          old_blob="3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed"
+          new_blob="9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          old_size="8167048"
+          new_size="8167007"
+
+          files=sorted(p for p in Path("tests").rglob("*") if p.is_file() and old_blob in p.read_text(encoding="utf-8",errors="ignore"))
+          assert files, "no old runtime fingerprints found in tests"
+          print("repinning",len(files),"test files")
+          for p in files:
+              s=p.read_text(encoding="utf-8")
+              assert old_blob in s
+              s=s.replace(old_blob,new_blob)
+              if old_size in s:
+                  s=s.replace(old_size,new_size)
+              p.write_text(s,encoding="utf-8")
+
+          public=Path("tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs")
+          s=public.read_text(encoding="utf-8")
+          old="assert.ok(start139.includes('saveActiveEnemies([])'));"
+          new="assert.ok(!start139.includes('saveActiveEnemies([])'),'Capture139 active-enemy reset must remain retired after the dedicated Phase 9 seam');"
+          assert old in s
+          s=s.replace(old,new)
+          s=s.replace("'saveActiveEnemies updates Dungeon explore UI'","'legacy saveActiveEnemies still updates Dungeon explore UI outside Capture139'")
+          public.write_text(s,encoding="utf-8")
+
+          coupling=Path("tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs")
+          s=coupling.read_text(encoding="utf-8")
+          old="""assert.match(c139,/saveActiveEnemies\\(\\[\\]\\)/,
+            'legacy Capture139 still resets active enemies through the historical shared/global seam');"""
+          new="""assert.doesNotMatch(c139,/saveActiveEnemies|loadActiveEnemies|ACTIVE_ENEMIES_KEY/,
+            'Capture139 active-enemy dependency must remain retired after the dedicated Phase 9 seam');"""
+          assert old in s
+          s=s.replace(old,new)
+          s=s.replace("saveActiveEnemiesReset:true","saveActiveEnemiesReset:false")
+          coupling.write_text(s,encoding="utf-8")
+
+          Path("/tmp/repin-files.txt").write_text("\n".join(str(p) for p in files)+"\n",encoding="utf-8")
+          PY
+
+      - name: Run immediate targeted sentinels
+        run: |
+          node tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
+          node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+
+      - name: Remove temporary fingerprint audit workflow
+        run: rm .github/workflows/gensrpg-phase9-old-fingerprint-audit.yml
+
+      - name: Verify purely mechanical scope
+        run: |
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          expected=set(Path("/tmp/repin-files.txt").read_text().splitlines())
+          expected.add(".github/workflows/gensrpg-phase9-old-fingerprint-audit.yml")
+          changed=set(subprocess.check_output(["git","diff","--name-only"],text=True).splitlines())
+          assert changed==expected,(sorted(changed-expected),sorted(expected-changed))
+          assert "index.html" not in changed
+          print("changed",len(changed),"files; runtime untouched")
+          PY
+          git diff --stat
+
+      - name: Commit cumulative sentinel repin
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "test(phase9): repin cumulative sentinels after Capture139 retirement"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Dispatch required validation on repinned SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run gensrpg-architecture-sentinels.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-firefox-wall-sentinel.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-tactical-dock-sentinel.yml --ref "$GITHUB_REF_NAME"

@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167048,'Capture139 session preaudit must inspect the current verified pregame GREEN runtime');
-assert.equal(blob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed','Capture139 session preaudit must inspect the exact verified pregame GREEN runtime blob');
+assert.equal(bytes.length,8167007,'Capture139 session preaudit must inspect the current verified pregame GREEN runtime');
+assert.equal(blob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4','Capture139 session preaudit must inspect the exact verified pregame GREEN runtime blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
@@ -74,7 +74,7 @@ function functionSource(name){
 
 const c139=block('captureFix139');
 assert.doesNotMatch(c139,/ensureBaseGameProfile\(\)/,'Capture139 must remain decoupled from Base/Dungeon profile preparation after the dedicated retirement seam');
-assert.match(c139,/saveActiveEnemies\(\[\]\)/,'Capture139 must still expose the historical active-enemy reset dependency during preaudit');
+assert.doesNotMatch(c139,/saveActiveEnemies|loadActiveEnemies|ACTIVE_ENEMIES_KEY/,'Capture139 active-enemy dependency must remain retired by its dedicated Phase 9 seam');
 
 assert.match(captureEntry,/GensCaptureV1/);
 assert.match(captureEntry,/startModuleSession/);
@@ -128,7 +128,7 @@ console.log(JSON.stringify({
   rule26:{bytes:bytes.length,blob},
   capture139:{
     ensureBaseGameProfileCall:false,
-    saveActiveEnemiesResetCall:true
+    saveActiveEnemiesResetCall:false
   },
   owners:{
     ensureBaseGameProfile:ownerCandidates('ensureBaseGameProfile'),
@@ -144,6 +144,6 @@ console.log(JSON.stringify({
     ensureBaseGameProfile:ensureContexts,
     saveActiveEnemies:enemyContexts
   },
-  decision:'Base/Dungeon profile preparation dependency retired; saveActiveEnemies reset remains the next session dependency to preaudit',
+  decision:'Base/Dungeon profile preparation and active-enemy legacy launch dependencies retired by dedicated Phase 9 seams',
   runtimeChanged:true
 },null,2));

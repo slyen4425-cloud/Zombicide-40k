@@ -1,0 +1,173 @@
+name: Phase 9 Capture pregame ownership one-shot
+
+on:
+  push:
+    branches:
+      - work/gensrpg-phase9-capture-pregame-adventure-ownership-raccord-2026-10-04
+
+permissions:
+  contents: write
+
+jobs:
+  patch-runtime:
+    if: ${{ github.event.head_commit.message == 'phase9 apply pregame adventure ownership runtime once' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-phase9-capture-pregame-adventure-ownership-raccord-2026-10-04
+          fetch-depth: 0
+
+      - name: Apply exact pregame ownership seam
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import hashlib, re
+
+          OLD_SIZE=8168810
+          OLD_BLOB='a5d337ae25435d801a72333ee27e6dbc390a5175'
+          NEW_SIZE=8166976
+          NEW_BLOB='28f68c7ce751f78f2503dd6bf6c695311dbb1bd9'
+
+          def git_blob(data: bytes) -> str:
+              return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+
+          p=Path('index.html')
+          raw=p.read_bytes()
+          if len(raw)!=OLD_SIZE:
+              raise SystemExit(f'base size mismatch: {len(raw)}')
+          if git_blob(raw)!=OLD_BLOB:
+              raise SystemExit(f'base blob mismatch: {git_blob(raw)}')
+
+          src=raw.decode('utf-8')
+
+          pat137=re.compile(
+              r'function cleanDungeonPregame137\(\)\{\s*'
+              r'const capture=typeof gensCapturePregameMode==="function"&&gensCapturePregameMode\(\);\s*'
+              r'const btn=document\.getElementById\("sessionDungeonSetupBtn"\);\s*'
+              r'const page=document\.getElementById\("sessionDungeonSetup"\);\s*'
+              r'if\(btn\)btn\.style\.display=capture\?"none":"";\s*'
+              r'if\(page&&capture\)page\.style\.setProperty\("display","none","important"\);\s*'
+              r'\}\s*'
+              r'setTimeout\(cleanDungeonPregame137,80\);\s*'
+              r'const update137=window\.updateGameStyleUi;\s*'
+              r'if\(typeof update137==="function"\)window\.updateGameStyleUi=function\(\)\{const r=update137\.apply\(this,arguments\);cleanDungeonPregame137\(\);return r\};'
+          )
+          src,n137=pat137.subn('',src,count=1)
+          if n137!=1:
+              raise SystemExit(f'Capture137 seam count {n137}')
+
+          start_marker='/* ---------- supprime vraiment Aventure Dungeon du flux Capture ---------- */'
+          start=src.find(start_marker)
+          if start<0:
+              raise SystemExit('Capture138 cleanup start marker missing')
+          end_marker='setTimeout(captureCleanDungeonUi138,200);'
+          end=src.find(end_marker,start)
+          if end<0:
+              raise SystemExit('Capture138 cleanup end marker missing')
+          end += len(end_marker)
+          seg=src[start:end]
+          for required in [
+              'window.captureCleanDungeonUi138=function',
+              'const rps138=window.renderParticipantSelector',
+              'const ugs138=window.updateGameStyleUi',
+              'DOMContentLoaded',
+              'setTimeout(captureCleanDungeonUi138,200)'
+          ]:
+              if required not in seg:
+                  raise SystemExit('Capture138 segment missing '+required)
+          src=src[:start]+src[end:]
+
+          if src.count('captureCleanDungeonUi138();')!=1:
+              raise SystemExit('unexpected residual Capture138 cleanup call count')
+          src=src.replace('captureCleanDungeonUi138();','',1)
+
+          required_invariants=[
+              'window.openSessionDungeonSetup=(function(old)',
+              'window.isCaptureContext138=function',
+              'const turnMgr138=window.startTurnManagerForGame;',
+              'const start138=window.startConfiguredGame;',
+              'window.captureElementLabel138=function',
+              'window.captureBattleSelectDefaultTarget=function',
+              'window.gensEnsureDungeonAdventureButton139=function',
+              'const r139=window.renderParticipantSelector;',
+              'const u139=window.updateGameStyleUi;'
+          ]
+          for invariant in required_invariants:
+              if invariant not in src:
+                  raise SystemExit('protected invariant missing: '+invariant)
+          if 'cleanDungeonPregame137' in src:
+              raise SystemExit('Capture137 cleanup still present')
+          if 'captureCleanDungeonUi138' in src:
+              raise SystemExit('Capture138 cleanup still present')
+
+          new_raw=src.encode('utf-8')
+          new_blob=git_blob(new_raw)
+          if len(new_raw)!=NEW_SIZE:
+              raise SystemExit(f'new size mismatch: {len(new_raw)}')
+          if new_blob!=NEW_BLOB:
+              raise SystemExit(f'new blob mismatch: {new_blob}')
+          p.write_bytes(new_raw)
+
+          # Advance only runtime fingerprints in test sentinels.
+          changed_tests=[]
+          for fp in Path('tests').rglob('*'):
+              if not fp.is_file():
+                  continue
+              try:
+                  txt=fp.read_text(encoding='utf-8')
+              except Exception:
+                  continue
+              if OLD_BLOB not in txt and str(OLD_SIZE) not in txt:
+                  continue
+              new=txt.replace(OLD_BLOB,NEW_BLOB).replace(str(OLD_SIZE),str(NEW_SIZE))
+              if new!=txt:
+                  fp.write_text(new,encoding='utf-8')
+                  changed_tests.append(str(fp))
+
+          # Phase 2 manifests pin the current index blob as a structural source.
+          manifests=[
+              Path('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),
+              Path('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'),
+              Path('docs/GENSRPG_PHASE2_STORAGE_OWNERS.json'),
+              Path('docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json'),
+          ]
+          changed_manifests=[]
+          for fp in manifests:
+              if not fp.exists():
+                  continue
+              txt=fp.read_text(encoding='utf-8')
+              new=txt.replace(OLD_BLOB,NEW_BLOB)
+              if new!=txt:
+                  fp.write_text(new,encoding='utf-8')
+                  changed_manifests.append(str(fp))
+
+          lingering=[]
+          for fp in Path('tests').rglob('*'):
+              if fp.is_file():
+                  try:
+                      txt=fp.read_text(encoding='utf-8')
+                  except Exception:
+                      continue
+                  if OLD_BLOB in txt or str(OLD_SIZE) in txt:
+                      lingering.append(str(fp))
+          if lingering:
+              raise SystemExit('old runtime fingerprint remains in tests: '+', '.join(lingering[:20]))
+
+          print({
+              'runtime':{'bytes':len(new_raw),'blob':new_blob},
+              'changed_tests':len(changed_tests),
+              'changed_manifests':changed_manifests,
+          })
+          PY
+
+      - name: Commit exact runtime seam
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html tests docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv docs/GENSRPG_PHASE2_INLINE_OWNERS.json docs/GENSRPG_PHASE2_STORAGE_OWNERS.json docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json
+          git diff --cached --quiet && { echo "No runtime change to commit"; exit 1; }
+          git commit -m "runtime(phase9): consolidate Capture pregame adventure ownership"
+          git push origin HEAD:work/gensrpg-phase9-capture-pregame-adventure-ownership-raccord-2026-10-04

@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   indexBuf
 ])).digest('hex');
 
-assert.equal(indexBuf.length,8167091,'Phase 7 exit audit must target the exact current runtime');
-assert.equal(gitBlob,'8a42d15ed218895690a3b8490bbe636d9d2d27c6',
+assert.equal(indexBuf.length,8167048,'Phase 7 exit audit must target the exact current runtime');
+assert.equal(gitBlob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed',
   'Phase 7 exit audit runtime blob drifted');
 
 const roadmap=read('docs/GENSRPG_RESTRUCTURATION_ROADMAP.md');

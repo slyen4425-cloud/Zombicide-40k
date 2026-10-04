@@ -16,9 +16,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167091,
+assert.equal(bytes.length,8167048,
   'Phase 7 authored-entry movement characterization must track the micro-lot 6 runtime');
-assert.equal(gitBlob,'8a42d15ed218895690a3b8490bbe636d9d2d27c6',
+assert.equal(gitBlob,'3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed',
   'Phase 7 authored-entry movement characterization must track the exact micro-lot 6 blob');
 
 assert.match(

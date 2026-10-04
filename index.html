@@ -27099,7 +27099,6 @@ window.startConfiguredGame=async function(){
     try{state=loadState(current)}catch(e){}
     saveGameParticipants([...participants]);
 
-    try{ensureBaseGameProfile()}catch(e){}
     try{applyCustomHeroesMulti()}catch(e){}
     try{applyPregameGoldToParticipants(participants)}catch(e){}
     try{markSessionActive(true)}catch(e){}

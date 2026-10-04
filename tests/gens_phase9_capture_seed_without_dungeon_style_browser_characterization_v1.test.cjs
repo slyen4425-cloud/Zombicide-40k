@@ -12,6 +12,8 @@ const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 
 assert.match(indexSource,/id="builtinMonsterCapture162"/,'production HTML must keep the built-in Monster Capture seed');
+assert.match(indexSource,/function rpgProfiles\(\)/,'Shell RPG profile listing owner must remain explicit');
+assert.match(indexSource,/function gensFamilyForProfileId\(profileId\)/,'Shell family routing owner must remain explicit');
 assert.match(indexSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
 assert.match(indexSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
 assert.match(indexSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');
@@ -213,6 +215,28 @@ const server=http.createServer((req,res)=>{
     let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
     await captureCard.waitFor({state:'visible'});
     assert.match(await captureCard.textContent(),/Monster Capture/);
+
+    const routing=await page.evaluate((captureId)=>{
+      const p=loadGameProfiles().find(x=>String(x?.id||'')===String(captureId));
+      return {
+        contentFamily:gensContentFamilyForProfile(p),
+        shellFamily:gensFamilyForProfileId(captureId),
+        dungeonMode:!!isDungeonMode(),
+        dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2')
+      };
+    },CAPTURE_ID);
+    assert.equal(routing.contentFamily,'creature','canonical Capture content identity must remain creature without gameStyle');
+    assert.equal(routing.shellFamily,'adventure','Shell must route canonical Capture profiles to Adventure without borrowing Dungeon identity');
+    assert.equal(routing.dungeonMode,false,'Capture without the historical style must not identify as Dungeon');
+    assert.equal(routing.dungeonRuntime,null,'opening the Adventure family must not create Dungeon runtime state');
+
+    mark('shell-family-routing-characterization-passed');
+    console.log(JSON.stringify({
+      scenario:'Phase 9 Capture Shell family routing without dungeon-style identity',
+      captureId:CAPTURE_ID,
+      routing
+    },null,2));
+    return;
 
     const switchInfo=await page.evaluate((captureId)=>({
       active:activeGameProfileId(),

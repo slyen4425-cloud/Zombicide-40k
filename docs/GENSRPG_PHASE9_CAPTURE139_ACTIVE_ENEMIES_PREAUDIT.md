@@ -12,114 +12,158 @@ Date : 2026-10-04
 
 ## Mission
 
-Caractériser la dépendance historique `saveActiveEnemies([])` encore appelée par Capture139, sans mutation runtime.
+Caractériser la dépendance historique `saveActiveEnemies([])` encore appelée par Capture139, sans mutation runtime, puis sélectionner un seul seam minimal sous TDD.
 
-Le lot doit déterminer :
-- le propriétaire réel de `saveActiveEnemies()` ;
-- la responsabilité de `ACTIVE_ENEMIES_KEY` ;
-- les effets UI de `renderActiveEnemyButtons()` et `updateDungeonExploreButtons()` ;
-- l'effet de synchronisation éventuel de `z40kSchedulePush()` ;
-- les consommateurs Dungeon et Capture ;
-- la raison exacte du reset Capture139 ;
-- le plus petit seam soustractif possible sous TDD.
+## Rule 26 validée
 
-## Faits déjà établis par le pré-audit session précédent
+Runtime exact reçu depuis le permalink du HEAD d'ouverture :
 
-Le document `GENSRPG_PHASE9_CAPTURE139_SESSION_DEPENDENCY_PREAUDIT.md` a déjà établi que `saveActiveEnemies(a)` :
-- écrit `ACTIVE_ENEMIES_KEY` dans `localStorage` ;
-- appelle `renderActiveEnemyButtons()` ;
-- appelle `updateDungeonExploreButtons()` ;
-- appelle `z40kSchedulePush()` ;
-- est consommée par de nombreux blocs Dungeon/combat/exploration.
+- HEAD documentaire d'ouverture : `6ce3be7243b83037e10ce70830e9f6cd9c56630f`
+- taille `index.html` : `8167048` octets ;
+- blob Git : `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed` ;
+- SHA-256 local : `e26a4087dc14327cdaa73c0482df39b76cdf9614bcc1d99a9f38666d5603e137`.
 
-Le pré-audit précédent a donc explicitement interdit tout contournement ou duplication et a conservé temporairement le reset Capture `saveActiveEnemies([])`.
+La copie utilisateur correspond exactement au runtime GitHub requis.
 
-Ces faits servent uniquement de point de départ. Ils doivent être revalidés sur le runtime exact du présent lot avant sélection du seam.
+## Caractérisation exacte
 
-## Frontières déjà prouvées
+### 1. Autorité de stockage
 
-### Capture public entry
+`ACTIVE_ENEMIES_KEY` vaut :
 
-`assets/gensrpg/capture/entry-v1.js` :
-- expose `GensCaptureV1` ;
-- possède l'entrée publique Capture ;
-- délègue temporairement le démarrage de session au legacy Capture139 ;
-- ne possède aucun stockage, DOM, timer, listener, observer, Dungeon ou Tactical.
+`gensrpg_active_enemies_v1`
 
-Le contrat Capture interdit explicitement la dépendance au runtime privé Dungeon.
+`loadActiveEnemies()` lit directement cette clé depuis `localStorage`.
 
-### Dungeon public contract
+`saveActiveEnemies(a)` :
+1. écrit cette clé dans `localStorage` ;
+2. appelle `renderActiveEnemyButtons()` ;
+3. appelle `updateDungeonExploreButtons()` ;
+4. appelle `z40kSchedulePush()`.
 
-`assets/gensrpg/dungeon/module-contract-v1.json` déclare notamment :
-- Dungeon propriétaire du world state ;
-- exploration ;
-- événements ;
-- combat trigger ;
-- persistance d'état Dungeon.
+Cette fonction n'est donc pas un simple setter de stockage.
 
-Cela rend suspecte toute API historique qui mélange persistance ennemis, rendu UI Dungeon et synchronisation globale avec un appel depuis Capture.
+### 2. Ownership réel : legacy partagé Survie/Dungeon, avec effets Dungeon
 
-Ce constat ne suffit pas encore à déclarer `saveActiveEnemies()` « Dungeon » : la preuve doit venir de l'inspection exacte de tous ses consommateurs et effets.
+`trackSpawnedEnemyInstances(type,qty)` utilise explicitement `isDungeonMode()`.
 
-## Rule 26 — runtime exact requis
+- En Dungeon, le runtime accepte les ennemis Dungeon intégrés, utilise PV/endurance Dungeon et tamponne `dungeonRoom`.
+- Hors Dungeon, le même état d'ennemis actifs est utilisé par le flux de spawn historique / Survie.
+- `generateRealSpawn()` appelle `trackSpawnedEnemyInstances(...)` pour les vagues/spawns non Dungeon.
 
-HEAD documentaire d'ouverture :
-`6ce3be7243b83037e10ce70830e9f6cd9c56630f`
+Le stockage `ACTIVE_ENEMIES_KEY` n'est donc pas une autorité Capture et n'est pas non plus une autorité Dungeon pure : c'est une **autorité legacy de session ennemis partagée Survie/Dungeon**.
 
-`index.html` :
-- taille : `8167048` octets ;
-- blob Git : `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.
+Cependant, `saveActiveEnemies()` mélange cette persistance legacy avec un effet UI explicitement Dungeon via `updateDungeonExploreButtons()`.
 
-Permalink requis :
-`https://github.com/slyen4425-cloud/Zombicide-40k/blob/6ce3be7243b83037e10ce70830e9f6cd9c56630f/index.html`
+### 3. Synchronisation
 
-L'inspection inline exacte de la définition et des consommateurs de `saveActiveEnemies` / `ACTIVE_ENEMIES_KEY` doit utiliser le fichier téléchargé depuis ce permalink et vérifié contre le blob/taille ci-dessus.
+`z40kSchedulePush()` planifie `z40kPushState()`.
 
-## Hypothèses à tester — pas encore des conclusions
+`z40kSnapshot()` copie toutes les clés `localStorage` non exclues dans l'état partagé. `ACTIVE_ENEMIES_KEY` n'est pas exclue.
 
-1. `ACTIVE_ENEMIES_KEY` pourrait être une donnée de session historiquement globale mais fonctionnellement Dungeon.
-2. `saveActiveEnemies()` pourrait être un mélange de persistance générique et d'effets UI/sync Dungeon.
-3. Le reset `saveActiveEnemies([])` de Capture139 pourrait seulement nettoyer un reliquat Dungeon avant entrée Capture.
-4. Le bon seam pourrait être soustractif si Capture n'a aucun consommateur réel de cet état après démarrage.
+Donc chaque `saveActiveEnemies()` peut aussi déclencher la synchronisation distante du snapshot de session contenant l'état ennemi actif.
 
-Aucune de ces hypothèses ne doit être transformée en architecture avant preuve sur le runtime exact.
+Capture139 appelle donc actuellement une autorité qui :
+- écrit un état de session Survie/Dungeon ;
+- rafraîchit une UI Dungeon ;
+- peut déclencher une synchronisation globale.
 
-## Invariants protégés
+### 4. Consommateurs
 
-Ne pas modifier pendant le pré-audit :
+Le runtime exact montre de nombreux consommateurs réels dans :
+- combat RPG/Dungeon ;
+- talents et capacités ennemis ;
+- spawn/vagues legacy ;
+- Dungeon Core ;
+- Dungeon MJ ;
+- exploration Dungeon ;
+- Tactical bridge Dungeon.
+
+Le système est encore réellement actif pour Survie/Dungeon et ne doit pas être retiré globalement.
+
+### 5. Capture
+
+Dans le bloc `captureFix139` :
+- aucune lecture `loadActiveEnemies()` ;
+- aucune utilisation de `ACTIVE_ENEMIES_KEY` ;
+- aucun ennemi Capture n'est stocké via cette autorité ;
+- le seul contact est `saveActiveEnemies([])` pendant le lancement.
+
+Le public entry `GensCaptureV1` ne référence ni `loadActiveEnemies` ni `saveActiveEnemies`.
+
+Conclusion :
+**Capture ne consomme pas cet état ; elle le nettoie seulement.**
+
+### 6. Pourquoi le reset existe encore
+
+Le reset est un héritage de l'ancien lancement générique de session.
+
+Le runtime possède déjà les nettoyages transitoires généraux hors Capture139 :
+- `newGame()` -> `saveActiveEnemies([])` avant le pré-game ;
+- `switchGameModeFromHome()` -> reset si une session active est quittée ;
+- `openGensBuiltInGame()` -> reset si une session active est quittée ;
+- le lancement legacy générique Survie conserve son propre reset ;
+- les démarrages Dungeon conservent leur propre reset.
+
+Le chemin utilisateur normal vers le bouton « DÉMARRER LA PARTIE » Capture traverse le pré-game ouvert par `newGame()`, qui a déjà nettoyé cet état transitoire.
+
+Le reset dans Capture139 est donc une **deuxième prise de responsabilité inter-module au moment du lancement Capture**, et non une nécessité métier Capture.
+
+## Décision d'ownership
+
+- `ACTIVE_ENEMIES_KEY` : état legacy de session ennemis partagé Survie/Dungeon.
+- `saveActiveEnemies()` : autorité legacy mixte persistance + UI Dungeon + sync, à ne pas déplacer ni dupliquer dans ce lot.
+- Capture : **aucun ownership** de cet état.
+- Shell/pré-game général : conserve les nettoyages transitoires de changement/nouvelle partie déjà existants.
+
+## Seam minimal sélectionné
+
+Retirer **uniquement** du bloc `captureFix139` :
+
+`try{saveActiveEnemies([])}catch(e){}`
+
+Conserver intégralement :
+- définition `saveActiveEnemies()` ;
+- `ACTIVE_ENEMIES_KEY` ;
+- tous les consommateurs Survie/Dungeon ;
+- resets `newGame()` / changements de jeu ;
+- vrais démarrages Dungeon ;
+- lancement Survival ;
+- `renderActiveEnemyButtons()` ;
+- `updateDungeonExploreButtons()` ;
+- `z40kSchedulePush()`.
+
+Aucun nouveau service, wrapper, fallback, timer, observer, polling ou second stockage.
+
+## RED TDD attendu
+
+La sentinelle doit exiger :
+1. Capture139 ne référence plus `saveActiveEnemies` ni `loadActiveEnemies` ;
+2. `saveActiveEnemies()` reste intact comme autorité legacy existante ;
+3. sa clé `ACTIVE_ENEMIES_KEY` reste inchangée ;
+4. le nettoyage général `newGame()` reste présent ;
+5. les vrais démarrages Dungeon gardent leur reset ;
+6. `GensCaptureV1` reste routing-only ;
+7. starter kits, monde Capture, participants, or pré-game et turn manager Capture restent inchangés ;
+8. les E2E Capture, victoire/reprise, vrai Dungeon et non-interférence restent disponibles.
+
+## Hors périmètre
+
+- découper ou moderniser `saveActiveEnemies()` ;
+- créer un service Core ennemi ;
+- migrer `ACTIVE_ENEMIES_KEY` ;
+- modifier `updateDungeonExploreButtons()` ;
+- modifier la synchronisation ;
+- retirer les resets Survie/Dungeon ;
 - `isDungeonMode()` ;
-- seed Capture `gameStyle:"dungeon"` ;
-- vrai Dungeon ;
-- Capture victoire/reprise ;
-- Shell -> `GensCaptureV1.startModuleSession()` -> Capture139 ;
-- participants Capture ;
-- starter creatures/kits ;
-- monde Capture ;
-- or pré-game ;
-- Tactical ;
-- Survival ;
-- PvP ;
-- laboratoires Combat Dynamique / Exploration / Builder / Map Actor ;
+- seed `gameStyle:"dungeon"` ;
+- Combat Dynamique / Exploration / Builder / Map Actor ;
 - `main`.
-
-Interdits :
-- `saveCaptureEnemies()` parallèle ;
-- seconde source de vérité ennemis ;
-- wrapper/fallback/timer/observer/polling.
-
-## TDD attendu après caractérisation
-
-Le RED ne sera écrit qu'après sélection d'un seul seam minimal.
-
-La sentinelle devra protéger au minimum :
-- vrai Dungeon ;
-- Capture Shell/provider ;
-- Capture victoire + reprise ;
-- non-interférence quatre modules ;
-- absence de nouvelle autorité concurrente.
 
 ## État
 
-Pré-audit ouvert.
-Aucune mutation runtime.
-Ownership final et seam : **NON ENCORE ÉTABLIS**.
+Pré-audit ownership : **ÉTABLI**.
+
+Seam minimal : **SÉLECTIONNÉ**.
+
+Prochaine étape : écrire et constater le RED dédié avant toute mutation runtime.

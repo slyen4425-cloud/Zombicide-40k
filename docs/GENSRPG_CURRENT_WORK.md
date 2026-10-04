@@ -49,9 +49,24 @@ Runtime de base GREEN :
 - taille `8167091` octets ;
 - blob `8a42d15ed218895690a3b8490bbe636d9d2d27c6`.
 
+Vérification GitHub Rule 26 reconfirmée sur `20b102f1671c54419daeedbc30f85360768337ce` : même taille et même blob.
+
 Aucune mutation runtime avant :
 1. TDD RED dédié constaté ;
 2. vérification Rule 26 du fichier exact à modifier.
+
+## État TDD RED
+
+RED constaté sur le HEAD :
+`30cf01e56d13b9ea722117f6641252af70bd5eff`.
+
+Architecture run :
+`37180445589`.
+
+Étape en échec attendue :
+`Exiger le retrait de ensureBaseGameProfile du lancement Capture139 Phase 9`.
+
+Aucune mutation runtime n'a encore été faite.
 
 ## TDD
 

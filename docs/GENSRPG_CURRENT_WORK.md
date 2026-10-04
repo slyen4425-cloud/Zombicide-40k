@@ -1,3 +1,85 @@
+# PHASE 9 — SHELL ROUTING CAPTURE SANS IDENTITÉ DUNGEON — GREEN — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-postdocs-green-2026-10-04`
+
+SHA de base :
+`bc7d104fa76c0f83f5d88c9cd829b533179161e2`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-seed-dungeon-identity-preaudit-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture-seed-dungeon-identity-preaudit-2026-10-04`
+
+Checkpoint GREEN fonctionnel :
+`checkpoint/gensrpg-phase9-capture-shell-family-routing-green-2026-10-04`
+
+SHA fonctionnel GREEN :
+`941c10bb4bb3af4882c2360a004634589d81a4f6`
+
+## Résultat
+
+Le premier besoin Shell du faux `gameStyle:"dungeon"` de Monster Capture est retiré.
+
+Le Shell utilise désormais `gensContentFamilyForProfile(profile)` pour :
+- lister les profils de la famille Adventure via `rpgProfiles()` ;
+- le fallback de `renderGensRpgUniverseCards()` ;
+- router `gensFamilyForProfileId()` vers `adventure` pour les familles `rpg`, `manga`, `creature`.
+
+Le seed Monster Capture reste volontairement inchangé :
+`gameStyle:"dungeon"`.
+
+`isDungeonMode()` reste volontairement inchangé.
+
+## Rule 26
+
+Runtime avant seam :
+- taille `8167007` octets ;
+- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+Runtime après seam :
+- taille `8167187` octets ;
+- blob `99d7784676669b629cae6070df8c02606d67002f`.
+
+## TDD
+
+RED :
+- `37232449153` — FAILURE attendu ;
+- sans `gameStyle` dans le profil de test, la carte Monster Capture disparaissait de la famille Adventure.
+
+GREEN ciblé :
+- `37233366401` — SUCCESS ;
+- Capture reste visible et routé vers Adventure via son identité canonique ;
+- `isDungeonMode()===false` dans ce scénario ;
+- aucun runtime Dungeon créé.
+
+Triple GREEN fonctionnel :
+- Architecture + Browser `37232850397` — SUCCESS ;
+- Firefox `37232850435` — SUCCESS ;
+- Tactical Dock `37232850379` — SUCCESS.
+
+## Architecture
+
+Aucune nouvelle identité, aucun wrapper, aucun fallback, aucun timer, observer ou polling.
+
+Autorité réutilisée :
+`gensContentFamilyForProfile(profile)`.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Prochaine étape Phase 9
+
+Ne pas retirer encore le seed `gameStyle:"dungeon"`.
+
+Le prochain pré-audit devra identifier le **prochain consommateur réel atteint par Capture** lorsque `isDungeonMode()` cesse d'être vrai, puis sélectionner un seul seam minimal.
+
+Critère Phase 9 inchangé :
+**Capture peut démarrer sans runtime Dungeon/Survie actif.**
+
+---
+
 # PHASE 9 — PRÉ-AUDIT IDENTITÉ CAPTURE `gameStyle:"dungeon"` — 2026-10-04
 
 Base GREEN :

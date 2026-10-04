@@ -1,3 +1,80 @@
+# PHASE 9 — PRÉ-AUDIT IDENTITÉ CAPTURE `gameStyle:"dungeon"` — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-postdocs-green-2026-10-04`
+
+SHA de base :
+`bc7d104fa76c0f83f5d88c9cd829b533179161e2`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-seed-dungeon-identity-preaudit-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture-seed-dungeon-identity-preaudit-2026-10-04`
+
+Dernier runtime GREEN :
+- taille `8167007` octets ;
+- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+## Mission unique
+
+Caractériser pourquoi le profil intégré Monster Capture porte encore `gameStyle:"dungeon"`, quels consommateurs historiques voient Capture comme Dungeon, et sélectionner un seul seam minimal avant tout changement.
+
+Identité Capture canonique déjà validée :
+`GensCaptureV1.isProfile(profile)`.
+
+## Périmètre protégé
+
+Aucune mutation runtime dans ce pré-audit.
+
+Ne pas modifier :
+- `isDungeonMode()` ;
+- `builtinMonsterCapture162` ;
+- seed `gameStyle:"dungeon"` ;
+- `GensCaptureV1.isProfile()` ;
+- vrai Dungeon ;
+- Combat Dynamique / Exploration / Builder / Map Actor ;
+- Survie / PvP / Tactical ;
+- `main`.
+
+Interdit :
+- nouvelle identité Capture parallèle ;
+- remplacement global de `isDungeonMode()` ;
+- wrapper/fallback/timer/observer/polling ;
+- migration de sauvegarde sans caractérisation.
+
+## Preuves déjà disponibles
+
+Le dernier audit GREEN montre :
+- seed Capture encore `gameStyle:"dungeon"` ;
+- ~126 usages historiques de `isDungeonMode()` ;
+- Capture139 déjà débarrassé de `ensureBaseGameProfile()` et `saveActiveEnemies([])` ;
+- `gensStability151` reconnaît Capture avant Dungeon ;
+- `dungeonCore310PersistenceAndTokens` protège le vrai Dungeon via `!capture`.
+
+## Tests prévus
+
+- inventaire exact des consommateurs `gameStyle:"dungeon"` réellement atteints par Capture ;
+- vrai Dungeon vs Capture ;
+- Shell + démarrage Capture ;
+- reprise/victoire Capture ;
+- Dungeon après Survie ;
+- non-interférence quatre modules ;
+- RED dédié seulement après sélection du seam.
+
+## Rule 26
+
+Pour l'inspection exacte de `index.html`, utiliser uniquement la copie correspondant au SHA de cette branche et vérifier taille/blob avant analyse.
+
+## Prochaine étape
+
+Valider la copie exacte du runtime, caractériser les consommateurs résiduels, puis choisir un seul seam.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
 
 Base GREEN :

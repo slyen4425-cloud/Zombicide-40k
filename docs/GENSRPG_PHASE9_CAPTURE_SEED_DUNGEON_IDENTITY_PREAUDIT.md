@@ -182,3 +182,47 @@ Le RED dédié doit exiger, avec un profil Capture auquel `gameStyle` a été re
 - aucun runtime Dungeon créé par cette simple sélection.
 
 Le seed de production reste inchangé dans ce micro-lot.
+
+
+## GREEN — micro-lot Shell family routing
+
+Le seam Shell sélectionné a été appliqué sans modifier le seed Capture ni `isDungeonMode()`.
+
+Runtime final du micro-lot :
+- taille : `8167187` octets ;
+- blob Git : `99d7784676669b629cae6070df8c02606d67002f`.
+
+Modifications runtime limitées à trois expressions Shell :
+1. `rpgProfiles()` ne filtre plus les profils Adventure uniquement par `gameStyle==="dungeon"` ; il utilise `gensContentFamilyForProfile(profile)` et accepte les familles `rpg`, `manga`, `creature`.
+2. Le fallback de `renderGensRpgUniverseCards()` utilise la même autorité de contenu.
+3. `gensFamilyForProfileId()` mappe désormais ces familles de contenu vers `"adventure"`.
+
+Conservé strictement :
+- seed Monster Capture `gameStyle:"dungeon"` ;
+- `GensCaptureV1.isProfile()` ;
+- `isDungeonMode()` ;
+- vrai Dungeon ;
+- Survie/PvP/Tactical ;
+- tous les autres consommateurs historiques `isDungeonMode()`.
+
+### TDD
+
+RED :
+- run diagnostic ciblé `37232449153` — FAILURE ;
+- rupture exacte : carte Monster Capture absente dans la famille Adventure lorsque le test retire `gameStyle`.
+
+GREEN ciblé :
+- `37233366401` — SUCCESS ;
+- avec `gameStyle` retiré uniquement dans le navigateur de test :
+  - carte Monster Capture visible ;
+  - `gensContentFamilyForProfile(profile)==="creature"` ;
+  - `gensFamilyForProfileId(profile.id)==="adventure"` ;
+  - `isDungeonMode()===false` ;
+  - aucun runtime Dungeon créé par la simple ouverture de la famille.
+
+Triple GREEN fonctionnel sur le candidat propre `941c10bb4bb3af4882c2360a004634589d81a4f6` :
+- Architecture + Browser : `37232850397` — SUCCESS ;
+- Firefox : `37232850435` — SUCCESS ;
+- Tactical Dock : `37232850379` — SUCCESS.
+
+Le micro-lot ne retire toujours PAS `gameStyle:"dungeon"` du seed. Il retire uniquement le premier besoin Shell démontré de ce champ historique.

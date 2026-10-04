@@ -26684,23 +26684,13 @@ window.renderParticipantSelector=function(){const r=rp137.apply(this,arguments);
 const rh137=window.renderCaptureWorldHub;
 window.renderCaptureWorldHub=function(){const r=rh137.apply(this,arguments);injectMj137();return r};
 
-/* ---------- supprime réellement le morceau Aventure Dungeon en Capture ---------- */
+/* ---------- bloque l’accès Aventure Dungeon en Capture ---------- */
 window.openSessionDungeonSetup=(function(old){
   return function(){
     if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return;
     return old.apply(this,arguments);
   };
 })(window.openSessionDungeonSetup);
-function cleanDungeonPregame137(){
-  const capture=typeof gensCapturePregameMode==="function"&&gensCapturePregameMode();
-  const btn=document.getElementById("sessionDungeonSetupBtn");
-  const page=document.getElementById("sessionDungeonSetup");
-  if(btn)btn.style.display=capture?"none":"";
-  if(page&&capture)page.style.setProperty("display","none","important");
-}
-setTimeout(cleanDungeonPregame137,80);
-const update137=window.updateGameStyleUi;
-if(typeof update137==="function")window.updateGameStyleUi=function(){const r=update137.apply(this,arguments);cleanDungeonPregame137();return r};
 
 /* ---------- multiplicateurs XP / or ---------- */
 const xp137=window.captureApplyXpToInstance;
@@ -26873,29 +26863,6 @@ window.isCaptureContext138=function(){
   }catch(e){return false}
 };
 
-/* ---------- supprime vraiment Aventure Dungeon du flux Capture ---------- */
-window.captureCleanDungeonUi138=function(){
-  const cap=isCaptureContext138();
-  const btn=document.getElementById("sessionDungeonSetupBtn");
-  const page=document.getElementById("sessionDungeonSetup");
-  if(btn)btn.style.setProperty("display",cap?"none":"","important");
-  if(page&&cap)page.style.setProperty("display","none","important");
-
-  /* sécurité : aucun accès au bouton Aventure depuis la grille de session */
-  const grid=document.querySelector(".sessionSetupGrid");
-  if(grid&&cap){
-    [...grid.querySelectorAll("button")].forEach(b=>{
-      if(b.id==="sessionDungeonSetupBtn")b.style.setProperty("display","none","important");
-    });
-  }
-};
-const rps138=window.renderParticipantSelector;
-window.renderParticipantSelector=function(){const r=rps138.apply(this,arguments);captureCleanDungeonUi138();return r};
-const ugs138=window.updateGameStyleUi;
-if(typeof ugs138==="function")window.updateGameStyleUi=function(){const r=ugs138.apply(this,arguments);captureCleanDungeonUi138();return r};
-document.addEventListener("DOMContentLoaded",()=>setTimeout(captureCleanDungeonUi138,80));
-setTimeout(captureCleanDungeonUi138,200);
-
 /* ---------- ordre de tour Capture : uniquement si MODE TOURS est réellement choisi ---------- */
 const turnMgr138=window.startTurnManagerForGame;
 window.startTurnManagerForGame=function(){
@@ -26931,7 +26898,6 @@ window.startConfiguredGame=async function(){
         renderCaptureWorldHub();
         const hub=document.getElementById("captureGameHub");
         if(hub){hub.style.display="block";hub.scrollIntoView({block:"start"})}
-        captureCleanDungeonUi138();
       }catch(e){}
     },30);
   }
@@ -27062,6 +27028,7 @@ window.captureRenderBattleLive=function(b=window.gensCurrentCaptureBattle){
 window.gensEnsureDungeonAdventureButton139=function(){
   const grid=document.querySelector("#pregameSetup .sessionSetupGrid");if(!grid)return;
   let b=document.getElementById("sessionDungeonSetupBtn");
+  const page=document.getElementById("sessionDungeonSetup");
   let realDungeon=false;
   try{
     const p=getActiveGameProfile();
@@ -27069,7 +27036,11 @@ window.gensEnsureDungeonAdventureButton139=function(){
       && String(p.id)===String(GAME_PROFILE_DUNGEON_ID)
       && !(typeof gensCurrentContentFamily==="function"&&gensCurrentContentFamily()==="creature");
   }catch(e){}
-  if(!realDungeon){b?.remove();return}
+  if(!realDungeon){
+    b?.remove();
+    if(page)page.style.setProperty("display","none","important");
+    return;
+  }
   if(!b){
     b=document.createElement("button");b.id="sessionDungeonSetupBtn";b.className="sessionSetupBtn";
     b.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";

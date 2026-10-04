@@ -411,7 +411,7 @@ renderInventory	1	dungeonCore062GearPortrait
 renderMenuStatuses	1	dungeonEconomy160
 renderMerchant	1	dungeonCore071Merchant
 renderMerchant071	1	dungeonCore071Merchant
-renderParticipantSelector	8	coreCombatPoolFix156
+renderParticipantSelector	7	coreCombatPoolFix156
 renderRpgHeroProgressionCurve	1	dungeonCore044HeroProgression
 renderRpgHeroProgressionPreview	1	dungeonCore044HeroProgression
 renderTacticalMovement081	1	dungeonCore098IsolatedMovement
@@ -434,4 +434,4 @@ startTurnManagerForGame	2	rpgTurnTargetFlow157
 state	8	dungeonCore200Rebuild
 toggleOutOfGameHeroes	2	gensrpgDungeonFlowFix171
 updateDungeonSearchUi	1	dungeonEconomy160
-updateGameStyleUi	4	gensStability151
+updateGameStyleUi	2	gensStability151

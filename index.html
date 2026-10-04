@@ -10692,7 +10692,7 @@ function ensureRpgProfileData(p){
   return p;
 }
 function rpgProfiles(){
-  const all=loadGameProfiles(),rpg=all.filter(p=>p.gameStyle==="dungeon").map(ensureRpgProfileData);
+  const all=loadGameProfiles(),rpg=all.filter(p=>{const f=gensContentFamilyForProfile(p);return f==="rpg"||f==="manga"||f==="creature"}).map(ensureRpgProfileData);
   let changed=false;
   rpg.forEach(p=>{if(!p.rpgUniverse){p.rpgUniverse=p.id===GAME_PROFILE_DUNGEON_ID?gensReferenceRpgSettings():gensBlankRpgSettings();changed=true}});
   if(changed)saveGameProfiles(all);
@@ -12062,7 +12062,7 @@ function renderGensRpgUniverseCards(){
   let profiles=[];
   try{profiles=rpgProfiles()}catch(e){
     console.error("GenSrpG RPG profiles",e);
-    const raw=loadGameProfiles().filter(p=>p?.gameStyle==="dungeon");
+    const raw=loadGameProfiles().filter(p=>{const f=gensContentFamilyForProfile(p);return f==="rpg"||f==="manga"||f==="creature"});
     profiles=raw.map(p=>{try{return ensureRpgProfileData(p)}catch(err){console.error(err);return p}});
   }
 
@@ -12130,7 +12130,7 @@ function openGensFamily(family){
 }
 function gensFamilyForProfileId(profileId){
   const p=loadGameProfiles().find(x=>String(x.id)===String(profileId||""));
-  return p?.gameStyle==="dungeon"?"adventure":"survival";
+  const f=gensContentFamilyForProfile(p);return (f==="rpg"||f==="manga"||f==="creature")?"adventure":"survival";
 }
 function renderGensGameHomeLight(profileId,family){
   const fam=family||gensFamilyForProfileId(profileId||activeGameProfileId());

@@ -15,9 +15,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167007,
+assert.equal(bytes.length,8167187,
   'Core200 global-retirement characterization must follow the current Phase 7 generated Boss policy runtime');
-assert.equal(gitBlob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4',
+assert.equal(gitBlob,'99d7784676669b629cae6070df8c02606d67002f',
   'Core200 global-retirement characterization must use the current Phase 7 generated Boss policy runtime blob');
 
 function block(id){

@@ -16,9 +16,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167007,
+assert.equal(bytes.length,8167187,
   'Phase 7 Final Exit terminal characterization must start from lock-delegation GREEN runtime');
-assert.equal(gitBlob,'9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4',
+assert.equal(gitBlob,'99d7784676669b629cae6070df8c02606d67002f',
   'Phase 7 Final Exit terminal characterization must keep the exact canonical index blob');
 
 assert.match(

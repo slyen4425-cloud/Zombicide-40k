@@ -79,10 +79,9 @@ jobs:
                   raise SystemExit('Capture138 segment missing '+required)
           src=src[:start]+src[end:]
 
-          cleanup_line='        captureCleanDungeonUi138();\\n'
-          if src.count(cleanup_line)!=1:
-              raise SystemExit('unexpected residual Capture138 cleanup line count')
-          src=src.replace(cleanup_line,'',1)
+          src,n_call=re.subn(r'^[ \\t]*captureCleanDungeonUi138\\(\\);[ \\t]*\\r?\\n','',src,count=1,flags=re.M)
+          if n_call!=1:
+              raise SystemExit(f'unexpected residual Capture138 cleanup line count {n_call}')
 
           required_invariants=[
               'window.openSessionDungeonSetup=(function(old)',

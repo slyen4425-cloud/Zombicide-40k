@@ -58,11 +58,22 @@ Aucune mutation runtime avant RED dédié + vérification d'une copie locale exa
 
 ## État du fichier fourni
 
-`workc.zip/indexc.txt` reçu le 2026-10-04 :
-- taille `8167091` ;
-- blob `8a42d15ed218895690a3b8490bbe636d9d2d27c6`.
+`workD.zip/indexd.txt` vérifié le 2026-10-04 :
+- taille `8168810` ;
+- blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
 
-Cette copie **ne correspond pas** au runtime de base et ne doit pas être utilisée pour le raccord.
+Cette copie correspond exactement au `index.html` du HEAD RED et franchit la Rule 26.
+
+Diff runtime préparé localement :
+- retrait du cleanup UI Capture137 uniquement ;
+- retrait du cleanup UI Capture138, de ses wrappers/listener/timers liés uniquement ;
+- retrait de l'appel résiduel `captureCleanDungeonUi138()` dans le post-start Capture138 ;
+- garde `openSessionDungeonSetup` Capture137 conservée ;
+- Capture139 inchangé.
+
+Fingerprint cible calculé :
+- taille `8167044` ;
+- blob `d38eae0b46208f71bc4c290b25b625cc9c12e052`.
 
 ## RED constaté
 
@@ -85,17 +96,14 @@ Le RED prouve donc exactement la multi-autorité UI visée.
 
 ## Gate Rule 26 avant runtime
 
-La copie utilisateur `workc.zip/indexc.txt` reçue le 2026-10-04 est **refusée comme base** :
-- taille `8167091` ;
-- blob `8a42d15ed218895690a3b8490bbe636d9d2d27c6`.
-
-Runtime exact requis :
+**GREEN** avec `workD.zip/indexd.txt` :
 - taille `8168810` ;
-- blob `a5d337ae25435d801a72333ee27e6dbc390a5175`.
+- blob `a5d337ae25435d801a72333ee27e6dbc390a5175` ;
+- correspondance exacte avec le runtime du HEAD RED `5e93e48a9d8976f7a0ea8d37d61b2ca6fe99833d`.
 
 ## Prochaine étape
 
-Recevoir et vérifier la copie exacte Rule 26, puis appliquer uniquement le retrait des nettoyages UI redondants 137/138. Aucun autre runtime avant cette vérification.
+Appliquer uniquement le retrait des nettoyages UI redondants 137/138 sur la copie Rule 26 validée, avancer les fingerprints courants sans modifier les contrats métier, puis rejouer la triple CI.
 
 Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
 

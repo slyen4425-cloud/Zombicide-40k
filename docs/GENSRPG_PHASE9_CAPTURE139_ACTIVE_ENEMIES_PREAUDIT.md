@@ -167,3 +167,29 @@ Pré-audit ownership : **ÉTABLI**.
 Seam minimal : **SÉLECTIONNÉ**.
 
 Prochaine étape : écrire et constater le RED dédié avant toute mutation runtime.
+
+## Clôture GREEN — retrait Capture139
+
+Le seam sélectionné a été appliqué sous TDD :
+- retrait unique de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139` ;
+- aucune modification de la définition `saveActiveEnemies()`, de sa clé, de ses consommateurs Survie/Dungeon ou des resets généraux ;
+- aucune nouvelle autorité.
+
+Runtime final :
+- taille : `8167007` octets ;
+- blob Git : `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+RED dédié :
+- Architecture `37216705469` — FAILURE attendu.
+
+Triple CI fonctionnelle GREEN :
+- Architecture + Browser `37225278513` — SUCCESS ;
+- Firefox `37225278411` — SUCCESS ;
+- Tactical Dock `37225278415` — SUCCESS.
+
+Les fingerprints cumulés ont été repinés mécaniquement sur le nouveau runtime. Aucun code gameplay supplémentaire n'a été modifié.
+
+Checkpoint de fermeture prévu :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`.
+
+État : **GREEN fonctionnel, fermeture documentaire en cours**.

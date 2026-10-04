@@ -1,3 +1,96 @@
+# PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`
+
+SHA de base :
+`77d68ab0764c7715969a24d102a725d1a3d03a74`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture139-active-enemies-preaudit-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04`
+
+Checkpoint GREEN de fermeture :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-retirement-green-2026-10-04`
+
+SHA fonctionnel GREEN :
+`fc4cc5bb2f4117794a7b5e36369be131a692ff19`
+
+## Résultat
+
+Capture139 ne touche plus l'autorité legacy des ennemis actifs Survie/Dungeon.
+
+Retrait runtime unique :
+- suppression de `try{saveActiveEnemies([])}catch(e){}` dans `captureFix139`.
+
+Conservé strictement :
+- `saveActiveEnemies()` ;
+- `loadActiveEnemies()` ;
+- `ACTIVE_ENEMIES_KEY` ;
+- `renderActiveEnemyButtons()` ;
+- `updateDungeonExploreButtons()` ;
+- `z40kSchedulePush()` ;
+- consommateurs Survie/Dungeon ;
+- resets généraux `newGame()`, `switchGameModeFromHome()`, `openGensBuiltInGame()` ;
+- vrais démarrages Dungeon ;
+- lancement Survival ;
+- starter kits, monde, participants, or pré-game et turn manager Capture ;
+- `GensCaptureV1` routing-only ;
+- `isDungeonMode()` et seed Capture `gameStyle:"dungeon"` inchangés.
+
+Aucun nouveau service, stockage, wrapper, fallback, timer, observer, polling ou seconde autorité.
+
+## Rule 26
+
+Runtime de base vérifié depuis le fichier utilisateur exact :
+- taille `8167048` octets ;
+- blob `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.
+
+Runtime après seam :
+- taille `8167007` octets ;
+- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+Diff runtime :
+- `index.html` : une seule ligne retirée ;
+- -41 octets ;
+- aucune autre logique gameplay modifiée.
+
+Les fingerprints des sentinelles cumulatives et quatre manifestes Phase 2 ont été repinés mécaniquement sur le nouveau blob, sans modifier le runtime ni assouplir les contrats. Les workflows temporaires de transport/diagnostic ont été supprimés.
+
+## TDD
+
+RED dédié constaté :
+- Architecture `37216705469` — FAILURE attendu sur « retrait de saveActiveEnemies du lancement Capture139 ».
+
+GREEN fonctionnel final :
+- Architecture + Browser : `37225278513` — SUCCESS ;
+- Firefox : `37225278411` — SUCCESS ;
+- Tactical Dock : `37225278415` — SUCCESS.
+
+Le cœur Architecture a validé 659 étapes, puis son job navigateur a terminé SUCCESS.
+
+## Résultat architectural
+
+- Capture : aucun ownership de l'état legacy `ACTIVE_ENEMIES_KEY` ;
+- Survie/Dungeon : autorité legacy existante conservée ;
+- Shell/pré-game général : nettoyages transitoires existants conservés ;
+- aucune multi-autorité créée.
+
+Production :
+- `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Prochaine étape Phase 9
+
+Après checkpoint GREEN, ouvrir un nouveau pré-audit du prochain couplage résiduel Capture/Dungeon.
+
+Ne pas modifier `isDungeonMode()` ni le seed `gameStyle:"dungeon"` sans caractérisation dédiée et RED TDD.
+
+Critère Phase 9 inchangé : **Capture peut démarrer sans runtime Dungeon/Survie actif.**
+
+---
+
 # PHASE 9 — PRÉ-AUDIT saveActiveEnemies([]) DANS CAPTURE139 — 2026-10-04
 
 Base GREEN :

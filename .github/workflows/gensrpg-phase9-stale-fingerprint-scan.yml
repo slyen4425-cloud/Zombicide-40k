@@ -1,0 +1,27 @@
+name: GenSrpG Phase 9 stale fingerprint scan
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04'
+    paths:
+      - '.github/workflows/gensrpg-phase9-stale-fingerprint-scan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+      - name: List stale runtime fingerprints
+        run: |
+          echo "=== OLD BLOB REFERENCES ==="
+          grep -RIl --exclude-dir=.git '3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed' . || true
+          echo "=== OLD SIZE REFERENCES ==="
+          grep -RIl --exclude-dir=.git '8167048' . || true
+          echo "=== CURRENT RUNTIME ==="
+          git hash-object index.html
+          wc -c < index.html

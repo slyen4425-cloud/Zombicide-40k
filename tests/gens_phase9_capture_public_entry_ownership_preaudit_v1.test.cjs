@@ -60,7 +60,7 @@ const start139=functionFrom(c139,'window.startConfiguredGame=async function()');
 assert.ok(start139.includes('if(!isCaptureContext138())return await start139.apply(this,arguments);'));
 assert.ok(start139.includes('normalizeGameParticipants()'));
 assert.ok(start139.includes('gensCaptureParticipantsReady'));
-assert.ok(start139.includes('ensureBaseGameProfile()'));
+assert.ok(!start139.includes('ensureBaseGameProfile()'),'Capture139 must remain decoupled from Base/Dungeon profile preparation after the dedicated Phase 9 retirement seam');
 assert.ok(start139.includes('captureWorldState()'));
 assert.ok(start139.includes('saveCaptureWorldState(ws)'));
 assert.ok(start139.includes('captureEnsureStarterKitsForParticipants()'));
@@ -112,9 +112,11 @@ console.log(JSON.stringify({
     providerStillInline:false
   },
   historicalDebts:[
-    'normalizeGameParticipants uses isDungeonMode',
-    'ensureBaseGameProfile maintains Dungeon content',
     'saveActiveEnemies updates Dungeon explore UI'
+  ],
+  retiredDebts:[
+    'normalizeGameParticipants no longer uses Dungeon identity for Capture',
+    'Capture139 no longer invokes ensureBaseGameProfile'
   ],
   identityBoundary:'GensCaptureV1.isProfile(profile)',
   selectedRuntimeSeam:'Shell -> GensCaptureV1 -> legacy Capture139',

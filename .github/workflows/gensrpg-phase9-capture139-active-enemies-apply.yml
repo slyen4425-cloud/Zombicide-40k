@@ -1,0 +1,97 @@
+name: GenSrpG Phase 9 Capture139 active-enemies one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture139-active-enemies-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-capture139-active-enemies-retirement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 baseline
+        run: |
+          test "$(git hash-object index.html)" = "3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed"
+          test "$(wc -c < index.html)" = "8167048"
+
+      - name: Apply exact runtime seam and repin cumulative sentinels
+        run: python tools/gensrpg_phase9_capture139_active_enemies_retirement_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4"
+          test "$(wc -c < index.html)" = "8167007"
+          python - <<'PY'
+          from pathlib import Path
+          s=Path("index.html").read_text(encoding="utf-8")
+          tag=s.index('id="captureFix139"')
+          start=s.rfind("<script",0,tag)
+          end=s.index("</script>",tag)
+          block=s[start:end]
+          assert "saveActiveEnemies" not in block
+          assert "loadActiveEnemies" not in block
+          assert "ACTIVE_ENEMIES_KEY" not in block
+          assert "function saveActiveEnemies(a)" in s
+          assert "function loadActiveEnemies()" in s
+          assert "try{saveActiveEnemies([])}catch(e){}" in s
+          PY
+
+      - name: Run Phase 9 cumulative sentinels
+        run: |
+          node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+          node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_participant_identity_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_participant_identity_raccord_v1.test.cjs
+          node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs
+
+      - name: Remove one-shot transport files
+        run: |
+          rm tools/gensrpg_phase9_capture139_active_enemies_retirement_apply.py
+          rm .github/workflows/gensrpg-phase9-capture139-active-enemies-apply.yml
+
+      - name: Verify exact diff scope
+        run: |
+          git diff --check
+          python - <<'PY'
+          import subprocess
+          expected={
+            "index.html",
+            "tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs",
+            "tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs",
+            "tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs",
+            "tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs",
+            "tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs",
+            "tests/gens_phase9_capture_participant_identity_preaudit_v1.test.cjs",
+            "tests/gens_phase9_capture_participant_identity_raccord_v1.test.cjs",
+            "tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs",
+            "tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs",
+            "tools/gensrpg_phase9_capture139_active_enemies_retirement_apply.py",
+            ".github/workflows/gensrpg-phase9-capture139-active-enemies-apply.yml",
+          }
+          changed=set(subprocess.check_output(["git","diff","--name-only"],text=True).splitlines())
+          assert changed==expected,(sorted(changed),sorted(expected))
+          PY
+          git diff --stat
+          git diff -- index.html | sed -n '1,80p'
+
+      - name: Commit exact GREEN candidate
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor(phase9): retire Capture139 active-enemy reset"
+          git push origin "HEAD:$GITHUB_REF_NAME"

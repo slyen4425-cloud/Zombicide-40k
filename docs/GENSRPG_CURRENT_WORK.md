@@ -1,3 +1,84 @@
+# PHASE 9 — RETRAIT saveActiveEnemies([]) DU LANCEMENT CAPTURE139 — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-preaudit-green-2026-10-04`
+
+SHA de base :
+`91fdb6d60480b1d84bed61263c1b26e603da0686`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture139-active-enemies-retirement-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture139-active-enemies-retirement-2026-10-04`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture139-active-enemies-preaudit-green-2026-10-04`
+
+## Mission unique
+
+Retirer uniquement l'appel historique `saveActiveEnemies([])` du lancement Capture139.
+
+Ownership prouvé par le pré-audit :
+- `ACTIVE_ENEMIES_KEY` et `saveActiveEnemies()` appartiennent au legacy de session ennemis partagé Survie/Dungeon ;
+- `saveActiveEnemies()` mélange persistance, UI Dungeon et synchronisation ;
+- Capture139 ne lit jamais cet état et n'en possède aucun consommateur ;
+- les nettoyages généraux `newGame()`, changement de jeu et vrais démarrages Survie/Dungeon restent les propriétaires légitimes des resets concernés.
+
+## TDD
+
+1. RED dédié avant runtime ;
+2. diff runtime : suppression d'une seule ligne dans `captureFix139` ;
+3. aucun changement de `saveActiveEnemies()`, `ACTIVE_ENEMIES_KEY`, UI Dungeon ou sync ;
+4. repin mécanique uniquement des fingerprints exacts si requis ;
+5. triple CI et checkpoint GREEN.
+
+## Rule 26
+
+Base runtime vérifiée :
+- taille `8167048` octets ;
+- blob `3438e75b607d0b9bb68eb1d3edc2d97b3bd662ed`.
+
+Candidat attendu après suppression unique :
+- taille `8167007` octets ;
+- blob `9eff1bfddc9e4fab82f7a181eb9996ecce9c6ae4`.
+
+## Invariants protégés
+
+Conserver :
+- starter kits Capture ;
+- monde Capture ;
+- participants ;
+- or pré-game ;
+- activation session ;
+- turn manager Capture ;
+- public entry `GensCaptureV1` ;
+- resets généraux `newGame()` / changement de jeu ;
+- vrais consommateurs Survie/Dungeon ;
+- vrai Dungeon ;
+- Capture victoire/reprise ;
+- non-interférence quatre modules.
+
+Interdit :
+- nouveau service/wrapper/fallback/timer/observer/polling ;
+- second stockage ennemis ;
+- modification `isDungeonMode()` ;
+- migration `gameStyle:"dungeon"` ;
+- laboratoires ;
+- `main`.
+
+## CI de la base pré-audit
+
+- Architecture + Browser : `37216664145` — SUCCESS ;
+- Firefox : `37216664184` — SUCCESS ;
+- Tactical Dock : `37216664196` — SUCCESS.
+
+## Prochaine étape
+
+Établir le RED dédié sur cette branche, puis seulement appliquer le diff runtime minimal.
+
+---
+
 # PHASE 9 — PRÉ-AUDIT saveActiveEnemies([]) DANS CAPTURE139 — 2026-10-04
 
 Base GREEN :

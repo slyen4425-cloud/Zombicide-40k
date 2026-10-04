@@ -82,8 +82,8 @@ assert.match(available,/!capture && isDungeonMode\(\) && typeof ensureDungeonCon
 
 assert.match(c138,/GensCaptureV1/);
 assert.match(c151,/GensCaptureV1/);
-assert.match(c139,/ensureBaseGameProfile\(\)/,
-  'legacy Capture139 still calls the historical base-profile preparation seam');
+assert.doesNotMatch(c139,/ensureBaseGameProfile\(\)/,
+  'Capture139 must remain decoupled from Base/Dungeon profile preparation after the dedicated retirement seam');
 assert.match(c139,/saveActiveEnemies\(\[\]\)/,
   'legacy Capture139 still resets active enemies through the historical shared/global seam');
 
@@ -183,7 +183,7 @@ console.log(JSON.stringify({
     captureDungeonIdentityBlocks,
     captureDungeonServiceBlocks,
     capture139:{
-      ensureBaseGameProfile:true,
+      ensureBaseGameProfile:false,
       saveActiveEnemiesReset:true
     },
     residualIdentityContexts,

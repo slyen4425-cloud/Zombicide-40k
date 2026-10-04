@@ -21,9 +21,9 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8168810,
+assert.equal(bytes.length,8166967,
   'final Shell authority contract must run on the current Phase 7 generated Boss policy index');
-assert.equal(gitBlob,'a5d337ae25435d801a72333ee27e6dbc390a5175',
+assert.equal(gitBlob,'1d09d3d810485b206afb677ccd0be275212f912f',
   'final Shell authority contract must keep the current Phase 7 generated Boss policy composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),

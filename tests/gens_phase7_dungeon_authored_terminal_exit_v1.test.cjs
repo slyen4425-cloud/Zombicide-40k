@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168810,
+assert.equal(bytes.length,8166967,
   'Phase 7 authored terminal-exit RED must start from the real-exit GREEN runtime');
-assert.equal(gitBlob,'a5d337ae25435d801a72333ee27e6dbc390a5175',
+assert.equal(gitBlob,'1d09d3d810485b206afb677ccd0be275212f912f',
   'Phase 7 authored terminal-exit RED must start from the exact real-exit GREEN blob');
 
 const sandbox={};

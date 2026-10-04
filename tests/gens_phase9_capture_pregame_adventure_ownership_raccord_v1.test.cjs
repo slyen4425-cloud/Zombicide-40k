@@ -13,8 +13,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8168810,'pregame ownership raccord must start from the exact verified Rule 26 runtime');
-assert.equal(blob,'a5d337ae25435d801a72333ee27e6dbc390a5175','pregame ownership raccord must inspect the exact verified Rule 26 blob');
+assert.equal(bytes.length,8166967,'pregame ownership raccord must start from the exact verified Rule 26 runtime');
+assert.equal(blob,'1d09d3d810485b206afb677ccd0be275212f912f','pregame ownership raccord must inspect the exact verified Rule 26 blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

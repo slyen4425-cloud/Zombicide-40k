@@ -1,3 +1,82 @@
+# PHASE 9 — PRÉ-AUDIT saveActiveEnemies([]) DANS CAPTURE139 — 2026-10-04
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`
+
+SHA de base :
+`77d68ab0764c7715969a24d102a725d1a3d03a74`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture139-active-enemies-preaudit-2026-10-04`
+
+Branche :
+`work/gensrpg-phase9-capture139-active-enemies-preaudit-2026-10-04`
+
+Dernier checkpoint GREEN :
+`checkpoint/gensrpg-phase9-capture139-base-profile-retirement-green-2026-10-04`
+
+## Mission unique
+
+Pré-audit lecture/caractérisation de la dépendance `saveActiveEnemies([])` encore appelée par Capture139.
+
+Aucune mutation runtime au démarrage.
+
+Objectifs :
+1. déterminer le propriétaire réel de `saveActiveEnemies()` ;
+2. caractériser `ACTIVE_ENEMIES_KEY`, rendu boutons ennemis, `updateDungeonExploreButtons()`, éventuelle sync `z40kSchedulePush()` et tous les consommateurs ;
+3. distinguer service Core réellement partagé, autorité Dungeon, ou mélange historique ;
+4. comprendre précisément pourquoi Capture139 appelle `saveActiveEnemies([])` ;
+5. déterminer ce qui doit réellement être réinitialisé au démarrage Capture ;
+6. protéger vrai Dungeon, Capture victoire/reprise et non-interférence quatre modules ;
+7. sélectionner un seul seam minimal ;
+8. écrire un TDD RED avant toute mutation runtime.
+
+## Périmètre protégé
+
+Ne pas toucher :
+- `isDungeonMode()` ;
+- seed Capture `gameStyle:"dungeon"` ;
+- Combat Dynamique ;
+- Exploration / World Builder / Map Actor ;
+- progression / créatures / compétences ;
+- Survival ;
+- PvP ;
+- Tactical ;
+- `main`.
+
+Interdit :
+- retrait global de `saveActiveEnemies()` ;
+- `saveCaptureEnemies()` parallèle sans audit d'ownership ;
+- seconde source de vérité ennemis ;
+- wrapper/fallback/timer/observer/polling.
+
+## Rule 26
+
+Si l'inspection exacte de `index.html` est nécessaire :
+1. résoudre SHA/blob/taille GitHub ;
+2. fournir immédiatement à Sylvain le permalink SHA exact ;
+3. utiliser uniquement le fichier/ZIP reçu et vérifié pour l'inspection du gros runtime.
+
+## Tests prévus
+
+Pré-audit :
+- sentinelle structurale ownership `saveActiveEnemies` ;
+- vrai Dungeon ;
+- Capture Shell/provider ;
+- Capture victoire + reprise inter-module ;
+- non-interférence quatre modules ;
+- triple CI Architecture + Browser / Firefox / Tactical Dock.
+
+## Risque principal
+
+`saveActiveEnemies()` peut mélanger persistance, UI Dungeon et synchronisation globale. Aucun découplage ne sera choisi avant preuve de ses effets réels et de ses consommateurs.
+
+## Prochaine étape
+
+Caractériser sans mutation runtime les définitions/consommateurs hors gros `index.html`, puis appliquer Rule 26 dès que l'inspection exacte inline de Capture139 devient nécessaire. Sélectionner ensuite un seul seam et établir le RED TDD.
+
+---
+
 # PHASE 9 — RETRAIT ensureBaseGameProfile() DU LANCEMENT CAPTURE139 — GREEN — 2026-10-04
 
 Base GREEN :

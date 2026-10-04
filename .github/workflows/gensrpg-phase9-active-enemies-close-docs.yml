@@ -39,7 +39,7 @@ jobs:
           assert marker not in c, "CURRENT_WORK already closed"
           assert close_marker not in p, "preaudit already closed"
           current.write_text(block+c,encoding="utf-8")
-          preaudit.write_text(p.rstrip()+closure+"\n",encoding="utf-8")
+          preaudit.write_text((p.rstrip()+closure).rstrip()+"\n",encoding="utf-8")
           PY
 
       - name: Remove one-shot workflow

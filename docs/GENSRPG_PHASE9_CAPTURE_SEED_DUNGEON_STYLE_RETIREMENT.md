@@ -107,3 +107,69 @@ Interdit :
 - GREEN non-interférence quatre modules ;
 - triple CI GREEN ;
 - checkpoint final dédié.
+
+
+## GREEN — retrait du style Dungeon du seed Capture
+
+Runtime final :
+- taille `8167094` octets ;
+- blob Git `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb`;
+- diff runtime : suppression des deux occurrences seed/factory de `"gameStyle":"dungeon",` dans `builtinMonsterCapture162` ;
+- delta exact : `-44` octets.
+
+Conservé strictement :
+- identifiant et nom Monster Capture ;
+- modules/règles/contenu/factory/bootstrap Capture ;
+- `GensCaptureV1.isProfile()` ;
+- `gensContentFamilyForProfile()` ;
+- `isDungeonMode()` ;
+- anciens profils persistés avec ou sans `gameStyle` ;
+- stockage/reprise ;
+- vrai Dungeon ;
+- Survie / PvP / Tactical ;
+- Combat Dynamique / Exploration / Builder / Map Actor.
+
+Les anciens tests qui attendaient explicitement l'ancien seed Dungeon ont été alignés uniquement lorsque leur contrat historique devenait volontairement obsolète. Les fingerprints runtime cumulés ont été repinés sur le nouveau blob sans assouplir les invariants métier.
+
+### TDD
+
+RED dédié :
+- HEAD `92ea8c27236925ad06e56443f2eb9d31949e60ba` ;
+- Architecture : étape « Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9 » — FAILURE attendue ;
+- Firefox `37280565050` — SUCCESS ;
+- Tactical `37280565106` — SUCCESS.
+
+Candidat runtime propre validé sur arbre identique :
+- Architecture `37313921257` — SUCCESS ;
+- Firefox `37313921062` — SUCCESS ;
+- Tactical `37313921292` — SUCCESS.
+
+Triple CI finale sur HEAD propre `cd6746bdad2d5726d38aa7986d152090cd84af69` :
+- Architecture + Browser `37316198318` — SUCCESS ;
+- Firefox `37316198416` — SUCCESS ;
+- Tactical Dock `37316198246` — SUCCESS.
+
+Le job navigateur final confirme notamment :
+- victoire/reprise Capture inter-module — SUCCESS ;
+- routage Shell Capture sans identité Dungeon — SUCCESS ;
+- pré-game Capture sans identité Dungeon — SUCCESS ;
+- reprise Capture persistée sans identité Dungeon — SUCCESS ;
+- vrai Dungeon / Dungeon après Survie — SUCCESS ;
+- non-interférence inter-modules — SUCCESS.
+
+## Résultat architectural
+
+Le **nouveau seed Monster Capture n'emprunte plus l'identité Dungeon**.
+
+Capture reste identifiée par son autorité canonique et peut traverser son chemin utilisateur principal sans que `isDungeonMode()` soit vrai.
+
+Aucune migration forcée n'est appliquée aux profils existants : un ancien profil qui possède encore `gameStyle:"dungeon"` reste toléré.
+
+Critère Phase 9 renforcé :
+**le profil intégré Monster Capture est désormais seedé sans identité Dungeon historique.**
+
+## Prochaine étape
+
+Après CI documentaire GREEN + checkpoint final, ouvrir un nouveau pré-audit des couplages résiduels `isDungeonMode()` / services Dungeon effectivement atteints par Capture.
+
+Ne pas lancer de nettoyage global de `isDungeonMode()`.

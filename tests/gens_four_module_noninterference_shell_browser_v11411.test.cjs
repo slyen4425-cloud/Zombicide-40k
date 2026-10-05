@@ -291,7 +291,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(s.family,'adventure');
     assert.equal(s.contentFamily,'creature');
     assert.equal(s.mode151,'capture');
-    assert.equal(s.dungeonMode,true,'current Capture keeps historical dungeon-style substrate');
+    assert.equal(s.dungeonMode,false,'Capture must remain isolated from Dungeon identity after seed retirement');
     assert.equal(s.dungeonTheme,true,'Capture currently lives under Adventure Shell theme');
     assert.notEqual(s.session,'1');
     assert.equal(s.dungeonRuntime,null);

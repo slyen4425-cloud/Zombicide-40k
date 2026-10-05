@@ -8306,10 +8306,28 @@ function updatePregameWizard(){
 
   const active=getActiveGameProfile?.();
   const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();
+  const realDungeon=!!active && active.gameStyle==="dungeon"
+    && String(active.id)===String(GAME_PROFILE_DUNGEON_ID)
+    && !captureFamily;
   document.body.classList.toggle("gensCapturePregame",captureFamily);
   document.body.classList.toggle("gensAdventurePregame",!!active&&active.gameStyle==="dungeon");
 
-  const dungeonBtn=document.getElementById("sessionDungeonSetupBtn");if(dungeonBtn)dungeonBtn.style.display=captureFamily?"none":"";
+  const dungeonGrid=document.querySelector("#pregameSetup .sessionSetupGrid");
+  let dungeonBtn=document.getElementById("sessionDungeonSetupBtn");
+  const dungeonPage=document.getElementById("sessionDungeonSetup");
+  if(realDungeon){
+    if(!dungeonBtn&&dungeonGrid){
+      dungeonBtn=document.createElement("button");dungeonBtn.id="sessionDungeonSetupBtn";dungeonBtn.className="sessionSetupBtn";
+      dungeonBtn.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";
+      dungeonBtn.onclick=()=>openSessionDungeonSetup();
+      const obj=[...dungeonGrid.children].find(x=>/OBJETS\s*\/\s*PIOCHE/i.test(x.textContent||""));
+      if(obj)dungeonGrid.insertBefore(dungeonBtn,obj);else dungeonGrid.appendChild(dungeonBtn);
+    }
+    if(dungeonBtn)dungeonBtn.style.display="";
+  }else{
+    dungeonBtn?.remove();
+    if(dungeonPage)dungeonPage.style.setProperty("display","none","important");
+  }
   const waveBtn=document.getElementById("sessionWaveSetupBtn");if(waveBtn)waveBtn.style.display=active?.gameStyle==="dungeon"?"none":"";
   const sessionGrid=[...document.querySelectorAll("#pregameHeroStep .sessionSetupGrid .sessionSetupBtn")];
   sessionGrid.forEach(btn=>{
@@ -27023,39 +27041,6 @@ window.captureRenderBattleLive=function(b=window.gensCurrentCaptureBattle){
 (function(){
 /* V16.139 — séparation réelle du lancement Capture et Dungeon */
 
-/* Le bouton Aventure n'existe plus dans le HTML commun.
-   On ne le crée que pour le VRAI profil Dungeon RPG. */
-window.gensEnsureDungeonAdventureButton139=function(){
-  const grid=document.querySelector("#pregameSetup .sessionSetupGrid");if(!grid)return;
-  let b=document.getElementById("sessionDungeonSetupBtn");
-  const page=document.getElementById("sessionDungeonSetup");
-  let realDungeon=false;
-  try{
-    const p=getActiveGameProfile();
-    realDungeon=p?.gameStyle==="dungeon"
-      && String(p.id)===String(GAME_PROFILE_DUNGEON_ID)
-      && !(typeof gensCurrentContentFamily==="function"&&gensCurrentContentFamily()==="creature");
-  }catch(e){}
-  if(!realDungeon){
-    b?.remove();
-    if(page)page.style.setProperty("display","none","important");
-    return;
-  }
-  if(!b){
-    b=document.createElement("button");b.id="sessionDungeonSetupBtn";b.className="sessionSetupBtn";
-    b.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";
-    b.onclick=()=>openSessionDungeonSetup();
-    const obj=[...grid.children].find(x=>/OBJETS\s*\/\s*PIOCHE/i.test(x.textContent||""));
-    if(obj)grid.insertBefore(b,obj);else grid.appendChild(b);
-  }
-};
-
-const r139=window.renderParticipantSelector;
-window.renderParticipantSelector=function(){const x=r139.apply(this,arguments);gensEnsureDungeonAdventureButton139();return x};
-const u139=window.updateGameStyleUi;
-if(typeof u139==="function")window.updateGameStyleUi=function(){const x=u139.apply(this,arguments);gensEnsureDungeonAdventureButton139();return x};
-setTimeout(gensEnsureDungeonAdventureButton139,50);
-
 /* En Capture, le dresseur est choisi AVANT Démarrer.
    Le lancement ne doit jamais ouvrir/reproposer un héros. */
 window.captureEnterWorld139=function(){
@@ -28095,7 +28080,6 @@ window.gensReconcile151=function(reason=""){
     });
   }
 
-  try{gensEnsureDungeonAdventureButton139?.()}catch(e){}
   try{gensFilterItems151()}catch(e){}
   ensureDungeonMj151();
   ensureDungeonInGameMj151();

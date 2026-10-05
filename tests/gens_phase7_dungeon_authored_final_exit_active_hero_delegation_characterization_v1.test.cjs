@@ -19,9 +19,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167094,
+assert.equal(bytes.length,8166377,
   'Final Exit active-hero characterization must keep the canonical index size');
-assert.equal(gitBlob,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb',
+assert.equal(gitBlob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223',
   'Final Exit active-hero characterization must keep the canonical index blob');
 
 const historical=/function activeHero\(x\)\{const a=Array\.isArray\(x\?\.participants\)\?x\.participants:\[\],i=Math\.max\(0,Math\.min\(Math\.max\(0,a\.length-1\),Number\(x\?\.index\)\|\|0\)\);return String\(a\[i\]\|\|""\)\}/;

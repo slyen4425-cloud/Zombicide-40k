@@ -26,7 +26,7 @@ const allowed=new Map([
   [8169856,'454b2e12cde591c2db19023d1b76055ebac8e1b1'],
   [8169442,'a37acaabcb3202a8527c2d545f9e2ff4466ea1db'],
   [8169447,'106d2ec6e82f3b777e1d724cd3f74f30a22fdf39'],
-  [8167094,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb']
+  [8166377,'37056722bb0a27f96e26b3ef3b05e9543dc5a223']
 ]);
 assert.equal(allowed.get(bytes.length),gitBlob,
   'Core200 retirement RED/runtime must stay on the exact reviewed base or exact one-line retirement target');

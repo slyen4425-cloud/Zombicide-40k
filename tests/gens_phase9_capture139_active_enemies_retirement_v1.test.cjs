@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167094,'GREEN must inspect the exact verified Capture139 active-enemies retirement runtime');
-assert.equal(blob,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb','GREEN must inspect the exact verified Capture139 active-enemies retirement blob');
+assert.equal(bytes.length,8166377,'GREEN must inspect the exact verified Capture139 active-enemies retirement runtime');
+assert.equal(blob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223','GREEN must inspect the exact verified Capture139 active-enemies retirement blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

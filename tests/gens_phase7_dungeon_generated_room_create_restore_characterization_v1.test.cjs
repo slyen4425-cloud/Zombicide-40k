@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167094,'Phase 7 room create/restore characterization must track the current Phase 9 participant raccord runtime');
-assert.equal(gitBlob,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb','Phase 7 room create/restore characterization must track the exact current Phase 9 participant raccord blob');
+assert.equal(bytes.length,8166377,'Phase 7 room create/restore characterization must track the current Phase 9 participant raccord runtime');
+assert.equal(gitBlob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223','Phase 7 room create/restore characterization must track the exact current Phase 9 participant raccord blob');
 
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

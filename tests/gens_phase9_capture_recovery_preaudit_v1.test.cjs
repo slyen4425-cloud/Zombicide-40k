@@ -46,16 +46,16 @@ assert.ok(launchContract.providers.includes('capture'));
 assert.ok(launchContract.invariants.some(x=>/selected module owns its launch preconditions/i.test(x)));
 
 for(const proof of [
-  /style,'dungeon'/,
+  /style,''/,
   /family,'adventure'/,
   /contentFamily,'creature'/,
-  /dungeonMode,true/,
-  /current Capture intentionally reuses the dungeon-style RPG substrate/,
+  /dungeonMode,false/,
+  /current Capture seed must no longer borrow Dungeon gameStyle identity/,
   /V137\/V138 own the Capture pre-game Dungeon cleanup\/context/,
   /V139 owns Capture launch/
 ]){
   assert.match(currentCaptureTest,proof,
-    'current Capture historical substrate characterization must remain visible');
+    'current Capture autonomy characterization must remain visible after retiring the Dungeon-style seed identity');
 }
 
 assert.match(providerTest,/GensShellModuleLaunchV1\?\.startModuleSession\?\.\('capture'\)/,
@@ -105,7 +105,7 @@ console.log(JSON.stringify({
   genSrpg:{
     finalShellPublicRouting:true,
     captureTargetEntryLoaded:true,
-    currentCaptureHistoricalSubstrate:true
+    currentCaptureHistoricalSubstrate:false,\n    captureSeedDungeonStyleRetired:true
   },
   laboratory:{
     reviewedCheckpoint:'3414ad1e23a2204daf79f26cdd4e381982b713c6',

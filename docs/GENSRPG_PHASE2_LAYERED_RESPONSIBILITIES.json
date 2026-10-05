@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "696014056409dda9b6ef25ace58dfd9d5f9e2718",
+  "sourceIndexBlob": "37056722bb0a27f96e26b3ef3b05e9543dc5a223",
   "note": "High-density active responsibility hotspots. Descriptive only; listing does not authorize deletion or consolidation.",
   "hotspots": [
     {
@@ -86,7 +86,7 @@
     },
     {
       "name": "renderParticipantSelector",
-      "assignmentCount": 7,
+      "assignmentCount": 6,
       "lastOwner": "coreCombatPoolFix156",
       "classification": "cross-domain-shared-ui",
       "domain": "core",

@@ -16,9 +16,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8166377,
+assert.equal(bytes.length,8165906,
   'Phase 7 authored exit-edge characterization must track the move-allowance GREEN runtime');
-assert.equal(gitBlob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223',
+assert.equal(gitBlob,'1e3398755beb751786d825047bc60fe1a7179d79',
   'Phase 7 authored exit-edge characterization must track the exact move-allowance GREEN blob');
 
 assert.match(

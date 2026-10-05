@@ -1,7 +1,7 @@
 # GenSrpG Phase 2 — inline global last owners
-# sourceIndexBlob=37056722bb0a27f96e26b3ef3b05e9543dc5a223
+# sourceIndexBlob=1e3398755beb751786d825047bc60fe1a7179d79
 # scope=explicit window.<name> assignments in 119 active inline blocks
-# distinctGlobals=431 assignments=746 multiOwnerGlobals=116
+# distinctGlobals=430 assignments=744 multiOwnerGlobals=115
 # name	assignmentCount	lastOwner
 DUNGEON_FLOOR_THEMES_078	1	dungeonCore078FloorSets
 DungeonCore01	2	dungeonCore200Rebuild
@@ -393,7 +393,6 @@ openDungeonMasterPanel	2	gensrpgDungeonFlowFix171
 openDungeonMj151	4	gensrpgDungeonFlowFix171
 openGensBuiltInGame	1	forceReload155
 openMerchant	2	dungeonCore071Merchant
-openSessionDungeonSetup	2	gensStability151
 openZombieRule	3	dungeonDirectImageBinding166
 queueDungeonRoomEvent074	1	dungeonCore074EventsAndWeights
 removeInventoryEntry	1	dungeonCore062GearPortrait

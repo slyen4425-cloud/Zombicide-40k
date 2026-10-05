@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "37056722bb0a27f96e26b3ef3b05e9543dc5a223",
+  "sourceIndexBlob": "1e3398755beb751786d825047bc60fe1a7179d79",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",
@@ -99,7 +99,7 @@
       "order": 12,
       "status": "active",
       "primaryDomain": "capture",
-      "responsibility": "Capture centralized MJ rules and Capture/Dungeon pregame separation",
+      "responsibility": "Capture centralized MJ rules, XP multipliers and Capture Hub UI",
       "crossDomains": [
         "capture",
         "dungeon",
@@ -167,7 +167,7 @@
       "order": 20,
       "status": "active",
       "primaryDomain": "core",
-      "responsibility": "Cross-mode stability boundary for Capture/Dungeon setup and Dungeon MJ settings",
+      "responsibility": "Cross-mode UI reconciliation and Dungeon MJ settings; native pregame owns Dungeon setup entry",
       "crossDomains": [
         "capture",
         "dungeon",

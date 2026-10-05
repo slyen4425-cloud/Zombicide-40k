@@ -12,8 +12,8 @@ const index=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8166377,'characterize the verified Phase 9 runtime only');
-assert.equal(blob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223');
+assert.equal(bytes.length,8165906,'characterize the verified Phase 9 runtime only');
+assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -39,18 +39,15 @@ const captureIdentity=exactBetween(index,'function gensCapturePregameMode(){','\
 const native=exactBetween(index,'function openSessionDungeonSetup(){','\nfunction closeSessionDungeonSetup(');
 const c137=block('captureFix137');
 const c151=block('gensStability151');
-const guard137=exactBetween(c137,'window.openSessionDungeonSetup=(function(old){','\n\n/* ---------- multiplicateurs XP / or');
-const mode151=exactBetween(c151,'window.gensMode151=function(){','\n\nwindow.dungeonMjRules151');
-const guard151=exactBetween(c151,'const openD151=window.openSessionDungeonSetup;','\n\n/* Premier affichage. */');
-
 assert.match(native,/if\(!isDungeonMode\(\)\)return;/);
-assert.doesNotMatch(native,/GensCaptureV1|gensCapturePregameMode|gensMode151/,
-  'pre-audit must expose the native owner lacking its own canonical Capture exclusion');
-assert.match(guard137,/gensCapturePregameMode\(\)/);
-assert.match(mode151,/GensCaptureV1\?\.isProfile\?\.\(p\)/);
-assert.match(guard151,/gensMode151\(\)!=="dungeon"/);
-assert.ok(index.indexOf('function openSessionDungeonSetup(){')<index.indexOf('<script id="captureFix137">'));
-assert.ok(index.indexOf('<script id="captureFix137">')<index.indexOf('<script id="gensStability151">'));
+assert.match(native,/GensCaptureV1\?\.isProfile\?\.\(p\)/,
+  'native owner must now exclude canonical Capture directly');
+assert.match(native,/p\?\.gameStyle!=="dungeon"/,
+  'native owner must retain the complete historical V151 Dungeon gate');
+assert.doesNotMatch(c137,/openSessionDungeonSetup/);
+assert.doesNotMatch(c151,/openD151|openSessionDungeonSetup/);
+assert.doesNotMatch(index,/window\.openSessionDungeonSetup\s*=/,
+  'both former module wrappers must stay retired');
 
 const captureProfile=(legacy=false,modulesOnly=false)=>({
   id:'gp_mt7ker7t_m2iw9',
@@ -73,7 +70,7 @@ const cases=[
   {name:'no active profile',profile:null,native:false,capture137:false,final:false}
 ];
 
-function execute(profile,layers){
+function execute(profile){
   const trace=[];
   const storage=new Map([
     ['gensrpg_game_profile_active_v1',profile?.id||''],
@@ -93,9 +90,7 @@ function execute(profile,layers){
   context.window=context;
   vm.createContext(context);
   vm.runInContext(captureEntry,context,{filename:'capture/entry-v1.js'});
-  vm.runInContext(dungeonIdentity+'\n'+captureIdentity+'\n'+native+'\n'+mode151,context,{filename:'native-pregame-owners.js'});
-  if(layers.includes('137'))vm.runInContext(guard137,context,{filename:'captureFix137.setup-guard.js'});
-  if(layers.includes('151'))vm.runInContext(guard151,context,{filename:'gensStability151.setup-guard.js'});
+  vm.runInContext(dungeonIdentity+'\n'+captureIdentity+'\n'+native,context,{filename:'native-pregame-owners.js'});
   const result=context.openSessionDungeonSetup();
   const entered=page.style.display==='block';
   assert.equal(result,undefined,'historical entry return contract stays unchanged');
@@ -107,31 +102,22 @@ function execute(profile,layers){
 
 const evidence=[];
 for(const item of cases){
-  const nativeResult=execute(item.profile,[]);
-  const capture137=execute(item.profile,['137']);
-  const full=execute(item.profile,['137','151']);
-  const without137=execute(item.profile,['151']);
-  assert.equal(nativeResult.entered,item.native,item.name+' / native owner');
-  assert.equal(capture137.entered,item.capture137,item.name+' / Capture137 guard');
-  assert.equal(full.entered,item.final,item.name+' / full production chain');
-  assert.equal(without137.entered,full.entered,item.name+' / Capture137 is redundant behind V151');
-  assert.deepEqual(without137.effects,full.effects,item.name+' / same native effects without Capture137');
+  const result=execute(item.profile);
+  assert.equal(result.entered,item.final,item.name+' / native production owner preserves the pre-audit final contract');
   if(item.name.includes('Capture')){
-    assert.deepEqual(full.trace,['profile'],
-      'V151 must reject canonical Capture before reaching Capture137, Dungeon identity or native UI');
+    assert.deepEqual(result.trace,['profile'],
+      'native owner must reject canonical Capture before Dungeon identity or UI');
   }
-  evidence.push({name:item.name,nativeEntered:nativeResult.entered,capture137Entered:capture137.entered,
-    productionEntered:full.entered,without137Entered:without137.entered,productionTrace:full.trace});
+  evidence.push({name:item.name,productionEntered:result.entered,productionTrace:result.trace});
 }
 
-assert.equal(evidence.find(x=>x.name==='historical Capture with Dungeon style').nativeEntered,true,
-  'removing both wrappers without moving the guard into the native owner would regress historical Capture');
-
+assert.ok(fs.existsSync(path.join(root,'tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs')),
+  'the immutable old-chain comparison and exact inverse-runtime proof must remain available');
 console.log(JSON.stringify({
-  scenario:'Phase 9 Dungeon setup entry ownership characterization',
+  scenario:'Phase 9 Dungeon setup entry production parity after ownership transfer',
   rule26:{bytes:bytes.length,blob},
-  chain:['native openSessionDungeonSetup','captureFix137','gensStability151'],
+  chain:['native openSessionDungeonSetup'],
+  retiredWrappers:['captureFix137','gensStability151'],
   evidence,
-  decision:'Move the full V151 entry predicate into the native pregame owner, preserve isDungeonMode(), then retire both wrappers in a separate TDD lot',
-  runtimeChanged:false
+  decision:'Native pregame owner preserves the complete historical production predicate; both former wrappers remain retired'
 },null,2));

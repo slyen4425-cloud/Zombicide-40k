@@ -13,8 +13,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8166377,'pregame ownership raccord must inspect the transferred-owner Phase 9 runtime');
-assert.equal(blob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223','pregame ownership raccord must inspect the exact transferred-owner runtime blob');
+assert.equal(bytes.length,8165906,'pregame ownership raccord must inspect the transferred-owner Phase 9 runtime');
+assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79','pregame ownership raccord must inspect the exact transferred-owner runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -56,8 +56,10 @@ const c138=block('captureFix138');
 const c139=block('captureFix139');
 const wizard=fn('updatePregameWizard');
 
-assert.match(c137,/openSessionDungeonSetup/,
-  'Capture137 must retain its dedicated guard around openSessionDungeonSetup in this first ownership seam');
+assert.doesNotMatch(c137,/openSessionDungeonSetup/,
+  'Capture137 setup guard was transferred to the native owner in its dedicated follow-up seam');
+assert.match(fn('openSessionDungeonSetup'),/GensCaptureV1\?\.isProfile\?\.\(p\)/,
+  'native setup owner must retain the canonical Capture exclusion');
 
 assert.equal((c137.match(/cleanDungeonPregame137/g)||[]).length,0,
   'RED: Capture137 must no longer own Dungeon pregame visibility cleanup');
@@ -102,7 +104,7 @@ console.log(JSON.stringify({
   target:{
     capture137CleanupOwners:0,
     capture138CleanupOwners:0,
-    capture137DungeonSetupGuardPreserved:true,
+    nativeDungeonSetupGuardPreserved:true,
     canonicalPregameOwner:'updatePregameWizard'
   }
 },null,2));

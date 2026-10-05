@@ -10237,7 +10237,7 @@ function renderSessionDungeonLibrary(){
     card.onclick=()=>applyDungeonAdventure(a.id,true);host.appendChild(card);
   });
 }
-function openSessionDungeonSetup(){if(!isDungeonMode())return;hidePregameAndSessionPages();const page=document.getElementById("sessionDungeonSetup");if(page)page.style.display="block";renderSessionDungeonLibrary();window.scrollTo(0,0)}
+function openSessionDungeonSetup(){try{const p=getActiveGameProfile?.();if(window.GensCaptureV1?.isProfile?.(p)||p?.gameStyle!=="dungeon")return;}catch(e){return;}if(!isDungeonMode())return;hidePregameAndSessionPages();const page=document.getElementById("sessionDungeonSetup");if(page)page.style.display="block";renderSessionDungeonLibrary();window.scrollTo(0,0)}
 function closeSessionDungeonSetup(){returnToSessionSetup()}
 
 function renderDungeonAdventureLibrary(){
@@ -26702,14 +26702,6 @@ window.renderParticipantSelector=function(){const r=rp137.apply(this,arguments);
 const rh137=window.renderCaptureWorldHub;
 window.renderCaptureWorldHub=function(){const r=rh137.apply(this,arguments);injectMj137();return r};
 
-/* ---------- bloque l’accès Aventure Dungeon en Capture ---------- */
-window.openSessionDungeonSetup=(function(old){
-  return function(){
-    if(typeof gensCapturePregameMode==="function"&&gensCapturePregameMode())return;
-    return old.apply(this,arguments);
-  };
-})(window.openSessionDungeonSetup);
-
 /* ---------- multiplicateurs XP / or ---------- */
 const xp137=window.captureApplyXpToInstance;
 window.captureApplyXpToInstance=function(inst,amount){
@@ -28149,15 +28141,6 @@ if(typeof hub151==="function"){
       return;
     }
     return hub151.apply(this,arguments);
-  };
-}
-
-/* Protection inverse : Aventure Dungeon jamais ouverte depuis Capture. */
-const openD151=window.openSessionDungeonSetup;
-if(typeof openD151==="function"){
-  window.openSessionDungeonSetup=function(){
-    if(gensMode151()!=="dungeon")return;
-    return openD151.apply(this,arguments);
   };
 }
 

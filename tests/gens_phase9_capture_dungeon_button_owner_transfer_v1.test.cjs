@@ -12,8 +12,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8166377,'pregame Dungeon-button ownership RED must inspect the current Phase 9 runtime');
-assert.equal(blob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223','pregame Dungeon-button ownership RED must inspect the exact verified runtime blob');
+assert.equal(bytes.length,8165906,'pregame Dungeon-button ownership RED must inspect the current Phase 9 runtime');
+assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79','pregame Dungeon-button ownership RED must inspect the exact verified runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -83,10 +83,12 @@ assert.match(c139,/window\.captureEnterWorld139=function\(\)/,
 assert.match(c139,/window\.startConfiguredGame=async function\(\)/,
   'Capture139 dedicated launch path must remain intact');
 
-assert.match(c137,/openSessionDungeonSetup/,
-  'Capture137 dedicated guard around Dungeon setup remains protected in this seam');
-assert.match(c151,/const openD151=window\.openSessionDungeonSetup/,
-  'Stability151 inverse Dungeon/Capture guard remains protected in this seam');
+assert.doesNotMatch(c137,/openSessionDungeonSetup/,
+  'Capture137 entry guard was transferred to the native owner in the dedicated follow-up seam');
+assert.doesNotMatch(c151,/openD151|openSessionDungeonSetup/,
+  'Stability151 entry guard was transferred to the native owner in the dedicated follow-up seam');
+assert.match(fn('openSessionDungeonSetup'),/GensCaptureV1\?\.isProfile\?\.\(p\)/,
+  'native setup owner must retain the canonical Capture guard');
 
 for(const proof of [
   'tests/gens_capture_current_shell_browser_v11411.test.cjs',
@@ -105,6 +107,6 @@ console.log(JSON.stringify({
   target:{
     shellOwner:'updatePregameWizard',
     retiredCaptureOwner:'captureFix139.gensEnsureDungeonAdventureButton139',
-    protectedGuards:['captureFix137.openSessionDungeonSetup','gensStability151.openSessionDungeonSetup']
+    protectedGuards:['native openSessionDungeonSetup']
   }
 },null,2));

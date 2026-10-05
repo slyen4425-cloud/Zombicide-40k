@@ -61,9 +61,39 @@ Interdit :
 
 Le parcours neuf Capture est maintenant GREEN sans `gameStyle`, mais une sauvegarde ou un profil déjà persisté peut encore traverser une branche legacy différente du parcours neuf.
 
+## Résultat du pré-audit
+
+Sentinelle permanente :
+`tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs`.
+
+Run ciblé :
+`37279109842` — **SUCCESS**.
+
+Le scénario valide :
+- profil Capture persisté sans `gameStyle` ;
+- vraie sauvegarde Dungeon résiduelle conservée ;
+- lancement Capture ;
+- victoire Capture ;
+- reload complet ;
+- seed intégré qui ne réinjecte pas `gameStyle` sur le profil existant ;
+- bouton Reprendre du vrai Shell ;
+- reprise Capture non volée par le runtime Dungeon résiduel.
+
+Aucune mutation runtime.
+
+La sentinelle est branchée à l'Architecture permanente.
+
+Décision :
+- aucune migration forcée des anciens profils n'est nécessaire ;
+- les anciens profils avec `gameStyle:"dungeon"` restent tolérés ;
+- un nouveau profil Capture peut fonctionner sans ce champ ;
+- le prochain lot peut cibler uniquement le **retrait du champ dans le seed intégré Monster Capture**.
+
 ## Prochaine étape
 
-Inventorier les propriétaires de persistance/reprise et les sentinelles existantes, puis reproduire le vrai chemin de reload/reprise avec un profil Capture privé de `gameStyle` uniquement dans le test.
+Après triple CI documentaire GREEN et checkpoint final de ce pré-audit, ouvrir un lot dédié de retrait du seed sous Rule 26 + RED TDD.
+
+Le prochain lot ne devra pas modifier `isDungeonMode()`, les sauvegardes existantes ni le vrai Dungeon.
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

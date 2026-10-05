@@ -1,58 +1,52 @@
-# PHASE 9 — TRANSFERT ENTRY DUNGEON / CAPTURE — CI EN COURS — 2026-10-05
+# PHASE 9 — ENTRÉE DUNGEON / CAPTURE — CLÔTURE DU TRANSFERT — 2026-10-05
 
-Branche : `work/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`
-Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`
-SHA de base exact : `a8c9aa9934276c38fc4ca2755e65cee7116ada4e`
-Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-green-2026-10-05` sur le même SHA.
-HEAD runtime appliqué : `284b4c76f333780b68c069fe0b18e610467f044a`.
-
-## Résultat structurel
-
-Propriétaire unique : entrée native `openSessionDungeonSetup()` du Shell/pré-game.
-Prédicat complet V151 transféré avec priorité à l'identité publique Capture, style Dungeon obligatoire et refus sur erreur.
-Garde `isDungeonMode()` et corps original conservés.
-Deux wrappers retirés : Capture137 et V151 autour de cette seule entrée.
-Aucune autre autorité runtime ni aucun helper global modifié.
-
-Runtime dérivé du ZIP utilisateur vérifié :
-- avant : `8166377` octets, blob `37056722bb0a27f96e26b3ef3b05e9543dc5a223` ;
-- après : `8165906` octets, blob `1e3398755beb751786d825047bc60fe1a7179d79` ;
-- SHA-256 : `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d` ;
-- delta : `-471` octets, trois fragments exacts ;
-- inversion des trois fragments : reconstitution byte-exacte du blob GREEN de départ.
-
-## TDD et preuves
-
-- RED initial : `54843ead4af50c5d0766f04624b922f749fdbe3a`, Architecture `37362473505`, étape dédiée #270 en échec attendu, log vérifié.
-- RED du HEAD de transport : `a0ad35074bcb7023911ad2168f9fbd5be9e48fcf`, Architecture `37363506670`, même échec attendu.
-- Application ponctuelle : `37363506750`, tentative 2, job `111948888218` — SUCCESS ; première tentative annulée avant exécution par attente de runner.
-- 18 cas de parité comparés à la chaîne historique exacte ; fixture SHA-256 immuable `3d925e4f3760819642b1f48d2ab2d0aba66dbd5c45d6595d0d4d4b1e3d22e7b2`.
-- Dix cas de caractérisation antérieurs conservés sur le propriétaire natif.
-- 16 contrôles locaux Phase 9 : GREEN ; inventaires inline/global/layered : GREEN.
-- Zéro affectation inline `window.openSessionDungeonSetup=` ; une déclaration native.
-- Deux fichiers de transport supprimés dans le commit runtime ; aucune différence finale de transport.
-
-Preuve navigateur ajoutée au scénario existant du provider Dungeon :
-Shell -> vrai profil Dungeon -> nouveau jeu -> vrai bouton `sessionDungeonSetupBtn` -> bibliothèque visible et rendue -> vrai retour au pré-game -> sélection héros -> provider -> Save & Quit -> reprise.
-Les appels réels depuis Capture sans/avec style historique restent protégés dans leur scénario existant.
-Les scénarios victoire/reprise Capture, reprise persistée, Dungeon après Survie et quatre modules restent exigés.
-
-## Adaptations justifiées et fonctions protégées
-
-102 tests reçoivent uniquement le nouveau blob/taille, sauf cinq adaptations structurelles justifiées : caractérisation de l'entrée, anciennes gardes protégées dans les tests bouton/pré-game, et deux totaux d'inventaire.
-Cinq cartographies `sourceIndexBlob` suivent le nouveau runtime ; la table perd exactement deux affectations et les descriptions 137/151 retirent seulement l'ownership de cette entrée.
-Les tests de comportement ne sont pas assouplis. Détails : `docs/GENSRPG_PHASE9_CAPTURE_DUNGEON_SETUP_ENTRY_OWNER_TRANSFER.md`.
-
-Identité Capture, `gensMode151()`, `gensCapturePregameMode()`, `isDungeonMode()`, stockage, sauvegardes, gameplay, autres responsabilités 137/151 et runtimes des quatre modules restent protégés.
-
-## État et prochaine étape
-
-Triple CI sur le runtime appliqué démarrée : Architecture + Browser `37365375843`, Firefox `37365379421`, Tactical Dock `37365382799`.
-Le commit de preuve UI déclenche une nouvelle triple CI, obligatoire avant clôture documentaire.
-Attendre le GREEN complet, clôturer les documents, valider la triple CI finale et créer `checkpoint/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-green-2026-10-05` sur son HEAD exact.
-Aucun checkpoint GREEN final créé à ce stade.
-
+Branche : `work/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`.
+Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05` sur `a8c9aa9934276c38fc4ca2755e65cee7116ada4e`.
+Dernier GREEN avant ce lot : `checkpoint/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-green-2026-10-05` sur la même base.
+Checkpoint final de reprise : `checkpoint/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-green-2026-10-05` ; publié sur le HEAD de cette clôture uniquement après sa triple CI GREEN.
 Production `main` gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat et périmètre clos
+
+L'entrée native Shell/pré-game `openSessionDungeonSetup()` est désormais le propriétaire unique de sa frontière Capture/Dungeon.
+Elle reprend le prédicat complet V151 : priorité à `GensCaptureV1.isProfile`, style Dungeon obligatoire et refus sur erreur, puis conserve la garde `isDungeonMode()` et tout le corps original.
+Les deux wrappers Capture137/V151 de cette seule entrée sont retirés.
+Identité Capture, helpers globaux, autres responsabilités 137/151, règles, sauvegardes, assets et runtimes des quatre modules restent protégés.
+
+Runtime appliqué à `284b4c76f333780b68c069fe0b18e610467f044a` : `8165906` octets, blob `1e3398755beb751786d825047bc60fe1a7179d79`, SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d`.
+Base ZIP utilisateur vérifiée : `8166377` octets / blob `37056722bb0a27f96e26b3ef3b05e9543dc5a223`.
+Delta : `-471` octets, exactement trois fragments ; leur inversion reconstitue le blob de départ byte pour byte.
+La copie locale dérivée a été comparée au blob GitHub appliqué ; le ZIP original décrit la base, pas le nouveau HEAD.
+
+## Preuves TDD et validation
+
+- Périmètre déclaré avant code à `0975ced6a92ef6d90eb59bf77004f97cd86f9b96` ; checkpoint de départ créé sur la base avant toute modification.
+- RED dédié à `54843ead4af50c5d0766f04624b922f749fdbe3a` : [Architecture 37362473505](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37362473505), job `111940130819`, étape #270 en échec attendu ; log vérifié sur Capture historique et identifiant Dungeon sans style.
+- Application ponctuelle : [run 37363506750](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37363506750), tentative 2 / job `111948888218` SUCCESS. Première tentative annulée avant exécution, sans runner attribué. Transport supprimé dans le commit runtime.
+- 18 cas comparés à la chaîne historique exacte ; 10 cas antérieurs conservés ; fixture immuable ; refus sans effet UI/stockage et navigation une seule fois.
+- 16 tests locaux Phase 9 et trois inventaires : GREEN.
+- État historique du HEAD fonctionnel `e5eef857b1acad9b05d02088a89cb1cc483bf9b5` relevé le `2026-10-05T20:42:08.237Z` : [Architecture + Browser](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37365705449) SUCCESS ; [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37365705466) SUCCESS (tentative 3) ; [Tactical Dock](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37365705439) en attente de runner (tentative 4, trois annulations sans exécution).
+- Architecture : 335 étapes ; Browser : 48 étapes. Vrai bouton Dungeon, bibliothèque rendue et retour pré-game, provider / Save & Quit / reprise, Capture sans/avec style historique, reprise persistée, victoire/reprise, Dungeon après Survie et frontière des quatre modules : GREEN.
+- Cette clôture modifie seulement deux documents et déclenche la triple CI complète sur son propre HEAD, avec le même runtime et les mêmes tests. Le checkpoint final est publié exclusivement après SUCCESS des trois runs sur ce SHA exact ; ses checks GitHub portent la validation définitive de ce lot.
+- Firefox et Tactical ont été relancés après annulation sans étape exécutée ; aucun test n'a été retiré.
+
+## Revue des fichiers
+
+115 fichiers dans le diff net : 1 runtime, 1 workflow (+3 lignes pour le test dédié), 7 documents/cartographies et 106 fichiers de tests.
+98 tests changent uniquement d'empreinte ; 5 tests structurels ont des attentes obsolètes remplacées et justifiées ; 1 nouveau test dédié, 1 scénario navigateur renforcé et 1 fixture.
+102 tests existants reçoivent le nouveau blob/taille, dont 4 des 5 tests structurels.
+Inventaires : 430 globals / 744 affectations / 115 globals multi-propriétaires ; 119 blocs actifs inchangés.
+Aucun asset ni fichier de transport dans le diff final.
+Rapport et liste exhaustive : `docs/GENSRPG_PHASE9_CAPTURE_DUNGEON_SETUP_ENTRY_OWNER_TRANSFER.md`.
+
+## Test manuel et prochaine étape
+
+[Test manuel figé sur le HEAD fonctionnel](https://raw.githack.com/slyen4425-cloud/Zombicide-40k/e5eef857b1acad9b05d02088a89cb1cc483bf9b5/preview.html).
+Dungeon : Shell -> nouveau jeu -> bouton Aventure Dungeon -> bibliothèque -> retour au pré-game.
+Capture : Shell -> nouveau jeu -> parcours de pré-game Capture ; aucune ouverture de l'Aventure Dungeon.
+
+La Phase 9 continue. Prochain chantier : pré-audit séparé du prochain couplage résiduel Capture/Dungeon, avec son propre checkpoint de départ et son propre périmètre avant toute mutation.
+Aucun merge sur `main` ou branche d'intégration lab dans ce lot.
 
 
 ---

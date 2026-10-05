@@ -52,9 +52,57 @@ Interdit :
 4. sélectionner un seul propriétaire fautif ;
 5. poser un RED dédié avant toute mutation runtime.
 
+## GREEN — transfert du bouton Dungeon du pré-game vers le Shell
+
+Propriétaire cible validé :
+`updatePregameWizard()`.
+
+Ancienne autorité retirée :
+`captureFix139.gensEnsureDungeonAdventureButton139`.
+
+Retiré de Capture139 :
+- création/retrait de `sessionDungeonSetupBtn` ;
+- maintenance de `sessionDungeonSetup` ;
+- wrapper `renderParticipantSelector` lié au bouton ;
+- wrapper `updateGameStyleUi` lié au bouton ;
+- `setTimeout(gensEnsureDungeonAdventureButton139,50)`.
+
+Retiré de `gensStability151` :
+- appel résiduel au helper Capture139 retiré.
+
+Conservé strictement :
+- `openSessionDungeonSetup` ;
+- garde Capture137 autour de cette fonction ;
+- garde inverse Capture/Dungeon de `gensStability151` ;
+- lancement Capture139 ;
+- `isDungeonMode()` ;
+- runtime vrai Dungeon ;
+- sauvegarde/reprise ;
+- Survie / PvP / Tactical ;
+- Combat Dynamique / Exploration / Builder / Map Actor.
+
+Runtime :
+- avant : `8167094` octets / `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb` ;
+- après : `8166377` octets / `37056722bb0a27f96e26b3ef3b05e9543dc5a223`.
+
+TDD :
+- RED dédié : transfert de propriété du bouton Dungeon vers Shell ;
+- GREEN runtime : `9079622d74e2e549d593f1b17137353375dad26f` puis alignement des inventaires historiques ;
+- triple CI sur HEAD fonctionnel/documentaire courant `6b38b3f5acbd0af6b7a24f2c2a157c8e8bbbdbcf` :
+  - Architecture `37325483116` — SUCCESS ;
+  - Firefox `37325483066` — SUCCESS ;
+  - Tactical `37325483227` — SUCCESS.
+
+Résultat architectural :
+- la navigation Dungeon du pré-game appartient au Shell ;
+- Capture139 ne maintient plus cette UI Dungeon ;
+- un timer et deux wrappers inter-modules ont disparu ;
+- aucune nouvelle autorité n'a été créée.
+
 ## Prochaine étape
 
-Inventorier les résidus actuels à partir du test d'audit Phase 9 et des logs de la dernière Architecture GREEN, puis choisir le prochain seam uniquement si un couplage réel est démontré.
+Après triple CI documentaire finale et checkpoint dédié, ouvrir un nouveau pré-audit des couplages Dungeon restants réellement atteints par Capture. Ne pas nettoyer globalement `isDungeonMode()`.
+
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

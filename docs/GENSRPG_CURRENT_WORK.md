@@ -1,4 +1,4 @@
-# PHASE 9 — PRÉ-AUDIT ENTRY DUNGEON / CAPTURE — CARACTÉRISATION — 2026-10-05
+# PHASE 9 — PRÉ-AUDIT ENTRY DUNGEON / CAPTURE — GREEN — 2026-10-05
 
 Branche :
 `work/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-2026-10-05`
@@ -58,13 +58,20 @@ Le retrait sans transfert préalable de la protection est interdit.
 - Les tests existants de seed, bouton Dungeon, pré-game, reprise, victoire, provider Capture, vrai Dungeon, Dungeon après Survie et quatre modules restent protégés.
 - Test VM local : GREEN.
 - Gardes locaux bouton/pré-game et inventaire couplages : GREEN.
-- Exécution navigateur à valider par la CI GitHub : Chromium n'est pas installé dans l'environnement local.
-- Triple CI du commit de caractérisation puis triple CI documentaire finale requises avant checkpoint.
+- Navigateur GitHub : GREEN, y compris les vrais appels Dungeon depuis Capture avec et sans style historique.
+- HEAD caractérisation triple-GREEN : `d9b1b10f5e8f4e938adecdb6e06211d7f3b97c3d`.
+- Architecture + Browser : `37344256269` — SUCCESS.
+- Firefox : `37344256249` — SUCCESS.
+- Tactical Dock : `37344256223` — SUCCESS.
+- Capture victoire/reprise, reprise persistée, provider Capture, Dungeon après Survie et quatre modules : SUCCESS.
+- Aucun RED runtime dans ce pré-audit ; RED obligatoire dans le prochain lot dédié.
+- Checkpoint final : `checkpoint/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-green-2026-10-05`, sur le HEAD exact validé par la triple CI documentaire de fermeture.
 
 ## Prochaine étape
 
-Valider la triple CI de ce pré-audit, documenter les IDs, créer son checkpoint final exact.
-Ouvrir ensuite un lot dédié de transfert des gardes avec checkpoint de départ et RED TDD.
+Après triple CI documentaire de fermeture et création du checkpoint ci-dessus :
+ouvrir un lot dédié de transfert des gardes de l'entrée native `openSessionDungeonSetup()`, avec son checkpoint de départ et RED TDD.
+Le runtime du ZIP déjà reçu reste la base exacte du prochain lot ; ne pas demander un nouveau téléchargement tant que son blob est inchangé.
 
 Production `main` reste gelée :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

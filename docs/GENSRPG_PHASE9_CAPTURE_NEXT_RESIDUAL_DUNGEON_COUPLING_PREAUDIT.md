@@ -162,3 +162,37 @@ Le reste de Capture137 et V151, la navigation du bouton déjà transférée, les
 - sentinelle VM ajoutée au workflow Architecture permanent ;
 - triple CI puis fermeture documentaire et checkpoint requis ;
 - aucun runtime modifié.
+
+## GREEN — caractérisation et frontière navigateur
+
+HEAD fonctionnel validé :
+`d9b1b10f5e8f4e938adecdb6e06211d7f3b97c3d`.
+
+Triple CI :
+- Architecture + Browser : `37344256269` — SUCCESS ;
+- Firefox : `37344256249` — SUCCESS ;
+- Tactical Dock : `37344256223` — SUCCESS.
+
+Preuves ciblées du run Architecture :
+- job architecture `111878751340`, nouveau test des gardes natifs — SUCCESS ;
+- job navigateur `111879269684`, pré-game Capture sans identité Dungeon renforcé — SUCCESS ;
+- vraie victoire/reprise Capture — SUCCESS ;
+- vraie reprise persistée sans style avec résidu Dungeon — SUCCESS ;
+- provider Capture — SUCCESS ;
+- Dungeon après Survie — SUCCESS ;
+- non-interférence quatre modules — SUCCESS.
+
+Diff réel du lot : cinq fichiers, uniquement tests, branchement CI et documentation.
+Le runtime avant/après conserve `8166377 / 37056722bb0a27f96e26b3ef3b05e9543dc5a223`.
+Aucun profil persistant ni sauvegarde utilisateur n'est migré.
+
+Checkpoint final :
+`checkpoint/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-green-2026-10-05`.
+
+Le checkpoint doit pointer sur le HEAD exact triple-GREEN **après** ce commit documentaire.
+Les runs de fermeture sont attachés au SHA résolu par ce checkpoint dans GitHub Actions ; aucun commit supplémentaire ne sera créé seulement pour recopier leurs IDs dans le même fichier.
+
+Décision finale du pré-audit : propriétaire natif sélectionné, retrait des deux wrappers autorisé uniquement dans le prochain lot isolé après RED dédié et transfert intégral de la protection.
+
+Production main reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.

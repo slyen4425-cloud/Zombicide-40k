@@ -166,3 +166,91 @@ Le test navigateur existant
 est désormais câblé dans l'Architecture comme exigence permanente du seam.
 
 Aucune mutation runtime n'est autorisée avant constat du RED sur cette sentinelle.
+
+
+## GREEN — seam identité pré-game Capture
+
+Le seam minimal `updatePregameWizard()` a été appliqué.
+
+### Mutation runtime unique
+
+Avant :
+
+`const captureFamily=!!active && active.gameStyle==="dungeon" && typeof gensCurrentContentFamily==="function" && gensCurrentContentFamily()==="creature";`
+
+Après :
+
+`const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();`
+
+Aucun autre comportement de `updatePregameWizard()` n'a été modifié.
+
+Conservé strictement :
+- `gensAdventurePregame` dépend toujours de `active.gameStyle==="dungeon"` ;
+- boutons/règles spécifiques Dungeon inchangés ;
+- `isDungeonMode()` inchangé ;
+- seed Monster Capture `gameStyle:"dungeon"` inchangé ;
+- vrai Dungeon inchangé ;
+- Survie / PvP / Tactical inchangés.
+
+### Runtime
+
+Avant :
+- taille `8167187` octets ;
+- blob `99d7784676669b629cae6070df8c02606d67002f`.
+
+Après :
+- taille `8167138` octets ;
+- blob `09b1e19c04777da82fd0ad355adc7eb82532db29`.
+
+Diff : `-49` octets.
+
+### TDD
+
+RED permanent confirmé :
+- run ciblé `37260771553` — FAILURE attendue ;
+- identité Capture correcte ;
+- pré-game visible ;
+- `gensCapturePregame` absent.
+
+GREEN ciblé transport :
+- run `37260868725` — SUCCESS ;
+- sentinelle pré-game complète SUCCESS ;
+- sentinelle Shell routing SUCCESS ;
+- workflows temporaires supprimés avant commit.
+
+Le scénario sans `gameStyle` traverse désormais :
+- Shell Adventure ;
+- sélection Monster Capture ;
+- changement d'univers V155 ;
+- ouverture pré-game ;
+- classe `gensCapturePregame` ;
+- sélection dresseur/créature ;
+- lancement session ;
+- Hub Capture ;
+- progression Jour 1 -> Jour 2.
+
+Aucun runtime Dungeon n'est créé dans ce scénario.
+
+### Triple CI fonctionnelle
+
+Sur le candidat `fe995828a8bddc1b1a54f3c1b9433d23eea6e765` :
+- Architecture + Browser `37260949708` — SUCCESS ;
+- Firefox `37260949665` — SUCCESS ;
+- Tactical Dock `37260949800` — SUCCESS.
+
+La sentinelle permanente « Exiger le pré-game Capture sans identité Dungeon historique » passe dans la CI complète.
+
+## Résultat architectural
+
+Le vrai parcours Capture principal n'a désormais plus besoin de `gameStyle:"dungeon"` pour :
+- être visible dans le Shell ;
+- être routé vers Adventure ;
+- ouvrir le pré-game Capture ;
+- sélectionner ses participants ;
+- démarrer ;
+- afficher le Hub ;
+- progresser d'un jour.
+
+Le seed historique n'est toujours pas retiré dans ce lot.
+
+La prochaine étape doit rester un pré-audit séparé avant toute suppression réelle du seed : compatibilité sauvegardes/profils persistants et consommateurs historiques restants doivent être caractérisés explicitement.

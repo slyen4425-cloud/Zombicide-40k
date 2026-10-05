@@ -96,7 +96,49 @@ Constater le RED permanent exact, puis appliquer uniquement ce seam minimal dans
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
+## GREEN — seam pré-game Capture
+
+Propriétaire corrigé :
+`updatePregameWizard()`.
+
+Mutation unique :
+- `captureFamily` réutilise désormais `gensCapturePregameMode()` ;
+- retrait du besoin `active.gameStyle==="dungeon"` pour identifier Capture dans le pré-game.
+
+Conservé :
+- `gensAdventurePregame` / vrai Dungeon inchangés ;
+- `isDungeonMode()` inchangé ;
+- seed Monster Capture `gameStyle:"dungeon"` inchangé ;
+- aucun wrapper/fallback/timer/observer/polling.
+
+Runtime :
+- avant : `8167187` / `99d7784676669b629cae6070df8c02606d67002f` ;
+- après : `8167138` / `09b1e19c04777da82fd0ad355adc7eb82532db29`.
+
+RED permanent :
+- `37260771553` — FAILURE attendue sur classe pré-game Capture absente.
+
+GREEN ciblé :
+- `37260868725` — SUCCESS.
+
+Triple GREEN fonctionnelle sur `fe995828a8bddc1b1a54f3c1b9433d23eea6e765` :
+- Architecture + Browser `37260949708` — SUCCESS ;
+- Firefox `37260949665` — SUCCESS ;
+- Tactical Dock `37260949800` — SUCCESS.
+
+Le scénario Capture sans `gameStyle` passe maintenant jusqu'au Hub et au Jour 2.
+
+### Prochaine étape Phase 9
+
+Ne pas supprimer encore le seed.
+
+Ouvrir ensuite un pré-audit dédié à la **compatibilité des profils/sauvegardes existants et aux consommateurs historiques restants** avant de décider si le seed `gameStyle:"dungeon"` peut être retiré réellement.
+
+Critère Phase 9 inchangé :
+**Capture peut démarrer sans runtime Dungeon/Survie actif.**
+
 ---
+
 
 # PHASE 9 — SHELL ROUTING CAPTURE SANS IDENTITÉ DUNGEON — GREEN — 2026-10-04
 

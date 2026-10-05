@@ -836,6 +836,9 @@ jobs:
       - name: Exiger le retrait de saveActiveEnemies du lancement Capture139 Phase 9
         run: node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
 
+      - name: Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9
+        run: node tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs
+
       - name: Retirer le dernier wrapper global openChar Capture139
         run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 

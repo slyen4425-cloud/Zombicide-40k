@@ -65,12 +65,12 @@ assert.doesNotMatch(captureEntry,/gameStyle|isDungeonMode|ensureDungeonContent|D
   'canonical Capture identity must remain pure and Dungeon-independent');
 
 assert.match(isDungeon,/return p\?\.gameStyle==="dungeon"/,
-  'historical Dungeon identity helper is intentionally unchanged in this preaudit');
+  'historical Dungeon identity helper remains intentionally unchanged after retiring only the Capture seed field');
 assert.ok((index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length>=120,
-  'preaudit expects substantial historical isDungeonMode usage to remain before selecting one seam');
+  'historical isDungeonMode debt must remain visible after retiring only the Capture seed field');
 
-assert.match(seed,/"gameStyle":"dungeon"/,
-  'built-in Capture still carries historical Dungeon style and must be treated as migration debt');
+assert.doesNotMatch(seed,/"gameStyle":"dungeon"/,
+  'built-in Capture seed must remain retired from historical Dungeon style after the dedicated Phase 9 seam');
 assert.match(seed,/"profile":"creature"/);
 assert.match(seed,/"capture":true/);
 assert.match(seed,/"controllableCreatures":true/);
@@ -151,9 +151,9 @@ const residualServiceContexts=Object.fromEntries(
 );
 
 assert.ok(captureDungeonIdentityBlocks.length>0,
-  'preaudit must expose at least one remaining Capture block carrying Dungeon identity debt');
+  'post-retirement audit must still expose remaining Capture/Dungeon identity debt outside the retired seed field');
 assert.ok(captureDungeonServiceBlocks.length>0,
-  'preaudit must expose at least one remaining Capture block touching historical Dungeon/shared seams');
+  'post-retirement audit must still expose remaining Capture blocks touching historical Dungeon/shared seams');
 
 for(const proof of [
   'tests/gens_capture_current_shell_browser_v11411.test.cjs',
@@ -171,7 +171,7 @@ console.log(JSON.stringify({
   rule26:{bytes:bytes.length,blob},
   identity:{
     canonicalCapture:'GensCaptureV1.isProfile(profile)',
-    captureSeedStillDungeonStyle:true,
+    captureSeedStillDungeonStyle:false,
     isDungeonModeCalls:(index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length
   },
   alreadyDecoupled:{
@@ -189,6 +189,6 @@ console.log(JSON.stringify({
     residualIdentityContexts,
     residualServiceContexts
   },
-  decision:'diagnostic only; select exactly one next seam after reviewing this inventory',
+  decision:'Capture seed Dungeon style retired; continue auditing remaining historical identity/service seams separately',
   runtimeChanged:false
 },null,2));

@@ -1,4 +1,4 @@
-# PHASE 9 — RETRAIT DU SEED CAPTURE `gameStyle:"dungeon"` — 2026-10-05
+# PHASE 9 — RETRAIT DU SEED CAPTURE `gameStyle:"dungeon"` — GREEN — 2026-10-05
 
 Base GREEN :
 `checkpoint/gensrpg-phase9-capture-seed-compatibility-preaudit-green-2026-10-05`
@@ -12,84 +12,60 @@ Checkpoint de départ :
 Branche :
 `work/gensrpg-phase9-capture-seed-dungeon-style-retirement-2026-10-05`
 
-Dernier runtime GREEN :
-- taille `8167138` octets ;
-- blob `09b1e19c04777da82fd0ad355adc7eb82532db29`.
+HEAD runtime propre validé :
+`cd6746bdad2d5726d38aa7986d152090cd84af69`
 
-## Mission unique
+## Résultat
 
-Retirer `gameStyle:"dungeon"` uniquement de la représentation **seed/factory intégrée Monster Capture**, maintenant que les preuves GREEN établissent qu'un profil Capture sans ce champ :
-- reste visible et routé par le Shell ;
-- ouvre son pré-game ;
-- démarre jusqu'au Hub ;
-- progresse Jour 1 -> Jour 2 ;
-- survit à un reload complet ;
-- reprend correctement via le vrai Shell même avec une sauvegarde Dungeon résiduelle.
+Le seed/factory intégré Monster Capture ne contient plus `gameStyle:"dungeon"`.
 
-## Invariants protégés
+Mutation runtime strictement bornée dans `builtinMonsterCapture162` :
+- suppression de 2 occurrences seed/factory ;
+- runtime avant : `8167138` / `09b1e19c04777da82fd0ad355adc7eb82532db29` ;
+- runtime après : `8167094` / `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb` ;
+- delta : `-44` octets.
 
-Ne pas modifier :
+Conservé :
+- anciens profils persistés avec ou sans `gameStyle` ;
+- `GensCaptureV1.isProfile()` ;
+- `gensContentFamilyForProfile()` ;
 - `isDungeonMode()` ;
-- `GensCaptureV1.isProfile(profile)` ;
-- `gensContentFamilyForProfile(profile)` ;
-- anciens profils déjà persistés, avec ou sans `gameStyle` ;
-- logique de migration/sauvegarde ;
+- stockage/reprise ;
 - vrai Dungeon ;
 - Survie / PvP / Tactical ;
-- Combat Dynamique / Exploration / Builder / Map Actor ;
-- `main`.
+- Combat Dynamique / Exploration / Builder / Map Actor.
 
-Interdit :
-- nettoyage global des profils existants ;
-- migration forcée ;
-- nouvelle identité Capture ;
-- wrapper/fallback/timer/observer/polling ;
-- remplacement global de `isDungeonMode()`.
+## TDD / CI
 
-## TDD attendu
+RED dédié :
+- HEAD `92ea8c27236925ad06e56443f2eb9d31949e60ba` ;
+- Architecture — FAILURE attendue sur le retrait du champ seed ;
+- Firefox `37280565050` — SUCCESS ;
+- Tactical `37280565106` — SUCCESS.
 
-RED structural dédié :
-- le bloc `builtinMonsterCapture162` doit encore contenir le champ historique avant mutation ;
-- le test exige son absence dans le seed/factory Capture ;
-- il protège simultanément l'id, le nom, les modules Capture et l'identité canonique.
+Triple GREEN finale sur le HEAD runtime propre `cd6746b…` :
+- Architecture + Browser `37316198318` — SUCCESS ;
+- Firefox `37316198416` — SUCCESS ;
+- Tactical Dock `37316198246` — SUCCESS.
 
-Puis mutation runtime minimale sous Rule 26 :
-- supprimer uniquement le champ seed/factory `gameStyle:"dungeon"` ;
-- aucune autre modification `index.html`.
-
-## Tests de sortie
-
-- RED dédié seed ;
-- GREEN dédié seed ;
+Le navigateur final valide notamment :
+- Capture victoire/reprise ;
 - Shell Capture sans identité Dungeon ;
 - pré-game Capture sans identité Dungeon ;
 - reprise persistée sans identité Dungeon ;
-- Capture victoire/reprise inter-module ;
 - vrai Dungeon ;
 - Dungeon après Survie ;
-- non-interférence quatre modules ;
-- triple CI Architecture + Browser / Firefox / Tactical.
+- frontières inter-modules.
 
-## RED TDD constaté
-
-Test :
-`tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs`.
-
-HEAD RED :
-`92ea8c27236925ad06e56443f2eb9d31949e60ba`.
-
-Résultat :
-- Architecture étape 274 « Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9 » — FAILURE attendue ;
-- Firefox `37280565050` — SUCCESS ;
-- Tactical Dock `37280565106` — SUCCESS.
-
-Aucune mutation runtime n'a encore été faite.
+Aucun wrapper/fallback/timer/observer/polling ni migration globale ajoutés.
 
 ## Prochaine étape
 
-Appliquer Rule 26 sur le HEAD courant, vérifier `8167138 / 09b1e19c04777da82fd0ad355adc7eb82532db29`, puis retirer uniquement le champ `gameStyle:"dungeon"` de la représentation seed/factory Monster Capture.
+Après la triple CI documentaire de fermeture et le checkpoint final de ce lot, ouvrir un **nouveau pré-audit des couplages résiduels réellement atteints par Capture parmi les usages de `isDungeonMode()` / services Dungeon**.
 
-Production `main` :
+Ne pas faire de remplacement global de `isDungeonMode()`.
+
+Production `main` reste gelée :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
 ---

@@ -208,6 +208,31 @@ const server=http.createServer((req,res)=>{
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
 
+    mark('open-native-dungeon-setup-through-real-pregame-button');
+    const setupEntryBefore=await page.evaluate(()=>({
+      profile:getActiveGameProfile()?.id,
+      style:getActiveGameProfile()?.gameStyle,
+      capture:!!window.GensCaptureV1?.isProfile?.(getActiveGameProfile()),
+      dungeon:!!isDungeonMode()
+    }));
+    assert.equal(setupEntryBefore.profile,'game_profile_dungeon_demo');
+    assert.equal(setupEntryBefore.style,'dungeon');
+    assert.equal(setupEntryBefore.capture,false);
+    assert.equal(setupEntryBefore.dungeon,true);
+    await page.locator('#sessionDungeonSetupBtn').click();
+    await page.waitForFunction(()=>
+      getComputedStyle(document.getElementById('sessionDungeonSetup')).display!=='none' &&
+      getComputedStyle(document.getElementById('pregameSetup')).display==='none'
+    );
+    assert.equal(await page.evaluate(()=>getActiveGameProfile()?.id),'game_profile_dungeon_demo',
+      'the native Dungeon setup entry must retain the real selected Dungeon profile');
+    await page.locator('#sessionDungeonLibrary .gameProfileCard').first().waitFor({state:'visible'});
+    await page.locator('#sessionDungeonSetup .startGameBtn[onclick="closeSessionDungeonSetup()"]').click();
+    await page.waitForFunction(()=>
+      getComputedStyle(document.getElementById('pregameSetup')).display!=='none' &&
+      getComputedStyle(document.getElementById('sessionDungeonSetup')).display==='none'
+    );
+
     mark('open-real-hero-selection');
     await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
@@ -371,6 +396,7 @@ const server=http.createServer((req,res)=>{
       participants:savedBeforeQuit.participants,
       family:resumed.family,
       profile:resumed.profile,
+      nativeDungeonSetupEntry:true,
       resumed:true
     }));
   }finally{

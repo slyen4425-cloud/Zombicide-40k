@@ -22,14 +22,15 @@ Les 10 cas du pré-audit sont conservés. S'ajoutent priorité Capture sur ident
 Il vérifie aussi zéro réassignation globale de l'entrée et reconstitue le blob GREEN exact en inversant les seuls trois fragments autorisés.
 
 RED local avant mutation : échec de l'assertion `native owner must preserve the complete V151 entry predicate`, notamment Capture historique et identifiant Dungeon sans style.
-RED GitHub : à relever avant application.
+RED GitHub initial : HEAD `54843ead4af50c5d0766f04624b922f749fdbe3a`, run `37362473505`, job `111940130819`, étape #270 en échec attendu. Log vérifié : Capture historique et identifiant Dungeon sans style.
+RED confirmé aussi sur le HEAD transport `a0ad35074bcb7023911ad2168f9fbd5be9e48fcf`, run `37363506670`.
 
 ## Adaptations d'attentes volontairement obsolètes
 
 La règle de comportement reste identique ; la propriété de la garde change volontairement.
 
 - La caractérisation précédente exigeait la présence active des wrappers et l'absence de garde Capture native. Ces attentes structurelles sont obsolètes après ce transfert autorisé. Les dix résultats de production deviennent les attentes du propriétaire natif ; la comparaison complète à l'ancienne chaîne est désormais protégée par le nouveau test immuable.
-- Le test du bouton Dungeon protégeait provisoirement les deux wrappers « dans ce seam » antérieur. Il protégera désormais la garde native et l'absence de ces wrappers ; ses assertions concernant le bouton et Capture139 restent identiques.
+- Les tests du bouton et de l'ownership du pré-game Dungeon protégeaient provisoirement les deux wrappers « dans ce seam » antérieur. Il protégera désormais la garde native et l'absence de ces wrappers ; ses assertions concernant le bouton et Capture139 restent identiques.
 - Les empreintes exactes des anciens tests suivent le nouveau blob/taille vérifiés, sans changer leurs invariants métier.
 - La table des affectations explicites `window.<name>` perd exactement la ligne `openSessionDungeonSetup` (deux affectations). La déclaration native reste active : le nouveau test prouve son existence unique. Totaux attendus : 430 globals, 744 affectations, 115 globals multi-propriétaires, mêmes 119 blocs actifs.
 - Les descriptions du manifeste d'owners doivent retirer uniquement l'ownership de cette entrée pour 137/151. Les autres responsabilités et frontières restent présentes.
@@ -48,4 +49,10 @@ Si nécessaire, transporter ce gros HTML par un workflow ponctuel borné à la b
 
 ## Validation et clôture
 
-À compléter après RED GitHub, GREEN local et triple CI complète.
+Runtime appliqué : `284b4c76f333780b68c069fe0b18e610467f044a`.
+Taille `8165906`, blob `1e3398755beb751786d825047bc60fe1a7179d79`, SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d` ; delta `-471` octets.
+Application ponctuelle `37363506750` : première tentative annulée en attente de runner, relance ciblée, tentative 2 / job `111948888218` SUCCESS. RED/GREEN exécutés avant commit ; transport supprimé dans le commit runtime.
+16 tests locaux Phase 9 et trois inventaires : GREEN. Triple CI fonctionnelle finale avec la preuve du vrai bouton Dungeon : en cours.
+
+La preuve UI est ajoutée au scénario existant `tests/gens_phase5_module_launch_s4_dungeon_provider_browser_v1.test.cjs` : vrai Shell, profil Dungeon, nouveau jeu, clic réel sur le bouton, affichage de la bibliothèque et de ses cartes, clic réel de retour, puis poursuite intacte du scénario de provider / Save & Quit / reprise.
+Aucun handler, wrapper ou valeur runtime de succès n'est injecté dans cette preuve.

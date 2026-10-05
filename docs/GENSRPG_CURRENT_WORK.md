@@ -1,43 +1,56 @@
-# PHASE 9 — TRANSFERT ENTRY DUNGEON / CAPTURE — TDD — 2026-10-05
+# PHASE 9 — TRANSFERT ENTRY DUNGEON / CAPTURE — CI EN COURS — 2026-10-05
 
 Branche : `work/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`
 Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`
 SHA de base exact : `a8c9aa9934276c38fc4ca2755e65cee7116ada4e`
 Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-green-2026-10-05` sur le même SHA.
+HEAD runtime appliqué : `284b4c76f333780b68c069fe0b18e610467f044a`.
 
-## Périmètre déclaré avant codage
+## Résultat structurel
 
-Module : frontière de navigation Shell/pré-game entre Capture et Dungeon.
-Propriétaire unique cible : entrée native `openSessionDungeonSetup()` dans `index.html`.
-Décision du pré-audit : transférer le prédicat complet de V151 dans cette entrée, conserver sa garde `isDungeonMode()`, puis retirer exactement les wrappers Capture137 et V151 de cette entrée.
+Propriétaire unique : entrée native `openSessionDungeonSetup()` du Shell/pré-game.
+Prédicat complet V151 transféré avec priorité à l'identité publique Capture, style Dungeon obligatoire et refus sur erreur.
+Garde `isDungeonMode()` et corps original conservés.
+Deux wrappers retirés : Capture137 et V151 autour de cette seule entrée.
+Aucune autre autorité runtime ni aucun helper global modifié.
 
-API réutilisées : `getActiveGameProfile()`, identité publique pure `GensCaptureV1.isProfile(profile)`, `isDungeonMode()` et corps de navigation existant.
-Aucun nouvel identifiant de mode, helper global, wrapper, timer, retry, observer ou migration.
+Runtime dérivé du ZIP utilisateur vérifié :
+- avant : `8166377` octets, blob `37056722bb0a27f96e26b3ef3b05e9543dc5a223` ;
+- après : `8165906` octets, blob `1e3398755beb751786d825047bc60fe1a7179d79` ;
+- SHA-256 : `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d` ;
+- delta : `-471` octets, trois fragments exacts ;
+- inversion des trois fragments : reconstitution byte-exacte du blob GREEN de départ.
 
-Fonctions protégées : identité Capture publique, `gensMode151()`, `gensCapturePregameMode()`, `isDungeonMode()`, sélection du bouton Dungeon déjà transférée, stockage/sauvegardes, gameplay, combat, progression, autres responsabilités de Capture137/V151 et runtimes des quatre modules.
-Seule la propriété des gardes de l'entrée Dungeon change ; le comportement observable complet actuel reste le contrat.
+## TDD et preuves
 
-Base Rule 26 vérifiée depuis le ZIP utilisateur déjà fourni :
-- taille : `8166377` octets ;
-- blob Git : `37056722bb0a27f96e26b3ef3b05e9543dc5a223` ;
-- SHA-256 : `25417800fd80f8efb5bfe10d6cb0e16058c6b81b80cfd5cb479b801361fb3863`.
+- RED initial : `54843ead4af50c5d0766f04624b922f749fdbe3a`, Architecture `37362473505`, étape dédiée #270 en échec attendu, log vérifié.
+- RED du HEAD de transport : `a0ad35074bcb7023911ad2168f9fbd5be9e48fcf`, Architecture `37363506670`, même échec attendu.
+- Application ponctuelle : `37363506750`, tentative 2, job `111948888218` — SUCCESS ; première tentative annulée avant exécution par attente de runner.
+- 18 cas de parité comparés à la chaîne historique exacte ; fixture SHA-256 immuable `3d925e4f3760819642b1f48d2ab2d0aba66dbd5c45d6595d0d4d4b1e3d22e7b2`.
+- Dix cas de caractérisation antérieurs conservés sur le propriétaire natif.
+- 16 contrôles locaux Phase 9 : GREEN ; inventaires inline/global/layered : GREEN.
+- Zéro affectation inline `window.openSessionDungeonSetup=` ; une déclaration native.
+- Deux fichiers de transport supprimés dans le commit runtime ; aucune différence finale de transport.
 
-## Tests et risque inter-module
+Preuve navigateur ajoutée au scénario existant du provider Dungeon :
+Shell -> vrai profil Dungeon -> nouveau jeu -> vrai bouton `sessionDungeonSetupBtn` -> bibliothèque visible et rendue -> vrai retour au pré-game -> sélection héros -> provider -> Save & Quit -> reprise.
+Les appels réels depuis Capture sans/avec style historique restent protégés dans leur scénario existant.
+Les scénarios victoire/reprise Capture, reprise persistée, Dungeon après Survie et quatre modules restent exigés.
 
-Avant mutation runtime : RED dédié prouvant que la garde native manque encore pour Capture historique et Dungeon intégré sans style.
-Après transfert : parité des dix cas du pré-audit, erreurs fail-closed, aucun effet UI/stockage sur refus, corps natif exactement une fois pour Dungeon valide, aucune réassignation restante de cette entrée.
-Le vrai scénario mobile Shell -> Capture -> pré-game appelle l'entrée avec/sans style historique ; Dungeon valide et Dungeon après Survie restent couverts par leurs scénarios navigateur.
-Conserver victoire/reprise Capture, profils persistés, provider Capture, seed, bouton, frontières quatre modules, Firefox et Tactical Dock.
-Triple CI exigée sur le HEAD fonctionnel, puis documentaire final avant checkpoint GREEN.
+## Adaptations justifiées et fonctions protégées
 
-Risque : retirer les wrappers sans le prédicat complet autoriserait Capture historique ou l'identifiant Dungeon sans style. Le test doit rejeter ces deux régressions.
-Les attentes devenues obsolètes qui imposent les wrappers, ainsi que les empreintes/inventaires du runtime, seront adaptées uniquement avec justification écrite et le contrat plus fort du propriétaire natif.
-Transport éventuel du gros HTML : application déterministe sur la branche dédiée, base et résultat vérifiés, sans changement sur `main`.
+102 tests reçoivent uniquement le nouveau blob/taille, sauf cinq adaptations structurelles justifiées : caractérisation de l'entrée, anciennes gardes protégées dans les tests bouton/pré-game, et deux totaux d'inventaire.
+Cinq cartographies `sourceIndexBlob` suivent le nouveau runtime ; la table perd exactement deux affectations et les descriptions 137/151 retirent seulement l'ownership de cette entrée.
+Les tests de comportement ne sont pas assouplis. Détails : `docs/GENSRPG_PHASE9_CAPTURE_DUNGEON_SETUP_ENTRY_OWNER_TRANSFER.md`.
+
+Identité Capture, `gensMode151()`, `gensCapturePregameMode()`, `isDungeonMode()`, stockage, sauvegardes, gameplay, autres responsabilités 137/151 et runtimes des quatre modules restent protégés.
 
 ## État et prochaine étape
 
-Checkpoint et branche créés sur la base GREEN exacte. Aucun changement runtime.
-Écrire le RED dédié, constater son échec précis, puis appliquer le diff minimal.
+Triple CI sur le runtime appliqué démarrée : Architecture + Browser `37365375843`, Firefox `37365379421`, Tactical Dock `37365382799`.
+Le commit de preuve UI déclenche une nouvelle triple CI, obligatoire avant clôture documentaire.
+Attendre le GREEN complet, clôturer les documents, valider la triple CI finale et créer `checkpoint/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-green-2026-10-05` sur son HEAD exact.
+Aucun checkpoint GREEN final créé à ce stade.
 
 Production `main` gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 

@@ -1,0 +1,12 @@
+{
+  "sourceIndexBlob": "37056722bb0a27f96e26b3ef3b05e9543dc5a223",
+  "sourceCommit": "a8c9aa9934276c38fc4ca2755e65cee7116ada4e",
+  "native": "function openSessionDungeonSetup(){if(!isDungeonMode())return;hidePregameAndSessionPages();const page=document.getElementById(\"sessionDungeonSetup\");if(page)page.style.display=\"block\";renderSessionDungeonLibrary();window.scrollTo(0,0)}",
+  "guard137": "window.openSessionDungeonSetup=(function(old){\n  return function(){\n    if(typeof gensCapturePregameMode===\"function\"&&gensCapturePregameMode())return;\n    return old.apply(this,arguments);\n  };\n})(window.openSessionDungeonSetup);",
+  "guard151": "const openD151=window.openSessionDungeonSetup;\nif(typeof openD151===\"function\"){\n  window.openSessionDungeonSetup=function(){\n    if(gensMode151()!==\"dungeon\")return;\n    return openD151.apply(this,arguments);\n  };\n}",
+  "mode151": "window.gensMode151=function(){\n  try{\n    const p=getActiveGameProfile?.();\n    if(window.GensCaptureV1?.isProfile?.(p))return \"capture\";\n    if(p?.gameStyle===\"dungeon\")return \"dungeon\";\n    return \"other\";\n  }catch(e){return \"other\"}\n};",
+  "removed137": "/* ---------- bloque l’accès Aventure Dungeon en Capture ---------- */\nwindow.openSessionDungeonSetup=(function(old){\n  return function(){\n    if(typeof gensCapturePregameMode===\"function\"&&gensCapturePregameMode())return;\n    return old.apply(this,arguments);\n  };\n})(window.openSessionDungeonSetup);\n\n",
+  "removed151": "/* Protection inverse : Aventure Dungeon jamais ouverte depuis Capture. */\nconst openD151=window.openSessionDungeonSetup;\nif(typeof openD151===\"function\"){\n  window.openSessionDungeonSetup=function(){\n    if(gensMode151()!==\"dungeon\")return;\n    return openD151.apply(this,arguments);\n  };\n}\n\n",
+  "anchor137": "/* ---------- multiplicateurs XP / or ---------- */",
+  "anchor151": "/* Premier affichage. */"
+}

@@ -824,6 +824,9 @@ jobs:
       - name: Pré-auditer les couplages Capture / identité Dungeon Phase 9
         run: node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
 
+      - name: Exiger le propriétaire natif unique de l'entrée Dungeon hors Capture
+        run: node tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs
+
       - name: Caractériser les gardes réels de l'entrée Dungeon en pré-game Capture
         run: node tests/gens_phase9_capture_dungeon_setup_entry_ownership_characterization_v1.test.cjs
 

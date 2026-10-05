@@ -67,3 +67,98 @@ Interdit :
 
 L'inspection inline exacte est désormais nécessaire pour déterminer la chaîne de propriétaires.
 Le fichier utilisateur doit correspondre exactement au HEAD courant avant sélection du seam.
+
+## Caractérisation exacte sous Rule 26
+
+Fichier reçu : `index.zip`, membre `index.html`.
+- taille : `8166377` octets ;
+- blob Git : `37056722bb0a27f96e26b3ef3b05e9543dc5a223` ;
+- SHA-256 : `25417800fd80f8efb5bfe10d6cb0e16058c6b81b80cfd5cb479b801361fb3863` ;
+- correspondance avec `de81c9e4c8bab829ed55e970b9259166caaae748` confirmée ;
+- aucun changement du runtime dans le pré-audit.
+
+### Chaîne et propriété
+
+L'entrée native est définie dans le bloc principal, près de `renderSessionDungeonLibrary()` et `closeSessionDungeonSetup()`.
+Elle appartient à la navigation de pré-game et délègue le contenu à la bibliothèque Dungeon.
+
+Ordre d'installation :
+1. définition native `openSessionDungeonSetup()` ;
+2. `captureFix137`, qui capture cette définition dans `old` ;
+3. `gensStability151`, qui capture le wrapper Capture137 dans `openD151`.
+
+Ordre d'appel :
+`V151 -> Capture137 -> entrée native -> bibliothèque Dungeon`.
+
+- Entrée native : refuse uniquement `!isDungeonMode()`.
+- Capture137 : refuse `gensCapturePregameMode()`, qui appelle l'identité canonique `GensCaptureV1.isProfile()`.
+- V151 : refuse `gensMode151() !== "dungeon"` ; cette classification donne priorité à l'identité Capture canonique sur le style Dungeon.
+- V151 capture également les erreurs de classification et reste fermé.
+
+### Preuves VM sur sources exactes
+
+Sentinelle :
+`tests/gens_phase9_capture_dungeon_setup_entry_ownership_characterization_v1.test.cjs`.
+
+Les fonctions/gardes viennent du runtime vérifié et sont exécutés dans l'ordre réel ; l'identité Capture vient du vrai fichier public `capture/entry-v1.js`.
+Seules les dépendances de lecture du profil et les effets de navigation sont simulés pour observer le passage de la frontière.
+
+| Cas | Native seule | + Capture137 | Chaîne complète V151 |
+| --- | --- | --- | --- |
+| Capture neuf, sans style | bloqué | bloqué | bloqué |
+| Capture historique, style Dungeon | ouvert | bloqué | bloqué |
+| Capture reconnue par modules, style Dungeon | ouvert | bloqué | bloqué |
+| Dungeon intégré, style Dungeon | ouvert | ouvert | ouvert |
+| Identifiant Dungeon intégré sans style | ouvert | ouvert | bloqué |
+| Dungeon personnalisé, style Dungeon | ouvert | ouvert | ouvert |
+| Identifiant Survie avec style Dungeon | bloqué | bloqué | bloqué |
+| Survie sans style | bloqué | bloqué | bloqué |
+| Autre profil | bloqué | bloqué | bloqué |
+| Aucun profil actif | bloqué | bloqué | bloqué |
+
+Dans les trois cas Capture, la chaîne complète ne lit que le profil via V151 : Capture137, `isDungeonMode()` et le corps de navigation ne sont pas atteints.
+Retirer uniquement Capture137 dans la composition VM finale conserve les effets sur tous les cas.
+Retirer les deux wrappers sans transférer le prédicat complet ferait régresser Capture historique et l'identifiant Dungeon sans style.
+
+### Frontière navigateur réelle
+
+La sentinelle existante :
+`tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs`
+traverse toujours Shell -> profil Capture -> pré-game -> dresseur/créature -> lancement -> Hub -> progression.
+
+Le nouveau contrôle appelle directement l'entrée publique existante depuis le vrai pré-game Capture :
+- une fois avec le profil sans style ;
+- une fois en représentant le format historique `gameStyle:"dungeon"` ;
+- les deux doivent conserver les vues et toutes les clés de stockage ;
+- le profil initial est rétabli avant de poursuivre le parcours normal.
+
+Le test n'injecte aucun wrapper, garde ou valeur de retour.
+Cet appel programmatique vérifie une frontière atteignable ; le parcours UI normal Capture n'expose pas le bouton Adventure Dungeon.
+
+## Décision d'ownership
+
+Seam sélectionné pour un **lot TDD séparé** :
+transférer le prédicat complet de V151 dans le propriétaire natif du pré-game, puis retirer les deux wrappers autour de `openSessionDungeonSetup()`.
+
+Le transfert doit conserver :
+- priorité de l'identité Capture publique ;
+- refus hors profil de style Dungeon, y compris absence de style/profil ;
+- comportement fermé sur erreur de classification ;
+- garde native `isDungeonMode()` inchangée ;
+- ouverture Dungeon intégré/personnalisé exactement une fois ;
+- zéro effet de vue/stockage en Capture et Survie ;
+- compatibilité des anciens profils sans migration.
+
+Retirer seulement Capture137 conserverait V151 comme propriétaire inter-module de cette entrée ; le seam choisi vise donc une seule autorité au propriétaire natif.
+Aucune nouvelle fonction d'identité ou maintenance globale ne doit être créée.
+
+Le reste de Capture137 et V151, la navigation du bouton déjà transférée, les modules, sauvegardes et labos restent hors périmètre du prochain lot.
+
+## Validation de ce pré-audit
+
+- nouveau test VM local : GREEN ;
+- tests existants bouton Dungeon/pré-game et inventaire couplages : GREEN ;
+- navigateur local indisponible faute de Chromium ; validation par le job navigateur GitHub obligatoire ;
+- sentinelle VM ajoutée au workflow Architecture permanent ;
+- triple CI puis fermeture documentaire et checkpoint requis ;
+- aucun runtime modifié.

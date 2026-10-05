@@ -352,6 +352,40 @@ const server=http.createServer((req,res)=>{
     );
     assert.equal(pregame.mode151,'capture');
 
+    mark('characterize-real-dungeon-setup-entry-boundary');
+    const entryBoundary=await page.evaluate(()=>{
+      const profiles=loadGameProfiles(),profile=profiles.find(p=>String(p.id)===String(activeGameProfileId()));
+      if(!profile||!GensCaptureV1.isProfile(profile))throw new Error('real Capture pregame profile required');
+      const hadStyle=Object.hasOwn(profile,'gameStyle'),originalStyle=profile.gameStyle;
+      const view=()=>({
+        pregame:getComputedStyle(document.getElementById('pregameSetup')).display,
+        dungeonSetup:getComputedStyle(document.getElementById('sessionDungeonSetup')).display
+      });
+      const store=()=>JSON.stringify(Object.keys(localStorage).sort().map(key=>[key,localStorage.getItem(key)]));
+      const evidence=[];
+      try{
+        for(const legacy of [false,true]){
+          if(legacy)profile.gameStyle='dungeon';else delete profile.gameStyle;
+          saveGameProfiles(profiles);
+          const before=view(),beforeStorage=store();
+          const dungeonMode=isDungeonMode(),mode151=gensMode151();
+          openSessionDungeonSetup();
+          evidence.push({legacy,dungeonMode,mode151,before,after:view(),storageChanged:store()!==beforeStorage});
+        }
+      }finally{
+        if(hadStyle)profile.gameStyle=originalStyle;else delete profile.gameStyle;
+        saveGameProfiles(profiles);
+      }
+      return evidence;
+    });
+    for(const evidence of entryBoundary){
+      assert.equal(evidence.dungeonMode,evidence.legacy,'old Capture style must remain accepted by historical Dungeon identity');
+      assert.equal(evidence.mode151,'capture','canonical Capture identity must win for both profile representations');
+      assert.deepEqual(evidence.after,evidence.before,'the real programmatic Dungeon entry must preserve Capture pregame');
+      assert.equal(evidence.storageChanged,false,'blocked Dungeon entry must not create or mutate persistent state');
+    }
+    console.log(JSON.stringify({scenario:'real Capture pregame Dungeon setup entry boundary',entryBoundary},null,2));
+
     mark('select-real-capture-trainer');
     await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');

@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+# retry-contract-v2
 
 jobs:
   apply:

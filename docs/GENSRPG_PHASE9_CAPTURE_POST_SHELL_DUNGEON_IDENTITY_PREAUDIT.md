@@ -110,3 +110,59 @@ Interdit :
 ## Prochaine étape
 
 Appliquer Rule 26 sur le runtime exact `99d7784676669b629cae6070df8c02606d67002f`, localiser la définition exacte qui possède `gensCapturePregame` et `gens-pure-capture`, puis sélectionner un seul seam minimal et établir son RED dédié.
+
+
+## Rule 26 — propriétaire exact du pré-game
+
+Copie utilisateur vérifiée :
+- archive `workh.zip` ;
+- fichier interne `indexH.txt` ;
+- taille `8167187` octets ;
+- blob Git `99d7784676669b629cae6070df8c02606d67002f` ;
+- SHA-256 `05db467d19495b79171a866965e7db8e5533772303c4d9c99e2b1dcc694fb533`.
+
+Écriture exacte de la classe `gensCapturePregame` localisée dans le propriétaire Shell/pré-game :
+
+`updatePregameWizard()`
+
+Condition actuelle :
+
+`const captureFamily=!!active && active.gameStyle==="dungeon" && typeof gensCurrentContentFamily==="function" && gensCurrentContentFamily()==="creature";`
+
+Cette condition mélange deux identités :
+- ancienne identité historique : `active.gameStyle==="dungeon"` ;
+- identité de contenu déjà canonique : `gensCurrentContentFamily()==="creature"`.
+
+Le même runtime dispose déjà de l'autorité Capture canonique :
+
+`gensCapturePregameMode() -> GensCaptureV1.isProfile(getActiveGameProfile())`.
+
+`gensPureCaptureSheetMode()` utilise la même autorité canonique.
+
+### Seam minimal sélectionné
+
+Modifier uniquement le calcul de `captureFamily` dans `updatePregameWizard()` afin qu'il repose sur l'identité Capture canonique existante, sans dépendre de `gameStyle==="dungeon"`.
+
+À conserver strictement dans la même fonction :
+- `gensAdventurePregame` reste conditionné par le vrai style Dungeon ;
+- visibilité `sessionWaveSetupBtn` inchangée ;
+- visibilité `sessionCustomRulesBtn` inchangée ;
+- vrai Dungeon inchangé ;
+- aucun changement à `isDungeonMode()` ;
+- aucun changement au seed Monster Capture ;
+- aucune nouvelle fonction d'identité.
+
+Effet attendu :
+- Capture sans `gameStyle` reçoit de nouveau `gensCapturePregame` ;
+- le bouton Dungeon reste masqué en pré-game Capture ;
+- le vrai Dungeon conserve son habillage Adventure/Dungeon ;
+- aucun runtime Dungeon n'est créé ;
+- le parcours peut poursuivre jusqu'au prochain consommateur réel.
+
+### TDD RED permanent
+
+Le test navigateur existant
+`tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs`
+est désormais câblé dans l'Architecture comme exigence permanente du seam.
+
+Aucune mutation runtime n'est autorisée avant constat du RED sur cette sentinelle.

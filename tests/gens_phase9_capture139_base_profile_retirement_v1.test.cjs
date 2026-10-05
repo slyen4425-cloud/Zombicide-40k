@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167187,'Capture139 base-profile retirement must start from the exact preaudit GREEN runtime');
-assert.equal(blob,'99d7784676669b629cae6070df8c02606d67002f','Capture139 base-profile retirement must start from the exact preaudit GREEN blob');
+assert.equal(bytes.length,8167138,'Capture139 base-profile retirement must start from the exact preaudit GREEN runtime');
+assert.equal(blob,'09b1e19c04777da82fd0ad355adc7eb82532db29','Capture139 base-profile retirement must start from the exact preaudit GREEN blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

@@ -8305,7 +8305,7 @@ function updatePregameWizard(){
   }
 
   const active=getActiveGameProfile?.();
-  const captureFamily=!!active && active.gameStyle==="dungeon" && typeof gensCurrentContentFamily==="function" && gensCurrentContentFamily()==="creature";
+  const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();
   document.body.classList.toggle("gensCapturePregame",captureFamily);
   document.body.classList.toggle("gensAdventurePregame",!!active&&active.gameStyle==="dungeon");
 

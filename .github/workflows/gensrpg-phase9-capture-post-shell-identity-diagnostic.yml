@@ -1,5 +1,5 @@
 name: GenSrpG Phase 9 Capture post-Shell identity diagnostic
-# diagnostic pass 2: pregame identity/reconcile instrumentation
+# diagnostic pass 3: distinguish updateGameStyleUi owner
 
 on:
   push:

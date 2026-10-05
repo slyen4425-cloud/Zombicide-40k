@@ -1,3 +1,65 @@
+# PHASE 9 — PRÉ-AUDIT POST-SHELL IDENTITÉ DUNGEON DE CAPTURE — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-shell-family-routing-postdocs-green-2026-10-05`
+
+SHA de base :
+`b162cebcc8a9792e1a905ed9ad71835c1a2e8fa7`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-post-shell-dungeon-identity-preaudit-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-post-shell-dungeon-identity-preaudit-2026-10-05`
+
+Dernier runtime GREEN :
+- taille `8167187` octets ;
+- blob `99d7784676669b629cae6070df8c02606d67002f`.
+
+## Mission unique
+
+Avec `gameStyle` retiré uniquement dans le navigateur de test, poursuivre le vrai chemin Capture au-delà du Shell déjà corrigé et identifier le **prochain consommateur historique réellement atteint** lorsque `isDungeonMode()===false`.
+
+Aucune mutation runtime au démarrage.
+
+## Propriétaires et invariants protégés
+
+- identité Capture canonique : `GensCaptureV1.isProfile(profile)` ;
+- classification contenu : `gensContentFamilyForProfile(profile)` ;
+- Shell routing Adventure : déjà GREEN ;
+- seed de production `gameStyle:"dungeon"` : inchangé ;
+- `isDungeonMode()` : inchangé ;
+- vrai Dungeon : inchangé ;
+- Survie / PvP / Tactical : inchangés ;
+- Combat Dynamique / Exploration / Builder / Map Actor : hors périmètre ;
+- `main` gelée.
+
+Interdit :
+- retrait global de `gameStyle` ;
+- remplacement global de `isDungeonMode()` ;
+- nouvelle identité Capture parallèle ;
+- wrapper/fallback/timer/observer/polling ;
+- migration persistante sans audit.
+
+## Test de caractérisation
+
+Le test doit :
+1. retirer `gameStyle` seulement du profil Capture dans le navigateur de test ;
+2. vérifier que la carte reste visible via le Shell GREEN ;
+3. traverser pré-game -> sélection dresseur/créature -> lancement ;
+4. relever le premier échec réel éventuel ;
+5. vérifier qu'aucun runtime Dungeon n'est créé avant le point de rupture ;
+6. ne sélectionner qu'un seul seam à partir de cette preuve.
+
+## Prochaine étape
+
+Exécuter le vrai parcours Capture sans identité Dungeon historique, relever le premier point de rupture après le Shell, documenter son propriétaire, puis seulement établir un RED dédié.
+
+Production `main` :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — SHELL ROUTING CAPTURE SANS IDENTITÉ DUNGEON — GREEN — 2026-10-04
 
 Base GREEN :

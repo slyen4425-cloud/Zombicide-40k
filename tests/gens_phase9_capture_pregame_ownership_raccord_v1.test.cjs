@@ -13,8 +13,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167094,'pregame ownership raccord must start from the verified Phase 9 runtime');
-assert.equal(blob,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb','pregame ownership raccord must start from the exact verified Phase 9 runtime blob');
+assert.equal(bytes.length,8166377,'pregame ownership raccord must inspect the transferred-owner Phase 9 runtime');
+assert.equal(blob,'37056722bb0a27f96e26b3ef3b05e9543dc5a223','pregame ownership raccord must inspect the exact transferred-owner runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -26,9 +26,35 @@ function block(id){
   return index.slice(bodyStart,end);
 }
 
+function fn(name){
+  const marker='function '+name+'(';
+  const start=index.indexOf(marker);
+  assert.ok(start>=0,'missing '+name);
+  const open=index.indexOf('{',start);
+  let depth=0,quote=null,escaped=false,line=false,comment=false;
+  for(let i=open;i<index.length;i++){
+    const c=index[i],n=index[i+1]||'';
+    if(line){if(c==='\n')line=false;continue}
+    if(comment){if(c==='*'&&n==='/'){comment=false;i++}continue}
+    if(quote){
+      if(escaped){escaped=false;continue}
+      if(c==='\\'){escaped=true;continue}
+      if(c===quote)quote=null;
+      continue;
+    }
+    if(c==='/'&&n==='/'){line=true;i++;continue}
+    if(c==='/'&&n==='*'){comment=true;i++;continue}
+    if(c==="'"||c==='"'||c===String.fromCharCode(96)){quote=c;continue}
+    if(c==='{')depth++;
+    if(c==='}'&&--depth===0)return index.slice(start,i+1);
+  }
+  assert.fail('unterminated '+name);
+}
+
 const c137=block('captureFix137');
 const c138=block('captureFix138');
 const c139=block('captureFix139');
+const wizard=fn('updatePregameWizard');
 
 assert.match(c137,/openSessionDungeonSetup/,
   'Capture137 must retain its dedicated guard around openSessionDungeonSetup in this first ownership seam');
@@ -43,13 +69,18 @@ assert.equal((c138.match(/captureCleanDungeonUi138/g)||[]).length,0,
 assert.doesNotMatch(c138,/captureCleanDungeonUi138[\s\S]{0,400}(renderParticipantSelector|updateGameStyleUi|DOMContentLoaded|setTimeout)|(?:renderParticipantSelector|updateGameStyleUi|DOMContentLoaded|setTimeout)[\s\S]{0,400}captureCleanDungeonUi138/,
   'RED: Capture138 wrappers/listeners/timers used only to maintain duplicate pregame visibility must be retired');
 
-assert.match(c139,/gensEnsureDungeonAdventureButton139/,
-  'Capture139 must remain the temporary unique owner of the Dungeon Adventure pregame button boundary');
-assert.match(c139,/GAME_PROFILE_DUNGEON_ID/,
-  'Capture139 must continue distinguishing the real built-in Dungeon profile');
-assert.match(c139,/sessionDungeonSetupBtn/);
-assert.match(c139,/window\.gensEnsureDungeonAdventureButton139=function\(\)\{[\s\S]*const page=document\.getElementById\("sessionDungeonSetup"\);[\s\S]*if\(!realDungeon\)\{[\s\S]*if\(page\)page\.style\.setProperty\("display","none","important"\)/,
-  'RED: Capture139 must own hiding the Dungeon Adventure page when the active profile is not the real Dungeon');
+assert.match(wizard,/GAME_PROFILE_DUNGEON_ID/,
+  'Shell pregame owner must distinguish the real built-in Dungeon profile');
+assert.match(wizard,/sessionDungeonSetupBtn/);
+assert.match(wizard,/document\.createElement\("button"\)/,
+  'Shell pregame owner must create the Dungeon Adventure button');
+assert.match(wizard,/sessionDungeonSetup/,
+  'Shell pregame owner must hide the Dungeon setup page outside real Dungeon');
+
+assert.doesNotMatch(c139,/gensEnsureDungeonAdventureButton139/,
+  'Capture139 must no longer own Dungeon Adventure button maintenance');
+assert.doesNotMatch(c139,/sessionDungeonSetupBtn/,
+  'Capture139 must no longer create or remove the Dungeon Adventure button');
 
 assert.doesNotMatch(c139,/window\.GensCaptureV1\s*=/,
   'this seam must not create a second Capture public authority');
@@ -72,6 +103,6 @@ console.log(JSON.stringify({
     capture137CleanupOwners:0,
     capture138CleanupOwners:0,
     capture137DungeonSetupGuardPreserved:true,
-    temporaryUniquePregameOwner:'captureFix139.gensEnsureDungeonAdventureButton139'
+    canonicalPregameOwner:'updatePregameWizard'
   }
 },null,2));

@@ -1,3 +1,84 @@
+# PHASE 9 — RETRAIT DU SEED CAPTURE `gameStyle:"dungeon"` — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-seed-compatibility-preaudit-green-2026-10-05`
+
+SHA de base :
+`a83e5d01e53e6dd50b9c8cc28edb9b6d179cc4b2`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-seed-dungeon-style-retirement-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-seed-dungeon-style-retirement-2026-10-05`
+
+Dernier runtime GREEN :
+- taille `8167138` octets ;
+- blob `09b1e19c04777da82fd0ad355adc7eb82532db29`.
+
+## Mission unique
+
+Retirer `gameStyle:"dungeon"` uniquement de la représentation **seed/factory intégrée Monster Capture**, maintenant que les preuves GREEN établissent qu'un profil Capture sans ce champ :
+- reste visible et routé par le Shell ;
+- ouvre son pré-game ;
+- démarre jusqu'au Hub ;
+- progresse Jour 1 -> Jour 2 ;
+- survit à un reload complet ;
+- reprend correctement via le vrai Shell même avec une sauvegarde Dungeon résiduelle.
+
+## Invariants protégés
+
+Ne pas modifier :
+- `isDungeonMode()` ;
+- `GensCaptureV1.isProfile(profile)` ;
+- `gensContentFamilyForProfile(profile)` ;
+- anciens profils déjà persistés, avec ou sans `gameStyle` ;
+- logique de migration/sauvegarde ;
+- vrai Dungeon ;
+- Survie / PvP / Tactical ;
+- Combat Dynamique / Exploration / Builder / Map Actor ;
+- `main`.
+
+Interdit :
+- nettoyage global des profils existants ;
+- migration forcée ;
+- nouvelle identité Capture ;
+- wrapper/fallback/timer/observer/polling ;
+- remplacement global de `isDungeonMode()`.
+
+## TDD attendu
+
+RED structural dédié :
+- le bloc `builtinMonsterCapture162` doit encore contenir le champ historique avant mutation ;
+- le test exige son absence dans le seed/factory Capture ;
+- il protège simultanément l'id, le nom, les modules Capture et l'identité canonique.
+
+Puis mutation runtime minimale sous Rule 26 :
+- supprimer uniquement le champ seed/factory `gameStyle:"dungeon"` ;
+- aucune autre modification `index.html`.
+
+## Tests de sortie
+
+- RED dédié seed ;
+- GREEN dédié seed ;
+- Shell Capture sans identité Dungeon ;
+- pré-game Capture sans identité Dungeon ;
+- reprise persistée sans identité Dungeon ;
+- Capture victoire/reprise inter-module ;
+- vrai Dungeon ;
+- Dungeon après Survie ;
+- non-interférence quatre modules ;
+- triple CI Architecture + Browser / Firefox / Tactical.
+
+## Prochaine étape
+
+Écrire et câbler le RED structural du seed sans modifier le runtime, constater le RED attendu, puis appliquer Rule 26 avant toute mutation de `index.html`.
+
+Production `main` :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — PRÉ-AUDIT COMPATIBILITÉ SEED CAPTURE / PROFILS & SAUVEGARDES — 2026-10-05
 
 Base GREEN :

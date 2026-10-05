@@ -314,7 +314,7 @@ const server=http.createServer((req,res)=>{
         reconcile151:typeof gensReconcile151,
         updateGameStyleUi:typeof updateGameStyleUi
       }));
-      const after=await page.evaluate(()=>{
+      const afterReconcile=await page.evaluate(()=>{
         try{window.gensReconcile151?.('phase9-post-shell-diagnostic')}catch(e){}
         return {
           captureClass:document.body.classList.contains('gensCapturePregame'),
@@ -324,7 +324,18 @@ const server=http.createServer((req,res)=>{
           capturePregameMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing'
         };
       });
-      pregameIdentityDiagnostic={before,after};
+      const afterUpdateGameStyleUi=await page.evaluate(()=>{
+        try{window.updateGameStyleUi?.()}catch(e){}
+        return {
+          captureClass:document.body.classList.contains('gensCapturePregame'),
+          pureClass:document.body.classList.contains('gens-pure-capture'),
+          bodyClasses:[...document.body.classList],
+          mode151:typeof gensMode151==='function'?gensMode151():'missing',
+          capturePregameMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing',
+          dungeonMode:typeof isDungeonMode==='function'?isDungeonMode():'missing'
+        };
+      });
+      pregameIdentityDiagnostic={before,afterReconcile,afterUpdateGameStyleUi};
       console.error('[capture-post-shell-no-dungeon-style] pregame-identity-diagnostic',JSON.stringify(pregameIdentityDiagnostic));
       throw error;
     }

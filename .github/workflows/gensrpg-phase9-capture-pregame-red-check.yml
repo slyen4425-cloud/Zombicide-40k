@@ -1,0 +1,28 @@
+name: GenSrpG Phase 9 Capture pregame RED check
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-post-shell-dungeon-identity-preaudit-2026-10-05'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-pregame-red-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pregame-red:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run permanent Capture pregame sentinel
+        run: node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs

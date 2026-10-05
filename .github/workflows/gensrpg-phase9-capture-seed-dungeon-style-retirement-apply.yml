@@ -1,0 +1,84 @@
+name: GenSrpG Phase 9 Capture seed Dungeon style retirement apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-seed-dungeon-style-retirement-2026-10-05'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-seed-dungeon-style-retirement-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 baseline
+        run: |
+          test "$(git hash-object index.html)" = "09b1e19c04777da82fd0ad355adc7eb82532db29"
+          test "$(wc -c < index.html)" = "8167138"
+
+      - name: Apply exact seed/factory retirement
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          marker='id="builtinMonsterCapture162"'
+          idx=s.find(marker)
+          assert idx >= 0, "builtinMonsterCapture162 missing"
+          start=s.rfind("<script",0,idx)
+          end=s.find("</script>",idx)
+          assert start >= 0 and end > idx, "seed script boundary missing"
+          end += len("</script>")
+
+          block=s[start:end]
+          token='"gameStyle":"dungeon",'
+          assert block.count(token)==2, f"expected 2 seed/factory tokens, got {block.count(token)}"
+          assert s.count(token)==2, f"unexpected global token count {s.count(token)}"
+
+          new_block=block.replace(token,"")
+          out=s[:start]+new_block+s[end:]
+
+          assert token not in new_block
+          p.write_text(out,encoding="utf-8")
+          PY
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb"
+          test "$(wc -c < index.html)" = "8167094"
+          ! grep -q '"gameStyle":"dungeon"' index.html
+          git diff --check
+
+      - name: Run Phase 9 seed and boundary sentinels
+        run: |
+          node tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs
+          node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/gensrpg-phase9-capture-seed-dungeon-style-retirement-apply.yml
+
+      - name: Verify exact diff scope
+        run: |
+          git diff --check
+          git status --short
+          git diff -- index.html
+
+      - name: Commit GREEN candidate
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor(phase9): retire Dungeon style from Capture seed"
+          git push origin "HEAD:$GITHUB_REF_NAME"

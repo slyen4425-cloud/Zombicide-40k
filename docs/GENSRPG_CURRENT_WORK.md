@@ -1,3 +1,89 @@
+# PHASE 9 — PRÉ-AUDIT COUPLAGES DUNGEON RÉSIDUELS DE CAPTURE — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-seed-dungeon-style-retirement-green-2026-10-05`
+
+SHA de base :
+`a09029a74ac2738a9b867fb67a63ac40a8e8ac6e`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-residual-dungeon-coupling-preaudit-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-residual-dungeon-coupling-preaudit-2026-10-05`
+
+Runtime de base GREEN :
+- taille `8167094` octets ;
+- blob `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb`.
+
+## Situation acquise
+
+Le nouveau seed Monster Capture ne contient plus `gameStyle:"dungeon"`.
+
+Sont déjà GREEN sans identité Dungeon historique :
+- visibilité/routage Shell ;
+- pré-game Capture ;
+- lancement jusqu'au Hub ;
+- progression Jour 1 -> Jour 2 ;
+- victoire/reprise inter-module ;
+- profil persistant sans `gameStyle` ;
+- reload complet + Reprendre avec vieille sauvegarde Dungeon présente.
+
+## Mission unique
+
+Identifier parmi les usages historiques de `isDungeonMode()` et les services Dungeon lesquels sont **encore réellement atteints par Capture** maintenant que le seed ne porte plus l'identité Dungeon.
+
+Aucune mutation runtime au démarrage.
+
+Objectifs :
+1. inventorier les appels `isDungeonMode()` encore observables sur le vrai parcours Capture ;
+2. distinguer les appels légitimes vrai Dungeon de ceux qui consultent encore Capture par héritage ;
+3. repérer les services Dungeon éventuellement initialisés malgré `isDungeonMode()===false` ;
+4. protéger reprise, victoire, non-interférence et vrai Dungeon ;
+5. sélectionner un seul seam minimal ;
+6. établir RED TDD avant toute mutation.
+
+## Invariants protégés
+
+Ne pas modifier :
+- `isDungeonMode()` globalement ;
+- `GensCaptureV1.isProfile()` ;
+- `gensContentFamilyForProfile()` ;
+- seed Monster Capture désormais sans `gameStyle` ;
+- anciens profils persistés ;
+- stockage/reprise ;
+- vrai Dungeon ;
+- Survie / PvP / Tactical ;
+- Combat Dynamique / Exploration / Builder / Map Actor ;
+- `main`.
+
+Interdit :
+- remplacement global des appels `isDungeonMode()` ;
+- nouveau wrapper/fallback/timer/observer/polling ;
+- nouvelle identité Capture ;
+- migration de sauvegarde ;
+- suppression en masse de code Dungeon sans preuve d'atteinte par Capture.
+
+## Tests prévus
+
+- audit statique des usages `isDungeonMode()` ;
+- scénario navigateur Capture complet avec seed natif désormais sans `gameStyle` ;
+- instrumentation ciblée des appels historiques sur le chemin réel ;
+- victoire/reprise Capture ;
+- vrai Dungeon ;
+- Dungeon après Survie ;
+- non-interférence quatre modules ;
+- RED dédié seulement après sélection du prochain seam.
+
+## Prochaine étape
+
+Caractériser les consommateurs résiduels sans mutation runtime, puis sélectionner un seul prochain seam.
+
+Production `main` reste gelée :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — RETRAIT DU SEED CAPTURE `gameStyle:"dungeon"` — GREEN — 2026-10-05
 
 Base GREEN :

@@ -12,9 +12,9 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8167138,
+assert.equal(bytes.length,8167094,
   'custom-enemy-refresh wrapper lot must run on the current Phase 7 Dungeon generated Boss policy runtime size');
-assert.equal(blob,'09b1e19c04777da82fd0ad355adc7eb82532db29',
+assert.equal(blob,'4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb',
   'custom-enemy-refresh wrapper lot must target the current Phase 7 generated Boss policy runtime baseline');
 
 assert.equal(

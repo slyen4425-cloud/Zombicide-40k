@@ -72,7 +72,7 @@ assert.ok(c139.includes('const gensCaptureStartConfiguredGame139V1=window.startC
 assert.ok(c139.includes('window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);'));
 assert.ok(!c139.includes('const gensCaptureStartModuleSessionV1=async()=>{'));
 assert.ok(!c139.includes('window.GensShellModuleLaunchV1.register("capture",gensCaptureStartModuleSessionV1);'));
-assert.ok(c139.includes('gensEnsureDungeonAdventureButton139'));
+assert.ok(!c139.includes('gensEnsureDungeonAdventureButton139'),'Capture139 must remain free of the retired Dungeon pregame button owner');
 
 const pregame=functionFrom(index,'function gensCapturePregameMode()');
 const pureSheet=functionFrom(index,'function gensPureCaptureSheetMode()');
@@ -116,7 +116,8 @@ console.log(JSON.stringify({
   ],
   retiredDebts:[
     'normalizeGameParticipants no longer uses Dungeon identity for Capture',
-    'Capture139 no longer invokes ensureBaseGameProfile'
+    'Capture139 no longer invokes ensureBaseGameProfile',
+    'Capture139 no longer owns Dungeon pregame button maintenance'
   ],
   identityBoundary:'GensCaptureV1.isProfile(profile)',
   selectedRuntimeSeam:'Shell -> GensCaptureV1 -> legacy Capture139',

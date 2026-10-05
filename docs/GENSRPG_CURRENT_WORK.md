@@ -55,9 +55,30 @@ Interdit :
 5. poser un RED dédié avant toute mutation runtime ;
 6. appliquer Rule 26 seulement si l'inspection exacte d'`index.html` devient nécessaire.
 
+## Candidat prioritaire — pas encore sélectionné
+
+L'inventaire GREEN du runtime `8166377 / 37056722bb0a27f96e26b3ef3b05e9543dc5a223` montre encore dans `captureFix137` un wrapper autour de :
+
+`openSessionDungeonSetup()`.
+
+État prouvé :
+- le bouton `sessionDungeonSetupBtn` est désormais possédé par `updatePregameWizard()` ;
+- Capture137 ne possède plus le nettoyage visuel du pré-game ;
+- Capture138 ne possède plus de nettoyage/wrappers de pré-game ;
+- Capture137 conserve encore uniquement un garde qui refuse l'entrée Dungeon lorsque `gensCapturePregameMode()` est vrai ;
+- `gensStability151` possède également une garde autour de `openSessionDungeonSetup`.
+
+Risque :
+supprimer Capture137 sans localiser la définition propriétaire pourrait retirer une vraie protection de frontière.
+
 ## Prochaine étape
 
-Analyser les résidus actuels `isDungeonMode()` / services Dungeon dans les blocs encore vus par Capture et choisir un seul seam démontré.
+Appliquer Rule 26 au runtime exact courant, localiser :
+1. la définition propriétaire de `openSessionDungeonSetup()` ;
+2. la chaîne complète de wrappers Capture137 / V151 ;
+3. l'effet réel du garde pour Capture et vrai Dungeon.
+
+Seulement ensuite sélectionner ou rejeter ce seam et poser un RED dédié.
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

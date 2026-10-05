@@ -827,6 +827,9 @@ jobs:
       - name: Exiger l'ownership unique du pré-game Capture / Dungeon Phase 9
         run: node tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs
 
+      - name: Exiger le transfert du bouton Dungeon hors de Capture139
+        run: node tests/gens_phase9_capture_dungeon_button_owner_transfer_v1.test.cjs
+
       - name: Pré-auditer les dépendances session Capture139 Phase 9
         run: node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
 

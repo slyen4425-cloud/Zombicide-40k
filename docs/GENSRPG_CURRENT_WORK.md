@@ -1,3 +1,69 @@
+# PHASE 9 — PROCHAIN PRÉ-AUDIT COUPLAGE RÉSIDUEL CAPTURE ↔ DUNGEON — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-dungeon-pregame-button-owner-transfer-green-2026-10-05`
+
+SHA de base :
+`4331c7b00e98d1ed629146e688fef6a1ca249386`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-next-residual-dungeon-coupling-preaudit-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-next-residual-dungeon-coupling-preaudit-2026-10-05`
+
+Runtime GREEN :
+- taille `8166377` octets ;
+- blob `37056722bb0a27f96e26b3ef3b05e9543dc5a223`.
+
+## Mission unique
+
+Identifier le prochain **couplage Dungeon réellement exécuté par Capture** après :
+- retrait du seed `gameStyle:"dungeon"` ;
+- retrait du besoin Shell de cette identité ;
+- retrait du besoin pré-game de cette identité ;
+- transfert du bouton Adventure Dungeon hors de Capture139.
+
+Aucune mutation runtime au démarrage.
+
+## Invariants protégés
+
+- identité Capture : `GensCaptureV1.isProfile(profile)` ;
+- famille contenu : `gensContentFamilyForProfile(profile)` ;
+- Shell Capture sans identité Dungeon : GREEN ;
+- pré-game Capture sans identité Dungeon : GREEN ;
+- seed Capture sans identité Dungeon : GREEN ;
+- bouton Dungeon du pré-game possédé par Shell : GREEN ;
+- profils historiques avec `gameStyle:"dungeon"` restent tolérés ;
+- vrai Dungeon / Survie / PvP / Tactical inchangés ;
+- Combat Dynamique / Exploration / Builder / Map Actor hors périmètre ;
+- `main` gelée.
+
+Interdit :
+- remplacement global de `isDungeonMode()` ;
+- retrait massif de gardes Dungeon ;
+- nouvelle identité Capture parallèle ;
+- wrapper/fallback/timer/observer/polling ;
+- migration globale de profils.
+
+## Méthode
+
+1. lire l'inventaire Phase 9 actuel ;
+2. confronter les résidus aux sentinelles Capture réelles ;
+3. sélectionner un seul propriétaire fautif réellement atteint ;
+4. documenter le périmètre ;
+5. poser un RED dédié avant toute mutation runtime ;
+6. appliquer Rule 26 seulement si l'inspection exacte d'`index.html` devient nécessaire.
+
+## Prochaine étape
+
+Analyser les résidus actuels `isDungeonMode()` / services Dungeon dans les blocs encore vus par Capture et choisir un seul seam démontré.
+
+Production `main` :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — PRÉ-AUDIT COUPLAGES RÉSIDUELS CAPTURE ↔ DUNGEON — 2026-10-05
 
 Base GREEN :

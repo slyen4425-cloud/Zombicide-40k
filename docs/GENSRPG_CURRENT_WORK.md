@@ -70,9 +70,24 @@ Puis mutation runtime minimale sous Rule 26 :
 - non-interférence quatre modules ;
 - triple CI Architecture + Browser / Firefox / Tactical.
 
+## RED TDD constaté
+
+Test :
+`tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs`.
+
+HEAD RED :
+`92ea8c27236925ad06e56443f2eb9d31949e60ba`.
+
+Résultat :
+- Architecture étape 274 « Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9 » — FAILURE attendue ;
+- Firefox `37280565050` — SUCCESS ;
+- Tactical Dock `37280565106` — SUCCESS.
+
+Aucune mutation runtime n'a encore été faite.
+
 ## Prochaine étape
 
-Écrire et câbler le RED structural du seed sans modifier le runtime, constater le RED attendu, puis appliquer Rule 26 avant toute mutation de `index.html`.
+Appliquer Rule 26 sur le HEAD courant, vérifier `8167138 / 09b1e19c04777da82fd0ad355adc7eb82532db29`, puis retirer uniquement le champ `gameStyle:"dungeon"` de la représentation seed/factory Monster Capture.
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

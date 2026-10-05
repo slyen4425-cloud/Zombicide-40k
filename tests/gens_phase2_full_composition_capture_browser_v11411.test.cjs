@@ -396,7 +396,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(profileState.active,CAPTURE_ID);
     assert.equal(profileState.mode151,'capture');
     assert.equal(profileState.contentFamily,'creature');
-    assert.equal(profileState.dungeonMode,true,'current Capture substrate remains dungeon-style');
+    assert.equal(profileState.dungeonMode,false,'current Capture must stay outside Dungeon identity after seed retirement');
 
     mark('open-capture-pregame-full-composition');
     await page.locator('#gensGameHomeActions .newGameBtn').click();

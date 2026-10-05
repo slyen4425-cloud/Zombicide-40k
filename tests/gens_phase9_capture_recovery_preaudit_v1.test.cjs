@@ -105,7 +105,8 @@ console.log(JSON.stringify({
   genSrpg:{
     finalShellPublicRouting:true,
     captureTargetEntryLoaded:true,
-    currentCaptureHistoricalSubstrate:false,\n    captureSeedDungeonStyleRetired:true
+    currentCaptureHistoricalSubstrate:false,
+    captureSeedDungeonStyleRetired:true
   },
   laboratory:{
     reviewedCheckpoint:'3414ad1e23a2204daf79f26cdd4e381982b713c6',

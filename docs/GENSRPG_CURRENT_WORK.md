@@ -1,3 +1,75 @@
+# PHASE 9 — PRÉ-AUDIT COMPATIBILITÉ SEED CAPTURE / PROFILS & SAUVEGARDES — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-pregame-identity-green-2026-10-05`
+
+SHA de base :
+`d2821fb1a5bf7719f6925f8c81f63ab7461f73f8`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-seed-compatibility-preaudit-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-seed-compatibility-preaudit-2026-10-05`
+
+Dernier runtime GREEN :
+- taille `8167138` octets ;
+- blob `09b1e19c04777da82fd0ad355adc7eb82532db29`.
+
+## Mission unique
+
+Avant toute suppression réelle de `gameStyle:"dungeon"` dans le seed Monster Capture, caractériser :
+1. profils Capture déjà persistés avec l'ancien champ ;
+2. profils Capture persistés sans ce champ ;
+3. Save & Quit / reprise ;
+4. victoire / reprise inter-module ;
+5. restauration après reload ;
+6. consommateurs historiques qui lisent encore `gameStyle` ou `isDungeonMode()` sur Capture.
+
+Aucune mutation runtime au démarrage.
+
+## Invariants protégés
+
+- `GensCaptureV1.isProfile(profile)` reste l'identité Capture canonique ;
+- `gensContentFamilyForProfile(profile)` reste l'autorité de famille de contenu ;
+- routage Shell Capture sans identité Dungeon : GREEN ;
+- pré-game Capture sans identité Dungeon : GREEN ;
+- `isDungeonMode()` : inchangé ;
+- seed `gameStyle:"dungeon"` : inchangé dans ce pré-audit ;
+- vrai Dungeon / Survie / PvP / Tactical : inchangés ;
+- Combat Dynamique / Exploration / Builder / Map Actor : hors périmètre ;
+- `main` gelée.
+
+Interdit :
+- supprimer le champ du seed avant preuve de compatibilité ;
+- migrer silencieusement toutes les sauvegardes ;
+- ajouter une seconde identité Capture ;
+- wrapper/fallback/timer/observer/polling ;
+- assouplir les sentinelles existantes pour faire passer la CI.
+
+## Tests prévus
+
+- audit statique des tests Save & Quit / reprise Capture ;
+- audit des fonctions de chargement et normalisation de profils ;
+- scénario navigateur : profil Capture persistant sans `gameStyle` + reload ;
+- scénario navigateur : sauvegarde Capture existante + reprise sans identité Dungeon ;
+- vrai Dungeon après Survie ;
+- non-interférence quatre modules ;
+- seulement après caractérisation : sélection d'un seul seam et RED dédié.
+
+## Risque principal
+
+Le parcours neuf Capture est maintenant GREEN sans `gameStyle`, mais une sauvegarde ou un profil déjà persisté peut encore traverser une branche legacy différente du parcours neuf.
+
+## Prochaine étape
+
+Inventorier les propriétaires de persistance/reprise et les sentinelles existantes, puis reproduire le vrai chemin de reload/reprise avec un profil Capture privé de `gameStyle` uniquement dans le test.
+
+Production `main` :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — PRÉ-AUDIT POST-SHELL IDENTITÉ DUNGEON DE CAPTURE — 2026-10-05
 
 Base GREEN :

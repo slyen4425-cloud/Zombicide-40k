@@ -69,9 +69,29 @@ le prochain couplage résiduel est dans le **propriétaire de rendu/habillage du
 
 Le propriétaire exact n'est pas encore sélectionné. Aucune correction runtime autorisée avant Rule 26 sur le blob courant.
 
+## Propriétaire exact sélectionné
+
+Rule 26 validée sur `workh.zip/indexH.txt` :
+- taille `8167187` octets ;
+- blob `99d7784676669b629cae6070df8c02606d67002f`.
+
+Le propriétaire de l'habillage pré-game est `updatePregameWizard()`.
+
+Dette exacte :
+`captureFamily` exige encore simultanément `active.gameStyle==="dungeon"` et `gensCurrentContentFamily()==="creature"`.
+
+Autorité Capture déjà existante :
+`gensCapturePregameMode() -> GensCaptureV1.isProfile(profile)`.
+
+Seam sélectionné :
+- modifier uniquement le calcul de `captureFamily` pour réutiliser cette identité canonique ;
+- conserver `gensAdventurePregame`, boutons/règles Dungeon et tous les autres comportements inchangés.
+
+Le test post-Shell est câblé comme RED permanent dans l'Architecture.
+
 ## Prochaine étape
 
-Appliquer Rule 26 sur le runtime exact courant, localiser le propriétaire de `gensCapturePregame` / `gens-pure-capture`, puis sélectionner un seul seam minimal et établir son RED dédié.
+Constater le RED permanent exact, puis appliquer uniquement ce seam minimal dans `updatePregameWizard()` et rejouer le parcours jusqu'au prochain point de rupture.
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

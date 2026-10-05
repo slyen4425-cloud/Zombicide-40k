@@ -189,7 +189,7 @@ const server=http.createServer((req,res)=>{
       };
     },CAPTURE_ID);
     assert.equal(seed.name,'Monster Capture');
-    assert.equal(seed.style,'dungeon','current Capture intentionally reuses the dungeon-style RPG substrate');
+    assert.equal(seed.style,'','current Capture seed must no longer borrow Dungeon gameStyle identity');
     assert.equal(seed.contentFamily,'creature');
     assert.equal(seed.profile,'creature');
     assert.equal(seed.capture,true);
@@ -254,8 +254,8 @@ const server=http.createServer((req,res)=>{
     assert.equal(state.family,'adventure','current Shell family guard classifies Capture under Adventure');
     assert.equal(state.contentFamily,'creature');
     assert.equal(state.mode151,'capture','V16.151 must separate Capture from classic Dungeon');
-    assert.equal(state.dungeonMode,true,'current Capture still uses the historical dungeon-style RPG substrate');
-    assert.equal(state.style,'dungeon');
+    assert.equal(state.dungeonMode,false,'current Capture must stay outside Dungeon identity after seed retirement');
+    assert.equal(state.style,'');
     assert.notEqual(state.session,'1');
 
     mark('open-current-capture-pregame');

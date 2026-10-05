@@ -51,9 +51,27 @@ Le test doit :
 5. vérifier qu'aucun runtime Dungeon n'est créé avant le point de rupture ;
 6. ne sélectionner qu'un seul seam à partir de cette preuve.
 
+## Résultat intermédiaire du pré-audit
+
+Test dédié :
+`tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs`.
+
+RED de caractérisation :
+- `37256502370` — le pré-game s'affiche mais la classe `gensCapturePregame` n'apparaît pas ;
+- `37256643602` — identité Capture confirmée correcte : `contentFamily=creature`, `mode151=capture`, `gensCapturePregameMode()=true`, module Shell `capture`, `isDungeonMode()=false`.
+
+Diagnostic supplémentaire :
+- appel manuel `gensReconcile151()` : ne pose pas la classe ;
+- appel manuel `updateGameStyleUi()` : ne pose pas la classe.
+
+Conclusion :
+le prochain couplage résiduel est dans le **propriétaire de rendu/habillage du pré-game**, pas dans l'identité Capture ni dans le Shell routing.
+
+Le propriétaire exact n'est pas encore sélectionné. Aucune correction runtime autorisée avant Rule 26 sur le blob courant.
+
 ## Prochaine étape
 
-Exécuter le vrai parcours Capture sans identité Dungeon historique, relever le premier point de rupture après le Shell, documenter son propriétaire, puis seulement établir un RED dédié.
+Appliquer Rule 26 sur le runtime exact courant, localiser le propriétaire de `gensCapturePregame` / `gens-pure-capture`, puis sélectionner un seul seam minimal et établir son RED dédié.
 
 Production `main` :
 `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

@@ -1,3 +1,66 @@
+# PHASE 9 — PRÉ-AUDIT COUPLAGES RÉSIDUELS CAPTURE ↔ DUNGEON — 2026-10-05
+
+Base GREEN :
+`checkpoint/gensrpg-phase9-capture-seed-dungeon-style-retirement-green-2026-10-05`
+
+SHA de base :
+`a09029a74ac2738a9b867fb67a63ac40a8e8ac6e`
+
+Checkpoint de départ :
+`checkpoint/gensrpg-start-phase9-capture-residual-dungeon-couplings-preaudit-2026-10-05`
+
+Branche :
+`work/gensrpg-phase9-capture-residual-dungeon-couplings-preaudit-2026-10-05`
+
+Runtime GREEN :
+- taille `8167094` octets ;
+- blob `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb`.
+
+## Mission unique
+
+Maintenant que le seed intégré Monster Capture n'emprunte plus `gameStyle:"dungeon"`, identifier les **couplages résiduels réellement atteints par Capture** parmi les usages historiques de :
+- `isDungeonMode()` ;
+- services / UI / stockage Dungeon ;
+- branches de compatibilité legacy.
+
+Le but n'est PAS de remplacer globalement `isDungeonMode()`, mais de sélectionner un seul prochain seam démontré par le vrai parcours Capture.
+
+## Invariants protégés
+
+- identité Capture : `GensCaptureV1.isProfile(profile)` ;
+- famille de contenu : `gensContentFamilyForProfile(profile)` ;
+- Shell Capture sans identité Dungeon : GREEN ;
+- pré-game Capture sans identité Dungeon : GREEN ;
+- seed Capture sans identité Dungeon : GREEN ;
+- profils historiques avec `gameStyle:"dungeon"` restent tolérés ;
+- vrai Dungeon / Survie / PvP / Tactical inchangés ;
+- Combat Dynamique / Exploration / Builder / Map Actor hors périmètre ;
+- `main` gelée.
+
+Interdit :
+- remplacement global de `isDungeonMode()` ;
+- suppression massive de gardes Dungeon ;
+- nouvelle identité Capture parallèle ;
+- wrapper/fallback/timer/observer/polling ;
+- migration globale des anciens profils.
+
+## Méthode
+
+1. réutiliser l'audit structurel existant des couplages Capture/Dungeon ;
+2. confronter ses résidus au runtime final sans style Dungeon ;
+3. privilégier les chemins réellement exécutés par les sentinelles Capture ;
+4. sélectionner un seul propriétaire fautif ;
+5. poser un RED dédié avant toute mutation runtime.
+
+## Prochaine étape
+
+Inventorier les résidus actuels à partir du test d'audit Phase 9 et des logs de la dernière Architecture GREEN, puis choisir le prochain seam uniquement si un couplage réel est démontré.
+
+Production `main` :
+`e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — RETRAIT DU SEED CAPTURE `gameStyle:"dungeon"` — GREEN — 2026-10-05
 
 Base GREEN :

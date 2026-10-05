@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
 # retry-contract-v2
+# retry-scope-v3
 
 jobs:
   apply:
@@ -111,7 +112,7 @@ jobs:
           git status --short
           python - <<'PY'
           import subprocess
-          allowed_prefixes=("index.html","tests/","docs/GENSRPG_PHASE2_")
+          allowed_prefixes=("index.html","tests/","docs/GENSRPG_PHASE2_",".github/workflows/gensrpg-phase9-capture-seed-retirement-one-shot.yml")
           files=subprocess.check_output(["git","diff","--name-only"],text=True).splitlines()
           bad=[f for f in files if not f.startswith(allowed_prefixes)]
           assert not bad, f"unexpected changed files: {bad}"

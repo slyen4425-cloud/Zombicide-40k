@@ -101,3 +101,58 @@ Le test doit exiger simultanément :
 - vrai Dungeon et Capture sentinelles toujours présentes.
 
 Aucune mutation runtime avant constat du RED.
+
+
+## GREEN — bouton Adventure Dungeon transféré au Shell
+
+Le seam sélectionné a été appliqué sans toucher au runtime Dungeon ni à `isDungeonMode()`.
+
+### Propriétaire final
+
+`updatePregameWizard()` :
+- détermine le vrai Dungeon avec la sémantique existante ;
+- crée `sessionDungeonSetupBtn` uniquement pour le vrai Dungeon ;
+- retire le bouton hors vrai Dungeon ;
+- masque `sessionDungeonSetup` hors vrai Dungeon.
+
+### Autorité retirée
+
+`captureFix139` ne contient plus :
+- `gensEnsureDungeonAdventureButton139` ;
+- `sessionDungeonSetupBtn` ;
+- wrapper participant lié au helper ;
+- wrapper `updateGameStyleUi` lié au helper ;
+- timer de maintenance à 50 ms.
+
+`gensStability151` ne rappelle plus ce helper retiré.
+
+### Runtime
+
+Avant :
+- `8167094` octets ;
+- blob `4eee0fd1cc1b932cb7cb8b33ca357cf2d55bafeb`.
+
+Après :
+- `8166377` octets ;
+- blob `37056722bb0a27f96e26b3ef3b05e9543dc5a223`.
+
+### Preuves
+
+Tests permanents :
+- `tests/gens_phase9_capture_dungeon_button_owner_transfer_v1.test.cjs` ;
+- `tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs`.
+
+Triple CI GREEN sur `6b38b3f5acbd0af6b7a24f2c2a157c8e8bbbdbcf` :
+- Architecture `37325483116` — SUCCESS ;
+- Firefox `37325483066` — SUCCESS ;
+- Tactical `37325483227` — SUCCESS.
+
+Les inventaires Phase 2 ont été réalignés uniquement sur les propriétaires/timers réellement retirés.
+
+### Résultat
+
+Le bloc Capture139 ne fabrique plus ni ne maintient une navigation Dungeon de pré-game.
+
+Aucun wrapper, fallback, observer, polling ou nouvelle identité ajouté.
+
+Prochaine étape : nouveau pré-audit séparé des couplages résiduels réellement exécutés par Capture.

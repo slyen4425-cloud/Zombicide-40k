@@ -31,87 +31,27 @@ jobs:
           p=Path("index.html")
           s=p.read_text(encoding="utf-8")
 
-          old='''  const active=getActiveGameProfile?.();
-  const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();
-  document.body.classList.toggle("gensCapturePregame",captureFamily);
-  document.body.classList.toggle("gensAdventurePregame",!!active&&active.gameStyle==="dungeon");
-
-  const dungeonBtn=document.getElementById("sessionDungeonSetupBtn");if(dungeonBtn)dungeonBtn.style.display=captureFamily?"none":"";
-'''
-          new='''  const active=getActiveGameProfile?.();
-  const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();
-  const realDungeon=!!active && active.gameStyle==="dungeon"
-    && String(active.id)===String(GAME_PROFILE_DUNGEON_ID)
-    && !captureFamily;
-  document.body.classList.toggle("gensCapturePregame",captureFamily);
-  document.body.classList.toggle("gensAdventurePregame",!!active&&active.gameStyle==="dungeon");
-
-  const dungeonGrid=document.querySelector("#pregameSetup .sessionSetupGrid");
-  let dungeonBtn=document.getElementById("sessionDungeonSetupBtn");
-  const dungeonPage=document.getElementById("sessionDungeonSetup");
-  if(realDungeon){
-    if(!dungeonBtn&&dungeonGrid){
-      dungeonBtn=document.createElement("button");dungeonBtn.id="sessionDungeonSetupBtn";dungeonBtn.className="sessionSetupBtn";
-      dungeonBtn.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";
-      dungeonBtn.onclick=()=>openSessionDungeonSetup();
-      const obj=[...dungeonGrid.children].find(x=>/OBJETS\s*\/\s*PIOCHE/i.test(x.textContent||""));
-      if(obj)dungeonGrid.insertBefore(dungeonBtn,obj);else dungeonGrid.appendChild(dungeonBtn);
-    }
-    if(dungeonBtn)dungeonBtn.style.display="";
-  }else{
-    dungeonBtn?.remove();
-    if(dungeonPage)dungeonPage.style.setProperty("display","none","important");
-  }
-'''
-          assert s.count(old)==1, f"wizard ownership anchor count={s.count(old)}"
+          old='  const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();\n  document.body.classList.toggle("gensCapturePregame",captureFamily);'
+          new='  const captureFamily=!!active && typeof gensCapturePregameMode==="function" && gensCapturePregameMode();\n  const realDungeon=!!active && active.gameStyle==="dungeon"\n    && String(active.id)===String(GAME_PROFILE_DUNGEON_ID)\n    && !captureFamily;\n  document.body.classList.toggle("gensCapturePregame",captureFamily);'
+          assert s.count(old)==1, f"wizard capture-family anchor count={s.count(old)}"
           s=s.replace(old,new,1)
 
-          old139='''/* Le bouton Aventure n'existe plus dans le HTML commun.
-   On ne le crée que pour le VRAI profil Dungeon RPG. */
-window.gensEnsureDungeonAdventureButton139=function(){
-  const grid=document.querySelector("#pregameSetup .sessionSetupGrid");if(!grid)return;
-  let b=document.getElementById("sessionDungeonSetupBtn");
-  const page=document.getElementById("sessionDungeonSetup");
-  let realDungeon=false;
-  try{
-    const p=getActiveGameProfile();
-    realDungeon=p?.gameStyle==="dungeon"
-      && String(p.id)===String(GAME_PROFILE_DUNGEON_ID)
-      && !(typeof gensCurrentContentFamily==="function"&&gensCurrentContentFamily()==="creature");
-  }catch(e){}
-  if(!realDungeon){
-    b?.remove();
-    if(page)page.style.setProperty("display","none","important");
-    return;
-  }
-  if(!b){
-    b=document.createElement("button");b.id="sessionDungeonSetupBtn";b.className="sessionSetupBtn";
-    b.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";
-    b.onclick=()=>openSessionDungeonSetup();
-    const obj=[...grid.children].find(x=>/OBJETS\s*\/\s*PIOCHE/i.test(x.textContent||""));
-    if(obj)grid.insertBefore(b,obj);else grid.appendChild(b);
-  }
-};
+          old2='  const dungeonBtn=document.getElementById("sessionDungeonSetupBtn");if(dungeonBtn)dungeonBtn.style.display=captureFamily?"none":"";'
+          new2='  const dungeonGrid=document.querySelector("#pregameSetup .sessionSetupGrid");\n  let dungeonBtn=document.getElementById("sessionDungeonSetupBtn");\n  const dungeonPage=document.getElementById("sessionDungeonSetup");\n  if(realDungeon){\n    if(!dungeonBtn&&dungeonGrid){\n      dungeonBtn=document.createElement("button");dungeonBtn.id="sessionDungeonSetupBtn";dungeonBtn.className="sessionSetupBtn";\n      dungeonBtn.innerHTML="<b>🏰 AVENTURE</b><small>Choisir une aventure Dungeon déjà créée.</small>";\n      dungeonBtn.onclick=()=>openSessionDungeonSetup();\n      const obj=[...dungeonGrid.children].find(x=>/OBJETS\\s*\\/\\s*PIOCHE/i.test(x.textContent||""));\n      if(obj)dungeonGrid.insertBefore(dungeonBtn,obj);else dungeonGrid.appendChild(dungeonBtn);\n    }\n    if(dungeonBtn)dungeonBtn.style.display="";\n  }else{\n    dungeonBtn?.remove();\n    if(dungeonPage)dungeonPage.style.setProperty("display","none","important");\n  }'
+          assert s.count(old2)==1, f"wizard Dungeon-button anchor count={s.count(old2)}"
+          s=s.replace(old2,new2,1)
 
-const r139=window.renderParticipantSelector;
-window.renderParticipantSelector=function(){const x=r139.apply(this,arguments);gensEnsureDungeonAdventureButton139();return x};
-const u139=window.updateGameStyleUi;
-if(typeof u139==="function")window.updateGameStyleUi=function(){const x=u139.apply(this,arguments);gensEnsureDungeonAdventureButton139();return x};
-setTimeout(gensEnsureDungeonAdventureButton139,50);
+          start=s.index("/* Le bouton Aventure n'existe plus dans le HTML commun.")
+          end=s.index("/* En Capture, le dresseur est choisi AVANT Démarrer.",start)
+          s=s[:start]+s[end:]
 
-'''
-          assert s.count(old139)==1, f"Capture139 ownership block count={s.count(old139)}"
-          s=s.replace(old139,'',1)
-
-          old151='''  try{gensEnsureDungeonAdventureButton139?.()}catch(e){}
-'''
+          old151='  try{gensEnsureDungeonAdventureButton139?.()}catch(e){}\n'
           assert s.count(old151)==1, f"Stability151 helper call count={s.count(old151)}"
           s=s.replace(old151,'',1)
 
           assert "gensEnsureDungeonAdventureButton139" not in s
           assert 'window.captureEnterWorld139=function()' in s
           assert 'window.startConfiguredGame=async function()' in s
-
           p.write_text(s,encoding="utf-8")
           PY
 
@@ -123,7 +63,6 @@ setTimeout(gensEnsureDungeonAdventureButton139,50);
           new_blob="37056722bb0a27f96e26b3ef3b05e9543dc5a223"
           old_size="8167094"
           new_size="8166377"
-
           changed=[]
           for p in sorted(Path("tests").rglob("*.test.cjs")):
               s=p.read_text(encoding="utf-8")
@@ -131,22 +70,22 @@ setTimeout(gensEnsureDungeonAdventureButton139,50);
               if n!=s:
                   p.write_text(n,encoding="utf-8")
                   changed.append(str(p))
-
           for p in [
               Path("docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json"),
               Path("docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv"),
               Path("docs/GENSRPG_PHASE2_INLINE_OWNERS.json"),
               Path("docs/GENSRPG_PHASE2_STORAGE_OWNERS.json"),
           ]:
-              if not p.exists(): continue
+              if not p.exists():
+                  continue
               s=p.read_text(encoding="utf-8")
               n=s.replace(old_blob,new_blob).replace(old_size,new_size)
               if n!=s:
                   p.write_text(n,encoding="utf-8")
                   changed.append(str(p))
-
           print("repinned",len(changed),"files")
-          for p in changed: print(p)
+          for p in changed:
+              print(p)
           PY
 
       - name: Verify exact runtime result

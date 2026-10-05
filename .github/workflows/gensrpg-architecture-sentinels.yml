@@ -1117,6 +1117,9 @@ jobs:
       - name: Exiger le pré-game Capture sans identité Dungeon historique
         run: node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs
 
+      - name: Verrouiller reprise Capture persistée sans identité Dungeon historique
+        run: node tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs
+
       - name: Vérifier le provider Capture module-launch S3
         run: node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
 

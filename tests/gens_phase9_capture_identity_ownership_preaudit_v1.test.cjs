@@ -101,7 +101,8 @@ assert.match(c138,/GensCaptureV1/);
 assert.match(c138,/isProfile/);
 assert.doesNotMatch(c138,/gensPureCaptureSheetMode|gensCapturePregameMode|fam==="creature"/);
 
-assert.match(c162,/"gameStyle":"dungeon"/);
+assert.doesNotMatch(c162,/"gameStyle":"dungeon"/,
+  'built-in Capture seed must stay retired from historical Dungeon identity');
 assert.match(c162,/"profile":"creature"/);
 assert.match(c162,/"controllableCreatures":true/);
 assert.match(c162,/"capture":true/);
@@ -121,7 +122,7 @@ console.log(JSON.stringify({
   scenario:'Phase 9 Capture identity ownership preaudit',
   rule26:{bytes:bytes.length,blob},
   current:{
-    captureSeedStillDungeonStyle:true,
+    captureSeedStillDungeonStyle:false,
     isDungeonModeCalls:(index.match(/\bisDungeonMode\s*\(\s*\)/g)||[]).length,
     boundaryIdentityCanonical:true,
     participantDungeonDependency:false

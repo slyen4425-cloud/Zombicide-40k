@@ -295,7 +295,39 @@ const server=http.createServer((req,res)=>{
     mark('open-current-capture-pregame');
     await page.locator('#gensGameHomeActions .newGameBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
-    await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
+    let pregameIdentityDiagnostic=null;
+    try{
+      await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'),null,{timeout:2500});
+    }catch(error){
+      const before=await page.evaluate(()=>({
+        active:activeGameProfileId(),
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        mode151:typeof gensMode151==='function'?gensMode151():'missing',
+        capturePregameMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing',
+        pureCaptureSheetMode:typeof gensPureCaptureSheetMode==='function'?gensPureCaptureSheetMode():'missing',
+        shellActiveModule:typeof gensShellActiveModuleV1==='function'?gensShellActiveModuleV1():'missing',
+        dungeonMode:typeof isDungeonMode==='function'?isDungeonMode():'missing',
+        style:getActiveGameProfile()?.gameStyle||'',
+        pregameDisplay:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        bodyClasses:[...document.body.classList],
+        reconcile151:typeof gensReconcile151,
+        updateGameStyleUi:typeof updateGameStyleUi
+      }));
+      const after=await page.evaluate(()=>{
+        try{window.gensReconcile151?.('phase9-post-shell-diagnostic')}catch(e){}
+        return {
+          captureClass:document.body.classList.contains('gensCapturePregame'),
+          pureClass:document.body.classList.contains('gens-pure-capture'),
+          bodyClasses:[...document.body.classList],
+          mode151:typeof gensMode151==='function'?gensMode151():'missing',
+          capturePregameMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing'
+        };
+      });
+      pregameIdentityDiagnostic={before,after};
+      console.error('[capture-post-shell-no-dungeon-style] pregame-identity-diagnostic',JSON.stringify(pregameIdentityDiagnostic));
+      throw error;
+    }
 
     const pregame=await page.evaluate(()=>({
       captureClass:document.body.classList.contains('gensCapturePregame'),

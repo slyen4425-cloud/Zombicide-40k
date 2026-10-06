@@ -46,3 +46,7 @@ Lot ouvert, tests RED à ajouter, aucun correctif runtime. Phase 9 en cours ; au
 ## Sentinelles permanentes ajoutées
 
 VM local RED exact : « Capture must not be selected by the Survival editor », profil Capture renvoyé à la place de 40K. Les tests utilisent les fonctions exactes et l’API réelle ; les ports DOM/rendu/application du VM sont observés, tandis que le navigateur traverse la composition complète sans remplacer les propriétaires. Aucun runtime modifié. Le RED CI et le RED navigateur doivent précéder le correctif.
+
+## Fixture positive préparée par ses propriétaires réels
+
+Transport 37497157544 : RED VM et vrai navigateur confirmés avant mutation, puis douze gardes/inverse exact appliqués en runner. Le premier GREEN VM révélait une fixture Survie partiellement normalisée : la vraie duplication complétait légitimement les règles. Préparer seulement les profils Survie par ensureSurvivalProfileData() et saveGameProfiles() réels avant les assertions ; profils Capture et toutes les assertions exactes inchangés. Aucun commit runtime n’a été produit par ce run échoué. La nouvelle passe doit conserver les deux RED puis obtenir les deux GREEN.

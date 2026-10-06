@@ -83,6 +83,10 @@ function setup(id){
  vm.runInContext('const GAME_PROFILES_KEY='+JSON.stringify(profileKey)+';const GAME_PROFILE_ACTIVE_KEY='+JSON.stringify(activeKey)+';'+
   'const GAME_PROFILE_BASE_ID='+JSON.stringify(baseId)+';const GAME_PROFILE_DUNGEON_ID='+JSON.stringify(dungeonId)+';const ZOMBICIDE_BASE_PRESET_ID="baseline-waves";let smodEditingId=null;'+
   owners.map(exactFunction).join('\n'),context,{filename:'exact-native-survival-editor-owners.js'});
+ // Prepare valid Survival fixtures through the real normalizer/storage, as the editor does.
+ const prepared=context.loadGameProfiles();
+ for(const p of prepared)if(context.gensContentFamilyForProfile(p)==='survival')context.ensureSurvivalProfileData(p);
+ context.saveGameProfiles(prepared);writes.length=0;
  return {context,values,writes,effects,snapshot:()=>JSON.stringify([...values.entries()]),get profiles(){return JSON.parse(values.get(profileKey))}};
 }
 

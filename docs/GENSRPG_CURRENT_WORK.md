@@ -1,3 +1,28 @@
+# PHASE 9 — CLASSEMENT CAPTURE / SURVIE — PRÉ-AUDIT CONCLU — 2026-10-06
+
+Branche : `work/gensrpg-phase9-capture-library-family-classification-preaudit-2026-10-06`.
+Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-library-family-classification-preaudit-2026-10-06`, base `168578f4394fc22cb4aec517e052e94847790bd9`.
+Production main : `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+Checkpoint final prévu après triple CI SUCCESS sur le HEAD de fermeture : `checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06`.
+
+## Résultat
+
+L'archive index (1)(3).zip est reçue et vérifiée : 8165906 octets / blob `1e3398755beb751786d825047bc60fe1a7179d79` / SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d`.
+
+Cause démontrée : `survivalProfiles()` filtre encore par `p.gameStyle!=="dungeon"`. Capture neuf sans style et Capture reconnu par ses modules passent ce filtre, alors que `gensContentFamilyForProfile()` les classe déjà comme creature. Le renderer Survie consomme directement cette liste.
+
+Six profils exécutés via les fonctions exactes et la vraie API Capture confirment le défaut ; le normaliseur Survie reçoit les deux profils Capture indûment inclus. Aucun défaut de sauvegarde personnelle n'est inféré.
+
+## Prochaine étape
+
+Après la triple CI de fermeture et le checkpoint, ouvrir le lot TDD séparé. Correctif sélectionné : faire utiliser `gensContentFamilyForProfile(p)==="survival"` par le filtre existant de `survivalProfiles()`. Conserver renderer, normaliseur et classification canonique ; ajouter un RED permanent et des assertions sur les listes/cartes réelles.
+
+Aucun changement de runtime dans ce pré-audit. `activeSurvivalModId()`, l'entrée Capture de premier niveau, Dungeon PC et les autres couplages restent des périmètres séparés. Aucun merge ou déploiement main.
+
+Rapport : [GENSRPG_PHASE9_CAPTURE_LIBRARY_FAMILY_CLASSIFICATION_PREAUDIT.md](GENSRPG_PHASE9_CAPTURE_LIBRARY_FAMILY_CLASSIFICATION_PREAUDIT.md).
+
+---
+
 # PHASE 9 — CLASSEMENT SHELL CAPTURE / SURVIE — PRÉ-AUDIT OUVERT — 2026-10-06
 
 Coordinateur : ce fil ; Sylvain confirme avoir arrêté l'ancien fil.

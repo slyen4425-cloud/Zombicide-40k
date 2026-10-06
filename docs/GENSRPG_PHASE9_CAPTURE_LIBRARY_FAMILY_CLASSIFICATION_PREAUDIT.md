@@ -76,3 +76,51 @@ Télécharger ce fichier, le compresser en ZIP si nécessaire et le joindre à c
 Recevoir et vérifier le fichier exact, inspecter le propriétaire de la liste Survie, puis documenter la cause et le prochain correctif concret. Tant que cette inspection manque, le pré-audit reste ouvert.
 
 Le diagnostic Dungeon PC reste clos techniquement, avec retour sur le parcours personnel et visuel précis toujours ouverts. Aucun merge ou déploiement main.
+
+## Inspection exacte et conclusion — 2026-10-06
+
+ZIP reçu : index (1)(3).zip, membre index (1).html. Taille 8165906 octets, blob 1e3398755beb751786d825047bc60fe1a7179d79 et SHA-256 0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d vérifiés. La copie est exactement celle du checkpoint demandé.
+
+Le propriétaire fautif est survivalProfiles(), dans le bloc natif principal du Shell / édition Survie :
+
+```js
+return loadGameProfiles().filter(p=>p.gameStyle!=="dungeon").map(ensureSurvivalProfileData);
+```
+
+Le même runtime classe déjà Capture correctement via gensContentFamilyForProfile(p), qui délègue à GensCaptureV1.isProfile(p). rpgProfiles() et gensFamilyForProfileId() consomment cette classification canonique. Le rendu Survie appelle survivalProfiles() puis génère les cartes des profils retournés.
+
+L'écart est reproduit en exécutant les fonctions exactes extraites du fichier vérifié, avec la véritable API Capture, sans remplacer leur résultat :
+
+| Profil | Famille canonique | Routage Shell | Liste Survie actuelle |
+| --- | --- | --- | --- |
+| Survie explicite | survival | survival | présent |
+| Profil neutre sans style | survival | survival | présent |
+| Dungeon classique | rpg | adventure | absent |
+| Capture neuf sans style | creature | adventure | présent — défaut |
+| Capture historique style Dungeon | creature | adventure | absent |
+| Capture reconnu par ses deux modules | creature | adventure | présent — défaut |
+
+ensureSurvivalProfileData est appelé pour les deux profils Capture indûment inclus. Ce constat explique le doublon signalé et le passage par la normalisation Survie ; il ne démontre pas à lui seul une mutation de la sauvegarde personnelle.
+
+### Correctif sélectionné, dans un lot TDD séparé
+
+Remplacer uniquement le prédicat du filtre de survivalProfiles() par :
+
+```js
+p=>gensContentFamilyForProfile(p)==="survival"
+```
+
+Le normaliseur Survie et le renderer restent inchangés. Le classement commun reste l'autorité ; aucune logique d'identité Capture n'est copiée, aucun wrapper ou masque visuel n'est ajouté.
+
+activeSurvivalModId() conserve une garde historique par gameStyle ; c'est un résidu distinct non modifié dans ce seam. La création d'une entrée Capture de premier niveau reste un chantier ultérieur de Phase 9. Ne pas élargir cette correction aux choix de navigation ou aux réglages de profil.
+
+### Validation du pré-audit
+
+- Archive et empreintes exactes : vérifiées.
+- Inspection et exécution VM sur six profils : défaut reproduit ; classement canonique correct.
+- Aucun runtime, asset ou règle modifié dans ce pré-audit.
+- Fermeture documentaire sur cette branche ; les trois workflows doivent terminer SUCCESS sur son HEAD avant le checkpoint final.
+- Checkpoint final prévu : checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06.
+- Ce checkpoint sera créé uniquement sur le SHA dont la triple CI est réellement verte.
+
+Après ce GREEN : créer le checkpoint de départ et la branche du correctif, déclarer le périmètre, ajouter une sentinelle RED qui teste les profils et les cartes réelles, puis appliquer la condition unique et valider. Le fichier exact est désormais reçu ; aucune nouvelle demande du même ZIP n'est nécessaire tant que son blob reste la base du runtime.

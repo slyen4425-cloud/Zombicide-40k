@@ -132,6 +132,8 @@ function checkSurvival(ids,captures,survivals){
           const manga=clone(dungeon,'library-manga');manga.rpgUniverse.gameplay.profile='manga';
           manga.rpgUniverse.gameplay.modules.capture=false;
           manga.rpgUniverse.gameplay.modules.controllableCreatures=false;
+          // A new Manga universe cannot inherit classic Dungeon content pools.
+          manga.heroPool=[];manga.objectPool=[];manga.enemyConfig={};manga.enemyReserve={};manga.deck={};
           const added=[current,historical,modules,contradictory,custom,neutral,manga];
           profiles.push(...added);saveGameProfiles(profiles);
           return {

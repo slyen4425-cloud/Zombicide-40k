@@ -1,3 +1,49 @@
+# PHASE 9 — ENTRÉE CAPTURE AUTONOME DE PREMIER NIVEAU — PRÉAUDIT OUVERT — 2026-10-06
+
+Branche : `work/gensrpg-phase9-capture-top-level-entry-preaudit-2026-10-06`.
+Départ avant toute modification runtime : `checkpoint/gensrpg-start-phase9-capture-top-level-entry-preaudit-2026-10-06`, base `19e56a082ca0ec36e0169d143776ebc04d3d520d`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06`, même SHA ; Architecture+Browser `37498140987`, Firefox wall `37498140914`, Tactical dock `37498140733` SUCCESS.
+main gelée et revérifiée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Périmètre déclaré avant code
+
+Module : Monster Capture.
+Objectif du préaudit : identifier le propriétaire canonique de l'entrée Capture comme module autonome de premier niveau et le plus petit seam restant qui empêche Capture de démarrer/fermer sans runtime Dungeon ou Survie actif.
+
+Autorités à réutiliser, à confirmer par preuve :
+- identité Capture canonique existante (`GensCaptureV1.isProfile()` / classification déjà GREEN) ;
+- Shell / registre de lancement de modules déjà extrait ;
+- entry/lifecycle Capture déjà présents sous `assets/gensrpg/capture/` ;
+- stockage et contrats Core existants uniquement lorsqu'ils sont réellement communs.
+
+Fonctions et domaines protégés :
+- aucun changement d'identité/classifier Capture ;
+- aucun retour à `gameStyle="dungeon"` ou `isDungeonMode()` comme identité Capture ;
+- ne pas toucher au filtre/éditeur Survie désormais GREEN ;
+- ne pas modifier gameplay, progression, créatures, compétences, combat Capture, Dungeon, Tactical, PvP, assets, PWA ou laboratoires sans preuve directe ;
+- aucun wrapper global, observer, timer/retry, reload, masque ou seconde route concurrente.
+
+## Tests / preuves attendus
+
+1. cartographier les appels réels de l'entrée Capture depuis le Shell jusqu'au lifecycle Capture ;
+2. prouver si un runtime Dungeon/Survie est encore requis, activé ou consulté pour ouvrir/fermer Capture ;
+3. vérifier les chemins Adventure -> Monster Capture déjà GREEN sans confondre conteneur UI et identité/runtime ;
+4. caractériser ouverture, fermeture, retour Shell et réouverture Capture sans runtime hôte étranger ;
+5. conserver les sentinelles Survie/Dungeon/Tactical/PvP et les frontières déjà validées ;
+6. préaudit documentaire d'abord ; aucun runtime tant que le propriétaire et le seam minimal ne sont pas démontrés.
+
+## Risques
+
+Réintroduire une identité Dungeon, créer une seconde route Capture, confondre sélection Adventure avec runtime hôte, casser le Shell ou le retour de module, ou intégrer prématurément les laboratoires Combat/Exploration. Les laboratoires restent des chantiers distincts à examiner avant toute future intégration fonctionnelle.
+
+## Prochaine étape
+
+Lire les propriétaires Shell/Capture, les sentinelles Phase 5/9 et les rapports de raccord déjà GREEN. Identifier une seule dépendance résiduelle démontrée. Si l'analyse exige le contenu exact du gros `index.html`, appliquer immédiatement §26 de la charte et demander le fichier exact du SHA courant au lieu de le faire transiter par le connecteur.
+
+Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — POINT DE REPRISE FINAL — 2026-10-06
 
 Branche : `work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06`.

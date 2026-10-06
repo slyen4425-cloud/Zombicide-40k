@@ -818,6 +818,9 @@ jobs:
       - name: Pré-auditer l'entrée Capture autonome de premier niveau Phase 9
         run: node tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs
 
+      - name: Caractériser le transfert propriétaire du démarrage Capture
+        run: node tests/gens_phase9_capture_session_start_owner_transfer_preaudit_v1.test.cjs
+
       - name: Pré-auditer l'identité Capture Phase 9
         run: node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
 

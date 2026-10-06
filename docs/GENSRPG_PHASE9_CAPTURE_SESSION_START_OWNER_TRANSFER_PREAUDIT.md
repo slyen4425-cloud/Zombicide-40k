@@ -78,3 +78,75 @@ Interdits :
 Un rapport d'ownership, un seam minimal unique, un plan TDD RED/GREEN et la liste stricte des fragments autorisés. Le runtime reste inchangé tant que ce préaudit n'est pas clos.
 
 Aucun merge/deploy main.
+
+
+## Rule 26 exécutée — résultat exact
+
+Le fichier inspecté a été reconstruit localement depuis l'archive utilisateur déjà fournie et les deltas GitHub du GREEN, puis vérifié contre le SHA cible avant lecture :
+- taille : `8166499` octets ;
+- blob Git : `20381d1df0b10b664d5163f308f909cd7a6e45df` ;
+- SHA-256 : `9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b`.
+
+Le corps exact de `captureFix139` possède actuellement l'initialisation de session Capture. Il :
+1. normalise et valide les participants ;
+2. exige les créatures de départ ;
+3. fixe `current` et recharge `state` ;
+4. persiste les participants, héros personnalisés et or de pré-game ;
+5. active la session ;
+6. initialise jour/tour/round/localisation du monde Capture ;
+7. garantit les kits de départ ;
+8. applique le réglage du gestionnaire de tours ;
+9. entre dans le monde Capture ;
+10. effectue une seconde entrée bornée après 1200 ms.
+
+Le Shell final est déjà l'autorité globale de lancement : `assets/gensrpg/shell/module-launch-final-authority-v1.js` remplace `startConfiguredGame()` par un routage générique vers `GensShellModuleLaunchV1.startModuleSession(moduleId)`. Aucun changement Shell n'est donc nécessaire ni autorisé pour ce transfert.
+
+## Classement des dépendances
+
+Capture-owned existant :
+- `gensCaptureParticipantsReady` ;
+- `captureWorldState` / `saveCaptureWorldState` ;
+- `captureEnsureStarterKitsForParticipants` ;
+- `captureEnterWorld139` (consommé temporairement ; sa propriété écran reste un futur lot distinct).
+
+Services partagés existants :
+- `normalizeGameParticipants`, `saveGameParticipants`, `loadState` ;
+- `applyCustomHeroesMulti`, `applyPregameGoldToParticipants`, `markSessionActive` ;
+- `loadGameCustomization`, `saveGameCustomization` ;
+- `startTurnManagerForGame`, `saveTurnState`, `closeTurnPopup`, `renderTurnUi`.
+
+Une seule dépendance ne peut pas être résolue proprement par le namespace global : `current/state` sont des bindings lexicaux. Le futur owner recevra donc un adaptateur explicite `activateParticipant(id)` fourni par le bootstrap historique. Aucun autre gameplay ne doit rester dans ce câblage.
+
+## Seam unique retenu
+
+Nouveau propriétaire :
+`assets/gensrpg/capture/session-start-v1.js` exposant `GensCaptureSessionStartV1`.
+
+Contrat visé :
+- `install(bindings)` : injecte une fois les dépendances explicites et valide leur présence ;
+- `start()` : unique initialiseur de session Capture ;
+- `dispose()` : annule le délai borné restant et remet l'état transitoire à zéro ;
+- `status()` : permet aux sentinelles de vérifier l'installation sans état gameplay dupliqué.
+
+`GensCaptureV1.startModuleSession()` appellera cet owner au lieu de `legacyStartConfiguredGame`.
+`GensCaptureV1.install()` conservera uniquement l'enregistrement du provider Shell et ne recevra plus la fonction Capture139.
+
+Dans `captureFix139`, le corps actuel de `window.startConfiguredGame` et la référence `gensCaptureStartConfiguredGame139V1` seront retirés. Le bloc ne gardera que :
+- `captureEnterWorld139` / retour écran, dette séparée déjà déclarée ;
+- le câblage explicite nécessaire au nouvel owner ;
+- `GensCaptureV1.install()`.
+
+Aucune seconde implémentation active ne sera conservée.
+
+## TDD suivant
+
+Après GREEN documentaire :
+1. créer un checkpoint final de préaudit ;
+2. créer le checkpoint de départ et la branche TDD dédiés ;
+3. écrire un RED permanent exigeant le nouvel owner, l'absence du binding `legacyStartConfiguredGame` et l'absence du corps session dans Capture139 ;
+4. prouver que le chemin Shell réel déclenche le nouvel owner, avec dresseur/créature valides, monde jour 1 et configuration de tours conservés ;
+5. appliquer le transfert exact ;
+6. repinner mécaniquement les sentinelles de blob/taille sans assouplir leurs autres assertions ;
+7. triple CI, preview réel mobile/PC, puis checkpoint GREEN.
+
+Le retour écran n'est pas traité dans ce lot.

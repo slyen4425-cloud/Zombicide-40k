@@ -1,3 +1,32 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — PRÉAUDIT CONCLU / CI EN COURS — 2026-10-06
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`, base `194112b90aa50727fb3e33be1b3bc8b7b52c6b10`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-capture-top-level-entry-preaudit-green-2026-10-06`.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Rule 26 vérifiée
+
+L'index exact du GREEN a été reconstruit localement depuis l'archive utilisateur déjà fournie et les deltas GitHub validés, puis vérifié contre Git :
+8166499 octets / blob `20381d1df0b10b664d5163f308f909cd7a6e45df` / SHA-256 `9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b`.
+
+L'inspection exacte de `captureFix139` confirme que le corps d'initialisation de session est encore inline : validation dresseurs/créatures, participant actif, persistance pré-game, activation session, monde Capture, kits de départ, tours et entrée monde. Le Shell final possède déjà l'unique route globale `startConfiguredGame() -> startModuleSession(moduleId)` ; le Shell ne doit donc pas être modifié.
+
+## Seam sélectionné
+
+Créer un owner Capture dédié `assets/gensrpg/capture/session-start-v1.js` / `GensCaptureSessionStartV1`. Le module public `GensCaptureV1` consommera cet owner au lieu de `legacyStartConfiguredGame`. Capture139 perdra le corps d'initialisation et ne conservera que le câblage minimal des dépendances encore historiques ainsi que son retour écran, qui reste un lot séparé.
+
+Dépendance lexicale particulière : seul l'assignement `current/state` nécessite un adaptateur explicite. Les autres dépendances sont des fonctions Capture ou services partagés existants. Le délai de ré-entrée de 1200 ms, actuellement borné, sera conservé dans le nouvel owner avec nettoyage explicite ; aucun polling, intervalle ou seconde autorité.
+
+Sentinelle de préaudit : `tests/gens_phase9_capture_session_start_owner_transfer_preaudit_v1.test.cjs`.
+Après triple CI SUCCESS sur ce HEAD documentaire : créer `checkpoint/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-green-2026-10-06`, puis ouvrir un lot TDD séparé avec RED avant toute mutation runtime.
+
+`moduleScreenReturn` / propriété de `captureEnterWorld139` reste volontairement hors périmètre. Aucun merge/deploy main.
+
+Rapport : [GENSRPG_PHASE9_CAPTURE_SESSION_START_OWNER_TRANSFER_PREAUDIT.md](GENSRPG_PHASE9_CAPTURE_SESSION_START_OWNER_TRANSFER_PREAUDIT.md).
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — RULE 26 GATE — 2026-10-06
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`.

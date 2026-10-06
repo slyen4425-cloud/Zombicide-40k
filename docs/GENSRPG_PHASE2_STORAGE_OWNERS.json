@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "1e3398755beb751786d825047bc60fe1a7179d79",
+  "sourceIndexBlob": "d721d1665ba937b855d8de6c5b59c8d04d4a2bdf",
   "note": "Resolved localStorage keys plus explicitly unresolved dynamic accesses. Descriptive cartography only; this file does not authorize storage migration or deletion.",
   "totals": {
     "totalAccesses": 181,

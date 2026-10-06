@@ -26,8 +26,8 @@ const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
-assert.equal(bytes.length,8165906,'preaudit must execute the exact verified current Phase 9 index');
-assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79','preaudit current Phase 9 index blob drifted');
+assert.equal(bytes.length,8165926,'preaudit must execute the exact verified current Phase 9 index');
+assert.equal(blob,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf','preaudit current Phase 9 index blob drifted');
 
 function extractFunction(source,name){
   const token='function '+name+'(';

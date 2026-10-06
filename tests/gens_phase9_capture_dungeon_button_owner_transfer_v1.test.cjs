@@ -12,8 +12,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165906,'pregame Dungeon-button ownership RED must inspect the current Phase 9 runtime');
-assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79','pregame Dungeon-button ownership RED must inspect the exact verified runtime blob');
+assert.equal(bytes.length,8165926,'pregame Dungeon-button ownership RED must inspect the current Phase 9 runtime');
+assert.equal(blob,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf','pregame Dungeon-button ownership RED must inspect the exact verified runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';

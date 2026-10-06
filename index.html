@@ -8791,7 +8791,7 @@ function ensureSurvivalProfileData(p){
   return p;
 }
 function survivalProfiles(){
-  return loadGameProfiles().filter(p=>p.gameStyle!=="dungeon").map(ensureSurvivalProfileData);
+  return loadGameProfiles().filter(p=>gensContentFamilyForProfile(p)==="survival").map(ensureSurvivalProfileData);
 }
 function activeSurvivalModId(){
   const p=getActiveGameProfile();

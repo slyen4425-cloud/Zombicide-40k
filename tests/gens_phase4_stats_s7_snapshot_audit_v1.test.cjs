@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))
   .digest('hex');
 
-assert.equal(bytes.length,8165906,'S7 must audit the exact verified current Phase 9 participant raccord index');
-assert.equal(blob,'1e3398755beb751786d825047bc60fe1a7179d79','S7 index blob must remain the current Phase 9 participant raccord source');
+assert.equal(bytes.length,8165926,'S7 must audit the exact verified current Phase 9 participant raccord index');
+assert.equal(blob,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf','S7 index blob must remain the current Phase 9 participant raccord source');
 
 for(const text of [
   'function dungeonCombatHeroSnapshot(heroId){',

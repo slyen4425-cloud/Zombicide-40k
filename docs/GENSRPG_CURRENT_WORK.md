@@ -1,3 +1,29 @@
+# PHASE 9 — BIBLIOTHÈQUE SURVIE — CORRECTIF INTÉGRÉ / VALIDATION FINALE — 2026-10-06
+
+Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06`.
+Checkpoint de départ : `checkpoint/gensrpg-start-phase9-survival-library-canonical-classification-2026-10-06`, base `b3186266b726b649f7010ca831fe3cfcbc1668df`.
+Dernier GREEN avant ce lot : `checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06`, même SHA, triple CI SUCCESS.
+Point de reprise final : `checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06` ; créé uniquement après triple CI SUCCESS sur le SHA exact candidat.
+Production main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat et preuve
+
+`survivalProfiles()` utilise désormais la famille canonique survival. Capture neuf/historique/par modules/contradictoire est exclu de Survie ; son routage Adventure actuel est préservé. Aucune logique Capture, migration, renderer, normaliseur, wrapper, timer ou couche UI ajouté.
+
+RED CI : `37481119855`, commit `15a637a92c37bfaed7a810e9b6a6fbc92d345b5e`. Run TDD réel : `37483773723` ; RED VM/navigateur intact, puis GREEN VM et vrai preview mobile/PC exigés avant le commit runtime. 17 profils VM, lectures sans écriture, listes réelles/refresh/reload/stockage/sélection Capture protégés.
+
+Index : 8165926 octets / blob `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf` / SHA-256 `e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768`. Une condition changée, +20 octets, inversion exacte vers le ZIP reçu. 102 tests repinnés mécaniquement et quatre métadonnées de source mises à jour, sans contrat assoupli. Le script ponctuel est retiré ; le coordinateur retire le workflow avant validation finale.
+
+## Validation finale et suite
+
+Les trois workflows Architecture+Browser, Firefox wall et Tactical dock doivent être SUCCESS sur le même SHA avant création du checkpoint final. Vérifier ce checkpoint dans GitHub ; le transport n'est pas le GREEN final. Le rapport de clôture fournit le lien preview.html du SHA validé et le test manuel Survie -> Adventure -> Capture.
+
+Phase 9 reste en cours. Résidus distincts : `activeSurvivalModId()`, `gensFamilyForProfile()`, autonomie Capture de premier niveau, diagnostic personnel/visuel Dungeon PC. Ne pas rouvrir Phase 8. Aucun merge ou déploiement main.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md](GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md).
+
+---
+
 # PHASE 9 — BIBLIOTHÈQUE SURVIE — SENTINELLE RED AJOUTÉE — 2026-10-06
 
 Le test permanent reproduit quatre variantes Capture indûment incluses, sur 17 profils utilisant les fonctions et l'identité réelles. La classification canonique et les routes préexistantes sont correctes. L'index reste intact, blob `1e3398755beb751786d825047bc60fe1a7179d79`.

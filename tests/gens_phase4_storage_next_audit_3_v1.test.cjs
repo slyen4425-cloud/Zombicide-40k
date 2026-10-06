@@ -22,8 +22,8 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 const index=read('index.html');
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8165906,'index.html byte size drifted from current Phase 9 participant raccord runtime');
-assert.equal(blobSha,'1e3398755beb751786d825047bc60fe1a7179d79','index.html blob must match the current Phase 9 participant raccord runtime source');
+assert.equal(index.length,8165926,'index.html byte size drifted from current Phase 9 participant raccord runtime');
+assert.equal(blobSha,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf','index.html blob must match the current Phase 9 participant raccord runtime source');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');

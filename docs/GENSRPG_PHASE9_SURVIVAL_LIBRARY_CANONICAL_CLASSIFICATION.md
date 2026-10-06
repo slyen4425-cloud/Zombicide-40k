@@ -68,3 +68,21 @@ Architecture 37481119855 : FAILURE attendu sur le test d'appartenance, job 11232
 La condition unique appliquée à la copie locale reçue fait passer les 17 profils, protège les cartes et ne produit aucune écriture persistante. Candidat : 8165926 octets, blob d721d1665ba937b855d8de6c5b59c8d04d4a2bdf, SHA-256 e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768. L'inversion retrouve exactement les octets du ZIP utilisateur.
 
 Le transport vérifie à nouveau le RED VM et le RED navigateur réels avant toute mutation distante. Il n'installe aucune dépendance dans les fichiers suivis, conserve l'index hors connecteur, met à jour les pins sans assouplir les tests, exige le GREEN ciblé et ne publie pas main. Son script s'auto-retire ; son workflow est supprimé via le connecteur avant la triple CI finale afin de séparer les permissions de transport et d'édition des workflows.
+
+## Correctif intégré et preuve TDD réelle — 2026-10-06
+
+- RED CI permanent : commit 15a637a92c37bfaed7a810e9b6a6fbc92d345b5e, Architecture 37481119855, job 112329182345. Échec exact sur l'appartenance de quatre variantes Capture à Survie ; autres identités/routages corrects.
+- Transport ponctuel : run 37483773723, https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37483773723.
+- Ce run exige le RED VM et le RED navigateur sur l'index intact, puis GREEN VM et vrai preview.html mobile/PC avant de produire le commit runtime.
+- Nouveau runtime : 8165926 octets, blob d721d1665ba937b855d8de6c5b59c8d04d4a2bdf, SHA-256 e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768.
+- Diff runtime : une seule condition dans survivalProfiles(), +20 octets ; inversion exacte vers l'index utilisateur vérifiée.
+- La logique de classification, les normaliseurs, renderers, profils, paramètres et quatre runtimes ne sont pas modifiés.
+- 102 fichiers de tests ont seulement leurs empreintes taille/blob repinnées. Quatre métadonnées de cartographie sont repinnées ; aucune assertion de comportement n'est assouplie.
+- Le script de transport se retire dans le commit runtime. Le coordinateur retire le workflow ponctuel avec le connecteur avant la triple CI finale ; aucun installateur permanent ajouté.
+- Preuves navigateur dans l'artefact gensrpg-survival-library-tdd : membership, stockage, rechargement, sélection Capture et captures des vraies listes.
+
+Le raccord VM couvre 17 profils : 8 Survie, 5 Capture, 4 Dungeon/Manga. Le vrai preview couvre les deux listes sur mobile et PC, rafraîchissement, rechargement, invariance des profils/du profil actif/des sauvegardes avant sélection, puis sélection réelle de Capture via le propriétaire V155 existant. Le chemin actif reste Capture et ne crée pas de runtime Dungeon.
+
+Point de reprise final : checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06. Ce checkpoint est créé uniquement sur le SHA exact dont Architecture+Browser, Firefox wall et Tactical dock terminent tous SUCCESS ; le run de transport seul ne constitue pas ce GREEN final.
+
+Le lien manuel de clôture est fourni sur le SHA validé de preview.html. Le test utilisateur ciblé reste ouvert. Phase 9 non close : autonomie Capture de premier niveau et autres résidus restent distincts. main demeure e8681f9823573ced8aec59c8ddc47a72b02bc663, sans merge ni déploiement.

@@ -16,9 +16,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165906,
+assert.equal(bytes.length,8165926,
   'Phase 7 authored exit-lock characterization must track the terminal-exit GREEN runtime');
-assert.equal(gitBlob,'1e3398755beb751786d825047bc60fe1a7179d79',
+assert.equal(gitBlob,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf',
   'Phase 7 authored exit-lock characterization must track the exact terminal-exit GREEN blob');
 
 assert.match(

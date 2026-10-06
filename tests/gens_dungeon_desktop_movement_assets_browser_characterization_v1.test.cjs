@@ -149,7 +149,9 @@ async function move(page,touch){
     return Number(choice.dataset.dcMapIndex);
   });
   const cell=page.locator('#dc047RoomBoard .dc047Cell[data-dc-map-index="'+target+'"]');
-  await cell.scrollIntoViewIfNeeded();
+  // Trial pointer action waits on the live locator and re-resolves a cell rebuilt by a render.
+  // It scrolls and checks actionability without emitting the movement click.
+  await cell.click({trial:true});
   const hit=await cell.evaluate(e=>{
     const r=e.getBoundingClientRect(),top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
     return {accepted:!!top&&(top===e||e.contains(top)),top:top?.tagName,classes:top?.className};

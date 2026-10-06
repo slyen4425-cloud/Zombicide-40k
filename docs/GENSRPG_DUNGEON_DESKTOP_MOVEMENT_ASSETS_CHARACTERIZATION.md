@@ -59,11 +59,15 @@ Ce contrôle porte sur les scènes enregistrées, pas sur tout le catalogue ni s
 
 Les premières itérations ont corrigé le test, sans modification du produit : locator « Valider » ambigu avec « Retour », prise en compte d'une vraie notice d'événement, puis budget global de 300 secondes insuffisant pour les quatre parcours. Les contextes PC/mobile indépendants sont désormais exécutés en parallèle, avec un watchdog global de 600 secondes. Aucun contrôle n'a été supprimé pour obtenir le résultat.
 
+La répétition sur `4841d13cd5101accf118d641b886874f7c2bdd17` ([run 37438946458](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37438946458), job `112188124475`) a exposé une autre fragilité du test : `scrollIntoViewIfNeeded` échoue si son élément est détaché pendant un rendu. Le premier déplacement PC avait fonctionné ; après fin du tour, le runtime indiquait tour 2, trois cases, onze cases accessibles et zéro erreur. Le test échouait avant le second clic ; les deux parcours mobiles étaient terminés avec succès. Les preuves de cette répétition ont été téléchargées et vérifiées (artefact `11400288055`, SHA-256 `356889b58bba84ba279887e2895860906e06e23cbea147952b9ad04dace9e385`).
+
+L'attente utilise désormais `locator.click({trial:true})` : Playwright résout la case vivante, fait défiler et vérifie son actionnabilité sans émettre de clic. Le hit-test explicite, le vrai clic/tap et toutes les assertions de position, coût et fin de tour restent exécutés. Aucun retry d'une mutation métier, clic forcé ou changement du moteur n'est ajouté.
+
 Le test dédié est `tests/gens_dungeon_desktop_movement_assets_browser_characterization_v1.test.cjs`. La CI Architecture+Browser existante reçoit son invocation et l'upload `always()` des captures/JSON ; tous les contrôles antérieurs restent présents. Le watchdog et les contextes appartiennent seulement au test.
 
-Sur `b37fbe2bdb66104b7dd61e4fb0cc4d0ae0adf661`, le diagnostic dédié, l'architecture, Firefox Wall+Zoom ([run 37437911415](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37437911415)) et les trois jobs Tactical ([run 37437911436](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37437911436)) sont verts. La suite navigateur historique du run 37437911494 était encore en cours lors de la rédaction de cette clôture.
+Sur `b37fbe2bdb66104b7dd61e4fb0cc4d0ae0adf661`, le diagnostic dédié, l'architecture, Firefox Wall+Zoom ([run 37437911415](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37437911415)) et les trois jobs Tactical ([run 37437911436](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37437911436)) sont verts. La suite navigateur historique du run 37437911494 est également terminée SUCCESS : 335 étapes architecture et 50 étapes navigateur.
 
-Le commit de clôture ne contient que ce rapport et la mise à jour de CURRENT_WORK. Ses trois workflows requis doivent être intégralement SUCCESS sur le même HEAD avant de publier le checkpoint final. L'existence du checkpoint nommé ci-dessus est la preuve de cette validation finale ; aucun état partiel ne doit être présenté comme GREEN.
+Le HEAD de clôture ajoute l'attente de locator décrite ci-dessus dans le test, ce rapport et la mise à jour de CURRENT_WORK. Ses trois workflows requis doivent être intégralement SUCCESS sur le même HEAD avant de publier le checkpoint final. L'existence du checkpoint nommé ci-dessus est la preuve de cette validation finale ; aucun état partiel ne doit être présenté comme GREEN.
 
 ## Test manuel précis
 

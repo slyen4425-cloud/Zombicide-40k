@@ -100,3 +100,13 @@ Point de reprise final : checkpoint/gensrpg-phase9-survival-library-canonical-cl
 Test manuel ciblé : ouvrir la preview du SHA validé, Survie doit présenter 40K et les univers Survie, avec Monster Capture absent ; revenir aux modes, ouvrir Adventure, sélectionner Monster Capture. Capture doit rester accessible et distinct de Dungeon. Le retour utilisateur est encore à recueillir avant publication.
 
 Après ce jalon technique : pré-auditer séparément les consommateurs résiduels de gameStyle et l'autonomie Shell Capture prévue en Phase 9. Ne pas modifier main, reprendre Phase 8 ou rouvrir les laboratoires. Les observations personnelles Dungeon PC restent séparées.
+
+## Adaptation déclarée de la preuve historique d'inversion — avant modification du test
+
+Architecture 37484352811, job 112340437847 : les autres contrôles statiques et la nouvelle sentinelle passent ; échec de tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs sur la reconstruction globale du runtime précédent. Firefox 37484352898 et Tactical 37484352845 : SUCCESS sur a49e9ea707ab86d5d8eaa0811fb5c296b5a1bf27.
+
+Cause : ce test inverse le transfert antérieur de l'entrée Dungeon dans le HTML actuel, puis exige le blob historique 37056722bb0a27f96e26b3ef3b05e9543dc5a223. La condition nouvelle de survivalProfiles() reste présente dans sa reconstruction ; elle doit être inversée explicitement avant la preuve historique.
+
+Adaptation prévue : reconnaître exactement une occurrence du nouveau propriétaire survivalProfiles(), inverser cette seule condition, vérifier que cette inversion récupère le blob exact 1e3398755beb751786d825047bc60fe1a7179d79 du pré-audit b3186266b726b649f7010ca831fe3cfcbc1668df, puis exécuter les trois inversions historiques existantes et conserver l'assertion finale contre le blob 37056722bb0a27f96e26b3ef3b05e9543dc5a223. Le fixture JSON, son SHA-256, le classifier V151, les 18 cas de frontière, les clauses natives et les assertions de stockage ne sont pas modifiés. Aucun nouveau blob dérivé ne remplace le checkpoint historique.
+
+Ce contrôle supplémentaire rend explicite la composition des deux seams autorisés ; il n'assouplit aucune assertion de comportement ou d'intégrité. Seul ce test historique s'ajoute au périmètre des deux nouvelles sentinelles et des pins. Le runtime reste strictement identique au candidat d721d1665ba937b855d8de6c5b59c8d04d4a2bdf. Relancer les trois workflows sur le HEAD adapté avant le checkpoint final.

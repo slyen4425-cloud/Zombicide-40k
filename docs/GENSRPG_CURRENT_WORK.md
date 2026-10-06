@@ -1,3 +1,15 @@
+# PHASE 9 — VALIDATION FINALE : PREUVE HISTORIQUE D'INVERSION À ADAPTER — 2026-10-06
+
+Candidat runtime inchangé : `a1391b78578e9ea4c25b5f05695e39e049351c11`, blob `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf`. Branche et checkpoint de départ ci-dessous restent applicables ; aucun nouveau GREEN final.
+
+Sur le HEAD `a49e9ea707ab86d5d8eaa0811fb5c296b5a1bf27`, Firefox `37484352898` et Tactical `37484352845` sont SUCCESS. Architecture `37484352811` bloque sur le test d'inversion complète de l'ancien transfert d'entrée Dungeon : notre condition Survie nouvelle n'est pas encore inversée dans cette preuve historique.
+
+Périmètre additionnel déclaré avant code : adapter uniquement `tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs`. Inverser exactement notre nouvelle condition, contrôler le blob du pré-audit `1e3398755beb751786d825047bc60fe1a7179d79`, puis garder la reconstruction et le blob historiques `37056722bb0a27f96e26b3ef3b05e9543dc5a223` inchangés. Préserver fixture immutable, classifier, 18 cas, propriétaires et comportements. Aucune assertion assouplie, aucun runtime supplémentaire modifié.
+
+Prochaine étape : preuve locale de cette composition stricte, puis triple CI du HEAD adapté et checkpoint final. Rapport détaillé ci-dessous.
+
+---
+
 # PHASE 9 — BIBLIOTHÈQUE SURVIE CANONIQUE — POINT DE REPRISE — 2026-10-06
 
 Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06`.

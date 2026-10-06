@@ -50,3 +50,17 @@ VM local RED exact : « Capture must not be selected by the Survival editor », 
 ## Fixture positive préparée par ses propriétaires réels
 
 Transport 37497157544 : RED VM et vrai navigateur confirmés avant mutation, puis douze gardes/inverse exact appliqués en runner. Le premier GREEN VM révélait une fixture Survie partiellement normalisée : la vraie duplication complétait légitimement les règles. Préparer seulement les profils Survie par ensureSurvivalProfileData() et saveGameProfiles() réels avant les assertions ; profils Capture et toutes les assertions exactes inchangés. Aucun commit runtime n’a été produit par ce run échoué. La nouvelle passe doit conserver les deux RED puis obtenir les deux GREEN.
+
+## Correctif natif et TDD réel — 2026-10-06
+
+- RED CI permanent : 37496576542 / job 112382541562 / commit 4bd3d77e3b953da183cfec06ba1788da62567bb5 ; échec exact « Capture must not be selected by the Survival editor ».
+- Transport contrôlé : https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37497531956.
+- Le transport exige RED VM et navigateur sur l’index intact, puis GREEN VM et vrai preview mobile/PC avant le commit runtime.
+- Runtime : 8166499 octets / 20381d1df0b10b664d5163f308f909cd7a6e45df / SHA-256 9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b. Douze fonctions natives, conditions uniquement, +573 octets. Inverse exact vers le checkpoint de départ.
+- Paramètres Survie personnalisés sauvegardés, relus et affichés après reload ; profils Capture neufs/historiques/modules/contradictoires refusés ; état devenu étranger pendant l’édition refusé par les neuf actions natives testées.
+- 102 repins mécaniques taille/blob ; quatre métadonnées repinnées ; preuve historique étendue de façon réversible, fixture et anciens blobs immuables conservés.
+- Aucun classifier, identité, filtre de liste, route, seed, schéma, gameplay, renderer, applyGameProfile(), asset, PWA ou autre runtime modifié.
+- Script retiré dans ce commit ; workflow retiré ensuite par le coordinateur avant le HEAD final.
+- Artefacts gensrpg-survival-editor-tdd : RED et GREEN, données de preuve et captures réelles.
+
+Le transport seul ne constitue pas le GREEN final : Architecture+Browser, Firefox wall et Tactical dock doivent réussir sur le HEAD exact de clôture avant checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06. Test manuel ciblé à faire sur ce SHA. Phase 9 reste en cours ; aucun merge/deploy main.

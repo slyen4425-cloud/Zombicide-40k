@@ -119,12 +119,25 @@ assert.doesNotMatch(index,/\bwindow\.openSessionDungeonSetup\s*=/,'no inline mod
 assert.doesNotMatch(block('captureFix137'),/openSessionDungeonSetup/,'Capture137 relinquishes Dungeon navigation');
 assert.doesNotMatch(block('gensStability151'),/openD151|openSessionDungeonSetup/,'V151 relinquishes this entry');
 
+// Invert the separately declared canonical Survival-editor guard seam first.
+const editorBoundarySeams=[{"count": 1, "before": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&p.gameStyle!==\"dungeon\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}", "after": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&gensContentFamilyForProfile(p)===\"survival\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}"}, {"count": 1, "before": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&x.gameStyle!==\"dungeon\");\n  if(p)applyGameProfile(p,false);\n}", "after": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\");\n  if(p)applyGameProfile(p,false);\n}"}, {"count": 1, "before": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&x.gameStyle!==\"dungeon\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID)\n}", "after": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID&&gensContentFamilyForProfile(x)===\"survival\")\n}"}, {"count": 1, "before": "function selectSurvivalModProfile(id){smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}", "after": "function selectSurvivalModProfile(id){if(!loadGameProfiles().some(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\"))return;smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}"}, {"count": 6, "before": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;", "after": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(i<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(pi<0)return;", "after": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(pi<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source)return;", "after": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source||String(source.id)!==String(smodEditingId))return;"}];
+let beforeEditorBoundary=index;
+for(const seam of [...editorBoundarySeams].reverse()){
+  assert.equal(beforeEditorBoundary.split(seam.after).length-1,seam.count,"declared canonical editor guard count");
+  beforeEditorBoundary=beforeEditorBoundary.split(seam.after).join(seam.before);
+}
+const editorBoundaryBytes=Buffer.from(beforeEditorBoundary,"utf8");
+const editorBoundaryBlob=crypto.createHash("sha1").update(Buffer.concat([
+  Buffer.from("blob "+editorBoundaryBytes.length+"\0"),editorBoundaryBytes
+])).digest("hex");
+assert.equal(editorBoundaryBlob,"d721d1665ba937b855d8de6c5b59c8d04d4a2bdf","inverse editor guards must recover the exact preceding GREEN");
+
 // Compose the separately authorized Survival-library seam before the historical
 // owner-transfer inverse. Both immutable checkpoints remain byte-exact targets.
 const previousLibrary='function survivalProfiles(){\n  return loadGameProfiles().filter(p=>p.gameStyle!=="dungeon").map(ensureSurvivalProfileData);\n}';
 const canonicalLibrary='function survivalProfiles(){\n  return loadGameProfiles().filter(p=>gensContentFamilyForProfile(p)==="survival").map(ensureSurvivalProfileData);\n}';
-assert.equal(index.split(canonicalLibrary).length-1,1,'exactly one canonical Survival-library owner must be present');
-const ownershipRuntime=index.replace(canonicalLibrary,previousLibrary);
+assert.equal(beforeEditorBoundary.split(canonicalLibrary).length-1,1,'exactly one canonical Survival-library owner must be present');
+const ownershipRuntime=beforeEditorBoundary.replace(canonicalLibrary,previousLibrary);
 const ownershipBytes=Buffer.from(ownershipRuntime,'utf8');
 const ownershipBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+ownershipBytes.length+'\0'),ownershipBytes

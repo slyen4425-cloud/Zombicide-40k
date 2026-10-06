@@ -8795,7 +8795,7 @@ function survivalProfiles(){
 }
 function activeSurvivalModId(){
   const p=getActiveGameProfile();
-  if(p&&p.gameStyle!=="dungeon")return p.id;
+  if(p&&gensContentFamilyForProfile(p)==="survival")return p.id;
   return GAME_PROFILE_BASE_ID;
 }
 function activeSurvivalMod(){
@@ -8809,7 +8809,7 @@ function activeSurvivalMod(){
   };
 }
 function setActiveSurvivalMod(id){
-  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&x.gameStyle!=="dungeon");
+  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)==="survival");
   if(p)applyGameProfile(p,false);
 }
 let smodEditingId=null;
@@ -8824,13 +8824,13 @@ function showSurvivalModTab(tab){
   const el=document.getElementById("smodTab_"+tab);if(el)el.style.display="block";
 }
 function currentSmodProfile(){
-  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&x.gameStyle!=="dungeon")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID)
+  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID&&gensContentFamilyForProfile(x)==="survival")
 }
 function currentSmod(){
   const p=currentSmodProfile();if(!p)return null;ensureSurvivalProfileData(p);
   return {id:p.id,name:p.name,desc:p.desc||"",protected:!!p.builtIn,...p.survival,pools:{heroes:p.heroPool||[],items:p.objectPool||[],enemies:Object.keys(p.enemyConfig||{})}};
 }
-function selectSurvivalModProfile(id){smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}
+function selectSurvivalModProfile(id){if(!loadGameProfiles().some(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)==="survival"))return;smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}
 function renderSurvivalModEditor(){
   const profiles=survivalProfiles(),mod=currentSmod(),profile=currentSmodProfile();if(!mod||!profile)return;
   const sel=document.getElementById("smodProfileSelect");
@@ -8879,7 +8879,7 @@ function renderSurvivalModPools(profile){
 }
 function checkedSmodPool(id){return [...document.querySelectorAll("#"+id+" input[type=checkbox]:checked")].map(x=>String(x.value))}
 function saveSurvivalModPools(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);
   p.heroPool=checkedSmodPool("smodHeroPool");
   p.objectPool=checkedSmodPool("smodItemPool");
@@ -8906,14 +8906,14 @@ function renderSmodLevels(){
     '<button type="button" class="danger" onclick="removeSurvivalThreatLevel('+i+')">✕</button></div>').join("");
 }
 function addSurvivalThreatLevel(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);const levels=p.survival.levels;
   const n=levels.length,last=levels[n-1];
   levels.push({id:"level_"+Date.now().toString(36),name:"Niveau "+(n+1),color:"#777777",xp:last?Number(last.xp||0)+10:0,skillSlots:1,waveMultiplier:1,doubleWaveChance:0});
   saveGameProfiles(profiles);renderSurvivalModEditor();
 }
 function removeSurvivalThreatLevel(i){
-  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(pi<0)return;
+  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(pi<0)return;
   const p=profiles[pi];ensureSurvivalProfileData(p);
   if(p.survival.levels.length<=1){alert("Il faut conserver au moins un niveau.");return}
   p.survival.levels.splice(i,1);saveGameProfiles(profiles);renderSurvivalModEditor();
@@ -8930,7 +8930,7 @@ function readSmodLevels(){
   })).sort((a,b)=>a.xp-b.xp);
 }
 function saveSurvivalModIdentity(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);
   p.name=document.getElementById("smodName")?.value.trim()||"Univers Survie";
   p.desc=document.getElementById("smodDesc")?.value.trim()||"";
@@ -8939,7 +8939,7 @@ function saveSurvivalModIdentity(){
   saveGameProfiles(profiles);applyGameProfile(p,false);renderSurvivalModEditor();renderGensFamilyGamesIfVisible();alert("Univers enregistré ✅");
 }
 function saveSurvivalModProgression(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);
   p.survival.xpCap=Math.max(1,Number(document.getElementById("smodXpCap")?.value)||100);
   p.survival.baseActions=Math.max(1,Number(document.getElementById("smodBaseActions")?.value)||3);
@@ -8947,7 +8947,7 @@ function saveSurvivalModProgression(){
   saveGameProfiles(profiles);applyGameProfile(p,false);renderSurvivalModEditor();alert("Progression enregistrée ✅");
 }
 function saveSurvivalModRules(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);
   p.survival.rules={searchCost:Math.max(0,Number(document.getElementById("smodSearchCost")?.value)||0),reloadCost:Math.max(0,Number(document.getElementById("smodReloadCost")?.value)||0),equipCost:Math.max(0,Number(document.getElementById("smodEquipCost")?.value)||0),searchLimit:Math.max(0,Number(document.getElementById("smodSearchLimit")?.value)||0),baseHp:Math.max(1,Number(document.getElementById("smodBaseHp")?.value)||3),friendlyFire:document.getElementById("smodFriendlyFire")?.value==="true",keepGear:document.getElementById("smodKeepGear")?.value==="true",keepXp:document.getElementById("smodKeepXp")?.value==="true",xpMultiplier:Math.max(0,Number(document.getElementById("smodXpMultiplier")?.value)||1),lootMultiplier:Math.max(0,Number(document.getElementById("smodLootMultiplier")?.value)||1),lootDraws:Math.max(0,Number(document.getElementById("smodLootDraws")?.value)||1)};
   saveGameProfiles(profiles);applyGameProfile(p,false);alert("Règles enregistrées ✅");
@@ -8957,14 +8957,14 @@ function renderSmodWaveRules(){
   host.innerHTML=(mod.levels||[]).map((l,i)=>'<div class="smodLevelRow" data-i="'+i+'"><span style="width:34px;height:28px;border-radius:6px;background:'+z40kEscAttr(l.color||"#777")+'"></span><strong>'+z40kEscHtml(l.name||("Niveau "+(i+1)))+'</strong><input class="smodWaveMult" type="number" min="0" max="100" step="0.05" value="'+(Number(l.waveMultiplier)||1)+'" title="Multiplicateur vague"><input class="smodWaveDouble" type="number" min="0" max="100" value="'+(Number(l.doubleWaveChance)||0)+'" title="% double invasion"><span class="smodMini wideHide">× vague · % double</span></div>').join("");
 }
 function saveSurvivalModWaveRules(){
-  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;
+  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)==="survival");if(i<0)return;
   const p=profiles[i];ensureSurvivalProfileData(p);
   [...document.querySelectorAll("#smodWaveRules .smodLevelRow")].forEach((row,i)=>{if(!p.survival.levels?.[i])return;p.survival.levels[i].waveMultiplier=Math.max(0,Number(row.querySelector(".smodWaveMult")?.value)||1);p.survival.levels[i].doubleWaveChance=Math.max(0,Math.min(100,Number(row.querySelector(".smodWaveDouble")?.value)||0))});
   saveGameProfiles(profiles);applyGameProfile(p,false);alert("Règles de vagues enregistrées ✅");
 }
 function newSurvivalModProfile(){createNewSurvivalUniverse(true)}
 function duplicateSurvivalModProfile(){
-  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source)return;
+  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source||String(source.id)!==String(smodEditingId))return;
   const copy=JSON.parse(JSON.stringify(source));
   copy.id=gameProfileId();copy.name=(source.name||"Univers")+" — copie";copy.builtIn=false;delete copy.factory;copy.createdAt=Date.now();
   ensureSurvivalProfileData(copy);profiles.push(copy);saveGameProfiles(profiles);

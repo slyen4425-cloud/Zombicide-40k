@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "d721d1665ba937b855d8de6c5b59c8d04d4a2bdf",
+  "sourceIndexBlob": "20381d1df0b10b664d5163f308f909cd7a6e45df",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",

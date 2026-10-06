@@ -1,3 +1,21 @@
+# PHASE 9 — FRONTIÈRE CANONIQUE ÉDITEUR SURVIE — CORRECTIF INTÉGRÉ — 2026-10-06
+
+Branche : work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06.
+Départ : checkpoint/gensrpg-start-phase9-survival-editor-canonical-boundary-2026-10-06, base 797316634b1354522adee616c637013aad69a1eb.
+Dernier GREEN : checkpoint/gensrpg-phase9-survival-editor-family-boundary-preaudit-green-2026-10-06, même base triple SUCCESS.
+Point final : checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06, uniquement après triple CI SUCCESS du HEAD exact.
+main gelée : e8681f9823573ced8aec59c8ddc47a72b02bc663.
+
+Douze gardes natives classent sélection, lecture, fallback, sept écrivains et duplication stale par l’autorité existante. Corps de règle/rendu inchangés. RED permanent 37496576542 ; transport TDD 37497531956 exige RED VM/navigateur puis GREEN VM/preview mobile-PC avant runtime.
+
+Index : 8166499 / 20381d1df0b10b664d5163f308f909cd7a6e45df / SHA-256 9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b, +573 octets et inverse exact. 102 repins mécaniques, quatre métadonnées et composition stricte de la preuve historique sans fixture/blob/cas assoupli. Paramètres Survie personnalisés sauvegardés/relus, profils étrangers intacts.
+
+Prochaine étape : retirer le workflow temporaire, triple CI du HEAD de clôture, checkpoint final et lien manuel. Si le checkpoint final est absent, finir cette validation ; s’il existe, prendre son SHA pour le prochain préaudit de l’entrée Capture autonome. Phase 9 en cours ; Phase 8 close ; Dungeon PC/visuel et labos distincts. Aucun merge/deploy.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md](GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md).
+
+---
+
 # PHASE 9 — FRONTIÈRE CANONIQUE ÉDITEUR SURVIE — LOT TDD OUVERT — 2026-10-06
 
 Branche : `work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06`.

@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165926,
+assert.equal(bytes.length,8166499,
   'non-combat room result RED must start from the exact materialization-characterization runtime size');
-assert.equal(gitBlob,'d721d1665ba937b855d8de6c5b59c8d04d4a2bdf',
+assert.equal(gitBlob,'20381d1df0b10b664d5163f308f909cd7a6e45df',
   'non-combat room result RED must start from the exact materialization-characterization runtime blob');
 
 const sandbox={};

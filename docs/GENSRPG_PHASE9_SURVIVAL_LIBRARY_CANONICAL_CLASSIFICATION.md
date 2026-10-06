@@ -45,7 +45,7 @@ Résidus connus, hors correction : activeSurvivalModId() et gensFamilyForProfile
 7. Appliquer seulement le prédicat prévu, contrôler l'inversion exacte et repinner mécaniquement les empreintes de référence.
 8. Conserver tous les anciens tests et vérifier Architecture+Browser, Firefox wall et Tactical dock sur le même SHA final.
 
-Le transport du gros index utilise un workflow ponctuel borné à cette branche, vérifie main et l'empreinte de départ, puis se retire dans le commit runtime. Il ne publie ni main ni Pages. Le diff inverse doit reconstruire exactement les octets de départ.
+Le transport du gros index utilise un workflow ponctuel borné à cette branche, vérifie main et l'empreinte de départ, puis son script se retire dans le commit runtime et son workflow est retiré par le coordinateur avant la triple CI finale. Il ne publie ni main ni Pages. Le diff inverse doit reconstruire exactement les octets de départ.
 
 ## État et prochaine étape
 
@@ -60,3 +60,11 @@ Le test tests/gens_phase9_survival_library_canonical_classification_v1.test.cjs 
 Le test conserve les vrais chargement/stockage/normaliseur/renderers et observe uniquement les appels au normaliseur. Aucun résultat de famille ou de liste n'est injecté. Le test navigateur permanent utilise le vrai preview.html et les graines actuelles, enrichies par de vrais profils stockés ; il couvre mobile puis PC, les deux listes, rafraîchissement, rechargement et sélection réelle Capture.
 
 Les deux sentinelles sont ajoutées tôt dans Architecture+Browser ; aucune sentinelle existante n'est retirée. Le RED CI est attendu tant que le propriétaire n'a pas été corrigé. Prochaine étape : vérifier ce RED, puis transporter la condition unique avec contrôle d'empreinte et validation réelle RED/GREEN navigateur.
+
+## RED CI confirmé et correctif local vérifié
+
+Architecture 37481119855 : FAILURE attendu sur le test d'appartenance, job 112329182345, commit 15a637a92c37bfaed7a810e9b6a6fbc92d345b5e. Firefox 37481120148 et Tactical 37481120043 : SUCCESS sur le même SHA ; navigateur architecture sauté après le RED unitaire.
+
+La condition unique appliquée à la copie locale reçue fait passer les 17 profils, protège les cartes et ne produit aucune écriture persistante. Candidat : 8165926 octets, blob d721d1665ba937b855d8de6c5b59c8d04d4a2bdf, SHA-256 e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768. L'inversion retrouve exactement les octets du ZIP utilisateur.
+
+Le transport vérifie à nouveau le RED VM et le RED navigateur réels avant toute mutation distante. Il n'installe aucune dépendance dans les fichiers suivis, conserve l'index hors connecteur, met à jour les pins sans assouplir les tests, exige le GREEN ciblé et ne publie pas main. Son script s'auto-retire ; son workflow est supprimé via le connecteur avant la triple CI finale afin de séparer les permissions de transport et d'édition des workflows.

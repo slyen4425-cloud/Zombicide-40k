@@ -153,6 +153,7 @@ async function authoredFixture(page){
     const R=DungeonRoomCreator100,B=DungeonWorldBuilder167821;
     const room=R.createRoom({id:'pc_movement_room',name:'Diagnostic déplacement PC',width:4,height:4,theme:'stone'});
     room.cells=room.cells.map(c=>({...c,terrain:'floor',object:null}));
+    room.cells[0].terrain='wall';room.cells[1].terrain='wall';
     room.cells[12].object='entry';room.cells[3].object='exit';R.upsertRoom(room);
     const world=B.createDungeon({name:'Diagnostic déplacement PC'});
     const added=B.addRoomInstance(world.id,room.id,'Salle diagnostic');
@@ -160,6 +161,20 @@ async function authoredFixture(page){
     const validation=B.validation(B.findDungeon(world.id));
     const selected=DungeonWorldSessionBridge167832.selectWorld(world.id,false);
     return {worldId:world.id,roomId:room.id,nodeId:added.node.id,validation,selected};
+  });
+}
+async function generatedFixture(page){
+  // Isolate pointer input from random ambushes/events via real adventure content APIs.
+  // Profile movement flags, hero positions, budgets and listeners remain untouched.
+  return page.evaluate(()=>{
+    const adventure=dungeonAdventureFromConfig('Diagnostic déplacement généré');
+    adventure.config={...adventure.config,
+      roomWeights:{enemy:0,ambush:0,trap:0,chest:0,merchant:0,rest:1,mystery:0},
+      events:false,eventChance:0,specialBranchChance:0,challengeDoorChance:0,
+      secondaryObjectiveChance:0};
+    saveDungeonAdventures([...loadDungeonAdventures(),adventure]);
+    const selected=DungeonWorldSessionBridge167832.selectAdventure(adventure.id,false);
+    return {adventureId:adventure.id,selected};
   });
 }
 (async()=>{
@@ -187,6 +202,8 @@ async function authoredFixture(page){
           await page.goto('http://127.0.0.1:'+server.address().port+'/preview.html',{waitUntil:'domcontentloaded'});
           await ready(page);await home(page);
           if(kind==='generated'){
+            row.fixture=await generatedFixture(page);
+            assert.equal(row.fixture.selected,true);
             mark(device.name+'-default-profile');
             await start(page);row.default=await state(page);
             assert.equal(row.default.module,false,'fresh reference Dungeon defaults must remain user-configurable');

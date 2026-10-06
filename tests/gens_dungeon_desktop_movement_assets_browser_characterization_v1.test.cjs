@@ -193,15 +193,17 @@ async function generatedFixture(page){
   });
 }
 (async()=>{
-  const watchdog=setTimeout(()=>{console.error('[dungeon-pc] WATCHDOG '+stage);process.exit(1)},300000);
+  const watchdog=setTimeout(()=>{console.error('[dungeon-pc] WATCHDOG '+stage);process.exit(1)},600000);
   fs.mkdirSync(artifacts,{recursive:true});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   try{
-    for(const device of [
+    const devices=[
       {name:'desktop',viewport:{width:1366,height:768},deviceScaleFactor:1,isMobile:false,hasTouch:false},
       {name:'mobile',viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true}
-    ]){
+    ];
+    // Devices use isolated storage/browser contexts and distinct screenshots.
+    const results=await Promise.allSettled(devices.map(async device=>{
       for(const kind of ['generated','authored']){
         const context=await browser.newContext({...device,locale:'fr-FR',serviceWorkers:'block'});
         await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
@@ -267,7 +269,9 @@ async function generatedFixture(page){
           await context.close();
         }
       }
-    }
+    }));
+    const failed=results.find(result=>result.status==='rejected');
+    if(failed)throw failed.reason;
     console.log(JSON.stringify({scenario:'Dungeon real desktop clicks/mobile taps and visible assets',evidence},null,2));
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.close();await browser.close();

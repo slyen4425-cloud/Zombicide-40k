@@ -67,14 +67,14 @@ async function start(page){
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.locator('#sessionDungeonSetupBtn').click();
   await page.locator('#sessionDungeonLibrary .gameProfileCard').first().waitFor({state:'visible'});
-  await page.locator('#sessionDungeonSetup button[onclick="closeSessionDungeonSetup()"]').click();
+  await page.locator('#sessionDungeonSetup button.startGameBtn[onclick="closeSessionDungeonSetup()"]').click();
   assert.equal(await page.locator('#sessionDungeonSetup').isVisible(),false,'library must close before game start');
   await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
   const choices=page.locator('#participantList input[type="checkbox"]');
   await choices.first().waitFor({state:'visible'});
   const count=await choices.count();
   for(let i=0;i<count;i++)await choices.nth(i).setChecked(i===0);
-  await page.locator('#sessionHeroSetup button[onclick="closeSessionHeroSetup()"]').click();
+  await page.locator('#sessionHeroSetup button.startGameBtn[onclick="closeSessionHeroSetup()"]').click();
   await page.locator('#pregameSetup button[onclick="startConfiguredGame()"]').click();
   await page.waitForFunction(()=>DungeonCore01.active===true&&!!localStorage.getItem('gensrpg_dungeon_runtime_v2'));
   await page.locator('#dc01Explore').click();

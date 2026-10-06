@@ -94,6 +94,8 @@ function checkSurvival(ids,captures,survivals){
           const dungeon=profiles.find(p=>p.id===dungeonId);
           if(!original||!base||!dungeon)throw new Error('real built-in profiles required');
           if(!GensCaptureV1.isProfile(original))throw new Error('real built-in Capture identity required');
+          ensureSurvivalProfileData(base);
+          ensureRpgProfileData(dungeon);
           const clone=(source,id)=>({...JSON.parse(JSON.stringify(source)),id,name:id,builtIn:false});
           const current=clone(original,'library-capture-new');delete current.gameStyle;
           const historical=clone(original,'library-capture-historical');historical.gameStyle='dungeon';

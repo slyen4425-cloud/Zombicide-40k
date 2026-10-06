@@ -1,0 +1,92 @@
+name: GenSrpG Phase 9 Survival editor canonical boundary one-shot
+# One declared native editor boundary; RED precedes mutation and inverse is byte-exact.
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06'
+    paths:
+      - '.github/workflows/gensrpg-phase9-survival-editor-canonical-boundary-apply.yml'
+      - 'tools/gensrpg_phase9_survival_editor_canonical_boundary_apply.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-canonical-survival-editor:
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/gensrpg-survival-editor-browsers
+    steps:
+      - name: Checkout the declared lot only
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify exact baseline and frozen main
+        run: |
+          test "$GITHUB_REF_NAME" = "work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse origin/main)" = "e8681f9823573ced8aec59c8ddc47a72b02bc663"
+          test "$(git hash-object index.html)" = "d721d1665ba937b855d8de6c5b59c8d04d4a2bdf"
+          test "$(wc -c < index.html)" = "8165926"
+          test "$(node -p 'require("playwright/package.json").version')" = "1.55.0"
+
+      - name: Install Chromium using the existing pinned Playwright
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+
+      - name: Require precise VM and real-browser RED before mutation
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          import shutil
+          targets=[
+            ('tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs','Capture must not be selected by the Survival editor'),
+            ('tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs','Capture must not be selected by the Survival editor in real preview'),
+          ]
+          for test,reason in targets:
+              result=subprocess.run(['node',test],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+              print(result.stdout,flush=True)
+              assert result.returncode==1 and reason in result.stdout, 'expected defect RED not proven: '+test
+          shutil.copytree('artifacts/gensrpg-survival-editor','artifacts/gensrpg-survival-editor-red',dirs_exist_ok=True)
+          PY
+
+      - name: Apply twelve native guards and strictly compose fingerprints
+        run: python3 tools/gensrpg_phase9_survival_editor_canonical_boundary_apply.py apply
+
+      - name: Require precise VM and real-preview mobile-PC GREEN
+        run: |
+          node tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs
+          node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
+
+      - name: Document evidence and remove the one-shot script
+        run: |
+          python3 tools/gensrpg_phase9_survival_editor_canonical_boundary_apply.py finalize
+          git diff --cached --check
+          git diff --cached --stat
+          git diff --cached -- index.html
+
+      - name: Commit the verified candidate without publishing main
+        run: |
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "e8681f9823573ced8aec59c8ddc47a72b02bc663"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix(gensrpg): protect Survival editor through canonical profile family"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Preserve precise RED-GREEN browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gensrpg-survival-editor-tdd
+          path: |
+            artifacts/gensrpg-survival-editor/
+            artifacts/gensrpg-survival-editor-red/
+          if-no-files-found: ignore

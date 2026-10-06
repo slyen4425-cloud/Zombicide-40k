@@ -1,3 +1,30 @@
+# PHASE 9 — BIBLIOTHÈQUE SURVIE / CLASSEMENT CANONIQUE — LOT TDD OUVERT — 2026-10-06
+
+Coordinateur : ce fil, ancien fil arrêté par Sylvain.
+Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06`.
+Checkpoint de départ : `checkpoint/gensrpg-start-phase9-survival-library-canonical-classification-2026-10-06`, créé avant code.
+Base exacte et dernier GREEN : `b3186266b726b649f7010ca831fe3cfcbc1668df`, `checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06`.
+Pré-audit : Architecture+Browser `37478026750`, Firefox `37478026555`, Tactical Dock `37478026603` — SUCCESS sur ce SHA.
+Production main : `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée.
+
+## Périmètre et invariants
+
+Modifier seulement le prédicat de `survivalProfiles()` pour réutiliser `gensContentFamilyForProfile(p)==="survival"`. Le normaliseur et le renderer restent inchangés. Aucune nouvelle identité Capture, route, autorité, couche UI ou logique de gameplay.
+
+Protégés : identité Capture, classifier, RPG list/routage, seeds, launch, normaliseurs, sauvegardes, paramètres, héros, stats, mouvement, combat, assets, PWA et quatre modules. Risques : carte valide perdue, routage modifié, Capture normalisé comme Survie. `activeSurvivalModId()`, `gensFamilyForProfile()`, autonomie Capture de premier niveau et observations Dungeon PC restent des chantiers séparés.
+
+Index exact reçu : 8165906 octets / blob `1e3398755beb751786d825047bc60fe1a7179d79` / SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d`. Le pré-audit n'a pas changé ces octets.
+
+## Tests et prochaine étape
+
+Ajouter le RED permanent sur les fonctions exactes et la vraie API Capture ; tests de profils neufs/historiques/par modules/contradictoires/partiels. Ajouter le vrai `preview.html` PC/mobile : listes Survie/Adventure, rafraîchissement, rechargement, stockage et sélection. Conserver tous les tests existants et leurs contrats ; seuls les pins d'empreinte et les métadonnées de source seront repinnés mécaniquement après la condition unique.
+
+Prochaine étape : test RED avant toute mutation de runtime, puis correctif du propriétaire et triple CI sur le SHA final. Checkpoint final : `checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06`, créé uniquement après ces validations. Aucun merge ou déploiement.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md](GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md).
+
+---
+
 # PHASE 9 — CLASSEMENT CAPTURE / SURVIE — PRÉ-AUDIT CONCLU — 2026-10-06
 
 Branche : `work/gensrpg-phase9-capture-library-family-classification-preaudit-2026-10-06`.

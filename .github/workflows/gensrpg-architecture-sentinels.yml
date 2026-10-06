@@ -1037,6 +1037,17 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
+      - name: Caractériser les déplacements Dungeon PC/mobile et les images réelles
+        run: node tests/gens_dungeon_desktop_movement_assets_browser_characterization_v1.test.cjs
+
+      - name: Conserver les captures et preuves du diagnostic Dungeon PC
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dungeon-desktop-movement-assets
+          path: artifacts/dungeon-desktop-movement-assets/
+          if-no-files-found: ignore
+
       - name: Vérifier l'isolation navigateur V114.11
         run: node tests/gens_v11411_native_ui_browser.test.cjs
 

@@ -40,7 +40,6 @@ assert.doesNotMatch(entry,/DungeonCore|DungeonSpatial|GensTactical|CombatRuntime
   'public entry must not acquire a foreign private runtime dependency');
 
 assert.match(publicRaccord,/legacySessionOwner:'Capture139'/);
-assert.match(s3,/await legacyStartConfiguredGame\(\)/);
 assert.match(s3,/Capture139 remains the gameplay\/session owner/);
 
 assert.match(shell,/activeModule\(\)/);

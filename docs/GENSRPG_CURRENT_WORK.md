@@ -1,3 +1,30 @@
+# PHASE 9 — LISTE SURVIE CANONIQUE — POINT DE REPRISE FINAL — 2026-10-06
+
+Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-survival-library-canonical-classification-2026-10-06` sur `b3186266b726b649f7010ca831fe3cfcbc1668df` ; dernier GREEN avant ce lot : `checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06`, même SHA.
+Point final : `checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06`, créé uniquement après Architecture+Browser, Firefox wall et Tactical dock SUCCESS sur le HEAD exact de fermeture. Résoudre ce checkpoint dans GitHub ; s'il est absent, finir la validation du HEAD courant avant de commencer un autre lot.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat et preuve
+
+Une condition de `survivalProfiles()` fait désormais utiliser la famille canonique survival. Capture est exclu de Survie et reste accessible dans Adventure. Runtime : `a1391b78578e9ea4c25b5f05695e39e049351c11`, index blob `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf`, 8165926 octets (+20), SHA-256 `e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768`. Aucun autre JS/CSS/asset/seed/contrat runtime modifié.
+
+RED permanent : Architecture `37481119855`. TDD VM et vrai preview mobile/PC : [`37483773723`](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37483773723) SUCCESS. 17 profils, listes réelles, refresh, reload, stockage exact et sélection Capture protégés. Les profils de test sont valides et préparés par les API existantes ; aucune classification ou liste correcte injectée.
+
+102 tests ont seulement les pins de taille/blob mis à jour ; quatre métadonnées de source repinnées. Un test historique supplémentaire compose explicitement l'inversion de notre condition, vérifie le blob du pré-audit, puis conserve le blob historique, le fixture immutable et ses 18 cas de frontière. Les deux preuves d'intégrité et les nouvelles assertions sont GREEN localement. Script et workflow de transport retirés.
+
+## Validation finale et prochaine étape
+
+L'ancien HEAD `a49e9ea707ab86d5d8eaa0811fb5c296b5a1bf27` a Firefox `37484352898` et Tactical `37484352845` SUCCESS ; Architecture `37484352811` révélait uniquement la preuve historique non composée. Le HEAD présent corrige cette preuve sans nouveau changement de runtime et doit obtenir la triple CI avant le checkpoint final.
+
+Test manuel du SHA validé : Survie, vérifier Capture absent ; Modes -> Adventure -> Monster Capture, vérifier sa sélection. Le lien exact est fourni au rapport de clôture. Test utilisateur encore ouvert ; aucun merge ni déploiement.
+
+Phase 9 continue par des pré-audits séparés : `activeSurvivalModId()` / `gensFamilyForProfile()`, puis autonomie Capture de premier niveau. Retour personnel/visuel Dungeon PC toujours distinct. Phase 8 close, laboratoires inchangés.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md](GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md).
+
+---
+
 # PHASE 9 — VALIDATION FINALE : PREUVE HISTORIQUE D'INVERSION À ADAPTER — 2026-10-06
 
 Candidat runtime inchangé : `a1391b78578e9ea4c25b5f05695e39e049351c11`, blob `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf`. Branche et checkpoint de départ ci-dessous restent applicables ; aucun nouveau GREEN final.

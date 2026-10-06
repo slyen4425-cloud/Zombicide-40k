@@ -119,7 +119,20 @@ assert.doesNotMatch(index,/\bwindow\.openSessionDungeonSetup\s*=/,'no inline mod
 assert.doesNotMatch(block('captureFix137'),/openSessionDungeonSetup/,'Capture137 relinquishes Dungeon navigation');
 assert.doesNotMatch(block('gensStability151'),/openD151|openSessionDungeonSetup/,'V151 relinquishes this entry');
 
-const restored=index.replace(native,before.native)
+// Compose the separately authorized Survival-library seam before the historical
+// owner-transfer inverse. Both immutable checkpoints remain byte-exact targets.
+const previousLibrary='function survivalProfiles(){\n  return loadGameProfiles().filter(p=>p.gameStyle!=="dungeon").map(ensureSurvivalProfileData);\n}';
+const canonicalLibrary='function survivalProfiles(){\n  return loadGameProfiles().filter(p=>gensContentFamilyForProfile(p)==="survival").map(ensureSurvivalProfileData);\n}';
+assert.equal(index.split(canonicalLibrary).length-1,1,'exactly one canonical Survival-library owner must be present');
+const ownershipRuntime=index.replace(canonicalLibrary,previousLibrary);
+const ownershipBytes=Buffer.from(ownershipRuntime,'utf8');
+const ownershipBlob=crypto.createHash('sha1').update(Buffer.concat([
+  Buffer.from('blob '+ownershipBytes.length+'\0'),ownershipBytes
+])).digest('hex');
+assert.equal(ownershipBlob,'1e3398755beb751786d825047bc60fe1a7179d79',
+  'undoing only the declared Survival-library predicate must recover the byte-exact preaudit GREEN');
+
+const restored=ownershipRuntime.replace(native,before.native)
   .replace(before.anchor137,before.removed137+before.anchor137)
   .replace(before.anchor151,before.removed151+before.anchor151);
 const restoredBytes=Buffer.from(restored,'utf8');

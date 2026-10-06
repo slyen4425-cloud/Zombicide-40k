@@ -1,3 +1,34 @@
+# PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — POINT DE REPRISE FINAL — 2026-10-06
+
+Branche : `work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-survival-editor-canonical-boundary-2026-10-06`, base `797316634b1354522adee616c637013aad69a1eb`.
+Dernier GREEN avant ce lot : `checkpoint/gensrpg-phase9-survival-editor-family-boundary-preaudit-green-2026-10-06`, même base ; Architecture+Browser `37492464948`, Firefox `37492464522`, Tactical dock `37492464844` SUCCESS.
+Point final : `checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06`. Créer ce checkpoint uniquement après Architecture+Browser, Firefox wall et Tactical dock SUCCESS sur le HEAD exact de clôture. Absent, finir cette validation ; présent, prendre son SHA comme point de reprise unique.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat vérifié
+
+Douze fonctions natives de l’éditeur Survie délèguent leurs gardes à la classification canonique existante : sélection/lecture, fallback, sept écrivains et duplication d’un identifiant stale. Capture, Dungeon et Manga sont refusés au bon propriétaire ; aucun classifier parallèle, wrapper, timer ou masque.
+
+Runtime `cbd3b692c8447a883e4404de3bbaf75b7d4d913e` : 8166499 octets / blob `20381d1df0b10b664d5163f308f909cd7a6e45df` / SHA-256 `9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b`. +573 octets, douze lignes propriétaires modifiées ; inversion intégrale byte-exact vers la base. Filtre Survie GREEN, classifier, identité, routes, seeds, valeurs de jeu, corps des écrivains/renderers, application des profils, assets et autres runtimes inchangés.
+
+## Tests et intégrité
+
+RED permanent Architecture `37496576542`, job `112382541562`, SHA `4bd3d77e3b953da183cfec06ba1788da62567bb5`.
+TDD complet [37497531956](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37497531956) SUCCESS : RED VM + vrai navigateur intact, puis GREEN VM (17 profils, 31 propriétaires réels, 90 actions étrangères bloquées, 54 actions Survie) et GREEN preview mobile/PC, sauvegarde/affichage des paramètres personnalisés après reload, Capture réel et neuf actions sur profil devenu Capture pendant l’édition. Une fixture Survie a été préparée par normaliseur/sauvegarde réels ; aucune assertion assouplie.
+
+102 tests ont uniquement taille/blob repinnés ; quatre métadonnées de source repinnées ; preuve historique composée avec inverse du seam, cibles immuables et 18 cas conservés. Transport ponctuel retiré avant HEAD final. Les runs finaux sont attachés au SHA résolu par le checkpoint ; aucun commit supplémentaire uniquement pour leurs IDs.
+
+## Test manuel et suite
+
+Sur le preview.html du SHA GREEN : Survie -> univers personnalisé -> éditeur -> modifier/enregistrer progression ou règles -> recharger -> vérifier valeurs ; Adventure -> Monster Capture -> vérifier son accès. Lien exact fourni au bilan de clôture.
+
+Validation utilisateur du classement précédent acquise. Nouveau test manuel ciblé encore ouvert avant publication. Après GREEN, préauditer l’entrée Capture autonome de premier niveau suivant roadmap ; ancien helper gensFamilyForProfile() sans appel statique identifié, classé à part. Phase 9 reste en cours, Phase 8 close. Observations Dungeon PC/visuel et laboratoires distincts. Aucun merge/deploy.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md](GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md).
+
+---
+
 # PHASE 9 — FRONTIÈRE CANONIQUE ÉDITEUR SURVIE — CORRECTIF INTÉGRÉ — 2026-10-06
 
 Branche : work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06.

@@ -64,3 +64,19 @@ Transport 37497157544 : RED VM et vrai navigateur confirmés avant mutation, pui
 - Artefacts gensrpg-survival-editor-tdd : RED et GREEN, données de preuve et captures réelles.
 
 Le transport seul ne constitue pas le GREEN final : Architecture+Browser, Firefox wall et Tactical dock doivent réussir sur le HEAD exact de clôture avant checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06. Test manuel ciblé à faire sur ce SHA. Phase 9 reste en cours ; aucun merge/deploy main.
+
+## Clôture technique et point de reprise
+
+Runtime enregistré : cbd3b692c8447a883e4404de3bbaf75b7d4d913e. Transport TDD 37497531956 SUCCESS, job 112385813378 : les deux RED ont précédé la mutation, puis les deux GREEN ont précédé le commit. VM : 17 profils / 31 fonctions / 90 actions étrangères refusées / 54 actions Survie préservées. Vrai preview : mobile et PC, paramètres personnalisés après reload, profils Capture conservés et neuf actions sur sélection devenue étrangère sans modification d’aucune clé persistante.
+
+La fixture positive passe par le normaliseur et la sauvegarde réels avant les assertions de copie exactes ; la copie est comparée intégralement à sa source normalisée. Les formats Capture neufs sans survival et les résidus historiques restent des cas distincts.
+
+Index : 8166499 octets, blob 20381d1df0b10b664d5163f308f909cd7a6e45df, SHA-256 9bace694ada4e3dd3701ebf6803a53df298ed3079150dd366633974f38f3fc1b. Douze fonctions, douze lignes modifiées, +573 octets ; inversion de tous les fragments exactement vers d721d1665ba937b855d8de6c5b59c8d04d4a2bdf. Aucun schéma, migration, gameplay, classifier, rendu, route, seed, asset ou autre runtime changé.
+
+102 tests repinnés mécaniquement ; quatre métadonnées ; une extension historique strictement réversible avec blob de base et anciennes cibles/fixture/18 cas conservés. Les fichiers de transport sont retirés avant la clôture.
+
+Checkpoint final : checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06, uniquement après triple CI SUCCESS du HEAD de fermeture. Résoudre la référence pour connaître le SHA final testé ; absent, terminer cette validation avant tout nouveau lot. Les runs utiles de TDD sont ci-dessus ; les runs finaux restent directement attachés au SHA de ce checkpoint.
+
+Test manuel sur preview.html de ce SHA : Survie -> univers personnalisé -> éditeur -> paramètres/progression -> sauvegarder -> recharger et vérifier ; Adventure -> Monster Capture -> vérifier accès. Validation manuelle de ce nouveau seam encore ouverte avant publication. Classement précédent validé par Sylvain.
+
+Prochain périmètre après checkpoint : préaudit de l’entrée Capture autonome de premier niveau, une responsabilité à la fois, en rappelant la refonte menée dans les laboratoires distincts avant toute intégration. Phase 9 non fermée. Phase 8 close. Déplacement/visuel personnel Dungeon PC toujours distinct. main reste e8681f9823573ced8aec59c8ddc47a72b02bc663, aucun merge/deploy.

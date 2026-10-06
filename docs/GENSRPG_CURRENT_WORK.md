@@ -1,3 +1,31 @@
+# PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — PRÉAUDIT CONCLU — 2026-10-06
+
+Sylvain valide le classement Capture/Survie à 17:51 Europe/Paris : lot précédent clos pour son périmètre. Aucun merge/deploy main autorisé.
+
+Branche : `work/gensrpg-phase9-survival-editor-family-boundary-preaudit-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-survival-editor-family-boundary-preaudit-2026-10-06`, base `7d317cc77683f1c3ce0f5e8696984f8c9b65a2a7`.
+Dernier GREEN de base : `checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06`, même SHA ; Architecture+Browser `37485298316`, Firefox `37485298290`, Tactical dock `37485298338` SUCCESS.
+Point final : `checkpoint/gensrpg-phase9-survival-editor-family-boundary-preaudit-green-2026-10-06`, créé seulement après triple CI SUCCESS du HEAD documentaire de clôture. Absent, finir cette validation ; présent, prendre son SHA comme base du prochain lot.
+main vérifiée gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat
+
+Liste Survie correcte. Frontière éditeur encore fondée sur l’ancien style : lecteurs/sélecteurs, état smodEditingId et sept écrivains directs peuvent accepter un profil étranger. 12 profils / 63 couples profil-action, fonctions exactes + vraie identité Capture : la sauvegarde native d’identité modifie Capture. Ports DOM/rendu/application observés ; persistance prouvée par saveGameProfiles() réel. Pas de conclusion sur un bouton visible ou un incident personnel.
+
+gensFamilyForProfile() : une déclaration inline, aucune référence dans les 39 scripts externes directement référencés et contrôlés ; helper laissé hors correction. Vrai routage Shell inchangé.
+
+## Prochain lot
+
+Après GREEN : TDD « frontière canonique éditeur Survie ». Gardes natives de sélection/lecture et sept écrivains déléguant au classifier existant ; rejet étranger avant état ; duplication stale rejetée au lieu de dupliquer le fallback ; suppression/fallback protégés. RED permanent + preview réel mobile/PC, paramètres Survie personnalisés sauvegardés/relus et profils étrangers intacts ; triple CI et checkpoint. Sans seconde identité ni wrapper.
+
+Pré-audit documentaire uniquement. Runtime égal au blob GitHub `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf`, 8165926 octets, SHA-256 `e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768`, inchangé. Rapport + preuve JSON + reproduction.
+
+Phase 9 en cours, autonomie Capture au premier niveau à réaliser. Phase 8 close ; Dungeon PC/visuel distinct ; laboratoires inchangés.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_EDITOR_FAMILY_BOUNDARY_PREAUDIT.md](GENSRPG_PHASE9_SURVIVAL_EDITOR_FAMILY_BOUNDARY_PREAUDIT.md).
+
+---
+
 # PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — PRÉAUDIT OUVERT — 2026-10-06
 
 Sylvain valide le classement Capture/Survie à 17:51 Europe/Paris et autorise la poursuite selon charte et plan.

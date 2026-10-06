@@ -42,7 +42,7 @@ async function home(page){
   await card.click();
   await page.locator('#gensGameHomeActions .newGameBtn').waitFor({state:'visible'});
 }
-async function configureMovement(page){
+async function configureMovement(page,isolateRoundEvents=false){
   // Exercise the actual creator settings and persistence, not a patched runtime flag.
   await page.locator('#gensGameHome button[onclick="backToGensFamily()"]').click();
   await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseCardActions button').first().click();
@@ -57,6 +57,15 @@ async function configureMovement(page){
   await modal.locator('#rpgMovementRefreshMode').selectOption('turn');
   await modal.locator('button[onclick="saveRpgMovementSettings()"]').click();
   await page.waitForFunction(()=>getActiveGameProfile()?.rpgUniverse?.movement?.mode==='tactical');
+  if(isolateRoundEvents){
+    // Test-scene configuration through the creator UI; keep real auto-combat guards intact.
+    await modal.locator('button[onclick="showRpgUniverseTab(\'exploration\')"]').click();
+    await modal.locator('#rpgRoundEvents').selectOption('false');
+    await modal.locator('#rpgEventTrigger').selectOption('manual');
+    await modal.locator('#rpgEventChance').fill('0');
+    await modal.locator('button[onclick="saveRpgUniverseExploration()"]').click();
+    await page.waitForFunction(()=>getActiveGameProfile()?.rpgUniverse?.exploration?.roundEvents===false);
+  }
   await modal.locator('button[onclick="closeRpgUniverseEditor()"]').click();
   await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn').click();
   const stored=await page.evaluate(()=>({module:getActiveGameProfile()?.rpgUniverse?.gameplay?.modules?.movement,mode:getActiveGameProfile()?.rpgUniverse?.movement?.mode,enabled:getActiveGameProfile()?.rpgUniverse?.movement?.enabled}));
@@ -190,8 +199,10 @@ async function generatedFixture(page){
       events:false,eventChance:0,specialBranchChance:0,challengeDoorChance:0,
       secondaryObjectiveChance:0};
     saveDungeonAdventures([...loadDungeonAdventures(),adventure]);
+    // The bridge selects the kind; the adventure owner applies the actual legacy id/config.
+    const applied=applyDungeonAdventure(adventure.id,false);
     const selected=DungeonWorldSessionBridge167832.selectAdventure(adventure.id,false);
-    return {adventureId:adventure.id,selected};
+    return {adventureId:adventure.id,applied,selected,activeAdventureId:activeDungeonAdventureId(),roomWeights:loadDungeonConfig().roomWeights};
   });
 }
 (async()=>{
@@ -222,7 +233,10 @@ async function generatedFixture(page){
           await ready(page);await home(page);
           if(kind==='generated'){
             row.fixture=await generatedFixture(page);
+            assert.equal(row.fixture.applied,true);
             assert.equal(row.fixture.selected,true);
+            assert.equal(row.fixture.activeAdventureId,row.fixture.adventureId);
+            assert.deepEqual(row.fixture.roomWeights,{enemy:0,ambush:0,trap:0,chest:0,merchant:0,rest:1,mystery:0});
             mark(device.name+'-default-profile');
             row.defaultNotices=await start(page);row.default=await state(page);
             assert.equal(row.default.module,false,'fresh reference Dungeon defaults must remain user-configurable');
@@ -237,7 +251,11 @@ async function generatedFixture(page){
             await home(page);
           }
           mark(device.name+'-'+kind+'-editor-enable');
-          row.settings=await configureMovement(page);
+          row.settings=await configureMovement(page,kind==='generated');
+          if(kind==='generated'){
+            row.sceneSettings=await page.evaluate(()=>({adventureId:activeDungeonAdventureId(),roundEvents:currentRpgEventSettings().roundEvents,eventTrigger:currentRpgEventSettings().eventTrigger,eventChance:currentRpgEventSettings().eventChance}));
+            assert.deepEqual(row.sceneSettings,{adventureId:row.fixture.adventureId,roundEvents:false,eventTrigger:'manual',eventChance:0});
+          }
           if(kind==='authored'){
             row.fixture=await authoredFixture(page);
             assert.equal(row.fixture.validation.valid,true);

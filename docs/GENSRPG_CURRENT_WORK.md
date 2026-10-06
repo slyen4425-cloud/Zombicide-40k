@@ -1,3 +1,32 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — RULE 26 GATE — 2026-10-06
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`, SHA `194112b90aa50727fb3e33be1b3bc8b7b52c6b10`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-capture-top-level-entry-preaudit-green-2026-10-06`, même SHA.
+CI GREEN de base : Architecture+Browser `37506319577`, Firefox `37506319678`, Tactical `37506319532`.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Diagnostic acquis
+
+`GensCaptureV1` possède déjà l'identité et le provider public Capture. Le premier verrou d'autonomie de premier niveau restant est l'initialisation de session : `startModuleSession()` appelle encore `legacyStartConfiguredGame`, lié explicitement à Capture139.
+
+Le contrat `moduleScreenReturn` reste une dette séparée ; ne pas la traiter dans ce lot.
+
+## Gate active
+
+Le prochain diagnostic exige le corps exact de Capture139 dans `index.html`. Application stricte de la charte §26 : aucun transport du gros HTML par connecteur, aucune vieille copie.
+
+Fichier requis : `index.html` du SHA `194112b90aa50727fb3e33be1b3bc8b7b52c6b10`.
+Empreinte attendue inchangée : 8166499 octets / blob `20381d1df0b10b664d5163f308f909cd7a6e45df`.
+
+Après réception : vérifier l'empreinte, inspecter Capture139 localement, cartographier uniquement le chemin session-start, sélectionner un seam unique et écrire le RED avant toute mutation runtime.
+
+Rapport : [GENSRPG_PHASE9_CAPTURE_SESSION_START_OWNER_TRANSFER_PREAUDIT.md](GENSRPG_PHASE9_CAPTURE_SESSION_START_OWNER_TRANSFER_PREAUDIT.md).
+
+Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — ENTRÉE CAPTURE AUTONOME — PRÉAUDIT DOCUMENTÉ / CI EN COURS — 2026-10-06
 
 Branche : `work/gensrpg-phase9-capture-top-level-entry-preaudit-2026-10-06`.

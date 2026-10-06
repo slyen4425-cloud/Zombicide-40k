@@ -1,3 +1,40 @@
+# PHASE 9 — ENTRÉE CAPTURE AUTONOME — PRÉAUDIT DOCUMENTÉ / CI EN COURS — 2026-10-06
+
+Branche : `work/gensrpg-phase9-capture-top-level-entry-preaudit-2026-10-06`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-top-level-entry-preaudit-2026-10-06`, base `19e56a082ca0ec36e0169d143776ebc04d3d520d`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06`.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Diagnostic
+
+L'entrée publique Capture est bien active et correctement possédée par `GensCaptureV1` pour l'identité et le provider Shell. Le premier verrou d'autonomie encore actif est le **binding de démarrage de session vers Capture139** :
+
+- `GensCaptureV1.startModuleSession()` appelle encore `legacyStartConfiguredGame()` ;
+- `install(legacyStart)` exige explicitement la fonction legacy Capture139 ;
+- le contrat Capture déclare encore `temporary legacy Capture139 session start binding` ;
+- les sentinelles historiques confirment que Capture139 reste le propriétaire temporaire de la session.
+
+Le contrat `moduleScreenReturn` reste `declared-not-loaded`, mais cette dette est séparée afin de ne pas mélanger démarrage et fermeture dans un même lot.
+
+## Preuves ajoutées
+
+- rapport : `docs/GENSRPG_PHASE9_CAPTURE_TOP_LEVEL_ENTRY_PREAUDIT.md` ;
+- sentinelle : `tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs` ;
+- workflow Architecture : exécution permanente de cette sentinelle.
+
+Aucun runtime, gameplay, profil, route, asset ou laboratoire modifié.
+
+## Sortie attendue
+
+Le HEAD documentaire doit obtenir Architecture+Browser, Firefox wall et Tactical dock SUCCESS avant :
+`checkpoint/gensrpg-phase9-capture-top-level-entry-preaudit-green-2026-10-06`.
+
+Après ce checkpoint, ouvrir un lot Rule 26 séparé pour inspecter le corps exact de Capture139 et sélectionner le plus petit transfert de propriétaire de démarrage de session vers le module Capture. Aucun déplacement du corps legacy n'est autorisé avant cette inspection.
+
+Rapport : [GENSRPG_PHASE9_CAPTURE_TOP_LEVEL_ENTRY_PREAUDIT.md](GENSRPG_PHASE9_CAPTURE_TOP_LEVEL_ENTRY_PREAUDIT.md).
+
+---
+
 # PHASE 9 — ENTRÉE CAPTURE AUTONOME DE PREMIER NIVEAU — PRÉAUDIT OUVERT — 2026-10-06
 
 Branche : `work/gensrpg-phase9-capture-top-level-entry-preaudit-2026-10-06`.

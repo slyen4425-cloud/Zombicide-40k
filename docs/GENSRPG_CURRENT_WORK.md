@@ -1,3 +1,22 @@
+# PHASE 9 — FRONTIÈRE CANONIQUE ÉDITEUR SURVIE — LOT TDD OUVERT — 2026-10-06
+
+Branche : `work/gensrpg-phase9-survival-editor-canonical-boundary-2026-10-06`.
+Départ avant code : `checkpoint/gensrpg-start-phase9-survival-editor-canonical-boundary-2026-10-06`, base `797316634b1354522adee616c637013aad69a1eb`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-survival-editor-family-boundary-preaudit-green-2026-10-06`, même SHA ; Architecture+Browser `37492464948`, Firefox `37492464522`, Tactical dock `37492464844` SUCCESS.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Périmètre : douze fonctions natives de l’éditeur Survie, conditions de sélection/lecture, état smodEditingId, sept écrivains et duplication stale. Déléguer au classifier existant, fallback classé et identifiant étranger rejeté. Corps de calcul/rendu, classifier, filtre Survie, routes, seeds, applyGameProfile, sauvegardes et autres modes protégés. Sans wrapper ou seconde identité.
+
+Préadit : 12 profils / 63 couples profil-action / 31 fonctions exactes (compteur documentaire corrigé), mutation étrangère démontrée par saveGameProfiles() réel. Repins mécaniques et inversion historique explicitement composés sans assouplir fixture/blobs/18 cas.
+
+Prochaine étape : RED permanent VM + vrai preview mobile/PC avant mutation, paramètres Survie personnalisés sauvegardés/relus, profil devenu Capture pendant l’édition, stockage étranger intact. Puis gardes natives, inverse byte-exact, GREEN ciblés, transport retiré, triple CI et `checkpoint/gensrpg-phase9-survival-editor-canonical-boundary-green-2026-10-06`.
+
+Index source disponible : 8165926 octets / `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf` / SHA-256 `e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768`. Aucun transport HTML par connecteur. Validation utilisateur du classement précédent acquise. Phase 9 en cours, autonomie Capture à venir ; Phase 8 close ; Dungeon PC et laboratoires distincts. Aucun merge/deploy.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md](GENSRPG_PHASE9_SURVIVAL_EDITOR_CANONICAL_BOUNDARY.md).
+
+---
+
 # PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — PRÉAUDIT CONCLU — 2026-10-06
 
 Sylvain valide le classement Capture/Survie à 17:51 Europe/Paris : lot précédent clos pour son périmètre. Aucun merge/deploy main autorisé.

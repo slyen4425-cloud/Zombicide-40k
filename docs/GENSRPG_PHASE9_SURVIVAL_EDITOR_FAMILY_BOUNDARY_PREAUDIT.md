@@ -51,7 +51,7 @@ Sept écrivains retrouvent directement cet identifiant sans garde : saveSurvival
 
 ### Sources et preuve
 
-12 profils / 63 couples profil-action / 30 fonctions exactes / vraie API Capture. Les fixtures contiennent des pools et niveaux retenus ; Capture porte un champ survival résiduel, format à protéger. Les profils neufs sans ce champ devront aussi entrer dans le prochain TDD.
+12 profils / 63 couples profil-action / 31 fonctions exactes / vraie API Capture. Les fixtures contiennent des pools et niveaux retenus ; Capture porte un champ survival résiduel, format à protéger. Les profils neufs sans ce champ devront aussi entrer dans le prochain TDD.
 
 Classifier, chargement, profil actif, normaliseur et saveGameProfiles() sont réels. Les ports DOM, alert/confirmation, rendus et applyGameProfile() sont observés/simulés. La mutation est prouvée par le vrai saveGameProfiles(), avant le port application. Il ne s’agit pas encore d’une preuve de bouton visible dans un navigateur ni d’une corruption personnelle.
 

@@ -25,6 +25,9 @@ jobs:
       - name: Vérifier RuntimeBootstrap V1
         run: node tests/gens_runtime_bootstrap_v1.test.cjs
 
+      - name: Verrouiller la frontière canonique de l’éditeur Survie
+        run: node tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs
+
       - name: Verrouiller le classement canonique de la bibliothèque Survie
         run: node tests/gens_phase9_survival_library_canonical_classification_v1.test.cjs
 
@@ -1039,6 +1042,17 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+
+      - name: Verrouiller l’éditeur Survie et les sauvegardes étrangères en vrai navigateur mobile et PC
+        run: node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
+
+      - name: Conserver les preuves de la frontière native de l’éditeur Survie
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gensrpg-survival-editor
+          path: artifacts/gensrpg-survival-editor/
+          if-no-files-found: ignore
 
       - name: Vérifier les bibliothèques réelles Survie et Adventure sur mobile et PC
         run: node tests/gens_phase9_survival_library_canonical_classification_browser_v1.test.cjs

@@ -42,3 +42,7 @@ Le runtime de 8 Mo ne transite pas par connecteur. Le transport CI ponctuel appl
 ## État
 
 Lot ouvert, tests RED à ajouter, aucun correctif runtime. Phase 9 en cours ; autonomie Capture au premier niveau et observations personnelles Dungeon PC distinctes.
+
+## Sentinelles permanentes ajoutées
+
+VM local RED exact : « Capture must not be selected by the Survival editor », profil Capture renvoyé à la place de 40K. Les tests utilisent les fonctions exactes et l’API réelle ; les ports DOM/rendu/application du VM sont observés, tandis que le navigateur traverse la composition complète sans remplacer les propriétaires. Aucun runtime modifié. Le RED CI et le RED navigateur doivent précéder le correctif.

@@ -1,4 +1,5 @@
 name: GenSrpG Phase 9 Survival library canonical classification one-shot
+# Real seed/reference initialization precedes persistent-state assertions.
 
 on:
   push:

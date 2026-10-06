@@ -39,6 +39,22 @@ async function persisted(page){
     'gensrpg_game_participants_v1','z40k_session_active_v1'
   ].map(key=>[key,localStorage.getItem(key)])));
 }
+async function assertPersisted(page,before,reason){
+  const after=await persisted(page);
+  const changed=Object.keys(before).filter(key=>after[key]!==before[key]);
+  if(changed.length){
+    const differences=[];
+    const visit=(a,b,pointer)=>{
+      if(differences.length>=20||JSON.stringify(a)===JSON.stringify(b))return;
+      if(a&&b&&typeof a==='object'&&typeof b==='object'){
+        for(const key of new Set([...Object.keys(a),...Object.keys(b)]))visit(a[key],b[key],pointer+'/'+key);
+      }else differences.push({pointer,before:a,after:b});
+    };
+    try{visit(JSON.parse(before.gensrpg_game_profiles_v1),JSON.parse(after.gensrpg_game_profiles_v1),'profiles')}catch(e){}
+    console.error('[survival-library] persistent-difference '+JSON.stringify({changed,differences}));
+  }
+  assert.deepEqual(changed,[],reason);
+}
 async function backToModes(page){
   await page.locator('#gensFamilyHome button[onclick="showGensRootHome()"]').click();
   await page.locator('#gensRootHome').waitFor({state:'visible'});
@@ -88,6 +104,9 @@ function checkSurvival(ids,captures,survivals){
         await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
         await ready(page);
         row.fixtures=await page.evaluate(({captureId,dungeonId,baseId})=>{
+          // Complete the real idempotent seed/reference initialization before taking read-only snapshots.
+          ensureBuiltinMonsterCapture162();
+          ensureBaseGameProfile();
           const profiles=loadGameProfiles();
           const original=profiles.find(p=>p.id===captureId);
           const base=profiles.find(p=>p.id===baseId);
@@ -96,7 +115,11 @@ function checkSurvival(ids,captures,survivals){
           if(!GensCaptureV1.isProfile(original))throw new Error('real built-in Capture identity required');
           ensureSurvivalProfileData(base);
           ensureRpgProfileData(dungeon);
-          const clone=(source,id)=>({...JSON.parse(JSON.stringify(source)),id,name:id,builtIn:false});
+          const clone=(source,id)=>{
+            const copy={...JSON.parse(JSON.stringify(source)),id,name:id,builtIn:false};
+            delete copy.factory;
+            return copy;
+          };
           const current=clone(original,'library-capture-new');delete current.gameStyle;
           const historical=clone(original,'library-capture-historical');historical.gameStyle='dungeon';
           const modules=clone(original,'library-capture-modules');delete modules.gameStyle;
@@ -131,7 +154,7 @@ function checkSurvival(ids,captures,survivals){
         console.log('[survival-library] actual-membership '+JSON.stringify({device:name,ids:row.survival}));
         checkSurvival(row.survival,row.fixtures.captures,row.fixtures.survivals);
         await page.screenshot({path:path.join(artifacts,name+'-survival.png'),fullPage:true});
-        assert.deepEqual(await persisted(page),before,'opening Survival must not rewrite profiles, active selection or module saves');
+        await assertPersisted(page,before,'opening Survival must not rewrite profiles, active selection or module saves');
 
         mark(name+'-open-adventure');
         await backToModes(page);await family(page,'adventure');
@@ -147,12 +170,12 @@ function checkSurvival(ids,captures,survivals){
         assert.deepEqual(await survivalIds(page),row.survival,'returning from Adventure must preserve Survival membership');
         await page.evaluate(()=>renderGensFamilyGamesIfVisible());
         assert.deepEqual(await survivalIds(page),row.survival,'real visible-list refresh must preserve Survival membership');
-        assert.deepEqual(await persisted(page),before,'browsing and refreshing both libraries must preserve persistent state');
+        await assertPersisted(page,before,'browsing and refreshing both libraries must preserve persistent state');
         row.persistentStateUnchanged=true;
 
         mark(name+'-reload-real-preview');
         await page.reload({waitUntil:'domcontentloaded',timeout:60000});await ready(page);
-        assert.deepEqual(await persisted(page),before,'real reload must preserve complete profiles, active selection and module saves');
+        await assertPersisted(page,before,'real reload must preserve complete profiles, active selection and module saves');
         await family(page,'survival');
         checkSurvival(await survivalIds(page),row.fixtures.captures,row.fixtures.survivals);
         await backToModes(page);await family(page,'adventure');

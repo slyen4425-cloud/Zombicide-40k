@@ -815,6 +815,9 @@ jobs:
       - name: Raccorder l'entrée publique Capture Phase 9
         run: node tests/gens_phase9_capture_public_entry_raccord_v1.test.cjs
 
+      - name: Pré-auditer l'entrée Capture autonome de premier niveau Phase 9
+        run: node tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs
+
       - name: Pré-auditer l'identité Capture Phase 9
         run: node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
 

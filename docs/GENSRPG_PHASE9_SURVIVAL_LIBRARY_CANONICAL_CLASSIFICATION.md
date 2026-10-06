@@ -86,3 +86,17 @@ Le raccord VM couvre 17 profils : 8 Survie, 5 Capture, 4 Dungeon/Manga. Le vrai 
 Point de reprise final : checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06. Ce checkpoint est créé uniquement sur le SHA exact dont Architecture+Browser, Firefox wall et Tactical dock terminent tous SUCCESS ; le run de transport seul ne constitue pas ce GREEN final.
 
 Le lien manuel de clôture est fourni sur le SHA validé de preview.html. Le test utilisateur ciblé reste ouvert. Phase 9 non close : autonomie Capture de premier niveau et autres résidus restent distincts. main demeure e8681f9823573ced8aec59c8ddc47a72b02bc663, sans merge ni déploiement.
+
+## Clôture du transport et point de reprise final
+
+- Commit runtime ciblé : a1391b78578e9ea4c25b5f05695e39e049351c11 ; source vérifiée dans GitHub, index blob d721d1665ba937b855d8de6c5b59c8d04d4a2bdf, 8165926 octets.
+- Run TDD 37483773723 : SUCCESS. RED VM et RED navigateur exacts sur le fichier intact ; GREEN sur les 17 profils et les deux appareils avec la condition corrigée. Le parcours réel conserve le stockage, recharge, puis sélectionne Capture via Adventure.
+- Revue du diff runtime : une ligne retirée / une ligne ajoutée ; les 102 patches de tests sont vérifiés comme remplacements stricts d'empreinte, les quatre cartes de source ne changent que de blob. Aucun autre JS, asset, CSS, seed ou contrat modifié.
+- Le script temporaire est absent du commit runtime ; le présent commit retire le workflow de transport. Seules les deux sentinelles permanentes et leur raccord CI restent actifs.
+- Les profils de test sont préparés par les API existantes : initialisation des références et seeds, normalisation du profil historique comme dans le duplicateur RPG, pools vides pour Manga. Les assertions comparent toutes les valeurs exactes des clés surveillées ; aucun changement de stockage n'est toléré ou effacé. Cette invariance concerne des profils valides déjà normalisés ; les migrations historiques de version ne sont pas modifiées.
+
+Point de reprise final : checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06, sur le HEAD de clôture documentaire uniquement après ses trois workflows SUCCESS. Le coordinateur vérifie cette condition puis crée le checkpoint exact ; aucun GREEN n'est déduit du seul transport.
+
+Test manuel ciblé : ouvrir la preview du SHA validé, Survie doit présenter 40K et les univers Survie, avec Monster Capture absent ; revenir aux modes, ouvrir Adventure, sélectionner Monster Capture. Capture doit rester accessible et distinct de Dungeon. Le retour utilisateur est encore à recueillir avant publication.
+
+Après ce jalon technique : pré-auditer séparément les consommateurs résiduels de gameStyle et l'autonomie Shell Capture prévue en Phase 9. Ne pas modifier main, reprendre Phase 8 ou rouvrir les laboratoires. Les observations personnelles Dungeon PC restent séparées.

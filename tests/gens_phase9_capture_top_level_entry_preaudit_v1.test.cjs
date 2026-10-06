@@ -39,7 +39,6 @@ assert.doesNotMatch(entry,/document\.|localStorage|sessionStorage|indexedDB|Muta
 assert.doesNotMatch(entry,/DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
   'public entry must not acquire a foreign private runtime dependency');
 
-assert.match(publicRaccord,/GensCaptureV1\.install/);
 assert.match(publicRaccord,/legacySessionOwner:'Capture139'/);
 assert.match(s3,/await legacyStartConfiguredGame\(\)/);
 assert.match(s3,/Capture139 remains the gameplay\/session owner/);

@@ -1,3 +1,24 @@
+# PHASE 9 — FRONTIÈRE ÉDITEUR SURVIE — PRÉAUDIT OUVERT — 2026-10-06
+
+Sylvain valide le classement Capture/Survie à 17:51 Europe/Paris et autorise la poursuite selon charte et plan.
+
+Branche : `work/gensrpg-phase9-survival-editor-family-boundary-preaudit-2026-10-06`.
+Checkpoint de départ créé avant code : `checkpoint/gensrpg-start-phase9-survival-editor-family-boundary-preaudit-2026-10-06`, base exacte `7d317cc77683f1c3ce0f5e8696984f8c9b65a2a7`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06`, même SHA. Architecture+Browser `37485298316`, Firefox `37485298290`, Tactical dock `37485298338` : SUCCESS.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Périmètre : consommateurs natifs de l’éditeur Survie, `activeSurvivalModId()`, `setActiveSurvivalMod()`, `currentSmodProfile()`, sélection et écritures sur `smodEditingId`. Audit séparé des références de `gensFamilyForProfile()`. Mutation actuelle : documents seulement ; aucun correctif runtime ni identité nouvelle.
+
+Réutiliser la classification canonique existante. Préserver classifier, filtre Survie GREEN, routes, seeds, sauvegardes, gameplay, mouvement, assets, PWA et autres modes. Risques : édition Capture par Survie, sélection erronée, écriture inter-module. Caractériser les fonctions exactes et les effets avant décision.
+
+Index local contrôlé contre GitHub : 8165926 octets, blob `d721d1665ba937b855d8de6c5b59c8d04d4a2bdf`, SHA-256 `e08b76f1e3c7e1eb625d764ad665dcffef2c8f14b30b09bc5f8cbe3408ca7768`. Aucun transport du gros HTML par connecteur.
+
+Prochaine étape : cartographie, reproduction des lectures/écritures, décision du propriétaire, puis triple CI et checkpoint de préaudit avant TDD. Phase 9 reste en cours ; Phase 8 close ; observations Dungeon PC séparées. Aucun merge/deploy.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_EDITOR_FAMILY_BOUNDARY_PREAUDIT.md](GENSRPG_PHASE9_SURVIVAL_EDITOR_FAMILY_BOUNDARY_PREAUDIT.md).
+
+---
+
 # PHASE 9 — LISTE SURVIE CANONIQUE — POINT DE REPRISE FINAL — 2026-10-06
 
 Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06`.

@@ -1,3 +1,40 @@
+# PHASE 9 — CLASSEMENT SHELL CAPTURE / SURVIE — PRÉ-AUDIT OUVERT — 2026-10-06
+
+Coordinateur : ce fil ; Sylvain confirme avoir arrêté l'ancien fil.
+Branche : `work/gensrpg-phase9-capture-library-family-classification-preaudit-2026-10-06`.
+Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-library-family-classification-preaudit-2026-10-06`.
+Base exacte : `168578f4394fc22cb4aec517e052e94847790bd9`.
+Dernier GREEN : `checkpoint/gensrpg-dungeon-desktop-movement-assets-characterization-green-2026-10-06`, même SHA.
+Production main vérifiée et gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Mission et périmètre
+
+Reprendre la Phase 9 par un pré-audit distinct du classement de Monster Capture dans la liste Survie. L'anomalie est signalée et documentée ; le propriétaire exact de la condition fautive reste à démontrer dans le runtime actuel.
+
+Autorité à réutiliser : `GensCaptureV1.isProfile(profile)`.
+Propriétaires candidats : fonctions Shell inline `rpgProfiles()`, `gensFamilyForProfileId()` et rendu de la liste `gensFamilyGames`. Aucune nouvelle fonction d'identité ou maintenance UI ne doit être créée.
+
+Ce jalon déclare son périmètre et met à jour la reprise avant code. Seuls les documents sont modifiés. Navigation/lancement, sauvegardes, seeds, gameStyle, isDungeonMode, héros, mouvement, stats, combats, assets, PWA, les quatre runtimes et les laboratoires sont protégés. Aucun masque CSS, wrapper, timer, observer, suppression de profil ou migration opportuniste.
+
+## Validation et accès au runtime
+
+La base a été vérifiée : Architecture+Browser `37441136353`, Firefox `37441136661`, Tactical Dock `37441136680` sont SUCCESS ; le checkpoint final pointe bien sur ce SHA. Ne pas relancer ces runs déjà terminés sans nouveau motif.
+
+Index attendu : `8165906` octets / blob `1e3398755beb751786d825047bc60fe1a7179d79` / SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d`.
+Le ZIP index.zip précédent décrit la base avant le retrait de 471 octets ; il n'est pas une copie vérifiée du runtime actuel.
+
+Charte §26 : demander [l'index exact au SHA de reprise](https://github.com/slyen4425-cloud/Zombicide-40k/blob/168578f4394fc22cb4aec517e052e94847790bd9/index.html), puis contrôler son empreinte avant inspection. Ne pas lire les 8 Mo par connecteur.
+
+## Tests prévus et prochaine étape
+
+Reproduction par la vraie liste Shell, cas Capture neuf/historique/par modules, présence des autres profils, absence de mutation stockage ou sélection, vrai routage/lancement, mobile et frontière des quatre modules. Ajouter le RED ciblé après inspection, puis corriger le propriétaire démontré. Triple CI requise avant tout futur GREEN.
+
+Rapport : [GENSRPG_PHASE9_CAPTURE_LIBRARY_FAMILY_CLASSIFICATION_PREAUDIT.md](GENSRPG_PHASE9_CAPTURE_LIBRARY_FAMILY_CLASSIFICATION_PREAUDIT.md).
+
+Statut : PRÉ-AUDIT OUVERT ; attente du fichier exact pour sélectionner le correctif. Aucun nouveau GREEN, merge ou déploiement. La Phase 8 est fermée ; la Phase 9 reste en cours. Retour utilisateur Dungeon PC et identification du visuel restent ouverts séparément.
+
+---
+
 # DUNGEON — DIAGNOSTIC PC / MOUVEMENT / ASSETS — CLÔTURE — 2026-10-06
 
 Branche : `work/gensrpg-dungeon-desktop-movement-assets-characterization-2026-10-06`.

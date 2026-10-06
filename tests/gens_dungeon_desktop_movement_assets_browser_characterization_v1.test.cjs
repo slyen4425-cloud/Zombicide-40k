@@ -63,6 +63,25 @@ async function configureMovement(page){
   assert.deepEqual(stored,{module:true,mode:'tactical',enabled:true});
   return stored;
 }
+async function dismissNotices(page){
+  const closed=[];
+  for(let i=0;i<8;i++){
+    // Wait on the existing notice owner's scheduled work, then use its visible button.
+    await page.waitForFunction(()=>typeof z40kEffectTimer==='undefined'||z40kEffectTimer===null,null,{timeout:5000});
+    const effect=page.locator('#effectModal.open button.effectClose');
+    if(await effect.isVisible()){
+      closed.push({kind:'effect',title:await page.locator('#effectTitle').textContent()});
+      await effect.click();continue;
+    }
+    const ok=page.locator('#dc200Modal.open #dc200ModalOk');
+    if(await ok.isVisible()){
+      closed.push({kind:'dungeon',title:await page.locator('#dc200ModalTitle').textContent()});
+      await ok.click();continue;
+    }
+    return closed;
+  }
+  throw new Error('Dungeon notice chain did not settle through its real UI');
+}
 async function start(page){
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.locator('#sessionDungeonSetupBtn').click();
@@ -79,11 +98,7 @@ async function start(page){
   await page.waitForFunction(()=>DungeonCore01.active===true&&!!localStorage.getItem('gensrpg_dungeon_runtime_v2'));
   await page.locator('#dc01Explore').click();
   await page.locator('#dc047RoomBoard .dc047Grid > .dc047Cell').first().waitFor({state:'visible'});
-  for(let i=0;i<8;i++){
-    const ok=page.locator('#dc200Modal.open #dc200ModalOk');
-    if(!(await ok.isVisible()))break;
-    await ok.click();
-  }
+  return dismissNotices(page);
 }
 async function state(page){
   return page.evaluate(()=>{
@@ -112,7 +127,7 @@ async function visual(page,label){
       let decoded=true;try{await img.decode()}catch(_){decoded=false}
       return {source:src.startsWith('data:')?'embedded:'+src.length:new URL(src,location.href).pathname,decoded,width:img.naturalWidth,height:img.naturalHeight};
     }));
-    const overlays=[...document.querySelectorAll('#sessionDungeonSetup,#rpgUniverseEditorModal,#dc200Modal,.gtv2Overlay')].map(e=>({id:e.id||e.className,visible:visible(e),pointerEvents:getComputedStyle(e).pointerEvents}));
+    const overlays=[...document.querySelectorAll('#sessionDungeonSetup,#rpgUniverseEditorModal,#dc200Modal,#effectModal,.gtv2Overlay')].map(e=>({id:e.id||e.className,visible:visible(e),pointerEvents:getComputedStyle(e).pointerEvents}));
     return {viewport:{width:innerWidth,height:innerHeight},images:imageRows,backgrounds,overlays,bodyOverflow:getComputedStyle(document.body).overflow};
   });
   // Broken visible images are actual load/decode defects, not a subjective style comparison.
@@ -205,7 +220,7 @@ async function generatedFixture(page){
             row.fixture=await generatedFixture(page);
             assert.equal(row.fixture.selected,true);
             mark(device.name+'-default-profile');
-            await start(page);row.default=await state(page);
+            row.defaultNotices=await start(page);row.default=await state(page);
             assert.equal(row.default.module,false,'fresh reference Dungeon defaults must remain user-configurable');
             assert.equal(row.default.positional,false,'disabled movement must not be overridden by a desktop-specific fallback');
             assert.equal(row.default.reachable,0,'disabled movement must not expose reachable cells');
@@ -225,7 +240,7 @@ async function generatedFixture(page){
             assert.equal(row.fixture.selected,true);
           }
           mark(device.name+'-'+kind+'-enabled-start');
-          await start(page);row.enabledStart=await state(page);
+          row.enabledNotices=await start(page);row.enabledStart=await state(page);
           assert.equal(row.enabledStart.authored,kind==='authored');
           if(kind==='authored')assert.equal(row.enabledStart.position,12,'real authored entry must use the Builder entry cell');
           row.visual=await visual(page,device.name+'-enabled-'+kind);
@@ -233,10 +248,7 @@ async function generatedFixture(page){
           row.firstMove=await move(page,device.hasTouch);
           mark(device.name+'-'+kind+'-end-turn');
           await page.locator('#dc01EndTurn').click();
-          for(let i=0;i<8;i++){
-            const ok=page.locator('#dc200Modal.open #dc200ModalOk');
-            if(!(await ok.isVisible()))break;await ok.click();
-          }
+          row.endTurnNotices=await dismissNotices(page);
           row.nextTurn=await state(page);
           assert.ok(row.nextTurn.round>row.firstMove.after.round,'single-hero end turn must start a new round');
           assert.ok(row.nextTurn.remaining>row.firstMove.after.remaining,'next turn must restore the configured movement');

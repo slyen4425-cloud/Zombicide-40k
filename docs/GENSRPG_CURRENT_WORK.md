@@ -1,3 +1,34 @@
+# DUNGEON — DIAGNOSTIC PC / MOUVEMENT / ASSETS — 2026-10-06
+
+Chantier : caractérisation du signalement utilisateur après le lot Phase 9 d’entrée Dungeon/Capture.
+Branche : `work/gensrpg-dungeon-desktop-movement-assets-characterization-2026-10-06`.
+Checkpoint de départ : `checkpoint/gensrpg-start-dungeon-desktop-movement-assets-characterization-2026-10-06` sur `5c915705a9ce6530646dd74f29edaf05c49dd5be`.
+Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-green-2026-10-05`, même SHA.
+Production `main` gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Signalement et périmètre avant code
+
+Le parcours du dernier lot paraît fonctionner selon l’utilisateur. Lors de son premier essai Dungeon sur PC, le déplacement ne répond pas et certains visuels paraissent différents. Ce signalement ne prouve pas encore une régression ni un défaut spécifique au PC.
+
+Module : Dungeon ; propriétaires existants : Dungeon Core 2.00 / Spatial 3.13 pour les positions et droits d’action, API Dungeon pour les règles, resolver central / autorité visuelle existante pour les images. Réutiliser leurs chemins réels, sans nouvelle autorité.
+
+Périmètre : tests navigateur desktop souris (`1366x768`, `hasTouch:false`) et contrôle mobile tactile (`412x915`) sur la composition exacte `preview.html`, ouverture/fermeture du vrai bouton Aventure Dungeon, vraie sélection de héros, lancement, exploration, clic/tap sur une case accessible, position/mouvement persistés, fin de tour et nouveau déplacement, hit-test DOM / overlays et décodage des images présentes.
+
+Fonctions et données protégées : déplacement, navigation/fiche héros, stats, sauvegardes, identité Capture, filtres Survie, Tactical, PvP, PWA et tous les assets. Aucun changement runtime, configuration de gameplay, image ou données utilisateur dans ce diagnostic. Si une panne est reproduite : isoler le premier changement responsable et déclarer le seam avant tout correctif ; aucun wrapper, observer, timer de reprise, listener global ni contournement des gardes.
+
+Tests prévus : vraie UI sur desktop et mobile, aventure générée et monde construit par les APIs Builder existantes ; contrôler la configuration réelle avant d’attendre du mouvement. Vérification de non-interférence par la CI existante. Les fixtures de monde passent par les propriétaires Builder ; aucun remplacement de moteur, aucune injection de position ou de résultat attendu.
+
+Risques : tests historiques surtout mobiles ; clavier non raccordé au déplacement Dungeon (les écouteurs `keydown` actifs observés ferment les modales avec Escape) ; rôle Joueur / héros assigné / tour / mode narratif peuvent refuser légitimement une action ; images inchangées peuvent néanmoins être mal chargées ou rendues selon le viewport.
+
+## Comparaison initiale vérifiée
+
+Base avant le dernier lot : `a8c9aa9934276c38fc4ca2755e65cee7116ada4e` ; HEAD testé : `5c915705a9ce6530646dd74f29edaf05c49dd5be`.
+Les 273 fichiers sous `assets/` ont les mêmes blobs Git : aucun asset ni fichier externe Dungeon n’a changé dans ce lot. `index.html` actuel reçu/dérivé du ZIP utilisateur reste exact : `8165906` octets, blob `1e3398755beb751786d825047bc60fe1a7179d79`, SHA-256 `0c98f5490bd0c0397458f136147ca430d047d907c7594ec0eb995d3db748c66d`.
+
+Prochaine étape : réaliser les scénarios navigateur et comparer les états / couches. Ne pas présenter le signalement comme réparé avant reproduction et preuve. Le classement Capture dans Survie demeure une anomalie distincte déjà identifiée, hors du présent diagnostic.
+
+---
+
 # PHASE 9 — ENTRÉE DUNGEON / CAPTURE — CLÔTURE DU TRANSFERT — 2026-10-05
 
 Branche : `work/gensrpg-phase9-capture-dungeon-setup-entry-owner-transfer-2026-10-05`.

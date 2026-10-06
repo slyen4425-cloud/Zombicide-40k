@@ -1,3 +1,15 @@
+# PHASE 9 — BIBLIOTHÈQUE SURVIE — SENTINELLE RED AJOUTÉE — 2026-10-06
+
+Le test permanent reproduit quatre variantes Capture indûment incluses, sur 17 profils utilisant les fonctions et l'identité réelles. La classification canonique et les routes préexistantes sont correctes. L'index reste intact, blob `1e3398755beb751786d825047bc60fe1a7179d79`.
+
+Branche : `work/gensrpg-phase9-survival-library-canonical-classification-2026-10-06` ; base / checkpoint de départ : `b3186266b726b649f7010ca831fe3cfcbc1668df` / `checkpoint/gensrpg-start-phase9-survival-library-canonical-classification-2026-10-06`. Dernier GREEN : `checkpoint/gensrpg-phase9-capture-library-family-classification-preaudit-green-2026-10-06`, même SHA.
+
+Deux sentinelles permanentes sont ajoutées : VM et vrai preview.html mobile/PC. CI RED attendu sur la nouvelle assertion d'appartenance. Prochaine étape : confirmer le RED CI, puis modifier seulement le prédicat propriétaire, contrôler le diff inverse exact et valider. Aucun autre runtime, main ou Pages touché.
+
+Rapport : [GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md](GENSRPG_PHASE9_SURVIVAL_LIBRARY_CANONICAL_CLASSIFICATION.md).
+
+---
+
 # PHASE 9 — BIBLIOTHÈQUE SURVIE / CLASSEMENT CANONIQUE — LOT TDD OUVERT — 2026-10-06
 
 Coordinateur : ce fil, ancien fil arrêté par Sylvain.

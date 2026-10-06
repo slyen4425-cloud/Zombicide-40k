@@ -52,3 +52,11 @@ Le transport du gros index utilise un workflow ponctuel borné à cette branche,
 Périmètre consigné avant code. Ajouter les deux sentinelles permanentes, obtenir le RED ciblé, puis appliquer le correctif minimal.
 Le checkpoint final checkpoint/gensrpg-phase9-survival-library-canonical-classification-green-2026-10-06 ne sera créé qu'après triple CI SUCCESS sur le SHA exact.
 Aucun merge ni déploiement. Le retour utilisateur ciblé et les observations personnelles Dungeon PC restent ouverts.
+
+## RED permanent — runtime intact
+
+Le test tests/gens_phase9_survival_library_canonical_classification_v1.test.cjs exécute les vrais propriétaires et la vraie API Capture. Sur 17 profils, la classification canonique et le routage préexistants sont corrects. La liste Survie ajoute à tort capture-new, capture-modules, capture-contradictory et capture-disabled-modules-preset ; l'assertion d'appartenance échoue avec ce diff avant toute mutation de l'index. Capture historique reste correctement exclu.
+
+Le test conserve les vrais chargement/stockage/normaliseur/renderers et observe uniquement les appels au normaliseur. Aucun résultat de famille ou de liste n'est injecté. Le test navigateur permanent utilise le vrai preview.html et les graines actuelles, enrichies par de vrais profils stockés ; il couvre mobile puis PC, les deux listes, rafraîchissement, rechargement et sélection réelle Capture.
+
+Les deux sentinelles sont ajoutées tôt dans Architecture+Browser ; aucune sentinelle existante n'est retirée. Le RED CI est attendu tant que le propriétaire n'a pas été corrigé. Prochaine étape : vérifier ce RED, puis transporter la condition unique avec contrôle d'empreinte et validation réelle RED/GREEN navigateur.

@@ -122,6 +122,9 @@ function checkSurvival(ids,captures,survivals){
           };
           const current=clone(original,'library-capture-new');delete current.gameStyle;
           const historical=clone(original,'library-capture-historical');historical.gameStyle='dungeon';
+          // The real RPG duplicator normalizes a legacy-style copy before saving it.
+          // This prevents a first-load movement-schema migration from contaminating a library-read snapshot.
+          ensureRpgProfileData(historical);
           const modules=clone(original,'library-capture-modules');delete modules.gameStyle;
           modules.rpgUniverse.gameplay.profile='custom';
           modules.rpgUniverse.gameplay.modules.capture=true;

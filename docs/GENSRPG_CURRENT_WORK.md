@@ -1,3 +1,13 @@
+# PHASE 9 — RÉGRESSION LIEN PREVIEW — CAUSE CONFIRMÉE / TEST UTILISATEUR RÉEL — 2026-10-07
+
+Le vrai Chromium public sur `html-preview.github.io` a rendu GenSrpG correctement sur viewport mobile : accueil complet visible, titre `GenSrpG V16.78.11`, `GensCaptureV1` et `GensCaptureSessionStartV1` présents, zéro erreur page/console et zéro requête échouée.
+
+Le marker technique `gensrpgPreviewReady` n'est pas conservé par ce transport externe malgré le rendu complet ; il ne doit donc pas être utilisé comme définition de « page chargée » pour ce test externe. La sentinelle permanente est renforcée sur le comportement utilisateur réel : titre GenSrpG + Shell/menu présent + APIs Capture + autorité finale `startConfiguredGame` + absence d'erreur.
+
+La page blanche observée venait du lien jsDelivr précédent, qui servait le fichier comme texte brut. Le runtime Capture n'était pas la cause.
+
+---
+
 # PHASE 9 — RÉGRESSION LIEN PREVIEW — SENTINELLE EXTERNE PERMANENTE — 2026-10-07
 
 Toujours le même lot. Le diagnostic public précédent a démontré que jsDelivr servait `preview.html` comme texte brut : aucun JS, aucun Shell, aucun owner Capture. La route de test externe retenue est désormais `html-preview.github.io`, tandis que `preview.html` résout l'index et les assets sur le SHA immuable via RawGitHack.

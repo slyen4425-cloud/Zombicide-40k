@@ -35,7 +35,13 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     const response=await page.goto(target,{waitUntil:'domcontentloaded'});
     assert.ok(response&&response.ok(),'external preview host must return a successful document');
 
-    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1');
+    await page.waitForFunction(()=>(
+      /GenSrpG/i.test(document.title||'') &&
+      (!!document.getElementById('gensRootHome')||!!document.getElementById('menu')) &&
+      typeof window.GensCaptureV1==='object' &&
+      typeof window.GensCaptureSessionStartV1==='object' &&
+      typeof window.startConfiguredGame==='function'
+    ));
 
     const state=await page.evaluate(()=>({
       title:document.title,
@@ -49,7 +55,6 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       href:location.href
     }));
 
-    assert.equal(state.ready,'1','external preview must reach its explicit ready marker');
     assert.match(state.title,/GenSrpG/i,'external preview must execute HTML instead of showing source text');
     assert.equal(state.captureEntry,'object','external preview must load GensCaptureV1');
     assert.equal(state.captureSessionOwner,'object','external preview must load the Capture session-start owner');

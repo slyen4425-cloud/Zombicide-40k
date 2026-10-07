@@ -8,6 +8,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 const entry=read('assets/gensrpg/capture/entry-v1.js');
+const owner=read('assets/gensrpg/capture/session-start-v1.js');
 const contract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));
 const shellFinal=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
 
@@ -25,6 +26,8 @@ const c139=block('captureFix139');
 
 assert.equal((index.match(/assets\/gensrpg\/capture\/entry-v1\.js/g)||[]).length,1,
   'Capture public entry must be loaded exactly once by the real index');
+assert.equal((index.match(/assets\/gensrpg\/capture\/session-start-v1\.js/g)||[]).length,1,
+  'Capture session-start owner must be loaded exactly once by the real index');
 assert.match(entry,/GensCaptureV1/,
   'Capture entry must expose the public GensCaptureV1 API');
 assert.match(entry,/function\s+install\s*\(/,
@@ -42,15 +45,21 @@ assert.equal(contract.status,'partial-runtime-loaded');
 assert.equal(contract.activatedPhase,9);
 assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
 assert.equal(contract.publicEntries.moduleLaunch.status,'loaded-public-provider');
+assert.ok(contract.owns.includes('Capture session initialization'));
+assert.ok(contract.consumes.includes('Capture session-start owner public API'));
 
-assert.match(c139,/const gensCaptureStartConfiguredGame139V1=window\.startConfiguredGame;/,
-  'legacy Capture139 stable reference must remain');
-assert.match(c139,/GensCaptureV1\.install/,
-  'Capture139 must bind its stable legacy reference into the public entry');
-assert.doesNotMatch(c139,/const gensCaptureStartModuleSessionV1=async\(\)=>/,
-  'Capture139 must no longer own the public provider implementation');
+assert.match(owner,/GensCaptureSessionStartV1/);
+assert.match(owner,/async\s+function\s+start\s*\(/);
+assert.doesNotMatch(owner,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener/,
+  'Capture session owner must consume injected contracts only');
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
+  'Capture139 must remain retired from session-start ownership');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may only wire explicit dependencies into the Capture session owner');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture139 must bind the dedicated session owner into the public entry');
 assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,
-  'Capture139 must no longer register the public Capture provider directly');
+  'Capture139 must not register the public Capture provider directly');
 
 assert.match(shellFinal,/activeModule\(\)/);
 assert.match(shellFinal,/startModuleSession\(moduleId\)/);
@@ -60,6 +69,6 @@ assert.doesNotMatch(shellFinal,/GensCaptureV1|captureFix139|gensCapture/,
 console.log(JSON.stringify({
   scenario:'Phase 9 Capture public-entry raccord',
   owner:'GensCaptureV1',
-  legacySessionOwner:'Capture139',
+  sessionOwner:'GensCaptureSessionStartV1',
   uniqueProvider:true
 },null,2));

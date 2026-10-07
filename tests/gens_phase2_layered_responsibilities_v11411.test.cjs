@@ -13,7 +13,12 @@ for(const line of tsv.split(/\r?\n/)){
   const [name,count,lastOwner]=line.split('\t');
   if(name&&count&&lastOwner)rows.set(name,{assignmentCount:Number(count),lastOwner});
 }
-assert.equal(rows.size,430,'last-owner table size drifted');
+assert.equal(rows.size,429,'last-owner table must shrink by exactly one after Capture139 launch-lock retirement');
+assert.equal(rows.has('_captureStarting139'),false,
+  'retired Capture139 launch lock must remain absent from the inline global owner inventory');
+assert.deepEqual(rows.get('startConfiguredGame'),
+  {assignmentCount:2,lastOwner:'gensDungeonCore01Js'},
+  'global startConfiguredGame chain must retain only captureFix138 + Dungeon owner after Capture139 retirement');
 
 for(const h of manifest.hotspots){
   const row=rows.get(h.name);

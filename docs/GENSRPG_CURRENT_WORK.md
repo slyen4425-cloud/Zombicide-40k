@@ -1,3 +1,17 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — CARTOGRAPHIE PHASE 2 RÉALIGNÉE — 2026-10-07
+
+Même lot, aucune nouvelle branche/micro-tâche.
+
+Après le réalignement du graphe de production, Architecture a validé l'étape 318 puis a signalé l'étape 319 « responsabilités stratifiées ». Diff exact contre le dernier GREEN :
+- table inline globals : 430 -> 429 ;
+- seule ligne supprimée : `_captureStarting139` (ancien count 3, owner Capture139) ;
+- `startConfiguredGame` : count 3 -> 2, dernier owner inchangé `gensDungeonCore01Js` ;
+- aucun hotspot stratifié ne diverge.
+
+La sentinelle est renforcée pour exiger explicitement ces résultats. Aucun runtime ni manifeste de hotspots n'est modifié.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — SENTINELLE PHASE 2 RÉALIGNÉE — 2026-10-07
 
 Même branche / même lot. Aucun micro-lot supplémentaire.

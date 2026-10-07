@@ -70,8 +70,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'preaudit must track the three remaining historical global launch owners after captureFix135 retirement');
+  ['captureFix138','gensDungeonCore01Js'],
+  'preaudit must track the reduced two-owner historical global launch chain after Capture139 retirement');
 assert.doesNotMatch(block('captureFix135').body,/window\.startConfiguredGame\s*=(?!=)/,
   'captureFix135 global launch owner must remain retired');
 

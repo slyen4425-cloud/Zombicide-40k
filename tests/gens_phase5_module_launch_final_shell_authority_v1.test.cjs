@@ -88,8 +88,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'captureFix135 retirement must leave exactly three historical global owners');
+  ['captureFix138','gensDungeonCore01Js'],
+  'Capture139 session-owner retirement must leave exactly two historical inline global owners');
 assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
   'captureFix135 global launch owner must remain retired');
 
@@ -119,5 +119,6 @@ console.log(JSON.stringify({
   dispatch:'GensShellModuleLaunchV1.startModuleSession(GensShellModuleLaunchV1.activeModule())',
   legacyFallback:false,
   historicalOwnersRetained:chain,
+  captureSessionOwner:'GensCaptureSessionStartV1',
   productionCallsite:'startConfiguredGame()'
 },null,2));

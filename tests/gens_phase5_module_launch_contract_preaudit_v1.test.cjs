@@ -87,7 +87,8 @@ for(const module of ['survival','dungeon','capture','pvp']){
     assert.equal(contract.activatedPhase,9);
     assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
     assert.match(src,/function startModuleSession\(\)/);
-    assert.match(src,/function install\(legacyStart\)/);
+    assert.match(src,/function install\(owner\)/);
+    assert.match(src,/sessionStartOwner/);
     assert.match(src,/shell\.register\("capture",startModuleSession\)/);
     assert.doesNotMatch(src,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
       'Capture Phase 9 public provider entry must remain routing-only');
@@ -103,7 +104,7 @@ assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollba
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
 assert.match(rollbackGuard,/captureFix135 global startConfiguredGame owner must remain retired/);
-assert.match(rollbackGuard,/assert\.equal\(assignments,3/);
+assert.match(rollbackGuard,/assert\.equal\(assignments,2/);
 assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs')),
   'the dedicated captureFix135 retirement RED/contract must remain present');
 
@@ -116,10 +117,9 @@ for(const block of blocks){
 }
 assert.deepEqual(chain,[
   'captureFix138',
-  'captureFix139',
   'gensDungeonCore01Js'
-],'module-launch preaudit must track the three remaining historical startConfiguredGame global owners after captureFix135 retirement');
-assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m);
+],'module-launch preaudit must track the reduced two-owner historical startConfiguredGame chain after Capture139 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m);
 
 // Phase 6 keeps the pure Survival wave-rules entry connected and Phase 7 additionally connects
 // the reviewed pure Dungeon exploration planner. The module-launch contract itself remains metadata-only.
@@ -129,6 +129,8 @@ assert.equal((index.match(/assets\/gensrpg\/dungeon\/entry-v1\.js/g)||[]).length
   'Phase 7 must load the reviewed Dungeon entry exactly once');
 assert.equal((index.match(/assets\/gensrpg\/capture\/entry-v1\.js/g)||[]).length,1,
   'Phase 9 must load the Capture public entry exactly once');
+assert.equal((index.match(/assets\/gensrpg\/capture\/session-start-v1\.js/g)||[]).length,1,
+  'Phase 9 must load the Capture session-start owner exactly once');
 assert.doesNotMatch(index,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|pvp)\/entry-v1\.js/,
   'Phase 9 must not activate Shell/PvP target entries or runtime-load the launch contract metadata');
 assert.doesNotMatch(preview,/module-launch-contract-v1\.json|assets\/gensrpg\/(?:shell|survival|dungeon|capture|pvp)\/entry-v1\.js/,

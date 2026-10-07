@@ -55,8 +55,8 @@ assert.ok((index.match(/GensShellModuleLaunchV1\.register\("dungeon"/g)||[]).len
 assert.doesNotMatch(index,/GensShellModuleLaunchV1\.register\(["']pvp["']/,
   'PvP must remain unrouted during the module-launch provider sequence');
 
-assert.equal((index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length,3,
-  'S2 must track the three remaining historical startConfiguredGame globals');
+assert.equal((index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length,2,
+  'S2 must track the reduced two-owner historical startConfiguredGame globals');
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'S2 must preserve the native Shell startConfiguredGame owner');
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
@@ -64,11 +64,17 @@ assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,
 assert.equal((index.match(/GensShellModuleLaunchV1\.startModuleSession\(/g)||[]).length,0,
   'S2 must not switch production routing to the registry');
 
-for(const id of ['captureFix138','captureFix139','gensDungeonCore01Js']){
+for(const id of ['captureFix138','gensDungeonCore01Js']){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing historical launch owner '+id);
   assert.match(m[1],/window\.startConfiguredGame\s*=\s*async\s+function/,'historical owner changed: '+id);
 }
+const capture139Match=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']captureFix139["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
+assert.ok(capture139Match,'missing captureFix139 block');
+assert.doesNotMatch(capture139Match[1],/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 global launch owner must remain retired');
+assert.match(capture139Match[1],/GensCaptureSessionStartV1\.install/,
+  'Capture139 must retain only the dedicated Capture session-owner wiring');
 const capture135Match=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']captureFix135["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
 assert.ok(capture135Match,'missing captureFix135 block');
 assert.doesNotMatch(capture135Match[1],/window\.startConfiguredGame\s*=(?!=)/,'Capture135 global launch owner must remain retired');
@@ -84,6 +90,6 @@ console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S2 Survival provider',
   expected:'RED before provider insertion, GREEN after provider registration',
   legacyProductionRouting:true,
-  historicalWrappers:3,
+  historicalWrappers:2,
   provider:'survival'
 },null,2));

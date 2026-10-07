@@ -22,10 +22,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Probe RawGitHack transport
+      - name: Probe jsDelivr transport
         env:
-          TARGET_URL: https://raw.githack.com/slyen4425-cloud/Zombicide-40k/bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
-          INDEX_URL: https://raw.githack.com/slyen4425-cloud/Zombicide-40k/bf4f0aac5492dcf3e53cf92987400747969540c1/index.html
+          TARGET_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
+          INDEX_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/index.html
         run: |
           set -euxo pipefail
           curl -fL --retry 2 --retry-delay 1 -D /tmp/preview.headers -o /tmp/preview.html "$TARGET_URL"
@@ -42,9 +42,9 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Load exact public preview
+      - name: Load exact public jsDelivr preview
         env:
-          TARGET_URL: https://raw.githack.com/slyen4425-cloud/Zombicide-40k/bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
+          TARGET_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
         run: |
           mkdir -p artifacts/gensrpg-external-preview
           node - <<'NODE'

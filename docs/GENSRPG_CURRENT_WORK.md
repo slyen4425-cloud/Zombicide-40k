@@ -1,3 +1,13 @@
+# PHASE 9 — RÉGRESSION LIEN PREVIEW — SENTINELLE EXTERNE PERMANENTE — 2026-10-07
+
+Toujours le même lot. Le diagnostic public précédent a démontré que jsDelivr servait `preview.html` comme texte brut : aucun JS, aucun Shell, aucun owner Capture. La route de test externe retenue est désormais `html-preview.github.io`, tandis que `preview.html` résout l'index et les assets sur le SHA immuable via RawGitHack.
+
+Une sentinelle navigateur permanente est ajoutée au job Browser Architecture existant : `tests/gens_preview_external_browser_v1.test.cjs`. Elle ouvre le vrai lien externe sur `GITHUB_SHA` en viewport mobile et exige le marker ready, le Shell, `GensCaptureV1`, `GensCaptureSessionStartV1` et l'absence d'erreur navigateur.
+
+Le workflow diagnostic temporaire sera supprimé après validation de cette sentinelle afin de ne pas multiplier les workflows/micro-lots.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — GREEN AUTOMATISÉ / VALIDATION UTILISATEUR À FAIRE — 2026-10-07
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.

@@ -1195,6 +1195,9 @@ jobs:
       - name: Vérifier la preview manuelle dans Chromium
         run: node tests/gens_preview_browser_v11411.test.cjs
 
+      - name: Vérifier le lien externe exact de preview sur le SHA courant
+        run: node tests/gens_preview_external_browser_v1.test.cjs
+
       - name: Caractériser la résolution réelle des assets Phase 4
         run: node tests/gens_asset_resolver_browser_v1.test.cjs
 

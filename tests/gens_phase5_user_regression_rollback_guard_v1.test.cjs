@@ -28,11 +28,15 @@ assert.match(fix135,/captureBattleLiveBody/,'captureFix135 detailed combat-log U
 assert.match(fix135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
 assert.match(fix135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
 assert.match(fix138,/window\.isCaptureContext138\s*=\s*function/,'captureFix138 must remain present');
-assert.match(fix139,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix139 must remain the dedicated Capture launch interceptor');
+assert.doesNotMatch(fix139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
+  'user-regression guard: Capture139 must remain retired from global launch ownership');
+assert.match(fix139,/GensCaptureSessionStartV1\.install\(/,
+  'user-regression guard: Capture139 must preserve explicit wiring to the dedicated Capture session owner');
+assert.match(fix139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
 assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+function/,'Dungeon Core 2.00 must retain its stable local Dungeon launch dispatcher');
 assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 global launch owner must remain retired');
 
 const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
-assert.equal(assignments,3,'rollback guard must preserve the three remaining historical global owners after captureFix135 retirement');
+assert.equal(assignments,2,'rollback guard must preserve the reduced two-owner inline launch chain after Capture139 retirement');
 
-console.log('Phase 5 user regression rollback guard: captureFix135 non-wrapper responsibilities preserved, global owner retired, 3-owner chain preserved, Core200 local dispatcher retained');
+console.log('Phase 5 user regression rollback guard: Capture135 responsibilities preserved, Capture139 global owner retired, 2-owner inline chain preserved, Core200 local dispatcher retained');

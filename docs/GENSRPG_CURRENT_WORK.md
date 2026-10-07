@@ -1,3 +1,35 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — GREEN CANDIDATE / CI DE RÉGRESSION — 2026-10-07
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-session-start-owner-transfer-2026-10-07`, SHA `b16ef9d4e58c55c9e68e126a323c040cb1583fa3`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-green-2026-10-06`, même SHA.
+RED confirmé : Architecture `37588018715`, étape « Transférer le propriétaire du démarrage Capture » en FAILURE, toutes les étapes précédentes SUCCESS.
+Runtime transféré : SHA `77c66c52774331614e206b680f0f67473f349397`.
+Repin mécanique des empreintes : SHA `9889eba9f07c130af9d742d9de565cdd7cd4d09e`.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat runtime
+
+- nouveau propriétaire : `assets/gensrpg/capture/session-start-v1.js` / `GensCaptureSessionStartV1` ;
+- `GensCaptureV1` conserve le provider Shell et délègue désormais au nouvel owner ;
+- le wrapper `window.startConfiguredGame` de Capture139 est retiré ;
+- `legacyStartConfiguredGame` et `gensCaptureStartConfiguredGame139V1` sont retirés ;
+- le verrou mort `_captureStarting139` et son `setTimeout(1200)` sont retirés ;
+- `captureEnterWorld139` et `moduleScreenReturn` restent hors périmètre ;
+- le Shell final n'a pas été modifié.
+
+Empreinte runtime exacte : 8165614 octets / blob `560966d096134cd58ff4dc6ab2be589cee936ba7`.
+Le test dédié est GREEN dans le one-shot `37588355447`.
+Le repin a modifié 103 tests uniquement sur taille/blob ; aucune assertion fonctionnelle n'a été assouplie.
+
+## Étape active
+
+CI de régression sur le HEAD courant pour identifier uniquement les sentinelles historiques dont le contrat « Capture139 reste propriétaire de la session » est devenu volontairement obsolète. Chaque adaptation devra préserver l'intention d'origine et exiger explicitement le retrait de Capture139 plutôt que masquer un échec.
+
+Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — TDD RED — 2026-10-07
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.

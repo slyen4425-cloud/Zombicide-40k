@@ -44,7 +44,10 @@ assert.equal(chain.reduce((n,x)=>n+x.count,0),0,
 
 const capture=blocks.find(x=>x.id==='captureFix139')?.body||'';
 assert.ok(capture,'Capture139 launch block must remain present');
-assert.match(capture,/window\._captureStarting139=false/);
+assert.doesNotMatch(capture,/_captureStarting139/,
+  'dead Capture139 launch lock must remain retired; no openChar wrapper consumes it');
+assert.match(capture,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 remains only as explicit session-owner wiring plus separate screen-return debt');
 assert.doesNotMatch(capture,/const openChar139=window\.openChar/);
 assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
 assert.doesNotMatch(capture,/return openChar139\.apply\(this,arguments\)/);

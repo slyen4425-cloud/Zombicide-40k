@@ -137,7 +137,10 @@ const DUNGEON_ID='game_profile_dungeon_demo';
     const trainer=page.locator('#participantList input[type="checkbox"]').first();
     await trainer.waitFor({state:'visible'});
     if(!(await trainer.isChecked()))await trainer.check();
-    const trainerId=await trainer.getAttribute('value');
+    const trainerId=await page.evaluate(()=>(
+      typeof normalizeGameParticipants==='function' ? String(normalizeGameParticipants()[0]||'') : ''
+    ));
+    assert.ok(trainerId,'Capture regression test must resolve the selected trainer through the real participant owner');
 
     const choices=page.locator('#participantList .captureStarterChoice');
     await choices.first().waitFor({state:'visible'});

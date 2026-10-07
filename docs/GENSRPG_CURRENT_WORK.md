@@ -1,3 +1,15 @@
+# PHASE 9 — SENTINELLE EXTERNE — FAUX RED CORRIGÉ — 2026-10-07
+
+Le premier échec du test externe renforcé n'était pas encore une preuve runtime : le checkbox participant n'expose pas de `value`, donc le test utilisait `trainerId=null`. Correction de la sentinelle uniquement : l'ID du dresseur sélectionné est désormais lu via l'autorité réelle `normalizeGameParticipants()`.
+
+Aucun runtime modifié. Le même scénario externe doit maintenant déterminer réellement :
+- pool Capture multiple ;
+- sélection 1 à 3 persistée ;
+- bascule vers Dungeon ;
+- Builder visible et ouvrable.
+
+---
+
 # PHASE 9 — RETOUR UTILISATEUR — RÉGRESSIONS CAPTURE / BUILDER À REPRODUIRE — 2026-10-07
 
 Même branche, aucun nouveau micro-lot.

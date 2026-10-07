@@ -54,7 +54,7 @@ function exactScript(id){
 const captureScriptIds=[
   // Current production dependencies for this Phase 1 scenario only:
   // V137/V138 own the Capture pre-game Dungeon cleanup/context,
-  // V139 owns Capture launch, V151 owns Capture/Dungeon UI reconciliation,
+  // GensCaptureSessionStartV1 owns Capture session start; V151 owns Capture/Dungeon UI reconciliation,
   // V155 owns universe reload, V162 owns the built-in Monster Capture seed.
   'captureFix137',
   'captureFix138',

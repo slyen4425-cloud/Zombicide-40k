@@ -49,11 +49,11 @@ assert.doesNotMatch(service,/GensShellModuleLaunchV1\.register/,
   'module provider registrations must remain outside the S1 registry infrastructure block');
 
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
-assert.equal(wrappers,3,'S1 must track the three remaining historical startConfiguredGame globals');
+assert.equal(wrappers,2,'S1 must track the two remaining inline startConfiguredGame globals after Capture139 retirement');
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'S1 must preserve the native Shell startConfiguredGame owner');
 
-const expected=['captureFix138','captureFix139','gensDungeonCore01Js'];
+const expected=['captureFix138','gensDungeonCore01Js'];
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing '+id);
@@ -62,10 +62,14 @@ function block(id){
 for(const id of expected){
   const body=block(id);
   assert.match(body,/window\.startConfiguredGame\s*=\s*async\s+function/,'historical start owner changed: '+id);
-  if(id!=='captureFix139'){
-    assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
-  }
+  assert.doesNotMatch(body,/GensShellModuleLaunchV1/,'historical owner must not host module-launch provider logic: '+id);
 }
+const capture139=block('captureFix139');
+assert.doesNotMatch(capture139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 global launch owner must remain retired');
+assert.match(capture139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may retain only explicit session-owner wiring');
+
 const capture135=block('captureFix135');
 assert.doesNotMatch(capture135,/window\.startConfiguredGame\s*=(?!=)/,'Capture135 global launch owner must remain retired');
 assert.match(capture135,/target135\([\s\S]*render135\(/,'Capture135 non-launch responsibilities must remain');

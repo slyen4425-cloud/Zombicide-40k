@@ -42,8 +42,8 @@ assert.doesNotMatch(
 const owners=globalOwners('startConfiguredGame');
 assert.deepEqual(
   owners,
-  ['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'after captureFix135 retirement exactly three historical global owners must remain'
+  ['captureFix138','gensDungeonCore01Js'],
+  'Phase 9 must preserve Capture135 retirement and additionally retire Capture139 from the global chain'
 );
 
 assert.match(c135,/target135\(/,'captureFix135 ally-targeting responsibility must remain');
@@ -56,9 +56,11 @@ assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureF
 assert.match(c138,/isCaptureContext138/,'captureFix138 Capture-context routing must remain');
 assert.match(c138,/renderCaptureWorldHub/,'captureFix138 post-launch Capture UI responsibility must remain');
 
-assert.match(c139,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix139 global owner must remain');
-assert.match(c139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/,'captureFix139 dedicated Capture launch boundary must remain');
-assert.match(c139,/markSessionActive/,'captureFix139 Capture session activation must remain');
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 global launch owner must remain retired after Phase 9 transfer');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/);
+assert.match(c139,/markSessionActive:\(\)=>markSessionActive\(true\)/,
+  'Capture139 wiring must preserve the shared session activation dependency');
 
 assert.match(dc01,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core01 global owner must remain');
 assert.match(dc01,/eligible\(\)/,'Dungeon Core01 launch eligibility must remain');
@@ -69,7 +71,8 @@ assert.doesNotMatch(dc200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global
 assert.match(dc200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Dungeon provider S4 must remain');
 
 assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,'Capture139 must no longer register the public provider directly');
-assert.match(c139,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,'Capture139 must bind its stable session initializer into the public entry');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture139 must bind the dedicated Capture session-start owner into the public entry');
 assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/,'Capture public entry must keep the provider registered exactly once');
 assert.match(finalShell,/window\.startConfiguredGame=async function/,'Shell final authority must remain visible');
 assert.match(finalShell,/launchService\.startModuleSession\(moduleId\)/,'Shell final authority must continue delegating through the module registry');
@@ -88,7 +91,8 @@ console.log(JSON.stringify({
   scenario:'Phase 5 retire captureFix135 global startConfiguredGame owner',
   owners,
   capture135BlockRetained:true,
-  preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
+  preservedOwners:['captureFix138','gensDungeonCore01Js'],
+  retiredByPhase9:'captureFix139',
   core200LocalDispatcher:true,
   shellFinalAuthority:true
 },null,2));

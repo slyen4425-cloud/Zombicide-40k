@@ -11,184 +11,59 @@ const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 const shellContract=JSON.parse(read('assets/gensrpg/shell/module-contract-v1.json'));
 const captureContract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
-
-const ids=['captureFix138','captureFix139'];
-const retiredCapture135Id='captureFix135';
+const sessionOwner=read('assets/gensrpg/capture/session-start-v1.js');
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing inline block '+id);
   return m[1];
 }
+const c135=blockBody('captureFix135');
+const c138=blockBody('captureFix138');
+const c139=blockBody('captureFix139');
 
-function extractAssignedFunction(src,name){
-  const needles=[
-    'window.'+name+'=async function',
-    'window.'+name+' = async function',
-    'window.'+name+'=function',
-    'window.'+name+' = function'
-  ];
-  let start=-1;
-  for(const needle of needles){
-    start=src.indexOf(needle);
-    if(start>=0)break;
-  }
-  assert.ok(start>=0,'missing '+name+' assignment');
-  const open=src.indexOf('{',start);
-  assert.ok(open>=0,'missing '+name+' body');
-  let depth=0,quote=null,escaped=false,line=false,block=false;
-  for(let i=open;i<src.length;i++){
-    const c=src[i],n=src[i+1]||'';
-    if(line){if(c==='\n')line=false;continue;}
-    if(block){if(c==='*'&&n==='/'){block=false;i++;}continue;}
-    if(quote){
-      if(escaped){escaped=false;continue;}
-      if(c==='\\'){escaped=true;continue;}
-      if(c===quote)quote=null;
-      continue;
-    }
-    if(c==='/'&&n==='/'){line=true;i++;continue;}
-    if(c==='/'&&n==='*'){block=true;i++;continue;}
-    if(c==="'"||c==='"'||c===String.fromCharCode(96)){quote=c;continue;}
-    if(c==='{')depth++;
-    if(c==='}'&&--depth===0)return src.slice(start,i+1);
-  }
-  assert.fail('unterminated '+name);
-}
+assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m,
+  'Phase 9 closure must retain only Capture138 and Dungeon Core01 as inline global launch owners');
+assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
+  'Capture135 global launch owner must remain retired');
+assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/);
+assert.match(c138,/isCaptureContext138/);
+assert.match(c138,/renderCaptureWorldHub/);
 
-function normalized(src){
-  return src.replace(/\s+/g,' ').trim();
-}
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 must remain retired from the global launch chain');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may only wire historical dependencies into the dedicated Capture session owner');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
+assert.match(c139,/GensShellScreenReturnV1\?\.register\?\.\("capture"/,
+  'screen-return debt remains separate and intentionally untouched');
 
-const blocks={};
-const functions={};
-let captureContextSource='';
-for(const id of ids){
-  const meta=owners.blocks?.[id];
-  assert.ok(meta,'missing owner metadata '+id);
-  assert.equal(meta.status,'active',id+' must remain active');
-  assert.equal(meta.primaryDomain,'capture',id+' must remain Capture-owned');
-  blocks[id]=blockBody(id);
-  functions[id]=extractAssignedFunction(blocks[id],'startConfiguredGame');
-}
-const capture135Meta=owners.blocks?.[retiredCapture135Id];
-assert.ok(capture135Meta,'missing owner metadata '+retiredCapture135Id);
-assert.equal(capture135Meta.status,'active',retiredCapture135Id+' block must remain active');
-assert.equal(capture135Meta.primaryDomain,'capture',retiredCapture135Id+' must remain Capture-owned');
-blocks[retiredCapture135Id]=blockBody(retiredCapture135Id);
-assert.doesNotMatch(blocks[retiredCapture135Id],/window\.startConfiguredGame\s*=/,
-  'captureFix135 global startConfiguredGame owner must remain retired');
-captureContextSource=extractAssignedFunction(blocks.captureFix138,'isCaptureContext138');
-
-assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m,
-  'preaudit must run against the current three-owner global chain after captureFix135 retirement');
+assert.equal(owners.blocks.captureFix139.primaryDomain,'capture');
+assert.match(owners.blocks.captureFix139.responsibility,/no session initializer ownership/i);
 
 assert.equal(shellContract.status,'contract-only-not-loaded');
-assert.ok(shellContract.consumes.includes('module public entry contracts'));
 assert.ok(shellContract.forbidden.includes('module gameplay rules'));
-assert.ok(shellContract.forbidden.includes('private module runtime state'));
-
 assert.equal(captureContract.status,'partial-runtime-loaded');
 assert.equal(captureContract.activatedPhase,9);
-assert.equal(captureContract.publicRuntimeApi,'GensCaptureV1');
-assert.ok(captureContract.owns.includes('Monster Capture public runtime entry'));
-assert.ok(captureContract.owns.includes('Capture module-launch provider'));
-assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
+assert.ok(captureContract.owns.includes('Capture session initialization'));
+assert.ok(captureContract.consumes.includes('Capture session-start owner public API'));
+assert.ok(!captureContract.consumes.includes('temporary legacy Capture139 session start binding'));
 
-assert.match(captureEntry,/GensCaptureV1/);
-assert.match(captureEntry,/function install\(legacyStart\)/);
-assert.match(captureEntry,/function startModuleSession\(\)/);
-assert.doesNotMatch(captureEntry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setInterval|setTimeout|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
-  'Capture Phase 9 public entry must remain routing-only');
+assert.match(captureEntry,/let\s+sessionStartOwner\s*=\s*null/);
+assert.match(captureEntry,/function install\(owner\)/);
+assert.match(captureEntry,/await sessionStartOwner\.start\(\)/);
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/);
+assert.doesNotMatch(captureEntry,/legacyStartConfiguredGame|document\.|localStorage|setTimeout|MutationObserver/);
 
-assert.match(blocks.captureFix135,/target135\(/);
-assert.match(blocks.captureFix135,/render135\(/);
-assert.match(blocks.captureFix135,/captureBattleLiveBody/);
-assert.match(blocks.captureFix135,/captureCreatureDetailBody/);
-assert.match(blocks.captureFix135,/oldPlayerText135/);
-assert.doesNotMatch(blocks.captureFix135,/start135|\.apply\(this,arguments\)/);
-
-assert.match(functions.captureFix138,/isCaptureContext138/);
-assert.match(functions.captureFix138,/setTimeout/);
-assert.match(functions.captureFix138,/renderCaptureWorldHub/);
-
-assert.match(functions.captureFix139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
-assert.match(functions.captureFix139,/markSessionActive/);
-
-// Effective-chain shadowing proof.
-assert.match(captureContextSource,/GensCaptureV1/);
-assert.match(captureContextSource,/isProfile/);
-assert.doesNotMatch(captureContextSource,/gensCapturePregameMode|gensPureCaptureSheetMode|fam===["']creature["']/);
-assert.doesNotMatch(blocks.captureFix135,/window\.startConfiguredGame\s*=/);
-assert.match(functions.captureFix138,/const cap=isCaptureContext138\(\)/);
-assert.match(functions.captureFix138,/if\(cap\)\{/);
-
-const shadowingProof={
-  outerOwner:'captureFix139',
-  delegatesOnlyWhen:'isCaptureContext138() === false',
-  capture135GlobalOwnerRetired:true,
-  capture138IdentityOwner:'GensCaptureV1.isProfile(profile)',
-  capture138EffectCondition:'isCaptureContext138() === true',
-  capture138ConditionCoveredByOuterPredicate:true,
-  consequence:[
-    'Capture contexts are intercepted by captureFix139 before captureFix138',
-    'delegated non-Capture contexts do not activate captureFix138 post-launch branch',
-    'captureFix135 no longer participates in the global launch chain'
-  ]
-};
-
-const sourceReport=[
-  {
-    id:'captureFix135',
-    responsibility:owners.blocks.captureFix135.responsibility,
-    functionSource:'global startConfiguredGame retired',
-    relevantBlockLines:blocks.captureFix135.split(/\n/).map(x=>x.trim()).filter(x=>
-      /target135|render135|captureBattleLiveBody|captureCreatureDetailBody|oldPlayerText135|world|trainer|starter|participant|turn|round|day/i.test(x)
-    ).slice(0,80)
-  },
-  ...ids.map(id=>({
-  id,
-  responsibility:owners.blocks[id].responsibility,
-  functionSource:normalized(functions[id]),
-  relevantBlockLines:blocks[id].split(/\n/).map(x=>x.trim()).filter(x=>
-    /startConfiguredGame|gensCapturePregameMode|saveCaptureWorldState|isCaptureContext138|renderCaptureWorldHub|markSessionActive|setTimeout|world|trainer|starter|participant|turn|round|day/i.test(x)
-  ).slice(0,80)
-  }))
-];
-
-const proposedPublicBoundary={
-  owner:'capture',
-  consumer:'shell',
-  currentBestEntryOwner:'captureFix139',
-  shellProvides:['module selection / routing decision only'],
-  captureKeeps:[
-    'pregame/private state',
-    'participant/starter validation',
-    'Capture world initialization',
-    'Capture hub/UI transition'
-  ],
-  initialShape:'one async Capture-owned start entry; no private Capture state passed by Shell',
-  returnContract:'preserve current observable return semantics until a dedicated result contract is proven',
-  status:'descriptive only; no runtime entry connected in this lot'
-};
-
-const selectedFirstRuntimeMicroLot={
-  owner:'captureFix135',
-  seam:'startConfiguredGame',
-  action:'retirement completed',
-  targetAssignments:3,
-  preservedOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
-  rationale:'captureFix135 global authority is retired while its non-wrapper Capture responsibilities remain',
-  requiresDedicatedRed:false,
-  reAuditBeforeAnyCaptureFix138Retirement:true
-};
+assert.match(sessionOwner,/GensCaptureSessionStartV1/);
+assert.match(sessionOwner,/async function start\(\)/);
+assert.match(sessionOwner,/function dispose\(\)/);
+assert.doesNotMatch(sessionOwner,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/);
 
 console.log(JSON.stringify({
-  scenario:'Phase 5 Capture public launch-entry preaudit',
-  chainOwners:['captureFix138','captureFix139','gensDungeonCore01Js'],
-  sourceReport,
-  shadowingProof,
-  proposedPublicBoundary,
-  selectedFirstRuntimeMicroLot,
-  runtimeChanged:false
+  scenario:'Phase 5 Capture public launch-entry preaudit closure after Phase 9',
+  inlineLaunchOwners:['captureFix138','gensDungeonCore01Js'],
+  retiredOwner:'captureFix139',
+  activeCaptureSessionOwner:'GensCaptureSessionStartV1',
+  screenReturnDeferred:true
 },null,2));

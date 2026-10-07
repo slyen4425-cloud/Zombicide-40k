@@ -17,7 +17,6 @@ const dungeonEntry=read('assets/gensrpg/dungeon/entry-v1.js');
 
 const ids=[
   'captureFix138',
-  'captureFix139',
   'gensDungeonCore01Js'
 ];
 const retiredCapture135Id='captureFix135';
@@ -87,13 +86,13 @@ assert.ok(core200Meta,'missing owner metadata '+core200Id);
 assert.equal(core200Meta.status,'active',core200Id+' must remain active');
 const core200Body=blockBody(core200Id);
 
-assert.match(lastOwners,/^startConfiguredGame\t3\tgensDungeonCore01Js$/m,
-  'cartography must expose the current three historical global owners after captureFix135 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m,
+  'Phase 9 must expose only two remaining inline global startConfiguredGame owners');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
-  ['capture','capture','dungeon'],
-  'remaining historical global owners must stay module-owned'
+  ['capture','dungeon'],
+  'remaining inline global owners must stay module-owned'
 );
 assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must remain Dungeon-owned');
 
@@ -106,9 +105,12 @@ assert.match(functions.captureFix138,/isCaptureContext138/);
 assert.match(functions.captureFix138,/setTimeout/);
 assert.match(functions.captureFix138,/renderCaptureWorldHub/);
 
-// Capture 139: dedicated Capture launch path; delegates only outside Capture.
-assert.match(functions.captureFix139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
-assert.match(functions.captureFix139,/markSessionActive/);
+// Capture 139: no longer owns launch; it only wires the dedicated Capture session owner and keeps screen-return debt.
+const capture139Body=blockBody('captureFix139');
+assert.doesNotMatch(capture139Body,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/);
+assert.match(capture139Body,/GensCaptureSessionStartV1\.install\(/);
+assert.match(capture139Body,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
+assert.match(capture139Body,/GensShellScreenReturnV1\?\.register\?\.\("capture"/);
 
 // Dungeon Core01: real Dungeon eligibility/start rule.
 assert.match(functions.gensDungeonCore01Js,/eligible\(\)/);
@@ -188,8 +190,9 @@ const classification=[
   },
   {
     id:'captureFix139',
-    role:'capture-dedicated-launch-entry',
+    role:'capture-session-dependency-wiring-and-screen-return',
     shellAuthority:false,
+    globalOwner:false,
     removableNow:false
   },
   {
@@ -208,21 +211,21 @@ const classification=[
 ];
 
 const nextMicroLot={
-  name:'Re-audit captureFix138 before any further startConfiguredGame retirement',
-  kind:'contract/preaudit-only',
-  reason:'captureFix135 is now retired globally; captureFix138 must be re-characterized against the new three-owner chain before any runtime change',
-  runtimeChanged:false,
-  indexChanged:false,
+  name:'Capture139 session-start owner transfer completed in Phase 9',
+  kind:'historical-preaudit-closure',
+  reason:'Capture139 is retired from the global launch chain; Capture138 remains a separate compatibility debt',
+  runtimeChanged:true,
+  indexChanged:true,
   forbidden:[
-    'retire captureFix138 without a fresh preaudit and dedicated RED',
-    'connect Shell entry now',
+    'restore Capture139 as a global startConfiguredGame owner',
+    'retire captureFix138 without a fresh dedicated audit',
     'move Capture gameplay into Shell'
   ]
 };
 
 console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame remaining-chain preaudit',
-  assignments:3,
+  assignments:2,
   chain:ids,
   lastOwner:'gensDungeonCore01Js',
   core200LocalDispatcher:true,

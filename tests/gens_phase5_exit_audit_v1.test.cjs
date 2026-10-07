@@ -76,12 +76,16 @@ assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
   'retired Dungeon Core 0.28 hero-sheet wrapper must stay absent');
 
 const startChain=strictChain('startConfiguredGame');
-assert.deepEqual(startChain,['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'historical startConfiguredGame chain must stay frozen during the exit audit');
+assert.deepEqual(startChain,['captureFix138','gensDungeonCore01Js'],
+  'Phase 9 session-owner transfer must retire Capture139 from the historical startConfiguredGame chain');
+assert.doesNotMatch(capture139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
+  'Capture139 must remain retired from session-start ownership');
 assert.doesNotMatch(capture139,/GensShellModuleLaunchV1\.register\(["']capture["']/,
-  'Capture139 must no longer register the public launch provider');
-assert.match(capture139,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,
-  'Capture139 must bind only its stable legacy session initializer');
+  'Capture139 must not register the public launch provider');
+assert.match(capture139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may retain only explicit dependency wiring for the dedicated Capture session owner');
+assert.match(capture139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture public entry must bind the dedicated Capture session owner');
 assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/,
   'Capture public entry must own the registered launch provider');
 assert.match(index,/GensShellModuleLaunchV1\.register\(["']dungeon["']/,

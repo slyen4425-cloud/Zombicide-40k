@@ -1,3 +1,55 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — GREEN AUTOMATISÉ / VALIDATION UTILISATEUR À FAIRE — 2026-10-07
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-session-start-owner-transfer-2026-10-07`, SHA `b16ef9d4e58c55c9e68e126a323c040cb1583fa3`.
+Checkpoint GREEN automatisé : `checkpoint/gensrpg-phase9-capture-session-start-owner-transfer-green-2026-10-07`, SHA `bf4f0aac5492dcf3e53cf92987400747969540c1`.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Résultat
+
+Le démarrage de session Monster Capture est désormais possédé par `GensCaptureSessionStartV1`. `GensCaptureV1` conserve uniquement l'entrée publique et le provider Shell. Capture139 n'est plus propriétaire du démarrage de session.
+
+Retirés du runtime :
+- wrapper Capture139 de `window.startConfiguredGame` ;
+- `legacyStartConfiguredGame` ;
+- `gensCaptureStartConfiguredGame139V1` ;
+- `_captureStarting139` ;
+- seconde entrée monde différée `setTimeout(1200)`.
+
+Conservés hors périmètre :
+- `captureEnterWorld139` ;
+- `moduleScreenReturn` ;
+- Shell final ;
+- Dungeon / Survie / Tactical / PvP ;
+- gameplay Capture hors initialisation de session.
+
+Empreinte runtime : 8165614 octets / blob `560966d096134cd58ff4dc6ab2be589cee936ba7`.
+
+## Preuves
+
+RED : Architecture `37588018715`, étape dédiée en FAILURE avant toute mutation runtime.
+One-shot transfert : `37588355447` — SUCCESS.
+Triple CI sur SHA exact `bf4f0aac5492dcf3e53cf92987400747969540c1` :
+- Architecture + Browser `37646029643` — SUCCESS ;
+- Firefox wall `37646029439` — SUCCESS ;
+- Tactical dock `37646029389` — SUCCESS.
+
+Les sentinelles historiques Phase 2/3/5 ont été réalignées uniquement lorsqu'un contrat d'ownership ou de graphe est devenu volontairement obsolète. Elles exigent désormais explicitement le nouvel owner Capture et le retrait de Capture139 ; elles n'ont pas été assouplies.
+
+## Étape restante avant clôture fonctionnelle
+
+Validation utilisateur ciblée sur le preview exact du checkpoint GREEN :
+1. entrer dans Monster Capture ;
+2. sélectionner dresseur + créature de départ ;
+3. démarrer ;
+4. vérifier arrivée directe dans le monde Capture ;
+5. vérifier absence de double ouverture / flash / seconde ré-entrée ;
+6. vérifier que le réglage ordre des tours conserve son comportement.
+
+Aucun nouveau micro-lot ne doit être ouvert avant ce verdict utilisateur. Si validé : marquer le lot fermé et passer seulement ensuite au prochain seam Phase 9.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — ORDRE DE CHARGEMENT VERROUILLÉ — 2026-10-07
 
 Même lot. Le contrat Phase 3 précédent avait supposé à tort que le nouvel owner devait précéder l'entry Capture. Le script d'application source prouve l'ordre volontaire :

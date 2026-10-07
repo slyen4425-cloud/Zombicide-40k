@@ -22,29 +22,24 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Probe jsDelivr transport
+      - name: Probe html-preview transport
         env:
-          TARGET_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
-          INDEX_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/index.html
-        run: |
+          TARGET_URL: https://html-preview.github.io/?url=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/preview.html
+                  run: |
           set -euxo pipefail
-          curl -fL --retry 2 --retry-delay 1 -D /tmp/preview.headers -o /tmp/preview.html "$TARGET_URL"
-          curl -fL --retry 2 --retry-delay 1 -D /tmp/index.headers -o /tmp/index.html "$INDEX_URL"
-          echo "=== preview headers ==="
+          curl -fL --retry 2 --retry-delay 1 -D /tmp/preview.headers -o /tmp/preview-host.html "$TARGET_URL"
+          echo "=== html-preview headers ==="
           cat /tmp/preview.headers
-          echo "=== index headers ==="
-          cat /tmp/index.headers
-          wc -c /tmp/preview.html /tmp/index.html
-          grep -q 'gensrpgPreviewReady' /tmp/preview.html
+          wc -c /tmp/preview-host.html
 
       - name: Install Chromium
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Load exact public jsDelivr preview
+      - name: Load exact public html-preview
         env:
-          TARGET_URL: https://cdn.jsdelivr.net/gh/slyen4425-cloud/Zombicide-40k@bf4f0aac5492dcf3e53cf92987400747969540c1/preview.html
+          TARGET_URL: https://html-preview.github.io/?url=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/preview.html
         run: |
           mkdir -p artifacts/gensrpg-external-preview
           node - <<'NODE'

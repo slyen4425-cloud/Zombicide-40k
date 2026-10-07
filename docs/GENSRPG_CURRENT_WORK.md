@@ -1,3 +1,26 @@
+# PHASE 9 — RETOUR UTILISATEUR — RÉGRESSIONS CAPTURE / BUILDER À REPRODUIRE — 2026-10-07
+
+Même branche, aucun nouveau micro-lot.
+
+Retour utilisateur sur le vrai preview externe :
+- Capture n'affiche plus qu'une seule créature ;
+- Capture reste présenté sous la famille Adventure/Dungeon (dette Phase 9 déjà connue, pas traitée dans ce correctif tant que les régressions ne sont pas stabilisées) ;
+- le Builder Dungeon n'est plus visible dans le parcours utilisateur.
+
+Le test local existant était insuffisant : Capture exigeait seulement `>=1` starter et le Builder n'était testé que sur `preview.html` local. La sentinelle externe existante est étendue sur le vrai lien utilisé par l'utilisateur :
+1. source Capture > 1 créature ;
+2. pool runtime Capture > 1 ;
+3. nombre de cartes starter UI = pool runtime ;
+4. capacité de groupe 1 à 3 préservée ;
+5. bascule réelle Capture -> Dungeon ;
+6. bouton Dungeon visible ;
+7. Room Creator + World Builder chargés ;
+8. lanceur Builder visible et modal ouvrable.
+
+Aucune mutation runtime dans ce commit : RED de reproduction d'abord.
+
+---
+
 # PHASE 9 — RÉGRESSION LIEN PREVIEW — CAUSE CONFIRMÉE / TEST UTILISATEUR RÉEL — 2026-10-07
 
 Le vrai Chromium public sur `html-preview.github.io` a rendu GenSrpG correctement sur viewport mobile : accueil complet visible, titre `GenSrpG V16.78.11`, `GensCaptureV1` et `GensCaptureSessionStartV1` présents, zéro erreur page/console et zéro requête échouée.

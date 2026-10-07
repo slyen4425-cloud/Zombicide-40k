@@ -1,3 +1,38 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — TDD RED — 2026-10-07
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-session-start-owner-transfer-2026-10-07`, SHA `b16ef9d4e58c55c9e68e126a323c040cb1583fa3`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-green-2026-10-06`, SHA `b16ef9d4e58c55c9e68e126a323c040cb1583fa3`.
+Triple CI du préaudit : Architecture+Browser `37524056176`, Firefox `37524056093`, Tactical `37524056178` — SUCCESS.
+main gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Périmètre déclaré avant mutation runtime
+
+Responsabilité unique : initialisation d'une nouvelle session Monster Capture.
+
+Owner cible : `assets/gensrpg/capture/session-start-v1.js` / `GensCaptureSessionStartV1`.
+Le Shell final, l'identité Capture, le provider Shell, le retour écran, Dungeon, Survie, Tactical, PvP, progression, combat, assets, sauvegardes et PWA sont protégés.
+
+Transfert prévu :
+- `GensCaptureV1` reste l'entrée publique et le provider Shell ;
+- `GensCaptureV1.startModuleSession()` délègue au nouvel owner Capture au lieu de `legacyStartConfiguredGame` ;
+- le corps session de `captureFix139` sort entièrement de l'inline ;
+- `captureFix139` ne conserve que le câblage explicite de dépendances et son retour écran déjà séparé ;
+- aucune seconde route globale `startConfiguredGame`, aucun observer, polling, retry ou masque.
+
+## Caractérisation supplémentaire avant RED
+
+Recherche exacte dans l'index Rule 26 : `_captureStarting139` n'existe que trois fois et les trois occurrences sont dans `captureFix139` (initialisation false, passage true, remise false). Aucun autre code ne lit ce verrou. Le délai de 1200 ms ne protège donc plus aucun consommateur ; il ne fait qu'une seconde ré-entrée `captureEnterWorld139()`.
+
+Décision soustractive conforme aux garde-fous : ne pas migrer ce timer mort vers le nouvel owner. Le RED exige sa disparition avec le vieux wrapper Capture139.
+
+RED permanent : `tests/gens_phase9_capture_session_start_owner_transfer_v1.test.cjs`.
+Le premier échec attendu est l'absence de `assets/gensrpg/capture/session-start-v1.js`. Aucun runtime ne doit être modifié avant constat du RED.
+
+Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — PRÉAUDIT CONCLU / CI EN COURS — 2026-10-06
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-preaudit-2026-10-06`.

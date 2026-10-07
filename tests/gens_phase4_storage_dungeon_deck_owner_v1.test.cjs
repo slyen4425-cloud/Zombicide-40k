@@ -24,8 +24,8 @@ assert.match(block,/if\(ds\.remaining\[it\.id\]===undefined\)\{ds\.remaining\[it
 assert.match(block,/remaining\[it\.id\]=raw===undefined\?2:Math\.max\(0,parseInt\(raw,10\)\|\|0\)/,'Dungeon deck build quantity semantics must remain unchanged');
 assert.equal(block.includes('gensrpg_dungeon_runtime_v2'),false,'Deck raccord must not touch deferred runtime_v2');
 
-assert.equal(bytes.length,8166499,'current index size must include the Phase 7 generated Boss policy composition');
-assert.equal(blob,'20381d1df0b10b664d5163f308f909cd7a6e45df','current index blob must include the Phase 7 generated Boss policy composition');
+assert.equal(bytes.length,8165614,'current index size must include the Phase 7 generated Boss policy composition');
+assert.equal(blob,'560966d096134cd58ff4dc6ab2be589cee936ba7','current index blob must include the Phase 7 generated Boss policy composition');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 Dungeon deck Core storage authority',

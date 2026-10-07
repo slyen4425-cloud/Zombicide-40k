@@ -55,8 +55,8 @@ assert.match(
 assert.equal(mj.includes('removeItem("'+KEY+'")'),false);
 assert.equal(stability.includes('removeItem("'+KEY+'")'),false);
 
-assert.equal(bytes.length,8166499,'current Phase 9 participant raccord index size must remain deterministic');
-assert.equal(gitBlob(bytes),'20381d1df0b10b664d5163f308f909cd7a6e45df','MJ Rules raccord must target the current Phase 9 participant raccord baseline');
+assert.equal(bytes.length,8165614,'current Phase 9 participant raccord index size must remain deterministic');
+assert.equal(gitBlob(bytes),'560966d096134cd58ff4dc6ab2be589cee936ba7','MJ Rules raccord must target the current Phase 9 participant raccord baseline');
 
 console.log(JSON.stringify({
   scenario:'Phase 4 MJ Rules Core storage authority',

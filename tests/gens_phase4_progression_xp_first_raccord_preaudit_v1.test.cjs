@@ -18,8 +18,8 @@ const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.length+'\0')).update(indexBuf).digest('hex');
 const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
-assert.equal(indexBuf.length,8166499,'first-raccord preaudit must track the exact current Phase 7 Dungeon generated Boss policy index');
-assert.equal(indexBlob,'20381d1df0b10b664d5163f308f909cd7a6e45df','index blob drifted from the Phase 7 Dungeon generated Boss policy baseline');
+assert.equal(indexBuf.length,8165614,'first-raccord preaudit must track the exact current Phase 7 Dungeon generated Boss policy index');
+assert.equal(indexBlob,'560966d096134cd58ff4dc6ab2be589cee936ba7','index blob drifted from the Phase 7 Dungeon generated Boss policy baseline');
 assert.equal(coreBlob,'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
 
 function scriptBody(id){

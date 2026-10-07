@@ -1,16 +1,16 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "20381d1df0b10b664d5163f308f909cd7a6e45df",
-  "note": "Timer classification is descriptive only. No timer is removable solely because it is listed here.",
+  "sourceIndexBlob": "560966d096134cd58ff4dc6ab2be589cee936ba7",
+  "note": "Timer classification is descriptive only. The Phase 9 Capture session-start transfer retired the dead Capture139 1200 ms re-entry timer; no other timer was changed by that lot.",
   "expected": {
-    "externalReachableFiles": 83,
+    "externalReachableFiles": 84,
     "externalTimerSources": 51,
     "externalSetTimeoutSyntax": 141,
     "externalSetIntervalSyntax": 1,
     "activeInlineBlocks": 119,
-    "inlineTimerSources": 65,
-    "inlineSetTimeoutSyntax": 139,
+    "inlineTimerSources": 64,
+    "inlineSetTimeoutSyntax": 138,
     "inlineSetIntervalSyntax": 1
   },
   "defaultClassification": "deferred-ui-runtime",
@@ -78,7 +78,6 @@
   "mixedInline": [
     "captureFix137",
     "captureFix138",
-    "captureFix139",
     "dungeonCore213Stability"
   ]
 }

@@ -23,21 +23,22 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,3,'Phase 5 historical global chain must now contain three owners after captureFix135 global retirement');
+assert.equal(total,2,'Phase 9 session-start transfer must leave only two historical inline startConfiguredGame owners');
 assert.deepEqual(ids,[
   'captureFix138',
-  'captureFix139',
   'gensDungeonCore01Js'
-],'Phase 5 target chain drifted after captureFix135 global retirement');
+],'Phase 9 target chain must keep Capture138 compatibility and Dungeon Core01 while retiring Capture139');
 
 const capture131=blocks.find(x=>x.id==='captureFix131');
 assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-for(const id of ['captureFix138','captureFix139','gensDungeonCore01Js']){
+for(const id of ['captureFix138','gensDungeonCore01Js']){
   assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
 }
+assert.ok(!chain.some(x=>x.id==='captureFix139'),
+  'Capture139 must remain retired as a global startConfiguredGame owner after Phase 9 session-start transfer');
 assert.equal(chain.at(-1)?.id,'gensDungeonCore01Js',
   'Dungeon Core01 must remain the last historical global startConfiguredGame owner after captureFix135 retirement');
 
@@ -56,8 +57,13 @@ assert.match(c135,/captureCreatureDetailBody/);
 assert.match(c135,/oldPlayerText135/);
 assert.match(c138,/isCaptureContext138/);
 assert.match(c138,/renderCaptureWorldHub/);
-assert.match(c139,/if\(!isCaptureContext138\(\)\)return await start139\.apply/);
-assert.match(c139,/markSessionActive/);
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 session-start wrapper/reference must remain retired');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may only wire explicit dependencies to the Capture session-start owner');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture public entry must bind the dedicated session-start owner');
+assert.match(c139,/markSessionActive:\(\)=>markSessionActive\(true\)/);
 assert.match(dc01,/if\(eligible\?*\(\)?|if\(eligible\(\)\)/);
 assert.match(dc200,/isDungeonMode/);
 assert.match(dc200,/isCaptureContext138/);

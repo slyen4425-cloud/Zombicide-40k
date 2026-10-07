@@ -119,9 +119,112 @@ assert.doesNotMatch(index,/\bwindow\.openSessionDungeonSetup\s*=/,'no inline mod
 assert.doesNotMatch(block('captureFix137'),/openSessionDungeonSetup/,'Capture137 relinquishes Dungeon navigation');
 assert.doesNotMatch(block('gensStability151'),/openD151|openSessionDungeonSetup/,'V151 relinquishes this entry');
 
+// Compose the later Phase 9 Capture session-start transfer inverse before
+// replaying this older Dungeon-entry proof. This keeps the historical target
+// immutable instead of repinning it to a newer runtime.
+const sessionLoadOld='<script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>';
+const sessionLoadNew=sessionLoadOld+'\n<script src="assets/gensrpg/capture/session-start-v1.js?v=1"></script>';
+const sessionSeamOld=`/* Neutralise l'ouverture automatique d'une fiche durant la fenêtre critique de lancement. */
+window._captureStarting139=false;
+
+/* Remplace le lancement Capture par un chemin dédié, sans passer par les initialisations Dungeon. */
+const start139=window.startConfiguredGame;
+window.startConfiguredGame=async function(){
+  if(!isCaptureContext138())return await start139.apply(this,arguments);
+
+  const participants=normalizeGameParticipants();
+  if(!participants.length){
+    alert("Sélectionne au moins un dresseur avant de démarrer.");
+    openSessionHeroSetup();return;
+  }
+  if(typeof gensCaptureParticipantsReady==="function"&&!gensCaptureParticipantsReady()){
+    alert("Choisis les créatures de départ avant de démarrer.");
+    openSessionHeroSetup();return;
+  }
+
+  window._captureStarting139=true;
+  try{
+    /* participant actif fixé AVANT activation de la session */
+    current=String(participants[0]);
+    try{state=loadState(current)}catch(e){}
+    saveGameParticipants([...participants]);
+
+    try{applyCustomHeroesMulti()}catch(e){}
+    try{applyPregameGoldToParticipants(participants)}catch(e){}
+    try{markSessionActive(true)}catch(e){}
+
+    /* nouveau monde Capture */
+    try{
+      const ws=captureWorldState();
+      ws.day=1;ws.turnIndex=0;ws.round=1;ws.last=null;
+      if(!ws.locationId)ws.locationId="cap_forest";
+      if(!ws.locationName)ws.locationName="Forêt sauvage";
+      saveCaptureWorldState(ws);
+    }catch(e){}
+
+    try{captureEnsureStarterKitsForParticipants()}catch(e){}
+
+    /* Tours : ne démarrent que si explicitement cochés */
+    const toggle=document.getElementById("participantTurnOrderToggle");
+    const cfg=loadGameCustomization();
+    cfg.turnOrder=!!toggle?.checked;
+    saveGameCustomization(cfg);
+    if(cfg.turnOrder){
+      try{startTurnManagerForGame()}catch(e){}
+    }else{
+      try{saveTurnState(null);closeTurnPopup(false);renderTurnUi()}catch(e){}
+    }
+
+    captureEnterWorld139();
+  }finally{
+    /* garde le verrou un instant pour bloquer les vieux setTimeout openChar */
+    setTimeout(()=>{
+      window._captureStarting139=false;
+      captureEnterWorld139();
+    },1200);
+  }
+};
+const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;
+window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);`;
+const sessionSeamNew=`/* Le propriétaire Capture initialise la session ; Capture139 ne conserve que le câblage legacy explicite. */
+window.GensCaptureSessionStartV1.install({
+  normalizeParticipants:()=>normalizeGameParticipants(),
+  participantsReady:()=>typeof gensCaptureParticipantsReady!=="function"||gensCaptureParticipantsReady(),
+  activateParticipant:id=>{
+    current=String(id);
+    try{state=loadState(current)}catch(e){}
+  },
+  saveParticipants:participants=>saveGameParticipants([...participants]),
+  applyCustomHeroes:()=>applyCustomHeroesMulti(),
+  applyPregameGold:participants=>applyPregameGoldToParticipants(participants),
+  markSessionActive:()=>markSessionActive(true),
+  loadWorld:()=>captureWorldState(),
+  saveWorld:ws=>saveCaptureWorldState(ws),
+  ensureStarterKits:()=>captureEnsureStarterKitsForParticipants(),
+  readTurnOrderEnabled:()=>!!document.getElementById("participantTurnOrderToggle")?.checked,
+  loadCustomization:()=>loadGameCustomization(),
+  saveCustomization:cfg=>saveGameCustomization(cfg),
+  startTurnManager:()=>startTurnManagerForGame(),
+  clearTurnManager:()=>{saveTurnState(null);closeTurnPopup(false);renderTurnUi()},
+  enterWorld:()=>captureEnterWorld139(),
+  notify:message=>alert(message),
+  openParticipantSetup:()=>openSessionHeroSetup()
+});
+window.GensCaptureV1.install(window.GensCaptureSessionStartV1);`;
+
+assert.equal(index.split(sessionLoadNew).length-1,1,'current runtime must contain one Capture session-owner load seam');
+assert.equal(index.split(sessionSeamNew).length-1,1,'current runtime must contain one Capture session-owner wiring seam');
+let beforeSessionOwner=index.replace(sessionLoadNew,sessionLoadOld).replace(sessionSeamNew,sessionSeamOld);
+const beforeSessionOwnerBytes=Buffer.from(beforeSessionOwner,'utf8');
+const beforeSessionOwnerBlob=crypto.createHash('sha1').update(Buffer.concat([
+  Buffer.from('blob '+beforeSessionOwnerBytes.length+'\0'),beforeSessionOwnerBytes
+])).digest('hex');
+assert.equal(beforeSessionOwnerBlob,'20381d1df0b10b664d5163f308f909cd7a6e45df',
+  'inverting only the Capture session-start transfer must recover its exact GREEN base');
+
 // Invert the separately declared canonical Survival-editor guard seam first.
 const editorBoundarySeams=[{"count": 1, "before": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&p.gameStyle!==\"dungeon\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}", "after": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&gensContentFamilyForProfile(p)===\"survival\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}"}, {"count": 1, "before": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&x.gameStyle!==\"dungeon\");\n  if(p)applyGameProfile(p,false);\n}", "after": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\");\n  if(p)applyGameProfile(p,false);\n}"}, {"count": 1, "before": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&x.gameStyle!==\"dungeon\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID)\n}", "after": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID&&gensContentFamilyForProfile(x)===\"survival\")\n}"}, {"count": 1, "before": "function selectSurvivalModProfile(id){smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}", "after": "function selectSurvivalModProfile(id){if(!loadGameProfiles().some(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\"))return;smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}"}, {"count": 6, "before": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;", "after": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(i<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(pi<0)return;", "after": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(pi<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source)return;", "after": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source||String(source.id)!==String(smodEditingId))return;"}];
-let beforeEditorBoundary=index;
+let beforeEditorBoundary=beforeSessionOwner;
 for(const seam of [...editorBoundarySeams].reverse()){
   assert.equal(beforeEditorBoundary.split(seam.after).length-1,seam.count,"declared canonical editor guard count");
   beforeEditorBoundary=beforeEditorBoundary.split(seam.after).join(seam.before);

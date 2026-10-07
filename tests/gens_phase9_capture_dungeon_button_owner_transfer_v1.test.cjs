@@ -80,8 +80,10 @@ assert.doesNotMatch(c151,/gensEnsureDungeonAdventureButton139/,
 
 assert.match(c139,/window\.captureEnterWorld139=function\(\)/,
   'Capture139 launch/world handoff must remain intact');
-assert.match(c139,/window\.startConfiguredGame=async function\(\)/,
-  'Capture139 dedicated launch path must remain intact');
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
+  'Capture139 must remain retired from global/session-start ownership');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 must retain only explicit dependency wiring for the dedicated Capture session owner');
 
 assert.doesNotMatch(c137,/openSessionDungeonSetup/,
   'Capture137 entry guard was transferred to the native owner in the dedicated follow-up seam');

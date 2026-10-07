@@ -24,6 +24,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
   'assets/gensrpg/capture/entry-v1.js',
+  'assets/gensrpg/capture/session-start-v1.js',
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -53,7 +54,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,39,'production composition must expose 39 unique direct local JS entries before dynamic module-entry traversal');
+assert.equal(new Set(productionDirect).size,40,'production composition must expose 40 unique direct local JS entries before dynamic module-entry traversal');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -122,12 +123,16 @@ const phase5ConnectedServices=[
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ];
 const phase5Set=new Set(phase5ConnectedServices);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel));
+const phase9ConnectedServices=[
+  'assets/gensrpg/capture/session-start-v1.js'
+];
+const phase9Set=new Set(phase9ConnectedServices);
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,96,'physical JS inventory must reflect the retired legacy Survival/Dungeon guard');
+assert.equal(allJs.length,97,'physical JS inventory must include the Capture session-start owner');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,83,'production-reachable JS graph must include the active Survival, Dungeon, Capture and Tactical public entries');
+assert.equal(reachable.size,84,'production-reachable JS graph must include the Capture session-start owner');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
@@ -153,6 +158,10 @@ for(const rel of phase4InertServices){
 for(const rel of phase5ConnectedServices){
   assert.equal(allJs.includes(rel),true,'Phase 5 connected Shell service missing: '+rel);
   assert.equal(reachable.has(rel),true,'Phase 5 connected Shell service must stay production-reachable: '+rel);
+}
+for(const rel of phase9ConnectedServices){
+  assert.equal(allJs.includes(rel),true,'Phase 9 connected Capture service missing: '+rel);
+  assert.equal(reachable.has(rel),true,'Phase 9 connected Capture service must stay production-reachable: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',
@@ -181,6 +190,7 @@ console.log(JSON.stringify({
   phase4ConnectedServices:phase4ConnectedServices.length,
   phase4InertServices:phase4InertServices.length,
   phase5ConnectedServices:phase5ConnectedServices.length,
+  phase9ConnectedServices:phase9ConnectedServices.length,
   productionReachableLocalJs:reachable.size,
   phase2NonReachableLocalJs:notReachablePhase2.length,
   knownDebt:{

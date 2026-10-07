@@ -25,7 +25,7 @@ jobs:
       - name: Probe html-preview transport
         env:
           TARGET_URL: https://html-preview.github.io/?url=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/preview.html
-                  run: |
+        run: |
           set -euxo pipefail
           curl -fL --retry 2 --retry-delay 1 -D /tmp/preview.headers -o /tmp/preview-host.html "$TARGET_URL"
           echo "=== html-preview headers ==="
@@ -50,7 +50,6 @@ jobs:
               viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
               locale:'fr-FR',serviceWorkers:'block'
             });
-            await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
             const page=await context.newPage();
             const errors=[];
             const consoleErrors=[];

@@ -427,7 +427,12 @@
     "assets/gensrpg/capture/entry-v1.js": {
       "owner": "GenSrpG Capture Public Entry",
       "domain": "capture",
-      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider while legacy Capture139 remains the temporary session initializer"
+      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider and delegating session initialization to GensCaptureSessionStartV1"
+    },
+    "assets/gensrpg/capture/session-start-v1.js": {
+      "owner": "GenSrpG Capture Session Start",
+      "domain": "capture",
+      "role": "active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority"
     }
   }
 }

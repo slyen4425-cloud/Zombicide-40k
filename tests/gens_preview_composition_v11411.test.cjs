@@ -29,7 +29,10 @@ assert.match(preview,/html=html\.split\(perf\)\.join\(''\)/,
   'preview must remove the source performance tag before reinjecting the Pages order');
 assert.match(preview,/html=html\.split\(finalShell\)\.join\(''\)/,
   'preview must remove the source final Shell tag before reinjecting the Pages order');
-assert.ok(preview.includes('const base=new URL(\'./\',location.href).href;'),'preview must derive its immutable commit-root base URL');
+assert.ok(preview.includes("const original=params.get('url')"),'preview must recover the immutable source URL when rendered through html-preview');
+assert.ok(preview.includes("https://raw.githack.com/"),'html-preview transport must resolve runtime assets against the exact immutable GitHub commit');
+assert.ok(preview.includes("return {base,index:base+'index.html'}"),'preview must fetch the exact commit index through a non-document RawGitHack request');
+assert.ok(preview.includes("if(!window.supabase)"),'manual preview must survive a blocked Supabase CDN without changing production runtime');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
 assert.ok(preview.includes('document.open();')&&preview.includes('document.write(html);')&&preview.includes('document.close();'),'preview must render into the top-level document so reload/restart returns to preview.html');
 assert.doesNotMatch(preview,/<iframe\b/i,'restart-safe preview must not use an iframe/srcdoc');

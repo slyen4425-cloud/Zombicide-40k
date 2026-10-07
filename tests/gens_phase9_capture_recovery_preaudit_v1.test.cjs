@@ -32,7 +32,10 @@ assert.ok(captureContract.owns.includes('Capture module-launch provider'));
 assert.ok(captureContract.forbidden.includes('Dungeon private runtime'));
 assert.ok(captureContract.forbidden.includes('Survival private runtime'));
 assert.match(captureEntry,/GensCaptureV1/);
-assert.match(captureEntry,/function install\(legacyStart\)/);
+assert.match(captureEntry,/function install\(owner\)/);
+assert.match(captureEntry,/sessionStartOwner/);
+assert.ok(captureContract.owns.includes('Capture session initialization'));
+assert.ok(captureContract.consumes.includes('Capture session-start owner public API'));
 assert.match(captureEntry,/function startModuleSession\(\)/);
 assert.doesNotMatch(captureEntry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
   'the activated Capture public entry must remain a routing boundary only');
@@ -52,7 +55,7 @@ for(const proof of [
   /dungeonMode,false/,
   /current Capture seed must no longer borrow Dungeon gameStyle identity/,
   /V137\/V138 own the Capture pre-game Dungeon cleanup\/context/,
-  /V139 owns Capture launch/
+  /GensCaptureSessionStartV1 owns Capture session start/
 ]){
   assert.match(currentCaptureTest,proof,
     'current Capture autonomy characterization must remain visible after retiring the Dungeon-style seed identity');

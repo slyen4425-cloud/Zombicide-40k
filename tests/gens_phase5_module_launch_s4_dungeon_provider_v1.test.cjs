@@ -66,8 +66,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
 }
 assert.deepEqual(
   chain,
-  ['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S4 must preserve the three remaining historical launch owners after captureFix135 retirement'
+  ['captureFix138','gensDungeonCore01Js'],
+  'S4 must preserve the post-transfer historical launch owners'
 );
 
 assert.match(index,/onclick=["']startConfiguredGame\(\)["']/,

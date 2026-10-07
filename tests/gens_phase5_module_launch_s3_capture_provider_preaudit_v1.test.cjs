@@ -42,16 +42,14 @@ assert.ok(registryExpose<c139.start,'Shell launch registry must exist before Cap
 assert.ok(c135.start<c138.start&&c138.start<c139.start&&c139.start<d01.start&&d01.start<d200.start,
   'historical launch owner load order drifted');
 
-assert.match(c139.body,/const\s+start139\s*=\s*window\.startConfiguredGame/,
-  'Capture139 must capture the previous launch chain');
-assert.match(c139.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
-  'Capture139 must remain a real launch owner');
-assert.match(c139.body,/if\(!isCaptureContext138\(\)\)return await start139\.apply\(this,arguments\)/,
-  'Capture139 must delegate only outside Capture context');
-assert.match(c139.body,/normalizeGameParticipants/,
-  'Capture139 must still own Capture participant initialization');
+assert.doesNotMatch(c139.body,/const\s+start139\s*=|window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 must remain retired from global launch ownership');
+assert.doesNotMatch(c139.body,/const\s+participants\s*=\s*normalizeGameParticipants\(\)/,
+  'Capture139 must no longer own Capture participant initialization');
 assert.match(c139.body,/captureEnterWorld139/,
-  'Capture139 must still own Capture world entry');
+  'Capture139 keeps only its deferred world-entry/screen-return debt');
+assert.match(c139.body,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 must wire the dedicated Capture session owner');
 
 assert.doesNotMatch(c135.body,/window\.startConfiguredGame\s*=(?!=)/,
   'Capture135 global launch boundary must remain retired');
@@ -72,8 +70,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S3 preaudit must track the exact three-owner global chain after Capture135 retirement');
+assert.deepEqual(chain,['captureFix138','gensDungeonCore01Js'],
+  'S3 preaudit must track the post-transfer global chain after Capture139 session-owner retirement');
 
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_user_regression_rollback_guard_v1.test.cjs')),
   'the permanent user-regression rollback guard must remain');
@@ -82,20 +80,18 @@ assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_capture_victory_resu
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase2_full_composition_capture_browser_v11411.test.cjs')),
   'full Capture composition E2E proof must remain available');
 
-assert.match(c139.body,/const gensCaptureStartConfiguredGame139V1=window\.startConfiguredGame;/,
-  'historical S3 stable reference must remain available');
-assert.match(c139.body,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/,
-  'Phase 9 must hand the stable Capture139 reference to the public entry');
+assert.match(c139.body,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Phase 9 must bind the dedicated session owner into the public entry');
 assert.doesNotMatch(c139.body,/GensShellModuleLaunchV1\.register\("capture"/,
-  'Capture139 must no longer register the provider directly');
+  'Capture139 must not register the provider directly');
 
 const selectedSeam={
   owner:'GensCaptureV1',
-  legacySessionOwner:'captureFix139',
-  captureReference:'stable Capture139 window.startConfiguredGame reference preserved',
-  registrationTiming:'public Capture entry loads before Capture139 binding',
+  sessionOwner:'GensCaptureSessionStartV1',
+  captureReference:'explicit session-start owner binding',
+  registrationTiming:'Capture session owner and public entry load before Capture139 wiring',
   productionRouting:'Shell public registry path preserved',
-  retirement:'captureFix135 global retired; Capture139 keeps legacy session initialization only',
+  retirement:'captureFix135 and Capture139 global launch owners retired',
   proof:'legacy Capture shell + Capture victory/resume + full composition + four-module non-interference'
 };
 

@@ -67,8 +67,10 @@ for(const domain of domains){
       assert.equal(exists(sessionStart),true,'Capture session-start owner must exist in the active Phase 9 structure');
       assert.equal(composition.index.includes(sessionStart),true,'Capture session-start owner must be directly loaded by source index in Phase 9');
       assert.equal(composition.index.includes(entry),true,'capture entry must be directly loaded by source index in Phase 9');
-      assert.ok(composition.index.indexOf(sessionStart)<composition.index.indexOf(entry),
-        'Capture session-start owner must load before the public Capture entry');
+      assert.ok(composition.index.indexOf(entry)<composition.index.indexOf(sessionStart),
+        'public Capture entry must load before its session-start owner');
+      assert.ok(composition.index.indexOf(sessionStart)<composition.index.indexOf('id="captureFix139"'),
+        'Capture session-start owner must load before Capture139 performs explicit dependency wiring');
       for(const name of ['preview','pages','bootstrap']){
         assert.equal(composition[name].includes(sessionStart),false,'Capture session-start owner must not be redundantly injected by '+name);
         assert.equal(composition[name].includes(entry),false,'capture source entry must not be redundantly injected by '+name);

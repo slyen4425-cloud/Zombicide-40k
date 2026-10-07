@@ -1,3 +1,12 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — ORDRE DE CHARGEMENT VERROUILLÉ — 2026-10-07
+
+Même lot. Le contrat Phase 3 précédent avait supposé à tort que le nouvel owner devait précéder l'entry Capture. Le script d'application source prouve l'ordre volontaire :
+`capture/entry-v1.js` -> `capture/session-start-v1.js` -> inline `captureFix139` qui injecte les dépendances.
+
+La sentinelle exige désormais exactement cet ordre. Aucun runtime modifié.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — RÉFÉRENCE PHASE 5 RÉALIGNÉE — 2026-10-07
 
 Toujours le même lot ; aucun micro-lot ouvert.

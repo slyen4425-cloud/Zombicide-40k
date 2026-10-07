@@ -1,8 +1,8 @@
 "use strict";
 
 (function installGensCaptureV1(root){
-  const VERSION="1.1.0";
-  let legacyStartConfiguredGame=null;
+  const VERSION="1.2.0";
+  let sessionStartOwner=null;
   let installed=false;
 
   function isProfile(profile){
@@ -17,27 +17,27 @@
     const shell=root.GensShellModuleLaunchV1;
     if(!shell||typeof shell.activeModule!=="function")return false;
     if(shell.activeModule()!=="capture")return false;
-    if(typeof legacyStartConfiguredGame!=="function")return false;
-    await legacyStartConfiguredGame();
+    if(!sessionStartOwner||typeof sessionStartOwner.start!=="function")return false;
+    await sessionStartOwner.start();
     return true;
   }
 
-  function install(legacyStart){
-    if(typeof legacyStart!=="function")throw new TypeError("GensCaptureV1.install requires the Capture139 legacy start function");
+  function install(owner){
+    if(!owner||typeof owner.start!=="function")throw new TypeError("GensCaptureV1.install requires the Capture session-start owner");
     if(installed){
-      if(legacyStartConfiguredGame!==legacyStart)throw new Error("GensCaptureV1 legacy start owner already bound");
+      if(sessionStartOwner!==owner)throw new Error("GensCaptureV1 session-start owner already bound");
       return true;
     }
     const shell=root.GensShellModuleLaunchV1;
     if(!shell||typeof shell.register!=="function")throw new Error("GensCaptureV1 requires GensShellModuleLaunchV1");
-    legacyStartConfiguredGame=legacyStart;
+    sessionStartOwner=owner;
     shell.register("capture",startModuleSession);
     installed=true;
     return true;
   }
 
   function status(){
-    return Object.freeze({installed,legacyBound:typeof legacyStartConfiguredGame==="function"});
+    return Object.freeze({installed,sessionStartBound:!!(sessionStartOwner&&typeof sessionStartOwner.start==="function")});
   }
 
   root.GensCaptureV1=Object.freeze({VERSION,isProfile,install,startModuleSession,status});

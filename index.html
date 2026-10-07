@@ -4298,6 +4298,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>
+<script src="assets/gensrpg/capture/session-start-v1.js?v=1"></script>
 
 <script>
 
@@ -27051,68 +27052,31 @@ window.captureEnterWorld139=function(){
   }
 };
 
-/* Neutralise l'ouverture automatique d'une fiche durant la fenêtre critique de lancement. */
-window._captureStarting139=false;
-
-/* Remplace le lancement Capture par un chemin dédié, sans passer par les initialisations Dungeon. */
-const start139=window.startConfiguredGame;
-window.startConfiguredGame=async function(){
-  if(!isCaptureContext138())return await start139.apply(this,arguments);
-
-  const participants=normalizeGameParticipants();
-  if(!participants.length){
-    alert("Sélectionne au moins un dresseur avant de démarrer.");
-    openSessionHeroSetup();return;
-  }
-  if(typeof gensCaptureParticipantsReady==="function"&&!gensCaptureParticipantsReady()){
-    alert("Choisis les créatures de départ avant de démarrer.");
-    openSessionHeroSetup();return;
-  }
-
-  window._captureStarting139=true;
-  try{
-    /* participant actif fixé AVANT activation de la session */
-    current=String(participants[0]);
+/* Le propriétaire Capture initialise la session ; Capture139 ne conserve que le câblage legacy explicite. */
+window.GensCaptureSessionStartV1.install({
+  normalizeParticipants:()=>normalizeGameParticipants(),
+  participantsReady:()=>typeof gensCaptureParticipantsReady!=="function"||gensCaptureParticipantsReady(),
+  activateParticipant:id=>{
+    current=String(id);
     try{state=loadState(current)}catch(e){}
-    saveGameParticipants([...participants]);
-
-    try{applyCustomHeroesMulti()}catch(e){}
-    try{applyPregameGoldToParticipants(participants)}catch(e){}
-    try{markSessionActive(true)}catch(e){}
-
-    /* nouveau monde Capture */
-    try{
-      const ws=captureWorldState();
-      ws.day=1;ws.turnIndex=0;ws.round=1;ws.last=null;
-      if(!ws.locationId)ws.locationId="cap_forest";
-      if(!ws.locationName)ws.locationName="Forêt sauvage";
-      saveCaptureWorldState(ws);
-    }catch(e){}
-
-    try{captureEnsureStarterKitsForParticipants()}catch(e){}
-
-    /* Tours : ne démarrent que si explicitement cochés */
-    const toggle=document.getElementById("participantTurnOrderToggle");
-    const cfg=loadGameCustomization();
-    cfg.turnOrder=!!toggle?.checked;
-    saveGameCustomization(cfg);
-    if(cfg.turnOrder){
-      try{startTurnManagerForGame()}catch(e){}
-    }else{
-      try{saveTurnState(null);closeTurnPopup(false);renderTurnUi()}catch(e){}
-    }
-
-    captureEnterWorld139();
-  }finally{
-    /* garde le verrou un instant pour bloquer les vieux setTimeout openChar */
-    setTimeout(()=>{
-      window._captureStarting139=false;
-      captureEnterWorld139();
-    },1200);
-  }
-};
-const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;
-window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);
+  },
+  saveParticipants:participants=>saveGameParticipants([...participants]),
+  applyCustomHeroes:()=>applyCustomHeroesMulti(),
+  applyPregameGold:participants=>applyPregameGoldToParticipants(participants),
+  markSessionActive:()=>markSessionActive(true),
+  loadWorld:()=>captureWorldState(),
+  saveWorld:ws=>saveCaptureWorldState(ws),
+  ensureStarterKits:()=>captureEnsureStarterKitsForParticipants(),
+  readTurnOrderEnabled:()=>!!document.getElementById("participantTurnOrderToggle")?.checked,
+  loadCustomization:()=>loadGameCustomization(),
+  saveCustomization:cfg=>saveGameCustomization(cfg),
+  startTurnManager:()=>startTurnManagerForGame(),
+  clearTurnManager:()=>{saveTurnState(null);closeTurnPopup(false);renderTurnUi()},
+  enterWorld:()=>captureEnterWorld139(),
+  notify:message=>alert(message),
+  openParticipantSetup:()=>openSessionHeroSetup()
+});
+window.GensCaptureV1.install(window.GensCaptureSessionStartV1);
 
 /* Le Shell garde l’unique frontière globale goMenu.
    Capture expose uniquement son retour owner-local via le contrat public. */

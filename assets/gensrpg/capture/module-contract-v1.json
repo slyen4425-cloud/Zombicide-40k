@@ -7,12 +7,13 @@
   "owns": [
     "Monster Capture public runtime entry",
     "Capture module-launch provider",
-    "Capture profile identity classification"
+    "Capture profile identity classification",
+    "Capture session initialization"
   ],
   "consumes": [
     "core public contracts",
     "Shell module-launch public contract",
-    "temporary legacy Capture139 session start binding"
+    "Capture session-start owner public API"
   ],
   "forbidden": [
     "Dungeon private runtime",
@@ -22,14 +23,15 @@
     "Capture gameplay ownership inside the public entry"
   ],
   "lifecycle": {
-    "install": "explicit Capture139 legacy binding; registers the Capture public provider exactly once",
-    "dispose": "not temporary in this seam; no listener observer timer or storage state is created"
+    "install": "explicit Capture session-start owner binding; registers the Capture public provider exactly once",
+    "dispose": "session-start owner exposes explicit dispose; public entry creates no listener observer timer or storage state"
   },
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
-    "the entry owns the public Capture module-launch provider but not Capture gameplay/session initialization",
-    "Capture139 remains the sole temporary legacy session initializer during this seam",
+    "the entry owns the public Capture module-launch provider and delegates session initialization to GensCaptureSessionStartV1",
+    "Capture139 no longer owns session initialization and only wires explicit historical dependencies plus its separate screen-return debt",
     "the entry has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
+    "the session-start owner has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
     "only one Shell register capture provider is active",
     "historical Dungeon compatibility remains unchanged until separately audited",
     "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity"

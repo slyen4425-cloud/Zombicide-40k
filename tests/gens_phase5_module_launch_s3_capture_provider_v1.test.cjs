@@ -8,6 +8,7 @@ const crypto=require('node:crypto');
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
+const owner=fs.readFileSync(path.join(root,'assets/gensrpg/capture/session-start-v1.js'),'utf8');
 const bytes=Buffer.from(index,'utf8');
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),
@@ -24,16 +25,12 @@ function block(id){
 }
 
 const c139=block('captureFix139');
-assert.match(c139,/const\s+start139\s*=\s*window\.startConfiguredGame/);
-assert.match(c139,/window\.startConfiguredGame\s*=\s*async\s+function/);
-
-const wrapperPos=c139.indexOf('window.startConfiguredGame=async function(){');
-const captureRefPos=c139.indexOf('const gensCaptureStartConfiguredGame139V1=window.startConfiguredGame;');
-const installPos=c139.indexOf('window.GensCaptureV1.install(gensCaptureStartConfiguredGame139V1);');
-
-assert.ok(wrapperPos>=0,'Capture139 wrapper must remain');
-assert.ok(captureRefPos>wrapperPos,'S3 stable Capture139 reference must remain after its wrapper is installed');
-assert.ok(installPos>captureRefPos,'Phase 9 must bind the stable Capture139 reference into the public Capture entry');
+assert.doesNotMatch(c139,/const\s+start139\s*=|window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 must remain retired from global launch ownership');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 must wire the dedicated Capture session owner');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture139 must bind the dedicated owner into the public entry');
 assert.doesNotMatch(c139,/const gensCaptureStartModuleSessionV1=async\(\)=>/,
   'Capture139 must no longer own the public provider implementation');
 assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,
@@ -41,11 +38,14 @@ assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,
 
 assert.match(entry,/function startModuleSession\(\)/);
 assert.match(entry,/if\(shell\.activeModule\(\)!=="capture"\)return false/);
-assert.match(entry,/await legacyStartConfiguredGame\(\)/);
+assert.match(entry,/sessionStartOwner/);
+assert.match(entry,/await sessionStartOwner\.start\(\)/);
 assert.match(entry,/return true/);
 assert.match(entry,/shell\.register\("capture",startModuleSession\)/);
-assert.doesNotMatch(entry,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener/,
-  'Phase 9 Capture provider must remain routing-only; Capture139 remains the gameplay/session owner');
+assert.doesNotMatch(entry,/legacyStartConfiguredGame|document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener/,
+  'Phase 9 Capture provider must remain routing-only and delegate to GensCaptureSessionStartV1');
+assert.match(owner,/GensCaptureSessionStartV1/);
+assert.doesNotMatch(owner,/document\.|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener/);
 
 assert.match(index,/GensShellModuleLaunchV1\.register\("survival",gensSurvivalStartModuleSessionV1\)/,
   'S2 Survival provider must remain');
@@ -64,8 +64,8 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'S3 must track the three remaining historical global launch owners after Capture135 retirement');
+assert.deepEqual(chain,['captureFix138','gensDungeonCore01Js'],
+  'S3 must track the post-transfer historical global launch owners');
 assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
   'Capture135 global launch owner must remain retired');
 
@@ -76,7 +76,7 @@ assert.equal((index.match(/GensShellModuleLaunchV1\.startModuleSession\(/g)||[])
 
 console.log(JSON.stringify({
   scenario:'Phase 5 module-launch S3 Capture provider',
-  expected:'historical S3 reference preserved; Phase 9 provider ownership moved to GensCaptureV1',
+  expected:'Capture provider remains in GensCaptureV1 and session initialization is owned by GensCaptureSessionStartV1',
   historicalChain:chain,
   productionRouting:'legacy startConfiguredGame unchanged',
   provider:'GensCaptureV1'

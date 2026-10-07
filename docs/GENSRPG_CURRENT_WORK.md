@@ -1,3 +1,13 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — RÉFÉRENCE PHASE 5 RÉALIGNÉE — 2026-10-07
+
+Toujours le même lot ; aucun micro-lot ouvert.
+
+Le run Architecture suivant a validé les sentinelles Phase 2/3 réalignées puis a échoué dans une sentinelle Phase 5 qui lisait textuellement l'ancien `productionOwnerGraph:83` depuis le test Phase 3. Ce test est mis à jour pour exiger le nouveau contrat `productionOwnerGraph:84` et `captureAuxiliaryRuntimeOwners:1`.
+
+Aucun runtime, Shell, screen-return ou gameplay n'est modifié.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — STRUCTURE PHASE 3 RÉALIGNÉE — 2026-10-07
 
 Toujours le même lot. La sentinelle Phase 3 échouait uniquement parce que son contrat datait de l'époque où Capture n'avait qu'un entry actif.

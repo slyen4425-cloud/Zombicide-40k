@@ -33,12 +33,12 @@ assert.doesNotMatch(capture,/const\s+openChar139\s*=\s*window\.openChar/);
 assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
 assert.doesNotMatch(capture,/return\s+openChar139\.apply\(this,arguments\)/);
 
-assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','captureFix139','gensDungeonCore01Js'],
-  'openChar-only retirement must not alter historical startConfiguredGame ownership');
-assert.match(capture,/window\.startConfiguredGame\s*=\s*async function\(\)/);
-assert.match(capture,/gensCaptureStartConfiguredGame139V1/);
+assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','gensDungeonCore01Js'],
+  'openChar retirement must preserve the current post-transfer startConfiguredGame ownership');
+assert.doesNotMatch(capture,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/);
+assert.match(capture,/GensCaptureSessionStartV1\.install\(/);
 assert.doesNotMatch(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);
-assert.match(capture,/GensCaptureV1\.install\(gensCaptureStartConfiguredGame139V1\)/);
+assert.match(capture,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
 assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/);
 
 console.log(JSON.stringify({

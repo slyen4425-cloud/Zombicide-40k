@@ -1,3 +1,19 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — SENTINELLE PHASE 2 RÉALIGNÉE — 2026-10-07
+
+Même branche / même lot. Aucun micro-lot supplémentaire.
+
+La CI Architecture du HEAD `0beaf3372f1ec8ae435386e5db3883a85c5ae4e5` a atteint l'étape Phase 2 « fichiers hors graphe de production » après avoir validé toutes les sentinelles précédentes. L'unique échec était `reachable.size = 84` contre l'ancien contrat `83`.
+
+Cause démontrée : le transfert ajoute volontairement un seul module au graphe réel, `assets/gensrpg/capture/session-start-v1.js`. La sentinelle est donc renforcée, pas assouplie :
+- graphe attendu : 84 ;
+- `session-start-v1.js` doit être réellement atteignable ;
+- il ne peut apparaître qu'une fois ;
+- les sept fichiers historiques classés non-production doivent rester inatteignables.
+
+Aucun runtime, gameplay, Shell, retour écran ou autre module n'est modifié par ce réalignement. Prochaine étape : triple CI sur le HEAD exact puis fermeture du lot si GREEN.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — GREEN CANDIDATE / CI DE RÉGRESSION — 2026-10-07
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.

@@ -30,9 +30,9 @@ const expected={
     mustInclude:['capturePlaytestFix128','captureAbilityTruth144','coreCombatPoolFix156']
   },
   startConfiguredGame:{
-    assignments:3,
+    assignments:2,
     last:'gensDungeonCore01Js',
-    exact:['captureFix138','captureFix139','gensDungeonCore01Js']
+    exact:['captureFix138','gensDungeonCore01Js']
   },
   resumeGame:{
     assignments:1,
@@ -70,7 +70,7 @@ assert.doesNotMatch(start200,/window\.startConfiguredGame\s*=(?!=)/,'Dungeon Cor
 assert.match(
   start200,
   /if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,
-  'Phase 2 must keep Dungeon launch interception while preserving the dedicated Capture chain'
+  'Phase 2 must keep Dungeon launch interception while preserving the dedicated Capture module owner'
 );
 assert.doesNotMatch(
   start200,

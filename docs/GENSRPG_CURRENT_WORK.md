@@ -1,3 +1,19 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — STRUCTURE PHASE 3 RÉALIGNÉE — 2026-10-07
+
+Toujours le même lot. La sentinelle Phase 3 échouait uniquement parce que son contrat datait de l'époque où Capture n'avait qu'un entry actif.
+
+Contrat renforcé :
+- owner graph : 84, dont exactement le nouvel owner `assets/gensrpg/capture/session-start-v1.js` ;
+- son rôle doit rester domaine Capture / session initialization uniquement ;
+- il doit être chargé par l'index avant `capture/entry-v1.js` ;
+- preview / Pages fallback / Core bootstrap ne doivent pas le réinjecter ;
+- `GensCaptureV1.install(owner)` remplace explicitement l'ancien binding legacy ;
+- les autres structures Phase 3 restent inchangées/inertes.
+
+Aucun changement runtime dans ce réalignement. Relance triple CI pour fermeture du lot.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DÉMARRAGE CAPTURE — CARTOGRAPHIE PHASE 2 RÉALIGNÉE — 2026-10-07
 
 Même lot, aucune nouvelle branche/micro-tâche.

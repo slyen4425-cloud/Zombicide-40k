@@ -59,12 +59,20 @@ for(const domain of domains){
       for(const name of ['index','preview','pages'])assert.equal(composition[name].includes(entry),false,'Tactical entry must not be redundantly loaded by '+name);
     }else{
       assert.match(source,/root\.GensCaptureV1=Object\.freeze\(/,'Capture entry must expose GensCaptureV1 in Phase 9');
-      assert.match(source,/function install\(legacyStart\)/,'Capture entry must expose the explicit legacy binding boundary');
+      assert.match(source,/function install\(owner\)/,'Capture entry must expose the explicit session-start owner binding boundary');
       assert.match(source,/function startModuleSession\(\)/,'Capture entry must own the public module-launch provider');
       assert.doesNotMatch(source,/\bdocument\b|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
         'Capture public entry must stay isolated from DOM storage and private module runtimes');
+      const sessionStart='assets/gensrpg/capture/session-start-v1.js';
+      assert.equal(exists(sessionStart),true,'Capture session-start owner must exist in the active Phase 9 structure');
+      assert.equal(composition.index.includes(sessionStart),true,'Capture session-start owner must be directly loaded by source index in Phase 9');
       assert.equal(composition.index.includes(entry),true,'capture entry must be directly loaded by source index in Phase 9');
-      for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(entry),false,'capture source entry must not be redundantly injected by '+name);
+      assert.ok(composition.index.indexOf(sessionStart)<composition.index.indexOf(entry),
+        'Capture session-start owner must load before the public Capture entry');
+      for(const name of ['preview','pages','bootstrap']){
+        assert.equal(composition[name].includes(sessionStart),false,'Capture session-start owner must not be redundantly injected by '+name);
+        assert.equal(composition[name].includes(entry),false,'capture source entry must not be redundantly injected by '+name);
+      }
     }
     assert.equal(composition.index.includes(contractPath),false,domain+' contract metadata must not be runtime-loaded');
     continue;
@@ -86,7 +94,13 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,83,'Phase 3 scaffolding remains inert except explicitly activated Survival, Dungeon, Tactical and Capture entry slices; production owner graph now contains 83 files');
+assert.equal(Object.keys(ownerManifest.files||{}).length,84,
+  'Phase 3 scaffolding remains inert; Phase 9 intentionally adds exactly one Capture session-start runtime owner');
+assert.deepEqual(ownerManifest.files?.['assets/gensrpg/capture/session-start-v1.js'],{
+  owner:'GenSrpG Capture Session Start',
+  domain:'capture',
+  role:'active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority'
+},'Capture session-start owner manifest contract drifted');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');
@@ -97,6 +111,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:83,
-  loadedByProduction:4
+  productionOwnerGraph:84,
+  loadedEntrySlices:4,
+  captureAuxiliaryRuntimeOwners:1
 },null,2));

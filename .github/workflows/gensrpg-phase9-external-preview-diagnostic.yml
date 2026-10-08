@@ -6,6 +6,7 @@ on:
       - 'work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07'
     paths:
       - '.github/workflows/gensrpg-phase9-external-preview-diagnostic.yml'
+      - 'tests/gens_preview_external_browser_v1.test.cjs'
 
 permissions:
   contents: read

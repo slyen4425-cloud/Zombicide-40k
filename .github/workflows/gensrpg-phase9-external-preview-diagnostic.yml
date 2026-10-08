@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/gensrpg-phase9-external-preview-diagnostic.yml'
       - 'tests/gens_preview_external_browser_v1.test.cjs'
+      - 'tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs'
 
 permissions:
   contents: read
@@ -28,5 +29,5 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Verify exact public Capture to Dungeon Builder path
-        run: node tests/gens_preview_external_browser_v1.test.cjs
+      - name: Reproduce Capture return to Dungeon Builder deterministically
+        run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs

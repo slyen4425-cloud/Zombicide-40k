@@ -53,8 +53,23 @@ assert.match(core01,/let coreActive=false/,
 const capture139=blocks.find(x=>x.id==='captureFix139')?.body||'';
 assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
   'Capture S1 must remain migrated off global goMenu');
-assert.match(capture139,/GensShellScreenReturnV1/,
-  'Capture must remain registered through the Shell screen-return contract');
+const captureScreenReturn=read('assets/gensrpg/capture/screen-return-v1.js');
+assert.match(capture139,/GensCaptureScreenReturnV1\.install\s*\(\s*\{/,
+  'Capture139 must inject legacy closure bindings into the dedicated Capture return owner');
+assert.match(capture139,/enterWorld:\(\)=>captureEnterWorld139\(\)/,
+  'the Phase 5 Capture hub transition must remain bound to the same owner-local renderer');
+assert.doesNotMatch(capture139,/GensShellScreenReturnV1/,
+  'Capture139 must not regain direct Shell provider registration after the Phase 9 transfer');
+assert.match(captureScreenReturn,/shell\.register\("capture",returnToPrimaryView\)/,
+  'the dedicated Capture owner must preserve the Phase 5 Shell return provider');
+assert.equal((captureScreenReturn.match(/shell\.register\("capture",returnToPrimaryView\)/g)||[]).length,1,
+  'Capture must retain exactly one public provider registration');
+assert.match(captureScreenReturn,/!bindings\.hasActiveSession\(\)\|\|!bindings\.isCaptureContext\(\)/,
+  'Capture return must retain both Phase 5 guard conditions');
+assert.match(captureScreenReturn,/bindings\.enterWorld\(\)/,
+  'Capture return must keep the owner-local hub transition');
+assert.doesNotMatch(captureScreenReturn,/window\.goMenu\s*=/,
+  'the new Capture owner must not recreate any global goMenu wrapper');
 
 const core200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
 assert.doesNotMatch(core200,/window\.goMenu\s*=/,

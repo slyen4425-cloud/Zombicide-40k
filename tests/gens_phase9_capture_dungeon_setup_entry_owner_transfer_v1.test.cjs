@@ -212,15 +212,25 @@ window.GensCaptureSessionStartV1.install({
 });
 window.GensCaptureV1.install(window.GensCaptureSessionStartV1);`;
 
-assert.equal(index.split(sessionLoadNew).length-1,1,'current runtime must contain one Capture session-owner load seam');
-assert.equal(index.split(sessionSeamNew).length-1,1,'current runtime must contain one Capture session-owner wiring seam');
-let beforeSessionOwner=index.replace(sessionLoadNew,sessionLoadOld).replace(sessionSeamNew,sessionSeamOld);
+const captureCardMetaOld=`const meta=(p.heroPool?.length||0)+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres";`;
+const captureCardMetaNew=`const trainerCount=p.heroPool?.length||0;
+      const meta=gensContentFamilyForProfile(p)==="creature"
+        ? trainerCount+" dresseur"+(trainerCount===1?"":"s")+" · Capture de créatures"
+        : trainerCount+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres";`;
+
+assert.equal(index.split(captureCardMetaNew).length-1,1,
+  'current runtime must contain the one approved Capture-card semantic seam');
+const beforeCaptureCard=index.replace(captureCardMetaNew,captureCardMetaOld);
+
+assert.equal(beforeCaptureCard.split(sessionLoadNew).length-1,1,'current runtime must contain one Capture session-owner load seam');
+assert.equal(beforeCaptureCard.split(sessionSeamNew).length-1,1,'current runtime must contain one Capture session-owner wiring seam');
+let beforeSessionOwner=beforeCaptureCard.replace(sessionLoadNew,sessionLoadOld).replace(sessionSeamNew,sessionSeamOld);
 const beforeSessionOwnerBytes=Buffer.from(beforeSessionOwner,'utf8');
 const beforeSessionOwnerBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+beforeSessionOwnerBytes.length+'\0'),beforeSessionOwnerBytes
 ])).digest('hex');
 assert.equal(beforeSessionOwnerBlob,'20381d1df0b10b664d5163f308f909cd7a6e45df',
-  'inverting only the Capture session-start transfer must recover its exact GREEN base');
+  'inverting the approved Capture-card seam plus the Capture session-start transfer must recover the exact GREEN base');
 
 // Invert the separately declared canonical Survival-editor guard seam first.
 const editorBoundarySeams=[{"count": 1, "before": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&p.gameStyle!==\"dungeon\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}", "after": "function activeSurvivalModId(){\n  const p=getActiveGameProfile();\n  if(p&&gensContentFamilyForProfile(p)===\"survival\")return p.id;\n  return GAME_PROFILE_BASE_ID;\n}"}, {"count": 1, "before": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&x.gameStyle!==\"dungeon\");\n  if(p)applyGameProfile(p,false);\n}", "after": "function setActiveSurvivalMod(id){\n  const p=loadGameProfiles().find(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\");\n  if(p)applyGameProfile(p,false);\n}"}, {"count": 1, "before": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&x.gameStyle!==\"dungeon\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID)\n}", "after": "function currentSmodProfile(){\n  const arr=loadGameProfiles();return arr.find(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\")||arr.find(x=>x.id===GAME_PROFILE_BASE_ID&&gensContentFamilyForProfile(x)===\"survival\")\n}"}, {"count": 1, "before": "function selectSurvivalModProfile(id){smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}", "after": "function selectSurvivalModProfile(id){if(!loadGameProfiles().some(x=>String(x.id)===String(id)&&gensContentFamilyForProfile(x)===\"survival\"))return;smodEditingId=id;setActiveSurvivalMod(id);renderSurvivalModEditor()}"}, {"count": 6, "before": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(i<0)return;", "after": "  const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(i<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId));if(pi<0)return;", "after": "  const profiles=loadGameProfiles(),pi=profiles.findIndex(x=>String(x.id)===String(smodEditingId)&&gensContentFamilyForProfile(x)===\"survival\");if(pi<0)return;"}, {"count": 1, "before": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source)return;", "after": "  const profiles=loadGameProfiles(),source=currentSmodProfile();if(!source||String(source.id)!==String(smodEditingId))return;"}];

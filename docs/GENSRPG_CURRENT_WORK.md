@@ -1,3 +1,11 @@
+# PHASE 9 — ROLLBACK BYTE-EXACT — COMPOSITION VIGNETTE + SESSION-START — 2026-10-08
+
+Même lot. L'étape Architecture « entrée Dungeon hors Capture » n'a détecté aucune régression Dungeon : sa preuve de rollback inversait uniquement le transfert session-start puis comparait au GREEN historique, alors que la correction de vignette Capture est désormais un second seam runtime approuvé.
+
+La sentinelle conserve la preuve byte-exacte : elle inverse d'abord l'unique seam de résumé Capture, puis l'unique seam session-start, et exige toujours le blob historique `20381d1df0b10b664d5163f308f909cd7a6e45df`. Aucune assertion de comportement n'est retirée ou assouplie. Aucun runtime modifié.
+
+---
+
 # PHASE 9 — VIGNETTE CAPTURE / BUILDER — REPIN CARTOGRAPHIE PHASE 2 — 2026-10-08
 
 Même branche, même lot. La correction utilisateur de la vignette Capture a modifié uniquement le texte rendu par le propriétaire Shell et donc le blob exact de `index.html` : `560966d096134cd58ff4dc6ab2be589cee936ba7` -> `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`.

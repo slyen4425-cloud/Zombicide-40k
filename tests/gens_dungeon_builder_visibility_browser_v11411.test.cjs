@@ -6,6 +6,7 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const DUNGEON_ID='game_profile_dungeon_demo';
+const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const mime={
   '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
   '.css':'text/css; charset=utf-8','.json':'application/json',
@@ -39,6 +40,60 @@ async function prepare(page,port){
     typeof window.openEditorHub==='function' &&
     typeof window.openDungeonAdvancedEditor==='function'
   ,null,{timeout:60000});
+}
+
+async function openCapturePregameAndReturn(page){
+  const adventure=page.locator('button.gensRootModeCard.adventure');
+  await adventure.waitFor({state:'visible'});await adventure.click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+
+  let card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
+  await card.waitFor({state:'visible'});
+  const sw=await page.evaluate(id=>({
+    active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+    from:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(activeGameProfileId()):'',
+    to:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(id):''
+  }),CAPTURE_ID);
+  if(sw.active&&sw.active!==CAPTURE_ID&&sw.from!==sw.to){
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),card.click()]);
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    const adventure2=page.locator('button.gensRootModeCard.adventure');
+    await adventure2.waitFor({state:'visible'});await adventure2.click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+    card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
+    await card.waitFor({state:'visible'});
+  }
+  await card.click();
+  await page.waitForFunction(id=>activeGameProfileId()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',CAPTURE_ID);
+
+  await page.locator('#gensGameHomeActions .newGameBtn').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+  await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+
+  const trainer=page.locator('#participantList input[type="checkbox"]').first();
+  await trainer.waitFor({state:'visible'});
+  if(!(await trainer.isChecked()))await trainer.check();
+  const starter=page.locator('#participantList .captureStarterChoice').first();
+  await starter.waitFor({state:'visible'});await starter.click();
+  await page.waitForFunction(()=>typeof gensCaptureParticipantsReady==='function'&&gensCaptureParticipantsReady()===true);
+
+  await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
+  await page.locator('#pregameHeroStep .pregameBackStep').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
+  await page.locator('#gensGameHome .homeTop button.back').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+  await page.locator('#gensFamilyHome .homeTop button.back').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensRootHome')).display!=='none');
+
+  const state=await page.evaluate(()=>({
+    active:activeGameProfileId(),
+    captureClass:document.body.classList.contains('gensCapturePregame'),
+    pureCapture:document.body.classList.contains('gens-pure-capture'),
+    dungeonTheme:document.body.classList.contains('gensDungeonTheme')
+  }));
+  console.log('[dungeon-builder-visibility] after-capture-return',JSON.stringify(state));
 }
 
 async function openDungeonGameHome(page){
@@ -96,6 +151,7 @@ async function openDungeonGameHome(page){
     await page.reload({waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
 
+    await openCapturePregameAndReturn(page);
     await openDungeonGameHome(page);
     const editors=page.locator('#gensGameHomeActions .homeEditorsBtn');
     await editors.waitFor({state:'visible'});await editors.click();
@@ -119,6 +175,12 @@ async function openDungeonGameHome(page){
       builderLauncher:!!document.getElementById('drc300Launch'),
       roomModal:!!document.getElementById('drc100Modal'),
       builderModal:!!document.getElementById('drc300Modal'),
+      captureClass:document.body.classList.contains('gensCapturePregame'),
+      pureCapture:document.body.classList.contains('gens-pure-capture'),
+      dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
+      contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'',
+      mode151:typeof gensMode151==='function'?gensMode151():'',
+      dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
       roomLauncherHtml:document.getElementById('drc100Launcher')?.outerHTML?.slice(0,1200)||'',
       builderParent:document.getElementById('drc300Launch')?.parentElement?.id||'',
       tacticalRuntimeFixesLoaded:typeof window.GensRpgTacticalRuntimeFixes1678111!=='undefined',

@@ -60,11 +60,11 @@ small{display:block;margin-top:10px;opacity:.7}
         const m=String(original||'').match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([0-9a-f]{40})\/preview\.html(?:[?#].*)?$/i);
         if(m){
           const base='https://raw.githack.com/'+m[1]+'/'+m[2]+'/'+m[3]+'/';
-          return {base,index:base+'index.html'};
+          return {base,index:base+'index.html',external:true};
         }
       }catch(_){}
       const base=new URL('./',location.href).href;
-      return {base,index:new URL('index.html',base).href};
+      return {base,index:new URL('index.html',base).href,external:false};
     };
     const source=resolveSource();
     let html=await fetch(source.index,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
@@ -79,15 +79,14 @@ small{display:block;margin-top:10px;opacity:.7}
     // The external HTML preview transport sometimes fails to execute those
     // auxiliary tags: only then load the explicit script graph exactly once.
     const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\/script>';
-    html=html.replace(/<\/body>/i,tags.join('\n')+'\n'+ready+'\n</body>');
+    if(!source.external)html=html.replace(/<\/body>/i,tags.join('\n')+'\n'+ready+'\n</body>');
     document.open();
     document.write(html);
     document.close();
     if(document.readyState==="loading"){
       await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
     }
-    if(typeof window.DungeonRoomCreator100!=="object" ||
-       typeof window.DungeonWorldBuilder167821!=="object"){
+    if(source.external){
       for(const tag of tags){
         const match=tag.match(/src="([^"]+)"/);
         if(!match)throw new Error("Script de preview invalide");

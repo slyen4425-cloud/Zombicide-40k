@@ -35,6 +35,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/dungeon/entry-v1.js?v=1',
   'assets/gensrpg/capture/entry-v1.js?v=1',
   'assets/gensrpg/capture/session-start-v1.js?v=1',
+  'assets/gensrpg/capture/screen-return-v1.js?v=1',
   'assets/gensrpg/core/progression-v1.js?v=1',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',

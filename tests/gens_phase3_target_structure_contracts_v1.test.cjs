@@ -69,6 +69,12 @@ for(const domain of domains){
       assert.equal(composition.index.includes(entry),true,'capture entry must be directly loaded by source index in Phase 9');
       assert.ok(composition.index.indexOf(entry)<composition.index.indexOf(sessionStart),
         'public Capture entry must load before its session-start owner');
+      const screenReturn='assets/gensrpg/capture/screen-return-v1.js';
+      assert.equal(exists(screenReturn),true,'Capture screen-return owner must exist');
+      assert.equal(composition.index.split(screenReturn).length-1,1,'Capture screen-return owner must be loaded exactly once');
+      assert.ok(composition.index.indexOf(sessionStart)<composition.index.indexOf(screenReturn),'Capture screen-return must load after session-start');
+      assert.ok(composition.index.indexOf(screenReturn)<composition.index.indexOf('id="captureFix139"'),'Capture screen-return owner must load before historical dependency injection');
+      for(const name of ['preview','pages','bootstrap'])assert.equal(composition[name].includes(screenReturn),false,'Capture screen-return owner must not be doubly injected');
       assert.ok(composition.index.indexOf(sessionStart)<composition.index.indexOf('id="captureFix139"'),
         'Capture session-start owner must load before Capture139 performs explicit dependency wiring');
       for(const name of ['preview','pages','bootstrap']){
@@ -97,12 +103,17 @@ for(const domain of domains){
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
 assert.equal(Object.keys(ownerManifest.files||{}).length,85,
-  'Phase 3 scaffolding remains inert; Phase 9 intentionally adds exactly one Capture session-start runtime owner');
+  'Phase 3 scaffolding remains inert; Phase 9 registers two Capture auxiliary runtime owners (session start and screen return)');
 assert.deepEqual(ownerManifest.files?.['assets/gensrpg/capture/session-start-v1.js'],{
   owner:'GenSrpG Capture Session Start',
   domain:'capture',
   role:'active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority'
 },'Capture session-start owner manifest contract drifted');
+assert.deepEqual(ownerManifest.files?.['assets/gensrpg/capture/screen-return-v1.js'],{
+  owner:'GenSrpG Capture Screen Return',
+  domain:'capture',
+  role:'active Phase 9 unique Shell screen-return provider for Capture using explicitly injected Capture-owned session/context and Hub rendering bindings'
+},'Capture screen-return manifest contract drifted');
 for(const rel of Object.keys(ownerManifest.files||{}))assert.equal(exists(rel),true,'existing production owner disappeared: '+rel);
 
 assert.equal(exists('assets/gensrpg/core/runtime-bootstrap-v1.js'),true,'existing Core bootstrap must remain untouched');

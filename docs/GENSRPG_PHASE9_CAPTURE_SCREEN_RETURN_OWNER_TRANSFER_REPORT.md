@@ -33,6 +33,20 @@ Le propriétaire expose `install()`, `dispose()`, `status()` et reste inactif si
 - Un balayage `37823983854` a exécuté 339 sentinelles statiques, identifié neuf anciens contrats liés à l’ownership et aux comptes ; ceux-ci ont été réécrits pour attendre explicitement le nouveau propriétaire, sans faiblir les protections.
 - Triple CI Architecture + Browser / Firefox / Tactical Dock sur le HEAD documentaire final exigée. Preview publique exacte et validation utilisateur ciblée avant de déclarer GREEN fonctionnel.
 
-## Sortie
+## Sortie — validation utilisateur reçue le 8 octobre 2026
 
-Lorsque la triple CI du HEAD de clôture est SUCCESS, préparer une preview smartphone du SHA pour Capture → hub → retour → reprise, et vérifier simultanément Dungeon Builder, Survie et PvP. Créer alors un checkpoint GREEN uniquement si les conditions de la charte sont satisfaites. Pas de merge ni déploiement de `main`.
+Après correction de l'ancienne sentinelle Phase 5 devenue obsolète, triple CI du **même commit runtime/documentaire** `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba` :
+
+- Architecture + Browser : [run 37831320078](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37831320078), SUCCESS, 341 étapes Architecture et 55 étapes Browser ;
+- Firefox : [run 37831320077](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37831320077), SUCCESS ;
+- Tactical Dock : [run 37831320196](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37831320196), SUCCESS.
+
+Prévisualisation exacte testée : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba/preview.html
+
+**Validation manuelle utilisateur**, après demande de contrôle de Monster Capture → Hub/retour/reprise et accès Builder Dungeon : « Ok tout fonctionne parfaitement » (8 octobre 2026). Aucun dysfonctionnement signalé.
+
+L'ancien test Phase 5 `gens_phase5_gomenu_core01_retirement_v1.test.cjs` a été adapté pour vérifier le nouveau propriétaire Capture plutôt que forcer `GensShellScreenReturnV1` au sein de `captureFix139`. Il conserve les vérifications d'unicité et d'absence de wrapper global.
+
+Le chantier a un checkpoint technique GREEN : `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-technical-green-2026-10-08` au SHA `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba`. Le checkpoint **fonctionnel** `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-green-2026-10-08` sera créé après GREEN des CI sur le HEAD final incluant ces mises à jour documentaires.
+
+Aucun changement de runtime par cette mise à jour. Aucun merge de `main`.

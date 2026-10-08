@@ -1,3 +1,20 @@
+# PHASE 9 — RETOUR ÉCRAN CAPTURE — VALIDATION UTILISATEUR + TRIPLE CI GREEN — 2026-10-08
+
+**Dernier jalon fonctionnel validé par l'utilisateur.** Sur le lien de preview smartphone du commit `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba`, retour utilisateur : « Ok tout fonctionne parfaitement » (8 octobre 2026). Aucune anomalie signalée sur le parcours ciblé proposé (retour au Hub Capture, reprise, Builder Dungeon). Ne pas extrapoler cette validation à toute la Phase 9.
+
+- Branche : `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-screen-return-owner-transfer-2026-10-08` SHA `1d1eede2556bbe3f76120dfb4befca262f023296`.
+- SHA runtime/manual/CI validé : `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba`.
+- GREEN technique intermédiaire : `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-technical-green-2026-10-08`, même SHA.
+- CI sur ce SHA : Architecture + Browser `37831320078` (341+55 étapes SUCCESS), Firefox `37831320077` (SUCCESS), Tactical Dock `37831320196` (SUCCESS).
+- Source `indexH.txt` vérifiée selon §26 (8 165 794 octets, Git blob `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`). Après transfert, `index.html` = 8 165 823 octets, Git blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+- Propriétaire unique : `assets/gensrpg/capture/screen-return-v1.js` enregistre le provider Capture dans le registre public Shell déjà existant. `captureFix139` fournit seulement les dépendances closure/legacy ; `captureEnterWorld139` demeure le rendu du Hub.
+- **Checkpoint final à créer après la CI du commit documentaire portant cette note :** `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-green-2026-10-08` au SHA exact. Aucun checkpoint fonctionnel déclaré avant ce contrôle.
+- **Chantier actuel :** finalisation documentaire et checkpoint du lot retour Capture. **Suite :** un lot Phase 9 distinct, seulement après nouveau checkpoint de départ ; choisir la dette suivante par audit des documents LIVE, sans retravailler le retour ni le session-start.
+- **Production :** `main` gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`; aucun merge/déploiement demandé ni réalisé.
+
+---
+
 # PHASE 9 — TRANSFERT RETOUR ÉCRAN CAPTURE — CANDIDAT DE CLÔTURE — 2026-10-08
 
 Chantier : `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`.

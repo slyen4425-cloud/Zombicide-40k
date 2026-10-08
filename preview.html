@@ -47,7 +47,7 @@ small{display:block;margin-top:10px;opacity:.7}
     '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>'
   ];
   const previewGuard='<script>(()=>{window.__GENSRPG_PREVIEW__=true;const fake={scope:location.href,active:null,waiting:null,installing:null,update:async()=>{},unregister:async()=>true,addEventListener:()=>{},removeEventListener:()=>{}};try{if(!window.supabase){const offlineError=()=>new Error("Preview hors ligne : synchronisation Supabase indisponible");const chain={select(){return this},eq(){return this},like(){return this},maybeSingle:async()=>({data:null,error:offlineError()}),upsert:async()=>({data:null,error:offlineError()})};window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:null}}),signInAnonymously:async()=>({data:{session:null},error:offlineError()})},from:()=>Object.create(chain),rpc:async()=>({data:null,error:offlineError()}),channel:()=>({on(){return this},subscribe(){return this}}),removeChannel:async()=>true})}}}catch(_){}try{if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations?.().then(rs=>Promise.all(rs.filter(r=>String(r.scope||"").includes("/slyen4425-cloud/Zombicide-40k/")).map(r=>r.unregister?.()))).catch(()=>{});try{Object.defineProperty(navigator.serviceWorker,"register",{configurable:true,value:async()=>fake})}catch(_){try{navigator.serviceWorker.register=async()=>fake}catch(__){}}try{Object.defineProperty(navigator.serviceWorker,"ready",{configurable:true,get:()=>Promise.resolve(fake)})}catch(_){}}}catch(_){}try{if("caches" in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>String(k).startsWith("gensrpg-cache-")).map(k=>caches.delete(k)))).catch(()=>{})}catch(_){}})();<\/script>';
-  const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\/script>';
+
   try{
     if("caches" in window){
       const cacheKeys=await caches.keys();
@@ -75,10 +75,31 @@ small{display:block;margin-top:10px;opacity:.7}
     const base=source.base;
     html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
     if(!/<\/body>/i.test(html))throw new Error('</body> absent');
-    html=html.replace(/<\/body>/i,tags.join('\n')+'\n'+ready+'\n</body>');
+    // The external HTML preview host does not reliably execute parser-inserted
+    // auxiliary scripts appended through document.write(). Keep the existing
+    // production index composition, then load only the preview's auxiliary
+    // dependencies explicitly and in their documented order.
     document.open();
     document.write(html);
     document.close();
+    if(document.readyState==="loading"){
+      await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
+    }
+    for(const tag of tags){
+      const match=tag.match(/src="([^"]+)"/);
+      if(!match)throw new Error("Script de preview invalide");
+      const src=new URL(match[1],source.base).href;
+      await new Promise((resolve,reject)=>{
+        const script=document.createElement("script");
+        script.src=src;
+        script.async=false;
+        script.dataset.gensrpgPreviewAux="1";
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error("Script de preview inaccessible : "+match[1]));
+        document.body.appendChild(script);
+      });
+    }
+    document.documentElement.dataset.gensrpgPreviewReady="1";
   }catch(err){
     const status=document.getElementById('status');
     if(status)status.innerHTML='<div><strong>Preview impossible à charger.</strong><small>'+String(err&&err.message||err)+'</small></div>';

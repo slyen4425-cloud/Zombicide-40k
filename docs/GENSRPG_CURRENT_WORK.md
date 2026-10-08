@@ -1,3 +1,46 @@
+# PHASE 9 — RETOUR UTILISATEUR — VIGNETTE CAPTURE CORRIGÉE / BUILDER PROTÉGÉ — 2026-10-08
+
+Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.
+Runtime courant : `0458cf4e2354cd5af06e182713a9517cf4d6aad2`.
+main reste gelée : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Retour utilisateur traité sans nouveau micro-lot
+
+Le texte de la vignette Monster Capture provenait du renderer Adventure générique et affichait :
+`1 héros · 0 objets · 0 monstres`.
+
+Diagnostic réel : aucune perte de créatures. Le même navigateur a mesuré 100 créatures dans la source Capture et 18 dans le pool runtime/UI de départ.
+
+Correction minimale au propriétaire Shell existant :
+- Capture : `1 dresseur · Capture de créatures` ;
+- Dungeon/RPG : résumé `héros · objets · monstres` inchangé ;
+- aucun compteur de créatures inventé sur une carte inactive ;
+- aucune donnée, sauvegarde, pool, gameplay ou Builder modifié.
+
+Runtime exact après correction : 8165794 octets / blob `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`.
+
+## Preuves navigateur
+
+RED permanent : `tests/gens_capture_current_shell_browser_v11411.test.cjs` exige le libellé dresseur/Capture et refuse le résumé Dungeon sur Capture, tout en exigeant le résumé historique sur la carte Dungeon.
+
+Le Builder Dungeon a été testé sur le parcours utilisateur déterministe :
+Capture -> pré-game -> choix dresseur/créature -> retour -> Dungeon -> éditeurs -> Dungeon avancé -> Builder.
+Résultat : GREEN ; le Builder n'était pas cassé dans le runtime courant et aucune rustine Builder n'a été ajoutée.
+
+One-shot exact `37744086645` : SUCCESS, avec :
+- empreinte Rule 26 source vérifiée ;
+- vignette Capture GREEN ;
+- Capture -> Dungeon Builder GREEN ;
+- repin mécanique des fingerprints ;
+- diff scope contrôlé.
+
+## Étape actuelle
+
+Triple CI de non-régression à lancer sur le HEAD documenté, puis fournir le lien public exact au test utilisateur.
+Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — RETOUR UTILISATEUR — SENTINELLE RECENTRÉE SUR VIGNETTE + BUILDER — 2026-10-08
 
 Même branche, pas de nouveau micro-lot.

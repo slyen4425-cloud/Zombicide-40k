@@ -28,10 +28,12 @@ const DUNGEON_ID='game_profile_dungeon_demo';
   const pageErrors=[];
   const consoleErrors=[];
   const failed=[];
+  const dungeonScriptResponses=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
   page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
   page.on('dialog',d=>d.accept().catch(()=>{}));
+  page.on('response',r=>{if(/dungeon-room-creator|dungeon-world-builder|storage-v1|text-utils-v1/.test(r.url()))dungeonScriptResponses.push({url:r.url(),status:r.status(),type:r.headers()['content-type']||''})});
 
   try{
     const response=await page.goto(target,{waitUntil:'domcontentloaded'});
@@ -193,6 +195,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       advancedDisplay:document.getElementById('dungeonAdvancedEditor')?getComputedStyle(document.getElementById('dungeonAdvancedEditor')).display:'absent',
       scripts:[...document.querySelectorAll('script[src]')].map(s=>s.getAttribute('src')||'').filter(s=>/dungeon-room-creator|dungeon-world-builder/.test(s))
     }));
+    console.log('[external-preview] builder-network '+JSON.stringify({responses:dungeonScriptResponses,failed,consoleErrors,pageErrors}));
     console.log('[external-preview] builder-prestate '+JSON.stringify(preBuilderState));
     assert.equal(preBuilderState.active,DUNGEON_ID,'Dungeon profile must be active before Builder diagnostics');
     assert.equal(preBuilderState.dungeonMode,true,'Capture -> Dungeon must restore canonical Dungeon identity before editor load');

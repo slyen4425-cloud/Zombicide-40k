@@ -1,3 +1,19 @@
+# PHASE 9 — VIGNETTE CAPTURE / BUILDER — REPIN CARTOGRAPHIE PHASE 2 — 2026-10-08
+
+Même branche, même lot. La correction utilisateur de la vignette Capture a modifié uniquement le texte rendu par le propriétaire Shell et donc le blob exact de `index.html` : `560966d096134cd58ff4dc6ab2be589cee936ba7` -> `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`.
+
+La CI Architecture a confirmé que le premier échec était uniquement l'empreinte stale du manifeste inline. Audit global effectué avant correction : exactement quatre artefacts Phase 2 portaient encore l'ancien blob :
+- `GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv`;
+- `GENSRPG_PHASE2_INLINE_OWNERS.json`;
+- `GENSRPG_PHASE2_STORAGE_OWNERS.json`;
+- `GENSRPG_PHASE2_TIMER_CLASSIFICATION.json`.
+
+Repin mécanique de ces quatre empreintes uniquement. Aucun owner, count, ordre, responsabilité, timer, stockage, runtime ou gameplay modifié.
+
+Prochaine étape : triple CI complète sur ce HEAD ; si GREEN, fournir le lien public exact au test utilisateur. Aucun merge/deploy main.
+
+---
+
 # PHASE 9 — RETOUR UTILISATEUR — VIGNETTE CAPTURE CORRIGÉE / BUILDER PROTÉGÉ — 2026-10-08
 
 Branche : `work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07`.

@@ -1,0 +1,69 @@
+name: GenSrpG Phase 9 Capture card summary one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-card-summary-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-capture-card-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact Rule 26 runtime baseline
+        run: |
+          test "$(git hash-object index.html)" = "560966d096134cd58ff4dc6ab2be589cee936ba7"
+          test "$(wc -c < index.html)" = "8165614"
+
+      - name: Apply Capture-aware Adventure card summary
+        run: python tools/gensrpg_phase9_capture_card_summary_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "462abc969e7ac636f8ac4ee54c0d14fe51b83e7d"
+          test "$(wc -c < index.html)" = "8165794"
+          grep -F 'Capture de créatures' index.html
+          git diff --check
+
+      - name: Prepare Chromium
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify Capture card GREEN
+        run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
+
+      - name: Verify Capture to Dungeon Builder stays GREEN
+        run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+
+      - name: Repin exact index fingerprints mechanically
+        run: python tools/gensrpg_phase9_capture_card_summary_repin.py
+
+      - name: Verify generated scope
+        run: |
+          git diff --check
+          test -z "$(git diff --name-only | grep -v -E '^(index\.html|tests/)')" || (echo "Unexpected generated file" && git diff --name-only && exit 1)
+          ! grep -RIl --exclude-dir=.git '560966d096134cd58ff4dc6ab2be589cee936ba7\|8165614' tests
+          git diff --stat
+
+      - name: Commit exact GREEN and mechanical repin
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html tests
+          git commit -m "fix(capture): use Capture semantics in Adventure card summary"
+          git push origin "HEAD:$GITHUB_REF_NAME"

@@ -49,8 +49,10 @@ const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
 const dungeon=blocks.find(b=>b.id==='dungeonCore200Rebuild')?.body||'';
 assert.doesNotMatch(capture,/window\.goMenu\s*=/,
   'Capture S1 must no longer assign the global goMenu boundary');
-assert.match(capture,/GensShellScreenReturnV1/,
-  'Capture S1 must register through the Shell public contract');
+assert.match(capture,/GensCaptureScreenReturnV1\.install/,
+  'Capture139 must only wire the owner');
+assert.match(read('assets/gensrpg/capture/screen-return-v1.js'),/shell\.register\("capture",returnToPrimaryView\)/,
+  'Capture screen-return owner must register exactly one public Shell provider');
 assert.ok(capture.includes('captureEnterWorld139()'),
   'Capture S1 must keep the Capture-owned world/hub implementation');
 assert.doesNotMatch(dungeon,/window\.goMenu\s*=/,

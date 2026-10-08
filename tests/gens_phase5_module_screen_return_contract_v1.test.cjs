@@ -65,7 +65,7 @@ for(const module of modules){
   assert.deepEqual(contract.publicEntries.moduleScreenReturn,{
     contract:sharedPath,
     operation:'returnToPrimaryView',
-    status:'declared-not-loaded',
+    status:module==='capture'?'loaded-public-provider':'declared-not-loaded',
     ownership:'module-owned-primary-view'
   },module+' screen-return declaration drifted');
 
@@ -108,6 +108,9 @@ for(const module of modules){
   }
 }
 
+const captureReturn=read('assets/gensrpg/capture/screen-return-v1.js');
+assert.match(captureReturn,/shell\.register\("capture",returnToPrimaryView\)/,'Capture return is physically owned by its module');
+assert.doesNotMatch(captureReturn,/document\.|localStorage|sessionStorage|setTimeout|setInterval|MutationObserver/,'Capture return owner cannot recreate UI/storage/timer authority');
 const tactical=json('assets/gensrpg/tactical/module-contract-v1.json');
 assert.equal(tactical.publicEntries?.moduleScreenReturn,undefined,
   'Tactical must stay outside general module screen-return routing');

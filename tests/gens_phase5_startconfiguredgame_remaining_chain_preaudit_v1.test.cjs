@@ -105,12 +105,12 @@ assert.match(functions.captureFix138,/isCaptureContext138/);
 assert.match(functions.captureFix138,/setTimeout/);
 assert.match(functions.captureFix138,/renderCaptureWorldHub/);
 
-// Capture 139: no longer owns launch; it only wires the dedicated Capture session owner and keeps screen-return debt.
+// Capture139 wires both already-transferred Capture owners; it owns neither launch nor Shell return registration.
 const capture139Body=blockBody('captureFix139');
 assert.doesNotMatch(capture139Body,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/);
 assert.match(capture139Body,/GensCaptureSessionStartV1\.install\(/);
 assert.match(capture139Body,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
-assert.match(capture139Body,/GensShellScreenReturnV1\?\.register\?\.\("capture"/);
+assert.match(capture139Body,/GensCaptureScreenReturnV1\.install\(/);
 
 // Dungeon Core01: real Dungeon eligibility/start rule.
 assert.match(functions.gensDungeonCore01Js,/eligible\(\)/);

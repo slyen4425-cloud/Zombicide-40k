@@ -220,7 +220,34 @@ const captureCardMetaNew=`const trainerCount=p.heroPool?.length||0;
 
 assert.equal(index.split(captureCardMetaNew).length-1,1,
   'current runtime must contain the one approved Capture-card semantic seam');
-const beforeCaptureCard=index.replace(captureCardMetaNew,captureCardMetaOld);
+// Invert the separately approved Capture screen-return owner transfer first.
+// This additional seam must restore the prior GREEN byte-for-byte, before
+// the earlier Capture card and session-start inverses are composed.
+const captureReturnLoadOld="<script src=\"assets/gensrpg/capture/session-start-v1.js?v=1\"></script>";
+const captureReturnLoadNew="<script src=\"assets/gensrpg/capture/session-start-v1.js?v=1\"></script>\n<script src=\"assets/gensrpg/capture/screen-return-v1.js?v=1\"></script>";
+const captureReturnSeamOld=`/* Le Shell garde l’unique frontière globale goMenu.
+   Capture expose uniquement son retour owner-local via le contrat public. */
+window.GensShellScreenReturnV1?.register?.("capture",function(){
+  if(!hasActiveSession()||!isCaptureContext138())return false;
+  captureEnterWorld139();
+  return true;
+});`;
+const captureReturnSeamNew=`/* Le propriétaire Capture enregistre son retour via ses seules dépendances legacy. */
+window.GensCaptureScreenReturnV1.install({
+  hasActiveSession:()=>hasActiveSession(),
+  isCaptureContext:()=>isCaptureContext138(),
+  enterWorld:()=>captureEnterWorld139()
+});`;
+assert.equal(index.split(captureReturnLoadNew).length-1,1,'exactly one current Capture return-owner script load seam');
+assert.equal(index.split(captureReturnSeamNew).length-1,1,'exactly one current Capture return-owner binding seam');
+const beforeReturnOwner=index.replace(captureReturnLoadNew,captureReturnLoadOld).replace(captureReturnSeamNew,captureReturnSeamOld);
+const beforeReturnBytes=Buffer.from(beforeReturnOwner,'utf8');
+const beforeReturnBlob=crypto.createHash('sha1').update(Buffer.concat([
+  Buffer.from('blob '+beforeReturnBytes.length+'\0'),beforeReturnBytes
+])).digest('hex');
+assert.equal(beforeReturnBlob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d',
+  'reversing ONLY the Capture return owner must restore the approved preceding GREEN exactly');
+const beforeCaptureCard=beforeReturnOwner.replace(captureCardMetaNew,captureCardMetaOld);
 
 assert.equal(beforeCaptureCard.split(sessionLoadNew).length-1,1,'current runtime must contain one Capture session-owner load seam');
 assert.equal(beforeCaptureCard.split(sessionSeamNew).length-1,1,'current runtime must contain one Capture session-owner wiring seam');

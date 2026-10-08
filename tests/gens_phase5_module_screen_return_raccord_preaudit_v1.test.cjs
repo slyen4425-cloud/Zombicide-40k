@@ -39,10 +39,10 @@ assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert b
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
 assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'"),
   'Phase 3 guard must explicitly recognize Survival, Dungeon, Tactical and Capture partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:84'),
-  'Phase 3 guard must track the current 84-file production owner graph after Capture session-start activation');
-assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:1"),
-  'Phase 3 guard must explicitly account for the single active Capture session-start auxiliary owner');
+assert.ok(phase3Test.includes('productionOwnerGraph:85'),
+  'Phase 3 guard must track both Capture auxiliary owners in the 85-file production graph');
+assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:2"),
+  'Phase 3 guard must account for session-start and screen-return Capture owners');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 assert.doesNotMatch(bootstrap,/assets\/gensrpg\/shell\/entry-v1\.js/,

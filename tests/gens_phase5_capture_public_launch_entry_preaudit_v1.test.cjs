@@ -12,6 +12,7 @@ const shellContract=JSON.parse(read('assets/gensrpg/shell/module-contract-v1.jso
 const captureContract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const sessionOwner=read('assets/gensrpg/capture/session-start-v1.js');
+const screenReturnOwner=read('assets/gensrpg/capture/screen-return-v1.js');
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -35,8 +36,10 @@ assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|g
 assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
   'Capture139 may only wire historical dependencies into the dedicated Capture session owner');
 assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
-assert.match(c139,/GensShellScreenReturnV1\?\.register\?\.\("capture"/,
-  'screen-return debt remains separate and intentionally untouched');
+assert.match(c139,/GensCaptureScreenReturnV1\.install\(/,
+  'Capture139 only injects the screen-return owner dependencies, not Shell registration');
+assert.match(screenReturnOwner,/shell\.register\("capture",returnToPrimaryView\)/,
+  'the sole Capture return provider must be installed by the Capture module');
 
 assert.equal(owners.blocks.captureFix139.primaryDomain,'capture');
 assert.match(owners.blocks.captureFix139.responsibility,/no session initializer ownership/i);
@@ -65,5 +68,5 @@ console.log(JSON.stringify({
   inlineLaunchOwners:['captureFix138','gensDungeonCore01Js'],
   retiredOwner:'captureFix139',
   activeCaptureSessionOwner:'GensCaptureSessionStartV1',
-  screenReturnDeferred:true
+  screenReturnDeferred:false
 },null,2));

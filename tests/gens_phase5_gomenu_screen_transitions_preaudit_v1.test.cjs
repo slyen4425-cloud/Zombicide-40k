@@ -58,8 +58,10 @@ assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
 assert.doesNotMatch(dungeon200,/window\.goMenu\s*=/,
   'Dungeon S2 must not regain global goMenu authority');
 
-assert.match(capture139,/GensShellScreenReturnV1/,
-  'Capture S1 must expose its return through the Shell public registry');
+assert.match(capture139,/GensCaptureScreenReturnV1\.install/,
+  'Capture139 must only inject return dependencies');
+assert.match(read('assets/gensrpg/capture/screen-return-v1.js'),/shell\.register\("capture",returnToPrimaryView\)/,
+  'Capture module must own the unique Shell screen-return provider');
 assert.match(capture139,/captureEnterWorld139\(\)/,
   'Capture S1 must keep Capture-owned world/hub rendering');
 

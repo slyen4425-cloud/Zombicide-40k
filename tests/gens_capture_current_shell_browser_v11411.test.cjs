@@ -9,6 +9,7 @@ const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
+const DUNGEON_ID='game_profile_dungeon_demo';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 
 assert.match(indexSource,/id="builtinMonsterCapture162"/,'production HTML must keep the built-in Monster Capture seed');
@@ -210,6 +211,9 @@ const server=http.createServer((req,res)=>{
       'Capture card must expose Capture-specific content semantics');
     assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
       'Capture card must not reuse the generic Dungeon RPG summary');
+    const dungeonCardText=String(await page.locator(`#gensFamilyGames [data-rpg-profile="${DUNGEON_ID}"] .gensUniverseMainBtn`).textContent()||'').replace(/\s+/g,' ').trim();
+    assert.match(dungeonCardText,/héros.*objets.*monstres/i,
+      'classic Dungeon card must retain the generic RPG summary while Capture gets its own semantics');
 
     const switchInfo=await page.evaluate((captureId)=>({
       active:activeGameProfileId(),

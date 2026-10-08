@@ -202,7 +202,14 @@ const server=http.createServer((req,res)=>{
 
     let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
     await captureCard.waitFor({state:'visible'});
-    assert.match(await captureCard.textContent(),/Monster Capture/);
+    const captureCardText=String(await captureCard.textContent()||'').replace(/\s+/g,' ').trim();
+    assert.match(captureCardText,/Monster Capture/);
+    assert.match(captureCardText,/dresseur/i,
+      'Capture card must describe its trainer role instead of the generic RPG hero label');
+    assert.match(captureCardText,/Capture de créatures/i,
+      'Capture card must expose Capture-specific content semantics');
+    assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
+      'Capture card must not reuse the generic Dungeon RPG summary');
 
     const switchInfo=await page.evaluate((captureId)=>({
       active:activeGameProfileId(),

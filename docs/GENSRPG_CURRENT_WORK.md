@@ -1,3 +1,24 @@
+# PHASE 9 — RETOUR CAPTURE — TRANSFERT RUNTIME EXACT EN COURS DE VALIDATION — 2026-10-08
+
+Branche : `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`. Dernier HEAD runtime transféré : `a0ef601f67c13c10a038c7c91cee6aa8424dc26d`.
+Source Rule 26 utilisateur : `indexH.txt`, 8 165 794 octets, blob Git `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`, vérifié avant mutation.
+Après transfert : `index.html` 8 165 823 octets, blob Git `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+Branche/checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-screen-return-owner-transfer-2026-10-08` sur `1d1eede2556bbe3f76120dfb4befca262f023296`.
+Dernier GREEN complet avant runtime : `checkpoint/gensrpg-phase9-capture-screen-return-ownership-preaudit-green-2026-10-08`.
+Production `main` gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Modifications bornées :
+- un nouveau propriétaire `assets/gensrpg/capture/screen-return-v1.js` exécute les deux gardes de retour et enregistre l’unique provider `capture` auprès du Shell Phase 5 ;
+- `captureFix139` injecte seulement ses trois dépendances legacy, ne possède plus l’enregistrement du retour ; son `captureEnterWorld139` reste inchangé et appartient au rendu Capture ;
+- le Shell natif `goMenu` et le provider Dungeon sont identiques ;
+- contrat Capture, manifeste Phase 2 et empreintes index historiques sont recalés selon la réalité du runtime ;
+- nouvelle sentinelle dédiée TDD RED/GREEN, tests Phase 5/9 conservés.
+
+Preuve TDD : workflow one-shot `37823283538` SUCCESS sur patch exact ; tests ciblés GREEN. Les CI complètes Architecture + Browser, Firefox et Tactical sur le nouveau HEAD documentaire restent le verrou de clôture.
+Aucun merge/deploy main. Aucun nouveau lot avant triple CI + checkpoint et validation utilisateur.
+
+---
+
 # PHASE 9 — TRANSFERT PROPRIÉTAIRE DU RETOUR CAPTURE — GATE RULE 26 — 2026-10-08
 
 Le préaudit du retour Capture est **GREEN sur `1d1eede2556bbe3f76120dfb4befca262f023296`** (Architecture + Browser `37806001901`, Firefox `37806001870`, Tactical `37806001625`). Checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-screen-return-ownership-preaudit-green-2026-10-08`.

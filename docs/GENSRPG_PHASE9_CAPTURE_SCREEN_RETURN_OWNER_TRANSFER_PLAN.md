@@ -43,3 +43,13 @@ Réutiliser le registre public Phase 5 et l’identité canonique Capture ; ne p
 6. Tester localement puis triple CI (Architecture/Browser, Firefox, Tactical) sur SHA exact ; preview publique sur ce SHA ; validation utilisateur ciblée ; checkpoint final.
 
 Aucun merge/deploy de `main` avant approbation spécifique.
+
+
+## Application Rule 26 et état du transfert — 2026-10-08
+
+- Pièce utilisateur : `indexH.txt`. Exactitude vérifiée : taille `8165794`, blob Git `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`, SHA-256 `29ade721f6518d7ccb5a30573f35676d43d1fa827c15097ed7dac2452b792d6e`.
+- RED exécuté puis GREEN après un changement unique : script propriétaire chargé avant `captureFix139`, l’unique `GensShellScreenReturnV1.register("capture",...)` déplacé de l’inline dans `GensCaptureScreenReturnV1.install`; trois closures de compatibilité explicitement injectées dans le module.
+- `captureEnterWorld139` (Hub) inchangé, `goMenu` Shell inchangé, Dungeon inchangé, démarrage SessionStart inchangé.
+- Runtime final : taille `8165823`, blob Git `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+- One-shot `37823283538` SUCCESS, commit runtime `a0ef601f67c13c10a038c7c91cee6aa8424dc26d`.
+- Documentation de l’owner, Phase 2 et tests de frontières ajustés avec repin strict de l’empreinte source. Ne pas déclarer terminé sans triple CI et parcours utilisateur externe.

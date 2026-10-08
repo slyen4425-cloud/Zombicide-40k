@@ -16,8 +16,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165794,'identity preaudit must use the current verified Phase 9 runtime');
-assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','identity preaudit must use the exact verified post-participant-raccord index blob');
+assert.equal(bytes.length,8165823,'identity preaudit must use the current verified Phase 9 runtime');
+assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','identity preaudit must use the exact verified post-participant-raccord index blob');
 
 function block(id){
   const marker='<script id="'+id+'">';

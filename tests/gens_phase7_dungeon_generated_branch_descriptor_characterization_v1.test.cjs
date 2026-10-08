@@ -18,9 +18,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165794,
+assert.equal(bytes.length,8165823,
   'Phase 7 generated branch descriptor characterization must track the current Phase 9 participant raccord runtime');
-assert.equal(gitBlob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d',
+assert.equal(gitBlob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd',
   'Phase 7 generated branch descriptor characterization must track the exact current Phase 9 participant raccord blob');
 
 function block(id){

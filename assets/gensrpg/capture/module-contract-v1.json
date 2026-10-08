@@ -8,12 +8,14 @@
     "Monster Capture public runtime entry",
     "Capture module-launch provider",
     "Capture profile identity classification",
-    "Capture session initialization"
+    "Capture session initialization",
+    "Capture screen-return primary-view provider"
   ],
   "consumes": [
     "core public contracts",
     "Shell module-launch public contract",
-    "Capture session-start owner public API"
+    "Capture session-start owner public API",
+    "Capture screen-return owner public API"
   ],
   "forbidden": [
     "Dungeon private runtime",
@@ -24,7 +26,8 @@
   ],
   "lifecycle": {
     "install": "explicit Capture session-start owner binding; registers the Capture public provider exactly once",
-    "dispose": "session-start owner exposes explicit dispose; public entry creates no listener observer timer or storage state"
+    "dispose": "session-start owner exposes explicit dispose; public entry creates no listener observer timer or storage state",
+    "screenReturn": "GensCaptureScreenReturnV1 installed explicitly from Capture139 legacy dependencies, unregisters functional access on dispose"
   },
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
@@ -34,13 +37,14 @@
     "the session-start owner has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
     "only one Shell register capture provider is active",
     "historical Dungeon compatibility remains unchanged until separately audited",
-    "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity"
+    "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity",
+    "Capture139 wires but does not register the unique Capture screen-return provider; GensCaptureScreenReturnV1 owns Shell registration"
   ],
   "publicEntries": {
     "moduleScreenReturn": {
       "contract": "assets/gensrpg/shell/module-screen-return-contract-v1.json",
       "operation": "returnToPrimaryView",
-      "status": "declared-not-loaded",
+      "status": "loaded-public-provider",
       "ownership": "module-owned-primary-view"
     },
     "moduleLaunch": {

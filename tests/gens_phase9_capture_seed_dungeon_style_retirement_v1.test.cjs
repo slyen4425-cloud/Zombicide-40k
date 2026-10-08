@@ -14,8 +14,8 @@ const gitBlob=buffer=>{
   return crypto.createHash('sha1').update(Buffer.concat([header,buffer])).digest('hex');
 };
 
-assert.equal(index.length,8165794,'Rule 26 pre-retirement runtime size must stay pinned until the seed seam mutates');
-assert.equal(gitBlob(index),'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','Rule 26 pre-retirement runtime blob must stay pinned until the seed seam mutates');
+assert.equal(index.length,8165823,'Rule 26 pre-retirement runtime size must stay pinned until the seed seam mutates');
+assert.equal(gitBlob(index),'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Rule 26 pre-retirement runtime blob must stay pinned until the seed seam mutates');
 
 const marker='<script id="builtinMonsterCapture162"';
 const start=source.indexOf(marker);

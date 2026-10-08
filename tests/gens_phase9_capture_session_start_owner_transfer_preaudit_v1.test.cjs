@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165794,'Rule 26 closure must stay on the exact Capture session-owner runtime');
-assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','Rule 26 closure must stay on the exact Capture session-owner blob');
+assert.equal(bytes.length,8165823,'Rule 26 closure must stay on the exact Capture session-owner runtime');
+assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Rule 26 closure must stay on the exact Capture session-owner blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

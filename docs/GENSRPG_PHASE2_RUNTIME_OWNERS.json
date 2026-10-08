@@ -433,6 +433,11 @@
       "owner": "GenSrpG Capture Session Start",
       "domain": "capture",
       "role": "active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority"
+    },
+    "assets/gensrpg/capture/screen-return-v1.js": {
+      "owner": "GenSrpG Capture Screen Return",
+      "domain": "capture",
+      "role": "active Phase 9 unique Shell screen-return provider for Capture using explicitly injected Capture-owned session/context and Hub rendering bindings"
     }
   }
 }

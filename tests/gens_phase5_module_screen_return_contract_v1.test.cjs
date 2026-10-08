@@ -15,8 +15,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(runtime.length,8165794,'contract lot must keep the current Phase 7 Dungeon generated Boss policy runtime size');
-assert.equal(gitBlob(runtime),'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d',
+assert.equal(runtime.length,8165823,'contract lot must keep the current Phase 7 Dungeon generated Boss policy runtime size');
+assert.equal(gitBlob(runtime),'26421e0347305437fe2b1dc149b3e4fb8b3761bd',
   'contract lot must keep the current Phase 7 generated Boss policy index byte-identical');
 
 const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';

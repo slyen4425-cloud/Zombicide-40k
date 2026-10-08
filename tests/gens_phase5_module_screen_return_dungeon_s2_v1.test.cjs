@@ -43,7 +43,7 @@ assert.deepEqual(chainFor('goMenu'),[],
 
 assert.doesNotMatch(capture,/window\.goMenu\s*=/,
   'Capture S1 must remain migrated to the public Shell contract');
-assert.match(capture,/GensShellScreenReturnV1/,
+assert.match(capture,/GensCaptureScreenReturnV1/,
   'Capture provider must remain registered through the Shell contract');
 
 console.log(JSON.stringify({

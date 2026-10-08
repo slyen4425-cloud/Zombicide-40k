@@ -4299,6 +4299,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/session-start-v1.js?v=1"></script>
+<script src="assets/gensrpg/capture/screen-return-v1.js?v=1"></script>
 
 <script>
 
@@ -27081,12 +27082,11 @@ window.GensCaptureSessionStartV1.install({
 });
 window.GensCaptureV1.install(window.GensCaptureSessionStartV1);
 
-/* Le Shell garde l’unique frontière globale goMenu.
-   Capture expose uniquement son retour owner-local via le contrat public. */
-window.GensShellScreenReturnV1?.register?.("capture",function(){
-  if(!hasActiveSession()||!isCaptureContext138())return false;
-  captureEnterWorld139();
-  return true;
+/* Le propriétaire Capture enregistre son retour via ses seules dépendances legacy. */
+window.GensCaptureScreenReturnV1.install({
+  hasActiveSession:()=>hasActiveSession(),
+  isCaptureContext:()=>isCaptureContext138(),
+  enterWorld:()=>captureEnterWorld139()
 });
 })();
 </script>

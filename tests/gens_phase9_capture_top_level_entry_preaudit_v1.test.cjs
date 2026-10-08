@@ -18,7 +18,7 @@ assert.equal(contract.module,'capture');
 assert.equal(contract.status,'partial-runtime-loaded');
 assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
 assert.equal(contract.publicEntries?.moduleLaunch?.status,'loaded-public-provider');
-assert.equal(contract.publicEntries?.moduleScreenReturn?.status,'declared-not-loaded');
+assert.equal(contract.publicEntries?.moduleScreenReturn?.status,'loaded-public-provider');
 
 assert.match(entry,/let\s+sessionStartOwner\s*=\s*null/);
 assert.match(entry,/function\s+startModuleSession\s*\(\)/);

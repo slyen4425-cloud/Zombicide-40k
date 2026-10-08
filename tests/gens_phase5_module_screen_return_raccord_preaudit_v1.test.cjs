@@ -16,8 +16,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8165794,'raccord guard must target current Phase 7 Dungeon generated Boss policy runtime size');
-assert.equal(gitBlob(indexBuf),'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d',
+assert.equal(indexBuf.length,8165823,'raccord guard must target current Phase 7 Dungeon generated Boss policy runtime size');
+assert.equal(gitBlob(indexBuf),'26421e0347305437fe2b1dc149b3e4fb8b3761bd',
   'raccord guard current Phase 7 generated Boss policy runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');
@@ -28,7 +28,7 @@ for(const module of shared.providers){
   const contract=json('assets/gensrpg/'+module+'/module-contract-v1.json');
   assert.equal(contract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView',
     module+' must declare the public screen-return operation');
-  assert.equal(contract.publicEntries?.moduleScreenReturn?.status,'declared-not-loaded',
+  assert.equal(contract.publicEntries?.moduleScreenReturn?.status,module==='capture'?'loaded-public-provider':'declared-not-loaded',
     module+' screen-return must remain declaration-only in this preaudit');
 }
 

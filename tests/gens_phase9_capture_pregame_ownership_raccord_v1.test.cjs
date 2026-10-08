@@ -13,8 +13,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165794,'pregame ownership raccord must inspect the transferred-owner Phase 9 runtime');
-assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','pregame ownership raccord must inspect the exact transferred-owner runtime blob');
+assert.equal(bytes.length,8165823,'pregame ownership raccord must inspect the transferred-owner Phase 9 runtime');
+assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','pregame ownership raccord must inspect the exact transferred-owner runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';

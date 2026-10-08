@@ -13,8 +13,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165794,'S2 runtime must match the current Phase 7 generated Boss policy Survival-provider candidate');
-assert.equal(gitBlob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','S2 runtime blob must match the current Phase 7 generated Boss policy Survival-provider candidate');
+assert.equal(bytes.length,8165823,'S2 runtime must match the current Phase 7 generated Boss policy Survival-provider candidate');
+assert.equal(gitBlob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','S2 runtime blob must match the current Phase 7 generated Boss policy Survival-provider candidate');
 
 assert.match(index,/window\.GensShellModuleLaunchV1\s*=\s*Object\.freeze\(\{/,
   'S2 requires the S1 Shell registry');

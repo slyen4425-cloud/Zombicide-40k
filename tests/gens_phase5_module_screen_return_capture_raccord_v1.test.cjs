@@ -38,7 +38,7 @@ assert.match(nativeGo,/returnToPrimaryView/,
 assert.match(nativeGo,/handled/,
   'native Shell goMenu must honor the handled:boolean contract');
 
-assert.match(capture,/GensShellScreenReturnV1/,
+assert.match(capture,/GensCaptureScreenReturnV1/,
   'Capture must register an owner-local screen-return provider');
 assert.match(capture,/captureEnterWorld139\(\)/,
   'Capture provider must keep Capture-owned world/hub rendering');

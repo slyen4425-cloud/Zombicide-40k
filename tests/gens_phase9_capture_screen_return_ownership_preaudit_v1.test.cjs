@@ -14,8 +14,8 @@ const json=rel=>JSON.parse(read(rel));
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const source=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8165794,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
-assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','Rule 26: unexpected runtime blob; stop before any ownership decision');
+assert.equal(bytes.length,8165823,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
+assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Rule 26: unexpected runtime blob; stop before any ownership decision');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(x=>({id:x[1],body:x[2]}));
@@ -29,7 +29,7 @@ const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 assert.equal(shellContract.operation,'returnToPrimaryView');
 assert.ok(shellContract.providers.includes('capture'));
 assert.equal(captureContract.publicEntries?.moduleScreenReturn?.operation,'returnToPrimaryView');
-assert.equal(captureContract.publicEntries?.moduleScreenReturn?.status,'declared-not-loaded',
+assert.equal(captureContract.publicEntries?.moduleScreenReturn?.status,'loaded-public-provider',
   'Capture Phase 3 metadata must not be silently changed before relocating the real provider');
 assert.equal(captureContract.publicEntries?.moduleLaunch?.status,'loaded-public-provider',
   'Capture session-start ownership was transferred in the previous GREEN lot');
@@ -38,13 +38,13 @@ assert.doesNotMatch(captureEntry,/GensShellScreenReturnV1|returnToPrimaryView/,
   'public Capture entry must not accidentally become a second screen-return provider');
 assert.match(go,/GensShellScreenReturnV1/);
 assert.match(go,/returnToPrimaryView/);
-assert.match(capture,/GensShellScreenReturnV1/);
-assert.match(capture,/register\?\.\(\s*["']capture["']/,
-  'the existing LIVE screen-return provider is registered from Capture139');
+assert.match(capture,/GensCaptureScreenReturnV1/);
+assert.match(capture,/GensCaptureScreenReturnV1\.install\s*\(/,
+  'the existing LIVE screen-return provider must be installed via the dedicated Capture owner');
 assert.match(capture,/captureEnterWorld139\(\)/,
   'Capture139 remains the physical owner of the Capture hub/world transition');
-assert.equal((capture.match(/register\?\.\(\s*["']capture["']/g)||[]).length,1,
-  'the historic Capture block must own exactly one return registration');
+assert.equal((capture.match(/GensCaptureScreenReturnV1\.install\s*\(/g)||[]).length,1,
+  'the historic Capture block must provide exactly one owner dependency binding');
 assert.doesNotMatch(capture,/window\.goMenu\s*=/,
   'Phase 5 removed the Capture global goMenu override');
 assert.doesNotMatch(dungeon,/window\.goMenu\s*=/,

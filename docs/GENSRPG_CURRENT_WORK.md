@@ -1,3 +1,16 @@
+# PHASE 9 — TRANSFERT RETOUR ÉCRAN CAPTURE — CANDIDAT DE CLÔTURE — 2026-10-08
+
+Chantier : `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`.
+Base GREEN et checkpoint de départ : `1d1eede2556bbe3f76120dfb4befca262f023296`, `checkpoint/gensrpg-start-phase9-capture-screen-return-owner-transfer-2026-10-08`.
+Règle 26 : `indexH.txt` reçu, taille `8165794`, blob Git `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d`, SHA-256 validé avant toute mutation.
+Après transfert exact : `index.html` taille `8165823`, blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+Règles : provider Capture unique dans `assets/gensrpg/capture/screen-return-v1.js` ; `captureFix139` ne fait que le câblage des 3 dépendances ; Shell `goMenu` et le rendu Hub inchangés.
+TDD ciblé `37823283538` SUCCESS ; tests architecturaux et rollback byte-exact renforcés. Scope sous contrôle : aucun gameplay, PWA, sauvegarde, Dungeon, Survie, Tactical, PvP ni laboratoire modifié.
+Rapport : `docs/GENSRPG_PHASE9_CAPTURE_SCREEN_RETURN_OWNER_TRANSFER_REPORT.md`.
+CI finale Architecture + Browser / Firefox / Tactical attendue sur le HEAD final ; checkpoint GREEN conditionnel, jamais anticipé. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — RETOUR CAPTURE — TRANSFERT RUNTIME EXACT EN COURS DE VALIDATION — 2026-10-08
 
 Branche : `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`. Dernier HEAD runtime transféré : `a0ef601f67c13c10a038c7c91cee6aa8424dc26d`.

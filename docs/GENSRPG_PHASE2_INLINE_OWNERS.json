@@ -121,10 +121,9 @@
       "order": 14,
       "status": "active",
       "primaryDomain": "capture",
-      "responsibility": "Capture world-entry UI, explicit session-start dependency wiring and Shell screen-return adapter; no session initializer ownership",
+      "responsibility": "Capture world-entry Hub UI and explicit session-start/screen-return dependency wiring; no session initializer ownership and no Shell provider registration",
       "crossDomains": [
-        "capture",
-        "shell"
+        "capture"
       ]
     },
     "captureFix140": {

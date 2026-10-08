@@ -32,7 +32,7 @@
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
     "the entry owns the public Capture module-launch provider and delegates session initialization to GensCaptureSessionStartV1",
-    "Capture139 no longer owns session initialization and only wires explicit historical dependencies plus its separate screen-return debt",
+    "Capture139 no longer owns session initialization and no longer registers the Shell screen-return provider; it only wires explicit historical Capture dependencies",
     "the entry has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
     "the session-start owner has no DOM storage listener observer timer retry Dungeon Tactical Combat or Exploration dependency",
     "only one Shell register capture provider is active",

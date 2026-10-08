@@ -30,6 +30,28 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
+      - name: Diagnose exact Shell cards and Dungeon Builder entry points
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const cp=require('child_process');
+          const src=fs.readFileSync('index.html','utf8');
+          const blob=cp.execFileSync('git',['hash-object','index.html'],{encoding:'utf8'}).trim();
+          const want='462abc969e7ac636f8ac4ee54c0d14fe51b83e7d';
+          console.log('[phase9-user-entry] HEAD='+cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()+' blob='+blob+' bytes='+Buffer.byteLength(src));
+          if(blob!==want)throw Error('Rule 26 index blob changed; stop, re-inspect exact SHA');
+          for(const term of ['id="gensGameHomeActions"','id="dungeonAdvancedEditorBtn"','id="gensFamilyGames"','gensUniverseMainBtn','drc100Launcher','1 dresseur','Capture de créatures','héros ·','homeEditorsBtn','openEditorHub','openDungeonAdvancedEditor']){
+            let from=0,hits=0;
+            while(hits<2){
+              const i=src.indexOf(term,from);
+              if(i<0)break;
+              console.log('[phase9-user-entry] '+JSON.stringify({term,offset:i,context:src.slice(Math.max(0,i-500),Math.min(src.length,i+1100))}));
+              from=i+term.length;hits++;
+            }
+            if(!hits)console.log('[phase9-user-entry] missing '+term);
+          }
+          NODE
+
       - name: Verify Capture Adventure card semantics
         run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
 

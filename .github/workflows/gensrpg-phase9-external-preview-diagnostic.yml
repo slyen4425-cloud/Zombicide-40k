@@ -14,7 +14,7 @@ jobs:
   external-preview:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact HEAD
         uses: actions/checkout@v4
 
       - name: Prepare Node
@@ -22,72 +22,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Probe html-preview transport
-        env:
-          TARGET_URL: https://html-preview.github.io/?url=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/preview.html
-        run: |
-          set -euxo pipefail
-          curl -fL --retry 2 --retry-delay 1 -D /tmp/preview.headers -o /tmp/preview-host.html "$TARGET_URL"
-          echo "=== html-preview headers ==="
-          cat /tmp/preview.headers
-          wc -c /tmp/preview-host.html
-
       - name: Install Chromium
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Load exact public html-preview
-        env:
-          TARGET_URL: https://html-preview.github.io/?url=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/preview.html
-        run: |
-          mkdir -p artifacts/gensrpg-external-preview
-          node - <<'NODE'
-          const {chromium}=require('playwright');
-          (async()=>{
-            const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
-            const context=await browser.newContext({
-              viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
-              locale:'fr-FR',serviceWorkers:'block'
-            });
-            const page=await context.newPage();
-            const errors=[];
-            const consoleErrors=[];
-            const requests=[];
-            page.on('pageerror',e=>errors.push(String(e)));
-            page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
-            page.on('requestfailed',r=>requests.push({url:r.url(),error:r.failure()?.errorText||''}));
-            page.on('dialog',d=>d.accept().catch(()=>{}));
-            const response=await page.goto(process.env.TARGET_URL,{waitUntil:'domcontentloaded',timeout:60000});
-            let ready=false;
-            try{
-              await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:30000});
-              ready=true;
-            }catch(_){}
-            const state=await page.evaluate(()=>({
-              title:document.title,
-              ready:document.documentElement?.dataset?.gensrpgPreviewReady||'',
-              bodyText:(document.body?.innerText||'').slice(0,500),
-              bodyHtmlLength:document.body?.innerHTML?.length||0,
-              rootDisplay:document.getElementById('gensRootHome')?getComputedStyle(document.getElementById('gensRootHome')).display:'missing',
-              status:document.getElementById('status')?.innerText||'',
-              captureEntry:typeof window.GensCaptureV1,
-              captureSessionOwner:typeof window.GensCaptureSessionStartV1
-            }));
-            console.log(JSON.stringify({
-              httpStatus:response?.status()||null,
-              url:page.url(),ready,state,errors,consoleErrors,requestFailures:requests.slice(0,30)
-            },null,2));
-            await page.screenshot({path:'artifacts/gensrpg-external-preview/mobile.png',fullPage:true});
-            await context.close();await browser.close();
-            if(!ready||errors.length||consoleErrors.length)process.exitCode=1;
-          })().catch(e=>{console.error(e);process.exitCode=1});
-          NODE
-
-      - name: Upload evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gensrpg-external-preview-diagnostic
-          path: artifacts/gensrpg-external-preview/
-          if-no-files-found: ignore
+      - name: Verify exact public Capture to Dungeon Builder path
+        run: node tests/gens_preview_external_browser_v1.test.cjs

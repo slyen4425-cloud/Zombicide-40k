@@ -75,29 +75,33 @@ small{display:block;margin-top:10px;opacity:.7}
     const base=source.base;
     html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
     if(!/<\/body>/i.test(html))throw new Error('</body> absent');
-    // The external HTML preview host does not reliably execute parser-inserted
-    // auxiliary scripts appended through document.write(). Keep the existing
-    // production index composition, then load only the preview's auxiliary
-    // dependencies explicitly and in their documented order.
+    // Keep the historical parser-inserted composition for the local preview.
+    // The external HTML preview transport sometimes fails to execute those
+    // auxiliary tags: only then load the explicit script graph exactly once.
+    const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\\/script>';
+    html=html.replace(/<\\/body>/i,tags.join('\\n')+'\\n'+ready+'\\n</body>');
     document.open();
     document.write(html);
     document.close();
     if(document.readyState==="loading"){
       await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
     }
-    for(const tag of tags){
-      const match=tag.match(/src="([^"]+)"/);
-      if(!match)throw new Error("Script de preview invalide");
-      const src=new URL(match[1],source.base).href;
-      await new Promise((resolve,reject)=>{
-        const script=document.createElement("script");
-        script.src=src;
-        script.async=false;
-        script.dataset.gensrpgPreviewAux="1";
-        script.onload=resolve;
-        script.onerror=()=>reject(new Error("Script de preview inaccessible : "+match[1]));
-        document.body.appendChild(script);
-      });
+    if(typeof window.DungeonRoomCreator100!=="object" ||
+       typeof window.DungeonWorldBuilder167821!=="object"){
+      for(const tag of tags){
+        const match=tag.match(/src="([^"]+)"/);
+        if(!match)throw new Error("Script de preview invalide");
+        const src=new URL(match[1],source.base).href;
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement("script");
+          script.src=src;
+          script.async=false;
+          script.dataset.gensrpgPreviewAux="1";
+          script.onload=resolve;
+          script.onerror=()=>reject(new Error("Script de preview inaccessible : "+match[1]));
+          document.body.appendChild(script);
+        });
+      }
     }
     document.documentElement.dataset.gensrpgPreviewReady="1";
   }catch(err){

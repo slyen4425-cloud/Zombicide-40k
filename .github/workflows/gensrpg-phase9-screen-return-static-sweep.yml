@@ -1,0 +1,22 @@
+name: GenSrpG Phase 9 screen-return static diagnostic
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08'
+    paths:
+      - '.github/workflows/gensrpg-phase9-screen-return-static-sweep.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enumerate all Architecture static failures without short-circuiting
+        run: python tools/gensrpg_phase9_static_failure_sweep.py

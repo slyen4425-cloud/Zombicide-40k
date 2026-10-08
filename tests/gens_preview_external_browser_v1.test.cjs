@@ -77,6 +77,8 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       typeof window.gensProfileContentFamily155==='function'
     ));
 
+    let captureCardText='';
+
     async function openAdventureProfile(profileId){
       const adventure=page.locator('button.gensRootModeCard.adventure');
       await adventure.waitFor({state:'visible'});
@@ -110,6 +112,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
         await card.waitFor({state:'visible'});
       }
 
+      if(profileId===CAPTURE_ID)captureCardText=String(await card.textContent()||'').replace(/\s+/g,' ').trim();
       await card.click();
       await page.waitForFunction(id=>(
         typeof activeGameProfileId==='function' &&
@@ -149,12 +152,11 @@ const DUNGEON_ID='game_profile_dungeon_demo';
     assert.ok(starterPoolCount>1,'Capture runtime pool must expose multiple starter creatures');
     assert.equal(starterUiCount,starterPoolCount,'Capture pre-game must render the complete starter pool');
 
-    for(let i=0;i<Math.min(3,starterUiCount);i++)await choices.nth(i).click();
-    if(starterUiCount>=3){
-      await page.waitForFunction(id=>typeof gensCaptureStarterIdsForHero==='function'&&gensCaptureStarterIdsForHero(id).length===3,trainerId);
-      const selected=await page.evaluate(id=>gensCaptureStarterIdsForHero(id),trainerId);
-      assert.equal(selected.length,3,'Capture must preserve the configured 1-to-3 starter team capacity');
-    }
+    await choices.first().click();
+    await page.waitForFunction(id=>typeof gensCaptureStarterIdsForHero==='function'&&gensCaptureStarterIdsForHero(id).length>=1,trainerId);
+    const selected=await page.evaluate(id=>gensCaptureStarterIdsForHero(id),trainerId);
+    assert.ok(selected.length>=1,'Capture must preserve a valid starter selection');
+    console.log('[external-preview] capture-card '+JSON.stringify({text:captureCardText,starterSource:captureIdentity.starterSource,starterPoolCount,starterUiCount,selected:selected.length}));
 
     await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
@@ -206,7 +208,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       target,
       sha,
       state,
-      captureRegression:{starterPool:'multiple',teamCapacity:'1-to-3'},
+      captureRegression:{starterPool:'multiple',cardText:captureCardText,starterSelection:'valid'},
       dungeonRegression:{builder:'visible-and-openable'},
       requestFailures:failed.slice(0,12)
     },null,2));

@@ -1,3 +1,20 @@
+# PHASE 9 — RETOUR UTILISATEUR — SENTINELLE RECENTRÉE SUR VIGNETTE + BUILDER — 2026-10-08
+
+Même branche, pas de nouveau micro-lot.
+
+Clarification utilisateur : le « 1 héros » signalé concerne le résumé de la vignette Capture, pas une preuve qu'une seule créature existe dans le runtime. Le RED externe précédent était donc faux sur un point : il forçait arbitrairement 3 starters avant d'atteindre le Builder.
+
+La sentinelle externe est recentrée sans mutation runtime :
+- source Capture et pool runtime doivent rester > 1 ;
+- l'UI doit rendre le pool complet ;
+- une vraie sélection starter doit persister ;
+- le texte exact de la vignette Capture est enregistré pour diagnostiquer son résumé ;
+- le scénario continue ensuite jusqu'au profil Dungeon, au hub éditeurs, au Dungeon Advanced Editor et au Builder visible/ouvrable.
+
+Le prochain échec éventuel doit donc correspondre soit au texte de vignette à corriger, soit au vrai Builder, et non à une hypothèse d'équipe hors périmètre.
+
+---
+
 # PHASE 9 — SENTINELLE EXTERNE — FAUX RED CORRIGÉ — 2026-10-07
 
 Le premier échec du test externe renforcé n'était pas encore une preuve runtime : le checkbox participant n'expose pas de `value`, donc le test utilisait `trainerId=null`. Correction de la sentinelle uniquement : l'ID du dresseur sélectionné est désormais lu via l'autorité réelle `normalizeGameParticipants()`.

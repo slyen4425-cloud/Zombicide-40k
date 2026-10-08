@@ -1,3 +1,19 @@
+# PHASE 9 — PRÉAUDIT RETOUR ÉCRAN CAPTURE — OUVERT — 2026-10-08
+
+Branche : `work/gensrpg-phase9-capture-screen-return-preaudit-2026-10-08`.
+Départ : `checkpoint/gensrpg-start-phase9-capture-screen-return-preaudit-2026-10-08`, SHA `ff1e9516913f2bcbb0d0c169f9442768f872b7a1`.
+Dernier GREEN : `checkpoint/gensrpg-phase9-capture-session-start-builder-preview-green-2026-10-08`, même SHA.
+Tests du GREEN de départ : Architecture+Browser `37798497172` (rerun SUCCESS), Firefox `37798497251`, Tactical `37798497163`, preview externe antérieure `37798462269`.
+`main` reste `e8681f9823573ced8aec59c8ddc47a72b02bc663` (gelée).
+
+Périmètre : **préadit documentaire sans runtime**. Phase 5 a déjà raccordé le retour écran Capture dans `captureFix139` au routeur Shell `GensShellScreenReturnV1`. La dette n’est pas un bouton absent : c’est le transfert de l’enregistrement/transition physique à un module Capture autonome. Le provider session-start transféré précédemment reste gelé.
+Invariants : aucun nouveau `goMenu`, provider Capture ou registre Shell ; pas de modification Dungeon, Survie, PvP, gameplay, sauvegardes, PWA, labos ni `index.html`.
+Garde : `tests/gens_phase9_capture_screen_return_ownership_preaudit_v1.test.cjs` intégrée dans Architecture.
+Rapport : `docs/GENSRPG_PHASE9_CAPTURE_SCREEN_RETURN_OWNERSHIP_PREAUDIT.md`.
+Sortie : triple CI GREEN de ce HEAD documentaire, checkpoint propre, puis lot runtime séparé soumis à la règle 26 ; aucun merge main.
+
+---
+
 # PHASE 9 — ROLLBACK BYTE-EXACT — COMPOSITION VIGNETTE + SESSION-START — 2026-10-08
 
 Même lot. L'étape Architecture « entrée Dungeon hors Capture » n'a détecté aucune régression Dungeon : sa preuve de rollback inversait uniquement le transfert session-start puis comparait au GREEN historique, alors que la correction de vignette Capture est désormais un second seam runtime approuvé.

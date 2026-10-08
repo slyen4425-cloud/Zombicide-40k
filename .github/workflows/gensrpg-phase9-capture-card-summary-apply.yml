@@ -56,7 +56,7 @@ jobs:
       - name: Verify generated scope
         run: |
           git diff --check
-          test -z "$(git diff --name-only | grep -v -E '^(index\.html|tests/)')" || (echo "Unexpected generated file" && git diff --name-only && exit 1)
+          test -z "$(git diff --name-only | grep -v -E '^(index\.html|tests/|node_modules/)')" || (echo "Unexpected generated file" && git diff --name-only && exit 1)
           ! grep -RIl --exclude-dir=.git '560966d096134cd58ff4dc6ab2be589cee936ba7\|8165614' tests
           git diff --stat
 

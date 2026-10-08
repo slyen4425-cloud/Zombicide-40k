@@ -1,3 +1,21 @@
+# PHASE 9 — TRANSFERT PROPRIÉTAIRE DU RETOUR CAPTURE — GATE RULE 26 — 2026-10-08
+
+Le préaudit du retour Capture est **GREEN sur `1d1eede2556bbe3f76120dfb4befca262f023296`** (Architecture + Browser `37806001901`, Firefox `37806001870`, Tactical `37806001625`). Checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-screen-return-ownership-preaudit-green-2026-10-08`.
+
+**Chantier actif :** `work/gensrpg-phase9-capture-screen-return-owner-transfer-2026-10-08`.
+**Départ immuable :** `checkpoint/gensrpg-start-phase9-capture-screen-return-owner-transfer-2026-10-08` sur `1d1eede2556bbe3f76120dfb4befca262f023296`.
+**Dernier GREEN :** même SHA `1d1eede2556bbe3f76120dfb4befca262f023296`.
+**Production gelée :** `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Objet unique : sortir l’owner de retour écran Capture de `captureFix139` sans créer une deuxième autorité. Le retour Capture fonctionne déjà via `GensShellScreenReturnV1` Phase 5 ; ne pas le reconstruire. Démarrage/session Capture déjà transféré et gelé.
+
+**Bloqueur §26 explicite :** le code exact à déplacer se trouve dans le `index.html` volumineux. Demander le fichier du permalink immuable `https://github.com/slyen4425-cloud/Zombicide-40k/blob/1d1eede2556bbe3f76120dfb4befca262f023296/index.html` en pièce jointe (ZIP possible), puis vérifier taille 8 165 794 et blob Git `462abc969e7ac636f8ac4ee54c0d14fe51b83e7d` avant toute lecture ou mutation. Pas de tentative de transit du gros index par le connecteur ; pas de vieille copie présumée correcte.
+
+Plan détaillé : `docs/GENSRPG_PHASE9_CAPTURE_SCREEN_RETURN_OWNER_TRANSFER_PLAN.md`.
+À ce point : aucun changement runtime, Shell, profil, sauvegarde ou laboratoire ; aucun merge sur main.
+
+---
+
 # PHASE 9 — PRÉAUDIT RETOUR ÉCRAN CAPTURE — OUVERT — 2026-10-08
 
 Branche : `work/gensrpg-phase9-capture-screen-return-preaudit-2026-10-08`.

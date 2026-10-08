@@ -18,8 +18,8 @@ assert.deepEqual(manifest.totals,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8165614,'current Phase 9 participant raccord index byte size drifted');
-assert.equal(blob,'560966d096134cd58ff4dc6ab2be589cee936ba7','audit 5 must target the exact current Phase 9 participant raccord index blob');
+assert.equal(bytes.length,8165794,'current Phase 9 participant raccord index byte size drifted');
+assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','audit 5 must target the exact current Phase 9 participant raccord index blob');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

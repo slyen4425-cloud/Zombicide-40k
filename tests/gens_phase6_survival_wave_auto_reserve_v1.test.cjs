@@ -17,8 +17,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165614,'micro-lot 4 must run on the current Phase 7 Dungeon generated Boss policy index');
-assert.equal(blob,'560966d096134cd58ff4dc6ab2be589cee936ba7','micro-lot 4 must target the current Phase 7 generated Boss policy runtime baseline');
+assert.equal(bytes.length,8165794,'micro-lot 4 must run on the current Phase 7 Dungeon generated Boss policy index');
+assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','micro-lot 4 must target the current Phase 7 generated Boss policy runtime baseline');
 
 const entry=fs.readFileSync(entryPath,'utf8');
 const contract=JSON.parse(fs.readFileSync(contractPath,'utf8'));

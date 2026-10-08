@@ -20,9 +20,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165614,
+assert.equal(bytes.length,8165794,
   'Phase 7 active-hero owner guard must keep the canonical post-divergence runtime');
-assert.equal(gitBlob,'560966d096134cd58ff4dc6ab2be589cee936ba7',
+assert.equal(gitBlob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d',
   'Phase 7 active-hero owner guard must keep the exact canonical index blob');
 
 const pure={};

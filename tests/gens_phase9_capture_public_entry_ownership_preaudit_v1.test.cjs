@@ -18,8 +18,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165614,'preaudit must inspect the current verified Phase 9 runtime');
-assert.equal(blob,'560966d096134cd58ff4dc6ab2be589cee936ba7','preaudit must inspect the exact verified Capture session-owner runtime');
+assert.equal(bytes.length,8165794,'preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','preaudit must inspect the exact verified Capture session-owner runtime');
 
 function block(id){
   const marker='<script id="'+id+'">';

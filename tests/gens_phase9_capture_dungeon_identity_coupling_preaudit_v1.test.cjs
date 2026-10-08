@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165614,'Capture/Dungeon coupling preaudit must inspect the current verified Phase 9 runtime');
-assert.equal(blob,'560966d096134cd58ff4dc6ab2be589cee936ba7','Capture/Dungeon coupling preaudit must inspect the exact verified Phase 9 runtime blob');
+assert.equal(bytes.length,8165794,'Capture/Dungeon coupling preaudit must inspect the current verified Phase 9 runtime');
+assert.equal(blob,'462abc969e7ac636f8ac4ee54c0d14fe51b83e7d','Capture/Dungeon coupling preaudit must inspect the exact verified Phase 9 runtime blob');
 
 function block(id){
   const marker='<script id="'+id+'">';

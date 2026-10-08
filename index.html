@@ -12088,7 +12088,10 @@ function renderGensRpgUniverseCards(){
   const cards=profiles.map(p=>{
     try{
       ensureRpgProfileData(p);
-      const meta=(p.heroPool?.length||0)+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres";
+      const trainerCount=p.heroPool?.length||0;
+      const meta=gensContentFamilyForProfile(p)==="creature"
+        ? trainerCount+" dresseur"+(trainerCount===1?"":"s")+" · Capture de créatures"
+        : trainerCount+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres";
       const protectedUniverse=p.id===GAME_PROFILE_DUNGEON_ID||p.builtIn;
       return `
         <div class="gensFamilyGameCard gensUniverseCard" data-rpg-profile="${z40kEscAttr(p.id)}">

@@ -52,6 +52,9 @@ jobs:
           }
           NODE
 
+      - name: Verify actual immutable public preview and full user route
+        run: node tests/gens_preview_external_browser_v1.test.cjs
+
       - name: Verify Capture Adventure card semantics
         run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
 

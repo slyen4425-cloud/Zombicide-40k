@@ -8,6 +8,7 @@ on:
       - '.github/workflows/gensrpg-phase9-external-preview-diagnostic.yml'
       - 'tests/gens_preview_external_browser_v1.test.cjs'
       - 'tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs'
+      - 'tests/gens_capture_current_shell_browser_v11411.test.cjs'
 
 permissions:
   contents: read
@@ -29,5 +30,9 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
+      - name: Verify Capture Adventure card semantics
+        run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
+
       - name: Reproduce Capture return to Dungeon Builder deterministically
+        if: always()
         run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs

@@ -175,11 +175,32 @@ const DUNGEON_ID='game_profile_dungeon_demo';
     await dungeonEditor.waitFor({state:'visible'});
     await dungeonEditor.click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('dungeonAdvancedEditor')).display!=='none');
-    await page.waitForFunction(()=>(
-      !!window.DungeonRoomCreator100 &&
-      !!window.DungeonWorldBuilder167821 &&
-      !!document.getElementById('drc300Launch')
-    ));
+    await page.waitForTimeout(300);
+    const preBuilderState=await page.evaluate(()=>({
+      active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+      family:typeof gensSelectedFamily==='string'?gensSelectedFamily:'',
+      contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'',
+      mode151:typeof gensMode151==='function'?gensMode151():'',
+      dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
+      captureClass:document.body.classList.contains('gensCapturePregame'),
+      pureCapture:document.body.classList.contains('gens-pure-capture'),
+      dungeonTheme:document.body.classList.contains('gensDungeonTheme'),
+      roomApi:!!window.DungeonRoomCreator100,
+      builderApi:!!window.DungeonWorldBuilder167821,
+      roomLauncher:!!document.getElementById('drc100Launcher'),
+      builderLauncher:!!document.getElementById('drc300Launch'),
+      advancedDisplay:document.getElementById('dungeonAdvancedEditor')?getComputedStyle(document.getElementById('dungeonAdvancedEditor')).display:'absent',
+      scripts:[...document.querySelectorAll('script[src]')].map(s=>s.getAttribute('src')||'').filter(s=>/dungeon-room-creator|dungeon-world-builder/.test(s))
+    }));
+    console.log('[external-preview] builder-prestate '+JSON.stringify(preBuilderState));
+    assert.equal(preBuilderState.active,DUNGEON_ID,'Dungeon profile must be active before Builder diagnostics');
+    assert.equal(preBuilderState.dungeonMode,true,'Capture -> Dungeon must restore canonical Dungeon identity before editor load');
+    assert.equal(preBuilderState.captureClass,false,'Capture pre-game class must be cleared before Dungeon editor');
+    assert.equal(preBuilderState.pureCapture,false,'pure Capture class must be cleared before Dungeon editor');
+    assert.equal(preBuilderState.roomApi,true,'Capture -> Dungeon must retain Dungeon Room Creator API');
+    assert.equal(preBuilderState.builderApi,true,'Capture -> Dungeon must retain Dungeon World Builder API');
+    assert.equal(preBuilderState.roomLauncher,true,'Capture -> Dungeon must mount Room Creator launcher');
+    assert.equal(preBuilderState.builderLauncher,true,'Capture -> Dungeon must mount Dungeon Builder launcher');
 
     const builderState=await page.evaluate(()=>({
       active:typeof activeGameProfileId==='function'?activeGameProfileId():'',

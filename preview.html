@@ -78,8 +78,8 @@ small{display:block;margin-top:10px;opacity:.7}
     // Keep the historical parser-inserted composition for the local preview.
     // The external HTML preview transport sometimes fails to execute those
     // auxiliary tags: only then load the explicit script graph exactly once.
-    const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\\/script>';
-    html=html.replace(/<\\/body>/i,tags.join('\\n')+'\\n'+ready+'\\n</body>');
+    const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\/script>';
+    html=html.replace(/<\/body>/i,tags.join('\n')+'\n'+ready+'\n</body>');
     document.open();
     document.write(html);
     document.close();

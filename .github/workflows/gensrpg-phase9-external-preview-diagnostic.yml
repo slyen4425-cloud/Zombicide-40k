@@ -6,6 +6,7 @@ on:
       - 'work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07'
     paths:
       - '.github/workflows/gensrpg-phase9-external-preview-diagnostic.yml'
+      - 'preview.html'
       - 'tests/gens_preview_external_browser_v1.test.cjs'
       - 'tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs'
       - 'tests/gens_capture_current_shell_browser_v11411.test.cjs'

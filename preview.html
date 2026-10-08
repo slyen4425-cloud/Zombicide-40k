@@ -75,6 +75,9 @@ small{display:block;margin-top:10px;opacity:.7}
     const base=source.base;
     html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
     if(!/<\/body>/i.test(html))throw new Error('</body> absent');
+    // Preview-only readiness gate: prevent a game switch/reload from cancelling
+    // the external auxiliary script graph before it is fully installed.
+    html=html.replace(/<body([^>]*)>/i,(m)=>m+'<div id="gensrpgPreviewLoadGate" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#080808;color:#eee;font:600 17px system-ui;text-align:center;padding:24px">Chargement de GenSrpG…</div>');
     // Keep the historical parser-inserted composition for the local preview.
     // The external HTML preview transport sometimes fails to execute those
     // auxiliary tags: only then load the explicit script graph exactly once.
@@ -103,7 +106,10 @@ small{display:block;margin-top:10px;opacity:.7}
       }
     }
     document.documentElement.dataset.gensrpgPreviewReady="1";
+    document.getElementById("gensrpgPreviewLoadGate")?.remove();
   }catch(err){
+    const gate=document.getElementById("gensrpgPreviewLoadGate");
+    if(gate)gate.textContent="Preview impossible à charger : "+String(err&&err.message||err);
     const status=document.getElementById('status');
     if(status)status.innerHTML='<div><strong>Preview impossible à charger.</strong><small>'+String(err&&err.message||err)+'</small></div>';
   }

@@ -31,7 +31,12 @@ assert.match(preview,/html=html\.split\(finalShell\)\.join\(''\)/,
   'preview must remove the source final Shell tag before reinjecting the Pages order');
 assert.ok(preview.includes("const original=params.get('url')"),'preview must recover the immutable source URL when rendered through html-preview');
 assert.ok(preview.includes("https://raw.githack.com/"),'html-preview transport must resolve runtime assets against the exact immutable GitHub commit');
-assert.ok(preview.includes("return {base,index:base+'index.html'}"),'preview must fetch the exact commit index through a non-document RawGitHack request');
+assert.ok(preview.includes("return {base,index:base+'index.html',external:true}"),'external preview must fetch the exact immutable commit index through RawGitHack');
+assert.ok(preview.includes("return {base,index:new URL('index.html',base).href,external:false}"),'local preview must keep its native source-root composition');
+assert.ok(preview.includes("if(!source.external)html=html.replace(/<\\/body>/i,tags.join("),'local preview must preserve the historical parser-ordered script injection');
+assert.ok(preview.includes("if(source.external){"),'external preview must use an explicit dependency load path');
+assert.ok(preview.includes('script.async=false')&&preview.includes('script.onload=resolve'),'external dependencies must load in sequence and await completion');
+assert.ok(preview.includes('gensrpgPreviewLoadGate')&&preview.includes('document.getElementById("gensrpgPreviewLoadGate")?.remove()'),'preview must block user navigation until the external dependency graph completes');
 assert.ok(preview.includes("if(!window.supabase)"),'manual preview must survive a blocked Supabase CDN without changing production runtime');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
 assert.ok(preview.includes('document.open();')&&preview.includes('document.write(html);')&&preview.includes('document.close();'),'preview must render into the top-level document so reload/restart returns to preview.html');

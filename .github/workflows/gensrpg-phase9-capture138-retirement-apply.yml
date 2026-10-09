@@ -43,7 +43,8 @@ jobs:
       - name: Verify changed files and avoid broad mutation
         run: |
           git diff --check
-          test "$(git diff --numstat -- index.html | awk '{print $1\" \"$2}')" = "0 19"
+          test "$(git diff --numstat -- index.html | cut -f1)" = "0"
+          test "$(git diff --numstat -- index.html | cut -f2)" = "19"
           if git diff --name-only | grep -Ev '^(index\.html|tests/|docs/GENSRPG_PHASE2_)'; then
             echo 'UNEXPECTED non-test/non-manifest changed file'; exit 1
           fi

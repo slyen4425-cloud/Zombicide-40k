@@ -1,0 +1,33 @@
+name: GenSrpG Phase9 Capture138 migration audit (isolated)
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture138-migration.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Auditer empreintes figees avant toute mutation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          b=Path("index.html").read_bytes()
+          print("index bytes",len(b),"blob",hashlib.sha1(f"blob {len(b)}\0".encode()+b).hexdigest())
+          for folder in ("tests",".github"):
+            matches=[]
+            for p in Path(folder).rglob("*"):
+              if not p.is_file(): continue
+              try: s=p.read_text(encoding="utf-8")
+              except (UnicodeDecodeError, OSError): continue
+              marks=[x for x in ("8165398","18627cc0c5fc7945732c8a910504c59ef823b6ae","captureFix138","startOutside200") if x in s]
+              if marks: matches.append((str(p),marks))
+            print("==== audit",folder,"====")
+            for p,m in matches: print(p,",".join(m))
+          PY

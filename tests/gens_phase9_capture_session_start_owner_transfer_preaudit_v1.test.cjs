@@ -45,7 +45,12 @@ assert.match(c139,/loadWorld:/);
 assert.match(c139,/saveWorld:/);
 assert.match(c139,/ensureStarterKits:/);
 assert.match(c139,/readTurnOrderEnabled:/);
-assert.match(c139,/enterWorld:\(\)=>captureEnterWorld139\(\)/);
+assert.match(c139,/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/,
+  'session start must keep the same Hub entry effect through the sole Capture UI owner');
+assert.match(c139,/window\.GensCaptureHubEntryV1\.install\(\{/,
+  'Capture139 must inject only legacy presentation dependencies into that UI owner');
+assert.doesNotMatch(c139,/window\.captureEnterWorld139\s*=/,
+  'session composer must not regain legacy global Hub ownership');
 assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
 
 assert.equal((index.match(/assets\/gensrpg\/capture\/session-start-v1\.js/g)||[]).length,1,
@@ -83,7 +88,7 @@ console.log(JSON.stringify({
     owner:'assets/gensrpg/capture/session-start-v1.js',
     publicApi:'GensCaptureSessionStartV1',
     lexicalAdapter:'activateParticipant(current,state) only',
-    deferred:'moduleScreenReturn / captureEnterWorld139 ownership remains a separate lot'
+    deferred:'Capture Hub visual ownership moved to the dedicated Phase 9 owner; world renderer remains separate'
   },
   runtimeChanged:true
 },null,2));

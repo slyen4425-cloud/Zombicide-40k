@@ -1,0 +1,24 @@
+name: GenSrpG Phase 9 Capture Hub owner static sweep
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-hub-owner-static-sweep.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture-hub-static-sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enumerate and execute all Architecture static sentinels without browser
+        run: python tools/gensrpg_phase9_static_failure_sweep.py

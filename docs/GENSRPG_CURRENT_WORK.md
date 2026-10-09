@@ -1,3 +1,18 @@
+# PHASE 9 — HUB CAPTURE UI TRANSFER — COMMIT RUNTIME ET PARITÉ GREEN — 2026-10-09
+
+- Branche `work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09` ; dernier checkpoint GREEN `checkpoint/gensrpg-phase9-capture-hub-world-owner-preaudit-green-2026-10-09` au SHA `00d7adcf3be669e7921234eb30e9b319413c8649`.
+- Départ `checkpoint/gensrpg-start-phase9-capture-hub-entry-owner-transfer-2026-10-09` sur le même SHA.
+- Fichier source §26 `worki.zip/indexI.txt` validé : 8 165 823 octets / blob Git `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+- Runtime transféré : commit `7704651e92840226d7915e753149a02d0aa944f7`, `index.html` **8 165 398 octets**, blob `18627cc0c5fc7945732c8a910504c59ef823b6ae`.
+- Nouveau propriétaire `assets/gensrpg/capture/hub-entry-v1.js` ; `captureFix139` ne définit plus `captureEnterWorld139()`, câble trois dépendances existantes ; SessionStart et ScreenReturn appellent **la même** `enterWorld()`. Le monde / renderer `renderCaptureWorldHub`, V138, V151, Shell, Dungeon, sauvegardes, autres modes et labos sont intacts.
+- TDD RED GitHub `37932572987` vérifié sur l'ancienne définition ; workflow one-shot `37933458038` **SUCCESS**, 4 tests parité VM + rollback byte-exact + cumulative rollback Dungeon.
+- Raccord des sentinelles Phase5/9 et des empreintes historiques sans suppression de protections ; inventaire productif étendu à 86 propriétaires, dont 3 auxiliaires Capture.
+- **État :** tests ciblés GREEN, CI globale Architecture+Browser/Firefox/Tactical à relancer sur le HEAD documentaire de clôture avant tout checkpoint GREEN. Validation smartphone utilisateur encore requise pour la nouvelle transition Hub.
+- Rapport : `docs/GENSRPG_PHASE9_CAPTURE_HUB_ENTRY_OWNER_TRANSFER.md`.
+- Production `main` toujours gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun merge.
+
+---
+
 # PHASE 9 — HUB CAPTURE UI OWNER TRANSFER — RED TDD — 2026-10-09
 
 Branche `work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09`. Base/checkpoint GREEN `00d7adcf3be669e7921234eb30e9b319413c8649` (`checkpoint/gensrpg-phase9-capture-hub-world-owner-preaudit-green-2026-10-09`). Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-hub-entry-owner-transfer-2026-10-09`.

@@ -9,13 +9,15 @@
     "Capture module-launch provider",
     "Capture profile identity classification",
     "Capture session initialization",
-    "Capture screen-return primary-view provider"
+    "Capture screen-return primary-view provider",
+    "Capture Hub primary-view UI transition"
   ],
   "consumes": [
     "core public contracts",
     "Shell module-launch public contract",
     "Capture session-start owner public API",
-    "Capture screen-return owner public API"
+    "Capture screen-return owner public API",
+    "Capture Hub entry owner public API"
   ],
   "forbidden": [
     "Dungeon private runtime",
@@ -27,7 +29,8 @@
   "lifecycle": {
     "install": "explicit Capture session-start owner binding; registers the Capture public provider exactly once",
     "dispose": "session-start owner exposes explicit dispose; public entry creates no listener observer timer or storage state",
-    "screenReturn": "GensCaptureScreenReturnV1 installed explicitly from Capture139 legacy dependencies, unregisters functional access on dispose"
+    "screenReturn": "GensCaptureScreenReturnV1 installed explicitly from Capture139 legacy dependencies, unregisters functional access on dispose",
+    "hubEntry": "GensCaptureHubEntryV1 owns the Capture primary-view DOM transition and cancels pending scrolls on dispose; installed once from Capture139 injected legacy callbacks"
   },
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
@@ -38,7 +41,8 @@
     "only one Shell register capture provider is active",
     "historical Dungeon compatibility remains unchanged until separately audited",
     "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity",
-    "Capture139 wires but does not register the unique Capture screen-return provider; GensCaptureScreenReturnV1 owns Shell registration"
+    "Capture139 wires but does not register the unique Capture screen-return provider; GensCaptureScreenReturnV1 owns Shell registration",
+    "Capture139 no longer defines captureEnterWorld139; it wires the dedicated Hub UI entry and preserves the historical renderCaptureWorldHub owner"
   ],
   "publicEntries": {
     "moduleScreenReturn": {

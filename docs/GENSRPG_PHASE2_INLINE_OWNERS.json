@@ -121,7 +121,7 @@
       "order": 14,
       "status": "active",
       "primaryDomain": "capture",
-      "responsibility": "Capture world-entry Hub UI and explicit session-start/screen-return dependency wiring; no session initializer ownership and no Shell provider registration",
+      "responsibility": "Capture-only dependency wiring for public session-start, screen-return and primary Hub UI entry owners; no direct Shell registration or Hub UI transition",
       "crossDomains": [
         "capture"
       ]

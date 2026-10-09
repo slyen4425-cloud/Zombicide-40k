@@ -1,3 +1,14 @@
+# PHASE 9 — CAPTURE138 : JALON FONCTIONNEL GREEN VALIDÉ — 2026-10-09
+
+- **Checkpoint GREEN final immuable** : `checkpoint/gensrpg-phase9-capture138-delayed-hub-guard-green-2026-10-09` → **`3e47a393f9fca326bf9aab21a15ba4b4d315eddb`** ; créé après validation utilisateur smartphone (« Ok ça fonctionne »).
+- **Triples CI GREEN sur le même SHA** : Architecture + Browser `37995288162` (**346 contrôles Architecture + 55 étapes du job Browser réussis**), Firefox `37995288148`, Tactical Dock `37995288208`. Le timer Capture138 ne manipule plus le Hub après changement Capture→Dungeon/Survie.
+- **Source exacte du jalon** : `index.html` 8 165 438 octets, blob Git `1a61147d5a32889fa85e6a09e846049103b9f0bf`. Diff de l'index : +1 ligne, sans suppression. Test RED→GREEN et tests de rollback préservés.
+- **Branche de développement** : `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture138-delayed-hub-guard-2026-10-09` sur `50ea199c1bbb909537383bdb10337ba054d53077`. **Production `main` gelée** : `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun merge ni déploiement.
+- **Risque de chantier parallèle** : `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09` (HEAD `12eb2ed847be280d516879a5e0bb1577732bce48` à l'audit), branche divergente issue de `049d616c6a16decdb3eefd1ece922c3720a7eff3` ; modifie **le même gros index**. Ne PAS fusionner ni reprendre ce périmètre sans coordination. Chantier lifecycle Capture parallèle également divergent.
+- **Suite Phase 9** : ne pas annoncer phase achevée. À examiner dans un micro-lot **distinct**, depuis le checkpoint vert avec checkpoint de départ propre : preuve du cycle complet autonome Capture (démarrer → monde/équipe/combats → sauvegarder/reprendre → fermer) sans activité Dungeon/Survie. Prioriser le critère de sortie de la roadmap plutôt qu'empiler les petits préaudits ; conserver toutes les protections et sentinelles. **Si le prochain lot nécessite le contenu exact d'index.html, demander le fichier de ce nouveau SHA conformément à la charte §26**.
+
+---
+
 # PHASE 9 — CAPTURE138 : CORRECTIF DE HUB DIFFÉRÉ SUR BRANCHE — 2026-10-09
 
 - **Branche** : `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09` ; **checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture138-delayed-hub-guard-2026-10-09` SHA `50ea199c1bbb909537383bdb10337ba054d53077`.

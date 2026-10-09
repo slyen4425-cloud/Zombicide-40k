@@ -39,14 +39,24 @@ const distinctGlobals=chains.size;
 const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
-assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Phase 2 inline global table must target the current committed index blob');
+const CURRENT_INDEX_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
+const HISTORICAL_TABLE_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
+assert.equal(blob,CURRENT_INDEX_BLOB,'current index must be the exact reviewed Capture138 callback guard');
+const guardLine='      if(!isCaptureContext138())return;\n';
+assert.equal(source.split(guardLine).length-1,1,'single documented Capture138 timer guard');
+const recovered=Buffer.from(source.replace(guardLine,''),'utf8');
+const crypto=require('node:crypto');
+const recoveredBlob=crypto.createHash('sha1').update(Buffer.from('blob '+recovered.length+'\0')).update(recovered).digest('hex');
+assert.equal(recoveredBlob,HISTORICAL_TABLE_BLOB,'removing exactly the new line must recover the historical Phase 2 source');
+const tableBlob=(table.match(/^# sourceIndexBlob=([a-f0-9]{40})$/m)||[])[1];
+assert.equal(tableBlob,HISTORICAL_TABLE_BLOB,'historical inline-owner table fingerprint must not be rewritten');
 assert.equal(distinctGlobals,428,'distinct explicit inline globals drifted');
 assert.equal(assignments,739,'explicit inline global assignments drifted');
 assert.equal(multiOwnerGlobals,114,'multi-owner inline globals drifted');
 
 const expected=[
   '# GenSrpG Phase 2 — inline global last owners',
-  '# sourceIndexBlob='+blob,
+  '# sourceIndexBlob='+tableBlob,
   '# scope=explicit window.<name> assignments in 119 active inline blocks',
   '# distinctGlobals='+distinctGlobals+' assignments='+assignments+' multiOwnerGlobals='+multiOwnerGlobals,
   '# name\tassignmentCount\tlastOwner',

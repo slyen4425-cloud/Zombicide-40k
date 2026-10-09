@@ -1,10 +1,10 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "26421e0347305437fe2b1dc149b3e4fb8b3761bd",
+  "sourceIndexBlob": "18627cc0c5fc7945732c8a910504c59ef823b6ae",
   "note": "Timer classification is descriptive only. The Phase 9 Capture session-start transfer retired the dead Capture139 1200 ms re-entry timer; no other timer was changed by that lot.",
   "expected": {
-    "externalReachableFiles": 85,
+    "externalReachableFiles": 86,
     "externalTimerSources": 51,
     "externalSetTimeoutSyntax": 141,
     "externalSetIntervalSyntax": 1,

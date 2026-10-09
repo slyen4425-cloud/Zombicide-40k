@@ -17,8 +17,8 @@ assert.equal(rows.size,428,'last-owner map loses only retired Capture139 hub ent
 assert.equal(rows.has('_captureStarting139'),false,
   'retired Capture139 launch lock must remain absent from the inline global owner inventory');
 assert.deepEqual(rows.get('startConfiguredGame'),
-  {assignmentCount:2,lastOwner:'gensDungeonCore01Js'},
-  'global startConfiguredGame chain must retain only captureFix138 + Dungeon owner after Capture139 retirement');
+  {assignmentCount:1,lastOwner:'gensDungeonCore01Js'},
+  'global startConfiguredGame chain must retain only Dungeon Core01 after dedicated Capture138 retirement');
 
 for(const h of manifest.hotspots){
   const row=rows.get(h.name);

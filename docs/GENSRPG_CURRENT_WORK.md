@@ -1,3 +1,18 @@
+# PHASE 9 — PRÉAUDIT FERMETURE AUTONOME CAPTURE — 2026-10-09
+
+**Branche :** `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` ; **checkpoint de départ :** `checkpoint/gensrpg-start-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` sur `8b33eddbc8e57453e7cf5159c07e04762aa64827`.
+**Dernier GREEN fonctionnel :** `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-green-2026-10-08`, même SHA. Architecture+Browser `37838853571`, Firefox `37838853606`, Tactical `37838853693` SUCCESS ; validation manuelle smartphone du 8 octobre positive.
+**Production :** `main` gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+**Périmètre :** caractériser l'absence de lifecycle de fermeture coordonné dans `GensCaptureV1`, sans confondre avec `GensCaptureScreenReturnV1` (retour Hub déjà GREEN) ni `GensCaptureSessionStartV1` (démarrage déjà GREEN). Aucun runtime modifié.
+**Tests :** `tests/gens_phase9_capture_lifecycle_shutdown_preaudit_v1.test.cjs`, branché à Architecture ; document `docs/GENSRPG_PHASE9_CAPTURE_LIFECYCLE_SHUTDOWN_PREAUDIT.md`.
+**Risques protégés :** Shell unique, Builder Dungeon, Survie/PvP/Tactical, sauvegarde/reprise, créatures/assets/labos et gameplay.
+**Prochaine étape :** triple CI du préaudit ; checkpoint préaudit GREEN si réussite ; audit exact du vrai chemin quitter/fermer/reprendre avant un micro-lot runtime séparé.
+
+**Rule 26 :** `indexH.txt` précédent ne correspond plus au runtime : fournir le `index.html` SHA `8b33eddbc8e57453e7cf5159c07e04762aa64827` (8 165 823 octets, blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`) pour le lot suivant. Aucun merge `main`.
+
+---
+
 # PHASE 9 — RETOUR ÉCRAN CAPTURE — VALIDATION UTILISATEUR + TRIPLE CI GREEN — 2026-10-08
 
 **Dernier jalon fonctionnel validé par l'utilisateur.** Sur le lien de preview smartphone du commit `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba`, retour utilisateur : « Ok tout fonctionne parfaitement » (8 octobre 2026). Aucune anomalie signalée sur le parcours ciblé proposé (retour au Hub Capture, reprise, Builder Dungeon). Ne pas extrapoler cette validation à toute la Phase 9.

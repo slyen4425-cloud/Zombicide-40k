@@ -62,8 +62,17 @@ assert.match(capture139,/GensCaptureScreenReturnV1\.install/,
   'Capture139 must only inject return dependencies');
 assert.match(read('assets/gensrpg/capture/screen-return-v1.js'),/shell\.register\("capture",returnToPrimaryView\)/,
   'Capture module must own the unique Shell screen-return provider');
-assert.match(capture139,/captureEnterWorld139\(\)/,
-  'Capture S1 must keep Capture-owned world/hub rendering');
+const captureHub=read('assets/gensrpg/capture/hub-entry-v1.js');
+assert.match(capture139,/GensCaptureHubEntryV1\.install\s*\(/,
+  'Capture139 must install the one Capture-owned Hub visual provider');
+assert.match(capture139,/renderCaptureWorldHub:\(\)=>renderCaptureWorldHub\(\)/,
+  'Capture139 must preserve delegation to the original world renderer');
+assert.equal((capture139.match(/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/g)||[]).length,2,
+  'SessionStart and ScreenReturn must share exactly one visual Hub authority');
+assert.doesNotMatch(capture139,/window\.captureEnterWorld139\s*=/,
+  'legacy Capture139 Hub global must remain retired');
+assert.match(captureHub,/root\.GensCaptureHubEntryV1=Object\.freeze/,
+  'Capture Hub transition must belong to its dedicated Capture owner');
 
 assert.match(dungeon200,/GensShellScreenReturnV1/,
   'Dungeon S2 must expose its return through the Shell public registry');

@@ -1,3 +1,16 @@
+# PHASE 9 — PRÉAUDIT CHEMIN HISTORIQUE CAPTURE138 — 2026-10-09
+
+- **Branche** : `work/gensrpg-phase9-capture-legacy138-launch-preaudit-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-legacy138-launch-preaudit-2026-10-09`, SHA `35ac5a66b4e367bb8463beb757078134e818922d`. **Base GREEN** : `35ac5a66b4e367bb8463beb757078134e818922d` (triple CI SUCCESS : Architecture+Browser `37951626194`, Firefox `37951625914`, Tactical `37951626058`).
+- **Dernier checkpoint GREEN fonctionnel** : `checkpoint/gensrpg-phase9-capture-hub-entry-owner-transfer-green-2026-10-09` sur `1a80044e0fb29d0a635994cb94d69a55afbf1078`, avec validation utilisateur. `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Périmètre** : préauditer sans runtime le wrapper historique `captureFix138` / `startConfiguredGame` / rafraîchissement Hub différé. Propriétaires protégés : `GensCaptureV1`, `GensCaptureSessionStartV1`, `GensCaptureScreenReturnV1`, `GensCaptureHubEntryV1`, Shell, `renderCaptureWorldHub` et les autres modules.
+- **Parallèle identifié** : `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` sur `e537678c68c43d7f58899f55d58341421caf90ad` (base plus ancienne et divergente). Le lifecycle, la fermeture/désinstallation et la reprise ne sont pas modifiés ici.
+- **Test nouveau** : `tests/gens_phase9_capture_legacy138_launch_boundary_preaudit_v1.test.cjs`, VM du vrai point d'entrée public Capture + validation contrat / absence de lancement historique dans les modules déjà extraits. Aucune lecture/transformation de `index.html` par l'outil GitHub.
+- **Gate Rule 26** : le runtime du SHA de base vaut 8 165 398 octets / blob `18627cc0c5fc7945732c8a910504c59ef823b6ae`. Pour analyser `captureFix138` en vue du RED runtime, demander ce fichier exact à l'utilisateur. Ne pas utiliser `worki.zip`.
+- **Suite** : triple CI sur HEAD du préaudit → checkpoint GREEN **du préaudit uniquement** si SUCCESS ; puis vrai code `index.html` validé, cartographie des consommateurs, nouveau lot TDD RED/GREEN borné, rollback et test smartphone. Aucun merge main.
+- **Rapport** : `docs/GENSRPG_PHASE9_CAPTURE_LEGACY138_LAUNCH_PREAUDIT.md`.
+
+---
+
 # PHASE 9 — HUB CAPTURE : VALIDATION UTILISATEUR ET CHECKPOINT GREEN — 2026-10-09
 
 - **Validation utilisateur reçue le 9 octobre 2026** : « OK, je valide, tout fonctionne parfaitement. Prépare un prompt pour une reprise sur un nouveau fil et ensuite on continue. » La validation porte sur le dernier lot Hub Capture présenté, ne valide pas par extension toute la Phase 9.

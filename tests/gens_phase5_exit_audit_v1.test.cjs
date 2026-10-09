@@ -76,8 +76,8 @@ assert.equal(blocks.some(x=>x.id==='dungeonCore028HeroExploreGuard'),false,
   'retired Dungeon Core 0.28 hero-sheet wrapper must stay absent');
 
 const startChain=strictChain('startConfiguredGame');
-assert.deepEqual(startChain,['captureFix138','gensDungeonCore01Js'],
-  'Phase 9 session-owner transfer must retire Capture139 from the historical startConfiguredGame chain');
+assert.deepEqual(startChain,['gensDungeonCore01Js'],
+  'Phase 9 must retire both Capture139 and Capture138 historical global launch writers while retaining Dungeon Core01');
 assert.doesNotMatch(capture139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
   'Capture139 must remain retired from session-start ownership');
 assert.doesNotMatch(capture139,/GensShellModuleLaunchV1\.register\(["']capture["']/,

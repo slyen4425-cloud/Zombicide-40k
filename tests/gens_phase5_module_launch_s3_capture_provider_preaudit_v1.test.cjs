@@ -66,8 +66,10 @@ assert.doesNotMatch(c135.body,/window\.startConfiguredGame\s*=(?!=)/,
   'Capture135 global launch boundary must remain retired');
 assert.match(c135.body,/target135\([\s\S]*render135\([\s\S]*captureBattleLiveBody/,
   'Capture135 non-launch combat/UX responsibilities must remain');
-assert.match(c138.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
-  'Capture138 historical boundary must remain');
+assert.doesNotMatch(c138.body,/window\.startConfiguredGame\s*=|const start138=/,
+  'Capture138 historical global launch wrapper must remain retired');
+assert.match(c138.body,/captureBattleApplyAbility/,
+  'Capture138 must still own combat-target ability wiring');
 assert.match(d01.body,/window\.startConfiguredGame\s*=\s*async\s+function/,
   'Dungeon Core01 historical boundary must remain');
 assert.match(d200.body,/const gensDungeonStartConfiguredGame200V1=async function/,
@@ -81,7 +83,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix138','gensDungeonCore01Js'],
+assert.deepEqual(chain,['gensDungeonCore01Js'],
   'S3 preaudit must track the post-transfer global chain after Capture139 session-owner retirement');
 
 assert.ok(fs.existsSync(path.join(root,'tests','gens_phase5_user_regression_rollback_guard_v1.test.cjs')),

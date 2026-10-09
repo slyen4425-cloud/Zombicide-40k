@@ -104,7 +104,7 @@ assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollba
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
 assert.match(rollbackGuard,/captureFix135 global startConfiguredGame owner must remain retired/);
-assert.match(rollbackGuard,/assert\.equal\(assignments,2/);
+assert.match(rollbackGuard,/assert\.equal\(assignments,1/);
 assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs')),
   'the dedicated captureFix135 retirement RED/contract must remain present');
 
@@ -116,10 +116,9 @@ for(const block of blocks){
   for(let i=0;i<count;i++)chain.push(block.id);
 }
 assert.deepEqual(chain,[
-  'captureFix138',
   'gensDungeonCore01Js'
-],'module-launch preaudit must track the reduced two-owner historical startConfiguredGame chain after Capture139 retirement');
-assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m);
+],'module-launch preaudit must preserve the sole remaining Dungeon Core01 historical inline writer after Capture138 retirement');
+assert.match(lastOwners,/^startConfiguredGame\t1\tgensDungeonCore01Js$/m);
 
 // Phase 6 keeps the pure Survival wave-rules entry connected and Phase 7 additionally connects
 // the reviewed pure Dungeon exploration planner. The module-launch contract itself remains metadata-only.
@@ -143,7 +142,7 @@ console.log(JSON.stringify({
   contract:'module-launch/startModuleSession',
   providers:launch.providers,
   startConfiguredGameChain:chain,
-  regressionInvariant:'captureFix135 global retirement is accepted only after dedicated RED and real E2E parity; captureFix138 requires a fresh re-audit',
+  regressionInvariant:'captureFix135 remains retired; Capture138 global launch retired after strict RED/GREEN and byte-exact rollback, with public Shell and Capture owner preserved',
   runtimeChanged:true,
   productionLoadGraphChanged:'Phase 9 Capture public entry active; Shell registry contract remains public routing metadata'
 },null,2));

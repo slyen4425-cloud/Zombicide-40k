@@ -64,7 +64,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   const count=(body.match(/window\.startConfiguredGame\s*=(?!=)/g)||[]).length;
   for(let i=0;i<count;i++)chain.push(id);
 }
-assert.deepEqual(chain,['captureFix138','gensDungeonCore01Js'],
+assert.deepEqual(chain,['gensDungeonCore01Js'],
   'S3 must track the post-transfer historical global launch owners');
 assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
   'Capture135 global launch owner must remain retired');

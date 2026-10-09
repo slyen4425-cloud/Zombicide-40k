@@ -49,11 +49,11 @@ assert.doesNotMatch(service,/GensShellModuleLaunchV1\.register/,
   'module provider registrations must remain outside the S1 registry infrastructure block');
 
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
-assert.equal(wrappers,2,'S1 must track the two remaining inline startConfiguredGame globals after Capture139 retirement');
+assert.equal(wrappers,1,'S1 must retain exactly the Dungeon Core01 historical inline launch writer after Capture138 retirement');
 assert.equal((index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length,1,
   'S1 must preserve the native Shell startConfiguredGame owner');
 
-const expected=['captureFix138','gensDungeonCore01Js'];
+const expected=['gensDungeonCore01Js'];
 function block(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing '+id);

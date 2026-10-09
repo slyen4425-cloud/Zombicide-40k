@@ -39,7 +39,7 @@ assert.doesNotMatch(deploy,/assets\/gensrpg\/shell\/entry-v1\.js/,'Shell Phase 3
 const native=(index.match(/async\s+function\s+startConfiguredGame\s*\(\)\s*\{/g)||[]).length;
 const wrappers=(index.match(/window\.startConfiguredGame\s*=\s*async\s+function\s*\(\)\s*\{/g)||[]).length;
 assert.equal(native,1,'Shell native startConfiguredGame owner must remain present');
-assert.equal(wrappers,2,'preaudit must track the reduced two-owner historical global module wrapper chain');
+assert.equal(wrappers,1,'preaudit must retain the single Dungeon Core01 historical global launch writer');
 
 function scriptBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
@@ -47,7 +47,7 @@ function scriptBody(id){
   return m[1];
 }
 
-const chain=['captureFix138','gensDungeonCore01Js'];
+const chain=['gensDungeonCore01Js'];
 for(const id of chain){
   assert.match(scriptBody(id),/window\.startConfiguredGame\s*=\s*async\s+function/,'missing startConfiguredGame owner '+id);
 }
@@ -59,7 +59,11 @@ assert.match(core200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonSt
 const capture135=scriptBody('captureFix135');
 assert.doesNotMatch(capture135,/window\.startConfiguredGame\s*=(?!=)/,'Capture135 global launch owner must remain retired');
 assert.match(capture135,/target135\([\s\S]*render135\([\s\S]*captureBattleLiveBody/,'Capture135 non-launch combat/UX responsibilities must remain');
-assert.match(scriptBody('captureFix138'),/isCaptureContext138[\s\S]*renderCaptureWorldHub[\s\S]*setTimeout/,'Capture138 post-launch UI semantics must remain');
+const capture138=scriptBody('captureFix138');
+assert.match(capture138,/isCaptureContext138/,'Capture138 context detection must remain');
+assert.match(capture138,/captureBattleApplyAbility/,'Capture138 combat targeting must remain');
+assert.doesNotMatch(capture138,/const start138=|window\.startConfiguredGame\s*=|renderCaptureWorldHub\(\)/,
+  'Capture138 legacy global launcher and deferred Hub refresh must remain retired');
 assert.doesNotMatch(scriptBody('captureFix139'),/window\.startConfiguredGame\s*=|start139\.apply|gensCaptureStartConfiguredGame139V1/,
   'Capture139 must remain retired from global/session-start ownership');
 assert.match(scriptBody('captureFix139'),/GensCaptureSessionStartV1\.install/,

@@ -66,7 +66,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
 }
 assert.deepEqual(
   chain,
-  ['captureFix138','gensDungeonCore01Js'],
+  ['gensDungeonCore01Js'],
   'S4 must preserve the post-transfer historical launch owners'
 );
 

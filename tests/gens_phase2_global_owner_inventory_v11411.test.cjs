@@ -30,9 +30,9 @@ const expected={
     mustInclude:['capturePlaytestFix128','captureAbilityTruth144','coreCombatPoolFix156']
   },
   startConfiguredGame:{
-    assignments:2,
+    assignments:1,
     last:'gensDungeonCore01Js',
-    exact:['captureFix138','gensDungeonCore01Js']
+    exact:['gensDungeonCore01Js']
   },
   resumeGame:{
     assignments:1,

@@ -1,3 +1,13 @@
+# PHASE 9 — CAPTURE138 : CORRECTIF DE HUB DIFFÉRÉ SUR BRANCHE — 2026-10-09
+
+- **Branche** : `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09` ; **checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture138-delayed-hub-guard-2026-10-09` SHA `50ea199c1bbb909537383bdb10337ba054d53077`.
+- **Correctif runtime** : commit `c833a80e5301dd49712a27b6b51f74329a77e76d` ; une seule ligne `if(!isCaptureContext138())return;` dans le timer historique 30 ms. `index.html` passe de 8 165 398 / blob `18627cc0c5fc7945732c8a910504c59ef823b6ae` à **8 165 438 / blob `1a61147d5a32889fa85e6a09e846049103b9f0bf`**. Rollback byte-exact contrôlé.
+- **Tests** : RED GitHub `37992125271`, simulation isolée `37994439246` (108 tests), application contrôlée `37994592917` SUCCESS. 106 tests adaptés à la nouvelle empreinte courante, 2 références historiques intactes ; manifestes historiques conservés, tests rollback toujours byte-exacts. Après adaptation : **108/108 tests GREEN dans le runner isolé**.
+- **Sécurité** : `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`; aucune fusion, pas de modification du chantier lifecycle parallèle. **Gate** : triple CI complète Architecture+Browser, Firefox, Tactical sur le SHA final, validation utilisateur smartphone ensuite, puis checkpoint GREEN fonctionnel.
+- **Rapport** : `docs/GENSRPG_PHASE9_CAPTURE138_DELAYED_HUB_RED_AND_FINGERPRINT_AUDIT.md`. Les workflows one-shot seront retirés ; sentinelle comportementale permanente conservée dans Architecture.
+
+---
+
 # PHASE 9 — CAPTURE138 : GARDE DU CALLBACK DE HUB DIFFÉRÉ — 2026-10-09
 
 - **Branche** : `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture138-delayed-hub-guard-2026-10-09` sur `50ea199c1bbb909537383bdb10337ba054d53077`. Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-legacy138-launch-characterization-green-2026-10-09` sur le même SHA (triple CI SUCCESS Architecture/Browser 37981581468, Firefox 37981581403, Tactical 37981581440).

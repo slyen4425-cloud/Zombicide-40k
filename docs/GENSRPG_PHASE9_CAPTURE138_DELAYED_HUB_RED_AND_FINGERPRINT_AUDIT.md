@@ -50,3 +50,12 @@ La branche contient actuellement uniquement le nouveau test RED, le raccord CI, 
 5. Conserver `main` gelée, ne pas fusionner sans validation.
 
 **Interdits :** rustines sur Shell, interception globale de `setTimeout`, redéfinition de `isCaptureContext138` dans un second fichier, désactivation des tests, modification automatique des 108 assertions sans classification, assimilation du GREEN local à un GREEN GitHub.
+
+## Résolution appliquée sur branche (9 octobre 2026)
+
+- **Commit de migration réel** : `c833a80e5301dd49712a27b6b51f74329a77e76d` sur `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09`. GitHub diff comparé au parent : **107 fichiers modifiés**, exactement `index.html` (+1 ligne, 0 suppression) et **106 fichiers de tests** (références à la version courante et oracles associés).
+- **Empreinte active après correction** : 8 165 438 octets, blob Git `1a61147d5a32889fa85e6a09e846049103b9f0bf`. Le retrait byte-exact de la garde redonne l'index de départ 8 165 398 octets / blob `18627cc0c5fc7945732c8a910504c59ef823b6ae`.
+- **Tests avant/après** : audit one-shot `37994182555` (108 candidats, 106 échecs attendus avec index corrigé et oracles anciens, 2 passent) ; rebasing simulé `37994285746` (100/106 corrigés) ; six oracles particuliers analysés et adaptés ; simulation complète `37994439246` (**106/106 après correction des oracles, plus les 2 tests inchangés**) ; application conditionnelle `37994592917` **SUCCESS** sur GitHub, vérifie les 108 tests et le diff avant commit.
+- **Oracles non falsifiés** : deux tests de rollback d'ancienne transition Hub retirent explicitement la nouvelle garde avant de comparer le SHA historique intact ; trois manifestes historiques restent épinglés à leur blob documentaire `18627cc0c5fc7945732c8a910504c59ef823b6ae` ; la sentinelle `gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs` vérifie désormais que le timer Capture138 n'agit plus après sortie du mode. Le test nouveau de non-interférence Capture→Dungeon/Survie demeure branché dans l'architecture.
+- **Nettoyage** : les deux workflows one-shot de simulation/application et le script temporaire de migration sont retirés après la preuve et le commit ; aucune autorité runtime ajoutée.
+- **Avant la fermeture du jalon** : contrôler les trois workflows de non-régression Architecture+Browser, Firefox, Tactical au **SHA de documentation/nettoyage exact**, demander validation utilisateur mobile. Aucun merge main et aucun checkpoint GREEN fonctionnel n'est proclamé avant ces portes.

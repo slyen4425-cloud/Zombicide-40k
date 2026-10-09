@@ -257,7 +257,7 @@ assert.equal(index.split(capture138Next).length-1,1,'unique exact Capture138 inv
 const indexBeforeCapture138=index.replace(capture138Next,retiredCapture138Start+capture138Next);
 const capture138RestoredBytes=Buffer.from(indexBeforeCapture138,'utf8');
 assert.equal(capture138RestoredBytes.length,8165398,'restore Capture138 starting index size exactly');
-assert.equal(crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+capture138RestoredBytes.length+'\\0'),capture138RestoredBytes])).digest('hex'),'18627cc0c5fc7945732c8a910504c59ef823b6ae','restore Capture138 historical GREEN blob');
+assert.equal(crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+capture138RestoredBytes.length+'\0'),capture138RestoredBytes])).digest('hex'),'18627cc0c5fc7945732c8a910504c59ef823b6ae','restore Capture138 historical GREEN blob');
 const beforeHubEntry=indexBeforeCapture138.replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntrySeamNew,hubEntrySeamOld)

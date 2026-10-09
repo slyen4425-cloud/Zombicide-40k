@@ -1,3 +1,15 @@
+# PHASE 9 — CARACTÉRISATION DU ROUTAGE FINAL CAPTURE138/DUNGEON200 — 2026-10-09
+
+- **Branche de travail** : `work/gensrpg-phase9-capture-legacy138-launch-characterization-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-legacy138-launch-characterization-2026-10-09` sur `049d616c6a16decdb3eefd1ece922c3720a7eff3`. **Dernier checkpoint GREEN de préaudit** : `checkpoint/gensrpg-phase9-capture-legacy138-launch-preaudit-green-2026-10-09` (même SHA ; triple CI SUCCESS).
+- **Production** : `main` demeure `e8681f9823573ced8aec59c8ddc47a72b02bc663`, gelée, sans fusion, aucun déploiement.
+- **Source Rule 26** : envoi utilisateur `indexj.txt`, contrôlé **8 165 398 octets / blob Git `18627cc0c5fc7945732c8a910504c59ef823b6ae`**, identique à `index.html` du checkpoint.
+- **Périmètre unique** : caractériser le vrai ordre `captureFix138` -> référence locale `dungeonCore200Rebuild` -> remplacement public final dans `assets/gensrpg/shell/module-launch-final-authority-v1.js`. Protection de SessionStart, HubEntry, ScreenReturn, Dungeon, Survie, Builder, Tactical, Core, sauvegardes et de toutes les fonctions globales. Pas de changement de runtime dans ce lot.
+- **Observation vérifiée** : le Shell final remplace `window.startConfiguredGame` ; le lancement public Capture passe par `GensCaptureV1`, sans timer Capture138. Dungeon200 conserve néanmoins `startOutside200`, référence vers le wrapper ancien ; ce fallback peut encore déclencher son timer de 30 ms, sans revérifier le mode à l'exécution.
+- **Tests du lot** : `tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs` sur le vrai index et les vraies sources, scénarios Capture/Dungeon/Survie et fallback historique, non-régression inter-module. Vérification locale OK ; CI du HEAD à vérifier. Diagnostic et risque documentés dans `docs/GENSRPG_PHASE9_CAPTURE_LEGACY138_FINAL_SHELL_CHARACTERIZATION.md`.
+- **Prochain jalon séparé** : RED démontrant la non-interférence du fallback Dungeon lors des bascules de mode, puis migration/retrait ciblé de l'autorité ancienne avec parité réelle, rollback byte-exact et triple CI. Aucun nettoyage prématuré de `captureFix138`/Dungeon200/V151 ; coordination obligatoire avec chantier lifecycle divergent.
+ 
+---
+
 # PHASE 9 — PRÉAUDIT CHEMIN HISTORIQUE CAPTURE138 — 2026-10-09
 
 - **Branche** : `work/gensrpg-phase9-capture-legacy138-launch-preaudit-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-legacy138-launch-preaudit-2026-10-09`, SHA `35ac5a66b4e367bb8463beb757078134e818922d`. **Base GREEN** : `35ac5a66b4e367bb8463beb757078134e818922d` (triple CI SUCCESS : Architecture+Browser `37951626194`, Firefox `37951625914`, Tactical `37951626058`).

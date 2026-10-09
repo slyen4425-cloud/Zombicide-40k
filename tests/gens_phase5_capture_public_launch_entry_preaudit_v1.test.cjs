@@ -23,13 +23,14 @@ const c135=blockBody('captureFix135');
 const c138=blockBody('captureFix138');
 const c139=blockBody('captureFix139');
 
-assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m,
-  'Phase 9 closure must retain only Capture138 and Dungeon Core01 as inline global launch owners');
+assert.match(lastOwners,/^startConfiguredGame\t1\tgensDungeonCore01Js$/m,
+  'Phase 9 closure must retain only Dungeon Core01 as historical inline launch owner');
 assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
   'Capture135 global launch owner must remain retired');
-assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/);
+assert.doesNotMatch(c138,/window\.startConfiguredGame\s*=|const start138=/,'Capture138 launch authority must remain retired');
 assert.match(c138,/isCaptureContext138/);
-assert.match(c138,/renderCaptureWorldHub/);
+assert.match(c138,/captureBattleApplyAbility/,'Capture138 combat targeting stays loaded');
+assert.doesNotMatch(c138,/renderCaptureWorldHub\(\)/,'obsolete delayed Hub render stays retired');
 
 assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
   'Capture139 must remain retired from the global launch chain');
@@ -77,7 +78,7 @@ assert.doesNotMatch(sessionOwner,/document\.|localStorage|sessionStorage|indexed
 
 console.log(JSON.stringify({
   scenario:'Phase 5 Capture public launch-entry preaudit closure after Phase 9',
-  inlineLaunchOwners:['captureFix138','gensDungeonCore01Js'],
+  inlineLaunchOwners:['gensDungeonCore01Js'],
   retiredOwner:'captureFix139',
   activeCaptureSessionOwner:'GensCaptureSessionStartV1',
   screenReturnDeferred:false

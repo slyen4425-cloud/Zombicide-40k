@@ -74,7 +74,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix138','gensDungeonCore01Js'],
+  ['gensDungeonCore01Js'],
   'characterization must preserve the reduced historical owner chain after Capture139 session-owner retirement');
 assert.doesNotMatch(c139.body,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
   'Capture139 must remain retired from global/session-start ownership');
@@ -171,7 +171,7 @@ console.log(JSON.stringify({
     dungeonProviderRetained:true,
     stableCore200ReferenceRetained:true,
     core200GlobalAssignmentCount:0,
-    untouchedHistoricalOwners:['captureFix138','gensDungeonCore01Js'],
+    untouchedHistoricalOwners:['gensDungeonCore01Js'],
     protectedPaths:[
       'Dungeon direct',
       'Survival -> Dungeon same page',

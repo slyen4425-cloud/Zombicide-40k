@@ -42,7 +42,7 @@ assert.doesNotMatch(
 const owners=globalOwners('startConfiguredGame');
 assert.deepEqual(
   owners,
-  ['captureFix138','gensDungeonCore01Js'],
+  ['gensDungeonCore01Js'],
   'Phase 9 must preserve Capture135 retirement and additionally retire Capture139 from the global chain'
 );
 
@@ -52,9 +52,10 @@ assert.match(c135,/captureBattleLiveBody/,'captureFix135 detailed combat-log UI 
 assert.match(c135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
 assert.match(c135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
 
-assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix138 global owner must remain');
+assert.doesNotMatch(c138,/window\.startConfiguredGame\s*=|const start138=/,'Capture138 must no longer own a global launch wrapper');
 assert.match(c138,/isCaptureContext138/,'captureFix138 Capture-context routing must remain');
-assert.match(c138,/renderCaptureWorldHub/,'captureFix138 post-launch Capture UI responsibility must remain');
+assert.match(c138,/captureBattleApplyAbility/,'Capture138 must retain the gameplay targeting responsibility');
+assert.doesNotMatch(c138,/renderCaptureWorldHub\(\)/,'Capture138 obsolete deferred Hub repaint must stay retired');
 
 assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
   'Capture139 global launch owner must remain retired after Phase 9 transfer');
@@ -91,7 +92,7 @@ console.log(JSON.stringify({
   scenario:'Phase 5 retire captureFix135 global startConfiguredGame owner',
   owners,
   capture135BlockRetained:true,
-  preservedOwners:['captureFix138','gensDungeonCore01Js'],
+  preservedOwners:['gensDungeonCore01Js'],
   retiredByPhase9:'captureFix139',
   core200LocalDispatcher:true,
   shellFinalAuthority:true

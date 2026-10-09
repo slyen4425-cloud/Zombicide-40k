@@ -75,7 +75,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix138','gensDungeonCore01Js'],
+  ['gensDungeonCore01Js'],
   'retirement lot must preserve the reduced historical owners after Capture139 session-owner retirement');
 
 const finalSrc=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');

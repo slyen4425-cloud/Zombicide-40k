@@ -102,11 +102,12 @@ const restoredHubBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+restoredHubBytes.length+'\\\\0'),restoredHubBytes
 ])).digest('hex');
 assert.equal(restoredHubBlob,'"""+OLD_BLOB+"""','before cumulative rollback, undo Hub owner exactly');
+assert.equal(beforeHubEntry.split(captureReturnLoadNew).length-1,1,'Capture return script load preserved in rollback');
+assert.equal(beforeHubEntry.split(captureReturnSeamNew).length-1,1,'Capture return dependency preserved in rollback');
 const beforeReturnOwner=beforeHubEntry.replace(captureReturnLoadNew,captureReturnLoadOld).replace(captureReturnSeamNew,captureReturnSeamOld);"""
 insert=insert.replace("restoredHubBytes.length+'\\\\0'","restoredHubBytes.length+'\\0'")
 s=substitute(s,anchor,insert,1,"cumulative rollback")
-s=substitute(s,"assert.equal(index.split(captureReturnLoadNew).length-1,1,","assert.equal(beforeHubEntry.split(captureReturnLoadNew).length-1,1,",1)
-s=substitute(s,"assert.equal(index.split(captureReturnSeamNew).length-1,1,","assert.equal(beforeHubEntry.split(captureReturnSeamNew).length-1,1,",1)
+s=substitute(s,"assert.equal(index.split(captureReturnSeamNew).length-1,1,'exactly one current Capture return-owner binding seam');","",1,"move pre-migration guard after rollback")
 p.write_text(s,encoding="utf8",newline="")
 
 # Existing tests keep guards, updated for the now canonical owner.

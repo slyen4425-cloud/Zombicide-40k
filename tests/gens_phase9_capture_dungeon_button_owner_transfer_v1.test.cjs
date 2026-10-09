@@ -78,8 +78,14 @@ assert.doesNotMatch(c139,/updateGameStyleUi[\s\S]{0,240}gensEnsureDungeonAdventu
 assert.doesNotMatch(c151,/gensEnsureDungeonAdventureButton139/,
   'RED: Stability151 must stop calling the retired Capture-owned Dungeon button helper');
 
-assert.match(c139,/window\.captureEnterWorld139=function\(\)/,
-  'Capture139 launch/world handoff must remain intact');
+assert.match(c139,/window\.GensCaptureHubEntryV1\.install\(\{/,
+  'Capture139 must still wire the sole Capture Hub visual owner');
+assert.match(c139,/renderCaptureWorldHub:\(\)=>renderCaptureWorldHub\(\)/,
+  'Capture139 must preserve the original Capture world renderer');
+assert.equal((c139.match(/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/g)||[]).length,2,
+  'Capture launch and return must share exactly one visual Hub owner');
+assert.doesNotMatch(c139,/window\.captureEnterWorld139\s*=/,
+  'legacy global Hub implementation must stay retired');
 assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/,
   'Capture139 must remain retired from global/session-start ownership');
 assert.match(c139,/GensCaptureSessionStartV1\.install\(/,

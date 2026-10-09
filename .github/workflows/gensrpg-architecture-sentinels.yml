@@ -16,6 +16,9 @@ jobs:
   architecture-sentinels:
     runs-on: ubuntu-latest
     steps:
+      - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
+        run: node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 

@@ -1,3 +1,13 @@
+# PHASE 9 — HUB CAPTURE UI OWNER TRANSFER — RED TDD — 2026-10-09
+
+Branche `work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09`. Base/checkpoint GREEN `00d7adcf3be669e7921234eb30e9b319413c8649` (`checkpoint/gensrpg-phase9-capture-hub-world-owner-preaudit-green-2026-10-09`). Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-hub-entry-owner-transfer-2026-10-09`.
+
+Règle 26 vérifiée : `worki.zip/indexI.txt` = 8 165 823 octets, blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+Objectif unique : extraire `captureEnterWorld139` vers `GensCaptureHubEntryV1` sans déplacer `renderCaptureWorldHub`, ni défaire V151, V138, Shell, SessionStart ou ScreenReturn. Le test dédié doit être RED sur cette base puis GREEN après patch strict. Préview et test mobile avant clôture.
+Plan : `docs/GENSRPG_PHASE9_CAPTURE_HUB_ENTRY_OWNER_TRANSFER.md`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — HUB / MONDE CAPTURE — CARACTÉRISATION EXACTE (RÈGLE 26) — 2026-10-09
 
 - Branche `work/gensrpg-phase9-capture-hub-world-owner-preaudit-2026-10-09`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-hub-world-owner-preaudit-2026-10-09` sur `8b33eddbc8e57453e7cf5159c07e04762aa64827`.

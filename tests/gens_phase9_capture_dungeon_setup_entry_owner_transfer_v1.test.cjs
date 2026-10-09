@@ -249,7 +249,16 @@ const hubEntryBindNew="enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld()"
 assert.equal(index.split(hubEntryLoadNew).length-1,1,'one Hub owner script load');
 assert.equal(index.split(hubEntrySeamNew).length-1,1,'one Hub owner install');
 assert.equal(index.split(hubEntryBindNew).length-1,2,'both Capture owners use dedicated hub');
-const beforeHubEntry=index.replace(hubEntryBindNew,hubEntryBindOld)
+// Compose the already validated Capture138 retirement inverse BEFORE earlier Hub / return oracles.
+// The later runtime differs from their immutable checkpoint solely by this 724-byte seam.
+const retiredCapture138Start=Buffer.from('LyogLS0tLS0tLS0tLSBkw6ltYXJyYWdlIENhcHR1cmUgOiBhcnJpdmUgZGlyZWN0ZW1lbnQgc3VyIEV4cGxvcmVyIC8gSHViIC0tLS0tLS0tLS0gKi8KY29uc3Qgc3RhcnQxMzg9d2luZG93LnN0YXJ0Q29uZmlndXJlZEdhbWU7CndpbmRvdy5zdGFydENvbmZpZ3VyZWRHYW1lPWFzeW5jIGZ1bmN0aW9uKCl7CiAgY29uc3QgY2FwPWlzQ2FwdHVyZUNvbnRleHQxMzgoKTsKICBjb25zdCByZXM9YXdhaXQgc3RhcnQxMzguYXBwbHkodGhpcyxhcmd1bWVudHMpOwogIGlmKGNhcCl7CiAgICBzZXRUaW1lb3V0KCgpPT57CiAgICAgIHRyeXsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgic2hlZXQiKSYmKGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJzaGVldCIpLnN0eWxlLmRpc3BsYXk9Im5vbmUiKTsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgibWVudSIpJiYoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoIm1lbnUiKS5zdHlsZS5kaXNwbGF5PSJibG9jayIpOwogICAgICAgIHJlbmRlckNhcHR1cmVXb3JsZEh1YigpOwogICAgICAgIGNvbnN0IGh1Yj1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiY2FwdHVyZUdhbWVIdWIiKTsKICAgICAgICBpZihodWIpe2h1Yi5zdHlsZS5kaXNwbGF5PSJibG9jayI7aHViLnNjcm9sbEludG9WaWV3KHtibG9jazoic3RhcnQifSl9CiAgICAgIH1jYXRjaChlKXt9CiAgICB9LDMwKTsKICB9CiAgcmV0dXJuIHJlczsKfTsKCg==','base64').toString('utf8');
+const capture138Next='/* ---------- traduction propre des éléments ---------- */';
+assert.equal(index.split(capture138Next).length-1,1,'unique exact Capture138 inverse seam');
+const indexBeforeCapture138=index.replace(capture138Next,retiredCapture138Start+capture138Next);
+const capture138RestoredBytes=Buffer.from(indexBeforeCapture138,'utf8');
+assert.equal(capture138RestoredBytes.length,8165398,'restore Capture138 starting index size exactly');
+assert.equal(crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+capture138RestoredBytes.length+'\\0'),capture138RestoredBytes])).digest('hex'),'18627cc0c5fc7945732c8a910504c59ef823b6ae','restore Capture138 historical GREEN blob');
+const beforeHubEntry=indexBeforeCapture138.replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntrySeamNew,hubEntrySeamOld)
   .replace(hubEntryLoadNew,hubEntryLoadOld);

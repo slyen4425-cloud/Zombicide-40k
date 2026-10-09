@@ -15,10 +15,10 @@ jobs:
       - name: Enumerate Phase5/9 obsolete start chain in every test
         run: |
           echo '=== old explicit chain ==='
-          rg -n -F "['captureFix138','gensDungeonCore01Js']" tests || true
+          grep -RnF "['captureFix138','gensDungeonCore01Js']" tests || true
           echo '=== old exact 2 count ==='
-          rg -n -F 'startConfiguredGame\t2\tgensDungeonCore01Js' tests || true
+          grep -RnF 'startConfiguredGame\t2\tgensDungeonCore01Js' tests || true
           echo '=== legacy wrapper test refs ==='
-          rg -n -e 'assert\.match\(.*c138' -e 'assert\.match\(.*capture138' -e 'start138=window.startConfiguredGame' tests || true
+          grep -RnE -e 'assert\.match\(.*c138' -e 'assert\.match\(.*capture138' -e 'start138=window.startConfiguredGame' tests || true
           echo '=== global two-owner wording ==='
-          rg -n 'two-owner|2-owner|only two .*launch|two historical .*launch|Capture138.*remain.*global' tests || true
+          grep -RnE 'two-owner|2-owner|only two .*launch|two historical .*launch|Capture138.*remain.*global' tests || true

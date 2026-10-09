@@ -15,7 +15,16 @@ const timerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.js
 
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\0'),bytes])).digest('hex');
-assert.equal(blob,timerManifest.sourceIndexBlob,'timer classification must target exact index blob');
+const CURRENT_CAPTURE138_INDEX_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
+assert.equal(blob,CURRENT_CAPTURE138_INDEX_BLOB,'timer classification must run on the exact reviewed Capture138 index');
+// Phase 2 timer classification is a historical census. Revert only the
+// new callback guard before comparing its original sourceIndexBlob.
+const guardLine='      if(!isCaptureContext138())return;\n';
+assert.equal(index.split(guardLine).length-1,1,'exactly one new Capture138 callback guard');
+const previous=Buffer.from(index.replace(guardLine,''),'utf8');
+const previousBlob=crypto.createHash('sha1').update(Buffer.from('blob '+previous.length+'\0')).update(previous).digest('hex');
+assert.equal(previousBlob,timerManifest.sourceIndexBlob,'timer manifest retains the exact historical source');
+assert.equal(timerManifest.sourceIndexBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','unexpected historical timer manifest drift');
 
 const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
   .map(m=>m[1]).filter(src=>/^assets\/(?:gensrpg|dungeon)\//.test(src)).map(stripQuery);

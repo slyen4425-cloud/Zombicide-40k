@@ -35,3 +35,17 @@ Pas de renommage global, pas de contournement de sentinelle, pas de rustine ni m
 - One-shot appliqué : [run 37933458038](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37933458038) **SUCCESS**, commit transmis par GitHub Actions sur la branche dédiée. Les essais de workflow intermédiaires qui ont échoué étaient bloqués avant commit runtime ; aucune mutation de `main`.
 - À partir du prochain commit, les outils de one-shot seront retirés : ils n'ont aucune raison de rester chargés en permanence. La triple CI doit valider le SHA final ensuite.
 - Passage en GREEN fonctionnel **uniquement** après Architecture+Browser / Firefox / Tactical à SUCCESS sur un seul SHA et test smartphone réel, avec checkpoint final sur ce même SHA.
+
+## Clôture — validation manuelle reçue le 9 octobre 2026
+
+L'utilisateur valide la version testée : **« OK, je valide, tout fonctionne parfaitement. »** Il demande un prompt de reprise sur un nouveau fil, puis la poursuite de la Phase 9.
+
+- Commit exact runtime et tests : `1a80044e0fb29d0a635994cb94d69a55afbf1078`.
+- Architecture + Browser [37941029905](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37941029905) : SUCCESS, 343 étapes Architecture / 55 Browser.
+- Firefox [37941030033](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37941030033) : SUCCESS.
+- Tactical Dock [37941029998](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/37941029998) : SUCCESS (contract, Chromium, Firefox).
+- Checkpoint fonctionnel final : `checkpoint/gensrpg-phase9-capture-hub-entry-owner-transfer-green-2026-10-09` sur `1a80044e0fb29d0a635994cb94d69a55afbf1078`.
+- Production `main` toujours `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun merge ni changement d'autre mode.
+- Suite Phase 9 : **nouveau chantier isolé seulement**, après lecture des chartes/roadmap/current work et des dettes résiduelles, état réel GitHub/CI/branches puis nouveau checkpoint de départ. Pas de nouvelle extraction du Hub validé et pas de migration monde ou gameplay non étudiée.
+
+Aucune modification runtime introduite par cette clôture documentaire.

@@ -1,3 +1,20 @@
+# PHASE 9 — HUB CAPTURE : VALIDATION UTILISATEUR ET CHECKPOINT GREEN — 2026-10-09
+
+- **Validation utilisateur reçue le 9 octobre 2026** : « OK, je valide, tout fonctionne parfaitement. Prépare un prompt pour une reprise sur un nouveau fil et ensuite on continue. » La validation porte sur le dernier lot Hub Capture présenté, ne valide pas par extension toute la Phase 9.
+- Branche terminée : `work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09` ; commit runtime + sentinelles validé `1a80044e0fb29d0a635994cb94d69a55afbf1078`.
+- **Checkpoint GREEN fonctionnel créé** : `checkpoint/gensrpg-phase9-capture-hub-entry-owner-transfer-green-2026-10-09` pointe sur `1a80044e0fb29d0a635994cb94d69a55afbf1078`.
+- Base / checkpoint de départ : `checkpoint/gensrpg-start-phase9-capture-hub-entry-owner-transfer-2026-10-09`, SHA `00d7adcf3be669e7921234eb30e9b319413c8649`, venant du préaudit Hub/Monde GREEN.
+- CI **sur le SHA exact `1a80044e0fb29d0a635994cb94d69a55afbf1078`** : Architecture + Browser `37941029905` (343 étapes Architecture et 55 Browser, SUCCESS) ; Firefox `37941030033` (SUCCESS) ; Tactical Dock `37941029998` (3 jobs SUCCESS).
+- Migration strictement bornée : `assets/gensrpg/capture/hub-entry-v1.js` possède la transition UI Hub ; `captureFix139` retire l'ancienne définition `captureEnterWorld139()`, injecte les dépendances ; SessionStart et ScreenReturn appellent ce seul owner, sans toucher au renderer `renderCaptureWorldHub`, au wrapper V138, à la garde V151 ni au Shell.
+- Fingerprints index migré : **8 165 398 octets / Git blob `18627cc0c5fc7945732c8a910504c59ef823b6ae`**. Source initiale §26 `worki.zip/indexI.txt` : 8 165 823 octets / blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+- TDD RED puis GREEN, 4 cas VM de parité, rollback index byte-exact, tests Browser/Firefox/Tactical GREEN. Aucun moteur monde, sauvegarde, combat, Dungeon, Survie, PvP, laboratoires ou `main` modifié.
+- Rapport et protocole : `docs/GENSRPG_PHASE9_CAPTURE_HUB_ENTRY_OWNER_TRANSFER.md` ; charte `docs/GENSRPG_CHARTE.md`, roadmap `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`, politique `docs/GENSRPG_CHECKPOINT_POLICY.md`.
+- **À la reprise** : traiter ce checkpoint comme dernier lot fonctionnel GREEN. Ne pas recommencer le Hub ; commencer par relire documents LIVE et auditer les couplages Capture restants pour sélectionner le **prochain lot unique** (monde/exploration, équipes, créatures, combat, sauvegarde et lifecycle encore en partie historique). Créer son checkpoint de départ + branche avant toute mutation ; respecter §26 si le `index.html` exact est nécessaire. Protéger les E2E Capture, retour, victoire/reprise et Builder Dungeon.
+- Production `main` **gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`** ; pas de fusion ni déploiement. Le prochain travail ne doit pas reprendre sur main.
+- Mise à jour documentaire présente : nouveau commit après `1a80044e0fb29d0a635994cb94d69a55afbf1078`. CI de ce commit et éventuel checkpoint documentaire GREEN à valider séparément ; ne pas confondre la validation utilisateur du runtime avec un SHA documentaire nouveau.
+
+---
+
 # PHASE 9 — HUB CAPTURE UI TRANSFER — COMMIT RUNTIME ET PARITÉ GREEN — 2026-10-09
 
 - Branche `work/gensrpg-phase9-capture-hub-entry-owner-transfer-2026-10-09` ; dernier checkpoint GREEN `checkpoint/gensrpg-phase9-capture-hub-world-owner-preaudit-green-2026-10-09` au SHA `00d7adcf3be669e7921234eb30e9b319413c8649`.

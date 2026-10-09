@@ -34,6 +34,9 @@ jobs:
       - name: Caractériser l'ordre réel Capture138 Dungeon200 Shell final
         run: node tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs
 
+      - name: Bloquer les callbacks historiques Capture138 apres bascule de mode
+        run: node tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs
+
       - name: Verrouiller la frontière canonique de l’éditeur Survie
         run: node tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs
 

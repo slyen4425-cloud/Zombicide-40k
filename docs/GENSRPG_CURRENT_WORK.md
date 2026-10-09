@@ -1,3 +1,16 @@
+# PHASE 9 — AUDIT DE SORTIE CANONIQUE (PÉRIMÈTRE SANS RUNTIME) — 2026-10-09
+
+- **Objectif** : trancher les critères restants Phase 9 de manière mesurable et regrouper les véritables obstacles au critère de sortie : Capture fonctionnel en démarrage/jeu/fermeture **sans runtime privé Dungeon ni Survie**.
+- **Branche** : `work/gensrpg-phase9-capture-exit-gate-2026-10-09` ; **checkpoint de départ obligatoire** `checkpoint/gensrpg-start-phase9-capture-exit-gate-2026-10-09` → `d45f4d4d853289895b9d76ffc6a7eb8c284b7352` (commit documentaire après dernier GREEN).
+- **Dernier checkpoint GREEN fonctionnel vérifié** : `checkpoint/gensrpg-phase9-capture138-delayed-hub-guard-green-2026-10-09` → `3e47a393f9fca326bf9aab21a15ba4b4d315eddb` ; CI `37995288162` Architecture+Browser SUCCESS, `37995288148` Firefox SUCCESS, `37995288208` Tactical SUCCESS ; validation utilisateur smartphone « Ok ça fonctionne ».
+- **Scope autorisé** : inventaire des propriétaires Capture déjà existants, contrats, tests navigateur prouvés, des preuves manquantes et des blocages Phase 9. Sortie attendue : matrice factuelle, test d'audit permanent et ordre d'exécution **priorisé**, pas une nouvelle couche de gameplay.
+- **Interdits/protections** : ne pas modifier `index.html` (règle 26), Shell, Core, Dungeon, Survie, Tactical, Builders, labs combat/exploration, sauvegardes, `main`. Pas de fusion de `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09` (divergente, même index) ni de `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09`.
+- **Tests prévus** : sentinelle lisant les vrais contrats Capture, modules externes et scénarios navigateur existants ; constater honnêtement ce qui est prouvé / non prouvé. CI Architecture+Browser, Firefox, Tactical avant checkpoint GREEN **de l'audit uniquement**.
+- **Risque principal** : confondre tests « Capture avec sauvegarde Dungeon ancienne mais sans reprise de son UI » et exigence plus forte « Capture démarre, joue et se ferme avec runtime privé Dungeon totalement absent/inactif ». Ne pas déclarer Phase 9 achevée sur cette base.
+- **Étape suivante** : produire la matrice officielle `docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-09.md` et son test, puis prioriser au plus trois **axes de preuves métier**, sans promouvoir les détails de confort en bloqueurs.
+
+---
+
 # PHASE 9 — CAPTURE138 : JALON FONCTIONNEL GREEN VALIDÉ — 2026-10-09
 
 - **Checkpoint GREEN final immuable** : `checkpoint/gensrpg-phase9-capture138-delayed-hub-guard-green-2026-10-09` → **`3e47a393f9fca326bf9aab21a15ba4b4d315eddb`** ; créé après validation utilisateur smartphone (« Ok ça fonctionne »).

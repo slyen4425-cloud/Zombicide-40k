@@ -1,3 +1,16 @@
+# PHASE 9 — PRÉAUDIT PHYSIQUE HUB / MONDE CAPTURE — OUVERT — 2026-10-09
+
+- Branche : `work/gensrpg-phase9-capture-hub-world-owner-preaudit-2026-10-09`.
+- Départ : `checkpoint/gensrpg-start-phase9-capture-hub-world-owner-preaudit-2026-10-09`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-green-2026-10-08`, SHA `8b33eddbc8e57453e7cf5159c07e04762aa64827`, validé manuellement et triple CI GREEN (Architecture+Browser `37838853571`, Firefox `37838853606`, Tactical `37838853693`).
+- Scope unique **sans runtime** : préauditer le propriétaire physique de `captureEnterWorld139()`, toujours dans l'inline historique, tandis que SessionStart et ScreenReturn ont déjà leurs owners dédiés.
+- Périmètre interdit : index, vrais moteurs/UI, Dungeon/Survie/Tactical/PvP, sauvegardes, labos, `main`.
+- Gate §26 : fichier `index.html` **exact de `8b33eddbc8e57453e7cf5159c07e04762aa64827`**, attendu 8 165 823 octets / blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`. Le fichier `indexH.txt` précédent ne correspond plus et ne peut pas être réutilisé comme source exacte.
+- Plan : `docs/GENSRPG_PHASE9_CAPTURE_HUB_WORLD_OWNER_PREAUDIT.md`. Prochaine étape : carte d'appels et classification owner-local sur fichier §26 vérifié ; ne pas présumer d'un transfert sûr avant cette preuve.
+- Production `main` : `e8681f9823573ced8aec59c8ddc47a72b02bc663` (gelée).
+
+---
+
 # PHASE 9 — RETOUR ÉCRAN CAPTURE — VALIDATION UTILISATEUR + TRIPLE CI GREEN — 2026-10-08
 
 **Dernier jalon fonctionnel validé par l'utilisateur.** Sur le lien de preview smartphone du commit `cd5f43d29fa3cae395729d6d5a3e4dc9ef9cceba`, retour utilisateur : « Ok tout fonctionne parfaitement » (8 octobre 2026). Aucune anomalie signalée sur le parcours ciblé proposé (retour au Hub Capture, reprise, Builder Dungeon). Ne pas extrapoler cette validation à toute la Phase 9.

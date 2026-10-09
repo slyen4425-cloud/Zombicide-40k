@@ -33,8 +33,8 @@ assert.doesNotMatch(capture,/const\s+openChar139\s*=\s*window\.openChar/);
 assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
 assert.doesNotMatch(capture,/return\s+openChar139\.apply\(this,arguments\)/);
 
-assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','gensDungeonCore01Js'],
-  'openChar retirement must preserve the current post-transfer startConfiguredGame ownership');
+assert.deepEqual(strictChain('startConfiguredGame'),['gensDungeonCore01Js'],
+  'openChar retirement must retain only the reviewed Dungeon Core01 inline launch writer');
 assert.doesNotMatch(capture,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/);
 assert.match(capture,/GensCaptureSessionStartV1\.install\(/);
 assert.doesNotMatch(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);

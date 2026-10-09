@@ -139,7 +139,8 @@ for path,rewrites in patches.items():
 # Update exact current-index fingerprint assertions in all other tests.
 for p in sorted(Path("tests").rglob("*.test.cjs")):
     if p.name in ["gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs",
-      "gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs"]:continue
+      "gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs",
+      "gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs"]:continue
     old=p.read_text(encoding="utf8")
     new=old.replace(OLD_BLOB,NEW_BLOB).replace(str(OLD_SIZE),str(NEW_SIZE))
     new=new.replace("productionOwnerGraph:85","productionOwnerGraph:86").replace("captureAuxiliaryRuntimeOwners:2","captureAuxiliaryRuntimeOwners:3")

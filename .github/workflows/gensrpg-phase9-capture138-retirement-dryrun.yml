@@ -1,0 +1,51 @@
+name: GenSrpG Phase 9 Capture138 retirement candidate characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture138-retirement-dryrun.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture138-dryrun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify strict Rule 26 base
+        run: |
+          test "$(wc -c < index.html)" = "8165398"
+          test "$(git hash-object index.html)" = "18627cc0c5fc7945732c8a910504c59ef823b6ae"
+      - name: Prove target RED on original runtime
+        run: |
+          if node tests/gens_phase9_capture138_legacy_start_retirement_v1.test.cjs > /tmp/capture138-red.log 2>&1; then
+            echo "Unexpected GREEN on original runtime"; cat /tmp/capture138-red.log; exit 1
+          fi
+          grep -F 'RED: the obsolete Capture138 global start wrapper' /tmp/capture138-red.log
+      - name: Strict candidate patch (runner only; no repository push)
+        run: python tools/gensrpg_phase9_capture138_retirement_apply.py
+      - name: Prove candidate GREEN, rollback and actual Shell parity
+        run: node tests/gens_phase9_capture138_legacy_start_retirement_v1.test.cjs
+      - name: Characterize residual historical expectations
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          keys=['18627cc0c5fc7945732c8a910504c59ef823b6ae','8165398','const start138=window.startConfiguredGame','startConfiguredGame\t2\tgensDungeonCore01Js']
+          for key in keys:
+              hits=[str(p) for p in Path('tests').rglob('*.cjs') if key in p.read_text(errors='replace')]
+              print('HISTORICAL',key,len(hits),','.join(hits[:100]))
+          PY
+          git diff --check
+          git diff --stat
+          git diff -- index.html | sed -n '1,100p'
+      - name: Probe three existing legacy sentinels without weakening them
+        run: |
+          for t in \
+            tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs \
+            tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs \
+            tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs; do
+            echo "PROBE $t"; node "$t" > /tmp/out 2>&1 && echo PASS || { echo EXPECTED_BASELINE_FAILURE; head -c 1400 /tmp/out; echo; }
+          done

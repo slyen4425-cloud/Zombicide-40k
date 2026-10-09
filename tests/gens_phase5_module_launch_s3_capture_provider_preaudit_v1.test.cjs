@@ -46,8 +46,19 @@ assert.doesNotMatch(c139.body,/const\s+start139\s*=|window\.startConfiguredGame\
   'Capture139 must remain retired from global launch ownership');
 assert.doesNotMatch(c139.body,/const\s+participants\s*=\s*normalizeGameParticipants\(\)/,
   'Capture139 must no longer own Capture participant initialization');
-assert.match(c139.body,/captureEnterWorld139/,
-  'Capture139 keeps only its deferred world-entry/screen-return debt');
+const hubOwner=fs.readFileSync(path.join(root,'assets/gensrpg/capture/hub-entry-v1.js'),'utf8');
+assert.match(c139.body,/GensCaptureHubEntryV1\.install\(\{/,
+  'Capture139 must wire only the sole Capture Hub entry visual owner');
+assert.match(c139.body,/renderCaptureWorldHub:\(\)=>renderCaptureWorldHub\(\)/,
+  'Capture139 must preserve the existing world renderer instead of cloning it');
+assert.equal((c139.body.match(/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/g)||[]).length,2,
+  'Capture session start and screen return must share one visual Hub owner');
+assert.doesNotMatch(c139.body,/window\.captureEnterWorld139\s*=/,
+  'Capture139 must not restore its old global Hub UI implementation');
+assert.match(hubOwner,/root\.GensCaptureHubEntryV1=Object\.freeze/,
+  'new Hub entry authority must be owned by the dedicated Capture module');
+assert.doesNotMatch(hubOwner,/DungeonCore|GensShellScreenReturnV1|localStorage|sessionStorage|window\.goMenu\s*=/,
+  'Hub owner cannot acquire Dungeon, Shell or storage authority');
 assert.match(c139.body,/GensCaptureSessionStartV1\.install\(/,
   'Capture139 must wire the dedicated Capture session owner');
 

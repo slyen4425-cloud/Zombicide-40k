@@ -26908,6 +26908,7 @@ window.startConfiguredGame=async function(){
   const res=await start138.apply(this,arguments);
   if(cap){
     setTimeout(()=>{
+      if(!isCaptureContext138())return;
       try{
         document.getElementById("sheet")&&(document.getElementById("sheet").style.display="none");
         document.getElementById("menu")&&(document.getElementById("menu").style.display="block");

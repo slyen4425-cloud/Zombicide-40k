@@ -11,7 +11,7 @@ const owner=read('assets/gensrpg/capture/hub-entry-v1.js');
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const blob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 const before={bytes:8165823,blob:'26421e0347305437fe2b1dc149b3e4fb8b3761bd'};
-const after={bytes:8165398,blob:'18627cc0c5fc7945732c8a910504c59ef823b6ae'};
+const after={bytes:8165438,blob:'1a61147d5a32889fa85e6a09e846049103b9f0bf'};
 
 assert.equal(bytes.length,after.bytes,'exact Hub owner extraction must be applied');
 assert.equal(blob(bytes),after.blob,'Hub owner runtime fingerprint drifted');
@@ -51,7 +51,7 @@ const init=`window.GensCaptureHubEntryV1.install({
   renderCaptureWorldHub:()=>renderCaptureWorldHub()
 });`;
 assert.equal(index.split(init).length-1,1);
-const restored=index.replace(bind,'enterWorld:()=>captureEnterWorld139()')
+const restored=index.replace('      if(!isCaptureContext138())return;\n','').replace(bind,'enterWorld:()=>captureEnterWorld139()')
  .replace(bind,'enterWorld:()=>captureEnterWorld139()')
  .replace(init,oldBody).replace(load,oldLoad);
 const oldBytes=Buffer.from(restored,'utf8');

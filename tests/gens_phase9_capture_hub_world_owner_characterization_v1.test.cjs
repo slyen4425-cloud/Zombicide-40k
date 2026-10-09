@@ -10,8 +10,8 @@ const root=path.join(__dirname,'..');
 const activeBytes=fs.readFileSync(path.join(root,'index.html'));
 const active=activeBytes.toString('utf8');
 const indexBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
-assert.equal(activeBytes.length,8165398);
-assert.equal(indexBlob(activeBytes),'18627cc0c5fc7945732c8a910504c59ef823b6ae');
+assert.equal(activeBytes.length,8165438);
+assert.equal(indexBlob(activeBytes),'1a61147d5a32889fa85e6a09e846049103b9f0bf');
 const oldLoad="<script src=\"assets/gensrpg/capture/screen-return-v1.js?v=1\"></script>";
 const newLoad="<script src=\"assets/gensrpg/capture/screen-return-v1.js?v=1\"></script>\n<script src=\"assets/gensrpg/capture/hub-entry-v1.js?v=1\"></script>";
 const oldMethod="window.captureEnterWorld139=function(){\n  try{closeTurnPopup(false)}catch(e){}\n  [\"pregameSetup\",\"sessionHeroSetup\",\"sessionObjectSetup\",\"sessionWaveSetup\",\"sessionDungeonSetup\",\"sheet\",\"setup\"].forEach(id=>{\n    const e=document.getElementById(id);if(e)e.style.setProperty(\"display\",\"none\",\"important\");\n  });\n  const menu=document.getElementById(\"menu\");\n  if(menu)menu.style.setProperty(\"display\",\"block\",\"important\");\n  try{renderMenuStatuses()}catch(e){}\n  try{renderCaptureWorldHub()}catch(e){}\n  const hub=document.getElementById(\"captureGameHub\");\n  if(hub){\n    hub.style.setProperty(\"display\",\"block\",\"important\");\n    requestAnimationFrame(()=>hub.scrollIntoView({block:\"start\",behavior:\"auto\"}));\n  }\n};";
@@ -21,7 +21,7 @@ const newBind="enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld()";
 assert.equal(active.split(newLoad).length-1,1);
 assert.equal(active.split(newInstall).length-1,1);
 assert.equal(active.split(newBind).length-1,2);
-const restored=active.replace(newBind,oldBind).replace(newBind,oldBind)
+const restored=active.replace('      if(!isCaptureContext138())return;\n','').replace(newBind,oldBind).replace(newBind,oldBind)
   .replace(newInstall,oldMethod).replace(newLoad,oldLoad);
 const bytes=Buffer.from(restored,'utf8');
 const source=bytes.toString('utf8');

@@ -14,8 +14,8 @@ const json=rel=>JSON.parse(read(rel));
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const source=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8165398,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
-assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Rule 26: unexpected runtime blob; stop before any ownership decision');
+assert.equal(bytes.length,8165438,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
+assert.equal(blob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','Rule 26: unexpected runtime blob; stop before any ownership decision');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(x=>({id:x[1],body:x[2]}));

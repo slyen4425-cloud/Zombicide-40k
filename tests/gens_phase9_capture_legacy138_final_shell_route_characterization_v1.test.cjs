@@ -12,8 +12,8 @@ const root=path.resolve(__dirname,'..');
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const index=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8165398,'Rule 26: unexpected index size; re-audit the active source');
-assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Rule 26: unexpected index blob');
+assert.equal(bytes.length,8165438,'Rule 26: unexpected index size; re-audit the active source');
+assert.equal(blob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','Rule 26: unexpected index blob');
 const shellFile='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const shellFinal=fs.readFileSync(path.join(root,shellFile),'utf8');
 const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
@@ -103,10 +103,10 @@ assert.match(dungeon200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeo
   mode='dungeon';
   const before=worldRenders;
   timers.splice(0).forEach(x=>x.cb());
-  assert.equal(worldRenders,before+1,'historical timer is not mode-cancelled (KNOWN RISK)');
+  assert.equal(worldRenders,before,'Capture138 delayed callback must be inert after the mode changes');
 
   console.log(JSON.stringify({scenario:'Capture138 / Dungeon200 / final Shell real-source ordering',
     publicRoutes:['capture','dungeon','survival'],publicLegacyInvocations:0,
-    staleDungeonFallback:true,legacyTimerMs:30,postModeChangeLegacyTimerStillRuns:true,
+    staleDungeonFallback:true,legacyTimerMs:30,postModeChangeLegacyTimerStillRuns:false,
     runtimeChanged:false,indexBytes:bytes.length,indexBlob:blob}));
 })().catch(e=>{console.error(e);process.exitCode=1});

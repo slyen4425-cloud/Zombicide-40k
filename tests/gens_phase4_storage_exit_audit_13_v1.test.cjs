@@ -16,10 +16,10 @@ function gitBlob(buffer){
   ])).digest('hex');
 }
 
-const BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
-assert.equal(bytes.length,8165398);
+const BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
+assert.equal(bytes.length,8165438);
 assert.equal(gitBlob(bytes),BLOB);
-assert.equal(manifest.sourceIndexBlob,BLOB);
+assert.equal(manifest.sourceIndexBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','storage owner cartography source remains the exact historical baseline');
 assert.deepEqual(manifest.totals,{
   totalAccesses:181,resolvedAccesses:116,unresolvedAccesses:65,distinctResolvedKeys:19
 });

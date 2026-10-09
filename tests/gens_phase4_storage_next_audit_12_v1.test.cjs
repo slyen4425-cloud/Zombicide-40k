@@ -13,7 +13,7 @@ const inlineOwners=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHA
 
 const KEY='gensrpg_dungeon_mj_rules_v145';
 const HISTORICAL_SOURCE_BLOB='1545aba502777d9fb76decdcee90a89c7cf3f971';
-const CURRENT_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae'; // Phase 9 participant identity raccord changes participant gating only; storage ownership totals stay unchanged.
+const CURRENT_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf'; // Phase 9 participant identity raccord changes participant gating only; storage ownership totals stay unchanged.
 
 function gitBlob(buffer){
   return crypto.createHash('sha1').update(Buffer.concat([
@@ -27,7 +27,7 @@ function blockInfo(id){
   return {body:m[1],full:m[0],index:m.index};
 }
 
-assert.equal(manifest.sourceIndexBlob,CURRENT_BLOB,'Storage cartography fingerprint must follow MJ Rules GREEN candidate index');
+assert.equal(manifest.sourceIndexBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','storage cartography snapshot remains historical; active runtime fingerprint checked separately');
 assert.deepEqual(manifest.totals,{
   totalAccesses:181,resolvedAccesses:116,unresolvedAccesses:65,distinctResolvedKeys:19
 },'Audit 12 guard must follow the migrated MJ Rules storage totals');
@@ -37,7 +37,7 @@ assert.deepEqual(manifest.byDomain.dungeon,{
 assert.deepEqual(manifest.byDomain.core,{
   accesses:2,resolved:1,unresolved:1,distinctKeys:1
 },'Audit 12 guard must follow the migrated MJ Rules Core totals');
-assert.equal(bytes.length,8165398);
+assert.equal(bytes.length,8165438);
 assert.equal(gitBlob(bytes),CURRENT_BLOB,'Audit 12 must follow the exact migrated MJ Rules index');
 
 const mj=blockInfo('dungeonMj72_2Script');

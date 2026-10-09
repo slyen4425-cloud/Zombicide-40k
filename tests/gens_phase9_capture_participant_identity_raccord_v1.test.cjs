@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165398,'participant raccord must inspect the verified post-raccord runtime');
-assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','participant raccord must inspect the exact verified post-raccord index blob');
+assert.equal(bytes.length,8165438,'participant raccord must inspect the verified post-raccord runtime');
+assert.equal(blob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','participant raccord must inspect the exact verified post-raccord index blob');
 
 function fn(name){
   const marker='function '+name+'(';

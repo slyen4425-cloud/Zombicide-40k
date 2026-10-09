@@ -16,7 +16,6 @@ const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 const dungeonEntry=read('assets/gensrpg/dungeon/entry-v1.js');
 
 const ids=[
-  'captureFix138',
   'gensDungeonCore01Js'
 ];
 const retiredCapture135Id='captureFix135';
@@ -86,12 +85,12 @@ assert.ok(core200Meta,'missing owner metadata '+core200Id);
 assert.equal(core200Meta.status,'active',core200Id+' must remain active');
 const core200Body=blockBody(core200Id);
 
-assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m,
+assert.match(lastOwners,/^startConfiguredGame\t1\tgensDungeonCore01Js$/m,
   'Phase 9 must expose only two remaining inline global startConfiguredGame owners');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
-  ['capture','dungeon'],
+  ['dungeon'],
   'remaining inline global owners must stay module-owned'
 );
 assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must remain Dungeon-owned');
@@ -100,10 +99,11 @@ assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must 
 assert.equal(retiredCapture135Meta.primaryDomain,'capture');
 assert.doesNotMatch(retiredCapture135Body,/start135|\.apply\(this,arguments\)/);
 
-// Capture 138: Capture-context post-launch UI work + historical delayed render.
-assert.match(functions.captureFix138,/isCaptureContext138/);
-assert.match(functions.captureFix138,/setTimeout/);
-assert.match(functions.captureFix138,/renderCaptureWorldHub/);
+// Capture138 remains loaded for turn, target and creature UI responsibilities, not start.
+const c138=blockBody('captureFix138');
+assert.match(c138,/isCaptureContext138/);
+assert.match(c138,/captureBattleApplyAbility/);
+assert.doesNotMatch(c138,/window\.startConfiguredGame\s*=|const start138=/);
 
 // Capture139 wires both already-transferred Capture owners; it owns neither launch nor Shell return registration.
 const capture139Body=blockBody('captureFix139');
@@ -225,7 +225,7 @@ const nextMicroLot={
 
 console.log(JSON.stringify({
   scenario:'Phase 5 startConfiguredGame remaining-chain preaudit',
-  assignments:2,
+  assignments:1,
   chain:ids,
   lastOwner:'gensDungeonCore01Js',
   core200LocalDispatcher:true,

@@ -26901,25 +26901,6 @@ window.startTurnManagerForGame=function(){
   return turnMgr138.apply(this,arguments);
 };
 
-/* ---------- démarrage Capture : arrive directement sur Explorer / Hub ---------- */
-const start138=window.startConfiguredGame;
-window.startConfiguredGame=async function(){
-  const cap=isCaptureContext138();
-  const res=await start138.apply(this,arguments);
-  if(cap){
-    setTimeout(()=>{
-      try{
-        document.getElementById("sheet")&&(document.getElementById("sheet").style.display="none");
-        document.getElementById("menu")&&(document.getElementById("menu").style.display="block");
-        renderCaptureWorldHub();
-        const hub=document.getElementById("captureGameHub");
-        if(hub){hub.style.display="block";hub.scrollIntoView({block:"start"})}
-      }catch(e){}
-    },30);
-  }
-  return res;
-};
-
 /* ---------- traduction propre des éléments ---------- */
 window.captureElementLabel138=function(id){
   const k=String(id||"").toLowerCase();

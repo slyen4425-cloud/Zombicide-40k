@@ -14,8 +14,8 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165398,'Phase 5 exit audit must target the current Phase 7 Dungeon generated Boss policy runtime');
-assert.equal(gitBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae',
+assert.equal(bytes.length,8164674,'Phase 5 exit audit must target the current Phase 7 Dungeon generated Boss policy runtime');
+assert.equal(gitBlob,'644fc5d0ce5fd195c5496d42cc0204bd1f9a9831',
   'Phase 5 exit audit runtime blob drifted from the Phase 7 generated Boss policy baseline');
 
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');

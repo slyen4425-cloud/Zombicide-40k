@@ -21,9 +21,9 @@ const finalPath='assets/gensrpg/shell/module-launch-final-authority-v1.js';
 const finalTag='<script src="'+finalPath+'"></script>';
 const mobileTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 
-assert.equal(bytes.length,8165398,
+assert.equal(bytes.length,8164674,
   'final Shell authority contract must run on the current Phase 7 generated Boss policy index');
-assert.equal(gitBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae',
+assert.equal(gitBlob,'644fc5d0ce5fd195c5496d42cc0204bd1f9a9831',
   'final Shell authority contract must keep the current Phase 7 generated Boss policy composition');
 
 assert.ok(fs.existsSync(path.join(root,finalPath)),
@@ -88,7 +88,7 @@ for(const id of ['captureFix135','captureFix138','captureFix139','gensDungeonCor
   for(let i=0;i<count;i++)chain.push(id);
 }
 assert.deepEqual(chain,
-  ['captureFix138','gensDungeonCore01Js'],
+  ['gensDungeonCore01Js'],
   'Capture139 session-owner retirement must leave exactly two historical inline global owners');
 assert.doesNotMatch(block('captureFix135'),/window\.startConfiguredGame\s*=(?!=)/,
   'captureFix135 global launch owner must remain retired');

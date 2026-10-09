@@ -11,7 +11,7 @@ const owner=read('assets/gensrpg/capture/hub-entry-v1.js');
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const blob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 const before={bytes:8165823,blob:'26421e0347305437fe2b1dc149b3e4fb8b3761bd'};
-const after={bytes:8165398,blob:'18627cc0c5fc7945732c8a910504c59ef823b6ae'};
+const after={bytes:8164674,blob:'644fc5d0ce5fd195c5496d42cc0204bd1f9a9831'};
 
 assert.equal(bytes.length,after.bytes,'exact Hub owner extraction must be applied');
 assert.equal(blob(bytes),after.blob,'Hub owner runtime fingerprint drifted');
@@ -53,7 +53,8 @@ const init=`window.GensCaptureHubEntryV1.install({
 assert.equal(index.split(init).length-1,1);
 const restored=index.replace(bind,'enterWorld:()=>captureEnterWorld139()')
  .replace(bind,'enterWorld:()=>captureEnterWorld139()')
- .replace(init,oldBody).replace(load,oldLoad);
+ .replace(init,oldBody).replace(load,oldLoad)
+ .replace('/* ---------- traduction propre des éléments ---------- */',Buffer.from('LyogLS0tLS0tLS0tLSBkw6ltYXJyYWdlIENhcHR1cmUgOiBhcnJpdmUgZGlyZWN0ZW1lbnQgc3VyIEV4cGxvcmVyIC8gSHViIC0tLS0tLS0tLS0gKi8KY29uc3Qgc3RhcnQxMzg9d2luZG93LnN0YXJ0Q29uZmlndXJlZEdhbWU7CndpbmRvdy5zdGFydENvbmZpZ3VyZWRHYW1lPWFzeW5jIGZ1bmN0aW9uKCl7CiAgY29uc3QgY2FwPWlzQ2FwdHVyZUNvbnRleHQxMzgoKTsKICBjb25zdCByZXM9YXdhaXQgc3RhcnQxMzguYXBwbHkodGhpcyxhcmd1bWVudHMpOwogIGlmKGNhcCl7CiAgICBzZXRUaW1lb3V0KCgpPT57CiAgICAgIHRyeXsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgic2hlZXQiKSYmKGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJzaGVldCIpLnN0eWxlLmRpc3BsYXk9Im5vbmUiKTsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgibWVudSIpJiYoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoIm1lbnUiKS5zdHlsZS5kaXNwbGF5PSJibG9jayIpOwogICAgICAgIHJlbmRlckNhcHR1cmVXb3JsZEh1YigpOwogICAgICAgIGNvbnN0IGh1Yj1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiY2FwdHVyZUdhbWVIdWIiKTsKICAgICAgICBpZihodWIpe2h1Yi5zdHlsZS5kaXNwbGF5PSJibG9jayI7aHViLnNjcm9sbEludG9WaWV3KHtibG9jazoic3RhcnQifSl9CiAgICAgIH1jYXRjaChlKXt9CiAgICB9LDMwKTsKICB9CiAgcmV0dXJuIHJlczsKfTsKCg==','base64').toString('utf8')+'/* ---------- traduction propre des éléments ---------- */');
 const oldBytes=Buffer.from(restored,'utf8');
 assert.equal(oldBytes.length,before.bytes,'rollback size');
 assert.equal(blob(oldBytes),before.blob,'rollback must be byte-exact');

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "Phase 2 runtime cartography",
-  "sourceIndexBlob": "18627cc0c5fc7945732c8a910504c59ef823b6ae",
+  "sourceIndexBlob": "644fc5d0ce5fd195c5496d42cc0204bd1f9a9831",
   "note": "Dominant-responsibility map for every inline script id in the current production index. Descriptive cartography only; it authorizes no runtime deletion or extraction.",
   "allowedPrimaryDomains": [
     "core",
@@ -110,7 +110,7 @@
       "order": 13,
       "status": "active",
       "primaryDomain": "capture",
-      "responsibility": "Capture context detection, shared turn/start routing and Capture UI cleanup",
+      "responsibility": "Capture context detection, turn/target routing and Capture UI cleanup",
       "crossDomains": [
         "capture",
         "dungeon",

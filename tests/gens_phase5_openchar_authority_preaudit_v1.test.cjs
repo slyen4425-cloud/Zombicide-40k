@@ -13,8 +13,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(bytes.length,8165398,'openChar guard must target the current Phase 7 Dungeon generated Boss policy runtime');
-assert.equal(gitBlob(bytes),'18627cc0c5fc7945732c8a910504c59ef823b6ae',
+assert.equal(bytes.length,8164674,'openChar guard must target the current Phase 7 Dungeon generated Boss policy runtime');
+assert.equal(gitBlob(bytes),'644fc5d0ce5fd195c5496d42cc0204bd1f9a9831',
   'openChar guard Phase 7 generated Boss policy runtime blob drifted');
 
 const native=source.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';

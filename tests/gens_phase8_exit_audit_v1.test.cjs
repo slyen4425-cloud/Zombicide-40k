@@ -18,8 +18,8 @@ const indexBuf=fs.readFileSync(path.join(root,'index.html'));
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+indexBuf.length+'\0'),indexBuf
 ])).digest('hex');
-assert.equal(indexBuf.length,8165398,'Phase 8 exit audit must target the exact current runtime');
-assert.equal(gitBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae',
+assert.equal(indexBuf.length,8164674,'Phase 8 exit audit must target the exact current runtime');
+assert.equal(gitBlob,'644fc5d0ce5fd195c5496d42cc0204bd1f9a9831',
   'Phase 8 exit audit runtime blob drifted');
 
 const roadmap=read('docs/GENSRPG_RESTRUCTURATION_ROADMAP.md');

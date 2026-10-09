@@ -249,7 +249,11 @@ const hubEntryBindNew="enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld()"
 assert.equal(index.split(hubEntryLoadNew).length-1,1,'one Hub owner script load');
 assert.equal(index.split(hubEntrySeamNew).length-1,1,'one Hub owner install');
 assert.equal(index.split(hubEntryBindNew).length-1,2,'both Capture owners use dedicated hub');
-const beforeHubEntry=index.replace(hubEntryBindNew,hubEntryBindOld)
+// The Capture138 fix came later than this Dungeon-entry proof. Reverse only
+// the audited 40-byte timer guard before the pre-existing cumulative rollback.
+const capture138Guard='      if(!isCaptureContext138())return;\n';
+assert.equal(index.split(capture138Guard).length-1,1,'one reviewed Capture138 timer guard');
+const beforeHubEntry=index.replace(capture138Guard,'').replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntryBindNew,hubEntryBindOld)
   .replace(hubEntrySeamNew,hubEntrySeamOld)
   .replace(hubEntryLoadNew,hubEntryLoadOld);

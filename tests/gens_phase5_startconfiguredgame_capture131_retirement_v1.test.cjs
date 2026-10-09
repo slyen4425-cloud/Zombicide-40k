@@ -23,18 +23,17 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,2,'Phase 9 session-start transfer must leave only two historical inline startConfiguredGame owners');
+assert.equal(total,1,'Phase 9 Capture138 retirement must leave only the Dungeon historical inline startConfiguredGame owner');
 assert.deepEqual(ids,[
-  'captureFix138',
   'gensDungeonCore01Js'
-],'Phase 9 target chain must keep Capture138 compatibility and Dungeon Core01 while retiring Capture139');
+],'Phase 9 must retire the Capture138 launch wrapper while retaining Dungeon Core01');
 
 const capture131=blocks.find(x=>x.id==='captureFix131');
 assert.ok(capture131,'captureFix131 block must remain present');
 assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
   'captureFix131 must no longer assign startConfiguredGame');
 
-for(const id of ['captureFix138','gensDungeonCore01Js']){
+for(const id of ['gensDungeonCore01Js']){
   assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
 }
 assert.ok(!chain.some(x=>x.id==='captureFix139'),
@@ -56,7 +55,9 @@ assert.match(c135,/captureBattleLiveBody/);
 assert.match(c135,/captureCreatureDetailBody/);
 assert.match(c135,/oldPlayerText135/);
 assert.match(c138,/isCaptureContext138/);
-assert.match(c138,/renderCaptureWorldHub/);
+assert.match(c138,/captureBattleApplyAbility/);
+assert.doesNotMatch(c138,/window\.startConfiguredGame\s*=|const start138=|renderCaptureWorldHub\(\)/,
+  'Capture138 must retain its targeting owner without reviving obsolete launch/Hub authority');
 assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
   'Capture139 session-start wrapper/reference must remain retired');
 assert.match(c139,/GensCaptureSessionStartV1\.install\(/,

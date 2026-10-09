@@ -113,6 +113,40 @@ try{
     alterations.push({file:r.file,category:r.category,changes:(before.length===after.length?0:after.length-before.length)});
     fs.writeFileSync(file,after);
   }
+
+  // Six cases whose meaning is NOT "use the current index fingerprint".
+  // Historical manifests remain pinned to their original cartography source.
+  // Historical rollback fixtures first reverse only this known 40-byte guard.
+  function pinFix(rel,oldText,newText){
+    const file=path.join(root,rel);
+    assert.ok(backups.has(file),'special case must be a failing test: '+rel);
+    const current=fs.readFileSync(file,'utf8');
+    assert.equal(current.split(oldText).length-1,1,'unambiguous historical pin fix: '+rel);
+    fs.writeFileSync(file,current.replace(oldText,newText));
+  }
+  pinFix('tests/gens_phase4_storage_exit_audit_13_v1.test.cjs',
+    'assert.equal(manifest.sourceIndexBlob,BLOB);',
+    "assert.equal(manifest.sourceIndexBlob,'"+old+"','storage owner cartography source remains the exact historical baseline');");
+  pinFix('tests/gens_phase4_storage_next_audit_12_v1.test.cjs',
+    "assert.equal(manifest.sourceIndexBlob,CURRENT_BLOB,'Storage cartography fingerprint must follow MJ Rules GREEN candidate index');",
+    "assert.equal(manifest.sourceIndexBlob,'"+old+"','storage cartography snapshot remains historical; active runtime fingerprint checked separately');");
+  pinFix('tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs',
+    "assert.equal(owners.sourceIndexBlob,'"+target+"','owner manifest must target current Phase 7 generated Boss policy runtime');",
+    "assert.equal(owners.sourceIndexBlob,'"+old+"','Phase 2 historical owner manifest must not be rewritten by a Capture UI timer change');");
+  const unguarded="      if(!isCaptureContext138())return;\\n";
+  pinFix('tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs',
+    'const restored=index.replace(bind,',
+    "const restored=index.replace('"+unguarded+"','').replace(bind,");
+  pinFix('tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs',
+    'const restored=active.replace(newBind,',
+    "const restored=active.replace('"+unguarded+"','').replace(newBind,");
+  pinFix('tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs',
+    "assert.equal(worldRenders,before+1,'historical timer is not mode-cancelled (KNOWN RISK)');",
+    "assert.equal(worldRenders,before,'Capture138 delayed callback must be inert after the mode changes');");
+  pinFix('tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs',
+    'postModeChangeLegacyTimerStillRuns:true',
+    'postModeChangeLegacyTimerStillRuns:false');
+
   const reruns=[];
   try{
     let nextR=0;

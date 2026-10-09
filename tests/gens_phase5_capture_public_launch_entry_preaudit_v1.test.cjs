@@ -42,7 +42,19 @@ assert.match(screenReturnOwner,/shell\.register\("capture",returnToPrimaryView\)
   'the sole Capture return provider must be installed by the Capture module');
 
 assert.equal(owners.blocks.captureFix139.primaryDomain,'capture');
-assert.match(owners.blocks.captureFix139.responsibility,/no session initializer ownership/i);
+assert.match(owners.blocks.captureFix139.responsibility,/dependency wiring for public session-start, screen-return and primary Hub UI entry owners/i,
+  'Capture139 cartography must describe only the explicit dependency composer');
+assert.match(owners.blocks.captureFix139.responsibility,/no direct Shell registration or Hub UI transition/i,
+  'Capture139 must not regain Shell or visual Hub ownership');
+const hubOwner=read('assets/gensrpg/capture/hub-entry-v1.js');
+assert.match(c139,/window\.GensCaptureHubEntryV1\.install\s*\(/,
+  'Capture139 must explicitly inject UI dependencies into the sole Hub owner');
+assert.doesNotMatch(c139,/window\.captureEnterWorld139\s*=/,
+  'Capture139 must not define a legacy global Hub transition');
+assert.match(hubOwner,/root\.GensCaptureHubEntryV1=Object\.freeze/,
+  'Capture Hub API must be owned exclusively by the Capture module');
+assert.doesNotMatch(hubOwner,/DungeonCore|GensTactical|localStorage|sessionStorage|window\.goMenu/,
+  'Capture Hub UI owner must not become a foreign gameplay or storage owner');
 
 assert.equal(shellContract.status,'contract-only-not-loaded');
 assert.ok(shellContract.forbidden.includes('module gameplay rules'));

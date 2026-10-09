@@ -1,4 +1,6 @@
 'use strict';
+
+async function main(){
 // Phase 9: pure-API characterization only; never mutates the production runtime.
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -73,3 +75,6 @@ console.log(JSON.stringify({
   runtimeModified:false,
   nextGate:'Rule 26 inspect exact quit/save/close transitions before a single-owner TDD transfer'
 },null,2));
+
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

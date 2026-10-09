@@ -13,7 +13,7 @@ for(const line of tsv.split(/\r?\n/)){
   const [name,count,lastOwner]=line.split('\t');
   if(name&&count&&lastOwner)rows.set(name,{assignmentCount:Number(count),lastOwner});
 }
-assert.equal(rows.size,429,'last-owner table must shrink by exactly one after Capture139 launch-lock retirement');
+assert.equal(rows.size,428,'last-owner map loses only retired Capture139 hub entry after prior launch-lock retirement');
 assert.equal(rows.has('_captureStarting139'),false,
   'retired Capture139 launch lock must remain absent from the inline global owner inventory');
 assert.deepEqual(rows.get('startConfiguredGame'),

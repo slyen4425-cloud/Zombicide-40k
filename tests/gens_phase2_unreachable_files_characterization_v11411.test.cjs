@@ -52,8 +52,9 @@ while(queue.length){
 }
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
-assert.equal(reachable.size,85,
-  'production graph must add exactly two Capture auxiliary owners after the return-owner transfer');
+const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
+assert.equal(reachable.size,86,
+  'production graph must have exactly three Capture auxiliary owners after the Hub transfer');
 assert.equal(reachable.has(CAPTURE_SESSION_START),true,
   'new Capture session-start owner must be reachable from the real production graph');
 assert.equal([...reachable].filter(x=>x===CAPTURE_SESSION_START).length,1,
@@ -62,6 +63,8 @@ assert.equal(reachable.has(CAPTURE_SCREEN_RETURN),true,
   'new Capture screen-return owner must be reachable from the real production graph');
 assert.equal([...reachable].filter(x=>x===CAPTURE_SCREEN_RETURN).length,1,
   'Capture screen-return owner must enter the production graph exactly once');
+assert.equal(reachable.has(CAPTURE_HUB),true,'Hub entry owner must be reachable');
+assert.equal([...reachable].filter(x=>x===CAPTURE_HUB).length,1,'Hub entry must be loaded exactly once');
 for(const rel of targets)assert.equal(reachable.has(rel),false,rel+' unexpectedly entered production graph');
 
 const textExt=new Set(['.js','.cjs','.mjs','.html','.md','.json','.yml','.yaml','.txt','.webmanifest']);

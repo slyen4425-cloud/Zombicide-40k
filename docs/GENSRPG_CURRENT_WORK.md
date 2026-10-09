@@ -1,3 +1,14 @@
+# PHASE 9 — RETRAIT DU WRAPPER DE LANCEMENT CAPTURE138 — RED PRÉPARÉ — 2026-10-09
+
+- Branche : `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09`. Départ : `checkpoint/gensrpg-start-phase9-capture138-legacy-start-retirement-2026-10-09`, SHA `049d616c6a16decdb3eefd1ece922c3720a7eff3`.
+- Dernier préaudit GREEN : `checkpoint/gensrpg-phase9-capture-legacy138-launch-preaudit-green-2026-10-09` sur `049d616c6a16decdb3eefd1ece922c3720a7eff3`, triple CI `37960827487`, `37960827480`, `37960827332` SUCCESS.
+- Fichier §26 : `indexj.txt` confirmé byte-exact (8165398 octets / blob `18627cc0c5fc7945732c8a910504c59ef823b6ae`). Seul seam envisagé : ancienne interception `startConfiguredGame` + rendu différé 30ms dans Capture138, 724 octets. Autres propriétaires Capture138 protégés.
+- Nouveau RED : `tests/gens_phase9_capture138_legacy_start_retirement_v1.test.cjs`. Sur source actuelle : RED ; sur copie locale strictement patchée : GREEN, rollback byte-exact et parité Shell réelle. **Aucune mutation runtime GitHub encore.**
+- Risques : sentinelles et inventaires Phase 2 citant encore l'ancienne autorité ; ne pas repin aveuglément les oracles historiques. Parallèle lifecycle-shutdown sur base divergente, exclu. Aucun merge sur `main` gelée.
+- Rapport : `docs/GENSRPG_PHASE9_CAPTURE138_LEGACY_START_RETIREMENT.md`. Suite : établir migration bornée avec TDD vert GitHub, inventaire actualisé, triple CI et preview smartphone ; pas de checkpoint fonctionnel avant validation.
+
+---
+
 # PHASE 9 — PRÉAUDIT CHEMIN HISTORIQUE CAPTURE138 — 2026-10-09
 
 - **Branche** : `work/gensrpg-phase9-capture-legacy138-launch-preaudit-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-legacy138-launch-preaudit-2026-10-09`, SHA `35ac5a66b4e367bb8463beb757078134e818922d`. **Base GREEN** : `35ac5a66b4e367bb8463beb757078134e818922d` (triple CI SUCCESS : Architecture+Browser `37951626194`, Firefox `37951625914`, Tactical `37951626058`).

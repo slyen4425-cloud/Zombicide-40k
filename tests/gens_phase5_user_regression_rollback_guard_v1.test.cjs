@@ -27,7 +27,9 @@ assert.match(fix135,/render135\(/,'captureFix135 battle rendering/log responsibi
 assert.match(fix135,/captureBattleLiveBody/,'captureFix135 detailed combat-log UI must remain');
 assert.match(fix135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
 assert.match(fix135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
-assert.match(fix138,/window\.isCaptureContext138\s*=\s*function/,'captureFix138 must remain present');
+assert.match(fix138,/window\.isCaptureContext138\s*=\s*function/,'captureFix138 context detection must remain present');
+assert.match(fix138,/captureBattleApplyAbility/,'Capture138 targeting and combat guards stay active');
+assert.doesNotMatch(fix138,/window\.startConfiguredGame\s*=|const start138=/,'Capture138 global launch wrapper must stay retired');
 assert.doesNotMatch(fix139,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1/,
   'user-regression guard: Capture139 must remain retired from global launch ownership');
 assert.match(fix139,/GensCaptureSessionStartV1\.install\(/,
@@ -37,6 +39,6 @@ assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+
 assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 global launch owner must remain retired');
 
 const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
-assert.equal(assignments,2,'rollback guard must preserve the reduced two-owner inline launch chain after Capture139 retirement');
+assert.equal(assignments,1,'rollback guard must keep only the reviewed Dungeon inline launch writer after Capture138 retirement');
 
-console.log('Phase 5 user regression rollback guard: Capture135 responsibilities preserved, Capture139 global owner retired, 2-owner inline chain preserved, Core200 local dispatcher retained');
+console.log('Phase 5 user regression rollback guard: Capture135 responsibilities preserved, Capture139 global owner retired, single historical Dungeon inline launch writer preserved, Core200 local dispatcher retained');

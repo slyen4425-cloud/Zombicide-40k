@@ -1,15 +1,15 @@
 'use strict';
 /* Diagnostic only. Never commits or writes files in the checked-out repository.
  * Classify hard-pins and simulate the 40-byte Capture138 fix in a separate
- * temporary workspace. Historical rollback oracles MUST be reviewed manually.
+ * GitHub Actions ephemeral workspace. Historical rollback oracles MUST be reviewed manually.
  */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const {execFileSync,spawn}=require('node:child_process');
-const root=path.resolve(__dirname,'../..');
+const {spawn}=require('node:child_process');
+const root=path.resolve(__dirname,'..');
 const tests=path.join(root,'tests');
 const old='18627cc0c5fc7945732c8a910504c59ef823b6ae',target='1a61147d5a32889fa85e6a09e846049103b9f0bf';
 const oldLen=8165398,targetLen=8165438;
@@ -40,13 +40,11 @@ const candidates=names.flatMap(n=>{
 const classifyCount={};for(const x of candidates)classifyCount[x.category]=(classifyCount[x.category]||0)+1;
 console.log('AUDIT_PREVIEW '+JSON.stringify({candidateTests:candidates.length,groups:classifyCount,
   oldBytes:oldLen,oldBlob:old,newBytes:targetLen,newBlob:target,onlyRuntimeChangeBytes:40}));
-const work=fs.mkdtempSync(path.join(os.tmpdir(),'gens-capture138-audit-'));
+// GitHub Actions checkout is a disposable job-local workspace. Never commit it.
+(async()=>{
 try{
-  // Execute tests against the *real source tree* with the index replaced in a
-  // disposable checkout copy, never against a mocked inline implementation.
-  // GNU cp is available on GitHub's ubuntu runner.
-  execFileSync('cp',['-a',root+'/.',work+'/'],{stdio:'pipe',timeout:90000});
-  fs.writeFileSync(path.join(work,'index.html'),patched);
+  fs.writeFileSync(path.join(root,'index.html'),patched);
+  const work=root;
   const chk=fs.readFileSync(path.join(work,'index.html'));
   assert.equal(hash(chk),target);
   const results=[];
@@ -82,5 +80,9 @@ try{
   console.log('PIN_SIMULATION_REPORT '+outputFile);
   console.log('PIN_SIMULATION_RESULT '+JSON.stringify(findings.counts));
   const failures=results.filter(x=>!x.ok);console.log('PIN_SIMULATION_FAILURES '+JSON.stringify(failures.slice(0,120)));
-  console.log('PIN_SIMULATION_NOT_A_COMMIT: patched runtime exists only in disposable temporary directory');
-}finally{fs.rmSync(work,{recursive:true,force:true});}
+  console.log('PIN_SIMULATION_NOT_A_COMMIT: patched runtime exists only in ephemeral GitHub Actions checkout');
+}finally{
+  fs.writeFileSync(path.join(root,'index.html'),original);
+  assert.equal(hash(fs.readFileSync(path.join(root,'index.html'))),old,'restore pristine runtime in runner');
+}
+})().catch(e=>{console.error(e);process.exitCode=1});

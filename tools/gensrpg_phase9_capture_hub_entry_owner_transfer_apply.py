@@ -33,7 +33,7 @@ old_method='''window.captureEnterWorld139=function(){
   const hub=document.getElementById("captureGameHub");
   if(hub){
     hub.style.setProperty("display","block","important");
-    requestAnimationFrame(()=>hub.scrollIntoView({block:"start",behavior:"auto"));
+    requestAnimationFrame(()=>hub.scrollIntoView({block:"start",behavior:"auto"}));
   }
 };'''
 new_install='''window.GensCaptureHubEntryV1.install({

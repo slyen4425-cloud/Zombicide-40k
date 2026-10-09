@@ -1,4 +1,4 @@
-name: GenSrpG Phase 9 Capture Hub UI owner exact apply one-shot
+name: GenSrpG Phase 9 Capture Hub UI owner exact apply one-shot v2
 
 on:
   push:

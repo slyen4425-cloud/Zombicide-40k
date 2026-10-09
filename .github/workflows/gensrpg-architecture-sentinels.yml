@@ -28,6 +28,9 @@ jobs:
       - name: Vérifier RuntimeBootstrap V1
         run: node tests/gens_runtime_bootstrap_v1.test.cjs
 
+      - name: Verrouiller le retrait borné du lancement historique Capture138 et son rollback
+        run: node tests/gens_phase9_capture138_legacy_start_retirement_v1.test.cjs
+
       - name: Auditer la frontière publique Capture / ancien lancement 138
         run: node tests/gens_phase9_capture_legacy138_launch_boundary_preaudit_v1.test.cjs
 

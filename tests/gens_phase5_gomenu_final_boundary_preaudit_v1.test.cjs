@@ -53,8 +53,17 @@ assert.match(capture,/GensCaptureScreenReturnV1\.install/,
   'Capture139 must only wire the owner');
 assert.match(read('assets/gensrpg/capture/screen-return-v1.js'),/shell\.register\("capture",returnToPrimaryView\)/,
   'Capture screen-return owner must register exactly one public Shell provider');
-assert.ok(capture.includes('captureEnterWorld139()'),
-  'Capture S1 must keep the Capture-owned world/hub implementation');
+const hubOwner=read('assets/gensrpg/capture/hub-entry-v1.js');
+assert.equal((capture.match(/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/g)||[]).length,2,
+  'Capture SessionStart and ScreenReturn must delegate to the same owner-local Hub entry');
+assert.match(capture,/renderCaptureWorldHub:\(\)=>renderCaptureWorldHub\(\)/,
+  'Capture world renderer stays historical and separate from the visual transition');
+assert.doesNotMatch(capture,/window\.captureEnterWorld139\s*=/,
+  'legacy global Hub UI transition must remain retired');
+assert.match(hubOwner,/root\.GensCaptureHubEntryV1=Object\.freeze/,
+  'Capture must own its Hub UI transition through a dedicated module');
+assert.doesNotMatch(hubOwner,/GensShellScreenReturnV1|DungeonCore|window\.goMenu\s*=/,
+  'new Hub owner must not steal global Shell or Dungeon responsibilities');
 assert.doesNotMatch(dungeon,/window\.goMenu\s*=/,
   'Dungeon S2 must no longer assign the global goMenu boundary');
 assert.doesNotMatch(dungeon,/const goOutside200=window\.goMenu/,

@@ -28,3 +28,13 @@ La migration doit également mettre à jour les empreintes dans les sentinelles 
 2. Construire/appliquer sur cette branche **seulement** un patch exact vérifié, après avoir cartographié toutes les sentinelles qui attendent encore la chaîne historique. Le gros index transite sur le runner depuis le dépôt, pas via les connecteurs.
 3. Lancer GREEN ciblé, les tests historiques composés et rollback byte-exact ; puis Architecture + Browser, Firefox, Tactical au même SHA. Toute CI rouge interdit checkpoint et preview validée.
 4. Proposer preview smartphone et attendre validation utilisateur avant checkpoint fonctionnel final.
+
+
+## Application réelle sur GitHub — c6cc7ef26327dacc7a7ef72507b002ef4c127a1f
+
+- Source Rule 26 utilisateur rigoureusement vérifiée. RED publié sur `d9f1e2e535a89b17f9f8ec36eeb27eb5c713f629`.
+- Dry-run `37966286703` **SUCCESS** : RED réel, patch candidat GREEN, empreinte et rollback exact, analyse d'impact de 107 anciennes références de blob et 105 anciennes références de taille dans les tests.
+- One-shot `37966631255` **SUCCESS**, commit runtime `c6cc7ef26327dacc7a7ef72507b002ef4c127a1f` sur branche dédiée ; strictement 19 lignes de `index.html` supprimées (724 octets), Git blob cible `644fc5d0ce5fd195c5496d42cc0204bd1f9a9831`.
+- Les quatre inventaires Phase 2 ont des empreintes cohérentes ; les sentinelles actives ont leur empreinte courante et les deux oracles historiques Hub sont byte-exact après réapplication inverse du seam. La parité VM du lancement public Shell et les tests ciblés de propriétaire sont GREEN sur le runner.
+- Aucune modification `main`, Dungeon, Survie, PvP, Tactical, laboratoires ou sauvegardes.
+- **Barrière de clôture** : triple CI Architecture+Browser / Firefox / Tactical sur le prochain commit de nettoyage documentaire, puis preview smartphone et validation utilisateur. Jusqu'à ces conditions : **candidat technique, pas checkpoint GREEN fonctionnel**.

@@ -1,3 +1,16 @@
+# PHASE 9 — CAPTURE138 ANCIEN LANCEMENT : RUNTIME TRANSFÉRÉ / TRIPLE CI À VALIDER — 2026-10-09
+
+- **Branche** : `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09` ; base/point de départ `checkpoint/gensrpg-start-phase9-capture138-legacy-start-retirement-2026-10-09`, SHA `049d616c6a16decdb3eefd1ece922c3720a7eff3`.
+- **GREEN confirmé avant mutation** : préaudit `checkpoint/gensrpg-phase9-capture-legacy138-launch-preaudit-green-2026-10-09`, même SHA, CI `37960827487` (Architecture+Browser), `37960827480` (Firefox), `37960827332` (Tactical) SUCCESS.
+- **TDD RED** : `d9f1e2e535a89b17f9f8ec36eeb27eb5c713f629`. Dry-run GitHub `37966286703` SUCCESS (RED sur ancien runtime / GREEN sur fichier candidat) ; one-shot `37966631255` SUCCESS après correction de shell `awk`.
+- **Runtime implanté** par commit `c6cc7ef26327dacc7a7ef72507b002ef4c127a1f` : retrait strict de l'unique wrapper `window.startConfiguredGame` de Capture138, 19 lignes / −724 octets. `index.html` de 8 165 398 octets, blob `18627cc0c5fc7945732c8a910504c59ef823b6ae` à **8 164 674 octets**, blob `644fc5d0ce5fd195c5496d42cc0204bd1f9a9831`. Inversion byte-exact prouvée.
+- **Propriétaires conservés** : Shell final `GensShellModuleLaunchV1`, Capture SessionStart, ScreenReturn, HubEntry, monde/HUB historique/V151 et toutes les autres fonctions de Capture138 (tour, affinités, ciblage/IA/combat). Dungeon, Survie, PvP, Tactical, labos, stockage et production `main` inchangés.
+- **Tests ciblés GREEN dans le workflow one-shot** : nouveau vrai test RED/GREEN, ancien HubEntry VM (4 scénarios) et caractérisation Hub/Monde, préaudit de la chaîne de lancement et Shell final. **106 fichiers de sentinelles** re-épinglés pour le hash/taille source actif ; les anciens oracles sont reconstruits par inversion composée au lieu d'être effacés. Inventaires Phase 2 actualisés (source hash, 738 assignations, 113 multi-owner, 137 setTimeout inline, 1 seul global inline `startConfiguredGame`).
+- **État et gate** : le commit poussé par GitHub Actions ne déclenche pas les CI sur son SHA. Retrait de l'outillage one-shot et commit documentaire distinct par connecteur pour déclencher Architecture + Browser, Firefox et Tactical. AUCUN checkpoint GREEN runtime avant la triple CI et la validation smartphone du nouvel état. Pas de merge dans `main`.
+- **Rapport** : `docs/GENSRPG_PHASE9_CAPTURE138_LEGACY_START_RETIREMENT.md`. **Test manuel** : preview de `preview.html` au SHA de clôture ; Capture créer/reprendre/Hub, puis Builder Dungeon, Survie et PvP sentinelles.
+
+---
+
 # PHASE 9 — RETRAIT DU WRAPPER DE LANCEMENT CAPTURE138 — RED PRÉPARÉ — 2026-10-09
 
 - Branche : `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09`. Départ : `checkpoint/gensrpg-start-phase9-capture138-legacy-start-retirement-2026-10-09`, SHA `049d616c6a16decdb3eefd1ece922c3720a7eff3`.

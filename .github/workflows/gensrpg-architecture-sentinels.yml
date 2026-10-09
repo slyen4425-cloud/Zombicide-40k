@@ -37,6 +37,9 @@ jobs:
       - name: Bloquer les callbacks historiques Capture138 apres bascule de mode
         run: node tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs
 
+      - name: Mesurer les critères de sortie Phase 9 sans déclarer Capture autonome prématurément
+        run: node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+
       - name: Verrouiller la frontière canonique de l’éditeur Survie
         run: node tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs
 

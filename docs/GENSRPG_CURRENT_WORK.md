@@ -1,3 +1,15 @@
+# PHASE 9 — CAPTURE138 : GARDE DU CALLBACK DE HUB DIFFÉRÉ — 2026-10-09
+
+- **Branche** : `work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture138-delayed-hub-guard-2026-10-09` sur `50ea199c1bbb909537383bdb10337ba054d53077`. Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-legacy138-launch-characterization-green-2026-10-09` sur le même SHA (triple CI SUCCESS Architecture/Browser 37981581468, Firefox 37981581403, Tactical 37981581440).
+- **Production** : `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, aucun merge. **Index §26 fourni par l'utilisateur** : `indexj.txt` de 8 165 398 octets, blob Git `18627cc0c5fc7945732c8a910504c59ef823b6ae`.
+- **Périmètre unique** : empêcher le callback de `captureFix138` planifié à 30 ms de modifier le Hub Capture après un changement de module. RED prouvé localement sur la fonction historique réelle : après Capture -> Dungeon, elle rend le Hub et modifie DOM ; cible minimaliste : revérifier `isCaptureContext138()` au moment du timer. Ne pas supprimer/refondre la chaîne historique ni créer un propriétaire concurrent.
+- **Protections** : Dungeon200, Survie, Shell final, HubEntry/ScreenReturn/SessionStart, `gensStability151`, Builder, Tactical, sauvegardes, monde, combat ; aucune publication main.
+- **Tests** : nouveau test `tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs`, RED avant correction et GREEN local après insertion de 40 octets. Fingerprint cible local : 8 165 438 octets / blob Git `1a61147d5a32889fa85e6a09e846049103b9f0bf`. Déploiement sur branche et triple CI nécessaires avant tout GREEN. Étudier l'impact des sentinelles à empreinte figée avant écriture distante du gros index.
+- **Chantier parallèle** de fermeture Capture `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` est divergent, hors périmètre.
+- **Rollback** : restaurer exactement l'index blob `18627cc0c5fc7945732c8a910504c59ef823b6ae` et retirer le test de garde si retour en arrière. Prochaine étape : commit RED puis correction unique, tests navigateur et validation utilisateur.
+ 
+---
+
 # PHASE 9 — CARACTÉRISATION DU ROUTAGE FINAL CAPTURE138/DUNGEON200 — 2026-10-09
 
 - **Branche de travail** : `work/gensrpg-phase9-capture-legacy138-launch-characterization-2026-10-09`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-legacy138-launch-characterization-2026-10-09` sur `049d616c6a16decdb3eefd1ece922c3720a7eff3`. **Dernier checkpoint GREEN de préaudit** : `checkpoint/gensrpg-phase9-capture-legacy138-launch-preaudit-green-2026-10-09` (même SHA ; triple CI SUCCESS).

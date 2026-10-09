@@ -1,3 +1,16 @@
+# PHASE 9 — HUB / MONDE CAPTURE — CARACTÉRISATION EXACTE (RÈGLE 26) — 2026-10-09
+
+- Branche `work/gensrpg-phase9-capture-hub-world-owner-preaudit-2026-10-09`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-hub-world-owner-preaudit-2026-10-09` sur `8b33eddbc8e57453e7cf5159c07e04762aa64827`.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase9-capture-screen-return-owner-transfer-green-2026-10-08`; triple CI du préaudit d'ouverture `403dc14a0084db7e144a518c62b82573b42e3030` GREEN (`37913279541`, `37913279456`, `37913279515`).
+- Rule 26 vérifiée : `worki.zip` → `indexI.txt`, 8 165 823 octets, blob `26421e0347305437fe2b1dc149b3e4fb8b3761bd`.
+- Résultat : `captureFix139` ne possède que la transition UI du Hub ; `renderCaptureWorldHub` est un renderer avec effets monde/kits/lieux ; V151 en garde l'exclusion hors Capture ; Capture138 conserve un wrapper de lancement avec timer. Aucun transfert global sûr à déduire.
+- Sentinelle permanente VM `tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs` exécutée localement GREEN et ajoutée au workflow ; triple CI du prochain commit **à vérifier avant checkpoint**.
+- **Scope :** tests + workflow + docs uniquement ; ni `index.html` ni Capture runtime, aucun changement sauvegarde / gameplay / Dungeon / Survie / PvP / Tactical / labo, pas de merge `main`.
+- Préparation du lot runtime distinct : choisir seulement la transition UI `captureEnterWorld139` après un nouveau checkpoint de départ et un RED dédié ; tout le renderer monde reste protégé.
+- Audit : `docs/GENSRPG_PHASE9_CAPTURE_HUB_WORLD_OWNER_PREAUDIT.md`. Production `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — PRÉAUDIT PHYSIQUE HUB / MONDE CAPTURE — OUVERT — 2026-10-09
 
 - Branche : `work/gensrpg-phase9-capture-hub-world-owner-preaudit-2026-10-09`.

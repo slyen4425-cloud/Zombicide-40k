@@ -827,6 +827,9 @@ jobs:
       - name: Pré-auditer le retour écran Capture autonome Phase 9
         run: node tests/gens_phase9_capture_screen_return_ownership_preaudit_v1.test.cjs
 
+      - name: Caractériser le propriétaire actuel du Hub Monde Capture Phase 9
+        run: node tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs
+
       - name: Pré-auditer l'identité Capture Phase 9
         run: node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
 

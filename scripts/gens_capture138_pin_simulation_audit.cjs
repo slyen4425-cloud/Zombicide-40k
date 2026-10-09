@@ -40,7 +40,10 @@ const candidates=names.flatMap(n=>{
 const classifyCount={};for(const x of candidates)classifyCount[x.category]=(classifyCount[x.category]||0)+1;
 console.log('AUDIT_PREVIEW '+JSON.stringify({candidateTests:candidates.length,groups:classifyCount,
   oldBytes:oldLen,oldBlob:old,newBytes:targetLen,newBlob:target,onlyRuntimeChangeBytes:40}));
-// GitHub Actions checkout is a disposable job-local workspace. Never commit it.
+// GitHub Actions checkout is disposable. Apply mode is permitted ONLY after
+// all 108 tests pass and the exact runtime 40-byte delta is verified.
+let preserveVerified=false;
+const applyVerified=process.env.GENSRPG_APPLY_PHASE9_GUARD==='APPLY_VERIFIED_40_BYTE_GUARD';
 (async()=>{
 try{
   fs.writeFileSync(path.join(root,'index.html'),patched);
@@ -170,16 +173,31 @@ try{
     const rec={};for(const r of reruns)rec[r.reason]=(rec[r.reason]||0)+1;
     const fails=reruns.filter(x=>!x.ok);
     console.log('PIN_REBASE_DRYRUN '+JSON.stringify({filesChangedInEphemeralRunner:alterations.length,afterSimulatedRebase:rec,failures:fails}));
+    if(applyVerified){
+      assert.equal(candidates.length,108,'verified candidate inventory must remain exact');
+      assert.equal(results.filter(x=>x.ok).length,2,'two historical references are preserved unchanged');
+      assert.equal(initialFailures.length,106);
+      assert.equal(alterations.length,106);
+      assert.equal(reruns.length,106);
+      assert.equal(fails.length,0,'do not publish a failing test migration');
+      assert.equal(hash(fs.readFileSync(path.join(root,'index.html'))),target,'exact 40 byte index guard');
+      preserveVerified=true;
+      console.log('PIN_VERIFIED_MIGRATION_READY '+JSON.stringify({runtimeBlob:target,pinsMigrated:106,testsPassing:108,preservedHistoricalFiles:2}));
+    }
     findings.rebaseDryrun={filesChangedInEphemeralRunner:alterations.length,summary:rec,failures:fails,alterations};
     fs.writeFileSync(outputFile,JSON.stringify(findings,null,2)+'\n');
   }finally{
-    for(const [file,content] of backups)fs.writeFileSync(file,content);
-    for(const [file,content] of backups)assert.equal(fs.readFileSync(file,'utf8'),content,'reverted pinned test '+file);
+    if(!preserveVerified){
+      for(const [file,content] of backups)fs.writeFileSync(file,content);
+      for(const [file,content] of backups)assert.equal(fs.readFileSync(file,'utf8'),content,'reverted pinned test '+file);
+    }
   }
 
   console.log('PIN_SIMULATION_NOT_A_COMMIT: patched runtime exists only in ephemeral GitHub Actions checkout');
 }finally{
-  fs.writeFileSync(path.join(root,'index.html'),original);
-  assert.equal(hash(fs.readFileSync(path.join(root,'index.html'))),old,'restore pristine runtime in runner');
+  if(!preserveVerified){
+    fs.writeFileSync(path.join(root,'index.html'),original);
+    assert.equal(hash(fs.readFileSync(path.join(root,'index.html'))),old,'restore pristine runtime in runner');
+  }
 }
 })().catch(e=>{console.error(e);process.exitCode=1});

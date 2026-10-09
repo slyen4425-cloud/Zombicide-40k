@@ -14,8 +14,8 @@ const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165823,'Capture139 session preaudit must inspect the current verified pregame GREEN runtime');
-assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Capture139 session preaudit must inspect the exact verified pregame GREEN runtime blob');
+assert.equal(bytes.length,8165398,'Capture139 session preaudit must inspect the current verified pregame GREEN runtime');
+assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Capture139 session preaudit must inspect the exact verified pregame GREEN runtime blob');
 
 function block(id){
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');

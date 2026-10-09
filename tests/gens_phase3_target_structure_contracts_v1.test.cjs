@@ -102,8 +102,8 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,85,
-  'Phase 3 scaffolding remains inert; Phase 9 registers two Capture auxiliary runtime owners (session start and screen return)');
+assert.equal(Object.keys(ownerManifest.files||{}).length,86,
+  'Phase 3 scaffolding remains inert; Phase 9 registers three Capture auxiliary runtime owners (session, return and Hub UI)');
 assert.deepEqual(ownerManifest.files?.['assets/gensrpg/capture/session-start-v1.js'],{
   owner:'GenSrpG Capture Session Start',
   domain:'capture',
@@ -124,7 +124,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:85,
+  productionOwnerGraph:86,
   loadedEntrySlices:4,
-  captureAuxiliaryRuntimeOwners:2
+  captureAuxiliaryRuntimeOwners:3
 },null,2));

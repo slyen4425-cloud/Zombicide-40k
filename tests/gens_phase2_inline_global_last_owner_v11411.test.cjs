@@ -39,7 +39,7 @@ const distinctGlobals=chains.size;
 const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
-assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Phase 2 inline global table must target the current committed index blob');
+assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Phase 2 inline global table must target the current committed index blob');
 assert.equal(distinctGlobals,429,'distinct explicit inline globals drifted');
 assert.equal(assignments,740,'explicit inline global assignments drifted');
 assert.equal(multiOwnerGlobals,114,'multi-owner inline globals drifted');

@@ -239,8 +239,28 @@ window.GensCaptureScreenReturnV1.install({
   enterWorld:()=>captureEnterWorld139()
 });`;
 assert.equal(index.split(captureReturnLoadNew).length-1,1,'exactly one current Capture return-owner script load seam');
-assert.equal(index.split(captureReturnSeamNew).length-1,1,'exactly one current Capture return-owner binding seam');
-const beforeReturnOwner=index.replace(captureReturnLoadNew,captureReturnLoadOld).replace(captureReturnSeamNew,captureReturnSeamOld);
+
+const hubEntryLoadOld="<script src=\"assets/gensrpg/capture/screen-return-v1.js?v=1\"></script>";
+const hubEntryLoadNew="<script src=\"assets/gensrpg/capture/screen-return-v1.js?v=1\"></script>\n<script src=\"assets/gensrpg/capture/hub-entry-v1.js?v=1\"></script>";
+const hubEntrySeamOld="window.captureEnterWorld139=function(){\n  try{closeTurnPopup(false)}catch(e){}\n  [\"pregameSetup\",\"sessionHeroSetup\",\"sessionObjectSetup\",\"sessionWaveSetup\",\"sessionDungeonSetup\",\"sheet\",\"setup\"].forEach(id=>{\n    const e=document.getElementById(id);if(e)e.style.setProperty(\"display\",\"none\",\"important\");\n  });\n  const menu=document.getElementById(\"menu\");\n  if(menu)menu.style.setProperty(\"display\",\"block\",\"important\");\n  try{renderMenuStatuses()}catch(e){}\n  try{renderCaptureWorldHub()}catch(e){}\n  const hub=document.getElementById(\"captureGameHub\");\n  if(hub){\n    hub.style.setProperty(\"display\",\"block\",\"important\");\n    requestAnimationFrame(()=>hub.scrollIntoView({block:\"start\",behavior:\"auto\"}));\n  }\n};";
+const hubEntrySeamNew="window.GensCaptureHubEntryV1.install({\n  closeTurnPopup:()=>closeTurnPopup(false),\n  renderMenuStatuses:()=>renderMenuStatuses(),\n  renderCaptureWorldHub:()=>renderCaptureWorldHub()\n});";
+const hubEntryBindOld="enterWorld:()=>captureEnterWorld139()";
+const hubEntryBindNew="enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld()";
+assert.equal(index.split(hubEntryLoadNew).length-1,1,'one Hub owner script load');
+assert.equal(index.split(hubEntrySeamNew).length-1,1,'one Hub owner install');
+assert.equal(index.split(hubEntryBindNew).length-1,2,'both Capture owners use dedicated hub');
+const beforeHubEntry=index.replace(hubEntryBindNew,hubEntryBindOld)
+  .replace(hubEntryBindNew,hubEntryBindOld)
+  .replace(hubEntrySeamNew,hubEntrySeamOld)
+  .replace(hubEntryLoadNew,hubEntryLoadOld);
+const restoredHubBytes=Buffer.from(beforeHubEntry,'utf8');
+const restoredHubBlob=crypto.createHash('sha1').update(Buffer.concat([
+  Buffer.from('blob '+restoredHubBytes.length+'\0'),restoredHubBytes
+])).digest('hex');
+assert.equal(restoredHubBlob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','before cumulative rollback, undo Hub owner exactly');
+assert.equal(beforeHubEntry.split(captureReturnLoadNew).length-1,1,'Capture return script load preserved in rollback');
+assert.equal(beforeHubEntry.split(captureReturnSeamNew).length-1,1,'Capture return dependency preserved in rollback');
+const beforeReturnOwner=beforeHubEntry.replace(captureReturnLoadNew,captureReturnLoadOld).replace(captureReturnSeamNew,captureReturnSeamOld);
 const beforeReturnBytes=Buffer.from(beforeReturnOwner,'utf8');
 const beforeReturnBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+beforeReturnBytes.length+'\0'),beforeReturnBytes

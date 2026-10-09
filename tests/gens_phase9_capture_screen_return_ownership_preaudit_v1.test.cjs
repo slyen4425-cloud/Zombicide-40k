@@ -14,8 +14,8 @@ const json=rel=>JSON.parse(read(rel));
 const bytes=fs.readFileSync(path.join(root,'index.html'));
 const source=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
-assert.equal(bytes.length,8165823,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
-assert.equal(blob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd','Rule 26: unexpected runtime blob; stop before any ownership decision');
+assert.equal(bytes.length,8165398,'Rule 26: unexpected runtime size; re-audit exact new source before interpreting Capture139');
+assert.equal(blob,'18627cc0c5fc7945732c8a910504c59ef823b6ae','Rule 26: unexpected runtime blob; stop before any ownership decision');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(x=>({id:x[1],body:x[2]}));
@@ -41,8 +41,8 @@ assert.match(go,/returnToPrimaryView/);
 assert.match(capture,/GensCaptureScreenReturnV1/);
 assert.match(capture,/GensCaptureScreenReturnV1\.install\s*\(/,
   'the existing LIVE screen-return provider must be installed via the dedicated Capture owner');
-assert.match(capture,/captureEnterWorld139\(\)/,
-  'Capture139 remains the physical owner of the Capture hub/world transition');
+assert.match(capture,/GensCaptureHubEntryV1\.enterWorld\(\)/,
+  'Capture139 delegates the Hub transition to the unique physical Capture Hub owner');
 assert.equal((capture.match(/GensCaptureScreenReturnV1\.install\s*\(/g)||[]).length,1,
   'the historic Capture block must provide exactly one owner dependency binding');
 assert.doesNotMatch(capture,/window\.goMenu\s*=/,

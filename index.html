@@ -4300,6 +4300,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/session-start-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/screen-return-v1.js?v=1"></script>
+<script src="assets/gensrpg/capture/hub-entry-v1.js?v=1"></script>
 
 <script>
 
@@ -27040,21 +27041,11 @@ window.captureRenderBattleLive=function(b=window.gensCurrentCaptureBattle){
 
 /* En Capture, le dresseur est choisi AVANT Démarrer.
    Le lancement ne doit jamais ouvrir/reproposer un héros. */
-window.captureEnterWorld139=function(){
-  try{closeTurnPopup(false)}catch(e){}
-  ["pregameSetup","sessionHeroSetup","sessionObjectSetup","sessionWaveSetup","sessionDungeonSetup","sheet","setup"].forEach(id=>{
-    const e=document.getElementById(id);if(e)e.style.setProperty("display","none","important");
-  });
-  const menu=document.getElementById("menu");
-  if(menu)menu.style.setProperty("display","block","important");
-  try{renderMenuStatuses()}catch(e){}
-  try{renderCaptureWorldHub()}catch(e){}
-  const hub=document.getElementById("captureGameHub");
-  if(hub){
-    hub.style.setProperty("display","block","important");
-    requestAnimationFrame(()=>hub.scrollIntoView({block:"start",behavior:"auto"}));
-  }
-};
+window.GensCaptureHubEntryV1.install({
+  closeTurnPopup:()=>closeTurnPopup(false),
+  renderMenuStatuses:()=>renderMenuStatuses(),
+  renderCaptureWorldHub:()=>renderCaptureWorldHub()
+});
 
 /* Le propriétaire Capture initialise la session ; Capture139 ne conserve que le câblage legacy explicite. */
 window.GensCaptureSessionStartV1.install({
@@ -27076,7 +27067,7 @@ window.GensCaptureSessionStartV1.install({
   saveCustomization:cfg=>saveGameCustomization(cfg),
   startTurnManager:()=>startTurnManagerForGame(),
   clearTurnManager:()=>{saveTurnState(null);closeTurnPopup(false);renderTurnUi()},
-  enterWorld:()=>captureEnterWorld139(),
+  enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld(),
   notify:message=>alert(message),
   openParticipantSetup:()=>openSessionHeroSetup()
 });
@@ -27086,7 +27077,7 @@ window.GensCaptureV1.install(window.GensCaptureSessionStartV1);
 window.GensCaptureScreenReturnV1.install({
   hasActiveSession:()=>hasActiveSession(),
   isCaptureContext:()=>isCaptureContext138(),
-  enterWorld:()=>captureEnterWorld139()
+  enterWorld:()=>window.GensCaptureHubEntryV1.enterWorld()
 });
 })();
 </script>

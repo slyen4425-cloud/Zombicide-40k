@@ -40,7 +40,7 @@ assert.match(nativeGo,/handled/,
 
 assert.match(capture,/GensCaptureScreenReturnV1/,
   'Capture must register an owner-local screen-return provider');
-assert.match(capture,/captureEnterWorld139\(\)/,
+assert.match(capture,/GensCaptureHubEntryV1\.enterWorld\(\)/,
   'Capture provider must keep Capture-owned world/hub rendering');
 assert.doesNotMatch(capture,/const oldMenu139=window\.goMenu/,
   'Capture must no longer capture the global goMenu boundary');

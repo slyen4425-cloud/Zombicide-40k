@@ -17,9 +17,9 @@ const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
 
-assert.equal(bytes.length,8165823,
+assert.equal(bytes.length,8165398,
   'Phase 7 materialization characterization must track the current Boss-policy runtime size');
-assert.equal(gitBlob,'26421e0347305437fe2b1dc149b3e4fb8b3761bd',
+assert.equal(gitBlob,'18627cc0c5fc7945732c8a910504c59ef823b6ae',
   'Phase 7 materialization characterization must track the exact current Boss-policy runtime blob');
 
 function block(id){

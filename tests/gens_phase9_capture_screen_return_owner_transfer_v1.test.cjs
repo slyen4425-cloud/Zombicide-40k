@@ -25,9 +25,9 @@ assert.match(legacy,/GensCaptureScreenReturnV1\.install\s*\(\s*\{/,
   'Capture139 must only inject existing owner-local dependencies');
 assert.match(legacy,/hasActiveSession:\(\)=>hasActiveSession\(\)/);
 assert.match(legacy,/isCaptureContext:\(\)=>isCaptureContext138\(\)/);
-assert.match(legacy,/enterWorld:\(\)=>captureEnterWorld139\(\)/);
-assert.match(legacy,/window\.captureEnterWorld139=function\(\)/,
-  'Hub renderer remains unchanged in this single-responsibility lot');
+assert.match(legacy,/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/);
+assert.match(legacy,/GensCaptureHubEntryV1\.install\(\{/,
+  'Capture139 must wire, not own, the dedicated Hub entry; world renderer remains unchanged');
 assert.doesNotMatch(legacy,/window\.goMenu\s*=/);
 assert.doesNotMatch(entry,/GensShellScreenReturnV1/,
   'public Capture entry must not also register a screen-return owner');

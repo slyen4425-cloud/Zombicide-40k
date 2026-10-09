@@ -56,7 +56,7 @@ assert.doesNotMatch(capture139,/window\.goMenu\s*=/,
 const captureScreenReturn=read('assets/gensrpg/capture/screen-return-v1.js');
 assert.match(capture139,/GensCaptureScreenReturnV1\.install\s*\(\s*\{/,
   'Capture139 must inject legacy closure bindings into the dedicated Capture return owner');
-assert.match(capture139,/enterWorld:\(\)=>captureEnterWorld139\(\)/,
+assert.match(capture139,/enterWorld:\(\)=>window\.GensCaptureHubEntryV1\.enterWorld\(\)/,
   'the Phase 5 Capture hub transition must remain bound to the same owner-local renderer');
 assert.doesNotMatch(capture139,/GensShellScreenReturnV1/,
   'Capture139 must not regain direct Shell provider registration after the Phase 9 transfer');

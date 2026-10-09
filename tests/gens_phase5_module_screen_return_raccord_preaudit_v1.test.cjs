@@ -16,8 +16,8 @@ function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 }
 
-assert.equal(indexBuf.length,8165823,'raccord guard must target current Phase 7 Dungeon generated Boss policy runtime size');
-assert.equal(gitBlob(indexBuf),'26421e0347305437fe2b1dc149b3e4fb8b3761bd',
+assert.equal(indexBuf.length,8165398,'raccord guard must target current Phase 7 Dungeon generated Boss policy runtime size');
+assert.equal(gitBlob(indexBuf),'18627cc0c5fc7945732c8a910504c59ef823b6ae',
   'raccord guard current Phase 7 generated Boss policy runtime blob drifted');
 
 const shared=json('assets/gensrpg/shell/module-screen-return-contract-v1.json');
@@ -39,9 +39,9 @@ assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert b
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
 assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'"),
   'Phase 3 guard must explicitly recognize Survival, Dungeon, Tactical and Capture partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:85'),
+assert.ok(phase3Test.includes('productionOwnerGraph:86'),
   'Phase 3 guard must track both Capture auxiliary owners in the 85-file production graph');
-assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:2"),
+assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:3"),
   'Phase 3 guard must account for session-start and screen-return Capture owners');
 
 const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');

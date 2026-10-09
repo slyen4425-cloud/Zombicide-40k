@@ -80,6 +80,69 @@ try{
   console.log('PIN_SIMULATION_REPORT '+outputFile);
   console.log('PIN_SIMULATION_RESULT '+JSON.stringify(findings.counts));
   const failures=results.filter(x=>!x.ok);console.log('PIN_SIMULATION_FAILURES '+JSON.stringify(failures.slice(0,120)));
+
+  // Second sandbox pass: rebase only failed active-runtime pins. The old
+  // historical baselines stay untouched for rollback tests. This is a
+  // classification rehearsal, not a commit or an authorization to bulk edit.
+  const backups=new Map(),alterations=[];
+  const initialFailures=results.filter(r=>!r.ok);
+  for(const r of initialFailures){
+    const file=path.join(root,r.file),before=fs.readFileSync(file,'utf8');
+    let after=before;
+    if(r.category==='current-runtime-pin'){
+      after=before.replaceAll(String(oldLen),String(targetLen)).replaceAll(old,target);
+    }else if(r.category==='version-whitelist'){
+      const pair='['+oldLen+',\''+old+'\']';
+      assert.equal(before.split(pair).length-1,1,'whitelist old baseline must be present once');
+      after=before.replace(pair,pair+',\n  ['+targetLen+',\''+target+'\']');
+    }else if(r.category==='mixed-runtime-and-historical-rollback'){
+      // Preserve the original *before* baseline (a real historical commit).
+      const afterLine='const after={bytes:'+oldLen+',blob:\''+old+'\'};';
+      if(before.includes(afterLine)){
+        after=before.replace(afterLine,'const after={bytes:'+targetLen+',blob:\''+target+'\'};');
+      }else{
+        // This characterization has a current-runtime identity check and a
+        // reconstructed historical source. Update ONLY the current identity.
+        assert.equal(before.includes('assert.equal(activeBytes.length,'+oldLen+')'),true);
+        after=before.replace('assert.equal(activeBytes.length,'+oldLen+')','assert.equal(activeBytes.length,'+targetLen+')')
+          .replace("assert.equal(indexBlob(activeBytes),'"+old+"')","assert.equal(indexBlob(activeBytes),'"+target+"')");
+      }
+    }
+    assert.notEqual(after,before,'expected a targeted dry-run edit for '+r.file);
+    backups.set(file,before);
+    alterations.push({file:r.file,category:r.category,changes:(before.length===after.length?0:after.length-before.length)});
+    fs.writeFileSync(file,after);
+  }
+  const reruns=[];
+  try{
+    let nextR=0;
+    async function rerunWorker(){
+      while(nextR<initialFailures.length){
+        const ent=initialFailures[nextR++];
+        const outcome=await new Promise(resolve=>{
+          let textOut='',exited=false;
+          const child=spawn(process.execPath,[ent.file],{cwd:root,env:{...process.env,CI:'true'},stdio:['ignore','pipe','pipe']});
+          const tm=setTimeout(()=>child.kill('SIGKILL'),20000);
+          for(const stream of [child.stdout,child.stderr])stream.on('data',b=>{if(textOut.length<15000)textOut+=b.toString()});
+          child.on('error',e=>{if(!exited){exited=true;clearTimeout(tm);resolve({ok:false,reason:'spawn-error',details:String(e)})}});
+          child.on('close',(code,signal)=>{if(exited)return;exited=true;clearTimeout(tm);
+            let err=textOut.split(/\r?\n/).filter(s=>/AssertionError|ERR_ASSERTION|actual:|expected:|Error \[/.test(s)).slice(0,8).join(' | ');
+            resolve({ok:code===0,reason:code===0?'pass':signal==='SIGKILL'?'timeout':/AssertionError|ERR_ASSERTION/.test(textOut)?'assertion-failure':'other-failure',details:err.slice(0,520)});
+          });
+        });reruns.push({file:ent.file,category:ent.category,...outcome});
+      }
+    }
+    await Promise.all(Array.from({length:6},()=>rerunWorker()));
+    const rec={};for(const r of reruns)rec[r.reason]=(rec[r.reason]||0)+1;
+    const fails=reruns.filter(x=>!x.ok);
+    console.log('PIN_REBASE_DRYRUN '+JSON.stringify({filesChangedInEphemeralRunner:alterations.length,afterSimulatedRebase:rec,failures:fails}));
+    findings.rebaseDryrun={filesChangedInEphemeralRunner:alterations.length,summary:rec,failures:fails,alterations};
+    fs.writeFileSync(outputFile,JSON.stringify(findings,null,2)+'\n');
+  }finally{
+    for(const [file,content] of backups)fs.writeFileSync(file,content);
+    for(const [file,content] of backups)assert.equal(fs.readFileSync(file,'utf8'),content,'reverted pinned test '+file);
+  }
+
   console.log('PIN_SIMULATION_NOT_A_COMMIT: patched runtime exists only in ephemeral GitHub Actions checkout');
 }finally{
   fs.writeFileSync(path.join(root,'index.html'),original);

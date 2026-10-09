@@ -1,0 +1,26 @@
+name: GenSrpG Phase9 Capture138 pin simulation (isolated)
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture138-delayed-hub-guard-2026-10-09'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture138-pin-simulation.yml'
+      - 'scripts/gens_capture138_pin_simulation_audit.cjs'
+permissions:
+  contents: read
+jobs:
+  pin-simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer dépôt réel
+        uses: actions/checkout@v4
+      - name: Tester les empreintes contre les 40 octets proposés (runtime runner seulement)
+        run: node scripts/gens_capture138_pin_simulation_audit.cjs
+      - name: Conserver le rapport classifié
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture138-pin-simulation
+          path: /tmp/gens-capture138-pin-simulation.json
+          if-no-files-found: warn

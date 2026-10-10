@@ -1,3 +1,14 @@
+# PHASE 9 — EXTRACTION PHYSIQUE SEED CAPTURE : CHECKPOINT GREEN — 2026-10-10
+
+- **Jalon terminé et checkpoint confirmé** : `checkpoint/gensrpg-phase9-capture-physical-seed-extraction-green-2026-10-10` → **`f193f86d1c5d09bf905540863d9f1757d86e08aa`**. Base de départ `74866ac8c824bc13fb6d44e3571f683b57af4769` ; branche de travail `work/gensrpg-phase9-capture-physical-seed-extraction-2026-10-10`. `main` inchangée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **CI triple exactement au SHA validé** : Architecture + Browser [38066969716](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969716) SUCCESS ; Firefox [38066969684](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969684) SUCCESS ; Tactical Dock [38066969705](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969705) SUCCESS.
+- **Responsabilité extraite** : seed natif V16.162 Capture en `assets/gensrpg/capture/builtin-seed-v1.js`, 189 500 octets, blob `15721cc9d1f13368aee2d1ea2e0de22945ed3960` ; `index.html` extrait 7 975 990 octets, blob `2f2edfa5a1e229e4630889e7f0d5442199e221eb`, rollback exact vers ancien HTML vérifié.
+- **Régressions résolues sans masquer de tests** : cinq sentinelles historiques de navigation/identité Capture avaient encore un accès inline au seed ; elles vérifient désormais les constantes réellement propriétaires dans le JS externe et le chargent depuis l'URL de production. A/B/C Capture, chargement Shell, provider Capture, composition quatre modules et protections Dungeon/Survie/éditeur passent dans la CI complète.
+- **Validation et limite** : GREEN technique de l'extraction du **seed uniquement**, non achèvement de la migration physique du moteur. Validation manuelle de l'extraction à recueillir. Prévisualisation SHA du checkpoint : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/f193f86d1c5d09bf905540863d9f1757d86e08aa/preview.html .
+- **Suite autorisée** : avant tout nouveau code, checkpoint initial **neuf** sur ce SHA et branche dédiée pour le propriétaire monde/exploration Capture, à cadrer face à équipe/combats sans multi-autorité. Charte §26 : source `index.html` exacte du nouveau SHA requise et contrôlée avant toute extraction; ne pas réutiliser aveuglément l'archive initiale. Ne pas toucher à `main`, ni Phase 10, ni fusionner les branches divergentes.
+
+---
+
 # PHASE 9 — EXTRACTION PHYSIQUE DU SEED MONSTER CAPTURE — 2026-10-10
 
 - **Chantier** : déplacer hors du runtime HTML le script autonome `builtinMonsterCapture162` (~189,5 Ko), propriétaire des données de démonstration Capture, **sans déplacement des moteurs de jeu**, dans `assets/gensrpg/capture/builtin-seed-v1.js`.

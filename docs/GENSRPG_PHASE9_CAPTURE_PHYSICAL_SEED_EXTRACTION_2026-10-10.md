@@ -23,3 +23,14 @@
 
 ## Suite bornée
 Passer ensuite à l'extraction des propriétaires **monde/exploration, équipe/réserve et combat Capture** depuis les blocs encore embarqués, de manière progressive et sans recréation du gameplay. Respecter pour chaque responsabilité le protocole checkpoint → unique autorité → RED/parité → retrait ancienne autorité → triple CI → checkpoint GREEN. Phase 10 n'est pas démarrée.
+
+## Clôture — extraction V16.162 triple CI GREEN (10 octobre 2026)
+
+- Checkpoint final : `checkpoint/gensrpg-phase9-capture-physical-seed-extraction-green-2026-10-10`, SHA **`f193f86d1c5d09bf905540863d9f1757d86e08aa`**.
+- Architecture + Browser : [38066969716](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969716) **SUCCESS**. Cette CI inclut le vrai parcours Monster Capture depuis le Shell, le maintien du seed en fichier externe, les axes A/B/C, la sauvegarde/reprise, le combat, la navigation Dungeon/Survie et les scénarios de non-interférence.
+- Firefox : [38066969684](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969684) **SUCCESS**.
+- Tactical Dock : [38066969705](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38066969705) **SUCCESS**.
+- Correctif du test Shell actuel : `2db6e505331f3c456083a7c186e95ee29d36321a`, puis autres sentinelles historiques dans `f193f86d1c5d09bf905540863d9f1757d86e08aa`. Les assertions sur les valeurs réelles du profil et le chargement effectif ont été conservées ; les tests ne tentent plus d'exécuter un script Capture inline supprimé.
+- Impact production : `main` inchangée, ni profil ni règle ni combat édité. Le chantier reste **limité au seed Capture** ; le contrat `partial-runtime-loaded` est exact, puisque monde/équipe/combat sont encore dans l'ancien HTML.
+- Test manuel ciblé à confirmer : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/f193f86d1c5d09bf905540863d9f1757d86e08aa/preview.html — Capture → création de partie → combat → sauvegarder et quitter → reprendre, puis vérifier présence de la bibliothèque de créatures.
+- Prochain chantier (séparé et protégé) : extraction d'une autorité **monde/exploration** Capture, sans réinventer gameplay ; faire d'abord un checkpoint initial et vérifier l'index courant selon la charte §26.

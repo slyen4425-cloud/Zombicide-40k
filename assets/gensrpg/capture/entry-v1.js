@@ -46,10 +46,11 @@
     if(root.gensCurrentCaptureBattle && root.gensCurrentCaptureBattle.phase!=="ended")return false;
     if(typeof root.backHomeFromGame!=="function"||typeof root.showGensRootHome!=="function")return false;
     if(sessionStartOwner.stop()!==true)return false;
-    if(hub.leaveWorld()!==true)return false;
+    // Shell navigation can render the Hub again while the resumable session
+    // marker is kept. Close the Capture-owned UI AFTER that navigation.
     root.backHomeFromGame();
     root.showGensRootHome();
-    return true;
+    return hub.leaveWorld()===true;
   }
 
   function dispose(){

@@ -8770,7 +8770,7 @@ function applyModeEditorVisibility(){
   const editorHubVisible=!!editorHub && editorHub.style.display!=="none";
   const familyContext=editorHubVisible ? gensSelectedFamily : null;
   const dungeon=(familyContext==="adventure") || (familyContext!=="survival" && (activeProfile?.gameStyle==="dungeon" || isDungeonMode()));
-  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=dungeon?"":"none";
+  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=dungeon&&!window.GensCaptureV1?.isProfile?.(activeProfile)?"":"none";
   const dsb=document.getElementById("sessionDungeonSetupBtn");if(dsb)dsb.style.display=dungeon?"":"none";
   const gph=document.getElementById("gameProfileEditorHubBtn");if(gph)gph.style.display=dungeon?"none":"";
   const survivalEditor=document.getElementById("survivalModEditorHubBtn");if(survivalEditor)survivalEditor.style.display=dungeon?"none":"";const rpgEditor=document.getElementById("rpgUniverseEditorHubBtn");if(rpgEditor)rpgEditor.style.display=dungeon?"":"none";
@@ -9856,7 +9856,7 @@ function syncEditorHubForActiveFamily(){
   const dungeonBtn=document.getElementById("dungeonAdvancedEditorBtn");
   if(survivalBtn)survivalBtn.style.display=isRpg?"none":"";
   if(rpgBtn)rpgBtn.style.display=isRpg?"":"none";
-  if(dungeonBtn)dungeonBtn.style.display=isRpg?"":"none";
+  if(dungeonBtn)dungeonBtn.style.display=isRpg&&!window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.())?"":"none";
 
   const hub=document.getElementById("editorHub");
   if(hub){
@@ -9984,6 +9984,7 @@ function loadDungeonAdventureIntoEditor(id){
   renderDungeonAdventureLibrary();
 }
 function openDungeonAdvancedEditor(){
+  if(window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.()))return;
   if(hasActiveSession()){alert("Les réglages structurels Dungeon sont verrouillés pendant une partie.");return}
   hideMainScreens();const e=document.getElementById("dungeonAdvancedEditor");if(e)e.style.display="block";
   const list=ensureDungeonAdventureLibrary(),target=list.find(a=>a.id===activeDungeonAdventureId())||list[0];if(target)loadDungeonAdventureIntoEditor(target.id);renderDungeonAdventureLibrary();window.scrollTo(0,0)

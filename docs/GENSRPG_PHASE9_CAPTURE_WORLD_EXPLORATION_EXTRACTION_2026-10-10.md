@@ -1,6 +1,6 @@
-# Phase 9 — Capture : prochain transfert propriétaire Monde / Exploration
+# Phase 9 — Capture : extraction physique Monde / Exploration
 
-10 octobre 2026 — **chantier préparé, pas encore de changement runtime**.
+10 octobre 2026 — **transfert réalisé, parité technique vérifiée le 11 octobre 2026**.
 
 **Base GREEN** : `f193f86d1c5d09bf905540863d9f1757d86e08aa`, checkpoint `checkpoint/gensrpg-phase9-capture-physical-seed-extraction-green-2026-10-10`; Architecture + Browser 38066969716, Firefox 38066969684, Tactical 38066969705 SUCCESS. **Point de départ** : `checkpoint/gensrpg-start-phase9-capture-world-exploration-extraction-2026-10-10` sur le même SHA. Branche : `work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10`.
 
@@ -12,7 +12,7 @@
 
 **Gate** : inventaire ciblé, preuve RED ou caractérisation du point de raccord, extraction minimale réversible du propriétaire, ancienne autorité retirée, tests unitaires/rollback/parité, parcours Capture réel (Hub jour suivant, combat, victoire, Save Quit/reprise), tests des quatre modules, Architecture+Browser + Firefox + Tactical au SHA identique, checkpoint lisible et test utilisateur.
 
-**Statut** : preparation gouvernée ; pas de GREEN d'extraction monde revendiqué.
+**Statut historique d'ouverture** : préparation initiale du chantier, conservée ci-dessous pour traçabilité ; transfert exécuté ensuite.
 
 ## Transfert runtime physique exécuté — 10 octobre 2026
 
@@ -21,4 +21,14 @@
 - Commit runtime : `9420868a7c589325ff59686e8433bd96d5cac571`, branche dédiée seulement. Workflow d'application `38082335976` SUCCESS.
 - Tests : restauration Git blob exacte ; conservation clés/valeurs/règles, parité VM jours/tours ; navigateur réel : Capture sans Dungeon, jour 2, victoire, recharge, reprise jour 3, Save Quit, seconde reprise/fermeture, ancienne sauvegarde Dungeon non interférente. Tous SUCCESS dans le workflow d'application.
 - Frontière : monde, lieux, tours, événements et rendu Hub déplacés. Combat, XP, équipe/réserve, stockage Core, Shell, Dungeon, Survie, Tactical, PvP et PWA inchangés. Les API globales historiques restent pour leurs appelants ; leur découplage futur nécessite un lot distinct.
-- Gouvernance : manifestes et sentinelles de composition réalignés sans réduction de portée. **Triple CI finale et validation utilisateur encore requises avant checkpoint GREEN.** Production `main` gelée, Phase 10 interdite.
+- Gouvernance : manifestes et sentinelles de composition réalignés sans réduction de portée. **Triple CI finale désormais validée sur un SHA identique ; validation utilisateur encore requise avant checkpoint GREEN final.** Production `main` gelée, Phase 10 interdite.
+
+## Gate technique vérifiée — 11 octobre 2026
+
+- **SHA gelé du runtime** : `b291cb596804963f51aab267f5a1e615a92e80e4` ; `main` demeure `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Architecture + Browser : [38083270491](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38083270491) **SUCCESS**.
+- Firefox : [38083270510](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38083270510) **SUCCESS**.
+- Tactical Dock : [38083270494](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38083270494) **SUCCESS**.
+- **Checkpoint intermédiaire de sûreté technique** : `checkpoint/gensrpg-phase9-capture-world-exploration-technical-green-2026-10-11`, pointe sur le SHA testé ci-dessus. Il ne remplace **pas** le checkpoint GREEN final conditionné par la validation manuelle.
+- **Prévisualisation smartphone / navigateur** : https://htmlpreview.github.io/?https://github.com/slyen4425-cloud/Zombicide-40k/blob/b291cb596804963f51aab267f5a1e615a92e80e4/preview.html . Vérifier l'entrée dans Capture, une journée supplémentaire, une rencontre, combat/victoire, Save & Quit, reprise et un retour sans pollution Dungeon. Aucun succès manuel utilisateur n'est déclaré à ce stade.
+- **Prochain propriétaire physique prévu après gate manuel et checkpoint final** : équipe/réserve Capture, distinct du monde déjà extrait et du combat. Nouveau chantier, nouveau checkpoint de départ obligatoire ; si `index.html` doit être inspecté, fournir une copie au blob Git exact selon charte §26.

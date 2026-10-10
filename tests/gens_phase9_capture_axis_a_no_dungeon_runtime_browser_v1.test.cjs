@@ -145,7 +145,7 @@ async function startCapture(page){
     // is ever built here. The real Capture UI must work in a clean browser.
     const observations=[];
     const snapshot=async label=>{
-      const s=await page.evaluate(stage=>{
+      const s=await page.evaluate(({stage,captureId})=>{
         const profile=typeof getActiveGameProfile==='function'?getActiveGameProfile():null;
         const display=id=>{
           const el=document.getElementById(id);
@@ -166,10 +166,10 @@ async function startCapture(page){
           captureHub:display('captureGameHub'),
           dungeonPanel:display('gensDungeonCore01'),
           dungeonMenu:display('dungeonMenuPanel'),
-          captureWorldState:localStorage.getItem('gensrpg_capture_world_v1_'+CAPTURE_ID),
+          captureWorldState:localStorage.getItem('gensrpg_capture_world_v1_'+captureId),
           battle:window.gensCurrentCaptureBattle?.phase||null
         };
-      },label);
+      },{stage:label,captureId:CAPTURE_ID});
       observations.push(s);
       console.log('[phase9-capture-axis-a] snapshot '+JSON.stringify(s));
       assert.equal(s.dungeonRuntime,null,label+': private Dungeon runtime unexpectedly created');

@@ -7,6 +7,8 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
+const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
+const captureSeedUrl='assets/gensrpg/capture/builtin-seed-v1.js?v=1';
 
 const SURVIVAL_ID='game_profile_zombicide_base';
 const DUNGEON_ID='game_profile_dungeon_demo';
@@ -18,7 +20,8 @@ assert.match(indexSource,/function showGensRootHome\(\)/,'real Shell root naviga
 assert.match(indexSource,/function backToGensFamily\(\)/,'real Shell game-to-family owner must exist');
 assert.match(indexSource,/window\.gensSwitchUniverse155=function\(profileId,family\)/,'V16.155 content-family switch owner must exist');
 assert.match(indexSource,/window\.gensMode151=function\(\)/,'V16.151 mode authority must exist');
-assert.match(indexSource,/id="builtinMonsterCapture162"/,'built-in Capture seed must exist');
+assert.match(indexSource,/<script id="builtinMonsterCapture162" src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"><\/script>/,'built-in Capture seed must exist');
+assert.match(captureSeedSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production external Capture seed must retain the canonical profile id');
 assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production bootstrap must not load the retired Survival/Dungeon guard');
 
 const shellOwner=indexSource.indexOf('async function startConfiguredGame(){');
@@ -43,8 +46,12 @@ function exactScript(id){
   assert.ok(start>customScriptEnd,'production script '+id+' must exist after custom-content support');
   const openEnd=indexSource.indexOf('>',start);
   const end=indexSource.indexOf('</script>',openEnd);
+  if(id==='builtinMonsterCapture162'){
+    assert.match(indexSource.slice(start,openEnd+1),/src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"/,'production Capture seed URL must remain canonical');
+    assert.equal(indexSource.slice(openEnd+1,end),'','old inline Capture seed must remain retired');
+  }
   assert.ok(openEnd>start&&end>openEnd,'production script '+id+' must have an exact boundary');
-  return {id,start,source:indexSource.slice(openEnd+1,end)};
+  return {id,start,source:id==='builtinMonsterCapture162'?null:indexSource.slice(openEnd+1,end),url:id==='builtinMonsterCapture162'?captureSeedUrl:null};
 }
 
 const ownerIds=[
@@ -125,7 +132,11 @@ const server=http.createServer((req,res)=>{
   const installOwners=async()=>{
     for(const owner of ownerScripts){
       mark('install-'+owner.id);
-      await page.addScriptTag({content:owner.source});
+      if(owner.url){
+        await page.addScriptTag({url:'http://127.0.0.1:'+port+'/'+owner.url});
+      }else{
+        await page.addScriptTag({content:owner.source});
+      }
     }
     await page.evaluate(()=>{try{window.gensReconcile151?.('four-module-install')}catch(e){}});
   };

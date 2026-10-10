@@ -24,7 +24,7 @@ const REPLACEMENT=Buffer.from('<script id="builtinMonsterCapture162" src="assets
 const gitBlob=x=>crypto.createHash('sha1').update(Buffer.from('blob '+x.length+String.fromCharCode(0))).update(x).digest('hex');
 function check(condition,message){assert.ok(condition,message)}
 function verify(){
-  const index=fs.readFileSync(indexPath);
+  const index=require('../tests/helpers/gens_capture_world_extraction_snapshot_v1.cjs').seedEraIndexBytes(root);
   const src=fs.readFileSync(assetPath);
   assert.equal(index.length,extractedLength,'extracted index size');
   assert.equal(gitBlob(index),extractedSha,'extracted index Git blob');

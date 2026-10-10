@@ -12,7 +12,7 @@ const oldOpen='<script id="builtinMonsterCapture162">';
 const oldClose='</script>';
 const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+String.fromCharCode(0))).update(b).digest('hex');
 function legacyBytes(root=path.resolve(__dirname,'../..')){
-  const index=fs.readFileSync(path.join(root,'index.html'));
+  const index=require('./gens_capture_world_extraction_snapshot_v1.cjs').seedEraIndexBytes(root);
   const seed=fs.readFileSync(path.join(root,'assets/gensrpg/capture/builtin-seed-v1.js'));
   assert.equal(index.length,7975990,'externalized index length');
   assert.equal(hash(index),'2f2edfa5a1e229e4630889e7f0d5442199e221eb','externalized index blob');

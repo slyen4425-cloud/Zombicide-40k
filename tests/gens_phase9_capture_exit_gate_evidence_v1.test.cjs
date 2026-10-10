@@ -52,7 +52,10 @@ const expected=['entry-v1.js','hub-entry-v1.js','module-contract-v1.json','scree
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
 const exportedOwnerFile=existing.filter(x=>x.endsWith('.js'));
 assert.equal(exportedOwnerFile.length,4);
-assert.doesNotMatch(entry,/\bfunction dispose\s*\(/,'public capture coordinator has no symmetric disposal entry yet');
+assert.match(entry,/\bfunction dispose\s*\(/,'Capture entry now has explicit shutdown/dispose ownership');
+assert.match(entry,/\bfunction stop\s*\(/,'Capture entry must implement in-game shutdown');
+assert.match(hub,/\bfunction leaveWorld\s*\(/,'Capture Hub must release its owned UI');
+assert.match(session,/\bfunction stop\s*\(/,'Capture save owner must preserve persisted world on shutdown');
 assert.doesNotMatch(entry,/\bfunction (?:startBattle|renderWorld|saveWorld|resumeSession)\s*\(/);
 assert.doesNotMatch(hub,/\bfunction (?:startBattle|resolveCombat)\s*\(/);
 assert.deepEqual(Object.keys(full.criteria),[

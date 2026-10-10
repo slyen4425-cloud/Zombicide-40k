@@ -1,3 +1,15 @@
+# PHASE 9 — AXE A : SENTINELLE NAVIGATEUR RUNTIME CAPTURE SEUL — 2026-10-10
+
+- **Branche unique** : `work/gensrpg-phase9-capture-runtime-isolation-e2e-2026-10-10`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-runtime-isolation-e2e-2026-10-10` sur `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Dernier checkpoint GREEN **audit uniquement** : `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10`, même SHA (triple CI 37998055014, 37998055029, 37998054983 SUCCESS).
+- **But exclusif / propriétaire** : caractériser dans navigateur Chromium mobile le vrai parcours Capture depuis `preview.html` en session froide **sans précréer Dungeon** : sélection du profil, choix du dresseur/créature, lancement via Shell, progression du monde, combat Capture réel, victoire et retour Hub. Observer `gensrpg_dungeon_runtime_v2`, `gensrpg_dungeon_state_v1`, identité `isDungeonMode()`, `gensMode151()`, UI et session. Ne pas confondre stockage partagé avec état privé Dungeon actif. Faire RED diagnostique si un état privé Dungeon est créé.
+- **Périmètre protégé** : aucun changement runtime `index.html`, assets, Core, Shell, Dungeon, Survie, Tactical, PvP, mode Capture existant, sauvegardes, labs ou `main`. **Règle §26 : ne pas lire/écrire le gros index par API** ; la sentinelle exécutée en CI sur la vraie branche le lira naturellement depuis checkout.
+- **Test initial** : réutiliser le vrai test navigateur Phase 5 Capture victoire/reprise, mais **sans** initialiser Dungeon, avec preuves à chaque étape et sans effacer les échecs du test initial. Conserver E2E existant avec sauvegarde Dungeon périmée. Premier lot **diagnostic seulement** et non correction aveugle.
+- **Risques** : backend partagé `z40k_session_active_v1`, runtime Dungeon privé résiduel, outils historiques Capture139, transition de profil; branches parallèles divergentes `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` et `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09` inchangées.
+- **CI** : ajouter une étape explicite à `.github/workflows/gensrpg-architecture-sentinels.yml` pour exécuter ce scénario Playwright; conserver Firefox et Tactical; triple CI **au même SHA** avant checkpoint GREEN du diagnostic. La Phase 9 entière reste `phaseExitReady:false` tant que B/C et l'absence de dépendance privée ne sont pas validés.
+- **Main gelée** : `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — AUDIT DE SORTIE CANONIQUE (PÉRIMÈTRE SANS RUNTIME) — 2026-10-09
 
 - **Objectif** : trancher les critères restants Phase 9 de manière mesurable et regrouper les véritables obstacles au critère de sortie : Capture fonctionnel en démarrage/jeu/fermeture **sans runtime privé Dungeon ni Survie**.

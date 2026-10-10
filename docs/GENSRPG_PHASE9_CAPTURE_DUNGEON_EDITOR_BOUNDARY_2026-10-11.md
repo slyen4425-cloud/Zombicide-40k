@@ -31,3 +31,10 @@ La carte **Dungeon** du hub d'édition Capture était héritée de la famille «
 - Triple CI **Architecture+Browser, Firefox, Tactical** à vérifier sur un même SHA après la mise à jour des documents (GITHUB_TOKEN push de workflow n'émet pas automatiquement une nouvelle run).
 - Aucune validation manuelle utilisateur de l'interface corrigée ne doit être inventée. Checkpoint technique seulement après les trois CI ; checkpoint final GREEN après gate manuel si requis par la charte.
 - Preview au SHA documenté après validation ; puis lot physique **Équipe / Réserve Capture** distinct, avec checkpoint de départ et source `index.html` exacte selon §26.
+
+## Alignement des sentinelles d'empreinte — 11 octobre 2026
+
+- Le premier run Architecture sur le runtime corrigé a détecté exactement deux assertions d'empreinte du **fichier index actif** restées à l'ancienne valeur ; aucune erreur du test visuel Capture/Dungeon.
+- Repin **mécanique et borné** (deux fichiers seulement) : `tests/gens_phase2_inline_owner_manifest_v11411.test.cjs` et `tests/gens_phase2_inline_global_last_owner_v11411.test.cjs`. Les valeurs historiques de source, les tables de propriétaires et les fixtures anciennes restent inchangées.
+- Workflow [38094666974](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094666974) **SUCCESS**, commit test `0176ebc912ffb13cc258d2c8b601d57cc6f88819`. Les deux sentinelles, restauration World V1 et Seed V16.162, valeurs du créateur et rollback index passent.
+- Triple CI finale sur le SHA documentaire du présent rapport en attente de contrôle ; aucun checkpoint final créé tant que ces validations ne sont pas vertes.

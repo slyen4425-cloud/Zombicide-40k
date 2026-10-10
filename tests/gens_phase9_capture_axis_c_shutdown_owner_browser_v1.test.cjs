@@ -355,12 +355,13 @@ async function startCapture(page){
     assert.equal(stopped.session,'1','Save & Quit must preserve a resumable session without creating Dungeon state');
     assert.equal(JSON.parse(stopped.world||'null')?.day,initialWorld.day,'Capture world day must remain persisted');
     assert.equal(stopped.participants,initialParticipants,'Capture team selection must survive Save & Quit');
-    assert.equal(stopped.exitCount,0,'Capture exit UI must be disposed after leaving world');
+    assert.equal(stopped.exitCount,1,'One permanent, hidden Capture control must be reused without duplicate listeners');
     assert.equal(stopped.entry?.inWorld,false,'Capture entry must no longer own an active world');
     assert.equal(stopped.hubOwner?.inWorld,false,'Capture Hub must release its active-session UI');
     assert.equal(stopped.hubOwner?.pendingScrolls,0,'Capture Hub must cancel pending scroll animation frames');
     assert.equal(stopped.dungeonRuntime,null);assert.equal(stopped.dungeonState,null);
     assert.equal(stopped.dungeonMode,false);assert.deepEqual(stopped.overlays,[]);
+    assert.equal(await exit.isVisible(),false,'Save & Quit control must not intercept clicks outside Capture');
 
     mark('resume-after-explicit-exit-without-page-reload');
     await selectProfile(page,CAPTURE_ID);
@@ -383,7 +384,7 @@ async function startCapture(page){
       dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2')
     }),CAPTURE_ID);
     assert.equal(afterSecondExit.day,4);
-    assert.equal(afterSecondExit.controls,0);
+    assert.equal(afterSecondExit.controls,1);
     assert.equal(afterSecondExit.hub?.inWorld,false);
     assert.equal(afterSecondExit.hub?.pendingScrolls,0);
     assert.equal(afterSecondExit.dungeonRuntime,null);

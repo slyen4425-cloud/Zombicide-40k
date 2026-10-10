@@ -338,7 +338,7 @@ async function startCapture(page){
           onclick:(e.getAttribute('onclick')||'').slice(0,180),
           className:typeof e.className==='string'?e.className.slice(0,110):''
         }))
-        .filter(x=>/quitt|sauv|retour|accueil|menu|fermer|close|home|exit|logout/i.test(Object.values(x).join(' ')))
+        .filter(x=>/quitter|sauvegarder|sauver|enregistrer|retour|accueil|\bmenu\b|fermer|\bclose\b|\bhome\b|\bexit\b|logout/i.test([x.text,x.aria,x.title,x.onclick,x.id].join(" ")))
         .slice(0,90);
     });
     console.log('[phase9-capture-axis-c] real-visible-exit-candidates '+JSON.stringify(actions,null,2));
@@ -360,7 +360,26 @@ async function startCapture(page){
     assert.equal(beforeNavigation.dungeonRuntime,null);
     assert.ok(beforeNavigation.session==='1');
     assert.equal(beforeNavigation.hasCaptureEntryDispose,false,'entry still lacks coordinated dispose: characterization, not completed shutdown');
-    assert.ok(actions.length>0,'no candidate navigation/shutdown action observed in real Capture UI');
+    // No DOM control for Save & Quit has yet been proven. Navigation to
+    // the root and terminating Capture are distinct contracts.
+    const directStop=actions.filter(x=>/quitter|sauvegarder|sauver|enregistrer|logout|exit/i.test([x.text,x.aria,x.title,x.onclick].join(' ')));
+    console.log('[phase9-capture-axis-c] visible-direct-stop '+JSON.stringify(directStop));
+    mark('characterize-shell-root-navigation-not-shutdown');
+    await page.evaluate(()=>{if(typeof showGensRootHome!=='function')throw new Error('Shell root owner missing');showGensRootHome()});
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensRootHome')).display!=='none',null,{timeout:10000});
+    const rootState=await page.evaluate(()=>({
+      root:getComputedStyle(document.getElementById('gensRootHome')).display,
+      session:localStorage.getItem('z40k_session_active_v1'),
+      captureEntryStatus:window.GensCaptureV1?.status?.()||null,
+      sessionOwnerStatus:window.GensCaptureSessionStartV1?.status?.()||null,
+      hubStatus:window.GensCaptureHubEntryV1?.status?.()||null,
+      dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2'),
+      world:localStorage.getItem('gensrpg_capture_world_v1_gp_mt7ker7t_m2iw9')
+    }));
+    console.log('[phase9-capture-axis-c] shell-root-navigation-state '+JSON.stringify(rootState));
+    assert.equal(rootState.dungeonRuntime,null,'Shell navigation must not create Dungeon runtime');
+    assert.equal(JSON.parse(rootState.world||'null')?.day,3,'Shell navigation must preserve Capture world');
+
 
     assert.deepEqual(errors,[],'Capture-only browser scenario must not raise runtime errors');
     console.log(JSON.stringify({

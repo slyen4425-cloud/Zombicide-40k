@@ -11,3 +11,10 @@ Date : 10 octobre 2026. **Ce jalon ne valide PAS la fermeture autonome avant obs
 - **Méthode** : nouvel essai Chromium mobile sur vraie preview en contexte vierge, puis scan des **éléments DOM visibles** des actions de sortie et relevé d'état des propriétaires publics, sans consulter le contenu exact du gros `index.html` (charte §26). À la suite, écrire le test définitif du **vrai clic de fermeture** ou signaler si aucun contrôle ne l'expose.
 - **Risque** : `showGensRootHome()` est potentiellement une navigation, et `DungeonCore01.quit()` appartient à Dungeon : ni l'un ni l'autre ne doit être présenté comme un shutdown Capture sans test. Ne pas confondre fermeture de page/reload validée en axe B avec fermeture de session.
 - **Gates** : test ciblé GREEN pour la caractérisation, puis pas de checkpoint GREEN de fermeture sans test explicite du cycle arrêt/réouverture et triple CI du HEAD final. Ne pas annoncer Phase 9 achevée.
+
+## Résultat du premier diagnostic ciblé — 10 octobre 2026
+
+- GitHub Actions [38038475133](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38038475133), **SUCCESS**. Scénario complet Capture → jour 3 après vrai reload/reprise conservé, aucune clé Dungeon créée.
+- Le scan initial ciblant naïvement `sauv` a produit **un faux positif** : « EXPLORER Lieux, routes et zones **sauvages** » n'est pas un contrôle de sauvegarde. **Ce sélecteur a été corrigé** pour ne jamais servir de fausse preuve de bouton Quitter.
+- API réellement détectée : `GensCaptureV1.dispose` **absente** ; `GensCaptureSessionStartV1.dispose`, `GensCaptureHubEntryV1.dispose`, `GensCaptureScreenReturnV1.dispose` **présentes** ; `showGensRootHome` et `DungeonCore01.quit` existent, mais le dernier appartient exclusivement à Dungeon. Ne pas créer un nouvel appel Dungeon depuis Capture.
+- **Décision :** prouver séparément le comportement du retour Shell, puis identifier l'autorité de fermeture véritable. **Aucun arrêt Capture réel prouvé à ce stade**.

@@ -1,3 +1,16 @@
+# PHASE 9 — AXE A : CAPTURE SANS PARTIE DUNGEON — GREEN CIBLÉ — 2026-10-10
+
+- **Checkpoint immuable GREEN du scénario ciblé** : `checkpoint/gensrpg-phase9-capture-axis-a-runtime-isolation-green-2026-10-10` SHA `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`. **Ce GREEN valide le scénario navigateur de l'axe A, et NON la sortie de la Phase 9**.
+- **Triple CI même SHA SUCCESS** : Architecture+Browser `38025145492` (347 étapes architecture et 56 étapes browser), Firefox `38025145499`, Tactical Dock `38025145507`.
+- **Parcours navigateur réel Chromium sur base vierge** : profil Capture sans style Dungeon, sélection dresseur/créature, lancement du Hub (jour 1), progression jour 2, combat Capture réel, attaque, victoire puis retour au Hub. **Aucun `gensrpg_dungeon_runtime_v2` ou `gensrpg_dungeon_state_v1` créé** aux captures des étapes. Le scénario ne prépare PAS de sauvegarde ni session Dungeon.
+- **Limite explicite** : absence d'état Dungeon persisté et d'identité Dungeon pour le parcours contrôlé ne prouve pas la désactivation exhaustive de toute autorité historique ni le teardown/restore Capture. Les scripts Survie non activés et le cycle complet seront vérifiés par des preuves distinctes.
+- **Branche de lot** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10` ; **checkpoint départ** `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Aucune modification du runtime, de `index.html`, ni merge.
+- **Rapport** `docs/GENSRPG_PHASE9_CAPTURE_AXIS_A_RUNTIME_ISOLATION_2026-10-10.md` ; sentinelle `tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs` intégrée à Architecture+Browser.
+- **Étapes critiques suivantes** : preuve plus stricte de l'absence d'autorité privée Dungeon/Survie, axe B (sauvegarde/reprise Capture sans fixture Dungeon), axe C (fermeture/reouverture et ressources libérées), coordination avec branche lifecycle divergente **avant** toute mutation. Nouveau lot = nouveau checkpoint de départ.
+- **Production `main` gelée** : `e8681f9823573ced8aec59c8ddc47a72b02bc663`. **Phase9ExitReady=false**.
+
+---
+
 # PHASE 9 — AXE A : CAPTURE SEUL NAVIGATEUR GREEN CIBLÉ — 2026-10-10
 
 - **Branche** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` sur `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Dernier checkpoint GREEN **certifié** reste `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10`, même SHA.

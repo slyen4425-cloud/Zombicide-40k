@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const fixtureBytes=fs.readFileSync(path.join(__dirname,'fixtures/phase9_dungeon_setup_entry_before_transfer_v1.json'));
 assert.equal(crypto.createHash('sha256').update(fixtureBytes).digest('hex'),
   '3d925e4f3760819642b1f48d2ab2d0aba66dbd5c45d6595d0d4d4b1e3d22e7b2',

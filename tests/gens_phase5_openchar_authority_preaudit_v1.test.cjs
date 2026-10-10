@@ -6,8 +6,8 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
-const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 
 function gitBlob(buf){
   return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');

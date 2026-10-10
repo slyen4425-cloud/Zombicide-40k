@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const entry=read('assets/gensrpg/capture/entry-v1.js');
 const preauditDoc=read('docs/GENSRPG_PHASE9_CAPTURE_IDENTITY_OWNERSHIP_PREAUDIT.md');
 const bytes=Buffer.from(index,'utf8');

@@ -11,7 +11,7 @@ const corePath=path.join(root,'assets','gensrpg','core','inventory-equipped-view
 
 assert.ok(fs.existsSync(corePath),'Core Inventory equipped-view contract module must exist');
 
-const index=fs.readFileSync(indexPath,'utf8');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1')
   .update(Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0]),bytes]))

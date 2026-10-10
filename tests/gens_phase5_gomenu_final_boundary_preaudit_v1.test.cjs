@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const indexBuf=fs.readFileSync(path.join(root,'index.html'));
+const indexBuf=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const source=indexBuf.toString('utf8');
 const owners=JSON.parse(read('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'));
 const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');

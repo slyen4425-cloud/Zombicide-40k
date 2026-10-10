@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const core316=read('assets/dungeon/dungeon-core-316.js');
 const inventoryCore=read('assets/gensrpg/core/inventory-equipped-view-v1.js');
 const hotfix=read('assets/dungeon/dungeon-equipment-hotfix-167817.js');

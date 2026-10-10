@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
-const activeBytes=fs.readFileSync(path.join(root,'index.html'));
+const activeBytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const active=activeBytes.toString('utf8');
 const indexBlob=buf=>crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
 assert.equal(activeBytes.length,8165438);

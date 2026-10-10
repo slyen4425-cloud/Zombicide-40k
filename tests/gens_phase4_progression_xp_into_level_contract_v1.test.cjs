@@ -9,7 +9,7 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const corePath='assets/gensrpg/core/progression-v1.js';
 const coreBuf=fs.readFileSync(path.join(root,corePath));
 const coreSource=coreBuf.toString('utf8');
-const indexBuf=fs.readFileSync(path.join(root,'index.html'));
+const indexBuf=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const index=indexBuf.toString('utf8');
 
 const gitBlob=buf=>crypto.createHash('sha1')

@@ -4,7 +4,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 const inline=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 const runtime=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_RUNTIME_OWNERS.json'),'utf8'));

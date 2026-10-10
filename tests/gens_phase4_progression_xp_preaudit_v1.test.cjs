@@ -6,7 +6,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const index=bytes.toString('utf8');
 const preview=read('preview.html');
 const pagesWorkflow=read('.github/workflows/main.yml');

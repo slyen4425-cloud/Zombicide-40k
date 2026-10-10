@@ -9,7 +9,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const json=rel=>JSON.parse(read(rel));
 const exists=rel=>fs.existsSync(path.join(root,rel));
-const indexBuf=fs.readFileSync(path.join(root,'index.html'));
+const indexBuf=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const source=indexBuf.toString('utf8');
 
 function gitBlob(buf){

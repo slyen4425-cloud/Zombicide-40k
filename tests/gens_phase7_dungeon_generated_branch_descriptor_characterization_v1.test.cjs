@@ -8,7 +8,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const authored=read('assets/dungeon/dungeon-authored-runtime-167839.js');
 const authoredBranchContent=read('assets/dungeon/dungeon-secondary-branch-content-fix-167860.js');

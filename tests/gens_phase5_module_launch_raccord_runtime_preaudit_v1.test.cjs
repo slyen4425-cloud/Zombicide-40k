@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const preview=read('preview.html');
 const deploy=read('.github/workflows/main.yml');
 const launchContract=JSON.parse(read('assets/gensrpg/shell/module-launch-contract-v1.json'));

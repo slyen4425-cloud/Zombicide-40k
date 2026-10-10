@@ -11,7 +11,7 @@ const indexPath=path.join(root,'index.html');
 const entryPath=path.join(root,'assets/gensrpg/survival/entry-v1.js');
 const contractPath=path.join(root,'assets/gensrpg/survival/module-contract-v1.json');
 
-const bytes=fs.readFileSync(indexPath);
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const index=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes

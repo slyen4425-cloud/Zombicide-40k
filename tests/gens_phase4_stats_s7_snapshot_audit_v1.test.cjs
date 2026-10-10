@@ -6,7 +6,7 @@ const crypto=require('node:crypto');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const adapter=read('assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js');
 const v110=read('assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');

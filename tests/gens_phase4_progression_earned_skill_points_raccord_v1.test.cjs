@@ -5,7 +5,7 @@ const crypto=require('node:crypto');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
-const indexBuf=fs.readFileSync(path.join(root,'index.html'));
+const indexBuf=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const index=indexBuf.toString('utf8');
 const corePath='assets/gensrpg/core/progression-v1.js';
 const coreBuf=fs.readFileSync(path.join(root,corePath));

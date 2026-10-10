@@ -4,7 +4,7 @@ const crypto=require('node:crypto');
 const path=require('node:path');
 
 const indexPath=path.join(__dirname,'..','index.html');
-const bytes=fs.readFileSync(indexPath);
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const index=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),

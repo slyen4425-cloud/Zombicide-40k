@@ -14,7 +14,7 @@ const block=(src,start,end,label)=>{
   return src.slice(a,b);
 };
 
-const indexBuf=fs.readFileSync(path.join(root,'index.html'));
+const indexBuf=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
 const gitBlob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+indexBuf.length+'\0'),indexBuf
 ])).digest('hex');

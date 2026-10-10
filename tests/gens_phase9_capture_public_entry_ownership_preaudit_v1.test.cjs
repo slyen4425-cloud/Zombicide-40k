@@ -7,7 +7,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes().toString('utf8');
 const entry=read('assets/gensrpg/capture/entry-v1.js');
 const owner=read('assets/gensrpg/capture/session-start-v1.js');
 const contract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json'));

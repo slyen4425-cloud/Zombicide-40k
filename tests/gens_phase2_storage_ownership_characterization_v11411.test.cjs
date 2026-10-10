@@ -6,7 +6,10 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const exists=rel=>fs.existsSync(path.join(root,rel));
 const stripQuery=v=>String(v||'').replace(/\?.*$/,'');
-const index=read('index.html');
+// This is the immutable Phase 2 *historical* storage census. Reconstruct
+// the exact pre-extraction source, while the new migration sentinel verifies
+// the actual external Capture seed and live browser storage continuity.
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const preview=read('preview.html');
 const workflow=read('.github/workflows/main.yml');
 const externalOwners=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
@@ -42,7 +45,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,87,'Capture screen-return, Hub entry and seeded runtime data remain in the storage graph');
+assert.equal(reachable.size,86,'historical Phase 2 storage census must reconstruct the original 86-owner graph exactly');
 
 const disabled=new Set(Object.entries(inlineOwners.blocks||{}).filter(([,v])=>v.status==='disabled').map(([k])=>k));
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]

@@ -1166,6 +1166,9 @@ jobs:
       - name: Prouver Save Quit Capture puis seconde session sans Dungeon
         run: node tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs
 
+      - name: Verrouiller extraction physique et source unique du seed Capture V16.162
+        run: node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 

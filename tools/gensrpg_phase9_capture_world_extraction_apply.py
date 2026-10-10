@@ -102,6 +102,8 @@ def main():
         INDEX.write_bytes(clean)
     else:
         check(MODULE.exists(),'missing world module')
+        from gensrpg_phase9_capture_dungeon_editor_boundary_apply import restore_bytes as restore_editor_boundary
+        data=restore_editor_boundary(data)
         ext=MODULE.read_bytes()
         restore(data,ext)
     print({'mode':'apply' if args.apply else 'verify','source_blob':SOURCE_BLOB,'active_index_blob':blob(INDEX.read_bytes()),'active_index_bytes':INDEX.stat().st_size,'world_module_blob':blob(MODULE.read_bytes()),'world_module_bytes':MODULE.stat().st_size,'sections':len(SEAMS),'rollback_byte_exact':True})

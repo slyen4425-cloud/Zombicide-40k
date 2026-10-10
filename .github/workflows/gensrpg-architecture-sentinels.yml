@@ -1157,6 +1157,9 @@ jobs:
       - name: Verrouiller Dungeon map vers Tactical V2
         run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
 
+      - name: Prouver Capture seul sans démarrage Dungeon pendant monde et combat
+        run: node tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs
+
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 

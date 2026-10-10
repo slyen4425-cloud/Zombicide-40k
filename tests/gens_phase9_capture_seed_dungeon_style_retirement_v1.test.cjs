@@ -5,7 +5,7 @@ const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const indexPath=path.join(root,'index.html');
-const index=fs.readFileSync(indexPath);
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root);
 const source=index.toString('utf8');
 const captureEntry=fs.readFileSync(path.join(root,'assets','gensrpg','capture','entry-v1.js'),'utf8');
 

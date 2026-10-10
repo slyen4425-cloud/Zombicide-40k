@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,86,'production graph must include all three active Capture auxiliary owners');
-assert.equal(mapped.size,86,'owner manifest must map all 86 production-reachable files after the Phase 9 Capture screen-return transfer');
+assert.equal(reachable.size,87,'production graph must include all three active Capture auxiliary owners');
+assert.equal(mapped.size,87,'owner manifest must map all 87 production-reachable files after the Phase 9 Capture screen-return transfer');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

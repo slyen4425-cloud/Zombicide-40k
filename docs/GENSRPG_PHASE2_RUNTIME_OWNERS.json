@@ -448,6 +448,11 @@
       "owner": "GenSrpG Capture Hub Entry",
       "domain": "capture",
       "role": "active Phase 9 unique UI transition owner for Capture Hub, injected legacy rendering dependencies, no Shell or world-data ownership"
+    },
+    "assets/gensrpg/capture/world-exploration-v1.js": {
+      "owner": "GenSrpG Capture World Exploration V1",
+      "domain": "capture",
+      "role": "Single physically loaded owner for legacy Capture world-state persistence, profile locations, day and turn progression, Hub-world rendering and exploration encounters; byte-exact relocated functions; legacy cross-script API intentionally retained"
     }
   }
 }

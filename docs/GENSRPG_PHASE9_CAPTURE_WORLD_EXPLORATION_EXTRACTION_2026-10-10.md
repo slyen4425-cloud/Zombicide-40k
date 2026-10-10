@@ -13,3 +13,12 @@
 **Gate** : inventaire ciblé, preuve RED ou caractérisation du point de raccord, extraction minimale réversible du propriétaire, ancienne autorité retirée, tests unitaires/rollback/parité, parcours Capture réel (Hub jour suivant, combat, victoire, Save Quit/reprise), tests des quatre modules, Architecture+Browser + Firefox + Tactical au SHA identique, checkpoint lisible et test utilisateur.
 
 **Statut** : preparation gouvernée ; pas de GREEN d'extraction monde revendiqué.
+
+## Transfert runtime physique exécuté — 10 octobre 2026
+
+- Base SHA / fichier validé selon charte §26 : `988d13e12ad2f7bb27acffb75217f9dafbabe803` / blob `2f2edfa5a1e229e4630889e7f0d5442199e221eb` / 7 975 990 octets, copie ZIP contrôlée.
+- Transfert de quatre sections existantes sans réécriture de gameplay dans `assets/gensrpg/capture/world-exploration-v1.js` (17 511 octets, blob `ecfe276ba1a73b0a164c09f698ab17010289b7ee`). Nouveau HTML 7 958 968 octets, blob `42583858f0df0f1b3bcd65ca6a282c8ba27b1c07`.
+- Commit runtime : `9420868a7c589325ff59686e8433bd96d5cac571`, branche dédiée seulement. Workflow d'application `38082335976` SUCCESS.
+- Tests : restauration Git blob exacte ; conservation clés/valeurs/règles, parité VM jours/tours ; navigateur réel : Capture sans Dungeon, jour 2, victoire, recharge, reprise jour 3, Save Quit, seconde reprise/fermeture, ancienne sauvegarde Dungeon non interférente. Tous SUCCESS dans le workflow d'application.
+- Frontière : monde, lieux, tours, événements et rendu Hub déplacés. Combat, XP, équipe/réserve, stockage Core, Shell, Dungeon, Survie, Tactical, PvP et PWA inchangés. Les API globales historiques restent pour leurs appelants ; leur découplage futur nécessite un lot distinct.
+- Gouvernance : manifestes et sentinelles de composition réalignés sans réduction de portée. **Triple CI finale et validation utilisateur encore requises avant checkpoint GREEN.** Production `main` gelée, Phase 10 interdite.

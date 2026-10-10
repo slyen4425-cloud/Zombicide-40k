@@ -11,7 +11,8 @@
     "Capture session initialization",
     "Capture screen-return primary-view provider",
     "Capture Hub primary-view UI transition",
-    "Monster Capture non-destructive V16.162 showcase seed, physically extracted as assets/gensrpg/capture/builtin-seed-v1.js"
+    "Monster Capture non-destructive V16.162 showcase seed, physically extracted as assets/gensrpg/capture/builtin-seed-v1.js",
+    "Physically extracted Capture World / Exploration V1 owner: world state and persistence, creator-defined locations, day / turn progress, exploration encounters, Capture Hub world view"
   ],
   "consumes": [
     "core public contracts",
@@ -33,7 +34,8 @@
     "screenReturn": "GensCaptureScreenReturnV1 installed explicitly from Capture139 legacy dependencies, unregisters functional access on dispose",
     "hubEntry": "Single owner-bound Save & Quit button, bounded modal and CSS cleanup, RAF cancellation on stop, no global observers or persistent polling.",
     "captureSessionStop": "GensCaptureV1.stop() is the unique Save & Quit entry; SessionStart.stop() preserves world, Shell handles navigation, and HubEntry.leaveWorld() releases Capture UI.",
-    "builtinSeed": "Standalone synchronous IIFE executed at its original script position; exact 189,500-byte source preserved, zero gameplay defaults or storage identities changed, with byte-exact rollback and real-browser tests."
+    "builtinSeed": "Standalone synchronous IIFE executed at its original script position; exact 189,500-byte source preserved, zero gameplay defaults or storage identities changed, with byte-exact rollback and real-browser tests.",
+    "worldExploration": "Single classic script loaded synchronously before historical inline owner; preserves exact legacy global function APIs and value schemas. No replacement Core storage engine, Dungeon runtime or duplicate world."
   },
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
@@ -47,7 +49,9 @@
     "Capture139 wires but does not register the unique Capture screen-return provider; GensCaptureScreenReturnV1 owns Shell registration",
     "Capture139 no longer defines captureEnterWorld139; it wires the dedicated Hub UI entry and preserves the historical renderCaptureWorldHub owner",
     "Save & Quit → Shell → resume same page → Save & Quit again without Dungeon state, verified in real browser.",
-    "V16.162 legacy builtin seed inline tag retired; owner is a single external script in the same order without changing Capture world, battle, Shell, or historical save behavior."
+    "V16.162 legacy builtin seed inline tag retired; owner is a single external script in the same order without changing Capture world, battle, Shell, or historical save behavior.",
+    "world-exploration-v1.js is the single active world/exploration owner; original index definitions are absent; four extracted regions have byte-exact rollback to the approved 7,975,990-byte index",
+    "Capture combat, team roster, progress and Shell screen return remain under their existing owners; V151 Capture guard remains loaded."
   ],
   "publicEntries": {
     "moduleScreenReturn": {

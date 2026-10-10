@@ -1,3 +1,14 @@
+# PHASE 9 MONSTER CAPTURE — MONDE / EXPLORATION PHYSIQUEMENT EXTRAIT (2026-10-10)
+
+- Travail : work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10 ; transfert runtime confirmé au SHA 9420868a7c589325ff59686e8433bd96d5cac571 après workflow d'application 38082335976 SUCCESS.
+- Base fonctionnelle GREEN : f193f86d1c5d09bf905540863d9f1757d86e08aa ; checkpoint de départ checkpoint/gensrpg-start-phase9-capture-world-exploration-extraction-2026-10-10.
+- Quatre blocs source déplacés octet pour octet vers assets/gensrpg/capture/world-exploration-v1.js. HTML : 7 958 968 octets, blob 42583858f0df0f1b3bcd65ca6a282c8ba27b1c07 ; propriétaire externe : 17 511 octets, blob ecfe276ba1a73b0a164c09f698ab17010289b7ee.
+- Tests locaux et navigateur Capture de l'application verts (jours, combat/victoire, relance, Save/Quit x2, sans runtime Dungeon). Triple CI et vérification utilisateur sur SHA final encore nécessaires ; ne pas créer le checkpoint final avant ces gates.
+- Pas de modification main, ni de refonte Core, Shell, Dungeon, Survival, PvP, Tactical, équipes ou règles utilisateur. Suite après ce jalon : équipe/réserve et combat Capture ; ne pas ouvrir la Phase 10.
+- Rapport détaillé : docs/GENSRPG_PHASE9_CAPTURE_WORLD_EXPLORATION_EXTRACTION_2026-10-10.md
+
+---
+
 # PHASE 9 — MONSTER CAPTURE : EXTRACTION MONDE / EXPLORATION — REPRISE 2026-10-10
 
 - **Chantier ouvert, code non encore modifié** : `work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10`.

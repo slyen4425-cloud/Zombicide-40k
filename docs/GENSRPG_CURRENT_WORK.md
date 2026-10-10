@@ -1,3 +1,13 @@
+# PHASE 9 — AXE A : PREUVE NAVIGATEUR CAPTURE SANS RUNTIME DUNGEON — 2026-10-10
+
+- **Chantier** : axe A de l'audit de sortie Phase 9, statut pré-test. **Branche** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6`.
+- **Dernier GREEN** : `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10` SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6` (audit, non sortie Phase 9) ; triple CI Architecture+Browser `37998055014`, Firefox `37998055029`, Tactical `37998054983` SUCCESS.
+- **But** : parcours navigateur vierge sans ancienne partie Dungeon, via UI Capture dresseur/créature→Hub→jour 2→combat→victoire→Hub ; constater identité canonique, runtime `gensrpg_dungeon_runtime_v2` absent et runtime Survie inactif. Tests existants réutilisés ; aucun changement runtime ni `index.html`. N'inclut pas fermeture/reprise (axes C/B).
+- **Interdits** : ne pas toucher Shell, Core, Dungeon, Survie, Tactical, Builder, labs, sauvegarde, fichiers `index.html`, branches divergentes Capture138 et lifecycle. Détection précise du premier résidu, aucun patch sans TDD + charte §26.
+- **Main gelée** : `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Risque : un jeu Capture peut afficher le Hub sans preuve que le runtime Dungeon privé reste inactif. **Étape suivante** : écrire la sentinelle réelle, l'exécuter en CI, documenter RED/GREEN; checkpoint uniquement sur SHA vérifié.
+
+---
+
 # PHASE 9 — AUDIT DE SORTIE CANONIQUE (PÉRIMÈTRE SANS RUNTIME) — 2026-10-09
 
 - **Objectif** : trancher les critères restants Phase 9 de manière mesurable et regrouper les véritables obstacles au critère de sortie : Capture fonctionnel en démarrage/jeu/fermeture **sans runtime privé Dungeon ni Survie**.

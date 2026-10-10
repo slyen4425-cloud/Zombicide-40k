@@ -16,6 +16,7 @@ const roadmap=read('docs/GENSRPG_RESTRUCTURATION_ROADMAP.md');
 const browserLaunch=read('tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs');
 const browserResume=read('tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs');
 const browserVictory=read('tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs');
+const browserCold=read('tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs');
 const full=JSON.parse(read('docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-09.json'));
 assert.match(roadmap,/Critère de sortie : Capture peut démarrer sans runtime Dungeon\/Survie actif\./);
 assert.match(roadmap,/fonctionner et se fermer comme module autonome de premier niveau/);
@@ -47,6 +48,12 @@ assert.match(browserResume,/resumed\.dungeonRuntime\?\.participants/);
 assert.match(browserVictory,/await startDungeonAndLeaveSavedRuntime\(page\);/);
 assert.match(browserVictory,/captureBattleUseAbility\('capture_basic_attack'\)/);
 assert.match(browserVictory,/resumed\.dungeonRuntime\?\.participants/);
+assert.doesNotMatch(browserCold,/startDungeonAndLeaveSavedRuntime/);
+assert.match(browserCold,/const before=await snapshot\(page,'cold-before-capture'\)/);
+assert.match(browserCold,/await startCapture\(page\)/);
+assert.match(browserCold,/const explored=await snapshot\(page,'capture-world-day2'\)/);
+assert.match(browserCold,/const battling=await snapshot\(page,'capture-battle-start'\)/);
+assert.match(browserCold,/const afterResume=await snapshot\(page,'capture-resume'\)/);
 const existing=fs.readdirSync(path.join(root,'assets/gensrpg/capture')).sort();
 const expected=['entry-v1.js','hub-entry-v1.js','module-contract-v1.json','screen-return-v1.js','session-start-v1.js'];
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
@@ -60,7 +67,7 @@ assert.deepEqual(Object.keys(full.criteria),[
 ]);
 assert.deepEqual(
  Object.values(full.criteria).map(x=>x.status),
- ['proven','proven','partial','partial','partial','unproven','unproven']
+ ['proven','proven','partial','partial','partial','unproven','partial']
 );
 assert.equal(full.phaseExitReady,false,'do not imply Phase 9 is complete');
 assert.equal(full.remainingCriticalAxes.length,3,'give a bounded list of decisive exit axes');

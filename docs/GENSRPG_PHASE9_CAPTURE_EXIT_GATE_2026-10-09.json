@@ -56,17 +56,18 @@
       "missingProof": "Les propriétaires partiels exposent dispose(); l'entrée Capture GensCaptureV1 n'expose pas un lifecycle complet install/start/stop/dispose de session, et aucun scénario navigateur complet de fermeture autonome n'est couvert ici."
     },
     "noForeignRuntime": {
-      "status": "unproven",
+      "status": "partial",
       "evidence": [
         "assets/gensrpg/capture/module-contract-v1.json",
         "tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs",
-        "tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs"
+        "tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs",
+        "tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs"
       ],
-      "missingProof": "Aucun scénario bout en bout démontré avec runtime privés Dungeon ET Survie absents/inactifs pendant l'exploration, le combat, la reprise et la fermeture."
+      "missingProof": "Chromium mobile à froid : lancement, exploration jour 2, bataille/victoire, reload/reprise réussissent sans créer de clé privée Dungeon et avec module Shell Capture actif. Restent à instrumenter les appels privés Dungeon/Survie en mémoire et à prouver le teardown total."
     }
   },
   "remainingCriticalAxes": [
-    "A — Vérifier en navigateur réel Capture seul : aucune création/activation de runtime Dungeon ou Survie au lancement, durant exploration et combat; si échec, transférer un propriétaire ciblé après TDD.",
+    "A — Preuve GREEN du parcours Capture à froid sans état de session Dungeon (run 38023317474). Compléter uniquement la preuve d'absence d'autorité privée Dungeon/Survie réellement appelée pendant ce parcours et le teardown, sans refaire le gameplay.",
     "B — Boucler vrai cycle Capture: équipe → exploration → combat → victoire → sauvegarde → reload/reprise sans sauvegarde Dungeon préexistante.",
     "C — Prouver fermeture et réouverture propre Capture: timers/listeners/sessions désactivés, aucun contrôle inter-module; si échec, relier un lifecycle Capture owner-local unique."
   ],
@@ -88,6 +89,8 @@
     "architectureBrowserRun": 37995288162,
     "firefoxRun": 37995288148,
     "tacticalRun": 37995288208,
-    "simultaneousLegacy138Branch": "work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09"
+    "simultaneousLegacy138Branch": "work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09",
+    "coldIsolationRun": 38023317474,
+    "coldIsolationSha": "f03689f99e2b12bcb27794f4da9fe067c9f443e5"
   }
 }

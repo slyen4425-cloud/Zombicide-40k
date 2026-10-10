@@ -1,3 +1,13 @@
+# PHASE 9 — AXE A : CAPTURE FROID GREEN EN NAVIGATEUR (DIAGNOSTIC) — 2026-10-10
+
+- **Résultat réel** : run Chromium mobile ciblé [38023317474](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38023317474) **SUCCESS** sur `f03689f99e2b12bcb27794f4da9fe067c9f443e5`. Capture démarre depuis stockage vide, monde jour 1→2, combat Capture réel, victoire, reload et reprise sans création de `gensrpg_dungeon_runtime_v2` ni `gensrpg_dungeon_state_v1`, et `isDungeonMode()===false` sur chaque étape. Après lancement, `GensShellModuleLaunchV1.activeModule()==='capture'`. **Ce constat ne démontre pas l'absence de tous les appels de fonctions privées Dungeon/Survie ni le lifecycle complet.**
+- **Chantier** : `work/gensrpg-phase9-capture-runtime-isolation-e2e-2026-10-10` ; checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-runtime-isolation-e2e-2026-10-10` SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Preuves** : `tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs` intégré au navigateur CI permanent, `docs/GENSRPG_PHASE9_CAPTURE_COLD_ISOLATION_E2E_2026-10-10.md`, matrice de sortie mise à jour `noForeignRuntime:partial`, `phaseExitReady:false`. L'ancien E2E avec vraie sauvegarde Dungeon étrangère est inchangé.
+- **Runtime** : aucun fichier `index.html`, moteur, Shell, Capture, Dungeon, Survie, Tactical ou PWA modifié. One-shot de test supprimé après journal GREEN ; le test permanent demeure. Branches Capture138 et lifecycle parallèles intactes.
+- **Gate final du lot** : triple CI Architecture+Browser/Firefox/Tactical sur le **même SHA final**, puis checkpoint GREEN de caractérisation. **Pas de proclamation de sortie Phase 9 ni merge**. Suite : mesurer les appels internes résiduels et la fermeture Capture uniquement si nécessaires pour satisfaire le critère officiel.
+
+---
+
 # PHASE 9 — AXE A : SENTINELLE NAVIGATEUR RUNTIME CAPTURE SEUL — 2026-10-10
 
 - **Branche unique** : `work/gensrpg-phase9-capture-runtime-isolation-e2e-2026-10-10`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-runtime-isolation-e2e-2026-10-10` sur `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Dernier checkpoint GREEN **audit uniquement** : `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10`, même SHA (triple CI 37998055014, 37998055029, 37998054983 SUCCESS).

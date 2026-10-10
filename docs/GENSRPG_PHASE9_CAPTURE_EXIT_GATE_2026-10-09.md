@@ -21,7 +21,7 @@
 | Équipe et combat Capture | **PARTIEL** | `gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs` crée un vrai combat via `captureStartBattleAutomatic`, fait une attaque réelle, gagne puis revient au Hub | Le combat existe et marche ; la propriété de toute la chaîne reste historique. Il faut tester l'absence d'autorité Dungeon active, pas le réécrire d'office. |
 | Sauvegarde / reprise Capture | **PARTIEL** | Même E2E : reprend Capture après reload sans basculer vers le menu Dungeon | **Attention :** ce test commence volontairement par `startDungeonAndLeaveSavedRuntime(page)` puis vérifie que l'ancienne sauvegarde Dungeon est préservée. C'est une preuve de non-collision, **pas** un test avec runtime Dungeon absent. |
 | Fermeture / teardown Capture | **NON PROUVÉ** | `session-start-v1.js`, `hub-entry-v1.js`, `screen-return-v1.js` exposent des `dispose()` partiels | L'entrée publique `GensCaptureV1` ne fournit pas encore une fermeture/teardown de session complète. Aucun scénario de fermeture et deuxième session autonome n'est établi ici. |
-| Inactivité réelle de Dungeon et Survie pendant tout le cycle | **NON PROUVÉ** | `module-contract-v1.json` décrit le module comme `partial-runtime-loaded`; les E2E montrent un mode Capture et une UI Dungeon masquée | Il faut une preuve explicite que les moteurs privés Dungeon/Survie ne sont ni nécessaires ni actifs durant **démarrage, exploration, combat, reprise ET fermeture**. Une UI masquée n'est pas une preuve suffisante. |
+| Inactivité réelle de Dungeon et Survie pendant tout le cycle | **PARTIEL : parcours froid GREEN** | `module-contract-v1.json` décrit le module comme `partial-runtime-loaded`; les E2E montrent un mode Capture et une UI Dungeon masquée | Il faut une preuve explicite que les moteurs privés Dungeon/Survie ne sont ni nécessaires ni actifs durant **démarrage, exploration, combat, reprise ET fermeture**. Une UI masquée n'est pas une preuve suffisante. |
 
 ### Limite de preuve essentielle
 
@@ -49,3 +49,10 @@ Import de nouveaux assets/sons, animations et FX, contenu de créatures, confort
 - Triple CI + checkpoint GREEN **de l'audit** obligatoires avant tout nouveau chantier. Ne pas confondre ce checkpoint documentaire avec une approbation de sortie de Phase 9.
 
 **Conclusion :** l'essentiel de la navigation et le jeu historique Capture existent ; la sortie n'est pas justifiée tant que le cycle complet autonome et sa fermeture ne sont pas démontrés. Plutôt qu'un pourcentage trompeur ou un nombre de micro-lots inventé, la progression se mesurera désormais **3 axes validés sur 3**.
+
+
+## Complément du 10 octobre 2026 — Axe A froid GREEN
+
+Le [test Chromium mobile à froid 38023317474](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38023317474) montre **sept instantanés réels** (accueil, Capture lancée, exploration jour 2, combat, victoire, rechargement, reprise). À aucun moment une session Dungeon n'est créée dans `gensrpg_dungeon_runtime_v2` ni dans `gensrpg_dungeon_state_v1`. Après l'ouverture Capture, `GensShellModuleLaunchV1.activeModule()` vaut `capture`, `gensMode151()` vaut `capture`, `isDungeonMode()` reste faux. Les clés d'état privés Dungeon restent null. **Aucun Dungeon de contrôle n'a été lancé avant Capture**, à la différence des anciens tests de non-interférence.
+
+Cette preuve fait passer le critère `noForeignRuntime` de **NON PROUVÉ** à **PARTIEL** dans la matrice JSON ; elle ne démontre pas l'absence de tous les appels privés Dungeon/Survie en mémoire, ni le teardown complet de Capture. Les trois axes A/B/C de la sortie restent ouverts dans la mesure nécessaire. Rapport détaillé : `docs/GENSRPG_PHASE9_CAPTURE_COLD_ISOLATION_E2E_2026-10-10.md`.

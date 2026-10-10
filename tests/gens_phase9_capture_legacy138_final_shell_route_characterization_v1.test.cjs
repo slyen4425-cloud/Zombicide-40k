@@ -9,7 +9,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root);
 const index=bytes.toString('utf8');
 const blob=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
 assert.equal(bytes.length,8165438,'Rule 26: unexpected index size; re-audit the active source');

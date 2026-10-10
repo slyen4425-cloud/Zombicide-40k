@@ -1172,6 +1172,9 @@ jobs:
       - name: Verrouiller le propriétaire physique Monde / Exploration Capture Phase 9
         run: node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
 
+      - name: Protéger les lieux MJ Capture et la persistance isolée par profil
+        run: node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 

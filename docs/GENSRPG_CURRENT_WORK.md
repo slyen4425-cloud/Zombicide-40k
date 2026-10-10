@@ -1,3 +1,15 @@
+# PHASE 9 — AUDIT DE SORTIE GREEN (AUDIT UNIQUEMENT) — 2026-10-10
+
+- **Checkpoint GREEN de l'audit** : `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10` sur SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. **Ce checkpoint valide l'audit, pas la sortie Phase 9** : `phaseExitReady:false`.
+- **Triple CI même SHA GREEN** : Architecture + Browser `37998055014` (347 étapes d'architecture, 55 étapes du job navigateur), Firefox `37998055029`, Tactical Dock `37998054983`.
+- **Branche** : `work/gensrpg-phase9-capture-exit-gate-2026-10-09`, checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-exit-gate-2026-10-09` sur `d45f4d4d853289895b9d76ffc6a7eb8c284b7352`.
+- **Livrables** : `docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-09.md`, `docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-09.json`, `tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs` (sentinelle branchée en CI). 7 critères : 2 prouvés, 3 partiels, 2 non prouvés. **Aucune mutation de runtime ou index**.
+- **3 axes de sortie** : (A) absence d'autorité/runtime privés Dungeon/Survie dans un jeu Capture seul, (B) cycle complet équipe/exploration/combat/sauvegarde/reprise sans fixture Dungeon, (C) fermeture et réouverture propres sans fuite. Ne pas multiplier les micro-lots historiques s'ils ne bloquent pas ces trois preuves.
+- **Prochaine opération** : préparer un lot distinct à partir du checkpoint GREEN de cet audit, en donnant priorité à la preuve navigateur de l'axe A ; observer avant de corriger. **S'il faut inspecter exactement le gros index actuel, appliquer la charte §26 (fichier utilisateur byte-exact)**. Préserver les branches Capture138 legacy-start-retirement et lifecycle-shutdown parallèles, non fusionnées.
+- **Production `main`** : gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Dernier GREEN fonctionnel utilisateur : `checkpoint/gensrpg-phase9-capture138-delayed-hub-guard-green-2026-10-09` SHA `3e47a393f9fca326bf9aab21a15ba4b4d315eddb`.
+
+---
+
 # PHASE 9 — AUDIT DE SORTIE CANONIQUE (PÉRIMÈTRE SANS RUNTIME) — 2026-10-09
 
 - **Objectif** : trancher les critères restants Phase 9 de manière mesurable et regrouper les véritables obstacles au critère de sortie : Capture fonctionnel en démarrage/jeu/fermeture **sans runtime privé Dungeon ni Survie**.

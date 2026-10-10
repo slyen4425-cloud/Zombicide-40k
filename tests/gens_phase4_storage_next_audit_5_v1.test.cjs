@@ -4,7 +4,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root);
 const src=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_STORAGE_OWNERS.json'),'utf8'));
 
@@ -18,8 +18,8 @@ assert.deepEqual(manifest.totals,{
 const blob=crypto.createHash('sha1').update(Buffer.concat([
   Buffer.from('blob '+bytes.length+'\0'),bytes
 ])).digest('hex');
-assert.equal(bytes.length,8165438,'current Phase 9 participant raccord index byte size drifted');
-assert.equal(blob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','audit 5 must target the exact current Phase 9 participant raccord index blob');
+assert.equal(bytes.length,8165438,'reconstructed Phase 9 pre-extraction storage baseline byte size drifted');
+assert.equal(blob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','audit 5 must retain its original byte-exact storage baseline via reversible Capture extraction');
 
 function block(id){
   const m=src.match(new RegExp('<script[^>]*id=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));

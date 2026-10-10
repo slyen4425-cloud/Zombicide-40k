@@ -1,3 +1,16 @@
+# PHASE 9 — FRONTIÈRE ÉDITEUR DUNGEON / CAPTURE — CHANTIER 2026-10-11
+
+- **Accord utilisateur** : ne pas dupliquer le générateur Dungeon dans Capture ; masquer l'accès au créateur Dungeon depuis un profil Capture ; conserver les lieux/rencontres Capture et le futur raccord du World Builder dans un autre chantier.
+- **Branche** : `work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11` ; **checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-dungeon-editor-boundary-2026-10-11` au SHA `2e6c01aa0d7ce4ebe061a436b2753940b1750e03`.
+- **Dernier état source à trois CI vertes** : `2e6c01aa0d7ce4ebe061a436b2753940b1750e03` (Architecture+Browser `38091868762`, Firefox `38091868838`, Tactical `38091868770` SUCCESS). HEAD ultérieur `44f7ebe...` écarté car Browser goMenu RED `38091877196`. Checkpoint de retour monde : `checkpoint/gensrpg-phase9-capture-world-exploration-technical-green-2026-10-11`.
+- **Index verrou §26** : fichier reçu dans cette conversation (`world_extraction_check/index.html`), 7 958 968 octets, Git blob `42583858f0df0f1b3bcd65ca6a282c8ba27b1c07` ; Git tree source vérifié, copie byte-exacte. Permalien : https://github.com/slyen4425-cloud/Zombicide-40k/blob/2e6c01aa0d7ce4ebe061a436b2753940b1750e03/index.html .
+- **Propriétaires protégés** : Shell navigation, capture entry, session/world et profils, Dungeon Builder & vraie bibliothèque Dungeon, Survie, Tactical, PvP, Core/storage, seed, autres éditeurs, sauvegardes, PWA, `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Périmètre** : frontières d'affichage de la carte `#dungeonAdvancedEditorBtn` et garde d'entrée `openDungeonAdvancedEditor()`, uniquement quand `GensCaptureV1.isProfile(active)` ; aucune duplication ni changement mécanique/format stockage.
+- **Tests prévus** : preuve RED sur Capture et Dungeon ; source index/historique reconstituable ; navigateur vrai Shell -> Capture éditeur (Dungeon invisible, ouverture directe refusée) -> Dungeon éditeur (Builder fonctionnel) -> retour Capture ; Triple CI architecture/browser + Firefox + Tactical, preview SHA-pinnée. Échec goMenu antérieur surveillé séparément.
+- **Statut** : checkpoint initial créé, aucune modification runtime à ce stade. Ne pas ouvrir Phase 10 ; prochain transfert équipe/réserve reste distinct.
+
+---
+
 # PHASE 9 — MONDE / EXPLORATION : GATE TECHNIQUE VERT — 2026-10-11
 
 - **SHA runtime validé** : `b291cb596804963f51aab267f5a1e615a92e80e4`; branche `work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10`.

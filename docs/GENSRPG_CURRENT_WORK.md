@@ -1,3 +1,14 @@
+# PHASE 9 — AXE C : RETOUR SHELL ≠ ARRÊT CAPTURE — DIAGNOSTIC RÉEL — 2026-10-10
+
+- **Checkpoint de départ** `checkpoint/gensrpg-start-phase9-capture-axis-c-real-shutdown-2026-10-10` sur `0bc5e2348d195c8581509b76ce47f6c20d052318`, branche `work/gensrpg-phase9-capture-axis-c-real-shutdown-2026-10-10`. Axe B GREEN sur cette base, runs `38032288907`, `38032288895`, `38032288898`.
+- **Vrai navigateur** : diagnostic initial `38038475133` GREEN mais faux candidat dû au texte « zones sauvages » ; regex corrigée puis `38038660692` GREEN. Après partie Capture (sans Dungeon), victoire, reload/reprise, jour 3, **aucun bouton d'arrêt directement visible dans le Hub** selon scan ciblé. Ce résultat est limité à l'écran testé.
+- `showGensRootHome()` ouvre réellement l'accueil, mais **la session reste marquée active** et les propriétaires Capture restent installés : ce **n'est pas** la preuve d'un teardown. `GensCaptureV1.dispose` absent ; propriétaires session/Hub/retour possèdent leurs `dispose()` distincts. **AXE C NON ACQUIS, Phase9ExitReady=false**.
+- **Charte §26** : pour sélectionner le vrai propriétaire de Quitter/fermer depuis le gros index, demander le `index.html` exact correspondant au SHA courant ; taille **8 165 438 octets**, Git blob `1a61147d5a32889fa85e6a09e846049103b9f0bf`. Ne pas tenter une lecture intégrale du gros fichier via le connecteur.
+- **Protection** : zéro modification runtime, `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, branches lifecycle Capture et retrait Capture138 divergentes non touchées. Aucun checkpoint GREEN de fermeture autorisé avant véritable preuve E2E et triple CI.
+- Rapport `docs/GENSRPG_PHASE9_CAPTURE_AXIS_C_REAL_SHUTDOWN_2026-10-10.md`, test `tests/gens_phase9_capture_axis_c_shutdown_ui_diagnostic_browser_v1.test.cjs`.
+
+---
+
 # PHASE 9 — AXE C : OBSERVER LE VRAI ARRÊT CAPTURE — 2026-10-10
 
 - Base GREEN axe B `0bc5e2348d195c8581509b76ce47f6c20d052318` et checkpoint `checkpoint/gensrpg-phase9-capture-axis-b-clean-resume-green-2026-10-10`, triple CI `38032288907` Architecture/Browser, `38032288895` Firefox, `38032288898` Tactical — SUCCESS.

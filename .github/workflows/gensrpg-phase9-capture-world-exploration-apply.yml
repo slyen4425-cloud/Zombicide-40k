@@ -57,7 +57,6 @@ jobs:
           node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
           node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
           node tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs
-          node tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs --help >/dev/null 2>&1 || true
 
       - name: Install Chromium for real Capture browser routes
         run: |
@@ -72,6 +71,7 @@ jobs:
 
       - name: Review restricted runtime diff before committing
         run: |
+          git restore -- node_modules/.package-lock.json
           git diff --check
           git diff --stat
           python tools/gensrpg_phase9_capture_world_extraction_apply.py --verify

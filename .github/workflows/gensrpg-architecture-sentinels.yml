@@ -1160,6 +1160,9 @@ jobs:
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 
+      - name: Prouver Capture sans runtime Dungeon en navigateur mobile (Phase 9 axe A)
+        run: node tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs
+
       - name: Caractériser Dungeon après Survie dans Chromium
         env:
           GENSRPG_BROWSER: chromium

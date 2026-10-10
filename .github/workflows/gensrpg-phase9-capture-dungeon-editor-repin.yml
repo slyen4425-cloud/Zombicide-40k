@@ -1,0 +1,45 @@
+name: GenSrpG Phase 9 Capture editor index test repin one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-dungeon-editor-repin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repin-current-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact boundary branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert exact runtime unchanged
+        run: |
+          test "$(git hash-object index.html)" = 'd19fb899e646ee97ec21d055b5271ac2cbba91a2'
+          test "$(wc -c < index.html)" = '7959154'
+      - name: Repin current physical index only
+        run: |
+          python tools/gensrpg_phase9_capture_dungeon_editor_repin.py
+          ! git diff --name-only | grep -v '^tests/'
+          git diff --check
+      - name: Verify affected historical and active snapshots
+        run: |
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+          python tools/gensrpg_phase9_capture_dungeon_editor_boundary_apply.py --verify
+      - name: Commit only mechanical test baseline updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests
+          test -n "$(git diff --cached --name-only)"
+          git commit -m "test(phase9): repin current index after Capture editor guard"
+          git push origin "HEAD:$GITHUB_REF_NAME"

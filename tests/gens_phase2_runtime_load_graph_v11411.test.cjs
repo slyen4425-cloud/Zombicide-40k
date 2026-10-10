@@ -27,6 +27,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/capture/session-start-v1.js',
   'assets/gensrpg/capture/screen-return-v1.js',
   'assets/gensrpg/capture/hub-entry-v1.js',
+  'assets/gensrpg/capture/builtin-seed-v1.js',
   'assets/gensrpg/core/progression-v1.js',
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
@@ -56,7 +57,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,42,'production composition must expose 42 unique direct local JS entries before dynamic module-entry traversal');
+assert.equal(new Set(productionDirect).size,43,'production composition must expose 42 unique direct local JS entries before dynamic module-entry traversal');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -128,15 +129,16 @@ const phase5Set=new Set(phase5ConnectedServices);
 const phase9ConnectedServices=[
   'assets/gensrpg/capture/session-start-v1.js',
   'assets/gensrpg/capture/screen-return-v1.js',
-  'assets/gensrpg/capture/hub-entry-v1.js'
+  'assets/gensrpg/capture/hub-entry-v1.js',
+  'assets/gensrpg/capture/builtin-seed-v1.js'
 ];
 const phase9Set=new Set(phase9ConnectedServices);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,99,'physical JS inventory must include three Capture auxiliary module owners');
+assert.equal(allJs.length,100,'physical JS inventory must include three Capture auxiliary module owners');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,86,'production-reachable JS graph must include the Capture session-start, screen-return and Hub entry owners');
+assert.equal(reachable.size,87,'production-reachable JS graph must include the Capture session-start, screen-return and Hub entry owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

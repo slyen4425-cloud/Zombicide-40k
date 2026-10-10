@@ -1,0 +1,20 @@
+name: GenSrpG Phase9 Capture legacy fingerprint inventory once
+on:
+  push:
+    branches:
+      - work/gensrpg-phase9-capture-physical-seed-extraction-2026-10-10
+    paths:
+      - .github/workflows/gensrpg-capture-index-pin-audit-once.yml
+permissions:
+  contents: read
+jobs:
+  locate-historical-index-fingerprints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find exact legacy index fingerprint pins without changing code
+        run: |
+          echo "=== MATCHING PATHS ==="
+          git grep -l -E '8165438|1a61147d5a32889fa85e6a09e846049103b9f0bf' -- tests || true
+          echo "=== ALL MATCHING LINES ==="
+          git grep -n -E '8165438|1a61147d5a32889fa85e6a09e846049103b9f0bf' -- tests || true

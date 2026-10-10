@@ -6,6 +6,37 @@
   let bindings=null;
   let installed=false;
   const pending=new Set();
+  const EXIT_ID="gensCaptureExitButtonV1";
+  const MODALS=[
+    "captureExploreModal","captureCreatureDetailModal","captureBattleLiveModal",
+    "captureMjBattleRuleModal","captureTrainerModal","captureEncounterModal",
+    "captureHealModal","captureShopModal","captureMjModal","captureBattleSetupModal",
+    "creatureCaptureModal"
+  ];
+  function addExitControl(){
+    const hub=root.document.getElementById("captureGameHub");
+    if(!hub)return false;
+    if(root.document.getElementById(EXIT_ID))return true;
+    const wrap=hub.querySelector(".captureWorldQuick")||hub;
+    const button=root.document.createElement("button");
+    button.id=EXIT_ID;
+    button.type="button";
+    button.textContent="💾 SAUVEGARDER ET QUITTER";
+    button.style.cssText="width:100%;margin-top:8px;background:#2b5241;border:1px solid #77a68c";
+    button.onclick=()=>{root.GensCaptureV1?.stop?.()};
+    wrap.appendChild(button);
+    return true;
+  }
+  function cancelPendingScrolls(){
+    for(const raf of pending){try{root.cancelAnimationFrame?.(raf)}catch(e){}}
+    pending.clear();
+  }
+  function inWorld(){
+    const d=root.document,hub=d.getElementById("captureGameHub"),menu=d.getElementById("menu");
+    if(!installed||!hub||!menu)return false;
+    return root.getComputedStyle(hub).display!=="none" &&
+      root.getComputedStyle(menu).display!=="none";
+  }
 
   function install(next){
     if(!next||typeof next!=="object")throw new TypeError("GensCaptureHubEntryV1.install requires bindings");
@@ -18,11 +49,13 @@
     }
     bindings=next;
     installed=true;
+    addExitControl();
     return true;
   }
 
   function enterWorld(){
     if(!installed||!bindings)return false;
+    addExitControl();
     try{bindings.closeTurnPopup()}catch(e){}
     ["pregameSetup","sessionHeroSetup","sessionObjectSetup","sessionWaveSetup","sessionDungeonSetup","sheet","setup"].forEach(id=>{
       const e=root.document.getElementById(id);if(e)e.style.setProperty("display","none","important");
@@ -42,15 +75,34 @@
     }
   }
 
-  function dispose(){
-    installed=false;
-    bindings=null;
-    for(const raf of pending){try{root.cancelAnimationFrame?.(raf)}catch(e){}}
-    pending.clear();
+  // Keep the single persistent Shell registration, release only session UI
+  // and pending effects. No unrelated module navigation or global listeners.
+  function leaveWorld(){
+    if(!installed)return false;
+    cancelPendingScrolls();
+    try{bindings?.closeTurnPopup?.()}catch(e){}
+    const hub=root.document.getElementById("captureGameHub");
+    if(hub)hub.style.display="none";
+    for(const id of MODALS){
+      const modal=root.document.getElementById(id);
+      if(modal){modal.classList.remove("open");modal.style.display="none"}
+    }
+    root.document.body.style.removeProperty("overflow");
+    root.document.documentElement.style.removeProperty("overflow");
     return true;
   }
 
-  function status(){return Object.freeze({installed,pendingScrolls:pending.size})}
+  function dispose(){
+    leaveWorld();
+    const button=root.document.getElementById(EXIT_ID);
+    if(button){button.onclick=null;button.remove()}
+    installed=false;
+    bindings=null;
+    cancelPendingScrolls();
+    return true;
+  }
 
-  root.GensCaptureHubEntryV1=Object.freeze({VERSION,install,enterWorld,dispose,status});
+  function status(){return Object.freeze({installed,inWorld:inWorld(),pendingScrolls:pending.size})}
+
+  root.GensCaptureHubEntryV1=Object.freeze({VERSION,install,enterWorld,leaveWorld,dispose,status});
 })(typeof window!=="undefined"?window:globalThis);

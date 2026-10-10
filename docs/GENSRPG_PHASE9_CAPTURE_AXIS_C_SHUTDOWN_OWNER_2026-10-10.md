@@ -22,3 +22,13 @@ La sentinelle permanente ajoute `tests/gens_phase9_capture_axis_c_shutdown_owner
 
 ## Gate
 CI Architecture+Browser, Firefox, Tactical Dock au même HEAD, puis checkpoint GREEN. Phase 9 globale uniquement après vérification finale des frontières et validation ciblée utilisateur. Ni assets ni éditeurs ni Phase 10 ne sont inclus dans ce lot.
+
+## Clôture du lot C — triple CI GREEN (10 octobre 2026)
+
+- Checkpoint final : `checkpoint/gensrpg-phase9-capture-axis-c-shutdown-owner-green-2026-10-10`, SHA **`74866ac8c824bc13fb6d44e3571f683b57af4769`**.
+- Architecture + Browser : [38053501475](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501475) SUCCESS ; le navigateur a validé A, B, C, le parcours inter-module avec ancienne sauvegarde Dungeon et la preview externe.
+- Firefox : [38053501444](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501444) SUCCESS.
+- Tactical Dock : [38053501461](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501461) SUCCESS.
+- Test de contre-vérification ciblé sur la conservation Dungeon → Capture : [38053396300](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053396300) SUCCESS. Un premier run Architecture + Browser avait montré un retour d'accueil intermittent dans ce parcours, non reproduit ensuite, sans suppression de la sentinelle.
+- Test manuel : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/74866ac8c824bc13fb6d44e3571f683b57af4769/preview.html ; essayer Capture → monde/combat → Sauvegarder et quitter → Reprendre → encore un jour → Sauvegarder et quitter. La validation utilisateur n'a pas encore été fournie.
+- **Statut** : AXE C GREEN, pas une déclaration autonome d'achèvement complet Phase 9 au-delà des preuves instrumentées. Trois axes sur trois, reste la validation utilisateur et décision de sortie, sans élargissement artificiel aux FX, éditeurs, assets ou Phase 10.

@@ -1,3 +1,15 @@
+# PHASE 9 — AXE C CLOTURÉ GREEN — 2026-10-10
+
+- **Checkpoint GREEN axe C créé** : `checkpoint/gensrpg-phase9-capture-axis-c-shutdown-owner-green-2026-10-10` sur le **SHA exact** `74866ac8c824bc13fb6d44e3571f683b57af4769`. Branche `work/gensrpg-phase9-capture-axis-c-shutdown-owner-2026-10-10`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, inchangée.
+- **Triple CI GREEN exactement sur ce SHA** : Architecture + Browser [38053501475](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501475), Firefox [38053501444](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501444), Tactical Dock [38053501461](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053501461) — toutes SUCCESS.
+- **Chaîne réelle protégée** : Capture vierge → dresseur/créature → monde → combat/victoire → reload/reprise → bouton Capture « Sauvegarder et quitter » → retour Shell et Hub inactif → reprise dans la même page → jour 4 → seconde fermeture. Aucune clé runtime Dungeon créée. Les tests historiques de compatibilité avec une ancienne sauvegarde Dungeon sont également **SUCCESS** dans la CI finale, de même que les sentinelles Survie, Dungeon, Tactical et preview externe.
+- **Incident intermédiaire** : un run a momentanément rendu le menu d'accueil visible pendant la victoire du scénario Dungeon→Capture. La contre-épreuve navigateur [38053396300](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38053396300) et la CI finale ont toutes deux validé la non-régression **sans toucher le test historique ni changer le runtime** ; aléa de synchronisation signalé, pas supprimé à coups de délais ou rustines.
+- **Changements** : uniquement modules propriétaires Capture, contrat, tests/CI et documentation ; **aucune modification `index.html`** (Git blob `1a61147d5a32889fa85e6a09e846049103b9f0bf`), `main`, Survie/Dungeon/Tactical, branches parallèles.
+- **Axe A GREEN** `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`, **axe B GREEN** `0bc5e2348d195c8581509b76ce47f6c20d052318`, **axe C GREEN** `74866ac8c824bc13fb6d44e3571f683b57af4769`. **3 axes critiques sur 3 validés** ; ne pas prétendre que chaque ancien code Survie/Dungeon préchargé est instrumenté et totalement inactif.
+- **Prochaine étape bornée** : validation utilisateur mobile du vrai « Sauvegarder et quitter » puis « Reprendre », et décision finale de sortie Phase 9 / passage Phase 10 (PvP) conformément à la charte, sans autre lot non bloquant. Preview manuelle immutable : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/74866ac8c824bc13fb6d44e3571f683b57af4769/preview.html
+
+---
+
 # PHASE 9 — AXE C : FERMETURE CAPTURE RÉELLE, CI FINALE — 2026-10-10
 
 - **Chantier** : `work/gensrpg-phase9-capture-axis-c-shutdown-owner-2026-10-10`. Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-axis-c-shutdown-owner-2026-10-10` sur `b492ed66bc8e61f65c1c3bf81cd937f8f57f5129`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

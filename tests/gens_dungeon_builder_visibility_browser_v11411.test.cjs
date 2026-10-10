@@ -80,7 +80,7 @@ async function openCapturePregameAndReturn(page){
   assert.equal(captureBoundary.captureWorldAvailable,true,'Capture own world location API remains available');
   await page.evaluate(()=>openDungeonAdvancedEditor());
   assert.equal(await visible(page.locator('#dungeonAdvancedEditor')),false,'direct Dungeon generator opening must be blocked for Capture');
-  await page.locator('#editorHub .topbar button.back').click();
+  await page.locator('#editorHub .topbar button[onclick="closeEditorHub()"]').click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
 
   await page.locator('#gensGameHomeActions .newGameBtn').click();

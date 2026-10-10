@@ -15,7 +15,7 @@ const SEAMS = [
  'const GENS_CAPTURE_NEXT_BATTLE_RULES_KEY='
 ];
 function seedEraIndexBytes(root=path.resolve(__dirname,'../..')){
-  let index=fs.readFileSync(path.join(root,'index.html'));
+  let index=require('./gens_capture_editor_boundary_snapshot_v1.cjs').worldExtractedIndexBytes(root);
   const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/world-exploration-v1.js'));
   assert.equal(index.length,7958968);
   assert.equal(hash(index),'42583858f0df0f1b3bcd65ca6a282c8ba27b1c07');

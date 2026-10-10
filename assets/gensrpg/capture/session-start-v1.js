@@ -83,6 +83,20 @@
     return true;
   }
 
+  // Preserve the module-owned save and world progress on a visible Save & Quit.
+  // The persisted session marker intentionally stays resumable, like Dungeon.
+  function stop(){
+    if(!installed||!bindings)return false;
+    try{
+      const world=bindings.loadWorld();
+      if(world&&typeof world==="object")bindings.saveWorld(world);
+    }catch(e){
+      try{root.console?.warn?.("GensCaptureSessionStartV1 stop save failed",e)}catch(_){}
+      return false;
+    }
+    return true;
+  }
+
   function dispose(){
     bindings=null;
     installed=false;
@@ -93,5 +107,5 @@
     return Object.freeze({installed});
   }
 
-  root.GensCaptureSessionStartV1=Object.freeze({VERSION,install,start,dispose,status});
+  root.GensCaptureSessionStartV1=Object.freeze({VERSION,install,start,stop,dispose,status});
 })(typeof window!=="undefined"?window:globalThis);

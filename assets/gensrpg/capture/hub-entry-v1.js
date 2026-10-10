@@ -81,8 +81,11 @@
     if(!installed)return false;
     cancelPendingScrolls();
     try{bindings?.closeTurnPopup?.()}catch(e){}
+    // The historical Capture skin forces display:block!important on the Hub.
+    // Release that owner-local skin before applying the terminal hide.
+    root.document.body?.classList?.remove?.("gens-pure-capture");
     const hub=root.document.getElementById("captureGameHub");
-    if(hub)hub.style.display="none";
+    if(hub)hub.style.setProperty("display","none","important");
     for(const id of MODALS){
       const modal=root.document.getElementById(id);
       if(modal){modal.classList.remove("open");modal.style.display="none"}

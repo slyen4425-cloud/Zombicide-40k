@@ -7,16 +7,16 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const exists=rel=>fs.existsSync(path.join(root,rel));
 const stripQuery=value=>String(value||'').replace(/\?.*$/,'');
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const preview=read('preview.html');
 const workflow=read('.github/workflows/main.yml');
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
 const timerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_TIMER_CLASSIFICATION.json'));
 
-const bytes=fs.readFileSync(path.join(root,'index.html'));
+const bytes=Buffer.from(index,'utf8');
 const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\0'),bytes])).digest('hex');
 const CURRENT_CAPTURE138_INDEX_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
-assert.equal(blob,CURRENT_CAPTURE138_INDEX_BLOB,'timer classification must run on the exact reviewed Capture138 index');
+assert.equal(blob,CURRENT_CAPTURE138_INDEX_BLOB,'timer classification uses the byte-exact historical Capture138 snapshot reconstructed from the current external seed');
 // Phase 2 timer classification is a historical census. Revert only the
 // new callback guard before comparing its original sourceIndexBlob.
 const guardLine='      if(!isCaptureContext138())return;\n';

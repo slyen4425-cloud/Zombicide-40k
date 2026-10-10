@@ -53,7 +53,7 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,86,
+assert.equal(reachable.size,87,
   'production graph must have exactly three Capture auxiliary owners after the Hub transfer');
 assert.equal(reachable.has(CAPTURE_SESSION_START),true,
   'new Capture session-start owner must be reachable from the real production graph');

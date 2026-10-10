@@ -1,3 +1,17 @@
+# PHASE 9 — MONDE / EXPLORATION : GATE TECHNIQUE VERT — 2026-10-11
+
+- **SHA runtime validé** : `b291cb596804963f51aab267f5a1e615a92e80e4`; branche `work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10`.
+- **Checkpoint intermédiaire technique** : `checkpoint/gensrpg-phase9-capture-world-exploration-technical-green-2026-10-11` au même SHA.
+- **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-world-exploration-extraction-2026-10-10` à `f193f86d1c5d09bf905540863d9f1757d86e08aa`.
+- **Trois CI au SHA exact** : Architecture+Browser `38083270491` SUCCESS ; Firefox `38083270510` SUCCESS ; Tactical Dock `38083270494` SUCCESS.
+- **Travail physique** : Monde/exploration déplacé dans `assets/gensrpg/capture/world-exploration-v1.js`, 17 511 octets. Index 7 958 968 octets, blob `42583858f0df0f1b3bcd65ca6a282c8ba27b1c07`. Rollback byte-exact et tests réels Capture démarrage, jour suivant, combat/victoire, Save Quit/reprise verts.
+- **Statut** : seule la validation utilisateur ciblée sur la preview de ce SHA reste requise avant le checkpoint final `...-green-...`. Ne pas annoncer Phase 9 terminée ni lancer équipe/réserve ou combat tant que le gate final n'est pas acquis.
+- **Fonctions protégées** : Core Storage, Shell/navigation, combat/roster Capture, Dungeon, Survie, Tactical, PvP, sauvegardes, éditeurs, PWA ; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Preview exacte** : https://htmlpreview.github.io/?https://github.com/slyen4425-cloud/Zombicide-40k/blob/b291cb596804963f51aab267f5a1e615a92e80e4/preview.html
+- **Prochain chantier après validation** : transfert physique équipe/réserve Capture, point de départ propre, charte §26 si le nouvel index doit être édité. Rapport : `docs/GENSRPG_PHASE9_CAPTURE_WORLD_EXPLORATION_EXTRACTION_2026-10-10.md`.
+
+---
+
 # PHASE 9 MONSTER CAPTURE — MONDE / EXPLORATION PHYSIQUEMENT EXTRAIT (2026-10-10)
 
 - Travail : work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10 ; transfert runtime confirmé au SHA 9420868a7c589325ff59686e8433bd96d5cac571 après workflow d'application 38082335976 SUCCESS.

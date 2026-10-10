@@ -1,0 +1,27 @@
+name: GenSrpG Phase 9 Capture Cold Isolation RED/GREEN One-Shot
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-runtime-isolation-e2e-2026-10-10'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-isolation-one-shot.yml'
+      - 'tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs'
+permissions:
+  contents: read
+jobs:
+  capture-cold-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout du commit exact
+        uses: actions/checkout@v4
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Capture froid sans runtime Dungeon : RED ou GREEN reel
+        run: node tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs

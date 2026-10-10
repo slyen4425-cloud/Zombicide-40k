@@ -1,3 +1,17 @@
+# PHASE 9 — EXTRACTION PHYSIQUE DU SEED MONSTER CAPTURE — 2026-10-10
+
+- **Chantier** : déplacer hors du runtime HTML le script autonome `builtinMonsterCapture162` (~189,5 Ko), propriétaire des données de démonstration Capture, **sans déplacement des moteurs de jeu**, dans `assets/gensrpg/capture/builtin-seed-v1.js`.
+- **Branche de travail** : `work/gensrpg-phase9-capture-physical-seed-extraction-2026-10-10`. Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-physical-seed-extraction-2026-10-10` sur **`74866ac8c824bc13fb6d44e3571f683b57af4769`**. Dernier checkpoint GREEN = `checkpoint/gensrpg-phase9-capture-axis-c-shutdown-owner-green-2026-10-10` sur le même SHA. `main` protégée = `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Origine exacte charte §26** : index utilisateur reçu `indexj.zip`, 8 165 438 octets, Git blob `1a61147d5a32889fa85e6a09e846049103b9f0bf`, identique au checkpoint de départ (diff Git confirmé depuis diagnostic C sans modification index).
+- **Périmètre** : extraction bit-à-bit du seul script seed V16.162, remplacement de son tag inline par un tag `src` **à la même position**, aucune modification des données, valeurs, créatures, capacité, règle, clé de sauvegarde, UI ou API ; conservation du comportement `ensureBuiltinMonsterCapture162`. Script d'extraction vérifie old/new Git blob, taille et réversibilité avant toute écriture et s'exécute exclusivement sur la branche dédiée.
+- **Propriétaires / interdictions** : Capture reste propriétaire de ses seeds ; Shell assure la navigation, Core reste propriétaire des services communs ; aucun retour d'une dépendance Dungeon/Survie, aucun changement du Shell, de `main`, des patches Capture en jeu ni du moteur Tactical, pas de migration de profil, pas de suppression des données utilisateurs.
+- **Tests nécessaires** : contrôle byte-exact du script extrait et rollback, chargement externe une seule fois à l'ancien emplacement, seed non destructif, vrai navigateur Capture vierge → sélection → monde/combat/victoire → save quit/reprise, tests inter-module, triple CI Architecture+Browser / Firefox / Tactical sur SHA identique.
+- **Risques** : asset JS chargé en ordre différent ou caché par PWA, espace de nom du seed, actions concurrentes sur `index.html`. En cas de RED, retour checkpoint et retrait, pas de rustine.
+- **État Phase 9** : autonomie fonctionnelle A/B/C GREEN validée et test utilisateur reçu le 10 octobre 2026 (« Ça fonctionne parfaitement »). Découpage physique se poursuit selon charte §9 et Phase 9, sans déclarer toute la migration finie ni avancer Phase 10.
+- **Étape suivante** : exécuter extraction vérifiable en CI contrôlée sur branche dédiée ; vérifier script externe et triple régression, checkpoint GREEN si et seulement si les trois passent.
+
+---
+
 # PHASE 9 — AXE C : FERMETURE CAPTURE RÉELLE, CI FINALE — 2026-10-10
 
 - **Chantier** : `work/gensrpg-phase9-capture-axis-c-shutdown-owner-2026-10-10`. Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-axis-c-shutdown-owner-2026-10-10` sur `b492ed66bc8e61f65c1c3bf81cd937f8f57f5129`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

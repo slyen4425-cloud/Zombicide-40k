@@ -50,6 +50,7 @@ jobs:
 
       - name: Prove Capture hides Dungeon builder but Dungeon keeps working
         run: |
+          echo 'Capture editor return selector is explicit; Dungeon generator remains owner-bound'
           node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
           node tests/gens_capture_current_shell_browser_v11411.test.cjs
 

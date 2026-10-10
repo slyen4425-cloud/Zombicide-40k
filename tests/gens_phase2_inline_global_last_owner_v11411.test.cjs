@@ -4,7 +4,7 @@ const path=require('node:path');
 const {execFileSync}=require('node:child_process');
 
 const root=path.join(__dirname,'..');
-const source=execFileSync('git',['show','HEAD:index.html'],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
+const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const blob=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
 const table=fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
 
@@ -39,9 +39,9 @@ const distinctGlobals=chains.size;
 const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
-const CURRENT_INDEX_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
+const CURRENT_INDEX_BLOB='2f2edfa5a1e229e4630889e7f0d5442199e221eb';
 const HISTORICAL_TABLE_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
-assert.equal(blob,CURRENT_INDEX_BLOB,'current index must be the exact reviewed Capture138 callback guard');
+assert.equal(blob,CURRENT_INDEX_BLOB,'current physical index must load external Capture seed; historical global table uses byte-exact restoration');
 const guardLine='      if(!isCaptureContext138())return;\n';
 assert.equal(source.split(guardLine).length-1,1,'single documented Capture138 timer guard');
 const recovered=Buffer.from(source.replace(guardLine,''),'utf8');

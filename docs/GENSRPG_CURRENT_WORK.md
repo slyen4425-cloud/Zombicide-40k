@@ -1,3 +1,14 @@
+# PHASE 9 — AXE A : CAPTURE SEUL NAVIGATEUR GREEN CIBLÉ — 2026-10-10
+
+- **Branche** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` sur `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Dernier checkpoint GREEN **certifié** reste `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10`, même SHA.
+- **Preuve technique** : test `tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs` sur vrai navigateur Chromium, run one-shot `38025033078` **SUCCESS**. À cinq étapes (navigateur vierge, session, jour 2, combat, victoire), `gensrpg_dungeon_runtime_v2` et `gensrpg_dungeon_state_v1` restent absents ; après ouverture Capture `isDungeonMode()===false`, `gensMode151()==="capture"`, `gameStyle===""`, UI Dungeon masquée ; vrai combat gagné.
+- **RED du harnais résolu** : première tentative `38024960695` FAIL pour variable Playwright `CAPTURE_ID` non transmise à `page.evaluate`, **erreur de test avant gameplay**, corrigée dans le test seul par paramètre `captureId`. Aucun échec métier constaté dans cette tentative.
+- **Propreté** : workflow one-shot créé pour accélérer le diagnostic puis retiré après son GREEN (commit de nettoyage `73cf6f540f3e3a423f62aea99c882642a023a7d0`). Sentinelle navigateur permanente reste intégrée à `gensrpg-architecture-sentinels.yml`. **Aucune modification du code runtime ni de `index.html`**.
+- **Reste avant checkpoint du lot** : CI Architecture+Browser, Firefox et Tactical GREEN au SHA final documentaire/nettoyé. Axe A **parcours observé validé**, mais autonomie totale de Phase 9 non proclamée ; runtime interne Survie et shutdown distincts restent à certifier selon matrice des axes.
+- **Next** : après triple GREEN, créer `checkpoint/gensrpg-phase9-capture-axis-a-runtime-isolation-green-2026-10-10` sur SHA final. Ne pas poursuivre l'axe B avant checkpoint. Production `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — AXE A : PREUVE NAVIGATEUR CAPTURE SANS RUNTIME DUNGEON — 2026-10-10
 
 - **Chantier** : axe A de l'audit de sortie Phase 9, statut pré-test. **Branche** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` SHA `a556eeb0f6798e1cf210eca5896ac75231efc1c6`.

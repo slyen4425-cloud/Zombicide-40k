@@ -38,3 +38,25 @@ Le mot « chargé » n'est pas synonyme d'« actif » : les scripts historiques 
 ## Gate
 
 Le RED qui identifierait une dépendance privée à Dungeon est un résultat de diagnostic, pas une raison de falsifier le test. CI Architecture+Browser, Firefox et Tactical obligatoires avant checkpoint GREEN du lot. **Ne pas qualifier Phase 9 comme achevée parce que seul l'axe A serait validé.**
+
+## Résultat ciblé du vrai navigateur — 10 octobre 2026
+
+**GREEN ciblé :** [GitHub Actions 38025033078](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38025033078) — `node tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs` sur `9f7af076f41c27a51284af1ea81eaf17927cb07b`.
+
+**Observations mesurées depuis le navigateur (pas des valeurs inventées dans un mock) :**
+
+| Point réel | Identité du mode | Clé `gensrpg_dungeon_runtime_v2` | Clé `gensrpg_dungeon_state_v1` | Action |
+| --- | --- | --- | --- | --- |
+| Navigateur vierge | `other` (profil 40K de base non lancé), session `null` | `null` | `null` | Aucun jeu Dungeon installé/initialisé par la fixture |
+| Session Capture lancée | `capture` / `isDungeonMode()=false` | `null` | `null` | Hub visible, monde `cap_forest`, jour 1 |
+| Capture jour 2 | `capture` / Dungeon false | `null` | `null` | Clic réel sur `#captureNextTurnBtn`, monde Capture persisté |
+| Combat Capture | `capture` / Dungeon false | `null` | `null` | `captureStartBattleAutomatic` réel, phase `battle` |
+| Retour après victoire | `capture` / Dungeon false | `null` | `null` | `captureBattleUseAbility`, victoire, `captureBattleFinishAndClose`, Hub visible |
+
+Après démarrage du jeu : profil `gp_mt7ker7t_m2iw9`, `contentFamily:"creature"`, `gameStyle:""`, `family:"adventure"`. Écran et menu Dungeon restent masqués. L'ancien scénario de non-collision avec une vraie sauvegarde Dungeon reste conservé, non remplacé.
+
+**Incident initial :** run `38024960695` FAIL dans le harnais dès le snapshot `virgin-browser` (`ReferenceError: CAPTURE_ID is not defined` dans le contexte isolé `page.evaluate`), sans aucun résultat du moteur. Réparé par passage explicite de l'ID depuis Node au navigateur dans **le test seulement**, puis run `38025033078` GREEN. Ce RED de harnais n'est pas une preuve d'échec d'autonomie.
+
+**Portée de la preuve :** aucun runtime Dungeon *persisté* ou identifié actif n'a été observé lors de ces étapes, Capture réalise une partie réelle sans créer Dungeon. Mais les scripts historiques préchargés, les fonctions Survie non exécutées, les cycles complets sauvegarde/reprise et le teardown ne sont pas mesurés intégralement par ce test. Ne pas confondre ce GREEN avec la sortie globale Phase 9.
+
+**CI** : workflow one-shot retiré et test conservé dans la sentinelle navigateur permanente. Checkpoint final uniquement après trois workflows GREEN sur le SHA final.

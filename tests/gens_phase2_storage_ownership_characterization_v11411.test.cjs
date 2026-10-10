@@ -42,7 +42,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,86,'Capture screen-return and Hub entry owners remain in the side-effect and storage graph');
+assert.equal(reachable.size,87,'Capture screen-return, Hub entry and seeded runtime data remain in the storage graph');
 
 const disabled=new Set(Object.entries(inlineOwners.blocks||{}).filter(([,v])=>v.status==='disabled').map(([k])=>k));
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]

@@ -1,3 +1,16 @@
+# PHASE 9 — MONSTER CAPTURE : EXTRACTION MONDE / EXPLORATION — REPRISE 2026-10-10
+
+- **Chantier ouvert, code non encore modifié** : `work/gensrpg-phase9-capture-world-exploration-extraction-2026-10-10`.
+- **Checkpoint obligatoire de départ** : `checkpoint/gensrpg-start-phase9-capture-world-exploration-extraction-2026-10-10` sur **`f193f86d1c5d09bf905540863d9f1757d86e08aa`**, dernier checkpoint technique GREEN `checkpoint/gensrpg-phase9-capture-physical-seed-extraction-green-2026-10-10`, trois CI SUCCESS Architecture+Browser 38066969716, Firefox 38066969684, Tactical 38066969705.
+- **Dernier jalon validé** : seed V16.162 déplacé sans altération en `assets/gensrpg/capture/builtin-seed-v1.js`; rapport `docs/GENSRPG_PHASE9_CAPTURE_PHYSICAL_SEED_EXTRACTION_2026-10-10.md`. Pas encore de sortie complète du moteur.
+- **Périmètre suivant déclaré** : identifier puis extraire une seule autorité propriétaire **monde/exploration Capture** (état monde, changement de jour, événements, rendu Hub lié au monde) dans `assets/gensrpg/capture/` en conservant strictement le gameplay et la persistance existante. L'équipe/réserve et les combats sont **hors de ce premier transfert** sauf seam purement nécessaire et démontré.
+- **Propriétaires protégés** : Shell (navigation globale), Capture session-start/Hub/entry, Core Storage, Capture combat, Dungeon/Survie/Tactical/PvP, sauvegardes et migrations, V16.162 seed éditable; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Pas de deuxième runtime ni de wrapper global.
+- **Test imposé** : d'abord un inventaire et la frontière propriétaire depuis le HTML exact, puis RED et parité, bouton « jour suivant » réel, vraie partie et combat/victoire, sauvegarde/quitter/reprise, interférence Dungeon/Survie et quadruple modules, rollback byte-exact et trois CI sur un SHA unique avant checkpoint.
+- **Charte §26 — bloquant pour lire/modifier HTML** : fichier exact `index.html` à recevoir depuis https://github.com/slyen4425-cloud/Zombicide-40k/blob/f193f86d1c5d09bf905540863d9f1757d86e08aa/index.html , taille Git attendue **7 975 990 octets**, blob Git **`2f2edfa5a1e229e4630889e7f0d5442199e221eb`**. La précédente archive `indexj.zip` décrivait un ancien état 8 165 438 octets, donc **ne pas l'utiliser directement** sans source actuelle vérifiée.
+- **État / prochaine étape** : audit ciblé seulement **après** vérification du fichier fourni ; aucun code de ce nouveau chantier changé et aucun checkpoint final à ce stade. Aucun merge divergent, aucune Phase 10.
+
+---
+
 # PHASE 9 — EXTRACTION PHYSIQUE DU SEED MONSTER CAPTURE — 2026-10-10
 
 - **Chantier** : déplacer hors du runtime HTML le script autonome `builtinMonsterCapture162` (~189,5 Ko), propriétaire des données de démonstration Capture, **sans déplacement des moteurs de jeu**, dans `assets/gensrpg/capture/builtin-seed-v1.js`.

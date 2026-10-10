@@ -1,3 +1,15 @@
+# PHASE 9 — AXE C : FERMETURE CAPTURE RÉELLE, CI FINALE — 2026-10-10
+
+- **Chantier** : `work/gensrpg-phase9-capture-axis-c-shutdown-owner-2026-10-10`. Checkpoint de départ `checkpoint/gensrpg-start-phase9-capture-axis-c-shutdown-owner-2026-10-10` sur `b492ed66bc8e61f65c1c3bf81cd937f8f57f5129`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Source historique contrôlée** : fichier fourni 8 165 438 octets, Git blob `1a61147d5a32889fa85e6a09e846049103b9f0bf` ; `index.html` non modifié.
+- **Propriétaire unique** : `GensCaptureV1.stop()` → `GensCaptureSessionStartV1.stop()` (sauvegarde monde) → navigation Shell existante → `GensCaptureHubEntryV1.leaveWorld()` (overlay CSS, Hub, RAF). Nouveau bouton unique réutilisable, sans observer ni boucle globale. Branche lifecycle divergente et retrait Capture138 non fusionnés.
+- **RED concret** : bouton Quitter initialement absent, puis Hub laissé visible à cause de `body.gens-pure-capture #captureGameHub {display:block!important}`. Correctif limité au propriétaire Capture.
+- **GREEN ciblé** : [38052459057](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38052459057) sur `8b708de9f95e41e0aec7f744752e2d4f053f6cd8`. Vraie session Capture depuis navigateur vierge, équipe/monde/combat/victoire, reload/reprise, Save & Quit, nouveau Reprendre sur même page, jour 4, deuxième Save & Quit, pas de runtime privé Dungeon persisté.
+- **À valider avant checkpoint GREEN du lot** : sentinelle C intégrée Architecture+Browser, Firefox et Tactical Dock tous SUCCESS sur le **SHA final identique** ; test utilisateur mobile, vérification finale de frontières Dungeon/Survie. Rapport : `docs/GENSRPG_PHASE9_CAPTURE_AXIS_C_SHUTDOWN_OWNER_2026-10-10.md`.
+- **Pas encore déclaré** : sortie Phase 9 globale. Suivant : checkpoint C GREEN après triple CI, preuve finale d'absence d'autorité étrangère, puis Phase 10 PvP. Contenus/FX/laboratoires hors gate.
+
+---
+
 # PHASE 9 — AXE C : FERMETURE CAPTURE PROPRIÉTAIRE — REPRISE 2026-10-10
 
 - **Chantier** : Phase 9, axe C uniquement — caractériser puis corriger (si RED) la fermeture explicite Capture et vérifier une deuxième session; pas de changement de gameplay.

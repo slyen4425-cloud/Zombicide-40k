@@ -28,9 +28,10 @@
   ],
   "lifecycle": {
     "install": "explicit Capture session-start owner binding; registers the Capture public provider exactly once",
-    "dispose": "session-start owner exposes explicit dispose; public entry creates no listener observer timer or storage state",
+    "dispose": "Explicit module teardown via GensCaptureV1.dispose(); ordinary Save & Quit uses stop() and retains one installed reusable Shell registration.",
     "screenReturn": "GensCaptureScreenReturnV1 installed explicitly from Capture139 legacy dependencies, unregisters functional access on dispose",
-    "hubEntry": "GensCaptureHubEntryV1 owns the Capture primary-view DOM transition and cancels pending scrolls on dispose; installed once from Capture139 injected legacy callbacks"
+    "hubEntry": "Single owner-bound Save & Quit button, bounded modal and CSS cleanup, RAF cancellation on stop, no global observers or persistent polling.",
+    "captureSessionStop": "GensCaptureV1.stop() is the unique Save & Quit entry; SessionStart.stop() preserves world, Shell handles navigation, and HubEntry.leaveWorld() releases Capture UI."
   },
   "invariants": [
     "the active entry exposes only the public GensCaptureV1 namespace",
@@ -42,7 +43,8 @@
     "historical Dungeon compatibility remains unchanged until separately audited",
     "Capture profile identity is owned only by pure GensCaptureV1.isProfile(profile) and does not depend on Dungeon identity",
     "Capture139 wires but does not register the unique Capture screen-return provider; GensCaptureScreenReturnV1 owns Shell registration",
-    "Capture139 no longer defines captureEnterWorld139; it wires the dedicated Hub UI entry and preserves the historical renderCaptureWorldHub owner"
+    "Capture139 no longer defines captureEnterWorld139; it wires the dedicated Hub UI entry and preserves the historical renderCaptureWorldHub owner",
+    "Save & Quit → Shell → resume same page → Save & Quit again without Dungeon state, verified in real browser."
   ],
   "publicEntries": {
     "moduleScreenReturn": {

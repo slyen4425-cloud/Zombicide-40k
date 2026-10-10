@@ -359,7 +359,7 @@ async function startCapture(page){
     assert.equal(beforeNavigation.mode,'capture');
     assert.equal(beforeNavigation.dungeonRuntime,null);
     assert.ok(beforeNavigation.session==='1');
-    assert.equal(beforeNavigation.hasCaptureEntryDispose,false,'entry still lacks coordinated dispose: characterization, not completed shutdown');
+    assert.equal(beforeNavigation.hasCaptureEntryDispose,true,'Capture now exposes dispose; Shell navigation alone remains an independent diagnostic');
     // No DOM control for Save & Quit has yet been proven. Navigation to
     // the root and terminating Capture are distinct contracts.
     const directStop=actions.filter(x=>/quitter|sauvegarder|sauver|enregistrer|logout|exit/i.test([x.text,x.aria,x.title,x.onclick].join(' ')));

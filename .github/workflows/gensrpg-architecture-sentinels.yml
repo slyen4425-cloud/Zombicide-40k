@@ -1163,6 +1163,9 @@ jobs:
       - name: Prouver reprise Capture après reload puis jour 3 sans sauvegarde Dungeon
         run: node tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs
 
+      - name: Prouver Save Quit Capture puis seconde session sans Dungeon
+        run: node tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs
+
       - name: Verrouiller Capture victoire et reprise inter-module
         run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 

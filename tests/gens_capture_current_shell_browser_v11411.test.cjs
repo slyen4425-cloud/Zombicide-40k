@@ -7,15 +7,18 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
+const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
+const captureSeedUrl='assets/gensrpg/capture/builtin-seed-v1.js?v=1';
 
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 const DUNGEON_ID='game_profile_dungeon_demo';
 const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 
-assert.match(indexSource,/id="builtinMonsterCapture162"/,'production HTML must keep the built-in Monster Capture seed');
-assert.match(indexSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
-assert.match(indexSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
-assert.match(indexSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');
+assert.match(indexSource,/<script id="builtinMonsterCapture162" src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"><\/script>/,'production HTML must load the canonical Capture seed externally at the original script slot');
+assert.equal(indexSource.split('id="builtinMonsterCapture162"').length-1,1,'Capture seed script must load exactly once');
+assert.match(captureSeedSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
+assert.match(captureSeedSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
+assert.match(captureSeedSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');
 assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(profile\)\)return "creature"/,'content-family owner must classify Capture through GensCaptureV1');
 assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(p\)\)return "capture"/,'V16.151 must keep Capture distinct from classic Dungeon through canonical identity');
 assert.match(indexSource,/if\(gensMode151\(\)!=="capture"\)[\s\S]*captureGameHub/,'V16.151 must guard the Capture hub');
@@ -45,10 +48,16 @@ function exactScript(id){
   const openEnd=indexSource.indexOf('>',start);
   const end=indexSource.indexOf('</script>',openEnd);
   assert.ok(openEnd>start&&end>openEnd,'production script '+id+' must have an exact boundary');
+  const external=id==='builtinMonsterCapture162';
+  if(external){
+    assert.match(indexSource.slice(start,openEnd+1),/src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"/,'the real Capture script must keep its external production URL');
+    assert.equal(indexSource.slice(openEnd+1,end),'','the historical inline Capture seed owner must be retired');
+  }
   return {
     id,
     start,
-    source:indexSource.slice(openEnd+1,end)
+    source:external?null:indexSource.slice(openEnd+1,end),
+    url:external?captureSeedUrl:null
   };
 }
 
@@ -151,7 +160,11 @@ const server=http.createServer((req,res)=>{
   const installCaptureOwners=async()=>{
     for(const owner of captureOwnerScripts){
       mark('install-'+owner.id);
-      await page.addScriptTag({content:owner.source});
+      if(owner.url){
+        await page.addScriptTag({url:'http://127.0.0.1:'+port+'/'+owner.url});
+      }else{
+        await page.addScriptTag({content:owner.source});
+      }
     }
     await page.evaluate(()=>{try{window.gensReconcile151?.('sentinel-install')}catch(e){}});
   };

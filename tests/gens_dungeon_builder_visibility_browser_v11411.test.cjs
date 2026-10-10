@@ -66,6 +66,23 @@ async function openCapturePregameAndReturn(page){
   await card.click();
   await page.waitForFunction(id=>activeGameProfileId()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',CAPTURE_ID);
 
+  // Phase 9 boundary: Capture may use generic content editors, never Dungeon's map generator.
+  const captureEditors=page.locator('#gensGameHomeActions .homeEditorsBtn');
+  await captureEditors.waitFor({state:'visible'});await captureEditors.click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('editorHub')).display!=='none');
+  const captureBoundary=await page.evaluate(()=>({
+    capture:!!window.GensCaptureV1?.isProfile?.(getActiveGameProfile()),
+    dungeonButtonVisible:getComputedStyle(document.getElementById('dungeonAdvancedEditorBtn')).display!=='none',
+    captureWorldAvailable:typeof window.captureProfileLocations==='function'
+  }));
+  assert.equal(captureBoundary.capture,true,'real Capture profile must be recognized independently of Adventure family');
+  assert.equal(captureBoundary.dungeonButtonVisible,false,'Capture must not expose Dungeon map generator card');
+  assert.equal(captureBoundary.captureWorldAvailable,true,'Capture own world location API remains available');
+  await page.evaluate(()=>openDungeonAdvancedEditor());
+  assert.equal(await visible(page.locator('#dungeonAdvancedEditor')),false,'direct Dungeon generator opening must be blocked for Capture');
+  await page.locator('#editorHub .topbar button.back').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
+
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
   await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();

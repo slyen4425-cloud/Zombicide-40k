@@ -1,0 +1,72 @@
+name: GenSrpG Phase 9 Capture Dungeon editor boundary apply one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-dungeon-editor-boundary-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-capture-editor-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout guarded work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact Rule 26 user-supplied source
+        run: |
+          test "$(git branch --show-current)" = 'work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11'
+          test "$(wc -c < index.html)" = "7958968"
+          test "$(git hash-object index.html)" = '42583858f0df0f1b3bcd65ca6a282c8ba27b1c07'
+
+      - name: Apply only the three approved boundary statements
+        env:
+          GENSRPG_CAPTURE_EDITOR_APPROVED: '1'
+        run: |
+          python tools/gensrpg_phase9_capture_dungeon_editor_boundary_apply.py --apply
+          python tools/gensrpg_phase9_capture_dungeon_editor_boundary_apply.py --verify
+          test "$(wc -c < index.html)" = "7959154"
+          test "$(git hash-object index.html)" = 'd19fb899e646ee97ec21d055b5271ac2cbba91a2'
+
+      - name: Verify historical world, seed and creator isolation
+        run: |
+          node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+          python tools/gensrpg_phase9_capture_world_extraction_apply.py --verify
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+
+      - name: Install real-browser test runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove Capture hides Dungeon builder but Dungeon keeps working
+        run: |
+          node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+          node tests/gens_capture_current_shell_browser_v11411.test.cjs
+
+      - name: Limit physical diff and verify rollback
+        run: |
+          git restore -- node_modules/.package-lock.json
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+          python tools/gensrpg_phase9_capture_dungeon_editor_boundary_apply.py --verify
+          git diff --stat
+          git diff -- index.html | sed -n '1,200p'
+
+      - name: Commit only byte-verified runtime boundary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          test "$(git diff --cached --name-only)" = 'index.html'
+          git commit -m "fix(phase9): keep Dungeon map editor out of Capture UI"
+          git push origin "HEAD:$GITHUB_REF_NAME"

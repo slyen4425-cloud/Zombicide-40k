@@ -21,7 +21,7 @@ const extractedLength=7975990;
 const OPEN=Buffer.from('<script id="builtinMonsterCapture162">');
 const CLOSE=Buffer.from('</script>');
 const REPLACEMENT=Buffer.from('<script id="builtinMonsterCapture162" src="assets/gensrpg/capture/builtin-seed-v1.js?v=1"></script>');
-const gitBlob=x=>crypto.createHash('sha1').update(Buffer.from('blob '+x.length+'\\0')).update(x).digest('hex');
+const gitBlob=x=>crypto.createHash('sha1').update(Buffer.from('blob '+x.length+String.fromCharCode(0))).update(x).digest('hex');
 function check(condition,message){assert.ok(condition,message)}
 function verify(){
   const index=fs.readFileSync(indexPath);

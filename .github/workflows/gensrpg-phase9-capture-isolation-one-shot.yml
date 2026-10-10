@@ -23,5 +23,5 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
-      - name: Capture froid sans runtime Dungeon : RED ou GREEN reel
+      - name: 'Capture froid sans runtime Dungeon - RED ou GREEN reel'
         run: node tests/gens_phase9_capture_cold_runtime_isolation_browser_v1.test.cjs

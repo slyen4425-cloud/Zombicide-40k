@@ -424,6 +424,11 @@
       "domain": "tactical",
       "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
     },
+    "assets/gensrpg/capture/builtin-seed-v1.js": {
+      "owner": "GenSrpG Monster Capture Built-in Showcase Seed V16.162",
+      "domain": "capture",
+      "role": "production-reachable non-destructive Capture sample-profile, creature and ability definitions; exact migration of inline seed, not a gameplay runtime owner"
+    },
     "assets/gensrpg/capture/entry-v1.js": {
       "owner": "GenSrpG Capture Public Entry",
       "domain": "capture",

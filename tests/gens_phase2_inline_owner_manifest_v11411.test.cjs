@@ -8,7 +8,7 @@ const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legac
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
 const gitBlobSha=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
-const CURRENT_BLOB='42583858f0df0f1b3bcd65ca6a282c8ba27b1c07';
+const CURRENT_BLOB='d19fb899e646ee97ec21d055b5271ac2cbba91a2';
 const HISTORICAL_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
 assert.equal(gitBlobSha,CURRENT_BLOB,'physical index must load the extracted world module and seed; legacy snapshot remains independently byte-verified');
 const activeIndex=fs.readFileSync(path.join(root,'index.html'),'utf8');

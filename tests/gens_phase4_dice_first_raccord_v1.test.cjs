@@ -12,7 +12,11 @@ const gitBlobSha=src=>crypto.createHash('sha1')
   .digest('hex');
 const sha256=value=>crypto.createHash('sha256').update(value,'utf8').digest('hex');
 
-const index=read('index.html');
+const activeIndex=read('index.html');
+const index=require('./helpers/gens_capture_world_extraction_snapshot_v1.cjs').seedEraIndexBytes(root).toString('utf8');
+// Preserve the historical Phase 4 Dice census while proving the active source loads
+// the extracted Capture World owner only once.
+assert.equal(activeIndex.split('<script src="assets/gensrpg/capture/world-exploration-v1.js?v=1"></script>').length-1,1,'Capture World script remains a unique production owner');
 const coreSrc=read('assets/gensrpg/core/dice-v1.js');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');

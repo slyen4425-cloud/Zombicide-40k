@@ -1,3 +1,14 @@
+# PHASE 9 — AXE C : OBSERVER LE VRAI ARRÊT CAPTURE — 2026-10-10
+
+- Base GREEN axe B `0bc5e2348d195c8581509b76ce47f6c20d052318` et checkpoint `checkpoint/gensrpg-phase9-capture-axis-b-clean-resume-green-2026-10-10`, triple CI `38032288907` Architecture/Browser, `38032288895` Firefox, `38032288898` Tactical — SUCCESS.
+- Branche `work/gensrpg-phase9-capture-axis-c-real-shutdown-2026-10-10`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-axis-c-real-shutdown-2026-10-10` sur même SHA.
+- Périmètre unique : test navigateur réel sortie/teardown après Capture autonome complet, sans runtime touché, sans lecture brute du gros index. Observer les contrôles et distinguer Shell navigation d'arrêt session Capture.
+- Protéger : Dungeon, Survie, PVP, Tactical, Builder, imports/export, services Core, sauvegardes, UI Hub et rendu Capture ; chantiers divergents lifecycle et ancien Capture138 laissés inchangés. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Risque : le bouton quitter réel n'est pas encore identifié/validé ; ne pas déclarer un shutdown effectif ou autonome sans preuve du chemin UI et du nettoyage. Test ciblé Chromium, puis TDD et triple CI, validation smartphone si modification runtime.
+- Rapport `docs/GENSRPG_PHASE9_CAPTURE_AXIS_C_REAL_SHUTDOWN_2026-10-10.md`. Charte §26 obligatoire si inspection/migration du véritable `index.html` requise.
+
+---
+
 # PHASE 9 — AXE B : REPRISE DE CAPTURE SEUL PROUVÉE EN TEST CIBLÉ — 2026-10-10
 
 - **Test navigateur réel** `tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs` : **GREEN ciblé** GitHub Actions `38032142960`. Capture vierge → dresseur/créature → jour 2 → combat/victoire → fermeture de la page/reload → vrai bouton Shell Reprendre → jour 3. Sur toutes les étapes, `gensrpg_dungeon_runtime_v2` et `gensrpg_dungeon_state_v1` absents ; `isDungeonMode()===false`.

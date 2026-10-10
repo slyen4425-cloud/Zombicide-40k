@@ -1,3 +1,19 @@
+# PHASE 9 — AXE C : FERMETURE CAPTURE PROPRIÉTAIRE — REPRISE 2026-10-10
+
+- **Chantier** : Phase 9, axe C uniquement — caractériser puis corriger (si RED) la fermeture explicite Capture et vérifier une deuxième session; pas de changement de gameplay.
+- **Branche dédiée** : `work/gensrpg-phase9-capture-axis-c-shutdown-owner-2026-10-10`.
+- **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-axis-c-shutdown-owner-2026-10-10` sur **`b492ed66bc8e61f65c1c3bf81cd937f8f57f5129`**, HEAD de diagnostic C dont Architecture+Browser `38042517877`, Firefox `38042517875`, Tactical Dock `38042517879` sont SUCCESS.
+- **Dernier checkpoint GREEN** : `checkpoint/gensrpg-phase9-capture-axis-c-real-shutdown-diagnostic-green-2026-10-10` sur `d211dbba20f94ef7272f572777a46fbae35c2365`. **GREEN de diagnostic seulement**; axe C et Phase 9 restent NON validés.
+- **Axes acquis** : A `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`, B `0bc5e2348d195c8581509b76ce47f6c20d052318`, leurs checkpoints et triples CI confirmés.
+- **Périmètre / autorité** : Capture `GensCaptureV1`, propriétaires Capture de session, Hub, retour écran ; Shell uniquement pour navigation, Core uniquement pour stockage partagé. Identifier le **propriétaire réel** du Quitter/Save & Quit historique avant de toucher au runtime. Aucun second propriétaire.
+- **Preuve RED existante** : E2E Capture vierge jusqu'au jour 3 puis `showGensRootHome()` → accueil visible MAIS `z40k_session_active_v1="1"`, propriétaires toujours installés et `GensCaptureV1.dispose` absent. Pas de contrôle direct Quitter dans le Hub examiné. Cela prouve navigation, non teardown. Voir `docs/GENSRPG_PHASE9_CAPTURE_AXIS_C_REAL_SHUTDOWN_2026-10-10.md`.
+- **Fonctions et données protégées** : main gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, runtime Dungeon/Survie/Tactical, partie Capture, édition, monde/équipe/combats, sauvegardes historiques, Shell/Core sauf seam explicitement démontré, PWA. Ne pas fusionner branches divergentes Capture138 ou lifecycle.
+- **Test de sortie prévu** : vraie UI Capture, sélection équipe, monde, combat/victoire, sauvegarde/reload/reprise, **vraie fermeture explicite**, deuxième démarrage autonome, session/Hub et timers/listeners libérés, absence d'autorité Dungeon/Survie, compatibilité anciens profils, sentinelles existantes; triple CI Architecture+Browser, Firefox, Tactical Dock sur SHA identique.
+- **Risque / règle §26** : fermeture historique potentiellement située dans `index.html` (~8 Mo). Demander le fichier **exact** du SHA `b492ed66bc8e61f65c1c3bf81cd937f8f57f5129`, blob `1a61147d5a32889fa85e6a09e846049103b9f0bf`, 8 165 438 octets; contrôler hash et taille, rollback byte-exact. Aucun contournement par lecture volumineuse du gros index.
+- **Prochaine étape** : réception/vérification du HTML exact, identification du seul propriétaire de fermeture, test RED ciblé puis correction minimale et validation. **Aucun GREEN ni sortie Phase 9 avant preuve E2E et triple CI.**
+
+---
+
 # PHASE 9 — AXE C : CHECKPOINT GREEN DU DIAGNOSTIC (ARRÊT NON PROUVÉ) — 2026-10-10
 
 - **Checkpoint diagnostic GREEN créé et vérifié** : `checkpoint/gensrpg-phase9-capture-axis-c-real-shutdown-diagnostic-green-2026-10-10` → **`d211dbba20f94ef7272f572777a46fbae35c2365`**. Ce GREEN couvre **uniquement l'observation**, absolument pas un arrêt autonome ni la fin Phase 9.

@@ -6,7 +6,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const vm=require('node:vm');
-const bytes=fs.readFileSync(path.join(__dirname,'..','index.html'));
+const bytes=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(path.join(__dirname,'..'));
 const src=bytes.toString('utf8');
 const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
 const oldBlob='18627cc0c5fc7945732c8a910504c59ef823b6ae';

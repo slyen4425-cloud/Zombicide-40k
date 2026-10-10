@@ -15,9 +15,9 @@
   ];
   function addExitControl(){
     const hub=root.document.getElementById("captureGameHub");
-    if(!hub)return false;
+    if(!hub||typeof root.document.createElement!=="function"||typeof hub.appendChild!=="function")return false;
     if(root.document.getElementById(EXIT_ID))return true;
-    const wrap=hub.querySelector(".captureWorldQuick")||hub;
+    const wrap=typeof hub.querySelector==="function"?(hub.querySelector(".captureWorldQuick")||hub):hub;
     const button=root.document.createElement("button");
     button.id=EXIT_ID;
     button.type="button";
@@ -33,7 +33,7 @@
   }
   function inWorld(){
     const d=root.document,hub=d.getElementById("captureGameHub"),menu=d.getElementById("menu");
-    if(!installed||!hub||!menu)return false;
+    if(!installed||!hub||!menu||typeof root.getComputedStyle!=="function")return false;
     return root.getComputedStyle(hub).display!=="none" &&
       root.getComputedStyle(menu).display!=="none";
   }
@@ -87,13 +87,13 @@
       const modal=root.document.getElementById(id);
       if(modal){modal.classList.remove("open");modal.style.display="none"}
     }
-    root.document.body.style.removeProperty("overflow");
-    root.document.documentElement.style.removeProperty("overflow");
+    root.document.body?.style?.removeProperty?.("overflow");
+    root.document.documentElement?.style?.removeProperty?.("overflow");
     return true;
   }
 
   function dispose(){
-    leaveWorld();
+    if(inWorld())leaveWorld();
     const button=root.document.getElementById(EXIT_ID);
     if(button){button.onclick=null;button.remove()}
     installed=false;

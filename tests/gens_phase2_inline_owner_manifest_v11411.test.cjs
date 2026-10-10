@@ -4,15 +4,16 @@ const path=require('node:path');
 const {execFileSync}=require('node:child_process');
 
 const root=path.join(__dirname,'..');
-const source=execFileSync('git',['show','HEAD:index.html'],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
+const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
 const gitBlobSha=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
-const CURRENT_BLOB='1a61147d5a32889fa85e6a09e846049103b9f0bf';
+const CURRENT_BLOB='2f2edfa5a1e229e4630889e7f0d5442199e221eb';
 const HISTORICAL_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
-assert.equal(gitBlobSha,CURRENT_BLOB,'inline-owner guard must match the exact reviewed Capture138 index');
-// Phase 2 metadata is historical cartography, not a fingerprint of every
-// later UI change. Undo only the reviewed 40-byte Capture138 timer guard.
+assert.equal(gitBlobSha,CURRENT_BLOB,'physical index must load the extracted seed; legacy snapshot is independently byte-verified');
+// Phase 2 metadata is historical cartography. First reconstruct the exact
+// old Capture seed inline from its external source, then undo ONLY the 40-byte
+// Capture138 timer guard; the historical code and manifest remain protected.
 const guardLine='      if(!isCaptureContext138())return;\n';
 assert.equal(source.split(guardLine).length-1,1,'Capture138 guard must appear exactly once');
 const historical=Buffer.from(source.replace(guardLine,''),'utf8');

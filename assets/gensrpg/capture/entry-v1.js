@@ -36,9 +36,40 @@
     return true;
   }
 
-  function status(){
-    return Object.freeze({installed,sessionStartBound:!!(sessionStartOwner&&typeof sessionStartOwner.start==="function")});
+  // Session stop is distinct from destroying a persistent save. The Shell owns
+  // root navigation; Capture owns the world state and UI teardown.
+  function stop(){
+    if(!installed||!sessionStartOwner||typeof sessionStartOwner.stop!=="function")return false;
+    if(root.GensShellModuleLaunchV1?.activeModule?.()!=="capture")return false;
+    const hub=root.GensCaptureHubEntryV1;
+    if(!hub||typeof hub.leaveWorld!=="function"||hub.status?.().inWorld!==true)return false;
+    if(root.gensCurrentCaptureBattle && root.gensCurrentCaptureBattle.phase!=="ended")return false;
+    if(typeof root.backHomeFromGame!=="function"||typeof root.showGensRootHome!=="function")return false;
+    if(sessionStartOwner.stop()!==true)return false;
+    if(hub.leaveWorld()!==true)return false;
+    root.backHomeFromGame();
+    root.showGensRootHome();
+    return true;
   }
 
-  root.GensCaptureV1=Object.freeze({VERSION,isProfile,install,startModuleSession,status});
+  function dispose(){
+    if(!installed)return true;
+    if(root.GensCaptureHubEntryV1?.status?.().inWorld && !stop())return false;
+    root.GensCaptureHubEntryV1?.dispose?.();
+    root.GensCaptureScreenReturnV1?.dispose?.();
+    sessionStartOwner?.dispose?.();
+    sessionStartOwner=null;
+    installed=false;
+    return true;
+  }
+
+  function status(){
+    return Object.freeze({
+      installed,
+      sessionStartBound:!!(sessionStartOwner&&typeof sessionStartOwner.start==="function"),
+      inWorld:root.GensCaptureHubEntryV1?.status?.().inWorld===true
+    });
+  }
+
+  root.GensCaptureV1=Object.freeze({VERSION,isProfile,install,startModuleSession,stop,dispose,status});
 })(typeof window!=="undefined"?window:globalThis);

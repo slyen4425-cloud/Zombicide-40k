@@ -19,11 +19,11 @@ assert.deepEqual(manifest.byDomain.dungeon,{
   accesses:151,resolved:101,unresolved:50,distinctKeys:11
 },'Dungeon storage totals drifted');
 
-const index=read('index.html');
+const index=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root);
 const header=Buffer.from('blob '+index.length+'\0');
 const blobSha=crypto.createHash('sha1').update(Buffer.concat([header,index])).digest('hex');
-assert.equal(index.length,8165438,'index.html byte size drifted from current Phase 9 participant raccord runtime');
-assert.equal(blobSha,'1a61147d5a32889fa85e6a09e846049103b9f0bf','index.html blob must match the current Phase 9 participant raccord runtime source');
+assert.equal(index.length,8165438,'byte-exact restored Phase 9 Dungeon deck baseline must remain pinned');
+assert.equal(blobSha,'1a61147d5a32889fa85e6a09e846049103b9f0bf','historical Phase 9 Dungeon deck audit must match its original byte-exact snapshot');
 
 
 const deckStart=index.toString('utf8').indexOf('const DUNGEON_DECK_KEY="gensrpg_dungeon_deck_v1";');

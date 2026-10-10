@@ -1,3 +1,13 @@
+# PHASE 9 — AXE B : REPRISE DE CAPTURE SEUL PROUVÉE EN TEST CIBLÉ — 2026-10-10
+
+- **Test navigateur réel** `tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs` : **GREEN ciblé** GitHub Actions `38032142960`. Capture vierge → dresseur/créature → jour 2 → combat/victoire → fermeture de la page/reload → vrai bouton Shell Reprendre → jour 3. Sur toutes les étapes, `gensrpg_dungeon_runtime_v2` et `gensrpg_dungeon_state_v1` absents ; `isDungeonMode()===false`.
+- **Limite** : persistance automatique + page recréée/reprise prouvées, mais pas de « Save & Quit » explicite ni d'arrêt complet de session (axe C). Ne PAS déclarer Phase 9 terminée.
+- **Intégration** : le test ciblé est ajouté au job navigateur Architecture permanent. Workflow de diagnostic one-shot retiré. **Triple CI du nouveau SHA final encore à vérifier avant checkpoint GREEN de l'axe B**. Aucun changement de moteur, de `index.html` ni de `main`.
+- **Branche isolée** `work/gensrpg-phase9-capture-axis-b-clean-resume-2026-10-10` ; départ `checkpoint/gensrpg-start-phase9-capture-axis-b-clean-resume-2026-10-10` sur `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453` (checkpoint GREEN axe A).
+- **Prochain critère Phase 9** : axe C, cycle de fermeture propre et deuxième session, après checkpoint propre et coordination lifecycle concurrent. Voir `docs/GENSRPG_PHASE9_CAPTURE_AXIS_B_CLEAN_RESUME_2026-10-10.md`.
+
+---
+
 # PHASE 9 — AXE B : REPRISE CAPTURE SANS FIXTURE DUNGEON — 2026-10-10
 
 - **Branche unique** : `work/gensrpg-phase9-capture-axis-b-clean-resume-2026-10-10`. Checkpoint obligatoire de départ `checkpoint/gensrpg-start-phase9-capture-axis-b-clean-resume-2026-10-10` SHA `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`.

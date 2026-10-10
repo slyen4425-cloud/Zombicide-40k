@@ -1,3 +1,16 @@
+# PHASE 9 — AXE B : REPRISE CAPTURE SANS FIXTURE DUNGEON — 2026-10-10
+
+- **Branche unique** : `work/gensrpg-phase9-capture-axis-b-clean-resume-2026-10-10`. Checkpoint obligatoire de départ `checkpoint/gensrpg-start-phase9-capture-axis-b-clean-resume-2026-10-10` SHA `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`.
+- **Dernier GREEN fonctionnel** : `checkpoint/gensrpg-phase9-capture-axis-a-runtime-isolation-green-2026-10-10` sur SHA `5b39eacb2fdc2f0ab69b3c6063196f7a37f40453`; Architecture + Browser `38025145492`, Firefox `38025145499`, Tactical `38025145507` SUCCESS ; scénario réel Capture vierge → jour 2 → combat → victoire sans état Dungeon.
+- **Périmètre** : test navigateur réel de sauvegarde/rechargement/reprise Capture **sans jamais créer de partie Dungeon**, et poursuite du monde après reprise. Conserver `tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs` et les tests legacy avec sauvegarde Dungeon. Ce lot est **diagnostic uniquement** : aucun changement moteur, index, Shell, Core, Capture, Survie, Dungeon, Tactical ou éditeurs.
+- **Propriétaire** : Capture `GensCaptureV1` / session, world state historique, reprise par API publique Shell ; pas de nouveau runtime ni autorité dupliquée. **Protéger** sauvegardes, quatre modules, PWA et `main`.
+- **Tests visés** : TDD ciblé Chromium en profil vierge, état World jour 2 + victoire, persistance après fermeture de la page, bouton Reprendre, progression jour 3, assertion absence persistante des clés runtime Dungeon. La mise en place de combat automatique existe dans le test A mais conserve le vrai moteur Capture ; aucune simulation de moteur.
+- **Risques/limites** : si la reprise passe par une compatibilité legacy Dungeon, l'identifier et ne pas maquiller le défaut ; ne pas conclure à la fermeture propre (axe C). Note : le scénario A contrôle les clés `gensrpg_dungeon_runtime_v2` et `gensrpg_dungeon_state_v1` mais n'observe pas tous les listeners; ne pas extrapoler.
+- **Autres branches divergentes** : `work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09` et `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` non touchées. **Production main gelée** SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Règle 26** : le test opère sur des sources depuis le dépôt, sans inspection/édition manuelle du contenu exact du gros `index.html`. Toute future modification ou comparaison exacte devra exiger le fichier vérifié envoyé par l'utilisateur.
+
+---
+
 # PHASE 9 — AXE A : CAPTURE SEUL NAVIGATEUR GREEN CIBLÉ — 2026-10-10
 
 - **Branche** : `work/gensrpg-phase9-capture-axis-a-runtime-isolation-2026-10-10`, checkpoint initial `checkpoint/gensrpg-start-phase9-capture-axis-a-runtime-isolation-2026-10-10` sur `a556eeb0f6798e1cf210eca5896ac75231efc1c6`. Dernier checkpoint GREEN **certifié** reste `checkpoint/gensrpg-phase9-capture-exit-gate-green-2026-10-10`, même SHA.

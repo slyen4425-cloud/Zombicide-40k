@@ -1,3 +1,14 @@
+# PHASE 9 — AXE C : CHECKPOINT GREEN DU DIAGNOSTIC (ARRÊT NON PROUVÉ) — 2026-10-10
+
+- **Checkpoint diagnostic GREEN créé et vérifié** : `checkpoint/gensrpg-phase9-capture-axis-c-real-shutdown-diagnostic-green-2026-10-10` → **`d211dbba20f94ef7272f572777a46fbae35c2365`**. Ce GREEN couvre **uniquement l'observation**, absolument pas un arrêt autonome ni la fin Phase 9.
+- **Trois workflows GREEN sur ce SHA exact** : Architecture+Browser `38038795293`, Firefox `38038795308`, Tactical Dock `38038795307`. Le test navigateur ciblé de diagnostic `38038660692` est SUCCESS.
+- **Résultat réel** : partie Capture → victoire → rechargement → reprise → jour 3, sans clé runtime Dungeon ; aucun vrai contrôle direct Quitter identifié dans le Hub étudié. Après `showGensRootHome()`, **session active `"1"`**, propriétaires Capture toujours installés, monde Capture conservé. `GensCaptureV1.dispose` inexistant. **AXE C NON VALIDÉ**.
+- **Autorité / limite** : le retour accueil Shell est une navigation, non un shutdown. La branche parallèle `work/gensrpg-phase9-capture-lifecycle-shutdown-preaudit-2026-10-09` est divergente et non fusionnée ; aucune seconde autorité créée.
+- **Prochaine étape autorisée** : vrai audit des actions Quitter/Save&Quit/arrêt avec `index.html` fourni par l'utilisateur, **SHA de fichier exact** au checkpoint `d211dbba20f94ef7272f572777a46fbae35c2365`, taille **8 165 438 octets**, blob Git `1a61147d5a32889fa85e6a09e846049103b9f0bf` ; charte §26. Puis RED concret → choix d'un propriétaire unique → correction soustractive ciblée, sauvegardes rétrocompatibles, tests E2E deux sessions, triple CI, validation mobile.
+- **Production** : `main` toujours gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Aucune modification runtime/index dans cet audit.
+
+---
+
 # PHASE 9 — AXE C : RETOUR SHELL ≠ ARRÊT CAPTURE — DIAGNOSTIC RÉEL — 2026-10-10
 
 - **Checkpoint de départ** `checkpoint/gensrpg-start-phase9-capture-axis-c-real-shutdown-2026-10-10` sur `0bc5e2348d195c8581509b76ce47f6c20d052318`, branche `work/gensrpg-phase9-capture-axis-c-real-shutdown-2026-10-10`. Axe B GREEN sur cette base, runs `38032288907`, `38032288895`, `38032288898`.

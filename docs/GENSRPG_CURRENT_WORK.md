@@ -1,3 +1,16 @@
+# PHASE 9 — DUNGEON BUILDER ISOLÉ DE CAPTURE — RUNTIME CORRIGÉ 2026-10-11
+
+- **Chantier** : `work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11`, base checkpoint `checkpoint/gensrpg-start-phase9-capture-dungeon-editor-boundary-2026-10-11` sur `2e6c01aa0d7ce4ebe061a436b2753940b1750e03`.
+- **Résultat** : le créateur de cartes Dungeon ne s'affiche plus dans le hub éditeur du profil Capture ; l'ouverture directe refuse Capture ; le vrai Dungeon conserve son Builder sans changement.
+- **Commit runtime** : `5faf9614e49668dcae2a56d9ac85265bbf3a6349`. Index Git blob `d19fb899e646ee97ec21d055b5271ac2cbba91a2`, 7 959 154 octets ; migration réversible avec rollback byte exact.
+- **Propriétés préservées** : cartes, salles et bibliothèque Dungeon, lieux/événements/biomes Capture, éditeurs communs, données MJ, profils, sauvegardes, Shell/Core, Survie, Tactical, PvP, PWA et `main`.
+- **Preuve déjà GREEN** : [workflow d'application 38094461562](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094461562), vrai parcours Capture -> édition (Dungeon caché et bloqué) -> Dungeon (Builder ouvert), world/seed/creator tests et composition.
+- **Gate encore attendu** : Architecture+Browser, Firefox et Tactical SUCCESS sur le même SHA documentaire final ; puis preview manuelle Capture et Dungeon avant checkpoint fonctionnel GREEN.
+- **Prochain lot** : extraction physique Equipe/Réserve Capture séparée après gate de ce lot ; utiliser fichier `index.html` exact du nouveau SHA selon charte §26.
+- **Rapport complet** : `docs/GENSRPG_PHASE9_CAPTURE_DUNGEON_EDITOR_BOUNDARY_2026-10-11.md`. **Phase 10 non ouverte** ; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
 # PHASE 9 — FRONTIÈRE ÉDITEUR DUNGEON / CAPTURE — CHANTIER 2026-10-11
 
 - **Accord utilisateur** : ne pas dupliquer le générateur Dungeon dans Capture ; masquer l'accès au créateur Dungeon depuis un profil Capture ; conserver les lieux/rencontres Capture et le futur raccord du World Builder dans un autre chantier.

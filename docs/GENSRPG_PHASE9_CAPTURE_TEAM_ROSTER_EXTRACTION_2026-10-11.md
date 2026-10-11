@@ -1,5 +1,16 @@
 # Phase 9 — Extraction physique Équipe / Réserve Monster Capture
-11 octobre 2026 — **chantier ouvert, résultat technique en cours de validation**.
+11 octobre 2026 — **extraction runtime physiquement réalisée ; validation de la triple CI documentaire et du test manuel du nouveau lot encore requise**.
+
+## Exécution contrôlée et preuves réelles
+- Workflow [38130159374](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38130159374) **SUCCESS** ; commit runtime `94b00857dcbe5a2f92a63dd57713f0eac8033b33`.
+- Script `tools/gensrpg_phase9_capture_team_roster_extraction_apply.py` : extraction de 5 blocs de propriétaires existants et suppression simultanée des corps inline, sans nouveau moteur ni duplication.
+- Index réduit à **7 950 873 octets**, Git blob `57415a1071475cc10f0c79e092897190577127e8`. Module `team-roster-v1.js` **8 761 octets**, blob `297e1e1624bacb0f288403294c1b56aa6f26e66b`.
+- La restauration byte-exacte ramène le HTML à **7 959 089 octets**, blob `e777d484ab10049650440fee04f47cf2dfdc3043`, preuve automatique sur GitHub Actions.
+- TDD RED sur l'ancien HTML (échec attendu : aucun chargeur propriétaire Équipe/Réserve), puis GREEN sur la nouvelle composition ; **19 fonctions** garanties non dupliquées et champs sauvegardés UID/niveau/XP/statistiques personnalisées/inventaire conservés.
+- Historique Phase 2, semences, monde, éditeur Dungeon et composition contrôlés sur le commit appliqué ; vrais navigateurs Chromium sur les axes Capture reprise et Save Quit, vrai Dungeon Builder et frontières de quatre modules : **SUCCESS** dans le même workflow.
+- La sentinelle Équipe / Réserve est branchée dans `.github/workflows/gensrpg-architecture-sentinels.yml`. Les anciens snapshots byte-exacts sont reconstruits à partir du nouveau propriétaire avant application des anciens invariants ; aucune vérification supprimée.
+- Statut de sortie : triple CI à relever sur **le SHA final comportant documentation/contrat** ; checkpoint technique après succès, test utilisateur avant checkpoint GREEN fonctionnel. Pas de changement de `main`.
+
 
 ## Gouvernance et provenance
 - Dernier GREEN fonctionnel : `checkpoint/gensrpg-phase9-dungeon-editor-single-owner-green-2026-10-11`, SHA `b4b1a3dfad64f43265294a2485591701c38c7644`, trois CI SUCCESS (`38108512387`, `38108512336`, `38108512371`) et validation utilisateur explicite du 11 octobre.

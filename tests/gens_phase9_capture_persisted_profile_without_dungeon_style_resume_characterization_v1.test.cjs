@@ -42,15 +42,16 @@ async function waitPreview(page){
   ,null,{timeout:60000});
 }
 
-async function openCaptureFamily(page){
-  const b=page.locator('button.gensRootModeCard.capture');
+async function openFamily(page,family){
+  const b=page.locator('button.gensRootModeCard.'+family);
   await b.waitFor({state:'visible'});
   await b.click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 }
 
 async function selectProfile(page,profileId){
-  await openCaptureFamily(page);
+  const family=profileId===DUNGEON_ID?'adventure':'capture';
+  await openFamily(page,family);
   let card=page.locator('#gensFamilyGames [data-rpg-profile="'+profileId+'"] .gensUniverseMainBtn');
   await card.waitFor({state:'visible'});
 
@@ -66,7 +67,7 @@ async function selectProfile(page,profileId){
       card.click()
     ]);
     await waitPreview(page);
-    await openCaptureFamily(page);
+    await openFamily(page,family);
     card=page.locator('#gensFamilyGames [data-rpg-profile="'+profileId+'"] .gensUniverseMainBtn');
     await card.waitFor({state:'visible'});
   }

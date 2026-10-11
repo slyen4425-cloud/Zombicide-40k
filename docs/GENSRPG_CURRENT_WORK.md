@@ -10,6 +10,7 @@
 - `tests/gens_capture_current_shell_browser_v11411.test.cjs` (navigation réelle Shell Capture) ;
 - `tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs` (profil Dungeon de sauvegarde étrangère dans la famille Dungeon, jamais Capture).
 - `tests/gens_preview_external_browser_v1.test.cjs` (preview externe à URL GitHub SHA épinglé : sélection Capture via `capture`, Dungeon via `adventure`, y compris après reload) ; ajustement strictement limité aux sélecteurs de l'ancien test.
+- `tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs` : dans la composition Shell volontairement partielle (sans markup de l'éditeur RPG), prouver la **création et persistance** du nouveau monde Capture plutôt que d'attendre une modale volontairement absente ; les tests du Builder/éditeur complet conservent la couverture du DOM réel.
 
 **Triple CI définitive obligatoire** : architecture et navigateur Chromium, Firefox, Tactical Chromium/Firefox, chaque workflow SUCCESS **sur le SHA exact du dernier commit** ; suivi depuis les actions de la branche. **Aucune déclaration GREEN avant ce gate.** Retour manuel du 11/10 positif. Au passage des trois CI, créer et vérifier le checkpoint final, lier les runs et permettre la reprise par ce checkpoint. Pas de micro-refactor sans nouveau bug prouvé.
 

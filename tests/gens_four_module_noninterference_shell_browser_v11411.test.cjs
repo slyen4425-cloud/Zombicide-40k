@@ -358,8 +358,16 @@ const server=http.createServer((req,res)=>{
     mark('create-new-independent-capture-world');
     await page.locator('#gensFamilyHome .homeTop button.back').click();
     await openFamily('capture');
+    const previousProfileId=await page.evaluate(()=>activeGameProfileId());
     await page.locator('#gensFamilyGames button.gensFamilyGameCard[onclick*="createNewRpgUniverse"]').click();
-    await page.waitForFunction(()=>getComputedStyle(document.getElementById('rpgUniverseEditorModal')).display==='block');
+    // The reduced real-Shell composition intentionally excludes the full RPG editor modal.
+    // Prove creation and persistence here; the full editor is covered by preview E2E tests.
+    await page.waitForFunction(previous=>{
+      const id=typeof activeGameProfileId==='function'?activeGameProfileId():null;
+      if(!id||String(id)===String(previous))return false;
+      const profile=typeof loadGameProfiles==='function'?loadGameProfiles().find(p=>String(p.id)===String(id)):null;
+      return !!profile&&profile.rpgUniverse?.gameplay?.profile==='creature';
+    },previousProfileId);
     const newlyCreated=await page.evaluate(()=>{
       const p=loadGameProfiles().find(p=>String(p.id)===String(activeGameProfileId()));
       return {id:p?.id,profile:p?.rpgUniverse?.gameplay?.profile,mods:p?.rpgUniverse?.gameplay?.modules,family:gensSelectedFamily,route:gensFamilyForProfileId(p?.id)};

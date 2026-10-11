@@ -37,3 +37,9 @@ Date : **11 octobre 2026**. Décision : **Phase 9 clôturée fonctionnellement**
 Un **unique lot de preuves**, sans code runtime, solde les axes. Une fois la CI du commit documentaire de clôture elle-même GREEN, fixer le checkpoint final `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` au SHA exact de cette documentation. Aucune validation manuelle additionnelle de gameplay n'est imposée puisque le runtime testé reste byte-identique au GREEN validé.
 
 **Phase 9 terminée fonctionnellement ; Phase 10 non entamée.** Le futur chantier doit ouvrir son propre checkpoint de départ, respecter la charte et ne peut pas être confondu avec les travaux de laboratoires.
+
+## Avenant du 11 octobre 2026 — Quatrième vignette du Hub racine
+
+L'état de ce document, écrit avant la vérification de la position visuelle du module dans l'accueil, prouvait l'autonomie **fonctionnelle interne**. Le contrôle utilisateur a identifié un dernier critère d'acceptation : afficher Capture directement au premier niveau du Hub plutôt que dans la famille `adventure`.
+
+Ce point a été corrigé via le chantier gouverné `work/gensrpg-phase9-capture-root-hub-2026-10-11`, à partir du checkpoint `bf6d6536fe013d9339a9790f6565a98699440f63`, avec le vrai fichier `a1.zip` préalablement vérifié selon la charte §26 (blob d'origine `b64eae3650081af624155c8a4b8e47e4a1791658`). Le code `53bab4060107683eb8e0f3159201ed3844849474` ajoute la vignette racine Monster Capture et sa famille de mondes dédiée ; Survie, Dungeon et PvP restent isolés. L'utilisateur a confirmé « Parfait ! » après visualisation. Le gate final demeure soumis à une **triple CI sur le SHA définitif** ; voir `docs/GENSRPG_CURRENT_WORK.md` pour le checkpoint. La dette de découpage physique du monolithe et le lancement de Phase 10 demeurent séparés.

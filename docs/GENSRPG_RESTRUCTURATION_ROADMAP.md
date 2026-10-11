@@ -182,6 +182,10 @@ Exigence renforcée de Phase 9 : Capture doit également fonctionner et se ferme
 
 La présence résiduelle d'actions/UI Capture et de calculs XP/récompenses dans `index.html` demeure une dette de découpage physique **à traiter ultérieurement si justifiée**, sans conditionner la sortie fonctionnelle de Phase 9. Elle ne doit pas provoquer un nouveau micro-lot tant que les invariants sont conservés. Phase 10 n'est pas commencée et `main` demeure gelée.
 
+### Critère d'interface racine désormais satisfait — 11 octobre 2026
+
+Le dernier lot Phase 9 a corrigé le **routage Shell du Hub principal** en ajoutant une quatrième carte `MONSTER CAPTURE` au même rang que `SURVIE`, `DUNGEON / AVENTURE` et `DUEL / PVP`, avec sa propre famille `capture`. Les univers Capture ne sont plus listés dans `adventure`, et leur création/édition/reprise suit la famille Capture. Code de référence du lot : `53bab4060107683eb8e0f3159201ed3844849474` ; réponse de validation manuelle utilisateur « Parfait ! ». Les résultats CI et le checkpoint final de ce lot sont consignés dans `docs/GENSRPG_CURRENT_WORK.md`. Ni `main` ni la Phase 10 n'ont été modifiées.
+
 ## Phase 10 — Séparer Duel/PvP
 
 Créer `pvp/` autonome avec ses règles de session, combat et UI.

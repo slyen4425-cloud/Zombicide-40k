@@ -1,3 +1,14 @@
+# VALIDATION UTILISATEUR — PHASE 9 / MONSTER CAPTURE AU HUB RACINE — 11 OCTOBRE 2026
+
+- **État : fonctionnalité testée et acceptée par l'utilisateur** (« Parfait ! »), à l'adresse de preview du SHA `53bab4060107683eb8e0f3159201ed3844849474`. Monster Capture constitue le **quatrième choix de premier niveau** à côté de Survie, Dungeon et PvP, avec sa propre famille de profils (aucun monde Capture sous Dungeon).
+- **Entrée préexistante préservée** : autonomie moteur Capture validée au checkpoint `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` (`bf6d6536fe013d9339a9790f6565a98699440f63`). Modifications du présent lot limitées au routage/navigation du Shell, à la présentation racine et aux sentinelles historiques adaptées.
+- **Checkpoint de départ du dernier lot** : `checkpoint/gensrpg-start-phase9-capture-root-hub-2026-10-11`, SHA `bf6d6536fe013d9339a9790f6565a98699440f63` ; branche `work/gensrpg-phase9-capture-root-hub-2026-10-11`.
+- **Checkpoint final à poser après triple CI SUCCESS sur le présent SHA de documentation** : `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11`. **Aucun lancement Phase 10** ici. `main` et laboratoires protégés.
+- **Exigence de sortie vérifiable** : quatre vignettes racines ; familles Capture/Dungeon non mélangées ; création/édition/reprise Capture ; Save & Quit et navigateur ; CI Architecture/Chromium, Firefox, Tactical toutes SUCCESS sur le même commit. Jeu validé manuellement via le retour utilisateur du 11 octobre 2026.
+- **Plan de reprise** : vérifier le triple résultat CI **sur le dernier SHA**, puis fixer le checkpoint immuable sur ce SHA. Aucun micro-refactor secondaire. **Phase 9 terminée après ce checkpoint**.
+
+---
+
 # CHANTIER BORNE — PHASE 9 / VIGNETTE MONSTER CAPTURE AU HUB RACINE — 11 OCTOBRE 2026
 
 - **Base GREEN de départ** : `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` / SHA `bf6d6536fe013d9339a9790f6565a98699440f63` (CI Chromium/Firefox/Tactical tous SUCCESS, moteur Capture précédemment validé manuellement). Production `main` toujours gelée.

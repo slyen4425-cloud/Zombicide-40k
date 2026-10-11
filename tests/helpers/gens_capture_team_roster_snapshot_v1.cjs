@@ -96,4 +96,4 @@ function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..'))
  assert.equal(hash(index),'e777d484ab10049650440fee04f47cf2dfdc3043','pre-team index source blob');
  return index;
 }
-module.exports={teamRosterPreExtractionIndexBytes};
+module.exports={teamRosterPreExtractionIndexBytes,restoreHistoricalHubSnapshot};

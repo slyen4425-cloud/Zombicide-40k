@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,89,'production graph includes the Capture team/roster single owner');
-assert.equal(mapped.size,89,'owner manifest must classify every production-reachable file including Capture team/roster');
+assert.equal(reachable.size,90,'production graph includes the Capture team/roster and Combat Core owners');
+assert.equal(mapped.size,90,'owner manifest must classify every production-reachable file including Capture Combat Core');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

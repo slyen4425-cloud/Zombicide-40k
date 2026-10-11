@@ -89,6 +89,35 @@ assert.equal(full.remainingCriticalAxes.length,3,'give a bounded list of decisiv
 assert.equal(full.scope.runtimeChanges,false);
 assert.equal(full.scope.indexInspectedDirectly,false,'Rule 26 forbids substitute readings of huge HTML');
 assert.equal(full.evidence.baselineGreenSha,'3e47a393f9fca326bf9aab21a15ba4b4d315eddb');
+// The 2026-10-09 assessment is preserved as historical evidence. The 2026-10-11
+// closure must be supported by GREEN browser tests for A/B/C on a shared SHA.
+const finalGate=JSON.parse(read('docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-11.json'));
+const axisA=read('tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs');
+const axisB=read('tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs');
+const axisC=read('tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs');
+assert.equal(finalGate.phase,9);
+assert.equal(finalGate.phaseExitReady,true,'Phase 9 final gate is functional closure, not code-size completion');
+assert.equal(finalGate.exitKind,'functional-runtime-autonomy');
+assert.equal(finalGate.runtimeSha,'9ad6a3b0a8b54e6798d095e027f1770eca54f52b');
+assert.equal(finalGate.evidenceSha,'edab672d914f929becfdba93dbfd33638b75b6ff');
+assert.deepEqual(Object.keys(finalGate.criteria),Object.keys(full.criteria));
+assert.ok(Object.values(finalGate.criteria).every(c=>c.status==='proven'),'Every autonomy gate must be proven');
+assert.deepEqual(finalGate.remainingBlockingCodeLots,[]);
+assert.deepEqual(finalGate.ci.evidenceRuns.map(x=>x.conclusion),['success','success','success']);
+assert.ok(finalGate.ci.evidenceRuns.every(x=>x.sha===finalGate.evidenceSha));
+assert.match(axisA,/assert\.equal\(s\.shellOwner,'capture'/);
+assert.match(axisA,/assert\.equal\(s\.dungeonRuntime,null/);
+assert.match(axisB,/capture-second-real-combat-after-reload-and-resume/);
+assert.match(axisB,/captureBattleUseAbility\('capture_basic_attack'\)/);
+assert.match(axisB,/capture-second-battle-victory-after-resume/);
+assert.match(axisC,/assert\.equal\(stopped\.hubOwner\?\.pendingScrolls,0/);
+assert.match(axisC,/resume-after-explicit-exit-without-page-reload/);
+assert.match(axisC,/assert\.equal\(afterSecondExit\.controls,1/);
+assert.equal(finalGate.scope.indexInspectedDirectly,false);
+assert.equal(finalGate.scope.runtimeChanges,false);
+assert.equal(finalGate.scope.mainTouched,false);
+assert.ok(finalGate.deferredLegacyOwners.some(x=>/XP/.test(x)),'Historical inline XP remains explicit debt');
+
 console.log(JSON.stringify({
  scenario:'Phase 9 Capture autonomy EXIT EVIDENCE gate (NOT exit-ready)',
  phaseExitReady:full.phaseExitReady,

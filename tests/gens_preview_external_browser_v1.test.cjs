@@ -82,10 +82,11 @@ const DUNGEON_ID='game_profile_dungeon_demo';
 
     let captureCardText='';
 
-    async function openAdventureProfile(profileId){
-      const adventure=page.locator('button.gensRootModeCard.adventure');
-      await adventure.waitFor({state:'visible'});
-      await adventure.click();
+    async function openProfileInRootFamily(profileId){
+      const family=profileId===CAPTURE_ID?'capture':'adventure';
+      const rootCard=page.locator('button.gensRootModeCard.'+family);
+      await rootCard.waitFor({state:'visible'});
+      await rootCard.click();
       await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 
       let card=page.locator('#gensFamilyGames [data-rpg-profile="'+profileId+'"] .gensUniverseMainBtn');
@@ -107,9 +108,9 @@ const DUNGEON_ID='game_profile_dungeon_demo';
           typeof window.openGensFamily==='function' &&
           typeof window.gensProfileContentFamily155==='function'
         ));
-        const adventure2=page.locator('button.gensRootModeCard.adventure');
-        await adventure2.waitFor({state:'visible'});
-        await adventure2.click();
+        const rootCard2=page.locator('button.gensRootModeCard.'+family);
+        await rootCard2.waitFor({state:'visible'});
+        await rootCard2.click();
         await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
         card=page.locator('#gensFamilyGames [data-rpg-profile="'+profileId+'"] .gensUniverseMainBtn');
         await card.waitFor({state:'visible'});
@@ -124,7 +125,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       ),profileId);
     }
 
-    await openAdventureProfile(CAPTURE_ID);
+    await openProfileInRootFamily(CAPTURE_ID);
     const captureIdentity=await page.evaluate(()=>({
       family:typeof gensSelectedFamily==='string'?gensSelectedFamily:'',
       contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'',
@@ -170,7 +171,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
     await page.locator('#gensFamilyHome .homeTop button.back').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensRootHome')).display!=='none');
 
-    await openAdventureProfile(DUNGEON_ID);
+    await openProfileInRootFamily(DUNGEON_ID);
     await page.locator('#gensGameHomeActions .homeEditorsBtn').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('editorHub')).display!=='none');
 

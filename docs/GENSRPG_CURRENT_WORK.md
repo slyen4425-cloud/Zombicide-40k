@@ -1,6 +1,18 @@
+# REPRISE OFFICIELLE — PHASE 9 : COMBAT CAPTURE GREEN FONCTIONNEL — 11 OCTOBRE 2026
+
+- **Statut validé** : l'utilisateur a confirmé explicitement « Test validé » le 11 octobre 2026 pour le lot extraction Combat Core ; **GREEN fonctionnel**. Le lot Équipe / Réserve était déjà GREEN fonctionnel.
+- **Checkpoint fonctionnel GREEN créé** : `checkpoint/gensrpg-phase9-capture-combat-core-extraction-green-2026-10-11` → SHA exact `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` (même SHA que preview utilisateur validée et 3 CI SUCCESS).
+- **CI triple SUCCESS sur ce SHA** : Architecture **et navigateur Chromium** [38139392742](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38139392742) ; Firefox [38139392738](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38139392738) ; Tactical [38139392748](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38139392748).
+- **Publication vérifiée** : la branche du lot `work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11` contient aussi le commit documentaire `8c3f1452f5852480f36adffebf2fc348cca2bb20` dont la triple CI est SUCCESS ([Architecture 38140707188](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38140707188), Firefox 38140707222, Tactical 38140707234). Le checkpoint GREEN cible exprès le **SHA runtime/preview validé** `9ad6a3b...`, pas ce document.
+- **Production `main` toujours gelée** : `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucune fusion de ces travaux. Phase 10 non ouverte.
+- **À la prochaine reprise** : lire la charte, ce CURRENT_WORK LIVE et la roadmap ; repartir de ce GREEN fonctionnel. **Priorité unique : trancher les trois axes de sortie A/B/C de la Phase 9 avec les preuves existantes**, avant d'ouvrir une nouvelle branche de chantier. Les actions/UI du combat et récompenses/XP peuvent rester partiellement inline : ne les extraire que si elles bloquent le critère d'autonomie. Éviter les micro-lots, éviter les changements de gameplay, ne pas créer un autre moteur. Pour toute nouvelle édition de l'index, suivre impérativement le §26.
+- **Lien de la preview manuelle validée** : https://raw.githack.com/slyen4425-cloud/Zombicide-40k/9ad6a3b0a8b54e6798d095e027f1770eca54f52b/preview.html .
+
+---
+
 # PHASE 9 — COMBAT CAPTURE : EXTRACTION PHYSIQUE NOYAU — 2026-10-11
 
-- **État actuel** : Combat Core V1 extrait physiquement et testé dans le workflow contrôlé. **39 fonctions**, code original conservé ; Shell Hub corrigé sans nouvelle autorité. Le lot **n'est pas encore GREEN fonctionnel** : triples sentinelles sur SHA documentaire final puis test manuel à obtenir.
+- **État actuel** : Combat Core V1 extrait physiquement et testé dans le workflow contrôlé. **39 fonctions**, code original conservé ; Shell Hub corrigé sans nouvelle autorité. Le lot est désormais **GREEN fonctionnel**, avec triple CI SUCCESS sur `9ad6a3b0a8b54e6798d095e027f1770eca54f52b`, validation manuelle du 11 octobre 2026 et checkpoint final vérifié. Les mentions de gates en attente ci-dessous sont historiques.
 - **Dernier GREEN fonctionnel préalable** : `checkpoint/gensrpg-phase9-capture-team-roster-extraction-green-2026-10-11` SHA `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`. Validation manuelle de l'utilisateur le 11 octobre : « tout fonctionne parfaitement ».
 - **Départ exact du lot** : `checkpoint/gensrpg-start-phase9-capture-combat-owner-extraction-2026-10-11` à `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`. Branche dédiée `work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11`.
 - **Source §26** : index de départ 7 950 873 octets/blob `57415a1071475cc10f0c79e092897190577127e8`, reconstitué et vérifié exactement depuis le ZIP `indexa.zip` et l'extraction Équipe / Réserve approuvée.

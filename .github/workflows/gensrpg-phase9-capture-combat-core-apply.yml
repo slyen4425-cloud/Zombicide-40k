@@ -1,0 +1,71 @@
+name: GenSrpG Phase 9 Capture Combat Core controlled apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-combat-core-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-combat-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact approved work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify source and starting functional checkpoint
+        run: |
+          test "$(git branch --show-current)" = 'work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11'
+          test "$(wc -c < index.html)" = '7950873'
+          test "$(git hash-object index.html)" = '57415a1071475cc10f0c79e092897190577127e8'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase9-capture-combat-owner-extraction-2026-10-11)" = 'f7d64ba8c5b2539ce8ee65ab3db3d51828229965'
+
+      - name: Relocate existing core, preserve real APIs and prove rollback
+        run: |
+          python tools/gensrpg_phase9_capture_combat_core_apply.py --apply
+          python tools/gensrpg_phase9_capture_combat_core_apply.py --verify
+          test "$(wc -c < index.html)" = '7932251'
+          test "$(git hash-object index.html)" = 'b64eae3650081af624155c8a4b8e47e4a1791658'
+          test "$(wc -c < assets/gensrpg/capture/combat-core-v1.js)" = '18894'
+          test "$(git hash-object assets/gensrpg/capture/combat-core-v1.js)" = '129e0af81d7454ed9f7697d40454a5e32bb8e580'
+          node --check assets/gensrpg/capture/combat-core-v1.js
+          node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
+
+      - name: Verify related modules and subtractive diff before commit
+        run: |
+          node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs
+          node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+          git add index.html assets/gensrpg/capture/combat-core-v1.js
+          git diff --cached --check
+          test "$(git diff --cached --name-only)" = "$(printf 'assets/gensrpg/capture/combat-core-v1.js\nindex.html')"
+
+      - name: Install real browser for module boundary verification
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Real Capture battle victory resume and four module non-interference
+        run: |
+          node tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs
+          node tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs
+          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+          node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+
+      - name: Commit and publish only the tested Capture work branch
+        run: |
+          python tools/gensrpg_phase9_capture_combat_core_apply.py --verify
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor(phase9): physically extract existing Capture combat core owner"
+          git push origin "HEAD:$GITHUB_REF_NAME"

@@ -16,8 +16,35 @@ const END=[
  'function renderCaptureHeroInventory(){',
  'function openCreatureCapture(){'
 ];
+// Historical sentinels consume the pre-combat index, not the new runtime owner.
+// Rebuild it from the external module only after its physical extraction.
+// This keeps all earlier hashes and their original expectations unchanged.
+function restoreCombatCoreIfExtracted(index,root){
+ const tag=Buffer.from('<script src="assets/gensrpg/capture/combat-core-v1.js?v=1"></script>\n');
+ if(index.indexOf(tag)<0)return index;
+ assert.equal(index.length,7932251,'Capture battle core extracted index bytes');
+ assert.equal(hash(index),'b64eae3650081af624155c8a4b8e47e4a1791658','Capture battle core active index fingerprint');
+ const owner=fs.readFileSync(path.join(root,'assets/gensrpg/capture/combat-core-v1.js'));
+ assert.equal(owner.length,18894,'Capture battle core bytes');
+ assert.equal(hash(owner),'129e0af81d7454ed9f7697d40454a5e32bb8e580','Capture battle core fingerprint');
+ const header=Buffer.from('// GenSrpG Phase9 Capture battle core - identical legacy source relocation.\n// Classic script to retain original global lexical/function contract.\n// BEGIN_CAPTURE_BATTLE_CORE\n');
+ const footer=Buffer.from('// END_CAPTURE_BATTLE_CORE\n');
+ assert.ok(owner.subarray(0,header.length).equals(header));
+ assert.ok(owner.subarray(-footer.length).equals(footer));
+ const first=index.indexOf(tag);
+ assert.equal(index.indexOf(tag,first+tag.length),-1,'one Capture core loader');
+ index=Buffer.concat([index.subarray(0,first),index.subarray(first+tag.length)]);
+ const end=Buffer.from('function gensRollLocationEncounter(locationId){\n');
+ const at=index.indexOf(end);
+ assert.ok(at>=0);assert.equal(index.indexOf(end,at+end.length),-1);
+ const body=owner.subarray(header.length,owner.length-footer.length);
+ index=Buffer.concat([index.subarray(0,at),body,index.subarray(at)]);
+ assert.equal(index.length,7950873,'restore old team-roster index bytes');
+ assert.equal(hash(index),'57415a1071475cc10f0c79e092897190577127e8','restore old team-roster index blob');
+ return index;
+}
 function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..')){
- let index=fs.readFileSync(path.join(root,'index.html'));
+ let index=restoreCombatCoreIfExtracted(fs.readFileSync(path.join(root,'index.html')),root);
  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/team-roster-v1.js'));
  assert.equal(index.length,7950873,'Capture team extracted index bytes');
  assert.equal(hash(index),'57415a1071475cc10f0c79e092897190577127e8','Capture team index fingerprint');

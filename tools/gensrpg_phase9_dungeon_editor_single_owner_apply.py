@@ -18,12 +18,16 @@ INDEX=ROOT/"index.html"
 BRANCH="work/gensrpg-phase9-dungeon-editor-single-owner-2026-10-11"
 OLD_BYTES=7959154
 OLD_BLOB="d19fb899e646ee97ec21d055b5271ac2cbba91a2"
-NEW_BYTES=7958895
-NEW_BLOB="91cdf82df453453a69e04900193517836c3969e6"
+NEW_BYTES=7959089
+NEW_BLOB="e777d484ab10049650440fee04f47cf2dfdc3043"
 EDITS=[
 (
+ b'function applyModeEditorVisibility(){\n',
+ b'function gensShellDungeonEditorAllowed(){\n  try{const p=getActiveGameProfile?.();return !!p&&p.gameStyle==="dungeon"&&!window.GensCaptureV1?.isProfile?.(p)}catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n'
+),
+(
  b'  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=dungeon&&!window.GensCaptureV1?.isProfile?.(activeProfile)?"":"none";',
- b'  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=gensMode151()==="dungeon"?"":"none";'
+ b'  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=gensShellDungeonEditorAllowed()?"":"none";'
 ),
 (
  b'  const dungeonBtn=document.getElementById("dungeonAdvancedEditorBtn");\n',
@@ -35,7 +39,7 @@ EDITS=[
 ),
 (
  b'function openDungeonAdvancedEditor(){\n  if(window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.()))return;\n',
- b'function openDungeonAdvancedEditor(){\n  if(gensMode151()!=="dungeon")return;\n'
+ b'function openDungeonAdvancedEditor(){\n  if(!gensShellDungeonEditorAllowed())return;\n'
 )
 ]
 def blob(data):

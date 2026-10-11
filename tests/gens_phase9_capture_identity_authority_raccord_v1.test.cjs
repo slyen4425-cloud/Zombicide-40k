@@ -9,6 +9,7 @@ const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
 const entry=read('assets/gensrpg/capture/entry-v1.js');
+const combat=read('assets/gensrpg/capture/combat-core-v1.js');
 
 function block(id){
   const marker='<script id="'+id+'">';
@@ -69,7 +70,7 @@ assert.equal(api.isProfile(survival),false);
 const identityFn=functionFrom(entry,'function isProfile');
 assert.doesNotMatch(identityFn,/gameStyle|isDungeonMode|document\.|localStorage|sessionStorage|ensureRpgProfileData|setTimeout|MutationObserver/);
 
-const captureGameplay=functionFrom(index,'function gensIsCaptureGameplay(');
+const captureGameplay=functionFrom(combat,'function gensIsCaptureGameplay(');
 const pregame=functionFrom(index,'function gensCapturePregameMode()');
 const sheet=functionFrom(index,'function gensPureCaptureSheetMode()');
 const shellActive=functionFrom(index,'function gensShellActiveModuleV1()');

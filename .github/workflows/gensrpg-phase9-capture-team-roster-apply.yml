@@ -25,7 +25,7 @@ jobs:
           test "$(git branch --show-current)" = 'work/gensrpg-phase9-capture-team-roster-extraction-2026-10-11'
           test "$(wc -c < index.html)" = '7959089'
           test "$(git hash-object index.html)" = 'e777d484ab10049650440fee04f47cf2dfdc3043'
-          test "$(git rev-parse checkpoint/gensrpg-start-phase9-capture-team-roster-extraction-2026-10-11)" = 'b4b1a3dfad64f43265294a2485591701c38c7644'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase9-capture-team-roster-extraction-2026-10-11)" = 'b4b1a3dfad64f43265294a2485591701c38c7644'
 
       - name: Relocate exactly one owner and prove full byte exact rollback
         run: |

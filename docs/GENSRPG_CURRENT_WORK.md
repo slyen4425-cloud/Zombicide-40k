@@ -1,3 +1,21 @@
+# CLÔTURE EN COURS — PHASE 9 / HUB MONSTER CAPTURE 4 MODULES — 11 OCTOBRE 2026
+
+**Validation utilisateur : « Test validé ».** Quatre cartes racines Survie, Dungeon/Aventure, Monster Capture, PvP ; familles `adventure` et `capture` désormais distinctes. L'autonomie moteur Capture avait déjà son checkpoint GREEN `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` au SHA `bf6d6536fe013d9339a9790f6565a98699440f63`.
+
+**Branche unique** `work/gensrpg-phase9-capture-root-hub-2026-10-11`, **checkpoint §25 de départ** `checkpoint/gensrpg-start-phase9-capture-root-hub-2026-10-11` sur `bf6d6536fe013d9339a9790f6565a98699440f63`. **Checkpoint final réservé sous condition de triple CI verte sur un même SHA** : `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11`.
+
+**Code du Hub accepté** : `index.html`, issu du ZIP `a1.zip` certifié selon §26 (blob source `b64eae3650081af624155c8a4b8e47e4a1791658`), ainsi que les tests de non-interférence Capture/Dungeon/Survie/PvP. Les correctifs ultérieurs sont seulement des sentinelles de navigation historiquement branchées sur Adventure :
+- `tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs` (victoire/reprise inter-module : Dungeon→adventure, Capture→capture) ;
+- `tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs` (Dungeon Builder bloqué pour Capture mais accessible à Dungeon) ;
+- `tests/gens_capture_current_shell_browser_v11411.test.cjs` (navigation réelle Shell Capture) ;
+- `tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs` (profil Dungeon de sauvegarde étrangère dans la famille Dungeon, jamais Capture).
+
+**Triple CI définitive obligatoire** : architecture et navigateur Chromium, Firefox, Tactical Chromium/Firefox, chaque workflow SUCCESS **sur le SHA exact du dernier commit** ; suivi depuis les actions de la branche. **Aucune déclaration GREEN avant ce gate.** Retour manuel du 11/10 positif. Au passage des trois CI, créer et vérifier le checkpoint final, lier les runs et permettre la reprise par ce checkpoint. Pas de micro-refactor sans nouveau bug prouvé.
+
+**Invariants** : aucun changement de moteur/Combat/Stockage, ni des laboratoires ; `main` de production gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; Phase 10 PvP non ouverte. Prochaine étape seulement : CI finale, puis checkpoint GREEN Phase 9.
+
+---
+
 # PHASE 9 — MONSTER CAPTURE AU HUB PRINCIPAL : TEST MANUEL VALIDÉ — 11 OCTOBRE 2026
 
 - **Retour utilisateur explicite** : « **Test validé** » (11 octobre 2026, après contrôle du quatrième bouton Monster Capture et de son Hub distinct). Ce retour complète « Parfait ! », antérieur.

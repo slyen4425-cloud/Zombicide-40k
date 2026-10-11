@@ -38,6 +38,7 @@ jobs:
           node --check assets/gensrpg/capture/combat-core-v1.js
           node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
 
+      # Pre-existing byte-pinned snapshots are reconstructed by the read-only test helper.
       - name: Verify related modules and subtractive diff before commit
         run: |
           node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs

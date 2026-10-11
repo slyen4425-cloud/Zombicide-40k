@@ -157,6 +157,7 @@ async function startCapture(page){
           family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
           contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
           mode:typeof gensMode151==='function'?gensMode151():'missing',
+          shellOwner:window.GensShellModuleLaunchV1?.activeModule?.()||null,
           dungeonMode:typeof isDungeonMode==='function'?!!isDungeonMode():null,
           gameStyle:profile?.gameStyle||'',
           session:localStorage.getItem('z40k_session_active_v1'),
@@ -177,6 +178,7 @@ async function startCapture(page){
       if(label!=='virgin-browser'){
         assert.equal(s.active,CAPTURE_ID,label+': active profile was stolen');
         assert.equal(s.mode,'capture',label+': Capture authority was lost');
+        assert.equal(s.shellOwner,'capture',label+': exclusive Shell module is not Capture (possible Survival activation)');
         assert.equal(s.dungeonMode,false,label+': Capture borrowed Dungeon identity');
         assert.equal(s.dungeonTheme,false,label+': Capture borrowed Dungeon theme');
         assert.equal(s.gameStyle,'',label+': Capture profile must not borrow gameStyle dungeon');

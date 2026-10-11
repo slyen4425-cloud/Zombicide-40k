@@ -1,3 +1,15 @@
+# PHASE 9 — PREUVES FINALES A/B/C (11 OCTOBRE 2026) — GATE OUVERTE
+
+- **Chantier / propriétaire unique** : consolidation de la preuve de sortie Monster Capture (tests uniquement), sans nouvelle autorité ni modification du moteur. Propriétaire : suite des sentinelles Capture, pas de fonction de production transférée.
+- **Dernier GREEN fonctionnel / SHA exact de base** : `checkpoint/gensrpg-phase9-capture-combat-core-extraction-green-2026-10-11` — `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` ; validation utilisateur « Test validé ». Trois CI SUCCESS sur cette base : Architecture/Chromium 38139392742, Firefox 38139392738, Tactical 38139392748.
+- **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-exit-proof-2026-10-11` au même SHA. **Branche dédiée** : `work/gensrpg-phase9-capture-exit-proof-2026-10-11` créée sur le SHA GREEN sans merge divergent. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Périmètre** : fermer les lacunes de preuve, pas refactorer : vérifier autorité Shell Capture exclusive face à Survie en A ; deuxième vrai combat après fermeture/rechargement/reprise en B ; conserver le Save/Quit x2 et nettoyage UI propriétaire en C.
+- **Protégés** : tous les runtimes, Shell, Capture world/roster/combat/XP, sauvegardes, Survie, Dungeon, Tactical, PvP, PWA, `index.html` et dépôts de laboratoires. Aucune lecture/édition exacte de `index.html` prévue ; métadonnées SHA seulement (§26).
+- **Tests** : étendre seulement les sentinelles existantes A et B ; C existant est déjà GREEN. En cas de RED nouveau, isoler un blocage concret avant d'envisager une correction minimale sur nouveau périmètre. Triple CI Architecture+Chromium/Firefox/Tactical sur un même SHA, checkpoint technique et preuve utilisateur si runtime modifié. **Phase 9 non encore close, Phase 10 fermée**.
+- **Prochaine étape** : renforcer les assertions sans altérer le gameplay, exécuter la CI réelle, statuer A/B/C. Si entièrement démontré, mettre à jour la matrice de sortie et clôturer officiellement plutôt que d'extraire l'UI/XP historique par automatisme.
+
+---
+
 # PHASE 9 — COMBAT CAPTURE : EXTRACTION PHYSIQUE NOYAU — 2026-10-11
 
 - **État actuel** : Combat Core V1 extrait physiquement et testé dans le workflow contrôlé. **39 fonctions**, code original conservé ; Shell Hub corrigé sans nouvelle autorité. Le lot **n'est pas encore GREEN fonctionnel** : triples sentinelles sur SHA documentaire final puis test manuel à obtenir.

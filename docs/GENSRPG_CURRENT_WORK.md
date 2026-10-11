@@ -1,3 +1,17 @@
+# PHASE 9 — COMBAT CAPTURE : PROPRIÉTÉ UNIQUE ET EXTRACTION — 2026-10-11
+
+- **État actuel** : chantier combat ouvert et documenté, AUCUN changement runtime Combat ni nouveau moteur. Propriétaires/points de raccord repérés dans le HTML exact ; test RED de frontière puis extraction soustractive à réaliser.
+- **GREEN fonctionnel précédent** : `checkpoint/gensrpg-phase9-capture-team-roster-extraction-green-2026-10-11` sur `f7d64ba8c5b2539ce8ee65ab3db3d51828229965` ; l'utilisateur a confirmé « tout fonctionne parfaitement » le 11 octobre 2026. Triple CI Architecture+Browser `38130847051`, Firefox `38130847008`, Tactical `38130847003` SUCCESS sur ce SHA.
+- **Point de départ Combat** : `checkpoint/gensrpg-start-phase9-capture-combat-owner-extraction-2026-10-11` au SHA `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`; branche `work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11`.
+- **Source §26** : index exact au SHA initial de ce lot, **7 950 873 octets**, blob Git `57415a1071475cc10f0c79e092897190577127e8`. Reconstitué à l'octet depuis le ZIP précédent vérifié + outil d'extraction Équipe/Réserve validé puis comparé au Git tree. Permalien : https://github.com/slyen4425-cloud/Zombicide-40k/blob/f7d64ba8c5b2539ce8ee65ab3db3d51828229965/index.html
+- **Périmètre** : moteur et UI de combat Capture historiques (config, entrée, cible/action, statuts, KO, récompenses, sauvegarde du combat, fin/reprise). Préserver les API, configurations créateur et clés persistées, retirer les corps inline après transfert ; ne dupliquer ni engine ni propriétaires.
+- **Hors périmètre/protégés** : Monde/Exploration, Équipe/Réserve, XP/évolution hors combat, Shell, Core/Storage, éditeurs, Dungeon, Survie, PvP, Tactical, PWA, profil/objets/creatures utilisateurs, laboratoires.
+- **Gates** : caractérisation RED initiale, rollback exact, parité des actions/états, vrai E2E Capture et quatre modules, CI Architecture/Firefox/Tactical sur même SHA, checkpoint technique puis validation manuelle avant GREEN final.
+- **Référence de lot** : `docs/GENSRPG_PHASE9_CAPTURE_COMBAT_OWNER_EXTRACTION_2026-10-11.md` ; ne pas confondre ouverture documentaire avec extraction runtime finie. **Phase 9 en cours, Phase 10 non ouverte**.
+- **Production `main`** : `e8681f9823573ced8aec59c8ddc47a72b02bc663` gelée et inchangée.
+
+---
+
 # PHASE 9 — EXTRACTION PHYSIQUE ÉQUIPE / RÉSERVE CAPTURE — 2026-10-11
 
 - **Statut** : transfert physique Équipe / Réserve appliqué et testé en navigateur sur le commit runtime `94b00857dcbe5a2f92a63dd57713f0eac8033b33` ; documentation et contrat actualisés ; triple CI sur le SHA de clôture et validation utilisateur du nouveau lot encore requises.

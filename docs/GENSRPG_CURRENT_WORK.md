@@ -1,3 +1,15 @@
+# ÉTAT OFFICIEL — PHASE 9 MONSTER CAPTURE : CLÔTURE FONCTIONNELLE — 11 OCTOBRE 2026
+
+- **Dernière base gameplay GREEN validée manuellement** : `checkpoint/gensrpg-phase9-capture-combat-core-extraction-green-2026-10-11`, SHA `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` ; validation utilisateur « Test validé ».
+- **Décision A/B/C** : les trois critères d'autonomie Capture sont PROUVÉS par la CI du lot de preuves `edab672d914f929becfdba93dbfd33638b75b6ff` ; Architecture/Chromium [38149307335](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307335), Firefox [38149307324](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307324), Tactical [38149307332](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307332), toutes SUCCESS. Réelle reprise sans Dungeon et **second combat Capture après page close/reload** ; Save/Quit répété, owner-local cleanup, Shell Capture exclusif.
+- **Branche de clôture** : `work/gensrpg-phase9-capture-exit-proof-2026-10-11` ; checkpoint initial `checkpoint/gensrpg-start-phase9-capture-exit-proof-2026-10-11` sur SHA `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` ; checkpoint technique `checkpoint/gensrpg-phase9-capture-exit-evidence-technical-green-2026-10-11` sur SHA `edab672d914f929becfdba93dbfd33638b75b6ff`.
+- **Checkpoint de clôture prévu sur le SHA exact de ce commit documentaire après triple CI SUCCESS** : `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11`. La clôture est **fonctionnelle**, non une revendication que `index.html` est déjà entièrement allégé.
+- **Documents de vérité** : `docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-11.json` et `docs/GENSRPG_PHASE9_CAPTURE_CLOSURE_2026-10-11.md`. La gate datée du 9 octobre reste une photographie historique et les tests vérifient les deux états chronologiques sans contradiction.
+- **Dette reportée** : actions/UI de combat, récompenses/XP et options historiquement inline ; aucune extraction de confort en Phase 9. **0 lot de gameplay bloquant restant**. Runtime, sauvegardes, quatres modules et PvP protégés ; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Laboratoires intacts. Aucun nouvel accès à `index.html` (§26).
+- **Prochaine étape** : confirmer la triple CI sur le dernier SHA documentaire de clôture, créer le checkpoint final sur **ce même SHA**, sans ouvrir Phase 10 ici ni fusionner les branches divergentes. Toute phase future commence sur son propre checkpoint, après décision de lancement dédiée.
+
+---
+
 # PHASE 9 — PREUVES FINALES A/B/C (11 OCTOBRE 2026) — GATE OUVERTE
 
 - **Chantier / propriétaire unique** : consolidation de la preuve de sortie Monster Capture (tests uniquement), sans nouvelle autorité ni modification du moteur. Propriétaire : suite des sentinelles Capture, pas de fonction de production transférée.

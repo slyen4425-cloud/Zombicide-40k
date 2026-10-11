@@ -1,3 +1,15 @@
+# PHASE 9 — ÉDITEUR DUNGEON : UN SEUL PROPRIÉTAIRE SHELL — 2026-10-11
+
+- **Rustine antérieure révoquée comme solution définitive** : deux masquages du bouton et garde indépendante malgré CI vertes.
+- **Branche** `work/gensrpg-phase9-dungeon-editor-single-owner-2026-10-11` ; checkpoint initial `checkpoint/gensrpg-start-phase9-dungeon-editor-single-owner-2026-10-11` sur `6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e`.
+- **Runtime corrigé** `7221f062e87e9ce9f85e04fb5db658240e988384` ; index 7 959 089 octets/blob `e777d484ab10049650440fee04f47cf2dfdc3043`.
+- **Autorité** `gensShellDungeonEditorAllowed()` dans Shell, utilisant `GensCaptureV1.isProfile()` déjà propriétaire de l'identité. `applyModeEditorVisibility` seul écrivain de la carte Dungeon ; `syncEditorHubForActiveFamily` n'écrit plus ce bouton ; ouverture directe consulte la même capacité. Pas de nouveau système parallèle.
+- **Application contrôlée et vrai navigateur** : [38108342391](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38108342391) SUCCESS, rollback octet-exact, Capture et Dungeon, créateur de pièces et Dungeon Builder, anciennes créations et sauvegardes.
+- **Gates restants** : triple CI sur le SHA de clôture documentaire et test manuel. Pas de checkpoint fonctionnel final ni Phase 10 sans ces validations. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Rapport `docs/GENSRPG_PHASE9_DUNGEON_EDITOR_SINGLE_OWNER_2026-10-11.md`.
+
+---
+
 # PHASE 9 — CORRECTION DE PROPRIÉTÉ ÉDITEUR DUNGEON/CAPTURE — 2026-10-11
 
 - **Motif / charte §§3, 17–21** : le correctif précédent `5faf9614...` masque le bouton dans deux fonctions et ajoute une troisième garde tout en conservant la décision erronée `gensSelectedFamily==="adventure"`. Techniquement vert mais multi-écriture de `#dungeonAdvancedEditorBtn` ; jalon fonctionnel NON ACCEPTÉ.

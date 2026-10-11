@@ -38,3 +38,7 @@ La carte **Dungeon** du hub d'édition Capture était héritée de la famille «
 - Repin **mécanique et borné** (deux fichiers seulement) : `tests/gens_phase2_inline_owner_manifest_v11411.test.cjs` et `tests/gens_phase2_inline_global_last_owner_v11411.test.cjs`. Les valeurs historiques de source, les tables de propriétaires et les fixtures anciennes restent inchangées.
 - Workflow [38094666974](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094666974) **SUCCESS**, commit test `0176ebc912ffb13cc258d2c8b601d57cc6f88819`. Les deux sentinelles, restauration World V1 et Seed V16.162, valeurs du créateur et rollback index passent.
 - Triple CI finale sur le SHA documentaire du présent rapport en attente de contrôle ; aucun checkpoint final créé tant que ces validations ne sont pas vertes.
+
+## Rectification exigée par la charte
+
+Ce lot de masquage était techniquement vert mais **non conforme comme séparation architecturale finale** (écriture multiple de visibilité). Voir `docs/GENSRPG_PHASE9_DUNGEON_EDITOR_SINGLE_OWNER_2026-10-11.md`, commit runtime `7221f062e87e9ce9f85e04fb5db658240e988384` qui retire l'ancien écrivain et centralise la capacité dans Shell. L'ancien checkpoint reste rollback seulement.

@@ -1,0 +1,83 @@
+name: GenSrpG Phase 9 Capture Team Reserve controlled apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-team-roster-extraction-2026-10-11'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-team-roster-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-roster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify prior checkpoint and user supplied Rule 26 source
+        run: |
+          test "$(git branch --show-current)" = 'work/gensrpg-phase9-capture-team-roster-extraction-2026-10-11'
+          test "$(wc -c < index.html)" = '7959089'
+          test "$(git hash-object index.html)" = 'e777d484ab10049650440fee04f47cf2dfdc3043'
+          test "$(git rev-parse checkpoint/gensrpg-start-phase9-capture-team-roster-extraction-2026-10-11)" = 'b4b1a3dfad64f43265294a2485591701c38c7644'
+
+      - name: Relocate exactly one owner and prove full byte exact rollback
+        run: |
+          python tools/gensrpg_phase9_capture_team_roster_extraction_apply.py --apply
+          python tools/gensrpg_phase9_capture_team_roster_extraction_apply.py --verify
+          test "$(wc -c < index.html)" = '7950873'
+          test "$(git hash-object index.html)" = '57415a1071475cc10f0c79e092897190577127e8'
+          test "$(wc -c < assets/gensrpg/capture/team-roster-v1.js)" = '8761'
+          test "$(git hash-object assets/gensrpg/capture/team-roster-v1.js)" = '297e1e1624bacb0f288403294c1b56aa6f26e66b'
+          node --check assets/gensrpg/capture/team-roster-v1.js
+          node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs
+
+      - name: Verify narrow subtractive runtime diff
+        run: |
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+          git add index.html assets/gensrpg/capture/team-roster-v1.js
+          git diff --cached --check
+          test "$(git diff --cached --name-only)" = "$(printf 'assets/gensrpg/capture/team-roster-v1.js\nindex.html')"
+          git diff --cached --stat
+          git diff --cached -- index.html | sed -n '1,130p'
+
+      - name: Commit byte pinned owner transfer on work branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor(phase9): physically extract Capture team and reserve owner"
+
+      - name: Verify historical cartography and all exact composition boundaries
+        run: |
+          node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs
+          node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+          node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase9_dungeon_editor_single_owner_v1.test.cjs
+
+      - name: Install browser for full real flow regressions
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Real Capture battle resume stop plus genuine Dungeon and four module boundaries
+        run: |
+          node tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs
+          node tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs
+          node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+
+      - name: Publish tested runtime only on declared work branch
+        run: |
+          python tools/gensrpg_phase9_capture_team_roster_extraction_apply.py --verify
+          git push origin "HEAD:$GITHUB_REF_NAME"

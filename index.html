@@ -1710,7 +1710,7 @@ body.dungeon-sheet .armorBtn{display:none!important}
 </style>
 
 <style id="gensSafeHome73_2Style">
-.gensBrandMark{display:flex;align-items:center;justify-content:center;gap:12px;margin:3px auto 8px}.gensBrandMark>div:last-child{display:grid;text-align:left}.gensBrandMark strong{font-size:25px;letter-spacing:.5px}.gensBrandMark small{font-size:11px;color:#aeb8c1}.gensBrandIcon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-weight:1000;font-size:27px;background:linear-gradient(145deg,#2e3c49,#111820);border:1px solid #62788a;box-shadow:0 8px 22px #0008}.gensRootModeGrid,.gensFamilyGameGrid{display:grid;gap:11px}.gensRootModeCard,.gensFamilyGameCard{width:100%;min-height:112px;border-radius:16px;border:1px solid #46515b;background:#151a1f;color:#fff;padding:15px;text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center}.gensRootModeCard>span,.gensFamilyGameCard>span{grid-row:1/3;font-size:37px;text-align:center}.gensRootModeCard b,.gensFamilyGameCard b{font-size:18px}.gensRootModeCard small,.gensFamilyGameCard small{color:#b8c1c8;line-height:1.35}.gensRootModeCard.survival{border-color:#7c4b43;background:linear-gradient(135deg,#211616,#171a1e)}.gensRootModeCard.adventure{border-color:#6d5b38;background:linear-gradient(135deg,#201b11,#171a1e)}.gensRootModeCard.pvp{border-color:#4c5877;background:linear-gradient(135deg,#151a28,#171a1e)}.gensFamilyGameCard.active{box-shadow:0 0 0 1px #87a8c2 inset;border-color:#87a8c2}.gensFamilyGameCard.disabled{opacity:.5;cursor:default}.combatSide.heroSide{border:2px solid #397f52!important;background:linear-gradient(180deg,rgba(35,100,59,.22),rgba(15,31,22,.4))!important;box-shadow:0 0 0 1px rgba(76,174,105,.12) inset}.combatSide.heroSide>h3{color:#8ee3a8}.combatSide.enemySide{border:2px solid #9a4141!important;background:linear-gradient(180deg,rgba(120,35,35,.23),rgba(38,15,15,.42))!important;box-shadow:0 0 0 1px rgba(217,76,76,.12) inset}.combatSide.enemySide>h3{color:#f09b9b}
+.gensBrandMark{display:flex;align-items:center;justify-content:center;gap:12px;margin:3px auto 8px}.gensBrandMark>div:last-child{display:grid;text-align:left}.gensBrandMark strong{font-size:25px;letter-spacing:.5px}.gensBrandMark small{font-size:11px;color:#aeb8c1}.gensBrandIcon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-weight:1000;font-size:27px;background:linear-gradient(145deg,#2e3c49,#111820);border:1px solid #62788a;box-shadow:0 8px 22px #0008}.gensRootModeGrid,.gensFamilyGameGrid{display:grid;gap:11px}.gensRootModeCard,.gensFamilyGameCard{width:100%;min-height:112px;border-radius:16px;border:1px solid #46515b;background:#151a1f;color:#fff;padding:15px;text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center}.gensRootModeCard>span,.gensFamilyGameCard>span{grid-row:1/3;font-size:37px;text-align:center}.gensRootModeCard b,.gensFamilyGameCard b{font-size:18px}.gensRootModeCard small,.gensFamilyGameCard small{color:#b8c1c8;line-height:1.35}.gensRootModeCard.survival{border-color:#7c4b43;background:linear-gradient(135deg,#211616,#171a1e)}.gensRootModeCard.adventure{border-color:#6d5b38;background:linear-gradient(135deg,#201b11,#171a1e)}.gensRootModeCard.capture{border-color:#39887d;background:linear-gradient(135deg,#122923,#171a1e)}.gensRootModeCard.pvp{border-color:#4c5877;background:linear-gradient(135deg,#151a28,#171a1e)}.gensFamilyGameCard.active{box-shadow:0 0 0 1px #87a8c2 inset;border-color:#87a8c2}.gensFamilyGameCard.disabled{opacity:.5;cursor:default}.combatSide.heroSide{border:2px solid #397f52!important;background:linear-gradient(180deg,rgba(35,100,59,.22),rgba(15,31,22,.4))!important;box-shadow:0 0 0 1px rgba(76,174,105,.12) inset}.combatSide.heroSide>h3{color:#8ee3a8}.combatSide.enemySide{border:2px solid #9a4141!important;background:linear-gradient(180deg,rgba(120,35,35,.23),rgba(38,15,15,.42))!important;box-shadow:0 0 0 1px rgba(217,76,76,.12) inset}.combatSide.enemySide>h3{color:#f09b9b}
 </style>
 
 
@@ -2630,6 +2630,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
         <div class="gensRootModeGrid">
           <button type="button" class="gensRootModeCard survival" onclick="openGensFamily('survival')"><span>☠️</span><b>MODE SURVIE</b><small>40K et futurs univers de survie.</small></button>
           <button type="button" class="gensRootModeCard adventure" onclick="openGensFamily('adventure')"><span>🏰</span><b>MODE AVENTURE RPG</b><small>Dungeon et futurs jeux de rôle.</small></button>
+          <button type="button" class="gensRootModeCard capture" onclick="openGensFamily('capture')"><span>🐲</span><b>MONSTER CAPTURE</b><small>Créatures, mondes et aventures Capture.</small></button>
           <button type="button" class="gensRootModeCard pvp" onclick="openGensFamily('pvp')"><span>⚔️</span><b>MODE DUEL / PVP</b><small>Affrontements entre joueurs — futur module.</small></button>
         </div>
       </div>
@@ -10138,7 +10139,7 @@ let gensSelectedFamily="";
 let gensModeSwitchToken=0;
 function gensHideHomeLevels(){["gensRootHome","gensFamilyHome","gensGameHome"].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display="none"})}
 function showGensRootHome(){gensSelectedFamily="";gensHideHomeLevels();const e=document.getElementById("gensRootHome");if(e)e.style.display="block";window.scrollTo(0,0)}
-function gensFamilyForProfile(p){return p?.gameStyle==="dungeon"?"adventure":"survival"}
+function gensFamilyForProfile(p){return gensContentFamilyForProfile(p)==="creature"?"capture":p?.gameStyle==="dungeon"?"adventure":"survival"}
 
 function createNewSurvivalUniverse(openEditorAfter=true){
   if(hasActiveSession()){
@@ -10436,7 +10437,7 @@ function openRpgUniverseEditor(){
   const selected=profiles.find(x=>String(x.id)===String(rpgEditingId));
   if(selected){
     setActiveGameProfileId(selected.id);
-    gensSelectedFamily="adventure";
+    gensSelectedFamily=gensContentFamilyForProfile(selected)==="creature"?"capture":"adventure";
   }
   m.style.display="block";
   document.body.style.overflow="hidden";
@@ -10459,7 +10460,7 @@ function selectRpgUniverseProfile(id){
 
   setActiveGameProfileId(p.id);
   gensCleanIncompatibleHeroSelection();
-  gensSelectedFamily="adventure";
+  gensSelectedFamily=gensContentFamilyForProfile(p)==="creature"?"capture":"adventure";
   applyGameProfile(p,false);
   rpgEditingId=p.id;
 
@@ -10898,7 +10899,7 @@ function saveRpgGameplayModules(){
   // Miroir facultatif pour compatibilité seulement, jamais relu comme source principale.
   setStoredRpgGameplay(p.id,savedGameplay);
 
-  setActiveGameProfileId(saved.id);rpgEditingId=saved.id;gensSelectedFamily="adventure";
+  setActiveGameProfileId(saved.id);rpgEditingId=saved.id;gensSelectedFamily=gensContentFamilyForProfile(saved)==="creature"?"capture":"adventure";
   applyGameProfile(saved,false);rpgEditingId=saved.id;
   renderRpgUniverseEditor();
   reloadRpgGameplayFromProfileId(saved.id);
@@ -11112,7 +11113,7 @@ function renderEconomyWallet(){
 function saveRpgUniverseIdentity(){
   const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(rpgEditingId));if(i<0)return;const p=profiles[i];ensureRpgProfileData(p);
   p.name=document.getElementById("rpgName")?.value.trim()||"Univers RPG";p.desc=document.getElementById("rpgDesc")?.value.trim()||"";p.rpgUniverse.icon=document.getElementById("rpgIcon")?.value.trim()||"🧭";p.rpgUniverse.themeColor=document.getElementById("rpgThemeColor")?.value||"#4e5968";
-  saveGameProfiles(profiles);setActiveGameProfileId(p.id);rpgEditingId=p.id;gensSelectedFamily="adventure";applyGameProfile(p,false);rpgEditingId=p.id;renderRpgUniverseEditor();renderGensFamilyGamesIfVisible();alert("Univers RPG enregistré ✅");
+  saveGameProfiles(profiles);setActiveGameProfileId(p.id);rpgEditingId=p.id;gensSelectedFamily=gensContentFamilyForProfile(p)==="creature"?"capture":"adventure";applyGameProfile(p,false);rpgEditingId=p.id;renderRpgUniverseEditor();renderGensFamilyGamesIfVisible();alert("Univers RPG enregistré ✅");
 }
 function saveRpgUniverseProgression(){
   const profiles=loadGameProfiles(),i=profiles.findIndex(x=>String(x.id)===String(rpgEditingId));if(i<0)return;
@@ -11303,7 +11304,8 @@ function saveRpgUniversePools(){
   enemyIds.forEach(id=>{const def=enemiesForMode(true).find(e=>String(e.id)===String(id));p.enemyConfig[id]=Math.max(0,Number(oldCfg[id]??def?.defaultCount??0)||0);p.enemyReserve[id]=Math.max(0,Number(oldRes[id]??p.enemyConfig[id])||0)});
   saveGameProfiles(profiles);applyGameProfile(p,false);renderRpgUniverseEditor();alert("Pools RPG enregistrés ✅");
 }
-function createNewRpgUniverse(openEditorAfter=true){
+function createNewRpgUniverse(openEditorAfter=true,family=gensSelectedFamily){
+  const isCapture=family==="capture";
   // Création indépendante : le nouvel univers reçoit immédiatement sa propre identité,
   // sa structure RPG complète et devient le profil actif avant tout rendu.
   const profiles=loadGameProfiles();
@@ -11311,7 +11313,7 @@ function createNewRpgUniverse(openEditorAfter=true){
 
   const blank={
     id,
-    name:"Nouvel univers RPG",
+    name:isCapture?"Nouvel univers Capture":"Nouvel univers RPG",
     desc:"",
     builtIn:false,
     gameStyle:"dungeon",
@@ -11329,6 +11331,10 @@ function createNewRpgUniverse(openEditorAfter=true){
   };
 
   Object.keys(blank.deck).forEach(k=>blank.deck[k]=0);
+  if(isCapture){
+    blank.rpgUniverse.icon="🐲";
+    blank.rpgUniverse.gameplay={profile:"creature",modules:{...blank.rpgUniverse.gameplay.modules,...GENS_RPG_GAMEPLAY_PRESETS.creature.modules}};
+  }
   ensureRpgProfileData(blank);
 
   profiles.push(blank);
@@ -11338,7 +11344,7 @@ function createNewRpgUniverse(openEditorAfter=true){
   // Verrouiller l'ID avant tout appel susceptible de relire le profil actif.
   rpgEditingId=id;
   setActiveGameProfileId(id);
-  gensSelectedFamily="adventure";
+  gensSelectedFamily=isCapture?"capture":"adventure";
 
   const saved=loadGameProfiles().find(p=>String(p.id)===String(id));
   if(!saved){
@@ -11365,7 +11371,7 @@ function createNewRpgUniverse(openEditorAfter=true){
       updateGameplayModuleVisibility(gensGameplayModules());
     },0);
   }else{
-    openGensBuiltInGame(id,"adventure");
+    openGensBuiltInGame(id,isCapture?"capture":"adventure");
   }
 }
 function newRpgUniverseProfile(){createNewRpgUniverse(true)}
@@ -11399,7 +11405,7 @@ function deleteRpgUniverseProfile(profileId=null){
 function restoreReferenceRpgUniverse(){
   const profiles=loadGameProfiles(),i=profiles.findIndex(x=>x.id===GAME_PROFILE_DUNGEON_ID);if(i<0)return;const p=profiles[i];p.rpgUniverse=gensReferenceRpgSettings();p.name="Dungeon";p.builtIn=true;saveGameProfiles(profiles);setStoredRpgGameplay(p.id,p.rpgUniverse.gameplay);rpgEditingId=GAME_PROFILE_DUNGEON_ID;applyGameProfile(p,false);renderRpgUniverseEditor();renderGensFamilyGamesIfVisible();alert("Dungeon restauré ✅");
 }
-function renderGensRpgUniverseCards(){
+function renderGensRpgUniverseCards(family="adventure"){
   let profiles=[];
   try{profiles=rpgProfiles()}catch(e){
     console.error("GenSrpG RPG profiles",e);
@@ -11407,6 +11413,7 @@ function renderGensRpgUniverseCards(){
     profiles=raw.map(p=>{try{return ensureRpgProfileData(p)}catch(err){console.error(err);return p}});
   }
 
+  profiles=profiles.filter(p=>(gensContentFamilyForProfile(p)==="creature")===(family==="capture"));
   const cards=profiles.map(p=>{
     try{
       ensureRpgProfileData(p);
@@ -11417,7 +11424,7 @@ function renderGensRpgUniverseCards(){
       const protectedUniverse=p.id===GAME_PROFILE_DUNGEON_ID||p.builtIn;
       return `
         <div class="gensFamilyGameCard gensUniverseCard" data-rpg-profile="${z40kEscAttr(p.id)}">
-          <button type="button" class="gensUniverseMainBtn" onclick="openGensBuiltInGame('${z40kEscAttr(p.id)}','adventure')">
+          <button type="button" class="gensUniverseMainBtn" onclick="openGensBuiltInGame('${z40kEscAttr(p.id)}','${family}')">
             <span>${z40kEscHtml(p.rpgUniverse?.icon||"🧭")}</span>
             <b>${z40kEscHtml(p.name||"Univers RPG")}</b>
             <small>${z40kEscHtml(meta)}</small>
@@ -11431,9 +11438,9 @@ function renderGensRpgUniverseCards(){
   }).join("");
 
   return cards+`
-    <button type="button" class="gensFamilyGameCard" onclick="createNewRpgUniverse(true)">
+    <button type="button" class="gensFamilyGameCard" onclick="createNewRpgUniverse(true,'${family}')">
       <span>➕</span><b>NOUVEL UNIVERS</b>
-      <small>Partir de zéro : aucun héros, objet ou monstre sélectionné.</small>
+      <small>${family==="capture"?"Créer un monde Capture avec équipe de créatures.":"Partir de zéro : aucun héros, objet ou monstre sélectionné."}</small>
     </button>`;
 }
 
@@ -11450,7 +11457,7 @@ function renderGensFamilyGamesIfVisible(){
   if(document.getElementById("gensFamilyHome")?.style.display==="none")return;
   const host=document.getElementById("gensFamilyGames");if(!host)return;
   if(gensSelectedFamily==="survival")host.innerHTML=renderGensSurvivalUniverseCards();
-  if(gensSelectedFamily==="adventure")host.innerHTML=renderGensRpgUniverseCards();
+  if(gensSelectedFamily==="adventure"||gensSelectedFamily==="capture")host.innerHTML=renderGensRpgUniverseCards(gensSelectedFamily);
 }
 
 function openGensFamily(family){
@@ -11465,7 +11472,10 @@ function openGensFamily(family){
     if(host)host.innerHTML=renderGensSurvivalUniverseCards();
   }else if(family==="adventure"){
     if(title)title.textContent="🧭 Aventure RPG";if(heading)heading.textContent="Univers RPG";if(hint)hint.textContent="Dungeon est l’univers RPG de référence. Tu peux créer autant d’univers RPG indépendants que tu veux et partir totalement de zéro.";
-    if(host)host.innerHTML=renderGensRpgUniverseCards();
+    if(host)host.innerHTML=renderGensRpgUniverseCards("adventure");
+  }else if(family==="capture"){
+    if(title)title.textContent="🐲 Monster Capture";if(heading)heading.textContent="Mondes Monster Capture";if(hint)hint.textContent="Crée et explore des mondes de créatures indépendants de Dungeon.";
+    if(host)host.innerHTML=renderGensRpgUniverseCards("capture");
   }else{
     if(title)title.textContent="⚔️ Mode Duel / PvP";if(heading)heading.textContent="Duel / affrontement";if(hint)hint.textContent="Le moteur PvP n’est pas encore construit.";
     if(host)host.innerHTML='<button type="button" class="gensFamilyGameCard disabled"><span>⚔️</span><b>PVP — À VENIR</b><small>Cette section est réservée au futur mode d’affrontement entre joueurs.</small></button>';
@@ -11474,13 +11484,13 @@ function openGensFamily(family){
 }
 function gensFamilyForProfileId(profileId){
   const p=loadGameProfiles().find(x=>String(x.id)===String(profileId||""));
-  const f=gensContentFamilyForProfile(p);return (f==="rpg"||f==="manga"||f==="creature")?"adventure":"survival";
+  const f=gensContentFamilyForProfile(p);return f==="creature"?"capture":(f==="rpg"||f==="manga")?"adventure":"survival";
 }
 function renderGensGameHomeLight(profileId,family){
   const fam=family||gensFamilyForProfileId(profileId||activeGameProfileId());
   if(!gensSelectedFamily)gensSelectedFamily=fam;
   const title=document.getElementById("gensGameHomeTitle");
-  if(title){const p=loadGameProfiles().find(x=>String(x.id)===String(profileId||activeGameProfileId()));title.textContent=fam==="adventure"?(p?.name||"Univers RPG"):(p?.name||"Univers Survie");}
+  if(title){const p=loadGameProfiles().find(x=>String(x.id)===String(profileId||activeGameProfileId()));title.textContent=fam==="capture"?(p?.name||"Monde Capture"):fam==="adventure"?(p?.name||"Univers RPG"):(p?.name||"Univers Survie");}
   const actions=document.getElementById("gensGameHomeActions"),pvp=document.getElementById("gensPvpPlaceholder");
   if(actions)actions.style.display="";
   if(pvp)pvp.style.display="none";
@@ -11519,7 +11529,7 @@ function gensCleanIncompatibleHeroSelection(){
 function openGensBuiltInGame(profileId,family){
   gensCleanDungeonBaseHeroesFromOtherRpgProfiles();
   gensCleanDungeonDemoHeroesFromOtherUniverses();
-  const selectedFamily=family||gensFamilyForProfileId(profileId);
+  const selectedFamily=gensFamilyForProfileId(profileId);
   gensSelectedFamily=selectedFamily;
   const switchToken=++gensModeSwitchToken;
   const previousId=activeGameProfileId();
@@ -11580,7 +11590,7 @@ function openGensBuiltInGame(profileId,family){
 }
 function showGensGameHome(){
   const profileId=activeGameProfileId()||GAME_PROFILE_BASE_ID;
-  const family=gensSelectedFamily||gensFamilyForProfileId(profileId);
+  const family=gensFamilyForProfileId(profileId);
   gensSelectedFamily=family;
   gensHideHomeLevels();
   const page=document.getElementById("gensGameHome");if(page)page.style.display="block";
@@ -11588,7 +11598,7 @@ function showGensGameHome(){
   renderGensGameHomeLight(profileId,family);
   window.scrollTo(0,0);
 }
-function backToGensFamily(){openGensFamily(gensSelectedFamily||gensFamilyForProfileId(activeGameProfileId()))}
+function backToGensFamily(){openGensFamily(gensFamilyForProfileId(activeGameProfileId()))}
 function showGensGameHomeAfterBack(){
   const setup=document.getElementById("setup");if(setup)setup.style.display="block";
   showGensGameHome();

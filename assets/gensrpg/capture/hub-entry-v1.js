@@ -55,6 +55,8 @@
 
   function enterWorld(){
     if(!installed||!bindings)return false;
+    // Shell alone owns the visibility of the application home-level screens.
+    if(typeof root.gensHideHomeLevels==="function")root.gensHideHomeLevels();
     addExitControl();
     try{bindings.closeTurnPopup()}catch(e){}
     ["pregameSetup","sessionHeroSetup","sessionObjectSetup","sessionWaveSetup","sessionDungeonSetup","sheet","setup"].forEach(id=>{

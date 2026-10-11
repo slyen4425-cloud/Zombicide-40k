@@ -34,6 +34,7 @@ jobs:
           test "$(wc -c < index.html)" = '7958895'
           test "$(git hash-object index.html)" = '91cdf82df453453a69e04900193517836c3969e6'
 
+      # Retry owner-writer sentinels after correcting a test-only false positive.
       - name: Prove canonical mode owner and historical snapshots
         run: |
           node tests/gens_phase9_dungeon_editor_single_owner_v1.test.cjs

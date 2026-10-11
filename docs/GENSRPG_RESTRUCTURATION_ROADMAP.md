@@ -186,6 +186,9 @@ La présence résiduelle d'actions/UI Capture et de calculs XP/récompenses dans
 
 Le dernier lot Phase 9 a corrigé le **routage Shell du Hub principal** en ajoutant une quatrième carte `MONSTER CAPTURE` au même rang que `SURVIE`, `DUNGEON / AVENTURE` et `DUEL / PVP`, avec sa propre famille `capture`. Les univers Capture ne sont plus listés dans `adventure`, et leur création/édition/reprise suit la famille Capture. Code de référence du lot : `53bab4060107683eb8e0f3159201ed3844849474` ; réponse de validation manuelle utilisateur « Parfait ! ». Les résultats CI et le checkpoint final de ce lot sont consignés dans `docs/GENSRPG_CURRENT_WORK.md`. Ni `main` ni la Phase 10 n'ont été modifiées.
 
+
+**Validation manuelle explicite du Hub racine :** l'utilisateur a confirmé « Test validé » le 11 octobre 2026. Les adaptations des sentinelles historiques qui pointaient encore vers la famille Aventure sont cantonnées aux tests, sans correction de gameplay. Le checkpoint final ne sera créé qu'après triple CI SUCCESS sur son SHA final ; le point de reprise est `docs/GENSRPG_CURRENT_WORK.md`.
+
 ## Phase 10 — Séparer Duel/PvP
 
 Créer `pvp/` autonome avec ses règles de session, combat et UI.

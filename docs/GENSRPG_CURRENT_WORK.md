@@ -1,3 +1,15 @@
+# PHASE 9 — MONSTER CAPTURE AU HUB PRINCIPAL : TEST MANUEL VALIDÉ — 11 OCTOBRE 2026
+
+- **Retour utilisateur explicite** : « **Test validé** » (11 octobre 2026, après contrôle du quatrième bouton Monster Capture et de son Hub distinct). Ce retour complète « Parfait ! », antérieur.
+- **Livrable fonctionnel validé sur smartphone** : quatre vignettes premier niveau (Survie, Dungeon/Aventure, Monster Capture, Duel/PvP) et familles `capture`/`adventure` distinctes. Le gameplay Capture conserve les propriétaires extraits et les sauvegardes existantes.
+- **Branche unique** : `work/gensrpg-phase9-capture-root-hub-2026-10-11` ; **checkpoint de départ** : `checkpoint/gensrpg-start-phase9-capture-root-hub-2026-10-11` SHA `bf6d6536fe013d9339a9790f6565a98699440f63` ; ancien checkpoint fonctionnel : `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` sur le même SHA.
+- **Rattrapage contrôlé des sentinelles** : le test victoire/reprise inter-module `tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs` a été adapté (`7268f1da258c2e12ba96f78514e30a32a7ea1a47`) et sa reprise testée SUCCESS dans Chromium. Puis la sentinelle Dungeon Builder `tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs` a été alignée sur la nouvelle carte Capture (`c1a249e6af87f978b1349c971361b1da078cbc68`), préservant les interdictions de Dungeon Builder côté Capture.
+- **CI de clôture** : Architecture/Chromium + Firefox + Tactical doivent être **toutes SUCCESS sur le même dernier SHA documentaire** avant la création du checkpoint `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11`. Si l'une est rouge, résoudre sa vraie cause sur la même branche, sans nouveau lot, sans fausse déclaration GREEN.
+- **Limites strictes** : aucun changement du moteur Capture, des bibliothèques, des fichiers de laboratoire, de `main` (toujours `e8681f9823573ced8aec59c8ddc47a72b02bc663`), ni démarrage Phase 10. `index.html` est issu du ZIP utilisateur exact validé §26.
+- **Prochaine étape unique** : triple CI sur le dernier SHA, puis checkpoint GREEN définitif et clôture Phase 9 ; ne pas lancer Phase 10 sur une branche non checkpointée.
+
+---
+
 # VALIDATION UTILISATEUR — PHASE 9 / MONSTER CAPTURE AU HUB RACINE — 11 OCTOBRE 2026
 
 - **État : fonctionnalité testée et acceptée par l'utilisateur** (« Parfait ! »), à l'adresse de preview du SHA `53bab4060107683eb8e0f3159201ed3844849474`. Monster Capture constitue le **quatrième choix de premier niveau** à côté de Survie, Dungeon et PvP, avec sa propre famille de profils (aucun monde Capture sous Dungeon).

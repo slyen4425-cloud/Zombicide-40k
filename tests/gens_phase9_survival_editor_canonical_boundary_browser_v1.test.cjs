@@ -29,7 +29,7 @@ async function modesFromGame(page){
 }
 async function select(page,name,id){
  await family(page,name);
- const selector=name==='adventure'?'#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn':
+ const selector=(name==='adventure'||name==='capture')?'#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn':
   '#gensFamilyGames button[onclick="openGensBuiltInGame(\''+id+'\',\'survival\')"]';
  let card=page.locator(selector);await card.waitFor({state:'visible'});
  const reload=await page.evaluate(id=>activeGameProfileId()!==id&&
@@ -83,7 +83,7 @@ const profile=id=>page=>page.evaluate(id=>loadGameProfiles().find(p=>p.id===id),
      return {captures:[captureId,clean.id,historical.id,modules.id,contradictory.id],customId};
     },{captureId:CAPTURE_ID,baseId:BASE_ID,customId:CUSTOM_ID});
 
-    mark(name+'-real-capture-selection');await select(page,'adventure',CAPTURE_ID);
+    mark(name+'-real-capture-selection');await select(page,'capture',CAPTURE_ID);
     row.captureRead=await page.evaluate(()=>{
      const before=localStorage.getItem('gensrpg_game_profiles_v1'),activeBefore=activeGameProfileId();
      const activeEditorId=activeSurvivalModId();openSurvivalModEditor();

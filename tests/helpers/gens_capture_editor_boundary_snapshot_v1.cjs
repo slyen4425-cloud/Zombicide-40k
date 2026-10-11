@@ -18,15 +18,17 @@ const EDITS=[
 const OWNER_WRITER='  if(dungeonBtn)dungeonBtn.style.display=isRpg&&!window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.())?"":"none";\n';
 const OWNER_LOOKUP='  const dungeonBtn=document.getElementById("dungeonAdvancedEditorBtn");\n';
 const OWNER_BEFORE=[
+ ['function applyModeEditorVisibility(){\n',
+  'function gensShellDungeonEditorAllowed(){\n  try{const p=getActiveGameProfile?.();return !!p&&p.gameStyle==="dungeon"&&!window.GensCaptureV1?.isProfile?.(p)}catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n'],
  ['  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=dungeon&&!window.GensCaptureV1?.isProfile?.(activeProfile)?"":"none";',
-  '  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=gensMode151()==="dungeon"?"":"none";'],
+  '  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=gensShellDungeonEditorAllowed()?"":"none";'],
  ['function openDungeonAdvancedEditor(){\n  if(window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.()))return;\n',
-  'function openDungeonAdvancedEditor(){\n  if(gensMode151()!=="dungeon")return;\n']
+  'function openDungeonAdvancedEditor(){\n  if(!gensShellDungeonEditorAllowed())return;\n']
 ];
 function worldExtractedIndexBytes(root=path.resolve(__dirname,'../..')){
  let bytes=fs.readFileSync(path.join(root,'index.html'));
- assert.equal(bytes.length,7958895,'canonical single-owner index bytes');
- assert.equal(hash(bytes),'91cdf82df453453a69e04900193517836c3969e6','canonical single-owner index blob');
+ assert.equal(bytes.length,7959089,'canonical single-owner index bytes');
+ assert.equal(hash(bytes),'e777d484ab10049650440fee04f47cf2dfdc3043','canonical single-owner index blob');
  let str=bytes.toString('utf8');
  for(const [before,after] of [...OWNER_BEFORE].reverse()){
   assert.equal(str.split(after).length-1,1,'single-owner replacement must be unique');

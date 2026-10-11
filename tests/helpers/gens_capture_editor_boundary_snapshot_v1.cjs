@@ -14,11 +14,32 @@ const EDITS=[
  ['function openDungeonAdvancedEditor(){\n  if(hasActiveSession())',
   'function openDungeonAdvancedEditor(){\n  if(window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.()))return;\n  if(hasActiveSession())']
 ];
+// Revert current single-owner subtractive refactor first; historical fixtures remain intact.
+const OWNER_WRITER='  if(dungeonBtn)dungeonBtn.style.display=isRpg&&!window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.())?"":"none";\n';
+const OWNER_LOOKUP='  const dungeonBtn=document.getElementById("dungeonAdvancedEditorBtn");\n';
+const OWNER_BEFORE=[
+ ['  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=dungeon&&!window.GensCaptureV1?.isProfile?.(activeProfile)?"":"none";',
+  '  const dae=document.getElementById("dungeonAdvancedEditorBtn");if(dae)dae.style.display=gensMode151()==="dungeon"?"":"none";'],
+ ['function openDungeonAdvancedEditor(){\n  if(window.GensCaptureV1?.isProfile?.(getActiveGameProfile?.()))return;\n',
+  'function openDungeonAdvancedEditor(){\n  if(gensMode151()!=="dungeon")return;\n']
+];
 function worldExtractedIndexBytes(root=path.resolve(__dirname,'../..')){
  let bytes=fs.readFileSync(path.join(root,'index.html'));
- assert.equal(bytes.length,7959154);
- assert.equal(hash(bytes),'d19fb899e646ee97ec21d055b5271ac2cbba91a2');
+ assert.equal(bytes.length,7958895,'canonical single-owner index bytes');
+ assert.equal(hash(bytes),'91cdf82df453453a69e04900193517836c3969e6','canonical single-owner index blob');
  let str=bytes.toString('utf8');
+ for(const [before,after] of [...OWNER_BEFORE].reverse()){
+  assert.equal(str.split(after).length-1,1,'single-owner replacement must be unique');
+  str=str.replace(after,before);
+ }
+ const beforeLookup='  if(survivalBtn)survivalBtn.style.display=isRpg?"none":"";\n';
+ const beforeWriter='  if(rpgBtn)rpgBtn.style.display=isRpg?"":"none";\n';
+ assert.equal(str.split(beforeLookup).length-1,1);
+ assert.equal(str.split(beforeWriter).length-1,1);
+ str=str.replace(beforeLookup,OWNER_LOOKUP+beforeLookup).replace(beforeWriter,beforeWriter+OWNER_WRITER);
+ bytes=Buffer.from(str,'utf8');
+ assert.equal(bytes.length,7959154,'previous technical boundary index size');
+ assert.equal(hash(bytes),'d19fb899e646ee97ec21d055b5271ac2cbba91a2','previous boundary fingerprint');
  for(const [before,after] of [...EDITS].reverse()){
   assert.equal(str.split(after).length-1,1,'editor boundary replacement must be unique');
   str=str.replace(after,before);

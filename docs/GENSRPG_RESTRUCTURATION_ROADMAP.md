@@ -176,6 +176,12 @@ Critère de sortie : Capture peut démarrer sans runtime Dungeon/Survie actif.
 
 Exigence renforcée de Phase 9 : Capture doit également fonctionner et se fermer comme module autonome de premier niveau, sans utiliser Dungeon comme runtime hôte ou identité fonctionnelle.
 
+### Bilan de Phase 9 — 11 octobre 2026
+
+**Phase 9 close fonctionnellement sur la branche de travail, sans publication sur `main`.** Les axes A/B/C ont une preuve navigateur réelle sur un même SHA (`edab672d914f929becfdba93dbfd33638b75b6ff`) : démarrage/exploration/combat Capture sans runtime Dungeon, Shell actif Capture sans hôte Survie ; rechargement, reprise et deuxième combat ; Save & Quit deux fois avec nettoyage de l'UI locale. Triple CI Architecture/Chromium, Firefox et Tactical SUCCESS. Le runtime manuellement validé reste `9ad6a3b0a8b54e6798d095e027f1770eca54f52b`. Voir `docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-11.json` et `docs/GENSRPG_PHASE9_CAPTURE_CLOSURE_2026-10-11.md`.
+
+La présence résiduelle d'actions/UI Capture et de calculs XP/récompenses dans `index.html` demeure une dette de découpage physique **à traiter ultérieurement si justifiée**, sans conditionner la sortie fonctionnelle de Phase 9. Elle ne doit pas provoquer un nouveau micro-lot tant que les invariants sont conservés. Phase 10 n'est pas commencée et `main` demeure gelée.
+
 ## Phase 10 — Séparer Duel/PvP
 
 Créer `pvp/` autonome avec ses règles de session, combat et UI.

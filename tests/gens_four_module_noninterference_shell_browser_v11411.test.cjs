@@ -292,14 +292,14 @@ const server=http.createServer((req,res)=>{
 
     mark('survival-to-capture');
     await selectWithRealReload(
-      'adventure',
+      'capture',
       `#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`,
       CAPTURE_ID,
       'capture'
     );
     s=await snapshot();
     assert.equal(s.active,CAPTURE_ID);
-    assert.equal(s.family,'adventure');
+    assert.equal(s.family,'capture');
     assert.equal(s.contentFamily,'creature');
     assert.equal(s.mode151,'capture');
     assert.equal(s.dungeonMode,false,'Capture must remain isolated from Dungeon identity after seed retirement');

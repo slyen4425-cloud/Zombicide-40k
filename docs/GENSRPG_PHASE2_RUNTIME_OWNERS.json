@@ -449,6 +449,11 @@
       "domain": "capture",
       "role": "active Phase 9 unique UI transition owner for Capture Hub, injected legacy rendering dependencies, no Shell or world-data ownership"
     },
+    "assets/gensrpg/capture/team-roster-v1.js": {
+      "owner": "GenSrpG Capture Team and Reserve V1",
+      "domain": "capture",
+      "role": "Single physically loaded Capture roster owner for active trainer creature team/reserve normalization, owned-instance lookup, existing hero save schema, roster moves, reserve and team display; legacy global APIs retained, byte-exact extraction"
+    },
     "assets/gensrpg/capture/world-exploration-v1.js": {
       "owner": "GenSrpG Capture World Exploration V1",
       "domain": "capture",

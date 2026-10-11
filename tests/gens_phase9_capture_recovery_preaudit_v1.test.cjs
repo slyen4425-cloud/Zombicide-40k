@@ -50,7 +50,7 @@ assert.ok(launchContract.invariants.some(x=>/selected module owns its launch pre
 
 for(const proof of [
   /style,''/,
-  /family,'adventure'/,
+  /family,'capture'/,
   /contentFamily,'creature'/,
   /dungeonMode,false/,
   /current Capture seed must no longer borrow Dungeon gameStyle identity/,

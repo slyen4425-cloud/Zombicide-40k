@@ -8,10 +8,14 @@ const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legac
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
 const gitBlobSha=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
-const CURRENT_BLOB='b64eae3650081af624155c8a4b8e47e4a1791658';
+const CURRENT_BLOB='613b4a21d83e9adcdd091be82240a3a6f9cf5bf7';
+const hubPatch=require('./fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
+assert.equal(hubPatch.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
+assert.equal(hubPatch.toBlob,CURRENT_BLOB);
 const HISTORICAL_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
 assert.equal(gitBlobSha,CURRENT_BLOB,'physical index must load the extracted world module and seed; legacy snapshot remains independently byte-verified');
 const activeIndex=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert.match(activeIndex,/class="gensRootModeCard capture"/,'new Shell root exposes independent Capture family');
 assert.equal(activeIndex.split('<script src="assets/gensrpg/capture/world-exploration-v1.js?v=1"></script>').length-1,1,'physical world owner must load exactly once');
 assert.equal(activeIndex.split('<script src="assets/gensrpg/capture/combat-core-v1.js?v=1"></script>').length-1,1,'physical Combat Core owner must load exactly once');
 // Phase 2 metadata is historical cartography. First reconstruct the exact

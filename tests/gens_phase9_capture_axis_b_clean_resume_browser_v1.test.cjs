@@ -324,6 +324,81 @@ async function startCapture(page){
     assert.equal(afterResumeProgress.session,'1');
     assert.notEqual(afterResumeProgress.captureHub,'none');
 
+    // Decisive Phase 9 B gate: a SECOND real Capture combat AFTER page closure,
+    // new-page reload and real Shell resume, not merely an advancing day counter.
+    mark('capture-second-real-combat-after-reload-and-resume');
+    {
+    const battleSetup=await page.evaluate(()=>{
+      const playerRoster=captureTeamEntityRoster();
+      if(!playerRoster.length)return {ok:false,reason:'no-player-roster'};
+      const player={...playerRoster[0],stats:{...(playerRoster[0].stats||{}),speed:99,agility:99,agilite:99}};
+      const pool=loadSharedEntities().filter(x=>x?.category==='creature'&&String(x.id)!==String(player.id));
+      if(!pool.length)return {ok:false,reason:'no-enemy-pool'};
+      const base=pool[0];
+      const enemy={...base,hp:1,maxHp:1,level:1,stats:{...(base.stats||{}),speed:1,agility:1,agilite:1,defense:0}};
+      const b=captureStartBattleAutomatic(
+        {name:'Dresseur test',roster:[player],controller:'human'},
+        {name:'Adversaire test',roster:[enemy],controller:'mj'},
+        {type:'trainer',captureAllowed:false,activeSlots:1,teamSize:1,minBattleTeam:1,maxBattleTeam:1,
+         recallCost:'turn',controller:'mj',saveBattle:false,itemsAllowed:false,defendAllowed:true}
+      );
+      if(!b)return {ok:false,reason:'battle-create-failed'};
+      b.awaitingStart=false;
+      const a=b.sides.A.active[0],e=b.sides.B.active[0];
+      const ec=b.sides.B.creatures.find(x=>x.instanceId===e);
+      ec.hp=1;ec.maxHp=1;ec.ko=false;ec.defended=false;
+      b.turnOrder=[
+        {sideKey:'A',instanceId:a,initiative:999,speed:999},
+        {sideKey:'B',instanceId:e,initiative:1,speed:1}
+      ];
+      b.turnIndex=0;
+      captureRenderBattleLive(b);
+      return {ok:true,a,e,phase:b.phase};
+    });
+    assert.equal(battleSetup.ok,true,'real Capture battle must be creatable without any Dungeon fixture');
+    await snapshot('capture-second-battle-start-after-reload');
+
+    await page.evaluate(()=>{
+      const old=Math.random;Math.random=()=>0.99;
+      try{captureBattleUseAbility('capture_basic_attack')}finally{Math.random=old}
+    });
+
+    await page.waitForFunction(()=>{
+      const b=window.gensCurrentCaptureBattle;
+      return b?.phase==='ended'&&b?.victory?.winner==='A'&&
+        !!document.querySelector('#captureBattleLiveBody button[onclick="captureBattleFinishAndClose()"]');
+    },null,{timeout:10000});
+
+    await page.locator('#captureBattleLiveBody button[onclick="captureBattleFinishAndClose()"]').click();
+    await page.waitForFunction(()=>
+      !window.gensCurrentCaptureBattle &&
+      getComputedStyle(document.getElementById('captureGameHub')).display!=='none'
+    ,null,{timeout:10000});
+
+    const afterVictory=await page.evaluate(()=>({
+      active:activeGameProfileId(),
+      mode:gensMode151(),
+      session:localStorage.getItem('z40k_session_active_v1'),
+      hub:getComputedStyle(document.getElementById('captureGameHub')).display,
+      dungeon:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
+      root:getComputedStyle(document.getElementById('gensRootHome')).display,
+      menu:getComputedStyle(document.getElementById('menu')).display
+    }));
+    assert.equal(afterVictory.active,CAPTURE_ID,'Capture victory must keep Capture as active profile');
+    assert.equal(afterVictory.mode,'capture','Capture victory must keep Capture mode authority');
+    assert.equal(afterVictory.session,'1','Capture victory must keep the session active');
+    assert.notEqual(afterVictory.hub,'none','TERMINER after Capture victory must return to Capture hub');
+    assert.equal(afterVictory.dungeon,'none','Capture victory must not enter Dungeon');
+    assert.equal(afterVictory.root,'none','Capture victory must not return to the application root menu');
+    assert.notEqual(afterVictory.menu,'none','Capture world menu must remain active after victory');
+    }
+    const afterSecondCombat=await snapshot('capture-second-battle-victory-after-resume');
+    assert.equal(afterSecondCombat.mode,'capture','Second combat must not switch to Dungeon');
+    assert.notEqual(afterSecondCombat.captureHub,'none','Second combat must return to Capture exploration');
+    assert.equal(afterSecondCombat.session,'1','Second combat must preserve the Capture session');
+    assert.equal(JSON.parse(afterSecondCombat.captureWorldState||'null')?.day,3,'Second combat must preserve the resumed world day');
+
+
     assert.deepEqual(errors,[],'Capture-only browser scenario must not raise runtime errors');
     console.log(JSON.stringify({
       scenario:'Phase 9 axis B — Capture save/reload/resume/continue without Dungeon game or saved runtime',

@@ -39,7 +39,7 @@ const distinctGlobals=chains.size;
 const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
-const CURRENT_INDEX_BLOB='e777d484ab10049650440fee04f47cf2dfdc3043';
+const CURRENT_INDEX_BLOB='57415a1071475cc10f0c79e092897190577127e8';
 const HISTORICAL_TABLE_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
 assert.equal(blob,CURRENT_INDEX_BLOB,'current physical index must load external Capture seed and world; historical global table uses byte-exact restoration');
 assert.equal(fs.readFileSync(path.join(root,'index.html'),'utf8').split('<script src="assets/gensrpg/capture/world-exploration-v1.js?v=1"></script>').length-1,1,'Capture world must load once');

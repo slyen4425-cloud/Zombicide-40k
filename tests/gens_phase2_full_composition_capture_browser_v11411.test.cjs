@@ -326,8 +326,8 @@ const server=http.createServer((req,res)=>{
     await page.waitForLoadState('domcontentloaded',{timeout:90000});
   };
 
-  const openAdventure=async()=>{
-    await page.locator('button.gensRootModeCard.adventure').click();
+  const openCaptureFamily=async()=>{
+    await page.locator('button.gensRootModeCard.capture').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
   };
 
@@ -349,7 +349,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(composition.pagesInjectedModules,31,'full production characterization must use the Pages module set including final Shell authority');
 
     mark('open-adventure');
-    await openAdventure();
+    await openCaptureFamily();
     let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
     await captureCard.waitFor({state:'visible'});
 
@@ -372,7 +372,7 @@ const server=http.createServer((req,res)=>{
       }));
       assert.equal(reloadState.active,CAPTURE_ID,'full composition V16.155 reload must preserve Capture profile');
       assert.equal(reloadState.forced,null,'full composition V16.155 handoff must be consumed');
-      await openAdventure();
+      await openCaptureFamily();
       captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
       await captureCard.waitFor({state:'visible'});
     }

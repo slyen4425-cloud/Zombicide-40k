@@ -20,7 +20,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
-        run: node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+        run: |
+          node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
 
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs

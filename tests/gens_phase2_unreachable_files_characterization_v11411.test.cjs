@@ -53,8 +53,10 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,89,
-  'production graph must include physical Capture world and team owners as well as Hub/session boundary owners');
+assert.equal(reachable.size,90,
+  'production graph must include physical Capture world, team and battle core owners as well as Hub/session boundary owners');
+assert.equal(reachable.has('assets/gensrpg/capture/combat-core-v1.js'),true,
+  'Capture battle core owner must enter the production graph exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/world-exploration-v1.js'),true,
   'Capture world owner must enter the production graph');
 assert.equal(reachable.has('assets/gensrpg/capture/team-roster-v1.js'),true,

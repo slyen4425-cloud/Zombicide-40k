@@ -133,6 +133,7 @@ const phase9ConnectedServices=[
   'assets/gensrpg/capture/screen-return-v1.js',
   'assets/gensrpg/capture/hub-entry-v1.js',
   'assets/gensrpg/capture/world-exploration-v1.js',
+  'assets/gensrpg/capture/team-roster-v1.js',
   'assets/gensrpg/capture/builtin-seed-v1.js'
 ];
 const phase9Set=new Set(phase9ConnectedServices);

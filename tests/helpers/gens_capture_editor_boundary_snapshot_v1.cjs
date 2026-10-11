@@ -26,7 +26,7 @@ const OWNER_BEFORE=[
   'function openDungeonAdvancedEditor(){\n  if(!gensShellDungeonEditorAllowed())return;\n']
 ];
 function worldExtractedIndexBytes(root=path.resolve(__dirname,'../..')){
- let bytes=fs.readFileSync(path.join(root,'index.html'));
+ let bytes=require('./gens_capture_team_roster_snapshot_v1.cjs').teamRosterPreExtractionIndexBytes(root);
  assert.equal(bytes.length,7959089,'canonical single-owner index bytes');
  assert.equal(hash(bytes),'e777d484ab10049650440fee04f47cf2dfdc3043','canonical single-owner index blob');
  let str=bytes.toString('utf8');

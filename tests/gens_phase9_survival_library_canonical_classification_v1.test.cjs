@@ -98,8 +98,8 @@ vm.runInContext(
 for(const item of cases){
   assert.equal(context.gensContentFamilyForProfile(item),item.expected,'real canonical family for '+item.id);
   assert.equal(context.GensCaptureV1.isProfile(item),item.expected==='creature','real Capture identity for '+item.id);
-  assert.equal(context.gensFamilyForProfileId(item.id),item.expected==='survival'?'survival':'adventure',
-    'existing Shell route must remain stable for '+item.id);
+  assert.equal(context.gensFamilyForProfileId(item.id),item.expected==='creature'?'capture':item.expected==='survival'?'survival':'adventure',
+    'first-level Shell route must match canonical module for '+item.id);
 }
 
 // Observe calls while retaining the real normalizer, never replace a classification result.

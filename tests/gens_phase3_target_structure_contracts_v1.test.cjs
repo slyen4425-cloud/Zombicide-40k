@@ -102,10 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,89,
-  'Phase 3 scaffolding remains inert; Phase 9 owns Capture entry boundaries, physical World Exploration and the V16.162 seed');
+assert.equal(Object.keys(ownerManifest.files||{}).length,90,
+  'Phase 3 scaffolding remains inert; Phase 9 owns Capture entry boundaries, physical World Exploration, Team/Reserve, Combat Core and the V16.162 seed');
 assert.equal(composition.index.split('assets/gensrpg/capture/world-exploration-v1.js?v=1').length-1,1,'Capture World owner must be loaded exactly once');
 assert.equal(composition.index.split('assets/gensrpg/capture/team-roster-v1.js?v=1').length-1,1,'Capture team/roster owner must be loaded exactly once');
+assert.equal(composition.index.split('assets/gensrpg/capture/combat-core-v1.js?v=1').length-1,1,'Capture Combat Core owner must be loaded exactly once');
+assert.equal(ownerManifest.files?.['assets/gensrpg/capture/combat-core-v1.js']?.domain,'capture','Combat Core must be privately owned by Capture');
 assert.equal(ownerManifest.files?.['assets/gensrpg/capture/team-roster-v1.js']?.domain,'capture','Team / Reserve remains private Capture-owned');
 assert.equal(ownerManifest.files?.['assets/gensrpg/capture/world-exploration-v1.js']?.domain,'capture','World / Exploration remains private Capture-owned');
 assert.deepEqual(ownerManifest.files?.['assets/gensrpg/capture/session-start-v1.js'],{
@@ -128,7 +130,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:89,
+  productionOwnerGraph:90,
   loadedEntrySlices:4,
-  captureAuxiliaryRuntimeOwners:5
+  captureAuxiliaryRuntimeOwners:6
 },null,2));

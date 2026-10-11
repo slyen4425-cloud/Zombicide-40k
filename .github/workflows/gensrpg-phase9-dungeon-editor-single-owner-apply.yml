@@ -31,10 +31,10 @@ jobs:
         run: |
           python tools/gensrpg_phase9_dungeon_editor_single_owner_apply.py --apply
           python tools/gensrpg_phase9_dungeon_editor_single_owner_apply.py --verify
-          test "$(wc -c < index.html)" = '7958895'
-          test "$(git hash-object index.html)" = '91cdf82df453453a69e04900193517836c3969e6'
+          test "$(wc -c < index.html)" = '7959089'
+          test "$(git hash-object index.html)" = 'e777d484ab10049650440fee04f47cf2dfdc3043'
 
-      # Retry owner-writer sentinels after correcting a test-only false positive.
+      # Canonical Shell capability is available without the optional V151 launcher.
       - name: Prove canonical mode owner and historical snapshots
         run: |
           node tests/gens_phase9_dungeon_editor_single_owner_v1.test.cjs

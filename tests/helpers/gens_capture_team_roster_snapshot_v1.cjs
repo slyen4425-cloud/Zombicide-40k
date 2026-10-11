@@ -16,6 +16,25 @@ const END=[
  'function renderCaptureHeroInventory(){',
  'function openCreatureCapture(){'
 ];
+// Phase 9 root Hub is an unrelated Shell-only diff. Strip ONLY the audited
+// root-family edits before reconstructing pre-extraction historical fixtures.
+// The immutable pre-extraction fingerprints below remain unchanged.
+function restoreHistoricalHubSnapshot(index,root){
+ const h=hash(index);
+ if(h==='b64eae3650081af624155c8a4b8e47e4a1791658')return index;
+ const fixture=require('../fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
+ assert.equal(h,fixture.toBlob,'Capture root Hub exact patch fingerprint');
+ assert.equal(fixture.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
+ let source=index.toString('utf8');
+ for(const [before,after] of fixture.edits.slice().reverse()){
+  assert.equal(source.split(after).length-1,1,'unique inverse Hub edit');
+  source=source.replace(after,before);
+ }
+ const restored=Buffer.from(source,'utf8');
+ assert.equal(hash(restored),fixture.fromBlob,'historical hub-to-base reconstruction');
+ return restored;
+}
+
 // Historical sentinels consume the pre-combat index, not the new runtime owner.
 // Rebuild it from the external module only after its physical extraction.
 // This keeps all earlier hashes and their original expectations unchanged.
@@ -44,7 +63,7 @@ function restoreCombatCoreIfExtracted(index,root){
  return index;
 }
 function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..')){
- let index=restoreCombatCoreIfExtracted(fs.readFileSync(path.join(root,'index.html')),root);
+ let index=restoreCombatCoreIfExtracted(restoreHistoricalHubSnapshot(fs.readFileSync(path.join(root,'index.html')),root),root);
  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/team-roster-v1.js'));
  assert.equal(index.length,7950873,'Capture team extracted index bytes');
  assert.equal(hash(index),'57415a1071475cc10f0c79e092897190577127e8','Capture team index fingerprint');

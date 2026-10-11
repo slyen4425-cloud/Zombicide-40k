@@ -1,6 +1,6 @@
 # Phase 9 — Capture : transfert physique du propriétaire combat (ouverture gouvernée)
 
-Date : 11 octobre 2026. **Statut : chantier ouvert, extraction combat non appliquée.** Ce document est un point de reprise borné, non une preuve GREEN du runtime.
+Date : 11 octobre 2026. **Statut : propriétaire Combat Core extrait physiquement, contrôles de sortie du lot encore ouverts.** Ce document reste un point de reprise borné, non une preuve GREEN tant que les trois CI du commit documentaire final et la validation utilisateur ne sont pas acquises.
 
 ## Gouvernance et validation précédente
 
@@ -17,7 +17,7 @@ Date : 11 octobre 2026. **Statut : chantier ouvert, extraction combat non appliq
 - Source immuable de référence : https://github.com/slyen4425-cloud/Zombicide-40k/blob/f7d64ba8c5b2539ce8ee65ab3db3d51828229965/index.html
 - Toute inspection/édition future du HTML doit rester fondée sur cette preuve d'identité ; ne pas prendre une branche divergente comme source.
 
-## Frontières réellement repérées, sans mutation
+## Frontières réellement repérées à l'ouverture du chantier
 
 Les fonctions du combat Capture demeurent dans le HTML historique et sont **distinctes** du module Équipe / Réserve extrait :
 1. Bloc démarrage/configuration du combat Capture autour de `captureBattleModeKey`, `captureWildBattleRules`, `captureStartBattleAutomatic`.
@@ -37,3 +37,16 @@ Les API existantes sont appelées par le monde, l'équipe/réserve, les éditeur
 - **Phase 10 non ouverte**. Après ce transfert, évaluer les critères de sortie de Phase 9 sans inventer des micro-lots : si les 3 axes d'autonomie et propriétaires Capture sont démontrés, finaliser Phase 9 au lieu de prolonger indéfiniment.
 
 **Interdits** : toucher `main`, modifier les dépôts de laboratoires, fusionner les branches divergentes, changer la carte monde ou ses règles, créer un nouveau moteur combat, remplacer le système de sauvegarde, introduire le Dungeon Builder dans Capture.
+
+
+## Exécution contrôlée — propriétaire Combat Core réellement déplacé
+
+- GitHub Actions [38136340298](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38136340298) **SUCCESS**. Commit runtime `36727d526c374fe4072a7655a6ce91747347dc7f`. Aucun déploiement sur `main`.
+- Source `index.html` vérifiée à **7 950 873 octets** et Git blob `57415a1071475cc10f0c79e092897190577127e8`. Le script de transfert `tools/gensrpg_phase9_capture_combat_core_apply.py` impose cette provenance et le checkpoint de départ.
+- `assets/gensrpg/capture/combat-core-v1.js` : **18 894 octets**, Git blob `129e0af81d7454ed9f7697d40454a5e32bb8e580`, **39 fonctions originales**, sauvegarde `gensrpg_capture_battle_current_v1` inchangée.
+- Nouvel `index.html` : **7 932 251 octets**, Git blob `b64eae3650081af624155c8a4b8e47e4a1791658`; ancien propriétaire inline supprimé, nouveau chargeur classique synchrone immédiatement après Équipe / Réserve.
+- Restauration à l'octet de la source GREEN démontrée, sentinelle `gens_phase9_capture_combat_core_owner_v1.test.cjs` et parité VM de ciblage. Ancien propriétaire Équipe/Réserve et ses snapshots historiques intégralement reconstruits en **test uniquement** (aucun fallback runtime).
+- Dans le même workflow, test navigateur réel Capture profil persistant sans Dungeon, victoire, retour Hub, reprise, test Axe B, frontières quatre modules et Dungeon Builder : **SUCCESS**.
+- Anomalie d'entrée Hub préexistante : `assets/gensrpg/capture/hub-entry-v1.js` délègue désormais le masquage des trois écrans de sélection à l'unique fonction propriétaire Shell `gensHideHomeLevels()` ; test frontière dédié `gens_phase9_capture_shell_home_return_boundary_v1.test.cjs`. Aucune seconde écriture de visibilité Capture.
+- UI/actions de combat Capture `captureBattleApplyAbility`, `captureBattleUseAbility`, `captureBattleFinishAndClose`, combat de dresseurs et XP/récompenses restent encore dans le propriétaire historique inline. Ne pas les compter comme physiquement extraits.
+- **Étape de sortie restante** : triple CI Architecture+Browser/Firefox/Tactical sur **un même SHA final** avec contrat, tests et documentation, checkpoint technique, validation smartphone utilisateur ; GREEN fonctionnel seulement après validation. Les responsabilités UI encore inline doivent être évaluées contre le critère d'autonomie de Phase 9 et déplacées seulement si ce critère l'exige. Phase 10 toujours fermée.

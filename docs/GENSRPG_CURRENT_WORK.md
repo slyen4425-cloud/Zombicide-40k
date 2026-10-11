@@ -1,14 +1,17 @@
-# PHASE 9 — COMBAT CAPTURE : PROPRIÉTÉ UNIQUE ET EXTRACTION — 2026-10-11
+# PHASE 9 — COMBAT CAPTURE : EXTRACTION PHYSIQUE NOYAU — 2026-10-11
 
-- **État actuel** : chantier combat ouvert et documenté, AUCUN changement runtime Combat ni nouveau moteur. Propriétaires/points de raccord repérés dans le HTML exact ; test RED de frontière puis extraction soustractive à réaliser.
-- **GREEN fonctionnel précédent** : `checkpoint/gensrpg-phase9-capture-team-roster-extraction-green-2026-10-11` sur `f7d64ba8c5b2539ce8ee65ab3db3d51828229965` ; l'utilisateur a confirmé « tout fonctionne parfaitement » le 11 octobre 2026. Triple CI Architecture+Browser `38130847051`, Firefox `38130847008`, Tactical `38130847003` SUCCESS sur ce SHA.
-- **Point de départ Combat** : `checkpoint/gensrpg-start-phase9-capture-combat-owner-extraction-2026-10-11` au SHA `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`; branche `work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11`.
-- **Source §26** : index exact au SHA initial de ce lot, **7 950 873 octets**, blob Git `57415a1071475cc10f0c79e092897190577127e8`. Reconstitué à l'octet depuis le ZIP précédent vérifié + outil d'extraction Équipe/Réserve validé puis comparé au Git tree. Permalien : https://github.com/slyen4425-cloud/Zombicide-40k/blob/f7d64ba8c5b2539ce8ee65ab3db3d51828229965/index.html
-- **Périmètre** : moteur et UI de combat Capture historiques (config, entrée, cible/action, statuts, KO, récompenses, sauvegarde du combat, fin/reprise). Préserver les API, configurations créateur et clés persistées, retirer les corps inline après transfert ; ne dupliquer ni engine ni propriétaires.
-- **Hors périmètre/protégés** : Monde/Exploration, Équipe/Réserve, XP/évolution hors combat, Shell, Core/Storage, éditeurs, Dungeon, Survie, PvP, Tactical, PWA, profil/objets/creatures utilisateurs, laboratoires.
-- **Gates** : caractérisation RED initiale, rollback exact, parité des actions/états, vrai E2E Capture et quatre modules, CI Architecture/Firefox/Tactical sur même SHA, checkpoint technique puis validation manuelle avant GREEN final.
-- **Référence de lot** : `docs/GENSRPG_PHASE9_CAPTURE_COMBAT_OWNER_EXTRACTION_2026-10-11.md` ; ne pas confondre ouverture documentaire avec extraction runtime finie. **Phase 9 en cours, Phase 10 non ouverte**.
-- **Production `main`** : `e8681f9823573ced8aec59c8ddc47a72b02bc663` gelée et inchangée.
+- **État actuel** : Combat Core V1 extrait physiquement et testé dans le workflow contrôlé. **39 fonctions**, code original conservé ; Shell Hub corrigé sans nouvelle autorité. Le lot **n'est pas encore GREEN fonctionnel** : triples sentinelles sur SHA documentaire final puis test manuel à obtenir.
+- **Dernier GREEN fonctionnel préalable** : `checkpoint/gensrpg-phase9-capture-team-roster-extraction-green-2026-10-11` SHA `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`. Validation manuelle de l'utilisateur le 11 octobre : « tout fonctionne parfaitement ».
+- **Départ exact du lot** : `checkpoint/gensrpg-start-phase9-capture-combat-owner-extraction-2026-10-11` à `f7d64ba8c5b2539ce8ee65ab3db3d51828229965`. Branche dédiée `work/gensrpg-phase9-capture-combat-owner-extraction-2026-10-11`.
+- **Source §26** : index de départ 7 950 873 octets/blob `57415a1071475cc10f0c79e092897190577127e8`, reconstitué et vérifié exactement depuis le ZIP `indexa.zip` et l'extraction Équipe / Réserve approuvée.
+- **Application contrôlée** : [GitHub Actions 38136340298](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38136340298) SUCCESS, commit runtime `36727d526c374fe4072a7655a6ce91747347dc7f` ; nouveau `index.html` 7 932 251 octets/blob `b64eae3650081af624155c8a4b8e47e4a1791658`, nouveau `assets/gensrpg/capture/combat-core-v1.js` 18 894 octets/blob `129e0af81d7454ed9f7697d40454a5e32bb8e580`. Rollback byte-exact vers index de départ et parité ciblage VM vérifiés, pas de code métier réécrit.
+- **Navigation Hub corrigée** : le Capture Hub fait appel à `gensHideHomeLevels()` propriétaire Shell, au lieu de conserver `gensRootHome` visible dans le DOM. Test anti-régression permanent `tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs`. Le même workflow prouve victoire, retour Hub et reprise sur profil Capture sans identité Dungeon.
+- **Sentinelles** : core ownership `tests/gens_phase9_capture_combat_core_owner_v1.test.cjs`, restauration byte-exacte, nouvelles sentinelles permanentes Architecture ; tous les tests navigateur ciblés du workflow contrôlé GREEN. En attente des trois CI générales sur le SHA documentaire final.
+- **Encore au propriétaire historique** : actions/UI Combat Capture, récompenses/XP et certaines options de combat. Les analyser après checkpoint technique, ne déplacer que ce qui bloque l'autonomie réelle Phase 9 ; arrêter les micro-lots non nécessaires. Ne pas commencer la Phase 10.
+- **Protégés** : combat et règles inchangés, sauvegarde `gensrpg_capture_battle_current_v1`, Monde/Exploration, Équipe/Réserve, Shell, Core/Storage, éditeurs, Dungeon, Survie, PvP, Tactical, PWA et laboratoires.
+- **Prochaine gate** : trois CI Architecture+Browser, Firefox et Tactical sur même SHA, checkpoint technique, preview smartphone, confirmation utilisateur, puis checkpoint GREEN fonctionnel du lot. Dernier résultat documenté : `docs/GENSRPG_PHASE9_CAPTURE_COMBAT_OWNER_EXTRACTION_2026-10-11.md`.
+- **Production `main`** : `e8681f9823573ced8aec59c8ddc47a72b02bc663` intacte.
+
 
 ---
 

@@ -15,6 +15,18 @@
 
 ---
 
+## VALIDATION TECHNIQUE COMBAT CAPTURE — 11 OCTOBRE 2026
+
+- **ÉTAT : GREEN technique, validation fonctionnelle manuelle attendue**. Contrôles sur le SHA exact `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` : Architecture + navigateur (run `38139392742`, **SUCCESS**, deux jobs dont navigateur), Firefox (run `38139392738`, **SUCCESS**), Tactical Dock (run `38139392748`, **SUCCESS**).
+- **Checkpoint technique créé et vérifié** : `checkpoint/gensrpg-phase9-capture-combat-core-extraction-technical-green-2026-10-11` → `9ad6a3b0a8b54e6798d095e027f1770eca54f52b`.
+- **Preview manuelle mobile figée** : https://raw.githack.com/slyen4425-cloud/Zombicide-40k/9ad6a3b0a8b54e6798d095e027f1770eca54f52b/preview.html . Tester équipe/réserve, exploration, combat, victoire/retour au monde, Save & Quit puis reprise.
+- **Aucune validation manuelle de ce nouveau lot Combat Core à ce stade.** Le « tout fonctionne parfaitement » précédent concerne uniquement le lot Équipe / Réserve. Ne pas créer de checkpoint fonctionnel GREEN Combat Core sans le test utilisateur.
+- **Phase 9 toujours ouverte** : actions/UI Combat Capture historiquement inline et preuve complète des trois axes A/B/C de sortie à statuer après validation, sans inférer l'autonomie complète du succès des sentinelles partielles. **Phase 10 non ouverte.**
+- **Attention au SHA du présent commit documentaire** : le checkpoint technique reste épinglé à la version runtime et tests intégralement GREEN précédente ; il ne doit pas être déplacé pour une modification de documentation. `main` reste `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+---
+
+
 # PHASE 9 — EXTRACTION PHYSIQUE ÉQUIPE / RÉSERVE CAPTURE — 2026-10-11
 
 - **Statut** : transfert physique Équipe / Réserve appliqué et testé en navigateur sur le commit runtime `94b00857dcbe5a2f92a63dd57713f0eac8033b33` ; documentation et contrat actualisés ; triple CI sur le SHA de clôture et validation utilisateur du nouveau lot encore requises.

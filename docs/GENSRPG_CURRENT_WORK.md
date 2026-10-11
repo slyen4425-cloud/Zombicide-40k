@@ -1,3 +1,12 @@
+# GREEN FINAL — PHASE 9 HUB MONSTER CAPTURE — 11 OCTOBRE 2026
+
+- **Checkpoint final** : `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11` sur SHA `097d0e3b895b71f5a64b011d0c5e327e8efc1336`, vérifié identique au SHA CI.
+- **CI du même SHA** : Architecture+Chromium [38170941342](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38170941342) SUCCESS (347 étapes architecture et 63 étapes navigateur), Firefox [38170941321](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38170941321) SUCCESS, Tactical [38170941376](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38170941376) SUCCESS.
+- **Manuel** : utilisateur « Test validé ». Quatrième vignette racine Monster Capture, famille Capture distincte de Dungeon/Aventure. `main` gelée, labs intacts, Phase 10 non ouverte.
+- **Reprise** : la Phase 9 est entièrement clôturée. Toute Phase 10 démarre avec nouveau checkpoint §25 et branche dédiée depuis le dernier checkpoint GREEN ; pas de micro-lot Phase 9 sans bug prouvé. Cette note de clôture documentaire est postérieure au SHA CI et n'en modifie ni le contenu ni les résultats.
+
+---
+
 # CLÔTURE EN COURS — PHASE 9 / HUB MONSTER CAPTURE 4 MODULES — 11 OCTOBRE 2026
 
 **Validation utilisateur : « Test validé ».** Quatre cartes racines Survie, Dungeon/Aventure, Monster Capture, PvP ; familles `adventure` et `capture` désormais distinctes. L'autonomie moteur Capture avait déjà son checkpoint GREEN `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` au SHA `bf6d6536fe013d9339a9790f6565a98699440f63`.

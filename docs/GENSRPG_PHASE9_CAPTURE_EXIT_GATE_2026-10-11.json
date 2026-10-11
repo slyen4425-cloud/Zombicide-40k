@@ -1,0 +1,132 @@
+{
+  "version": 2,
+  "date": "2026-10-11",
+  "project": "GenSrpG",
+  "phase": 9,
+  "phaseExitReady": true,
+  "exitKind": "functional-runtime-autonomy",
+  "decision": "Phase 9 technically and functionally closed on the validated Capture runtime. No further gameplay extraction is necessary for the Phase 9 gate; Phase 10 remains unopened.",
+  "historicalAssessment": "docs/GENSRPG_PHASE9_CAPTURE_EXIT_GATE_2026-10-09.json",
+  "runtimeSha": "9ad6a3b0a8b54e6798d095e027f1770eca54f52b",
+  "evidenceSha": "edab672d914f929becfdba93dbfd33638b75b6ff",
+  "criteria": {
+    "publicEntry": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/entry-v1.js",
+        "tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs"
+      ],
+      "meaning": "Capture is classified as a first-class Shell module without historical Dungeon gameStyle; Shell activeModule remains capture throughout gameplay."
+    },
+    "sessionAndHub": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/session-start-v1.js",
+        "assets/gensrpg/capture/hub-entry-v1.js",
+        "assets/gensrpg/capture/screen-return-v1.js",
+        "tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs"
+      ],
+      "meaning": "One Capture session/Hub entry and return owner; Save & Quit control is owner-local."
+    },
+    "worldExploration": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/world-exploration-v1.js",
+        "tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs",
+        "tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs"
+      ],
+      "meaning": "Physically extracted world/exploration runs and persists day 2, then day 3 after reload/resume without a prior Dungeon save."
+    },
+    "teamAndBattle": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/team-roster-v1.js",
+        "assets/gensrpg/capture/combat-core-v1.js",
+        "tests/gens_phase9_capture_team_roster_owner_v1.test.cjs",
+        "tests/gens_phase9_capture_combat_core_owner_v1.test.cjs",
+        "tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs"
+      ],
+      "meaning": "19 roster functions and 39 combat core functions have one physical Capture owner. Real Capture battle APIs resolve two victories (second after reload) with return to Capture world. UI/XP legacy inline code is not a foreign runtime activation."
+    },
+    "saveAndResume": {
+      "status": "proven",
+      "evidence": [
+        "tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs",
+        "tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs",
+        "assets/gensrpg/capture/session-start-v1.js"
+      ],
+      "meaning": "Fresh-profile no-Dungeon-state → world → victory → page close/recreate → resume → day advance → second battle/victory; save world and participants remain intact."
+    },
+    "sessionShutdown": {
+      "status": "proven",
+      "evidence": [
+        "tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs",
+        "assets/gensrpg/capture/entry-v1.js",
+        "assets/gensrpg/capture/hub-entry-v1.js"
+      ],
+      "meaning": "Two real Save & Quit cycles, clean root navigation and resume, hidden Capture hub/modals, no duplicate quit UI, zero pending owner-local animation frames. This does not assert universal teardown of dormant scripts."
+    },
+    "noForeignRuntime": {
+      "status": "proven",
+      "evidence": [
+        "tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs",
+        "tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs",
+        "tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs",
+        "assets/gensrpg/survival/module-contract-v1.json",
+        "assets/gensrpg/shell/module-launch-final-authority-v1.js"
+      ],
+      "meaning": "The exclusive active Shell module is Capture; no Dungeon runtime/state is created, Dungeon gameplay/skin stays inactive. Survival public entry contains pure wave-rule helpers, with no independent activated Survival module provider. Inert shared/legacy code may still be loaded."
+    }
+  },
+  "remainingBlockingCodeLots": [],
+  "deferredLegacyOwners": [
+    "Capture battle action/UI functions currently remain in historical index.html; they use the existing Capture owner and do not activate Dungeon or Survival as hosts.",
+    "Capture XP/rewards and some options remain inline; defer purely physical extraction to later index.html lightening/ownership work (Phase 12), with independent tests and charter §26.",
+    "Possible dormant global code and broader app cleanup are out of Phase 9; no claim that all legacy scripts are physically unloaded."
+  ],
+  "ci": {
+    "evidenceRuns": [
+      {
+        "name": "Architecture + Chromium",
+        "runId": 38149307335,
+        "sha": "edab672d914f929becfdba93dbfd33638b75b6ff",
+        "conclusion": "success",
+        "url": "https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307335"
+      },
+      {
+        "name": "Firefox",
+        "runId": 38149307324,
+        "sha": "edab672d914f929becfdba93dbfd33638b75b6ff",
+        "conclusion": "success",
+        "url": "https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307324"
+      },
+      {
+        "name": "Tactical Dock",
+        "runId": 38149307332,
+        "sha": "edab672d914f929becfdba93dbfd33638b75b6ff",
+        "conclusion": "success",
+        "url": "https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38149307332"
+      }
+    ]
+  },
+  "checkpoints": {
+    "starting": "checkpoint/gensrpg-start-phase9-capture-exit-proof-2026-10-11",
+    "technicalEvidence": "checkpoint/gensrpg-phase9-capture-exit-evidence-technical-green-2026-10-11",
+    "plannedFunctionalFinal": "checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11"
+  },
+  "validation": {
+    "runtimeManualDate": "2026-10-11",
+    "runtimeManualStatement": "Test validé",
+    "runtimeManualSha": "9ad6a3b0a8b54e6798d095e027f1770eca54f52b",
+    "newRuntimeChanges": false,
+    "manualRetestRequired": false
+  },
+  "scope": {
+    "runtimeChanges": false,
+    "indexInspectedDirectly": false,
+    "indexModified": false,
+    "mainTouched": false,
+    "laboratoriesTouched": false,
+    "phase10Started": false
+  }
+}

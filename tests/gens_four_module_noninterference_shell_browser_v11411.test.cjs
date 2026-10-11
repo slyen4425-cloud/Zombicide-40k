@@ -227,6 +227,17 @@ const server=http.createServer((req,res)=>{
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
     await installOwners();await waitOwners();
 
+    mark('four-first-level-cards-and-family-exclusivity');
+    assert.equal(await page.locator('#gensRootHome .gensRootModeCard').count(),4,'Shell must expose all four modes at root');
+    await openFamily('adventure');
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn').count(),0,'Capture must not be listed inside Dungeon / Aventure');
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn').count(),1,'Dungeon keeps its own family');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+    await openFamily('capture');
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn').count(),0,'Dungeon must not be listed inside Monster Capture');
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn').count(),1,'Capture belongs in its root family');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+
     mark('survival-first');
     await selectWithRealReload(
       'survival',
@@ -344,6 +355,27 @@ const server=http.createServer((req,res)=>{
     assert.equal(pvp.pureCapture,false,'Capture runtime class must not leak into PvP');
     assert.ok(pvp.captureHub==='none'||pvp.captureHub==='absent','Capture hub must stay inactive in PvP');
     assert.ok(pvp.dungeonPanel==='none'||pvp.dungeonPanel==='absent','Dungeon panel must stay inactive in PvP');
+    mark('create-new-independent-capture-world');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+    await openFamily('capture');
+    await page.locator('#gensFamilyGames button.gensFamilyGameCard[onclick*="createNewRpgUniverse"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('rpgUniverseEditorModal')).display==='block');
+    const newlyCreated=await page.evaluate(()=>{
+      const p=loadGameProfiles().find(p=>String(p.id)===String(activeGameProfileId()));
+      return {id:p?.id,profile:p?.rpgUniverse?.gameplay?.profile,mods:p?.rpgUniverse?.gameplay?.modules,family:gensSelectedFamily,route:gensFamilyForProfileId(p?.id)};
+    });
+    assert.ok(newlyCreated.id,'new Capture world must be persisted');
+    assert.equal(newlyCreated.profile,'creature');
+    assert.equal(newlyCreated.route,'capture');
+    assert.equal(newlyCreated.family,'capture');
+    assert.equal(newlyCreated.mods?.capture,true);
+    assert.equal(newlyCreated.mods?.controllableCreatures,true);
+    await page.evaluate(()=>{closeRpgUniverseEditor();renderGensFamilyGamesIfVisible()});
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+newlyCreated.id+'"] .gensUniverseMainBtn').count(),1,'Capture world appears in the Capture family');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+    await openFamily('adventure');
+    assert.equal(await page.locator('#gensFamilyGames [data-rpg-profile="'+newlyCreated.id+'"] .gensUniverseMainBtn').count(),0,'Capture world is absent from Dungeon family');
+
     assert.deepEqual(browserErrors,[],'four-module transition scenario must not raise browser/runtime errors');
 
     mark('assertions-passed');

@@ -1,3 +1,19 @@
+# PHASE 9 — EXTRACTION PHYSIQUE ÉQUIPE / RÉSERVE CAPTURE — 2026-10-11
+
+- **Statut** : nouveau chantier ouvert et borné. Aucune mutation runtime au checkpoint de départ ; l'implémentation soustractive attend le contrôle d'application et les CI.
+- **Dernier jalon fonctionnel GREEN** : `checkpoint/gensrpg-phase9-dungeon-editor-single-owner-green-2026-10-11`, SHA `b4b1a3dfad64f43265294a2485591701c38c7644`. Confirmation manuelle de l'utilisateur le 11 octobre 2026 : Capture sans créateur Dungeon, véritable Dungeon avec Room Creator / Dungeon Builder et autres éditeurs OK.
+- **Preuves trois CI au SHA identique** : Architecture+Browser `38108512387`, Firefox `38108512336`, Tactical Dock `38108512371`, SUCCESS.
+- **Checkpoint de départ du lot courant** : `checkpoint/gensrpg-start-phase9-capture-team-roster-extraction-2026-10-11` sur `b4b1a3dfad64f43265294a2485591701c38c7644`.
+- **Branche dédiée** : `work/gensrpg-phase9-capture-team-roster-extraction-2026-10-11`; `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`, non modifiée.
+- **Source approuvée §26** : ZIP fourni par utilisateur, index 7 959 089 octets et blob Git `e777d484ab10049650440fee04f47cf2dfdc3043`, empreinte byte-exacte vérifiée contre le checkpoint (lien : https://github.com/slyen4425-cloud/Zombicide-40k/blob/b4b1a3dfad64f43265294a2485591701c38c7644/index.html).
+- **Propriétaire ciblé** : Capture Équipe / Réserve (sélection du dresseur actif, représentation créature possédée, normalisation/persistance existantes, transfert équipe↔réserve, rendu local). Ancienne autorité inline retirée physiquement ; conserver les noms d'API consommés par les appelants historiques.
+- **Protégés** : combat et XP Capture, monde/biomes/rencontres, profiles/créatures/dresseurs personnalisés, imports/exports, Core Storage, Shell, Dungeon, Survie, Tactical, PvP, PWA. Aucun deuxième moteur, wrapper global, observateur, timer, ni migration de sauvegarde.
+- **Test frontière** : test RED sur HTML initial et GREEN sur extraction locale, rollback source octet-exact, VM transfert équipe/réserve sans pertes XP/UID/champs personnalisés, vrai navigateur Capture combat/rappel, Save Quit/reprise, vrai Dungeon/Survie et frontières quatre modules.
+- **Gate de clôture** : application contrôlée sur une seule branche, trois CI sur un SHA identique, checkpoint technique puis test utilisateur avant checkpoint GREEN fonctionnel. Prochaine extraction Combat Capture seulement sur frontière démontrée. Phase 10 interdite tant que Phase 9 non close.
+- **Rapport ciblé** : `docs/GENSRPG_PHASE9_CAPTURE_TEAM_ROSTER_EXTRACTION_2026-10-11.md`.
+
+---
+
 # PHASE 9 — ÉDITEUR DUNGEON : UN SEUL PROPRIÉTAIRE SHELL — 2026-10-11
 
 - **Rustine antérieure révoquée comme solution définitive** : deux masquages du bouton et garde indépendante malgré CI vertes.

@@ -1,3 +1,17 @@
+# CHANTIER BORNE — PHASE 9 / VIGNETTE MONSTER CAPTURE AU HUB RACINE — 11 OCTOBRE 2026
+
+- **Base GREEN de départ** : `checkpoint/gensrpg-phase9-capture-exit-green-2026-10-11` / SHA `bf6d6536fe013d9339a9790f6565a98699440f63` (CI Chromium/Firefox/Tactical tous SUCCESS, moteur Capture précédemment validé manuellement). Production `main` toujours gelée.
+- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase9-capture-root-hub-2026-10-11` sur le SHA `bf6d6536fe013d9339a9790f6565a98699440f63` ; **branche de travail unique** `work/gensrpg-phase9-capture-root-hub-2026-10-11`.
+- **Entrée utilisateur exacte §26** : ZIP reçu `a1.zip`, `index.html(1).txt` 7 932 251 octets, blob Git `b64eae3650081af624155c8a4b8e47e4a1791658`, identique à `index.html` de base. Analyse depuis cette copie vérifiée, pas d'ancienne version.
+- **Constat** : seulement trois cartes racine (Survie/Aventure/PvP) ; Capture (content family `creature`) est encore visible dans la page Univers Aventure. Autonomie du module et fonctions de gameplay déjà GREEN, problème de **navigation Shell uniquement**.
+- **Périmètre du lot** : ajouter la quatrième vignette Monster Capture au Hub de premier niveau, faire de la famille d'écran `capture` un espace de profils Capture distinct (sans filtrer les mondes Dungeon dans Capture), retrouver création/édition/reprise Capture, préserver transitions Shell et changements de famille, mise en page smartphone ; adapter les sentinelles anciennes qui utilisaient encore la carte Aventure pour Capture.
+- **Invariants protégés** : aucune nouvelle autorité de moteur/Combat/Équipe/Monde Capture, ni changement de stockage, aucune altération d'identité de sauvegarde, aucun changement Tactical/Survie/PvP/Dungeon, pas de fusion `main`, ni de modifications des laboratoires. Pas de surcouche double propriétaire. Jeu/PWA sur mobile prioritaire.
+- **Tests de sortie** : assertions structurales, vrais clics Shell depuis une session vierge sur 4 cartes ; présence Capture uniquement en Capture, Dungeon uniquement en Aventure ; création d'univers Capture ; monde/combat/reprise/quitter ; anciens tests de non-interférence ; triple CI Architecture+Chromium / Firefox / Tactical au **même SHA**.
+- **Risque** : `index.html` très volumineux et plusieurs sentinelles historiquement branchées sur Aventure. Toute modification de ce fichier doit être strictement ciblée et faite depuis le ZIP vérifié (§26). Pas de checkpoint GREEN si CI rouge ; demande de validation manuelle mobile si le routage est modifié.
+- **Prochaine étape** : changement ciblé du Shell et migration des sentinelles, puis CI ; preview SHA épinglée pour test utilisateur avant checkpoint vert fonctionnel.
+
+---
+
 # ÉTAT OFFICIEL — PHASE 9 MONSTER CAPTURE : CLÔTURE FONCTIONNELLE — 11 OCTOBRE 2026
 
 - **Dernière base gameplay GREEN validée manuellement** : `checkpoint/gensrpg-phase9-capture-combat-core-extraction-green-2026-10-11`, SHA `9ad6a3b0a8b54e6798d095e027f1770eca54f52b` ; validation utilisateur « Test validé ».

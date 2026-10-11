@@ -53,10 +53,12 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,88,
-  'production graph must include the physical Capture world owner as well as the Hub and session boundary owners');
+assert.equal(reachable.size,89,
+  'production graph must include physical Capture world and team owners as well as Hub/session boundary owners');
 assert.equal(reachable.has('assets/gensrpg/capture/world-exploration-v1.js'),true,
   'Capture world owner must enter the production graph');
+assert.equal(reachable.has('assets/gensrpg/capture/team-roster-v1.js'),true,
+  'Capture team/reserve owner must enter the production graph');
 assert.equal(reachable.has(CAPTURE_SESSION_START),true,
   'new Capture session-start owner must be reachable from the real production graph');
 assert.equal([...reachable].filter(x=>x===CAPTURE_SESSION_START).length,1,

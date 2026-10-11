@@ -224,9 +224,23 @@ const server=http.createServer((req,res)=>{
       'Capture card must expose Capture-specific content semantics');
     assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
       'Capture card must not reuse the generic Dungeon RPG summary');
-    const dungeonCardText=String(await page.locator(`#gensFamilyGames [data-rpg-profile="${DUNGEON_ID}"] .gensUniverseMainBtn`).textContent()||'').replace(/\s+/g,' ').trim();
+    // Two independent root families: no Dungeon card should exist in Capture.
+    assert.equal(await page.locator(`#gensFamilyGames [data-rpg-profile="${DUNGEON_ID}"] .gensUniverseMainBtn`).count(),0,
+      'Dungeon profile must not be listed inside the Capture family');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+    await page.locator('button.gensRootModeCard.adventure').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+    const dungeonCard=page.locator(`#gensFamilyGames [data-rpg-profile="${DUNGEON_ID}"] .gensUniverseMainBtn`);
+    await dungeonCard.waitFor({state:'visible'});
+    const dungeonCardText=String(await dungeonCard.textContent()||'').replace(/\s+/g,' ').trim();
     assert.match(dungeonCardText,/héros.*objets.*monstres/i,
-      'classic Dungeon card must retain the generic RPG summary while Capture gets its own semantics');
+      'classic Dungeon card must retain its RPG summary inside Adventure');
+    assert.equal(await page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`).count(),0,
+      'Capture profile must not be listed inside Adventure');
+    await page.locator('#gensFamilyHome .homeTop button.back').click();
+    await page.locator('button.gensRootModeCard.capture').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+    await captureCard.waitFor({state:'visible'});
 
     const switchInfo=await page.evaluate((captureId)=>({
       active:activeGameProfileId(),

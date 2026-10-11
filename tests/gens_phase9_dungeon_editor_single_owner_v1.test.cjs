@@ -28,7 +28,7 @@ const sync=slice('function syncEditorHubForActiveFamily(){','function updateGame
 const editor=slice('function openDungeonAdvancedEditor(){','function closeDungeonAdvancedEditor(){');
 const canon='gensMode151()==="dungeon"';
 assert.ok(apply.includes('if(dae)dae.style.display='+canon+'?"":"none";'),'one authoritative visibility policy is canonical mode');
-assert.ok(!sync.includes('dungeonAdvancedEditorBtn')&&!sync.includes('if(dungeonBtn)'),"editor sync must not be a second writer of Dungeon access");
+assert.ok(!sync.includes('getElementById("dungeonAdvancedEditorBtn")')&&!sync.includes('if(dungeonBtn)'),"editor sync must not read/write Dungeon button; static structural exclusion IDs are not visibility ownership");
 assert.ok(editor.includes('if(gensMode151()!=="dungeon")return;'),'direct entry rejects non-Dungeon using same canonical authority');
 assert.ok(!apply.includes('if(dae)dae.style.display=dungeon&&'),'old family-based masking removed');
 assert.equal((src.match(/if\(dae\)dae\.style\.display=/g)||[]).length,1,'exactly one active Dungeon editor visibility writer');

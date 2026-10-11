@@ -43,8 +43,8 @@ async function prepare(page,port){
 }
 
 async function openCapturePregameAndReturn(page){
-  const adventure=page.locator('button.gensRootModeCard.adventure');
-  await adventure.waitFor({state:'visible'});await adventure.click();
+  const capture=page.locator('button.gensRootModeCard.capture');
+  await capture.waitFor({state:'visible'});await capture.click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 
   let card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
@@ -57,8 +57,8 @@ async function openCapturePregameAndReturn(page){
   if(sw.active&&sw.active!==CAPTURE_ID&&sw.from!==sw.to){
     await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),card.click()]);
     await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
-    const adventure2=page.locator('button.gensRootModeCard.adventure');
-    await adventure2.waitFor({state:'visible'});await adventure2.click();
+    const capture2=page.locator('button.gensRootModeCard.capture');
+    await capture2.waitFor({state:'visible'});await capture2.click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
     card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
     await card.waitFor({state:'visible'});

@@ -1,3 +1,15 @@
+# PHASE 9 — CORRECTION DE PROPRIÉTÉ ÉDITEUR DUNGEON/CAPTURE — 2026-10-11
+
+- **Motif / charte §§3, 17–21** : le correctif précédent `5faf9614...` masque le bouton dans deux fonctions et ajoute une troisième garde tout en conservant la décision erronée `gensSelectedFamily==="adventure"`. Techniquement vert mais multi-écriture de `#dungeonAdvancedEditorBtn` ; jalon fonctionnel NON ACCEPTÉ.
+- **Branche dédiée** : `work/gensrpg-phase9-dungeon-editor-single-owner-2026-10-11`. **Checkpoint de départ** : `checkpoint/gensrpg-start-phase9-dungeon-editor-single-owner-2026-10-11` sur `6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e` (trois CI GREEN `38094709779`, `38094709768`, `38094709816`).
+- **Périmètre** : reprendre exactement l'éditeur Dungeon dans le Shell, sans duplication ; `applyModeEditorVisibility()` seul propriétaire de l'affichage du bouton ; retirer son second écrivain `syncEditorHubForActiveFamily()` ; utiliser le classificateur canonique déjà existant `gensMode151()` pour l'admissibilité et dans `openDungeonAdvancedEditor()`. Aucune nouvelle API, couche UI, timer, observer, wrapper, ni reclassification de tout le mode Aventure.
+- **Source §26 vérifiée** : ancienne copie utilisateur `index.html` 7 958 968 octets/blob `42583858...`, reconstruite de façon déterministe à partir du patch Git `5faf9614...` ; la copie obtenue est **byte-identique** à l'index HEAD de départ 7 959 154 octets, blob `d19fb899e646ee97ec21d055b5271ac2cbba91a2`. Source figée https://github.com/slyen4425-cloud/Zombicide-40k/blob/6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e/index.html .
+- **Protections** : sauvegardes et créations Capture, éditeurs communs, Dungeon Builder / Room Creator, monde/rencontres/combat, Shell, Core, Survie, Tactical, PvP, PWA, `main` `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Tests prévus** : test RED propriétaire unique + classification réelle Capture (y compris gameStyle historique dungeon) / vrai Dungeon / Survie ; restauration index vers l'ancien correctif et vers l'index monde précédent, re-pin des seules empreintes actives ; vrai E2E Capture -> éditeur -> Dungeon inaccessible -> véritable Dungeon -> Builder accessible ; triple CI sur SHA unique. Validation utilisateur requise avant GREEN final.
+- **Suite Phase 9** : ne pas commencer équipe/réserve ni Phase 10 tant que ce chantier n'a pas son gate vert.
+
+---
+
 # PHASE 9 — DUNGEON BUILDER ISOLÉ DE CAPTURE — RUNTIME CORRIGÉ 2026-10-11
 
 - **Chantier** : `work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11`, base checkpoint `checkpoint/gensrpg-start-phase9-capture-dungeon-editor-boundary-2026-10-11` sur `2e6c01aa0d7ce4ebe061a436b2753940b1750e03`.

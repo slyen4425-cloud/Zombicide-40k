@@ -39,14 +39,14 @@ async function waitPreview(page){
   ,null,{timeout:60000});
 }
 
-async function openAdventure(page){
-  const b=page.locator('button.gensRootModeCard.adventure');
+async function openProfileFamily(page,id){
+  const b=page.locator('button.gensRootModeCard.'+(id===CAPTURE_ID?'capture':'adventure'));
   await b.waitFor({state:'visible'});await b.click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 }
 
 async function selectProfile(page,id){
-  await openAdventure(page);
+  await openProfileFamily(page,id);
   let card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
   await card.waitFor({state:'visible'});
   const sw=await page.evaluate(pid=>({
@@ -56,7 +56,7 @@ async function selectProfile(page,id){
   }),id);
   if(sw.active&&sw.active!==id&&sw.from!==sw.to){
     await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),card.click()]);
-    await waitPreview(page);await openAdventure(page);
+    await waitPreview(page);await openProfileFamily(page,id);
     card=page.locator('#gensFamilyGames [data-rpg-profile="'+id+'"] .gensUniverseMainBtn');
     await card.waitFor({state:'visible'});
   }

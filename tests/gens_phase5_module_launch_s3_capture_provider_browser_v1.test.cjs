@@ -209,7 +209,7 @@ const server=http.createServer((req,res)=>{
     assert.ok(seed.trainer.map(String).includes(CAPTURE_TRAINER),'built-in Capture profile must keep its current trainer');
 
     mark('open-real-adventure-family');
-    await page.locator('button.gensRootModeCard.adventure').click();
+    await page.locator('button.gensRootModeCard.capture').click();
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
 
     let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
@@ -239,7 +239,7 @@ const server=http.createServer((req,res)=>{
       assert.equal(reloaded.forced,null,'forced-mode handoff must be consumed after reload');
 
       mark('reopen-adventure-after-real-reload');
-      await page.locator('button.gensRootModeCard.adventure').click();
+      await page.locator('button.gensRootModeCard.capture').click();
       await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
       captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
       await captureCard.waitFor({state:'visible'});
@@ -263,7 +263,7 @@ const server=http.createServer((req,res)=>{
       session:localStorage.getItem('z40k_session_active_v1')
     }));
     assert.equal(state.active,CAPTURE_ID);
-    assert.equal(state.family,'adventure','current Shell family guard classifies Capture under Adventure');
+    assert.equal(state.family,'capture','current Shell family guard classifies Capture under Adventure');
     assert.equal(state.contentFamily,'creature');
     assert.equal(state.mode151,'capture','V16.151 must separate Capture from classic Dungeon');
     assert.equal(state.dungeonMode,false,'current Capture must stay outside Dungeon identity after seed retirement');
@@ -358,7 +358,7 @@ const server=http.createServer((req,res)=>{
       location:document.getElementById('captureWorldLocationLabel')?.textContent||''
     }));
     assert.equal(state.active,CAPTURE_ID);
-    assert.equal(state.family,'adventure');
+    assert.equal(state.family,'capture');
     assert.equal(state.contentFamily,'creature');
     assert.equal(state.mode151,'capture');
     assert.equal(state.session,'1');

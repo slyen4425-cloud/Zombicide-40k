@@ -1,3 +1,16 @@
+# PHASE 9 — FRONTIÈRE ÉDITEUR CAPTURE/DUNGEON : TRIPLE CI GREEN TECHNIQUE — 2026-10-11
+
+- **Dernier runtime validé** : `6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e` ; branche `work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11`.
+- **Checkpoint technique GREEN** : `checkpoint/gensrpg-phase9-capture-dungeon-editor-boundary-technical-green-2026-10-11` au SHA ci-dessus. **Checkpoint initial** : `checkpoint/gensrpg-start-phase9-capture-dungeon-editor-boundary-2026-10-11` au SHA `2e6c01aa0d7ce4ebe061a436b2753940b1750e03`.
+- **Triple CI SHA identique** : Architecture+Browser `38094709779` SUCCESS, Firefox `38094709768` SUCCESS, Tactical `38094709816` SUCCESS.
+- **Correction livrée** : créateur Dungeon invisible et non ouvrable depuis Capture ; Dungeon conserve Room Creator/World Builder. 3 changements bornés dans index ; rollback byte exact ; source `index.html` 7 959 154 octets / blob `d19fb899e646ee97ec21d055b5271ac2cbba91a2`.
+- **Aucune duplication de générateur** ; monde/rencontres/valeurs/sauvegardes Capture, Dungeon, Survie, Tactical, PvP, Shell et Core inchangés. `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Gate restant** : test manuel utilisateur depuis Capture Éditeurs puis Dungeon Éditeurs sur la preview SHA figée. Pas de checkpoint final fonctionnel GREEN ni de démarrage d'un autre lot avant cette preuve.
+- **Preview** : https://raw.githack.com/slyen4425-cloud/Zombicide-40k/6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e/preview.html
+- **Prochaine extraction planifiée** : Équipe / Réserve Capture, avec nouvelle branche, checkpoint initial, source index à réétablir selon charte §26. Rapport `docs/GENSRPG_PHASE9_CAPTURE_DUNGEON_EDITOR_BOUNDARY_2026-10-11.md`.
+
+---
+
 # PHASE 9 — DUNGEON BUILDER ISOLÉ DE CAPTURE — RUNTIME CORRIGÉ 2026-10-11
 
 - **Chantier** : `work/gensrpg-phase9-capture-dungeon-editor-boundary-2026-10-11`, base checkpoint `checkpoint/gensrpg-start-phase9-capture-dungeon-editor-boundary-2026-10-11` sur `2e6c01aa0d7ce4ebe061a436b2753940b1750e03`.

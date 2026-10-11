@@ -38,3 +38,14 @@ La carte **Dungeon** du hub d'édition Capture était héritée de la famille «
 - Repin **mécanique et borné** (deux fichiers seulement) : `tests/gens_phase2_inline_owner_manifest_v11411.test.cjs` et `tests/gens_phase2_inline_global_last_owner_v11411.test.cjs`. Les valeurs historiques de source, les tables de propriétaires et les fixtures anciennes restent inchangées.
 - Workflow [38094666974](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094666974) **SUCCESS**, commit test `0176ebc912ffb13cc258d2c8b601d57cc6f88819`. Les deux sentinelles, restauration World V1 et Seed V16.162, valeurs du créateur et rollback index passent.
 - Triple CI finale sur le SHA documentaire du présent rapport en attente de contrôle ; aucun checkpoint final créé tant que ces validations ne sont pas vertes.
+
+## Triple CI verte finale — 11 octobre 2026
+
+- **SHA runtime/documentation validé** : `6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e`.
+- Architecture + Browser : [38094709779](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094709779) **SUCCESS**.
+- Firefox : [38094709768](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094709768) **SUCCESS**.
+- Tactical Dock : [38094709816](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38094709816) **SUCCESS**.
+- **Checkpoint technique intermédiaire** créé : `checkpoint/gensrpg-phase9-capture-dungeon-editor-boundary-technical-green-2026-10-11` sur **ce SHA précis**. Les commits documentaires postérieurs ne changent pas ce runtime vérifié.
+- **Validation utilisateur non encore constatée** sur la nouvelle interface. Ne pas confondre ce checkpoint technique avec la clôture fonctionnelle GREEN. Test manuel : depuis Capture, ouvrir Éditeurs et vérifier l'absence de Dungeon ; puis depuis Dungeon, ouvrir son éditeur et le générateur.
+- Preview figée : https://raw.githack.com/slyen4425-cloud/Zombicide-40k/6ce7e0a2cf3613a02629f4d5c20237a01cbcc57e/preview.html
+- **Suite autorisée seulement après gate** : lot séparé Équipe / Réserve Capture, en préservant les créations utilisateur et sans dupliquer le World Builder.

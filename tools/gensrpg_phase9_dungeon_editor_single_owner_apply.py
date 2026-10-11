@@ -59,11 +59,14 @@ def revert_bytes(result):
             require(data.count(new)==1,"owner replacement not unique")
             data=data.replace(new,original,1)
         else:
-            anchor=(b'  if(survivalBtn)survivalBtn.style.display=isRpg?"none":"";\n'
-                    if original.startswith(b'  const dungeonBtn') else
-                    b'  const hub=document.getElementById("editorHub");\n')
-            require(data.count(anchor)==1,"removed seam restoration anchor not unique")
-            data=data.replace(anchor,original+anchor,1)
+            if original.startswith(b'  const dungeonBtn'):
+                anchor=b'  if(survivalBtn)survivalBtn.style.display=isRpg?"none":"";\n'
+                require(data.count(anchor)==1,"removed lookup restoration anchor not unique")
+                data=data.replace(anchor,original+anchor,1)
+            else:
+                anchor=b'  if(rpgBtn)rpgBtn.style.display=isRpg?"":"none";\n'
+                require(data.count(anchor)==1,"removed writer restoration anchor not unique")
+                data=data.replace(anchor,anchor+original,1)
     require(len(data)==OLD_BYTES and blob(data)==OLD_BLOB,"rollback mismatched original current index")
     return data
 

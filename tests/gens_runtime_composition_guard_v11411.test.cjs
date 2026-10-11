@@ -38,6 +38,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/capture/screen-return-v1.js?v=1',
   'assets/gensrpg/capture/hub-entry-v1.js?v=1',
   'assets/gensrpg/capture/world-exploration-v1.js?v=1',
+  'assets/gensrpg/capture/team-roster-v1.js?v=1',
   'assets/gensrpg/capture/builtin-seed-v1.js?v=1',
   'assets/gensrpg/core/progression-v1.js?v=1',
   'assets/dungeon/dungeon-core-316.js',

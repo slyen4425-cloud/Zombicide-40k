@@ -150,7 +150,7 @@ function checkSurvival(ids,captures,survivals){
         for(const item of row.fixtures.identities){
           const capture=row.fixtures.captures.includes(item.id);
           assert.equal(item.family,capture?'creature':item.id==='library-manga'?'manga':'survival');
-          assert.equal(item.route,capture||item.id==='library-manga'?'adventure':'survival');
+          assert.equal(item.route,capture?'capture':item.id==='library-manga'?'adventure':'survival');
         }
         const before=await persisted(page);
         mark(name+'-open-survival');
@@ -164,13 +164,19 @@ function checkSurvival(ids,captures,survivals){
         mark(name+'-open-adventure');
         await backToModes(page);await family(page,'adventure');
         row.adventure=await adventureIds(page);
-        for(const id of [...row.fixtures.captures,DUNGEON_ID,'library-manga'])
+        for(const id of [DUNGEON_ID,'library-manga'])
           assert.equal(row.adventure.includes(id),true,'existing Adventure card must remain accessible: '+id);
-        for(const id of row.fixtures.survivals)
-          assert.equal(row.adventure.includes(id),false,'Survival card must remain outside Adventure: '+id);
+        for(const id of [...row.fixtures.survivals,...row.fixtures.captures])
+          assert.equal(row.adventure.includes(id),false,'non-Adventure profile must stay outside Adventure: '+id);
         await page.screenshot({path:path.join(artifacts,name+'-adventure.png'),fullPage:true});
         await page.evaluate(()=>renderGensFamilyGamesIfVisible());
         assert.deepEqual(await adventureIds(page),row.adventure,'real visible-list refresh must preserve Adventure membership');
+        await backToModes(page);await family(page,'capture');
+        row.capture=await adventureIds(page);
+        for(const id of row.fixtures.captures)assert.equal(row.capture.includes(id),true,'Capture library must contain '+id);
+        for(const id of [DUNGEON_ID,'library-manga',...row.fixtures.survivals])assert.equal(row.capture.includes(id),false,'Capture library must exclude '+id);
+        await page.evaluate(()=>renderGensFamilyGamesIfVisible());
+        assert.deepEqual(await adventureIds(page),row.capture,'Capture refresh preserves family membership');
         await backToModes(page);await family(page,'survival');
         assert.deepEqual(await survivalIds(page),row.survival,'returning from Adventure must preserve Survival membership');
         await page.evaluate(()=>renderGensFamilyGamesIfVisible());
@@ -183,7 +189,7 @@ function checkSurvival(ids,captures,survivals){
         await assertPersisted(page,before,'real reload must preserve complete profiles, active selection and module saves');
         await family(page,'survival');
         checkSurvival(await survivalIds(page),row.fixtures.captures,row.fixtures.survivals);
-        await backToModes(page);await family(page,'adventure');
+        await backToModes(page);await family(page,'capture');
 
         mark(name+'-select-real-capture-card');
         let card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
@@ -192,7 +198,7 @@ function checkSurvival(ids,captures,survivals){
           gensProfileContentFamily155(activeGameProfileId())!==gensProfileContentFamily155(id),CAPTURE_ID);
         if(reload){
           await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:60000}),card.click()]);
-          await ready(page);await family(page,'adventure');
+          await ready(page);await family(page,'capture');
           card=page.locator('#gensFamilyGames [data-rpg-profile="'+CAPTURE_ID+'"] .gensUniverseMainBtn');
         }
         await card.click();
@@ -202,7 +208,7 @@ function checkSurvival(ids,captures,survivals){
           module:gensShellActiveModuleV1(),content:gensCurrentContentFamily(),dungeon:isDungeonMode(),
           dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2')}));
         assert.equal(row.selection.id,CAPTURE_ID);
-        assert.equal(row.selection.family,'adventure');
+        assert.equal(row.selection.family,'capture');
         assert.equal(row.selection.module,'capture');
         assert.equal(row.selection.content,'creature');
         assert.equal(row.selection.dungeon,false);

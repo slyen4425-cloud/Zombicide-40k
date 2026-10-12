@@ -18,7 +18,8 @@ const expected=[
   "module-launch-v1.js",
   "shell-composition-v1.js"
 ];
-assert.equal(contract.phase,10);
+assert.equal(contract.phase,3);
+assert.equal(contract.activatedPhase,10);
 assert.equal(contract.module,"pvp");
 assert.equal(contract.stage,"S4-architectural-closure");
 assert.equal(contract.status,"shell-registered-structural-module-no-gameplay");

@@ -1,3 +1,15 @@
+# DERNIER JALON GREEN — PHASE 10 / S2 COMPOSITION SHELL PVP — 12 OCTOBRE 2026
+
+- **Checkpoint S2 GREEN technique (point de reprise unique)** : `checkpoint/gensrpg-phase10-pvp-shell-composition-s2-green-2026-10-12`, SHA `f467c2554a59f2ff7eaac55de3fd1976c3ba7059`.
+- **Vérification finale sur exactement ce SHA** : Architecture/Chromium [38257227187](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227187) SUCCESS ; Firefox [38257227197](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227197) SUCCESS ; Tactical [38257227169](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227169) SUCCESS.
+- **Index certifié §26 et appliqué automatiquement** : 7 934 204 octets, Git blob `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441`; workflow de publication sur branche S2 effectué par l'assistant, sans action GitHub de l'utilisateur. Production `main` toujours gelée au `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Périmètre livré** : propriétaire de session PvP S0 ; provider de Shell S1 ; composition S2 explicitement raccordée à l'index réel. Shell seul possède navigation ; PvP seul possède session ; aucun contrôle de Survie/Dungeon/Capture/Tactical. Pas de règle de combat inventée.
+- **Limite claire** : ceci ne débloque PAS encore la vignette « PVP — À VENIR » ; aucun écran ni gameplay PvP jouable, ni sauvegarde PvP persistante. Cette absence n'est pas un bug.
+- **Suite Phase 10** : partir du checkpoint S2 avec un nouveau checkpoint §25 et une branche unique pour le prochain lot de configuration/écrans PvP, puis gameplay seulement avec règles définies. Ne pas ouvrir Phase 11, ni retoucher `main` ou les laboratoires. Si besoin du contenu exact `index.html`, appliquer §26 au nouveau SHA (ne pas réutiliser un ancien ZIP sans vérification).
+- **Pièce documentaire** : `docs/GENSRPG_PHASE10_PVP_S2_SHELL_COMPOSITION_2026-10-12.md`. Le présent HEAD documentaire vient après le jalon technique vert et ne modifie pas le code vérifié.
+
+---
+
 # CHANTIER ACTIF — PHASE 10 / S2 COMPOSITION PVP SHELL — 12 OCTOBRE 2026
 
 - **Dernier checkpoint GREEN confirmé** : `checkpoint/gensrpg-phase10-pvp-shell-provider-s1-green-2026-10-12` sur `cb36c5f1db0a5734083b39bd9f50b40d80e1c010` ; CI Architecture [38230907940](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907940), Firefox [38230907878](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907878), Tactical [38230907872](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907872), toutes SUCCESS sur ce SHA.

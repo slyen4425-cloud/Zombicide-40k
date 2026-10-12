@@ -1,3 +1,15 @@
+# CHANTIER ACTIF — PHASE 10 / S2 COMPOSITION PVP SHELL — 12 OCTOBRE 2026
+
+- **Dernier checkpoint GREEN confirmé** : `checkpoint/gensrpg-phase10-pvp-shell-provider-s1-green-2026-10-12` sur `cb36c5f1db0a5734083b39bd9f50b40d80e1c010` ; CI Architecture [38230907940](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907940), Firefox [38230907878](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907878), Tactical [38230907872](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38230907872), toutes SUCCESS sur ce SHA.
+- **Checkpoint de départ S2 §25** : `checkpoint/gensrpg-start-phase10-pvp-shell-composition-s2-2026-10-12` sur le même SHA ; branche dédiée `work/gensrpg-phase10-pvp-shell-composition-s2-2026-10-12`.
+- **Propriétaires** : Shell seul = navigation et composition ; PvP seul = session / règles futures / combat futur ; Core = services partagés. Aucune extension du gameplay ni autorité sur Survie, Dungeon, Capture, Tactical.
+- **Réalisé dans S2 (technique, non GREEN)** : `assets/gensrpg/pvp/shell-composition-v1.js` opt-in + test `tests/gens_phase10_pvp_shell_composition_s2.test.cjs` intégré à CI ; feuille de route et document de gate S2 actualisés.
+- **Index local §26 vérifié** : ZIP utilisateur `a2.zip`, index 7 933 755 octets, blob `613b4a21d83e9adcdd091be82240a3a6f9cf5bf7`, correspond au S1 checkpoint. Insertion stricte de 449 octets préparée (index 7 934 204 octets/blob `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441`). **La version modifiée n'est pas encore publiée sur la branche ; ne pas revendiquer raccord navigateur ni CI GREEN**.
+- **Tests / risques** : après publication exacte de l'index, tester le graphe réel des scripts, préparation et lancement refusés hors PvP, non-interférence quatre modules, navigateur Chromium et Firefox, Tactical sur un seul SHA. La carte `PVP — À VENIR` reste normale. Pas de règles arbitraires, ni auto-install implicite, ni doublon de registre Shell.
+- **Prochaine étape unique** : obtenir sur GitHub le blob d'index modifié exact sur la branche S2, corriger uniquement les sentinelles d'inventaire légitimement affectées, valider triple CI, checkpoint GREEN et preview ciblée. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, laboratoires intacts. **Phase 11 non ouverte**.
+
+---
+
 # CHANTIER ACTIF — PHASE 10 / S1 PROVIDER PVP → SHELL — 12 OCTOBRE 2026
 
 - **Source de vérité** : charte `docs/GENSRPG_CHARTE.md`, roadmap et dernier checkpoint S0 `checkpoint/gensrpg-phase10-pvp-session-s0-green-2026-10-12` sur `2a464acab5ed8080bbc9081d148742c72ee7773c`, triple CI S0 SUCCESS Architecture/Chromium [38201807342](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807342), Firefox [38201807324](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807324), Tactical [38201807340](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807340).

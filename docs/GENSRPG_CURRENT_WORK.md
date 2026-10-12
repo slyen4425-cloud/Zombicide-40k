@@ -1,3 +1,14 @@
+# CHANTIER ACTIF — PHASE 11 / A0 INVENTAIRE DES ASSETS VISUELS — 12 OCTOBRE 2026
+
+- **Dernier état technique GREEN** : Phase 10 clôturée sur le plan architectural. Checkpoint GREEN S4 `checkpoint/gensrpg-phase10-pvp-architectural-closure-s4-green-2026-10-12` au SHA `b5b16cb9d0a8def7749a32a9bfecf1ce17cd21ef`. La branche documentaire Phase 10 a elle aussi les trois CI SUCCESS au SHA de départ `3acd7a6112e3da9a546749e1acb39ee81cb4c9d7`.
+- **Checkpoint initial §25** : `checkpoint/gensrpg-start-phase11-asset-inventory-2026-10-12` au SHA exact `3acd7a6112e3da9a546749e1acb39ee81cb4c9d7`. Branche unique `work/gensrpg-phase11-asset-inventory-2026-10-12`.
+- **Périmètre et propriétaire** : Phase 11, recensement des images physiques et attribution des propriétaires des assets. Core asset resolver garde la résolution commune ; Dungeon conserve ses images privées ; Shell/PWA garde ses icônes ; fichiers racine `assets/img_*` encore **non classés** jusqu'à preuve de consommation. Aucune migration d'images, aucun fallback croisé, aucune modification de runtime.
+- **Interdictions** : `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; ne pas toucher Survie, Dungeon, Capture, PvP, Tactical, PWA, laboratoires, `index.html`, Core resolver ou assets binaires dans ce lot ; ne pas inférer un usage depuis le seul nom d'un fichier. Charte §26 : toute consultation future du contenu exact d'`index.html` requiert le fichier ZIP correspondant au SHA.
+- **Tests/révisions** : inventaire Git exact des images PNG/JPG/WebP/SVG/GIF, tailles et chemins ; séparer dépendances `node_modules`, images de contenu et icônes PWA ; vérifier l'unicité des chemins/risques de collisions et contrôler la synchronisation avec Git ; ne pas annoncer un fichier comme utilisé en production sans preuve. Triple CI Architecture/Chromium, Firefox, Tactical requise sur un même SHA avant GREEN.
+- **Prochaine étape** : inventorier et classifier sans déplacement ; documenter les chemins candidats à migrer et les preuves manquantes de consommation. Phase 11 ouverte, pas terminée.
+
+---
+
 # GREEN — PHASE 10 / S4 CLÔTURE ARCHITECTURALE PVP — 12 OCTOBRE 2026
 
 - **Phase 10 clôturée sur le plan architectural seulement** : S0 session, S1 provider, S2 composition explicite au Shell, S3 écran de configuration privé et S4 contrat/sentinelle de sortie. **Aucun combat PvP n'est développé ni attendu.** Le bouton « PVP — À VENIR » est normal et l'UI S3 n'est pas montée publiquement.

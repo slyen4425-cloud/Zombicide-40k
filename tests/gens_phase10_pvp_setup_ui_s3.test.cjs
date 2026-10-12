@@ -85,7 +85,7 @@ assert.equal(descendants(root).filter(x=>x.className==="gens-pvp-side").length,2
 
 const form=descendants(root).find(x=>x.tagName==="FORM");
 const submit=()=>form.fire("submit");
-placeholder(root,"session").value="custom-duel";
+placeholder(root,"duel-personnalise").value="custom-duel";
 const campIds=descendants(root).filter(x=>x.placeholder==="ex. equipe-a");
 const participantIds=descendants(root).filter(x=>x.placeholder==="ex. perso-1,perso-2");
 campIds[0].value="alpha";campIds[1].value="beta";

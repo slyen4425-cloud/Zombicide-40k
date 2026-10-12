@@ -1,3 +1,13 @@
+# GREEN TECHNIQUE — PHASE 10 / S3 CONFIGURATION PVP — 12 OCTOBRE 2026
+
+- **Dernier jalon GREEN** : `checkpoint/gensrpg-phase10-pvp-configuration-screen-s3-green-2026-10-12`, SHA `aebb542b7ad1c3150edbcb451a5ec2c1a9d17810`. Triple CI sur le même SHA : Architecture/Chromium [38273208100](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208100), Firefox [38273208194](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208194), Tactical [38273208189](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208189) SUCCESS. Le vrai formulaire PvP autonome mobile et PC et la sentinelle du placeholder Shell sont SUCCESS dans le job navigateur.
+- **Livraison validée** : `assets/gensrpg/pvp/setup-ui-v1.js` + contrat, avec montage/démontage explicites, configuration de session/camps/participants/règles JSON sans nombres de combat imposés, délégation unique au propriétaire S0 et provider S1, pas d'effets sur Survie, Dungeon, Capture ou Tactical. Aucun stockage direct.
+- **Limite explicite** : écran propriétaire encore **non composé dans le Hub public**, aucune partie PvP jouable, aucune persistance/configuration joueur visible ; la vignette `PVP — À VENIR` n'est pas un bug. Le GREEN S3 prouve le composant isolé, pas le parcours utilisateur final.
+- **Prochain chantier cohérent** : établir un checkpoint de départ dédié depuis ce GREEN pour un **raccord utilisateur contrôlé de l'écran de configuration PvP** avec vérification du vrai Shell/Navigation, sans gameplay arbitraire. Suivre le §26 pour toute lecture/modification de `index.html`, en vérifiant le nouvel HEAD/blob et la copie exacte avant adaptation. Triple CI et preuve mobile nécessaires ; aucun jalon GREEN prématuré.
+- **Invariants** : `main` reste `e8681f9823573ced8aec59c8ddc47a72b02bc663` gelée ; laboratoires intacts ; Phase 11 bloquée.
+
+---
+
 # CHANTIER ACTIF — PHASE 10 / S3 CONFIGURATION ET ÉCRAN PV-PV — 12 OCTOBRE 2026
 
 - **Départ unique GREEN S2** : `checkpoint/gensrpg-phase10-pvp-shell-composition-s2-green-2026-10-12` SHA `f467c2554a59f2ff7eaac55de3fd1976c3ba7059` ; Architecture/Chromium [38257227187](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227187), Firefox [38257227197](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227197), Tactical [38257227169](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227169) SUCCESS, tous sur le SHA exact.

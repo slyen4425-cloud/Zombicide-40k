@@ -24,7 +24,7 @@ function restoreHistoricalHubSnapshot(index,root){
  // addition from this READ-ONLY Phase 9 historical snapshot. Runtime unchanged.
  if(hash(index)==='bf996ec4e748a4927ac6dd57cceaeaf2afcd9441'){
   assert.equal(index.length,7934204,'S2 current index length');
-  const first=Buffer.from('<script src="assets/gensrpg/pvp/session-v1.js"></script>\\n');
+  const first=Buffer.from('<script src="assets/gensrpg/pvp/session-v1.js"></script>\n');
   const last=Buffer.from('<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>');
   const at=index.indexOf(first),end=index.indexOf(last,at+first.length);
   assert.ok(at>=0&&end>at,'exact S2 composition tail missing');

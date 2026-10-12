@@ -202,9 +202,10 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 - S2 GREEN : composition explicite du provider depuis le Shell, sans règle ou interface de combat inventée, checkpoint `checkpoint/gensrpg-phase10-pvp-shell-composition-s2-green-2026-10-12` sur `f467c2554a59f2ff7eaac55de3fd1976c3ba7059`. Conserver le placeholder PvP jusqu'au vrai gameplay et aux réglages configurables. Exiger le ZIP index certifié §26, les tests du vrai chargement et les trois CI sur le même SHA avant GREEN. Détails : `docs/GENSRPG_PHASE10_PVP_S2_SHELL_COMPOSITION_2026-10-12.md`.
 
 - S3 GREEN TECHNIQUE : premier écran propriétaire PvP de préparation avec identifiant de session, camps et participants librement définis, règles JSON du créateur. Pas de valeurs de combat par défaut, pas de stockage direct. Le module est montable uniquement sur demande et reste non composé dans le Hub jusqu'à validation du vrai raccord utilisateur (§26 si besoin). Checkpoint `checkpoint/gensrpg-phase10-pvp-configuration-screen-s3-green-2026-10-12` sur `aebb542b7ad1c3150edbcb451a5ec2c1a9d17810` (triple CI SUCCESS, formulaire isolé mobile/PC testé). Voir `docs/GENSRPG_PHASE10_PVP_S3_SETUP_UI_2026-10-12.md`.
-- Étape suivante : rattachement utilisateur contrôlé du formulaire PvP au vrai Shell/Hub, tests de navigation et préservation des trois autres modules ; §26 pour `index.html` si requis. Le combat et ses règles restent à définir par configuration ; ne pas annoncer le PvP jouable.
+- S4 EN VALIDATION — clôture **architecturale uniquement** : aligner le contrat racine PvP obsolète Phase 3 avec le raccord réel S2 et l'UI privée S3 ; contrôler l'ordre du vrai graphe de production, l'unicité de chaque propriétaire, la non-interférence des quatre modes et la triple CI, sans modifier `index.html`. Base/Checkpoint initial : `785c11e8d2b37f5fffb674aa093ce882e77377fa`, `checkpoint/gensrpg-start-phase10-pvp-architectural-closure-s4-2026-10-12`. Voir `docs/GENSRPG_PHASE10_PVP_S4_ARCHITECTURAL_EXIT_2026-10-12.md`.
+- **Périmètre confirmé par l'utilisateur** : la Phase 10 consiste à préparer un module indépendant, **pas** à développer un combat PvP. Le bouton « PVP — À VENIR » est conservé ; l'UI technique S3 reste non exposée. L'absence de gameplay, de configuration publique ou de parties jouables n'est **pas** un blocage de la clôture architecturale.
 
-**Phase 10 non terminée ; Phase 11 bloquée.**
+**Phase 10 : clôture architecturale soumise à triple CI GREEN et checkpoint S4 ; Phase 11 non démarrée.**
 
 ## Phase 11 — Restructurer les assets visuels
 

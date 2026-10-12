@@ -201,6 +201,8 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 - S1 GREEN : provider explicite au contrat Shell, non chargé en production, checkpoint `checkpoint/gensrpg-phase10-pvp-shell-provider-s1-green-2026-10-12` sur `cb36c5f1db0a5734083b39bd9f50b40d80e1c010`.
 - S2 EN COURS : composition explicite du provider depuis le Shell, sans règle ou interface de combat inventée. Conserver le placeholder PvP jusqu'au vrai gameplay et aux réglages configurables. Exiger le ZIP index certifié §26, les tests du vrai chargement et les trois CI sur le même SHA avant GREEN. Détails : `docs/GENSRPG_PHASE10_PVP_S2_SHELL_COMPOSITION_2026-10-12.md`.
 
+- S3 EN COURS : premier écran propriétaire PvP de préparation avec identifiant de session, camps et participants librement définis, règles JSON du créateur. Pas de valeurs de combat par défaut, pas de stockage direct. Le module est montable uniquement sur demande et reste non composé dans le Hub jusqu'à validation du vrai raccord utilisateur (§26 si besoin). Voir `docs/GENSRPG_PHASE10_PVP_S3_SETUP_UI_2026-10-12.md`.
+
 **Phase 10 non terminée ; Phase 11 bloquée.**
 
 ## Phase 11 — Restructurer les assets visuels

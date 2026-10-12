@@ -1,3 +1,16 @@
+# CHANTIER ACTIF — PHASE 10 / S1 PROVIDER PVP → SHELL — 12 OCTOBRE 2026
+
+- **Source de vérité** : charte `docs/GENSRPG_CHARTE.md`, roadmap et dernier checkpoint S0 `checkpoint/gensrpg-phase10-pvp-session-s0-green-2026-10-12` sur `2a464acab5ed8080bbc9081d148742c72ee7773c`, triple CI S0 SUCCESS Architecture/Chromium [38201807342](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807342), Firefox [38201807324](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807324), Tactical [38201807340](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807340).
+- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase10-pvp-shell-provider-s1-2026-10-12`, SHA `2a464acab5ed8080bbc9081d148742c72ee7773c`. **Branche unique** : `work/gensrpg-phase10-pvp-shell-provider-s1-2026-10-12`, créée depuis exactement ce SHA.
+- **Périmètre S1 borné** : raccorder, sous installation **explicitement déclenchée**, le propriétaire de session `GensPvpSessionV1` au contrat public `GensShellModuleLaunchV1.register("pvp",provider)` ; test Node déterministe du routage/du cycle de vie, sentinelle d'absence de prise de contrôle sur les autres modules et du placeholder PvP courant ; contrat `assets/gensrpg/pvp/module-launch-contract-v1.json`.
+- **Aucune composition en production à ce stade** : `index.html` n'est pas consulté ni modifié dans ce lot. Conformément au §26, le futur raccordement d'affichage et de chargement réel exige le ZIP exact de l'index épinglé au SHA requis, et devra être audité par tests navigateur/manual. Ne pas réutiliser `a1.zip` (Phase 9) sans comparaison de blob.
+- **Fonctions protégées** : Shell possède toujours l'accueil, `openGensFamily`, `startConfiguredGame` et le sélecteur actif ; PvP propriétaire exclusif de ses sessions. Ne pas prendre l'autorité de la navigation, des moteurs Dungeon/Survie/Capture, Tactical, Core, de l'état de sauvegarde étranger ni de l'UI. Aucun timer, observer, poll ou compatibility wrapper.
+- **Tests planifiés** : injection explicite uniquement, garde `activeModule()==="pvp"`, refuse lancement sans préparation, session clonée immutable, registration unique, démarrage et refus callback, stop/dispose sans toucher aux modules étrangers, placeholder navigateur existant inchangé ; triple CI Architecture/Chromium, Firefox, Tactical sur un SHA exact.
+- **Risques** : aucun `unregister` Shell confirmé ; ne pas prétendre que `dispose()` retire un provider quand l'API de désinscription n'existe pas. Au maximum, rendre le callback enregistré inerte à l'arrêt et interdire double enregistrement. Ne pas prétendre que PvP est jouable avec un simple provider.
+- **Étape suivante** : poser provider + tests + contrat, tripler la CI, checkpoint GREEN S1 si tout passe. Puis seulement, depuis un nouveau checkpoint, raccordement véritable du Hub/PvP après fichier exact §26. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; laboratoires intacts. Phase 11 non ouverte.
+
+---
+
 # PHASE 10 OUVERTE — DUEL / PVP : PROPRIÉTAIRE DE SESSION ISOLÉ — 12 OCTOBRE 2026
 
 ## Reprise unique — chantier S0

@@ -463,6 +463,21 @@
       "owner": "GenSrpG Capture World Exploration V1",
       "domain": "capture",
       "role": "Single physically loaded owner for legacy Capture world-state persistence, profile locations, day and turn progression, Hub-world rendering and exploration encounters; byte-exact relocated functions; legacy cross-script API intentionally retained"
+    },
+    "assets/gensrpg/pvp/session-v1.js": {
+      "owner": "GenSrpG PvP Session V1",
+      "domain": "pvp",
+      "role": "PvP-only immutable configured session state and explicit lifecycle; no gameplay rule resolution"
+    },
+    "assets/gensrpg/pvp/module-launch-v1.js": {
+      "owner": "GenSrpG PvP Module Launch V1",
+      "domain": "pvp",
+      "role": "Single opt-in PvP launch provider registered through the existing Shell contract; cannot launch unprepared sessions"
+    },
+    "assets/gensrpg/pvp/shell-composition-v1.js": {
+      "owner": "GenSrpG PvP Shell Composition V1",
+      "domain": "pvp",
+      "role": "One explicit Shell-to-PvP binding without navigation ownership, combat or automatic start"
     }
   }
 }

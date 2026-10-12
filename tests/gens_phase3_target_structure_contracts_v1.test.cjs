@@ -86,7 +86,7 @@ for(const domain of domains){
     continue;
   }
 
-  assert.equal(contract.status,'contract-only-not-loaded',domain+' contract status');
+  assert.equal(contract.status,domain==='pvp'?'shell-registered-structural-module-no-gameplay':'contract-only-not-loaded',domain+' contract status');
   const forbidden=/\b(?:window|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|removeEventListener|fetch|XMLHttpRequest|navigator|location)\b|\bnew\s+Worker\b|\.install\s*\(|\bimport\s*\(/;
   assert.doesNotMatch(source,forbidden,entry+' must remain inert');
   const executable=source

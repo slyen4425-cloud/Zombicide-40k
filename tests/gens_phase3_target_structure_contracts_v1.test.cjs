@@ -102,8 +102,8 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,90,
-  'Phase 3 scaffolding remains inert; Phase 9 owns Capture entry boundaries, physical World Exploration, Team/Reserve, Combat Core and the V16.162 seed');
+assert.equal(Object.keys(ownerManifest.files||{}).length,93,
+  'Phase 3 entry scaffolding remains inert while S2 explicitly adds three PvP launch owners without changing Capture ownership');
 assert.equal(composition.index.split('assets/gensrpg/capture/world-exploration-v1.js?v=1').length-1,1,'Capture World owner must be loaded exactly once');
 assert.equal(composition.index.split('assets/gensrpg/capture/team-roster-v1.js?v=1').length-1,1,'Capture team/roster owner must be loaded exactly once');
 assert.equal(composition.index.split('assets/gensrpg/capture/combat-core-v1.js?v=1').length-1,1,'Capture Combat Core owner must be loaded exactly once');
@@ -130,7 +130,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:90,
+  productionOwnerGraph:93,
   loadedEntrySlices:4,
   captureAuxiliaryRuntimeOwners:6
 },null,2));

@@ -45,8 +45,14 @@ assert.deepEqual(directSrcs,[
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'assets/gensrpg/pvp/session-v1.js',
+  'assets/gensrpg/pvp/module-launch-v1.js',
+  'assets/gensrpg/pvp/shell-composition-v1.js',
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
+
+assert.match(source,/window\\.GensPvpShellCompositionV1\\.connect\\(\\)/,
+  'PvP Shell composition must remain explicitly invoked after its three scripts');
 
 // 2. Pages build keeps the same deterministic static order.
 const pagesModules=[

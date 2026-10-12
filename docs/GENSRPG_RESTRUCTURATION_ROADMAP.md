@@ -199,7 +199,7 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 
 - S0 GREEN : propriétaire de session sans gameplay, checkpoint `checkpoint/gensrpg-phase10-pvp-session-s0-green-2026-10-12`.
 - S1 GREEN : provider explicite au contrat Shell, non chargé en production, checkpoint `checkpoint/gensrpg-phase10-pvp-shell-provider-s1-green-2026-10-12` sur `cb36c5f1db0a5734083b39bd9f50b40d80e1c010`.
-- S2 EN COURS : composition explicite du provider depuis le Shell, sans règle ou interface de combat inventée. Conserver le placeholder PvP jusqu'au vrai gameplay et aux réglages configurables. Exiger le ZIP index certifié §26, les tests du vrai chargement et les trois CI sur le même SHA avant GREEN. Détails : `docs/GENSRPG_PHASE10_PVP_S2_SHELL_COMPOSITION_2026-10-12.md`.
+- S2 GREEN technique : composition explicite du provider PvP depuis le vrai Shell, sans règle/interface de combat inventée. Checkpoint `checkpoint/gensrpg-phase10-pvp-shell-composition-s2-green-2026-10-12` au SHA `f467c2554a59f2ff7eaac55de3fd1976c3ba7059` ; triple CI SUCCESS sur le même SHA, index certifié §26 appliqué via controlled apply par l'assistant. Les vrais réglages et écrans PvP restent à développer ; vignette « PVP — À VENIR » maintenue. Détails : `docs/GENSRPG_PHASE10_PVP_S2_SHELL_COMPOSITION_2026-10-12.md`.
 
 **Phase 10 non terminée ; Phase 11 bloquée.**
 

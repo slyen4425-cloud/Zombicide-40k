@@ -1,3 +1,14 @@
+# CHANTIER ACTIF — PHASE 10 / S4 CLÔTURE ARCHITECTURALE (SANS GAMEPLAY) — 12 OCTOBRE 2026
+
+- **SHA de base GREEN vérifié** : `785c11e8d2b37f5fffb674aa093ce882e77377fa` (S3 GREEN `aebb542b7ad1c3150edbcb451a5ec2c1a9d17810`, puis documentation seule avec triple CI SUCCESS : Architecture 38280254350, Firefox 38280254322, Tactical 38280254373).
+- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase10-pvp-architectural-closure-s4-2026-10-12` sur ce même SHA. Branche unique : `work/gensrpg-phase10-pvp-architectural-closure-s4-2026-10-12`.
+- **Périmètre/propriétaire** : uniquement contrats et frontières `assets/gensrpg/pvp/`, tests et documents Phase 10. PvP détient session/configuration ; Shell détient navigation/composition ; Core reste partagé. Aligner les contrats obsolètes Phase 3/S0/S1 avec les faits S2/S3. Attester l'inertie du gameplay et le placeholder volontaire, sans lancer de combat.
+- **Interdictions** : aucun combat PvP, moteur de règles, persistance nouvelle, accès au DOM étranger, reprise d'autorité, ni modification de `index.html`, Shell, Survie, Dungeon, Capture, Tactical, PWA, `main` ou dépôts labo. Ne pas rendre la configuration S3 visible dans le Hub sans chantier demandé ni §26.
+- **Tests / risques** : sentinelle de fermeture croisant contrats et script graph, S0/S1/S2/S3, non-interférence quatre modules et triple CI Architecture/Chromium, Firefox, Tactical sur le même SHA. Risque : anciens contrats mensongers et prétendue jouabilité ; corriger seulement la documentation d'autorité et verrouiller sa cohérence.
+- **Sortie** : checkpoint GREEN S4 uniquement après validation. Phase 10 pourra être considérée clôturée **architecturalement** sans que la jouabilité PvP, son interface publique ou ses mécaniques soient prétendues livrées. Phase 11 ne commence pas dans ce lot.
+
+---
+
 # GREEN TECHNIQUE — PHASE 10 / S3 CONFIGURATION PVP — 12 OCTOBRE 2026
 
 - **Dernier jalon GREEN** : `checkpoint/gensrpg-phase10-pvp-configuration-screen-s3-green-2026-10-12`, SHA `aebb542b7ad1c3150edbcb451a5ec2c1a9d17810`. Triple CI sur le même SHA : Architecture/Chromium [38273208100](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208100), Firefox [38273208194](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208194), Tactical [38273208189](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38273208189) SUCCESS. Le vrai formulaire PvP autonome mobile et PC et la sentinelle du placeholder Shell sont SUCCESS dans le job navigateur.

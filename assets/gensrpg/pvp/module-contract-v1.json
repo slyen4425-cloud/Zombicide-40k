@@ -67,5 +67,19 @@
     "session-contract-v1.json records S0 introduction",
     "module-launch-contract-v1.json records S1 introduction",
     "setup-ui-contract-v1.json records S3 isolated UI; S4 records current production graph"
-  ]
+  ],
+  "publicEntries": {
+    "moduleScreenReturn": {
+      "contract": "assets/gensrpg/shell/module-screen-return-contract-v1.json",
+      "operation": "returnToPrimaryView",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-primary-view"
+    },
+    "moduleLaunch": {
+      "contract": "assets/gensrpg/shell/module-launch-contract-v1.json",
+      "operation": "startModuleSession",
+      "status": "registered-via-S2-shell-composition",
+      "ownership": "module-owned-session-start"
+    }
+  }
 }

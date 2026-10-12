@@ -35,8 +35,13 @@ assert.deepEqual(rawDirect,[
   'assets/dungeon/dungeon-core-316.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'assets/gensrpg/pvp/session-v1.js',
+  'assets/gensrpg/pvp/module-launch-v1.js',
+  'assets/gensrpg/pvp/shell-composition-v1.js',
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'raw index local JS entries must remain explicit and ordered');
+assert.match(index,/window\.GensPvpShellCompositionV1\.connect\(\)/,
+  'S2 must compose PvP from the real Shell without a global navigation wrapper');
 
 const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
@@ -60,7 +65,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,46,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,49,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -139,17 +144,18 @@ const phase9ConnectedServices=[
   'assets/gensrpg/capture/builtin-seed-v1.js'
 ];
 const phase9Set=new Set(phase9ConnectedServices);
-const phase10InertServices=[
+const phase10ConnectedServices=[
   'assets/gensrpg/pvp/session-v1.js',
-  'assets/gensrpg/pvp/module-launch-v1.js'
+  'assets/gensrpg/pvp/module-launch-v1.js',
+  'assets/gensrpg/pvp/shell-composition-v1.js'
 ];
-const phase10Set=new Set(phase10InertServices);
+const phase10Set=new Set(phase10ConnectedServices);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,105,'physical JS inventory includes two inert Phase 10 PvP modules beyond the Capture baseline');
+assert.equal(allJs.length,106,'physical JS inventory includes three Phase 10 PvP services after S2 composition');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,90,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,93,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
@@ -180,9 +186,9 @@ for(const rel of phase9ConnectedServices){
   assert.equal(allJs.includes(rel),true,'Phase 9 connected Capture service missing: '+rel);
   assert.equal(reachable.has(rel),true,'Phase 9 connected Capture service must stay production-reachable: '+rel);
 }
-for(const rel of phase10InertServices){
+for(const rel of phase10ConnectedServices){
   assert.equal(allJs.includes(rel),true,'Phase 10 PvP owner file missing: '+rel);
-  assert.equal(reachable.has(rel),false,'unwired Phase 10 PvP session/provider must not enter production graph: '+rel);
+  assert.equal(reachable.has(rel),true,'S2 connected PvP composition must be reachable from index: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',

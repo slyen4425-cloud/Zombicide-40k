@@ -1,3 +1,19 @@
+# PHASE 10 OUVERTE — DUEL / PVP : PROPRIÉTAIRE DE SESSION ISOLÉ — 12 OCTOBRE 2026
+
+## Reprise unique — chantier S0
+
+- **Base exacte** : `7c01025a88bbdd0fb5ecc4bf534d0f0c3a4c9912` (post-clôture documentaire de Phase 9, triple CI GREEN : Architecture+Chromium [38174246058](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38174246058), Firefox [38174246088](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38174246088), Tactical [38174246246](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38174246246)). Checkpoint fonctionnel dernier GREEN : `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11` au SHA `097d0e3b895b71f5a64b011d0c5e327e8efc1336`.
+- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase10-pvp-ownership-bootstrap-2026-10-12` sur `7c01025a88bbdd0fb5ecc4bf534d0f0c3a4c9912`. **Branche unique** : `work/gensrpg-phase10-pvp-ownership-bootstrap-2026-10-12`. `main` reste gelé à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **État vérifié** : la carte PvP du Shell affiche volontairement « PVP — À VENIR », sans lancer de session ; `assets/gensrpg/pvp/entry-v1.js` est un placeholder contractuel inerte, NON chargé en production ; `module-contract-v1.json` ne déclare qu'une future propriété PvP. Aucun gameplay Duel livré à ce stade.
+- **Périmètre S0** : fonder un propriétaire d'état de session PvP autonome, explicite, configurable, avec lifecycle propre et tests node déterministes, **sans raccord automatique au Shell**, sans UI de duel ni combat inventé ; inventorier contrats existants et préserver la sentinelle actuelle de placeholder. Préparer un contrat de liaison ultérieure sans nouvelle autorité globale intempestive.
+- **Propriétaires** : Shell = route/accueil; Core = stats, dés et stockage ; PvP seul = sessions PvP futures; Tactical = combat tactique Dungeon actuel ; Capture, Dungeon, Survie restent strictement propriétaires de leurs données/écrans.
+- **Fonctions protégées** : `index.html`, `startConfiguredGame`, `openGensFamily`, `GensShellModuleLaunchV1`, sauvegardes/reprises étrangères, règles/dés/dégâts, Capture world/battle, Dungeon Builder, Survie UI. Le nouveau PvP n'a aucun droit sur ces fonctions.
+- **Tests S0 prévus** : API en absence d'install, activation explicite, garde d'identité PvP, validation des participants/config, état isolé/immutable, arrêt/dispose sans effets sur globals/DOM/storage, aucun démarrage automatique, sentinelle navigateur du placeholder intacte, triple CI Architecture+Chromium / Firefox / Tactical.
+- **Risque & gate suivant** : PvP reste une vignette « À VENIR » jusqu'à liaison volontaire au vrai Shell, aux règles/éditeur et au moteur/UI PvP. Tout chantier nécessitant le contenu exact de `index.html` appliquera §26 avec le ZIP exact du SHA requis ; ne pas réutiliser le vieux ZIP Phase 9. Ne pas annoncer un Duel jouable tant que le vrai parcours manuel et ses sentinelles ne sont pas GREEN.
+- **Prochaine étape** : implémenter un propriétaire PvP léger, ajouter tests et contrat, vérifier CI ; checkpoint GREEN S0 si toutes les CI sur un SHA identique sont réussies. Pas de Phase 11 ni de micro-refactor des modes existants.
+
+---
+
 # GREEN FINAL — PHASE 9 HUB MONSTER CAPTURE — 11 OCTOBRE 2026
 
 - **Checkpoint final** : `checkpoint/gensrpg-phase9-capture-root-hub-green-2026-10-11` sur SHA `097d0e3b895b71f5a64b011d0c5e327e8efc1336`, vérifié identique au SHA CI.

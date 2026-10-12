@@ -1,3 +1,13 @@
+# PHASE 10 — S0 SESSION PVP GREEN — 12 OCTOBRE 2026
+
+- **GREEN vérifié** : `checkpoint/gensrpg-phase10-pvp-session-s0-green-2026-10-12` pointe exactement sur `2a464acab5ed8080bbc9081d148742c72ee7773c`. Triple CI sur ce même SHA : Architecture + Chromium [38201807342](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807342) SUCCESS (348 étapes statiques incluant test PvP et 63 étapes navigateur), Firefox [38201807324](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807324) SUCCESS, Tactical [38201807340](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807340) SUCCESS.
+- **Étape S0 terminée** : propriétaire PvP `assets/gensrpg/pvp/session-v1.js` indépendant, avec contrat de session et sentinelle Node ; **non chargé en production**, aucun accès Shell/PvP jouable. La carte reste « PVP — À VENIR ».
+- **Point de reprise unique Phase 10** : prochain chantier après S0 = raccord explicite du module PvP au Shell et définition des interfaces UI/règles selon la roadmap ; doit ouvrir son **propre checkpoint de départ §25 depuis le SHA GREEN S0**, branche et CURRENT_WORK dédiés. Ne pas simuler un combat ni réutiliser Dungeon/Capture/Survie comme hôte.
+- **Invariants** : `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`, laboratoires intacts ; `index.html` inchangé depuis la Phase 9. Si le raccord futur nécessite son contenu exact, appliquer §26 avec le ZIP du SHA actuel et non le ZIP Phase 9.
+- **Clôture documentaire** : le présent ajout est postérieur au SHA GREEN S0 ; il ne modifie pas la preuve CI ni le code du checkpoint.
+
+---
+
 # PHASE 10 OUVERTE — DUEL / PVP : PROPRIÉTAIRE DE SESSION ISOLÉ — 12 OCTOBRE 2026
 
 ## Reprise unique — chantier S0

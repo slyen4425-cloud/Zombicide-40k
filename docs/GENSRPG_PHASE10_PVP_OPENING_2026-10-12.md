@@ -11,3 +11,9 @@ Sentinelle déterministe : `tests/gens_phase10_pvp_session_owner_v1.test.cjs`. E
 **Non réalisé / ne pas sur-vendre :** aucun raccord Shell, aucune sauvegarde PvP persistée, aucune UI, aucun calcul de dégâts/initiative, aucun combat jouable. Ces propriétés doivent être ajoutées ultérieurement via API Core/contrats configurables et le vrai parcours utilisateur ; l'accès exact à `index.html` suivra impérativement la charte §26.
 
 Base de départ : `7c01025a88bbdd0fb5ecc4bf534d0f0c3a4c9912`, checkpoint `checkpoint/gensrpg-start-phase10-pvp-ownership-bootstrap-2026-10-12`. `main` gelée, laboratoires intacts. CI requise : Architecture/Chromium, Firefox, Tactical, même SHA.
+
+## S0 — Gate GREEN validé le 12 octobre 2026
+
+- Checkpoint final : `checkpoint/gensrpg-phase10-pvp-session-s0-green-2026-10-12` sur le SHA `2a464acab5ed8080bbc9081d148742c72ee7773c`, vérifié identique à la CI.
+- Architecture/Chromium : [38201807342](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807342) SUCCESS ; Firefox : [38201807324](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807324) SUCCESS ; Tactical : [38201807340](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38201807340) SUCCESS.
+- La session PvP autonome est prête comme propriétaire de données **non composé** ; aucun joueur ne peut encore lancer un duel. Le prochain chantier S1 suit la charte §25 avec checkpoint de départ et une branche séparée, et §26 si l'index exact est nécessaire. Ne pas modifier les autres modules.

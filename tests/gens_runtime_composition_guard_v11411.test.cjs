@@ -51,7 +51,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
 
-assert.match(source,/window\\.GensPvpShellCompositionV1\\.connect\\(\\)/,
+assert.match(source,/window\.GensPvpShellCompositionV1\.connect\(\)/,
   'PvP Shell composition must remain explicitly invoked after its three scripts');
 
 // 2. Pages build keeps the same deterministic static order.

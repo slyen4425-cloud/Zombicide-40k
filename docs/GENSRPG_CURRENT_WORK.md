@@ -1,3 +1,13 @@
+# GREEN — PHASE 10 / S4 CLÔTURE ARCHITECTURALE PVP — 12 OCTOBRE 2026
+
+- **Phase 10 clôturée sur le plan architectural seulement** : S0 session, S1 provider, S2 composition explicite au Shell, S3 écran de configuration privé et S4 contrat/sentinelle de sortie. **Aucun combat PvP n'est développé ni attendu.** Le bouton « PVP — À VENIR » est normal et l'UI S3 n'est pas montée publiquement.
+- **Dernier checkpoint GREEN** : `checkpoint/gensrpg-phase10-pvp-architectural-closure-s4-green-2026-10-12`, SHA exact `b5b16cb9d0a8def7749a32a9bfecf1ce17cd21ef`. Triple CI SUCCESS sur ce SHA : Architecture/Chromium [38293153357](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38293153357), Firefox [38293153182](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38293153182), Tactical [38293153214](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38293153214).
+- **Branche de livraison S4** : `work/gensrpg-phase10-pvp-architectural-closure-s4-2026-10-12` ; checkpoint initial `checkpoint/gensrpg-start-phase10-pvp-architectural-closure-s4-2026-10-12` depuis `785c11e8d2b37f5fffb674aa093ce882e77377fa`.
+- **Invariants** : `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`, aucun changement de code gameplay ou `index.html` au lot S4, aucun changement aux laboratoires ni aux modules étrangers.
+- **Prochain travail** : Phase 11 (restructuration des assets visuels) seulement sur décision de reprise du plan, avec nouveau checkpoint de départ et branche dédiée. La Phase 11 n'a pas été lancée. Ne pas confondre la clôture technique PvP avec un produit jouable.
+
+---
+
 # CHANTIER ACTIF — PHASE 10 / S4 CLÔTURE ARCHITECTURALE (SANS GAMEPLAY) — 12 OCTOBRE 2026
 
 - **SHA de base GREEN vérifié** : `785c11e8d2b37f5fffb674aa093ce882e77377fa` (S3 GREEN `aebb542b7ad1c3150edbcb451a5ec2c1a9d17810`, puis documentation seule avec triple CI SUCCESS : Architecture 38280254350, Firefox 38280254322, Tactical 38280254373).

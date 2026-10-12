@@ -32,3 +32,12 @@ Insertion locale strictement ciblée avant `assets/gensrpg/shell/module-launch-f
 5. Seulement après ces gates, checkpoint GREEN S2 ; ne pas confondre absence de combat et régression.
 
 `main` demeure gelé au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Aucun changement des laboratoires ni ouverture Phase 11.
+
+
+## Clôture technique S2 — GREEN, 12 octobre 2026
+
+- **Checkpoint vert créé** : `checkpoint/gensrpg-phase10-pvp-shell-composition-s2-green-2026-10-12`, SHA exact `f467c2554a59f2ff7eaac55de3fd1976c3ba7059`.
+- **Triple CI du même SHA, toutes SUCCESS** : Architecture + Chromium (incluant le job browser-sentinel) [38257227187](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227187) ; Firefox [38257227197](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227197) ; Tactical Chromium/Firefox [38257227169](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38257227169).
+- **Index GitHub publié par controlled apply, pas par l'utilisateur** : Git blob `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441` (7 934 204 octets), conservé par le checkpoint.
+- **Portée GREEN technique seulement** : Shell PvP composé explicitement ; préparation refusée hors famille PvP ; aucune session ou écran PvP jouable sans règles/configuration créateur. Le placeholder « PVP — À VENIR » reste normal et ne doit pas être présenté comme un gameplay livré.
+- **Suite autorisée** : un nouveau chantier/branche depuis le checkpoint S2 pour la configuration d'une session PvP et ses écrans propriétaires, sans inventer des règles de combat, avec sentinelles intermodules. Le prochain lot requérant un `index.html` exact appliquera à nouveau la charte §26 au nouveau SHA.

@@ -139,10 +139,14 @@ const phase9ConnectedServices=[
   'assets/gensrpg/capture/builtin-seed-v1.js'
 ];
 const phase9Set=new Set(phase9ConnectedServices);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel));
+const phase10InertServices=[
+  'assets/gensrpg/pvp/session-v1.js'
+];
+const phase10Set=new Set(phase10InertServices);
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,103,'physical JS inventory must include the Capture team, roster and combat core owners');
+assert.equal(allJs.length,104,'physical JS inventory includes one inert Phase 10 PvP session owner beyond the Capture baseline');
 assert.equal(phase2Js.length,71,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
 assert.equal(reachable.size,90,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
@@ -174,6 +178,10 @@ for(const rel of phase5ConnectedServices){
 for(const rel of phase9ConnectedServices){
   assert.equal(allJs.includes(rel),true,'Phase 9 connected Capture service missing: '+rel);
   assert.equal(reachable.has(rel),true,'Phase 9 connected Capture service must stay production-reachable: '+rel);
+}
+for(const rel of phase10InertServices){
+  assert.equal(allJs.includes(rel),true,'Phase 10 PvP owner file missing: '+rel);
+  assert.equal(reachable.has(rel),false,'unwired Phase 10 PvP session owner must not enter production graph: '+rel);
 }
 assert.deepEqual(notReachablePhase2,[
   'assets/gensrpg/dungeon/progression-runtime-v1.js',

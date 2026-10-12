@@ -1,0 +1,62 @@
+name: GenSrpG Phase 10 S2 PvP Shell controlled index apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase10-pvp-shell-composition-s2-2026-10-12'
+    paths:
+      - '.github/workflows/gensrpg-phase10-pvp-s2-index-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-pvp-shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact S2 work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify frozen production and S2 base checkpoint
+        run: |
+          test "$(git branch --show-current)" = 'work/gensrpg-phase10-pvp-shell-composition-s2-2026-10-12'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase10-pvp-shell-composition-s2-2026-10-12)" = 'cb36c5f1db0a5734083b39bd9f50b40d80e1c010'
+          test "$(git rev-parse refs/remotes/origin/main)" = 'e8681f9823573ced8aec59c8ddc47a72b02bc663'
+          test "$(wc -c < index.html)" = '7933755'
+          test "$(git hash-object index.html)" = '613b4a21d83e9adcdd091be82240a3a6f9cf5bf7'
+
+      - name: Apply only byte-verified user ZIP delta under charter Rule 26
+        run: |
+          python3 tools/gensrpg_phase10_pvp_s2_shell_composition_apply.py --apply
+          python3 tools/gensrpg_phase10_pvp_s2_shell_composition_apply.py --verify
+          test "$(wc -c < index.html)" = '7934204'
+          test "$(git hash-object index.html)" = 'bf996ec4e748a4927ac6dd57cceaeaf2afcd9441'
+
+      - name: Prove minimal index-only diff and no other runtime modifications
+        run: |
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+          git add index.html
+          git diff --cached --check
+          test "$(git diff --cached --name-only)" = 'index.html'
+          git diff --cached --stat
+          git diff --cached -- index.html | sed -n '1,65p'
+
+      - name: Run PvP owner, provider, S2 composition and true load graph sentinels
+        run: |
+          node tests/gens_phase10_pvp_session_owner_v1.test.cjs
+          node tests/gens_phase10_pvp_shell_provider_v1.test.cjs
+          node tests/gens_phase10_pvp_shell_composition_s2.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+
+      - name: Commit and push exact audited index on S2 branch only
+        run: |
+          python3 tools/gensrpg_phase10_pvp_s2_shell_composition_apply.py --verify
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat(phase10): compose PvP launch provider in real Shell without combat"
+          git push origin "HEAD:$GITHUB_REF_NAME"

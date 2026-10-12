@@ -1,0 +1,25 @@
+name: GenSrpG Phase 10 S2 exact baseline reference inventory
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase10-pvp-shell-composition-s2-2026-10-12'
+    paths:
+      - '.github/workflows/gensrpg-phase10-pvp-s2-baseline-inventory.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory-pins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate only S2 affected physical index size, blob, script and owner pins
+        run: |
+          echo '--- Source index former blob and size pins in tests ---'
+          rg -n --glob '*.cjs' --glob '*.js' '613b4a21d83e9adcdd091be82240a3a6f9cf5bf7|7933755' tests || true
+          echo '--- Production reachability count 90 and S1 inert assumptions ---'
+          rg -n --glob '*.cjs' --glob '*.js' 'reachable\.size,90|mapped\.size,90|allJs\.length,105|phase10InertServices|unwired Phase 10|productionReachable,90|physicalLocalJs,105' tests || true
+          echo '--- S2 index references in dedicated tests ---'
+          rg -n --glob '*.cjs' --glob '*.js' 'index\.html|module-launch-v1\.js' tests/gens_phase10_pvp* || true

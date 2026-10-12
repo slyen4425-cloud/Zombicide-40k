@@ -39,8 +39,8 @@ assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert b
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
 assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'"),
   'Phase 3 guard must explicitly recognize Survival, Dungeon, Tactical and Capture partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:90'),
-  'Phase 3 guard must track Capture Combat Core, team/roster, world, boundary and seed owners in the 90-file graph');
+assert.ok(phase3Test.includes('productionOwnerGraph:93'),
+  'Phase 3 guard must preserve Capture owners plus the three explicitly connected PvP S2 owners in the 93-file graph');
 assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:6"),
   'Phase 3 guard must account for session-start, screen-return, Hub, World, Team/Reserve and Combat Core Capture owners');
 

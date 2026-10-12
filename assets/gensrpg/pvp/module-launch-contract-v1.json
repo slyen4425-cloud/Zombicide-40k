@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "phase": 10,
+  "stage": "S1-Shell-provider-explicit-not-composed",
+  "module": "pvp",
+  "owner": "pvp",
+  "provider": "assets/gensrpg/pvp/module-launch-v1.js",
+  "sessionOwner": "assets/gensrpg/pvp/session-v1.js",
+  "shellInterface": {
+    "register": "register('pvp', startModuleSession)",
+    "activeModule": "must be pvp to prepare or launch"
+  },
+  "installation": "explicit by composition owner only; not automatically loaded",
+  "lifecycle": [
+    "install",
+    "prepare",
+    "startModuleSession",
+    "stop",
+    "dispose",
+    "status"
+  ],
+  "result": "boolean; false unless explicit PvP session prepared and Shell active module pvp",
+  "shutdown": "registered Shell callback remains inert after dispose; no unregister exposed, no second install in same page",
+  "forbidden": [
+    "auto-install",
+    "load into production before PvP UI/rules approval",
+    "read foreign module state",
+    "touch Shell global navigation",
+    "touch storage or DOM",
+    "invent combat rules"
+  ],
+  "currentUserExperience": "PVP — À VENIR, unchanged; no interactive duel available",
+  "nextGate": [
+    "obtain exact SHA-pinned index.html ZIP under charter §26",
+    "compose provider in real Shell and implement PvP-owned rules/UI",
+    "real mobile play/save/quit/regression CI"
+  ]
+}

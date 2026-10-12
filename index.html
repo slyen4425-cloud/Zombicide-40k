@@ -42015,6 +42015,18 @@ try{const b=document.querySelector(".dc01Badge");if(b)b.textContent="NOUVEAU MOT
 </script>
 <script src="assets/dungeon/dungeon-core-317.js"></script>
 <script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>
+<script src="assets/gensrpg/pvp/session-v1.js"></script>
+<script src="assets/gensrpg/pvp/module-launch-v1.js"></script>
+<script src="assets/gensrpg/pvp/shell-composition-v1.js"></script>
+<script>
+  try {
+    if (window.GensPvpShellCompositionV1.connect() !== true) {
+      console.warn("GenSrpG Phase 10 PvP Shell composition unavailable");
+    }
+  } catch (error) {
+    console.error("GenSrpG Phase 10 PvP Shell composition", error);
+  }
+</script>
 <script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>
 </body>
 </html>

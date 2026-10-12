@@ -37,6 +37,9 @@ jobs:
       - name: Verrouiller la configuration PvP S3 sans gameplay et sans effet sur les autres modes
         run: node tests/gens_phase10_pvp_setup_ui_s3.test.cjs
 
+      - name: Vérifier la sortie architecturale PvP Phase 10 sans gameplay
+        run: node tests/gens_phase10_pvp_architectural_exit_s4.test.cjs
+
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 

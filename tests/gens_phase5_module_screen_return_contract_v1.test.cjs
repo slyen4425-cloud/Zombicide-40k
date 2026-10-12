@@ -51,7 +51,7 @@ for(const module of modules){
   const entry=read(entryPath);
 
   const partialRuntime=module==='survival'||module==='dungeon'||module==='capture';
-  const expectedStatus=partialRuntime?'partial-runtime-loaded':'contract-only-not-loaded';
+  const expectedStatus=module==='pvp'?'shell-registered-structural-module-no-gameplay':partialRuntime?'partial-runtime-loaded':'contract-only-not-loaded';
   assert.equal(contract.status,expectedStatus,
     module+(module==='survival'
       ?' may activate only its Phase 6 wave-rules slice'
@@ -59,7 +59,7 @@ for(const module of modules){
         ?' may activate only its pure Phase 7 exploration slices'
         :module==='capture'
           ?' may activate only its Phase 9 public module-launch boundary'
-          :' must remain contract-only'));
+          :' has Shell-registered structural providers, but no duel gameplay'));
   assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
     module+' must declare moduleScreenReturn');
   assert.deepEqual(contract.publicEntries.moduleScreenReturn,{

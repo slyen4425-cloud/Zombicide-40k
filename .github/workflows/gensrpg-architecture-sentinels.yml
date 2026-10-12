@@ -31,6 +31,9 @@ jobs:
       - name: Verrouiller le provider PvP Phase 10 S1 explicite sans composition production
         run: node tests/gens_phase10_pvp_shell_provider_v1.test.cjs
 
+      - name: Vérifier la composition PvP explicite S2 sans règles de combat imposées
+        run: node tests/gens_phase10_pvp_shell_composition_s2.test.cjs
+
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 

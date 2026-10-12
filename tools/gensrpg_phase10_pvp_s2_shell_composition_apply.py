@@ -31,7 +31,7 @@ INSERT = (
 )
 
 def blob(data):
-    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
 def verify_source(data):
     assert len(data) == SOURCE_SIZE and blob(data) == SOURCE_BLOB, (

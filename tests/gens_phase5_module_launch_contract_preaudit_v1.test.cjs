@@ -61,7 +61,7 @@ for(const module of ['survival','dungeon','capture','pvp']){
   assert.ok(entry,module+' must declare the module launch public entry');
   assert.equal(entry.contract,'assets/gensrpg/shell/module-launch-contract-v1.json');
   assert.equal(entry.operation,'startModuleSession');
-  assert.equal(entry.status,module==='capture'?'loaded-public-provider':'declared-not-loaded');
+  assert.equal(entry.status,module==='capture'?'loaded-public-provider':module==='pvp'?'registered-via-S2-shell-composition':'declared-not-loaded');
   assert.equal(entry.ownership,'module-owned-session-start');
 
   const src=read('assets/gensrpg/'+module+'/entry-v1.js');

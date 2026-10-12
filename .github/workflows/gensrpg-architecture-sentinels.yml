@@ -34,6 +34,9 @@ jobs:
       - name: Vérifier la composition PvP explicite S2 sans règles de combat imposées
         run: node tests/gens_phase10_pvp_shell_composition_s2.test.cjs
 
+      - name: Verrouiller la configuration PvP S3 sans gameplay et sans effet sur les autres modes
+        run: node tests/gens_phase10_pvp_setup_ui_s3.test.cjs
+
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 

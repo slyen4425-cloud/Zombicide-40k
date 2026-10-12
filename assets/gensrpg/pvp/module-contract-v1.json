@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "phase": 10,
+  "version": 1,
+  "phase": 3,
   "module": "pvp",
   "stage": "S4-architectural-closure",
   "status": "shell-registered-structural-module-no-gameplay",
@@ -81,5 +81,14 @@
       "status": "registered-via-S2-shell-composition",
       "ownership": "module-owned-session-start"
     }
-  }
+  },
+  "activatedPhase": 10,
+  "plannedEntry": "assets/gensrpg/pvp/entry-v1.js",
+  "invariants": [
+    "Phase 3 entry-v1.js remains inert and is never loaded by the production index, preview or Core bootstrap",
+    "Phase 10 S2 public registration uses the dedicated PvP session, module launch and Shell composition files, not entry-v1.js",
+    "Shell alone owns global navigation and final module-launch authority; PvP owns session data only",
+    "The private S3 setup UI is not in the production index; gameplay and player-facing duel stay unavailable",
+    "No private runtime or global function of Survival, Dungeon, Capture or Tactical is replaced"
+  ]
 }

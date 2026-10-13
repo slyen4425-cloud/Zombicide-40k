@@ -13,6 +13,7 @@ const contract=JSON.parse(read('assets/gensrpg/dungeon/module-contract-v1.json')
 const index=read('index.html');
 const sw=read('service-worker.js');
 const authored=read('assets/dungeon/dungeon-authored-runtime-167839.js');
+const core200=read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
 
 const sandbox={};
 sandbox.window=sandbox;
@@ -57,12 +58,14 @@ assert.equal(contract.publicRuntimeApi,'GensDungeonV1',
 const tag='<script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>';
 assert.equal(index.split(tag).length-1,1,
   'Dungeon entry must be loaded exactly once by the source index');
-assert.ok(index.indexOf(tag)<index.indexOf('<script id="dungeonCore200Rebuild">'),
+const core200Tag='<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>';
+assert.equal(index.split(core200Tag).length-1,1,'D4 must load exactly one physical Core200 owner');
+assert.ok(index.indexOf(tag)<index.indexOf(core200Tag),
   'Dungeon entry must load before the generated exploration owner Core 2.00');
 
-assert.match(index,/GensDungeonV1\.exploration\.planGeneratedAdvance\(/,
+assert.match(core200,/GensDungeonV1\.exploration\.planGeneratedAdvance\(/,
   'Core 2.00 generated exploration must delegate its destination plan to Dungeon entry');
-assert.doesNotMatch(index,/const targetRoom=Math\.max\(1,Number\(x\.room\|\|0\)\+1\);/,
+assert.doesNotMatch(core200,/const targetRoom=Math\.max\(1,Number\(x\.room\|\|0\)\+1\);/,
   'Core 2.00 must no longer own the generated target-room calculation directly');
 
 assert.match(sw,/\.\/assets\/gensrpg\/dungeon\/entry-v1\.js/,

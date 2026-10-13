@@ -30,3 +30,14 @@ Le simple ajout des fichiers ou le succès de l'application contrôlée ne signi
 - Extraction réellement publiée sur la branche D2 uniquement : `index.html` 7 863 589 octets, SHA blob `e5f8895495f969597a6c209fcc29afd66b7a0636`, nouveau JS 47 962 octets, blob `d7ec321ffa05b8749de5d7bf9e8264e55b24f919`.
 - Ancien index D1 restauré octet exact par `--verify`; sentinelles historiques D1 conservées et adaptées au nouveau graphe physique.
 - **D2 reste en attente de triple CI complète sur un même SHA.** Les tests d'application ne suffisent pas à déclarer GREEN.
+
+## Clôture officielle D2 GREEN — 13 octobre 2026
+
+- **Checkpoint créé après vérification de la triple CI** : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` sur le SHA `06c3608f36d020ac4f470de4dbe4ca272da3b897`.
+- Architecture / Chromium [38428721362](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721362) — SUCCESS (356 sentinelles structurelles et tests navigateur).
+- Firefox [38428721028](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721028) — SUCCESS.
+- Tactical [38428721250](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721250) — SUCCESS.
+- Les mises à jour de tests préservent les snapshots historiques Capture, le graphe des modules chargés et les deux preuves de retour arrière exact ; aucune fonction métier/autorité runtime n'a été retouchée en dehors du transfert octet-identique de Core051.
+- `index.html` final : **7 863 589 octets**, blob Git `e5f8895495f969597a6c209fcc29afd66b7a0636`.
+- Le chantier D2 est **terminé GREEN**. La Phase 12 globale demeure ouverte, et D3 nécessitera un nouveau checkpoint §25 et le ZIP exact de ce dernier index (§26).
+

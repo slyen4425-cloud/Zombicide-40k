@@ -273,6 +273,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 
 - **D1 GREEN le 13 octobre 2026** : extraction publiée, rollback octet exact vérifié, ancien propriétaire inline absent ; checkpoint `checkpoint/gensrpg-phase12-dungeon-core01-d1-green-2026-10-13` sur `5d8d0d37982ac2987bd4c72326de28318a4687c6`. Triple CI sur cet exact SHA : Architecture/Chromium [38419138287](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138287), Firefox [38419138332](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138332), Tactical [38419138470](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138470), toutes SUCCESS. D1 représente 22 715 octets nets retirés de l'index ; la Phase 12 complète reste ouverte. D2 exige son propre checkpoint/branche et le prochain index exact selon §26.
 
+### D2 GREEN — extraction physique Dungeon Core051 (13 octobre 2026)
+
+- Départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core051-extraction-2026-10-13` sur `11813ebc8d40ba976041f0be78d698cf2314b2dc` ; branche `work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13`.
+- Source exacte §26 : ZIP utilisateur `a3.zip` vérifié (7 911 489 octets, blob `2921ebadacf6f660e815d9ff7712e44cd765fbdd`).
+- `dungeonCore051ExplorationPolish` extrait sans modification de son IIFE : **47 962 octets** de JS vers `assets/gensrpg/dungeon/core051-exploration-polish-v1.js`, même emplacement parser ; index final **7 863 589 octets** (blob `e5f8895495f969597a6c209fcc29afd66b7a0636`), retour D2 → D1 → original exact garanti par les tests.
+- **Checkpoint GREEN** : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` au SHA `06c3608f36d020ac4f470de4dbe4ca272da3b897`, Architecture/Chromium [38428721362](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721362), Firefox [38428721028](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721028), Tactical [38428721250](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721250) **SUCCESS sur le même SHA**.
+- Phase 12 globale **non terminée**. Prochaine extraction D3 seulement après checkpoint de départ propre, cartographie propriétaire et nouvel index exact demandé §26. Aucun autre domaine, labos ni assets Survie modifiés.
+
 Une fois les modules extraits, index.html doit contenir principalement :
 
 - structure HTML minimale ;

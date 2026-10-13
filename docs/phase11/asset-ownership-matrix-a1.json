@@ -508,5 +508,22 @@
       ]
     }
   ],
-  "warning": "No external literal references found does not imply any asset is unused. No moved files or rewritten URLs."
+  "warning": "No external literal references found does not imply any asset is unused. No moved files or rewritten URLs.",
+  "preservationDecision": {
+    "date": "2026-10-13",
+    "source": "project owner's instruction",
+    "scope": "32 historical assets/img_* images: retain their current paths and bytes without renaming, moving or removing; possible legacy Survival association remains an unverified observation",
+    "action": "preserve-existing",
+    "doNotMigrateWithoutNewExplicitDecision": true,
+    "indexContentAuditRequiredForPreservation": false,
+    "ownerReclassificationRequiredNow": false,
+    "legacySurvivalMayContainInlineImages": true,
+    "futureRemakeOrReplacement": "deferred until user decides to remake or migrate",
+    "independentLabs": [
+      "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
+      "slyen4425-cloud/laboratoire_dynamique_exploration-"
+    ],
+    "labAssetsPolicy": "each laboratory repository owns its independently classified visual assets; no copying, reorganizing or cross-repo fallbacks as part of Phase 11",
+    "mainMigrationPolicy": "limit any future moves to proven concrete needs and keep the documented resolver and compatible references"
+  }
 }

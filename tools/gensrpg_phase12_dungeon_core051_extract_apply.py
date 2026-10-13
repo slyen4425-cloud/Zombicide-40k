@@ -103,6 +103,23 @@ const index=Buffer.concat([
         target=target.replace(d2_external,b'<script id="dungeonCore051ExplorationPolish">'+d2+b'</script>',1)
     runtime=OUTPUT.read_bytes()'''
     single(d1tool,before,after,patches)
+    # D1's immutable byte-exact rollback is still required. Its graph and
+    # current-index pins naturally advance by one additional physical D2 owner.
+    d1_expect='''            assert updated.count(after)==1, f"{path}: expected new owner graph exactly once"'''
+    d2_expect='''            expected_after=after
+            if d2_external in INDEX.read_bytes():
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="e5f8895495f969597a6c209fcc29afd66b7a0636"
+                elif path==PATH_GRAPH:
+                    for before_count,after_count in [
+                        ("size,50,","size,51,"),
+                        ("allJs.length,108,","allJs.length,109,"),
+                        ("phase2Js.length,72,","phase2Js.length,73,"),
+                        ("reachable.size,94,","reachable.size,95,")
+                    ]:
+                        expected_after=expected_after.replace(before_count,after_count)
+            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"'''
+    single(d1tool,d1_expect,d2_expect,patches)
     return patches
 
 def verify():

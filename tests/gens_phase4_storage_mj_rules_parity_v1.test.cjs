@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
+const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'index.html'),'utf8');
@@ -16,6 +17,18 @@ const coreWrite='GensStorageV1.writeJson(localStorage,"'+KEY+'",r)';
 function block(id){
   const m=src.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing owner '+id);
+  if(id==='dungeonMj72_2Script'){
+    // The active MJ owner was moved as a classic parser-time script in D3.
+    assert.match(m[0],/src="assets\/gensrpg\/dungeon\/mj72-scene-v1\.js"/,
+      'MJ72 external owner must load at its original parser point');
+    const body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/mj72-scene-v1.js'),'utf8');
+    const bytes=Buffer.from(body,'utf8');
+    const digest=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+    assert.equal(bytes.length,27511,'original MJ72 body length is preserved');
+    assert.equal(digest,'8304087b15bbbf5f71c22b7f8c916e0a78b1b905',
+      'MJ72 transport parity must use precisely the certified former inline owner');
+    return body;
+  }
   return m[1];
 }
 const mj=block('dungeonMj72_2Script');

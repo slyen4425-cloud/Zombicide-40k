@@ -1,3 +1,13 @@
+# GREEN — PHASE 11 / A0 INVENTAIRE DES IMAGES — 13 OCTOBRE 2026
+
+- **Checkpoint GREEN officiel :** `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13`, SHA exact `a96cb54049648bb87619a7febdcfe0388a6fb98f`.
+- **Triple CI sur ce SHA :** Architecture/Chromium [38300391035](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391035), Firefox [38300391129](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391129), Tactical [38300391095](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391095) : SUCCESS.
+- **Livraison :** inventaire Git exact `docs/phase11/asset-inventory-a0.json` + sentinelle `tests/gens_phase11_asset_inventory_a0.test.cjs` pour 173 images ; 134 chemins Dungeon, 32 images `assets/img_*` de propriétaire inconnu, 4 icônes Shell/PWA candidates et 3 dépendances exclues ; collision de basenames surveillée.
+- **Périmètre vérifié :** aucune image déplacée, aucun remplacement de référence, aucun gameplay. `index.html` inchangé, `main` gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun laboratoire touché.
+- **Prochaine étape :** ouvrir nouveau checkpoint de départ et branche dédiée depuis ce GREEN pour l'audit de consommation/ownership des 32 images non classées ; avant toute lecture du gros `index.html`, respecter la charte §26 (lien GitHub au SHA demandé, fichier ZIP utilisateur correspondant). Ne pas migrer sans preuve, table ancien → nouveau et tests navigateur réels. Phase 11 toujours en cours.
+
+---
+
 # CHANTIER ACTIF — PHASE 11 / A0 INVENTAIRE DES ASSETS VISUELS — 12 OCTOBRE 2026
 
 - **Dernier état technique GREEN** : Phase 10 clôturée sur le plan architectural. Checkpoint GREEN S4 `checkpoint/gensrpg-phase10-pvp-architectural-closure-s4-green-2026-10-12` au SHA `b5b16cb9d0a8def7749a32a9bfecf1ce17cd21ef`. La branche documentaire Phase 10 a elle aussi les trois CI SUCCESS au SHA de départ `3acd7a6112e3da9a546749e1acb39ee81cb4c9d7`.

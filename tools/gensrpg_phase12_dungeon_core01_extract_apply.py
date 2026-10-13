@@ -23,7 +23,7 @@ END_TAG = b'</script>'
 EXTERNAL_TAG = b'<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>'
 
 def blob(value):
-    return hashlib.sha1(b"blob " + str(len(value)).encode("ascii") + b"\\0" + value).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(value)).encode("ascii") + b"\0" + value).hexdigest()
 
 def pinned(data, length, sha, label):
     assert len(data) == length and blob(data) == sha, (

@@ -15,8 +15,18 @@ Date : 13 octobre 2026.
 - GREEN seulement après triple CI Architecture/Chromium, Firefox, Tactical SUCCESS **sur le même SHA** et création d'un checkpoint final.
 - Ne modifier ni `main` gelé, ni les laboratoires combat/exploration, ni les images Survie historiques.
 
-## Livraison physique D3 — en validation
+## Livraison physique D3 — validée
 
 - Workflow d'application [38459404192](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38459404192) SUCCESS ; commit moteur 7a2242ab825b95707b671207106c73d216cfaf5f.
 - Indices : index 7 836 124 octets Git blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c` ; source externe MJ72 27 511 octets Git blob `8304087b15bbbf5f71c22b7f8c916e0a78b1b905`.
 - Checkpoints D1 et D2, preuves exactes et tests initiaux validés. Attente des CI structurelles et navigateur sur un même commit final. Pas de checkpoint D3 GREEN à ce stade.
+
+## Clôture officielle D3 GREEN (13 octobre 2026)
+
+- **Checkpoint créé après succès intégral de la triple CI :** `checkpoint/gensrpg-phase12-dungeon-mj72-d3-green-2026-10-13`, SHA exact `2ec9e6dc5f13e9ea19234f6167641f6ccfd61dbb`.
+- **Architecture / Chromium** [38460988097](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38460988097) : SUCCESS ; job structurel 356/356, job browser 64/64 étapes.
+- **Firefox** [38460988091](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38460988091) : SUCCESS.
+- **Tactical** [38460988049](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38460988049) : SUCCESS.
+- L'index physique est bien le blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c` (7 836 124 octets), le JS externe reste byte-identique `8304087b15bbbf5f71c22b7f8c916e0a78b1b905` (27 511 octets). Aucun script désactivé externalisé.
+- Tests de régression adaptés pour la composition réelle, sans supprimer les vérifications de propriétaires, d'ordre, de snapshots historiques ni de retour arrière.
+- La clôture documentaire suivant le checkpoint n'altère pas ce commit testé. **Le prochain lot D4 reste fermé** en attendant l'index exact de ce checkpoint selon §26.

@@ -2,7 +2,10 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.join(__dirname,'..');
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+// D4 physically relocated byte-identical Core200. Count both parser-ordered
+// sources, not just the now smaller HTML; compatibility debt stays unchanged.
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8')+
+  '\n'+fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
 const doc=fs.readFileSync(path.join(root,'docs','GENSRPG_COMBAT_CALLSITE_INVENTORY.md'),'utf8');
 
 function countWord(name){return (html.match(new RegExp('\\b'+name+'\\b','g'))||[]).length;}

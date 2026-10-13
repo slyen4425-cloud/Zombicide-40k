@@ -5,11 +5,11 @@ Base : restructuration issue de V16.78.114.11
 
 ## But
 
-Avant de remplacer les anciens noms globaux par le contrat unique `GensRpgTacticalCombatV2Bridge.requestCombat()`, figer les appels encore présents dans le monolithe `index.html`.
+Avant de remplacer les anciens noms globaux par le contrat unique `GensRpgTacticalCombatV2Bridge.requestCombat()`, figer les appels encore présents dans `index.html` et dans les propriétaires historiques déplacés byte-identiques hors du monolithe.
 
 Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro : un nom historique peut rester lorsqu’il constitue un adaptateur de compatibilité caractérisé, sans autorité Dungeon propre. Toute migration doit préserver les règles de participants, la détection, l’embuscade, les modes MJ et le retour exploration.
 
-## Comptage actuel dans `index.html`
+## Comptage actuel dans `index.html` et `assets/gensrpg/dungeon/core200-rebuild-v1.js` (Phase 12 D4)
 
 | Symbole historique | Occurrences | Rôle observé |
 |---|---:|---|
@@ -36,7 +36,7 @@ Une seule définition historique reste pour rollback capturé par le Bridge. Auc
 
 ### C. Lancement interne (`launchCombat200`)
 
-Les deux occurrences du monolithe correspondent à la définition historique du lanceur et à son rappel depuis le flux Core 2.x après préparation/sélection.
+Les deux occurrences conservées (l'une ou l'autre source physique du moteur historique) correspondent à la définition historique du lanceur et à son rappel depuis le flux Core 2.x après préparation/sélection.
 
 Le lot 4H a établi que ce lanceur historique n’est pas une seconde autorité Dungeon active à supprimer brutalement : `Bridge.install()` le capture comme `legacyLaunch`, puis remplace le nom global par son adaptateur. Hors Dungeon, cet adaptateur rappelle exactement le lanceur historique ; en Dungeon, il ne rappelle jamais le legacy et délègue à `requestCombat` avec `entry:"launchCombat200"`.
 

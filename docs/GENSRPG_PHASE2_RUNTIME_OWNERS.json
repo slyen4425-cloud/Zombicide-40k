@@ -324,6 +324,11 @@
       "domain": "dungeon",
       "role": "byte-identical former gensDungeonCore01Js inline IIFE, loaded synchronously at its historical parser point; Dungeon session and legacy UI only"
     },
+    "assets/gensrpg/dungeon/core051-exploration-polish-v1.js": {
+      "owner": "Dungeon Core051 Exploration Polish",
+      "domain": "dungeon",
+      "role": "byte-identical 47962-byte former dungeonCore051ExplorationPolish inline IIFE; synchronous Dungeon exploration and authored challenge UI at its original parser position"
+    },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
       "domain": "dungeon",

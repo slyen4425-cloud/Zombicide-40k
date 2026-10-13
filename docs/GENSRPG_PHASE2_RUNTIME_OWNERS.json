@@ -334,6 +334,11 @@
       "domain": "dungeon",
       "role": "public Phase 7 Dungeon module entry exposing pure generated advance planning only; authored travel remains owned by DungeonAuthoredRuntime167839"
     },
+    "assets/gensrpg/dungeon/mj72-scene-v1.js": {
+      "owner": "Dungeon MJ72 Scene / Content",
+      "domain": "dungeon",
+      "role": "byte-identical former dungeonMj72_2Script (27511 bytes); classic synchronous parser-time scene state, rarity and persistence primitives"
+    },
     "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js": {
       "owner": "Dungeon Visual Bridge",
       "domain": "dungeon",

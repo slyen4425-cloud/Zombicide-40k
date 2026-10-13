@@ -20,6 +20,19 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // Phase12 D3: reconstruction is test-only; no runtime fallback or new owner.
+ if(hash(index)==='972f0e0be12fac14427853fbcd7abe5233eb5a8c'){
+  assert.equal(index.length,7836124,'D3 extracted index length');
+  const tag=Buffer.from('<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'single D3 MJ72 owner');
+  const body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/mj72-scene-v1.js'));
+  assert.equal(body.length,27511);
+  assert.equal(hash(body),'8304087b15bbbf5f71c22b7f8c916e0a78b1b905');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonMj72_2Script">'),body,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7863589);
+  assert.equal(hash(index),'e5f8895495f969597a6c209fcc29afd66b7a0636','exact D2 historical index');
+ }
  // Phase 12 D2: restore only the exact Core051 IIFE before the pre-existing
  // D1, PvP and Capture history reversions. Never affect the active runtime.
  if(hash(index)==='e5f8895495f969597a6c209fcc29afd66b7a0636'){

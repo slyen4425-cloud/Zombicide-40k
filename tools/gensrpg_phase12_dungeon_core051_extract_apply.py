@@ -124,6 +124,13 @@ const index=Buffer.concat([
 
 def verify():
     new=INDEX.read_bytes()
+    d3tag=b'<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>'
+    if d3tag in new:
+        assert new.count(d3tag)==1, "D3 source only once"
+        assert len(new)==7836124 and sha(new)=="972f0e0be12fac14427853fbcd7abe5233eb5a8c", "D3 index fingerprint"
+        body=(ROOT/"assets/gensrpg/dungeon/mj72-scene-v1.js").read_bytes()
+        assert len(body)==27511 and sha(body)=="8304087b15bbbf5f71c22b7f8c916e0a78b1b905", "D3 code fingerprint"
+        new=new.replace(d3tag,b'<script id="dungeonMj72_2Script">'+body+b'</script>',1)
     runtime=OUT.read_bytes()
     pinned(new,DST_LEN,DST_SHA,"current physical index")
     pinned(runtime,JS_LEN,JS_SHA,"external Core051")

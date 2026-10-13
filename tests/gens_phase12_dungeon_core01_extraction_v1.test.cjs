@@ -11,7 +11,16 @@ const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"
 const originalBlob="bf996ec4e748a4927ac6dd57cceaeaf2afcd9441";
 const targetBlob="2921ebadacf6f660e815d9ff7712e44cd765fbdd";
 const runtimeBlob="df36eba9b8a62f806bc50f86f09f53c90608ce07";
-const liveIndex=read("index.html");
+const currentIndex=read("index.html");
+const mj72Tag=Buffer.from('<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>');
+const mj72Open=Buffer.from('<script id="dungeonMj72_2Script">');
+const mj72Body=read("assets/gensrpg/dungeon/mj72-scene-v1.js");
+const mj72At=currentIndex.indexOf(mj72Tag);
+assert.ok(mj72At>0,"D3 owner must stay at parser-time");
+const liveIndex=Buffer.concat([
+  currentIndex.subarray(0,mj72At),mj72Open,mj72Body,Buffer.from("</script>"),
+  currentIndex.subarray(mj72At+mj72Tag.length)
+]);
 const core051External=Buffer.from('<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>');
 const core051Open=Buffer.from('<script id="dungeonCore051ExplorationPolish">');
 const core051Body=read("assets/gensrpg/dungeon/core051-exploration-polish-v1.js");

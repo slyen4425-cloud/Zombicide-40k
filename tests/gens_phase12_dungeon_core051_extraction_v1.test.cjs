@@ -9,7 +9,16 @@ const {execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const index=read("index.html");
+const currentIndex=read("index.html");
+const mj72Tag=Buffer.from('<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>');
+const mj72Open=Buffer.from('<script id="dungeonMj72_2Script">');
+const mj72Body=read("assets/gensrpg/dungeon/mj72-scene-v1.js");
+const mj72At=currentIndex.indexOf(mj72Tag);
+assert.ok(mj72At>0,"D3 MJ72 script must load at parser time");
+const index=Buffer.concat([
+  currentIndex.subarray(0,mj72At),mj72Open,mj72Body,Buffer.from("</script>"),
+  currentIndex.subarray(mj72At+mj72Tag.length)
+]);
 const js=read("assets/gensrpg/dungeon/core051-exploration-polish-v1.js");
 const open=Buffer.from('<script id="dungeonCore051ExplorationPolish">');
 const tag=Buffer.from('<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>');

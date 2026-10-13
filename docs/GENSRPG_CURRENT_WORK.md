@@ -1,3 +1,15 @@
+# CHANTIER ACTIF — PHASE 12 / PREMIÈRE EXTRACTION PHYSIQUE DE L'INDEX — 13 OCTOBRE 2026
+
+- **Phase 11 en conservation** : A0 et A1 GREEN pour inventaire et audit. Les 32 `assets/img_*` historiques restent exactement en place ; migration abandonnée pour le moment sur décision de l'utilisateur. Les deux laboratoires ont leurs propres assets et restent hors périmètre. Aucun transfert global d'assets n'est revendiqué.
+- **Dernier GREEN** : `checkpoint/gensrpg-phase11-asset-ownership-a1-green-2026-10-13` sur `7ef5060a72b883ecee23ddee9c381a300f8be1b9` ; Architecture [38377948215](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948215), Firefox [38377948201](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948201), Tactical [38377948264](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948264), SUCCESS sur le même SHA.
+- **Checkpoint initial §25** : `checkpoint/gensrpg-start-phase12-dungeon-core01-extraction-2026-10-13` sur le même SHA ; branche dédiée `work/gensrpg-phase12-dungeon-core01-extraction-2026-10-13`.
+- **Périmètre et propriétaire** : extraire le bloc JS Dungeon `gensDungeonCore01Js` (IIFE autonome, propriétaire Dungeon) dans `assets/gensrpg/dungeon/core01-session-ui-v1.js`, à exactement la même position du graphe runtime, sans changement métier ni nouveau mécanisme global. Shell/Core/Survie/Capture/PvP/Tactical restent intacts.
+- **Charte §26** : la copie utilisateur de `index.html` a été vérifiée : 7 934 204 octets, blob Git `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441`, identique au SHA requis de la branche. Le script d'application doit prouver l'aller-retour byte-exact, appliquer sur cette branche uniquement et laisser `main` gelée.
+- **Tests** : vérifier les contrats de propriétaire et de graphe, préserver les tableaux historiques, exécuter les vrais tests Dungeon, non-interférence quatre modules et triple CI identique avant checkpoint GREEN. Ne pas déplacer d'image ou modifier les laboratoires.
+- **État** : chantier ouvert, extraction pas encore appliquée. Ne pas considérer l'étape terminée sans CI.
+
+---
+
 # DECISION DE PERIMETRE — PHASE 11 / A1 CONSERVATION DES IMAGES — 13 OCTOBRE 2026
 
 - **Instruction propriétaire prioritaire** : conserver sur place sans déplacement ni renommage les 32 images historiques `assets/img_*` probablement liées au code Survie ; aucune migration ou reclassification complète n'est attendue pour le moment. Les recréations futures ne seront envisagées qu'après nouvelle demande.

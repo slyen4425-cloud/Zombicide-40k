@@ -102,8 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,95,
-  'Phase 3 entries stay inert while Phase 12 adds only the extracted Dungeon Core01 and Core051 production owners');
+assert.equal(Object.keys(ownerManifest.files||{}).length,96,
+  'Phase 3 entries stay inert while Phase 12 includes Core01, Core051 and D3 MJ72 physical Dungeon owners');
+assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/mj72-scene-v1.js']?.domain,'dungeon',
+  'D3 MJ72 must belong exclusively to the Dungeon runtime');
+assert.equal(composition.index.split('assets/gensrpg/dungeon/mj72-scene-v1.js').length-1,1,
+  'D3 MJ72 owner must be loaded exactly once at its existing parser point');
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core051-exploration-polish-v1.js']?.domain,'dungeon',
   'the newly external Core051 exploration polish code must remain Dungeon-owned');
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core01-session-ui-v1.js']?.domain,'dungeon',

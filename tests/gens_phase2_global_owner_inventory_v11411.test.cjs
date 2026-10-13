@@ -5,8 +5,14 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
+const dungeonCore01Path='assets/gensrpg/dungeon/core01-session-ui-v1.js';
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2],offset:m.index}));
+  .map(m=>{
+    if(m[1]!=='gensDungeonCore01Js')return {id:m[1],body:m[2],offset:m.index};
+    assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core01-session-ui-v1\.js"/,
+      'Phase12 Dungeon source must be composed at its original parser position');
+    return {id:m[1],body:fs.readFileSync(path.join(root,dungeonCore01Path),'utf8'),offset:m.index};
+  });
 
 function assignmentChain(name){
   const re=new RegExp('window\\.'+name+'\\s*=','g');

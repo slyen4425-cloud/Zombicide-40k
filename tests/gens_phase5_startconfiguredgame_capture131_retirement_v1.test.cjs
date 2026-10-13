@@ -9,7 +9,7 @@ const DUNGEON_CORE01_SCRIPT='assets/gensrpg/dungeon/core01-session-ui-v1.js';
 const DUNGEON_CORE01_TAG='<script id="gensDungeonCore01Js" src="'+DUNGEON_CORE01_SCRIPT+'"></script>';
 assert.equal(source.split(DUNGEON_CORE01_TAG).length-1,1,
   'Dungeon Core01 must be loaded exactly once as the original parser-ordered owner');
-const blocks=[...source.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
+const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({
     id:m[1],
     body:m[1]==='gensDungeonCore01Js'

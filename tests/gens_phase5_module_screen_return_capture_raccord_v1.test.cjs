@@ -8,7 +8,15 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2]}));
+  .map(m=>{
+    if(m[1]==='dungeonCore200Rebuild'){
+      assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+        'D4 Dungeon screen-return owner must remain at its parser position');
+      assert.equal(m[2],'','D4 must not duplicate Core200 inline');
+      return {id:m[1],body:fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8')};
+    }
+    return {id:m[1],body:m[2]};
+  });
 
 function chainFor(name){
   const re=new RegExp('window\\.'+name+'\\s*=','g');

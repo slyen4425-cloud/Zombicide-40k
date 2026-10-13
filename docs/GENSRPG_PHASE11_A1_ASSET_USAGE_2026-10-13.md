@@ -13,6 +13,19 @@ Base triple-CI GREEN `dc9ad1e5396892c805ddc79c4542f29420062095`, checkpoint init
 - **Dungeon/Cache** : `service-worker.js` déclare explicitement plusieurs ressources `assets/dungeon/creatures/` dans `CORE_FILES`, notamment `dng_wall_block.jpg` et des sols. Ce sont des dépendances PWA réelles ; elles ne peuvent pas être déplacées comme de simples images orphelines.
 - **Resolver Core** : `assets/gensrpg/core/asset-resolver-v1.js` définit des chemins Dungeon explicitement ; ni ce fichier, ni le `service-worker.js` ne doivent être court-circuités par un nouveau fallback entre modules.
 
+## Premier résultat observé en CI sur le vrai checkout Git
+
+Exécution du contrôle A1 dans le job Architecture sur le commit `cc88eaec8ff423dc1c5334fb428e7ec339feed50` :
+
+- **123 fichiers externes inspectés** : sources Git suivies réellement présentes dans le checkout ;
+- **32 images racine prises en compte** ;
+- **0 image avec référence littérale externe** et **0 occurrence** ;
+- test `gens_phase11_external_asset_refs_a1.test.cjs` : SUCCESS.
+
+Ce constat **n'autorise ni suppression, ni renommage, ni attribution à un module**. Les chemins peuvent être formés dynamiquement, figurer dans `index.html` ou dans des données de profils/imports qui sont délibérément hors périmètre de ce scanner. Il exclut les fichiers de documentation/test pour ne pas confondre mentions historiques et consommation de runtime.
+
+Cette preuve peut conclure le **sous-lot d'audit externe** une fois triple CI sur un SHA final, mais **pas la classification complète A1/Phase 11** tant que l'index exact n'est pas inspecté (§26).
+
 ## Preuves automatiques A1
 
 Le script de diagnostic `tools/gensrpg_phase11_external_asset_refs_a1.cjs` lit les fichiers externes suivis par Git (`assets/*` JS/JSON/CSS/HTML et manifests/PWA/preview) et produit :

@@ -73,6 +73,15 @@ def make_patches():
     ):
         change_once(p,path,var+"='"+SRC_SHA+"'",var+"='"+DST_SHA+"'")
 
+    # The controlled apply checks out the certified D3 commit, then replaces
+    # index.html before making the final commit. Verify the physical working
+    # blob rather than HEAD:index.html while keeping the expected SHA pinned.
+    for path in (
+        "tests/gens_phase2_inline_owner_manifest_v11411.test.cjs",
+        "tests/gens_phase2_inline_global_last_owner_v11411.test.cjs",
+    ):
+        change_once(p,path,"['rev-parse','HEAD:index.html']","['hash-object','index.html']")
+
     ownpath="docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json"
     obj=json.loads((ROOT/ownpath).read_text(encoding="utf-8"))
     assert len(obj["files"])==96 and newpath not in obj["files"]

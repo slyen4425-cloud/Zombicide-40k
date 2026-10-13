@@ -106,7 +106,8 @@ def verify():
     for path in touched_tests():
         updated=(ROOT/path).read_text(encoding="utf8")
         for before,after in test_replacements(path):
-            assert before not in updated, f"{path}: obsolete graph/sha value remains"
+            if before not in after:
+                assert before not in updated, f"{path}: obsolete graph/sha value remains"
             assert updated.count(after)==1, f"{path}: expected new owner graph exactly once"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

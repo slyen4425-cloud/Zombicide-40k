@@ -50,7 +50,8 @@ assert.doesNotMatch(flow171,/window\.openDungeonCombatSetup\s*=/,
 assert.doesNotMatch(core053,/openDungeonCombatSetup/,
   'Core 0.53 must stay on dc030/Bridge only');
 
-const ambush=html.match(/window\.dc076StartAmbushCombat=function\(\)\{[\s\S]*?\n\};/);
+const dungeonCore01=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8');
+const ambush=dungeonCore01.match(/window\.dc076StartAmbushCombat=function\(\)\{[\s\S]*?\n\};/);
 assert.ok(ambush,'Core 0.76 ambush entry missing');
 assert.match(ambush[0],/if\(typeof dc030EngageCombat==='function'\)dc030EngageCombat\(\);/,
   'ambush normal path must preserve the position-bypass dc030 chain');

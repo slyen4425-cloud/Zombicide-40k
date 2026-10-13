@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Phase 12: byte-exact, reversible single-owner Dungeon inline extraction.
+
+Rule 26: the user-supplied index.html was independently checked against the
+GitHub source blob and byte length BEFORE authoring this transform.
+Only the already-pinned checkout source may be transformed on its work branch.
+"""
+from pathlib import Path
+import argparse
+import hashlib
+
+ROOT = Path(__file__).resolve().parents[1]
+INDEX = ROOT / "index.html"
+OUTPUT = ROOT / "assets/gensrpg/dungeon/core01-session-ui-v1.js"
+SOURCE_LENGTH = 7934204
+SOURCE_BLOB = "bf996ec4e748a4927ac6dd57cceaeaf2afcd9441"
+TARGET_LENGTH = 7911489
+TARGET_BLOB = "2921ebadacf6f660e815d9ff7712e44cd765fbdd"
+RUNTIME_LENGTH = 22768
+RUNTIME_BLOB = "df36eba9b8a62f806bc50f86f09f53c90608ce07"
+START_TAG = b'<script id="gensDungeonCore01Js">'
+END_TAG = b'</script>'
+EXTERNAL_TAG = b'<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>'
+
+def blob(value):
+    return hashlib.sha1(b"blob " + str(len(value)).encode("ascii") + b"\\0" + value).hexdigest()
+
+def pinned(data, length, sha, label):
+    assert len(data) == length and blob(data) == sha, (
+        f"{label} mismatch: {len(data)} bytes / {blob(data)}; expected {length}/{sha}"
+    )
+
+def derive(data):
+    pinned(data, SOURCE_LENGTH, SOURCE_BLOB, "user-verified source index")
+    assert data.count(START_TAG) == 1, "Dungeon owner tag must occur once"
+    assert data.count(EXTERNAL_TAG) == 0, "Dungeon owner cannot be double loaded"
+    start = data.index(START_TAG)
+    ending = data.find(END_TAG, start + len(START_TAG))
+    assert ending > start, "Dungeon owner closing tag missing"
+    inner = data[start + len(START_TAG):ending]
+    pinned(inner, RUNTIME_LENGTH, RUNTIME_BLOB, "extracted Dungeon owner")
+    transformed = data[:start] + EXTERNAL_TAG + data[ending + len(END_TAG):]
+    pinned(transformed, TARGET_LENGTH, TARGET_BLOB, "transformed index")
+    return transformed, inner
+
+def modify_once(text, before, after, label):
+    assert text.count(before) == 1, f"{label}: unexpected preimage count {text.count(before)}"
+    assert after not in text, f"{label}: target already applied"
+    return text.replace(before, after, 1)
+
+BASE = "bf996ec4e748a4927ac6dd57cceaeaf2afcd9441"
+NEXT = TARGET_BLOB
+PATH_GRAPH = "tests/gens_phase2_runtime_load_graph_v11411.test.cjs"
+PATH_COMPOSITION = "tests/gens_runtime_composition_guard_v11411.test.cjs"
+PATH_OWNERS = "tests/gens_phase2_inline_owner_manifest_v11411.test.cjs"
+PATH_GLOBALS = "tests/gens_phase2_inline_global_last_owner_v11411.test.cjs"
+
+def test_replacements(path):
+    if path in (PATH_OWNERS, PATH_GLOBALS):
+        return [(BASE,NEXT)]
+    if path in (PATH_GRAPH, PATH_COMPOSITION):
+        anchor="  'assets/gensrpg/capture/builtin-seed-v1.js?v=1',\n" if path == PATH_COMPOSITION else "  'assets/gensrpg/capture/builtin-seed-v1.js',\n"
+        newpath="  'assets/gensrpg/dungeon/core01-session-ui-v1.js',\n"
+        replace=[(anchor,anchor+newpath)]
+        if path == PATH_GRAPH:
+            replace.extend([
+                ("size,49,'production composition", "size,50,'production composition"),
+                ("allJs.length,107,", "allJs.length,108,"),
+                ("phase2Js.length,71,", "phase2Js.length,72,"),
+                ("reachable.size,93,", "reachable.size,94,")
+            ])
+        return replace
+    raise ValueError(path)
+
+def touched_tests():
+    return [PATH_OWNERS,PATH_GLOBALS,PATH_GRAPH,PATH_COMPOSITION]
+
+def apply():
+    source=INDEX.read_bytes()
+    target, runtime=derive(source)
+    assert not OUTPUT.exists(), "Target Dungeon owner already exists"
+    patches={}
+    for path in touched_tests():
+        original=(ROOT/path).read_text(encoding="utf8")
+        updated=original
+        for old,new in test_replacements(path):
+            updated=modify_once(updated,old,new,path)
+        patches[path]=updated
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True)
+    OUTPUT.write_bytes(runtime)
+    INDEX.write_bytes(target)
+    for path, updated in patches.items():
+        (ROOT/path).write_text(updated,encoding="utf8")
+    verify()
+
+def verify():
+    target=INDEX.read_bytes()
+    runtime=OUTPUT.read_bytes()
+    pinned(target,TARGET_LENGTH,TARGET_BLOB,"current index")
+    pinned(runtime,RUNTIME_LENGTH,RUNTIME_BLOB,"external owner")
+    assert target.count(EXTERNAL_TAG)==1
+    assert target.count(START_TAG)==0
+    restored=target.replace(EXTERNAL_TAG,START_TAG+runtime+END_TAG,1)
+    pinned(restored,SOURCE_LENGTH,SOURCE_BLOB,"reconstituted original index")
+    assert derive(restored)==(target,runtime)
+    for path in touched_tests():
+        updated=(ROOT/path).read_text(encoding="utf8")
+        for before,after in test_replacements(path):
+            assert before not in updated, f"{path}: obsolete graph/sha value remains"
+            assert updated.count(after)==1, f"{path}: expected new owner graph exactly once"
+    print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
+
+if __name__=="__main__":
+    p=argparse.ArgumentParser()
+    group=p.add_mutually_exclusive_group(required=True)
+    group.add_argument("--apply",action="store_true")
+    group.add_argument("--verify",action="store_true")
+    a=p.parse_args()
+    if a.apply: apply()
+    else: verify()

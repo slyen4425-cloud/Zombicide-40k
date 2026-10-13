@@ -76,6 +76,15 @@ const jsFiles=cp.execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'}
   .split('\0').filter(file=>file.endsWith('.js'));
 for(const file of jsFiles){
   const code=fs.readFileSync(path.join(root,file),'utf8');
+  if(file==='assets/gensrpg/dungeon/mj72-scene-v1.js'){
+    // Phase12 D3 moves this *same* former inline owner, byte-for-byte.
+    // Preserve the singleton writer boundary and reject a cloned implementation.
+    assert.equal(gitBlob(Buffer.from(code,'utf8')),'8304087b15bbbf5f71c22b7f8c916e0a78b1b905',
+      'moved MJ72 storage owner must retain its exact pre-extraction source');
+    assert.equal(code,mj.body,'external MJ72 must be exactly its historical inline body');
+    assert.equal(code.split(KEY).length-1,1,'MJ Rules must retain exactly one external writer occurrence');
+    continue;
+  }
   assert.equal(code.includes(KEY),false,'additional external owner/call site: '+file);
 }
 

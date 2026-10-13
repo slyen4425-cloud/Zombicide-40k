@@ -1,0 +1,38 @@
+name: GenSrpG Phase 12 Dungeon Core051 controlled apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13'
+    paths:
+      - '.github/workflows/gensrpg-phase12-dungeon-core051-controlled-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply the certified Dungeon Core051 owner extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13'
+          test "$(git hash-object index.html)" = '2921ebadacf6f660e815d9ff7712e44cd765fbdd'
+          python3 tools/gensrpg_phase12_dungeon_core051_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_dungeon_core051_extract_apply.py --verify
+          node --check assets/gensrpg/dungeon/core051-exploration-polish-v1.js
+          node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+      - name: Commit and push on D2 work branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/gensrpg/dungeon/core051-exploration-polish-v1.js tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs tests/gens_phase2_runtime_load_graph_v11411.test.cjs tests/gens_runtime_composition_guard_v11411.test.cjs tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs tests/gens_phase2_inline_owner_manifest_v11411.test.cjs tests/gens_phase2_inline_global_last_owner_v11411.test.cjs tools/gensrpg_phase12_dungeon_core01_extract_apply.py
+          git diff --cached --check
+          git commit -m "refactor(phase12): move Dungeon Core051 owner without behavior changes"
+          git push origin "HEAD:$GITHUB_REF_NAME"

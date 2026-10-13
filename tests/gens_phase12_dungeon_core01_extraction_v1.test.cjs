@@ -7,7 +7,7 @@ const crypto=require("node:crypto");
 const {execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p));
-const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"\\0")).update(buf).digest("hex");
+const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"\0")).update(buf).digest("hex");
 const originalBlob="bf996ec4e748a4927ac6dd57cceaeaf2afcd9441";
 const targetBlob="2921ebadacf6f660e815d9ff7712e44cd765fbdd";
 const runtimeBlob="df36eba9b8a62f806bc50f86f09f53c90608ce07";

@@ -31,6 +31,12 @@ function blockBody(id){
     assert.equal(m[1],'','external Dungeon Core01 must not contain an inline duplicate');
     return read(external);
   }
+  if(id==='dungeonCore200Rebuild'){
+    const external='assets/gensrpg/dungeon/core200-rebuild-v1.js';
+    assert.ok(m[0].includes('src="'+external+'"'),'D4 Core200 must load at the same parser position');
+    assert.equal(m[1],'','Core200 physical owner may not be duplicated inline');
+    return read(external);
+  }
   return m[1];
 }
 

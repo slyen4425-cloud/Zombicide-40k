@@ -14,6 +14,8 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
     id:m[1],
     body:m[1]==='gensDungeonCore01Js'
       ? fs.readFileSync(path.join(root,DUNGEON_CORE01_SCRIPT),'utf8')
+      : m[1]==='dungeonCore200Rebuild'
+      ? fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8')
       : m[2],
     offset:m.index
   }));

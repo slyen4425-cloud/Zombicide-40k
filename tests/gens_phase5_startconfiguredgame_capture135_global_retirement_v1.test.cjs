@@ -18,6 +18,12 @@ function blockBody(id){
     assert.equal(m[1],'','no inline Dungeon Core01 duplicate');
     return read('assets/gensrpg/dungeon/core01-session-ui-v1.js');
   }
+  if(id==='dungeonCore200Rebuild'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+      'D4 Dungeon Core200 must be a synchronous external owner');
+    assert.equal(m[1],'','Core200 external script must have no inline duplicate');
+    return read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
+  }
   return m[1];
 }
 

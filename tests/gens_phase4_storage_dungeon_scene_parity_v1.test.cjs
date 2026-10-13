@@ -1,12 +1,20 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const crypto=require('node:crypto');
 
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const m=src.match(/<script[^>]*id=["']dungeonMj72_2Script["'][^>]*>([\s\S]*?)<\/script>/i);
 assert.ok(m,'missing dungeonMj72_2Script');
-const block=m[1];
+// Phase 12 D3 physically moved exactly this same legacy owner to a classic JS file.
+assert.match(m[0],/src="assets\/gensrpg\/dungeon\/mj72-scene-v1\.js"/,
+  'Dungeon MJ72 must be loaded at its historical parser point');
+const block=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/mj72-scene-v1.js'),'utf8');
+const bytes=Buffer.from(block,'utf8');
+const digest=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length)).update(Buffer.from([0])).update(bytes).digest('hex');
+assert.equal(bytes.length,27511,'Dungeon MJ72 must remain the exact original owner');
+assert.equal(digest,'8304087b15bbbf5f71c22b7f8c916e0a78b1b905','Dungeon MJ72 body fingerprint');
 
 const sourceRead='JSON.parse(localStorage.getItem(GENS_DUNGEON_SCENE_KEY)||"[]")';
 const targetRead='GensStorageV1.readJson(localStorage,GENS_DUNGEON_SCENE_KEY,[])';

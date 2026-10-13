@@ -12,6 +12,12 @@ const entry=read('assets/gensrpg/dungeon/entry-v1.js');
 const authored=read('assets/dungeon/dungeon-authored-runtime-167839.js');
 
 function block(id){
+  if(id==='dungeonCore200Rebuild'){
+    const external='<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>';
+    assert.equal(index.split(external).length-1,1,'D4 Core200 must load exactly once at parser time');
+    assert.ok(!index.includes('<script id="dungeonCore200Rebuild">'),'Core200 cannot be duplicated inline');
+    return read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
+  }
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing inline block '+id);
   return m[1];

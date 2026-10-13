@@ -223,7 +223,9 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 - Checkpoint de départ `checkpoint/gensrpg-start-phase11-asset-ownership-a1-2026-10-13` sur la base `dc9ad1e5396892c805ddc79c4542f29420062095`, triple-CI SUCCESS. Branche `work/gensrpg-phase11-asset-ownership-a1-2026-10-13`.
 - Vérifications étayées : PWA `manifest.webmanifest` + publication `icon-*.png → _site/icons/` dans `main.yml` ; `service-worker.js` référence plusieurs images Dungeon en cache. Les 32 fichiers `assets/img_*` restent sans propriétaire confirmé.
 - Scanner reproductible des seuls fichiers externes suivis Git (`tools/gensrpg_phase11_external_asset_refs_a1.cjs`) et sentinelle `tests/gens_phase11_external_asset_refs_a1.test.cjs` dans Architecture ; **`index.html` n'est jamais lu** conformément à §26. Voir `docs/GENSRPG_PHASE11_A1_ASSET_USAGE_2026-10-13.md`.
-- Aucun déplacement, aucune réécriture des images/chemins, aucun nouveau fallback Core. Résultats CI A1 à vérifier avant GREEN. Classement final et table ancien → nouveau après preuve des références du vrai `index.html` par ZIP exact si nécessaire.
+- **Résultat contrôlé dans le job Architecture A1** : 123 fichiers externes vérifiés, 32 images concernées, **zéro référence littérale externe** ; ceci ne prouve pas qu'elles sont inutilisées.
+- **Matrice préparée** : `docs/phase11/asset-ownership-matrix-a1.json`, vérifiée par `tests/gens_phase11_asset_ownership_matrix_a1.test.cjs`. Elle garde les 32 propriétaires indéterminés et distingue les deux icônes racine effectivement publiées des deux fichiers `Icon/` de blobs différents.
+- Aucun déplacement, aucune réécriture des images/chemins, aucun fallback Core. **Triple CI finale A1 à vérifier avant GREEN**. Classement final et table ancien → nouveau après preuve des références du vrai `index.html` par ZIP exact §26 ; aucune suppression sur une simple absence de référence.
 
 
 

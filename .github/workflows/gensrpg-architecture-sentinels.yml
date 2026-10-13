@@ -48,6 +48,9 @@ jobs:
           node tests/gens_phase11_external_asset_refs_a1.test.cjs
           node tools/gensrpg_phase11_external_asset_refs_a1.cjs
 
+      - name: Vérifier la matrice de migration A1, les icônes PWA et l'interdiction de déplacer sans preuve
+        run: node tests/gens_phase11_asset_ownership_matrix_a1.test.cjs
+
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 

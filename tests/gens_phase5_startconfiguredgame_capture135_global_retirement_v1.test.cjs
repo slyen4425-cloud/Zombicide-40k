@@ -11,7 +11,13 @@ const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
-  assert.ok(m,'missing inline block '+id);
+  assert.ok(m,'missing historical owner block '+id);
+  if(id==='gensDungeonCore01Js'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'),
+      'Dungeon Core01 must remain a parser-ordered external owner');
+    assert.equal(m[1],'','no inline Dungeon Core01 duplicate');
+    return read('assets/gensrpg/dungeon/core01-session-ui-v1.js');
+  }
   return m[1];
 }
 
@@ -21,7 +27,8 @@ function globalOwners(name){
   const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
   const ids=[];
   for(const m of blocks){
-    const hits=m[2].match(re)||[];
+    const body=m[1]==='gensDungeonCore01Js'?blockBody(m[1]):m[2];
+    const hits=body.match(re)||[];
     for(let i=0;i<hits.length;i++)ids.push(m[1]);
   }
   return ids;

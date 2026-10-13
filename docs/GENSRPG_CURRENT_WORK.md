@@ -16,6 +16,7 @@
 - **Tests de sortie :** preuve byte-exact D4→D3→D2→D1, node JS syntax, sentinelles d'inventaire/domaine, vrai navigateur Dungeon/Survie/Capture/PvP/Tactical ; trois CI Architecture/Chromium, Firefox, Tactical SUCCESS **sur le même SHA final** avant checkpoint GREEN.
 - **Invariants :** `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, laboratoires combat/exploration intacts, 32 images historiques Survie inchangées.
 - **Application D4 physique :** [workflow 38470070484](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38470070484) SUCCESS ; commit moteur `9697f21c05f3764c8d7fabffa618bd80f3395d7a`. JS + index exactement aux empreintes verrouillées ; contrôles node/rollback D4→D1, graphe JS, composition et sentinelles propriétaires PASSÉS dans le workflow. **Attendre la triple CI post-application sur un même SHA avant tout checkpoint GREEN.**
+- **Sentinelles historiques :** après externalisation, inventaire combat et tests des anciens callsites Runtime 2.00 doivent lire le code depuis le nouveau propriétaire ; helper de reconstruction D4→D3 strictement limité aux tests et aux empreintes Git certifiées. Ancienne exception de protection globale limitée aux deux occurrences préexistantes et byte-verrouillée. Aucune modification du runtime.
 - **Prochain acte :** CI Architecture/Chromium + Firefox + Tactical sur HEAD courant, correction ciblée seulement si échec. Ne pas commencer D5 avant D4 GREEN et nouvelle source §26.
 
 ## Historique

@@ -4,6 +4,7 @@ const path=require("node:path");
 
 const root=path.resolve(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"index.html"),"utf8");
+const core051=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core051-exploration-polish-v1.js"),"utf8");
 const perf=fs.readFileSync(path.join(root,"assets","gensrpg","gens-mobile-combat-performance-16781022.js"),"utf8");
 const tacticalDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-visual-dice-16781142.js"),"utf8");
 const tacticalWallDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-wall-dice-stats-16781145.js"),"utf8");
@@ -31,8 +32,12 @@ assert.match(index,/window\.rollDungeonRpDice073=function\(\)[\s\S]*?dungeonUniv
   "free RPG stat roll must still delegate to dungeonUniversalTest");
 assert.match(index,/function d10048\(chance\)\{[\s\S]*?Math\.max\(5,Math\.min\(95[\s\S]*?roll>=threshold/,
   "legacy Dungeon D100 helper must remain characterized with its 5..95 clamp");
-assert.match(index,/window\.dc051RollStatChallenge=function\([\s\S]*?Math\.max\(5,Math\.min\(95[\s\S]*?roll>=threshold/,
-  "Dungeon stat challenge must remain characterized as its own D100 consumer");
+assert.match(index,/<script id="dungeonCore051ExplorationPolish" src="assets\/gensrpg\/dungeon\/core051-exploration-polish-v1\.js"><\/script>/,
+  "Dungeon Core051 D100 owner must load synchronously from its dedicated source");
+assert.doesNotMatch(index,/window\.dc051RollStatChallenge=function\(/,
+  "Dungeon Core051 old inline definition must remain removed");
+assert.match(core051,/window\.dc051RollStatChallenge=function\([\s\S]*?Math\.max\(5,Math\.min\(95[\s\S]*?roll>=threshold/,
+  "Dungeon stat challenge must remain characterized as its own D100 consumer in the external owner");
 assert.match(index,/window\.dc201PuzzleRoll=function\(\)[\s\S]*?roll<=chance/,
   "Puzzle D100 path must remain characterized as success-on-roll<=chance");
 assert.match(index,/window\.dc211TrapTest=function\(\)[\s\S]*?roll<=chance/,

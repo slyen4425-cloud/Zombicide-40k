@@ -1,0 +1,41 @@
+name: GenSrpG Phase 12 D3 MJ72 controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13'
+    paths:
+      - '.github/workflows/gensrpg-phase12-dungeon-mj72-controlled-apply.yml'
+      - 'tools/gensrpg_phase12_dungeon_mj72_extract_apply.py'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply certified byte-exact MJ72 physical extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13'
+          test "$(git hash-object index.html)" = 'e5f8895495f969597a6c209fcc29afd66b7a0636'
+          python3 tools/gensrpg_phase12_dungeon_mj72_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_dungeon_mj72_extract_apply.py --verify
+          node --check assets/gensrpg/dungeon/mj72-scene-v1.js
+          node tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+      - name: Commit on D3 work branch only
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/dungeon/mj72-scene-v1.js tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs tests/helpers/gens_capture_team_roster_snapshot_v1.cjs tests/gens_phase2_runtime_load_graph_v11411.test.cjs tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs tests/gens_runtime_composition_guard_v11411.test.cjs tests/gens_phase2_inline_owner_manifest_v11411.test.cjs tests/gens_phase2_inline_global_last_owner_v11411.test.cjs docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json tools/gensrpg_phase12_dungeon_core051_extract_apply.py tools/gensrpg_phase12_dungeon_core01_extract_apply.py
+          git diff --cached --check
+          git commit -m "refactor(phase12): extract Dungeon MJ72 exact classic script"
+          git push origin "HEAD:$GITHUB_REF_NAME"

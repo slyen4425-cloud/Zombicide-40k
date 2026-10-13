@@ -225,7 +225,7 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 - Scanner reproductible des seuls fichiers externes suivis Git (`tools/gensrpg_phase11_external_asset_refs_a1.cjs`) et sentinelle `tests/gens_phase11_external_asset_refs_a1.test.cjs` dans Architecture ; **`index.html` n'est jamais lu** conformément à §26. Voir `docs/GENSRPG_PHASE11_A1_ASSET_USAGE_2026-10-13.md`.
 - **Résultat contrôlé dans le job Architecture A1** : 123 fichiers externes vérifiés, 32 images concernées, **zéro référence littérale externe** ; ceci ne prouve pas qu'elles sont inutilisées.
 - **Matrice préparée** : `docs/phase11/asset-ownership-matrix-a1.json`, vérifiée par `tests/gens_phase11_asset_ownership_matrix_a1.test.cjs`. Elle garde les 32 propriétaires indéterminés et distingue les deux icônes racine effectivement publiées des deux fichiers `Icon/` de blobs différents.
-- Aucun déplacement, aucune réécriture des images/chemins, aucun fallback Core. **Triple CI finale A1 à vérifier avant GREEN**. Classement final et table ancien → nouveau après preuve des références du vrai `index.html` par ZIP exact §26 ; aucune suppression sur une simple absence de référence.
+- **A1 GREEN — audit et conservation des images** : checkpoint `checkpoint/gensrpg-phase11-asset-ownership-a1-green-2026-10-13` au SHA `7ef5060a72b883ecee23ddee9c381a300f8be1b9` ; Architecture/Chromium [38377948215](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948215), Firefox [38377948201](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948201), Tactical [38377948264](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38377948264), toutes SUCCESS sur le même SHA. L'utilisateur suspend expressément tout déplacement des 32 images historiques et des assets des deux laboratoires ; le statut "conserver en place" est protégé dans la matrice et son test. **Aucune migration globale n'est revendiquée.**
 
 
 
@@ -263,6 +263,13 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - Les déplacements historiques deviennent **reportés, non bloquants pour l'étude de la Phase 12**, sous réserve de préserver les chemins chargés par l'application et les protections de la charte. Ne pas annoncer une migration complète de Phase 11.
 
 ## Phase 12 — Alléger index.html
+
+### Premier lot en cours — extraction physique Dungeon Core01
+
+- Base : dernier checkpoint A1 GREEN `7ef5060a72b883ecee23ddee9c381a300f8be1b9`, départ `checkpoint/gensrpg-start-phase12-dungeon-core01-extraction-2026-10-13`, branche `work/gensrpg-phase12-dungeon-core01-extraction-2026-10-13`.
+- Extraction visée, sans modifier le comportement : le bloc autonome `<script id="gensDungeonCore01Js">` devient un JS externe au même emplacement de chargement, propriété exclusive Dungeon (`assets/gensrpg/dungeon/core01-session-ui-v1.js`). L'original doit être reconstructible **octet par octet** ; tests sur le vrai index, browser et CI triple requise.
+- Source exacte fournie précédemment par l'utilisateur et de nouveau vérifiée sur le SHA : `index.html` 7 934 204 octets / Git blob `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441` (§26). Aucun extrait de copie inconnue, aucune modification de `main` ou des laboratoires.
+- L'extraction est un **lot isolé**, pas une refonte générale des moteurs ni du Shell. Pas de déplacement des assets historiques de Survie, aucune règle de gameplay ou compatibilité fictive.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

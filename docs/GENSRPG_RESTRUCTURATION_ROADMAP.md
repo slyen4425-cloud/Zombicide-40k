@@ -254,6 +254,14 @@ Aucun fallback inter-module.
 
 Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par collision de nom.
 
+### Orientation du propriétaire — 13 octobre 2026 : conservation sans déménagement
+
+- Les 32 `assets/img_*` historiques possiblement issus de Survie doivent **rester à leurs emplacements actuels**. Aucun déplacement, suppression ou reclassification forcée ; éventuelle recréation seulement sur décision ultérieure.
+- Les laboratoires combat dynamique (`slyen4425-cloud/GenSrpg_labo_combat_dynamique`) et exploration dynamique (`slyen4425-cloud/laboratoire_dynamique_exploration-`) conservent leur propre organisation d'assets. Ne pas les intégrer à cet inventaire du dépôt principal, ni leur imposer une arborescence commune.
+- **Réduire la Phase 11 aux garde-fous utiles** : A0 inventaire et A1 traçabilité/gel des images connues ; ne pas entreprendre de migration générale ni multiplier les micro-audits pour atteindre artificiellement une structure cible. La séparation par module reste la règle des nouveaux assets et des futures intégrations explicites.
+- A1 peut être validé comme **lot de conservation et cartographie externe**, sans prétendre avoir vérifié les consommateurs internes à `index.html` ni terminé un transfert d'assets. Aucun ZIP de l'index n'est requis tant qu'aucune consultation exacte n'est nécessaire.
+- Les déplacements historiques deviennent **reportés, non bloquants pour l'étude de la Phase 12**, sous réserve de préserver les chemins chargés par l'application et les protections de la charte. Ne pas annoncer une migration complète de Phase 11.
+
 ## Phase 12 — Alléger index.html
 
 Une fois les modules extraits, index.html doit contenir principalement :

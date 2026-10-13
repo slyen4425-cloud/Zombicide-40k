@@ -7,6 +7,7 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'),'utf8');
+const core211=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js'),'utf8');
 const corePath=path.join(root,'assets','gensrpg','core','dice-v1.js');
 const tacticalPath=path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js');
 const perfPath=path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js');
@@ -97,8 +98,12 @@ assert.match(core051,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*
   'dc051RollStatChallenge must remain deferred in the exact external Dungeon owner');
 assert.match(index,/dc201PuzzleRoll=function\(\)\{[\s\S]*?ok=roll<=chance/,
   'puzzle low-roll convention must remain deferred');
-assert.match(index,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,
-  'trap low-roll convention must remain deferred');
+assert.match(index,/<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"><\/script>/,
+  'Core211 Dungeon owner must remain loaded synchronously in the physical index');
+assert.doesNotMatch(index,/dc211TrapTest=function\(\)/,
+  'Core211 trap roll must no longer have an inline definition');
+assert.match(core211,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,
+  'trap low-roll convention must remain deferred in the external Dungeon owner');
 
 const math=Object.create(Math);
 let draws=0;

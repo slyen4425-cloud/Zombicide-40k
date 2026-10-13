@@ -40,7 +40,7 @@ const assignments=[...chains.values()].reduce((sum,chain)=>sum+chain.length,0);
 const multiOwnerGlobals=[...chains.values()].filter(chain=>chain.length>1).length;
 
 const HISTORICAL_CAPTURE_HUB_BLOB='613b4a21d83e9adcdd091be82240a3a6f9cf5bf7';
-const CURRENT_INDEX_BLOB='bf996ec4e748a4927ac6dd57cceaeaf2afcd9441';
+const CURRENT_INDEX_BLOB='2921ebadacf6f660e815d9ff7712e44cd765fbdd';
 const hubPatch=require('./fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
 assert.equal(hubPatch.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
 assert.equal(hubPatch.toBlob,HISTORICAL_CAPTURE_HUB_BLOB);

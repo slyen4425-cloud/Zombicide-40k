@@ -1,3 +1,14 @@
+# DECISION DE PERIMETRE — PHASE 11 / A1 CONSERVATION DES IMAGES — 13 OCTOBRE 2026
+
+- **Instruction propriétaire prioritaire** : conserver sur place sans déplacement ni renommage les 32 images historiques `assets/img_*` probablement liées au code Survie ; aucune migration ou reclassification complète n'est attendue pour le moment. Les recréations futures ne seront envisagées qu'après nouvelle demande.
+- **Laboratoires indépendants** : `slyen4425-cloud/GenSrpg_labo_combat_dynamique` et `slyen4425-cloud/laboratoire_dynamique_exploration-` maintiennent leurs propres assets déjà classés ; aucun audit/mouvement entre dépôts n'est autorisé dans cette Phase 11.
+- **Branche active A1** : `work/gensrpg-phase11-asset-ownership-a1-2026-10-13`, checkpoint initial `checkpoint/gensrpg-start-phase11-asset-ownership-a1-2026-10-13` SHA `dc9ad1e5396892c805ddc79c4542f29420062095`, dernier checkpoint GREEN A0 `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13` SHA `a96cb54049648bb87619a7febdcfe0388a6fb98f`.
+- **Livraison du lot** : matrice A1 + test de préservation et documentation de la décision ; les références littérales de 123 sources externes ont été auditées sans lire `index.html`. Ne pas demander l'index exact tant qu'aucune consultation/modification de son contenu n'est utile.
+- **Prochaine étape** : vérifier triple CI sur un SHA identique ; checkpoint de conservation A1 uniquement si GREEN. Puis planifier les tâches utiles de Phase 12 sans déplacement artificiel d'assets, avec propre checkpoint et branche selon §25.
+- **Protection** : `main` gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; ne pas toucher les moteurs, images, laboratoires, Core resolver ou PWA.
+
+---
+
 # CHANTIER ACTIF — PHASE 11 / A1 TRAÇABILITÉ DES ASSETS — 13 OCTOBRE 2026
 
 - **Base validée** : `dc9ad1e5396892c805ddc79c4542f29420062095`, triple-CI SUCCESS Architecture [38335242504](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242504), Firefox [38335242473](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242473), Tactical [38335242485](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242485).

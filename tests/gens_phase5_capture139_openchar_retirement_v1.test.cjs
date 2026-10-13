@@ -9,7 +9,14 @@ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2]}));
+    .map(m=>({
+    id:m[1],
+    body:m[1]==='gensDungeonCore01Js'
+      ? (()=>{assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'));
+          assert.equal(m[2],'','no duplicate inline Dungeon owner');
+          return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8')})()
+      : m[2]
+  }));
 
 function strictChain(name){
   const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
@@ -34,7 +41,7 @@ assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
 assert.doesNotMatch(capture,/return\s+openChar139\.apply\(this,arguments\)/);
 
 assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','gensDungeonCore01Js'],
-  'openChar retirement must preserve the current post-transfer startConfiguredGame ownership');
+  'openChar retirement must preserve the post-extraction ownership across inline and external scripts');
 assert.doesNotMatch(capture,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/);
 assert.match(capture,/GensCaptureSessionStartV1\.install\(/);
 assert.doesNotMatch(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);

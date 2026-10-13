@@ -59,8 +59,13 @@ function exactScript(id){
 }
 
 const dungeonUiStart=indexSource.indexOf('<style id="gensDungeonCore01Css">');
-const dungeonLegacyScriptStart=indexSource.indexOf('<script id="gensDungeonCore01Js">',dungeonUiStart);
-assert.ok(dungeonUiStart>customHeroesScriptEnd&&dungeonLegacyScriptStart>dungeonUiStart,'exact native Dungeon Core01 markup must exist');
+const dungeonOwnerTag='<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>';
+const dungeonLegacyScriptStart=indexSource.indexOf(dungeonOwnerTag,dungeonUiStart);
+assert.ok(dungeonUiStart>customHeroesScriptEnd&&dungeonLegacyScriptStart>dungeonUiStart,'exact native Dungeon Core01 markup and external owner must exist');
+assert.equal(indexSource.indexOf(dungeonOwnerTag,dungeonLegacyScriptStart+1),-1,'external Dungeon owner must be loaded once');
+assert.doesNotMatch(indexSource,/<script id="gensDungeonCore01Js">/,'retired inline Dungeon owner must be absent');
+const dungeonOwnerScript=exactScript('gensDungeonCore01Js');
+assert.equal(dungeonOwnerScript,dungeonOwnerTag,'browser sentinel must use the exact production external script tag');
 
 const spatial313Script=exactScript('dungeonCore313SpatialModel');
 const core200Script=exactScript('dungeonCore200Rebuild');
@@ -82,6 +87,7 @@ const roundTripHtml=
   '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(customHeroesScriptStart,customHeroesScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(dungeonUiStart,dungeonLegacyScriptStart)+
+  '\n'+dungeonOwnerScript+
   '\n'+spatial313Script+
   '\n'+core200Script+
   '\n'+core304Script+

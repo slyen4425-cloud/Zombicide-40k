@@ -11,7 +11,16 @@ const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"
 const originalBlob="bf996ec4e748a4927ac6dd57cceaeaf2afcd9441";
 const targetBlob="2921ebadacf6f660e815d9ff7712e44cd765fbdd";
 const runtimeBlob="df36eba9b8a62f806bc50f86f09f53c90608ce07";
-const index=read("index.html");
+const liveIndex=read("index.html");
+const core051External=Buffer.from('<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>');
+const core051Open=Buffer.from('<script id="dungeonCore051ExplorationPolish">');
+const core051Body=read("assets/gensrpg/dungeon/core051-exploration-polish-v1.js");
+const core051Position=liveIndex.indexOf(core051External);
+assert.ok(core051Position>0,"D2 external Core051 script must stay at its original parser position");
+const index=Buffer.concat([
+  liveIndex.subarray(0,core051Position),core051Open,core051Body,Buffer.from("</script>"),
+  liveIndex.subarray(core051Position+core051External.length)
+]);
 const runtime=read("assets/gensrpg/dungeon/core01-session-ui-v1.js");
 const oldOpen=Buffer.from('<script id="gensDungeonCore01Js">');
 const newTag=Buffer.from('<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>');

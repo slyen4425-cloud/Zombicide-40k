@@ -53,7 +53,7 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,94,
+assert.equal(reachable.size,95,
   'production graph must include the extracted Dungeon Core01 owner and physical Capture world/team/combat/session owners');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
   'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');

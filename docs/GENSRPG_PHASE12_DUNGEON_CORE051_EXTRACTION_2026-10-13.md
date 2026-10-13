@@ -23,3 +23,10 @@ Date : 13 octobre 2026.
 ## Exigences GREEN
 
 Le simple ajout des fichiers ou le succès de l'application contrôlée ne signifie **pas** GREEN. Exiger les tests réels Dungeon et la non-interférence Survie, Capture, PvP, Tactical ; Architecture/Chromium, Firefox et Tactical SUCCESS sur le **même SHA final**. Revoir toute CI rouge avant checkpoint. Aucune modification de `main`, des labos ou des 32 assets Survie historiques.
+
+## Application GitHub contrôlée D2 — 13 octobre 2026
+
+- [Workflow d'application 38427032779](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38427032779) : SUCCESS ; commit `b4ae5c9a2d1cbc23fa59d4f05c536c37c79ac4bc`.
+- Extraction réellement publiée sur la branche D2 uniquement : `index.html` 7 863 589 octets, SHA blob `e5f8895495f969597a6c209fcc29afd66b7a0636`, nouveau JS 47 962 octets, blob `d7ec321ffa05b8749de5d7bf9e8264e55b24f919`.
+- Ancien index D1 restauré octet exact par `--verify`; sentinelles historiques D1 conservées et adaptées au nouveau graphe physique.
+- **D2 reste en attente de triple CI complète sur un même SHA.** Les tests d'application ne suffisent pas à déclarer GREEN.

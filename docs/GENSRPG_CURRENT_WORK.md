@@ -16,6 +16,13 @@
 
 Mise à jour : 13 octobre 2026. Cette page résume le chantier courant ; les anciennes notes exhaustives sont conservées sans perte dans `docs/history/GENSRPG_CURRENT_WORK_HISTORY_PRE_D1_2026-10-13.md` (Git blob `a2e6567ec28d2a54754129515de24722228d62e3`).
 
+## Livraison physique D2 (non encore GREEN)
+
+- GitHub Actions application contrôlée : [38427032779](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38427032779) — **SUCCESS**.
+- Commit du transfert réel : `b4ae5c9a2d1cbc23fa59d4f05c536c37c79ac4bc`. `index.html` Git blob `e5f8895495f969597a6c209fcc29afd66b7a0636`, **7 863 589 octets** ; source externe `assets/gensrpg/dungeon/core051-exploration-polish-v1.js`, 47 962 octets, blob `d7ec321ffa05b8749de5d7bf9e8264e55b24f919`.
+- Le code JS a été déplacé byte-exact et chargé au même emplacement ; ancien bloc inline supprimé. Reconstruction D2 vers D1 puis D1 vers l'original vérifiée, sans changement gameplay.
+- **CI complète encore requise** sur un nouveau SHA final : Architecture/Chromium, Firefox et Tactical. Ne pas créer checkpoint D2 GREEN prématurément.
+
 ## Dernier jalon GREEN — Phase 12 / D1 Dungeon Core01
 
 - **Checkpoint GREEN** : `checkpoint/gensrpg-phase12-dungeon-core01-d1-green-2026-10-13`.

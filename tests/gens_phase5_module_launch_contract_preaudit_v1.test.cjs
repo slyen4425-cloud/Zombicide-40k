@@ -104,12 +104,21 @@ assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_user_regression_rollba
   'the user-regression rollback guard must remain permanent');
 const rollbackGuard=read('tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs');
 assert.match(rollbackGuard,/captureFix135 global startConfiguredGame owner must remain retired/);
-assert.match(rollbackGuard,/assert\.equal\(assignments,2/);
+assert.match(rollbackGuard,/assert\.equal\(inlineAssignments\+externalAssignments,2/,
+  'rollback must still enforce two historical owners after Dungeon extraction');
 assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs')),
   'the dedicated captureFix135 retirement RED/contract must remain present');
 
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2]}));
+  .map(m=>({
+    id:m[1],
+    body:m[1]==='gensDungeonCore01Js'
+      ? (()=>{const external='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+          assert.ok(m[0].includes('src="'+external+'"'),'Dungeon Core01 must remain parser-loaded');
+          assert.equal(m[2],'','no duplicate Dungeon wrapper inline');
+          return read(external)})()
+      : m[2]
+  }));
 const chain=[];
 for(const block of blocks){
   const count=[...block.body.matchAll(/window\.startConfiguredGame\s*=(?!=)/g)].length;

@@ -13,7 +13,13 @@ const SURVIVAL_ID='game_profile_zombicide_base';
 
 function scriptBody(id){
   const m=source.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
-  assert.ok(m,'missing inline block '+id);
+  assert.ok(m,'missing historical owner block '+id);
+  if(id==='gensDungeonCore01Js'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'),
+      'Dungeon Core01 must remain the same parser-ordered owner');
+    assert.equal(m[1],'','no duplicate inline Dungeon owner');
+    return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8');
+  }
   return m[1];
 }
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]

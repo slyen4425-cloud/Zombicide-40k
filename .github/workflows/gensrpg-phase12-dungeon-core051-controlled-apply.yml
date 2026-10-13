@@ -21,6 +21,7 @@ jobs:
       - name: Apply the certified Dungeon Core051 owner extraction
         run: |
           test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13'
+          test "$(git branch --show-current)" = 'work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13'
           test "$(git hash-object index.html)" = '2921ebadacf6f660e815d9ff7712e44cd765fbdd'
           python3 tools/gensrpg_phase12_dungeon_core051_extract_apply.py --apply
           python3 tools/gensrpg_phase12_dungeon_core051_extract_apply.py --verify

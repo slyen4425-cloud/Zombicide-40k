@@ -5,8 +5,18 @@ const path=require('node:path');
 
 const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2],offset:m.index}));
+const DUNGEON_CORE01_SCRIPT='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+const DUNGEON_CORE01_TAG='<script id="gensDungeonCore01Js" src="'+DUNGEON_CORE01_SCRIPT+'"></script>';
+assert.equal(source.split(DUNGEON_CORE01_TAG).length-1,1,
+  'Dungeon Core01 must be loaded exactly once as the original parser-ordered owner');
+const blocks=[...source.matchAll(/<script\\b[^>]*\\bid=["']([^"']+)["'][^>]*>([\\s\\S]*?)<\\/script>/gi)]
+  .map(m=>({
+    id:m[1],
+    body:m[1]==='gensDungeonCore01Js'
+      ? fs.readFileSync(path.join(root,DUNGEON_CORE01_SCRIPT),'utf8')
+      : m[2],
+    offset:m.index
+  }));
 
 function assignmentChain(name){
   const re=new RegExp('window\\.'+name+'\\s*=','g');
@@ -23,7 +33,7 @@ const chain=assignmentChain(target);
 const total=chain.reduce((sum,x)=>sum+x.count,0);
 const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
 
-assert.equal(total,2,'Phase 9 session-start transfer must leave only two historical inline startConfiguredGame owners');
+assert.equal(total,2,'Phase 12 must retain both historical Capture/Dungeon owners across inline/external files');
 assert.deepEqual(ids,[
   'captureFix138',
   'gensDungeonCore01Js'

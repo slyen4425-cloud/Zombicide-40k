@@ -17,7 +17,11 @@ function between(src,start,end){
   return src.slice(a,b);
 }
 
-const core=scriptById('dungeonCore211Consolidation');
+const physicalCore211='assets/gensrpg/dungeon/core211-consolidation-v1.js';
+assert.match(html,/\<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"\>\<\/script\>/,
+  'Core211 must load from the exact owner at its historic parser position');
+const core=fs.readFileSync(path.join(root,physicalCore211),'utf8');
+assert.ok(core.includes('function resolveEnemyDetection211'),'external Core211 detection owner missing');
 const detection=between(core,'function resolveEnemyDetection211','function sensePanel211');
 
 // Characterization: Core 2.11 remains owner of its own visual detection bookkeeping.

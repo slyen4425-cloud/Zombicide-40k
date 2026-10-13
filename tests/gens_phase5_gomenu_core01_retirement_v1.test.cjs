@@ -10,7 +10,15 @@ const source=read('index.html');
 const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2]}));
+  .map(m=>({
+    id:m[1],
+    body:m[1]==='gensDungeonCore01Js'
+      ? (()=>{assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'),
+          'Dungeon owner must still load at original parser location');
+          assert.equal(m[2],'','Core01 must not be duplicated inline');
+          return read('assets/gensrpg/dungeon/core01-session-ui-v1.js')})()
+      : m[2]
+  }));
 
 function chainFor(name){
   const re=new RegExp('window\\.'+name+'\\s*=','g');

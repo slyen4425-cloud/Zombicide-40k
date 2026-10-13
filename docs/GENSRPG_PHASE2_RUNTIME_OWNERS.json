@@ -204,6 +204,46 @@
       "domain": "dungeon",
       "role": "authored main/secondary graph links and return stacks"
     },
+    "assets/gensrpg/capture/builtin-seed-v1.js": {
+      "owner": "GenSrpG Monster Capture Built-in Showcase Seed V16.162",
+      "domain": "capture",
+      "role": "production-reachable non-destructive Capture sample-profile, creature and ability definitions; exact migration of inline seed, not a gameplay runtime owner"
+    },
+    "assets/gensrpg/capture/combat-core-v1.js": {
+      "owner": "GenSrpG Capture Combat Core V1",
+      "domain": "capture",
+      "role": "Single physically loaded Capture battle core owner for target selection, battle setup/state, phases, KO, status, recall, save and victory; 39 byte-exact relocated historical functions, no second engine"
+    },
+    "assets/gensrpg/capture/entry-v1.js": {
+      "owner": "GenSrpG Capture Public Entry",
+      "domain": "capture",
+      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider and delegating session initialization to GensCaptureSessionStartV1"
+    },
+    "assets/gensrpg/capture/hub-entry-v1.js": {
+      "owner": "GenSrpG Capture Hub Entry",
+      "domain": "capture",
+      "role": "active Phase 9 unique UI transition owner for Capture Hub, injected legacy rendering dependencies, no Shell or world-data ownership"
+    },
+    "assets/gensrpg/capture/screen-return-v1.js": {
+      "owner": "GenSrpG Capture Screen Return",
+      "domain": "capture",
+      "role": "active Phase 9 unique Shell screen-return provider for Capture using explicitly injected Capture-owned session/context and Hub rendering bindings"
+    },
+    "assets/gensrpg/capture/session-start-v1.js": {
+      "owner": "GenSrpG Capture Session Start",
+      "domain": "capture",
+      "role": "active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority"
+    },
+    "assets/gensrpg/capture/team-roster-v1.js": {
+      "owner": "GenSrpG Capture Team and Reserve V1",
+      "domain": "capture",
+      "role": "Single physically loaded Capture roster owner for active trainer creature team/reserve normalization, owned-instance lookup, existing hero save schema, roster moves, reserve and team display; legacy global APIs retained, byte-exact extraction"
+    },
+    "assets/gensrpg/capture/world-exploration-v1.js": {
+      "owner": "GenSrpG Capture World Exploration V1",
+      "domain": "capture",
+      "role": "Single physically loaded owner for legacy Capture world-state persistence, profile locations, day and turn progression, Hub-world rendering and exploration encounters; byte-exact relocated functions; legacy cross-script API intentionally retained"
+    },
     "assets/gensrpg/core/asset-resolver-v1.js": {
       "owner": "GenSrpG Core Assets",
       "domain": "core",
@@ -278,6 +318,11 @@
       "owner": "GenSrpG Core Text Utils",
       "domain": "core",
       "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/dungeon/core01-session-ui-v1.js": {
+      "owner": "Dungeon Core01 Session/UI",
+      "domain": "dungeon",
+      "role": "byte-identical former gensDungeonCore01Js inline IIFE, loaded synchronously at its historical parser point; Dungeon session and legacy UI only"
     },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
@@ -409,6 +454,21 @@
       "domain": "shell",
       "role": "live world-card summaries from content sources"
     },
+    "assets/gensrpg/pvp/module-launch-v1.js": {
+      "owner": "GenSrpG PvP Module Launch V1",
+      "domain": "pvp",
+      "role": "Single opt-in PvP launch provider registered through the existing Shell contract; cannot launch unprepared sessions"
+    },
+    "assets/gensrpg/pvp/session-v1.js": {
+      "owner": "GenSrpG PvP Session V1",
+      "domain": "pvp",
+      "role": "PvP-only immutable configured session state and explicit lifecycle; no gameplay rule resolution"
+    },
+    "assets/gensrpg/pvp/shell-composition-v1.js": {
+      "owner": "GenSrpG PvP Shell Composition V1",
+      "domain": "pvp",
+      "role": "One explicit Shell-to-PvP binding without navigation ownership, combat or automatic start"
+    },
     "assets/gensrpg/shell/module-launch-final-authority-v1.js": {
       "owner": "GenSrpG Shell Module Launch Final Authority",
       "domain": "shell",
@@ -423,61 +483,6 @@
       "owner": "Tactical Module Entry",
       "domain": "tactical",
       "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
-    },
-    "assets/gensrpg/capture/builtin-seed-v1.js": {
-      "owner": "GenSrpG Monster Capture Built-in Showcase Seed V16.162",
-      "domain": "capture",
-      "role": "production-reachable non-destructive Capture sample-profile, creature and ability definitions; exact migration of inline seed, not a gameplay runtime owner"
-    },
-    "assets/gensrpg/capture/combat-core-v1.js": {
-      "owner": "GenSrpG Capture Combat Core V1",
-      "domain": "capture",
-      "role": "Single physically loaded Capture battle core owner for target selection, battle setup/state, phases, KO, status, recall, save and victory; 39 byte-exact relocated historical functions, no second engine"
-    },
-    "assets/gensrpg/capture/entry-v1.js": {
-      "owner": "GenSrpG Capture Public Entry",
-      "domain": "capture",
-      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider and delegating session initialization to GensCaptureSessionStartV1"
-    },
-    "assets/gensrpg/capture/session-start-v1.js": {
-      "owner": "GenSrpG Capture Session Start",
-      "domain": "capture",
-      "role": "active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority"
-    },
-    "assets/gensrpg/capture/screen-return-v1.js": {
-      "owner": "GenSrpG Capture Screen Return",
-      "domain": "capture",
-      "role": "active Phase 9 unique Shell screen-return provider for Capture using explicitly injected Capture-owned session/context and Hub rendering bindings"
-    },
-    "assets/gensrpg/capture/hub-entry-v1.js": {
-      "owner": "GenSrpG Capture Hub Entry",
-      "domain": "capture",
-      "role": "active Phase 9 unique UI transition owner for Capture Hub, injected legacy rendering dependencies, no Shell or world-data ownership"
-    },
-    "assets/gensrpg/capture/team-roster-v1.js": {
-      "owner": "GenSrpG Capture Team and Reserve V1",
-      "domain": "capture",
-      "role": "Single physically loaded Capture roster owner for active trainer creature team/reserve normalization, owned-instance lookup, existing hero save schema, roster moves, reserve and team display; legacy global APIs retained, byte-exact extraction"
-    },
-    "assets/gensrpg/capture/world-exploration-v1.js": {
-      "owner": "GenSrpG Capture World Exploration V1",
-      "domain": "capture",
-      "role": "Single physically loaded owner for legacy Capture world-state persistence, profile locations, day and turn progression, Hub-world rendering and exploration encounters; byte-exact relocated functions; legacy cross-script API intentionally retained"
-    },
-    "assets/gensrpg/pvp/session-v1.js": {
-      "owner": "GenSrpG PvP Session V1",
-      "domain": "pvp",
-      "role": "PvP-only immutable configured session state and explicit lifecycle; no gameplay rule resolution"
-    },
-    "assets/gensrpg/pvp/module-launch-v1.js": {
-      "owner": "GenSrpG PvP Module Launch V1",
-      "domain": "pvp",
-      "role": "Single opt-in PvP launch provider registered through the existing Shell contract; cannot launch unprepared sessions"
-    },
-    "assets/gensrpg/pvp/shell-composition-v1.js": {
-      "owner": "GenSrpG PvP Shell Composition V1",
-      "domain": "pvp",
-      "role": "One explicit Shell-to-PvP binding without navigation ownership, combat or automatic start"
     }
   }
 }

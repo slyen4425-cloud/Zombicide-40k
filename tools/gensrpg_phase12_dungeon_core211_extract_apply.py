@@ -137,7 +137,6 @@ def patches_for_apply():
         assert len(d3)==17511 and blob(d3)=="bba60d921df20a114b489e17f9222e0c4f310871", "D3 script drift"
         assert target.count(d3_external)==1
         target=target.replace(d3_external,b'<script id="dungeonCore211Consolidation">'+d3+b'</script>',1)
-        assert len(target)==7863589 and blob(target)=="e5f8895495f969597a6c209fcc0ea6f7a0636" if False else True
         assert len(target)==7863589 and blob(target)=="e5f8895495f969597a6c209fcc29afd66b7a0636", "D2 rollback drift"
     d2_external=b'<script id="dungeonCore051ExplorationPolish"'''
     # no weakened assertions: the exact D2 index fingerprint is mandatory
@@ -179,7 +178,7 @@ def patches_for_apply():
 const fs=require("node:fs");
 const path=require("node:path");
 const crypto=require("node:crypto");
-const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\\\\0")).update(b).digest("hex");
+const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\\0")).update(b).digest("hex");
 const srcSha="e5f8895495f969597a6c209fcc29afd66b7a0636";
 const dstSha="18afb7fa25f86eea9993acc7f961fb7c11901168";
 const jsSha="bba60d921df20a114b489e17f9222e0c4f310871";
@@ -213,7 +212,7 @@ const vm=require("node:vm");
 const {execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p));
-const blob=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\\\\0")).update(b).digest("hex");
+const blob=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\\0")).update(b).digest("hex");
 const current=read("index.html");
 const modulePath="assets/gensrpg/dungeon/core211-consolidation-v1.js";
 const js=read(modulePath);
@@ -228,8 +227,8 @@ assert.equal(current.toString().includes(open),false,"retired inline owner absen
 const old=require("./helpers/gens_phase12_d3_rollback_v1.cjs").d2IndexBytes(root);
 assert.equal(old.length,7863589);
 assert.equal(blob(old),"e5f8895495f969597a6c209fcc29afd66b7a0636");
-assert.match(js.toString(),/window\\\\.dc211TrapTest\\\\s*=/);
-assert.match(js.toString(),/window\\\\.dungeonDebug211\\\\s*=/);
+assert.match(js.toString(),/window\\.dc211TrapTest\\s*=/);
+assert.match(js.toString(),/window\\.dungeonDebug211\\s*=/);
 new vm.Script(js.toString(),"core211-consolidation-v1.js");
 const text=current.toString();
 const at=text.indexOf(tag);

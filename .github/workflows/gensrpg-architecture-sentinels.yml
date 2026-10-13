@@ -40,6 +40,9 @@ jobs:
       - name: Vérifier la sortie architecturale PvP Phase 10 sans gameplay
         run: node tests/gens_phase10_pvp_architectural_exit_s4.test.cjs
 
+      - name: Vérifier l'extraction physique exacte du propriétaire Dungeon Core01 Phase 12
+        run: node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs
 

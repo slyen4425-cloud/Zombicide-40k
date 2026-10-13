@@ -43,6 +43,11 @@ jobs:
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs
 
+      - name: Vérifier les références externes des 32 images Phase 11 A1 sans lire index
+        run: |
+          node tests/gens_phase11_external_asset_refs_a1.test.cjs
+          node tools/gensrpg_phase11_external_asset_refs_a1.cjs
+
       - name: Verrouiller la composition réelle du runtime V114.11
         run: node tests/gens_runtime_composition_guard_v11411.test.cjs
 

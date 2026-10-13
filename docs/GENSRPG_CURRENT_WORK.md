@@ -1,5 +1,12 @@
 # CHANTIER ACTIF — PHASE 12 / D3 Dungeon MJ72 Scene (13 octobre 2026)
 
+**État D3 : extraction physique publiée, triple CI en attente sur un SHA commun.**
+
+- Application contrôlée [38459404192](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38459404192) : SUCCESS ; commit runtime exact [7a2242a](https://github.com/slyen4425-cloud/Zombicide-40k/commit/7a2242ab825b95707b671207106c73d216cfaf5f).
+- Index final : 7 836 124 octets, blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c`. Module externe MJ72 : 27 511 octets, blob `8304087b15bbbf5f71c22b7f8c916e0a78b1b905`. Code inchangé, chargement classique à sa place.
+- Gate : **NE PAS** créer D3 GREEN avant Architecture/Chromium, Firefox, Tactical SUCCESS sur le même SHA final. Les documentations sont distinctes des commits runtime.
+- Prochaine action : analyse des trois CI et correction strictement ciblée des sentinelles de cartographie/snapshots si besoin.
+
 - **Base GREEN :** `370da67fc163576c8e1a78f8b01e5beaf9236d64` ; triple CI Architecture/Chromium [38431606561](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606561), Firefox [38431606505](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606505) et Tactical [38431606512](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606512), toutes SUCCESS sur le même SHA. Dernier checkpoint D2 GREEN : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` sur `06c3608f36d020ac4f470de4dbe4ca272da3b897`.
 - **Checkpoint de départ D3 :** `checkpoint/gensrpg-start-phase12-dungeon-mj72-d3-extraction-2026-10-13` à `370da67fc163576c8e1a78f8b01e5beaf9236d64`.
 - **Branche dédiée D3 :** `work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13`, depuis exactement cette base. Aucun autre lot ouvert par la présente reprise.
@@ -9,7 +16,7 @@
 - **Risque principal :** déclarations `const` / fonctions top-level et dépendances entre scripts classiques ; protéger la portée globale lexicale et l'ordre d'exécution, éviter `type=module`, IIFE ou chargement différé. Aucun changement comportemental.
 - **Invariants :** `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, Survie, Capture, PvP, Tactical, Core et Shell inchangés, deux laboratoires intacts, 32 images historiques Survie intactes.
 - **Validation :** reconstruction octet exacte D3 → D2 → D1, JS syntaxique, manifeste propriétaires, graphe de scripts, tests navigateur Dungeon/Survie/Capture/PvP/Tactical et triple CI sur même SHA. **D3 non GREEN avant la CI complète.**
-- **État :** D3 ouvert, checkpoint/branche créés, source ZIP certifiée ; extraction physique non encore publiée. Prochaine étape : application contrôlée et sentinelles.
+- **État :** D3 extrait et publié, validations complètes en cours ; pas encore de checkpoint GREEN.
 
 ---
 

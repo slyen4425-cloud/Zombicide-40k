@@ -14,3 +14,9 @@ Date : 13 octobre 2026.
 - Adapter uniquement l'inventaire propriétaire vivant, la composition directe et les snapshots historiques, sans affaiblir les tests.
 - GREEN seulement après triple CI Architecture/Chromium, Firefox, Tactical SUCCESS **sur le même SHA** et création d'un checkpoint final.
 - Ne modifier ni `main` gelé, ni les laboratoires combat/exploration, ni les images Survie historiques.
+
+## Livraison physique D3 — en validation
+
+- Workflow d'application [38459404192](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38459404192) SUCCESS ; commit moteur 7a2242ab825b95707b671207106c73d216cfaf5f.
+- Indices : index 7 836 124 octets Git blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c` ; source externe MJ72 27 511 octets Git blob `8304087b15bbbf5f71c22b7f8c916e0a78b1b905`.
+- Checkpoints D1 et D2, preuves exactes et tests initiaux validés. Attente des CI structurelles et navigateur sur un même commit final. Pas de checkpoint D3 GREEN à ce stade.

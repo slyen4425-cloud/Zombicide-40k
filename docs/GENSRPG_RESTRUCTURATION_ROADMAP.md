@@ -281,6 +281,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Checkpoint GREEN** : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` au SHA `06c3608f36d020ac4f470de4dbe4ca272da3b897`, Architecture/Chromium [38428721362](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721362), Firefox [38428721028](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721028), Tactical [38428721250](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721250) **SUCCESS sur le même SHA**.
 - Phase 12 globale **non terminée**. Prochaine extraction D3 seulement après checkpoint de départ propre, cartographie propriétaire et nouvel index exact demandé §26. Aucun autre domaine, labos ni assets Survie modifiés.
 
+### D3 EN VALIDATION — extraction Dungeon MJ72 Scene (13 octobre 2026)
+
+- Branche isolée `work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13` et checkpoint §25 `checkpoint/gensrpg-start-phase12-dungeon-mj72-d3-extraction-2026-10-13` depuis la base triple CI GREEN `370da67fc163576c8e1a78f8b01e5beaf9236d64`.
+- Source §26 ZIP `ar.zip` : 7 863 589 octets, blob `e5f8895495f969597a6c209fcc29afd66b7a0636` certifié.
+- Extraction byte-identique `dungeonMj72_2Script` (27 511 octets) vers `assets/gensrpg/dungeon/mj72-scene-v1.js` ; index final 7 836 124 octets, blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c`. Ordre et portée script classique conservés.
+- Workflow d'application [38459404192](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38459404192) SUCCESS, SHA de livraison `7a2242ab825b95707b671207106c73d216cfaf5f`.
+- **Statut : NON GREEN** jusqu'aux trois CI complètes sur le même SHA final et création du checkpoint conforme. Aucun nouveau lot ouvert ni travail sur `main` / labos.
+
 Une fois les modules extraits, index.html doit contenir principalement :
 
 - structure HTML minimale ;

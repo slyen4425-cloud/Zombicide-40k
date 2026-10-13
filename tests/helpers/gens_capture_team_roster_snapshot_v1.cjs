@@ -20,6 +20,21 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // Phase 12 D2: restore only the exact Core051 IIFE before the pre-existing
+ // D1, PvP and Capture history reversions. Never affect the active runtime.
+ if(hash(index)==='e5f8895495f969597a6c209fcc29afd66b7a0636'){
+  assert.equal(index.length,7863589,'D2 extracted index length');
+  const tag=Buffer.from('<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0,'D2 Core051 owner load must be present');
+  assert.equal(index.indexOf(tag,at+tag.length),-1,'D2 Core051 must load only once');
+  const body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'));
+  assert.equal(body.length,47962,'D2 Core051 source length');
+  assert.equal(hash(body),'d7ec321ffa05b8749de5d7bf9e8264e55b24f919','D2 Core051 source Git blob');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore051ExplorationPolish">'),body,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7911489,'D2 rolled back to D1 index length');
+  assert.equal(hash(index),'2921ebadacf6f660e815d9ff7712e44cd765fbdd','D2 rolled back to D1 exact index');
+ }
  // Phase 12 moved one unchanged Dungeon IIFE out of the heavy HTML.
  // Reconstitute the exact old index ONLY for historical Capture snapshots.
  // Never install this rollback in production or change the old Capture hashes.

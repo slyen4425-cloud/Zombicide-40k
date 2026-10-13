@@ -218,6 +218,14 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 - **Aucun asset déplacé et aucune référence de production réécrite.** La vérification du contenu exact de `index.html` est soumise au §26 avant audit de consommation ou migration, pour ne pas confondre emplacement et usage réel.
 - **A0 validé** : checkpoint `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13` au SHA `a96cb54049648bb87619a7febdcfe0388a6fb98f` ; Architecture/Chromium [38300391035](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391035), Firefox [38300391129](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391129), Tactical [38300391095](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391095), SUCCESS sur le même SHA. Détails : `docs/GENSRPG_PHASE11_A0_ASSET_INVENTORY_2026-10-12.md`. **La Phase 11 n'est pas terminée** ; prochain lot : preuves de consommation réelle et cartographie `ancien → nouveau` avant migration.
 
+### A1 en cours — traçabilité des 32 assets racine et chemins PWA
+
+- Checkpoint de départ `checkpoint/gensrpg-start-phase11-asset-ownership-a1-2026-10-13` sur la base `dc9ad1e5396892c805ddc79c4542f29420062095`, triple-CI SUCCESS. Branche `work/gensrpg-phase11-asset-ownership-a1-2026-10-13`.
+- Vérifications étayées : PWA `manifest.webmanifest` + publication `icon-*.png → _site/icons/` dans `main.yml` ; `service-worker.js` référence plusieurs images Dungeon en cache. Les 32 fichiers `assets/img_*` restent sans propriétaire confirmé.
+- Scanner reproductible des seuls fichiers externes suivis Git (`tools/gensrpg_phase11_external_asset_refs_a1.cjs`) et sentinelle `tests/gens_phase11_external_asset_refs_a1.test.cjs` dans Architecture ; **`index.html` n'est jamais lu** conformément à §26. Voir `docs/GENSRPG_PHASE11_A1_ASSET_USAGE_2026-10-13.md`.
+- Aucun déplacement, aucune réécriture des images/chemins, aucun nouveau fallback Core. Résultats CI A1 à vérifier avant GREEN. Classement final et table ancien → nouveau après preuve des références du vrai `index.html` par ZIP exact si nécessaire.
+
+
 
 Créer :
 

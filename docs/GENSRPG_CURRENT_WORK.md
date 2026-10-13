@@ -1,6 +1,6 @@
 # GenSrpG — Point de reprise LIVE / Phase 12 D4 (13 octobre 2026)
 
-**État actuel : D4 préparé, extraction physique NON appliquée, aucun checkpoint GREEN D4.**
+**État actuel : extraction physique D4 publiée et testée, en attente du triple GREEN. Aucun checkpoint final D4 créé.**
 
 ## Références obligatoires
 
@@ -15,7 +15,8 @@
 - **Risques protégés :** intercepteur de lancement Dungeon, ordre de chargement, session, rechargement, Capture/Survie, Tactical, PvP non jouable, ancien graphe JS et snapshots. Aucun changement fonctionnel, aucune refonte.
 - **Tests de sortie :** preuve byte-exact D4→D3→D2→D1, node JS syntax, sentinelles d'inventaire/domaine, vrai navigateur Dungeon/Survie/Capture/PvP/Tactical ; trois CI Architecture/Chromium, Firefox, Tactical SUCCESS **sur le même SHA final** avant checkpoint GREEN.
 - **Invariants :** `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, laboratoires combat/exploration intacts, 32 images historiques Survie inchangées.
-- **Prochain acte :** préparer le script d'application contrôlée et ses régressions, publier uniquement sur branche D4, puis analyser les tests. Ne pas commencer D5 avant D4 GREEN et nouvelle source §26.
+- **Application D4 physique :** [workflow 38470070484](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38470070484) SUCCESS ; commit moteur `9697f21c05f3764c8d7fabffa618bd80f3395d7a`. JS + index exactement aux empreintes verrouillées ; contrôles node/rollback D4→D1, graphe JS, composition et sentinelles propriétaires PASSÉS dans le workflow. **Attendre la triple CI post-application sur un même SHA avant tout checkpoint GREEN.**
+- **Prochain acte :** CI Architecture/Chromium + Firefox + Tactical sur HEAD courant, correction ciblée seulement si échec. Ne pas commencer D5 avant D4 GREEN et nouvelle source §26.
 
 ## Historique
 

@@ -10,3 +10,7 @@ Attention : Core104 marqué actif dans la cartographie, mais `type="application/
 - Restaurer les snapshots historiques D1/D2 strictement par un rollback de ce seul changement d'index ; pas de nouvelles implémentations/autorités runtime.
 - Vérifier source et cible byte-exact, syntaxe JS, graphe et propriété, vraies CI navigateur Architecture/Chromium, Firefox et Tactical sur le **même SHA final**.
 - Lot non GREEN avant checkpoint explicite sur SHA triple-CI SUCCESS. `main`, labos, gameplay, images historiques protégés.
+
+## Livraison GitHub
+
+Workflow de transformation [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) SUCCESS ; commit source [a4e8723](https://github.com/slyen4425-cloud/Zombicide-40k/commit/a4e8723ab6a9d4cada787f939b94faad503ffa0c). Nouveau fichier JS 17 511 octets, sha blob bba60d921df20a114b489e17f9222e0c4f310871 ; index 7 846 135 octets, sha blob 18afb7fa25f86eea9993acc7f961fb7c11901168. Tests de rollback et propriétaire passés dans ce workflow. **CI triple finale encore requise pour qualifier le lot GREEN.**

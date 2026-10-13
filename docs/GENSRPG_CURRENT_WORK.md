@@ -14,6 +14,12 @@
 - **Garde-fous :** script de transformation SHA/longueur verrouillés ; réversion exacte D3 → D2 → D1 → source, sentinelles historisées, vrais tests navigateur multi-modules + CI Architecture/Chromium, Firefox et Tactical SUCCESS sur un même SHA ; checkpoint D3 GREEN uniquement après succès.
 - **État :** la transformation contrôlée est préparée, non présumée validée. Seule la branche D3 peut recevoir les changements.
 
+## Résultat appliqué (D3 non GREEN)
+
+- **Extraction réelle publiée** par le workflow [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) : SUCCESS après correction d'un échappement dans le test de blob Git. Commit runtime : `a4e8723ab6a9d4cada787f939b94faad503ffa0c`.
+- Nouveau `index.html` Git blob `18afb7fa25f86eea9993acc7f961fb7c11901168`, **7 846 135 octets**. Nouveau JS Dungeon : 17 511 octets, blob `bba60d921df20a114b489e17f9222e0c4f310871`. Ancien IIFE inline non chargé ; ordre de chargement conservé.
+- **Triple CI encore à vérifier sur un SHA unique avec ce nouveau runtime**. Ne pas annoncer GREEN avant Architecture/Chromium, Firefox et Tactical SUCCESS.
+
 ## Historique et protections
 
 - D2 GREEN : `06c3608f36d020ac4f470de4dbe4ca272da3b897` ; Architecture/Chromium [38428721362](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721362), Firefox [38428721028](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721028), Tactical [38428721250](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721250) SUCCESS.

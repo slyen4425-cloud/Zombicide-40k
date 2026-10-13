@@ -68,7 +68,10 @@ const dungeonOwnerScript=exactScript('gensDungeonCore01Js');
 assert.equal(dungeonOwnerScript,dungeonOwnerTag,'browser sentinel must use the exact production external script tag');
 
 const spatial313Script=exactScript('dungeonCore313SpatialModel');
-const core200Script=exactScript('dungeonCore200Rebuild');
+const core200Tag=exactScript('dungeonCore200Rebuild');
+assert.equal(core200Tag,'<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>',
+  'browser harness must use the exact current classic external Dungeon Core200 tag');
+const core200Script=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
 const core304Script=exactScript('dungeonCore304DefeatExit');
 const core307Script=exactScript('dungeonCore307CriticalResumeFix');
 const core308Script=exactScript('dungeonCore308NewRunReset');
@@ -89,7 +92,7 @@ const roundTripHtml=
   '\n'+indexSource.slice(dungeonUiStart,dungeonLegacyScriptStart)+
   '\n'+dungeonOwnerScript+
   '\n'+spatial313Script+
-  '\n'+core200Script+
+  '\n'+core200Tag+
   '\n'+core304Script+
   '\n'+core307Script+
   '\n'+core308Script+

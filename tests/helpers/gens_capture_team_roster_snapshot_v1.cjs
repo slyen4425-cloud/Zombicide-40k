@@ -20,6 +20,23 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // Phase 12 moved one unchanged Dungeon IIFE out of the heavy HTML.
+ // Reconstitute the exact old index ONLY for historical Capture snapshots.
+ // Never install this rollback in production or change the old Capture hashes.
+ if(hash(index)==='2921ebadacf6f660e815d9ff7712e44cd765fbdd'){
+  assert.equal(index.length,7911489,'Phase 12 current index length');
+  const tag=Buffer.from('<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>');
+  const oldOpen=Buffer.from('<script id="gensDungeonCore01Js">');
+  const at=index.indexOf(tag);
+  assert.ok(at>=0,'Phase 12 Dungeon single owner tag missing');
+  assert.equal(index.indexOf(tag,at+tag.length),-1,'Phase 12 Dungeon owner double-loaded');
+  const owner=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'));
+  assert.equal(owner.length,22768,'Phase 12 relocated owner length');
+  assert.equal(hash(owner),'df36eba9b8a62f806bc50f86f09f53c90608ce07','Phase 12 relocated owner fingerprint');
+  index=Buffer.concat([index.subarray(0,at),oldOpen,owner,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7934204,'Phase 12 restored S2 index length');
+  assert.equal(hash(index),'bf996ec4e748a4927ac6dd57cceaeaf2afcd9441','Phase 12 restored S2 original index');
+ }
  // Phase 10 S2 adds a tested PvP-only tail; remove only that exact 449-byte
  // addition from this READ-ONLY Phase 9 historical snapshot. Runtime unchanged.
  if(hash(index)==='bf996ec4e748a4927ac6dd57cceaeaf2afcd9441'){

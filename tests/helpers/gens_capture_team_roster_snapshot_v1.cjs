@@ -20,6 +20,11 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // D3 is an exact later Dungeon-only extraction. Reverse it before D2,
+ // D1 and Capture historical snapshot byte assertions.
+ if(hash(index)==='18afb7fa25f86eea9993acc7f961fb7c11901168'){
+  index=require('./gens_phase12_d3_rollback_v1.cjs').d2IndexBytes(root,index);
+ }
  // Phase 12 D2: restore only the exact Core051 IIFE before the pre-existing
  // D1, PvP and Capture history reversions. Never affect the active runtime.
  if(hash(index)==='e5f8895495f969597a6c209fcc29afd66b7a0636'){

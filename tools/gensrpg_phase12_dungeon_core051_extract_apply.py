@@ -124,6 +124,12 @@ const index=Buffer.concat([
 
 def verify():
     new=INDEX.read_bytes()
+    d3_external=b'<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>'
+    if d3_external in new:
+        assert new.count(d3_external)==1 and len(new)==7846135 and sha(new)=="18afb7fa25f86eea9993acc7f961fb7c11901168","D3 index drift"
+        d3=(ROOT/"assets/gensrpg/dungeon/core211-consolidation-v1.js").read_bytes()
+        assert len(d3)==17511 and sha(d3)=="bba60d921df20a114b489e17f9222e0c4f310871","D3 code drift"
+        new=new.replace(d3_external,b'<script id="dungeonCore211Consolidation">'+d3+b'</script>',1)
     runtime=OUT.read_bytes()
     pinned(new,DST_LEN,DST_SHA,"current physical index")
     pinned(runtime,JS_LEN,JS_SHA,"external Core051")

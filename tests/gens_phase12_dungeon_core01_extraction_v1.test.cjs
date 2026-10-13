@@ -11,7 +11,7 @@ const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"
 const originalBlob="bf996ec4e748a4927ac6dd57cceaeaf2afcd9441";
 const targetBlob="2921ebadacf6f660e815d9ff7712e44cd765fbdd";
 const runtimeBlob="df36eba9b8a62f806bc50f86f09f53c90608ce07";
-const liveIndex=read("index.html");
+const liveIndex=require("./helpers/gens_phase12_d3_rollback_v1.cjs").d2IndexBytes(root);
 const core051External=Buffer.from('<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>');
 const core051Open=Buffer.from('<script id="dungeonCore051ExplorationPolish">');
 const core051Body=read("assets/gensrpg/dungeon/core051-exploration-polish-v1.js");

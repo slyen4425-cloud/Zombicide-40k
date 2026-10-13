@@ -97,6 +97,14 @@ def verify():
     # D2 is an independent downstream physical extraction. Undo only its
     # verified external tag in memory to inspect the immutable D1 state.
     target=INDEX.read_bytes()
+    d3_external=b'<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>'
+    if d3_external in target:
+        assert len(target)==7846135 and blob(target)=="18afb7fa25f86eea9993acc7f961fb7c11901168", "D3 physical index drift"
+        d3=(ROOT/"assets/gensrpg/dungeon/core211-consolidation-v1.js").read_bytes()
+        assert len(d3)==17511 and blob(d3)=="bba60d921df20a114b489e17f9222e0c4f310871", "D3 script drift"
+        assert target.count(d3_external)==1
+        target=target.replace(d3_external,b'<script id="dungeonCore211Consolidation">'+d3+b'</script>',1)
+        assert len(target)==7863589 and blob(target)=="e5f8895495f969597a6c209fcc29afd66b7a0636", "D2 rollback drift"
     d2_external=b'<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>'
     if d2_external in target:
         assert target.count(d2_external)==1, "D2 owner must load once"
@@ -129,7 +137,17 @@ def verify():
                         ("reachable.size,94,","reachable.size,95,")
                     ]:
                         expected_after=expected_after.replace(before_count,after_count)
-            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"
+            if d3_external in INDEX.read_bytes():
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="18afb7fa25f86eea9993acc7f961fb7c11901168"
+                elif path==PATH_GRAPH:
+                    for b,a in [
+                        ("size,51,","size,52,"),
+                        ("allJs.length,109,","allJs.length,110,"),
+                        ("phase2Js.length,73,","phase2Js.length,74,"),
+                        ("reachable.size,95,","reachable.size,96,"),
+                    ]: expected_after=expected_after.replace(b,a)
+            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2/D3"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 
 if __name__=="__main__":

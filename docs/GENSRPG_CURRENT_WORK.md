@@ -1,3 +1,18 @@
+# CHANTIER ACTIF — PHASE 12 / D3 Dungeon MJ72 Scene (13 octobre 2026)
+
+- **Base GREEN :** `370da67fc163576c8e1a78f8b01e5beaf9236d64` ; triple CI Architecture/Chromium [38431606561](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606561), Firefox [38431606505](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606505) et Tactical [38431606512](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38431606512), toutes SUCCESS sur le même SHA. Dernier checkpoint D2 GREEN : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` sur `06c3608f36d020ac4f470de4dbe4ca272da3b897`.
+- **Checkpoint de départ D3 :** `checkpoint/gensrpg-start-phase12-dungeon-mj72-d3-extraction-2026-10-13` à `370da67fc163576c8e1a78f8b01e5beaf9236d64`.
+- **Branche dédiée D3 :** `work/gensrpg-phase12-dungeon-mj72-d3-extraction-2026-10-13`, depuis exactement cette base. Aucun autre lot ouvert par la présente reprise.
+- **Preuve source §26 :** ZIP utilisateur `ar.zip`, entrée `index.html(4).txt` : 7 863 589 octets, blob Git `e5f8895495f969597a6c209fcc29afd66b7a0636`, copie exacte de l'index sur le SHA de départ.
+- **Propriétaire ciblé :** bloc actif classique `<script id="dungeonMj72_2Script">`, propriétaire Dungeon (scene state, helpers rareté/contenu, éléments de scène), sans `crossDomains` dans `docs/GENSRPG_PHASE2_INLINE_OWNERS.json`.
+- **Mouvement prévu :** 27 511 octets de JavaScript, blob `8304087b15bbbf5f71c22b7f8c916e0a78b1b905`, vers `assets/gensrpg/dungeon/mj72-scene-v1.js`, avec tag `<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>` au même emplacement parser, code inchangé et script classique conservé. Index attendu 7 836 124 octets, blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c`.
+- **Risque principal :** déclarations `const` / fonctions top-level et dépendances entre scripts classiques ; protéger la portée globale lexicale et l'ordre d'exécution, éviter `type=module`, IIFE ou chargement différé. Aucun changement comportemental.
+- **Invariants :** `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`, Survie, Capture, PvP, Tactical, Core et Shell inchangés, deux laboratoires intacts, 32 images historiques Survie intactes.
+- **Validation :** reconstruction octet exacte D3 → D2 → D1, JS syntaxique, manifeste propriétaires, graphe de scripts, tests navigateur Dungeon/Survie/Capture/PvP/Tactical et triple CI sur même SHA. **D3 non GREEN avant la CI complète.**
+- **État :** D3 ouvert, checkpoint/branche créés, source ZIP certifiée ; extraction physique non encore publiée. Prochaine étape : application contrôlée et sentinelles.
+
+---
+
 # GenSrpG — point de reprise LIVE
 
 Date : 13 octobre 2026. **Phase 12 en cours — D1 et D2 GREEN.** Aucun D3 ouvert.

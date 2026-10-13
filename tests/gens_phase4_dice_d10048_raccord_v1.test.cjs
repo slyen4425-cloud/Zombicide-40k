@@ -6,6 +6,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'),'utf8');
 const corePath=path.join(root,'assets','gensrpg','core','dice-v1.js');
 const tacticalPath=path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js');
 const perfPath=path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js');
@@ -88,8 +89,12 @@ assert.match(index,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*
   'dungeonUniversalTest must remain deferred');
 assert.match(index,/function showSpecialD6Roll\([\s\S]*?Math\.random\(\)\*6/,
   'showSpecialD6Roll must remain deferred');
-assert.match(index,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*?threshold=101-chance,roll=1\+Math\.floor\(Math\.random\(\)\*100\)/,
-  'dc051RollStatChallenge must remain deferred');
+assert.match(index,/<script id="dungeonCore051ExplorationPolish" src="assets\/gensrpg\/dungeon\/core051-exploration-polish-v1\.js"><\/script>/,
+  'Core051 Dungeon owner remains loaded in the real index');
+assert.doesNotMatch(index,/dc051RollStatChallenge=function\(kind,id,chance\)/,
+  'Core051 inline stat challenge owner must be retired');
+assert.match(core051,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*?threshold=101-chance,roll=1\+Math\.floor\(Math\.random\(\)\*100\)/,
+  'dc051RollStatChallenge must remain deferred in the exact external Dungeon owner');
 assert.match(index,/dc201PuzzleRoll=function\(\)\{[\s\S]*?ok=roll<=chance/,
   'puzzle low-roll convention must remain deferred');
 assert.match(index,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,

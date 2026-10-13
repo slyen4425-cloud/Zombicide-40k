@@ -36,7 +36,17 @@ assert.match(fix139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)
 assert.match(core200,/const\s+gensDungeonStartConfiguredGame200V1\s*=\s*async\s+function/,'Dungeon Core 2.00 must retain its stable local Dungeon launch dispatcher');
 assert.doesNotMatch(core200,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core 2.00 global launch owner must remain retired');
 
-const assignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
-assert.equal(assignments,2,'rollback guard must preserve the reduced two-owner inline launch chain after Capture139 retirement');
+const dungeonTag='<script id="gensDungeonCore01Js" src="assets/gensrpg/dungeon/core01-session-ui-v1.js"></script>';
+assert.equal(html.split(dungeonTag).length-1,1,
+  'the Dungeon launch wrapper must retain its original parser position and run once');
+const dungeonCore01=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8');
+assert.match(dungeonCore01,/window\.startConfiguredGame\s*=\s*async\s+function/,
+  'Dungeon Core01 external owner must still publish the same historical wrapper');
+const inlineAssignments=(html.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
+const externalAssignments=(dungeonCore01.match(/window\.startConfiguredGame\s*=\s*async\s+function/g)||[]).length;
+assert.equal(inlineAssignments,1,'only Capture138 remains an inline historical launch owner');
+assert.equal(externalAssignments,1,'Dungeon Core01 remains the sole moved historical launch owner');
+assert.equal(inlineAssignments+externalAssignments,2,
+  'rollback guard must preserve both historical owners across inline and external scripts');
 
-console.log('Phase 5 user regression rollback guard: Capture135 responsibilities preserved, Capture139 global owner retired, 2-owner inline chain preserved, Core200 local dispatcher retained');
+console.log('Phase 5 user regression rollback guard: Capture135 responsibilities preserved, Capture139 global owner retired, 2-owner chain preserved across inline/external scripts, Core200 local dispatcher retained');

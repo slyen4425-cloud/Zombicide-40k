@@ -1,0 +1,512 @@
+{
+  "schemaVersion": 1,
+  "phase": 11,
+  "lot": "A1",
+  "ownerDecision": "deferred-until-exact-index-and-profile-consumer-proof",
+  "baseline": "dc9ad1e5396892c805ddc79c4542f29420062095",
+  "sourceInventory": "docs/phase11/asset-inventory-a0.json",
+  "externalAudit": {
+    "tool": "tools/gensrpg_phase11_external_asset_refs_a1.cjs",
+    "scannedTrackedSources": 123,
+    "imagesWithLiteralReferences": 0,
+    "literalHits": 0,
+    "notCovered": [
+      "index.html",
+      "persistent user profiles",
+      "exports/imports",
+      "dynamic source construction"
+    ]
+  },
+  "migrationApproved": false,
+  "unnamedAssets": [
+    {
+      "existingPath": "assets/img_01_53b38c99.png",
+      "gitBlob": "4f593cc52a923f823ffae4c1cb8cb625f6bc3791",
+      "bytes": 2719706,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_02_289f15e8.png",
+      "gitBlob": "b8c0c6ee4076f84f94c722994f02fe7fd198d30b",
+      "bytes": 2881890,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_03_de27e5a7.png",
+      "gitBlob": "d67886830249d4ddaa52f1c22cd0e7f58d8ee123",
+      "bytes": 2856491,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_04_25156b9a.jpg",
+      "gitBlob": "84825b552c758ea6c8f559d5687d1ee642d7ec7a",
+      "bytes": 143283,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_05_184ce6b8.jpg",
+      "gitBlob": "32205f172e68fe614b602ef71ecb21ff5b151151",
+      "bytes": 129721,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_06_a737b5eb.jpg",
+      "gitBlob": "1a384639082142e7242dc867e9ae084151be3b73",
+      "bytes": 137267,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_07_1390c30b.png",
+      "gitBlob": "642d320e26e69c5c75d974a6adc4ccd9959e87a8",
+      "bytes": 471125,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_08_8a4a46dc.png",
+      "gitBlob": "93d20e90b2ac479d3a48c46050c5537f6e2222b8",
+      "bytes": 599994,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_09_00b03dce.png",
+      "gitBlob": "dc8e0beaa894959b03b3fa728de922dcbdfb460d",
+      "bytes": 568003,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_10_e940d82d.png",
+      "gitBlob": "d9e32dfc09314299aa3410b5ccd1b16586f3be7c",
+      "bytes": 568313,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_11_d5bcb253.png",
+      "gitBlob": "ef28ce3bbd4ea6cc423be911c0c4356b5dd9fa05",
+      "bytes": 536281,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_12_3cb0d253.png",
+      "gitBlob": "8dd183abe718ee4c65302062e744be284fc73a8b",
+      "bytes": 494217,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_13_dc98a4bc.png",
+      "gitBlob": "61da5b262f9ea169229f225d33d475bfcf589561",
+      "bytes": 579233,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_14_48aa449f.png",
+      "gitBlob": "19ae8e789d917eccab7530b6b9b4b78087faffc5",
+      "bytes": 538056,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_15_450056b8.png",
+      "gitBlob": "4ba50eb52cec57b87464fbfee273eb5db61ab7bf",
+      "bytes": 534961,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_16_948b8374.png",
+      "gitBlob": "55ed08c2f2f9345f8c6f135590cd70130397f192",
+      "bytes": 530264,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_17_dac8fa45.png",
+      "gitBlob": "938b82b8c977f643aca024a4c000ce80eae31cee",
+      "bytes": 547879,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_18_f09add3b.jpg",
+      "gitBlob": "de5018e3e27d2d6bf398541200d85dc948444e5c",
+      "bytes": 206370,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_19_bf3fd8f3.jpg",
+      "gitBlob": "833cbce9f90d3a8c4bf774a5caec295df5e7bdf6",
+      "bytes": 343632,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_20_35f03b5e.jpg",
+      "gitBlob": "aa21680f5171e4597dd14268772eb786656b42e2",
+      "bytes": 189431,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_21_f4f05222.jpg",
+      "gitBlob": "613c9e3dd64baa7e5978216e6303a7ae2fcfa472",
+      "bytes": 189489,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_22_65b48717.jpg",
+      "gitBlob": "69d01454c4ac5046ac5a7396a7a9c500959c6395",
+      "bytes": 334479,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_23_0095840d.jpg",
+      "gitBlob": "2fe41618ac54b1f16221b5b4f56f5de068acbb11",
+      "bytes": 214656,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_24_5ab892ea.jpg",
+      "gitBlob": "bb3bbd4a4e6107b7c14d2e203c2d0b79de5a3d9f",
+      "bytes": 207861,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_25_4d75c641.jpg",
+      "gitBlob": "aa10347db242ff1e27c346aef54a3734fb315aee",
+      "bytes": 196821,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_26_ff05a090.png",
+      "gitBlob": "4174a5b7557fc5162f02c7ead014cd0e3482c52c",
+      "bytes": 228972,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_27_f3d5c020.png",
+      "gitBlob": "e786a7774172a835b6b66580c5175391d012c597",
+      "bytes": 243757,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_28_1395802a.png",
+      "gitBlob": "0397b351b098d17c2e35c744f658cd7c44e5933d",
+      "bytes": 241470,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_29_f102b709.png",
+      "gitBlob": "3be132fc5bb6cba13f1839cd695ea48950098d99",
+      "bytes": 246647,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_30_e02b021c.png",
+      "gitBlob": "e5dae959bce7dda2471c04246f8a3e3acb6d71fb",
+      "bytes": 241211,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_31_a7de1a50.jpg",
+      "gitBlob": "2ae030ef340ecc017462cc66ecbf4dc8fdc7e5cb",
+      "bytes": 44962,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    },
+    {
+      "existingPath": "assets/img_32_29232d11.jpg",
+      "gitBlob": "0b680597974fb35bf7742e5e3f78c656d4cd4872",
+      "bytes": 16820,
+      "externalLiteralRefs": 0,
+      "consumer": "not-established",
+      "owner": "not-established",
+      "proposedRepoDestination": null,
+      "legacyCompatibility": "no changes allowed",
+      "requiredEvidence": [
+        "exact-index-§26",
+        "persistent-profile/export consumers where relevant"
+      ]
+    }
+  ],
+  "pwaIcons": [
+    {
+      "source": "icon-192.png",
+      "sourceBlob": "a8e5c257eb91e77d805708393d2af24ab4a06a72",
+      "publishedPath": "icons/icon-192.png",
+      "owner": "shell-pwa",
+      "proof": [
+        "manifest.webmanifest",
+        "github-pages-main-workflow"
+      ]
+    },
+    {
+      "source": "icon-512.png",
+      "sourceBlob": "34ff30639e8cbc0f2c366c6d82049772d38934fd",
+      "publishedPath": "icons/icon-512.png",
+      "owner": "shell-pwa",
+      "proof": [
+        "manifest.webmanifest",
+        "github-pages-main-workflow"
+      ]
+    },
+    {
+      "source": "Icon/icon-192.png",
+      "sourceBlob": "6737685b59a9b1825e75dbc54e5c4ab6dde24f8d",
+      "publishedPath": null,
+      "owner": "unknown",
+      "proof": [
+        "separate-nonidentical-blob"
+      ]
+    },
+    {
+      "source": "Icon/icon-512.png",
+      "sourceBlob": "6bf28f71982effc1e5695960af1fd121b748c254",
+      "publishedPath": null,
+      "owner": "unknown",
+      "proof": [
+        "separate-nonidentical-blob"
+      ]
+    }
+  ],
+  "warning": "No external literal references found does not imply any asset is unused. No moved files or rewritten URLs."
+}

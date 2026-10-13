@@ -209,14 +209,14 @@ Critère de sortie : aucune fonction globale des trois autres modules n’est re
 
 ## Phase 11 — Restructurer les assets visuels
 
-### A0 en cours — inventaire physique sans migration
+### A0 GREEN — inventaire physique sans migration
 
 - Checkpoint §25 : `checkpoint/gensrpg-start-phase11-asset-inventory-2026-10-12`, base triple-CI GREEN `3acd7a6112e3da9a546749e1acb39ee81cb4c9d7`.
 - Branche : `work/gensrpg-phase11-asset-inventory-2026-10-12`.
 - **173 images suivies par Git**, dont 134 déjà sous Dungeon, 32 `assets/img_*` non classées, 4 icônes Shell/PWA candidates et 3 images de dépendance exclues.
 - Manifeste Git exact et test de non-dérive : `docs/phase11/asset-inventory-a0.json`, `tests/gens_phase11_asset_inventory_a0.test.cjs` ; collisions de basenames documentées.
 - **Aucun asset déplacé et aucune référence de production réécrite.** La vérification du contenu exact de `index.html` est soumise au §26 avant audit de consommation ou migration, pour ne pas confondre emplacement et usage réel.
-- Détails : `docs/GENSRPG_PHASE11_A0_ASSET_INVENTORY_2026-10-12.md`. A0 ne termine pas Phase 11 ; son GREEN requiert triple CI sur le même SHA.
+- **A0 validé** : checkpoint `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13` au SHA `a96cb54049648bb87619a7febdcfe0388a6fb98f` ; Architecture/Chromium [38300391035](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391035), Firefox [38300391129](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391129), Tactical [38300391095](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38300391095), SUCCESS sur le même SHA. Détails : `docs/GENSRPG_PHASE11_A0_ASSET_INVENTORY_2026-10-12.md`. **La Phase 11 n'est pas terminée** ; prochain lot : preuves de consommation réelle et cartographie `ancien → nouveau` avant migration.
 
 
 Créer :

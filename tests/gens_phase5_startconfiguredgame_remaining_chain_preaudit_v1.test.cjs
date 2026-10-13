@@ -24,7 +24,13 @@ const core200Id='dungeonCore200Rebuild';
 
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
-  assert.ok(m,'missing inline block '+id);
+  assert.ok(m,'missing owner block '+id);
+  if(id==='gensDungeonCore01Js'){
+    const external='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+    assert.ok(m[0].includes('src="'+external+'"'),'Dungeon Core01 must be loaded at original parser position');
+    assert.equal(m[1],'','external Dungeon Core01 must not contain an inline duplicate');
+    return read(external);
+  }
   return m[1];
 }
 
@@ -87,12 +93,12 @@ assert.equal(core200Meta.status,'active',core200Id+' must remain active');
 const core200Body=blockBody(core200Id);
 
 assert.match(lastOwners,/^startConfiguredGame\t2\tgensDungeonCore01Js$/m,
-  'Phase 9 must expose only two remaining inline global startConfiguredGame owners');
+  'the frozen historical Phase 9 table must retain the original two owners');
 
 assert.deepEqual(
   ids.map(id=>owners.blocks[id].primaryDomain),
   ['capture','dungeon'],
-  'remaining inline global owners must stay module-owned'
+  'historical global owners must stay module-owned'
 );
 assert.equal(core200Meta.primaryDomain,'dungeon','Core200 local dispatcher must remain Dungeon-owned');
 

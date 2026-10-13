@@ -52,8 +52,8 @@ def make_patches():
     newpath="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"
     graph="tests/gens_phase2_runtime_load_graph_v11411.test.cjs"
     composition="tests/gens_runtime_composition_guard_v11411.test.cjs"
-    anchor_graph="  'assets/gensrpg/core/progression-v1.js',\n"
-    anchor_composition="  'assets/gensrpg/core/progression-v1.js?v=1',\n"
+    anchor_graph="  'assets/gensrpg/dungeon/core01-session-ui-v1.js',\n  'assets/gensrpg/core/progression-v1.js',\n"
+    anchor_composition="  'assets/gensrpg/dungeon/core01-session-ui-v1.js',\n  'assets/gensrpg/core/progression-v1.js?v=1',\n"
     single(graph,anchor_graph,anchor_graph+f"  '{newpath}',\n",patches)
     single(composition,anchor_composition,anchor_composition+f"  '{newpath}',\n",patches)
     for old,new in [

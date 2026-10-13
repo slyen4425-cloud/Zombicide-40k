@@ -6,6 +6,7 @@ on:
       - 'work/gensrpg-phase12-dungeon-core051-extraction-2026-10-13'
     paths:
       - '.github/workflows/gensrpg-phase12-dungeon-core051-controlled-apply.yml'
+      - 'tools/gensrpg_phase12_dungeon_core051_extract_apply.py'
 
 permissions:
   contents: write

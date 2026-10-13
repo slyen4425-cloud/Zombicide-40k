@@ -8,6 +8,14 @@ const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const dungeonCore01Path='assets/gensrpg/dungeon/core01-session-ui-v1.js';
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>{
+    if(m[1]==='dungeonCore200Rebuild'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core200-rebuild-v1\.js"/,
+        'D4 Core200 must load synchronously in the original parser position');
+      const d4=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+      assert.match(d4,/window\.DungeonCore01\s*=/,
+        'D4 Core200 remains the final DungeonCore01 owner');
+      return {id:m[1],body:d4,offset:m.index};
+    }
     if(m[1]!=='gensDungeonCore01Js')return {id:m[1],body:m[2],offset:m.index};
     assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core01-session-ui-v1\.js"/,
       'Phase12 Dungeon source must be composed at its original parser position');

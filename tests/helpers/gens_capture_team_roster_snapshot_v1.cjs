@@ -20,6 +20,19 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // Phase12 D4: exact test-only reconstruction, no runtime fallback.
+ if(hash(index)==='ca15dd7b483963d7bd0767b7b5baca915d17ec43'){
+  assert.equal(index.length,7780333,'D4 extracted index length');
+  const tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'single D4 Core200 owner');
+  const code=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'));
+  assert.equal(code.length,55842);
+  assert.equal(hash(code),'5649ae0af69064dde72e6ea28b8dbefd105cb527');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore200Rebuild">'),code,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7836124);
+  assert.equal(hash(index),'972f0e0be12fac14427853fbcd7abe5233eb5a8c','exact D3 index snapshot');
+ }
  // Phase12 D3: reconstruction is test-only; no runtime fallback or new owner.
  if(hash(index)==='972f0e0be12fac14427853fbcd7abe5233eb5a8c'){
   assert.equal(index.length,7836124,'D3 extracted index length');

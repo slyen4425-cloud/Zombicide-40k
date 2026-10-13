@@ -41,7 +41,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,96,'Phase 12 Dungeon Core01 and Core051 physical owners plus Capture screen-return, Hub UI, seed, World Exploration, Team/Reserve and Combat Core are included in the inventoried production graph');
+assert.equal(reachable.size,97,'Phase 12 Dungeon Core01 and Core051 physical owners plus Capture screen-return, Hub UI, seed, World Exploration, Team/Reserve and Combat Core are included in the inventoried production graph');
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 
 const disabled=new Set([

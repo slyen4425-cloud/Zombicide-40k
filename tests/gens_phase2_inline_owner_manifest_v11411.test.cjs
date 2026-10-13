@@ -7,9 +7,9 @@ const root=path.join(__dirname,'..');
 const source=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes(root).toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_OWNERS.json'),'utf8'));
 
-const gitBlobSha=execFileSync('git',['rev-parse','HEAD:index.html'],{cwd:root,encoding:'utf8'}).trim();
+const gitBlobSha=execFileSync('git',['hash-object','index.html'],{cwd:root,encoding:'utf8'}).trim();
 const HISTORICAL_CAPTURE_HUB_BLOB='613b4a21d83e9adcdd091be82240a3a6f9cf5bf7';
-const CURRENT_BLOB='972f0e0be12fac14427853fbcd7abe5233eb5a8c';
+const CURRENT_BLOB='ca15dd7b483963d7bd0767b7b5baca915d17ec43';
 const hubPatch=require('./fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
 assert.equal(hubPatch.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
 assert.equal(hubPatch.toBlob,HISTORICAL_CAPTURE_HUB_BLOB);

@@ -329,6 +329,11 @@
       "domain": "dungeon",
       "role": "byte-identical 47962-byte former dungeonCore051ExplorationPolish inline IIFE; synchronous Dungeon exploration and authored challenge UI at its original parser position"
     },
+    "assets/gensrpg/dungeon/core200-rebuild-v1.js": {
+      "owner": "Dungeon Core200 Rebuild Runtime",
+      "domain": "dungeon",
+      "role": "byte-identical 55842-byte former dungeonCore200Rebuild active IIFE; synchronous Dungeon rebuild, interaction and start ownership in original parser order"
+    },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
       "domain": "dungeon",

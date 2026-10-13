@@ -9,7 +9,19 @@ const {execFileSync}=require("node:child_process");
 const ROOT=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(ROOT,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const index=read("index.html");
+const actualD4=read("index.html");
+const core200Tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
+const core200Open=Buffer.from('<script id="dungeonCore200Rebuild">');
+const core200Body=read("assets/gensrpg/dungeon/core200-rebuild-v1.js");
+const core200At=actualD4.indexOf(core200Tag);
+assert.ok(core200At>0 && actualD4.indexOf(core200Tag,core200At+core200Tag.length)<0,"D4 owner appears exactly once");
+const indexBeforeD4=Buffer.concat([
+  actualD4.subarray(0,core200At),core200Open,core200Body,Buffer.from("</script>"),
+  actualD4.subarray(core200At+core200Tag.length)
+]);
+assert.equal(indexBeforeD4.length,7836124);
+assert.equal(sha(indexBeforeD4),"972f0e0be12fac14427853fbcd7abe5233eb5a8c");
+const index=indexBeforeD4;
 const js=read("assets/gensrpg/dungeon/mj72-scene-v1.js");
 const tag=Buffer.from('<script id="dungeonMj72_2Script" src="assets/gensrpg/dungeon/mj72-scene-v1.js"></script>');
 const open=Buffer.from('<script id="dungeonMj72_2Script">');

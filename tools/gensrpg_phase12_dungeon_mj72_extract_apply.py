@@ -192,6 +192,13 @@ const liveIndex=Buffer.concat([
 
 def verify():
     target=INDEX.read_bytes()
+    d4tag=b'<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>'
+    if d4tag in target:
+        assert target.count(d4tag)==1, "D4 owner loaded once"
+        d4=(ROOT/"assets/gensrpg/dungeon/core200-rebuild-v1.js").read_bytes()
+        assert len(target)==7780333 and sha(target)=="ca15dd7b483963d7bd0767b7b5baca915d17ec43", "D4 index drifted"
+        assert len(d4)==55842 and sha(d4)=="5649ae0af69064dde72e6ea28b8dbefd105cb527", "D4 code drifted"
+        target=target.replace(d4tag,b'<script id="dungeonCore200Rebuild">'+d4+b'</script>',1)
     body=OUTPUT.read_bytes()
     pin(target,TARGET_BYTES,TARGET_BLOB,"active D3 index")
     pin(body,BODY_BYTES,BODY_BLOB,"external MJ72")

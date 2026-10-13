@@ -264,12 +264,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 
 ## Phase 12 — Alléger index.html
 
-### Premier lot en cours — extraction physique Dungeon Core01
+### D1 GREEN — extraction physique Dungeon Core01
 
 - Base : dernier checkpoint A1 GREEN `7ef5060a72b883ecee23ddee9c381a300f8be1b9`, départ `checkpoint/gensrpg-start-phase12-dungeon-core01-extraction-2026-10-13`, branche `work/gensrpg-phase12-dungeon-core01-extraction-2026-10-13`.
 - Extraction visée, sans modifier le comportement : le bloc autonome `<script id="gensDungeonCore01Js">` devient un JS externe au même emplacement de chargement, propriété exclusive Dungeon (`assets/gensrpg/dungeon/core01-session-ui-v1.js`). L'original doit être reconstructible **octet par octet** ; tests sur le vrai index, browser et CI triple requise.
 - Source exacte fournie précédemment par l'utilisateur et de nouveau vérifiée sur le SHA : `index.html` 7 934 204 octets / Git blob `bf996ec4e748a4927ac6dd57cceaeaf2afcd9441` (§26). Aucun extrait de copie inconnue, aucune modification de `main` ou des laboratoires.
 - L'extraction est un **lot isolé**, pas une refonte générale des moteurs ni du Shell. Pas de déplacement des assets historiques de Survie, aucune règle de gameplay ou compatibilité fictive.
+
+- **D1 GREEN le 13 octobre 2026** : extraction publiée, rollback octet exact vérifié, ancien propriétaire inline absent ; checkpoint `checkpoint/gensrpg-phase12-dungeon-core01-d1-green-2026-10-13` sur `5d8d0d37982ac2987bd4c72326de28318a4687c6`. Triple CI sur cet exact SHA : Architecture/Chromium [38419138287](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138287), Firefox [38419138332](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138332), Tactical [38419138470](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138470), toutes SUCCESS. D1 représente 22 715 octets nets retirés de l'index ; la Phase 12 complète reste ouverte. D2 exige son propre checkpoint/branche et le prochain index exact selon §26.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

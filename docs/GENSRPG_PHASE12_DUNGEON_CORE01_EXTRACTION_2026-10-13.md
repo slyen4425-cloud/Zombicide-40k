@@ -36,3 +36,12 @@ Le commit d'application par GitHub Actions sur la branche de travail est `6b70ed
 ## Décision graphique toujours active
 
 Les 32 `assets/img_*` historiques restent en place, sans réaffectation exigée. Les assets des labos ont leurs propres dépôts et ne sont ni déplacés ni fusionnés ici. La Phase 11 est conservée avec cette exception documentée ; aucun transfert graphique n'est prétendu.
+
+## Clôture officielle D1 GREEN — 13 octobre 2026
+
+- **Checkpoint créé** : `checkpoint/gensrpg-phase12-dungeon-core01-d1-green-2026-10-13` pointant sur `5d8d0d37982ac2987bd4c72326de28318a4687c6`, après succès effectif des trois CI sur ce SHA.
+- Architecture/Chromium : [38419138287](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138287) — SUCCESS ; sentinelles structurelles + navigateur, y compris Dungeon Save & Quit/reprise, provider Dungeon et non-interférence des quatre modules.
+- Firefox : [38419138332](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138332) — SUCCESS.
+- Tactical : [38419138470](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38419138470) — SUCCESS.
+- Les deux derniers correctifs portent uniquement sur les **tests historiques navigateur** (chargement explicite du module Dungeon Core01 externe), commits `53865246aab030c5076e5b5be5881a23c94ab5bb` et `5d8d0d37982ac2987bd4c72326de28318a4687c6`; aucun changement runtime.
+- Prochain lot D2 : nouveau checkpoint §25, inspection du nouvel index certifié §26, propriétaire indépendant, extraction contrôlée. **Aucun D2 déclaré GREEN.**

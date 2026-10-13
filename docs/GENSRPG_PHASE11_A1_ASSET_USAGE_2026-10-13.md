@@ -57,3 +57,11 @@ Le test `tests/gens_phase11_asset_ownership_matrix_a1.test.cjs` bloque tout glis
 4. Triple CI Architecture/Chromium, Firefox et Tactical sur le même SHA avant checkpoint GREEN ; aucune interface de combat ou mécanisme PvP n'entre dans ce chantier.
 
 `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; pas de modification des laboratoires.
+
+## Décision utilisateur — conservation des images historiques (13 octobre 2026)
+
+Le propriétaire du projet demande de **laisser les 32 `assets/img_*` exactement en place**. Ces premières ressources Survie pourraient être insérées dans le code historique ou être recréées plus tard. Leur déplacement, suppression, renommage, transfert ou remplacement n'est **pas** un objectif actuel. Cette décision ne requiert pas d'attribuer un propriétaire définitif à chacune des 32 images ni de demander le ZIP `index.html` pour une migration qui n'aura pas lieu. Les réserves techniques sur les consommateurs non prouvés restent consignées, sans blocage artificiel de la restructuration.
+
+Les deux dépôts `slyen4425-cloud/GenSrpg_labo_combat_dynamique` et `slyen4425-cloud/laboratoire_dynamique_exploration-` disposent déjà de leur propre classement d'assets : **ils ne sont pas dans le périmètre de la Phase 11 du dépôt principal**. Aucun déplacement entre dépôts, regroupement forcé ni partage implicite par fallback ne doit être engagé. Une éventuelle future intégration de données ou d'assets sera un chantier explicite, avec contrat/chemins et tests distincts.
+
+**Livraison admissible du lot A1** : conserver l'inventaire et l'audit des 123 sources externes, enregistrer le statut « préservé en place » dans la matrice et ses tests. L'absence d'analyse exacte de `index.html` ne doit pas être transformée en prétexte à poursuivre les audits de ces 32 images, tant que leur migration est suspendue. La Phase 11 ne prétend pas avoir réalisé sa cible idéale de déplacement ; le plan se poursuit sur les travaux utiles, en rouvrant la migration seulement à la demande.

@@ -24,7 +24,8 @@ assert.ok(matrix.preservationDecision.independentLabs.includes("slyen4425-cloud/
 assert.equal(matrix.unnamedAssets.every(x=>x.proposedRepoDestination===null),true);
 assert.equal(matrix.unnamedAssets.length,32);
 assert.equal(scan.items.length,32);
-assert.equal(matrix.externalAudit.scannedTrackedSources,scan.sourceCount);
+assert.ok(scan.sourceCount>=matrix.externalAudit.scannedTrackedSources,
+  'A1 historical external scan baseline must not lose coverage as new JS owner files are extracted');
 assert.equal(matrix.externalAudit.imagesWithLiteralReferences,scan.imagesWithLiteralReferences);
 assert.equal(matrix.externalAudit.literalHits,scan.literalReferenceCount);
 assert.equal(scan.exactIndexStatus,"not inspected; charter section 26 ZIP required");

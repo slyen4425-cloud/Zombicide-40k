@@ -102,8 +102,10 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,93,
-  'Phase 3 entry scaffolding remains inert while S2 explicitly adds three PvP launch owners without changing Capture ownership');
+assert.equal(Object.keys(ownerManifest.files||{}).length,94,
+  'Phase 3 entries stay inert while Phase 12 adds only the extracted Dungeon Core01 production owner');
+assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core01-session-ui-v1.js']?.domain,'dungeon',
+  'the newly external Core01 code must remain Dungeon-owned');
 assert.equal(composition.index.split('assets/gensrpg/capture/world-exploration-v1.js?v=1').length-1,1,'Capture World owner must be loaded exactly once');
 assert.equal(composition.index.split('assets/gensrpg/capture/team-roster-v1.js?v=1').length-1,1,'Capture team/roster owner must be loaded exactly once');
 assert.equal(composition.index.split('assets/gensrpg/capture/combat-core-v1.js?v=1').length-1,1,'Capture Combat Core owner must be loaded exactly once');

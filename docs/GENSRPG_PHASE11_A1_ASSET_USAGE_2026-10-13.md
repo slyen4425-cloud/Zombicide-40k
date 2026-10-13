@@ -37,6 +37,18 @@ Il exclut `index.html`, `docs/`, `tests/`, `node_modules/`, les exports utilisat
 
 **Important :** ce lot est une preuve *partielle* ; il n'autorise aucune migration physique, décision de suppression ou transfert de propriétaire non étayé.
 
+## Matrice versionnée et décisions fondées sur preuves
+
+La matrice `docs/phase11/asset-ownership-matrix-a1.json` lie les **32 images racine** à leur blob Git, à l'absence constatée de littéraux externes, aux preuves manquantes et à une destination volontairement **non définie** (aucun chemin arbitraire inventé).
+
+Pour les icônes PWA, elle distingue :
+- deux fichiers **racine** effectivement copiés sous `icons/` lors du déploiement : `icon-192.png`, `icon-512.png` ;
+- deux fichiers sous `Icon/` dont les **SHA diffèrent** de ceux des racines et pour lesquels aucune utilisation publique n'est prouvée.
+
+Le test `tests/gens_phase11_asset_ownership_matrix_a1.test.cjs` bloque tout glissement silencieux de cette matrice : liens vers manifest, commande exacte de publication GitHub Pages, empreintes Git et interdiction de migration sans preuve. Ces assertions ne prouvent pas pour autant qu'aucun ancien export ou profil n'utilise les fichiers.
+
+**Verdict du lot** : traçabilité externe et flux d'icônes identifiés, mais propriétaires des 32 images encore non établis. La migration reste bloquée jusqu'au contrôle exact de l'index et des données concernées.
+
 ## Suite prévue, en conservant la charte
 
 1. Lire les résultats des tests CI externes sur la branche A1 et fixer les preuves validées pour chaque référence trouvée.

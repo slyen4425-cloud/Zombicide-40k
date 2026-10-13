@@ -53,8 +53,10 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,93,
-  'production graph must include physical Capture world, team and battle core owners as well as Hub/session boundary owners');
+assert.equal(reachable.size,94,
+  'production graph must include the extracted Dungeon Core01 owner and physical Capture world/team/combat/session owners');
+assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
+  'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/combat-core-v1.js'),true,
   'Capture battle core owner must enter the production graph exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/world-exploration-v1.js'),true,

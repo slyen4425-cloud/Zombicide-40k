@@ -120,7 +120,7 @@ assert.equal(sha(indexBeforeD4),"972f0e0be12fac14427853fbcd7abe5233eb5a8c");
         target=target.replace(d4tag,b'<script id="dungeonCore200Rebuild">'+d4+b'</script>',1)
 '''
     d3tool="tools/gensrpg_phase12_dungeon_mj72_extract_apply.py"
-    change_once(p,d3tool,'    target=INDEX.read_bytes()\n    body=OUT.read_bytes()', '    target=INDEX.read_bytes()\n'+pyrollback+'    body=OUT.read_bytes()')
+    change_once(p,d3tool,'    target=INDEX.read_bytes()\n    body=OUTPUT.read_bytes()', '    target=INDEX.read_bytes()\n'+pyrollback+'    body=OUTPUT.read_bytes()')
     d2tool="tools/gensrpg_phase12_dungeon_core051_extract_apply.py"
     pyrollback2=pyrollback.replace('blob(target)','sha(target)').replace('blob(d4)','sha(d4)').replace('    d4tag','    d4tag')
     change_once(p,d2tool,'    new=INDEX.read_bytes()\n    d3tag=', '    target=INDEX.read_bytes()\n'+pyrollback2+'    new=target\n    d3tag=')

@@ -7,7 +7,7 @@ const Bridge=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat
 // Lot 4G is characterization-only: the last dc200StartCombat occurrence in index.html
 // is not an active Dungeon owner. It seeds the Bridge rollback/fallback path for
 // non-Dungeon contexts, while Dungeon must stay on requestCombat -> Tactical/V113.
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const html=require('./helpers/gens_phase12_core200_source_view_v1.cjs').restore(root);
 const aliases=html.match(/window\.dc200StartCombat\s*=\s*startCombat/g)||[];
 assert.equal(aliases.length,1,'exactly one historical dc200StartCombat=startCombat compatibility alias must remain');
 

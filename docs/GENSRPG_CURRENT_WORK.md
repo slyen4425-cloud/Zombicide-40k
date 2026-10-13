@@ -1,3 +1,14 @@
+# CHANTIER ACTIF — PHASE 11 / A1 TRAÇABILITÉ DES ASSETS — 13 OCTOBRE 2026
+
+- **Base validée** : `dc9ad1e5396892c805ddc79c4542f29420062095`, triple-CI SUCCESS Architecture [38335242504](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242504), Firefox [38335242473](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242473), Tactical [38335242485](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38335242485).
+- **Dernier checkpoint GREEN A0** : `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13`, SHA `a96cb54049648bb87619a7febdcfe0388a6fb98f`. **Checkpoint de départ A1 §25** : `checkpoint/gensrpg-start-phase11-asset-ownership-a1-2026-10-13` sur `dc9ad1e5396892c805ddc79c4542f29420062095`. Branche dédiée : `work/gensrpg-phase11-asset-ownership-a1-2026-10-13`.
+- **Objectif mesurable** : prouver, avec fichiers et lignes, les références des 32 images `assets/img_*` dans les fichiers externes suivis Git, cartographier les usages Shell/PWA et les inconnues, sans supposer leur propriétaire. Contrat Core asset resolver conservé. Cartographie ancien → nouveau uniquement après validation des propriétaires.
+- **Hors périmètre** : aucun déplacement binaire, aucune réécriture de référence, aucune modification runtime/CI d'autres modules, pas de code gameplay. `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; laboratoires intacts.
+- **Charte §26** : ne pas lire `index.html` via GitHub ou en CI pour ce premier sous-lot. Une éventuelle inspection exacte nécessite le ZIP d'index correspondant au SHA du chantier ; marquer cette source « non encore vérifiée » tant que le ZIP n'est pas fourni.
+- **Tests requis** : traçabilité reproductible des références externes, garde de non-migration et de frontière d'autorité, sentinelles des quatre modules, triple CI sur le même SHA avant GREEN. Risque : les images peuvent être assemblées dynamiquement ou stockées dans les profils, absence de littéral ≠ absence d'utilisation.
+
+---
+
 # GREEN — PHASE 11 / A0 INVENTAIRE DES IMAGES — 13 OCTOBRE 2026
 
 - **Checkpoint GREEN officiel :** `checkpoint/gensrpg-phase11-asset-inventory-a0-green-2026-10-13`, SHA exact `a96cb54049648bb87619a7febdcfe0388a6fb98f`.

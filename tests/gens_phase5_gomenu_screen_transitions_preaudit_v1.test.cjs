@@ -11,7 +11,15 @@ const owners=JSON.parse(read('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'));
 const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2],offset:m.index}));
+  .map(m=>{
+    if(m[1]==='dungeonCore200Rebuild'){
+      assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+        'D4 Core200 owner must keep original parser position');
+      assert.equal(m[2],'','Core200 cannot have an inline duplicate');
+      return {id:m[1],body:read('assets/gensrpg/dungeon/core200-rebuild-v1.js'),offset:m.index};
+    }
+    return {id:m[1],body:m[2],offset:m.index};
+  });
 
 function lastOwnerRow(name){
   const safe=name.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');

@@ -17,6 +17,11 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
           'Dungeon owner must still load at original parser location');
           assert.equal(m[2],'','Core01 must not be duplicated inline');
           return read('assets/gensrpg/dungeon/core01-session-ui-v1.js')})()
+      : m[1]==='dungeonCore200Rebuild'
+      ? (()=>{assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+          'Core200 must retain its original parser location');
+          assert.equal(m[2],'','Core200 must not have a duplicate inline owner');
+          return read('assets/gensrpg/dungeon/core200-rebuild-v1.js')})()
       : m[2]
   }));
 

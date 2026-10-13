@@ -169,6 +169,18 @@ const liveIndex=Buffer.concat([
                         ]: expected_after=expected_after.replace(before_count,after_count)
             assert updated.count(expected_after)==1'''
     replace_one(p,d1tool,before,after)
+    # Preserve the D1 parser-order check while accounting for the new MJ72
+    # classic owner inserted between builtin-seed and Core01 by D3.
+    before='''            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"'''
+    after='''            if d3_external in INDEX.read_bytes() and path in (PATH_GRAPH,PATH_COMPOSITION):
+                seed_marker=("  'assets/gensrpg/capture/builtin-seed-v1.js?v=1',\\n"
+                             if path==PATH_COMPOSITION
+                             else "  'assets/gensrpg/capture/builtin-seed-v1.js',\\n")
+                core_marker="  'assets/gensrpg/dungeon/core01-session-ui-v1.js',\\n"
+                if expected_after.startswith(seed_marker+core_marker):
+                    expected_after=seed_marker+"  'assets/gensrpg/dungeon/mj72-scene-v1.js',\\n"+core_marker
+            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2/D3"'''
+    replace_one(p,d1tool,before,after)
 
     # Historical Capture snapshots likewise need D3 -> D2 -> D1 before Phase 9.
     snapshot="tests/helpers/gens_capture_team_roster_snapshot_v1.cjs"

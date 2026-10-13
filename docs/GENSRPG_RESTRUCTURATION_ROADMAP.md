@@ -281,12 +281,12 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Checkpoint GREEN** : `checkpoint/gensrpg-phase12-dungeon-core051-d2-green-2026-10-13` au SHA `06c3608f36d020ac4f470de4dbe4ca272da3b897`, Architecture/Chromium [38428721362](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721362), Firefox [38428721028](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721028), Tactical [38428721250](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38428721250) **SUCCESS sur le même SHA**.
 - Phase 12 globale **non terminée**. Prochaine extraction D3 seulement après checkpoint de départ propre, cartographie propriétaire et nouvel index exact demandé §26. Aucun autre domaine, labos ni assets Survie modifiés.
 
-### D3 — extraction Dungeon Core211 effectuée (GREEN en attente)
+### D3 GREEN — extraction Dungeon Core211 (13 octobre 2026)
 
 - Nouveau checkpoint de départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core211-d3-extraction-2026-10-13` sur le dernier D2 GREEN `06c3608f36d020ac4f470de4dbe4ca272da3b897` ; branche `work/gensrpg-phase12-dungeon-core211-d3-extraction-2026-10-13`.
 - Source §26 : ZIP utilisateur `ar.zip` validé, index 7 863 589 octets, blob `e5f8895495f969597a6c209fcc29afd66b7a0636`. Le Core104 de la carte Phase 2 est **désactivé** dans le HTML réel : il n'a pas été déplacé.
 - Propriétaire choisi : `dungeonCore211Consolidation`, bloc réellement exécuté ; extraction sans modification de 17 511 octets dans `assets/gensrpg/dungeon/core211-consolidation-v1.js`, même ordre parser. Index final 7 846 135 octets, blob `18afb7fa25f86eea9993acc7f961fb7c11901168`.
-- Workflow de transformation [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) SUCCESS ; commit `a4e8723ab6a9d4cada787f939b94faad503ffa0c`. **D3 n'est PAS encore GREEN** avant triple CI sur le SHA complet ; aucune modification gameplay.
+- Workflow de transformation [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) SUCCESS ; commit `a4e8723ab6a9d4cada787f939b94faad503ffa0c`. **D3 GREEN** : checkpoint `checkpoint/gensrpg-phase12-dungeon-core211-d3-green-2026-10-13` au SHA `1e3c718a862704f819cb4eafe3fbaac6492b9344`. Architecture/Chromium [38435658574](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658574), Firefox [38435658608](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658608), Tactical [38435658635](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658635), toutes SUCCESS **sur le même SHA** ; aucun changement gameplay. D4 exige un nouveau checkpoint et ZIP index certifié §26.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

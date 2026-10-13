@@ -13,4 +13,13 @@ Attention : Core104 marqué actif dans la cartographie, mais `type="application/
 
 ## Livraison GitHub
 
-Workflow de transformation [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) SUCCESS ; commit source [a4e8723](https://github.com/slyen4425-cloud/Zombicide-40k/commit/a4e8723ab6a9d4cada787f939b94faad503ffa0c). Nouveau fichier JS 17 511 octets, sha blob bba60d921df20a114b489e17f9222e0c4f310871 ; index 7 846 135 octets, sha blob 18afb7fa25f86eea9993acc7f961fb7c11901168. Tests de rollback et propriétaire passés dans ce workflow. **CI triple finale encore requise pour qualifier le lot GREEN.**
+Workflow de transformation [38434266794](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38434266794) SUCCESS ; commit source [a4e8723](https://github.com/slyen4425-cloud/Zombicide-40k/commit/a4e8723ab6a9d4cada787f939b94faad503ffa0c). Nouveau fichier JS 17 511 octets, sha blob bba60d921df20a114b489e17f9222e0c4f310871 ; index 7 846 135 octets, sha blob 18afb7fa25f86eea9993acc7f961fb7c11901168. Tests de rollback et propriétaire passés dans ce workflow. **CI triple finale obtenue sur `1e3c718a862704f819cb4eafe3fbaac6492b9344` ; voir la clôture GREEN ci-dessous.**
+
+## Clôture D3 GREEN — 13 octobre 2026
+
+- Checkpoint après triple CI : `checkpoint/gensrpg-phase12-dungeon-core211-d3-green-2026-10-13` au SHA `1e3c718a862704f819cb4eafe3fbaac6492b9344`.
+- Architecture et Chromium [38435658574](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658574) : SUCCESS, 356 sentinelles structurelles et E2E navigateur.
+- Firefox [38435658608](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658608) : SUCCESS.
+- Tactical [38435658635](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38435658635) : SUCCESS.
+- La livraison exacte reste 17 511 octets de JS transférés, index 7 846 135 octets, blob `18afb7fa25f86eea9993acc7f961fb7c11901168`. Les snapshots historiques et les tests de retour arrière sont préservés.
+- **D3 terminé GREEN** ; Phase 12 globale encore ouverte. D4 seulement avec checkpoint de départ propre, branche distincte et nouvel index certifié §26.

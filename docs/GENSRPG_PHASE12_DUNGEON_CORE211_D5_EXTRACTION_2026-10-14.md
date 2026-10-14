@@ -12,8 +12,16 @@ Date : 14 octobre 2026.
 - Contrôle reproductible sur runner GitHub Actions ; source verrouillée par Git blob, rollback D5→D4→D3→D2→D1 et manifeste de runtime.
 - **Statut : NON GREEN avant succès complet de la triple CI sur même SHA et checkpoint §25 de clôture.**
 
-## Livraison physique D5 (validation CI complète en cours)
+## Livraison physique D5 (VALIDÉE)
 
 - [Application contrôlée 38581987594](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38581987594) : **SUCCESS** ; commit `a039172e51efec5fa48b4b6d2fd4ced556473471`.
 - JS déplacé : 17 511 octets, blob `bba60d921df20a114b489e17f9222e0c4f310871`. Index : 7 762 879 octets, blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`.
 - Rollback D5 vers D4 et les anciennes étapes vérifié ; l'analyse navigateur et la triple CI sur un SHA final restent à terminer. **Aucun GREEN anticipé.**
+
+## Clôture officielle D5 GREEN (14 octobre 2026)
+
+- Checkpoint exact `checkpoint/gensrpg-phase12-dungeon-core211-d5-green-2026-10-14` créé **après** la triple CI SUCCESS sur SHA `50715c1b150fbd8d9829b90d88a983e6550ff63d`.
+- Architecture/Chromium [38584005349](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38584005349) SUCCESS : 356 contrôles Architecture et 64 étapes browser.
+- Firefox [38584005102](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38584005102) SUCCESS ; Tactical [38584005388](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38584005388) SUCCESS.
+- JS Dungeon Core211 déplacé byte-identique (17 511 octets, blob `bba60d921df20a114b489e17f9222e0c4f310871`). Index 7 762 879 octets, blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`.
+- La Phase 12 globale n'est pas close. Aucun D6 ouvert ; son fichier source devra provenir exactement du checkpoint D5 GREEN conformément au §26.

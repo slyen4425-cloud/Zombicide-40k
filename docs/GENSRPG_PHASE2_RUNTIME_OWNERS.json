@@ -334,6 +334,11 @@
       "domain": "dungeon",
       "role": "byte-identical 55842-byte former dungeonCore200Rebuild active IIFE; synchronous Dungeon rebuild, interaction and start ownership in original parser order"
     },
+    "assets/gensrpg/dungeon/core211-consolidation-v1.js": {
+      "owner": "Dungeon Core211 Consolidation",
+      "domain": "dungeon",
+      "role": "byte-identical 17511-byte former active dungeonCore211Consolidation IIFE; classic synchronous Dungeon traps, hero visibility and combat consolidation"
+    },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
       "domain": "dungeon",

@@ -97,6 +97,13 @@ def verify():
     # D2 is an independent downstream physical extraction. Undo only its
     # verified external tag in memory to inspect the immutable D1 state.
     target=INDEX.read_bytes()
+    d5tag=b'<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>'
+    if d5tag in target:
+        assert target.count(d5tag)==1, "D5 owner once"
+        d5=(ROOT/"assets/gensrpg/dungeon/core211-consolidation-v1.js").read_bytes()
+        assert len(target)==7762879 and blob(target)=="2ad1961efb9733037b7753ffd4a308baa1b00b64", "D5 index drifted"
+        assert len(d5)==17511 and blob(d5)=="bba60d921df20a114b489e17f9222e0c4f310871", "D5 external JS drifted"
+        target=target.replace(d5tag,b'<script id="dungeonCore211Consolidation">'+d5+b'</script>',1)
     d4tag=b'<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>'
     if d4tag in target:
         assert target.count(d4tag)==1, "D4 owner loaded once"
@@ -134,7 +141,8 @@ def verify():
             expected_after=after
             if d2_external in INDEX.read_bytes():
                 if path in (PATH_OWNERS,PATH_GLOBALS):
-                    expected_after=("ca15dd7b483963d7bd0767b7b5baca915d17ec43" if d4tag in INDEX.read_bytes()
+                    expected_after=("2ad1961efb9733037b7753ffd4a308baa1b00b64" if d5tag in INDEX.read_bytes()
+                                    else "ca15dd7b483963d7bd0767b7b5baca915d17ec43" if d4tag in INDEX.read_bytes()
                                     else "972f0e0be12fac14427853fbcd7abe5233eb5a8c"
                                     if d3_external in INDEX.read_bytes()
                                     else "e5f8895495f969597a6c209fcc29afd66b7a0636")
@@ -159,6 +167,13 @@ def verify():
                             ("allJs.length,110,","allJs.length,111,"),
                             ("phase2Js.length,74,","phase2Js.length,75,"),
                             ("reachable.size,96,","reachable.size,97,")
+                        ]: expected_after=expected_after.replace(before_count,after_count)
+                    if d5tag in INDEX.read_bytes():
+                        for before_count,after_count in [
+                            ("size,53,","size,54,"),
+                            ("allJs.length,111,","allJs.length,112,"),
+                            ("phase2Js.length,75,","phase2Js.length,76,"),
+                            ("reachable.size,97,","reachable.size,98,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
             assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")

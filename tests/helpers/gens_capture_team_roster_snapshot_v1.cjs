@@ -20,6 +20,19 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // D5: undo byte-identical Core211 only to reconstruct an immutable old fixture.
+ if(hash(index)==='2ad1961efb9733037b7753ffd4a308baa1b00b64'){
+  assert.equal(index.length,7762879,'D5 physical index length');
+  const tag=Buffer.from('<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'D5 exact single owner');
+  const code=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js'));
+  assert.equal(code.length,17511);
+  assert.equal(hash(code),'bba60d921df20a114b489e17f9222e0c4f310871');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore211Consolidation">'),code,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7780333);
+  assert.equal(hash(index),'ca15dd7b483963d7bd0767b7b5baca915d17ec43','exact D4 restored index');
+ }
  // Phase12 D4: exact test-only reconstruction, no runtime fallback.
  if(hash(index)==='ca15dd7b483963d7bd0767b7b5baca915d17ec43'){
   assert.equal(index.length,7780333,'D4 extracted index length');

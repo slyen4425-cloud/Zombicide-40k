@@ -11,7 +11,19 @@ const sha=buf=>crypto.createHash("sha1").update(Buffer.from("blob "+buf.length+"
 const originalBlob="bf996ec4e748a4927ac6dd57cceaeaf2afcd9441";
 const targetBlob="2921ebadacf6f660e815d9ff7712e44cd765fbdd";
 const runtimeBlob="df36eba9b8a62f806bc50f86f09f53c90608ce07";
-const actualD4=read("index.html");
+const d5Index=read("index.html");
+const core211Tag=Buffer.from('<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>');
+const core211Open=Buffer.from('<script id="dungeonCore211Consolidation">');
+const core211Body=read("assets/gensrpg/dungeon/core211-consolidation-v1.js");
+const core211At=d5Index.indexOf(core211Tag);
+assert.ok(core211At>0 && d5Index.indexOf(core211Tag,core211At+core211Tag.length)<0,"D5 owner single classic load");
+const indexBeforeD5=Buffer.concat([
+ d5Index.subarray(0,core211At),core211Open,core211Body,Buffer.from("</script>"),
+ d5Index.subarray(core211At+core211Tag.length)
+]);
+assert.equal(indexBeforeD5.length,7780333);
+assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
+const actualD4=indexBeforeD5;
 const core200Tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
 const core200Open=Buffer.from('<script id="dungeonCore200Rebuild">');
 const core200Body=read("assets/gensrpg/dungeon/core200-rebuild-v1.js");

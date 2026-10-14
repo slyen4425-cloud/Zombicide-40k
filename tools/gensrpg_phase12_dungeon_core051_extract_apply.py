@@ -124,6 +124,13 @@ const index=Buffer.concat([
 
 def verify():
     target=INDEX.read_bytes()
+    d5tag=b'<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>'
+    if d5tag in target:
+        assert target.count(d5tag)==1, "D5 owner once"
+        d5=(ROOT/"assets/gensrpg/dungeon/core211-consolidation-v1.js").read_bytes()
+        assert len(target)==7762879 and sha(target)=="2ad1961efb9733037b7753ffd4a308baa1b00b64", "D5 index drifted"
+        assert len(d5)==17511 and sha(d5)=="bba60d921df20a114b489e17f9222e0c4f310871", "D5 external JS drifted"
+        target=target.replace(d5tag,b'<script id="dungeonCore211Consolidation">'+d5+b'</script>',1)
     d4tag=b'<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>'
     if d4tag in target:
         assert target.count(d4tag)==1, "D4 owner loaded once"

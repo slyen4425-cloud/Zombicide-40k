@@ -166,13 +166,11 @@ assert.equal(sha(indexBeforeD6),"2ad1961efb9733037b7753ffd4a308baa1b00b64");
     replacement=old+'''
 const DUNGEON_CORE213='assets/gensrpg/dungeon/core213-stability-v1.js';
 const core213=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE213));
-const core213Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core213.length+'\\\\0')).update(core213).digest('hex');
+const core213Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core213.length+'\\0')).update(core213).digest('hex');
 assert.equal(core213.length,17519,'D6 moved Core213 exact byte length');
 assert.equal(core213Blob,'af4bf724315180becd80833af251504130751ad3','D6 Core213 must remain exactly original inline bytes');
-assert.equal((core213.toString().match(/\\\\.stopImmediatePropagation\\\\s*\\\\(/g)||[]).length,1,'D6 historic Core213 had one propagation hard-stop');
+assert.equal((core213.toString().match(/\\.stopImmediatePropagation\\s*\\(/g)||[]).length,1,'D6 historic Core213 had one propagation hard-stop');
 '''
-    # Python string escapes above purposefully become JS regex/backslash syntax.
-    replacement=replacement.replace("'+core213.length+'\\\\0'","'+core213.length+'\\\\0'")
     one(p,guard,old,replacement)
     one(p,guard,
       "  [DUNGEON_CORE200,new Set(['event propagation hard-stop','protected Dungeon combat global replacement'])]",

@@ -7,6 +7,12 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'),'utf8');
+const core211Path=path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js');
+const core211Bytes=fs.readFileSync(core211Path);
+const core211=core211Bytes.toString('utf8');
+const exact211=crypto.createHash('sha1').update(Buffer.from('blob '+core211Bytes.length+'\0')).update(core211Bytes).digest('hex');
+assert.equal(core211Bytes.length,17511,'D5 source owner size remains original');
+assert.equal(exact211,'bba60d921df20a114b489e17f9222e0c4f310871','D5 source owner stays byte-identical');
 const corePath=path.join(root,'assets','gensrpg','core','dice-v1.js');
 const tacticalPath=path.join(root,'assets','gensrpg','gens-rpg-tactical-visual-dice-16781142.js');
 const perfPath=path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js');
@@ -97,8 +103,10 @@ assert.match(core051,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*
   'dc051RollStatChallenge must remain deferred in the exact external Dungeon owner');
 assert.match(index,/dc201PuzzleRoll=function\(\)\{[\s\S]*?ok=roll<=chance/,
   'puzzle low-roll convention must remain deferred');
-assert.match(index,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,
-  'trap low-roll convention must remain deferred');
+assert.match(index,/<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"><\/script>/,
+  'Dungeon Core211 must load at its original classic parser position');
+assert.match(core211,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,
+  'trap low-roll convention must remain deferred in its byte-identical external owner');
 
 const math=Object.create(Math);
 let draws=0;

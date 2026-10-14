@@ -5,6 +5,12 @@ const path=require("node:path");
 const root=path.resolve(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"index.html"),"utf8");
 const core051=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core051-exploration-polish-v1.js"),"utf8");
+const core211Bytes=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core211-consolidation-v1.js"));
+const crypto=require("node:crypto");
+const core211Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core211Bytes.length+'\0')).update(core211Bytes).digest('hex');
+assert.equal(core211Bytes.length,17511,"D5 Dice owner must retain original source bytes");
+assert.equal(core211Blob,"bba60d921df20a114b489e17f9222e0c4f310871","D5 source must remain byte-identical");
+const core211=core211Bytes.toString("utf8");
 const perf=fs.readFileSync(path.join(root,"assets","gensrpg","gens-mobile-combat-performance-16781022.js"),"utf8");
 const tacticalDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-visual-dice-16781142.js"),"utf8");
 const tacticalWallDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-wall-dice-stats-16781145.js"),"utf8");
@@ -40,7 +46,8 @@ assert.match(core051,/window\.dc051RollStatChallenge=function\([\s\S]*?Math\.max
   "Dungeon stat challenge must remain characterized as its own D100 consumer in the external owner");
 assert.match(index,/window\.dc201PuzzleRoll=function\(\)[\s\S]*?roll<=chance/,
   "Puzzle D100 path must remain characterized as success-on-roll<=chance");
-assert.match(index,/window\.dc211TrapTest=function\(\)[\s\S]*?roll<=chance/,
+assert.match(index,/<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"><\/script>/, "Core211 must load once and synchronously");
+assert.match(core211,/window\.dc211TrapTest=function\(\)[\s\S]*?roll<=chance/,
   "Trap detection D100 path must remain characterized as success-on-roll<=chance");
 
 assert.match(perf,/const nativeAnimateDice=typeof R\.animateDice==="function"\?R\.animateDice:null/);
@@ -84,7 +91,7 @@ console.log(JSON.stringify({
     specialD6:"index:showSpecialD6Roll",
     freeRpgDice:"index:rollDungeonRpDice073",
     legacyDungeonD100:"index:d10048/dc051RollStatChallenge",
-    puzzleTrapD100:"index:dc201PuzzleRoll/dc211TrapTest",
+    puzzleTrapD100:"index:dc201PuzzleRoll + dungeon/core211-consolidation:dc211TrapTest",
     legacyAnimationDecorator:"gens-mobile-combat-performance-16781022.js",
     tacticalRuleOwner:"gens-rpg-tactical-visual-dice-16781142.js",
     tacticalAnimationDecorator:"gens-rpg-tactical-wall-dice-stats-16781145.js"

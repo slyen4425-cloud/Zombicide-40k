@@ -67,14 +67,19 @@ assert.equal(dungeonOwnerScript,dungeonOwnerTag,'browser sentinel must use the e
 
 const spatial313Script=exactScript('dungeonCore313SpatialModel');
 const core200Script=exactScript('dungeonCore200Rebuild');
+assert.equal(core200Script,
+  '<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>',
+  'Core200 must load its byte-identical external script at the same parser position');
+const core200Body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+assert.equal(Buffer.byteLength(core200Body,'utf8'),55842,'D4 Core200 exact historical source');
 const core304Script=exactScript('dungeonCore304DefeatExit');
 const core307Script=exactScript('dungeonCore307CriticalResumeFix');
 const core308Script=exactScript('dungeonCore308NewRunReset');
 const core310Script=exactScript('dungeonCore310PersistenceAndTokens');
-assert.match(core200Script,/localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\)/,'Core 2.00 must remain the creator/persister of the Dungeon runtime');
-assert.match(core200Script,/const gensDungeonStartConfiguredGame200V1=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,'Core 2.00 must retain the local Dungeon launch dispatcher while preserving Capture routing');
-assert.doesNotMatch(core200Script,/window\.startConfiguredGame\s*=(?!=)/,'Core 2.00 global startConfiguredGame owner must remain retired');
-assert.match(core200Script,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core 2.00 must keep the public Dungeon module-launch provider bound to its local dispatcher');
+assert.match(core200Body,/localStorage\.setItem\(RT_KEY,JSON\.stringify\(x\|\|\{\}\)\)/,'Core 2.00 must remain the creator/persister of the Dungeon runtime');
+assert.match(core200Body,/const gensDungeonStartConfiguredGame200V1=async function\(\)\{if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,'Core 2.00 must retain the local Dungeon launch dispatcher while preserving Capture routing');
+assert.doesNotMatch(core200Body,/window\.startConfiguredGame\s*=(?!=)/,'Core 2.00 global startConfiguredGame owner must remain retired');
+assert.match(core200Body,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Core 2.00 must keep the public Dungeon module-launch provider bound to its local dispatcher');
 
 // Browser harness built only from exact production source blocks:
 // Shell + offline session support + custom-content + native Dungeon markup,

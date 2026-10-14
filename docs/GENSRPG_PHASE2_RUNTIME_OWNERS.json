@@ -339,6 +339,11 @@
       "domain": "dungeon",
       "role": "byte-identical 17511-byte former active dungeonCore211Consolidation IIFE; classic synchronous Dungeon traps, hero visibility and combat consolidation"
     },
+    "assets/gensrpg/dungeon/core213-stability-v1.js": {
+      "owner": "Dungeon Core213 Stability",
+      "domain": "dungeon",
+      "role": "byte-identical 17519-byte former active dungeonCore213Stability IIFE; synchronous Dungeon combat, chests, pieces and puzzles stability at original parser position"
+    },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
       "domain": "dungeon",

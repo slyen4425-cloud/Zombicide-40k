@@ -20,6 +20,19 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // D6: restore ONLY the unchanged Core213 IIFE in a test-only old fixture.
+ if(hash(index)==='b5271e44dc4c14834a7725a869fb3c12386f2437'){
+  assert.equal(index.length,7745413,'D6 index length');
+  const tag=Buffer.from('<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'D6 exactly one owner');
+  const code=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core213-stability-v1.js'));
+  assert.equal(code.length,17519);
+  assert.equal(hash(code),'af4bf724315180becd80833af251504130751ad3');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore213Stability">'),code,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7762879);
+  assert.equal(hash(index),'2ad1961efb9733037b7753ffd4a308baa1b00b64','D5 historical index unchanged');
+ }
  // D5: undo byte-identical Core211 only to reconstruct an immutable old fixture.
  if(hash(index)==='2ad1961efb9733037b7753ffd4a308baa1b00b64'){
   assert.equal(index.length,7762879,'D5 physical index length');

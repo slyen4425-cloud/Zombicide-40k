@@ -55,6 +55,13 @@ const legacyFiles=new Set([
 const RUNTIME_BOOTSTRAP='assets/gensrpg/core/runtime-bootstrap-v1.js';
 const TACTICAL_ENTRY='assets/gensrpg/tactical/entry-v1.js';
 const DUNGEON_CORE200='assets/gensrpg/dungeon/core200-rebuild-v1.js';
+const DUNGEON_CORE213='assets/gensrpg/dungeon/core213-stability-v1.js';
+const core213=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE213));
+const core213Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core213.length+'\0')).update(core213).digest('hex');
+assert.equal(core213.length,17519,'D6 moved Core213 exact byte length');
+assert.equal(core213Blob,'af4bf724315180becd80833af251504130751ad3','D6 Core213 must remain exactly original inline bytes');
+assert.equal((core213.toString().match(/\.stopImmediatePropagation\s*\(/g)||[]).length,1,'D6 historic Core213 had one propagation hard-stop');
+
 // D4 moved this unchanged active inline owner into a physical JS file. Allow
 // only two original historical patterns, tied to the exact audited JS blob.
 const core200=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE200));
@@ -66,7 +73,8 @@ assert.equal((core200.toString().match(/(?:window|R)\.(?:dc200StartCombat|openDu
 const explicitRuleExceptions=new Map([
   [RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])],
   [TACTICAL_ENTRY,new Set(['hidden script injection'])],
-  [DUNGEON_CORE200,new Set(['event propagation hard-stop','protected Dungeon combat global replacement'])]
+  [DUNGEON_CORE200,new Set(['event propagation hard-stop','protected Dungeon combat global replacement'])],
+  [DUNGEON_CORE213,new Set(['event propagation hard-stop'])]
 ]);
 
 const allFiles=walk(root).map(rel).sort();
@@ -119,6 +127,6 @@ for(const file of allFiles.filter(f=>targetPrefixes.some(p=>f.startsWith(p)))){
   }
 }
 
-assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200],
+assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200,DUNGEON_CORE213],
   'only the two composition entrypoints and the exact byte-verified D4 legacy owner may claim named exceptions');
 console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; Core loads public entry, Tactical entry owns private composition)`);

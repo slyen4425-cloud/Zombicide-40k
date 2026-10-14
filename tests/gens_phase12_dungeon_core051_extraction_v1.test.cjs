@@ -9,7 +9,19 @@ const {execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const d5Index=read("index.html");
+const d6Index=read("index.html");
+const core213Tag=Buffer.from('<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>');
+const core213Open=Buffer.from('<script id="dungeonCore213Stability">');
+const core213Body=read("assets/gensrpg/dungeon/core213-stability-v1.js");
+const core213At=d6Index.indexOf(core213Tag);
+assert.ok(core213At>0 && d6Index.indexOf(core213Tag,core213At+core213Tag.length)<0,"D6 owner once");
+const indexBeforeD6=Buffer.concat([
+  d6Index.subarray(0,core213At),core213Open,core213Body,Buffer.from("</script>"),
+  d6Index.subarray(core213At+core213Tag.length)
+]);
+assert.equal(indexBeforeD6.length,7762879);
+assert.equal(sha(indexBeforeD6),"2ad1961efb9733037b7753ffd4a308baa1b00b64");
+const d5Index=indexBeforeD6;
 const core211Tag=Buffer.from('<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>');
 const core211Open=Buffer.from('<script id="dungeonCore211Consolidation">');
 const core211Body=read("assets/gensrpg/dungeon/core211-consolidation-v1.js");

@@ -178,7 +178,15 @@ assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
     return p
 
 def verify():
-    index=INDEX.read_bytes()
+    target=INDEX.read_bytes()
+    d6tag=b'<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>'
+    if d6tag in target:
+        assert target.count(d6tag)==1, "D6 owner only once"
+        d6=(ROOT/"assets/gensrpg/dungeon/core213-stability-v1.js").read_bytes()
+        assert len(target)==7745413 and blob(target)=="b5271e44dc4c14834a7725a869fb3c12386f2437", "D6 index drifted"
+        assert len(d6)==17519 and blob(d6)=="af4bf724315180becd80833af251504130751ad3", "D6 code drifted"
+        target=target.replace(d6tag,b'<script id="dungeonCore213Stability">'+d6+b'</script>',1)
+    index=target
     js=OUT.read_bytes()
     pin(index,DST_LEN,DST_SHA,"D5 live index")
     pin(js,BODY_LEN,BODY_SHA,"D5 external Dungeon Core211")

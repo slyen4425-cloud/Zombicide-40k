@@ -20,6 +20,14 @@ function scriptBody(id){
     assert.equal(m[1],'','no duplicate inline Dungeon owner');
     return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8');
   }
+  if(id==='dungeonCore200Rebuild'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+      'D4 Core200 must retain its original parser-ordered owner');
+    assert.equal(m[1],'','Core200 must not be duplicated inline');
+    const runtime=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+    assert.equal(Buffer.byteLength(runtime,'utf8'),55842,'D4 legacy Core200 exact byte count');
+    return runtime;
+  }
   return m[1];
 }
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]

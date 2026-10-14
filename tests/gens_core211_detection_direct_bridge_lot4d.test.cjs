@@ -17,7 +17,16 @@ function between(src,start,end){
   return src.slice(a,b);
 }
 
-const core=scriptById('dungeonCore211Consolidation');
+// Phase 12 D5: this exact classic owner was moved from inline HTML to an
+// unchanged synchronous JS file. Verify the owner and its immutable body.
+const crypto=require('node:crypto');
+const ownerPath=path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js');
+const ownerBytes=fs.readFileSync(ownerPath);
+const hash=crypto.createHash('sha1').update(Buffer.from('blob '+ownerBytes.length+'\0')).update(ownerBytes).digest('hex');
+assert.equal(ownerBytes.length,17511,'D5 original detection owner length');
+assert.equal(hash,'bba60d921df20a114b489e17f9222e0c4f310871','D5 original detection owner Git blob');
+assert.equal(html.split('<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>').length-1,1,'single classic owner at parser time');
+const core=ownerBytes.toString('utf8');
 const detection=between(core,'function resolveEnemyDetection211','function sensePanel211');
 
 // Characterization: Core 2.11 remains owner of its own visual detection bookkeeping.

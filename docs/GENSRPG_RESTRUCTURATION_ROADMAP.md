@@ -300,6 +300,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **D1+D2+D3+D4 = 154 083 octets externalisés ; 153 871 octets nets retirés de l'index. Phase 12 toujours ouverte.** D5 exige nouveau ZIP index à ce SHA (§26), checkpoint et branche séparés (§25). Aucun changement de `main` ou des deux laboratoires.
 
 
+### D5 EN VALIDATION — extraction Dungeon Core211 Consolidation (14 octobre 2026)
+
+- Départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core211-d5-extraction-2026-10-14` depuis `00022b60a5b9dea8bc8bc281a7705d94b31ff09a`, trois CI SUCCESS avant ouverture ; branche `work/gensrpg-phase12-dungeon-core211-d5-extraction-2026-10-14`.
+- Source §26 : ZIP utilisateur `b1.zip` (`index.html(6).txt`), 7 780 333 octets, blob `ca15dd7b483963d7bd0767b7b5baca915d17ec43` exact après D4.
+- IIFE active `dungeonCore211Consolidation` externalisée sans altération : 17 511 octets (blob `bba60d921df20a114b489e17f9222e0c4f310871`) vers `assets/gensrpg/dungeon/core211-consolidation-v1.js` chargé au même emplacement synchrone ; index 7 762 879 octets (blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`).
+- [Workflow d'application 38581987594](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38581987594) **SUCCESS**, commit physique `a039172e51efec5fa48b4b6d2fd4ced556473471` ; les 5 rollbacks D5→D1 et le graphe des propriétaires sont couverts par les tests. Test D5 enregistré dans le workflow CI Architecture permanent.
+- **NON GREEN** jusqu'à Architecture/Chromium, Firefox et Tactical SUCCESS sur le même SHA final et checkpoint GREEN §25. Production main et laboratoires inchangés.
+
 Une fois les modules extraits, index.html doit contenir principalement :
 
 - structure HTML minimale ;

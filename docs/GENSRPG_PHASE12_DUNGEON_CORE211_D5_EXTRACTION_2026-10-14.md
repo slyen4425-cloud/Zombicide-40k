@@ -11,3 +11,9 @@ Date : 14 octobre 2026.
 - Tag externe synchrone classique au même emplacement parser. Aucune transformation fonctionnelle de l'IIFE ou des globals. Nouvel index attendu : 7 762 879 octets / blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`, économie nette 17 454 octets.
 - Contrôle reproductible sur runner GitHub Actions ; source verrouillée par Git blob, rollback D5→D4→D3→D2→D1 et manifeste de runtime.
 - **Statut : NON GREEN avant succès complet de la triple CI sur même SHA et checkpoint §25 de clôture.**
+
+## Livraison physique D5 (validation CI complète en cours)
+
+- [Application contrôlée 38581987594](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38581987594) : **SUCCESS** ; commit `a039172e51efec5fa48b4b6d2fd4ced556473471`.
+- JS déplacé : 17 511 octets, blob `bba60d921df20a114b489e17f9222e0c4f310871`. Index : 7 762 879 octets, blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`.
+- Rollback D5 vers D4 et les anciennes étapes vérifié ; l'analyse navigateur et la triple CI sur un SHA final restent à terminer. **Aucun GREEN anticipé.**

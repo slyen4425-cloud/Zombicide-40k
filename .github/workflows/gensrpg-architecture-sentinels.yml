@@ -46,6 +46,7 @@ jobs:
           node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core200_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core211_extraction_v1.test.cjs
 
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs

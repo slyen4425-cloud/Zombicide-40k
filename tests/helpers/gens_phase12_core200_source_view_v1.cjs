@@ -9,7 +9,19 @@ const crypto=require("node:crypto");
 const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
-  const actual=fs.readFileSync(path.join(root,"index.html"));
+  let actual=fs.readFileSync(path.join(root,"index.html"));
+  // D5 is an independent byte-identical extraction. Undo it only inside
+  // this read-only historical D4 combat-contract view.
+  if(sha(actual)==="2ad1961efb9733037b7753ffd4a308baa1b00b64"){
+    assert.equal(actual.length,7762879,"D5 index length");
+    const d5Tag=Buffer.from('<script id="dungeonCore211Consolidation" src="assets/gensrpg/dungeon/core211-consolidation-v1.js"></script>');
+    const at=actual.indexOf(d5Tag);
+    assert.ok(at>0 && actual.indexOf(d5Tag,at+d5Tag.length)<0,"D5 owner exactly once");
+    const moved=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core211-consolidation-v1.js"));
+    assert.equal(moved.length,17511,"D5 external code size");
+    assert.equal(sha(moved),"bba60d921df20a114b489e17f9222e0c4f310871","D5 moved code unchanged");
+    actual=Buffer.concat([actual.subarray(0,at),Buffer.from('<script id="dungeonCore211Consolidation">'),moved,Buffer.from("</script>"),actual.subarray(at+d5Tag.length)]);
+  }
   const code=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core200-rebuild-v1.js"));
   assert.equal(actual.length,7780333,"D4 expected physical index length");
   assert.equal(sha(actual),"ca15dd7b483963d7bd0767b7b5baca915d17ec43","D4 active index fingerprint");

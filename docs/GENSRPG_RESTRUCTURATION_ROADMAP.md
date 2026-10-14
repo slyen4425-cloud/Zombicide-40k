@@ -291,13 +291,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Phase 12 globale toujours ouverte** : D1+D2+D3 = 98 241 octets JS externalisés et 98 080 octets nets retirés de l'index initial. D4 nécessite son propre checkpoint §25 ainsi que le nouvel index exact reçu en ZIP (§26) avant lecture/transfert.
 
 
-### D4 EN VALIDATION — extraction physique Dungeon Core200 (13 octobre 2026)
+### D4 GREEN — extraction physique Dungeon Core200 (14 octobre 2026)
 
-- Base triple CI GREEN : `9fa3729d0ae4f3531d53221a9d1021277a1c7382`, checkpoint de départ `checkpoint/gensrpg-start-phase12-dungeon-core200-d4-extraction-2026-10-13`, branche exclusive `work/gensrpg-phase12-dungeon-core200-d4-extraction-2026-10-13`.
-- Source §26 `a4.zip` (`index.html(5).txt`) byte-certifiée, 7 836 124 octets, Git blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c`.
-- Code du propriétaire Dungeon Core200 inchangé : **55 842 octets** déplacés vers `assets/gensrpg/dungeon/core200-rebuild-v1.js`, balise parser synchrone au même endroit ; nouveau `index.html` 7 780 333 octets, blob `ca15dd7b483963d7bd0767b7b5baca915d17ec43`.
-- [Workflow d'application 38470070484](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38470070484) : SUCCESS ; commit runtime `9697f21c05f3764c8d7fabffa618bd80f3395d7a`. Preuves exactes de retour arrière D4→D3→D2→D1 et sentinelles préliminaires exécutées.
-- **D4 NON GREEN** jusqu'aux CI Architecture/Chromium, Firefox et Tactical complètes sur le même SHA et checkpoint officiel. Aucun changement `main`, laboratoires ou assets Survie.
+- Départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core200-d4-extraction-2026-10-13` au SHA triple-CI GREEN `9fa3729d0ae4f3531d53221a9d1021277a1c7382` ; lot sur `work/gensrpg-phase12-dungeon-core200-d4-extraction-2026-10-13`.
+- Source §26 : `a4.zip` (index après D3) vérifié, 7 836 124 octets, blob `972f0e0be12fac14427853fbcd7abe5233eb5a8c`.
+- `dungeonCore200Rebuild` : 55 842 octets de code Dungeon byte-identique transférés vers `assets/gensrpg/dungeon/core200-rebuild-v1.js`, chargement classique synchrone à sa position initiale. Le nouvel index fait 7 780 333 octets (blob `ca15dd7b483963d7bd0767b7b5baca915d17ec43`) ; rollback D4→D3→D2→D1 vérifié.
+- [Application contrôlée 38470070484](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38470070484) SUCCESS. **Checkpoint final GREEN** `checkpoint/gensrpg-phase12-dungeon-core200-d4-green-2026-10-14` sur le SHA `be7f159a189d1f14579707ba67eb024be4238487` après succès de la triple CI exacte : [Architecture/Chromium 38543038090](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38543038090), [Firefox 38543037973](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38543037973) et [Tactical 38543038142](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38543038142). Les sentinelles d'effets de bord et de points d'entrée historiques ont été préservées en comptant le nouveau propriétaire physique.
+- **D1+D2+D3+D4 = 154 083 octets externalisés ; 153 871 octets nets retirés de l'index. Phase 12 toujours ouverte.** D5 exige nouveau ZIP index à ce SHA (§26), checkpoint et branche séparés (§25). Aucun changement de `main` ou des deux laboratoires.
+
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

@@ -310,6 +310,15 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Phase 12 encore ouverte**, D1–D5 : **171 594 octets externalisés**, **171 325 octets nets en moins**. D6 demande son propre checkpoint et un nouveau ZIP exact (§25, §26). `main`/laboratoires/Survie historique inchangés.
 
 
+### D6 EN VALIDATION — Dungeon Core213 Stability (15 octobre 2026)
+
+- Départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core213-d6-extraction-2026-10-15` sur base triple GREEN `db64f0aa2334d75c556fb9a122f5da51271419ec` ; branche dédiée `work/gensrpg-phase12-dungeon-core213-d6-extraction-2026-10-15`.
+- §26 : ZIP `b3.zip` (`index.html(8).txt`) certifié, 7 762 879 octets, blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`.
+- Seul propriétaire Dungeon actif `dungeonCore213Stability` déplacé **byte-identique**, 17 519 octets (blob `af4bf724315180becd80833af251504130751ad3`) vers `assets/gensrpg/dungeon/core213-stability-v1.js`. Script classique synchrone, même emplacement.
+- Index final 7 745 413 octets, blob `b5271e44dc4c14834a7725a869fb3c12386f2437`. Rollback D6→D5→D4→D3→D2→D1 exact.
+- [Application contrôlée 38657162683](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38657162683) SUCCESS ; SHA code `3e85b6071cec57748782454de35d8b76c373e3cd`. Ancien arrêt de propagation protégé par empreinte, sans changement de gameplay.
+- **NON GREEN** avant trois CI Architecture/Chromium, Firefox et Tactical SUCCESS au même SHA et checkpoint final §25.
+
 Une fois les modules extraits, index.html doit contenir principalement :
 
 - structure HTML minimale ;

@@ -13,8 +13,9 @@
 - Mouvement prévu : **17 519 octets JS** (blob `af4bf724315180becd80833af251504130751ad3`) vers `assets/gensrpg/dungeon/core213-stability-v1.js`. Remplacer une unique balise inline par `<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>` au même emplacement, sans réécrire le code ni différer le chargement.
 - Index attendu : **7 745 413 octets** (blob `b5271e44dc4c14834a7725a869fb3c12386f2437`), soit **17 466 octets nets** retirés.
 - Risque : l'ancien IIFE comprend un arrêt de propagation d'événement déjà présent inline ; préserver strictement son occurrence (empreinte verrouillée), aucun privilège global ni nouveau mécanisme. Dungeon, Capture, Survie, Tactical, Shell/PvP, stockage et session restent identiques.
+- **Application contrôlée :** [workflow 38657162683](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38657162683) SUCCESS ; commit moteur [3e85b607](https://github.com/slyen4425-cloud/Zombicide-40k/commit/3e85b6071cec57748782454de35d8b76c373e3cd). Index et JS aux blobs Git attendus ; rollback exact D6→D1 et sentinelles historiques PASSÉS dans le workflow.
 - Preuves prévues : rollback exact D6→D5→D4→D3→D2→D1 ; syntaxe Node ; ordre d'exécution ; cartographie owner + effets préexistants ; CI complète Architecture/Chromium, Firefox, Tactical **au même SHA** avant tout checkpoint D6 GREEN.
-- **État :** D6 préparé, application physique non encore terminée et pas de checkpoint D6 GREEN. Ne pas commencer D7 avant clôture §25 et nouvelle source §26.
+- **État :** extraction D6 publiée et vérifiée par le workflow contrôlé ; triple CI complète en attente, pas encore de checkpoint D6 GREEN. Ne pas commencer D7 avant clôture §25 et nouvelle source §26.
 
 ## Bilan précédent
 

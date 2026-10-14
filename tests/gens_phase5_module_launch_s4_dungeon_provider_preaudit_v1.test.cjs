@@ -109,8 +109,10 @@ for(const p of [
 const saveQuit=fs.readFileSync(path.join(root,'tests','gens_savequit_resume_shell_browser_v11411.test.cjs'),'utf8');
 assert.match(saveQuit,/Core 2\.00 must retain the true Dungeon launch dispatcher as a stable local provider target/,
   'permanent Save & Quit E2E must continue to characterize Core200 as the local Dungeon launch dispatcher');
-assert.match(saveQuit,/const core200Script=exactScript\('dungeonCore200Rebuild'\)/,
-  'Save & Quit E2E must continue to execute the exact Core200 production block');
+assert.match(saveQuit,/const core200Tag=exactScript\('dungeonCore200Rebuild'\)/,
+  'Save & Quit E2E must use the exact production Core200 external parser tag');
+assert.match(saveQuit,/const core200Script=fs\.readFileSync\(path\.join\(root,'assets\/gensrpg\/dungeon\/core200-rebuild-v1\.js'\),'utf8'\)/,
+  'Save & Quit E2E must execute the exact byte-verified external Core200 code');
 
 const mapCombat=fs.readFileSync(path.join(root,'tests','gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs'),'utf8');
 assert.match(mapCombat,/GensRpgTacticalCombatV2Bridge/,

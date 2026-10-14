@@ -102,8 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,97,
-  'Phase 3 entries stay inert while Phase 12 includes Core01, Core051, MJ72 and D4 Core200 physical Dungeon owners');
+assert.equal(Object.keys(ownerManifest.files||{}).length,98,
+  'Phase 3 entries stay inert while Phase 12 includes five byte-identical physical Dungeon owners through D5 Core211');
+assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core211-consolidation-v1.js']?.domain,'dungeon',
+  'D5 Core211 belongs exclusively to Dungeon');
+assert.equal(composition.index.split('assets/gensrpg/dungeon/core211-consolidation-v1.js').length-1,1,
+  'D5 Core211 loads once at its original classic parser position');
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core200-rebuild-v1.js']?.domain,'dungeon',
   'D4 Core200 must belong exclusively to the Dungeon runtime');
 assert.equal(composition.index.split('assets/gensrpg/dungeon/core200-rebuild-v1.js').length-1,1,

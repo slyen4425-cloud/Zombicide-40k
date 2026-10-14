@@ -1,0 +1,43 @@
+name: GenSrpG Phase 12 D5 Core211 controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-core211-d5-extraction-2026-10-14'
+    paths:
+      - '.github/workflows/gensrpg-phase12-dungeon-core211-controlled-apply.yml'
+      - 'tools/gensrpg_phase12_dungeon_core211_extract_apply.py'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply strict D5 exact Dungeon owner relocation
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-core211-d5-extraction-2026-10-14'
+          test "$(git hash-object index.html)" = 'ca15dd7b483963d7bd0767b7b5baca915d17ec43'
+          python3 tools/gensrpg_phase12_dungeon_core211_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_dungeon_core211_extract_apply.py --verify
+          node --check assets/gensrpg/dungeon/core211-consolidation-v1.js
+          node tests/gens_phase12_dungeon_core211_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core200_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+      - name: Commit exact D5 source, manifests and historical regressions
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-dungeon-core211-d5-extraction-2026-10-14'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/dungeon/core211-consolidation-v1.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json tools/gensrpg_phase12_dungeon_core200_extract_apply.py tools/gensrpg_phase12_dungeon_mj72_extract_apply.py tools/gensrpg_phase12_dungeon_core051_extract_apply.py tools/gensrpg_phase12_dungeon_core01_extract_apply.py tests/gens_phase12_dungeon_core200_extraction_v1.test.cjs tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs tests/helpers/gens_capture_team_roster_snapshot_v1.cjs tests/gens_phase2_runtime_load_graph_v11411.test.cjs tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs tests/gens_runtime_composition_guard_v11411.test.cjs tests/gens_phase2_inline_owner_manifest_v11411.test.cjs tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          git diff --cached --check
+          git commit -m "refactor(phase12): extract Dungeon Core211 byte-identical IIFE"
+          git push origin "HEAD:$GITHUB_REF_NAME"

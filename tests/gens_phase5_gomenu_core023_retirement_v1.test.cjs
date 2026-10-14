@@ -51,7 +51,16 @@ assert.match(core023,/specialDiceModal/,
 assert.match(core023,/dungeonCombatActive/,
   'Core 0.23 combat guard must remain intact');
 
-const core200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
+// D4 physically moved this exact classic Dungeon owner out of index.html.
+// Keep the real production body and its fingerprint under the goMenu sentinel.
+const core200Tag='<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>';
+assert.equal(source.split(core200Tag).length-1,1,'one Core200 production parser tag');
+const core200Bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'));
+const crypto=require('node:crypto');
+const sha=crypto.createHash('sha1').update(Buffer.from('blob '+core200Bytes.length+'\0')).update(core200Bytes).digest('hex');
+assert.equal(core200Bytes.length,55842,'exact historical Core200 length');
+assert.equal(sha,'5649ae0af69064dde72e6ea28b8dbefd105cb527','exact historical Core200 body');
+const core200=core200Bytes.toString('utf8');
 assert.doesNotMatch(core200,/window\.goMenu\s*=/,
   'Dungeon S2 must not reintroduce global goMenu ownership');
 assert.match(core200,/GensShellScreenReturnV1/,

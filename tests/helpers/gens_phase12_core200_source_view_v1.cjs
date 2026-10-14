@@ -10,6 +10,20 @@ const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
   let actual=fs.readFileSync(path.join(root,"index.html"));
+  // D6 preserves the exact historical Core213 bytes. Undo the new owner
+  // only in this read-only helper before checking the immutable D5/D4 view.
+  if(sha(actual)==="b5271e44dc4c14834a7725a869fb3c12386f2437"){
+    assert.equal(actual.length,7745413,"D6 index length");
+    const tag=Buffer.from('<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>');
+    const at=actual.indexOf(tag);
+    assert.ok(at>0 && actual.indexOf(tag,at+tag.length)<0,"D6 owner only once");
+    const moved=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core213-stability-v1.js"));
+    assert.equal(moved.length,17519);
+    assert.equal(sha(moved),"af4bf724315180becd80833af251504130751ad3");
+    actual=Buffer.concat([actual.subarray(0,at),Buffer.from('<script id="dungeonCore213Stability">'),moved,Buffer.from("</script>"),actual.subarray(at+tag.length)]);
+    assert.equal(actual.length,7762879);
+    assert.equal(sha(actual),"2ad1961efb9733037b7753ffd4a308baa1b00b64","D5 exact historical view");
+  }
   // D5 is an independent byte-identical extraction. Undo it only inside
   // this read-only historical D4 combat-contract view.
   if(sha(actual)==="2ad1961efb9733037b7753ffd4a308baa1b00b64"){

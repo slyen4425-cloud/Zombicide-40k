@@ -9,7 +9,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_
 
 const gitBlobSha=execFileSync('git',['hash-object','index.html'],{cwd:root,encoding:'utf8'}).trim();
 const HISTORICAL_CAPTURE_HUB_BLOB='613b4a21d83e9adcdd091be82240a3a6f9cf5bf7';
-const CURRENT_BLOB='b5271e44dc4c14834a7725a869fb3c12386f2437';
+const CURRENT_BLOB='6e1cb9b82126409b633306b0e77a7e45badb0f79';
 const hubPatch=require('./fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
 assert.equal(hubPatch.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
 assert.equal(hubPatch.toBlob,HISTORICAL_CAPTURE_HUB_BLOB);

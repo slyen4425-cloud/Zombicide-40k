@@ -344,6 +344,11 @@
       "domain": "dungeon",
       "role": "byte-identical 17519-byte former active dungeonCore213Stability IIFE; synchronous Dungeon combat, chests, pieces and puzzles stability at original parser position"
     },
+    "assets/gensrpg/dungeon/core214-single-authority-v1.js": {
+      "owner": "Dungeon Core214 Single Authority",
+      "domain": "dungeon",
+      "role": "byte-identical 15795-byte active dungeonCore214SingleAuthority IIFE; native Dungeon scene, combat and token single-authority render kept at original parser position"
+    },
     "assets/gensrpg/dungeon/entry-v1.js": {
       "owner": "GenSrpG Dungeon Exploration",
       "domain": "dungeon",

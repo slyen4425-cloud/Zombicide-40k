@@ -185,6 +185,14 @@ assert.equal(sha(indexBeforeD4),"972f0e0be12fac14427853fbcd7abe5233eb5a8c");
 
 def verify():
     target=INDEX.read_bytes()
+    d7tag=b'<script id="dungeonCore214SingleAuthority" src="assets/gensrpg/dungeon/core214-single-authority-v1.js"></script>'
+    if d7tag in target:
+        assert target.count(d7tag)==1, "D7 owner once"
+        assert len(target)==7729678 and blob(target)=="6e1cb9b82126409b633306b0e77a7e45badb0f79", "D7 index drift"
+        d7=(ROOT/"assets/gensrpg/dungeon/core214-single-authority-v1.js").read_bytes()
+        assert len(d7)==15795 and blob(d7)=="72481ac3ee62bc67f6c0646eb724baf4a87a2f88", "D7 body drift"
+        target=target.replace(d7tag,b'<script id="dungeonCore214SingleAuthority">'+d7+b'</script>',1)
+        assert len(target)==7745413 and blob(target)=="b5271e44dc4c14834a7725a869fb3c12386f2437", "restored D6 drift"
     d6tag=b'<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>'
     if d6tag in target:
         assert target.count(d6tag)==1, "D6 owner only once"

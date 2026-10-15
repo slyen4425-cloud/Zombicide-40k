@@ -9,7 +9,23 @@ const {execFileSync}=require("node:child_process");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const d6Index=read("index.html");
+const d7Index=read("index.html");
+const core214Tag=Buffer.from('<script id="dungeonCore214SingleAuthority" src="assets/gensrpg/dungeon/core214-single-authority-v1.js"></script>');
+const core214Open=Buffer.from('<script id="dungeonCore214SingleAuthority">');
+const core214Body=read("assets/gensrpg/dungeon/core214-single-authority-v1.js");
+assert.equal(d7Index.length,7729678,"D7 length");
+assert.equal(sha(d7Index),"6e1cb9b82126409b633306b0e77a7e45badb0f79","D7 exact blob");
+assert.equal(core214Body.length,15795,"D7 body length");
+assert.equal(sha(core214Body),"72481ac3ee62bc67f6c0646eb724baf4a87a2f88","D7 exact body");
+const core214At=d7Index.indexOf(core214Tag);
+assert.ok(core214At>0 && d7Index.indexOf(core214Tag,core214At+core214Tag.length)<0,"D7 exactly one owner");
+const indexBeforeD7=Buffer.concat([
+  d7Index.subarray(0,core214At),core214Open,core214Body,Buffer.from("</script>"),
+  d7Index.subarray(core214At+core214Tag.length)
+]);
+assert.equal(indexBeforeD7.length,7745413);
+assert.equal(sha(indexBeforeD7),"b5271e44dc4c14834a7725a869fb3c12386f2437","D6 historic index");
+const d6Index=indexBeforeD7;
 const core213Tag=Buffer.from('<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>');
 const core213Open=Buffer.from('<script id="dungeonCore213Stability">');
 const core213Body=read("assets/gensrpg/dungeon/core213-stability-v1.js");

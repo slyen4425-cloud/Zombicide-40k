@@ -10,6 +10,19 @@ const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
   let actual=fs.readFileSync(path.join(root,"index.html"));
+  // D7: restore only the unchanged Core214 IIFE in this historical view.
+  if(sha(actual)==="6e1cb9b82126409b633306b0e77a7e45badb0f79"){
+    assert.equal(actual.length,7729678,"D7 exact index");
+    const tag=Buffer.from('<script id="dungeonCore214SingleAuthority" src="assets/gensrpg/dungeon/core214-single-authority-v1.js"></script>');
+    const at=actual.indexOf(tag);
+    assert.ok(at>0 && actual.indexOf(tag,at+tag.length)<0,"D7 only one owner");
+    const moved=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core214-single-authority-v1.js"));
+    assert.equal(moved.length,15795);
+    assert.equal(sha(moved),"72481ac3ee62bc67f6c0646eb724baf4a87a2f88");
+    actual=Buffer.concat([actual.subarray(0,at),Buffer.from('<script id="dungeonCore214SingleAuthority">'),moved,Buffer.from("</script>"),actual.subarray(at+tag.length)]);
+    assert.equal(actual.length,7745413);
+    assert.equal(sha(actual),"b5271e44dc4c14834a7725a869fb3c12386f2437","D6 historical view");
+  }
   // D6 preserves the exact historical Core213 bytes. Undo the new owner
   // only in this read-only helper before checking the immutable D5/D4 view.
   if(sha(actual)==="b5271e44dc4c14834a7725a869fb3c12386f2437"){

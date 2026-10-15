@@ -102,8 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,99,
-  'Phase 3 entries stay inert while Phase 12 includes six byte-identical physical Dungeon owners through D6 Core213');
+assert.equal(Object.keys(ownerManifest.files||{}).length,100,
+  'Phase 3 entries stay inert while Phase 12 includes seven byte-identical physical Dungeon owners through D7 Core214');
+assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core214-single-authority-v1.js']?.domain,'dungeon',
+  'D7 Core214 belongs exclusively to Dungeon');
+assert.equal(composition.index.split('assets/gensrpg/dungeon/core214-single-authority-v1.js').length-1,1,
+  'D7 Core214 loads exactly once at its original synchronous parser position');
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core213-stability-v1.js']?.domain,'dungeon',
   'D6 Core213 belongs exclusively to Dungeon');
 assert.equal(composition.index.split('assets/gensrpg/dungeon/core213-stability-v1.js').length-1,1,
@@ -150,7 +154,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:93,
+  productionOwnerGraph:100,
   loadedEntrySlices:4,
   captureAuxiliaryRuntimeOwners:6
 },null,2));

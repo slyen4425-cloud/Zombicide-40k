@@ -133,7 +133,7 @@ assert.equal(sha(indexBeforeD7),"b5271e44dc4c14834a7725a869fb3c12386f2437","D6 h
         section=original[original.index("def verify():"):]
         assert section.count("    target=INDEX.read_bytes()")>=1
         # Alias historical hash only in the inserted restore block.
-        patch_once(p,script,"def verify():","def verify():\n"+rollback.replace("sha214(",hash_fn+"("))
+        patch_once(p,script,"\ndef verify():\n","\ndef verify():\n"+rollback.replace("sha214(",hash_fn+"("))
     d6tool="tools/gensrpg_phase12_dungeon_core213_extract_apply.py"
     rollback6=rollback.replace("    d7tag=", "    target=live\n    d7tag=")
     patch_once(p,d6tool,"def verify():\n    live=INDEX.read_bytes()",

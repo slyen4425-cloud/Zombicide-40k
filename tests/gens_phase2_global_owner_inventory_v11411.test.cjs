@@ -36,6 +36,16 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
       assert.equal(hash,'af4bf724315180becd80833af251504130751ad3','D6 Core213 byte-identical owner');
       return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
     }
+    if(m[1]==='dungeonCore214SingleAuthority'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core214-single-authority-v1\.js"/,
+        'D7 Core214 must retain its original synchronous parser position');
+      const bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core214-single-authority-v1.js'));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+      assert.equal(bytes.length,15795,'D7 Core214 historical byte length');
+      assert.equal(hash,'72481ac3ee62bc67f6c0646eb724baf4a87a2f88','D7 Core214 byte-identical owner');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
     if(m[1]!=='gensDungeonCore01Js')return {id:m[1],body:m[2],offset:m.index};
     assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core01-session-ui-v1\.js"/,
       'Phase12 Dungeon source must be composed at its original parser position');

@@ -10,6 +10,19 @@ const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
   let actual=fs.readFileSync(path.join(root,"index.html"));
+  // D8: reconstruct the strict D7 index before the unchanged D7-D4 history.
+  if(sha(actual)==="f56dc5bbb368b176509ab16477bd4b24dd000497"){
+    assert.equal(actual.length,7715741,"D8 exact index length");
+    const tag=Buffer.from('<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>');
+    const at=actual.indexOf(tag);
+    assert.ok(at>0 && actual.indexOf(tag,at+tag.length)<0,"D8 exactly one owner");
+    const moved=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core201-stability-v1.js"));
+    assert.equal(moved.length,13990,"D8 exact body length");
+    assert.equal(sha(moved),"7edf731fd1aa209ec96490fb8e2cb7af04afd627","D8 unchanged Core201");
+    actual=Buffer.concat([actual.subarray(0,at),Buffer.from('<script id="dungeonCore201Stability">'),moved,Buffer.from("</script>"),actual.subarray(at+tag.length)]);
+    assert.equal(actual.length,7729678,"D7 restored byte length");
+    assert.equal(sha(actual),"6e1cb9b82126409b633306b0e77a7e45badb0f79","D7 restored exact Git blob");
+  }
   // D7: restore only the unchanged Core214 IIFE in this historical view.
   if(sha(actual)==="6e1cb9b82126409b633306b0e77a7e45badb0f79"){
     assert.equal(actual.length,7729678,"D7 exact index");

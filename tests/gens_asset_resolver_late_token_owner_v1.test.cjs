@@ -5,6 +5,18 @@ const path=require('node:path');
 const index=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 
 function block(id){
+  // D6 moved the unchanged active Core213 implementation into a synchronous
+  // Dungeon script. Inspect its certified bytes, not its external script tag.
+  if(id==='dungeonCore213Stability'){
+    const tag='<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>';
+    assert.equal(index.split(tag).length-1,1,'Core213 must load exactly once in its original parser position');
+    const bytes=fs.readFileSync(path.join(__dirname,'..','assets/gensrpg/dungeon/core213-stability-v1.js'));
+    const crypto=require('node:crypto');
+    const sha=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+    assert.equal(bytes.length,17519,'D6 Core213 bytes must remain unchanged');
+    assert.equal(sha,'af4bf724315180becd80833af251504130751ad3','Core213 exact historical image resolver owner');
+    return bytes.toString('utf8');
+  }
   const start=index.indexOf('id="'+id+'"');
   assert.ok(start>=0,'missing inline block '+id);
   const end=index.indexOf('</script>',start);

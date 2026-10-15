@@ -17,6 +17,16 @@ function block(id){
     assert.equal(sha,'af4bf724315180becd80833af251504130751ad3','Core213 exact historical image resolver owner');
     return bytes.toString('utf8');
   }
+  if(id==='dungeonCore214SingleAuthority'){
+    const tag='<script id="dungeonCore214SingleAuthority" src="assets/gensrpg/dungeon/core214-single-authority-v1.js"></script>';
+    assert.equal(index.split(tag).length-1,1,'Core214 must load once at its original parser position');
+    const bytes=fs.readFileSync(path.join(__dirname,'..','assets/gensrpg/dungeon/core214-single-authority-v1.js'));
+    const crypto=require('node:crypto');
+    const sha=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+    assert.equal(bytes.length,15795,'D7 Core214 exact source length');
+    assert.equal(sha,'72481ac3ee62bc67f6c0646eb724baf4a87a2f88','Core214 source must remain byte-identical');
+    return bytes.toString('utf8');
+  }
   const start=index.indexOf('id="'+id+'"');
   assert.ok(start>=0,'missing inline block '+id);
   const end=index.indexOf('</script>',start);

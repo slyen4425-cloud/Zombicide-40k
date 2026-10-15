@@ -40,7 +40,7 @@ jobs:
       - name: Vérifier la sortie architecturale PvP Phase 10 sans gameplay
         run: node tests/gens_phase10_pvp_architectural_exit_s4.test.cjs
 
-      - name: Vérifier les quatre extractions physiques réversibles Dungeon Phase 12
+      - name: Vérifier les huit extractions physiques réversibles Dungeon Phase 12
         run: |
           node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
@@ -49,6 +49,7 @@ jobs:
           node tests/gens_phase12_dungeon_core211_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core213_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs
+          node tests/gens_phase12_dungeon_core201_d8_extraction_v1.test.cjs
 
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs

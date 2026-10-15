@@ -310,14 +310,15 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Phase 12 encore ouverte**, D1–D5 : **171 594 octets externalisés**, **171 325 octets nets en moins**. D6 demande son propre checkpoint et un nouveau ZIP exact (§25, §26). `main`/laboratoires/Survie historique inchangés.
 
 
-### D6 EN VALIDATION — Dungeon Core213 Stability (15 octobre 2026)
+### D6 GREEN — Dungeon Core213 Stability (15 octobre 2026)
 
 - Départ §25 : `checkpoint/gensrpg-start-phase12-dungeon-core213-d6-extraction-2026-10-15` sur base triple GREEN `db64f0aa2334d75c556fb9a122f5da51271419ec` ; branche dédiée `work/gensrpg-phase12-dungeon-core213-d6-extraction-2026-10-15`.
 - §26 : ZIP `b3.zip` (`index.html(8).txt`) certifié, 7 762 879 octets, blob `2ad1961efb9733037b7753ffd4a308baa1b00b64`.
 - Seul propriétaire Dungeon actif `dungeonCore213Stability` déplacé **byte-identique**, 17 519 octets (blob `af4bf724315180becd80833af251504130751ad3`) vers `assets/gensrpg/dungeon/core213-stability-v1.js`. Script classique synchrone, même emplacement.
 - Index final 7 745 413 octets, blob `b5271e44dc4c14834a7725a869fb3c12386f2437`. Rollback D6→D5→D4→D3→D2→D1 exact.
 - [Application contrôlée 38657162683](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38657162683) SUCCESS ; SHA code `3e85b6071cec57748782454de35d8b76c373e3cd`. Ancien arrêt de propagation protégé par empreinte, sans changement de gameplay.
-- **NON GREEN** avant trois CI Architecture/Chromium, Firefox et Tactical SUCCESS au même SHA et checkpoint final §25.
+- **Clôture D6 GREEN** : SHA validé `4b93ee9f8ceb9850097421b54db8c43a8df2862a`, triple CI [Architecture/Chromium 38658003954](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658003954), [Firefox 38658003956](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658003956), [Tactical 38658004148](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658004148), toutes SUCCESS sur le même SHA ; checkpoint final §25 `checkpoint/gensrpg-phase12-dungeon-core213-d6-green-2026-10-15` créé sur ce SHA. Script externe et index byte-identiques aux blobs verrouillés.
+- Bilan D1–D6 : **189 113 octets JS externalisés** et **188 791 octets nets retirés** de l'index ; index actuel de **7 745 413 octets**. Phase 12 toujours ouverte. D7 exige nouveau checkpoint de départ, propriétaire identifié, source exacte de ce SHA suivant §26. Le ZIP `b4.zip` reçu le 15 octobre correspond au D4 (7 780 333 octets, blob `ca15dd7b483963d7bd0767b7b5baca915d17ec43`) et n'est pas une source valide D7.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

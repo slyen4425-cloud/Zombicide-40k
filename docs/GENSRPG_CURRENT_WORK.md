@@ -1,5 +1,23 @@
 # GenSrpG — Point de reprise LIVE (15 octobre 2026)
 
+**Phase 12 en cours : D1–D6 GREEN ; D7 Core214 ouvert, NON GREEN.**
+
+## D7 — extraction Dungeon Core214 Single Authority
+
+- Base triple CI GREEN : `ac1e3c8be76732bdc7f389d0d9258cf283d65a84`, Architecture [38757922080](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38757922080), Firefox [38757921764](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38757921764), Tactical [38757921660](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38757921660), toutes SUCCESS au même SHA.
+- Dernier checkpoint GREEN : `checkpoint/gensrpg-phase12-dungeon-core213-d6-green-2026-10-15` (SHA `4b93ee9f8ceb9850097421b54db8c43a8df2862a`). Les documents D6 ont ensuite été mis à jour sans changement de runtime sur la base `ac1e3c8be76732bdc7f389d0d9258cf283d65a84` (elle aussi triple CI GREEN).
+- Checkpoint §25 départ : `checkpoint/gensrpg-start-phase12-dungeon-core214-d7-extraction-2026-10-15`, SHA `ac1e3c8be76732bdc7f389d0d9258cf283d65a84`.
+- Branche dédiée : `work/gensrpg-phase12-dungeon-core214-d7-extraction-2026-10-15` ; aucune autre branche/modification concurrente autorisée pendant ce lot.
+- §26 source : ZIP utilisateur `b5.zip`, entrée `index.html(10).txt`, **7 745 413 octets**, blob Git `b5271e44dc4c14834a7725a869fb3c12386f2437` vérifié — copie exacte du dernier index D6 GREEN.
+- Propriétaire unique : `dungeonCore214SingleAuthority`, domaine Dungeon, `crossDomains=[]`; IIFE classique de **15 795 octets**, blob `72481ac3ee62bc67f6c0646eb724baf4a87a2f88`. Responsabilités conservées sans évolution : rendu des pions, équipement/combat natif, post-render, cohérence de la scène.
+- Cible proposée : `assets/gensrpg/dungeon/core214-single-authority-v1.js`, script classique synchrone à la même position. Index cible **7 729 678 octets**, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79` (**15 735 octets nets retirés**).
+- Préserver sans modification : gameplay, chaînes de wrappers Dungeon Core01, combat Tactical/Bridge, héroïne/fiche héros, stockage/session, Capture/Survie/PvP, 32 images Survie, services partagés, `main` gelée.
+- Risque principal : ce propriétaire fait partie des derniers wrappers/renders actifs. Conserver strictement ordre parser, globals, effets existants, liens avec Core213, sans les recréer ni changer leurs sémantiques.
+- Tests nécessaires : source et JS identifiés par SHA Git, syntaxe Node, restauration byte-identique D7→D6→D1, vérification du chargement/owner, CI Architecture/Chromium + Firefox + Tactical **SUCCESS au même SHA**.
+- **NON GREEN** : aucun checkpoint final D7 avant publication contrôlée, validation du runtime sur la branche, triple CI et documentation à jour. Voir `docs/GENSRPG_PHASE12_DUNGEON_CORE214_D7_EXTRACTION_2026-10-15.md`.
+
+## Historique D6 GREEN (ne pas confondre avec D7)
+
 **Phase 12 en cours : D1–D6 GREEN. D7 non ouvert.**
 
 ## Dernier lot validé — D6 Dungeon Core213 Stability

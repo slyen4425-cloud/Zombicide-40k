@@ -325,7 +325,8 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - §25 base triple CI GREEN `ac1e3c8be76732bdc7f389d0d9258cf283d65a84`, départ `checkpoint/gensrpg-start-phase12-dungeon-core214-d7-extraction-2026-10-15`, branche `work/gensrpg-phase12-dungeon-core214-d7-extraction-2026-10-15`.
 - §26 ZIP `b5.zip` (entrée `index.html(10).txt`) vérifié exact D6 : 7 745 413 octets, blob `b5271e44dc4c14834a7725a869fb3c12386f2437`.
 - Candidat propriétaire actif unique `dungeonCore214SingleAuthority` : IIFE de 15 795 octets, blob `72481ac3ee62bc67f6c0646eb724baf4a87a2f88`. Extraction envisagée byte-identique vers `assets/gensrpg/dungeon/core214-single-authority-v1.js`, à sa place parser ; index attendu 7 729 678 octets, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`.
-- **NON GREEN** : triple CI et checkpoint de clôture exigés. Aucune évolution gameplay, `main` ou labos.
+- Application contrôlée [38761613784](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38761613784) **SUCCESS**, code SHA `821d2c3f91c2f238fc223c8dd73ff1cebac6181b`. Index D7 confirmé 7 729 678 octets / blob `6e1cb9b82126409b633306b0e77a7e45badb0f79` ; rollback intégral byte exact validé ; sentinelle Architecture D7 intégrée.
+- **NON GREEN** avant triple CI Architecture/Chromium, Firefox, Tactical sur même SHA final et checkpoint de clôture §25. Aucune évolution gameplay, `main` ou labos.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

@@ -1,6 +1,6 @@
 # GenSrpG — Point de reprise LIVE (15 octobre 2026)
 
-**Phase 12 en cours : D1–D6 GREEN ; D7 Core214 ouvert, NON GREEN.**
+**Phase 12 en cours : D1–D6 GREEN ; D7 Core214 publié, CI finale en attente (NON GREEN).**
 
 ## D7 — extraction Dungeon Core214 Single Authority
 
@@ -14,7 +14,8 @@
 - Préserver sans modification : gameplay, chaînes de wrappers Dungeon Core01, combat Tactical/Bridge, héroïne/fiche héros, stockage/session, Capture/Survie/PvP, 32 images Survie, services partagés, `main` gelée.
 - Risque principal : ce propriétaire fait partie des derniers wrappers/renders actifs. Conserver strictement ordre parser, globals, effets existants, liens avec Core213, sans les recréer ni changer leurs sémantiques.
 - Tests nécessaires : source et JS identifiés par SHA Git, syntaxe Node, restauration byte-identique D7→D6→D1, vérification du chargement/owner, CI Architecture/Chromium + Firefox + Tactical **SUCCESS au même SHA**.
-- **NON GREEN** : aucun checkpoint final D7 avant publication contrôlée, validation du runtime sur la branche, triple CI et documentation à jour. Voir `docs/GENSRPG_PHASE12_DUNGEON_CORE214_D7_EXTRACTION_2026-10-15.md`.
+- **Application contrôlée SUCCESS** : [run 38761613784](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38761613784), SHA moteur `821d2c3f91c2f238fc223c8dd73ff1cebac6181b`. Index 7 729 678 octets, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`, JS Core214 blob `72481ac3ee62bc67f6c0646eb724baf4a87a2f88`.
+- **NON GREEN** : attendre triple CI complète Architecture/Chromium, Firefox, Tactical même SHA avec sentinelle D7 permanente. Ensuite seulement checkpoint final §25. Ne pas ouvrir D8. Voir `docs/GENSRPG_PHASE12_DUNGEON_CORE214_D7_EXTRACTION_2026-10-15.md`.
 
 ## Historique D6 GREEN (ne pas confondre avec D7)
 

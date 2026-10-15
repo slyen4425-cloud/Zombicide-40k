@@ -173,6 +173,12 @@ assert.equal(sha(indexBeforeD7),"b5271e44dc4c14834a7725a869fb3c12386f2437","D6 h
  }
 '''
     patch_once(p,snapshot,before,addition)
+    # Register the new exact rollback sentinel in the permanent Architecture CI.
+    architecture=".github/workflows/gensrpg-architecture-sentinels.yml"
+    old="          node tests/gens_phase12_dungeon_core213_extraction_v1.test.cjs\\n"
+    # use an actual linefeed instead of a YAML escaping sequence
+    old=old.replace("\\\\n","\\n")
+    patch_once(p,architecture,old,old+"          node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs\\n".replace("\\\\n","\\n"))
     # New D7 script introduces no pattern forbidden by the global side-effect
     # guard; no exception is created or relaxed.
     return p

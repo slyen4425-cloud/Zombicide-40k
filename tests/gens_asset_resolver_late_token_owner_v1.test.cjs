@@ -12,7 +12,7 @@ function block(id){
     assert.equal(index.split(tag).length-1,1,'Core213 must load exactly once in its original parser position');
     const bytes=fs.readFileSync(path.join(__dirname,'..','assets/gensrpg/dungeon/core213-stability-v1.js'));
     const crypto=require('node:crypto');
-    const sha=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+    const sha=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
     assert.equal(bytes.length,17519,'D6 Core213 bytes must remain unchanged');
     assert.equal(sha,'af4bf724315180becd80833af251504130751ad3','Core213 exact historical image resolver owner');
     return bytes.toString('utf8');

@@ -184,6 +184,16 @@ assert.equal(sha(indexBeforeD7),"b5271e44dc4c14834a7725a869fb3c12386f2437","D6 h
 
 def verify():
     live=INDEX.read_bytes()
+    target=live
+    d8tag=b'<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>'
+    if d8tag in target:
+        assert target.count(d8tag)==1, "D8 owner once"
+        assert len(target)==7715741 and sha(target)=="f56dc5bbb368b176509ab16477bd4b24dd000497", "D8 index drift"
+        d8=(ROOT/"assets/gensrpg/dungeon/core201-stability-v1.js").read_bytes()
+        assert len(d8)==13990 and sha(d8)=="7edf731fd1aa209ec96490fb8e2cb7af04afd627", "D8 body drift"
+        target=target.replace(d8tag,b'<script id="dungeonCore201Stability">'+d8+b'</script>',1)
+        assert len(target)==7729678 and sha(target)=="6e1cb9b82126409b633306b0e77a7e45badb0f79", "D7 restored drift"
+    live=target
     code=OUT.read_bytes()
     pin(live,DST_LEN,DST_SHA,"D7 live index")
     pin(code,BODY_LEN,BODY_SHA,"D7 external Core214")

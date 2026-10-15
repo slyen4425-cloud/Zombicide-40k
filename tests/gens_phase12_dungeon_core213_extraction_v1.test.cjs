@@ -9,7 +9,23 @@ const {execFileSync}=require("node:child_process");
 const ROOT=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(ROOT,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const d7Index=read("index.html");
+const d8Index=read("index.html");
+const core201Tag=Buffer.from('<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>');
+const core201Open=Buffer.from('<script id="dungeonCore201Stability">');
+const core201Body=read("assets/gensrpg/dungeon/core201-stability-v1.js");
+assert.equal(d8Index.length,7715741,"D8 index length");
+assert.equal(sha(d8Index),"f56dc5bbb368b176509ab16477bd4b24dd000497","D8 exact blob");
+assert.equal(core201Body.length,13990,"D8 Core201 length");
+assert.equal(sha(core201Body),"7edf731fd1aa209ec96490fb8e2cb7af04afd627","D8 Core201 exact blob");
+const core201At=d8Index.indexOf(core201Tag);
+assert.ok(core201At>0 && d8Index.indexOf(core201Tag,core201At+core201Tag.length)<0,"D8 Core201 unique owner");
+const indexBeforeD8=Buffer.concat([
+ d8Index.subarray(0,core201At),core201Open,core201Body,Buffer.from("</script>"),
+ d8Index.subarray(core201At+core201Tag.length)
+]);
+assert.equal(indexBeforeD8.length,7729678);
+assert.equal(sha(indexBeforeD8),"6e1cb9b82126409b633306b0e77a7e45badb0f79","exact D7 historical index");
+const d7Index=indexBeforeD8;
 const core214Tag=Buffer.from('<script id="dungeonCore214SingleAuthority" src="assets/gensrpg/dungeon/core214-single-authority-v1.js"></script>');
 const core214Open=Buffer.from('<script id="dungeonCore214SingleAuthority">');
 const core214Body=read("assets/gensrpg/dungeon/core214-single-authority-v1.js");

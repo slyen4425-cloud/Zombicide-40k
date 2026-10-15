@@ -11,6 +11,13 @@ const core211Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core211By
 assert.equal(core211Bytes.length,17511,"D5 Dice owner must retain original source bytes");
 assert.equal(core211Blob,"bba60d921df20a114b489e17f9222e0c4f310871","D5 source must remain byte-identical");
 const core211=core211Bytes.toString("utf8");
+
+const core201Bytes=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core201-stability-v1.js"));
+const core201Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core201Bytes.length+'\0')).update(core201Bytes).digest('hex');
+assert.equal(core201Bytes.length,13990,"D8 Puzzle D100 owner must retain original source bytes");
+assert.equal(core201Blob,"7edf731fd1aa209ec96490fb8e2cb7af04afd627","D8 puzzle owner is byte-identical to old inline body");
+const core201=core201Bytes.toString("utf8");
+
 const perf=fs.readFileSync(path.join(root,"assets","gensrpg","gens-mobile-combat-performance-16781022.js"),"utf8");
 const tacticalDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-visual-dice-16781142.js"),"utf8");
 const tacticalWallDice=fs.readFileSync(path.join(root,"assets","gensrpg","gens-rpg-tactical-wall-dice-stats-16781145.js"),"utf8");
@@ -44,8 +51,12 @@ assert.doesNotMatch(index,/window\.dc051RollStatChallenge=function\(/,
   "Dungeon Core051 old inline definition must remain removed");
 assert.match(core051,/window\.dc051RollStatChallenge=function\([\s\S]*?Math\.max\(5,Math\.min\(95[\s\S]*?roll>=threshold/,
   "Dungeon stat challenge must remain characterized as its own D100 consumer in the external owner");
-assert.match(index,/window\.dc201PuzzleRoll=function\(\)[\s\S]*?roll<=chance/,
-  "Puzzle D100 path must remain characterized as success-on-roll<=chance");
+assert.match(index,/<script id="dungeonCore201Stability" src="assets\/gensrpg\/dungeon\/core201-stability-v1\.js"><\/script>/,
+  "Puzzle D100 owner must load exactly at its original synchronous parser position");
+assert.doesNotMatch(index,/<script id="dungeonCore201Stability">/,
+  "Puzzle D100 inline owner must not duplicate the extracted source");
+assert.match(core201,/window\.dc201PuzzleRoll=function\(\)[\s\S]*?roll<=chance/,
+  "Puzzle D100 path must remain characterized as success-on-roll<=chance in the exact D8 external owner");
 assert.match(index,/<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"><\/script>/, "Core211 must load once and synchronously");
 assert.match(core211,/window\.dc211TrapTest=function\(\)[\s\S]*?roll<=chance/,
   "Trap detection D100 path must remain characterized as success-on-roll<=chance");

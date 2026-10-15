@@ -1,6 +1,6 @@
 # GenSrpG — Point de reprise LIVE (15 octobre 2026)
 
-**Phase 12 en cours : D1–D7 GREEN ; D8 Core201 certifié et préparé, NON GREEN (application et CI en attente).**
+**Phase 12 en cours : D1–D7 GREEN ; D8 Core201 extrait et publié, NON GREEN (CI Architecture navigateur en cours).**
 
 ## Chantier actuel : D8, alléger index.html / Dungeon
 
@@ -17,7 +17,10 @@
 - **Cible verrouillée :** `assets/gensrpg/dungeon/core201-stability-v1.js`, script classique et synchrone à sa position historique, sans changement d'un seul octet du JS. `index.html` attendu 7 715 741 octets, Git blob `f56dc5bbb368b176509ab16477bd4b24dd000497`, soit 13 937 octets nets retirés.
 - **Risques et garde-fous :** ordre du chargement autour de Core200 et Core211, état runtime/sauvegarde Dungeon, panneaux d'ennemis, appel Bridge. Verrouillage du graphe des 101 fichiers atteignables, SHA de toute la chaîne de rollback D8→D1, syntaxe Node, tests navigateur et trois CI sur un SHA unique.
 - **Statut : D8 NON GREEN**, publication/extraction contrôlée à faire sur la branche dédiée ; aucun checkpoint final avant tests et triple CI SUCCESS.
-- **Prochaine action :** appliquer via workflow contrôlé verrouillé par blob, vérifier rétrocompatibilité et CI Architecture/Chromium + Firefox + Tactical, puis seulement clore GREEN.
+- **Application contrôlée D8 SUCCESS :** [workflow 38801893284](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38801893284), commit moteur `773fa7301980325c70acd336e267dd056e4a6273`. `index.html` réel : **7 715 741 octets**, blob `f56dc5bbb368b176509ab16477bd4b24dd000497`; Core201 externalisé : 13 990 octets / blob `7edf731fd1aa209ec96490fb8e2cb7af04afd627`. Retour D8→D7→D6→D5→D4→D3→D2→D1 exact, script classique synchrone et owner manifest à 101 propriétaires.
+- **CI sur SHA code/test `dd3f127041a78b9e7539ab1735cb188557a50ccc` :** [Firefox 38803573894](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573894) SUCCESS ; [Tactical 38803573930](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573930) SUCCESS ; [Architecture/Chromium 38803573910](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573910) **en cours**, suite statique SUCCESS, suite navigateur non terminée. Aucun checkpoint D8 GREEN créé.
+- **Correctifs de sentinelles historiques uniquement :** anciens tests Core201/D100 lisent maintenant le JS externalisé exact ; helpers de rollback, compte de 101 propriétaires, frontières Dungeon/Survie/Capture inchangées. Aucun correctif de gameplay.
+- **Prochaine action :** constater l'issue réelle de la CI Architecture/Chromium au SHA `dd3f127041a78b9e7539ab1735cb188557a50ccc` ; **si** et seulement si SUCCESS, créer le checkpoint D8 GREEN sur ce SHA et clôturer la documentation. En cas d'échec, corriger uniquement le test/contrat démontré, recommencer la triple CI. **Ne pas commencer D9** avant ce verrou.
 - Historique : [rapport D7](https://github.com/slyen4425-cloud/Zombicide-40k/blob/20048a1b1059c0c2ad31df72d17c399065a1da49/docs/GENSRPG_PHASE12_DUNGEON_CORE214_D7_EXTRACTION_2026-10-15.md), charte `docs/GENSRPG_CHARTE.md`, policy `docs/GENSRPG_CHECKPOINT_POLICY.md`, roadmap `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`.
 
 ## Résultat validé D7

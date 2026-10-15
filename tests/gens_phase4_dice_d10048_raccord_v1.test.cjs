@@ -10,6 +10,12 @@ const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exp
 const core211Path=path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js');
 const core211Bytes=fs.readFileSync(core211Path);
 const core211=core211Bytes.toString('utf8');
+const core201Path=path.join(root,'assets/gensrpg/dungeon/core201-stability-v1.js');
+const core201Bytes=fs.readFileSync(core201Path);
+const core201=core201Bytes.toString('utf8');
+const core201Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core201Bytes.length+'\0')).update(core201Bytes).digest('hex');
+assert.equal(core201Bytes.length,13990,'D8 exact Core201 owner length');
+assert.equal(core201Blob,'7edf731fd1aa209ec96490fb8e2cb7af04afd627','D8 Core201 owner stays byte-identical');
 const exact211=crypto.createHash('sha1').update(Buffer.from('blob '+core211Bytes.length+'\0')).update(core211Bytes).digest('hex');
 assert.equal(core211Bytes.length,17511,'D5 source owner size remains original');
 assert.equal(exact211,'bba60d921df20a114b489e17f9222e0c4f310871','D5 source owner stays byte-identical');
@@ -101,8 +107,12 @@ assert.doesNotMatch(index,/dc051RollStatChallenge=function\(kind,id,chance\)/,
   'Core051 inline stat challenge owner must be retired');
 assert.match(core051,/dc051RollStatChallenge=function\(kind,id,chance\)\{[\s\S]*?threshold=101-chance,roll=1\+Math\.floor\(Math\.random\(\)\*100\)/,
   'dc051RollStatChallenge must remain deferred in the exact external Dungeon owner');
-assert.match(index,/dc201PuzzleRoll=function\(\)\{[\s\S]*?ok=roll<=chance/,
-  'puzzle low-roll convention must remain deferred');
+assert.match(index,/<script id="dungeonCore201Stability" src="assets\/gensrpg\/dungeon\/core201-stability-v1\.js"><\/script>/,
+  'Core201 must remain loaded exactly at its historical parser position');
+assert.doesNotMatch(index,/<script id="dungeonCore201Stability">/,
+  'D8 owner must not exist both inline and externally');
+assert.match(core201,/dc201PuzzleRoll=function\(\)\{[\s\S]*?ok=roll<=chance/,
+  'puzzle low-roll convention must remain deferred in the identical D8 external owner');
 assert.match(index,/<script id="dungeonCore211Consolidation" src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"><\/script>/,
   'Dungeon Core211 must load at its original classic parser position');
 assert.match(core211,/dc211TrapTest=function\(\)\{[\s\S]*?ok=roll<=chance/,

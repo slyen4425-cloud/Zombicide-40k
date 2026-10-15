@@ -320,13 +320,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Clôture D6 GREEN** : SHA validé `4b93ee9f8ceb9850097421b54db8c43a8df2862a`, triple CI [Architecture/Chromium 38658003954](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658003954), [Firefox 38658003956](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658003956), [Tactical 38658004148](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38658004148), toutes SUCCESS sur le même SHA ; checkpoint final §25 `checkpoint/gensrpg-phase12-dungeon-core213-d6-green-2026-10-15` créé sur ce SHA. Script externe et index byte-identiques aux blobs verrouillés.
 - Bilan D1–D6 : **189 113 octets JS externalisés** et **188 791 octets nets retirés** de l'index ; index actuel de **7 745 413 octets**. Phase 12 toujours ouverte. D7 exige nouveau checkpoint de départ, propriétaire identifié, source exacte de ce SHA suivant §26. Le ZIP `b4.zip` reçu le 15 octobre correspond au D4 (7 780 333 octets, blob `ca15dd7b483963d7bd0767b7b5baca915d17ec43`) et n'est pas une source valide D7.
 
-### D7 OUVERT — Dungeon Core214 Single Authority (15 octobre 2026)
+### D7 GREEN — Dungeon Core214 Single Authority (15 octobre 2026)
 
 - §25 base triple CI GREEN `ac1e3c8be76732bdc7f389d0d9258cf283d65a84`, départ `checkpoint/gensrpg-start-phase12-dungeon-core214-d7-extraction-2026-10-15`, branche `work/gensrpg-phase12-dungeon-core214-d7-extraction-2026-10-15`.
 - §26 ZIP `b5.zip` (entrée `index.html(10).txt`) vérifié exact D6 : 7 745 413 octets, blob `b5271e44dc4c14834a7725a869fb3c12386f2437`.
 - Candidat propriétaire actif unique `dungeonCore214SingleAuthority` : IIFE de 15 795 octets, blob `72481ac3ee62bc67f6c0646eb724baf4a87a2f88`. Extraction envisagée byte-identique vers `assets/gensrpg/dungeon/core214-single-authority-v1.js`, à sa place parser ; index attendu 7 729 678 octets, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`.
 - Application contrôlée [38761613784](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38761613784) **SUCCESS**, code SHA `821d2c3f91c2f238fc223c8dd73ff1cebac6181b`. Index D7 confirmé 7 729 678 octets / blob `6e1cb9b82126409b633306b0e77a7e45badb0f79` ; rollback intégral byte exact validé ; sentinelle Architecture D7 intégrée.
-- **NON GREEN** avant triple CI Architecture/Chromium, Firefox, Tactical sur même SHA final et checkpoint de clôture §25. Aucune évolution gameplay, `main` ou labos.
+- **GREEN officiel** : triple CI [Architecture/Chromium 38763178917](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178917), [Firefox 38763178876](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178876), [Tactical 38763178850](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178850) **SUCCESS sur le même SHA** `20048a1b1059c0c2ad31df72d17c399065a1da49`. Checkpoint final §25 : `checkpoint/gensrpg-phase12-dungeon-core214-d7-green-2026-10-15`, vérifié sur ce SHA. Aucune évolution gameplay, `main` ou labos.
+- **Bilan D1–D7** : 204 908 octets de JS externalisés ; 204 526 octets nets retirés de l'index initial ; index actuel de 7 729 678 octets. Phase 12 toujours ouverte, D8 non ouvert. Pour une nouvelle extraction, source exacte du checkpoint D7 exigée §26.
 
 Une fois les modules extraits, index.html doit contenir principalement :
 

@@ -1,0 +1,114 @@
+name: GenSrpG Phase12 R03 historical sentinels adaptation
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r03-shell-hub-family-ui-extraction-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r03-historical-fixtures.yml'
+permissions:
+  contents: write
+jobs:
+  adapt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify R03 exact published code before migrating historical fixtures
+        run: |
+          test "$(git hash-object index.html)" = '8faf7af7fced0a1e0724985e85718a0e4a9e673b'
+          test "$(git hash-object assets/gensrpg/shell/legacy-hub-family-ui-v1.js)" = 'e45f3b4e419a10b030c47bc921bded1ec0dc723b'
+          python3 tools/gensrpg_phase12_r03_shell_hub_extract_apply.py --verify
+      - name: Correct only byte-pinned history and owner inventory
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('.')
+          R02='062c4cd37634f504cc75ce3329d6e69e19b5f547'
+          R03='8faf7af7fced0a1e0724985e85718a0e4a9e673b'
+          OWNER='assets/gensrpg/shell/legacy-hub-family-ui-v1.js'
+          def change(path, pairs):
+              file=root/path
+              text=file.read_text()
+              for old,new in pairs:
+                  count=text.count(old)
+                  assert count==1,(path,repr(old[:90]),count)
+                  text=text.replace(old,new,1)
+              file.write_text(text)
+          helper = '''"use strict";
+          /* Historical-only R03->R02 reconstruction; not loaded by runtime. */
+          const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict"),crypto=require("node:crypto");
+          const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\\0")).update(b).digest("hex");
+          const R03="8faf7af7fced0a1e0724985e85718a0e4a9e673b",R02="062c4cd37634f504cc75ce3329d6e69e19b5f547";
+          const JS="e45f3b4e419a10b030c47bc921bded1ec0dc723b",REL="assets/gensrpg/shell/legacy-hub-family-ui-v1.js";
+          const TAG='<script src="'+REL+'"></script>\\n',END='function gensCleanDungeonDemoHeroesFromOtherUniverses()';
+          module.exports=function r02SourceView(index,root=path.resolve(__dirname,"../..")){
+            if(hash(index)===R02){assert.equal(index.length,2869485);return index;}
+            assert.equal(index.length,2862906);assert.equal(hash(index),R03,"R03 current source");
+            const js=fs.readFileSync(path.join(root,REL));assert.equal(js.length,6651);assert.equal(hash(js),JS);
+            let s=index.toString("utf8");
+            assert.equal(s.split(TAG).length,2,"one synchronous Shell Hub owner");
+            s=s.replace(TAG,"");
+            assert.equal(s.split(END).length,2,"one monolith continuation");
+            s=s.replace(END,js.toString("utf8")+END);
+            const out=Buffer.from(s,"utf8");
+            assert.equal(out.length,2869485);assert.equal(hash(out),R02,"R03 restores byte-identical R02");
+            return out;
+          };
+          '''
+          # Remove indentation added to this workflow's YAML literal before creating the actual helper.
+          helper='\\n'.join(line[10:] if line.startswith('          ') else line for line in helper.splitlines())+'\\n'
+          newfile=root/'tests/helpers/gens_phase12_r03_r02_source_view_v1.cjs'
+          assert not newfile.exists()
+          newfile.write_text(helper)
+          change('tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs', [
+              (' if(hash(index)===R01){assert.equal(index.length,6969593);return index;}',
+               ' if(hash(index)===R01){assert.equal(index.length,6969593);return index;}\\n if(hash(index)==="'+R03+'")index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);')
+          ])
+          change('tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs', [
+              ('const index=read("index.html"),rel=',
+               'const index=require("./helpers/gens_phase12_r03_r02_source_view_v1.cjs")(read("index.html"),root),rel='),
+              ('execFileSync("python3",["tools/gensrpg_phase12_r02_legacy_visual_data_extract_apply.py","--verify"],{cwd:root});',
+               'const r01=require("./helpers/gens_phase12_r02_r01_source_view_v1.cjs")(index,root);assert.equal(blob(r01),"caf31c121d926b7b76b9bb05688fab8f2839814e");')
+          ])
+          change('tests/helpers/gens_phase12_core200_source_view_v1.cjs', [
+              ('"'+R02+'"].includes(sha(actual))','"'+R02+'","'+R03+'"].includes(sha(actual))')
+          ])
+          change('tests/gens_phase2_inline_global_last_owner_v11411.test.cjs', [
+              ("const CURRENT_INDEX_BLOB='"+R02+"'","const CURRENT_INDEX_BLOB='"+R03+"'")
+          ])
+          change('tests/gens_phase2_inline_owner_manifest_v11411.test.cjs', [
+              ("const CURRENT_BLOB='"+R02+"'","const CURRENT_BLOB='"+R03+"'")
+          ])
+          anchor="  'assets/gensrpg/core/legacy-visual-data-v1.js',"
+          insert=anchor+"\\n  '"+OWNER+"',"
+          change('tests/gens_phase2_runtime_load_graph_v11411.test.cjs', [
+              (anchor,insert),
+              ('assert.equal(new Set(productionDirect).size,60','assert.equal(new Set(productionDirect).size,61'),
+              ('assert.equal(allJs.length,118','assert.equal(allJs.length,119'),
+              ("const phase5ConnectedServices=[\\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'",
+               "const phase5ConnectedServices=[\\n  '"+OWNER+"',\\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'"),
+              ('assert.equal(reachable.size,104','assert.equal(reachable.size,105')
+          ])
+          change('tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs', [
+              ('assert.equal(reachable.size,104','assert.equal(reachable.size,105'),
+              ('assert.equal(mapped.size,104','assert.equal(mapped.size,105')
+          ])
+          for file in [
+              'tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs',
+              'tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs'
+          ]:
+              change(file,[('assert.equal(reachable.size,104','assert.equal(reachable.size,105')])
+          change('tests/gens_runtime_composition_guard_v11411.test.cjs',[(anchor,insert)])
+          PY
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+          git diff --check
+      - name: Publish historical fixture adjustments on R03 branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests
+          git diff --cached --check
+          git commit -m "test(phase12): preserve strict R02 history through R03 and count Shell owner once"
+          git push origin "HEAD:$GITHUB_REF_NAME"

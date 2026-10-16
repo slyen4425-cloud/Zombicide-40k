@@ -247,8 +247,14 @@ def verify():
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="caf31c121d926b7b76b9bb05688fab8f2839814e"
                 elif path==PATH_GRAPH:
-                    expected_after=expected_after.replace("reachable.size,102,","reachable.size,103,")
-            assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"
+                    for former,current in [
+                        ("size,58,","size,59,"),
+                        ("allJs.length,116,","allJs.length,117,"),
+                        ("phase2Js.length,80,","phase2Js.length,81,"),
+                        ("reachable.size,102,","reachable.size,103,")
+                    ]:
+                        expected_after=expected_after.replace(former,current)
+            assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 
 if __name__=="__main__":

@@ -55,6 +55,9 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html assets/gensrpg/shell/legacy-hub-family-ui-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
-          git diff --cached --check
+          # The preserved source block ends with a historical blank line. Exclude
+          # this one byte-pinned migrated asset from the whitespace-style check;
+          # its exact content is independently asserted by the R03 test above.
+          git diff --cached --check -- ':!assets/gensrpg/shell/legacy-hub-family-ui-v1.js'
           git commit -m "refactor(phase12): relocate six Shell Hub UI functions without changing their bodies"
           git push origin "HEAD:$GITHUB_REF_NAME"

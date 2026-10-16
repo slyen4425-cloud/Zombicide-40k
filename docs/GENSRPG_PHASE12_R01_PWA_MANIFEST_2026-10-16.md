@@ -40,3 +40,9 @@
 ## ZIP D9 reçu : source §26 vérifiée
 
 Le fichier utilisateur `c4.zip` contient `index.html(13).txt` de **7 703 979 octets**, Git blob `fce949665fea47a2aa2a535ede7289b06936f986`, identique au checkpoint D9 GREEN. IIFE PWA identique au propriétaire attendu, une seule occurrence. Transformation projetée **6 969 593 octets** / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`. Contrôle local de restitution byte-identique PASS. Ce résultat lève le gate §26 ; un workflow contrôlé R01 applique uniquement à partir du blob D9 verrouillé, teste le JS et déclare le propriétaire Shell. **R01 reste NON GREEN tant que la triple CI post-extraction n'est pas validée sur un même SHA et le checkpoint §25 créé.**
+
+## Application R01 contrôlée (réussie, pas encore GREEN)
+
+- [GitHub Actions 38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) **SUCCESS**, commit code `48fa1f0a3f0948fe254b46fda96542854c576baa` ; source D9 et owner SHA certifiés. Index réel **6 969 593 octets** / Git blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, soit réduction nette **734 386 octets**.
+- Script PWA externe byte-identique `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js` (**734 440 octets** / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`). Classé comme unique propriétaire Shell dans `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json`. Aucun autre changement runtime ; pas de fusion des manifestes.
+- À ce jalon, **R01 NON GREEN** : attendre triple CI post-extraction sur le même SHA et créer checkpoint final §25 uniquement sur le SHA testé.

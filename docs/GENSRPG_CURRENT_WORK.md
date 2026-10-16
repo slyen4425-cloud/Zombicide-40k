@@ -1,6 +1,6 @@
 # GenSrpG — CURRENT_WORK LIVE (16 octobre 2026)
 
-**Phase12 : D1–D9 GREEN ; audit remaining-inline documenté ; lot R01 PWA ouvert en préflight, NON GREEN. D10 Core203 NON ouvert.**
+**Phase12 : D1–D9 GREEN ; audit remaining-inline documenté ; R01 physiquement extrait, NON GREEN tant que CI triple et checkpoint final non validés. D10 Core203 NON ouvert.**
 
 ## Lot actif R01 — manifeste PWA dynamique (734 440 octets)
 
@@ -14,7 +14,8 @@
 - **Risques** : source HTML ~7 Mo §26, manifeste dynamique prioritaire sur statique et différence d'icônes, imports PWA, anciennes sentinelles index et graph.
 
 - **Préflight CI read-only validé :** [GitHub Actions 38883525975](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38883525975) **SUCCESS** au commit `2ec208c798b5dfef30c4cb0202987d8354cca4a1` : script d'origine certifié, PWA Blob/href/PNG caractérisés, index R01 projeté 6 969 593 octets, rollback D9 exact. Git index demeure D9 blob `fce949665fea47a2aa2a535ede7289b06936f986`. **R01 encore NON GREEN** : source D9 ZIP §26 à recevoir, extraction non appliquée et triple CI post-extraction requise.
-- **Prochaine action :** lancer l'application contrôlée R01 maintenant autorisée par le ZIP §26 exact, valider les CI et seulement ensuite créer checkpoint R01 GREEN. Ne pas ouvrir R02/Core203 avant R01 GREEN.
+- **R01 physiquement appliqué et vérifié** : [workflow 38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) SUCCESS, code commit `48fa1f0a3f0948fe254b46fda96542854c576baa` ; nouvel index **6 969 593 octets** / blob `caf31c121d926b7b76b9bb05688fab8f2839814e` ; script externe **734 440 octets** / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`. Source D9 intégralement restaurable. Seuls index, propriétaire PWA et manifeste d'inventaire modifiés.
+- **Prochaine action :** valider post-extraction Architecture/Chromium + Firefox + Tactical sur le **même SHA** et les tests historiques ; checkpoint §25 final R01 GREEN seulement après succès. Ne pas ouvrir R02/Core203 avant R01 GREEN.
 - **Rapports** : `docs/GENSRPG_PHASE12_R01_PWA_MANIFEST_2026-10-16.md`, `docs/GENSRPG_PHASE12_REMAINING_INLINE_EXIT_BOUNDARY_AUDIT_2026-10-16.md`. La charte §§25–26 reste impérative ; `main` `e8681f9823573ced8aec59c8ddc47a72b02bc663` et les labos ne changent pas.
 
 ## Bilan

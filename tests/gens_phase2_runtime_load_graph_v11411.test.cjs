@@ -32,6 +32,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/capture/team-roster-v1.js',
   'assets/gensrpg/capture/combat-core-v1.js',
   'assets/gensrpg/core/legacy-visual-data-v1.js',
+  'assets/gensrpg/shell/legacy-hub-family-ui-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
   'assets/gensrpg/capture/builtin-seed-v1.js',
   'assets/gensrpg/dungeon/core01-session-ui-v1.js',
@@ -76,7 +77,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,60,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,61,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -142,6 +143,7 @@ const phase4InertServices=[
 ];
 const phase4Set=new Set([...phase4ConnectedServices,...phase4InertServices]);
 const phase5ConnectedServices=[
+  'assets/gensrpg/shell/legacy-hub-family-ui-v1.js',
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ];
 const phase5Set=new Set(phase5ConnectedServices);
@@ -165,9 +167,9 @@ const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,118,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(allJs.length,119,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,104,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,105,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

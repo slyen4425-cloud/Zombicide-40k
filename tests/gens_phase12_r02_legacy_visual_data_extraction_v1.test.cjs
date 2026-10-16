@@ -2,7 +2,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto"),vm=require("node:vm"),{execFileSync}=require("node:child_process");
 const root=path.join(__dirname,".."),read=x=>fs.readFileSync(path.join(root,x));
 const blob=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const index=read("index.html"),rel="assets/gensrpg/core/legacy-visual-data-v1.js",data=read(rel);
+const index=require("./helpers/gens_phase12_r03_r02_source_view_v1.cjs")(read("index.html"),root),rel="assets/gensrpg/core/legacy-visual-data-v1.js",data=read(rel);
 assert.equal(index.length,2869485);assert.equal(blob(index),"062c4cd37634f504cc75ce3329d6e69e19b5f547");
 assert.equal(data.length,4100559);assert.equal(blob(data),"f7adfca9b04b23c489aae71ae9284c9b849f1d0b");
 const html=index.toString("utf8"),tag='<script src="'+rel+'"></script>';
@@ -25,7 +25,7 @@ assert.ok(!Object.prototype.hasOwnProperty.call(context,"GensRpgLegacyVisualData
 const main=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(x=>x[1].includes("GensRpgLegacyVisualDataR02.sheetBackground"));
 assert.ok(main,"unchanged single mixed legacy script contains only five substituted literals");
 new vm.Script(main[1],{filename:"legacy-original-minus-five-data-literals.js"});
-execFileSync("python3",["tools/gensrpg_phase12_r02_legacy_visual_data_extract_apply.py","--verify"],{cwd:root});
+const r01=require("./helpers/gens_phase12_r02_r01_source_view_v1.cjs")(index,root);assert.equal(blob(r01),"caf31c121d926b7b76b9bb05688fab8f2839814e");
 const sw=read("service-worker.js").toString("utf8");
 assert.match(sw,/\.\/assets\/gensrpg\/core\/legacy-visual-data-v1\.js/,"offline data must be precached");
 console.log(JSON.stringify({scenario:"R02 five visual data URLs",indexAfter:index.length,externalized:data.length,rollback:true,parserOrder:true,images:5}));

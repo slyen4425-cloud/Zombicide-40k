@@ -62,7 +62,8 @@ assert.equal(registrationCount,1);
 for(const name of foreignNames)assert.strictEqual(win[name],foreign[name],"foreign authority changed: "+name);
 assert.deepEqual(Object.keys(win).filter(k=>!foreignNames.includes(k)&&k!=="GensShellModuleLaunchV1").sort(),
   ["GensPvpModuleLaunchV1","GensPvpSessionV1","GensPvpShellCompositionV1"].sort());
-assert.match(read("index.html"),/PVP — À VENIR/,"no invented PvP gameplay or false playable UX");
+const historicalR01=require("./helpers/gens_phase12_r02_r01_source_view_v1.cjs")(fs.readFileSync(path.join(root,"index.html")),root).toString("utf8");
+assert.match(historicalR01,/PVP — À VENIR/,"no invented PvP gameplay or false playable UX");
 console.log(JSON.stringify({scenario:"Phase 10 S2 explicit PvP-to-Shell composition",
   explicitConnect:true,registered:registrationCount,foreignOwnersIntact:true,customRules:true,
   gameplayImplemented:false,manualIndexCompositionPending:true}));

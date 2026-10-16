@@ -30,3 +30,9 @@
 3. Tests de composition : script externe chargé exactement une fois, ordre parser, inventaires et manifestes propriétaires actualisés sans diminuer les gardes, tests des anciennes vues de source sur D9 restauré.
 4. Test navigateur sur vrai PWA : lien Blob, champs et icônes actifs, installation, cache/hors ligne, retour écran. Au minimum sentinelles Architecture/Chromium + Firefox + Tactical toutes SUCCESS au **même SHA** et checkpoint R01 GREEN §25 seulement ensuite.
 5. `main` gelée, laboratoires inchangés. Aucune branche différente ni refonte parallèle.
+
+## Préflight GitHub en lecture seule (SUCCESS)
+
+- [Workflow R01 preflight 38883525975](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38883525975) SUCCESS au SHA `2ec208c798b5dfef30c4cb0202987d8354cca4a1`. Aucun `--apply` exécuté : `index.html` et les assets runtime du checkpoint D9 restent inchangés.
+- La comparaison depuis D9 GREEN montre uniquement documentation, test, utilitaire Python et workflow read-only ; pas de modification de source runtime. Test Node historique du `Blob`, du `href`, des 2 PNG et de la différence manifeste statique/dynamique vert ; prévision réversible de l'extraction prouvée.
+- **Prochain gate bloquant §26 : recevoir le ZIP du vrai `index.html` D9 GREEN, 7 703 979 octets / blob `fce949665fea47a2aa2a535ede7289b06936f986`**, contrôler l'empreinte, puis préparer et exécuter l'application contrôlée et la triple CI. R01 NON GREEN.

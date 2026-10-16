@@ -11,6 +11,8 @@
 - **Invariants** : script classique synchrone au même ordre ; conserver `Blob` et `gensManifestLink.href`, les deux PNG inline PWA pendant R01 et les manifestes statique/dynamique séparés ; pas de changement Shell, moteurs, sauvegardes ni comportements smartphone/PWA.
 - **Préflight** : source JS et test de caractérisation piné ; aucun code de jeu ni fichier `index.html` modifié à ce stade. Tests obligatoires : preuve réversible R01→D9→D1, PWA lien/installation/cache, architecture/Chromium, Firefox, Tactical sur un même SHA avant GREEN.
 - **Risques** : source HTML ~7 Mo §26, manifeste dynamique prioritaire sur statique et différence d'icônes, imports PWA, anciennes sentinelles index et graph.
+
+- **Préflight CI read-only validé :** [GitHub Actions 38883525975](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38883525975) **SUCCESS** au commit `2ec208c798b5dfef30c4cb0202987d8354cca4a1` : script d'origine certifié, PWA Blob/href/PNG caractérisés, index R01 projeté 6 969 593 octets, rollback D9 exact. Git index demeure D9 blob `fce949665fea47a2aa2a535ede7289b06936f986`. **R01 encore NON GREEN** : source D9 ZIP §26 à recevoir, extraction non appliquée et triple CI post-extraction requise.
 - **Prochaine action :** recevoir le ZIP D9 à partir du permalink §26, le vérifier et alors seulement appliquer et valider R01. Ne pas ouvrir R02/Core203 avant R01 GREEN.
 - **Rapports** : `docs/GENSRPG_PHASE12_R01_PWA_MANIFEST_2026-10-16.md`, `docs/GENSRPG_PHASE12_REMAINING_INLINE_EXIT_BOUNDARY_AUDIT_2026-10-16.md`. La charte §§25–26 reste impérative ; `main` `e8681f9823573ced8aec59c8ddc47a72b02bc663` et les labos ne changent pas.
 

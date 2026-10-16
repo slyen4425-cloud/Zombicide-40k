@@ -1,4 +1,4 @@
-# GenSrpG — Phase12 R01 / PWA Dynamic Manifest — Préflight (16 octobre 2026)
+# GenSrpG — Phase12 R01 / PWA Dynamic Manifest — GREEN (16 octobre 2026)
 
 ## Gouvernance
 
@@ -46,3 +46,12 @@ Le fichier utilisateur `c4.zip` contient `index.html(13).txt` de **7 703 979 oct
 - [GitHub Actions 38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) **SUCCESS**, commit code `48fa1f0a3f0948fe254b46fda96542854c576baa` ; source D9 et owner SHA certifiés. Index réel **6 969 593 octets** / Git blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, soit réduction nette **734 386 octets**.
 - Script PWA externe byte-identique `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js` (**734 440 octets** / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`). Classé comme unique propriétaire Shell dans `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json`. Aucun autre changement runtime ; pas de fusion des manifestes.
 - À ce jalon, **R01 NON GREEN** : attendre triple CI post-extraction sur le même SHA et créer checkpoint final §25 uniquement sur le SHA testé.
+
+## Clôture officielle R01 — GREEN (16 octobre 2026)
+
+- **Source certifiée §26** : `c4.zip` / `index.html(13).txt` ; 7 703 979 octets et blob `fce949665fea47a2aa2a535ede7289b06936f986` vérifiés.
+- **Application effective** : `index.html` 6 969 593 octets (Git blob `caf31c121d926b7b76b9bb05688fab8f2839814e`) et JS PWA 734 440 octets (blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`), différence index **−734 386 octets nets** ; restauration bit-exacte D9 prouvée.
+- **Régression hors ligne évitée** : ajout de la nouvelle ressource au pré-cache dans `service-worker.js` + renouvellement du nom de cache. Pas de suppression du manifeste dynamique, de sa priorité sur le statique ni des deux PNG base64.
+- **Contrôles finaux** : Architecture/Chromium [38897048039](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897048039), Firefox [38897047733](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897047733), Tactical [38897047747](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897047747), **tous SUCCESS au même SHA `1b0fa3a718059242507d3e95de45033bba57ea24`**.
+- **Checkpoint GREEN §25 créé et vérifié sur le code testé, sans le faire pointer sur les commits de documentation ultérieurs** : `checkpoint/gensrpg-phase12-r01-pwa-dynamic-manifest-green-2026-10-16` → `1b0fa3a718059242507d3e95de45033bba57ea24`.
+- **R01 GREEN, Phase12 non terminée**. Étape suivante : R02 caractérisation isolée, entrée §26 `index.html` R01 GREEN (6 969 593 octets / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`). Tests d'installation/mise à jour sur Android conseillés avant mise en production, sans les présenter comme déjà effectués.

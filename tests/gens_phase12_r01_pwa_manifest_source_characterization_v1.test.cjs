@@ -3,7 +3,16 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto"),vm=require("node:vm");
 const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const idx=read("index.html"),html=idx.toString("utf8");
+const candidate=read("index.html"),pwaTag='<script src="assets/gensrpg/shell/pwa-manifest-dynamic-v1.js"></script>';
+let idx=candidate;
+if(candidate.includes(Buffer.from(pwaTag))){
+  assert.equal(candidate.length,6969593);assert.equal(sha(candidate),"caf31c121d926b7b76b9bb05688fab8f2839814e");
+  const moved=read("assets/gensrpg/shell/pwa-manifest-dynamic-v1.js");
+  assert.equal(moved.length,734440);assert.equal(sha(moved),"778e3acf2f77b3c7680bf70a0c6a846b84826235");
+  assert.equal(candidate.toString("utf8").split(pwaTag).length,2,"unique physical PWA owner");
+  idx=Buffer.from(candidate.toString("utf8").replace(pwaTag,"<script>"+moved.toString("utf8")+"</script>"));
+}
+const html=idx.toString("utf8");
 assert.equal(idx.length,7703979);assert.equal(sha(idx),"fce949665fea47a2aa2a535ede7289b06936f986");
 const found=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
   .filter(x=>Buffer.byteLength(x[2])===734440 && sha(Buffer.from(x[2]))==="778e3acf2f77b3c7680bf70a0c6a846b84826235");

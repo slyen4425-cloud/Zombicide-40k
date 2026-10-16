@@ -36,3 +36,7 @@
 - [Workflow R01 preflight 38883525975](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38883525975) SUCCESS au SHA `2ec208c798b5dfef30c4cb0202987d8354cca4a1`. Aucun `--apply` exécuté : `index.html` et les assets runtime du checkpoint D9 restent inchangés.
 - La comparaison depuis D9 GREEN montre uniquement documentation, test, utilitaire Python et workflow read-only ; pas de modification de source runtime. Test Node historique du `Blob`, du `href`, des 2 PNG et de la différence manifeste statique/dynamique vert ; prévision réversible de l'extraction prouvée.
 - **Prochain gate bloquant §26 : recevoir le ZIP du vrai `index.html` D9 GREEN, 7 703 979 octets / blob `fce949665fea47a2aa2a535ede7289b06936f986`**, contrôler l'empreinte, puis préparer et exécuter l'application contrôlée et la triple CI. R01 NON GREEN.
+
+## ZIP D9 reçu : source §26 vérifiée
+
+Le fichier utilisateur `c4.zip` contient `index.html(13).txt` de **7 703 979 octets**, Git blob `fce949665fea47a2aa2a535ede7289b06936f986`, identique au checkpoint D9 GREEN. IIFE PWA identique au propriétaire attendu, une seule occurrence. Transformation projetée **6 969 593 octets** / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`. Contrôle local de restitution byte-identique PASS. Ce résultat lève le gate §26 ; un workflow contrôlé R01 applique uniquement à partir du blob D9 verrouillé, teste le JS et déclare le propriétaire Shell. **R01 reste NON GREEN tant que la triple CI post-extraction n'est pas validée sur un même SHA et le checkpoint §25 créé.**

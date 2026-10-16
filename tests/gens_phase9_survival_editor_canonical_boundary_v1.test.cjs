@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
 const root=path.join(__dirname,'..');
-const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const source=require('./helpers/gens_phase12_r02_r01_source_view_v1.cjs')(fs.readFileSync(path.join(root,'index.html')),root).toString('utf8');
 const identity=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 const profileKey='gensrpg_game_profiles_v1',activeKey='gensrpg_game_profile_active_v1';
 const baseId='game_profile_zombicide_base',dungeonId='game_profile_dungeon_demo';

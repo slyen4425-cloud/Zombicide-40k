@@ -1,7 +1,8 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const root=path.join(__dirname,'..');
+const html=require('./helpers/gens_phase12_r02_r01_source_view_v1.cjs')(fs.readFileSync(path.join(root,'index.html')),root).toString('utf8');
 
 function scripts(){
   const out=[];const re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m,n=0;

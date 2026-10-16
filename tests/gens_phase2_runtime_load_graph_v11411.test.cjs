@@ -164,8 +164,8 @@ const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,116,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
-assert.equal(phase2Js.length,80,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
+assert.equal(allJs.length,117,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(phase2Js.length,81,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
 assert.equal(reachable.size,103,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',

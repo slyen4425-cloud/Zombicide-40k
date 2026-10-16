@@ -243,7 +243,7 @@ def verify():
             # continues to check the exact D9 source via read_d9_index_view.
             # The live manifest tests intentionally pin the NEW physical source
             # and the one additional reachable Shell/PWA owner.
-            if blob(INDEX.read_bytes()) in ("caf31c121d926b7b76b9bb05688fab8f2839814e","062c4cd37634f504cc75ce3329d6e69e19b5f547"):
+            if blob(INDEX.read_bytes()) in ("caf31c121d926b7b76b9bb05688fab8f2839814e","062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="caf31c121d926b7b76b9bb05688fab8f2839814e"
                 elif path==PATH_GRAPH:
@@ -257,7 +257,7 @@ def verify():
             # R02 physically moves only the five exact visual data URLs to a
             # data-only Core file. Preserve the D1..R01 history and account
             # for one additional synchronous production script / owner.
-            if blob(INDEX.read_bytes())=="062c4cd37634f504cc75ce3329d6e69e19b5f547":
+            if blob(INDEX.read_bytes()) in ("062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="062c4cd37634f504cc75ce3329d6e69e19b5f547"
                 elif path==PATH_GRAPH:
@@ -266,6 +266,18 @@ def verify():
                         ("allJs.length,117,","allJs.length,118,"),
                         ("phase2Js.length,81,","phase2Js.length,82,"),
                         ("reachable.size,103,","reachable.size,104,")
+                    ]:
+                        expected_after=expected_after.replace(former,current)
+            # R03 introduces one Shell Hub UI owner, leaving Phase 2 cross-mode
+            # functions and the historical source hashes fully recoverable.
+            if blob(INDEX.read_bytes())=="8faf7af7fced0a1e0724985e85718a0e4a9e673b":
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="8faf7af7fced0a1e0724985e85718a0e4a9e673b"
+                elif path==PATH_GRAPH:
+                    for former,current in [
+                        ("size,60,","size,61,"),
+                        ("allJs.length,118,","allJs.length,119,"),
+                        ("reachable.size,104,","reachable.size,105,")
                     ]:
                         expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"

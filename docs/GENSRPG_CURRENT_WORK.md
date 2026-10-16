@@ -1,28 +1,25 @@
-# GenSrpG — Point de reprise LIVE (15 octobre 2026)
+# GenSrpG — Point de reprise LIVE (16 octobre 2026)
 
-**Phase 12 en cours : D1–D7 GREEN ; D8 Core201 certifié et préparé, NON GREEN (application et CI en attente).**
+**Phase 12 en cours : D1–D8 GREEN. D9 ouvert / pré-extraction seulement, NON GREEN.**
 
-## Chantier actuel : D8, alléger index.html / Dungeon
+## Lot courant D9 — sélectionner un propriétaire Dungeon inline actif
 
-- **Branche exclusive** : `work/gensrpg-phase12-dungeon-d8-extraction-2026-10-15`.
-- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase12-dungeon-d8-extraction-2026-10-15`, sur SHA **`20048a1b1059c0c2ad31df72d17c399065a1da49`** (exact dernier checkpoint D7 GREEN).
-- **Dernier checkpoint final GREEN :** `checkpoint/gensrpg-phase12-dungeon-core214-d7-green-2026-10-15`, sur SHA `20048a1b1059c0c2ad31df72d17c399065a1da49`.
-- **D7 triple CI confirmée** : [Architecture 38763178917](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178917), [Firefox 38763178876](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178876), [Tactical 38763178850](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38763178850), toutes SUCCESS sur SHA `20048a1b1059c0c2ad31df72d17c399065a1da49`.
-- **Source requise §26 :** `index.html` au [permalink exact D7](https://github.com/slyen4425-cloud/Zombicide-40k/blob/20048a1b1059c0c2ad31df72d17c399065a1da49/index.html), métadonnées Git vérifiées, **7 729 678 octets**, blob **`6e1cb9b82126409b633306b0e77a7e45badb0f79`**. Demander téléchargement et ZIP à l'utilisateur ; vérifier la copie contre ce blob. `b5.zip` est l'index D6 et ne peut pas servir pour D8.
-- **Périmètre autorisé :** repérage d'un **seul propriétaire Dungeon inline encore actif**, puis extraction physique byte-identique en JS externe, au même emplacement et même ordre de chargement. **L'identité et la taille du prochain bloc restent à déterminer** après lecture locale de la source exacte ; ne pas présumer d'un Core215 ni d'un autre propriétaire.
-- **Risques/protections :** aucun nouvel owner, effet de bord, script async/defer, wrapper ou règle gameplay ; conserver les chemins historiques Dungeon, navigation, fiche héros, parties/sauvegardes, Tactical Bridge, quatre modes séparés, 32 images Survie historiques et labos isolés. Production `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
-- **Tests obligatoires :** empreintes source/cible byte-exact, test de syntaxe, rollback D8→D7→D6→D5→D4→D3→D2→D1, sentinel d'owner et graphe runtime, CI Architecture/Chromium + Firefox + Tactical GREEN sur le même SHA et checkpoint final §25 uniquement après.
-- **Source §26 reçue et certifiée :** `c1.zip` / `index.html(11).txt`, 7 729 678 octets, Git blob `6e1cb9b82126409b633306b0e77a7e45badb0f79` = index D7 du checkpoint, sans dérive.
-- **Propriétaire D8 unique sélectionné :** script actif `dungeonCore201Stability`, 13 990 octets, Git blob `7edf731fd1aa209ec96490fb8e2cb7af04afd627`; domaine Dungeon ; raccord combat via l'unique Bridge Tactical existant, sans mutation de Capture, Survie, PvP ou Shell.
-- **Cible verrouillée :** `assets/gensrpg/dungeon/core201-stability-v1.js`, script classique et synchrone à sa position historique, sans changement d'un seul octet du JS. `index.html` attendu 7 715 741 octets, Git blob `f56dc5bbb368b176509ab16477bd4b24dd000497`, soit 13 937 octets nets retirés.
-- **Risques et garde-fous :** ordre du chargement autour de Core200 et Core211, état runtime/sauvegarde Dungeon, panneaux d'ennemis, appel Bridge. Verrouillage du graphe des 101 fichiers atteignables, SHA de toute la chaîne de rollback D8→D1, syntaxe Node, tests navigateur et trois CI sur un SHA unique.
-- **Statut : D8 NON GREEN**, publication/extraction contrôlée à faire sur la branche dédiée ; aucun checkpoint final avant tests et triple CI SUCCESS.
-- **Prochaine action :** appliquer via workflow contrôlé verrouillé par blob, vérifier rétrocompatibilité et CI Architecture/Chromium + Firefox + Tactical, puis seulement clore GREEN.
-- Historique : [rapport D7](https://github.com/slyen4425-cloud/Zombicide-40k/blob/20048a1b1059c0c2ad31df72d17c399065a1da49/docs/GENSRPG_PHASE12_DUNGEON_CORE214_D7_EXTRACTION_2026-10-15.md), charte `docs/GENSRPG_CHARTE.md`, policy `docs/GENSRPG_CHECKPOINT_POLICY.md`, roadmap `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`.
+- **Branche de travail dédiée §25 :** `work/gensrpg-phase12-dungeon-d9-extraction-2026-10-16` ; aucun autre mode, laboratoire ou branche de production concerné.
+- **Base D9 :** SHA `dd3f127041a78b9e7539ab1735cb188557a50ccc` — SHA exact du dernier checkpoint GREEN D8 `checkpoint/gensrpg-phase12-dungeon-core201-d8-green-2026-10-16` ; Architecture/Chromium [38803573910](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573910), Firefox [38803573894](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573894), Tactical [38803573930](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573930) **SUCCESS sur le même SHA**.
+- **Checkpoint de départ D9 §25 :** `checkpoint/gensrpg-start-phase12-dungeon-d9-extraction-2026-10-16`, sur le SHA D8 GREEN `dd3f127041a78b9e7539ab1735cb188557a50ccc`, créé avant toute modification.
+- **Source indispensable §26 :** [`index.html` exact après D8](https://github.com/slyen4425-cloud/Zombicide-40k/blob/dd3f127041a78b9e7539ab1735cb188557a50ccc/index.html), **7 715 741 octets**, Git blob **`f56dc5bbb368b176509ab16477bd4b24dd000497`** (métadonnées Git vérifiées). Demander à l'utilisateur de télécharger ce lien, compresser en ZIP et le joindre. Vérifier ensuite l'empreinte avant de lire/modifier. Les ZIP `c1.zip`, `b5.zip`, etc., sont des états antérieurs.
+- **Périmètre et propriétaire :** un seul script JavaScript inline actif du domaine Dungeon, **non encore identifié** faute de la copie de l'index D8. Après réception, cartographier propriétaire et domaines croisés, position, dépendances, API globales, effets de bord, chargement et usages avant sélection. Aucune extraction sans validation du contenu exact.
+- **Invariants :** transfert physique octet pour octet en fichier JS externe synchrone à position parser identique ; aucun remaniement gameplay, combat, stats, navigation, sauvegardes, Shell ou modules Survie/Capture/PvP/Tactical. 32 assets Survie historiques immobiles, laboratoires combat/exploration isolés, `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Aucune double autorité.
+- **Tests exigés :** SHA Git source et corps JS, node --check, restauration byte-identique D9→D8→D7→D6→D5→D4→D3→D2→D1, graphe de chargement, manifest de propriétaires, sentinelles et éventuels appels inter-modules, Architecture/Chromium + Firefox + Tactical SUCCESS sur un même SHA. Checkpoint final D9 GREEN interdit avant ces critères.
+- **Risques connus :** gros `index.html` : lecture via connecteur GitHub interdite par §26 ; propriétaires Dungeon historiques actifs, callbacks/ordre parser, sessions et vieux points d'entrée Tactical. Éviter tout wrapper additionnel ou refonte pendant cette extraction.
+- **Prochaine action :** réception et vérification du ZIP D8 exact, identification d'un propriétaire et élaboration des hashes/rollback/tests ; ensuite, seulement, appliquer et valider D9. D9 NON GREEN, aucune modification de runtime encore réalisée.
+- Rapport D9 : `docs/GENSRPG_PHASE12_D9_SCOPING_2026-10-16.md`.
 
-## Résultat validé D7
+## Dernier jalon clos : D8 Dungeon Core201 Stability
 
-- Core214 (`dungeonCore214SingleAuthority`) : 15 795 octets JS déplacés sans transformation vers `assets/gensrpg/dungeon/core214-single-authority-v1.js`, blob `72481ac3ee62bc67f6c0646eb724baf4a87a2f88` ; index obtenu 7 729 678 octets / blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`. Rollback exact validé.
-- **Bilan D1–D7 :** 204 908 octets de JS externalisés ; 204 526 octets nets retirés d'index.html. Phase 12 non terminée ; le nombre de lots restants n'est pas déterminé.
-- La clôture documentaire sur la branche D7 au commit `54941629850f391b91aed4365ae2ea89e1d5d446` n'a touché que les documents ; D8 repart volontairement du dernier **checkpoint code triple CI GREEN** `20048a1b1059c0c2ad31df72d17c399065a1da49`, et les informations documentaires vérifiées D7 sont reprises ici.
-
+- Source `c1.zip` validée pour D8 (index D7 **7 729 678 octets**, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`).
+- Bloc Dungeon `dungeonCore201Stability` déplacé **byte-identique**, **13 990 octets** vers `assets/gensrpg/dungeon/core201-stability-v1.js`, blob `7edf731fd1aa209ec96490fb8e2cb7af04afd627`.
+- Index actuel **7 715 741 octets** (blob `f56dc5bbb368b176509ab16477bd4b24dd000497`). Rollback D8→D1 confirmé.
+- Checkpoint GREEN `checkpoint/gensrpg-phase12-dungeon-core201-d8-green-2026-10-16` au SHA `dd3f127041a78b9e7539ab1735cb188557a50ccc`. Documentation D8 clôturée sur branche précédente dans `docs/GENSRPG_PHASE12_D8_SCOPING_2026-10-15.md`.
+- **Cumul Phase 12 D1–D8 : 218 898 octets JS externalisés ; 218 463 octets nets retirés de l'index initial**. Phase 12 non terminée, nombre de lots restants inconnu.
+- Règles : `docs/GENSRPG_CHARTE.md` §§25–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`.

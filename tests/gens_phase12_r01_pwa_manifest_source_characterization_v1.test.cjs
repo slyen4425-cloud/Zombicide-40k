@@ -3,7 +3,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto"),vm=require("node:vm");
 const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const candidate=read("index.html"),pwaTag='<script src="assets/gensrpg/shell/pwa-manifest-dynamic-v1.js"></script>';
+const candidate=require("./helpers/gens_phase12_r02_r01_source_view_v1.cjs")(read("index.html"),root),pwaTag='<script src="assets/gensrpg/shell/pwa-manifest-dynamic-v1.js"></script>';
 let idx=candidate;
 if(candidate.includes(Buffer.from(pwaTag))){
   assert.equal(candidate.length,6969593);assert.equal(sha(candidate),"caf31c121d926b7b76b9bb05688fab8f2839814e");

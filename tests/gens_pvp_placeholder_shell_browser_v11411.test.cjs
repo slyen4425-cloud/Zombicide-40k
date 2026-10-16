@@ -6,11 +6,12 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const shellHubSource=fs.readFileSync(path.join(root,'assets','gensrpg','shell','legacy-hub-family-ui-v1.js'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 
 assert.match(indexSource,/class="gensRootModeCard pvp" onclick="openGensFamily\('pvp'\)"/,'real Shell must expose the PvP root card');
-assert.match(indexSource,/if\(family==="survival"\)[\s\S]*else if\(family==="adventure"\)[\s\S]*PVP — À VENIR/,'real Shell must keep PvP as the current placeholder branch');
-assert.match(indexSource,/Le moteur PvP n’est pas encore construit\./,'real Shell must keep the current PvP not-built message');
+assert.match(indexSource+shellHubSource,/if\(family==="survival"\)[\s\S]*else if\(family==="adventure"\)[\s\S]*PVP — À VENIR/,'real Shell must keep PvP as the current placeholder branch');
+assert.match(indexSource+shellHubSource,/Le moteur PvP n’est pas encore construit\./,'real Shell must keep the current PvP not-built message');
 assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production composition must not load the retired Survival/Dungeon guard');
 
 const shellOwnerMarker='async function startConfiguredGame(){';

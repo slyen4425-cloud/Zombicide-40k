@@ -19,3 +19,13 @@
 Un seul propriétaire Dungeon actif, responsabilités correctement bornées ; déplacer le corps JS sans retouches, script synchrone à sa position historique et tests de rollback exacts D9→D8→D7→D6→D5→D4→D3→D2→D1. Mettre à jour sentinelles et manifeste sans relâcher les garde-fous. Triple CI Architecture/Chromium, Firefox, Tactical SUCCESS sur même SHA et checkpoint D9 GREEN §25 seulement à la fin. `main` figée ; laboratoires et autres modes non modifiés.
 
 **Statut : D9 ouvert, NON GREEN, aucun changement runtime et aucune extraction.**
+
+## Certificat §26 et sélection de propriétaire (16 octobre 2026)
+
+- ZIP utilisateur `c2.zip`, entrée `index.html(12).txt`, **7 715 741 octets**, blob `f56dc5bbb368b176509ab16477bd4b24dd000497` vérifié identique à la source D8 GREEN. Source certifiée.
+- Candidat actif et unique du lot : `dungeonCore202ContentDensity`, IIFE byte-exacte **11 821 octets**, blob Git **`364673f3dd35bfa8be7f378152f775656c9243e2`** ; emplacement immédiatement après Core201, avant Core203 puis Core211, script classique synchrone.
+- Responsabilités à préserver : encounters/pièges/énigmes/affichage densité dans Dungeon, wrappers existants `DungeonCore01.explore`, `render`, `show`, debug `dungeonDebug202`. Garder intacte la garde `authored202` (aucune densité aléatoire sur les mondes authored), vérifiée par `tests/gens_authored_core202_boundary_v11411.test.cjs`.
+- Destination ciblée : `assets/gensrpg/dungeon/core202-content-density-v1.js` ; nouvel index dérivé localement **7 703 979 octets**, Git blob **`fce949665fea47a2aa2a535ede7289b06936f986`**, nette réduction **11 762 octets**. Aucun octet de JS n'est édité.
+- Cross-domain : interactions limitées au runtime/éditeur de mondes Dungeon ; pas d'import dans Capture/Survie/PvP. Protéger le Bridge Tactical existant, le moteur Core01, les sauvegardes, le rendu.
+- Avant GREEN : preuve index D9→D8 bit-à-bit, régression D8→D1, mise à jour manifest/runtime et test de frontière Core202, triple CI au même SHA et checkpoint §25.
+- **État : propriétaire sélectionné, code NON encore publié ; D9 NON GREEN.**

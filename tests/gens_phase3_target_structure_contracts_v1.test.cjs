@@ -102,8 +102,13 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,104,
-  'Phase 3 entries stay inert while Phase 12 includes nine byte-identical physical Dungeon owners through D9 Core202');
+assert.equal(Object.keys(ownerManifest.files||{}).length,105,
+  'R03 must add exactly one production Shell Hub owner, leaving Phase 3 entries inert');
+assert.equal(ownerManifest.files?.['assets/gensrpg/shell/legacy-hub-family-ui-v1.js']?.domain,'shell',
+  'R03 family cards must belong only to Shell');
+assert.equal(composition.index.split('assets/gensrpg/shell/legacy-hub-family-ui-v1.js').length-1,1,
+  'R03 Shell Hub owner must load once at the parser seam');
+
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core202-content-density-v1.js']?.domain,'dungeon',
   'D9 Core202 remains exclusively Dungeon-owned');
 assert.equal(composition.index.split('assets/gensrpg/dungeon/core202-content-density-v1.js').length-1,1,

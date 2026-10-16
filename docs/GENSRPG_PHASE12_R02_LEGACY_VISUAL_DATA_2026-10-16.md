@@ -1,6 +1,6 @@
 # Phase12 / R02 — Données visuelles du monolithe multi-domaines (16 octobre 2026)
 
-**Travail isolé sur R01 GREEN, aucun runtime publié tant que la triple CI n'est pas SUCCESS.**
+**R02 GREEN technique/CI, clôturé le 16 octobre 2026 au SHA `b5f923fa0426467827c12696ad9a4a02f24e3b6f` ; aucune publication sur `main` ou validation Android manuelle revendiquée.**
 
 - Source §26 : fichier utilisateur `c5.zip` → `index.html(14).txt`, longueur 6 969 593 octets, blob `caf31c121d926b7b76b9bb05688fab8f2839814e`. Checkpoint R01 final `checkpoint/gensrpg-phase12-r01-pwa-dynamic-manifest-green-2026-10-16`, SHA `1b0fa3a718059242507d3e95de45033bba57ea24`.
 - Départ R02 §25 : checkpoint `checkpoint/gensrpg-start-phase12-r02-legacy-visual-data-extraction-2026-10-16` au SHA code R01 GREEN ; branche `work/gensrpg-phase12-r02-legacy-visual-data-extraction-2026-10-16`.
@@ -13,3 +13,11 @@
 - Préserve PWA : nouveau fichier ajouté au `service-worker.js` pré-cache et nom de cache versionné ; lancement hors ligne à vérifier. Ne pas modifier les 32 images historiques ni le manifeste PWA R01.
 - **Tests obligatoires :** vérification hash/rollback, syntaxe JS, valeurs des cinq images via contexte global lexical, graph propriétaire, tests historiques R01→D9→D1, Architecture/Chromium, Firefox, Tactical au même commit + checkpoint GREEN. Test manuel visuel de l'éditeur/fiche et des ennemis recommandé.
 - Après R02 : audit et découpe par responsabilités des **~1,264 Mo de code réellement restant** dans le monolithe, sans multiplier les micro-lots Core Dungeon.
+
+## Clôture officielle §25 et réconciliation (16 octobre 2026)
+
+- Checkpoint créé : `checkpoint/gensrpg-phase12-r02-legacy-visual-data-extraction-green-2026-10-16` sur `b5f923fa0426467827c12696ad9a4a02f24e3b6f`, après triple CI SUCCESS : [Architecture](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318213), [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318235), [Tactical](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318218).
+- Validation spécifique de l'extraction, hashes, image VM, script synchrone, pré-cache et rollback byte-exact : [workflow contrôlé 38933052158](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38933052158) SUCCESS. Les mêmes blobs de `index.html` et du fournisseur visuel sont présents au SHA final.
+- Test Android/PWA réel, consultation manuelle hors-ligne, rendu détaillé et export/import utilisateur : **non effectués dans cette réconciliation**. Vérifications restantes avant de prétendre à une validation mobile/de publication ; ne pas assimiler succès CI à installation Android.
+- Piste concurrente `work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16` laissée en attente pour Architecture FAILURE et autorité multi-domaines non résolue. Les deux autres branches de scoping/audit R02 sont conservées sans fusion.
+- Périmètre suivant : 1 264 265 octets de code métier à cartographier par propriétaires R03–R07. Source exacte nouvelle : [index R02 au SHA GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/b5f923fa0426467827c12696ad9a4a02f24e3b6f/index.html) (2 869 485 octets, blob `062c4cd37634f504cc75ce3329d6e69e19b5f547`). `c5.zip` correspond au checkpoint R01, pas à R02.

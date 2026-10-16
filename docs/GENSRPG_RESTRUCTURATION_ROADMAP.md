@@ -358,12 +358,15 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **D1–D9 + R01 :** 965 159 octets JS externalisés ; 964 611 octets nets retirés du HTML. Phase12 toujours ouverte ; pas d'ouverture automatique du prochain Core Dungeon.
 - **R02 prochain candidat, non ouvert :** sous-audit du monolithe multi-domaines 5 364 441 octets (~4,10 Mo images base64), avec ZIP du **nouvel index R01** au SHA GREEN (§26), checkpoint/branche propres (§25), séparation par autorité à prouver avant toute mutation du runtime.
 
-### R02 ouvert — Extraction des cinq chaînes visuelles massives (16 octobre 2026)
+### R02 GREEN technique — Cinq chaînes visuelles extraites (16 octobre 2026)
 
 - Checkpoint départ §25 `checkpoint/gensrpg-start-phase12-r02-legacy-visual-data-extraction-2026-10-16` au SHA R01 GREEN `1b0fa3a718059242507d3e95de45033bba57ea24`, branche `work/gensrpg-phase12-r02-legacy-visual-data-extraction-2026-10-16`.
 - Source §26 certifiée `c5.zip` : 6 969 593 octets / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`.
 - Cinq valeurs `data:image` extraites vers fournisseur de données **sans moteur** `assets/gensrpg/core/legacy-visual-data-v1.js` (4 100 559 octets), conservées comme URL base64 originales et accessibles via variable lexicale commune ; monolithe original n'est pas découpé en plusieurs moteurs.
-- Index projeté **2 869 485 octets** / blob `062c4cd37634f504cc75ce3329d6e69e19b5f547` ; économie **4 100 108 octets**. Retour R02→R01 exact, PWA service worker et CI triple obligatoires. **R02 NON GREEN à l'ouverture** ; ne pas ouvrir R03 avant checkpoint validé.
+- **Index réel certifié** : **2 869 485 octets** / blob `062c4cd37634f504cc75ce3329d6e69e19b5f547` ; économie **4 100 108 octets**. Retour R02→R01 byte-exact, JS de données et service worker pré-caché validés. **R02 GREEN technique** sur `b5f923fa0426467827c12696ad9a4a02f24e3b6f` ; checkpoint §25 `checkpoint/gensrpg-phase12-r02-legacy-visual-data-extraction-green-2026-10-16` créé le 16 octobre.
+- **Preuves** : [application ciblée et rollback 38933052158](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38933052158) SUCCESS ; Architecture [38934318213](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318213), Firefox [38934318235](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318235), Tactical [38934318218](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38934318218) toutes SUCCESS sur le même SHA `b5f923fa0426467827c12696ad9a4a02f24e3b6f`. Pas de test manuel Android/hors-ligne attesté : la publication reste distincte.
+- **Arbitrage des R02 concurrents** : garder l'historique de `work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16` sans fusion (Architecture FAILURE, mélange Survie/Dungeon/Capture/Shell/stockage) et les deux pistes d'audit `r02-megablock-boundary-audit` / `r02-monolith-exit-scoping` en attente. **Une seule branche retenue**, aucun nouveau lot R02.
+- **Après R02** : monolithe métier résiduel **1 264 265 octets** ; prochains chantiers R03–R07 à borner par propriétaire avec checkpoint indépendant. Nouveau fichier source si nécessité §26 : [index.html au SHA R02 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/b5f923fa0426467827c12696ad9a4a02f24e3b6f/index.html) ; `c5.zip` est seulement R01.
 - Rapport `docs/GENSRPG_PHASE12_R02_LEGACY_VISUAL_DATA_2026-10-16.md`.
 
 ### REMAINING INLINE / EXIT BOUNDARY AUDIT — après D9 GREEN (16 octobre 2026)

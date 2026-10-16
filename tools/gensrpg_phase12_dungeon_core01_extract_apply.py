@@ -6,6 +6,7 @@ GitHub source blob and byte length BEFORE authoring this transform.
 Only the already-pinned checkout source may be transformed on its work branch.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import argparse
 import hashlib
 
@@ -96,7 +97,7 @@ def apply():
 def verify():
     # D2 is an independent downstream physical extraction. Undo only its
     # verified external tag in memory to inspect the immutable D1 state.
-    target=INDEX.read_bytes()
+    target=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in target:
         assert target.count(d9tag)==1, "D9 owner once"
@@ -170,16 +171,16 @@ def verify():
             if before not in after:
                 assert before not in updated, f"{path}: obsolete graph/sha value remains"
             expected_after=after
-            if d2_external in INDEX.read_bytes():
+            if d2_external in read_d9_index_view(INDEX,ROOT):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
-                    expected_after=("fce949665fea47a2aa2a535ede7289b06936f986" if d9tag in INDEX.read_bytes()
-                                    else "f56dc5bbb368b176509ab16477bd4b24dd000497" if d8tag in INDEX.read_bytes()
-                                    else "6e1cb9b82126409b633306b0e77a7e45badb0f79" if d7tag in INDEX.read_bytes()
-                                    else "b5271e44dc4c14834a7725a869fb3c12386f2437" if d6tag in INDEX.read_bytes()
-                                    else "2ad1961efb9733037b7753ffd4a308baa1b00b64" if d5tag in INDEX.read_bytes()
-                                    else "ca15dd7b483963d7bd0767b7b5baca915d17ec43" if d4tag in INDEX.read_bytes()
+                    expected_after=("fce949665fea47a2aa2a535ede7289b06936f986" if d9tag in read_d9_index_view(INDEX,ROOT)
+                                    else "f56dc5bbb368b176509ab16477bd4b24dd000497" if d8tag in read_d9_index_view(INDEX,ROOT)
+                                    else "6e1cb9b82126409b633306b0e77a7e45badb0f79" if d7tag in read_d9_index_view(INDEX,ROOT)
+                                    else "b5271e44dc4c14834a7725a869fb3c12386f2437" if d6tag in read_d9_index_view(INDEX,ROOT)
+                                    else "2ad1961efb9733037b7753ffd4a308baa1b00b64" if d5tag in read_d9_index_view(INDEX,ROOT)
+                                    else "ca15dd7b483963d7bd0767b7b5baca915d17ec43" if d4tag in read_d9_index_view(INDEX,ROOT)
                                     else "972f0e0be12fac14427853fbcd7abe5233eb5a8c"
-                                    if d3_external in INDEX.read_bytes()
+                                    if d3_external in read_d9_index_view(INDEX,ROOT)
                                     else "e5f8895495f969597a6c209fcc29afd66b7a0636")
                 elif path==PATH_GRAPH:
                     for before_count,after_count in [
@@ -189,49 +190,49 @@ def verify():
                         ("reachable.size,94,","reachable.size,95,")
                     ]:
                         expected_after=expected_after.replace(before_count,after_count)
-                    if d3_external in INDEX.read_bytes():
+                    if d3_external in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,51,","size,52,"),
                             ("allJs.length,109,","allJs.length,110,"),
                             ("phase2Js.length,73,","phase2Js.length,74,"),
                             ("reachable.size,95,","reachable.size,96,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d4tag in INDEX.read_bytes():
+                    if d4tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,52,","size,53,"),
                             ("allJs.length,110,","allJs.length,111,"),
                             ("phase2Js.length,74,","phase2Js.length,75,"),
                             ("reachable.size,96,","reachable.size,97,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d5tag in INDEX.read_bytes():
+                    if d5tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,53,","size,54,"),
                             ("allJs.length,111,","allJs.length,112,"),
                             ("phase2Js.length,75,","phase2Js.length,76,"),
                             ("reachable.size,97,","reachable.size,98,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d6tag in INDEX.read_bytes():
+                    if d6tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,54,","size,55,"),
                             ("allJs.length,112,","allJs.length,113,"),
                             ("phase2Js.length,76,","phase2Js.length,77,"),
                             ("reachable.size,98,","reachable.size,99,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d7tag in INDEX.read_bytes():
+                    if d7tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,55,","size,56,"),
                             ("allJs.length,113,","allJs.length,114,"),
                             ("phase2Js.length,77,","phase2Js.length,78,"),
                             ("reachable.size,99,","reachable.size,100,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d8tag in INDEX.read_bytes():
+                    if d8tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,56,","size,57,"),
                             ("allJs.length,114,","allJs.length,115,"),
                             ("phase2Js.length,78,","phase2Js.length,79,"),
                             ("reachable.size,100,","reachable.size,101,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
-                    if d9tag in INDEX.read_bytes():
+                    if d9tag in read_d9_index_view(INDEX,ROOT):
                         for before_count,after_count in [
                             ("size,57,","size,58,"),
                             ("allJs.length,115,","allJs.length,116,"),

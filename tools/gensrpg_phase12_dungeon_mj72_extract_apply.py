@@ -6,6 +6,7 @@ D2 physical index 7863589 bytes, Git blob e5f8895495f969597a6c209fcc29afd66b7a06
 No runtime rewrite and no touch of production main or isolated labs.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import hashlib
 import argparse
 import json
@@ -191,7 +192,7 @@ const liveIndex=Buffer.concat([
     return p
 
 def verify():
-    target=INDEX.read_bytes()
+    target=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in target:
         assert target.count(d9tag)==1, "D9 owner once"

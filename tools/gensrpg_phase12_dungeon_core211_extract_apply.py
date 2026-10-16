@@ -6,6 +6,7 @@ index.html 7780333 bytes, Git blob ca15dd7b483963d7bd0767b7b5baca915d17ec43.
 The Action runner is the only writer of the ~7.8 MB source.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import argparse
 import hashlib
 import json
@@ -178,7 +179,7 @@ assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
     return p
 
 def verify():
-    target=INDEX.read_bytes()
+    target=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in target:
         assert target.count(d9tag)==1, "D9 owner once"

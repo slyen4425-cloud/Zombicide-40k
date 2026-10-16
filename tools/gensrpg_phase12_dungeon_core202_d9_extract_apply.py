@@ -2,6 +2,7 @@
 """Phase12 D9: byte-identical Dungeon Core202 extraction. Single branch / §25-26."""
 import argparse, hashlib, json
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 ROOT=Path(__file__).resolve().parents[1]
 INDEX=ROOT/"index.html"
 REL="assets/gensrpg/dungeon/core202-content-density-v1.js"
@@ -143,7 +144,7 @@ const block=fs.readFileSync('assets/gensrpg/dungeon/core202-content-density-v1.j
     return p
 
 def verify():
-    live=INDEX.read_bytes()
+    live=read_d9_index_view(INDEX,ROOT)
     js=OUT.read_bytes()
     pin(live,DST_LEN,DST_SHA,"D9 live index")
     pin(js,BODY_LEN,BODY_SHA,"D9 script")

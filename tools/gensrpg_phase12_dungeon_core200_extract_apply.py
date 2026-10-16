@@ -5,6 +5,7 @@ Source: user ZIP a4.zip, exactly the tested GitHub D3 index.
 No full index transported through GitHub API. This runs only in the D4 Actions checkout.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import argparse
 import hashlib
 import json
@@ -184,7 +185,7 @@ assert.equal(sha(indexBeforeD4),"972f0e0be12fac14427853fbcd7abe5233eb5a8c");
     return p
 
 def verify():
-    target=INDEX.read_bytes()
+    target=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in target:
         assert target.count(d9tag)==1, "D9 owner once"

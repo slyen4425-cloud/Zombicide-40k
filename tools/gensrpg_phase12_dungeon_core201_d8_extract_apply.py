@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 
 ROOT=Path(__file__).resolve().parents[1]
 INDEX=ROOT/"index.html"
@@ -157,7 +158,7 @@ assert.equal(sha(indexBeforeD8),"6e1cb9b82126409b633306b0e77a7e45badb0f79","exac
     return p
 
 def verify():
-    live=INDEX.read_bytes()
+    live=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in live:
         assert live.count(d9tag)==1, "D9 owner once"

@@ -6,6 +6,7 @@
 The GitHub workflow is the only writer of the large index on the D2 branch.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import argparse
 import hashlib
 
@@ -123,7 +124,7 @@ const index=Buffer.concat([
     return patches
 
 def verify():
-    target=INDEX.read_bytes()
+    target=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in target:
         assert target.count(d9tag)==1, "D9 owner once"

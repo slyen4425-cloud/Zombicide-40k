@@ -4,6 +4,7 @@ User ZIP b3.zip exactly matches the triple-GREEN D5 checkout. GitHub Actions
 is the only writer of the large index; this script has no runtime fallback.
 """
 from pathlib import Path
+from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 import argparse
 import hashlib
 import json
@@ -181,7 +182,7 @@ assert.equal((core213.toString().match(/\\.stopImmediatePropagation\\s*\\(/g)||[
     return p
 
 def verify():
-    live=INDEX.read_bytes()
+    live=read_d9_index_view(INDEX,ROOT)
     d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
     if d9tag in live:
         assert live.count(d9tag)==1, "D9 owner once"

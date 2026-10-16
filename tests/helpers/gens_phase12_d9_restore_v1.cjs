@@ -2,6 +2,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
 const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 module.exports=function restoreD8(index,root){
+  index=require('./gens_phase12_r01_d9_source_view_v1.cjs')(index,root);
   assert.equal(index.length,7703979,"D9 physical index length");
   assert.equal(hash(index),"fce949665fea47a2aa2a535ede7289b06936f986","D9 index git blob");
   const tag=Buffer.from('<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>');

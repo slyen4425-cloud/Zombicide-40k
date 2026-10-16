@@ -3,7 +3,7 @@ const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("n
 const vm=require("node:vm"),crypto=require("node:crypto"),{execFileSync}=require("node:child_process");
 const root=path.join(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p));
 const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const index=read("index.html"),js=read("assets/gensrpg/dungeon/core202-content-density-v1.js");
+const index=require("./helpers/gens_phase12_r01_d9_source_view_v1.cjs")(read("index.html"),root),js=read("assets/gensrpg/dungeon/core202-content-density-v1.js");
 assert.equal(index.length,7703979);assert.equal(hash(index),"fce949665fea47a2aa2a535ede7289b06936f986");
 assert.equal(js.length,11821);assert.equal(hash(js),"364673f3dd35bfa8be7f378152f775656c9243e2");
 const tag=Buffer.from('<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'),open=Buffer.from('<script id="dungeonCore202ContentDensity">');

@@ -30,6 +30,7 @@ assert.deepEqual(directSrcs,[
   'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
+  'assets/gensrpg/shell/pwa-manifest-dynamic-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js?v=1',
   'assets/gensrpg/dungeon/entry-v1.js?v=1',

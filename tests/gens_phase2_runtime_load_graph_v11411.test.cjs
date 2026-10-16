@@ -20,6 +20,7 @@ const rawDirect=[...index.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g
 assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
+  'assets/gensrpg/shell/pwa-manifest-dynamic-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
@@ -74,7 +75,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,58,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,59,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -165,7 +166,7 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,116,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,80,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,102,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,103,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

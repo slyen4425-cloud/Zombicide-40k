@@ -369,6 +369,16 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Après R02** : monolithe métier résiduel **1 264 265 octets** ; prochains chantiers R03–R07 à borner par propriétaire avec checkpoint indépendant. Nouveau fichier source si nécessité §26 : [index.html au SHA R02 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/b5f923fa0426467827c12696ad9a4a02f24e3b6f/index.html) ; `c5.zip` est seulement R01.
 - Rapport `docs/GENSRPG_PHASE12_R02_LEGACY_VISUAL_DATA_2026-10-16.md`.
 
+### R03 Shell Hub Family UI — GREEN technique (16 octobre 2026)
+
+- **Départ §25** : `checkpoint/gensrpg-start-phase12-r03-shell-hub-family-ui-extraction-2026-10-16` sur `e8700f10aca7d4f3b9c85aa3cd4dc11aae6530ab`, branche unique `work/gensrpg-phase12-r03-shell-hub-family-ui-extraction-2026-10-16`.
+- **Source exacte §26** : `c6.zip` / `index.html(15).txt` vérifié, index R02 2 869 485 octets, blob `062c4cd37634f504cc75ce3329d6e69e19b5f547`.
+- **Transfert limité au Shell Hub** : six fonctions contiguës de sélection/présentation des familles, 6 651 octets JS, vers `assets/gensrpg/shell/legacy-hub-family-ui-v1.js`, blob `e45f3b4e419a10b030c47bc921bded1ec0dc723b` ; anciennes fonctions retirées de l'inline, aucune autorité de session ou stockage déplacée, même ordre parser synchrone.
+- **Index R03 vérifié** : 2 862 906 octets, blob `8faf7af7fced0a1e0724985e85718a0e4a9e673b` ; gain net 6 579 octets. Cache PWA versionné avec pré-cache de ce fichier ; rollback exact R03→R02 et chaîne des instantanés historiques maintenus.
+- **Application** [38942880813](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38942880813) SUCCESS. Triple CI au **même SHA `afab707dad385450fdf296f7b2b6b41da376929b`** : [Architecture/Chromium 38946742376](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742376), [Firefox 38946742392](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742392), [Tactical 38946742410](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742410), toutes SUCCESS ; sentinelles historiques R03→R02 et quatre modes validées dans les pipelines.
+- **Checkpoint final §25 GREEN technique** : `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16` exactement sur ce SHA. Sans fusion sur `main`, sans test Android manuel revendiqué. Ce lot valide la partie Shell Hub traitée, **pas la séparation complète du monolithe**. Prochaine responsabilité R03–R07 à délimiter avant code ; pas de nouveau D10 mécanique.
+- **Source pour futur §26** : [index R03 au SHA code GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html) ; `c6.zip` reste la source R02. Rapport : `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`.
+
 ### REMAINING INLINE / EXIT BOUNDARY AUDIT — après D9 GREEN (16 octobre 2026)
 
 - **Changement explicite de plan :** ne pas ouvrir D10 sur le prochain Core Dungeon par inertie. D9 est réellement GREEN au SHA `83d6683896cdb58a63f98cf2fc3e360c23423f76` ; checkpoint final `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16`. Audit documentaire isolé sur `work/gensrpg-phase12-remaining-inline-exit-boundary-audit-2026-10-16` et checkpoint de départ `checkpoint/gensrpg-start-phase12-remaining-inline-exit-boundary-audit-2026-10-16`.

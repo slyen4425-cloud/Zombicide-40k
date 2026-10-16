@@ -10,6 +10,7 @@ const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
   let actual=fs.readFileSync(path.join(root,"index.html"));
+  if(sha(actual)==="caf31c121d926b7b76b9bb05688fab8f2839814e")actual=require("./gens_phase12_r01_d9_source_view_v1.cjs")(actual,root);
   // D9: restore only the proven byte-identical Core202 source before the
   // existing D8->D4 historical combat inventory; do not relax any fingerprint.
   if(sha(actual)==="fce949665fea47a2aa2a535ede7289b06936f986"){

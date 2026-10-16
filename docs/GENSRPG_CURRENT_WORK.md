@@ -1,23 +1,20 @@
-# GenSrpG — CURRENT_WORK LIVE (16 octobre 2026)
+# GenSrpG — Point de reprise LIVE (16 octobre 2026)
 
-**Phase12 : D1–D9 GREEN ; audit remaining-inline documenté ; R01 physiquement extrait, NON GREEN tant que CI triple et checkpoint final non validés. D10 Core203 NON ouvert.**
+**Phase12 : D1–D9 GREEN, R01 GREEN, R02 APPLICATION PHYSIQUE PUBLIÉE mais R02 NON GREEN (triple CI pas encore validée).**
 
-## Lot actif R01 — manifeste PWA dynamique (734 440 octets)
+## Chantier R02 actif
 
-- **Base runtime certifiée D9 GREEN** : `83d6683896cdb58a63f98cf2fc3e360c23423f76` / `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16`, Architecture [38867846431](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846431), Firefox [38867846444](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846444), Tactical [38867846636](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846636) SUCCESS au même SHA.
-- **Base de documents** : `d26f4a3219d34aac229c0ee71a0f489915c83129` (audit de sortie, documentation uniquement, même index D9). **Checkpoint de départ §25** : `checkpoint/gensrpg-start-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16` sur ce SHA. **Branche unique R01** : `work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`.
-- **§26 reçu et vérifié :** `c4.zip` / `index.html(13).txt` a exactement **7 703 979 octets**, Git blob `fce949665fea47a2aa2a535ede7289b06936f986`, identique au D9 GREEN. Bloc anonyme PWA = 734 440 octets / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`; sortie calculée 6 969 593 octets / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, rollback bit-à-bit exact.
-- **Source certifiée §26 pour extraction runtime** : [index.html D9 exact](https://github.com/slyen4425-cloud/Zombicide-40k/blob/83d6683896cdb58a63f98cf2fc3e360c23423f76/index.html), **7 703 979 octets**, Git blob `fce949665fea47a2aa2a535ede7289b06936f986`. Demander ZIP de cette version ; `c2.zip` est la source D8, pas le ZIP D9 requis.
-- **Propriétaire unique visé** : IIFE anonyme de manifeste PWA `734 440 octets` / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`. Destination `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js`. Projection sans exécution : index `6 969 593 octets`, blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, gain net `734 386` octets.
-- **Invariants** : script classique synchrone au même ordre ; conserver `Blob` et `gensManifestLink.href`, les deux PNG inline PWA pendant R01 et les manifestes statique/dynamique séparés ; pas de changement Shell, moteurs, sauvegardes ni comportements smartphone/PWA.
-- **Préflight** : source JS et test de caractérisation piné ; aucun code de jeu ni fichier `index.html` modifié à ce stade. Tests obligatoires : preuve réversible R01→D9→D1, PWA lien/installation/cache, architecture/Chromium, Firefox, Tactical sur un même SHA avant GREEN.
-- **Risques** : source HTML ~7 Mo §26, manifeste dynamique prioritaire sur statique et différence d'icônes, imports PWA, anciennes sentinelles index et graph.
-
-- **Préflight CI read-only validé :** [GitHub Actions 38883525975](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38883525975) **SUCCESS** au commit `2ec208c798b5dfef30c4cb0202987d8354cca4a1` : script d'origine certifié, PWA Blob/href/PNG caractérisés, index R01 projeté 6 969 593 octets, rollback D9 exact. Git index demeure D9 blob `fce949665fea47a2aa2a535ede7289b06936f986`. **R01 encore NON GREEN** : source D9 ZIP §26 à recevoir, extraction non appliquée et triple CI post-extraction requise.
-- **R01 physiquement appliqué et vérifié** : [workflow 38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) SUCCESS, code commit `48fa1f0a3f0948fe254b46fda96542854c576baa` ; nouvel index **6 969 593 octets** / blob `caf31c121d926b7b76b9bb05688fab8f2839814e` ; script externe **734 440 octets** / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`. Source D9 intégralement restaurable. Seuls index, propriétaire PWA et manifeste d'inventaire modifiés.
-- **Prochaine action :** valider post-extraction Architecture/Chromium + Firefox + Tactical sur le **même SHA** et les tests historiques ; checkpoint §25 final R01 GREEN seulement après succès. Ne pas ouvrir R02/Core203 avant R01 GREEN.
-- **Rapports** : `docs/GENSRPG_PHASE12_R01_PWA_MANIFEST_2026-10-16.md`, `docs/GENSRPG_PHASE12_REMAINING_INLINE_EXIT_BOUNDARY_AUDIT_2026-10-16.md`. La charte §§25–26 reste impérative ; `main` `e8681f9823573ced8aec59c8ddc47a72b02bc663` et les labos ne changent pas.
+- Code GREEN de départ : R01 SHA 1b0fa3a718059242507d3e95de45033bba57ea24, checkpoint/gensrpg-phase12-r01-pwa-dynamic-manifest-green-2026-10-16.
+- Checkpoint de départ §25 : checkpoint/gensrpg-start-phase12-r02-legacy-multidomain-boundary-2026-10-16. Branche unique : work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16.
+- Source exacte utilisateur : c5.zip / index.html(14).txt, 6 969 593 octets / blob caf31c121d926b7b76b9bb05688fab8f2839814e (§26).
+- Transfert contrôlé : GitHub Actions 38913046289 SUCCESS ; script 5 364 441 octets / blob 181ec13091f7dfeb5dde173af99dbe1aeecb07c2 vers assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js.
+- Index R02 : 1 605 224 octets / Git blob f6d3eb2a1cc87046d88e678c3bf67f6877baa887, net moins 5 364 369 octets. Retour R02→R01 byte-exact et syntaxe JS vérifiés.
+- Script synchrone conservé, cache PWA mis à jour, domaine transport temporaire LEGACY enregistré ; 5 URI images et ~1,26 Mo de code multi-domaines demeurent à séparer véritablement en R03–R07.
+- Les tests anciens sont réadaptés par SOURCE VIEW et hash strict, sans neutralisation des contrôles. Architecture actuellement NON GREEN; Firefox/Tactical sur les commits de correction PASS mais triple finale même SHA à obtenir.
+- Garde-fous : main e8681f9823573ced8aec59c8ddc47a72b02bc663 gelée, labs indépendants, sauvegardes, quatre modes, 32 visuels Survie historiques inchangés.
+- Prochaine étape : corriger uniquement les sentinelles impactées, obtenir Architecture/Chromium + Firefox + Tactical SUCCESS sur même SHA, créer checkpoint final R02 GREEN, puis ouvrir séparément R03.
+- Rapport détaillé : docs/GENSRPG_PHASE12_R02_LEGACY_BOUNDARY_2026-10-16.md. Références : docs/GENSRPG_CHARTE.md §§25–26 et docs/GENSRPG_RESTRUCTURATION_ROADMAP.md.
 
 ## Bilan
 
-D1–D9 : **230 719 octets JS externalisés**, **230 225 octets nets retirés** ; index actuel 7 703 979 octets. Sortie Phase12 pilotée par catégories A/B/C et **17 enveloppes indicatives**, estimation 12–20 lots réels non garantie. Priorité aux grands scripts anonymes, pas aux dizaines de petits blocs Dungeon numérotés.
+Index historique initial Phase12 : 7 934 204 octets ; index R02 actuel : 1 605 224 octets ; réduction physique totale 6 328 980 octets (mais Phase12 NOT EXIT).

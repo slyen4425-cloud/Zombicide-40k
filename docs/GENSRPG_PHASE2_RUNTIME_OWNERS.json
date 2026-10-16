@@ -14,6 +14,11 @@
     "builders"
   ],
   "files": {
+    "assets/gensrpg/core/legacy-visual-data-v1.js": {
+      "owner": "GenSrpG Core Legacy Visual Data R02",
+      "domain": "core",
+      "role": "five bit-identical historical PNG/WebP data URLs for sheet, equipment card and enemy skins; no gameplay authority; loaded synchronously before the original monolithic script"
+    },
     "assets/gensrpg/shell/pwa-manifest-dynamic-v1.js": {
       "owner": "GenSrpG Shell PWA Dynamic Manifest",
       "domain": "shell",

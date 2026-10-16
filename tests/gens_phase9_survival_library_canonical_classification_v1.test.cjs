@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const source=require('./helpers/gens_phase12_r02_r01_source_view_v1.cjs')(fs.readFileSync(path.join(root,'index.html')),root).toString('utf8');
 const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 
 function exactFunction(name){

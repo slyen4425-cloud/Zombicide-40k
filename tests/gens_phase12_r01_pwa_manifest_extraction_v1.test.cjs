@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p
 const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 const srcHash="fce949665fea47a2aa2a535ede7289b06936f986",dstHash="caf31c121d926b7b76b9bb05688fab8f2839814e",bodyHash="778e3acf2f77b3c7680bf70a0c6a846b84826235";
 const rel="assets/gensrpg/shell/pwa-manifest-dynamic-v1.js",tag='<script src="'+rel+'"></script>';
-const index=read("index.html"),js=read(rel),s=index.toString("utf8");
+const index=require("./helpers/gens_phase12_r02_r01_source_view_v1.cjs")(read("index.html"),root),js=read(rel),s=index.toString("utf8");
 assert.equal(index.length,6969593);assert.equal(hash(index),dstHash);
 assert.equal(js.length,734440);assert.equal(hash(js),bodyHash);
 assert.equal(s.split(tag).length,2,"one PWA script at exact parser location");

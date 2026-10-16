@@ -5,6 +5,7 @@ const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0"
 const D9="fce949665fea47a2aa2a535ede7289b06936f986",R01="caf31c121d926b7b76b9bb05688fab8f2839814e",JS="778e3acf2f77b3c7680bf70a0c6a846b84826235";
 const TAG=Buffer.from('<script src="assets/gensrpg/shell/pwa-manifest-dynamic-v1.js"></script>');
 module.exports=function d9SourceView(index,root){
+ if(hash(index)!==D9&&hash(index)!==R01)index=require("./gens_phase12_r02_r01_source_view_v1.cjs")(index,root);
  if(hash(index)===D9){assert.equal(index.length,7703979);return index;}
  assert.equal(index.length,6969593,"R01 exact physical index length");
  assert.equal(hash(index),R01,"R01 physical index exact blob");

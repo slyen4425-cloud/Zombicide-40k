@@ -102,7 +102,7 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,103,
+assert.equal(Object.keys(ownerManifest.files||{}).length,104,
   'Phase 3 entries stay inert while Phase 12 includes nine byte-identical physical Dungeon owners through D9 Core202');
 assert.equal(ownerManifest.files?.['assets/gensrpg/dungeon/core202-content-density-v1.js']?.domain,'dungeon',
   'D9 Core202 remains exclusively Dungeon-owned');
@@ -162,7 +162,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:103,
+  productionOwnerGraph:104,
   loadedEntrySlices:4,
   captureAuxiliaryRuntimeOwners:6
 },null,2));

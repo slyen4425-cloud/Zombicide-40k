@@ -31,6 +31,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/capture/world-exploration-v1.js',
   'assets/gensrpg/capture/team-roster-v1.js',
   'assets/gensrpg/capture/combat-core-v1.js',
+  'assets/gensrpg/core/legacy-visual-data-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
   'assets/gensrpg/capture/builtin-seed-v1.js',
   'assets/gensrpg/dungeon/core01-session-ui-v1.js',
@@ -166,7 +167,7 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,117,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,81,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,103,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,104,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

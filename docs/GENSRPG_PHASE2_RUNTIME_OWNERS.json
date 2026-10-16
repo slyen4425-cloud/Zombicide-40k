@@ -11,7 +11,8 @@
     "tactical",
     "capture",
     "pvp",
-    "builders"
+    "builders",
+    "legacy"
   ],
   "files": {
     "assets/gensrpg/shell/pwa-manifest-dynamic-v1.js": {
@@ -528,6 +529,11 @@
       "owner": "Tactical Module Entry",
       "domain": "tactical",
       "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
+    },
+    "assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js": {
+      "owner": "Phase12 Historical Multi-domain Transport (temporary non-semantic grouping)",
+      "domain": "legacy",
+      "role": "byte-exact 5364441-byte legacy transport; NOT a unified owner: Survival/Dungeon/Capture/UI/storage roles remain to be split in R03-R07"
     }
   }
 }

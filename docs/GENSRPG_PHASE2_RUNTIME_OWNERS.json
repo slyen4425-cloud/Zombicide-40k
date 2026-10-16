@@ -14,6 +14,11 @@
     "builders"
   ],
   "files": {
+    "assets/gensrpg/shell/legacy-hub-family-ui-v1.js": {
+      "owner": "GenSrpG Shell Hub Family UI R03",
+      "domain": "shell",
+      "role": "six classic function declarations for family cards and four-mode home UI; no game-state persistence or game-mode runtime authority"
+    },
     "assets/gensrpg/core/legacy-visual-data-v1.js": {
       "owner": "GenSrpG Core Legacy Visual Data R02",
       "domain": "core",

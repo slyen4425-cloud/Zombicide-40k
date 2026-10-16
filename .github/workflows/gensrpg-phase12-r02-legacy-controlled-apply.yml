@@ -1,0 +1,59 @@
+name: GenSrpG Phase12 R02 legacy transport controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r02-legacy-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply only certified R02 legacy physical relocation
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16'
+          test "$(git hash-object index.html)" = 'caf31c121d926b7b76b9bb05688fab8f2839814e'
+          python3 tools/gensrpg_phase12_r02_legacy_multidomain_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r02_legacy_multidomain_extract_apply.py --verify
+          node --check assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js
+      - name: Preserve PWA offline cache and classify legacy transport explicitly
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          sw=Path("service-worker.js")
+          s=sw.read_text()
+          old='-r01-pwa";'
+          assert s.count(old)==1,"R01 cache key must be known"
+          s=s.replace(old,'-r02-legacy-transport";',1)
+          source='"./assets/gensrpg/shell/pwa-manifest-dynamic-v1.js",'
+          assert s.count(source)==1,"historical PWA preload must remain singular"
+          dest='"./assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js",'
+          s=s.replace(source,source+dest,1)
+          sw.write_text(s)
+          p=Path("docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json")
+          m=json.loads(p.read_text())
+          rel="assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js"
+          assert rel not in m["files"] and "legacy" not in m["allowedDomains"]
+          m["allowedDomains"].append("legacy")
+          m["files"][rel]={
+            "owner":"Phase12 Historical Multi-domain Transport (temporary non-semantic grouping)",
+            "domain":"legacy",
+            "role":"byte-exact 5364441-byte legacy transport; NOT a unified owner: Survival/Dungeon/Capture/UI/storage roles remain to be split in R03-R07"
+          }
+          p.write_text(json.dumps(m,ensure_ascii=False,indent=2)+"\n")
+          PY
+          node tests/gens_phase12_r02_legacy_boundary_v1.test.cjs
+      - name: Commit precise code movement and offline support
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r02-legacy-multidomain-boundary-2026-10-16'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git commit -m "refactor(phase12): move legacy multi-domain script byte-identically out of index (R02)"
+          git push origin "HEAD:$GITHUB_REF_NAME"

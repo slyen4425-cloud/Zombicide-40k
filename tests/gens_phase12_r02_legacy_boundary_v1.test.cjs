@@ -1,0 +1,22 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto"),vm=require("node:vm");
+const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p));
+const blob=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
+const src="caf31c121d926b7b76b9bb05688fab8f2839814e",dst="f6d3eb2a1cc87046d88e678c3bf67f6877baa887",jsSha="181ec13091f7dfeb5dde173af99dbe1aeecb07c2";
+const rel="assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js",tag='<script src="'+rel+'"></script>';
+const idx=read("index.html");
+if(blob(idx)===src){assert.equal(idx.length,6969593);assert.equal(fs.existsSync(path.join(root,rel)),false);console.log("R02 R01-baseline preflight PASS");process.exit(0);}
+assert.equal(idx.length,1605224);assert.equal(blob(idx),dst);
+const js=read(rel);assert.equal(js.length,5364441);assert.equal(blob(js),jsSha);
+const at=idx.indexOf(Buffer.from(tag));assert.ok(at>0&&idx.indexOf(tag,at+tag.length)<0);
+assert.ok(idx.indexOf(Buffer.from("capture/combat-core-v1.js"))<at);
+assert.ok(at<idx.indexOf(Buffer.from("dungeon/mj72-scene-v1.js")));
+new vm.Script(js.toString("utf8"),{filename:rel});
+const restored=Buffer.concat([idx.subarray(0,at),Buffer.from("<script>"),js,Buffer.from("</script>"),idx.subarray(at+Buffer.byteLength(tag))]);
+assert.equal(restored.length,6969593);assert.equal(blob(restored),src);
+const images=[...js.toString("utf8").matchAll(/data:image\/(?:png|webp);base64,([A-Za-z0-9+/=]+)/g)];
+assert.equal(images.length,5);assert.equal(images.reduce((a,m)=>a+m[1].length,0),4100280);
+assert.ok(read("service-worker.js").toString().includes("./"+rel),"offline precache");
+const manifest=JSON.parse(read("docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json"));
+assert.equal(manifest.files[rel].domain,"legacy");
+console.log("R02 bytes, parser-order, rollback, assets, owner classification and offline precache PASS");

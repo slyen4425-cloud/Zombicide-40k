@@ -1,25 +1,23 @@
 # GenSrpG — Point de reprise LIVE (16 octobre 2026)
 
-**Phase 12 en cours : D1–D8 GREEN. D9 Core202 extrait et publié, NON GREEN (triple CI de validation finale requise).**
+**Phase 12 en cours : D1–D9 GREEN. D10 n'est pas ouvert.**
 
-## Lot courant D9 — sélectionner un propriétaire Dungeon inline actif
+## Dernier lot validé — D9 Dungeon Core202 Content Density
 
-- **Branche de travail dédiée §25 :** `work/gensrpg-phase12-dungeon-d9-extraction-2026-10-16` ; aucun autre mode, laboratoire ou branche de production concerné.
-- **Base D9 :** SHA `dd3f127041a78b9e7539ab1735cb188557a50ccc` — SHA exact du dernier checkpoint GREEN D8 `checkpoint/gensrpg-phase12-dungeon-core201-d8-green-2026-10-16` ; Architecture/Chromium [38803573910](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573910), Firefox [38803573894](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573894), Tactical [38803573930](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38803573930) **SUCCESS sur le même SHA**.
-- **Checkpoint de départ D9 §25 :** `checkpoint/gensrpg-start-phase12-dungeon-d9-extraction-2026-10-16`, sur le SHA D8 GREEN `dd3f127041a78b9e7539ab1735cb188557a50ccc`, créé avant toute modification.
-- **Source indispensable §26 :** [`index.html` exact après D8](https://github.com/slyen4425-cloud/Zombicide-40k/blob/dd3f127041a78b9e7539ab1735cb188557a50ccc/index.html), **7 715 741 octets**, Git blob **`f56dc5bbb368b176509ab16477bd4b24dd000497`** (métadonnées Git vérifiées). Demander à l'utilisateur de télécharger ce lien, compresser en ZIP et le joindre. Vérifier ensuite l'empreinte avant de lire/modifier. Les ZIP `c1.zip`, `b5.zip`, etc., sont des états antérieurs.
-- **Périmètre et propriétaire :** un seul script JavaScript inline actif du domaine Dungeon, **identifié et certifié : `dungeonCore202ContentDensity`** (11 821 octets / blob `364673f3dd35bfa8be7f378152f775656c9243e2`), source utilisateur `c2.zip` byte-identique à D8. Destination prévue `assets/gensrpg/dungeon/core202-content-density-v1.js`. Après réception, cartographier propriétaire et domaines croisés, position, dépendances, API globales, effets de bord, chargement et usages avant sélection. Aucune extraction sans validation du contenu exact.
-- **Invariants :** transfert physique octet pour octet en fichier JS externe synchrone à position parser identique ; aucun remaniement gameplay, combat, stats, navigation, sauvegardes, Shell ou modules Survie/Capture/PvP/Tactical. 32 assets Survie historiques immobiles, laboratoires combat/exploration isolés, `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Aucune double autorité.
-- **Tests exigés :** SHA Git source et corps JS, node --check, restauration byte-identique D9→D8→D7→D6→D5→D4→D3→D2→D1, graphe de chargement, manifest de propriétaires, sentinelles et éventuels appels inter-modules, Architecture/Chromium + Firefox + Tactical SUCCESS sur un même SHA. Checkpoint final D9 GREEN interdit avant ces critères.
-- **Risques connus :** gros `index.html` : lecture via connecteur GitHub interdite par §26 ; propriétaires Dungeon historiques actifs, callbacks/ordre parser, sessions et vieux points d'entrée Tactical. Éviter tout wrapper additionnel ou refonte pendant cette extraction.
-- **Application D9 vérifiée :** [workflow 38866855495](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38866855495) SUCCESS, code et sentinelles au SHA `9dcbecc29ea2c366c8d5a2e177902df8d89c5b08`. Core202 externalisé byte-identique, index **7 703 979 octets / Git blob `fce949665fea47a2aa2a535ede7289b06936f986`** ; 11 762 octets nets retirés. Retour D9→D8 et historique D8→D1 certifiés, manifest à **102** propriétaires et test boundary authored Core202 validé. **Prochaine action :** triple CI Architecture/Chromium, Firefox et Tactical SUCCESS sur un même SHA ; checkpoint D9 GREEN ensuite seulement. D9 NON GREEN ; extraction runtime publiée sur la branche isolée, pas sur `main`.
-- Rapport D9 : `docs/GENSRPG_PHASE12_D9_SCOPING_2026-10-16.md`.
+- **Branche dédiée :** `work/gensrpg-phase12-dungeon-d9-extraction-2026-10-16`.
+- **Base §25 :** D8 GREEN `dd3f127041a78b9e7539ab1735cb188557a50ccc` ; checkpoint de départ `checkpoint/gensrpg-start-phase12-dungeon-d9-extraction-2026-10-16`.
+- **Source exacte §26 :** ZIP reçu `c2.zip` / `index.html(12).txt` ; 7 715 741 octets, blob `f56dc5bbb368b176509ab16477bd4b24dd000497`, certifié égal au checkpoint D8.
+- **Extraction :** l'unique IIFE `dungeonCore202ContentDensity` (11 821 octets, blob `364673f3dd35bfa8be7f378152f775656c9243e2`) déplacée byte-identique vers `assets/gensrpg/dungeon/core202-content-density-v1.js`. Script classique synchrone au même emplacement de parseur, garde `authored202` des mondes personnalisés intacte, aucun changement de gameplay.
+- **Index D9 :** **7 703 979 octets**, blob `fce949665fea47a2aa2a535ede7289b06936f986`, soit 11 762 octets nets retirés par D9 ; 102 propriétaires JS atteignables. Rollback byte-exact D9→D8→D7→D6→D5→D4→D3→D2→D1 testé.
+- **Application contrôlée :** [workflow 38866855495](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38866855495) SUCCESS, commit moteur `9dcbecc29ea2c366c8d5a2e177902df8d89c5b08`.
+- **GREEN FINAL sur le même SHA `83d6683896cdb58a63f98cf2fc3e360c23423f76` :** [Architecture/Chromium 38867846431](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846431), [Firefox 38867846444](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846444), [Tactical 38867846636](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846636), toutes **SUCCESS**.
+- **Checkpoint final §25 :** `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16`, confirmé pointant exactement au SHA triple CI GREEN `83d6683896cdb58a63f98cf2fc3e360c23423f76`. Des correctifs ont seulement ajusté les sentinelles d'inventaire des propriétaires et les vues historiques (sans changer le JS Core202). Les contrôles hérités restent stricts.
+- **Rapport complet :** `docs/GENSRPG_PHASE12_D9_SCOPING_2026-10-16.md`.
+- **Invariants :** production `main` gelée au SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun changement aux labos combat ou exploration, aux modes Capture, Survie, PvP, aux 32 images Survie historiques, ni à la logique Tactical ou aux sauvegardes.
 
-## Dernier jalon GREEN : D8 Dungeon Core201 Stability
+## Bilan et prochaine action
 
-- Source `c1.zip` validée pour D8 (index D7 **7 729 678 octets**, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`).
-- Bloc Dungeon `dungeonCore201Stability` déplacé **byte-identique**, **13 990 octets** vers `assets/gensrpg/dungeon/core201-stability-v1.js`, blob `7edf731fd1aa209ec96490fb8e2cb7af04afd627`.
-- Index actuel **7 715 741 octets** (blob `f56dc5bbb368b176509ab16477bd4b24dd000497`). Rollback D8→D1 confirmé.
-- Checkpoint GREEN `checkpoint/gensrpg-phase12-dungeon-core201-d8-green-2026-10-16` au SHA `dd3f127041a78b9e7539ab1735cb188557a50ccc`. Documentation D8 clôturée sur branche précédente dans `docs/GENSRPG_PHASE12_D8_SCOPING_2026-10-15.md`.
-- **Cumul Phase 12 D1–D8 : 218 898 octets JS externalisés ; 218 463 octets nets retirés de l'index initial**. Phase 12 non terminée, nombre de lots restants inconnu.
-- Règles : `docs/GENSRPG_CHARTE.md` §§25–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`.
+- **D1–D9 GREEN : 230 719 octets de JS externalisés ; 230 225 octets nets retirés d'`index.html`.** Phase 12 toujours ouverte ; nombre de lots encore nécessaires indéterminé.
+- **D10 non ouvert.** Appliquer §25 avant tout code : checkpoint de départ fondé sur le dernier SHA D9 GREEN, branche exclusive, périmètre unique.
+- **Source obligatoire §26 pour D10 :** [index.html au SHA D9 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/83d6683896cdb58a63f98cf2fc3e360c23423f76/index.html), **7 703 979 octets**, blob `fce949665fea47a2aa2a535ede7289b06936f986`. Demander à l'utilisateur de télécharger et joindre cette copie compressée en ZIP pour identifier le prochain propriétaire inline. `c2.zip` est désormais périmé pour D10.
+- Conserver l'ordre parser, les propriétaires et l'absence de changements fonctionnels ; triple CI au même SHA puis nouveau checkpoint final seulement après vérification. Références : `docs/GENSRPG_CHARTE.md` §§25–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_RESTRUCTURATION_ROADMAP.md`.

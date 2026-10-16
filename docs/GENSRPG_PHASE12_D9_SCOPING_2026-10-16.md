@@ -1,3 +1,16 @@
+# GenSrpG — Phase 12 / D9 Core202 Content Density — GREEN (16 octobre 2026)
+
+## Clôture officielle du lot §25
+
+- **GREEN validé** au commit `83d6683896cdb58a63f98cf2fc3e360c23423f76`, checkpoint `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16` vérifié sur ce SHA.
+- **Les trois CI au même SHA sont SUCCESS :** [Architecture/Chromium 38867846431](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846431), [Firefox 38867846444](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846444), [Tactical 38867846636](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38867846636).
+- Source `c2.zip` identique au checkpoint D8 : 7 715 741 octets, blob `f56dc5bbb368b176509ab16477bd4b24dd000497`.
+- Extraction contrôlée [38866855495](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38866855495) SUCCESS : `dungeonCore202ContentDensity` déplacé sans modifier ses **11 821 octets** / blob `364673f3dd35bfa8be7f378152f775656c9243e2`. Index D9 **7 703 979 octets** / blob `fce949665fea47a2aa2a535ede7289b06936f986`. Net −11 762 octets.
+- Régressions strictes : architecture, navigateur Chromium, Firefox, Tactical, vérification de la garde `authored202`, manifest des 102 propriétaires, restauration D9→D8→D7→D6→D5→D4→D3→D2→D1. Les attentes des anciennes sentinelles ont été mises à jour sans affaiblir les fingerprints ou changer le gameplay.
+- **Cumul D1–D9** : 230 719 octets JS déplacés ; 230 225 octets nets retirés. D10 pas ouvert ; Phase 12 non terminée ; production et laboratoires inchangés.
+
+## Historique des états précédents (mentions « NON GREEN » historiques, désormais closes)
+
 # GenSrpG — Phase 12 D9 / ouverture et source certifiée requise (16 octobre 2026)
 
 ## Gouvernance et base vérifiée

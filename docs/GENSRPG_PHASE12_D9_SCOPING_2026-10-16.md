@@ -29,3 +29,12 @@ Un seul propriétaire Dungeon actif, responsabilités correctement bornées ; d�
 - Cross-domain : interactions limitées au runtime/éditeur de mondes Dungeon ; pas d'import dans Capture/Survie/PvP. Protéger le Bridge Tactical existant, le moteur Core01, les sauvegardes, le rendu.
 - Avant GREEN : preuve index D9→D8 bit-à-bit, régression D8→D1, mise à jour manifest/runtime et test de frontière Core202, triple CI au même SHA et checkpoint §25.
 - **État : propriétaire sélectionné, code NON encore publié ; D9 NON GREEN.**
+
+## Extraction physique appliquée, gate finale non encore GREEN
+
+- **Application contrôlée SUCCESS** : [workflow 38866855495](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38866855495). Commit runtime et sentinelles : `9dcbecc29ea2c366c8d5a2e177902df8d89c5b08`.
+- Index D9 certifié par arbre Git : **7 703 979 octets**, blob `fce949665fea47a2aa2a535ede7289b06936f986`; ancien index D8 exact : **7 715 741 octets**, blob `f56dc5bbb368b176509ab16477bd4b24dd000497`.
+- Script externe `assets/gensrpg/dungeon/core202-content-density-v1.js` : **11 821 octets**, blob `364673f3dd35bfa8be7f378152f775656c9243e2`. Copie byte-identique, ordre parser et sync préservés.
+- Tests du workflow SUCCESS : vérification du corps et index, rollback exact D9→D8 et restaurations historiques, syntaxe Node, manifest 102 fichiers atteignables, garde `authored202`, checks owner et graphe.
+- D1–D9 : **230 719 octets JS externalisés**, **230 225 octets nets retirés** d'index. La Phase 12 reste ouverte.
+- **D9 NON GREEN :** triplet CI Architecture/Chromium, Firefox et Tactical requis sur le même SHA et checkpoint §25. Ne pas ouvrir D10.

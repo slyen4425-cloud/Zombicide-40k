@@ -1,6 +1,6 @@
 # GenSrpG — Point de reprise LIVE (16 octobre 2026)
 
-**Phase 12 en cours : D1–D8 GREEN. D9 ouvert / pré-extraction seulement, NON GREEN.**
+**Phase 12 en cours : D1–D8 GREEN. D9 Core202 extrait et publié, NON GREEN (triple CI de validation finale requise).**
 
 ## Lot courant D9 — sélectionner un propriétaire Dungeon inline actif
 
@@ -12,10 +12,10 @@
 - **Invariants :** transfert physique octet pour octet en fichier JS externe synchrone à position parser identique ; aucun remaniement gameplay, combat, stats, navigation, sauvegardes, Shell ou modules Survie/Capture/PvP/Tactical. 32 assets Survie historiques immobiles, laboratoires combat/exploration isolés, `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Aucune double autorité.
 - **Tests exigés :** SHA Git source et corps JS, node --check, restauration byte-identique D9→D8→D7→D6→D5→D4→D3→D2→D1, graphe de chargement, manifest de propriétaires, sentinelles et éventuels appels inter-modules, Architecture/Chromium + Firefox + Tactical SUCCESS sur un même SHA. Checkpoint final D9 GREEN interdit avant ces critères.
 - **Risques connus :** gros `index.html` : lecture via connecteur GitHub interdite par §26 ; propriétaires Dungeon historiques actifs, callbacks/ordre parser, sessions et vieux points d'entrée Tactical. Éviter tout wrapper additionnel ou refonte pendant cette extraction.
-- **Prochaine action :** script d'application contrôlée et sentinelle autorité `gens_authored_core202_boundary_v11411.test.cjs` préservant les exceptions pour les mondes authored ; migration byte-exacte et rollback, puis CI Architecture/Chromium, Firefox, Tactical au même SHA. D9 NON GREEN, aucune modification de runtime encore réalisée.
+- **Application D9 vérifiée :** [workflow 38866855495](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38866855495) SUCCESS, code et sentinelles au SHA `9dcbecc29ea2c366c8d5a2e177902df8d89c5b08`. Core202 externalisé byte-identique, index **7 703 979 octets / Git blob `fce949665fea47a2aa2a535ede7289b06936f986`** ; 11 762 octets nets retirés. Retour D9→D8 et historique D8→D1 certifiés, manifest à **102** propriétaires et test boundary authored Core202 validé. **Prochaine action :** triple CI Architecture/Chromium, Firefox et Tactical SUCCESS sur un même SHA ; checkpoint D9 GREEN ensuite seulement. D9 NON GREEN ; extraction runtime publiée sur la branche isolée, pas sur `main`.
 - Rapport D9 : `docs/GENSRPG_PHASE12_D9_SCOPING_2026-10-16.md`.
 
-## Dernier jalon clos : D8 Dungeon Core201 Stability
+## Dernier jalon GREEN : D8 Dungeon Core201 Stability
 
 - Source `c1.zip` validée pour D8 (index D7 **7 729 678 octets**, blob `6e1cb9b82126409b633306b0e77a7e45badb0f79`).
 - Bloc Dungeon `dungeonCore201Stability` déplacé **byte-identique**, **13 990 octets** vers `assets/gensrpg/dungeon/core201-stability-v1.js`, blob `7edf731fd1aa209ec96490fb8e2cb7af04afd627`.

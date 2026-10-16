@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
-const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const source=fs.readFileSync(path.join(root,'index.html'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/gensrpg/shell/legacy-hub-family-ui-v1.js'),'utf8');
 const entry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
 
 function exactFunction(name){

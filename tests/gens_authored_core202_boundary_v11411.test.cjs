@@ -2,10 +2,10 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 
 const src=fs.readFileSync('index.html','utf8');
-const start=src.indexOf('<script id="dungeonCore202ContentDensity">');
-const end=src.indexOf('</script>',start);
-assert.ok(start>=0&&end>start,'Core 2.02 inline block must exist');
-const block=src.slice(start,end);
+const tag='<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>';
+assert.equal(src.split(tag).length,2,'one exact synchronous Core202 owner');
+assert.ok(!src.includes('<script id="dungeonCore202ContentDensity">'),'no duplicate inline Core202');
+const block=fs.readFileSync('assets/gensrpg/dungeon/core202-content-density-v1.js','utf8');
 
 assert.match(block,/function authored202\(x\)\{return !!x\?\.last\?\.authoredRuntime167839\}/,'Core 2.02 must recognize the dedicated authored runtime');
 assert.match(block,/function ensureEncounter202\(x\)\{\s*if\(authored202\(x\)\|\|/,'legacy encounter regeneration must be disabled for authored worlds');

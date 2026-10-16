@@ -339,6 +339,11 @@
       "domain": "dungeon",
       "role": "byte-identical 13990-byte native dungeonCore201Stability IIFE, keeping existing encounter UI, scene persistence, combat Bridge and original synchronous parser order"
     },
+    "assets/gensrpg/dungeon/core202-content-density-v1.js": {
+      "owner": "Dungeon Core202 Content Density",
+      "domain": "dungeon",
+      "role": "byte-identical active 11821-byte Core202 IIFE: Dungeon encounter/trap/puzzle cadence; authored-world density guard and existing Core01 hooks at original synchronous parser position"
+    },
     "assets/gensrpg/dungeon/core211-consolidation-v1.js": {
       "owner": "Dungeon Core211 Consolidation",
       "domain": "dungeon",

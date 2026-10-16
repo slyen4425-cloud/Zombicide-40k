@@ -158,6 +158,14 @@ assert.equal(sha(indexBeforeD8),"6e1cb9b82126409b633306b0e77a7e45badb0f79","exac
 
 def verify():
     live=INDEX.read_bytes()
+    d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
+    if d9tag in live:
+        assert live.count(d9tag)==1, "D9 owner once"
+        assert len(live)==7703979 and blob(live)=="fce949665fea47a2aa2a535ede7289b06936f986", "D9 index drift"
+        d9=(ROOT/"assets/gensrpg/dungeon/core202-content-density-v1.js").read_bytes()
+        assert len(d9)==11821 and blob(d9)=="364673f3dd35bfa8be7f378152f775656c9243e2", "D9 body drift"
+        live=live.replace(d9tag,b'<script id="dungeonCore202ContentDensity">'+d9+b'</script>',1)
+        assert len(live)==7715741 and blob(live)=="f56dc5bbb368b176509ab16477bd4b24dd000497", "restored D8 exact"
     code=OUT.read_bytes()
     pin(live,DST_LEN,DST_SHA,"live D8 index")
     pin(code,BODY_LEN,BODY_SHA,"Core201 script")

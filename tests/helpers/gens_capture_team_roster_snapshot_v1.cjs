@@ -20,6 +20,16 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ if(hash(index)==='fce949665fea47a2aa2a535ede7289b06936f986'){
+  assert.equal(index.length,7703979,'D9 exact length');
+  const tag=Buffer.from('<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>');
+  const at=index.indexOf(tag);
+  assert.ok(at>0&&index.indexOf(tag,at+tag.length)<0,'D9 one owner');
+  const js=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core202-content-density-v1.js'));
+  assert.equal(js.length,11821);assert.equal(hash(js),'364673f3dd35bfa8be7f378152f775656c9243e2');
+  index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore202ContentDensity">'),js,Buffer.from('</script>'),index.subarray(at+tag.length)]);
+  assert.equal(index.length,7715741);assert.equal(hash(index),'f56dc5bbb368b176509ab16477bd4b24dd000497','D8 exact restore');
+ }
  if(hash(index)==='f56dc5bbb368b176509ab16477bd4b24dd000497'){
   assert.equal(index.length,7715741,'D8 exact length');
   const tag=Buffer.from('<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>');

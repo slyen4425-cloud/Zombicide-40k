@@ -9,7 +9,7 @@ const {execFileSync}=require("node:child_process");
 const ROOT=path.resolve(__dirname,"..");
 const read=rel=>fs.readFileSync(path.join(ROOT,rel));
 const blob=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
-const index=read("index.html");
+const index=require("./helpers/gens_phase12_d9_restore_v1.cjs")(read("index.html"),require("node:path").resolve(__dirname,".."));
 const js=read("assets/gensrpg/dungeon/core201-stability-v1.js");
 const tag=Buffer.from('<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>');
 const open=Buffer.from('<script id="dungeonCore201Stability">');

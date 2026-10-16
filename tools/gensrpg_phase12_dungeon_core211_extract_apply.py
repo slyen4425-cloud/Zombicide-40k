@@ -179,6 +179,14 @@ assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
 
 def verify():
     target=INDEX.read_bytes()
+    d9tag=b'<script id="dungeonCore202ContentDensity" src="assets/gensrpg/dungeon/core202-content-density-v1.js"></script>'
+    if d9tag in target:
+        assert target.count(d9tag)==1, "D9 owner once"
+        assert len(target)==7703979 and blob(target)=="fce949665fea47a2aa2a535ede7289b06936f986", "D9 index drift"
+        d9=(ROOT/"assets/gensrpg/dungeon/core202-content-density-v1.js").read_bytes()
+        assert len(d9)==11821 and blob(d9)=="364673f3dd35bfa8be7f378152f775656c9243e2", "D9 body drift"
+        target=target.replace(d9tag,b'<script id="dungeonCore202ContentDensity">'+d9+b'</script>',1)
+        assert len(target)==7715741 and blob(target)=="f56dc5bbb368b176509ab16477bd4b24dd000497", "restored D8 exact"
     d8tag=b'<script id="dungeonCore201Stability" src="assets/gensrpg/dungeon/core201-stability-v1.js"></script>'
     if d8tag in target:
         assert target.count(d8tag)==1, "D8 owner once"

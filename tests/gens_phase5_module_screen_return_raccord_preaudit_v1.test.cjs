@@ -39,8 +39,8 @@ assert.equal(executable,'"use strict";','Shell Phase 3 entry must remain inert b
 const phase3Test=read('tests/gens_phase3_target_structure_contracts_v1.test.cjs');
 assert.ok(phase3Test.includes("domain==='survival'||domain==='dungeon'||domain==='tactical'||domain==='capture'"),
   'Phase 3 guard must explicitly recognize Survival, Dungeon, Tactical and Capture partial-runtime entries');
-assert.ok(phase3Test.includes('productionOwnerGraph:101'),
-  'Phase 3 guard must preserve all 101 production owners including eight byte-identical Dungeon Phase12 owners, Capture and PvP');
+assert.ok(phase3Test.includes('productionOwnerGraph:102'),
+  'Phase 3 guard must preserve all 102 production owners including nine byte-identical Dungeon Phase12 owners, Capture and PvP');
 assert.ok(phase3Test.includes("captureAuxiliaryRuntimeOwners:6"),
   'Phase 3 guard must account for session-start, screen-return, Hub, World, Team/Reserve and Combat Core Capture owners');
 

@@ -6,6 +6,7 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const shellHubSource=fs.readFileSync(path.join(root,'assets/gensrpg/shell/legacy-hub-family-ui-v1.js'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
 const captureSeedUrl='assets/gensrpg/capture/builtin-seed-v1.js?v=1';
@@ -15,7 +16,7 @@ const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
 
 assert.match(indexSource,/<script id="builtinMonsterCapture162" src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"><\/script>/,'production HTML must keep the built-in Monster Capture seed');
 assert.match(indexSource,/function rpgProfiles\(\)/,'Shell RPG profile listing owner must remain explicit');
-assert.match(indexSource,/function gensFamilyForProfileId\(profileId\)/,'Shell family routing owner must remain explicit');
+assert.match(shellHubSource,/function gensFamilyForProfileId\(profileId\)/,'Shell family routing owner must remain explicit');
 assert.match(captureSeedSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
 assert.match(captureSeedSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
 assert.match(captureSeedSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');

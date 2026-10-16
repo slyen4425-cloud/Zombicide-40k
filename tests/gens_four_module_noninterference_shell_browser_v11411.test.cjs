@@ -6,6 +6,7 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const shellHubSource=fs.readFileSync(path.join(root,'assets/gensrpg/shell/legacy-hub-family-ui-v1.js'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
 const captureSeedUrl='assets/gensrpg/capture/builtin-seed-v1.js?v=1';
@@ -14,7 +15,7 @@ const SURVIVAL_ID='game_profile_zombicide_base';
 const DUNGEON_ID='game_profile_dungeon_demo';
 const CAPTURE_ID='gp_mt7ker7t_m2iw9';
 
-assert.match(indexSource,/function openGensFamily\(family\)/,'real Shell family owner must exist');
+assert.match(shellHubSource,/function openGensFamily\(family\)/,'real Shell family owner must exist');
 assert.match(indexSource,/function openGensBuiltInGame\(profileId,family\)/,'real Shell profile owner must exist');
 assert.match(indexSource,/function showGensRootHome\(\)/,'real Shell root navigation owner must exist');
 assert.match(indexSource,/function backToGensFamily\(\)/,'real Shell game-to-family owner must exist');

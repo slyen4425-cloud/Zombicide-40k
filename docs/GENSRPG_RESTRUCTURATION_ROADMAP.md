@@ -349,16 +349,22 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Cumul Phase 12 D1–D9 :** 230 719 octets JS externalisés ; 230 225 octets nets retirés. Phase 12 toujours ouverte, D10 non ouvert ; nouvelle source D9 exacte obligatoire (§26).
 - `main` gelée ; labs et autres modes hors périmètre, aucun changement fonctionnel.
 
-### R01 OUVERT — Externalisation fidèle du manifeste PWA dynamique (16 octobre 2026)
+### R01 GREEN — Manifeste PWA externe (16 octobre 2026)
 
-- **Code R01 appliqué** : [workflow 38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) SUCCESS ; code SHA `48fa1f0a3f0948fe254b46fda96542854c576baa`, index 6 969 593 octets (blob `caf31c121d926b7b76b9bb05688fab8f2839814e`), un seul owner PWA de 734 440 octets, restauration D9 identique. **NON GREEN** : tests post-extraction / checkpoint final encore requis.
+- **Base §25 :** `checkpoint/gensrpg-start-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16` depuis l'audit après D9 GREEN ; branche `work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`. §26 : `c4.zip`, D9 7 703 979 octets / blob `fce949665fea47a2aa2a535ede7289b06936f986`.
+- **Source déplacée byte-identique :** IIFE anonyme du manifeste dynamique 734 440 octets / blob `778e3acf2f77b3c7680bf70a0c6a846b84826235` vers `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js` ; script classique synchrone, URL Blob, images et manifeste statique non modifiés. Service worker actualisé (pré-cache fichier nouveau et cache versionné) pour hors-ligne.
+- **Index R01 exact :** 6 969 593 octets, blob `caf31c121d926b7b76b9bb05688fab8f2839814e` : **−734 386 octets nets**. Rollback R01→D9 byte exact prouvé, inventaire **103** propriétaires externes atteignables. Application contrôlée [38895240370](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38895240370) SUCCESS.
+- **Triple CI GREEN au même SHA `1b0fa3a718059242507d3e95de45033bba57ea24` :** Architecture/Chromium [38897048039](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897048039), Firefox [38897047733](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897047733), Tactical [38897047747](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38897047747), toutes SUCCESS. **Checkpoint final §25** `checkpoint/gensrpg-phase12-r01-pwa-dynamic-manifest-green-2026-10-16` créé/vérifié à cet exact SHA.
+- **D1–D9 + R01 :** 965 159 octets JS externalisés ; 964 611 octets nets retirés du HTML. Phase12 toujours ouverte ; pas d'ouverture automatique du prochain Core Dungeon.
+- **R02 prochain candidat, non ouvert :** sous-audit du monolithe multi-domaines 5 364 441 octets (~4,10 Mo images base64), avec ZIP du **nouvel index R01** au SHA GREEN (§26), checkpoint/branche propres (§25), séparation par autorité à prouver avant toute mutation du runtime.
 
+### R02 ouvert — Extraction des cinq chaînes visuelles massives (16 octobre 2026)
 
-- **Préflight, NON GREEN** : source runtime D9 GREEN `83d6683896cdb58a63f98cf2fc3e360c23423f76` ; audit documentaire `d26f4a3219d34aac229c0ee71a0f489915c83129` ; checkpoint de départ `checkpoint/gensrpg-start-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`, branche `work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`.
-- §26 : [index D9 exact](https://github.com/slyen4425-cloud/Zombicide-40k/blob/83d6683896cdb58a63f98cf2fc3e360c23423f76/index.html), 7 703 979 octets, blob `fce949665fea47a2aa2a535ede7289b06936f986`. ZIP de ce SHA toujours nécessaire ; `c2.zip` contient D8 et ne doit pas être utilisé directement comme source R01.
-- **IIFE PWA anonyme** : 734 440 octets, blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`; cible `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js`, ordre parser/Blob/données PWA inchangés. Projection uniquement (non publiée) : index 6 969 593 octets, blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, gain net 734 386 octets.
-- Pas de conversion statique du manifeste, pas de suppression des PNG. Tests source + parité PWA + rollback strict et triple CI avant checkpoint GREEN ; ne pas ouvrir autre lot.
-- Détails dans `docs/GENSRPG_PHASE12_R01_PWA_MANIFEST_2026-10-16.md`.
+- Checkpoint départ §25 `checkpoint/gensrpg-start-phase12-r02-legacy-visual-data-extraction-2026-10-16` au SHA R01 GREEN `1b0fa3a718059242507d3e95de45033bba57ea24`, branche `work/gensrpg-phase12-r02-legacy-visual-data-extraction-2026-10-16`.
+- Source §26 certifiée `c5.zip` : 6 969 593 octets / blob `caf31c121d926b7b76b9bb05688fab8f2839814e`.
+- Cinq valeurs `data:image` extraites vers fournisseur de données **sans moteur** `assets/gensrpg/core/legacy-visual-data-v1.js` (4 100 559 octets), conservées comme URL base64 originales et accessibles via variable lexicale commune ; monolithe original n'est pas découpé en plusieurs moteurs.
+- Index projeté **2 869 485 octets** / blob `062c4cd37634f504cc75ce3329d6e69e19b5f547` ; économie **4 100 108 octets**. Retour R02→R01 exact, PWA service worker et CI triple obligatoires. **R02 NON GREEN à l'ouverture** ; ne pas ouvrir R03 avant checkpoint validé.
+- Rapport `docs/GENSRPG_PHASE12_R02_LEGACY_VISUAL_DATA_2026-10-16.md`.
 
 ### REMAINING INLINE / EXIT BOUNDARY AUDIT — après D9 GREEN (16 octobre 2026)
 

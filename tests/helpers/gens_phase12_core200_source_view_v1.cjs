@@ -10,6 +10,11 @@ const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
   let actual=fs.readFileSync(path.join(root,"index.html"));
+  // D9: restore only the proven byte-identical Core202 source before the
+  // existing D8->D4 historical combat inventory; do not relax any fingerprint.
+  if(sha(actual)==="fce949665fea47a2aa2a535ede7289b06936f986"){
+    actual=require("./gens_phase12_d9_restore_v1.cjs")(actual,root);
+  }
   // D8: reconstruct the strict D7 index before the unchanged D7-D4 history.
   if(sha(actual)==="f56dc5bbb368b176509ab16477bd4b24dd000497"){
     assert.equal(actual.length,7715741,"D8 exact index length");

@@ -243,7 +243,7 @@ def verify():
             # continues to check the exact D9 source via read_d9_index_view.
             # The live manifest tests intentionally pin the NEW physical source
             # and the one additional reachable Shell/PWA owner.
-            if blob(INDEX.read_bytes())=="caf31c121d926b7b76b9bb05688fab8f2839814e":
+            if blob(INDEX.read_bytes()) in ("caf31c121d926b7b76b9bb05688fab8f2839814e","f6d3eb2a1cc87046d88e678c3bf67f6877baa887"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="caf31c121d926b7b76b9bb05688fab8f2839814e"
                 elif path==PATH_GRAPH:
@@ -252,6 +252,19 @@ def verify():
                         ("allJs.length,116,","allJs.length,117,"),
                         ("phase2Js.length,80,","phase2Js.length,81,"),
                         ("reachable.size,102,","reachable.size,103,")
+                    ]:
+                        expected_after=expected_after.replace(former,current)
+            # R02 adds precisely one temporary legacy transport entry without
+            # modifying historical D1-D9 or R01 snapshots.
+            if blob(INDEX.read_bytes())=="f6d3eb2a1cc87046d88e678c3bf67f6877baa887":
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="f6d3eb2a1cc87046d88e678c3bf67f6877baa887"
+                elif path==PATH_GRAPH:
+                    for former,current in [
+                        ("size,59,","size,60,"),
+                        ("allJs.length,117,","allJs.length,118,"),
+                        ("phase2Js.length,81,","phase2Js.length,82,"),
+                        ("reachable.size,103,","reachable.size,104,")
                     ]:
                         expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"

@@ -57,13 +57,13 @@ jobs:
           };
           '''
           # Remove indentation added to this workflow's YAML literal before creating the actual helper.
-          helper='\\n'.join(line[10:] if line.startswith('          ') else line for line in helper.splitlines())+'\\n'
+          helper='\n'.join(line[10:] if line.startswith('          ') else line for line in helper.splitlines())+'\n'
           newfile=root/'tests/helpers/gens_phase12_r03_r02_source_view_v1.cjs'
           assert not newfile.exists()
           newfile.write_text(helper)
           change('tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs', [
               (' if(hash(index)===R01){assert.equal(index.length,6969593);return index;}',
-               ' if(hash(index)===R01){assert.equal(index.length,6969593);return index;}\\n if(hash(index)==="'+R03+'")index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);')
+               ' if(hash(index)===R01){assert.equal(index.length,6969593);return index;}\n if(hash(index)==="'+R03+'")index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);')
           ])
           change('tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs', [
               ('const index=read("index.html"),rel=',
@@ -81,13 +81,13 @@ jobs:
               ("const CURRENT_BLOB='"+R02+"'","const CURRENT_BLOB='"+R03+"'")
           ])
           anchor="  'assets/gensrpg/core/legacy-visual-data-v1.js',"
-          insert=anchor+"\\n  '"+OWNER+"',"
+          insert=anchor+"\n  '"+OWNER+"',"
           change('tests/gens_phase2_runtime_load_graph_v11411.test.cjs', [
               (anchor,insert),
               ('assert.equal(new Set(productionDirect).size,60','assert.equal(new Set(productionDirect).size,61'),
               ('assert.equal(allJs.length,118','assert.equal(allJs.length,119'),
-              ("const phase5ConnectedServices=[\\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'",
-               "const phase5ConnectedServices=[\\n  '"+OWNER+"',\\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'"),
+              ("const phase5ConnectedServices=[\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'",
+               "const phase5ConnectedServices=[\n  '"+OWNER+"',\n  'assets/gensrpg/shell/module-launch-final-authority-v1.js'"),
               ('assert.equal(reachable.size,104','assert.equal(reachable.size,105')
           ])
           change('tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs', [

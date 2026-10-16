@@ -1,0 +1,33 @@
+name: GenSrpG Phase12 R01 PWA source preflight (read-only)
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r01-pwa-source-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify unchanged D9 source and exact PWA behavior
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16'
+          test "$(git hash-object index.html)" = 'fce949665fea47a2aa2a535ede7289b06936f986'
+          python3 -m py_compile tools/gensrpg_phase12_r01_pwa_manifest_extract_apply.py
+          node tests/gens_phase12_r01_pwa_manifest_source_characterization_v1.test.cjs
+          python3 - <<'PY'
+          import importlib.util
+          spec=importlib.util.spec_from_file_location("r01","tools/gensrpg_phase12_r01_pwa_manifest_extract_apply.py")
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          before=mod.INDEX.read_bytes()
+          after,body=mod.extract(before)
+          assert len(after)==6969593 and mod.blob(after)=="caf31c121d926b7b76b9bb05688fab8f2839814e"
+          assert len(body)==734440 and mod.blob(body)=="778e3acf2f77b3c7680bf70a0c6a846b84826235"
+          assert after.replace(mod.TAG,mod.OPEN+body+mod.CLOSE,1)==before
+          print("R01 read-only forecast, exact rollback and parser tag: PASS")
+          PY
+          test "$(git hash-object index.html)" = 'fce949665fea47a2aa2a535ede7289b06936f986'
+          test ! -e 'assets/gensrpg/shell/pwa-manifest-dynamic-v1.js'

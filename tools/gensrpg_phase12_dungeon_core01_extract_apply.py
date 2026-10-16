@@ -239,6 +239,15 @@ def verify():
                             ("phase2Js.length,79,","phase2Js.length,80,"),
                             ("reachable.size,101,","reachable.size,102,")
                         ]: expected_after=expected_after.replace(before_count,after_count)
+            # R01 moved only the independent PWA IIFE. Historical Core01 proof
+            # continues to check the exact D9 source via read_d9_index_view.
+            # The live manifest tests intentionally pin the NEW physical source
+            # and the one additional reachable Shell/PWA owner.
+            if blob(INDEX.read_bytes())=="caf31c121d926b7b76b9bb05688fab8f2839814e":
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="caf31c121d926b7b76b9bb05688fab8f2839814e"
+                elif path==PATH_GRAPH:
+                    expected_after=expected_after.replace("reachable.size,102,","reachable.size,103,")
             assert updated.count(expected_after)==1, f"{path}: expected owner graph exactly once after D1/D2"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

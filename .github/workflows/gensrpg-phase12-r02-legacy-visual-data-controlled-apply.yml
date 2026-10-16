@@ -1,0 +1,60 @@
+name: GenSrpG Phase12 R02 five visual data URLs controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r02-legacy-visual-data-extraction-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r02-legacy-visual-data-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Certify exact R01 GREEN and apply isolated R02 visual data extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r02-legacy-visual-data-extraction-2026-10-16'
+          test "$(git hash-object index.html)" = 'caf31c121d926b7b76b9bb05688fab8f2839814e'
+          test ! -e assets/gensrpg/core/legacy-visual-data-v1.js
+          python3 tools/gensrpg_phase12_r02_legacy_visual_data_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r02_legacy_visual_data_extract_apply.py --verify
+          node --check assets/gensrpg/core/legacy-visual-data-v1.js
+      - name: Preserve offline caching and one explicit data-only owner
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('service-worker.js')
+          sw=p.read_text()
+          old='gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r01-pwa'
+          assert sw.count(old)==1
+          sw=sw.replace(old,'gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r02-visual-data',1)
+          anchor='"./assets/gensrpg/shell/pwa-manifest-dynamic-v1.js",'
+          assert sw.count(anchor)==1
+          sw=sw.replace(anchor,anchor+'"./assets/gensrpg/core/legacy-visual-data-v1.js",',1)
+          p.write_text(sw)
+          m=Path('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')
+          source=m.read_text()
+          anchor='  "files": {\n'
+          assert source.count(anchor)==1
+          asset='assets/gensrpg/core/legacy-visual-data-v1.js'
+          assert asset not in source
+          entry=('    "'+asset+'": {\n'
+          '      "owner": "GenSrpG Core Legacy Visual Data R02",\n'
+          '      "domain": "core",\n'
+          '      "role": "five bit-identical historical PNG/WebP data URLs for sheet, equipment card and enemy skins; no gameplay authority; loaded synchronously before the original monolithic script"\n'
+          '    },\n')
+          m.write_text(source.replace(anchor,anchor+entry,1))
+          PY
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+          git diff --check
+      - name: Publish only verified R02 files on this one work branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/core/legacy-visual-data-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git diff --cached --check
+          git commit -m "refactor(phase12): externalize five legacy visual data URLs without moving game code"
+          git push origin "HEAD:$GITHUB_REF_NAME"

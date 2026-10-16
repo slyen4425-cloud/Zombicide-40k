@@ -22,7 +22,7 @@ vm.runInContext(data.toString("utf8"),context);
 const values=vm.runInContext("[GensRpgLegacyVisualDataR02.sheetBackground,GensRpgLegacyVisualDataR02.equipmentCardBackground,GensRpgLegacyVisualDataR02.enemySkins.creature,GensRpgLegacyVisualDataR02.enemySkins.boss,GensRpgLegacyVisualDataR02.enemySkins.invocation]",context);
 assert.deepEqual(Array.from(values),images.map(x=>x[1]),"all five original data URL values retained");
 assert.ok(!Object.prototype.hasOwnProperty.call(context,"GensRpgLegacyVisualDataR02"),"no window-global assignment added");
-const main=html.match(/<script>([\s\S]*?GensRpgLegacyVisualDataR02\.sheetBackground[\s\S]*?)<\/script>/);
+const main=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(x=>x[1].includes("GensRpgLegacyVisualDataR02.sheetBackground"));
 assert.ok(main,"unchanged single mixed legacy script contains only five substituted literals");
 new vm.Script(main[1],{filename:"legacy-original-minus-five-data-literals.js"});
 execFileSync("python3",["tools/gensrpg_phase12_r02_legacy_visual_data_extract_apply.py","--verify"],{cwd:root});

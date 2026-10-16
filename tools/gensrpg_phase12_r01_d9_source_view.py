@@ -11,6 +11,14 @@ def _blob(data):
 def read_d9_index_view(index_file, root):
     """Current physical D9/R01 index -> byte-exact D9 view solely for legacy --verify."""
     data=Path(index_file).read_bytes()
+    if _blob(data)=="f6d3eb2a1cc87046d88e678c3bf67f6877baa887":
+        assert len(data)==1605224, "R02 size drift"
+        legacy=(Path(root)/"assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js").read_bytes()
+        assert len(legacy)==5364441 and _blob(legacy)=="181ec13091f7dfeb5dde173af99dbe1aeecb07c2", "R02 body drift"
+        tag=b'<script src="assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js"></script>'
+        assert data.count(tag)==1, "one R02 parser owner"
+        data=data.replace(tag,b"<script>"+legacy+b"</script>",1)
+        assert len(data)==6969593 and _blob(data)==R01_SHA, "R02 -> R01 rollback drift"
     if _blob(data)!=R01_SHA:
         return data
     assert len(data)==6969593, "R01 size drift"

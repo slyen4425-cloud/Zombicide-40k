@@ -349,6 +349,14 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Cumul Phase 12 D1–D9 :** 230 719 octets JS externalisés ; 230 225 octets nets retirés. Phase 12 toujours ouverte, D10 non ouvert ; nouvelle source D9 exacte obligatoire (§26).
 - `main` gelée ; labs et autres modes hors périmètre, aucun changement fonctionnel.
 
+### R01 OUVERT — Externalisation fidèle du manifeste PWA dynamique (16 octobre 2026)
+
+- **Préflight, NON GREEN** : source runtime D9 GREEN `83d6683896cdb58a63f98cf2fc3e360c23423f76` ; audit documentaire `d26f4a3219d34aac229c0ee71a0f489915c83129` ; checkpoint de départ `checkpoint/gensrpg-start-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`, branche `work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16`.
+- §26 : [index D9 exact](https://github.com/slyen4425-cloud/Zombicide-40k/blob/83d6683896cdb58a63f98cf2fc3e360c23423f76/index.html), 7 703 979 octets, blob `fce949665fea47a2aa2a535ede7289b06936f986`. ZIP de ce SHA toujours nécessaire ; `c2.zip` contient D8 et ne doit pas être utilisé directement comme source R01.
+- **IIFE PWA anonyme** : 734 440 octets, blob `778e3acf2f77b3c7680bf70a0c6a846b84826235`; cible `assets/gensrpg/shell/pwa-manifest-dynamic-v1.js`, ordre parser/Blob/données PWA inchangés. Projection uniquement (non publiée) : index 6 969 593 octets, blob `caf31c121d926b7b76b9bb05688fab8f2839814e`, gain net 734 386 octets.
+- Pas de conversion statique du manifeste, pas de suppression des PNG. Tests source + parité PWA + rollback strict et triple CI avant checkpoint GREEN ; ne pas ouvrir autre lot.
+- Détails dans `docs/GENSRPG_PHASE12_R01_PWA_MANIFEST_2026-10-16.md`.
+
 ### REMAINING INLINE / EXIT BOUNDARY AUDIT — après D9 GREEN (16 octobre 2026)
 
 - **Changement explicite de plan :** ne pas ouvrir D10 sur le prochain Core Dungeon par inertie. D9 est réellement GREEN au SHA `83d6683896cdb58a63f98cf2fc3e360c23423f76` ; checkpoint final `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16`. Audit documentaire isolé sur `work/gensrpg-phase12-remaining-inline-exit-boundary-audit-2026-10-16` et checkpoint de départ `checkpoint/gensrpg-start-phase12-remaining-inline-exit-boundary-audit-2026-10-16`.

@@ -51,6 +51,11 @@ jobs:
           node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core201_d8_extraction_v1.test.cjs
 
+      - name: Vérifier la frontière R03 Shell Hub et le rollback R03 vers R02
+        run: |
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs
 

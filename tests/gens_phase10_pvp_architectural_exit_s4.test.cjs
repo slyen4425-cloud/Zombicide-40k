@@ -44,7 +44,7 @@ const finalAuthority=index.indexOf('<script src="assets/gensrpg/shell/module-lau
 assert.ok(atConnect>prev,"only the Shell composition point can explicitly connect PvP");
 assert.ok(finalAuthority>atConnect,"Shell final launcher remains the last authority");
 assert.equal(index.lastIndexOf(connect),atConnect,"PvP must not be composed twice");
-assert.match(index,/PVP — À VENIR/,"PvP home entry is deliberately not playable");
+assert.match(index+read("assets/gensrpg/shell/legacy-hub-family-ui-v1.js"),/PVP — À VENIR/,"PvP home entry remains nonplayable in its sole Shell UI owner");
 assert.doesNotMatch(index,/<script[^>]+src="assets\/gensrpg\/pvp\/setup-ui-v1\.js"/,"S3 UI must remain opt-in");
 assert.doesNotMatch(index,/<script[^>]+src="assets\/gensrpg\/pvp\/entry-v1\.js"/,"Phase 3 stub must stay inert");
 

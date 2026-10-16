@@ -70,11 +70,21 @@ assert.equal(core200.length,55842,'D4 legacy Core200 physical owner size locked'
 assert.equal(core200Blob,'5649ae0af69064dde72e6ea28b8dbefd105cb527','D4 legacy Core200 must remain byte-identical');
 assert.equal((core200.toString().match(/\.stopImmediatePropagation\s*\(/g)||[]).length,1,'D4 owner had exactly one historical hard-stop');
 assert.equal((core200.toString().match(/(?:window|R)\.(?:dc200StartCombat|openDungeonCombatSetup|launchCombat200|startCombat)\s*=/g)||[]).length,1,'D4 owner had exactly one historical combat public assignment');
+// R02 is a byte-identical transport of an already active historical inline
+// script. Do not interpret its original timers as a NEW global side effect;
+// fail closed on any alteration until its proper domain owners are extracted.
+const R02_LEGACY_TRANSPORT='assets/gensrpg/legacy/phase12-historical-multidomain-bridge-v1.js';
+const r02Bytes=fs.readFileSync(path.join(__dirname,'..',R02_LEGACY_TRANSPORT));
+const r02Blob=crypto.createHash('sha1').update(Buffer.from('blob '+r02Bytes.length+'\0')).update(r02Bytes).digest('hex');
+assert.equal(r02Bytes.length,5364441,'R02 moved historical transport exact size');
+assert.equal(r02Blob,'181ec13091f7dfeb5dde173af99dbe1aeecb07c2','R02 must remain byte-identical to the existing inline historical code');
+assert.match(r02Bytes.toString(),/\bsetInterval\s*\(/,'R02 known original legacy interval debt remains visible');
 const explicitRuleExceptions=new Map([
   [RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])],
   [TACTICAL_ENTRY,new Set(['hidden script injection'])],
   [DUNGEON_CORE200,new Set(['event propagation hard-stop','protected Dungeon combat global replacement'])],
-  [DUNGEON_CORE213,new Set(['event propagation hard-stop'])]
+  [DUNGEON_CORE213,new Set(['event propagation hard-stop'])],
+  [R02_LEGACY_TRANSPORT,new Set(['permanent heartbeat/setInterval'])]
 ]);
 
 const allFiles=walk(root).map(rel).sort();
@@ -127,6 +137,6 @@ for(const file of allFiles.filter(f=>targetPrefixes.some(p=>f.startsWith(p)))){
   }
 }
 
-assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200,DUNGEON_CORE213],
+assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200,DUNGEON_CORE213,R02_LEGACY_TRANSPORT],
   'only the two composition entrypoints and the exact byte-verified D4 legacy owner may claim named exceptions');
 console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; Core loads public entry, Tactical entry owns private composition)`);

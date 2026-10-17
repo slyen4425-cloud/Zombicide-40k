@@ -16,7 +16,8 @@ assert.doesNotMatch(bootstrap,/gens-rpg-tactical-combat-v2(?:-adapter|-rules|-in
 assert.match(preauditDoc,/Façade Bridge chargée \/ pile Tactical privée activée à la première requête de combat/);
 assert.match(entry,/const facadeFile="assets\/gensrpg\/gens-rpg-tactical-combat-v2-bridge\.js"/);
 assert.match(entry,/function activate\(onReady\)/);
-assert.match(entry,/function install\(\)[\s\S]*loadFacade\(\)/);
+assert.match(entry,/function install\(\)[\s\S]*ensureDetection\(\)/);
+assert.match(entry,/function ensureDetection\(\)[\s\S]*loadFacade\(\)/);
 assert.match(bridge,/function requestCombat\(rt=R,options=\{\}\)/);
 assert.match(bridge,/GensTacticalV1\?\.activate/,'Bridge must now request cold activation');
 assert.match(bridge,/pending:true,reason:"tactical-activating"/);
@@ -26,7 +27,7 @@ assert.match(nativeUi,/two native manual buttons -> Bridge\.requestCombat/);
 console.log(JSON.stringify({
  scenario:'Phase 8 Tactical session ownership preaudit',
  selectedSeamImplemented:true,
- keepLoaded:['Core RuntimeBootstrap -> public Tactical entry','canonical Bridge facade'],
+ keepLoaded:['Core RuntimeBootstrap -> public Tactical entry','single V113 detector','canonical Bridge facade'],
  deferredUntilFirstCombat:['engine','adapter','rules','integration','UI','compatibility chain activation'],
  trigger:'Bridge.requestCombat',indexChangeRequired:false
 },null,2));

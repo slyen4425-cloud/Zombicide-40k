@@ -14,6 +14,12 @@ const ownerRel='assets/gensrpg/capture/session-start-v1.js';
 const ownerPath=path.join(root,ownerRel);
 
 function block(id){
+  if(id==='captureFix138'||id==='captureFix139'){
+    const rel='assets/gensrpg/capture/legacy-patches/'+(id==='captureFix138'?'capture-fix138-v1.js':'capture-fix139-v1.js');
+    assert.equal(index.split('<script id="'+id+'" src="'+rel+'"></script>').length-1,1,
+      'R06 Capture '+id+' must remain unique in original parser order');
+    return read(rel);
+  }
   const re=new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i');
   const m=index.match(re);
   assert.ok(m,'missing '+id);

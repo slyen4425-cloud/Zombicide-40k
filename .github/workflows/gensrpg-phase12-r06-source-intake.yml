@@ -24,5 +24,17 @@ jobs:
         run: python3 tests/gens_phase12_r06_source_inventory_v1.test.py
       - name: Verify byte-exact R06 Capture rollback
         run: python3 tools/gensrpg_phase12_r06_capture_inline_extract_apply.py --verify
+      - name: Validate current Capture launch and return authority after 18 exact script relocations
+        run: |
+          node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
+          node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
+          node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
+          node tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs
+          node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
+          node tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs
+          node tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
       - name: Recheck validated generated-wall owner
         run: node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs

@@ -238,12 +238,29 @@
       hp=spawnCells(fallback,heroIds.length,"hero",used);ep=spawnCells(fallback,enemies.length,"enemy",used);
       grid.width=fallback.width;grid.height=fallback.height;grid.blocked=[];grid.cover=[];delete grid.sourceMap;
     }
+
+    // Read existing Dungeon tile art once. This is only visual metadata; the
+    // authoritative room, walls, occupants and inventory remain in Dungeon.
+    if(sameRoom&&rt?.document?.querySelectorAll){
+      const cells=[...rt.document.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")];
+      if(cells.length===grid.width*grid.height){
+        const tileBackgrounds=cells.map(el=>{
+          const bg=String(el.style?.backgroundImage||rt.getComputedStyle?.(el)?.backgroundImage||"");
+          return /^url\(/.test(bg)&&!/^url\(["']?data:/i.test(bg)?bg:"";
+        });
+        if(tileBackgrounds.some(Boolean))grid.sourceMap={...(grid.sourceMap||{}),tileBackgrounds};
+      }
+    }
     const actors=[...heroIds.map((id,i)=>heroActor(rt,id,hp[i])),...enemies.map((x,i)=>enemyActor(rt,x,ep[i]))];
     return {id:options.id||`gens_${Date.now().toString(36)}`,grid,actors,rngSeed:num(options.rngSeed,0),config:{actionsPerTurn:1},meta:{source:"gensrpg",heroIds,enemyInstanceIds:enemies.map(x=>str(x.id))}};
   }
   function createBattle(rt=R,options={}){
     const E=engine(rt);if(!E?.createBattle)throw new Error("Tactical combat V2 engine unavailable");
-    return E.createBattle(buildInput(rt,options));
+    const source=buildInput(rt,options),battle=E.createBattle(source);
+    // The pure engine normalizes gameplay grid properties only. Attach a
+    // read-only visual snapshot for the Tactical renderer; no gameplay owner.
+    if(source.grid?.sourceMap)battle.grid.sourceMap=source.grid.sourceMap;
+    return battle;
   }
   function commitBattle(rt=R,battle,{removeDefeatedEnemies=false}={}){
     if(!battle?.actors)return {heroes:0,enemies:0};let heroes=0,enemies=0;

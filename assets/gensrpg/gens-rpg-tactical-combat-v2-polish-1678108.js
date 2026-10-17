@@ -120,8 +120,7 @@
   function paintWalls(rt=R){
     const D=doc(rt);if(!D)return 0;let count=0;
     for(const el of D.querySelectorAll?.("#drc100Grid .drc100Cell.wall")||[]){el.style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");el.style?.setProperty?.("background-size","cover","important");count++}
-    const state=runtimeState(rt),map=state?.last?.map,kinds=arr(map?.cells),cells=[...(D.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];
-    for(let i=0;i<cells.length;i++)if(str(kinds[i]).toLowerCase()==="wall"){cells[i].style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");cells[i].style?.setProperty?.("background-size","cover","important");cells[i].style?.setProperty?.("background-position","center","important");count++}
+    // Native Dungeon map styling belongs to the existing 0.79/167877 owners.
     return count;
   }
   function patchDungeonMapHtml(rt=R){

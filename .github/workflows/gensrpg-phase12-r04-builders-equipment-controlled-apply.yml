@@ -1,0 +1,62 @@
+name: GenSrpG Phase12 R04 equipment Builder controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r04-builders-equipment-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify pinned R03 source and exact reversible equipment extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17'
+          test "$(git hash-object index.html)" = '8faf7af7fced0a1e0724985e85718a0e4a9e673b'
+          test ! -e assets/gensrpg/builders/equipment-library-editor-v1.js
+          python3 tools/gensrpg_phase12_r04_builders_equipment_extract_apply.py --check-source
+          python3 tools/gensrpg_phase12_r04_builders_equipment_extract_apply.py --apply
+          node --check assets/gensrpg/builders/equipment-library-editor-v1.js
+          test "$(git hash-object index.html)" = '554bf6100aeb0f40bfc098dc90863af7d2d5e439'
+          test "$(git hash-object assets/gensrpg/builders/equipment-library-editor-v1.js)" = '27cadba87c766b5293ac3a7fe3ddffb8510adc40'
+      - name: Precache and map the sole Builder equipment owner
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('service-worker.js')
+          s=p.read_text()
+          old='gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r03-shell-hub'
+          assert s.count(old)==1
+          s=s.replace(old,'gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r04-equipment-builder',1)
+          anchor='"./assets/gensrpg/shell/legacy-hub-family-ui-v1.js",'
+          assert s.count(anchor)==1
+          s=s.replace(anchor,anchor+'"./assets/gensrpg/builders/equipment-library-editor-v1.js",',1)
+          p.write_text(s)
+          p=Path('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')
+          s=p.read_text()
+          anchor='  "files": {\n'
+          assert s.count(anchor)==1
+          owner='assets/gensrpg/builders/equipment-library-editor-v1.js'
+          assert owner not in s
+          entry=('    "'+owner+'": {\n'
+                '      "owner": "GenSrpG Builders Equipment Library Editor R04",\n'
+                '      "domain": "builders",\n'
+                '      "role": "26 original equipment library/editor functions shared across modes; startup ITEM refresh remains exactly once in legacy index"\n'
+                '    },\n')
+          p.write_text(s.replace(anchor,anchor+entry,1))
+          PY
+          node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
+          git diff --check -- ':!assets/gensrpg/builders/equipment-library-editor-v1.js'
+      - name: Commit only tested R04 owner, source and offline cache
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/builders/equipment-library-editor-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git diff --cached --check -- ':!assets/gensrpg/builders/equipment-library-editor-v1.js'
+          git commit -m "refactor(phase12): externalize 26 shared equipment Builder functions preserving startup refresh"
+          git push origin "HEAD:$GITHUB_REF_NAME"

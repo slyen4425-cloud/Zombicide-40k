@@ -1,0 +1,30 @@
+name: GenSrpG Dungeon Tactical action-panel lifecycle fix
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-tactical-action-panel-lifecycle-fix-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  tactical-action-panel-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify exact R05 HTML source is untouched
+        run: |
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object preview.html)" = 'b01cd01fcd76908fe8d97189b40b8215ad721faf'
+      - name: Test old V108 behavior and new native afterRender contract
+        run: |
+          node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
+          node tests/gens_dungeon_tactical_action_panel_lifecycle_v1.test.cjs
+      - name: Install mobile Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify actual approach, visible action/weapon/item selection and dice pause in both preview compositions
+        run: node tests/gens_dungeon_tactical_attack_dice_e2e_browser_v1.test.cjs

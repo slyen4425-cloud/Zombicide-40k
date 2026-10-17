@@ -1,5 +1,23 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+**CORRECTIF DUNGEON EN COURS / NON GREEN — Phase 12 R06 suspendue.** Dernier GREEN technique R05, mais anomalie terrain Dungeon non résolue. Aucun changement sur `main`.
+
+## Correctif borné — Tactical V108 panneau d'actions (charte §25)
+
+- **Base exacte** : `7ac97a36df9f31f2cc3f7640e857ffc59963574c`, diagnostic navigateur ayant reproduit Dungeon carte → approche valide → attaque → dés et tour adverse **uniquement après réinstallation MANUELLE du panneau V108 dans le banc de test**.
+- **Checkpoint de départ** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-v108-panel-rebind-fix-2026-10-17` sur ce SHA.
+- **Branche unique** : `work/gensrpg-phase12-dungeon-tactical-v108-panel-rebind-fix-2026-10-17`.
+- **Source index §26** : `c8.zip`, 2 781 436 octets / blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f` ; **index.html ne sera pas modifié**.
+- **Propriétaire** : interface Tactical V108, module `assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js` ; raccord explicite à l'activation via `assets/gensrpg/tactical/entry-v1.js`. Un seul panneau et une seule autorité de commandes ; aucun observateur body/html.
+- **Cause identifiée** : V108 `installWithRetries` peut s'exécuter AVANT l'UI Tactical chargée à la demande ; `installed=true` malgré `hookUiRender()` non établi. La page peut cacher l'attaque historique sans remonter le panneau V108. Re-rendu lors des sélections et des mouvements efface le panneau absent.
+- **Périmètre** : brancher V108 lorsque l'UI est réellement chargée, utiliser le callback contractuel `GensRpgTacticalCombatV2Ui.onAfterRender` pour remonter le panneau après chaque rendu, cleanup explicite ; aucun changement au moteur, déplacements/portées, IA, dégâts, timing de dés, sauvegardes.
+- **Protections** : test Chrome mobile du parcours réel, sans réinstallation artificielle ; distance et approche légitimes, Attaque/Arme/Objet visibles après ciblage et déplacement, dés héros et ennemi bloquants jusqu'au bouton Continuer, aucune frappe en boucle. Triple CI Architecture/Chromium, Firefox, Tactical même SHA ; checkpoint GREEN si et seulement si preuves intégrales. Production `main` et les laboratoires intacts ; pas de R06.
+- **Prochain** : retirer la rustine du **test uniquement**, adapter raccord d'activation, puis exécuter ces contrôles et vérifier le résultat avant de proposer une nouvelle preview.
+
+---
+
+# GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
+
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
 ## Diagnostic isolé après retour utilisateur

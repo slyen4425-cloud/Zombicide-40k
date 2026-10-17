@@ -42,6 +42,10 @@
      sequential layer installation and never replaces the browser MutationObserver. */
 
   function notifyCompatibilityReady(ok=true){
+    /* V108 loaded earlier than the last compatibility layers may lose its UI.render hook.
+       Rebind once at the final readiness seam; V108 install is idempotent.
+       No new owner, timer, observer or change to Tactical gameplay/dice. */
+    if(ok!==false)try{R.GensRpgTacticalPolish1678108?.install?.(R)}catch(e){console.error("GenSrpG Tactical V108 final UI handoff",e)}
     try{R.GensTacticalV1?.compatibilityReady?.(ok!==false)}catch(e){console.error("GenSrpG Tactical compatibility ready signal",e)}
     return ok!==false;
   }

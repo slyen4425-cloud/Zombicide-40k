@@ -9,16 +9,21 @@ const DUNGEON_CORE01_SCRIPT='assets/gensrpg/dungeon/core01-session-ui-v1.js';
 const DUNGEON_CORE01_TAG='<script id="gensDungeonCore01Js" src="'+DUNGEON_CORE01_SCRIPT+'"></script>';
 assert.equal(source.split(DUNGEON_CORE01_TAG).length-1,1,
   'Dungeon Core01 must be loaded exactly once as the original parser-ordered owner');
+const r06CaptureNames=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureRel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({
-    id:m[1],
-    body:m[1]==='gensDungeonCore01Js'
-      ? fs.readFileSync(path.join(root,DUNGEON_CORE01_SCRIPT),'utf8')
-      : m[1]==='dungeonCore200Rebuild'
-      ? fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8')
-      : m[2],
-    offset:m.index
-  }));
+  .map(m=>{
+    const id=m[1];
+    let body=m[2];
+    if(id==='gensDungeonCore01Js')body=fs.readFileSync(path.join(root,DUNGEON_CORE01_SCRIPT),'utf8');
+    if(id==='dungeonCore200Rebuild')body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+    if(r06CaptureNames.has(id)){
+      const rel=captureRel(id);
+      assert.equal(m[0],'<script id="'+id+'" src="'+rel+'"></script>','R06 Capture owners must remain parser ordered and unique');
+      body=fs.readFileSync(path.join(root,rel),'utf8');
+    }
+    return {id,body,offset:m.index};
+  });
 
 function assignmentChain(name){
   const re=new RegExp('window\\.'+name+'\\s*=','g');

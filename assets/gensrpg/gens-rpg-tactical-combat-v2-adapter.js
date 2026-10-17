@@ -143,7 +143,7 @@
     const def=enemyDef(rt,inst)||{},d=enemyDerived(rt,inst,def),maxHp=Math.max(1,num(inst?.maxHp??def?.rule?.hp??d.maxHp,1));
     return {id:`enemy:${str(inst?.id||inst?.enemyId)}`,name:str(def.name||inst?.name||inst?.enemyId||"Ennemi"),side:"enemy",x:pos.x,y:pos.y,hp:clamp(num(inst?.hp,maxHp),0,maxHp),maxHp,
       movement:Math.max(1,Math.round(num(d.movement??def?.rule?.movement,2))),initiative:num(d.initiative,8),defense:num(d.defense,0),armor:num(d.armor,0),dodge:num(d.dodge,0),attacks:enemyAttacks(rt,inst,def),
-      meta:{kind:"enemy",instanceId:str(inst?.id||""),enemyId:str(inst?.enemyId||""),art:def.art||def.image_data||def.image||""}};
+      meta:{kind:"enemy",instanceId:str(inst?.id||""),enemyId:str(inst?.enemyId||""),art:(typeof rt?.gensDungeonCreatureArt165==="function"?rt.gensDungeonCreatureArt165(def?.id?def:str(inst?.enemyId||"")):"")||def.image_data||def.art||def.image||""}};
   }
   function defaultGrid(heroCount,enemyCount){
     const rows=Math.max(6,Math.min(12,Math.max(heroCount,enemyCount)+3));
@@ -163,7 +163,7 @@
       if(type==="wall"||type==="void")blocked.push({x,y});
       if(type==="cover")cover.push({x,y});
     }
-    return {width:size,height:size,blocked,cover,sourceMap:{shape:map?.shape||"",roomKind:map?.kind||""}};
+    return {width:size,height:size,blocked,cover,sourceMap:{shape:map?.shape||"",roomKind:map?.kind||"",environment:map?.environment||""}};
   }
   function spread(count,x,height){
     if(count<=0)return [];
@@ -216,8 +216,28 @@
     const requestedHeroIds=arr(options.heroIds).length?arr(options.heroIds).map(String):participants(rt),heroIds=enteredParticipants(rt,requestedHeroIds,options.scope);
     const enemies=activeEnemies(rt).filter(x=>!arr(options.enemyIds).length||arr(options.enemyIds).map(String).includes(str(x.id)));
     const grid=options.grid||gridFromDungeonMap(rt)||defaultGrid(heroIds.length,enemies.length),used=new Set();
-    let hp=spawnCells(grid,heroIds.length,"hero",used),ep=spawnCells(grid,enemies.length,"enemy",used);
-    if(hp.length<heroIds.length||ep.length<enemies.length){const fallback=defaultGrid(heroIds.length,enemies.length);used.clear();hp=spawnCells(fallback,heroIds.length,"hero",used);ep=spawnCells(fallback,enemies.length,"enemy",used);grid.width=fallback.width;grid.height=fallback.height;grid.blocked=[]}
+    // The Dungeon runtime owns scene placement; Tactical must not respawn actors
+    // at opposite edges when a live room and its cell coordinates exist.
+    const scene=dungeonRuntimeState(rt),size=num(scene?.last?.map?.size,0);
+    const sameRoom=Array.isArray(scene?.last?.map?.cells)&&size===grid.width&&size===grid.height;
+    const blocked=new Set(arr(grid.blocked).map(p=>cellKey(p.x,p.y)));
+    function originalCell(index){
+      if(!sameRoom||index===null||index===undefined||index==="")return null;
+      const n=Number(index);if(!Number.isInteger(n)||n<0||n>=grid.width*grid.height)return null;
+      const point={x:n%grid.width,y:Math.floor(n/grid.width)},k=cellKey(point.x,point.y);
+      if(blocked.has(k)||used.has(k))return null;
+      used.add(k);return point;
+    }
+    function choosePoint(index,side){
+      return originalCell(index)||spawnCells(grid,1,side,used)[0]||null;
+    }
+    let hp=heroIds.map(id=>choosePoint(runtimeHeroCell(scene,id),"hero"));
+    let ep=enemies.map(inst=>choosePoint(scene?.enemyCells?.[inst.id]??inst?.dungeonCell200,"enemy"));
+    if(hp.some(p=>!p)||ep.some(p=>!p)){
+      const fallback=defaultGrid(heroIds.length,enemies.length);used.clear();
+      hp=spawnCells(fallback,heroIds.length,"hero",used);ep=spawnCells(fallback,enemies.length,"enemy",used);
+      grid.width=fallback.width;grid.height=fallback.height;grid.blocked=[];grid.cover=[];delete grid.sourceMap;
+    }
     const actors=[...heroIds.map((id,i)=>heroActor(rt,id,hp[i])),...enemies.map((x,i)=>enemyActor(rt,x,ep[i]))];
     return {id:options.id||`gens_${Date.now().toString(36)}`,grid,actors,rngSeed:num(options.rngSeed,0),config:{actionsPerTurn:1},meta:{source:"gensrpg",heroIds,enemyInstanceIds:enemies.map(x=>str(x.id))}};
   }

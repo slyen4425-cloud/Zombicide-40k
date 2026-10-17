@@ -1,5 +1,21 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+**Phase 12 suspendue avant R06 : correctif ciblé Dungeon/Tactical sur retour utilisateur.** D1–D9 et R01–R05 GREEN code/CI restent inchangés ; test Android de combat à revalider. Production main et les deux labos intacts.
+
+## Correctif actif — raccord V108 après fin d'activation Tactical
+
+- **Checkpoint START (§25)** : `checkpoint/gensrpg-start-dungeon-tactical-v108-final-ready-handoff-fix-2026-10-17`, SHA **`7ac97a36df9f31f2cc3f7640e857ffc59963574c`**, runtime R05 exactement inchangé, sortie du diagnostic read-only.
+- **Branche UNIQUE** : `work/gensrpg-dungeon-tactical-v108-final-ready-handoff-fix-2026-10-17`.
+- **Source §26** : `c8.zip` ; `index.html` R05 (2 781 436 octets, blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`) ; **ne pas modifier le gros HTML**.
+- **Symptôme user** : après rapprochement et première attaque, commandes arme/objet disparues, dés et pauses absents, frappes semblent enchaînées ; détection ennemie parfois faible.
+- **Diagnostic PROUVÉ** : dans deux previews Chromium mobiles (run [39014482141](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39014482141)), le module V108 existe mais `GensRpgTacticalCombatV2Ui.render.__gensRpg108Polish` est faux après activation à froid ; l'appel **test-only** à `GensRpgTacticalPolish1678108.install()` après readiness rétablit boutons attaque/arme/objet, animation et pause « Continuer » du héros et de l'ennemi. L'approche de la cible fonctionne normalement.
+- **Responsabilité** : chaînage de compatibilité `assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js`, à la dernière notification `notifyCompatibilityReady`. Un seul raccord final idempotent vers le propriétaire V108, sans nouveau timer, observer ou global ; aucun changement règles combat, portée, mouvement, dégâts, armure, dés, IA.
+- **Tests requis** : même scénario réel sans intervention manuelle de test, début session Dungeon → ennemi réel → approche légitime → panneau complet → dés animés héros et ennemi → pause explicite et absence d'auto-loop ; reload/teardown ; CI Architecture + Chromium / Firefox / Tactical au même code SHA ; checkpoint GREEN final seulement alors.
+- **Statut** : correction bornée EN COURS, **NON GREEN tant que la CI et le scénario sans intervention manuelle n'ont pas prouvé le résultat**.
+- **R06, main, laboratoire combat, laboratoire exploration hors périmètre**. Une détection imprécise des ennemis sera traitée séparément après le correctif UI, sans toucher aux règles de combat.
+
+## Historique diagnostic et R05
+
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
 ## Diagnostic isolé après retour utilisateur

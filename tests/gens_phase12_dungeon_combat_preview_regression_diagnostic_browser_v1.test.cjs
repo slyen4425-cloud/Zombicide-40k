@@ -56,7 +56,10 @@ async function start(page){
   },null,{timeout:30000});
 }
 async function scenario(browser,port,kind){
- const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'block'});
+ // Firefox Playwright does not support isMobile. Match touchscreen viewport,
+ // keeping Chromium's real mobile device behavior for the primary validation.
+ const mobile=process.env.GENS_BROWSER==='firefox'?{hasTouch:true}:{isMobile:true,hasTouch:true};
+ const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,...mobile,locale:'fr-FR',serviceWorkers:'block'});
  const page=await context.newPage();page.setDefaultTimeout(25000);page.setDefaultNavigationTimeout(65000);
  const errors=[],failed=[];
  page.on('pageerror',e=>errors.push(String(e).slice(0,200)));

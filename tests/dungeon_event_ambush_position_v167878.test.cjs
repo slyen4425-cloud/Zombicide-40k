@@ -12,11 +12,12 @@ const runtime={participants:['aldren','lyra'],index:0,room:5,heroRooms:{aldren:5
 runtime.last.map.cells[0]='enemy';runtime.last.map.cells[24]='exit';
 localStorage.setItem(RT,JSON.stringify(runtime));
 let enemies=[{id:'old_enemy',enemyId:'dng_skeleton',dungeonRoom:5,hp:3}],renderCalls=0;
-const ctx={console,Math,Date,localStorage,setTimeout(fn){fn();return 1},loadActiveEnemies(){return enemies},saveActiveEnemies(v){enemies=v},DungeonSpatial313:{sameView(){return true},persist(){}},DungeonCore01:{render(){renderCalls++;return true}},applyDungeonTurnEvent(evt){if(evt.id==='d_evt_ambush')enemies.push({id:'ambush_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});else enemies.push({id:'reinforce_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});return {event:evt}}};
+const ctx={console,Math,Date,GENSRPG_VERSION:"current-runtime-unmodified",localStorage,setTimeout(fn){fn();return 1},loadActiveEnemies(){return enemies},saveActiveEnemies(v){enemies=v},DungeonSpatial313:{sameView(){return true},persist(){}},DungeonCore01:{render(){renderCalls++;return true}},applyDungeonTurnEvent(evt){if(evt.id==='d_evt_ambush')enemies.push({id:'ambush_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});else enemies.push({id:'reinforce_new',enemyId:'dng_ghoul',dungeonRoom:5,hp:4});return {event:evt}}};
 ctx.window=ctx;ctx.globalThis=ctx;
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-event-runtime-fix-167878.js'});
 const api=ctx.DungeonEventRuntimeFix167878;
 assert.ok(api);assert.equal(api.APP_VERSION,'16.78.79');
+assert.equal(ctx.GENSRPG_VERSION,'current-runtime-unmodified','isolated event module must not downgrade the global app version');
 function dist(cell){const size=5,heroCells=[12,13];return Math.min(...heroCells.map(h=>Math.abs(Math.floor(h/size)-Math.floor(cell/size))+Math.abs((h%size)-(cell%size))))}
 ctx.applyDungeonTurnEvent({id:'d_evt_ambush',name:'Embuscade'});
 let x=JSON.parse(localStorage.getItem(RT));

@@ -1,0 +1,62 @@
+name: GenSrpG Phase12 R05 Core cloud-sync backup controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r05-core-cloud-sync-backup-2026-10-17'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r05-core-cloud-sync-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock source SHA and byte-identical R05 synchronous Core extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r05-core-cloud-sync-backup-2026-10-17'
+          test "$(git hash-object index.html)" = '554bf6100aeb0f40bfc098dc90863af7d2d5e439'
+          test ! -e assets/gensrpg/core/legacy-cloud-sync-backup-v1.js
+          python3 tools/gensrpg_phase12_r05_core_cloud_sync_extract_apply.py --check-source
+          python3 tools/gensrpg_phase12_r05_core_cloud_sync_extract_apply.py --apply
+          node --check assets/gensrpg/core/legacy-cloud-sync-backup-v1.js
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+      - name: Single Core sync owner and versioned offline cache
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('service-worker.js')
+          s=p.read_text()
+          old='gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r04-equipment-builder'
+          assert s.count(old)==1
+          s=s.replace(old,'gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r05-core-cloud-sync',1)
+          needle='"./assets/gensrpg/builders/equipment-library-editor-v1.js",'
+          assert s.count(needle)==1
+          s=s.replace(needle,needle+'"./assets/gensrpg/core/legacy-cloud-sync-backup-v1.js",',1)
+          p.write_text(s)
+          p=Path('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')
+          s=p.read_text()
+          needle='  "files": {\n'
+          assert s.count(needle)==1
+          rel='assets/gensrpg/core/legacy-cloud-sync-backup-v1.js'
+          assert rel not in s
+          record=('    "'+rel+'": {\n'
+                  '      "owner": "GenSrpG Core Legacy Cloud Sync and Backup R05",\n'
+                  '      "domain": "core",\n'
+                  '      "role": "original single synchronous online-session sync, shared creation snapshot transfer and local backup recovery owner; all top-level side effects preserved byte-identically"\n'
+                  '    },\n')
+          p.write_text(s.replace(needle,needle+record,1))
+          PY
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+          git diff --check -- ':!assets/gensrpg/core/legacy-cloud-sync-backup-v1.js'
+      - name: Commit checked R05 runtime, PWA and owner inventory
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/core/legacy-cloud-sync-backup-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git diff --cached --check -- ':!assets/gensrpg/core/legacy-cloud-sync-backup-v1.js'
+          git commit -m "refactor(phase12): move classic online sync and local backup into single Core owner"
+          git push origin "HEAD:$GITHUB_REF_NAME"

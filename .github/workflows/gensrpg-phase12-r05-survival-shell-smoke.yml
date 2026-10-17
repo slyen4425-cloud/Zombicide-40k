@@ -1,0 +1,26 @@
+name: GenSrpG Phase12 R05 Survival Shell browser smoke
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r05-core-cloud-sync-backup-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  survival-shell-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate pinned physical R05 Core sync before browser
+        run: |
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+      - name: Install Chromium for real reduced Shell fixture
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify real Survival launch and protected Core sync owner through browser
+        run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs

@@ -1,6 +1,21 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**Phase 12 : D1–D9 et R01–R05 GREEN technique/CI ; Phase 12 globale encore OUVERTE.** Aucun R06 ouvert. Production `main` inchangée.
+**Phase 12 suspendue : régression observée en combat Dungeon ; R06 non ouvert.** Les jalons R01–R05 gardent leur certification code/CI mais pas encore validation Dungeon mobile manuelle. `main` intact.
+
+## Chantier actif — fix unique du panneau d'actions Tactical
+
+- **Base autoritaire** : `5f6eaf3933c521f1fa43ffea9808f59eeb7a54a6`, clôture documentaire R05 (runtime du checkpoint GREEN `a832da1cbbad39c446f46f1035dbb819aa60ec20`).
+- **Checkpoint START §25** : `checkpoint/gensrpg-start-dungeon-tactical-action-panel-lifecycle-fix-2026-10-17`, sur cette base exacte.
+- **Branche de correction unique** : `work/gensrpg-dungeon-tactical-action-panel-lifecycle-fix-2026-10-17`.
+- **Source HTML §26** : `c8.zip`, 2 781 436 octets, blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f` (R05). Aucune modification de `index.html` autorisée dans ce lot.
+- **Diagnostic isolé préexistant (aucun changement runtime)** : `work/gensrpg-phase12-dungeon-combat-preview-regression-diagnostic-2026-10-17`, test run [39013425377](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39013425377) a échoué honnêtement après approche valide, **car panneau Attaque/Arme/Objet absent** dans les deux modes. L'ancienne attaque reste visible (fallback), les commandes complètes manquent.
+- **Cause structurelle bornée** : `GensRpgTacticalPolish1678108.hookUiRender` enveloppait `GensRpgTacticalCombatV2Ui.render` exporté, tandis que les réaffichages normaux du combat passent par `render()` interne ; le module UI expose déjà `onAfterRender(fn)`, appelé par l'interface réelle à chaque rendu.
+- **Correction ciblée à valider** : abonner le propriétaire de l'ergonomie V108 via l'API `onAfterRender` existante ; désabonnement en `dispose`. Aucun nouveau poller, observer, autorité, règle ou contournement.
+- **Protégé** : portée, rapprochement, moteur Tactical V2, initiative, dés, dégâts, objets/sauvegardes, detection de monstres (audit séparé si toujours défectueux), R01–R05, Survie/Capture/PvP, `main`, labos.
+- **Tests requis** : lancement vrai Dungeon, cible hors de portée → Approcher réel → portée validée par moteur → panneau Attaque/Arme/Objet **visible et réactualisé** → dés visualisés → confirmation obligatoire → absence de frappes automatiques ; vérification local et externe; tests existants V108 + triple CI Architecture/Chromium, Firefox, Tactical au même SHA.
+- **Gates** : code/CI GREEN uniquement si tous les tests passent au SHA strict, checkpoint GREEN ensuite ; demander test utilisateur sur téléphone et conserver R06 gelé jusque-là.
+
+## Dernier jalon certifié précédent : R05
 
 ## Dernier jalon GREEN — R05 Core cloud sync & backup
 

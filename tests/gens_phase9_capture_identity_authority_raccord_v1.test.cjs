@@ -12,6 +12,12 @@ const entry=read('assets/gensrpg/capture/entry-v1.js');
 const combat=read('assets/gensrpg/capture/combat-core-v1.js');
 
 function block(id){
+  if(id==='captureFix138'||id==='captureFix139'){
+    const rel='assets/gensrpg/capture/legacy-patches/'+(id==='captureFix138'?'capture-fix138-v1.js':'capture-fix139-v1.js');
+    assert.equal(index.split('<script id="'+id+'" src="'+rel+'"></script>').length-1,1,
+      'R06 Capture '+id+' must remain unique in original parser order');
+    return read(rel);
+  }
   const marker='<script id="'+id+'">';
   const start=index.indexOf(marker);
   assert.ok(start>=0,'missing '+id);

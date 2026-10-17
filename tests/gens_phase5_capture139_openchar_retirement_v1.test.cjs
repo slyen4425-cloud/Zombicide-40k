@@ -11,7 +11,13 @@ const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
     .map(m=>({
     id:m[1],
-    body:m[1]==='gensDungeonCore01Js'
+    body:m[1]==='captureFix138'||m[1]==='captureFix139'
+      ? (()=>{
+          const rel='assets/gensrpg/capture/legacy-patches/'+(m[1]==='captureFix138'?'capture-fix138-v1.js':'capture-fix139-v1.js');
+          assert.equal(m[0],'<script id="'+m[1]+'" src="'+rel+'"></script>','unique R06 Capture source');
+          return fs.readFileSync(path.join(root,rel),'utf8')
+        })()
+      : m[1]==='gensDungeonCore01Js'
       ? (()=>{assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'));
           assert.equal(m[2],'','no duplicate inline Dungeon owner');
           return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8')})()

@@ -1,5 +1,5 @@
 name: GenSrpG Phase12 R04 historical fixtures controlled adaptation
-# Strict R04 index load-graph anchor after guarded first application
+# Publish historical tests separately from workflow-permission protected Architecture CI
 on:
   push:
     branches:
@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tests tools/gensrpg_phase12_r01_d9_source_view.py .github/workflows/gensrpg-architecture-sentinels.yml
+          git add tests tools/gensrpg_phase12_r01_d9_source_view.py
           git diff --cached --check
           git commit -m "test(phase12): chain strict R04->R03->R02 history and recognize Builders owner"
           git push origin "HEAD:$GITHUB_REF_NAME"

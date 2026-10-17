@@ -140,7 +140,8 @@ async function scenario(browser,port,kind){
     assert.equal(manhattan(Number(e.cell),24,7),1,kind+': event enemy is not adjacent to hero: '+JSON.stringify(e));
   }
   assert.equal(report.afterMarkers.filter(x=>x.ambush).length,1,kind+': event proximity owner must be installed exactly once');
-  assert.ok(report.afterMarkers.some(x=>x.vision),kind+': V113 remains the detection owner');
+  if(report.detectedBefore)assert.ok(report.afterMarkers.some(x=>x.vision),kind+': loaded V113 owner must remain in wrapper chain');
+  else assert.equal(report.afterMarkers.filter(x=>x.vision).length,0,kind+': deferred V113 must not be invented by the event placement module');
   await page.waitForTimeout(350);
   result.post=await page.evaluate(()=>({
     battleActive:!!window.GensRpgTacticalCombatV2Ui?.getBattle?.(),

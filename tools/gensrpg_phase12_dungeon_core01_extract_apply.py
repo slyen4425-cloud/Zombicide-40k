@@ -315,10 +315,15 @@ def verify():
             ):
                 expected_after=current_blob
             if path==PATH_GRAPH and current_blob=="12fc91df4ee4c7989a172baa96f9790da6dc57f7":
-                # R06 adds 18 real Capture source files to the production
-                # graph. These current assertions are NOT historical hashes;
-                # the D1–R05 rollback calculation above remains unchanged.
-                expected_after=expected_after.replace("reachable.size,107,", "reachable.size,125,")
+                # R06 introduces 18 Capture-owner files without changing the
+                # historical D1-R05 rollback. Phase 2 JS baseline remains 82,
+                # since all new files belong to the known Capture domain.
+                for former,current in (
+                    ("size,64,", "size,82,"),
+                    ("allJs.length,121,", "allJs.length,139,"),
+                    ("reachable.size,107,", "reachable.size,125,"),
+                ):
+                    expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

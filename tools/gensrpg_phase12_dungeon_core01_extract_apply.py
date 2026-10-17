@@ -297,7 +297,7 @@ def verify():
                     expected_after="485de2e6a08ffd89e4f1fb9410e40c938774d62f"
                 elif path==PATH_GRAPH:
                     for former,current in [
-                        ("size,62,","size,63,"),
+                        ("size,62,","size,64,"),
                         ("allJs.length,120,","allJs.length,121,"),
                         ("reachable.size,106,","reachable.size,107,")
                     ]:

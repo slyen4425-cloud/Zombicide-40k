@@ -149,24 +149,21 @@ async function scenario(browser,port,kind){
   result.inRange=await combatSnapshot();
   if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
 
-  // Characterization only: do not change runtime code. The V108 panel may
-  // have missed lazy Tactical UI load. Record its initial state before a
-  // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
+  // Le module V108 doit se raccorder AUTOMATIQUEMENT lors de l'activation
+  // différée du Tactical. Le test n'a pas le droit de l'installer lui-même.
+  result.binding=await page.evaluate(()=>({
     uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
     uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
     polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
     polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
   }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
-  }
+  assert.equal(result.binding.uiRenderExists,true,'lazy Tactical UI must exist');
+  assert.equal(result.binding.polishAvailable,true,'V108 owner must exist');
+  assert.equal(result.binding.uiRenderWrapped,true,'V108 must be bound BEFORE any manual intervention');
+  assert.ok(result.inRange.panel&&result.inRange.visibleAttack?.rect?.width>0,
+    'the live player attack/weapon/item panel must already be visible after approach');
+  assert.equal(result.inRange.legacyAttack?.display,'none',
+    'legacy duplicate attack button must stay hidden under the V108 panel');
 
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est

@@ -1,6 +1,17 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
+**Phase 12 en PAUSE, régression manuelle Dungeon en diagnostic.** D1–D9/R01–R05 GREEN technique CI, mais le combat utilisateur n'est pas encore revalidé. R06 non ouvert, `main` inchangé.
+
+## Lot correctif borné — raccord automatique du panneau Tactical V108
+
+- **Checkpoint START §25** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-action-panel-rebind-2026-10-17` sur le SHA exact `7ac97a36df9f31f2cc3f7640e857ffc59963574c` (protocole de diagnostic GREEN du test, sans modification runtime R05).
+- **Branche de travail unique** : `work/gensrpg-phase12-dungeon-tactical-action-panel-rebind-2026-10-17`.
+- **Dernier checkpoint GREEN code** : `checkpoint/gensrpg-phase12-r05-core-cloud-sync-backup-green-2026-10-17`, SHA `a832da1cbbad39c446f46f1035dbb819aa60ec20`. Le HTML reste `index.html` **2 781 436 octets / blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`** (source §26 `c8.zip`). Aucune modification de ce gros fichier prévue.
+- **Propriétaire ciblé** : `assets/gensrpg/tactical/entry-v1.js` (cycle d'activation Tactical), un raccord idempotent vers l'unique module `GensRpgTacticalPolish1678108` dès que l'UI privée `GensRpgTacticalCombatV2Ui` est réellement chargée ; pas de deuxième renderer, de polling, ni de changement gameplay.
+- **Preuve avant correctif** : [run 39014482141](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39014482141) — après approche valide à distance 1, panneau V108 absent malgré `status.installed=true` ; `V108.install()` appelé uniquement par le banc de diagnostic rétablit le panneau et permet les dés du héros/ennemi, leur animation/confirmation et les tours sans chaîne automatique pendant le dialogue.
+- **Test correctif** : retirer obligatoirement la réinstallation test-only ; simuler deux compositions (preview locale et externe), vrai lancement Dungeon, rencontre réelle, approche autorisée, commandes visibles attaque/arme/objet, attaque à portée, dés + attente et tour ennemi. La CI doit échouer si le cycle d'activation ne rattache pas V108 automatiquement.
+- **Invariants protégés** : portée, déplacements, IA, dégâts, taux de toucher, animations, sauvegardes, routes des quatre modes, R01–R05, `main`, laboratoires et 32 visuels Survie historiques. Vérifier Architecture/Chromium, Firefox et Tactical au même SHA avec checkpoint GREEN uniquement après preuves.
+- **Non couvert** : détection ennemie « bof » signalée, et validation réelle sur Android du combat fluide. Rester en pause avant R06 tant que ces points ne sont pas levés.
 
 ## Diagnostic isolé après retour utilisateur
 

@@ -1,0 +1,83 @@
+name: GenSrpG one-shot Core079 generated wall correction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-generated-wall-texture-2026-10-17'
+    paths:
+      - '.github/workflows/gensrpg-apply-generated-wall-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch-exact-canonical-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Apply byte-verified surgical edit inside existing terrain owner
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('index.html')
+          raw=p.read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert len(raw)==2781436 and blob=='485de2e6a08ffd89e4f1fb9410e40c938774d62f', (len(raw),blob)
+          s=raw.decode('utf-8')
+          old='''    // Les obstacles/couverts ne montrent plus dungeon_wall.png.
+              if(cell.classList.contains("wall") || cell.classList.contains("cover")){
+                cell.classList.add("dc079TerrainCover");
+                cell.style.backgroundImage='url("'+cover079(t,r,i)+'")';
+                cell.dataset.coverTheme=t;
+              }'''
+          new='''    // Murs générés : même matériau canonique que Dungeon Builder.
+              // Les couverts restent des cases de terrain thématique distinctes.
+              if(cell.classList.contains("wall")){
+                cell.classList.remove("dc079TerrainCover");
+                cell.classList.add("dc079WallBlock");
+                delete cell.dataset.coverTheme;
+                cell.style.backgroundImage='url("assets/dungeon/creatures/dng_wall_block.jpg")';
+              }else if(cell.classList.contains("cover")){
+                cell.classList.remove("dc079WallBlock");
+                cell.classList.add("dc079TerrainCover");
+                cell.style.backgroundImage='url("'+cover079(t,r,i)+'")';
+                cell.dataset.coverTheme=t;
+              }else{
+                cell.classList.remove("dc079WallBlock");
+                cell.classList.remove("dc079TerrainCover");
+                delete cell.dataset.coverTheme;
+              }'''
+          assert s.count(old)==1, ('Core079 wall owner not uniquely located',s.count(old))
+          s=s.replace(old,new,1)
+          marker='''.dc047Cell.dc079TerrainCover{'''
+          css='''.dc047Cell.dc079WallBlock{
+            background-size:cover!important;
+            background-position:center!important;
+            filter:none!important;
+            outline:1px solid rgba(205,181,126,.20)!important;
+            outline-offset:-2px!important;
+          }
+          '''
+          assert s.count(marker)==1, ('Core079 CSS owner not uniquely located',s.count(marker))
+          s=s.replace(marker,css+marker,1)
+          p.write_bytes(s.encode('utf-8'))
+          print('Core079 generated-wall patch from original blob',blob,'->',hashlib.sha1(b'blob '+str(p.stat().st_size).encode()+b'\0'+p.read_bytes()).hexdigest())
+          PY
+      - name: Check single owner and authored wall invariants
+        run: |
+          node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs
+          node tests/dungeon_wall_visual_v167866.test.cjs
+          node tests/dungeon_authored_cache_visual_source_owner_v167877.test.cjs
+      - name: Commit only index material plus retire one-time workflow
+        shell: bash
+        run: |
+          git config user.name "GenSrpG source correction"
+          git config user.email "gensrpg-github-actions@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/gensrpg-apply-generated-wall-once.yml
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "fix(dungeon): render generated walls with canonical Builder material in Core079"
+          git push origin "HEAD:refs/heads/work/gensrpg-dungeon-generated-wall-texture-2026-10-17"

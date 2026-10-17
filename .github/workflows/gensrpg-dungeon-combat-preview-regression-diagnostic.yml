@@ -1,0 +1,26 @@
+name: GenSrpG Dungeon combat preview regression diagnostic
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-combat-preview-regression-diagnostic-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  preview-combat-browser-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Guard exact R05 runtime
+        run: |
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object preview.html)" = 'b01cd01fcd76908fe8d97189b40b8215ad721faf'
+      - name: Install mobile Chromium browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Compare real Dungeon attack in local and external preview compositions
+        run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs

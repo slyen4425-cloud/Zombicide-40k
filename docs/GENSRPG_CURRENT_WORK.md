@@ -2,6 +2,15 @@
 
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
+## Retour terrain aggravé / anti-faux-GREEN
+
+- **Utilisateur** : le combat démarre normalement puis se dérègle après ~3 tours ; embuscade avec monstre éloigné, détection incohérente. **BLOCAGE MANUEL OUVERT** : ni nouveau lien de preview dite prête ni R06 ni merge `main`.
+- **Échec long prouvé** : [39031194199](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39031194199) : deuxième tour → action « Choisis d’abord une cible », aucun dé, bien que héros actif, portée valide et panneau visible. `refreshSelection` effaçait la cible choisie au passage du tour ennemi.
+- **Correctif UI strict** : `3084c86d6c5a1af0ec6165a5d5d927bffbf8057c` préserve la cible choisie, sans auto-attaque et sans modification des règles. [39031317603](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39031317603) : SUCCESS du **scénario réel local/externe sur quatre cycles**, dés héros/ennemi avec pauses, V108 commandes présentes. Ne pas déclarer checkpoint complet sans les sept checks au même SHA et revue des défauts restants.
+- **Embuscade : raccord suspect identifié** : `assets/dungeon/dungeon-event-runtime-fix-167878.js` est bien pré-caché et répertorié, mais absent des scripts `index.html`, `preview.html`, de l'injection `main.yml` et du bootstrap Core. Test unitaire mocké ne prouve pas l'exécution réelle. Vérifier aucun autre chargeur, puis lot borné de raccord et test vrai spawn.
+- **Détection** : V113 seul propriétaire autorisé. Ne pas réinstaller les hooks retirés V108/V111/V112 ; auditer la vraie trajectoire déplacement/événement/Bridge et les filtres room/branche avant modification.
+- Rapport détaillé : `docs/GENSRPG_PHASE12_DUNGEON_COMBAT_PREVIEW_REGRESSION_DIAGNOSTIC_2026-10-17.md`.
+
 ## Correctif borné après preuve — Tactical V108, commandes d'attaque
 
 - **Preuve [run 39014482141](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39014482141)** : les deux previews atteignent le combat réel, le déplacement légitime hors portée → à portée, puis le dé du héros et du monstre avec pauses « Continuer », MAIS seulement après appel **artificiel dans le test** à `GensRpgTacticalPolish1678108.install()`.

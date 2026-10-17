@@ -11,13 +11,17 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const entrySrc=read('assets/gensrpg/tactical/entry-v1.js');
 const integrationSrc=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 
-// Target 1: bootstrap loads only the inert Bridge facade.
+// Target 1: bootstrap loads only V113 detection and inert Bridge facade.
 {
   const loaded=[];
   let bridgeInstalls=0,readyCallbacks=0;
   const sandbox={console};
   const head={appendChild(s){
     loaded.push(s.src);
+    if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js')){
+      sandbox.GensRpgTacticalRuntimeAuthority1678113={install(){return true}};
+      s.onload?.();return s;
+    }
     if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js')){
       sandbox.GensRpgTacticalCombatV2Bridge={install(){bridgeInstalls++;return true}};
       s.onload?.();return s;
@@ -39,14 +43,16 @@ const integrationSrc=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integratio
   vm.runInContext(entrySrc,sandbox,{filename:'tactical/entry-v1.js'});
 
   assert.deepEqual(loaded,[
+    'assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js?v=16.78.114.10',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105'
-  ],'bootstrap must load only the inert Bridge facade');
+  ],'bootstrap must load V113 detection and inert Bridge facade, never the private stack');
   assert.equal(bridgeInstalls,0,'Bridge facade must not install before a combat request');
   assert.notEqual(sandbox.__gensTacticalV2Loader105,true,'private Tactical loader guard must remain cold before first combat');
   assert.equal(typeof sandbox.GensTacticalV1?.activate,'function','public Tactical entry must expose session activation');
 
   sandbox.GensTacticalV1.activate(ok=>{assert.equal(ok,true);readyCallbacks++});
   assert.deepEqual(loaded,[
+    'assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js?v=16.78.114.10',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
     'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',

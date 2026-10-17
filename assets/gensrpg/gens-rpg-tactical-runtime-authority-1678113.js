@@ -170,7 +170,13 @@
   function hookMovement(rt=R){
     const fn=rt?.dungeonMoveHero098;if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){moveWrapped=fn;return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,"movement-detection-v113",true,0);scheduleDetection(rt,"movement-detection-v113",true,90);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt.dungeonMoveHero098=wrapped;moveWrapped=wrapped;return true;
   }
-  function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){eventWrapped.set(name,fn);return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
+  function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;
+    // Another legitimate event owner (e.g. Dungeon event placement) may sit
+    // outside V113. Never wrap V113 again merely because it is not outermost.
+    for(let layer=fn,depth=0;typeof layer==="function"&&depth<20;layer=layer.__original,depth++){
+      if(layer.__gensRpg113Detection){eventWrapped.set(name,layer);return true}
+    }
+    const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
   function ensureDetectionHooks(rt=R){hookMovement(rt);for(const name of ["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"])hookEventFunction(rt,name);hookStart(rt);hookAdapter(rt);return true}
   function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
 

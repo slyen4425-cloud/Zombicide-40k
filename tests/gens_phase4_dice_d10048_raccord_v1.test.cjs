@@ -64,7 +64,14 @@ function extractFunctionSource(source,name){
 }
 
 assert.equal(gitBlob(corePath),'1813b6edb1ac69317d158e8cac6eb5c8ac353855','Core Dice service must stay byte-identical');
-assert.equal(gitBlob(tacticalPath),'4f05007de537793fed07739ca718f5131faef9eb','Tactical dice owner must stay byte-identical');
+const originalTacticalDice=Buffer.from(
+  require('./helpers/gens_phase12_tactical_dice_source_view_v1.cjs')(fs.readFileSync(tacticalPath,'utf8')),
+  'utf8');
+const originalTacticalBlob=crypto.createHash('sha1')
+  .update(Buffer.from('blob '+originalTacticalDice.length+'\0'))
+  .update(originalTacticalDice).digest('hex');
+assert.equal(originalTacticalBlob,'4f05007de537793fed07739ca718f5131faef9eb',
+  'Tactical Dice/gameplay unchanged modulo the two exact native wall retirements');
 assert.equal(gitBlob(perfPath),'e8fd9f1049a6597118eb026976bca7548f11b284','mobile combat performance must stay byte-identical');
 
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/,

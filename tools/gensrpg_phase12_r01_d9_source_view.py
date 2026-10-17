@@ -11,6 +11,10 @@ def _blob(data):
 def read_d9_index_view(index_file, root):
     """Current physical D9/R01 index -> byte-exact D9 view solely for legacy --verify."""
     data=Path(index_file).read_bytes()
+    # Exact test-only reversal of a newer procedural wall material change.
+    # No writeback: runtime index remains the corrected version.
+    from gensrpg_phase12_generated_wall_history import historical_r05_view
+    data=historical_r05_view(data)
     if _blob(data)=="485de2e6a08ffd89e4f1fb9410e40c938774d62f":
         from gensrpg_phase12_r05_core_cloud_sync_extract_apply import reverse as r05_reverse
         module=(Path(root)/"assets/gensrpg/core/legacy-cloud-sync-backup-v1.js").read_bytes()

@@ -291,6 +291,17 @@ async function startDungeon(page){
     assert.equal(equipped.rightHand,inventorySeed.bowIndex,'weapon choice must persist through existing hero state authority');
     await panel.locator('[data-v108-item]').selectOption('dng_heal_potion');
     await panel.locator('[data-v108-qty]').selectOption('1');
+    const itemContract=await page.evaluate(heroId=>{
+      const fn=window.dungeonCombatUseItem061;
+      const st=loadState(heroId);
+      const item=window.GensRpgTacticalPolish1678108?.itemOptions?.(window,heroId).find(x=>x.id==='dng_heal_potion');
+      return {fnType:typeof fn,fnLength:fn?.length,fnSource:fn?.toString().slice(0,260),
+        index:item?.index,itemName:item?.name,itemQty:item?.qty,healing:item?.item?.rpgUse,
+        wounds:st?.wounds,panelItem:document.querySelector('[data-v108-item]')?.value,
+        useDisabled:document.querySelector('[data-v108-use]')?.disabled,
+        clickListenerRegistered:!!document.__gensRpg108Controls};
+    },inventorySeed.heroId);
+    console.log('[dungeon-tactical-item-contract] '+JSON.stringify(itemContract));
     const attackCountBeforeItem=await page.evaluate(()=>window.GensRpgTacticalCombatV2Ui.getBattle().log.filter(e=>e.type==='attack').length);
     await panel.locator('[data-v108-use]').click();
     const afterItem=await page.evaluate(id=>{

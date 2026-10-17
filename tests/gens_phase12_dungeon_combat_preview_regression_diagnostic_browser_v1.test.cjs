@@ -133,6 +133,8 @@ async function scenario(browser,port,kind){
   await targetBtn.click();
   result.steps.push('select-enemy');
   result.afterTarget=await combatSnapshot();
+  assert.ok(result.afterTarget.panel&&result.afterTarget.visibleAttack,
+    'Native onAfterRender must preserve attack/weapon/item controls after selecting target');
 
   // Rapprochement est une mécanique VOULUE. Tester l'attaque uniquement APRES
   // une distance valide, au lieu d'interpréter un "Hors de portée" comme un bug.
@@ -143,6 +145,8 @@ async function scenario(browser,port,kind){
     await approach.click();
     result.steps.push('legitimate-approach');
     result.afterApproach=await combatSnapshot();
+    assert.ok(result.afterApproach.panel&&result.afterApproach.visibleAttack,
+      'Native onAfterRender must preserve attack/weapon/item controls after moving');
     assert.ok(result.afterApproach.preview?.distance<result.afterTarget.preview.distance,
       'approach must genuinely reduce engine distance');
   }
@@ -157,10 +161,9 @@ async function scenario(browser,port,kind){
     polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
     panelCount:document.querySelectorAll('.gtv2Overlay [data-v108-panel]').length
   }));
-  assert.equal(result.nativeHandoff.uiRenderWrapped,true,
-    'V108 must be bound to final Tactical UI render without test-only reinstall');
   assert.equal(result.nativeHandoff.panelCount,1,
-    'Attack/weapon/item owner must render automatically after lazy activation');
+    'Existing onAfterRender contract must keep the visible V108 panel without manual repair');
+  assert.equal(result.inRange.panel?.display,'grid','V108 panel must remain visible after real approach');
   result.steps.push('native-final-ready-handoff');
   
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est

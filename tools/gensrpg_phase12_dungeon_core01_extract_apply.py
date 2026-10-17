@@ -302,6 +302,11 @@ def verify():
                         ("reachable.size,106,","reachable.size,107,")
                     ]:
                         expected_after=expected_after.replace(former,current)
+            # This separate Dungeon event connection changes one physical Pages entry
+            # without touching any D1..R05 index blob or historical source proof.
+            # The already-existing Dungeon module now has a parser-owned load site.
+            if path==PATH_GRAPH and 'assets/dungeon/dungeon-event-runtime-fix-167878.js' in Path('.github/workflows/main.yml').read_text(encoding='utf-8'):
+                expected_after=expected_after.replace("size,63,","size,64,")
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

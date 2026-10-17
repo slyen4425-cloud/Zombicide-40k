@@ -37,8 +37,12 @@ for(const file of privateTactical){
   cursor=pos;
 }
 assert.ok(entry.includes(bridgeFacade),'Tactical public entry must own the Bridge facade');
-assert.match(entry,/function install\(\)[\s\S]*loadFacade\(\)/,
-  'Tactical bootstrap install must now load only the inert Bridge facade');
+assert.match(entry,/function install\(\)[\s\S]*ensureDetection\(\)/,
+  'Tactical public entry must establish its existing sole V113 detector before combat');
+assert.match(entry,/detectionFile="assets\/gensrpg\/gens-rpg-tactical-runtime-authority-1678113\.js"/,
+  'V113 may be eager, but must not create a parallel detection service');
+assert.match(entry,/script\.onload=[\s\S]*loadFacade\(\)/,
+  'Bridge facade should load after the V113 detection owner');
 assert.match(entry,/function activate\(onReady\)/,
   'Tactical public entry must own first-request private activation');
 assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/,'Core RuntimeBootstrap must delegate to the Tactical public entry');
@@ -74,7 +78,7 @@ const result={
   targetArchitecture:['engine','adapter','ui','ai','dungeon-bridge'],
   currentPublicEntry:'GensTacticalV1',
   currentCompositionOwner:'Tactical public entry',
-  baseComposition:{private:privateTactical,facade:bridgeFacade,activation:'first-request'},
+  baseComposition:{detection:'V113 eager',private:privateTactical,facade:bridgeFacade,activation:'first-request'},
   activeCompatibilityChain:['V108','V109','V110','V111','V112','V113','V114.11'],
   alreadyRetired:['active V108/V109/V111/V112/V113 global observers','V114.1 global observer hotfix','V114.4 session guard'],
   selectedFirstSeam:'handoff Tactical base composition ownership from Core RuntimeBootstrap to Tactical public entry',

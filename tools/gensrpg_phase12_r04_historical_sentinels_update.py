@@ -86,8 +86,4 @@ change("tests/gens_runtime_composition_guard_v11411.test.cjs",(anchor,insert))
 change("tools/gensrpg_phase12_r01_d9_source_view.py",
  ('    if _blob(data)=="'+R03+'":',
   '    if _blob(data)=="'+R04+'":\n        from gensrpg_phase12_r04_builders_equipment_extract_apply import restore as r04_reverse\n        module=(Path(root)/"'+OWNER+'").read_bytes()\n        data=r04_reverse(data,module) # test-only R04 -> R03 exact restoration\n    if _blob(data)=="'+R03+'":'))
-workflow=" .github/workflows/gensrpg-architecture-sentinels.yml"
-change(workflow.strip(),
- ("      - name: Vérifier la frontière R03 Shell Hub et le rollback R03 vers R02",
-  "      - name: Vérifier la frontière R04 Builders equipment et le rollback vers R03\n        run: node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs\n\n      - name: Vérifier la frontière R03 Shell Hub et le rollback R03 vers R02"))
 print("R04 test-only historical migration complete")

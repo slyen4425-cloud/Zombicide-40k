@@ -97,6 +97,7 @@ async function scenario(browser,port,kind){
       return {fixLoaded:!!fix,appVersion:fix?.APP_VERSION,wrapped:eventCount===1,eventCount,detectionCount,chain,spawned:all.length,outcome:outcome?.result||'',enemyId:enemy?.id||'',type:enemy?.enemyId||'',enemyCell:Number.isInteger(cell)?cell:null,distance:dist,enemyRoom:enemy?.dungeonRoom,stored:enemy?.dungeonCell200,mapKind:x2.last.map.cells[cell],heroCell,hero,ids:ids.slice(0,8)};
     });
     assert.deepEqual(errors,[],kind+' browser exceptions');
+    console.log('[dungeon-real-ambush-owner-chain] '+JSON.stringify({kind,fixLoaded:result.fixLoaded,eventCount:result.eventCount,detectionCount:result.detectionCount,chain:result.chain,spawned:result.spawned}));
     assert.equal(result.fixLoaded,true,'the production Dungeon event proximity owner MUST load into real game');
     assert.equal(result.wrapped,true,'actual global event function must be wrapped exactly once');
     assert.equal(result.eventCount,1,'placement owner must appear once in the effective event wrapper chain');

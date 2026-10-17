@@ -37,6 +37,13 @@ function blockBody(id){
     assert.equal(m[1],'','Core200 physical owner may not be duplicated inline');
     return read(external);
   }
+  const captureR06Names=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+  if(captureR06Names.has(id)){
+    const external='assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
+    assert.equal(m[0],'<script id="'+id+'" src="'+external+'"></script>','Capture R06 script must retain its original parser slot');
+    assert.equal(m[1],'','no inline duplicate of R06 Capture script');
+    return read(external);
+  }
   return m[1];
 }
 

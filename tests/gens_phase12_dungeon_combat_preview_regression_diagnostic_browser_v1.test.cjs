@@ -125,6 +125,14 @@ async function scenario(browser,port,kind){
       };
     });
   }
+  // Prolonger la même vraie session: seule la réserve PV du fixture augmente.
+  // On n'injecte aucune action, aucun dé, ni faux contrôleur de combat.
+  await page.evaluate(()=>{
+    const b=window.GensRpgTacticalCombatV2Ui?.getBattle();
+    if(!b||!Array.isArray(b.actors)||b.actors.length<2)throw Error('No live actors');
+    for(const a of b.actors){a.maxHp=Math.max(Number(a.maxHp)||1,300);a.hp=300;a.alive=true}
+  });
+  result.steps.push('long-combat-hp-fixture');
   result.combat=await combatSnapshot();
   assert.equal(result.combat.active?.side,'hero','the actual Dungeon encounter must enter a hero turn');
   assert.ok(result.combat.target,'a live enemy must be present');
@@ -217,6 +225,58 @@ async function scenario(browser,port,kind){
     result.steps.push('enemy-dice-confirmed');
   }
 
+  // Multiround sentinel: four REAL hero actions, enemy confirmations and round
+  // progression. Never click hidden legacy buttons or bypass attack/AI handlers.
+  result.longCombat=[];
+  for(let cycle=2;cycle<=4;cycle++){
+    await page.waitForFunction(()=>{
+      const b=window.GensRpgTacticalCombatV2Ui?.getBattle();
+      return b?.status==='active'&&window.GensRpgTacticalCombatV2?.currentActor?.(b)?.side==='hero'&&!document.querySelector('.gtv2DiceBackdrop');
+    },null,{timeout:16000});
+    const turnStart=await combatSnapshot();
+    assert.ok(turnStart.visibleAttack?.display==='block','cycle '+cycle+': visible V108 attack UI missing');
+    assert.equal(turnStart.panel?.display,'grid','cycle '+cycle+': equipment/item panel missing');
+    if(!turnStart.preview?.ok){
+      assert.equal(turnStart.preview?.reason,'out-of-range','cycle '+cycle+': unexpected target state');
+      await page.locator('.gtv2Overlay .gtv2Actions [data-approach]').click();
+      await page.waitForFunction(()=>{
+        const b=window.GensRpgTacticalCombatV2Ui?.getBattle(),e=window.GensRpgTacticalCombatV2,c=e?.currentActor(b),t=b?.actors.find(a=>a.side==='enemy'&&a.alive);
+        return !!(c&&t&&e.attackPreview(b,c.id,t.id,c.attacks[0].id).ok);
+      },null,{timeout:7000});
+    }
+    const prior=await combatSnapshot();
+    assert.ok(prior.preview?.ok,'cycle '+cycle+': attack must be in range');
+    const panel=page.locator('.gtv2Overlay [data-v108-panel]');
+    await panel.locator('[data-v108-attack]').selectOption(prior.selectedAttack);
+    await panel.locator('[data-v108-attack-go]').click();
+    await page.locator('.gtv2DiceBackdrop').waitFor({state:'visible',timeout:7500});
+    const inDice=await combatSnapshot();
+    assert.equal(inDice.dice,1,'cycle '+cycle+': exactly one hero dice modal');
+    await page.waitForTimeout(1200);
+    const inDiceAfter=await combatSnapshot();
+    assert.equal(inDiceAfter.attackEvents,inDice.attackEvents,'cycle '+cycle+': no auto attack before continue');
+    await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8500});
+    await page.locator('.gtv2DiceBackdrop [data-dice-continue]').click();
+    await page.waitForFunction(()=>{
+      const b=window.GensRpgTacticalCombatV2Ui?.getBattle(),e=window.GensRpgTacticalCombatV2;
+      return !!document.querySelector('.gtv2DiceBackdrop')||b?.status==='ended'||e?.currentActor?.(b)?.side==='hero';
+    },null,{timeout:14000});
+    const enemyPhase=await combatSnapshot();
+    assert.notEqual(enemyPhase.phase,'ended','cycle '+cycle+': fixture should prevent premature finish');
+    if(enemyPhase.dice){
+      const n=enemyPhase.attackEvents;
+      await page.waitForTimeout(1150);
+      assert.equal((await combatSnapshot()).attackEvents,n,'cycle '+cycle+': enemy dice must pause progression');
+      await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8500});
+      await page.locator('.gtv2DiceBackdrop [data-dice-continue]').click();
+    }
+    const after=await combatSnapshot();
+    result.longCombat.push({cycle,round:after.turn,attackEvents:after.attackEvents,phase:after.phase,hasHeroPanel:!!after.panel,
+      turnActor:after.active?.side});
+    result.steps.push('completed-real-combat-cycle-'+cycle);
+  }
+  assert.equal(result.longCombat.length,3,'three extra combat cycles must complete');
+
  }catch(e){result.exception=String(e).slice(0,700);result.html=await page.evaluate(()=>document.body?.innerText?.slice(0,250)).catch(()=>null)}
  finally{await context.close()}
  console.log('[dungeon-combat-preview-diagnostic] '+JSON.stringify(result));
@@ -226,6 +286,8 @@ async function scenario(browser,port,kind){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const b=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
  try{const local=await scenario(b,server.address().port,'local');const external=await scenario(b,server.address().port,'external-emulated');
+   assert.ok(local.steps.includes('completed-real-combat-cycle-4'),'LOCAL: must survive four consecutive complete rounds');
+   assert.ok(external.steps.includes('completed-real-combat-cycle-4'),'EXTERNAL: must survive four consecutive complete rounds');
    assert.ok(local.steps.includes('hero-animated-dice-visible'),'LOCAL preview must show dice for a VALID attack');
    assert.ok(external.steps.includes('hero-animated-dice-visible'),'EXTERNAL preview must show dice for a VALID attack');
    assert.ok(local.steps.includes('automatic-lazy-tactical-panel'),'LOCAL must register V108 after lazy combat UI load');

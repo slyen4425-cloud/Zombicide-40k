@@ -72,7 +72,7 @@ assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit
 
 const r06Source=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
 const crypto=require('node:crypto');
-const blob=v=>crypto.createHash('sha1').update(Buffer.from('blob '+v.length+'\\0')).update(v).digest('hex');
+const blob=v=>crypto.createHash('sha1').update(Buffer.from('blob '+v.length+String.fromCharCode(0))).update(v).digest('hex');
 const moduleNames=["captureGameplayModalMount","capturePlaytestFix128","captureFix129","captureFix130","captureFix131","captureFix132","captureFix133","captureFix134","captureFix135","captureFix136","captureFix137","captureFix138","captureFix139","captureFix140","captureItems141","captureBuffs142","captureBuffFx143","captureAbilityTruth144"];
 const archiveDir=path.join(root,'assets/gensrpg/capture/legacy-patches');
 const actualPatches=fs.readdirSync(archiveDir).sort();

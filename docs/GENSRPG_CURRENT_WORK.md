@@ -2,6 +2,14 @@
 
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
+## Correctif borné après preuve — Tactical V108, commandes d'attaque
+
+- **Preuve [run 39014482141](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39014482141)** : les deux previews atteignent le combat réel, le déplacement légitime hors portée → à portée, puis le dé du héros et du monstre avec pauses « Continuer », MAIS seulement après appel **artificiel dans le test** à `GensRpgTacticalPolish1678108.install()`.
+- **Défaut caractérisé** : la façade Tactical charge sa UI privée à la première entrée en combat, après la fenêtre des retries initiaux V108 ; `GensRpgTacticalPolish1678108.status().installed` peut être true avec `GensRpgTacticalCombatV2Ui.render` non raccordée et aucun panneau. À chaque rendu de ciblage/approche, le panneau manque, l'ancien bouton masqué par CSS reparaît.
+- **Périmètre de correction autorisé** : **uniquement** le raccord lifecycle/after-render de `assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js` ; utiliser le hook officiel Tactical `onAfterRender` et l'événement existant `gensrpg:tactical-combat-ready`. Ne pas créer de seconde autorité, de timers infinis, ni retoucher stats/dés/IA/détection/portée. Nettoyer le listener et le hook en `dispose()`.
+- **Sentinelle de non-artifice** : retirer la réinstallation manuelle du banc de test et exiger explicitement le panneau V108, à chaque rendu y compris après approche, avant attaque. Tests ancien V108, scénario navigateur local/externe, 3 CI au même SHA. Aucun checkpoint GREEN avant validation.
+- R06 suspendu ; aucune modification de `main`.
+
 ## Diagnostic isolé après retour utilisateur
 
 - **Constat** : navigation entre les modes OK ; Dungeon exploration/rencontres : détection des monstres peu fiable ; en combat, après déplacements initiaux, appui sur attaque puis résultats de coups enchaînés héros/ennemis, absence d'animation des dés et de sélection d'objets/actions. **Régression signalée par l'utilisateur, cause inconnue.**

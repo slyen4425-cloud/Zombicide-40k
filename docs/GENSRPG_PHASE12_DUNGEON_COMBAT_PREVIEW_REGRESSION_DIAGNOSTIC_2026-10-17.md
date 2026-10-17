@@ -48,3 +48,9 @@ Commit de test `fca7cd4d386b865037edf12707745727102b79e9`, [run de diagnostic](h
 - Aucune erreur JS `pageerror` signalée ; deux scripts CDN (Supabase/QR) volontairement non chargés dans le protocole. Aucune séquence de frappes automatiques reproduite à ce stade.
 
 **Correction toujours NON FAITE**. L'absence de dés mesurée ne prouve pas la régression utilisateur, car le ciblage pouvait être hors portée. Prochaine preuve exigée : position précise des acteurs, mouvement réel jusqu'à portée, attaque autorisée avec animation et décision « continuer », puis tour adverse sans auto-boucle ; inspecter overlays/visibilité avec screenshot/états CSS et comparer au chargement Pages natif. La détection de monstres reste un deuxième sous-problème distinct. **Pas de R06, pas de checkpoint GREEN diagnostic, pas de publication main.**
+
+## Addendum de correction technique — 17/10/2026
+
+Le diagnostic ci-dessus reste une trace historique des premiers échecs. Un correctif borné est maintenant certifié techniquement au SHA `2ed333215a2b2f985b205daaf5fbc986314ecfe5` sur `work/gensrpg-phase12-dungeon-tactical-action-panel-rebind-2026-10-17`. Le propriétaire V108 est branché au hook `Ui.onAfterRender` existant, et son installation est faite par le routeur avant l'ouverture. La réinstallation test-only a été supprimée et les deux compositions passent attaque/approche/dés/confirmation/tour ennemi/retour héros sans intervention artificielle. [Run 39016355366](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39016355366) SUCCESS, avec Architecture/Firefox/Tactical aussi SUCCESS sur le même code.
+
+**Cela ne signifie pas que la détection des rencontres réelles ni le test manuel Android soient clos.** Le lot de diagnostic initial ne reçoit pas un checkpoint GREEN artificiel : le checkpoint GREEN appartient à la **branche de correction** dédiée.

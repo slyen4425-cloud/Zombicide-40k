@@ -379,6 +379,15 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Checkpoint final §25 GREEN technique** : `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16` exactement sur ce SHA. Sans fusion sur `main`, sans test Android manuel revendiqué. Ce lot valide la partie Shell Hub traitée, **pas la séparation complète du monolithe**. Prochaine responsabilité R03–R07 à délimiter avant code ; pas de nouveau D10 mécanique.
 - **Source pour futur §26** : [index R03 au SHA code GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html) ; `c6.zip` reste la source R02. Rapport : `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`.
 
+### Correctif isolé après R05 — Dungeon Tactical V108 / panneau attaque et dés — GREEN technique/CI (17 octobre 2026)
+
+- Retour réel utilisateur : navigation entre modes OK ; Dungeon : panne des commandes et absence de dés pendant le combat, détection ennemie à part. **Approcher jusqu'à portée = comportement attendu**, protégé.
+- Seul propriétaire V108 raccordé au `Ui.onAfterRender()` natif, avec installation avant l'ouverture du combat et nettoyage au teardown. Ni gameplay, ni `index.html`, ni module non Tactical modifié ; cache PWA versionné.
+- START `checkpoint/gensrpg-start-phase12-dungeon-tactical-action-panel-rebind-2026-10-17` sur `7ac97a36df9f31f2cc3f7640e857ffc59963574c`. Checkpoint final `checkpoint/gensrpg-phase12-dungeon-tactical-action-panel-rebind-green-2026-10-17` sur `2ed333215a2b2f985b205daaf5fbc986314ecfe5`.
+- Même SHA : [Dungeon browser 39016355366](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39016355366), [Architecture/Chromium 39016355312](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39016355312), [Firefox 39016355389](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39016355389), [Tactical 39016355354](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39016355354) : **7 checks SUCCESS**.
+- GREEN technique ; **test manuel Android et détection réelle des monstres encore à valider**. R06 reste suspendu, `main` intact.
+- Rapport : `docs/GENSRPG_PHASE12_DUNGEON_TACTICAL_ACTION_PANEL_REBIND_2026-10-17.md`.
+
 ### R05 Core cloud sync & backup — GREEN technique/CI (17 octobre 2026)
 
 - **Source §26** : `c7 (1).zip` / `index.html(17).txt` = R04 (2 835 125 octets ; blob `554bf6100aeb0f40bfc098dc90863af7d2d5e439`). Checkpoint START `checkpoint/gensrpg-start-phase12-r05-core-cloud-sync-backup-2026-10-17` à `f01e0b65c67fcc4e14dbd64b8fec17625c1b5753`.

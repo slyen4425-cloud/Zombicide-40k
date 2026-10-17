@@ -168,7 +168,17 @@
     const st=inventoryState(rt,heroId),idx=num(inventoryIndex,-1);if(!st||idx<0||idx>=arr(st.inventory).length)return false;
     const item=itemFromEntry(rt,st.inventory[idx]);if(str(item?.type).toLowerCase()!=="arme")return false;
     st.rightHand=idx;
-    try{rt?.saveState?.(heroId,st)}catch(e){return false}
+    // In the real game there is no global saveState(heroId, state). The
+    // heroic profile is stored by the Core storage owner under key(heroId).
+    // Never report an equipment change as successful without persistence.
+    try{
+      if(typeof rt?.saveState==="function"){
+        if(rt.saveState(heroId,st)===false)return false;
+      }else if(typeof rt?.GensStorageV1?.writeJson==="function"&&typeof rt?.key==="function"){
+        rt.GensStorageV1.writeJson(rt.localStorage,rt.key(heroId),st);
+      }else return false;
+    }catch(e){return false}
+    if(Number(inventoryState(rt,heroId)?.rightHand)!==idx)return false;
     refreshActorFromState(rt,heroId);return true;
   }
   function reloadWeapon(rt=R,heroId="",inventoryIndex=-1){

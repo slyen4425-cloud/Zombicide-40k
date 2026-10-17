@@ -1,6 +1,20 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
+**Chantier bloquant : réparation bornée du raccord Tactical V108 après test utilisateur Dungeon.** Phase 12 R06 SUSPENDUE. R05 reste GREEN CI, **mais le combat utilisateur R05 n'est pas validé**. Production main inchangée.
+
+## Correctif ciblé Tactical UI V108 — EN COURS / NON GREEN
+
+- **Checkpoint départ §25** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-v108-ui-render-repair-2026-10-17` exactement sur le SHA `7ac97a36df9f31f2cc3f7640e857ffc59963574c` (branche diagnostic documentaire, runtime R05 sans altération).
+- **Branche unique du correctif** : `work/gensrpg-phase12-dungeon-tactical-v108-ui-render-repair-2026-10-17`.
+- **Dernier checkpoint code GREEN structurel** : `checkpoint/gensrpg-phase12-r05-core-cloud-sync-backup-green-2026-10-17` SHA `a832da1cbbad39c446f46f1035dbb819aa60ec20`.
+- **Source exacte §26** : `c8.zip` = HTML R05, 2 781 436 octets, Git blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`. **Le correctif ne modifie pas l'HTML.**
+- **Cause démontrée** : le panneau V108 d'attaque/équipement/objets reste absent ou disparaît après ciblage et mouvement. `GensRpgTacticalPolish1678108.install` appelé manuellement après le chargement tardif Tactical restitue les commandes et le cycle dés héros/ennemi avec attente « Continuer ». Son ancien raccord sur la fonction publique `Ui.render` ne capte pas les appels internes du rendu. Le cycle `GensTacticalV1` charge l'UI paresseusement après les courtes tentatives V108.
+- **Périmètre strict** : contrat `GensRpgTacticalCombatV2Ui.onAfterRender` déjà existant, utilisé par V108 pour remonter son panneau après chaque vrai rendu ; relancer l'installation du propriétaire V108 depuis le point **déjà établi** de chargement Tactical `baseLoaded`. Aucun nouveau timer, MutationObserver, autorité de gameplay ou fallback multi-modes.
+- **Protégés** : déplacements/rapprochement **volontaires**, portée, détection ennemie non modifiée, choix des armes et objets/persistance, dés/attentes/IA, autres modes, R01–R05, laboratoires, `main`. Détection ennemie à auditer dans un chantier séparé après validation du combat.
+- **Gates** : test navigateur du vrai parcours Dungeon sans aucune `install` manuelle, panneau visible et persistant après cible/rapprochement, attaque en portée, dés et bouton « Continuer » avec absence de chaîne automatique, tours ennemi et nouveau tour héros, non-interférence, contrôles Architecture/Chromium, Firefox, Tactical sur le **même SHA**, checkpoint GREEN seulement après réussite.
+- **Suite** : ne pas proposer de preview avant résultat satisfaisant d'une vraie attaque complète dans la preview externe et tests CI ; ne pas fusionner main ou reprendre R06.
+
+## Référence du diagnostic initial et jalons antérieurs
 
 ## Diagnostic isolé après retour utilisateur
 

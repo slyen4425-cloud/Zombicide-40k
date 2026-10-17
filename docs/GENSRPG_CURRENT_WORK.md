@@ -1,5 +1,14 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+## Chantier actif — murs des donjons générés (retour manuel validant les combats)
+
+- **Retour utilisateur** : combats et embuscades semblent corrigés dans la preview du commit `83d379501e8fe2863471fbe0f10cdfb4f295576c`. **Défaut restant** : texture des murs en donjon **généré** ; texture des murs Builder, y compris en jeu, correcte et **à préserver**.
+- **Branche exclusive** : `work/gensrpg-dungeon-generated-wall-texture-2026-10-17`. **Checkpoint START** : `checkpoint/gensrpg-start-dungeon-generated-wall-texture-2026-10-17`, base exacte `83d379501e8fe2863471fbe0f10cdfb4f295576c` (quatre suites CI vertes). Le précédent chantier Phase 12 reste suspendu, `main` intacte.
+- **Diagnostic vérifié §26** : `c8.zip/index.html(18).txt`, 2 781 436 octets, Git blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`, égal au blob `index.html` de la base. Core 0.79 `polish079()` confond les classes `.wall` et `.cover` et applique `cover079()` (image `dng_floor_cave/water`) aux deux ; la texture murale Builder existante est `assets/dungeon/creatures/dng_wall_block.jpg`.
+- **Périmètre strict** : différencier `.wall` et `.cover` **dans le peintre canonique Core 0.79 lui-même**, sans ajouter de seconde autorité peinture, sans modifier les autres modules, les stats, les dés, la génération de salles, les données Builder ni les règles du combat. Conserver `cover079()` pour les couverts et `floor079()` pour les sols.
+- **Gates** : test source isolé Core 0.79 (mur/cover/sol, callback idempotent), navigateur Dungeon généré → Tactical → retour conserve la même image, tests authored Builder, Firefox, Tactical et Architecture. Aucun R06 ni merge ni checkpoint GREEN métier sans validations utilisateur.
+
+
 ## Reprise vérifiée — correctifs ciblés du 17 octobre (état le plus récent)
 
 **Ne pas lancer R06, ne pas fusionner `main`, ne pas déclarer le donjon GREEN.** Les sections ci-dessous conservent les observations historiques ; le présent bloc supersède leurs hypothèses désormais vérifiées.

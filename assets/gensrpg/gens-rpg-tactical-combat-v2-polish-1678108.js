@@ -187,21 +187,22 @@
     try{if(typeof rt?.refillWeapon==="function"){rt.refillWeapon(idx);setTimeout(()=>refreshActorFromState(rt,heroId),0);return true}}catch(e){}
     return false;
   }
-  function legacyConsumableArgs(fn,heroId,item,index){
-    let names=[];try{const src=Function.prototype.toString.call(fn),m=src.match(/^[^(]*\(([^)]*)\)/);if(m)names=m[1].split(",").map(x=>x.trim().toLowerCase()).filter(Boolean)}catch(e){}
-    if(!names.length){if(fn.length>=2)return [heroId,item.id];if(fn.length===1)return [item.id];return []}
-    return names.map((name,pos)=>{if(/hero|char|actor/.test(name))return heroId;if(/index|idx|slot|inventory/.test(name))return index;if(/item|object|objet|consum/.test(name))return item.id;if(/qty|quant|count|amount/.test(name))return 1;return pos===0?heroId:pos===1?item.id:index});
-  }
   async function useConsumable(rt=R,heroId="",itemId="",qty=1){
     const options=itemOptions(rt,heroId),opt=options.find(x=>x.id===str(itemId));if(!opt)return false;
     const fn=rt?.dungeonCombatUseItem061;if(typeof fn!=="function")return false;
     const count=Math.max(1,Math.min(num(qty,1),opt.qty));
+    let consumed=0;
     for(let i=0;i<count;i++){
       const latest=itemOptions(rt,heroId).find(x=>x.id===opt.id);if(!latest)break;
-      const args=legacyConsumableArgs(fn,heroId,latest.item,latest.index);
-      if(!args.length)return false;
-      await Promise.resolve(fn.apply(rt,args));
+      // Core 0.61 public contract: dungeonCombatUseItem061(heroId, index, targetId).
+      // Legacy turn guards wrap this function with fn(heroId) but forward
+      // arguments; inspecting fn.length/toString would drop index and target.
+      await Promise.resolve(fn.call(rt,heroId,latest.index,""));
+      const remaining=itemOptions(rt,heroId).find(x=>x.id===opt.id)?.qty||0;
+      if(remaining>=latest.qty)break; // rejected/no-op must not report success
+      consumed+=latest.qty-remaining;
     }
+    if(!consumed)return false;
     refreshActorFromState(rt,heroId);return true;
   }
 

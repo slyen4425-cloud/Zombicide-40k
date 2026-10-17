@@ -149,25 +149,15 @@ async function scenario(browser,port,kind){
   result.inRange=await combatSnapshot();
   if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
 
-  // Characterization only: do not change runtime code. The V108 panel may
-  // have missed lazy Tactical UI load. Record its initial state before a
-  // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
-    uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
-    uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
-    polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-  }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
+  // Mandatory real-world path: no test-only calls to V108.install().
+  // The owner must be mounted by Tactical lazy activation and remain mounted
+  // through enemy selection and legitimate approach.
+  result.v108State=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.status?.()||null);
+  assert.equal(result.v108State?.uiHooked,true,'V108 must bind to the lazy Tactical UI without artificial test installation');
+  for(const [name,view] of [['engage',result.combat],['target',result.afterTarget],['approach',result.inRange]]){
+    assert.ok(view.panel&&view.visibleAttack?.rect?.width>0,'V108 action panel must stay visible after '+name);
+    assert.equal(view.legacyAttack?.display,'none','old delegated attack must remain hidden after '+name);
   }
-
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
   // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.
@@ -175,6 +165,8 @@ async function scenario(browser,port,kind){
   const go=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack-go]');
   assert.equal(await selected.count(),1,'the real attack choice must exist');
   assert.equal(await go.count(),1,'the real visible player command must exist');
+  assert.equal(await page.locator('.gtv2Overlay [data-v108-panel] [data-v108-weapon]').count(),1,'weapon selector must be present');
+  assert.equal(await page.locator('.gtv2Overlay [data-v108-panel] [data-v108-item]').count(),1,'item selector must be present');
   await go.waitFor({state:'visible',timeout:8000});
   await selected.selectOption(result.inRange.selectedAttack);
   result.steps.push('visible-player-action-available');

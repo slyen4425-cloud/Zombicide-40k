@@ -16,6 +16,8 @@
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
   let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  // Single per-UI subscription. The Tactical UI is loaded only on first combat.
+  let afterRenderOwner=null,afterRenderOff=null;
   const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -241,8 +243,20 @@
     D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
-    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
+    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;
+    // Native after-render contract keeps V108 controls present after target changes,
+    // approach, equip and turn transitions, without replacing UI.render or observing body.
+    if(typeof U.onAfterRender==="function"){
+      if(afterRenderOwner===U&&typeof afterRenderOff==="function")return true;
+      if(typeof afterRenderOff==="function")try{afterRenderOff()}catch(e){}
+      afterRenderOwner=U;
+      afterRenderOff=U.onAfterRender(()=>enhanceActions(rt));
+      return typeof afterRenderOff==="function";
+    }
+    // Compatibility for minimal/offline adapters that predate onAfterRender.
+    if(old.__gensRpg108Polish)return true;
+    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};
+    wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
   function install(rt=R){
     ensureStyle(rt);bindControls(rt);hookUiRender(rt);enhanceActions(rt);
@@ -252,11 +266,14 @@
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
   function dispose(rt=R){
     for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
-    const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
+    const D=doc(rt),U=ui(rt);
+    if(typeof afterRenderOff==="function")try{afterRenderOff()}catch(e){}
+    afterRenderOff=null;afterRenderOwner=null;
+    if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
     const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
     D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;
   }
-  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,dispose,status:()=>({installed,wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
+  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,dispose,status:()=>({installed,uiHooked:!!afterRenderOwner&&typeof afterRenderOff==="function",wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

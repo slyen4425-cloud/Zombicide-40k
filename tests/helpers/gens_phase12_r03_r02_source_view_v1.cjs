@@ -6,6 +6,7 @@ const R03="8faf7af7fced0a1e0724985e85718a0e4a9e673b",R02="062c4cd37634f504cc75ce
 const JS="e45f3b4e419a10b030c47bc921bded1ec0dc723b",REL="assets/gensrpg/shell/legacy-hub-family-ui-v1.js";
 const TAG='<script src="'+REL+'"></script>\n',END='function gensCleanDungeonDemoHeroesFromOtherUniverses()';
 module.exports=function r02SourceView(index,root=path.resolve(__dirname,"../..")){
+ index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);
   if(hash(index)===R02){assert.equal(index.length,2869485);return index;}
   if(["554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"].includes(hash(index)))index=require("./gens_phase12_r04_r03_source_view_v1.cjs")(index,root);
   assert.equal(index.length,2862906);assert.equal(hash(index),R03,"R03 current source");

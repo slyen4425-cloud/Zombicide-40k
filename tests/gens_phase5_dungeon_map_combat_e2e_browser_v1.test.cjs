@@ -265,6 +265,47 @@ async function startDungeon(page){
     assert.ok(coord.find(a=>a.side==='enemy').art,'monster must borrow its existing Dungeon sprite');
     assert.equal(opened.activeProfile,DUNGEON_ID,'combat launch must keep Dungeon profile authority');
     assert.notEqual(opened.dungeonCore,'none','Dungeon world remains the owning background while Tactical is active');
+    // In the same REAL session, exercise V108's on-screen weapon selector
+    // against the actual persisted hero inventory. Fixture edits only DATA.
+    const inventorySeed=await page.evaluate(()=>{
+      const hero=window.GensRpgTacticalCombatV2Ui.getBattle().actors.find(a=>a.side==='hero');
+      const heroId=String(hero.meta?.heroId||hero.id);
+      const st=loadState(heroId);if(!st||!Array.isArray(st.inventory))throw Error('Hero inventory unavailable');
+      const oldHand=st.rightHand;
+      st.inventory.push({itemId:'dng_bow',ammo:2});
+      const bowIndex=st.inventory.length-1;
+      st.inventory.push({itemId:'dng_heal_potion',qty:2});
+      st.wounds=Math.max(4,Number(st.wounds)||0);
+      localStorage.setItem(key(heroId),JSON.stringify(st));
+      window.GensRpgTacticalCombatV2Ui.render();
+      return {heroId,oldHand,bowIndex,wounds:st.wounds};
+    });
+    const panel=page.locator('.gtv2Overlay [data-v108-panel]');
+    await panel.waitFor({state:'visible'});
+    await panel.locator('[data-v108-weapon]').selectOption(String(inventorySeed.bowIndex));
+    await panel.locator('[data-v108-equip]').click();
+    const equipped=await page.evaluate(id=>{
+      const st=loadState(id);return {rightHand:st.rightHand,items:st.inventory.map(e=>e.itemId)};
+    },inventorySeed.heroId);
+    console.log('[dungeon-real-tactical-inventory-equip] '+JSON.stringify({inventorySeed,equipped}));
+    assert.equal(equipped.rightHand,inventorySeed.bowIndex,'weapon choice must persist through existing hero state authority');
+    await panel.locator('[data-v108-item]').selectOption('dng_heal_potion');
+    await panel.locator('[data-v108-qty]').selectOption('1');
+    const attackCountBeforeItem=await page.evaluate(()=>window.GensRpgTacticalCombatV2Ui.getBattle().log.filter(e=>e.type==='attack').length);
+    await panel.locator('[data-v108-use]').click();
+    const afterItem=await page.evaluate(id=>{
+      const st=loadState(id);return {wounds:st.wounds,potions:st.inventory.filter(e=>e.itemId==='dng_heal_potion').reduce((n,e)=>n+Math.max(1,Number(e.qty)||1),0),
+        battleActive:window.GensRpgTacticalCombatV2Ui.getBattle()?.status==='active',
+        attacks:window.GensRpgTacticalCombatV2Ui.getBattle()?.log.filter(e=>e.type==='attack').length,
+        panel:!!document.querySelector('.gtv2Overlay [data-v108-panel]')};
+    },inventorySeed.heroId);
+    console.log('[dungeon-real-tactical-consumable] '+JSON.stringify({inventorySeed,afterItem}));
+    assert.ok(afterItem.wounds<inventorySeed.wounds,'a real healing item must actually heal');
+    assert.equal(afterItem.potions,1,'use of one potion must consume precisely one charge');
+    assert.equal(afterItem.attacks,attackCountBeforeItem,'using an item must not auto-trigger attacks');
+    assert.equal(afterItem.battleActive,true,'Tactical encounter must remain active after non-attack item');
+    assert.equal(afterItem.panel,true,'item use must keep the visible hero action panel');
+
     // Return through the real UI owner, rebuild the Dungeon board, and
     // assert that the existing terrain owner restores exactly the same art.
     await page.evaluate(()=>{window.GensRpgTacticalCombatV2Ui.close(false);DungeonCore01.render()});

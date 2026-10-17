@@ -117,6 +117,16 @@ async function scenario(browser,port,kind){
         target:enemy?{id:enemy.id,x:enemy.x,y:enemy.y,hp:enemy.hp}:null,
         selectedAttack:attack?.id||null,preview:p?{ok:p.ok,reason:p.reason||'',distance:p.distance,minRange:p.minRange,maxRange:p.maxRange}:null,
         tactical:!!window.GensRpgTacticalPolish1678108,
+        layers:(()=>{
+          const list=[];let fn=window.GensRpgTacticalCombatV2Ui?.render;
+          for(let i=0;i<12&&typeof fn==='function';i++){
+            list.push({v108:!!fn.__gensRpg108Polish,v109:!!fn.__gensRpg109Ui,
+              id:fn.name||'',own:!!fn.__original});
+            if(fn.__original===fn)break;fn=fn.__original;
+          }
+          return list;
+        })(),
+        tacticalLifecycle:window.GensTacticalV1?.status?.()||null,
         panel:css(panel),visibleAttack:css(el),legacyAttack:css(legacy),
         approaches:document.querySelectorAll('.gtv2Overlay .gtv2Actions [data-approach]').length,
         dice:document.querySelectorAll('.gtv2DiceBackdrop').length,

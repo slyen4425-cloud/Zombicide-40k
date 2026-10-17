@@ -67,7 +67,7 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,31,'GitHub Pages must inject the current 31-module production list');
+assert.equal(injected.length,32,'GitHub Pages must inject 32 modules including the existing Dungeon ambush event placement owner');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay immediately before final Shell authority');
 assert.equal(injected.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js','final Shell authority must stay final');

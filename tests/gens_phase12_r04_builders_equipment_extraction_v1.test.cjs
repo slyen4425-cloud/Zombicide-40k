@@ -13,7 +13,7 @@ for(const name of ["loadCustomEquipment","saveCustomEquipment","refreshCustomEqu
  assert.match(script,new RegExp("function "+name+"\\("));
  assert.doesNotMatch(html,new RegExp("function "+name+"\\("),"legacy duplicate of "+name);
 }
-assert.match(html,/refreshCustomEquipmentIntoItems\(\);\n\n\n\n\nconst GENS_GAME_CONFIG_KEY/,"same original boot-time initializer location");
+assert.match(html,/refreshCustomEquipmentIntoItems\(\);\nconst GENS_GAME_CONFIG_KEY/,"same original boot-time initializer location");
 assert.match(script,/const CUSTOM_EQUIPMENT_KEY="gensrpg_custom_equipment_v1";/);
 const ctx=vm.createContext({});
 vm.runInContext(script,ctx);assert.equal(vm.runInContext("typeof renderEquipmentLibrary",ctx),"function");

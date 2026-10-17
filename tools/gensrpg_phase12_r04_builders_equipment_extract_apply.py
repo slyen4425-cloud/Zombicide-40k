@@ -49,7 +49,7 @@ def restore(index,js):
  assert index.count(TAG)==1 and js.count(JS_SEAM)==1
  before=index.replace(TAG,b"",1)
  # Adjacent boot-time refresh and exactly one untouched next owner boundary.
- needle=CALL+b"\n\n\n\n"+LAST
+ needle=CALL+LAST
  assert before.count(needle)==1
  chunk=js.replace(JS_SEAM,CALL_SEAM,1)
  restored=before.replace(needle,chunk+LAST,1)

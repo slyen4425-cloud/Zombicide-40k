@@ -24,6 +24,9 @@ function finishIfReady(){
   if(!activating||!baseReady||!bridgeInstalled||!compatibilityDone)return false;
   const ok=compatibilityOk!==false;
   active=ok;activating=false;
+  // V108 is loaded by the compatibility chain AFTER baseLoaded, not before it.
+  // Subscribe only after all its layers are ready, including on cold activation.
+  if(ok)try{bindTacticalActionPanel()}catch(e){console.error("GenSrpG Tactical V1 panel hook",e)}
   flushReady(ok);
   return ok;
 }
@@ -50,7 +53,6 @@ function bindTacticalActionPanel(){
 function baseLoaded(){
   baseReady=true;
   try{R.GensRpgTacticalCombatV2Ui?.installGlobalPolish?.()}catch(e){console.error("GenSrpG Tactical V1 UI install",e)}
-  try{bindTacticalActionPanel()}catch(e){console.error("GenSrpG Tactical V1 panel hook",e)}
   try{bridgeInstalled=!!R.GensRpgTacticalCombatV2Bridge?.install?.(R)}
   catch(e){bridgeInstalled=false;console.error("GenSrpG Tactical V1 Bridge install",e)}
   if(!bridgeInstalled){compatibilityDone=true;compatibilityOk=false;return finishIfReady()}

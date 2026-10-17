@@ -181,8 +181,13 @@ async function startDungeon(page){
     await page.waitForFunction(()=>{
       const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
       const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
+      // The native 0.80 renderer initially paints the base floor (stone).
+      // For a stone wall the 0.79 cover owner must finish with cave/water,
+      // not merely set a class while a stale stone image is still visible.
+      const permitted={stone:['cave','water'],cave:['cave','water'],forest:['forest','water'],water:['cave','water'],ice:['ice','water'],lava:['cave','lava']};
+      const visual=String(wall?getComputedStyle(wall).backgroundImage:'');
       return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
-        wall?.dataset.coverTheme===theme&&/dng_floor_(?:stone|cave|water|forest|ice|lava)_/.test(getComputedStyle(wall).backgroundImage);
+        wall?.dataset.coverTheme===theme&&(permitted[theme]||permitted.stone).some(t=>visual.includes('/dng_floor_'+t+'_'));
     },null,{timeout:10000});
 
     const nativeAtEngagement=await page.evaluate(()=>[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage));
@@ -269,8 +274,13 @@ async function startDungeon(page){
     await page.waitForFunction(()=>{
       const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
       const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
+      // The native 0.80 renderer initially paints the base floor (stone).
+      // For a stone wall the 0.79 cover owner must finish with cave/water,
+      // not merely set a class while a stale stone image is still visible.
+      const permitted={stone:['cave','water'],cave:['cave','water'],forest:['forest','water'],water:['cave','water'],ice:['ice','water'],lava:['cave','lava']};
+      const visual=String(wall?getComputedStyle(wall).backgroundImage:'');
       return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
-        wall?.dataset.coverTheme===theme&&/dng_floor_(?:stone|cave|water|forest|ice|lava)_/.test(getComputedStyle(wall).backgroundImage);
+        wall?.dataset.coverTheme===theme&&(permitted[theme]||permitted.stone).some(t=>visual.includes('/dng_floor_'+t+'_'));
     },null,{timeout:10000});
 
     const returned=await page.evaluate(()=>({

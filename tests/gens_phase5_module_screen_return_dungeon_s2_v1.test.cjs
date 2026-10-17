@@ -15,6 +15,12 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
       assert.equal(m[2],'','Core200 must not be duplicated inline');
       return {id:m[1],body:fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8')};
     }
+    if(m[1]==='captureFix139'){
+      const rel='assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js';
+      assert.equal(m[0],'<script id="captureFix139" src="'+rel+'"></script>',
+        'R06 Capture139 must remain unique and at its original parser slot');
+      return {id:m[1],body:fs.readFileSync(path.join(root,rel),'utf8')};
+    }
     return {id:m[1],body:m[2]};
   });
 

@@ -14,6 +14,11 @@
     "builders"
   ],
   "files": {
+    "assets/gensrpg/core/legacy-cloud-sync-backup-v1.js": {
+      "owner": "GenSrpG Core Legacy Cloud Sync and Backup R05",
+      "domain": "core",
+      "role": "original single synchronous online-session sync, shared creation snapshot transfer and local backup recovery owner; all top-level side effects preserved byte-identically"
+    },
     "assets/gensrpg/builders/equipment-library-editor-v1.js": {
       "owner": "GenSrpG Builders Equipment Library Editor R04",
       "domain": "builders",

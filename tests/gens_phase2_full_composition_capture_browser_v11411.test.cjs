@@ -11,7 +11,8 @@ const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
 const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"></script>');
-assert.equal(pageTags.length,31,'Pages-equivalent characterization expects 31 injected modules including connected Core services and final Shell authority');
+assert.equal(pageTags.length,32,'Pages-equivalent characterization expects 32 injected modules including the Dungeon ambush runtime and final Shell authority');
+assert.equal(pageTags.filter(tag=>tag.includes('assets/dungeon/dungeon-event-runtime-fix-167878.js')).length,1,'Pages-equivalent must load the existing Dungeon ambush proximity runtime exactly once');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 const finalShellTag='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>';
 let productionHtml=indexSource.split(perfTag).join('').split(finalShellTag).join('');

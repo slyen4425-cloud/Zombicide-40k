@@ -72,6 +72,15 @@ async function scenario(browser,port,kind){
     await page.goto(target,{waitUntil:'domcontentloaded'});await ready(page);await start(page);
     const result=await page.evaluate(()=>{
       const fix=window.DungeonEventRuntimeFix167878,fn=window.applyDungeonTurnEvent;
+      // Placement and detection are distinct owners that wrap the same event.
+      // Check each owner once along the effective chain, not just the outermost.
+      const chain=[];let wrapped=fn;
+      for(let depth=0;typeof wrapped==='function'&&depth<12;depth++){
+        chain.push({event:!!wrapped.__der167879,detection:!!wrapped.__gensRpg113Detection});
+        wrapped=wrapped.__original;
+      }
+      const eventCount=chain.filter(x=>x.event).length;
+      const detectionCount=chain.filter(x=>x.detection).length;
       const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
       if(!x?.participants?.length)throw new Error('Real Dungeon session absent');
       const hero=String(x.participants[0]),heroCell=12,room=1;
@@ -85,11 +94,13 @@ async function scenario(browser,port,kind){
       const outcome=fn(effect,1),all=loadActiveEnemies(),x2=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
       const enemy=all.find(e=>e?.hp>0&&Number(e.dungeonRoom)===room),cell=enemy?.id!=null?Number(x2.enemyCells?.[String(enemy.id)]):NaN;
       const dist=Number.isInteger(cell)?Math.abs(Math.floor(cell/5)-Math.floor(heroCell/5))+Math.abs(cell%5-heroCell%5):null;
-      return {fixLoaded:!!fix,appVersion:fix?.APP_VERSION,wrapped:!!fn?.__der167879,spawned:all.length,outcome:outcome?.result||'',enemyId:enemy?.id||'',type:enemy?.enemyId||'',enemyCell:Number.isInteger(cell)?cell:null,distance:dist,enemyRoom:enemy?.dungeonRoom,stored:enemy?.dungeonCell200,mapKind:x2.last.map.cells[cell],heroCell,hero,ids:ids.slice(0,8)};
+      return {fixLoaded:!!fix,appVersion:fix?.APP_VERSION,wrapped:eventCount===1,eventCount,detectionCount,chain,spawned:all.length,outcome:outcome?.result||'',enemyId:enemy?.id||'',type:enemy?.enemyId||'',enemyCell:Number.isInteger(cell)?cell:null,distance:dist,enemyRoom:enemy?.dungeonRoom,stored:enemy?.dungeonCell200,mapKind:x2.last.map.cells[cell],heroCell,hero,ids:ids.slice(0,8)};
     });
     assert.deepEqual(errors,[],kind+' browser exceptions');
     assert.equal(result.fixLoaded,true,'the production Dungeon event proximity owner MUST load into real game');
     assert.equal(result.wrapped,true,'actual global event function must be wrapped exactly once');
+    assert.equal(result.eventCount,1,'placement owner must appear once in the effective event wrapper chain');
+    assert.equal(result.detectionCount,1,'V113 detection must wrap the same event function once');
     assert.ok(result.spawned>=1,'real engine must spawn an ambush opponent');
     assert.ok(result.enemyId,'spawned event enemy must have a real instance id');
     assert.equal(result.distance,1,'spawned ambush enemy MUST be adjacent to hero on traversable dungeon grid');

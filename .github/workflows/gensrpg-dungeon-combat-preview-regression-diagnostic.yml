@@ -1,12 +1,16 @@
-name: GenSrpG Dungeon combat preview regression diagnostic
+name: GenSrpG Dungeon Tactical V108 UI lifecycle browser test
 on:
   push:
     branches:
-      - 'work/gensrpg-phase12-dungeon-combat-preview-regression-diagnostic-2026-10-17'
+      - 'work/gensrpg-phase12-dungeon-tactical-v108-ui-render-repair-2026-10-17'
 permissions:
   contents: read
 jobs:
-  preview-combat-browser-diagnostic:
+  v108-dungeon-combat-browser:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -14,13 +18,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Guard exact R05 runtime
+      - name: Guard unmodified R05 index + preview
         run: |
           test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
           test "$(git hash-object preview.html)" = 'b01cd01fcd76908fe8d97189b40b8215ad721faf'
-      - name: Install mobile Chromium browser
+      - name: Test V108 original equipment and proximity contracts
+        run: |
+          node tests/gens_rpg_tactical_combat_v2_polish_v1678108.test.cjs
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+      - name: Install real mobile browser
         run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-      - name: Compare real Dungeon attack in local and external preview compositions
-        run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Test real Dungeon approach, persistent V108 panel, dice and turn pacing
+        run: GENS_BROWSER=${{ matrix.browser }} node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs

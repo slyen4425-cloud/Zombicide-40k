@@ -152,22 +152,18 @@ async function scenario(browser,port,kind){
   // Characterization only: do not change runtime code. The V108 panel may
   // have missed lazy Tactical UI load. Record its initial state before a
   // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
-    uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
-    uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
-    polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
+  // No test-only manual install: lazy UI must expose the controls on every render.
+  result.autoPolish=await page.evaluate(()=>({
+    uiAvailable:typeof window.GensRpgTacticalCombatV2Ui?.onAfterRender==='function',
+    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.enhanceActions==='function'
   }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
-  }
-
+  assert.equal(result.autoPolish.uiAvailable,true,'canonical UI afterRender contract');
+  assert.equal(result.autoPolish.polishAvailable,true,'V108 action owner');
+  assert.ok(result.combat.panel,'hero action panel must exist at combat opening');
+  assert.ok(result.afterTarget.panel,'action panel must persist after target selection');
+  assert.ok(result.afterApproach.panel,'action panel must persist after legitimate approach');
+  assert.ok(result.inRange.panel,'in-range attack must have visible choice with no manual install');
+  result.steps.push('automatic-polish-lifecycle-hook');
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
   // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.

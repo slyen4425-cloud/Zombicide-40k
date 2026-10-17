@@ -14,6 +14,7 @@ const files=[...privateFiles,facadeFile];
 let installed=false,facadeLoading=false,facadeReady=!!R.GensRpgTacticalCombatV2Bridge;
 let activating=false,active=false,baseReady=false,compatibilityDone=false,compatibilityOk=false,bridgeInstalled=false;
 let readyQueue=[];
+let polishRenderUnsubscribe=null;
 
 function flushReady(ok){
   const queue=readyQueue;readyQueue=[];
@@ -35,9 +36,21 @@ function startCompatibility(){
   if(typeof chain?.activate!=="function")return false;
   try{return chain.activate()!==false}catch(e){console.error("GenSrpG Tactical V1 compatibility activation",e);compatibilityReady(false);return false}
 }
+function bindTacticalActionPanel(){
+  const U=R.GensRpgTacticalCombatV2Ui,polish=R.GensRpgTacticalPolish1678108;
+  if(typeof U?.onAfterRender!=="function"||typeof polish?.enhanceActions!=="function")return false;
+  // The private Tactical UI loads lazily, after V108's initial finite retry window.
+  // Subscribe to the canonical UI render lifecycle; never duplicate the listener.
+  if(typeof polishRenderUnsubscribe==="function")polishRenderUnsubscribe();
+  polishRenderUnsubscribe=null;
+  try{polish.install?.(R)}catch(e){console.error("GenSrpG Tactical V1 panel install",e)}
+  polishRenderUnsubscribe=U.onAfterRender(()=>polish.enhanceActions(R));
+  return true;
+}
 function baseLoaded(){
   baseReady=true;
   try{R.GensRpgTacticalCombatV2Ui?.installGlobalPolish?.()}catch(e){console.error("GenSrpG Tactical V1 UI install",e)}
+  try{bindTacticalActionPanel()}catch(e){console.error("GenSrpG Tactical V1 panel hook",e)}
   try{bridgeInstalled=!!R.GensRpgTacticalCombatV2Bridge?.install?.(R)}
   catch(e){bridgeInstalled=false;console.error("GenSrpG Tactical V1 Bridge install",e)}
   if(!bridgeInstalled){compatibilityDone=true;compatibilityOk=false;return finishIfReady()}
@@ -78,6 +91,8 @@ function activate(onReady){
   return true;
 }
 function deactivate(){
+  if(typeof polishRenderUnsubscribe==="function")try{polishRenderUnsubscribe()}catch(e){}
+  polishRenderUnsubscribe=null;
   try{R.GensRpgTacticalCompatibilityChainPhase8?.deactivate?.(R)}catch(e){console.error("GenSrpG Tactical V1 compatibility teardown",e)}
   try{R.GensRpgTacticalCombatV2Bridge?.dispose?.(R)}catch(e){console.error("GenSrpG Tactical V1 Bridge teardown",e)}
   try{R.GensRpgTacticalCombatV2Ui?.dispose?.(R)}catch(e){console.error("GenSrpG Tactical V1 UI teardown",e)}

@@ -2,6 +2,15 @@
 
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
+## Correctif ciblé ouvert — panneau Tactical V108 / initialisation différée
+
+- **Checkpoint START §25** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-polish-lazy-ui-hook-2026-10-17` sur `7ac97a36df9f31f2cc3f7640e857ffc59963574c` (diagnostic uniquement ; runtime R05 intact).
+- **Branche** : `work/gensrpg-phase12-dungeon-tactical-polish-lazy-ui-hook-2026-10-17` ; la branche de diagnostic précédente demeure intacte.
+- **Cause démontrée** : le composant V108 s'installe avant le chargement lazy de l'UI Tactical. Un appel manuel V108 après activation rétablit Attaque/Arme/Objet et dés bloquants.
+- **Correctif minimal** : enregistrer le raccord `onAfterRender` canonique de l'UI Tactical à `baseLoaded` et désinscrire à `deactivate`, sans changer les règles de combat, les durées d'animation, la portée ou la détection.
+- **Contrôle bloquant** : le test navigateur reproduit le vrai Dungeon sur preview locale et externe, sans `install()` manuel dans le test, puis rapprochement légitime, panneau visible après chaque rendu, dés des deux camps avec `Continuer`, absence d'auto-enchaînement ; triple CI et checkpoint GREEN ensuite.
+- **Autres limites** : anomalie détection ennemie utilisateur à diagnostiquer séparément. Pas de publication `main`, aucun R06.
+
 ## Diagnostic isolé après retour utilisateur
 
 - **Constat** : navigation entre les modes OK ; Dungeon exploration/rencontres : détection des monstres peu fiable ; en combat, après déplacements initiaux, appui sur attaque puis résultats de coups enchaînés héros/ennemis, absence d'animation des dés et de sélection d'objets/actions. **Régression signalée par l'utilisateur, cause inconnue.**

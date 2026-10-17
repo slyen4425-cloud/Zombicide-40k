@@ -17,7 +17,8 @@ assert.match(entry,/const facadeFile="assets\/gensrpg\/gens-rpg-tactical-combat-
 assert.match(entry,/function activate\(onReady\)/);
 assert.match(entry,/function deactivate\(/,'session lifecycle owner must now expose teardown');
 assert.match(entry,/dispose:deactivate/,'public lifecycle must expose dispose alias');
-assert.match(entry,/function install\(\)[\s\S]*loadFacade\(\)/,'bootstrap install must load only the facade');
+assert.match(entry,/function install\(\)[\s\S]*ensureDetection\(\)/,'entry install must load the sole Dungeon detector then Bridge facade');
+assert.match(entry,/function ensureDetection\(\)[\s\S]*loadFacade\(\)/,'V113 detection must precede inert Bridge facade');
 assert.match(bridge,/return \{ok:true,pending:true,reason:"tactical-activating"\}/,'cold Bridge request must own activation');
 assert.match(integration,/GensRpgTacticalCompatibilityChainPhase8/);
 assert.match(integration,/function deactivateCompatibilityChain\(/,'compatibility chain must now own reverse teardown');
@@ -31,7 +32,7 @@ assert.match(closeFn,/rootEl\?\.remove\?\.\(\)/);assert.match(closeFn,/rootEl=nu
 assert.match(closeFn,/GensTacticalV1\?\.deactivate\?\.\(\)/,'close must now signal the lifecycle owner');
 console.log(JSON.stringify({
  scenario:'Phase 8 Tactical session lifecycle audit',
- current:{publicEntryLoadedAtBootstrap:true,bridgeFacadeLoadedAtBootstrap:true,privateStackLoadedAtBootstrap:false,privateStackActivatesOnFirstCombat:true,closeSignalsLifecycleTeardown:true},
+ current:{publicEntryLoadedAtBootstrap:true,bridgeFacadeLoadedAtBootstrap:true,v113DetectionAtBootstrap:true,privateStackLoadedAtBootstrap:false,privateStackActivatesOnFirstCombat:true,closeSignalsLifecycleTeardown:true},
  selectedNextSeam:'teardown ownership implemented; re-audit Phase 8 exit criterion',
  gameplayChangeExpected:false,indexChangeRequired:false
 },null,2));

@@ -35,8 +35,8 @@ async function openDungeonHome(page){
   await card.click();
   await page.waitForFunction(id=>typeof activeGameProfileId==='function'&&activeGameProfileId()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',dungeonId,{timeout:30000});
 }
-async function start(page){
-  await openDungeonHome(page);
+async function start(page,alreadyAtGameHome=false){
+  if(!alreadyAtGameHome)await openDungeonHome(page);
   await page.locator('#gensGameHomeActions .newGameBtn').click();
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
   await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
@@ -152,7 +152,8 @@ async function realMovementDetection(browser,port){
   await editor.locator('#rpgMovementRefreshMode').selectOption('turn');
   await editor.locator('button[onclick="saveRpgMovementSettings()"]').click();
   await editor.locator('button[onclick="closeRpgUniverseEditor()"]').click();
-  await start(page);
+  await page.locator('#gensFamilyGames [data-rpg-profile="game_profile_dungeon_demo"] .gensUniverseMainBtn').click();
+  await start(page,true);
   const initial=await page.evaluate(()=>{
    const K='gensrpg_dungeon_runtime_v2',x=JSON.parse(localStorage.getItem(K)||'null');
    if(!x?.participants?.length)throw Error('Dungeon runtime missing');

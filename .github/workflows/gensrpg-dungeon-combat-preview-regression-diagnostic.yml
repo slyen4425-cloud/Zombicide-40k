@@ -24,3 +24,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Compare real Dungeon attack in local and external preview compositions
         run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
+      - name: Exercise real Dungeon ambush event from the running game (local and external preview)
+        run: node tests/gens_phase12_dungeon_event_ambush_live_browser_v1.test.cjs

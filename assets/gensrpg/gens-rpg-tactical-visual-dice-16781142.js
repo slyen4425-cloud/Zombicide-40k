@@ -47,7 +47,7 @@
 
   /* Compatibility facade: the base UI is the sole wall renderer in V114.9+. */
   function preloadWallBitmap(rt=R){try{return Promise.resolve(!!ui(rt)?.preloadWall?.())}catch(e){return Promise.resolve(false)}}
-  function wallTargets(rt=R){const D=doc(rt);if(!D)return [];return [...(D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell")||[])]}
+  function wallTargets(rt=R){const D=doc(rt);if(!D)return [];return [...(D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall")||[])]}
   function styleWallTile(img){return img||null}
   function attachWallTile(rt=R,el=null){try{return !!ui(rt)?.ensureWallTile?.(el)}catch(e){return false}}
   function stabilizeWalls(rt=R){try{return num(ui(rt)?.paintLiveWalls?.(),0)}catch(e){return 0}}
@@ -181,7 +181,7 @@
   }
 
   function install(rt=R){
-    ensureStyle(rt);preloadWallBitmap(rt);patchDungeonMapHtml(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);
+    ensureStyle(rt);preloadWallBitmap(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);
     try{rt.GENS_RPG_TACTICAL_VISUAL_DICE_VERSION=APP_VERSION}catch(e){}installed=true;return true;
   }
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}

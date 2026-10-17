@@ -38,11 +38,6 @@
   function ensureStyle(rt=R){
     const D=doc(rt);if(!D)return false;if(D.getElementById?.(STYLE_ID))return true;
     const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
-      .gtv21145WallPrepaint,.dav167870WallCell,.gtv2112WallCell,.gtv2113Wall,.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall{
-        background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;background-color:#171512!important;filter:none!important
-      }
-      .gtv21145WallPrepaint::before,.gtv21145WallPrepaint::after,.dav167870WallCell::before,.dav167870WallCell::after,.gtv2112WallCell::before,.gtv2112WallCell::after,.gtv2113Wall::before,.gtv2113Wall::after,.gtv2Cell.blocked::before,.gtv2Cell.blocked::after{content:none!important;display:none!important}
-      .gtv21145WallPrepaint>*,.dav167870WallCell>*,.gtv2112WallCell>*,.gtv2113Wall>*,.gtv2Cell.blocked>*{visibility:hidden!important}
       .gtv2DiceCard.gtv21145Rolling .gtv2DiceResult,.gtv2DiceCard.gtv21145Rolling .gtv2DiceRule strong,.gtv2DiceCard.gtv21145Rolling .gtv2112Explain{visibility:hidden!important}
       .gtv2DiceCard.gtv21145Rolling .gtv2Die[data-die]{transform:none!important;animation:none!important;min-width:72px!important}
     `;(D.head||D.documentElement||D.body)?.appendChild(s);return true;
@@ -139,7 +134,7 @@
     const old=fn,wrapped=function(){const b=currentBattle(rt);if(b)repairBattleStats(rt,b,false);const out=old.apply(this,arguments);const after=currentBattle(rt);if(after&&repairBattleStats(rt,after,false)>0)refreshDetail(rt);return out};wrapped.__gensRpg1145StatsLink=true;wrapped.__original=old;U.render=wrapped;uiHooked=true;return true;
   }
 
-  function maintain(rt=R){ensureStyle(rt);patchMapHtml(rt);paintExistingWalls(rt);patchDice(rt);patchAdapter(rt);patchUi(rt);const b=currentBattle(rt);if(b&&repairBattleStats(rt,b,false)>0)refreshDetail(rt);return true}
+  function maintain(rt=R){ensureStyle(rt);patchDice(rt);patchAdapter(rt);patchUi(rt);const b=currentBattle(rt);if(b&&repairBattleStats(rt,b,false)>0)refreshDetail(rt);return true}
   function install(rt=R){maintain(rt);try{rt.GENS_RPG_TACTICAL_WALL_DICE_STATS_VERSION=APP_VERSION}catch(e){}installed=true;return true}
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,9000,12000])setTimeout(()=>install(rt),ms);return true}
   const api={VERSION,APP_VERSION,SNAPSHOT_VERSION,LINK_VERSION,WALL_ASSET,DICE_MS,DICE_TICK_MS,canonicalValue,buildLinkedSnapshot,repairBattleStats,patchMapHtml,paintExistingWalls,patchDice,patchAdapter,patchUi,install,installWithRetries,status:()=>({installed,mapHooked,diceHooked,adapterHooked,uiHooked})};

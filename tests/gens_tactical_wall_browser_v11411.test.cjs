@@ -16,7 +16,7 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
     const result=await page.evaluate(async()=>{
       const api=window.GensRpgTacticalCombatV2Ui;if(!api)throw new Error('Tactical UI missing');
       window.__runtime.room=1;window.__runtime.heroRooms.dungeon_aldren=1;window.__runtime.positions.dungeon_aldren=1;window.__runtime.last.map={width:2,height:1,cells:['wall','floor']};
-      const board=document.getElementById('dc047RoomBoard');board.innerHTML='<div class="dc047Grid"><div id="liveWall" class="dc047Cell"></div><div id="liveFloor" class="dc047Cell"></div></div>';
+      const board=document.getElementById('dc047RoomBoard');board.innerHTML='<div class="dc047Grid"><div id="liveWall" class="dc047Cell wall"></div><div id="liveFloor" class="dc047Cell"></div></div>';
       const builder=document.createElement('div');builder.id='drc100Grid';builder.innerHTML='<div id="builderWall" class="drc100Cell wall"></div>';document.body.appendChild(builder);
       const tactical=document.createElement('div');tactical.id='tacticalWall';tactical.className='gtv2Cell blocked';document.body.appendChild(tactical);
       for(let i=0;i<5;i++)api.paintLiveWalls();
@@ -25,12 +25,13 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       const ids=['liveWall','builderWall','tacticalWall'];
       const rows=ids.map(id=>{const el=document.getElementById(id),tiles=[...el.querySelectorAll(':scope > .gtv2WallTile')],img=tiles[0]||null,cs=getComputedStyle(el);return {id,count:tiles.length,owner:el.classList.contains('gtv2WallOwner'),src:img?.getAttribute('src')||'',complete:!!img?.complete,naturalWidth:Number(img?.naturalWidth||0),background:cs.backgroundImage}});
       window.dungeonMapHtml=map=>'<div class="dc047Grid">'+(map.cells||[]).map(kind=>`<div class="dc047Cell">${kind}</div>`).join('')+'</div>';
-      const patched=api.patchDungeonMapHtml();
+      const unmodified=window.dungeonMapHtml(window.__runtime.last.map);
+      api.installGlobalPolish();
       const html=window.dungeonMapHtml(window.__runtime.last.map);
+      const patched=html===unmodified;
       const tpl=document.createElement('template');tpl.innerHTML=html;const patchedWalls=[...tpl.content.querySelectorAll('.gtv2WallOwner > .gtv2WallTile')].length;
 
       window.DungeonCore01={render(){board.innerHTML='<div class="dc047Grid"><div id="lateWall" class="dc047Cell"></div><div class="dc047Cell"></div></div>';return true}};
-      api.installGlobalPolish();
       window.DungeonCore01.render();
       const late=document.getElementById('lateWall'),lateTiles=[...late.querySelectorAll(':scope > .gtv2WallTile')],lateImg=lateTiles[0]||null;
       if(lateImg&&typeof lateImg.decode==='function')await lateImg.decode().catch(()=>{});
@@ -38,12 +39,19 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       return {asset:api.WALL_ASSET,rows,patched,patchedWalls,lateRender};
     });
     assert.equal(result.asset,'assets/dungeon/creatures/dng_wall_block.jpg');
-    for(const row of result.rows){assert.equal(row.count,1,`${row.id}: canonical wall painter must keep exactly one direct wall tile`);assert.equal(row.owner,true,`${row.id}: canonical owner class missing`);assert.equal(row.src,'assets/dungeon/creatures/dng_wall_block.jpg',`${row.id}: wrong wall asset`);assert.equal(row.complete,true,`${row.id}: wall image did not finish loading`);assert.ok(row.naturalWidth>0,`${row.id}: wall asset failed to decode`);assert.match(row.background,/dng_wall_block\.jpg/,`${row.id}: canonical wall background missing`)}
-    assert.equal(result.patched,true);assert.equal(result.patchedWalls,1,'Dungeon HTML patch must inject one canonical wall tile for one wall cell');
-    assert.equal(result.lateRender.count,1,'a late Dungeon render must be post-painted by the canonical wall authority');
-    assert.equal(result.lateRender.owner,true,'late Dungeon wall must receive the canonical owner class');
-    assert.equal(result.lateRender.src,'assets/dungeon/creatures/dng_wall_block.jpg','late Dungeon wall must use the canonical wall asset');
-    assert.ok(result.lateRender.naturalWidth>0,'late Dungeon wall asset must decode');
+    const native=result.rows.find(x=>x.id==='liveWall');
+    assert.equal(native.count,0,'Tactical may not inject a wall tile into native Dungeon');
+    assert.equal(native.owner,false,'native Dungeon must not receive Tactical wall ownership');
+    for(const row of result.rows.filter(x=>x.id!=='liveWall')){
+      assert.equal(row.count,1,`${row.id}: Tactical/Builder fallback must have exactly one image`);
+      assert.equal(row.owner,true,`${row.id}: Tactical/Builder wall owner missing`);
+      assert.equal(row.src,'assets/dungeon/creatures/dng_wall_block.jpg',`${row.id}: wrong fallback JPEG`);
+      assert.equal(row.complete,true);assert.ok(row.naturalWidth>0);assert.match(row.background,/dng_wall_block\.jpg/);
+    }
+    assert.equal(result.patched,true,'normal installation cannot rewrite Dungeon map HTML');
+    assert.equal(result.patchedWalls,0,'native Dungeon map must not receive tactical wall markup');
+    assert.equal(result.lateRender.count,0,'a later native Dungeon render must not receive Tactical wall tiles');
+    assert.equal(result.lateRender.owner,false,'native Dungeon wall remains Dungeon-owned');
     assert.deepEqual(errors,[],'wall sentinel browser console/page errors');
     console.log(JSON.stringify({scenario:'V114.11 canonical Tactical walls including late Dungeon render',viewport:'412x915 @2.625 touch',asset:result.asset,walls:result.rows.map(r=>({id:r.id,tiles:r.count,naturalWidth:r.naturalWidth})),patchedWalls:result.patchedWalls,lateRender:result.lateRender}));
   }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}

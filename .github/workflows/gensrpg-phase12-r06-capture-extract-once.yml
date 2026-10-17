@@ -1,0 +1,61 @@
+name: GenSrpG Phase12 R06 Capture inline extraction one-shot
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r06-inline-owner-scope-2026-10-18'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r06-capture-extract-once.yml'
+permissions:
+  contents: write
+jobs:
+  source-checked-extraction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Guard exact user-approved source and installed owners
+        run: |
+          test "$(git hash-object index.html)" = 'b33542b033c5afa8a1643d99c56c21dbd4be266c'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+          test "$(git hash-object assets/dungeon/creatures/dng_wall_block.jpg)" = 'd21b657a8ffd84deab55633e2663a0a81ab9a6f2'
+      - name: Apply only exact reversible 18-script Capture physical relocation
+        run: |
+          python3 tools/gensrpg_phase12_r06_capture_inline_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r06_capture_inline_extract_apply.py --verify
+      - name: Verify all 18 classic independent scripts are valid JavaScript
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess
+          scripts=sorted(pathlib.Path('assets/gensrpg/capture/legacy-patches').glob('*.js'))
+          assert len(scripts)==18,(len(scripts),scripts)
+          for f in scripts:subprocess.run(['node','--check',str(f)],check=True)
+          print('18 independent classic Capture scripts: syntax valid')
+          PY
+      - name: Verify historical source restoration and current graph ownership
+        run: |
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs
+      - name: Commit code delta and retire the one-shot tool runner
+        run: |
+          git config user.name "GenSrpG Phase 12 controlled extraction"
+          git config user.email "gensrpg-github-actions@users.noreply.github.com"
+          git add index.html service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json \
+            assets/gensrpg/capture/legacy-patches \
+            tests/gens_phase2_inline_owner_manifest_v11411.test.cjs \
+            tests/gens_phase2_inline_global_last_owner_v11411.test.cjs \
+            tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs \
+            tests/helpers/gens_phase12_generated_wall_material_source_view_v1.cjs \
+            .github/workflows/gensrpg-phase12-r06-source-intake.yml
+          git rm .github/workflows/gensrpg-phase12-r06-capture-extract-once.yml
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "refactor(phase12): extract 18 byte-identical Capture patches, preserving classic load order"
+          git push origin "HEAD:refs/heads/work/gensrpg-phase12-r06-inline-owner-scope-2026-10-18"

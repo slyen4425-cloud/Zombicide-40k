@@ -158,6 +158,7 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-authored-runtime-167839.js"), '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"></script>', "Dedicated authored Dungeon movement runtime missing"),
               (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>', "Authored Dungeon runtime wall/token bridge missing"),
               (Path("_site/assets/dungeon/dungeon-source-render-stability-167877.js"), '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>', "Dungeon source render stability missing"),
+              (Path("_site/assets/dungeon/dungeon-event-runtime-fix-167878.js"), '<script src="assets/dungeon/dungeon-event-runtime-fix-167878.js"></script>', "Dungeon event ambush and reinforcement placement bridge missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
               (Path("_site/assets/gensrpg/core/inventory-equipped-view-v1.js"), '<script src="assets/gensrpg/core/inventory-equipped-view-v1.js?v=1"></script>', "GenSrpG Core Inventory equipped view missing"),
               (Path("_site/assets/gensrpg/core/equipment-bonus-sets-v1.js"), '<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"></script>', "GenSrpG Core Equipment bonus + sets missing"),

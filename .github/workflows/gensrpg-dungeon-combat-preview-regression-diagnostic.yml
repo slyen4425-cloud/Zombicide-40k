@@ -22,9 +22,11 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+      # Run the known visual blocker first: fail fast rather than waiting
+      # for the unrelated four-cycle combat and real-ambush browser scenarios.
+      - name: Assert real Dungeon scene continuity before during and after Tactical combat
+        run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
       - name: Compare real Dungeon attack in local and external preview compositions
         run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
       - name: Exercise real Dungeon ambush event from the running game (local and external preview)
         run: node tests/gens_phase12_dungeon_event_ambush_live_browser_v1.test.cjs
-      - name: Assert real Dungeon scene continuity before during and after Tactical combat
-        run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs

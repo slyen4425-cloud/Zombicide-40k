@@ -243,7 +243,7 @@ def verify():
             # continues to check the exact D9 source via read_d9_index_view.
             # The live manifest tests intentionally pin the NEW physical source
             # and the one additional reachable Shell/PWA owner.
-            if blob(INDEX.read_bytes()) in ("caf31c121d926b7b76b9bb05688fab8f2839814e","062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439"):
+            if blob(INDEX.read_bytes()) in ("caf31c121d926b7b76b9bb05688fab8f2839814e","062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="caf31c121d926b7b76b9bb05688fab8f2839814e"
                 elif path==PATH_GRAPH:
@@ -257,7 +257,7 @@ def verify():
             # R02 physically moves only the five exact visual data URLs to a
             # data-only Core file. Preserve the D1..R01 history and account
             # for one additional synchronous production script / owner.
-            if blob(INDEX.read_bytes()) in ("062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439"):
+            if blob(INDEX.read_bytes()) in ("062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="062c4cd37634f504cc75ce3329d6e69e19b5f547"
                 elif path==PATH_GRAPH:
@@ -270,7 +270,7 @@ def verify():
                         expected_after=expected_after.replace(former,current)
             # R03 introduces one Shell Hub UI owner, leaving Phase 2 cross-mode
             # functions and the historical source hashes fully recoverable.
-            if blob(INDEX.read_bytes()) in ("8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439"):
+            if blob(INDEX.read_bytes()) in ("8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="8faf7af7fced0a1e0724985e85718a0e4a9e673b"
                 elif path==PATH_GRAPH:
@@ -281,7 +281,7 @@ def verify():
                     ]:
                         expected_after=expected_after.replace(former,current)
             # R04 Builders moves 26 unchanged editor functions, retaining the startup refresh in index.
-            if blob(INDEX.read_bytes())=="554bf6100aeb0f40bfc098dc90863af7d2d5e439":
+            if blob(INDEX.read_bytes()) in ("554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"):
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after="554bf6100aeb0f40bfc098dc90863af7d2d5e439"
                 elif path==PATH_GRAPH:
@@ -289,6 +289,17 @@ def verify():
                         ("size,61,","size,62,"),
                         ("allJs.length,119,","allJs.length,120,"),
                         ("reachable.size,105,","reachable.size,106,")
+                    ]:
+                        expected_after=expected_after.replace(former,current)
+            # R05 one more Core production owner; old snapshot fingerprints remain strict.
+            if blob(INDEX.read_bytes())=="485de2e6a08ffd89e4f1fb9410e40c938774d62f":
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after="485de2e6a08ffd89e4f1fb9410e40c938774d62f"
+                elif path==PATH_GRAPH:
+                    for former,current in [
+                        ("size,62,","size,63,"),
+                        ("allJs.length,120,","allJs.length,121,"),
+                        ("reachable.size,106,","reachable.size,107,")
                     ]:
                         expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"

@@ -20,6 +20,7 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ if(hash(index)==='485de2e6a08ffd89e4f1fb9410e40c938774d62f')index=require('./gens_phase12_r05_r04_source_view_v1.cjs')(index,root);
  if(hash(index)==='554bf6100aeb0f40bfc098dc90863af7d2d5e439')index=require('./gens_phase12_r04_r03_source_view_v1.cjs')(index,root);
  if(hash(index)==='8faf7af7fced0a1e0724985e85718a0e4a9e673b')index=require('./gens_phase12_r03_r02_source_view_v1.cjs')(index,root);
  if(hash(index)==='062c4cd37634f504cc75ce3329d6e69e19b5f547')index=require('./gens_phase12_r02_r01_source_view_v1.cjs')(index,root);

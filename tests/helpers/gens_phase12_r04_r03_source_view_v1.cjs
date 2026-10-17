@@ -8,6 +8,7 @@ const TAG='<script src="'+REL+'"></script>\n',LAST='const GENS_GAME_CONFIG_KEY="
 const CALL='refreshCustomEquipmentIntoItems();\n',FROM='\n\nfunction showEquipmentLibrary',TO='\n'+CALL+'\nfunction showEquipmentLibrary';
 module.exports=function r03SourceView(index,root=path.resolve(__dirname,"../..")){
  if(gitblob(index)===R03){assert.equal(index.length,2862906);return index;}
+ if(gitblob(index)==="485de2e6a08ffd89e4f1fb9410e40c938774d62f")index=require("./gens_phase12_r05_r04_source_view_v1.cjs")(index,root);
  assert.equal(index.length,2835125);assert.equal(gitblob(index),R04,"R04 pinned physical source");
  const js=fs.readFileSync(path.join(root,REL));assert.equal(js.length,27860);assert.equal(gitblob(js),JS,"R04 pinned Builder owner");
  let s=index.toString("utf8");

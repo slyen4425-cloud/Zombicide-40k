@@ -102,8 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,106,
+assert.equal(Object.keys(ownerManifest.files||{}).length,107,
   'R04 adds one reachable Builders equipment owner; planned Phase 3 entry contracts remain inert');
+assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
+  'R05 cloud-sync/local-backup must have a sole Core owner');
+assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,
+  'R05 Core cloud-sync owner must load once synchronously');
 assert.equal(ownerManifest.files?.['assets/gensrpg/builders/equipment-library-editor-v1.js']?.domain,'builders',
   'R04 multi-mode equipment library/editor must belong to Builders');
 assert.equal(composition.index.split('assets/gensrpg/builders/equipment-library-editor-v1.js').length-1,1,

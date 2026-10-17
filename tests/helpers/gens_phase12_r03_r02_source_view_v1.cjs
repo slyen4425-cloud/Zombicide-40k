@@ -7,6 +7,7 @@ const JS="e45f3b4e419a10b030c47bc921bded1ec0dc723b",REL="assets/gensrpg/shell/le
 const TAG='<script src="'+REL+'"></script>\n',END='function gensCleanDungeonDemoHeroesFromOtherUniverses()';
 module.exports=function r02SourceView(index,root=path.resolve(__dirname,"../..")){
   if(hash(index)===R02){assert.equal(index.length,2869485);return index;}
+  if(hash(index)==="554bf6100aeb0f40bfc098dc90863af7d2d5e439")index=require("./gens_phase12_r04_r03_source_view_v1.cjs")(index,root);
   assert.equal(index.length,2862906);assert.equal(hash(index),R03,"R03 current source");
   const js=fs.readFileSync(path.join(root,REL));assert.equal(js.length,6651);assert.equal(hash(js),JS);
   let s=index.toString("utf8");

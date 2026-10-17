@@ -11,6 +11,10 @@ def _blob(data):
 def read_d9_index_view(index_file, root):
     """Current physical D9/R01 index -> byte-exact D9 view solely for legacy --verify."""
     data=Path(index_file).read_bytes()
+    if _blob(data)=="554bf6100aeb0f40bfc098dc90863af7d2d5e439":
+        from gensrpg_phase12_r04_builders_equipment_extract_apply import restore as r04_reverse
+        module=(Path(root)/"assets/gensrpg/builders/equipment-library-editor-v1.js").read_bytes()
+        data=r04_reverse(data,module) # test-only R04 -> R03 exact restoration
     if _blob(data)=="8faf7af7fced0a1e0724985e85718a0e4a9e673b":
         from gensrpg_phase12_r03_shell_hub_extract_apply import reverse as r03_reverse
         shell=(Path(root)/"assets/gensrpg/shell/legacy-hub-family-ui-v1.js").read_bytes()

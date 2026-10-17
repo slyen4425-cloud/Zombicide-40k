@@ -8,7 +8,7 @@ const TAG='<script src="'+REL+'"></script>';
 const FIELDS=["sheetBackground","equipmentCardBackground","enemySkins.creature","enemySkins.boss","enemySkins.invocation"];
 module.exports=function r01SourceView(index,root=path.resolve(__dirname,"../..")){
  if(hash(index)===R01){assert.equal(index.length,6969593);return index;}
- if(hash(index)==="8faf7af7fced0a1e0724985e85718a0e4a9e673b")index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);
+ if(["8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439"].includes(hash(index)))index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);
  assert.equal(index.length,2869485,"R02 current code index length");
  assert.equal(hash(index),R02,"R02 code index locked source");
  const js=fs.readFileSync(path.join(root,REL));

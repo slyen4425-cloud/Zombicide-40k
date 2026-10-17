@@ -14,6 +14,11 @@
     "builders"
   ],
   "files": {
+    "assets/gensrpg/builders/equipment-library-editor-v1.js": {
+      "owner": "GenSrpG Builders Equipment Library Editor R04",
+      "domain": "builders",
+      "role": "26 original equipment library/editor functions shared across modes; startup ITEM refresh remains exactly once in legacy index"
+    },
     "assets/gensrpg/shell/legacy-hub-family-ui-v1.js": {
       "owner": "GenSrpG Shell Hub Family UI R03",
       "domain": "shell",

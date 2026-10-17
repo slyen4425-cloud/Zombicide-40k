@@ -104,6 +104,28 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   assert.equal(battle.meta.canonical,'v110');
 }
 
+// During exploration V113 is available before the Tactical engine/UI.
+// The public Bridge (which lazily activates Tactical) is the ONLY legal
+// combat-start owner; never wake an old Dungeon combat timeline.
+{
+  const state=baseState();
+  const calls=[];
+  const legacyStart=()=>{throw new Error('retired combat timeline must remain inert')};
+  const local={...rt,loadDungeonState:()=>state,dc200StartCombat:legacyStart,
+    GensRpgTacticalCombatV2Bridge:{requestCombat:(runtime,options)=>{calls.push({runtime,options});return {ok:true,pending:true}}},
+    GensRpgTacticalCombatV2Ui:{getBattle:()=>null}};
+  assert.equal(P.hookStart(local),false,'must not take ownership of legacy combat start');
+  assert.equal(local.dc200StartCombat,legacyStart,'old global is never wrapped by V113');
+  const matched=P.detectionPairs(local,state);
+  assert.ok(matched.some(p=>p.enemyId==='ep'),'test fixture must have a real visible nearby enemy');
+  const detected=P.scanDetection(local,'movement-detection-v113',true);
+  assert.deepEqual(detected,['ep'],'V113 detection must pass detected enemies through the public Bridge');
+  assert.equal(calls.length,1,'single combat request, no retries or duplicate authority');
+  assert.equal(calls[0].options.reason,'movement-detection-v113');
+  assert.deepEqual(calls[0].options.enemyIds,['ep']);
+  assert.equal(calls[0].options.entry,'dungeon-detection-v113');
+}
+
 assert.deepEqual(P.rowRolls({rollsDisplay:[12,88]}),[12,88]);
 assert.deepEqual(P.rowRolls({roll:42}),[42]);
 assert.equal(P.animateDiceOverlay(rt),false,'V113 no longer owns visual dice animation');

@@ -36,6 +36,24 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/builders/equipment-library-editor-v1.js',
   'assets/gensrpg/core/legacy-cloud-sync-backup-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix130-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix131-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix132-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix133-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix134-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix135-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix136-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix140-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-items141-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-buffs142-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-buff-fx143-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-ability-truth144-v1.js',
   'assets/gensrpg/capture/builtin-seed-v1.js',
   'assets/gensrpg/dungeon/core01-session-ui-v1.js',
   'assets/gensrpg/core/progression-v1.js',
@@ -80,7 +98,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,64,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,82,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');
@@ -159,6 +177,24 @@ const phase9ConnectedServices=[
   'assets/gensrpg/capture/world-exploration-v1.js',
   'assets/gensrpg/capture/team-roster-v1.js',
   'assets/gensrpg/capture/combat-core-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix130-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix131-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix132-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix133-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix134-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix135-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix136-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-fix140-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-items141-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-buffs142-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-buff-fx143-v1.js',
+  'assets/gensrpg/capture/legacy-patches/capture-ability-truth144-v1.js',
   'assets/gensrpg/capture/builtin-seed-v1.js'
 ];
 const phase9Set=new Set(phase9ConnectedServices);
@@ -172,9 +208,9 @@ const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,121,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(allJs.length,139,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,107,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,125,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

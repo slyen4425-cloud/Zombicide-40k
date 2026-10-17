@@ -1,5 +1,14 @@
 # Diagnostic en cours — régression combat Dungeon après premier test R05 (17/10/2026)
 
+## Actualisation du diagnostic — après rapprochement des autorités 0.79/0.80 et du teardown
+
+**Les observations antérieures dans cette note sont conservées comme historique, non comme état actuel.** Le graphe externe charge maintenant le fix d'embuscade : apparition à distance 1 dans le vrai runtime. Le test Chromium de quatre cycles de combat local/externe démontre la présence des commandes, la sélection de cible et les phases de dés avec confirmation (sans cycle de frappes automatiques).
+
+Le premier échec non résolu était la continuité visuelle Dungeon → Tactical → Dungeon. Les journaux du [run 39061788861](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39061788861) identifient **uniquement la case 5**, mur : `stone_01` au premier instant, `cave_01` après retour. Le renderer historique 0.80 recrée le DOM de `board47()`, et le propriétaire 0.79 applique ensuite le décor. La première tentative par `requestAnimationFrame` n'a pas corrigé ce point et a été retirée. Le correctif remplace cet essai par une microtâche à l'unique seam `dungeonMapHtml` existant qui rappelle le peintre 0.79 après insertion DOM ; ni second renderer ni mutation observer. Le run [39062138586](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39062138586) a franchi toutes les assertions de parité visuelle et découvert ensuite une autre anomalie : `dispose()` UI référençait `STYLE_ID` inexistant. Correction ciblée commit `3039e2870c797ec1bc3b23d097f522a3ab99e85b`, sentinelles en cours.
+
+Le test de scène a été réordonné en premier dans la CI de diagnostic ; une trace précise par case a été ajoutée pour tout nouvel écart. Ne pas considérer la réparation finale ni le checkpoint comme GREEN avant résultats coïncidents de la suite complète et une revue manuelle du Dungeon réel. Aucune modification à `main`, `index.html`, R06 ou aux autres modules.
+
+
 **État : anomalie utilisateur toujours ouverte ; aucune correction du gameplay ; R06 suspendu.** Ceci n'est PAS un nouveau GREEN Dungeon.
 
 ## Retour terrain

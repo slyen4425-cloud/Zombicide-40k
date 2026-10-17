@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs'), http=require('node:http'), path=require('node:path');
-const {chromium}=require('playwright');
+const {chromium,firefox}=require('playwright');
 const root=path.resolve(__dirname,'..'),SHA='a832da1cbbad39c446f46f1035dbb819aa60ec20';
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webmanifest':'application/manifest+json','.mp3':'audio/mpeg','.wav':'audio/wav','.ogg':'audio/ogg'};
 function fixture(file){const target=path.resolve(root,'.'+file);if(!target.startsWith(root+path.sep))return null;try{return {data:fs.readFileSync(target),type:mime[path.extname(target).toLowerCase()]||'application/octet-stream'}}catch(_){return null}}
@@ -149,24 +149,27 @@ async function scenario(browser,port,kind){
   result.inRange=await combatSnapshot();
   if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
 
-  // Characterization only: do not change runtime code. The V108 panel may
-  // have missed lazy Tactical UI load. Record its initial state before a
-  // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
-    uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
-    uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
-    polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
+  // No test-only install: the actual lazy Tactical loader must invoke V108.install,
+  // and the canonical afterRender hook must preserve panel after EVERY internal render.
+  result.hooks=await page.evaluate(()=>({
+    v108Loaded:!!window.GensRpgTacticalPolish1678108,
+    tacticalEntryActive:!!window.GensTacticalV1?.status?.().active,
+    onAfterRender:typeof window.GensRpgTacticalCombatV2Ui?.onAfterRender,
+    uiRenderPublicWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish
   }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
+  assert.equal(result.hooks.onAfterRender,'function','must reuse public Tactical after-render event');
+  assert.equal(result.hooks.uiRenderPublicWrapped,false,'do not replace native render with a parallel owner');
+  for(const [name,snap] of [
+    ['on initial opening',result.combat],
+    ['after target selection',result.afterTarget],
+    ['after legitimate approach',result.afterApproach||result.afterTarget],
+    ['while in valid range',result.inRange]
+  ]){
+    assert.ok(snap.panel&&snap.panel.rect.width>0&&snap.visibleAttack&&snap.visibleAttack.rect.width>0,
+      'V108 action/weapon/item panel must survive '+name+' without manual install');
+    assert.equal(snap.legacyAttack?.display,'none','original internal attack button must stay hidden '+name);
   }
+  result.steps.push('automatic-v108-panel-persistent');
 
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
@@ -230,13 +233,20 @@ async function scenario(browser,port,kind){
 }
 (async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
- const b=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+ const browserType=process.env.GENS_BROWSER==='firefox'?firefox:chromium;
+ const b=await browserType.launch({headless:true,args:['--disable-dev-shm-usage']});
  try{const local=await scenario(b,server.address().port,'local');const external=await scenario(b,server.address().port,'external-emulated');
    assert.ok(local.steps.includes('hero-animated-dice-visible'),'LOCAL preview must show dice for a VALID attack');
    assert.ok(external.steps.includes('hero-animated-dice-visible'),'EXTERNAL preview must show dice for a VALID attack');
    assert.ok(local.steps.includes('visible-player-action-available'),'LOCAL must provide real attack/weapon/item panel');
    assert.ok(external.steps.includes('visible-player-action-available'),'EXTERNAL must provide real attack/weapon/item panel');
    assert.ok(external.boot?.aux>=20,'external diagnostic must observe late auxiliary module loading');
+   for(const c of [local,external]){
+     assert.ok(!c.steps.includes('test-only-late-polish-install'),'no manual V108 installation allowed');
+     assert.ok(c.steps.includes('automatic-v108-panel-persistent'),'render hook must keep actions visible through movement');
+     assert.ok(c.steps.includes('hero-dice-confirmed')&&c.steps.includes('enemy-dice-confirmed'),'hero and enemy dice must wait for Continue');
+     assert.deepEqual(c.errors,[],'no JavaScript runtime errors in '+c.kind);
+   }
    console.log('[dungeon-combat-preview-comparison] '+JSON.stringify({localSteps:local.steps,externalSteps:external.steps,localErrors:local.errors,externalErrors:external.errors,externalTiming:external.boot?.auxStates?.slice(0,5)}));
  }finally{await b.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(e=>{console.error(e);process.exitCode=1});

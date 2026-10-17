@@ -7,6 +7,7 @@ const JS="f7adfca9b04b23c489aae71ae9284c9b849f1d0b",REL="assets/gensrpg/core/leg
 const TAG='<script src="'+REL+'"></script>';
 const FIELDS=["sheetBackground","equipmentCardBackground","enemySkins.creature","enemySkins.boss","enemySkins.invocation"];
 module.exports=function r01SourceView(index,root=path.resolve(__dirname,"../..")){
+ index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);
  if(hash(index)===R01){assert.equal(index.length,6969593);return index;}
  if(["8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"].includes(hash(index)))index=require("./gens_phase12_r03_r02_source_view_v1.cjs")(index,root);
  assert.equal(index.length,2869485,"R02 current code index length");

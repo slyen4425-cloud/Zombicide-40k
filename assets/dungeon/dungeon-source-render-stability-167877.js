@@ -10,7 +10,7 @@ const FLOOR_ROOT="assets/dungeon/creatures/";
 const WALL_ASSET=FLOOR_ROOT+"dng_wall_block.jpg";
 const THEMES=new Set(["stone","cave","forest","ice","lava"]);
 const VERSION="1.0.0",APP_VERSION="16.78.77";
-let retries=0;
+let retries=0,paintFrameQueued=false;
 function rt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function authored(x){return !!(x?.last?.authoredRuntime167839&&x?.last?.worldDungeonId&&x?.last?.worldNodeId)}
 function room(x){const id=String(x?.last?.customRoomId||"");if(!id)return null;try{return ROOT.DungeonRoomCreator100?.findRoom?.(id)||null}catch(e){return null}}
@@ -29,7 +29,17 @@ function disableLateScaleObserver(){try{const o=ROOT.__dac167852TokenObserver;if
 function wrapCore(){const core=ROOT.DungeonCore01;if(!core)return false;for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__dsr167877)continue;const w=function(){const out=old.apply(this,arguments);
       // Procedural Dungeon owns its terrain via 0.79; simply reapply that
       // existing painter after board rebuild. Authored Builder keeps its own.
+      // The native Dungeon board may be rebuilt again during the same UI frame.
+      // Reinvoke its sole 0.79 terrain painter after that frame is settled;
+      // do not introduce a second terrain renderer, observer, or timer loop.
       try{if(!authored(rt()))ROOT.applyDungeonMapPolish079?.()}catch(e){}
+      if(!paintFrameQueued&&typeof ROOT.requestAnimationFrame==="function"){
+        paintFrameQueued=true;
+        ROOT.requestAnimationFrame(()=>{
+          paintFrameQueued=false;
+          try{if(!authored(rt()))ROOT.applyDungeonMapPolish079?.()}catch(e){}
+        });
+      }
       try{paintTokensNow()}catch(e){}return out};w.__dsr167877=true;w.__dsrOriginal=old;core[name]=w}return true}
 function install(){ensureStyle();disableLateScaleObserver();const a=patchMapHtml(),b=wrapCore();if(a&&b){try{paintTokensNow()}catch(e){}return true}if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
 ROOT.DungeonSourceRenderStability167877={VERSION,APP_VERSION,patchMapHtml,paintTokensNow,disableLateScaleObserver,install};

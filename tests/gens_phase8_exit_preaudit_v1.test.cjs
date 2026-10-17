@@ -18,7 +18,8 @@ const dungeonContract=JSON.parse(read('assets/gensrpg/dungeon/module-contract-v1
 assert.match(roadmap,/## Phase 8 — Consolider Tactical[\s\S]*Critère de sortie : Tactical n’existe que pendant une session de combat et se démonte proprement\./);
 assert.match(historical,/A1 — activation eager de la pile Tactical/,'historical preaudit must preserve initial blocker classification');
 assert.match(bootstrap,/assets\/gensrpg\/tactical\/entry-v1\.js/);
-assert.match(entry,/function install\(\)[\s\S]*loadFacade\(\)/,'facade-only bootstrap must remain');
+assert.match(entry,/function install\(\)[\s\S]*ensureDetection\(\)/,'eager V113 detection must precede the public Bridge facade');
+assert.match(entry,/function ensureDetection\(\)[\s\S]*loadFacade\(\)/,'detection-first composition must leave the Tactical engine and UI cold');
 assert.match(entry,/function activate\(onReady\)/);assert.match(entry,/function deactivate\(/);assert.match(entry,/dispose:deactivate/);
 assert.match(integration,/function deactivateCompatibilityChain\(/);
 for(const [label,file] of [
@@ -41,7 +42,7 @@ assert.ok(dungeonContract.owns.includes('combat trigger'));assert.ok(dungeonCont
 assert.match(bridge,/function requestCombat\(rt=R,options=\{\}\)/);assert.match(bridge,/pending:true,reason:"tactical-activating"/);
 console.log(JSON.stringify({
  scenario:'Phase 8 exit preaudit after session teardown ownership',
- resolved:['A1 eager private-stack activation','A2 session-unowned retries/listeners','A3 close lacks teardown','A4 V113 authority survives close','A5 UI/menu/start side effects survive close'],
+ resolved:['A1 eager private-stack activation (V113 detection-only exception)','A2 session-unowned retries/listeners','A3 close lacks teardown','A4 V113 authority survives close','A5 UI/menu/start side effects survive close'],
  exitReadyCandidate:true,
  next:'run dedicated Phase 8 EXIT audit instead of legacy cleanup',
  dungeonCombatTriggerOwner:'Dungeon',explicitBoundary:'Bridge.requestCombat',indexChangeRequired:false

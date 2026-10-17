@@ -6,6 +6,8 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
+const r06CaptureNames=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureR06Rel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
 const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
 const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
 
@@ -24,6 +26,12 @@ function blockBody(id){
     assert.equal(m[1],'','Core200 external script must have no inline duplicate');
     return read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
   }
+  if(r06CaptureNames.has(id)){
+    const rel=captureR06Rel(id);
+    assert.equal(m[0],'<script id="'+id+'" src="'+rel+'"></script>','R06 Capture script remains classic, unique and parser-ordered');
+    assert.equal(m[1],'','R06 has no inline duplicate for '+id);
+    return read(rel);
+  }
   return m[1];
 }
 
@@ -33,7 +41,7 @@ function globalOwners(name){
   const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
   const ids=[];
   for(const m of blocks){
-    const body=m[1]==='gensDungeonCore01Js'?blockBody(m[1]):m[2];
+    const body=m[1]==='gensDungeonCore01Js'||r06CaptureNames.has(m[1])?blockBody(m[1]):m[2];
     const hits=body.match(re)||[];
     for(let i=0;i<hits.length;i++)ids.push(m[1]);
   }

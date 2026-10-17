@@ -1,4 +1,5 @@
 name: GenSrpG Phase12 R04 historical fixtures controlled adaptation
+# Strict R04 index load-graph anchor after guarded first application
 on:
   push:
     branches:

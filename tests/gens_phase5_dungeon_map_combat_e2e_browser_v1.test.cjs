@@ -175,6 +175,16 @@ async function startDungeon(page){
     assert.equal(before.battle,null,'Tactical battle must not exist before the real Dungeon action');
     assert.equal(before.overlay,false,'Tactical overlay must not exist before combat');
 
+    // The real Dungeon 0.79 cover painter is scheduled on a frame after a board
+    // reconstruction. Wait for its own DOM contract, not a guessed delay or
+    // artificial call to applyDungeonMapPolish079().
+    await page.waitForFunction(()=>{
+      const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
+      const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
+      return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
+        wall?.dataset.coverTheme===theme&&/dng_floor_(?:stone|cave|water|forest|ice|lava)_/.test(getComputedStyle(wall).backgroundImage);
+    },null,{timeout:10000});
+
     const nativeAtEngagement=await page.evaluate(()=>[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage));
 
     await action.click();
@@ -253,6 +263,16 @@ async function startDungeon(page){
     // Return through the real UI owner, rebuild the Dungeon board, and
     // assert that the existing terrain owner restores exactly the same art.
     await page.evaluate(()=>{window.GensRpgTacticalCombatV2Ui.close(false);DungeonCore01.render()});
+    // The real Dungeon 0.79 cover painter is scheduled on a frame after a board
+    // reconstruction. Wait for its own DOM contract, not a guessed delay or
+    // artificial call to applyDungeonMapPolish079().
+    await page.waitForFunction(()=>{
+      const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
+      const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
+      return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
+        wall?.dataset.coverTheme===theme&&/dng_floor_(?:stone|cave|water|forest|ice|lava)_/.test(getComputedStyle(wall).backgroundImage);
+    },null,{timeout:10000});
+
     const returned=await page.evaluate(()=>({
       room:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}').room,
       backgrounds:[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage),

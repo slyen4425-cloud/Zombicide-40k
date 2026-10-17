@@ -1,6 +1,20 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**CORRECTIF DUNGEON EN COURS / NON GREEN — Phase 12 R06 suspendue.** Dernier GREEN technique R05, mais anomalie terrain Dungeon non résolue. Aucun changement sur `main`.
+**Correctif Dungeon V108 GREEN technique/CI — validation manuelle Android encore attendue.** Phase 12 extraction R06 **suspendue** tant que le retour terrain n'est pas disponible. `main` reste gelée. Le problème distinct de détection des monstres en exploration reste à diagnostiquer.
+
+## Correction bornée validée : panneau d'actions Tactical V108
+
+- **Checkpoint GREEN** : `checkpoint/gensrpg-phase12-dungeon-tactical-v108-panel-rebind-green-2026-10-17`, commit code exact **`32b5120f26fe8d01dcd6c602b82630fa27bbf23e`** (https://github.com/slyen4425-cloud/Zombicide-40k/tree/checkpoint/gensrpg-phase12-dungeon-tactical-v108-panel-rebind-green-2026-10-17).
+- **Branche de travail** : `work/gensrpg-phase12-dungeon-tactical-v108-panel-rebind-fix-2026-10-17` ; commit documentaire postérieur possible sans changer le code GREEN.
+- **Checkpoint START** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-v108-panel-rebind-fix-2026-10-17`, SHA `7ac97a36df9f31f2cc3f7640e857ffc59963574c`.
+- **Modifications runtime limitées** : `assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js` et `assets/gensrpg/tactical/entry-v1.js` ; raccord V108 à la disponibilité de l'UI Tactical lazy, abonnement unique au contrat `onAfterRender`, désabonnement au dispose. Aucun moteur de combat ni `index.html` modifié ; ni timing dés, portée, rapprochement, IA, dégâts ou sauvegardes.
+- **Suite testée sans installation manuelle artificielle** : Dungeon lancé, ennemi ciblé, rapprochement légitime, panneau Attaque / Arme / Objet persistant, clic Attaquer, dés visibles du héros (Continuer exigé), dés de l'ennemi (Continuer exigé), absence d'enchaînement automatique pendant chaque attente ; validation en prévisualisation locale et externe simulée sur Chromium mobile.
+- **Sept checks SUCCESS au SHA code unique** : [Architecture+Chromium 39027235756](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39027235756), [Firefox 39027235760](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39027235760), [Tactical 39027235759](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39027235759), [Dungeon preview combat E2E 39027235758](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39027235758).
+- **Prudence** : prévisualisation externe non équivalente à GitHub Pages/PWA native : Supabase et QR CDN simulés comme indisponibles dans le test, pas de sauvegardes privées, ni preuve d'installation sur Android. Retour utilisateur requis. La détection terrain de monstres et les autres situations de jeu ne sont pas garanties par un seul scénario de combat.
+- **Preview isolée** : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/32b5120f26fe8d01dcd6c602b82630fa27bbf23e/preview.html ; source épinglée, sans publication `main`.
+- **Rapport** : `docs/GENSRPG_PHASE12_DUNGEON_TACTICAL_V108_PANEL_REBIND_FIX_2026-10-17.md`. R06 non ouvert.
+
+---
 
 ## Correctif borné — Tactical V108 panneau d'actions (charte §25)
 

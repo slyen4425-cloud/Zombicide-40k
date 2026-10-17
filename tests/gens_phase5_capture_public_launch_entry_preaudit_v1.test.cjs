@@ -6,6 +6,8 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const index=read('index.html');
+const r06CaptureNames=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureR06Rel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
 const owners=JSON.parse(read('docs/GENSRPG_PHASE2_INLINE_OWNERS.json'));
 const lastOwners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 const shellContract=JSON.parse(read('assets/gensrpg/shell/module-contract-v1.json'));
@@ -17,6 +19,12 @@ const screenReturnOwner=read('assets/gensrpg/capture/screen-return-v1.js');
 function blockBody(id){
   const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing inline block '+id);
+  if(r06CaptureNames.has(id)){
+    const rel=captureR06Rel(id);
+    assert.equal(m[0],'<script id="'+id+'" src="'+rel+'"></script>','R06 Capture script remains classic, unique and parser-ordered');
+    assert.equal(m[1],'','R06 has no inline duplicate for '+id);
+    return read(rel);
+  }
   return m[1];
 }
 const c135=blockBody('captureFix135');

@@ -26,3 +26,12 @@ jobs:
         run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
       - name: Verify real Survival S2 provider launch using the external Core sync owner
         run: node tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs
+      - name: Verify seven real Dungeon and Capture reduced Shell browser fixtures
+        run: |
+          node tests/gens_phase5_module_launch_s4_dungeon_provider_browser_v1.test.cjs
+          node tests/gens_savequit_resume_shell_browser_v11411.test.cjs
+          node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
+          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+          node tests/gens_capture_current_shell_browser_v11411.test.cjs
+          node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs
+          node tests/gens_phase9_capture_seed_without_dungeon_style_browser_characterization_v1.test.cjs

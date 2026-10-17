@@ -9,6 +9,7 @@ const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0'
 // historical fingerprints to today's unrelated wall-material correction.
 // This one audited test-only inverse is gated on the exact new index blob.
 function restorePreWallMaterialIndex(index){
+  index=require('./gens_phase12_r06_capture_source_view_v1.cjs')(index);
   if(hash(index)!=='b33542b033c5afa8a1643d99c56c21dbd4be266c')return index;
   let source=index.toString('utf8');
   const now=`    // Murs générés : même matériau canonique que Dungeon Builder.

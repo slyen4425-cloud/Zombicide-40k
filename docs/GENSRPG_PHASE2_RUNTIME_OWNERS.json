@@ -548,6 +548,96 @@
       "owner": "Tactical Module Entry",
       "domain": "tactical",
       "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js": {
+      "owner": "Monster Capture / historical captureGameplayModalMount",
+      "domain": "capture",
+      "role": "Existing single Capture captureGameplayModalMount script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js": {
+      "owner": "Monster Capture / historical capturePlaytestFix128",
+      "domain": "capture",
+      "role": "Existing single Capture capturePlaytestFix128 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js": {
+      "owner": "Monster Capture / historical captureFix129",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix129 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix130-v1.js": {
+      "owner": "Monster Capture / historical captureFix130",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix130 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix131-v1.js": {
+      "owner": "Monster Capture / historical captureFix131",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix131 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix132-v1.js": {
+      "owner": "Monster Capture / historical captureFix132",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix132 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix133-v1.js": {
+      "owner": "Monster Capture / historical captureFix133",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix133 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix134-v1.js": {
+      "owner": "Monster Capture / historical captureFix134",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix134 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix135-v1.js": {
+      "owner": "Monster Capture / historical captureFix135",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix135 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix136-v1.js": {
+      "owner": "Monster Capture / historical captureFix136",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix136 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js": {
+      "owner": "Monster Capture / historical captureFix137",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix137 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js": {
+      "owner": "Monster Capture / historical captureFix138",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix138 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js": {
+      "owner": "Monster Capture / historical captureFix139",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix139 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix140-v1.js": {
+      "owner": "Monster Capture / historical captureFix140",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix140 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-items141-v1.js": {
+      "owner": "Monster Capture / historical captureItems141",
+      "domain": "capture",
+      "role": "Existing single Capture captureItems141 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-buffs142-v1.js": {
+      "owner": "Monster Capture / historical captureBuffs142",
+      "domain": "capture",
+      "role": "Existing single Capture captureBuffs142 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-buff-fx143-v1.js": {
+      "owner": "Monster Capture / historical captureBuffFx143",
+      "domain": "capture",
+      "role": "Existing single Capture captureBuffFx143 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-ability-truth144-v1.js": {
+      "owner": "Monster Capture / historical captureAbilityTruth144",
+      "domain": "capture",
+      "role": "Existing single Capture captureAbilityTruth144 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
     }
   }
 }

@@ -48,3 +48,29 @@ Commit de test `fca7cd4d386b865037edf12707745727102b79e9`, [run de diagnostic](h
 - Aucune erreur JS `pageerror` signalée ; deux scripts CDN (Supabase/QR) volontairement non chargés dans le protocole. Aucune séquence de frappes automatiques reproduite à ce stade.
 
 **Correction toujours NON FAITE**. L'absence de dés mesurée ne prouve pas la régression utilisateur, car le ciblage pouvait être hors portée. Prochaine preuve exigée : position précise des acteurs, mouvement réel jusqu'à portée, attaque autorisée avec animation et décision « continuer », puis tour adverse sans auto-boucle ; inspecter overlays/visibilité avec screenshot/états CSS et comparer au chargement Pages natif. La détection de monstres reste un deuxième sous-problème distinct. **Pas de R06, pas de checkpoint GREEN diagnostic, pas de publication main.**
+
+## Retour utilisateur aggravé — plusieurs manches, embuscades et détection
+
+17 octobre 2026 — le test manuel utilisateur confirme que le déroulement est initialement fonctionnel pendant environ **trois tours**, puis les frappes/résultats s'enchaînent ou les commandes/dés ne répondent plus. Nouvelles observations : ennemis d'embuscade apparaissant loin du groupe et détection des monstres incohérente. Le jeu **n'est PAS validé**, même si une CI courte est GREEN.
+
+### Diagnostic reproductible du deuxième tour
+
+- Le navigateur mobile sur la vraie preview locale et la preview externe simulée a reproduit une absence de dé au deuxième tour après une attaque complète héros + ennemi validée. [Run 39031194199](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39031194199) : FAILURE **attendue** du scénario long.
+- L'état Tactical valide héros actif, cible ennemie vivante et à distance 1, attaque autorisée ; panneau d'armes/objets visible. Au clic, le message exact est **« Choisis d’abord une cible. »** et aucun dé ne s'ouvre.
+- Cause locale vérifiée par le code : `refreshSelection()` de `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js` effaçait la cible choisie lorsque le tour actif passait à l'ennemi (`t.side===cur.side`). La sélection n'était plus restaurée au tour suivant.
+- Correction bornée : commit `3084c86d6c5a1af0ec6165a5d5d927bffbf8057c` ; conserver le choix de cible vivant pendant la phase ennemie, sans choisir ni lancer une attaque à la place du joueur, sans toucher portée/dégâts/dés/IA. Exiger **quatre cycles réels** avec pause dés héros/ennemi et panneau présent après chaque rendu, local et externe. **Validation longue encore en attente à l'écriture.**
+
+### Anomalie potentielle du raccord d'embuscade
+
+- Le module `assets/dungeon/dungeon-event-runtime-fix-167878.js` existe et un test unitaire isolé vérifie un placement adjacent dans son *fixture*.
+- **Le nom de ce module est absent** du `index.html` R05 certifié, du tableau de scripts ajoutés dans `preview.html`, des scripts injectés par le workflow GitHub Pages `.github/workflows/main.yml`, ainsi que du Core `runtime-bootstrap-v1.js`. Il figure dans le **pré-cache du service-worker** et dans le manifeste des propriétaires, ce qui **ne prouve aucun chargement/exécution**. Hypothèse forte : le correctif de placement n'atteint pas la vraie partie.
+- Avant raccord : vérifier l'absence d'autre chargeur effectif, l'ordre parser et la frontière avec **V113**, seul propriétaire autorisé de la détection, puis test d'embuscade dans le navigateur avec positions persistées. **Aucun patch embuscade/IA effectué dans le présent lot Tactical UI.**
+
+### Détection
+
+- `gens_tactical_single_detection_authority_v11411.test.cjs` confirme que **V113** possède la détection active ; les anciens hooks V108/V111/V112 sont débranchés. Ne pas réactiver un ancien détecteur pour masquer les écarts.
+- Faire un test de déplacement réel sur grille : distances calculées à partir des cases traversables, positions héros/ennemis, room/scope, déclenchement unique, puis vérification du raccord Bridge. **Non validé à ce stade.**
+
+### Blocage
+
+R06 et déploiement `main` suspendus. Aucun checkpoint GREEN pour ce diagnostic tant que la CI Architecture/Chromium, Firefox, Tactical, les manches multiples, les embuscades et la détection en navigation réelle ne sont pas caractérisés/corrigés. Ne pas envoyer de nouvelle preview présentée comme sûre avant ces preuves.

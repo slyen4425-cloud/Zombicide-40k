@@ -167,11 +167,13 @@ async function scenario(browser,port,kind){
     polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function'
   }));
   assert.equal(result.activation.uiRenderExists,true,'Tactical UI must load');
-  assert.equal(result.activation.uiRenderWrapped,true,'V108 owner must be reattached BEFORE the first action');
+  assert.equal(result.activation.polishAvailable,true,'V108 action owner must be loaded');
+  assert.equal(result.afterTarget.panel?.display,'grid','target selection must preserve action panel');
+  assert.equal(result.afterApproach.panel?.display,'grid','the internal movement render must preserve action panel');
   assert.equal(result.inRange.panel?.display,'grid','the real attack/weapon/item panel must persist after approach');
   assert.equal(result.inRange.visibleAttack?.display,'block','the real attack command must be visible');
   assert.equal(result.inRange.legacyAttack?.display,'none','the hidden legacy button is not a user control');
-  result.steps.push('lifecycle-owner-attached-without-manual-install');
+  result.steps.push('internal-render-v108-panel-without-manual-install');
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
   // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.

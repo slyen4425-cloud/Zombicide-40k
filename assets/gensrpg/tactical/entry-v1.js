@@ -38,6 +38,9 @@ function startCompatibility(){
 function baseLoaded(){
   baseReady=true;
   try{R.GensRpgTacticalCombatV2Ui?.installGlobalPolish?.()}catch(e){console.error("GenSrpG Tactical V1 UI install",e)}
+  // V108 is loaded at page boot; Tactical V2 UI arrives lazily on first encounter.
+  // Rebind its existing onAfterRender contract BEFORE first tactical UI open.
+  try{R.GensRpgTacticalPolish1678108?.install?.(R)}catch(e){console.error("GenSrpG Tactical V108 UI hook",e)}
   try{bridgeInstalled=!!R.GensRpgTacticalCombatV2Bridge?.install?.(R)}
   catch(e){bridgeInstalled=false;console.error("GenSrpG Tactical V1 Bridge install",e)}
   if(!bridgeInstalled){compatibilityDone=true;compatibilityOk=false;return finishIfReady()}

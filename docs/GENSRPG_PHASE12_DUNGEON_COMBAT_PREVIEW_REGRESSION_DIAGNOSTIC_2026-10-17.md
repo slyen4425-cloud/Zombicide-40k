@@ -35,3 +35,16 @@
 3. Si le défaut est dans la composition externe, corriger la preview isolée ; si le défaut est dans le runtime, ouvrir un correctif borné avec tests / CI / checkpoint propres.
 4. Tester la détection ennemie séparément ; ne pas reconfigurer les règles de gameplay pour masquer un défaut d'UI/événement.
 5. Aucune fusion `main`, R06 ou nouveau chantier gameplay tant que le blocage utilisateur n'est pas résolu.
+
+## Nouvelle preuve — vrai cycle Dungeon atteint (run 39012695829)
+
+Commit de test `fca7cd4d386b865037edf12707745727102b79e9`, [run de diagnostic](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39012695829) **SUCCESS du protocole d'observation**, et non validation de la fonctionnalité. Amélioration du banc : gestion du rechargement du profil Dungeon, inspirée du test existant Phase 5.
+
+**Scénario exécuté dans Chromium mobile simulé (412×915)** : boot → entrée réelle dans une session Dungeon → injection d'une rencontre de test déterministe sur carte → bouton d'engagement réel → overlay Tactical V2 → sélection d'ennemi → tentative de clic sur le bouton d'attaque.
+
+- **Local preview** : entrée réelle Dungeon, ennemi et overlay tactique présents ; bouton d'attaque dans le DOM (`gtv2Actions button[data-attack]`), mais **invisible** selon Playwright. Clic impossible (timeout). Causes CSS/couches/état d'overlay à caractériser, conformément au §23 charte.
+- **External preview simulée** : mêmes étapes de jeu jusqu'au clic réussi sur `⚔️ Épée longue · portée 0-1`. Dans la fenêtre d'observation, **aucun `.gtv2DiceBackdrop`** ; l'interface propose ensuite **« Approcher la cible »**, le tour reste au héros. **Interprétation limitée : une attaque hors portée n'est pas censée lancer des dés ; ne pas conclure « animation cassée » avant d'avoir confirmé la position et la portée puis effectué une attaque réellement à portée.**
+- Dans la preview externe, les 30 scripts auxiliaires se chargent après `DOMContentLoaded` (`document.readyState=interactive`), différence structurelle conservée.
+- Aucune erreur JS `pageerror` signalée ; deux scripts CDN (Supabase/QR) volontairement non chargés dans le protocole. Aucune séquence de frappes automatiques reproduite à ce stade.
+
+**Correction toujours NON FAITE**. L'absence de dés mesurée ne prouve pas la régression utilisateur, car le ciblage pouvait être hors portée. Prochaine preuve exigée : position précise des acteurs, mouvement réel jusqu'à portée, attaque autorisée avec animation et décision « continuer », puis tour adverse sans auto-boucle ; inspecter overlays/visibilité avec screenshot/états CSS et comparer au chargement Pages natif. La détection de monstres reste un deuxième sous-problème distinct. **Pas de R06, pas de checkpoint GREEN diagnostic, pas de publication main.**

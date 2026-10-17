@@ -31973,11 +31973,22 @@ function polish079(){
       cell.style.backgroundImage='url("'+floor079(t,r,i)+'")';
     }
 
-    // Les obstacles/couverts ne montrent plus dungeon_wall.png.
-    if(cell.classList.contains("wall") || cell.classList.contains("cover")){
+    // Murs générés : même matériau canonique que Dungeon Builder.
+    // Les couverts restent des cases de terrain thématique distinctes.
+    if(cell.classList.contains("wall")){
+      cell.classList.remove("dc079TerrainCover");
+      cell.classList.add("dc079WallBlock");
+      delete cell.dataset.coverTheme;
+      cell.style.backgroundImage='url("assets/dungeon/creatures/dng_wall_block.jpg")';
+    }else if(cell.classList.contains("cover")){
+      cell.classList.remove("dc079WallBlock");
       cell.classList.add("dc079TerrainCover");
       cell.style.backgroundImage='url("'+cover079(t,r,i)+'")';
       cell.dataset.coverTheme=t;
+    }else{
+      cell.classList.remove("dc079WallBlock");
+      cell.classList.remove("dc079TerrainCover");
+      delete cell.dataset.coverTheme;
     }
   });
 }
@@ -32011,6 +32022,13 @@ else boot();
   box-shadow:none!important;
 }
 /* Terrain/couvert : plus de petit cube de mur. La case reste lisible comme terrain spécial. */
+.dc047Cell.dc079WallBlock{
+  background-size:cover!important;
+  background-position:center!important;
+  filter:none!important;
+  outline:1px solid rgba(205,181,126,.20)!important;
+  outline-offset:-2px!important;
+}
 .dc047Cell.dc079TerrainCover{
   background-size:118% 118%!important;
   outline:1px solid rgba(205,181,126,.20)!important;

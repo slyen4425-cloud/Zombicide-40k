@@ -13,13 +13,16 @@ const shellOwner=indexSource.indexOf(shellOwnerMarker);
 assert.ok(shellOwner>0,'real index.html must expose startConfiguredGame()');
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellScriptEnd>shellOwner,'real index.html must close the script block that owns startConfiguredGame()');
-const onlineMarker="let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;";
+// R05: same original online Shell support is loaded from one classic synchronous Core script.
+// Use the real physical reference in this reduced browser fixture, not an invented JS shim.
+const onlineMarker='<script src="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js"></script>';
 const onlineOwner=indexSource.indexOf(onlineMarker,shellScriptEnd);
-assert.ok(onlineOwner>shellScriptEnd,'real index.html must expose the online Shell support block');
-const onlineScriptStart=indexSource.lastIndexOf('<script',onlineOwner);
-const onlineScriptEnd=indexSource.indexOf('</script>',onlineOwner);
-assert.ok(onlineScriptStart>shellScriptEnd && onlineScriptEnd>onlineOwner,'real index.html must close the online Shell support block');
-const realOnlineShellSupport=indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length);
+assert.ok(onlineOwner>shellScriptEnd,'real index.html must load the original online support owner');
+assert.equal(indexSource.split(onlineMarker).length-1,1,'one online sync/local backup parser owner');
+const onlineScriptStart=onlineOwner;
+const onlineScriptEnd=onlineOwner+onlineMarker.length;
+assert.ok(onlineScriptStart>shellScriptEnd && onlineScriptEnd>onlineOwner,'online support must load after the original Shell script');
+const realOnlineShellSupport=indexSource.slice(onlineScriptStart,onlineScriptEnd);
 
 const customHeroMarker='function loadCustomHeroesMulti(){';
 const customHeroOwner=indexSource.indexOf(customHeroMarker,onlineScriptEnd);
